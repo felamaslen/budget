@@ -656,10 +656,21 @@ button:active {
 }
 #page-funds .stocks-list .price:after {
   content: "";
+  right: 0.1em;
+  top: 50%;
+  position: absolute;
+  width: 0.8em;
+  height: 2px;
+  background: turquoise;
+}
+#page-funds .stocks-list .up .price:after,
+#page-funds .stocks-list .down .price:after {
   border-left: 0.4em solid transparent;
   border-right: 0.4em solid transparent;
-  position: absolute;
-  right: 0.1em;
+  border-top: none;
+  background: none;
+  width: 0;
+  height: 0;
   top: 0.2em;
 }
 #page-funds .stocks-list .up .price:after {
