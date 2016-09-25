@@ -1,5 +1,7 @@
 node_modules
 node_modules/*
+serial
+scripts
 inc/db.password.inc.php
 rest.dev.php
 js/budget.es5.js
