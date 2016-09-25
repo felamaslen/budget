@@ -1,3 +1,6 @@
 node_modules
 node_modules/*
 inc/db.password.inc.php
+rest.dev.php
+js/budget.es5.js
+js/main.min.js

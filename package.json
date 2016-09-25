@@ -1,0 +1,25 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "description": "Personal finance web app",
+  "main": "index.php",
+  "dependencies": {
+    "babel-plugin-uglify": "^1.0.2",
+    "babel-preset-es2015": "^6.14.0",
+    "babel": "^6.5.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/felamaslen/budget.git"
+  },
+  "author": "Fela Maslen",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/felamaslen/budget/issues"
+  },
+  "homepage": "https://github.com/felamaslen/budget#readme"
+}
