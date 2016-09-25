@@ -7,6 +7,8 @@
   const PIE_LABEL_SCALE_FACTOR_POST = 1.2;
   const PIE_SMALL_LABEL_OFFSET = 10;
 
+  const STOCKS_REFRESH_INTERVAL = 10000;
+
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   let editingAdd = false;
@@ -2166,8 +2168,8 @@
     }
 
     buildStockViewer() {
-      this.stocksRefreshInterval = 30000;
-      this.hlTime = 30000;
+      this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
+      this.hlTime = STOCKS_REFRESH_INTERVAL - 1000;
 
       this.stocksListLoading = false;
 
