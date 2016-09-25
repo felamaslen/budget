@@ -1,0 +1,588 @@
+<?php
+
+/**
+ * provides a REST api for the app
+ *
+ * this one is absolute cunt and will be rewritten in python,
+ * at some point
+ */
+
+require_once dirname(__FILE__) . '/inc/common.php';
+
+require_once BASE_DIR . '/inc/user.rest.php';
+
+function _GET_pie($res, $table = NULL) {
+  global $user;
+
+  if (is_null($table)) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Must supply table!';
+
+    return $res;
+  }
+
+  $col = array(
+    'funds' => array(
+      array('item', 'cost', 'Total'),
+    ),
+    'in' => array(
+      array('item', 'cost', 'Total'),
+    ),
+    'food' => array(
+      array('shop', 'cost', 'Shop cost'),
+      array('category', 'cost',  'Category cost'),
+    ),
+    'general' => array(
+      array('shop', 'cost', 'Shop cost'),
+      array('category', 'cost', 'Category cost'),
+    ),
+    'holiday' => array(
+      array('holiday', 'cost', 'Holiday cost'),
+      array('holiday', 'int', 'Holiday number'),
+    ),
+    'social' => array(
+      array('shop', 'cost', 'Shop cost'),
+      array('society', 'cost', 'Society cost'),
+    ),
+  );
+
+  if (!isset($col[$table])) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Must supply valid table!';
+
+    return $res;
+  }
+
+  $pieTemplates = array(
+    'cost' => array(
+      'query' => function($col, $table, $limit) {
+        global $user;
+
+        return array(
+          'SELECT `%s` AS col, SUM(cost) AS cost FROM {`%s`}
+          WHERE uid = %d AND cost > 0
+          GROUP BY %s
+          ORDER BY cost DESC
+          LIMIT %d',
+          $col,
+          $table,
+          $user->uid,
+          $col,
+          $limit,
+        );
+      },
+      'type'  => 'cost',
+    ),
+    'int' => array(
+      'query' => function($col, $table, $limit) {
+        global $user;
+
+        return array(
+          'SELECT col, COUNT(*) AS cost FROM (
+            SELECT `%s` AS col
+            FROM {`%s`}
+            WHERE uid = %d
+            GROUP BY year, month, date, col
+          ) results
+          GROUP BY col
+          ORDER BY cost DESC
+          LIMIT %d',
+          $col,
+          $table,
+          $user->uid,
+          $limit,
+        );
+      },
+      'type'  => 'int',
+    ),
+  );
+
+  $limit = 30;
+
+  $threshold = PIE_TOLERANCE / (2 * M_PI);
+
+  $data = array();
+  
+  function sort_quant($a, $b) {
+    return $a[1] < $b[1] ? 1 : -1;
+  }
+
+  foreach ($col[$table] as $chart) {
+    $pieCol       = $chart[0];
+    $pieTemplate  = $chart[1];
+    $pieTitle     = $chart[2];
+
+    $template = $pieTemplates[$pieTemplate];
+
+    $query_args = $template['query']($pieCol, $table, $limit);
+
+    $query = call_user_func_array('db_query', $query_args);
+
+    if (!$query) {
+      json_error(500);
+    }
+
+    $pie_data = array();
+
+    $total = 0;
+
+    while (NULL !== ($row = $query->fetch_object())) {
+      $total += (int)$row->cost;
+
+      $pie_data[] = array(
+        $row->col,
+        (int)$row->cost,
+      );
+    }
+
+    if ($total > 0) {
+      // concatenate very small slices into a slice called "other"
+      $j = count($pie_data) - 1;
+
+      $other = 0;
+
+      while ($pie_data[$j][1] / $total < $threshold) {
+        $other += $pie_data[$j][1];
+
+        array_pop($pie_data);
+        $j--;
+      }
+
+      if ($other > 0) {
+        $pie_data[] = array('Other', $other);
+
+        uasort($pie_data, 'sort_quant');
+      }
+
+      uasort($pie_data, 'sort_quant');
+    }
+
+    $pie_data = array_values($pie_data);
+
+    $data[] = array(
+      'title' => $pieTitle,
+      'type'  => $pieTemplate,
+      'data'  => $pie_data,
+      'total' => $total,
+    );
+  }
+
+  $res['data'] = $data;
+
+  return $res;
+}
+
+function _GET_data_stocks($res) {
+  $result = db_query('
+    SELECT code, name, SUM(weight * subweight) AS weight FROM {stocks}
+    GROUP BY code
+    ORDER BY weight DESC
+  ');
+
+  if (!$result) {
+    json_error(500);
+  }
+
+  $stocks = array();
+
+  $total_weight = 0;
+
+  while (NULL !== ($row = $result->fetch_object())) {
+    $this_weight = (double)$row->weight;
+
+    $total_weight += $this_weight;
+
+    $stocks[$row->code] = array(
+      'n' => $row->name,
+      'w' => $this_weight
+    );
+  }
+
+  $res['data']['stocks'] = $stocks;
+
+  $res['data']['total'] = $total_weight;
+
+  return $res;
+}
+
+function _GET_data($res, $table, $offset = 0) {
+  $res['data'] = get_data($table, (int)$offset);
+
+  return $res;
+}
+
+function _GET_data_funds($res, $offset = 0) {
+  $res['data'] = get_data('funds', $offset);
+
+  $scraper = new FundScraper($res['data']['data']);
+
+  $scraper->cache_only = TRUE;
+
+  $res['data']['data'] = $scraper->scrape();
+
+  $res['data']['from_cache'] = !$scraper->did_scrape;
+
+  return $res;
+}
+
+function _GET_data_all($res) {
+  $res['data'] = array();
+
+  $cols = array(
+    'overview', 'funds', 'in', 'bills', 'food', 'general', 'holiday', 'social'
+  );
+
+  foreach ($cols as $col) {
+    $_res = _GET_data($res, $col);
+
+    if ($_res['error']) {
+      $res['error'] = TRUE;
+      $res['errorText'] = $this_res['errorText'];
+      
+      return $res;
+    }
+
+    $res['data'][$col] = $_res['data'];
+  }
+
+  return $res;
+}
+
+function _POST_update_overview($res) {
+  global $user;
+
+  if (
+    !isset($_POST['balance']) || !is_numeric($_POST['balance']) ||
+    !isset($_POST['year']) || !isset($_POST['month'])
+  ) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Must supply valid data!';
+
+    return $res;
+  }
+
+  $exists = db_query(
+    'SELECT uid
+    FROM {balance}
+    WHERE uid = %d AND year = %d AND month = %d',
+    $user->uid, $_POST['year'], $_POST['month']
+  )->num_rows > 0;
+
+  if ($exists) {
+    $query = db_query(
+      'UPDATE {balance} SET balance = %d
+      WHERE uid = %d AND year = %d AND month = %d',
+      $_POST['balance'], $user->uid, $_POST['year'], $_POST['month']
+    );
+  }
+  else {
+    $query = db_query(
+      'INSERT INTO {balance} (uid, year, month, balance) VALUES (%d, %d, %d, %d)',
+      $user->uid, $_POST['year'], $_POST['month'], $_POST['balance']
+    );
+  }
+
+  if (!$query) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Database error';
+  }
+
+  return $res;
+}
+
+$table_cols = array(
+  'funds' => array('item' => '"%s"', 'units' => '"%s"', 'cost' => '%d'),
+  'in'    => array('item' => '"%s"', 'cost' => '%d'),
+  'bills' => array('item' => '"%s"', 'cost' => '%d'),
+  'food'  => array(
+    'item' => '"%s"', 'category' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+  ),
+  'general'  => array(
+    'item' => '"%s"', 'category' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+  ),
+  'holiday'  => array(
+    'item' => '"%s"', 'holiday' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+  ),
+  'social'  => array(
+    'item' => '"%s"', 'society' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+  ),
+);
+
+function _POST_update($res, $table) {
+  global $table_cols;
+  global $user;
+  
+  if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Must supply valid ID!';
+
+    return $res;
+  }
+
+  $qArgs = array();
+  $qTxt = 'UPDATE {`' . $table . '`} SET';
+
+  $cols = $table_cols[$table];
+
+  $cols_defined = 0;
+  
+  if (isset($_POST['date'])) {
+    $cols_defined++;
+  
+    $date = deserialise_date($_POST['date']);
+
+    if (is_null($date)) {
+      $res['error'] = TRUE;
+      $res['errorText'] = 'Must supply valid date!';
+
+      return $res;
+    }
+
+    $qTxt .= ' year = %d, month = %d, date = %d';
+
+    $qArgs[] = $date['year'];
+    $qArgs[] = $date['month'];
+    $qArgs[] = $date['date'];
+  }
+
+  foreach ($cols as $col => $type) {
+    if (isset($_POST[$col])) {
+      $comma = $cols_defined++ ? ',' : '';
+
+      $qTxt .= $comma . ' ' . $col . ' = ' . $type;
+
+      $qArgs[] = $_POST[$col];
+    }
+  }
+
+  if ($cols_defined === 0) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Must enter some data!';
+
+    return $res;
+  }
+
+  $qTxt .= ' WHERE uid = %d AND id = %d';
+
+  $qArgs[] = $user->uid;
+  $qArgs[] = $_POST['id'];
+
+  array_unshift($qArgs, $qTxt);
+
+  $query = call_user_func_array('db_query', $qArgs);
+
+  if (!$query) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Database error';
+  }
+  else {
+    $res['total'] = get_total_cost($table);
+  }
+
+  return $res;
+}
+
+function _POST_add($res, $table) {
+  global $table_cols;
+  global $user;
+
+  $cols = $table_cols[$table];
+
+  $cols_defined = TRUE;
+
+  foreach ($cols as $col => $type) {
+    if (!isset($_POST[$col])) {
+      $cols_defined = FALSE;
+
+      break;
+    }
+  }
+
+  if (
+    !$cols_defined || !isset($_POST['date']) ||
+    !preg_match(DATE_SERIALISED, $_POST['date'])
+  ) {
+    json_error(400);
+  }
+
+  $date = deserialise_date($_POST['date']);
+
+  $qArgs = array();
+
+  $qTxt = 'INSERT INTO {`' . $table . '`} (uid, year, month, date, ' .
+    implode(', ', array_keys($cols)) .
+    ') VALUES (%d, %d, %d, %d, ' . implode(', ', $cols) . ')';
+
+  $qArgs[] = $user->uid;
+
+  $qArgs[] = $date['year'];
+  $qArgs[] = $date['month'];
+  $qArgs[] = $date['date'];
+
+  foreach ($cols as $col => $type) {
+    $qArgs[] = $_POST[$col];
+  }
+
+  array_unshift($qArgs, $qTxt);
+
+  $query = call_user_func_array('db_query', $qArgs);
+
+  if (!$query) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Database error';
+  }
+  else {
+    $res['total'] = get_total_cost($table);
+    $res['id'] = db_insert_id();
+  }
+
+  return $res;
+}
+
+function _POST_delete($res, $table) {
+  global $user;
+
+  if (!isset($_POST['id'])) {
+    json_error(400);
+  }
+
+  $query = db_query(
+    'DELETE FROM ' . $table . ' WHERE uid = %d AND id = %d', $user->uid, $_POST['id']
+  );
+  
+  if (!$query) {
+    $res['error'] = TRUE;
+    $res['errorText'] = 'Database error';
+  }
+
+  return $res;
+}
+
+$res = array(
+  'error' => FALSE
+);
+
+if (!isset($_GET['t'])) {
+  $res['error'] = TRUE;
+  $res['errorText'] = 'Must supply API method';
+}
+else {
+  $args = explode('/', $_GET['t']);
+
+  if ($args[0] === 'login') {
+    // check if this IP has tried to log in before in the past 5 seconds
+    $num_seconds_penalty = 60;
+
+    $num_tries = 10;
+
+    $ip_check_query = db_query(
+      'SELECT `time`, `count` FROM {ip_login_req} WHERE `ip` = "%s"',
+      $_SERVER['REMOTE_ADDR']
+    );
+
+    $ip_check_exists = FALSE;
+    $ip_check_count = 0;
+
+    if ($ip_check_query->num_rows > 0) {
+      $ip_check_exists = TRUE;
+
+      $obj = $ip_check_query->fetch_object();
+
+      $time = (int)($obj->time);
+      $ip_check_count = (int)($obj->count);
+
+      $breach = FALSE;
+      
+      if ($ip_check_count >= $num_tries) {
+        $since = time() - $time;
+
+        if ($since < 1) {
+          // fuck that!
+          json_error(401);
+        }
+        else if ($since < $num_seconds_penalty) {
+          $breach = TRUE;
+        }
+        else {
+          $ip_check_count = 0;
+        }
+      }
+
+      if ($breach) {
+        db_query(
+          'UPDATE {ip_login_req} SET `time` = %d, `count` = %d WHERE ip = "%s"',
+          time(), $num_tries, $_SERVER['REMOTE_ADDR']
+        );
+        
+        json_error(401);
+      }
+    }
+
+    $user->login();
+
+    if ($user->uid > 0) {
+      // logged in
+      $res['uid']     = $user->uid;
+      $res['name']    = $user->name;
+      $res['api_key'] = $user->api_key;
+
+      //db_query('UPDATE {ip_login_req} SET `count` = 0 WHERE ip = "%s"', $_SERVER['REMOTE_ADDR']);
+    }
+    else {
+      // bad login
+      $res['error'] = TRUE;
+
+      $res['errorText'] = $user->pin ? 'Bad PIN' : 'No PIN';
+
+      if ($ip_check_exists) {
+        db_query(
+          'UPDATE {ip_login_req} SET `time` = %d, `count` = %d WHERE ip = "%s"',
+          time(), $ip_check_count + 1, $_SERVER['REMOTE_ADDR']
+        );
+      }
+      else {
+        db_query(
+          'INSERT INTO {ip_login_req} (`ip`, `time`, `count`) VALUES("%s", %d, %d)',
+          $_SERVER['REMOTE_ADDR'], time(), 1
+        );
+      }
+    }
+  }
+  else {
+    $user->auth();
+
+    if (!$user->uid) {
+      $res['error'] = TRUE;
+
+      $res['errorText'] = isset($_SERVER['HTTP_AUTHORIZATION'])
+        ? 'Bad authentication token'
+        : 'Not authenticated';
+    }
+    else {
+      $method = $_SERVER['REQUEST_METHOD'];
+
+      $func_args = array();
+
+      do {
+        $func_name = '_' . $method . '_' . implode('_', $args);
+
+        if (function_exists($func_name)) {
+          array_unshift($func_args, $res);
+
+          $res = call_user_func_array($func_name, $func_args);
+
+          break;
+        }
+        else {
+          array_unshift($func_args, array_pop($args));
+        }
+      } while (count($args) > 0);
+
+      if (count($args) === 0) {
+        json_error(400);
+      }
+    }
+  }
+}
+
+print json_encode($res);
