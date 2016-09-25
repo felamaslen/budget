@@ -4,7 +4,9 @@ function update_js {
   babel js/budget.es6.js > js/budget.es5.js
 
   cp js/jquery.min.js js/main.min.js
-  cat js/js.cookie.js js/api.js js/page.js js/pageOverview.js js/common.js js/budget.es5.js | uglifyjs -m >> js/main.min.js
+  cat js/js.cookie.js js/budget.es5.js | uglifyjs -m >> js/main.min.js
+
+  rm js/budget.es5.js
 }
 
 function update_css {
