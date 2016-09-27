@@ -1469,7 +1469,7 @@
     hookSwitchToAfterLoad() {
     }
 
-    loadData(callback, render, changed) {
+    loadData(callback, render, changed, extra) {
       if (this.loading) {
         return;
       }
@@ -1490,7 +1490,7 @@
           res => this.onDataLoaded(callback, render, res),
           null,
           () => this.onRequestComplete(),
-          true
+          !extra
         );
       }
     }
@@ -1917,7 +1917,7 @@
 
       this.offset++;
 
-      this.loadData(null, false, true);
+      this.loadData(null, false, true, true);
     }
 
     calculateDaily() {
