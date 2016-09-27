@@ -610,9 +610,12 @@ class RestApi {
 
               $this->get_data_search($table, $column, $term, $max);
               break;
+            
+            case 'funds':
+              $this->get_data_funds();
+              break;
 
             case 'overview':
-            case 'funds':
             case 'in':
             case 'bills':
             case 'food':
