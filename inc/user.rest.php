@@ -38,9 +38,10 @@ class User {
   }
   
   public function login() {
-    if (!is_null($this->pin) && is_numeric($this->pin)) {
+    if (!is_null($this->pin)) {
       $info_query = db_query(
-        'SELECT uid, user, pin FROM {users} WHERE pin = %d', $this->pin
+        'SELECT uid, user, api_key FROM {users} WHERE api_key = "%s"',
+        $this->password_hash($this->pin)
       );
       
       if (!$info_query) {
@@ -52,7 +53,7 @@ class User {
 
         $this->uid      = (int)($row->uid);
         $this->name     = $row->user;
-        $this->api_key  = $this->password_hash($row->pin);
+        $this->api_key  = $row->api_key;
       }
     }
   }
