@@ -219,6 +219,10 @@ function get_data($table, $offset = 0) {
       's' => 'shop',
     ),
   );
+
+  if (!array_key_exists($table, $table_cols)) {
+    json_error(400);
+  }
   
   $limit_cols = array(
     'food'    => 1,
