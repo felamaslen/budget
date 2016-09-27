@@ -557,7 +557,7 @@
   let editing = null;
 
   class EditItem {
-    constructor($input, $td, editHook, type) {
+    constructor($input, $td, editHook, type, suggestion) {
       this.$input   = $input;
       this.$td      = $td;
       this.editHook = editHook;
@@ -565,6 +565,10 @@
 
       this.locked = false;
       this.active = false;
+
+      if (suggestion) {
+        this.$input.autoSearch(suggestion.page, suggestion.col);
+      }
 
       if (this.$td) {
         this.$td.on("mousedown", this.finishLastAndActivate.bind(this));
@@ -1637,11 +1641,16 @@
           newItem[col] = getData(newDataValue, this.dataType[j]);
 
           this.$li[id][col] = $("<span></span>").addClass(col).append(
-            $("<span></span>").addClass("text").html(formatData(newItem[col], this.dataType[j]))
+            $("<span></span>").addClass("text").html(
+              formatData(newItem[col], this.dataType[j])
+            )
           ).data("val", newItem[col]);
 
+          const suggestion = this.dataType[j] === "text"
+            ? { page: this.page, col } : null;
+
           this.$li[id][col].editable(
-            this.listEditCallback(j), this.dataType[j]
+            this.listEditCallback(j), this.dataType[j], suggestion
           );
 
           this.$lis[id].append(this.$li[id][col]);
@@ -1722,6 +1731,7 @@
             .addClass("editable-input")
             .addClass("editable-" + col)
             .val(this.addDefaultVal[col])
+            .autoSearch(this.page, col)
           ;
 
           this.$addInput[col]
@@ -3079,15 +3089,139 @@
     editing.finish();
   }
 
-  $.fn.editable = function editable(editHook, type) {
+  $.fn.editable = function editable(editHook, type, suggestion) {
     this.editable = new EditItem(
       $("<input type=text />").hide()
         .addClass("editable-input")
         .addClass("editable-" + type),
       $(this),
       editHook,
-      type
+      type,
+      suggestion
     );
+
+    return this;
+  };
+
+  class AutoSearch {
+    constructor($elem, page, col) {
+      this.$input = $elem;
+
+      this.page = page;
+      this.col = col;
+
+      this.range = 0;
+      this.typedVal = "";
+      this.suggestion = null;
+
+      this.loading = false;
+
+      this.timer = null;
+      this.throttleTime = 100;
+
+      this.cache = {};
+
+      this.$input.after(this.$suggestion);
+
+      this.$input
+      .on("input", () => this.input())
+      .on("keydown", evt => {
+        if (evt.key === "Tab") {
+          this.confirmSuggestion();
+        }
+        else if (evt.key === "Escape") {
+          this.cancelSuggestion();
+
+          evt.stopPropagation();
+        }
+      })
+      .on("blur", () => this.cache = {});
+    }
+
+    confirmSuggestion() {
+      this.$input.val(this.suggestion);
+    }
+
+    cancelSuggestion() {
+      this.$input.val(this.typedVal);
+    }
+
+    input() {
+      this.range = this.$input[0].selectionStart;
+
+      const val = this.$input.val().substring(0, this.range);
+
+      this.suggestion = val;
+
+      this.typedVal = val;
+
+      this.loadSuggestion(val);
+    }
+
+    loadSuggestion(val) {
+      if (val.length === 0) {
+        this.$input.val(val);
+
+        return;
+      }
+
+      if (this.cache[val]) {
+        this.suggestionsLoaded(this.cache[val], val);
+      }
+      else {
+        if (this.loading) {
+          return;
+        }
+
+        this.loading = true;
+
+        const args = ["data", "search", this.page, this.col, val, 1];
+
+        api.request(
+          args.join("/"), "GET", null, user.apiKey,
+          res => this.suggestionsLoaded(res.data[0], val),
+          () => this.suggestionsError(),
+          () => this.suggestionsComplete(),
+          false
+        );
+      }
+    }
+
+    suggestionsLoaded(term, oldVal) {
+      if (!term) {
+        this.$input.val(oldVal);
+      }
+      else {
+        this.cache[oldVal] = term;
+
+        this.suggestion = term;
+
+        this.$input.val(term);
+
+        this.$input[0].setSelectionRange(this.range, this.range);
+      }
+    }
+
+    suggestionsError() {
+      console.warn("Error loading suggestions!");
+    }
+
+    suggestionsComplete() {
+      if (this.timer) {
+        window.clearTimeout(this.timer);
+      }
+
+      this.timer = window.setTimeout(() => {
+        this.loading = false;
+      }, this.throttleTime);
+
+    }
+  }
+
+  $.fn.autoSearch = function autoSearch(page, col) {
+    this.searchHandler = new AutoSearch($(this), page, col);
+
+    return this;
   };
 
   $(document).ready(() => {

@@ -262,6 +262,47 @@ class RestApi {
     $this->res['data'] = get_data($table, (int)$offset);
   }
 
+  private function get_data_search($table, $column, $term, $max) {
+    if (is_null($table) || is_null($column) || is_null($term)) {
+      json_error(400);
+    }
+
+    if (!isset($this->table_cols[$table]) || !isset($this->table_cols[$table][$column])) {
+      json_error(400);
+    }
+
+    $colType = $this->table_cols[$table][$column];
+
+    if ($colType !== '"%s"') {
+      json_error(400);
+    }
+
+    if (is_null($max) || !is_numeric($max)) {
+      $max = 1;
+    }
+
+    $query = db_query(
+      'SELECT `%s` AS `col`, SUM(IF(`%s` LIKE "%s%", 1, 0)) AS matches
+      FROM `%s`
+      WHERE uid = %d AND `%s` LIKE "%%%s%%"
+      GROUP BY `col`
+      ORDER BY matches DESC
+      LIMIT %d
+      ', $column, $column, $term, $table, $this->user->uid, $column, $term, $max);
+
+    if (!$query) {
+      json_error(500);
+    }
+
+    $this->res['data'] = array();
+
+    if ($query->num_rows > 0) {
+      while (NULL !== ($row = $query->fetch_object())) {
+        $this->res['data'][] = $row->col;
+      }
+    }
+  }
+
   private function post_update_overview() {
     if (
       !isset($_POST['balance']) || !is_numeric($_POST['balance']) ||
@@ -551,16 +592,26 @@ class RestApi {
           case 'data':
             $type = array_shift($this->args);
 
-            $offset = array_shift($this->args);
-            if (is_null($offset)) {
-              $offset = 0;
-            }
+            $arg3 = array_shift($this->args);
 
             switch ($type) {
             case 'stocks':
               $this->get_data_stocks();
               break;
 
+            case 'search':
+              $table = $arg3;
+
+              $column = array_shift($this->args);
+
+              $term = array_shift($this->args);
+
+              $max = array_shift($this->args);
+
+              $this->get_data_search($table, $column, $term, $max);
+              break;
+
+            case 'overview':
             case 'funds':
             case 'in':
             case 'bills':
@@ -568,6 +619,12 @@ class RestApi {
             case 'general':
             case 'holiday':
             case 'social':
+              $offset = $arg3;
+
+              if (is_null($offset)) {
+                $offset = 0;
+              }
+
               $this->get_data($type, $offset);
               break;
 
