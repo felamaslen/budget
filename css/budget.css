@@ -720,7 +720,7 @@ button:active {
   font-style: italic;
 }
   
-@media screen and (max-width: 1400px) {
+@media screen and (max-width: 1500px) {
   body {
     overflow: auto;
   }
@@ -811,7 +811,7 @@ button:active {
   }
 }
 
-@media screen and (min-width: 1401px) {
+@media screen and (min-width: 1501px) {
   html, body {
     height: 100%;
   }
