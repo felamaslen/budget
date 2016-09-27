@@ -11,473 +11,451 @@ require_once dirname(__FILE__) . '/inc/common.php';
 
 require_once BASE_DIR . '/inc/user.rest.php';
 
-function _GET_pie($res, $table = NULL) {
-  global $user;
+class RestApi {
+  public function __construct($user) {
+    $this->res = array('error' => FALSE);
 
-  if (is_null($table)) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Must supply table!';
-
-    return $res;
-  }
-
-  $col = array(
-    'funds' => array(
-      array('item', 'cost', 'Total'),
-    ),
-    'in' => array(
-      array('item', 'cost', 'Total'),
-    ),
-    'food' => array(
-      array('shop', 'cost', 'Shop cost'),
-      array('category', 'cost',  'Category cost'),
-    ),
-    'general' => array(
-      array('shop', 'cost', 'Shop cost'),
-      array('category', 'cost', 'Category cost'),
-    ),
-    'holiday' => array(
-      array('holiday', 'cost', 'Holiday cost'),
-      array('holiday', 'int', 'Holiday number'),
-    ),
-    'social' => array(
-      array('shop', 'cost', 'Shop cost'),
-      array('society', 'cost', 'Society cost'),
-    ),
-  );
-
-  if (!isset($col[$table])) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Must supply valid table!';
-
-    return $res;
-  }
-
-  $pieTemplates = array(
-    'cost' => array(
-      'query' => function($col, $table, $limit) {
-        global $user;
-
-        return array(
-          'SELECT `%s` AS col, SUM(cost) AS cost FROM {`%s`}
-          WHERE uid = %d AND cost > 0
-          GROUP BY %s
-          ORDER BY cost DESC
-          LIMIT %d',
-          $col,
-          $table,
-          $user->uid,
-          $col,
-          $limit,
-        );
-      },
-      'type'  => 'cost',
-    ),
-    'int' => array(
-      'query' => function($col, $table, $limit) {
-        global $user;
-
-        return array(
-          'SELECT col, COUNT(*) AS cost FROM (
-            SELECT `%s` AS col
-            FROM {`%s`}
-            WHERE uid = %d
-            GROUP BY year, month, date, col
-          ) results
-          GROUP BY col
-          ORDER BY cost DESC
-          LIMIT %d',
-          $col,
-          $table,
-          $user->uid,
-          $limit,
-        );
-      },
-      'type'  => 'int',
-    ),
-  );
-
-  $limit = 30;
-
-  $threshold = PIE_TOLERANCE / (2 * M_PI);
-
-  $data = array();
-  
-  function sort_quant($a, $b) {
-    return $a[1] < $b[1] ? 1 : -1;
-  }
-
-  foreach ($col[$table] as $chart) {
-    $pieCol       = $chart[0];
-    $pieTemplate  = $chart[1];
-    $pieTitle     = $chart[2];
-
-    $template = $pieTemplates[$pieTemplate];
-
-    $query_args = $template['query']($pieCol, $table, $limit);
-
-    $query = call_user_func_array('db_query', $query_args);
-
-    if (!$query) {
-      json_error(500);
+    if (!$this->validate_args()) { 
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply API method';
     }
-
-    $pie_data = array();
-
-    $total = 0;
-
-    while (NULL !== ($row = $query->fetch_object())) {
-      $total += (int)$row->cost;
-
-      $pie_data[] = array(
-        $row->col,
-        (int)$row->cost,
+    else {
+      $this->user = $user;
+      
+      $this->table_cols = array(
+        'funds' => array('item' => '"%s"', 'units' => '"%s"', 'cost' => '%d'),
+        'in'    => array('item' => '"%s"', 'cost' => '%d'),
+        'bills' => array('item' => '"%s"', 'cost' => '%d'),
+        'food'  => array(
+          'item' => '"%s"', 'category' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+        ),
+        'general'  => array(
+          'item' => '"%s"', 'category' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+        ),
+        'holiday'  => array(
+          'item' => '"%s"', 'holiday' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+        ),
+        'social'  => array(
+          'item' => '"%s"', 'society' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
+        ),
       );
+
+      $this->execute();
     }
 
-    if ($total > 0) {
-      // concatenate very small slices into a slice called "other"
-      $j = count($pie_data) - 1;
+    print json_encode($this->res);
+  }
 
-      $other = 0;
+  private function get_pie($table = NULL) {
+    if (is_null($table)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply table!';
 
-      while ($pie_data[$j][1] / $total < $threshold) {
-        $other += $pie_data[$j][1];
+      return;
+    }
 
-        array_pop($pie_data);
-        $j--;
+    $col = array(
+      'funds' => array(
+        array('item', 'cost', 'Total'),
+      ),
+      'in' => array(
+        array('item', 'cost', 'Total'),
+      ),
+      'food' => array(
+        array('shop', 'cost', 'Shop cost'),
+        array('category', 'cost',  'Category cost'),
+      ),
+      'general' => array(
+        array('shop', 'cost', 'Shop cost'),
+        array('category', 'cost', 'Category cost'),
+      ),
+      'holiday' => array(
+        array('holiday', 'cost', 'Holiday cost'),
+        array('holiday', 'int', 'Holiday number'),
+      ),
+      'social' => array(
+        array('shop', 'cost', 'Shop cost'),
+        array('society', 'cost', 'Society cost'),
+      ),
+    );
+
+    if (!isset($col[$table])) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid table!';
+
+      return;
+    }
+
+    $pieTemplates = array(
+      'cost' => array(
+        'query' => function($col, $table, $limit) {
+          return array(
+            'SELECT `%s` AS col, SUM(cost) AS cost FROM {`%s`}
+            WHERE uid = %d AND cost > 0
+            GROUP BY %s
+            ORDER BY cost DESC
+            LIMIT %d',
+            $col,
+            $table,
+            $this->user->uid,
+            $col,
+            $limit,
+          );
+        },
+        'type'  => 'cost',
+      ),
+      'int' => array(
+        'query' => function($col, $table, $limit) {
+          return array(
+            'SELECT col, COUNT(*) AS cost FROM (
+              SELECT `%s` AS col
+              FROM {`%s`}
+              WHERE uid = %d
+              GROUP BY year, month, date, col
+            ) results
+            GROUP BY col
+            ORDER BY cost DESC
+            LIMIT %d',
+            $col,
+            $table,
+            $this->user->uid,
+            $limit,
+          );
+        },
+        'type'  => 'int',
+      ),
+    );
+
+    $limit = 30;
+
+    $threshold = PIE_TOLERANCE / (2 * M_PI);
+
+    $data = array();
+    
+    function sort_quant($a, $b) {
+      return $a[1] < $b[1] ? 1 : -1;
+    }
+
+    foreach ($col[$table] as $chart) {
+      $pieCol       = $chart[0];
+      $pieTemplate  = $chart[1];
+      $pieTitle     = $chart[2];
+
+      $template = $pieTemplates[$pieTemplate];
+
+      $query_args = $template['query']($pieCol, $table, $limit);
+
+      $query = call_user_func_array('db_query', $query_args);
+
+      if (!$query) {
+        json_error(500);
       }
 
-      if ($other > 0) {
-        $pie_data[] = array('Other', $other);
+      $pie_data = array();
+
+      $total = 0;
+
+      while (NULL !== ($row = $query->fetch_object())) {
+        $total += (int)$row->cost;
+
+        $pie_data[] = array(
+          $row->col,
+          (int)$row->cost,
+        );
+      }
+
+      if ($total > 0) {
+        // concatenate very small slices into a slice called "other"
+        $j = count($pie_data) - 1;
+
+        $other = 0;
+
+        while ($pie_data[$j][1] / $total < $threshold) {
+          $other += $pie_data[$j][1];
+
+          array_pop($pie_data);
+          $j--;
+        }
+
+        if ($other > 0) {
+          $pie_data[] = array('Other', $other);
+
+          uasort($pie_data, 'sort_quant');
+        }
 
         uasort($pie_data, 'sort_quant');
       }
 
-      uasort($pie_data, 'sort_quant');
+      $pie_data = array_values($pie_data);
+
+      $data[] = array(
+        'title' => $pieTitle,
+        'type'  => $pieTemplate,
+        'data'  => $pie_data,
+        'total' => $total,
+      );
     }
 
-    $pie_data = array_values($pie_data);
-
-    $data[] = array(
-      'title' => $pieTitle,
-      'type'  => $pieTemplate,
-      'data'  => $pie_data,
-      'total' => $total,
-    );
+    $this->res['data'] = $data;
   }
 
-  $res['data'] = $data;
+  private function get_data_stocks() {
+    $result = db_query('
+      SELECT code, name, SUM(weight * subweight) AS weight FROM {stocks}
+      GROUP BY code
+      ORDER BY weight DESC
+      ');
 
-  return $res;
-}
-
-function _GET_data_stocks($res) {
-  $result = db_query('
-    SELECT code, name, SUM(weight * subweight) AS weight FROM {stocks}
-    GROUP BY code
-    ORDER BY weight DESC
-  ');
-
-  if (!$result) {
-    json_error(500);
-  }
-
-  $stocks = array();
-
-  $total_weight = 0;
-
-  while (NULL !== ($row = $result->fetch_object())) {
-    $this_weight = (double)$row->weight;
-
-    $total_weight += $this_weight;
-
-    $stocks[$row->code] = array(
-      'n' => $row->name,
-      'w' => $this_weight
-    );
-  }
-
-  $res['data']['stocks'] = $stocks;
-
-  $res['data']['total'] = $total_weight;
-
-  return $res;
-}
-
-function _GET_data($res, $table, $offset = 0) {
-  $res['data'] = get_data($table, (int)$offset);
-
-  return $res;
-}
-
-function _GET_data_funds($res, $offset = 0) {
-  $res['data'] = get_data('funds', $offset);
-
-  $scraper = new FundScraper($res['data']['data']);
-
-  $scraper->cache_only = TRUE;
-
-  $res['data']['data'] = $scraper->scrape();
-
-  $res['data']['from_cache'] = !$scraper->did_scrape;
-
-  return $res;
-}
-
-function _GET_data_all($res) {
-  $res['data'] = array();
-
-  $cols = array(
-    'overview', 'funds', 'in', 'bills', 'food', 'general', 'holiday', 'social'
-  );
-
-  foreach ($cols as $col) {
-    $_res = _GET_data($res, $col);
-
-    if ($_res['error']) {
-      $res['error'] = TRUE;
-      $res['errorText'] = $this_res['errorText'];
-      
-      return $res;
+    if (!$result) {
+      json_error(500);
     }
 
-    $res['data'][$col] = $_res['data'];
+    $stocks = array();
+
+    $total_weight = 0;
+
+    while (NULL !== ($row = $result->fetch_object())) {
+      $this_weight = (double)$row->weight;
+
+      $total_weight += $this_weight;
+
+      $stocks[$row->code] = array(
+        'n' => $row->name,
+        'w' => $this_weight
+      );
+    }
+
+    $this->res['data']['stocks'] = $stocks;
+
+    $this->res['data']['total'] = $total_weight;
+  }
+  
+  private function get_data_funds($offset = 0) {
+    $this->res['data'] = get_data('funds', $offset);
+
+    $scraper = new FundScraper($this->res['data']['data']);
+
+    $scraper->cache_only = TRUE;
+
+    $this->res['data']['data'] = $scraper->scrape();
+
+    $this->res['data']['from_cache'] = !$scraper->did_scrape;
   }
 
-  return $res;
-}
+  private function get_data_all() {
+    $this->res['data'] = array();
 
-function _POST_update_overview($res) {
-  global $user;
+    $cols = array(
+      'overview', 'funds', 'in', 'bills', 'food', 'general', 'holiday', 'social'
+    );
 
-  if (
-    !isset($_POST['balance']) || !is_numeric($_POST['balance']) ||
-    !isset($_POST['year']) || !isset($_POST['month'])
-  ) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Must supply valid data!';
+    $overview = get_data('overview', 0);
 
-    return $res;
+    foreach ($cols as $col) {
+      $_res = get_data($col, 0);
+
+      $this->res['data'][$col] = $_res;
+    }
   }
 
-  $exists = db_query(
-    'SELECT uid
-    FROM {balance}
-    WHERE uid = %d AND year = %d AND month = %d',
-    $user->uid, $_POST['year'], $_POST['month']
-  )->num_rows > 0;
+  private function get_data($table, $offset = 0) {
+    $this->res['data'] = get_data($table, (int)$offset);
+  }
 
-  if ($exists) {
-    $query = db_query(
-      'UPDATE {balance} SET balance = %d
+  private function post_update_overview() {
+    if (
+      !isset($_POST['balance']) || !is_numeric($_POST['balance']) ||
+      !isset($_POST['year']) || !isset($_POST['month'])
+    ) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid data!';
+
+      return;
+    }
+
+    $exists = db_query(
+      'SELECT uid
+      FROM {balance}
       WHERE uid = %d AND year = %d AND month = %d',
-      $_POST['balance'], $user->uid, $_POST['year'], $_POST['month']
-    );
-  }
-  else {
-    $query = db_query(
-      'INSERT INTO {balance} (uid, year, month, balance) VALUES (%d, %d, %d, %d)',
-      $user->uid, $_POST['year'], $_POST['month'], $_POST['balance']
-    );
-  }
+      $this->user->uid, $_POST['year'], $_POST['month']
+    )->num_rows > 0;
 
-  if (!$query) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Database error';
-  }
+    if ($exists) {
+      $query = db_query(
+        'UPDATE {balance} SET balance = %d
+        WHERE uid = %d AND year = %d AND month = %d',
+        $_POST['balance'], $this->user->uid, $_POST['year'], $_POST['month']
+      );
+    }
+    else {
+      $query = db_query(
+        'INSERT INTO {balance} (uid, year, month, balance) VALUES (%d, %d, %d, %d)',
+        $this->user->uid, $_POST['year'], $_POST['month'], $_POST['balance']
+      );
+    }
 
-  return $res;
-}
-
-$table_cols = array(
-  'funds' => array('item' => '"%s"', 'units' => '"%s"', 'cost' => '%d'),
-  'in'    => array('item' => '"%s"', 'cost' => '%d'),
-  'bills' => array('item' => '"%s"', 'cost' => '%d'),
-  'food'  => array(
-    'item' => '"%s"', 'category' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
-  ),
-  'general'  => array(
-    'item' => '"%s"', 'category' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
-  ),
-  'holiday'  => array(
-    'item' => '"%s"', 'holiday' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
-  ),
-  'social'  => array(
-    'item' => '"%s"', 'society' => '"%s"', 'cost' => '%d', 'shop' => '"%s"'
-  ),
-);
-
-function _POST_update($res, $table) {
-  global $table_cols;
-  global $user;
-  
-  if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Must supply valid ID!';
-
-    return $res;
+    if (!$query) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Database error';
+    }
   }
 
-  $qArgs = array();
-  $qTxt = 'UPDATE {`' . $table . '`} SET';
+  private function post_update($table) {
+    if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid ID!';
 
-  $cols = $table_cols[$table];
+      return;
+    }
 
-  $cols_defined = 0;
-  
-  if (isset($_POST['date'])) {
-    $cols_defined++;
-  
+    $qArgs = array();
+    $qTxt = 'UPDATE {`' . $table . '`} SET';
+
+    $cols = $this->table_cols[$table];
+
+    $cols_defined = 0;
+    
+    if (isset($_POST['date'])) {
+      $cols_defined++;
+    
+      $date = deserialise_date($_POST['date']);
+
+      if (is_null($date)) {
+        $this->res['error'] = TRUE;
+        $this->res['errorText'] = 'Must supply valid date!';
+
+        return;
+      }
+
+      $qTxt .= ' year = %d, month = %d, date = %d';
+
+      $qArgs[] = $date['year'];
+      $qArgs[] = $date['month'];
+      $qArgs[] = $date['date'];
+    }
+
+    foreach ($cols as $col => $type) {
+      if (isset($_POST[$col])) {
+        $comma = $cols_defined++ ? ',' : '';
+
+        $qTxt .= $comma . ' ' . $col . ' = ' . $type;
+
+        $qArgs[] = $_POST[$col];
+      }
+    }
+
+    if ($cols_defined === 0) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must enter some data!';
+
+      return;
+    }
+
+    $qTxt .= ' WHERE uid = %d AND id = %d';
+
+    $qArgs[] = $this->user->uid;
+    $qArgs[] = $_POST['id'];
+
+    array_unshift($qArgs, $qTxt);
+
+    $query = call_user_func_array('db_query', $qArgs);
+
+    if (!$query) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Database error';
+    }
+    else {
+      $this->res['total'] = get_total_cost($table);
+    }
+  }
+
+  private function post_add($table) {
+    $cols = $this->table_cols[$table];
+
+    $cols_defined = TRUE;
+
+    foreach ($cols as $col => $type) {
+      if (!isset($_POST[$col])) {
+        $cols_defined = FALSE;
+
+        break;
+      }
+    }
+
+    if (
+      !$cols_defined || !isset($_POST['date']) ||
+      !preg_match(DATE_SERIALISED, $_POST['date'])
+    ) {
+      json_error(400);
+    }
+
     $date = deserialise_date($_POST['date']);
 
-    if (is_null($date)) {
-      $res['error'] = TRUE;
-      $res['errorText'] = 'Must supply valid date!';
+    $qArgs = array();
 
-      return $res;
-    }
+    $qTxt = 'INSERT INTO {`' . $table . '`} (uid, year, month, date, ' .
+      implode(', ', array_keys($cols)) .
+      ') VALUES (%d, %d, %d, %d, ' . implode(', ', $cols) . ')';
 
-    $qTxt .= ' year = %d, month = %d, date = %d';
+    $qArgs[] = $this->user->uid;
 
     $qArgs[] = $date['year'];
     $qArgs[] = $date['month'];
     $qArgs[] = $date['date'];
-  }
 
-  foreach ($cols as $col => $type) {
-    if (isset($_POST[$col])) {
-      $comma = $cols_defined++ ? ',' : '';
-
-      $qTxt .= $comma . ' ' . $col . ' = ' . $type;
-
+    foreach ($cols as $col => $type) {
       $qArgs[] = $_POST[$col];
     }
-  }
 
-  if ($cols_defined === 0) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Must enter some data!';
+    array_unshift($qArgs, $qTxt);
 
-    return $res;
-  }
+    $query = call_user_func_array('db_query', $qArgs);
 
-  $qTxt .= ' WHERE uid = %d AND id = %d';
-
-  $qArgs[] = $user->uid;
-  $qArgs[] = $_POST['id'];
-
-  array_unshift($qArgs, $qTxt);
-
-  $query = call_user_func_array('db_query', $qArgs);
-
-  if (!$query) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Database error';
-  }
-  else {
-    $res['total'] = get_total_cost($table);
-  }
-
-  return $res;
-}
-
-function _POST_add($res, $table) {
-  global $table_cols;
-  global $user;
-
-  $cols = $table_cols[$table];
-
-  $cols_defined = TRUE;
-
-  foreach ($cols as $col => $type) {
-    if (!isset($_POST[$col])) {
-      $cols_defined = FALSE;
-
-      break;
+    if (!$query) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Database error';
+    }
+    else {
+      $this->res['total'] = get_total_cost($table);
+      $this->res['id'] = db_insert_id();
     }
   }
 
-  if (
-    !$cols_defined || !isset($_POST['date']) ||
-    !preg_match(DATE_SERIALISED, $_POST['date'])
-  ) {
-    json_error(400);
+  private function post_delete($table) {
+    if (!isset($_POST['id'])) {
+      json_error(400);
+    }
+
+    $query = db_query(
+      'DELETE FROM ' . $table . ' WHERE uid = %d AND id = %d', $this->user->uid, $_POST['id']
+    );
+    
+    if (!$query) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Database error';
+    }
   }
 
-  $date = deserialise_date($_POST['date']);
+  private function validate_args() {
+    if (!isset($_GET['t'])) {
+      return FALSE;
+    }
 
-  $qArgs = array();
+    $this->args = explode('/', $_GET['t']);
 
-  $qTxt = 'INSERT INTO {`' . $table . '`} (uid, year, month, date, ' .
-    implode(', ', array_keys($cols)) .
-    ') VALUES (%d, %d, %d, %d, ' . implode(', ', $cols) . ')';
-
-  $qArgs[] = $user->uid;
-
-  $qArgs[] = $date['year'];
-  $qArgs[] = $date['month'];
-  $qArgs[] = $date['date'];
-
-  foreach ($cols as $col => $type) {
-    $qArgs[] = $_POST[$col];
+    return TRUE;
   }
 
-  array_unshift($qArgs, $qTxt);
-
-  $query = call_user_func_array('db_query', $qArgs);
-
-  if (!$query) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Database error';
-  }
-  else {
-    $res['total'] = get_total_cost($table);
-    $res['id'] = db_insert_id();
-  }
-
-  return $res;
-}
-
-function _POST_delete($res, $table) {
-  global $user;
-
-  if (!isset($_POST['id'])) {
-    json_error(400);
-  }
-
-  $query = db_query(
-    'DELETE FROM ' . $table . ' WHERE uid = %d AND id = %d', $user->uid, $_POST['id']
-  );
-  
-  if (!$query) {
-    $res['error'] = TRUE;
-    $res['errorText'] = 'Database error';
-  }
-
-  return $res;
-}
-
-$res = array(
-  'error' => FALSE
-);
-
-if (!isset($_GET['t'])) {
-  $res['error'] = TRUE;
-  $res['errorText'] = 'Must supply API method';
-}
-else {
-  $args = explode('/', $_GET['t']);
-
-  if ($args[0] === 'login') {
+  private function get_login() {
     // check if this IP has tried to log in before in the past 5 seconds
     $num_seconds_penalty = 60;
 
     $num_tries = 10;
 
+    $ip = $_SERVER['REMOTE_ADDR'];
+
     $ip_check_query = db_query(
-      'SELECT `time`, `count` FROM {ip_login_req} WHERE `ip` = "%s"',
-      $_SERVER['REMOTE_ADDR']
+      'SELECT `time`, `count` FROM {ip_login_req} WHERE `ip` = "%s"', $ip
     );
 
     $ip_check_exists = FALSE;
@@ -504,6 +482,7 @@ else {
           $breach = TRUE;
         }
         else {
+          // user has honoured the penalty
           $ip_check_count = 0;
         }
       }
@@ -511,22 +490,20 @@ else {
       if ($breach) {
         db_query(
           'UPDATE {ip_login_req} SET `time` = %d, `count` = %d WHERE ip = "%s"',
-          time(), $num_tries, $_SERVER['REMOTE_ADDR']
+          time(), $num_tries, $ip
         );
         
         json_error(401);
       }
     }
 
-    $user->login();
+    $this->user->login();
 
-    if ($user->uid > 0) {
+    if ($this->user->uid > 0) {
       // logged in
-      $res['uid']     = $user->uid;
-      $res['name']    = $user->name;
-      $res['api_key'] = $user->api_key;
-
-      //db_query('UPDATE {ip_login_req} SET `count` = 0 WHERE ip = "%s"', $_SERVER['REMOTE_ADDR']);
+      $this->res['uid']     = $this->user->uid;
+      $this->res['name']    = $this->user->name;
+      $this->res['api_key'] = $this->user->api_key;
     }
     else {
       // bad login
@@ -537,52 +514,123 @@ else {
       if ($ip_check_exists) {
         db_query(
           'UPDATE {ip_login_req} SET `time` = %d, `count` = %d WHERE ip = "%s"',
-          time(), $ip_check_count + 1, $_SERVER['REMOTE_ADDR']
+          time(), $ip_check_count + 1, $ip
         );
       }
       else {
         db_query(
           'INSERT INTO {ip_login_req} (`ip`, `time`, `count`) VALUES("%s", %d, %d)',
-          $_SERVER['REMOTE_ADDR'], time(), 1
+          $ip, time(), 1
         );
       }
     }
   }
-  else {
-    $user->auth();
 
-    if (!$user->uid) {
-      $res['error'] = TRUE;
+  private function execute() {
+    $arg = array_shift($this->args);
 
-      $res['errorText'] = isset($_SERVER['HTTP_AUTHORIZATION'])
-        ? 'Bad authentication token'
-        : 'Not authenticated';
+    if ($arg === 'login') {
+      $this->get_login();
     }
     else {
-      $method = $_SERVER['REQUEST_METHOD'];
+      $this->user->auth();
 
-      $func_args = array();
+      if (!$this->user->uid) {
+        $this->res['error'] = TRUE;
 
-      do {
-        $func_name = '_' . $method . '_' . implode('_', $args);
+        $this->res['errorText'] = isset($_SERVER['HTTP_AUTHORIZATION'])
+          ? 'Bad authentication token'
+          : 'Not authenticated';
+      }
+      else {
+        $method = strtolower($_SERVER['REQUEST_METHOD']);
 
-        if (function_exists($func_name)) {
-          array_unshift($func_args, $res);
+        switch ($method) {
+        case 'get':
+          switch ($arg) {
+          case 'data':
+            $type = array_shift($this->args);
 
-          $res = call_user_func_array($func_name, $func_args);
+            $offset = array_shift($this->args);
+            if (is_null($offset)) {
+              $offset = 0;
+            }
+
+            switch ($type) {
+            case 'stocks':
+              $this->get_data_stocks();
+              break;
+
+            case 'funds':
+            case 'in':
+            case 'bills':
+            case 'food':
+            case 'general':
+            case 'holiday':
+            case 'social':
+              $this->get_data($type, $offset);
+              break;
+
+            case 'all':
+            default:
+              $this->get_data_all();
+            }
+
+            break;
+          
+          case 'pie':
+            $table = array_shift($this->args);
+
+            $this->get_pie($table);
+
+            break;
+
+          default:
+            json_error(400);
+          }
 
           break;
-        }
-        else {
-          array_unshift($func_args, array_pop($args));
-        }
-      } while (count($args) > 0);
+        
+        case 'post':
+          $arg2 = array_shift($this->args);
 
-      if (count($args) === 0) {
-        json_error(400);
+          switch ($arg) {
+          case 'update':
+            switch ($arg2) {
+            case 'overview':
+              $this->post_update_overview();
+              break;
+
+            default:
+              $this->post_update($arg2);
+              break;
+            }
+
+            break;
+
+          case 'add':
+            $this->post_add($arg2);
+
+            break;
+
+          case 'delete':
+            $this->post_delete($arg2);
+
+            break;
+
+          default:
+            json_error(400);
+          }
+
+          break;
+
+        default:
+          json_error(400);
+        }
       }
     }
   }
 }
 
-print json_encode($res);
+$api = new RestApi($user);
+
