@@ -688,10 +688,6 @@ button:active {
   border-top: 0.8em solid #e22121;
   margin-top: 0.2em;
 }
-#page-funds .stocks-list .hl-up,
-#page-funds .stocks-list .hl-down {
-  color: white;
-}
 #page-funds .stocks-list .up .hl-up {
   color: #0f0;
 }
