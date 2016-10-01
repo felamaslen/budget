@@ -7,6 +7,8 @@
   const PIE_LABEL_SCALE_FACTOR_POST = 1.2;
   const PIE_SMALL_LABEL_OFFSET = 10;
 
+  const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
+
   const STOCKS_REFRESH_INTERVAL = 10000;
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -556,23 +558,25 @@
 
   let editing = null;
 
-  class EditItem {
-    constructor($input, $td, editHook, type, suggestion) {
-      this.$input   = $input;
-      this.$td      = $td;
-      this.editHook = editHook;
-      this.type     = type;
+  class InlineEdit {
+    constructor(options) {
+      options = options || {};
+
+      this.$input   = options.$input;
+      this.$elem    = options.$elem;
+      this.editHook = options.editHook;
+      this.type     = options.type;
+
+      this.hideInput();
+
+      const suggestion = options.suggestion;
 
       this.locked = false;
       this.active = false;
       this.clicked = false;
 
-      if (suggestion) {
-        this.$input.autoSearch(suggestion.page, suggestion.col);
-      }
-
-      if (this.$td) {
-        this.$td.on("mousedown", evt => this.finishLastAndActivate(evt));
+      if (this.$elem) {
+        this.$elem.on("mousedown", evt => this.finishLastAndActivate(evt));
 
         // these two events prevent a click action on the input itself from triggering an edit
         this.$input.on("mouseup", evt => this.unlock(evt));
@@ -582,14 +586,28 @@
           this.lock(evt);
         });
 
-        this.$td.append(this.$input).addClass("editable");
+        this.$elem.append(this.$input).addClass("editable");
+
+        if (suggestion) {
+          this.searchHandler = new AutoSearchDropdown(
+            this.$input, suggestion.page, suggestion.col
+          );
+        }
       }
+    }
+
+    showInput() {
+      this.$input && this.$input.show();
+    }
+
+    hideInput() {
+      this.searchHandler && this.searchHandler.cancel();
     }
 
     activate() {
       editing = this;
 
-      let val = this.$td.data("val");
+      let val = this.$elem.data("val");
 
       switch (this.type) {
       case "date":
@@ -600,9 +618,11 @@
         break;
       }
 
-      this.$input.val(val).show();
+      this.$input.val(val);
 
-      this.$td.addClass("editing");
+      this.showInput();
+
+      this.$elem.addClass("editing");
 
       this.$input.focus();
 
@@ -644,8 +664,9 @@
     cancel() {
       this.unlock();
 
-      this.$input.hide();
-      this.$td.removeClass("editing");
+      this.hideInput();
+
+      this.$elem && this.$elem.removeClass("editing");
 
       if (!this.active) {
         return false;
@@ -683,10 +704,11 @@
         break;
       }
 
-      this.$td.parent().data(this.type, newValRaw);
+      this.$elem.parent().data(this.type, newValRaw);
 
-      this.$input.hide();
-      this.$td.removeClass("editing").children(".text").html(newVal);
+      this.hideInput();
+
+      this.$elem.removeClass("editing").children(".text").html(newVal);
 
       this.unlock();
       this.active = false;
@@ -706,6 +728,38 @@
       if (evt && evt.stopPropagation) {
         evt.stopPropagation();
       }
+    }
+  }
+
+  class EditItem extends InlineEdit {
+    constructor(options) {
+      super(options);
+    }
+
+    hideInput() {
+      super.hideInput();
+
+      this.$input && this.$input.hide();
+    }
+  }
+
+  class AddItem extends InlineEdit {
+    constructor(options) {
+      super(options);
+
+      this.$input.on("focus", () => {
+        editingAdd = true;
+      })
+      .on("blur", () => {
+        editingAdd = false;
+      })
+      .val(options.add.val);
+    }
+
+    showInput() {
+    }
+
+    cancel() {
     }
   }
 
@@ -1728,21 +1782,15 @@
         const col = this.col[j];
 
         if (!col.name || col.edit) {
-          this.$addInput[col] = $("<input></input>")
-            .addClass("editable-input")
-            .addClass("editable-" + col)
-            .val(this.addDefaultVal[col])
-            .autoSearch(this.page, col)
-          ;
-
-          this.$addInput[col]
-          .on("focus", () => { editingAdd = true; return; })
-          .on("blur", () => { editingAdd = false; return; });
-
           this.$addInputCont[col] = $("<span></span>")
             .addClass(col)
             .append(this.$addInput[col])
-          ;
+            .editable(
+              () => {},
+              this.dataType[j],
+              { page: this.page, col },
+              { val: this.addDefaultVal[col] }
+            );
 
           this.$liAdd.append(this.$addInputCont[col]);
         }
@@ -1850,7 +1898,7 @@
 
       postData[key] = val.toString();
 
-      const dataKey = editing.$td.parent().data("dataKey");
+      const dataKey = editing.$elem.parent().data("dataKey");
 
       api.request(
         "update/" + this.page, "POST", postData, user.apiKey,
@@ -2061,7 +2109,7 @@
      * @param callback:
      */
     triggerListEdit(column, type, callback) {
-      const dataKey = editing.$td.parent().data("dataKey");
+      const dataKey = editing.$elem.parent().data("dataKey");
 
       const status = afterEditValidateCompare(
         editing.$input.val(), this.data[dataKey][column], type
@@ -2075,7 +2123,7 @@
       }
       else {
         if (status.changed) {
-          const id = editing.$td.parent().data("id");
+          const id = editing.$elem.parent().data("id");
 
           this.submitEdit(id, column, status.val, callback);
 
@@ -2569,7 +2617,7 @@
         return;
       }
 
-      const $tr = editing.$td.parent();
+      const $tr = editing.$elem.parent();
 
       const yearMonth = $tr.data("yearMonth");
       const key = $tr.index();
@@ -3062,12 +3110,12 @@
 
       if (editing.active) {
         if (page0) {
-          y = Math.min(maxY, Math.max(0, editing.$td.parent().index() + dy));
+          y = Math.min(maxY, Math.max(0, editing.$elem.parent().index() + dy));
         }
         else {
-          x = Math.min(maxX, Math.max(0, editing.$td.index() + dx));
+          x = Math.min(maxX, Math.max(0, editing.$elem.index() + dx));
 
-          y = Math.min(maxY, Math.max(0, editing.$td.parent().index() - 1 + dy));
+          y = Math.min(maxY, Math.max(0, editing.$elem.parent().index() - 1 + dy));
         }
 
         editing.finish(
@@ -3097,23 +3145,26 @@
     }
   }
 
-  $.fn.editable = function editable(editHook, type, suggestion) {
-    this.editable = new EditItem(
-      $("<input type=text />").hide()
+  $.fn.editable = function editable(editHook, type, suggestion, add) {
+    const options = {
+      $input: $("<input type=text />")
         .addClass("editable-input")
         .addClass("editable-" + type),
-      $(this),
+      $elem: $(this),
       editHook,
       type,
-      suggestion
-    );
+      suggestion,
+      add
+    };
+
+    this.editable = add ? new AddItem(options) : new EditItem(options);
 
     return this;
   };
 
   class AutoSearch {
-    constructor($elem, page, col) {
-      this.$input = $elem;
+    constructor($input, page, col) {
+      this.$input = $input;
 
       this.page = page;
       this.col = col;
@@ -3122,38 +3173,65 @@
       this.typedVal = "";
       this.suggestion = null;
 
+      this.numSuggestions = 1;
+
       this.loading = false;
 
+      this.$spinner = $("<div></div>")
+      .addClass("progress")
+      .addClass("progress-tiny")
+      .append($("<div></div>").text("Loading..."))
+      .hide();
+
       this.timer = null;
-      this.throttleTime = 100;
+      this.throttleTime = SEARCH_SUGGESTION_THROTTLE_TIME;
 
       this.cache = {};
-
-      this.$input.after(this.$suggestion);
 
       this.$input
       .on("input", () => this.input())
       .on("keydown", evt => {
-        if (evt.key === "Tab") {
-          this.confirmSuggestion();
-        }
-        else if (evt.key === "Escape") {
-          this.cancelSuggestion();
-
-          evt.stopPropagation();
+        switch (evt.key) {
+        case "Tab":
+          this.onTab(evt);
+          break;
+        case "Escape":
+          this.onEscape(evt);
+          break;
+        default:
+          this.onKey(evt);
         }
       })
       .on("blur", () => {
         this.cache = {};
       });
+
+      this.$input.parent().append(this.$spinner);
     }
 
-    confirmSuggestion() {
+    onKey() {
+    }
+
+    onTab() {
       this.$input.val(this.suggestion);
     }
 
-    cancelSuggestion() {
+    onEscape(evt) {
+      if (this.cancel()) {
+        evt.stopPropagation();
+      }
+    }
+
+    cancel() {
       this.$input.val(this.typedVal);
+
+      if (!this.suggestion) {
+        return false;
+      }
+
+      this.suggestion = null;
+
+      return true;
     }
 
     input() {
@@ -3165,50 +3243,70 @@
 
       this.typedVal = val;
 
-      this.loadSuggestion(val);
+      this.loadSuggestion();
     }
 
-    loadSuggestion(val) {
-      if (val.length === 0) {
-        this.$input.val(val);
+    loadSuggestion() {
+      if (this.typedVal.length === 0) {
+        if (this.timer) {
+          window.clearTimeout(this.timer);
+        }
 
-        return;
+        return this.cancel();
       }
 
-      if (this.cache[val]) {
-        this.suggestionsLoaded(this.cache[val], val);
+      if (this.cache[this.typedVal]) {
+        this.suggestionsLoaded(this.cache[this.typedVal], this.typedVal);
       }
       else {
         if (this.loading) {
           return;
         }
 
-        this.loading = true;
+        if (this.timer) {
+          window.clearTimeout(this.timer);
+        }
 
-        const args = ["data", "search", this.page, this.col, val, 1];
+        this.timer = window.setTimeout(() => {
+          this.loading = true;
 
-        api.request(
-          args.join("/"), "GET", null, user.apiKey,
-          res => this.suggestionsLoaded(res.data[0], val),
-          () => this.suggestionsError(),
-          () => this.suggestionsComplete(),
-          false
-        );
+          this.$spinner.show();
+
+          const val = this.typedVal;
+
+          const args = [
+            "data", "search", this.page, this.col, val, this.numSuggestions
+          ];
+
+          api.request(
+            args.join("/"), "GET", null, user.apiKey,
+            res => this.suggestionsLoaded(res.data, val),
+            () => this.suggestionsError(),
+            () => this.suggestionsComplete(),
+            false
+          );
+        }, this.throttleTime);
       }
     }
 
-    suggestionsLoaded(term, oldVal) {
-      if (!term) {
-        this.$input.val(oldVal);
+    gotSuggestions(terms) {
+      const term = terms[0];
+
+      this.suggestion = term;
+
+      this.$input.val(term);
+
+      this.$input[0].setSelectionRange(this.range, this.range);
+    }
+
+    suggestionsLoaded(terms, oldVal) {
+      if (!terms || terms.length == 0) {
+        this.cancel();
       }
       else {
-        this.cache[oldVal] = term;
+        this.cache[oldVal] = terms;
 
-        this.suggestion = term;
-
-        this.$input.val(term);
-
-        this.$input[0].setSelectionRange(this.range, this.range);
+        this.gotSuggestions(terms);
       }
     }
 
@@ -3217,22 +3315,168 @@
     }
 
     suggestionsComplete() {
-      if (this.timer) {
-        window.clearTimeout(this.timer);
-      }
+      this.$spinner.hide();
 
-      this.timer = window.setTimeout(() => {
-        this.loading = false;
-      }, this.throttleTime);
-
+      this.loading = false;
     }
   }
 
-  $.fn.autoSearch = function autoSearch(page, col) {
-    this.searchHandler = new AutoSearch($(this), page, col);
+  class AutoSearchDropdown extends AutoSearch {
+    constructor($input, page, col) {
+      super($input, page, col);
 
-    return this;
-  };
+      this.numSuggestions = 5;
+
+      this.suggestions = [];
+
+      this.activeSuggestion = -1;
+
+      this.listShown = false;
+
+      this.$list = null;
+    }
+
+    onKey(evt) {
+      if (this.listShown) {
+        let delta = 1;
+
+        let didSomething = true;
+
+        switch (evt.key) {
+        case "ArrowUp":
+          delta *= -1;
+        case "ArrowDown":
+          this.selectNextSuggestion(delta);
+
+          break;
+
+        case "Enter":
+          this.replaceWithCurrentSuggestion();
+
+          break;
+
+        default:
+          didSomething = false;
+        }
+
+        if (didSomething) {
+          evt.stopPropagation();
+        }
+      }
+    }
+
+    onTab(evt) {
+      if (this.listShown) {
+        this.selectNextSuggestion(1);
+
+        evt.preventDefault();
+        evt.stopPropagation();
+      }
+    }
+
+    onEscape() {
+      this.cancel();
+    }
+
+    cancel() {
+      this.suggestions = [];
+
+      if (!this.listShown) {
+        return false;
+      }
+
+      this.hideList();
+
+      return true;
+    }
+
+    input() {
+      this.typedVal = this.$input.val();
+
+      this.loadSuggestion();
+    }
+
+    gotSuggestions(terms) {
+      if (!this.$list) {
+        this.buildList();
+      }
+
+      this.suggestions = terms;
+
+      this.$list.empty();
+
+      for (const term of this.suggestions) {
+        const $li = $("<li></li>")
+        .addClass("suggestion").text(term)
+        .mouseenter(() => {
+          this.selectSuggestion($li.index());
+        });
+
+        this.$list.append($li);
+      }
+
+      this.showList();
+    }
+
+    buildList() {
+      this.$list = $("<ul></ul>")
+      .addClass("suggestions")
+      .mousedown(evt => {
+        this.replaceWithCurrentSuggestion();
+
+        evt.stopPropagation();
+      });
+
+      this.$input.after(this.$list);
+    }
+
+    showList() {
+      if (!this.listShown) {
+        this.$list.css("height", "auto");
+        this.listShown = true;
+      }
+
+      this.activeSuggestion = -1;
+    }
+
+    hideList() {
+      if (this.listShown) {
+        this.$list.css("height", 0);
+        this.listShown = false;
+      }
+    }
+
+    selectSuggestion(newIndex) {
+      if (this.activeSuggestion > -1) {
+        this.$list.children().eq(this.activeSuggestion).removeClass("active");
+      }
+
+      if (newIndex > -1) {
+        this.$list.children().eq(newIndex).addClass("active");
+      }
+      else {
+        this.$input.focus();
+      }
+
+      this.activeSuggestion = newIndex;
+    }
+
+    selectNextSuggestion(direction) {
+      const newIndex = (
+        this.activeSuggestion + 1 + direction + this.suggestions.length + 1
+      ) % (this.suggestions.length + 1) - 1;
+
+      this.selectSuggestion(newIndex);
+    }
+
+    replaceWithCurrentSuggestion() {
+      if (this.activeSuggestion > -1) {
+        this.$input.val(this.suggestions[this.activeSuggestion]);
+
+        this.cancel();
+      }
+    }
+  }
 
   $(document).ready(() => {
     $(window)

@@ -141,6 +141,26 @@ button:active {
 	background: #bbb;
 }
 
+.progress-tiny {
+  width: 18px;
+  height: 18px;
+}
+.progress-tiny:before,
+.progress-tiny:after,
+.progress-tiny > div:before,
+.progress-tiny > div:after {
+  left: 8px;
+  width: 2px;
+  height: 6px;
+  border-radius: 2px;
+  box-shadow: 0 12px #8ecbff;
+  transform-origin: 50% 9px;
+  background: #8ecbff;
+}
+.progress-tiny:before {
+  background: #3c6b94;
+}
+
 #nav-outer {
   z-index: 5;
   height: 30px;
@@ -149,6 +169,12 @@ button:active {
   position: absolute;
   right: 0;
   top: 0;
+}
+
+.list-ul .progress {
+  position: absolute;
+  right: 2px;
+  top: 3px;
 }
 
 #bg {
@@ -228,26 +254,48 @@ button:active {
   margin: 0;
   bottom: 0;
 }
-.list-ul li {
+.list-ul > li {
   width: 100%;
   height: 24px;
   line-height: 24px;
   white-space: nowrap;
 }
-.list-ul li:nth-child(2n) {
+.list-ul > li:nth-child(2n) {
   background: #eee;
 }
 .list-ul li > span {
   display: inline-block;
   position: relative;
-  overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   border-right: 1px solid #ccc;
+  vertical-align: top;
 }
 .list-ul .text {
   margin-right: 2px;
   padding: 0 2px;
+}
+
+.list-ul .suggestions {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  height: 0;
+  z-index: 10;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  animation: .2s ease-in-out height;
+}
+.list-ul .suggestion {
+  margin: 1px 0;
+  padding: 2px;
+  cursor: default;
+}
+.list-ul .suggestion.active {
+  background: #09e;
+  color: white;
 }
 
 .list-add {
