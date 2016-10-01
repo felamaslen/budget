@@ -1776,23 +1776,24 @@
       this.$lis = {};
 
       this.$addInput = {};
-      this.$addInputCont = {};
 
       for (const j of this.colEdit) {
         const col = this.col[j];
 
         if (!col.name || col.edit) {
-          this.$addInputCont[col] = $("<span></span>")
+          const suggestion = this.dataType[j] === "text"
+            ? { page: this.page, col } : null;
+
+          this.$addInput[col] = $("<span></span>")
             .addClass(col)
-            .append(this.$addInput[col])
             .editable(
               () => {},
               this.dataType[j],
-              { page: this.page, col },
+              suggestion,
               { val: this.addDefaultVal[col] }
             );
 
-          this.$liAdd.append(this.$addInputCont[col]);
+          this.$liAdd.append(this.$addInput[col]);
         }
       }
 
@@ -1835,7 +1836,9 @@
       for (const j of this.colEdit) {
         const col = this.col[j];
 
-        const val = validateInput(this.$addInput[col].val(), col);
+        const val = validateInput(
+          this.$addInput[col].editable.$input.val(), col
+        );
 
         if (val === null) {
           console.warn("Must enter valid data");
