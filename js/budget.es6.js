@@ -648,6 +648,10 @@
         return false;
       }
 
+      if (this.searchHandler && this.searchHandler.timer) {
+        window.clearTimeout(this.searchHandler.timer);
+      }
+
       if (this.editHook) {
         this.lock();
 
@@ -752,6 +756,10 @@
       })
       .on("blur", () => {
         editingAdd = false;
+
+        if (this.searchHandler && this.searchHandler.timer) {
+          window.clearTimeout(this.searchHandler.timer);
+        }
       })
       .val(options.add.val);
     }
@@ -1868,7 +1876,7 @@
       for (const j of this.colEdit) {
         const col = this.col[j];
 
-        this.$addInput[col].val(
+        this.$addInput[col].editable.$input.val(
           this.addDefaultVal[col]
         );
 
@@ -1881,7 +1889,7 @@
 
       this.update(newData);
 
-      this.$addInput.date.val("").focus();
+      this.$addInput.date.editable.$input.val(today.format()).focus();
 
       this.updatePieChart();
     }
@@ -3255,7 +3263,7 @@
           window.clearTimeout(this.timer);
         }
 
-        return this.cancel();
+        this.cancel();
       }
 
       if (this.cache[this.typedVal]) {
@@ -3303,7 +3311,7 @@
     }
 
     suggestionsLoaded(terms, oldVal) {
-      if (!terms || terms.length == 0) {
+      if (!terms || terms.length === 0) {
         this.cancel();
       }
       else {
