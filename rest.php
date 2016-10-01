@@ -548,9 +548,9 @@ class RestApi {
     }
     else {
       // bad login
-      $res['error'] = TRUE;
+      $this->res['error'] = TRUE;
 
-      $res['errorText'] = $user->pin ? 'Bad PIN' : 'No PIN';
+      $this->res['errorText'] = $this->user->pin ? 'Bad PIN' : 'No PIN';
 
       if ($ip_check_exists) {
         db_query(
