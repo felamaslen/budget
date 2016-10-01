@@ -565,17 +565,22 @@
 
       this.locked = false;
       this.active = false;
+      this.clicked = false;
 
       if (suggestion) {
         this.$input.autoSearch(suggestion.page, suggestion.col);
       }
 
       if (this.$td) {
-        this.$td.on("mousedown", this.finishLastAndActivate.bind(this));
+        this.$td.on("mousedown", evt => this.finishLastAndActivate(evt));
 
         // these two events prevent a click action on the input itself from triggering an edit
-        this.$input.on("mouseup", this.unlock.bind(this));
-        this.$input.on("mousedown", this.lock.bind(this));
+        this.$input.on("mouseup", evt => this.unlock(evt));
+        this.$input.on("mousedown", evt => {
+          this.clicked = true;
+
+          this.lock(evt);
+        });
 
         this.$td.append(this.$input).addClass("editable");
       }
@@ -683,18 +688,14 @@
       this.$input.hide();
       this.$td.removeClass("editing").children(".text").html(newVal);
 
-      this.locked = false;
+      this.unlock();
       this.active = false;
-    }
-
-    isLocked() {
-      return this.locked;
     }
 
     lock(evt) {
       this.locked = true;
 
-      if (evt) {
+      if (evt && evt.stopPropagation) {
         evt.stopPropagation();
       }
     }
@@ -702,7 +703,7 @@
     unlock(evt) {
       this.locked = false;
 
-      if (evt) {
+      if (evt && evt.stopPropagation) {
         evt.stopPropagation();
       }
     }
@@ -3086,7 +3087,14 @@
    * @returns {void} void
    */
   function mouseUpHandler() {
-    editing.finish();
+    if (editing.clicked) {
+      // handle selecting from inside to outside input
+      editing.unlock();
+      editing.clicked = false;
+    }
+    else {
+      editing.finish();
+    }
   }
 
   $.fn.editable = function editable(editHook, type, suggestion) {
@@ -3135,7 +3143,9 @@
           evt.stopPropagation();
         }
       })
-      .on("blur", () => this.cache = {});
+      .on("blur", () => {
+        this.cache = {};
+      });
     }
 
     confirmSuggestion() {
