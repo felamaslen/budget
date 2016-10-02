@@ -3279,11 +3279,15 @@
         }
 
         this.timer = window.setTimeout(() => {
+          const val = this.typedVal;
+
+          if (val.length === 0) {
+            return;
+          }
+
           this.loading = true;
 
           this.$spinner.show();
-
-          const val = this.typedVal;
 
           const args = [
             "data", "search", this.page, this.col, val, this.numSuggestions
@@ -3443,7 +3447,7 @@
 
     showList() {
       if (!this.listShown) {
-        this.$list.css("height", "auto");
+        this.$list.addClass("active");
         this.listShown = true;
       }
 
@@ -3452,7 +3456,7 @@
 
     hideList() {
       if (this.listShown) {
-        this.$list.css("height", 0);
+        this.$list.removeClass("active");
         this.listShown = false;
       }
     }

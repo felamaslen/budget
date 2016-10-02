@@ -280,13 +280,16 @@ button:active {
   padding: 0;
   position: absolute;
   width: 100%;
-  height: 0;
+  max-height: 0;
   z-index: 10;
   overflow: hidden;
   text-overflow: ellipsis;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
   background: rgba(255, 255, 255, 0.9);
-  animation: .2s ease-in-out height;
+  /*transition: .2s ease-in-out max-height;*/
+}
+.list-ul .suggestions.active {
+  max-height: initial;
 }
 .list-ul .suggestion {
   margin: 1px 0;
