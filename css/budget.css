@@ -798,6 +798,9 @@ button:active {
   #graph-balance {
     float: left;
   }
+  #graph-fund-history {
+    display: none;
+  }
   #page-funds .graph-container-pie {
   }
 
@@ -905,7 +908,13 @@ button:active {
     position: absolute;
     left: 900px;
     top: 350px;
-    width: 600px;
+    width: 400px;
+  }
+  #graph-fund-history {
+    position: absolute;
+    width: 200px;
+    left: 1300px;
+    top: 350px;
   }
  
   .list-head {

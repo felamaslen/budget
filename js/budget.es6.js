@@ -9,6 +9,9 @@
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
+  const GRAPH_FUND_HIST_WIDTH = 200;
+  const GRAPH_FUND_HIST_POINT_SIZE = 2;
+
   const STOCKS_REFRESH_INTERVAL = 10000;
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1054,7 +1057,7 @@
         // add value (Y axis) tick to array to draw on top of graph
         ticksY.push([i * tickSize * 100, tickPos]);
 
-        // drwa horizontal line
+        // draw horizontal line
         this.ctx.beginPath();
         this.ctx.moveTo(this.padX1, tickPos);
         this.ctx.lineTo(this.width - this.padX2, tickPos);
@@ -1296,6 +1299,114 @@
       this.getData(data);
 
       this.draw();
+    }
+  }
+
+  class GraphFundHistory extends LineGraph {
+    constructor(options) {
+      super(options);
+
+      this.data = options.data;
+
+      this.color = "#039";
+
+      this.tension = 0.5;
+      this.stroke = true;
+
+      this.draw();
+    }
+
+    draw() {
+      // clear canvas
+      this.ctx.clearRect(0, 0, this.width, this.height);
+
+      // draw axes
+      this.ctx.strokeStyle = "#999";
+      this.ctx.lineWidth = 1;
+
+      this.ctx.font = "12px Arial, Helvetica, sans-serif";
+      this.ctx.fillStyle = "#333";
+      this.ctx.textBaseline = "top";
+      this.ctx.textAlign = "center";
+
+      // calculate tick range
+      const tickSizeY = getTickSize(0, this.maxY, 5);
+
+      this.maxY = tickSizeY * Math.ceil(this.maxY / tickSizeY);
+
+      const ticksY = [];
+
+      // draw value (Y axis) ticks and horizontal lines
+      for (let i = 0; i < 4; i++) {
+        const tickPos = Math.floor(
+          this.pixY(i * tickSizeY)
+        ) + 0.5;
+
+        // add value (Y axis) tick to array to draw on top of graph
+        ticksY.push([i * tickSizeY, tickPos]);
+
+        // draw horizontal line
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.padX1, tickPos);
+        this.ctx.lineTo(this.width - this.padX2, tickPos);
+        this.ctx.stroke();
+      }
+
+      // process data -> pixels
+      const pix = this.data.map(point => {
+        return [this.pixX(point[0]), this.pixY(point[1])];
+      });
+
+      // plot past data
+      let moved = false;
+
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = this.color;
+
+      for (const point of pix) {
+        if (moved) {
+          this.ctx.lineTo(point[0], point[1]);
+        }
+        else {
+          this.ctx.moveTo(point[0], point[1]);
+
+          moved = true;
+        }
+      }
+
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      // draw Y axis
+      this.ctx.textBaseline = "bottom";
+      this.ctx.textAlign = "left";
+
+      for (const tick of ticksY) {
+        const tickName = formatCurrency(tick[0], true, true);
+
+        this.ctx.fillText(tickName, this.padX1, tick[1]);
+      }
+
+      // draw circles on data points
+      this.ctx.fillStyle = this.color;
+      for (const point of pix) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(point[0], point[1]);
+        this.ctx.arc(
+          point[0], point[1], GRAPH_FUND_HIST_POINT_SIZE, 0, Math.PI * 2, false
+        );
+        this.ctx.closePath();
+        this.ctx.fill();
+      }
+
+      // add title and key
+      this.ctx.font = "16px bold Arial, Helvetica, sans-serif";
+      this.ctx.fillStyle = "#000";
+      this.ctx.textAlign = "left";
+      this.ctx.textBaseline = "top";
+
+      this.ctx.fillText("History", 10, 10);
     }
   }
 
@@ -2235,6 +2346,9 @@
 
       // build stock rendering thingy
       this.buildStockViewer();
+
+      // build graph showing fund value history
+      this.loadFundHistory();
     }
 
     buildStockViewer() {
@@ -2426,6 +2540,26 @@
     }
     onStockPricesRequestComplete() {
       this.stockPricesLoading = false;
+    }
+
+    loadFundHistory() {
+      api.request(
+        "data/fund_history", "GET", null, user.apiKey,
+        res => this.onFundHistoryLoaded(res),
+        () => {},
+        () => {}
+      );
+    }
+    onFundHistoryLoaded(res) {
+      this.graphFundHistory = new GraphFundHistory({
+        width:  GRAPH_FUND_HIST_WIDTH,
+        height: this.pieHeight,
+        $cont:  this.$graphs,
+        page:   this.page,
+        title:  "fund-history",
+        data:   res.data.history,
+        range:  [0, res.data.totalTime, 0, res.data.maxValue]
+      });
     }
   }
 
