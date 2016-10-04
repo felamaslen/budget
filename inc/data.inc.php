@@ -562,7 +562,7 @@ class FundScraper {
     return file_get_contents($url);
   }
 
-  function process_data($data, $hash, $broker) {
+  function process_data($data, $hash, $broker, $did) {
     if ($data) {
       // remove new lines
       $data = str_replace(array("\n", "\r"), '', $data);
@@ -657,14 +657,18 @@ class FundScraper {
 
     // cache this value so we don't need to do it again until tomorrow
     $cache_query = db_query(
-      'INSERT INTO {fund_cache} (cid, fid, price) VALUES (%d, %d, %f)',
-      $this->new_cache_cid, $fid, $price
+      'INSERT INTO {fund_cache} (cid, fid, did, price) VALUES (%d, %d, %d, %s)',
+      $this->new_cache_cid, $fid, $did, $price
     );
+
+    if (!$cache_query) {
+      json_error(500, 'Error inserting into cache');
+    }
 
     return $return;
   }
 
-  function get_current_sell_price_hl($fund, $i, $total) {
+  function get_current_sell_price_hl($fund, $i, $total, $did) {
     $hash = $this->hash($fund);
 
     $broker = 'hl'; // TODO: multiple brokers
@@ -688,7 +692,7 @@ class FundScraper {
 
     $data = $this->download_url($url, $i, $total);
 
-    $price = $this->process_data($data, $hash, $broker);
+    $price = $this->process_data($data, $hash, $broker, $did);
 
     return $price;
   }
@@ -699,23 +703,15 @@ class FundScraper {
 
     $fund = $item['i'];
 
+    $did = $item['I'];
+
     if (!preg_match($this->fund_preg, $fund)) {
       // wrong item format
       return;
     }
 
-    /* 
-    $units = $item['u'];
-
-    if (empty($units) || !is_numeric($units)) {
-      $units = 0;
-    }
-
-    $units = (float)$units;
-   */
-
     $sell_price = $this->get_current_sell_price_hl(
-      $fund, $i, $this->total
+      $fund, $i, $this->total, $did
     );
 
     if (is_null($sell_price)) {
