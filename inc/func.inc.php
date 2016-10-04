@@ -58,16 +58,24 @@ function http_error($code = 500) {
 }
 
 // for the REST api
-function json_error($code = 500) {
+function json_error($code = 500, $message = NULL) {
   $status = http_error_status($code);
 
-  header($status['header']);
-
-  print json_encode(array(
+  if (php_sapi_name() !== 'cli') {
+    header($status['header']);
+  }
+  
+  $res = array(
     'error' => TRUE,
     'errorText' => $status['msg'],
-  ));
+  );
 
+  if ($message) {
+    $res['errorMsg'] = $message;
+  }
+
+  print json_encode($res);
+  
   die;
 }
 

@@ -465,11 +465,29 @@ class FundScraper {
 
   public $cache = array();
 
+  private $time_now;
+
+  private $new_cache_cid = NULL;
+
   public function __construct($data) {
+    $this->data = $data;
+
+    $this->time_now = time();
+
+    $this->get_cache();
+  }
+
+  public function get_cache() {
     $cache_query = db_query(
-      'SELECT broker, fund_hash, sell_price FROM {fund_info}
-      WHERE cache_time > %d',
-      time() - 86400
+      'SELECT f.broker, f.hash, c.price
+      FROM {fund_cache_time} ct
+      INNER JOIN {fund_cache} c ON ct.cid = c.cid
+      INNER JOIN {fund_hash} f ON f.fid = c.fid
+      WHERE ct.time > %d AND ct.cid = (
+        SELECT max(cid) FROM {fund_cache_time}
+      )
+      ORDER BY ct.cid DESC
+    ', $this->time_now - 86400
     );
 
     if (!$cache_query) {
@@ -481,10 +499,8 @@ class FundScraper {
         $this->cache[$row->broker] = array();
       }
 
-      $this->cache[$row->broker][$row->fund_hash] = (double)$row->sell_price;
+      $this->cache[$row->broker][$row->hash] = (float)$row->price;
     }
-
-    $this->data = $data;
   }
 
   public function scrape() {
@@ -546,50 +562,103 @@ class FundScraper {
     return file_get_contents($url);
   }
 
-  function process_data($data, $hash) {
-    // remove new lines
-    $data = str_replace(array("\n", "\r"), '', $data);
+  function process_data($data, $hash, $broker) {
+    if ($data) {
+      // remove new lines
+      $data = str_replace(array("\n", "\r"), '', $data);
 
-    $preg_parts = array(
-      array('<div id="security-price">', TRUE),
-      array('.*', FALSE),
-      array('<div>', TRUE),
-      array('\s*', FALSE),
-      array('<span class="price-label">Sell:</span><span class="bid', TRUE),
-      array('[^>]+>', FALSE),
-      array('([0-9]+(\.[0-9]*)?)p\s*', FALSE),
-      array('</span>', TRUE)
-    );
+      $preg_parts = array(
+        array('<div id="security-price">', TRUE),
+        array('.*', FALSE),
+        array('<div>', TRUE),
+        array('\s*', FALSE),
+        array('<span class="price-label">Sell:</span><span class="bid', TRUE),
+        array('[^>]+>', FALSE),
+        array('([0-9]+(\.[0-9]*)?)p\s*', FALSE),
+        array('</span>', TRUE)
+      );
 
-    $preg = '/' . implode('', array_map(function($item) {
-      return $item[1] ? preg_quote($item[0], '/') : $item[0];
-    }, $preg_parts)) . '/';
+      $preg = '/' . implode('', array_map(function($item) {
+        return $item[1] ? preg_quote($item[0], '/') : $item[0];
+      }, $preg_parts)) . '/';
 
-    $data = str_replace(',', '', $data);
+      $data = str_replace(',', '', $data);
 
-    preg_match_all($preg, $data, $matches);
+      preg_match_all($preg, $data, $matches);
 
-    if (empty($matches[1])) {
-      $price = 'NULL';
-      $return = NULL;
+      if (empty($matches[1])) {
+        $price = 'NULL';
+        $return = NULL;
+      }
+      else {
+        $price = (float)$matches[1][0];
+        $return = $price;
+      }
     }
     else {
-      $price = (double)$matches[1][0];
-      $return = $price;
+      $price = 'NULL';
+      $return = NULL;
+
+      if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
+        printf("[ERROR] data not got!\n");
+      }
     }
 
     if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
       printf("Price: %f\n", $price);
     }
 
+    if (is_null($this->new_cache_cid)) {
+      // create a new cache item
+      $query_new_item = db_query('INSERT INTO {fund_cache_time} (`time`) VALUES (%d)',
+        $this->time_now);
+
+      if (!$query_new_item) {
+        json_error(500, 'Error inserting cache item');
+      }
+
+      $this->new_cache_cid = db_insert_id();
+    }
+
+    // make sure this fund is in the hash list
+    $hash_exists_query = db_query(
+      'SELECT fid FROM {fund_hash}
+      WHERE hash = "%s" AND broker = "%s"',
+      $hash, $broker
+    );
+
+    if (!$hash_exists_query) {
+      json_error(500, 'Error determing if fund exists');
+    }
+
+    $hash_exists = (int)$hash_exists_query->num_rows !== 0;
+
+    if (!$hash_exists) {
+      $hash_put_query = db_query(
+        'INSERT INTO {fund_hash} (broker, hash) VALUES ("%s", "%s")',
+        $broker, $hash
+      );
+
+      if (!$hash_put_query) {
+        json_error(500, 'Error adding fund to hash table');
+      }
+
+      $fid = db_insert_id();
+    }
+    else {
+      $obj = $hash_exists_query->fetch_object();
+
+      if (!$obj) {
+        json_error(500, 'Error fetching fund from hash table');
+      }
+
+      $fid = (int)$obj->fid;
+    }
 
     // cache this value so we don't need to do it again until tomorrow
-    db_query(
-      'INSERT INTO {fund_info} (broker, fund_hash, cache_time, sell_price)
-      VALUES("hl", "%s", %d, %f)
-      ON DUPLICATE KEY UPDATE
-      cache_time=VALUES(cache_time), sell_price=VALUES(sell_price)',
-      $hash, time(), $price
+    $cache_query = db_query(
+      'INSERT INTO {fund_cache} (cid, fid, price) VALUES (%d, %d, %f)',
+      $this->new_cache_cid, $fid, $price
     );
 
     return $return;
@@ -598,15 +667,17 @@ class FundScraper {
   function get_current_sell_price_hl($fund, $i, $total) {
     $hash = $this->hash($fund);
 
-    if (isset($this->fund_sell_price['hl'][$hash])) {
-      return $this->fund_sell_price['hl'][$hash];
+    $broker = 'hl'; // TODO: multiple brokers
+
+    if (isset($this->fund_sell_price[$broker][$hash])) {
+      return $this->fund_sell_price[$broker][$hash];
     }
 
     if (
       !$this->force_scrape &&
-      isset($this->cache['hl']) && isset($this->cache['hl'][$hash])
+      isset($this->cache[$broker]) && isset($this->cache[$broker][$hash])
     ) {
-      return $this->cache['hl'][$hash];
+      return $this->cache[$broker][$hash];
     }
 
     if ($this->cache_only) {
@@ -617,7 +688,7 @@ class FundScraper {
 
     $data = $this->download_url($url, $i, $total);
 
-    $price = $this->process_data($data, $hash);
+    $price = $this->process_data($data, $hash, $broker);
 
     return $price;
   }
@@ -632,14 +703,16 @@ class FundScraper {
       // wrong item format
       return;
     }
-    
+
+    /* 
     $units = $item['u'];
 
     if (empty($units) || !is_numeric($units)) {
       $units = 0;
     }
 
-    $units = (double)$units;
+    $units = (float)$units;
+   */
 
     $sell_price = $this->get_current_sell_price_hl(
       $fund, $i, $this->total
