@@ -488,7 +488,9 @@ class FundScraper {
   }
 
   public function scrape() {
-    $this->data = array_map(array($this, 'map_current_cost'), $this->data);
+    $this->total = count($this->data);
+
+    array_walk($this->data, array($this, 'map_current_cost'));
 
     return $this->data;
   }
@@ -534,8 +536,12 @@ class FundScraper {
     return $base_url;
   }
 
-  function download_url($url) {
+  function download_url($url, $i, $total) {
     $this->did_scrape = TRUE;
+
+    if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
+      printf("[%d/%d] %s...\n", $i, $total, $url);
+    }
 
     return file_get_contents($url);
   }
@@ -572,6 +578,11 @@ class FundScraper {
       $return = $price;
     }
 
+    if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
+      printf("Price: %f\n", $price);
+    }
+
+
     // cache this value so we don't need to do it again until tomorrow
     db_query(
       'INSERT INTO {fund_info} (broker, fund_hash, cache_time, sell_price)
@@ -584,7 +595,7 @@ class FundScraper {
     return $return;
   }
 
-  function get_current_sell_price_hl($fund) {
+  function get_current_sell_price_hl($fund, $i, $total) {
     $hash = $this->hash($fund);
 
     if (isset($this->fund_sell_price['hl'][$hash])) {
@@ -604,14 +615,14 @@ class FundScraper {
 
     $url = $this->get_url_hl($fund);
 
-    $data = $this->download_url($url);
+    $data = $this->download_url($url, $i, $total);
 
     $price = $this->process_data($data, $hash);
 
     return $price;
   }
 
-  function map_current_cost($item) {
+  function map_current_cost(&$item, $i) {
     // price per unit
     $item['P'] = null;
 
@@ -619,7 +630,7 @@ class FundScraper {
 
     if (!preg_match($this->fund_preg, $fund)) {
       // wrong item format
-      return $item;
+      return;
     }
     
     $units = $item['u'];
@@ -630,16 +641,16 @@ class FundScraper {
 
     $units = (double)$units;
 
-    $sell_price = $this->get_current_sell_price_hl($fund);
+    $sell_price = $this->get_current_sell_price_hl(
+      $fund, $i, $this->total
+    );
 
     if (is_null($sell_price)) {
       // for some reason the scrape failed
-      return $item;
+      return;
     }
 
     $item['P'] = $sell_price;
-
-    return $item;
   }
 }
 
