@@ -242,6 +242,49 @@ class RestApi {
     $this->res['data']['from_cache'] = !$scraper->did_scrape;
   }
 
+  private function get_fund_value_history() {
+    $query = db_query(
+      'SELECT c.time, SUM(fc.price * f.units) AS value
+      FROM {funds} f
+      INNER JOIN {fund_cache} fc ON fc.did = f.id
+      INNER JOIN {fund_cache_time} c ON c.cid = fc.cid
+      WHERE f.uid = %d
+      GROUP BY fc.cid
+      ORDER BY c.time ASC', $this->user->uid
+    );
+
+    if (!$query) {
+      json_error(500);
+    }
+
+    $results = array();
+
+    $start_time = NULL;
+
+    $total_time = 0;
+
+    while (NULL !== ($row = $query->fetch_object())) {
+      $time = (int)$row->time;
+      $value = round($row->value);
+
+      if (is_null($start_time)) {
+        $start_time = $time;
+      }
+
+      $results[] = array(
+        $time - $start_time,
+        $value
+      );
+
+      $total_time = $time - $start_time;
+    }
+
+    $this->res['data'] = array(
+      'history' => $results,
+      'totalTime' => $total_time
+    );
+  }
+
   private function get_data_all() {
     $this->res['data'] = array();
 
@@ -613,6 +656,10 @@ class RestApi {
             
             case 'funds':
               $this->get_data_funds();
+              break;
+
+            case 'fund_history':
+              $this->get_fund_value_history();
               break;
 
             case 'overview':
