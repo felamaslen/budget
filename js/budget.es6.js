@@ -10,7 +10,6 @@
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
   const GRAPH_FUND_HIST_WIDTH = 600;
-  const GRAPH_FUND_HIST_POINT_SIZE = 2;
   const GRAPH_FUND_HISTORY_TITLE = "History";
   const GRAPH_FUND_NUM_TICKS = 10;
 
@@ -24,7 +23,6 @@
   const COLOR_DARK = "#333";
   const COLOR_LIGHT = "#eee";
   const COLOR_LIGHT_GREY = "#999";
-  const COLOR_DARK_GREY = "#666";
 
   const COLOR_BALANCE_ACTUAL = "#039";
   const COLOR_BALANCE_PREDICTED = "#f00";
@@ -253,12 +251,12 @@
   }
   function validateInput(val, type) {
     switch (type) {
-      case "date":
-        return validateDateInput(val);
-      case "cost":
-        return validateCurrencyInput(val);
-      default:
-        return val;
+    case "date":
+      return validateDateInput(val);
+    case "cost":
+      return validateCurrencyInput(val);
+    default:
+      return val;
     }
   }
   function afterEditValidateCompare(val, compare, type) {
@@ -271,13 +269,13 @@
     let changed = false;
 
     switch (type) {
-      case "date":
-        changed = !(val.isEqual(compare));
-        break;
-      case "cost":
-      case "text":
-      default:
-        changed = val !== compare;
+    case "date":
+      changed = !(val.isEqual(compare));
+      break;
+    case "cost":
+    case "text":
+    default:
+      changed = val !== compare;
     }
 
     return { val, changed };
@@ -314,24 +312,24 @@
   }
   function formatData(val, type, raw) {
     switch (type) {
-      case "date":
-        return val.format();
-      case "cost":
-        return formatCurrency(val, raw);
-      default:
-        return val;
+    case "date":
+      return val.format();
+    case "cost":
+      return formatCurrency(val, raw);
+    default:
+      return val;
     }
   }
 
   function getData(val, type) {
     switch (type) {
-      case "date":
-        if (typeof val[0] !== "undefined") {
+    case "date":
+      if (typeof val[0] !== "undefined") {
         return new YMD(val[0], val[1], val[2]);
       }
 
-      default:
-        return val;
+    default:
+      return val;
     }
   }
 
@@ -650,11 +648,11 @@
       let val = this.$elem.data("val");
 
       switch (this.type) {
-        case "date":
-          val = val.format();
+      case "date":
+        val = val.format();
         break;
-        case "cost":
-          val = (val / 100).toFixed(2);
+      case "cost":
+        val = (val / 100).toFixed(2);
         break;
       }
 
@@ -740,11 +738,11 @@
       let newVal = newValRaw;
 
       switch (this.type) {
-        case "date":
-          newVal = newVal.format();
+      case "date":
+        newVal = newVal.format();
         break;
-        case "cost":
-          newVal = formatCurrency(newVal);
+      case "cost":
+        newVal = formatCurrency(newVal);
         break;
       }
 
@@ -1365,7 +1363,7 @@
 
       // calculate tick range
       const tickSizeY = getTickSize(
-        this.minY, this.maxY, GRAPH_FUND_NUM_TICKS
+        this.minY, this.maxY, numTicks
       );
 
       this.maxY = tickSizeY * Math.ceil(this.maxY / tickSizeY);
@@ -1375,7 +1373,7 @@
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      for (let i = 0; i < GRAPH_FUND_NUM_TICKS; i++) {
+      for (let i = 0; i < numTicks; i++) {
         const value = this.minY + i * tickSizeY;
 
         const tickPos = Math.floor(this.pixY(value)) + 0.5;
@@ -3116,14 +3114,14 @@
       pageExists = false;
 
       switch (id) {
-        case "overview":
-          pages[id] = new PageOverview();
-          break;
-        case "funds":
-          pages[id] = new PageFunds(pageDefFunds);
-          break;
-        default:
-          pages[id] = newPageList(id);
+      case "overview":
+        pages[id] = new PageOverview();
+        break;
+      case "funds":
+        pages[id] = new PageFunds(pageDefFunds);
+        break;
+      default:
+        pages[id] = newPageList(id);
       }
     }
 
@@ -3374,14 +3372,14 @@
       .on("input", () => this.input())
       .on("keydown", evt => {
         switch (evt.key) {
-          case "Tab":
-            this.onTab(evt);
-            break;
-          case "Escape":
-            this.onEscape(evt);
-            break;
-          default:
-            this.onKey(evt);
+        case "Tab":
+          this.onTab(evt);
+          break;
+        case "Escape":
+          this.onEscape(evt);
+          break;
+        default:
+          this.onKey(evt);
         }
       })
       .on("blur", () => {
@@ -3529,20 +3527,20 @@
         let didSomething = true;
 
         switch (evt.key) {
-          case "ArrowUp":
-            delta *= -1;
-          case "ArrowDown":
-            this.selectNextSuggestion(delta);
+        case "ArrowUp":
+          delta *= -1;
+        case "ArrowDown":
+          this.selectNextSuggestion(delta);
 
-            break;
+          break;
 
-          case "Enter":
-            this.replaceWithCurrentSuggestion();
+        case "Enter":
+          this.replaceWithCurrentSuggestion();
 
-            break;
+          break;
 
-          default:
-            didSomething = false;
+        default:
+          didSomething = false;
         }
 
         if (didSomething) {
