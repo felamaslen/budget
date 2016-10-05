@@ -12,6 +12,9 @@
   const GRAPH_FUND_HIST_WIDTH = 600;
   const GRAPH_FUND_HIST_POINT_SIZE = 2;
   const GRAPH_FUND_HISTORY_TITLE = "History";
+  const GRAPH_FUND_NUM_TICKS = 10;
+
+  const GRAPH_BALANCE_NUM_TICKS = 5;
 
   const GRAPH_KEY_SIZE = 12;
   const GRAPH_KEY_OFFSET_X = 5;
@@ -1079,12 +1082,14 @@
       }
 
       // calculate tick range
-      const tickSize = getTickSize(0, this.maxY, 5);
+      const numTicks = GRAPH_BALANCE_NUM_TICKS;
+
+      const tickSize = getTickSize(this.minY, this.maxY, numTicks);
 
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      for (let i = 1; i < 4; i++) {
+      for (let i = 1; i < numTicks; i++) {
         const tickPos = Math.floor(
           this.pixY(i * tickSize)
         ) + 0.5;
@@ -1352,12 +1357,16 @@
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
 
+      const numTicks = GRAPH_FUND_NUM_TICKS;
+
       // draw axes
       this.ctx.strokeStyle = axisColor;
       this.ctx.lineWidth = 1;
 
       // calculate tick range
-      const tickSizeY = getTickSize(this.minY, this.maxY, 5);
+      const tickSizeY = getTickSize(
+        this.minY, this.maxY, GRAPH_FUND_NUM_TICKS
+      );
 
       this.maxY = tickSizeY * Math.ceil(this.maxY / tickSizeY);
 
@@ -1366,7 +1375,7 @@
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < GRAPH_FUND_NUM_TICKS; i++) {
         const value = this.minY + i * tickSizeY;
 
         const tickPos = Math.floor(this.pixY(value)) + 0.5;
@@ -1419,25 +1428,13 @@
         this.ctx.fillText(tickName, this.width - this.padX2, tick[1]);
       }
 
-      // draw circles on data points
-      this.ctx.fillStyle = this.color;
-      for (const point of pix) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(point[0], point[1]);
-        this.ctx.arc(
-          point[0], point[1], GRAPH_FUND_HIST_POINT_SIZE, 0, Math.PI * 2, false
-        );
-        this.ctx.closePath();
-        this.ctx.fill();
-      }
-
       // add title and key
-      this.ctx.font = FONT_GRAPH_TITLE;
+      this.ctx.font = FONT_GRAPH_TITLE_LARGE;
       this.ctx.fillStyle = COLOR_LIGHT;
       this.ctx.textAlign = "right";
       this.ctx.textBaseline = "top";
 
-      this.ctx.fillText(GRAPH_FUND_HISTORY_TITLE, this.width - 10, 10);
+      this.ctx.fillText(GRAPH_FUND_HISTORY_TITLE, this.width - 64, 3);
     }
   }
 
