@@ -909,12 +909,18 @@ button:active {
     left: 900px;
     top: 350px;
     width: 400px;
+    z-index: 1;
+    opacity: 0.7;
   }
   #graph-fund-history {
     position: absolute;
-    width: 200px;
-    left: 1300px;
+    width: 600px;
+    left: 900px;
     top: 350px;
+    z-index: 0;
+  }
+  #graph-fund-history:hover {
+    z-index: 1;
   }
  
   .list-head {

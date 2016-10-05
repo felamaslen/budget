@@ -9,8 +9,9 @@
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
-  const GRAPH_FUND_HIST_WIDTH = 200;
+  const GRAPH_FUND_HIST_WIDTH = 600;
   const GRAPH_FUND_HIST_POINT_SIZE = 2;
+  const GRAPH_FUND_HISTORY_TITLE = "History";
 
   const STOCKS_REFRESH_INTERVAL = 10000;
 
@@ -1379,12 +1380,12 @@
 
       // draw Y axis
       this.ctx.textBaseline = "bottom";
-      this.ctx.textAlign = "left";
+      this.ctx.textAlign = "right";
 
       for (const tick of ticksY) {
         const tickName = formatCurrency(tick[0], true, true);
 
-        this.ctx.fillText(tickName, this.padX1, tick[1]);
+        this.ctx.fillText(tickName, this.width - this.padX2, tick[1]);
       }
 
       // draw circles on data points
@@ -1402,10 +1403,10 @@
       // add title and key
       this.ctx.font = "16px bold Arial, Helvetica, sans-serif";
       this.ctx.fillStyle = "#000";
-      this.ctx.textAlign = "left";
+      this.ctx.textAlign = "right";
       this.ctx.textBaseline = "top";
 
-      this.ctx.fillText("History", 10, 10);
+      this.ctx.fillText(GRAPH_FUND_HISTORY_TITLE, this.width - 10, 10);
     }
   }
 
@@ -2565,7 +2566,8 @@
         page:   this.page,
         title:  "fund-history",
         data:   res.data.history,
-        range:  [0, res.data.totalTime, minValue, res.data.maxValue]
+        range:  [0, res.data.totalTime, minValue, res.data.maxValue],
+        pad:    [24, 0, 0, 0]
       });
     }
   }
