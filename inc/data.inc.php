@@ -508,6 +508,17 @@ class FundScraper {
 
     array_walk($this->data, array($this, 'map_current_cost'));
 
+    if (!is_null($this->new_cache_cid)) {
+      // activate the last cache item, since we are done caching
+      $done_query = db_query(
+        'UPDATE {fund_cache_time} SET `done` = 1 WHERE `cid` = %d', $this->new_cache_cid
+      );
+
+      if (!$done_query) {
+        json_error(500, 'Error activating cache!');
+      }
+    }
+
     return $this->data;
   }
 
@@ -610,7 +621,7 @@ class FundScraper {
 
     if (is_null($this->new_cache_cid)) {
       // create a new cache item
-      $query_new_item = db_query('INSERT INTO {fund_cache_time} (`time`) VALUES (%d)',
+      $query_new_item = db_query('INSERT INTO {fund_cache_time} (`time`, `done`) VALUES (%d, 0)',
         $this->time_now);
 
       if (!$query_new_item) {
