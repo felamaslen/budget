@@ -1310,9 +1310,6 @@
 
       this.color = "#039";
 
-      this.tension = 0.5;
-      this.stroke = true;
-
       this.draw();
     }
 
@@ -1330,20 +1327,22 @@
       this.ctx.textAlign = "center";
 
       // calculate tick range
-      const tickSizeY = getTickSize(0, this.maxY, 5);
+      const tickSizeY = getTickSize(this.minY, this.maxY, 5);
 
       this.maxY = tickSizeY * Math.ceil(this.maxY / tickSizeY);
+
+      this.minY = tickSizeY * Math.floor(this.minY / tickSizeY);
 
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
       for (let i = 0; i < 4; i++) {
-        const tickPos = Math.floor(
-          this.pixY(i * tickSizeY)
-        ) + 0.5;
+        const value = this.minY + i * tickSizeY;
+
+        const tickPos = Math.floor(this.pixY(value)) + 0.5;
 
         // add value (Y axis) tick to array to draw on top of graph
-        ticksY.push([i * tickSizeY, tickPos]);
+        ticksY.push([value, tickPos]);
 
         // draw horizontal line
         this.ctx.beginPath();
@@ -2551,6 +2550,14 @@
       );
     }
     onFundHistoryLoaded(res) {
+      // get minimum value
+      let minValue = res.data.maxValue;
+      res.data.history.forEach(item => {
+        if (item[1] < minValue) {
+          minValue = item[1];
+        }
+      });
+
       this.graphFundHistory = new GraphFundHistory({
         width:  GRAPH_FUND_HIST_WIDTH,
         height: this.pieHeight,
@@ -2558,7 +2565,7 @@
         page:   this.page,
         title:  "fund-history",
         data:   res.data.history,
-        range:  [0, res.data.totalTime, 0, res.data.maxValue]
+        range:  [0, res.data.totalTime, minValue, res.data.maxValue]
       });
     }
   }
