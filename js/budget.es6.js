@@ -13,9 +13,42 @@
   const GRAPH_FUND_HIST_POINT_SIZE = 2;
   const GRAPH_FUND_HISTORY_TITLE = "History";
 
+  const GRAPH_KEY_SIZE = 12;
+  const GRAPH_KEY_OFFSET_X = 5;
+  const GRAPH_KEY_OFFSET_Y = 34;
+
+  const COLOR_GRAPH_TITLE = "#000";
+  const COLOR_DARK = "#333";
+  const COLOR_LIGHT = "#eee";
+  const COLOR_LIGHT_GREY = "#999";
+  const COLOR_DARK_GREY = "#666";
+
+  const COLOR_BALANCE_ACTUAL = "#039";
+  const COLOR_BALANCE_PREDICTED = "#f00";
+
+  const COLOR_GRAPH_FUND_LINE = "#04a9ef";
+
+  const COLOR_PIE_L1 = "#f15854";
+  const COLOR_PIE_L2 = "#decf3f";
+  const COLOR_PIE_L3 = "#b276b2";
+  const COLOR_PIE_M1 = "#b2912f";
+  const COLOR_PIE_M2 = "#f17cb0";
+  const COLOR_PIE_M3 = "#60bd68";
+  const COLOR_PIE_S1 = "#faa43a";
+  const COLOR_PIE_S2 = "#5da5da";
+
+  const FONT_AXIS_LABEL = "12px Arial, Helvetica, sans-serif";
+  const FONT_GRAPH_TITLE = "16px bold Arial, Helvetica, sans-serif";
+  const FONT_GRAPH_TITLE_LARGE = "18px bold Arial, Helvetica, sans-serif";
+  const FONT_GRAPH_KEY = "13px Arial, Helvetica, sans-serif";
+  const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
+
   const STOCKS_REFRESH_INTERVAL = 10000;
 
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
 
   let editingAdd = false;
 
@@ -217,12 +250,12 @@
   }
   function validateInput(val, type) {
     switch (type) {
-    case "date":
-      return validateDateInput(val);
-    case "cost":
-      return validateCurrencyInput(val);
-    default:
-      return val;
+      case "date":
+        return validateDateInput(val);
+      case "cost":
+        return validateCurrencyInput(val);
+      default:
+        return val;
     }
   }
   function afterEditValidateCompare(val, compare, type) {
@@ -235,13 +268,13 @@
     let changed = false;
 
     switch (type) {
-    case "date":
-      changed = !(val.isEqual(compare));
-      break;
-    case "cost":
-    case "text":
-    default:
-      changed = val !== compare;
+      case "date":
+        changed = !(val.isEqual(compare));
+        break;
+      case "cost":
+      case "text":
+      default:
+        changed = val !== compare;
     }
 
     return { val, changed };
@@ -278,24 +311,24 @@
   }
   function formatData(val, type, raw) {
     switch (type) {
-    case "date":
-      return val.format();
-    case "cost":
-      return formatCurrency(val, raw);
-    default:
-      return val;
+      case "date":
+        return val.format();
+      case "cost":
+        return formatCurrency(val, raw);
+      default:
+        return val;
     }
   }
 
   function getData(val, type) {
     switch (type) {
-    case "date":
-      if (typeof val[0] !== "undefined") {
+      case "date":
+        if (typeof val[0] !== "undefined") {
         return new YMD(val[0], val[1], val[2]);
       }
 
-    default:
-      return val;
+      default:
+        return val;
     }
   }
 
@@ -614,11 +647,11 @@
       let val = this.$elem.data("val");
 
       switch (this.type) {
-      case "date":
-        val = val.format();
+        case "date":
+          val = val.format();
         break;
-      case "cost":
-        val = (val / 100).toFixed(2);
+        case "cost":
+          val = (val / 100).toFixed(2);
         break;
       }
 
@@ -704,11 +737,11 @@
       let newVal = newValRaw;
 
       switch (this.type) {
-      case "date":
-        newVal = newVal.format();
+        case "date":
+          newVal = newVal.format();
         break;
-      case "cost":
-        newVal = formatCurrency(newVal);
+        case "cost":
+          newVal = formatCurrency(newVal);
         break;
       }
 
@@ -841,16 +874,17 @@
         * (this.width - this.padX1 - this.padX2);
     }
     pixY(y) {
-      return this.height - this.padY2 - (y - this.minY) / (this.maxY - this.minY)
-        * (this.height - this.padY1 - this.padY2);
+      return this.height - this.padY2 -
+        (y - this.minY) / (this.maxY - this.minY) *
+        (this.height - this.padY1 - this.padY2);
     }
     valX(pix) {
-      return (pix - this.padX1) * (this.maxX - this.minX)
-        / (this.width - this.padX1 - this.padX2) + this.minX;
+      return (pix - this.padX1) * (this.maxX - this.minX) /
+        (this.width - this.padX1 - this.padX2) + this.minX;
     }
     valY(pix) {
-      return (this.height - this.padY2 - pix) * (this.maxY - this.minY)
-        / (this.height - this.padY1 - this.padY2) + this.minY;
+      return (this.height - this.padY2 - pix) * (this.maxY - this.minY) /
+        (this.height - this.padY1 - this.padY2) + this.minY;
     }
 
     getSpline(p) {
@@ -1006,7 +1040,7 @@
 
       this.yearMonths = options.yearMonths;
 
-      this.colors = ["#039", "red"];
+      this.colors = [COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED];
       this.tension = 0.5;
       this.stroke = true;
 
@@ -1018,18 +1052,18 @@
       this.ctx.clearRect(0, 0, this.width, this.height);
 
       // draw axes
-      this.ctx.strokeStyle = "#999";
+      this.ctx.strokeStyle = COLOR_LIGHT_GREY;
       this.ctx.lineWidth = 1;
 
-      this.ctx.font = "12px Arial, Helvetica, sans-serif";
-      this.ctx.fillStyle = "#333";
+      this.ctx.font = FONT_AXIS_LABEL;
+      this.ctx.fillStyle = COLOR_DARK;
       this.ctx.textBaseline = "top";
       this.ctx.textAlign = "center";
 
       // draw month (X axis) ticks, and vertical lines
       for (let i = 3; i < this.maxX - 1; i += 4) {
         const tickName = months[this.yearMonths[i][1] - 1] + "-"
-          + (this.yearMonths[i][0] % 100).toString();
+        + (this.yearMonths[i][0] % 100).toString();
 
         const tickPosX = Math.floor(this.pixX(i)) + 0.5;
         const tickPosY = Math.floor(this.pixY(0)) + 0.5;
@@ -1084,8 +1118,8 @@
       this.ctx.fillRect(45, 8, 200, 60);
       this.ctx.closePath();
 
-      this.ctx.font = "16px bold Arial, Helvetica, sans-serif";
-      this.ctx.fillStyle = "#000";
+      this.ctx.font = FONT_GRAPH_TITLE;
+      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
       this.ctx.textAlign = "left";
       this.ctx.textBaseline = "top";
 
@@ -1093,20 +1127,20 @@
 
       this.ctx.beginPath();
       this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = "#039";
+      this.ctx.strokeStyle = COLOR_BALANCE_ACTUAL;
       this.ctx.moveTo(50, 40);
       this.ctx.lineTo(74, 40);
       this.ctx.stroke();
       this.ctx.closePath();
 
-      this.ctx.font = "11px Arial, Helvetica, sans-serif";
+      this.ctx.font = FONT_GRAPH_KEY_SMALL;
       this.ctx.textBaseline = "middle";
-      this.ctx.fillStyle = "#333";
+      this.ctx.fillStyle = COLOR_DARK;
       this.ctx.fillText("Actual", 78, 40);
 
       this.ctx.beginPath();
       this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = "red";
+      this.ctx.strokeStyle = COLOR_BALANCE_PREDICTED;
       this.ctx.moveTo(130, 40);
       this.ctx.lineTo(154, 40);
       this.ctx.stroke();
@@ -1119,8 +1153,8 @@
       const dataPast = past.map(hundredth);
       const dataFuture = future.map(hundredth);
 
-      this.futureKey = 12 * (this.currentYear - this.startYear)
-       + this.currentMonth - this.startMonth + 1;
+      this.futureKey = 12 * (this.currentYear - this.startYear) +
+        this.currentMonth - this.startMonth + 1;
 
       this.data = dataPast.map((item, key) => {
         return key < this.futureKey ? item : dataFuture[key];
@@ -1167,7 +1201,7 @@
 
       this.ctx.clearRect(0, 0, this.width, this.height);
       // draw X axis ticks
-      this.ctx.strokeStyle = "#999";
+      this.ctx.strokeStyle = COLOR_LIGHT_GREY;
       this.ctx.lineWidth = 1;
 
       const ticksY = [];
@@ -1183,8 +1217,6 @@
       }
 
       // draw Y axis ticks
-      this.ctx.strokeStyle = "#333";
-
       const ticksX = [];
       for (let i = 0; i < 3; i++) {
         const tickPos = Math.floor(this.pixY(tickSize * i)) + 0.5;
@@ -1204,15 +1236,13 @@
         );
       });
 
-      this.ctx.font = "12px Arial, Helvetica, sans-serif";
+      this.ctx.font = FONT_AXIS_LABEL;
       this.ctx.textBaseline = "top";
       this.ctx.textAlign = "left";
-      this.ctx.fillStyle = "#000";
+      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
 
       ticksX.forEach((tickPos, i) => {
         if (i > 0) {
-          this.ctx.strokeStyle = "#999";
-
           const tickName = "£" + numberFormat(tickSize * i);
 
           this.ctx.fillText(tickName, 0, tickPos);
@@ -1220,54 +1250,55 @@
       });
 
       // draw month ticks
-      this.ctx.fillStyle = "#333";
+      this.ctx.fillStyle = COLOR_DARK;
       this.ctx.textBaseline = "bottom";
       this.ctx.textAlign = "center";
 
       ticksY.forEach((tick, j) => {
-        const tickName = months[this.yearMonths[tick[0]][1] - 1] + "-"
-          + (this.yearMonths[tick[0]][0] % 100).toString();
+        const tickName = months[this.yearMonths[tick[0]][1] - 1] + "-" +
+          (this.yearMonths[tick[0]][0] % 100).toString();
 
-        this.ctx.fillText(tickName, tick[1], this.height - this.padY2 + 3 + 10.5 * (2 - j % 2));
+        this.ctx.fillText(
+          tickName, tick[1], this.height - this.padY2 + 3 + 10.5 * (2 - j % 2)
+        );
       });
 
       // add title and key
-      this.ctx.font = "16px bold Arial, Helvetica, sans-serif";
-      this.ctx.fillStyle = "#000";
+      this.ctx.font = FONT_GRAPH_TITLE;
+      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
       this.ctx.textAlign = "left";
       this.ctx.textBaseline = "top";
 
       this.ctx.fillText("Spending", 15, 10);
 
       this.ctx.textBaseline = "middle";
-      this.ctx.font = "13px Arial, Helvetica, sans-serif";
+      this.ctx.font = FONT_GRAPH_KEY;
 
-      const fontColor = "#333";
+      const fontColor = COLOR_DARK;
 
-      this.ctx.fillStyle = rgb(this.textColors.bills);
-      this.ctx.fillRect(5, 34, 12, 12);
       this.ctx.fillStyle = fontColor;
       this.ctx.fillText("Bills", 20, 40);
+      this.ctx.fillText("Food", 72, 40);
+      this.ctx.fillText("General", 130, 40);
+      this.ctx.fillText("Holiday", 200, 40);
+      this.ctx.fillText("Social", 265, 40);
+
+      this.ctx.fillStyle = rgb(this.textColors.bills);
+      this.ctx.fillRect(
+        GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE
+      );
 
       this.ctx.fillStyle = rgb(this.textColors.food);
-      this.ctx.fillRect(57, 34, 12, 12);
-      this.ctx.fillStyle = fontColor;
-      this.ctx.fillText("Food", 72, 40);
+      this.ctx.fillRect(57, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
 
       this.ctx.fillStyle = rgb(this.textColors.general);
-      this.ctx.fillRect(115, 34, 12, 12);
-      this.ctx.fillStyle = fontColor;
-      this.ctx.fillText("General", 130, 40);
+      this.ctx.fillRect(115, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
 
       this.ctx.fillStyle = rgb(this.textColors.holiday);
-      this.ctx.fillRect(185, 34, 12, 12);
-      this.ctx.fillStyle = fontColor;
-      this.ctx.fillText("Holiday", 200, 40);
+      this.ctx.fillRect(185, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
 
       this.ctx.fillStyle = rgb(this.textColors.social);
-      this.ctx.fillRect(250, 34, 12, 12);
-      this.ctx.fillStyle = fontColor;
-      this.ctx.fillText("Social", 265, 40);
+      this.ctx.fillRect(250, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
     }
 
     getData(data) {
@@ -1309,7 +1340,7 @@
 
       this.data = options.data;
 
-      this.color = "#039";
+      this.color = COLOR_GRAPH_FUND_LINE;
 
       this.draw();
     }
@@ -1318,14 +1349,12 @@
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
 
-      // draw axes
-      this.ctx.strokeStyle = "#999";
-      this.ctx.lineWidth = 1;
+      const axisColor = COLOR_DARK;
+      const axisTextColor = COLOR_LIGHT;
 
-      this.ctx.font = "12px Arial, Helvetica, sans-serif";
-      this.ctx.fillStyle = "#333";
-      this.ctx.textBaseline = "top";
-      this.ctx.textAlign = "center";
+      // draw axes
+      this.ctx.strokeStyle = axisColor;
+      this.ctx.lineWidth = 1;
 
       // calculate tick range
       const tickSizeY = getTickSize(this.minY, this.maxY, 5);
@@ -1379,8 +1408,10 @@
       this.ctx.closePath();
 
       // draw Y axis
+      this.ctx.fillStyle = axisTextColor;
       this.ctx.textBaseline = "bottom";
       this.ctx.textAlign = "right";
+      this.ctx.font = FONT_AXIS_LABEL;
 
       for (const tick of ticksY) {
         const tickName = formatCurrency(tick[0], true, true);
@@ -1401,8 +1432,8 @@
       }
 
       // add title and key
-      this.ctx.font = "16px bold Arial, Helvetica, sans-serif";
-      this.ctx.fillStyle = "#000";
+      this.ctx.font = FONT_GRAPH_TITLE;
+      this.ctx.fillStyle = COLOR_LIGHT;
       this.ctx.textAlign = "right";
       this.ctx.textBaseline = "top";
 
@@ -1429,14 +1460,14 @@
       .attr("id", "graph-pie-" + this.title.toLowerCase() + "-" + this.page);
 
       this.colors = [
-        "#f15854",
-        "#decf3f",
-        "#b276b2",
-        "#b2912f",
-        "#f17cb0",
-        "#60bd68",
-        "#faa43a",
-        "#5da5da"
+        COLOR_PIE_L1,
+        COLOR_PIE_L2,
+        COLOR_PIE_L3,
+        COLOR_PIE_M1,
+        COLOR_PIE_M2,
+        COLOR_PIE_M3,
+        COLOR_PIE_S1,
+        COLOR_PIE_S2
       ];
 
       this.labelColors = {};
@@ -1487,8 +1518,8 @@
         }
       }
 
-      this.ctx.strokeStyle = "#000";
-      this.ctx.font = "12px Arial, Helvetica, sans-serif";
+      this.ctx.strokeStyle = COLOR_GRAPH_TITLE;
+      this.ctx.font = FONT_AXIS_LABEL;
 
       let smallLabelOffset = PIE_SMALL_LABEL_OFFSET;
 
@@ -1605,7 +1636,7 @@
 
           const label = labelName + " (" + formatData(labelValue, this.type, true) + ")";
 
-          this.ctx.fillStyle = "black";
+          this.ctx.fillStyle = COLOR_GRAPH_TITLE;
           this.ctx.textAlign = align;
           this.ctx.textBaseline = baseline;
           this.ctx.fillText(label, this.stretchPoint(textAnchor[0]), textAnchor[1]);
@@ -1615,7 +1646,7 @@
       }
 
       this.ctx.fillStyle = "#000";
-      this.ctx.font = "18px bold Arial, Helvetica, sans-serif";
+      this.ctx.font = FONT_GRAPH_TITLE_LARGE;
       this.ctx.textAlign = "right";
       this.ctx.textBaseline = "top";
 
@@ -3088,14 +3119,14 @@
       pageExists = false;
 
       switch (id) {
-      case "overview":
-        pages[id] = new PageOverview();
-        break;
-      case "funds":
-        pages[id] = new PageFunds(pageDefFunds);
-        break;
-      default:
-        pages[id] = newPageList(id);
+        case "overview":
+          pages[id] = new PageOverview();
+          break;
+        case "funds":
+          pages[id] = new PageFunds(pageDefFunds);
+          break;
+        default:
+          pages[id] = newPageList(id);
       }
     }
 
@@ -3346,14 +3377,14 @@
       .on("input", () => this.input())
       .on("keydown", evt => {
         switch (evt.key) {
-        case "Tab":
-          this.onTab(evt);
-          break;
-        case "Escape":
-          this.onEscape(evt);
-          break;
-        default:
-          this.onKey(evt);
+          case "Tab":
+            this.onTab(evt);
+            break;
+          case "Escape":
+            this.onEscape(evt);
+            break;
+          default:
+            this.onKey(evt);
         }
       })
       .on("blur", () => {
@@ -3501,20 +3532,20 @@
         let didSomething = true;
 
         switch (evt.key) {
-        case "ArrowUp":
-          delta *= -1;
-        case "ArrowDown":
-          this.selectNextSuggestion(delta);
+          case "ArrowUp":
+            delta *= -1;
+          case "ArrowDown":
+            this.selectNextSuggestion(delta);
 
-          break;
+            break;
 
-        case "Enter":
-          this.replaceWithCurrentSuggestion();
+          case "Enter":
+            this.replaceWithCurrentSuggestion();
 
-          break;
+            break;
 
-        default:
-          didSomething = false;
+          default:
+            didSomething = false;
         }
 
         if (didSomething) {

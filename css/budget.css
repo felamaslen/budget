@@ -12,6 +12,23 @@ body.wait * {
   cursor: wait !important;
 }
 
+*::-webkit-scrollbar {
+  width: 0.5em;
+}
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 16px -4px rgba(0, 0, 0, 0.3);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5em;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+*::-webkit-scrollbar-thumb:active {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
 button {
 	-moz-box-shadow:inset 0px 1px 0px 0px #9acc85;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #9acc85;
@@ -909,8 +926,20 @@ button:active {
     left: 900px;
     top: 350px;
     width: 400px;
+    background: transparent;
     z-index: 1;
-    opacity: 0.7;
+  }
+  .stocks-list::-webkit-scrollbar-track {
+    -webkit-box-shadow: none;
+  }
+  .stocks-list::-webkit-scrollbar-thumb {
+    background-color: rgba(240, 240, 240, 0.3);
+  }
+  .stocks-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(160, 160, 160, 0.9);
+  }
+  .stocks-list::-webkit-scrollbar-thumb:active {
+    background-color: rgba(240, 240, 240, 0.8);
   }
   #graph-fund-history {
     position: absolute;
@@ -918,9 +947,7 @@ button:active {
     left: 900px;
     top: 350px;
     z-index: 0;
-  }
-  #graph-fund-history:hover {
-    z-index: 1;
+    background: black;
   }
  
   .list-head {
