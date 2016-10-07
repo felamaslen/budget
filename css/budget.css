@@ -286,6 +286,7 @@ button:active {
   text-overflow: ellipsis;
   border-right: 1px solid #ccc;
   vertical-align: top;
+  overflow: hidden;
 }
 .list-ul .text {
   margin-right: 2px;
@@ -484,7 +485,9 @@ button:active {
 .editable {
   position: relative;
 }
-.editable.editing {
+.editable.editing,
+.li-add .editable {
+  overflow: visible;
 }
 .editable.editing .text {
   display: none;
