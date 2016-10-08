@@ -791,6 +791,10 @@
 
       this.$input.on("focus", () => {
         editingAdd = true;
+
+        if (editing && editing.cancel) {
+          editing.cancel();
+        }
       })
       .on("blur", () => {
         editingAdd = false;
