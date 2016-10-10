@@ -451,6 +451,10 @@ function get_student_loan_data() {
   print_r($data);
 }
 
+function fund_hash($fund) {
+  return hash_hmac('md5', $fund, 'a963anx2', FALSE);
+}
+
 class FundScraper {
   public $fund_preg = '/^(.*)\s\((accum|inc)\.?\)$/';
 
@@ -522,10 +526,6 @@ class FundScraper {
     return $this->data;
   }
 
-  function hash($fund) {
-    return hash_hmac('md5', $fund, 'a963anx2', FALSE);
-  }
-
   function get_url_hl($fund) {
     // e.g.: http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation 
     
@@ -571,6 +571,71 @@ class FundScraper {
     }
 
     return file_get_contents($url);
+  }
+  
+  function insert_new_cid() {
+    if (is_null($this->new_cache_cid)) {
+      // create a new cache item
+      $query_new_item = db_query(
+        'INSERT INTO {fund_cache_time} (`time`, `done`) VALUES (%d, 0)',
+        $this->time_now
+      );
+
+      if (!$query_new_item) {
+        json_error(500, 'Error inserting cache item');
+      }
+
+      $this->new_cache_cid = db_insert_id();
+    }
+  }
+
+  function insert_cache_item($broker, $hash, $did, $price) {
+    $this->insert_new_cid();
+
+    // make sure this fund is in the hash list
+    $hash_exists_query = db_query(
+      'SELECT fid FROM {fund_hash}
+      WHERE hash = "%s" AND broker = "%s"',
+      $hash, $broker
+    );
+
+    if (!$hash_exists_query) {
+      json_error(500, 'Error determing if fund exists');
+    }
+
+    $hash_exists = (int)$hash_exists_query->num_rows !== 0;
+
+    if (!$hash_exists) {
+      $hash_put_query = db_query(
+        'INSERT INTO {fund_hash} (broker, hash) VALUES ("%s", "%s")',
+        $broker, $hash
+      );
+
+      if (!$hash_put_query) {
+        json_error(500, 'Error adding fund to hash table');
+      }
+
+      $fid = db_insert_id();
+    }
+    else {
+      $obj = $hash_exists_query->fetch_object();
+
+      if (!$obj) {
+        json_error(500, 'Error fetching fund from hash table');
+      }
+
+      $fid = (int)$obj->fid;
+    }
+
+    // cache this value so we don't need to do it again until tomorrow
+    $cache_query = db_query(
+      'INSERT INTO {fund_cache} (cid, fid, did, price) VALUES (%d, %d, %d, %s)',
+      $this->new_cache_cid, $fid, $did, $price
+    );
+
+    if (!$cache_query) {
+      json_error(500, 'Error inserting into cache');
+    }
   }
 
   function process_data($data, $hash, $broker, $did) {
@@ -619,74 +684,20 @@ class FundScraper {
       printf("Price: %f\n", $price);
     }
 
-    if (is_null($this->new_cache_cid)) {
-      // create a new cache item
-      $query_new_item = db_query('INSERT INTO {fund_cache_time} (`time`, `done`) VALUES (%d, 0)',
-        $this->time_now);
-
-      if (!$query_new_item) {
-        json_error(500, 'Error inserting cache item');
-      }
-
-      $this->new_cache_cid = db_insert_id();
-    }
-
-    // make sure this fund is in the hash list
-    $hash_exists_query = db_query(
-      'SELECT fid FROM {fund_hash}
-      WHERE hash = "%s" AND broker = "%s"',
-      $hash, $broker
-    );
-
-    if (!$hash_exists_query) {
-      json_error(500, 'Error determing if fund exists');
-    }
-
-    $hash_exists = (int)$hash_exists_query->num_rows !== 0;
-
-    if (!$hash_exists) {
-      $hash_put_query = db_query(
-        'INSERT INTO {fund_hash} (broker, hash) VALUES ("%s", "%s")',
-        $broker, $hash
-      );
-
-      if (!$hash_put_query) {
-        json_error(500, 'Error adding fund to hash table');
-      }
-
-      $fid = db_insert_id();
-    }
-    else {
-      $obj = $hash_exists_query->fetch_object();
-
-      if (!$obj) {
-        json_error(500, 'Error fetching fund from hash table');
-      }
-
-      $fid = (int)$obj->fid;
-    }
-
-    // cache this value so we don't need to do it again until tomorrow
-    $cache_query = db_query(
-      'INSERT INTO {fund_cache} (cid, fid, did, price) VALUES (%d, %d, %d, %s)',
-      $this->new_cache_cid, $fid, $did, $price
-    );
-
-    if (!$cache_query) {
-      json_error(500, 'Error inserting into cache');
+    $this->insert_cache_item($broker, $hash, $did, $price);
+    
+    // don't scrape the same URL twice!
+    if (!isset($this->fund_sell_price[$broker][$hash])) {
+      $this->fund_sell_price[$broker][$hash] = $price;
     }
 
     return $return;
   }
 
   function get_current_sell_price_hl($fund, $i, $total, $did) {
-    $hash = $this->hash($fund);
+    $hash = fund_hash($fund);
 
     $broker = 'hl'; // TODO: multiple brokers
-
-    if (isset($this->fund_sell_price[$broker][$hash])) {
-      return $this->fund_sell_price[$broker][$hash];
-    }
 
     if (
       !$this->force_scrape &&
@@ -699,11 +710,19 @@ class FundScraper {
       return NULL;
     }
 
-    $url = $this->get_url_hl($fund);
+    if (isset($this->fund_sell_price[$broker][$hash])) {
+      $price = $this->fund_sell_price[$broker][$hash];
 
-    $data = $this->download_url($url, $i, $total);
+      $this->insert_cache_item($broker, $hash, $did, $price);
+    }
+    else {
+      // new scrape
+      $url = $this->get_url_hl($fund);
 
-    $price = $this->process_data($data, $hash, $broker, $did);
+      $data = $this->download_url($url, $i, $total);
+
+      $price = $this->process_data($data, $hash, $broker, $did);
+    }
 
     return $price;
   }
