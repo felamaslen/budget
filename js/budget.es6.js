@@ -1392,31 +1392,10 @@
         this.ctx.stroke();
       }
 
-      // process data -> pixels
-      const pix = this.data.map(point => {
-        return [this.pixX(point[0]), this.pixY(point[1])];
-      });
-
       // plot past data
-      let moved = false;
+      const p = this.data.map(point => point[1]);
 
-      this.ctx.beginPath();
-      this.ctx.lineWidth = 1;
-      this.ctx.strokeStyle = this.color;
-
-      for (const point of pix) {
-        if (moved) {
-          this.ctx.lineTo(point[0], point[1]);
-        }
-        else {
-          this.ctx.moveTo(point[0], point[1]);
-
-          moved = true;
-        }
-      }
-
-      this.ctx.stroke();
-      this.ctx.closePath();
+      this.drawCubicLine(p, [this.color]);
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
@@ -2596,7 +2575,7 @@
         page:   this.page,
         title:  "fund-history",
         data:   res.data.history,
-        range:  [0, res.data.totalTime, minValue, res.data.maxValue],
+        range:  [0, res.data.history.length - 1, minValue, res.data.maxValue],
         pad:    [24, 0, 0, 0]
       });
     }
