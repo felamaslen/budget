@@ -27,7 +27,7 @@
   const COLOR_BALANCE_ACTUAL = "#039";
   const COLOR_BALANCE_PREDICTED = "#f00";
 
-  const COLOR_GRAPH_FUND_LINE = "#04a9ef";
+  const COLOR_GRAPH_FUND_LINE = "#fffd93";
 
   const COLOR_PIE_L1 = "#f15854";
   const COLOR_PIE_L2 = "#decf3f";
@@ -77,6 +77,8 @@
     predicted:  [36, 191, 55],
     balance:    [36, 191, 55]
   };
+
+  const indexPoints = (value, key) => [key, value];
 
   function trim(string) {
     while (string.indexOf(" ") === 0) {
@@ -856,6 +858,8 @@
       this.fill = options.fill;
       this.stroke = options.stroke || true;
 
+      this.lineWidth = options.lineWidth || 2;
+
       this.transition = options.transition || [];
 
       this.$gCont = $("<div></div>")
@@ -906,11 +910,11 @@
       const d = [];
 
       for (let k = 0; k < n; k++) {
-        d[k] = p[k + 1] - p[k];
+        d[k] = (p[k + 1][1] - p[k][1]) / (p[k + 1][0] - p[k][0]);
       }
 
       // tangents
-      const m = p.map((yv, k) => {
+      const m = p.map((point, k) => {
         if (k === 0) {
           return d[0];
         }
@@ -930,16 +934,20 @@
       const f = (x, xk, yk, xk1, yk1, mk, mk1) => {
         const t = (x - xk) / (xk1 - xk);
 
-        return h00(t) * yk + h10(t) * (xk1 - xk) * mk +
-          h01(t) * yk1 + h11(t) * (xk1 - xk) * mk1;
+        return  h00(t) * yk +
+                h10(t) * (xk1 - xk) * mk +
+                h01(t) * yk1 +
+                h11(t) * (xk1 - xk) * mk1;
       };
 
       let xn = this.pixX(0);
 
-      for (let k = 0; k < n; k++) {
+      let k = 0, k1 = 0;
+
+      for (let K = 0; K < n; K++) {
         const curvePiece = [];
 
-        const k1 = k + 1;
+        k1 += p[K + 1][0] - p[K][0];
 
         const x = xn;
         xn = this.pixX(k1);
@@ -947,12 +955,14 @@
         // interpolate the curve between this point and the next
         for (let j = 0; j < xn - x; j++) {
           const xv = this.valX(x + j);
-          const yv = f(xv, k, p[k], k1, p[k1], m[k], m[k1]);
+          const yv = f(xv, k, p[K][1], k1, p[K + 1][1], m[K], m[K + 1]);
 
           curvePiece.push([x + j, this.pixY(yv)]);
         }
 
         curve.push(curvePiece);
+
+        k = k1;
       }
 
       // add the last point
@@ -989,7 +999,7 @@
       }
 
       if (this.stroke) {
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = this.lineWidth;
 
         this.ctx.beginPath();
 
@@ -1163,11 +1173,13 @@
       this.futureKey = 12 * (this.currentYear - this.startYear) +
         this.currentMonth - this.startMonth + 1;
 
-      this.data = dataPast.map((item, key) => {
+      const data = dataPast.map((item, key) => {
         return key < this.futureKey ? item : dataFuture[key];
       });
 
-      this.maxY = Math.max.apply(null, this.data);
+      this.maxY = Math.max.apply(null, data);
+
+      this.data = data.map(indexPoints);
 
       this.transition = [this.futureKey - 1];
     }
@@ -1326,7 +1338,7 @@
 
         maxY = Math.max(maxY, Math.max.apply(null, thisData));
 
-        return thisData;
+        return thisData.map(indexPoints);
       }).reverse();
 
       this.maxY = maxY;
@@ -1393,9 +1405,7 @@
       }
 
       // plot past data
-      const p = this.data.map(point => point[1]);
-
-      this.drawCubicLine(p, [this.color]);
+      this.drawCubicLine(this.data, [this.color]);
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
@@ -2575,8 +2585,9 @@
         page:   this.page,
         title:  "fund-history",
         data:   res.data.history,
-        range:  [0, res.data.history.length - 1, minValue, res.data.maxValue],
-        pad:    [24, 0, 0, 0]
+        range:  [0, res.data.totalTime, minValue, res.data.maxValue],
+        pad:    [24, 0, 0, 0],
+        lineWidth: 1
       });
     }
   }
