@@ -2649,33 +2649,35 @@
         }
       });
 
-      const lastValue = res.data.history[res.data.history.length - 1][1];
+      if (res.data.history.length > 0) {
+        const lastValue = res.data.history[res.data.history.length - 1][1];
 
-      const profit = lastValue - this.costTotal;
+        const profit = lastValue - this.costTotal;
 
-      // put the current value at the top of the page
-      const profitSign = profit >= 0 ? "+" : "-";
+        // put the current value at the top of the page
+        const profitSign = profit >= 0 ? "+" : "-";
 
-      const profitLabel = " (" + profitSign +
-        formatCurrency(Math.abs(profit)) + ")";
+        const profitLabel = " (" + profitSign +
+          formatCurrency(Math.abs(profit)) + ")";
 
-      const valueTime = res.data.startTime +
-        res.data.history[res.data.history.length - 1][0];
+        const valueTime = res.data.startTime +
+          res.data.history[res.data.history.length - 1][0];
 
-      const ageHours = Math.round(
-        (new Date().getTime() - valueTime * 1000) / 3600000
-      );
+        const ageHours = Math.round(
+          (new Date().getTime() - valueTime * 1000) / 3600000
+        );
 
-      const ago = ageHours + " hour" + (ageHours === 1 ? "" : "s") + " ago";
+        const ago = ageHours + " hour" + (ageHours === 1 ? "" : "s") + " ago";
 
-      this.$gainInfo.html(
-        "Current value (" + ago + "): " +
-          formatCurrency(lastValue)
-      );
+        this.$gainInfo.html(
+          "Current value (" + ago + "): " +
+            formatCurrency(lastValue)
+        );
 
-      this.$gainText.html(profitLabel)
-      .toggleClass("profit", profit > 0)
-      .toggleClass("loss", profit < 0);
+        this.$gainText.html(profitLabel)
+        .toggleClass("profit", profit > 0)
+        .toggleClass("loss", profit < 0);
+      }
 
       this.graphFundHistory = new GraphFundHistory({
         width:  GRAPH_FUND_HISTORY_WIDTH,
