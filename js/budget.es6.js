@@ -1389,7 +1389,34 @@
 
       this.data = options.data;
 
+      this.dataOffset = 0;
+
       this.color = COLOR_GRAPH_FUND_LINE;
+
+      this.draw();
+
+      this.$canvas[0].addEventListener("mousewheel", evt => {
+        if (evt.wheelDelta > 0) {
+          this.increaseDetail();
+        }
+        else {
+          this.decreaseDetail();
+        }
+      });
+    }
+
+    increaseDetail() {
+      this.dataOffset = Math.min(this.data.length - 3, this.dataOffset + 1);
+      this.detailChanged();
+    }
+
+    decreaseDetail() {
+      this.dataOffset = Math.max(0, this.dataOffset - 1);
+      this.detailChanged();
+    }
+
+    detailChanged() {
+      this.minX = this.data[this.dataOffset][0];
 
       this.draw();
     }
@@ -1435,7 +1462,7 @@
       }
 
       // plot past data
-      this.drawLine(this.data, this.color);
+      this.drawLine(this.data.slice(this.dataOffset), this.color);
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
@@ -2397,7 +2424,7 @@
       this.buildStockViewer();
 
       const $gain = $("<span></span>").addClass("gain");
-      this.$gainInfo = $("<span></span>");
+      this.$gainInfo = $("<span></span>").addClass("gain-info");
       this.$gainText = $("<span></span>").addClass("text");
 
       $gain.append(this.$gainInfo);
