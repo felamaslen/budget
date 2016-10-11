@@ -835,6 +835,9 @@ button:active {
   }
   #page-funds .graph-container-pie {
   }
+  #page-funds .gain-info {
+    display: none;
+  }
 
   #page-in .graph-container-pie {
     width: 800px;
