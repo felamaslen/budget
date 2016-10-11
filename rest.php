@@ -244,13 +244,17 @@ class RestApi {
 
   private function get_fund_value_history() {
     $query = db_query(
-      'SELECT c.time, SUM(fc.price * f.units) AS value
-      FROM {funds} f
-      INNER JOIN {fund_cache} fc ON fc.did = f.id
-      INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
-      WHERE f.uid = %d
-      GROUP BY fc.cid
-      ORDER BY c.time ASC', $this->user->uid
+      'SELECT * FROM (
+        SELECT c.time, SUM(fc.price * f.units) AS value
+        FROM {funds} f
+        INNER JOIN {fund_cache} fc ON fc.did = f.id
+        INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
+        WHERE f.uid = %d
+        GROUP BY fc.cid
+        ORDER BY c.time DESC
+        LIMIT 100
+      ) results
+      ORDER BY time ASC', $this->user->uid
     );
 
     if (!$query) {
