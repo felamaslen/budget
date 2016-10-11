@@ -267,8 +267,6 @@ class RestApi {
 
     $total_time = 0;
 
-    $max_value = 0;
-
     while (NULL !== ($row = $query->fetch_object())) {
       $time = (int)$row->time;
       $value = round($row->value);
@@ -283,16 +281,12 @@ class RestApi {
       );
 
       $total_time = $time - $start_time;
-
-      if ($value > $max_value) {
-        $max_value = $value;
-      }
     }
 
     $this->res['data'] = array(
       'history' => $results,
+      'startTime' => $start_time,
       'totalTime' => $total_time,
-      'maxValue'  => $max_value,
     );
   }
 

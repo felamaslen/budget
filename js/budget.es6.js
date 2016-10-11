@@ -2396,6 +2396,14 @@
       // build stock rendering thingy
       this.buildStockViewer();
 
+      const $gain = $("<span></span>").addClass("gain");
+      this.$gainInfo = $("<span></span>");
+      this.$gainText = $("<span></span>").addClass("text");
+
+      $gain.append(this.$gainInfo);
+      $gain.append(this.$gainText);
+      this.$lhead.append($gain);
+
       // build graph showing fund value history
       this.loadFundHistory();
     }
@@ -2601,12 +2609,46 @@
     }
     onFundHistoryLoaded(res) {
       // get minimum value
-      let minValue = res.data.maxValue;
+      let minValue = -1;
+      let maxValue = -1;
+
       res.data.history.forEach(item => {
-        if (item[1] < minValue) {
+        if (minValue < 0 || item[1] < minValue) {
           minValue = item[1];
         }
+
+        if (item[1] > maxValue) {
+          maxValue = item[1];
+        }
       });
+
+      const lastValue = res.data.history[res.data.history.length - 1][1];
+
+      const profit = lastValue - this.costTotal;
+
+      // put the current value at the top of the page
+      const profitSign = profit >= 0 ? "+" : "-";
+
+      const profitLabel = " (" + profitSign +
+        formatCurrency(Math.abs(profit)) + ")";
+
+      const valueTime = res.data.startTime +
+        res.data.history[res.data.history.length - 1][0];
+
+      const ageHours = Math.round(
+        (new Date().getTime() - valueTime * 1000) / 3600000
+      );
+
+      const ago = ageHours + " hour" + (ageHours === 1 ? "" : "s") + " ago";
+
+      this.$gainInfo.html(
+        "Current value (" + ago + "): " +
+          formatCurrency(lastValue)
+      );
+
+      this.$gainText.html(profitLabel)
+      .toggleClass("profit", profit > 0)
+      .toggleClass("loss", profit < 0);
 
       this.graphFundHistory = new GraphFundHistory({
         width:  GRAPH_FUND_HISTORY_WIDTH,
@@ -2615,7 +2657,7 @@
         page:   this.page,
         title:  "fund-history",
         data:   res.data.history,
-        range:  [0, res.data.totalTime, minValue, res.data.maxValue],
+        range:  [0, res.data.totalTime, minValue, maxValue],
         pad:    [24, 0, 0, 0],
         lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH
       });

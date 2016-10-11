@@ -652,14 +652,26 @@ button:active {
   width: 81px;
 }
 #page-funds .list .gain {
-  width: 200px;
   font-weight: bold;
+}
+#page-funds .list-head .gain {
+  margin-left: 0.5em;
+  text-transform: none;
+}
+#page-funds .list-head .gain .text {
+  padding: 0 0.25em;
+  margin-left: 0.25em;
+}
+#page-funds .list-ul .gain {
+  width: 200px;
+}
+#page-funds .list-ul .gain .text {
+  width: 100%;
+  display: block;
 }
 #page-funds .gain .text {
   padding: 0;
-  width: 200px;
   height: 24px;
-  display: block;
   background: #666;
   color: #333;
 }
