@@ -9,9 +9,11 @@
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
-  const GRAPH_FUND_HIST_WIDTH = 600;
+  const GRAPH_FUND_HISTORY_WIDTH = 600;
   const GRAPH_FUND_HISTORY_TITLE = "History";
-  const GRAPH_FUND_NUM_TICKS = 10;
+  const GRAPH_FUND_HISTORY_TENSION = 0.7;
+  const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
+  const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
 
   const GRAPH_BALANCE_NUM_TICKS = 5;
 
@@ -1041,6 +1043,32 @@
         this.ctx.closePath();
       }
     }
+
+    drawLine(p, color) {
+      let moved = false;
+
+      this.ctx.beginPath();
+
+      p.forEach(point => {
+        const x = this.pixX(point[0]),
+          y = this.pixY(point[1]);
+
+        if (moved) {
+          this.ctx.lineTo(x, y);
+        }
+        else {
+          this.ctx.moveTo(x, y);
+
+          moved = true;
+        }
+      });
+
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = this.lineWidth;
+
+      this.ctx.stroke();
+      this.ctx.closePath();
+    }
   }
 
   class GraphBalance extends LineGraph {
@@ -1357,6 +1385,8 @@
     constructor(options) {
       super(options);
 
+      this.tension = GRAPH_FUND_HISTORY_TENSION;
+
       this.data = options.data;
 
       this.color = COLOR_GRAPH_FUND_LINE;
@@ -1371,7 +1401,7 @@
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
 
-      const numTicks = GRAPH_FUND_NUM_TICKS;
+      const numTicks = GRAPH_FUND_HISTORY_NUM_TICKS;
 
       // draw axes
       this.ctx.strokeStyle = axisColor;
@@ -1405,7 +1435,7 @@
       }
 
       // plot past data
-      this.drawCubicLine(this.data, [this.color]);
+      this.drawLine(this.data, this.color);
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
@@ -2579,7 +2609,7 @@
       });
 
       this.graphFundHistory = new GraphFundHistory({
-        width:  GRAPH_FUND_HIST_WIDTH,
+        width:  GRAPH_FUND_HISTORY_WIDTH,
         height: this.pieHeight,
         $cont:  this.$graphs,
         page:   this.page,
@@ -2587,7 +2617,7 @@
         data:   res.data.history,
         range:  [0, res.data.totalTime, minValue, res.data.maxValue],
         pad:    [24, 0, 0, 0],
-        lineWidth: 1
+        lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH
       });
     }
   }
