@@ -488,7 +488,7 @@ class FundScraper {
       INNER JOIN {fund_cache} c ON ct.cid = c.cid
       INNER JOIN {fund_hash} f ON f.fid = c.fid
       WHERE ct.time = (
-        SELECT max(time) FROM {fund_cache_time}
+        SELECT max(time) FROM {fund_cache_time} WHERE done = 1
       )
     ', $this->time_now - 86400
     );
