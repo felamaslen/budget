@@ -733,11 +733,16 @@ button:active {
   line-height: 1.2em;
   padding-left: 0.2em;
   display: block;
+  float: left;
 }
 #page-funds .stocks-list .label {
   overflow: hidden;
   display: inline-block;
   white-space: nowrap;
+}
+#page-funds .stocks-list .label,
+#page-funds .stocks-list .absolute {
+  display: none;
 }
 #page-funds .stocks-list .price {
   text-align: right;
@@ -943,9 +948,12 @@ button:active {
     position: absolute;
     left: 900px;
     top: 350px;
+    width: 600px;
+    background: black;
+    z-index: 0;
+  }
+  #page-funds .stocks-list-ul {
     width: 400px;
-    background: transparent;
-    z-index: 1;
   }
   .stocks-list::-webkit-scrollbar-track {
     -webkit-box-shadow: none;
@@ -964,8 +972,8 @@ button:active {
     width: 600px;
     left: 900px;
     top: 350px;
-    z-index: 0;
-    background: black;
+    z-index: 1;
+    background: transparent;
   }
  
   .list-head {

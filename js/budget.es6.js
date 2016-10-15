@@ -14,6 +14,7 @@
   const GRAPH_FUND_HISTORY_TENSION = 0.7;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
   const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
+  const GRAPH_FUND_HISTORY_POINT_RADIUS = 3;
 
   const GRAPH_BALANCE_NUM_TICKS = 5;
 
@@ -30,6 +31,7 @@
   const COLOR_BALANCE_PREDICTED = "#f00";
 
   const COLOR_GRAPH_FUND_LINE = "#fffd93";
+  const COLOR_GRAPH_FUND_POINT = "#ff9400";
 
   const COLOR_PIE_L1 = "#f15854";
   const COLOR_PIE_L2 = "#decf3f";
@@ -47,6 +49,7 @@
   const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
 
   const STOCKS_REFRESH_INTERVAL = 10000;
+  const STOCKS_LIST_WIDTH = 400;
 
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -151,7 +154,8 @@
     }
 
     format() {
-      return leadingZeroes(this.date) + "/" + leadingZeroes(this.month) + "/" + this.year;
+      return leadingZeroes(this.date) + "/" + leadingZeroes(this.month) + "/" +
+        this.year;
     }
   }
 
@@ -283,6 +287,27 @@
     }
 
     return { val, changed };
+  }
+
+  function formatAge(seconds) {
+    const measures = [
+      [1,           "second"],
+      [60,          "minute"],
+      [3600,        "hour"],
+      [86400,       "day"],
+      [86400 * 30,  "month"],
+      [86400 * 365, "year"]
+    ];
+
+    const measure = measures.reverse().filter(item => {
+      return seconds >= item[0];
+    })[0];
+
+    const rounded = Math.round(seconds / measure[0]);
+
+    const units = measure[1] + (rounded === 1 ? "" : "s");
+
+    return rounded + " " + units + " ago";
   }
 
   function numberFormat(number) {
@@ -944,7 +969,8 @@
 
       let xn = this.pixX(0);
 
-      let k = 0, k1 = 0;
+      let k = 0;
+      let k1 = 0;
 
       for (let K = 0; K < n; K++) {
         const curvePiece = [];
@@ -1050,8 +1076,8 @@
       this.ctx.beginPath();
 
       p.forEach(point => {
-        const x = this.pixX(point[0]),
-          y = this.pixY(point[1]);
+        const x = this.pixX(point[0]);
+        const y = this.pixY(point[1]);
 
         if (moved) {
           this.ctx.lineTo(x, y);
@@ -1387,9 +1413,10 @@
 
       this.tension = GRAPH_FUND_HISTORY_TENSION;
 
-      this.data = options.data;
-
+      this.data       = options.data;
+      this.startTime  = options.startTime;
       this.dataOffset = 0;
+      this.hlPoint    = -1;
 
       this.color = COLOR_GRAPH_FUND_LINE;
 
@@ -1402,6 +1429,16 @@
         else {
           this.decreaseDetail();
         }
+      });
+
+      const offsetX = this.$canvas.offset().left;
+
+      this.$canvas.on("mousemove", evt => {
+        this.mouseOver(evt.pageX - offsetX);
+      })
+      .on("mouseout", () => {
+        this.hlPoint = -1;
+        this.draw();
       });
     }
 
@@ -1427,6 +1464,8 @@
 
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
+
+      const stocksWidth = STOCKS_LIST_WIDTH;
 
       const numTicks = GRAPH_FUND_HISTORY_NUM_TICKS;
 
@@ -1456,7 +1495,7 @@
 
         // draw horizontal line
         this.ctx.beginPath();
-        this.ctx.moveTo(this.padX1, tickPos);
+        this.ctx.moveTo(this.padX1 + stocksWidth, tickPos);
         this.ctx.lineTo(this.width - this.padX2, tickPos);
         this.ctx.stroke();
       }
@@ -1476,6 +1515,59 @@
         this.ctx.fillText(tickName, this.width - this.padX2, tick[1]);
       }
 
+      // highlight point on mouseover
+      if (this.hlPoint > -1) {
+        const hlX = this.pixX(this.data[this.hlPoint][0]);
+        const hlY = this.pixY(this.data[this.hlPoint][1]);
+
+        const time = this.data[this.hlPoint][0] + this.startTime;
+
+        const age = new Date().getTime() - time * 1000;
+
+        const ageText = formatAge(age / 1000);
+
+        const align = hlX < this.width / 2 ? -1 : 1;
+
+        this.ctx.font = FONT_GRAPH_TITLE;
+        this.ctx.textAlign = align < 0 ? "left" : "right";
+        this.ctx.textBaseline = "top";
+
+        const label = ageText + ": " +
+          formatCurrency(this.data[this.hlPoint][1], true);
+
+        const labelWidth = this.ctx.measureText(label).width;
+        const labelHeight = 24;
+
+        const labelPadding = 2;
+
+        const rectX = hlX + (align > 0 ? -labelWidth - labelPadding * 2 : 0);
+        const rectY = hlY - 1;
+
+        this.ctx.beginPath();
+        this.ctx.fillStyle = COLOR_DARK;
+        this.ctx.fillRect(
+          rectX, rectY, labelWidth + labelPadding * 2, labelHeight
+        );
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = COLOR_LIGHT;
+        this.ctx.fillText(
+          label,
+          hlX - labelPadding * align,
+          hlY + GRAPH_FUND_HISTORY_POINT_RADIUS + 1
+        );
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(hlX, hlY);
+        this.ctx.arc(
+          hlX, hlY, GRAPH_FUND_HISTORY_POINT_RADIUS, 0, Math.PI * 2, false
+        );
+
+        this.ctx.fillStyle = COLOR_GRAPH_FUND_POINT;
+        this.ctx.fill();
+        this.ctx.closePath();
+      }
+
       // add title and key
       this.ctx.font = FONT_GRAPH_TITLE_LARGE;
       this.ctx.fillStyle = COLOR_LIGHT;
@@ -1483,6 +1575,29 @@
       this.ctx.textBaseline = "top";
 
       this.ctx.fillText(GRAPH_FUND_HISTORY_TITLE, this.width - 64, 3);
+    }
+
+    mouseOver(x) {
+      const xv = this.valX(x);
+
+      let lastProximity = -1;
+
+      const hlPoint = this.data.reduce((prev, point, index) => {
+        const thisProximity = Math.abs(xv - point[0]);
+
+        const returnVal = prev === null || thisProximity < lastProximity
+          ? index : prev;
+
+        lastProximity = thisProximity;
+
+        return returnVal;
+      }, null);
+
+      if (hlPoint !== this.hlPoint) {
+        this.hlPoint = hlPoint;
+
+        this.draw();
+      }
     }
   }
 
@@ -2538,6 +2653,7 @@
           // change as a percentage
           const change = parseFloat(stock.c_fix, 10) / price * 100;
 
+          // highlight
           let hl = false;
 
           if (this.stocks[symbol].price !== price) {
@@ -2599,11 +2715,16 @@
 
           stock.$elem.attr("title", stock.name);
 
-          stock.$priceOuter = $("<span></span>").addClass("price");
+          stock.$priceOuter = $("<span></span>")
+          .addClass("price");
 
-          stock.$price = $("<span></span>").text(stock.price.toFixed(2));
+          stock.$price = $("<span></span>")
+          .addClass("absolute")
+          .text(stock.price.toFixed(2));
 
-          stock.$change = $("<span></span>").addClass("change").text(stock.changeText);
+          stock.$change = $("<span></span>")
+          .addClass("change")
+          .text(stock.changeText);
 
           stock.$priceOuter.append(stock.$price);
           stock.$priceOuter.append(stock.$change);
@@ -2688,7 +2809,8 @@
         data:   res.data.history,
         range:  [0, res.data.totalTime, minValue, maxValue],
         pad:    [24, 0, 0, 0],
-        lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH
+        lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
+        startTime: res.data.startTime
       });
     }
   }
