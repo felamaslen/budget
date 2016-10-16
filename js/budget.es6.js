@@ -2602,6 +2602,8 @@
 
       this.stocks = {};
 
+      this.$stocksList.empty();
+
       for (const symbol in res.data.stocks) {
         this.stocks[symbol] = {
           name:   res.data.stocks[symbol].n,
