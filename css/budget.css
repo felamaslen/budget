@@ -668,12 +668,12 @@ button:active {
 #page-funds .list-ul .gain .text {
   width: 100%;
   display: block;
+  color: #333;
 }
 #page-funds .gain .text {
   padding: 0;
   height: 24px;
   background: #666;
-  color: #333;
 }
 #page-funds .gain .text span {
   float: left;
