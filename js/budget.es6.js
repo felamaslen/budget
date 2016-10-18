@@ -10,7 +10,6 @@
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
   const GRAPH_FUND_HISTORY_WIDTH = 600;
-  const GRAPH_FUND_HISTORY_TITLE = "History";
   const GRAPH_FUND_HISTORY_TENSION = 0.7;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
   const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
@@ -84,6 +83,48 @@
   };
 
   const indexPoints = (value, key) => [key, value];
+
+  class MediaQueryHandler {
+    constructor() {
+      this.mqlNarrow = window.matchMedia("(max-width: 1500px)");
+
+      this.callbackNarrow = [];
+      this.callbackWide = [];
+
+      this.mqlNarrow.addListener(mediaQueryList => {
+        this.handleChange(mediaQueryList);
+      });
+    }
+
+    narrow(callback) {
+      this.callbackNarrow.push(callback);
+
+      return this;
+    }
+
+    wide(callback) {
+      this.callbackWide.push(callback);
+
+      return this;
+    }
+
+    handleChange(queryList) {
+      if (queryList.matches) {
+        // window is narrow
+        this.callbackNarrow.forEach(callback => callback());
+      }
+      else {
+        // window is wide
+        this.callbackWide.forEach(callback => callback());
+      }
+    }
+
+    trigger() {
+      this.handleChange(this.mqlNarrow);
+    }
+  }
+
+  const windowSize = new MediaQueryHandler();
 
   function trim(string) {
     while (string.indexOf(" ") === 0) {
@@ -1420,7 +1461,8 @@
 
       this.color = COLOR_GRAPH_FUND_LINE;
 
-      this.draw();
+      this.$label = $("<div></div>").addClass("label");
+      this.$gCont.append(this.$label);
 
       this.$canvas[0].addEventListener("mousewheel", evt => {
         if (evt.wheelDelta > 0) {
@@ -1431,27 +1473,232 @@
         }
       });
 
-      const offsetX = this.$canvas.offset().left;
-
-      this.$canvas.on("mousemove", evt => {
-        this.mouseOver(evt.pageX - offsetX);
+      this.$gCont.on("mousemove", evt => {
+        this.mouseOver(evt.pageX - this.$gCont.offset().left);
       })
       .on("mouseout", () => {
         this.hlPoint = -1;
         this.draw();
       });
+
+      // build stock rendering thingy
+      this.buildStockViewer();
+
+      windowSize.narrow(() => {
+        this.resize(400);
+      })
+      .wide(() => {
+        this.resize(600);
+      })
+      .trigger();
+    }
+
+    resize(size) {
+      this.width = size;
+      this.$canvas[0].width = size;
+
+      this.draw();
+    }
+
+    buildStockViewer() {
+      this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
+      this.hlTime = STOCKS_REFRESH_INTERVAL - 1000;
+
+      this.stocksListLoading = false;
+
+      this.stockPricesLoading = false;
+
+      this.stocks = {};
+
+      this.$stocksListOuter = $("<div></div>")
+      .addClass("stocks-list");
+
+      this.$stocksList = $("<ul></ul>")
+      .addClass("stocks-list-ul");
+
+      this.$stocksListOuter.append(this.$stocksList);
+
+      this.$gCont.append(this.$stocksListOuter);
+
+      this.loadStocksList();
+    }
+
+    loadStocksList() {
+      if (this.stocksListLoading) {
+        return;
+      }
+      this.stocksListLoading = true;
+
+      api.request(
+        "data/stocks", "GET", null, user.apiKey,
+        res => this.onStocksListLoaded(res),
+        () => this.onStocksListError(),
+        () => this.onStocksListRequestComplete()
+      );
+    }
+
+    onStocksListLoaded(res) {
+      this.stockWeight = res.data.stocks;
+
+      const total = res.data.total;
+
+      this.stocks = {};
+
+      this.$stocksList.empty();
+
+      for (const symbol in res.data.stocks) {
+        this.stocks[symbol] = {
+          name:   res.data.stocks[symbol].n,
+          weight: res.data.stocks[symbol].w / total,
+          price:  0,
+          change: 0,
+          changeText: "",
+          $elem:  null,
+          active: false
+        };
+      }
+
+      this.loadStockPrices();
+    }
+    onStocksListError() {
+      console.warn("Error loading stocks list!");
+    }
+    onStocksListRequestComplete() {
+      this.stocksListLoading = false;
+    }
+
+    loadStockPrices() {
+      if (this.stockPricesLoading || pageActive !== "funds") {
+        return;
+      }
+
+      this.stockPricesLoading = true;
+
+      finance.get(
+        this.stocks,
+        res => this.onStockPricesLoaded(res),
+        () => this.onStockPricesFail(),
+        () => this.onStockPricesRequestComplete()
+      );
+    }
+
+    onStockPricesLoaded(res) {
+      let badStocks = 0;
+
+      for (const stock of res) {
+        const symbol = stock.e + ":" + stock.t;
+
+        if (!this.stocks[symbol]) {
+          badStocks++;
+        }
+        else {
+          const price = parseFloat(stock.l_fix, 10);
+
+          // change as a percentage
+          const change = parseFloat(stock.c_fix, 10) / price * 100;
+
+          // highlight
+          let hl = false;
+
+          if (this.stocks[symbol].price !== price) {
+            hl = this.stocks[symbol].price > price ? "hl-down" : "hl-up";
+          }
+
+          this.stocks[symbol].hl = hl;
+
+          this.stocks[symbol].price = price;
+
+          this.stocks[symbol].change = change;
+
+          this.stocks[symbol].changeText = (change >= 0 ? "+" : "") + change.toFixed(2);
+        }
+      }
+
+      if (badStocks > 0) {
+        console.warn("Got " + badStocks.toString() + " extra stocks from finance api");
+
+        return;
+      }
+
+      this.updateStockList();
+
+      // refresh the prices in 5 seconds
+      if (this.stocksLoadingTimer) {
+        window.clearTimeout(this.stocksLoadingTimer);
+      }
+
+      this.stocksLoadingTimer = window.setTimeout(() => {
+        this.loadStockPrices();
+      }, this.stocksRefreshInterval);
+    }
+
+    updateStockList() {
+      for (const symbol in this.stocks) {
+        const stock = this.stocks[symbol];
+
+        if (stock.$elem) {
+          // update the item
+          stock.$price.text(stock.price.toFixed(2));
+
+          stock.$change.text(stock.changeText);
+
+          if (stock.hl) {
+            stock.$priceOuter.addClass(stock.hl);
+            stock.hl = false;
+
+            window.setTimeout(() => {
+              stock.$priceOuter.removeClass("hl-up").removeClass("hl-down");
+            }, this.hlTime);
+          }
+        }
+        else {
+          // add the item
+          stock.$elem = $("<li></li>").addClass("stock-list-item");
+
+          stock.$label = $("<span></span>").addClass("label").text(symbol);
+
+          stock.$elem.attr("title", stock.name);
+
+          stock.$priceOuter = $("<span></span>")
+          .addClass("price");
+
+          stock.$price = $("<span></span>")
+          .addClass("absolute")
+          .text(stock.price.toFixed(2));
+
+          stock.$change = $("<span></span>")
+          .addClass("change")
+          .text(stock.changeText);
+
+          stock.$priceOuter.append(stock.$price);
+          stock.$priceOuter.append(stock.$change);
+
+          stock.$elem.append(stock.$label);
+          stock.$elem.append(stock.$priceOuter);
+
+          this.$stocksList.append(stock.$elem);
+        }
+
+        stock.$elem.toggleClass("up", stock.change > 0);
+        stock.$elem.toggleClass("down", stock.change < 0);
+      }
+    }
+
+    onStockPricesFail() {
+      console.warn("Error loading stock prices!");
+    }
+    onStockPricesRequestComplete() {
+      this.stockPricesLoading = false;
     }
 
     increaseDetail() {
       this.dataOffset = Math.min(this.data.length - 3, this.dataOffset + 1);
       this.detailChanged();
     }
-
     decreaseDetail() {
       this.dataOffset = Math.max(0, this.dataOffset - 1);
       this.detailChanged();
     }
-
     detailChanged() {
       this.minX = this.data[this.dataOffset][0];
 
@@ -1528,35 +1775,26 @@
 
         const align = hlX < this.width / 2 ? -1 : 1;
 
-        this.ctx.font = FONT_GRAPH_TITLE;
-        this.ctx.textAlign = align < 0 ? "left" : "right";
-        this.ctx.textBaseline = "top";
-
-        const label = ageText + ": " +
-          formatCurrency(this.data[this.hlPoint][1], true);
-
-        const labelWidth = this.ctx.measureText(label).width;
-        const labelHeight = 24;
-
-        const labelPadding = 2;
-
-        const rectX = hlX + (align > 0 ? -labelWidth - labelPadding * 2 : 0);
-        const rectY = hlY - 1;
-
-        this.ctx.beginPath();
-        this.ctx.fillStyle = COLOR_DARK;
-        this.ctx.fillRect(
-          rectX, rectY, labelWidth + labelPadding * 2, labelHeight
-        );
-        this.ctx.closePath();
-
-        this.ctx.fillStyle = COLOR_LIGHT;
-        this.ctx.fillText(
-          label,
-          hlX - labelPadding * align,
-          hlY + GRAPH_FUND_HISTORY_POINT_RADIUS + 1
+        const label = ageText + ": " + formatCurrency(
+          this.data[this.hlPoint][1]
         );
 
+        const left = align > 0
+          ? "initial" : hlX + GRAPH_FUND_HISTORY_POINT_RADIUS;
+        const right = align > 0
+          ? this.width - hlX - GRAPH_FUND_HISTORY_POINT_RADIUS : "initial";
+        const top = hlY + GRAPH_FUND_HISTORY_POINT_RADIUS;
+
+        this.$label.css({
+          textAlign: align > 0 ? "right" : "left",
+          left,
+          right,
+          top
+        })
+        .html(label)
+        .show();
+
+        // highlight the point with a circle
         this.ctx.beginPath();
         this.ctx.moveTo(hlX, hlY);
         this.ctx.arc(
@@ -1567,14 +1805,9 @@
         this.ctx.fill();
         this.ctx.closePath();
       }
-
-      // add title and key
-      this.ctx.font = FONT_GRAPH_TITLE_LARGE;
-      this.ctx.fillStyle = COLOR_LIGHT;
-      this.ctx.textAlign = "right";
-      this.ctx.textBaseline = "top";
-
-      this.ctx.fillText(GRAPH_FUND_HISTORY_TITLE, this.width - 64, 3);
+      else {
+        this.$label.hide();
+      }
     }
 
     mouseOver(x) {
@@ -2535,9 +2768,6 @@
     render() {
       super.render();
 
-      // build stock rendering thingy
-      this.buildStockViewer();
-
       const $gain = $("<span></span>").addClass("gain");
       this.$gainInfo = $("<span></span>").addClass("gain-info");
       this.$gainText = $("<span></span>").addClass("text");
@@ -2550,203 +2780,12 @@
       this.loadFundHistory();
     }
 
-    buildStockViewer() {
-      this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
-      this.hlTime = STOCKS_REFRESH_INTERVAL - 1000;
-
-      this.stocksListLoading = false;
-
-      this.stockPricesLoading = false;
-
-      this.stocks = {};
-
-      this.$stocksListOuter = $("<div></div>")
-      .addClass("stocks-list");
-
-      this.$stocksList = $("<ul></ul>")
-      .addClass("stocks-list-ul");
-
-      this.$stocksListOuter.append(this.$stocksList);
-
-      this.$graphs.append(this.$stocksListOuter);
-
-      this.loadStocksList();
-    }
-
     hookSwitchToCallback(pageExists) {
       super.hookSwitchToCallback();
 
       if (pageExists) {
-        this.loadStocksList();
+        this.graphFundHistory.loadStocksList();
       }
-    }
-
-    loadStocksList() {
-      if (this.stocksListLoading) {
-        return;
-      }
-      this.stocksListLoading = true;
-
-      api.request(
-        "data/stocks", "GET", null, user.apiKey,
-        res => this.onStocksListLoaded(res),
-        () => this.onStocksListError(),
-        () => this.onStocksListRequestComplete()
-      );
-    }
-
-    onStocksListLoaded(res) {
-      this.stockWeight = res.data.stocks;
-
-      const total = res.data.total;
-
-      this.stocks = {};
-
-      this.$stocksList.empty();
-
-      for (const symbol in res.data.stocks) {
-        this.stocks[symbol] = {
-          name:   res.data.stocks[symbol].n,
-          weight: res.data.stocks[symbol].w / total,
-          price:  0,
-          change: 0,
-          changeText: "",
-          $elem:  null,
-          active: false
-        };
-      }
-
-      this.loadStockPrices();
-    }
-    onStocksListError() {
-      console.warn("Error loading stocks list!");
-    }
-    onStocksListRequestComplete() {
-      this.stocksListLoading = false;
-    }
-
-    loadStockPrices() {
-      if (this.stockPricesLoading || pageActive !== "funds") {
-        return;
-      }
-
-      this.stockPricesLoading = true;
-
-      finance.get(
-        this.stocks,
-        res => this.onStockPricesLoaded(res),
-        () => this.onStockPricesFail(),
-        () => this.onStockPricesRequestComplete()
-      );
-    }
-
-    onStockPricesLoaded(res) {
-      let badStocks = 0;
-
-      for (const stock of res) {
-        const symbol = stock.e + ":" + stock.t;
-
-        if (!this.stocks[symbol]) {
-          badStocks++;
-        }
-        else {
-          const price = parseFloat(stock.l_fix, 10);
-
-          // change as a percentage
-          const change = parseFloat(stock.c_fix, 10) / price * 100;
-
-          // highlight
-          let hl = false;
-
-          if (this.stocks[symbol].price !== price) {
-            hl = this.stocks[symbol].price > price ? "hl-down" : "hl-up";
-          }
-
-          this.stocks[symbol].hl = hl;
-
-          this.stocks[symbol].price = price;
-
-          this.stocks[symbol].change = change;
-
-          this.stocks[symbol].changeText = (change >= 0 ? "+" : "") + change.toFixed(2);
-        }
-      }
-
-      if (badStocks > 0) {
-        console.warn("Got " + badStocks.toString() + " extra stocks from finance api");
-
-        return;
-      }
-
-      this.updateStockList();
-
-      // refresh the prices in 5 seconds
-      if (this.stocksLoadingTimer) {
-        window.clearTimeout(this.stocksLoadingTimer);
-      }
-
-      this.stocksLoadingTimer = window.setTimeout(() => {
-        this.loadStockPrices();
-      }, this.stocksRefreshInterval);
-    }
-
-    updateStockList() {
-      for (const symbol in this.stocks) {
-        const stock = this.stocks[symbol];
-
-        if (stock.$elem) {
-          // update the item
-          stock.$price.text(stock.price.toFixed(2));
-
-          stock.$change.text(stock.changeText);
-
-          if (stock.hl) {
-            stock.$priceOuter.addClass(stock.hl);
-            stock.hl = false;
-
-            window.setTimeout(() => {
-              stock.$priceOuter.removeClass("hl-up").removeClass("hl-down");
-            }, this.hlTime);
-          }
-        }
-        else {
-          // add the item
-          stock.$elem = $("<li></li>").addClass("stock-list-item");
-
-          stock.$label = $("<span></span>").addClass("label").text(symbol);
-
-          stock.$elem.attr("title", stock.name);
-
-          stock.$priceOuter = $("<span></span>")
-          .addClass("price");
-
-          stock.$price = $("<span></span>")
-          .addClass("absolute")
-          .text(stock.price.toFixed(2));
-
-          stock.$change = $("<span></span>")
-          .addClass("change")
-          .text(stock.changeText);
-
-          stock.$priceOuter.append(stock.$price);
-          stock.$priceOuter.append(stock.$change);
-
-          stock.$elem.append(stock.$label);
-          stock.$elem.append(stock.$priceOuter);
-
-          this.$stocksList.append(stock.$elem);
-        }
-
-        stock.$elem.toggleClass("up", stock.change > 0);
-        stock.$elem.toggleClass("down", stock.change < 0);
-      }
-    }
-
-    onStockPricesFail() {
-      console.warn("Error loading stock prices!");
-    }
-    onStockPricesRequestComplete() {
-      this.stockPricesLoading = false;
     }
 
     loadFundHistory() {
