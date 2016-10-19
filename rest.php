@@ -243,18 +243,47 @@ class RestApi {
   }
 
   private function get_fund_value_history() {
+    $num_results_display = 100; // this defines the detail of the graph
+
+    $num_results_query = db_query('
+      SELECT COUNT(*) AS num_results FROM (
+          SELECT c.cid
+          FROM {funds} f
+          INNER JOIN {fund_cache} fc ON fc.did = f.id
+          INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
+          WHERE f.uid = %d
+          GROUP BY fc.cid
+      ) results', $this->user->uid
+    );
+
+    if (!$num_results_query) {
+      json_error(500, 'Database error');
+    }
+
+    $num_results = (int)$num_results_query->fetch_object()->num_results;
+
     $query = db_query(
       'SELECT * FROM (
-        SELECT c.time, SUM(fc.price * f.units) AS value
-        FROM {funds} f
-        INNER JOIN {fund_cache} fc ON fc.did = f.id
-        INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
-        WHERE f.uid = %d
-        GROUP BY fc.cid
-        ORDER BY c.time DESC
-        LIMIT 100
-      ) results
-      ORDER BY time ASC', $this->user->uid
+        SELECT time, value, rownum, FLOOR(rownum %% (%d / %d)) AS period FROM (
+          SELECT @row := @row + 1 AS rownum,
+              time,
+              value
+          FROM (
+              SELECT @row := -1
+          ) r, (
+              SELECT c.time, SUM(fc.price * f.units) AS value
+              FROM funds f
+              INNER JOIN fund_cache fc ON fc.did = f.id
+              INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+              WHERE f.uid = %d
+              GROUP BY fc.cid
+              ORDER BY c.time DESC
+          ) results
+          ORDER BY time ASC
+          ) ranked
+        ) list
+        WHERE period = 0 OR rownum = %d',
+      $num_results, $num_results_display - 1, $this->user->uid, $num_results - 1
     );
 
     if (!$query) {
