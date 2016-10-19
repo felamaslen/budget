@@ -1782,7 +1782,7 @@
         const left = align > 0
           ? "initial" : hlX + GRAPH_FUND_HISTORY_POINT_RADIUS;
         const right = align > 0
-          ? this.width - hlX - GRAPH_FUND_HISTORY_POINT_RADIUS : "initial";
+          ? this.width - hlX + GRAPH_FUND_HISTORY_POINT_RADIUS : "initial";
         const top = hlY + GRAPH_FUND_HISTORY_POINT_RADIUS;
 
         this.$label.css({
