@@ -657,8 +657,6 @@ button:active {
 
 /* analysis page */
 #page-analysis .block-tree {
-  width: 500px;
-  height: 500px;
   position: relative;
   border: 1px solid #666;
   box-shadow: 0 3px 13px rgba(60, 60, 60, 0.4);

@@ -9,6 +9,9 @@
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
+  const ANALYSIS_VIEW_WIDTH   = 1000;
+  const ANALYSIS_VIEW_HEIGHT  = 500;
+
   const GRAPH_FUND_HISTORY_WIDTH = 600;
   const GRAPH_FUND_HISTORY_TENSION = 0.7;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
@@ -3260,8 +3263,8 @@
       this.period = "month";
       this.pageIndex = 2;
 
-      this.treeWidth  = 500;
-      this.treeHeight = 500;
+      this.treeWidth  = ANALYSIS_VIEW_WIDTH;
+      this.treeHeight = ANALYSIS_VIEW_HEIGHT;
     }
 
     hookDataAddArgs(args) {
@@ -3317,7 +3320,8 @@
       this.$inputPeriod.week.on("click",  () => this.changePeriod("week"));
 
       this.$view = $("<div></div>")
-        .addClass("block-tree");
+      .addClass("block-tree")
+      .css({ width: this.treeWidth, height: this.treeHeight });
 
       this.$page.append(this.$view);
     }
