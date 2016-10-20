@@ -380,6 +380,106 @@ class RestApi {
     }
   }
 
+  private function get_data_analysis($period, $index = 0) {
+    // period can be "year", "month" or "week"
+    if (!in_array($period, array('year', 'month', 'week'))) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid period!';
+      return;
+    }
+
+    $categories = array('bills', 'food', 'general', 'holiday', 'social');
+
+    switch ($period) {
+    case 'week':
+      $this_week_start = mktime(0, 0, 0, date('n'), date('j') - date('N') + 1);
+
+      $t1 = $this_week_start - 86400 * 7 * ($index - 1);
+      $t0 = $t1 - 86400 * 7;
+
+      list($date0, $month0, $year0) = explode('-', date('d-m-Y', $t0));
+      list($date1, $month1, $year1) = explode('-', date('d-m-Y', $t1));
+
+      $condition = '(
+        year > %d OR (year = %d AND (month > %d OR (month = %d AND date >= %d)))
+      ) AND (
+        year < %d OR (year = %d AND (month < %d OR (month = %d AND date < %d)))
+      )';
+
+      $condition_args = array(
+        $year0, $year0, $month0, $month0, $date0,
+        $year1, $year1, $month1, $month1, $date1
+      );
+
+      break;
+    
+    case 'month':
+      list($current_year, $current_month) = explode('-', date('Y-m'));
+
+      $year = $current_year - ceil(($index - $current_month) / 12);
+
+      $month = ($current_month - $index - 1) % 12 + 1;
+      
+      if ($month < 0) {
+        $month += 12;
+      }
+
+      $condition = 'year = %d AND month = %d';
+
+      $condition_args = array($year, $month);
+
+      break;
+
+    case 'year':
+      $current_year = date('Y');
+
+      $year = $current_year - $index;
+
+      $condition = 'year = %d';
+
+      $condition_args = array($year);
+
+      break;
+    }
+
+    $select = array();
+
+    $args = array();
+
+    foreach ($categories as $category) {
+      $select[] = 'SELECT "' . $category . '" AS category, SUM(cost) AS total
+        FROM {' . $category . '}
+        WHERE uid = %d AND ' . $condition;
+
+      $args[] = $this->user->uid;
+
+      $args = array_merge($args, $condition_args);
+    }
+
+    $query = implode(' UNION ', $select);
+
+    array_unshift($args, $query);
+
+    $result = call_user_func_array('db_query', $args);
+
+    if (!$result) {
+      json_error(500, 'Database error');
+    }
+
+    $cost = array();
+
+    while (NULL !== ($row = $result->fetch_object())) {
+      $cost[] = array(
+        $row->category,
+        (int)$row->total
+      );
+    }
+
+    $this->res['data']['cost'] = $cost;
+
+    return;
+  }
+
   private function post_update_overview() {
     if (
       !isset($_POST['balance']) || !is_numeric($_POST['balance']) ||
@@ -694,6 +794,14 @@ class RestApi {
 
             case 'fund_history':
               $this->get_fund_value_history();
+              break;
+
+            case 'analysis':
+              $period = $arg3;
+
+              $index = array_shift($this->args);
+
+              $this->get_data_analysis($period, (int)$index);
               break;
 
             case 'overview':

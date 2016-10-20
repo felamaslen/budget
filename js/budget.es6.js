@@ -152,6 +152,11 @@
       sorted[numKeys / 2 - 1] + sorted[numKeys / 2]
     );
   }
+  function arraySum(array) {
+    return array.reduce((a, b) => {
+      return a + b;
+    }, 0);
+  }
   function arrayAverage(array, offset) {
     return array.slice(0, -1 * offset).reduce((red, item) => {
       return red + item;
@@ -2050,7 +2055,13 @@
   class Page {
     constructor(options) {
       this.page = options.page;
-      this.$page = $("#page-" + this.page);
+
+      this.$page = $("<div></div>")
+      .attr("id", "page-" + this.page)
+      .addClass("page")
+      .addClass("page-loading");
+
+      $("#doc-inner").append(this.$page);
 
       this.data = null;
 
@@ -2117,7 +2128,7 @@
     }
 
     switchTo(pageExists) {
-      this.loadData(() => this.hookSwitchToAfterLoad(), true);
+      this.loadData(() => this.hookSwitchToAfterLoad(), !pageExists);
 
       this.hookSwitchToCallback(pageExists);
     }
@@ -3242,6 +3253,191 @@
     }
   }
 
+  class PageAnalysis extends Page {
+    constructor() {
+      super({ page: "analysis" });
+
+      this.period = "month";
+      this.pageIndex = 2;
+
+      this.treeWidth  = 500;
+      this.treeHeight = 500;
+    }
+
+    hookDataAddArgs(args) {
+      args.push(this.period);
+      args.push(this.pageIndex);
+
+      return args;
+    }
+
+    render() {
+      this.$upper = $("<div></div>").addClass("upper");
+
+      this.$inputPeriodOuter = $("<span></span>").addClass("input-period");
+
+      this.$inputPeriod = {
+        year:   $("<input type=\"radio\" name=\"period\"></input>"),
+        month:  $("<input type=\"radio\" name=\"period\"></input>"),
+        week:   $("<input type=\"radio\" name=\"period\"></input>")
+      };
+
+      this.$inputPeriod[this.period].attr("checked", true);
+
+      this.$inputPeriodOuter
+      .append($("<span></span>").text("Period: "))
+      .append(this.$inputPeriod.year)
+      .append($("<span></span>").text("Year"))
+      .append(this.$inputPeriod.month)
+      .append($("<span></span>").text("Month"))
+      .append(this.$inputPeriod.week)
+      .append($("<span></span>").text("Week"));
+
+      this.$btnPagePrevious = $("<button></button>")
+      .addClass("btn-previous")
+      .text("Previous");
+
+      this.$btnPagePrevious.on("click", () => this.changePage(1));
+
+      this.$btnPageNext = $("<button></button>")
+      .addClass("btn-next")
+      .text("Next");
+
+      this.$btnPageNext.on("click", () => this.changePage(-1));
+
+      this.$upper
+      .append(this.$inputPeriodOuter)
+      .append(this.$btnPagePrevious)
+      .append(this.$btnPageNext);
+
+      this.$page.append(this.$upper);
+
+      this.$inputPeriod.year.on("click",  () => this.changePeriod("year"))
+      this.$inputPeriod.month.on("click", () => this.changePeriod("month"));
+      this.$inputPeriod.week.on("click",  () => this.changePeriod("week"));
+
+      this.$view = $("<div></div>")
+        .addClass("block-tree");
+
+      this.$page.append(this.$view);
+    }
+
+    changePeriod(period) {
+      this.period = period;
+      this.pageIndex = 0;
+
+      this.updateView();
+    }
+
+    changePage(direction) {
+      const pageIndex = Math.max(0, this.pageIndex + direction);
+
+      if (pageIndex !== this.pageIndex) {
+        this.pageIndex = pageIndex;
+
+        this.updateView();
+      }
+    }
+
+    updateView() {
+      this.loadData(null, false, true, true);
+    }
+
+    hookDataLoadedAfterRender(callback, res) {
+      this.cost = res.data.cost.sort((a, b) => {
+        if (a[1] > b[1]) {
+          return 1;
+        }
+        else {
+          return -1;
+        }
+      });
+
+      this.drawTree();
+    }
+
+    drawTree() {
+      this.$view.empty();
+
+      const data = this.cost.map(
+        item => Math.max(0, item[1])
+      );
+
+      const blocks = this.treeBlocks(data, this.treeWidth, this.treeHeight, 0, 0, 0).reverse();
+
+      blocks.forEach((block, j) => {
+        const category = this.cost[j][0];
+
+        const $block = $("<div></div>")
+        .addClass("block")
+        .addClass("block-" + category)
+        .css({
+          width: block[0],
+          height: block[1],
+          left: block[2],
+          top:  block[3]
+        });
+        this.$view.append($block);
+      });
+    }
+
+    treeBlocks(data, width, height, offsetX, offsetY, j) {
+      const blocks = [];
+
+      const total = arraySum(data);
+
+      const first = data.pop();
+
+      if (data.length > 0) {
+        let nWidth = width;
+        let nHeight = height;
+        let nOffsetX = offsetX;
+        let nOffsetY = offsetY;
+
+        if (total > 0) {
+          const scale = first / total;
+
+          // align
+          const left  = j % 4 === 0;
+          const top   = j % 4 === 1;
+          const right = j % 4 === 2;
+          const bottom = j % 4 === 3;
+
+          const even  = left || right;
+          const odd   = !even;
+
+          const bWidth  = width * (even ? scale : 1);
+          const bHeight = height * (odd ? scale : 1);
+
+          const bOffsetX = offsetX + (right ? width - bWidth : 0);
+          const bOffsetY = offsetY + (bottom ? height - bHeight : 0);
+
+          blocks[0] = [bWidth, bHeight, bOffsetX, bOffsetY];
+
+          nWidth = even ? width - bWidth : width;
+          nHeight = odd ? height - bHeight : height;
+
+          nOffsetX = offsetX + (left ? bWidth : 0);
+          nOffsetY = offsetY + (top ? bHeight : 0);
+        }
+        else {
+          blocks[0] = [0, 0, offsetX, offsetY];
+        }
+
+        const otherBlocks = this.treeBlocks(data, nWidth, nHeight, nOffsetX, nOffsetY, j + 1);
+
+        otherBlocks.forEach(block => {
+          blocks.push(block);
+        });
+      }
+      else {
+        blocks[0] = [width, height, offsetX, offsetY];
+      }
+
+      return blocks;
+    }
+  }
+
   const pageDef = {
     in: {
       page:           "in",
@@ -3374,6 +3570,9 @@
       switch (id) {
       case "overview":
         pages[id] = new PageOverview();
+        break;
+      case "analysis":
+        pages[id] = new PageAnalysis();
         break;
       case "funds":
         pages[id] = new PageFunds(pageDefFunds);

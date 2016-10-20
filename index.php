@@ -26,6 +26,7 @@ else {
           <div id="nav-inner">
             <ul class="nav-list noselect">
               <li><a class="nav-link" id="nav-link-overview">Overview</a>
+              <li><a class="nav-link" id="nav-link-analysis">Analysis</a>
               <li><a class="nav-link" id="nav-link-funds">Funds</a>
               <li><a class="nav-link" id="nav-link-in">In</a>
               <li><a class="nav-link" id="nav-link-bills">Bills</a>
@@ -39,19 +40,6 @@ else {
         </div>
         <div id="doc-outer">
           <div id="doc-inner">
-            <div class="page page-loading" id="page-overview">
-              <!--<div id="student-loan">
-              <h3>Student Loan</h3>
-<?php //get_student_loan_data(); ?>
-              </div>-->
-            </div>
-            <div class="page page-loading" id="page-funds"></div>
-            <div class="page page-loading" id="page-in"></div>
-            <div class="page page-loading" id="page-bills"></div>
-            <div class="page page-loading" id="page-food"></div>
-            <div class="page page-loading" id="page-general"></div>
-            <div class="page page-loading" id="page-holiday"></div>
-            <div class="page page-loading" id="page-social"></div>
           </div>
         </div>
       </div>
