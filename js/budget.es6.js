@@ -3261,7 +3261,7 @@
       super({ page: "analysis" });
 
       this.period = "month";
-      this.pageIndex = 2;
+      this.pageIndex = 0;
 
       this.treeWidth  = ANALYSIS_VIEW_WIDTH;
       this.treeHeight = ANALYSIS_VIEW_HEIGHT;
@@ -3315,6 +3315,10 @@
 
       this.$page.append(this.$upper);
 
+      this.$title = $("<h3></h3>").addClass("period-title");
+
+      this.$page.append(this.$title);
+
       this.$inputPeriod.year.on("click",  () => this.changePeriod("year"))
       this.$inputPeriod.month.on("click", () => this.changePeriod("month"));
       this.$inputPeriod.week.on("click",  () => this.changePeriod("week"));
@@ -3358,6 +3362,8 @@
       });
 
       this.drawTree();
+
+      this.$title.text(res.data.description);
     }
 
     drawTree() {
