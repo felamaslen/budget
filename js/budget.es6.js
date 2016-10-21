@@ -160,6 +160,11 @@
       return a + b;
     }, 0);
   }
+  function arraySum1(array) {
+    return array.reduce((a, b) => {
+      return a + b[1];
+    }, 0);
+  }
   function arrayAverage(array, offset) {
     return array.slice(0, -1 * offset).reduce((red, item) => {
       return red + item;
@@ -3263,6 +3268,15 @@
       this.period = "month";
       this.pageIndex = 0;
 
+      this.cost = [];
+      this.items = [];
+
+      this.$blocks = [];
+      this.$subBlocks = {};
+
+      // stores whether tree items are expanded or not
+      this.treeStatus = {};
+
       this.treeWidth  = ANALYSIS_VIEW_WIDTH;
       this.treeHeight = ANALYSIS_VIEW_HEIGHT;
     }
@@ -3308,10 +3322,14 @@
 
       this.$btnPageNext.on("click", () => this.changePage(-1));
 
+      const $btns = $("<div></div>").addClass("btns");
+
+      $btns.append(this.$btnPagePrevious)
+      .append(this.$btnPageNext);
+
       this.$upper
       .append(this.$inputPeriodOuter)
-      .append(this.$btnPagePrevious)
-      .append(this.$btnPageNext);
+      .append($btns);
 
       this.$page.append(this.$upper);
 
@@ -3319,9 +3337,16 @@
 
       this.$page.append(this.$title);
 
-      this.$inputPeriod.year.on("click",  () => this.changePeriod("year"))
+      this.$inputPeriod.year.on("click",  () => this.changePeriod("year"));
       this.$inputPeriod.month.on("click", () => this.changePeriod("month"));
       this.$inputPeriod.week.on("click",  () => this.changePeriod("week"));
+
+      this.$treeOuter = $("<div></div>").addClass("tree");
+
+      this.$tree = $("<ul></ul>").addClass("tree-list");
+      this.$treeOuter.append(this.$tree);
+
+      this.$page.append(this.$treeOuter);
 
       this.$view = $("<div></div>")
       .addClass("block-tree")
@@ -3351,29 +3376,138 @@
       this.loadData(null, false, true, true);
     }
 
+    sortItems(a, b) {
+      if (a[1] > b[1]) {
+        return -1;
+      }
+
+      return 1;
+    }
+
     hookDataLoadedAfterRender(callback, res) {
-      this.cost = res.data.cost.sort((a, b) => {
-        if (a[1] > b[1]) {
-          return 1;
-        }
-        else {
-          return -1;
-        }
-      });
+      this.cost = res.data.cost.sort(this.sortItems).filter(
+        item => item[1] > 0
+      );
+
+      this.items = {};
+
+      for (const category in res.data.items) {
+        this.items[category] = res.data.items[category].sort(this.sortItems);
+      }
 
       this.drawTree();
+
+      this.drawBlockTree();
 
       this.$title.text(res.data.description);
     }
 
-    drawTree() {
-      this.$view.empty();
+    treeListItem(item, total) {
+      const pct = "&nbsp;(" + (100 * item[1] / total).toFixed(1) + "%)";
 
-      const data = this.cost.map(
-        item => Math.max(0, item[1])
+      const $li = $("<li></li>")
+      .addClass("tree-list-item")
+      .append($("<div></div>").addClass("main")
+        .append($("<span></span>").addClass("title").text(item[0]))
+        .append($("<span></span>").addClass("cost").html(formatCurrency(item[1])))
+        .append($("<span></span>").addClass("pct").html(pct))
       );
 
-      const blocks = this.treeBlocks(data, this.treeWidth, this.treeHeight, 0, 0, 0).reverse();
+      return $li;
+    }
+
+    drawTree() {
+      this.$tree.empty();
+
+      const total = arraySum1(this.cost);
+
+      this.cost.forEach((item, key) => {
+        const $li = this.treeListItem(item, total);
+
+        $li.on("click", () => {
+          this.toggleTreeItem($li, item[0]);
+        });
+
+        this.$tree.append($li);
+
+        $li.children(".main").on("mouseover", () => this.hlBlock(key, true))
+        .on("mouseout", () => this.hlBlock(key, false));
+
+        this.toggleTreeItem($li, item[0], !!this.treeStatus[item[0]]);
+      });
+    }
+
+    toggleTreeItem($li, category, status) {
+      const open = typeof status === "undefined"
+        ? !this.treeStatus[category] : status;
+
+      const wasOpen = !!this.treeStatus[category];
+
+      $li.toggleClass("open", open);
+
+      if (!open && wasOpen) {
+        $li.children(".sub-tree").remove();
+      }
+      else if (open) {
+        const $subTree = $("<ul></ul>").addClass("sub-tree");
+
+        const items = this.items[category];
+
+        const total = arraySum1(items);
+
+        items.forEach((item, key) => {
+          const $sLi = this.treeListItem(item, total);
+
+          $sLi.on("mouseover", () => this.hlSubBlock(category, key, true))
+          .on("mouseout", () => this.hlSubBlock(category, key, false));
+
+          $subTree.append($sLi);
+        });
+
+        $li.append($subTree);
+      }
+
+      this.treeStatus[category] = open;
+    }
+
+    _deactivateBlock($block) {
+      $block.removeClass("active");
+    }
+    _activateBlock($block) {
+      $block.addClass("active");
+    }
+
+    hlBlock(key, active) {
+      if (!active) {
+        this._deactivateBlock(this.$blocks[key]);
+      }
+      else {
+        this._activateBlock(this.$blocks[key]);
+      }
+    }
+
+    hlSubBlock(category, key, active) {
+      if (!active) {
+        this._deactivateBlock(this.$subBlocks[category][key]);
+      }
+      else {
+        this._activateBlock(this.$subBlocks[category][key]);
+      }
+    }
+
+    blockMap(data) {
+      return data.map(item => Math.max(0, item[1])).reverse();
+    }
+
+    drawBlockTree() {
+      this.$view.empty();
+
+      const data = this.blockMap(this.cost);
+
+      this.$blocks = [];
+      this.$subBlocks = {};
+
+      const blocks = this.treeBlocks(data, this.treeWidth, this.treeHeight, 0, 0, 0);
 
       blocks.forEach((block, j) => {
         const category = this.cost[j][0];
@@ -3387,6 +3521,34 @@
           left: block[2],
           top:  block[3]
         });
+
+        const $inside = $("<div></div>").addClass("inside");
+
+        this.$subBlocks[category] = [];
+
+        const subBlocks = this.treeBlocks(
+          this.blockMap(this.items[category]), block[0], block[1], 0, 0, 0
+        );
+
+        subBlocks.forEach(subBlock => {
+          const $subBlock = $("<div></div>")
+          .addClass("sub-block")
+          .css({
+            width: subBlock[0],
+            height: subBlock[1],
+            left: subBlock[2],
+            top: subBlock[3]
+          });
+
+          this.$subBlocks[category].push($subBlock);
+
+          $inside.append($subBlock);
+        });
+
+        $block.append($inside);
+
+        this.$blocks.push($block);
+
         this.$view.append($block);
       });
     }

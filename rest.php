@@ -13,6 +13,9 @@ require_once BASE_DIR . '/inc/user.rest.php';
 
 class RestApi {
   public function __construct($user) {
+    $this->analysis_categories = array('bills', 'food', 'general', 'holiday', 'social');
+    $this->analysis_periods = array('week', 'month', 'year');
+
     $this->res = array('error' => FALSE);
 
     if (!$this->validate_args()) { 
@@ -380,16 +383,7 @@ class RestApi {
     }
   }
 
-  private function get_data_analysis($period, $index = 0) {
-    // period can be "year", "month" or "week"
-    if (!in_array($period, array('year', 'month', 'week'))) {
-      $this->res['error'] = TRUE;
-      $this->res['errorText'] = 'Must supply valid period!';
-      return;
-    }
-
-    $categories = array('bills', 'food', 'general', 'holiday', 'social');
-
+  private function analysis_period_condition($period, $index) {
     switch ($period) {
     case 'week':
       $this_week_start = mktime(0, 0, 0, date('n'), date('j') - date('N') + 1);
@@ -448,23 +442,104 @@ class RestApi {
 
       $condition_args = array($year);
 
-      $description = $year;
+      $description = (string)$year;
 
       break;
     }
+
+    return array(
+      'query' => $condition,
+      'args'  => $condition_args,
+      'desc'  => $description,
+    );
+  }
+
+  private function _get_data_analysis_category($category, $condition) {
+    switch ($category) {
+    case 'food':
+    case 'general':
+      $category_column = 'category';
+      break;
+    case 'social':
+      $category_column = 'society';
+      break;
+    case 'holiday':
+      $category_column = 'holiday';
+      break;
+    default:
+      $category_column = 'item';
+    }
+
+    $query = '
+    SELECT `' . $category_column . '` AS item_col, SUM(cost) AS cost
+      FROM {' . $category . '}
+      WHERE ' . $condition['query'] . ' AND uid = %d
+      GROUP BY `' . $category_column . '`
+    ';
+    
+    $args = $condition['args'];
+
+    $args[] = $this->user->uid;
+
+    array_unshift($args, $query);
+
+    $result = call_user_func_array('db_query', $args);
+
+    if (!$result) {
+      json_error(500, 'Database error');
+    }
+
+    $items = array();
+
+    while (NULL !== ($row = $result->fetch_object())) {
+      $items[] = array($row->item_col, (int)$row->cost);
+    }
+
+    return $items;
+  }
+
+  private function get_data_analysis_category($category, $period, $index) {
+    if (!in_array($period, $this->analysis_periods)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid period!';
+      return;
+    }
+
+    if (!in_array($category, $this->analysis_categories)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid category!';
+      return;
+    }
+
+    $condition = $this->analysis_period_condition($period, $index);
+
+    $items = $this->_get_data_analysis_category($category, $condition);
+
+    $this->res['data']['items'] = $items;
+  }
+
+  private function get_data_analysis($period, $index = 0) {
+    // period can be "year", "month" or "week"
+    if (!in_array($period, $this->analysis_periods)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid period!';
+      return;
+    }
+
+    $condition = $this->analysis_period_condition($period, $index);
 
     $select = array();
 
     $args = array();
 
-    foreach ($categories as $category) {
+    foreach ($this->analysis_categories as $category) {
       $select[] = 'SELECT "' . $category . '" AS category, SUM(cost) AS total
         FROM {' . $category . '}
-        WHERE uid = %d AND ' . $condition;
+        WHERE uid = %d AND ' . $condition['query'];
 
       $args[] = $this->user->uid;
 
-      $args = array_merge($args, $condition_args);
+      $args = array_merge($args, $condition['args']);
     }
 
     $query = implode(' UNION ', $select);
@@ -488,7 +563,17 @@ class RestApi {
 
     $this->res['data']['cost'] = $cost;
 
-    $this->res['data']['description'] = (string)$description;
+    $this->res['data']['description'] = $condition['desc'];
+
+    if (!isset($_GET['shallow'])) {
+      $items = array();
+
+      foreach ($this->analysis_categories as $category) {
+        $items[$category] = $this->_get_data_analysis_category($category, $condition);
+      }
+      
+      $this->res['data']['items'] = $items;
+    }
 
     return;
   }
@@ -807,6 +892,16 @@ class RestApi {
 
             case 'fund_history':
               $this->get_fund_value_history();
+              break;
+
+            case 'analysis_category':
+              $category = $arg3;
+
+              $period = array_shift($this->args);
+
+              $index = array_shift($this->args);
+
+              $this->get_data_analysis_category($category, $period, (int)$index);
               break;
 
             case 'analysis':
