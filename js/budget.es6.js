@@ -640,7 +640,7 @@
       }
 
       for (const id in pages) {
-        pages[id].$page.empty();
+        pages[id].$page.remove();
 
         $("#nav-link-" + id).removeClass("active");
       }
