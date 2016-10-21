@@ -411,6 +411,8 @@ class RestApi {
         $year1, $year1, $month1, $month1, $date1
       );
 
+      $description = 'Week beginning ' . $date0 . '/' . $month0 . '/' . $year0;
+
       break;
     
     case 'month':
@@ -428,6 +430,13 @@ class RestApi {
 
       $condition_args = array($year, $month);
 
+      $months = array(
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      );
+
+      $description = $months[$month - 1] . ' ' . $year;
+
       break;
 
     case 'year':
@@ -438,6 +447,8 @@ class RestApi {
       $condition = 'year = %d';
 
       $condition_args = array($year);
+
+      $description = $year;
 
       break;
     }
@@ -476,6 +487,8 @@ class RestApi {
     }
 
     $this->res['data']['cost'] = $cost;
+
+    $this->res['data']['description'] = (string)$description;
 
     return;
   }
