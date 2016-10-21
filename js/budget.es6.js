@@ -3416,8 +3416,8 @@
           const even  = left || right;
           const odd   = !even;
 
-          const bWidth  = width * (even ? scale : 1);
-          const bHeight = height * (odd ? scale : 1);
+          const bWidth  = Math.round(width * (even ? scale : 1));
+          const bHeight = Math.round(height * (odd ? scale : 1));
 
           const bOffsetX = offsetX + (right ? width - bWidth : 0);
           const bOffsetY = offsetY + (bottom ? height - bHeight : 0);
