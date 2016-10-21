@@ -3261,6 +3261,164 @@
     }
   }
 
+  /**
+   * Class to pack rectangles into a root node
+   */
+  class BlockPacker {
+    constructor(data, width, height) {
+      this.data   = data;
+
+      this.width = width;
+      this.height = height;
+
+      this.total  = arraySum1(data);
+
+      const totalArea = width * height;
+
+      this.tree = this.data.map(item => item[1] * totalArea / this.total);
+
+      this.blocks = [];
+
+      this.root = { x: 0, y: 0, w: width, h: height };
+
+      const row = [];
+
+      this.squarify(this.tree, row, this.root, -1);
+    }
+
+    squarify(children, row, node, j) {
+      if (!children.length) {
+        console.warn("[BUG] zero child length");
+        return;
+      }
+
+      const next = children[0];
+
+      const row2 = [];
+      row.forEach(item => row2.push(item));
+      row2.push(next);
+
+      if (children.length === 1 && row.length === 0) {
+        // use all the remaining space for the last child
+        this.addRow(children, node, j + 1);
+      }
+      else if (this.worst(row, node) >= this.worst(row2, node)) {
+        children.shift();
+
+        this.squarify(children, row2, node, j + 1);
+      }
+      else {
+        const newNode = this.addRow(row, node, j);
+
+        this.squarify(children, [], newNode, j);
+      }
+    }
+
+    addRow(row, node, j) {
+      // returns a new node (the rest of the available space)
+      const wide = node.w > node.h;
+
+      let newX = node.x;
+
+      let newWidth = node.w;
+      let newHeight = node.h;
+
+      let blockWidth;
+      let blockHeight;
+
+      const sum = arraySum(row);
+
+      if (wide) {
+        blockWidth = sum / node.h;
+
+        newWidth = node.w - blockWidth;
+        newX += blockWidth;
+      }
+      else {
+        blockHeight = sum / node.w;
+
+        newHeight = node.h - blockHeight;
+      }
+
+      // add row's blocks
+      let bX = node.x;
+      let bY = node.y + (wide ? 0 : newHeight);
+
+      row.forEach((item, i) => {
+        const thisBlockWidth = wide ? blockWidth : item / blockHeight;
+        const thisBlockHeight = wide ? item / blockWidth : blockHeight;
+
+        const newBlock = {
+          x: (bX),
+          y: (bY),
+          w: (thisBlockWidth),
+          h: (thisBlockHeight)
+        };
+
+        if (this.data[i + j][2]) {
+          const thisBlocks = new BlockPacker(
+            this.data[i + j][2], newBlock.w, newBlock.h
+          );
+
+          newBlock.blocks = thisBlocks.blocks;
+        }
+
+        newBlock.name = this.data[i + j][0];
+
+        this.blocks.push(newBlock);
+
+        bX += wide ? 0 : thisBlockWidth;
+        bY += wide ? thisBlockHeight : 0;
+      });
+
+      const newNode = {
+        x: newX, y: node.y, w: newWidth, h: newHeight
+      };
+
+      return newNode;
+    }
+
+    worst(row, node) {
+      // row is a list of areas
+      if (row.length === 0) {
+        return Infinity;
+      }
+
+      const aspect = node.w / node.h;
+
+      let worst;
+
+      const sum = arraySum(row);
+
+      if (aspect > 1) {
+        // wide, so fill the node from the left
+        const rowWidth = sum / node.h;
+
+        worst = row.reduce((a, b) => {
+          const thisAspect = rowWidth * rowWidth / b;
+
+          const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+
+          return worstAspect > a ? worstAspect : a;
+        }, 0);
+      }
+      else {
+        // tall, so fill the node from the bottom
+        const rowHeight = sum / node.w;
+
+        worst = row.reduce((a, b) => {
+          const thisAspect = b / (rowHeight * rowHeight);
+
+          const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+
+          return worstAspect > a ? worstAspect : a;
+        }, 0);
+      }
+
+      return worst;
+    }
+  }
+
   class PageAnalysis extends Page {
     constructor() {
       super({ page: "analysis" });
@@ -3385,11 +3543,18 @@
     }
 
     hookDataLoadedAfterRender(callback, res) {
-      this.cost = res.data.cost.sort(this.sortItems).filter(
+      // sort the data
+      this.cost = res.data.cost.map(item => {
+        const total = arraySum1(item[1]);
+
+        const subTree = item[1].sort(this.sortItems);
+
+        return [item[0], total, subTree];
+      })
+      .sort(this.sortItems)
+      .filter(
         item => item[1] > 0
       );
-
-      this.items = {};
 
       for (const category in res.data.items) {
         this.items[category] = res.data.items[category].sort(this.sortItems);
@@ -3425,7 +3590,7 @@
         const $li = this.treeListItem(item, total);
 
         $li.on("click", () => {
-          this.toggleTreeItem($li, item[0]);
+          this.toggleTreeItem($li, key);
         });
 
         this.$tree.append($li);
@@ -3433,11 +3598,13 @@
         $li.children(".main").on("mouseover", () => this.hlBlock(key, true))
         .on("mouseout", () => this.hlBlock(key, false));
 
-        this.toggleTreeItem($li, item[0], !!this.treeStatus[item[0]]);
+        this.toggleTreeItem($li, key, !!this.treeStatus[item[0]]);
       });
     }
 
-    toggleTreeItem($li, category, status) {
+    toggleTreeItem($li, cKey, status) {
+      const category = this.cost[cKey][0];
+
       const open = typeof status === "undefined"
         ? !this.treeStatus[category] : status;
 
@@ -3451,7 +3618,7 @@
       else if (open) {
         const $subTree = $("<ul></ul>").addClass("sub-tree");
 
-        const items = this.items[category];
+        const items = this.cost[cKey][2];
 
         const total = arraySum1(items);
 
@@ -3471,10 +3638,10 @@
     }
 
     _deactivateBlock($block) {
-      $block.removeClass("active");
+      $block && $block.removeClass("active");
     }
     _activateBlock($block) {
-      $block.addClass("active");
+      $block && $block.addClass("active");
     }
 
     hlBlock(key, active) {
@@ -3500,50 +3667,44 @@
     }
 
     drawBlockTree() {
-      this.$view.empty();
+      const packer = new BlockPacker(this.cost, this.treeWidth, this.treeHeight);
 
-      const data = this.blockMap(this.cost);
+      this.$view.empty();
 
       this.$blocks = [];
       this.$subBlocks = {};
 
-      const blocks = this.treeBlocks(data, this.treeWidth, this.treeHeight, 0, 0, 0);
-
-      blocks.forEach((block, j) => {
-        const category = this.cost[j][0];
-
+      packer.blocks.forEach(block => {
         const $block = $("<div></div>")
         .addClass("block")
-        .addClass("block-" + category)
+        .addClass("block-" + block.name)
         .css({
-          width: block[0],
-          height: block[1],
-          left: block[2],
-          top:  block[3]
+          width:  block.w,
+          height: block.h,
+          left:   block.x,
+          top:    block.y
         });
 
         const $inside = $("<div></div>").addClass("inside");
 
-        this.$subBlocks[category] = [];
+        this.$subBlocks[block.name] = [];
 
-        const subBlocks = this.treeBlocks(
-          this.blockMap(this.items[category]), block[0], block[1], 0, 0, 0
-        );
+        if (block.blocks) {
+          block.blocks.forEach(subBlock => {
+            const $subBlock = $("<div></div>")
+            .addClass("sub-block")
+            .css({
+              width:  subBlock.w,
+              height: subBlock.h,
+              left:   subBlock.x,
+              top:    subBlock.y
+            });
 
-        subBlocks.forEach(subBlock => {
-          const $subBlock = $("<div></div>")
-          .addClass("sub-block")
-          .css({
-            width: subBlock[0],
-            height: subBlock[1],
-            left: subBlock[2],
-            top: subBlock[3]
+            this.$subBlocks[block.name].push($subBlock);
+
+            $inside.append($subBlock);
           });
-
-          this.$subBlocks[category].push($subBlock);
-
-          $inside.append($subBlock);
-        });
+        }
 
         $block.append($inside);
 
@@ -3551,6 +3712,15 @@
 
         this.$view.append($block);
       });
+
+      /*
+
+      const data = this.blockMap(this.cost);
+
+      const blocks = this.treeBlocks(data, this.treeWidth, this.treeHeight, 0, 0, 0);
+
+      const blocks = packer.fit();
+      */
     }
 
     treeBlocks(data, width, height, offsetX, offsetY, j) {

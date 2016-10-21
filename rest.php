@@ -473,7 +473,7 @@ class RestApi {
     $query = '
     SELECT `' . $category_column . '` AS item_col, SUM(cost) AS cost
       FROM {' . $category . '}
-      WHERE ' . $condition['query'] . ' AND uid = %d
+      WHERE ' . $condition['query'] . ' AND uid = %d AND cost > 0
       GROUP BY `' . $category_column . '`
     ';
     
@@ -528,52 +528,51 @@ class RestApi {
 
     $condition = $this->analysis_period_condition($period, $index);
 
-    $select = array();
+    if (isset($_GET['shallow'])) {
+      $select = array();
 
-    $args = array();
+      $args = array();
 
-    foreach ($this->analysis_categories as $category) {
-      $select[] = 'SELECT "' . $category . '" AS category, SUM(cost) AS total
-        FROM {' . $category . '}
-        WHERE uid = %d AND ' . $condition['query'];
+      foreach ($this->analysis_categories as $category) {
+        $select[] = 'SELECT "' . $category . '" AS category, SUM(cost) AS total
+          FROM {' . $category . '}
+          WHERE uid = %d AND cost > 0 AND ' . $condition['query'];
 
-      $args[] = $this->user->uid;
+        $args[] = $this->user->uid;
 
-      $args = array_merge($args, $condition['args']);
+        $args = array_merge($args, $condition['args']);
+      }
+
+      $query = implode(' UNION ', $select);
+
+      array_unshift($args, $query);
+
+      $result = call_user_func_array('db_query', $args);
+
+      if (!$result) {
+        json_error(500, 'Database error');
+      }
+
+      $cost = array();
+
+      while (NULL !== ($row = $result->fetch_object())) {
+        $cost[$row->category] = (int)$row->total;
+      }
     }
+    else {
+      $cost = array();
 
-    $query = implode(' UNION ', $select);
-
-    array_unshift($args, $query);
-
-    $result = call_user_func_array('db_query', $args);
-
-    if (!$result) {
-      json_error(500, 'Database error');
-    }
-
-    $cost = array();
-
-    while (NULL !== ($row = $result->fetch_object())) {
-      $cost[] = array(
-        $row->category,
-        (int)$row->total
-      );
+      foreach ($this->analysis_categories as $category) {
+        $cost[] = array(
+          $category,
+          $this->_get_data_analysis_category($category, $condition)
+        );
+      }
     }
 
     $this->res['data']['cost'] = $cost;
 
     $this->res['data']['description'] = $condition['desc'];
-
-    if (!isset($_GET['shallow'])) {
-      $items = array();
-
-      foreach ($this->analysis_categories as $category) {
-        $items[$category] = $this->_get_data_analysis_category($category, $condition);
-      }
-      
-      $this->res['data']['items'] = $items;
-    }
 
     return;
   }

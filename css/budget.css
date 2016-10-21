@@ -1085,6 +1085,10 @@ button:active {
     top: 360px;
   }
 
+  #page-analysis {
+    margin: 0.5em 1em;
+  }
+
   .graph-toggle-btn {
     display: none;
   }
