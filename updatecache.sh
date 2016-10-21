@@ -1,12 +1,12 @@
 #!/bin/bash
 
 function update_js {
-  babel js/budget.es6.js > js/budget.es5.js
+  rm js/main.min.js
+  touch js/main.min.js
 
-  cp js/jquery.min.js js/main.min.js
-  cat js/js.cookie.js js/budget.es5.js | uglifyjs -m >> js/main.min.js
-
-  rm js/budget.es5.js
+  cat js/jquery.min.js >> js/main.min.js
+  cat js/js.cookie.min.js >> js/main.min.js
+  babel js/budget.es6.js | uglifyjs -m >> js/main.min.js
 }
 
 function update_css {
