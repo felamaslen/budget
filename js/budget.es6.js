@@ -3290,7 +3290,6 @@
 
     squarify(children, row, node) {
       if (!children.length) {
-        console.warn("[BUG] zero child length");
         return;
       }
 
@@ -3320,64 +3319,78 @@
       // returns a new node (the rest of the available space)
       const wide = node.w > node.h;
 
-      let newX = node.x;
+      let freeX = node.x;
+      let freeY = node.y; // measured from bottom
 
-      let newWidth = node.w;
-      let newHeight = node.h;
+      let freeWidth = node.w;
+      let freeHeight = node.h;
 
-      let blockWidth;
-      let blockHeight;
+      let blockWidth = node.w;
+      let blockHeight = node.h;
 
       const sum = arraySum(row);
 
       if (wide) {
         blockWidth = sum / node.h;
 
-        newWidth = node.w - blockWidth;
-        newX += blockWidth;
+        freeWidth -= blockWidth;
+
+        freeX += blockWidth;
       }
       else {
         blockHeight = sum / node.w;
 
-        newHeight = node.h - blockHeight;
+        freeHeight -= blockHeight;
+
+        freeY += blockHeight;
       }
 
       // add row's blocks
-      let bX = node.x;
-      let bY = node.y + (wide ? 0 : newHeight);
+      const blockX = node.x;
+      const blockY = node.y;
+
+      const newBlock = {
+        x: blockX,
+        y: blockY,
+        w: blockWidth,
+        h: blockHeight,
+        bits: []
+      };
+
+      const newNode = {
+        x: freeX,
+        y: freeY,
+        w: freeWidth, h: freeHeight
+      };
 
       row.forEach(item => {
-        const thisBlockWidth = wide ? blockWidth : item / blockHeight;
-        const thisBlockHeight = wide ? item / blockWidth : blockHeight;
+        const thisBlockWidth = wide ? 1 : (item / sum);
 
-        const newBlock = {
-          x: (bX),
-          y: (bY),
-          w: (thisBlockWidth),
-          h: (thisBlockHeight)
+        const thisBlockHeight = wide ? (item / sum) : 1;
+
+        const newBlockBit = {
+          w: 100 * thisBlockWidth,
+          h: 100 * thisBlockHeight
         };
 
         const j = this.rowCount++;
 
+        newBlockBit.name = this.data[j][0];
+
         if (this.data[j][2]) {
           const thisBlocks = new BlockPacker(
-            this.data[j][2], newBlock.w, newBlock.h
+            this.data[j][2],
+            thisBlockWidth * blockWidth,
+            thisBlockHeight * blockHeight
           );
 
-          newBlock.blocks = thisBlocks.blocks;
+          newBlockBit.blocks = thisBlocks.blocks;
         }
 
-        newBlock.name = this.data[j][0];
-
-        this.blocks.push(newBlock);
-
-        bX += wide ? 0 : thisBlockWidth;
-        bY += wide ? thisBlockHeight : 0;
+        newBlock.bits.push(newBlockBit);
       });
 
-      const newNode = {
-        x: (newX), y: 0, w: (newWidth), h: (newHeight)
-      };
+      this.blocks.push(newBlock);
 
       return newNode;
     }
@@ -3427,7 +3440,7 @@
     constructor() {
       super({ page: "analysis" });
 
-      this.period = "month";
+      this.period = "year";
       this.pageIndex = 0;
 
       this.cost = [];
@@ -3678,53 +3691,62 @@
       this.$blocks = [];
       this.$subBlocks = {};
 
-      packer.blocks.forEach(block => {
-        const $block = $("<div></div>")
-        .addClass("block")
-        .addClass("block-" + block.name)
+      packer.blocks.forEach(group => {
+        const $blockGroup = $("<div></div>")
+        .addClass("block-group")
         .css({
-          width:  block.w,
-          height: block.h,
-          left:   block.x,
-          top:    block.y
+          width:  (group.w),
+          height: (group.h),
+          left:   (group.x),
+          bottom: (group.y)
         });
 
-        const $inside = $("<div></div>").addClass("inside");
-
-        this.$subBlocks[block.name] = [];
-
-        if (block.blocks) {
-          block.blocks.forEach(subBlock => {
-            const $subBlock = $("<div></div>")
-            .addClass("sub-block")
-            .css({
-              width:  subBlock.w,
-              height: subBlock.h,
-              left:   subBlock.x,
-              top:    subBlock.y
-            });
-
-            this.$subBlocks[block.name].push($subBlock);
-
-            $inside.append($subBlock);
+        group.bits.forEach(block => {
+          const $block = $("<div></div>")
+          .addClass("block")
+          .addClass("block-" + block.name)
+          .css({
+            width: block.w + "%",
+            height: block.h + "%"
           });
-        }
 
-        $block.append($inside);
+          this.$subBlocks[block.name] = [];
 
-        this.$blocks.push($block);
+          if (block.blocks) {
+            block.blocks.forEach(subBlockGroup => {
+              const $subBlockGroup = $("<div></div>")
+              .addClass("block-group")
+              .css({
+                width:  (subBlockGroup.w),
+                height: (subBlockGroup.h),
+                left:   (subBlockGroup.x),
+                bottom: (subBlockGroup.y)
+              });
 
-        this.$view.append($block);
+              subBlockGroup.bits.forEach(subBlock => {
+                const $subBlock = $("<div></div>")
+                .addClass("sub-block")
+                .css({
+                  width:  subBlock.w + "%",
+                  height: subBlock.h + "%"
+                });
+
+                this.$subBlocks[block.name].push($subBlock);
+
+                $subBlockGroup.append($subBlock);
+              });
+
+              $block.append($subBlockGroup);
+            });
+          }
+
+          this.$blocks.push($block);
+
+          $blockGroup.append($block);
+        });
+
+        this.$view.append($blockGroup);
       });
-
-      /*
-
-      const data = this.blockMap(this.cost);
-
-      const blocks = this.treeBlocks(data, this.treeWidth, this.treeHeight, 0, 0, 0);
-
-      const blocks = packer.fit();
-      */
     }
 
     treeBlocks(data, width, height, offsetX, offsetY, j) {
