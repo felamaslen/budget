@@ -3283,10 +3283,12 @@
 
       const row = [];
 
-      this.squarify(this.tree, row, this.root, -1);
+      this.rowCount = 0;
+
+      this.squarify(this.tree, row, this.root);
     }
 
-    squarify(children, row, node, j) {
+    squarify(children, row, node) {
       if (!children.length) {
         console.warn("[BUG] zero child length");
         return;
@@ -3300,21 +3302,21 @@
 
       if (children.length === 1 && row.length === 0) {
         // use all the remaining space for the last child
-        this.addRow(children, node, j + 1);
+        this.addRow(children, node);
       }
       else if (this.worst(row, node) >= this.worst(row2, node)) {
         children.shift();
 
-        this.squarify(children, row2, node, j + 1);
+        this.squarify(children, row2, node);
       }
       else {
-        const newNode = this.addRow(row, node, j);
+        const newNode = this.addRow(row, node);
 
-        this.squarify(children, [], newNode, j);
+        this.squarify(children, [], newNode);
       }
     }
 
-    addRow(row, node, j) {
+    addRow(row, node) {
       // returns a new node (the rest of the available space)
       const wide = node.w > node.h;
 
@@ -3344,7 +3346,7 @@
       let bX = node.x;
       let bY = node.y + (wide ? 0 : newHeight);
 
-      row.forEach((item, i) => {
+      row.forEach(item => {
         const thisBlockWidth = wide ? blockWidth : item / blockHeight;
         const thisBlockHeight = wide ? item / blockWidth : blockHeight;
 
@@ -3355,15 +3357,17 @@
           h: (thisBlockHeight)
         };
 
-        if (this.data[i + j][2]) {
+        const j = this.rowCount++;
+
+        if (this.data[j][2]) {
           const thisBlocks = new BlockPacker(
-            this.data[i + j][2], newBlock.w, newBlock.h
+            this.data[j][2], newBlock.w, newBlock.h
           );
 
           newBlock.blocks = thisBlocks.blocks;
         }
 
-        newBlock.name = this.data[i + j][0];
+        newBlock.name = this.data[j][0];
 
         this.blocks.push(newBlock);
 
@@ -3372,7 +3376,7 @@
       });
 
       const newNode = {
-        x: newX, y: node.y, w: newWidth, h: newHeight
+        x: (newX), y: 0, w: (newWidth), h: (newHeight)
       };
 
       return newNode;
