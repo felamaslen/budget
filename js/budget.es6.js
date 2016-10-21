@@ -2647,24 +2647,6 @@
       if (scrolledToBottom) {
         this.increaseLimit();
       }
-
-      // old code
-      /*
-      const scrollTop = this.$lbody.scrollTop();
-
-      const scrollHeight = this.$lbody[0].scrollHeight;
-
-      const windowHeight = $(window).height();
-
-      const offsetTop = this.$lbody.offset().top;
-
-      const scrolledToBottom = scrollHeight < (windowHeight - offsetTop) ||
-        scrollTop + windowHeight >= scrollHeight + offsetTop - 100;
-
-      if (scrolledToBottom) {
-        this.increaseLimit();
-      }
-      */
     }
 
     /*
