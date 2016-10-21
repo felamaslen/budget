@@ -656,10 +656,81 @@ button:active {
 }
 
 /* analysis page */
+#page-analysis .upper {
+  margin: 0.3em 0;
+}
+#page-analysis .input-period {
+  margin: 0 1em;
+}
+#page-analysis .btns {
+  float: right;
+}
 #page-analysis .period-title {
   margin: 0.3em 0;
   font-size: 1.2em;
 }
+#page-analysis .tree {
+  margin: 1em 0;
+  width: 100%;
+}
+#page-analysis .tree-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#page-analysis .sub-tree {
+  margin: 0 0.5em 0 3em;
+  padding: 0;
+  list-style: none;
+  background: #fffcda;
+}
+#page-analysis .sub-tree .main {
+  font-size: 0.9em;
+}
+#page-analysis .tree-list-item {
+  line-height: 1.5em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#page-analysis .tree-list > .tree-list-item {
+  position: relative;
+}
+#page-analysis .tree-list > .tree-list-item:nth-child(2n+1) > .main {
+  background: #ececec;
+}
+#page-analysis .main:hover {
+  background: #039cff !important;
+}
+#page-analysis .tree-list > .tree-list-item > .main::before {
+  content: "";
+  border: 6px solid transparent;
+  border-left-color: black;
+  display: inline-block;
+  margin-right: 0.5em;
+}
+#page-analysis .tree-list > .tree-list-item.open > .main::before {
+  border-left-color: transparent;
+  border-top-color: black;
+  vertical-align: bottom;
+}
+#page-analysis .tree-list-item span {
+  display: inline-block;
+} 
+#page-analysis .tree .title {
+  text-transform: capitalize;
+}
+#page-analysis .tree .cost {
+  width: 160px;
+  text-align: right;
+  position: absolute;
+  right: 100px;
+}
+#page-analysis .tree .pct {
+  width: 80px;
+  text-align: right;
+  float: right;
+}
+
 #page-analysis .block-tree {
   position: relative;
   border: 1px solid #666;
@@ -673,24 +744,47 @@ button:active {
   position: absolute;
   z-index: 1;
 }
+#page-analysis .block .inside {
+  position: relative;
+  width: inherit;
+  height: inherit;
+}
 #page-analysis .block-tree .block:hover {
-  box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6), 0 0 33px 10px rgba(20, 20, 20, 0.3);
   z-index: 2;
+  box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6),
+              0 0 16px 3px rgba(60, 60, 60, 0.8);
 }
 #page-analysis .block-tree .block-bills {
   background: radial-gradient(ellipse at center, #d92121 0%, #b71c1c 44%, #590e0e 100%);
+  background: #b71c1c;
 }
 #page-analysis .block-tree .block-food {
   background: radial-gradient(ellipse at center, #5dde62 0%, #43a047 44%, #29612b  100%);
+  background: #43a047;
 }
 #page-analysis .block-tree .block-general {
   background: radial-gradient(ellipse at center, #007ad9 0%, #01579b 44%, #003259 100%);
+  background: #01579b;
 }
 #page-analysis .block-tree .block-holiday {
   background: radial-gradient(ellipse at center, #00d9c3 0%, #00897b 44%, #005950 100%);
+  background: #00897b;
 }
 #page-analysis .block-tree .block-social {
   background: radial-gradient(ellipse at center, #d9b329 0%, #bf9e24 44%, #594a11 100%);
+  background: #bf9e24;
+}
+
+#page-analysis .sub-block {
+  position: absolute;
+  box-shadow: inset 0 0 13px -3px rgba(60, 60, 60, 0.6);
+  background: radial-gradient(ellipse at center,
+    rgba(255, 255, 255, 0.3) 0%, rgba(190, 190, 190, 0.3) 44%,
+    rgba(60, 60, 60, 0.3) 100%);
+}
+#page-analysis .sub-block.active,
+#page-analysis .block.active {
+  background: rgba(255, 255, 0, 0.85);
 }
 
 /* funds page */
