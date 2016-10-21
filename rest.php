@@ -412,11 +412,11 @@ class RestApi {
     case 'month':
       list($current_year, $current_month) = explode('-', date('Y-m'));
 
-      $year = $current_year - ceil(($index - $current_month) / 12);
+      $year = $current_year - ceil(($index + 1 - $current_month) / 12);
 
       $month = ($current_month - $index - 1) % 12 + 1;
       
-      if ($month < 0) {
+      if ($month <= 0) {
         $month += 12;
       }
 
