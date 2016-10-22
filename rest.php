@@ -508,7 +508,7 @@ class RestApi {
     $items = array();
 
     foreach ($_items as $item_col => $item) {
-      $items[] = array_merge(array($item_col), $item);
+      $items[] = array($item_col, $item);
     }
 
     return $items;
