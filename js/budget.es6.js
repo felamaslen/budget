@@ -3661,10 +3661,6 @@
       }
     }
 
-    blockMap(data) {
-      return data.map(item => Math.max(0, item[1])).reverse();
-    }
-
     drawBlockTree() {
       const packer = new BlockPacker(this.cost, this.treeWidth, this.treeHeight);
 
@@ -3729,62 +3725,6 @@
 
         this.$view.append($blockGroup);
       });
-    }
-
-    treeBlocks(data, width, height, offsetX, offsetY, j) {
-      const blocks = [];
-
-      const total = arraySum(data);
-
-      const first = data.pop();
-
-      if (data.length > 0) {
-        let nWidth = width;
-        let nHeight = height;
-        let nOffsetX = offsetX;
-        let nOffsetY = offsetY;
-
-        if (total > 0) {
-          const scale = first / total;
-
-          // align
-          const left  = j % 4 === 0;
-          const top   = j % 4 === 1;
-          const right = j % 4 === 2;
-          const bottom = j % 4 === 3;
-
-          const even  = left || right;
-          const odd   = !even;
-
-          const bWidth  = Math.round(width * (even ? scale : 1));
-          const bHeight = Math.round(height * (odd ? scale : 1));
-
-          const bOffsetX = offsetX + (right ? width - bWidth : 0);
-          const bOffsetY = offsetY + (bottom ? height - bHeight : 0);
-
-          blocks[0] = [bWidth, bHeight, bOffsetX, bOffsetY];
-
-          nWidth = even ? width - bWidth : width;
-          nHeight = odd ? height - bHeight : height;
-
-          nOffsetX = offsetX + (left ? bWidth : 0);
-          nOffsetY = offsetY + (top ? bHeight : 0);
-        }
-        else {
-          blocks[0] = [0, 0, offsetX, offsetY];
-        }
-
-        const otherBlocks = this.treeBlocks(data, nWidth, nHeight, nOffsetX, nOffsetY, j + 1);
-
-        otherBlocks.forEach(block => {
-          blocks.push(block);
-        });
-      }
-      else {
-        blocks[0] = [width, height, offsetX, offsetY];
-      }
-
-      return blocks;
     }
   }
 
