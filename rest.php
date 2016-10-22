@@ -454,7 +454,7 @@ class RestApi {
     );
   }
 
-  private function _get_data_analysis_category($category, $condition) {
+  private function get_category_column($category) {
     switch ($category) {
     case 'food':
     case 'general':
@@ -469,6 +469,73 @@ class RestApi {
     default:
       $category_column = 'item';
     }
+
+    return $category_column;
+  }
+
+  private function _get_data_analysis_category($category, $condition) {
+    $category_column = $this->get_category_column($category);
+    
+    $query = '
+    SELECT item, `' . $category_column . '` AS item_col, SUM(cost) AS cost
+      FROM {' . $category . '}
+      WHERE ' . $condition['query'] . ' AND uid = %d AND cost > 0
+      GROUP BY item
+    ';
+    
+    $args = $condition['args'];
+
+    $args[] = $this->user->uid;
+
+    array_unshift($args, $query);
+
+    $result = call_user_func_array('db_query', $args);
+
+    if (!$result) {
+      json_error(500, 'Database error');
+    }
+
+    $_items = array();
+
+    while (NULL !== ($row = $result->fetch_object())) {
+      if (!isset($_items[$row->item_col])) {
+        $_items[$row->item_col] = array();
+      }
+
+      $_items[$row->item_col][] = array($row->item, (int)$row->cost);
+    }
+
+    $items = array();
+
+    foreach ($_items as $item_col => $item) {
+      $items[] = array_merge(array($item_col), $item);
+    }
+
+    return $items;
+  }
+
+  private function get_data_analysis_category($category, $period, $index) {
+    if (!in_array($period, $this->analysis_periods)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid period!';
+      return;
+    }
+
+    if (!in_array($category, $this->analysis_categories)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid category!';
+      return;
+    }
+
+    $condition = $this->analysis_period_condition($period, $index);
+
+    $items = $this->_get_data_analysis_category($category, $condition);
+
+    $this->res['data']['items'] = $items;
+  }
+
+  private function _get_data_analysis_items($category, $condition) {
+    $category_column = $this->get_category_column($category);
 
     $query = '
     SELECT `' . $category_column . '` AS item_col, SUM(cost) AS cost
@@ -496,26 +563,6 @@ class RestApi {
     }
 
     return $items;
-  }
-
-  private function get_data_analysis_category($category, $period, $index) {
-    if (!in_array($period, $this->analysis_periods)) {
-      $this->res['error'] = TRUE;
-      $this->res['errorText'] = 'Must supply valid period!';
-      return;
-    }
-
-    if (!in_array($category, $this->analysis_categories)) {
-      $this->res['error'] = TRUE;
-      $this->res['errorText'] = 'Must supply valid category!';
-      return;
-    }
-
-    $condition = $this->analysis_period_condition($period, $index);
-
-    $items = $this->_get_data_analysis_category($category, $condition);
-
-    $this->res['data']['items'] = $items;
   }
 
   private function get_data_analysis($period, $index = 0) {
@@ -565,7 +612,7 @@ class RestApi {
       foreach ($this->analysis_categories as $category) {
         $cost[] = array(
           $category,
-          $this->_get_data_analysis_category($category, $condition)
+          $this->_get_data_analysis_items($category, $condition)
         );
       }
     }
