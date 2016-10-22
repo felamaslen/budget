@@ -3431,6 +3431,11 @@
       this.$blocks = [];
       this.$subBlocks = {};
 
+      this.$deepBlockGroup = null;
+      this.$deepBlockTree = null;
+
+      this.deepBlockTime = 300;
+
       // stores whether tree items are expanded or not
       this.treeStatus = {};
 
@@ -3518,7 +3523,6 @@
 
       this.updateView();
     }
-
     changePage(direction) {
       const pageIndex = Math.max(0, this.pageIndex + direction);
 
@@ -3540,10 +3544,8 @@
 
       return 1;
     }
-
-    hookDataLoadedAfterRender(callback, res) {
-      // sort the data
-      this.cost = res.data.cost.map(item => {
+    sortData(data) {
+      return data.map(item => {
         const total = arraySum1(item[1]);
 
         const subTree = item[1].sort(this.sortItems);
@@ -3554,6 +3556,11 @@
       .filter(
         item => item[1] > 0
       );
+    }
+
+    hookDataLoadedAfterRender(callback, res) {
+      // sort the data
+      this.cost = this.sortData(res.data.cost);
 
       for (const category in res.data.items) {
         this.items[category] = res.data.items[category].sort(this.sortItems);
@@ -3561,7 +3568,7 @@
 
       this.drawTree();
 
-      this.drawBlockTree();
+      this.drawMainBlocks();
 
       this.$title.text(res.data.description);
     }
@@ -3579,7 +3586,6 @@
 
       return $li;
     }
-
     drawTree() {
       this.$tree.empty();
 
@@ -3600,7 +3606,6 @@
         this.toggleTreeItem($li, key, !!this.treeStatus[item[0]]);
       });
     }
-
     toggleTreeItem($li, cKey, status) {
       const category = this.cost[cKey][0];
 
@@ -3642,7 +3647,6 @@
     _activateBlock($block) {
       $block && $block.addClass("active");
     }
-
     hlBlock(key, active) {
       if (!active) {
         this._deactivateBlock(this.$blocks[key]);
@@ -3651,7 +3655,6 @@
         this._activateBlock(this.$blocks[key]);
       }
     }
-
     hlSubBlock(category, key, active) {
       if (!active) {
         this._deactivateBlock(this.$subBlocks[category][key]);
@@ -3661,13 +3664,20 @@
       }
     }
 
-    drawBlockTree() {
-      const packer = new BlockPacker(this.cost, this.treeWidth, this.treeHeight);
+    /**
+     * draws a block tree, which is a tree data block visualisation
+     * with two levels
+     * @param {array} data: data to visualise
+     * @param {object} $root: DOM element to place
+     * @param {function} blockCallback: callback to run on each block
+     * @param {string} category: name of block
+     * @returns {array} block and sub-block elements
+     */
+    drawBlockTree(data, $root, blockCallback, category) {
+      const packer = new BlockPacker(data, this.treeWidth, this.treeHeight);
 
-      this.$view.empty();
-
-      this.$blocks = [];
-      this.$subBlocks = {};
+      const $blocks = [];
+      const $subBlocks = {};
 
       packer.blocks.forEach(group => {
         const $blockGroup = $("<div></div>")
@@ -3680,15 +3690,17 @@
         });
 
         group.bits.forEach(block => {
+          const blockClass = category || block.name;
+
           const $block = $("<div></div>")
           .addClass("block")
-          .addClass("block-" + block.name)
+          .addClass("block-" + blockClass)
           .css({
             width: block.w + "%",
             height: block.h + "%"
           });
 
-          this.$subBlocks[block.name] = [];
+          $subBlocks[block.name] = [];
 
           if (block.blocks) {
             block.blocks.forEach(subBlockGroup => {
@@ -3704,12 +3716,13 @@
               subBlockGroup.bits.forEach(subBlock => {
                 const $subBlock = $("<div></div>")
                 .addClass("sub-block")
+                .attr("title", subBlock.name)
                 .css({
                   width:  subBlock.w + "%",
                   height: subBlock.h + "%"
                 });
 
-                this.$subBlocks[block.name].push($subBlock);
+                $subBlocks[block.name].push($subBlock);
 
                 $subBlockGroup.append($subBlock);
               });
@@ -3718,13 +3731,92 @@
             });
           }
 
-          this.$blocks.push($block);
+          $blocks.push($block);
 
           $blockGroup.append($block);
+
+          if (blockCallback) {
+            blockCallback($block, block.name);
+          }
         });
 
-        this.$view.append($blockGroup);
+        $root.append($blockGroup);
       });
+
+      return { $blocks, $subBlocks };
+    }
+    drawMainBlocks() {
+      this.$view.empty().removeClass("deep");
+
+      const result = this.drawBlockTree(this.cost, this.$view, ($block, category) => {
+        if (category !== "bills") {
+          $block.on("click", () => {
+            this.$deepBlockGroup = $block.parent();
+
+            this.$deepBlockGroup.addClass("expanded");
+
+            this.deepBlock(category, new Date().getTime());
+          });
+        }
+      });
+
+      this.$blocks = result.$blocks;
+      this.$subBlocks = result.$subBlocks;
+    }
+    drawDeepBlocks(data, category) {
+      if (this.$deepBlockTree) {
+        this.$deepBlockTree.remove();
+      }
+
+      this.$view.addClass("deep");
+
+      this.$deepBlockTree = $("<div></div>")
+      .addClass("deep-block-tree")
+      .addClass("block-tree-" + category);
+
+      this.drawBlockTree(data, this.$deepBlockTree, null, category);
+
+      this.$deepBlockTree.on("click", () => {
+        this.$deepBlockTree.remove();
+
+        this.$view.removeClass("deep");
+
+        this.$deepBlockGroup.removeClass("expanded");
+      });
+
+      this.$view.append(this.$deepBlockTree);
+    }
+
+    deepBlock(category, time0) {
+      // selects a block to analyse more deeply
+      if (this.loading) {
+        return;
+      }
+
+      this.loading = true;
+
+      const args = ["data", "analysis_category", category, this.period, this.pageIndex];
+
+      api.request(
+        args.join("/"), "GET", null, user.apiKey,
+        res => this.deepBlockDataLoaded(res.data, category, time0),
+        null,
+        () => this.deepBlockComplete(),
+        false
+      );
+    }
+    deepBlockDataLoaded(data, category, time0) {
+      const items = this.sortData(data.items);
+
+      // possibly wait until the expand transition has completed
+      const transitionTime = Math.max(0, this.deepBlockTime - (new Date().getTime() - time0));
+
+      window.setTimeout(() => {
+        this.drawDeepBlocks(items, category);
+      }, transitionTime);
+    }
+    deepBlockComplete() {
+      this.loading = false;
     }
   }
 
