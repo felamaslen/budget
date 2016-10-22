@@ -274,7 +274,7 @@ class RestApi {
           FROM (
               SELECT @row := -1
           ) r, (
-              SELECT c.time, SUM(fc.price * f.units) AS value
+              SELECT c.time, SUM(fc.price * fc.units) AS value
               FROM funds f
               INNER JOIN fund_cache fc ON fc.did = f.id
               INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
