@@ -753,6 +753,7 @@ button:active {
   background: #222;
   color: #eee;
   padding: 0 0.8em;
+  margin-top: -1px;
 }
 #page-analysis .block-tree {
   position: relative;
@@ -801,6 +802,13 @@ button:active {
 #page-analysis .block-tree .sub-block {
   float: left;
   position: relative;
+}
+#page-analysis .block-tree .sub-block {
+  transition: opacity 0.1s linear;
+  opacity: 1;
+}
+#page-analysis .block-tree .sub-block.hidden {
+  opacity: 0;
 }
 #page-analysis .block-tree .block:hover {
   z-index: 2;

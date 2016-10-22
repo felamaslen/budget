@@ -3441,6 +3441,7 @@
       this.$deepBlockTree = null;
 
       this.deepBlockTime = 250;
+      this.blockAppearTime = 100;
 
       // stores whether tree items are expanded or not
       this.treeStatus = {};
@@ -3694,7 +3695,7 @@
      * @param {array} data: data to visualise
      * @param {object} $root: DOM element to place
      * @param {function} blockCallback: callback to run on each block
-     * @param {string} category: name of block
+     * @param {boolean} noBlockClass: don't add the block's name to the classes
      * @returns {array} block and sub-block elements
      */
     drawBlockTree(data, $root, blockCallback, noBlockClass) {
@@ -3727,6 +3728,24 @@
           $subBlocks[block.name] = [];
 
           if (block.blocks) {
+            let flashTimes = [];
+            let k = 0;
+
+            for (let i = 0; i < block.blocks.length; i++) {
+              for (let j = 0; j < block.blocks[i].bits.length; j++) {
+                flashTimes.push(++k);
+              }
+            }
+
+            let i = 0;
+            flashTimes = flashTimes.sort(() => {
+              return i++ & 2 ? 1 : -1;
+            });
+
+            const blockFlashTime = k > 0 ? this.blockAppearTime / k : 0;
+
+            k = 0;
+
             block.blocks.forEach(subBlockGroup => {
               const $subBlockGroup = $("<div></div>")
               .addClass("block-group")
@@ -3741,6 +3760,7 @@
 
                 const $subBlock = $("<div></div>")
                 .addClass("sub-block")
+                .addClass("hidden")
                 .css({
                   width:  subBlock.w,
                   height: subBlock.h
@@ -3753,6 +3773,10 @@
                 $subBlocks[block.name].push($subBlock);
 
                 $subBlockGroup.append($subBlock);
+
+                window.setTimeout(() => {
+                  $subBlock.removeClass("hidden");
+                }, flashTimes[k++] * blockFlashTime);
               });
 
               $block.append($subBlockGroup);
