@@ -819,23 +819,23 @@ button:active {
   position: absolute;
   z-index: 5;
 }
-#page-analysis .block-tree .block.block-bills {
+#page-analysis .block-tree .block-bills {
   background: radial-gradient(ellipse at center, #d92121 0%, #b71c1c 44%, #590e0e 100%);
   background: #b71c1c;
 }
-#page-analysis .block-tree .block.block-food {
+#page-analysis .block-tree .block-food {
   background: radial-gradient(ellipse at center, #5dde62 0%, #43a047 44%, #29612b  100%);
   background: #43a047;
 }
-#page-analysis .block-tree .block.block-general {
+#page-analysis .block-tree .block-general {
   background: radial-gradient(ellipse at center, #007ad9 0%, #01579b 44%, #003259 100%);
   background: #01579b;
 }
-#page-analysis .block-tree .block.block-holiday {
+#page-analysis .block-tree .block-holiday {
   background: radial-gradient(ellipse at center, #00d9c3 0%, #00897b 44%, #005950 100%);
   background: #00897b;
 }
-#page-analysis .block-tree .block.block-social {
+#page-analysis .block-tree .block-social {
   background: radial-gradient(ellipse at center, #d9b329 0%, #bf9e24 44%, #594a11 100%);
   background: #bf9e24;
 }
