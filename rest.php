@@ -480,7 +480,7 @@ class RestApi {
     SELECT item, `' . $category_column . '` AS item_col, SUM(cost) AS cost
       FROM {' . $category . '}
       WHERE ' . $condition['query'] . ' AND uid = %d AND cost > 0
-      GROUP BY item
+      GROUP BY item, item_col
     ';
     
     $args = $condition['args'];
@@ -515,6 +515,13 @@ class RestApi {
   }
 
   private function get_data_analysis_category($category, $period, $index) {
+    if ($category === 'bills') {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Bills aren\'t categorised';
+
+      return;
+    }
+
     if (!in_array($period, $this->analysis_periods)) {
       $this->res['error'] = TRUE;
       $this->res['errorText'] = 'Must supply valid period!';
