@@ -180,6 +180,9 @@
 
     return (n < base ? "0" : "") + n.toString(base);
   }
+  function percent(n) {
+    return (n * 100) + "%";
+  }
 
   class YMD {
     constructor(year, month, date) {
@@ -3328,21 +3331,17 @@
       }
 
       // add row's blocks
-      const blockX = node.x;
-      const blockY = node.y;
-
       const newBlock = {
-        x: blockX,
-        y: blockY,
-        w: blockWidth,
-        h: blockHeight,
+        w: percent(blockWidth / this.width),
+        h: percent(blockHeight / this.height),
         bits: []
       };
 
       const newNode = {
         x: freeX,
         y: freeY,
-        w: freeWidth, h: freeHeight
+        w: freeWidth,
+        h: freeHeight
       };
 
       row.forEach(item => {
@@ -3351,8 +3350,8 @@
         const thisBlockHeight = wide ? (item / sum) : 1;
 
         const newBlockBit = {
-          w: 100 * thisBlockWidth,
-          h: 100 * thisBlockHeight
+          w: percent(thisBlockWidth),
+          h: percent(thisBlockHeight)
         };
 
         const j = this.rowCount++;
@@ -3431,7 +3430,7 @@
       this.$blocks = [];
       this.$subBlocks = {};
 
-      this.$deepBlockGroup = null;
+      this.$deepBlock = null;
       this.$deepBlockTree = null;
 
       this.deepBlockTime = 300;
@@ -3683,10 +3682,8 @@
         const $blockGroup = $("<div></div>")
         .addClass("block-group")
         .css({
-          width:  (group.w),
-          height: (group.h),
-          left:   (group.x),
-          bottom: (group.y)
+          width:  group.w,
+          height: group.h
         });
 
         group.bits.forEach(block => {
@@ -3696,8 +3693,8 @@
           .addClass("block")
           .addClass("block-" + blockClass)
           .css({
-            width: block.w + "%",
-            height: block.h + "%"
+            width: block.w,
+            height: block.h
           });
 
           $subBlocks[block.name] = [];
@@ -3707,10 +3704,8 @@
               const $subBlockGroup = $("<div></div>")
               .addClass("block-group")
               .css({
-                width:  (subBlockGroup.w),
-                height: (subBlockGroup.h),
-                left:   (subBlockGroup.x),
-                bottom: (subBlockGroup.y)
+                width:  subBlockGroup.w,
+                height: subBlockGroup.h
               });
 
               subBlockGroup.bits.forEach(subBlock => {
@@ -3718,8 +3713,8 @@
                 .addClass("sub-block")
                 .attr("title", subBlock.name)
                 .css({
-                  width:  subBlock.w + "%",
-                  height: subBlock.h + "%"
+                  width:  subBlock.w,
+                  height: subBlock.h
                 });
 
                 $subBlocks[block.name].push($subBlock);
@@ -3751,9 +3746,38 @@
       const result = this.drawBlockTree(this.cost, this.$view, ($block, category) => {
         if (category !== "bills") {
           $block.on("click", () => {
-            this.$deepBlockGroup = $block.parent();
+            const offset = $block.position();
 
-            this.$deepBlockGroup.addClass("expanded");
+            const width = $block.width();
+            const height = $block.height();
+
+            const left = offset.left;
+            const top = offset.top;
+
+            const $preview = $("<div></div>")
+            .addClass("preview")
+            .addClass("block-" + category)
+            .css({ width, height, left, top });
+
+            this.$deepBlock = {
+              $preview,
+              $block,
+              width,
+              height,
+              left,
+              top
+            };
+
+            $block.addClass("expanded");
+
+            this.$view.append($preview);
+
+            $preview.animate({
+              width: this.treeWidth,
+              height: this.treeHeight,
+              left: 0,
+              top: 0
+            }, this.deepBlockTime);
 
             this.deepBlock(category, new Date().getTime());
           });
@@ -3768,8 +3792,6 @@
         this.$deepBlockTree.remove();
       }
 
-      this.$view.addClass("deep");
-
       this.$deepBlockTree = $("<div></div>")
       .addClass("deep-block-tree")
       .addClass("block-tree-" + category);
@@ -3781,10 +3803,21 @@
 
         this.$view.removeClass("deep");
 
-        this.$deepBlockGroup.removeClass("expanded");
+        this.$deepBlock.$preview.show().animate({
+          width: this.$deepBlock.width,
+          height: this.$deepBlock.height,
+          left: this.$deepBlock.left,
+          top: this.$deepBlock.top
+        }, this.deepBlockTime, () => {
+          this.$deepBlock.$preview.remove();
+
+          this.$deepBlock.$block.removeClass("expanded");
+
+          this.$deepBlock = null;
+        });
       });
 
-      this.$view.append(this.$deepBlockTree);
+      this.$view.addClass("deep").append(this.$deepBlockTree);
     }
 
     deepBlock(category, time0) {
@@ -3813,6 +3846,8 @@
 
       window.setTimeout(() => {
         this.drawDeepBlocks(items, category);
+
+        this.$deepBlock.$preview.hide();
       }, transitionTime);
     }
     deepBlockComplete() {

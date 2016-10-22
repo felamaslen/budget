@@ -738,23 +738,26 @@ button:active {
   overflow: hidden;
 }
 #page-analysis .block-tree .block-group {
-  position: absolute;
+  float: left;
 }
-#page-analysis .block-tree > .block-group {
+#page-analysis .block-tree > .block {
   transition: all 0.25s ease-in-out;
 }
-#page-analysis .block-tree > .block-group.expanded {
-  z-index: 5;
-  width: 100% !important;
-  height: 100% !important;
-  left: 0 !important;
-  top: 0 !important;
+#page-analysis .block-tree .expanded {
 }
-#page-analysis .block-tree > .block-group.expanded .block-group {
+#page-analysis .block-tree .preview {
+  position: absolute;
+  z-index: 5;
+}
+#page-analysis .block-tree .expanded .block-group {
   opacity: 0;
 }
 #page-analysis .block-tree.deep > .block-group {
   display: none;
+}
+#page-analysis .deep-block-tree {
+  width: 100%;
+  height: 100%;
 }
 #page-analysis .block-tree .block {
   background: radial-gradient(ellipse at center, #a90329 0%, #8f0222 44%, #6d0019 100%);
