@@ -9,7 +9,7 @@
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
-  const ANALYSIS_VIEW_WIDTH   = 1000;
+  const ANALYSIS_VIEW_WIDTH   = 500;
   const ANALYSIS_VIEW_HEIGHT  = 500;
 
   const GRAPH_FUND_HISTORY_WIDTH = 600;
@@ -182,6 +182,9 @@
   }
   function percent(n) {
     return (n * 100) + "%";
+  }
+  function capitalise(word) {
+    return word.substring(0, 1).toUpperCase() + word.substring(1);
   }
 
   class YMD {
@@ -3256,6 +3259,12 @@
       this.width = width;
       this.height = height;
 
+      this.numBlockColors = 16;
+
+      this.colorOffset = this.data.reduce((a, b) => {
+        return a + (b[1] & 1);
+      }, 0);
+
       this.total  = arraySum1(data);
 
       const totalArea = width * height;
@@ -3317,16 +3326,12 @@
 
       if (wide) {
         blockWidth = sum / node.h;
-
         freeWidth -= blockWidth;
-
         freeX += blockWidth;
       }
       else {
         blockHeight = sum / node.w;
-
         freeHeight -= blockHeight;
-
         freeY += blockHeight;
       }
 
@@ -3356,7 +3361,9 @@
 
         const j = this.rowCount++;
 
-        newBlockBit.name = this.data[j][0];
+        newBlockBit.name  = this.data[j][0];
+        newBlockBit.color = (j + this.colorOffset) % this.numBlockColors;
+        newBlockBit.value = this.data[j][1];
 
         if (this.data[j][2]) {
           const thisBlocks = new BlockPacker(
@@ -3433,7 +3440,7 @@
       this.$deepBlock = null;
       this.$deepBlockTree = null;
 
-      this.deepBlockTime = 300;
+      this.deepBlockTime = 250;
 
       // stores whether tree items are expanded or not
       this.treeStatus = {};
@@ -3502,18 +3509,36 @@
       this.$inputPeriod.month.on("click", () => this.changePeriod("month"));
       this.$inputPeriod.week.on("click",  () => this.changePeriod("week"));
 
+      this.$flexBox = $("<div></div>").addClass("flexbox");
+
       this.$treeOuter = $("<div></div>").addClass("tree");
 
-      this.$tree = $("<ul></ul>").addClass("tree-list");
+      this.$tree = $("<ul></ul>")
+      .addClass("tree-list")
+      .addClass("flex");
       this.$treeOuter.append(this.$tree);
 
-      this.$page.append(this.$treeOuter);
+      this.$flexBox.append(this.$treeOuter);
+
+      this.$blockView = $("<div></div>").addClass("block-view");
 
       this.$view = $("<div></div>")
       .addClass("block-tree")
-      .css({ width: this.treeWidth, height: this.treeHeight });
+      .addClass("flex");
 
-      this.$page.append(this.$view);
+      this.$blockView.append(this.$view);
+
+      this.$statusBar = $("<div></div>").addClass("status-bar");
+
+      this.$blockView.append(this.$statusBar);
+
+      this.$blockView.on("mouseout", () => {
+        this.$statusBar.html("");
+      });
+
+      this.$flexBox.append(this.$blockView);
+
+      this.$page.append(this.$flexBox);
     }
 
     changePeriod(period) {
@@ -3672,7 +3697,7 @@
      * @param {string} category: name of block
      * @returns {array} block and sub-block elements
      */
-    drawBlockTree(data, $root, blockCallback, category) {
+    drawBlockTree(data, $root, blockCallback, noBlockClass) {
       const packer = new BlockPacker(data, this.treeWidth, this.treeHeight);
 
       const $blocks = [];
@@ -3687,15 +3712,17 @@
         });
 
         group.bits.forEach(block => {
-          const blockClass = category || block.name;
-
           const $block = $("<div></div>")
           .addClass("block")
-          .addClass("block-" + blockClass)
+          .addClass("block-" + block.color)
           .css({
             width: block.w,
             height: block.h
           });
+
+          if (!noBlockClass) {
+            $block.addClass("block-" + block.name);
+          }
 
           $subBlocks[block.name] = [];
 
@@ -3709,12 +3736,18 @@
               });
 
               subBlockGroup.bits.forEach(subBlock => {
+                const title = capitalise(block.name) + ": " + subBlock.name + " (" +
+                  formatCurrency(subBlock.value, true) + ")";
+
                 const $subBlock = $("<div></div>")
                 .addClass("sub-block")
-                .attr("title", subBlock.name)
                 .css({
                   width:  subBlock.w,
                   height: subBlock.h
+                });
+
+                $subBlock.on("mouseover", () => {
+                  this.$statusBar.html(title);
                 });
 
                 $subBlocks[block.name].push($subBlock);
@@ -3740,49 +3773,52 @@
 
       return { $blocks, $subBlocks };
     }
+
+    expandBlock($block, category) {
+      if (category !== "bills") {
+        $block.on("click", () => {
+          const offset = $block.position();
+
+          const width = $block.width();
+          const height = $block.height();
+
+          const left = offset.left;
+          const top = offset.top;
+
+          const $preview = $("<div></div>")
+          .addClass("preview")
+          .addClass("block")
+          .addClass("block-" + category)
+          .css({ width, height, left, top });
+
+          this.$deepBlock = {
+            $preview,
+            $block,
+            width,
+            height,
+            left,
+            top
+          };
+
+          $block.addClass("expanded");
+
+          this.$view.append($preview);
+
+          $preview.animate({
+            width: this.treeWidth,
+            height: this.treeHeight,
+            left: 0,
+            top: 0
+          }, this.deepBlockTime);
+
+          this.deepBlock(category, new Date().getTime());
+        });
+      }
+    }
     drawMainBlocks() {
       this.$view.empty().removeClass("deep");
 
-      const result = this.drawBlockTree(this.cost, this.$view, ($block, category) => {
-        if (category !== "bills") {
-          $block.on("click", () => {
-            const offset = $block.position();
-
-            const width = $block.width();
-            const height = $block.height();
-
-            const left = offset.left;
-            const top = offset.top;
-
-            const $preview = $("<div></div>")
-            .addClass("preview")
-            .addClass("block-" + category)
-            .css({ width, height, left, top });
-
-            this.$deepBlock = {
-              $preview,
-              $block,
-              width,
-              height,
-              left,
-              top
-            };
-
-            $block.addClass("expanded");
-
-            this.$view.append($preview);
-
-            $preview.animate({
-              width: this.treeWidth,
-              height: this.treeHeight,
-              left: 0,
-              top: 0
-            }, this.deepBlockTime);
-
-            this.deepBlock(category, new Date().getTime());
-          });
-        }
-      });
+      const result = this.drawBlockTree(this.cost, this.$view, (a, b) => this.expandBlock(a, b));
 
       this.$blocks = result.$blocks;
       this.$subBlocks = result.$subBlocks;
@@ -3796,7 +3832,7 @@
       .addClass("deep-block-tree")
       .addClass("block-tree-" + category);
 
-      this.drawBlockTree(data, this.$deepBlockTree, null, category);
+      this.drawBlockTree(data, this.$deepBlockTree, null, true);
 
       this.$deepBlockTree.on("click", () => {
         this.$deepBlockTree.remove();
