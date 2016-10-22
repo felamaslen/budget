@@ -820,31 +820,25 @@ button:active {
   z-index: 5;
 }
 #page-analysis .block-tree .block-bills {
-  background: radial-gradient(ellipse at center, #d92121 0%, #b71c1c 44%, #590e0e 100%);
   background: #b71c1c;
 }
 #page-analysis .block-tree .block-food {
-  background: radial-gradient(ellipse at center, #5dde62 0%, #43a047 44%, #29612b  100%);
   background: #43a047;
 }
 #page-analysis .block-tree .block-general {
-  background: radial-gradient(ellipse at center, #007ad9 0%, #01579b 44%, #003259 100%);
   background: #01579b;
 }
 #page-analysis .block-tree .block-holiday {
-  background: radial-gradient(ellipse at center, #00d9c3 0%, #00897b 44%, #005950 100%);
   background: #00897b;
 }
 #page-analysis .block-tree .block-social {
-  background: radial-gradient(ellipse at center, #d9b329 0%, #bf9e24 44%, #594a11 100%);
   background: #bf9e24;
 }
 
 #page-analysis .sub-block {
-  box-shadow: inset 0 0 13px -3px rgba(60, 60, 60, 0.6);
-  background: radial-gradient(ellipse at center,
-    rgba(235, 235, 235, 0.68) 0%, rgba(160, 160, 160, 0.5) 44%,
-    rgba(20, 20, 20, 0.4) 100%);
+  box-shadow: inset -1px -1px 13px rgba(30, 30, 30, 0.4);
+  background: linear-gradient(to bottom right,
+    rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.3));
 }
 #page-analysis .sub-block.active,
 #page-analysis .block.active {
