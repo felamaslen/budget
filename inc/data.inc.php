@@ -588,7 +588,7 @@ class FundScraper {
     }
   }
 
-  function insert_cache_item($broker, $hash, $did, $price) {
+  function insert_cache_item($broker, $hash, $fund, $price) {
     $this->insert_new_cid();
 
     // make sure this fund is in the hash list
@@ -628,8 +628,8 @@ class FundScraper {
 
     // cache this value so we don't need to do it again until tomorrow
     $cache_query = db_query(
-      'INSERT INTO {fund_cache} (cid, fid, did, price) VALUES (%d, %d, %d, %s)',
-      $this->new_cache_cid, $fid, $did, $price
+      'INSERT INTO {fund_cache} (cid, fid, did, price, units) VALUES (%d, %d, %d, %s, %s)',
+      $this->new_cache_cid, $fid, $fund['did'], $price, $fund['units']
     );
 
     if (!$cache_query) {
@@ -637,7 +637,7 @@ class FundScraper {
     }
   }
 
-  function process_data($data, $hash, $broker, $did) {
+  function process_data($data, $hash, $broker, $fund) {
     if ($data) {
       // remove new lines
       $data = str_replace(array("\n", "\r"), '', $data);
@@ -678,12 +678,12 @@ class FundScraper {
         printf("[ERROR] data not got!\n");
       }
     }
-
+    
     if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
       printf("Price: %f\n", $price);
     }
 
-    $this->insert_cache_item($broker, $hash, $did, $price);
+    $this->insert_cache_item($broker, $hash, $fund, $price);
     
     // don't scrape the same URL twice!
     if (!isset($this->fund_sell_price[$broker][$hash])) {
@@ -693,8 +693,8 @@ class FundScraper {
     return $return;
   }
 
-  function get_current_sell_price_hl($fund, $i, $total, $did) {
-    $hash = fund_hash($fund);
+  function get_current_sell_price_hl($fund, $i, $total) {
+    $hash = fund_hash($fund['name']);
 
     $broker = 'hl'; // TODO: multiple brokers
 
@@ -712,15 +712,15 @@ class FundScraper {
     if (isset($this->fund_sell_price[$broker][$hash])) {
       $price = $this->fund_sell_price[$broker][$hash];
 
-      $this->insert_cache_item($broker, $hash, $did, $price);
+      $this->insert_cache_item($broker, $hash, $fund, $price);
     }
     else {
       // new scrape
-      $url = $this->get_url_hl($fund);
+      $url = $this->get_url_hl($fund['name']);
 
       $data = $this->download_url($url, $i, $total);
 
-      $price = $this->process_data($data, $hash, $broker, $did);
+      $price = $this->process_data($data, $hash, $broker, $fund);
     }
 
     return $price;
@@ -730,17 +730,19 @@ class FundScraper {
     // price per unit
     $item['P'] = null;
 
-    $fund = $item['i'];
+    $fund = array(
+      'name'  => $item['i'],
+      'did'   => $item['I'],
+      'units' => $item['u'],
+    );
 
-    $did = $item['I'];
-
-    if (!preg_match($this->fund_preg, $fund)) {
+    if (!preg_match($this->fund_preg, $fund['name'])) {
       // wrong item format
       return;
     }
 
     $sell_price = $this->get_current_sell_price_hl(
-      $fund, $i, $this->total, $did
+      $fund, $i, $this->total
     );
 
     if (is_null($sell_price)) {
