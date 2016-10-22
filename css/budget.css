@@ -69,6 +69,12 @@ button:active {
 	top: 0;
 }
 
+.flexbox {
+  display: flex;
+}
+.flex {
+}
+
 @keyframes spin {
 	to { transform: rotate(1turn); }
 }
@@ -304,7 +310,6 @@ button:active {
   text-overflow: ellipsis;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
   background: rgba(255, 255, 255, 0.9);
-  /*transition: .2s ease-in-out max-height;*/
 }
 .list-ul .suggestions.active {
   max-height: initial;
@@ -669,10 +674,18 @@ button:active {
   margin: 0.3em 0;
   font-size: 1.2em;
 }
-#page-analysis .tree {
-  margin: 1em 0;
-  width: 100%;
+#page-analysis .flexbox {
 }
+#page-analysis .tree {
+  margin: 1em;
+  flex: 1;
+}
+#page-analysis .block-view {
+  width: 500px;
+  height: 500px;
+  flex: 0 0 500px;
+}
+
 #page-analysis .tree-list {
   margin: 0;
   padding: 0;
@@ -731,23 +744,27 @@ button:active {
   float: right;
 }
 
+#page-analysis .block-view .status-bar {
+  height: 32px;
+  line-height: 32px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #222;
+  color: #eee;
+  padding: 0 0.8em;
+}
 #page-analysis .block-tree {
   position: relative;
-  border: 1px solid #666;
-  box-shadow: 0 3px 13px rgba(60, 60, 60, 0.4);
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  box-shadow: 0 3px 13px rgba(60, 60, 60, 0.4);
 }
 #page-analysis .block-tree .block-group {
   float: left;
 }
-#page-analysis .block-tree > .block {
-  transition: all 0.25s ease-in-out;
-}
 #page-analysis .block-tree .expanded {
-}
-#page-analysis .block-tree .preview {
-  position: absolute;
-  z-index: 5;
 }
 #page-analysis .block-tree .expanded .block-group {
   opacity: 0;
@@ -760,10 +777,26 @@ button:active {
   height: 100%;
 }
 #page-analysis .block-tree .block {
-  background: radial-gradient(ellipse at center, #a90329 0%, #8f0222 44%, #6d0019 100%);
   box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6);
   z-index: 1;
 }
+#page-analysis .block-tree .block-0 { background: #d35400; }
+#page-analysis .block-tree .block-1 { background: #1abc9c; }
+#page-analysis .block-tree .block-2 { background: #f1c40f; }
+#page-analysis .block-tree .block-3 { background: #2980b9; }
+#page-analysis .block-tree .block-4 { background: #27ae60; }
+#page-analysis .block-tree .block-5 { background: #e74c3c; }
+#page-analysis .block-tree .block-6 { background: #9b59b6; }
+#page-analysis .block-tree .block-7 { background: #f70000; }
+#page-analysis .block-tree .block-8 { background: #f206ff; }
+#page-analysis .block-tree .block-9 { background: #29afd6; }
+#page-analysis .block-tree .block-10 { background: #4a9586; }
+#page-analysis .block-tree .block-11 { background: #b9264f; }
+#page-analysis .block-tree .block-12 { background: #c27e3a; }
+#page-analysis .block-tree .block-13 { background: #9d9d00; }
+#page-analysis .block-tree .block-14 { background: #75b4ff; }
+#page-analysis .block-tree .block-15 { background: #93bf96; }
+
 #page-analysis .block-tree .block,
 #page-analysis .block-tree .sub-block {
   float: left;
@@ -774,23 +807,27 @@ button:active {
   box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6),
               0 0 16px 3px rgba(60, 60, 60, 0.8);
 }
-#page-analysis .block-tree .block-bills {
+#page-analysis .block-tree .preview {
+  position: absolute;
+  z-index: 5;
+}
+#page-analysis .block-tree .block.block-bills {
   background: radial-gradient(ellipse at center, #d92121 0%, #b71c1c 44%, #590e0e 100%);
   background: #b71c1c;
 }
-#page-analysis .block-tree .block-food {
+#page-analysis .block-tree .block.block-food {
   background: radial-gradient(ellipse at center, #5dde62 0%, #43a047 44%, #29612b  100%);
   background: #43a047;
 }
-#page-analysis .block-tree .block-general {
+#page-analysis .block-tree .block.block-general {
   background: radial-gradient(ellipse at center, #007ad9 0%, #01579b 44%, #003259 100%);
   background: #01579b;
 }
-#page-analysis .block-tree .block-holiday {
+#page-analysis .block-tree .block.block-holiday {
   background: radial-gradient(ellipse at center, #00d9c3 0%, #00897b 44%, #005950 100%);
   background: #00897b;
 }
-#page-analysis .block-tree .block-social {
+#page-analysis .block-tree .block.block-social {
   background: radial-gradient(ellipse at center, #d9b329 0%, #bf9e24 44%, #594a11 100%);
   background: #bf9e24;
 }
