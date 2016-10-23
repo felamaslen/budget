@@ -13,7 +13,7 @@
   const ANALYSIS_VIEW_HEIGHT  = 500;
 
   const GRAPH_FUND_HISTORY_WIDTH = 600;
-  const GRAPH_FUND_HISTORY_TENSION = 0.7;
+  const GRAPH_FUND_HISTORY_TENSION = 0.65;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
   const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
   const GRAPH_FUND_HISTORY_POINT_RADIUS = 3;
@@ -1767,7 +1767,7 @@
       }
 
       // plot past data
-      this.drawLine(this.data.slice(this.dataOffset), this.color);
+      this.drawCubicLine(this.data.slice(this.dataOffset), [this.color]);
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
