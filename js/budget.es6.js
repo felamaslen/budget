@@ -6,6 +6,9 @@
   const PIE_LABEL_SCALE_FACTOR_PRE = 0.4;
   const PIE_LABEL_SCALE_FACTOR_POST = 1.2;
   const PIE_SMALL_LABEL_OFFSET = 10;
+  const PIE_DEPTH = 10;
+
+  const pio2 = Math.PI / 2;
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
@@ -1912,13 +1915,8 @@
       ];
     }
 
-    draw() {
-      const pio2 = Math.PI / 2;
-
-      this.ctx.clearRect(0, 0, this.width, this.height);
-
-      // set label colours
-      for (const item of this.data) {
+    setLabelColors() {
+      this.data.forEach(item => {
         const label = item[0];
 
         if (!this.labelColors[label]) {
@@ -1928,7 +1926,151 @@
             (offset + this.labelKey++) % this.colors.length
           ];
         }
+      });
+    }
+
+    labelRadiusExtension(x) {
+      return x < PIE_LABEL_SWITCH_POINT
+      ? PIE_LABEL_SCALE_FACTOR_PRE * Math.sin(
+        pio2 * x / PIE_LABEL_SWITCH_POINT
+      )
+      : -PIE_LABEL_SCALE_FACTOR_POST * (x - 1) /
+        (1 - PIE_LABEL_SWITCH_POINT);
+    }
+
+    drawLabel(p, x, y, angle, thisAngle, radius, smallLabelOffset, lastLabelAngle) {
+      const midAngle = (angle + 0.5 * thisAngle + 2 * Math.PI) % (2 * Math.PI);
+
+      let labelDirection = -1;
+
+      if (
+        !lastLabelAngle || (
+          midAngle - lastLabelAngle + 2 * Math.PI
+        ) % (2 * Math.PI) > this.pieTolerance
+      ) {
+        lastLabelAngle = midAngle;
+
+        const quadrant = Math.floor((midAngle + pio2) / pio2) % 4;
+
+        let labelRadiusScale = PIE_LABEL_RADIUS_START;
+
+        if (quadrant === 3) {
+          // fraction of the top-left quadrant where the label is
+          const frac = (midAngle - Math.PI) / pio2;
+
+          if (frac >= PIE_LABEL_SWITCH_POINT) {
+            labelDirection = 1;
+          }
+
+          labelRadiusScale = PIE_LABEL_RADIUS_START + PIE_LABEL_RADIUS_SCALE *
+            this.labelRadiusExtension(frac);
+        }
+
+        const labelRadius = radius * labelRadiusScale;
+
+        const labelBegin = this.pointFromCircle(
+          x, y, radius * PIE_LABEL_INSIDE_RADIUS, midAngle
+        );
+        const labelEnd = this.pointFromCircle(
+          x, y, labelRadius, midAngle
+        );
+
+        this.stretch();
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(labelBegin[0], labelBegin[1]);
+
+        const textAnchor = this.pointFromCircle(
+          x, y, labelRadius + 1, midAngle
+        );
+
+        textAnchor[1] = Math.floor(textAnchor[1]) + 0.5;
+
+        const baseline = quadrant === 1 && midAngle > 0.2 ? "top" : "middle";
+        const align = quadrant < 2 || labelDirection > 0 ? "left" : "right";
+
+        if (quadrant === 3) {
+          this.ctx.lineTo(textAnchor[0], textAnchor[1]);
+
+          textAnchor[0] += labelDirection * smallLabelOffset++;
+
+          this.ctx.lineTo(textAnchor[0] - 3 * labelDirection, textAnchor[1]);
+        }
+        else {
+          this.ctx.lineTo(labelEnd[0], labelEnd[1]);
+        }
+
+        this.unstretch();
+
+        this.ctx.stroke();
+        this.ctx.closePath();
+
+        const labelValue = p[1];
+
+        let labelName = p[0];
+        if (labelName.length > this.pieLabelLength) {
+          labelName = trim(labelName.substring(0, this.pieLabelLength)) + "... ";
+        }
+
+        const label = labelName + " (" + formatData(labelValue, this.type, true) + ")";
+
+        this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+        this.ctx.textAlign = align;
+        this.ctx.textBaseline = baseline;
+        this.ctx.fillText(label, this.stretchPoint(textAnchor[0]), textAnchor[1]);
       }
+
+      return {
+        offset: smallLabelOffset,
+        angle: lastLabelAngle
+      };
+    }
+
+    drawPieSection(x, y, r, angle1, angle2, color) {
+      const pieDepth = PIE_DEPTH;
+
+      this.stretch();
+
+      this.ctx.beginPath();
+      this.ctx.fillStyle = color;
+
+      this.ctx.moveTo(x, y);
+
+      // filled arcs
+      this.ctx.arc(x, y, r, angle1, angle2, false);
+
+      if (angle2 > 0 && (angle1 < Math.PI || angle2 <= Math.PI)) {
+        this.ctx.fill();
+        this.ctx.closePath();
+        this.ctx.beginPath();
+        this.ctx.lineWidth = 2;
+
+        const base1 = Math.max(0, angle1);
+        const base2 = Math.min(Math.PI, angle2);
+
+        const p = [
+          [r * Math.cos(base1), r * Math.sin(base1)],
+          [r * Math.cos(base2), r * Math.sin(base2) + pieDepth]
+        ];
+
+        this.ctx.moveTo(x + p[0][0], y + p[0][1]);
+        this.ctx.arc(x, y, r, base1, base2, false);
+        this.ctx.lineTo(x + p[1][0], y + p[1][1]);
+        this.ctx.arc(x, y + pieDepth, r, base2, base1, true);
+        this.ctx.lineTo(x + p[0][0], y + p[0][1]);
+      }
+
+      this.ctx.fill();
+      this.ctx.closePath();
+
+      this.unstretch();
+    }
+
+    draw() {
+      this.ctx.clearRect(0, 0, this.width, this.height);
+
+      // set label colours
+      this.setLabelColors();
 
       this.ctx.strokeStyle = COLOR_GRAPH_TITLE;
       this.ctx.font = FONT_AXIS_LABEL;
@@ -1942,121 +2084,49 @@
 
       const radius = Math.min(this.width, this.height) / 4.5;
 
-      let angle = -0.1 - pio2;
+      const startAngle = -0.1 - pio2;
+      let angle = startAngle;
 
-      const labelRadiusExtension = x => {
-        return x < PIE_LABEL_SWITCH_POINT
-        ? PIE_LABEL_SCALE_FACTOR_PRE * Math.sin(
-          Math.PI * x / 2 / PIE_LABEL_SWITCH_POINT
-        )
-        : -PIE_LABEL_SCALE_FACTOR_POST * (x - 1) /
-          (1 - PIE_LABEL_SWITCH_POINT);
-      };
-
-      for (const p of this.data) {
+      this.data.forEach(p => {
         const thisAngle = 2 * Math.PI * p[1] / this.total;
-
         const thisColor = this.labelColors[p[0]];
 
-        const newAngle = angle + thisAngle;
+        const newAngle  = angle + thisAngle;
 
-        this.stretch();
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(centreX, centreY);
-        this.ctx.arc(centreX, centreY, radius, angle, newAngle, false);
-
-        this.unstretch();
-
-        this.ctx.fillStyle = thisColor;
-        this.ctx.fill();
-        this.ctx.stroke();
+        // draw pie section
+        this.drawPieSection(centreX, centreY, radius, angle, newAngle, thisColor);
 
         // draw label
-        const midAngle = (angle + 0.5 * thisAngle + 2 * Math.PI) % (2 * Math.PI);
+        const label = this.drawLabel(
+          p, centreX, centreY, angle, thisAngle, radius, smallLabelOffset, lastLabelAngle
+        );
 
-        let labelDirection = -1;
-
-        if (
-          !lastLabelAngle || (
-            midAngle - lastLabelAngle + 2 * Math.PI
-          ) % (2 * Math.PI) > this.pieTolerance
-        ) {
-          lastLabelAngle = midAngle;
-
-          const quadrant = Math.floor((midAngle + pio2) / pio2) % 4;
-
-          let labelRadiusScale = PIE_LABEL_RADIUS_START;
-
-          if (quadrant === 3) {
-            // x is the fraction of the top-left quadrant where the label is
-            const x = (midAngle - Math.PI) / pio2;
-
-            if (x >= PIE_LABEL_SWITCH_POINT) {
-              labelDirection = 1;
-            }
-
-            labelRadiusScale = PIE_LABEL_RADIUS_START + PIE_LABEL_RADIUS_SCALE *
-              labelRadiusExtension(x);
-          }
-
-          const labelRadius = radius * labelRadiusScale;
-
-          const labelBegin = this.pointFromCircle(
-            centreX, centreY, radius * PIE_LABEL_INSIDE_RADIUS, midAngle
-          );
-          const labelEnd = this.pointFromCircle(
-            centreX, centreY, labelRadius, midAngle
-          );
-
-          this.stretch();
-
-          this.ctx.beginPath();
-          this.ctx.moveTo(labelBegin[0], labelBegin[1]);
-
-          const textAnchor = this.pointFromCircle(
-            centreX, centreY, labelRadius + 1, midAngle
-          );
-
-          textAnchor[1] = Math.floor(textAnchor[1]) + 0.5;
-
-          const baseline = quadrant === 1 && midAngle > 0.2 ? "top" : "middle";
-          const align = quadrant < 2 || labelDirection > 0 ? "left" : "right";
-
-          if (quadrant === 3) {
-            this.ctx.lineTo(textAnchor[0], textAnchor[1]);
-
-            textAnchor[0] += labelDirection * smallLabelOffset++;
-
-            this.ctx.lineTo(textAnchor[0] - 3 * labelDirection, textAnchor[1]);
-          }
-          else {
-            this.ctx.lineTo(labelEnd[0], labelEnd[1]);
-          }
-
-          this.unstretch();
-
-          this.ctx.stroke();
-          this.ctx.closePath();
-
-          const labelValue = p[1];
-
-          let labelName = p[0];
-          if (labelName.length > this.pieLabelLength) {
-            labelName = trim(labelName.substring(0, this.pieLabelLength)) + "... ";
-          }
-
-          const label = labelName + " (" + formatData(labelValue, this.type, true) + ")";
-
-          this.ctx.fillStyle = COLOR_GRAPH_TITLE;
-          this.ctx.textAlign = align;
-          this.ctx.textBaseline = baseline;
-          this.ctx.fillText(label, this.stretchPoint(textAnchor[0]), textAnchor[1]);
-        }
+        smallLabelOffset = label.offset;
+        lastLabelAngle = label.angle;
 
         angle = newAngle;
-      }
+      });
 
+      // stroke the entire pie
+      this.stretch();
+      this.ctx.beginPath();
+
+      this.ctx.arc(centreX, centreY, radius, 0, Math.PI * 2, false);
+      this.ctx.stroke();
+
+      this.ctx.closePath();
+      this.ctx.beginPath();
+
+      this.ctx.moveTo(centreX + radius, centreY);
+      this.ctx.lineTo(centreX + radius, centreY + PIE_DEPTH);
+      this.ctx.arc(centreX, centreY + PIE_DEPTH, radius, 0, Math.PI, false);
+      this.ctx.lineTo(centreX - radius, centreY);
+
+      this.ctx.stroke();
+      this.ctx.closePath();
+      this.unstretch();
+
+      // draw graph title
       this.ctx.fillStyle = "#000";
       this.ctx.font = FONT_GRAPH_TITLE_LARGE;
       this.ctx.textAlign = "right";
