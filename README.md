@@ -7,3 +7,6 @@
 
  - To update/create minified JavaScript and CSS, run:
   * `./updatecache.sh [js] [css]`
+
+ - To scrape fund values, run from the command line:
+  *  php cache_funds.php
