@@ -298,7 +298,11 @@ class RestApi {
 
       $start_time = NULL;
 
-      $total_time = array();
+      $total_time = 0;
+
+      $fid_keys = array();
+
+      $fid_key = 0;
 
       while (NULL !== ($row = $query->fetch_object())) {
         $time = (int)$row->time;
@@ -306,30 +310,36 @@ class RestApi {
 
         $fid = (int)$row->item;
 
-        if (!isset($all[$time])) {
-          $all[$time] = 0;
+        if (!isset($fid_keys[$fid])) {
+          $fid_keys[$fid] = $fid_key++;
         }
-        $all[$time] += $value;
 
-        if (!isset($results[$fid])) {
-          $results[$fid] = array();
+        if (!isset($results[$time])) {
+          $results[$time] = array_fill(0, $fid_key, 0);
         }
+
+        $results[$time][$fid_keys[$fid]] = $value;
 
         if (is_null($start_time)) {
           $start_time = $time;
         }
-
-        $results[$fid][] = array(
-          $time - $start_time,
-          $value
-        );
-
-        $total_time[$fid] = $time - $start_time;
       }
 
-      $results['all'] = array_map(function($item, $key) {
-        return array($key, $item);
-      }, $all);
+      $total_time = $time - $start_time;
+
+      $_results = array();
+
+      foreach($results as $time => $result) {
+        $_result = $result;
+
+        array_unshift($_result, $time - $start_time);
+
+        array_push($_result, array_sum($result));
+
+        $_results[] = $_result;
+      }
+
+      $results = $_results;
     }
     else {
       $num_results_query = db_query('
