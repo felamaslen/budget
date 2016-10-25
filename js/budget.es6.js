@@ -966,24 +966,47 @@
       this.maxX = range[1];
       this.minY = range[2];
       this.maxY = range[3];
+
+      this.setLogRange();
+    }
+
+    setLogY(base) {
+      if (this.minY * this.maxY <= 0) {
+        // can't log a zero value; range contains zero
+        console.warn("Attempted to set log range containing zero!");
+        return;
+      }
+
+      this.log = true;
+      this.setLogRange();
+    }
+
+    setLogRange() {
+      this.lMinY = this.log ? Math.log(this.minY) : this.minY;
+      this.lMaxY = this.log ? Math.log(this.maxY) : this.maxY;
     }
 
     pixX(x) {
       return this.padX1 + (x - this.minX) / (this.maxX - this.minX)
         * (this.width - this.padX1 - this.padX2);
     }
-    pixY(y) {
-      return this.height - this.padY2 -
-        (y - this.minY) / (this.maxY - this.minY) *
-        (this.height - this.padY1 - this.padY2);
-    }
     valX(pix) {
       return (pix - this.padX1) * (this.maxX - this.minX) /
         (this.width - this.padX1 - this.padX2) + this.minX;
     }
+
+    pixY(y) {
+      const ly = this.log ? Math.log(y) / this.log : y;
+
+      return this.height - this.padY2 -
+        (ly - this.lMinY) / (this.lMaxY - this.lMinY) *
+        (this.height - this.padY1 - this.padY2);
+    }
     valY(pix) {
-      return (this.height - this.padY2 - pix) * (this.maxY - this.minY) /
+      const yv = (this.height - this.padY2 - pix) * (this.lMaxY - this.lMinY) /
         (this.height - this.padY1 - this.padY2) + this.minY;
+
+      return this.log ? Math.pow(Math.E, yv * this.log) : yv;
     }
 
     getSpline(p) {
@@ -1294,7 +1317,9 @@
         return key < this.futureKey ? item : dataFuture[key];
       });
 
-      this.maxY = Math.max.apply(null, data);
+      this.setRange([
+        this.minX, this.maxX, this.minY, Math.max.apply(null, data)
+      ]);
 
       this.data = data.map(indexPoints);
 
@@ -1458,7 +1483,7 @@
         return thisData.map(indexPoints);
       }).reverse();
 
-      this.maxY = maxY;
+      this.setRange([this.minX, this.maxX, this.minY, maxY]);
 
       // const chartCategories = this.categories.concat().reverse();
     }
@@ -1724,7 +1749,9 @@
       this.detailChanged();
     }
     detailChanged() {
-      this.minX = this.data[this.dataOffset][0];
+      this.setRange(
+        [this.data[this.dataOffset][0], this.maxX, this.minY, this.maxY]
+      );
 
       this.draw();
     }
@@ -1808,7 +1835,10 @@
       this.ctx.clearRect(0, 0, this.width, this.height);
 
       // set the maximum time to now
-      this.maxX = new Date().getTime() / 1000 - this.startTime;
+      this.setRange([
+        this.minX, new Date().getTime() / 1000 - this.startTime,
+        this.minY, this.maxY
+      ]);
 
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
@@ -1828,8 +1858,11 @@
         this.minY, this.maxY, numTicks
       );
 
-      this.maxY = tickSizeY * Math.ceil(this.maxY / tickSizeY);
-      this.minY = tickSizeY * Math.floor(this.minY / tickSizeY);
+      this.setRange([
+        this.minX, this.maxX,
+        tickSizeY * Math.floor(this.minY / tickSizeY),
+        tickSizeY * Math.ceil(this.maxY / tickSizeY)
+      ]);
 
       const ticksY = [];
 
