@@ -330,13 +330,7 @@ class RestApi {
       $_results = array();
 
       foreach($results as $time => $result) {
-        $_result = $result;
-
-        array_unshift($_result, $time - $start_time);
-
-        array_push($_result, array_sum($result));
-
-        $_results[] = $_result;
+        $_results[] = array($time - $start_time, $result, array_sum($result));
       }
 
       $results = $_results;
