@@ -27,3 +27,5 @@ $serial = file_exists($serial_file)
   : date('Ymd') . '1';
 
 define('CACHE_SERIAL', $serial);
+
+define('FUND_SALT', 'a963anx2');

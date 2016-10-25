@@ -452,64 +452,87 @@ function get_student_loan_data() {
 }
 
 function fund_hash($fund) {
-  return hash_hmac('md5', $fund, 'a963anx2', FALSE);
+  return md5($fund . FUND_SALT);
 }
 
-class FundScraper {
-  public $fund_preg = '/^(.*)\s\((accum|inc)\.?\)$/';
-
-  public $fund_sell_price = array(
-    'hl' => array(),
-  );
-
-  public $did_scrape = FALSE;
-
-  public $cache_only = FALSE;
-  public $force_scrape = FALSE;
-
+class FundScraperCache {
   public $cache = array();
 
-  private $time_now;
-
-  private $new_cache_cid = NULL;
-
-  public function __construct($data) {
-    $this->data = $data;
-
-    $this->time_now = time();
-
-    $this->get_cache();
-  }
-
-  public function get_cache() {
+  public function __construct() {
     $cache_query = db_query(
-      'SELECT f.broker, f.hash, c.price
-      FROM {fund_cache_time} ct
-      INNER JOIN {fund_cache} c ON ct.cid = c.cid
-      INNER JOIN {fund_hash} f ON f.fid = c.fid
-      WHERE ct.time = (
-        SELECT max(time) FROM {fund_cache_time} WHERE done = 1
-      )
-    ', $this->time_now - 86400
-    );
+      'SELECT f.hash, c.price
+      FROM (
+        SELECT fid, MAX(ctg.time) AS latest
+        FROM {fund_cache_time} ctg
+        INNER JOIN {fund_cache} cg ON cg.cid = ctg.cid
+        WHERE ctg.done = 1
+        GROUP BY cg.fid
+      ) x
+      INNER JOIN {fund_cache_time} ct ON ct.time = x.latest
+      INNER JOIN {fund_hash} f ON f.fid = x.fid
+      INNER JOIN {fund_cache} c ON c.fid = x.fid AND c.cid = ct.cid
+      GROUP BY f.fid');
 
     if (!$cache_query) {
       json_error(500);
     }
 
     while (NULL !== ($row = $cache_query->fetch_object())) {
-      if (!isset($this->cache[$row->broker])) {
-        $this->cache[$row->broker] = array();
-      }
-
-      $this->cache[$row->broker][$row->hash] = (float)$row->price;
+      $this->cache[$row->hash] = (float)$row->price;
     }
   }
 
-  public function scrape() {
-    $this->total = count($this->data);
+  public function get_cache_latest($funds) {
+    return array_map(array($this, 'get_fund_cache_latest'), $funds);
+  }
 
-    array_walk($this->data, array($this, 'map_current_cost'));
+  private function get_fund_cache_latest($fund) {
+    $hash = fund_hash($fund['i']);
+
+    $price = isset($this->cache[$hash]) ? $this->cache[$hash] : 0;
+
+    $fund['P'] = $price;
+
+    return $fund;
+  }
+}
+
+class FundScraper {
+  public function __construct() {
+    $this->get_funds();
+
+    $this->time_now = time();
+  }
+
+  private $fund_preg = '/^(.*)\s\((accum|inc)\.?\)$/';
+
+  private $fund_sell_price = array(
+    'hl' => array(),
+  );
+
+  private $time_now;
+
+  private $new_cache_cid = NULL;
+
+  private $funds = array();
+
+  public function scrape() {
+    $i = 0;
+
+    $total = count($this->funds);
+
+    foreach ($this->funds as $fund) {
+      printf("[%d/%d]: %s...\n", ++$i, $total, $fund['name']);
+
+      $price = $this->scrape_fund($fund);
+
+      if (is_null($price)) {
+        printf("Error, skipping\n");
+      }
+      else {
+        printf("[price] %fp\n", $price);
+      }
+    }
 
     if (!is_null($this->new_cache_cid)) {
       // activate the last cache item, since we are done caching
@@ -521,11 +544,36 @@ class FundScraper {
         json_error(500, 'Error activating cache!');
       }
     }
-
-    return $this->data;
+  }
+  
+  private function verbose() {
+    return defined('CLI_VERBOSE') && CLI_VERBOSE;
   }
 
-  function get_url_hl($fund) {
+  private function get_funds() {
+    $query = db_query('
+      SELECT id, item, SUM(cost) AS cost, SUM(units) AS units
+      FROM {funds}
+      GROUP BY item
+    ');
+
+    if (!$query) {
+      printf("Error getting fund data!\n");
+      die;
+    }
+
+    while (NULL !== ($row = $query->fetch_object())) {
+      $this->funds[] = array(
+        'id'    => (int)$row->id,
+        'name'  => $row->item,
+        'hash'  => fund_hash($row->item),
+        'cost'  => (int)$row->cost,
+        'units' => (float)$row->units,
+      );
+    }
+  }
+  
+  private function get_url_hl($fund) {
     // e.g.: http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation 
     
     preg_match_all($this->fund_preg, $fund, $matches);
@@ -562,17 +610,11 @@ class FundScraper {
     return $base_url;
   }
 
-  function download_url($url, $i, $total) {
-    $this->did_scrape = TRUE;
-
-    if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
-      printf("[%d/%d] %s...\n", $i, $total, $url);
-    }
-
+  private function download_url($url) {
     return file_get_contents($url);
   }
   
-  function insert_new_cid() {
+  private function insert_new_cid() {
     if (is_null($this->new_cache_cid)) {
       // create a new cache item
       $query_new_item = db_query(
@@ -588,14 +630,14 @@ class FundScraper {
     }
   }
 
-  function insert_cache_item($broker, $hash, $fund, $price) {
+  private function insert_cache_item($broker, $fund, $price) {
     $this->insert_new_cid();
 
     // make sure this fund is in the hash list
     $hash_exists_query = db_query(
       'SELECT fid FROM {fund_hash}
       WHERE hash = "%s" AND broker = "%s"',
-      $hash, $broker
+      $fund['hash'], $broker
     );
 
     if (!$hash_exists_query) {
@@ -607,7 +649,7 @@ class FundScraper {
     if (!$hash_exists) {
       $hash_put_query = db_query(
         'INSERT INTO {fund_hash} (broker, hash) VALUES ("%s", "%s")',
-        $broker, $hash
+        $broker, $fund['hash']
       );
 
       if (!$hash_put_query) {
@@ -628,8 +670,8 @@ class FundScraper {
 
     // cache this value so we don't need to do it again until tomorrow
     $cache_query = db_query(
-      'INSERT INTO {fund_cache} (cid, fid, did, price, units) VALUES (%d, %d, %d, %s, %s)',
-      $this->new_cache_cid, $fid, $fund['did'], $price, $fund['units']
+      'INSERT INTO {fund_cache} (cid, fid, price, units) VALUES (%d, %d, %s, %s)',
+      $this->new_cache_cid, $fid, $price, $fund['units']
     );
 
     if (!$cache_query) {
@@ -637,7 +679,7 @@ class FundScraper {
     }
   }
 
-  function process_data($data, $hash, $broker, $fund) {
+  private function process_data($data, $broker, $fund) {
     if ($data) {
       // remove new lines
       $data = str_replace(array("\n", "\r"), '', $data);
@@ -674,83 +716,54 @@ class FundScraper {
       $price = 'NULL';
       $return = NULL;
 
-      if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
+      if ($this->verbose()) {
         printf("[ERROR] data not got!\n");
       }
     }
-    
-    if (defined('CLI_VERBOSE') && CLI_VERBOSE) {
-      printf("Price: %f\n", $price);
-    }
 
-    $this->insert_cache_item($broker, $hash, $fund, $price);
+    $this->insert_cache_item($broker, $fund, $price);
     
     // don't scrape the same URL twice!
-    if (!isset($this->fund_sell_price[$broker][$hash])) {
-      $this->fund_sell_price[$broker][$hash] = $price;
+    if (!isset($this->fund_sell_price[$broker][$fund['hash']])) {
+      $this->fund_sell_price[$broker][$fund['hash']] = $price;
     }
 
     return $return;
   }
 
-  function get_current_sell_price_hl($fund, $i, $total) {
-    $hash = fund_hash($fund['name']);
-
+  private function get_current_sell_price_hl($fund) {
     $broker = 'hl'; // TODO: multiple brokers
 
-    if (
-      !$this->force_scrape &&
-      isset($this->cache[$broker]) && isset($this->cache[$broker][$hash])
+    if (isset($this->fund_sell_price[$broker]) &&
+      isset($this->fund_sell_price[$broker][$fund['hash']])
     ) {
-      return $this->cache[$broker][$hash];
-    }
-
-    if ($this->cache_only) {
-      return NULL;
-    }
-
-    if (isset($this->fund_sell_price[$broker][$hash])) {
-      $price = $this->fund_sell_price[$broker][$hash];
-
-      $this->insert_cache_item($broker, $hash, $fund, $price);
+      $price = $this->fund_sell_price[$broker][$fund['hash']];
     }
     else {
       // new scrape
       $url = $this->get_url_hl($fund['name']);
 
-      $data = $this->download_url($url, $i, $total);
+      if ($this->verbose()) {
+        printf("[dl] %s\n", $url);
+      }
 
-      $price = $this->process_data($data, $hash, $broker, $fund);
+      $data = $this->download_url($url);
+
+      $price = $this->process_data($data, $broker, $fund);
     }
 
     return $price;
   }
 
-  function map_current_cost(&$item, $i) {
-    // price per unit
-    $item['P'] = null;
-
-    $fund = array(
-      'name'  => $item['i'],
-      'did'   => $item['I'],
-      'units' => $item['u'],
-    );
-
+  private function scrape_fund($fund) {
     if (!preg_match($this->fund_preg, $fund['name'])) {
       // wrong item format
-      return;
+      return NULL;
     }
 
-    $sell_price = $this->get_current_sell_price_hl(
-      $fund, $i, $this->total
-    );
+    $sell_price = $this->get_current_sell_price_hl($fund);
 
-    if (is_null($sell_price)) {
-      // for some reason the scrape failed
-      return;
-    }
-
-    $item['P'] = $sell_price;
+    return $sell_price;
   }
 }
 
