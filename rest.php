@@ -234,15 +234,13 @@ class RestApi {
   }
   
   private function get_data_funds($offset = 0) {
-    $this->res['data'] = get_data('funds', $offset);
+    $funds = get_data('funds', $offset);
 
-    $scraper = new FundScraper($this->res['data']['data']);
+    $fundScraperCache = new FundScraperCache();
 
-    $scraper->cache_only = TRUE;
-
-    $this->res['data']['data'] = $scraper->scrape();
-
-    $this->res['data']['from_cache'] = !$scraper->did_scrape;
+    $funds['data'] = $fundScraperCache->get_cache_latest($funds['data']);
+    
+    $this->res['data'] = $funds;
   }
 
   private function get_fund_value_history() {
@@ -251,12 +249,12 @@ class RestApi {
     $num_results_query = db_query('
       SELECT COUNT(*) AS num_results FROM (
           SELECT c.cid
-          FROM {funds} f
-          INNER JOIN {fund_cache} fc ON fc.did = f.id
+          FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+          INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+          INNER JOIN {fund_cache} fc ON fh.fid = fc.fid
           INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
-          WHERE f.uid = %d
           GROUP BY fc.cid
-      ) results', $this->user->uid
+      ) results', $this->user->uid, FUND_SALT
     );
 
     if (!$num_results_query) {
@@ -275,10 +273,10 @@ class RestApi {
               SELECT @row := -1
           ) r, (
               SELECT c.time, SUM(fc.price * fc.units) AS value
-              FROM funds f
-              INNER JOIN fund_cache fc ON fc.did = f.id
+              FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+              INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+              INNER JOIN fund_cache fc ON fh.fid = fc.fid
               INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
-              WHERE f.uid = %d
               GROUP BY fc.cid
               ORDER BY c.time DESC
           ) results
@@ -286,7 +284,7 @@ class RestApi {
           ) ranked
         ) list
         WHERE period = 0 OR rownum = %d',
-      $num_results, $num_results_display - 1, $this->user->uid, $num_results - 1
+      $num_results, $num_results_display - 1, $this->user->uid, FUND_SALT, $num_results - 1
     );
 
     if (!$query) {
