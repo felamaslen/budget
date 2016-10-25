@@ -1486,7 +1486,7 @@
       this.$label = $("<div></div>").addClass("label");
       this.$gCont.append(this.$label);
 
-      this.$canvas[0].addEventListener("mousewheel", evt => {
+      this.$gCont[0].addEventListener("mousewheel", evt => {
         if (evt.wheelDelta > 0) {
           this.increaseDetail();
         }
@@ -1733,48 +1733,69 @@
       // divides the time axis (horizontal) into appropriate chunks
       const range = this.maxX - this.minX;
 
+      const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+      const times = {
+        h: 3600,
+        d: 86400,
+        w: 86400 * 7,
+        M: 86400 * 28,
+        y: 86400 * 365
+      };
+
       const divisors = [
-        [60,              "s", 1],
-        [3600,            "h", 3],
-        [86400,           "d", 5],
-        [86400 * 7,       "w", 7],
-        [86400 * 28,      "m", 10],
-        [86400 * 7 * 52,  "y", 12]
+        [times.h,     "h", times.h / 2],
+        [times.h * 6, "h", times.h],
+        [times.d,     "d", times.h * 6],
+        [times.w,     "w", times.d],
+        [times.m,     "M", times.w],
+        [times.y,     "y", times.y / 12, n => monthLength[n] * 86400]
       ];
 
-      const divContains = divisors.findIndex((item, index) => {
-        return item[0] > range || index === divisors.length - 1;
+      // minimum width between major ticks
+      const maxMajorTicks = this.width / 64;
+
+      const majorIndex = divisors.findIndex((item, index) => {
+        return range / item[0] < maxMajorTicks ||
+          index === divisors.length - 1;
       });
 
-      const divMajor = divisors[Math.max(1, divContains - 2)];
-      const divMinor = divisors[Math.max(0, divContains - 3)];
+      const div = divisors[majorIndex];
 
       const ticks = [];
 
-      for (
-        let x = divMinor[0], i = 1;
-        x <= range;
-        x += divMinor[0], i++
-      ) {
-        const X = Math.round(x);
+      const numMajorTicks = Math.ceil(range / div[0]);
+      const numMinorTicks = Math.floor(div[0] / div[2]);
 
-        const pix = Math.round(this.pixX(this.maxX - x)) + 0.5;
+      for (let t = 0; t < numMajorTicks; t++) {
+        // X is the start of the current tick block
+        const X = Math.round(t * div[0]);
 
-        const major = X % divMajor[0] === 0;
+        if (t > 0) {
+          const numTickUnits = Math.floor(X / times[div[1]]);
 
-        if (major) {
           ticks.push({
-            text: (-i).toString() + divMajor[1],
-            pix,
-            size: divMajor[2],
-            major
+            text:   (-numTickUnits).toString() + div[1],
+            pix:    Math.round(this.pixX(this.maxX - X)) + 0.5,
+            major:  true
           });
         }
-        else {
+
+        // minor ticks
+        let Xm = X;
+        for (let n = 0; n < numMinorTicks; n++) {
+          // div[3] is a function which generates the minor tick length
+          const minorTickLength = div[3] ? div[3](n) : div[2];
+
+          Xm += minorTickLength;
+
+          if (Xm > range) {
+            break;
+          }
+
           ticks.push({
-            pix,
-            size: divMinor[2],
-            major
+            pix:    Math.round(this.pixX(this.maxX - Xm)) + 0.5,
+            major:  false
           });
         }
       }
@@ -1810,7 +1831,7 @@
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      for (let i = 0; i < numTicks; i++) {
+      for (let i = 1; i < numTicks; i++) {
         const value = this.minY + i * tickSizeY;
 
         const tickPos = Math.floor(this.pixY(value)) + 0.5;
@@ -1834,18 +1855,21 @@
       this.ctx.textBaseline = "bottom";
 
       const tickAngle = -Math.PI / 6;
+      const tickSize = 10;
 
       timeTicks.forEach(tick => {
+        const thisTickSize = tickSize * (tick.major ? 1 : 0.5);
+
         this.ctx.beginPath();
         this.ctx.strokeStyle = tick.major ? COLOR_LIGHT : COLOR_LIGHT_GREY;
         this.ctx.moveTo(tick.pix, y0);
-        this.ctx.lineTo(tick.pix, y0 - tick.size);
+        this.ctx.lineTo(tick.pix, y0 - thisTickSize);
         this.ctx.stroke();
         this.ctx.closePath();
 
         if (tick.major) {
           this.ctx.save();
-          this.ctx.translate(tick.pix, y0 - tick.size);
+          this.ctx.translate(tick.pix, y0 - thisTickSize);
           this.ctx.rotate(tickAngle);
           this.ctx.fillText(tick.text, 0, 0);
           this.ctx.restore();
