@@ -9,4 +9,4 @@
   * `./updatecache.sh [js] [css]`
 
  - To scrape fund values, run from the command line:
-  *  php cache_funds.php
+  *  `php cache_funds.php`
