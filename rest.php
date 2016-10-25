@@ -247,71 +247,157 @@ class RestApi {
   private function get_fund_value_history() {
     $num_results_display = 100; // this defines the detail of the graph
 
-    $num_results_query = db_query('
-      SELECT COUNT(*) AS num_results FROM (
-          SELECT c.cid
-          FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
-          INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
-          INNER JOIN {fund_cache} fc ON fh.fid = fc.fid
-          INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
-          GROUP BY fc.cid
-      ) results', $this->user->uid, FUND_SALT
-    );
-
-    if (!$num_results_query) {
-      json_error(500, 'Database error');
-    }
-
-    $num_results = (int)$num_results_query->fetch_object()->num_results;
-
-    $query = db_query(
-      'SELECT * FROM (
-        SELECT time, value, rownum, FLOOR(rownum %% (%d / %d)) AS period FROM (
-          SELECT @row := @row + 1 AS rownum,
-              time,
-              value
-          FROM (
-              SELECT @row := -1
-          ) r, (
-              SELECT c.time, SUM(fc.price * fc.units) AS value
-              FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
-              INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
-              INNER JOIN fund_cache fc ON fh.fid = fc.fid
-              INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
-              GROUP BY fc.cid
-              ORDER BY c.time DESC
-          ) results
-          ORDER BY time ASC
-          ) ranked
-        ) list
-        WHERE period = 0 OR rownum = %d',
-      $num_results, $num_results_display - 1, $this->user->uid, FUND_SALT, $num_results - 1
-    );
-
-    if (!$query) {
-      json_error(500);
-    }
-
-    $results = array();
-
-    $start_time = NULL;
-
-    $total_time = 0;
-
-    while (NULL !== ($row = $query->fetch_object())) {
-      $time = (int)$row->time;
-      $value = round($row->value);
-
-      if (is_null($start_time)) {
-        $start_time = $time;
+    if (isset($_GET['deep'])) {
+      $num_results_query = db_query('
+        SELECT COUNT(*) AS num_results
+        FROM {funds} f
+        INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+        INNER JOIN {fund_cache} fc ON fh.fid = fc.fid
+        INNER JOIN {fund_cache_time} c ON c.cid = fc.cid AND c.done = 1
+        WHERE f.uid = %d
+        GROUP BY c.cid
+      ', FUND_SALT, $this->user->uid);
+      
+      if (!$num_results_query) {
+        json_error(500, 'Database error');
       }
 
-      $results[] = array(
-        $time - $start_time,
-        $value
+      $num_results = (int)$num_results_query->fetch_object()->num_results;
+
+      $query = db_query('
+        SELECT * FROM (
+          SELECT item, time, value, FLOOR(cNum %% (%d / %d)) AS period FROM (
+            SELECT x.item, x.time, x.value,
+            (
+              CASE x.cid
+                WHEN @lastCid THEN @cNum
+                ELSE @cNum := @cNum + 1 END
+            ) AS cNum,
+            @lastCid := x.cid AS last_cid
+            FROM (
+              SELECT c.cid, fc.fid AS item, c.time, (fc.price * fc.units) AS value
+              FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+              INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+              INNER JOIN {fund_cache} fc ON fh.fid = fc.fid
+              INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
+            ) x
+            JOIN (SELECT @cNum := 0, @lastCid := 0) r
+          ) ranked
+        ) list
+        WHERE period = 0
+        ORDER BY time, item
+      ', $num_results, $num_results_display, $this->user->uid, FUND_SALT);
+      
+      if (!$query) {
+        json_error(500);
+      }
+
+      $results = array();
+
+      $all = array();
+
+      $start_time = NULL;
+
+      $total_time = array();
+
+      while (NULL !== ($row = $query->fetch_object())) {
+        $time = (int)$row->time;
+        $value = round($row->value);
+
+        $fid = (int)$row->item;
+
+        if (!isset($all[$time])) {
+          $all[$time] = 0;
+        }
+        $all[$time] += $value;
+
+        if (!isset($results[$fid])) {
+          $results[$fid] = array();
+        }
+
+        if (is_null($start_time)) {
+          $start_time = $time;
+        }
+
+        $results[$fid][] = array(
+          $time - $start_time,
+          $value
+        );
+
+        $total_time[$fid] = $time - $start_time;
+      }
+
+      $results['all'] = array_map(function($item, $key) {
+        return array($key, $item);
+      }, $all);
+    }
+    else {
+      $num_results_query = db_query('
+        SELECT COUNT(*) AS num_results FROM (
+            SELECT c.cid
+            FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+            INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+            INNER JOIN {fund_cache} fc ON fh.fid = fc.fid
+            INNER JOIN {fund_cache_time} c ON c.done = 1 AND c.cid = fc.cid
+            GROUP BY fc.cid
+        ) results', $this->user->uid, FUND_SALT
       );
 
-      $total_time = $time - $start_time;
+      if (!$num_results_query) {
+        json_error(500, 'Database error');
+      }
+
+      $num_results = (int)$num_results_query->fetch_object()->num_results;
+
+      $query = db_query(
+        'SELECT * FROM (
+          SELECT time, value, rownum, FLOOR(rownum %% (%d / %d)) AS period FROM (
+            SELECT @row := @row + 1 AS rownum,
+                time,
+                value
+            FROM (
+                SELECT @row := -1
+            ) r, (
+                SELECT c.time, SUM(fc.price * fc.units) AS value
+                FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+                INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+                INNER JOIN fund_cache fc ON fh.fid = fc.fid
+                INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+                GROUP BY fc.cid
+                ORDER BY c.time DESC
+            ) results
+            ORDER BY time ASC
+            ) ranked
+          ) list
+          WHERE period = 0 OR rownum = %d',
+        $num_results, $num_results_display - 1, $this->user->uid, FUND_SALT, $num_results - 1
+      );
+
+      if (!$query) {
+        json_error(500);
+      }
+
+      $results = array();
+
+      $start_time = NULL;
+
+      $total_time = 0;
+
+      while (NULL !== ($row = $query->fetch_object())) {
+        $time = (int)$row->time;
+        $value = round($row->value);
+
+        if (is_null($start_time)) {
+          $start_time = $time;
+        }
+
+        $results[] = array(
+          $time - $start_time,
+          $value
+        );
+
+        $total_time = $time - $start_time;
+      }
     }
 
     $this->res['data'] = array(
