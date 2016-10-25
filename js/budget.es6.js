@@ -970,7 +970,7 @@
       this.setLogRange();
     }
 
-    setLogY(base) {
+    setLogY() {
       if (this.minY * this.maxY <= 0) {
         // can't log a zero value; range contains zero
         console.warn("Attempted to set log range containing zero!");
@@ -1834,12 +1834,6 @@
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
 
-      // set the maximum time to now
-      this.setRange([
-        this.minX, new Date().getTime() / 1000 - this.startTime,
-        this.minY, this.maxY
-      ]);
-
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
 
@@ -1853,22 +1847,36 @@
       this.ctx.strokeStyle = axisColor;
       this.ctx.lineWidth = 1;
 
-      // calculate tick range
+      // calculate new Y range based on truncating the data (zooming)
+      const data = this.data.slice(this.dataOffset);
+
+      const minY = data.reduce((a, b) => {
+        return b[1] < a ? b[1] : a;
+      }, Infinity);
+
+      const maxY = data.reduce((a, b) => {
+        return b[1] > a ? b[1] : a;
+      }, 0);
+
       const tickSizeY = getTickSize(
-        this.minY, this.maxY, numTicks
+        minY, maxY, numTicks
       );
 
+      // set the new ranges
       this.setRange([
-        this.minX, this.maxX,
-        tickSizeY * Math.floor(this.minY / tickSizeY),
-        tickSizeY * Math.ceil(this.maxY / tickSizeY)
+        this.minX, new Date().getTime() / 1000 - this.startTime,
+        tickSizeY * Math.floor(minY / tickSizeY),
+        tickSizeY * Math.ceil(maxY / tickSizeY)
       ]);
 
+      // calculate tick range
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      for (let i = 1; i < numTicks; i++) {
-        const value = this.minY + i * tickSizeY;
+      const newNumTicks = Math.floor((this.maxY - this.minY) / tickSizeY);
+
+      for (let i = 0; i < newNumTicks; i++) {
+        const value = this.minY + (i + 1) * tickSizeY;
 
         const tickPos = Math.floor(this.pixY(value)) + 0.5;
 
@@ -1913,7 +1921,7 @@
       });
 
       // plot past data
-      this.drawCubicLine(this.data.slice(this.dataOffset), [this.color]);
+      this.drawCubicLine(data, [this.color]);
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
