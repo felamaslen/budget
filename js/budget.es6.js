@@ -3605,7 +3605,9 @@
     constructor() {
       super({ page: "analysis" });
 
-      this.period = "year";
+      this.period   = "year";
+      this.grouping = "category";
+
       this.pageIndex = 0;
 
       this.cost = [];
@@ -3629,6 +3631,8 @@
 
     hookDataAddArgs(args) {
       args.push(this.period);
+      args.push(this.grouping);
+
       args.push(this.pageIndex);
 
       return args;
@@ -3656,6 +3660,22 @@
       .append(this.$inputPeriod.week)
       .append($("<span></span>").text("Week"));
 
+      this.$inputGroupingOuter = $("<span></span>").addClass("input-grouping");
+
+      this.$inputGrouping = {
+        category: $("<input type=\"radio\" name=\"grouping\"></input>"),
+        shop:     $("<input type=\"radio\" name=\"grouping\"></input>")
+      };
+
+      this.$inputGrouping[this.grouping].attr("checked", true);
+
+      this.$inputGroupingOuter
+      .append($("<span></span>").text("Grouping: "))
+      .append(this.$inputGrouping.category)
+      .append($("<span></span>").text("Category"))
+      .append(this.$inputGrouping.shop)
+      .append($("<span></span>").text("Shop"));
+
       this.$btnPagePrevious = $("<button></button>")
       .addClass("btn-previous")
       .text("Previous");
@@ -3675,6 +3695,7 @@
 
       this.$upper
       .append(this.$inputPeriodOuter)
+      .append(this.$inputGroupingOuter)
       .append($btns);
 
       this.$page.append(this.$upper);
@@ -3686,6 +3707,9 @@
       this.$inputPeriod.year.on("click",  () => this.changePeriod("year"));
       this.$inputPeriod.month.on("click", () => this.changePeriod("month"));
       this.$inputPeriod.week.on("click",  () => this.changePeriod("week"));
+
+      this.$inputGrouping.category.on("click",  () => this.changeGrouping("category"));
+      this.$inputGrouping.shop.on("click",  () => this.changeGrouping("shop"));
 
       this.$flexBox = $("<div></div>").addClass("flexbox");
 
@@ -3725,6 +3749,14 @@
 
       this.updateView();
     }
+
+    changeGrouping(grouping) {
+      this.grouping = grouping;
+      this.pageIndex = 0;
+
+      this.updateView();
+    }
+
     changePage(direction) {
       const pageIndex = Math.max(0, this.pageIndex + direction);
 
@@ -4065,7 +4097,9 @@
 
       this.loading = true;
 
-      const args = ["data", "analysis_category", category, this.period, this.pageIndex];
+      const args = [
+        "data", "analysis_category", category, this.period, this.grouping, this.pageIndex
+      ];
 
       api.request(
         args.join("/"), "GET", null, user.apiKey,

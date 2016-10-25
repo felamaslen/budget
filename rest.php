@@ -13,8 +13,9 @@ require_once BASE_DIR . '/inc/user.rest.php';
 
 class RestApi {
   public function __construct($user) {
-    $this->analysis_categories = array('bills', 'food', 'general', 'holiday', 'social');
-    $this->analysis_periods = array('week', 'month', 'year');
+    $this->analysis_categories  = array('bills', 'food', 'general', 'holiday', 'social');
+    $this->analysis_periods     = array('week', 'month', 'year');
+    $this->analysis_groupings   = array('category', 'shop');
 
     $this->res = array('error' => FALSE);
 
@@ -452,27 +453,37 @@ class RestApi {
     );
   }
 
-  private function get_category_column($category) {
-    switch ($category) {
-    case 'food':
-    case 'general':
-      $category_column = 'category';
-      break;
-    case 'social':
-      $category_column = 'society';
-      break;
-    case 'holiday':
-      $category_column = 'holiday';
-      break;
-    default:
-      $category_column = 'item';
+  private function get_category_column($category, $grouping) {
+    if ($category === 'bills') {
+      return 'item';
     }
 
-    return $category_column;
+    switch($grouping) {
+    case 'category':
+      switch ($category) {
+      case 'food':
+      case 'general':
+        $group = 'category';
+        break;
+      case 'social':
+        $group = 'society';
+        break;
+      case 'holiday':
+        $group = 'holiday';
+        break;
+      default:
+        $group = 'item';
+      }
+
+      return $group;
+
+    case 'shop':
+      return 'shop';
+    }
   }
 
-  private function _get_data_analysis_category($category, $condition) {
-    $category_column = $this->get_category_column($category);
+  private function _get_data_analysis_category($category, $condition, $grouping) {
+    $category_column = $this->get_category_column($category, $grouping);
     
     $query = '
     SELECT item, `' . $category_column . '` AS item_col, SUM(cost) AS cost
@@ -512,7 +523,7 @@ class RestApi {
     return $items;
   }
 
-  private function get_data_analysis_category($category, $period, $index) {
+  private function get_data_analysis_category($category, $period, $grouping, $index) {
     if ($category === 'bills') {
       $this->res['error'] = TRUE;
       $this->res['errorText'] = 'Bills aren\'t categorised';
@@ -526,6 +537,12 @@ class RestApi {
       return;
     }
 
+    if (!in_array($grouping, $this->analysis_groupings)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid grouping!';
+      return;
+    }
+
     if (!in_array($category, $this->analysis_categories)) {
       $this->res['error'] = TRUE;
       $this->res['errorText'] = 'Must supply valid category!';
@@ -534,13 +551,13 @@ class RestApi {
 
     $condition = $this->analysis_period_condition($period, $index);
 
-    $items = $this->_get_data_analysis_category($category, $condition);
+    $items = $this->_get_data_analysis_category($category, $condition, $grouping);
 
     $this->res['data']['items'] = $items;
   }
 
-  private function _get_data_analysis_items($category, $condition) {
-    $category_column = $this->get_category_column($category);
+  private function _get_data_analysis_items($category, $condition, $grouping) {
+    $category_column = $this->get_category_column($category, $grouping);
 
     $query = '
     SELECT `' . $category_column . '` AS item_col, SUM(cost) AS cost
@@ -570,11 +587,17 @@ class RestApi {
     return $items;
   }
 
-  private function get_data_analysis($period, $index = 0) {
+  private function get_data_analysis($period, $grouping, $index = 0) {
     // period can be "year", "month" or "week"
     if (!in_array($period, $this->analysis_periods)) {
       $this->res['error'] = TRUE;
       $this->res['errorText'] = 'Must supply valid period!';
+      return;
+    }
+
+    if (!in_array($grouping, $this->analysis_groupings)) {
+      $this->res['error'] = TRUE;
+      $this->res['errorText'] = 'Must supply valid grouping!';
       return;
     }
 
@@ -617,7 +640,7 @@ class RestApi {
       foreach ($this->analysis_categories as $category) {
         $cost[] = array(
           $category,
-          $this->_get_data_analysis_items($category, $condition)
+          $this->_get_data_analysis_items($category, $condition, $grouping)
         );
       }
     }
@@ -950,17 +973,21 @@ class RestApi {
 
               $period = array_shift($this->args);
 
+              $grouping = array_shift($this->args);
+
               $index = array_shift($this->args);
 
-              $this->get_data_analysis_category($category, $period, (int)$index);
+              $this->get_data_analysis_category($category, $period, $grouping, (int)$index);
               break;
 
             case 'analysis':
               $period = $arg3;
 
+              $grouping = array_shift($this->args);
+
               $index = array_shift($this->args);
 
-              $this->get_data_analysis($period, (int)$index);
+              $this->get_data_analysis($period, $grouping, (int)$index);
               break;
 
             case 'overview':
