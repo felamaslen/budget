@@ -1807,6 +1807,9 @@
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
 
+      // set the maximum time to now
+      this.maxX = new Date().getTime() / 1000 - this.startTime;
+
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
 
