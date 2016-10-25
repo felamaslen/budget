@@ -1030,10 +1030,10 @@
                 h11(t) * (xk1 - xk) * mk1;
       };
 
-      let xn = this.pixX(0);
+      let xn = this.pixX(this.minX);
 
-      let k = 0;
-      let k1 = 0;
+      let k = this.minX;
+      let k1 = this.minX;
 
       for (let K = 0; K < n; K++) {
         const curvePiece = [];
@@ -1493,6 +1493,8 @@
         else {
           this.decreaseDetail();
         }
+
+        evt.preventDefault();
       });
 
       this.$gCont.on("mousemove", evt => {
@@ -1748,7 +1750,6 @@
       );
 
       this.maxY = tickSizeY * Math.ceil(this.maxY / tickSizeY);
-
       this.minY = tickSizeY * Math.floor(this.minY / tickSizeY);
 
       const ticksY = [];
@@ -1785,7 +1786,7 @@
       }
 
       // highlight point on mouseover
-      if (this.hlPoint > -1) {
+      if (this.hlPoint > -1 && this.data[this.hlPoint][0] >= this.minX) {
         const hlX = this.pixX(this.data[this.hlPoint][0]);
         const hlY = this.pixY(this.data[this.hlPoint][1]);
 
