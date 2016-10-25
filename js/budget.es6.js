@@ -1729,6 +1729,59 @@
       this.draw();
     }
 
+    getTimeScale() {
+      // divides the time axis (horizontal) into appropriate chunks
+      const range = this.maxX - this.minX;
+
+      const divisors = [
+        [60,              "s", 1],
+        [3600,            "h", 3],
+        [86400,           "d", 5],
+        [86400 * 7,       "w", 7],
+        [86400 * 28,      "m", 10],
+        [86400 * 7 * 52,  "y", 12]
+      ];
+
+      const divContains = divisors.findIndex((item, index) => {
+        return item[0] > range || index === divisors.length - 1;
+      });
+
+      const divMajor = divisors[Math.max(1, divContains - 2)];
+      const divMinor = divisors[Math.max(0, divContains - 3)];
+
+      const ticks = [];
+
+      for (
+        let x = divMinor[0], i = 1;
+        x <= range;
+        x += divMinor[0], i++
+      ) {
+        const X = Math.round(x);
+
+        const pix = Math.round(this.pixX(this.maxX - x)) + 0.5;
+
+        const major = X % divMajor[0] === 0;
+
+        if (major) {
+          ticks.push({
+            text: (-i).toString() + divMajor[1],
+            pix,
+            size: divMajor[2],
+            major
+          });
+        }
+        else {
+          ticks.push({
+            pix,
+            size: divMinor[2],
+            major
+          });
+        }
+      }
+
+      return ticks;
+    }
+
     draw() {
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
@@ -1739,6 +1792,8 @@
       const stocksWidth = STOCKS_LIST_WIDTH;
 
       const numTicks = GRAPH_FUND_HISTORY_NUM_TICKS;
+
+      const timeTicks = this.getTimeScale();
 
       // draw axes
       this.ctx.strokeStyle = axisColor;
@@ -1770,6 +1825,33 @@
         this.ctx.stroke();
       }
 
+      // draw time (X axis) ticks
+      const y0 = this.pixY(this.minY);
+
+      this.ctx.font = FONT_AXIS_LABEL;
+      this.ctx.fillStyle = COLOR_LIGHT;
+      this.ctx.textAlign = "left";
+      this.ctx.textBaseline = "bottom";
+
+      const tickAngle = -Math.PI / 6;
+
+      timeTicks.forEach(tick => {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = tick.major ? COLOR_LIGHT : COLOR_LIGHT_GREY;
+        this.ctx.moveTo(tick.pix, y0);
+        this.ctx.lineTo(tick.pix, y0 - tick.size);
+        this.ctx.stroke();
+        this.ctx.closePath();
+
+        if (tick.major) {
+          this.ctx.save();
+          this.ctx.translate(tick.pix, y0 - tick.size);
+          this.ctx.rotate(tickAngle);
+          this.ctx.fillText(tick.text, 0, 0);
+          this.ctx.restore();
+        }
+      });
+
       // plot past data
       this.drawCubicLine(this.data.slice(this.dataOffset), [this.color]);
 
@@ -1792,7 +1874,7 @@
 
         const time = this.data[this.hlPoint][0] + this.startTime;
 
-        const age = new Date().getTime() - time * 1000;
+        const age = todayDate.getTime() - time * 1000;
 
         const ageText = formatAge(age / 1000);
 
@@ -2904,7 +2986,7 @@
           res.data.history[res.data.history.length - 1][0];
 
         const ageHours = Math.round(
-          (new Date().getTime() - valueTime * 1000) / 3600000
+          (todayDate.getTime() - valueTime * 1000) / 3600000
         );
 
         const ago = ageHours + " hour" + (ageHours === 1 ? "" : "s") + " ago";
