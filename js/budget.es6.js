@@ -1611,7 +1611,7 @@
       });
 
       // build stock rendering thingy
-      this.buildStockViewer();
+      // this.buildStockViewer();
 
       windowSize.narrow(() => {
         this.resize(400);
@@ -2037,7 +2037,7 @@
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
 
-      const stocksWidth = STOCKS_LIST_WIDTH;
+      const stocksWidth = 0; // STOCKS_LIST_WIDTH;
 
       const timeTicks = this.getTimeScale();
 
