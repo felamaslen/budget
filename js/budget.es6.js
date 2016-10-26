@@ -39,6 +39,7 @@
   const COLOR_BALANCE_PREDICTED = "#f00";
 
   const COLOR_GRAPH_FUND_LINE = "#fffd93";
+  const COLOR_GRAPH_FUND_LINE_MINOR = "#c6c4ad";
   const COLOR_GRAPH_FUND_POINT = "#ff9400";
 
   const COLOR_PIE_L1 = "#f15854";
@@ -1091,6 +1092,10 @@
     }
 
     drawCubicLine(p, colors) {
+      if (typeof colors === "string") {
+        colors = [colors];
+      }
+
       const curve = this.getSpline(p);
 
       if (this.fill) {
@@ -1159,6 +1164,10 @@
     }
 
     drawLine(p, color) {
+      if (typeof color === "object") {
+        color = color[0];
+      }
+
       let moved = false;
 
       this.ctx.beginPath();
@@ -1564,12 +1573,17 @@
 
       this.tension = GRAPH_FUND_HISTORY_TENSION;
 
-      this.data       = options.data;
+      this.raw    = options.data;
+      this.funds  = options.funds;
+
       this.startTime  = options.startTime;
       this.dataOffset = 0;
       this.hlPoint    = -1;
 
-      this.color = COLOR_GRAPH_FUND_LINE;
+      this.togglePercent(true, true);
+
+      this.colorMajor = COLOR_GRAPH_FUND_LINE;
+      this.colorMinor = COLOR_GRAPH_FUND_LINE_MINOR;
 
       this.$label = $("<div></div>").addClass("label");
       this.$gCont.append(this.$label);
@@ -1591,6 +1605,9 @@
       .on("mouseout", () => {
         this.hlPoint = -1;
         this.draw();
+      })
+      .on("click", () => {
+        this.togglePercent(!this.percent);
       });
 
       // build stock rendering thingy
@@ -1603,6 +1620,27 @@
         this.resize(600);
       })
       .trigger();
+    }
+
+    processData() {
+      const mainLine = this.raw.map(item => {
+        return [item[0], item[2]];
+      });
+
+      if (this.percent) {
+        const lines = this.funds.map((fund, i) => {
+          return this.raw.map(item => {
+            return [item[0], item[1][i]];
+          });
+        });
+
+        // add total line
+        lines.push(mainLine);
+
+        return lines;
+      }
+
+      return [mainLine];
     }
 
     resize(size) {
@@ -1722,12 +1760,21 @@
 
           this.stocks[symbol].change = change;
 
-          this.stocks[symbol].changeText = (change >= 0 ? "+" : "") + change.toFixed(2);
+          const numDp = change === 0 ? 2 : Math.max(
+            0, 2 - Math.max(
+              0, Math.floor(Math.log(Math.abs(change)) / Math.LN10)
+            )
+          );
+
+          this.stocks[symbol].changeText = (change >= 0 ? "+" : "") +
+            change.toFixed(numDp);
         }
       }
 
       if (badStocks > 0) {
-        console.warn("Got " + badStocks.toString() + " extra stocks from finance api");
+        console.warn(
+          "Got " + badStocks.toString() + " extra stocks from finance api"
+        );
 
         return;
       }
@@ -1804,19 +1851,31 @@
     }
 
     increaseDetail() {
-      this.dataOffset = Math.min(this.data.length - 3, this.dataOffset + 1);
+      this.dataOffset = Math.min(this.data[0].length - 3, this.dataOffset + 1);
       this.detailChanged();
     }
     decreaseDetail() {
       this.dataOffset = Math.max(0, this.dataOffset - 1);
       this.detailChanged();
     }
-    detailChanged() {
-      this.setRange(
-        [this.data[this.dataOffset][0], this.maxX, this.minY, this.maxY]
-      );
+    detailChanged(noDraw) {
+      this.calculatePercentages();
 
-      this.draw();
+      this.calculateZoomedRange();
+
+      if (!noDraw) {
+        this.draw();
+      }
+    }
+
+    togglePercent(status, noDraw) {
+      this.percent = status;
+
+      this.dataProc = this.processData();
+
+      this.getFundColors();
+
+      this.detailChanged(noDraw);
     }
 
     getTimeScale() {
@@ -1893,6 +1952,84 @@
       return ticks;
     }
 
+    calculateZoomedRange() {
+      // calculate new Y range based on truncating the data (zooming)
+      this.dataZoomed = this.data.map(line => line.slice(this.dataOffset));
+
+      let minY = this.dataZoomed.reduce((last, line) => {
+        const lineMin = line.reduce((a, b) => {
+          return b[1] < a ? b[1] : a;
+        }, Infinity);
+
+        return lineMin < last ? lineMin : last;
+      }, Infinity);
+
+      const maxY = this.dataZoomed.reduce((last, line) => {
+        const lineMax = line.reduce((a, b) => {
+          return b[1] > a ? b[1] : a;
+        }, 0);
+
+        return lineMax > last ? lineMax : last;
+      }, 0);
+
+      if (this.percent && minY === 0) {
+        minY = -maxY * 0.2;
+      }
+
+      // return the tick size for the new range
+      this.tickSizeY = getTickSize(
+        minY, maxY, GRAPH_FUND_HISTORY_NUM_TICKS
+      );
+
+      // set the new ranges
+      this.setRange([
+        this.data[0][this.dataOffset][0],
+        new Date().getTime() / 1000 - this.startTime,
+        this.tickSizeY * Math.floor(minY / this.tickSizeY),
+        this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
+      ]);
+    }
+
+    calculatePercentages() {
+      // turns data from absolute values to percentage returns
+      this.data = this.percent ? this.dataProc.map(line => {
+        const initial = line[this.dataOffset][1];
+
+        return line.map(item => {
+          return [item[0], 100 * (item[1] - initial) / initial];
+        });
+      }) : this.dataProc;
+    }
+
+    formatValue(value) {
+      return this.percent
+        ? value.toFixed(2) + "%"
+        : formatCurrency(value, true);
+    }
+
+    getFundColors() {
+      // assigns a colour to each fund depending on the fund's investment as a
+      // fraction of the entire portfolio
+      const totalInitial = this.dataProc[this.dataProc.length - 1][0][1];
+
+      const maxLineWidth = 5;
+
+      const ratios = this.dataProc.map(line => {
+        return 1 - Math.pow(Math.E, -6 * line[0][1] / totalInitial);
+      });
+
+      this.fundColors = ratios.map(ratio => {
+        const red = Math.round(255 * ratio);
+        const green = Math.round(255 * (1 - ratio));
+
+        return "rgba(" + red + "," + green + ",50,0.5)";
+      });
+
+      this.fundLineWidth = ratios.map(ratio => {
+        return maxLineWidth * ratio;
+      });
+    }
+
     draw() {
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
@@ -1902,44 +2039,20 @@
 
       const stocksWidth = STOCKS_LIST_WIDTH;
 
-      const numTicks = GRAPH_FUND_HISTORY_NUM_TICKS;
-
       const timeTicks = this.getTimeScale();
-
-      // draw axes
-      this.ctx.strokeStyle = axisColor;
-      this.ctx.lineWidth = 1;
-
-      // calculate new Y range based on truncating the data (zooming)
-      const data = this.data.slice(this.dataOffset);
-
-      const minY = data.reduce((a, b) => {
-        return b[1] < a ? b[1] : a;
-      }, Infinity);
-
-      const maxY = data.reduce((a, b) => {
-        return b[1] > a ? b[1] : a;
-      }, 0);
-
-      const tickSizeY = getTickSize(
-        minY, maxY, numTicks
-      );
-
-      // set the new ranges
-      this.setRange([
-        this.minX, new Date().getTime() / 1000 - this.startTime,
-        tickSizeY * Math.floor(minY / tickSizeY),
-        tickSizeY * Math.ceil(maxY / tickSizeY)
-      ]);
 
       // calculate tick range
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      const newNumTicks = Math.floor((this.maxY - this.minY) / tickSizeY);
+      const newNumTicks = Math.floor((this.maxY - this.minY) / this.tickSizeY);
+
+      // draw axes
+      this.ctx.strokeStyle = axisColor;
+      this.ctx.lineWidth = 1;
 
       for (let i = 0; i < newNumTicks; i++) {
-        const value = this.minY + (i + 1) * tickSizeY;
+        const value = this.minY + (i + 1) * this.tickSizeY;
 
         const tickPos = Math.floor(this.pixY(value)) + 0.5;
 
@@ -1984,7 +2097,18 @@
       });
 
       // plot past data
-      this.drawCubicLine(data, [this.color]);
+      const numMinorLines = this.data.length - 1;
+
+      this.dataZoomed.forEach((line, key) => {
+        if (key < numMinorLines) {
+          this.lineWidth = this.fundLineWidth[key];
+          this.drawLine(line, this.fundColors[key]);
+        }
+        else {
+          this.lineWidth = 2;
+          this.drawCubicLine(line, this.colorMajor);
+        }
+      });
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
@@ -1993,17 +2117,21 @@
       this.ctx.font = FONT_AXIS_LABEL;
 
       for (const tick of ticksY) {
-        const tickName = formatCurrency(tick[0], true, true);
+        const tickName = this.formatValue(tick[0], true, true);
 
         this.ctx.fillText(tickName, this.width - this.padX2, tick[1]);
       }
 
       // highlight point on mouseover
-      if (this.hlPoint > -1 && this.data[this.hlPoint][0] >= this.minX) {
-        const hlX = this.pixX(this.data[this.hlPoint][0]);
-        const hlY = this.pixY(this.data[this.hlPoint][1]);
+      if (
+        this.hlPoint > -1 &&
+        this.data[this.data.length - 1][this.hlPoint][0] >= this.minX
+      ) {
+        const hlX = this.pixX(this.data[this.data.length - 1][this.hlPoint][0]);
+        const hlY = this.pixY(this.data[this.data.length - 1][this.hlPoint][1]);
 
-        const time = this.data[this.hlPoint][0] + this.startTime;
+        const time = this.data[this.data.length - 1][this.hlPoint][0] +
+          this.startTime;
 
         const age = todayDate.getTime() - time * 1000;
 
@@ -2011,8 +2139,8 @@
 
         const align = hlX < this.width / 2 ? -1 : 1;
 
-        const label = ageText + ": " + formatCurrency(
-          this.data[this.hlPoint][1]
+        const label = ageText + ": " + this.formatValue(
+          this.data[this.data.length - 1][this.hlPoint][1]
         );
 
         const left = align > 0
@@ -2051,7 +2179,8 @@
 
       let lastProximity = -1;
 
-      const hlPoint = this.data.reduce((prev, point, index) => {
+      const hlPoint = this.data[this.data.length - 1]
+      .reduce((prev, point, index) => {
         const thisProximity = Math.abs(xv - point[0]);
 
         const returnVal = prev === null || thisProximity < lastProximity
@@ -3081,7 +3210,7 @@
 
     loadFundHistory() {
       api.request(
-        "data/fund_history", "GET", null, user.apiKey,
+        "data/fund_history", "GET", { deep: true }, user.apiKey,
         res => this.onFundHistoryLoaded(res),
         () => {},
         () => {}
@@ -3103,7 +3232,7 @@
       });
 
       if (res.data.history.length > 0) {
-        const lastValue = res.data.history[res.data.history.length - 1][1];
+        const lastValue = res.data.history[res.data.history.length - 1][2];
 
         const profit = lastValue - this.costTotal;
 
@@ -3139,6 +3268,7 @@
         page:   this.page,
         title:  "fund-history",
         data:   res.data.history,
+        funds:  res.data.funds,
         range:  [0, res.data.totalTime, minValue, maxValue],
         pad:    [24, 0, 0, 0],
         lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
