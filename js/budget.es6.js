@@ -15,6 +15,8 @@
   const ANALYSIS_VIEW_WIDTH   = 500;
   const ANALYSIS_VIEW_HEIGHT  = 500;
 
+  const DO_STOCKS_LIST = false;
+
   const GRAPH_FUND_HISTORY_WIDTH = 600;
   const GRAPH_FUND_HISTORY_TENSION = 0.65;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
@@ -1611,7 +1613,9 @@
       });
 
       // build stock rendering thingy
-      // this.buildStockViewer();
+      if (DO_STOCKS_LIST) {
+        this.buildStockViewer();
+      }
 
       windowSize.narrow(() => {
         this.resize(400);
@@ -1623,6 +1627,10 @@
     }
 
     processData() {
+      if (!this.raw.length) {
+        return null;
+      }
+
       const mainLine = this.raw.map(item => {
         return [item[0], item[2]];
       });
@@ -1674,7 +1682,7 @@
     }
 
     loadStocksList() {
-      if (this.stocksListLoading) {
+      if (!DO_STOCKS_LIST || this.stocksListLoading) {
         return;
       }
       this.stocksListLoading = true;
@@ -1873,6 +1881,10 @@
 
       this.dataProc = this.processData();
 
+      if (!this.dataProc) {
+        return;
+      }
+
       this.getFundColors();
 
       this.detailChanged(noDraw);
@@ -2037,7 +2049,7 @@
       const axisColor = COLOR_DARK;
       const axisTextColor = COLOR_LIGHT;
 
-      const stocksWidth = 0; // STOCKS_LIST_WIDTH;
+      const stocksWidth = DO_STOCKS_LIST ? STOCKS_LIST_WIDTH : 0;
 
       const timeTicks = this.getTimeScale();
 
@@ -2097,18 +2109,20 @@
       });
 
       // plot past data
-      const numMinorLines = this.data.length - 1;
+      if (this.data) {
+        const numMinorLines = this.data.length - 1;
 
-      this.dataZoomed.forEach((line, key) => {
-        if (key < numMinorLines) {
-          this.lineWidth = this.fundLineWidth[key];
-          this.drawLine(line, this.fundColors[key]);
-        }
-        else {
-          this.lineWidth = 2;
-          this.drawCubicLine(line, this.colorMajor);
-        }
-      });
+        this.dataZoomed.forEach((line, key) => {
+          if (key < numMinorLines) {
+            this.lineWidth = this.fundLineWidth[key];
+            this.drawLine(line, this.fundColors[key]);
+          }
+          else {
+            this.lineWidth = 2;
+            this.drawCubicLine(line, this.colorMajor);
+          }
+        });
+      }
 
       // draw Y axis
       this.ctx.fillStyle = axisTextColor;
@@ -2175,6 +2189,10 @@
     }
 
     mouseOver(x) {
+      if (!this.data) {
+        return;
+      }
+
       const xv = this.valX(x);
 
       let lastProximity = -1;
