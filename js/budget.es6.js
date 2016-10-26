@@ -32,6 +32,9 @@
   const COLOR_LIGHT = "#eee";
   const COLOR_LIGHT_GREY = "#999";
 
+  const COLOR_PROFIT = "#0c3";
+  const COLOR_LOSS = "#c30";
+
   const COLOR_BALANCE_ACTUAL = "#039";
   const COLOR_BALANCE_PREDICTED = "#f00";
 
@@ -1114,25 +1117,25 @@
 
       if (this.stroke) {
         this.ctx.lineWidth = this.lineWidth;
-
         this.ctx.beginPath();
+        this.ctx.strokeStyle = colors[0];
 
         let colorKey = 0;
 
-        this.ctx.strokeStyle = colors[colorKey];
-
         let moved = false;
 
+        let t = 0; // transition key
+
         curve.forEach((piece, i) => {
-          if (i === this.transition[0]) {
-            this.transition.shift();
+          if (i === this.transition[t]) {
+            t++;
 
             this.ctx.lineTo(piece[0][0], piece[0][1]);
+
             this.ctx.stroke();
-
             this.ctx.closePath();
-            this.ctx.beginPath();
 
+            this.ctx.beginPath();
             this.ctx.strokeStyle = colors[++colorKey % colors.length];
 
             moved = false;
@@ -1151,7 +1154,6 @@
         });
 
         this.ctx.stroke();
-
         this.ctx.closePath();
       }
     }
@@ -1200,6 +1202,44 @@
       this.stroke = true;
 
       this.getData(options.dataPast, options.dataFuture);
+    }
+
+    drawKey() {
+      // add title and key
+      this.ctx.beginPath();
+      this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      this.ctx.fillRect(45, 8, 200, 60);
+      this.ctx.closePath();
+
+      this.ctx.font = FONT_GRAPH_TITLE;
+      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+      this.ctx.textAlign = "left";
+      this.ctx.textBaseline = "top";
+
+      this.ctx.fillText("Balance", 65, 10);
+
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = COLOR_BALANCE_ACTUAL;
+      this.ctx.moveTo(50, 40);
+      this.ctx.lineTo(74, 40);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      this.ctx.font = FONT_GRAPH_KEY_SMALL;
+      this.ctx.textBaseline = "middle";
+      this.ctx.fillStyle = COLOR_DARK;
+      this.ctx.fillText("Actual", 78, 40);
+
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = COLOR_BALANCE_PREDICTED;
+      this.ctx.moveTo(130, 40);
+      this.ctx.lineTo(154, 40);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      this.ctx.fillText("Predicted", 158, 40);
     }
 
     draw() {
@@ -1265,8 +1305,43 @@
         this.ctx.closePath();
       }
 
-      // plot past data
-      this.drawCubicLine(this.data, this.colors);
+      const lineWidth = this.lineWidth;
+
+      // draw spending anomalies
+      this.ctx.lineWidth = this.lineWidth;
+
+      this.dataAnomalies.forEach((anomaly, key) => {
+        if (Math.abs(anomaly) > 0) {
+          const above = anomaly > 0;
+          const color = above ? COLOR_PROFIT : COLOR_LOSS;
+
+          const px = Math.round(this.pixX(key));
+
+          const py1 = this.pixY(this.dataPredicted[key][1] + anomaly);
+          const py2 = this.pixY(this.dataPredicted[key][1]);
+
+          if (Math.abs(py1 - py2) >= 1) {
+            this.ctx.beginPath();
+
+            this.ctx.moveTo(px, py1);
+            this.ctx.lineTo(px, py2);
+
+            this.ctx.strokeStyle = color;
+            this.ctx.stroke();
+            this.ctx.closePath();
+          }
+        }
+      });
+
+      // plot predicted data
+      this.lineWidth = 1;
+      this.drawCubicLine(
+        this.dataPredicted.slice(0, this.futureKey + 1), this.colors.slice(1, 2)
+      );
+
+      // plot past + future predicted data
+      this.lineWidth = lineWidth;
+      this.drawCubicLine(this.dataMain, this.colors);
 
       // draw Y axis
       this.ctx.textBaseline = "bottom";
@@ -1278,61 +1353,40 @@
         this.ctx.fillText(tickName, this.padX1, tick[1]);
       }
 
-      // add title and key
-      this.ctx.beginPath();
-      this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-      this.ctx.fillRect(45, 8, 200, 60);
-      this.ctx.closePath();
-
-      this.ctx.font = FONT_GRAPH_TITLE;
-      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
-      this.ctx.textAlign = "left";
-      this.ctx.textBaseline = "top";
-
-      this.ctx.fillText("Balance", 65, 10);
-
-      this.ctx.beginPath();
-      this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = COLOR_BALANCE_ACTUAL;
-      this.ctx.moveTo(50, 40);
-      this.ctx.lineTo(74, 40);
-      this.ctx.stroke();
-      this.ctx.closePath();
-
-      this.ctx.font = FONT_GRAPH_KEY_SMALL;
-      this.ctx.textBaseline = "middle";
-      this.ctx.fillStyle = COLOR_DARK;
-      this.ctx.fillText("Actual", 78, 40);
-
-      this.ctx.beginPath();
-      this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = COLOR_BALANCE_PREDICTED;
-      this.ctx.moveTo(130, 40);
-      this.ctx.lineTo(154, 40);
-      this.ctx.stroke();
-      this.ctx.closePath();
-
-      this.ctx.fillText("Predicted", 158, 40);
+      this.drawKey();
     }
 
-    getData(past, future) {
-      const dataPast = past.map(hundredth);
-      const dataFuture = future.map(hundredth);
+    getData(actual, predicted) {
+      const dataActual    = actual.map(hundredth);
+      const dataPredicted = predicted.map(hundredth);
 
       this.futureKey = 12 * (this.currentYear - this.startYear) +
         this.currentMonth - this.startMonth + 1;
 
-      const data = dataPast.map((item, key) => {
-        return key < this.futureKey ? item : dataFuture[key];
-      });
+      const maxValue = Math.max(
+        Math.max.apply(null, dataActual),
+        Math.max.apply(null, dataPredicted)
+      );
 
       this.setRange([
-        this.minX, this.maxX, this.minY, Math.max.apply(null, data)
+        this.minX, this.maxX, this.minY, maxValue
       ]);
 
-      this.data = data.map(indexPoints);
+      // combine the actual data with the future predicted data
+      const dataMain = dataActual.map((item, key) => {
+        return key < this.futureKey ? item : dataPredicted[key];
+      });
 
+      this.dataMain = dataMain.map(indexPoints);
+
+      // for changing the colour
       this.transition = [this.futureKey - 1];
+
+      this.dataPredicted = dataPredicted.map(indexPoints);
+
+      this.dataAnomalies = dataMain.map((item, key) => {
+        return item - dataPredicted[key];
+      });
     }
 
     update(costBalance, costPredicted) {
