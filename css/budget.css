@@ -269,6 +269,7 @@ button:active {
   display: inline-block;
   text-align: left !important;
   padding-left: 1px;
+  vertical-align: middle;
 }
 
 .list-ul {
@@ -572,6 +573,9 @@ button:active {
 .li-add .value .editable-input,
 .li-add .cost .editable-input {
   max-width: 94px;
+}
+.li-add button {
+  z-index: 0;
 }
 
 /* graphs */
