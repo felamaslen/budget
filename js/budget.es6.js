@@ -1234,26 +1234,35 @@
       }
 
       // calculate tick range
-      const numTicks = GRAPH_BALANCE_NUM_TICKS;
+      const minorTicks = 5;
+
+      const numTicks = GRAPH_BALANCE_NUM_TICKS * minorTicks;
 
       const tickSize = getTickSize(this.minY, this.maxY, numTicks);
 
       const ticksY = [];
 
       // draw value (Y axis) ticks and horizontal lines
-      for (let i = 1; i < numTicks; i++) {
+      for (let i = 0; i < numTicks; i++) {
         const tickPos = Math.floor(
           this.pixY(i * tickSize)
         ) + 0.5;
 
+        const major = i % minorTicks === 0;
+
         // add value (Y axis) tick to array to draw on top of graph
-        ticksY.push([i * tickSize * 100, tickPos]);
+        if (major) {
+          ticksY.push([i * tickSize * 100, tickPos]);
+        }
 
         // draw horizontal line
         this.ctx.beginPath();
         this.ctx.moveTo(this.padX1, tickPos);
         this.ctx.lineTo(this.width - this.padX2, tickPos);
+
+        this.ctx.strokeStyle = major ? COLOR_LIGHT_GREY : COLOR_LIGHT;
         this.ctx.stroke();
+        this.ctx.closePath();
       }
 
       // plot past data
