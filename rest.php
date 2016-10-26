@@ -266,8 +266,8 @@ class RestApi {
 
       $query = db_query('
         SELECT * FROM (
-          SELECT item, time, value, FLOOR(cNum %% (%d / %d)) AS period FROM (
-            SELECT x.item, x.time, x.value,
+          SELECT item, fid, time, value, FLOOR(cNum %% (%d / %d)) AS period FROM (
+            SELECT x.item, x.fid, x.time, x.value,
             (
               CASE x.cid
                 WHEN @lastCid THEN @cNum
@@ -275,7 +275,7 @@ class RestApi {
             ) AS cNum,
             @lastCid := x.cid AS last_cid
             FROM (
-              SELECT c.cid, fc.fid AS item, c.time, (fc.price * fc.units) AS value
+              SELECT c.cid, fc.fid, f.item, c.time, (fc.price * fc.units) AS value
               FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
               INNER JOIN {fund_hash} fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
               INNER JOIN {fund_cache} fc ON fh.fid = fc.fid
@@ -301,6 +301,7 @@ class RestApi {
       $total_time = 0;
 
       $fid_keys = array();
+      $funds = array();
 
       $fid_key = 0;
 
@@ -308,7 +309,11 @@ class RestApi {
         $time = (int)$row->time;
         $value = round($row->value);
 
-        $fid = (int)$row->item;
+        $fid = (int)$row->fid;
+
+        if (!isset($funds[$fid])) {
+          $funds[$fid_key] = $row->item;
+        }
 
         if (!isset($fid_keys[$fid])) {
           $fid_keys[$fid] = $fid_key++;
@@ -333,7 +338,12 @@ class RestApi {
         $_results[] = array($time - $start_time, $result, array_sum($result));
       }
 
-      $results = $_results;
+      $this->res['data'] = array(
+        'funds'   => $funds,
+        'history' => $_results,
+        'startTime' => $start_time,
+        'totalTime' => $total_time,
+      );
     }
     else {
       $num_results_query = db_query('
@@ -402,13 +412,13 @@ class RestApi {
 
         $total_time = $time - $start_time;
       }
-    }
 
-    $this->res['data'] = array(
-      'history' => $results,
-      'startTime' => $start_time,
-      'totalTime' => $total_time,
-    );
+      $this->res['data'] = array(
+        'history' => $results,
+        'startTime' => $start_time,
+        'totalTime' => $total_time,
+      );
+    }
   }
 
   private function get_data_all() {
