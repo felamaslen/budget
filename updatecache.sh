@@ -1,16 +1,23 @@
 #!/bin/bash
 
-function update_js {
-  rm js/main.min.js
-  touch js/main.min.js
+WEB_ROOT="./web"
 
-  cat js/jquery.min.js >> js/main.min.js
-  cat js/js.cookie.min.js >> js/main.min.js
-  babel js/budget.es6.js | uglifyjs -m >> js/main.min.js
+function update_js {
+  $MAIN = $WEB_ROOT/js/main.min.js
+
+  if [ -e $MAIN ]; then
+    rm $MAIN
+  fi
+
+  touch $MAIN
+
+  cat $WEB_ROOT/js/jquery.min.js >> $MAIN
+  cat $WEB_ROOT/js/js.cookie.min.js >> $MAIN
+  babel $WEB_ROOT/js/budget.es6.js | uglifyjs -m >> $MAIN
 }
 
 function update_css {
-  uglifycss css/budget.css > css/budget.min.css
+  uglifycss $WEB_ROOT/css/budget.css > $WEB_ROOT/css/budget.min.css
 }
 
 function update_serial {

@@ -3,7 +3,6 @@ node_modules/*
 serial
 scripts
 inc/db.password.inc.php
-rest.dev.php
-js/budget.es5.js
-js/main.min.js
-css/budget.min.css
+web/js/budget.es5.js
+web/js/main.min.js
+web/css/budget.min.css
