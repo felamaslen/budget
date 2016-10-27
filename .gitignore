@@ -1,7 +1,11 @@
 node_modules
 node_modules/*
+**/__pycache__
+Budget.egg-info
+srv
+include
+budget/*.pyc
 serial
-scripts
 inc/db.password.inc.php
 web/js/budget.es5.js
 web/js/main.min.js
