@@ -1,0 +1,6 @@
+# set MySQL database information here
+
+DB_HOSTNAME = 'localhost'
+DB_PORT     = 3306
+DB_USERNAME = 'your_db_username'
+DB_PASSWORD = 'your_db_password'
