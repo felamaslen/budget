@@ -2,9 +2,9 @@ node_modules
 node_modules/*
 **/__pycache__
 Budget.egg-info
-srv
+env
 include
-budget/*.pyc
+srv/*.pyc
 serial
 inc/db.password.inc.php
 web/js/budget.es5.js
