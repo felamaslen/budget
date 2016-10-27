@@ -5,6 +5,7 @@ Budget.egg-info
 env
 include
 srv/*.pyc
+srv/db_info.py
 serial
 inc/db.password.inc.php
 web/js/budget.es5.js
