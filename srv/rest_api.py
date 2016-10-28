@@ -10,22 +10,28 @@ from user import user
 
 from config import IP_BAN_TIME
 
+import api_data
+
 class api:
     def __init__(self, request):
         self.api_error = False
         self.response_code = 200
 
+        """ new database connection """
         self.db = database()
 
+        """ headers """
         headerForward = request.headers.getlist("X-Forwarded-For")
         self.remote_ip = headerForward[0] if headerForward else request.remote_addr
 
         headerAuth = request.headers.getlist("Authorization")
         self.auth = headerAuth[0] if headerAuth else None
 
+        """ parameters """
         self.form = request.form
         self.args = request.args
 
+        """ method: GET or POST """
         self.method = request.method
 
         try:
@@ -33,6 +39,7 @@ class api:
         except:
             pin = None
 
+        """ user object for login and authentication """
         self.user = user(self.db, pin)
 
         self.res = {} # this is the entire response given
@@ -48,8 +55,10 @@ class api:
 
             return
 
+        """ give internal server error if execute() returns False """
         self.api_error = self.execute() is False
 
+        """ close the database connection """
         self.db.close()
 
     def getJSON(self):
@@ -87,7 +96,34 @@ class api:
 
                 return True
 
-            self.data['msg'] = "Authenticated!"
+            data = None
+
+            if self.method == 'GET':
+                if arg == 'data':
+                    data = api_data.retrieve(self.db, self.user.uid, self.task)
+
+            elif self.method == 'POST':
+                if arg == 'update':
+                    data = api_data.update(self.db, self.user.uid, self.task)
+
+                elif arg == 'add':
+                    data = api_data.add(self.db, self.user.uid, self.task)
+
+                elif arg == 'delete':
+                    data = api_data.delete(self.db, self.user.uid, self.task)
+
+            default_response = {
+                'error': True, 'errorText': "Invalid task", 'data': {}
+            }
+
+            response = default_response if data is None else data.get_response()
+
+            if response is None: # server error
+                return False
+
+            self.data       = response['data']
+            self.error      = response['error']
+            self.errorText  = response['errorText']
 
         return True
 
@@ -130,12 +166,4 @@ class api:
             self.error = True
             self.errorText = "No PIN" if self.user.pin is None else "Bad PIN"
 
-
-class analysis:
-    """ gets analysis data """
-
-    def __init__(self):
-        self.categories = ['bills', 'food', 'general', 'holiday', 'social']
-        self.periods    = ['week', 'month', 'year']
-        self.groupings  = ['category', 'shop']
 
