@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from itertools import groupby
 
 from config import E_NO_PARAMS, E_BAD_PARAMS
+from misc import fund_hash
 
 class response(object):
     def __init__(self, db, uid, task):
@@ -63,6 +64,9 @@ class retrieve(response):
         elif arg == 'analysis_category':
             this_processor = analysis_category(self.db, self.uid, self.task)
 
+        elif arg == 'funds':
+            this_processor = funds(self.db, self.uid)
+
         elif arg == 'search':
             this_processor = search(self.db, self.uid, self.task)
 
@@ -96,6 +100,144 @@ class processor(object):
         self.errorText = ""
 
         self.data = {}
+
+class list_data(processor):
+    """ gets data for a list view such as food, general etc. """
+    def __init__(self, db, uid, table, offset = 0):
+        super(list_data, self).__init__(db, uid)
+
+        self.table  = table
+        self.offset = offset
+
+        """ map abbreviations to columns, to save bandwidth """
+        cols = [
+            ['dy', 'year'], ['dm', 'month'], ['dd', 'date'], ['I', 'id'], ['i', 'item'], ['c', 'cost']
+        ]
+
+        """ non-standard columns on some tables """
+        table_cols = {
+            'funds':    [['u', 'units']],
+            'in':       [],
+            'bills':    [],
+            'food':     [['k', 'category'], ['s', 'shop']],
+            'general':  [['k', 'category'], ['s', 'shop']],
+            'holiday':  [['h', 'holiday'],  ['s', 'shop']],
+            'social':   [['y', 'society'],  ['s', 'shop']]
+        }
+
+        """ limit the view to N months per group (can page between groups) """
+        limit_cols = {
+            'food':     1,
+            'general':  5,
+            'bills':    24
+        }
+
+        if self.table not in table_cols:
+            self.error = True
+            self.errorText = E_BAD_PARAMS
+
+        """ merge the specific columns for the specified table, with the standard columns """
+        this_cols = cols + table_cols[self.table]
+
+        self.colShort   = map(lambda x: x[0], this_cols)
+        self.colSystem  = map(lambda x: x[1], this_cols)
+
+        """ don't display date, month, year columns individually """
+        self.colDisp    = self.colShort[3:]
+
+    def process(self):
+        query = """
+        SELECT %s FROM `%s`
+        WHERE uid = %d
+        ORDER BY year DESC, month DESC, date DESC, id DESC
+        """ % (', '.join(self.colSystem), self.table, self.uid)
+
+        result = self.db.query(query, [])
+
+        if result is False:
+            return False
+
+        data = []
+
+        for row in result:
+            datum = {}
+            datum['d'] = [int(row[0]), int(row[1]), int(row[2])] # date
+
+            j = 3
+            for col in self.colDisp:
+                datum[col] = int(row[j]) if col == 'c' else row[j]
+                j += 1
+
+            data.append(datum)
+
+        self.data['data'] = data
+
+        self.data['total'] = self.get_total_cost()
+
+        return True
+
+    def get_total_cost(self):
+        result = self.db.query("""
+        SELECT SUM(cost) AS total FROM `%s` WHERE uid = %d
+        """ % (self.table, self.uid), [])
+
+        if result is False:
+            return -1
+
+        for row in result:
+            total = int(row[0])
+
+        return total
+
+class funds(list_data):
+    def __init__(self, db, uid):
+        super(funds, self).__init__(db, uid, 'funds')
+
+        self.cache = None
+
+        self.get_cache_latest()
+
+    def process(self):
+        if self.cache is None:
+            return False
+
+        if super(funds, self).process() is False:
+            return False
+
+        """ add latest fund values to the fetched data """
+        self.data['data'] = map(self.add_cache_value, self.data['data'])
+
+        return True
+
+    def add_cache_value(self, fund):
+        hashValue = fund_hash(fund['i'])
+
+        fund['P'] = self.cache[hashValue] if hashValue in self.cache else 0
+
+        return fund
+
+    def get_cache_latest(self):
+        result = self.db.query("""
+        SELECT f.hash, c.price
+        FROM (
+            SELECT fid, MAX(ctg.time) AS latest
+            FROM fund_cache_time ctg
+            INNER JOIN fund_cache cg ON cg.cid = ctg.cid
+            WHERE ctg.done = 1
+            GROUP BY cg.fid
+        ) x
+        INNER JOIN fund_cache_time ct ON ct.time = x.latest
+        INNER JOIN fund_hash f ON f.fid = x.fid
+        INNER JOIN fund_cache c ON c.fid = x.fid AND c.cid = ct.cid
+        GROUP BY f.fid
+        """, [])
+
+        if result is False:
+            return
+
+        self.cache = {}
+        for (hashValue, price) in result:
+            self.cache[hashValue] = float(price)
 
 class search(processor):
     def __init__(self, db, uid, task):
@@ -150,7 +292,6 @@ class search(processor):
         self.data = [str(col) for (col, matches) in result]
 
         return True
-
 
 class stocks(processor):
     def __init__(self, db, uid):

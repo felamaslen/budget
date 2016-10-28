@@ -4,8 +4,9 @@ Miscellaneous functions
 
 import os.path
 import time
+from hashlib import md5
 
-import config
+from config import SERIAL_FILE, FUND_SALT
 
 def file_get_contents(filename):
     if not os.path.isfile(filename):
@@ -36,15 +37,18 @@ def new_serial(oldSerial = None):
     return date + str(serialIndex)
 
 def get_serial():
-    serial = file_get_contents(config.SERIAL_FILE)
+    serial = file_get_contents(SERIAL_FILE)
 
     return new_serial() if serial is None else serial
 
 def set_serial():
-    serial = file_get_contents(config.SERIAL_FILE)
+    serial = file_get_contents(SERIAL_FILE)
 
     next_serial = new_serial(serial)
 
     print "new serial: %s" % next_serial
 
-    file_put_contents(config.SERIAL_FILE, next_serial)
+    file_put_contents(SERIAL_FILE, next_serial)
+
+def fund_hash(fund):
+    return md5(fund + FUND_SALT).hexdigest()
