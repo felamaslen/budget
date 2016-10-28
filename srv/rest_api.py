@@ -20,6 +20,9 @@ class api:
         headerForward = request.headers.getlist("X-Forwarded-For")
         self.remote_ip = headerForward[0] if headerForward else request.remote_addr
 
+        headerAuth = request.headers.getlist("Authorization")
+        self.auth = headerAuth[0] if headerAuth else None
+
         self.form = request.form
         self.args = request.args
 
@@ -51,27 +54,40 @@ class api:
 
     def getJSON(self):
         if len(self.data) > 0:
-            self.res["data"] = self.data
+            self.res['data'] = self.data
 
-        self.res["error"] = self.error
+        self.res['error'] = self.error
 
         if len(self.errorText) > 0:
-            self.res["errorText"] = self.errorText
+            self.res['errorText'] = self.errorText
 
         return json.dumps(self.res, separators = (',', ':'))
 
     def execute(self):
         """
         decides what to do based on the task set
+        returns false iff a server (not user) error was encountered
         """
 
         arg = self.task.popleft()
 
-        if (arg == "login"):
+        if (arg == 'login'):
             return self.task_login()
 
         else:
-            self.data["foo"] = "hmm"
+            """ make sure we're authenticated before proceeding """
+            auth_status = self.user.auth(self.auth)
+
+            if auth_status is None: # server error
+                return False
+
+            if auth_status > 0: # not authenticated
+                self.error = True
+                self.errorText = "Not authenticated" if auth_status == 2 else "Bad authentication token"
+
+                return True
+
+            self.data['msg'] = "Authenticated!"
 
         return True
 
