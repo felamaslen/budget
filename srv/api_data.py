@@ -8,7 +8,7 @@ from math import ceil
 from datetime import datetime, timedelta
 from itertools import groupby
 
-from config import E_NO_PARAMS
+from config import E_NO_PARAMS, E_BAD_PARAMS
 
 class response(object):
     def __init__(self, db, uid, task):
@@ -57,15 +57,25 @@ class retrieve(response):
 
         arg = self.task.popleft()
 
+        """ decide which processor to run """
         if arg == 'analysis':
             this_processor = analysis(self.db, self.uid, self.task)
         elif arg == 'analysis_category':
             this_processor = analysis_category(self.db, self.uid, self.task)
 
+        elif arg == 'search':
+            this_processor = search(self.db, self.uid, self.task)
+
         elif arg == 'stocks':
             this_processor = stocks(self.db, self.uid)
 
-        result = None if this_processor is None else this_processor.process()
+        """ decide whether the processor is valid """
+        if this_processor is None:
+            result = None
+        elif this_processor.error:
+            result = this_processor
+        else:
+            result = this_processor.process()
 
         if result is not None:
             self.error      = True if result is False else this_processor.error
@@ -86,6 +96,61 @@ class processor(object):
         self.errorText = ""
 
         self.data = {}
+
+class search(processor):
+    def __init__(self, db, uid, task):
+        super(search, self).__init__(db, uid)
+
+        table_cols = {
+            'funds':    ['item', 'units', 'cost'],
+            'in':       ['item', 'cost'],
+            'bills':    ['item', 'cost'],
+            'food':     ['item', 'category', 'cost', 'shop'],
+            'general':  ['item', 'category', 'cost', 'shop'],
+            'holiday':  ['item', 'holiday', 'cost', 'shop'],
+            'social':   ['item', 'society', 'cost', 'shop']
+        }
+
+        default_max = 1
+
+        if len(task) == 3:
+            task.append(default_max)
+
+        if len(task) != 4:
+            self.error = True
+            self.errorText = E_NO_PARAMS
+            return
+
+        self.table, self.column, self.term, self.max = task
+
+        try:
+            self.max = int(self.max)
+        except:
+            self.max = default_max
+
+        if self.table not in table_cols or self.column not in table_cols[self.table]:
+            self.error = True
+            self.errorText = E_BAD_PARAMS
+
+    def process(self):
+        query = """
+        SELECT `%s` AS col, SUM(IF(`%s` LIKE %%s, 1, 0)) AS matches
+        FROM `%s`
+        WHERE uid = %d AND `%s` LIKE %%s
+        GROUP BY col
+        ORDER BY matches DESC
+        LIMIT %%s
+        """ % (self.column, self.column, self.table, self.uid, self.column)
+
+        result = self.db.query(query, [self.term + '%', '%' + self.term + '%', self.max])
+
+        if result is False:
+            return False
+
+        self.data = [str(col) for (col, matches) in result]
+
+        return True
+
 
 class stocks(processor):
     def __init__(self, db, uid):
@@ -246,7 +311,10 @@ class analysis(data_analysis):
 
         self.period, self.grouping, self.index = task
 
-        self.index = int(self.index)
+        try:
+            self.index = int(self.index)
+        except:
+            self.index = 0
 
     def process(self):
         super(analysis, self).process()
@@ -292,7 +360,10 @@ class analysis_category(data_analysis):
 
         self.category, self.period, self.grouping, self.index = task
 
-        self.index = int(self.index)
+        try:
+            self.index = int(self.index)
+        except:
+            self.index = 0
 
     def process(self):
         super(analysis_category, self).process()
