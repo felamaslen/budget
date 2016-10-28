@@ -17,6 +17,7 @@ app = Flask('budget')
 # the .php extension is vestigial
 @app.route('/rest.php', methods = ['GET', 'POST'])
 def api():
+
     api = rest_api.api(request)
 
     if api.api_error:
