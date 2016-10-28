@@ -59,9 +59,11 @@ class retrieve(response):
 
         if arg == 'analysis':
             this_processor = analysis(self.db, self.uid, self.task)
-
         elif arg == 'analysis_category':
             this_processor = analysis_category(self.db, self.uid, self.task)
+
+        elif arg == 'stocks':
+            this_processor = stocks(self.db, self.uid)
 
         result = None if this_processor is None else this_processor.process()
 
@@ -76,7 +78,7 @@ class retrieve(response):
 
 
 class processor(object):
-    def __init__(self, db, uid, task):
+    def __init__(self, db, uid):
         self.db = db
         self.uid = uid
 
@@ -85,10 +87,40 @@ class processor(object):
 
         self.data = {}
 
+class stocks(processor):
+    def __init__(self, db, uid):
+        super(stocks, self).__init__(db, uid)
+
+    def process(self):
+        return self.get_stocks()
+
+    def get_stocks(self):
+        result = self.db.query("""
+        SELECT code, name, SUM(weight * subweight) AS weight
+        FROM stocks
+        GROUP BY code
+        ORDER BY weight DESC
+        """, [])
+
+        if result is False:
+            return False
+
+        stocks = {}
+        total_weight = 0
+
+        for (code, name, weight) in result:
+            this_weight = int(weight)
+            stocks[code] = { 'n': str(name), 'w': this_weight }
+            total_weight += this_weight
+
+        self.data['stocks'] = stocks
+        self.data['total'] = total_weight
+
+        return True
 
 class data_analysis(processor):
     def __init__(self, db, uid, task, num_params = 0):
-        super(data_analysis, self).__init__(db, uid, task)
+        super(data_analysis, self).__init__(db, uid)
 
         self.categories = ['bills', 'food', 'general', 'holiday', 'social']
         self.periods    = ['week', 'month', 'year']
@@ -107,7 +139,6 @@ class data_analysis(processor):
         self.condition = self.period_condition(self.period, self.index)
 
         self.valid_params = self.validate_task(self.period, self.grouping, self.index)
-
 
     def validate_task(self, period, grouping, index):
         valid = True
@@ -206,7 +237,6 @@ class data_analysis(processor):
 
         return group
 
-
 class analysis(data_analysis):
     """ gets analysis data """
     def __init__(self, db, uid, task):
@@ -252,7 +282,6 @@ class analysis(data_analysis):
             items.append([item_col, int(cost)])
 
         return items
-
 
 class analysis_category(data_analysis):
     """ gets deeper analysis data """
