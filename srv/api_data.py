@@ -6,6 +6,7 @@ Does not handle authentication
 import time
 from math import ceil
 from datetime import datetime, timedelta
+from itertools import groupby
 
 from config import E_NO_PARAMS
 
@@ -59,12 +60,19 @@ class retrieve(response):
         if arg == 'analysis':
             this_processor = analysis(self.db, self.uid, self.task)
 
+        elif arg == 'analysis_category':
+            this_processor = analysis_category(self.db, self.uid, self.task)
+
         result = None if this_processor is None else this_processor.process()
 
         if result is not None:
-            self.error      = this_processor.error
+            self.error      = True if result is False else this_processor.error
             self.errorText  = this_processor.errorText
             self.data       = this_processor.data
+
+        else:
+            self.error      = True
+            self.errorText  = "Unknown task"
 
 
 class processor(object):
@@ -94,6 +102,12 @@ class data_analysis(processor):
         if len(task) < num_params:
             self.error      = True
             self.errorText  = E_NO_PARAMS
+
+    def process(self):
+        self.condition = self.period_condition(self.period, self.index)
+
+        self.valid_params = self.validate_task(self.period, self.grouping, self.index)
+
 
     def validate_task(self, period, grouping, index):
         valid = True
@@ -168,32 +182,6 @@ class data_analysis(processor):
             'desc':     description
         }
 
-
-class analysis(data_analysis):
-    """ gets analysis data """
-    def __init__(self, db, uid, task):
-        super(analysis, self).__init__(db, uid, task, 3)
-        if self.error:
-            return
-
-        self.period, self.grouping, self.index = task
-
-        self.index = int(self.index)
-
-    def process(self):
-        if self.validate_task(self.period, self.grouping, self.index) is False:
-            return False
-
-        condition = self.period_condition(self.period, self.index)
-
-        cost = [[category, self.get_items(category, condition, self.grouping)]
-                for category in self.categories]
-
-        self.data['cost'] = cost
-        self.data['description'] = condition['desc']
-
-        return True
-
     def get_category_column(self, category, grouping):
         group = None
 
@@ -218,17 +206,42 @@ class analysis(data_analysis):
 
         return group
 
-    def get_items(self, category, condition, grouping):
-        category_column = self.get_category_column(category, grouping)
+
+class analysis(data_analysis):
+    """ gets analysis data """
+    def __init__(self, db, uid, task):
+        super(analysis, self).__init__(db, uid, task, 3)
+        if self.error:
+            return
+
+        self.period, self.grouping, self.index = task
+
+        self.index = int(self.index)
+
+    def process(self):
+        super(analysis, self).process()
+
+        if self.valid_params is False:
+            return False
+
+        cost = [[category, self.get_items(category)] for category in self.categories]
+
+        self.data['cost'] = cost
+        self.data['description'] = self.condition['desc']
+
+        return True
+
+    def get_items(self, category):
+        category_column = self.get_category_column(category, self.grouping)
 
         query = """
         SELECT `%s` AS item_col, SUM(cost) AS cost
         FROM `%s`
         WHERE %s AND uid = %d AND cost > 0
         GROUP BY item_col
-        """ % (category_column, category, condition['query'], self.uid)
+        """ % (category_column, category, self.condition['query'], self.uid)
 
-        result = self.db.query(query, condition['args'])
+        result = self.db.query(query, self.condition['args'])
 
         if result is False:
             return None
@@ -253,13 +266,46 @@ class analysis_category(data_analysis):
         self.index = int(self.index)
 
     def process(self):
-        valid = super(analysis_category, self).validate_task(self.period, self.grouping, self.index)
+        super(analysis_category, self).process()
 
-        if valid and self.category not in self.categories:
-            self.error      = True
-            self.errorText  = self.e_invalid_category
-            valid = False
+        if self.valid_params:
+            if self.category not in self.categories:
+                self.error      = True
+                self.errorText  = self.e_invalid_category
+                self.valid_params = False
 
-        if valid is False:
+            elif self.category == 'bills':
+                self.error      = True
+                self.errorText  = "Bills aren't categorised"
+                self.valid_params = False
+
+        if self.valid_params is False:
             return False
 
+        items = self.get_items()
+
+        self.data['items'] = items
+
+        return True
+
+    def get_items(self):
+        category_column = self.get_category_column(self.category, self.grouping)
+
+        query = """
+        SELECT item, `%s` AS item_col, SUM(cost) AS cost
+        FROM `%s`
+        WHERE %s AND uid = %d AND cost > 0
+        GROUP BY item, item_col
+        ORDER BY item_col
+        """ % (category_column, self.category, self.condition['query'], self.uid)
+
+        result = self.db.query(query, self.condition['args'])
+
+        if result is False:
+            return None
+
+        values = [[str(item_col), str(item), int(cost)] for (item, item_col, cost) in result]
+
+        items = [[k, [x[1:] for x in g]] for k, g in groupby(values, key = lambda x: x[0])]
+
+        return items
