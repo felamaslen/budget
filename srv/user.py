@@ -129,6 +129,24 @@ class user:
 
         return True # login attempted
 
+    def auth(self, token):
+        """ authenticates using an authorization http header """
+        if token is None or len(token) == 0:
+            return 2
+
+        query = self.db.query("""
+        SELECT uid, user FROM users WHERE api_key = %s
+        """, [token])
+
+        if query is False:
+            return None
+
+        for (uid, user) in query:
+            self.uid    = int(uid)
+            self.name   = str(user)
+
+        return 1 if self.uid == 0 else 0
+
     def password_hash(self):
         """
         gets the has of a password (4 digit pin)
