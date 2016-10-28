@@ -8,7 +8,11 @@ from collections import deque
 from user import user
 
 class api:
-    def __init__(self, request):
+    def __init__(self, db, request):
+        self.api_error = False
+
+        self.remote_ip = request.headers.getlist("X-Forwarded-For")[0] if request.headers.getlist("X-Forwarded-For") else request.remote_addr
+
         self.form = request.form
         self.args = request.args
 
@@ -19,7 +23,7 @@ class api:
         except:
             pin = None
 
-        self.user = user(pin)
+        self.user = user(db, pin)
 
         self.res = {} # this is the entire response given
 
@@ -34,7 +38,7 @@ class api:
 
             return
 
-        self.execute()
+        self.api_error = not self.execute()
 
     def getJSON(self):
         if len(self.data) > 0:
@@ -55,7 +59,10 @@ class api:
         arg = self.task.popleft()
 
         if (arg == "login"):
-            self.user.login()
+            login_status = self.user.login(self.remote_ip)
+
+            if not login_status: # unknown error occurred
+                return False
 
             if self.user.uid > 0:
                 """logged in"""
@@ -69,6 +76,8 @@ class api:
 
         else:
             self.data["foo"] = "hmm"
+
+        return True
 
     def validate_args(self):
         """
