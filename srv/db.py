@@ -27,7 +27,6 @@ class database:
         self.cursor.close()
         self.conn.close()
 
-
     def query(self, statement, data = None):
         statement = statement.strip()
 
@@ -38,7 +37,7 @@ class database:
 
             return False
 
-        if statement.startswith("UPDATE") or statement.startswith("INSERT"):
+        if statement.startswith("UPDATE") or statement.startswith("INSERT") or statement.startswith("DELETE"):
             self.needs_commit = True
 
             return True

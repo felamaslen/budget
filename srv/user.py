@@ -5,6 +5,8 @@ Class for handling user login / logout
 import time
 from hashlib import sha1
 
+from config import IP_BAN_TIME, IP_BAN_TRIES
+
 class user:
     def __init__(self, db, pin = None):
         self.db = db
@@ -26,20 +28,21 @@ class user:
         """
         implements throttling to prevent brute force login attempts
         (thanks to Webster for the idea)
+        returns true iff ip is banned
         """
-        num_seconds_penalty = 60 # penalty to give if IP breaches brute force limit
-
-        num_tries = 10 # number of consecutive bad login attempts to allow
+        num_seconds_penalty = IP_BAN_TIME   # penalty to give if IP breaches brute force limit
+        num_tries           = IP_BAN_TRIES  # number of consecutive bad login attempts to allow
 
         ip_check_query = self.db.query("""
         SELECT `time`, `count` FROM ip_login_req WHERE `ip` = %s
         """, [ip])
 
-        if not ip_check_query:
+        if ip_check_query is False:
             return None
 
         self.ip_check_exists = False
         self.ip_check_count = 0
+        self.ip_check_expired = False
 
         for row in ip_check_query:
             self.ip_check_exists = True
@@ -62,6 +65,8 @@ class user:
                 else:
                     """ ip has waited for penalty time to expire """
                     self.ip_check_count = 0
+
+                    self.ip_check_expired = True
 
             if breach:
                 """ give a penalty to ip """
@@ -90,13 +95,21 @@ class user:
                 INSERT INTO ip_login_req (`ip`, `time`, `count`) VALUES (%s, %s, %s)
                 """, [ip, current_time, 1])
 
+        elif self.ip_check_expired:
+            """ ip made a good login after waiting for ban to expire; delete counter """
+
+            self.db.query("""
+            DELETE FROM ip_login_req WHERE `ip` = %s
+            """, [ip])
+
     def login(self, ip):
+        """ try to log in """
         breachedPenalty = self.ip_check_before(ip)
 
-        if breachedPenalty is None:
-            return False
+        if breachedPenalty is None: # unknown error
+            return None
 
-        if breachedPenalty is True:
+        if breachedPenalty is True: # ip is temp banned
             return False
 
         if breachedPenalty is False and self.pin is not None:
@@ -114,7 +127,7 @@ class user:
 
         self.ip_check_after(ip)
 
-        return True
+        return True # login attempted
 
     def password_hash(self):
         """

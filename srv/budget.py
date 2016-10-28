@@ -7,7 +7,6 @@ from flask import Flask, request, render_template
 
 import config
 import misc
-from db import database
 import user
 import rest_api
 
@@ -18,16 +17,12 @@ app = Flask('budget')
 # the .php extension is vestigial
 @app.route('/rest.php', methods = ['GET', 'POST'])
 def api():
-    db = database()
-
-    api = rest_api.api(db, request)
-
-    db.close()
+    api = rest_api.api(request)
 
     if api.api_error:
-        return "Unknown server error"
+        return "Unknown server error", 500
 
-    return api.getJSON()
+    return api.getJSON(), api.response_code
 
 @app.route('/')
 def index():

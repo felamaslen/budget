@@ -5,13 +5,20 @@ Main class for serving data to the clients
 import json
 from collections import deque
 
+from db import database
 from user import user
 
-class api:
-    def __init__(self, db, request):
-        self.api_error = False
+from config import IP_BAN_TIME
 
-        self.remote_ip = request.headers.getlist("X-Forwarded-For")[0] if request.headers.getlist("X-Forwarded-For") else request.remote_addr
+class api:
+    def __init__(self, request):
+        self.api_error = False
+        self.response_code = 200
+
+        self.db = database()
+
+        headerForward = request.headers.getlist("X-Forwarded-For")
+        self.remote_ip = headerForward[0] if headerForward else request.remote_addr
 
         self.form = request.form
         self.args = request.args
@@ -23,7 +30,7 @@ class api:
         except:
             pin = None
 
-        self.user = user(db, pin)
+        self.user = user(self.db, pin)
 
         self.res = {} # this is the entire response given
 
@@ -38,7 +45,9 @@ class api:
 
             return
 
-        self.api_error = not self.execute()
+        self.api_error = self.execute() is False
+
+        self.db.close()
 
     def getJSON(self):
         if len(self.data) > 0:
@@ -59,20 +68,7 @@ class api:
         arg = self.task.popleft()
 
         if (arg == "login"):
-            login_status = self.user.login(self.remote_ip)
-
-            if not login_status: # unknown error occurred
-                return False
-
-            if self.user.uid > 0:
-                """logged in"""
-                self.res["uid"]     = self.user.uid
-                self.res["name"]    = self.user.name
-                self.res["api_key"] = self.user.api_key
-            else:
-                """bad login"""
-                self.error = True
-                self.errorText = "No PIN" if self.user.pin is None else "Bad PIN"
+            return self.task_login()
 
         else:
             self.data["foo"] = "hmm"
@@ -95,6 +91,28 @@ class api:
         self.task = deque(task.split('/'))
 
         return True
+
+    def task_login(self):
+        login_status = self.user.login(self.remote_ip)
+
+        if login_status is None: # unknown error occurred
+            return False
+
+        if login_status is False: # ip banned
+            self.response_code = 401
+            self.error = True
+            self.errorText = "Your IP has been banned for %s seconds" % IP_BAN_TIME
+
+        elif self.user.uid > 0: # correct login
+            """logged in"""
+            self.res["uid"]     = self.user.uid
+            self.res["name"]    = self.user.name
+            self.res["api_key"] = self.user.api_key
+
+        else: # bad login
+            """bad login"""
+            self.error = True
+            self.errorText = "No PIN" if self.user.pin is None else "Bad PIN"
 
 
 class analysis:
