@@ -60,18 +60,17 @@ def fund_hash(fund):
 def strng(the_string):
     return u''.join(the_string).encode('utf-8')
 
-def list_data_schema(table = None):
-    schema = LIST_DATA_FORM_SCHEMA
+def list_data_schema(table, do_id = True):
+    schema = LIST_DATA_FORM_SCHEMA[table]
 
-    keys = schema if table is None else [table]
+    if do_id:
+        schema['id'] = ('int', False)
 
-    for key in keys:
-        schema[key]['id']   = ('int',       False)
-        schema[key]['date'] = ('date',      True)
-        schema[key]['item'] = ('string',    True)
-        schema[key]['cost'] = ('int',       True)
+    schema['date'] = ('date',      True)
+    schema['item'] = ('string',    True)
+    schema['cost'] = ('int',       True)
 
-    return schema if table is None else schema[table]
+    return schema
 
 def deserialise_date(string):
     """ validates and returns a date from a POST request """
