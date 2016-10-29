@@ -64,6 +64,19 @@ class retrieve(response):
         elif arg == 'analysis_category':
             this_processor = analysis_category(self.db, self.uid, self.task)
 
+        elif arg in ('in', 'bills', 'food', 'general', 'holiday', 'social'):
+            offset = self.task.popleft() if len(self.task) > 0 else 0
+
+            if offset is None:
+                offset = 0
+
+            offset = int(offset)
+
+            if offset < 0:
+                offset = 0
+
+            this_processor = list_data(self.db, self.uid, arg, offset)
+
         elif arg == 'funds':
             this_processor = funds(self.db, self.uid)
 
@@ -148,12 +161,59 @@ class list_data(processor):
         """ don't display date, month, year columns individually """
         self.colDisp    = self.colShort[3:]
 
+        self.condition = ''
+
+        """ limit (paginate) results for certain tables """
+        if self.table in limit_cols:
+            num_months_view = limit_cols[self.table]
+
+            now = datetime.now()
+
+            current_year    = int(now.year)
+            current_month   = int(now.month)
+
+            first_month = (current_month - (offset + 1) * num_months_view - 1) % 12 + 1
+
+            first_year = current_year - int(
+                    ceil(float((offset + 1) * num_months_view - current_month + 1) / 12))
+
+            self.condition += """
+            AND ((year > %d OR (year = %d AND month >= %d))
+            """ % (first_year, first_year, first_month)
+
+            if offset > 0:
+                last_month = (first_month + num_months_view - 1) % 12 + 1
+
+                last_year = first_year + int(ceil(float(num_months_view - 12 + first_month) / 12))
+
+                self.condition += """
+                AND (year < %d OR (year = %d AND month < %d))
+                """ % (last_year, last_year, last_month)
+
+            self.condition += ')'
+
+            older_exists_query = self.db.query("""
+            SELECT COUNT(*) AS count FROM `%s`
+            WHERE uid = %d AND (year < %d OR (year = %d AND month < %d))
+            """ % (self.table, self.uid, first_year, first_year, first_month), [])
+
+            if older_exists_query is False:
+                self.error = True
+                return
+
+            older_exists = False
+            for row in older_exists_query:
+                if int(row[0]) > 0:
+                    older_exists = True
+
+            self.older_exists = older_exists
+
     def process(self):
         query = """
         SELECT %s FROM `%s`
-        WHERE uid = %d
+        WHERE uid = %d %s
         ORDER BY year DESC, month DESC, date DESC, id DESC
-        """ % (', '.join(self.colSystem), self.table, self.uid)
+        """ % (', '.join(self.colSystem), self.table, self.uid, self.condition)
 
         result = self.db.query(query, [])
 
@@ -176,6 +236,8 @@ class list_data(processor):
         self.data['data'] = data
 
         self.data['total'] = self.get_total_cost()
+
+        self.data['older_exists'] = self.older_exists
 
         return True
 
