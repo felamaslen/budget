@@ -4,7 +4,6 @@ Does not handle authentication
 """
 
 import time
-from datetime import datetime, timedelta
 
 from config import LIST_CATEGORIES
 
