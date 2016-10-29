@@ -99,6 +99,10 @@ class api:
             data = None
 
             if self.method == 'GET':
+                if arg == 'pie':
+                    self.task.appendleft(arg)
+                    arg = 'data'
+
                 if arg == 'data':
                     data = api_data.retrieve(self.db, self.user.uid, self.task, self.args)
 

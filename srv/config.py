@@ -1,6 +1,7 @@
 import os.path
 
 PIE_TOLERANCE               = 0.075
+PIE_DETAIL                  = 30
 GRAPH_FUND_HISTORY_DETAIL   = 100
 
 OVERVIEW_NUM_LAST   = 25
