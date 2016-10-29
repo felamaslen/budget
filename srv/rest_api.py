@@ -108,10 +108,10 @@ class api:
 
             elif self.method == 'POST':
                 if arg == 'update':
-                    data = api_data.update(self.db, self.user.uid, self.task, self.args)
+                    data = api_data.update(self.db, self.user.uid, self.task, self.args, self.form)
 
                 elif arg == 'add':
-                    data = api_data.add(self.db, self.user.uid, self.task, self.args)
+                    data = api_data.add(self.db, self.user.uid, self.task, self.args, )
 
                 elif arg == 'delete':
                     data = api_data.delete(self.db, self.user.uid, self.task, self.args)

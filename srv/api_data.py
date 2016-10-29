@@ -7,8 +7,10 @@ import time
 from datetime import datetime, timedelta
 
 from config import LIST_CATEGORIES
+
 from data_get import overview, list_all, list_data, funds, fund_history,\
         pie, search, stocks, analysis, analysis_category
+from data_update import update_overview, update_list_data
 
 from api_data_methods import response
 
@@ -82,3 +84,40 @@ class retrieve(response):
             self.error      = True
             self.errorText  = "Unknown task"
 
+class update(response):
+    """ updates data in the database """
+    def __init__(self, db, uid, task, args, form):
+        self.form = form
+
+        super(update, self).__init__(db, uid, task, args)
+
+    def execute(self):
+        super(update, self).execute()
+
+        this_processor = None
+
+        if len(self.task) > 0:
+            arg = self.task.popleft()
+
+            if arg == 'overview':
+                this_processor = update_overview(self.db, self.uid, self.form)
+
+            else:
+                this_processor = update_list_data(self.db, self.uid, arg, self.form)
+
+        """ decide whether the processor is valid """
+        if this_processor is None:
+            result = None
+        elif this_processor.error:
+            result = this_processor
+        else:
+            result = this_processor.process()
+
+        if result is not None:
+            self.error      = True if result is False else this_processor.error
+            self.errorText  = this_processor.errorText
+            self.data       = this_processor.data
+
+        else:
+            self.error      = True
+            self.errorText  = "Unknown task"
