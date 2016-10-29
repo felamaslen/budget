@@ -111,10 +111,10 @@ class api:
                     data = api_data.update(self.db, self.user.uid, self.task, self.args, self.form)
 
                 elif arg == 'add':
-                    data = api_data.add(self.db, self.user.uid, self.task, self.args, )
+                    data = api_data.add(self.db, self.user.uid, self.task, self.args, self.form)
 
                 elif arg == 'delete':
-                    data = api_data.delete(self.db, self.user.uid, self.task, self.args)
+                    data = api_data.delete(self.db, self.user.uid, self.task, self.args, self.form)
 
             default_response = {
                 'error': True, 'errorText': "Invalid task", 'data': {}

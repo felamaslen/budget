@@ -4,10 +4,11 @@ from misc import strng, list_data_schema, deserialise_date
 from config import LIST_CATEGORIES, E_BAD_PARAMS, E_BAD_FORM, E_NO_FORM
 
 class update_data(processor):
-    def __init__(self, db, uid, form, schema):
+    def __init__(self, db, uid, form, schema, all_required = False):
         super(update_data, self).__init__(db, uid)
 
         self.form_raw = form
+        self.all_required = all_required
 
         form_valid = False
 
@@ -29,7 +30,7 @@ class update_data(processor):
 
         for (key, (dataType, optional)) in schema.items():
             if key not in self.form_raw:
-                if optional:
+                if optional and not self.all_required:
                     continue
                 else:
                     raise Exception("Form data for %s not supplied" % key)
@@ -154,3 +155,33 @@ class update_list_data(update_data):
             return False
 
         return True
+
+class add_list_data(update_data):
+    def __init__(self, db, uid, table, form):
+        if table not in LIST_CATEGORIES:
+            self.error = True
+            self.errorText = E_BAD_PARAMS
+
+        self.table = table
+
+        form_schema = list_data_schema(table, False)
+
+        super(add_list_data, self).__init__(db, uid, form, form_schema, True)
+
+    def process(self):
+        cols = ', '.join(["%s" % col for col in self.form])
+
+        values = ', '.join(["%s" for col in self.form])
+
+        args = [self.form[col] for col in self.form]
+
+        query = self.db.query("""
+        INSERT INTO `%s` (uid, %s) VALUES (%d, %s)
+        """ % (self.table, cols, self.uid, values), args)
+
+        if query is False:
+            return False
+
+        return True
+
+

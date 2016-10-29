@@ -10,7 +10,7 @@ from config import LIST_CATEGORIES
 
 from data_get import overview, list_all, list_data, funds, fund_history,\
         pie, search, stocks, analysis, analysis_category
-from data_update import update_overview, update_list_data
+from data_post import update_overview, update_list_data, add_list_data
 
 from api_data_methods import response
 
@@ -121,3 +121,27 @@ class update(response):
         else:
             self.error      = True
             self.errorText  = "Unknown task"
+
+class add(response):
+    """ adds data to the database """
+    def __init__(self, db, uid, task, args, form):
+        self.form = form
+
+        super(add, self).__init__(db, uid, task, args)
+
+    def execute(self):
+        super(add, self).execute()
+
+        table = None if len(self.task) == 0 else self.task.popleft()
+
+        if table is None:
+            self.error = True
+            self.errorText = "Must provide a table"
+
+        add_processor = add_list_data(self.db, self.uid, table, self.form)
+
+        result = add_processor if add_processor.error else add_processor.process()
+
+        self.error      = True if result is False else add_processor.error
+        self.errorText  = add_processor.errorText
+
