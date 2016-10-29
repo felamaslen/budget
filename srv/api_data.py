@@ -8,8 +8,14 @@ from math import ceil
 from datetime import datetime, timedelta
 from itertools import groupby
 
-from config import E_NO_PARAMS, E_BAD_PARAMS, FUND_SALT, GRAPH_FUND_HISTORY_DETAIL
+from config import E_NO_PARAMS, E_BAD_PARAMS,\
+FUND_SALT, GRAPH_FUND_HISTORY_DETAIL,\
+OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE, START_YEAR, START_MONTH,\
+LIST_CATEGORIES
+
 from misc import fund_hash
+
+now = datetime.now()
 
 class response(object):
     def __init__(self, db, uid, task, args):
@@ -67,7 +73,13 @@ class retrieve(response):
         elif arg == 'all':
             this_processor = list_all(self.db, self.uid)
 
-        elif arg in ('in', 'bills', 'food', 'general', 'holiday', 'social'):
+        elif arg == 'overview':
+            this_processor = overview(self.db, self.uid)
+
+        elif arg == 'funds':
+            this_processor = funds(self.db, self.uid)
+
+        elif arg in LIST_CATEGORIES:
             offset = self.task.popleft() if len(self.task) > 0 else 0
 
             if offset is None:
@@ -79,9 +91,6 @@ class retrieve(response):
                 offset = 0
 
             this_processor = list_data(self.db, self.uid, arg, offset)
-
-        elif arg == 'funds':
-            this_processor = funds(self.db, self.uid)
 
         elif arg == 'fund_history':
             deep = 'deep' in self.args
@@ -120,26 +129,131 @@ class processor(object):
 
         self.data = {}
 
+class overview(processor):
+    def __init__(self, db, uid):
+        super(overview, self).__init__(db, uid)
+
+        self.year_months = self.get_year_months(OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE)
+
+    def process(self):
+        categories = LIST_CATEGORIES
+
+        balance = self.get_balance()
+
+        month_cost = {}
+
+        try:
+            for category in categories:
+                month_cost[category] = self.get_category_data(category)
+
+        except EnvironmentError as error:
+            self.errorText = "%s" % error
+
+            return False
+
+        month_cost['balance'] = balance
+
+        self.data['cost']           = month_cost
+        self.data['startYearMonth'] = list(self.year_months[0])
+        self.data['endYearMonth']   = list(self.year_months[len(self.year_months) - 1])
+        self.data['currentYear']    = int(now.year)
+        self.data['currentMonth']   = int(now.month)
+        self.data['futureMonths']   = OVERVIEW_NUM_FUTURE
+
+        return True
+
+    def get_category_data(self, category):
+        params = []
+
+        union = "SELECT %d AS y, %d AS m UNION " % self.year_months[0]
+
+        union += " UNION ".join(["SELECT %d, %d" % self.year_months[i]
+            for i in range(1, len(self.year_months))])
+
+        query = """
+        SELECT SUM(cost) AS month_cost FROM (%s) AS dates
+        LEFT JOIN `%s` AS list
+        ON uid = %d AND ((list.year = dates.y AND list.month = dates.m))
+        GROUP BY y, m
+        """ % (union, category, self.uid)
+
+        result = self.db.query(query, [])
+
+        if result is False:
+            raise EnvironmentError("database error")
+
+        return [0 if row[0] is None else int(row[0]) for row in result]
+
+    def get_balance(self):
+        ym1 = self.year_months[0]
+        ym2 = self.year_months[len(self.year_months) - 1]
+
+        y1 = ym1[0]
+        y2 = ym2[0]
+
+        m1 = ym1[1]
+        m2 = ym2[1]
+
+        query = self.db.query("""
+        SELECT year, month, balance
+        FROM balance
+        WHERE uid = %d AND (
+            (year > %d OR (year = %d AND month >= %d)) AND
+            (year < %d OR (year = %d AND month <= %d))
+        ) ORDER BY year, month
+        """ % (self.uid, y1, y1, m1, y2, y2, m2), [])
+
+        if query is False:
+            return None
+
+        balance = []
+
+        for (y, m, value) in query:
+            balance += [0] * max(0, 12 * (y - y1) + m - m1 - len(balance))
+
+            balance.append(int(value))
+
+        return balance
+
+    def get_year_months(self, past_months, future_months):
+        start_month = int((now.month - past_months + 11) % 12 + 1)
+        start_year  = int(now.year - max(0, ceil(float(past_months - now.month + 1) / 12)))
+
+        if start_year < START_YEAR or (start_year == START_YEAR and start_month < START_MONTH):
+            start_year  = START_YEAR
+            start_month = START_MONTH
+
+        end_month   = (now.month + future_months - 1) % 12 + 1
+        end_year    = now.year + int(ceil(float(future_months - 12 + now.month) / 12))
+
+        return [(y, m) for y in range(start_year, end_year + 1) for m in range(1, 13)
+                if (y > start_year or m >= start_month) and (y < end_year or m <= end_month)]
+
 class list_all(processor):
     def __init__(self, db, uid):
         super(list_all, self).__init__(db, uid)
 
-        self.list_tables = ('funds', 'in', 'bills', 'food', 'general', 'holiday', 'social')
+        self.tables = ['overview'] + list(LIST_CATEGORIES)
 
     def process(self):
-        for table in self.list_tables:
-            this_processor = list_data(self.db, self.uid, table)
+        processors = [overview(self.db, self.uid)] + [
+                list_data(self.db, self.uid, table) for table in LIST_CATEGORIES]
 
-            if this_processor.error:
+        for key in range(len(self.tables)):
+            processor = processors[key]
+
+            if processor.error:
                 self.errorText = this_processor.errorText
                 return False
 
-            result = this_processor.process()
+            result = processor.process()
 
             if result is False:
                 return False
 
-            self.data[table] = this_processor.data
+            table = self.tables[key]
+
+            self.data[table] = processor.data
 
         return True
 
@@ -194,8 +308,6 @@ class list_data(processor):
         """ limit (paginate) results for certain tables """
         if self.table in limit_cols:
             num_months_view = limit_cols[self.table]
-
-            now = datetime.now()
 
             current_year    = int(now.year)
             current_month   = int(now.month)
@@ -647,8 +759,6 @@ class data_analysis(processor):
         return valid
 
     def period_condition(self, period, index):
-        now = datetime.now()
-
         if period == 'week':
             t0 = now - timedelta(days = now.weekday()) - timedelta(weeks = index)
             t1 = t0 + timedelta(weeks = 1)
