@@ -174,4 +174,3 @@ class api:
             self.error = True
             self.errorText = "No PIN" if self.user.pin is None else "Bad PIN"
 
-
