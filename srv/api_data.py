@@ -213,6 +213,8 @@ class overview(processor):
 
             balance.append(int(value))
 
+        balance += [0] * max(0, 12 * (y2 - y1) + m2 - m1 + 1 - len(balance))
+
         return balance
 
     def get_year_months(self, past_months, future_months):
