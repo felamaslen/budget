@@ -1,6 +1,6 @@
 from api_data_methods import processor
 
-from misc import strng, list_data_schema, deserialise_date
+from misc import strng, list_data_schema, deserialise_date, get_table_total
 from config import LIST_CATEGORIES, E_BAD_PARAMS, E_BAD_FORM, E_NO_FORM
 
 class update_data(processor):
@@ -84,6 +84,12 @@ class update_data(processor):
 
         return True
 
+    def get_new_total(self):
+        """ gets the total cost of the table after inserting a new item,
+        or editing an item """
+
+        return get_table_total(self.table, self.db, self.uid)
+
 class update_overview(update_data):
     def __init__(self, db, uid, form):
         form_schema = {
@@ -154,6 +160,11 @@ class update_list_data(update_data):
         if query is False:
             return False
 
+        try:
+            self.new_total = self.get_new_total()
+        except:
+            return False
+
         return True
 
 class add_list_data(update_data):
@@ -182,6 +193,53 @@ class add_list_data(update_data):
         if query is False:
             return False
 
+        self.add_id = self.db.last_insert_id() # add last insert id to the response
+
+        try:
+            self.new_total = self.get_new_total()
+        except:
+            return False
+
         return True
 
+class delete_list_data(processor):
+    def __init__(self, db, uid, table, form):
+        super(delete_list_data, self).__init__(db, uid)
 
+        if table not in LIST_CATEGORIES:
+            self.error = True
+            self.errorText = E_BAD_PARAMS
+
+        self.table = table
+
+        if 'id' not in form:
+            self.error = True
+            self.errorText = E_NO_FORM
+
+        form_id = form['id']
+        try:
+            form_id = int(form_id)
+            if form_id < 1:
+                raise Exception
+
+            self.form_id = form_id
+        except:
+            self.error = True
+            self.errorText = E_BAD_FORM
+
+            return
+
+    def process(self):
+        query = self.db.query("""
+        DELETE FROM `%s` WHERE uid = %d AND id = %%s
+        """ % (self.table, self.uid), [self.form_id])
+
+        if query is False:
+            return False
+
+        try:
+            self.new_total = get_table_total(self.table, self.db, self.uid)
+        except:
+            return False
+
+        return True

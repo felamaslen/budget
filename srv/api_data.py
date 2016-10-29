@@ -10,7 +10,7 @@ from config import LIST_CATEGORIES
 
 from data_get import overview, list_all, list_data, funds, fund_history,\
         pie, search, stocks, analysis, analysis_category
-from data_post import update_overview, update_list_data, add_list_data
+from data_post import update_overview, update_list_data, add_list_data, delete_list_data
 
 from api_data_methods import response
 
@@ -91,10 +91,22 @@ class update(response):
 
         super(update, self).__init__(db, uid, task, args)
 
+    def get_response(self):
+        response = super(update, self).get_response()
+
+        if self.new_total is not None and response is not None:
+            """ add new total to response after updating """
+            response['extra'] = { 'total': self.new_total }
+
+        return response
+
     def execute(self):
         super(update, self).execute()
 
         this_processor = None
+
+        self.new_total = None
+        get_total = False
 
         if len(self.task) > 0:
             arg = self.task.popleft()
@@ -103,6 +115,7 @@ class update(response):
                 this_processor = update_overview(self.db, self.uid, self.form)
 
             else:
+                get_total = True
                 this_processor = update_list_data(self.db, self.uid, arg, self.form)
 
         """ decide whether the processor is valid """
@@ -118,19 +131,36 @@ class update(response):
             self.errorText  = this_processor.errorText
             self.data       = this_processor.data
 
+            if get_total:
+                self.new_total = this_processor.new_total
+
         else:
             self.error      = True
             self.errorText  = "Unknown task"
 
-class add(response):
-    """ adds data to the database """
-    def __init__(self, db, uid, task, args, form):
+class add_delete(response):
+    """ adds or deletes data to / from the database """
+    def __init__(self, which, db, uid, task, args, form):
         self.form = form
 
-        super(add, self).__init__(db, uid, task, args)
+        self.which = which
+
+        super(add_delete, self).__init__(db, uid, task, args)
+
+    def get_response(self):
+        response = super(add_delete, self).get_response()
+
+        if self.error is False and response is not None:
+            """ add id and new total to response after adding item """
+            response['extra'] = { 'total': self.new_total }
+
+            if self.which == 'add':
+                response['extra']['id'] = self.add_id
+
+        return response
 
     def execute(self):
-        super(add, self).execute()
+        super(add_delete, self).execute()
 
         table = None if len(self.task) == 0 else self.task.popleft()
 
@@ -138,10 +168,29 @@ class add(response):
             self.error = True
             self.errorText = "Must provide a table"
 
-        add_processor = add_list_data(self.db, self.uid, table, self.form)
+        self.new_total  = None
+        self.add_id     = None
 
-        result = add_processor if add_processor.error else add_processor.process()
+        this_processor = None
 
-        self.error      = True if result is False else add_processor.error
-        self.errorText  = add_processor.errorText
+        if self.which == 'add':
+            this_processor = add_list_data(self.db, self.uid, table, self.form)
+        elif self.which == 'delete':
+            this_processor = delete_list_data(self.db, self.uid, table, self.form)
 
+        if this_processor is None:
+            self.error = True
+            self.errorText = "Unknown server error"
+
+            return
+
+        result = this_processor if this_processor.error else this_processor.process()
+
+        self.error      = True if result is False else this_processor.error
+        self.errorText  = this_processor.errorText
+
+        if self.error is False:
+            self.new_total = this_processor.new_total
+
+            if self.which == 'add':
+                self.add_id = this_processor.add_id

@@ -45,6 +45,7 @@ class api:
         self.res = {} # this is the entire response given
 
         self.data = {} # this is the main response provided
+        self.extra = {} # for legacy reasons this is required
 
         self.error = False
         self.errorText = ""
@@ -62,6 +63,10 @@ class api:
         self.db.close()
 
     def getJSON(self):
+        if self.extra is not None and len(self.extra) > 0:
+            for key in self.extra:
+                self.res[key] = self.extra[key]
+
         if len(self.data) > 0:
             self.res['data'] = self.data
 
@@ -110,11 +115,9 @@ class api:
                 if arg == 'update':
                     data = api_data.update(self.db, self.user.uid, self.task, self.args, self.form)
 
-                elif arg == 'add':
-                    data = api_data.add(self.db, self.user.uid, self.task, self.args, self.form)
-
-                elif arg == 'delete':
-                    data = api_data.delete(self.db, self.user.uid, self.task, self.args, self.form)
+                elif arg == 'add' or arg == 'delete':
+                    data = api_data.add_delete(
+                            arg, self.db, self.user.uid, self.task, self.args, self.form)
 
             default_response = {
                 'error': True, 'errorText': "Invalid task", 'data': {}
@@ -125,6 +128,7 @@ class api:
             if response is None: # server error
                 return False
 
+            self.extra      = response['extra']
             self.data       = response['data']
             self.error      = response['error']
             self.errorText  = response['errorText']

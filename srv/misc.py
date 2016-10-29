@@ -100,3 +100,20 @@ def deserialise_date(string):
 
     return (year, month, date)
 
+def get_table_total(table, db, uid):
+    if table == 'overview':
+        return -1
+
+    query = db.query("""
+    SELECT SUM(cost) AS total FROM `%s` WHERE uid = %d
+    """ % (table, uid), [])
+
+    if query is False:
+        raise Exception
+
+    total = -1
+    for row in query:
+        total = int(row[0])
+
+    return total
+
