@@ -23,3 +23,5 @@ FUND_SALT       = 'a963anx2'
 # error messages
 E_NO_PARAMS     = "Not enough parameters given"
 E_BAD_PARAMS    = "Invalid parameters given"
+E_NO_FORM       = "Not enough form data given"
+E_BAD_FORM      = "Invalid form data given"
