@@ -1,7 +1,7 @@
 from api_data_methods import processor
 
 from misc import strng, list_data_schema, deserialise_date, get_table_total
-from config import LIST_CATEGORIES, E_BAD_PARAMS, E_BAD_FORM, E_NO_FORM
+from config import LIST_CATEGORIES, E_BAD_PARAMS, E_BAD_FORM, E_NO_FORM, E_NO_ITEM
 
 class update_data(processor):
     def __init__(self, db, uid, form, schema, all_required = False):
@@ -178,6 +178,10 @@ class add_list_data(update_data):
         form_schema = list_data_schema(table, False)
 
         super(add_list_data, self).__init__(db, uid, form, form_schema, True)
+
+        if 'item' not in self.form or len(self.form['item']) == 0:
+            self.error = True
+            self.errorText = E_NO_ITEM
 
     def process(self):
         cols = ', '.join(["%s" % col for col in self.form])
