@@ -64,6 +64,9 @@ class retrieve(response):
         elif arg == 'analysis_category':
             this_processor = analysis_category(self.db, self.uid, self.task)
 
+        elif arg == 'all':
+            this_processor = list_all(self.db, self.uid)
+
         elif arg in ('in', 'bills', 'food', 'general', 'holiday', 'social'):
             offset = self.task.popleft() if len(self.task) > 0 else 0
 
@@ -116,6 +119,29 @@ class processor(object):
         self.errorText = ""
 
         self.data = {}
+
+class list_all(processor):
+    def __init__(self, db, uid):
+        super(list_all, self).__init__(db, uid)
+
+        self.list_tables = ('funds', 'in', 'bills', 'food', 'general', 'holiday', 'social')
+
+    def process(self):
+        for table in self.list_tables:
+            this_processor = list_data(self.db, self.uid, table)
+
+            if this_processor.error:
+                self.errorText = this_processor.errorText
+                return False
+
+            result = this_processor.process()
+
+            if result is False:
+                return False
+
+            self.data[table] = this_processor.data
+
+        return True
 
 class list_data(processor):
     """ gets data for a list view such as food, general etc. """
