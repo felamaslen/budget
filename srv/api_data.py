@@ -163,6 +163,8 @@ class list_data(processor):
 
         self.condition = ''
 
+        self.older_exists = None
+
         """ limit (paginate) results for certain tables """
         if self.table in limit_cols:
             num_months_view = limit_cols[self.table]
