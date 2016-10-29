@@ -12,6 +12,33 @@ START_MONTH = 9
 
 LIST_CATEGORIES = ('funds', 'in', 'bills', 'food', 'general', 'holiday', 'social')
 
+# common columns are added programmatically
+LIST_DATA_FORM_SCHEMA = {
+    'funds':    {
+        'units':    ('float',   True),
+    },
+    'in':   {
+    },
+    'bills':    {
+    },
+    'food':    {
+        'category': ('string',  True),
+        'shop':     ('string',  True)
+    },
+    'general':    {
+        'category': ('string',  True),
+        'shop':     ('string',  True)
+    },
+    'holiday':    {
+        'holiday':  ('string',  True),
+        'shop':     ('string',  True)
+    },
+    'social':    {
+        'society':  ('string',  True),
+        'shop':     ('string',  True)
+    }
+}
+
 IP_BAN_TIME     = 60
 IP_BAN_TRIES    = 10
 DEV             = True
