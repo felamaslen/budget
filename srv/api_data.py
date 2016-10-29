@@ -4,12 +4,13 @@ Does not handle authentication
 """
 
 import time
-from math import ceil
+from math import ceil, pi
 from datetime import datetime, timedelta
 from itertools import groupby
 
 from config import E_NO_PARAMS, E_BAD_PARAMS,\
 FUND_SALT, GRAPH_FUND_HISTORY_DETAIL,\
+PIE_DETAIL, PIE_TOLERANCE,\
 OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE, START_YEAR, START_MONTH,\
 LIST_CATEGORIES
 
@@ -95,6 +96,9 @@ class retrieve(response):
         elif arg == 'fund_history':
             deep = 'deep' in self.args
             this_processor = fund_history(self.db, self.uid, deep)
+
+        elif arg == 'pie':
+            this_processor = pie(self.db, self.uid, self.task)
 
         elif arg == 'search':
             this_processor = search(self.db, self.uid, self.task)
@@ -634,6 +638,102 @@ class fund_history(processor):
         self.data['totalTime']  = total_time
 
         return True
+
+class pie(processor):
+    def __init__(self, db, uid, task):
+        super(pie, self).__init__(db, uid)
+
+        if len(task) != 1:
+            self.error = True
+            self.errorText = E_NO_PARAMS
+            return
+
+        self.limit = PIE_DETAIL
+
+        self.col = {
+            'funds':    [['item', 'cost', 'Total']],
+            'in':       [['item', 'cost', 'Total']],
+            'food':     [['shop', 'cost', 'Shop cost'], ['category', 'cost', 'Category cost']],
+            'general':  [['shop', 'cost', 'Shop cost'], ['category', 'cost', 'Category cost']],
+            'holiday':  [['holiday', 'cost', 'Holiday cost'], ['holiday', 'int', 'Holiday number']],
+            'social':   [['shop', 'cost', 'Shop cost'], ['society', 'cost', 'Society cost']]
+        }
+
+        self.table = task.popleft()
+
+        if self.table not in self.col:
+            self.error = True
+            self.errorText = E_BAD_PARAMS
+            return
+
+    def process(self):
+        threshold = PIE_TOLERANCE / (2 * pi)
+
+        data = []
+
+        queries = [self.query(query[1], query[0])
+                for query in self.col[self.table]]
+
+        if None in queries:
+            return False
+
+        for (key, query) in enumerate(queries):
+            result = self.db.query(query, [])
+
+            if result is False:
+                return False
+
+            pie_data = [[str(row[0]), int(row[1])] for row in result]
+
+            total = sum([row[1] for row in pie_data])
+
+            if total > 0:
+                """ concatenate very small slices into a slice called "other" """
+                other = sum([row[1] for row in pie_data if float(row[1]) / total < threshold])
+
+                pie_data = [row for row in pie_data if float(row[1]) / total >= threshold]
+
+                if other > 0:
+                    pie_data.append(["Other", other])
+
+                """ sort pie data """
+                pie_data = sorted(pie_data, key = lambda row: row[1], reverse = True)
+
+            data.append({
+                'title':    self.col[self.table][key][2],
+                'type':     self.col[self.table][key][1],
+                'data':     pie_data,
+                'total':    total
+            })
+
+        self.data = data
+
+        return True
+
+    def query(self, queryType, queryCol):
+        if queryType == 'cost':
+            return """
+            SELECT `%s` AS col, SUM(cost) AS cost FROM `%s`
+            WHERE uid = %d AND cost > 0
+            GROUP BY `%s`
+            ORDER BY cost DESC
+            LIMIT %d
+            """ % (queryCol, self.table, self.uid, queryCol, self.limit)
+
+        if queryType == 'int':
+            return """
+            SELECT col, COUNT(*) AS cost FROM (
+                SELECT `%s` AS col
+                FROM `%s`
+                WHERE uid = %d
+                GROUP BY year, month, date, col
+            ) results
+            GROUP BY col
+            ORDER BY cost DESC
+            LIMIT %d
+            """ % (queryCol, self.table, self.uid, self.limit)
+
+        return None
 
 class search(processor):
     def __init__(self, db, uid, task):
