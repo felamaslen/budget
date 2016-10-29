@@ -28,7 +28,12 @@ class update_data(processor):
 
         optionalCount = 0
 
+        hasOptional = False
+
         for (key, (dataType, optional)) in schema.items():
+            if not hasOptional and optional:
+                hasOptional = True
+
             if key not in self.form_raw:
                 if optional and not self.all_required:
                     continue
@@ -79,7 +84,7 @@ class update_data(processor):
             if optional:
                 optionalCount += 1
 
-        if optionalCount == 0:
+        if hasOptional and optionalCount == 0:
             raise Exception("No optional form data supplied")
 
         return True
