@@ -100,17 +100,17 @@ class api:
 
             if self.method == 'GET':
                 if arg == 'data':
-                    data = api_data.retrieve(self.db, self.user.uid, self.task)
+                    data = api_data.retrieve(self.db, self.user.uid, self.task, self.args)
 
             elif self.method == 'POST':
                 if arg == 'update':
-                    data = api_data.update(self.db, self.user.uid, self.task)
+                    data = api_data.update(self.db, self.user.uid, self.task, self.args)
 
                 elif arg == 'add':
-                    data = api_data.add(self.db, self.user.uid, self.task)
+                    data = api_data.add(self.db, self.user.uid, self.task, self.args)
 
                 elif arg == 'delete':
-                    data = api_data.delete(self.db, self.user.uid, self.task)
+                    data = api_data.delete(self.db, self.user.uid, self.task, self.args)
 
             default_response = {
                 'error': True, 'errorText': "Invalid task", 'data': {}

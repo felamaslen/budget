@@ -8,11 +8,11 @@ from math import ceil
 from datetime import datetime, timedelta
 from itertools import groupby
 
-from config import E_NO_PARAMS, E_BAD_PARAMS
+from config import E_NO_PARAMS, E_BAD_PARAMS, FUND_SALT, GRAPH_FUND_HISTORY_DETAIL
 from misc import fund_hash
 
 class response(object):
-    def __init__(self, db, uid, task):
+    def __init__(self, db, uid, task, args):
         self.db = db
         self.uid = uid
 
@@ -23,6 +23,7 @@ class response(object):
         self.serverError = False
 
         self.task = task
+        self.args = args
 
         self.execute()
 
@@ -45,11 +46,10 @@ class response(object):
 
             return
 
-
 class retrieve(response):
     """ retrieves data from the database """
-    def __init__(self, db, uid, task):
-        super(retrieve, self).__init__(db, uid, task)
+    def __init__(self, db, uid, task, args):
+        super(retrieve, self).__init__(db, uid, task, args)
 
     def execute(self):
         super(retrieve, self).execute()
@@ -66,6 +66,10 @@ class retrieve(response):
 
         elif arg == 'funds':
             this_processor = funds(self.db, self.uid)
+
+        elif arg == 'fund_history':
+            deep = 'deep' in self.args
+            this_processor = fund_history(self.db, self.uid, deep)
 
         elif arg == 'search':
             this_processor = search(self.db, self.uid, self.task)
@@ -89,7 +93,6 @@ class retrieve(response):
         else:
             self.error      = True
             self.errorText  = "Unknown task"
-
 
 class processor(object):
     def __init__(self, db, uid):
@@ -238,6 +241,195 @@ class funds(list_data):
         self.cache = {}
         for (hashValue, price) in result:
             self.cache[hashValue] = float(price)
+
+class fund_history(processor):
+    def __init__(self, db, uid, deep):
+        super(fund_history, self).__init__(db, uid)
+
+        self.num_results_display = GRAPH_FUND_HISTORY_DETAIL
+
+        self.deep = deep
+
+    def process(self):
+        if self.deep: # retrieve individual fund values
+            return self.process_deep()
+
+        return self.process_shallow()
+
+    def process_deep(self):
+        num_results_query = self.db.query("""
+        SELECT COUNT(*) AS num_results
+        FROM funds f
+        INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
+        INNER JOIN fund_cache fc ON fh.fid = fc.fid
+        INNER JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
+        WHERE f.uid = %d
+        GROUP BY c.cid""" % self.uid, [FUND_SALT])
+
+        if num_results_query is False:
+            return False
+
+        num_results = -1
+        for row in num_results_query:
+            num_results = int(row[0])
+
+        if num_results < 0:
+            return False
+
+        query = self.db.query("""
+        SELECT * FROM (
+          SELECT item, fid, time, value, FLOOR(cNum %% (%d / %d)) AS period FROM (
+            SELECT x.item, x.fid, x.time, x.value,
+            (
+              CASE x.cid
+                WHEN @lastCid THEN @cNum
+                ELSE @cNum := @cNum + 1 END
+            ) AS cNum,
+            @lastCid := x.cid AS last_cid
+            FROM (
+              SELECT c.cid, fc.fid, f.item, c.time, (fc.price * fc.units) AS value
+              FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+              INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
+              INNER JOIN fund_cache fc ON fh.fid = fc.fid
+              INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+            ) x
+            JOIN (SELECT @cNum := 0, @lastCid := 0) r
+          ) ranked
+        ) list
+        WHERE period = 0
+        ORDER BY time, item""" % (num_results, self.num_results_display, self.uid), [FUND_SALT])
+
+        if query is False:
+            return False
+
+        rows = []
+
+        start_time = None
+
+        funds = []
+        fid_keys = {}
+        num_fids = 0
+
+        time_key = -1
+        times = []
+
+        for (item, fid, time, value, period) in query:
+            item = str(item)
+
+            time = int(time)
+            value = int(round(value))
+
+            fid = int(fid)
+
+            if fid not in fid_keys:
+                fid_keys[fid] = num_fids
+                num_fids += 1
+
+            fid_key = fid_keys[fid]
+
+            if item not in funds:
+                funds.append(item)
+
+            if start_time is None:
+                start_time = time
+
+            if time not in times:
+                """ make sure each item has a consistent number of points (0 is better than null) """
+                row = [0] * (fid_key - 1) if fid_key > 0 else []
+                row.append(value)
+
+                rows.append([time - start_time, row])
+                time_key += 1
+
+                times.append(time)
+            else:
+                if fid_key >= len(rows[time_key][1]):
+                    if fid_key > len(rows[time_key][1]):
+                        rows[time_key][1] += [0] * (fid_key - 1 - len(rows[time_key][1]))
+                    rows[time_key][1].append(value)
+                else:
+                    rows[time_key][1][fid_key] = value
+
+        total_time = 0 if start_time is None else time - start_time
+
+        results = [item + [sum(item[1])] for item in rows]
+
+        self.data['funds']      = funds
+        self.data['history']    = results
+        self.data['startTime']  = start_time
+        self.data['totalTime']  = total_time
+
+        return True
+
+    def process_shallow(self):
+        num_results_query = self.db.query("""
+        SELECT COUNT(*) AS num_results FROM (
+            SELECT c.cid
+            FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+            INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+            INNER JOIN fund_cache fc ON fh.fid = fc.fid
+            INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+            GROUP BY fc.cid
+        ) results""" % (self.uid, FUND_SALT), [])
+
+        if num_results_query is False:
+            return False
+
+        num_results = -1
+        for row in num_results_query:
+            num_results = int(row[0])
+
+        if num_results < 0:
+            return False
+
+        query = self.db.query("""
+        SELECT * FROM (
+          SELECT time, value, rownum, FLOOR(rownum %% (%d / %d)) AS period FROM (
+            SELECT @row := @row + 1 AS rownum,
+                time,
+                value
+            FROM (
+                SELECT @row := -1
+            ) r, (
+                SELECT c.time, SUM(fc.price * fc.units) AS value
+                FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
+                INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
+                INNER JOIN fund_cache fc ON fh.fid = fc.fid
+                INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+                GROUP BY fc.cid
+                ORDER BY c.time DESC
+            ) results
+            ORDER BY time ASC
+            ) ranked
+          ) list
+          WHERE period = 0 OR rownum = %d
+        """ % (num_results, self.num_results_display - 1, self.uid, FUND_SALT, num_results - 1), [])
+
+        if query is False:
+            return False
+
+        results = []
+
+        start_time = None
+
+        total_time = 0
+
+        for (time, value, rownum, period) in query:
+            time = int(time)
+            value = int(round(value))
+
+            if start_time is None:
+                start_time = time
+
+            results.append([time - start_time, value])
+
+        total_time = time - start_time
+
+        self.data['history']    = results
+        self.data['startTime']  = start_time
+        self.data['totalTime']  = total_time
+
+        return True
 
 class search(processor):
     def __init__(self, db, uid, task):
