@@ -4,10 +4,11 @@ Miscellaneous functions
 
 import os.path
 import time
-from hashlib import md5
 from datetime import datetime
+from hashlib import md5
+import re
 
-from config import SERIAL_FILE, FUND_SALT
+from config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
 
 now = datetime.now()
 
@@ -58,3 +59,45 @@ def fund_hash(fund):
 
 def strng(the_string):
     return u''.join(the_string).encode('utf-8')
+
+def list_data_schema(table = None):
+    schema = LIST_DATA_FORM_SCHEMA
+
+    keys = schema if table is None else [table]
+
+    for key in keys:
+        schema[key]['id']   = ('int',       False)
+        schema[key]['date'] = ('date',      True)
+        schema[key]['item'] = ('string',    True)
+        schema[key]['cost'] = ('int',       True)
+
+    return schema if table is None else schema[table]
+
+def deserialise_date(string):
+    """ validates and returns a date from a POST request """
+    date_is_valid = re.search('^[0-9]{4},[0-9]{1,2},[0-9]{1,2}$', string)
+
+    if not date_is_valid:
+        raise ValueError("Date is not a valid date")
+
+    year, month, date = string.split(',')
+
+    year    = int(year)
+    month   = int(month)
+    date    = int(date)
+
+    if month < 1 or month > 12:
+        raise ValueError("Date's month is out of range")
+
+    month_length = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    year_is_leap = year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
+    if year_is_leap:
+        month_length[1] = 29
+
+    if date < 1 or date > month_length[month - 1]:
+        raise ValueError("Date's day is out of range")
+
+    return (year, month, date)
+

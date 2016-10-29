@@ -1,6 +1,6 @@
 from api_data_methods import processor
 
-from misc import strng
+from misc import strng, list_data_schema, deserialise_date
 from config import LIST_CATEGORIES, E_BAD_PARAMS, E_BAD_FORM, E_NO_FORM
 
 class update_data(processor):
@@ -17,16 +17,22 @@ class update_data(processor):
             if form_valid is False:
                 self.error = True
                 self.errorText = E_BAD_FORM
-        except Exception:
+
+        except Exception as paramError:
             self.error = True
-            self.errorText = E_NO_FORM
+            self.errorText = str(paramError)
 
     def validate_form(self, schema):
         self.form = {}
 
-        for (key, dataType) in schema.items():
+        optionalCount = 0
+
+        for (key, (dataType, optional)) in schema.items():
             if key not in self.form_raw:
-                raise Exception("Form data for %s not supplied" % key)
+                if optional:
+                    continue
+                else:
+                    raise Exception("Form data for %s not supplied" % key)
 
             raw_value = self.form_raw[key]
 
@@ -35,34 +41,54 @@ class update_data(processor):
 
             value = None
 
-            if dataType is 'int':
+            if dataType == 'date':
                 try:
-                    value = int(raw_value)
-                except ValueError:
+                    value = deserialise_date(raw_value)
+                except ValueError as dateError:
+                    raise Exception(dateError)
+
+                self.form['year']   = value[0]
+                self.form['month']  = value[1]
+                self.form['date']   = value[2]
+
+            else:
+                if dataType == 'int':
+                    try:
+                        value = int(raw_value)
+                    except ValueError:
+                        return False
+
+                elif dataType == 'float':
+                    try:
+                        value = float(raw_value)
+                    except ValueError:
+                        return False
+
+                elif dataType == 'string':
+                    try:
+                        value = strng(raw_value)
+                    except:
+                        raise Exception("Error with text value for %s" % key)
+
+                if value is None:
                     return False
 
-            elif dataType is 'float':
-                try:
-                    value = float(raw_value)
-                except ValueError:
-                    return False
+                self.form[key] = value
 
-            elif dataType is 'string':
-                value = strng(raw_value)
+            if optional:
+                optionalCount += 1
 
-            if value is None:
-                return False
-
-            self.form[key] = value
+        if optionalCount == 0:
+            raise Exception("No optional form data supplied")
 
         return True
 
 class update_overview(update_data):
     def __init__(self, db, uid, form):
         form_schema = {
-            'balance':  'int',
-            'year':     'int',
-            'month':    'int'
+            'balance':  ('int', False),
+            'year':     ('int', False),
+            'month':    ('int', False)
         }
 
         super(update_overview, self).__init__(db, uid, form, form_schema)
@@ -109,10 +135,22 @@ class update_list_data(update_data):
 
         self.table = table
 
-        form_schema = list_data_form_schema[self.table]
+        form_schema = list_data_schema(table)
 
         super(update_list_data, self).__init__(db, uid, form, form_schema)
 
-
     def process(self):
-        return False
+        cols = ', '.join(["%s = %%s" % col for col in self.form if col != 'id'])
+
+        params = [self.form[col] for col in self.form if col != 'id']
+        args = params + [self.form['id']]
+
+        query = self.db.query("""
+        UPDATE `%s` SET %s
+        WHERE uid = %d AND id = %%s
+        """ % (self.table, cols, self.uid), args)
+
+        if query is False:
+            return False
+
+        return True
