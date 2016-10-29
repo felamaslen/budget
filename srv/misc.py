@@ -5,8 +5,11 @@ Miscellaneous functions
 import os.path
 import time
 from hashlib import md5
+from datetime import datetime
 
 from config import SERIAL_FILE, FUND_SALT
+
+now = datetime.now()
 
 def file_get_contents(filename):
     if not os.path.isfile(filename):
