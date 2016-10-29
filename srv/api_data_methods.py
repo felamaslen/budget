@@ -23,6 +23,8 @@ class response(object):
         response['errorText']   = self.errorText
         response['data']        = self.data
 
+        response['extra'] = None
+
         return response
 
     def execute(self):
