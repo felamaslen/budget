@@ -559,7 +559,7 @@ class pie(processor):
             if result is False:
                 return False
 
-            pie_data = [[str(row[0]), int(row[1])] for row in result]
+            pie_data = [[strng(row[0]), int(row[1])] for row in result]
 
             total = sum([row[1] for row in pie_data])
 
