@@ -243,3 +243,4 @@ class delete_list_data(processor):
             return False
 
         return True
+

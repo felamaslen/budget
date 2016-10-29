@@ -194,3 +194,4 @@ class add_delete(response):
 
             if self.which == 'add':
                 self.add_id = this_processor.add_id
+
