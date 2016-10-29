@@ -3,7 +3,7 @@
 WEB_ROOT="./web"
 
 function update_js {
-  $MAIN = $WEB_ROOT/js/main.min.js
+  MAIN=$WEB_ROOT/js/main.min.js
 
   if [ -e $MAIN ]; then
     rm $MAIN
