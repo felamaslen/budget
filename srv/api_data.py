@@ -13,7 +13,7 @@ FUND_SALT, GRAPH_FUND_HISTORY_DETAIL,\
 OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE, START_YEAR, START_MONTH,\
 LIST_CATEGORIES
 
-from misc import fund_hash
+from misc import fund_hash, strng
 
 now = datetime.now()
 
@@ -518,7 +518,7 @@ class fund_history(processor):
         times = []
 
         for (item, fid, time, value, period) in query:
-            item = str(item)
+            item = strng(item)
 
             time = int(time)
             value = int(round(value))
@@ -685,7 +685,7 @@ class search(processor):
         if result is False:
             return False
 
-        self.data = [str(col) for (col, matches) in result]
+        self.data = [strng(col) for (col, matches) in result]
 
         return True
 
@@ -712,7 +712,7 @@ class stocks(processor):
 
         for (code, name, weight) in result:
             this_weight = int(weight)
-            stocks[code] = { 'n': str(name), 'w': this_weight }
+            stocks[code] = { 'n': strng(name), 'w': this_weight }
             total_weight += this_weight
 
         self.data['stocks'] = stocks
@@ -939,7 +939,7 @@ class analysis_category(data_analysis):
         if result is False:
             return None
 
-        values = [[str(item_col), str(item), int(cost)] for (item, item_col, cost) in result]
+        values = [[strng(item_col), strng(item), int(cost)] for (item, item_col, cost) in result]
 
         items = [[k, [x[1:] for x in g]] for k, g in groupby(values, key = lambda x: x[0])]
 

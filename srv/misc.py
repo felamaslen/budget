@@ -52,3 +52,6 @@ def set_serial():
 
 def fund_hash(fund):
     return md5(fund + FUND_SALT).hexdigest()
+
+def strng(the_string):
+    return u''.join(the_string).encode('utf-8')
