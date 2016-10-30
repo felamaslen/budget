@@ -99,7 +99,7 @@ button {
   width: 100%;
   height: 100%;
   z-index: 500;
-  top: 0;
+  top: @height_nav;
   left: 0;
   background: rgba(255, 255, 255, 0.8);
   display: none;
@@ -191,7 +191,7 @@ button {
   height: 100%;
   z-index: 1000;
   left: 0;
-  top: 0;
+  top: @height_nav;
 }
 
 .noselect {
@@ -328,6 +328,9 @@ button {
   box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
   width: 100%;
   height: @height_nav;
+  &.hide-nav .nav-list {
+    opacity: 0;
+  }
 }
 #nav-outer {
   position: fixed;
@@ -364,6 +367,7 @@ button {
     margin: 0;
     padding: (@height_nav - 30) 0 0 0;
     white-space: nowrap;
+    transition: 0.2s opacity;
     li {
       display: inline-block;
       vertical-align: bottom;
