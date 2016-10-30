@@ -1,6 +1,15 @@
 (function Budget($) {
   const pio2 = Math.PI / 2;
 
+  const E_NO_STORAGE = "Your browser does not support HTML5 storage, so logins won't be remembered.";
+
+  const MSG_TIME_DEBUG  = 0;
+  const MSG_TIME_WARN   = 1000;
+  const MSG_TIME_ERROR  = 5000;
+  const MSG_TIME_FATAL  = 0;
+
+  const MIN_MSG_LEVEL  = 1;
+
   const PIE_LABEL_RADIUS_START = 1.1;
   const PIE_LABEL_RADIUS_SCALE = 1.2;
   const PIE_LABEL_INSIDE_RADIUS = 0.6;
@@ -97,6 +106,78 @@
   };
 
   const indexPoints = (value, key) => [key, value];
+
+  class ErrorMessage {
+    constructor(text, level, timeout) {
+      this.text = text;
+      this.level = level;
+
+      this.timeout = timeout;
+
+      this.$elem = $("<div></div>")
+      .addClass("message")
+      .addClass("message-" + level)
+      .text(text);
+
+      this.setCloseTimer();
+
+      this.$elem.on("mouseover", () => {
+        this.stopCloseTimer();
+      }).on("mouseout", () => {
+        this.setCloseTimer();
+      }).on("click", () => {
+        this.hide();
+      });
+    }
+
+    setCloseTimer() {
+      this.stopCloseTimer();
+
+      this.timer = this.timeout ? window.setTimeout(() => {
+        this.hide();
+      }, this.timeout) : null;
+    }
+
+    stopCloseTimer() {
+      if (this.timer) {
+        window.clearTimeout(this.timer);
+      }
+    }
+
+    hide() {
+      this.$elem.addClass("hidden");
+      // wait for CSS transition to remove message
+      window.setTimeout(() => {
+        this.$elem.remove();
+      }, 1000);
+    }
+  }
+
+  class ErrorMessages {
+    constructor() {
+      this.$outer = $("<div></div>").addClass("messages-outer");
+
+      $(document.body).append(this.$outer);
+
+      this.levels = ["debug", "warning", "error", "fatal"];
+    }
+
+    newMessage(text, level, timeout) {
+      if (typeof level === "undefined") {
+        level = 1;
+      }
+
+      if (level < MIN_MSG_LEVEL) {
+        return;
+      }
+
+      const message = new ErrorMessage(text, this.levels[level], timeout);
+
+      this.$outer.prepend(message.$elem);
+    }
+  }
+
+  const errorMessages = new ErrorMessages();
 
   class MediaQueryHandler {
     constructor() {
@@ -247,7 +328,7 @@
   }
   function getColorFromScore(color, score, negative) {
     if (!color) {
-      console.warn("No colour given to getColor!");
+      errorMessages.newMessage("No colour given to getColor!", 0, MSG_TIME_DEBUG);
       color = [36, 191, 55];
     }
 
@@ -291,7 +372,7 @@
     const isDate = val.match(/^[0-3]?[0-9]\/[0-1]?[0-9](\/[0-9]{2}([0-9]{2})?)?$/);
 
     if (!isDate) {
-      console.warn("\"" + val + "\" isn\"t a date");
+      errorMessages.newMessage("\"" + val + "\" isn\"t a date", 0, MSG_TIME_DEBUG);
 
       return null;
     }
@@ -321,7 +402,7 @@
     const floatVal = parseFloat(val);
 
     if (isNaN(floatVal) || val.match(/[A-Za-z]/)) {
-      console.warn("\"" + val.toString() + "\" isn\"t a number");
+      errorMessages.newMessage("\"" + val.toString() + "\" isn\"t a number", 0, MSG_TIME_DEBUG);
 
       return null;
     }
@@ -506,14 +587,14 @@
             }
           }
           else {
-            console.warn("API says: " + data.errorText);
+            errorMessages.newMessage(data.errorText, 1, MSG_TIME_WARN);
             if (error) {
               error(data.errorText);
             }
           }
         },
         error: () => {
-          console.warn("General API error!");
+          errorMessages.newMessage("General API error!", 2, MSG_TIME_ERROR);
           if (error) {
             error();
           }
@@ -694,7 +775,7 @@
         localStorage.setItem("userPin", this.loginPin);
       }
       else {
-        console.warn("Your browser does not support HTML5 storage, so logins won't be remembered.");
+        errorMessages.newMessage(E_NO_STORAGE, 1, MSG_TIME_WARN);
       }
 
       $("#nav-link-" + currentPage).trigger(NAV_HANDLE_EVENT);
@@ -835,13 +916,13 @@
      */
     finish(callback) {
       if (!this.active) {
-        // console.warn("Tried to finish editing while not active");
+        // errorMessages.newMessage("Tried to finish editing while not active");
         return false;
       }
 
       if (this.locked) {
         // probably still loading previous edit request
-        console.warn("Tried to finish editing while locked");
+        errorMessages.newMessage("Tried to finish editing while locked", 0, MSG_TIME_DEBUG);
         return false;
       }
 
@@ -857,7 +938,7 @@
         return true;
       }
 
-      console.warn("Tried to finish editing while no hook set");
+      errorMessages.newMessage("Tried to finish editing while no hook set", 0, MSG_TIME_DEBUG);
 
       return false;
     }
@@ -979,9 +1060,7 @@
       this.supported = !!window.CanvasRenderingContext2D;
 
       if (!this.supported) {
-        console.warn("HTML5 Canvas is not supported! Not drawing graphs");
-
-        return;
+        errorMessages.newMessage("HTML5 Canvas is not supported! Not drawing graphs", 3, MSG_TIME_FATAL);
       }
 
       this.width  = options.width;
@@ -995,7 +1074,7 @@
         height: this.height
       });
 
-      this.ctx = this.$canvas[0].getContext("2d");
+      this.ctx = this.supported ? this.$canvas[0].getContext("2d") : null;
     }
   }
 
@@ -1040,7 +1119,7 @@
     setLogY() {
       if (this.minY * this.maxY <= 0) {
         // can't log a zero value; range contains zero
-        console.warn("Attempted to set log range containing zero!");
+        errorMessages.newMessage("Attempted to set log range containing zero!", 0, MSG_TIME_DEBUG);
         return;
       }
 
@@ -1315,6 +1394,10 @@
     }
 
     draw() {
+      if (!this.supported) {
+        return;
+      }
+
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
 
@@ -1492,6 +1575,10 @@
     }
 
     draw() {
+      if (!this.supported) {
+        return;
+      }
+
       // calculate tick range
       const tickSize = getTickSize(this.minY, this.maxY, 5);
 
@@ -1780,7 +1867,7 @@
       this.loadStockPrices();
     }
     onStocksListError() {
-      console.warn("Error loading stocks list!");
+      errorMessages.newMessage("Error loading stocks list!", 2, MSG_TIME_ERROR);
     }
     onStocksListRequestComplete() {
       this.stocksListLoading = false;
@@ -1841,8 +1928,9 @@
       }
 
       if (badStocks > 0) {
-        console.warn(
-          "Got " + badStocks.toString() + " extra stocks from finance api"
+        errorMessages.newMessage(
+          "Got " + badStocks.toString() + " extra stocks from finance api",
+          2, MSG_TIME_ERROR
         );
 
         return;
@@ -1913,7 +2001,7 @@
     }
 
     onStockPricesFail() {
-      console.warn("Error loading stock prices!");
+      errorMessages.newMessage("Error loading stock prices!", 2, MSG_TIME_ERROR);
     }
     onStockPricesRequestComplete() {
       this.stockPricesLoading = false;
@@ -2104,6 +2192,10 @@
     }
 
     draw() {
+      if (!this.supported) {
+        return;
+      }
+
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
 
@@ -2489,6 +2581,10 @@
     }
 
     draw() {
+      if (!this.supported) {
+        return;
+      }
+
       this.ctx.clearRect(0, 0, this.width, this.height);
 
       // set label colours
@@ -2903,7 +2999,7 @@
         );
 
         if (val === null) {
-          console.warn("Must enter valid data");
+          errorMessages.newMessage("Must enter valid data", 1, MSG_TIME_WARN);
 
           this.$addButton.attr("disabled", false);
 
@@ -2949,7 +3045,7 @@
     }
 
     onNewError() {
-      console.warn("Error inserting row! (Server error)");
+      errorMessages.newMessage("Error inserting row! (Server error)", 2, MSG_TIME_ERROR);
     }
 
     onNewRequestComplete() {
@@ -2998,7 +3094,7 @@
     }
 
     onSubmitError() {
-      console.warn("Error updating value! (Server error)");
+      errorMessages.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
     }
 
     onSubmitRequestComplete(dataKey, key, callback) {
@@ -3164,7 +3260,7 @@
 
       if (!status) {
         // invalid data input
-        console.warn("invalid data input");
+        errorMessages.newMessage("invalid data input", 1, MSG_TIME_WARN);
 
         editing.cancel();
       }
@@ -3591,7 +3687,7 @@
     }
 
     onBalanceEditError() {
-      console.warn("Error updating value! (Server error)");
+      errorMessages.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
     }
 
     onBalanceEditRequestComplete(key, callback) {
@@ -4940,7 +5036,7 @@
     }
 
     suggestionsError() {
-      console.warn("Error loading suggestions!");
+      errorMessages.newMessage("Error loading suggestions!", 2, MSG_TIME_ERROR);
     }
 
     suggestionsComplete() {

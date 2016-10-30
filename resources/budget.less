@@ -204,6 +204,41 @@ button {
                                   not supported by any browser */
 }
 
+/* error messages */
+.messages-outer {
+  z-index: 1001;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1em;
+  .message {
+    transition: 0.8s opacity ease-in-out;
+    padding: 1em 2em;
+    font-style: italic;
+    font-size: 0.9em;
+    cursor: pointer;
+    border-radius: 0.3em;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    margin: 0.5em 0;
+
+    &.message-debug {
+      background: rgba(0, 156, 255, 0.5);
+    }
+    &.message-warning {
+      background: rgba(255, 147, 0, 0.5);
+    }
+    &.message-error {
+      background: rgba(255, 0, 0, 0.5);
+    }
+    &.message-fatal {
+      background: rgba(128, 0, 0, 0.7);
+    }
+    &.hidden {
+      opacity: 0;
+    }
+  }
+}
+
 /* document */
 #doc-outer {
   padding-top: @top_nav;
