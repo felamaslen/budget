@@ -2754,7 +2754,7 @@
 
       this.$lhead = $("<div></div>")
       .addClass("list-head")
-      .addClass("noselect")
+      .addClass("noselect");
 
       for (const j of this.colEdit) {
         this.$lhead.append($("<span></span>").addClass(this.col[j]).text(this.col[j]));
