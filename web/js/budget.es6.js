@@ -2752,7 +2752,9 @@
 
       this.$total = $("<span></span>");
 
-      this.$lhead = $("<div></div>").addClass("list-head");
+      this.$lhead = $("<div></div>")
+      .addClass("list-head")
+      .addClass("noselect")
 
       for (const j of this.colEdit) {
         this.$lhead.append($("<span></span>").addClass(this.col[j]).text(this.col[j]));
