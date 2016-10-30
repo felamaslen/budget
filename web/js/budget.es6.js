@@ -698,7 +698,7 @@
     inputKey(val) {
       this.loginPin += Math.pow(10, 3 - this.inputActive) * val;
 
-      this.$input.slice(user.inputActive, user.inputActive + 1)
+      this.$input.slice(this.inputActive, this.inputActive + 1)
       .addClass("done").removeClass("active");
 
       if (this.inputActive < 3) {
