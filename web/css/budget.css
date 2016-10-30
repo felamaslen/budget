@@ -1139,8 +1139,8 @@ button:active {
   }
   .graph-toggle-btn {
     position: absolute;
-    right: 38px;
-    bottom: -2px;
+    right: 0;
+    bottom: -24px;
     top: initial !important;
     padding: 3px 10px;
     box-shadow: 0 3px 10px rgba(60, 60, 60, 0.6);
@@ -1148,17 +1148,15 @@ button:active {
   .graph-toggle-btn:after {
     content: "Hide";
   }
-  .graph-hidden .graph-toggle-btn:after {
-    content: "Show";
-  }
   .graph-toggle-btn:active {
-    bottom: -5px;
+    bottom: -25px;
   }
   .list-insert .list-head {
     width: 1000px;
     left: 50%;
     margin-left: -500px;
-    top: 330px;
+    top: 348px;
+    padding-top: 10px;
     transition: top 0.3s ease-in-out;
   }
   .list-insert .list-ul {
@@ -1170,7 +1168,13 @@ button:active {
     top: 59px;
   }
   .graph-hidden .list-ul {
-    padding-top: 24px;
+    padding-top: 34px;
+  }
+  .graph-hidden .graph-toggle-btn {
+    margin-bottom: -10px;
+  }
+  .graph-hidden .graph-toggle-btn::after {
+    content: "Show";
   }
 }
 @media screen and (min-width: 1500px) {
