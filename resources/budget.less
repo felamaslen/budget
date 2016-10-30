@@ -7,6 +7,12 @@
 @width_page_narrow:   1000px;
 @width_page_wide:     1500px;
 
+@width_logo:  30px;
+@height_logo: 30px;
+@height_nav:  49px;
+
+@top_nav:     @height_nav + 10;
+
 @font-face {
   font-family: lcd;
   src: url(fonts/erbos_draco_1st_open_nbp.woff);
@@ -208,7 +214,7 @@ button {
 
 /* document */
 #doc-outer {
-  padding-top: 31px;
+  padding-top: @top_nav;
   .doc-inner {
     position: relative;
   }
@@ -242,7 +248,7 @@ button {
 .list-insert {
   .list-head {
     position: fixed;
-    top: 31px;
+    top: @top_nav;
     left: 0;
     z-index: 4;
     background: white;
@@ -325,30 +331,36 @@ button {
 }
 
 /* navigation */
+#nav-inner {
+  background: linear-gradient(to bottom, #d84d4d, #9f3030);
+  box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
+}
 #nav-outer {
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
-  height: 31px;
-  z-index: 5;
-  background: #9f3030;
+  height: @height_nav;
+  z-index: 10;
   color: white;
+  padding-bottom: 10px;
+  background: white;
   .app-logo-outer {
-    float: left;
-    height: 30px;
+    float: right;
+    height: @height_nav;
     margin: 0 1em 0 0.5em;
   }
   .app-logo {
-    line-height: 30px;
+    line-height: @height_nav;
     font-family: Ubuntu, Georgia, serif;
     font-weight: bold;
     font-size: 22px;
     &:before {
       content: '';
-      width: 30px;
-      height: 30px;
-      float: left;
+      width: @width_logo;
+      height: @height_logo;
+      display: inline-block;
+      vertical-align: middle;
       background: url(/img/nav.png) 0 -56px;
       padding-right: 0.5em;
     }
@@ -356,7 +368,7 @@ button {
   .nav-list {
     list-style: none;
     margin: 0;
-    padding: 1px 0 0 0;
+    padding: (@height_nav - 30) 0 0 0;
     white-space: nowrap;
     li {
       display: inline-block;
@@ -365,26 +377,26 @@ button {
     }
     .nav-link-template() {
       float: left;
-      line-height: 27px;
+      line-height: 30px;
       height: 27px;
-      padding: 0 0.5em 0 30px;
-      background: white;
-      color: black;
+      padding: 0 0.5em 0 35px;
+      color: white;
       border-bottom: 3px solid transparent;
       border-radius: 3px 3px 0 0;
       cursor: pointer;
       position: relative;
       &:hover {
-        background: #ececec;
+        background: rgba(0, 0, 0, 0.3);
       }
       &:active {
-        background: #bbb;
+        background: rgba(0, 0, 0, 0.5);
       }
       &.active {
         border-bottom-color: black !important;
-        background: #ffbaba;
-        box-shadow: inset 0 0 6px rgba(40, 40, 40, 0.5);
         cursor: default;
+        &, &:hover, &:active {
+          background: rgba(0, 0, 0, 0.7);
+        }
       }
       &:before {
         /* icon */
@@ -392,7 +404,7 @@ button {
         width: 28px;
         height: 28px;
         position: absolute;
-        left: 0;
+        left: 5px;
         top: 0;
         background-image: url(../img/nav.png);
       }
@@ -437,10 +449,8 @@ button {
       &:before { background-position: -28px -28px; }
     }
     #nav-link-logout {
-      padding-left: 0.5em;
-      &:before {
-        display: none;
-      }
+      border-color: #eee;
+      &:before { background-position: -56px -28px; }
     }
   }
 }
@@ -1058,6 +1068,24 @@ button {
     margin: 0 auto;
   }
 
+  /* hide navigation text */
+  #nav-outer {
+    .small-nav-link() {
+      text-indent: -9999px;
+      width: 30px;
+      padding: 0 0.5em;
+      &:before {
+        left: 0.5em;
+      }
+    }
+
+    .nav-list {
+      .nav-link, .nav-link-btn {
+        .small-nav-link();
+      }
+    }
+  }
+
   /* overview page */
   #page-overview {
     .table-overview {
@@ -1101,7 +1129,7 @@ button {
     width: inherit;
     height: 299px;
     position: fixed;
-    top: 31px;
+    top: @height_nav;
     z-index: 5;
     box-shadow: 0 3px 16px rgba(60, 60, 60, .3);
     background: white;
@@ -1151,13 +1179,14 @@ button {
       width: inherit;
       transition: padding-top .3s ease-in-out;
     }
-    &.graph-hidden {
-      .list-head {
-        top: 30px;
-      }
-      .list-ul {
-        padding-top: 24px;
-      }
+  }
+
+  .graph-hidden {
+    .list-head {
+      top: @top_nav;
+    }
+    .list-ul {
+      padding-top: 24px;
     }
   }
 }
@@ -1166,22 +1195,23 @@ button {
   html, body {
     height: 100%;
   }
+  
+  .graph-container {
+    position: fixed;
+    z-index: 1;
+    background: rgba(255, 255, 255, .8);
+    box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
+  }
 
   /* overview page */
   #page-overview {
-    .graph-container {
-      position: fixed;
-      z-index: 1;
-      background: rgba(255, 255, 255, .8);
-      box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
-    }
     .graph-balance {
       left: 900px;
-      top: 50px;
+      top: @top_nav + 10
     }
     .graph-spend {
       left: 900px;
-      top: 360px;
+      top: @top_nav + 320;
     }
   }
 
@@ -1194,7 +1224,7 @@ button {
   #page-in {
     .graph-container-pie {
       left: 400px;
-      top: 90px;
+      top: @top_nav + 60;
     }
   }
 
@@ -1221,10 +1251,9 @@ button {
       }
     }
     .graph-fund-history {
-      position: absolute;
       width: 600px;
       left: 900px;
-      top: 350px;
+      top: @top_nav + 350;
       z-index: 1;
     }
   }
@@ -1234,10 +1263,10 @@ button {
   }
   .graph-container-pie {
     left: 800px;
-    top: 70px;
+    top: @top_nav + 40;
   }
   .graph-container-pie-1 {
-    top: 390px;
+    top: @top_nav + 350;
   }
   .graph-container-pie-2 {
   }
