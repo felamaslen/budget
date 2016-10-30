@@ -14,7 +14,7 @@
   * `./updatecache.sh [js] [css]`
 
  - To scrape fund values, run from the command line:
-  *  `./cache_funds.py`
+  *  `./scrape_funds.sh`
 
 ### Operation:
  - To run the server:
