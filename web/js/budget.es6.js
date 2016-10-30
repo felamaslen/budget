@@ -3335,7 +3335,8 @@
     render() {
       this.$tbl = $("<table></table>")
         .addClass("table-insert")
-        .addClass("table-overview");
+        .addClass("table-overview")
+        .addClass("noselect");
 
       this.$thead = $("<thead></thead>");
 
