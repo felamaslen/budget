@@ -286,9 +286,11 @@ button:active {
   color: white;
 }
 /* navigation */
-#nav-inner {
+#nav {
   background: linear-gradient(to bottom, #d84d4d, #9f3030);
   box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
+  width: 100%;
+  height: 49px;
 }
 #nav-outer {
   position: fixed;
