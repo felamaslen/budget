@@ -642,16 +642,14 @@
       let focusLogin = true;
 
       // check if we have a localStorage user defined
-      if (typeof Storage !== "undefined") {
-        const loginPin = localStorage.getItem("userPin");
+      const loginPin = localStorage ? localStorage.getItem("userPin") : null;
 
-        if (loginPin) {
-          focusLogin = false;
+      if (loginPin) {
+        focusLogin = false;
 
-          this.loginPin = loginPin;
+        this.loginPin = loginPin;
 
-          this.login();
-        }
+        this.login();
       }
 
       this.$input.on("click", evt => this.handleInputClick(evt));
@@ -682,7 +680,7 @@
         data => this.onLoginSuccess(data),
         () => this.onLoginFail(),
         () => this.onLoginRequestComplete(),
-        true
+        false
       );
     }
 
@@ -717,23 +715,19 @@
       this.name = "";
       this.apiKey = null;
 
-      if (typeof Storage !== "undefined") {
-        localStorage.removeItem("userPin");
-      }
+      localStorage && localStorage.removeItem("userPin");
 
       for (const id in pages) {
         pages[id].$page.remove();
-
         $("#nav-link-" + id).removeClass("active");
       }
+      pages       = {};
 
-      pages = {};
-
-      navActive = null;
-
+      navActive   = null;
       currentPage = pageActive;
 
       $("#bg").fadeIn();
+      $("#nav").addClass("hide-nav");
 
       this.focus();
     }
@@ -4604,6 +4598,7 @@
     }
     else {
       $("#bg").fadeOut();
+      $("#nav").removeClass("hide-nav");
     }
 
     if (pageActive) {
