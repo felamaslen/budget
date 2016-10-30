@@ -273,7 +273,10 @@ class list_data(processor):
             return -1
 
         for row in result:
-            total = int(row[0])
+            try:
+                total = int(row[0])
+            except:
+                total = 0
 
         return total
 
