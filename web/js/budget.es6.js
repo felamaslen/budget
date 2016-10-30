@@ -351,6 +351,7 @@
       break;
     case "cost":
     case "text":
+    case "text_nosug":
     default:
       changed = val !== compare;
     }
@@ -4478,7 +4479,7 @@
     col:            ["date", "item", "units", "cost", "price"],
     colShort:       ["d", "i", "u", "c", "P"],
     colEdit:        [0, 1, 2, 3],
-    dataType:       ["date", "text", "text", "cost"],
+    dataType:       ["date", "text", "text_nosug", "cost"],
     addDefaultVal:  {
       date:     today.format(),
       item:     "",
@@ -4726,6 +4727,10 @@
   }
 
   $.fn.editable = function editable(editHook, type, suggestion, add) {
+    if (type.indexOf("text") === 0) {
+      type = "text";
+    }
+
     const options = {
       $input: $("<input type=text />")
         .addClass("editable-input")
