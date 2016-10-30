@@ -184,16 +184,6 @@ button:active {
   background: #3c6b94;
 }
 
-#nav-outer {
-  z-index: 5;
-  height: 30px;
-}
-#nav-outer .progress {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
 .list-ul .progress {
   position: absolute;
   right: 2px;
@@ -285,7 +275,7 @@ button:active {
   white-space: nowrap;
 }
 .list-ul > li:nth-child(2n) {
-  background: #eee;
+  background: rgba(220, 220, 220, 0.4);
 }
 .list-ul li > span {
   display: inline-block;
@@ -333,11 +323,30 @@ button:active {
   left: 0;
   right: 0;
   top: 0;
-  background: #fff;
+  height: 31px;
+  z-index: 5;
+  background: #9f3030;
+  color: white
 }
 #nav-inner {
+}
+#app-logo-outer {
+  float: left;
+  width: 160px;
   height: 30px;
-  border-bottom: 1px solid #333;
+}
+#app-logo {
+  line-height: 30px;
+  font-family: Georgia, serif;
+  font-weight: bold;
+  font-size: 22px;
+}
+#app-logo:before {
+  content: '';
+  width: 30px;
+  height: 30px;
+  float: left;
+  background: url(/img/nav.png) 0 -56px;
 }
 
 #doc-inner {
@@ -401,84 +410,83 @@ button:active {
 .nav-list {
   list-style: none;
   margin: 0;
-  padding: 5px 1em 0 1em;
+  padding: 1px 0 0 0;
+  white-space: nowrap;
 }
 .nav-list li {
   display: inline-block;
   vertical-align: bottom;
+  margin-right: 0.5em;
 }
 .nav-link, .nav-link-btn {
   float: left;
-  line-height: 24px;
-  height: 24px;
-  border: 1px solid #999;
-  border-bottom: 0;
-  padding: 0 1em;
+  line-height: 27px;
+  height: 27px;
+  padding: 0 0.5em 0 30px;
+  background: white;
+  color: black;
+  border-bottom: 3px solid transparent;
+  border-radius: 3px 3px 0 0;
   cursor: pointer;
-  margin: 0 .1em;
   position: relative;
 }
 .nav-link:hover, .nav-link-btn:hover {
-  background: #eee;
+  background: #ececec;
 }
 .nav-link:active, .nav-link-btn:active {
   background: #bbb;
 }
-.nav-link:before,
+.nav-link:before, .nav-link-btn:before {
+  /* icon */
+  content: '';
+  width: 28px;
+  height: 28px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-image: url(../img/nav.png);
+}
 .nav-link:after, .nav-link-btn:after {
   content: '';
   display: block;
   position: absolute;
-  width: 90%;
-  left: 5%;
+  left: 0;
+  bottom: 0;
+  width: 100%;
   height: 3px;
 }
-.nav-link:before, .nav-link-btn:before {
-  top: 0;
-  display: none;
-}
-.nav-link:after, .nav-link-btn:after {
-  bottom: 0;
-}
-.nav-link.active:before {
-  display: block;
+.nav-link.active {
+  border-bottom-color: black;
+  background: linear-gradient(to bottom, white, #ececec);
+  box-shadow: 0 0 6px rgba(40, 40, 40, 0.5);
 }
 
-#nav-link-overview:before,
-#nav-link-overview:after {
-  background: #424242;
+#nav-link-overview {
+  border-color: #424242;
 }
-#nav-link-analysis:before,
-#nav-link-analysis:after {
-  background: #f4a742;
+#nav-link-analysis {
+  border-color: #f4a742;
 }
-#nav-link-funds:before,
-#nav-link-funds:after {
-  background: #546e7a;
+#nav-link-funds {
+  border-color: #546e7a;
 }
-#nav-link-in:before,
-#nav-link-in:after {
-  background: #d84315;
+#nav-link-in {
+  border-color: #d84315;
 }
-#nav-link-bills:before,
-#nav-link-bills:after {
-  background: rgb(183, 28, 28);
+#nav-link-bills {
+  border-color: rgb(183, 28, 28);
 }
-#nav-link-food:before,
-#nav-link-food:after {
-  background: rgb(67, 160, 71);
+#nav-link-food {
+  border-color: rgb(67, 160, 71);
 }
-#nav-link-general:before,
-#nav-link-general:after {
-  background: rgb(1, 87, 155);
+#nav-link-general {
+  border-color: rgb(1, 87, 155);
 }
-#nav-link-holiday:before,
-#nav-link-holiday:after {
-  background: rgb(0, 137, 123);
+#nav-link-holiday {
+  border-color: rgb(0, 137, 123);
 }
-#nav-link-social:before,
-#nav-link-social:after {
-  background: rgb(191, 158, 36);
+#nav-link-social {
+  border-color: rgb(191, 158, 36);
 }
 
 .page {
@@ -1036,9 +1044,10 @@ button:active {
     width: inherit;
   }
   #nav-outer {
-    left: 50%;
-    margin-left: -500px;
+  }
+  #nav-inner {
     width: 1000px;
+    margin: 0 auto;
   }
   .table-overview {
     width: 100%;
@@ -1164,7 +1173,7 @@ button:active {
     top: 70px;
   }
   .graph-container-pie-1 {
-    top: 410px;
+    top: 390px;
   }
   .graph-container-pie-2 {
   }
