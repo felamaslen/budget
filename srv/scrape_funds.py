@@ -5,8 +5,8 @@ import re
 import time
 import mechanize
 
-from srv.db import database
-from srv.misc import strng, fund_hash, now
+from db import database
+from misc import strng, fund_hash, now
 
 db = database()
 
