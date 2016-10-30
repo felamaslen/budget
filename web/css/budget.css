@@ -31,16 +31,8 @@ body.wait * {
   cursor: wait !important;
 }
 button {
-  -moz-box-shadow: inset 0px 1px 0px 0px #9acc85;
-  -webkit-box-shadow: inset 0px 1px 0px 0px #9acc85;
   box-shadow: inset 0px 1px 0px 0px #9acc85;
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #74ad5a), color-stop(1, #68a54b));
-  background: -moz-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
-  background: -webkit-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
-  background: -o-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
-  background: -ms-linear-gradient(top, #74ad5a 5%, #68a54b 100%);
   background: linear-gradient(to bottom, #74ad5a 5%, #68a54b 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='@color_grad_btn_from', endColorstr='@color_grad_btn_to', GradientType=0);
   background-color: #74ad5a;
   border: 1px solid #3b6e22;
   display: inline-block;
@@ -450,10 +442,10 @@ button:active {
   position: fixed;
   left: 50%;
   top: 50%;
-  margin-top: -115px;
+  margin-top: -180px;
   margin-left: -194px;
   width: 288px;
-  height: 130px;
+  height: 360px;
   padding: 0 50px 50px 50px;
   background: #111;
   border-radius: 4px;
@@ -496,6 +488,40 @@ button:active {
   position: absolute;
   left: 22px;
   top: 32px;
+}
+#login-form .number-input {
+  margin: 90px 14px 0 14px;
+  background: #3e3e3e;
+  box-shadow: inset 0 0 13px rgba(0, 0, 0, 0.5);
+  padding: 0 10px 5px 10px;
+}
+#login-form .number-input .btn-digit {
+  width: 70px;
+  height: 35px;
+  line-height: 35px;
+  top: 0;
+  margin: 10px 5px;
+  padding: 0;
+  background-color: #868686;
+  background-image: linear-gradient(167deg, rgba(255, 255, 255, 0.1) 50%, rgba(0, 0, 0, 0) 55%), linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0));
+  box-shadow: inset 0 0 0 1px #868686, inset 0 0 0 2px rgba(255, 255, 255, 0.15), 0 8px 0 0 #737373, 0 8px 0 1px rgba(0, 0, 0, 0.4), 0 8px 8px 1px rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-family: "Lucida Grande", Arial, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: -1px;
+  position: relative;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  transition: 0.05s;
+}
+#login-form .number-input .btn-digit:active {
+  box-shadow: inset 0 0 0 1px #737373, inset 0 0 0 2px rgba(255, 255, 255, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.4);
+  transform: translateY(10px);
+}
+#login-form .number-input .btn-digit-0 {
+  margin-left: 85px;
 }
 .page {
   position: relative;

@@ -556,6 +556,25 @@
 
   const finance = new GoogleFinanceAPI();
 
+  class NumberInput {
+    constructor(callback) {
+      this.callback = callback;
+
+      this.$elem = $("<div></div>").addClass("number-input");
+
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(digit => {
+        const $digit = $("<button></button>")
+        .addClass("btn-digit")
+        .addClass("btn-digit-" + digit.toString())
+        .text(digit.toString());
+
+        this.$elem.append($digit);
+
+        $digit.on("click", () => callback(digit));
+      });
+    }
+  }
+
   class User {
     constructor() {
       this.$input = null;
@@ -571,9 +590,54 @@
       this.apiKey = null;
     }
 
+    addNumInput() {
+      this.numInput = new NumberInput(val => this.inputKey(val));
+
+      this.$form.append(this.numInput.$elem.addClass("noselect"));
+    }
+
+    keyDown(evt) {
+      if (!this.uid) {
+        if (this.inputActive === -1) {
+          return;
+        }
+
+        let val = parseInt(evt.key, 10);
+
+        if (isNaN(val)) {
+          return;
+        }
+
+        val = Math.min(9, Math.max(0, val));
+
+        this.inputKey(val);
+      }
+    }
+
+    inputKey(val) {
+      this.loginPin += Math.pow(10, 3 - this.inputActive) * val;
+
+      this.$input.slice(user.inputActive, user.inputActive + 1)
+      .addClass("done").removeClass("active");
+
+      if (this.inputActive < 3) {
+        this.inputActive++;
+
+        this.$input.slice(this.inputActive, this.inputActive + 1)
+        .addClass("active");
+      }
+      else {
+        this.login();
+      }
+    }
+
     init($input, $form) {
       this.$input = $input;
       this.$form = $form;
+
+      this.addNumInput();
+
+      $(window).on("keydown", evt => { this.keyDown(evt); });
 
       let focusLogin = true;
 
@@ -4633,88 +4697,62 @@
    * @returns {void} nothing
    */
   function keyDownHandler(evt) {
-    if (!user.uid) {
-      if (user.inputActive === -1) {
-        return;
+    if (user.uid) {
+      if (evt.key === "Enter") {
+        if (editing.finish()) {
+          evt.preventDefault();
+        }
       }
-
-      let val = parseInt(evt.key, 10);
-
-      if (isNaN(val)) {
-        return;
+      else if (evt.key === "Escape") {
+        if (editing.cancel()) {
+          evt.preventDefault();
+        }
       }
+      else if (pageActive && (
+        (evt.ctrlKey && (evt.key === "ArrowLeft" || evt.key === "ArrowRight")) ||
+        (evt.key === "ArrowUp" || evt.key === "ArrowDown") ||
+        (!editingAdd && evt.key === "Tab")
+      )) {
+        const page0 = pageActive === "overview";
 
-      val = Math.min(9, Math.max(0, val));
+        let x = 0;
+        let y = 0;
 
-      user.loginPin += Math.pow(10, 3 - user.inputActive) * val;
+        const dx = evt.key === "ArrowLeft"  ? -1 : (evt.key === "ArrowRight"  ? 1 : 0);
+        const dy = evt.key === "ArrowUp"    ? -1 : (evt.key === "ArrowDown"   ? 1 : 0);
 
-      user.$input.slice(user.inputActive, user.inputActive + 1)
-      .addClass("done").removeClass("active");
+        let maxX;
+        let maxY;
 
-      if (user.inputActive < 3) {
-        user.inputActive++;
-
-        user.$input.slice(user.inputActive, user.inputActive + 1)
-        .addClass("active");
-      }
-      else {
-        user.login();
-      }
-    }
-    else if (evt.key === "Enter") {
-      if (editing.finish()) {
-        evt.preventDefault();
-      }
-    }
-    else if (evt.key === "Escape") {
-      if (editing.cancel()) {
-        evt.preventDefault();
-      }
-    }
-    else if (pageActive && (
-      (evt.ctrlKey && (evt.key === "ArrowLeft" || evt.key === "ArrowRight")) ||
-      (evt.key === "ArrowUp" || evt.key === "ArrowDown") ||
-      (!editingAdd && evt.key === "Tab")
-    )) {
-      const page0 = pageActive === "overview";
-
-      let x = 0;
-      let y = 0;
-
-      const dx = evt.key === "ArrowLeft"  ? -1 : (evt.key === "ArrowRight"  ? 1 : 0);
-      const dy = evt.key === "ArrowUp"    ? -1 : (evt.key === "ArrowDown"   ? 1 : 0);
-
-      let maxX;
-      let maxY;
-
-      if (page0) {
-        maxX = 0;
-        maxY = pages.overview.data.cost.balance.length - 1;
-      }
-      else {
-        maxX = pages[pageActive].numEditCols() - 1;
-        maxY = pages[pageActive].data.length - 1;
-      }
-
-      if (editing.active) {
         if (page0) {
-          y = Math.min(maxY, Math.max(0, editing.$elem.parent().index() + dy));
+          maxX = 0;
+          maxY = pages.overview.data.cost.balance.length - 1;
         }
         else {
-          x = Math.min(maxX, Math.max(0, editing.$elem.index() + dx));
-
-          y = Math.min(maxY, Math.max(0, editing.$elem.parent().index() - 1 + dy));
+          maxX = pages[pageActive].numEditCols() - 1;
+          maxY = pages[pageActive].data.length - 1;
         }
 
-        editing.finish(
-          () => tableNavigate(true, evt, x, y, dx, dy, maxX, maxY)
-        );
-      }
-      else {
-        tableNavigate(false, evt, x, y, dx, dy, maxX, maxY);
-      }
+        if (editing.active) {
+          if (page0) {
+            y = Math.min(maxY, Math.max(0, editing.$elem.parent().index() + dy));
+          }
+          else {
+            x = Math.min(maxX, Math.max(0, editing.$elem.index() + dx));
 
-      evt.preventDefault();
+            y = Math.min(maxY, Math.max(0, editing.$elem.parent().index() - 1 + dy));
+          }
+
+          editing.finish(
+            () => tableNavigate(true, evt, x, y, dx, dy, maxX, maxY)
+          );
+        }
+        else {
+          tableNavigate(false, evt, x, y, dx, dy, maxX, maxY);
+        }
+
+        evt.preventDefault();
+      }
     }
   }
 
