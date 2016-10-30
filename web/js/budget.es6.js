@@ -2998,11 +2998,20 @@
           this.$addInput[col].editable.$input.val(), col
         );
 
+        let error = false;
+
+        if (col === "item" && val.length === 0) {
+          errorMessages.newMessage("Must enter text for main item field", 1, MSG_TIME_WARN);
+          error = true;
+        }
+
         if (val === null) {
           errorMessages.newMessage("Must enter valid data", 1, MSG_TIME_WARN);
+          error = true;
+        }
 
+        if (error) {
           this.$addButton.attr("disabled", false);
-
           return;
         }
 
@@ -3014,7 +3023,7 @@
       api.request(
         "add/" + this.page, "POST", data, user.apiKey,
         res => this.onNewAdded(dataVal, res),
-        () => this.onNewError(),
+        null,
         () => this.onNewRequestComplete()
       );
     }
@@ -3042,10 +3051,6 @@
       this.$addInput.date.editable.$input.val(today.format()).focus();
 
       this.updatePieChart();
-    }
-
-    onNewError() {
-      errorMessages.newMessage("Error inserting row! (Server error)", 2, MSG_TIME_ERROR);
     }
 
     onNewRequestComplete() {
