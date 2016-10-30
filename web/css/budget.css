@@ -185,7 +185,7 @@ button:active {
 }
 /* document */
 #doc-outer {
-  padding-top: 31px;
+  padding-top: 59px;
 }
 #doc-outer .doc-inner {
   position: relative;
@@ -216,7 +216,7 @@ button:active {
 /* insert list */
 .list-insert .list-head {
   position: fixed;
-  top: 31px;
+  top: 59px;
   left: 0;
   z-index: 4;
   background: white;
@@ -294,23 +294,28 @@ button:active {
   color: white;
 }
 /* navigation */
+#nav-inner {
+  background: linear-gradient(to bottom, #d84d4d, #9f3030);
+  box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
+}
 #nav-outer {
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
-  height: 31px;
-  z-index: 5;
-  background: #9f3030;
+  height: 49px;
+  z-index: 10;
   color: white;
+  padding-bottom: 10px;
+  background: white;
 }
 #nav-outer .app-logo-outer {
-  float: left;
-  height: 30px;
+  float: right;
+  height: 49px;
   margin: 0 1em 0 0.5em;
 }
 #nav-outer .app-logo {
-  line-height: 30px;
+  line-height: 49px;
   font-family: Ubuntu, Georgia, serif;
   font-weight: bold;
   font-size: 22px;
@@ -319,14 +324,15 @@ button:active {
   content: '';
   width: 30px;
   height: 30px;
-  float: left;
+  display: inline-block;
+  vertical-align: middle;
   background: url(/img/nav.png) 0 -56px;
   padding-right: 0.5em;
 }
 #nav-outer .nav-list {
   list-style: none;
   margin: 0;
-  padding: 1px 0 0 0;
+  padding: 19px 0 0 0;
   white-space: nowrap;
 }
 #nav-outer .nav-list li {
@@ -337,11 +343,10 @@ button:active {
 #nav-outer .nav-list .nav-link,
 #nav-outer .nav-list .nav-link-btn {
   float: left;
-  line-height: 27px;
+  line-height: 30px;
   height: 27px;
-  padding: 0 0.5em 0 30px;
-  background: white;
-  color: black;
+  padding: 0 0.5em 0 35px;
+  color: white;
   border-bottom: 3px solid transparent;
   border-radius: 3px 3px 0 0;
   cursor: pointer;
@@ -349,18 +354,24 @@ button:active {
 }
 #nav-outer .nav-list .nav-link:hover,
 #nav-outer .nav-list .nav-link-btn:hover {
-  background: #ececec;
+  background: rgba(0, 0, 0, 0.3);
 }
 #nav-outer .nav-list .nav-link:active,
 #nav-outer .nav-list .nav-link-btn:active {
-  background: #bbb;
+  background: rgba(0, 0, 0, 0.5);
 }
 #nav-outer .nav-list .nav-link.active,
 #nav-outer .nav-list .nav-link-btn.active {
   border-bottom-color: black !important;
-  background: #ffbaba;
-  box-shadow: inset 0 0 6px rgba(40, 40, 40, 0.5);
   cursor: default;
+}
+#nav-outer .nav-list .nav-link.active,
+#nav-outer .nav-list .nav-link-btn.active,
+#nav-outer .nav-list .nav-link.active:hover,
+#nav-outer .nav-list .nav-link-btn.active:hover,
+#nav-outer .nav-list .nav-link.active:active,
+#nav-outer .nav-list .nav-link-btn.active:active {
+  background: rgba(0, 0, 0, 0.7);
 }
 #nav-outer .nav-list .nav-link:before,
 #nav-outer .nav-list .nav-link-btn:before {
@@ -369,7 +380,7 @@ button:active {
   width: 28px;
   height: 28px;
   position: absolute;
-  left: 0;
+  left: 5px;
   top: 0;
   background-image: url(../img/nav.png);
 }
@@ -428,10 +439,10 @@ button:active {
   background-position: -28px -28px;
 }
 #nav-outer .nav-list #nav-link-logout {
-  padding-left: 0.5em;
+  border-color: #eee;
 }
 #nav-outer .nav-list #nav-link-logout:before {
-  display: none;
+  background-position: -56px -28px;
 }
 #login-form {
   display: none;
@@ -1038,6 +1049,17 @@ button:active {
   #nav-inner {
     margin: 0 auto;
   }
+  /* hide navigation text */
+  #nav-outer .nav-list .nav-link,
+  #nav-outer .nav-list .nav-link-btn {
+    text-indent: -9999px;
+    width: 30px;
+    padding: 0 0.5em;
+  }
+  #nav-outer .nav-list .nav-link:before,
+  #nav-outer .nav-list .nav-link-btn:before {
+    left: 0.5em;
+  }
   /* overview page */
   #page-overview .table-overview {
     width: 100%;
@@ -1070,7 +1092,7 @@ button:active {
     width: inherit;
     height: 299px;
     position: fixed;
-    top: 31px;
+    top: 49px;
     z-index: 5;
     box-shadow: 0 3px 16px rgba(60, 60, 60, 0.3);
     background: white;
@@ -1118,10 +1140,10 @@ button:active {
     width: inherit;
     transition: padding-top 0.3s ease-in-out;
   }
-  .list-insert.graph-hidden .list-head {
-    top: 30px;
+  .graph-hidden .list-head {
+    top: 59px;
   }
-  .list-insert.graph-hidden .list-ul {
+  .graph-hidden .list-ul {
     padding-top: 24px;
   }
 }
@@ -1130,20 +1152,20 @@ button:active {
   body {
     height: 100%;
   }
-  /* overview page */
-  #page-overview .graph-container {
+  .graph-container {
     position: fixed;
     z-index: 1;
     background: rgba(255, 255, 255, 0.8);
     box-shadow: 0 3px 10px rgba(60, 60, 60, 0.6);
   }
+  /* overview page */
   #page-overview .graph-balance {
     left: 900px;
-    top: 50px;
+    top: 69px;
   }
   #page-overview .graph-spend {
     left: 900px;
-    top: 360px;
+    top: 379px;
   }
   /* analysis page */
   #page-analysis {
@@ -1152,7 +1174,7 @@ button:active {
   /* in page */
   #page-in .graph-container-pie {
     left: 400px;
-    top: 90px;
+    top: 119px;
   }
   /* funds page */
   #page-funds .stocks-list {
@@ -1176,10 +1198,9 @@ button:active {
     background-color: rgba(240, 240, 240, 0.8);
   }
   #page-funds .graph-fund-history {
-    position: absolute;
     width: 600px;
     left: 900px;
-    top: 350px;
+    top: 409px;
     z-index: 1;
   }
   .graph-toggle-btn {
@@ -1187,10 +1208,10 @@ button:active {
   }
   .graph-container-pie {
     left: 800px;
-    top: 70px;
+    top: 99px;
   }
   .graph-container-pie-1 {
-    top: 390px;
+    top: 409px;
   }
   .list-head {
     width: 100%;
