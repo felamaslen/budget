@@ -55,26 +55,21 @@ class user:
 
             current_time = int(time.time())
 
-            if self.ip_check_count >= num_tries:
-                """ ip has done at least num_tries unsuccessful login attempts """
-                since = current_time - last_time
+            since = current_time - last_time
 
-                if since < num_seconds_penalty:
-                    """ ip has attempted another login in penalty time """
-                    breach = True
-                else:
-                    """ ip has waited for penalty time to expire """
-                    self.ip_check_count = 0
+            if since < num_seconds_penalty:
+                """ ip has done an unsuccessful login attempt in the past penalty period """
 
-                    self.ip_check_expired = True
+                if self.ip_check_count >= num_tries:
+                    """ ip has exceeded the fat finger allowance, so needs locking out for a penalty period """
+                    return True
 
-            if breach:
-                """ give a penalty to ip """
-                self.db.query("""
-                UPDATE ip_login_req SET `time` = %s, `count` = %s WHERE ip = %s
-                """, [current_time, num_tries, ip])
+            else:
+                """ we are beyond the penalty period, so forget about
+                all previous bad login attempts from ip """
+                self.ip_check_count = 0
 
-                return True
+                self.ip_check_expired = True
 
         return False
 
@@ -96,7 +91,7 @@ class user:
                 """, [ip, current_time, 1])
 
         elif self.ip_check_expired:
-            """ ip made a good login after waiting for ban to expire; delete counter """
+            """ ip made a good login after waiting for ban time to expire; delete counter """
 
             self.db.query("""
             DELETE FROM ip_login_req WHERE `ip` = %s
@@ -104,15 +99,15 @@ class user:
 
     def login(self, ip):
         """ try to log in """
-        breachedPenalty = self.ip_check_before(ip)
+        breached_penalty = self.ip_check_before(ip)
 
-        if breachedPenalty is None: # unknown error
+        if breached_penalty is None: # unknown error
             return None
 
-        if breachedPenalty is True: # ip is temp banned
+        if breached_penalty is True: # ip is temp banned
             return False
 
-        if breachedPenalty is False and self.pin is not None:
+        if breached_penalty is False and self.pin is not None:
             info = self.db.query("""
             SELECT uid, user, api_key FROM users WHERE api_key = %s
             """, [self.password_hash()])
