@@ -1,4 +1,6 @@
 (function Budget($) {
+  const pio2 = Math.PI / 2;
+
   const PIE_LABEL_RADIUS_START = 1.1;
   const PIE_LABEL_RADIUS_SCALE = 1.2;
   const PIE_LABEL_INSIDE_RADIUS = 0.6;
@@ -8,7 +10,7 @@
   const PIE_SMALL_LABEL_OFFSET = 10;
   const PIE_DEPTH = 10;
 
-  const pio2 = Math.PI / 2;
+  const NAV_HANDLE_EVENT = "click";
 
   const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 
@@ -633,7 +635,7 @@
         console.warn("Your browser does not support HTML5 storage, so logins won't be remembered.");
       }
 
-      $("#nav-link-" + currentPage).mousedown();
+      $("#nav-link-" + currentPage).trigger(NAV_HANDLE_EVENT);
 
       this.$form.fadeOut();
     }
@@ -4556,12 +4558,14 @@
     if (!$btn || typeof $btn !== "object") {
       $btn = $(this);
 
-      event = "mousedown";
+      event = NAV_HANDLE_EVENT;
     }
 
-    $btn.on(event, selectPage.bind(
-      null, $btn.attr("id").substring(9), $btn, callback
-    ));
+    const pageName = $btn.attr("id").substring(9);
+
+    $btn.on(event, () => {
+      selectPage(pageName, $btn, callback);
+    });
   }
 
   function tableNavigate(wasEditing, evt, x, y, dx, dy, maxX, maxY) {
@@ -4607,7 +4611,7 @@
         y = maxY;
       }
 
-      pages.overview.$td[y].balance.mousedown();
+      pages.overview.$td[y].balance.trigger(NAV_HANDLE_EVENT);
     }
     else {
       const $span = pages[pageActive].$lbody
@@ -5077,7 +5081,7 @@
 
     $(".nav-link").each(navHandler);
 
-    $("#nav-link-logout").on("mousedown", () => user.logout());
+    $("#nav-link-logout").on(NAV_HANDLE_EVENT, () => user.logout());
 
     currentPage = Cookies.get("currentPage");
 
