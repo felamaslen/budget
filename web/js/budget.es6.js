@@ -117,7 +117,7 @@
       this.$elem = $("<div></div>")
       .addClass("message")
       .addClass("message-" + level)
-      .text(text);
+      .append($("<span></span>").text(text));
 
       this.setCloseTimer();
 

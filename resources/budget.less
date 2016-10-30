@@ -212,14 +212,25 @@ button {
   right: 0;
   margin: 1em;
   .message {
-    transition: 0.8s opacity ease-in-out;
-    padding: 1em 2em;
+    transition: 0.8s ease-in-out;
     font-style: italic;
     font-size: 0.9em;
     cursor: pointer;
     border-radius: 0.3em;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-    margin: 0.5em 0;
+    height: 3em;
+    margin-top: 0.5em;
+    overflow: hidden;
+
+    span {
+      display: block;
+      line-height: 1em;
+      padding: 1em 2em;
+      white-space: nowrap;
+      max-width: 400px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
 
     &.message-debug {
       background: rgba(0, 156, 255, 0.5);
@@ -235,6 +246,8 @@ button {
     }
     &.hidden {
       opacity: 0;
+      height: 0;
+      margin: 0;
     }
   }
 }
