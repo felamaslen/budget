@@ -4612,7 +4612,7 @@
         y = maxY;
       }
 
-      pages.overview.$td[y].balance.trigger(NAV_HANDLE_EVENT);
+      pages.overview.$td[y].mousedown();
     }
     else {
       const $span = pages[pageActive].$lbody
