@@ -357,9 +357,10 @@ button:active {
 }
 #nav-outer .nav-list .nav-link.active,
 #nav-outer .nav-list .nav-link-btn.active {
-  border-bottom-color: black;
-  background: linear-gradient(to bottom, white, #ececec);
-  box-shadow: 0 0 6px rgba(40, 40, 40, 0.5);
+  border-bottom-color: black !important;
+  background: #ffbaba;
+  box-shadow: inset 0 0 6px rgba(40, 40, 40, 0.5);
+  cursor: default;
 }
 #nav-outer .nav-list .nav-link:before,
 #nav-outer .nav-list .nav-link-btn:before {
@@ -375,29 +376,62 @@ button:active {
 #nav-outer .nav-list #nav-link-overview {
   border-color: #424242;
 }
+#nav-outer .nav-list #nav-link-overview:before {
+  background-position: 0 0;
+}
 #nav-outer .nav-list #nav-link-analysis {
   border-color: #f4a742;
+}
+#nav-outer .nav-list #nav-link-analysis:before {
+  background-position: -28px 0;
 }
 #nav-outer .nav-list #nav-link-funds {
   border-color: #546e7a;
 }
+#nav-outer .nav-list #nav-link-funds:before {
+  background-position: -56px 0;
+}
 #nav-outer .nav-list #nav-link-in {
   border-color: #d84315;
+}
+#nav-outer .nav-list #nav-link-in:before {
+  background-position: -84px 0;
 }
 #nav-outer .nav-list #nav-link-bills {
   border-color: #b71c1c;
 }
+#nav-outer .nav-list #nav-link-bills:before {
+  background-position: -112px 0;
+}
 #nav-outer .nav-list #nav-link-food {
   border-color: #43a047;
+}
+#nav-outer .nav-list #nav-link-food:before {
+  background-position: -140px 0;
 }
 #nav-outer .nav-list #nav-link-general {
   border-color: #01579b;
 }
+#nav-outer .nav-list #nav-link-general:before {
+  background-position: -168px 0;
+}
 #nav-outer .nav-list #nav-link-holiday {
   border-color: #00897b;
 }
+#nav-outer .nav-list #nav-link-holiday:before {
+  background-position: 0 -28px;
+}
 #nav-outer .nav-list #nav-link-social {
   border-color: #bf9e24;
+}
+#nav-outer .nav-list #nav-link-social:before {
+  background-position: -28px -28px;
+}
+#nav-outer .nav-list #nav-link-logout {
+  padding-left: 0.5em;
+}
+#nav-outer .nav-list #nav-link-logout:before {
+  display: none;
 }
 #login-form {
   display: none;
