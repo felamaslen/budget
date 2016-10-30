@@ -2809,7 +2809,7 @@
 
       this.update(res.data.data);
 
-      if (!res.data.older) {
+      if (!res.data.older_exists) {
         this.offset = -1;
       }
     }
