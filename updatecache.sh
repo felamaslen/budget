@@ -36,6 +36,8 @@ function update_serial {
 
     if [ $serial_date -eq $date_now ]; then
       serial_no=$(($serial_no + 1))
+    else
+      serial_no=1
     fi
   fi
 

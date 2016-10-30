@@ -10,8 +10,6 @@ import misc
 import user
 import rest_api
 
-serial = misc.get_serial()
-
 app = Flask('budget')
 
 # the .php extension is vestigial
@@ -26,9 +24,12 @@ def api():
 
 @app.route('/')
 def index():
+    dev = 'dev' in request.args
+    serial = misc.get_serial()
+
     return render_template(
         'index.html',
-        dev = config.DEV,
+        dev = dev,
         serial = serial,
         pie_tolerance = config.PIE_TOLERANCE
     )
