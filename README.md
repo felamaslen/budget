@@ -15,3 +15,7 @@
 
  - To scrape fund values, run from the command line:
   *  `./cache_funds.py`
+
+### Operation:
+ - To run the server:
+  *  `./init.sh`
