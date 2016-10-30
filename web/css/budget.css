@@ -179,7 +179,7 @@ button:active {
 .messages-outer {
   z-index: 1001;
   position: fixed;
-  bottom: 0;
+  top: 49px;
   right: 0;
   margin: 1em;
 }

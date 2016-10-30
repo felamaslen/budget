@@ -4,7 +4,7 @@
   const E_NO_STORAGE = "Your browser does not support HTML5 storage, so logins won't be remembered.";
 
   const MSG_TIME_DEBUG  = 0;
-  const MSG_TIME_WARN   = 1000;
+  const MSG_TIME_WARN   = 2000;
   const MSG_TIME_ERROR  = 5000;
   const MSG_TIME_FATAL  = 0;
 
@@ -173,7 +173,7 @@
 
       const message = new ErrorMessage(text, this.levels[level], timeout);
 
-      this.$outer.prepend(message.$elem);
+      this.$outer.append(message.$elem);
     }
   }
 
