@@ -17,7 +17,7 @@
   const ANALYSIS_VIEW_WIDTH   = 500;
   const ANALYSIS_VIEW_HEIGHT  = 500;
 
-  const DO_STOCKS_LIST = false;
+  const DO_STOCKS_LIST = true;
 
   const GRAPH_FUND_HISTORY_WIDTH = 600;
   const GRAPH_FUND_HISTORY_TENSION = 0.65;
@@ -963,7 +963,7 @@
 
       this.$gCont = $("<div></div>")
       .addClass("graph-container")
-      .attr("id", "graph-" + this.title);
+      .addClass("graph-" + this.title);
 
       this.$gCont.append(this.$canvas);
 
