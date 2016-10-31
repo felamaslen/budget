@@ -368,7 +368,7 @@ button:active {
   height: 30px;
   display: inline-block;
   vertical-align: middle;
-  background: url(/img/nav.png) 0 -56px;
+  background: url("../img/nav.png?v=2016103101") 0 -56px;
   padding-right: 0.5em;
 }
 #nav-outer .nav-list {
@@ -425,7 +425,7 @@ button:active {
   position: absolute;
   left: 5px;
   top: 0;
-  background-image: url(../img/nav.png);
+  background-image: url("../img/nav.png?v=2016103101");
 }
 #nav-outer .nav-list #nav-link-overview {
   border-color: #424242;
@@ -588,7 +588,7 @@ button:active {
 }
 .editable.editing,
 .li-add .editable {
-  overflow: visible;
+  overflow: visible !important;
 }
 .editable.editing .text {
   display: none;
