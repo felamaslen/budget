@@ -13,6 +13,8 @@
 
 @top_nav:     @height_nav + 10;
 
+@nav_img: "../img/nav.png?v=2016103101";
+
 @font-face {
   font-family: lcd;
   src: url(fonts/erbos_draco_1st_open_nbp.woff);
@@ -406,7 +408,7 @@ button {
       height: @height_logo;
       display: inline-block;
       vertical-align: middle;
-      background: url(/img/nav.png) 0 -56px;
+      background: url(@nav_img) 0 -56px;
       padding-right: 0.5em;
     }
   }
@@ -452,7 +454,7 @@ button {
         position: absolute;
         left: 5px;
         top: 0;
-        background-image: url(../img/nav.png);
+        background-image: url(@nav_img);
       }
     }
     .nav-link, .nav-link-btn {
@@ -615,7 +617,7 @@ button {
 }
 .editable.editing,
 .li-add .editable {
-  overflow: visible;
+  overflow: visible !important;
 }
 .editable.editing .text {
   display: none;
