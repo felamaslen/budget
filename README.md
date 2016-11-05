@@ -5,7 +5,8 @@
 ### Installation:
  - Install Python 2.7 and MySQL
  - Create MySQL database called "budget"
- - Install Python environment and MySQL database: `./setup.sh install`
+ - Install Python environment and MySQL database:
+  * `./setup.sh install`
  - Configure MySQL username and password in `srv/db_info.py` (rename from `.example`)
  - Set up nginx or apache. An example nginx configuration is given in `resources/nginx.example.conf`
  - To scrape fund values, run from the command line or as a cron job:
