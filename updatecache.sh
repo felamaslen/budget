@@ -22,7 +22,7 @@ function update_css {
 
 function update_serial {
   # increase serial
-  serial_file=./serial
+  serial_file=./resources/serial
 
   serial_no=1
 
