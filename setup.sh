@@ -13,7 +13,7 @@ function setup_python {
   echo $MSG_SETUP_PYTHON
   virtualenv env || exit 1
   . env/bin/activate
-  env/bin/pip install -r deps.txt
+  env/bin/pip install -r resources/deps.txt
   deactivate
 }
 
