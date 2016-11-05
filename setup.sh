@@ -52,9 +52,20 @@ fi
 
 if [[ $1 == "dev" ]]; then
   setup_dev
-
 elif [[ $1 == "build" ]]; then
   build || exit 1
-fi
+elif [[ $1 == "install" ]]; then
+  read -p "Database username: " dbusername
+
+  echo ""
+  echo "WARNING: continuing may destroy data currently in the budget database!"
+  read -p "Continue? [y/N] " do_import
+
+  if [[ $do_import == "y" || $do_import == "Y" ]]; then
+    mysql -u $dbusername -p budget < resources/schema.sql
+  else
+    echo "Doing nothing"
+  fi
+fi 
 
 exit 0

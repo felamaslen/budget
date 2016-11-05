@@ -4,17 +4,17 @@
 
 ### Installation:
  - Install Python 2.7 and MySQL
- - Create MySQL database and schema (TODO: install script)
+ - Create MySQL database called "budget"
+ - Install Python environment and MySQL database: `./setup.sh install`
  - Configure MySQL username and password in `srv/db_info.py` (rename from `.example`)
- - Install Python environment: `./setup.sh`
- - Install nodejs dependencies: `npm i`
- - Set up nginx or apache (TODO: install script)
+ - Set up nginx or apache. An example nginx configuration is given in `resources/nginx.example.conf`
+ - To scrape fund values, run from the command line or as a cron job:
+  *  `./scrape_funds.sh`
 
+#### Extra (for devs):
+ - Install nodejs dependencies: `npm i`
  - To update/create minified JavaScript and CSS, run:
   * `./updatecache.sh [js] [css]`
-
- - To scrape fund values, run from the command line:
-  *  `./scrape_funds.sh`
 
 ### Operation:
  - To run the server:
