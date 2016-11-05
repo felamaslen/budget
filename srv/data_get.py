@@ -1,14 +1,16 @@
 from math import ceil, pi
 from itertools import groupby
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from api_data_methods import processor
-from misc import now, fund_hash, strng
+from misc import fund_hash, strng
 from config import E_NO_PARAMS, E_BAD_PARAMS,\
     FUND_SALT, GRAPH_FUND_HISTORY_DETAIL,\
     PIE_DETAIL, PIE_TOLERANCE,\
     OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE, START_YEAR, START_MONTH,\
     LIST_CATEGORIES
+
+now = datetime.now()
 
 class overview(processor):
     def __init__(self, db, uid):
