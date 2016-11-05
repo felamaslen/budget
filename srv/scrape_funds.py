@@ -6,7 +6,7 @@ import time
 import mechanize
 
 from db import database
-from misc import strng, fund_hash, now
+from misc import strng, fund_hash
 
 db = database()
 

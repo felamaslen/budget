@@ -4,13 +4,10 @@ Miscellaneous functions
 
 import os.path
 import time
-from datetime import datetime
 from hashlib import md5
 import re
 
 from config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
-
-now = datetime.now()
 
 def file_get_contents(filename):
     if not os.path.isfile(filename):
