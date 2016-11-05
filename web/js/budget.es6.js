@@ -3650,6 +3650,8 @@
 
         return value;
       });
+
+      this.data.cost.predicted[0] = this.data.cost.balance[0];
     }
 
     afterBalanceEdit(callback) {
