@@ -7,7 +7,6 @@ include
 srv/*.pyc
 srv/db_info.py
 serial
-inc/db.password.inc.php
 web/js/budget.es5.js
 web/js/main.min.js
 web/css/budget.min.css
