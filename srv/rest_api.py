@@ -14,7 +14,7 @@ import api_data
 
 class CommandAPI:
     """ api wrapper for the cli interface """
-    def __init__(self, command):
+    def __init__(self, uid, method, task, args, form):
         self.error = False
 
         self.res = {} # response data
@@ -22,7 +22,7 @@ class CommandAPI:
         """ new database connection """
         self.db = database()
 
-        uid, method, task, args, form = self.validate_command(command)
+        task = deque(task)
 
         if not self.error is False:
             self.error = True
@@ -41,16 +41,6 @@ class CommandAPI:
             self.errorText  = api.errorText
             self.extra      = api.extra
             self.data       = api.data
-
-    def validate_command(self, command):
-        # TODO: make this validate the command and produce proper values below
-        uid = 1
-        method = "GET"
-        task = deque(["data", "overview"])
-        args = {}
-        form = {}
-
-        return uid, method, task, args, form
 
     def process_response(self):
         """ gets a response from the output data """

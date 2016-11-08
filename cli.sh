@@ -38,6 +38,12 @@ get_uid() {
 
 get_task() {
   read -p "Task? " task
+
+  if [[ -z $task ]]; then
+    echo
+    echo "Must set a task."
+    exit 1
+  fi
 }
 get_args() {
   read -p "Arguments? (query string) [optional] " args
@@ -60,7 +66,7 @@ if [[ $method == "POST" ]]; then
   get_form
 fi
 
-echo "python srv/cli.py $method $uid $task $args $form"
+python srv/cli.py $method $uid $task $args $form
 
 deactivate
 
