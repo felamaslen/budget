@@ -1,5 +1,5 @@
 """
-Main budget app (backend)
+Main budget web app (backend)
 Written by Fela Maslen, 2016
 """
 
@@ -15,12 +15,12 @@ app = Flask('budget')
 # the .php extension is vestigial
 @app.route('/rest.php', methods = ['GET', 'POST'])
 def api():
-    api = rest_api.api(request)
+    api = rest_api.WebAPI(request)
 
     if api.api_error:
         return "Unknown server error", 500
 
-    return api.getJSON(), api.response_code
+    return api.get_json(), api.response_code
 
 @app.route('/')
 def index():
