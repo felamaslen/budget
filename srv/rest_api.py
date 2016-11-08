@@ -12,7 +12,68 @@ from config import IP_BAN_TIME
 
 import api_data
 
-class api:
+class CommandAPI:
+    """ api wrapper for the cli interface """
+    def __init__(self, command):
+        self.error = False
+
+        self.res = {} # response data
+
+        """ new database connection """
+        self.db = database()
+
+        uid, method, task, args, form = self.validate_command(command)
+
+        if not self.error is False:
+            self.error = True
+            self.errorText = "Must supply a valid command"
+
+        else:
+            """ self.validate_args() creates self.method and self.task """
+
+            """ initialise api object to process the actual request """
+            api = API(self.db)
+
+            """ give internal server error if execute() returns False """
+            self.api_error = api.execute(uid, method, task, args, form) is False
+
+            self.error      = api.error
+            self.errorText  = api.errorText
+            self.extra      = api.extra
+            self.data       = api.data
+
+    def validate_command(self, command):
+        # TODO: make this validate the command and produce proper values below
+        uid = 1
+        method = "GET"
+        task = deque(["data", "overview"])
+        args = {}
+        form = {}
+
+        return uid, method, task, args, form
+
+    def process_response(self):
+        """ gets a response from the output data """
+        if self.extra is not None and len(self.extra) > 0:
+            for key in self.extra:
+                self.res[key] = self.extra[key]
+
+        if len(self.data) > 0:
+            self.res['data'] = self.data
+
+        self.res['error'] = self.error
+
+        if len(self.errorText) > 0:
+            self.res['errorText'] = self.errorText
+
+    def print_output(self):
+        """ for the cli app (formatted response) """
+        self.process_response()
+
+        print(self.res) # TODO: format output properly
+
+class WebAPI:
+    """ api wrapper for the web app, to handle requests """
     def __init__(self, request):
         self.api_error = False
         self.response_code = 200
@@ -56,13 +117,42 @@ class api:
 
             return
 
-        """ give internal server error if execute() returns False """
-        self.api_error = self.execute() is False
+        """ logins aren't handled by the API class """
+        if (self.task[0] == 'login'):
+            self.api_error = self.task_login()
+
+        else:
+            """ make sure we're authenticated before proceeding """
+            auth_status = self.user.auth(self.auth)
+
+            if auth_status > 0: # not authenticated
+                self.error = True
+                self.errorText = "Not authenticated" if auth_status == 2 \
+                        else "Bad authentication token"
+
+                self.api_error = True
+
+            elif not auth_status is None:
+
+                """ initialise api object to process the actual request """
+                api = API(self.db)
+
+                """ give internal server error if execute() returns False """
+                self.api_error = api.execute(
+                    self.user.uid, self.method, self.task, \
+                    self.args, self.form
+                ) is False
+
+                self.error      = api.error
+                self.errorText  = api.errorText
+                self.extra      = api.extra
+                self.data       = api.data
 
         """ close the database connection """
         self.db.close()
 
-    def getJSON(self):
+    def process_response(self):
+        """ gets a response from the output data """
         if self.extra is not None and len(self.extra) > 0:
             for key in self.extra:
                 self.res[key] = self.extra[key]
@@ -75,65 +165,11 @@ class api:
         if len(self.errorText) > 0:
             self.res['errorText'] = self.errorText
 
+    def get_json(self):
+        """ for the web app (json) """
+        self.process_response()
+
         return json.dumps(self.res, separators = (',', ':'))
-
-    def execute(self):
-        """
-        decides what to do based on the task set
-        returns false iff a server (not user) error was encountered
-        """
-
-        arg = self.task.popleft()
-
-        if (arg == 'login'):
-            return self.task_login()
-
-        else:
-            """ make sure we're authenticated before proceeding """
-            auth_status = self.user.auth(self.auth)
-
-            if auth_status is None: # server error
-                return False
-
-            if auth_status > 0: # not authenticated
-                self.error = True
-                self.errorText = "Not authenticated" if auth_status == 2 else "Bad authentication token"
-
-                return True
-
-            data = None
-
-            if self.method == 'GET':
-                if arg == 'pie':
-                    self.task.appendleft(arg)
-                    arg = 'data'
-
-                if arg == 'data':
-                    data = api_data.retrieve(self.db, self.user.uid, self.task, self.args)
-
-            elif self.method == 'POST':
-                if arg == 'update':
-                    data = api_data.update(self.db, self.user.uid, self.task, self.args, self.form)
-
-                elif arg == 'add' or arg == 'delete':
-                    data = api_data.add_delete(
-                            arg, self.db, self.user.uid, self.task, self.args, self.form)
-
-            default_response = {
-                'error': True, 'errorText': "Invalid task", 'data': {}
-            }
-
-            response = default_response if data is None else data.get_response()
-
-            if response is None: # server error
-                return False
-
-            self.extra      = response['extra']
-            self.data       = response['data']
-            self.error      = response['error']
-            self.errorText  = response['errorText']
-
-        return True
 
     def validate_args(self):
         """
@@ -173,4 +209,49 @@ class api:
             """bad login"""
             self.error = True
             self.errorText = "No PIN" if self.user.pin is None else "Bad PIN"
+
+class API:
+    """ class to process a request and potentially read or modify data """
+    def __init__(self, db):
+        self.db = db
+
+    def execute(self, uid, method, task, args, form):
+        """
+        decides what to do based on the task set
+        returns false iff a server (not user) error was encountered
+        """
+        arg = task.popleft()
+
+        data = None
+
+        if method == 'GET':
+            if arg == 'pie':
+                task.appendleft(arg)
+                arg = 'data'
+
+            if arg == 'data':
+                data = api_data.retrieve(self.db, uid, task, args)
+
+        elif method == 'POST':
+            if arg == 'update':
+                data = api_data.update(self.db, uid, task, args, form)
+
+            elif arg == 'add' or arg == 'delete':
+                data = api_data.add_delete(arg, self.db, uid, task, args, form)
+
+        default_response = {
+            'error': True, 'errorText': "Invalid task", 'data': {}
+        }
+
+        response = default_response if data is None else data.get_response()
+
+        if response is None: # server error
+            return False
+
+        self.extra      = response['extra']
+        self.data       = response['data']
+        self.error      = response['error']
+        self.errorText  = response['errorText']
+
+        return True
 
