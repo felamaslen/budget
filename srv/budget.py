@@ -4,6 +4,7 @@ Written by Fela Maslen, 2016
 """
 
 from flask import Flask, request, render_template
+import sys
 
 import config
 import misc
