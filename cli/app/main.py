@@ -1,4 +1,5 @@
 import curses
+from curses.textpad import rectangle
 
 from app.api import BudgetClientAPI
 from app.user import User
@@ -25,6 +26,7 @@ class BudgetClient(object):
 
     def init_ncurses_colors(self):
         curses.init_pair(*NC_COLOR_BG)
+        curses.init_pair(*NC_COLOR_TAB)
 
     def loop(self):
         """ main application loop """
@@ -55,22 +57,37 @@ class BudgetClient(object):
         self.gui_statusbar()
         self.gui_header()
 
+    def gui_tabs(self, header):
+        color_tab = curses.color_pair(NC_COLOR_TAB[0])
+
+        offset = 7 # length of "Budget" title + 1
+
+        tab1_title = "Overview"
+        rectangle(header, 0, offset, 1, offset + len(tab1_title) + 1)
+        header.addstr(1, offset + 1, tab1_title, color_tab)
+
     def gui_header(self):
-        color = curses.color_pair(NC_COLOR_HEADER[0])
+        color = curses.color_pair(NC_COLOR_HEADER[0]) | curses.A_BOLD
 
         header = window_color(0, 0, curses.COLS, 2, color)
         header.addstr(0, 0, "Budget", color)
+        header.refresh()
+
+        self.gui_tabs(header)
+
         header.refresh()
 
     def gui_statusbar(self):
         """ draws a status bar at the bottom of the screen """
         color = curses.color_pair(NC_COLOR_STATUS_BAR[0])
 
-        status_bar_text = ellipsis("Logged in as {} ({}: quit, {}: logout)".format(\
-                self.user.name, KEY_QUIT, KEY_LOGOUT), curses.COLS)
+        text1 = "Logged in as {}".format(self.user.name)
+        text2 = ellipsis(" ({}: quit, {}: logout)".format(KEY_QUIT, KEY_LOGOUT), \
+            curses.COLS - len(text1))
 
         statusbar = window_color(0, curses.LINES - 1, curses.COLS, 1, color)
-        statusbar.addstr(0, 0, status_bar_text, color)
+        statusbar.addstr(0, 0, text1, color)
+        statusbar.addstr(0, len(text1), text2, color | curses.A_BOLD)
         statusbar.refresh()
 
 
