@@ -9,26 +9,25 @@ class BudgetClient(object):
 
     def start(self, stdscr):
         """ this is called by the ncurses wrapper """
+        self.scr = stdscr
 
         api = BudgetClientAPI()
 
         self.user = User(stdscr, api)
 
-        while True:
-            pass
-
-        #self.logged_in_loop()
+        self.logged_in_loop()
 
     def logged_in_loop(self):
         """ main application loop """
-        stdscr.clear()
+        self.scr.clear()
 
-        stdscr.addstr("Logged in as %s" % (self.user.name))
+        self.scr.addstr("Logged in as %s" % (self.user.name))
+        self.scr.refresh()
 
-        #stdscr.addstr("%s" % api.req_get(['data', 'overview']))
+        #self.scr.addstr("%s" % api.req_get(['data', 'overview']))
 
         while True:
-            c = stdscr.getch()
+            c = self.scr.getch()
 
             if c == ord('q'):
                 break # quit the app
