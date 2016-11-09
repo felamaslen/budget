@@ -3,6 +3,8 @@ from time import sleep
 import curses
 from curses.textpad import Textbox, rectangle
 
+from const import *
+
 class User:
     """ handles user object and logging in """
     def __init__(self, stdscr, api):
@@ -15,30 +17,33 @@ class User:
         self.token = None
         self.pin = None
 
-        self.result_length = 20
+        self.form_width = LOGIN_FORM_WIDTH
+        self.form_height = LOGIN_FORM_HEIGHT
 
         self.build_login_form()
         self.display_login_form()
 
     def display_result(self, msg):
         self.win_result.clear()
-        self.win_result.box()
-        self.win_result.addstr(1, 1, msg)
+        self.win_result.addstr(0, 0, msg)
         self.win_result.refresh()
 
     def build_login_form(self):
         self.scr.clear()
 
-        self.win_title  = curses.newwin(1, 40, 0, 0)
-        self.win_pin    = curses.newwin(1, 5, 2, 1)
-        self.win_result = curses.newwin(3, self.result_length + 2, 4, 0)
-
-        self.win_title.addstr(0, 0, "Enter your PIN to log in: ")
+        self.win_title  = curses.newwin(1, self.form_width, 1, 1)
+        self.win_pin    = curses.newwin(1, 5, 3, 2)
+        self.win_result = curses.newwin(1, self.form_width - 8, 3, 9)
 
         """ box around pin input """
-        rectangle(self.scr, 1, 0, 3, 6)
+        rectangle(self.scr, 2, 1, 4, 7)
 
         self.scr.refresh()
+
+        """ login form title """
+        self.win_title.clear()
+        self.win_title.addstr(0, 0, LOGIN_FORM_TITLE)
+        self.win_title.refresh()
 
     def display_login_form(self, msg = ""):
         self.display_result(msg)
