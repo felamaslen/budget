@@ -10,12 +10,12 @@ class User:
     def __init__(self, stdscr, api):
         """ for ncurses """
         self.scr = stdscr
+        self.api = api
 
         self.uid = 0
         self.name = None
 
         self.token = None
-        self.pin = None
 
         self.form_width = LOGIN_FORM_WIDTH
         self.form_height = LOGIN_FORM_HEIGHT
@@ -72,7 +72,16 @@ class User:
             self.display_login_form("PIN must be numeric")
 
     def login(self, pin):
-        return True if str(pin) == "1996" else False
+        self.display_result("Waiting...")
 
-        pass
+        res = self.api.req('post', ['login'], form = {'pin': pin})
+
+        if res is False or not res['error'] is False:
+            return False
+
+        self.uid    = res['uid']
+        self.name   = res['name']
+        self.token  = res['api_key']
+
+        return True
 

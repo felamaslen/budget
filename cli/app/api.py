@@ -10,11 +10,16 @@ class BudgetClientAPI(object):
     def __init__(self):
         pass
 
-    def req_get(self, task, query = {}):
-        """ makes a get (retrieve) request to the api """
+    def req(self, method, task, query = {}, form = None):
+        """ makes a request to the api """
         query['t'] = '/'.join(task)
 
-        res = requests.get(API_URL, params = query)
+        if method == 'get':
+            res = requests.get(API_URL, params = query)
+        elif method == 'post':
+            res = requests.post(API_URL, params = query, data = form)
+        else:
+            raise Exception
 
         if res.status_code != 200:
             return False
