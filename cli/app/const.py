@@ -12,3 +12,6 @@ LOGIN_FORM_HEIGHT = 7
 """ ncurses colour pairs """
 NC_COLOR_STATUS_BAR = (1, curses.COLOR_WHITE, curses.COLOR_BLUE)
 
+""" keyboard shortcuts """
+KEY_QUIT    = 'q'
+KEY_LOGOUT  = 'l'
