@@ -4,7 +4,7 @@ node_modules/*
 Budget.egg-info
 env
 include
-srv/*.pyc
+**/*.pyc
 srv/db_info.py
 resources/serial
 web/js/budget.es5.js
