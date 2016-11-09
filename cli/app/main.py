@@ -3,6 +3,8 @@ import curses
 from app.api import BudgetClientAPI
 from app.user import User
 
+from app.methods import window_color, ellipsis
+
 from const import *
 
 class BudgetClient(object):
@@ -52,33 +54,18 @@ class BudgetClient(object):
 
         self.gui_statusbar()
 
+    def gui_header(self):
+        pass
+
     def gui_statusbar(self):
         """ draws a status bar at the bottom of the screen """
-        x = 0
-        y = curses.LINES - 1
-        w = curses.COLS
-        h = 1
-
-        status_bar_text = "Logged in as {} ({}: quit, {}: logout)".format(\
-                self.user.name, KEY_QUIT, KEY_LOGOUT)
-
-        if len(status_bar_text) > w:
-            """ limit length of status bar """
-            status_bar_text = status_bar_text[:3] + "..."
-
-        elif len(status_bar_text) < w:
-            """ add spaces to fill width """
-            num_spaces = w - len(status_bar_text) - 1
-
-            status_bar_text = status_bar_text + (' ' * num_spaces)
-
         color = curses.color_pair(NC_COLOR_STATUS_BAR[0])
 
-        statusbar = curses.newwin(h, w, y, x)
-        statusbar.clear()
+        status_bar_text = ellipsis("Logged in as {} ({}: quit, {}: logout)".format(\
+                self.user.name, KEY_QUIT, KEY_LOGOUT), curses.COLS)
 
+        statusbar = window_color(0, curses.LINES - 1, curses.COLS, 1, color)
         statusbar.addstr(0, 0, status_bar_text, color)
-
         statusbar.refresh()
 
 
