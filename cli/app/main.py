@@ -24,7 +24,7 @@ class BudgetClient(object):
         self.loop()
 
     def init_ncurses_colors(self):
-        curses.init_pair(*NC_COLOR_STATUS_BAR)
+        curses.init_pair(*NC_COLOR_BG)
 
     def loop(self):
         """ main application loop """
@@ -53,9 +53,14 @@ class BudgetClient(object):
         self.scr.refresh()
 
         self.gui_statusbar()
+        self.gui_header()
 
     def gui_header(self):
-        pass
+        color = curses.color_pair(NC_COLOR_HEADER[0])
+
+        header = window_color(0, 0, curses.COLS, 2, color)
+        header.addstr(0, 0, "Budget", color)
+        header.refresh()
 
     def gui_statusbar(self):
         """ draws a status bar at the bottom of the screen """
