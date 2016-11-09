@@ -7,21 +7,20 @@ from const import *
 
 class User:
     """ handles user object and logging in """
-    def __init__(self, stdscr, api):
+    def __init__(self, stdscr, api, logged_in):
         """ for ncurses """
+        self.form_width = LOGIN_FORM_WIDTH
+        self.form_height = LOGIN_FORM_HEIGHT
+
         self.scr = stdscr
         self.api = api
 
         self.uid = 0
         self.name = None
-
         self.token = None
 
-        self.form_width = LOGIN_FORM_WIDTH
-        self.form_height = LOGIN_FORM_HEIGHT
-
-        self.build_login_form()
-        self.display_login_form()
+        """ callback to call when we logged in """
+        self.logged_in = logged_in
 
     def display_result(self, msg):
         self.win_result.clear()
@@ -31,14 +30,13 @@ class User:
     def build_login_form(self):
         self.scr.clear()
 
+        """ box around pin input """
+        rectangle(self.scr, 2, 1, 4, 7)
+        self.scr.refresh()
+
         self.win_title  = curses.newwin(1, self.form_width, 1, 1)
         self.win_pin    = curses.newwin(1, 5, 3, 2)
         self.win_result = curses.newwin(1, self.form_width - 8, 3, 9)
-
-        """ box around pin input """
-        rectangle(self.scr, 2, 1, 4, 7)
-
-        self.scr.refresh()
 
         """ login form title """
         self.win_title.clear()
@@ -64,7 +62,7 @@ class User:
 
             if login_status is True:
                 """ logged in """
-                return
+                self.logged_in()
             else:
                 self.display_login_form("Bad PIN")
 
@@ -85,3 +83,10 @@ class User:
 
         return True
 
+    def logged_out(self):
+        self.uid = 0
+        self.name = None
+        self.token = None
+
+        self.build_login_form()
+        self.display_login_form()
