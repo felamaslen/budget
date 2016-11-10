@@ -1,12 +1,11 @@
 import curses
 from curses.textpad import rectangle
 
-from api import BudgetClientAPI
-from user import User
-from methods import window_color, ellipsis
-from pages import PageOverview
-
-from const import *
+from app.api import BudgetClientAPI
+from app.user import User
+from app.methods import window_color, ellipsis
+from app.pages import PageOverview
+from app.const import *
 
 class BudgetClient(object):
     def __init__(self):
