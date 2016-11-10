@@ -3,8 +3,8 @@ from curses.textpad import rectangle
 
 from app.api import BudgetClientAPI
 from app.user import User
-
 from app.methods import window_color, ellipsis
+from app.pages import PageOverview
 
 from const import *
 
@@ -14,6 +14,8 @@ class BudgetClient(object):
         self.pages = ["Overview", "Funds", "In", "Bills", "Food", "General",\
                 "Holiday", "Social"]
         self.current_page = 0
+
+        self.page_obj = {}
 
         """ determines what will happen if navigation keys are pressed """
         self.nav_sect = NAV_SECT_TABS
@@ -78,6 +80,15 @@ class BudgetClient(object):
 
         self.gui_statusbar()
         self.gui_header()
+        self.gui_page()
+
+    def gui_page(self):
+        color = curses.color_pair(0)
+
+        self.w_page = window_color(0, 2, curses.COLS, curses.LINES - 3, color)
+
+        self.w_page.addstr(0, 0, "Select a page to continue")
+        self.w_page.refresh()
 
     def gui_tabs(self, header):
         color_tab = curses.color_pair(NC_COLOR_TAB[0])
@@ -131,25 +142,34 @@ class BudgetClient(object):
     def nav_select(self):
         if self.nav_sect == NAV_SECT_TABS:
             """ load the selected tab's page """
-            self.load_page(self.current_page)
+            self.load_page()
 
     def load_page(self):
         page = self.pages[self.current_page]
 
+        if not page in self.page_obj:
+            self.page_obj[page] = self.get_page_obj(page)
+
+        self.page_obj[page].switch_to()
+
+    def get_page_obj(self, page):
         if page == "Overview":
+            return PageOverview(self.w_page)
+
+        if page == "Funds":
             pass
-        elif page == "Funds":
+        if page == "In":
             pass
-        elif page == "In":
+        if page == "Bills":
             pass
-        elif page == "Bills":
+        if page == "Food":
             pass
-        elif page == "Food":
+        if page == "General":
             pass
-        elif page == "General":
+        if page == "Holiday":
             pass
-        elif page == "Holiday":
+        if page == "Social":
             pass
-        elif page == "Social":
-            pass
+
+        return None
 
