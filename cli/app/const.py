@@ -13,8 +13,13 @@ LOGIN_FORM_HEIGHT = 7
 NC_COLOR_BG         = (1, curses.COLOR_WHITE, curses.COLOR_RED)
 NC_COLOR_STATUS_BAR = NC_COLOR_BG
 NC_COLOR_HEADER     = NC_COLOR_BG
-NC_COLOR_TAB        = (2, curses.COLOR_BLACK, curses.COLOR_WHITE)
+NC_COLOR_TAB        = (2, curses.COLOR_WHITE, curses.COLOR_BLACK)
+NC_COLOR_TAB_SEL    = (3, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
 """ keyboard shortcuts """
 KEY_QUIT    = 'q'
 KEY_LOGOUT  = 'l'
+
+""" navigation sections """
+NAV_SECT_TABS = 0
+NAV_SECT_PAGE = 1
