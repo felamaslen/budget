@@ -72,8 +72,8 @@ class PageOverview(object):
         predicted = [
                 self.data['cost']['balance'][max(0, i - 1)] + net[i]
                 for i in range(future_key + 1)]
-        for i in range(num_months - future_key):
-            predicted.append(predicted[future_key + i - 1] + net[i])
+        for i in range(future_key + 1, num_months):
+            predicted.append(int(predicted[i - 1] + net[i]))
 
         rows = [
             [
