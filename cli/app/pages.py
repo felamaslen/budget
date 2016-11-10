@@ -1,6 +1,6 @@
 import curses
 
-from methods import ellipsis
+from app.methods import ellipsis, format_currency
 
 class PageOverview(object):
     def __init__(self, win, api):
@@ -78,11 +78,11 @@ class PageOverview(object):
         rows = [
             [
                 "{}-{}".format(months[(ym1[1]-1+i) % 12], (ym1[0] + (i - 1 + ym1[1]) // 12) % 1000),
-                str(self.data['cost']['in'][i]),
-                str(out_with_future[i]),
-                str(net[i]),
-                str(predicted[i]),
-                str(self.data['cost']['balance'][i])
+                format_currency(self.data['cost']['in'][i]),
+                format_currency(out_with_future[i]),
+                format_currency(net[i]),
+                format_currency(predicted[i]),
+                format_currency(self.data['cost']['balance'][i])
             ]
             for i in range(num_months)
         ]

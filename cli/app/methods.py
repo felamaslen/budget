@@ -1,4 +1,4 @@
-""" extra methods to make curses programming less disgusting """
+""" extra methods, e.g. to make curses programming less disgusting """
 
 import curses
 
@@ -17,4 +17,8 @@ def window_color(x, y, w, h, color):
 def ellipsis(text, length):
     """ shortens text with a [...] at the end """
     return text if len(text) <= length else text[:5] + "[...]"
+
+def format_currency(pence):
+    return u"\xA3{0:.2f}".format(float(pence) / 100)
+
 

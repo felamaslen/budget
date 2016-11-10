@@ -4,7 +4,7 @@ Reads and writes data on the server, through the budget API
 
 import requests
 
-from const import API_URL
+from app.const import API_URL
 
 class BudgetClientAPI(object):
     """ the reason this is in a class is so that the user token can be passed more easily """

@@ -3,7 +3,7 @@ from time import sleep
 import curses
 from curses.textpad import Textbox, rectangle
 
-from const import *
+from app.const import *
 
 class User:
     """ handles user object and logging in """
