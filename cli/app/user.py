@@ -7,13 +7,12 @@ from const import *
 
 class User:
     """ handles user object and logging in """
-    def __init__(self, stdscr, api, logged_in):
+    def __init__(self, stdscr, logged_in, api):
         """ for ncurses """
         self.form_width = LOGIN_FORM_WIDTH
         self.form_height = LOGIN_FORM_HEIGHT
 
         self.scr = stdscr
-        self.api = api
 
         self.uid = 0
         self.name = None
@@ -21,6 +20,8 @@ class User:
 
         """ callback to call when we logged in """
         self.logged_in = logged_in
+
+        self.api = api
 
     def display_result(self, msg):
         self.win_result.clear()
@@ -72,9 +73,15 @@ class User:
     def login(self, pin):
         self.display_result("Waiting...")
 
-        res = self.api.req('post', ['login'], form = {'pin': pin})
+        try:
+            res = self.api.req(['login'], method = 'post', form = {'pin': pin})
 
-        if res is False or not res['error'] is False:
+        except Exception as code:
+            self.display_result("Error: {}".format(code))
+            return False
+
+        if not res['error'] is False:
+            self.display_result("Error: {}".format(res['errorText']))
             return False
 
         self.uid    = res['uid']
@@ -90,3 +97,4 @@ class User:
 
         self.build_login_form()
         self.display_login_form()
+

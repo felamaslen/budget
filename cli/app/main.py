@@ -1,16 +1,15 @@
 import curses
 from curses.textpad import rectangle
 
-from app.api import BudgetClientAPI
-from app.user import User
-from app.methods import window_color, ellipsis
-from app.pages import PageOverview
+from api import BudgetClientAPI
+from user import User
+from methods import window_color, ellipsis
+from pages import PageOverview
 
 from const import *
 
 class BudgetClient(object):
     def __init__(self):
-
         self.pages = ["Overview", "Funds", "In", "Bills", "Food", "General",\
                 "Holiday", "Social"]
         self.current_page = 0
@@ -20,7 +19,7 @@ class BudgetClient(object):
         """ determines what will happen if navigation keys are pressed """
         self.nav_sect = NAV_SECT_TABS
 
-        """ window definitions """
+    def define_windows(self):
         self.w_header = None
 
     def start(self, stdscr):
@@ -29,9 +28,8 @@ class BudgetClient(object):
 
         self.init_ncurses_colors()
 
-        self.api = api = BudgetClientAPI()
-
-        self.user = User(stdscr, api, self.draw_gui)
+        self.api = BudgetClientAPI()
+        self.user = User(stdscr, self.logged_in, self.api)
 
         self.loop()
 
@@ -44,7 +42,7 @@ class BudgetClient(object):
         """ main application loop """
 
         if self.user.uid > 0:
-            self.draw_gui()
+            self.logged_in()
         else:
             self.user.logged_out()
 
@@ -70,6 +68,11 @@ class BudgetClient(object):
             elif c == 10: # enter
                 self.nav_select()
 
+    def logged_in(self):
+        self.api.set_token(self.user.token)
+
+        self.draw_gui()
+
     def logout(self):
         self.user.logged_out()
 
@@ -77,6 +80,8 @@ class BudgetClient(object):
         """ calls other methods to draw the main application window """
         self.scr.clear()
         self.scr.refresh()
+
+        self.define_windows()
 
         self.gui_statusbar()
         self.gui_header()
@@ -154,7 +159,7 @@ class BudgetClient(object):
 
     def get_page_obj(self, page):
         if page == "Overview":
-            return PageOverview(self.w_page)
+            return PageOverview(self.w_page, self.api)
 
         if page == "Funds":
             pass
