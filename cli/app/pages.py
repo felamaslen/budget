@@ -1,6 +1,7 @@
 import curses
 
-from app.methods import ellipsis, format_currency, alignr
+from app.const import NC_COLOR_TAB, NC_COLOR_TAB_SEL
+from app.methods import ellipsis, format_currency, YMD, alignr
 from app.api import BudgetClientAPIError
 
 class Page(object):
@@ -37,8 +38,8 @@ class Page(object):
 
         try:
             self.draw()
-        except:
-            self.win.addstr(0, 0, "Error: drawing page failed! (Unknown error)")
+        except Exception as e:
+            self.win.addstr(0, 0, "Error: drawing page failed! ({})".format(e))
 
 class PageOverview(Page):
     def __init__(self, win, api):
@@ -143,11 +144,11 @@ class PageOverview(Page):
 
 class PageFunds(Page):
     def __init__(self, win, api):
-        super().__init(win, api)
+        super().__init__(win, api)
 
         self.fund_list_selected = 0
 
-        self.win_funds = win.subwin(0, 0)
+        self.win_funds = win.derwin(0, 0)
 
         self.color_item = curses.color_pair(NC_COLOR_TAB[0])
         self.color_sel  = curses.color_pair(NC_COLOR_TAB_SEL[0])
@@ -156,5 +157,47 @@ class PageFunds(Page):
         res = self.api.req(['data', 'funds'])
 
         return res['data']
+
+    def calculate_data(self):
+        return [{
+                'date':     item['d'],
+                'item':     item['i'],
+                'cost':     item['c'],
+                'value':    float(item['u']) * float(item['P'])
+            } for item in self.data['data']]
+
+    def draw(self):
+        self.win_funds.clear()
+
+        funds = self.calculate_data()
+
+        """ draw list of funds """
+        num_display = min(self.winHW[0] - 1, len(self.data['data']))
+
+        cols = [
+                ["Date",                9,  'date',  lambda x: YMD(x).format()],
+                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
+                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(9, x)],
+                [alignr(9, "Value"),    10, 'value', lambda x: format_currency(9, x)]
+            ]
+
+        """ head """
+        col = 0
+        for (name, width, index, formatter) in cols:
+            self.win_funds.addstr(0, col, name, self.color_item | curses.A_BOLD)
+            col += width
+
+        """ body """
+        for i in range(num_display):
+            color = self.color_sel if i == self.fund_list_selected else self.color_item
+
+            self.win_funds.addstr(i + 1, 0, ' ' * self.winHW[1], color)
+
+            col = 0
+            for (name, width, index, formatter) in cols:
+                self.win_funds.addstr(i + 1, col, formatter(funds[i][index]), color)
+
+                col += width
+
 
 

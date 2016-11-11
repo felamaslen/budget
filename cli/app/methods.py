@@ -14,9 +14,25 @@ def window_color(x, y, w, h, color):
 
     return window
 
-def ellipsis(text, length):
-    """ shortens text with a [...] at the end """
-    return text if len(text) <= length else text[:5] + "[...]"
+class YMD:
+    """ date object """
+    def __init__(self, ymd):
+        self.year   = ymd[0]
+        self.month  = ymd[1]
+        self.date   = ymd[2]
+
+    def format(self):
+        return "%02d/%02d/%02d" % (self.date, self.month, self.year % 1000)
+
+def get_item_attr(key, value):
+    """ converts an item to an object, e.g. date to a date object """
+    if key == 'date':
+        return YMD(value)
+
+    if key in ['cost', 'value']:
+        return int(value)
+
+    return str(value)
 
 def format_currency(width, pence):
     sign = '-' if pence < 0 else ''
@@ -25,5 +41,8 @@ def format_currency(width, pence):
 
 def alignr(width, string):
     return ' ' * (width - len(string)) + string if len(string) <= width \
-            else string[:2] + ".."
+            else string[:width - len(string) - 2] + ".."
 
+def ellipsis(text, length):
+    """ shortens text with a [...] at the end """
+    return text if len(text) <= length else text[:length - len(text) - 5] + "[...]"
