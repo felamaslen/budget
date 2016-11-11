@@ -18,7 +18,12 @@ def ellipsis(text, length):
     """ shortens text with a [...] at the end """
     return text if len(text) <= length else text[:5] + "[...]"
 
-def format_currency(pence):
-    return u"\xA3{0:.2f}".format(float(pence) / 100)
+def format_currency(width, pence):
+    sign = '-' if pence < 0 else ''
 
+    return alignr(width, u"{0[0]}\xA3{0[1]:.2f}".format([sign, abs(float(pence) / 100)]))
+
+def alignr(width, string):
+    return ' ' * (width - len(string)) + string if len(string) <= width \
+            else string[:2] + ".."
 
