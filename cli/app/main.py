@@ -4,7 +4,7 @@ from curses.textpad import rectangle
 from app.api import BudgetClientAPI
 from app.user import User
 from app.methods import window_color, ellipsis
-from app.pages import PageOverview
+from app.pages import PageOverview, PageFunds
 from app.const import *
 
 class BudgetClient(object):
@@ -172,7 +172,8 @@ class BudgetClient(object):
             return PageOverview(self.w_page, self.api)
 
         if page == "Funds":
-            pass
+            return PageFunds(self.w_page, self.api)
+
         if page == "In":
             pass
         if page == "Bills":
