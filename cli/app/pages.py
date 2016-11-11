@@ -1,26 +1,44 @@
 import curses
 
 from app.methods import ellipsis, format_currency, alignr
+from app.api import BudgetClientAPIError
 
 class Page(object):
     def __init__(self, win, api):
         self.win = win
         self.api = api
 
-        self.data = self.get_data()
+        self.winHW = win.getmaxyx()
 
-        self.draw()
+        self.data = self.try_get_data()
+
+        self.try_draw()
 
     def switch_to(self):
         self.win.clear()
-        self.draw()
+        self.try_draw()
         self.win.refresh()
 
-    def get_data(self):
-        return None
+    def try_get_data(self):
+        try:
+            data = self.get_data()
 
-    def draw(self):
-        pass
+            return data
+        except BudgetClientAPIError as code:
+            self.win.addstr(0, 0, "API error: {}".format(code))
+            return None
+        except:
+            self.win.addstr(0, 0, "API error: unknown error!")
+            return None
+
+    def try_draw(self):
+        if self.data is None:
+            return
+
+        try:
+            self.draw()
+        except:
+            self.win.addstr(0, 0, "Error: drawing page failed! (Unknown error)")
 
 class PageOverview(Page):
     def __init__(self, win, api):
@@ -38,10 +56,7 @@ class PageOverview(Page):
         super().__init__(win, api)
 
     def get_data(self):
-        try:
-            res = self.api.req(['data', 'overview'])
-        except Exception as code:
-            return "Error: {}".format(code)
+        res = self.api.req(['data', 'overview'])
 
         return res['data']
 
@@ -53,9 +68,8 @@ class PageOverview(Page):
         ym2 = self.data['endYearMonth']
         ymc = [self.data['currentYear'], self.data['currentMonth']]
 
-        num_months = 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1] + 1
-
-        num_display = min(curses.LINES - 4, num_months)
+        """ number of months (inclusive) since the start month """
+        num_rows = 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1] + 1
 
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -71,20 +85,20 @@ class PageOverview(Page):
                 sum([self.data['cost'][col][i] if i < future_key else average[index] \
                         for (index, col) in enumerate(self.future_cols)]) \
                         + self.data['cost']['bills'][i]
-                for i in range(num_months)
+                for i in range(num_rows)
             ]
 
         """ net spending """
         net = [
                 self.data['cost']['in'][i] - out_with_future[i]
-                for i in range(num_months)
+                for i in range(num_rows)
             ]
 
         """ calculate predicted balance based on future spending predictions """
         predicted = [
                 self.data['cost']['balance'][max(0, i - 1)] + net[i]
                 for i in range(future_key + 1)]
-        for i in range(future_key + 1, num_months):
+        for i in range(future_key + 1, num_rows):
             predicted.append(int(predicted[i - 1] + net[i]))
 
         rows = [
@@ -96,15 +110,16 @@ class PageOverview(Page):
                 format_currency(self.cols[4][1] - 1, predicted[i]),
                 format_currency(self.cols[5][1] - 1, self.data['cost']['balance'][i])
             ]
-            for i in range(num_months)
+            for i in range(num_rows)
         ]
 
-        return num_display, rows
+        return rows
 
     def draw(self):
-        num_display, rows = self.calculate_data()
+        rows = self.calculate_data()
 
-        num_months = len(rows)
+        num_rows    = len(rows)
+        num_display = min(self.winHW[0], num_rows)
 
         """ draw all the rows and columns """
         for i in range(num_display):
@@ -117,7 +132,7 @@ class PageOverview(Page):
                     col += col_width
             else:
                 """ data """
-                row = num_months - num_display + i - 1 + 1
+                row = num_rows - num_display + i - 1 + 1
 
                 col = 0
                 j = 0
@@ -127,12 +142,19 @@ class PageOverview(Page):
                     col += col_width
 
 class PageFunds(Page):
-    def get_data(self):
-        try:
-            res = self.api.req(['data', 'funds'])
-        except Exception as code:
-            return "Error: {}".format(code)
+    def __init__(self, win, api):
+        super().__init(win, api)
 
-    def draw(self):
-        pass
+        self.fund_list_selected = 0
+
+        self.win_funds = win.subwin(0, 0)
+
+        self.color_item = curses.color_pair(NC_COLOR_TAB[0])
+        self.color_sel  = curses.color_pair(NC_COLOR_TAB_SEL[0])
+
+    def get_data(self):
+        res = self.api.req(['data', 'funds'])
+
+        return res['data']
+
 

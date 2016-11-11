@@ -6,6 +6,9 @@ import requests
 
 from app.const import API_URL
 
+class BudgetClientAPIError(Exception):
+    pass
+
 class BudgetClientAPI(object):
     """ the reason this is in a class is so that the user token can be passed more easily """
 
@@ -25,10 +28,10 @@ class BudgetClientAPI(object):
         elif method == 'post':
             res = self.session.post(API_URL, params = query, data = form)
         else:
-            raise Exception
+            raise BudgetClientAPIError
 
         if res.status_code != 200:
-            raise Exception(res.status_code)
+            raise BudgetClientAPIError(res.status_code)
 
         return res.json()
 
