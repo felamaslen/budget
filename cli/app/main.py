@@ -11,7 +11,7 @@ class BudgetClient(object):
     def __init__(self):
         self.pages = ["Overview", "Funds", "In", "Bills", "Food", "General",\
                 "Holiday", "Social"]
-        self.current_page = 0
+        self.current_page = 1
 
         self.page_obj = {}
 
@@ -89,7 +89,8 @@ class BudgetClient(object):
     def gui_page(self):
         color = curses.color_pair(0)
 
-        self.w_page = window_color(0, 2, curses.COLS, curses.LINES - 3, color)
+        self.w_page = curses.newwin(curses.LINES - 3, curses.COLS, 2, 0)
+        self.w_page.clear()
 
         """ Select and load first page in list """
         self.nav(0, 0, load = True)
