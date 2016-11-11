@@ -91,8 +91,8 @@ class BudgetClient(object):
 
         self.w_page = window_color(0, 2, curses.COLS, curses.LINES - 3, color)
 
-        self.w_page.addstr(0, 0, "Select a page to continue")
-        self.w_page.refresh()
+        """ Select and load first page in list """
+        self.nav(0, 0, load = True)
 
     def gui_tabs(self, header):
         color_tab = curses.color_pair(NC_COLOR_TAB[0])
@@ -133,12 +133,23 @@ class BudgetClient(object):
         statusbar.addstr(0, len(text1), text2, color | curses.A_BOLD)
         statusbar.refresh()
 
-    def nav(self, dx, dy):
+    def nav(self, dx, dy, load = False):
         """ navigates through selected part of application """
         if self.nav_sect == NAV_SECT_TABS:
             self.current_page = (self.current_page + dx) % len(self.pages)
 
             self.gui_header()
+
+            page = self.pages[self.current_page]
+
+            if page in self.page_obj:
+                self.page_obj[page].switch_to()
+            elif load:
+                self.load_page()
+            else:
+                self.w_page.clear()
+                self.w_page.addstr(0, 0, "Press enter to load page: {}".format(page))
+                self.w_page.refresh()
 
         elif self.nav_sect == NAV_SECT_PAGE:
             pass
@@ -154,7 +165,7 @@ class BudgetClient(object):
         if not page in self.page_obj:
             self.page_obj[page] = self.get_page_obj(page)
 
-        self.page_obj[page].switch_to()
+            self.page_obj[page].switch_to()
 
     def get_page_obj(self, page):
         if page == "Overview":
