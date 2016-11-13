@@ -83,12 +83,18 @@ class BudgetClient(object):
         self.draw_gui()
 
     def logout(self):
+        """ show cursor """
+        curses.curs_set(1)
+
         self.user.logged_out()
 
     def draw_gui(self):
         """ calls other methods to draw the main application window """
         self.scr.clear()
         self.scr.refresh()
+
+        """ hide cursor """
+        curses.curs_set(0)
 
         self.define_windows()
 
