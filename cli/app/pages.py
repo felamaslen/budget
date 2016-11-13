@@ -1,7 +1,8 @@
 import curses
+from curses.textpad import rectangle
 
 from app.const import *
-from app.methods import ellipsis, format_currency, YMD, alignr
+from app.methods import ellipsis, format_currency, YMD, alignr, alignc, window_fill_color
 from app.api import BudgetClientAPIError
 
 class Page(object):
@@ -49,6 +50,9 @@ class Page(object):
     def set_nav_active(self, status):
         self.nav_active = status
         self.nav(0, 0)
+
+    def key_input(self, c):
+        pass
 
 class PageOverview(Page):
     def __init__(self, win, api):
@@ -159,6 +163,10 @@ class PageFunds(Page):
 
         self.win_funds = win.derwin(0, 0)
 
+        self.graph_status = False
+
+        self.fund_history = None
+
         self.color_item = curses.color_pair(NC_COLOR_TAB[0])
         self.color_sel  = curses.color_pair(NC_COLOR_TAB_SEL[0])
 
@@ -181,6 +189,11 @@ class PageFunds(Page):
 
         return res['data']
 
+    def get_fund_history(self):
+        res = self.api.req(['data', 'fund_history'], query = {'deep': 1})
+
+        return res['data']
+
     def calculate_data(self):
         return [{
                 'date':     item['d'],
@@ -190,6 +203,9 @@ class PageFunds(Page):
             } for item in self.data['data']]
 
     def draw(self):
+        self.draw_list()
+
+    def draw_list(self):
         self.win_funds.clear()
 
         """ draw list of funds """
@@ -229,10 +245,123 @@ class PageFunds(Page):
 
             self.win_funds.addstr(i + 1, col, gain_text, color_gain)
 
+    def show_graph(self):
+        graphH = self.winHW[0] - 5
+        graphW = self.winHW[1] - 5
+
+        self.win_graph = self.win.derwin(graphH, graphW, 3, 2)
+
+        """ fill the window and add a frame """
+        window_fill_color(self.win_graph, graphH - 1, graphW - 1, curses.color_pair(NC_COLOR_TAB[0]))
+        rectangle(self.win_graph, 0, 0, graphH - 2, graphW - 2)
+
+        if self.fund_history is None:
+            self.win_graph.addstr(1, 1, alignc(graphW - 2, "Loading..."))
+            self.win_graph.refresh()
+
+            try:
+                self.fund_history = self.get_fund_history()
+
+                self.draw_graph(graphW, graphH)
+            except BudgetClientAPIError as error:
+                self.win_graph.clear()
+                self.win_graph.addstr(2, 2, "Error: {}".format(error))
+                self.win_graph.refresh()
+
+                self.fund_history = None
+
+        else:
+            self.draw_graph(graphW, graphH)
+
+    def hide_graph(self):
+        self.win_graph.clear()
+        self.win_graph.refresh()
+
+        del self.win_graph
+
+        self.draw_list()
+        self.win.refresh()
+
+    def draw_graph(self, graphW, graphH):
+        w = graphW - 2 # for border
+        h = graphH - 2
+
+        index = self.fund_list_selected
+
+        fund_name = self.funds[self.fund_list_selected]['item']
+
+        index = self.fund_history['funds'].index(fund_name)
+
+        if index < 0:
+            """ invalid fund """
+            self.win_graph.addstr(2, 1, "Invalid fund.")
+        else:
+            title = alignc(w - 1, "Fund: {}".format(fund_name))
+            self.win_graph.addstr(1, 1, title)
+
+            """ draw the actual graph points """
+            series_length = w - 1
+
+            history = self.fund_history['history'][-series_length:]
+
+            extra = max(0, series_length - len(history))
+
+            series = [history[0][1][index]] * extra + [
+                    history[i][1][index]
+                    for i in range(len(history))
+                ]
+
+            minV = min(series)
+            maxV = max(series)
+
+            last_yv = None
+
+            series_height = h - 3
+
+            for i in range(series_length):
+                yv = int(series_height * (1 - (float(series[i] - minV) / (maxV - minV))))
+
+                point = LINE_HORIZONTAL
+
+                if not last_yv is None:
+                    diff = yv - last_yv
+
+                    if diff != 0:
+                        """ draw a line from the last point to this one """
+                        start = yv + 1 if diff < 0 else last_yv + 1
+                        length = abs(diff) - 1
+
+                        for y in range(length):
+                            self.win_graph.addstr(y + start + 2, i + 1, LINE_VERTICAL)
+
+                        if diff < 0: # value has increased (y axis is inverted)
+                            self.win_graph.addstr(start + length + 2, i + 1, CORNER_BOTTOM_RIGHT)
+
+                            point = CORNER_TOP_LEFT
+                        else:
+                            self.win_graph.addstr(start + 1, i + 1, CORNER_TOP_RIGHT)
+
+                            point = CORNER_BOTTOM_LEFT
+
+                self.win_graph.addstr(yv + 2, i + 1, point)
+
+                last_yv = yv
+
+        self.win_graph.refresh()
+
     def nav(self, dx, dy):
         self.fund_list_selected = min(len(self.funds) - 1, max(0, \
                 self.fund_list_selected + dy))
 
         self.draw()
         self.win_funds.refresh()
+
+    def key_input(self, c):
+        if c == ord(KEY_GRAPH):
+            self.graph_status = not self.graph_status
+
+            if self.graph_status:
+                self.show_graph()
+            else:
+                self.hide_graph()
 

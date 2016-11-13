@@ -24,8 +24,19 @@ NC_COLOR_DOWN_SEL   = (7, curses.COLOR_RED, curses.COLOR_WHITE)
 
 """ keyboard shortcuts """
 KEY_QUIT    = 'q'
-KEY_LOGOUT  = 'l'
+KEY_LOGOUT  = 'L'
+
+KEY_GRAPH   = 'g'
 
 """ navigation sections """
 NAV_SECT_TABS = 0
 NAV_SECT_PAGE = 1
+
+""" unicode characters for graphs """
+CORNER_BOTTOM_LEFT  = u'\u2514'
+CORNER_TOP_LEFT     = u'\u250c'
+CORNER_TOP_RIGHT    = u'\u2510'
+CORNER_BOTTOM_RIGHT = u'\u2518'
+
+LINE_HORIZONTAL     = u'\u2500'
+LINE_VERTICAL       = u'\u2502'

@@ -7,6 +7,9 @@ def window_color(x, y, w, h, color):
     window = curses.newwin(h, w, y, x)
     window.clear()
 
+    return window_fill_color(window, h, w, color)
+
+def window_fill_color(window, h, w, color):
     spaces = min(curses.COLS - 1, w) * ' '
 
     for i in range(h):
@@ -41,8 +44,17 @@ def format_currency(width, pence):
 
 def alignr(width, string):
     return ' ' * (width - len(string)) + string if len(string) <= width \
-            else string[:width - len(string) - 2] + ".."
+            else ellipsis(string, width, '..')
 
-def ellipsis(text, length):
+def alignc(width, string):
+    if len(string) <= width:
+        padding = ' ' * ((width - len(string)) // 2)
+
+        return padding + string + padding
+
+    return ellipsis(string, width, '..')
+
+def ellipsis(text, length, cutoff = '[...]'):
     """ shortens text with a [...] at the end """
-    return text if len(text) <= length else text[:length - len(text) - 5] + "[...]"
+    return text if len(text) <= length else \
+            text[:length - len(text) - len(cutoff)] + cutoff

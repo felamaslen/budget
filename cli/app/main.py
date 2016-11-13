@@ -77,6 +77,10 @@ class BudgetClient(object):
                 self.page_obj[self.pages[self.current_page]].set_nav_active(\
                         self.nav_sect == NAV_SECT_PAGE)
 
+            elif self.nav_sect == NAV_SECT_PAGE:
+                """ pass the input to the current page """
+                self.page_obj[self.pages[self.current_page]].key_input(c)
+
     def logged_in(self):
         self.api.set_token(self.user.token)
 
