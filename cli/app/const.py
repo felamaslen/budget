@@ -28,6 +28,11 @@ KEY_LOGOUT  = 'L'
 
 KEY_GRAPH   = 'g'
 
+""" ascii definitions """
+KEYCODE_TAB     = 9
+KEYCODE_NEWLINE = 10
+KEYCODE_RETURN  = 13
+
 """ navigation sections """
 NAV_SECT_TABS = 0
 NAV_SECT_PAGE = 1

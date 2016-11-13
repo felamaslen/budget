@@ -51,35 +51,50 @@ class BudgetClient(object):
 
         """ catch keyboard input """
         while True:
-            c = self.scr.getch()
+            if not self.key_input(self.scr.getch()):
+                break
 
-            if c == ord(KEY_QUIT):
-                break # quit the app
+    def key_input(self, c):
+        if c == ord(KEY_QUIT):
+            return False # quit the app
 
-            elif c == ord(KEY_LOGOUT):
-                self.logout()
+        if c == ord(KEY_LOGOUT):
+            self.logout()
+            return True
 
-            elif c == curses.KEY_LEFT or c == ord('h'):
+        pass_input = True
+
+        nav_L = c == curses.KEY_LEFT    or c == ord('h')
+        nav_U = c == curses.KEY_UP      or c == ord('k')
+        nav_R = c == curses.KEY_RIGHT   or c == ord('l')
+        nav_D = c == curses.KEY_DOWN    or c == ord('j')
+
+        if nav_L or nav_U or nav_R or nav_D:
+            pass_input = False # this is done by the nav function itself
+
+            if nav_L:
                 self.nav(-1, 0)
-            elif c == curses.KEY_UP or c == ord('k'):
+            elif nav_U:
                 self.nav(0, -1)
-            elif c == curses.KEY_RIGHT or c == ord('l'):
+            elif nav_R:
                 self.nav(1, 0)
-            elif c == curses.KEY_DOWN or c == ord('j'):
+            elif nav_D:
                 self.nav(0, 1)
 
-            elif c == 10: # enter
-                self.nav_select()
+        elif c == KEYCODE_NEWLINE or c == KEYCODE_RETURN:
+            self.nav_select()
 
-            elif c == ord('\t'): # tab
-                self.nav_sect = (self.nav_sect + 1) % 2
+        elif c == KEYCODE_TAB:
+            self.nav_sect = (self.nav_sect + 1) % 2
 
-                self.page_obj[self.pages[self.current_page]].set_nav_active(\
-                        self.nav_sect == NAV_SECT_PAGE)
+            self.page_obj[self.pages[self.current_page]].set_nav_active(\
+                    self.nav_sect == NAV_SECT_PAGE)
 
-            elif self.nav_sect == NAV_SECT_PAGE:
-                """ pass the input to the current page """
-                self.page_obj[self.pages[self.current_page]].key_input(c)
+        if pass_input:
+            """ pass the input to the current page """
+            self.page_obj[self.pages[self.current_page]].key_input(c)
+
+        return True
 
     def logged_in(self):
         self.api.set_token(self.user.token)
