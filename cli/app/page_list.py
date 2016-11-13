@@ -32,11 +32,29 @@ class PageList(Page):
     def draw(self):
         self.draw_list()
 
+    def draw_list_row(self, i, offset):
+        j = i + offset
+
+        selected = self.nav_active and j == self.list_selected
+
+        color = self.color_sel if selected else self.color_item
+
+        self.win_list.addstr(i + 1, 0, ' ' * self.winHW[1], color)
+
+        col = 0
+        for (name, width, index, formatter) in self.cols:
+            self.win_list.addstr(i + 1, col, formatter(self.list[j][index]), color)
+
+            col += width
+
+        return j, col, selected
+
     def draw_list(self):
         self.win_list.clear()
 
         """ draw list of funds """
-        num_display = min(self.winHW[0] - 1, len(self.data['data']))
+        max_display = self.winHW[0] - 2
+        num_display = min(max_display, len(self.data['data']))
 
         """ head """
         col = 0
@@ -45,32 +63,11 @@ class PageList(Page):
             col += width
 
         """ body """
-        offset = 0 if len(self.list) <= num_display else max(0, self.list_selected - 2) # for scrolling
+        offset = 0 if len(self.list) <= num_display else \
+                max(0, min(len(self.list) - max_display, self.list_selected - 2)) # for scrolling
 
         for i in range(num_display):
-            j = i + offset
-
-            selected = self.nav_active and j == self.list_selected
-
-            color = self.color_sel if selected else self.color_item
-
-            self.win_list.addstr(i + 1, 0, ' ' * self.winHW[1], color)
-
-            col = 0
-            for (name, width, index, formatter) in self.cols:
-                self.win_list.addstr(i + 1, col, formatter(self.list[j][index]), color)
-
-                col += width
-
-            gain        = float(self.list[j]['value'] - self.list[j]['cost']) / self.list[j]['cost'] * 100
-            sign        = '-' if gain < 0 else '+'
-            gain_text   = "%s%0.1f%%" % (sign, abs(gain))
-
-            color_gain  = (self.color_up_sel if selected else self.color_up) \
-                    if gain >= 0 \
-                    else (self.color_down_sel if selected else self.color_down)
-
-            self.win_list.addstr(i + 1, col, gain_text, color_gain)
+            self.draw_list_row(i, offset)
 
     def nav(self, dx, dy):
         self.list_selected = min(len(self.list) - 1, max(0, \
@@ -109,6 +106,19 @@ class PageFunds(PageList):
                 'cost':     item['c'],
                 'value':    float(item['u']) * float(item['P'])
             } for item in self.data['data']]
+
+    def draw_list_row(self, i, offset):
+        j, col, selected = super().draw_list_row(i, offset)
+
+        gain        = float(self.list[j]['value'] - self.list[j]['cost']) / self.list[j]['cost'] * 100
+        sign        = '-' if gain < 0 else '+'
+        gain_text   = "%s%0.1f%%" % (sign, abs(gain))
+
+        color_gain  = (self.color_up_sel if selected else self.color_up) \
+                if gain >= 0 \
+                else (self.color_down_sel if selected else self.color_down)
+
+        self.win_list.addstr(i + 1, col, gain_text, color_gain)
 
     def draw_list(self):
         self.graph_status = False
@@ -263,4 +273,21 @@ class PageFunds(PageList):
                 self.show_graph(do_graph_all)
             else:
                 self.hide_graph()
+
+class PageIn(PageList):
+    def __init__(self, win, api, set_statusbar):
+        self.cols = [
+                ["Date",                9,  'date',  lambda x: YMD(x).format()],
+                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
+                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)]
+            ]
+
+        super().__init__(win, api, set_statusbar, 'in')
+
+    def calculate_data(self):
+        return [{
+                'date':     item['d'],
+                'item':     item['i'],
+                'cost':     item['c']
+            } for item in self.data['data']]
 

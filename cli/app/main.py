@@ -5,7 +5,7 @@ from app.api import BudgetClientAPI
 from app.user import User
 from app.methods import window_color, ellipsis
 from app.page_overview import PageOverview
-from app.page_list import PageFunds
+from app.page_list import PageFunds, PageIn
 from app.const import *
 
 class BudgetClient(object):
@@ -228,7 +228,8 @@ class BudgetClient(object):
             return PageFunds(self.w_page, self.api, self.set_statusbar)
 
         if page == "In":
-            pass
+            return PageIn(self.w_page, self.api, self.set_statusbar)
+
         if page == "Bills":
             pass
         if page == "Food":
