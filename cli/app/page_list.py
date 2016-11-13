@@ -274,15 +274,15 @@ class PageFunds(PageList):
             else:
                 self.hide_graph()
 
-class PageIn(PageList):
-    def __init__(self, win, api, set_statusbar):
+class PageListBasic(PageList):
+    def __init__(self, win, api, set_statusbar, page_name):
         self.cols = [
                 ["Date",                9,  'date',  lambda x: YMD(x).format()],
                 ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
                 [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)]
             ]
 
-        super().__init__(win, api, set_statusbar, 'in')
+        super().__init__(win, api, set_statusbar, page_name)
 
     def calculate_data(self):
         return [{
@@ -290,4 +290,12 @@ class PageIn(PageList):
                 'item':     item['i'],
                 'cost':     item['c']
             } for item in self.data['data']]
+
+class PageIn(PageListBasic):
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar, 'in')
+
+class PageBills(PageListBasic):
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar, 'bills')
 

@@ -5,7 +5,7 @@ from app.api import BudgetClientAPI
 from app.user import User
 from app.methods import window_color, ellipsis
 from app.page_overview import PageOverview
-from app.page_list import PageFunds, PageIn
+from app.page_list import PageFunds, PageIn, PageBills
 from app.const import *
 
 class BudgetClient(object):
@@ -96,7 +96,10 @@ class BudgetClient(object):
 
         if pass_input:
             """ pass the input to the current page """
-            self.page_obj[self.pages[self.current_page]].key_input(c)
+            try:
+                self.page_obj[self.pages[self.current_page]].key_input(c)
+            except:
+                pass # page hasn't loaded yet
 
         return True
 
@@ -205,7 +208,10 @@ class BudgetClient(object):
                 self.set_statusbar()
 
         elif self.nav_sect == NAV_SECT_PAGE:
-            self.page_obj[self.pages[self.current_page]].nav(dx, dy)
+            try:
+                self.page_obj[self.pages[self.current_page]].nav(dx, dy)
+            except:
+                pass # page hasn't loaded yet
 
     def nav_select(self):
         if self.nav_sect == NAV_SECT_TABS:
@@ -231,7 +237,8 @@ class BudgetClient(object):
             return PageIn(self.w_page, self.api, self.set_statusbar)
 
         if page == "Bills":
-            pass
+            return PageBills(self.w_page, self.api, self.set_statusbar)
+
         if page == "Food":
             pass
         if page == "General":
