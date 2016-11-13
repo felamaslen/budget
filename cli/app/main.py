@@ -117,7 +117,8 @@ class BudgetClient(object):
 
         self.define_windows()
 
-        self.gui_statusbar()
+        self.statusbar = None
+        self.set_statusbar()
         self.gui_header()
         self.gui_page()
 
@@ -156,18 +157,28 @@ class BudgetClient(object):
 
         self.w_header.refresh()
 
+    def set_statusbar(self, items = []):
+        self.statusbar = [[KEY_QUIT, "quit"], [KEY_LOGOUT, "logout"]] + items
+        self.gui_statusbar()
+
     def gui_statusbar(self):
         """ draws a status bar at the bottom of the screen """
         color = curses.color_pair(NC_COLOR_STATUS_BAR[0])
 
         text1 = "Logged in as {}".format(self.user.name)
-        text2 = ellipsis(" ({}: quit, {}: logout)".format(KEY_QUIT, KEY_LOGOUT), \
-            curses.COLS - len(text1))
 
-        statusbar = window_color(0, curses.LINES - 1, curses.COLS, 1, color)
-        statusbar.addstr(0, 0, text1, color)
-        statusbar.addstr(0, len(text1), text2, color | curses.A_BOLD)
-        statusbar.refresh()
+        text2 = ellipsis(" (" + ', '.join([
+            "{}: {}".format(key, item)
+            for (key, item) in self.statusbar
+        ]) + ")", curses.COLS - len(text1))
+
+        if not self.statusbar is None:
+            del self.statusbar
+
+        self.statusbar = window_color(0, curses.LINES - 1, curses.COLS, 1, color)
+        self.statusbar.addstr(0, 0, text1, color)
+        self.statusbar.addstr(0, len(text1), text2, color | curses.A_BOLD)
+        self.statusbar.refresh()
 
     def nav(self, dx, dy, load = False):
         """ navigates through selected part of application """
@@ -187,6 +198,8 @@ class BudgetClient(object):
                 self.w_page.addstr(0, 0, "Press enter to load page: {}".format(page))
                 self.w_page.refresh()
 
+                self.set_statusbar()
+
         elif self.nav_sect == NAV_SECT_PAGE:
             self.page_obj[self.pages[self.current_page]].nav(dx, dy)
 
@@ -205,10 +218,10 @@ class BudgetClient(object):
 
     def get_page_obj(self, page):
         if page == "Overview":
-            return PageOverview(self.w_page, self.api)
+            return PageOverview(self.w_page, self.api, self.set_statusbar)
 
         if page == "Funds":
-            return PageFunds(self.w_page, self.api)
+            return PageFunds(self.w_page, self.api, self.set_statusbar)
 
         if page == "In":
             pass

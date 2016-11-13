@@ -7,9 +7,12 @@ from app.methods import *
 from app.api import BudgetClientAPIError
 
 class Page(object):
-    def __init__(self, win, api):
+    def __init__(self, win, api, set_statusbar = None):
         self.win = win
         self.api = api
+
+        self.statusbar = []
+        self.set_statusbar = set_statusbar
 
         self.nav_active = False
 
@@ -23,6 +26,8 @@ class Page(object):
         self.win.clear()
         self.try_draw()
         self.win.refresh()
+
+        self.set_statusbar(self.statusbar)
 
     def try_get_data(self):
         try:
@@ -56,7 +61,7 @@ class Page(object):
         pass
 
 class PageOverview(Page):
-    def __init__(self, win, api):
+    def __init__(self, win, api, set_statusbar):
         self.cols = [
             ["Month",       8],
             ["In",          10],
@@ -68,7 +73,7 @@ class PageOverview(Page):
 
         self.future_cols = ['food', 'general', 'holiday', 'social']
 
-        super().__init__(win, api)
+        super().__init__(win, api, set_statusbar)
 
     def get_data(self):
         res = self.api.req(['data', 'overview'])
@@ -157,8 +162,8 @@ class PageOverview(Page):
                     col += col_width
 
 class PageFunds(Page):
-    def __init__(self, win, api):
-        super().__init__(win, api)
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar)
 
         self.fund_list_selected = 0
 
@@ -183,6 +188,10 @@ class PageFunds(Page):
                 ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
                 [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)],
                 [alignr(9, "Value"),    10, 'value', lambda x: format_currency(x, 9)]
+            ]
+
+        self.statusbar = [
+                [KEY_GRAPH, "graph"]
             ]
 
     def get_data(self):
@@ -391,15 +400,14 @@ class PageFunds(Page):
         self.win_funds.refresh()
 
     def key_input(self, c):
-        if self.nav_active:
-            do_graph_all = c == ord(KEY_GRAPH)
-            do_graph_selected = c == KEYCODE_NEWLINE or c == KEYCODE_RETURN
+        do_graph_all = c == ord(KEY_GRAPH)
+        do_graph_selected = self.nav_active and (c == KEYCODE_NEWLINE or c == KEYCODE_RETURN)
 
-            if do_graph_all or do_graph_selected:
-                self.graph_status = not self.graph_status
+        if do_graph_all or do_graph_selected:
+            self.graph_status = not self.graph_status
 
-                if self.graph_status:
-                    self.show_graph(do_graph_all)
-                else:
-                    self.hide_graph()
+            if self.graph_status:
+                self.show_graph(do_graph_all)
+            else:
+                self.hide_graph()
 
