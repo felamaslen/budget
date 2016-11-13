@@ -5,7 +5,8 @@ from app.api import BudgetClientAPI
 from app.user import User
 from app.methods import window_color, ellipsis
 from app.page_overview import PageOverview
-from app.page_list import PageFunds, PageIn, PageBills
+from app.page_list import PageFunds, PageIn, PageBills, PageFood, PageGeneral, \
+        PageHoliday, PageSocial
 from app.const import *
 
 class BudgetClient(object):
@@ -240,13 +241,16 @@ class BudgetClient(object):
             return PageBills(self.w_page, self.api, self.set_statusbar)
 
         if page == "Food":
-            pass
+            return PageFood(self.w_page, self.api, self.set_statusbar)
+
         if page == "General":
-            pass
+            return PageGeneral(self.w_page, self.api, self.set_statusbar)
+
         if page == "Holiday":
-            pass
+            return PageHoliday(self.w_page, self.api, self.set_statusbar)
+
         if page == "Social":
-            pass
+            return PageSocial(self.w_page, self.api, self.set_statusbar)
 
         return None
 
