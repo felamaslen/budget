@@ -1,6 +1,9 @@
 """ extra methods, e.g. to make curses programming less disgusting """
 
+import numpy as np
 import curses
+
+from app.const import SYMBOL_CURRENCY
 
 def window_color(x, y, w, h, color):
     """ returns a new window filled with a background colour """
@@ -37,10 +40,17 @@ def get_item_attr(key, value):
 
     return str(value)
 
-def format_currency(width, pence):
+def format_currency(pence, width = None, align = True, show_pence = True):
     sign = '-' if pence < 0 else ''
 
-    return alignr(width, u"{0[0]}\xA3{0[1]:.2f}".format([sign, abs(float(pence) / 100)]))
+    pounds = abs(float(pence) / 100)
+
+    text = u"{0[0]}{0[1]}{0[2]:.2f}".format([sign, SYMBOL_CURRENCY, pounds]) \
+            if show_pence else \
+            u"{0[0]}{0[1]}{0[2]}".format([sign, SYMBOL_CURRENCY, int(np.round(pounds))])
+
+
+    return alignr(width, text) if align else text
 
 def alignr(width, string):
     return ' ' * (width - len(string)) + string if len(string) <= width \
@@ -58,3 +68,21 @@ def ellipsis(text, length, cutoff = '[...]'):
     """ shortens text with a [...] at the end """
     return text if len(text) <= length else \
             text[:length - len(text) - len(cutoff)] + cutoff
+
+def get_tick_size(minV, maxV, numTicks = 5):
+    minimum = (maxV - minV) / numTicks
+
+    magnitude = 10 ** np.floor(np.log10(minimum))
+
+    res = minimum / magnitude
+
+    if res > 5:
+        tick = 10 * magnitude
+    elif res > 2:
+        tick = 5 * magnitude
+    elif res > 1:
+        tick = 2 * magnitude
+    else:
+        tick = magnitude
+
+    return tick
