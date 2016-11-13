@@ -15,7 +15,7 @@ class BudgetClientAPI(object):
     def __init__(self):
         self.session = requests.Session()
 
-    def set_token(self, token):
+    def set_token(self, token = ''):
         """ set authorization header for requests """
         self.session.headers.update({'Authorization': token})
 

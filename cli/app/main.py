@@ -117,6 +117,8 @@ class BudgetClient(object):
         """ show cursor """
         curses.curs_set(1)
 
+        self.api.set_token()
+        self.page_obj = {}
         self.user.logged_out()
 
     def draw_gui(self):
