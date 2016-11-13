@@ -9,6 +9,8 @@ class Page(object):
         self.win = win
         self.api = api
 
+        self.nav_active = False
+
         self.winHW = win.getmaxyx()
 
         self.data = self.try_get_data()
@@ -40,6 +42,13 @@ class Page(object):
             self.draw()
         except Exception as e:
             self.win.addstr(0, 0, "Error: drawing page failed! ({})".format(e))
+
+    def nav(self, dx, dy):
+        pass
+
+    def set_nav_active(self, status):
+        self.nav_active = status
+        self.nav(0, 0)
 
 class PageOverview(Page):
     def __init__(self, win, api):
@@ -158,6 +167,15 @@ class PageFunds(Page):
         self.color_up_sel   = curses.color_pair(NC_COLOR_UP_SEL[0])
         self.color_down_sel = curses.color_pair(NC_COLOR_DOWN_SEL[0])
 
+        self.funds = self.calculate_data()
+
+        self.cols = [
+                ["Date",                9,  'date',  lambda x: YMD(x).format()],
+                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
+                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(9, x)],
+                [alignr(9, "Value"),    10, 'value', lambda x: format_currency(9, x)]
+            ]
+
     def get_data(self):
         res = self.api.req(['data', 'funds'])
 
@@ -174,45 +192,47 @@ class PageFunds(Page):
     def draw(self):
         self.win_funds.clear()
 
-        funds = self.calculate_data()
-
         """ draw list of funds """
         num_display = min(self.winHW[0] - 1, len(self.data['data']))
 
-        cols = [
-                ["Date",                9,  'date',  lambda x: YMD(x).format()],
-                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
-                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(9, x)],
-                [alignr(9, "Value"),    10, 'value', lambda x: format_currency(9, x)]
-            ]
-
         """ head """
         col = 0
-        for (name, width, index, formatter) in cols:
+        for (name, width, index, formatter) in self.cols:
             self.win_funds.addstr(0, col, name, self.color_item | curses.A_BOLD)
             col += width
 
         """ body """
+        offset = 0 if len(self.funds) <= num_display else max(0, self.fund_list_selected - 2) # for scrolling
+
         for i in range(num_display):
-            color = self.color_sel if i == self.fund_list_selected else self.color_item
+            j = i + offset
+
+            selected = self.nav_active and j == self.fund_list_selected
+
+            color = self.color_sel if selected else self.color_item
 
             self.win_funds.addstr(i + 1, 0, ' ' * self.winHW[1], color)
 
             col = 0
-            for (name, width, index, formatter) in cols:
-                self.win_funds.addstr(i + 1, col, formatter(funds[i][index]), color)
+            for (name, width, index, formatter) in self.cols:
+                self.win_funds.addstr(i + 1, col, formatter(self.funds[j][index]), color)
 
                 col += width
 
-            gain        = float(funds[i]['value'] - funds[i]['cost']) / funds[i]['cost'] * 100
+            gain        = float(self.funds[j]['value'] - self.funds[j]['cost']) / self.funds[j]['cost'] * 100
             sign        = '-' if gain < 0 else '+'
             gain_text   = "%s%0.1f%%" % (sign, abs(gain))
 
-            color_gain  = (self.color_up_sel if i == self.fund_list_selected else self.color_up) \
+            color_gain  = (self.color_up_sel if selected else self.color_up) \
                     if gain >= 0 \
-                    else (self.color_down_sel if i == self.fund_list_selected else self.color_down)
+                    else (self.color_down_sel if selected else self.color_down)
 
             self.win_funds.addstr(i + 1, col, gain_text, color_gain)
 
+    def nav(self, dx, dy):
+        self.fund_list_selected = min(len(self.funds) - 1, max(0, \
+                self.fund_list_selected + dy))
 
+        self.draw()
+        self.win_funds.refresh()
 
