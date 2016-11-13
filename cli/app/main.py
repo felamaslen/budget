@@ -59,17 +59,23 @@ class BudgetClient(object):
             elif c == ord(KEY_LOGOUT):
                 self.logout()
 
-            elif c == curses.KEY_LEFT:
+            elif c == curses.KEY_LEFT or c == ord('h'):
                 self.nav(-1, 0)
-            elif c == curses.KEY_UP:
+            elif c == curses.KEY_UP or c == ord('k'):
                 self.nav(0, -1)
-            elif c == curses.KEY_RIGHT:
+            elif c == curses.KEY_RIGHT or c == ord('l'):
                 self.nav(1, 0)
-            elif c == curses.KEY_DOWN:
+            elif c == curses.KEY_DOWN or c == ord('j'):
                 self.nav(0, 1)
 
             elif c == 10: # enter
                 self.nav_select()
+
+            elif c == ord('\t'): # tab
+                self.nav_sect = (self.nav_sect + 1) % 2
+
+                self.page_obj[self.pages[self.current_page]].set_nav_active(\
+                        self.nav_sect == NAV_SECT_PAGE)
 
     def logged_in(self):
         self.api.set_token(self.user.token)
@@ -157,7 +163,7 @@ class BudgetClient(object):
                 self.w_page.refresh()
 
         elif self.nav_sect == NAV_SECT_PAGE:
-            pass
+            self.page_obj[self.pages[self.current_page]].nav(dx, dy)
 
     def nav_select(self):
         if self.nav_sect == NAV_SECT_TABS:
