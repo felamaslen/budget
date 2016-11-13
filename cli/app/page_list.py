@@ -6,17 +6,11 @@ from app.const import *
 from app.methods import *
 from app.page import Page
 
-class PageFunds(Page):
-    def __init__(self, win, api, set_statusbar):
+class PageList(Page):
+    def __init__(self, win, api, set_statusbar, data_name):
+        self.data_name = data_name
+
         super().__init__(win, api, set_statusbar)
-
-        self.fund_list_selected = 0
-
-        self.win_funds = win.derwin(0, 0)
-
-        self.graph_status = False
-
-        self.fund_history = None
 
         self.color_item = curses.color_pair(NC_COLOR_TAB[0])
         self.color_sel  = curses.color_pair(NC_COLOR_TAB_SEL[0])
@@ -26,8 +20,67 @@ class PageFunds(Page):
         self.color_up_sel   = curses.color_pair(NC_COLOR_UP_SEL[0])
         self.color_down_sel = curses.color_pair(NC_COLOR_DOWN_SEL[0])
 
-        self.funds = self.calculate_data()
+        self.list_selected  = 0
+        self.list           = self.calculate_data()
+        self.win_list       = win.derwin(0, 0)
 
+    def get_data(self):
+        res = self.api.req(['data', self.data_name])
+
+        return res['data']
+
+    def draw(self):
+        self.draw_list()
+
+    def draw_list(self):
+        self.win_list.clear()
+
+        """ draw list of funds """
+        num_display = min(self.winHW[0] - 1, len(self.data['data']))
+
+        """ head """
+        col = 0
+        for (name, width, index, formatter) in self.cols:
+            self.win_list.addstr(0, col, name, self.color_item | curses.A_BOLD)
+            col += width
+
+        """ body """
+        offset = 0 if len(self.list) <= num_display else max(0, self.list_selected - 2) # for scrolling
+
+        for i in range(num_display):
+            j = i + offset
+
+            selected = self.nav_active and j == self.list_selected
+
+            color = self.color_sel if selected else self.color_item
+
+            self.win_list.addstr(i + 1, 0, ' ' * self.winHW[1], color)
+
+            col = 0
+            for (name, width, index, formatter) in self.cols:
+                self.win_list.addstr(i + 1, col, formatter(self.list[j][index]), color)
+
+                col += width
+
+            gain        = float(self.list[j]['value'] - self.list[j]['cost']) / self.list[j]['cost'] * 100
+            sign        = '-' if gain < 0 else '+'
+            gain_text   = "%s%0.1f%%" % (sign, abs(gain))
+
+            color_gain  = (self.color_up_sel if selected else self.color_up) \
+                    if gain >= 0 \
+                    else (self.color_down_sel if selected else self.color_down)
+
+            self.win_list.addstr(i + 1, col, gain_text, color_gain)
+
+    def nav(self, dx, dy):
+        self.list_selected = min(len(self.list) - 1, max(0, \
+                self.list_selected + dy))
+
+        self.draw()
+        self.win_list.refresh()
+
+class PageFunds(PageList):
+    def __init__(self, win, api, set_statusbar):
         self.cols = [
                 ["Date",                9,  'date',  lambda x: YMD(x).format()],
                 ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
@@ -39,10 +92,10 @@ class PageFunds(Page):
                 [KEY_GRAPH, "graph"]
             ]
 
-    def get_data(self):
-        res = self.api.req(['data', 'funds'])
+        super().__init__(win, api, set_statusbar, 'funds')
 
-        return res['data']
+        self.graph_status   = False
+        self.fund_history   = None
 
     def get_fund_history(self):
         res = self.api.req(['data', 'fund_history'], query = {'deep': 1})
@@ -57,49 +110,10 @@ class PageFunds(Page):
                 'value':    float(item['u']) * float(item['P'])
             } for item in self.data['data']]
 
-    def draw(self):
-        self.draw_list()
-
     def draw_list(self):
-        self.win_funds.clear()
         self.graph_status = False
 
-        """ draw list of funds """
-        num_display = min(self.winHW[0] - 1, len(self.data['data']))
-
-        """ head """
-        col = 0
-        for (name, width, index, formatter) in self.cols:
-            self.win_funds.addstr(0, col, name, self.color_item | curses.A_BOLD)
-            col += width
-
-        """ body """
-        offset = 0 if len(self.funds) <= num_display else max(0, self.fund_list_selected - 2) # for scrolling
-
-        for i in range(num_display):
-            j = i + offset
-
-            selected = self.nav_active and j == self.fund_list_selected
-
-            color = self.color_sel if selected else self.color_item
-
-            self.win_funds.addstr(i + 1, 0, ' ' * self.winHW[1], color)
-
-            col = 0
-            for (name, width, index, formatter) in self.cols:
-                self.win_funds.addstr(i + 1, col, formatter(self.funds[j][index]), color)
-
-                col += width
-
-            gain        = float(self.funds[j]['value'] - self.funds[j]['cost']) / self.funds[j]['cost'] * 100
-            sign        = '-' if gain < 0 else '+'
-            gain_text   = "%s%0.1f%%" % (sign, abs(gain))
-
-            color_gain  = (self.color_up_sel if selected else self.color_up) \
-                    if gain >= 0 \
-                    else (self.color_down_sel if selected else self.color_down)
-
-            self.win_funds.addstr(i + 1, col, gain_text, color_gain)
+        super().draw_list()
 
     def show_graph(self, graph_all):
         graphH = self.winHW[0] - 5
@@ -158,9 +172,9 @@ class PageFunds(Page):
                 ]
 
         else:
-            index = self.fund_list_selected
+            index = self.list_selected
 
-            fund_name = self.funds[self.fund_list_selected]['item']
+            fund_name = self.list[self.list_selected]['item']
 
             index = self.fund_history['funds'].index(fund_name)
 
@@ -237,13 +251,6 @@ class PageFunds(Page):
                     pass # means the tick is out of range, no big deal
 
         self.win_graph.refresh()
-
-    def nav(self, dx, dy):
-        self.fund_list_selected = min(len(self.funds) - 1, max(0, \
-                self.fund_list_selected + dy))
-
-        self.draw()
-        self.win_funds.refresh()
 
     def key_input(self, c):
         do_graph_all = c == ord(KEY_GRAPH)
