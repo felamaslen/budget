@@ -1,7 +1,3 @@
-from numpy import floor, ceil
-import curses
-from curses.textpad import rectangle
-
 from app.const import *
 from app.methods import *
 from app.page import Page

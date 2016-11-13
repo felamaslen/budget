@@ -62,6 +62,7 @@ class PageFunds(Page):
 
     def draw_list(self):
         self.win_funds.clear()
+        self.graph_status = False
 
         """ draw list of funds """
         num_display = min(self.winHW[0] - 1, len(self.data['data']))
