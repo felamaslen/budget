@@ -88,8 +88,11 @@ class BudgetClient(object):
         elif c == KEYCODE_TAB:
             self.nav_sect = (self.nav_sect + 1) % 2
 
-            self.page_obj[self.pages[self.current_page]].set_nav_active(\
-                    self.nav_sect == NAV_SECT_PAGE)
+            try:
+                self.page_obj[self.pages[self.current_page]].set_nav_active(\
+                        self.nav_sect == NAV_SECT_PAGE)
+            except:
+                pass # page hasn't loaded yet
 
         if pass_input:
             """ pass the input to the current page """
