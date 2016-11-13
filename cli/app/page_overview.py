@@ -103,4 +103,6 @@ class PageOverview(Page):
 
                     col += col_width
 
+    def set_nav_active(self, status):
+        return False # this page can't be active
 

@@ -50,6 +50,7 @@ class Page(object):
     def set_nav_active(self, status):
         self.nav_active = status
         self.nav(0, 0)
+        return True
 
     def key_input(self, c):
         pass
