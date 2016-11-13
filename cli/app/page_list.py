@@ -12,13 +12,8 @@ class PageList(Page):
 
         super().__init__(win, api, set_statusbar)
 
-        self.color_item = curses.color_pair(NC_COLOR_TAB[0])
-        self.color_sel  = curses.color_pair(NC_COLOR_TAB_SEL[0])
-
-        self.color_up       = curses.color_pair(NC_COLOR_UP[0])
-        self.color_down     = curses.color_pair(NC_COLOR_DOWN[0])
-        self.color_up_sel   = curses.color_pair(NC_COLOR_UP_SEL[0])
-        self.color_down_sel = curses.color_pair(NC_COLOR_DOWN_SEL[0])
+        self.color_item     = curses.color_pair(NC_COLOR_TAB[0])
+        self.color_sel      = curses.color_pair(NC_COLOR_TAB_SEL[0])
 
         self.list_selected  = 0
         self.list           = self.calculate_data()
@@ -133,6 +128,11 @@ class PageFunds(PageList):
             ]
 
         super().__init__(win, api, set_statusbar, 'funds')
+
+        self.color_up       = curses.color_pair(NC_COLOR_UP[0])
+        self.color_down     = curses.color_pair(NC_COLOR_DOWN[0])
+        self.color_up_sel   = curses.color_pair(NC_COLOR_UP_SEL[0])
+        self.color_down_sel = curses.color_pair(NC_COLOR_DOWN_SEL[0])
 
         self.graph_status   = False
         self.fund_history   = None
