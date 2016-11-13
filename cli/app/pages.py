@@ -1,8 +1,9 @@
+from numpy import floor, ceil
 import curses
 from curses.textpad import rectangle
 
 from app.const import *
-from app.methods import ellipsis, format_currency, YMD, alignr, alignc, window_fill_color
+from app.methods import *
 from app.api import BudgetClientAPIError
 
 class Page(object):
@@ -118,11 +119,11 @@ class PageOverview(Page):
         rows = [
             [
                 "{}-{}".format(months[(ym1[1]-1+i) % 12], (ym1[0] + (i - 1 + ym1[1]) // 12) % 1000),
-                format_currency(self.cols[1][1] - 1, self.data['cost']['in'][i]),
-                format_currency(self.cols[2][1] - 1, out_with_future[i]),
-                format_currency(self.cols[3][1] - 1, net[i]),
-                format_currency(self.cols[4][1] - 1, predicted[i]),
-                format_currency(self.cols[5][1] - 1, self.data['cost']['balance'][i])
+                format_currency(self.data['cost']['in'][i],      self.cols[1][1] - 1),
+                format_currency(out_with_future[i],              self.cols[2][1] - 1),
+                format_currency(net[i],                          self.cols[3][1] - 1),
+                format_currency(predicted[i],                    self.cols[4][1] - 1),
+                format_currency(self.data['cost']['balance'][i], self.cols[5][1] - 1)
             ]
             for i in range(num_rows)
         ]
@@ -180,8 +181,8 @@ class PageFunds(Page):
         self.cols = [
                 ["Date",                9,  'date',  lambda x: YMD(x).format()],
                 ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
-                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(9, x)],
-                [alignr(9, "Value"),    10, 'value', lambda x: format_currency(9, x)]
+                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)],
+                [alignr(9, "Value"),    10, 'value', lambda x: format_currency(x, 9)]
             ]
 
     def get_data(self):
@@ -256,7 +257,7 @@ class PageFunds(Page):
         rectangle(self.win_graph, 0, 0, graphH - 2, graphW - 2)
 
         if self.fund_history is None:
-            self.win_graph.addstr(1, 1, alignc(graphW - 2, "Loading..."))
+            self.win_graph.addstr(1, 1, alignc(graphW - 3, "Loading..."))
             self.win_graph.refresh()
 
             try:
@@ -300,7 +301,7 @@ class PageFunds(Page):
             self.win_graph.addstr(1, 1, title)
 
             """ draw the actual graph points """
-            series_length = w - 1
+            series_length = w - 2
 
             history = self.fund_history['history'][-series_length:]
 
@@ -311,13 +312,14 @@ class PageFunds(Page):
                     for i in range(len(history))
                 ]
 
-            minV = min(series)
-            maxV = max(series)
+            minV = floor(float(min(series)) / 1000) * 1000
+            maxV = ceil(float(max(series)) / 1000) * 1000
 
             last_yv = None
 
             series_height = h - 3
 
+            """ draw line """
             for i in range(series_length):
                 yv = int(series_height * (1 - (float(series[i] - minV) / (maxV - minV))))
 
@@ -346,6 +348,24 @@ class PageFunds(Page):
                 self.win_graph.addstr(yv + 2, i + 1, point)
 
                 last_yv = yv
+
+            """ draw axis """
+            num_ticks = 5
+            tick_size = get_tick_size(minV, maxV, num_ticks)
+
+            for i in range(num_ticks):
+                value = minV + i * tick_size
+
+                yv = int(series_height * (1 - (float(value - minV) / (maxV - minV))))
+
+                tick = format_currency(value, align = False, show_pence = False)
+
+                xv = w - len(tick)
+
+                try:
+                    self.win_graph.addstr(yv + 2, xv, tick)
+                except:
+                    pass # means the tick is out of range, no big deal
 
         self.win_graph.refresh()
 

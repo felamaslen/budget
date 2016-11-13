@@ -32,6 +32,8 @@ KEY_GRAPH   = 'g'
 NAV_SECT_TABS = 0
 NAV_SECT_PAGE = 1
 
+SYMBOL_CURRENCY = u'\xA3'
+
 """ unicode characters for graphs """
 CORNER_BOTTOM_LEFT  = u'\u2570'
 CORNER_TOP_LEFT     = u'\u256d'
