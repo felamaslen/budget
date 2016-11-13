@@ -90,10 +90,14 @@ class BudgetClient(object):
             self.nav_sect = (self.nav_sect + 1) % 2
 
             try:
-                self.page_obj[self.pages[self.current_page]].set_nav_active(\
-                        self.nav_sect == NAV_SECT_PAGE)
+                if not self.page_obj[self.pages[self.current_page]].set_nav_active(
+                        self.nav_sect == NAV_SECT_PAGE):
+
+                    self.nav_sect = NAV_SECT_TABS
+
             except:
-                pass # page hasn't loaded yet
+                """ page isn't ready yet """
+                self.nav_sect = NAV_SECT_TABS
 
         if pass_input:
             """ pass the input to the current page """
