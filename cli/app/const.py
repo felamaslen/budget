@@ -16,6 +16,12 @@ NC_COLOR_HEADER     = NC_COLOR_BG
 NC_COLOR_TAB        = (2, curses.COLOR_WHITE, curses.COLOR_BLACK)
 NC_COLOR_TAB_SEL    = (3, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
+NC_COLOR_UP         = (4, curses.COLOR_GREEN, curses.COLOR_BLACK)
+NC_COLOR_UP_SEL     = (5, curses.COLOR_GREEN, curses.COLOR_WHITE)
+NC_COLOR_DOWN       = (6, curses.COLOR_RED, curses.COLOR_BLACK)
+NC_COLOR_DOWN_SEL   = (7, curses.COLOR_RED, curses.COLOR_WHITE)
+
+
 """ keyboard shortcuts """
 KEY_QUIT    = 'q'
 KEY_LOGOUT  = 'l'
