@@ -1,6 +1,6 @@
 import curses
 
-from app.const import NC_COLOR_TAB, NC_COLOR_TAB_SEL
+from app.const import *
 from app.methods import ellipsis, format_currency, YMD, alignr
 from app.api import BudgetClientAPIError
 
@@ -153,6 +153,11 @@ class PageFunds(Page):
         self.color_item = curses.color_pair(NC_COLOR_TAB[0])
         self.color_sel  = curses.color_pair(NC_COLOR_TAB_SEL[0])
 
+        self.color_up       = curses.color_pair(NC_COLOR_UP[0])
+        self.color_down     = curses.color_pair(NC_COLOR_DOWN[0])
+        self.color_up_sel   = curses.color_pair(NC_COLOR_UP_SEL[0])
+        self.color_down_sel = curses.color_pair(NC_COLOR_DOWN_SEL[0])
+
     def get_data(self):
         res = self.api.req(['data', 'funds'])
 
@@ -198,6 +203,16 @@ class PageFunds(Page):
                 self.win_funds.addstr(i + 1, col, formatter(funds[i][index]), color)
 
                 col += width
+
+            gain        = float(funds[i]['value'] - funds[i]['cost']) / funds[i]['cost'] * 100
+            sign        = '-' if gain < 0 else '+'
+            gain_text   = "%s%0.1f%%" % (sign, abs(gain))
+
+            color_gain  = (self.color_up_sel if i == self.fund_list_selected else self.color_up) \
+                    if gain >= 0 \
+                    else (self.color_down_sel if i == self.fund_list_selected else self.color_down)
+
+            self.win_funds.addstr(i + 1, col, gain_text, color_gain)
 
 
 

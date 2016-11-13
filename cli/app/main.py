@@ -36,6 +36,10 @@ class BudgetClient(object):
         curses.init_pair(*NC_COLOR_BG)
         curses.init_pair(*NC_COLOR_TAB)
         curses.init_pair(*NC_COLOR_TAB_SEL)
+        curses.init_pair(*NC_COLOR_UP)
+        curses.init_pair(*NC_COLOR_DOWN)
+        curses.init_pair(*NC_COLOR_UP_SEL)
+        curses.init_pair(*NC_COLOR_DOWN_SEL)
 
     def loop(self):
         """ main application loop """
