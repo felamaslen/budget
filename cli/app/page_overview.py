@@ -111,7 +111,8 @@ class PageOverview(Page):
                 col = 0
                 j = 0
                 for (j, (col_name, col_width)) in enumerate(self.cols):
-                    self.win.addstr(i, col, ellipsis(rows[row][j], col_width), color)
+                    self.win.addstr(i, col, ellipsis(rows[row][j], col_width), \
+                            color | curses.A_BOLD if j == 5 else color)
 
                     col += col_width
 
