@@ -246,7 +246,7 @@ class PageFunds(Page):
 
             self.win_funds.addstr(i + 1, col, gain_text, color_gain)
 
-    def show_graph(self):
+    def show_graph(self, graph_all):
         graphH = self.winHW[0] - 5
         graphW = self.winHW[1] - 5
 
@@ -263,7 +263,7 @@ class PageFunds(Page):
             try:
                 self.fund_history = self.get_fund_history()
 
-                self.draw_graph(graphW, graphH)
+                self.draw_graph(graphW, graphH, graph_all)
             except BudgetClientAPIError as error:
                 self.win_graph.clear()
                 self.win_graph.addstr(2, 2, "Error: {}".format(error))
@@ -272,7 +272,7 @@ class PageFunds(Page):
                 self.fund_history = None
 
         else:
-            self.draw_graph(graphW, graphH)
+            self.draw_graph(graphW, graphH, graph_all)
 
     def hide_graph(self):
         self.win_graph.clear()
@@ -283,34 +283,48 @@ class PageFunds(Page):
         self.draw_list()
         self.win.refresh()
 
-    def draw_graph(self, graphW, graphH):
+    def draw_graph(self, graphW, graphH, graph_all):
         w = graphW - 2 # for border
         h = graphH - 2
 
-        index = self.fund_list_selected
+        series_length   = w - 2
+        history         = self.fund_history['history'][-series_length:]
+        extra           = max(0, series_length - len(history))
 
-        fund_name = self.funds[self.fund_list_selected]['item']
+        draw_graph = True
 
-        index = self.fund_history['funds'].index(fund_name)
+        """ gather data """
+        if graph_all:
+            title = alignc(w - 1, "Portfolio history")
 
-        if index < 0:
-            """ invalid fund """
-            self.win_graph.addstr(2, 1, "Invalid fund.")
-        else:
-            title = alignc(w - 1, "Fund: {}".format(fund_name))
-            self.win_graph.addstr(1, 1, title)
-
-            """ draw the actual graph points """
-            series_length = w - 2
-
-            history = self.fund_history['history'][-series_length:]
-
-            extra = max(0, series_length - len(history))
-
-            series = [history[0][1][index]] * extra + [
-                    history[i][1][index]
+            series = [history[0][2]] * extra + [
+                    history[i][2]
                     for i in range(len(history))
                 ]
+
+        else:
+            index = self.fund_list_selected
+
+            fund_name = self.funds[self.fund_list_selected]['item']
+
+            index = self.fund_history['funds'].index(fund_name)
+
+            if index < 0:
+                """ invalid fund """
+                self.win_graph.addstr(2, 1, "Invalid fund.")
+
+                draw_graph = False
+            else:
+                title = alignc(w - 1, "Fund: {}".format(fund_name))
+
+                series = [history[0][1][index]] * extra + [
+                        history[i][1][index]
+                        for i in range(len(history))
+                    ]
+
+        """ draw the actual graph """
+        if draw_graph:
+            self.win_graph.addstr(1, 1, title)
 
             minV = floor(float(min(series)) / 1000) * 1000
             maxV = ceil(float(max(series)) / 1000) * 1000
@@ -377,11 +391,15 @@ class PageFunds(Page):
         self.win_funds.refresh()
 
     def key_input(self, c):
-        if c == ord(KEY_GRAPH):
-            self.graph_status = not self.graph_status
+        if self.nav_active:
+            do_graph_all = c == ord(KEY_GRAPH)
+            do_graph_selected = c == KEYCODE_NEWLINE or c == KEYCODE_RETURN
 
-            if self.graph_status:
-                self.show_graph()
-            else:
-                self.hide_graph()
+            if do_graph_all or do_graph_selected:
+                self.graph_status = not self.graph_status
+
+                if self.graph_status:
+                    self.show_graph(do_graph_all)
+                else:
+                    self.hide_graph()
 
