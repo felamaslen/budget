@@ -76,6 +76,49 @@ class PageList(Page):
         self.draw()
         self.win_list.refresh()
 
+class PageListBasic(PageList):
+    def __init__(self, win, api, set_statusbar, page_name):
+        self.cols = [
+                ["Date",                9,  'date',  lambda x: YMD(x).format()],
+                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
+                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)]
+            ]
+
+        super().__init__(win, api, set_statusbar, page_name)
+
+    def calculate_data(self):
+        return [{
+                'date':     item['d'],
+                'item':     item['i'],
+                'cost':     item['c']
+            } for item in self.data['data']]
+
+class PageListShop(PageList):
+    """ used for things like food, socials etc. """
+    def __init__(self, win, api, set_statusbar, page_name, \
+            col_category, col_category_json):
+
+        self.cols = [
+                ["Date",            9,  'date',     lambda x: YMD(x).format()],
+                ["Item",            25, 'item',     lambda x: ellipsis(x, 24)],
+                [col_category,      20, 'category', lambda x: ellipsis(x, 19)],
+                [alignr(9, "Cost"), 10, 'cost',     lambda x: format_currency(x, 9)],
+                ["Shop",            20, 'shop',     lambda x: ellipsis(x, 19)]
+            ]
+
+        self.col_category_json  = col_category_json
+
+        super().__init__(win, api, set_statusbar, page_name)
+
+    def calculate_data(self):
+        return [{
+            'date':     item['d'],
+            'item':     item['i'],
+            'category': item[self.col_category_json],
+            'cost':     item['c'],
+            'shop':     item['s']
+        } for item in self.data['data']]
+
 class PageFunds(PageList):
     def __init__(self, win, api, set_statusbar):
         self.cols = [
@@ -274,23 +317,6 @@ class PageFunds(PageList):
             else:
                 self.hide_graph()
 
-class PageListBasic(PageList):
-    def __init__(self, win, api, set_statusbar, page_name):
-        self.cols = [
-                ["Date",                9,  'date',  lambda x: YMD(x).format()],
-                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
-                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)]
-            ]
-
-        super().__init__(win, api, set_statusbar, page_name)
-
-    def calculate_data(self):
-        return [{
-                'date':     item['d'],
-                'item':     item['i'],
-                'cost':     item['c']
-            } for item in self.data['data']]
-
 class PageIn(PageListBasic):
     def __init__(self, win, api, set_statusbar):
         super().__init__(win, api, set_statusbar, 'in')
@@ -298,4 +324,20 @@ class PageIn(PageListBasic):
 class PageBills(PageListBasic):
     def __init__(self, win, api, set_statusbar):
         super().__init__(win, api, set_statusbar, 'bills')
+
+class PageFood(PageListShop):
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar, 'food', "Category", 'k')
+
+class PageGeneral(PageListShop):
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar, 'general', "Category", 'k')
+
+class PageHoliday(PageListShop):
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar, 'holiday', "Holiday", 'h')
+
+class PageSocial(PageListShop):
+    def __init__(self, win, api, set_statusbar):
+        super().__init__(win, api, set_statusbar, 'social', "Society", 'y')
 
