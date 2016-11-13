@@ -4,14 +4,15 @@ from curses.textpad import rectangle
 from app.api import BudgetClientAPI
 from app.user import User
 from app.methods import window_color, ellipsis
-from app.pages import PageOverview, PageFunds
+from app.page_overview import PageOverview
+from app.page_list import PageFunds
 from app.const import *
 
 class BudgetClient(object):
     def __init__(self):
         self.pages = ["Overview", "Funds", "In", "Bills", "Food", "General",\
                 "Holiday", "Social"]
-        self.current_page = 1
+        self.current_page = 0
 
         self.page_obj = {}
 
