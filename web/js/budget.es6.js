@@ -29,6 +29,8 @@
   const DO_STOCKS_LIST = true;
 
   const GRAPH_FUNDS_PIE_WIDTH = 500;
+  const GRAPH_FUND_ITEM_LINE_WIDTH = 2;
+  const GRAPH_FUND_ITEM_TENSION = 0.85;
   const GRAPH_FUND_HISTORY_WIDTH = 500;
   const GRAPH_FUND_HISTORY_TENSION = 0.65;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
@@ -51,6 +53,8 @@
 
   const COLOR_BALANCE_ACTUAL = "#039";
   const COLOR_BALANCE_PREDICTED = "#f00";
+
+  const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 
   const COLOR_GRAPH_FUND_LINE = "#fffd93";
   const COLOR_GRAPH_FUND_POINT = "#ff9400";
@@ -1724,9 +1728,9 @@
 
       super(options);
 
-      this.colors = [COLOR_BALANCE_ACTUAL];
-      this.lineWidth = 1;
-      this.tension = 0.8;
+      this.colors = [COLOR_GRAPH_FUND_ITEM];
+      this.lineWidth = GRAPH_FUND_ITEM_LINE_WIDTH;
+      this.tension = GRAPH_FUND_ITEM_TENSION;
 
       this.data = options.data;
     }
@@ -3340,7 +3344,10 @@
       const fundIndex = this.history.funds.indexOf(newData.i);
       if (fundIndex > -1) {
         const data = this.history.history.map(item => {
-          return [item[0], item[1][fundIndex]];
+          return [
+            item[0],
+            item[1][fundIndex] * newData.u
+          ];
         });
 
         const fundGraph = new GraphFundItem({
