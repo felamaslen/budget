@@ -28,7 +28,8 @@
 
   const DO_STOCKS_LIST = true;
 
-  const GRAPH_FUND_HISTORY_WIDTH = 600;
+  const GRAPH_FUNDS_PIE_WIDTH = 500;
+  const GRAPH_FUND_HISTORY_WIDTH = 500;
   const GRAPH_FUND_HISTORY_TENSION = 0.65;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
   const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
@@ -1766,10 +1767,10 @@
       }
 
       windowSize.narrow(() => {
-        this.resize(400);
+        this.resize(STOCKS_LIST_WIDTH);
       })
       .wide(() => {
-        this.resize(600);
+        this.resize(GRAPH_FUND_HISTORY_WIDTH);
       })
       .trigger();
     }
@@ -2700,8 +2701,10 @@
 
         const args = this.hookDataAddArgs(["data", this.page]);
 
+        const query = this.query || null;
+
         api.request(
-          args.join("/"), "GET", null, user.apiKey,
+          args.join("/"), "GET", query, user.apiKey,
           res => this.onDataLoaded(callback, render, res),
           null,
           () => this.onRequestComplete(),
@@ -3290,6 +3293,8 @@
   class PageFunds extends PageList {
     constructor(options) {
       super(options);
+
+      this.query = { history: 1 }; // tell api to get history data
     }
 
     calculateGain(unitsTxt, priceVal, cost) {
@@ -3377,9 +3382,6 @@
       $gain.append(this.$gainInfo);
       $gain.append(this.$gainText);
       this.$lhead.append($gain);
-
-      // build graph showing fund value history
-      this.loadFundHistory();
     }
 
     hookSwitchToCallback(pageExists) {
@@ -3390,20 +3392,16 @@
       }
     }
 
-    loadFundHistory() {
-      api.request(
-        "data/fund_history", "GET", { deep: true }, user.apiKey,
-        res => this.onFundHistoryLoaded(res),
-        () => {},
-        () => {}
-      );
-    }
-    onFundHistoryLoaded(res) {
+    hookDataLoadedAfterRender(callback, res) {
+      super.hookDataLoadedAfterRender(callback, res);
+
+      const history = res.data.history;
+
       // get minimum value
       let minValue = -1;
       let maxValue = -1;
 
-      res.data.history.forEach(item => {
+      history.history.forEach(item => {
         if (minValue < 0 || item[1] < minValue) {
           minValue = item[1];
         }
@@ -3413,8 +3411,8 @@
         }
       });
 
-      if (res.data.history.length > 0) {
-        const lastValue = res.data.history[res.data.history.length - 1][2];
+      if (history.history.length > 0) {
+        const lastValue = history.history[history.history.length - 1][2];
 
         const profit = lastValue - this.costTotal;
 
@@ -3424,8 +3422,8 @@
         const profitLabel = " (" + profitSign +
           formatCurrency(Math.abs(profit)) + ")";
 
-        const valueTime = res.data.startTime +
-          res.data.history[res.data.history.length - 1][0];
+        const valueTime = history.startTime +
+          history.history[history.history.length - 1][0];
 
         const ageHours = Math.round(
           (todayDate.getTime() - valueTime * 1000) / 3600000
@@ -3449,12 +3447,12 @@
         $cont:  this.$graphs,
         page:   this.page,
         title:  "fund-history",
-        data:   res.data.history,
-        funds:  res.data.funds,
-        range:  [0, res.data.totalTime, minValue, maxValue],
+        data:   history.history,
+        funds:  history.funds,
+        range:  [0, history.totalTime, minValue, maxValue],
         pad:    [24, 0, 0, 0],
         lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
-        startTime: res.data.startTime
+        startTime: history.startTime
       });
     }
   }
@@ -4655,8 +4653,8 @@
     daily: false,
     drawPie: true,
     pieStretch: 1.2,
-    pieWidth: 600,
-    pieLabelLength: 20
+    pieWidth: GRAPH_FUNDS_PIE_WIDTH,
+    pieLabelLength: 13
   };
 
   function newPageList(page) {
