@@ -1015,6 +1015,12 @@ button:active {
   width: 62px;
   text-align: right;
 }
+#page-funds .fund-graph-cont .graph-container {
+  width: 100px;
+  height: 48px;
+  position: static;
+  background: transparent;
+}
 #page-funds .graph-container-pie {
   width: 500px;
   left: 1000px;

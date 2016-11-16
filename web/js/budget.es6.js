@@ -53,7 +53,6 @@
   const COLOR_BALANCE_PREDICTED = "#f00";
 
   const COLOR_GRAPH_FUND_LINE = "#fffd93";
-  const COLOR_GRAPH_FUND_LINE_MINOR = "#c6c4ad";
   const COLOR_GRAPH_FUND_POINT = "#ff9400";
 
   const COLOR_PIE_L1 = "#f15854";
@@ -1350,7 +1349,6 @@
       this.yearMonths = options.yearMonths;
 
       this.colors = [COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED];
-      this.tension = 0.5;
       this.stroke = true;
 
       this.getData(options.dataPast, options.dataFuture);
@@ -1715,6 +1713,38 @@
       this.getData(data);
 
       this.draw();
+    }
+  }
+
+  class GraphFundItem extends LineGraph {
+    constructor(options) {
+      const minX = Math.min.apply(null, options.data.map(item => item[0]));
+      const maxX = Math.max.apply(null, options.data.map(item => item[0]));
+
+      const minY = Math.min.apply(null, options.data.map(item => item[1]));
+      const maxY = Math.max.apply(null, options.data.map(item => item[1]));
+
+      options.range = [minX, maxX, minY, maxY];
+
+      super(options);
+
+      this.colors = [COLOR_BALANCE_ACTUAL];
+      this.lineWidth = 1;
+      this.tension = 0.8;
+
+      this.data = options.data;
+    }
+
+    draw() {
+      if (!this.supported) {
+        return;
+      }
+
+      // clear canvas
+      this.ctx.clearRect(0, 0, this.width, this.height);
+
+      // plot data
+      this.drawCubicLine(this.data, this.colors);
     }
   }
 
@@ -2226,7 +2256,7 @@
       if (this.data) {
         this.lineWidth = 2;
 
-        this.dataZoomed.forEach((line, key) => {
+        this.dataZoomed.forEach(line => {
           this.drawCubicLine(line, this.colorMajor);
         });
       }
@@ -3292,6 +3322,7 @@
       this.$lbody.children("li:not(.li-add)").each((i, li) => {
         const id = $(li).data("id");
 
+        // update gain info
         const units = this.$li[id].units.data("val");
         const price = this.$li[id].units.data("price");
 
@@ -3307,6 +3338,30 @@
     hookCustomColumns(newItem, newData) {
       const id = newItem.id;
 
+      // add a graph column
+      const $graph = $("<div></div>").addClass("fund-graph-cont");
+
+      const fundIndex = this.history.funds.indexOf(newData.i);
+      if (fundIndex > -1) {
+        const data = this.history.history.map(item => {
+          return [item[0], item[1][fundIndex]];
+        });
+
+        const fundGraph = new GraphFundItem({
+          $cont: $graph,
+          width: 100,
+          height: 48,
+          title: newData.i.toLowerCase().replace(/\W+/g, "-"),
+          data
+        });
+
+        fundGraph.draw();
+
+        this.$li[id].graph = $("<span></span>").addClass("fund-graph").append($graph);
+        this.$lis[id].append(this.$li[id].graph);
+      }
+
+      // add a "gain/loss" column
       const units = newData.u;
       const price = newData.P;
 
@@ -3317,9 +3372,7 @@
         $("<span></span>").addClass("text")
       );
 
-      // add a "gain/loss" column
       this.$li[id].gain = $("<span></span>").addClass("gain").append($gainSpan);
-
       this.$lis[id].append(this.$li[id].gain);
 
       return newItem;
@@ -3345,16 +3398,20 @@
       }
     }
 
+    hookDataLoadedBeforeRender(callback, res) {
+      super.hookDataLoadedBeforeRender(callback, res);
+
+      this.history = res.data.history;
+    }
+
     hookDataLoadedAfterRender(callback, res) {
       super.hookDataLoadedAfterRender(callback, res);
-
-      const history = res.data.history;
 
       // get minimum value
       let minValue = -1;
       let maxValue = -1;
 
-      history.history.forEach(item => {
+      this.history.history.forEach(item => {
         if (minValue < 0 || item[1] < minValue) {
           minValue = item[1];
         }
@@ -3364,8 +3421,8 @@
         }
       });
 
-      if (history.history.length > 0) {
-        const lastValue = history.history[history.history.length - 1][2];
+      if (this.history.history.length > 0) {
+        const lastValue = this.history.history[this.history.history.length - 1][2];
 
         const profit = lastValue - this.costTotal;
 
@@ -3375,8 +3432,8 @@
         const profitLabel = " (" + profitSign +
           formatCurrency(Math.abs(profit)) + ")";
 
-        const valueTime = history.startTime +
-          history.history[history.history.length - 1][0];
+        const valueTime = this.history.startTime +
+          this.history.history[this.history.history.length - 1][0];
 
         const ageHours = Math.round(
           (todayDate.getTime() - valueTime * 1000) / 3600000
@@ -3392,20 +3449,20 @@
         this.$gainText.html(profitLabel)
         .toggleClass("profit", profit > 0)
         .toggleClass("loss", profit < 0);
-      }
 
-      this.graphFundHistory = new GraphFundHistory({
-        width:  GRAPH_FUND_HISTORY_WIDTH,
-        height: this.pieHeight,
-        $cont:  this.$graphs,
-        page:   this.page,
-        title:  "fund-history",
-        data:   history.history,
-        range:  [0, history.totalTime, minValue, maxValue],
-        pad:    [24, 0, 0, 0],
-        lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
-        startTime: history.startTime
-      });
+        this.graphFundHistory = new GraphFundHistory({
+          width:  GRAPH_FUND_HISTORY_WIDTH,
+          height: this.pieHeight,
+          $cont:  this.$graphs,
+          page:   this.page,
+          title:  "fund-history",
+          data:   this.history.history,
+          range:  [0, this.history.totalTime, minValue, maxValue],
+          pad:    [24, 0, 0, 0],
+          lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
+          startTime: this.history.startTime
+        });
+      }
     }
   }
 
