@@ -58,7 +58,9 @@ def strng(the_string):
     return u''.join(the_string).encode('utf-8')
 
 def list_data_schema(table, do_id = True):
-    schema = LIST_DATA_FORM_SCHEMA[table]
+    schema = {}
+    for (key, value) in LIST_DATA_FORM_SCHEMA[table].items():
+        schema[key] = value
 
     if do_id:
         schema['id'] = ('int', False)
