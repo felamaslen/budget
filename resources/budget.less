@@ -1056,21 +1056,22 @@ button {
     position: absolute;
     left: 0;
     top: 0;
+    height: 300px;
+    width: 300px;
     overflow-y: auto;
-    font-size: 1em;
+    font-size: 0.85em;
     font-family: lcd;
     color: white;
     
     .stocks-list-ul {
       margin: 0;
-      padding: 0 0 2em 0;
+      padding: 0;
       list-style: none;
       li {
         height: 1.2em;
         line-height: 1.2em;
-        padding-left: 0.2em;
-        display: block;
-        float: left;
+        display: inline-block;
+        width: 33.33%;
       }
     }
     .label {
@@ -1132,7 +1133,6 @@ button {
     }
     .change {
       display: inline-block;
-      margin-left: 1em;
       &:after {
         content: "%";
       }
@@ -1216,9 +1216,6 @@ button {
         right: 0;
       }
     }
-    .stocks-list {
-      width: 100%;
-    }
     .graph-container-pie {
     }
     .gain-info {
@@ -1238,7 +1235,7 @@ button {
     width: inherit;
     height: 299px;
     position: fixed;
-    top: @height_nav;
+    top: @top_nav;
     z-index: 5;
     box-shadow: 0 3px 16px rgba(60, 60, 60, .3);
     background: white;
@@ -1343,11 +1340,6 @@ button {
   #page-funds {
     .stocks-list {
       z-index: 0;
-      height: 300px;
-      width: 400px;
-      .stocks-list-ul {
-        width: 400px;
-      }
       &::-webkit-scrollbar-track {
         -webkit-box-shadow: none;
       }

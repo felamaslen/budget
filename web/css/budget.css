@@ -1029,22 +1029,23 @@ button:active {
   position: absolute;
   left: 0;
   top: 0;
+  height: 300px;
+  width: 300px;
   overflow-y: auto;
-  font-size: 1em;
+  font-size: 0.85em;
   font-family: lcd;
   color: white;
 }
 #page-funds .stocks-list .stocks-list-ul {
   margin: 0;
-  padding: 0 0 2em 0;
+  padding: 0;
   list-style: none;
 }
 #page-funds .stocks-list .stocks-list-ul li {
   height: 1.2em;
   line-height: 1.2em;
-  padding-left: 0.2em;
-  display: block;
-  float: left;
+  display: inline-block;
+  width: 33.33%;
 }
 #page-funds .stocks-list .label {
   overflow: hidden;
@@ -1101,7 +1102,6 @@ button:active {
 }
 #page-funds .stocks-list .change {
   display: inline-block;
-  margin-left: 1em;
 }
 #page-funds .stocks-list .change:after {
   content: "%";
@@ -1165,9 +1165,6 @@ button:active {
     position: absolute;
     right: 0;
   }
-  #page-funds .stocks-list {
-    width: 100%;
-  }
   #page-funds .gain-info {
     display: none;
   }
@@ -1180,7 +1177,7 @@ button:active {
     width: inherit;
     height: 299px;
     position: fixed;
-    top: 49px;
+    top: 59px;
     z-index: 5;
     box-shadow: 0 3px 16px rgba(60, 60, 60, 0.3);
     background: white;
@@ -1271,11 +1268,6 @@ button:active {
   /* funds page */
   #page-funds .stocks-list {
     z-index: 0;
-    height: 300px;
-    width: 400px;
-  }
-  #page-funds .stocks-list .stocks-list-ul {
-    width: 400px;
   }
   #page-funds .stocks-list::-webkit-scrollbar-track {
     -webkit-box-shadow: none;
