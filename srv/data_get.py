@@ -690,21 +690,21 @@ class stocks(processor):
 
     def get_stocks(self):
         result = self.db.query("""
-        SELECT code, name, SUM(weight * subweight) AS weight
+        SELECT code, name, SUM(weight * subweight) AS sum_weight
         FROM stocks
         GROUP BY code
-        ORDER BY weight DESC
+        ORDER BY sum_weight DESC
         """, [])
 
         if result is False:
             return False
 
-        stocks = {}
+        stocks = []
         total_weight = 0
 
         for (code, name, weight) in result:
             this_weight = int(weight)
-            stocks[code] = { 'n': strng(name), 'w': this_weight }
+            stocks.append([code, name, this_weight])
             total_weight += this_weight
 
         self.data['stocks'] = stocks
