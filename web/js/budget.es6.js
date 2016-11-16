@@ -1748,10 +1748,8 @@
     constructor(options) {
       super(options);
 
-      this.tension = GRAPH_FUND_HISTORY_TENSION;
-
-      this.raw    = options.data;
-
+      this.tension    = GRAPH_FUND_HISTORY_TENSION;
+      this.raw        = options.data;
       this.startTime  = options.startTime;
       this.dataOffset = 0;
       this.hlPoint    = -1;
@@ -2060,7 +2058,7 @@
         [times.h * 6, "h", times.h],
         [times.d,     "d", times.h * 6],
         [times.w,     "w", times.d],
-        [times.m,     "M", times.w],
+        [times.M,     "M", times.w],
         [times.y,     "y", times.y / 12, n => monthLength[n] * 86400]
       ];
 
