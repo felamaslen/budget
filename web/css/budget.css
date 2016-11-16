@@ -1053,9 +1053,7 @@ button:active {
   display: none;
 }
 #page-funds .stocks-list .price {
-  text-align: right;
-  float: right;
-  padding-right: 0.8em;
+  padding-right: 1em;
   position: relative;
 }
 #page-funds .stocks-list .price:after {

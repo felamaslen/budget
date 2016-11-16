@@ -1953,7 +1953,19 @@
     }
 
     updateStockList() {
-      this.stocks.forEach(stock => {
+      const numRows = 13;
+      const numCols = 3;
+
+      const list = this.stocks.slice(0, numRows * numCols);
+
+      let stocks = [];
+      for (let i = 0; i < numRows; i++) {
+        stocks = stocks.concat(list.filter((stock, index) => {
+          return index % numRows === i;
+        }));
+      }
+
+      stocks.forEach(stock => {
         if (stock.$elem) {
           // update the item
           stock.$price.text(stock.price.toFixed(2));
