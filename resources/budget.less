@@ -962,9 +962,9 @@ button {
 #page-funds {
   .list {
     .item {
-      width: 410px;
+      width: 400px;
       .editable-input {
-        max-width: 406px;
+        max-width: 396px;
       }
     }
     .units {
@@ -988,8 +988,13 @@ button {
     }
   }
   .list-ul {
+    &>li:not(.li-add) {
+      height: 48px;
+      line-height: 48px;
+    }
     .gain {
       width: 200px;
+      height: 100%;
       font-size: 0.8em;
       .text {
         width: 100%;
@@ -1001,7 +1006,7 @@ button {
   .gain {
     .text {
       padding: 0;
-      height: 24px;
+      height: 100%;
       background: #666;
       span {
         float: left;
@@ -1036,8 +1041,8 @@ button {
     }
   }
   .graph-container-pie {
-    width: 600px;
-    left: 900px;
+    width: 500px;
+    left: 1000px;
   }
   .stocks-list {
     position: absolute;
@@ -1345,8 +1350,8 @@ button {
       }
     }
     .graph-fund-history {
-      width: 600px;
-      left: 900px;
+      width: 500px;
+      left: 1000px;
       top: @top_nav + 350;
       z-index: 1;
     }
