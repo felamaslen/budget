@@ -15,11 +15,6 @@
 
 @nav_img: "../img/nav.png?v=2016103101";
 
-@font-face {
-  font-family: lcd;
-  src: url(fonts/erbos_draco_1st_open_nbp.woff);
-}
-
 @keyframes spin {
 	to { transform: rotate(1turn); }
 }
@@ -1059,8 +1054,8 @@ button {
     height: 300px;
     width: 300px;
     overflow-y: auto;
-    font-size: 0.85em;
-    font-family: lcd;
+    font-size: 1em;
+    font-family: hack, monospace;
     color: white;
     
     .stocks-list-ul {
@@ -1068,7 +1063,7 @@ button {
       padding: 0;
       list-style: none;
       li {
-        height: 1.2em;
+        height: 1em;
         line-height: 1.2em;
         display: inline-block;
         width: 33.33%;
