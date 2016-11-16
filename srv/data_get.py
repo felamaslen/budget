@@ -283,10 +283,12 @@ class list_data(processor):
         return total
 
 class funds(list_data):
-    def __init__(self, db, uid):
+    def __init__(self, db, uid, history = False):
         super(funds, self).__init__(db, uid, 'funds')
 
         self.cache = None
+
+        self.history = history
 
         self.get_cache_latest()
 
@@ -299,6 +301,14 @@ class funds(list_data):
 
         """ add latest fund values to the fetched data """
         self.data['data'] = map(self.add_cache_value, self.data['data'])
+
+        if self.history:
+            """ get history as well, for graphs """
+            history_processor = fund_history(self.db, self.uid, True)
+
+            history_processor.process()
+
+            self.data['history'] = history_processor.data
 
         return True
 

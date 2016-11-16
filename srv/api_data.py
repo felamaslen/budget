@@ -38,7 +38,9 @@ class retrieve(response):
             this_processor = overview(self.db, self.uid)
 
         elif arg == 'funds':
-            this_processor = funds(self.db, self.uid)
+            history = 'history' in self.args
+
+            this_processor = funds(self.db, self.uid, history)
 
         elif arg in LIST_CATEGORIES:
             offset = self.task.popleft() if len(self.task) > 0 else 0
