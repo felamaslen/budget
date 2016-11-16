@@ -1040,6 +1040,14 @@ button {
       text-align: right;
     }
   }
+  .fund-graph-cont {
+    .graph-container {
+      width: 100px;
+      height: 48px;
+      position: static;
+      background: transparent;
+    }
+  }
   .graph-container-pie {
     width: 500px;
     left: 1000px;
@@ -1195,6 +1203,10 @@ button {
 
   /* funds page */
   #page-funds {
+    .fund-graph-cont {
+      .graph-container {
+      }
+    }
     .graph-fund-history {
       float: right;
       width: 400px;
@@ -1354,6 +1366,10 @@ button {
       left: 1000px;
       top: @top_nav + 350;
       z-index: 1;
+    }
+    .fund-graph-cont {
+      .graph-container {
+      }
     }
   }
 
