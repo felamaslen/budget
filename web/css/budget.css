@@ -944,10 +944,10 @@ button:active {
 }
 /* funds page */
 #page-funds .list .item {
-  width: 410px;
+  width: 400px;
 }
 #page-funds .list .item .editable-input {
-  max-width: 406px;
+  max-width: 396px;
 }
 #page-funds .list .units {
   width: 85px;
@@ -966,8 +966,13 @@ button:active {
   padding: 0 0.25em;
   margin-left: 0.25em;
 }
+#page-funds .list-ul > li:not(.li-add) {
+  height: 48px;
+  line-height: 48px;
+}
 #page-funds .list-ul .gain {
   width: 200px;
+  height: 100%;
   font-size: 0.8em;
 }
 #page-funds .list-ul .gain .text {
@@ -977,7 +982,7 @@ button:active {
 }
 #page-funds .gain .text {
   padding: 0;
-  height: 24px;
+  height: 100%;
   background: #666;
 }
 #page-funds .gain .text span {
@@ -1011,8 +1016,8 @@ button:active {
   text-align: right;
 }
 #page-funds .graph-container-pie {
-  width: 600px;
-  left: 900px;
+  width: 500px;
+  left: 1000px;
 }
 #page-funds .stocks-list {
   position: absolute;
@@ -1279,8 +1284,8 @@ button:active {
     background-color: rgba(240, 240, 240, 0.8);
   }
   #page-funds .graph-fund-history {
-    width: 600px;
-    left: 900px;
+    width: 500px;
+    left: 1000px;
     top: 409px;
     z-index: 1;
   }
