@@ -71,7 +71,7 @@
   const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
 
   const STOCKS_REFRESH_INTERVAL = 10000;
-  const STOCKS_LIST_WIDTH = 400;
+  const STOCKS_LIST_WIDTH = 300;
 
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -616,17 +616,13 @@
     constructor() {
     }
 
-    get(stocks, success, error, complete) {
-      const symbols = [];
-
-      for (const symbol in stocks) {
-        symbols.push(symbol);
-      }
+    get(symbolsList, success, error, complete) {
+      const symbols = symbolsList.join(",");
 
       $.ajax({
-        url: "https://www.google.com/finance/info?client=ig&q=" + symbols.join(",") + "&callback=?",
+        url: "https://www.google.com/finance/info?client=ig&q=" + symbols + "&callback=?",
         type: "GET",
-        data: { q: symbols.join(",") },
+        data: { q: symbols },
         dataType: "json",
         success,
         error,
@@ -1860,25 +1856,22 @@
     }
 
     onStocksListLoaded(res) {
-      this.stockWeight = res.data.stocks;
+      this.stocks = res.data.stocks.map(stock => {
+        return {
+          symbol:     stock[0],
+          name:       stock[1],
+          weight:     stock[2],
+          price:      0,
+          change:     0,
+          changeText: "",
+          $elem:      null,
+          active:     false
+        };
+      });
 
-      const total = res.data.total;
-
-      this.stocks = {};
+      this.stockSymbols = this.stocks.map(stock => stock.symbol);
 
       this.$stocksList.empty();
-
-      for (const symbol in res.data.stocks) {
-        this.stocks[symbol] = {
-          name:   res.data.stocks[symbol].n,
-          weight: res.data.stocks[symbol].w / total,
-          price:  0,
-          change: 0,
-          changeText: "",
-          $elem:  null,
-          active: false
-        };
-      }
 
       this.loadStockPrices();
     }
@@ -1897,7 +1890,7 @@
       this.stockPricesLoading = true;
 
       finance.get(
-        this.stocks,
+        this.stockSymbols,
         res => this.onStockPricesLoaded(res),
         () => this.onStockPricesFail(),
         () => this.onStockPricesRequestComplete()
@@ -1908,9 +1901,10 @@
       let badStocks = 0;
 
       for (const stock of res) {
-        const symbol = stock.e + ":" + stock.t;
+        const symbol  = stock.e + ":" + stock.t;
+        const index   = this.stockSymbols.indexOf(symbol);
 
-        if (!this.stocks[symbol]) {
+        if (index < 0) {
           badStocks++;
         }
         else {
@@ -1922,15 +1916,13 @@
           // highlight
           let hl = false;
 
-          if (this.stocks[symbol].price !== price) {
-            hl = this.stocks[symbol].price > price ? "hl-down" : "hl-up";
+          if (this.stocks[index].price !== price) {
+            hl = this.stocks[index].price > price ? "hl-down" : "hl-up";
           }
 
-          this.stocks[symbol].hl = hl;
-
-          this.stocks[symbol].price = price;
-
-          this.stocks[symbol].change = change;
+          this.stocks[index].hl     = hl;     // highlight
+          this.stocks[index].price  = price;
+          this.stocks[index].change = change;
 
           const numDp = change === 0 ? 2 : Math.max(
             0, 2 - Math.max(
@@ -1938,7 +1930,7 @@
             )
           );
 
-          this.stocks[symbol].changeText = (change >= 0 ? "+" : "") +
+          this.stocks[index].changeText = (change >= 0 ? "+" : "") +
             change.toFixed(numDp);
         }
       }
@@ -1965,9 +1957,7 @@
     }
 
     updateStockList() {
-      for (const symbol in this.stocks) {
-        const stock = this.stocks[symbol];
-
+      this.stocks.forEach(stock => {
         if (stock.$elem) {
           // update the item
           stock.$price.text(stock.price.toFixed(2));
@@ -1987,9 +1977,7 @@
           // add the item
           stock.$elem = $("<li></li>").addClass("stock-list-item");
 
-          stock.$label = $("<span></span>").addClass("label").text(symbol);
-
-          stock.$elem.attr("title", stock.name);
+          stock.$elem.attr("title", stock.symbol + " (" + stock.name + ")");
 
           stock.$priceOuter = $("<span></span>")
           .addClass("price");
@@ -2013,7 +2001,7 @@
 
         stock.$elem.toggleClass("up", stock.change > 0);
         stock.$elem.toggleClass("down", stock.change < 0);
-      }
+      });
     }
 
     onStockPricesFail() {
