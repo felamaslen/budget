@@ -1725,7 +1725,6 @@
       this.tension = GRAPH_FUND_HISTORY_TENSION;
 
       this.raw    = options.data;
-      this.funds  = options.funds;
 
       this.startTime  = options.startTime;
       this.dataOffset = 0;
@@ -1734,7 +1733,6 @@
       this.togglePercent(true, true);
 
       this.colorMajor = COLOR_GRAPH_FUND_LINE;
-      this.colorMinor = COLOR_GRAPH_FUND_LINE_MINOR;
 
       this.$label = $("<div></div>").addClass("label");
       this.$gCont.append(this.$label);
@@ -1783,19 +1781,6 @@
       const mainLine = this.raw.map(item => {
         return [item[0], item[2]];
       });
-
-      if (this.percent) {
-        const lines = this.funds.map((fund, i) => {
-          return this.raw.map(item => {
-            return [item[0], item[1][i]];
-          });
-        });
-
-        // add total line
-        lines.push(mainLine);
-
-        return lines;
-      }
 
       return [mainLine];
     }
@@ -2035,8 +2020,6 @@
         return;
       }
 
-      this.getFundColors();
-
       this.detailChanged(noDraw);
     }
 
@@ -2169,29 +2152,6 @@
         : formatCurrency(value, true);
     }
 
-    getFundColors() {
-      // assigns a colour to each fund depending on the fund's investment as a
-      // fraction of the entire portfolio
-      const totalInitial = this.dataProc[this.dataProc.length - 1][0][1];
-
-      const maxLineWidth = 5;
-
-      const ratios = this.dataProc.map(line => {
-        return 1 - Math.pow(Math.E, -6 * line[0][1] / totalInitial);
-      });
-
-      this.fundColors = ratios.map(ratio => {
-        const red = Math.round(255 * ratio);
-        const green = Math.round(255 * (1 - ratio));
-
-        return "rgba(" + red + "," + green + ",50,0.5)";
-      });
-
-      this.fundLineWidth = ratios.map(ratio => {
-        return maxLineWidth * ratio;
-      });
-    }
-
     draw() {
       if (!this.supported) {
         return;
@@ -2264,17 +2224,10 @@
 
       // plot past data
       if (this.data) {
-        const numMinorLines = this.data.length - 1;
+        this.lineWidth = 2;
 
         this.dataZoomed.forEach((line, key) => {
-          if (key < numMinorLines) {
-            this.lineWidth = this.fundLineWidth[key];
-            this.drawLine(line, this.fundColors[key]);
-          }
-          else {
-            this.lineWidth = 2;
-            this.drawCubicLine(line, this.colorMajor);
-          }
+          this.drawCubicLine(line, this.colorMajor);
         });
       }
 
@@ -3448,7 +3401,6 @@
         page:   this.page,
         title:  "fund-history",
         data:   history.history,
-        funds:  history.funds,
         range:  [0, history.totalTime, minValue, maxValue],
         pad:    [24, 0, 0, 0],
         lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
