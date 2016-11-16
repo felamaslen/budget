@@ -7,9 +7,14 @@ import time
 
 from config import LIST_CATEGORIES
 
-from data_get import overview, list_all, list_data, funds, fund_history,\
+from data_get import \
+        overview, list_all, list_data, \
+        funds, fund_history,\
         pie, search, stocks, analysis, analysis_category
-from data_post import update_overview, update_list_data, add_list_data, delete_list_data
+
+from data_post import \
+        update_overview, update_list_data, \
+        add_list_data, delete_list_data
 
 from api_data_methods import response
 
