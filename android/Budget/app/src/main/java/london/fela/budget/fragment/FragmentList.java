@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +34,6 @@ import london.fela.budget.helper.Data;
 import london.fela.budget.activity.MainActivity;
 import london.fela.budget.app.YMD;
 import london.fela.budget.helper.PageCache;
-import london.fela.budget.helper.PagerAdapter;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -121,12 +119,12 @@ public class FragmentList extends Fragment {
 
   private int editingPosition;
   
-  IntentDialogAdd intentDialogAdd(String item) {
+  private IntentDialogAdd intentDialogAdd(String item) {
     editingPosition = -1;
     return new IntentDialogAdd(item);
   }
   
-  IntentDialogEdit intentDialogEdit(int position) {
+  private IntentDialogEdit intentDialogEdit(int position) {
     editingPosition = position;
     return new IntentDialogEdit(position);
   }
@@ -198,7 +196,7 @@ public class FragmentList extends Fragment {
    * @param position        : position in the list
    * @param newRowParcel    : parcel containing new data
    */
-  public void setItemData(
+  private void setItemData(
     int position, Parcelable newRowParcel
   ) {
 
@@ -266,7 +264,6 @@ public class FragmentList extends Fragment {
     updateList();
 
     // update the cache data for this page
-    //Data.Cache.pages.get(pageName);
 
     // update the overview cache data
     int oldMonthKey = Data.yearMonthDifference(
@@ -277,7 +274,6 @@ public class FragmentList extends Fragment {
       newDate.getYear(), newDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
     );
 
-    //refreshOverviewCache();
     // refresh the overview page, if it exists
     try {
       int[] cacheItem = Data.Cache.Overview.cost.get(pageName);

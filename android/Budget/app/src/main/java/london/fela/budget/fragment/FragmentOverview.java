@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import java.util.Map;
 
 import london.fela.budget.R;
 import london.fela.budget.activity.DialogOverviewEdit;
-import london.fela.budget.activity.MainActivity;
 import london.fela.budget.helper.Data;
 
 import static android.app.Activity.RESULT_OK;
@@ -47,7 +45,7 @@ public class FragmentOverview extends Fragment {
     return fragmentOverview;
   }
   
-  public Map<String, int[]> month = new HashMap<>();
+  private Map<String, int[]> month = new HashMap<>();
   private final Map<String, Integer> monthMax = new HashMap<>();
 
   // all columns
@@ -232,7 +230,7 @@ public class FragmentOverview extends Fragment {
     }
   }
 
-  public void updateData() {
+  private void updateData() {
     updateList();
     //updateGraph();
   }
