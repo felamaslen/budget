@@ -13,8 +13,7 @@ import rest_api
 
 app = Flask('budget')
 
-# the .php extension is vestigial
-@app.route('/rest.php', methods = ['GET', 'POST'])
+@app.route('/api', methods = ['GET', 'POST'])
 def api():
     api = rest_api.WebAPI(request)
 

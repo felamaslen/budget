@@ -24,7 +24,7 @@ public class ApiCaller {
   private static String api_url;
 
   public ApiCaller(String api_url) {
-    this.api_url = api_url + "/rest.php?t=";
+    this.api_url = api_url + "/api?t=";
   }
 
   public void addListener(Api listener) {

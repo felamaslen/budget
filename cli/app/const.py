@@ -2,8 +2,7 @@ import curses
 
 from app.modify import SERVER
 
-""" The api is coded in python. The .php extension is purely historical """
-API_URL = SERVER + "/rest.php"
+API_URL = SERVER + "/api"
 
 LOGIN_FORM_TITLE = "Enter your PIN to log in: "
 LOGIN_FORM_WIDTH = 42
