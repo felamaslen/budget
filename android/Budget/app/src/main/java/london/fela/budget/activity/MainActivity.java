@@ -2,7 +2,6 @@ package london.fela.budget.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -10,8 +9,6 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.android.volley.VolleyError;
@@ -74,7 +71,7 @@ public class MainActivity extends Activity implements Api {
     }
   }
   private void apiSetup() {
-    api = new ApiCaller(getResources().getString(R.string.api_url));
+    api = new ApiCaller(AppConfig.api_url(getResources()));
     api.addListener(this);
   }
   public static ProgressDialog pDialog;
@@ -82,8 +79,7 @@ public class MainActivity extends Activity implements Api {
   private SQLiteHandler db;
   private SessionManager session;
 
-  ViewPager pager;
-
+  private ViewPager pager;
   public PagerAdapter pagerAdapter;
 
   private void translateCacheData(JSONObject data) {

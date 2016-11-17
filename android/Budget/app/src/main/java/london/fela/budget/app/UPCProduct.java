@@ -15,14 +15,12 @@ import london.fela.budget.R;
  * returns a product by calling an API with a GSID
  */
 public class UPCProduct implements Api {
-  public static final String TAG = UPCProduct.class.getSimpleName();
-
-  private static final String apiKey = "72642104076b3494d2703035e0d0bbd1";
-
+  private static final String TAG = UPCProduct.class.getSimpleName();
   private static final String apiUrl = "https://api.outpan.com/v2/products/";
+  private static String apiKey;
 
   // api stuff
-  ApiCaller api;
+  private ApiCaller api;
   @Override public void apiResponse(int tag, String response) {
     switch (tag) {
       case API_TAG_FETCH_PRODUCT:
@@ -44,12 +42,12 @@ public class UPCProduct implements Api {
   @Override public void apiJSONException(int tag, JSONException e, String response) {
   }
   @Override public void apiError(int tag, VolleyError error) {
-    productFetchFailed("Error loading product!");
+    productFetchFailed();
   }
   @Override public void apiResponseEnd(int tag, String response) {
   }
   private void apiSetup() {
-    api = new ApiCaller(context.getResources().getString(R.string.api_url));
+    api = new ApiCaller("");
     api.addListener(this);
   }
 
@@ -59,12 +57,12 @@ public class UPCProduct implements Api {
 
   private Context context;
 
-  public UPCProduct(String gtin, final Context appContext) {
+  protected UPCProduct(String gtin, final Context appContext) {
     apiSetup();
 
     GTIN = gtin;
-
     context = appContext;
+    apiKey = context.getResources().getString(R.string.outpan_api_key);
   }
 
   public void request() {
@@ -80,7 +78,7 @@ public class UPCProduct implements Api {
     Log.d(TAG, "[log] productFetched default method");
   }
 
-  public void productFetchFailed(String message) {
-    Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+  private void productFetchFailed() {
+    Toast.makeText(context, "Error loading product!", Toast.LENGTH_LONG).show();
   }
 }

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!-- Uncomment this line and change it to your actual URL, then rename this file -->
+  <!-- Uncomment this line and change it to your actual URL -->
   <!--<string name="api_url">http://budget.example.com</string>-->
+
+  <!-- Uncomment this line and change it to your Outpan API key -->
+  <!--<string name="outpan_api_key">your_api_key_here</string>-->
 </resources>

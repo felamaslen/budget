@@ -2,7 +2,6 @@ package london.fela.budget.activity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
@@ -23,8 +22,8 @@ import java.util.HashMap;
 import london.fela.budget.R;
 import london.fela.budget.app.Api;
 import london.fela.budget.app.ApiCaller;
+import london.fela.budget.app.AppConfig;
 import london.fela.budget.app.AppController;
-import london.fela.budget.fragment.FragmentList;
 import london.fela.budget.helper.Data;
 import london.fela.budget.app.YMD;
 import london.fela.budget.fragment.EditParcel;
@@ -58,8 +57,7 @@ public class DialogUpdate extends Activity {
 
   private int API_TAG;
 
-  @SuppressWarnings("UnusedParameters")
-  void updateFragment(EditParcel item) {
+  private void updateFragment(EditParcel item) {
     /** call this after successful api call */
     Intent intent = this.getIntent();
     intent.putExtra("editParcel", item);
@@ -141,7 +139,7 @@ public class DialogUpdate extends Activity {
 
   private ApiCaller api;
   private void apiSetup() {
-    api = new ApiCaller(getResources().getString(R.string.api_url));
+    api = new ApiCaller(AppConfig.api_url(getResources()));
     api.addListener(apiObject);
   }
 

@@ -1,5 +1,6 @@
 package london.fela.budget.app;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 
 import java.util.HashMap;
@@ -84,5 +85,9 @@ public class AppConfig {
     public static int getBg(String pageName) {
       return bgColor.get(pageName);
     }
+  }
+
+  public static String api_url(Resources resources) {
+    return resources.getString(R.string.api_url) + "/api?t=";
   }
 }
