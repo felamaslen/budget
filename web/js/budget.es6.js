@@ -32,6 +32,7 @@
   const GRAPH_FUND_ITEM_LINE_WIDTH = 2;
   const GRAPH_FUND_ITEM_TENSION = 0.85;
   const GRAPH_FUND_HISTORY_WIDTH = 500;
+  const GRAPH_FUND_HISTORY_WIDTH_NARROW = 400;
   const GRAPH_FUND_HISTORY_TENSION = 0.65;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
   const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
@@ -1791,7 +1792,7 @@
       }
 
       windowSize.narrow(() => {
-        this.resize(STOCKS_LIST_WIDTH);
+        this.resize(GRAPH_FUND_HISTORY_WIDTH_NARROW);
       })
       .wide(() => {
         this.resize(GRAPH_FUND_HISTORY_WIDTH);
