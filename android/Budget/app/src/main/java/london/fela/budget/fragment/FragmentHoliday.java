@@ -18,7 +18,6 @@ public class FragmentHoliday extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "holiday";
-    this.dataUrl   = AppConfig.URL_DATA_HOLIDAY;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_HOLIDAY;
     this.loadingMsg    = "Loading holiday data...";

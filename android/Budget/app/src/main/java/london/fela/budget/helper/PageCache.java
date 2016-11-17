@@ -1,6 +1,8 @@
 package london.fela.budget.helper;
 
-import java.util.HashMap;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
+
 import java.util.Map;
 
 import london.fela.budget.app.YMD;
@@ -12,12 +14,12 @@ public class PageCache {
   public int numItems = 0;
 
   // maps keys to ids (essentially an iterator)
-  public final Map<Integer, Integer> id = new HashMap<>();
+  public final SparseIntArray id = new SparseIntArray();
 
   // Each of the following maps an integer id to a value
-  public final Map<Integer, YMD> date      = new HashMap<>();
-  public final Map<Integer, String> item   = new HashMap<>();
-  public final Map<Integer, Integer> cost  = new HashMap<>();
+  public final SparseArray<YMD> date    = new SparseArray<>();
+  public final SparseArray<String> item = new SparseArray<>();
+  public final SparseIntArray cost      = new SparseIntArray();
 
-  public final Map<Integer, Map<String, String>> other = new HashMap<>();
+  public final SparseArray<Map<String, String>> other = new SparseArray<>();
 }

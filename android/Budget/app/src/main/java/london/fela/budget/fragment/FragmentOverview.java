@@ -576,11 +576,8 @@ class OverviewListItem {
 }
 
 class OverviewAdapter extends BaseAdapter {
-  public static final String TAG = OverviewAdapter.class.getSimpleName();
-
   private final ArrayList<Object> itemList;
 
-  private final Activity context;
   private LayoutInflater inflater;
 
   private final int[] timeBg = {
@@ -604,7 +601,6 @@ class OverviewAdapter extends BaseAdapter {
   public OverviewAdapter(Activity context, ArrayList<Object> itemList) {
     super();
 
-    this.context = context;
     this.itemList = itemList;
 
     if (context != null) {

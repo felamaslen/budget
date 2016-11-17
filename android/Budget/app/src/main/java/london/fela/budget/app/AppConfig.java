@@ -16,14 +16,6 @@ public class AppConfig {
   public static final String URL_LOGIN = "login";
 
   public static final String URL_DATA_ALL       = "data/all";
-  public static final String URL_DATA_OVERVIEW  = "data/overview";
-  public static final String URL_DATA_FUNDS     = "data/funds";
-  public static final String URL_DATA_IN        = "data/in";
-  public static final String URL_DATA_BILLS     = "data/bills";
-  public static final String URL_DATA_FOOD      = "data/food";
-  public static final String URL_DATA_GENERAL   = "data/general";
-  public static final String URL_DATA_HOLIDAY   = "data/holiday";
-  public static final String URL_DATA_SOCIAL    = "data/social";
 
   public static final String URL_UPDATE_OVERVIEW  = "update/overview";
   public static final String URL_UPDATE_FUNDS     = "update/funds";
@@ -34,7 +26,6 @@ public class AppConfig {
   public static final String URL_UPDATE_HOLIDAY   = "update/holiday";
   public static final String URL_UPDATE_SOCIAL    = "update/social";
 
-  public static final String URL_ADD_OVERVIEW  = "add/overview";
   public static final String URL_ADD_FUNDS     = "add/funds";
   public static final String URL_ADD_IN        = "add/in";
   public static final String URL_ADD_BILLS     = "add/bills";
@@ -43,9 +34,7 @@ public class AppConfig {
   public static final String URL_ADD_HOLIDAY   = "add/holiday";
   public static final String URL_ADD_SOCIAL    = "add/social";
 
-  public static final int DIALOG_MSG_LOGIN            = 47105;
   public static final int DIALOG_MSG_LOADING_ALL      = 71885;
-  public static final int DIALOG_MSG_LOADING_OVERVIEW = 18378;
   public static final int DIALOG_MSG_LOADING_FUNDS    = 91784;
   public static final int DIALOG_MSG_LOADING_IN       = 10922;
   public static final int DIALOG_MSG_LOADING_BILLS    = 81904;
@@ -53,7 +42,7 @@ public class AppConfig {
   public static final int DIALOG_MSG_LOADING_GENERAL  = 41381;
   public static final int DIALOG_MSG_LOADING_HOLIDAY  = 38105;
   public static final int DIALOG_MSG_LOADING_SOCIAL   = 91847;
-  public static final int DIALOG_MSG_LOADING_SCAN     = 81199;
+  static final int DIALOG_MSG_LOADING_SCAN     = 81199;
 
   public static final int SCAN_REQUEST_CODE = 1886;
 

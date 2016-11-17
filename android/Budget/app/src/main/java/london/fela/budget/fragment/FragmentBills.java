@@ -13,7 +13,6 @@ public class FragmentBills extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "bills";
-    this.dataUrl   = AppConfig.URL_DATA_BILLS;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_BILLS;
     this.loadingMsg    = "Loading bills data...";

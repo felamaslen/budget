@@ -56,7 +56,7 @@
       android:textSize="35sp"
       android:textColor="@color/input_login"
       android:background="@color/white"
-      android:singleLine="true"
+      android:maxLines="1"
       android:textStyle="bold"
       android:layout_below="@+id/textViewEnterPin"
       android:layout_centerHorizontal="true"

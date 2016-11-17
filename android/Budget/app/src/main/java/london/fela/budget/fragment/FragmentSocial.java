@@ -18,7 +18,6 @@ public class FragmentSocial extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "social";
-    this.dataUrl   = AppConfig.URL_DATA_SOCIAL;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_SOCIAL;
     this.loadingMsg    = "Loading social data...";

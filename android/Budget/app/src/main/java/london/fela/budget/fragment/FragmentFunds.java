@@ -13,7 +13,6 @@ public class FragmentFunds extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "funds";
-    this.dataUrl   = AppConfig.URL_DATA_FUNDS;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_FUNDS;
     this.loadingMsg    = "Loading funds data...";

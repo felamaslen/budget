@@ -38,9 +38,7 @@ import london.fela.budget.fragment.EditParcel;
  * - override onCreate method:
  */
 public class DialogUpdate extends Activity {
-  private int dataIndex;
   private String id;
-
   private EditParcel newItem;
 
   private final HashMap<String, String> oldValues = new HashMap<>();
@@ -48,7 +46,6 @@ public class DialogUpdate extends Activity {
   private ProgressBar progressBar;
 
   private String apiUrl;
-
   String apiUrlAdd = null;
   String apiUrlUpdate = null;
 
@@ -263,28 +260,29 @@ public class DialogUpdate extends Activity {
 
   public class FormField {
     public final String name;
+    @SuppressWarnings("unused")
     public final String title;
 
-    public int type;
+    int type;
 
     // this should be modified for each field
     public String getFormValue() {
       return "";
     }
 
-    public FormField(String theName, String theTitle) {
+    FormField(String theName, String theTitle) {
       name = theName;
       title = theTitle;
     }
   }
   public class FormFieldText extends FormField {
-    public final EditText input;
+    final EditText input;
 
     public String getFormValue() {
       return input.getText().toString();
     }
 
-    public FormFieldText(
+    FormFieldText(
       String theName, String theTitle, EditText theInput, int theType
     ) {
       super(theName, theTitle);
@@ -369,7 +367,7 @@ public class DialogUpdate extends Activity {
     String titleText;
 
     // determine if this is a edit or add form, and set title accordingly
-    dataIndex = getIntent().getExtras().getInt("dataIndex");
+    int dataIndex = getIntent().getExtras().getInt("dataIndex");
 
     if (dataIndex == -1) {
       // this is an add form

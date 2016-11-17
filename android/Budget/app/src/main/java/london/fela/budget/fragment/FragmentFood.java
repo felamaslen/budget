@@ -18,7 +18,6 @@ public class FragmentFood extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "food";
-    this.dataUrl   = AppConfig.URL_DATA_FOOD;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_FOOD;
     this.loadingMsg    = "Loading food data...";

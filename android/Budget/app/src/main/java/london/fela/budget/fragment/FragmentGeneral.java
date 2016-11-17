@@ -18,7 +18,6 @@ public class FragmentGeneral extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "general";
-    this.dataUrl   = AppConfig.URL_DATA_GENERAL;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_GENERAL;
     this.loadingMsg    = "Loading general data...";
