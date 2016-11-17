@@ -135,10 +135,9 @@ class PageFunds(PageList):
         self.color_down_sel = curses.color_pair(NC_COLOR_DOWN_SEL[0])
 
         self.graph_status   = False
-        self.fund_history   = None
 
-    def get_fund_history(self):
-        res = self.api.req(['data', 'fund_history'], query = {'deep': 1})
+    def get_data(self):
+        res = self.api.req(['data', 'funds'], query = {'history': 1})
 
         return res['data']
 
@@ -178,23 +177,7 @@ class PageFunds(PageList):
         window_fill_color(self.win_graph, graphH - 1, graphW - 1, curses.color_pair(NC_COLOR_TAB[0]))
         rectangle(self.win_graph, 0, 0, graphH - 2, graphW - 2)
 
-        if self.fund_history is None:
-            self.win_graph.addstr(1, 1, alignc(graphW - 3, "Loading..."))
-            self.win_graph.refresh()
-
-            try:
-                self.fund_history = self.get_fund_history()
-
-                self.draw_graph(graphW, graphH, graph_all)
-            except BudgetClientAPIError as error:
-                self.win_graph.clear()
-                self.win_graph.addstr(2, 2, "Error: {}".format(error))
-                self.win_graph.refresh()
-
-                self.fund_history = None
-
-        else:
-            self.draw_graph(graphW, graphH, graph_all)
+        self.draw_graph(graphW, graphH, graph_all)
 
     def hide_graph(self):
         self.win_graph.clear()
@@ -210,7 +193,7 @@ class PageFunds(PageList):
         h = graphH - 2
 
         series_length   = w - 2
-        history         = self.fund_history['history'][-series_length:]
+        history         = self.data['history']['history'][-series_length:]
         extra           = max(0, series_length - len(history))
 
         draw_graph = True
@@ -229,7 +212,7 @@ class PageFunds(PageList):
 
             fund_name = self.list[self.list_selected]['item']
 
-            index = self.fund_history['funds'].index(fund_name)
+            index = self.data['history']['funds'].index(fund_name)
 
             if index < 0:
                 """ invalid fund """
