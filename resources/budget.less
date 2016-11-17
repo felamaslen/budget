@@ -1102,6 +1102,9 @@ button {
         top: 0.2em;
       }
     }
+    .stocks-list-price-reverse() {
+      color: #f1f442;
+    }
     .up, .down {
       .stocks-list-price-change();
     }
@@ -1113,6 +1116,9 @@ button {
       .hl-up {
         color: #0f0;
       }
+      .hl-down {
+        .stocks-list-price-reverse();
+      }
     }
     .down {
       color: #ffa7a7;
@@ -1122,6 +1128,9 @@ button {
       }
       .hl-down {
         color: #f00;
+      }
+      .hl-up {
+        .stocks-list-price-reverse();
       }
     }
     .change {
