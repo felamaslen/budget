@@ -1773,6 +1773,8 @@
         else {
           this.decreaseDetail();
         }
+
+        evt.preventDefault();
       });
 
       this.$gCont.on("mousemove", evt => {
