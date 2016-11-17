@@ -40,9 +40,9 @@ import static android.app.Activity.RESULT_OK;
 /**
  * Displays an editable list of items (such as food, or funds)
  */
+@SuppressWarnings("unused")
 public class FragmentList extends Fragment {
   String pageName   = null;
-  String dataUrl    = null;
   String[] props    = new String[] {};
   int loadingMsgId  = 0;
   String loadingMsg;
@@ -119,14 +119,14 @@ public class FragmentList extends Fragment {
 
   private int editingPosition;
   
-  private IntentDialogAdd intentDialogAdd(String item) {
+  private void intentDialogAdd(String item) {
     editingPosition = -1;
-    return new IntentDialogAdd(item);
+    new IntentDialogAdd(item);
   }
   
-  private IntentDialogEdit intentDialogEdit(int position) {
+  private void intentDialogEdit(int position) {
     editingPosition = position;
-    return new IntentDialogEdit(position);
+    new IntentDialogEdit(position);
   }
 
   @Override
@@ -433,13 +433,10 @@ class ListItem implements Comparable<ListItem> {
 class ListAdapter extends BaseAdapter {
   private final ArrayList<ListItem> itemList;
 
-  private final Activity context;
   private LayoutInflater inflater;
 
   public ListAdapter(Activity context, ArrayList<ListItem> itemList) {
     super();
-
-    this.context = context;
 
     this.itemList = itemList;
 

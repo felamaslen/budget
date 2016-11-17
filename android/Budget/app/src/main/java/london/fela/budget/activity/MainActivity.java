@@ -74,12 +74,11 @@ public class MainActivity extends Activity implements Api {
     api = new ApiCaller(AppConfig.api_url(getResources()));
     api.addListener(this);
   }
+
   public static ProgressDialog pDialog;
 
   private SQLiteHandler db;
   private SessionManager session;
-
-  private ViewPager pager;
   public PagerAdapter pagerAdapter;
 
   private void translateCacheData(JSONObject data) {
@@ -119,7 +118,6 @@ public class MainActivity extends Activity implements Api {
       Data.Cache.Overview.endMonth = endYearMonth.getInt(1);
       Data.Cache.Overview.currentYear = jOverview.getInt("currentYear");
       Data.Cache.Overview.currentMonth = jOverview.getInt("currentMonth");
-      Data.Cache.Overview.futureMonths = jOverview.getInt("futureMonths");
 
 
       // insert pages' data into cache
@@ -222,7 +220,6 @@ public class MainActivity extends Activity implements Api {
     Data.Cache.Overview.endMonth = 0;
     Data.Cache.Overview.currentYear = 0;
     Data.Cache.Overview.currentMonth = 0;
-    Data.Cache.Overview.futureMonths = 0;
 
     Data.Cache.Pages = new HashMap<>();
     
@@ -241,11 +238,9 @@ public class MainActivity extends Activity implements Api {
 
     this.setActionBar(toolbar);
 
-    pager = (ViewPager) findViewById(R.id.pager);
+    ViewPager pager = (ViewPager) findViewById(R.id.pager);
 
-    pagerAdapter = new PagerAdapter(
-      getFragmentManager(), MainActivity.this
-    );
+    pagerAdapter = new PagerAdapter(getFragmentManager());
     pager.setAdapter(pagerAdapter);
 
     TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);

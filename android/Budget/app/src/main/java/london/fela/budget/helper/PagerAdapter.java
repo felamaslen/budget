@@ -1,7 +1,5 @@
 package london.fela.budget.helper;
 
-import android.content.Context;
-
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentStatePagerAdapter;
@@ -25,12 +23,8 @@ import london.fela.budget.fragment.FragmentSocial;
 public class PagerAdapter extends FragmentStatePagerAdapter {
   private final SparseArray<Fragment> registeredFragments = new SparseArray<>();
 
-  private final Context context;
-
-  public PagerAdapter(FragmentManager fm, Context context) {
+  public PagerAdapter(FragmentManager fm) {
     super(fm);
-
-    this.context = context;
   }
 
   public int getIcon(int index) {

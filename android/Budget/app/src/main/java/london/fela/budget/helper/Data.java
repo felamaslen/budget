@@ -4,7 +4,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,7 +42,6 @@ public class Data {
       public static int endMonth      = 0;
       public static int currentYear   = 0;
       public static int currentMonth  = 0;
-      public static int futureMonths  = 0;
     }
 
     public static HashMap<String, PageCache> Pages = new HashMap<>();
@@ -85,28 +83,6 @@ public class Data {
     return monthsLong[month - 1] + " " + String.valueOf(year);
   }
 
-  /**
-   * convert JSON array to int[] array
-   */
-  public static int[] jsonArrayToInt(JSONArray array) {
-    if (array == null) {
-      return null;
-    }
-
-    int[] numbers = new int[array.length()];
-
-    for (int i = 0; i < array.length(); i++) {
-      try {
-        numbers[i] = array.getInt(i);
-      }
-      catch (JSONException e) {
-        e.printStackTrace();
-      }
-    }
-
-    return numbers;
-  }
-
   public static int yearMonthDifference(int newYear, int newMonth, int oldYear, int oldMonth) {
     return 12 * (newYear - oldYear) + newMonth - oldMonth;
   }
@@ -141,14 +117,14 @@ public class Data {
     input.addTextChangedListener(new NumberTextWatcher(input));
   }
 
-  public static class NumberTextWatcher implements TextWatcher {
+  private static class NumberTextWatcher implements TextWatcher {
     private final DecimalFormat df;
     private final DecimalFormat dfnd;
     private final EditText et;
     private boolean hasFractionalPart;
     private int trailingZeroCount;
 
-    public NumberTextWatcher(EditText editText) {
+    NumberTextWatcher(EditText editText) {
       df = new DecimalFormat("#,###.##");
       df.setDecimalSeparatorAlwaysShown(true);
       dfnd = new DecimalFormat("#,###.00");

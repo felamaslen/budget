@@ -10,8 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Handles application-specific databases
  */
 public class SQLiteHandler extends SQLiteOpenHelper {
-  private static final String TAG = SQLiteHandler.class.getSimpleName();
-
   // All Static variables
   // Database version
   private static final int DATABASE_VERSION = 1;

@@ -13,7 +13,6 @@ public class FragmentIn extends FragmentList {
   @Override
   public void setProps() {
     this.pageName  = "in";
-    this.dataUrl   = AppConfig.URL_DATA_IN;
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_IN;
     this.loadingMsg    = "Loading in data...";

@@ -25,8 +25,6 @@ import london.fela.budget.helper.SQLiteHandler;
 import london.fela.budget.helper.SessionManager;
 
 public class LoginActivity extends AppCompatActivity implements Api {
-  public static final String TAG = LoginActivity.class.getSimpleName();
-
   private ProgressDialog pDialog;
 
   private EditText inputPin;

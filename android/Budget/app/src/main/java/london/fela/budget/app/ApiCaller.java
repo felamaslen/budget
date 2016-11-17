@@ -37,7 +37,7 @@ public class ApiCaller {
    * @param tag_int_req    // tag used to identify the request to the implementation
    * @param tag_string_req // tag used to cancel the request
    * @param req_type       // GET or POST
-   * @param url            // which url to request
+   * @param args           // arguments to add to the URL
    */
   public void request(
     final int tag_int_req,

@@ -53,9 +53,8 @@ public class UPCProduct implements Api {
 
   private final int API_TAG_FETCH_PRODUCT = 1997;
 
-  private String GTIN;
-
-  private Context context;
+  private final String GTIN;
+  private final Context context;
 
   protected UPCProduct(String gtin, final Context appContext) {
     apiSetup();

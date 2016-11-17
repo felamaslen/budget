@@ -17,7 +17,6 @@ import london.fela.budget.activity.MainActivity;
 /**
  * Main app controller
  */
-@SuppressWarnings("SameParameterValue")
 public class AppController extends Application {
   public static final String TAG = AppController.class.getSimpleName();
 
@@ -48,6 +47,7 @@ public class AppController extends Application {
     getRequestQueue().add(req);
   }
 
+  @SuppressWarnings("unused")
   public void cancelPendingRequests(Object tag) {
     if (mRequestQueue != null) {
       mRequestQueue.cancelAll(tag);
