@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="colorPrimary">#fffef7</color>
+  <color name="colorPrimaryDark">#9f3030</color>
+  <color name="colorAccent">#ffa040</color>
+
+  <!--
+  <color name="barOverview">#424242</color>
+  <color name="barFunds">#546e7a</color>
+  <color name="barIn">#d84315</color>
+  <color name="barBills">#b71c1c</color>
+  <color name="barFood">#43a047</color>
+  <color name="barGeneral">#01579b</color>
+  <color name="barHoliday">#00897b</color>
+  <color name="barSocial">#bf9e24</color>
+  -->
+
+  <color name="barText">#555555</color>
+  <color name="barTextActive">#000000</color>
+
+  <color name="bg_main">@color/colorPrimary</color>
+
+  <color name="white">#ffffff</color>
+  <color name="black">#000000</color>
+
+  <color name="input_login">#222222</color>
+  <color name="btn_login">#2180ed</color>
+
+  <color name="yes">#007bff</color>
+  <color name="no">#d2d2d2</color>
+
+  <color name="overviewTblMonth">#fffca3</color>
+  <color name="overviewTblIn">#b7ffa3</color>
+  <color name="overviewTblOut">#ffa3a3</color>
+  <color name="overviewTblBalance">#a3baff</color>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="GraphOverview">
+    <attr name="layout_width" format="string"/>
+    <attr name="layout_height" format="string"/>
+    <attr name="id" format="string"/>
+  </declare-styleable>
+</resources>

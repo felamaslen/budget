@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:baselineAligned="true">
+  <TextView
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/rowOverviewMonth"
+      android:layout_weight="2"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:padding="10dp"
+      android:textSize="16sp"
+      android:textColor="@color/black">
+  </TextView>
+
+  <TextView
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/rowOverviewIn"
+      android:layout_weight="3"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:padding="10dp"
+      android:textSize="16sp"
+      android:textColor="@color/black">
+  </TextView>
+
+  <TextView
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/rowOverviewOut"
+      android:layout_weight="3"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:padding="10dp"
+      android:textSize="16sp"
+      android:textColor="@color/black">
+  </TextView>
+
+  <TextView
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/rowOverviewBalance"
+      android:layout_weight="3"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:padding="10dp"
+      android:textSize="16sp"
+      android:textColor="@color/black">
+  </TextView>
+</LinearLayout>

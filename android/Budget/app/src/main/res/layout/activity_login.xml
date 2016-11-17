@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".activity.LoginActivity"
+    android:theme="@style/LoginTheme">
+
+  <ImageView
+      android:layout_width="90dp"
+      android:layout_height="90dp"
+      android:scaleType="fitStart"
+      android:id="@+id/app_logo"
+      android:src="@mipmap/ic_launcher"
+      android:contentDescription="@string/logo_description"
+      android:layout_alignParentStart="true"/>
+
+  <london.fela.budget.app.TitleTextView
+      android:id="@+id/titleTextLogin"
+      android:layout_width="match_parent"
+      android:layout_height="90dp"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:text="@string/app_name"
+      android:textSize="65sp"
+      android:layout_alignBaseline="@id/app_logo"
+      android:layout_toEndOf="@id/app_logo"
+      android:textColor="@color/colorPrimaryDark"
+      />
+
+  <TextView
+      android:id="@+id/textViewEnterPin"
+      android:labelFor="@+id/loginPin"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:textColor="@color/colorPrimaryDark"
+      android:text="@string/title_login"
+      android:textSize="24sp"
+      android:layout_marginTop="50dp"
+      android:layout_below="@+id/titleTextLogin"
+      android:layout_centerHorizontal="true"
+      />
+
+  <EditText
+      android:id="@+id/loginPin"
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+      android:inputType="numberPassword"
+      android:layout_marginTop="20dp"
+      android:padding="10dp"
+      android:textSize="35sp"
+      android:textColor="@color/input_login"
+      android:background="@color/white"
+      android:singleLine="true"
+      android:textStyle="bold"
+      android:layout_below="@+id/textViewEnterPin"
+      android:layout_centerHorizontal="true"
+      />
+
+  <Button
+      android:id="@+id/buttonLogin"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/button_login"
+      android:layout_marginTop="17dp"
+      android:textSize="20sp"
+      android:textColor="@color/white"
+      android:padding="10dp"
+      android:background="@color/btn_login"
+      android:textAllCaps="false"
+      android:layout_below="@+id/loginPin"
+      android:layout_centerHorizontal="true"/>
+</RelativeLayout>
