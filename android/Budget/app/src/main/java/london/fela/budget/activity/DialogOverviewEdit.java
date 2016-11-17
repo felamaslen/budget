@@ -1,6 +1,7 @@
 package london.fela.budget.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -26,8 +27,6 @@ import london.fela.budget.fragment.FragmentOverview;
 
 
 public class DialogOverviewEdit extends Activity implements Api {
-  public static final String TAG = DialogOverviewEdit.class.getSimpleName();
-  private int dataIndex;
   private int balance;
   private int newBalance;
   private int year;
@@ -53,12 +52,9 @@ public class DialogOverviewEdit extends Activity implements Api {
     switch (tag) {
       case API_TAG_POST_EDIT:
         // successfully posted edit
-        FragmentOverview fragmentOverview = (FragmentOverview)
-          MainActivity.pagerAdapter.getRegisteredFragment(0);
-
-        fragmentOverview.month.get("balance")[dataIndex] = newBalance;
-
-        fragmentOverview.updateData();
+        Intent intent = this.getIntent();
+        intent.putExtra("balance", newBalance);
+        this.setResult(RESULT_OK, intent);
 
         break;
     }
@@ -110,7 +106,6 @@ public class DialogOverviewEdit extends Activity implements Api {
     Button btnSubmit = (Button) findViewById(R.id.btn_submit);
     Button btnCancel = (Button) findViewById(R.id.btn_cancel);
 
-    dataIndex = getIntent().getExtras().getInt("dataIndex");
     balance   = getIntent().getExtras().getInt("balance");
     year      = getIntent().getExtras().getInt("year");
     month     = getIntent().getExtras().getInt("month");
