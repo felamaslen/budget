@@ -23,7 +23,6 @@ import london.fela.budget.app.ApiCaller;
 import london.fela.budget.app.AppConfig;
 import london.fela.budget.app.AppController;
 import london.fela.budget.helper.Data;
-import london.fela.budget.fragment.FragmentOverview;
 
 
 public class DialogOverviewEdit extends Activity implements Api {
@@ -86,7 +85,7 @@ public class DialogOverviewEdit extends Activity implements Api {
 
   private ApiCaller api;
   private void apiSetup() {
-    api = new ApiCaller(getResources().getString(R.string.api_url));
+    api = new ApiCaller(AppConfig.api_url(getResources()));
     api.addListener(this);
   }
 

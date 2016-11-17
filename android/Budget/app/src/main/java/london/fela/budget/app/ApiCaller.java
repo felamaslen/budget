@@ -23,8 +23,8 @@ public class ApiCaller {
 
   private static String api_url;
 
-  public ApiCaller(String api_url) {
-    this.api_url = api_url + "/api?t=";
+  public ApiCaller(String url) {
+    api_url = url;
   }
 
   public void addListener(Api listener) {
@@ -43,7 +43,7 @@ public class ApiCaller {
     final int tag_int_req,
     String tag_string_req,
     String req_type,
-    String url,
+    String args,
     final Map<String, String> params
   ) {
     final int httpMethod;
@@ -54,7 +54,7 @@ public class ApiCaller {
       httpMethod = Request.Method.GET;
     }
 
-    url = this.api_url + url;
+    String url = api_url + args;
 
     StringRequest strReq = new StringRequest(
       httpMethod,
