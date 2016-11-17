@@ -9,5 +9,6 @@ srv/db_info.py
 resources/serial
 web/js/budget.es5.js
 web/js/main.min.js
+web/css/budget.css
 web/css/budget.min.css
 **/.syncthing*
