@@ -35,18 +35,19 @@ import london.fela.budget.helper.Data;
 import london.fela.budget.activity.MainActivity;
 import london.fela.budget.app.YMD;
 import london.fela.budget.helper.PageCache;
+import london.fela.budget.helper.PagerAdapter;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Displays an editable list of items (such as food, or funds)
  */
 public class FragmentList extends Fragment {
-  public final String TAG = FragmentList.class.getSimpleName();
-
-  String pageName = null;
-  String dataUrl = null;
-  int loadingMsgId = 0;
+  String pageName   = null;
+  String dataUrl    = null;
+  String[] props    = new String[] {};
+  int loadingMsgId  = 0;
   String loadingMsg;
-  String[] props = new String[] {};
   void setProps() {
     props = new String[] {};
   }
@@ -56,37 +57,34 @@ public class FragmentList extends Fragment {
 
   Intent getDialogIntent() { return null; }
 
+  private final int EDIT_ADD_LIST_ITEM = 711021;
+  
   private ListView list;
-
   private final ArrayList<ListItem> itemList = new ArrayList<>();
-
   private ListAdapter listAdapter;
-
-  private final int API_TAG_FETCH_DATA = 88181;
-
-  private class intentDialog {
+  
+  private class IntentDialog {
     public ListItem item;
-    public final HashMap<String, String> map = new HashMap<>();
-    public final Intent intent;
+    final HashMap<String, String> map = new HashMap<>();
 
     public void setMap(int position, String item) {
     }
 
-    public intentDialog(int position, String item) {
+    IntentDialog(int position, String item) {
       setMap(position, item);
 
       EditParcel values = new EditParcel(map);
 
-      intent = getDialogIntent();
+      Intent intent = getDialogIntent();
 
       intent.putExtra("values", values);
       intent.putExtra("dataIndex", position);
 
-      startActivity(intent);
+      startActivityForResult(intent, EDIT_ADD_LIST_ITEM);
     }
   }
-  private class intentDialogEdit extends intentDialog {
-    public intentDialogEdit(int position) {
+  private class IntentDialogEdit extends IntentDialog {
+    IntentDialogEdit(int position) {
       super(position, null);
     }
 
@@ -104,8 +102,8 @@ public class FragmentList extends Fragment {
       }
     }
   }
-  private class intentDialogAdd extends intentDialog {
-    public intentDialogAdd(String item) {
+  private class IntentDialogAdd extends IntentDialog {
+    IntentDialogAdd(String item) {
       super(-1, item);
     }
 
@@ -121,11 +119,53 @@ public class FragmentList extends Fragment {
     }
   }
 
+  private int editingPosition;
+  
+  IntentDialogAdd intentDialogAdd(String item) {
+    editingPosition = -1;
+    return new IntentDialogAdd(item);
+  }
+  
+  IntentDialogEdit intentDialogEdit(int position) {
+    editingPosition = position;
+    return new IntentDialogEdit(position);
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    if (requestCode == AppConfig.SCAN_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+      String code = intent.getStringExtra("SCAN_RESULT");
+      // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+
+      final UPCProduct product = new UPCProduct(code, getActivity()) {
+        @Override
+        public void productFetched(JSONObject res) {
+          try {
+            String productName = res.getJSONObject("attributes").getString("Brand");
+
+            intentDialogAdd(productName);
+          } catch (JSONException e) {
+            e.printStackTrace();
+
+            Toast.makeText(getActivity(), "Invalid barcode response", Toast.LENGTH_LONG).show();
+          }
+        }
+      };
+
+      product.request();
+    }
+    else if (requestCode == EDIT_ADD_LIST_ITEM && resultCode == RESULT_OK) {
+      EditParcel item = intent.getParcelableExtra("editParcel");
+
+      this.setItemData(editingPosition, item);
+    }
+  }
+
   // listener for ListView touch (edit item)
   private final AdapterView.OnItemClickListener listenerEdit = new AdapterView.OnItemClickListener() {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-      new intentDialogEdit(position);
+      intentDialogEdit(position);
     }
   };
 
@@ -133,7 +173,7 @@ public class FragmentList extends Fragment {
   private final Button.OnClickListener listenerAdd = new View.OnClickListener() {
     @Override
     public void onClick(View view) {
-      new intentDialogAdd("");
+      intentDialogAdd("");
     }
   };
 
@@ -248,8 +288,9 @@ public class FragmentList extends Fragment {
       Data.Cache.Overview.cost.put(pageName, cacheItem);
 
       try {
-        FragmentOverview overviewPage = (FragmentOverview)
-          MainActivity.pagerAdapter.getRegisteredFragment(0);
+        FragmentOverview overviewPage = (FragmentOverview)(
+          ((MainActivity)getActivity()).pagerAdapter.getRegisteredFragment(0)
+        );
 
         overviewPage.reloadDataFromCache();
       }
@@ -359,33 +400,6 @@ public class FragmentList extends Fragment {
       }
 
       updateList();
-    }
-  }
-
-  public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    if (requestCode == AppConfig.SCAN_REQUEST_CODE) {
-      if (resultCode == Activity.RESULT_OK) {
-        String code   = intent.getStringExtra("SCAN_RESULT");
-        String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-
-        final UPCProduct product = new UPCProduct(code, getActivity()) {
-          @Override
-          public void productFetched(JSONObject res) {
-            try {
-              String productName = res.getJSONObject("attributes").getString("Brand");
-
-              new intentDialogAdd(productName);
-            }
-            catch (JSONException e) {
-              e.printStackTrace();
-
-              Toast.makeText(getActivity(), "Invalid barcode response", Toast.LENGTH_LONG).show();
-            }
-          }
-        };
-
-        product.request();
-      }
     }
   }
 }

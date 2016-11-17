@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,20 +21,22 @@ import java.util.Map;
 
 import london.fela.budget.R;
 import london.fela.budget.activity.DialogOverviewEdit;
+import london.fela.budget.activity.MainActivity;
 import london.fela.budget.helper.Data;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Displays an editable table showing monthly overview financial data,
  * and draws a graph showing balance over the months
  */
 public class FragmentOverview extends Fragment {
-  public static final String TAG = FragmentOverview.class.getSimpleName();
-
   private ListView list;
   private ArrayList<Object> itemList;
   private int startOffset;
 
-  final int API_TAG_FETCH_DATA = 0;
+  private final int EDIT_ITEM = 119181;
+  private int dataIndex; // for editing
 
   public static FragmentOverview newInstance() {
     FragmentOverview fragmentOverview = new FragmentOverview();
@@ -61,9 +64,6 @@ public class FragmentOverview extends Fragment {
     "predicted"   // 9
   };
 
-  // raw columns sent from the server
-  private static final int[] rawCols = { 0, 1, 2, 3, 4, 5, 6, 7 };
-
   // extra column definitions which we calculate from the data
   private static final int[] extraCols = { 8, 9 };
 
@@ -73,10 +73,8 @@ public class FragmentOverview extends Fragment {
   // columns which we show on screen
   public static final int[] visibleCols = { 1, 8, 9 };
 
-  private static int numRawCols     = rawCols.length;
   private static final int numExtraCols   = extraCols.length;
   public static final int numVisibleCols  = visibleCols.length;
-  private static int numCols        = allCols.length;
 
   public static int startYear ;
   public static int startMonth ;
@@ -206,21 +204,32 @@ public class FragmentOverview extends Fragment {
 
         Intent intent = new Intent(getActivity(), DialogOverviewEdit.class);
 
-        int dataIndex = position + startOffset;
+        dataIndex = position + startOffset;
 
         intent.putExtra("year", item.year);
         intent.putExtra("month", item.month);
         intent.putExtra("yearMonth", item.yearMonth);
-        intent.putExtra("dataIndex", dataIndex);
         intent.putExtra("balance", month.get("balance")[dataIndex]);
 
-        startActivity(intent);
+        startActivityForResult(intent, EDIT_ITEM);
       }
     };
 
     list.setOnItemClickListener(listener);
 
     return view;
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    if (requestCode == EDIT_ITEM && resultCode == RESULT_OK) {
+      int newBalance = intent.getIntExtra("balance", -1);
+
+      if (newBalance >= 0) {
+        this.month.get("balance")[dataIndex] = newBalance;
+        this.updateData();
+      }
+    }
   }
 
   public void updateData() {

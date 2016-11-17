@@ -7,7 +7,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.2"
-        sha1="1f931b20898fae5a374d39777b57bc290a370f09">
+        sha1="a0201cbb50907c8c34f89796fb6153f727e4784f">
         <dex dex="/home/fela/projects/budget/android/Budget/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_ae3d293863d15b05f2362491b8e5063f8f6d9136/classes.dex" />
     </item>
     <item
@@ -187,7 +187,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.2"
-        sha1="69ed5352360d227440102ff758511808ac297cdb">
+        sha1="abe62e70305e507b565b8b02bf6b75b51766472f">
         <dex dex="/home/fela/projects/budget/android/Budget/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_5c195518b3f29bbeb9fab5e8f08eb3dfd91368ab/classes.dex" />
     </item>
     <item

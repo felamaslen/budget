@@ -16,15 +16,6 @@ import london.fela.budget.fragment.FragmentList;
  * See DialogUpdate.java for implementation requirements
  */
 public class DialogHoliday extends DialogUpdate {
-
-  @Override
-  public void updateFragment(int index, EditParcel item) {
-    /** call this after successful api call */
-    FragmentList page = (FragmentList) MainActivity.pagerAdapter.getRegisteredFragment(6);
-
-    page.setItemData(index, item);
-  }
-
   @Override
   public void onCreate(Bundle savedInstanceState) {
     /** set up the activity dialog */

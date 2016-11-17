@@ -38,8 +38,6 @@ import london.fela.budget.helper.SQLiteHandler;
 import london.fela.budget.helper.SessionManager;
 
 public class MainActivity extends Activity implements Api {
-  public static final String TAG = MainActivity.class.getSimpleName();
-
   private static final int API_TAG_FETCH_DATA = 87;
 
   // api stuff
@@ -84,13 +82,9 @@ public class MainActivity extends Activity implements Api {
   private SQLiteHandler db;
   private SessionManager session;
 
-  private static ViewPager pager;
+  ViewPager pager;
 
-  public static void refreshPages() {
-    pager.getAdapter().notifyDataSetChanged();
-  }
-
-  public static PagerAdapter pagerAdapter;
+  public PagerAdapter pagerAdapter;
 
   private void translateCacheData(JSONObject data) {
     try {
@@ -175,7 +169,7 @@ public class MainActivity extends Activity implements Api {
     // load the data into the first view
     try {
       FragmentOverview overviewPage = (FragmentOverview)
-        MainActivity.pagerAdapter.getRegisteredFragment(0);
+        pagerAdapter.getRegisteredFragment(0);
       overviewPage.reloadDataFromCache();
     }
     catch (Exception e) {
@@ -185,7 +179,8 @@ public class MainActivity extends Activity implements Api {
     // load data into any existing list views
     for (int p = 1; p < AppConfig.tabs.length; p++) {
       try {
-        FragmentList page = (FragmentList) MainActivity.pagerAdapter.getRegisteredFragment(p);
+        FragmentList page = (FragmentList) pagerAdapter.getRegisteredFragment(p);
+
         page.reloadDataFromCache();
       }
       catch (Exception e) {

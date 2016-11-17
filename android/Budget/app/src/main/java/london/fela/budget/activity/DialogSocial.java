@@ -8,23 +8,12 @@ import android.widget.TextView;
 
 import london.fela.budget.R;
 import london.fela.budget.app.AppConfig;
-import london.fela.budget.fragment.EditParcel;
-import london.fela.budget.fragment.FragmentList;
 
 /**
  * DialogUpdate extension for the Bills page
  * See DialogUpdate.java for implementation requirements
  */
 public class DialogSocial extends DialogUpdate {
-
-  @Override
-  public void updateFragment(int index, EditParcel item) {
-    /** call this after successful api call */
-    FragmentList page = (FragmentList) MainActivity.pagerAdapter.getRegisteredFragment(7);
-
-    page.setItemData(index, item);
-  }
-
   @Override
   public void onCreate(Bundle savedInstanceState) {
     /** set up the activity dialog */

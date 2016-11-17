@@ -2,7 +2,9 @@ package london.fela.budget.activity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -22,6 +24,7 @@ import london.fela.budget.R;
 import london.fela.budget.app.Api;
 import london.fela.budget.app.ApiCaller;
 import london.fela.budget.app.AppController;
+import london.fela.budget.fragment.FragmentList;
 import london.fela.budget.helper.Data;
 import london.fela.budget.app.YMD;
 import london.fela.budget.fragment.EditParcel;
@@ -36,8 +39,6 @@ import london.fela.budget.fragment.EditParcel;
  * - override onCreate method:
  */
 public class DialogUpdate extends Activity {
-  public static final String TAG = DialogFunds.class.getSimpleName();
-
   private int dataIndex;
   private String id;
 
@@ -58,7 +59,12 @@ public class DialogUpdate extends Activity {
   private int API_TAG;
 
   @SuppressWarnings("UnusedParameters")
-  void updateFragment(int index, EditParcel item) { }
+  void updateFragment(EditParcel item) {
+    /** call this after successful api call */
+    Intent intent = this.getIntent();
+    intent.putExtra("editParcel", item);
+    this.setResult(RESULT_OK, intent);
+  }
 
   /** api stuff */
   private final Api apiObject = new Api() {
@@ -85,7 +91,7 @@ public class DialogUpdate extends Activity {
 
         case API_TAG_POST_EDIT:
           // successfully posted edit/add
-          updateFragment(dataIndex, newItem);
+          updateFragment(newItem);
 
           progressBar.setVisibility(View.INVISIBLE);
           finish();
