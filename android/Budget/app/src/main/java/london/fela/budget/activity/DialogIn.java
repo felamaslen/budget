@@ -8,8 +8,6 @@ import android.widget.TextView;
 
 import london.fela.budget.R;
 import london.fela.budget.app.AppConfig;
-import london.fela.budget.fragment.EditParcel;
-import london.fela.budget.fragment.FragmentList;
 
 /**
  * DialogUpdate extension for the In page

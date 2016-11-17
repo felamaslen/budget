@@ -1,7 +1,5 @@
 package london.fela.budget.activity;
 
-import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.Button;
@@ -10,8 +8,6 @@ import android.widget.TextView;
 
 import london.fela.budget.R;
 import london.fela.budget.app.AppConfig;
-import london.fela.budget.fragment.EditParcel;
-import london.fela.budget.fragment.FragmentList;
 
 /**
  * DialogUpdate extension for the Funds page
