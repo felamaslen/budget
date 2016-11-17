@@ -525,7 +525,7 @@
    */
   class Api {
     constructor() {
-      this.apiUrl = "rest.php?t=";
+      this.apiUrl = "api?t=";
 
       this.queuedMain = 0;
       this.queuedMinor = 0;
