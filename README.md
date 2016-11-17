@@ -5,6 +5,8 @@
 ### Installation:
  - Install Python 2.7 and MySQL
  - Create MySQL database called "budget"
+ - Build resources:
+  * `./setup.sh build`
  - Install Python environment and MySQL database:
   * `./setup.sh install`
  - Configure MySQL username and password in `srv/db_info.py` (rename from `.example`)
