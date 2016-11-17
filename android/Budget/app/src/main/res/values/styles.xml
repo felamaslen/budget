@@ -1,0 +1,43 @@
+<resources>
+
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccent</item>
+  </style>
+
+  <style name="LoginTheme" parent="AppTheme">
+    <item name="android:background">@color/bg_main</item>
+  </style>
+
+  <style name="AppTabLayout" parent="Widget.Design.TabLayout">
+    <!--<item name="tabMaxWidth">@dimen/tab_max_width</item>-->
+    <item name="tabIndicatorColor">?attr/colorAccent</item>
+    <item name="tabIndicatorHeight">4dp</item>
+    <item name="tabPaddingStart">6dp</item>
+    <item name="tabPaddingEnd">6dp</item>
+    <item name="android:textSize">18sp</item>
+    <item name="tabBackground">?attr/selectableItemBackground</item>
+    <item name="tabTextAppearance">@style/AppTabTextAppearance</item>
+    <item name="tabSelectedTextColor">@color/barTextActive</item>
+  </style>
+
+  <style name="AppTabTextAppearance" parent="TextAppearance.Design.Tab">
+    <item name="android:textSize">12sp</item>
+    <item name="android:textColor">@color/barText</item>
+    <item name="textAllCaps">false</item>
+  </style>
+
+  <style name="tblHeaderTheme" parent="AppTheme">
+    <item name="android:textColor">@color/black</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textSize">18sp</item>
+  </style>
+
+  <style name="tblOverviewHeaderTheme" parent="tblHeaderTheme">
+    <item name="android:background">@color/colorPrimary</item>
+  </style>
+
+  <style name="dialogTheme" parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar.MinWidth"/>
+
+</resources>

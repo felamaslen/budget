@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="${relativePackage}.${activityClass}"
+    -->
+
+  <android.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/action_bar_size"
+      android:background="?attr/colorPrimaryDark"
+      android:elevation="4dp"
+      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+      >
+  </android.widget.Toolbar>
+
+  <android.support.design.widget.TabLayout
+      android:id="@+id/tab_layout"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/tab_bar_size"
+      android:layout_below="@+id/toolbar"
+      android:background="?attr/colorPrimary"
+      android:elevation="6dp"
+      android:minHeight="?attr/actionBarSize"
+      android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+      style="@style/AppTabLayout"
+      app:tabTextAppearance="@style/AppTabTextAppearance">
+  </android.support.design.widget.TabLayout>
+
+  <android.support.v4.view.ViewPager
+      android:id="@+id/pager"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_marginTop="@dimen/action_bar_size_with_tabs">
+  </android.support.v4.view.ViewPager>
+
+</RelativeLayout>

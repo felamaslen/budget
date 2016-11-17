@@ -1,0 +1,322 @@
+package london.fela.budget.fragment;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.util.AttributeSet;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+import london.fela.budget.helper.Data;
+
+public class GraphOverview extends SurfaceView implements SurfaceHolder.Callback {
+  private static Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+  SurfaceHolder holder;
+
+  private static float width, height;
+
+  static float padXL = 0;
+  static float padXR = 0;
+  static float padYT = 30;
+  static float padYB = 30;
+
+  static float[] rangeX = {-100, 100};
+  static float[] rangeY = {-100, 100};
+
+  static int tickSize;
+
+  int numTicksY = 5;
+
+  int bgColor   = Color.WHITE;
+  int axisColor = Color.BLACK;
+  int labelColor = Color.BLACK;
+
+  int axisWidth = 2;
+
+  public GraphOverview(Context context) {
+    // this is called by the fragment class
+    super(context);
+
+    init();
+  }
+  public GraphOverview(Context context, AttributeSet attrs) {
+    // this is called by the fragment .xml
+    super(context, attrs);
+
+    init();
+  }
+
+  private void init() {
+    holder = getHolder();
+
+    holder.addCallback(this);
+
+    setFocusable(true);
+
+    paint.setStyle(Paint.Style.STROKE);
+    paint.setColor(Color.RED);
+  }
+
+  /**
+   * maps an X value to an X pixel for display on the graph
+   * similarly for pixY below
+   * @param xValue X value to map to a pixel
+   * @return pixel
+   */
+  private static float pixX(float xValue) {
+    return (
+      padXL + (width - padXL - padXR) * (xValue - rangeX[0]) / (rangeX[1] - rangeX[0])
+    );
+  }
+
+  private static float pixY(float yValue) {
+    return (
+      padYT + (height - padYT - padYB) * (1 - (yValue - rangeY[0]) / (rangeY[1] - rangeY[0]))
+    );
+  }
+
+  /**
+   * turns an X pixel value into an X value (i.e. inverse of pixX)
+   * similarly for yPix below
+   * @param pixX X pixel to map to a value
+   * @return value
+   */
+  private static float xValue(float pixX) {
+    return (pixX - padXL) / (width - padXL - padXR) * (rangeX[1] - rangeX[0]) + rangeX[0];
+  }
+
+  @SuppressWarnings("unused")
+  private static float yValue(float pixY) {
+    return 1 - (pixY - padYT) / (height - padYT - padYB) * (rangeY[1] - rangeY[0]) + rangeY[0];
+  }
+
+  /**
+   * change range of graph
+   */
+  public void setRanges(float[][] ranges) {
+    rangeX = ranges[0];
+    rangeY = ranges[1];
+  }
+
+  private int getTickSize(float[] range, int numTicks) {
+    float minimum = (range[1] - range[0]) / numTicks;
+
+    float realMagnitude = (float)Math.pow(10, Math.floor(Math.log(minimum) / Math.log(10)));
+
+    int magnitude = Math.round(realMagnitude);
+
+    float res = minimum / realMagnitude;
+
+    int tick;
+
+    if (res > 5) {
+      tick = 10 * magnitude;
+    }
+    else if (res > 2) {
+      tick = 5 * magnitude;
+    }
+    else if (res > 1) {
+      tick = 2 * magnitude;
+    }
+    else {
+      tick = magnitude;
+    }
+
+    return tick;
+  }
+
+  /**
+   * draw graph labels
+   */
+  public void drawLabels(Canvas canvas) {
+    paint.setColor(labelColor);
+    paint.setTextAlign(Paint.Align.LEFT);
+    paint.setTextSize(40);
+    paint.setTypeface(Typeface.SANS_SERIF);
+
+    // draw Y labels
+    int pixX = (int)pixX(0) + 5;
+
+    for (int i = 1; i < numTicksY; i++) {
+      float tickPos = pixY(i * tickSize);
+
+      String tick = Data.formatCurrency(i * tickSize * 100, true);
+
+      Rect r = new Rect();
+      paint.getTextBounds(tick, 0, 1, r);
+
+      tickPos += Math.abs(r.height()) / 2;
+
+      canvas.drawText(tick, 0, tick.length() - 3, pixX, tickPos, paint);
+    }
+  }
+
+  /**
+   * draw graph axes
+   */
+  public void drawAxes(Canvas canvas) {
+    canvas.drawColor(bgColor);
+
+    paint.setColor(axisColor);
+    paint.setStrokeWidth(axisWidth);
+
+    // X axis
+    canvas.drawLine(pixX(rangeX[0]), pixY(0), pixX(rangeX[1]), pixY(0), paint);
+
+    // Y axis
+    canvas.drawLine(pixX(0), pixY(rangeY[0]), pixX(0), pixY(rangeY[1]), paint);
+  }
+
+  /**
+   * calculate tick size
+   */
+  public void calculateTickSize() {
+    // calculate tick range
+    tickSize = getTickSize(rangeY, numTicksY);
+  }
+
+  /**
+   * generates a smooth line from data points
+   */
+  public static class CubicLine {
+    float[] p;
+    int nPoints;
+    float[] m;
+
+    int transitionKey, color1, color2;
+
+    public CubicLine(float[] data, int _transitionKey, int _color1, int _color2) {
+      p = data;
+      nPoints = p.length - 1;
+      getMean();
+
+      transitionKey = _transitionKey;
+      color1 = _color1;
+      color2 = _color2;
+    }
+
+    void getMean() {
+      m = new float[p.length];
+
+      m[0] = p[1] - p[0];
+      for (int i = 1; i < nPoints; i++) {
+        m[i] = (float)0.5 * (p[i+1] - p[i-1]);
+      }
+      m[nPoints] = p[nPoints] - p[nPoints-1];
+    }
+
+    float getValFirst(float x) {
+      return  (m[1] - m[0]) * (float)Math.pow(x, 3) +
+        (m[0] - m[1]) * (float)Math.pow(x, 2) +
+        m[0] * x +
+        p[0]
+        ;
+    }
+
+    float getValNext(float x, int i) {
+      return  (m[2+i] + m[1+i] - 2*(p[2+i] - p[1+i])) * (float)Math.pow(x-1-i, 3) +
+        (-1*m[2+i] - 2*m[1+i] + 3*(p[2+i] - p[1+i])) * (float)Math.pow(x-1-i, 2) +
+        m[1+i] * (x-1-i) +
+        p[1+i]
+        ;
+    }
+
+    void draw(Canvas canvas) {
+      paint.setStyle(Paint.Style.STROKE);
+      paint.setColor(Color.BLUE);
+      paint.setStrokeWidth(5);
+
+      Path path = new Path();
+
+      float startPix  = pixX(0) + 1,
+            endPix    = pixX(1),
+            pixX,
+            pixY      = pixY(getValFirst(0));
+
+      float xVal;
+
+      path.moveTo(startPix, pixY);
+
+      for (pixX = startPix; pixX < endPix; pixX++) {
+        xVal = xValue(pixX);
+
+        pixY = pixY(getValFirst(xVal));
+
+        path.lineTo(pixX, pixY);
+      }
+
+      float oldPixX = endPix,
+          oldPixY = pixY;
+
+      for (int i = 0; i < nPoints-1; i++) {
+        if (i == transitionKey) {
+          paint.setColor(color1);
+          canvas.drawPath(path, paint);
+
+          paint.setColor(color2);
+
+          path = new Path();
+          path.moveTo(oldPixX, oldPixY);
+
+          oldPixX++;
+        }
+
+        endPix = pixX(i+2);
+
+        for (pixX = oldPixX; pixX < endPix; pixX++) {
+          xVal = xValue(pixX);
+
+          pixY = pixY(getValNext(xVal, i));
+
+          path.lineTo(pixX, pixY);
+
+          oldPixX = pixX;
+          oldPixY = pixY;
+        }
+      }
+
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  public void surfaceCreated(SurfaceHolder holder) {
+    FragmentOverview.updateGraph();
+
+    //holder.setFixedSize((int)width, (int)height);
+  }
+
+  public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+    //holder.setFixedSize(width, height);
+  }
+
+  public void surfaceDestroyed(SurfaceHolder holder) {
+  }
+
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+    height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+
+    setMeasuredDimension((int)width, (int)height);
+  }
+
+  @Override
+  protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    if (changed) {
+      final int width = right - left;
+      final int height = bottom - top;
+
+      holder.setFixedSize(width, height);
+    }
+  }
+
+  @Override
+  protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+  }
+}
