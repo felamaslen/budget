@@ -3,7 +3,7 @@ from curses.textpad import rectangle
 
 from app.api import BudgetClientAPI
 from app.user import User
-from app.methods import window_color, ellipsis
+from app.methods import window_color, ellipsis, nav_key
 from app.page_overview import PageOverview
 from app.page_list import PageFunds, PageIn, PageBills, PageFood, PageGeneral, \
         PageHoliday, PageSocial
@@ -66,27 +66,26 @@ class BudgetClient(object):
 
         pass_input = True
 
-        nav_L = c == curses.KEY_LEFT    or c == ord('h')
-        nav_U = c == curses.KEY_UP      or c == ord('k')
-        nav_R = c == curses.KEY_RIGHT   or c == ord('l')
-        nav_D = c == curses.KEY_DOWN    or c == ord('j')
+        dx, dy, done_nav = nav_key(c)
 
-        if nav_L or nav_U or nav_R or nav_D:
+        if done_nav:
             pass_input = False # this is done by the nav function itself
 
-            if nav_L:
-                self.nav(-1, 0)
-            elif nav_U:
-                self.nav(0, -1)
-            elif nav_R:
-                self.nav(1, 0)
-            elif nav_D:
-                self.nav(0, 1)
+            self.nav(dx, dy)
 
         elif c == KEYCODE_NEWLINE or c == KEYCODE_RETURN:
             self.nav_select()
 
-        elif c == KEYCODE_TAB:
+        can_nav = True
+
+        if pass_input:
+            """ pass the input to the current page """
+            try:
+                can_nav = self.page_obj[self.pages[self.current_page]].key_input(c)
+            except:
+                pass # page hasn't loaded yet
+
+        if can_nav and c == KEYCODE_TAB:
             self.nav_sect = (self.nav_sect + 1) % 2
 
             try:
@@ -99,12 +98,6 @@ class BudgetClient(object):
                 """ page isn't ready yet """
                 self.nav_sect = NAV_SECT_TABS
 
-        if pass_input:
-            """ pass the input to the current page """
-            try:
-                self.page_obj[self.pages[self.current_page]].key_input(c)
-            except:
-                pass # page hasn't loaded yet
 
         return True
 

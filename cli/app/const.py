@@ -20,10 +20,13 @@ NC_COLOR_UP_SEL     = (5, curses.COLOR_GREEN, curses.COLOR_WHITE)
 NC_COLOR_DOWN       = (6, curses.COLOR_RED, curses.COLOR_BLACK)
 NC_COLOR_DOWN_SEL   = (7, curses.COLOR_RED, curses.COLOR_WHITE)
 
+BTN_CANCEL_TEXT = "nope.avi"
+BTN_SUBMIT_TEXT = "Do it."
 
 """ keyboard shortcuts """
 KEY_QUIT    = 'q'
 KEY_LOGOUT  = 'L'
+KEY_EDIT    = 'e'
 
 KEY_GRAPH   = 'g'
 

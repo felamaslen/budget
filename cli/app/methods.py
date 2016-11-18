@@ -86,3 +86,15 @@ def get_tick_size(minV, maxV, numTicks = 5):
         tick = magnitude
 
     return tick
+
+def nav_key(c):
+    L = c == curses.KEY_LEFT    or c == ord('h')
+    U = c == curses.KEY_UP      or c == ord('k')
+    R = c == curses.KEY_RIGHT   or c == ord('l')
+    D = c == curses.KEY_DOWN    or c == ord('j')
+
+    dx = -1 if L else (1 if R else 0)
+    dy = -1 if U else (1 if D else 0)
+
+    return dx, dy, abs(dx) + abs(dy) != 0
+
