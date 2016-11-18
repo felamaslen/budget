@@ -1839,6 +1839,15 @@
 
       this.$stocksListOuter.append(this.$stocksList);
 
+      this.$overallStockChange  = $("<span></span>")
+      .addClass("change");
+
+      this.$stocksListOverall   = $("<span></span>")
+      .addClass("stocks-list-overall")
+      .append($("<span></span>").addClass("price").append(this.$overallStockChange));
+
+      this.$stocksListOuter.append(this.$stocksListOverall);
+
       this.$gCont.append(this.$stocksListOuter);
 
       this.loadStocksList();
@@ -1872,6 +1881,9 @@
         };
       });
 
+      this.stocksTotalWeight = res.data.total;
+      this.stocksWeightedChange = null;
+
       this.stockSymbols = this.stocks.map(stock => stock.symbol);
 
       this.$stocksList.empty();
@@ -1900,8 +1912,19 @@
       );
     }
 
+    numDp(stockChange, width) {
+      width = width || 2;
+      return stockChange === 0 ? width : Math.max(
+          0, width - Math.max(
+            0, Math.floor(Math.log(Math.abs(stockChange)) / Math.LN10)
+          )
+        );
+    }
+
     onStockPricesLoaded(res) {
       let badStocks = 0;
+
+      let weightedChange = 0;
 
       for (const stock of res) {
         const symbol  = stock.e + ":" + stock.t;
@@ -1927,16 +1950,18 @@
           this.stocks[index].price  = price;
           this.stocks[index].change = change;
 
-          const numDp = change === 0 ? 2 : Math.max(
-            0, 2 - Math.max(
-              0, Math.floor(Math.log(Math.abs(change)) / Math.LN10)
-            )
-          );
+          const numDp = this.numDp(change);
 
           this.stocks[index].changeText = (change >= 0 ? "+" : "") +
             change.toFixed(numDp);
+
+          weightedChange += this.stocks[index].weight * change;
         }
       }
+
+      weightedChange /= this.stocksTotalWeight;
+
+      this.updateStocksOverall(weightedChange);
 
       if (badStocks > 0) {
         errorMessages.newMessage(
@@ -1957,6 +1982,28 @@
       this.stocksLoadingTimer = window.setTimeout(() => {
         this.loadStockPrices();
       }, this.stocksRefreshInterval);
+    }
+
+    updateStocksOverall(change) {
+      const overallChangeText = (change >= 0 ? "+" : "") +
+        change.toFixed(this.numDp(change, 4));
+
+      this.$stocksListOverall
+      .toggleClass("up", change > 0)
+      .toggleClass("down", change < 0);
+
+      this.$overallStockChange
+      .text(overallChangeText)
+      .toggleClass(
+        "hl-up",
+        this.stocksWeightedChange !== null && change - this.stocksWeightedChange > 0
+      )
+      .toggleClass(
+        "hl-down",
+        this.stocksWeightedChange !== null && change - this.stocksWeightedChange < 0
+      );
+
+      this.stocksWeightedChange = change;
     }
 
     updateStockList() {
