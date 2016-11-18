@@ -4,6 +4,7 @@ from curses.textpad import rectangle
 
 from app.const import *
 from app.methods import *
+from app.form import FormEdit
 from app.page import Page
 
 class PageList(Page):
@@ -12,12 +13,19 @@ class PageList(Page):
 
         super().__init__(win, api, set_statusbar)
 
+        self.statusbar = [
+                [KEY_EDIT, "edit"]
+            ]
+
         self.color_item     = curses.color_pair(NC_COLOR_TAB[0])
         self.color_sel      = curses.color_pair(NC_COLOR_TAB_SEL[0])
 
         self.list_selected  = 0
         self.list           = self.calculate_data()
         self.win_list       = win.derwin(0, 0)
+
+        self.form_edit = None
+        self.edit_form_open = False
 
     def get_data(self):
         res = self.api.req(['data', self.data_name])
@@ -52,8 +60,13 @@ class PageList(Page):
         num_display = min(max_display, len(self.data['data']))
 
         """ head """
+        index_alignr = ['cost', 'value']
+
         col = 0
         for (name, width, index, formatter) in self.cols:
+            if index in index_alignr:
+                name = alignr(width - 1, name)
+
             self.win_list.addstr(0, col, name, self.color_item | curses.A_BOLD)
             col += width
 
@@ -64,25 +77,53 @@ class PageList(Page):
         for i in range(num_display):
             self.draw_list_row(i, offset)
 
-    def nav(self, dx, dy):
-        self.list_selected = min(len(self.list) - 1, max(0, \
-                self.list_selected + dy))
+    def edit_form_finished(self):
+        self.form_edit.win_form.clear()
+        self.form_edit.win_form.refresh()
 
-        self.draw()
+        del self.form_edit
+
+        self.draw_list()
         self.win_list.refresh()
+
+        self.edit_form_open = False
+
+    def nav(self, dx, dy):
+        if not self.edit_form_open:
+            self.list_selected = min(len(self.list) - 1, max(0, \
+                    self.list_selected + dy))
+
+            self.draw()
+            self.win_list.refresh()
+
+    def key_input(self, c):
+        if self.edit_form_open:
+            return self.form_edit.key_input(c)
+
+        elif c == ord(KEY_EDIT) and self.nav_active:
+            self.form_edit = FormEdit(self.win, self.winHW, self.api, \
+                    self.list[self.list_selected], self.edit_cols, \
+                    self.edit_form_finished)
+
+            self.edit_form_open = True
+
+        return True
 
 class PageListBasic(PageList):
     def __init__(self, win, api, set_statusbar, page_name):
         self.cols = [
-                ["Date",                9,  'date',  lambda x: YMD(x).format()],
-                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
-                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)]
+                ["Date",    9,  'date',  lambda x: YMD(x).format()],
+                ["Item",    30, 'item',  lambda x: ellipsis(x, 29)],
+                ["Cost",    10, 'cost',  lambda x: format_currency(x, 9)]
             ]
+
+        self.edit_cols = self.cols
 
         super().__init__(win, api, set_statusbar, page_name)
 
     def calculate_data(self):
         return [{
+                'id':       item['I'],
                 'date':     item['d'],
                 'item':     item['i'],
                 'cost':     item['c']
@@ -94,12 +135,14 @@ class PageListShop(PageList):
             col_category, col_category_json):
 
         self.cols = [
-                ["Date",            9,  'date',     lambda x: YMD(x).format()],
-                ["Item",            25, 'item',     lambda x: ellipsis(x, 24)],
-                [col_category,      20, 'category', lambda x: ellipsis(x, 19)],
-                [alignr(9, "Cost"), 10, 'cost',     lambda x: format_currency(x, 9)],
-                ["Shop",            20, 'shop',     lambda x: ellipsis(x, 19)]
+                ["Date",        9,  'date',     lambda x: YMD(x).format()],
+                ["Item",        25, 'item',     lambda x: ellipsis(x, 24)],
+                [col_category,  20, 'category', lambda x: ellipsis(x, 19)],
+                ["Cost",        10, 'cost',     lambda x: format_currency(x, 9)],
+                ["Shop",        20, 'shop',     lambda x: ellipsis(x, 19)]
             ]
+
+        self.edit_cols = self.cols
 
         self.col_category_json  = col_category_json
 
@@ -107,6 +150,7 @@ class PageListShop(PageList):
 
     def calculate_data(self):
         return [{
+            'id':       item['I'],
             'date':     item['d'],
             'item':     item['i'],
             'category': item[self.col_category_json],
@@ -117,17 +161,19 @@ class PageListShop(PageList):
 class PageFunds(PageList):
     def __init__(self, win, api, set_statusbar):
         self.cols = [
-                ["Date",                9,  'date',  lambda x: YMD(x).format()],
-                ["Item",                30, 'item',  lambda x: ellipsis(x, 29)],
-                [alignr(9, "Cost"),     10, 'cost',  lambda x: format_currency(x, 9)],
-                [alignr(9, "Value"),    10, 'value', lambda x: format_currency(x, 9)]
+                ["Date",    9,  'date',  lambda x: YMD(x).format()],
+                ["Item",    30, 'item',  lambda x: ellipsis(x, 29)],
+                ["Cost",    10, 'cost',  lambda x: format_currency(x, 9)],
+                ["Value",   10, 'value', lambda x: format_currency(x, 9)]
             ]
 
-        self.statusbar = [
-                [KEY_GRAPH, "graph"]
-            ]
+        self.edit_cols = self.cols[:3] + ["Units", 10, 'units', lambda x: x]
 
         super().__init__(win, api, set_statusbar, 'funds')
+
+        self.statusbar += [
+                [KEY_GRAPH, "graph"]
+            ]
 
         self.color_up       = curses.color_pair(NC_COLOR_UP[0])
         self.color_down     = curses.color_pair(NC_COLOR_DOWN[0])
@@ -143,9 +189,11 @@ class PageFunds(PageList):
 
     def calculate_data(self):
         return [{
+                'id':       item['I'],
                 'date':     item['d'],
                 'item':     item['i'],
                 'cost':     item['c'],
+                'units':    item['u'],
                 'value':    float(item['u']) * float(item['P'])
             } for item in self.data['data']]
 
@@ -292,13 +340,19 @@ class PageFunds(PageList):
         do_graph_all = c == ord(KEY_GRAPH)
         do_graph_selected = self.nav_active and (c == KEYCODE_NEWLINE or c == KEYCODE_RETURN)
 
-        if do_graph_all or do_graph_selected:
-            self.graph_status = not self.graph_status
+        if not self.edit_form_open:
+            if do_graph_all or do_graph_selected:
+                self.graph_status = not self.graph_status
 
-            if self.graph_status:
-                self.show_graph(do_graph_all)
-            else:
-                self.hide_graph()
+                if self.graph_status:
+                    self.show_graph(do_graph_all)
+                else:
+                    self.hide_graph()
+
+        elif not self.graph_status:
+            return super().key_input(c)
+
+        return True
 
 class PageIn(PageListBasic):
     def __init__(self, win, api, set_statusbar):
