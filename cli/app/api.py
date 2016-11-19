@@ -15,18 +15,21 @@ class BudgetClientAPI(object):
     def __init__(self):
         self.session = requests.Session()
 
-    def set_token(self, token = ''):
+    def set_token(self, token=''):
         """ set authorization header for requests """
         self.session.headers.update({'Authorization': token})
 
-    def req(self, task, method = 'get', query = {}, form = None):
+    def req(self, task, method='get', query=None, form=None):
         """ makes a request to the api """
+        if query is None:
+            query = {}
+
         query['t'] = '/'.join(task)
 
         if method == 'get':
-            res = self.session.get(API_URL, params = query)
+            res = self.session.get(API_URL, params=query)
         elif method == 'post':
-            res = self.session.post(API_URL, params = query, data = form)
+            res = self.session.post(API_URL, params=query, data=form)
         else:
             raise BudgetClientAPIError
 
