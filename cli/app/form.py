@@ -3,17 +3,20 @@ from curses.textpad import Textbox, rectangle
 
 from app.const import *
 from app.methods import *
+from app.api import BudgetClientAPIError
 
 class FormEdit:
-    def __init__(self, win, winHW, api, list_item, fields, finished):
+    def __init__(self, win, winHW, api, list_item, fields, finished, table):
         self.win    = win
         self.api    = api
         self.item   = list_item
         self.fields = fields
+        self.table  = table
 
-        self.finished = finished
+        self.finished   = finished
+        self.updated    = False
 
-        self.formH = min(winHW[0], 3 * (2 + len(self.fields)))
+        self.formH = min(winHW[0], 3 * (3 + len(self.fields)))
         self.formW = min(winHW[1], 40)
 
         formY = (winHW[0] - self.formH) // 2
@@ -34,6 +37,9 @@ class FormEdit:
         self.win_form.addstr(1, 1, alignc(self.formW - 3, \
                 "Editing id #{}".format(self.item['id'])))
 
+        """ status bar """
+        self.win_statusbar = self.win_form.derwin(3, self.formW - 3, 2, 1)
+
         """ form inputs """
         self.win_form_row   = []
         self.win_field      = []
@@ -42,8 +48,8 @@ class FormEdit:
         self.input_values   = []
 
         j = 0
-        for (name, width, index, formatter) in self.fields:
-            self.win_form_row.append(self.win_form.derwin(3, self.formW - 2, 2 + 3 * j, 1))
+        for (name, width, index, tbl) in self.fields:
+            self.win_form_row.append(self.win_form.derwin(3, self.formW - 2, 5 + 3 * j, 1))
             self.win_form_row[j].addstr(1, 0, ellipsis(name, self.formW // 2, ".."))
 
             inputH = 1
@@ -54,11 +60,12 @@ class FormEdit:
             self.win_field.append(self.win_form_row[j].derwin(inputH, inputW, 1, self.formW - inputW - 4))
 
             self.win_field[j].addstr(0, 0, \
-                    ellipsis(self.fields[j][3](self.item[self.fields[j][2]]).strip(' '), inputW - 1, ".."))
+                    ellipsis(deserialise(self.item[self.fields[j][2]], self.fields[j][2]).strip(' '),\
+                    inputW - 1, ".."))
 
             self.input.append(Textbox(self.win_field[j]))
 
-            self.input_values.append(self.item[self.fields[j][2]])
+            self.input_values.append(deserialise(self.item[index], index, width - 1))
 
             self.win_form_row[j].refresh()
 
@@ -106,6 +113,11 @@ class FormEdit:
             curses.curs_set(0)
             self.draw_button(self.btns[self.tab_index - num_fields], highlight = True)
 
+    def status(self, msg):
+        self.win_statusbar.clear()
+        self.win_statusbar.addstr(0, 0, alignc(self.formW - 2, msg))
+        self.win_statusbar.refresh()
+
     def key_input(self, c):
         if c == KEYCODE_TAB:
             self.nav(1)
@@ -115,7 +127,35 @@ class FormEdit:
 
             if btn_index == 1:
                 """ submit """
-                # TODO: submit the edit
+                try:
+                    data = {'id': self.item['id']}
+
+                    i = 0
+                    for (name, width, index, tbl) in self.fields:
+                        data[index] = serialise_input(self.input_values[i], index)
+                        i += 1
+
+                    self.status("Loading...")
+
+                    try:
+                        res = self.api.req(['update', self.table], method = 'post', form = data)
+
+                        if res and res['error'] is False:
+                            self.status("")
+                            self.updated = True
+
+                            self.finished()
+                        else:
+                            raise BudgetClientAPIError(res.errorText)
+
+                    except BudgetClientAPIError as code:
+                        self.status("API error: {}!".format(code))
+
+                except ValueError as error:
+                    self.status("Error: bad data!")
+
+                finally:
+                    return False
 
             self.finished()
 

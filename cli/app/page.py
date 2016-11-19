@@ -25,9 +25,7 @@ class Page(object):
 
     def try_get_data(self):
         try:
-            data = self.get_data()
-
-            return data
+            return self.get_data()
         except BudgetClientAPIError as code:
             self.win.addstr(0, 0, "API error: {}".format(code))
             return None
@@ -39,10 +37,7 @@ class Page(object):
         if self.data is None:
             return
 
-        try:
-            self.draw()
-        except Exception as e:
-            self.win.addstr(0, 0, "Error: drawing page failed! ({})".format(e))
+        self.draw()
 
     def nav(self, dx, dy):
         pass
