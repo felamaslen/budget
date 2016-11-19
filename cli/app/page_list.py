@@ -113,7 +113,7 @@ class PageList(Page):
     def edit_form_finished(self, data=None):
         """ update data """
         if self.form['form'].updated:
-            data = self.form['form'].input_values
+            data = self.form['form'].win['input_values']
 
             j = self.list['selected']
 
@@ -123,8 +123,8 @@ class PageList(Page):
 
             self.list['list'] = self.calculate_data()
 
-        self.form['form'].win_form.clear()
-        self.form['form'].win_form.refresh()
+        self.form['form'].win['form'].clear()
+        self.form['form'].win['form'].refresh()
 
         del self.form['form']
 
@@ -146,9 +146,15 @@ class PageList(Page):
             return self.form['form'].key_input(c)
 
         elif c == ord(KEY_EDIT) and self.nav_active:
-            self.form['form'] = FormEdit(self.win, self.winHW, self.api, \
-                    self.list['list'][self.list['selected']], self.cols['edit'], \
-                    self.edit_form_finished, self.data_name)
+            callback = {
+                'api': self.api,
+                'win': self.win,
+                'dim': self.winHW,
+                'callback': self.edit_form_finished
+            }
+
+            self.form['form'] = FormEdit(callback, \
+                    self.list['list'][self.list['selected']], self.cols['edit'], self.data_name)
 
             self.form['open'] = True
 
