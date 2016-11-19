@@ -1,7 +1,11 @@
+"""
+Displays interactive data on screen
+"""
+
 from app.api import BudgetClientAPIError
 
 class Page(object):
-    def __init__(self, win, api, set_statusbar = None):
+    def __init__(self, win, api, set_statusbar=None):
         self.win = win
         self.api = api
 
@@ -10,7 +14,7 @@ class Page(object):
 
         self.nav_active = False
 
-        self.winHW = win.getmaxyx()
+        self.dim = win.getmaxyx()
 
         self.data = self.try_get_data()
 
@@ -23,15 +27,18 @@ class Page(object):
 
         self.set_statusbar(self.statusbar)
 
+    def get_data(self):
+        pass
+
     def try_get_data(self):
         try:
             return self.get_data()
         except BudgetClientAPIError as code:
             self.win.addstr(0, 0, "API error: {}".format(code))
             return None
-        except:
-            self.win.addstr(0, 0, "API error: unknown error!")
-            return None
+
+    def draw(self):
+        pass
 
     def try_draw(self):
         if self.data is None:
@@ -39,7 +46,7 @@ class Page(object):
 
         self.draw()
 
-    def nav(self, dx, dy):
+    def nav(self, d_x, d_y):
         pass
 
     def set_nav_active(self, status):
@@ -47,6 +54,6 @@ class Page(object):
         self.nav(0, 0)
         return True
 
-    def key_input(self, c):
+    def key_input(self, key):
         pass
 
