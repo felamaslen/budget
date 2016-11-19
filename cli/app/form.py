@@ -1,144 +1,168 @@
+"""
+Display forms for editing and adding data
+"""
+
 import curses
 from curses.textpad import Textbox, rectangle
 
-from app.const import *
-from app.methods import *
+from app.const import NC_COLOR_TAB, NC_COLOR_TAB_SEL, \
+        BTN_CANCEL_TEXT, BTN_SUBMIT_TEXT, \
+        KEYCODE_TAB, KEYCODE_NEWLINE, KEYCODE_RETURN
+from app.methods import window_fill_color, alignc, \
+        serialise_input, deserialise, \
+        ellipsis
 from app.api import BudgetClientAPIError
 
-class FormEdit:
-    def __init__(self, win, winHW, api, list_item, fields, finished, table):
-        self.win    = win
-        self.api    = api
-        self.item   = list_item
-        self.fields = fields
-        self.table  = table
+def draw_button(btn, highlight=False):
+    color = curses.color_pair(NC_COLOR_TAB_SEL[0] if highlight else NC_COLOR_TAB[0])
 
-        self.finished   = finished
-        self.updated    = False
+    btn[0].clear()
+    btn[0].addstr(0, 0, alignc(9, btn[1]), color)
+    btn[0].refresh()
 
-        self.formH = min(winHW[0], 3 * (3 + len(self.fields)))
-        self.formW = min(winHW[1], 40)
+class FormEdit(object):
+    """ Displays an interactive form for editing data """
+    def __init__(self, callback, list_item, fields, table):
+        self.api = callback['api']
+        win = callback['win']
+        dim = callback['dim']
+        self.finished = callback['callback']
 
-        formY = (winHW[0] - self.formH) // 2
-        formX = (winHW[1] - self.formW) // 2
+        self.data = {
+            'item': list_item,
+            'fields': fields,
+            'table': table
+        }
 
-        self.tab_index = len(fields)
+        self.updated = False
 
-        self.win_form = win.derwin(self.formH, self.formW, formY, formX)
+        form_h = min(dim[0], 3 * (3 + len(self.data['fields'])))
+        form_w = min(dim[1], 40)
+
+        self.form = {
+            'h': form_h,
+            'w': form_w,
+            'y': (dim[0] - form_h) // 2,
+            'x': (dim[1] - form_w) // 2,
+            'tab_index': len(fields)
+        }
+
+        # subwindows
+        self.win = {
+            'form': win.derwin(self.form['h'], self.form['w'], self.form['y'], self.form['x']),
+            'form_row': [],
+            'field': [],
+            'input': [],
+            'input_values': []
+        }
+
+        self.win['statusbar'] = self.win['form'].derwin(3, self.form['w'] - 3, 2, 1)
 
         self.draw_window()
 
     def draw_window(self):
-        """ frame """
-        window_fill_color(self.win_form, self.formH - 1, self.formW - 1, curses.color_pair(NC_COLOR_TAB[0]))
-        rectangle(self.win_form, 0, 0, self.formH - 2, self.formW - 2)
+        # frame
+        window_fill_color(self.win['form'], self.form['h'] - 1, self.form['w'] - 1, \
+                curses.color_pair(NC_COLOR_TAB[0]))
+        rectangle(self.win['form'], 0, 0, self.form['h'] - 2, self.form['w'] - 2)
 
-        """ title """
-        self.win_form.addstr(1, 1, alignc(self.formW - 3, \
-                "Editing id #{}".format(self.item['id'])))
-
-        """ status bar """
-        self.win_statusbar = self.win_form.derwin(3, self.formW - 3, 2, 1)
-
-        """ form inputs """
-        self.win_form_row   = []
-        self.win_field      = []
-        self.input          = []
-
-        self.input_values   = []
+        # title
+        self.win['form'].addstr(1, 1, alignc(self.form['w'] - 3, \
+                "Editing id #{}".format(self.data['item']['id'])))
 
         j = 0
-        for (name, width, index, tbl) in self.fields:
-            self.win_form_row.append(self.win_form.derwin(3, self.formW - 2, 5 + 3 * j, 1))
-            self.win_form_row[j].addstr(1, 0, ellipsis(name, self.formW // 2, ".."))
+        for (name, width, index, _) in self.data['fields']:
+            self.win['form_row'].append(self.win['form'].derwin(\
+                    3, self.form['w'] - 2, 5 + 3 * j, 1))
+            self.win['form_row'][j].addstr(1, 0, ellipsis(name, self.form['w'] // 2, ".."))
 
-            inputH = 1
-            inputW = self.formW // 2 - 1
+            input_h = 1
+            input_w = self.form['w'] // 2 - 1
 
-            rectangle(self.win_form_row[j], 0, self.formW - inputW - 5 , inputH + 1, self.formW - 4)
+            rectangle(self.win['form_row'][j], 0, self.form['w'] - input_w - 5, \
+                    input_h + 1, self.form['w'] - 4)
 
-            self.win_field.append(self.win_form_row[j].derwin(inputH, inputW, 1, self.formW - inputW - 4))
+            self.win['field'].append(self.win['form_row'][j].derwin(input_h, input_w, 1, \
+                    self.form['w'] - input_w - 4))
 
-            self.win_field[j].addstr(0, 0, \
-                    ellipsis(deserialise(self.item[self.fields[j][2]], self.fields[j][2]).strip(' '),\
-                    inputW - 1, ".."))
+            self.win['field'][j].addstr(0, 0, \
+                    ellipsis(deserialise(self.data['item'][self.data['fields'][j][2]], \
+                    self.data['fields'][j][2]).strip(' '), input_w - 1, ".."))
 
-            self.input.append(Textbox(self.win_field[j]))
+            self.win['input'].append(Textbox(self.win['field'][j]))
 
-            self.input_values.append(deserialise(self.item[index], index, width - 1))
+            self.win['input_values'].append(deserialise(self.data['item'][index], index, width - 1))
 
-            self.win_form_row[j].refresh()
+            self.win['form_row'][j].refresh()
 
             j += 1
 
-        """ form buttons """
+        # form buttons
         self.btns = [
-                [self.win_form.derwin(1, 10, self.formH - 3, self.formW // 2 - 12), BTN_CANCEL_TEXT],
-                [self.win_form.derwin(1, 10, self.formH - 3, self.formW // 2 + 2),  BTN_SUBMIT_TEXT]
-            ]
+            [self.win['form'].derwin(1, 10, self.form['h'] - 3, self.form['w'] // 2 - 12), \
+                    BTN_CANCEL_TEXT],
+            [self.win['form'].derwin(1, 10, self.form['h'] - 3, self.form['w'] // 2 + 2), \
+                    BTN_SUBMIT_TEXT]
+        ]
 
         for i in range(len(self.btns)):
-            self.draw_button(self.btns[i], i == 0)
+            draw_button(self.btns[i], i == 0)
 
-        self.win_form.refresh()
-
-    def draw_button(self, btn, highlight = False):
-        color = curses.color_pair(NC_COLOR_TAB_SEL[0] if highlight else NC_COLOR_TAB[0])
-
-        btn[0].clear()
-        btn[0].addstr(0, 0, alignc(9, btn[1]), color)
-        btn[0].refresh()
+        self.win['form'].refresh()
 
     def nav(self, difference):
-        """ navigate between form elements """
+        # navigate between form elements
 
-        num_fields  = len(self.fields)
-        new_index   = (self.tab_index + difference) % (num_fields + 2) # two buttons: cancel, submit
+        num_fields = len(self.data['fields'])
 
-        """ deselect a button if it was selected """
-        if self.tab_index >= num_fields:
-            self.draw_button(self.btns[self.tab_index - num_fields], highlight = False)
+        # two buttons: cancel, submit
+        new_index = (self.form['tab_index'] + difference) % (num_fields + 2)
 
-        self.tab_index = new_index
+        # deselect a button if it was selected
+        if self.form['tab_index'] >= num_fields:
+            draw_button(self.btns[self.form['tab_index'] - num_fields], highlight=False)
 
-        if self.tab_index < num_fields:
-            """ select a form input """
+        self.form['tab_index'] = new_index
+
+        if self.form['tab_index'] < num_fields:
+            # select a form input
             curses.curs_set(1)
-            self.input[self.tab_index].edit()
+            self.win['input'][self.form['tab_index']].edit()
 
-            self.input_values[self.tab_index] = self.input[self.tab_index].gather().strip(' ')
+            self.win['input_values'][self.form['tab_index']] = \
+                    self.win['input'][self.form['tab_index']].gather().strip(' ')
             self.nav(1)
 
         else:
             curses.curs_set(0)
-            self.draw_button(self.btns[self.tab_index - num_fields], highlight = True)
+            draw_button(self.btns[self.form['tab_index'] - num_fields], highlight=True)
 
     def status(self, msg):
-        self.win_statusbar.clear()
-        self.win_statusbar.addstr(0, 0, alignc(self.formW - 2, msg))
-        self.win_statusbar.refresh()
+        self.win['statusbar'].clear()
+        self.win['statusbar'].addstr(0, 0, alignc(self.form['w'] - 2, msg))
+        self.win['statusbar'].refresh()
 
-    def key_input(self, c):
-        if c == KEYCODE_TAB:
+    def key_input(self, key):
+        if key == KEYCODE_TAB:
             self.nav(1)
 
-        elif c == KEYCODE_NEWLINE or c == KEYCODE_RETURN:
-            btn_index = self.tab_index - len(self.fields)
+        elif key == KEYCODE_NEWLINE or key == KEYCODE_RETURN:
+            btn_index = self.form['tab_index'] - len(self.data['fields'])
 
             if btn_index == 1:
-                """ submit """
+                # submit
                 try:
-                    data = {'id': self.item['id']}
+                    data = {'id': self.data['item']['id']}
 
                     i = 0
-                    for (name, width, index, tbl) in self.fields:
-                        data[index] = serialise_input(self.input_values[i], index)
+                    for (_, _, index, _) in self.data['fields']:
+                        data[index] = serialise_input(self.win['input_values'][i], index)
                         i += 1
 
                     self.status("Loading...")
 
                     try:
-                        res = self.api.req(['update', self.table], method = 'post', form = data)
+                        res = self.api.req(['update', self.data['table']], method='post', form=data)
 
                         if res and res['error'] is False:
                             self.status("")
@@ -151,11 +175,10 @@ class FormEdit:
                     except BudgetClientAPIError as code:
                         self.status("API error: {}!".format(code))
 
-                except ValueError as error:
+                except ValueError:
                     self.status("Error: bad data!")
 
-                finally:
-                    return False
+                return False
 
             self.finished()
 

@@ -1,9 +1,9 @@
 """ extra methods, e.g. to make curses programming less disgusting """
 
-import numpy as np
 import re
-from datetime import datetime
 import curses
+from datetime import datetime
+import numpy as np
 
 from app.const import SYMBOL_CURRENCY
 
@@ -22,12 +22,12 @@ def window_fill_color(window, h, w, color):
 
     return window
 
-class YMD:
+class YMD(object):
     """ date object """
     def __init__(self, ymd):
-        self.year   = ymd[0]
-        self.month  = ymd[1]
-        self.date   = ymd[2]
+        self.year = ymd[0]
+        self.month = ymd[1]
+        self.date = ymd[2]
 
     def format(self):
         return "%02d/%02d/%02d" % (self.date, self.month, self.year % 1000)
