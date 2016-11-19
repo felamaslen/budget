@@ -69,7 +69,7 @@ class PageList(Page):
 
         color = self.colors['sel'] if selected else self.colors['item']
 
-        self.list['win'].addstr(i + 1, 0, ' ' * self.winHW[1], color)
+        self.list['win'].addstr(i + 1, 0, ' ' * self.dim[1], color)
 
         if len(self.list['list']) <= j:
             return False
@@ -87,7 +87,7 @@ class PageList(Page):
         self.list['win'].clear()
 
         # draw list of items
-        max_display = self.winHW[0] - 2
+        max_display = self.dim[0] - 2
         num_display = min(max_display, len(self.data['data']))
 
         # head
@@ -133,10 +133,10 @@ class PageList(Page):
 
         self.form['open'] = False
 
-    def nav(self, dx, dy):
+    def nav(self, d_x, d_y):
         if not self.form['open']:
             self.list['selected'] = min(len(self.list['list']) - 1, max(0, \
-                    self.list['selected'] + dy))
+                    self.list['selected'] + d_y))
 
             self.draw()
             self.list['win'].refresh()
@@ -149,7 +149,7 @@ class PageList(Page):
             callback = {
                 'api': self.api,
                 'win': self.win,
-                'dim': self.winHW,
+                'dim': self.dim,
                 'callback': self.edit_form_finished
             }
 
@@ -248,8 +248,8 @@ class PageFunds(PageList):
         self.colors['up_sel'] = curses.color_pair(NC_COLOR_UP_SEL[0])
         self.colors['down_sel'] = curses.color_pair(NC_COLOR_DOWN_SEL[0])
 
-        graph_h = self.winHW[0] - 5
-        graph_w = self.winHW[1] - 5
+        graph_h = self.dim[0] - 5
+        graph_w = self.dim[1] - 5
 
         self.graph = {
             'win': self.win.derwin(graph_h, graph_w, 3, 2),
