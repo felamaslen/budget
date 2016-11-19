@@ -1,6 +1,8 @@
 """ extra methods, e.g. to make curses programming less disgusting """
 
 import numpy as np
+import re
+from datetime import datetime
 import curses
 
 from app.const import SYMBOL_CURRENCY
@@ -97,4 +99,81 @@ def nav_key(c):
     dy = -1 if U else (1 if D else 0)
 
     return dx, dy, abs(dx) + abs(dy) != 0
+
+""" data functions """
+def date_from_input(item):
+    """ gets year, month and date from user input """
+    if not re.match('[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,4})?', item):
+        raise ValueError('Bad date')
+
+    split = item.split('/')
+
+    if len(split) == 2:
+        y = datetime.now().year
+
+        d, m = split
+
+    elif len(split) == 3:
+        d, m, y = split
+
+        y = int(y)
+        if y < 100:
+            y += 2000
+
+    else:
+        raise ValueError('Bad date')
+
+    return y, int(m), int(d)
+
+def cost_from_input(item):
+    """ cost is input in pounds, but stored as pence """
+    return int(float(re.sub('[^0-9\.]', '', item)) * 100)
+
+def serialise(item, data_type):
+    """ user input -> REST output data """
+
+    if data_type == 'date':
+        y, m, d = date_from_input(item)
+
+        return [y, m, d]
+
+    if data_type == 'cost':
+        return cost_from_input(item)
+
+    if data_type == 'units':
+        return str(float(item)) # make sure item is numeric
+
+    return item
+
+def deserialise(item, data_type, width = None):
+    """ REST output data -> user output display """
+
+    if data_type == 'date':
+        return YMD(item).format()
+
+    if data_type in ['cost', 'value']:
+        align = not width is None
+
+        return format_currency(item, width, align)
+
+    return item if width is None else ellipsis(item, width)
+
+def serialise_input(item, data_type):
+    """
+    user input -> REST input data
+    (only basic validation since this is a client)
+    """
+
+    if data_type == 'date':
+        y, m, d = date_from_input(item)
+
+        return ','.join([str(y), str(m), str(d)])
+
+    return serialise(item, data_type)
+
+def display_input(item, data_type, width = None):
+    """ user input -> user output display """
+    """ essentially does nothing, except clean things up a bit """
+
+    return deserialise(serialise(item, data_type), data_type, width)
 
