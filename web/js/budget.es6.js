@@ -33,9 +33,9 @@
   const GRAPH_FUND_ITEM_TENSION = 0.85;
   const GRAPH_FUND_HISTORY_WIDTH = 500;
   const GRAPH_FUND_HISTORY_WIDTH_NARROW = 400;
-  const GRAPH_FUND_HISTORY_TENSION = 0.65;
+  const GRAPH_FUND_HISTORY_TENSION = 0.85;
   const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
-  const GRAPH_FUND_HISTORY_LINE_WIDTH = 1.5;
+  const GRAPH_FUND_HISTORY_LINE_WIDTH = 1;
   const GRAPH_FUND_HISTORY_POINT_RADIUS = 3;
 
   const GRAPH_BALANCE_NUM_TICKS = 5;
@@ -2304,7 +2304,7 @@
 
       // plot past data
       if (this.data) {
-        this.lineWidth = 2;
+        this.lineWidth = GRAPH_FUND_HISTORY_LINE_WIDTH;
 
         this.dataZoomed.forEach(line => {
           this.drawCubicLine(line, this.colorMajor);
@@ -3512,7 +3512,6 @@
           data:   this.history.history,
           range:  [0, this.history.totalTime, minValue, maxValue],
           pad:    [24, 0, 0, 0],
-          lineWidth: GRAPH_FUND_HISTORY_LINE_WIDTH,
           startTime: this.history.startTime
         });
       }
