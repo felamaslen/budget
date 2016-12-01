@@ -7,6 +7,7 @@ include
 **/*.pyc
 srv/db_info.py
 resources/serial
+resources/tickers.csv
 web/js/budget.es5.js
 web/js/main.min.js
 web/css/budget.css
