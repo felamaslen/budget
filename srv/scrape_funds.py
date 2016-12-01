@@ -65,8 +65,11 @@ def get_tickers():
             try:
                 tickers[row[0]] = row[1]
             except IndexError:
-                # invalid csv file row
-                pass
+                try:
+                    tickers[row[0]] = ''
+                except IndexError:
+                    # invalid csv file row
+                    pass
 
     return tickers
 
@@ -205,15 +208,20 @@ class FundScraper(object):
         rows = []
         if holdings is not None:
             for (security, perc) in holdings:
+                do_item = True
+
                 if security in self.tickers:
                     code = self.tickers[security]
+                elif self.quiet:
+                    do_item = False
                 else:
                     code = raw_input("Enter ticker for '%s': " % security)
 
-                    self.tickers[security] = code
                     self.ticker_added = True
+                    self.tickers[security] = code
 
-                rows.append([uid, security, code, cost, perc])
+                if do_item and len(code) > 0:
+                    rows.append([uid, security, code, cost, perc])
 
             self.fund_holdings_rows += rows
 
