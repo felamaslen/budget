@@ -692,9 +692,10 @@ class stocks(processor):
         result = self.db.query("""
         SELECT code, name, SUM(weight * subweight) AS sum_weight
         FROM stocks
+        WHERE uid = %s
         GROUP BY code
         ORDER BY sum_weight DESC
-        """, [])
+        """, [self.uid])
 
         if result is False:
             return False
