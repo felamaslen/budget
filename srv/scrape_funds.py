@@ -89,8 +89,7 @@ class FundScraper(object):
         self.verbose = '-v' in sys.argv
         self.quiet = '-q' in sys.argv
 
-        self.fund_sell_price = {'hl': {}}
-        self.fund_holdings = {'hl': {}}
+        self.fund_data_cache = {'hl': {}}
 
         self.fund_holdings_rows = []
 
@@ -228,10 +227,6 @@ class FundScraper(object):
         elif self.verbose:
             print("[WARN]: Couldn't get holdings for %s" % name)
 
-        # don't scrape the same fund twice
-        if _hash not in self.fund_holdings[broker]:
-            self.fund_holdings[broker][_hash] = holdings
-
     def scrape_price(self, name, _hash, units):
         broker = get_fund_broker(name)
         if broker is None:
@@ -246,17 +241,20 @@ class FundScraper(object):
         elif not self.quiet:
             print("[ERROR]: %s" % E_SCRAPE)
 
-        # don't scrape the same fund twice
-        if _hash not in self.fund_sell_price[broker]:
-            self.fund_sell_price[broker][_hash] = price
-
         return price
 
-    def get_fund_data(self, broker, name):
+    def get_fund_data(self, broker, name, _hash):
         """ gets raw html data for scraping """
-        url = self.get_fund_url(broker, name)
+        if _hash in self.fund_data_cache[broker]:
+            # don't make duplicate requests
+            return self.fund_data_cache[broker][_hash]
 
-        return None if url is None else self.download_url(url)
+        url = self.get_fund_url(broker, name)
+        data = None if url is None else self.download_url(url)
+
+        self.fund_data_cache[broker][_hash] = data
+
+        return data
 
     def add_cache_item(self, broker, _hash, price, units):
         try:
@@ -321,27 +319,15 @@ class FundScraper(object):
 
     def get_top_holdings(self, broker, name, _hash):
         """ gets the top stock holdings on a fund """
-        if _hash in self.fund_holdings[broker]:
-            # holdings already scraped (i.e. duplicate fund name)
-            return self.fund_holdings[broker][_hash]
+        data = self.get_fund_data(broker, name, _hash)
 
-        data = self.get_fund_data(broker, name)
-        if data is None:
-            return None
-
-        holdings = self.process_data_holdings(data, broker, name)
+        holdings = self.process_data_holdings(data, broker)
 
         return holdings
 
     def get_current_sell_price(self, broker, name, _hash):
-        if _hash in self.fund_sell_price[broker]:
-            # price already scraped (i.e. duplicate fund name)
-            return self.fund_sell_price[broker][_hash]
-
-        # price not scraped; now we must scrape
-        data = self.get_fund_data(broker, name)
-        if data is None:
-            return None
+        """ gets the current sell price for a fund """
+        data = self.get_fund_data(broker, name, _hash)
 
         price = self.process_data_price(data, broker)
 
@@ -385,16 +371,16 @@ class FundScraper(object):
 
             return None
 
-    def process_data_holdings(self, data, broker, name):
+    def process_data_holdings(self, data, broker):
         if data is None or len(data) == 0:
             return None
 
         if broker == 'hl':
-            return self.process_data_holdings_hl(data, name)
+            return self.process_data_holdings_hl(data)
 
         return None
 
-    def process_data_holdings_hl(self, data, name):
+    def process_data_holdings_hl(self, data):
         raw = re.sub(r'\t+', '', data.replace("\n", '').replace("\r", ''))
 
         parts = [
