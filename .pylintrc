@@ -21,7 +21,7 @@ persistent=yes
 # usually to register additional checkers.
 load-plugins=
 
-ignored-modules = mechanize, flask
+ignored-modules = mechanize, flask, mysql
 
 
 [MESSAGES CONTROL]

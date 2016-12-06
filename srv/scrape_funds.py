@@ -10,11 +10,11 @@ import time
 import mechanize
 import csv
 
-from db import database
+from db import Database
 from misc import strng, fund_hash
 from config import BASE_DIR
 
-DB = database()
+DB = Database()
 
 E_CACHE = "Couldn't activate cache"
 E_DATA = "Data not correctly formatted"

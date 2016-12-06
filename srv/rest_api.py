@@ -5,7 +5,7 @@ Main class for serving data to the clients
 import json
 from collections import deque
 
-from srv.db import database
+from srv.db import Database
 from srv.user import User
 
 from srv.config import IP_BAN_TIME
@@ -19,7 +19,7 @@ class CommandAPI(object):
         self.res = {} # response data
 
         """ new database connection """
-        self.dbx = database()
+        self.dbx = Database()
 
         task = deque(task)
 
@@ -65,7 +65,7 @@ class WebAPI(object):
     """ api wrapper for the web app, to handle requests """
     def __init__(self, request):
         # new database connection
-        self.dbx = database()
+        self.dbx = Database()
 
         # headers
         header_forward = request.headers.getlist("X-Forwarded-For")
