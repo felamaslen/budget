@@ -7,16 +7,18 @@ import time
 from hashlib import md5
 import re
 
-from config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
+from srv.config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
 
 def file_get_contents(filename):
+    """ opens a file and gets its contents """
     if not os.path.isfile(filename):
         return None
 
-    with open(filename) as f:
-        return f.read()
+    with open(filename) as handler:
+        return handler.read()
 
 def file_put_contents(filename, text):
+    """ writes to a file """
     try:
         target = open(filename, 'w')
 
@@ -27,22 +29,25 @@ def file_put_contents(filename, text):
     except IOError:
         return 1
 
-def new_serial(oldSerial = None):
+def new_serial(old_serial=None):
+    """ generates a new serial for caching purposes (web app) """
     date = time.strftime("%Y%m%d")
 
-    if oldSerial is None or oldSerial[:8] is not date:
-        serialIndex = 0
+    if old_serial is None or old_serial[:8] is not date:
+        serial_index = 0
     else:
-        serialIndex = int(oldSerial[8:]) + 1
+        serial_index = int(old_serial[8:]) + 1
 
-    return date + str(serialIndex)
+    return date + str(serial_index)
 
 def get_serial():
+    """ gets the current serial for caching purposes (web app) """
     serial = file_get_contents(SERIAL_FILE)
 
     return new_serial() if serial is None else serial
 
 def set_serial():
+    """ updates the serial to clear web app cache """
     serial = file_get_contents(SERIAL_FILE)
 
     next_serial = new_serial(serial)
@@ -52,12 +57,15 @@ def set_serial():
     file_put_contents(SERIAL_FILE, next_serial)
 
 def fund_hash(fund):
+    """ gets the fund name md5 hash """
     return md5(fund + FUND_SALT).hexdigest()
 
 def strng(the_string):
+    """ encodes a string with utf-8 """
     return u''.join(the_string).encode('utf-8')
 
-def list_data_schema(table, do_id = True):
+def list_data_schema(table, do_id=True):
+    """ builds form schema for list pages """
     schema = {}
     for (key, value) in LIST_DATA_FORM_SCHEMA[table].items():
         schema[key] = value
@@ -65,9 +73,9 @@ def list_data_schema(table, do_id = True):
     if do_id:
         schema['id'] = ('int', False)
 
-    schema['date'] = ('date',      True)
-    schema['item'] = ('string',    True)
-    schema['cost'] = ('int',       True)
+    schema['date'] = ('date', True)
+    schema['item'] = ('string', True)
+    schema['cost'] = ('int', True)
 
     return schema
 
@@ -80,9 +88,9 @@ def deserialise_date(string):
 
     year, month, date = string.split(',')
 
-    year    = int(year)
-    month   = int(month)
-    date    = int(date)
+    year = int(year)
+    month = int(month)
+    date = int(date)
 
     if month < 1 or month > 12:
         raise ValueError("Date's month is out of range")
@@ -99,11 +107,12 @@ def deserialise_date(string):
 
     return (year, month, date)
 
-def get_table_total(table, db, uid):
+def get_table_total(table, dbx, uid):
+    """ gets the total cost of all items in a list """
     if table == 'overview':
         return -1
 
-    query = db.query("""
+    query = dbx.query("""
     SELECT SUM(cost) AS total FROM `%s` WHERE uid = %d
     """ % (table, uid), [])
 
