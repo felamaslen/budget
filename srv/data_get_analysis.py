@@ -48,7 +48,7 @@ def period_condition_weekly(index):
     condition = """(
         year > %s OR (year = %s AND (month > %s OR (month = %s AND date >= %s)))
     ) AND (
-        year < %s OR (year = %s AND (month < %s OR (month = %s AND month < %s)))
+        year < %s OR (year = %s AND (month < %s OR (month = %s AND date < %s)))
     )"""
 
     condition_args = [year0, year0, month0, month0, date0, \
