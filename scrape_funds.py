@@ -7,12 +7,12 @@ Scrapes fund values (prices, top holdings) from the internet
 import sys
 import re
 import time
-import mechanize
 import csv
+import mechanize
 
-from db import Database
-from misc import strng, fund_hash
-from config import BASE_DIR
+from srv.db import Database
+from srv.misc import strng, fund_hash
+from srv.config import BASE_DIR
 
 DB = Database()
 
@@ -26,7 +26,15 @@ FUND_REGEX = r'^(.*)\s\((accum|inc)\.?\)$'
 
 TICKERS = BASE_DIR + '/resources/tickers.csv'
 
+def match_parts_regex(parts, data):
+    """ builds a regex out of parts, and matches strng with it """
+    regex = ''.join([re.escape(item) if not_regex else item \
+        for (item, not_regex) in parts])
+
+    return re.findall(regex, data)
+
 def get_fund_broker(name):
+    """ get the broker of a fund (only does HL for the moment) """
     if not re.search(FUND_REGEX, name):
         return None
 
@@ -35,12 +43,57 @@ def get_fund_broker(name):
 
     return broker
 
+def process_data_holdings(data, broker):
+    """ gets the top holdings from raw html """
+    if data is None or len(data) == 0:
+        return None
+
+    if broker == 'hl':
+        return process_data_holdings_hl(data)
+
+    return None
+
+def process_data_holdings_hl(data):
+    """ gets the top holdings from raw html data (HL) """
+    raw = re.sub(r'\t+', '', data.replace("\n", '').replace("\r", ''))
+
+    parts = [
+        ('<table class="factsheet-table" summary="Top 10 holdings">', True),
+        (r'(.*?)', False),
+        ('</table>', True)
+    ]
+
+    match_table = match_parts_regex(parts, raw)
+
+    if len(match_table) == 0:
+        return None
+
+    match_rows = re.findall(r'\<tr[^\>]*\>(.*?)\<\/tr\>', match_table[0])
+
+    regex_cells = r'\<td[^\>]*\>(.*?)\<\/td\>'
+
+    holdings = []
+
+    for row in match_rows:
+        match_cells = re.findall(regex_cells, row)
+
+        if len(match_cells) == 2:
+            name = re.sub(r'\<[^\>]*\>', '', match_cells[0])
+
+            try:
+                value = float(re.sub(r'[^\d\.]', '', match_cells[1]))
+
+                holdings.append([name, value])
+            except ValueError:
+                pass
+
+    return holdings
+
 def get_fund_url_hl(name):
     """
     returns a URL like:
     http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
     """
-
     matches = re.findall(FUND_REGEX, name)
 
     human_name = matches[0][0]
@@ -51,7 +104,8 @@ def get_fund_url_hl(name):
 
     first_letter = system_name[:1]
 
-    base_url = "http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results"
+    base_url = "http://www.hl.co.uk/funds/fund-discounts,-prices" + \
+            "--and--factsheets/search-results"
 
     return "%s/%s/%s-%s" % (base_url, first_letter, system_name, system_type)
 
@@ -76,35 +130,40 @@ def get_tickers():
 def save_tickers(tickers):
     """ write ticker values to resource file """
     with open(TICKERS, 'wb') as csvfile:
-        writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(csvfile, delimiter=',', quotechar='"', \
+                quoting=csv.QUOTE_MINIMAL)
 
         for name in tickers:
             writer.writerow([name, tickers[name]])
 
+TIME_NOW = int(time.time())
+
 class FundScraper(object):
     """ contains methods to scrape fund values """
     def __init__(self):
-        get_holdings = 'holdings' in sys.argv
-
-        self.verbose = '-v' in sys.argv
-        self.quiet = '-q' in sys.argv
+        self.switch = {
+            'verbose': '-v' in sys.argv,
+            'quiet': '-q' in sys.argv,
+            'holdings': 'holdings' in sys.argv
+        }
 
         self.fund_data_cache = {'hl': {}}
-
         self.fund_holdings_rows = []
-
-        self.time_now = int(time.time())
-
         self.new_cache_cid = None
 
+        self.ticker = {
+            'added': None,
+            'list': []
+        }
+
         if self.get_funds() is False:
-            if not self.quiet:
-                print("[FATAL]: %s" % E_DB)
+            if not self.switch['quiet']:
+                print "[FATAL]: %s" % E_DB
             return
 
         self.setup_browser()
 
-        self.scrape(get_holdings)
+        self.scrape(self.switch['holdings'])
 
     def setup_browser(self):
         """ spoof a browser to avoid detection """
@@ -121,7 +180,8 @@ class FundScraper(object):
                 max_time=1)
 
         # user agent
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
+        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' + \
+                '(KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
 
         self.browser.addheaders = [('User-agent', user_agent)]
 
@@ -130,13 +190,13 @@ class FundScraper(object):
         total = len(self.funds)
 
         # get saved security tickers
-        self.tickers = get_tickers()
-        self.ticker_added = False
+        self.ticker['list'] = get_tickers()
+        self.ticker['added'] = False
 
         key = 0
         for (name, uid, _hash, units, cost) in self.funds:
-            if not self.quiet:
-                print("[%d/%d]: %s..." % (key + 1, total, name))
+            if not self.switch['quiet']:
+                print "[%d/%d]: %s..." % (key + 1, total, name)
 
             if holdings:
                 # get fund top holdings
@@ -146,15 +206,15 @@ class FundScraper(object):
                 # get fund prices
                 price = self.scrape_price(name, _hash, units)
 
-                if self.verbose:
-                    print("Error, skipping" if price is None else \
-                            "[price] %s" % price)
+                if self.switch['verbose']:
+                    print "Error, skipping" if price is None else \
+                            "[price] %s" % price
 
             key += 1
 
         if holdings:
-            if self.ticker_added:
-                save_tickers(self.tickers)
+            if self.ticker['added']:
+                save_tickers(self.ticker['list'])
 
             self.save_holdings()
 
@@ -165,24 +225,23 @@ class FundScraper(object):
                 UPDATE fund_cache_time SET `done` = 1 WHERE `cid` = %s
                 """, [self.new_cache_cid])
 
-                if done_query is False and not self.quiet:
-                    print("[ERROR]: %s" % E_CACHE)
+                if done_query is False and not self.switch['quiet']:
+                    print "[ERROR]: %s" % E_CACHE
 
     def save_holdings(self):
         """ saves the scraped stock holdings to the database """
-
         rows = self.fund_holdings_rows
 
-        if self.verbose:
-            print("Saving new holding values...")
+        if self.switch['verbose']:
+            print "Saving new holding values..."
 
         delete_query = DB.query("""
         TRUNCATE stocks
         """)
 
         if delete_query is False:
-            if not self.quiet:
-                print("[ERROR]: %s" % E_DB)
+            if not self.switch['quiet']:
+                print "[ERROR]: %s" % E_DB
             return
 
         for (uid, security, code, cost, perc) in rows:
@@ -192,8 +251,8 @@ class FundScraper(object):
             """, [uid, security, code, cost, perc])
 
             if insert_query is False:
-                if not self.quiet:
-                    print("[ERROR]: %s" % E_DB)
+                if not self.switch['quiet']:
+                    print "[ERROR]: %s" % E_DB
                 return
 
     def scrape_holdings(self, name, uid, _hash, cost):
@@ -209,25 +268,26 @@ class FundScraper(object):
             for (security, perc) in holdings:
                 do_item = True
 
-                if security in self.tickers:
-                    code = self.tickers[security]
-                elif self.quiet:
+                if security in self.ticker['list']:
+                    code = self.ticker['list'][security]
+                elif self.switch['quiet']:
                     do_item = False
                 else:
                     code = raw_input("Enter ticker for '%s': " % security)
 
-                    self.ticker_added = True
-                    self.tickers[security] = code
+                    self.ticker['added'] = True
+                    self.ticker['list'][security] = code
 
                 if do_item and len(code) > 0:
                     rows.append([uid, security, code, cost, perc])
 
             self.fund_holdings_rows += rows
 
-        elif self.verbose:
-            print("[WARN]: Couldn't get holdings for %s" % name)
+        elif self.switch['verbose']:
+            print "[WARN]: Couldn't get holdings for %s" % name
 
     def scrape_price(self, name, _hash, units):
+        """ scrapes a fund's price """
         broker = get_fund_broker(name)
         if broker is None:
             return None
@@ -238,8 +298,8 @@ class FundScraper(object):
             # cache this item
             self.add_cache_item(broker, _hash, price, units)
 
-        elif not self.quiet:
-            print("[ERROR]: %s" % E_SCRAPE)
+        elif not self.switch['quiet']:
+            print "[ERROR]: %s" % E_SCRAPE
 
         return price
 
@@ -257,6 +317,7 @@ class FundScraper(object):
         return data
 
     def add_cache_item(self, broker, _hash, price, units):
+        """ inserts new item into the latest fund cache """
         try:
             self.insert_new_cid()
 
@@ -267,8 +328,8 @@ class FundScraper(object):
             """, [_hash, broker])
 
             if hash_exists_query is False:
-                if not self.quiet:
-                    print("[ERROR]: %s" % E_DB)
+                if not self.switch['quiet']:
+                    print "[ERROR]: %s" % E_DB
                 return
 
             hash_exists = False
@@ -284,8 +345,8 @@ class FundScraper(object):
                 """, [broker, _hash])
 
                 if hash_put_query is False:
-                    if not self.quiet:
-                        print("[ERROR]: %s" % E_DB)
+                    if not self.switch['quiet']:
+                        print "[ERROR]: %s" % E_DB
                     return
 
                 fid = DB.last_insert_id()
@@ -296,23 +357,24 @@ class FundScraper(object):
             """, [self.new_cache_cid, fid, price, units])
 
             if cache_query is False:
-                if not self.quiet:
-                    print("[ERROR]: %s" % E_DB)
+                if not self.switch['quiet']:
+                    print "[ERROR]: %s" % E_DB
 
         except EnvironmentError:
             # database error
             return
 
     def insert_new_cid(self):
+        """ inserts new item into the fund cache list """
         if self.new_cache_cid is None:
             # create a new cache item
             query_new_item = DB.query("""
             INSERT INTO fund_cache_time (`time`, `done`) VALUES (%s, 0)
-            """, [self.time_now])
+            """, [TIME_NOW])
 
             if query_new_item is False:
-                if not self.quiet:
-                    print("[ERROR]: %s" % E_DB)
+                if not self.switch['quiet']:
+                    print "[ERROR]: %s" % E_DB
                 raise EnvironmentError
 
             self.new_cache_cid = DB.last_insert_id()
@@ -321,7 +383,7 @@ class FundScraper(object):
         """ gets the top stock holdings on a fund """
         data = self.get_fund_data(broker, name, _hash)
 
-        holdings = self.process_data_holdings(data, broker)
+        holdings = process_data_holdings(data, broker)
 
         return holdings
 
@@ -334,6 +396,7 @@ class FundScraper(object):
         return price
 
     def process_data_price(self, data, broker):
+        """ gets the fund price from raw html """
         if data is None or len(data) == 0:
             return None
 
@@ -343,7 +406,10 @@ class FundScraper(object):
         return None
 
     def process_data_price_hl(self, data):
-        # build a regex to match the specific part of the html containing the bid (sell) price
+        """ gets the fund price from raw html (HL) """
+
+        # build a regex to match the specific part of the html
+        # containing the bid (sell) price
         match_parts = [
             ('<div id="security-price">', True),
             (r'.*', False),
@@ -355,69 +421,18 @@ class FundScraper(object):
             ('</span>', True)
         ]
 
-        regex = ''.join([re.escape(item) if not_regex else item \
-            for (item, not_regex) in match_parts])
-
         data_proc = data.replace("\n", '').replace("\r", '').replace(',', '')
 
-        matches = re.findall(regex, data_proc)
+        matches = match_parts_regex(match_parts, data_proc)
 
         try:
             price = float(matches[0][0])
             return price
         except ValueError:
-            if self.verbose:
-                print("[ERROR] %s" % E_DATA)
+            if self.switch['verbose']:
+                print "[ERROR] %s" % E_DATA
 
             return None
-
-    def process_data_holdings(self, data, broker):
-        if data is None or len(data) == 0:
-            return None
-
-        if broker == 'hl':
-            return self.process_data_holdings_hl(data)
-
-        return None
-
-    def process_data_holdings_hl(self, data):
-        raw = re.sub(r'\t+', '', data.replace("\n", '').replace("\r", ''))
-
-        parts = [
-            ('<table class="factsheet-table" summary="Top 10 holdings">', True),
-            (r'(.*?)', False),
-            ('</table>', True)
-        ]
-
-        regex_table = ''.join([re.escape(item) if not_regex else item \
-                for (item, not_regex) in parts])
-
-        match_table = re.findall(regex_table, raw)
-
-        if len(match_table) == 0:
-            return None
-
-        regex_rows = r'\<tr[^\>]*\>(.*?)\<\/tr\>'
-        match_rows = re.findall(regex_rows, match_table[0])
-
-        regex_cells = r'\<td[^\>]*\>(.*?)\<\/td\>'
-
-        holdings = []
-
-        for row in match_rows:
-            match_cells = re.findall(regex_cells, row)
-
-            if len(match_cells) == 2:
-                name = re.sub(r'\<[^\>]*\>', '', match_cells[0])
-
-                try:
-                    value = float(re.sub(r'[^\d\.]', '', match_cells[1]))
-
-                    holdings.append([name, value])
-                except ValueError:
-                    pass
-
-        return holdings
 
     def download_url(self, url):
         """ downloads data using a spoofed browser """
@@ -426,22 +441,24 @@ class FundScraper(object):
         return response.read()
 
     def get_fund_url(self, broker, name):
+        """ gets the url of a fund to scrape """
         url = None
 
         if broker == 'hl':
             url = get_fund_url_hl(name)
 
         if url is None:
-            if not self.quiet:
-                print("[WARN]: %s" % E_URL)
+            if not self.switch['quiet']:
+                print "[WARN]: %s" % E_URL
             return None
 
-        if self.verbose:
-            print("[dl] %s" % url)
+        if self.switch['verbose']:
+            print "[dl] %s" % url
 
         return url
 
     def get_funds(self):
+        """ get list of funds in database """
         query = DB.query("""
         SELECT item, uid, SUM(units) AS units, SUM(cost) AS cost
         FROM funds
@@ -458,6 +475,6 @@ class FundScraper(object):
 
         return True
 
-scraper = FundScraper()
+SCRAPER = FundScraper()
 
 DB.close()
