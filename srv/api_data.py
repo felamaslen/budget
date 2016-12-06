@@ -3,49 +3,43 @@ Operates on (retrieve, add, edit, delete) data in the database
 Does not handle authentication
 """
 
-import time
+from srv.config import LIST_CATEGORIES
+from srv.data_get import \
+        Overview, ListAll, ListData, \
+        Funds, FundHistory,\
+        Pie, Search, Stocks
+from srv.data_get_analysis import Analysis, AnalysisCategory
+from srv.data_post import \
+        UpdateOverview, UpdateListData, \
+        AddListData, DeleteListData
 
-from config import LIST_CATEGORIES
+from srv.api_data_methods import Response
 
-from data_get import \
-        overview, list_all, list_data, \
-        funds, fund_history,\
-        pie, search, stocks, analysis, analysis_category
-
-from data_post import \
-        update_overview, update_list_data, \
-        add_list_data, delete_list_data
-
-from api_data_methods import response
-
-class retrieve(response):
+class Retrieve(Response):
     """ retrieves data from the database """
     def __init__(self, db, uid, task, args):
-        super(retrieve, self).__init__(db, uid, task, args)
+        super(Retrieve, self).__init__(db, uid, task, args)
 
-    def execute(self):
-        super(retrieve, self).execute()
+    def get_processor(self, arg):
+        """ gets the correct processor based on the passed argument """
+        proc = None
 
-        this_processor = None
-
-        arg = self.task.popleft()
-
-        """ decide which processor to run """
         if arg == 'analysis':
-            this_processor = analysis(self.db, self.uid, self.task)
+            proc = Analysis(self.dbx, self.uid, self.task)
+
         elif arg == 'analysis_category':
-            this_processor = analysis_category(self.db, self.uid, self.task)
+            proc = AnalysisCategory(self.dbx, self.uid, self.task)
 
         elif arg == 'all':
-            this_processor = list_all(self.db, self.uid)
+            proc = ListAll(self.dbx, self.uid)
 
         elif arg == 'overview':
-            this_processor = overview(self.db, self.uid)
+            proc = Overview(self.dbx, self.uid)
 
         elif arg == 'funds':
             history = 'history' in self.args
 
-            this_processor = funds(self.db, self.uid, history)
+            proc = Funds(self.dbx, self.uid, history)
 
         elif arg in LIST_CATEGORIES:
             offset = self.task.popleft() if len(self.task) > 0 else 0
@@ -58,22 +52,32 @@ class retrieve(response):
             if offset < 0:
                 offset = 0
 
-            this_processor = list_data(self.db, self.uid, arg, offset)
+            proc = ListData(self.dbx, self.uid, arg, offset)
 
         elif arg == 'fund_history':
             deep = 'deep' in self.args
-            this_processor = fund_history(self.db, self.uid, deep)
+            proc = FundHistory(self.dbx, self.uid, deep)
 
         elif arg == 'pie':
-            this_processor = pie(self.db, self.uid, self.task)
+            proc = Pie(self.dbx, self.uid, self.task)
 
         elif arg == 'search':
-            this_processor = search(self.db, self.uid, self.task)
+            proc = Search(self.dbx, self.uid, self.task)
 
         elif arg == 'stocks':
-            this_processor = stocks(self.db, self.uid)
+            proc = Stocks(self.dbx, self.uid)
 
-        """ decide whether the processor is valid """
+        return proc
+
+    def execute(self):
+        super(Retrieve, self).execute()
+
+        arg = self.task.popleft()
+
+        # decide which processor to run
+        this_processor = self.get_processor(arg)
+
+        # decide whether the processor is valid
         if this_processor is None:
             result = None
         elif this_processor.error:
@@ -82,32 +86,33 @@ class retrieve(response):
             result = this_processor.process()
 
         if result is not None:
-            self.error      = True if result is False else this_processor.error
-            self.errorText  = this_processor.errorText
-            self.data       = this_processor.data
+            self.error = True if result is False else this_processor.error
+            self.error_text = this_processor.error_text
+            self.data = this_processor.data
 
         else:
-            self.error      = True
-            self.errorText  = "Unknown task"
+            self.error = True
+            self.error_text = "Unknown task"
 
-class update(response):
+class Update(Response):
     """ updates data in the database """
     def __init__(self, db, uid, task, args, form):
         self.form = form
+        self.new_total = None
 
-        super(update, self).__init__(db, uid, task, args)
+        super(Update, self).__init__(db, uid, task, args)
 
     def get_response(self):
-        response = super(update, self).get_response()
+        response = super(Update, self).get_response()
 
         if self.new_total is not None and response is not None:
-            """ add new total to response after updating """
-            response['extra'] = { 'total': self.new_total }
+            # add new total to response after updating
+            response['extra'] = {'total': self.new_total}
 
         return response
 
     def execute(self):
-        super(update, self).execute()
+        super(Update, self).execute()
 
         this_processor = None
 
@@ -118,13 +123,14 @@ class update(response):
             arg = self.task.popleft()
 
             if arg == 'overview':
-                this_processor = update_overview(self.db, self.uid, self.form)
+                this_processor = UpdateOverview(self.dbx, self.uid, self.form)
 
             else:
                 get_total = True
-                this_processor = update_list_data(self.db, self.uid, arg, self.form)
+                this_processor = UpdateListData(self.dbx, self.uid, \
+                        arg, self.form)
 
-        """ decide whether the processor is valid """
+        # decide whether the processor is valid
         if this_processor is None:
             result = None
         elif this_processor.error:
@@ -133,32 +139,33 @@ class update(response):
             result = this_processor.process()
 
         if result is not None:
-            self.error      = True if result is False else this_processor.error
-            self.errorText  = this_processor.errorText
-            self.data       = this_processor.data
+            self.error = True if result is False else this_processor.error
+            self.error_text = this_processor.error_text
+            self.data = this_processor.data
 
             if get_total:
                 self.new_total = this_processor.new_total
 
         else:
-            self.error      = True
-            self.errorText  = "Unknown task"
+            self.error = True
+            self.error_text = "Unknown task"
 
-class add_delete(response):
+class AddDelete(Response):
     """ adds or deletes data to / from the database """
     def __init__(self, which, db, uid, task, args, form):
         self.form = form
-
         self.which = which
+        self.add_id = None
+        self.new_total = None
 
-        super(add_delete, self).__init__(db, uid, task, args)
+        super(AddDelete, self).__init__(db, uid, task, args)
 
     def get_response(self):
-        response = super(add_delete, self).get_response()
+        response = super(AddDelete, self).get_response()
 
         if self.error is False and response is not None:
-            """ add id and new total to response after adding item """
-            response['extra'] = { 'total': self.new_total }
+            # add id and new total to response after adding item
+            response['extra'] = {'total': self.new_total}
 
             if self.which == 'add':
                 response['extra']['id'] = self.add_id
@@ -166,34 +173,37 @@ class add_delete(response):
         return response
 
     def execute(self):
-        super(add_delete, self).execute()
+        """ run the process() method of the processor """
+        super(AddDelete, self).execute()
 
         table = None if len(self.task) == 0 else self.task.popleft()
 
         if table is None:
             self.error = True
-            self.errorText = "Must provide a table"
+            self.error_text = "Must provide a table"
 
-        self.new_total  = None
-        self.add_id     = None
+        self.new_total = None
+        self.add_id = None
 
         this_processor = None
 
         if self.which == 'add':
-            this_processor = add_list_data(self.db, self.uid, table, self.form)
+            this_processor = AddListData(self.dbx, self.uid, table, self.form)
         elif self.which == 'delete':
-            this_processor = delete_list_data(self.db, self.uid, table, self.form)
+            this_processor = DeleteListData(self.dbx, self.uid, \
+                    table, self.form)
 
         if this_processor is None:
             self.error = True
-            self.errorText = "Unknown server error"
+            self.error_text = "Unknown server error"
 
             return
 
-        result = this_processor if this_processor.error else this_processor.process()
+        result = this_processor if this_processor.error \
+                else this_processor.process()
 
-        self.error      = True if result is False else this_processor.error
-        self.errorText  = this_processor.errorText
+        self.error = True if result is False else this_processor.error
+        self.error_text = this_processor.error_text
 
         if self.error is False:
             self.new_total = this_processor.new_total

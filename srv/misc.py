@@ -108,7 +108,7 @@ def get_table_total(table, db, uid):
     """ % (table, uid), [])
 
     if query is False:
-        raise Exception
+        raise EnvironmentError
 
     total = -1
     for row in query:

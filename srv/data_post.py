@@ -1,14 +1,20 @@
-from api_data_methods import processor
+""" Methods to put or edit data in the database """
 
-from misc import strng, list_data_schema, deserialise_date, get_table_total
-from config import LIST_CATEGORIES, E_BAD_PARAMS, E_BAD_FORM, E_NO_FORM, E_NO_ITEM
+from srv.api_data_methods import Processor
 
-class update_data(processor):
-    def __init__(self, db, uid, form, schema, all_required = False):
-        super(update_data, self).__init__(db, uid)
+from srv.misc import strng, list_data_schema, deserialise_date, get_table_total
+from srv.config import LIST_CATEGORIES, E_BAD_PARAMS, \
+        E_BAD_FORM, E_NO_FORM, E_NO_ITEM
+
+class UpdateData(Processor):
+    """ general class to update data in database """
+    def __init__(self, db, uid, form, schema, all_required=False, table=None):
+        super(UpdateData, self).__init__(db, uid, form=form)
 
         self.form_raw = form
         self.all_required = all_required
+
+        self.table = table
 
         form_valid = False
 
@@ -17,85 +23,92 @@ class update_data(processor):
 
             if form_valid is False:
                 self.error = True
-                self.errorText = E_BAD_FORM
+                self.error_text = E_BAD_FORM
 
-        except Exception as paramError:
+        except ValueError as param_error:
             self.error = True
-            self.errorText = str(paramError)
+            self.error_text = str(param_error)
+
+    def set_value_from_raw(self, key, raw_value, data_type):
+        """ sets individual form items after validating them """
+        value = None
+
+        if raw_value is None:
+            raise ValueError("Form data for %s is null" % key)
+
+        if data_type == 'date':
+            value = deserialise_date(raw_value)
+
+            self.form['year'] = value[0]
+            self.form['month'] = value[1]
+            self.form['date'] = value[2]
+
+        else:
+            if data_type == 'int':
+                try:
+                    value = int(raw_value)
+                except ValueError:
+                    return False
+
+            elif data_type == 'float':
+                try:
+                    value = float(raw_value)
+                except ValueError:
+                    return False
+
+            elif data_type == 'string':
+                try:
+                    value = strng(raw_value)
+                except:
+                    raise ValueError("Error with text value for %s" % key)
+
+            if value is None:
+                return False
+
+            self.form[key] = value
+
+        return True
 
     def validate_form(self, schema):
+        """ validate form entries according to schema """
         self.form = {}
 
-        optionalCount = 0
+        optional_count = 0
 
-        hasOptional = False
+        has_optional = False
 
-        for (key, (dataType, optional)) in schema.items():
-            if not hasOptional and optional:
-                hasOptional = True
+        for (key, (data_type, optional)) in schema.items():
+            if not has_optional and optional:
+                has_optional = True
 
             if key not in self.form_raw:
                 if optional and not self.all_required:
                     continue
                 else:
-                    raise Exception("Form data for %s not supplied" % key)
+                    raise ValueError("Form data for %s not supplied" % key)
 
-            raw_value = self.form_raw[key]
+            raw_value = str(self.form_raw[key])
 
-            if raw_value is None:
-                raise Exception("Form data for %s is null" % key)
-
-            value = None
-
-            if dataType == 'date':
-                try:
-                    value = deserialise_date(raw_value)
-                except ValueError as dateError:
-                    raise Exception(dateError)
-
-                self.form['year']   = value[0]
-                self.form['month']  = value[1]
-                self.form['date']   = value[2]
-
-            else:
-                if dataType == 'int':
-                    try:
-                        value = int(raw_value)
-                    except ValueError:
-                        return False
-
-                elif dataType == 'float':
-                    try:
-                        value = float(raw_value)
-                    except ValueError:
-                        return False
-
-                elif dataType == 'string':
-                    try:
-                        value = strng(raw_value)
-                    except:
-                        raise Exception("Error with text value for %s" % key)
-
-                if value is None:
-                    return False
-
-                self.form[key] = value
+            if not self.set_value_from_raw(key, raw_value, data_type):
+                raise ValueError("Bad form data for %s" % key)
 
             if optional:
-                optionalCount += 1
+                optional_count += 1
 
-        if hasOptional and optionalCount == 0:
-            raise Exception("No optional form data supplied")
+        if has_optional and optional_count == 0:
+            raise ValueError("No optional form data supplied")
 
         return True
 
     def get_new_total(self):
-        """ gets the total cost of the table after inserting a new item,
-        or editing an item """
+        """
+        gets the total cost of the table after inserting a new item,
+        or editing an item
+        """
+        return get_table_total(self.table, self.dbx, self.uid)
 
-        return get_table_total(self.table, self.db, self.uid)
-
-class update_overview(update_data):
+class UpdateOverview(UpdateData):
+    """ update balance data for the overview page """
     def __init__(self, db, uid, form):
         form_schema = {
             'balance':  ('int', False),
@@ -103,10 +116,11 @@ class update_overview(update_data):
             'month':    ('int', False)
         }
 
-        super(update_overview, self).__init__(db, uid, form, form_schema)
+        super(UpdateOverview, self).__init__(db, uid, form, form_schema)
 
     def process(self):
-        exists_query = self.db.query("""
+        """ do the actual updating """
+        exists_query = self.dbx.query("""
         SELECT COUNT(*) AS count
         FROM balance
         WHERE uid = %s AND year = %s AND month = %s
@@ -124,40 +138,46 @@ class update_overview(update_data):
             exists = True if count == 1 else False
 
         if exists:
-            query = self.db.query("""
+            query = self.dbx.query("""
             UPDATE `balance` SET balance = %s
             WHERE uid = %s AND year = %s AND month = %s
-            """, [self.form['balance'], self.uid, self.form['year'], self.form['month']])
+            """, [self.form['balance'], self.uid, self.form['year'], \
+                    self.form['month']])
         else:
-            query = self.db.query("""
+            query = self.dbx.query("""
             INSERT INTO `balance` (uid, year, month, balance)
             VALUES (%s, %s, %s, %s)
-            """, [self.uid, self.form['year'], self.form['month'], self.form['balance']])
+            """, [self.uid, self.form['year'], self.form['month'], \
+                    self.form['balance']])
 
         if query is False:
             return False
 
         return True
 
-class update_list_data(update_data):
+class UpdateListData(UpdateData):
+    """ update an item in a list """
     def __init__(self, db, uid, table, form):
         if table not in LIST_CATEGORIES:
             self.error = True
-            self.errorText = E_BAD_PARAMS
-
-        self.table = table
+            self.error_text = E_BAD_PARAMS
 
         form_schema = list_data_schema(table)
 
-        super(update_list_data, self).__init__(db, uid, form, form_schema)
+        self.new_total = None
+
+        super(UpdateListData, self).__init__(db, uid, form, \
+                form_schema, table=table)
 
     def process(self):
-        cols = ', '.join(["%s = %%s" % col for col in self.form if col != 'id'])
+        """ do the actual updating """
+        cols = ', '.join(["%s = %%s" % col \
+                for col in self.form if col != 'id'])
 
         params = [self.form[col] for col in self.form if col != 'id']
         args = params + [self.form['id']]
 
-        query = self.db.query("""
+        query = self.dbx.query("""
         UPDATE `%s` SET %s
         WHERE uid = %d AND id = %%s
         """ % (self.table, cols, self.uid), args)
@@ -167,26 +187,29 @@ class update_list_data(update_data):
 
         try:
             self.new_total = self.get_new_total()
-        except:
+        except EnvironmentError:
             return False
 
         return True
 
-class add_list_data(update_data):
+class AddListData(UpdateData):
+    """ adds an item to a list """
     def __init__(self, db, uid, table, form):
         if table not in LIST_CATEGORIES:
             self.error = True
-            self.errorText = E_BAD_PARAMS
-
-        self.table = table
+            self.error_text = E_BAD_PARAMS
 
         form_schema = list_data_schema(table, False)
 
-        super(add_list_data, self).__init__(db, uid, form, form_schema, True)
+        self.add_id = None
+        self.new_total = None
+
+        super(AddListData, self).__init__(db, uid, form, \
+                form_schema, all_required=True, table=table)
 
         if 'item' not in self.form or len(self.form['item']) == 0:
             self.error = True
-            self.errorText = E_NO_ITEM
+            self.error_text = E_NO_ITEM
 
     def process(self):
         cols = ', '.join(["%s" % col for col in self.form])
@@ -195,51 +218,55 @@ class add_list_data(update_data):
 
         args = [self.form[col] for col in self.form]
 
-        query = self.db.query("""
+        query = self.dbx.query("""
         INSERT INTO `%s` (uid, %s) VALUES (%d, %s)
         """ % (self.table, cols, self.uid, values), args)
 
         if query is False:
             return False
 
-        self.add_id = self.db.last_insert_id() # add last insert id to the response
+        # add last insert id to the response
+        self.add_id = self.dbx.last_insert_id()
 
         try:
             self.new_total = self.get_new_total()
-        except:
+        except ValueError:
             return False
 
         return True
 
-class delete_list_data(processor):
+class DeleteListData(Processor):
+    """ delete a list item """
     def __init__(self, db, uid, table, form):
-        super(delete_list_data, self).__init__(db, uid)
-
-        if table not in LIST_CATEGORIES:
-            self.error = True
-            self.errorText = E_BAD_PARAMS
-
+        self.new_total = 0
         self.table = table
 
-        if 'id' not in form:
-            self.error = True
-            self.errorText = E_NO_FORM
+        super(DeleteListData, self).__init__(db, uid, form=form)
 
-        form_id = form['id']
+    def prepare(self):
+        if self.table not in LIST_CATEGORIES:
+            self.error = True
+            self.error_text = E_BAD_PARAMS
+
+        if 'id' not in self.form:
+            self.error = True
+            self.error_text = E_NO_FORM
+
+        form_id = self.form['id']
         try:
             form_id = int(form_id)
             if form_id < 1:
-                raise Exception
+                raise ValueError
 
             self.form_id = form_id
-        except:
+        except ValueError:
             self.error = True
-            self.errorText = E_BAD_FORM
+            self.error_text = E_BAD_FORM
 
             return
 
     def process(self):
-        query = self.db.query("""
+        query = self.dbx.query("""
         DELETE FROM `%s` WHERE uid = %d AND id = %%s
         """ % (self.table, self.uid), [self.form_id])
 
@@ -247,8 +274,8 @@ class delete_list_data(processor):
             return False
 
         try:
-            self.new_total = get_table_total(self.table, self.db, self.uid)
-        except:
+            self.new_total = get_table_total(self.table, self.dbx, self.uid)
+        except EnvironmentError:
             return False
 
         return True
