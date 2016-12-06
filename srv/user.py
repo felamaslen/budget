@@ -7,9 +7,9 @@ from hashlib import sha1
 
 from config import IP_BAN_TIME, IP_BAN_TRIES
 
-class user:
+class User(object):
     def __init__(self, db, pin = None):
-        self.db = db
+        self.dbx = db
 
         self.uid = 0
         self.name = None
@@ -33,7 +33,7 @@ class user:
         num_seconds_penalty = IP_BAN_TIME   # penalty to give if IP breaches brute force limit
         num_tries           = IP_BAN_TRIES  # number of consecutive bad login attempts to allow
 
-        ip_check_query = self.db.query("""
+        ip_check_query = self.dbx.query("""
         SELECT `time`, `count` FROM ip_login_req WHERE `ip` = %s
         """, [ip])
 
@@ -82,18 +82,18 @@ class user:
             current_time = int(time.time())
 
             if self.ip_check_exists:
-                self.db.query("""
+                self.dbx.query("""
                 UPDATE ip_login_req SET `time` = %s, `count` = %s WHERE ip = %s
                 """, [current_time, self.ip_check_count + 1, ip])
             else:
-                self.db.query("""
+                self.dbx.query("""
                 INSERT INTO ip_login_req (`ip`, `time`, `count`) VALUES (%s, %s, %s)
                 """, [ip, current_time, 1])
 
         elif self.ip_check_expired:
             """ ip made a good login after waiting for ban time to expire; delete counter """
 
-            self.db.query("""
+            self.dbx.query("""
             DELETE FROM ip_login_req WHERE `ip` = %s
             """, [ip])
 
@@ -108,7 +108,7 @@ class user:
             return False
 
         if breached_penalty is False and self.pin is not None:
-            info = self.db.query("""
+            info = self.dbx.query("""
             SELECT uid, user, api_key FROM users WHERE api_key = %s
             """, [self.password_hash()])
 
@@ -129,7 +129,7 @@ class user:
         if token is None or len(token) == 0:
             return 2
 
-        query = self.db.query("""
+        query = self.dbx.query("""
         SELECT uid, user FROM users WHERE api_key = %s
         """, [token])
 

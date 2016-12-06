@@ -17,10 +17,10 @@ app = Flask('budget')
 def api():
     api = rest_api.WebAPI(request)
 
-    if api.api_error:
+    if api.res['api_error']:
         return "Unknown server error", 500
 
-    return api.get_json(), api.response_code
+    return api.get_json(), api.res['code']
 
 @app.route('/')
 def index():
