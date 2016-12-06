@@ -472,37 +472,59 @@
     // adds commas to a long number
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-  function formatCurrency(number, raw, noZeroes, abbreviate) {
-    let absValuePounds = Math.abs(number) / 100;
+  function formatCurrency(number, options) {
+    options = options || {};
+    let result = "";
 
-    let abbreviation = "";
+    if (!options.brackets) {
+      const sign = number < 0 ? "&minus;" : "";
+      result += sign;
+    }
+
+    if (!options.noSymbol) {
+      const symbol = options.raw ? "£" : "&pound;";
+      result += symbol;
+    }
+
+    const factor = options.noDivide ? 1 : 100;
+    const absValuePounds = Math.abs(number) / factor;
 
     let log = 0;
-
-    const abbr = ["k", "m", "bn", "trn"];
-
-    if (abbreviate && number !== 0) {
-      log = Math.min(Math.floor(Math.log(absValuePounds) / Math.log(10) / 3), abbr.length);
+    let abbreviation = "";
+    if (options.abbreviate && number !== 0) {
+      const abbr = ["k", "m", "bn", "trn"];
+      log = Math.min(
+        Math.floor(Math.log(absValuePounds) / Math.log(10) / 3), abbr.length);
+      if (log > 0) {
+        abbreviation = abbr[log - 1];
+      }
     }
 
-    if (log > 0) {
-      absValuePounds = Math.round(100 * absValuePounds / Math.pow(10, log * 3)) / 100;
-
-      abbreviation = abbr[log - 1];
-    }
-    else if (typeof noZeroes === "undefined" || !noZeroes || number === 0) {
-      absValuePounds = absValuePounds.toFixed(2);
+    if (options.suffix) {
+      abbreviation += options.suffix;
     }
 
-    return (number < 0 ? "&minus;" : "") + (raw ? "£" : "&pound;")
-      + numberFormat(absValuePounds) + abbreviation;
+    const rounded = log > 0
+      ? Math.round(100 * absValuePounds / Math.pow(10, log * 3)) / 100
+      : (options.noZeroes && number !== 0
+        ? absValuePounds : absValuePounds.toFixed(2)
+      );
+
+    const formatted = numberFormat(rounded);
+    result += formatted + abbreviation;
+
+    if (options.brackets && number < 0) {
+      result = "(" + result + ")";
+    }
+
+    return result;
   }
   function formatData(val, type, raw) {
     switch (type) {
     case "date":
       return val.format();
     case "cost":
-      return formatCurrency(val, raw);
+      return formatCurrency(val, { raw: true });
     default:
       return val;
     }
@@ -1503,7 +1525,7 @@
       this.ctx.textAlign = "left";
 
       for (const tick of ticksY) {
-        const tickName = formatCurrency(tick[0], true, true);
+        const tickName = formatCurrency(tick[0], { raw: true, noZeroes: true, });
 
         this.ctx.fillText(tickName, this.padX1, tick[1]);
       }
@@ -2229,7 +2251,7 @@
     formatValue(value) {
       return this.percent
         ? value.toFixed(2) + "%"
-        : formatCurrency(value, true);
+        : formatCurrency(value, { raw: true });
     }
 
     draw() {
@@ -3349,9 +3371,20 @@
         gainAbs = value - cost;
       }
 
-      const txt = "<span class=\"value\">" + formatCurrency(value, false, false, true) + "</span>" +
-        "<span class=\"abs\">(" + formatCurrency(gainAbs, false, false, true) + ")</span>" +
-        "<span class=\"pct\">(" + pct.toFixed(1) + "%)</span>"
+      const pctFormat = formatCurrency(pct, {
+        noSymbol: true, suffix: "%", brackets: true, noDivide: true
+      })
+
+      const format = {
+        raw: false,
+        noZeroes: false,
+        abbreviate: true,
+        brackets: true
+      };
+
+      const txt = "<span class=\"value\">" + formatCurrency(value, format) + "</span>" +
+        "<span class=\"abs\">" + formatCurrency(gainAbs, format) + "</span>" +
+        "<span class=\"pct\">" + pctFormat + "</span>"
       ;
 
       return { pct, txt };
@@ -3478,12 +3511,15 @@
         const lastValue = this.history.history[this.history.history.length - 1][2];
 
         const profit = lastValue - this.costTotal;
+        const profitPct = 100 * profit / this.costTotal;
 
         // put the current value at the top of the page
         const profitSign = profit >= 0 ? "+" : "-";
 
-        const profitLabel = " (" + profitSign +
-          formatCurrency(Math.abs(profit)) + ")";
+        const profitLabel = formatCurrency(profit, { brackets: true }) +
+        "&nbsp;" + formatCurrency(profitPct, {
+          brackets: true, noSymbol: true, suffix: "%", noDivide: true
+        });
 
         const valueTime = this.history.startTime +
           this.history.history[this.history.history.length - 1][0];
@@ -4446,7 +4482,7 @@
 
               subBlockGroup.bits.forEach(subBlock => {
                 const title = capitalise(block.name) + ": " + subBlock.name + " (" +
-                  formatCurrency(subBlock.value, true) + ")";
+                  formatCurrency(subBlock.value, { raw: true }) + ")";
 
                 const $subBlock = $("<div></div>")
                 .addClass("sub-block")
