@@ -4,35 +4,32 @@ Written by Fela Maslen, 2016
 """
 
 from flask import Flask, request, render_template
-import sys
 
-import config
-import misc
-import user
-import rest_api
+from srv.config import PIE_TOLERANCE
+from srv.misc import get_serial
+from srv.rest_api import WebAPI
 
-app = Flask('budget')
+APP = Flask('budget')
 
-@app.route('/api', methods = ['GET', 'POST'])
+@APP.route('/api', methods=['GET', 'POST'])
 def api():
-    api = rest_api.WebAPI(request)
+    """ api entry point """
+    the_api = WebAPI(request)
 
-    if api.res['api_error']:
+    if the_api.res['api_error']:
         return "Unknown server error", 500
 
-    return api.get_json(), api.res['code']
+    return the_api.get_json(), the_api.res['code']
 
-@app.route('/')
+@APP.route('/')
 def index():
+    """ web app entry point """
     dev = 'dev' in request.args
-    serial = misc.get_serial()
+    serial = get_serial()
 
-    return render_template(
-        'index.html',
-        dev = dev,
-        serial = serial,
-        pie_tolerance = config.PIE_TOLERANCE
-    )
+    return render_template('index.html', dev=dev, serial=serial, \
+            pie_tolerance=PIE_TOLERANCE)
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0', port = 8000)
+    APP.run(host='0.0.0.0', port=8000)
+
