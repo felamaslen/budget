@@ -524,7 +524,7 @@
     case "date":
       return val.format();
     case "cost":
-      return formatCurrency(val, { raw: true });
+      return formatCurrency(val, { raw });
     default:
       return val;
     }
@@ -1525,7 +1525,7 @@
       this.ctx.textAlign = "left";
 
       for (const tick of ticksY) {
-        const tickName = formatCurrency(tick[0], { raw: true, noZeroes: true, });
+        const tickName = formatCurrency(tick[0], { raw: true, noZeroes: true });
 
         this.ctx.fillText(tickName, this.padX1, tick[1]);
       }
@@ -1751,11 +1751,40 @@
 
       super(options);
 
+      this.dataMinY = minY;
+      this.dataMaxY = maxY;
+
       this.colors = [COLOR_GRAPH_FUND_ITEM];
       this.lineWidth = GRAPH_FUND_ITEM_LINE_WIDTH;
       this.tension = GRAPH_FUND_ITEM_TENSION;
 
       this.data = options.data;
+
+      this.defaultWidth = this.width;
+      this.defaultHeight = this.height;
+
+      this.popout = false;
+      this.$canvas.on("click", () => this.togglePopout());
+    }
+
+    togglePopout() {
+      // make the graph larger
+      this.popout = !this.popout;
+
+      this.$canvas.toggleClass("popout", this.popout);
+
+      this.width = this.popout ? this.$canvas.width() : this.defaultWidth;
+      this.height = this.popout ? this.$canvas.height() : this.defaultHeight;
+
+      this.$canvas[0].width = this.width;
+      this.$canvas[0].height = this.height;
+
+      const minY = this.popout ? Math.floor(this.dataMinY) : this.dataMinY;
+      const maxY = this.popout ? Math.ceil(this.dataMaxY) : this.dataMaxY;
+
+      this.setRange([this.minX, this.maxX, minY, maxY]);
+
+      this.draw();
     }
 
     draw() {
@@ -1765,6 +1794,32 @@
 
       // clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
+
+      // draw axes
+      if (this.popout) {
+        this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+        this.ctx.lineWidth = 1;
+        this.ctx.fillStyle = COLOR_DARK;
+        this.ctx.textBaseline = "middle";
+        this.ctx.textAlign = "left";
+        this.ctx.font = FONT_AXIS_LABEL;
+
+        const numTicks = 5;
+        const tickSize = getTickSize(this.minY, this.maxY, numTicks);
+        for (let i = 0; i < numTicks; i++) {
+          const value = this.minY + i * tickSize;
+          const tickPos = Math.floor(this.pixY(value)) + 0.5;
+
+          const tickName = value.toFixed(1) + "%";
+          this.ctx.fillText(tickName, this.padX1, tickPos);
+
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.padX1 + 40, tickPos);
+          this.ctx.lineTo(this.width - this.padX2, tickPos);
+          this.ctx.closePath();
+          this.ctx.stroke();
+        }
+      }
 
       // plot data
       this.drawCubicLine(this.data, this.colors);
@@ -3373,7 +3428,7 @@
 
       const pctFormat = formatCurrency(pct, {
         noSymbol: true, suffix: "%", brackets: true, noDivide: true
-      })
+      });
 
       const format = {
         raw: false,
@@ -3426,10 +3481,11 @@
 
       const fundIndex = this.history.funds.indexOf(newData.i);
       if (fundIndex > -1) {
+        const start = this.history.history[0][1];
         const data = this.history.history.map(item => {
           return [
             item[0],
-            item[1][fundIndex] * newData.u
+            100 * (item[1][fundIndex] - start[fundIndex]) / start[fundIndex]
           ];
         });
 
@@ -3512,9 +3568,6 @@
 
         const profit = lastValue - this.costTotal;
         const profitPct = 100 * profit / this.costTotal;
-
-        // put the current value at the top of the page
-        const profitSign = profit >= 0 ? "+" : "-";
 
         const profitLabel = formatCurrency(profit, { brackets: true }) +
         "&nbsp;" + formatCurrency(profitPct, {
