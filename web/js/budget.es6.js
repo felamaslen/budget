@@ -1800,42 +1800,35 @@
       // draw axes
       this.ctx.lineWidth = 1;
 
-      if (this.popout) {
+      if (this.popout || (this.maxY - this.minY) < this.height / 2) {
         this.ctx.fillStyle = COLOR_DARK;
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign = "left";
         this.ctx.font = FONT_AXIS_LABEL;
 
-        const numTicks = 5;
-        const tickSize = getTickSize(this.minY, this.maxY, numTicks);
-        for (let i = 0; i < numTicks; i++) {
-          const value = this.minY + i * tickSize;
-          const tickPos = Math.floor(this.pixY(value)) + 0.5;
+        const tickPad = this.popout ? 40 : 0;
 
-          const tickName = value.toFixed(1) + "%";
-          this.ctx.fillText(tickName, this.padX1, tickPos);
+        const range = this.maxY - this.minY;
+        const inc = this.popout
+          ? Math.round(
+            Math.max(20, this.height / range) / this.height * range / 2
+          ) * 2
+          : 1;
+
+        for (let i = Math.floor(this.minY / inc) * inc; i <= this.maxY; i += inc) {
+          const tickPos = Math.floor(this.pixY(i)) + 0.5;
+
+          if (this.popout) {
+            const tickName = i.toFixed(1) + "%";
+            this.ctx.fillText(tickName, this.padX1, tickPos);
+          }
 
           this.ctx.beginPath();
-          this.ctx.moveTo(this.padX1 + 40, tickPos);
+          this.ctx.moveTo(this.padX1 + tickPad, tickPos);
           this.ctx.lineTo(this.width - this.padX2, tickPos);
           this.ctx.closePath();
-          this.ctx.strokeStyle = value < 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
+          this.ctx.strokeStyle = i < 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
           this.ctx.stroke();
-        }
-      }
-      else {
-        const tickSize = this.height / (this.maxY - this.minY);
-
-        if (tickSize > 2) {
-          for (let i = Math.floor(this.minY) + 1; i <= this.maxY; i++) {
-            const point = Math.floor(this.pixY(i)) + 0.5;
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.padX1, point);
-            this.ctx.lineTo(this.width - this.padX2, point);
-            this.ctx.closePath();
-            this.ctx.strokeStyle = i < 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
-            this.ctx.stroke();
-          }
         }
       }
 
