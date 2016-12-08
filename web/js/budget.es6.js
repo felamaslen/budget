@@ -1801,7 +1801,6 @@
       this.ctx.lineWidth = 1;
 
       if (this.popout) {
-        this.ctx.strokeStyle = COLOR_LIGHT_GREY;
         this.ctx.fillStyle = COLOR_DARK;
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign = "left";
@@ -1820,6 +1819,7 @@
           this.ctx.moveTo(this.padX1 + 40, tickPos);
           this.ctx.lineTo(this.width - this.padX2, tickPos);
           this.ctx.closePath();
+          this.ctx.strokeStyle = value < 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
           this.ctx.stroke();
         }
       }
