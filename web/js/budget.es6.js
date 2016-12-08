@@ -2141,6 +2141,10 @@
         stock.$elem.toggleClass("up", stock.change > 0);
         stock.$elem.toggleClass("down", stock.change < 0);
       });
+
+      window.setTimeout(() => {
+        this.$overallStockChange.removeClass("hl-up").removeClass("hl-down");
+      }, this.hlTime);
     }
 
     onStockPricesFail() {
