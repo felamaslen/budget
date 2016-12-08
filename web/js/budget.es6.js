@@ -51,6 +51,8 @@
 
   const COLOR_PROFIT = "#0c3";
   const COLOR_LOSS = "#c30";
+  const COLOR_PROFIT_LIGHT = "#94efa0";
+  const COLOR_LOSS_LIGHT = "#ffd1d1";
 
   const COLOR_BALANCE_ACTUAL = "#039";
   const COLOR_BALANCE_PREDICTED = "#f00";
@@ -1796,9 +1798,10 @@
       this.ctx.clearRect(0, 0, this.width, this.height);
 
       // draw axes
+      this.ctx.lineWidth = 1;
+
       if (this.popout) {
         this.ctx.strokeStyle = COLOR_LIGHT_GREY;
-        this.ctx.lineWidth = 1;
         this.ctx.fillStyle = COLOR_DARK;
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign = "left";
@@ -1818,6 +1821,21 @@
           this.ctx.lineTo(this.width - this.padX2, tickPos);
           this.ctx.closePath();
           this.ctx.stroke();
+        }
+      }
+      else {
+        const tickSize = this.height / (this.maxY - this.minY);
+
+        if (tickSize > 2) {
+          for (let i = Math.floor(this.minY) + 1; i <= this.maxY; i++) {
+            const point = Math.floor(this.pixY(i)) + 0.5;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.padX1, point);
+            this.ctx.lineTo(this.width - this.padX2, point);
+            this.ctx.closePath();
+            this.ctx.strokeStyle = i < 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
+            this.ctx.stroke();
+          }
         }
       }
 
