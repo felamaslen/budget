@@ -3420,24 +3420,24 @@
       super(options);
 
       this.query = { history: 1 }; // tell api to get history data
+
+      this.minDown = 0;
+      this.maxUp = 0;
+
+      this.downColor = [255, 44, 44];
+      this.upColor = [0, 230, 18];
     }
 
     calculateGain(unitsTxt, priceVal, cost) {
       const units = parseFloat(unitsTxt, 10);
       const price = parseFloat(priceVal, 10);
-
       let pct = 0;
       let gainAbs = 0;
-
       let value = cost;
 
       if (!isNaN(units) && !isNaN(price) && cost > 0) {
         value = units * price;
-
-        // percentage value
         pct = 100 * (value - cost) / cost;
-
-        // absolute value
         gainAbs = value - cost;
       }
 
@@ -3459,35 +3459,53 @@
 
       return { pct, txt };
     }
-
     addGainText(gain, $span) {
+      const color = gain.pct >= 0 ? this.upColor : this.downColor;
+      const range = gain.pct >= 0 ? this.maxUp : this.minDown;
+      const thisColor = Math.abs(range) > 0
+        ? color.map(channel => Math.round(255 + (gain.pct / range) * (channel - 255)))
+        : [255, 255, 255];
+
       return $span
         .toggleClass("profit", gain.pct > 0)
         .toggleClass("loss", gain.pct < 0)
         .toggleClass("high", Math.abs(gain.pct) > 5)
-        .html(gain.txt)
-      ;
+        .css("background-color", "rgb(" + thisColor.join(",") + ")")
+        .html(gain.txt);
     }
 
+    setGainRanges(pct) {
+      this.minDown = Math.min.apply(null, pct.filter(item => item < 0));
+      this.maxUp = Math.max.apply(null, pct.filter(item => item > 0));
+    }
     hookCalculate() {
       super.hookCalculate();
-
-      this.$lbody.children("li:not(.li-add)").each((i, li) => {
+      const $list = this.$lbody.children("li:not(.li-add)");
+      const gain = [];
+      $list.each((i, li) => {
         const id = $(li).data("id");
 
         // update gain info
         const units = this.$li[id].units.data("val");
         const price = this.$li[id].units.data("price");
 
+        gain.push(this.calculateGain(units, price, this.data[i].cost));
+      });
+
+      const pct = gain.map(item => item.pct);
+      this.setGainRanges(pct);
+
+      $list.each((i, li) => {
+        const id = $(li).data("id");
+
         const $span = this.addGainText(
-          this.calculateGain(units, price, this.data[i].cost),
+          gain[i],
           this.$li[id].gain.children(".text")
         );
 
         this.$li[id].gain.children(".text").replaceWith($span);
       });
     }
-
     hookCustomColumns(newItem, newData) {
       const id = newItem.id;
 
@@ -3534,7 +3552,6 @@
 
       return newItem;
     }
-
     render() {
       super.render();
 
@@ -3554,13 +3571,16 @@
         this.graphFundHistory.loadStocksList();
       }
     }
-
     hookDataLoadedBeforeRender(callback, res) {
       super.hookDataLoadedBeforeRender(callback, res);
 
+      const gainPct = res.data.data.map(item => {
+        return 100 * (parseFloat(item.u) * item.P - item.c) / item.c;
+      });
+      this.setGainRanges(gainPct);
+
       this.history = res.data.history;
     }
-
     hookDataLoadedAfterRender(callback, res) {
       super.hookDataLoadedAfterRender(callback, res);
 
