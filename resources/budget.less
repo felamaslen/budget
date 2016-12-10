@@ -991,6 +991,7 @@ button {
       width: 200px;
       height: 100%;
       font-size: 0.8em;
+      line-height: 24px;
       .text {
         width: 100%;
         display: block;
@@ -1003,11 +1004,12 @@ button {
       padding: 0;
       height: 100%;
       background: #666;
-      span {
+      &>span {
         float: left;
         padding: 0 1px;
         overflow: hidden;
         text-overflow: ellipsis;
+        text-align: center;
       }
     }
     .profit {

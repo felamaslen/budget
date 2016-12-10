@@ -3430,7 +3430,8 @@
 
     calculateGain(unitsTxt, priceVal, cost) {
       const units = parseFloat(unitsTxt, 10);
-      const price = parseFloat(priceVal, 10);
+      const price = parseFloat(priceVal[0], 10);
+      const price1 = parseFloat(priceVal[1], 10); // previous price
       let pct = 0;
       let gainAbs = 0;
       let value = cost;
@@ -3441,9 +3442,12 @@
         gainAbs = value - cost;
       }
 
-      const pctFormat = formatCurrency(pct, {
+      const pctParam = {
         noSymbol: true, suffix: "%", brackets: true, noDivide: true
-      });
+      };
+
+      const pctFormat = formatCurrency(pct, pctParam);
+      const dayGain = formatCurrency(100 * (price - price1) / price1, pctParam);
 
       const format = {
         raw: false,
@@ -3452,9 +3456,11 @@
         brackets: true
       };
 
-      const txt = "<span class=\"value\">" + formatCurrency(value, format) + "</span>" +
-        "<span class=\"abs\">" + formatCurrency(gainAbs, format) + "</span>" +
-        "<span class=\"pct\">" + pctFormat + "</span>"
+      const txt = `<span class="value"><span>` + formatCurrency(value, format) +
+        `</span><br><span class="price">` + price.toFixed(1) + `</span></span>` +
+        `<span class="abs">` + formatCurrency(gainAbs, format) + `</span>` +
+        `<span class="pct"><span>` + pctFormat + `</span><br>` +
+        `<span class="dayGain">` + dayGain + `</span></span>`
       ;
 
       return { pct, txt };
@@ -3538,7 +3544,7 @@
 
       // add a "gain/loss" column
       const units = newData.u;
-      const price = newData.P;
+      const price = [newData.P, newData.Q];
 
       this.$li[id].units.data("price", price);
 

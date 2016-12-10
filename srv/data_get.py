@@ -340,20 +340,25 @@ class Funds(ListData):
         """ add cached fund price to fund item """
         hash_value = fund_hash(fund['i'])
 
-        fund['P'] = self.cache[hash_value] if hash_value in self.cache else 0
+        # previous value
+        fund['Q'] = self.cache[hash_value][0] if hash_value in self.cache else 0
+        # current value
+        fund['P'] = self.cache[hash_value][1] if hash_value in self.cache else 0
 
         return fund
 
     def get_cache_latest(self):
         """ get the latest cached fund value """
         result = self.dbx.query("""
-        SELECT f.hash, c.price
+        SELECT f.hash, GROUP_CONCAT(c.price) AS price
         FROM (
-            SELECT fid, MAX(ctg.time) AS latest
-            FROM fund_cache_time ctg
-            INNER JOIN fund_cache cg ON cg.cid = ctg.cid
-            WHERE ctg.done = 1
-            GROUP BY cg.fid
+            SELECT cg.fid, y.time AS latest FROM (
+                SELECT cid, time FROM fund_cache_time
+                WHERE done = 1
+                ORDER BY time DESC
+                LIMIT 2
+            ) y
+            INNER JOIN fund_cache cg ON cg.cid = y.cid
         ) x
         INNER JOIN fund_cache_time ct ON ct.time = x.latest
         INNER JOIN fund_hash f ON f.fid = x.fid
@@ -366,7 +371,8 @@ class Funds(ListData):
 
         self.cache = {}
         for (hash_value, price) in result:
-            self.cache[hash_value] = float(price)
+            price0, price1 = [float(x) for x in price.split(',')]
+            self.cache[hash_value] = [price0, price1]
 
 def fund_history_deep(query):
     """ get full fund history with individual funds (query processor) """
