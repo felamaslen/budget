@@ -3457,7 +3457,7 @@
       };
 
       const txt = `<span class="value"><span>` + formatCurrency(value, format) +
-        `</span><br><span class="price">` + price.toFixed(1) + `</span></span>` +
+        `</span><br><span class="price">` + price.toFixed(2) + `</span></span>` +
         `<span class="abs">` + formatCurrency(gainAbs, format) + `</span>` +
         `<span class="pct"><span>` + pctFormat + `</span><br>` +
         `<span class="dayGain">` + dayGain + `</span></span>`
