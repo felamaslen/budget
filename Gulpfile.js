@@ -31,7 +31,11 @@ gulp.task('webpack-dev-server', function(callback) {
   new WebpackDevServer(compiler, {
     watch: true,
     proxy: {
-      '**': 'https://budget.bristol.fela.london'
+      '/**': {
+        target: 'https://budget.bristol.fela.london/',
+        changeOrigin: true,
+        secure: true
+      }
     }
   }).listen(8080, '0.0.0.0', function(err) {
       if (err) {
