@@ -22,6 +22,7 @@ def api():
     return the_api.get_json(), the_api.res['code']
 
 @APP.route('/')
+@APP.route('/index.html')
 def index():
     """ web app entry point """
     dev = 'dev' in request.args
