@@ -1058,17 +1058,11 @@ button {
     left: 1000px;
   }
   .stocks-list {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 300px;
-    width: 300px;
-    overflow-y: auto;
     font-size: 1em;
     font-family: hack, monospace;
-    color: white;
     
     .stocks-list-ul {
+      width: 720px;
       margin: 0;
       padding: 0;
       list-style: none;
@@ -1079,13 +1073,17 @@ button {
         width: 33.33%;
       }
     }
-    .label {
-      overflow: hidden;
-      display: inline-block;
-      white-space: nowrap;
-    }
     .label, .absolute {
-      display: none;
+      width: 150px;
+      overflow: hidden;
+      white-space: nowrap;
+      float: left;
+    }
+    .label {
+    }
+    .absolute {
+      text-align: right;
+      padding-right: 1em;
     }
     .price {
       padding-right: 1em;
@@ -1111,33 +1109,36 @@ button {
         height: 0;
         top: 0.2em;
       }
+      .hl-up, .hl-down {
+        font-weight: bold;
+      }
     }
     .stocks-list-price-reverse() {
-      color: #f1f442;
+      color: #b5b323;
     }
     .up, .down {
       .stocks-list-price-change();
     }
     .up {
-      color: #ccffd5;
+      color: #5fb16d;
       .price:after {
         border-bottom: 0.8em solid #00c100;
       }
       .hl-up {
-        color: #0f0;
+        color: #2f8216;
       }
       .hl-down {
         .stocks-list-price-reverse();
       }
     }
     .down {
-      color: #ffa7a7;
+      color: #dc3333;
       .price:after {
         border-top: 0.8em solid #e22121;
         margin-top: 0.2em;
       }
       .hl-down {
-        color: #f00;
+        color: #fb0000;
       }
       .hl-up {
         .stocks-list-price-reverse();
