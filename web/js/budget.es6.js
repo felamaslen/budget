@@ -3456,11 +3456,19 @@
         brackets: true
       };
 
-      const txt = `<span class="value"><span>` + formatCurrency(value, format) +
-        `</span><br><span class="price">` + price.toFixed(2) + `</span></span>` +
-        `<span class="abs">` + formatCurrency(gainAbs, format) + `</span>` +
-        `<span class="pct"><span>` + pctFormat + `</span><br>` +
-        `<span class="dayGain">` + dayGain + `</span></span>`
+      const formatValue = formatCurrency(value, format);
+      const formatPrice = price.toFixed(2);
+      const formatGain = formatCurrency(gainAbs, format);
+
+      const txt = `<span class="value">
+        <span>${formatValue}</span><br>
+        <span class="price">${formatPrice}</span>f
+      </span>
+      <span class="abs">${formatGain}</span>
+      <span class="pct">
+        <span>${pctFormat}</span><br>
+        <span class="dayGain">${dayGain}</span>
+      </span>`
       ;
 
       return { pct, txt };
