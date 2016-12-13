@@ -3,17 +3,7 @@
 WEB_ROOT="./web"
 
 function update_js {
-  MAIN=$WEB_ROOT/js/main.min.js
-
-  if [ -e $MAIN ]; then
-    rm $MAIN
-  fi
-
-  touch $MAIN
-
-  cat $WEB_ROOT/js/jquery.min.js >> $MAIN
-  cat $WEB_ROOT/js/js.cookie.min.js >> $MAIN
-  babel $WEB_ROOT/js/budget.es6.js | uglifyjs -m >> $MAIN
+  grunt
 }
 
 function update_css {
