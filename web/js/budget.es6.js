@@ -3448,6 +3448,8 @@
 
       const pctFormat = formatCurrency(pct, pctParam);
       const dayGain = formatCurrency(100 * (price - price1) / price1, pctParam);
+      const dayGainClass = price !== price1 ?
+        "high " + (price > price1 ? "profit" : "loss") : "";
 
       const format = {
         raw: false,
@@ -3467,7 +3469,7 @@
       <span class="abs">${formatGain}</span>
       <span class="pct">
         <span>${pctFormat}</span><br>
-        <span class="dayGain">${dayGain}</span>
+        <span class="daygain ${dayGainClass}">${dayGain}</span>
       </span>`
       ;
 
