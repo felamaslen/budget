@@ -371,7 +371,7 @@ class Funds(ListData):
 
         self.cache = {}
         for (hash_value, price) in result:
-            price0, price1 = [float(x) for x in price.split(',')]
+            price1, price0 = [float(x) for x in price.split(',')]
             self.cache[hash_value] = [price0, price1]
 
 def fund_history_deep(query):
