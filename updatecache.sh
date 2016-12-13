@@ -3,11 +3,11 @@
 WEB_ROOT="./web"
 
 function update_js {
-  grunt
+  grunt build_js
 }
 
 function update_css {
-  uglifycss $WEB_ROOT/css/budget.css > $WEB_ROOT/css/budget.min.css
+  grunt build_css
 }
 
 function update_serial {

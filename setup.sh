@@ -23,24 +23,6 @@ function setup_dev {
   npm install
 }
 
-function build {
-  if [[ ! -d ./node_modules ]]; then
-    echo $E_NO_DEV
-    exit 1
-  fi
-
-  lessc="./node_modules/less/bin/lessc"
-
-  if [[ ! -e $lessc ]]; then
-    echo $E_NO_LESS
-    exit 1
-  fi
-
-  $lessc resources/budget.less > web/css/budget.css
-
-  exit 0
-}
-
 cd $(dirname "${BASH_SOURCE[0]}") || {
   echo $E_NO_DIR
   exit 1
@@ -52,8 +34,6 @@ fi
 
 if [[ $1 == "dev" ]]; then
   setup_dev
-elif [[ $1 == "build" ]]; then
-  build || exit 1
 elif [[ $1 == "install" ]]; then
   read -p "Database username: " dbusername
 

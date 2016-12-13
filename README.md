@@ -5,17 +5,17 @@
 ### Installation:
  - Install Python 2.7 and MySQL
  - Create MySQL database called "budget"
+ - Install nodejs dependencies: `npm i`
  - Build resources:
-  * `./setup.sh build`
+  * `grunt`
  - Install Python environment and MySQL database:
   * `./setup.sh install`
  - Configure MySQL username and password in `srv/db_info.py` (rename from `.example`)
  - Set up nginx or apache. An example nginx configuration is given in `resources/nginx.example.conf`
 
 #### Extra (for devs):
- - Install nodejs dependencies: `npm i`
  - To update/create minified JavaScript and CSS, run:
-  * `./updatecache.sh [js] [css]`
+  * `grunt [build_js] [build_css]`
 
 ### Operation:
  - To run the server:
