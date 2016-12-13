@@ -2,24 +2,16 @@
 module.exports = function(grunt) {
 	grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-		babel: {
-			compile: {
-				options: {
-					sourceMap: true,
-					presets: ['es2015']
-				},
-				files: {
-          'web/js/src/budget.es5.js': 'web/js/src/budget.js'
-				}
-			}
-		},
+    webpack: {
+      budget: require('./webpack.config.js')
+    },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: ['web/js/src/budget.es5.js'],
-        dest: 'web/js/min/budget.min.js'
+        src: ['web/js/main.js'],
+        dest: 'web/js/build/bundle.min.js'
       }
     },
     concat: {
@@ -28,9 +20,8 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
-          'web/js/min/jquery.min.js',
-          'web/js/min/js.cookie.min.js',
-          'web/js/min/budget.min.js'
+          'web/js/src/lib/js.cookie.min.js',
+          'web/js/build/bundle.min.js'
         ],
         dest: 'web/js/main.min.js',
       },
@@ -56,13 +47,15 @@ module.exports = function(grunt) {
 	});
 
 	grunt.loadTasks('tasks');
+  grunt.loadNpmTasks('grunt-webpack');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
 
-  grunt.registerTask('compile_js', ['babel', 'uglify']);
-  grunt.registerTask('build_js', ['compile_js', 'concat']);
+  grunt.registerTask('compile_js', ['webpack']);
+  grunt.registerTask('minify_js', ['uglify', 'concat']);
+  grunt.registerTask('build_js', ['compile_js', 'minify_js']);
 
   grunt.registerTask('build_css', ['less', 'cssmin']);
 
