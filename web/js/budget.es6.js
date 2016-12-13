@@ -3462,7 +3462,7 @@
 
       const txt = `<span class="value">
         <span>${formatValue}</span><br>
-        <span class="price">${formatPrice}</span>f
+        <span class="price">${formatPrice}</span>
       </span>
       <span class="abs">${formatGain}</span>
       <span class="pct">
