@@ -8,7 +8,9 @@ include
 srv/db_info.py
 resources/serial
 resources/tickers.csv
-web/js/budget.es5.js
+web/js/src/budget.es5.js
+web/js/src/budget.es5.js.map
+web/js/min/budget.min.js
 web/js/main.min.js
 web/css/budget.css
 web/css/budget.min.css
