@@ -1841,6 +1841,8 @@
     constructor(options) {
       super(options);
 
+      this.$list = options.$list;
+
       this.tension    = GRAPH_FUND_HISTORY_TENSION;
       this.raw        = options.data;
       this.startTime  = options.startTime;
@@ -1936,11 +1938,10 @@
 
       this.$stocksListOuter.append(this.$stocksListOverall);
 
-      this.$gCont.append(this.$stocksListOuter);
+      this.$list.append(this.$stocksListOuter);
 
       this.loadStocksList();
     }
-
     loadStocksList() {
       if (!DO_STOCKS_LIST || this.stocksListLoading) {
         return;
@@ -1954,7 +1955,6 @@
         () => this.onStocksListRequestComplete()
       );
     }
-
     onStocksListLoaded(res) {
       this.stocks = res.data.stocks.map(stock => {
         return {
@@ -1984,7 +1984,6 @@
     onStocksListRequestComplete() {
       this.stocksListLoading = false;
     }
-
     loadStockPrices() {
       if (this.stockPricesLoading || pageActive !== "funds") {
         return;
@@ -2071,7 +2070,6 @@
         this.loadStockPrices();
       }, this.stocksRefreshInterval);
     }
-
     updateStocksOverall(change) {
       const overallChangeText = (change >= 0 ? "+" : "") +
         change.toFixed(this.numDp(change, 4));
@@ -2093,7 +2091,6 @@
 
       this.stocksWeightedChange = change;
     }
-
     updateStockList() {
       const numRows = 13;
       const numCols = 3;
@@ -2157,7 +2154,6 @@
         this.$overallStockChange.removeClass("hl-up").removeClass("hl-down");
       }, this.hlTime);
     }
-
     onStockPricesFail() {
       errorMessages.newMessage("Error loading stock prices!", 2, MSG_TIME_ERROR);
     }
@@ -2194,7 +2190,6 @@
 
       this.detailChanged(noDraw);
     }
-
     getTimeScale() {
       // divides the time axis (horizontal) into appropriate chunks
       const range = this.maxX - this.minX;
@@ -2268,7 +2263,6 @@
 
       return ticks;
     }
-
     calculateZoomedRange() {
       // calculate new Y range based on truncating the data (zooming)
       this.dataZoomed = this.data.map(line => line.slice(this.dataOffset));
@@ -2306,7 +2300,6 @@
         this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
       ]);
     }
-
     calculatePercentages() {
       // turns data from absolute values to percentage returns
       this.data = this.percent ? this.dataProc.map(line => {
@@ -2323,7 +2316,6 @@
         ? value.toFixed(2) + "%"
         : formatCurrency(value, { raw: true });
     }
-
     draw() {
       if (!this.supported) {
         return;
@@ -2466,7 +2458,6 @@
         this.$label.hide();
       }
     }
-
     mouseOver(x) {
       if (!this.data) {
         return;
@@ -3647,6 +3638,7 @@
           width:  GRAPH_FUND_HISTORY_WIDTH,
           height: this.pieHeight,
           $cont:  this.$graphs,
+          $list:  this.$cont,
           page:   this.page,
           title:  "fund-history",
           data:   this.history.history,
