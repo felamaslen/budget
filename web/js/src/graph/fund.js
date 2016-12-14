@@ -7,7 +7,7 @@ import $ from "../../lib/jquery.min";
 import {
   MSG_TIME_ERROR,
   COLOR_GRAPH_FUND_ITEM, COLOR_GRAPH_FUND_POINT,
-  COLOR_DARK,
+  COLOR_DARK, COLOR_LIGHT_GREY,
   COLOR_PROFIT, COLOR_LOSS, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
   COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
@@ -626,6 +626,13 @@ export class GraphFundHistory extends LineGraph {
       this.ctx.closePath();
 
       if (tick.major) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+        this.ctx.moveTo(tick.pix, y0 - thisTickSize);
+        this.ctx.lineTo(tick.pix, this.padY1);
+        this.ctx.stroke();
+        this.ctx.closePath();
+
         this.ctx.save();
         this.ctx.translate(tick.pix, y0 - thisTickSize);
         this.ctx.rotate(tickAngle);
