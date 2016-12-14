@@ -2,7 +2,7 @@
  * Fund graphs
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
 import {
   MSG_TIME_ERROR,
@@ -14,16 +14,16 @@ import {
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
-  STOCKS_REFRESH_INTERVAL, DO_STOCKS_LIST, STOCKS_LIST_WIDTH,
+  STOCKS_REFRESH_INTERVAL, DO_STOCKS_LIST,
   FONT_AXIS_LABEL
-} from 'const';
+} from "const";
 
-import { formatAge } from 'misc/format';
-import MediaQueryHandler from 'misc/media_query';
-import { todayDate } from 'misc/date';
+import { formatAge } from "misc/format";
+import MediaQueryHandler from "misc/media_query";
+import { todayDate } from "misc/date";
 
-import { getTickSize, LineGraph } from 'graph/graph';
-import { GoogleFinanceAPI } from 'api/api';
+import { getTickSize, LineGraph } from "graph/graph";
+import { GoogleFinanceAPI } from "api/api";
 
 const windowSize = new MediaQueryHandler();
 const finance = new GoogleFinanceAPI();
@@ -616,8 +616,6 @@ export class GraphFundHistory extends LineGraph {
 
     const axisColor = COLOR_DARK;
     const axisTextColor = COLOR_LIGHT;
-
-    const stocksWidth = DO_STOCKS_LIST ? STOCKS_LIST_WIDTH : 0;
 
     const timeTicks = this.getTimeScale();
 

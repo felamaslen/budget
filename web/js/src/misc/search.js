@@ -2,9 +2,9 @@
  * Search the database using the API
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { SEARCH_SUGGESTION_THROTTLE_TIME, MSG_TIME_ERROR } from 'const';
+import { SEARCH_SUGGESTION_THROTTLE_TIME, MSG_TIME_ERROR } from "const";
 
 export class AutoSearch {
   constructor(api, $input, page, col) {

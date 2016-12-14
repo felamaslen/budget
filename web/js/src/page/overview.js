@@ -2,19 +2,19 @@
  * Overview of spending / cash flow
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
 import {
   COLOR_CATEGORY, MSG_TIME_ERROR
-} from 'const';
+} from "const";
 
-import { arrayAverage, median, months } from 'misc/misc';
-import { getColorFromScore } from 'misc/color';
-import { formatCurrency } from 'misc/format';
-import { validateCurrencyInput } from 'misc/edit';
+import { arrayAverage, median, months } from "misc/misc";
+import { getColorFromScore } from "misc/color";
+import { formatCurrency } from "misc/format";
+import { validateCurrencyInput } from "misc/edit";
 
-import Page from 'page/page';
-import { GraphBalance, GraphSpend } from 'graph/overview';
+import Page from "page/page";
+import { GraphBalance, GraphSpend } from "graph/overview";
 
 export class PageOverview extends Page {
   constructor(api, state) {

@@ -2,11 +2,11 @@
  * API methods
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { MSG_TIME_WARN, MSG_TIME_ERROR } from 'const'
+import { MSG_TIME_WARN, MSG_TIME_ERROR } from "const";
 
-import User from 'api/user';
+import User from "api/user";
 
 export class Api {
   constructor(state) {

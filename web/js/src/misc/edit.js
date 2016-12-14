@@ -2,13 +2,13 @@
  * Form stuff
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { MSG_TIME_DEBUG } from 'const';
+import { MSG_TIME_DEBUG } from "const";
 
-import { YMD, today } from 'misc/date';
-import { formatCurrency } from 'misc/format';
-import { AutoSearchDropdown } from 'misc/search';
+import { YMD, today } from "misc/date";
+import { formatCurrency } from "misc/format";
+import { AutoSearchDropdown } from "misc/search";
 
 export function validateDateInput(val) {
   const isDate = val.match(/^[0-3]?[0-9]\/[0-1]?[0-9](\/[0-9]{2}([0-9]{2})?)?$/);
@@ -320,5 +320,5 @@ export function editable(api, state, editHook, type, suggestion, add) {
     : new EditItem(options, api, state);
 
   return this;
-};
+}
 
