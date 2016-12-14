@@ -95,3 +95,7 @@ export const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
 export const STOCKS_REFRESH_INTERVAL = 10000;
 export const STOCKS_LIST_WIDTH = 300;
 
+export const STOCK_INDICES = {
+  "INDEXFTSE:UKX": "FTSE100"
+};
+

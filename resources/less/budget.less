@@ -1079,6 +1079,21 @@ button {
     .stock-sidebar {
       float: right;
       text-align: right;
+      width: 260px;
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        .label {
+          width: 90px;
+        }
+        .price {
+          width: 170px;
+          .absolute {
+            padding-right: 0.5em;
+          }
+        }
+      }
     }
     .label {
       width: 45%;
@@ -1159,16 +1174,6 @@ button {
       float: right;
       &:after {
         content: "%";
-      }
-    }
-  
-    .stocks-list-overall {
-      &:before {
-        content: "Overall: ";
-        vertical-align: top;
-      }
-      .price {
-        width: auto;
       }
     }
   }
