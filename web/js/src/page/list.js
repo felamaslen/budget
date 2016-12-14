@@ -7,7 +7,7 @@ import $ from "../../lib/jquery.min";
 
 import { MSG_TIME_WARN, MSG_TIME_ERROR } from "const";
 
-import { afterEditValidateCompare } from "misc/edit";
+import { afterEditValidateCompare, validateInput } from "misc/edit";
 import { today } from "misc/date";
 import { formatCurrency, getData, formatData } from "misc/format";
 
