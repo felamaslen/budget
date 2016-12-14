@@ -4,7 +4,7 @@
 
 import $ from "../../lib/jquery.min";
 
-import { SEARCH_SUGGESTION_THROTTLE_TIME, MSG_TIME_ERROR } from "const";
+import { SEARCH_SUGGESTION_THROTTLE_TIME } from "const";
 
 export class AutoSearch {
   constructor(api, $input, page, col) {

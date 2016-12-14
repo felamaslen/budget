@@ -2,8 +2,6 @@
  * Colour functions
  */
 
-import { MSG_TIME_DEBUG } from "const";
-
 import { leadingZeroes } from "misc/misc";
 
 export function rgb(color) {
