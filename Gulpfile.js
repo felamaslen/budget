@@ -4,6 +4,7 @@ var path = require('path');
 
 var concat = require('gulp-concat');
 var cssmin = require('gulp-cssmin');
+var eslint = require('gulp-eslint');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var less = require('gulp-less');
@@ -15,7 +16,14 @@ var WebpackDevServer = require('webpack-dev-server');
 
 var webpackOptions = require('./webpack.config');
 
-gulp.task('webpack', function(callback) {
+gulp.task('lint', function() {
+  return gulp.src('web/js/src/**')
+  .pipe(eslint())
+  .pipe(eslint.format())
+  .pipe(eslint.failOnError());
+});
+
+gulp.task('webpack', ['lint'], function(callback) {
   webpack(webpackOptions, function(err, stats) {
     if (err) {
       throw new gutil.PluginError('webpack', err);
