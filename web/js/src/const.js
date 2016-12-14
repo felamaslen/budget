@@ -60,8 +60,8 @@ export const COLOR_BALANCE_PREDICTED = "#f00";
 
 export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 
-export const COLOR_GRAPH_FUND_LINE = "#fffd93";
-export const COLOR_GRAPH_FUND_POINT = "#ff9400";
+export const COLOR_GRAPH_FUND_LINE = "#164187";
+export const COLOR_GRAPH_FUND_POINT = "#0e58ce";
 
 export const COLOR_CATEGORY = {
   funds:  [84, 110, 122],
