@@ -10,12 +10,11 @@ import { YMD, today } from "misc/date";
 import { formatCurrency } from "misc/format";
 import { AutoSearchDropdown } from "misc/search";
 
-export function validateDateInput(val) {
+function validateDateInput(val) {
   const isDate = val.match(/^[0-3]?[0-9]\/[0-1]?[0-9](\/[0-9]{2}([0-9]{2})?)?$/);
 
   if (!isDate) {
-    errorMessages.newMessage("\"" + val + "\" isn\"t a date", 0, MSG_TIME_DEBUG);
-
+    console.warn(val, "isn't a date");
     return null;
   }
 
@@ -40,8 +39,7 @@ export function validateCurrencyInput(val) {
   const floatVal = parseFloat(val);
 
   if (isNaN(floatVal) || val.match(/[A-Za-z]/)) {
-    errorMessages.newMessage("\"" + val.toString() + "\" isn\"t a number", 0, MSG_TIME_DEBUG);
-
+    console.warn(val, "isn't a number");
     return null;
   }
 
@@ -162,13 +160,13 @@ class InlineEdit {
    */
   finish(callback) {
     if (!this.active) {
-      // errorMessages.newMessage("Tried to finish editing while not active");
+      // this.state.error.newMessage("Tried to finish editing while not active");
       return false;
     }
 
     if (this.locked) {
       // probably still loading previous edit request
-      errorMessages.newMessage("Tried to finish editing while locked", 0, MSG_TIME_DEBUG);
+      this.state.error.newMessage("Tried to finish editing while locked", 0, MSG_TIME_DEBUG);
       return false;
     }
 
@@ -184,7 +182,7 @@ class InlineEdit {
       return true;
     }
 
-    errorMessages.newMessage("Tried to finish editing while no hook set", 0, MSG_TIME_DEBUG);
+    this.state.error.newMessage("Tried to finish editing while no hook set", 0, MSG_TIME_DEBUG);
 
     return false;
   }

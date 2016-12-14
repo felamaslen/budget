@@ -143,7 +143,7 @@ export default class {
       localStorage.setItem("userPin", this.loginPin);
     }
     else {
-      errorMessages.newMessage(E_NO_STORAGE, 1, MSG_TIME_WARN);
+      console.warn(E_NO_STORAGE);
     }
 
     $("#nav-link-" + this.state.currentPage).trigger(NAV_HANDLE_EVENT);
@@ -152,7 +152,7 @@ export default class {
   }
 
   onLoginFail() {
-    this.focus();
+    this.logout();
   }
 
   onLoginRequestComplete() {
@@ -166,14 +166,14 @@ export default class {
 
     localStorage && localStorage.removeItem("userPin");
 
-    for (const id in pages) {
-      pages[id].$page.remove();
+    for (const id in this.state.pages) {
+      this.state.pages[id].$page.remove();
       $("#nav-link-" + id).removeClass("active");
     }
-    pages       = {};
+    this.state.pages = {};
 
-    navActive   = null;
-    this.state.currentPage = pageActive;
+    this.state.navActive = null;
+    this.state.currentPage = this.state.pageActive;
 
     $("#bg").fadeIn();
     $("#nav").addClass("hide-nav");

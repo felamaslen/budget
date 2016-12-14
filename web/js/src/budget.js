@@ -7,6 +7,7 @@ import $ from "../lib/jquery.min";
 import { NAV_HANDLE_EVENT } from "const";
 import { mouseUpHandler, keyDownHandler, navHandler } from "misc/nav";
 import { EditItem, editable } from "misc/edit";
+import ErrorMessages from 'misc/error';
 
 import { Api } from "api/api";
 
@@ -17,7 +18,8 @@ const navState = {
   currentPage: null,
   graphHidden: false,
   editing: new EditItem(),
-  editingAdd: false
+  editingAdd: false,
+  error: new ErrorMessages()
 };
 
 const api = new Api(navState);

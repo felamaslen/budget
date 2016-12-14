@@ -268,7 +268,7 @@ export class GraphFundHistory extends LineGraph {
     this.loadStockPrices();
   }
   onStocksListError() {
-    errorMessages.newMessage("Error loading stocks list!", 2, MSG_TIME_ERROR);
+    this.state.error.newMessage("Error loading stocks list!", 2, MSG_TIME_ERROR);
   }
   onStocksListRequestComplete() {
     this.stocksListLoading = false;
@@ -340,7 +340,7 @@ export class GraphFundHistory extends LineGraph {
     this.updateStocksOverall(weightedChange);
 
     if (badStocks > 0) {
-      errorMessages.newMessage(
+      this.state.error.newMessage(
         "Got " + badStocks.toString() + " extra stocks from finance api",
         2, MSG_TIME_ERROR
       );
@@ -445,7 +445,7 @@ export class GraphFundHistory extends LineGraph {
     }, this.hlTime);
   }
   onStockPricesFail() {
-    errorMessages.newMessage("Error loading stock prices!", 2, MSG_TIME_ERROR);
+    this.state.error.newMessage("Error loading stock prices!", 2, MSG_TIME_ERROR);
   }
   onStockPricesRequestComplete() {
     this.stockPricesLoading = false;

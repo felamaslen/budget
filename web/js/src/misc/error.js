@@ -2,7 +2,7 @@
  * Error messages
  */
 
-import $ from "../lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { MIN_MSG_LEVEL } from "const";
 
@@ -55,7 +55,6 @@ class ErrorMessage {
 export default class {
   constructor() {
     this.$outer = $("<div></div>").addClass("messages-outer");
-
     $(document.body).append(this.$outer);
 
     this.levels = ["debug", "warning", "error", "fatal"];
@@ -65,13 +64,11 @@ export default class {
     if (typeof level === "undefined") {
       level = 1;
     }
-
     if (level < MIN_MSG_LEVEL) {
       return;
     }
 
     const message = new ErrorMessage(text, this.levels[level], timeout);
-
     this.$outer.append(message.$elem);
   }
 }

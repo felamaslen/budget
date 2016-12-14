@@ -251,7 +251,7 @@ export class PageOverview extends Page {
   }
 
   onBalanceEditError() {
-    errorMessages.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
+    this.state.error.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
   }
 
   onBalanceEditRequestComplete(key, callback) {

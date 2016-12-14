@@ -267,12 +267,12 @@ export class PageList extends Page {
       let error = false;
 
       if (col === "item" && val.length === 0) {
-        errorMessages.newMessage("Must enter text for main item field", 1, MSG_TIME_WARN);
+        this.state.error.newMessage("Must enter text for main item field", 1, MSG_TIME_WARN);
         error = true;
       }
 
       if (val === null) {
-        errorMessages.newMessage("Must enter valid data", 1, MSG_TIME_WARN);
+        this.state.error.newMessage("Must enter valid data", 1, MSG_TIME_WARN);
         error = true;
       }
 
@@ -359,7 +359,7 @@ export class PageList extends Page {
     this.updatePieChart();
   }
   onSubmitError() {
-    errorMessages.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
+    this.state.error.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
   }
   onSubmitRequestComplete(dataKey, key, callback) {
     this.state.editing.deactivate(this.data[dataKey][key]);
@@ -516,7 +516,7 @@ export class PageList extends Page {
 
     if (!status) {
       // invalid data input
-      errorMessages.newMessage("invalid data input", 1, MSG_TIME_WARN);
+      this.state.error.newMessage("invalid data input", 1, MSG_TIME_WARN);
 
       this.state.editing.cancel();
     }

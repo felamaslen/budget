@@ -155,7 +155,7 @@ export class AutoSearch {
     }
   }
   suggestionsError() {
-    errorMessages.newMessage("Error loading suggestions!", 2, MSG_TIME_ERROR);
+    console.error("Error loading suggestions!");
   }
   suggestionsComplete() {
     this.$spinner.hide();
