@@ -18,7 +18,7 @@ import {
   FONT_AXIS_LABEL
 } from "const";
 
-import { formatAge } from "misc/format";
+import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate } from "misc/date";
 
@@ -635,23 +635,20 @@ export class GraphFundHistory extends LineGraph {
     if (!this.supported) {
       return;
     }
-
     // clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
 
     const axisTextColor = COLOR_DARK;
-
     const timeTicks = this.getTimeScale();
-
     // calculate tick range
     const ticksY = [];
-
     // draw value (Y axis) ticks and horizontal lines
     const newNumTicks = Math.floor((this.maxY - this.minY) / this.tickSizeY);
 
     // draw axes
-    this.ctx.lineWidth = 1;
+    const startValue = this.raw[0][2];
 
+    this.ctx.lineWidth = 1;
     for (let i = 0; i < newNumTicks; i++) {
       const value = this.minY + (i + 1) * this.tickSizeY;
 
@@ -665,7 +662,8 @@ export class GraphFundHistory extends LineGraph {
       this.ctx.moveTo(this.padX1, tickPos);
       this.ctx.lineTo(this.width - this.padX2, tickPos);
 
-      this.ctx.strokeStyle = value >= 0 ? COLOR_PROFIT : COLOR_LOSS;
+      this.ctx.strokeStyle = (this.percent && value >= 0) || (!this.percent && value >= startValue)
+        ? COLOR_PROFIT : COLOR_LOSS;
       this.ctx.stroke();
     }
 
