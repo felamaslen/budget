@@ -246,7 +246,7 @@ export class GraphFundHistory extends LineGraph {
     this.$indicesList = $("<ul></ul>");
     this.$overallStockChange = $("<span></span>").addClass("change");
     this.$stocksListOverall   = $("<li></li>").addClass("stocks-list-overall")
-      .append($("<span></span>").addClass("label").text("Overall"))
+      .append($("<span></span>").addClass("label").text("Exposure:"))
       .append($("<span></span>").addClass("price").append(this.$overallStockChange));
     this.$indicesList.append(this.$stocksListOverall);
 
