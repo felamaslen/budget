@@ -229,7 +229,7 @@ function tableNavigate(state, wasEditing, evt, x, y, dx, dy, maxX, maxY) {
       y = maxY;
     }
 
-    state.pages.overview.$td[y].mousedown();
+    state.pages.overview.$td[y].balance.mousedown();
   }
   else {
     const $span = state.pages[state.pageActive].$lbody
