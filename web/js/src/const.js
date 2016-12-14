@@ -34,9 +34,9 @@ export const GRAPH_FUND_ITEM_LINE_WIDTH = 2;
 export const GRAPH_FUND_ITEM_TENSION = 0.85;
 export const GRAPH_FUND_HISTORY_WIDTH = 500;
 export const GRAPH_FUND_HISTORY_WIDTH_NARROW = 400;
-export const GRAPH_FUND_HISTORY_TENSION = 0.85;
+export const GRAPH_FUND_HISTORY_TENSION = 0.65;
 export const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
-export const GRAPH_FUND_HISTORY_LINE_WIDTH = 1;
+export const GRAPH_FUND_HISTORY_LINE_WIDTH = 2;
 export const GRAPH_FUND_HISTORY_POINT_RADIUS = 3;
 
 export const GRAPH_BALANCE_NUM_TICKS = 5;
@@ -59,7 +59,6 @@ export const COLOR_BALANCE_ACTUAL = "#039";
 export const COLOR_BALANCE_PREDICTED = "#f00";
 
 export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
-
 export const COLOR_GRAPH_FUND_LINE = "#164187";
 export const COLOR_GRAPH_FUND_POINT = "#0e58ce";
 
