@@ -14,7 +14,7 @@ import {
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
-  STOCKS_REFRESH_INTERVAL, DO_STOCKS_LIST,
+  STOCKS_REFRESH_INTERVAL, DO_STOCKS_LIST, STOCK_INDICES,
   FONT_AXIS_LABEL
 } from "const";
 
@@ -27,6 +27,32 @@ import { GoogleFinanceAPI } from "api/api";
 
 const windowSize = new MediaQueryHandler();
 const finance = new GoogleFinanceAPI();
+
+const numDp = (stockChange, width) => {
+  width = width || 2;
+  return stockChange === 0 ? width : Math.max(
+      0, width - Math.max(
+        0, Math.floor(Math.log(Math.abs(stockChange)) / Math.LN10)
+      )
+    );
+};
+
+const processStockChange = (res, old) => {
+  const price = parseFloat(res.l_fix, 10);
+  const change = parseFloat(res.c_fix, 10) / price * 100;
+
+  let hl = false; // highlight
+  if (old.price !== price) {
+    hl = old.price > price ? "hl-down" : "hl-up";
+  }
+
+  old.hl = hl;
+  old.price = price;
+  old.change = change;
+  old.changeText = (change >= 0 ? "+" : "") + change.toFixed(numDp(change));
+
+  return old;
+};
 
 export class GraphFundItem extends LineGraph {
   constructor(options, api) {
@@ -217,19 +243,29 @@ export class GraphFundHistory extends LineGraph {
     this.$sidebar = $("<div></div>")
     .addClass("stock-sidebar");
 
-    this.$overallStockChange  = $("<span></span>")
-    .addClass("change");
-    this.$stocksListOverall   = $("<span></span>")
-    .addClass("stocks-list-overall")
-    .append($("<span></span>").addClass("price").append(this.$overallStockChange));
+    this.$indicesList = $("<ul></ul>");
+    this.$overallStockChange = $("<span></span>").addClass("change");
+    this.$stocksListOverall   = $("<li></li>").addClass("stocks-list-overall")
+      .append($("<span></span>").addClass("label").text("Overall"))
+      .append($("<span></span>").addClass("price").append(this.$overallStockChange));
+    this.$indicesList.append(this.$stocksListOverall);
 
-    this.$sidebar.append(this.$stocksListOverall);
+    this.$sidebar.append(this.$indicesList);
 
     this.$stocksListOuter.append(this.$sidebar);
     this.$stocksListOuter.append(this.$stocksList);
     this.$list.append(this.$stocksListOuter);
 
+    this.indices = [];
+    this.indexSymbols = [];
     this.loadStocksList();
+  }
+  getStockSymbols(symbols) {
+    // get index quotes
+    for (const symbol in STOCK_INDICES) {
+      symbols.push(symbol);
+    }
+    return symbols;
   }
   loadStocksList() {
     if (!DO_STOCKS_LIST || this.stocksListLoading) {
@@ -247,24 +283,21 @@ export class GraphFundHistory extends LineGraph {
   onStocksListLoaded(res) {
     this.stocks = res.data.stocks.map(stock => {
       return {
-        symbol:     stock[0],
-        name:       stock[1],
-        weight:     stock[2],
-        price:      0,
-        change:     0,
+        symbol: stock[0],
+        name: stock[1],
+        weight: stock[2],
+        price: 0,
+        change: 0,
         changeText: "",
-        $elem:      null,
-        active:     false
+        $elem: null
       };
     });
 
     this.stocksTotalWeight = res.data.total;
     this.stocksWeightedChange = null;
 
-    this.stockSymbols = this.stocks.map(stock => stock.symbol);
-
+    this.stockSymbols = this.getStockSymbols(this.stocks.map(stock => stock.symbol));
     this.$stocksList.empty();
-
     this.loadStockPrices();
   }
   onStocksListError() {
@@ -277,7 +310,6 @@ export class GraphFundHistory extends LineGraph {
     if (this.stockPricesLoading || this.state.pageActive !== "funds") {
       return;
     }
-
     this.stockPricesLoading = true;
 
     finance.get(
@@ -288,56 +320,46 @@ export class GraphFundHistory extends LineGraph {
     );
   }
 
-  numDp(stockChange, width) {
-    width = width || 2;
-    return stockChange === 0 ? width : Math.max(
-        0, width - Math.max(
-          0, Math.floor(Math.log(Math.abs(stockChange)) / Math.LN10)
-        )
-      );
-  }
-
   onStockPricesLoaded(res) {
     let badStocks = 0;
-
     let weightedChange = 0;
 
     for (const stock of res) {
       const symbol  = stock.e + ":" + stock.t;
-      const index   = this.stockSymbols.indexOf(symbol);
 
-      if (index < 0) {
-        badStocks++;
-      }
-      else {
-        const price = parseFloat(stock.l_fix, 10);
+      if (STOCK_INDICES[symbol]) {
+        let index = this.indexSymbols.indexOf(symbol);
+        if (index < 0) {
+          // create the index symbol
+          index = this.indexSymbols.length;
 
-        // change as a percentage
-        const change = parseFloat(stock.c_fix, 10) / price * 100;
-
-        // highlight
-        let hl = false;
-
-        if (this.stocks[index].price !== price) {
-          hl = this.stocks[index].price > price ? "hl-down" : "hl-up";
+          this.indexSymbols.push(symbol);
+          this.indices.push({
+            symbol,
+            name: STOCK_INDICES[symbol],
+            hl: false,
+            price: 0,
+            change: 0,
+            changeText: "",
+            $elem: null
+          });
         }
 
-        this.stocks[index].hl     = hl;     // highlight
-        this.stocks[index].price  = price;
-        this.stocks[index].change = change;
-
-        const numDp = this.numDp(change);
-
-        this.stocks[index].changeText = (change >= 0 ? "+" : "") +
-          change.toFixed(numDp);
-
-        weightedChange += this.stocks[index].weight * change;
+        this.indices[index] = processStockChange(stock, this.indices[index]);
+      }
+      else {
+        const index = this.stockSymbols.indexOf(symbol);
+        if (index < 0) {
+          badStocks++;
+        }
+        else {
+          this.stocks[index] = processStockChange(stock, this.stocks[index]);
+          weightedChange += this.stocks[index].weight * this.stocks[index].change;
+        }
       }
     }
 
     weightedChange /= this.stocksTotalWeight;
-
-    this.updateStocksOverall(weightedChange);
 
     if (badStocks > 0) {
       this.state.error.newMessage(
@@ -348,6 +370,7 @@ export class GraphFundHistory extends LineGraph {
       return;
     }
 
+    this.updateStocksOverall(weightedChange);
     this.updateStockList();
 
     // refresh the prices in 5 seconds
@@ -361,7 +384,7 @@ export class GraphFundHistory extends LineGraph {
   }
   updateStocksOverall(change) {
     const overallChangeText = (change >= 0 ? "+" : "") +
-      change.toFixed(this.numDp(change, 4));
+      change.toFixed(numDp(change, 4));
 
     this.$stocksListOverall
     .toggleClass("up", change > 0)
@@ -380,6 +403,52 @@ export class GraphFundHistory extends LineGraph {
 
     this.stocksWeightedChange = change;
   }
+  updateStockItem(stock, index) {
+    if (stock.$elem) {
+      // update the item
+      stock.$absolute.text(stock.price.toFixed(2));
+      stock.$change.text(stock.changeText);
+
+      if (stock.hl) {
+        stock.$price.addClass(stock.hl);
+        stock.hl = false;
+
+        window.setTimeout(() => {
+          stock.$price.removeClass("hl-up").removeClass("hl-down");
+        }, this.hlTime);
+      }
+    }
+    // add the item
+    else if (index) {
+      stock.$elem = $("<li></li>");
+      stock.$label = $("<span></span>").addClass("label").text(stock.name);
+      stock.$price = $("<span></span>").addClass("price");
+      stock.$absolute = $("<span></span>").addClass("absolute").text(stock.price.toFixed(2));
+      stock.$change = $("<span></span>").addClass("change").text(stock.changeText);
+
+      stock.$price.append(stock.$absolute).append(stock.$change);
+      stock.$elem.append(stock.$label).append(stock.$price);
+
+      this.$indicesList.append(stock.$elem);
+    }
+    else {
+      stock.$elem = $("<li></li>").addClass("stock-list-item");
+      stock.$elem.attr("title", stock.symbol + " (" + stock.name + ")");
+
+      stock.$label = $("<span></span>").addClass("label").text(stock.symbol);
+      stock.$price = $("<span></span>").addClass("price");
+      stock.$absolute = $("<span></span>").addClass("absolute").text(stock.price.toFixed(2));
+      stock.$change = $("<span></span>").addClass("change").text(stock.changeText);
+
+      stock.$price.append(stock.$absolute).append(stock.$change);
+      stock.$elem.append(stock.$label).append(stock.$price);
+
+      this.$stocksList.append(stock.$elem);
+    }
+
+    stock.$elem.toggleClass("up", stock.change > 0);
+    stock.$elem.toggleClass("down", stock.change < 0);
+  }
   updateStockList() {
     const numCols = 2;
     const numRows = Math.ceil(this.stocks.length / numCols);
@@ -393,52 +462,8 @@ export class GraphFundHistory extends LineGraph {
       }));
     }
 
-    stocks.forEach(stock => {
-      if (stock.$elem) {
-        // update the item
-        stock.$price.text(stock.price.toFixed(2));
-
-        stock.$change.text(stock.changeText);
-
-        if (stock.hl) {
-          stock.$priceOuter.addClass(stock.hl);
-          stock.hl = false;
-
-          window.setTimeout(() => {
-            stock.$priceOuter.removeClass("hl-up").removeClass("hl-down");
-          }, this.hlTime);
-        }
-      }
-      else {
-        // add the item
-        stock.$elem = $("<li></li>").addClass("stock-list-item");
-
-        stock.$elem.attr("title", stock.symbol + " (" + stock.name + ")");
-
-        stock.$label = $("<span></span>").addClass("label");
-        stock.$priceOuter = $("<span></span>").addClass("price");
-
-        stock.$label.text(stock.symbol);
-
-        stock.$price = $("<span></span>")
-        .addClass("absolute").text(stock.price.toFixed(2));
-
-        stock.$change = $("<span></span>")
-        .addClass("change")
-        .text(stock.changeText);
-
-        stock.$priceOuter.append(stock.$price);
-        stock.$priceOuter.append(stock.$change);
-
-        stock.$elem.append(stock.$label);
-        stock.$elem.append(stock.$priceOuter);
-
-        this.$stocksList.append(stock.$elem);
-      }
-
-      stock.$elem.toggleClass("up", stock.change > 0);
-      stock.$elem.toggleClass("down", stock.change < 0);
-    });
+    stocks.forEach(stock => this.updateStockItem(stock));
+    this.indices.forEach(stock => this.updateStockItem(stock, true));
 
     window.setTimeout(() => {
       this.$overallStockChange.removeClass("hl-up").removeClass("hl-down");
