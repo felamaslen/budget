@@ -88,6 +88,18 @@ class TimeTickDayWeek {
       }
       ticks.push(tick);
 
+      if (next.extra) {
+        // extra tick
+        const extraTick = {
+          t: next.extra.t / 1000,
+          major: next.extra.major
+        };
+        if (next.extra.major) {
+          extraTick.label = this.label(next.extra.t);
+        }
+        ticks.push(extraTick);
+      }
+
       t = next.nt;
     }
 
@@ -167,20 +179,21 @@ class TimeTickWeekMonth extends TimeTickDayWeek {
   }
   next(i, t) {
     const nt = t - this.tick * 1000;
+    let extra = null;
 
     const date = new Date(t).getDate();
-    const major = date < 7;
-
-    if (major) {
+    if (date < 7) {
       // get the exact start of the month
       const time = new Date(t);
       const year = time.getFullYear();
       const month = time.getMonth();
 
-      t = new Date(year, month, 1, 0, 0, 0, 0).getTime();
+      const et = new Date(year, month, 1, 0, 0, 0, 0).getTime();
+
+      extra = { t: et, major: true };
     }
 
-    return { t, major, nt };
+    return { t, nt, extra };
   }
   label(t) {
     return months[new Date(t).getMonth()];
