@@ -7,7 +7,7 @@ import $ from "../lib/jquery.min";
 import { NAV_HANDLE_EVENT } from "const";
 import { mouseUpHandler, keyDownHandler, navHandler } from "misc/nav";
 import { EditItem, editable } from "misc/edit";
-import ErrorMessages from 'misc/error';
+import ErrorMessages from "misc/error";
 
 import { Api } from "api/api";
 

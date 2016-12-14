@@ -4,7 +4,7 @@
 
 import $ from "../../lib/jquery.min";
 
-import { E_NO_STORAGE, MSG_TIME_WARN, NAV_HANDLE_EVENT } from "const";
+import { E_NO_STORAGE, NAV_HANDLE_EVENT } from "const";
 
 class NumberInput {
   constructor(callback) {
