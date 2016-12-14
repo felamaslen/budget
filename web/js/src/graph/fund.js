@@ -7,9 +7,9 @@ import $ from "../../lib/jquery.min";
 import {
   MSG_TIME_ERROR,
   COLOR_GRAPH_FUND_ITEM, COLOR_GRAPH_FUND_POINT,
-  COLOR_DARK, COLOR_LIGHT, COLOR_LIGHT_GREY,
-  COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
-  COLOR_GRAPH_FUND_LINE,
+  COLOR_DARK,
+  COLOR_PROFIT, COLOR_LOSS, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
+  COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
@@ -639,8 +639,7 @@ export class GraphFundHistory extends LineGraph {
     // clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    const axisColor = COLOR_DARK;
-    const axisTextColor = COLOR_LIGHT;
+    const axisTextColor = COLOR_DARK;
 
     const timeTicks = this.getTimeScale();
 
@@ -651,7 +650,6 @@ export class GraphFundHistory extends LineGraph {
     const newNumTicks = Math.floor((this.maxY - this.minY) / this.tickSizeY);
 
     // draw axes
-    this.ctx.strokeStyle = axisColor;
     this.ctx.lineWidth = 1;
 
     for (let i = 0; i < newNumTicks; i++) {
@@ -666,6 +664,8 @@ export class GraphFundHistory extends LineGraph {
       this.ctx.beginPath();
       this.ctx.moveTo(this.padX1, tickPos);
       this.ctx.lineTo(this.width - this.padX2, tickPos);
+
+      this.ctx.strokeStyle = value >= 0 ? COLOR_PROFIT : COLOR_LOSS;
       this.ctx.stroke();
     }
 
@@ -673,7 +673,7 @@ export class GraphFundHistory extends LineGraph {
     const y0 = this.pixY(this.minY);
 
     this.ctx.font = FONT_AXIS_LABEL;
-    this.ctx.fillStyle = COLOR_LIGHT;
+    this.ctx.fillStyle = axisTextColor;
     this.ctx.textAlign = "left";
     this.ctx.textBaseline = "bottom";
 
@@ -684,7 +684,7 @@ export class GraphFundHistory extends LineGraph {
       const thisTickSize = tickSize * (tick.major ? 1 : 0.5);
 
       this.ctx.beginPath();
-      this.ctx.strokeStyle = tick.major ? COLOR_LIGHT : COLOR_LIGHT_GREY;
+      this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
       this.ctx.moveTo(tick.pix, y0);
       this.ctx.lineTo(tick.pix, y0 - thisTickSize);
       this.ctx.stroke();
