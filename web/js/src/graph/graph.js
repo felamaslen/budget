@@ -55,7 +55,7 @@ class Graph {
     this.state = state;
 
     if (!this.supported) {
-      errorMessages.newMessage("HTML5 Canvas is not supported! Not drawing graphs", 3, MSG_TIME_FATAL);
+      this.state.error.newMessage("HTML5 Canvas is not supported! Not drawing graphs", 3, MSG_TIME_FATAL);
     }
 
     this.width  = options.width;
@@ -113,7 +113,7 @@ export class LineGraph extends Graph {
   setLogY() {
     if (this.minY * this.maxY <= 0) {
       // can't log a zero value; range contains zero
-      errorMessages.newMessage("Attempted to set log range containing zero!", 0, MSG_TIME_DEBUG);
+      this.state.error.newMessage("Attempted to set log range containing zero!", 0, MSG_TIME_DEBUG);
       return;
     }
 

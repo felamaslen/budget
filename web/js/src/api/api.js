@@ -11,6 +11,7 @@ import User from "api/user";
 export class Api {
   constructor(state) {
     this.user = new User(this, state);
+    this.state = state;
     this.apiUrl = "api?t=";
 
     this.queuedMain = 0;
@@ -79,14 +80,14 @@ export class Api {
           }
         }
         else {
-          errorMessages.newMessage(data.errorText, 1, MSG_TIME_WARN);
+          this.state.error.newMessage(data.errorText, 1, MSG_TIME_WARN);
           if (error) {
             error(data.errorText);
           }
         }
       },
       error: () => {
-        errorMessages.newMessage("General API error!", 2, MSG_TIME_ERROR);
+        this.state.error.newMessage("General API error!", 2, MSG_TIME_ERROR);
         if (error) {
           error();
         }

@@ -16,7 +16,7 @@ export function rgba(color, alpha) {
 }
 export function getColorFromScore(color, score, negative) {
   if (!color) {
-    errorMessages.newMessage("No colour given to getColor!", 0, MSG_TIME_DEBUG);
+    console.warn("No colour given to getColor!");
     color = [36, 191, 55];
   }
 
