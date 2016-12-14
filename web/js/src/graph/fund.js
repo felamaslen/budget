@@ -638,7 +638,7 @@ export class GraphFundHistory extends LineGraph {
 
       // draw horizontal line
       this.ctx.beginPath();
-      this.ctx.moveTo(this.padX1 + stocksWidth, tickPos);
+      this.ctx.moveTo(this.padX1, tickPos);
       this.ctx.lineTo(this.width - this.padX2, tickPos);
       this.ctx.stroke();
     }
