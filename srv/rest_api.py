@@ -203,8 +203,9 @@ class WebAPI(object):
 
         else:
             # bad login
-            self.error = True
-            self.error_text = "No PIN" if self.user.pin is None else "Bad PIN"
+            self.res['error'] = True
+            self.res['errorText'] = "No PIN" \
+                    if self.user.pin is None else "Bad PIN"
 
 class API(object):
     """ class to process a request and potentially read or modify data """
