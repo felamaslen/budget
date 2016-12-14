@@ -2,7 +2,7 @@
  * Data formatting
  */
 
-import { YMD } from 'misc/date';
+import { YMD } from "misc/date";
 
 export function formatAge(seconds) {
   const measures = [

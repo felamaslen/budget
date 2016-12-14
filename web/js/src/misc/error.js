@@ -2,9 +2,9 @@
  * Error messages
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { MIN_MSG_LEVEL } from 'const';
+import { MIN_MSG_LEVEL } from "const";
 
 class ErrorMessage {
   constructor(text, level, timeout) {

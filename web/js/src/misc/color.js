@@ -2,9 +2,9 @@
  * Colour functions
  */
 
-import { MSG_TIME_DEBUG } from 'const';
+import { MSG_TIME_DEBUG } from "const";
 
-import { leadingZeroes } from 'misc/misc';
+import { leadingZeroes } from "misc/misc";
 
 export function rgb(color) {
   return "#" + color.map((item) => {

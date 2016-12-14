@@ -2,7 +2,7 @@
  * Overview page graphs
  */
 
-import { getTickSize, LineGraph } from 'graph/graph';
+import { getTickSize, LineGraph } from "graph/graph";
 
 import {
   COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED,
@@ -12,11 +12,11 @@ import {
   FONT_GRAPH_KEY,
   GRAPH_BALANCE_NUM_TICKS, GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y,
   GRAPH_KEY_SIZE
-} from 'const';
+} from "const";
 
-import { hundredth, indexPoints, months } from 'misc/misc';
-import { rgba, rgb } from 'misc/color';
-import { formatCurrency, numberFormat } from 'misc/format';
+import { hundredth, indexPoints, months } from "misc/misc";
+import { rgba, rgb } from "misc/color";
+import { formatCurrency, numberFormat } from "misc/format";
 
 export class GraphBalance extends LineGraph {
   constructor(options) {

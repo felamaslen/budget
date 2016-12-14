@@ -2,7 +2,7 @@
  * Date (YMD) class
  */
 
-import { leadingZeroes } from 'misc/misc';
+import { leadingZeroes } from "misc/misc";
 
 export class YMD {
   constructor(year, month, date) {
@@ -42,5 +42,4 @@ export const today = new YMD(
   todayDate.getMonth() + 1,
   todayDate.getDate()
 );
-
 

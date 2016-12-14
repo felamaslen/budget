@@ -2,15 +2,15 @@
  * UI navigation functions
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { GRAPH_FUNDS_PIE_WIDTH, NAV_HANDLE_EVENT } from 'const';
+import { GRAPH_FUNDS_PIE_WIDTH, NAV_HANDLE_EVENT } from "const";
 
-import { today } from 'misc/date';
-import { PageOverview } from 'page/overview';
-import { PageList } from 'page/list';
-import { PageAnalysis } from 'page/analysis';
-import { PageFunds } from 'page/funds';
+import { today } from "misc/date";
+import { PageOverview } from "page/overview";
+import { PageList } from "page/list";
+import { PageAnalysis } from "page/analysis";
+import { PageFunds } from "page/funds";
 
 const pageDef = {
   in: {
@@ -244,6 +244,8 @@ function tableNavigate(state, wasEditing, evt, x, y, dx, dy, maxX, maxY) {
 
 /**
  * main window keydown handler
+ * @param {User} user user object
+ * @param {object} state application state
  * @param {event} evt the event object send by the event listener
  * @returns {void} nothing
  */
@@ -312,6 +314,7 @@ export function keyDownHandler(user, state, evt) {
 
 /**
  * main window mouseup handler
+ * @param {object} state application state
  * @returns {void} void
  */
 export function mouseUpHandler(state) {
@@ -324,5 +327,4 @@ export function mouseUpHandler(state) {
     state.editing.finish();
   }
 }
-
 

@@ -2,7 +2,7 @@
  * Graph stuff
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
 import {
   MSG_TIME_FATAL, MSG_TIME_DEBUG,
@@ -15,10 +15,10 @@ import {
   PIE_LABEL_SWITCH_POINT, PIE_DEPTH,
   PIE_LABEL_RADIUS_START, PIE_LABEL_RADIUS_SCALE,
   PIE_LABEL_SCALE_FACTOR_PRE, PIE_LABEL_SCALE_FACTOR_POST
-} from 'const';
+} from "const";
 
-import { trim } from 'misc/misc';
-import { formatData } from 'misc/format';
+import { trim } from "misc/misc";
+import { formatData } from "misc/format";
 
 const pio2 = Math.PI / 2;
 

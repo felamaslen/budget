@@ -2,13 +2,13 @@
  * Analysis of spending page
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from 'const';
-import { formatCurrency } from 'misc/format';
-import { arraySum, arraySum1, percent, capitalise } from 'misc/misc';
+import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from "const";
+import { formatCurrency } from "misc/format";
+import { arraySum, arraySum1, percent, capitalise } from "misc/misc";
 
-import Page from 'page/page';
+import Page from "page/page";
 
 // class to pack rectangles into a root node
 class BlockPacker {

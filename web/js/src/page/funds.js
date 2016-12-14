@@ -2,17 +2,16 @@
  * Display fund data with historical prices etc.
  */
 
-import $ from 'lib/jquery.min';
+import $ from "lib/jquery.min";
 
-import { GRAPH_FUND_HISTORY_WIDTH } from 'const';
+import { GRAPH_FUND_HISTORY_WIDTH } from "const";
 
-import { todayDate } from 'misc/date';
-import { formatCurrency } from 'misc/format';
-import { rgb } from 'misc/color';
+import { todayDate } from "misc/date";
+import { formatCurrency } from "misc/format";
 
-import { PageList } from 'page/list';
+import { PageList } from "page/list";
 
-import { GraphFundItem, GraphFundHistory } from 'graph/fund';
+import { GraphFundItem, GraphFundHistory } from "graph/fund";
 
 export class PageFunds extends PageList {
   constructor(options, api, state) {
