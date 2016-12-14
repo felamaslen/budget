@@ -24,7 +24,6 @@ gulp.task('webpack', function(callback) {
     callback();
   });
 });
-
 gulp.task('webpack-dev-server', function(callback) {
   var compiler = webpack(webpackOptions);
 
@@ -53,10 +52,9 @@ gulp.task('uglify', ['webpack'], function(callback) {
     gulp.dest('web/js/build/')
   ], callback);
 });
-
 gulp.task('concat', ['uglify'], function() {
   return gulp.src([
-    'web/js/src/lib/js.cookie.min.js',
+    'web/js/lib/js.cookie.min.js',
     'web/js/build/main.js'
   ]).pipe(concat('main.min.js', {newLine: ';'}))
   .pipe(gulp.dest('web/js/'));
@@ -69,7 +67,6 @@ gulp.task('less', function() {
   }))
   .pipe(gulp.dest('web/css'));
 });
-
 gulp.task('cssmin', function() {
   gulp.src('web/css/budget.css')
   .pipe(cssmin())

@@ -2,7 +2,7 @@
  * Graph stuff
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import {
   MSG_TIME_FATAL, MSG_TIME_DEBUG,

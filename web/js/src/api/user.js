@@ -2,7 +2,7 @@
  * Handles user login
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { E_NO_STORAGE, MSG_TIME_WARN, NAV_HANDLE_EVENT } from "const";
 

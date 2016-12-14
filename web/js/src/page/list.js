@@ -3,7 +3,7 @@
  * optionally with pie chart(s)
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { MSG_TIME_WARN, MSG_TIME_ERROR } from "const";
 

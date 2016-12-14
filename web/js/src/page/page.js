@@ -2,7 +2,7 @@
  * General page class
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 export default class {
   constructor(options, api, state) {

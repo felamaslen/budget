@@ -2,7 +2,7 @@
  * Main entry point for budget web app
  */
 
-import $ from "lib/jquery.min";
+import $ from "../lib/jquery.min";
 
 import { NAV_HANDLE_EVENT } from "const";
 import { mouseUpHandler, keyDownHandler, navHandler } from "misc/nav";

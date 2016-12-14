@@ -2,7 +2,7 @@
  * Analysis of spending page
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from "const";
 import { formatCurrency } from "misc/format";

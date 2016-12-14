@@ -2,7 +2,7 @@
  * UI navigation functions
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { GRAPH_FUNDS_PIE_WIDTH, NAV_HANDLE_EVENT } from "const";
 
