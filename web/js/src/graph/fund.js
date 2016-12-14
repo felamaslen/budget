@@ -20,7 +20,7 @@ import {
 
 import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
-import { todayDate } from "misc/date";
+import { todayDate, timeSeriesTicks } from "misc/date";
 
 import { getTickSize, LineGraph } from "graph/graph";
 import { GoogleFinanceAPI } from "api/api";
@@ -507,76 +507,13 @@ export class GraphFundHistory extends LineGraph {
   }
   getTimeScale() {
     // divides the time axis (horizontal) into appropriate chunks
-    const range = this.maxX - this.minX;
-
-    const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    const times = {
-      h: 3600,
-      d: 86400,
-      w: 86400 * 7,
-      M: 86400 * 28,
-      y: 86400 * 365
-    };
-
-    const divisors = [
-      [times.h,     "h", times.h / 2],
-      [times.h * 6, "h", times.h],
-      [times.d,     "d", times.h * 6],
-      [times.w,     "w", times.d],
-      [times.M,     "M", times.w],
-      [times.y,     "y", times.y / 12, n => monthLength[n] * 86400]
-    ];
-
-    // minimum width between major ticks
-    const maxMajorTicks = this.width / 64;
-
-    const majorIndex = divisors.findIndex((item, index) => {
-      return range / item[0] < maxMajorTicks ||
-        index === divisors.length - 1;
+    return timeSeriesTicks(this.startTime + this.minX).map(tick => {
+      return {
+        major: tick.major,
+        pix: this.pixX(tick.t - this.startTime),
+        text: tick.major ? tick.label : null
+      };
     });
-
-    const div = divisors[majorIndex];
-
-    const ticks = [];
-
-    const numMajorTicks = Math.ceil(range / div[0]);
-    const numMinorTicks = Math.floor(div[0] / div[2]);
-
-    for (let t = 0; t < numMajorTicks; t++) {
-      // X is the start of the current tick block
-      const X = Math.round(t * div[0]);
-
-      if (t > 0) {
-        const numTickUnits = Math.floor(X / times[div[1]]);
-
-        ticks.push({
-          text:   (-numTickUnits).toString() + div[1],
-          pix:    Math.round(this.pixX(this.maxX - X)) + 0.5,
-          major:  true
-        });
-      }
-
-      // minor ticks
-      let Xm = X;
-      for (let n = 0; n < numMinorTicks; n++) {
-        // div[3] is a function which generates the minor tick length
-        const minorTickLength = div[3] ? div[3](n) : div[2];
-
-        Xm += minorTickLength;
-
-        if (Xm > range) {
-          break;
-        }
-
-        ticks.push({
-          pix:    Math.round(this.pixX(this.maxX - Xm)) + 0.5,
-          major:  false
-        });
-      }
-    }
-
-    return ticks;
   }
   calculateZoomedRange() {
     // calculate new Y range based on truncating the data (zooming)
