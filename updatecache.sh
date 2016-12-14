@@ -3,11 +3,11 @@
 WEB_ROOT="./web"
 
 function update_js {
-  grunt build_js
+  gulp build_js
 }
 
 function update_css {
-  grunt build_css
+  gulp build_css
 }
 
 function update_serial {
