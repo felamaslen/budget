@@ -510,7 +510,7 @@ export class GraphFundHistory extends LineGraph {
     return timeSeriesTicks(this.startTime + this.minX).map(tick => {
       return {
         major: tick.major,
-        pix: this.pixX(tick.t - this.startTime),
+        pix: Math.floor(this.pixX(tick.t - this.startTime)) + 0.5,
         text: tick.major ? tick.label : null
       };
     });
