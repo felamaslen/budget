@@ -477,13 +477,15 @@ class FundHistory(Processor):
     def process_deep(self):
         """ get full fund history with individual funds """
         num_results_query = self.dbx.query("""
-        SELECT COUNT(*) AS num_results
+        SELECT COUNT(*) AS num_results FROM (
+        SELECT c.cid
         FROM funds f
         INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
         INNER JOIN fund_cache fc ON fh.fid = fc.fid
         INNER JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
         WHERE f.uid = %d
-        GROUP BY c.cid""" % self.uid, [FUND_SALT])
+        GROUP BY c.cid
+        ) results""" % self.uid, [FUND_SALT])
 
         if num_results_query is False:
             return False
