@@ -46,7 +46,7 @@ gulp.task('webpack-dev-server', function(callback) {
   });
 });
 
-gulp.task('uglify', function(callback) {
+gulp.task('uglify', ['webpack'], function(callback) {
   pump([
     gulp.src('web/js/main.js'),
     uglify(),
@@ -54,7 +54,7 @@ gulp.task('uglify', function(callback) {
   ], callback);
 });
 
-gulp.task('concat', function() {
+gulp.task('concat', ['uglify'], function() {
   return gulp.src([
     'web/js/src/lib/js.cookie.min.js',
     'web/js/build/main.js'
@@ -78,7 +78,7 @@ gulp.task('cssmin', function() {
 });
 
 gulp.task('compile_js', ['webpack']);
-gulp.task('minify_js', ['uglify', 'concat']);
+gulp.task('minify_js', ['concat']);
 gulp.task('build_js', ['compile_js', 'minify_js']);
 
 gulp.task('build_css', ['less', 'cssmin']);
