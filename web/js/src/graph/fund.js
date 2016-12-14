@@ -214,17 +214,19 @@ export class GraphFundHistory extends LineGraph {
     this.$stocksList = $("<ul></ul>")
     .addClass("stocks-list-ul");
 
-    this.$stocksListOuter.append(this.$stocksList);
+    this.$sidebar = $("<div></div>")
+    .addClass("stock-sidebar");
 
     this.$overallStockChange  = $("<span></span>")
     .addClass("change");
-
     this.$stocksListOverall   = $("<span></span>")
     .addClass("stocks-list-overall")
     .append($("<span></span>").addClass("price").append(this.$overallStockChange));
 
-    this.$stocksListOuter.append(this.$stocksListOverall);
+    this.$sidebar.append(this.$stocksListOverall);
 
+    this.$stocksListOuter.append(this.$sidebar);
+    this.$stocksListOuter.append(this.$stocksList);
     this.$list.append(this.$stocksListOuter);
 
     this.loadStocksList();
@@ -379,8 +381,8 @@ export class GraphFundHistory extends LineGraph {
     this.stocksWeightedChange = change;
   }
   updateStockList() {
-    const numRows = 13;
-    const numCols = 3;
+    const numCols = 2;
+    const numRows = Math.ceil(this.stocks.length / numCols);
 
     const list = this.stocks.slice(0, numRows * numCols);
 
@@ -413,12 +415,13 @@ export class GraphFundHistory extends LineGraph {
 
         stock.$elem.attr("title", stock.symbol + " (" + stock.name + ")");
 
-        stock.$priceOuter = $("<span></span>")
-        .addClass("price");
+        stock.$label = $("<span></span>").addClass("label");
+        stock.$priceOuter = $("<span></span>").addClass("price");
+
+        stock.$label.text(stock.symbol);
 
         stock.$price = $("<span></span>")
-        .addClass("absolute")
-        .text(stock.price.toFixed(2));
+        .addClass("absolute").text(stock.price.toFixed(2));
 
         stock.$change = $("<span></span>")
         .addClass("change")
