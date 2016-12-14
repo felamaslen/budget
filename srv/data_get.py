@@ -393,43 +393,33 @@ def fund_history_deep(query):
     fid_keys = {}
     num_fids = 0
 
-    for (item, fid, time, value, _) in query:
-        item = strng(item)
+    for (items, fids, time, values, _, _) in query:
+        items = items.split(',')
+        fids = fids.split(',')
+        values = values.split(',')
 
         time = int(time)
-        value = int(round(value))
-        fid = int(fid)
-
-        if fid not in fid_keys:
-            fid_keys[fid] = num_fids
-            num_fids += 1
-
-        fid_key = fid_keys[fid]
-
-        if item not in results['funds']:
-            results['funds'].append(item)
-
         if times['start'] is None:
             times['start'] = time
 
-        if time not in times['list']:
-            # make sure each item has a consistent number of
-            # points (0 is better than null)
-            row = [0] * (fid_key - 1) if fid_key > 0 else []
-            row.append(value)
+        row = [] if num_fids == 0 else [0] * num_fids
+        for j, item in enumerate(items):
+            item = strng(item)
 
-            results['rows'].append([time - times['start'], row])
-            times['key'] += 1
+            if item not in results['funds']:
+                results['funds'].append(item)
 
-            times['list'].append(time)
-        else:
-            if fid_key >= len(results['rows'][times['key']][1]):
-                if fid_key > len(results['rows'][times['key']][1]):
-                    results['rows'][times['key']][1] += [0] * (fid_key - 1 \
-                            - len(results['rows'][times['key']][1]))
-                results['rows'][times['key']][1].append(value)
+            value = int(round(float(values[j])))
+            fid = int(fids[j])
+
+            if fid not in fid_keys:
+                fid_keys[fid] = num_fids
+                num_fids += 1
+                row.append(value)
             else:
-                results['rows'][times['key']][1][fid_key] = value
+                row[fid_keys[fid]] = value
+
+        results['rows'].append([time - times['start'], row])
 
     times['total'] = 0 if times['start'] is None else time - times['start']
 
@@ -499,7 +489,7 @@ class FundHistory(Processor):
 
         query = self.dbx.query("""
         SELECT * FROM (
-          SELECT item, fid, time, value, FLOOR(cNum %% (%d / %d)) AS period FROM (
+          SELECT item, fid, time, value, cNum, FLOOR(cNum %% (%d / %d)) AS period FROM (
             SELECT x.item, x.fid, x.time, x.value,
             (
               CASE x.cid
@@ -508,18 +498,20 @@ class FundHistory(Processor):
             ) AS cNum,
             @lastCid := x.cid AS last_cid
             FROM (
-              SELECT c.cid, fc.fid, f.item, c.time, (fc.price * fc.units) AS value
+              SELECT c.cid, c.time, GROUP_CONCAT(fc.fid) AS fid,
+                GROUP_CONCAT(f.item) AS item, GROUP_CONCAT((fc.price * fc.units)) AS value
               FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
               INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
               INNER JOIN fund_cache fc ON fh.fid = fc.fid
               INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+              GROUP BY c.cid
+              ORDER BY time
             ) x
-            JOIN (SELECT @cNum := 0, @lastCid := 0) r
+            JOIN (SELECT @cNum := -1, @lastCid := 0) r
           ) ranked
         ) list
-        WHERE period = 0
-        ORDER BY time, item""" % (num_results, self.num_results_display, \
-                self.uid), [FUND_SALT])
+        WHERE period = 0 OR cNum = %d""" % (num_results, self.num_results_display, \
+                self.uid, num_results - 1), [FUND_SALT])
 
         if query is False:
             return False
