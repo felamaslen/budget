@@ -7,7 +7,7 @@
  - Create MySQL database called "budget"
  - Install nodejs dependencies: `npm i`
  - Build resources:
-  * `grunt`
+  * `gulp`
  - Install Python environment and MySQL database:
   * `./setup.sh install`
  - Configure MySQL username and password in `srv/db_info.py` (rename from `.example`)
@@ -15,7 +15,7 @@
 
 #### Extra (for devs):
  - To update/create minified JavaScript and CSS, run:
-  * `grunt [build_js] [build_css]`
+  * `./updatecache.sh [js] [css]`
 
 ### Operation:
  - To run the server:
