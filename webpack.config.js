@@ -2,7 +2,11 @@ var path = require('path');
 
 module.exports = {
   entry: './web/js/src/budget.js',
-  output: { path: './web/js', filename: 'main.js' },
+  output: {
+    path: path.join(__dirname, 'web', 'js'),
+    publicPath: '/js/',
+    filename: 'main.js'
+  },
   module: {
     loaders: [
       {

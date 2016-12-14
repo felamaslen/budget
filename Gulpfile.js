@@ -30,18 +30,19 @@ gulp.task('webpack-dev-server', function(callback) {
 
   new WebpackDevServer(compiler, {
     watch: true,
+    publicPath: webpackOptions.output.publicPath,
     proxy: {
       '/**': {
-        target: 'https://budget.bristol.fela.london/',
-        changeOrigin: true,
-        secure: true
+        target: 'https://budget.bristol.fela.london',
+        secure: true,
+        changeOrigin: true
       }
     }
   }).listen(8080, '0.0.0.0', function(err) {
       if (err) {
         throw new gutil.PluginError('webpack-dev-server', err);
       }
-      gutil.log('[webpack-dev-server]', 'http://localhost:8080/webpack-dev-server/index.html');
+      gutil.log('[webpack-dev-server] 0.0.0.0:8080');
   });
 });
 
