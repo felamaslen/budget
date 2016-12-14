@@ -2,13 +2,13 @@
  * Overview of spending / cash flow
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import {
   COLOR_CATEGORY, MSG_TIME_ERROR
 } from "const";
 
-import { arrayAverage, median, months } from "misc/misc";
+import { arrayAverage, median, months, getYearMonthRow } from "misc/misc";
 import { getColorFromScore } from "misc/color";
 import { formatCurrency } from "misc/format";
 import { validateCurrencyInput } from "misc/edit";

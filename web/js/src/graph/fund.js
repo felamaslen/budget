@@ -2,7 +2,7 @@
  * Fund graphs
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import {
   MSG_TIME_ERROR,

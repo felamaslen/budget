@@ -2,7 +2,7 @@
  * Error messages
  */
 
-import $ from "lib/jquery.min";
+import $ from "../lib/jquery.min";
 
 import { MIN_MSG_LEVEL } from "const";
 

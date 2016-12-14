@@ -2,7 +2,7 @@
  * Form stuff
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { MSG_TIME_DEBUG } from "const";
 

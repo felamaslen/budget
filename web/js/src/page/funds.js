@@ -2,7 +2,7 @@
  * Display fund data with historical prices etc.
  */
 
-import $ from "lib/jquery.min";
+import $ from "../../lib/jquery.min";
 
 import { GRAPH_FUND_HISTORY_WIDTH } from "const";
 
