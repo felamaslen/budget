@@ -75,7 +75,7 @@ gulp.task('less', function() {
   }))
   .pipe(gulp.dest('web/css'));
 });
-gulp.task('cssmin', function() {
+gulp.task('cssmin', ['less'], function() {
   gulp.src('web/css/budget.css')
   .pipe(cssmin())
   .pipe(rename({suffix: '.min'}))
@@ -86,7 +86,7 @@ gulp.task('compile_js', ['webpack']);
 gulp.task('minify_js', ['concat']);
 gulp.task('build_js', ['compile_js', 'minify_js']);
 
-gulp.task('build_css', ['less', 'cssmin']);
+gulp.task('build_css', ['cssmin']);
 
 gulp.task('default', ['build_js', 'build_css']);
 
