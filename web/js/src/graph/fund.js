@@ -135,7 +135,7 @@ export class GraphFundItem extends LineGraph {
         this.ctx.moveTo(this.padX1 + tickPad, tickPos);
         this.ctx.lineTo(this.width - this.padX2, tickPos);
         this.ctx.closePath();
-        this.ctx.strokeStyle = i < 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
+        this.ctx.strokeStyle = i <= 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
         this.ctx.stroke();
       }
     }
@@ -604,7 +604,7 @@ export class GraphFundHistory extends LineGraph {
       this.ctx.moveTo(this.padX1, tickPos);
       this.ctx.lineTo(this.width - this.padX2, tickPos);
 
-      this.ctx.strokeStyle = (this.percent && value >= 0) || (!this.percent && value >= startValue)
+      this.ctx.strokeStyle = (this.percent && value > 0) || (!this.percent && value > startValue)
         ? COLOR_PROFIT : COLOR_LOSS;
       this.ctx.stroke();
     }
