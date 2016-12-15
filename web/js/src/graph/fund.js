@@ -384,6 +384,10 @@ export class GraphFundHistory extends LineGraph {
     .toggleClass("up", change > 0)
     .toggleClass("down", change < 0);
 
+    if (this.overallHlTimer) {
+      window.clearTimeout(this.overallHlTimer);
+    }
+
     this.$overallStockChange
     .text(overallChangeText)
     .toggleClass(
@@ -396,6 +400,10 @@ export class GraphFundHistory extends LineGraph {
     );
 
     this.stocksWeightedChange = change;
+
+    this.overallHlTimer = window.setTimeout(() => {
+      this.$overallStockChange.removeClass("hl-up").removeClass("hl-down");
+    }, STOCKS_HL_TIME);
   }
   updateStockItem(stock, index) {
     if (stock.$elem) {
@@ -465,10 +473,6 @@ export class GraphFundHistory extends LineGraph {
 
     stocks.forEach(stock => this.updateStockItem(stock));
     this.indices.forEach(stock => this.updateStockItem(stock, true));
-
-    window.setTimeout(() => {
-      this.$overallStockChange.removeClass("hl-up").removeClass("hl-down");
-    }, STOCKS_HL_TIME);
   }
   onStockPricesFail() {
     this.state.error.newMessage("Error loading stock prices!", 2, MSG_TIME_ERROR);
