@@ -430,7 +430,7 @@ export class GraphFundHistory extends LineGraph {
     // add the item
     else if (index) {
       stock.$elem = $("<li></li>");
-      stock.$label = $("<span></span>").addClass("label").text(stock.name);
+      stock.$label = $("<span></span>").addClass("label").html(stock.name);
       stock.$price = $("<span></span>").addClass("price");
       stock.$absolute = $("<span></span>").addClass("absolute").text(stock.price.toFixed(2));
       stock.$change = $("<span></span>").addClass("change").text(stock.changeText);
@@ -444,7 +444,7 @@ export class GraphFundHistory extends LineGraph {
       stock.$elem = $("<li></li>").addClass("stock-list-item");
       stock.$elem.attr("title", stock.symbol + " (" + stock.name + ")");
 
-      stock.$label = $("<span></span>").addClass("label").text(stock.name);
+      stock.$label = $("<span></span>").addClass("label").html(stock.name);
       stock.$price = $("<span></span>").addClass("price");
       stock.$absolute = $("<span></span>").addClass("absolute").text(stock.price.toFixed(2));
       stock.$change = $("<span></span>").addClass("change").text(stock.changeText);
