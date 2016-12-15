@@ -350,7 +350,8 @@ class Funds(ListData):
     def get_cache_latest(self):
         """ get the latest cached fund value """
         result = self.dbx.query("""
-        SELECT f.hash, GROUP_CONCAT(c.price) AS price
+        SELECT hash, GROUP_CONCAT(price) AS price FROM (
+        SELECT f.hash, f.fid, c.price
         FROM (
             SELECT cg.fid, y.time AS latest FROM (
                 SELECT cid, time FROM fund_cache_time
@@ -363,7 +364,9 @@ class Funds(ListData):
         INNER JOIN fund_cache_time ct ON ct.time = x.latest
         INNER JOIN fund_hash f ON f.fid = x.fid
         INNER JOIN fund_cache c ON c.fid = x.fid AND c.cid = ct.cid
-        GROUP BY f.fid
+        ORDER BY latest
+        ) list
+        GROUP BY fid
         """, [])
 
         if result is False:
