@@ -6,8 +6,10 @@
 
 @color_bg_up:         #1e5413;
 @color_bg_up_hl:      #d4ffcc;
+@color_bg_up_rev:     #bdfcf8;
 @color_bg_down:       #a01e1e;
 @color_bg_down_hl:    #f2bfbf;
+@color_bg_down_rev:   #bfd7f2;
 
 @width_page_narrow:   1000px;
 @width_page_wide:     1500px;
@@ -1160,9 +1162,6 @@ button {
         font-weight: bold;
       }
     }
-    .stocks-list-price-reverse() {
-      background-color: #ede865;
-    }
     .up, .down {
       .stocks-list-price-change();
     }
@@ -1175,7 +1174,7 @@ button {
         background-color: @color_bg_up_hl;
       }
       .hl-down {
-        .stocks-list-price-reverse();
+        background-color: @color_bg_up_rev;
       }
     }
     .down {
@@ -1187,7 +1186,7 @@ button {
         background-color: @color_bg_down_hl;
       }
       .hl-up {
-        .stocks-list-price-reverse();
+        background-color: @color_bg_down_rev;
       }
     }
     .change {
