@@ -91,7 +91,8 @@ export const FONT_GRAPH_TITLE_LARGE = "18px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY = "13px Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
 
-export const STOCKS_REFRESH_INTERVAL = 10000;
+export const STOCKS_REFRESH_INTERVAL = 6000;
+export const STOCKS_HL_TIME = 7000;
 export const STOCKS_LIST_WIDTH = 300;
 
 export const STOCK_INDICES = {

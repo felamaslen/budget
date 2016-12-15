@@ -14,7 +14,7 @@ import {
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
-  STOCKS_REFRESH_INTERVAL, DO_STOCKS_LIST, STOCK_INDICES,
+  STOCKS_REFRESH_INTERVAL, STOCKS_HL_TIME, DO_STOCKS_LIST, STOCK_INDICES,
   FONT_AXIS_LABEL
 } from "const";
 
@@ -41,12 +41,7 @@ const processStockChange = (res, old) => {
   const price = parseFloat(res.l_fix, 10);
   const change = parseFloat(res.c_fix, 10) / price * 100;
 
-  let hl = false; // highlight
-  if (old.price !== price) {
-    hl = old.price > price ? "hl-down" : "hl-up";
-  }
-
-  old.hl = hl;
+  old.delta = old.price !== price ? (old.price < price ? 1 : -1) : 0;
   old.price = price;
   old.change = change;
   old.changeText = (change >= 0 ? "+" : "") + change.toFixed(numDp(change));
@@ -226,7 +221,6 @@ export class GraphFundHistory extends LineGraph {
 
   buildStockViewer() {
     this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
-    this.hlTime = STOCKS_REFRESH_INTERVAL - 1000;
 
     this.stocksListLoading = false;
 
@@ -337,7 +331,7 @@ export class GraphFundHistory extends LineGraph {
           this.indices.push({
             symbol,
             name: STOCK_INDICES[symbol],
-            hl: false,
+            delta: 0,
             price: 0,
             change: 0,
             changeText: "",
@@ -409,14 +403,21 @@ export class GraphFundHistory extends LineGraph {
       stock.$absolute.text(stock.price.toFixed(2));
       stock.$change.text(stock.changeText);
 
-      if (stock.hl) {
-        stock.$price.addClass(stock.hl);
-        stock.hl = false;
-
-        window.setTimeout(() => {
-          stock.$price.removeClass("hl-up").removeClass("hl-down");
-        }, this.hlTime);
+      if (stock.hlTimer) {
+        window.clearTimeout(stock.hlTimer);
       }
+
+      stock.$price
+      .toggleClass("hl-up", stock.delta > 0)
+      .toggleClass("hl-down", stock.delta < 0);
+
+      if (stock.delta !== 0) {
+        stock.hlTimer = window.setTimeout(() => {
+          stock.$price.removeClass("hl-up").removeClass("hl-down");
+        }, STOCKS_HL_TIME);
+      }
+
+      stock.delta = 0;
     }
     // add the item
     else if (index) {
@@ -467,7 +468,7 @@ export class GraphFundHistory extends LineGraph {
 
     window.setTimeout(() => {
       this.$overallStockChange.removeClass("hl-up").removeClass("hl-down");
-    }, this.hlTime);
+    }, STOCKS_HL_TIME);
   }
   onStockPricesFail() {
     this.state.error.newMessage("Error loading stock prices!", 2, MSG_TIME_ERROR);
