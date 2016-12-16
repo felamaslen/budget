@@ -59,11 +59,11 @@ export const COLOR_BALANCE_ACTUAL = "#039";
 export const COLOR_BALANCE_PREDICTED = "#f00";
 
 export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
-export const COLOR_GRAPH_FUND_LINE = "#164187";
+export const COLOR_GRAPH_FUND_LINE = "#000";
 export const COLOR_GRAPH_FUND_POINT = "#0e58ce";
 
-export const COLOR_KEY = ["#b21e13", "#b25513", "#aab213", "#7ab213", "#13b27d",
-  "#6b13b2", "#b213b2"];
+export const COLOR_KEY = ["#b21e13", "#ff6500", "#cccb00", "#00cc0b", "#005dcc",
+  "#3800cc", "#c000cc"];
 
 export const COLOR_CATEGORY = {
   funds:  [84, 110, 122],
