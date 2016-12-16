@@ -229,10 +229,7 @@ export class GraphFundHistory extends LineGraph {
     if (!this.raw.length) {
       return null;
     }
-    const lines = [[COLOR_GRAPH_FUND_LINE, this.raw.map(item => {
-      return [item[0], item[2]];
-    })]];
-
+    const lines = [];
     this.fundLines.forEach((status, index) => {
       if (status) {
         lines.push([COLOR_KEY[index % COLOR_KEY.length], this.raw.map(item => {
@@ -240,6 +237,10 @@ export class GraphFundHistory extends LineGraph {
         })]);
       }
     });
+    lines.push([COLOR_GRAPH_FUND_LINE, this.raw.map(item => {
+      return [item[0], item[2]];
+    })]);
+
     return lines;
   }
   resize(size) {
@@ -668,10 +669,12 @@ export class GraphFundHistory extends LineGraph {
       }
     });
 
+    const mainIndex = this.data.length - 1;
+
     // plot past data
     if (this.data) {
       this.dataZoomed.forEach((line, index) => {
-        this.lineWidth = index ? 1 : GRAPH_FUND_HISTORY_LINE_WIDTH;
+        this.lineWidth = index === mainIndex ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
         this.drawCubicLine(line[1], line[0]);
       });
     }
@@ -691,12 +694,12 @@ export class GraphFundHistory extends LineGraph {
     // highlight point on mouseover
     if (
       this.hlPoint > -1 &&
-      this.data[this.data.length - 1][this.hlPoint][0] >= this.minX
+      this.data[mainIndex][1][this.hlPoint][0] >= this.minX
     ) {
-      const hlX = this.pixX(this.data[this.data.length - 1][this.hlPoint][0]);
-      const hlY = this.pixY(this.data[this.data.length - 1][this.hlPoint][1]);
+      const hlX = this.pixX(this.data[mainIndex][1][this.hlPoint][0]);
+      const hlY = this.pixY(this.data[mainIndex][1][this.hlPoint][1]);
 
-      const time = this.data[this.data.length - 1][this.hlPoint][0] +
+      const time = this.data[mainIndex][1][this.hlPoint][0] +
         this.startTime;
 
       const age = todayDate.getTime() - time * 1000;
@@ -706,7 +709,7 @@ export class GraphFundHistory extends LineGraph {
       const align = hlX < this.width / 2 ? -1 : 1;
 
       const label = ageText + ": " + this.formatValue(
-        this.data[this.data.length - 1][this.hlPoint][1]
+        this.data[mainIndex][1][this.hlPoint][1]
       );
 
       const left = align > 0
@@ -745,24 +748,16 @@ export class GraphFundHistory extends LineGraph {
     }
 
     const xv = this.valX(x);
-
-    let lastProximity = -1;
-
-    const hlPoint = this.data[this.data.length - 1]
-    .reduce((prev, point, index) => {
+    let lastProximity = Infinity;
+    const hlPoint = this.data[this.data.length - 1][1].reduce((prev, point, index) => {
       const thisProximity = Math.abs(xv - point[0]);
-
-      const returnVal = prev === null || thisProximity < lastProximity
-        ? index : prev;
-
+      const returnVal = thisProximity < lastProximity ? index : prev;
       lastProximity = thisProximity;
-
       return returnVal;
-    }, null);
+    }, -1);
 
     if (hlPoint !== this.hlPoint) {
       this.hlPoint = hlPoint;
-
       this.draw();
     }
   }
