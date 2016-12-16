@@ -364,7 +364,7 @@ class Funds(ListData):
         INNER JOIN fund_cache_time ct ON ct.time = x.latest
         INNER JOIN fund_hash f ON f.fid = x.fid
         INNER JOIN fund_cache c ON c.fid = x.fid AND c.cid = ct.cid
-        ORDER BY latest
+        ORDER BY fid, latest
         ) list
         GROUP BY fid
         """, [])
