@@ -714,6 +714,50 @@ button {
       z-index: 2;
       display: none;
     }
+    .fund-sidebar {
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+      list-style: none;
+      width: 10%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      transition: 0.3s width ease-in-out;
+      &:hover {
+        width: 40%;
+      }
+      li {
+        line-height: 1.2em;
+        width: 100%;
+        cursor: default;
+        font-size: 0.9em;
+        white-space: nowrap;
+        position: relative;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .checkbox {
+        position: absolute;
+        top: 0.1em;
+        left: 0.1em;
+        width: 0.6em;
+        height: 0.6em;
+        display: inline-block;
+        border: 0.1em solid black;
+      }
+      .enabled .checkbox {
+        width: 0;
+        height: 0;
+        top: 0.1em;
+        left: 0.1em;
+        border-width: 0.4em;
+      }
+      .fund {
+        padding-left: 1em;
+      }
+    }
   }
 }
 

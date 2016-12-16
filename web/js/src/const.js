@@ -62,6 +62,9 @@ export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 export const COLOR_GRAPH_FUND_LINE = "#164187";
 export const COLOR_GRAPH_FUND_POINT = "#0e58ce";
 
+export const COLOR_KEY = ["#b21e13", "#b25513", "#aab213", "#7ab213", "#13b27d",
+  "#6b13b2", "#b213b2"];
+
 export const COLOR_CATEGORY = {
   funds:  [84, 110, 122],
   bills: [183, 28, 28],
