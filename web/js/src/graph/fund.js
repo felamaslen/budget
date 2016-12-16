@@ -9,7 +9,7 @@ import {
   COLOR_GRAPH_FUND_ITEM, COLOR_GRAPH_FUND_POINT,
   COLOR_DARK, COLOR_LIGHT_GREY,
   COLOR_PROFIT, COLOR_LOSS, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
-  COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE,
+  COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE, COLOR_KEY,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
@@ -151,17 +151,21 @@ export class GraphFundHistory extends LineGraph {
 
     this.$list = options.$list;
 
-    this.tension    = GRAPH_FUND_HISTORY_TENSION;
-    this.raw        = options.data;
-    this.startTime  = options.startTime;
+    this.tension = GRAPH_FUND_HISTORY_TENSION;
+    this.raw = options.data;
+    this.funds = options.funds;
+    this.fundLines = this.funds.map(() => false);
+    this.startTime = options.startTime;
     this.dataOffset = 0;
-    this.hlPoint    = -1;
+    this.hlPoint = -1;
 
     this.togglePercent(true, true);
 
     this.colorMajor = COLOR_GRAPH_FUND_LINE;
 
     this.$label = $("<div></div>").addClass("label");
+    this.$gCont.append(this.$fundSidebar);
+    this.buildFundSidebar();
     this.$gCont.append(this.$label);
 
     this.$gCont[0].addEventListener("mousewheel", evt => {
@@ -200,18 +204,44 @@ export class GraphFundHistory extends LineGraph {
     .trigger();
   }
 
+  buildFundSidebar() {
+    const $fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
+
+    this.funds.forEach((fund, index) => {
+      const $item = $("<li></li>")
+      .append($("<span></span>")
+              .addClass("checkbox").css("border-color", COLOR_KEY[index % COLOR_KEY.length]))
+      .append($("<span></span>").addClass("fund").text(fund))
+      .toggleClass("enabled", this.fundLines[index]);
+      $item.on("click", evt => {
+        const status = !$item.hasClass("enabled");
+        $item.toggleClass("enabled", status);
+        this.fundLines[index] = status;
+        this.togglePercent(this.percent);
+        evt.stopPropagation();
+      });
+      $fundSidebar.append($item);
+    });
+    this.$gCont.append($fundSidebar);
+  }
+
   processData() {
     if (!this.raw.length) {
       return null;
     }
-
-    const mainLine = this.raw.map(item => {
+    const lines = [[COLOR_GRAPH_FUND_LINE, this.raw.map(item => {
       return [item[0], item[2]];
+    })]];
+
+    this.fundLines.forEach((status, index) => {
+      if (status) {
+        lines.push([COLOR_KEY[index % COLOR_KEY.length], this.raw.map(item => {
+          return [item[0], item[1][index]];
+        })]);
+      }
     });
-
-    return [mainLine];
+    return lines;
   }
-
   resize(size) {
     this.width = size;
     this.$canvas[0].width = size;
@@ -223,17 +253,13 @@ export class GraphFundHistory extends LineGraph {
     this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
 
     this.stocksListLoading = false;
-
     this.stockPricesLoading = false;
-
     this.stocks = {};
 
     this.$stocksListOuter = $("<div></div>")
     .addClass("stocks-list");
-
     this.$stocksList = $("<ul></ul>")
     .addClass("stocks-list-ul");
-
     this.$sidebar = $("<div></div>")
     .addClass("stock-sidebar");
 
@@ -482,7 +508,7 @@ export class GraphFundHistory extends LineGraph {
   }
 
   increaseDetail() {
-    this.dataOffset = Math.min(this.data[0].length - 3, this.dataOffset + 1);
+    this.dataOffset = Math.min(this.data[0][1].length - 3, this.dataOffset + 1);
     this.detailChanged();
   }
   decreaseDetail() {
@@ -501,13 +527,10 @@ export class GraphFundHistory extends LineGraph {
 
   togglePercent(status, noDraw) {
     this.percent = status;
-
     this.dataProc = this.processData();
-
     if (!this.dataProc) {
       return;
     }
-
     this.detailChanged(noDraw);
   }
   getTimeScale() {
@@ -522,10 +545,10 @@ export class GraphFundHistory extends LineGraph {
   }
   calculateZoomedRange() {
     // calculate new Y range based on truncating the data (zooming)
-    this.dataZoomed = this.data.map(line => line.slice(this.dataOffset));
+    this.dataZoomed = this.data.map(line => [line[0], line[1].slice(this.dataOffset)]);
 
     let minY = this.dataZoomed.reduce((last, line) => {
-      const lineMin = line.reduce((a, b) => {
+      const lineMin = line[1].reduce((a, b) => {
         return b[1] < a ? b[1] : a;
       }, Infinity);
 
@@ -533,7 +556,7 @@ export class GraphFundHistory extends LineGraph {
     }, Infinity);
 
     const maxY = this.dataZoomed.reduce((last, line) => {
-      const lineMax = line.reduce((a, b) => {
+      const lineMax = line[1].reduce((a, b) => {
         return b[1] > a ? b[1] : a;
       }, 0);
 
@@ -551,7 +574,7 @@ export class GraphFundHistory extends LineGraph {
 
     // set the new ranges
     this.setRange([
-      this.data[0][this.dataOffset][0],
+      this.data[0][1][this.dataOffset][0],
       new Date().getTime() / 1000 - this.startTime,
       this.tickSizeY * Math.floor(minY / this.tickSizeY),
       this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
@@ -560,11 +583,10 @@ export class GraphFundHistory extends LineGraph {
   calculatePercentages() {
     // turns data from absolute values to percentage returns
     this.data = this.percent ? this.dataProc.map(line => {
-      const initial = line[this.dataOffset][1];
-
-      return line.map(item => {
+      const initial = line[1][this.dataOffset][1];
+      return [line[0], line[1].map(item => {
         return [item[0], 100 * (item[1] - initial) / initial];
-      });
+      })];
     }) : this.dataProc;
   }
 
@@ -648,10 +670,9 @@ export class GraphFundHistory extends LineGraph {
 
     // plot past data
     if (this.data) {
-      this.lineWidth = GRAPH_FUND_HISTORY_LINE_WIDTH;
-
-      this.dataZoomed.forEach(line => {
-        this.drawCubicLine(line, this.colorMajor);
+      this.dataZoomed.forEach((line, index) => {
+        this.lineWidth = index ? 1 : GRAPH_FUND_HISTORY_LINE_WIDTH;
+        this.drawCubicLine(line[1], line[0]);
       });
     }
 
