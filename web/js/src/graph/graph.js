@@ -291,6 +291,9 @@ export class LineGraph extends Graph {
         }
       });
 
+      this.ctx.lineTo(this.pixX(p[p.length - 1][0]),
+                      this.pixY(p[p.length - 1][1]));
+
       this.ctx.stroke();
       this.ctx.closePath();
     }
