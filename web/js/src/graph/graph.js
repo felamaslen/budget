@@ -224,40 +224,73 @@ export class LineGraph extends Graph {
 
     return curve;
   }
-  drawCubicLineCurve(curve, p, colors, width) {
+  drawCubicLineCurve(curve, p, colors, width, dashed) {
     this.ctx.lineWidth = width;
-    this.ctx.beginPath();
     this.ctx.strokeStyle = colors[0];
+
+    this.ctx.beginPath();
 
     let colorKey = 0;
     let moved = false;
-    let t = 0; // transition key
+    let transitionKey = 0;
+    let arcLength = 0;
+    let dashToggle = 1;
+    let x;
+    let y;
+
     curve.forEach((piece, i) => {
-      if (i === this.transition[t]) {
-        t++;
+      if (i === this.transition[transitionKey]) {
+        transitionKey++;
 
-        this.ctx.lineTo(piece[0][0], piece[0][1]);
+        if (!dashed || dashToggle) {
+          this.ctx.lineTo(piece[0][0], piece[0][1]);
+          this.ctx.stroke();
+          this.ctx.closePath();
+          this.ctx.beginPath();
+        }
 
-        this.ctx.stroke();
-        this.ctx.closePath();
-
-        this.ctx.beginPath();
         this.ctx.strokeStyle = colors[++colorKey % colors.length];
 
         moved = false;
       }
 
       for (const point of piece) {
-        if (!moved) {
-          this.ctx.moveTo(point[0], point[1]);
-
-          moved = true;
+        if (!dashed || dashToggle) {
+          if (!moved) {
+            this.ctx.moveTo(point[0], point[1]);
+            moved = true;
+          }
+          else {
+            this.ctx.lineTo(point[0], point[1]);
+          }
         }
-        else {
-          this.ctx.lineTo(point[0], point[1]);
+
+        if (dashed) {
+          if (x) {
+            arcLength += Math.sqrt(Math.pow(point[0] - x, 2) + Math.pow(point[1] - y, 2));
+          }
+          if (arcLength > dashed) {
+            if (dashToggle) {
+              this.ctx.stroke();
+              this.ctx.closePath();
+            }
+            else {
+              this.ctx.beginPath();
+              moved = false;
+            }
+            dashToggle = !dashToggle;
+            arcLength = 0;
+          }
+          x = point[0];
+          y = point[1];
         }
       }
     });
+
+    if (dashed && !dashToggle) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, y);
+    }
     this.ctx.lineTo(this.pixX(p[p.length - 1][0]),
                     this.pixY(p[p.length - 1][1]));
 
@@ -293,7 +326,7 @@ export class LineGraph extends Graph {
     if (movingAverage > 0) {
       const avg = getMovingAverage(p, movingAverage);
       const averageCurve = this.getSpline(avg);
-      this.drawCubicLineCurve(averageCurve, avg, colors, 1);
+      this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5);
     }
   }
   drawLine(p, color) {
