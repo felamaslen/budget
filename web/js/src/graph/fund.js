@@ -675,7 +675,7 @@ export class GraphFundHistory extends LineGraph {
     if (this.data) {
       this.dataZoomed.forEach((line, index) => {
         this.lineWidth = index === mainIndex ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
-        this.drawCubicLine(line[1], line[0], index === mainIndex ? 5 : 0);
+        this.drawCubicLine(line[1], line[0], index === mainIndex ? 20 : 0);
       });
     }
 
