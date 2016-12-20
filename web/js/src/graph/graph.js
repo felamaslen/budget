@@ -17,7 +17,7 @@ import {
   PIE_LABEL_SCALE_FACTOR_PRE, PIE_LABEL_SCALE_FACTOR_POST
 } from "const";
 
-import { trim } from "misc/misc";
+import { trim, getMovingAverage } from "misc/misc";
 import { formatData } from "misc/format";
 
 const pio2 = Math.PI / 2;
@@ -224,18 +224,55 @@ export class LineGraph extends Graph {
 
     return curve;
   }
-  drawCubicLine(p, colors) {
+  drawCubicLineCurve(curve, p, colors, width) {
+    this.ctx.lineWidth = width;
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = colors[0];
+
+    let colorKey = 0;
+    let moved = false;
+    let t = 0; // transition key
+    curve.forEach((piece, i) => {
+      if (i === this.transition[t]) {
+        t++;
+
+        this.ctx.lineTo(piece[0][0], piece[0][1]);
+
+        this.ctx.stroke();
+        this.ctx.closePath();
+
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = colors[++colorKey % colors.length];
+
+        moved = false;
+      }
+
+      for (const point of piece) {
+        if (!moved) {
+          this.ctx.moveTo(point[0], point[1]);
+
+          moved = true;
+        }
+        else {
+          this.ctx.lineTo(point[0], point[1]);
+        }
+      }
+    });
+    this.ctx.lineTo(this.pixX(p[p.length - 1][0]),
+                    this.pixY(p[p.length - 1][1]));
+
+    this.ctx.stroke();
+    this.ctx.closePath();
+  }
+  drawCubicLine(p, colors, movingAverage) {
     if (typeof colors === "string") {
       colors = [colors];
     }
-
     const curve = this.getSpline(p);
 
     if (this.fill) {
       this.ctx.beginPath();
-
       this.ctx.fillStyle = colors[0];
-
       this.ctx.moveTo(this.pixX(0), this.pixY(0));
 
       for (const piece of curve) {
@@ -243,59 +280,20 @@ export class LineGraph extends Graph {
           this.ctx.lineTo(point[0], point[1]);
         });
       }
-
       this.ctx.lineTo(this.pixX(p.length - 1), this.pixY(0));
-
       this.ctx.lineTo(this.pixX(0), this.pixY(0));
-
       this.ctx.fill();
-
       this.ctx.closePath();
     }
 
     if (this.stroke) {
-      this.ctx.lineWidth = this.lineWidth;
-      this.ctx.beginPath();
-      this.ctx.strokeStyle = colors[0];
+      this.drawCubicLineCurve(curve, p, colors, this.lineWidth);
+    }
 
-      let colorKey = 0;
-
-      let moved = false;
-
-      let t = 0; // transition key
-
-      curve.forEach((piece, i) => {
-        if (i === this.transition[t]) {
-          t++;
-
-          this.ctx.lineTo(piece[0][0], piece[0][1]);
-
-          this.ctx.stroke();
-          this.ctx.closePath();
-
-          this.ctx.beginPath();
-          this.ctx.strokeStyle = colors[++colorKey % colors.length];
-
-          moved = false;
-        }
-
-        for (const point of piece) {
-          if (!moved) {
-            this.ctx.moveTo(point[0], point[1]);
-
-            moved = true;
-          }
-          else {
-            this.ctx.lineTo(point[0], point[1]);
-          }
-        }
-      });
-
-      this.ctx.lineTo(this.pixX(p[p.length - 1][0]),
-                      this.pixY(p[p.length - 1][1]));
-
-      this.ctx.stroke();
-      this.ctx.closePath();
+    if (movingAverage > 0) {
+      const avg = getMovingAverage(p, movingAverage);
+      const averageCurve = this.getSpline(avg);
+      this.drawCubicLineCurve(averageCurve, avg, colors, 1);
     }
   }
   drawLine(p, color) {

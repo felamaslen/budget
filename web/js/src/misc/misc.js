@@ -62,6 +62,17 @@ export function capitalise(word) {
 export function getYearMonthRow(startYear, startMonth, year, month) {
   return (year - startYear) * 12 + (month - startMonth);
 }
+
+export const getMovingAverage = (data, period) => data.map((item, key) => {
+  if (key < period - 1) {
+    return [item[0], data.filter((_, thisKey) => thisKey <= key)
+      .reduce((a, b) => a + b[1], 0) / (key + 1)];
+  }
+
+  return [item[0], data.filter(
+    (_, thisKey) => thisKey <= key && thisKey > key - period
+  ).reduce((a, b) => a + b[1], 0) / period];
+});
 export const indexPoints = (value, key) => [key, value];
 
 export const months = [
