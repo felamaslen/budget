@@ -40,7 +40,7 @@ gulp.task('webpack-dev-server', function(callback) {
     publicPath: webpackOptions.output.publicPath,
     proxy: {
       '/**': {
-        target: 'https://budget.bristol.fela.london',
+        target: 'http://budget.example.com',
         secure: true,
         changeOrigin: true
       }
