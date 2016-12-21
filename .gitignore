@@ -1,5 +1,6 @@
 node_modules
 node_modules/*
+Gulpfile.js
 **/__pycache__
 Budget.egg-info
 env

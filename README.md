@@ -6,6 +6,7 @@
  - Install Python 2.7 and MySQL
  - Create MySQL database called "budget"
  - Install nodejs dependencies: `npm i`
+ - Rename Gulpfile.js.example to Gulpfile.js, updating with correct proxy URL
  - Build resources:
   * `gulp`
  - Install Python environment and MySQL database:
