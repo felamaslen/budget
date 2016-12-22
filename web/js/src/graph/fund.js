@@ -6,8 +6,7 @@ import $ from "../../lib/jquery.min";
 
 import {
   MSG_TIME_ERROR,
-  COLOR_GRAPH_FUND_POINT, COLOR_DARK, COLOR_LIGHT_GREY,
-  COLOR_PROFIT, COLOR_LOSS,
+  COLOR_DARK, COLOR_LIGHT_GREY, COLOR_PROFIT, COLOR_LOSS,
   COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE, COLOR_KEY,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
@@ -173,7 +172,7 @@ export class GraphFundHistory extends LineGraph {
     this.fundLines = this.funds.map(() => false);
     this.startTime = options.startTime;
     this.dataOffset = 0;
-    this.hlPoint = -1;
+    this.hlPoint = [-1, -1];
 
     this.togglePercent(true, true);
 
@@ -196,10 +195,11 @@ export class GraphFundHistory extends LineGraph {
     });
 
     this.$gCont.on("mousemove", evt => {
-      this.mouseOver(evt.pageX - this.$gCont.offset().left);
+      const offset = this.$gCont.offset();
+      this.mouseOver(evt.pageX - offset.left, evt.pageY - offset.top);
     })
     .on("mouseout", () => {
-      this.hlPoint = -1;
+      this.hlPoint = [-1, -1];
       this.draw();
     })
     .on("click", () => {
@@ -534,7 +534,6 @@ export class GraphFundHistory extends LineGraph {
   }
   detailChanged(noDraw) {
     this.calculatePercentages();
-
     this.calculateZoomedRange();
 
     if (!noDraw) {
@@ -605,6 +604,10 @@ export class GraphFundHistory extends LineGraph {
         return [item[0], 100 * (item[1] - initial) / initial];
       })];
     }) : this.dataProc;
+
+    if (this.hlPoint[0] > this.data.length - 1) {
+      this.hlPoint[0] = this.data.length - 1;
+    }
   }
 
   formatValue(value) {
@@ -716,24 +719,20 @@ export class GraphFundHistory extends LineGraph {
 
     // highlight point on mouseover
     if (
-      this.hlPoint > -1 &&
-      this.data[mainIndex][1][this.hlPoint][0] >= this.minX
+      this.hlPoint[0] > -1 &&
+      this.data[this.hlPoint[0]][1][this.hlPoint[1]][0] >= this.minX
     ) {
-      const hlX = this.pixX(this.data[mainIndex][1][this.hlPoint][0]);
-      const hlY = this.pixY(this.data[mainIndex][1][this.hlPoint][1]);
+      const point = this.data[this.hlPoint[0]][1][this.hlPoint[1]];
 
-      const time = this.data[mainIndex][1][this.hlPoint][0] +
-        this.startTime;
+      const hlX = this.pixX(point[0]);
+      const hlY = this.pixY(point[1]);
 
+      const time = point[0] + this.startTime;
       const age = todayDate.getTime() - time * 1000;
-
       const ageText = formatAge(age / 1000);
 
       const align = hlX < this.width / 2 ? -1 : 1;
-
-      const label = ageText + ": " + this.formatValue(
-        this.data[mainIndex][1][this.hlPoint][1]
-      );
+      const label = ageText + ": " + this.formatValue(point[1]);
 
       const left = align > 0
         ? "initial" : hlX + GRAPH_FUND_HISTORY_POINT_RADIUS;
@@ -757,7 +756,7 @@ export class GraphFundHistory extends LineGraph {
         hlX, hlY, GRAPH_FUND_HISTORY_POINT_RADIUS, 0, Math.PI * 2, false
       );
 
-      this.ctx.fillStyle = COLOR_GRAPH_FUND_POINT;
+      this.ctx.fillStyle = this.hlPoint[2];
       this.ctx.fill();
       this.ctx.closePath();
     }
@@ -765,21 +764,31 @@ export class GraphFundHistory extends LineGraph {
       this.$label.hide();
     }
   }
-  mouseOver(x) {
+  mouseOver(x, y) {
     if (!this.data) {
       return;
     }
 
     const xv = this.valX(x);
-    let lastProximity = Infinity;
-    const hlPoint = this.data[this.data.length - 1][1].reduce((prev, point, index) => {
-      const thisProximity = Math.abs(xv - point[0]);
-      const returnVal = thisProximity < lastProximity ? index : prev;
-      lastProximity = thisProximity;
-      return returnVal;
-    }, -1);
+    const yv = this.valY(y);
 
-    if (hlPoint !== this.hlPoint) {
+    // find point nearest to mouse
+    let lastProximity = Infinity;
+    const hlPoint = this.data.reduce((prevPoint, thisLine, lineIndex) => {
+      return thisLine[1].reduce((prevLinePoint, thisLinePoint, pointIndex) => {
+        const thisProximity = Math.sqrt(Math.pow(xv - thisLinePoint[0], 2) +
+                                        Math.pow(yv - thisLinePoint[1], 2));
+
+        if (thisProximity < lastProximity) {
+          lastProximity = thisProximity;
+          return [lineIndex, pointIndex, thisLine[0]];
+        }
+
+        return prevLinePoint;
+      }, prevPoint);
+    }, [-1, -1]);
+
+    if (hlPoint[0] !== this.hlPoint[0] || hlPoint[1] !== this.hlPoint[1]) {
       this.hlPoint = hlPoint;
       this.draw();
     }
