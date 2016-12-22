@@ -6,9 +6,8 @@ import $ from "../../lib/jquery.min";
 
 import {
   MSG_TIME_ERROR,
-  COLOR_GRAPH_FUND_ITEM, COLOR_GRAPH_FUND_POINT,
-  COLOR_DARK, COLOR_LIGHT_GREY,
-  COLOR_PROFIT, COLOR_LOSS, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
+  COLOR_GRAPH_FUND_POINT, COLOR_DARK, COLOR_LIGHT_GREY,
+  COLOR_PROFIT, COLOR_LOSS,
   COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE, COLOR_KEY,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
@@ -64,11 +63,12 @@ export class GraphFundItem extends LineGraph {
     this.dataMinY = minY;
     this.dataMaxY = maxY;
 
-    this.colors = [COLOR_GRAPH_FUND_ITEM];
     this.lineWidth = GRAPH_FUND_ITEM_LINE_WIDTH;
     this.tension = GRAPH_FUND_ITEM_TENSION;
 
     this.data = options.data;
+
+    this.genColors();
 
     this.defaultWidth = this.width;
     this.defaultHeight = this.height;
@@ -76,7 +76,35 @@ export class GraphFundItem extends LineGraph {
     this.popout = false;
     this.$canvas.on("click", () => this.togglePopout());
   }
+  genColors() {
+    const colors = [];
+    const transition = [];
+    const levels = [
+      [0, COLOR_LOSS],
+      [Infinity, COLOR_PROFIT]
+    ];
 
+    if (this.data.length > 1) {
+      let level = levels.findIndex(item => this.data[1][1] < item[0]);
+      colors.push(levels[level][1]);
+
+      this.data.slice(2).forEach((point, key) => {
+        const thisLevel = levels.findIndex(item => point[1] < item[0]);
+
+        if (thisLevel !== level) {
+          level = thisLevel;
+          colors.push(levels[level][1]);
+          transition.push(key);
+        }
+      });
+
+      this.colors = colors;
+      this.transition = transition;
+    }
+    else {
+      this.colors = [COLOR_DARK];
+    }
+  }
   togglePopout() {
     // make the graph larger
     this.popout = !this.popout;
@@ -108,13 +136,11 @@ export class GraphFundItem extends LineGraph {
     // draw axes
     this.ctx.lineWidth = 1;
 
-    if (this.popout || (this.maxY - this.minY) < this.height / 2) {
+    if (this.popout) {
       this.ctx.fillStyle = COLOR_DARK;
       this.ctx.textBaseline = "middle";
       this.ctx.textAlign = "left";
       this.ctx.font = FONT_AXIS_LABEL;
-
-      const tickPad = this.popout ? 40 : 0;
 
       const range = this.maxY - this.minY;
       const inc = this.popout
@@ -125,18 +151,8 @@ export class GraphFundItem extends LineGraph {
 
       for (let i = Math.floor(this.minY / inc) * inc; i <= this.maxY; i += inc) {
         const tickPos = Math.floor(this.pixY(i)) + 0.5;
-
-        if (this.popout) {
-          const tickName = i.toFixed(1) + "%";
-          this.ctx.fillText(tickName, this.padX1, tickPos);
-        }
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.padX1 + tickPad, tickPos);
-        this.ctx.lineTo(this.width - this.padX2, tickPos);
-        this.ctx.closePath();
-        this.ctx.strokeStyle = i <= 0 ? COLOR_LOSS_LIGHT : COLOR_PROFIT_LIGHT;
-        this.ctx.stroke();
+        const tickName = i.toFixed(1) + "%";
+        this.ctx.fillText(tickName, this.padX1, tickPos);
       }
     }
 
