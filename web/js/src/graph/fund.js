@@ -16,6 +16,7 @@ import {
   FONT_AXIS_LABEL
 } from "const";
 
+import { zoomSlice } from "misc/misc";
 import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
@@ -561,9 +562,9 @@ export class GraphFundHistory extends LineGraph {
   }
   calculateZoomedRange() {
     // calculate new Y range based on truncating the data (zooming)
-    this.dataZoomed = this.data.map(line => [line[0], line[1].slice(this.dataOffset)]);
+    const dataZoomed = this.data.map(line => [line[0], zoomSlice(line[1], [this.dataOffset])]);
 
-    let minY = this.dataZoomed.reduce((last, line) => {
+    let minY = dataZoomed.reduce((last, line) => {
       const lineMin = line[1].reduce((a, b) => {
         return b[1] < a ? b[1] : a;
       }, Infinity);
@@ -571,7 +572,7 @@ export class GraphFundHistory extends LineGraph {
       return lineMin < last ? lineMin : last;
     }, Infinity);
 
-    const maxY = this.dataZoomed.reduce((last, line) => {
+    const maxY = dataZoomed.reduce((last, line) => {
       const lineMax = line[1].reduce((a, b) => {
         return b[1] > a ? b[1] : a;
       }, -Infinity);
@@ -590,8 +591,8 @@ export class GraphFundHistory extends LineGraph {
 
     // set the new ranges
     this.setRange([
-      this.data[0][1][this.dataOffset][0],
-      new Date().getTime() / 1000 - this.startTime,
+      dataZoomed[0][1][0][0],
+      this.maxX,
       this.tickSizeY * Math.floor(minY / this.tickSizeY),
       this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
     ]);
@@ -692,15 +693,18 @@ export class GraphFundHistory extends LineGraph {
 
     // plot past data
     if (this.data) {
-      const mainOnly = this.dataZoomed.length === 1;
-      const mainColor = mainOnly ? this.dataZoomed[0][0] : "#9c9c9c";
+      const mainOnly = this.data.length === 1;
+      const mainColor = mainOnly ? this.data[0][0] : COLOR_LIGHT_GREY;
 
-      this.dataZoomed.forEach((line, index) => {
+      this.data.forEach((line, index) => {
         const mainLine = index === mainIndex;
 
         this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
         this.drawCubicLine(
-          line[1], mainLine ? mainColor : line[0], mainLine ? [30, 90] : 0
+          line[1],
+          [mainLine ? mainColor : line[0]],
+          mainLine ? [30, 90] : 0,
+          [this.dataOffset]
         );
       });
     }
