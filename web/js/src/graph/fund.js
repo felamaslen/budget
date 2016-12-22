@@ -575,10 +575,10 @@ export class GraphFundHistory extends LineGraph {
     const maxY = this.dataZoomed.reduce((last, line) => {
       const lineMax = line[1].reduce((a, b) => {
         return b[1] > a ? b[1] : a;
-      }, 0);
+      }, -Infinity);
 
       return lineMax > last ? lineMax : last;
-    }, 0);
+    }, -Infinity);
 
     if (this.percent && minY === 0) {
       minY = -maxY * 0.2;
@@ -600,7 +600,7 @@ export class GraphFundHistory extends LineGraph {
   calculatePercentages() {
     // turns data from absolute values to percentage returns
     this.data = this.percent ? this.dataProc.map(line => {
-      const initial = line[1][this.dataOffset][1];
+      const initial = line[1][0][1];
       return [line[0], line[1].map(item => {
         return [item[0], 100 * (item[1] - initial) / initial];
       })];
