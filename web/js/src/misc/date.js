@@ -147,13 +147,25 @@ class TimeTickMinuteHour extends TimeTickDayWeek {
       index: minute
     };
   }
+  next(i, t) {
+    const obj = new Date(t);
+    const hour = obj.getHours();
+    const minute = obj.getMinutes();
+    const major = minute === 0 && hour % 3 === 0;
+
+    // 15 minute minor steps
+    const nt = t - 3600000;
+
+    return { t, major, nt };
+  }
   label(t) {
     const obj = new Date(t);
 
     const hour = obj.getHours();
     const am = hour < 12;
 
-    return ((hour + 11) % 12 + 1) + (am ? "am" : "pm");
+    return hour === 0 ? days[obj.getDay()]
+      : ((hour + 11) % 12 + 1) + (am ? "am" : "pm");
   }
 }
 class TimeTickWeekMonth extends TimeTickDayWeek {
@@ -237,7 +249,7 @@ export const timeSeriesTicks = begin => {
   if (range < 3600) {
     return null;
   }
-  else if (range < 86400) {
+  else if (range < 86400 * 1.5) {
     ticker = new TimeTickMinuteHour();
   }
   else if (range < 86400 * 4) {
