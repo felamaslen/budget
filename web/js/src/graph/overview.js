@@ -293,7 +293,7 @@ export class GraphSpend extends LineGraph {
     // plot data
     this.data.forEach((line, i) => {
       this.drawCubicLine(
-        line, this.colors[this.categories[this.categories.length - 1 - i]]
+        line, [this.colors[this.categories[this.categories.length - 1 - i]]]
       );
     });
 

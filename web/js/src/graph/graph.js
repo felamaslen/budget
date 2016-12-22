@@ -17,7 +17,7 @@ import {
   PIE_LABEL_SCALE_FACTOR_PRE, PIE_LABEL_SCALE_FACTOR_POST
 } from "const";
 
-import { trim, getMovingAverage } from "misc/misc";
+import { trim, getMovingAverage, zoomSlice } from "misc/misc";
 import { formatData } from "misc/format";
 
 const pio2 = Math.PI / 2;
@@ -299,11 +299,10 @@ export class LineGraph extends Graph {
     this.ctx.stroke();
     this.ctx.closePath();
   }
-  drawCubicLine(p, colors, movingAverage) {
-    if (typeof colors === "string") {
-      colors = [colors];
-    }
-    const curve = this.getSpline(p);
+  drawCubicLine(points, colors, movingAverage, zoom) {
+    zoom = zoom || 0;
+    const zoomPoints = zoomSlice(points, zoom);
+    const curve = this.getSpline(zoomPoints);
 
     if (this.fill) {
       this.ctx.beginPath();
@@ -322,12 +321,12 @@ export class LineGraph extends Graph {
     }
 
     if (this.stroke) {
-      this.drawCubicLineCurve(curve, p, colors, this.lineWidth);
+      this.drawCubicLineCurve(curve, zoomPoints, colors, this.lineWidth);
     }
 
     if (movingAverage) {
       movingAverage.forEach((period, key) => {
-        const avg = getMovingAverage(p, period);
+        const avg = zoomSlice(getMovingAverage(points, period), zoom);
         const averageCurve = this.getSpline(avg);
         this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5 * (key + 1), 5);
       });

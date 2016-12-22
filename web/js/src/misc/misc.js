@@ -43,6 +43,7 @@ export function arrayAverage(array, offset) {
     return red + item;
   }) / (array.length - offset);
 }
+export const zoomSlice = (array, zoom) => zoom ? Array.prototype.slice.apply(array, zoom) : array;
 export function hundredth(item) {
   return item / 100;
 }
