@@ -224,7 +224,7 @@ export class LineGraph extends Graph {
 
     return curve;
   }
-  drawCubicLineCurve(curve, p, colors, width, dashed) {
+  drawCubicLineCurve(curve, p, colors, width, dashed, dashGap) {
     this.ctx.lineWidth = width;
     this.ctx.strokeStyle = colors[0];
 
@@ -235,6 +235,7 @@ export class LineGraph extends Graph {
     let transitionKey = 0;
     let arcLength = 0;
     let dashToggle = 1;
+    let dashLength = dashed;
     let x;
     let y;
 
@@ -269,7 +270,7 @@ export class LineGraph extends Graph {
           if (x) {
             arcLength += Math.sqrt(Math.pow(point[0] - x, 2) + Math.pow(point[1] - y, 2));
           }
-          if (arcLength > dashed) {
+          if (arcLength > dashLength) {
             if (dashToggle) {
               this.ctx.stroke();
               this.ctx.closePath();
@@ -279,6 +280,7 @@ export class LineGraph extends Graph {
               moved = false;
             }
             dashToggle = !dashToggle;
+            dashLength = dashToggle ? dashed : dashGap;
             arcLength = 0;
           }
           x = point[0];
@@ -323,10 +325,12 @@ export class LineGraph extends Graph {
       this.drawCubicLineCurve(curve, p, colors, this.lineWidth);
     }
 
-    if (movingAverage > 0) {
-      const avg = getMovingAverage(p, movingAverage);
-      const averageCurve = this.getSpline(avg);
-      this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5);
+    if (movingAverage) {
+      movingAverage.forEach((period, key) => {
+        const avg = getMovingAverage(p, period);
+        const averageCurve = this.getSpline(avg);
+        this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5 * (key + 1), 5);
+      });
     }
   }
   drawLine(p, color) {

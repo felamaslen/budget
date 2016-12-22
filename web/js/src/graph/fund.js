@@ -689,9 +689,16 @@ export class GraphFundHistory extends LineGraph {
 
     // plot past data
     if (this.data) {
+      const mainOnly = this.dataZoomed.length === 1;
+      const mainColor = mainOnly ? this.dataZoomed[0][0] : "#9c9c9c";
+
       this.dataZoomed.forEach((line, index) => {
-        this.lineWidth = index === mainIndex ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
-        this.drawCubicLine(line[1], line[0], index === mainIndex ? 20 : 0);
+        const mainLine = index === mainIndex;
+
+        this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
+        this.drawCubicLine(
+          line[1], mainLine ? mainColor : line[0], mainLine ? [30, 90] : 0
+        );
       });
     }
 
