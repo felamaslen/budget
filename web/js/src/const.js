@@ -45,6 +45,9 @@ export const GRAPH_KEY_SIZE = 12;
 export const GRAPH_KEY_OFFSET_X = 5;
 export const GRAPH_KEY_OFFSET_Y = 34;
 
+export const GRAPH_ZOOM_SPEED = 1 / 10;
+export const GRAPH_ZOOM_MAX = 1 / 100;
+
 export const COLOR_GRAPH_TITLE = "#000";
 export const COLOR_DARK = "#333";
 export const COLOR_LIGHT = "#eee";

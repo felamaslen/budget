@@ -199,18 +199,12 @@ export class PageFunds extends PageList {
     super.hookDataLoadedAfterRender(callback, res);
 
     // get minimum value
-    let minValue = -1;
-    let maxValue = -1;
-
-    this.history.history.forEach(item => {
-      if (minValue < 0 || item[1] < minValue) {
-        minValue = item[1];
-      }
-
-      if (item[1] > maxValue) {
-        maxValue = item[1];
-      }
-    });
+    const minValue = this.history.history.reduce((last, item) => {
+      return item[2] < last ? item[2] : last;
+    }, Infinity);
+    const maxValue = this.history.history.reduce((last, item) => {
+      return item[2] > last ? item[2] : last;
+    }, -Infinity);
 
     if (this.history.history.length > 0) {
       const lastValue = this.history.history[this.history.history.length - 1][2];

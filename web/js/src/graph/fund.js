@@ -16,7 +16,6 @@ import {
   FONT_AXIS_LABEL
 } from "const";
 
-import { zoomSlice } from "misc/misc";
 import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
@@ -172,7 +171,6 @@ export class GraphFundHistory extends LineGraph {
     this.funds = options.funds;
     this.fundLines = this.funds.map(() => false);
     this.startTime = options.startTime;
-    this.zoom = [0];
     this.hlPoint = [-1, -1];
 
     this.togglePercent(true, true);
@@ -185,12 +183,7 @@ export class GraphFundHistory extends LineGraph {
     this.$gCont.append(this.$label);
 
     this.$gCont[0].addEventListener("mousewheel", evt => {
-      if (evt.wheelDelta > 0) {
-        this.increaseDetail();
-      }
-      else {
-        this.decreaseDetail();
-      }
+      this.zoomX(-evt.wheelDelta / Math.abs(evt.wheelDelta));
 
       evt.preventDefault();
     });
@@ -525,42 +518,17 @@ export class GraphFundHistory extends LineGraph {
     this.stockPricesLoading = false;
   }
 
-  increaseDetail() {
-    this.detailChanged(false, 1, -1);
-  }
-  decreaseDetail() {
-    this.detailChanged(false, -1, 1);
-  }
-  detailChanged(noDraw, zoomLeft, zoomRight) {
-    if (zoomLeft || zoomRight) {
-      const newZoomLeft = this.zoom[0] + zoomLeft;
-      const oldZoomRight = this.zoom[1] || this.data[0][1].length;
-      const newZoomRight = oldZoomRight + zoomRight;
-
-      const keepActiveZoomLeft = this.hlPoint[1] > -1
-        ? Math.min(this.hlPoint[1] - 1, newZoomLeft) : newZoomLeft;
-      const keepActiveZoomRight = this.hlPoint[1] > -1
-        ? Math.max(this.hlPoint[1] + 1, newZoomRight) : newZoomRight;
-
-      this.zoom[0] = Math.max(0, keepActiveZoomLeft);
-      this.zoom[1] = Math.min(this.data[0][1].length, keepActiveZoomRight);
-    }
-
-    this.calculatePercentages();
-    this.calculateZoomedRange();
-
-    if (!noDraw) {
-      this.draw();
-    }
-  }
-
   togglePercent(status, noDraw) {
     this.percent = status;
     this.dataProc = this.processData();
     if (!this.dataProc) {
       return;
     }
-    this.detailChanged(noDraw);
+    this.calculatePercentages();
+    this.calculateYRange();
+    if (!noDraw) {
+      this.draw();
+    }
   }
   getTimeScale() {
     // divides the time axis (horizontal) into appropriate chunks
@@ -574,39 +542,43 @@ export class GraphFundHistory extends LineGraph {
       };
     });
   }
-  calculateZoomedRange() {
+  dataVisible() {
+    return this.data.map(line => {
+      return line.map((item, key) => {
+        return key === 1 ? item.filter(point => point[0] >= this.minX && point[0] <= this.maxX) : item;
+      });
+    });
+  }
+  zoomX(direction) {
+    if (this.hlPoint[0] === -1 || this.hlPoint[0] === -1 ||
+        (direction < 0 && this.dataVisible()[0][1].length < 4)) {
+      return;
+    }
+
+    const point = this.data[this.hlPoint[0]][1][this.hlPoint[1]][0];
+    super.zoomX(direction, point);
+    this.calculateYRange();
+    this.draw();
+  }
+  calculateYRange() {
     // calculate new Y range based on truncating the data (zooming)
-    const dataZoomed = this.data.map(line => [line[0], zoomSlice(line[1], this.zoom)]);
-
-    let minY = dataZoomed.reduce((last, line) => {
-      const lineMin = line[1].reduce((a, b) => {
-        return b[1] < a ? b[1] : a;
-      }, Infinity);
-
-      return lineMin < last ? lineMin : last;
-    }, Infinity);
-
-    const maxY = dataZoomed.reduce((last, line) => {
-      const lineMax = line[1].reduce((a, b) => {
-        return b[1] > a ? b[1] : a;
-      }, -Infinity);
-
-      return lineMax > last ? lineMax : last;
-    }, -Infinity);
+    let minY = Infinity;
+    let maxY = -Infinity;
+    this.dataVisible().forEach(line => {
+      minY = line[1].reduce((last, current) => current[1] < last ? current[1] : last, minY);
+      maxY = line[1].reduce((last, current) => current[1] > last ? current[1] : last, maxY);
+    });
 
     if (this.percent && minY === 0) {
       minY = -maxY * 0.2;
     }
 
     // return the tick size for the new range
-    this.tickSizeY = getTickSize(
-      minY, maxY, GRAPH_FUND_HISTORY_NUM_TICKS
-    );
+    this.tickSizeY = getTickSize(minY, maxY, GRAPH_FUND_HISTORY_NUM_TICKS);
 
     // set the new ranges
     this.setRange([
-      dataZoomed[0][1][0][0],
-      dataZoomed[0][1][dataZoomed[0][1].length - 1][0],
+      this.minX, this.maxX,
       this.tickSizeY * Math.floor(minY / this.tickSizeY),
       this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
     ]);
@@ -717,8 +689,7 @@ export class GraphFundHistory extends LineGraph {
         this.drawCubicLine(
           line[1],
           [mainLine ? mainColor : line[0]],
-          mainLine ? [30, 90] : 0,
-          this.zoom
+          mainLine ? [30, 90] : 0
         );
       });
     }
