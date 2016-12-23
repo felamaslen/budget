@@ -76,7 +76,7 @@ class TimeTickDayWeek {
   }
   genTicks(t0, t1) {
     const ticks = [];
-    const start = this.start(t1);
+    const start = this.start(new Date(t1));
     for (let i = start.index, t = start.time; t >= t0; i--) {
       const next = this.next(i, t);
       const tick = {
@@ -239,10 +239,14 @@ class TimeTickMonthYear extends TimeTickDayWeek {
   }
 }
 
-export const timeSeriesTicks = begin => {
-  const now = new Date();
-  const nowTime = now.getTime() / 1000;
-  const range = nowTime - begin;
+/**
+ * Gets an appropriate range of ticks based on the time range provided
+ * @param {integer} begin UNIX timestamp (secs)
+ * @param {integer} end UNIX timestamp (secs)
+ * @return {array} range of ticks
+ */
+export const timeSeriesTicks = (begin, end) => {
+  const range = end - begin;
   let ticker;
 
   // determine the tick processor to use
@@ -265,6 +269,6 @@ export const timeSeriesTicks = begin => {
     ticker = new TimeTickMonthYear();
   }
 
-  return ticker.genTicks(begin * 1000, now);
+  return ticker.genTicks(begin * 1000, end * 1000);
 };
 

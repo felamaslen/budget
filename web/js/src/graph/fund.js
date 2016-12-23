@@ -172,7 +172,7 @@ export class GraphFundHistory extends LineGraph {
     this.funds = options.funds;
     this.fundLines = this.funds.map(() => false);
     this.startTime = options.startTime;
-    this.dataOffset = 0;
+    this.zoom = [0];
     this.hlPoint = [-1, -1];
 
     this.togglePercent(true, true);
@@ -526,14 +526,26 @@ export class GraphFundHistory extends LineGraph {
   }
 
   increaseDetail() {
-    this.dataOffset = Math.min(this.data[0][1].length - 3, this.dataOffset + 1);
-    this.detailChanged();
+    this.detailChanged(false, 1, -1);
   }
   decreaseDetail() {
-    this.dataOffset = Math.max(0, this.dataOffset - 1);
-    this.detailChanged();
+    this.detailChanged(false, -1, 1);
   }
-  detailChanged(noDraw) {
+  detailChanged(noDraw, zoomLeft, zoomRight) {
+    if (zoomLeft || zoomRight) {
+      const newZoomLeft = this.zoom[0] + zoomLeft;
+      const oldZoomRight = this.zoom[1] || this.data[0][1].length;
+      const newZoomRight = oldZoomRight + zoomRight;
+
+      const keepActiveZoomLeft = this.hlPoint[1] > -1
+        ? Math.min(this.hlPoint[1] - 1, newZoomLeft) : newZoomLeft;
+      const keepActiveZoomRight = this.hlPoint[1] > -1
+        ? Math.max(this.hlPoint[1] + 1, newZoomRight) : newZoomRight;
+
+      this.zoom[0] = Math.max(0, keepActiveZoomLeft);
+      this.zoom[1] = Math.min(this.data[0][1].length, keepActiveZoomRight);
+    }
+
     this.calculatePercentages();
     this.calculateZoomedRange();
 
@@ -552,7 +564,9 @@ export class GraphFundHistory extends LineGraph {
   }
   getTimeScale() {
     // divides the time axis (horizontal) into appropriate chunks
-    return timeSeriesTicks(this.startTime + this.minX).map(tick => {
+    return timeSeriesTicks(
+      this.startTime + this.minX, this.startTime + this.maxX
+    ).map(tick => {
       return {
         major: tick.major,
         pix: Math.floor(this.pixX(tick.t - this.startTime)) + 0.5,
@@ -562,7 +576,7 @@ export class GraphFundHistory extends LineGraph {
   }
   calculateZoomedRange() {
     // calculate new Y range based on truncating the data (zooming)
-    const dataZoomed = this.data.map(line => [line[0], zoomSlice(line[1], [this.dataOffset])]);
+    const dataZoomed = this.data.map(line => [line[0], zoomSlice(line[1], this.zoom)]);
 
     let minY = dataZoomed.reduce((last, line) => {
       const lineMin = line[1].reduce((a, b) => {
@@ -592,7 +606,7 @@ export class GraphFundHistory extends LineGraph {
     // set the new ranges
     this.setRange([
       dataZoomed[0][1][0][0],
-      this.maxX,
+      dataZoomed[0][1][dataZoomed[0][1].length - 1][0],
       this.tickSizeY * Math.floor(minY / this.tickSizeY),
       this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
     ]);
@@ -704,7 +718,7 @@ export class GraphFundHistory extends LineGraph {
           line[1],
           [mainLine ? mainColor : line[0]],
           mainLine ? [30, 90] : 0,
-          [this.dataOffset]
+          this.zoom
         );
       });
     }
