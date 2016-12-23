@@ -2,7 +2,7 @@
  * Date (YMD) class
  */
 
-import { leadingZeroes, months, days } from "misc/misc";
+import { pmod, leadingZeroes, months, days } from "misc/misc";
 
 export class YMD {
   constructor(year, month, date) {
@@ -56,15 +56,16 @@ class TimeTickDayWeek {
     const day = obj.getDay();
 
     return {
-      time: new Date(year, month, date, 0, 0, 0, 0).getTime(),
+      time: new Date(year, month, date, 0, 0, 0, 0).getTime() + 86400,
       index: day
     };
   }
   next(i, t) {
     const nt = t - this.tick * 1000;
-    const major = i % this.major === 0;
+    const major = i % this.major === 0 ? 2 : 0;
+    const label = major ? this.label(t) : null;
 
-    return { t, nt, major };
+    return { t, nt, major, label };
   }
   label(t) {
     const obj = new Date(t);
@@ -83,10 +84,11 @@ class TimeTickDayWeek {
         t: next.t / 1000,
         major: next.major
       };
-      if (next.major) {
-        tick.label = this.label(t);
+      if (next.label) {
+        tick.label = next.label;
       }
       ticks.push(tick);
+      t = next.nt;
 
       if (next.extra) {
         // extra tick
@@ -94,13 +96,11 @@ class TimeTickDayWeek {
           t: next.extra.t / 1000,
           major: next.extra.major
         };
-        if (next.extra.major) {
-          extraTick.label = this.label(next.extra.t);
+        if (next.extra.label) {
+          extraTick.label = next.extra.label;
         }
         ticks.push(extraTick);
       }
-
-      t = next.nt;
     }
 
     return ticks;
@@ -109,63 +109,54 @@ class TimeTickDayWeek {
 class TimeTickHourDay extends TimeTickDayWeek {
   constructor() {
     super();
-    this.tick = 3600;
-    this.major = 24;
+    this.tick = 3600 * 3;
+    this.major = 8;
   }
   start(obj) {
     const year = obj.getFullYear();
     const month = obj.getMonth();
     const date = obj.getDate();
-    const hour = obj.getHours();
+    const hour = Math.ceil(obj.getHours() / 3) * 3;
 
     return {
       time: new Date(year, month, date, hour, 0, 0, 0).getTime(),
-      index: hour
+      index: hour / 3
     };
   }
   label(t) {
-    const obj = new Date(t);
-    return days[obj.getDay()];
+    return days[new Date(t).getDay()];
   }
 }
 class TimeTickMinuteHour extends TimeTickDayWeek {
   constructor() {
     super();
-    this.tick = 1800;
-    this.major = 2;
+    this.tick = 1800000;
+    this.major = 3; // every x *hours*
+    this.startMinute = 60 * this.tick / 3600000;
   }
   start(obj) {
     const year = obj.getFullYear();
     const month = obj.getMonth();
     const date = obj.getDate();
     const hour = obj.getHours();
-    const factor = 60 / this.major;
-    const minute = Math.floor(obj.getMinutes() / factor) * factor;
+    const minute = Math.floor(obj.getMinutes() / this.startMinute) * this.startMinute;
 
     return {
       time: new Date(year, month, date, hour, minute, 0, 0).getTime(),
-      index: minute
+      index: Math.round(hour * 2 + minute / this.startMinute)
     };
   }
   next(i, t) {
-    const obj = new Date(t);
-    const hour = obj.getHours();
-    const minute = obj.getMinutes();
-    const major = minute === 0 && hour % 3 === 0;
+    const major = pmod(i, 2) === 0 ? (pmod(i, 48) === 0 ? 2 : 1) : 0;
+    const label = pmod(i, 6) === 0 ? this.label(t) : null;
+    const nt = t - this.tick;
 
-    // 15 minute minor steps
-    const nt = t - 3600000;
-
-    return { t, major, nt };
+    return { t, nt, major, label };
   }
   label(t) {
     const obj = new Date(t);
-
     const hour = obj.getHours();
-    const am = hour < 12;
-
-    return hour === 0 ? days[obj.getDay()]
-      : ((hour + 11) % 12 + 1) + (am ? "am" : "pm");
+    return hour === 0 ? days[obj.getDay()] : ((hour + 11) % 12 + 1) + (hour < 12 ? "am" : "pm");
   }
 }
 class TimeTickWeekMonth extends TimeTickDayWeek {
@@ -192,23 +183,19 @@ class TimeTickWeekMonth extends TimeTickDayWeek {
   next(i, t) {
     const nt = t - this.tick * 1000;
     let extra = null;
-
-    const date = new Date(t).getDate();
+    const obj = new Date(t);
+    const date = obj.getDate();
     if (date < 7) {
       // get the exact start of the month
-      const time = new Date(t);
-      const year = time.getFullYear();
-      const month = time.getMonth();
+      const year = obj.getFullYear();
+      const month = obj.getMonth();
+      const monthStart = new Date(year, month, 1, 0, 0, 0, 0);
+      const label = months[monthStart.getMonth()];
 
-      const et = new Date(year, month, 1, 0, 0, 0, 0).getTime();
-
-      extra = { t: et, major: true };
+      extra = { t: monthStart.getTime(), major: 2, label };
     }
 
-    return { t, nt, extra };
-  }
-  label(t) {
-    return months[new Date(t).getMonth()];
+    return { t, nt, major: 0, extra };
   }
 }
 class TimeTickMonthYear extends TimeTickDayWeek {
@@ -228,7 +215,7 @@ class TimeTickMonthYear extends TimeTickDayWeek {
   next(i, t) {
     const time = new Date(t);
     const month = time.getMonth();
-    const major = month === 0;
+    const major = month === 0 ? 2 : 0;
     const year = time.getFullYear() - (major ? 1 : 0);
     const nt = new Date(year, (month + 11) % 12, 1, 0, 0, 0, 0).getTime();
 
@@ -256,7 +243,7 @@ export const timeSeriesTicks = (begin, end) => {
   else if (range < 86400 * 1.5) {
     ticker = new TimeTickMinuteHour();
   }
-  else if (range < 86400 * 4) {
+  else if (range < 86400 * 8) {
     ticker = new TimeTickHourDay();
   }
   else if (range < 86400 * 35) {
