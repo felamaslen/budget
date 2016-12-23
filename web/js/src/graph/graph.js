@@ -10,6 +10,7 @@ import {
   COLOR_PIE_M1, COLOR_PIE_M2, COLOR_PIE_M3,
   COLOR_PIE_S1, COLOR_PIE_S2,
   COLOR_GRAPH_TITLE,
+  GRAPH_ZOOM_SPEED, GRAPH_ZOOM_MAX,
   FONT_AXIS_LABEL, FONT_GRAPH_TITLE_LARGE,
   PIE_SMALL_LABEL_OFFSET, PIE_LABEL_INSIDE_RADIUS,
   PIE_LABEL_SWITCH_POINT, PIE_DEPTH,
@@ -17,7 +18,7 @@ import {
   PIE_LABEL_SCALE_FACTOR_PRE, PIE_LABEL_SCALE_FACTOR_POST
 } from "const";
 
-import { trim, getMovingAverage, zoomSlice } from "misc/misc";
+import { trim, getMovingAverage } from "misc/misc";
 import { formatData } from "misc/format";
 
 const pio2 = Math.PI / 2;
@@ -82,6 +83,7 @@ export class LineGraph extends Graph {
     this.padY1 = options.pad && options.pad[0] || 0;
     this.padY2 = options.pad && options.pad[2] || 0;
 
+    this.originalRange = options.range;
     this.setRange(options.range);
 
     this.tension = options.tension || 0.5;
@@ -147,6 +149,34 @@ export class LineGraph extends Graph {
     return this.log ? Math.pow(Math.E, yv * this.log) : yv;
   }
 
+  /**
+   * Zoom the graph in or out
+   * @param {integer} direction - 1 is out, -1 is in
+   * @param {float} center - where to center the zoom
+   * @returns {null} nothing
+   */
+  zoomX(direction, center) {
+    const newRange = Math.max(
+      (this.originalRange[1] - this.originalRange[0]) * GRAPH_ZOOM_MAX,
+      (this.maxX - this.minX) * (1 + GRAPH_ZOOM_SPEED * direction)
+    );
+    let newMinXTarget = center - newRange / 2;
+    let newMaxXTarget = center + newRange / 2;
+    if (newMinXTarget < this.originalRange[0]) {
+      newMaxXTarget += this.originalRange[0] - newMinXTarget;
+      newMinXTarget = this.originalRange[0];
+    }
+    else if (newMaxXTarget > this.originalRange[1]) {
+      newMinXTarget -= newMaxXTarget - this.originalRange[1];
+      newMaxXTarget = this.originalRange[1];
+    }
+
+    const newMinX = Math.max(this.originalRange[0], newMinXTarget);
+    const newMaxX = Math.min(this.originalRange[1], newMaxXTarget);
+
+    this.setRange([newMinX, newMaxX, this.minY, this.maxY]);
+  }
+
   getSpline(p) {
     // array of [pixX, pixY] values
     const curve = [];
@@ -191,10 +221,10 @@ export class LineGraph extends Graph {
               h11(t) * (xk1 - xk) * mk1;
     };
 
-    let xn = this.pixX(this.minX);
+    let xn = this.pixX(p[0][0]);
 
-    let k = this.minX;
-    let k1 = this.minX;
+    let k = p[0][0];
+    let k1 = p[0][0];
 
     for (let K = 0; K < n; K++) {
       const curvePiece = [];
@@ -299,10 +329,8 @@ export class LineGraph extends Graph {
     this.ctx.stroke();
     this.ctx.closePath();
   }
-  drawCubicLine(points, colors, movingAverage, zoom) {
-    zoom = zoom || 0;
-    const zoomPoints = zoomSlice(points, zoom);
-    const curve = this.getSpline(zoomPoints);
+  drawCubicLine(points, colors, movingAverage) {
+    const curve = this.getSpline(points);
 
     if (this.fill) {
       this.ctx.beginPath();
@@ -321,12 +349,12 @@ export class LineGraph extends Graph {
     }
 
     if (this.stroke) {
-      this.drawCubicLineCurve(curve, zoomPoints, colors, this.lineWidth);
+      this.drawCubicLineCurve(curve, points, colors, this.lineWidth);
     }
 
     if (movingAverage) {
       movingAverage.forEach((period, key) => {
-        const avg = zoomSlice(getMovingAverage(points, period), zoom);
+        const avg = getMovingAverage(points, period);
         const averageCurve = this.getSpline(avg);
         this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5 * (key + 1), 5);
       });
@@ -367,12 +395,12 @@ export class PieGraph extends Graph {
   constructor(options) {
     super(options);
 
-    this.data           = options.data.data;
-    this.total          = options.data.total;
-    this.type           = options.data.type;
-    this.index          = options.index;
-    this.stretchFactor  = options.stretchFactor;
-    this.pieTolerance   = options.pieTolerance;
+    this.data = options.data.data;
+    this.total = options.data.total;
+    this.type = options.data.type;
+    this.index = options.index;
+    this.stretchFactor = options.stretchFactor;
+    this.pieTolerance = options.pieTolerance;
     this.pieLabelLength = options.pieLabelLength;
 
     const $gCont = $("<div></div>")
