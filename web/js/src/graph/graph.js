@@ -257,7 +257,6 @@ export class LineGraph extends Graph {
   drawCubicLineCurve(curve, p, colors, width, dashed, dashGap) {
     this.ctx.lineWidth = width;
     this.ctx.strokeStyle = colors[0];
-
     this.ctx.beginPath();
 
     let colorKey = 0;
@@ -273,7 +272,7 @@ export class LineGraph extends Graph {
       if (i === this.transition[transitionKey]) {
         transitionKey++;
 
-        if (!dashed || dashToggle) {
+        if (moved && (!dashed || dashToggle)) {
           this.ctx.lineTo(piece[0][0], piece[0][1]);
           this.ctx.stroke();
           this.ctx.closePath();

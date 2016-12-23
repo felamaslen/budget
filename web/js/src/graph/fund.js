@@ -550,7 +550,7 @@ export class GraphFundHistory extends LineGraph {
             const nextVisible = item[Math.min(item.length - 1, pointKey + 1)][0] >= this.minX;
             const prevVisible = item[Math.max(0, pointKey - 1)][0] <= this.maxX;
 
-            return nextVisible || prevVisible;
+            return nextVisible && prevVisible;
           });
         }
         return item;
@@ -660,7 +660,6 @@ export class GraphFundHistory extends LineGraph {
     const tickAngle = -Math.PI / 6;
     const tickSize = 10;
 
-    // console.debug(timeTicks);
     timeTicks.forEach(tick => {
       const thisTickSize = tickSize * 0.5 * (tick.major + 1);
 
