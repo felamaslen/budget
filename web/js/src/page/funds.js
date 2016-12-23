@@ -29,7 +29,7 @@ export class PageFunds extends PageList {
   calculateGain(unitsTxt, priceVal, cost) {
     const units = parseFloat(unitsTxt, 10);
     const price = parseFloat(priceVal[0], 10);
-    const price1 = parseFloat(priceVal[1], 10); // previous price
+    const lastChange = parseFloat(priceVal[1], 10);
     let pct = 0;
     let gainAbs = 0;
     let value = cost;
@@ -45,9 +45,9 @@ export class PageFunds extends PageList {
     };
 
     const pctFormat = formatCurrency(pct, pctParam);
-    const dayGain = formatCurrency(100 * (price - price1) / price1, pctParam);
-    const dayGainClass = price !== price1 ?
-      "high " + (price > price1 ? "profit" : "loss") : "";
+    const dayGain = formatCurrency(100 * lastChange, pctParam);
+    const dayGainClass = lastChange !== 0 ?
+      "high " + (lastChange > 0 ? "profit" : "loss") : "";
 
     const format = {
       raw: false,
@@ -122,6 +122,7 @@ export class PageFunds extends PageList {
   }
   hookCustomColumns(newItem, newData) {
     const id = newItem.id;
+    let lastChange = 0;
 
     // add a graph column
     const $graph = $("<div></div>").addClass("fund-graph-cont");
@@ -135,6 +136,13 @@ export class PageFunds extends PageList {
           100 * (item[1][fundIndex] - start[fundIndex]) / start[fundIndex]
         ];
       });
+
+      const lastValue = this.history.history[this.history.history.length - 1][1][fundIndex];
+      const changedValues = this.history.history.map(item => item[1][fundIndex])
+      .filter(value => value !== lastValue).reverse().slice(1);
+      if (changedValues.length > 0) {
+        lastChange = (lastValue - changedValues[0]) / changedValues[0];
+      }
 
       const fundGraph = new GraphFundItem({
         $cont: $graph,
@@ -152,7 +160,7 @@ export class PageFunds extends PageList {
 
     // add a "gain/loss" column
     const units = newData.u;
-    const price = [newData.P, newData.Q];
+    const price = [newData.P, lastChange];
 
     this.$li[id].units.data("price", price);
 
