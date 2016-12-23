@@ -252,7 +252,10 @@ export class PageFunds extends PageList {
         title:  "fund-history",
         data:   this.history.history,
         funds:  this.history.funds,
-        range:  [0, this.history.totalTime, minValue, maxValue],
+        range:  [
+          0, new Date().getTime() / 1000 - this.history.startTime,
+          minValue, maxValue
+        ],
         pad:    [24, 0, 0, 0],
         startTime: this.history.startTime
       }, this.api, this.state);
