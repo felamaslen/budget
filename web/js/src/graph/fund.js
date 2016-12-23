@@ -12,10 +12,12 @@ import {
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
+  GRAPH_FUND_HISTORY_MOVING_AVG,
   STOCKS_REFRESH_INTERVAL, STOCKS_HL_TIME, DO_STOCKS_LIST, STOCK_INDICES,
   FONT_AXIS_LABEL
 } from "const";
 
+import { getMovingAverage } from "misc/misc";
 import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
@@ -546,16 +548,17 @@ export class GraphFundHistory extends LineGraph {
     return this.data.map(line => {
       return line.map((item, key) => {
         if (key === 1) {
-          return item.filter((point, pointKey) => {
-            const nextVisible = item[Math.min(item.length - 1, pointKey + 1)][0] >= this.minX;
-            const prevVisible = item[Math.max(0, pointKey - 1)][0] <= this.maxX;
-
-            return nextVisible && prevVisible;
-          });
+          return item.filter((point, pointKey) => this.itemInRange(item, pointKey));
         }
         return item;
       });
     });
+  }
+  itemInRange(item, key) {
+    const nextVisible = item[Math.min(item.length - 1, key + 1)][0] >= this.minX;
+    const prevVisible = item[Math.max(0, key - 1)][0] <= this.maxX;
+
+    return nextVisible && prevVisible;
   }
   zoomX(direction) {
     if (this.hlPoint[0] === -1 || this.hlPoint[1] === -1 ||
@@ -704,6 +707,16 @@ export class GraphFundHistory extends LineGraph {
           [mainLine ? mainColor : line[0]],
           mainLine ? [30, 90] : 0
         );
+
+        if (mainLine) {
+          GRAPH_FUND_HISTORY_MOVING_AVG.forEach((period, key) => {
+            const avg = getMovingAverage(this.data[index][1], period);
+            const avgFiltered = avg.filter(
+              (point, pointKey) => this.itemInRange(avg, pointKey));
+            const averageCurve = this.getSpline(avgFiltered);
+            this.drawCubicLineCurve(averageCurve, avg, [mainColor], 1, 5 * (2 * key + 1), 5);
+          });
+        }
       });
     }
 
