@@ -356,7 +356,7 @@ export class LineGraph extends Graph {
       movingAverage.forEach((period, key) => {
         const avg = getMovingAverage(points, period);
         const averageCurve = this.getSpline(avg);
-        this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5 * (key + 1), 5);
+        this.drawCubicLineCurve(averageCurve, avg, colors, 1, 5 * (2 * key + 1), 5);
       });
     }
   }
