@@ -542,21 +542,30 @@ export class GraphFundHistory extends LineGraph {
       };
     });
   }
-  dataVisible() {
+  filterDataVisible() {
     return this.data.map(line => {
       return line.map((item, key) => {
-        return key === 1 ? item.filter(point => point[0] >= this.minX && point[0] <= this.maxX) : item;
+        if (key === 1) {
+          return item.filter((point, pointKey) => {
+            const nextVisible = item[Math.min(item.length - 1, pointKey + 1)][0] >= this.minX;
+            const prevVisible = item[Math.max(0, pointKey - 1)][0] <= this.maxX;
+
+            return nextVisible || prevVisible;
+          });
+        }
+        return item;
       });
     });
   }
   zoomX(direction) {
-    if (this.hlPoint[0] === -1 || this.hlPoint[0] === -1 ||
-        (direction < 0 && this.dataVisible()[0][1].length < 4)) {
+    if (this.hlPoint[0] === -1 || this.hlPoint[1] === -1 ||
+        (direction < 0 && this.dataVisible[0][1].length < 4)) {
       return;
     }
 
     const point = this.data[this.hlPoint[0]][1][this.hlPoint[1]][0];
     super.zoomX(direction, point);
+    this.dataVisible = this.filterDataVisible();
     this.calculateYRange();
     this.draw();
   }
@@ -564,7 +573,7 @@ export class GraphFundHistory extends LineGraph {
     // calculate new Y range based on truncating the data (zooming)
     let minY = Infinity;
     let maxY = -Infinity;
-    this.dataVisible().forEach(line => {
+    this.dataVisible.forEach(line => {
       minY = line[1].reduce((last, current) => current[1] < last ? current[1] : last, minY);
       maxY = line[1].reduce((last, current) => current[1] > last ? current[1] : last, maxY);
     });
@@ -591,6 +600,7 @@ export class GraphFundHistory extends LineGraph {
         return [item[0], 100 * (item[1] - initial) / initial];
       })];
     }) : this.dataProc;
+    this.dataVisible = this.filterDataVisible();
 
     if (this.hlPoint[0] > this.data.length - 1) {
       this.hlPoint[0] = this.data.length - 1;
@@ -678,11 +688,11 @@ export class GraphFundHistory extends LineGraph {
     const mainIndex = this.data.length - 1;
 
     // plot past data
-    if (this.data) {
-      const mainOnly = this.data.length === 1;
-      const mainColor = mainOnly ? this.data[0][0] : COLOR_LIGHT_GREY;
+    if (this.dataVisible) {
+      const mainOnly = this.dataVisible.length === 1;
+      const mainColor = mainOnly ? this.dataVisible[0][0] : COLOR_LIGHT_GREY;
 
-      this.data.forEach((line, index) => {
+      this.dataVisible.forEach((line, index) => {
         const mainLine = index === mainIndex;
 
         this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
