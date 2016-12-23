@@ -341,7 +341,7 @@ export class LineGraph extends Graph {
           this.ctx.lineTo(point[0], point[1]);
         });
       }
-      this.ctx.lineTo(this.pixX(p.length - 1), this.pixY(0));
+      this.ctx.lineTo(this.pixX(points.length - 1), this.pixY(0));
       this.ctx.lineTo(this.pixX(0), this.pixY(0));
       this.ctx.fill();
       this.ctx.closePath();
