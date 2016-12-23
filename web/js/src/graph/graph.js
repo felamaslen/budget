@@ -171,8 +171,8 @@ export class LineGraph extends Graph {
       newMaxXTarget = this.originalRange[1];
     }
 
-    const newMinX = Math.max(this.originalRange[0], newMinXTarget);
-    const newMaxX = Math.min(this.originalRange[1], newMaxXTarget);
+    const newMinX = Math.max(this.originalRange[0], Math.round(newMinXTarget));
+    const newMaxX = Math.min(this.originalRange[1], Math.round(newMaxXTarget));
 
     this.setRange([newMinX, newMaxX, this.minY, this.maxY]);
   }

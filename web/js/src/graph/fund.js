@@ -538,7 +538,7 @@ export class GraphFundHistory extends LineGraph {
       return {
         major: tick.major,
         pix: Math.floor(this.pixX(tick.t - this.startTime)) + 0.5,
-        text: tick.major ? tick.label : null
+        text: tick.label || null
       };
     });
   }
@@ -621,6 +621,7 @@ export class GraphFundHistory extends LineGraph {
 
     const axisTextColor = COLOR_DARK;
     const timeTicks = this.getTimeScale();
+
     // calculate tick range
     const ticksY = [];
     // draw value (Y axis) ticks and horizontal lines
@@ -659,8 +660,9 @@ export class GraphFundHistory extends LineGraph {
     const tickAngle = -Math.PI / 6;
     const tickSize = 10;
 
+    // console.debug(timeTicks);
     timeTicks.forEach(tick => {
-      const thisTickSize = tickSize * (tick.major ? 1 : 0.5);
+      const thisTickSize = tickSize * 0.5 * (tick.major + 1);
 
       this.ctx.beginPath();
       this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
@@ -669,14 +671,16 @@ export class GraphFundHistory extends LineGraph {
       this.ctx.stroke();
       this.ctx.closePath();
 
-      if (tick.major) {
+      if (tick.major > 1) {
         this.ctx.beginPath();
         this.ctx.strokeStyle = COLOR_LIGHT_GREY;
         this.ctx.moveTo(tick.pix, y0 - thisTickSize);
         this.ctx.lineTo(tick.pix, this.padY1);
         this.ctx.stroke();
         this.ctx.closePath();
+      }
 
+      if (tick.text) {
         this.ctx.save();
         this.ctx.translate(tick.pix, y0 - thisTickSize);
         this.ctx.rotate(tickAngle);
@@ -775,6 +779,10 @@ export class GraphFundHistory extends LineGraph {
     let lastProximity = Infinity;
     const hlPoint = this.data.reduce((prevPoint, thisLine, lineIndex) => {
       return thisLine[1].reduce((prevLinePoint, thisLinePoint, pointIndex) => {
+        if (thisLinePoint[0] < this.minX || thisLinePoint[1] > this.maxX) {
+          return prevLinePoint;
+        }
+
         const thisProximity = Math.sqrt(Math.pow(xv - thisLinePoint[0], 2) +
                                         Math.pow(yv - thisLinePoint[1], 2));
 
