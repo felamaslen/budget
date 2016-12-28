@@ -581,6 +581,11 @@ export class GraphFundHistory extends LineGraph {
       maxY = line[1].reduce((last, current) => current[1] > last ? current[1] : last, maxY);
     });
 
+    if (minY === maxY) {
+      minY -= 0.5;
+      maxY += 0.5;
+    }
+
     if (this.percent && minY === 0) {
       minY = -maxY * 0.2;
     }
