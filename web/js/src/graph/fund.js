@@ -172,6 +172,7 @@ export class GraphFundHistory extends LineGraph {
     this.raw = options.data;
     this.funds = options.funds;
     this.fundLines = this.funds.map(() => false);
+    this.fundLines.unshift(true); // overall line
     this.startTime = options.startTime;
     this.hlPoint = [-1, -1];
 
@@ -219,14 +220,18 @@ export class GraphFundHistory extends LineGraph {
   buildFundSidebar() {
     const $fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
 
+    const items = this.funds;
+    items.unshift("Overall");
     this.funds.forEach((fund, index) => {
+      const color = index > 0 ? COLOR_KEY[(index - 1) % COLOR_KEY.length] : "#000";
       const $item = $("<li></li>")
       .append($("<span></span>")
-              .addClass("checkbox").css("border-color", COLOR_KEY[index % COLOR_KEY.length]))
+              .addClass("checkbox").css("border-color", color))
       .append($("<span></span>").addClass("fund").text(fund))
       .toggleClass("enabled", this.fundLines[index]);
       $item.on("click", evt => {
-        const status = !$item.hasClass("enabled");
+        const numActive = this.fundLines.reduce((a, b) => a + (b ? 1 : 0), 0);
+        const status = numActive > 1 ? !$item.hasClass("enabled") : true;
         $item.toggleClass("enabled", status);
         this.fundLines[index] = status;
         this.togglePercent(this.percent);
@@ -242,16 +247,18 @@ export class GraphFundHistory extends LineGraph {
       return null;
     }
     const lines = [];
-    this.fundLines.forEach((status, index) => {
+    this.fundLines.slice(1).forEach((status, index) => {
       if (status) {
         lines.push([COLOR_KEY[index % COLOR_KEY.length], this.raw.map(item => {
           return [item[0], item[1][index]];
         })]);
       }
     });
-    lines.push([COLOR_GRAPH_FUND_LINE, this.raw.map(item => {
-      return [item[0], item[2]];
-    })]);
+    if (this.fundLines[0]) {
+      lines.push([COLOR_GRAPH_FUND_LINE, this.raw.map(item => {
+        return [item[0], item[2]];
+      })]);
+    }
 
     return lines;
   }
@@ -704,7 +711,7 @@ export class GraphFundHistory extends LineGraph {
       const mainColor = mainOnly ? this.dataVisible[0][0] : COLOR_LIGHT_GREY;
 
       this.dataVisible.forEach((line, index) => {
-        const mainLine = index === mainIndex;
+        const mainLine = index === mainIndex && this.fundLines[0];
 
         this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
         this.drawCubicLine(
