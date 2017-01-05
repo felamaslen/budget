@@ -14,20 +14,20 @@ from srv.config import E_NO_PARAMS, E_BAD_PARAMS,\
 
 def get_year_months(past_months, future_months):
     """ gets a range of [year, month] corresponding to the view """
-    NOW = datetime.now()
+    now = datetime.now()
 
-    start_month = int((NOW.month - past_months + 11) % 12 + 1)
-    start_year = int(NOW.year - max(0, ceil(float(past_months \
-            - NOW.month + 1) / 12)))
+    start_month = int((now.month - past_months + 11) % 12 + 1)
+    start_year = int(now.year - max(0, ceil(float(past_months \
+            - now.month + 1) / 12)))
 
     if start_year < START_YEAR or (start_year == START_YEAR \
             and start_month < START_MONTH):
         start_year = START_YEAR
         start_month = START_MONTH
 
-    end_month = (NOW.month + future_months - 1) % 12 + 1
-    end_year = NOW.year + int(ceil(float(future_months \
-            - 12 + NOW.month) / 12))
+    end_month = (now.month + future_months - 1) % 12 + 1
+    end_year = now.year + int(ceil(float(future_months \
+            - 12 + now.month) / 12))
 
     return [(y, m) for y in range(start_year, end_year + 1) \
             for m in range(1, 13)
@@ -59,14 +59,14 @@ class Overview(Processor):
 
         month_cost['balance'] = balance
 
-        NOW = datetime.now()
+        now = datetime.now()
 
         self.data['cost'] = month_cost
         self.data['startYearMonth'] = list(self.year_months[0])
         self.data['endYearMonth'] = \
                 list(self.year_months[len(self.year_months) - 1])
-        self.data['currentYear'] = int(NOW.year)
-        self.data['currentMonth'] = int(NOW.month)
+        self.data['currentYear'] = int(now.year)
+        self.data['currentMonth'] = int(now.month)
         self.data['futureMonths'] = OVERVIEW_NUM_FUTURE
 
         return True
@@ -166,7 +166,7 @@ class ListData(Processor):
 
     def prepare(self):
         """ do necessary things before executing """
-        NOW = datetime.now()
+        now = datetime.now()
 
         self.cols = {
             # map abbreviations to columns, to save bandwidth
@@ -214,8 +214,8 @@ class ListData(Processor):
         if self.table in self.cols['limit']:
             num_months_view = self.cols['limit'][self.table]
 
-            current_year = int(NOW.year)
-            current_month = int(NOW.month)
+            current_year = int(now.year)
+            current_month = int(now.month)
 
             first_month = (current_month - (self.offset + 1) * \
                     num_months_view - 1) % 12 + 1
@@ -514,8 +514,10 @@ class FundHistory(Processor):
             JOIN (SELECT @cNum := -1, @lastCid := 0) r
           ) ranked
         ) list
-        WHERE period = 0 OR cNum = %d""" % (num_results, self.num_results_display, \
-                self.uid, num_results - 1), [FUND_SALT])
+        WHERE period = 0 OR cNum = %d""" % (\
+                num_results, self.num_results_display, \
+                self.uid, num_results - 1), \
+                [FUND_SALT])
 
         if query is False:
             return False
