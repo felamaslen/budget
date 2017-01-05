@@ -12,10 +12,10 @@ from srv.config import E_NO_PARAMS, E_BAD_PARAMS,\
     OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE, START_YEAR, START_MONTH,\
     LIST_CATEGORIES
 
-NOW = datetime.now()
-
 def get_year_months(past_months, future_months):
     """ gets a range of [year, month] corresponding to the view """
+    NOW = datetime.now()
+
     start_month = int((NOW.month - past_months + 11) % 12 + 1)
     start_year = int(NOW.year - max(0, ceil(float(past_months \
             - NOW.month + 1) / 12)))
@@ -45,9 +45,7 @@ class Overview(Processor):
     def process(self):
         """ Get data and put it in the instance """
         categories = LIST_CATEGORIES
-
         balance = self.get_balance()
-
         month_cost = {}
 
         try:
@@ -60,6 +58,8 @@ class Overview(Processor):
             return False
 
         month_cost['balance'] = balance
+
+        NOW = datetime.now()
 
         self.data['cost'] = month_cost
         self.data['startYearMonth'] = list(self.year_months[0])
@@ -166,6 +166,7 @@ class ListData(Processor):
 
     def prepare(self):
         """ do necessary things before executing """
+        NOW = datetime.now()
 
         self.cols = {
             # map abbreviations to columns, to save bandwidth
