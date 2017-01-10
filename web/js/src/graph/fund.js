@@ -87,7 +87,9 @@ export class GraphFundItem extends LineGraph {
 
     if (this.data.length > 1) {
       let level = levels.findIndex(item => this.data[1][1] < item[0]);
-      colors.push(levels[level][1]);
+      if (level > -1) {
+        colors.push(levels[level][1]);
+      }
 
       this.data.slice(2).forEach((point, key) => {
         const thisLevel = levels.findIndex(item => point[1] < item[0]);
