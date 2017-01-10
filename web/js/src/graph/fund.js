@@ -611,9 +611,21 @@ export class GraphFundHistory extends LineGraph {
   }
   calculatePercentages() {
     // turns data from absolute values to percentage returns
-    this.data = this.percent ? this.dataProc.map(line => {
-      const initial = line[1][0][1];
-      return [line[0], line[1].map(item => {
+    this.data = this.percent ? this.dataProc.map((line, lineKey) => {
+      const mainLine = lineKey === this.dataProc.length - 1;
+      let initial = line[1][0][1];
+      return [line[0], line[1].map((item, itemKey) => {
+        // change initial value when funds bought / sold
+        if (mainLine && itemKey > 0) {
+          const oldLength = this.raw[itemKey - 1][1].length;
+          const newLength = this.raw[itemKey][1].length;
+          if (oldLength !== newLength) {
+            initial = this.raw[itemKey - 1][1].reduce((a, b) => a + b, 0);
+            if (newLength > oldLength) {
+              initial += this.raw[itemKey][1].slice(oldLength, newLength).reduce((a, b) => a + b, 0);
+            }
+          }
+        }
         return [item[0], 100 * (item[1] - initial) / initial];
       })];
     }) : this.dataProc;
