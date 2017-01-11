@@ -17,7 +17,7 @@ import {
   FONT_AXIS_LABEL
 } from "const";
 
-import { getMovingAverage } from "misc/misc";
+import { getMovingAverage, arraySum } from "misc/misc";
 import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
@@ -619,8 +619,13 @@ export class GraphFundHistory extends LineGraph {
         if (mainLine && itemKey > 0) {
           const oldLength = this.raw[itemKey - 1][1].length;
           const newLength = this.raw[itemKey][1].length;
-          if (oldLength !== newLength) {
-            initial = this.raw[itemKey][1].reduce((a, b) => a + b, 0);
+          if (oldLength < newLength) {
+            // bought fund(s)
+            initial += arraySum(this.raw[itemKey][1].slice(oldLength, newLength));
+          }
+          else if (oldLength > newLength) {
+            // sold fund(s)
+            initial = arraySum(this.raw[itemKey][1]);
           }
         }
         return [item[0], 100 * (item[1] - initial) / initial];
