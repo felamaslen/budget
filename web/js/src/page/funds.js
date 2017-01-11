@@ -129,16 +129,18 @@ export class PageFunds extends PageList {
 
     const fundIndex = this.history.funds.indexOf(newData.i);
     if (fundIndex > -1) {
-      const start = this.history.history[0][1];
-      const data = this.history.history.map(item => {
+      const historyWithFund = this.history.history.filter(
+        item => item[1].length > fundIndex);
+      const start = historyWithFund[0][1];
+      const data = historyWithFund.map(item => {
         return [
           item[0],
           100 * (item[1][fundIndex] - start[fundIndex]) / start[fundIndex]
         ];
       });
 
-      const lastValue = this.history.history[this.history.history.length - 1][1][fundIndex];
-      const changedValues = this.history.history.map(item => item[1][fundIndex])
+      const lastValue = historyWithFund[historyWithFund.length - 1][1][fundIndex];
+      const changedValues = historyWithFund.map(item => item[1][fundIndex])
       .filter(value => value !== lastValue).reverse().slice(1);
       if (changedValues.length > 0) {
         lastChange = (lastValue - changedValues[0]) / changedValues[0];
