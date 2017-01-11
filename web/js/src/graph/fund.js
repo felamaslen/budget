@@ -620,10 +620,7 @@ export class GraphFundHistory extends LineGraph {
           const oldLength = this.raw[itemKey - 1][1].length;
           const newLength = this.raw[itemKey][1].length;
           if (oldLength !== newLength) {
-            initial = this.raw[itemKey - 1][1].reduce((a, b) => a + b, 0);
-            if (newLength > oldLength) {
-              initial += this.raw[itemKey][1].slice(oldLength, newLength).reduce((a, b) => a + b, 0);
-            }
+            initial = this.raw[itemKey][1].reduce((a, b) => a + b, 0);
           }
         }
         return [item[0], 100 * (item[1] - initial) / initial];
