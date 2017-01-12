@@ -329,6 +329,9 @@ export class LineGraph extends Graph {
     this.ctx.closePath();
   }
   drawCubicLine(points, colors) {
+    if (points.length < 2) {
+      return;
+    }
     const curve = this.getSpline(points);
 
     if (this.fill) {
@@ -352,6 +355,9 @@ export class LineGraph extends Graph {
     }
   }
   drawLine(p, color) {
+    if (p.length < 2) {
+      return;
+    }
     if (typeof color === "object") {
       color = color[0];
     }
