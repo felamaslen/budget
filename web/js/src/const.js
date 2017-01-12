@@ -106,6 +106,7 @@ export const STOCK_INDICES = {
   "INDEXFTSE:SMX": "FTSE Small",
   "INDEXSTOXX:SX5E": "ES50",
   "INDEXSP:SPE350": "S&PE350",
-  "INDEXHANGSENG:HSI": "HangSeng"
+  "INDEXHANGSENG:HSI": "HangSeng",
+  "INDEXTOPIX:TOPIX": "Tokyo"
 };
 
