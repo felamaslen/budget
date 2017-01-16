@@ -399,40 +399,50 @@ def fund_history_deep(query):
         'rows': []
     }
 
-    fid_keys = {}
-    num_fids = 0
+    fid = {'keys': {}, 'num': 0, 'units': []}
 
-    for (items, fids, time, values, _, _) in query:
+    for (items, fids, time, prices, units, _, _) in query:
         items = items.split(',')
         fids = fids.split(',')
-        values = values.split(',')
+        prices = prices.split(',')
+        units = units.split(',')
 
         time = int(time)
         if times['start'] is None:
             times['start'] = time
 
-        row = [] if num_fids == 0 else [0] * num_fids
+        row = [] if fid['num'] == 0 else [[0, 0]] * fid['num']
         for j, item in enumerate(items):
             item = strng(item)
 
             if item not in results['funds']:
                 results['funds'].append(item)
 
-            value = int(round(float(values[j])))
-            fid = int(fids[j])
+            value = [float(prices[j])]
 
-            if fid not in fid_keys:
-                fid_keys[fid] = num_fids
-                num_fids += 1
+            this_fid = int(fids[j])
+
+            if this_fid not in fid['keys']:
+                fid['keys'][this_fid] = fid['num']
+                fid['num'] += 1
+
+            if len(fid['units']) <= fid['keys'][this_fid]:
+                fid['units'] += [None] \
+                        * (fid['keys'][this_fid] - len(fid['units']) + 1)
+
+            if not fid['units'][fid['keys'][this_fid]] or \
+                    fid['units'][fid['keys'][this_fid]] != float(units[j]):
+                fid['units'][fid['keys'][this_fid]] = float(units[j])
+                value.append(float(units[j]))
+
+            if fid['keys'][this_fid] > len(row) - 1:
                 row.append(value)
             else:
-                row[fid_keys[fid]] = value
+                row[fid['keys'][this_fid]] = value
 
         results['rows'].append([time - times['start'], row])
 
     times['total'] = 0 if times['start'] is None else time - times['start']
-
-    results['rows'] = [item + [sum(item[1])] for item in results['rows']]
 
     return results['funds'], results['rows'], times['start'], times['total']
 
@@ -498,8 +508,8 @@ class FundHistory(Processor):
 
         query = self.dbx.query("""
         SELECT * FROM (
-          SELECT item, fid, time, value, cNum, FLOOR(cNum %% (%d / %d)) AS period FROM (
-            SELECT x.item, x.fid, x.time, x.value,
+          SELECT item, fid, time, price, units, cNum, FLOOR(cNum %% (%d / %d)) AS period FROM (
+            SELECT x.item, x.fid, x.time, x.price, x.units,
             (
               CASE x.cid
                 WHEN @lastCid THEN @cNum
@@ -508,7 +518,8 @@ class FundHistory(Processor):
             @lastCid := x.cid AS last_cid
             FROM (
               SELECT c.cid, c.time, GROUP_CONCAT(fc.fid) AS fid,
-                GROUP_CONCAT(f.item) AS item, GROUP_CONCAT((fc.price * fc.units)) AS value
+                GROUP_CONCAT(f.item) AS item, GROUP_CONCAT(fc.price) AS price, \
+                        GROUP_CONCAT(fc.units) AS units
               FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
               INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
               INNER JOIN fund_cache fc ON fh.fid = fc.fid

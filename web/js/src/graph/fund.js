@@ -244,26 +244,6 @@ export class GraphFundHistory extends LineGraph {
     this.$gCont.append($fundSidebar);
   }
 
-  processData() {
-    if (!this.raw.length) {
-      return null;
-    }
-    const lines = [];
-    this.fundLines.slice(1).forEach((status, index) => {
-      if (status) {
-        lines.push([COLOR_KEY[index % COLOR_KEY.length], this.raw.map(item => {
-          return [item[0], item[1][index]];
-        })]);
-      }
-    });
-    if (this.fundLines[0]) {
-      lines.push([COLOR_GRAPH_FUND_LINE, this.raw.map(item => {
-        return [item[0], item[2]];
-      })]);
-    }
-
-    return lines;
-  }
   resize(size) {
     this.width = size;
     this.$canvas[0].width = size;
@@ -529,13 +509,143 @@ export class GraphFundHistory extends LineGraph {
     this.stockPricesLoading = false;
   }
 
+  processData() {
+    if (!this.raw.length) {
+      return null;
+    }
+
+    const lines = [];
+
+    if (this.percent) {
+      this.fundLines.slice(1).forEach((status, index) => {
+        // enabled individual fund lines
+        if (status) {
+          const color = COLOR_KEY[index % COLOR_KEY.length];
+          let initial = null;
+          const line = this.raw.map(item => {
+            if (!item[1][index]) {
+              return null;
+            }
+            const priceUnits = item[1][index];
+            if (priceUnits[1]) {
+              // units changed
+              initial = priceUnits[0];
+            }
+            const percent = 100 * (priceUnits[0] - initial) / initial;
+
+            return [item[0], percent];
+          }).filter(item => item !== null);
+
+          lines.push([color, line]);
+        }
+      });
+
+      if (this.fundLines[0]) {
+        // main line
+        // have to weight by units
+        let units = null;
+        let initialLength = this.raw[0][1].length;
+        const changedKeys = [];
+        const fundWeights = this.raw.map((item, key) => {
+          const changedFunds = item[1].map(priceUnits => {
+            return key === 0 || priceUnits[1] ? 1 : 0;
+          });
+
+          const changed = !units || item[1].length !== initialLength ||
+            arraySum(changedFunds) > 0;
+
+          if (changed) {
+            units = item[1].map((priceUnits, fundKey) => priceUnits[1] || units[fundKey]);
+            changedKeys.push([key, changedFunds]);
+            initialLength = item[1].length;
+          }
+
+          return units;
+        }).map(item => {
+          const total = arraySum(item);
+          return item.map(unit => unit / total);
+        });
+
+        let initial = [null, null];
+        const mainLine = [COLOR_GRAPH_FUND_LINE, this.raw.map((item, key) => {
+          const changed = changedKeys.length && changedKeys[0][0] === key;
+          const weights = item[1].map((priceUnits, fundKey) => {
+            return changed && changedKeys[0][1][fundKey] ? fundWeights[key][fundKey] : initial[0][fundKey];
+          });
+
+          const newValue = item[1].map((priceUnits, fundKey) => {
+            return priceUnits[0] * weights[fundKey];
+          });
+
+          if (changed) {
+            const changedValue = item[1].map((priceUnits, fundKey) => {
+              return changedKeys[0][1][fundKey] ? priceUnits[0] * weights[fundKey] : initial[1][fundKey];
+            });
+
+            initial = [weights, changedValue];
+            changedKeys.shift();
+          }
+          const initialValue = arraySum(initial[1]);
+          const percent = 100 * (arraySum(newValue) - initialValue) / initialValue;
+
+          return [item[0], percent];
+        })];
+
+        lines.push(mainLine);
+      }
+    }
+    else {
+      this.fundLines.slice(1).forEach((status, index) => {
+        // enabled individual fund lines
+        if (status) {
+          const color = COLOR_KEY[index % COLOR_KEY.length];
+          let units = null;
+          const line = this.raw.map(item => {
+            if (!item[1][index]) {
+              return null;
+            }
+            const priceUnits = item[1][index];
+            if (priceUnits[1]) {
+              units = priceUnits[1];
+            }
+
+            return [item[0], priceUnits[0] * units];
+          }).filter(item => item !== null);
+
+          lines.push([color, line]);
+        }
+      });
+
+      if (this.fundLines[0]) {
+        // main line
+        const units = [];
+        const mainLine = [COLOR_GRAPH_FUND_LINE, this.raw.map((item, key) => {
+          const value = arraySum(item[1].map((priceUnits, fundKey) => {
+            if (key === 0 || priceUnits[1]) {
+              units[fundKey] = priceUnits[1];
+            }
+            return priceUnits[0] * units[fundKey];
+          }));
+
+          return [item[0], value];
+        })];
+
+        lines.push(mainLine);
+      }
+    }
+
+    return lines;
+  }
   togglePercent(status, noDraw) {
     this.percent = status;
-    this.dataProc = this.processData();
-    if (!this.dataProc) {
+    this.data = this.processData();
+    if (!this.data) {
       return;
     }
-    this.calculatePercentages();
+    this.dataVisible = this.filterDataVisible();
+    if (this.hlPoint[0] > this.data.length - 1) {
+      this.hlPoint[0] = this.data.length - 1;
+    }
     this.calculateYRange();
     if (!noDraw) {
       this.draw();
@@ -608,34 +718,6 @@ export class GraphFundHistory extends LineGraph {
       this.tickSizeY * Math.floor(minY / this.tickSizeY),
       this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
     ]);
-  }
-  calculatePercentages() {
-    // turns data from absolute values to percentage returns
-    this.data = this.percent ? this.dataProc.map((line, lineKey) => {
-      const mainLine = lineKey === this.dataProc.length - 1;
-      let initial = line[1][0][1];
-      return [line[0], line[1].map((item, itemKey) => {
-        // change initial value when funds bought / sold
-        if (mainLine && itemKey > 0) {
-          const oldLength = this.raw[itemKey - 1][1].length;
-          const newLength = this.raw[itemKey][1].length;
-          if (oldLength < newLength) {
-            // bought fund(s)
-            initial += arraySum(this.raw[itemKey][1].slice(oldLength, newLength));
-          }
-          else if (oldLength > newLength) {
-            // sold fund(s)
-            initial = arraySum(this.raw[itemKey][1]);
-          }
-        }
-        return [item[0], 100 * (item[1] - initial) / initial];
-      })];
-    }) : this.dataProc;
-    this.dataVisible = this.filterDataVisible();
-
-    if (this.hlPoint[0] > this.data.length - 1) {
-      this.hlPoint[0] = this.data.length - 1;
-    }
   }
 
   formatValue(value) {

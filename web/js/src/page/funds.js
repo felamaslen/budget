@@ -8,6 +8,7 @@ import { GRAPH_FUND_HISTORY_WIDTH } from "const";
 
 import { todayDate } from "misc/date";
 import { formatCurrency } from "misc/format";
+import { arraySum } from "misc/misc";
 
 import { PageList } from "page/list";
 
@@ -135,7 +136,7 @@ export class PageFunds extends PageList {
       const data = historyWithFund.map(item => {
         return [
           item[0],
-          100 * (item[1][fundIndex] - start[fundIndex]) / start[fundIndex]
+          100 * (item[1][fundIndex][0] - start[fundIndex][0]) / start[fundIndex][0]
         ];
       });
 
@@ -217,7 +218,19 @@ export class PageFunds extends PageList {
     }, -Infinity);
 
     if (this.history.history.length > 0) {
-      const lastValue = this.history.history[this.history.history.length - 1][2];
+      // calculate latest value
+      const units = [];
+      this.history.history.forEach(item => {
+        return item[1].map((priceUnits, fundKey) => {
+          if (priceUnits[1]) {
+            units[fundKey] = priceUnits[1];
+          }
+        });
+      });
+      const lastValue = arraySum(this.history.history[this.history.history.length - 1][1]
+      .map((priceUnits, fundKey) => {
+        return units[fundKey] * priceUnits[0];
+      }));
 
       const profit = lastValue - this.costTotal;
       const profitPct = 100 * profit / this.costTotal;
