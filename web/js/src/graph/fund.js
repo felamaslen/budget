@@ -845,6 +845,7 @@ export class GraphFundHistory extends LineGraph {
     // highlight point on mouseover
     if (
       this.hlPoint[0] > -1 &&
+      this.data[this.hlPoint[0]][1][this.hlPoint[1]] &&
       this.data[this.hlPoint[0]][1][this.hlPoint[1]][0] >= this.minX
     ) {
       const point = this.data[this.hlPoint[0]][1][this.hlPoint[1]];
