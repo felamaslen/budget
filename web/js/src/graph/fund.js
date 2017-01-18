@@ -741,8 +741,6 @@ export class GraphFundHistory extends LineGraph {
     const newNumTicks = Math.floor((this.maxY - this.minY) / this.tickSizeY);
 
     // draw axes
-    const startValue = arraySum(this.raw[0][1].map(item => item[0] * item[1]));
-
     this.ctx.lineWidth = 1;
     for (let i = 0; i < newNumTicks; i++) {
       const value = this.minY + (i + 1) * this.tickSizeY;
@@ -757,8 +755,7 @@ export class GraphFundHistory extends LineGraph {
       this.ctx.moveTo(this.padX1, tickPos);
       this.ctx.lineTo(this.width - this.padX2, tickPos);
 
-      this.ctx.strokeStyle = (this.percent && value > 0) || (!this.percent && value > startValue)
-        ? COLOR_PROFIT : COLOR_LOSS;
+      this.ctx.strokeStyle = this.percent ? (value > 0 ? COLOR_PROFIT : COLOR_LOSS) : COLOR_LIGHT_GREY;
       this.ctx.stroke();
     }
 
