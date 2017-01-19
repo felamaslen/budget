@@ -29,9 +29,11 @@ export const ANALYSIS_VIEW_HEIGHT  = 500;
 
 export const DO_STOCKS_LIST = true;
 
-export const STOCKS_GRAPH_DETAIL = 100;
+export const STOCKS_GRAPH_DETAIL = 250;
 export const STOCKS_GRAPH_HEIGHT = 50;
 export const STOCKS_SIDEBAR_WIDTH = 260;
+export const STOCKS_REFRESH_INTERVAL = 6000;
+export const STOCKS_HL_TIME = 7000;
 
 export const GRAPH_FUNDS_PIE_WIDTH = 500;
 export const GRAPH_FUND_ITEM_LINE_WIDTH = 1.5;
@@ -100,9 +102,6 @@ export const FONT_GRAPH_TITLE = "16px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_TITLE_LARGE = "18px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY = "13px Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
-
-export const STOCKS_REFRESH_INTERVAL = 6000;
-export const STOCKS_HL_TIME = 7000;
 
 export const STOCK_INDICES = {
   "INDEXFTSE:UKX": "FTSE100",

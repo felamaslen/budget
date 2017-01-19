@@ -194,7 +194,7 @@ export class PageFunds extends PageList {
     super.hookSwitchToCallback();
 
     if (pageExists) {
-      this.graphFundHistory.loadStocksList();
+      this.stocksList && this.stocksList.loadStocksList();
     }
   }
   hookDataLoadedBeforeRender(callback, res) {
