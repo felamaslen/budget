@@ -43,23 +43,27 @@ class StocksGraph extends LineGraph {
       width: STOCKS_SIDEBAR_WIDTH,
       height: STOCKS_GRAPH_HEIGHT,
       range: [0, STOCKS_GRAPH_DETAIL - 1, -0.2, 0.2],
-      title: "stocks"
+      title: "stocks",
+      lineWidth: 1
     }, api, state);
 
-    this.data = [];
-    for (let i = 0; i < STOCKS_GRAPH_DETAIL; i++) {
-      this.data.push(0);
-    }
-
-    this.draw();
+    this.data = null;
   }
   update(value) {
     // updates graph with latest value
-    this.data.shift();
-    this.data.push(value);
-    const newMin = Math.min(-0.2, Math.min.apply(null, this.data));
-    const newMax = Math.max(0.2, Math.max.apply(null, this.data));
-    this.setRange([this.minX, this.maxX, newMin, newMax]);
+    if (!this.data) {
+      this.data = [];
+      for (let i = 0; i < STOCKS_GRAPH_DETAIL; i++) {
+        this.data.push(value);
+      }
+    }
+    else {
+      this.data.shift();
+      this.data.push(value);
+      const newMin = Math.min(-0.1, Math.min.apply(null, this.data) - 0.1);
+      const newMax = Math.max(0.1, Math.max.apply(null, this.data) + 0.1);
+      this.setRange([this.minX, this.maxX, newMin, newMax]);
+    }
 
     this.draw();
   }
