@@ -42,39 +42,35 @@ class StocksGraph extends LineGraph {
       $cont,
       width: STOCKS_SIDEBAR_WIDTH,
       height: STOCKS_GRAPH_HEIGHT,
-      range: [0, STOCKS_GRAPH_DETAIL - 1, -0.2, 0.2],
+      range: [0, 1, -0.2, 0.2],
       title: "stocks",
       lineWidth: 1
     }, api, state);
 
-    this.data = null;
+    this.data = [];
   }
   update(value) {
     // updates graph with latest value
-    if (!this.data) {
-      this.data = [];
-      for (let i = 0; i < STOCKS_GRAPH_DETAIL; i++) {
-        this.data.push(value);
-      }
-    }
-    else {
+    this.data.push(value);
+    while (this.data.length > STOCKS_GRAPH_DETAIL) {
       this.data.shift();
-      this.data.push(value);
-      const newMin = Math.min(-0.1, Math.min.apply(null, this.data) - 0.1);
-      const newMax = Math.max(0.1, Math.max.apply(null, this.data) + 0.1);
-      this.setRange([this.minX, this.maxX, newMin, newMax]);
     }
+    const newMin = Math.min(-0.1, Math.min.apply(null, this.data) - 0.1);
+    const newMax = Math.max(0.1, Math.max.apply(null, this.data) + 0.1);
+    this.setRange([0, this.data.length - 1, newMin, newMax]);
 
     this.draw();
   }
   draw() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    const profit = this.data[this.data.length - 1] > 0;
-    const loss = this.data[this.data.length - 1] < 0;
+    if (this.data.length > 1) {
+      const profit = this.data[this.data.length - 1] > 0;
+      const loss = this.data[this.data.length - 1] < 0;
 
-    const line = this.data.map((value, key) => [key, value]);
-    this.drawCubicLine(line, [profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK)]);
+      const line = this.data.map((value, key) => [key, value]);
+      this.drawLine(line, profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK));
+    }
   }
 }
 
