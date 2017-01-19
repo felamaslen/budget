@@ -6,9 +6,12 @@ import $ from "../../lib/jquery.min";
 
 import {
   DO_STOCKS_LIST, STOCKS_REFRESH_INTERVAL, STOCK_INDICES,
-  STOCKS_HL_TIME
+  STOCKS_HL_TIME, STOCKS_GRAPH_DETAIL,
+  STOCKS_GRAPH_HEIGHT, STOCKS_SIDEBAR_WIDTH,
+  COLOR_PROFIT, COLOR_LOSS, COLOR_DARK
 } from "const";
 
+import { LineGraph } from "graph/graph";
 import { GoogleFinanceAPI } from "api/api";
 
 const finance = new GoogleFinanceAPI();
@@ -33,6 +36,44 @@ const processStockChange = (res, old) => {
   return old;
 };
 
+class StocksGraph extends LineGraph {
+  constructor($cont, api, state) {
+    super({
+      $cont,
+      width: STOCKS_SIDEBAR_WIDTH,
+      height: STOCKS_GRAPH_HEIGHT,
+      range: [0, STOCKS_GRAPH_DETAIL - 1, -0.2, 0.2],
+      title: "stocks"
+    }, api, state);
+
+    this.data = [];
+    for (let i = 0; i < STOCKS_GRAPH_DETAIL; i++) {
+      this.data.push(0);
+    }
+
+    this.draw();
+  }
+  update(value) {
+    // updates graph with latest value
+    this.data.shift();
+    this.data.push(value);
+    const newMin = Math.min(-0.2, Math.min.apply(null, this.data));
+    const newMax = Math.max(0.2, Math.max.apply(null, this.data));
+    this.setRange([this.minX, this.maxX, newMin, newMax]);
+
+    this.draw();
+  }
+  draw() {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+
+    const profit = this.data[this.data.length - 1] > 0;
+    const loss = this.data[this.data.length - 1] < 0;
+
+    const line = this.data.map((value, key) => [key, value]);
+    this.drawCubicLine(line, [profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK)]);
+  }
+}
+
 export class StocksList {
   constructor(options, api, state) {
     this.api = api;
@@ -51,13 +92,15 @@ export class StocksList {
     this.$sidebar = $("<div></div>")
     .addClass("stock-sidebar");
 
+    this.stocksGraph = new StocksGraph(this.$sidebar, this.api, this.state);
+
     this.$indicesList = $("<ul></ul>");
     this.$overallStockChange = $("<span></span>").addClass("change");
     this.$stocksListOverall   = $("<li></li>").addClass("stocks-list-overall")
       .append($("<span></span>").addClass("label").text("Exposure"))
       .append($("<span></span>").addClass("price").append(this.$overallStockChange));
-    this.$indicesList.append(this.$stocksListOverall);
 
+    this.$indicesList.append(this.$stocksListOverall);
     this.$sidebar.append(this.$indicesList);
 
     this.$stocksListOuter.append(this.$sidebar);
@@ -213,6 +256,8 @@ export class StocksList {
       "hl-down",
       this.stocksWeightedChange !== null && change - this.stocksWeightedChange < 0
     );
+
+    this.stocksGraph.update(change);
 
     this.stocksWeightedChange = change;
 
