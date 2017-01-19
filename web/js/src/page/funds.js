@@ -4,7 +4,7 @@
 
 import $ from "../../lib/jquery.min";
 
-import { GRAPH_FUND_HISTORY_WIDTH } from "const";
+import { GRAPH_FUND_HISTORY_WIDTH, DO_STOCKS_LIST } from "const";
 
 import { todayDate } from "misc/date";
 import { formatCurrency } from "misc/format";
@@ -13,6 +13,7 @@ import { arraySum } from "misc/misc";
 import { PageList } from "page/list";
 
 import { GraphFundItem, GraphFundHistory } from "graph/fund";
+import { StocksList } from "page/funds_stocks";
 
 export class PageFunds extends PageList {
   constructor(options, api, state) {
@@ -262,7 +263,6 @@ export class PageFunds extends PageList {
         width:  GRAPH_FUND_HISTORY_WIDTH,
         height: this.pieHeight,
         $cont:  this.$graphs,
-        $list:  this.$cont,
         page:   this.page,
         title:  "fund-history",
         data:   this.history.history,
@@ -274,6 +274,10 @@ export class PageFunds extends PageList {
         pad:    [24, 0, 0, 0],
         startTime: this.history.startTime
       }, this.api, this.state);
+
+      if (DO_STOCKS_LIST) {
+        this.stocksList = new StocksList({ $list: this.$cont }, this.api, this.state);
+      }
     }
   }
 }
