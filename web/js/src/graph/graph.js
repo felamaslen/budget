@@ -100,7 +100,6 @@ export class LineGraph extends Graph {
     .addClass("graph-" + this.title);
 
     this.$gCont.append(this.$canvas);
-
     this.$cont.append(this.$gCont);
   }
 
