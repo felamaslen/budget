@@ -48,12 +48,13 @@ class StocksGraph extends LineGraph {
     }, api, state);
 
     this.data = [];
+    this.deleteKey = 0;
   }
   update(value) {
     // updates graph with latest value
     this.data.push(value);
     while (this.data.length > STOCKS_GRAPH_DETAIL) {
-      this.data.shift();
+      this.data.splice(1 + (this.deleteKey++ % (STOCKS_GRAPH_DETAIL - 2)), 1);
     }
     const newMin = Math.min(-0.1, Math.min.apply(null, this.data) - 0.1);
     const newMax = Math.max(0.1, Math.max.apply(null, this.data) + 0.1);
