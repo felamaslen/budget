@@ -8,6 +8,6 @@ import curses
 
 from app.main import BudgetClient
 
-app = BudgetClient()
-curses.wrapper(app.start)
+APP = BudgetClient()
+curses.wrapper(APP.start)
 
