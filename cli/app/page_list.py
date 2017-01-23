@@ -335,8 +335,9 @@ class PageFunds(PageList):
             else:
                 title = alignc(graph_w - 1, "Fund: {}".format(fund_name))
 
-                series = [history[0][1][index]] * extra + [
-                    history[i][1][index]
+                first_value = history[0][1][index] if len(history[0][1]) > index else 0
+                series = [first_value] * extra + [
+                    history[i][1][index] if len(history[i][1]) > index else 0
                     for i in range(len(history))
                 ]
 
@@ -360,17 +361,19 @@ class PageFunds(PageList):
 
             self.graph['win'].addstr(val_y + 2, val_x, tick)
 
-    def draw_graph_data(self, title, series, graph_w, graph_h):
+    def draw_graph_data(self, graph_data, graph):
+        title, series = graph_data
+
         self.graph['win'].addstr(1, 1, title)
 
         graph_range = [floor(float(min(series)) / 1000) * 1000, \
                 ceil(float(max(series)) / 1000) * 1000]
 
         last_yv = None
-        series_height = graph_h - 3
+        series_height = graph['h'] - 3
 
         # draw line
-        for i in range(graph_w - 2):
+        for i in range(graph['w'] - 2):
             val_y = int(series_height * (1 - (float(series[i] - graph_range[0]) / \
                     (graph_range[1] - graph_range[0]))))
 
@@ -401,25 +404,42 @@ class PageFunds(PageList):
             last_yv = val_y
 
         # draw axis
-        self.draw_graph_axis(graph_w, graph_range, series_height)
+        self.draw_graph_axis(graph['w'], graph_range, series_height)
 
     def draw_graph(self, graph_all):
-        graph_h = self.graph['h'] - 2
-        graph_w = self.graph['w'] - 2 # for border
+        graph = {'h': self.graph['h'] - 2, 'w': self.graph['w'] - 2}
 
-        series_length = graph_w - 2
-        history = self.data['history']['history'][-series_length:]
-        extra = max(0, series_length - len(history))
+        # fill out all the units values
+        history = {'full': [], 'value': [], 'cut': []}
+        key = 0
+        for (time, funds) in self.data['history']['history']:
+            fund_key = 0
+            values = []
+            for price_units in funds:
+                units = price_units[1] if len(price_units) > 1 \
+                        else history['full'][key - 1][1][fund_key][1]
 
-        graph_data = self.get_graph_data(graph_all, graph_w, history, extra)
+                values.append([price_units[0], units])
+                fund_key += 1
+
+            key += 1
+
+            history['full'].append([time, values])
+
+        history['value'] = [[time, [fund[0] * fund[1] for fund in funds], \
+                sum([fund[0] * fund[1] for fund in funds])] \
+                for (time, funds) in history['full']]
+
+        series_length = graph['w'] - 2
+        history['cut'] = history['value'][-series_length:]
+        extra = max(0, series_length - len(history['cut']))
+
+        graph_data = self.get_graph_data(graph_all, graph['w'], history['cut'], extra)
 
         ## gather data
-
         if graph_data is not False:
-            title, series = graph_data
-
             # draw the actual graph
-            self.draw_graph_data(title, series, graph_w, graph_h)
+            self.draw_graph_data(graph_data, graph)
 
         self.graph['win'].refresh()
 
