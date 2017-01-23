@@ -1,3 +1,6 @@
+"""
+Main CLI app, called by init script
+"""
 import curses
 from curses.textpad import rectangle
 
@@ -7,102 +10,113 @@ from app.methods import window_color, ellipsis, nav_key
 from app.page_overview import PageOverview
 from app.page_list import PageFunds, PageIn, PageBills, PageFood, PageGeneral, \
         PageHoliday, PageSocial
-from app.const import *
+from app.const import NC_COLOR_BG, NC_COLOR_TAB, NC_COLOR_TAB_SEL, NC_COLOR_UP, \
+        NC_COLOR_DOWN, NC_COLOR_UP_SEL, NC_COLOR_DOWN_SEL, \
+        NC_COLOR_HEADER, NC_COLOR_STATUS_BAR, \
+        KEY_QUIT, KEY_LOGOUT, KEYCODE_NEWLINE, KEYCODE_RETURN, KEYCODE_TAB, \
+        NAV_SECT_TABS, NAV_SECT_PAGE
+
+def init_ncurses_colors():
+    curses.init_pair(*NC_COLOR_BG)
+    curses.init_pair(*NC_COLOR_TAB)
+    curses.init_pair(*NC_COLOR_TAB_SEL)
+    curses.init_pair(*NC_COLOR_UP)
+    curses.init_pair(*NC_COLOR_DOWN)
+    curses.init_pair(*NC_COLOR_UP_SEL)
+    curses.init_pair(*NC_COLOR_DOWN_SEL)
 
 class BudgetClient(object):
+    """ main app """
     def __init__(self):
-        self.pages = ["Overview", "Funds", "In", "Bills", "Food", "General",\
-                "Holiday", "Social"]
-        self.current_page = 0
+        self.state = {
+            'pages': ["Overview", "Funds", "In", "Bills", "Food", "General", \
+                "Holiday", "Social"],
+            'obj': {},
+            'current': 0,
+            'statusbar': []
+        }
 
-        self.page_obj = {}
-
-        """ determines what will happen if navigation keys are pressed """
+        # determines what will happen if navigation keys are pressed
         self.nav_sect = NAV_SECT_TABS
 
-    def define_windows(self):
-        self.w_header = None
+        # define windows
+        self.win = {'statusbar': None, 'header': None}
+
+        self.scr = None
+        self.api = None
+        self.user = None
 
     def start(self, stdscr):
         """ this is called by the ncurses wrapper """
         self.scr = stdscr
 
-        self.init_ncurses_colors()
+        init_ncurses_colors()
 
         self.api = BudgetClientAPI()
         self.user = User(stdscr, self.logged_in, self.api)
 
         self.loop()
 
-    def init_ncurses_colors(self):
-        curses.init_pair(*NC_COLOR_BG)
-        curses.init_pair(*NC_COLOR_TAB)
-        curses.init_pair(*NC_COLOR_TAB_SEL)
-        curses.init_pair(*NC_COLOR_UP)
-        curses.init_pair(*NC_COLOR_DOWN)
-        curses.init_pair(*NC_COLOR_UP_SEL)
-        curses.init_pair(*NC_COLOR_DOWN_SEL)
-
     def loop(self):
         """ main application loop """
 
-        if self.user.uid > 0:
+        if self.user.state['uid'] > 0:
             self.logged_in()
         else:
             self.user.logged_out()
 
-        """ catch keyboard input """
+        # catch keyboard input
         while True:
             if not self.key_input(self.scr.getch()):
                 break
 
-    def key_input(self, c):
-        if c == ord(KEY_QUIT):
+    def key_input(self, char):
+        if char == ord(KEY_QUIT):
             return False # quit the app
 
-        if c == ord(KEY_LOGOUT):
+        if char == ord(KEY_LOGOUT):
             self.logout()
             return True
 
         pass_input = True
 
-        dx, dy, done_nav = nav_key(c)
+        d_x, d_y, done_nav = nav_key(char)
 
         if done_nav:
             pass_input = False # this is done by the nav function itself
+            self.nav(d_x, d_y)
 
-            self.nav(dx, dy)
-
-        elif c == KEYCODE_NEWLINE or c == KEYCODE_RETURN:
+        elif char == KEYCODE_NEWLINE or char == KEYCODE_RETURN:
             self.nav_select()
 
         can_nav = True
 
         if pass_input:
-            """ pass the input to the current page """
+            # pass the input to the current page
             try:
-                can_nav = self.page_obj[self.pages[self.current_page]].key_input(c)
-            except:
+                can_nav = self.state['obj'][self.state['pages'][self.state['current']]]\
+                        .key_input(char)
+            except AttributeError:
                 pass # page hasn't loaded yet
 
-        if can_nav and c == KEYCODE_TAB:
+        if can_nav and char == KEYCODE_TAB:
             self.nav_sect = (self.nav_sect + 1) % 2
 
             try:
-                if not self.page_obj[self.pages[self.current_page]].set_nav_active(
+                if not self.state['obj'][self.state['pages'][self.state['current']]].set_nav_active(
                         self.nav_sect == NAV_SECT_PAGE):
 
                     self.nav_sect = NAV_SECT_TABS
 
-            except:
-                """ page isn't ready yet """
+            except AttributeError:
+                # page isn't read_y yet
                 self.nav_sect = NAV_SECT_TABS
 
 
         return True
 
     def logged_in(self):
-        self.api.set_token(self.user.token)
+        self.api.set_token(self.user.state['token'])
 
         self.draw_gui()
 
@@ -111,7 +125,7 @@ class BudgetClient(object):
         curses.curs_set(1)
 
         self.api.set_token()
-        self.page_obj = {}
+        self.state['obj'] = {}
         self.user.logged_out()
 
     def draw_gui(self):
@@ -119,137 +133,132 @@ class BudgetClient(object):
         self.scr.clear()
         self.scr.refresh()
 
-        """ hide cursor """
+        # hide cursor
         curses.curs_set(0)
 
-        self.define_windows()
-
-        self.statusbar = None
         self.set_statusbar()
         self.gui_header()
         self.gui_page()
 
     def gui_page(self):
-        color = curses.color_pair(0)
+        self.win['page'] = curses.newwin(curses.LINES - 3, curses.COLS, 2, 0)
+        self.win['page'].clear()
 
-        self.w_page = curses.newwin(curses.LINES - 3, curses.COLS, 2, 0)
-        self.w_page.clear()
-
-        """ Select and load first page in list """
-        self.nav(0, 0, load = True)
+        # Select and load first page in list
+        self.nav(0, 0, load=True)
 
     def gui_tabs(self, header):
         color_tab = curses.color_pair(NC_COLOR_TAB[0])
 
         offset = 7 # length of "Budget" title + 1
 
-        for (key, tab) in enumerate(self.pages):
+        for (key, tab) in enumerate(self.state['pages']):
             rectangle(header, 0, offset, 1, offset + len(tab) + 1)
             header.addstr(0, offset + 1, tab, \
                     curses.color_pair(NC_COLOR_TAB_SEL[0]) if \
-                    key == self.current_page else color_tab)
+                    key == self.state['current'] else color_tab)
 
             offset += len(tab) + 2
 
     def gui_header(self):
         color = curses.color_pair(NC_COLOR_HEADER[0]) | curses.A_BOLD
 
-        if not self.w_header:
-            self.w_header = window_color(0, 0, curses.COLS, 2, color)
+        if not self.win['header']:
+            self.win['header'] = window_color(0, 0, curses.COLS, 2, color)
 
-            self.w_header.addstr(0, 0, "Budget", color)
-            self.w_header.refresh()
+            self.win['header'].addstr(0, 0, "Budget", color)
+            self.win['header'].refresh()
 
-        self.gui_tabs(self.w_header)
+        self.gui_tabs(self.win['header'])
 
-        self.w_header.refresh()
+        self.win['header'].refresh()
 
-    def set_statusbar(self, items = []):
-        self.statusbar = [[KEY_QUIT, "quit"], [KEY_LOGOUT, "logout"]] + items
+    def set_statusbar(self, items=None):
+        self.state['statusbar'] = [[KEY_QUIT, "quit"], [KEY_LOGOUT, "logout"]] + \
+                ([] if items is None else items)
         self.gui_statusbar()
 
     def gui_statusbar(self):
         """ draws a status bar at the bottom of the screen """
         color = curses.color_pair(NC_COLOR_STATUS_BAR[0])
 
-        text1 = "Logged in as {}".format(self.user.name)
+        text1 = "Logged in as {}".format(self.user.state['name'])
 
         text2 = ellipsis(" (" + ', '.join([
             "{}: {}".format(key, item)
-            for (key, item) in self.statusbar
+            for (key, item) in self.state['statusbar']
         ]) + ")", curses.COLS - len(text1))
 
-        if not self.statusbar is None:
-            del self.statusbar
+        if self.win['statusbar'] is not None:
+            del self.win['statusbar']
 
-        self.statusbar = window_color(0, curses.LINES - 1, curses.COLS, 1, color)
-        self.statusbar.addstr(0, 0, text1, color)
-        self.statusbar.addstr(0, len(text1), text2, color | curses.A_BOLD)
-        self.statusbar.refresh()
+        self.win['statusbar'] = window_color(0, curses.LINES - 1, curses.COLS, 1, color)
+        self.win['statusbar'].addstr(0, 0, text1, color)
+        self.win['statusbar'].addstr(0, len(text1), text2, color | curses.A_BOLD)
+        self.win['statusbar'].refresh()
 
-    def nav(self, dx, dy, load = False):
+    def nav(self, d_x, d_y, load=False):
         """ navigates through selected part of application """
         if self.nav_sect == NAV_SECT_TABS:
-            self.current_page = (self.current_page + dx) % len(self.pages)
+            self.state['current'] = (self.state['current'] + d_x) % len(self.state['pages'])
 
             self.gui_header()
 
-            page = self.pages[self.current_page]
+            page = self.state['pages'][self.state['current']]
 
-            if page in self.page_obj:
-                self.page_obj[page].switch_to()
+            if page in self.state['obj']:
+                self.state['obj'][page].switch_to()
             elif load:
                 self.load_page()
             else:
-                self.w_page.clear()
-                self.w_page.addstr(0, 0, "Press enter to load page: {}".format(page))
-                self.w_page.refresh()
+                self.win['page'].clear()
+                self.win['page'].addstr(0, 0, "Press enter to load page: {}".format(page))
+                self.win['page'].refresh()
 
                 self.set_statusbar()
 
         elif self.nav_sect == NAV_SECT_PAGE:
             try:
-                self.page_obj[self.pages[self.current_page]].nav(dx, dy)
-            except:
+                self.state['obj'][self.state['pages'][self.state['current']]].nav(d_x, d_y)
+            except AttributeError:
                 pass # page hasn't loaded yet
 
     def nav_select(self):
         if self.nav_sect == NAV_SECT_TABS:
-            """ load the selected tab's page """
+            # load the selected tab's page
             self.load_page()
 
     def load_page(self):
-        page = self.pages[self.current_page]
+        page = self.state['pages'][self.state['current']]
 
-        if not page in self.page_obj:
-            self.page_obj[page] = self.get_page_obj(page)
+        if page not in self.state['obj']:
+            if page == "Overview":
+                self.state['obj'][page] = PageOverview(\
+                        self.win['page'], self.api, self.set_statusbar)
 
-            self.page_obj[page].switch_to()
+            elif page == "Funds":
+                self.state['obj'][page] = PageFunds(self.win['page'], self.api, self.set_statusbar)
 
-    def get_page_obj(self, page):
-        if page == "Overview":
-            return PageOverview(self.w_page, self.api, self.set_statusbar)
+            elif page == "In":
+                self.state['obj'][page] = PageIn(self.win['page'], self.api, self.set_statusbar)
 
-        if page == "Funds":
-            return PageFunds(self.w_page, self.api, self.set_statusbar)
+            elif page == "Bills":
+                self.state['obj'][page] = PageBills(self.win['page'], self.api, self.set_statusbar)
 
-        if page == "In":
-            return PageIn(self.w_page, self.api, self.set_statusbar)
+            elif page == "Food":
+                self.state['obj'][page] = PageFood(self.win['page'], self.api, self.set_statusbar)
 
-        if page == "Bills":
-            return PageBills(self.w_page, self.api, self.set_statusbar)
+            elif page == "General":
+                self.state['obj'][page] = PageGeneral(\
+                        self.win['page'], self.api, self.set_statusbar)
 
-        if page == "Food":
-            return PageFood(self.w_page, self.api, self.set_statusbar)
+            elif page == "Holiday":
+                self.state['obj'][page] = PageHoliday(\
+                        self.win['page'], self.api, self.set_statusbar)
 
-        if page == "General":
-            return PageGeneral(self.w_page, self.api, self.set_statusbar)
+            elif page == "Social":
+                self.state['obj'][page] = PageSocial(self.win['page'], self.api, self.set_statusbar)
 
-        if page == "Holiday":
-            return PageHoliday(self.w_page, self.api, self.set_statusbar)
+            self.state['obj'][page].switch_to()
 
-        if page == "Social":
-            return PageSocial(self.w_page, self.api, self.set_statusbar)
-
-        return None
 

@@ -1,4 +1,6 @@
-""" extra methods, e.g. to make curses programming less disgusting """
+"""
+Extra methods, e.g. to make curses programming less disgusting
+"""
 
 import re
 import curses
