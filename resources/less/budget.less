@@ -614,6 +614,7 @@ button {
   bottom: 0;
 }
 
+/* editable items */
 .editable {
   position: relative;
 }
@@ -723,7 +724,7 @@ button {
       list-style: none;
       width: 10%;
       height: 100%;
-      background: rgba(245, 245, 245, 0.8);
+      background: linear-gradient(to bottom, rgba(235, 235, 235, 0.8), transparent);
       z-index: 3;
       transition: 0.3s width ease-in-out;
       &:hover {
@@ -757,6 +758,19 @@ button {
       .fund {
         padding-left: 12px;
       }
+    }
+  }
+}
+
+/* world map */
+.graph-world-map {
+  .world {
+    path {
+      stroke: black;
+      stroke-width: 0.1;
+    }
+    & > g {
+      fill: #eee;
     }
   }
 }
@@ -1320,7 +1334,6 @@ button {
     }
     .graph-fund-history {
       float: right;
-      width: 400px;
       position: relative;
       canvas {
         position: absolute;
@@ -1468,12 +1481,12 @@ button {
     .graph-fund-history {
       width: 500px;
       left: 1000px;
-      top: @top_nav + 350;
+      top: @top_nav + 40;
       z-index: 1;
     }
-    .fund-graph-cont {
-      .graph-container {
-      }
+    .graph-world-map {
+      top: @top_nav + 350;
+      left: 1000px;
     }
   }
 

@@ -5,7 +5,7 @@
 import $ from "../../lib/jquery.min";
 
 import {
-  DO_STOCKS_LIST, STOCKS_REFRESH_INTERVAL, STOCK_INDICES,
+  STOCKS_GET_PRICES, STOCKS_REFRESH_INTERVAL, STOCK_INDICES,
   STOCKS_HL_TIME, STOCKS_GRAPH_DETAIL,
   STOCKS_GRAPH_HEIGHT, STOCKS_SIDEBAR_WIDTH,
   COLOR_PROFIT, COLOR_LOSS, COLOR_DARK
@@ -80,12 +80,19 @@ export class StocksList {
     this.api = api;
     this.state = state;
 
-    this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
+    this.worldMap = options.worldMap;
 
+    this.stocksRefreshInterval = STOCKS_REFRESH_INTERVAL;
     this.stocksListLoading = false;
     this.stockPricesLoading = false;
     this.stocks = {};
 
+    this.indices = [];
+    this.indexSymbols = [];
+    this.$list = options.$list;
+    this.loadStocksList();
+  }
+  buildStocksList() {
     this.$stocksListOuter = $("<div></div>")
     .addClass("stocks-list");
     this.$stocksList = $("<ul></ul>")
@@ -107,11 +114,7 @@ export class StocksList {
     this.$stocksListOuter.append(this.$sidebar);
     this.$stocksListOuter.append(this.$stocksList);
 
-    options.$list.append(this.$stocksListOuter);
-
-    this.indices = [];
-    this.indexSymbols = [];
-    this.loadStocksList();
+    this.$list.append(this.$stocksListOuter);
   }
   getStockSymbols(symbols) {
     // get index quotes
@@ -120,8 +123,51 @@ export class StocksList {
     }
     return symbols;
   }
+  getStockGeoWeighted() {
+    const regions = [
+      ["europe", ["AMS", "BME", "CPH", "EPA", "ETR", "VTX"]],
+      ["uk", ["LON"]],
+      ["amr-n", ["NYSE", "NASDAQ"]],
+      ["china", ["TPE", "HKG", "SHA"]],
+      ["korea", ["KRX"]],
+      ["japan", ["TYO"]],
+      ["australia", ["ASX"]]
+    ];
+
+    const addWeightedItem = (weights, compare, weight) => {
+      const index = weights.findIndex(item => item[0] === compare);
+      if (index < 0) {
+        weights.push([compare, weight]);
+      }
+      else {
+        weights[index][1] += weight;
+      }
+
+      return weights;
+    };
+
+    const exchangeWeights = this.stocks.reduce((exchanges, stock) => {
+      const exchange = stock.symbol.substring(0, stock.symbol.indexOf(":"));
+      const weight = stock.weight / this.stocksTotalWeight;
+
+      return addWeightedItem(exchanges, exchange, weight);
+    }, []);
+
+    const geoWeights = exchangeWeights.reduce((weights, item) => {
+      const region = regions.filter(thisRegion => {
+        return thisRegion[1].indexOf(item[0]) !== -1;
+      });
+      if (region.length === 0) {
+        console.warn("Region undefined for stock exchange", item[0]);
+      }
+
+      return addWeightedItem(weights, region[0][0], item[1]);
+    }, []);
+
+    return geoWeights;
+  }
   loadStocksList() {
-    if (!DO_STOCKS_LIST || this.stocksListLoading) {
+    if (this.stocksListLoading) {
       return;
     }
     this.stocksListLoading = true;
@@ -134,6 +180,7 @@ export class StocksList {
     );
   }
   onStocksListLoaded(res) {
+    this.stocksTotalWeight = res.data.total;
     this.stocks = res.data.stocks.map(stock => {
       return {
         symbol: stock[0],
@@ -146,12 +193,16 @@ export class StocksList {
       };
     });
 
-    this.stocksTotalWeight = res.data.total;
-    this.stocksWeightedChange = null;
+    const stockGeo = this.getStockGeoWeighted();
+    this.worldMap.addWeights(stockGeo);
 
+    this.stocksWeightedChange = null;
     this.stockSymbols = this.getStockSymbols(this.stocks.map(stock => stock.symbol));
-    this.$stocksList.empty();
-    this.loadStockPrices();
+
+    if (STOCKS_GET_PRICES) {
+      this.buildStocksList();
+      this.loadStockPrices();
+    }
   }
   onStocksListError() {
     this.state.error.newMessage("Error loading stocks list!", 2, MSG_TIME_ERROR);

@@ -39,26 +39,9 @@ export class PageList extends Page {
     this.offset = 0;
 
     if (this.drawPie) {
-      this.$graphsOuter = $("<div></div>").addClass("graph-container-outer");
-
-      this.$graphs = $("<div></div>").addClass("graph-container-inner");
-
-      this.$graphToggle = $("<button></button")
-      .addClass("graph-toggle-btn");
-
-      this.$graphsOuter.append(this.$graphToggle);
-
-      this.$graphToggle.on("click", () => {
-        graphHidden = !graphHidden;
-
-        $(document.body).toggleClass("graph-hidden", graphHidden);
-      });
-
-      this.$graphsOuter.append(this.$graphs);
-
-      this.$page.prepend(this.$graphsOuter);
+      this.drawGraphs();
     }
-    else {
+    else if (options.graphHidden) {
       this.$page.addClass("graph-hidden");
     }
 
@@ -67,7 +50,19 @@ export class PageList extends Page {
 
     this.costTotal = 0;
   }
-
+  drawGraphs() {
+    this.$graphsOuter = $("<div></div>").addClass("graph-container-outer");
+    this.$graphs = $("<div></div>").addClass("graph-container-inner");
+    this.$graphToggle = $("<button></button")
+    .addClass("graph-toggle-btn");
+    this.$graphsOuter.append(this.$graphToggle);
+    this.$graphToggle.on("click", () => {
+      graphHidden = !graphHidden;
+      $(document.body).toggleClass("graph-hidden", graphHidden);
+    });
+    this.$graphsOuter.append(this.$graphs);
+    this.$page.prepend(this.$graphsOuter);
+  }
   hookDataAddArgs(args) {
     if (this.offset > 0) {
       args.push(this.offset);
