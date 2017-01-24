@@ -27,19 +27,17 @@ export const SEARCH_SUGGESTION_THROTTLE_TIME = 250;
 export const ANALYSIS_VIEW_WIDTH   = 500;
 export const ANALYSIS_VIEW_HEIGHT  = 500;
 
-export const DO_STOCKS_LIST = true;
-
+export const STOCKS_GET_PRICES = true;
 export const STOCKS_GRAPH_DETAIL = 250;
 export const STOCKS_GRAPH_HEIGHT = 50;
 export const STOCKS_SIDEBAR_WIDTH = 260;
 export const STOCKS_REFRESH_INTERVAL = 6000;
 export const STOCKS_HL_TIME = 7000;
 
-export const GRAPH_FUNDS_PIE_WIDTH = 500;
 export const GRAPH_FUND_ITEM_LINE_WIDTH = 1.5;
 export const GRAPH_FUND_ITEM_TENSION = 0.85;
 export const GRAPH_FUND_HISTORY_WIDTH = 500;
-export const GRAPH_FUND_HISTORY_WIDTH_NARROW = 400;
+export const GRAPH_FUND_HISTORY_WIDTH_NARROW = 500;
 export const GRAPH_FUND_HISTORY_TENSION = 0.65;
 export const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
 export const GRAPH_FUND_HISTORY_LINE_WIDTH = 2;

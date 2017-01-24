@@ -4,7 +4,7 @@
 
 import $ from "../../lib/jquery.min";
 
-import { GRAPH_FUND_HISTORY_WIDTH, DO_STOCKS_LIST } from "const";
+import { GRAPH_FUND_HISTORY_WIDTH } from "const";
 
 import { todayDate } from "misc/date";
 import { formatCurrency } from "misc/format";
@@ -12,6 +12,7 @@ import { arraySum } from "misc/misc";
 
 import { PageList } from "page/list";
 
+import { WorldMap } from "graph/world_map";
 import { GraphFundItem, GraphFundHistory } from "graph/fund";
 import { StocksList } from "page/funds_stocks";
 
@@ -26,6 +27,12 @@ export class PageFunds extends PageList {
 
     this.downColor = [255, 44, 44];
     this.upColor = [0, 230, 18];
+
+    this.drawGraphs();
+
+    // world map graph
+    this.worldMap = new WorldMap();
+    this.$graphs.append(this.worldMap.$elem);
   }
 
   calculateGain(unitsTxt, priceVal, cost) {
@@ -275,9 +282,7 @@ export class PageFunds extends PageList {
         startTime: this.history.startTime
       }, this.api, this.state);
 
-      if (DO_STOCKS_LIST) {
-        this.stocksList = new StocksList({ $list: this.$cont }, this.api, this.state);
-      }
+      this.stocksList = new StocksList({ $list: this.$cont, worldMap: this.worldMap }, this.api, this.state);
     }
   }
 }

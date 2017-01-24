@@ -4,7 +4,7 @@
 
 import $ from "../../lib/jquery.min";
 
-import { GRAPH_FUNDS_PIE_WIDTH, NAV_HANDLE_EVENT } from "const";
+import { NAV_HANDLE_EVENT } from "const";
 
 import { today } from "misc/date";
 import { PageOverview } from "page/overview";
@@ -38,7 +38,8 @@ const pageDef = {
       item: "",
       cost: "0.00"
     },
-    daily: false
+    daily: false,
+    graphHidden: true
   },
   food: {
     page:           "food",
@@ -115,11 +116,7 @@ const pageDefFunds = {
     units:    "0.00",
     cost:     "0.00"
   },
-  daily: false,
-  drawPie: true,
-  pieStretch: 1.2,
-  pieWidth: GRAPH_FUNDS_PIE_WIDTH,
-  pieLabelLength: 13
+  daily: false
 };
 
 function newPageList(api, state, page) {
