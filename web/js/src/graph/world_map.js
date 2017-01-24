@@ -5,11 +5,15 @@
 import $ from "../../lib/jquery.min";
 
 // coefficients for finding score colours
-const Cr = 2;
-const Cg = -30;
-const Cb = -30;
-const c0 = 238;
-const colorScore = (x, C) => c0 * (Math.pow(Math.E, C) - Math.pow(Math.E, C * x)) / (Math.pow(Math.E, C) - 1);
+const c0 = 238 / 255;
+
+const mr = (Math.pow(Math.E, -Math.pow(0.49, 2) / 0.2) - c0) / 0.01;
+const mg = (Math.pow(Math.E, -Math.pow(0.01, 2) / 0.1) - c0) / 0.01;
+const mb = (0.5 * Math.pow(Math.E, -Math.pow(0.01, 2)) - c0) / 0.01;
+
+const cr = x => x < 0.01 ? mr * x + c0 : (x < 0.5 ? Math.pow(Math.E, -Math.pow(x - 0.5, 2) / 0.2) : 1);
+const cg = x => x < 0.01 ? mb * x + c0 : Math.pow(Math.E, -Math.pow(x, 2) / 0.1);
+const cb = x => x < 0.01 ? mg * x + c0 : 0.5 * Math.pow(Math.E, -Math.pow(x - 0.1, 2));
 
 export class WorldMap {
   constructor() {
@@ -67,9 +71,9 @@ export class WorldMap {
   }
   getColor(weight) {
     return "rgb(" + [
-      Math.round(colorScore(weight, Cr), 1),
-      Math.round(colorScore(weight, Cg), 1),
-      Math.round(colorScore(weight, Cb), 1)
+      Math.round(255 * cr(weight), 1),
+      Math.round(255 * cg(weight), 1),
+      Math.round(255 * cb(weight), 1)
     ].join(", ") + ")";
   }
 }
