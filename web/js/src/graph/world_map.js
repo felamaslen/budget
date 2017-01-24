@@ -16,7 +16,7 @@ export class WorldMap {
     this.$elem = $("<div></div>").addClass("graph-container").addClass("graph-world-map");
     this.mapLoaded = false;
     this.regionElems = [];
-    this.regions = [];
+    this.regions = {};
     this.queue = [];
     this.loadMap();
   }
@@ -27,7 +27,13 @@ export class WorldMap {
 
       try {
         this.regionElems = this.$elem.children("svg").children(".world").children();
-        this.regions = Array.from(this.regionElems).map(item => item.classList[0].toString());
+        Array.from(svgRoot.children[0].children).forEach((item, key) => {
+          if (item.classList) {
+            item.classList.forEach(region => {
+              this.regions[region] = key;
+            });
+          }
+        });
 
         this.mapLoaded = true;
         this.processQueue();
@@ -53,10 +59,9 @@ export class WorldMap {
   processItem(weights) {
     // colourise regions based on weights
     weights.forEach(item => {
-      const regionIndex = this.regions.findIndex(region => region === item[0]);
-      if (regionIndex !== -1) {
+      if (this.regions[item[0]]) {
         const color = this.getColor(item[1]);
-        $(this.regionElems[regionIndex]).css("fill", color);
+        $(this.regionElems[this.regions[item[0]]]).css("fill", color);
       }
     });
   }

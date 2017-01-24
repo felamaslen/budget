@@ -124,16 +124,6 @@ export class StocksList {
     return symbols;
   }
   getStockGeoWeighted() {
-    const regions = [
-      ["europe", ["AMS", "BME", "CPH", "EPA", "ETR", "VTX"]],
-      ["uk", ["LON"]],
-      ["amr-n", ["NYSE", "NASDAQ"]],
-      ["china", ["TPE", "HKG", "SHA"]],
-      ["korea", ["KRX"]],
-      ["japan", ["TYO"]],
-      ["australia", ["ASX"]]
-    ];
-
     const addWeightedItem = (weights, compare, weight) => {
       const index = weights.findIndex(item => item[0] === compare);
       if (index < 0) {
@@ -153,18 +143,7 @@ export class StocksList {
       return addWeightedItem(exchanges, exchange, weight);
     }, []);
 
-    const geoWeights = exchangeWeights.reduce((weights, item) => {
-      const region = regions.filter(thisRegion => {
-        return thisRegion[1].indexOf(item[0]) !== -1;
-      });
-      if (region.length === 0) {
-        console.warn("Region undefined for stock exchange", item[0]);
-      }
-
-      return addWeightedItem(weights, region[0][0], item[1]);
-    }, []);
-
-    return geoWeights;
+    return exchangeWeights;
   }
   loadStocksList() {
     if (this.stocksListLoading) {
