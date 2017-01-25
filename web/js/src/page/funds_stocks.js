@@ -256,15 +256,6 @@ export class StocksList {
 
     this.updateStocksOverall(weightedChange);
     this.updateStockList();
-
-    // refresh the prices in 5 seconds
-    if (this.stocksLoadingTimer) {
-      window.clearTimeout(this.stocksLoadingTimer);
-    }
-
-    this.stocksLoadingTimer = window.setTimeout(() => {
-      this.loadStockPrices();
-    }, this.stocksRefreshInterval);
   }
   updateStocksOverall(change) {
     const overallChangeText = (change >= 0 ? "+" : "") +
@@ -371,6 +362,15 @@ export class StocksList {
   }
   onStockPricesRequestComplete() {
     this.stockPricesLoading = false;
+
+    // refresh the prices in 5 seconds
+    if (this.stocksLoadingTimer) {
+      window.clearTimeout(this.stocksLoadingTimer);
+    }
+
+    this.stocksLoadingTimer = window.setTimeout(() => {
+      this.loadStockPrices();
+    }, this.stocksRefreshInterval);
   }
 }
 
