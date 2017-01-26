@@ -5,15 +5,27 @@
 import $ from "../../lib/jquery.min";
 
 // coefficients for finding score colours
-const c0 = 238 / 255;
+const weightColor = (params, x) => {
+  return (params[1] + params[0] + 2 * (params[2] - params[3])) * Math.pow(x, 3) +
+    (3 * (params[3] - params[2]) - 2 * params[0] - params[1]) * Math.pow(x, 2) +
+    params[0] * x +
+    params[2];
+};
 
-const mr = (Math.pow(Math.E, -Math.pow(0.49, 2) / 0.2) - c0) / 0.01;
-const mg = (Math.pow(Math.E, -Math.pow(0.01, 2) / 0.1) - c0) / 0.01;
-const mb = (0.5 * Math.pow(Math.E, -Math.pow(0.01, 2)) - c0) / 0.01;
+const params = {
+  r: [0.21, 0, 0.84, 1],
+  g: [0.21, 0.21, 0.85, 0],
+  b: [2.67, -1.14, 1, 0]
+};
 
-const cr = x => x < 0.01 ? mr * x + c0 : (x < 0.5 ? Math.pow(Math.E, -Math.pow(x - 0.5, 2) / 0.2) : 1);
-const cg = x => x < 0.01 ? mb * x + c0 : Math.pow(Math.E, -Math.pow(x, 2) / 0.1);
-const cb = x => x < 0.01 ? mg * x + c0 : 0.5 * Math.pow(Math.E, -Math.pow(x - 0.1, 2));
+const cr = x => weightColor(params.r, x);
+const cg = x => weightColor(params.g, x);
+const cb = x => weightColor(params.b, x);
+
+const getColor = score => {
+  return "rgb(" + ([cr(score), cg(score), cb(score)]
+  .map(x => Math.max(0, Math.min(255, Math.round(255 * x)))).join(", ")) + ")";
+};
 
 export class WorldMap {
   constructor() {
@@ -64,16 +76,9 @@ export class WorldMap {
     // colourise regions based on weights
     weights.forEach(item => {
       if (this.regions[item[0]]) {
-        const color = this.getColor(item[1]);
+        const color = getColor(item[1]);
         $(this.regionElems[this.regions[item[0]]]).css("fill", color);
       }
     });
-  }
-  getColor(weight) {
-    return "rgb(" + [
-      Math.round(255 * cr(weight), 1),
-      Math.round(255 * cg(weight), 1),
-      Math.round(255 * cb(weight), 1)
-    ].join(", ") + ")";
   }
 }

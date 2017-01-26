@@ -125,24 +125,23 @@ export class StocksList {
     return symbols;
   }
   getStockGeoWeighted() {
-    const addWeightedItem = (weights, compare, weight) => {
-      const index = weights.findIndex(item => item[0] === compare);
-      if (index < 0) {
-        weights.push([compare, weight]);
+    const exchangeWeightsRaw = this.stocks.reduce((exchanges, stock) => {
+      const exchange = stock.symbol.substring(0, stock.symbol.indexOf(":"));
+      const index = exchanges.findIndex(item => item[0] === exchange);
+      if (index === -1) {
+        exchanges.push([exchange, stock.weight]);
       }
       else {
-        weights[index][1] += weight;
+        exchanges[index][1] += stock.weight;
       }
-
-      return weights;
-    };
-
-    const exchangeWeights = this.stocks.reduce((exchanges, stock) => {
-      const exchange = stock.symbol.substring(0, stock.symbol.indexOf(":"));
-      const weight = stock.weight / this.stocksTotalWeight;
-
-      return addWeightedItem(exchanges, exchange, weight);
+      return exchanges;
     }, []);
+
+    const maxWeight = Math.max.apply(null, exchangeWeightsRaw.map(exchange => exchange[1]));
+
+    const exchangeWeights = exchangeWeightsRaw.map(exchange => {
+      return [exchange[0], exchange[1] / maxWeight];
+    });
 
     return exchangeWeights;
   }
