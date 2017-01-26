@@ -149,7 +149,8 @@ class FundScraper(object):
 
         self.fund_data_cache = {'hl': {}}
         self.fund_holdings_rows = []
-        self.new_cache_cid = None
+
+        self.cache = {'queue': [], 'cid': None}
 
         self.ticker = {
             'added': None,
@@ -187,12 +188,19 @@ class FundScraper(object):
 
     def scrape(self, holdings):
         """ do the scraping """
-        total = len(self.funds)
-
         # get saved security tickers
         self.ticker['list'] = get_tickers()
         self.ticker['added'] = False
 
+        # get the data
+        self.scrape_funds(holdings)
+
+        # process the data
+        self.process_scrape(holdings)
+
+    def scrape_funds(self, holdings):
+        """ scrape actual data from the web """
+        total = len(self.funds)
         key = 0
         for (name, uid, _hash, units, cost) in self.funds:
             if not self.switch['quiet']:
@@ -212,6 +220,8 @@ class FundScraper(object):
 
             key += 1
 
+    def process_scrape(self, holdings):
+        """ process and cache scraped and preprocessed data """
         if holdings:
             if self.ticker['added']:
                 save_tickers(self.ticker['list'])
@@ -219,11 +229,23 @@ class FundScraper(object):
             self.save_holdings()
 
         else:
-            if self.new_cache_cid is not None:
+            # add the results to the database
+            if self.switch['verbose']:
+                save_results = raw_input("Cache these results? [Y/n] ")
+
+                if len(save_results) > 0 and save_results != 'y' \
+                        and save_results != 'Y':
+                    print "[WARN]: Results not saved to database"
+                    return
+
+            for (broker, _hash, price, units) in self.cache['queue']:
+                self.add_cache_item(broker, _hash, price, units)
+
+            if self.cache['cid'] is not None:
                 # activate the last cache item, since we are done caching
                 done_query = DB.query("""
                 UPDATE fund_cache_time SET `done` = 1 WHERE `cid` = %s
-                """, [self.new_cache_cid])
+                """, [self.cache['cid']])
 
                 if done_query is False and not self.switch['quiet']:
                     print "[ERROR]: %s" % E_CACHE
@@ -296,7 +318,7 @@ class FundScraper(object):
 
         if price is not None:
             # cache this item
-            self.add_cache_item(broker, _hash, price, units)
+            self.queue_add_cache_item(broker, _hash, price, units)
 
         elif not self.switch['quiet']:
             print "[ERROR]: %s" % E_SCRAPE
@@ -315,6 +337,10 @@ class FundScraper(object):
         self.fund_data_cache[broker][_hash] = data
 
         return data
+
+    def queue_add_cache_item(self, broker, _hash, price, units):
+        """ queues an item to be added to the cache """
+        self.cache['queue'].append([broker, _hash, price, units])
 
     def add_cache_item(self, broker, _hash, price, units):
         """ inserts new item into the latest fund cache """
@@ -354,7 +380,7 @@ class FundScraper(object):
             # cache this value for display in the graph
             cache_query = DB.query("""
             INSERT INTO fund_cache (cid, fid, price, units) VALUES (%s, %s, %s, %s)
-            """, [self.new_cache_cid, fid, price, units])
+            """, [self.cache['cid'], fid, price, units])
 
             if cache_query is False:
                 if not self.switch['quiet']:
@@ -366,7 +392,7 @@ class FundScraper(object):
 
     def insert_new_cid(self):
         """ inserts new item into the fund cache list """
-        if self.new_cache_cid is None:
+        if self.cache['cid'] is None:
             # create a new cache item
             query_new_item = DB.query("""
             INSERT INTO fund_cache_time (`time`, `done`) VALUES (%s, 0)
@@ -377,7 +403,7 @@ class FundScraper(object):
                     print "[ERROR]: %s" % E_DB
                 raise EnvironmentError
 
-            self.new_cache_cid = DB.last_insert_id()
+            self.cache['cid'] = DB.last_insert_id()
 
     def get_top_holdings(self, broker, name, _hash):
         """ gets the top stock holdings on a fund """
