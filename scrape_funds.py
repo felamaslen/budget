@@ -236,6 +236,11 @@ class FundScraper(object):
                 if len(save_results) > 0 and save_results != 'y' \
                         and save_results != 'Y':
                     print "[WARN]: Results not saved to database"
+
+                    new_total = sum([price * units for (_, _, price, units) \
+                            in self.cache['queue']]) / 100
+                    print "Current value: %f" % new_total
+
                     return
 
             for (broker, _hash, price, units) in self.cache['queue']:
