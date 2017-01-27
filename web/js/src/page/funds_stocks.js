@@ -102,6 +102,10 @@ export class StocksList {
     this.loadStocksList();
   }
   buildStocksList() {
+    if (this.$stocksListOuter) {
+      this.$stocksList.empty();
+      return;
+    }
     this.$stocksListOuter = $("<div></div>")
     .addClass("stocks-list");
     this.$stocksList = $("<ul></ul>")
