@@ -66,6 +66,14 @@ class StocksGraph extends LineGraph {
   draw() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
+    this.ctx.beginPath();
+    const y0 = Math.floor(this.pixY(0)) + 0.5;
+    this.ctx.moveTo(0, y0);
+    this.ctx.lineTo(this.width, y0);
+    this.ctx.strokeStyle = COLOR_DARK;
+    this.ctx.stroke();
+    this.ctx.closePath();
+
     if (this.data.length > 1) {
       const profit = this.data[this.data.length - 1] > 0;
       const loss = this.data[this.data.length - 1] < 0;
