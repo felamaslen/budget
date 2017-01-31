@@ -231,15 +231,15 @@ class FundScraper(object):
         else:
             # add the results to the database
             if self.switch['verbose']:
+                new_total = sum([price * units for (_, _, price, units) \
+                        in self.cache['queue']]) / 100
+                print "Current value: %f" % new_total
+
                 save_results = raw_input("Cache these results? [Y/n] ")
 
                 if len(save_results) > 0 and save_results != 'y' \
                         and save_results != 'Y':
                     print "[WARN]: Results not saved to database"
-
-                    new_total = sum([price * units for (_, _, price, units) \
-                            in self.cache['queue']]) / 100
-                    print "Current value: %f" % new_total
 
                     return
 
