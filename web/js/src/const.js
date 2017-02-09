@@ -43,6 +43,9 @@ export const GRAPH_FUND_HISTORY_NUM_TICKS = 10;
 export const GRAPH_FUND_HISTORY_LINE_WIDTH = 2;
 export const GRAPH_FUND_HISTORY_POINT_RADIUS = 3;
 export const GRAPH_FUND_HISTORY_MOVING_AVG = [30, 90];
+export const GRAPH_FUND_HISTORY_MODE_PERCENT = 0;
+export const GRAPH_FUND_HISTORY_MODE_ABSOLUTE = 1;
+export const GRAPH_FUND_HISTORY_MODE_PRICE = 2;
 
 export const GRAPH_BALANCE_NUM_TICKS = 5;
 
@@ -69,7 +72,7 @@ export const COLOR_BALANCE_PREDICTED = "#f00";
 export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 export const COLOR_GRAPH_FUND_LINE = "#000";
 
-export const COLOR_KEY = ["#b21e13", "#ff6500", "#cccb00", "#00cc0b", "#005dcc",
+export const COLOR_KEY = ["#b21e13", "#ff6500", "#7c7c08", "#00cc0b", "#005dcc",
   "#3800cc", "#c000cc"];
 
 export const COLOR_CATEGORY = {
