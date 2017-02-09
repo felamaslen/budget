@@ -269,6 +269,7 @@ export class LineGraph extends Graph {
     const dynamicColor = typeof colors === "function";
     const last = [null, null];
     let color = dynamicColor ? colors(0) : colors[0];
+    this.ctx.strokeStyle = color;
 
     curve.forEach((piece, i) => {
       if (i === this.transition[transitionKey]) {
@@ -346,7 +347,9 @@ export class LineGraph extends Graph {
       this.pixY(p[p.length - 1][1])
     );
 
-    this.ctx.strokeStyle = color;
+    if (dynamicColor) {
+      this.ctx.strokeStyle = color;
+    }
     this.ctx.stroke();
     this.ctx.closePath();
   }
