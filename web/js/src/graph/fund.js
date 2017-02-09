@@ -44,44 +44,11 @@ export class GraphFundItem extends LineGraph {
 
     this.data = options.data;
 
-    this.genColors();
-
     this.defaultWidth = this.width;
     this.defaultHeight = this.height;
 
     this.popout = false;
     this.$canvas.on("click", () => this.togglePopout());
-  }
-  genColors() {
-    const colors = [];
-    const transition = [];
-    const levels = [
-      [0, COLOR_LOSS],
-      [Infinity, COLOR_PROFIT]
-    ];
-
-    if (this.data.length > 1) {
-      let level = levels.findIndex(item => this.data[1][1] < item[0]);
-      if (level > -1) {
-        colors.push(levels[level][1]);
-      }
-
-      this.data.slice(2).forEach((point, key) => {
-        const thisLevel = levels.findIndex(item => point[1] < item[0]);
-
-        if (thisLevel !== level) {
-          level = thisLevel;
-          colors.push(levels[level][1]);
-          transition.push(key);
-        }
-      });
-
-      this.colors = colors;
-      this.transition = transition;
-    }
-    else {
-      this.colors = [COLOR_DARK];
-    }
   }
   togglePopout() {
     // make the graph larger
@@ -135,7 +102,7 @@ export class GraphFundItem extends LineGraph {
     }
 
     // plot data
-    this.drawCubicLine(this.data, this.colors);
+    this.drawCubicLine(this.data, value => value < 0 ? COLOR_LOSS : COLOR_PROFIT);
   }
 }
 

@@ -255,7 +255,6 @@ export class LineGraph extends Graph {
   }
   drawCubicLineCurve(curve, p, colors, width, dashed, dashGap) {
     this.ctx.lineWidth = width;
-    this.ctx.strokeStyle = colors[0];
     this.ctx.beginPath();
 
     let colorKey = 0;
@@ -266,6 +265,10 @@ export class LineGraph extends Graph {
     let dashLength = dashed;
     let x;
     let y;
+
+    const dynamicColor = typeof colors === "function";
+    const last = [null, null];
+    let color = dynamicColor ? colors(0) : colors[0];
 
     curve.forEach((piece, i) => {
       if (i === this.transition[transitionKey]) {
@@ -285,6 +288,23 @@ export class LineGraph extends Graph {
 
       for (const point of piece) {
         if (!dashed || dashToggle) {
+          if (dynamicColor) {
+            const newColor = colors(this.valY(point[1]));
+            if (newColor !== color) {
+              if (moved) {
+                this.ctx.strokeStyle = color;
+                this.ctx.stroke();
+                this.ctx.closePath();
+                this.ctx.beginPath();
+                this.ctx.moveTo(last[0], last[1]);
+              }
+              color = newColor;
+            }
+
+            last[0] = point[0];
+            last[1] = point[1];
+          }
+
           if (!moved) {
             this.ctx.moveTo(point[0], point[1]);
             moved = true;
@@ -321,9 +341,12 @@ export class LineGraph extends Graph {
       this.ctx.beginPath();
       this.ctx.moveTo(x, y);
     }
-    this.ctx.lineTo(this.pixX(p[p.length - 1][0]),
-                    this.pixY(p[p.length - 1][1]));
+    this.ctx.lineTo(
+      this.pixX(p[p.length - 1][0]),
+      this.pixY(p[p.length - 1][1])
+    );
 
+    this.ctx.strokeStyle = color;
     this.ctx.stroke();
     this.ctx.closePath();
   }
