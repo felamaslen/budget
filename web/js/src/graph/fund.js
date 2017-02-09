@@ -512,7 +512,7 @@ export class GraphFundHistory extends LineGraph {
           mainLine ? [30, 90] : 0
         );
 
-        if (mainLine) {
+        if (mainLine && this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
           GRAPH_FUND_HISTORY_MOVING_AVG.forEach((period, key) => {
             const avg = getMovingAverage(this.data[index][1], period);
             const avgFiltered = avg.filter(
