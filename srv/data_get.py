@@ -525,7 +525,7 @@ class FundHistory(Processor):
               INNER JOIN fund_cache fc ON fh.fid = fc.fid
               INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
               GROUP BY c.cid
-              ORDER BY time
+              ORDER BY time, f.item
             ) x
             JOIN (SELECT @cNum := -1, @lastCid := 0) r
           ) ranked
