@@ -121,8 +121,6 @@ export class GraphFundHistory extends LineGraph {
 
     this.toggleMode(GRAPH_FUND_HISTORY_MODE_PERCENT, true);
 
-    this.colorMajor = COLOR_GRAPH_FUND_LINE;
-
     this.$label = $("<div></div>").addClass("label");
     this.$gCont.append(this.$fundSidebar);
     this.buildFundSidebar();
