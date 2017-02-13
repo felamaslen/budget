@@ -500,25 +500,21 @@ export class GraphFundHistory extends LineGraph {
     // plot past data
     if (this.dataVisible) {
       const mainOnly = this.dataVisible.length === 1;
-      const mainColor = mainOnly ? this.dataVisible[0][0] : COLOR_LIGHT_GREY;
 
       this.dataVisible.forEach((line, index) => {
-        const mainLine = index === mainIndex && this.fundLines[0] && this.mode !== GRAPH_FUND_HISTORY_MODE_PRICE;
+        const mainLine = index === mainIndex && this.fundLines[0] &&
+          this.mode !== GRAPH_FUND_HISTORY_MODE_PRICE;
 
         this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
-        this.drawCubicLine(
-          line[1],
-          [mainLine ? mainColor : line[0]],
-          mainLine ? [30, 90] : 0
-        );
+        this.drawCubicLine(line[1], [line[0]]);
 
-        if (mainLine && this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
+        if (mainLine && mainOnly && this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
           GRAPH_FUND_HISTORY_MOVING_AVG.forEach((period, key) => {
             const avg = getMovingAverage(this.data[index][1], period);
             const avgFiltered = avg.filter(
               (point, pointKey) => this.itemInRange(avg, pointKey));
             const averageCurve = this.getSpline(avgFiltered);
-            this.drawCubicLineCurve(averageCurve, avg, [mainColor], 1, 5 * (2 * key + 1), 5);
+            this.drawCubicLineCurve(averageCurve, avg, [line[0]], 1, 5 * (2 * key + 1), 5);
           });
         }
       });
