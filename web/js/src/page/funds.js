@@ -152,7 +152,7 @@ export class PageFunds extends PageList {
       const changedValues = historyWithFund.map(item => item[1][fundIndex])
       .filter(value => value !== lastValue).reverse().slice(1);
       if (changedValues.length > 0) {
-        lastChange = (lastValue - changedValues[0]) / changedValues[0];
+        lastChange = (lastValue[0] - changedValues[0]) / changedValues[0];
       }
 
       const fundGraph = new GraphFundItem({
