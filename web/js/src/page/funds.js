@@ -7,7 +7,7 @@ import $ from "../../lib/jquery.min";
 import { GRAPH_FUND_HISTORY_WIDTH } from "const";
 
 import { todayDate } from "misc/date";
-import { formatCurrency } from "misc/format";
+import { formatCurrency, formatAge } from "misc/format";
 import { arraySum } from "misc/misc";
 
 import { PageList } from "page/list";
@@ -251,14 +251,10 @@ export class PageFunds extends PageList {
       const valueTime = this.history.startTime +
         this.history.history[this.history.history.length - 1][0];
 
-      const ageHours = Math.round(
-        (todayDate.getTime() - valueTime * 1000) / 3600000
-      );
-
-      const ago = ageHours + " hour" + (ageHours === 1 ? "" : "s") + " ago";
+      const cacheAge = formatAge((todayDate.getTime() - valueTime * 1000) / 1000);
 
       this.$gainInfo.html(
-        "Current value (" + ago + "): " +
+        "Current value (" + cacheAge + "): " +
           formatCurrency(lastValue)
       );
 
