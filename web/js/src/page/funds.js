@@ -137,6 +137,7 @@ export class PageFunds extends PageList {
     const $graph = $("<div></div>").addClass("fund-graph-cont");
 
     const fundIndex = this.history.funds.indexOf(newData.i);
+
     if (fundIndex > -1) {
       const historyWithFund = this.history.history.filter(
         item => item[1].length > fundIndex);
@@ -152,7 +153,7 @@ export class PageFunds extends PageList {
       const changedValues = historyWithFund.map(item => item[1][fundIndex])
       .filter(value => value !== lastValue).reverse().slice(1);
       if (changedValues.length > 0) {
-        lastChange = (lastValue[0] - changedValues[0]) / changedValues[0];
+        lastChange = (lastValue[0] - changedValues[0][0]) / changedValues[0][0];
       }
 
       const fundGraph = new GraphFundItem({
