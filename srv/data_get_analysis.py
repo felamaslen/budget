@@ -8,8 +8,6 @@ from srv.api_data_methods import Processor
 from srv.misc import strng
 from srv.config import E_NO_PARAMS
 
-NOW = datetime.now()
-
 def get_category_column(category, grouping):
     """ gets database column corresponding to 'category' type """
     group = None
@@ -35,7 +33,7 @@ def get_category_column(category, grouping):
 
     return group
 
-def period_condition_weekly(index):
+def period_condition_weekly(NOW, index):
     """ database query for weekly period """
     t_0 = NOW - timedelta(days=NOW.weekday()) - timedelta(weeks=index)
     t_1 = t_0 + timedelta(weeks=1)
@@ -58,7 +56,7 @@ def period_condition_weekly(index):
 
     return condition, condition_args, description
 
-def period_condition_monthly(index):
+def period_condition_monthly(NOW, index):
     """ database query for monthly period """
     year = int(NOW.year - ceil(float(index + 1 - NOW.month) / 12))
 
@@ -78,7 +76,7 @@ def period_condition_monthly(index):
 
     return condition, condition_args, description
 
-def period_condition_yearly(index):
+def period_condition_yearly(NOW, index):
     """ database query for yearly period """
     year = NOW.year - index
 
@@ -88,16 +86,16 @@ def period_condition_yearly(index):
 
     return condition, condition_args, description
 
-def period_condition(period, index):
+def period_condition(NOW, period, index):
     """ produces a database query condition string from parameters """
     if period == 'week':
-        condition, args, desc = period_condition_weekly(index)
+        condition, args, desc = period_condition_weekly(NOW, index)
 
     elif period == 'month':
-        condition, args, desc = period_condition_monthly(index)
+        condition, args, desc = period_condition_monthly(NOW, index)
 
     elif period == 'year':
-        condition, args, desc = period_condition_yearly(index)
+        condition, args, desc = period_condition_yearly(NOW, index)
 
     else:
         return None
@@ -142,7 +140,9 @@ class DataAnalysis(Processor):
 
     def process(self):
         """ get the query to execute """
-        self.condition = period_condition(self.param['period'], \
+        NOW = datetime.now()
+
+        self.condition = period_condition(NOW, self.param['period'], \
                 self.param['index'])
 
         self.valid_params = self.validate_task(self.param['period'], \
