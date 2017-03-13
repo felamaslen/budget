@@ -61,8 +61,8 @@ class StocksGraph extends LineGraph {
       this.timeData.splice(1 + (this.deleteKey++ % (STOCKS_GRAPH_DETAIL - 2)), 1);
     }
     this.data = this.timeData.map(item => item[1]);
-    const newMin = Math.min(-0.01, Math.min.apply(null, this.data));
-    const newMax = Math.max(0.01, Math.max.apply(null, this.data));
+    const newMin = Math.min(-0.00001, Math.min.apply(null, this.data));
+    const newMax = Math.max(0.00001, Math.max.apply(null, this.data));
     this.setRange([0, this.data.length - 1, newMin, newMax]);
 
     this.draw();
