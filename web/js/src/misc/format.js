@@ -4,25 +4,25 @@
 
 import { YMD } from "misc/date";
 
-export function formatAge(seconds) {
+export function formatAge(seconds, shortAbbr) {
   const measures = [
-    [1,           "second"],
-    [60,          "minute"],
-    [3600,        "hour"],
-    [86400,       "day"],
-    [86400 * 30,  "month"],
-    [86400 * 365, "year"]
+    [1,           "s", "second"],
+    [60,          "m", "minute"],
+    [3600,        "h", "hour"],
+    [86400,       "d", "day"],
+    [86400 * 30,  "M", "month"],
+    [86400 * 365, "Y", "year"]
   ];
-
+  const secondsNormalised = Math.max(seconds, 1);
   const measure = measures.reverse().filter(item => {
-    return seconds >= item[0];
+    return secondsNormalised >= item[0];
   })[0];
 
   const rounded = Math.round(seconds / measure[0]);
+  const plural = !shortAbbr ? (rounded === 1 ? "" : "s") : "";
+  const units = measure[shortAbbr ? 1 : 2] + plural;
 
-  const units = measure[1] + (rounded === 1 ? "" : "s");
-
-  return rounded + " " + units + " ago";
+  return shortAbbr ? rounded + units : `${rounded} ${units} ago`;
 }
 export function numberFormat(number) {
   // adds commas to a long number
