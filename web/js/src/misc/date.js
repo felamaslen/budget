@@ -185,7 +185,7 @@ class TimeTickWeekMonth extends TimeTickDayWeek {
     let extra = null;
     const obj = new Date(t);
     const date = obj.getDate();
-    if (date < 7) {
+    if (date <= 7) {
       // get the exact start of the month
       const year = obj.getFullYear();
       const month = obj.getMonth();
