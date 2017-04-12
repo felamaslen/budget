@@ -2,6 +2,7 @@
 
 from math import ceil, pi
 
+import time
 from datetime import datetime
 
 from srv.api_data_methods import Processor
@@ -311,7 +312,6 @@ class Funds(ListData):
         super(Funds, self).__init__(db, uid, 'funds')
 
         self.cache = None
-
         self.history = history
 
         self.get_cache_latest()
@@ -329,8 +329,7 @@ class Funds(ListData):
 
         if self.history:
             # get history as well, for graphs
-            history_processor = FundHistory(self.dbx, self.uid, True)
-
+            history_processor = FundHistory(self.dbx, self.uid, self.history)
             history_processor.process()
 
             self.data['history'] = history_processor.data
@@ -392,7 +391,7 @@ def fund_history_deep(query):
         'key': -1
     }
 
-    time = None
+    the_time = None
 
     results = {
         'funds': [],
@@ -401,15 +400,15 @@ def fund_history_deep(query):
 
     fid = {'keys': {}, 'num': 0, 'units': []}
 
-    for (items, fids, time, prices, units, _, _) in query:
+    for (items, fids, the_time, prices, units, _, _) in query:
         items = items.split(',')
         fids = fids.split(',')
         prices = prices.split(',')
         units = units.split(',')
 
-        time = int(time)
+        the_time = int(the_time)
         if times['start'] is None:
-            times['start'] = time
+            times['start'] = the_time
 
         row = [] if fid['num'] == 0 else [[0, 0]] * fid['num']
         for j, item in enumerate(items):
@@ -440,9 +439,9 @@ def fund_history_deep(query):
             else:
                 row[fid['keys'][this_fid]] = value
 
-        results['rows'].append([time - times['start'], row])
+        results['rows'].append([the_time - times['start'], row])
 
-    times['total'] = 0 if times['start'] is None else time - times['start']
+    times['total'] = 0 if times['start'] is None else the_time - times['start']
 
     return results['funds'], results['rows'], times['start'], times['total']
 
@@ -451,50 +450,72 @@ def fund_history_shallow(query):
     results = []
 
     start_time = None
-    time = None
+    the_time = None
 
     total_time = 0
 
-    for (time, value, _, _) in query:
-        time = int(time)
+    for (the_time, value, _, _) in query:
+        the_time = int(the_time)
         value = int(round(value))
 
         if start_time is None:
-            start_time = time
+            start_time = the_time
 
-        results.append([time - start_time, value])
+        results.append([the_time - start_time, value])
 
-    total_time = time - start_time
+    total_time = the_time - start_time
 
     return results, start_time, total_time
 
 class FundHistory(Processor):
     """ get fund value history for graph """
-    def __init__(self, db, uid, deep):
+    def __init__(self, db, uid, options):
         super(FundHistory, self).__init__(db, uid)
 
         self.num_results_display = GRAPH_FUND_HISTORY_DETAIL
 
-        self.deep = deep
+        self.options = options
 
     def process(self):
-        if self.deep: # retrieve individual fund values
+        if self.options['deep']: # retrieve individual fund values
             return self.process_deep()
 
         return self.process_shallow()
 
+    def get_min_time_cond(self):
+        """ get a query condition for limiting results by age """
+        min_time = 0
+        if self.options['period']:
+            now = int(time.time())
+
+            if self.options['period'] == 'decade':
+                min_time = now - 3600 * 24 * 365 * 10
+            elif self.options['period'] == 'year':
+                min_time = now - 3600 * 24 * 365 * 2
+            elif self.options['period'] == 'month':
+                min_time = now - 3600 * 24 * 30 * 6
+            elif self.options['period'] == 'week':
+                min_time = now - 3600 * 24 * 7 * 2
+
+        min_time_cond = "c.time > %d" % min_time
+
+        return min_time_cond
+
     def process_deep(self):
         """ get full fund history with individual funds """
+
+        min_time_cond = self.get_min_time_cond()
+
         num_results_query = self.dbx.query("""
         SELECT COUNT(*) AS num_results FROM (
         SELECT c.cid
         FROM funds f
         INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
         INNER JOIN fund_cache fc ON fh.fid = fc.fid
-        INNER JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
+        INNER JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1 AND %s
         WHERE f.uid = %d
         GROUP BY c.cid
-        ) results""" % self.uid, [FUND_SALT])
+        ) results""" % (min_time_cond, self.uid), [FUND_SALT])
 
         if num_results_query is False:
             return False
@@ -523,7 +544,7 @@ class FundHistory(Processor):
               FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
               INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
               INNER JOIN fund_cache fc ON fh.fid = fc.fid
-              INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+              INNER JOIN fund_cache_time c ON c.done = 1 AND %s AND c.cid = fc.cid
               GROUP BY c.cid
               ORDER BY time, f.item
             ) x
@@ -532,7 +553,7 @@ class FundHistory(Processor):
         ) list
         WHERE period = 0 OR cNum = %d""" % (\
                 num_results, self.num_results_display, \
-                self.uid, num_results - 1), \
+                self.uid, min_time_cond, num_results - 1), \
                 [FUND_SALT])
 
         if query is False:
@@ -549,15 +570,18 @@ class FundHistory(Processor):
 
     def process_shallow(self):
         """ get overall fund history data """
+
+        min_time_cond = self.get_min_time_cond()
+
         num_results_query = self.dbx.query("""
         SELECT COUNT(*) AS num_results FROM (
             SELECT c.cid
             FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
             INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
             INNER JOIN fund_cache fc ON fh.fid = fc.fid
-            INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+            INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid AND %s
             GROUP BY fc.cid
-        ) results""" % (self.uid, FUND_SALT), [])
+        ) results""" % (self.uid, FUND_SALT, min_time_cond), [])
 
         if num_results_query is False:
             return False
@@ -582,7 +606,7 @@ class FundHistory(Processor):
                 FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
                 INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
                 INNER JOIN fund_cache fc ON fh.fid = fc.fid
-                INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+                INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid AND %s
                 GROUP BY fc.cid
                 ORDER BY c.time DESC
             ) results
@@ -591,7 +615,7 @@ class FundHistory(Processor):
           ) list
           WHERE period = 0 OR rownum = %d
         """ % (num_results, self.num_results_display - 1, \
-                self.uid, FUND_SALT, num_results - 1), [])
+                self.uid, FUND_SALT, min_time_cond, num_results - 1), [])
 
         if query is False:
             return False

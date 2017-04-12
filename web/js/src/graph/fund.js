@@ -13,6 +13,7 @@ import {
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
   GRAPH_FUND_HISTORY_MOVING_AVG, GRAPH_FUND_HISTORY_MODE_PERCENT,
   GRAPH_FUND_HISTORY_MODE_ABSOLUTE, GRAPH_FUND_HISTORY_MODE_PRICE,
+  MSG_TIME_ERROR,
   FONT_AXIS_LABEL
 } from "const";
 
@@ -111,13 +112,19 @@ export class GraphFundHistory extends LineGraph {
   constructor(options, api, state) {
     super(options, api, state);
 
-    this.tension = GRAPH_FUND_HISTORY_TENSION;
     this.raw = options.data;
+    this.startTime = options.startTime;
+
+    this.tension = GRAPH_FUND_HISTORY_TENSION;
     this.funds = options.funds;
     this.fundLines = this.funds.map(() => false);
     this.fundLines.unshift(true); // overall line
-    this.startTime = options.startTime;
     this.hlPoint = [-1, -1];
+
+    this.setRangeValues();
+
+    this.period = null;
+    this.updatingPeriod = false;
 
     this.toggleMode(GRAPH_FUND_HISTORY_MODE_PERCENT, true);
 
@@ -153,8 +160,74 @@ export class GraphFundHistory extends LineGraph {
     .trigger();
   }
 
+  setRangeValues() {
+    const minX = 0;
+    const maxX = new Date().getTime() / 1000 - this.startTime;
+
+    const minY = this.raw.reduce((last, item) => {
+      return item[2] < last ? item[2] : last;
+    }, Infinity);
+
+    const maxY = this.raw.reduce((last, item) => {
+      return item[2] > last ? item[2] : last;
+    }, -Infinity);
+
+    this.originalRange = [minX, maxX, minY, maxY];
+    this.setRange([minX, maxX, minY, maxY]);
+  }
+
+  updatePeriod() {
+    if (this.updatingPeriod) {
+      return;
+    }
+    this.updatingPeriod = true;
+    this.api.request(
+      "data/fund_history", "GET", {
+        deep: true,
+        period: this.period
+      },
+      res => this.onPeriodUpdate(res),
+      () => this.onPeriodError(),
+      () => this.onPeriodRequestComplete()
+    );
+  }
+
+  onPeriodUpdate(res) {
+    this.raw = res.data.history;
+    this.startTime = res.data.startTime;
+    this.setRangeValues();
+    this.toggleMode(this.mode);
+  }
+  onPeriodError() {
+    this.state.error.newMessage("Error fetching data! (Server error)", 2, MSG_TIME_ERROR);
+  }
+  onPeriodRequestComplete() {
+    this.$periodSelector.attr("disabled", false);
+    this.updatingPeriod = false;
+  }
+
   buildFundSidebar() {
     const $fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
+
+    this.$periodSelector = $("<select></select>");
+    const periods = [
+      [0, "None"],
+      ["week", "2 weeks"],
+      ["month", "6 months"],
+      ["year", "2 years"],
+      ["decade", "10 years"]
+    ];
+    periods.forEach(item => this.$periodSelector.append(
+      $(`<option value="${item[0]}">${item[1]}</option>`))
+    );
+
+    this.$periodSelector.on("change", evt => {
+      this.period = evt.target.value;
+      $(evt.target).attr("disabled", true);
+      this.updatePeriod();
+    });
+
+    $fundSidebar.append($("<li></li>").append(this.$periodSelector));
 
     const items = this.funds;
     items.unshift("Overall");
