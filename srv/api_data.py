@@ -36,10 +36,18 @@ class Retrieve(Response):
         elif arg == 'overview':
             proc = Overview(self.dbx, self.uid)
 
-        elif arg == 'funds':
-            history = 'history' in self.args
+        elif arg in ('funds', 'fund_history'):
+            deep = 'deep' in self.args
+            period = self.args['period'] if 'period' in self.args else None
+            history = {'deep': deep, 'period': period}
 
-            proc = Funds(self.dbx, self.uid, history)
+            if arg == 'funds':
+                history_arg = history if 'history' in self.args else False
+
+                proc = Funds(self.dbx, self.uid, history_arg)
+
+            else:
+                proc = FundHistory(self.dbx, self.uid, history)
 
         elif arg in LIST_CATEGORIES:
             offset = self.task.popleft() if len(self.task) > 0 else 0
@@ -53,10 +61,6 @@ class Retrieve(Response):
                 offset = 0
 
             proc = ListData(self.dbx, self.uid, arg, offset)
-
-        elif arg == 'fund_history':
-            deep = 'deep' in self.args
-            proc = FundHistory(self.dbx, self.uid, deep)
 
         elif arg == 'pie':
             proc = Pie(self.dbx, self.uid, self.task)

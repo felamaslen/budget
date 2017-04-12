@@ -20,7 +20,7 @@ export class PageFunds extends PageList {
   constructor(options, api, state) {
     super(options, api, state);
 
-    this.query = { history: 1 }; // tell api to get history data
+    this.query = { history: true, deep: true }; // tell api to get history data
 
     this.minDown = 0;
     this.maxUp = 0;
@@ -218,14 +218,6 @@ export class PageFunds extends PageList {
   hookDataLoadedAfterRender(callback, res) {
     super.hookDataLoadedAfterRender(callback, res);
 
-    // get minimum value
-    const minValue = this.history.history.reduce((last, item) => {
-      return item[2] < last ? item[2] : last;
-    }, Infinity);
-    const maxValue = this.history.history.reduce((last, item) => {
-      return item[2] > last ? item[2] : last;
-    }, -Infinity);
-
     if (this.history.history.length > 0) {
       // calculate latest value
       const units = [];
@@ -271,12 +263,9 @@ export class PageFunds extends PageList {
         title:  "fund-history",
         data:   this.history.history,
         funds:  this.history.funds,
-        range:  [
-          0, new Date().getTime() / 1000 - this.history.startTime,
-          minValue, maxValue
-        ],
         pad:    [24, 0, 0, 0],
-        startTime: this.history.startTime
+        startTime: this.history.startTime,
+        range: [0, 0, 0, 0]
       }, this.api, this.state);
 
       this.stocksList = new StocksList({ $list: this.$cont, worldMap: this.worldMap }, this.api, this.state);
