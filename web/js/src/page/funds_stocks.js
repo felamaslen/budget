@@ -49,13 +49,12 @@ class StocksGraph extends LineGraph {
       lineWidth: 1
     }, api, state);
 
-    this.timeData = [];
     this.data = [];
     this.deleteKey = 0;
   }
   getTimeScale() {
     const ticks = timeSeriesTicks(
-      this.timeData[0][0], this.timeData[this.timeData.length - 1][0]
+      this.data[0][0], this.data[this.data.length - 1][0]
     );
 
     if (!ticks) {
@@ -72,15 +71,15 @@ class StocksGraph extends LineGraph {
   }
   update(value) {
     // updates graph with latest value
-    this.timeData.push([new Date().getTime() / 1000, value]);
-    while (this.timeData.length > STOCKS_GRAPH_DETAIL) {
-      this.timeData.splice(1 + (this.deleteKey++ % (STOCKS_GRAPH_DETAIL - 2)), 1);
+    this.data.push([new Date().getTime() / 1000, value]);
+    while (this.data.length > STOCKS_GRAPH_DETAIL) {
+      this.data.splice(1 + (this.deleteKey++ % (STOCKS_GRAPH_DETAIL - 2)), 1);
     }
-    this.data = this.timeData.map(item => item[1]);
-    const newMin = Math.min(-0.00001, Math.min.apply(null, this.data));
-    const newMax = Math.max(0.00001, Math.max.apply(null, this.data));
+    const values = this.data.map(item => item[1]);
+    const newMin = Math.min(-0.00001, Math.min.apply(null, values));
+    const newMax = Math.max(0.00001, Math.max.apply(null, values));
     this.setRange(
-      [this.timeData[0][0], this.timeData[this.timeData.length - 1][0], newMin, newMax]
+      [this.data[0][0], this.data[this.data.length - 1][0], newMin, newMax]
     );
 
     this.draw();
@@ -91,7 +90,6 @@ class StocksGraph extends LineGraph {
     const timeTicks = this.getTimeScale();
     const tickSize = 10;
     const tickAngle = -Math.PI / 6;
-    // console.debug(timeTicks.map(tick => tick.pix).join(", "));
     timeTicks.forEach(tick => {
       const thisTickSize = tickSize * 0.5 * (tick.major + 1);
 
@@ -120,10 +118,10 @@ class StocksGraph extends LineGraph {
     this.ctx.closePath();
 
     if (this.data.length > 1) {
-      const profit = this.data[this.data.length - 1] > 0;
-      const loss = this.data[this.data.length - 1] < 0;
+      const profit = this.data[this.data.length - 1][1] > 0;
+      const loss = this.data[this.data.length - 1][1] < 0;
 
-      this.drawLine(this.timeData, profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK));
+      this.drawLine(this.data, profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK));
     }
   }
 }

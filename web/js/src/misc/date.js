@@ -153,7 +153,7 @@ class TimeTickMinuteHour extends TimeTick {
   }
   next(i, t) {
     const major = pmod(i, 2) === 0 ? (pmod(i, 48) === 0 ? 2 : 1) : 0;
-    const label = pmod(i, 6) === 0 ? this.label(t) : null;
+    const label = pmod(i, 2) === 0 ? this.label(t) : null;
     const nt = t - this.tick;
 
     return { t, nt, major, label };
@@ -297,7 +297,7 @@ export const timeSeriesTicks = (begin, end) => {
   else if (range < 3600) {
     ticker = new TimeTickSecondMinute2();
   }
-  else if (range < 86400 * 1.5) {
+  else if (range < 86400 * 0.6) {
     ticker = new TimeTickMinuteHour();
   }
   else if (range < 86400 * 8) {
