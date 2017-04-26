@@ -8,14 +8,13 @@ import {
   STOCKS_GET_PRICES, STOCKS_REFRESH_INTERVAL, STOCK_INDICES,
   STOCKS_HL_TIME, STOCKS_GRAPH_DETAIL,
   STOCKS_GRAPH_HEIGHT, STOCKS_SIDEBAR_WIDTH,
-  COLOR_PROFIT, COLOR_LOSS, COLOR_DARK, COLOR_LIGHT_GREY,
-  MSG_TIME_ERROR,
-  FONT_AXIS_LABEL
+  COLOR_PROFIT, COLOR_LOSS, COLOR_DARK,
+  MSG_TIME_ERROR
 } from "const";
 
 import { LineGraph } from "graph/graph";
 import { GoogleFinanceAPI } from "api/api";
-import { formatAge } from "misc/format";
+import { timeSeriesTicks } from "misc/date";
 
 const finance = new GoogleFinanceAPI();
 
@@ -54,21 +53,63 @@ class StocksGraph extends LineGraph {
     this.data = [];
     this.deleteKey = 0;
   }
+  getTimeScale() {
+    const ticks = timeSeriesTicks(
+      this.timeData[0][0], this.timeData[this.timeData.length - 1][0]
+    );
+
+    if (!ticks) {
+      return [];
+    }
+
+    return ticks.map(tick => {
+      return {
+        major: tick.major,
+        pix: Math.floor(this.pixX(tick.t)) + 0.5,
+        text: tick.label || null
+      };
+    });
+  }
   update(value) {
     // updates graph with latest value
-    this.timeData.push([new Date().getTime(), value]);
+    this.timeData.push([new Date().getTime() / 1000, value]);
     while (this.timeData.length > STOCKS_GRAPH_DETAIL) {
       this.timeData.splice(1 + (this.deleteKey++ % (STOCKS_GRAPH_DETAIL - 2)), 1);
     }
     this.data = this.timeData.map(item => item[1]);
     const newMin = Math.min(-0.00001, Math.min.apply(null, this.data));
     const newMax = Math.max(0.00001, Math.max.apply(null, this.data));
-    this.setRange([0, this.data.length - 1, newMin, newMax]);
+    this.setRange(
+      [this.timeData[0][0], this.timeData[this.timeData.length - 1][0], newMin, newMax]
+    );
 
     this.draw();
   }
   draw() {
     this.ctx.clearRect(0, 0, this.width, this.height);
+
+    const timeTicks = this.getTimeScale();
+    const tickSize = 10;
+    const tickAngle = -Math.PI / 6;
+    // console.debug(timeTicks.map(tick => tick.pix).join(", "));
+    timeTicks.forEach(tick => {
+      const thisTickSize = tickSize * 0.5 * (tick.major + 1);
+
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = COLOR_DARK;
+      this.ctx.moveTo(tick.pix, this.height);
+      this.ctx.lineTo(tick.pix, this.height - thisTickSize);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      if (tick.text) {
+        this.ctx.save();
+        this.ctx.translate(tick.pix, this.height - thisTickSize);
+        this.ctx.rotate(tickAngle);
+        this.ctx.fillText(tick.text, 0, 0);
+        this.ctx.restore();
+      }
+    });
 
     this.ctx.beginPath();
     const y0 = Math.floor(this.pixY(0)) + 0.5;
@@ -82,14 +123,8 @@ class StocksGraph extends LineGraph {
       const profit = this.data[this.data.length - 1] > 0;
       const loss = this.data[this.data.length - 1] < 0;
 
-      const line = this.data.map((value, key) => [key, value]);
-      this.drawLine(line, profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK));
+      this.drawLine(this.timeData, profit ? COLOR_PROFIT : (loss ? COLOR_LOSS : COLOR_DARK));
     }
-
-    const age = formatAge((new Date().getTime() - this.timeData[0][0]) / 1000, true);
-    this.ctx.font = FONT_AXIS_LABEL;
-    this.ctx.fillStyle = COLOR_LIGHT_GREY;
-    this.ctx.fillText(age, 10, this.height - 10);
   }
 }
 
