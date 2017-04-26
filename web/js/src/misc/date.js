@@ -43,7 +43,7 @@ export const today = new YMD(
   todayDate.getDate()
 );
 
-class TimeTickDayWeek {
+class TimeTick {
   constructor() {
     this.tick = 86400;
     this.major = 7;
@@ -106,7 +106,12 @@ class TimeTickDayWeek {
     return ticks;
   }
 }
-class TimeTickHourDay extends TimeTickDayWeek {
+class TimeTickDayWeek extends TimeTick {
+  constructor() {
+    super();
+  }
+}
+class TimeTickHourDay extends TimeTick {
   constructor() {
     super();
     this.tick = 3600 * 3;
@@ -127,7 +132,7 @@ class TimeTickHourDay extends TimeTickDayWeek {
     return days[new Date(t).getDay()];
   }
 }
-class TimeTickMinuteHour extends TimeTickDayWeek {
+class TimeTickMinuteHour extends TimeTick {
   constructor() {
     super();
     this.tick = 1800000;
@@ -159,7 +164,56 @@ class TimeTickMinuteHour extends TimeTickDayWeek {
     return hour === 0 ? days[obj.getDay()] : ((hour + 11) % 12 + 1) + (hour < 12 ? "am" : "pm");
   }
 }
-class TimeTickWeekMonth extends TimeTickDayWeek {
+class TimeTickSecondMinute extends TimeTick {
+  constructor() {
+    super();
+    this.tick = 30;
+    this.major = 60;
+  }
+  getIndex(obj) {
+    return obj.getSeconds();
+  }
+  start(obj) {
+    const time = Math.floor(obj.getTime() / 1000 / this.tick) * 1000 * this.tick;
+    const index = this.getIndex(obj) % this.major;
+    return { time, index };
+  }
+  next(i, t) {
+    const nt = t - this.tick * 1000;
+    const major = this.getIndex(new Date(t)) % this.major === 0 ? 2 : 0;
+    const label = major ? this.label(t) : null;
+
+    return { t, nt, major, label };
+  }
+  label(t) {
+    const obj = new Date(t);
+
+    let hour = obj.getHours();
+    if (hour < 10) {
+      hour = `0${hour}`;
+    }
+
+    let minute = obj.getMinutes();
+    if (minute < 10) {
+      minute = `0${minute}`;
+    }
+
+    return `${hour}:${minute}`;
+  }
+}
+class TimeTickSecondMinute2 extends TimeTickSecondMinute {
+  constructor() {
+    super();
+    this.tick = 60;
+    this.major = 600;
+  }
+  getIndex(obj) {
+    const seconds = obj.getSeconds();
+    const minutes = obj.getMinutes();
+    return (seconds + minutes * 60);
+  }
+}
+class TimeTickWeekMonth extends TimeTick {
   constructor() {
     super();
     this.tick = 86400 * 7;
@@ -198,7 +252,7 @@ class TimeTickWeekMonth extends TimeTickDayWeek {
     return { t, nt, major: 0, extra };
   }
 }
-class TimeTickMonthYear extends TimeTickDayWeek {
+class TimeTickMonthYear extends TimeTick {
   constructor() {
     super();
     this.major = 12;
@@ -237,8 +291,11 @@ export const timeSeriesTicks = (begin, end) => {
   let ticker;
 
   // determine the tick processor to use
-  if (range < 3600) {
-    return null;
+  if (range < 600) {
+    ticker = new TimeTickSecondMinute();
+  }
+  else if (range < 3600) {
+    ticker = new TimeTickSecondMinute2();
   }
   else if (range < 86400 * 1.5) {
     ticker = new TimeTickMinuteHour();
