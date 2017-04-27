@@ -259,7 +259,7 @@ export class StocksList {
 
   onStockPricesLoaded(res) {
     let badStocks = 0;
-    let weightedChange = 0;
+    let weightedChange = null;
 
     for (const stock of res) {
       const symbol  = stock.e + ":" + stock.t;
@@ -290,13 +290,14 @@ export class StocksList {
           badStocks++;
         }
         else {
+          if (weightedChange === null) {
+            weightedChange = 0;
+          }
           this.stocks[index] = processStockChange(stock, this.stocks[index]);
           weightedChange += this.stocks[index].weight * this.stocks[index].change;
         }
       }
     }
-
-    weightedChange /= this.stocksTotalWeight;
 
     if (badStocks > 0) {
       this.state.error.newMessage(
@@ -307,7 +308,11 @@ export class StocksList {
       return;
     }
 
-    this.updateStocksOverall(weightedChange);
+    if (weightedChange !== null) {
+      weightedChange /= this.stocksTotalWeight;
+      this.updateStocksOverall(weightedChange);
+    }
+
     this.updateStockList();
   }
   updateStocksOverall(change) {
