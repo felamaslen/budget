@@ -21,7 +21,6 @@ export class PageOverview extends Page {
     super({ page: "overview" }, api, state);
 
     this.categories = [
-      "funds",
       "bills",
       "food", "general", "holiday", "social",
       "in", "out", "net",
