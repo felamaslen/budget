@@ -232,15 +232,12 @@ export class GraphBalance extends LineGraph {
 export class GraphSpend extends LineGraph {
   constructor(options) {
     super(options);
-
-    this.tension = 1;
-
+    this.tension = 1; // for graph interpolator
     this.yearMonths = options.yearMonths;
-
+    this.currentYearMonthKey = (12 * options.currentYear + options.currentMonth) -
+      (12 * this.yearMonths[0][0] + this.yearMonths[0][1]);
     this.categories = ["bills", "food", "general", "holiday", "social"];
-
     this.textColors = COLOR_CATEGORY;
-
     this.colors = {};
 
     for (const category of this.categories) {
@@ -324,6 +321,16 @@ export class GraphSpend extends LineGraph {
       );
     });
 
+    // draw rectangle over area which is predicted based on the past
+    const future0 = this.pixX(this.currentYearMonthKey);
+    const future1 = this.pixY(this.maxY);
+    const futureW = this.pixX(this.maxX) - future0;
+    const futureH = this.pixY(0) - future1;
+    this.ctx.beginPath();
+    this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    this.ctx.fillRect(future0, future1, futureW, futureH);
+    this.ctx.closePath();
+
     // add title and key
     this.ctx.font = FONT_GRAPH_TITLE;
     this.ctx.fillStyle = COLOR_GRAPH_TITLE;
@@ -371,7 +378,6 @@ export class GraphSpend extends LineGraph {
         if (!sum[key]) {
           sum[key] = 0;
         }
-
         sum[key] += item > 0 ? hundredth(item) : 0;
 
         return sum[key];
