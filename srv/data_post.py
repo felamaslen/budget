@@ -207,7 +207,8 @@ class AddListData(UpdateData):
         super(AddListData, self).__init__(db, uid, form, \
                 form_schema, all_required=True, table=table)
 
-        if 'item' not in self.form or len(self.form['item']) == 0:
+        if not self.error and \
+                ('item' not in self.form or len(self.form['item']) == 0):
             self.error = True
             self.error_text = E_NO_ITEM
 
