@@ -313,11 +313,11 @@ export class PageOverview extends Page {
       title:  "balance",
       dataPast: [],
       dataFuture: [],
-      startYear:    this.data.startYearMonth[0],
-      startMonth:   this.data.startYearMonth[1],
-      currentYear:  this.data.currentYear,
+      startYear: this.data.startYearMonth[0],
+      startMonth: this.data.startYearMonth[1],
+      currentYear: this.data.currentYear,
       currentMonth: this.data.currentMonth,
-      yearMonths:   this.yearMonths,
+      yearMonths: this.yearMonths,
       pad: [64, 0, 24, 0],
       range: [0, this.yearMonths.length - 1, 0, 0]
     });
@@ -330,7 +330,9 @@ export class PageOverview extends Page {
       data:   this.data.cost,
       pad: [64, 0, 24, 0],
       range: [0, this.yearMonths.length - 1, 0, 0],
-      yearMonths: this.yearMonths
+      yearMonths: this.yearMonths,
+      currentYear: this.data.currentYear,
+      currentMonth: this.data.currentMonth
     });
   }
 
