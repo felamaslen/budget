@@ -22,7 +22,7 @@ E_DB = "Database error"
 E_URL = "Couldn't get URL"
 E_SCRAPE = "Couldn't scrape URL"
 
-FUND_REGEX = r'^(.*)\s\((accum|inc)\.?\)$'
+FUND_REGEX = r'^(.*)\s\((accum|inc|share)\.?\)$'
 
 TICKERS = BASE_DIR + '/resources/tickers.csv'
 
@@ -43,17 +43,17 @@ def get_fund_broker(name):
 
     return broker
 
-def process_data_holdings(data, broker):
+def process_data_holdings(data, broker, name):
     """ gets the top holdings from raw html """
     if data is None or len(data) == 0:
         return None
 
     if broker == 'hl':
-        return process_data_holdings_hl(data)
+        return process_data_holdings_hl(data, hl_fund_is_share(name))
 
     return None
 
-def process_data_holdings_hl(data):
+def process_data_holdings_hl(data, is_share):
     """ gets the top holdings from raw html data (HL) """
     raw = re.sub(r'\t+', '', data.replace("\n", '').replace("\r", ''))
 
@@ -62,6 +62,10 @@ def process_data_holdings_hl(data):
         (r'(.*?)', False),
         ('</table>', True)
     ]
+    if is_share:
+        parts[0] = (\
+                '<table class="factsheet-table" summary="Top 10 exposures">',
+                True)
 
     match_table = match_parts_regex(parts, raw)
 
@@ -89,6 +93,10 @@ def process_data_holdings_hl(data):
 
     return holdings
 
+def hl_fund_is_share(name):
+    """ returns True if a fund is a share (as opposed to mutual fund etc.) """
+    return True if re.match(r'^(.*)\(share\.?\)$', name) else False
+
 def get_fund_url_hl(name):
     """
     returns a URL like:
@@ -97,16 +105,26 @@ def get_fund_url_hl(name):
     matches = re.findall(FUND_REGEX, name)
 
     human_name = matches[0][0]
-    human_type = matches[0][1]
+    human_type = matches[0][1].lower()
 
     system_name = human_name.lower().replace(' ', '-')
-    system_type = 'income' if human_type.lower() == 'inc' else 'accumulation'
+
+    if human_type == 'inc':
+        system_type = 'income'
+    elif human_type == 'accum':
+        system_type = 'accumulation'
+    elif human_type == 'share':
+        system_type = 'share'
 
     first_letter = system_name[:1]
+    base_url = "http://www.hl.co.uk/"
 
-    base_url = "http://www.hl.co.uk/funds/fund-discounts,-prices" + \
-            "--and--factsheets/search-results"
+    if system_type == 'share':
+        base_url = base_url + "shares/shares-search-results"
+        return "%s/%s/%s" % (base_url, first_letter, system_name)
 
+    base_url = base_url + \
+            "funds/fund-discounts,-prices--and--factsheets/search-results"
     return "%s/%s/%s-%s" % (base_url, first_letter, system_name, system_type)
 
 def get_tickers():
@@ -414,7 +432,7 @@ class FundScraper(object):
         """ gets the top stock holdings on a fund """
         data = self.get_fund_data(broker, name, _hash)
 
-        holdings = process_data_holdings(data, broker)
+        holdings = process_data_holdings(data, broker, name)
 
         return holdings
 
