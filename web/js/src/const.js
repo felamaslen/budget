@@ -105,6 +105,7 @@ export const FONT_GRAPH_KEY = "13px Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
 
 export const STOCK_INDICES = {
+  "LON:CTY": "CTY",
   "INDEXFTSE:UKX": "FTSE100",
   "INDEXFTSE:SMX": "FTSE Small",
   "INDEXSTOXX:SX5E": "ES50",
