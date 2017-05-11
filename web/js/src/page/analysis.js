@@ -6,36 +6,34 @@ import $ from "../../lib/jquery.min";
 
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from "const";
 import { formatCurrency } from "misc/format";
-import { arraySum, arraySum1, percent, capitalise } from "misc/misc";
+import { arraySum, percent, capitalise } from "misc/misc";
 
 import Page from "page/page";
+
+const sortTotal = (a, b) => {
+  return a.total > b.total ? -1 : 1;
+};
+const addTotal = cost => cost.reduce((a, b) => a + b.total, 0);
 
 // class to pack rectangles into a root node
 class BlockPacker {
   constructor(data, width, height) {
-    this.data   = data;
+    this.data = data;
 
     this.width = width;
     this.height = height;
 
     this.numBlockColors = 16;
+    this.colorOffset = this.data.reduce((a, b) => a + (b.total & 1), 0);
 
-    this.colorOffset = this.data.reduce((a, b) => {
-      return a + (b[1] & 1);
-    }, 0);
-
-    this.total  = arraySum1(data);
-
+    this.total = addTotal(data);
     const totalArea = width * height;
 
-    this.tree = this.data.map(item => item[1] * totalArea / this.total);
-
+    this.tree = this.data.map(item => item.total * totalArea / this.total);
     this.blocks = [];
-
     this.root = { x: 0, y: 0, w: width, h: height };
 
     const row = [];
-
     this.rowCount = 0;
 
     this.squarify(this.tree, row, this.root);
@@ -45,7 +43,6 @@ class BlockPacker {
     if (!children.length) {
       return;
     }
-
     const next = children[0];
 
     const row2 = [];
@@ -58,12 +55,10 @@ class BlockPacker {
     }
     else if (this.worst(row, node) >= this.worst(row2, node)) {
       children.shift();
-
       this.squarify(children, row2, node);
     }
     else {
       const newNode = this.addRow(row, node);
-
       this.squarify(children, [], newNode);
     }
   }
@@ -120,13 +115,13 @@ class BlockPacker {
 
       const j = this.rowCount++;
 
-      newBlockBit.name  = this.data[j][0];
+      newBlockBit.name  = this.data[j].name;
       newBlockBit.color = (j + this.colorOffset) % this.numBlockColors;
-      newBlockBit.value = this.data[j][1];
+      newBlockBit.value = this.data[j].total;
 
-      if (this.data[j][2]) {
+      if (this.data[j].subTree) {
         const thisBlocks = new BlockPacker(
-          this.data[j][2],
+          this.data[j].subTree,
           thisBlockWidth * blockWidth,
           thisBlockHeight * blockHeight
         );
@@ -205,7 +200,8 @@ export class PageAnalysis extends Page {
     this.blockAppearTime = 100;
 
     // stores whether tree items are expanded or not
-    this.treeStatus = {};
+    this.treeOpen = {};
+    this.treeVisible = { bills: false };
 
     this.treeWidth  = ANALYSIS_VIEW_WIDTH;
     this.treeHeight = ANALYSIS_VIEW_HEIGHT;
@@ -353,25 +349,23 @@ export class PageAnalysis extends Page {
     this.loadData(null, false, true, true);
   }
 
-  sortItems(a, b) {
-    if (a[1] > b[1]) {
-      return -1;
-    }
-
-    return 1;
-  }
   sortData(data) {
     return data.map(item => {
-      const total = arraySum1(item[1]);
+      const name = item[0];
+      const subTree = item[1].map(subItem => {
+        return { name: subItem[0], total: subItem[1] };
+      }).sort(sortTotal);
+      const total = addTotal(subTree);
 
-      const subTree = item[1].sort(this.sortItems);
+      if (typeof this.treeVisible[name] === "undefined") {
+        this.treeVisible[name] = true;
+      }
+      const visible = this.treeVisible[name];
 
-      return [item[0], total, subTree];
+      return { name, total, subTree, visible };
     })
-    .sort(this.sortItems)
-    .filter(
-      item => item[1] > 0
-    );
+    .filter(item => item.total > 0)
+    .sort(sortTotal);
   }
 
   hookDataLoadedAfterRender(callback, res) {
@@ -379,7 +373,9 @@ export class PageAnalysis extends Page {
     this.cost = this.sortData(res.data.cost);
 
     for (const category in res.data.items) {
-      this.items[category] = res.data.items[category].sort(this.sortItems);
+      this.items[category] = res.data.items[category].sort((a, b) => {
+        return a[1] > b[1] ? -1 : 1;
+      });
     }
 
     this.drawTree();
@@ -389,14 +385,25 @@ export class PageAnalysis extends Page {
     this.$title.text(res.data.description);
   }
 
-  treeListItem(item, total) {
-    const pct = "&nbsp;(" + (100 * item[1] / total).toFixed(1) + "%)";
+  treeListItem(item, total, level) {
+    const pct = "&nbsp;(" + (100 * item.total / total).toFixed(1) + "%)";
+
+    let $toggle = null;
+    if (level === 0) {
+      $toggle = $("<input type=\"checkbox\"></input>").attr("checked", item.visible);
+      $toggle.on("change", () => {
+        item.visible = !item.visible;
+        this.treeVisible[item.name] = item.visible;
+        this.drawMainBlocks();
+      });
+    }
 
     const $li = $("<li></li>")
     .addClass("tree-list-item")
     .append($("<div></div>").addClass("main")
-      .append($("<span></span>").addClass("title").text(item[0]))
-      .append($("<span></span>").addClass("cost").html(formatCurrency(item[1])))
+      .append($toggle)
+      .append($("<span></span>").addClass("title").text(item.name))
+      .append($("<span></span>").addClass("cost").html(formatCurrency(item.total)))
       .append($("<span></span>").addClass("pct").html(pct))
     );
 
@@ -405,31 +412,28 @@ export class PageAnalysis extends Page {
   drawTree() {
     this.$tree.empty();
 
-    const total = arraySum1(this.cost);
-
+    const total = addTotal(this.cost);
     this.cost.forEach((item, key) => {
-      const $li = this.treeListItem(item, total);
+      const $li = this.treeListItem(item, total, 0);
 
-      $li.on("click", () => {
-        this.toggleTreeItem($li, key);
+      $li.on("click", evt => {
+        if (!$(evt.target).is("input")) {
+          this.toggleTreeItem($li, key);
+        }
       });
-
       this.$tree.append($li);
-
       $li.children(".main").on("mouseover", () => this.hlBlock(key, true))
       .on("mouseout", () => this.hlBlock(key, false));
 
-      this.toggleTreeItem($li, key, !!this.treeStatus[item[0]]);
+      this.toggleTreeItem($li, key, !!this.treeOpen[item.name]);
     });
   }
   toggleTreeItem($li, cKey, status) {
-    const category = this.cost[cKey][0];
+    const category = this.cost[cKey].name;
 
     const open = typeof status === "undefined"
-      ? !this.treeStatus[category] : status;
-
-    const wasOpen = !!this.treeStatus[category];
-
+      ? !this.treeOpen[category] : status;
+    const wasOpen = !!this.treeOpen[category];
     $li.toggleClass("open", open);
 
     if (!open && wasOpen) {
@@ -438,23 +442,22 @@ export class PageAnalysis extends Page {
     else if (open) {
       const $subTree = $("<ul></ul>").addClass("sub-tree");
 
-      const items = this.cost[cKey][2];
-
-      const total = arraySum1(items);
+      const items = this.cost[cKey].subTree;
+      const total = addTotal(items);
 
       items.forEach((item, key) => {
-        const $sLi = this.treeListItem(item, total);
+        const $subTreeLi = this.treeListItem(item, total, 1);
 
-        $sLi.on("mouseover", () => this.hlSubBlock(category, key, true))
+        $subTreeLi.on("mouseover", () => this.hlSubBlock(category, key, true))
         .on("mouseout", () => this.hlSubBlock(category, key, false));
 
-        $subTree.append($sLi);
+        $subTree.append($subTreeLi);
       });
 
       $li.append($subTree);
     }
 
-    this.treeStatus[category] = open;
+    this.treeOpen[category] = open;
   }
 
   _deactivateBlock($block) {
@@ -499,7 +502,7 @@ export class PageAnalysis extends Page {
       const $blockGroup = $("<div></div>")
       .addClass("block-group")
       .css({
-        width:  group.w,
+        width: group.w,
         height: group.h
       });
 
@@ -633,7 +636,8 @@ export class PageAnalysis extends Page {
   drawMainBlocks() {
     this.$view.empty().removeClass("deep");
 
-    const result = this.drawBlockTree(this.cost, this.$view, (a, b) => this.expandBlock(a, b));
+    const data = this.cost.filter(item => this.treeVisible[item.name]);
+    const result = this.drawBlockTree(data, this.$view, (a, b) => this.expandBlock(a, b));
 
     this.$blocks = result.$blocks;
     this.$subBlocks = result.$subBlocks;
@@ -699,7 +703,6 @@ export class PageAnalysis extends Page {
 
     window.setTimeout(() => {
       this.drawDeepBlocks(items, category);
-
       this.$deepBlock.$preview.hide();
     }, transitionTime);
   }

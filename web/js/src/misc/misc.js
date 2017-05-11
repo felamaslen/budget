@@ -33,11 +33,6 @@ export function arraySum(array) {
     return a + b;
   }, 0);
 }
-export function arraySum1(array) {
-  return array.reduce((a, b) => {
-    return a + b[1];
-  }, 0);
-}
 export function arrayAverage(array, offset) {
   return array.slice(0, -1 * offset).reduce((red, item) => {
     return red + item;
