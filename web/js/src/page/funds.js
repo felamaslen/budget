@@ -101,6 +101,40 @@ export class PageFunds extends PageList {
     this.minDown = Math.min.apply(null, pct.filter(item => item < 0));
     this.maxUp = Math.max.apply(null, pct.filter(item => item > 0));
   }
+  calculateOverallGain() {
+    const historyFunds = this.history.funds.items.map((item, key) => {
+      return { item, transactions: new TransactionsList(this.history.funds.transactions[key]) };
+    });
+    const units = historyFunds.map(fund => {
+      return fund.transactions.getTotalUnits();
+    });
+    const lastValue = arraySum(this.history.history[this.history.history.length - 1][1]
+    .map((price, fundKey) => {
+      return units[fundKey] * price;
+    }));
+
+    const profit = lastValue - this.costTotal;
+    const profitPct = 100 * profit / this.costTotal;
+
+    const profitLabel = formatCurrency(profit, { brackets: true }) +
+    "&nbsp;" + formatCurrency(profitPct, {
+      brackets: true, noSymbol: true, suffix: "%", noDivide: true
+    });
+
+    const valueTime = this.history.startTime +
+      this.history.history[this.history.history.length - 1][0];
+    const cacheAge = formatAge((todayDate.getTime() - valueTime * 1000) / 1000);
+
+    this.$gainInfo.html(
+      "Current value (" + cacheAge + "): " +
+        formatCurrency(lastValue)
+    );
+    this.$gainText.html(profitLabel)
+    .toggleClass("profit", profit > 0)
+    .toggleClass("loss", profit < 0);
+
+    return historyFunds;
+  }
   hookCalculate() {
     super.hookCalculate();
     const $list = this.$lbody.children("li:not(.li-add)");
@@ -120,7 +154,6 @@ export class PageFunds extends PageList {
 
     $list.each((i, li) => {
       const id = $(li).data("id");
-
       const $span = this.addGainText(
         gain[i],
         this.$li[id].gain.children(".text")
@@ -128,6 +161,8 @@ export class PageFunds extends PageList {
 
       this.$li[id].gain.children(".text").replaceWith($span);
     });
+
+    this.calculateOverallGain();
   }
   hookCustomColumns(newItem, newData) {
     const id = newItem.id;
@@ -225,38 +260,7 @@ export class PageFunds extends PageList {
 
     if (this.history.history.length > 0) {
       // calculate latest value
-      const historyFunds = this.history.funds.items.map((item, key) => {
-        return { item, transactions: new TransactionsList(this.history.funds.transactions[key]) };
-      });
-      const units = historyFunds.map(fund => {
-        return fund.transactions.getTotalUnits();
-      });
-      const lastValue = arraySum(this.history.history[this.history.history.length - 1][1]
-      .map((price, fundKey) => {
-        return units[fundKey] * price;
-      }));
-
-      const profit = lastValue - this.costTotal;
-      const profitPct = 100 * profit / this.costTotal;
-
-      const profitLabel = formatCurrency(profit, { brackets: true }) +
-      "&nbsp;" + formatCurrency(profitPct, {
-        brackets: true, noSymbol: true, suffix: "%", noDivide: true
-      });
-
-      const valueTime = this.history.startTime +
-        this.history.history[this.history.history.length - 1][0];
-
-      const cacheAge = formatAge((todayDate.getTime() - valueTime * 1000) / 1000);
-
-      this.$gainInfo.html(
-        "Current value (" + cacheAge + "): " +
-          formatCurrency(lastValue)
-      );
-
-      this.$gainText.html(profitLabel)
-      .toggleClass("profit", profit > 0)
-      .toggleClass("loss", profit < 0);
+      const historyFunds = this.calculateOverallGain();
 
       // intiate the main fund history graph
       this.graphFundHistory = new GraphFundHistory({
