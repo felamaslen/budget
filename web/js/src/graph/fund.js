@@ -18,13 +18,19 @@ import {
 } from "const";
 
 import { arraySum } from "misc/misc";
-import { formatAge, formatCurrency } from "misc/format";
+import { formatAge, formatCurrency, TransactionsList } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
 
 import { getTickSize, LineGraph } from "graph/graph";
 
 const windowSize = new MediaQueryHandler();
+
+export const getHistoryFunds = funds => {
+  return funds.items.map((item, key) => {
+    return { item, transactions: new TransactionsList(funds.transactions[key]) };
+  });
+};
 
 export class GraphFundItem extends LineGraph {
   constructor(options, api) {
@@ -135,7 +141,6 @@ export class GraphFundHistory extends LineGraph {
 
     this.$gCont[0].addEventListener("mousewheel", evt => {
       this.zoomX(-evt.wheelDelta / Math.abs(evt.wheelDelta));
-
       evt.preventDefault();
     });
 
@@ -164,14 +169,14 @@ export class GraphFundHistory extends LineGraph {
     const maxX = new Date().getTime() / 1000 - this.startTime;
 
     const minY = this.raw.reduce((last, item) => {
-      return item[2] < last ? item[2] : last;
+      return Math.min(last, Math.min.apply(null, item[1]));
     }, Infinity);
 
     const maxY = this.raw.reduce((last, item) => {
-      return item[2] > last ? item[2] : last;
+      return Math.max(last, Math.max.apply(null, item[1]));
     }, -Infinity);
 
-    this.originalRange = [minX, maxX, minY, maxY];
+    this.originalRange = [minX, maxX, minY, maxY]; // for use in zooming
     this.setRange([minX, maxX, minY, maxY]);
   }
   updatePeriod() {
@@ -190,6 +195,15 @@ export class GraphFundHistory extends LineGraph {
   }
   onPeriodUpdate(res) {
     this.raw = res.data.history;
+    const fundsChanged = res.data.funds.items.reduce((a, b, key) => {
+      return a + (b === this.funds[key + 1].item ? 0 : 1);
+    }, 0) > 0;
+    if (fundsChanged) {
+      this.funds = getHistoryFunds(res.data.funds);
+      this.fundLines = this.funds.map(() => false);
+      this.fundLines.unshift(true); // overall line
+      this.addFundsToSidebar();
+    }
     this.startTime = res.data.startTime;
     this.setRangeValues();
     this.toggleMode(this.mode);
@@ -202,7 +216,7 @@ export class GraphFundHistory extends LineGraph {
     this.updatingPeriod = false;
   }
   buildFundSidebar() {
-    const $fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
+    this.$fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
 
     this.$periodSelector = $("<select></select>");
     const periods = [
@@ -215,15 +229,18 @@ export class GraphFundHistory extends LineGraph {
     periods.forEach(item => this.$periodSelector.append(
       $(`<option value="${item[0]}">${item[1]}</option>`))
     );
-
     this.$periodSelector.on("change", evt => {
       this.period = evt.target.value;
       $(evt.target).attr("disabled", true);
       this.updatePeriod();
     });
+    this.$fundSidebar.append($("<li></li>").append(this.$periodSelector));
 
-    $fundSidebar.append($("<li></li>").append(this.$periodSelector));
-
+    this.addFundsToSidebar();
+    this.$gCont.append(this.$fundSidebar);
+  }
+  addFundsToSidebar() {
+    this.$fundSidebar.children(":gt(0)").remove();
     const items = this.funds;
     items.unshift({ item: "Overall" });
     this.funds.forEach((fund, index) => {
@@ -241,9 +258,8 @@ export class GraphFundHistory extends LineGraph {
         this.toggleMode(this.mode);
         evt.stopPropagation();
       });
-      $fundSidebar.append($item);
+      this.$fundSidebar.append($item);
     });
-    this.$gCont.append($fundSidebar);
   }
   resize(size) {
     this.width = size;
@@ -274,7 +290,7 @@ export class GraphFundHistory extends LineGraph {
         initialCost = cost;
       }
 
-      return [item[0], 100 * (newValue - initialCost) / initialCost];
+      return initialCost > 0 ? [item[0], 100 * (newValue - initialCost) / initialCost] : null;
     }).filter(item => item !== null);
 
     return line;
@@ -308,7 +324,7 @@ export class GraphFundHistory extends LineGraph {
         initialCost = cost;
       }
 
-      return [item[0], 100 * (newValue - initialCost) / initialCost];
+      return initialCost > 0 ? [item[0], 100 * (newValue - initialCost) / initialCost] : null;
     });
 
     return [COLOR_GRAPH_FUND_LINE, mainLine];
@@ -462,8 +478,8 @@ export class GraphFundHistory extends LineGraph {
     let minY = Infinity;
     let maxY = -Infinity;
     this.dataVisible.forEach(line => {
-      minY = line[1].reduce((last, current) => current[1] < last ? current[1] : last, minY);
-      maxY = line[1].reduce((last, current) => current[1] > last ? current[1] : last, maxY);
+      minY = line[1].reduce((last, current) => Math.min(current[1], last), minY);
+      maxY = line[1].reduce((last, current) => Math.max(current[1], last), maxY);
     });
 
     if (minY === maxY) {
