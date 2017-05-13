@@ -46,6 +46,11 @@ export const GRAPH_FUND_HISTORY_MOVING_AVG = [30, 90];
 export const GRAPH_FUND_HISTORY_MODE_PERCENT = 0;
 export const GRAPH_FUND_HISTORY_MODE_ABSOLUTE = 1;
 export const GRAPH_FUND_HISTORY_MODE_PRICE = 2;
+export const GRAPH_FUND_HISTORY_PERIODS = [
+  ["year", [1, 5]],
+  ["month", [1, 3]],
+];
+export const GRAPH_FUND_HISTORY_DEFAULT_PERIOD = "year1";
 
 export const GRAPH_BALANCE_NUM_TICKS = 5;
 

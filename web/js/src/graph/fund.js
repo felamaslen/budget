@@ -13,6 +13,7 @@ import {
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
   GRAPH_FUND_HISTORY_MODE_PERCENT, GRAPH_FUND_HISTORY_MODE_ABSOLUTE,
   GRAPH_FUND_HISTORY_MODE_PRICE,
+  GRAPH_FUND_HISTORY_PERIODS, GRAPH_FUND_HISTORY_DEFAULT_PERIOD,
   MSG_TIME_ERROR,
   FONT_AXIS_LABEL
 } from "const";
@@ -129,7 +130,7 @@ export class GraphFundHistory extends LineGraph {
 
     this.setRangeValues();
 
-    this.period = "year3";
+    this.period = GRAPH_FUND_HISTORY_DEFAULT_PERIOD;
     this.updatingPeriod = false;
 
     this.toggleMode(GRAPH_FUND_HISTORY_MODE_PERCENT, true);
@@ -219,13 +220,8 @@ export class GraphFundHistory extends LineGraph {
     this.$fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
 
     this.$periodSelector = $("<select></select>");
-    const times = [
-      ["year", [1, 3, 5]],
-      ["month", [3, 6, 18]],
-      ["week", [2, 6]]
-    ];
     const periods = [];
-    times.forEach(period => {
+    GRAPH_FUND_HISTORY_PERIODS.forEach(period => {
       period[1].forEach(count => {
         periods.push([
           `${period[0]}${count}`,

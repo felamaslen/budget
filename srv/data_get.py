@@ -447,14 +447,10 @@ class FundHistory(Processor):
         min_time = 0
         if self.options['period']:
             now = int(time.time())
-            times = [\
-                    ('year', [365, [1, 3, 5]]),
-                    ('month', [30, [3, 6, 18]]),
-                    ('week', [7, [2, 6]])]
-
+            times = [('year', [365, [1, 5]]), ('month', [30, [1, 3]])]
             for (key, period) in times:
                 for count in period[1]:
-                    if self.options['period'] == key + str(count):
+                    if self.options['period'] == str(key) + str(count):
                         min_time = now - 3600 * 24 * period[0] * count
                         break
                 if min_time > 0:
