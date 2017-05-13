@@ -105,16 +105,16 @@ const pageDef = {
   }
 };
 const pageDefFunds = {
-  page:           "funds",
-  col:            ["date", "item", "units", "cost", "price"],
-  colShort:       ["d", "i", "u", "c", "P"],
-  colEdit:        [0, 1, 2, 3],
-  dataType:       ["date", "text", "text_nosug", "cost"],
-  addDefaultVal:  {
-    date:     today.format(),
-    item:     "",
-    units:    "0.00",
-    cost:     "0.00"
+  page: "funds",
+  col: ["date", "item", "transactions", "cost", "price"],
+  colShort: ["d", "i", "t", "c", "P"],
+  colEdit: [0, 1, 2, 3],
+  dataType: ["date", "text-nosug", "transactions", "cost"],
+  addDefaultVal: {
+    date: today.format(),
+    item: "",
+    transactions: [],
+    cost: "0.00"
   },
   daily: false
 };

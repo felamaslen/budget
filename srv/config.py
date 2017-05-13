@@ -12,12 +12,14 @@ OVERVIEW_NUM_FUTURE = 10
 START_YEAR = 2014
 START_MONTH = 9
 
-LIST_CATEGORIES = ('funds', 'in', 'bills', 'food', 'general', 'holiday', 'social')
+LIST_CATEGORIES = \
+        ('funds', 'in', 'bills', 'food', 'general', 'holiday', 'social')
 
 # common columns are added programmatically
+# the second parameter is a boolean marking if column is optional
 LIST_DATA_FORM_SCHEMA = {
     'funds':    {
-        'units': ('float', True),
+        'transactions': ('transactions', True)
     },
     'in': {
     },

@@ -1022,10 +1022,33 @@ button {
         max-width: 396px;
       }
     }
-    .units {
-      width: 85px;
+    .transactions {
+      width: 102px;
+      overflow: visible;
       .editable-input {
-        width: 81px;
+      }
+      .modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        min-height: 100px;
+        z-index: 5;
+        line-height: 26px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 3px 6px rgba(60, 60, 60, 0.3);
+        input {
+          width: 95%;
+        }
+        thead {
+          font-size: 0.9em;
+        }
+        .inner {
+          padding: 0.2em;
+        }
+      }
+      .text {
+        display: none;
       }
     }
     .gain {

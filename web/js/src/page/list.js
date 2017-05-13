@@ -9,7 +9,7 @@ import { MSG_TIME_WARN, MSG_TIME_ERROR } from "const";
 
 import { afterEditValidateCompare, validateInput } from "misc/edit";
 import { today } from "misc/date";
-import { formatCurrency, getData, formatData } from "misc/format";
+import { formatCurrency, appDataFromApi, formatData } from "misc/format";
 
 import { PieGraph } from "graph/graph";
 
@@ -73,7 +73,15 @@ export class PageList extends Page {
   hookDataLoadedAfterRender(callback, res) {
     this.costTotal = res.data.total;
 
-    this.update(res.data.data);
+    // convert data from GET api output to application format
+    const newData = res.data.data.map(item => {
+      const appItem = item;
+      this.colEdit.forEach((col, j) => {
+        appItem[this.colShort[j]] = appDataFromApi(item[this.colShort[j]], this.dataType[j]);
+      });
+      return appItem;
+    });
+    this.update(newData);
 
     if (!res.data.older_exists) {
       this.offset = -1;
@@ -83,8 +91,8 @@ export class PageList extends Page {
     this.updatePieChart();
   }
   update(newData) {
+    // this is fed application-format data
     this.addNewRows(newData);
-
     if (this.dailyColumn) {
       this.calculateDaily();
     }
@@ -96,21 +104,18 @@ export class PageList extends Page {
     return newItem;
   }
   addNewRows(newData) {
+    // data is already in application format
     newData.forEach((item, i) => {
       const id = parseInt(newData[i].I, 10);
 
       let newItem = { id };
 
       this.$lis[id] = $("<li></li>");
-
       this.$li[id] = {};
 
       this.colEdit.forEach(j => {
         const col = this.col[j];
-
-        const newDataValue = newData[i][this.colShort[j]];
-
-        newItem[col] = getData(newDataValue, this.dataType[j]);
+        newItem[col] = newData[i][this.colShort[j]];
 
         this.$li[id][col] = $("<span></span>").addClass(col).append(
           $("<span></span>").addClass("text").html(
@@ -188,15 +193,13 @@ export class PageList extends Page {
     this.$cont.append(this.$lhead);
 
     this.$lbody = $("<ul></ul>").addClass("list-ul");
-
     this.$liAdd = $("<li></li>").addClass("li-add");
-
     this.$li = {};
     this.$lis = {};
 
     this.$addInput = {};
 
-    for (const j of this.colEdit) {
+    this.colEdit.forEach((_, j) => {
       const col = this.col[j];
 
       if (!col.name || col.edit) {
@@ -215,20 +218,17 @@ export class PageList extends Page {
 
         this.$liAdd.append(this.$addInput[col]);
       }
-    }
+    });
 
     this.$addButton = $("<button></button>")
     .text("Add")
-    .on("click", () => this.addNew())
-    ;
+    .on("click", () => this.addNew());
 
     this.$addButtonCont = $("<span></span>")
     .append(this.$addButton);
 
     this.$liAdd.append(this.$addButtonCont);
-
     this.$lbody.append(this.$liAdd);
-
     this.$cont.append(this.$lbody);
 
     if (this.limit) {
@@ -254,31 +254,24 @@ export class PageList extends Page {
 
     for (const j of this.colEdit) {
       const col = this.col[j];
-
-      const val = validateInput(
-        this.$addInput[col].editable.$input.val(), col
-      );
+      const val = validateInput(this.$addInput[col].editable.$input.val(), col);
 
       let error = false;
-
       if (col === "item" && val.length === 0) {
         this.state.error.newMessage("Must enter text for main item field", 1, MSG_TIME_WARN);
         error = true;
       }
-
       if (val === null) {
         this.state.error.newMessage("Must enter valid data", 1, MSG_TIME_WARN);
         error = true;
       }
-
       if (error) {
         this.$addButton.attr("disabled", false);
         return;
       }
 
-      data[col] = val.toString();
-
-      dataVal[col] = val;
+      data[col] = val.toString(); // REST (POST) data
+      dataVal[col] = val; // application data
     }
 
     this.api.request(
@@ -294,22 +287,17 @@ export class PageList extends Page {
     let i = 0;
     for (const j of this.colEdit) {
       const col = this.col[j];
-
       this.$addInput[col].editable.$input.val(
         this.addDefaultVal[col]
       );
-
       newItem[this.colShort[i++]] = data[col];
     }
 
     const newData = [newItem];
 
     this.costTotal = parseInt(response.total, 10);
-
     this.update(newData);
-
     this.$addInput.date.editable.$input.val(today.format()).focus();
-
     this.updatePieChart();
   }
   onNewRequestComplete() {

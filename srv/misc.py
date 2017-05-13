@@ -6,6 +6,7 @@ import os.path
 import time
 from hashlib import md5
 import re
+import json
 
 from srv.config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
 
@@ -82,7 +83,6 @@ def list_data_schema(table, do_id=True):
 def deserialise_date(string):
     """ validates and returns a date from a POST request """
     date_is_valid = re.search('^[0-9]{4},[0-9]{1,2},[0-9]{1,2}$', string)
-
     if not date_is_valid:
         raise ValueError("Date is not a valid date")
 
@@ -106,6 +106,32 @@ def deserialise_date(string):
         raise ValueError("Date's day is out of range")
 
     return (year, month, date)
+
+def deserialise_transactions(string):
+    """ validates and returns a dated list of fund transactions """
+    transactions = []
+    if string is None or len(string) == 0:
+        return transactions
+
+    try:
+        raw = json.loads(string)
+    except ValueError:
+        raise ValueError("Invalid JSON string for transactions")
+
+    if not isinstance(raw, list):
+        raise ValueError("Transactions not a list")
+
+    for item in raw:
+        if 'd' not in item or 'u' not in item or 'c' not in item:
+            raise ValueError("Transactions list has incomplete data")
+
+        date = deserialise_date(item['d'])
+        units = float(item['u'])
+        cost = int(item['c'])
+
+        transactions.append({'d': date, 'u': units, 'c': cost})
+
+    return transactions
 
 def get_table_total(table, dbx, uid):
     """ gets the total cost of all items in a list """

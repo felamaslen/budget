@@ -37,9 +37,8 @@ class Retrieve(Response):
             proc = Overview(self.dbx, self.uid)
 
         elif arg in ('funds', 'fund_history'):
-            deep = 'deep' in self.args
             period = self.args['period'] if 'period' in self.args else None
-            history = {'deep': deep, 'period': period}
+            history = {'period': period}
 
             if arg == 'funds':
                 history_arg = history if 'history' in self.args else False

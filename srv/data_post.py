@@ -1,8 +1,11 @@
 """ Methods to put or edit data in the database """
 
+import json
+
 from srv.api_data_methods import Processor
 
-from srv.misc import strng, list_data_schema, deserialise_date, get_table_total
+from srv.misc import strng, list_data_schema, get_table_total, \
+        deserialise_date, deserialise_transactions
 from srv.config import LIST_CATEGORIES, E_BAD_PARAMS, \
         E_BAD_FORM, E_NO_FORM, E_NO_ITEM
 
@@ -42,6 +45,13 @@ class UpdateData(Processor):
             self.form['year'] = value[0]
             self.form['month'] = value[1]
             self.form['date'] = value[2]
+
+        elif data_type == 'transactions':
+            try:
+                value = deserialise_transactions(raw_value)
+                self.form[key] = json.dumps(value, separators=(',', ':'))
+            except ValueError:
+                return False
 
         else:
             if data_type == 'int':

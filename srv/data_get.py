@@ -4,6 +4,7 @@ from math import ceil, pi
 
 import time
 from datetime import datetime
+import json
 
 from srv.api_data_methods import Processor
 from srv.misc import fund_hash, strng
@@ -177,7 +178,7 @@ class ListData(Processor):
             ],
             # non-standard columns on some tables
             'table': {
-                'funds': [['u', 'units']],
+                'funds': [['t', 'transactions']],
                 'in': [],
                 'bills': [],
                 'food': [['k', 'category'], ['s', 'shop']],
@@ -337,12 +338,8 @@ class Funds(ListData):
         return True
 
     def add_cache_value(self, fund):
-        """ add cached fund price to fund item """
+        """ add latest cached fund price to fund item """
         hash_value = fund_hash(fund['i'])
-
-        # previous value
-        fund['Q'] = self.cache[hash_value][0] if hash_value in self.cache else 0
-        # current value
         fund['P'] = self.cache[hash_value][1] if hash_value in self.cache else 0
 
         return fund
@@ -382,57 +379,48 @@ class Funds(ListData):
 
             self.cache[hash_value] = [price0, price1]
 
-def fund_history_deep(query):
+def fund_history(fund_query, query):
     """ get full fund history with individual funds (query processor) """
+
+    # associate fids with fund names
+    funds = {}
+    for (_fid, _item, _transactions) in fund_query:
+        funds[_fid] = [_item, _transactions]
+
     times = {
-        'start': None,
-        'total': None,
-        'list': [],
-        'key': -1
+        'start': None, # start time of history
+        'total': None, # total time length of history
+        #'list': [], # TODO
+        #'key': -1 # TODO
     }
+
+    results = {'funds': {'items': [], 'transactions': []}, 'rows': []}
+
+    fid = {'keys': {}, 'num': 0}
 
     the_time = None
-
-    results = {
-        'funds': [],
-        'rows': []
-    }
-
-    fid = {'keys': {}, 'num': 0, 'units': []}
-
-    for (items, fids, the_time, prices, units, _, _) in query:
-        items = items.split(',')
+    for (fids, time, prices, _, _) in query:
         fids = fids.split(',')
         prices = prices.split(',')
-        units = units.split(',')
 
-        the_time = int(the_time)
+        the_time = int(time)
         if times['start'] is None:
             times['start'] = the_time
 
-        row = [] if fid['num'] == 0 else [[0, 0]] * fid['num']
-        for j, item in enumerate(items):
-            item = strng(item)
+        row = [] if fid['num'] == 0 else [0] * fid['num']
+        for j, _fid in enumerate(fids):
+            this_fid = int(_fid)
 
-            if item not in results['funds']:
-                results['funds'].append(item)
-
-            value = [float(prices[j])]
-
-            this_fid = int(fids[j])
+            item = strng(funds[this_fid][0])
+            if item not in results['funds']['items']:
+                results['funds']['items'].append(item)
+                results['funds']['transactions'].append(json.loads(funds[this_fid][1]))
 
             if this_fid not in fid['keys']:
                 fid['keys'][this_fid] = fid['num']
                 fid['num'] += 1
 
-            if len(fid['units']) <= fid['keys'][this_fid]:
-                fid['units'] += [None] \
-                        * (fid['keys'][this_fid] - len(fid['units']) + 1)
-
-            if not fid['units'][fid['keys'][this_fid]] or \
-                    fid['units'][fid['keys'][this_fid]] != float(units[j]):
-                fid['units'][fid['keys'][this_fid]] = float(units[j])
-                value.append(float(units[j]))
+            value = float(prices[j])
 
             if fid['keys'][this_fid] > len(row) - 1:
                 row.append(value)
@@ -445,28 +433,6 @@ def fund_history_deep(query):
 
     return results['funds'], results['rows'], times['start'], times['total']
 
-def fund_history_shallow(query):
-    """ get overall fund history data (query processor) """
-    results = []
-
-    start_time = None
-    the_time = None
-
-    total_time = 0
-
-    for (the_time, value, _, _) in query:
-        the_time = int(the_time)
-        value = int(round(value))
-
-        if start_time is None:
-            start_time = the_time
-
-        results.append([the_time - start_time, value])
-
-    total_time = the_time - start_time
-
-    return results, start_time, total_time
-
 class FundHistory(Processor):
     """ get fund value history for graph """
     def __init__(self, db, uid, options):
@@ -475,12 +441,6 @@ class FundHistory(Processor):
         self.num_results_display = GRAPH_FUND_HISTORY_DETAIL
 
         self.options = options
-
-    def process(self):
-        if self.options['deep']: # retrieve individual fund values
-            return self.process_deep()
-
-        return self.process_shallow()
 
     def get_min_time_cond(self):
         """ get a query condition for limiting results by age """
@@ -501,11 +461,12 @@ class FundHistory(Processor):
 
         return min_time_cond
 
-    def process_deep(self):
+    def process(self):
         """ get full fund history with individual funds """
 
         min_time_cond = self.get_min_time_cond()
 
+        # get the number of total results in the database, for use in filtering
         num_results_query = self.dbx.query("""
         SELECT COUNT(*) AS num_results FROM (
         SELECT c.cid
@@ -516,7 +477,6 @@ class FundHistory(Processor):
         WHERE f.uid = %d
         GROUP BY c.cid
         ) results""" % (min_time_cond, self.uid), [FUND_SALT])
-
         if num_results_query is False:
             return False
 
@@ -527,10 +487,20 @@ class FundHistory(Processor):
         if num_results < 0:
             return False
 
+        # get the association between fids and fund names
+        fund_name_query = self.dbx.query("""
+        SELECT DISTINCT fh.fid, item, transactions FROM funds f
+        INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
+        WHERE uid = %d
+        """ % (self.uid), [FUND_SALT])
+        if fund_name_query is False:
+            return False
+
+        # get the actual price results from the scraper cache
         query = self.dbx.query("""
         SELECT * FROM (
-          SELECT item, fid, time, price, units, cNum, FLOOR(cNum %% (%d / %d)) AS period FROM (
-            SELECT x.item, x.fid, x.time, x.price, x.units,
+          SELECT fid, time, price, cNum, FLOOR(cNum %% (%d / %d)) AS period FROM (
+            SELECT x.fid, x.time, x.price,
             (
               CASE x.cid
                 WHEN @lastCid THEN @cNum
@@ -538,15 +508,13 @@ class FundHistory(Processor):
             ) AS cNum,
             @lastCid := x.cid AS last_cid
             FROM (
-              SELECT c.cid, c.time, GROUP_CONCAT(fc.fid) AS fid,
-                GROUP_CONCAT(f.item) AS item, GROUP_CONCAT(fc.price) AS price, \
-                        GROUP_CONCAT(fc.units) AS units
+              SELECT c.cid, c.time, GROUP_CONCAT(fc.fid) AS fid, GROUP_CONCAT(fc.price) AS price
               FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
               INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
               INNER JOIN fund_cache fc ON fh.fid = fc.fid
               INNER JOIN fund_cache_time c ON c.done = 1 AND %s AND c.cid = fc.cid
               GROUP BY c.cid
-              ORDER BY time, f.item
+              ORDER BY time, fc.fid
             ) x
             JOIN (SELECT @cNum := -1, @lastCid := 0) r
           ) ranked
@@ -555,74 +523,13 @@ class FundHistory(Processor):
                 num_results, self.num_results_display, \
                 self.uid, min_time_cond, num_results - 1), \
                 [FUND_SALT])
-
         if query is False:
             return False
 
-        funds, results, start_time, total_time = fund_history_deep(query)
+        funds, results, start_time, total_time = fund_history(fund_name_query, query)
 
         self.data['funds'] = funds
         self.data['history'] = results
-        self.data['startTime'] = start_time
-        self.data['totalTime'] = total_time
-
-        return True
-
-    def process_shallow(self):
-        """ get overall fund history data """
-
-        min_time_cond = self.get_min_time_cond()
-
-        num_results_query = self.dbx.query("""
-        SELECT COUNT(*) AS num_results FROM (
-            SELECT c.cid
-            FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
-            INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
-            INNER JOIN fund_cache fc ON fh.fid = fc.fid
-            INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid AND %s
-            GROUP BY fc.cid
-        ) results""" % (self.uid, FUND_SALT, min_time_cond), [])
-
-        if num_results_query is False:
-            return False
-
-        num_results = -1
-        for row in num_results_query:
-            num_results = int(row[0])
-
-        if num_results < 0:
-            return False
-
-        query = self.dbx.query("""
-        SELECT * FROM (
-          SELECT time, value, rownum, FLOOR(rownum %% (%d / %d)) AS period FROM (
-            SELECT @row := @row + 1 AS rownum,
-                time,
-                value
-            FROM (
-                SELECT @row := -1
-            ) r, (
-                SELECT c.time, SUM(fc.price * fc.units) AS value
-                FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
-                INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, "%s"))
-                INNER JOIN fund_cache fc ON fh.fid = fc.fid
-                INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid AND %s
-                GROUP BY fc.cid
-                ORDER BY c.time DESC
-            ) results
-            ORDER BY time ASC
-            ) ranked
-          ) list
-          WHERE period = 0 OR rownum = %d
-        """ % (num_results, self.num_results_display - 1, \
-                self.uid, FUND_SALT, min_time_cond, num_results - 1), [])
-
-        if query is False:
-            return False
-
-        history, start_time, total_time = fund_history_shallow(query)
-
-        self.data['history'] = history
         self.data['startTime'] = start_time
         self.data['totalTime'] = total_time
 
@@ -746,7 +653,7 @@ class Search(Processor):
 
     def prepare(self):
         table_cols = {
-            'funds':    ['item', 'units', 'cost'],
+            'funds':    ['item', 'cost'],
             'in':       ['item', 'cost'],
             'bills':    ['item', 'cost'],
             'food':     ['item', 'category', 'cost', 'shop'],

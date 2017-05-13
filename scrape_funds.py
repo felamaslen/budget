@@ -8,6 +8,7 @@ import sys
 import re
 import time
 import csv
+import json
 import mechanize
 
 from srv.db import Database
@@ -262,7 +263,7 @@ class FundScraper(object):
                     return
 
             for (broker, _hash, price, units) in self.cache['queue']:
-                self.add_cache_item(broker, _hash, price, units)
+                self.add_cache_item(broker, _hash, price)
 
             if self.cache['cid'] is not None:
                 # activate the last cache item, since we are done caching
@@ -365,7 +366,7 @@ class FundScraper(object):
         """ queues an item to be added to the cache """
         self.cache['queue'].append([broker, _hash, price, units])
 
-    def add_cache_item(self, broker, _hash, price, units):
+    def add_cache_item(self, broker, _hash, price):
         """ inserts new item into the latest fund cache """
         try:
             self.insert_new_cid()
@@ -402,8 +403,8 @@ class FundScraper(object):
 
             # cache this value for display in the graph
             cache_query = DB.query("""
-            INSERT INTO fund_cache (cid, fid, price, units) VALUES (%s, %s, %s, %s)
-            """, [self.cache['cid'], fid, price, units])
+            INSERT INTO fund_cache (cid, fid, price) VALUES (%s, %s, %s)
+            """, [self.cache['cid'], fid, price])
 
             if cache_query is False:
                 if not self.switch['quiet']:
@@ -509,18 +510,20 @@ class FundScraper(object):
     def get_funds(self):
         """ get list of funds in database """
         query = DB.query("""
-        SELECT item, uid, SUM(units) AS units, SUM(cost) AS cost
+        SELECT item, uid, transactions, cost
         FROM funds
-        WHERE units > 0 AND cost > 0
-        GROUP BY uid, item
+        WHERE transactions != "" AND cost > 0
         """, [])
 
         if query is False:
             return False
-
-        self.funds = [(
-            strng(name), int(uid), fund_hash(name), float(units), int(cost)
-        ) for (name, uid, units, cost) in query]
+        self.funds = []
+        for (name, uid, transactions, cost) in query:
+            transactions_list = json.loads(transactions)
+            units = sum(float(item['u']) for item in transactions_list)
+            if units > 0:
+                self.funds.append((strng(name), int(uid), \
+                        fund_hash(name), units, int(cost)))
 
         return True
 
