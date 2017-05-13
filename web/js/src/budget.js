@@ -28,8 +28,8 @@ $.fn.editable = editable;
 
 $(document).ready(() => {
   $(window)
-  .on("mouseup", mouseUpHandler.bind(null, navState))
-  .on("keydown", keyDownHandler.bind(null, api.user, navState));
+  .on("mouseup", () => mouseUpHandler(navState))
+  .on("keydown", evt => keyDownHandler(api.user, navState, evt));
 
   // handle user login
   api.user.init($("#login-form").children(".input-pin"), $("#login-form"));

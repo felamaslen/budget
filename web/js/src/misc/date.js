@@ -10,11 +10,9 @@ export class YMD {
     this.month = month;
     this.date = date;
   }
-
   toString() {
     return [this.year, this.month, this.date].join(",");
   }
-
   isAfter(date2) {
     // returns true if date1 is after date2
     return this.year > date2.year || (
@@ -23,16 +21,17 @@ export class YMD {
       ))
     );
   }
-
   isEqual(date2) {
     return this.year === date2.year &&
       this.month === date2.month &&
       this.date === date2.date;
   }
-
   format() {
     return leadingZeroes(this.date) + "/" + leadingZeroes(this.month) + "/" +
       this.year;
+  }
+  timestamp() {
+    return new Date(`${this.year}-${this.month}-${this.date}`).getTime() / 1000;
   }
 }
 

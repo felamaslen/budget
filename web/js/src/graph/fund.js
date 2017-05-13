@@ -159,7 +159,6 @@ export class GraphFundHistory extends LineGraph {
     })
     .trigger();
   }
-
   setRangeValues() {
     const minX = 0;
     const maxX = new Date().getTime() / 1000 - this.startTime;
@@ -175,7 +174,6 @@ export class GraphFundHistory extends LineGraph {
     this.originalRange = [minX, maxX, minY, maxY];
     this.setRange([minX, maxX, minY, maxY]);
   }
-
   updatePeriod() {
     if (this.updatingPeriod) {
       return;
@@ -183,7 +181,6 @@ export class GraphFundHistory extends LineGraph {
     this.updatingPeriod = true;
     this.api.request(
       "data/fund_history", "GET", {
-        deep: true,
         period: this.period
       },
       res => this.onPeriodUpdate(res),
@@ -191,7 +188,6 @@ export class GraphFundHistory extends LineGraph {
       () => this.onPeriodRequestComplete()
     );
   }
-
   onPeriodUpdate(res) {
     this.raw = res.data.history;
     this.startTime = res.data.startTime;
@@ -205,7 +201,6 @@ export class GraphFundHistory extends LineGraph {
     this.$periodSelector.attr("disabled", false);
     this.updatingPeriod = false;
   }
-
   buildFundSidebar() {
     const $fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
 
@@ -230,13 +225,13 @@ export class GraphFundHistory extends LineGraph {
     $fundSidebar.append($("<li></li>").append(this.$periodSelector));
 
     const items = this.funds;
-    items.unshift("Overall");
+    items.unshift({ item: "Overall" });
     this.funds.forEach((fund, index) => {
       const color = index > 0 ? COLOR_KEY[(index - 1) % COLOR_KEY.length] : "#000";
       const $item = $("<li></li>")
       .append($("<span></span>")
               .addClass("checkbox").css("border-color", color))
-      .append($("<span></span>").addClass("fund").text(fund))
+      .append($("<span></span>").addClass("fund").text(fund.item))
       .toggleClass("enabled", this.fundLines[index]);
       $item.on("click", evt => {
         const numActive = this.fundLines.reduce((a, b) => a + (b ? 1 : 0), 0);
@@ -250,118 +245,122 @@ export class GraphFundHistory extends LineGraph {
     });
     this.$gCont.append($fundSidebar);
   }
-
   resize(size) {
     this.width = size;
     this.$canvas[0].width = size;
 
     this.draw();
   }
-
   getLinesPercent(index) {
-    let initial = null;
+    const thisUnits = this.funds[index + 1].transactions.list.map(item => {
+      return [item.date.timestamp(), item.units, item.cost];
+    });
+
+    let initialCost = null;
+
     const line = this.raw.map(item => {
-      if (!item[1][index]) {
+      const price = item[1][index];
+      if (!price) {
         return null;
       }
-      const priceUnits = item[1][index];
-      if (priceUnits[1]) {
-        // units changed
-        initial = priceUnits[0];
-      }
-      const percent = 100 * (priceUnits[0] - initial) / initial;
 
-      return [item[0], percent];
+      const pastTransactions = thisUnits.filter(units => units[0] <= item[0] + this.startTime);
+      const units = arraySum(pastTransactions.map(transaction => transaction[1]));
+      const newValue = price * units;
+
+      const cost = arraySum(pastTransactions.map(transaction => transaction[2]));
+
+      if (initialCost !== cost) {
+        initialCost = cost;
+      }
+
+      return [item[0], 100 * (newValue - initialCost) / initialCost];
     }).filter(item => item !== null);
 
     return line;
   }
   getMainPercent() {
-    // have to weight by units
-    let units = null;
-    let initialLength = this.raw[0][1].length;
-    const changedKeys = [];
-    const fundWeights = this.raw.map((item, key) => {
-      const changedFunds = item[1].map(priceUnits => {
-        return key === 0 || priceUnits[1] ? 1 : 0;
+    // for filtering future units in the graph history
+    const fundUnits = this.funds.filter(fund => fund.transactions).map(fund => {
+      return fund.transactions.list.map(item => {
+        return [item.date.timestamp(), item.units, item.cost];
       });
-
-      const changed = !units || item[1].length !== initialLength ||
-        arraySum(changedFunds) > 0;
-
-      if (changed) {
-        units = item[1].map((priceUnits, fundKey) => priceUnits[1] || units[fundKey]);
-        changedKeys.push([key, changedFunds]);
-        initialLength = item[1].length;
-      }
-
-      return units;
-    }).map(item => {
-      const total = arraySum(item);
-      return item.map(unit => unit / total);
     });
 
-    let initial = [null, null];
-    return [COLOR_GRAPH_FUND_LINE, this.raw.map((item, key) => {
-      const changed = changedKeys.length && changedKeys[0][0] === key;
-      const weights = item[1].map((priceUnits, fundKey) => {
-        return changed && changedKeys[0][1][fundKey] ? fundWeights[key][fundKey] : initial[0][fundKey];
+    let initialCost = null;
+
+    const mainLine = this.raw.map(item => {
+      const prices = item[1]; // vector
+      const pastTransactions = prices.map((price, fundKey) => {
+        return fundUnits[fundKey].filter(units => units[0] <= item[0] + this.startTime);
       });
+      const units = pastTransactions.map(transactions => arraySum(
+        transactions.map(transaction => transaction[1])
+      ));
 
-      const newValue = item[1].map((priceUnits, fundKey) => {
-        return priceUnits[0] * weights[fundKey];
-      });
+      const newValue = arraySum(prices.map((price, fundKey) => price * units[fundKey]));
 
-      if (changed) {
-        const changedValue = item[1].map((priceUnits, fundKey) => {
-          return changedKeys[0][1][fundKey] ? priceUnits[0] * weights[fundKey] : initial[1][fundKey];
-        });
+      const cost = arraySum(pastTransactions.map(transactions => arraySum(
+        transactions.map(transaction => transaction[2])
+      )));
 
-        initial = [weights, changedValue];
-        changedKeys.shift();
+      if (initialCost !== cost) {
+        initialCost = cost;
       }
-      const initialValue = arraySum(initial[1]);
-      const percent = 100 * (arraySum(newValue) - initialValue) / initialValue;
 
-      return [item[0], percent];
-    })];
+      return [item[0], 100 * (newValue - initialCost) / initialCost];
+    });
+
+    return [COLOR_GRAPH_FUND_LINE, mainLine];
   }
   getLinesAbsolute(index) {
-    let units = null;
+    const thisUnits = this.funds[index + 1].transactions.list.map(item => {
+      return [item.date.timestamp(), item.units, item.cost];
+    });
+
     const line = this.raw.map(item => {
-      if (!item[1][index]) {
+      const price = item[1][index];
+      if (!price) {
         return null;
       }
-      const priceUnits = item[1][index];
-      if (priceUnits[1]) {
-        units = priceUnits[1];
-      }
 
-      return [item[0], priceUnits[0] * units];
+      const pastTransactions = thisUnits.filter(units => units[0] <= item[0] + this.startTime);
+      const units = arraySum(pastTransactions.map(transaction => transaction[1]));
+      const newValue = price * units;
+
+      return [item[0], newValue];
     }).filter(item => item !== null);
 
     return line;
   }
   getMainAbsolute() {
     // main line
-    const units = [];
-    return [COLOR_GRAPH_FUND_LINE, this.raw.map((item, key) => {
-      const value = arraySum(item[1].map((priceUnits, fundKey) => {
-        if (key === 0 || priceUnits[1]) {
-          units[fundKey] = priceUnits[1];
-        }
-        return priceUnits[0] * units[fundKey];
-      }));
+    const fundUnits = this.funds.filter(fund => fund.transactions).map(fund => {
+      return fund.transactions.list.map(item => {
+        return [item.date.timestamp(), item.units, item.cost];
+      });
+    });
 
-      return [item[0], value];
-    })];
+    const mainLine = this.raw.map(item => {
+      const prices = item[1]; // vector
+      const pastTransactions = prices.map((price, fundKey) => {
+        return fundUnits[fundKey].filter(units => units[0] <= item[0] + this.startTime);
+      });
+      const units = pastTransactions.map(transactions => arraySum(
+        transactions.map(transaction => transaction[1])
+      ));
+      const newValue = arraySum(prices.map((price, fundKey) => price * units[fundKey]));
+      return [item[0], newValue];
+    });
+
+    return [COLOR_GRAPH_FUND_LINE, mainLine];
   }
   getLinesPrice(index) {
     return this.raw.map(item => {
       if (!item[1][index]) {
         return null;
       }
-      return [item[0], item[1][index][0]];
+      return [item[0], item[1][index]];
     }).filter(item => item !== null);
   }
   getLines(filter, mainLine) {

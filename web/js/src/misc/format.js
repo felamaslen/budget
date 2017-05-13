@@ -86,11 +86,58 @@ export function formatData(val, type, raw) {
   }
 }
 
-export function getData(val, type) {
+/**
+ * data type to hold transactions list for funds
+ */
+export class TransactionsList {
+  constructor(data, formatted) {
+    this.list = data.map(item => {
+      return {
+        date: formatted ? item.d : new YMD(item.d[0], item.d[1], item.d[2]),
+        units: parseFloat(item.u),
+        cost: parseInt(item.c, 10)
+      };
+    });
+
+    this.num = this.list.length;
+  }
+  toString() {
+    return JSON.stringify(this.list.map(item => {
+      return {
+        d: item.date.toString(),
+        u: item.units,
+        c: item.cost
+      };
+    }));
+  }
+  getTotalUnits() {
+    return this.list.reduce((a, b) => a + b.units, 0);
+  }
+  getTotalCost() {
+    return this.list.reduce((a, b) => a + b.cost, 0);
+  }
+}
+
+/**
+ * convert REST (GET) data to application data
+ * @param {mixed} val: return data from the api
+ * @param {string} type: data type string
+ * @return {object}: application data
+ */
+export function appDataFromApi(val, type) {
   switch (type) {
   case "date":
     if (typeof val[0] !== "undefined") {
       return new YMD(val[0], val[1], val[2]);
+    }
+
+  case "transactions":
+    let data = [];
+    try {
+      data = JSON.parse(val);
+    }
+    finally {
+      return new TransactionsList(data);
     }
 
   default:
