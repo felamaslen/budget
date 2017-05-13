@@ -11,13 +11,13 @@ import {
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
   GRAPH_FUND_HISTORY_WIDTH_NARROW, GRAPH_FUND_HISTORY_WIDTH,
-  GRAPH_FUND_HISTORY_MOVING_AVG, GRAPH_FUND_HISTORY_MODE_PERCENT,
-  GRAPH_FUND_HISTORY_MODE_ABSOLUTE, GRAPH_FUND_HISTORY_MODE_PRICE,
+  GRAPH_FUND_HISTORY_MODE_PERCENT, GRAPH_FUND_HISTORY_MODE_ABSOLUTE,
+  GRAPH_FUND_HISTORY_MODE_PRICE,
   MSG_TIME_ERROR,
   FONT_AXIS_LABEL
 } from "const";
 
-import { getMovingAverage, arraySum } from "misc/misc";
+import { arraySum } from "misc/misc";
 import { formatAge, formatCurrency } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
@@ -569,24 +569,12 @@ export class GraphFundHistory extends LineGraph {
 
     // plot past data
     if (this.dataVisible) {
-      const mainOnly = this.dataVisible.length === 1;
-
       this.dataVisible.forEach((line, index) => {
         const mainLine = index === mainIndex && this.fundLines[0] &&
           this.mode !== GRAPH_FUND_HISTORY_MODE_PRICE;
 
         this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
         this.drawCubicLine(line[1], [line[0]]);
-
-        if (mainLine && mainOnly && this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
-          GRAPH_FUND_HISTORY_MOVING_AVG.forEach((period, key) => {
-            const avg = getMovingAverage(this.data[index][1], period);
-            const avgFiltered = avg.filter(
-              (point, pointKey) => this.itemInRange(avg, pointKey));
-            const averageCurve = this.getSpline(avgFiltered);
-            this.drawCubicLineCurve(averageCurve, avg, [line[0]], 1, 5 * (2 * key + 1), 5);
-          });
-        }
       });
     }
 
