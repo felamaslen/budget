@@ -48,7 +48,7 @@ export const GRAPH_FUND_HISTORY_MODE_ABSOLUTE = 1;
 export const GRAPH_FUND_HISTORY_MODE_PRICE = 2;
 export const GRAPH_FUND_HISTORY_PERIODS = [
   ["year", [1, 5]],
-  ["month", [1, 3]],
+  ["month", [1, 3]]
 ];
 export const GRAPH_FUND_HISTORY_DEFAULT_PERIOD = "year1";
 
