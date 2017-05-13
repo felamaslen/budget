@@ -350,6 +350,9 @@ export class GraphFundHistory extends LineGraph {
       const pastTransactions = thisUnits.filter(units => units[0] <= item[0] + this.startTime);
       const units = arraySum(pastTransactions.map(transaction => transaction[1]));
       const newValue = price * units;
+      if (!newValue) {
+        return null;
+      }
 
       return [item[0], newValue];
     }).filter(item => item !== null);
@@ -510,9 +513,13 @@ export class GraphFundHistory extends LineGraph {
   }
 
   formatValue(value) {
-    return this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT
-      ? value.toFixed(2) + "%"
-      : formatCurrency(value, { raw: true });
+    if (this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
+      return value.toFixed(2) + "%";
+    }
+    if (this.mode === GRAPH_FUND_HISTORY_MODE_ABSOLUTE) {
+      return formatCurrency(value, { raw: true });
+    }
+    return Math.round(100 * value) / 100;
   }
   draw() {
     if (!this.supported) {
