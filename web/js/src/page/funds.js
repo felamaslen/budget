@@ -141,7 +141,6 @@ export class PageFunds extends PageList {
     $list.each((i, li) => {
       const id = $(li).data("id");
 
-      // update gain info TODO
       const units = this.$li[id].transactions.data("val").getTotalUnits();
       const price = this.$li[id].transactions.data("price");
 
@@ -172,6 +171,7 @@ export class PageFunds extends PageList {
     this.$li[id].graph = $("<span></span>").addClass("fund-graph");
 
     const fundIndex = this.history.funds.items.indexOf(newData.i);
+    const fundCurrent = this.history.history[this.history.history.length - 1][1][fundIndex] > 0;
     if (fundIndex > -1) {
       const historyWithFund = this.history.history.filter(
         item => item[1].length > fundIndex && item[1][fundIndex] > 0
@@ -184,11 +184,13 @@ export class PageFunds extends PageList {
         ];
       });
 
-      const lastValue = historyWithFund[historyWithFund.length - 1][1][fundIndex];
-      const changedValues = historyWithFund.map(item => item[1][fundIndex])
-      .filter(value => value !== lastValue).reverse().slice(1);
-      if (changedValues.length > 0) {
-        lastChange = (lastValue - changedValues[0]) / changedValues[0];
+      if (fundCurrent) {
+        const lastValue = historyWithFund[historyWithFund.length - 1][1][fundIndex];
+        const changedValues = historyWithFund.map(item => item[1][fundIndex])
+        .filter(value => value !== lastValue).reverse();
+        if (changedValues.length > 0) {
+          lastChange = (lastValue - changedValues[0]) / changedValues[0];
+        }
       }
 
       const fundGraph = new GraphFundItem({
@@ -198,25 +200,24 @@ export class PageFunds extends PageList {
         title: newData.i.toLowerCase().replace(/\W+/g, "-"),
         data
       }, this.api);
-
       fundGraph.draw();
-
       this.$li[id].graph.append($graph);
+      this.$lis[id].append(this.$li[id].graph);
     }
-    this.$lis[id].append(this.$li[id].graph);
 
     // add a "gain/loss" column
     const units = newData.t.getTotalUnits();
     const price = [newData.P, lastChange];
 
     this.$li[id].transactions.data("price", price);
-
-    const $gainSpan = this.addGainText(
-      this.calculateGain(units, price, newData.c),
-      $("<span></span>").addClass("text")
-    );
-
-    this.$li[id].gain = $("<span></span>").addClass("gain").append($gainSpan);
+    this.$li[id].gain = $("<span></span>");
+    if (fundCurrent) {
+      const $gainSpan = this.addGainText(
+        this.calculateGain(units, price, newData.c),
+        $("<span></span>").addClass("text")
+      );
+      this.$li[id].gain.addClass("gain").append($gainSpan);
+    }
     this.$lis[id].append(this.$li[id].gain);
 
     return newItem;
