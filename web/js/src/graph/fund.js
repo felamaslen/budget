@@ -604,7 +604,12 @@ export class GraphFundHistory extends LineGraph {
           this.mode !== GRAPH_FUND_HISTORY_MODE_PRICE;
 
         this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
-        this.drawCubicLine(line[1], [line[0]]);
+        if (this.mode !== GRAPH_FUND_HISTORY_MODE_ABSOLUTE) {
+          this.drawCubicLine(line[1], [line[0]]);
+        }
+        else {
+          this.drawLine(line[1], line[0]);
+        }
       });
     }
 
