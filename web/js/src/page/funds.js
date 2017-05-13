@@ -4,7 +4,7 @@
 
 import $ from "../../lib/jquery.min";
 
-import { GRAPH_FUND_HISTORY_WIDTH } from "const";
+import { GRAPH_FUND_HISTORY_WIDTH, GRAPH_FUND_HISTORY_DEFAULT_PERIOD } from "const";
 
 import { todayDate } from "misc/date";
 import { formatCurrency, formatAge, TransactionsList } from "misc/format";
@@ -20,7 +20,8 @@ export class PageFunds extends PageList {
   constructor(options, api, state) {
     super(options, api, state);
 
-    this.query = { history: true }; // tell api to get history data
+    // tell api to get history data
+    this.query = { history: true, period: GRAPH_FUND_HISTORY_DEFAULT_PERIOD };
 
     this.minDown = 0;
     this.maxUp = 0;
@@ -168,9 +169,9 @@ export class PageFunds extends PageList {
 
     // add a graph column
     const $graph = $("<div></div>").addClass("fund-graph-cont");
+    this.$li[id].graph = $("<span></span>").addClass("fund-graph");
 
     const fundIndex = this.history.funds.items.indexOf(newData.i);
-
     if (fundIndex > -1) {
       const historyWithFund = this.history.history.filter(
         item => item[1].length > fundIndex && item[1][fundIndex] > 0
@@ -200,9 +201,9 @@ export class PageFunds extends PageList {
 
       fundGraph.draw();
 
-      this.$li[id].graph = $("<span></span>").addClass("fund-graph").append($graph);
-      this.$lis[id].append(this.$li[id].graph);
+      this.$li[id].graph.append($graph);
     }
+    this.$lis[id].append(this.$li[id].graph);
 
     // add a "gain/loss" column
     const units = newData.t.getTotalUnits();
