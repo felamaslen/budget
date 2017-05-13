@@ -77,9 +77,6 @@ export const COLOR_BALANCE_PREDICTED = "#f00";
 export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 export const COLOR_GRAPH_FUND_LINE = "#000";
 
-export const COLOR_KEY = ["#b21e13", "#ff6500", "#7c7c08", "#00cc0b", "#005dcc",
-  "#3800cc", "#c000cc"];
-
 export const COLOR_CATEGORY = {
   funds:  [84, 110, 122],
   bills: [183, 28, 28],

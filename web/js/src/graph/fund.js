@@ -6,7 +6,7 @@ import $ from "../../lib/jquery.min";
 
 import {
   COLOR_DARK, COLOR_LIGHT_GREY, COLOR_PROFIT, COLOR_LOSS,
-  COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE, COLOR_KEY,
+  COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
   GRAPH_FUND_HISTORY_NUM_TICKS, GRAPH_FUND_HISTORY_LINE_WIDTH,
@@ -19,6 +19,7 @@ import {
 } from "const";
 
 import { arraySum } from "misc/misc";
+import { colorKey } from "misc/color";
 import { formatAge, formatCurrency, TransactionsList } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
 import { todayDate, timeSeriesTicks } from "misc/date";
@@ -251,7 +252,7 @@ export class GraphFundHistory extends LineGraph {
     const items = this.funds;
     items.unshift({ item: "Overall" });
     this.funds.forEach((fund, index) => {
-      const color = index > 0 ? COLOR_KEY[(index - 1) % COLOR_KEY.length] : "#000";
+      const color = colorKey(index);
       const $item = $("<li></li>")
       .append($("<span></span>")
               .addClass("checkbox").css("border-color", color))
@@ -393,7 +394,7 @@ export class GraphFundHistory extends LineGraph {
     const lines = [];
     this.fundLines.slice(1).forEach((status, index) => {
       if (status) {
-        const color = COLOR_KEY[index % COLOR_KEY.length];
+        const color = colorKey(index + 1);
         const line = filter(index);
         lines.push([color, line]);
       }
