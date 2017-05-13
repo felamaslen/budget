@@ -13,7 +13,7 @@ import { arraySum } from "misc/misc";
 import { PageList } from "page/list";
 
 import { WorldMap } from "graph/world_map";
-import { GraphFundItem, GraphFundHistory } from "graph/fund";
+import { GraphFundItem, GraphFundHistory, getHistoryFunds } from "graph/fund";
 import { StocksList } from "page/funds_stocks";
 
 export class PageFunds extends PageList {
@@ -102,9 +102,7 @@ export class PageFunds extends PageList {
     this.maxUp = Math.max.apply(null, pct.filter(item => item > 0));
   }
   calculateOverallGain() {
-    const historyFunds = this.history.funds.items.map((item, key) => {
-      return { item, transactions: new TransactionsList(this.history.funds.transactions[key]) };
-    });
+    const historyFunds = getHistoryFunds(this.history.funds);
     const units = historyFunds.map(fund => {
       return fund.transactions.getTotalUnits();
     });

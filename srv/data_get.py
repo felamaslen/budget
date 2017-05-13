@@ -508,13 +508,15 @@ class FundHistory(Processor):
             ) AS cNum,
             @lastCid := x.cid AS last_cid
             FROM (
-              SELECT c.cid, c.time, GROUP_CONCAT(fc.fid) AS fid, GROUP_CONCAT(fc.price) AS price
+              SELECT c.cid, c.time,
+              GROUP_CONCAT(fc.fid ORDER BY fc.fid) AS fid,
+              GROUP_CONCAT(fc.price ORDER BY fc.fid) AS price
               FROM (SELECT DISTINCT item FROM funds WHERE uid = %d) f
               INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, %%s))
               INNER JOIN fund_cache fc ON fh.fid = fc.fid
               INNER JOIN fund_cache_time c ON c.done = 1 AND %s AND c.cid = fc.cid
               GROUP BY c.cid
-              ORDER BY time, fc.fid
+              ORDER BY time
             ) x
             JOIN (SELECT @cNum := -1, @lastCid := 0) r
           ) ranked
