@@ -129,7 +129,7 @@ export class GraphFundHistory extends LineGraph {
 
     this.setRangeValues();
 
-    this.period = null;
+    this.period = "year3";
     this.updatingPeriod = false;
 
     this.toggleMode(GRAPH_FUND_HISTORY_MODE_PERCENT, true);
@@ -196,7 +196,7 @@ export class GraphFundHistory extends LineGraph {
   onPeriodUpdate(res) {
     this.raw = res.data.history;
     const fundsChanged = res.data.funds.items.reduce((a, b, key) => {
-      return a + (b === this.funds[key + 1].item ? 0 : 1);
+      return a + (this.funds.length > key + 1 && b === this.funds[key + 1].item ? 0 : 1);
     }, 0) > 0;
     if (fundsChanged) {
       this.funds = getHistoryFunds(res.data.funds);
@@ -219,16 +219,27 @@ export class GraphFundHistory extends LineGraph {
     this.$fundSidebar = $("<ul></ul>").addClass("fund-sidebar").addClass("noselect");
 
     this.$periodSelector = $("<select></select>");
-    const periods = [
-      [0, "None"],
-      ["week", "2 weeks"],
-      ["month", "6 months"],
-      ["year", "2 years"],
-      ["decade", "10 years"]
+    const times = [
+      ["year", [1, 3, 5]],
+      ["month", [3, 6, 18]],
+      ["week", [2, 6]]
     ];
-    periods.forEach(item => this.$periodSelector.append(
-      $(`<option value="${item[0]}">${item[1]}</option>`))
-    );
+    const periods = [];
+    times.forEach(period => {
+      period[1].forEach(count => {
+        periods.push([
+          `${period[0]}${count}`,
+          `${count} ${period[0]}` + (count > 1 ? "s" : "")
+        ]);
+      });
+    });
+    periods.forEach(item => {
+      const $option = $(`<option value="${item[0]}">${item[1]}</option>`);
+      if (item[0] === this.period) {
+        $option.attr("selected", true);
+      }
+      this.$periodSelector.append($option);
+    });
     this.$periodSelector.on("change", evt => {
       this.period = evt.target.value;
       $(evt.target).attr("disabled", true);
