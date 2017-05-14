@@ -26,11 +26,8 @@ const pio2 = Math.PI / 2;
 
 export function getTickSize(min, max, numTicks) {
   const minimum = (max - min) / numTicks;
-
   const magnitude = Math.pow(10, Math.floor(Math.log(minimum) / Math.log(10)));
-
   const res = minimum / magnitude;
-
   let tick;
 
   if (res > 5) {
@@ -118,11 +115,11 @@ export class LineGraph extends Graph {
       this.state.error.newMessage("Attempted to set log range containing zero!", 0, MSG_TIME_DEBUG);
       return;
     }
-
     this.log = true;
     this.setLogRange();
   }
   setLogRange() {
+    this.minY = Math.max(1, this.minY);
     this.lMinY = this.log ? Math.log(this.minY) : this.minY;
     this.lMaxY = this.log ? Math.log(this.maxY) : this.maxY;
   }
@@ -149,7 +146,7 @@ export class LineGraph extends Graph {
       (this.width - this.padX1 - this.padX2) + this.minX;
   }
   pixY(y) {
-    const ly = this.log ? Math.log(y) / this.log : y;
+    const ly = this.log ? Math.log(Math.max(y, this.minY)) : y;
 
     return this.height - this.padY2 -
       (ly - this.lMinY) / (this.lMaxY - this.lMinY) *
@@ -159,7 +156,7 @@ export class LineGraph extends Graph {
     const yv = (this.height - this.padY2 - pix) * (this.lMaxY - this.lMinY) /
       (this.height - this.padY1 - this.padY2) + this.minY;
 
-    return this.log ? Math.pow(Math.E, yv * this.log) : yv;
+    return this.log ? Math.exp(yv) : yv;
   }
 
   /**

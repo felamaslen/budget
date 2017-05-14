@@ -319,7 +319,7 @@ export class PageOverview extends Page {
       yearMonths: this.yearMonths,
       pad: [40, 0, 0, 0],
       range: [0, 1, 0, 0]
-    });
+    }, this.api, this.state);
 
     this.graphSpend = new GraphSpend({
       width:  500,
@@ -328,11 +328,11 @@ export class PageOverview extends Page {
       title:  "spend",
       data:   this.data.cost,
       pad: [48, 0, 45, 0],
-      range: [0, this.yearMonths.length - 1, 0, 0],
+      range: [0, this.yearMonths.length - 1, 1, 1],
       yearMonths: this.yearMonths,
       currentYear: this.data.currentYear,
       currentMonth: this.data.currentMonth
-    });
+    }, this.api, this.state);
   }
 
   updateCategories(key, cKey, category) {
