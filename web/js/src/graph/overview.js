@@ -16,7 +16,7 @@ import {
 } from "const";
 
 import { hundredth, indexPoints, months } from "misc/misc";
-import { rgba, rgb } from "misc/color";
+import { rgb } from "misc/color";
 import { formatCurrency, numberFormat } from "misc/format";
 
 export class GraphBalance extends LineGraph {
@@ -253,7 +253,7 @@ export class GraphSpend extends LineGraph {
       { name: "social", key: 260 }
     ];
     this.textColors = COLOR_CATEGORY;
-    this.colors = this.categories.map(category => [rgba(this.textColors[category.name], 0.75)]);
+    this.colors = this.categories.map(category => [rgb(this.textColors[category.name])]);
     this.fill = true;
     this.getData(options.data);
   }
@@ -261,7 +261,6 @@ export class GraphSpend extends LineGraph {
     // calculate tick range
     const tickSize = getTickSize(this.minY, this.maxY, 5);
 
-    this.ctx.clearRect(0, 0, this.width, this.height);
     // draw X axis ticks
     this.ctx.strokeStyle = COLOR_LIGHT_GREY;
     this.ctx.lineWidth = 1;
@@ -301,7 +300,7 @@ export class GraphSpend extends LineGraph {
       if (i > 0) {
         const tickName = "£" + numberFormat(axes.tickSize * i);
 
-        this.ctx.fillText(tickName, 0, tickPos);
+        this.ctx.fillText(tickName, this.pixX(0), tickPos);
       }
     });
 
@@ -360,6 +359,8 @@ export class GraphSpend extends LineGraph {
     if (!this.supported) {
       return;
     }
+
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
     const axes = this.drawAxes();
 
