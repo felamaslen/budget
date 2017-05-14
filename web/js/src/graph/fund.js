@@ -22,7 +22,7 @@ import { arraySum } from "misc/misc";
 import { colorKey } from "misc/color";
 import { formatAge, formatCurrency, TransactionsList } from "misc/format";
 import MediaQueryHandler from "misc/media_query";
-import { todayDate, timeSeriesTicks } from "misc/date";
+import { todayDate } from "misc/date";
 
 import { getTickSize, LineGraph } from "graph/graph";
 
@@ -444,18 +444,6 @@ export class GraphFundHistory extends LineGraph {
       this.draw();
     }
   }
-  getTimeScale() {
-    // divides the time axis (horizontal) into appropriate chunks
-    return timeSeriesTicks(
-      this.startTime + this.minX, this.startTime + this.maxX
-    ).map(tick => {
-      return {
-        major: tick.major,
-        pix: Math.floor(this.pixX(tick.t - this.startTime)) + 0.5,
-        text: tick.label || null
-      };
-    });
-  }
   filterDataVisible() {
     return this.data.map(line => {
       return line.map((item, key) => {
@@ -530,7 +518,7 @@ export class GraphFundHistory extends LineGraph {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
     const axisTextColor = COLOR_DARK;
-    const timeTicks = this.getTimeScale();
+    const timeTicks = this.getTimeScale(this.startTime);
 
     // calculate tick range
     const ticksY = [];

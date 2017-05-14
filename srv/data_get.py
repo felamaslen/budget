@@ -47,7 +47,7 @@ class Overview(Processor):
     def process(self):
         """ Get data and put it in the instance """
         categories = LIST_CATEGORIES
-        balance = self.get_balance()
+        balance, old = self.get_balance()
         month_cost = {}
 
         try:
@@ -60,6 +60,7 @@ class Overview(Processor):
             return False
 
         month_cost['balance'] = balance
+        month_cost['old'] = old
 
         now = datetime.now()
 
@@ -98,34 +99,44 @@ class Overview(Processor):
         ym1 = self.year_months[0]
         ym2 = self.year_months[len(self.year_months) - 1]
 
-        y_1 = ym1[0]
-        y_2 = ym2[0]
-        m_1 = ym1[1]
-        m_2 = ym2[1]
-
         query = self.dbx.query("""
         SELECT year, month, balance
         FROM balance
-        WHERE uid = %d AND (
-            (year > %d OR (year = %d AND month >= %d)) AND
-            (year < %d OR (year = %d AND month <= %d))
-        ) ORDER BY year, month
-        """ % (self.uid, y_1, y_1, m_1, y_2, y_2, m_2), [])
-
+        WHERE uid = %d
+        ORDER BY year, month
+        """ % self.uid)
         if query is False:
             return None
 
         balance = []
-
+        old = []
+        old_range = [0, 0, 0, 0]
         for (year, month, value) in query:
-            balance += [0] * \
-                    max(0, 12 * (year - y_1) + month - m_1 - len(balance))
+            in_list = (year > ym1[0] or (year == ym1[0] and month >= ym1[1])) \
+                    and (year < ym2[0] or (year == ym2[0] and month <= ym2[1]))
+            if in_list:
+                key = 12 * (year - ym1[0]) + month - ym1[1]
+                balance += [0] * max(0, key + 1 - len(balance))
+                balance[key] = int(value)
+            else:
+                old_range[2] = max(old_range[2], year)
+                old_range[3] = max(old_range[3], month)
 
-            balance.append(int(value))
+                if old_range[0] == 0 and old_range[1] == 0:
+                    old_range[0] = year
+                    old_range[1] = month
 
-        balance += [0] * max(0, 12 * (y_2 - y_1) + m_2 - m_1 + 1 - len(balance))
+                key = 12 * (year - old_range[0]) + month - old_range[1]
 
-        return balance
+                old += [0] * max(0, key + 1 - len(old))
+                old[key] = value
+
+        balance += [0] * max(0, 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1] \
+                + 1 - len(balance))
+        old += [0] * max(0, 12 * (ym1[0] - old_range[2]) + ym2[1] - \
+                old_range[3] + 1 - len(old))
+
+        return balance, old
 
 class ListAll(Processor):
     """ gets all list data """

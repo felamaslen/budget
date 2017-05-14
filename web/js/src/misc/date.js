@@ -260,7 +260,7 @@ class TimeTickMonthYear extends TimeTick {
     const year = obj.getFullYear();
     const month = obj.getMonth();
 
-    const time = new Date(year, month, 1, 0, 0, 0, 0).getTime();
+    const time = new Date(year, month, 1).getTime();
     const index = month;
 
     return { time, index };
@@ -270,9 +270,10 @@ class TimeTickMonthYear extends TimeTick {
     const month = time.getMonth();
     const major = month === 0 ? 2 : 0;
     const year = time.getFullYear() - (major ? 1 : 0);
-    const nt = new Date(year, (month + 11) % 12, 1, 0, 0, 0, 0).getTime();
+    const nt = new Date(year, (month + 11) % 12, 1).getTime();
+    const label = major ? this.label(t) : null;
 
-    return { t, major, nt };
+    return { t, major, nt, label };
   }
   label(t) {
     return new Date(t).getFullYear().toString();

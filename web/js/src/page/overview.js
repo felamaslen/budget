@@ -70,9 +70,7 @@ export class PageOverview extends Page {
     this.$tr = [];
 
     this.yearMonths.forEach((yearMonth, key) => this.addTableRow(key, yearMonth));
-
     this.$tbl.append(this.$tbody);
-
     this.$page.append(this.$tbl);
 
     // draw graphs
@@ -313,13 +311,14 @@ export class PageOverview extends Page {
       title:  "balance",
       dataPast: [],
       dataFuture: [],
+      dataOld: [],
       startYear: this.data.startYearMonth[0],
       startMonth: this.data.startYearMonth[1],
       currentYear: this.data.currentYear,
       currentMonth: this.data.currentMonth,
       yearMonths: this.yearMonths,
-      pad: [64, 0, 24, 0],
-      range: [0, this.yearMonths.length - 1, 0, 0]
+      pad: [40, 0, 0, 0],
+      range: [0, 1, 0, 0]
     });
 
     this.graphSpend = new GraphSpend({
@@ -353,7 +352,8 @@ export class PageOverview extends Page {
   }
 
   updateGraphs() {
-    this.graphBalance.update(this.data.cost.balance, this.data.cost.predicted);
+    this.graphBalance.update(
+      this.data.cost.balance, this.data.cost.predicted, this.data.cost.old);
     this.graphSpend.update(this.data.cost);
   }
 
