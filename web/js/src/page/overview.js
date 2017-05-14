@@ -328,7 +328,7 @@ export class PageOverview extends Page {
       title:  "spend",
       data:   this.data.cost,
       pad: [48, 0, 45, 0],
-      range: [0, this.yearMonths.length - 1, 1, 1],
+      range: [0, this.yearMonths.length - 1, 0, 0],
       yearMonths: this.yearMonths,
       currentYear: this.data.currentYear,
       currentMonth: this.data.currentMonth

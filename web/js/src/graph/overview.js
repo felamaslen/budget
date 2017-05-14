@@ -241,17 +241,16 @@ export class GraphBalance extends LineGraph {
 export class GraphSpend extends LineGraph {
   constructor(options, api, state) {
     super(options, api, state);
-    this.setLogY();
     this.tension = 1; // for graph interpolator
     this.yearMonths = options.yearMonths;
     this.currentYearMonthKey = (12 * options.currentYear + options.currentMonth) -
       (12 * this.yearMonths[0][0] + this.yearMonths[0][1]);
     this.categories = [
-      { name: "social", key: 260 },
-      { name: "holiday", key: 195 },
-      { name: "general", key: 125 },
+      { name: "bills", key: 15 },
       { name: "food", key: 67 },
-      { name: "bills", key: 15 }
+      { name: "general", key: 125 },
+      { name: "holiday", key: 195 },
+      { name: "social", key: 260 }
     ];
     this.textColors = COLOR_CATEGORY;
     this.colors = this.categories.map(category => [rgb(this.textColors[category.name])]);
@@ -259,9 +258,6 @@ export class GraphSpend extends LineGraph {
     this.getData(options.data);
   }
   drawAxes() {
-    // calculate tick range
-    const tickSize = getTickSize(this.minY, this.maxY, 5);
-
     // draw X axis ticks
     this.ctx.strokeStyle = COLOR_LIGHT_GREY;
     this.ctx.lineWidth = 1;
@@ -276,19 +272,24 @@ export class GraphSpend extends LineGraph {
       return [key + 1, tickPos];
     });
 
+    // calculate tick range
+    const numTicks = 5;
+    const tickSize = getTickSize(this.minY, this.maxY, numTicks);
+
     // draw Y axis ticks (log)
-    const numTicks = Math.floor(Math.log(this.maxY) / Math.log(10)) * 3 - 2;
     const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
-      const value = (Math.pow(2, (key % 3) & 1) * Math.pow(5, ((key + 2) % 3) & 1)) *
-        Math.pow(10, Math.floor(key / 3) + 1);
+      const value = this.minY + (key + 1) * tickSize;
       const pos = Math.floor(this.pixY(value)) + 0.5;
 
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.padX1, pos);
-      this.ctx.lineTo(this.width - this.padX2, pos);
-      this.ctx.stroke();
-
       return { value, pos };
+    }).filter(tick => tick.value <= this.maxY);
+
+    // draw horizontal lines
+    ticksY.forEach(tick => {
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.padX1, tick.pos);
+      this.ctx.lineTo(this.width - this.padX2, tick.pos);
+      this.ctx.stroke();
     });
 
     return { ticksX, ticksY, tickSize };
@@ -389,8 +390,6 @@ export class GraphSpend extends LineGraph {
       return items;
     });
 
-    // round up to the nearest exponent of 10
-    maxY = Math.pow(10, Math.ceil(Math.log10(maxY)));
     this.setRange([this.minX, this.maxX, this.minY, maxY]);
   }
   update(data) {
