@@ -119,7 +119,9 @@ export class LineGraph extends Graph {
     this.setLogRange();
   }
   setLogRange() {
-    this.minY = Math.max(1, this.minY);
+    if (this.log) {
+      this.minY = Math.max(1, this.minY);
+    }
     this.lMinY = this.log ? Math.log(this.minY) : this.minY;
     this.lMaxY = this.log ? Math.log(this.maxY) : this.maxY;
   }
