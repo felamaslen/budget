@@ -20,6 +20,7 @@ import {
 
 import { trim } from "misc/misc";
 import { formatData } from "misc/format";
+import { timeSeriesTicks } from "misc/date";
 
 const pio2 = Math.PI / 2;
 
@@ -124,6 +125,19 @@ export class LineGraph extends Graph {
   setLogRange() {
     this.lMinY = this.log ? Math.log(this.minY) : this.minY;
     this.lMaxY = this.log ? Math.log(this.maxY) : this.maxY;
+  }
+  getTimeScale(offset) {
+    // divides the time axis (horizontal) into appropriate chunks
+    const ticks = timeSeriesTicks(
+      offset + this.minX, offset + this.maxX
+    );
+    return ticks ? ticks.map(tick => {
+      return {
+        major: tick.major,
+        pix: Math.floor(this.pixX(tick.t - offset)) + 0.5,
+        text: tick.label || null
+      };
+    }) : [];
   }
 
   pixX(x) {

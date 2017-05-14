@@ -14,7 +14,6 @@ import {
 
 import { LineGraph } from "graph/graph";
 import { GoogleFinanceAPI } from "api/api";
-import { timeSeriesTicks } from "misc/date";
 
 const finance = new GoogleFinanceAPI();
 
@@ -52,23 +51,6 @@ class StocksGraph extends LineGraph {
     this.data = [];
     this.deleteKey = 0;
   }
-  getTimeScale() {
-    const ticks = timeSeriesTicks(
-      this.data[0][0], this.data[this.data.length - 1][0]
-    );
-
-    if (!ticks) {
-      return [];
-    }
-
-    return ticks.map(tick => {
-      return {
-        major: tick.major,
-        pix: Math.floor(this.pixX(tick.t)) + 0.5,
-        text: tick.label || null
-      };
-    });
-  }
   update(value) {
     // updates graph with latest value
     this.data.push([new Date().getTime() / 1000, value]);
@@ -87,7 +69,7 @@ class StocksGraph extends LineGraph {
   draw() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    const timeTicks = this.getTimeScale();
+    const timeTicks = this.getTimeScale(0);
     const tickSize = 10;
     const tickAngle = -Math.PI / 6;
     timeTicks.forEach(tick => {

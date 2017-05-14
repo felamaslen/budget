@@ -2,6 +2,8 @@
  * Overview page graphs
  */
 
+import $ from "../../lib/jquery.min";
+
 import { getTickSize, LineGraph } from "graph/graph";
 
 import {
@@ -22,18 +24,37 @@ export class GraphBalance extends LineGraph {
 
     this.currentYear = options.currentYear;
     this.currentMonth = options.currentMonth;
-
     this.startYear = options.startYear;
     this.startMonth = options.startMonth;
-
     this.yearMonths = options.yearMonths;
+
+    this.dataPast = options.dataPast;
+    this.dataFuture = options.dataFuture;
+    this.dataOld = options.dataOld;
 
     this.colors = [COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED];
     this.stroke = true;
 
-    this.getData(options.dataPast, options.dataFuture);
-  }
+    this.showAll = false;
+    const $showAll = $("<span></span>")
+    .addClass("show-all").addClass("noselect")
+    .toggleClass("enabled", this.showAll)
+    .append("<span>Show all</span>")
+    .on("click", () => {
+      this.toggleShowAll();
+      $showAll.toggleClass("enabled", this.showAll);
+    });
+    const $checkbox = $("<span></span>").addClass("checkbox");
+    $showAll.append($checkbox);
+    this.$gCont.append($showAll);
 
+    this.processData();
+  }
+  toggleShowAll() {
+    this.showAll = !this.showAll;
+    this.processData();
+    this.draw();
+  }
   drawKey() {
     // add title and key
     this.ctx.beginPath();
@@ -71,6 +92,79 @@ export class GraphBalance extends LineGraph {
 
     this.ctx.fillText("Predicted", 158, 40);
   }
+  drawAxes() {
+    // draw axes
+    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+    this.ctx.lineWidth = 1;
+
+    this.ctx.font = FONT_AXIS_LABEL;
+    this.ctx.fillStyle = COLOR_DARK;
+    this.ctx.textAlign = "left";
+    this.ctx.textBaseline = "bottom";
+
+    // calculate tick range
+    const minorTicks = 5;
+    const numTicks = GRAPH_BALANCE_NUM_TICKS * minorTicks;
+    const tickSize = getTickSize(this.minY, this.maxY, numTicks);
+    const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
+      const pos = Math.floor(this.pixY(key * tickSize)) + 0.5;
+      const major = key % minorTicks === 0;
+      const value = key * tickSize * 100;
+
+      return { pos, major, value };
+    });
+
+    const drawTick = tick => {
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.padX1, tick.pos);
+      this.ctx.lineTo(this.width - this.padX2, tick.pos);
+      this.ctx.stroke();
+      this.ctx.closePath();
+    };
+
+    // draw minor Y ticks
+    this.ctx.strokeStyle = COLOR_LIGHT;
+    ticksY.filter(tick => !tick.major).forEach(drawTick);
+
+    // draw time (X axis) ticks
+    const y0 = this.pixY(this.minY);
+    const tickAngle = -Math.PI / 6;
+    const tickLength = 10;
+    const timeTicks = this.getTimeScale(0);
+    timeTicks.forEach(tick => {
+      const thisTickSize = tickLength * 0.5 * (tick.major + 1);
+
+      // tick
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
+      this.ctx.moveTo(tick.pix, y0);
+      this.ctx.lineTo(tick.pix, y0 - thisTickSize);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      // vertical line
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = tick.major > 1 ? COLOR_LIGHT_GREY : COLOR_LIGHT;
+      this.ctx.moveTo(tick.pix, y0 - thisTickSize);
+      this.ctx.lineTo(tick.pix, 0);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      if (tick.text) {
+        this.ctx.save();
+        this.ctx.translate(tick.pix, y0 - thisTickSize);
+        this.ctx.rotate(tickAngle);
+        this.ctx.fillText(tick.text, 0, 0);
+        this.ctx.restore();
+      }
+    });
+
+    // draw major Y ticks
+    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+    const ticksMajor = ticksY.filter(tick => tick.major);
+    ticksMajor.filter(tick => tick.major).forEach(drawTick);
+    return ticksMajor;
+  }
   draw() {
     if (!this.supported) {
       return;
@@ -78,117 +172,67 @@ export class GraphBalance extends LineGraph {
 
     // clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
-
-    // draw axes
-    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
-    this.ctx.lineWidth = 1;
-
-    this.ctx.font = FONT_AXIS_LABEL;
-    this.ctx.fillStyle = COLOR_DARK;
-    this.ctx.textBaseline = "top";
-    this.ctx.textAlign = "center";
-
-    // draw month (X axis) ticks, and vertical lines
-    for (let i = 3; i < this.maxX - 1; i += 4) {
-      const tickName = months[this.yearMonths[i][1] - 1] + "-"
-      + (this.yearMonths[i][0] % 100).toString();
-
-      const tickPosX = Math.floor(this.pixX(i)) + 0.5;
-      const tickPosY = Math.floor(this.pixY(0)) + 0.5;
-
-      // draw month tick (X axis)
-      this.ctx.fillText(tickName, tickPosX, tickPosY + 2);
-
-      // draw vertical line
-      this.ctx.beginPath();
-      this.ctx.moveTo(tickPosX, 0);
-      this.ctx.lineTo(tickPosX, tickPosY);
-      this.ctx.stroke();
-    }
-
-    // calculate tick range
-    const minorTicks = 5;
-
-    const numTicks = GRAPH_BALANCE_NUM_TICKS * minorTicks;
-
-    const tickSize = getTickSize(this.minY, this.maxY, numTicks);
-
-    const ticksY = [];
-
-    // draw value (Y axis) ticks and horizontal lines
-    for (let i = 0; i < numTicks; i++) {
-      const tickPos = Math.floor(
-        this.pixY(i * tickSize)
-      ) + 0.5;
-
-      const major = i % minorTicks === 0;
-
-      // add value (Y axis) tick to array to draw on top of graph
-      if (major) {
-        ticksY.push([i * tickSize * 100, tickPos]);
-      }
-
-      // draw horizontal line
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.padX1, tickPos);
-      this.ctx.lineTo(this.width - this.padX2, tickPos);
-
-      this.ctx.strokeStyle = major ? COLOR_LIGHT_GREY : COLOR_LIGHT;
-      this.ctx.stroke();
-      this.ctx.closePath();
-    }
-
-    const lineWidth = this.lineWidth;
-
-    // draw spending anomalies
-    this.ctx.lineWidth = this.lineWidth;
+    const ticksY = this.drawAxes();
 
     // plot past + future predicted data
-    this.lineWidth = lineWidth;
     this.drawCubicLine(this.dataMain, this.colors);
 
     // draw Y axis
     this.ctx.textBaseline = "bottom";
     this.ctx.textAlign = "left";
 
-    for (const tick of ticksY) {
-      const tickName = formatCurrency(tick[0], { raw: true, noZeroes: true });
-
-      this.ctx.fillText(tickName, this.padX1, tick[1]);
-    }
-
+    ticksY.forEach(tick => {
+      const tickName = formatCurrency(tick.value, { raw: true, noZeroes: true });
+      this.ctx.fillText(tickName, this.padX1, tick.pos);
+    });
     this.drawKey();
   }
-  getData(actual, predicted) {
-    const dataActual    = actual.map(hundredth);
-    const dataPredicted = predicted.map(hundredth);
+  setRanges() {
+    const dataY = this.dataMain.map(item => item[1]);
+    const dataX = this.dataMain.map(item => item[0]);
 
-    this.futureKey = 12 * (this.currentYear - this.startYear) +
+    const minY = Math.min(0, Math.min.apply(null, dataY));
+    const maxY = Math.max.apply(null, dataY);
+    const minX = Math.min.apply(null, dataX);
+    const maxX = Math.max.apply(null, dataX);
+
+    this.setRange([minX, maxX, minY, maxY]);
+  }
+  getTime(key) {
+    // converts a key index to a UNIX time stamp
+    key -= this.oldOffset;
+    const year = this.startYear + Math.floor((key + this.startMonth) / 12);
+    const month = (this.startMonth + key + 12) % 12;
+    return new Date(year, month - 1, 1).getTime() / 1000;
+  }
+  processData() {
+    const dataActual = (this.showAll ? this.dataOld.concat(this.dataPast) : this.dataPast)
+    .map(hundredth);
+    const dataPredicted = this.dataFuture.map(hundredth);
+
+    this.oldOffset = this.showAll ? this.dataOld.length : 0;
+    this.futureKey = this.oldOffset + 12 * (this.currentYear - this.startYear) +
       this.currentMonth - this.startMonth + 1;
 
-    const maxValue = Math.max(
-      Math.max.apply(null, dataActual),
-      Math.max.apply(null, dataPredicted)
-    );
-
-    this.setRange([
-      this.minX, this.maxX, this.minY, maxValue
-    ]);
-
     // combine the actual data with the future predicted data
-    const dataMain = dataActual.map((item, key) => {
-      return key < this.futureKey ? item : dataPredicted[key];
+    this.dataMain = dataActual.map((item, key) => {
+      const time = this.getTime(key);
+      const value = key < this.futureKey ? item : dataPredicted[key - this.oldOffset];
+      return [time, value];
     });
-
-    this.dataMain = dataMain.map(indexPoints);
 
     // for changing the colour
     this.transition = [this.futureKey - 1];
 
     this.dataPredicted = dataPredicted.map(indexPoints);
+    this.setRanges();
   }
-  update(costBalance, costPredicted) {
-    this.getData(costBalance, costPredicted);
+  update(costBalance, costPredicted, balanceOld) {
+    this.dataPast = costBalance;
+    this.dataFuture = costPredicted;
+    this.dataOld = balanceOld;
+
+    this.processData();
     this.draw();
   }
 }
@@ -203,16 +247,13 @@ export class GraphSpend extends LineGraph {
     this.categories = ["bills", "food", "general", "holiday", "social"];
     this.textColors = COLOR_CATEGORY;
     this.colors = {};
-
     for (const category of this.categories) {
       this.colors[category] = [rgba(this.textColors[category], 0.75)];
     }
-
     this.fill = true;
 
     this.getData(options.data);
   }
-
   draw() {
     if (!this.supported) {
       return;
