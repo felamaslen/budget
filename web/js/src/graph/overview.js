@@ -6,10 +6,8 @@ import { getTickSize, LineGraph } from "graph/graph";
 
 import {
   COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED,
-  COLOR_GRAPH_TITLE, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_LIGHT,
-  COLOR_PROFIT, COLOR_LOSS, COLOR_CATEGORY,
-  FONT_GRAPH_TITLE, FONT_GRAPH_KEY_SMALL, FONT_AXIS_LABEL,
-  FONT_GRAPH_KEY,
+  COLOR_GRAPH_TITLE, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_LIGHT, COLOR_CATEGORY,
+  FONT_GRAPH_TITLE, FONT_GRAPH_KEY_SMALL, FONT_AXIS_LABEL, FONT_GRAPH_KEY,
   GRAPH_BALANCE_NUM_TICKS, GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y,
   GRAPH_KEY_SIZE
 } from "const";
@@ -145,35 +143,6 @@ export class GraphBalance extends LineGraph {
     // draw spending anomalies
     this.ctx.lineWidth = this.lineWidth;
 
-    this.dataAnomalies.forEach((anomaly, key) => {
-      if (Math.abs(anomaly) > 0) {
-        const above = anomaly > 0;
-        const color = above ? COLOR_PROFIT : COLOR_LOSS;
-
-        const px = Math.round(this.pixX(key));
-
-        const py1 = this.pixY(this.dataPredicted[key][1] + anomaly);
-        const py2 = this.pixY(this.dataPredicted[key][1]);
-
-        if (Math.abs(py1 - py2) >= 1) {
-          this.ctx.beginPath();
-
-          this.ctx.moveTo(px, py1);
-          this.ctx.lineTo(px, py2);
-
-          this.ctx.strokeStyle = color;
-          this.ctx.stroke();
-          this.ctx.closePath();
-        }
-      }
-    });
-
-    // plot predicted data
-    this.lineWidth = 1;
-    this.drawCubicLine(
-      this.dataPredicted.slice(0, this.futureKey + 1), this.colors.slice(1, 2)
-    );
-
     // plot past + future predicted data
     this.lineWidth = lineWidth;
     this.drawCubicLine(this.dataMain, this.colors);
@@ -217,14 +186,9 @@ export class GraphBalance extends LineGraph {
     this.transition = [this.futureKey - 1];
 
     this.dataPredicted = dataPredicted.map(indexPoints);
-
-    this.dataAnomalies = dataMain.map((item, key) => {
-      return item - dataPredicted[key];
-    });
   }
   update(costBalance, costPredicted) {
     this.getData(costBalance, costPredicted);
-
     this.draw();
   }
 }
