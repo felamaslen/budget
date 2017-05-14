@@ -100,7 +100,7 @@ export const COLOR_PIE_M3 = "#60bd68";
 export const COLOR_PIE_S1 = "#faa43a";
 export const COLOR_PIE_S2 = "#5da5da";
 
-export const FONT_AXIS_LABEL = "12px Arial, Helvetica, sans-serif";
+export const FONT_AXIS_LABEL = "11px Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_TITLE = "16px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_TITLE_LARGE = "18px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY = "13px Arial, Helvetica, sans-serif";

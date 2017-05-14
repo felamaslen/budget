@@ -327,7 +327,7 @@ export class PageOverview extends Page {
       $cont:  this.$page,
       title:  "spend",
       data:   this.data.cost,
-      pad: [64, 0, 24, 0],
+      pad: [48, 0, 45, 0],
       range: [0, this.yearMonths.length - 1, 0, 0],
       yearMonths: this.yearMonths,
       currentYear: this.data.currentYear,

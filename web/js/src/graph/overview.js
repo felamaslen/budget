@@ -5,6 +5,7 @@
 import $ from "../../lib/jquery.min";
 
 import { getTickSize, LineGraph } from "graph/graph";
+import { arraySum, capitalise } from "misc/misc";
 
 import {
   COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED,
@@ -244,21 +245,19 @@ export class GraphSpend extends LineGraph {
     this.yearMonths = options.yearMonths;
     this.currentYearMonthKey = (12 * options.currentYear + options.currentMonth) -
       (12 * this.yearMonths[0][0] + this.yearMonths[0][1]);
-    this.categories = ["bills", "food", "general", "holiday", "social"];
+    this.categories = [
+      { name: "bills", key: 15 },
+      { name: "food", key: 67 },
+      { name: "general", key: 125 },
+      { name: "holiday", key: 195 },
+      { name: "social", key: 260 }
+    ];
     this.textColors = COLOR_CATEGORY;
-    this.colors = {};
-    for (const category of this.categories) {
-      this.colors[category] = [rgba(this.textColors[category], 0.75)];
-    }
+    this.colors = this.categories.map(category => [rgba(this.textColors[category.name], 0.75)]);
     this.fill = true;
-
     this.getData(options.data);
   }
-  draw() {
-    if (!this.supported) {
-      return;
-    }
-
+  drawAxes() {
     // calculate tick range
     const tickSize = getTickSize(this.minY, this.maxY, 5);
 
@@ -267,24 +266,22 @@ export class GraphSpend extends LineGraph {
     this.ctx.strokeStyle = COLOR_LIGHT_GREY;
     this.ctx.lineWidth = 1;
 
-    const ticksY = [];
-    for (let i = 3, j = 0; i < this.maxX - 1; i += 2, j++) {
-      const tickPos = Math.floor(this.pixX(i)) + 0.5;
-
-      ticksY.push([i, tickPos]);
-
+    const ticksX = Array.apply(null, new Array(this.maxX)).map((_, key) => {
+      const tickPos = Math.floor(this.pixX(key + 1)) + 0.5;
       this.ctx.beginPath();
       this.ctx.moveTo(tickPos, this.padY1);
-      this.ctx.lineTo(tickPos, this.height - this.padY2 + 10 * (1 - j % 2));
+      this.ctx.lineTo(tickPos, this.height - this.padY2 + 8 - 3 * (key % 2));
       this.ctx.stroke();
-    }
+
+      return [key + 1, tickPos];
+    });
 
     // draw Y axis ticks
-    const ticksX = [];
+    const ticksY = [];
     for (let i = 0; i < 3; i++) {
       const tickPos = Math.floor(this.pixY(tickSize * i)) + 0.5;
 
-      ticksX.push(tickPos);
+      ticksY.push(tickPos);
 
       this.ctx.beginPath();
       this.ctx.moveTo(this.padX1, tickPos);
@@ -292,21 +289,17 @@ export class GraphSpend extends LineGraph {
       this.ctx.stroke();
     }
 
-    // plot data
-    this.data.forEach((line, i) => {
-      this.drawCubicLine(
-        line, [this.colors[this.categories[this.categories.length - 1 - i]]]
-      );
-    });
-
+    return { ticksX, ticksY, tickSize };
+  }
+  drawAxesTicks(axes) {
     this.ctx.font = FONT_AXIS_LABEL;
     this.ctx.textBaseline = "top";
     this.ctx.textAlign = "left";
     this.ctx.fillStyle = COLOR_GRAPH_TITLE;
 
-    ticksX.forEach((tickPos, i) => {
+    axes.ticksY.forEach((tickPos, i) => {
       if (i > 0) {
-        const tickName = "£" + numberFormat(tickSize * i);
+        const tickName = "£" + numberFormat(axes.tickSize * i);
 
         this.ctx.fillText(tickName, 0, tickPos);
       }
@@ -314,18 +307,24 @@ export class GraphSpend extends LineGraph {
 
     // draw month ticks
     this.ctx.fillStyle = COLOR_DARK;
-    this.ctx.textBaseline = "bottom";
-    this.ctx.textAlign = "center";
+    this.ctx.textBaseline = "middle";
+    this.ctx.textAlign = "right";
 
-    ticksY.forEach((tick, j) => {
+    const tickAngle = -Math.PI * 0.29;
+    const y0 = this.pixY(0) + 10;
+    axes.ticksX.forEach(tick => {
       const tickName = months[this.yearMonths[tick[0]][1] - 1] + "-" +
         (this.yearMonths[tick[0]][0] % 100).toString();
 
-      this.ctx.fillText(
-        tickName, tick[1], this.height - this.padY2 + 3 + 10.5 * (2 - j % 2)
-      );
+      this.ctx.save();
+      this.ctx.translate(this.pixX(tick[0]), y0);
+      this.ctx.rotate(tickAngle);
+      this.ctx.fillText(tickName, 0, 0);
+      this.ctx.restore();
     });
 
+  }
+  drawKey() {
     // draw rectangle over area which is predicted based on the past
     const future0 = this.pixX(this.currentYearMonthKey);
     const future1 = this.pixY(this.maxY);
@@ -347,59 +346,52 @@ export class GraphSpend extends LineGraph {
     this.ctx.textBaseline = "middle";
     this.ctx.font = FONT_GRAPH_KEY;
 
-    const fontColor = COLOR_DARK;
+    this.categories.forEach(category => {
+      this.ctx.fillStyle = COLOR_DARK;
+      this.ctx.fillText(capitalise(category.name), GRAPH_KEY_OFFSET_X + category.key, 40);
 
-    this.ctx.fillStyle = fontColor;
-    this.ctx.fillText("Bills", 20, 40);
-    this.ctx.fillText("Food", 72, 40);
-    this.ctx.fillText("General", 130, 40);
-    this.ctx.fillText("Holiday", 200, 40);
-    this.ctx.fillText("Social", 265, 40);
+      this.ctx.fillStyle = rgb(this.textColors[category.name]);
+      this.ctx.fillRect(
+        GRAPH_KEY_OFFSET_X + category.key - 15, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE
+      );
+    });
+  }
+  draw() {
+    if (!this.supported) {
+      return;
+    }
 
-    this.ctx.fillStyle = rgb(this.textColors.bills);
-    this.ctx.fillRect(
-      GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE
-    );
+    const axes = this.drawAxes();
 
-    this.ctx.fillStyle = rgb(this.textColors.food);
-    this.ctx.fillRect(57, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
+    // plot data
+    this.data.forEach((list, key) => {
+      const posX = Math.round(this.pixX(key));
+      let sum = 0;
+      let bottomY = this.pixY(0);
+      list.forEach((item, categoryKey) => {
+        sum += item;
+        const posY = Math.round(this.pixY(sum)) + 0.5;
+        this.ctx.fillStyle = this.colors[categoryKey];
+        this.ctx.fillRect(posX - 5, posY, 10, bottomY - posY);
+        bottomY = posY;
+      });
+    });
 
-    this.ctx.fillStyle = rgb(this.textColors.general);
-    this.ctx.fillRect(115, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
-
-    this.ctx.fillStyle = rgb(this.textColors.holiday);
-    this.ctx.fillRect(185, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
-
-    this.ctx.fillStyle = rgb(this.textColors.social);
-    this.ctx.fillRect(250, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE, GRAPH_KEY_SIZE);
+    this.drawAxesTicks(axes);
+    this.drawKey();
   }
   getData(data) {
-    const sum = [];
-
     let maxY = 0;
-
-    this.data = this.categories.map(category => {
-      const thisData = data[category].map((item, key) => {
-        if (!sum[key]) {
-          sum[key] = 0;
-        }
-        sum[key] += item > 0 ? hundredth(item) : 0;
-
-        return sum[key];
-      });
-
-      maxY = Math.max(maxY, Math.max.apply(null, thisData));
-
-      return thisData.map(indexPoints);
-    }).reverse();
+    this.data = data.balance.map((balanceActual, key) => {
+      const items = this.categories.map(category => Math.max(0, data[category.name][key] / 100));
+      maxY = Math.max(maxY, arraySum(items));
+      return items;
+    });
 
     this.setRange([this.minX, this.maxX, this.minY, maxY]);
-
-    // const chartCategories = this.categories.concat().reverse();
   }
   update(data) {
     this.getData(data);
-
     this.draw();
   }
 }
