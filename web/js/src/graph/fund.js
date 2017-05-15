@@ -112,6 +112,10 @@ export class GraphFundItem extends LineGraph {
   }
 }
 
+const getFundUnits = fund => fund.transactions.list.map(item => {
+  return [item.date.timestamp(), item.units, item.cost];
+});
+
 export class GraphFundHistory extends LineGraph {
   constructor(options, api, state) {
     super(options, api, state);
@@ -271,112 +275,49 @@ export class GraphFundHistory extends LineGraph {
 
     this.draw();
   }
-  getLinesPercent(index) {
-    const thisUnits = this.funds[index + 1].transactions.list.map(item => {
-      return [item.date.timestamp(), item.units, item.cost];
+  getLinesCostValue(index, callback) {
+    const units = this.funds.filter(item => item.item !== "Overall").map((fund, fundKey) => {
+      return (index === -1 || index === fundKey) && fund.transactions ? getFundUnits(fund) : null;
     });
+    return this.raw.map(item => {
+      const prices = item[1].map((price, fundKey) => {
+        return index === -1 || index === fundKey ? price : null;
+      });
 
-    let initialCost = null;
+      const currentTransactions = prices.map((price, fundKey) => {
+        return price ? units[fundKey].filter(thisUnits => thisUnits[0] <= item[0] + this.startTime) : null;
+      });
 
-    const line = this.raw.map(item => {
-      const price = item[1][index];
-      if (!price) {
-        return null;
-      }
+      const currentUnits = currentTransactions.map(transactions => {
+        return transactions ? arraySum(transactions.map(transaction => transaction[1])) : 0;
+      });
 
-      const pastTransactions = thisUnits.filter(units => units[0] <= item[0] + this.startTime);
-      const units = arraySum(pastTransactions.map(transaction => transaction[1]));
-      const newValue = price * units;
+      const currentCost = arraySum(currentTransactions.map(transactions => {
+        return transactions ? arraySum(transactions.map(transaction => transaction[2])) : 0;
+      }));
 
-      const cost = arraySum(pastTransactions.map(transaction => transaction[2]));
+      const currentValue = arraySum(prices.map((price, fundKey) => price * currentUnits[fundKey]));
 
-      if (initialCost !== cost) {
-        initialCost = cost;
-      }
-
-      return initialCost > 0 ? [item[0], 100 * (newValue - initialCost) / initialCost] : null;
+      return callback(item, currentCost, currentValue);
     }).filter(item => item !== null);
-
-    return line;
+  }
+  getLinesPercent(index) {
+    return this.getLinesCostValue(index, (item, cost, value) => {
+      return cost > 0 ? [item[0], 100 * (value - cost) / cost] : null;
+    });
   }
   getMainPercent() {
-    // for filtering future units in the graph history
-    const fundUnits = this.funds.filter(fund => fund.transactions).map(fund => {
-      return fund.transactions.list.map(item => {
-        return [item.date.timestamp(), item.units, item.cost];
-      });
-    });
-
-    let initialCost = null;
-
-    const mainLine = this.raw.map(item => {
-      const prices = item[1]; // vector
-      const pastTransactions = prices.map((price, fundKey) => {
-        return fundUnits[fundKey].filter(units => units[0] <= item[0] + this.startTime);
-      });
-      const units = pastTransactions.map(transactions => arraySum(
-        transactions.map(transaction => transaction[1])
-      ));
-
-      const newValue = arraySum(prices.map((price, fundKey) => price * units[fundKey]));
-
-      const cost = arraySum(pastTransactions.map(transactions => arraySum(
-        transactions.map(transaction => transaction[2])
-      )));
-
-      if (initialCost !== cost) {
-        initialCost = cost;
-      }
-
-      return initialCost > 0 ? [item[0], 100 * (newValue - initialCost) / initialCost] : null;
-    });
-
-    return [COLOR_GRAPH_FUND_LINE, mainLine];
+    const line = this.getLinesPercent(-1);
+    return [COLOR_GRAPH_FUND_LINE, line];
   }
   getLinesAbsolute(index) {
-    const thisUnits = this.funds[index + 1].transactions.list.map(item => {
-      return [item.date.timestamp(), item.units, item.cost];
+    return this.getLinesCostValue(index, (item, cost, value) => {
+      return value > 0 ? [item[0], value] : null;
     });
-
-    const line = this.raw.map(item => {
-      const price = item[1][index];
-      if (!price) {
-        return null;
-      }
-
-      const pastTransactions = thisUnits.filter(units => units[0] <= item[0] + this.startTime);
-      const units = arraySum(pastTransactions.map(transaction => transaction[1]));
-      const newValue = price * units;
-      if (!newValue) {
-        return null;
-      }
-
-      return [item[0], newValue];
-    }).filter(item => item !== null);
-
-    return line;
   }
   getMainAbsolute() {
-    // main line
-    const fundUnits = this.funds.filter(fund => fund.transactions).map(fund => {
-      return fund.transactions.list.map(item => {
-        return [item.date.timestamp(), item.units, item.cost];
-      });
-    });
-
-    const mainLine = this.raw.map(item => {
-      const prices = item[1]; // vector
-      const pastTransactions = prices.map((price, fundKey) => {
-        return fundUnits[fundKey].filter(units => units[0] <= item[0] + this.startTime);
-      });
-      const units = pastTransactions.map(transactions => arraySum(
-        transactions.map(transaction => transaction[1])
-      ));
-      const newValue = arraySum(prices.map((price, fundKey) => price * units[fundKey]));
-      return [item[0], newValue];
-    });
-
-    return [COLOR_GRAPH_FUND_LINE, mainLine];
+    const line = this.getLinesAbsolute(-1);
+    return [COLOR_GRAPH_FUND_LINE, line];
   }
   getLinesPrice(index) {
     return this.raw.map(item => {
