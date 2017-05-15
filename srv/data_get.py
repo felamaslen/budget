@@ -358,23 +358,11 @@ class Funds(ListData):
     def get_cache_latest(self):
         """ get the latest cached fund value """
         result = self.dbx.query("""
-        SELECT hash, GROUP_CONCAT(price) AS price FROM (
-        SELECT f.hash, f.fid, c.price
-        FROM (
-            SELECT cg.fid, y.time AS latest FROM (
-                SELECT cid, time FROM fund_cache_time
-                WHERE done = 1
-                ORDER BY time DESC
-                LIMIT 2
-            ) y
-            INNER JOIN fund_cache cg ON cg.cid = y.cid
-        ) x
-        INNER JOIN fund_cache_time ct ON ct.time = x.latest
-        INNER JOIN fund_hash f ON f.fid = x.fid
-        INNER JOIN fund_cache c ON c.fid = x.fid AND c.cid = ct.cid
-        ORDER BY fid, latest
-        ) list
-        GROUP BY fid
+        SELECT fh.hash, GROUP_CONCAT(fc.price ORDER BY ct.time DESC) AS prices
+        FROM fund_cache_time ct
+        INNER JOIN fund_cache fc ON fc.cid = ct.cid
+        INNER JOIN fund_hash fh ON fh.fid = fc.fid
+        GROUP BY fc.fid
         """, [])
 
         if result is False:
@@ -383,7 +371,7 @@ class Funds(ListData):
         self.cache = {}
         for (hash_value, price) in result:
             try:
-                price0, price1 = [float(x) for x in price.split(',')]
+                price0, price1 = [float(x) for x in price.split(',')[0:2]]
             except ValueError:
                 # only one price exists
                 price0 = price1 = float(price)

@@ -36,17 +36,18 @@ export class PageFunds extends PageList {
     this.$graphs.append(this.worldMap.$elem);
   }
 
-  calculateGain(unitsTxt, priceVal, cost) {
-    const units = parseFloat(unitsTxt, 10);
-    const price = parseFloat(priceVal[0], 10);
-    const lastChange = parseFloat(priceVal[1], 10);
+  calculateGain(units, priceVal, cost) {
+    const price = priceVal[0];
+    const lastChange = priceVal[1];
     let pct = 0;
     let gainAbs = 0;
     let value = cost;
-    if (!isNaN(units) && !isNaN(price) && cost > 0) {
+    if (!isNaN(units) && !isNaN(price)) {
       value = units * price;
-      pct = 100 * (value - cost) / cost;
-      gainAbs = value - cost;
+      if (cost > 0) {
+        pct = 100 * (value - cost) / cost;
+        gainAbs = value - cost;
+      }
     }
 
     const pctParam = {
@@ -148,10 +149,12 @@ export class PageFunds extends PageList {
     $list.each((i, li) => {
       const id = $(li).data("id");
 
-      const units = this.$li[id].transactions.data("val").getTotalUnits();
+      const transactions = this.$li[id].transactions.data("val");
+      const units = transactions.getLastUnits();
+      const cost = transactions.getLastCost();
       const price = this.$li[id].transactions.data("price");
 
-      gain.push(this.calculateGain(units, price, this.data[i].cost));
+      gain.push(this.calculateGain(units, price, cost));
     });
 
     const pct = gain.map(item => item.pct);
@@ -178,7 +181,6 @@ export class PageFunds extends PageList {
     this.$li[id].graph = $("<span></span>").addClass("fund-graph");
 
     const fundIndex = this.history.funds.items.indexOf(newData.i);
-    const fundCurrent = this.history.history[this.history.history.length - 1][1][fundIndex] > 0;
     if (fundIndex > -1) {
       const historyWithFund = this.history.history.filter(
         item => item[1].length > fundIndex && item[1][fundIndex] > 0
@@ -191,13 +193,11 @@ export class PageFunds extends PageList {
         ];
       });
 
-      if (fundCurrent) {
-        const lastValue = historyWithFund[historyWithFund.length - 1][1][fundIndex];
-        const changedValues = historyWithFund.map(item => item[1][fundIndex])
-        .filter(value => value !== lastValue).reverse();
-        if (changedValues.length > 0) {
-          lastChange = (lastValue - changedValues[0]) / changedValues[0];
-        }
+      const lastValue = historyWithFund[historyWithFund.length - 1][1][fundIndex];
+      const changedValues = historyWithFund.map(item => item[1][fundIndex])
+      .filter(value => value !== lastValue).reverse();
+      if (changedValues.length > 0) {
+        lastChange = (lastValue - changedValues[0]) / changedValues[0];
       }
 
       const fundGraph = new GraphFundItem({
@@ -213,17 +213,16 @@ export class PageFunds extends PageList {
     }
 
     // add a "gain/loss" column
-    const units = newData.t.getTotalUnits();
+    const units = newData.t.getLastUnits();
     const price = [newData.P, lastChange];
+    const cost = newData.t.getLastCost();
 
     this.$li[id].transactions.data("price", price);
     this.$li[id].gain = $("<span></span>");
-    if (fundCurrent) {
-      const $gainSpan = this.addGainText(
-        this.calculateGain(units, price, newData.c), $("<span></span>").addClass("text")
-      );
-      this.$li[id].gain.addClass("gain").append($gainSpan);
-    }
+    const $gainSpan = this.addGainText(
+      this.calculateGain(units, price, cost), $("<span></span>").addClass("text")
+    );
+    this.$li[id].gain.addClass("gain").append($gainSpan);
     this.$lis[id].append(this.$li[id].gain);
 
     return newItem;
@@ -252,8 +251,8 @@ export class PageFunds extends PageList {
 
     const gainPct = res.data.data.map(item => {
       const transactions = new TransactionsList(JSON.parse(item.t));
-      const units = transactions.getTotalUnits();
-      const cost = transactions.getTotalCost();
+      const units = transactions.getLastUnits();
+      const cost = transactions.getLastCost();
 
       return cost ? 100 * (units * item.P - cost) / cost : 0;
     });
