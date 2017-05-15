@@ -36,7 +36,6 @@ export function formatCurrency(number, options) {
     const sign = number < 0 ? "&minus;" : "";
     result += sign;
   }
-
   if (!options.noSymbol) {
     const symbol = options.raw ? "£" : "&pound;";
     result += symbol;
@@ -48,29 +47,35 @@ export function formatCurrency(number, options) {
   let log = 0;
   let abbreviation = "";
   if (options.abbreviate && number !== 0) {
-    const abbr = ["k", "m", "bn", "trn"];
-    log = Math.min(
-      Math.floor(Math.log(absValuePounds) / Math.log(10) / 3), abbr.length);
+    const abbr = ["k", "m", "bn", "tn"];
+    log = Math.min(Math.floor(Math.log(absValuePounds) / Math.log(10) / 3), abbr.length);
     if (log > 0) {
       abbreviation = abbr[log - 1];
     }
   }
-
   if (options.suffix) {
     abbreviation += options.suffix;
   }
 
-  const rounded = log > 0
-    ? Math.round(100 * absValuePounds / Math.pow(10, log * 3)) / 100
-    : (options.noZeroes && number !== 0
-      ? absValuePounds : absValuePounds.toFixed(2)
-    );
+  let value;
+  if (log > 0) {
+    value = absValuePounds / Math.pow(10, log * 3);
+  }
+  else {
+    value = absValuePounds;
+    if (!options.noPence) {
+      value = value.toFixed(2);
+    }
+  }
+  if (options.noPence) {
+    const round = log ? Math.pow(10, options.precision) : 1;
+    value = Math.round(round * value) / round;
+  }
+  const formatted = numberFormat(value);
 
-  const formatted = numberFormat(rounded);
   result += formatted + abbreviation;
-
   if (options.brackets && number < 0) {
-    result = "(" + result + ")";
+    result = `(${result})`;
   }
 
   return result;

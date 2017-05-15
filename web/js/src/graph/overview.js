@@ -183,7 +183,7 @@ export class GraphBalance extends LineGraph {
     this.ctx.textAlign = "left";
 
     ticksY.forEach(tick => {
-      const tickName = formatCurrency(tick.value, { raw: true, noZeroes: true });
+      const tickName = formatCurrency(tick.value, { raw: true, noPence: true });
       this.ctx.fillText(tickName, this.padX1, tick.pos);
     });
     this.drawKey();

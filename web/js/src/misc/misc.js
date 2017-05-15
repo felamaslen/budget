@@ -58,6 +58,16 @@ export function getYearMonthRow(startYear, startMonth, year, month) {
   return (year - startYear) * 12 + (month - startMonth);
 }
 
+export const classNames = obj => {
+  const array = [];
+  for (const key in obj) {
+    if (obj[key]) {
+      array.push(key);
+    }
+  }
+  return array.join(" ");
+};
+
 export const pmod = (i, n) => ((i % n) + n) % n;
 export const getMovingAverage = (data, period) => data.map((item, key) => {
   if (key < period - 1) {
