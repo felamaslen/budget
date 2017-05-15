@@ -351,7 +351,7 @@ class Funds(ListData):
     def add_cache_value(self, fund):
         """ add latest cached fund price to fund item """
         hash_value = fund_hash(fund['i'])
-        fund['P'] = self.cache[hash_value][1] if hash_value in self.cache else 0
+        fund['P'] = self.cache[hash_value] if hash_value in self.cache else 0
 
         return fund
 
@@ -370,13 +370,8 @@ class Funds(ListData):
 
         self.cache = {}
         for (hash_value, price) in result:
-            try:
-                price0, price1 = [float(x) for x in price.split(',')[0:2]]
-            except ValueError:
-                # only one price exists
-                price0 = price1 = float(price)
-
-            self.cache[hash_value] = [price0, price1]
+            price = float(price.split(',')[0])
+            self.cache[hash_value] = price
 
 def fund_history(fund_query, query):
     """ get full fund history with individual funds (query processor) """
