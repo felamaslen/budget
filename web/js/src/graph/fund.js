@@ -126,7 +126,9 @@ export class GraphFundHistory extends LineGraph {
 
     this.tension = GRAPH_FUND_HISTORY_TENSION;
     this.funds = options.funds;
-    this.fundLines = this.funds.map(() => false);
+    this.fundLines = this.funds.map((fund, fundKey) => {
+      return this.raw[this.raw.length - 1][1][fundKey] > 0;
+    });
     this.fundLines.unshift(true); // overall line
     this.hlPoint = [-1, -1];
 
