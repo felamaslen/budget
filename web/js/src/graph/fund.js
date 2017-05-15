@@ -15,7 +15,7 @@ import {
   GRAPH_FUND_HISTORY_MODE_PRICE,
   GRAPH_FUND_HISTORY_PERIODS, GRAPH_FUND_HISTORY_DEFAULT_PERIOD,
   MSG_TIME_ERROR,
-  FONT_AXIS_LABEL
+  FONT_AXIS_LABEL, FONT_GRAPH_TITLE
 } from "const";
 
 import { arraySum } from "misc/misc";
@@ -38,7 +38,6 @@ export class GraphFundItem extends LineGraph {
   constructor(options, api) {
     const minX = Math.min.apply(null, options.data.map(item => item[0]));
     const maxX = Math.max.apply(null, options.data.map(item => item[0]));
-
     const minY = Math.min.apply(null, options.data.map(item => item[1]));
     const maxY = Math.max.apply(null, options.data.map(item => item[1]));
 
@@ -85,12 +84,9 @@ export class GraphFundItem extends LineGraph {
       return;
     }
 
-    // clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
-
     // draw axes
     this.ctx.lineWidth = 1;
-
     if (this.popout) {
       this.ctx.fillStyle = COLOR_DARK;
       this.ctx.textBaseline = "middle";
@@ -416,14 +412,22 @@ export class GraphFundHistory extends LineGraph {
 
     switch (this.mode) {
     case GRAPH_FUND_HISTORY_MODE_PRICE:
-      lines = this.getLines(index => this.getLinesPrice(index, true));
+      lines = this.getLines(
+        index => this.getLinesPrice(index, true)
+      );
       break;
     case GRAPH_FUND_HISTORY_MODE_ABSOLUTE:
-      lines = this.getLines(index => this.getLinesAbsolute(index), () => this.getMainAbsolute());
+      lines = this.getLines(
+        index => this.getLinesAbsolute(index),
+        () => this.getMainAbsolute()
+      );
       break;
     case GRAPH_FUND_HISTORY_MODE_PERCENT:
     default:
-      lines = this.getLines(index => this.getLinesPercent(index), () => this.getMainPercent());
+      lines = this.getLines(
+        index => this.getLinesPercent(index),
+        () => this.getMainPercent()
+      );
       break;
     }
 
@@ -492,13 +496,13 @@ export class GraphFundHistory extends LineGraph {
 
     // return the tick size for the new range
     this.tickSizeY = getTickSize(minY, maxY, GRAPH_FUND_HISTORY_NUM_TICKS);
-
-    // set the new ranges
-    this.setRange([
-      this.minX, this.maxX,
-      this.tickSizeY * Math.floor(minY / this.tickSizeY),
-      this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
-    ]);
+    if (!isNaN(this.tickSizeY)) {
+      this.setRange([
+        this.minX, this.maxX,
+        this.tickSizeY * Math.floor(minY / this.tickSizeY),
+        this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
+      ]);
+    }
   }
 
   formatValue(value) {
@@ -661,6 +665,14 @@ export class GraphFundHistory extends LineGraph {
     else {
       this.$label.hide();
     }
+
+    // draw current mode at top right corner
+    const modes = ["ROI", "Value", "Price"];
+    const modeText = `Mode: ${modes[this.mode]}`;
+    this.ctx.textBaseline = "top";
+    this.ctx.font = FONT_GRAPH_TITLE;
+    this.ctx.fillStyle = COLOR_DARK;
+    this.ctx.fillText(modeText, this.width - 5, 5);
   }
   mouseOver(x, y) {
     if (!this.data) {
