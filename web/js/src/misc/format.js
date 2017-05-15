@@ -115,11 +115,31 @@ export class TransactionsList {
       };
     }));
   }
+  getUnits(list) {
+    return list.reduce((a, b) => a + b.units, 0);
+  }
+  getCost(list) {
+    return list.reduce((a, b) => a + b.cost, 0);
+  }
   getTotalUnits() {
-    return this.list.reduce((a, b) => a + b.units, 0);
+    return this.getUnits(this.list);
   }
   getTotalCost() {
-    return this.list.reduce((a, b) => a + b.cost, 0);
+    return this.getCost(this.list);
+  }
+  getLastUnits() {
+    let length = this.list.length;
+    if (this.list[length - 1].units < 0) {
+      length--;
+    }
+    return this.getUnits(this.list.slice(0, length));
+  }
+  getLastCost() {
+    let length = this.list.length;
+    if (this.list[length - 1].cost < 0) {
+      length--;
+    }
+    return this.getCost(this.list.slice(0, length));
   }
 }
 
