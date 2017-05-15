@@ -5,7 +5,8 @@
 import $ from "../../lib/jquery.min";
 
 import {
-  COLOR_DARK, COLOR_LIGHT_GREY, COLOR_PROFIT, COLOR_LOSS,
+  COLOR_DARK, COLOR_LIGHT_GREY,
+  COLOR_PROFIT, COLOR_LOSS, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
   COLOR_GRAPH_FUND_LINE, COLOR_GRAPH_TITLE,
   GRAPH_FUND_ITEM_LINE_WIDTH, GRAPH_FUND_ITEM_TENSION,
   GRAPH_FUND_HISTORY_TENSION, GRAPH_FUND_HISTORY_POINT_RADIUS,
@@ -539,6 +540,18 @@ export class GraphFundHistory extends LineGraph {
 
     this.ctx.lineWidth = 1;
 
+    // draw profit / loss backgrounds
+    if (this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT && this.minY < 0 && this.maxY > 0) {
+      const zero = this.pixY(0);
+      this.ctx.fillStyle = COLOR_PROFIT_LIGHT;
+      this.ctx.fillRect(this.padX1, this.padY1,
+                        this.width - this.padX1 - this.padX2, zero - this.padY1);
+
+      this.ctx.fillStyle = COLOR_LOSS_LIGHT;
+      this.ctx.fillRect(this.padX1, zero,
+                        this.width - this.padX1 - this.padX2, this.height - this.padY2 - zero);
+    }
+
     // calculate tick range
     const numTicks = isNaN(this.tickSizeY) ? 0 :
       Math.floor((this.maxY - this.minY) / this.tickSizeY);
@@ -549,15 +562,14 @@ export class GraphFundHistory extends LineGraph {
     });
 
     // draw horizontal lines
+    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
     ticksY.forEach(tick => {
       // draw horizontal line
       this.ctx.beginPath();
       this.ctx.moveTo(this.padX1, tick.pos);
       this.ctx.lineTo(this.width - this.padX2, tick.pos);
-
-      this.ctx.strokeStyle = this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT
-        ? (tick.value > 0 ? COLOR_PROFIT : COLOR_LOSS) : COLOR_LIGHT_GREY;
       this.ctx.stroke();
+      this.ctx.closePath();
     });
 
     // draw time (X axis) ticks

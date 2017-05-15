@@ -68,8 +68,8 @@ export const COLOR_LIGHT_GREY = "#999";
 
 export const COLOR_PROFIT = "#0c3";
 export const COLOR_LOSS = "#c30";
-export const COLOR_PROFIT_LIGHT = "#94efa0";
-export const COLOR_LOSS_LIGHT = "#ffd1d1";
+export const COLOR_PROFIT_LIGHT = "#f4fff4";
+export const COLOR_LOSS_LIGHT = "#fff4f4";
 
 export const COLOR_BALANCE_ACTUAL = "#039";
 export const COLOR_BALANCE_PREDICTED = "#f00";
