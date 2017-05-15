@@ -141,6 +141,9 @@ export class TransactionsList {
     }
     return this.getCost(this.list.slice(0, length));
   }
+  sold() {
+    return this.getTotalUnits() === 0;
+  }
 }
 
 /**
