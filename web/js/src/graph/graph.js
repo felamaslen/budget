@@ -266,7 +266,7 @@ export class LineGraph extends Graph {
 
     return curve;
   }
-  drawCubicLineCurve(curve, p, colors, width, dashed, dashGap) {
+  drawCubicLineCurve(curve, p, color, width, dashed, dashGap) {
     this.ctx.lineWidth = width;
     this.ctx.beginPath();
 
@@ -279,10 +279,10 @@ export class LineGraph extends Graph {
     let x;
     let y;
 
-    const dynamicColor = typeof colors === "function";
+    const dynamicColor = typeof color === "function";
     const last = [null, null];
-    let color = dynamicColor ? colors(0) : colors[0];
-    this.ctx.strokeStyle = color;
+    let theColor = dynamicColor ? color(this.valY(curve[0][0][1])) : color[0];
+    this.ctx.strokeStyle = theColor;
 
     curve.forEach((piece, i) => {
       if (i === this.transition[transitionKey]) {
@@ -295,24 +295,24 @@ export class LineGraph extends Graph {
           this.ctx.beginPath();
         }
 
-        this.ctx.strokeStyle = colors[++colorKey % colors.length];
-
+        this.ctx.strokeStyle = dynamicColor ? color(this.valY(piece[0][1]))
+          : color[++colorKey % color.length];
         moved = false;
       }
 
       for (const point of piece) {
         if (!dashed || dashToggle) {
           if (dynamicColor) {
-            const newColor = colors(this.valY(point[1]));
-            if (newColor !== color) {
+            const newColor = color(this.valY(point[1]));
+            if (newColor !== theColor) {
               if (moved) {
-                this.ctx.strokeStyle = color;
+                this.ctx.strokeStyle = theColor;
                 this.ctx.stroke();
                 this.ctx.closePath();
                 this.ctx.beginPath();
                 this.ctx.moveTo(last[0], last[1]);
               }
-              color = newColor;
+              theColor = newColor;
             }
 
             last[0] = point[0];
@@ -361,12 +361,12 @@ export class LineGraph extends Graph {
     );
 
     if (dynamicColor) {
-      this.ctx.strokeStyle = color;
+      this.ctx.strokeStyle = theColor;
     }
     this.ctx.stroke();
     this.ctx.closePath();
   }
-  drawCubicLine(points, colors) {
+  drawCubicLine(points, color) {
     if (points.length < 2) {
       return;
     }
@@ -374,7 +374,7 @@ export class LineGraph extends Graph {
 
     if (this.fill) {
       this.ctx.beginPath();
-      this.ctx.fillStyle = colors[0];
+      this.ctx.fillStyle = color[0];
       this.ctx.moveTo(this.pixX(0), this.pixY(0));
 
       for (const piece of curve) {
@@ -389,38 +389,47 @@ export class LineGraph extends Graph {
     }
 
     if (this.stroke) {
-      this.drawCubicLineCurve(curve, points, colors, this.lineWidth);
+      this.drawCubicLineCurve(curve, points, color, this.lineWidth);
     }
   }
   drawLine(p, color) {
     if (p.length < 2) {
       return;
     }
-    if (typeof color === "object") {
-      color = color[0];
+    if (typeof color === "string") {
+      color = [color];
     }
-
+    const dynamicColor = typeof color === "function";
+    let theColor = dynamicColor ? color(p[0][1]) : color;
+    let newColor;
     let moved = false;
-
+    this.ctx.lineWidth = this.lineWidth;
     this.ctx.beginPath();
-
     p.forEach(point => {
       const x = this.pixX(point[0]);
       const y = this.pixY(point[1]);
 
       if (moved) {
         this.ctx.lineTo(x, y);
+        if (dynamicColor) {
+          newColor = color(point[1]);
+          if (newColor !== theColor) {
+            this.ctx.strokeStyle = theColor;
+            this.ctx.stroke();
+            this.ctx.closePath();
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y);
+            theColor = newColor;
+          }
+        }
       }
       else {
         this.ctx.moveTo(x, y);
-
         moved = true;
       }
     });
 
-    this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = this.lineWidth;
-
+    this.ctx.strokeStyle = theColor;
     this.ctx.stroke();
     this.ctx.closePath();
   }
