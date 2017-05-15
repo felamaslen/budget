@@ -1117,19 +1117,44 @@ button {
     .gain {
       width: 200px;
       height: 100%;
-      font-size: 0.8em;
-      line-height: 24px;
       .text {
         width: 100%;
         display: block;
         color: #333;
-      }
-      .daygain {
-        background: none !important;
-        &.profit {
+        .profit {
           color: #483be4;
         }
-        &.loss {
+        .loss {
+          color: #ff2c2c;
+        }
+        > span {
+          padding: 0;
+        }
+      }
+      .value {
+        font-size: 1.1em;
+        width: 50%;
+      }
+      .price {
+        font-size: 1em;
+      }
+      .pct-gain, .day-gain {
+        background: rgba(255, 255, 255, 0.8);
+      }
+      .pct-gain {
+        border-top-left-radius: 3px;
+      }
+      .price, .abs-gain, .pct-gain, .day-gain {
+        font-size: 0.8em;
+        line-height: 24px;
+        width: 25%;
+        height: 24px;
+      }
+      .text {
+        .profit {
+          color: #483be4;
+        }
+        .loss {
           color: #ff2c2c;
         }
       }
@@ -1150,15 +1175,9 @@ button {
     }
     .profit {
       background: #ccffd5;
-      &.high {
-        background: #00e612;
-      }
     }
     .loss {
       background: #ffa7a7;
-      &.high {
-        background: #ff2c2c;
-      }
     }
     .value {
       width: 68px;

@@ -8,7 +8,7 @@ import { GRAPH_FUND_HISTORY_WIDTH, GRAPH_FUND_HISTORY_DEFAULT_PERIOD } from "con
 
 import { todayDate } from "misc/date";
 import { formatCurrency, formatAge, TransactionsList } from "misc/format";
-import { arraySum } from "misc/misc";
+import { arraySum, classNames } from "misc/misc";
 
 import { PageList } from "page/list";
 
@@ -43,7 +43,6 @@ export class PageFunds extends PageList {
     let pct = 0;
     let gainAbs = 0;
     let value = cost;
-
     if (!isNaN(units) && !isNaN(price) && cost > 0) {
       value = units * price;
       pct = 100 * (value - cost) / cost;
@@ -51,35 +50,44 @@ export class PageFunds extends PageList {
     }
 
     const pctParam = {
-      noSymbol: true, suffix: "%", brackets: true, noDivide: true
+      noSymbol: true,
+      suffix: "%",
+      brackets: true,
+      noDivide: true
+    };
+    const currencyFormat = {
+      noPence: true,
+      abbreviate: true,
+      brackets: true,
+      precision: 1
     };
 
+    const absProfitClass = classNames({ "abs-gain": true });
+    const priceClass = classNames({ price: true });
+    const pctGainClass = classNames({
+      "pct-gain": true,
+      profit: pct > 0,
+      loss: pct < 0
+    });
+    const dayGainClass = classNames({
+      "day-gain": true,
+      profit: lastChange > 0,
+      loss: lastChange < 0
+    });
+
+    const formatValue = formatCurrency(value, currencyFormat);
+    const formatProfit = formatCurrency(gainAbs, currencyFormat);
+    const formatPrice = price.toFixed(2);
     const pctFormat = formatCurrency(pct, pctParam);
     const dayGain = formatCurrency(100 * lastChange, pctParam);
-    const dayGainClass = lastChange !== 0 ?
-      "high " + (lastChange > 0 ? "profit" : "loss") : "";
 
-    const format = {
-      raw: false,
-      noZeroes: false,
-      abbreviate: true,
-      brackets: true
-    };
-
-    const formatValue = formatCurrency(value, format);
-    const formatPrice = price.toFixed(2);
-    const formatGain = formatCurrency(gainAbs, format);
-
-    const txt = `<span class="value">
-      <span>${formatValue}</span><br>
-      <span class="price">${formatPrice}</span>
-    </span>
-    <span class="abs">${formatGain}</span>
-    <span class="pct">
-      <span>${pctFormat}</span><br>
-      <span class="daygain ${dayGainClass}">${dayGain}</span>
-    </span>`
-    ;
+    const txt = `
+    <span class="value">${formatValue}</span>
+    <span class="${absProfitClass}">${formatProfit}</span>
+    <span class="${priceClass}">${formatPrice}</span>
+    <span class="${pctGainClass}">${pctFormat}</span>
+    <span class="${dayGainClass}">${dayGain}</span>
+    `;
 
     return { pct, txt };
   }
@@ -93,8 +101,7 @@ export class PageFunds extends PageList {
     return $span
       .toggleClass("profit", gain.pct > 0)
       .toggleClass("loss", gain.pct < 0)
-      .toggleClass("high", Math.abs(gain.pct) > 5)
-      .css("background-color", "rgb(" + thisColor.join(",") + ")")
+      .css("background-color", `rgb(${thisColor.join(",")})`)
       .html(gain.txt);
   }
 
@@ -213,8 +220,7 @@ export class PageFunds extends PageList {
     this.$li[id].gain = $("<span></span>");
     if (fundCurrent) {
       const $gainSpan = this.addGainText(
-        this.calculateGain(units, price, newData.c),
-        $("<span></span>").addClass("text")
+        this.calculateGain(units, price, newData.c), $("<span></span>").addClass("text")
       );
       this.$li[id].gain.addClass("gain").append($gainSpan);
     }
