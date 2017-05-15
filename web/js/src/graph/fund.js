@@ -455,110 +455,8 @@ export class GraphFundHistory extends LineGraph {
     }
     return Math.round(100 * value) / 100;
   }
-  draw() {
-    if (!this.supported) {
-      return;
-    }
-    // clear canvas
-    this.ctx.clearRect(0, 0, this.width, this.height);
 
-    const axisTextColor = COLOR_DARK;
-    const timeTicks = this.getTimeScale(this.startTime);
-
-    // calculate tick range
-    const ticksY = [];
-    // draw value (Y axis) ticks and horizontal lines
-    const newNumTicks = Math.floor((this.maxY - this.minY) / this.tickSizeY);
-
-    // draw axes
-    this.ctx.lineWidth = 1;
-    for (let i = 0; i < newNumTicks; i++) {
-      const value = this.minY + (i + 1) * this.tickSizeY;
-
-      const tickPos = Math.floor(this.pixY(value)) + 0.5;
-
-      // add value (Y axis) tick to array to draw on top of graph
-      ticksY.push([value, tickPos]);
-
-      // draw horizontal line
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.padX1, tickPos);
-      this.ctx.lineTo(this.width - this.padX2, tickPos);
-
-      this.ctx.strokeStyle = this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT
-        ? (value > 0 ? COLOR_PROFIT : COLOR_LOSS) : COLOR_LIGHT_GREY;
-      this.ctx.stroke();
-    }
-
-    // draw time (X axis) ticks
-    const y0 = this.pixY(this.minY);
-
-    this.ctx.font = FONT_AXIS_LABEL;
-    this.ctx.fillStyle = axisTextColor;
-    this.ctx.textAlign = "left";
-    this.ctx.textBaseline = "bottom";
-
-    const tickAngle = -Math.PI / 6;
-    const tickSize = 10;
-
-    timeTicks.forEach(tick => {
-      const thisTickSize = tickSize * 0.5 * (tick.major + 1);
-
-      this.ctx.beginPath();
-      this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
-      this.ctx.moveTo(tick.pix, y0);
-      this.ctx.lineTo(tick.pix, y0 - thisTickSize);
-      this.ctx.stroke();
-      this.ctx.closePath();
-
-      if (tick.major > 1) {
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = COLOR_LIGHT_GREY;
-        this.ctx.moveTo(tick.pix, y0 - thisTickSize);
-        this.ctx.lineTo(tick.pix, this.padY1);
-        this.ctx.stroke();
-        this.ctx.closePath();
-      }
-
-      if (tick.text) {
-        this.ctx.save();
-        this.ctx.translate(tick.pix, y0 - thisTickSize);
-        this.ctx.rotate(tickAngle);
-        this.ctx.fillText(tick.text, 0, 0);
-        this.ctx.restore();
-      }
-    });
-
-    const mainIndex = this.data.length - 1;
-
-    // plot past data
-    if (this.dataVisible) {
-      this.dataVisible.forEach((line, index) => {
-        const mainLine = index === mainIndex && this.fundLines[0] &&
-          this.mode !== GRAPH_FUND_HISTORY_MODE_PRICE;
-
-        this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
-        if (this.mode !== GRAPH_FUND_HISTORY_MODE_ABSOLUTE) {
-          this.drawCubicLine(line[1], [line[0]]);
-        }
-        else {
-          this.drawLine(line[1], line[0]);
-        }
-      });
-    }
-
-    // draw Y axis
-    this.ctx.fillStyle = axisTextColor;
-    this.ctx.textBaseline = "bottom";
-    this.ctx.textAlign = "right";
-    this.ctx.font = FONT_AXIS_LABEL;
-
-    for (const tick of ticksY) {
-      const tickName = this.formatValue(tick[0], true, true);
-
-      this.ctx.fillText(tickName, this.width - this.padX2, tick[1]);
-    }
-
+  handleMouseover() {
     // highlight point on mouseover
     if (
       this.hlPoint[0] > -1 &&
@@ -606,7 +504,27 @@ export class GraphFundHistory extends LineGraph {
     else {
       this.$label.hide();
     }
+  }
+  drawData() {
+    const mainIndex = this.data.length - 1;
 
+    // plot past data
+    if (this.dataVisible) {
+      this.dataVisible.forEach((line, index) => {
+        const mainLine = index === mainIndex && this.fundLines[0] &&
+          this.mode !== GRAPH_FUND_HISTORY_MODE_PRICE;
+
+        this.lineWidth = mainLine ? GRAPH_FUND_HISTORY_LINE_WIDTH : 1;
+        if (this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
+          this.drawCubicLine(line[1], [line[0]]);
+        }
+        else {
+          this.drawLine(line[1], line[0]);
+        }
+      });
+    }
+  }
+  drawModeIndicator() {
     // draw current mode at top right corner
     const modes = ["ROI", "Value", "Price"];
     const modeText = `Mode: ${modes[this.mode]}`;
@@ -614,6 +532,95 @@ export class GraphFundHistory extends LineGraph {
     this.ctx.font = FONT_GRAPH_TITLE;
     this.ctx.fillStyle = COLOR_DARK;
     this.ctx.fillText(modeText, this.width - 5, 5);
+  }
+  drawAxes() {
+    const axisTextColor = COLOR_DARK;
+    const timeTicks = this.getTimeScale(this.startTime);
+
+    this.ctx.lineWidth = 1;
+
+    // calculate tick range
+    const numTicks = isNaN(this.tickSizeY) ? 0 :
+      Math.floor((this.maxY - this.minY) / this.tickSizeY);
+    const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
+      const value = this.minY + (key + 1) * this.tickSizeY;
+      const pos = Math.floor(this.pixY(value)) + 0.5;
+      return { value, pos };
+    });
+
+    // draw horizontal lines
+    ticksY.forEach(tick => {
+      // draw horizontal line
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.padX1, tick.pos);
+      this.ctx.lineTo(this.width - this.padX2, tick.pos);
+
+      this.ctx.strokeStyle = this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT
+        ? (tick.value > 0 ? COLOR_PROFIT : COLOR_LOSS) : COLOR_LIGHT_GREY;
+      this.ctx.stroke();
+    });
+
+    // draw time (X axis) ticks
+    const y0 = this.pixY(this.minY);
+
+    this.ctx.font = FONT_AXIS_LABEL;
+    this.ctx.fillStyle = axisTextColor;
+    this.ctx.textAlign = "left";
+    this.ctx.textBaseline = "bottom";
+
+    const tickAngle = -Math.PI / 6;
+    const tickSize = 10;
+
+    timeTicks.forEach(tick => {
+      const thisTickSize = tickSize * 0.5 * (tick.major + 1);
+
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
+      this.ctx.moveTo(tick.pix, y0);
+      this.ctx.lineTo(tick.pix, y0 - thisTickSize);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      if (tick.major > 1) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+        this.ctx.moveTo(tick.pix, y0 - thisTickSize);
+        this.ctx.lineTo(tick.pix, this.padY1);
+        this.ctx.stroke();
+        this.ctx.closePath();
+      }
+
+      if (tick.text) {
+        this.ctx.save();
+        this.ctx.translate(tick.pix, y0 - thisTickSize);
+        this.ctx.rotate(tickAngle);
+        this.ctx.fillText(tick.text, 0, 0);
+        this.ctx.restore();
+      }
+    });
+
+    // draw Y axis
+    this.ctx.fillStyle = axisTextColor;
+    this.ctx.textBaseline = "bottom";
+    this.ctx.textAlign = "right";
+    this.ctx.font = FONT_AXIS_LABEL;
+
+    ticksY.forEach(tick => {
+      const tickName = this.formatValue(tick.value, true, true);
+      this.ctx.fillText(tickName, this.width - this.padX2, tick.pos);
+    });
+  }
+  draw() {
+    if (!this.supported) {
+      return;
+    }
+    // clear canvas
+    this.ctx.clearRect(0, 0, this.width, this.height);
+
+    this.drawAxes();
+    this.drawData();
+    this.handleMouseover();
+    this.drawModeIndicator();
   }
   mouseOver(x, y) {
     if (!this.data) {
