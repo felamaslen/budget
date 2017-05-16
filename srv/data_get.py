@@ -36,6 +36,14 @@ def get_year_months(past_months, future_months):
             if (y > start_year or m >= start_month) and \
                     (y < end_year or m <= end_month)]
 
+def get_fund_cost(year_month, transactions):
+    """ gets the total cost up to a certain date of a fund """
+    return reduce(lambda last, item: \
+        last + (item['c'] if \
+        (year_month[0] > item['d'][0] or \
+        (year_month[0] == item['d'][0] and year_month[1] >= item['d'][1])) \
+        else 0), transactions, 0)
+
 class Overview(Processor):
     """ get overview data """
     def __init__(self, db, uid):
@@ -76,21 +84,42 @@ class Overview(Processor):
 
     def get_category_data(self, category):
         """ get costs for each month in each category """
-        union = "SELECT %d AS y, %d AS m UNION " % self.year_months[0] + \
-                " UNION ".join(["SELECT %d, %d" % self.year_months[i] \
-                for i in range(1, len(self.year_months))])
+        get_funds = category == "funds"
+        if get_funds:
+            query = """
+            SELECT transactions FROM `funds` WHERE uid = %d
+            """ % (self.uid)
 
-        query = """
-        SELECT SUM(cost) AS month_cost FROM (%s) AS dates
-        LEFT JOIN `%s` AS list
-        ON uid = %d AND ((list.year = dates.y AND list.month = dates.m))
-        GROUP BY y, m
-        """ % (union, category, self.uid)
+        else:
+            union = "SELECT %d AS y, %d AS m UNION " % self.year_months[0] + \
+                    " UNION ".join(["SELECT %d, %d" % self.year_months[i] \
+                    for i in range(1, len(self.year_months))])
+
+            query = """
+            SELECT SUM(cost) AS month_cost FROM (%s) AS dates
+            LEFT JOIN `%s` AS list
+            ON uid = %d AND ((list.year = dates.y AND list.month = dates.m))
+            GROUP BY y, m
+            """ % (union, category, self.uid)
 
         result = self.dbx.query(query, [])
 
         if result is False:
             raise EnvironmentError("database error")
+
+        if get_funds:
+            transactions = []
+            for row in result:
+                try:
+                    fund_transactions = json.loads(row[0])
+                    transactions.append(fund_transactions)
+                except ValueError:
+                    pass # bad json; ignore
+
+            return [reduce(lambda last, item: last + item, [ \
+                    get_fund_cost(self.year_months[j], transactions[i]) \
+                    for i in range(len(transactions))]) \
+                    for j in range(len(self.year_months))]
 
         return [0 if row[0] is None else int(row[0]) for row in result]
 

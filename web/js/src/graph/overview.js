@@ -32,6 +32,7 @@ export class GraphBalance extends LineGraph {
     this.dataPast = options.dataPast;
     this.dataFuture = options.dataFuture;
     this.dataOld = options.dataOld;
+    this.dataFundsRaw = options.dataFunds;
 
     this.colors = [COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED];
     this.stroke = true;
@@ -48,8 +49,6 @@ export class GraphBalance extends LineGraph {
     const $checkbox = $("<span></span>").addClass("checkbox");
     $showAll.append($checkbox);
     this.$gCont.append($showAll);
-
-    this.processData();
   }
   toggleShowAll() {
     this.showAll = !this.showAll;
@@ -163,8 +162,11 @@ export class GraphBalance extends LineGraph {
     // draw major Y ticks
     this.ctx.strokeStyle = COLOR_LIGHT_GREY;
     const ticksMajor = ticksY.filter(tick => tick.major);
-    ticksMajor.filter(tick => tick.major).forEach(drawTick);
-    return ticksMajor;
+    ticksMajor.forEach(drawTick);
+    ticksMajor.forEach(tick => {
+      const tickName = formatCurrency(tick.value, { raw: true, noPence: true });
+      this.ctx.fillText(tickName, this.padX1, tick.pos);
+    });
   }
   draw() {
     if (!this.supported) {
@@ -173,19 +175,21 @@ export class GraphBalance extends LineGraph {
 
     // clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
-    const ticksY = this.drawAxes();
+    this.drawAxes();
 
     // plot past + future predicted data
     this.drawCubicLine(this.dataMain, this.colors);
+    this.fill = true;
+    const tension = this.tension;
+    this.tension = 1;
+    this.drawCubicLine(this.dataFunds, ["rgba(200, 200, 200, 0.5)", "#ffcfcf"]);
+    this.tension = tension;
+    this.fill = false;
 
     // draw Y axis
     this.ctx.textBaseline = "bottom";
     this.ctx.textAlign = "left";
 
-    ticksY.forEach(tick => {
-      const tickName = formatCurrency(tick.value, { raw: true, noPence: true });
-      this.ctx.fillText(tickName, this.padX1, tick.pos);
-    });
     this.drawKey();
   }
   setRanges() {
@@ -221,17 +225,20 @@ export class GraphBalance extends LineGraph {
       const value = key < this.futureKey ? item : dataPredicted[key - this.oldOffset];
       return [time, value];
     });
+    this.dataPredicted = dataPredicted.map(indexPoints);
+    this.dataFunds = Array.apply(null, new Array(this.oldOffset))
+    .map(Number.prototype.valueOf, 0).concat(this.dataFundsRaw)
+    .map((value, key) => [this.dataMain[key][0], value / 100]);
 
     // for changing the colour
     this.transition = [this.futureKey - 1];
-
-    this.dataPredicted = dataPredicted.map(indexPoints);
     this.setRanges();
   }
-  update(costBalance, costPredicted, balanceOld) {
+  update(costBalance, costPredicted, balanceOld, funds) {
     this.dataPast = costBalance;
     this.dataFuture = costPredicted;
     this.dataOld = balanceOld;
+    this.dataFundsRaw = funds;
 
     this.processData();
     this.draw();

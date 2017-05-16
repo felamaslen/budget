@@ -375,15 +375,16 @@ export class LineGraph extends Graph {
     if (this.fill) {
       this.ctx.beginPath();
       this.ctx.fillStyle = color[0];
-      this.ctx.moveTo(this.pixX(0), this.pixY(0));
+      this.ctx.moveTo(this.pixX(points[0][0]), this.pixY(points[0][1]));
 
       for (const piece of curve) {
         piece.forEach(point => {
           this.ctx.lineTo(point[0], point[1]);
         });
       }
-      this.ctx.lineTo(this.pixX(points.length - 1), this.pixY(0));
-      this.ctx.lineTo(this.pixX(0), this.pixY(0));
+      this.ctx.lineTo(this.pixX(points[points.length - 1][0]),
+                      this.pixY(points[points.length - 1][1]));
+      this.ctx.lineTo(this.pixX(points[points.length - 1][0]), this.pixY(0));
       this.ctx.fill();
       this.ctx.closePath();
     }
@@ -431,6 +432,12 @@ export class LineGraph extends Graph {
 
     this.ctx.strokeStyle = theColor;
     this.ctx.stroke();
+    if (this.fill) {
+      this.ctx.lineTo(this.pixX(p[p.length - 1][0]), this.pixY(0));
+      this.ctx.lineTo(this.pixX(p[0][0]), this.pixY(0));
+      this.ctx.fillStyle = theColor;
+      this.ctx.fill();
+    }
     this.ctx.closePath();
   }
 }
