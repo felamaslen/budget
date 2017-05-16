@@ -21,7 +21,7 @@ export class PageOverview extends Page {
     super({ page: "overview" }, api, state);
 
     this.categories = [
-      "bills",
+      "funds", "bills",
       "food", "general", "holiday", "social",
       "in", "out", "net",
       "predicted", "balance"
@@ -141,7 +141,6 @@ export class PageOverview extends Page {
       this.scores[category] = thisScores;
     }
   }
-
   calculateFutures() {
     // calculate futures (from past averages)
     const average = {};
@@ -163,7 +162,6 @@ export class PageOverview extends Page {
       Array.prototype.splice.apply(this.data.cost[category], spliceArgs);
     }
   }
-
   calculateColumns() {
     // calculate total spend (including bills) for each month
     this.data.cost.out = this.yearMonths.map((yearMonth, key) => {
@@ -240,17 +238,14 @@ export class PageOverview extends Page {
       }
     }
   }
-
   onBalanceEdited(key, val) {
     this.data.cost.balance[key] = val;
 
     this.update();
   }
-
   onBalanceEditError() {
     this.state.error.newMessage("Error updating value! (Server error)", 2, MSG_TIME_ERROR);
   }
-
   onBalanceEditRequestComplete(key, callback) {
     this.state.editing.deactivate(this.data.cost.balance[key]);
 
@@ -263,7 +258,6 @@ export class PageOverview extends Page {
   addCategory(key, category) {
     this.$thr.append($("<th></th>").text(category));
   }
-
   addTableCell(key, cKey, category) {
     this.$td[key][category] = $("<td></td>")
     .addClass("cost")
@@ -279,7 +273,6 @@ export class PageOverview extends Page {
 
     this.$tr[key].append(this.$td[key][category]);
   }
-
   addTableRow(key, yearMonth) {
     this.$tr[key] = $("<tr></tr>")
     .toggleClass(
@@ -302,7 +295,6 @@ export class PageOverview extends Page {
 
     this.$tbody.append(this.$tr[key]);
   }
-
   addGraphs() {
     this.graphBalance = new GraphBalance({
       width:  500,
@@ -312,6 +304,7 @@ export class PageOverview extends Page {
       dataPast: [],
       dataFuture: [],
       dataOld: [],
+      dataFunds: [],
       startYear: this.data.startYearMonth[0],
       startMonth: this.data.startYearMonth[1],
       currentYear: this.data.currentYear,
@@ -344,19 +337,17 @@ export class PageOverview extends Page {
       this.data.cost[category][key] < 0)
     ).children(".text").html(formatCurrency(this.data.cost[category][key]));
   }
-
   updateYearMonths(key) {
     this.categories.forEach((category, cKey) => {
       this.updateCategories(key, cKey, category);
     });
   }
-
   updateGraphs() {
     this.graphBalance.update(
-      this.data.cost.balance, this.data.cost.predicted, this.data.cost.old);
+      this.data.cost.balance, this.data.cost.predicted,
+      this.data.cost.old, this.data.cost.funds);
     this.graphSpend.update(this.data.cost);
   }
-
   update(data) {
     if (data) {
       this.data = data;
@@ -380,28 +371,41 @@ export class PageOverview extends Page {
 
   processCategory(category) {
     if (this.state.pages[category]) {
-      const doneRows = [];
+      if (category === "funds") {
+        const numRows = getYearMonthRow(this.data.startYearMonth[0], this.data.startYearMonth[1],
+                                        this.data.endYearMonth[0], this.data.endYearMonth[1]) + 1;
+        const data = this.state.pages[category].data;
+        this.data.cost[category] = Array.apply(null, new Array(numRows)).map((_, key) => {
+          const year = this.data.startYearMonth[0] +
+            Math.floor((key + this.data.startYearMonth[1]) / 12);
+          const month = (this.data.startYearMonth[1] + key) % 12;
+          return data.reduce((last, item) => {
+            return last + item.transactions.list.reduce((sum, transaction) => {
+              return sum + (((transaction.date.year === year && transaction.date.month <= month) ||
+                           transaction.date.year < year ? transaction.cost : 0) ? transaction.cost : 0);
+            }, 0);
+          }, 0);
+        });
+      }
+      else {
+        const doneRows = [];
 
-      for (let i = 0; i < this.state.pages[category].data.length; i++) {
-        const year  = this.state.pages[category].data[i].date.year;
-        const month = this.state.pages[category].data[i].date.month;
+        this.state.pages[category].data.forEach((item, key) => {
+          const year = item.date.year;
+          const month = item.date.month;
 
-        const row = getYearMonthRow(
-          this.data.startYearMonth[0], this.data.startYearMonth[1],
-          year, month
-        );
+          const row = getYearMonthRow(this.data.startYearMonth[0], this.data.startYearMonth[1],
+                                      year, month);
+          const doneRow = doneRows.indexOf(row) > -1;
+          if (!doneRow) {
+            this.data.cost[category][row] = 0;
+            doneRows.push(row);
+          }
 
-        const doneRow = doneRows.indexOf(row) > -1;
-
-        if (!doneRow) {
-          this.data.cost[category][row] = 0;
-
-          doneRows.push(row);
-        }
-
-        if (row > -1 && row < this.data.cost.in.length) {
-          this.data.cost[category][row] += this.state.pages[category].data[i].cost;
-        }
+          if (row > -1 && row < this.data.cost.in.length) {
+            this.data.cost[category][row] += this.state.pages[category].data[key].cost;
+          }
+        });
       }
     }
   }
