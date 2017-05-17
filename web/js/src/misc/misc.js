@@ -2,6 +2,8 @@
  * Miscllaneous functions
  */
 
+import { AVERAGE_MEDIAN, AVERAGE_MEAN_GEOM } from "const";
+
 export function trim(string) {
   while (string.indexOf(" ") === 0) {
     string = string.substring(1);
@@ -33,10 +35,31 @@ export function arraySum(array) {
     return a + b;
   }, 0);
 }
-export function arrayAverage(array, offset) {
-  return array.slice(0, -1 * offset).reduce((red, item) => {
-    return red + item;
-  }) / (array.length - offset);
+export function arrayAverage(array, offset, mode) {
+  const values = array.slice(0, -offset);
+
+  if (mode === AVERAGE_MEDIAN) {
+    const sorted = values.sort();
+    if (Math.floor(sorted.length / 2) === Math.ceil(sorted.length / 2)) {
+      // even: get the middle two values and find the average of them
+      const low = sorted[Math.floor(sorted.length / 2) - 1];
+      const high = sorted[Math.floor(sorted.length / 2)];
+      return (low + high) / 2;
+    }
+    // odd: get the middle value
+    return sorted[Math.floor((sorted.length - 1) / 2)];
+  }
+
+  if (mode === AVERAGE_MEAN_GEOM) {
+    const nonNegativeValues = values.filter(value => value > 0).map(value => value || 1);
+    if (nonNegativeValues.length === 0) {
+      return 0;
+    }
+    return Math.pow(nonNegativeValues.reduce((a, b) => a * b), 1 / nonNegativeValues.length);
+  }
+
+  // mean by default
+  return arraySum(values) / values.length;
 }
 export function hundredth(item) {
   return item / 100;

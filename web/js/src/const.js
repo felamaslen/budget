@@ -61,6 +61,10 @@ export const GRAPH_KEY_OFFSET_Y = 34;
 export const GRAPH_ZOOM_SPEED = 1 / 10;
 export const GRAPH_ZOOM_MAX = 1 / 100;
 
+export const AVERAGE_MEAN = 0;
+export const AVERAGE_MEDIAN = 1;
+export const AVERAGE_MEAN_GEOM = 2;
+
 export const COLOR_GRAPH_TITLE = "#000";
 export const COLOR_DARK = "#333";
 export const COLOR_LIGHT = "#eee";

@@ -5,7 +5,7 @@
 import $ from "../../lib/jquery.min";
 
 import {
-  COLOR_CATEGORY, MSG_TIME_ERROR
+  COLOR_CATEGORY, MSG_TIME_ERROR, AVERAGE_MEDIAN
 } from "const";
 
 import { arrayAverage, median, months, getYearMonthRow } from "misc/misc";
@@ -143,24 +143,21 @@ export class PageOverview extends Page {
   }
   calculateFutures() {
     // calculate futures (from past averages)
-    const average = {};
-
     const futureCategories = ["food", "general", "holiday", "social"];
 
-    for (const category of futureCategories) {
-      average[category] = arrayAverage(this.data.cost[category], this.data.futureMonths);
+    futureCategories.forEach(category => {
+      const average = arrayAverage(
+        this.data.cost[category], this.data.futureMonths, AVERAGE_MEDIAN);
 
+      // find where to splice future values, and splice them in
       const spliceArgs = [
         this.data.cost[category].length - this.data.futureMonths,
         this.data.futureMonths
-      ];
-
-      for (let i = 0; i < this.data.futureMonths; i++) {
-        spliceArgs.push(average[category]);
-      }
+      ].concat(Array.apply(null, new Array(this.data.futureMonths)).map(
+          () => average));
 
       Array.prototype.splice.apply(this.data.cost[category], spliceArgs);
-    }
+    });
   }
   calculateColumns() {
     // calculate total spend (including bills) for each month
