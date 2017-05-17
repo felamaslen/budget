@@ -230,7 +230,7 @@ class ListData(Processor):
             'limit': {
                 'food':     1,
                 'general':  5,
-                'bills':    24
+                'bills':    12
             }
         }
 
