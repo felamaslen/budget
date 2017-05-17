@@ -543,15 +543,18 @@ export class GraphFundHistory extends LineGraph {
     this.ctx.lineWidth = 1;
 
     // draw profit / loss backgrounds
-    if (this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT && this.minY < 0 && this.maxY > 0) {
-      const zero = this.pixY(0);
-      this.ctx.fillStyle = COLOR_PROFIT_LIGHT;
-      this.ctx.fillRect(this.padX1, this.padY1,
-                        this.width - this.padX1 - this.padX2, zero - this.padY1);
-
-      this.ctx.fillStyle = COLOR_LOSS_LIGHT;
-      this.ctx.fillRect(this.padX1, zero,
-                        this.width - this.padX1 - this.padX2, this.height - this.padY2 - zero);
+    if (this.mode === GRAPH_FUND_HISTORY_MODE_PERCENT) {
+      const zero = this.pixY(Math.min(Math.max(0, this.minY), this.maxY));
+      if (this.maxY > 0) {
+        this.ctx.fillStyle = COLOR_PROFIT_LIGHT;
+        this.ctx.fillRect(this.padX1, this.padY1,
+                          this.width - this.padX1 - this.padX2, zero - this.padY1);
+      }
+      if (this.minY < 0) {
+        this.ctx.fillStyle = COLOR_LOSS_LIGHT;
+        this.ctx.fillRect(this.padX1, zero,
+                          this.width - this.padX1 - this.padX2, this.height - this.padY2 - zero);
+      }
     }
 
     // calculate tick range
