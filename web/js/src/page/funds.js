@@ -36,7 +36,7 @@ export class PageFunds extends PageList {
     this.$graphs.append(this.worldMap.$elem);
   }
 
-  calculateGain(units, priceVal, cost, sold) {
+  calculateGain(units, priceVal, cost) {
     const price = priceVal[0];
     const lastChange = priceVal[1];
     let pct = 0;
@@ -90,7 +90,7 @@ export class PageFunds extends PageList {
     <span class="${dayGainClass}">${dayGain}</span>
     `;
 
-    return { pct, txt, sold };
+    return { pct, txt };
   }
   addGainText(gain, $span) {
     const color = gain.pct >= 0 ? this.upColor : this.downColor;
@@ -100,7 +100,6 @@ export class PageFunds extends PageList {
       : [255, 255, 255];
 
     return $span
-      .toggleClass("sold", gain.sold)
       .toggleClass("profit", gain.pct > 0)
       .toggleClass("loss", gain.pct < 0)
       .css("background-color", `rgb(${thisColor.join(",")})`)
@@ -155,8 +154,8 @@ export class PageFunds extends PageList {
       const cost = transactions.getLastCost();
       const price = this.$li[id].transactions.data("price");
       const sold = transactions.sold();
-
-      gain.push(this.calculateGain(units, price, cost, sold));
+      $(li).toggleClass("sold", sold);
+      gain.push(this.calculateGain(units, price, cost));
     });
 
     const pct = gain.map(item => item.pct);
@@ -219,11 +218,12 @@ export class PageFunds extends PageList {
     const price = [newData.P, lastChange];
     const cost = newData.t.getLastCost();
     const sold = newData.t.sold();
+    this.$lis[id].toggleClass("sold", sold);
 
     this.$li[id].transactions.data("price", price);
     this.$li[id].gain = $("<span></span>");
     const $gainSpan = this.addGainText(
-      this.calculateGain(units, price, cost, sold),
+      this.calculateGain(units, price, cost),
       $("<span></span>").addClass("text")
     );
     this.$li[id].gain.addClass("gain").append($gainSpan);

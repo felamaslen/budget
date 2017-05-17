@@ -703,7 +703,7 @@ button {
 .graph-container {
   width: 500px;
   height: 300px;
-  z-index: 1;
+  z-index: 2;
   &.graph-fund-history {
     .label {
       padding: 0.1em 0.2em;
@@ -1158,10 +1158,23 @@ button {
           color: #ff2c2c;
         }
       }
-      .sold {
+    }
+    .sold {
+      &:before {
+        content: "";
+        width: 100%;
+        height: inherit;
+        display: block;
+        position: absolute;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .fund-graph {
+        filter: grayscale(100%);
+      }
+      .gain {
         font-style: italic;
         font-weight: normal;
-        filter: opacity(50%);
       }
     }
   }
@@ -1531,7 +1544,7 @@ button {
   
   .graph-container {
     position: fixed;
-    z-index: 1;
+    z-index: 2;
     background: rgba(255, 255, 255, .8);
     box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
   }
@@ -1582,7 +1595,6 @@ button {
       width: 500px;
       left: 1000px;
       top: @top_nav + 40;
-      z-index: 1;
     }
     .graph-world-map {
       top: @top_nav + 350;
