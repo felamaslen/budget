@@ -228,6 +228,7 @@ class ListData(Processor):
             },
             # limit the view to N months per group (can page between groups)
             'limit': {
+                'in':       18,
                 'food':     1,
                 'general':  5,
                 'bills':    12

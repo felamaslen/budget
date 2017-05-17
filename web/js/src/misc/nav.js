@@ -23,6 +23,7 @@ const pageDef = {
       item: "",
       cost: "0.00"
     },
+    limit: true,
     daily: false,
     drawPie: true,
     pieWidth: 800
