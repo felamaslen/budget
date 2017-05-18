@@ -180,10 +180,17 @@ export class GraphBalance extends LineGraph {
 
     // plot past + future predicted data
     this.drawCubicLine(this.dataMain, this.colors);
-    this.fill = true;
+
+    // plot funds data
+    const lineWidth = this.lineWidth;
     const tension = this.tension;
+
+    this.fill = true;
+    this.lineWidth = 1;
     this.tension = 1;
     this.drawCubicLine(this.dataFunds, ["rgba(200, 200, 200, 0.5)", "#ffcfcf"]);
+
+    this.lineWidth = lineWidth;
     this.tension = tension;
     this.fill = false;
 
