@@ -30,6 +30,9 @@ export function numberFormat(number) {
 }
 export function formatCurrency(number, options) {
   options = options || {};
+  if (typeof options.precision === "undefined") {
+    options.precision = 0;
+  }
   let result = "";
 
   if (!options.brackets) {
@@ -48,7 +51,7 @@ export function formatCurrency(number, options) {
   let abbreviation = "";
   if (options.abbreviate && number !== 0) {
     const abbr = ["k", "m", "bn", "tn"];
-    log = Math.min(Math.floor(Math.log(absValuePounds) / Math.log(10) / 3), abbr.length);
+    log = Math.min(Math.floor(Math.log10(absValuePounds) / 3), abbr.length);
     if (log > 0) {
       abbreviation = abbr[log - 1];
     }
@@ -60,6 +63,9 @@ export function formatCurrency(number, options) {
   let value;
   if (log > 0) {
     value = absValuePounds / Math.pow(10, log * 3);
+    if (options.abbreviate) {
+      value = round(value, options.precision);
+    }
   }
   else {
     value = absValuePounds;
@@ -68,8 +74,7 @@ export function formatCurrency(number, options) {
     }
   }
   if (options.noPence) {
-    const round = log ? Math.pow(10, options.precision) : 1;
-    value = Math.round(round * value) / round;
+    value = round(value, log ? options.precision : 0);
   }
   const formatted = numberFormat(value);
 
@@ -89,6 +94,11 @@ export function formatData(val, type, raw) {
   default:
     return val;
   }
+}
+
+const round = (number, precision) => {
+  const exp = Math.pow(10, precision);
+  return Math.round(exp * number) / exp;
 }
 
 /**

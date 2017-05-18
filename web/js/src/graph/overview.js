@@ -163,7 +163,9 @@ export class GraphBalance extends LineGraph {
     const ticksMajor = ticksY.filter(tick => tick.major);
     ticksMajor.forEach(drawTick);
     ticksMajor.forEach(tick => {
-      const tickName = formatCurrency(tick.value, { raw: true, noPence: true });
+      const tickName = formatCurrency(tick.value, {
+        raw: true, noPence: true, abbreviate: true
+      });
       this.ctx.fillText(tickName, this.padX1, tick.pos);
     });
   }
@@ -331,7 +333,9 @@ export class GraphSpend extends LineGraph {
     this.ctx.fillStyle = COLOR_GRAPH_TITLE;
 
     axes.ticksY.forEach(tick => {
-      const tickName = "£" + numberFormat(tick.value);
+      const tickName = formatCurrency(tick.value, {
+        raw: true, noPence: true, abbreviate: true, noDivide: true
+      });
       this.ctx.fillText(tickName, this.pixX(0), tick.pos);
     });
 
