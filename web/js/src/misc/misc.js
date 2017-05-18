@@ -36,7 +36,7 @@ export function arraySum(array) {
   }, 0);
 }
 export function arrayAverage(array, offset, mode) {
-  const values = array.slice(0, -offset);
+  const values = offset ? array.slice(0, -offset) : array;
 
   if (mode === AVERAGE_MEDIAN) {
     const sorted = values.sort();
