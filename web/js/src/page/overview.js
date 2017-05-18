@@ -26,12 +26,15 @@ export class PageOverview extends Page {
       "in", "out", "net",
       "predicted", "balance"
     ];
+
+    const abbreviateCurrency = {
+      noPence: true,
+      abbreviate: true,
+      precision: 1
+    };
     this.displayFormat = {
-      funds: {
-        noPence: true,
-        abbreviate: true,
-        precision: 1
-      }
+      funds: abbreviateCurrency,
+      predicted: abbreviateCurrency
     };
 
     this.colors = COLOR_CATEGORY;
