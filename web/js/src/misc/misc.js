@@ -91,6 +91,11 @@ export const classNames = obj => {
   return array.join(" ");
 };
 
+export const randnBm = () => {
+  const u = 1 - Math.random();
+  const v = 1 - Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+};
 export const pmod = (i, n) => ((i % n) + n) % n;
 export const getMovingAverage = (data, period) => data.map((item, key) => {
   if (key < period - 1) {

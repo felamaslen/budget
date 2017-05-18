@@ -16,7 +16,7 @@ import { getTickSize, LineGraph } from "graph/graph";
 import { today } from "misc/date";
 import { hundredth, indexPoints, months, arraySum, capitalise } from "misc/misc";
 import { rgb } from "misc/color";
-import { formatCurrency, numberFormat } from "misc/format";
+import { formatCurrency } from "misc/format";
 
 export class GraphBalance extends LineGraph {
   constructor(options, api, state) {
