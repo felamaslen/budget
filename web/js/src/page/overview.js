@@ -27,14 +27,10 @@ export class PageOverview extends Page {
       "predicted", "balance"
     ];
 
-    const abbreviateCurrency = {
-      noPence: true,
+    this.displayFormat = {
+      noPence: false,
       abbreviate: true,
       precision: 1
-    };
-    this.displayFormat = {
-      stocks: abbreviateCurrency,
-      predicted: abbreviateCurrency
     };
 
     this.colors = COLOR_CATEGORY;
@@ -334,7 +330,7 @@ export class PageOverview extends Page {
   }
 
   updateCategories(key, cKey, category) {
-    const format = this.displayFormat[category] || {};
+    const format = category === "balance" ? {} : this.displayFormat;
     this.$td[key][category]
     .data("val", this.data.cost[category][key])
     .css("background-color", getColorFromScore(
