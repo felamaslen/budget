@@ -82,7 +82,7 @@ export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 export const COLOR_GRAPH_FUND_LINE = "#000";
 
 export const COLOR_CATEGORY = {
-  funds:  [84, 110, 122],
+  stocks:  [84, 110, 122],
   bills: [183, 28, 28],
   food: [67, 160, 71],
   general: [1, 87, 155],

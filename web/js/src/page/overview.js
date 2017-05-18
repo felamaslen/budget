@@ -21,7 +21,7 @@ export class PageOverview extends Page {
     super({ page: "overview" }, api, state);
 
     this.categories = [
-      "funds", "bills",
+      "stocks", "bills",
       "food", "general", "holiday", "social",
       "in", "out", "net",
       "predicted", "balance"
@@ -33,7 +33,7 @@ export class PageOverview extends Page {
       precision: 1
     };
     this.displayFormat = {
-      funds: abbreviateCurrency,
+      stocks: abbreviateCurrency,
       predicted: abbreviateCurrency
     };
 
@@ -42,6 +42,9 @@ export class PageOverview extends Page {
 
   hookDataLoadedBeforeRender(callback, res) {
     this.data = res.data;
+
+    const fundOldOffset = this.data.cost.funds.length - this.data.cost.balance.length;
+    this.data.cost.stocks = this.data.cost.funds.slice(fundOldOffset);
 
     this.getYearMonths();
   }
