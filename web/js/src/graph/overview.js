@@ -5,7 +5,7 @@
 import $ from "../../lib/jquery.min";
 
 import {
-  COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED,
+  COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
   COLOR_GRAPH_TITLE, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_LIGHT, COLOR_CATEGORY,
   FONT_GRAPH_TITLE, FONT_GRAPH_KEY_SMALL, FONT_AXIS_LABEL, FONT_GRAPH_KEY,
   GRAPH_BALANCE_NUM_TICKS, GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y,
@@ -88,8 +88,11 @@ export class GraphBalance extends LineGraph {
     this.ctx.lineTo(154, 40);
     this.ctx.stroke();
     this.ctx.closePath();
-
     this.ctx.fillText("Predicted", 158, 40);
+
+    this.ctx.fillText("Funds", 78, 57);
+    this.ctx.fillStyle = COLOR_BALANCE_STOCKS;
+    this.ctx.fillRect(50, 54, 24, 6);
   }
   drawAxes() {
     // draw axes
@@ -169,6 +172,20 @@ export class GraphBalance extends LineGraph {
       this.ctx.fillText(tickName, this.padX1, tick.pos);
     });
   }
+  drawFundsLine() {
+    // plot funds data
+    const lineWidth = this.lineWidth;
+    const tension = this.tension;
+
+    this.fill = true;
+    this.lineWidth = 1;
+    this.tension = 1;
+    this.drawCubicLine(this.dataFunds, [COLOR_BALANCE_STOCKS, "#ff9a9a"]);
+
+    this.lineWidth = lineWidth;
+    this.tension = tension;
+    this.fill = false;
+  }
   draw() {
     if (!this.supported) {
       return;
@@ -181,18 +198,7 @@ export class GraphBalance extends LineGraph {
     // plot past + future predicted data
     this.drawCubicLine(this.dataMain, this.colors);
 
-    // plot funds data
-    const lineWidth = this.lineWidth;
-    const tension = this.tension;
-
-    this.fill = true;
-    this.lineWidth = 1;
-    this.tension = 1;
-    this.drawCubicLine(this.dataFunds, ["rgba(200, 200, 200, 0.5)", "#ffcfcf"]);
-
-    this.lineWidth = lineWidth;
-    this.tension = tension;
-    this.fill = false;
+    this.drawFundsLine();
 
     // draw Y axis
     this.ctx.textBaseline = "bottom";

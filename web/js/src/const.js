@@ -77,6 +77,7 @@ export const COLOR_LOSS_LIGHT = "#fff4f4";
 
 export const COLOR_BALANCE_ACTUAL = "#039";
 export const COLOR_BALANCE_PREDICTED = "#f00";
+export const COLOR_BALANCE_STOCKS = "rgba(200, 200, 200, 0.5)";
 
 export const COLOR_GRAPH_FUND_ITEM = "#4286f4";
 export const COLOR_GRAPH_FUND_LINE = "#000";
