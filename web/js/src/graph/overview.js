@@ -6,6 +6,7 @@ import $ from "../../lib/jquery.min";
 
 import { getTickSize, LineGraph } from "graph/graph";
 import { arraySum, capitalise } from "misc/misc";
+import { today } from "misc/date";
 
 import {
   COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED,
@@ -205,10 +206,14 @@ export class GraphBalance extends LineGraph {
   }
   getTime(key) {
     // converts a key index to a UNIX time stamp
-    key -= this.oldOffset;
-    const year = this.startYear + Math.floor((key + this.startMonth) / 12);
-    const month = (this.startMonth + key + 12) % 12;
-    return new Date(year, month - 1, 1).getTime() / 1000;
+    const theKey = key - this.oldOffset;
+    const year = this.startYear + Math.floor((theKey + this.startMonth - 1) / 12);
+    const month = (this.startMonth + theKey + 11) % 12 + 1; // 1-indexed
+    if (year === today.year && month === today.month) { // today is 1-indexed
+      return today.timestamp();
+    }
+    // return the last day of this month
+    return new Date(year, month, 1).getTime() / 1000 - 86400;
   }
   processData() {
     const dataActual = (this.showAll ? this.dataOld.concat(this.dataPast) : this.dataPast)
