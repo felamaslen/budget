@@ -23,7 +23,7 @@ function setup_dev {
   npm install
 }
 
-cd $(dirname "${BASH_SOURCE[0]}") || {
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || {
   echo $E_NO_DIR
   exit 1
 }

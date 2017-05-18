@@ -6,7 +6,7 @@ Budget.egg-info
 env
 include
 **/*.pyc
-srv/db_info.py
+srv/app/db_info.py
 resources/serial
 resources/tickers.csv
 web/js/build/*.js

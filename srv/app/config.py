@@ -45,7 +45,8 @@ LIST_DATA_FORM_SCHEMA = {
 
 IP_BAN_TIME = 60
 IP_BAN_TRIES = 10
-BASE_DIR = os.path.dirname(os.path.realpath(__file__)) + "/.."
+# base directory of the project (i.e. 1 up from srv)
+BASE_DIR = os.path.dirname(os.path.realpath(__file__)) + "/../.."
 SERIAL_FILE = BASE_DIR + "/resources/serial"
 
 FUND_SALT = 'a963anx2'

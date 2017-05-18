@@ -1,3 +1,5 @@
+#!./env/bin/python
+
 """
 CLI interface to budget app (backend)
 Written by Fela Maslen, 2016
@@ -6,39 +8,41 @@ Written by Fela Maslen, 2016
 import sys
 import urlparse
 
-import rest_api
+from app.rest_api import CommandAPI
 
-sysargs = sys.argv[1:]
+def main():
+    """ main cli app entry point """
+    sysargs = sys.argv[1:]
 
-try:
-    method, uid, task, args, form = sysargs
-except ValueError:
-    form = None
     try:
-        method, uid, task, args = sysargs
+        method, uid, task, args, form = sysargs
     except ValueError:
-        args = None
+        form = None
         try:
-            method, uid, task = sysargs
+            method, uid, task, args = sysargs
         except ValueError:
-            print("Not enough arguments given")
-            sys.exit()
+            args = None
+            try:
+                method, uid, task = sysargs
+            except ValueError:
+                print "Not enough arguments given"
+                sys.exit()
 
-try:
-    method = str(method)
+    try:
+        method = str(method)
 
-    uid = int(uid)
+        uid = int(uid)
+        task = str(task).split('/')
 
-    task = str(task).split('/')
+        args = {} if args is None else urlparse.parse_qs(args)
+        form = {} if form is None else urlparse.parse_qs(form)
 
-    args = {} if args is None else urlparse.parse_qs(args)
+    except ValueError:
+        print "Bad arguments"
+        sys.exit()
 
-    form = {} if form is None else urlparse.parse_qs(form)
+    api = CommandAPI(uid, method, task, args, form)
+    api.print_output()
 
-except:
-    print("Bad arguments")
-    sys.exit()
-
-api = rest_api.CommandAPI(uid, method, task, args, form)
-api.print_output()
+main()
 

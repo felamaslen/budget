@@ -2,11 +2,11 @@
 
 import json
 
-from srv.api_data_methods import Processor
+from app.api_data_methods import Processor
 
-from srv.misc import strng, list_data_schema, get_table_total, \
+from app.misc import strng, list_data_schema, get_table_total, \
         deserialise_date, deserialise_transactions
-from srv.config import LIST_CATEGORIES, E_BAD_PARAMS, \
+from app.config import LIST_CATEGORIES, E_BAD_PARAMS, \
         E_BAD_FORM, E_NO_FORM, E_NO_ITEM
 
 class UpdateData(Processor):

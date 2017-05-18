@@ -6,9 +6,9 @@ import time
 from datetime import datetime
 import json
 
-from srv.api_data_methods import Processor
-from srv.misc import fund_hash, strng
-from srv.config import E_NO_PARAMS, E_BAD_PARAMS,\
+from app.api_data_methods import Processor
+from app.misc import fund_hash, strng
+from app.config import E_NO_PARAMS, E_BAD_PARAMS,\
     FUND_SALT, GRAPH_FUND_HISTORY_DETAIL,\
     PIE_DETAIL, PIE_TOLERANCE,\
     OVERVIEW_NUM_LAST, OVERVIEW_NUM_FUTURE, START_YEAR, START_MONTH,\

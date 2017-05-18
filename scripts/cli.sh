@@ -52,7 +52,7 @@ get_form() {
   read -p "Form? (query string) " form
 }
 
-cd $(dirname "${BASH_SOURCE[0]}")
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
 . env/bin/activate || exit 1
 

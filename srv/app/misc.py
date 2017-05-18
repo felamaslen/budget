@@ -8,7 +8,7 @@ from hashlib import md5
 import re
 import json
 
-from srv.config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
+from app.config import SERIAL_FILE, FUND_SALT, LIST_DATA_FORM_SCHEMA
 
 def file_get_contents(filename):
     """ opens a file and gets its contents """
