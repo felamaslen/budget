@@ -36,13 +36,30 @@ def get_year_months(past_months, future_months):
             if (y > start_year or m >= start_month) and \
                     (y < end_year or m <= end_month)]
 
-def get_fund_cost(year_month, transactions):
-    """ gets the total cost up to a certain date of a fund """
-    return reduce(lambda last, item: \
-        last + (item['c'] if \
-        (year_month[0] > item['d'][0] or \
-        (year_month[0] == item['d'][0] and year_month[1] >= item['d'][1])) \
-        else 0), transactions, 0)
+def get_fund_value(year_month, transactions, prices):
+    """ gets the total value at a certain date of a fund """
+    # find the units for this month
+    units = reduce(lambda last, item: \
+            last + (item['u'] if \
+            (year_month[0] > item['d'][0] or \
+            (year_month[0] == item['d'][0] and year_month[1] >= item['d'][1])) \
+            else 0), transactions, 0)
+
+    # find the price for this month
+    prices_current = [price for price in prices \
+            if year_month[0] > price[0] or \
+            (year_month[0] == price[0] and year_month[1] >= price[1])]
+
+    if len(prices_current) == 0:
+        # there is no accurate price cached, so revert to the cost of the fund
+        # (neglecting growth)
+        return reduce(lambda last, item: \
+            last + (item['c'] if \
+            (year_month[0] > item['d'][0] or \
+            (year_month[0] == item['d'][0] and year_month[1] >= item['d'][1])) \
+            else 0), transactions, 0)
+
+    return prices_current[0][2] * units
 
 class Overview(Processor):
     """ get overview data """
@@ -84,44 +101,68 @@ class Overview(Processor):
 
     def get_category_data(self, category):
         """ get costs for each month in each category """
-        get_funds = category == "funds"
-        if get_funds:
-            query = """
-            SELECT transactions FROM `funds` WHERE uid = %d
-            """ % (self.uid)
+        query = {}
 
-        else:
-            union = "SELECT %d AS y, %d AS m UNION " % self.year_months[0] + \
-                    " UNION ".join(["SELECT %d, %d" % self.year_months[i] \
-                    for i in range(1, len(self.year_months))])
+        if category == "funds":
+            query['transactions'] = self.dbx.query("""
+            SELECT id, transactions FROM `funds` WHERE uid = %d
+            """ % (self.uid))
 
-            query = """
-            SELECT SUM(cost) AS month_cost FROM (%s) AS dates
-            LEFT JOIN `%s` AS list
-            ON uid = %d AND ((list.year = dates.y AND list.month = dates.m))
-            GROUP BY y, m
-            """ % (union, category, self.uid)
+            query['prices'] = self.dbx.query("""
+            SELECT ft.time, GROUP_CONCAT(f.id) AS id,
+            GROUP_CONCAT(fc.price) AS price
+            FROM fund_cache fc
+            INNER JOIN fund_hash fh ON fh.fid = fc.fid
+            INNER JOIN fund_cache_time ft ON ft.cid = fc.cid
+            INNER JOIN funds f ON MD5(CONCAT(f.item, %%s)) = fh.hash
+            AND f.uid = %d
+            GROUP BY ft.cid
+            ORDER BY ft.time DESC
+            """ % (self.uid), [FUND_SALT])
 
-        result = self.dbx.query(query, [])
+            if query['transactions'] is False or query['prices'] is False:
+                raise EnvironmentError("database error")
 
-        if result is False:
-            raise EnvironmentError("database error")
+            funds = {'prices': {}, 'transactions': []}
+            for (_time, ids, prices) in query['prices']:
+                _ids = [int(x) for x in ids.split(',')]
+                _prices = [float(x) for x in prices.split(',')]
 
-        if get_funds:
-            transactions = []
-            for row in result:
+                year, month = [int(x) for x in datetime.fromtimestamp(_time) \
+                        .strftime('%Y-%m').split('-')]
+
+                for key, _id in enumerate(_ids):
+                    if _id not in funds['prices']:
+                        funds['prices'][_id] = []
+                    funds['prices'][_id].append((year, month, _prices[key]))
+
+            for (_id, transactions) in query['transactions']:
                 try:
-                    fund_transactions = json.loads(row[0])
-                    transactions.append(fund_transactions)
+                    this_transactions = json.loads(transactions)
+                    funds['transactions'].append((_id, this_transactions))
                 except ValueError:
                     pass # bad json; ignore
 
-            return [reduce(lambda last, item: last + item, [ \
-                    get_fund_cost(self.year_months[j], transactions[i]) \
-                    for i in range(len(transactions))]) \
-                    for j in range(len(self.year_months))]
+            return [round(reduce(lambda last, this, ym=year_month: \
+                        last + get_fund_value(ym, this[1], \
+                        funds['prices'][this[0]]), funds['transactions'], 0)) \
+                        for row, year_month in enumerate(self.year_months)]
 
-        return [0 if row[0] is None else int(row[0]) for row in result]
+        union = "SELECT %d AS y, %d AS m UNION " % self.year_months[0] + \
+                " UNION ".join(["SELECT %d, %d" % self.year_months[i] \
+                for i in range(1, len(self.year_months))])
+
+        query['list'] = self.dbx.query("""
+        SELECT SUM(cost) AS month_cost FROM (%s) AS dates
+        LEFT JOIN `%s` AS list
+        ON uid = %d AND ((list.year = dates.y AND list.month = dates.m))
+        GROUP BY y, m
+        """ % (union, category, self.uid), [])
+
+        if query['list'] is False:
+            raise EnvironmentError("database error")
+
+        return [0 if row[0] is None else int(row[0]) for row in query['list']]
 
     def get_balance(self):
         """ gets balance for each month """
