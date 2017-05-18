@@ -26,6 +26,13 @@ export class PageOverview extends Page {
       "in", "out", "net",
       "predicted", "balance"
     ];
+    this.displayFormat = {
+      funds: {
+        noPence: true,
+        abbreviate: true,
+        precision: 1
+      }
+    };
 
     this.colors = COLOR_CATEGORY;
   }
@@ -53,9 +60,7 @@ export class PageOverview extends Page {
       .addClass("table-insert")
       .addClass("table-overview")
       .addClass("noselect");
-
     this.$thead = $("<thead></thead>");
-
     this.$thr = $("<tr></tr>").append("<th>Month</th>");
 
     this.categories.forEach((category, key) => this.addCategory(key, category));
@@ -286,9 +291,7 @@ export class PageOverview extends Page {
     ).data("yearMonth", yearMonth);
 
     this.$td[key] = {};
-
     this.categories.forEach((category, cKey) => this.addTableCell(key, cKey, category));
-
     this.$tbody.append(this.$tr[key]);
   }
   addGraphs() {
@@ -325,13 +328,14 @@ export class PageOverview extends Page {
   }
 
   updateCategories(key, cKey, category) {
+    const format = this.displayFormat[category] || {};
     this.$td[key][category]
     .data("val", this.data.cost[category][key])
     .css("background-color", getColorFromScore(
       this.colors[category],
       this.scores[category][key],
       this.data.cost[category][key] < 0)
-    ).children(".text").html(formatCurrency(this.data.cost[category][key]));
+    ).children(".text").html(formatCurrency(this.data.cost[category][key], format));
   }
   updateYearMonths(key) {
     this.categories.forEach((category, cKey) => {
