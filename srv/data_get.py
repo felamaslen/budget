@@ -113,7 +113,7 @@ class Overview(Processor):
             GROUP_CONCAT(fc.price) AS price
             FROM fund_cache fc
             INNER JOIN fund_hash fh ON fh.fid = fc.fid
-            INNER JOIN fund_cache_time ft ON ft.cid = fc.cid
+            INNER JOIN fund_cache_time ft ON ft.cid = fc.cid AND ft.done = 1
             INNER JOIN funds f ON MD5(CONCAT(f.item, %%s)) = fh.hash
             AND f.uid = %d
             GROUP BY ft.cid
