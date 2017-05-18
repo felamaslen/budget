@@ -4,10 +4,6 @@
 
 import $ from "../../lib/jquery.min";
 
-import { getTickSize, LineGraph } from "graph/graph";
-import { arraySum, capitalise } from "misc/misc";
-import { today } from "misc/date";
-
 import {
   COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED,
   COLOR_GRAPH_TITLE, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_LIGHT, COLOR_CATEGORY,
@@ -16,7 +12,10 @@ import {
   GRAPH_KEY_SIZE
 } from "const";
 
-import { hundredth, indexPoints, months } from "misc/misc";
+
+import { getTickSize, LineGraph } from "graph/graph";
+import { today } from "misc/date";
+import { hundredth, indexPoints, months, arraySum, capitalise } from "misc/misc";
 import { rgb } from "misc/color";
 import { formatCurrency, numberFormat } from "misc/format";
 
@@ -204,12 +203,23 @@ export class GraphBalance extends LineGraph {
     const dataY = this.dataMain.map(item => item[1]);
     const dataX = this.dataMain.map(item => item[0]);
 
-    const minY = Math.min(0, Math.min.apply(null, dataY));
+    const minYValue = Math.min.apply(null, dataY);
+    const minY = Math.min(0, minYValue);
     const maxY = Math.max.apply(null, dataY);
     const minX = Math.min.apply(null, dataX);
     const maxX = Math.max.apply(null, dataX);
 
     this.setRange([minX, maxX, minY, maxY]);
+
+    // find the right tension, given the maximum jump in the data
+    const maxJump = dataY.reduce((last, value) => {
+      const thisJump = Math.abs(value - last[1]);
+      if (thisJump > last[0]) {
+        return [thisJump, value];
+      }
+      return last;
+    }, [0, 0])[0];
+    this.tension = maxJump > 10 * minYValue ? 1 : 0.5;
   }
   getTime(key) {
     // converts a key index to a UNIX time stamp
