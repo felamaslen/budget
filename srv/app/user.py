@@ -5,7 +5,7 @@ Class for handling user login / logout
 import time
 from hashlib import sha1
 
-from srv.config import IP_BAN_TIME, IP_BAN_TRIES
+from app.config import IP_BAN_TIME, IP_BAN_TRIES
 
 class User(object):
     """ handles user login """

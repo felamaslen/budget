@@ -5,11 +5,10 @@ Main class for serving data to the clients
 import json
 from collections import deque
 
-from srv.db import Database
-from srv.user import User
-
-from srv.config import IP_BAN_TIME
-from srv.api_data import AddDelete, Retrieve, Update
+from app.db import Database
+from app.user import User
+from app.config import IP_BAN_TIME
+from app.api_data import AddDelete, Retrieve, Update
 
 class CommandAPI(object):
     """ api wrapper for the cli interface """

@@ -3,17 +3,17 @@ Operates on (retrieve, add, edit, delete) data in the database
 Does not handle authentication
 """
 
-from srv.config import LIST_CATEGORIES
-from srv.data_get import \
+from app.config import LIST_CATEGORIES
+from app.data_get import \
         Overview, ListAll, ListData, \
         Funds, FundHistory,\
         Pie, Search, Stocks
-from srv.data_get_analysis import Analysis, AnalysisCategory
-from srv.data_post import \
+from app.data_get_analysis import Analysis, AnalysisCategory
+from app.data_post import \
         UpdateOverview, UpdateListData, \
         AddListData, DeleteListData
 
-from srv.api_data_methods import Response
+from app.api_data_methods import Response
 
 class Retrieve(Response):
     """ retrieves data from the database """

@@ -11,9 +11,9 @@ import csv
 import json
 import mechanize
 
-from srv.db import Database
-from srv.misc import strng, fund_hash
-from srv.config import BASE_DIR
+from app.db import Database
+from app.misc import strng, fund_hash
+from app.config import BASE_DIR
 
 DB = Database()
 

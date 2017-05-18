@@ -4,7 +4,7 @@ Class for handling database
 
 import mysql.connector
 
-from srv.db_info import DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT
+from app.db_info import DB_USERNAME, DB_PASSWORD, DB_HOSTNAME, DB_PORT
 
 class Database(object):
     """ handles database connections """

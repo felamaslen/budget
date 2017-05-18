@@ -4,9 +4,9 @@ from itertools import groupby
 from datetime import timedelta, datetime
 from math import ceil
 
-from srv.api_data_methods import Processor
-from srv.misc import strng
-from srv.config import E_NO_PARAMS
+from app.api_data_methods import Processor
+from app.misc import strng
+from app.config import E_NO_PARAMS
 
 def get_category_column(category, grouping):
     """ gets database column corresponding to 'category' type """

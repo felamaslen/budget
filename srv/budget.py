@@ -5,9 +5,9 @@ Written by Fela Maslen, 2016
 
 from flask import Flask, request, render_template
 
-from srv.config import PIE_TOLERANCE
-from srv.misc import get_serial
-from srv.rest_api import WebAPI
+from app.config import PIE_TOLERANCE
+from app.misc import get_serial
+from app.rest_api import WebAPI
 
 APP = Flask('budget')
 
