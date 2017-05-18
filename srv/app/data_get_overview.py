@@ -79,11 +79,20 @@ class Overview(Processor):
 
         self.year_months = get_year_months(OVERVIEW_NUM_LAST, \
                 OVERVIEW_NUM_FUTURE)
+        self.year_months_old = []
 
     def process(self):
         """ Get data and put it in the instance """
         categories = LIST_CATEGORIES
-        balance, old = self.get_balance()
+        balance, old, old_range = self.get_balance()
+        self.year_months_old = [(year, month) \
+                for year in range(old_range[0], old_range[2] + 1) \
+                for month in range(1, 13) \
+                if (year > old_range[0] or \
+                (year == old_range[0] and month >= old_range[1])) and \
+                (year < old_range[2] or \
+                (year == old_range[2] and month <= old_range[3]))]
+
         month_cost = {}
 
         try:
@@ -146,7 +155,7 @@ class Overview(Processor):
         return [round(reduce(lambda last, this, ym=year_month: \
                     last + get_fund_value(ym, this[1], \
                     funds['prices'][this[0]]), funds['transactions'], 0)) \
-                    for year_month in self.year_months]
+                    for year_month in self.year_months_old + self.year_months]
 
     def get_category_data(self, category):
         """ get costs for each month in each category """
@@ -195,8 +204,8 @@ class Overview(Processor):
                 balance += [0] * max(0, key + 1 - len(balance))
                 balance[key] = int(value)
             else:
+                old_range[3] = month if old_range[2] < year else max(old_range[3], month)
                 old_range[2] = max(old_range[2], year)
-                old_range[3] = max(old_range[3], month)
 
                 if old_range[0] == 0 and old_range[1] == 0:
                     old_range[0] = year
@@ -212,5 +221,5 @@ class Overview(Processor):
         old += [0] * max(0, 12 * (ym1[0] - old_range[2]) + ym2[1] - \
                 old_range[3] + 1 - len(old))
 
-        return balance, old
+        return balance, old, old_range
 

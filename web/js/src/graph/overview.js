@@ -247,9 +247,11 @@ export class GraphBalance extends LineGraph {
       return [time, value];
     });
     this.dataPredicted = dataPredicted.map(indexPoints);
-    this.dataFunds = Array.apply(null, new Array(this.oldOffset))
-    .map(Number.prototype.valueOf, 0).concat(this.dataFundsRaw)
-    .map((value, key) => [this.dataMain[key][0], value / 100]);
+
+    const fundOldOffset = this.dataFundsRaw.length - this.dataMain.length;
+    this.dataFunds = this.dataFundsRaw.slice(fundOldOffset).map((value, key) => {
+      return [this.dataMain[key][0], value / 100];
+    });
 
     // for changing the colour
     this.transition = [this.futureKey - 1];
