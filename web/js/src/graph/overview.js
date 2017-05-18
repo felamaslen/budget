@@ -12,7 +12,6 @@ import {
   GRAPH_KEY_SIZE
 } from "const";
 
-
 import { getTickSize, LineGraph } from "graph/graph";
 import { today } from "misc/date";
 import { hundredth, indexPoints, months, arraySum, capitalise } from "misc/misc";
