@@ -5,10 +5,10 @@
 import $ from "../../lib/jquery.min";
 
 import {
-  COLOR_CATEGORY, MSG_TIME_ERROR, AVERAGE_MEDIAN
+  COLOR_CATEGORY, MSG_TIME_ERROR, AVERAGE_MEDIAN, FUTURE_INVESTMENT_RATE
 } from "const";
 
-import { arrayAverage, median, months, getYearMonthRow } from "misc/misc";
+import { arrayAverage, median, months, getYearMonthRow, randnBm } from "misc/misc";
 import { getColorFromScore } from "misc/color";
 import { formatCurrency } from "misc/format";
 import { validateCurrencyInput } from "misc/edit";
@@ -38,9 +38,6 @@ export class PageOverview extends Page {
 
   hookDataLoadedBeforeRender(callback, res) {
     this.data = res.data;
-
-    const fundOldOffset = this.data.cost.funds.length - this.data.cost.balance.length;
-    this.data.cost.stocks = this.data.cost.funds.slice(fundOldOffset);
 
     this.getYearMonths();
   }
@@ -164,6 +161,18 @@ export class PageOverview extends Page {
 
       Array.prototype.splice.apply(this.data.cost[category], spliceArgs);
     });
+
+    // stupid feature: randomly generated fund income projections
+    const oldOffset = this.data.cost.funds.length - this.data.cost.balance.length;
+    this.futureKey = 12 * (this.data.currentYear - this.data.startYearMonth[0]) +
+      this.data.currentMonth - this.data.startYearMonth[1] + 1;
+    let Xt = this.data.cost.funds[oldOffset + this.futureKey - 1];
+    this.data.cost.funds = this.data.cost.funds.slice(0, oldOffset + this.futureKey).concat(Array.apply(
+      null, new Array(this.data.cost.funds.length - oldOffset - this.futureKey)
+    ).map(() => {
+      Xt *= (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100);
+      return Xt;
+    }));
   }
   calculateColumns() {
     // calculate total spend (including bills) for each month
@@ -176,22 +185,27 @@ export class PageOverview extends Page {
       ;
     });
 
+    // remove past items from the funds list
+    const fundOldOffset = this.data.cost.funds.length - this.data.cost.balance.length;
+    this.data.cost.stocks = this.data.cost.funds.slice(fundOldOffset);
+
+    const fundIncome = this.data.cost.stocks.map((item, key) => {
+      return key > this.futureKey ? this.data.cost.stocks[key] - this.data.cost.stocks[key - 1] : 0;
+    });
+
     // calculate net change in balance for each month
     this.data.cost.net = this.data.cost.out.map((item, key) => {
-      return this.data.cost.in[key] - item;
+      return this.data.cost.in[key] - item + fundIncome[key];
     });
 
     // calculate the predicted balance for each month
     this.data.cost.predicted = [];
 
     let lastValue = 0;
-
     this.data.cost.predicted = this.data.cost.out.map((item, key) => {
       let value = this.data.cost.net[key];
-
       if (key > 0) {
         const lastBalance = this.data.cost.balance[key - 1];
-
         if (lastBalance > 0) {
           value += lastBalance;
           this.data.cost.predicted[key] += lastBalance;
@@ -199,6 +213,8 @@ export class PageOverview extends Page {
         else {
           value += lastValue;
         }
+
+        value += fundIncome[key];
       }
 
       lastValue = value;

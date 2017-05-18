@@ -65,6 +65,8 @@ export const AVERAGE_MEAN = 0;
 export const AVERAGE_MEDIAN = 1;
 export const AVERAGE_MEAN_GEOM = 2;
 
+export const FUTURE_INVESTMENT_RATE = 0.1;
+
 export const COLOR_GRAPH_TITLE = "#000";
 export const COLOR_DARK = "#333";
 export const COLOR_LIGHT = "#eee";

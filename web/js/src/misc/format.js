@@ -99,7 +99,7 @@ export function formatData(val, type, raw) {
 const round = (number, precision) => {
   const exp = Math.pow(10, precision);
   return Math.round(exp * number) / exp;
-}
+};
 
 /**
  * data type to hold transactions list for funds
