@@ -1126,34 +1126,26 @@ button {
       .text {
         width: 100%;
         display: block;
-        color: #333;
         > span {
           padding: 0;
         }
       }
+      .profit {
+        color: #483be4;
+      }
+      .loss {
+        color: #ff2c2c;
+      }
       .value {
         font-size: 1.1em;
         width: 40%;
-      }
-      .price {
-        font-size: 1em;
-      }
-      .gain, .day-gain {
-        background: rgba(255, 255, 255, 0.8);
-        &.profit {
-          color: #483be4;
-        }
-        &.loss {
-          color: #ff2c2c;
-        }
-      }
-      .gain {
-        border-top-left-radius: 3px;
+        color: #333;
       }
       .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
         font-size: 0.8em;
         line-height: 24px;
         height: 24px;
+        background: rgba(255, 255, 255, 0.8);
       }
       .gain-abs, .day-gain-abs {
         width: 15%;
