@@ -1107,6 +1107,12 @@ button {
         padding: 0 0.25em;
         margin-left: 0.25em;
       }
+      .profit {
+        background: #ccffd5;
+      }
+      .loss {
+        background: #ffa7a7;
+      }
     }
   }
   .list-ul {
@@ -1121,42 +1127,50 @@ button {
         width: 100%;
         display: block;
         color: #333;
-        .profit {
-          color: #483be4;
-        }
-        .loss {
-          color: #ff2c2c;
-        }
         > span {
           padding: 0;
         }
       }
       .value {
         font-size: 1.1em;
-        width: 50%;
+        width: 40%;
       }
       .price {
         font-size: 1em;
       }
-      .pct-gain, .day-gain {
+      .gain, .day-gain {
         background: rgba(255, 255, 255, 0.8);
-      }
-      .pct-gain {
-        border-top-left-radius: 3px;
-      }
-      .price, .abs-gain, .pct-gain, .day-gain {
-        font-size: 0.8em;
-        line-height: 24px;
-        width: 25%;
-        height: 24px;
-      }
-      .text {
-        .profit {
+        &.profit {
           color: #483be4;
         }
-        .loss {
+        &.loss {
           color: #ff2c2c;
         }
+      }
+      .gain {
+        border-top-left-radius: 3px;
+      }
+      .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
+        font-size: 0.8em;
+        line-height: 24px;
+        height: 24px;
+      }
+      .gain-abs, .day-gain-abs {
+        width: 15%;
+        &.profit:before {
+          content: "\25b4";
+        }
+        &.loss:before {
+          content: "\25be";
+        }
+        &:before {
+          font-style: normal;
+          font-weight: normal;
+          margin-right: 0.2em;
+        }
+      }
+      .gain-abs, .day-gain-abs, .gain, .day-gain {
+        width: 30%;
       }
     }
     .sold {
@@ -1190,12 +1204,6 @@ button {
         text-overflow: ellipsis;
         text-align: center;
       }
-    }
-    .profit {
-      background: #ccffd5;
-    }
-    .loss {
-      background: #ffa7a7;
     }
     .value {
       width: 68px;
