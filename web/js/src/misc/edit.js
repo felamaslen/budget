@@ -110,11 +110,9 @@ export function validateInput(val, type) {
  */
 export function afterEditValidateCompare(val, compare, type) {
   val = validateInput(val, type);
-
   if (val === null) {
     return null;
   }
-
   let changed = false;
 
   switch (type) {
@@ -370,22 +368,18 @@ class InlineEdit {
       // this.state.error.newMessage("Tried to finish editing while not active");
       return false;
     }
-
     if (this.locked) {
       // probably still loading previous edit request
       this.state.error.newMessage("Tried to finish editing while locked", 0, MSG_TIME_DEBUG);
       return false;
     }
-
     if (this.searchHandler && this.searchHandler.timer) {
       window.clearTimeout(this.searchHandler.timer);
     }
 
     if (this.editHook) {
       this.lock();
-
       this.editHook(callback);
-
       return true;
     }
 
