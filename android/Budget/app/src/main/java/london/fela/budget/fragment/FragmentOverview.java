@@ -269,7 +269,7 @@ public class FragmentOverview extends Fragment {
       cols[i] = allCols[visibleCols[i]];
 
       newValue  = month.get(cols[i])[position];
-      newText   = Data.formatCurrency(newValue);
+      newText   = Data.formatCurrency(newValue, true);
       newScore  = (double)newValue / monthMax.get(cols[i]);
 
       if (!(newScore == scores[i] && newText.equals(text[i]))) {
@@ -625,7 +625,7 @@ class OverviewAdapter extends BaseAdapter {
 
   public static class ViewHolder {
     TextView tvMonth;
-    TextView tvIn;
+    TextView tvIncome;
     TextView tvOut;
     TextView tvBalance;
   }
@@ -677,7 +677,7 @@ class OverviewAdapter extends BaseAdapter {
       }
 
       holder.tvMonth    = tv[0];
-      holder.tvIn       = tv[1];
+      holder.tvIncome   = tv[1];
       holder.tvOut      = tv[2];
       holder.tvBalance  = tv[3];
 
@@ -691,7 +691,7 @@ class OverviewAdapter extends BaseAdapter {
 
     holder.tvMonth
       .setText(item.getCol("month"));
-    holder.tvIn
+    holder.tvIncome
       .setText(item.getCol(
         FragmentOverview.allCols[FragmentOverview.visibleCols[0]]
       ));
@@ -708,19 +708,19 @@ class OverviewAdapter extends BaseAdapter {
 
     holder.tvMonth.setBackgroundColor(timeBg[futureStatus]);
 
-    holder.tvIn.setBackgroundColor(getColorFromScore("income", item.getScore("income")));
+    holder.tvIncome.setBackgroundColor(getColorFromScore("income", item.getScore("income")));
     holder.tvOut.setBackgroundColor(getColorFromScore("out", item.getScore("out")));
     holder.tvBalance.setBackgroundColor(getColorFromScore("balance", item.getScore("predicted")));
     
     int textColor = timeColor[futureStatus];
     holder.tvMonth.setTextColor(textColor);
-    holder.tvIn.setTextColor(textColor);
+    holder.tvIncome.setTextColor(textColor);
     holder.tvOut.setTextColor(textColor);
     holder.tvBalance.setTextColor(textColor);
     
     int typeFace = timeTypeface[futureStatus];
     holder.tvMonth.setTypeface(null, typeFace);
-    holder.tvIn.setTypeface(null, typeFace);
+    holder.tvIncome.setTypeface(null, typeFace);
     holder.tvOut.setTypeface(null, typeFace);
     holder.tvBalance.setTypeface(null, typeFace);
 

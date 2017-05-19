@@ -91,14 +91,36 @@ public class Data {
    * format number (int) as currency
    */
   public static String formatCurrency(int cost) {
-    DecimalFormat format = new DecimalFormat("#0.00");
-    format.setGroupingUsed(true);
-    format.setGroupingSize(3);
-
+    return formatCurrency(cost, false);
+  }
+  public static String formatCurrency(int cost, boolean abbreviate) {
+    String result;
+    String format = "#0.00";
     // convert int (pence) to double (pounds)
     double costDouble = (double)cost / 100;
 
-    return AppConfig.currencySymbol + format.format(costDouble);
+    String abbreviation = "";
+    if (abbreviate && costDouble != 0) {
+      String[] abbr = {"k", "m", "bn", "tn"};
+      int log = (int) Math.min(Math.floor(Math.log10(Math.abs(costDouble)) / 3), abbr.length);
+      if (log > 0) {
+        abbreviation = abbr[log - 1];
+        costDouble = costDouble / Math.pow(10, log * 3);
+        format = "#0.0";
+      }
+    }
+
+    DecimalFormat formatter = new DecimalFormat(format);
+    formatter.setGroupingUsed(true);
+    formatter.setGroupingSize(3);
+
+    result = formatter.format(costDouble);
+
+    if (abbreviation.length() > 0) {
+      result = result + abbreviation;
+    }
+
+    return AppConfig.currencySymbol + result;
   }
 
   /**
