@@ -141,7 +141,8 @@ export const PAGE_DEF = {
       cost: "0.00"
     },
     limit: true,
-    daily: false
+    daily: false,
+    suggestions: false
   },
   bills: {
     page: "bills",

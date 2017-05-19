@@ -19,9 +19,11 @@ export class PageList extends Page {
   constructor(options, api, state) {
     super(options, api, state);
 
+    this.suggestions = typeof options.suggestions === "undefined"
+      ? true : options.suggestions;
+
     this.col = options.col;  // list of columns
     this.colShort = options.colShort;
-
     this.colEdit = options.colEdit || options.col.map((item, i) => i);
 
     this.dataType = options.dataType;
@@ -123,7 +125,7 @@ export class PageList extends Page {
           )
         ).data("val", newItem[col]);
 
-        const suggestion = this.dataType[j] === "text"
+        const suggestion = this.suggestions && this.dataType[j] === "text"
           ? { page: this.page, col } : null;
 
         this.$li[id][col].editable(
