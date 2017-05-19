@@ -35,11 +35,12 @@ export class YMD {
   }
 }
 
-export const todayDate = new Date();
+export const todayDate = () => new Date();
+const _todayDate = todayDate();
 export const today = new YMD(
-  todayDate.getFullYear(),
-  todayDate.getMonth() + 1,
-  todayDate.getDate()
+  _todayDate.getFullYear(),
+  _todayDate.getMonth() + 1,
+  _todayDate.getDate()
 );
 
 class TimeTick {

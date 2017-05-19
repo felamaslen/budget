@@ -472,7 +472,7 @@ export class GraphFundHistory extends LineGraph {
       const hlY = this.pixY(point[1]);
 
       const time = point[0] + this.startTime;
-      const age = todayDate.getTime() - time * 1000;
+      const age = todayDate().getTime() - time * 1000;
       const ageText = formatAge(age / 1000);
 
       const align = hlX < this.width / 2 ? -1 : 1;

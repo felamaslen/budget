@@ -130,7 +130,7 @@ export class PageFunds extends PageList {
 
     const valueTime = this.history.startTime +
       this.history.history[this.history.history.length - 1][0];
-    const cacheAge = formatAge((todayDate.getTime() - valueTime * 1000) / 1000);
+    const cacheAge = formatAge((todayDate().getTime() - valueTime * 1000) / 1000);
 
     this.$gainInfo.html(
       "Current value (" + cacheAge + "): " +
