@@ -196,15 +196,21 @@ class Overview(Processor):
         balance = []
         old = []
         old_range = [0, 0, 0, 0]
+        add_old = False
         for (year, month, value) in query:
             in_list = (year > ym1[0] or (year == ym1[0] and month >= ym1[1])) \
                     and (year < ym2[0] or (year == ym2[0] and month <= ym2[1]))
             if in_list:
+                # the item is within the current display range
                 key = 12 * (year - ym1[0]) + month - ym1[1]
                 balance += [0] * max(0, key + 1 - len(balance))
                 balance[key] = int(value)
             else:
-                old_range[3] = month if old_range[2] < year else max(old_range[3], month)
+                # re-calculate the old range
+                add_old = True
+
+                old_range[3] = month if old_range[2] < year \
+                        else max(old_range[3], month)
                 old_range[2] = max(old_range[2], year)
 
                 if old_range[0] == 0 and old_range[1] == 0:
@@ -218,8 +224,10 @@ class Overview(Processor):
 
         balance += [0] * max(0, 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1] \
                 + 1 - len(balance))
-        old += [0] * max(0, 12 * (ym1[0] - old_range[2]) + ym2[1] - \
-                old_range[3] + 1 - len(old))
+
+        if add_old:
+            old += [0] * max(0, 12 * (ym1[0] - old_range[2]) + ym2[1] - \
+                    old_range[3] + 1 - len(old))
 
         return balance, old, old_range
 

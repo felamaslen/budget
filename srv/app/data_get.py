@@ -185,6 +185,8 @@ class ListData(Processor):
         for row in result:
             try:
                 total = int(row[0])
+            except TypeError:
+                total = 0
             except ValueError:
                 total = 0
 
