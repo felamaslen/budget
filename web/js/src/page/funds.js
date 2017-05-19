@@ -38,19 +38,25 @@ export class PageFunds extends PageList {
 
   calculateGain(units, priceVal, cost) {
     const price = priceVal[0];
-    const lastChange = priceVal[1];
-    let pct = 0;
-    let gainAbs = 0;
-    let value = cost;
-    if (!isNaN(units) && !isNaN(price)) {
-      value = units * price;
-      if (cost > 0) {
-        pct = 100 * (value - cost) / cost;
-        gainAbs = value - cost;
+
+    const dayGain = priceVal[1] * 100; // today's percent gain
+    let dayGainAbs = 0; // today's absolute gain
+    let gain = 0; // overall percent gain
+    let gainAbs = 0; // overall absolute gain
+    let value = cost; // value of holding
+
+    if (!isNaN(units)) {
+      dayGainAbs = units * price * dayGain / 100;
+      if (!isNaN(price)) {
+        value = units * price;
+        if (cost > 0) {
+          gain = 100 * (value - cost) / cost;
+          gainAbs = value - cost;
+        }
       }
     }
 
-    const pctParam = {
+    const pctFormat = {
       noSymbol: true,
       suffix: "%",
       brackets: true,
@@ -63,45 +69,53 @@ export class PageFunds extends PageList {
       precision: 1
     };
 
-    const absProfitClass = classNames({ "abs-gain": true });
-    const priceClass = classNames({ price: true });
-    const pctGainClass = classNames({
-      "pct-gain": true,
-      profit: pct > 0,
-      loss: pct < 0
-    });
     const dayGainClass = classNames({
       "day-gain": true,
-      profit: lastChange > 0,
-      loss: lastChange < 0
+      profit: dayGain > 0,
+      loss: dayGain < 0
+    });
+    const dayGainClassAbs = classNames({
+      "day-gain-abs": true,
+      profit: dayGainAbs > 0,
+      loss: dayGainAbs < 0
+    });
+    const gainClass = classNames({
+      gain: true,
+      profit: gain > 0,
+      loss: gain < 0
+    });
+    const gainClassAbs = classNames({
+      "gain-abs": true,
+      profit: gainAbs > 0,
+      loss: gainAbs < 0
     });
 
     const formatValue = formatCurrency(value, currencyFormat);
-    const formatProfit = formatCurrency(gainAbs, currencyFormat);
-    const formatPrice = price.toFixed(2);
-    const pctFormat = formatCurrency(pct, pctParam);
-    const dayGain = formatCurrency(100 * lastChange, pctParam);
+    const formatGainAbs = formatCurrency(gainAbs, currencyFormat);
+    const formatDayGainAbs = formatCurrency(dayGainAbs, currencyFormat);
+    const formatGain = formatCurrency(gain, pctFormat);
+    const formatDayGain = formatCurrency(dayGain, pctFormat);
 
     const txt = `
     <span class="value">${formatValue}</span>
-    <span class="${absProfitClass}">${formatProfit}</span>
-    <span class="${priceClass}">${formatPrice}</span>
-    <span class="${pctGainClass}">${pctFormat}</span>
-    <span class="${dayGainClass}">${dayGain}</span>
+    <span class="${gainClassAbs}">${formatGainAbs}</span>
+    <span class="${dayGainClassAbs}">${formatDayGainAbs}</span>
+    <span class="${gainClass}">${formatGain}</span>
+    <span class="${dayGainClass}">${formatDayGain}</span>
     `;
 
-    return { pct, txt };
+    return { gain, txt };
   }
   addGainText(gain, $span) {
-    const color = gain.pct >= 0 ? this.upColor : this.downColor;
-    const range = gain.pct >= 0 ? this.maxUp : this.minDown;
+    const color = gain.gain >= 0 ? this.upColor : this.downColor;
+    const range = gain.gain >= 0 ? this.maxUp : this.minDown;
     const thisColor = Math.abs(range) > 0
-      ? color.map(channel => Math.round(255 + (gain.pct / range) * (channel - 255)))
+      ? color.map(channel => Math.round(255 + (gain.gain / range) * (channel - 255)))
       : [255, 255, 255];
 
     return $span
-      .toggleClass("profit", gain.pct > 0)
-      .toggleClass("loss", gain.pct < 0)
+      .toggleClass("profit", gain.gain > 0)
+      .toggleClass("loss", gain.gain < 0)
       .css("background-color", `rgb(${thisColor.join(",")})`)
       .html(gain.txt);
   }
