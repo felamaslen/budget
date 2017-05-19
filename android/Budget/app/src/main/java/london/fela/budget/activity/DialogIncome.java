@@ -13,7 +13,7 @@ import london.fela.budget.app.AppConfig;
  * DialogUpdate extension for the In page
  * See DialogUpdate.java for implementation requirements
  */
-public class DialogIn extends DialogUpdate {
+public class DialogIncome extends DialogUpdate {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     /** set up the activity dialog */
@@ -22,8 +22,8 @@ public class DialogIn extends DialogUpdate {
     setContentView(R.layout.dialog_edit_basic);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_IN;
-    apiUrlAdd     = AppConfig.URL_ADD_IN;
+    apiUrlUpdate  = AppConfig.URL_UPDATE_INCOME;
+    apiUrlAdd     = AppConfig.URL_ADD_INCOME;
 
     /** define custom columns */
     String[] cols = {"date", "item", "cost"};

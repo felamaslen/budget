@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -277,9 +278,13 @@ public class FragmentList extends Fragment {
     // refresh the overview page, if it exists
     try {
       int[] cacheItem = Data.Cache.Overview.cost.get(pageName);
-
-      cacheItem[oldMonthKey] -= oldCost;
-      cacheItem[newMonthKey] += newCost;
+      try {
+        cacheItem[oldMonthKey] -= oldCost;
+        cacheItem[newMonthKey] += newCost;
+      }
+      catch (ArrayIndexOutOfBoundsException e) {
+        // cache is out of overview date range
+      }
 
       Data.Cache.Overview.cost.put(pageName, cacheItem);
 

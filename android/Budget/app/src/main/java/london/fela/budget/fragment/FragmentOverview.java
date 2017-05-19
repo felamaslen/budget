@@ -51,7 +51,7 @@ public class FragmentOverview extends Fragment {
   // all columns
   public static final String[] allCols = {
     "funds",      // 0
-    "in",         // 1
+    "income",     // 1
     "bills",      // 2
     "food",       // 3
     "general",    // 4
@@ -389,7 +389,7 @@ public class FragmentOverview extends Fragment {
 
         int[] predicted = new int[numMonths];
 
-        int[] in  = month.get("in");
+        int[] income = month.get("income");
         int[] out = month.get("out");
 
         int[] balance = month.get("balance");
@@ -397,7 +397,7 @@ public class FragmentOverview extends Fragment {
         for (int j = 0; j < numMonths; j++) {
           if (j > presentKey && j > 0) {
             // add this month's net spending to the last balance
-            predicted[j] = predicted[j - 1] + in[j] - out[j];
+            predicted[j] = predicted[j - 1] + income[j] - out[j];
           }
           else {
             // copy the existing value since we're in the past
@@ -638,24 +638,20 @@ class OverviewAdapter extends BaseAdapter {
     int[] colorOut      = { 191,  36,   36 };
     int[] colorBalance  = { 36,   191,  55 };
 
-    colColors.put("in",       colorIn);
-    colColors.put("out",      colorOut);
-    colColors.put("balance",  colorBalance);
+    colColors.put("income", colorIn);
+    colColors.put("out", colorOut);
+    colColors.put("balance", colorBalance);
   }
 
   private int getColorFromScore(String col, double score) {
     int[] rgbVal = colColors.get(col);
 
-    int r = (int)Math.round(255 - (255 - rgbVal[0]) * score);
-    int g = (int)Math.round(255 - (255 - rgbVal[1]) * score);
-    int b = (int)Math.round(255 - (255 - rgbVal[2]) * score);
+    int r = (int) Math.round(255 - (255 - rgbVal[0]) * score);
+    int g = (int) Math.round(255 - (255 - rgbVal[1]) * score);
+    int b = (int) Math.round(255 - (255 - rgbVal[2]) * score);
 
     // 0..255 << 24 is the alpha channel (0x00000000..0xff000000)
     return (255 << 24) + (r << 16) + (g << 8) + b;
-
-    //int r = rgbVal[0], g = rgbVal[1], b = rgbVal[2];
-
-    //return ((int)Math.round(255.0 * score) << 24) + (r << 16) + (g << 8) + b;
   }
 
   @Override
@@ -712,7 +708,7 @@ class OverviewAdapter extends BaseAdapter {
 
     holder.tvMonth.setBackgroundColor(timeBg[futureStatus]);
 
-    holder.tvIn.setBackgroundColor(getColorFromScore("in", item.getScore("in")));
+    holder.tvIn.setBackgroundColor(getColorFromScore("income", item.getScore("income")));
     holder.tvOut.setBackgroundColor(getColorFromScore("out", item.getScore("out")));
     holder.tvBalance.setBackgroundColor(getColorFromScore("balance", item.getScore("predicted")));
     

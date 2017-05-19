@@ -13,7 +13,7 @@ import london.fela.budget.fragment.FragmentFood;
 import london.fela.budget.fragment.FragmentFunds;
 import london.fela.budget.fragment.FragmentGeneral;
 import london.fela.budget.fragment.FragmentHoliday;
-import london.fela.budget.fragment.FragmentIn;
+import london.fela.budget.fragment.FragmentIncome;
 import london.fela.budget.fragment.FragmentOverview;
 import london.fela.budget.fragment.FragmentSocial;
 
@@ -58,7 +58,7 @@ public class PagerAdapter extends FragmentStatePagerAdapter {
       case 1:
         return FragmentFunds.newInstance();
       case 2:
-        return FragmentIn.newInstance();
+        return FragmentIncome.newInstance();
       case 3:
         return FragmentBills.newInstance();
       case 4:

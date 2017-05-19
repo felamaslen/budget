@@ -49,7 +49,6 @@ export default class {
       this.data = [];
 
       const args = this.hookDataAddArgs(["data", this.page]);
-
       const query = this.query || null;
 
       this.api.request(

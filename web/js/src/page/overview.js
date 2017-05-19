@@ -23,7 +23,7 @@ export class PageOverview extends Page {
     this.categories = [
       "stocks", "bills",
       "food", "general", "holiday", "social",
-      "in", "out", "net",
+      "income", "out", "net",
       "predicted", "balance"
     ];
 
@@ -44,7 +44,7 @@ export class PageOverview extends Page {
 
   hookSwitchToAfterLoad() {
     // update data from other pages (which might have changed)
-    this.processCategory("in");
+    this.processCategory("income");
     this.processCategory("food");
     this.processCategory("general");
     this.processCategory("holiday");
@@ -195,7 +195,7 @@ export class PageOverview extends Page {
 
     // calculate net change in balance for each month
     this.data.cost.net = this.data.cost.out.map((item, key) => {
-      return this.data.cost.in[key] - item + fundIncome[key];
+      return this.data.cost.income[key] - item + fundIncome[key];
     });
 
     // calculate the predicted balance for each month
@@ -403,7 +403,7 @@ export class PageOverview extends Page {
           doneRows.push(row);
         }
 
-        if (row > -1 && row < this.data.cost.in.length) {
+        if (row > -1 && row < this.data.cost.income.length) {
           this.data.cost[category][row] += this.state.pages[category].data[key].cost;
         }
       });

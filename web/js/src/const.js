@@ -2,6 +2,8 @@
  * Configurable constants
  */
 
+import { today } from "misc/date";
+
 export const E_NO_STORAGE = "Your browser does not support HTML5 storage, so logins won't be remembered.";
 
 export const MSG_TIME_DEBUG  = 0;
@@ -91,7 +93,7 @@ export const COLOR_CATEGORY = {
   general: [1, 87, 155],
   holiday: [0, 137, 123],
   social: [191, 158, 36],
-  in: [36, 191, 55],
+  income: [36, 191, 55],
   out: [191, 36, 36],
   net: [[36, 191, 55], [191, 36, 36]],
   predicted: [36, 191, 55],
@@ -112,6 +114,112 @@ export const FONT_GRAPH_TITLE = "16px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_TITLE_LARGE = "18px bold Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY = "13px Arial, Helvetica, sans-serif";
 export const FONT_GRAPH_KEY_SMALL = "11px Arial, Helvetica, sans-serif";
+
+export const PAGE_DEF = {
+  funds: {
+    page: "funds",
+    col: ["date", "item", "transactions", "cost", "price"],
+    colShort: ["d", "i", "t", "c", "P"],
+    colEdit: [0, 1, 2, 3],
+    dataType: ["date", "text-nosug", "transactions", "cost"],
+    addDefaultVal: {
+      date: today.format(),
+      item: "",
+      transactions: [],
+      cost: "0.00"
+    },
+    daily: false
+  },
+  income: {
+    page: "income",
+    col: ["date", "item", "cost"],
+    colShort: ["d", "i", "c"],
+    dataType: ["date", "text", "cost"],
+    addDefaultVal:  {
+      date: today.format(),
+      item: "",
+      cost: "0.00"
+    },
+    limit: true,
+    daily: false
+  },
+  bills: {
+    page: "bills",
+    col: ["date", "item", "cost"],
+    colShort: ["d", "i", "c"],
+    limit: true,
+    dataType: ["date", "text", "cost"],
+    addDefaultVal:  {
+      date: today.format(),
+      item: "",
+      cost: "0.00"
+    },
+    daily: false,
+    graphHidden: true
+  },
+  food: {
+    page: "food",
+    col: ["date", "item", "category", "cost", "shop"],
+    colShort: ["d", "i", "k", "c", "s"],
+    dataType: ["date", "text", "text", "cost", "text"],
+    limit: true,
+    addDefaultVal:  {
+      date: today.format(),
+      item: "",
+      category: "",
+      cost: "0.00",
+      shop: ""
+    },
+    daily: true,
+    drawPie: true
+  },
+  general: {
+    page: "general",
+    col: ["date", "item", "category", "cost", "shop"],
+    colShort: ["d", "i", "k", "c", "s"],
+    dataType: ["date", "text", "text", "cost", "text"],
+    limit: true,
+    addDefaultVal:  {
+      date: today.format(),
+      item: "",
+      category: "",
+      cost: "0.00",
+      shop: ""
+    },
+    daily: true,
+    drawPie: true
+  },
+  social: {
+    page: "social",
+    col: ["date", "item", "society", "cost", "shop"],
+    colShort: ["d", "i", "y", "c", "s"],
+    dataType: ["date", "text", "text", "cost", "text"],
+    addDefaultVal:  {
+      date: today.format(),
+      item: "",
+      society: "",
+      cost: "0.00",
+      shop: ""
+    },
+    daily: false,
+    drawPie: true
+  },
+  holiday: {
+    page: "holiday",
+    col: ["date", "item", "holiday", "cost", "shop"],
+    colShort: ["d", "i", "h", "c", "s"],
+    dataType: ["date", "text", "text", "cost", "text"],
+    addDefaultVal:  {
+      date: today.format(),
+      item: "",
+      holiday: "",
+      cost: "0.00",
+      shop: ""
+    },
+    daily: false,
+    drawPie: true
+  }
+};
 
 export const STOCK_INDICES = {
   "LON:CTY": "CTY",
