@@ -13,7 +13,7 @@ START_YEAR = 2014
 START_MONTH = 9
 
 LIST_CATEGORIES = \
-        ('funds', 'in', 'bills', 'food', 'general', 'holiday', 'social')
+        ('funds', 'income', 'bills', 'food', 'general', 'holiday', 'social')
 
 # common columns are added programmatically
 # the second parameter is a boolean marking if column is optional
@@ -21,7 +21,7 @@ LIST_DATA_FORM_SCHEMA = {
     'funds':    {
         'transactions': ('transactions', True)
     },
-    'in': {
+    'income': {
     },
     'bills': {
     },

@@ -61,7 +61,7 @@ class ListData(Processor):
             # non-standard columns on some tables
             'table': {
                 'funds': [['t', 'transactions']],
-                'in': [],
+                'income': [],
                 'bills': [],
                 'food': [['k', 'category'], ['s', 'shop']],
                 'general': [['k', 'category'], ['s', 'shop']],
@@ -70,10 +70,10 @@ class ListData(Processor):
             },
             # limit the view to N months per group (can page between groups)
             'limit': {
-                'in':       18,
-                'food':     1,
-                'general':  5,
-                'bills':    12
+                'income': 18,
+                'food': 1,
+                'general': 5,
+                'bills': 12
             }
         }
 
@@ -205,7 +205,6 @@ class Pie(Processor):
 
         self.col = {
             'funds': [['item', 'cost', 'Total']],
-            'in': [['item', 'cost', 'Total']],
             'food': [['shop', 'cost', 'Shop cost'], \
                     ['category', 'cost', 'Category cost']],
             'general': [['shop', 'cost', 'Shop cost'], \
@@ -309,7 +308,6 @@ class Search(Processor):
     def prepare(self):
         table_cols = {
             'funds':    ['item', 'cost'],
-            'in':       ['item', 'cost'],
             'bills':    ['item', 'cost'],
             'food':     ['item', 'category', 'cost', 'shop'],
             'general':  ['item', 'category', 'cost', 'shop'],

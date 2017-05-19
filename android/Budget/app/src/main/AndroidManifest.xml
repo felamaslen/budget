@@ -48,7 +48,7 @@
         android:theme="@android:style/Theme.Holo.Light.Dialog.MinWidth">
     </activity>
     <activity
-        android:name=".activity.DialogIn"
+        android:name=".activity.DialogIncome"
         android:label="@string/dialog_title"
         android:theme="@android:style/Theme.Holo.Light.Dialog.MinWidth">
     </activity>

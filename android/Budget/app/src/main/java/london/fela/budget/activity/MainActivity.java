@@ -119,7 +119,6 @@ public class MainActivity extends Activity implements Api {
       Data.Cache.Overview.currentYear = jOverview.getInt("currentYear");
       Data.Cache.Overview.currentMonth = jOverview.getInt("currentMonth");
 
-
       // insert pages' data into cache
       for (String page : AppConfig.pages) {
         JSONArray pageJson = data.getJSONObject(page).getJSONArray("data");

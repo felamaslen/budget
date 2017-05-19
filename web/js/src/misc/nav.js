@@ -4,124 +4,15 @@
 
 import $ from "../../lib/jquery.min";
 
-import { NAV_HANDLE_EVENT } from "const";
+import { NAV_HANDLE_EVENT, PAGE_DEF } from "const";
 
-import { today } from "misc/date";
 import { PageOverview } from "page/overview";
 import { PageList } from "page/list";
 import { PageAnalysis } from "page/analysis";
 import { PageFunds } from "page/funds";
 
-const pageDef = {
-  in: {
-    page:           "in",
-    col:            ["date", "item", "cost"],
-    colShort:       ["d", "i", "c"],
-    dataType:       ["date", "text", "cost"],
-    addDefaultVal:  {
-      date: today.format(),
-      item: "",
-      cost: "0.00"
-    },
-    limit: true,
-    daily: false,
-    drawPie: true,
-    pieWidth: 800
-  },
-  bills: {
-    page:           "bills",
-    col:            ["date", "item", "cost"],
-    colShort:       ["d", "i", "c"],
-    limit:          true,
-    dataType:       ["date", "text", "cost"],
-    addDefaultVal:  {
-      date: today.format(),
-      item: "",
-      cost: "0.00"
-    },
-    daily: false,
-    graphHidden: true
-  },
-  food: {
-    page:           "food",
-    col:            ["date", "item", "category", "cost", "shop"],
-    colShort:       ["d", "i", "k", "c", "s"],
-    dataType:       ["date", "text", "text", "cost", "text"],
-    limit:          true,
-    addDefaultVal:  {
-      date: today.format(),
-      item: "",
-      category: "",
-      cost: "0.00",
-      shop: ""
-    },
-    daily: true,
-    drawPie: true
-  },
-  general: {
-    page:           "general",
-    col:            ["date", "item", "category", "cost", "shop"],
-    colShort:       ["d", "i", "k", "c", "s"],
-    dataType:       ["date", "text", "text", "cost", "text"],
-    limit:          true,
-    addDefaultVal:  {
-      date: today.format(),
-      item: "",
-      category: "",
-      cost: "0.00",
-      shop: ""
-    },
-    daily: true,
-    drawPie: true
-  },
-  social: {
-    page:           "social",
-    col:            ["date", "item", "society", "cost", "shop"],
-    colShort:       ["d", "i", "y", "c", "s"],
-    dataType:       ["date", "text", "text", "cost", "text"],
-    addDefaultVal:  {
-      date: today.format(),
-      item: "",
-      society: "",
-      cost: "0.00",
-      shop: ""
-    },
-    daily: false,
-    drawPie: true
-  },
-  holiday: {
-    page:           "holiday",
-    col:            ["date", "item", "holiday", "cost", "shop"],
-    colShort:       ["d", "i", "h", "c", "s"],
-    dataType:       ["date", "text", "text", "cost", "text"],
-    addDefaultVal:  {
-      date: today.format(),
-      item: "",
-      holiday: "",
-      cost: "0.00",
-      shop: ""
-    },
-    daily: false,
-    drawPie: true
-  }
-};
-const pageDefFunds = {
-  page: "funds",
-  col: ["date", "item", "transactions", "cost", "price"],
-  colShort: ["d", "i", "t", "c", "P"],
-  colEdit: [0, 1, 2, 3],
-  dataType: ["date", "text-nosug", "transactions", "cost"],
-  addDefaultVal: {
-    date: today.format(),
-    item: "",
-    transactions: [],
-    cost: "0.00"
-  },
-  daily: false
-};
-
 function newPageList(api, state, page) {
-  return new PageList(pageDef[page], api, state);
+  return new PageList(PAGE_DEF[page], api, state);
 }
 function selectPage(api, state, id, button, callback) {
   if (button.is(".active")) {
@@ -141,7 +32,7 @@ function selectPage(api, state, id, button, callback) {
       state.pages[id] = new PageAnalysis(api, state);
       break;
     case "funds":
-      state.pages[id] = new PageFunds(pageDefFunds, api, state);
+      state.pages[id] = new PageFunds(PAGE_DEF.funds, api, state);
       break;
     default:
       state.pages[id] = newPageList(api, state, id);

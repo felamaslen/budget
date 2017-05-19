@@ -54,7 +54,7 @@ public class ApiCaller {
       httpMethod = Request.Method.GET;
     }
 
-    String url = api_url + args;
+    final String url = api_url + args;
 
     StringRequest strReq = new StringRequest(
       httpMethod,
@@ -105,7 +105,7 @@ public class ApiCaller {
       new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-          Log.e(AppController.TAG, "API error: " + error.getMessage());
+          Log.e(AppController.TAG, "API error: " + error.getMessage() + " (" + url + ")");
 
           for (Api listener : listeners) {
             listener.apiError(tag_int_req, error);
