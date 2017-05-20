@@ -178,13 +178,15 @@ export class GraphBalance extends LineGraph {
     const tension = this.tension;
 
     this.fill = true;
+    this.stroke = false;
     this.lineWidth = 1;
     this.tension = 1;
-    this.drawCubicLine(this.dataFunds, [COLOR_BALANCE_STOCKS, "#ff9a9a"]);
+    this.drawCubicLine(this.dataFunds, [COLOR_BALANCE_STOCKS]);
 
     this.lineWidth = lineWidth;
     this.tension = tension;
     this.fill = false;
+    this.stroke = true;
   }
   draw() {
     if (!this.supported) {
