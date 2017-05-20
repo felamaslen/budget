@@ -8,15 +8,6 @@ import java.util.HashMap;
 public class EditParcel implements Parcelable {
   public HashMap<String, String> data = new HashMap<>();
 
-  /*
-  public int id;
-  public int year;
-  public int month;
-  public int date;
-  public String item;
-  public int cost;
-   */
-
   @Override
   public int describeContents() { return 0; }
 
@@ -44,39 +35,6 @@ public class EditParcel implements Parcelable {
       data.put(key, value);
     }
   }
-
-  /*
-  @Override
-  public void writeToParcel(Parcel out, int flags) {
-    out.writeInt(id);
-    out.writeInt(year);
-    out.writeInt(month);
-    out.writeInt(date);
-    out.writeString(item);
-    out.writeInt(cost);
-  }
-
-  public EditParcel(
-    int tId, int tYear, int tMonth, int tDate, String tItem, int tCost
-  ) {
-
-    id = tId;
-    year = tYear;
-    month = tMonth;
-    date = tDate;
-    item = tItem;
-    cost = tCost;
-  }
-  
-  private EditParcel(Parcel in) {
-    id    = in.readInt();
-    year = in.readInt();
-    month = in.readInt();
-    date = in.readInt();
-    item = in.readString();
-    cost = in.readInt();
-  }
-  */
 
   public static final Parcelable.Creator<EditParcel> CREATOR = new Parcelable.Creator<EditParcel>() {
     public EditParcel createFromParcel(Parcel in) {

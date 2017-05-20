@@ -26,7 +26,7 @@ public class DialogFunds extends DialogUpdate {
     apiUrlAdd     = AppConfig.URL_ADD_FUNDS;
 
     /** define custom columns */
-    String[] cols = {"date", "item", "cost"};
+    String[] cols = {"date", "item", "cost", "value"};
 
     /** call common onCreate methods */
     onCreateCommon(cols);

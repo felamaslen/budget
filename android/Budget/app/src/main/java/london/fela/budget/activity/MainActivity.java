@@ -85,23 +85,18 @@ public class MainActivity extends Activity implements Api {
     try {
       // insert overview data into cache
       JSONObject jOverview = data.getJSONObject("overview");
-
       JSONObject jOverviewCost = jOverview.getJSONObject("cost");
-
       Iterator<?> keys = jOverviewCost.keys();
 
       while (keys.hasNext()) {
         String category = (String) keys.next();
 
         JSONArray jValues = jOverviewCost.getJSONArray(category);
-
         try {
           int[] values = new int[jValues.length()];
-
           for (int i = 0; i < jValues.length(); i++) {
             values[i] = jValues.getInt(i);
           }
-
           Data.Cache.Overview.cost.put(category, values);
         } catch (Exception e) {
           // serious error
@@ -122,28 +117,25 @@ public class MainActivity extends Activity implements Api {
       // insert pages' data into cache
       for (String page : AppConfig.pages) {
         JSONArray pageJson = data.getJSONObject(page).getJSONArray("data");
-
         PageCache newPage = new PageCache();
-
         newPage.numItems = pageJson.length();
 
         for (int i = 0; i < pageJson.length(); i++) {
           JSONObject li = pageJson.getJSONObject(i);
 
+          // item ID
           int id = li.getInt("I");
-
+          // item date
           JSONArray jDate = li.getJSONArray("d");
           YMD date = new YMD(jDate.getInt(0), jDate.getInt(1), jDate.getInt(2));
-
+          // item name
           String item = li.getString("i");
-
+          // item cost
           int cost = li.getInt("c");
-
           // custom properties
-          HashMap<String, String> otherProps = Data.getOtherProps(page, li);
+          HashMap<String, String> otherProps = Data.getOtherProps(page, li, cost);
 
           newPage.id.put(i, id);
-
           newPage.date.put(id, date);
           newPage.item.put(id, item);
           newPage.cost.put(id, cost);
@@ -154,6 +146,7 @@ public class MainActivity extends Activity implements Api {
       }
     }
     catch (JSONException e) {
+      // serious error
       e.printStackTrace();
     }
   }
