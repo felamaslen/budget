@@ -4,7 +4,8 @@ Does not handle authentication
 """
 
 from app.config import LIST_CATEGORIES
-from app.data_get import ListAll, ListData, Pie, Search, Stocks
+from app.data_get import ListData, Pie, Search, Stocks
+from app.data_get_all import ListAll
 from app.data_get_overview import Overview
 from app.data_get_analysis import Analysis, AnalysisCategory
 from app.data_get_funds import Funds, FundHistory

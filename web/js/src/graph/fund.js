@@ -454,7 +454,7 @@ export class GraphFundHistory extends LineGraph {
       return value.toFixed(2) + "%";
     }
     if (this.mode === GRAPH_FUND_HISTORY_MODE_ABSOLUTE) {
-      return formatCurrency(value, { raw: true, abbreviate: true });
+      return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
     }
     return Math.round(100 * value) / 100;
   }
