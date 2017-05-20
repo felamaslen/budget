@@ -187,14 +187,12 @@ public class MainActivity extends Activity implements Api {
 
     try {
       JSONObject data = res.getJSONObject("data");
-
       translateCacheData(data);
-
       updateVisibleViewsData();
     }
     catch (JSONException e) {
       // misconfigured api
-      AppController.alert(getApplicationContext(), "Misconfigured motherphucking API!");
+      AppController.alert(getApplicationContext(), "Bug: Misconfigured API");
     }
   }
 
