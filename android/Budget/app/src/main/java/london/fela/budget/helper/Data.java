@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -246,14 +247,26 @@ public class Data {
   }
 
   /**
-   * get the rounded average value of an int[] array
+   * get the rounded average (mean or median) value of an int[] array
    */
-  public static int intArrayAvg(int[] array, int length) {
-    int sum = 0;
-    for (int i = 0; i < length; i++) {
-      sum += array[i];
+  public static int intArrayAvg(int[] array, int limit, boolean median) {
+    int[] list = Arrays.copyOfRange(array, 0, limit);
+    if (median) {
+      Arrays.sort(list);
+      if ((list.length & 1) == 1) {
+        // odd: get the middle value
+        return list[(list.length - 1) / 2];
+      }
+
+      // even: get the middle two values and find the average of them
+      int key = list.length / 2 - 1;
+      return (list[key] + list[key + 1]) / 2;
     }
 
-    return (int)Math.round((double)sum / length);
+    int sum = 0;
+    for (int i = 0; i < list.length; i++) {
+      sum += list[i];
+    }
+    return (int)Math.round((double)sum / list.length);
   }
 }
