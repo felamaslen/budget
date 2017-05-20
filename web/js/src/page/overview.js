@@ -156,8 +156,7 @@ export class PageOverview extends Page {
       const spliceArgs = [
         this.data.cost[category].length - this.data.futureMonths,
         this.data.futureMonths
-      ].concat(Array.apply(null, new Array(this.data.futureMonths)).map(
-          () => average));
+      ].concat(Array.apply(null, new Array(this.data.futureMonths)).map(() => average));
 
       Array.prototype.splice.apply(this.data.cost[category], spliceArgs);
     });
@@ -199,26 +198,14 @@ export class PageOverview extends Page {
     });
 
     // calculate the predicted balance for each month
-    this.data.cost.predicted = [];
-
     let lastValue = 0;
     this.data.cost.predicted = this.data.cost.out.map((item, key) => {
       let value = this.data.cost.net[key];
       if (key > 0) {
         const lastBalance = this.data.cost.balance[key - 1];
-        if (lastBalance > 0) {
-          value += lastBalance;
-          this.data.cost.predicted[key] += lastBalance;
-        }
-        else {
-          value += lastValue;
-        }
-
-        value += fundIncome[key];
+        value += lastBalance > 0 ? lastBalance : lastValue;
       }
-
       lastValue = value;
-
       return value;
     });
 
