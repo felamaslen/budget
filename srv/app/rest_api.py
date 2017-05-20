@@ -112,7 +112,7 @@ class WebAPI(object):
 
         # logins aren't handled by the API class
         if self.form['task'][0] == 'login':
-            self.res['api_error'] = self.task_login()
+            self.res['api_error'] = self.task_login() is False
 
         else:
             # make sure we're authenticated before proceeding
@@ -120,11 +120,9 @@ class WebAPI(object):
 
             if auth_status > 0:
                 # not authenticated
-                self.error = True
-                self.error_text = "Not authenticated" if auth_status == 2 \
-                        else "Bad authentication token"
-
-                self.res['api_error'] = True
+                self.res['error'] = True
+                self.res['errorText'] = "Not authenticated" \
+                        if auth_status == 2 else "Bad authentication token"
 
             elif auth_status is not None:
                 # initialise api object to process the actual request
@@ -186,7 +184,7 @@ class WebAPI(object):
         login_status = self.user.login(self.headers['remote_ip'])
 
         if login_status is None: # unknown error occurred
-            return False
+            return False # api error
 
         if login_status is False: # ip banned
             self.res['code'] = 401
@@ -205,6 +203,8 @@ class WebAPI(object):
             self.res['error'] = True
             self.res['errorText'] = "No PIN" \
                     if self.user.pin is None else "Bad PIN"
+
+        return True # no api error
 
 class API(object):
     """ class to process a request and potentially read or modify data """
