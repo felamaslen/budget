@@ -39,15 +39,15 @@ export function arrayAverage(array, offset, mode) {
   const values = offset ? array.slice(0, -offset) : array;
 
   if (mode === AVERAGE_MEDIAN) {
-    const sorted = values.sort();
-    if (Math.floor(sorted.length / 2) === Math.ceil(sorted.length / 2)) {
-      // even: get the middle two values and find the average of them
-      const low = sorted[Math.floor(sorted.length / 2) - 1];
-      const high = sorted[Math.floor(sorted.length / 2)];
-      return (low + high) / 2;
+    const sorted = values.sort((a, b) => a < b ? -1 : 1);
+    if (sorted.length & 1) {
+      // odd: get the middle value
+      return sorted[Math.floor((sorted.length - 1) / 2)];
     }
-    // odd: get the middle value
-    return sorted[Math.floor((sorted.length - 1) / 2)];
+    // even: get the middle two values and find the average of them
+    const low = sorted[Math.floor(sorted.length / 2) - 1];
+    const high = sorted[Math.floor(sorted.length / 2)];
+    return (low + high) / 2;
   }
 
   if (mode === AVERAGE_MEAN_GEOM) {
