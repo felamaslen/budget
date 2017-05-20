@@ -452,7 +452,7 @@ public class FragmentOverview extends Fragment {
     for (i = 0; i < futureCols.length; i++) {
       String col = allCols[futureCols[i]];
 
-      int avg = Data.intArrayAvg(month.get(col), presentKey + 1);
+      int avg = Data.intArrayAvg(month.get(col), presentKey + 1, true);
 
       // fill in the future values with the forecasted value
       for (j = presentKey + 1; j < numMonths; j++) {
