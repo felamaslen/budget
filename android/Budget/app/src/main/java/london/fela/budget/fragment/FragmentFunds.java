@@ -1,8 +1,15 @@
 package london.fela.budget.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.SparseArray;
+import android.view.View;
+import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
+import london.fela.budget.R;
 import london.fela.budget.activity.DialogFunds;
 import london.fela.budget.app.AppConfig;
 
@@ -15,12 +22,24 @@ public class FragmentFunds extends FragmentList {
     this.pageName  = "funds";
 
     this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_FUNDS;
-    this.loadingMsg    = "Loading funds data...";
+    this.loadingMsg = "Loading funds data...";
+
+    this.props = new String[] { "value" };
   }
 
   @Override
   public Intent getDialogIntent() {
     return new Intent(getActivity(), DialogFunds.class);
+  }
+
+  @Override
+  public void drawList() {
+    listAdapter = new ListAdapterFunds(
+      getActivity(),
+      itemList
+    );
+
+    list.setAdapter(listAdapter);
   }
 
   public static FragmentFunds newInstance() {
@@ -30,5 +49,25 @@ public class FragmentFunds extends FragmentList {
     fragmentFunds.setArguments(args);
 
     return fragmentFunds;
+  }
+}
+
+class ListAdapterFunds extends ListAdapter {
+  public ListAdapterFunds(Activity context, ArrayList<ListItem> itemList) {
+    super(context, itemList);
+    this.abbreviateCost = true;
+  }
+
+  @Override
+  public SparseArray<String> getTextViews(ListItem item) {
+    SparseArray<String> idValues = super.getTextViews(item);
+    idValues.put(R.id.rowValue, item.otherProps.get("value"));
+
+    return idValues;
+  }
+
+  @Override
+  public View getConvertView(ViewGroup parent) {
+    return inflater.inflate(R.layout.row_list_funds, parent, false);
   }
 }

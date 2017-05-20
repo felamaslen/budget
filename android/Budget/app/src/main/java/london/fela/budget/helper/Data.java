@@ -4,6 +4,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,7 +23,6 @@ public class Data {
     "January", "February", "March", "April", "May", "June", "July", "August", "September",
     "October", "November", "December"
   };
-
   public static final String[] months = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   };
@@ -47,7 +47,7 @@ public class Data {
     public static HashMap<String, PageCache> Pages = new HashMap<>();
   }
 
-  public static HashMap<String, String> getOtherProps(String page, JSONObject json) {
+  public static HashMap<String, String> getOtherProps(String page, JSONObject json, int cost) {
     HashMap<String, String> values = new HashMap<>();
 
     try {
@@ -67,6 +67,22 @@ public class Data {
           values.put("society", json.getString("y"));
           values.put("shop", json.getString("s"));
           break;
+
+        case "funds":
+          int value = cost;
+          try {
+            JSONArray transactions = new JSONArray(json.getString("t"));
+            double price = json.getDouble("P"); // latest cached price
+            double units = 0;
+            for (int i = 0; i < transactions.length(); i++) {
+              JSONObject transaction = transactions.getJSONObject(i);
+              units += transaction.getDouble("u");
+            }
+            value = (int)(units * price);
+          }
+          finally {
+            values.put("value", formatCurrency(value, true));
+          }
       }
     }
     catch (JSONException e) {

@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,8 +47,8 @@ public class FragmentList extends Fragment {
   String[] props    = new String[] {};
   int loadingMsgId  = 0;
   String loadingMsg;
-  void setProps() {
-    props = new String[] {};
+
+  public void setProps() {
   }
   public HashMap<String, String> getOtherProps(JSONObject json) {
     return new HashMap<>();
@@ -57,10 +57,10 @@ public class FragmentList extends Fragment {
   Intent getDialogIntent() { return null; }
 
   private final int EDIT_ADD_LIST_ITEM = 711021;
-  
-  private ListView list;
-  private final ArrayList<ListItem> itemList = new ArrayList<>();
-  private ListAdapter listAdapter;
+
+  public ListAdapter listAdapter;
+  public final ArrayList<ListItem> itemList = new ArrayList<>();
+  public ListView list;
   
   private class IntentDialog {
     public ListItem item;
@@ -359,7 +359,7 @@ public class FragmentList extends Fragment {
   /**
    * draw table of in data
    */
-  private void drawList() {
+  public void drawList() {
     listAdapter = new ListAdapter(
       getActivity(),
       itemList
@@ -437,10 +437,10 @@ class ListItem implements Comparable<ListItem> {
 
 class ListAdapter extends BaseAdapter {
   private final ArrayList<ListItem> itemList;
+  LayoutInflater inflater;
+  boolean abbreviateCost = false;
 
-  private LayoutInflater inflater;
-
-  public ListAdapter(Activity context, ArrayList<ListItem> itemList) {
+  ListAdapter(Activity context, ArrayList<ListItem> itemList) {
     super();
 
     this.itemList = itemList;
@@ -448,6 +448,19 @@ class ListAdapter extends BaseAdapter {
     if (context != null) {
       this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
+  }
+
+  SparseArray<String> getTextViews(ListItem item) {
+    SparseArray<String> idValues = new SparseArray<>();
+    idValues.put(R.id.rowDate, item.date.format());
+    idValues.put(R.id.rowItem, item.item);
+    idValues.put(R.id.rowCost, Data.formatCurrency(item.cost, this.abbreviateCost));
+
+    return idValues;
+  }
+
+  View getConvertView(ViewGroup parent) {
+    return inflater.inflate(R.layout.row_list, parent, false);
   }
 
   @Override
@@ -465,46 +478,31 @@ class ListAdapter extends BaseAdapter {
     return 0;
   }
 
-  public static class ViewHolder {
-    TextView tvDate;
-    TextView tvItem;
-    TextView tvCost;
+  private static class ViewHolder {
+    final SparseArray<TextView> tv = new SparseArray<>();
   }
 
   @Override
   public View getView(final int position, View convertView, ViewGroup parent) {
-    ViewHolder holder;
-    if (convertView == null) {
-      holder = new ViewHolder();
-      convertView = inflater.inflate(R.layout.row_list, parent, false);
-
-      TextView[] tv = new TextView[3];
-
-      int[] id = {
-        R.id.rowDate,
-        R.id.rowItem,
-        R.id.rowCost
-      };
-
-      for (int i = 0; i < id.length; i++) {
-        tv[i] = (TextView) convertView.findViewById(id[i]);
-      }
-
-      holder.tvDate = tv[0];
-      holder.tvItem = tv[1];
-      holder.tvCost = tv[2];
-
-      convertView.setTag(holder);
-    }
-    else {
-      holder = (ViewHolder) convertView.getTag();
-    }
+    ViewHolder holder = convertView == null ? new ViewHolder() : (ViewHolder) convertView.getTag();
 
     ListItem item = itemList.get(position);
+    SparseArray<String> idValues = getTextViews(item);
 
-    holder.tvDate.setText(item.date.format());
-    holder.tvItem.setText(item.item);
-    holder.tvCost.setText(Data.formatCurrency(item.cost));
+    if (convertView == null) {
+      convertView = getConvertView(parent);
+      convertView.setTag(holder);
+
+      for (int i = 0; i < idValues.size(); i++) {
+        holder.tv.append(i, (TextView) convertView.findViewById(idValues.keyAt(i)));
+        holder.tv.valueAt(i).setText(idValues.valueAt(i));
+      }
+    }
+    else {
+      for (int i = 0; i < idValues.size(); i++) {
+        holder.tv.valueAt(i).setText(idValues.valueAt(i));
+      }
+    }
 
     return convertView;
   }
