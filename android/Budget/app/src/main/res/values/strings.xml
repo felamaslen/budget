@@ -13,7 +13,7 @@
   <string name="change_date">Change</string>
   
   <string name="tblOverviewHeadMonth">Month</string>
-  <string name="tblOverviewHeadIn">In</string>
+  <string name="tblOverviewHeadIn">Income</string>
   <string name="tblOverviewHeadOut">Out</string>
   <string name="tblOverviewHeadBalance">Balance</string>
 
