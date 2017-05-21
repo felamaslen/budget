@@ -7,6 +7,7 @@ import $ from "../../lib/jquery.min";
 import {
   COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
   COLOR_GRAPH_TITLE, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_LIGHT, COLOR_CATEGORY,
+  COLOR_TRANSLUCENT_LIGHT,
   FONT_GRAPH_TITLE, FONT_GRAPH_KEY_SMALL, FONT_AXIS_LABEL, FONT_GRAPH_KEY,
   GRAPH_BALANCE_NUM_TICKS, GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y,
   GRAPH_KEY_SIZE
@@ -57,7 +58,7 @@ export class GraphBalance extends LineGraph {
   drawKey() {
     // add title and key
     this.ctx.beginPath();
-    this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    this.ctx.fillStyle = COLOR_TRANSLUCENT_LIGHT;
     this.ctx.fillRect(45, 8, 200, 60);
     this.ctx.closePath();
 
@@ -172,6 +173,20 @@ export class GraphBalance extends LineGraph {
       this.ctx.fillText(tickName, this.padX1, tick.pos);
     });
   }
+  drawNowLine() {
+    // draw a line indicating where the present ends and the future starts
+    const nowLineX = Math.floor(this.pixX(today.timestamp())) + 0.5;
+    this.ctx.beginPath();
+    this.ctx.moveTo(nowLineX, this.pixY(this.minY));
+    this.ctx.lineTo(nowLineX, this.pixY(this.maxY));
+    this.ctx.lineWidth = 1;
+    this.ctx.strokeStyle = COLOR_DARK;
+    this.ctx.stroke();
+    this.ctx.closePath();
+
+    this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+    this.ctx.fillText("Now", nowLineX, this.pixY(this.maxY));
+  }
   drawFundsLine() {
     // plot funds data
     const lineWidth = this.lineWidth;
@@ -196,15 +211,13 @@ export class GraphBalance extends LineGraph {
     // clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
     this.drawAxes();
+    this.drawNowLine();
 
     // plot past + future predicted data
     this.drawCubicLine(this.dataMain, this.colors);
 
+    // plot past + future predicted ISA stock value
     this.drawFundsLine();
-
-    // draw Y axis
-    this.ctx.textBaseline = "bottom";
-    this.ctx.textAlign = "left";
 
     this.drawKey();
   }
@@ -373,7 +386,7 @@ export class GraphSpend extends LineGraph {
     const futureW = this.pixX(this.maxX) - future0;
     const futureH = this.pixY(this.minY) - future1;
     this.ctx.beginPath();
-    this.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    this.ctx.fillStyle = COLOR_TRANSLUCENT_LIGHT;
     this.ctx.fillRect(future0, future1, futureW, futureH);
     this.ctx.closePath();
 
