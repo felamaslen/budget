@@ -189,34 +189,26 @@ export class LineGraph extends Graph {
     this.setRange([newMinX, newMaxX, this.minY, this.maxY]);
   }
 
-  getSpline(p) {
-    // array of [pixX, pixY] values
-    const curve = [];
-
+  getSpline(points) {
     // Hermite spline
     // cardinal spline
-    const c = 1 - this.tension; // tension parameter
-
-    const n = p.length - 1;
+    const card = 1 - this.tension; // tension parameter
 
     // secants
-    const d = [];
-
-    for (let k = 0; k < n; k++) {
-      d[k] = (p[k + 1][1] - p[k][1]) / (p[k + 1][0] - p[k][0]);
-    }
+    const numSecants = points.length - 1;
+    const secants = Array.apply(null, new Array(numSecants)).map((_, key) => {
+      return (points[key + 1][1] - points[key][1]) / (points[key + 1][0] - points[key][0]);
+    });
 
     // tangents
-    const m = p.map((point, k) => {
-      if (k === 0) {
-        return d[0];
+    const tangents = points.map((point, key) => {
+      if (key === 0) {
+        return secants[0];
       }
-
-      if (k === n) {
-        return d[n - 1];
+      if (key === numSecants) {
+        return secants[numSecants - 1];
       }
-
-      return c * (d[k - 1] + d[k]);
+      return card * (secants[key - 1] + secants[key]);
     });
 
     const h00 = t => (1 + 2 * t) * Math.pow(1 - t, 2);
@@ -233,35 +225,31 @@ export class LineGraph extends Graph {
               h11(t) * (xk1 - xk) * mk1;
     };
 
-    let xn = this.pixX(p[0][0]);
+    let xn = this.pixX(points[0][0]);
+    let k = points[0][0];
+    let k1 = points[0][0];
 
-    let k = p[0][0];
-    let k1 = p[0][0];
-
-    for (let K = 0; K < n; K++) {
-      const curvePiece = [];
-
-      k1 += p[K + 1][0] - p[K][0];
-
+    const curve = Array.apply(null, new Array(numSecants)).map((_, key) => {
+      k1 += points[key + 1][0] - points[key][0];
       const x = xn;
       xn = this.pixX(k1);
 
       // interpolate the curve between this point and the next
-      for (let j = 0; j < xn - x; j++) {
-        const xv = this.valX(x + j);
-        const yv = f(xv, k, p[K][1], k1, p[K + 1][1], m[K], m[K + 1]);
+      const numPoints = Math.max(1, Math.floor(xn - x));
+      const curvePiece = Array.apply(null, new Array(numPoints)).map((__, pieceKey) => {
+        const xv = this.valX(x + pieceKey);
+        const yv = f(xv, k, points[key][1], k1, points[key + 1][1], tangents[key], tangents[key + 1]);
 
-        curvePiece.push([x + j, this.pixY(yv)]);
-      }
-
-      curve.push(curvePiece);
+        return [x + pieceKey, this.pixY(yv)];
+      });
 
       k = k1;
-    }
+      return curvePiece;
+    });
 
     // add the last point
     curve[curve.length - 1].push([
-      this.pixX(n), this.pixY(p[n])
+      this.pixX(numSecants), this.pixY(points[numSecants])
     ]);
 
     return curve;
