@@ -26,8 +26,11 @@
   },
   "env": {
     "browser": true,
-    "node": true
+    "es6": true
   },
+  "extends": [
+    "plugin:react/recommended"
+  ],
   "parser": "babel-eslint",
   "plugins": [
     "babel",
@@ -176,7 +179,7 @@
     "operator-assignment": [1, "always"],
     "padded-blocks": [0, "never"],
     "quote-props": [0, "as-needed"],
-    "quotes": [1, "single"],
+    "quotes": [2, "single"],
     "semi-spacing": [1, { "before": false, "after": true }],
     "semi": [1, "always"],
     "sort-vars": 0,

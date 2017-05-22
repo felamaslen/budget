@@ -47,9 +47,7 @@ gulp.task('build_css', ['less'], () => {
 // verify es6 code is good
 gulp.task('lint', () => {
   return gulp.src('web/src/js/**')
-  .pipe(eslint({
-    'plugins': ['react']
-  }))
+  .pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failOnError());
 });
