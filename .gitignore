@@ -1,6 +1,5 @@
 node_modules
 node_modules/*
-Gulpfile.js
 **/__pycache__
 Budget.egg-info
 env
@@ -9,9 +8,8 @@ include
 srv/app/db_info.py
 resources/serial
 resources/tickers.csv
-web/js/build/*.js
-web/js/main.js
-web/js/main.min.js
-web/css/budget.css
-web/css/budget.min.css
+web/build/js/*.js
+web/build/js/*.js.map
+web/build/css/*.css
+local.conf.js
 **/.syncthing*
