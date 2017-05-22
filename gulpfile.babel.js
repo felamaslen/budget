@@ -63,14 +63,8 @@ gulp.task('webpack', ['lint'], callback => {
   });
 });
 
-// process and minify js
-gulp.task('build_js', ['webpack'], callback => {
-  pump([
-    gulp.src('web/build/js/main.js'),
-    uglify(),
-    gulp.dest('web/js/build/')
-  ], callback);
-});
+// process js
+gulp.task('build_js', ['webpack']);
 
 /**
  * Builds the web client files, which are then served by nginx via

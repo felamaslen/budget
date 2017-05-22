@@ -13,7 +13,19 @@ export default {
         NODE_ENV: JSON.stringify("production")
       }
     }),
-    new webpack.optimize.UglifyJsPlugin()
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false,
+        dead_code: true,
+        drop_debugger: true,
+        conditionals: true,
+        unused: true,
+        if_return: true
+      },
+      mangle: {
+        toplevel: true
+      }
+    })
   ],
   output: {
     path: path.join(__dirname, '../web/build/js'),
