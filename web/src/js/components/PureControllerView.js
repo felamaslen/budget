@@ -4,6 +4,8 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import { Dispatcher } from 'flux';
 import shallowEqual from 'react-pure-render/shallowEqual';
 
 export default class PureControllerView extends React.Component {
@@ -16,4 +18,8 @@ export default class PureControllerView extends React.Component {
     this.props.dispatcher.dispatch(action);
   }
 }
+
+PureControllerView.propTypes = {
+  dispatcher: PropTypes.instanceOf(Dispatcher)
+};
 

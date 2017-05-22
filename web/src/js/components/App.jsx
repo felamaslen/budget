@@ -10,8 +10,8 @@ import { Dispatcher } from 'flux';
 // the global reducer decides what to do for each action
 import globalReducer from '../reducers/GlobalReducer';
 
-import { SurveyForm } from './SurveyForm.jsx';
-import { Header } from './Header.jsx';
+import { Header } from './Header';
+import { LoginForm } from './LoginForm';
 
 // side-effect handlers
 import effectHandler from '../effects-handlers/EffectHandler';
@@ -30,40 +30,41 @@ export default class App extends Component {
     dispatcher.register(action => {
       let reduction = this.state.reduction;
 
-      // log all actions for debugging purposes
-      const actionLog = this.state.actionLog.push(action);
-
       // purge side effects
       reduction = reduction.set('effects', List.of());
       // execute reducers
       reduction = globalReducer(reduction, action);
-      reduction.get('effects').forEach(effectHandler.bind(null, dispatcher));
+      reduction.get('effects').forEach(effect => effectHandler(dispatcher, effect));
 
       // render views with changed properties
-      this.setState({ reduction, actionLog });
+      this.setState({ reduction });
     });
 
     // the state contains the dispatcher and reduction as its main properties
     this.state = {
       dispatcher,
-      reduction: new Reduction(),
-      actionLog: List.of() // for debugging
+      reduction: new Reduction()
     };
   }
 
   render() {
-    const form = <SurveyForm dispatcher={this.state.dispatcher}
-      formStep={this.state.reduction.getIn(['appState', 'formStep'])}
-      formValues={this.state.reduction.getIn(['appState', 'formValues'])}
-      formLoading={this.state.reduction.getIn(['appState', 'formLoading'])}
-      formSubmitted={this.state.reduction.getIn(['appState', 'formSubmitted'])}
-      formStatusText={this.state.reduction.getIn(['appState', 'formStatusText'])} />
+    const loggedIn = this.state.reduction.getIn(['appState', 'user', 'uid']) > 0;
+
+    const header = (
+      <Header dispatcher={this.state.dispatcher}
+        showNav={loggedIn}
+        navPageIndex={this.state.reduction.getIn(['appState', 'currentPage'])} />
+    );
+    const loginForm = loggedIn ? null : (
+      <LoginForm dispatcher={this.state.dispatcher}
+        inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
+        loading={this.state.reduction.getIn(['appState', 'loginFOrm', 'loading'])} />
+    );
 
     return (
       <div id="main">
-        <Header />
-        <h1>It works!</h1>
-        {form}
+        {header}
+        {loginForm}
       </div>
     );
   }
