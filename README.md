@@ -6,7 +6,7 @@
  - Install Python 2.7 and MySQL
  - Create MySQL database called "budget"
  - Install nodejs dependencies: `npm i`
- - Update `local.conf.js` (rename from `.example`) with correct parameters
+ - Update `web/local.conf.js` (rename from `.example`) with correct parameters
  - Build resources:
   * `gulp`
  - Install Python environment and MySQL database:
