@@ -19,9 +19,8 @@ import WebpackDevServer from 'webpack-dev-server';
 import webpackConfigDev from './webpack/webpack.development.config';
 import webpackConfig from './webpack/webpack.staging.config';
 
-import { WEB_URI } from './local.conf';
-
-const PORT_DEVSERVER = 8080;
+import { WEB_URI } from './web/local.conf';
+import { PORT_DEVSERVER } from './web/global.conf';
 
 // less css preprocessor
 gulp.task('less', () => {
@@ -83,8 +82,8 @@ gulp.task('production', ['build_css', 'build_js']);
 
 /**
  * Development server
- * Redirects the JS files on the client to a webpack-dev-server which are
- * hot-reloaded
+ * Redirects the JS files on the client to a webpack-dev-server
+ * with hot reloading
  */
 gulp.task('dev_server', callback => {
   const app = new WebpackDevServer(webpack(webpackConfigDev), {

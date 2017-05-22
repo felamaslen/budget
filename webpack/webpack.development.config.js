@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import moduleConfig from './module.config';
 
-import { PORT_DEVSERVER } from '../local.conf';
+import { PORT_DEVSERVER } from '../web/global.conf';
 
 export default {
   devtool: 'source-map',
