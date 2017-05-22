@@ -1,6 +1,11 @@
-// form actions
-export const FORM_NEXT_CLICKED = 'FORM_NEXT_CLICKED';
-export const FORM_RESPONSE_GOT = 'FORM_RESPONSE_GOT';
-export const FORM_INPUT_CHANGED = 'FORM_INPUT_CHANGED';
-export const FORM_RESET_CLICKED = 'FORM_RESET_CLICKED';
+/**
+ * Action constants
+ */
+
+export const AC_LOGIN_FORM_INPUTTED = 0xacf1;
+export const AC_LOGIN_FORM_RESET = 0xacf0;
+export const AC_LOGIN_FORM_SUBMITTED = 0xacfb;
+export const AC_LOGIN_FORM_RESPONSE_GOT = 0xacfb1;
+
+export const AC_USER_LOGGED_OUT = 0xac51;
 

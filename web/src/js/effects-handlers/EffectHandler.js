@@ -4,32 +4,31 @@
 
 import { } from 'immutable';
 import axios from 'axios';
-
+import querystring from 'querystring';
 import buildEffectHandler from '../effectHandlerBuilder';
 
 import {
-  FORM_SUBMIT_API_CALL
+  EF_LOGIN_FORM_SUBMIT
 } from '../constants/effects';
 
 import {
-  formResponseGot,
-  formResetClicked
-} from '../actions/FormActions';
+  aLoginFormResponseGot,
+  aLoginFormReset
+} from '../actions/LoginActions';
 
-export default buildEffectHandler({
-  /* When the form is submitted, this side effect is induced,
-   * which makes a POST ajax call to the API using axios. This returns
-   * a promise, which will then dispatch another action telling the view
-   * that the form has been submitted and a response given.
+export default buildEffectHandler([
+  /**
+   * submit the user login form
+   * @param {string} pin: the pin to send to the API for authorisation
+   * @param {Dispatcher} dispatcher: action dispatcher
+   * @returns {void}
    */
-  [FORM_SUBMIT_API_CALL]: (formValues, dispatcher) => {
-    axios.post('api/submit_survey', formValues.toJS()).then(
-      response => dispatcher.dispatch(formResponseGot({ response }))
-    ).catch(
-      error => {
-        console.error('Error submitting form', error);
-        dispatcher.dispatch(formResetClicked());
-      }
-    );
-  }
-});
+  [EF_LOGIN_FORM_SUBMIT, (pin, dispatcher) => {
+    axios.post('api?t=login', querystring.stringify({ pin })).then(
+      response => dispatcher.dispatch(aLoginFormResponseGot(response))
+    ).catch(error => {
+      console.error('Error submitting form', error); // TODO: global error handler function
+      dispatcher.dispatch(aLoginFormReset(0));
+    });
+  }]
+]);
