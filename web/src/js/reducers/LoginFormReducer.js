@@ -28,8 +28,9 @@ export const rLoginFormSubmit = reduction => {
  * @returns {Record} new app state
  */
 export const rLoginFormInput = (reduction, input) => {
-  if (reduction.getIn(['appState', 'loginForm', 'loading'])) {
-    // don't do anything if we're still loading a login request
+  if (!input.match(/^[0-9]$/) || reduction.getIn(['appState', 'loginForm', 'loading'])) {
+    // don't do anything if the input is non-numeric, or
+    // we're still loading a login request
     return reduction;
   }
   const values = reduction.getIn(['appState', 'loginForm', 'values']);

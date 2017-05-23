@@ -25,6 +25,13 @@ export class LoginForm extends PureControllerView {
     });
     return <div className='number-input noselect'>{digits}</div>;
   }
+  componentDidMount() {
+    this.keyDownHandler = evt => this.input(evt.key);
+    window.addEventListener('keydown', this.keyDownHandler);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.keyDownHandler);
+  }
   render() {
     const numberInput = this.renderNumberInput();
     return (
