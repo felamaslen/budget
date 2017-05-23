@@ -2,11 +2,13 @@
  * Carries out actions for the Form component
  */
 
+import { Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import {
   EF_LOGIN_FORM_SUBMIT
 } from '../constants/effects';
-import { LOGIN_INPUT_LENGTH } from '../misc/const';
+import { LOGIN_INPUT_LENGTH, ERROR_LEVEL_ERROR } from '../misc/const';
+import { rErrorMessageOpen } from './ErrorReducer';
 
 /**
  * submit the login form
@@ -68,7 +70,11 @@ export const rLoginFormHandleResponse = (reduction, response) => {
     ['appState', 'loginForm', 'loading'], false), 0);
   if (response.data.error) {
     // error logging in (TODO: global error handling)
-    return newReduction;
+    const message = map({
+      text: `Login error: ${response.data.errorText}`,
+      level: ERROR_LEVEL_ERROR
+    });
+    return rErrorMessageOpen(newReduction, message);
   }
   return newReduction.setIn(['appState', 'user', 'uid'], response.data.uid)
   .setIn(['appState', 'user', 'name'], response.data.name)

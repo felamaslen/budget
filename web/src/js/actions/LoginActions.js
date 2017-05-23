@@ -1,6 +1,5 @@
 /**
- * Handles calls from view(s), in turn calling on the dispatcher's global
- * reducer to modify the store
+ * Actions called by the LoginForm component
  */
 
 import buildMessage from '../messageBuilder';

@@ -6,6 +6,7 @@ import { PAGES } from './misc/const';
 // and returned (modified) by reducers
 export default new Record({
   appState: fromJS({
+    errorMsg: [],
     user: {
       uid: 0,
       name: null,
