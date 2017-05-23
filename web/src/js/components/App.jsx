@@ -10,6 +10,7 @@ import { Dispatcher } from 'flux';
 // the global reducer decides what to do for each action
 import globalReducer from '../reducers/GlobalReducer';
 
+import { ErrorMessages } from './ErrorMessages';
 import { Header } from './Header';
 import { LoginForm } from './LoginForm';
 
@@ -50,6 +51,11 @@ export default class App extends Component {
   render() {
     const loggedIn = this.state.reduction.getIn(['appState', 'user', 'uid']) > 0;
 
+    const errorMessages = (
+      <ErrorMessages dispatcher={this.state.dispatcher}
+        list={this.state.reduction.getIn(['appState', 'errorMsg'])}
+      />
+    );
     const header = (
       <Header dispatcher={this.state.dispatcher}
         showNav={loggedIn}
@@ -63,6 +69,7 @@ export default class App extends Component {
 
     return (
       <div id="main">
+        {errorMessages}
         {header}
         {loginForm}
       </div>

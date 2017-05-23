@@ -4,6 +4,10 @@
  */
 
 import {
+  AC_ERROR_OPEN,
+  AC_ERROR_CLOSE,
+  AC_ERROR_REMOVE,
+
   AC_LOGIN_FORM_INPUTTED,
   AC_LOGIN_FORM_RESET,
   AC_LOGIN_FORM_SUBMITTED,
@@ -12,6 +16,11 @@ import {
   AC_USER_LOGGED_OUT
 } from '../constants/actions';
 
+import {
+  rErrorMessageOpen,
+  rErrorMessageClose,
+  rErrorMessageRemove
+} from './ErrorReducer';
 import {
   rLoginFormInput,
   rLoginFormReset,
@@ -24,6 +33,15 @@ import {
 
 export default (reduction, action) => {
   switch (action.type) {
+  // error message actions
+  case AC_ERROR_OPEN:
+    return rErrorMessageOpen(reduction, action.payload);
+  case AC_ERROR_CLOSE:
+    return rErrorMessageClose(reduction, action.payload);
+  case AC_ERROR_REMOVE:
+    return rErrorMessageRemove(reduction, action.payload);
+
+  // login form actions
   case AC_LOGIN_FORM_INPUTTED:
     return rLoginFormInput(reduction, action.payload);
   case AC_LOGIN_FORM_RESET:
@@ -33,6 +51,7 @@ export default (reduction, action) => {
   case AC_LOGIN_FORM_RESPONSE_GOT:
     return rLoginFormHandleResponse(reduction, action.payload);
 
+  // header / app actions
   case AC_USER_LOGGED_OUT:
     return rLogout(reduction);
 
