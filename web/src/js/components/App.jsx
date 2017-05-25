@@ -62,12 +62,12 @@ export default class App extends Component {
     const header = (
       <Header dispatcher={this.state.dispatcher}
         showNav={loggedIn}
-        navPageIndex={this.state.reduction.getIn(['appState', 'currentPage'])} />
+        navPageIndex={this.state.reduction.getIn(['appState', 'currentPageIndex'])} />
     );
     const loginForm = loggedIn || loading ? null : (
       <LoginForm dispatcher={this.state.dispatcher}
         inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
-        loading={this.state.reduction.getIn(['appState', 'loginFOrm', 'loading'])} />
+        loading={this.state.reduction.getIn(['appState', 'loginForm', 'loading'])} />
     );
     const content = loading ? null : (
       <Content dispatcher={this.state.dispatcher}
