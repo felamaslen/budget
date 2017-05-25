@@ -7,7 +7,7 @@ import { PORT_DEVSERVER } from '../web/global.conf';
 export default {
   devtool: 'source-map',
   entry: [
-    'webpack-dev-server/client?http://localhost:' + PORT_DEVSERVER,
+    'webpack-dev-server/client?http://0.0.0.0:' + PORT_DEVSERVER,
     'webpack/hot/only-dev-server',
     './web/src/js/index.jsx'
   ],
