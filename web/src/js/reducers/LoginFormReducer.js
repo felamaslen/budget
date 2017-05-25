@@ -10,6 +10,7 @@ import {
 } from '../constants/effects';
 import { LOGIN_INPUT_LENGTH, ERROR_LEVEL_ERROR } from '../misc/const';
 import { rErrorMessageOpen } from './ErrorReducer';
+import { rLoadContent } from './ContentReducer';
 
 /**
  * submit the login form
@@ -85,13 +86,20 @@ export const rLoginFormHandleResponse = (reduction, output) => {
   }
 
   // go to the first page after logging in
-  const page = newReduction.getIn(['appState', 'currentPageIndex']);
+  let page = newReduction.getIn(['appState', 'currentPageIndex']);
   if (page < 0) {
-    newReduction = newReduction.setIn(['appState', 'currentPageIndex'], 0);
+    page = 0;
+    newReduction = newReduction.setIn(['appState', 'currentPageIndex'], page);
   }
 
-  return newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
+  // set user data
+  newReduction = newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
   .setIn(['appState', 'user', 'name'], output.response.data.name)
   .setIn(['appState', 'user', 'apiKey'], output.response.data.api_key);
+
+  // set side effect to load page data
+  newReduction = rLoadContent(newReduction, page);
+
+  return newReduction;
 };
 

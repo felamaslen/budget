@@ -15,7 +15,9 @@ import {
 
   AC_USER_LOGGED_OUT,
   AC_COOKIES_LOADED,
-  AC_PAGE_NAVIGATED
+  AC_PAGE_NAVIGATED,
+
+  AC_CONTENT_LOADED
 } from '../constants/actions';
 
 import {
@@ -34,6 +36,9 @@ import {
   rLoadCookies,
   rNavigateToPage
 } from './HeaderReducer';
+import {
+  rHandleContentResponse
+} from './ContentReducer';
 
 export default (reduction, action) => {
   switch (action.type) {
@@ -62,6 +67,10 @@ export default (reduction, action) => {
     return rLoadCookies(reduction);
   case AC_PAGE_NAVIGATED:
     return rNavigateToPage(reduction, action.payload);
+
+  // content actions
+  case AC_CONTENT_LOADED:
+    return rHandleContentResponse(reduction, action.payload);
 
   default:
     // By default, the reduction is simply returned unchanged.
