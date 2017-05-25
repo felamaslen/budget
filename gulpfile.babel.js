@@ -95,15 +95,9 @@ gulp.task('dev_server', callback => {
         target: WEB_URI,
         secure: false,
         changeOrigin: true,
-        /*
-        bypass: (req, res, proxyOptions) => {
-          if (req._parsedUrl.pathname === '/js/main.js') {
-            return 'main.js';
-          }
-        }
-        */
       }
-    }
+    },
+    disableHostCheck: true
   });
 
   app.use(morgan('dev'));
