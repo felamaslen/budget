@@ -69,11 +69,11 @@ export default class App extends Component {
         inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
         loading={this.state.reduction.getIn(['appState', 'loginForm', 'loading'])} />
     );
-    const content = loading ? null : (
+    const content = loggedIn && !loading ? (
       <Content dispatcher={this.state.dispatcher}
         pages={this.state.reduction.getIn(['appState', 'pages'])}
         index={this.state.reduction.getIn(['appState', 'currentPageIndex'])} />
-    );
+    ) : null;
 
     const spinner = loading ? <Spinner /> : null;
 
