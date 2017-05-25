@@ -2,9 +2,11 @@
  * Carries out actions for the Form component
  */
 
+import { List } from 'immutable';
 import Cookies from 'js-cookie';
 import { rLoginFormSubmit } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
+import { PAGES } from '../misc/const';
 
 /**
  * Log out of the system
@@ -13,9 +15,12 @@ import { rLoadContent } from './ContentReducer';
  */
 export const rLogout = reduction => {
   Cookies.remove('pin');
-  return reduction.setIn(['appState', 'user', 'uid'], 0)
+  return reduction.setIn(['appState', 'loginForm', 'values'], List.of())
+  .setIn(['appState', 'user', 'uid'], 0)
   .setIn(['appState', 'user', 'name'], null)
-  .setIn(['appState', 'user', 'apiKey'], null);
+  .setIn(['appState', 'user', 'apiKey'], null)
+  .setIn(['appState', 'pages'], List(PAGES.map(() => null)))
+  .setIn(['appState', 'pagesLoaded'], List(PAGES.map(() => false)));
 };
 
 /**
