@@ -72,6 +72,7 @@ export default class App extends Component {
     const content = loggedIn && !loading ? (
       <Content dispatcher={this.state.dispatcher}
         pages={this.state.reduction.getIn(['appState', 'pages'])}
+        loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
         index={this.state.reduction.getIn(['appState', 'currentPageIndex'])} />
     ) : null;
 

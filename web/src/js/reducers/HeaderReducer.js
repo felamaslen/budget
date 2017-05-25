@@ -4,6 +4,7 @@
 
 import Cookies from 'js-cookie';
 import { rLoginFormSubmit } from './LoginFormReducer';
+import { rLoadContent } from './ContentReducer';
 
 /**
  * Log out of the system
@@ -52,6 +53,10 @@ export const rLoadCookies = reduction => {
  */
 export const rNavigateToPage = (reduction, page) => {
   Cookies.set('page', page, { expires: 7 });
-  return reduction.setIn(['appState', 'currentPageIndex'], page);
+  let newReduction = reduction;
+  if (!newReduction.getIn(['appState', 'pagesLoaded', page])) {
+    newReduction = rLoadContent(newReduction, page);
+  }
+  return newReduction.setIn(['appState', 'currentPageIndex'], page);
 };
 
