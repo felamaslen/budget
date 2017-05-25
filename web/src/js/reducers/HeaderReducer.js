@@ -18,19 +18,40 @@ export const rLogout = reduction => {
 };
 
 /**
- * Check user pin cookie to remember logins
+ * Load cookies on app startup to remember settings
  * @param {Record} reduction application state
  * @returns {Record} modified reduction
  */
-export const rCheckUserCookie = reduction => {
+export const rLoadCookies = reduction => {
+  let newReduction = reduction;
+
+  // remember user logins
   const pin = Cookies.get('pin');
-  if (!pin || !pin.match(/^[0-9]{4}$/)) {
-    return reduction;
+  if (pin && pin.match(/^[0-9]{4}$/)) {
+    const values = pin.split('').map(item => parseInt(item, 10));
+    newReduction = rLoginFormSubmit(
+      newReduction.setIn(['appState', 'loading'], true)
+      .setIn(['appState', 'loginForm', 'loadedCookie'], true)
+      .setIn(['appState', 'loginForm', 'values'], values)
+    );
   }
-  return rLoginFormSubmit(
-    reduction.setIn(['appState', 'loading'], true).setIn(
-    ['appState', 'loginForm', 'values'],
-    pin.split('').map(item => parseInt(item, 10)))
-  );
+
+  const page = Cookies.get('page');
+  if (page && page.match(/^[0-9]+$/)) {
+    newReduction = newReduction.setIn(['appState', 'currentPageIndex'], parseInt(page, 10));
+  }
+
+  return newReduction;
+};
+
+/**
+ * Navigate to a page (index)
+ * @param {Record} reduction application state
+ * @param {integer} page: page index to navigate to
+ * @returns {Record} modified reduction
+ */
+export const rNavigateToPage = (reduction, page) => {
+  Cookies.set('page', page, { expires: 7 });
+  return reduction.setIn(['appState', 'currentPageIndex'], page);
 };
 

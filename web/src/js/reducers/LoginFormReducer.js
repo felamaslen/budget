@@ -67,7 +67,7 @@ export const rLoginFormReset = (reduction, index) => {
  * @returns {Record} new app state
  */
 export const rLoginFormHandleResponse = (reduction, output) => {
-  const newReduction = rLoginFormReset(
+  let newReduction = rLoginFormReset(
     reduction.setIn(['appState', 'loginForm', 'loading'], false)
     .setIn(['appState', 'loading'], false), 0);
 
@@ -80,7 +80,15 @@ export const rLoginFormHandleResponse = (reduction, output) => {
   }
 
   // save a cookie to remember the session
-  Cookies.set('pin', output.pin, { expires: 7 });
+  if (!newReduction.getIn(['appState', 'loginForm', 'loadedCookie'])) {
+    Cookies.set('pin', output.pin, { expires: 7 });
+  }
+
+  // go to the first page after logging in
+  const page = newReduction.getIn(['appState', 'currentPageIndex']);
+  if (page < 0) {
+    newReduction = newReduction.setIn(['appState', 'currentPageIndex'], 0);
+  }
 
   return newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
   .setIn(['appState', 'user', 'name'], output.response.data.name)

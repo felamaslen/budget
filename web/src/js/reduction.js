@@ -16,7 +16,8 @@ export default new Record({
     loginForm: {
       inputStep: 0,
       values: [],
-      loading: false
+      loading: false,
+      loadedCookie: false
     },
     pages: PAGES.map(() => null),
     currentPageIndex: -1

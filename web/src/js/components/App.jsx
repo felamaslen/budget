@@ -11,8 +11,10 @@ import { Dispatcher } from 'flux';
 import globalReducer from '../reducers/GlobalReducer';
 
 import { ErrorMessages } from './ErrorMessages';
+import { Spinner } from './Spinner';
 import { Header } from './Header';
 import { LoginForm } from './LoginForm';
+import { Content } from './Content';
 
 // side-effect handlers
 import effectHandler from '../effects-handlers/EffectHandler';
@@ -67,20 +69,20 @@ export default class App extends Component {
         inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
         loading={this.state.reduction.getIn(['appState', 'loginFOrm', 'loading'])} />
     );
+    const content = loading ? null : (
+      <Content dispatcher={this.state.dispatcher}
+        pages={this.state.reduction.getIn(['appState', 'pages'])}
+        index={this.state.reduction.getIn(['appState', 'currentPageIndex'])} />
+    );
 
-    const spinner = loading ? (
-      <div className="progress-outer">
-        <div className="progress-inner">
-          <div className="progress"></div>
-        </div>
-      </div>
-    ) : null;
+    const spinner = loading ? <Spinner /> : null;
 
     return (
       <div id="main">
         {errorMessages}
         {header}
         {loginForm}
+        {content}
         {spinner}
       </div>
     );
