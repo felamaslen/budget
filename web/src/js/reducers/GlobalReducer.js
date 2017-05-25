@@ -13,7 +13,8 @@ import {
   AC_LOGIN_FORM_SUBMITTED,
   AC_LOGIN_FORM_RESPONSE_GOT,
 
-  AC_USER_LOGGED_OUT
+  AC_USER_LOGGED_OUT,
+  AC_USER_COOKIE_CHECKED
 } from '../constants/actions';
 
 import {
@@ -28,7 +29,8 @@ import {
   rLoginFormHandleResponse
 } from './LoginFormReducer';
 import {
-  rLogout
+  rLogout,
+  rCheckUserCookie
 } from './HeaderReducer';
 
 export default (reduction, action) => {
@@ -54,6 +56,8 @@ export default (reduction, action) => {
   // header / app actions
   case AC_USER_LOGGED_OUT:
     return rLogout(reduction);
+  case AC_USER_COOKIE_CHECKED:
+    return rCheckUserCookie(reduction);
 
   default:
     // By default, the reduction is simply returned unchanged.

@@ -12,4 +12,5 @@ export const AC_LOGIN_FORM_SUBMITTED = 0xacfb;
 export const AC_LOGIN_FORM_RESPONSE_GOT = 0xacfb1;
 
 export const AC_USER_LOGGED_OUT = 0xac51;
+export const AC_USER_COOKIE_CHECKED = 0xac5c;
 

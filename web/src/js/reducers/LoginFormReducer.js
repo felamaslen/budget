@@ -3,6 +3,7 @@
  */
 
 import { Map as map } from 'immutable';
+import Cookies from 'js-cookie';
 import buildMessage from '../messageBuilder';
 import {
   EF_LOGIN_FORM_SUBMIT
@@ -62,22 +63,27 @@ export const rLoginFormReset = (reduction, index) => {
 /**
  * handle login form API response
  * @param {Record} reduction: app state
- * @param {object} response: API response (JSON)
+ * @param {object} output: pin and API response (JSON)
  * @returns {Record} new app state
  */
-export const rLoginFormHandleResponse = (reduction, response) => {
-  const newReduction = rLoginFormReset(reduction.setIn(
-    ['appState', 'loginForm', 'loading'], false), 0);
-  if (response.data.error) {
-    // error logging in (TODO: global error handling)
+export const rLoginFormHandleResponse = (reduction, output) => {
+  const newReduction = rLoginFormReset(
+    reduction.setIn(['appState', 'loginForm', 'loading'], false)
+    .setIn(['appState', 'loading'], false), 0);
+
+  if (output.response.data.error) {
     const message = map({
-      text: `Login error: ${response.data.errorText}`,
+      text: `Login error: ${output.response.data.errorText}`,
       level: ERROR_LEVEL_ERROR
     });
     return rErrorMessageOpen(newReduction, message);
   }
-  return newReduction.setIn(['appState', 'user', 'uid'], response.data.uid)
-  .setIn(['appState', 'user', 'name'], response.data.name)
-  .setIn(['appState', 'user', 'apiKey'], response.data.api_key);
+
+  // save a cookie to remember the session
+  Cookies.set('pin', output.pin, { expires: 7 });
+
+  return newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
+  .setIn(['appState', 'user', 'name'], output.response.data.name)
+  .setIn(['appState', 'user', 'apiKey'], output.response.data.api_key);
 };
 
