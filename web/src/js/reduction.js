@@ -7,6 +7,7 @@ import { PAGES } from './misc/const';
 export default new Record({
   appState: fromJS({
     errorMsg: [],
+    loading: false,
     user: {
       uid: 0,
       name: null,

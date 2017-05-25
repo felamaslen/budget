@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import PureControllerView from './PureControllerView';
 import { capitalise } from '../misc/text';
 import { PAGES } from '../misc/const';
-import { aUserLoggedOut } from '../actions/HeaderActions';
+import { aUserLoggedOut, aUserCookieChecked } from '../actions/HeaderActions';
 
 export class Header extends PureControllerView {
   logout() {
@@ -37,6 +37,9 @@ export class Header extends PureControllerView {
         </li>
       </ul>
     );
+  }
+  componentWillMount() {
+    this.dispatchAction(aUserCookieChecked());
   }
   render() {
     const navBar = this.props.showNav ? this.renderNavBar() : null;

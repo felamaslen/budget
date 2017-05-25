@@ -25,7 +25,7 @@ export default buildEffectHandler([
    */
   [EF_LOGIN_FORM_SUBMIT, (pin, dispatcher) => {
     axios.post('api?t=login', querystring.stringify({ pin })).then(
-      response => dispatcher.dispatch(aLoginFormResponseGot(response))
+      response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
     ).catch(error => {
       console.error('Error submitting form', error); // TODO: global error handler function
       dispatcher.dispatch(aLoginFormReset(0));

@@ -50,6 +50,7 @@ export default class App extends Component {
 
   render() {
     const loggedIn = this.state.reduction.getIn(['appState', 'user', 'uid']) > 0;
+    const loading = this.state.reduction.getIn(['appState', 'loading']);
 
     const errorMessages = (
       <ErrorMessages dispatcher={this.state.dispatcher}
@@ -61,17 +62,26 @@ export default class App extends Component {
         showNav={loggedIn}
         navPageIndex={this.state.reduction.getIn(['appState', 'currentPage'])} />
     );
-    const loginForm = loggedIn ? null : (
+    const loginForm = loggedIn || loading ? null : (
       <LoginForm dispatcher={this.state.dispatcher}
         inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
         loading={this.state.reduction.getIn(['appState', 'loginFOrm', 'loading'])} />
     );
+
+    const spinner = loading ? (
+      <div className="progress-outer">
+        <div className="progress-inner">
+          <div className="progress"></div>
+        </div>
+      </div>
+    ) : null;
 
     return (
       <div id="main">
         {errorMessages}
         {header}
         {loginForm}
+        {spinner}
       </div>
     );
   }
