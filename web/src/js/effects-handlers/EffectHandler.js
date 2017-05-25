@@ -2,10 +2,12 @@
  * Define side effects here (e.g. API calls)
  */
 
-import { } from 'immutable';
+import { Map as map } from 'immutable';
 import axios from 'axios';
 import querystring from 'querystring';
 import buildEffectHandler from '../effectHandlerBuilder';
+
+import { ERROR_LEVEL_ERROR } from '../misc/const';
 
 import {
   EF_LOGIN_FORM_SUBMIT
@@ -15,6 +17,9 @@ import {
   aLoginFormResponseGot,
   aLoginFormReset
 } from '../actions/LoginActions';
+import {
+  aErrorOpened
+} from '../actions/ErrorActions';
 
 export default buildEffectHandler([
   /**
@@ -27,7 +32,11 @@ export default buildEffectHandler([
     axios.post('api?t=login', querystring.stringify({ pin })).then(
       response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
     ).catch(error => {
-      console.error('Error submitting form', error); // TODO: global error handler function
+      const message = map({
+        text: `Login API error: ${error}`,
+        level: ERROR_LEVEL_ERROR
+      });
+      dispatcher.dispatch(aErrorOpened(message));
       dispatcher.dispatch(aLoginFormReset(0));
     });
   }]

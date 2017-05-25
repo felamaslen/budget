@@ -8,11 +8,14 @@ import classNames from 'classnames';
 import PureControllerView from './PureControllerView';
 import { capitalise } from '../misc/text';
 import { PAGES } from '../misc/const';
-import { aUserLoggedOut, aUserCookieChecked } from '../actions/HeaderActions';
+import { aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo } from '../actions/HeaderActions';
 
 export class Header extends PureControllerView {
   logout() {
     this.dispatchAction(aUserLoggedOut());
+  }
+  navToPage(page) {
+    this.dispatchAction(aPageNavigatedTo(page));
   }
   /**
    * render a navigation bar with links to different pages
@@ -22,7 +25,7 @@ export class Header extends PureControllerView {
     const pageLinksList = PAGES.map((item, key) => {
       return (
         <li key={key}>
-          <a className={classNames({
+          <a onClick={() => this.navToPage(key)} className={classNames({
             'nav-link': true, active: key === this.props.navPageIndex
           })} id={`nav-link-${item}`}>{capitalise(item)}</a>
         </li>
@@ -39,7 +42,7 @@ export class Header extends PureControllerView {
     );
   }
   componentWillMount() {
-    this.dispatchAction(aUserCookieChecked());
+    this.dispatchAction(aCookiesLoaded());
   }
   render() {
     const navBar = this.props.showNav ? this.renderNavBar() : null;

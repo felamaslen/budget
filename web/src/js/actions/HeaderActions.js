@@ -5,9 +5,11 @@
 import buildMessage from '../messageBuilder';
 import {
   AC_USER_LOGGED_OUT,
-  AC_USER_COOKIE_CHECKED
+  AC_COOKIES_LOADED,
+  AC_PAGE_NAVIGATED
 } from '../constants/actions';
 
 export const aUserLoggedOut = () => buildMessage(AC_USER_LOGGED_OUT);
-export const aUserCookieChecked = () => buildMessage(AC_USER_COOKIE_CHECKED);
+export const aCookiesLoaded = () => buildMessage(AC_COOKIES_LOADED);
+export const aPageNavigatedTo = page => buildMessage(AC_PAGE_NAVIGATED, page);
 
