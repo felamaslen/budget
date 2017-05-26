@@ -8,7 +8,6 @@ import PureControllerView from '../PureControllerView';
 import { Map as map } from 'immutable';
 import classNames from 'classnames';
 import { OVERVIEW_COLUMNS } from '../../misc/const';
-import { rgb } from '../../misc/color';
 
 export class PageOverview extends PureControllerView {
   render() {
@@ -22,7 +21,7 @@ export class PageOverview extends PureControllerView {
       const cells = row.get('cells').map((cell, cellKey) => {
         const style = {};
         if (cell.get('rgb')) {
-          style.backgroundColor = rgb(cell.get('rgb'));
+          style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
         }
 
         return (

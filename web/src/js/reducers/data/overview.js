@@ -3,7 +3,7 @@
  */
 
 import { AVERAGE_MEDIAN, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
-import { FUTURE_INVESTMENT_RATE } from '../../misc/config';
+import { FUTURE_INVESTMENT_RATE, COLOR_CATEGORY } from '../../misc/config';
 import { yearMonthDifference } from '../../misc/date';
 import { listAverage, randnBm } from '../../misc/data';
 import { List as list, Map as map, fromJS } from 'immutable';
@@ -125,6 +125,54 @@ export const rProcessDataOverview = raw => {
 };
 
 /**
+ * Get colours for colouring the table
+ * @returns {array} list of colour codes
+ */
+const getCategoryColor = () => {
+  return OVERVIEW_COLUMNS.slice(1).map(column => {
+    if (COLOR_CATEGORY[column]) {
+      return COLOR_CATEGORY[column];
+    }
+    if (column === 'Net') {
+      return [COLOR_CATEGORY.Spending, COLOR_CATEGORY.Income];
+    }
+    if (column === 'Predicted') {
+      return COLOR_CATEGORY.Balance;
+    }
+    return null;
+  });
+};
+
+/**
+ * Get a colour on a scale, based on value (linear)
+ * @param {integer} value: the value to score
+ * @param {array} range: minimum and maximum of range
+ * @param {array} color: color scale(s) to use
+ * @returns {array} rgb values
+ */
+const getScoreColor = (value, range, color) => {
+  if (range[0] === range[1]) {
+    return [255, 255, 255]; // white
+  }
+
+  const split = color.length === 2 && (range[0] < 0 || range[1] > 0);
+
+  let score;
+  let theColor = color;
+  if (split) {
+    // score separately for positive vs. negative
+    const end = value < 0 ? 0 : 1;
+    score = value / range[end];
+    theColor = color[end];
+  }
+  else {
+    score = (Math.min(range[1], Math.max(range[0], value)) - range[0]) / (range[1] - range[0]);
+  }
+
+  return theColor.map(item => Math.round(255 - (255 - item) * score));
+};
+
+/**
  * Get rows for display in the view
  * @param {List} data: processed data
  * @returns {List} rows for the view
@@ -140,8 +188,14 @@ export const rGetOverviewRows = data => {
   const futureData = calculateFutures(data, futureKey);
   const tableData = calculateTableData(data, futureData, startYear, startMonth, futureKey);
 
+  // get value ranges for calculating colours
+  const valueRange = OVERVIEW_COLUMNS.slice(1).map((column, colKey) => {
+    return [tableData.get(colKey + 1).min(), tableData.get(colKey + 1).max()];
+  });
+  const categoryColor = getCategoryColor();
+
   // translate the data into table cells for display in the view
-  const rows = list(tableData.get(0).map((monthText, key) => {
+  const rows = tableData.get(0).map((monthText, key) => {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
     const month = (startMonth + key + 11) % 12 + 1; // 1-indexed
 
@@ -150,13 +204,20 @@ export const rGetOverviewRows = data => {
     const future = !past && !active;
 
     const cells = list(OVERVIEW_COLUMNS).map((column, colKey) => {
+      const value = tableData.getIn([colKey, key]);
+      let rgb = null;
+      if (colKey > 0 && categoryColor[colKey - 1]) {
+        rgb = getScoreColor(value, valueRange[colKey - 1], categoryColor[colKey - 1]);
+      }
+
       return map({
-        text: tableData.getIn([colKey, key]).toString()
+        text: value.toString(),
+        rgb
       });
     });
 
     return map({ cells, past, active, future });
-  }));
+  });
 
   return rows;
 };
