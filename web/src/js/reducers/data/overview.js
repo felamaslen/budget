@@ -90,11 +90,15 @@ const calculateTableData = (data, futureData, startYear, startMonth, futureKey) 
 
   // add predicted and actual balance columns
   const balance = data.getIn(['cost', 'balance']);
+  let lastPredicted = balance.get(0);
   const predicted = months.map((month, key) => {
-    if (key === 0) {
-      return balance.get(key);
+    if (key > 0 && key < futureKey) {
+      lastPredicted = balance.get(key - 1) + net.get(key);
+      return lastPredicted;
     }
-    return balance.get(key - 1) + net.get(key);
+    const newPredicted = lastPredicted + net.get(key);
+    lastPredicted = newPredicted;
+    return newPredicted;
   });
 
   return list([])
