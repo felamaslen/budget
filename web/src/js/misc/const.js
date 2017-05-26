@@ -18,5 +18,14 @@ export const PAGES = [
   'holiday',
   'social'
 ];
+
+export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+  'August', 'September', 'October', 'November', 'December'];
+export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
+export const OVERVIEW_COLUMNS = ['Month', 'Stocks', 'Bills', 'Food', 'General', 'Holiday',
+  'Social', 'Income', 'Spending', 'Flow', 'Pred.', 'Balance'];
+
 export const LOGIN_INPUT_LENGTH = 4;
+
+export const AVERAGE_MEDIAN = 0xa1;
 
