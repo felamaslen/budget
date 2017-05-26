@@ -6,6 +6,8 @@ import { PAGES } from '../misc/const';
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
 
+import processPageDataOverview from './data/overview';
+
 export const rLoadContent = (reduction, page) => {
   if (!reduction.getIn(['appState', 'pagesLoaded', page])) {
     const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
@@ -18,8 +20,22 @@ export const rLoadContent = (reduction, page) => {
   return reduction;
 };
 
+/**
+ * Processes response data into output fit for consumption by the view
+ * @param {integer} page: page index
+ * @param {object} data: response data
+ * @returns {map}: page data for view
+ */
+const processPageData = (page, data) => {
+  if (page === 0) {
+    return processPageDataOverview(data);
+  }
+  return null;
+};
+
 export const rHandleContentResponse = (reduction, output) => {
   return reduction.setIn(['appState', 'pagesLoaded', output.page], true)
-  .setIn(['appState', 'pages', output.page], output.response.data.data);
+  .setIn(['appState', 'pagesRaw', output.page], output.response.data.data)
+  .setIn(['appState', 'pages', output.page], processPageData(output.page, output.response.data.data));
 };
 

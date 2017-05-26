@@ -20,6 +20,7 @@ export default new Record({
       loadedCookie: false
     },
     pages: PAGES.map(() => null),
+    pagesRaw: PAGES.map(() => null),
     pagesLoaded: PAGES.map(() => false),
     currentPageIndex: -1
   }),
