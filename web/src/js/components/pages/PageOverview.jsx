@@ -35,7 +35,7 @@ export class PageOverview extends PureControllerView {
     });
 
     return (
-      <table className='table-overview noselect'>
+      <table className='table-overview noselect table-insert'>
         <thead>
           <tr>
             {OVERVIEW_COLUMNS.map((column, key) => <th key={key}>{column}</th>)}

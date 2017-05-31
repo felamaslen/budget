@@ -6,8 +6,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from './PureControllerView';
 import { List } from 'immutable';
-import { Spinner } from './Spinner';
+import { PAGES } from '../misc/const';
 
+import { Spinner } from './Spinner';
 import { PageOverview } from './pages/PageOverview';
 
 export class Content extends PureControllerView {
@@ -27,9 +28,10 @@ export class Content extends PureControllerView {
     }
 
     const page = this.renderPage();
+    const pageName = `page-${PAGES[this.props.index]}`;
 
     return (
-      <div id='content'>
+      <div id='content' className={pageName}>
         <div className='inner'>
           {page}
         </div>
