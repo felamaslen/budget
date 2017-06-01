@@ -73,7 +73,8 @@ export default class App extends Component {
       <Content dispatcher={this.state.dispatcher}
         pages={this.state.reduction.getIn(['appState', 'pages'])}
         loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
-        index={this.state.reduction.getIn(['appState', 'currentPageIndex'])} />
+        index={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
+        edit={this.state.reduction.getIn(['appState', 'edit', 'active'])} />
     ) : null;
 
     const spinner = loading ? <Spinner /> : null;

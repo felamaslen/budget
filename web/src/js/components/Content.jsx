@@ -5,7 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from './PureControllerView';
-import { List } from 'immutable';
+import { Map as map, List } from 'immutable';
 import { PAGES } from '../misc/const';
 
 import { Spinner } from './Spinner';
@@ -17,7 +17,8 @@ export class Content extends PureControllerView {
       // overview page
       return (
         <PageOverview dispatcher={this.props.dispatcher}
-          data={this.props.pages.get(0)} />
+          data={this.props.pages.get(0)}
+          edit={this.props.edit} />
       );
     }
     return <div>TODO: page {this.props.index}</div>;
@@ -43,6 +44,7 @@ export class Content extends PureControllerView {
 Content.propTypes = {
   pages: PropTypes.instanceOf(List),
   loaded: PropTypes.instanceOf(List),
-  index: PropTypes.number
+  index: PropTypes.number,
+  edit: PropTypes.instanceOf(map)
 };
 

@@ -14,6 +14,10 @@ export const AC_LOGIN_FORM_RESPONSE_GOT = 0xacfb1;
 export const AC_USER_LOGGED_OUT = 0xac51;
 export const AC_COOKIES_LOADED = 0xac5c;
 export const AC_PAGE_NAVIGATED = 0xac52;
+export const AC_KEY_PRESSED = 0xac53;
 
 export const AC_CONTENT_LOADED = 0xacc1;
+
+export const AC_EDIT_ACTIVATED = 0xaceea;
+export const AC_EDIT_CHANGED = 0xaceec;
 

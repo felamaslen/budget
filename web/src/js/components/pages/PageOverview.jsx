@@ -5,11 +5,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
+import { EditableCost } from '../Editable/EditableCost';
 import { Map as map } from 'immutable';
 import classNames from 'classnames';
 import { OVERVIEW_COLUMNS } from '../../misc/const';
+import { formatCurrency } from '../../misc/format';
 
 export class PageOverview extends PureControllerView {
+  format(value, abbreviate) {
+    return formatCurrency(value, { abbreviate, precision: 1 });
+  }
   render() {
     const rows = this.props.data.get('rows').map((row, key) => {
       const rowClasses = classNames({
@@ -24,9 +29,27 @@ export class PageOverview extends PureControllerView {
           style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
         }
 
+        const cellClasses = {};
+        cellClasses[cell.get('column').toLowerCase()] = true;
+        let span;
+        if (cell.get('editable')) {
+          // editable balance column
+          const active = this.props.edit.get('row') === key && this.props.edit.get('col') === 0;
+          span = (
+            <EditableCost dispatcher={this.props.dispatcher}
+              row={key} col={0} value={cell.get('value')}
+              page='overview' active={active} />
+          );
+          cellClasses.editable = true;
+        }
+        else {
+          const value = cellKey > 0 ? this.format(cell.get('value'), true) : cell.get('value');
+          span = <span className='text'>{value}</span>;
+        }
+
         return (
-          <td key={cellKey} className={cell.get('class')} style={style}>
-            <span className='text'>{cell.get('text')}</span>
+          <td key={cellKey} className={classNames(cellClasses)} style={style}>
+            {span}
           </td>
         );
       });
@@ -35,7 +58,7 @@ export class PageOverview extends PureControllerView {
     });
 
     return (
-      <table className='table-overview noselect table-insert'>
+      <table className='table-insert table-overview noselect'>
         <thead>
           <tr>
             {OVERVIEW_COLUMNS.map((column, key) => <th key={key}>{column}</th>)}
@@ -50,6 +73,7 @@ export class PageOverview extends PureControllerView {
 }
 
 PageOverview.propTypes = {
-  data: PropTypes.instanceOf(map)
+  data: PropTypes.instanceOf(map),
+  edit: PropTypes.instanceOf(map)
 };
 

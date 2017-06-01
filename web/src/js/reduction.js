@@ -22,7 +22,18 @@ export default new Record({
     pages: PAGES.map(() => null),
     pagesRaw: PAGES.map(() => null),
     pagesLoaded: PAGES.map(() => false),
-    currentPageIndex: -1
+    currentPageIndex: -1,
+    edit: {
+      active: {
+        row: 0,
+        col: -1,
+        page: null,
+        item: null,
+        value: null,
+        originalValue: null
+      },
+      queue: []
+    }
   }),
   // side effects
   effects: List.of()
