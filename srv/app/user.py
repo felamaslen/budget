@@ -73,8 +73,8 @@ class User(object):
                     return True
 
             else:
-                """ we are beyond the penalty period, so forget about
-                all previous bad login attempts from ip """
+                # we are beyond the penalty period, so forget about
+                # all previous bad login attempts from ip
                 self.ip_check['count'] = 0
                 self.ip_check['expired'] = True
 

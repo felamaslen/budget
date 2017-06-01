@@ -33,9 +33,9 @@ def get_category_column(category, grouping):
 
     return group
 
-def period_condition_weekly(NOW, index):
+def period_condition_weekly(now, index):
     """ database query for weekly period """
-    t_0 = NOW - timedelta(days=NOW.weekday()) - timedelta(weeks=index)
+    t_0 = now - timedelta(days=now.weekday()) - timedelta(weeks=index)
     t_1 = t_0 + timedelta(weeks=1)
 
     year0, month0, date0 = [int(x) \
@@ -56,11 +56,11 @@ def period_condition_weekly(NOW, index):
 
     return condition, condition_args, description
 
-def period_condition_monthly(NOW, index):
+def period_condition_monthly(now, index):
     """ database query for monthly period """
-    year = int(NOW.year - ceil(float(index + 1 - NOW.month) / 12))
+    year = int(now.year - ceil(float(index + 1 - now.month) / 12))
 
-    month = (NOW.month - index - 1) % 12 + 1
+    month = (now.month - index - 1) % 12 + 1
 
     if month <= 0:
         month += 12
@@ -76,9 +76,9 @@ def period_condition_monthly(NOW, index):
 
     return condition, condition_args, description
 
-def period_condition_yearly(NOW, index):
+def period_condition_yearly(now, index):
     """ database query for yearly period """
-    year = NOW.year - index
+    year = now.year - index
 
     condition = "year = %s"
     condition_args = [year]
@@ -86,16 +86,16 @@ def period_condition_yearly(NOW, index):
 
     return condition, condition_args, description
 
-def period_condition(NOW, period, index):
+def period_condition(now, period, index):
     """ produces a database query condition string from parameters """
     if period == 'week':
-        condition, args, desc = period_condition_weekly(NOW, index)
+        condition, args, desc = period_condition_weekly(now, index)
 
     elif period == 'month':
-        condition, args, desc = period_condition_monthly(NOW, index)
+        condition, args, desc = period_condition_monthly(now, index)
 
     elif period == 'year':
-        condition, args, desc = period_condition_yearly(NOW, index)
+        condition, args, desc = period_condition_yearly(now, index)
 
     else:
         return None
@@ -140,9 +140,9 @@ class DataAnalysis(Processor):
 
     def process(self):
         """ get the query to execute """
-        NOW = datetime.now()
+        now = datetime.now()
 
-        self.condition = period_condition(NOW, self.param['period'], \
+        self.condition = period_condition(now, self.param['period'], \
                 self.param['index'])
 
         self.valid_params = self.validate_task(self.param['period'], \
