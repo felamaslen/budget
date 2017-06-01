@@ -7,9 +7,10 @@ import querystring from 'querystring';
 import buildEffectHandler from '../effectHandlerBuilder';
 
 import {
-  EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED
+  EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED, EF_SERVER_UPDATE_REQUESTED
 } from '../constants/effects';
 
+import { aServerUpdateReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
 import { aContentLoaded } from '../actions/ContentActions';
 
@@ -32,5 +33,14 @@ export default buildEffectHandler([
     }).then(
       response => dispatcher.dispatch(aContentLoaded({ response, page: obj.page }))
     );
+  }],
+
+  [EF_SERVER_UPDATE_REQUESTED, (obj, dispatcher) => {
+    axios.post('api?t=multiple', querystring.stringify({ list: obj.list }), {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => dispatcher.dispatch(aServerUpdateReceived(response))
+    );
   }]
+
 ]);

@@ -17,6 +17,8 @@ import {
   AC_COOKIES_LOADED,
   AC_PAGE_NAVIGATED,
   AC_KEY_PRESSED,
+  AC_SERVER_UPDATED,
+  AC_SERVER_UPDATE_RECEIVED,
 
   AC_CONTENT_LOADED,
 
@@ -39,7 +41,9 @@ import {
   rLogout,
   rLoadCookies,
   rNavigateToPage,
-  rHandleKeyPress
+  rHandleKeyPress,
+  rUpdateServer,
+  rHandleServerUpdate
 } from './HeaderReducer';
 import {
   rHandleContentResponse
@@ -78,6 +82,10 @@ export default (reduction, action) => {
     return rNavigateToPage(reduction, action.payload);
   case AC_KEY_PRESSED:
     return rHandleKeyPress(reduction, action.payload);
+  case AC_SERVER_UPDATED:
+    return rUpdateServer(reduction);
+  case AC_SERVER_UPDATE_RECEIVED:
+    return rHandleServerUpdate(reduction, action.payload);
 
   // content actions
   case AC_CONTENT_LOADED:

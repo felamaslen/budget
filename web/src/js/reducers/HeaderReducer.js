@@ -4,10 +4,16 @@
 
 import { List as list } from 'immutable';
 import Cookies from 'js-cookie';
+import buildMessage from '../messageBuilder';
 import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
-import { PAGES } from '../misc/const';
+import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
+import {
+  PAGES,
+  SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
+} from '../misc/const';
+import { buildQueueRequestList } from '../misc/data';
 
 /**
  * Handle navigation
@@ -125,5 +131,33 @@ export const rNavigateToPage = (reduction, page) => {
     newReduction = rLoadContent(newReduction, page);
   }
   return newReduction.setIn(['appState', 'currentPageIndex'], page);
+};
+
+export const rUpdateServer = reduction => {
+  const queue = reduction.getIn(['appState', 'edit', 'queue']);
+  if (queue.size === 0) {
+    // toggle the status to trigger another (delayed) update
+    return reduction.setIn(
+      ['appState', 'edit', 'status'],
+      (reduction.getIn(['appState', 'edit', 'status']) + 1) & 1
+    );
+  }
+
+  const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+  const startYearMonth = reduction.getIn(['appState', 'pages', 0, 'data', 'startYearMonth']);
+  const reqList = buildQueueRequestList(queue, startYearMonth);
+  const req = { apiKey, list: reqList };
+
+  return reduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
+  .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_UPDATE_REQUESTED, req)));
+};
+
+export const rHandleServerUpdate = (reduction, response) => {
+  const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
+  let newReduction = reduction.setIn(['appState', 'edit', 'status'], status);
+  if (!response.data.error) {
+    newReduction = newReduction.setIn(['appState', 'edit', 'queue'], list.of());
+  }
+  return newReduction;
 };
 
