@@ -21,3 +21,7 @@ export const COLOR_CATEGORY = {
   'Balance': [36, 191, 55]
 };
 
+// currency symbol
+export const SYMBOL_CURRENCY_HTML = '\u00a3';
+export const SYMBOL_CURRENCY_RAW = '£';
+

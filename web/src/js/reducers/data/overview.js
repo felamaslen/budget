@@ -118,9 +118,11 @@ const calculateTableData = (data, futureData, startYear, startMonth, futureKey) 
  */
 export const rProcessDataOverview = raw => {
   const numRows = yearMonthDifference(raw.startYearMonth, raw.endYearMonth) + 1;
+  const numCols = 1;
 
   return map({
     numRows,
+    numCols,
     futureMonths: raw.futureMonths,
     startYearMonth: raw.startYearMonth,
     currentYearMonth: [raw.currentYear, raw.currentMonth],
@@ -213,10 +215,13 @@ export const rGetOverviewRows = data => {
       if (colKey > 0 && categoryColor[colKey - 1]) {
         rgb = getScoreColor(value, valueRange[colKey - 1], categoryColor[colKey - 1]);
       }
+      const editable = column === 'Balance';
 
       return map({
-        text: value.toString(),
-        rgb
+        column,
+        value,
+        rgb,
+        editable
       });
     });
 

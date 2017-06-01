@@ -16,8 +16,12 @@ import {
   AC_USER_LOGGED_OUT,
   AC_COOKIES_LOADED,
   AC_PAGE_NAVIGATED,
+  AC_KEY_PRESSED,
 
-  AC_CONTENT_LOADED
+  AC_CONTENT_LOADED,
+
+  AC_EDIT_ACTIVATED,
+  AC_EDIT_CHANGED
 } from '../constants/actions';
 
 import {
@@ -34,11 +38,16 @@ import {
 import {
   rLogout,
   rLoadCookies,
-  rNavigateToPage
+  rNavigateToPage,
+  rHandleKeyPress
 } from './HeaderReducer';
 import {
   rHandleContentResponse
 } from './ContentReducer';
+import {
+  rActivateEditable,
+  rChangeEditable
+} from './EditReducer';
 
 export default (reduction, action) => {
   switch (action.type) {
@@ -67,10 +76,18 @@ export default (reduction, action) => {
     return rLoadCookies(reduction);
   case AC_PAGE_NAVIGATED:
     return rNavigateToPage(reduction, action.payload);
+  case AC_KEY_PRESSED:
+    return rHandleKeyPress(reduction, action.payload);
 
   // content actions
   case AC_CONTENT_LOADED:
     return rHandleContentResponse(reduction, action.payload);
+
+  // editable actions
+  case AC_EDIT_ACTIVATED:
+    return rActivateEditable(reduction, action.payload);
+  case AC_EDIT_CHANGED:
+    return rChangeEditable(reduction, action.payload);
 
   default:
     // By default, the reduction is simply returned unchanged.

@@ -8,7 +8,9 @@ import classNames from 'classnames';
 import PureControllerView from './PureControllerView';
 import { capitalise } from '../misc/text';
 import { PAGES } from '../misc/const';
-import { aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo } from '../actions/HeaderActions';
+import {
+  aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo, aKeyPressed
+} from '../actions/HeaderActions';
 
 export class Header extends PureControllerView {
   logout() {
@@ -43,6 +45,13 @@ export class Header extends PureControllerView {
   }
   componentWillMount() {
     this.dispatchAction(aCookiesLoaded());
+    window.addEventListener('keydown', evt => {
+      this.dispatchAction(aKeyPressed({
+        key: evt.key,
+        shift: evt.shiftKey,
+        ctrl: evt.ctrlKey
+      }));
+    });
   }
   render() {
     const navBar = this.props.showNav ? this.renderNavBar() : null;

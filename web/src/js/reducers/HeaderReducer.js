@@ -4,9 +4,71 @@
 
 import { List as list } from 'immutable';
 import Cookies from 'js-cookie';
-import { rLoginFormSubmit } from './LoginFormReducer';
+import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
+import { rActivateEditable } from './EditReducer';
 import { PAGES } from '../misc/const';
+
+/**
+ * Handle navigation
+ * @param {Record} reduction application state
+ * @param {integer} dx x direction
+ * @param {integer} dy y direction
+ * @returns {Record} modified reduction
+ */
+const handleNav = (reduction, dx, dy) => {
+  const editing = reduction.getIn(['appState', 'edit', 'active']);
+  if (dx === null) {
+    return rActivateEditable(reduction, null);
+  }
+  const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
+  const numRows = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']);
+  const numCols = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numCols']);
+  if (!numRows || !numCols || !editing) {
+    return reduction;
+  }
+
+  const newRow = (editing.get('row') + dy +
+                  Math.floor((editing.get('col') + dx) / numCols)) % numRows;
+  const newCol = (editing.get('col') + dx) % numCols;
+
+  return rActivateEditable(reduction, editing)
+  .setIn(['appState', 'edit', 'active', 'row'], newRow)
+  .setIn(['appState', 'edit', 'active', 'col'], newCol);
+};
+
+/**
+ * Handle key presses
+ * @param {Record} reduction application state
+ * @param {string} key which key was pressed
+ * @returns {Record} modified reduction
+ */
+export const rHandleKeyPress = (reduction, key) => {
+  if (reduction.getIn(['appState', 'user', 'uid'])) {
+    // logged in
+
+    // handle navigation
+    if (key.key === 'Tab') {
+      return handleNav(reduction, key.shift ? -1 : 1, 0);
+    }
+    if (key.ctrl) {
+      const arrows = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
+      const arrowIndex = arrows.indexOf(key.key);
+      if (arrowIndex > -1) {
+        return handleNav(reduction, ((arrowIndex % 4) - 1) % 2, (((arrowIndex - 1) % 4) - 1) % 2);
+      }
+    }
+    if (key.key === 'Escape') {
+      return handleNav(reduction, null);
+    }
+    return reduction;
+  }
+  // not logged in
+  if (key.key === 'Escape') {
+    return rLoginFormReset(reduction, 0);
+  }
+  return rLoginFormInput(reduction, key.key);
+};
 
 /**
  * Log out of the system

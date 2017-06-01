@@ -626,8 +626,8 @@ button {
   min-width: 10px;
   width: 100%;
   border: 0;
-  padding: 0 2px;
   margin: 0;
+  padding: 0;
   outline: none;
   font: inherit;
   text-align: left;
@@ -790,10 +790,15 @@ button {
       position: relative;
     }
     .editable-input {
-      position: absolute;
-      right: 1px;
-      top: 0;
+      height: 16px;
     }
+  }
+  .editable-input {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 20px;
+    padding: 0;
   }
   .active {
     font-weight: bold;
@@ -813,14 +818,6 @@ button {
 
   .month {
     text-align: right;
-  }
-
-  .cost {
-    .editable-input {
-      max-width: 78px;
-      margin-right: 0;
-      padding: 0 1px;
-    }
   }
   .graph-balance {
     .show-all {
