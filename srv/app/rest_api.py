@@ -128,28 +128,71 @@ class WebAPI(object):
                 # initialise api object to process the actual request
                 api = API(self.dbx)
 
-                # give internal server error if execute() returns False
-                self.res['api_error'] = api.execute(
-                    self.user.uid, self.form['method'], self.form['task'], \
-                    self.form['args'], self.form['form']
-                ) is False
+                if self.form['task'][0] == 'multiple' and \
+                        'list' in self.form['form']:
+                    # execute multiple API requests
+                    try:
+                        data = []
+                        extra = []
 
-                self.res['error'] = api.error
-                self.res['errorText'] = api.error_text
-                self.res['extra'] = api.extra
-                self.res['data'] = api.data
+                        tasks = json.loads(self.form['form']['list'])
+                        for (this_task, args, form) in tasks:
+                            task = deque(this_task.split('/'))
+                            api.execute(self.user.uid, self.form['method'], \
+                                    task, args, form)
+                            if api.error:
+                                self.res['error'] = True
+                                self.res['errorText'] = api.error_text
+                                break
+
+                            extra.append(api.extra)
+                            data.append(api.data)
+
+                        self.res['extra'] = extra
+                        self.res['data'] = data
+
+                    except ValueError:
+                        self.res['error'] = True
+                        self.res['errorText'] = 'Bad request JSON'
+
+                else:
+                    # give internal server error if execute() returns False
+                    self.res['api_error'] = api.execute(
+                        self.user.uid, self.form['method'], self.form['task'], \
+                        self.form['args'], self.form['form']
+                    ) is False
+
+                    self.res['error'] = api.error
+                    self.res['errorText'] = api.error_text
+                    self.res['extra'] = api.extra
+                    self.res['data'] = api.data
 
         # close the database connection
         self.dbx.close()
 
     def process_response(self):
         """ gets a response from the output data """
-        if self.res['extra'] is not None and len(self.res['extra']) > 0:
-            for key in self.res['extra']:
-                self.res['res'][key] = self.res['extra'][key]
+        multiple = isinstance(self.res['data'], list)
+        if multiple:
+            # multiple requests at once
+            self.res['res']['out'] = [{} for item in self.res['data']]
+            for (req_key, item) in enumerate(self.res['extra']):
+                if item is not None and len(item) > 0:
+                    for key in item:
+                        self.res['res']['out'][req_key][key] = item[key]
 
-        if len(self.res['data']) > 0:
-            self.res['res']['data'] = self.res['data']
+            for (req_key, item) in enumerate(self.res['data']):
+                if len(item) > 0:
+                    self.res['res'][req_key]['out']['data'] = item
+
+        else:
+            # single request
+            if self.res['extra'] is not None and len(self.res['extra']) > 0:
+                for key in self.res['extra']:
+                    self.res['res'][key] = self.res['extra'][key]
+
+            if len(self.res['data']) > 0:
+                self.res['res']['data'] = self.res['data']
 
         self.res['res']['error'] = self.res['error']
 
@@ -252,7 +295,8 @@ class API(object):
         """ returns false iff a server (not user) error was encountered """
         response = self.get_response(uid, method, task, args, form)
 
-        self.extra = response['extra']
+        if 'extra' in response:
+            self.extra = response['extra']
         self.data = response['data']
         self.error = response['error']
         self.error_text = response['errorText']
