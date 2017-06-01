@@ -1,6 +1,6 @@
 import { Record, List, fromJS } from 'immutable';
 
-import { PAGES } from './misc/const';
+import { PAGES, SERVER_UPDATE_IDLE } from './misc/const';
 
 // the state of the app (reduction) is stored as an immutable object,
 // and returned (modified) by reducers
@@ -32,7 +32,8 @@ export default new Record({
         value: null,
         originalValue: null
       },
-      queue: []
+      queue: [],
+      status: SERVER_UPDATE_IDLE
     }
   }),
   // side effects

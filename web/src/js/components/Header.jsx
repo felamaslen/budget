@@ -7,9 +7,10 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PureControllerView from './PureControllerView';
 import { capitalise } from '../misc/text';
-import { PAGES } from '../misc/const';
+import { PAGES, SERVER_UPDATE_ERROR, ERROR_LEVEL_ERROR } from '../misc/const';
+import { ERROR_MSG_SERVER_UPDATE, TIMER_UPDATE_SERVER } from '../misc/config';
 import {
-  aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo, aKeyPressed
+  aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo, aKeyPressed, aServerUpdated
 } from '../actions/HeaderActions';
 
 export class Header extends PureControllerView {
@@ -46,12 +47,32 @@ export class Header extends PureControllerView {
   componentWillMount() {
     this.dispatchAction(aCookiesLoaded());
     window.addEventListener('keydown', evt => {
+      if (evt.key === 'Tab') {
+        evt.preventDefault();
+      }
       this.dispatchAction(aKeyPressed({
         key: evt.key,
         shift: evt.shiftKey,
         ctrl: evt.ctrlKey
       }));
     });
+
+    window.setTimeout(() => {
+      this.dispatchAction(aServerUpdated());
+    }, TIMER_UPDATE_SERVER);
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.serverUpdateStatus !== nextProps.serverUpdateStatus) {
+      if (nextProps.serverUpdateStatus === SERVER_UPDATE_ERROR) {
+        this.dispatchAction(aErrorOpened(map({
+          level: ERROR_LEVEL_ERROR,
+          text: ERROR_MSG_SERVER_UPDATE
+        })));
+      }
+      window.setTimeout(() => {
+        this.dispatchAction(aServerUpdated());
+      }, TIMER_UPDATE_SERVER);
+    }
   }
   render() {
     const navBar = this.props.showNav ? this.renderNavBar() : null;
@@ -71,5 +92,6 @@ export class Header extends PureControllerView {
 
 Header.propTypes = {
   showNav: PropTypes.bool,
-  navPageIndex: PropTypes.number
+  navPageIndex: PropTypes.number,
+  serverUpdateStatus: PropTypes.number
 };

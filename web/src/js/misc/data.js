@@ -42,3 +42,28 @@ export const randnBm = () => {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 };
 
+/**
+ * Builds a request list for updating the server
+ * @param {List} queue: the queue of stuff to update
+ * @param {array} startYearMonth: start year/month of the overview data
+ * @returns {string} JSON-encoded list for ajax request
+ */
+export const buildQueueRequestList = (queue, startYearMonth) => {
+  const startYear = startYearMonth[0];
+  const startMonth = startYearMonth[1];
+  const reqList = queue.map(dataItem => {
+    if (dataItem.get('page') === 'overview') {
+      const key = dataItem.get('row');
+      const year = startYear + Math.floor((key + startMonth - 1) / 12);
+      const month = (startMonth + key - 1) % 12 + 1;
+      const balance = dataItem.get('value');
+
+      return ['update/overview', {}, { year, month, balance }];
+    }
+
+    return null;
+  }).filter(item => item !== null);
+
+  return JSON.stringify(reqList.toJS());
+};
+

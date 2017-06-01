@@ -25,3 +25,9 @@ export const COLOR_CATEGORY = {
 export const SYMBOL_CURRENCY_HTML = '\u00a3';
 export const SYMBOL_CURRENCY_RAW = '£';
 
+// update changes regularly with the server
+export const TIMER_UPDATE_SERVER = 1000;
+
+// error messages
+export const ERROR_MSG_SERVER_UPDATE = 'Error updating server!';
+

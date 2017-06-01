@@ -26,6 +26,9 @@ export const OVERVIEW_COLUMNS = ['Month', 'Stocks', 'Bills', 'Food', 'General', 
   'Social', 'Income', 'Spending', 'Net', 'Predicted', 'Balance'];
 
 export const LOGIN_INPUT_LENGTH = 4;
-
 export const AVERAGE_MEDIAN = 0xa1;
+export const SERVER_UPDATE_IDLE = 0;
+export const SERVER_UPDATE_REQUESTED = 0xf91;
+export const SERVER_UPDATE_RECEIVED = 0xf92;
+export const SERVER_UPDATE_ERROR = 0xf93;
 
