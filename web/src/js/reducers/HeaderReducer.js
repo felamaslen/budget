@@ -11,7 +11,7 @@ import { rActivateEditable } from './EditReducer';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
 import {
   PAGES,
-  LIST_COLS_FOOD,
+  LIST_COLS_PAGES,
   SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
 import { buildQueueRequestList } from '../misc/data.jsx';
@@ -24,7 +24,7 @@ const getItemValue = (reduction, page, pageIndex, row, col) => {
   }
   else if (page === 'food') {
     value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
-    item = LIST_COLS_FOOD[col];
+    item = LIST_COLS_PAGES[pageIndex][col];
   }
   return { item, value };
 };

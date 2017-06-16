@@ -27,7 +27,9 @@ export class Content extends PureControllerView {
       return (
         <PageFood dispatcher={this.props.dispatcher}
           data={this.props.pages.get(0)}
-          edit={this.props.edit} />
+          edit={this.props.edit}
+          index={this.props.index}
+          page={PAGES[this.props.index]} />
       );
     }
     return <div>TODO: page {this.props.index}</div>;

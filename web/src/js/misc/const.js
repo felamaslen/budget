@@ -27,8 +27,17 @@ export const OVERVIEW_COLUMNS = ['Month', 'Stocks', 'Bills', 'Food', 'General', 
 
 export const LIST_PAGES = [2, 3, 4, 5, 6, 7, 8];
 
-const LIST_COLS = ['date', 'item', 'category', 'cost', 'shop'];
-export const LIST_COLS_FOOD = LIST_COLS;
+export const LIST_COLS_PAGES = [
+  null, // overview (not list)
+  null, // analysis (not list)
+  ['date', 'item', 'transactions', 'cost'], // funds
+  ['date', 'item', 'cost'], // income
+  ['date', 'item', 'cost'], // bills
+  ['date', 'item', 'category', 'cost', 'shop'], // food
+  ['date', 'item', 'category', 'cost', 'shop'], // general
+  ['date', 'item', 'holiday', 'cost', 'shop'], // holiday
+  ['date', 'item', 'social', 'cost', 'shop'] // social
+];
 
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
