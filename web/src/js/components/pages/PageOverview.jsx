@@ -5,11 +5,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
-import { EditableCost } from '../Editable/EditableCost';
 import { Map as map } from 'immutable';
 import classNames from 'classnames';
 import { OVERVIEW_COLUMNS } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
+import { getEditable } from '../../misc/data';
 
 export class PageOverview extends PureControllerView {
   format(value, abbreviate) {
@@ -35,11 +35,7 @@ export class PageOverview extends PureControllerView {
         if (cell.get('editable')) {
           // editable balance column
           const active = this.props.edit.get('row') === key && this.props.edit.get('col') === 0;
-          span = (
-            <EditableCost dispatcher={this.props.dispatcher}
-              row={key} col={0} value={cell.get('value')}
-              page='overview' active={active} />
-          );
+          span = getEditable(null, this.props.dispatcher, key, 0, cell.get('value'), 'overview', active);
           cellClasses.editable = true;
         }
         else {

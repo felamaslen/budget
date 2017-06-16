@@ -2,7 +2,7 @@
  * Carries out actions for the Form component
  */
 
-import { List as list } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import Cookies from 'js-cookie';
 import buildMessage from '../messageBuilder';
 import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
@@ -11,9 +11,23 @@ import { rActivateEditable } from './EditReducer';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
 import {
   PAGES,
+  LIST_COLS_FOOD,
   SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
-import { buildQueueRequestList } from '../misc/data';
+import { buildQueueRequestList } from '../misc/data.jsx';
+
+const getItemValue = (reduction, page, pageIndex, row, col) => {
+  let item = null;
+  let value = null;
+  if (page === 'overview') {
+    value = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'cost', 'balance', row]);
+  }
+  else if (page === 'food') {
+    value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
+    item = LIST_COLS_FOOD[col];
+  }
+  return { item, value };
+};
 
 /**
  * Handle navigation
@@ -34,13 +48,23 @@ const handleNav = (reduction, dx, dy) => {
     return reduction;
   }
 
-  const newRow = (editing.get('row') + dy +
-                  Math.floor((editing.get('col') + dx) / numCols)) % numRows;
-  const newCol = (editing.get('col') + dx) % numCols;
+  let row;
+  let col;
+  if (editing.get('col') === -1 && editing.get('row') <= 0 && dx < 0) {
+    row = numRows - 1;
+    col = numCols - 1;
+  }
+  else {
+    row = (editing.get('row') + dy +
+              Math.floor((editing.get('col') + dx) / numCols)) % numRows;
+    col = (editing.get('col') + dx) % numCols;
+  }
+  const page = PAGES[pageIndex];
+  const itemValue = getItemValue(reduction, page, pageIndex, row, col);
+  const item = itemValue.item;
+  const value = itemValue.value;
 
-  return rActivateEditable(reduction, editing)
-  .setIn(['appState', 'edit', 'active', 'row'], newRow)
-  .setIn(['appState', 'edit', 'active', 'col'], newCol);
+  return rActivateEditable(reduction, map({ row, col, page, item, value }));
 };
 
 /**

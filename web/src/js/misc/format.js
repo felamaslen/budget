@@ -7,7 +7,7 @@ import {
 } from './config';
 
 /**
- * Round a number to a specified precision
+ * @function round
  * @param {float} value: value to round
  * @param {integer} precision: precision to round to
  * @returns {float} rounded value
@@ -18,12 +18,24 @@ const round = (value, precision) => {
 };
 
 /**
- * Format a number with commas etc.
+ * @function numberFormat
  * @param {float} value: value to format
  * @returns {string} formatted number
  */
 export const numberFormat = value => {
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+/**
+ * @function leadingZeroes
+ * @param {integer} value: number to add zeroes to
+ * @param {integer} numZeroes: number of zeroes to fill
+ * @returns {string} formatted number
+ */
+export const leadingZeroes = (value, numZeroes) => {
+  const numAdd = numZeroes - Math.ceil(Math.log10(value));
+  const zeroes = Array.apply(null, new Array(numAdd)).map(() => '0').join('');
+  return `${zeroes}${value}`;
 };
 
 /**
