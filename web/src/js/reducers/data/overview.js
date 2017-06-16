@@ -92,7 +92,7 @@ const calculateTableData = (data, futureData, startYear, startMonth, futureKey) 
   const balance = data.getIn(['cost', 'balance']);
   let lastPredicted = balance.get(0);
   const predicted = months.map((month, key) => {
-    if (key > 0 && key < futureKey) {
+    if (key > 0 && key <= futureKey) {
       lastPredicted = balance.get(key - 1) + net.get(key);
       return lastPredicted;
     }
