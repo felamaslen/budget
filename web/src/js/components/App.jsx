@@ -53,6 +53,7 @@ export default class App extends Component {
   render() {
     const loggedIn = this.state.reduction.getIn(['appState', 'user', 'uid']) > 0;
     const loading = this.state.reduction.getIn(['appState', 'loading']);
+    const loadingApi = this.state.reduction.getIn(['appState', 'loadingApi']);
 
     const errorMessages = (
       <ErrorMessages dispatcher={this.state.dispatcher}
@@ -62,6 +63,7 @@ export default class App extends Component {
     const header = (
       <Header dispatcher={this.state.dispatcher}
         showNav={loggedIn}
+        loadingApi={loadingApi}
         navPageIndex={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
         serverUpdateStatus={this.state.reduction.getIn(['appState', 'edit', 'status'])} />
     );

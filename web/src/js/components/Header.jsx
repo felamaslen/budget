@@ -76,12 +76,18 @@ export class Header extends PureControllerView {
   }
   render() {
     const navBar = this.props.showNav ? this.renderNavBar() : null;
+    const loadingApiSpinner = this.props.loadingApi ? (
+      <span className="loading-api"></span>
+    ) : null;
 
     return (
       <div id="nav">
         <div className="inner">
           <div className="app-logo">
-            <a className="logo">Budget</a>
+            <a className="logo">
+              <span>Budget</span>
+              {loadingApiSpinner}
+            </a>
           </div>
           {navBar}
         </div>
@@ -92,6 +98,7 @@ export class Header extends PureControllerView {
 
 Header.propTypes = {
   showNav: PropTypes.bool,
+  loadingApi: PropTypes.bool,
   navPageIndex: PropTypes.number,
   serverUpdateStatus: PropTypes.number
 };

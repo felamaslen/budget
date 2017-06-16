@@ -401,6 +401,7 @@ button {
       font-family: Ubuntu, Georgia, serif;
       font-weight: bold;
       font-size: 22px;
+      position: relative;
       &:before {
         content: '';
         width: @width_logo;
@@ -409,6 +410,17 @@ button {
         vertical-align: middle;
         background: url(@nav_img) 0 -56px;
         padding-right: 0.5em;
+      }
+      .loading-api {
+        width: @width_logo - 4;
+        height: @height_logo - 4;
+        position: absolute;
+        left: -2px;
+        top: -2px;
+        border-radius: 100%;
+        border: 4px solid transparent;
+        border-top: 4px solid yellow;
+	      animation: spin 1s infinite steps(64);
       }
     }
   }
