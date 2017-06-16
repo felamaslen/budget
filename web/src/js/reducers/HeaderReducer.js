@@ -134,6 +134,9 @@ export const rNavigateToPage = (reduction, page) => {
 };
 
 export const rUpdateServer = reduction => {
+  if (reduction.getIn(['appState', 'loadingApi'])) {
+    return reduction;
+  }
   const queue = reduction.getIn(['appState', 'edit', 'queue']);
   if (queue.size === 0) {
     // toggle the status to trigger another (delayed) update
@@ -149,12 +152,14 @@ export const rUpdateServer = reduction => {
   const req = { apiKey, list: reqList };
 
   return reduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
+  .setIn(['appState', 'loadingApi'], true)
   .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_UPDATE_REQUESTED, req)));
 };
 
 export const rHandleServerUpdate = (reduction, response) => {
   const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
-  let newReduction = reduction.setIn(['appState', 'edit', 'status'], status);
+  let newReduction = reduction.setIn(['appState', 'loadingApi'], false)
+  .setIn(['appState', 'edit', 'status'], status);
   if (!response.data.error) {
     newReduction = newReduction.setIn(['appState', 'edit', 'queue'], list.of());
   }

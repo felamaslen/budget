@@ -7,7 +7,8 @@ import { PAGES, SERVER_UPDATE_IDLE } from './misc/const';
 export default new Record({
   appState: fromJS({
     errorMsg: [],
-    loading: false,
+    loading: false, // for big (disruptive) things like loading pages
+    loadingApi: false, // for small things like edit updates
     user: {
       uid: 0,
       name: null,
