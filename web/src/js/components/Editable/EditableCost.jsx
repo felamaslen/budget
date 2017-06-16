@@ -26,6 +26,13 @@ export class EditableCost extends Editable {
     // format the current value
     return formatCurrency(this.props.value);
   }
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
+      window.setTimeout(() => {
+        this.input.focus();
+      }, 0);
+    }
+  }
   render() {
     if (this.props.active) {
       return (
