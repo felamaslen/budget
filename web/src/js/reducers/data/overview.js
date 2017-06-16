@@ -153,26 +153,39 @@ const getCategoryColor = () => {
  * Get a colour on a scale, based on value (linear)
  * @param {integer} value: the value to score
  * @param {array} range: minimum and maximum of range
+ * @param {array} median: median values in range
  * @param {array} color: color scale(s) to use
  * @returns {array} rgb values
  */
-const getScoreColor = (value, range, color) => {
+const getScoreColor = (value, range, median, color) => {
   if (range[0] === range[1]) {
     return [255, 255, 255]; // white
   }
 
-  const split = color.length === 2 && (range[0] < 0 || range[1] > 0);
-
   let score;
+
+  let medianValue = median[0];
+  let cost = value;
+  let max = range[1];
+  if (value < 0) {
+    medianValue = -median[1];
+    cost *= -1;
+    max = -range[0];
+  }
+
+  if (cost > medianValue) {
+    score = 0.5 * (1 + (cost - medianValue) / (max - medianValue));
+  }
+  else {
+    score = 0.5 * cost / medianValue;
+  }
+
+  const split = color.length === 2 && (range[0] < 0 || range[1] > 0);
   let theColor = color;
   if (split) {
     // score separately for positive vs. negative
     const end = value < 0 ? 0 : 1;
-    score = value / range[end];
     theColor = color[end];
-  }
-  else {
-    score = (Math.min(range[1], Math.max(range[0], value)) - range[0]) / (range[1] - range[0]);
   }
 
   return theColor.map(item => Math.round(255 - (255 - item) * score));
@@ -194,10 +207,16 @@ export const rGetOverviewRows = data => {
   const futureData = calculateFutures(data, futureKey);
   const tableData = calculateTableData(data, futureData, startYear, startMonth, futureKey);
 
-  // get value ranges for calculating colours
-  const valueRange = OVERVIEW_COLUMNS.slice(1).map((column, colKey) => {
-    return [tableData.get(colKey + 1).min(), tableData.get(colKey + 1).max()];
+  // get value ranges and medians for calculating colours
+  const values = OVERVIEW_COLUMNS.slice(1).map((column, colKey) => tableData.get(colKey + 1));
+  const valueRange = values.map(valuesItem => [valuesItem.min(), valuesItem.max()]);
+  const median = values.map(valuesItem => {
+    return [
+      listAverage(valuesItem.filter(item => item >= 0), 0, AVERAGE_MEDIAN), // median of positive values
+      listAverage(valuesItem.filter(item => item < 0), 0, AVERAGE_MEDIAN) // median of negative values
+    ];
   });
+
   const categoryColor = getCategoryColor();
 
   // translate the data into table cells for display in the view
@@ -213,7 +232,7 @@ export const rGetOverviewRows = data => {
       const value = tableData.getIn([colKey, key]);
       let rgb = null;
       if (colKey > 0 && categoryColor[colKey - 1]) {
-        rgb = getScoreColor(value, valueRange[colKey - 1], categoryColor[colKey - 1]);
+        rgb = getScoreColor(value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]);
       }
       const editable = column === 'Balance';
 
