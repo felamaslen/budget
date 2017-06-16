@@ -10,6 +10,7 @@ import { PAGES } from '../misc/const';
 
 import { Spinner } from './Spinner';
 import { PageOverview } from './pages/PageOverview';
+import { PageFood } from './pages/PageFood';
 
 export class Content extends PureControllerView {
   renderPage() {
@@ -17,6 +18,14 @@ export class Content extends PureControllerView {
       // overview page
       return (
         <PageOverview dispatcher={this.props.dispatcher}
+          data={this.props.pages.get(0)}
+          edit={this.props.edit} />
+      );
+    }
+    if (this.props.index === 5) {
+      // food page
+      return (
+        <PageFood dispatcher={this.props.dispatcher}
           data={this.props.pages.get(0)}
           edit={this.props.edit} />
       );

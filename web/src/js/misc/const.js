@@ -25,6 +25,11 @@ export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
 export const OVERVIEW_COLUMNS = ['Month', 'Stocks', 'Bills', 'Food', 'General', 'Holiday',
   'Social', 'Income', 'Spending', 'Net', 'Predicted', 'Balance'];
 
+export const LIST_PAGES = [2, 3, 4, 5, 6, 7, 8];
+
+const LIST_COLS = ['date', 'item', 'category', 'cost', 'shop'];
+export const LIST_COLS_FOOD = LIST_COLS;
+
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
 export const SERVER_UPDATE_IDLE = 0;

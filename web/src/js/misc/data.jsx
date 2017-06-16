@@ -3,6 +3,9 @@
  */
 
 import { AVERAGE_MEDIAN } from './const';
+import React from 'react';
+import EditableDate from '../components/Editable/EditableDate';
+import EditableCost from '../components/Editable/EditableCost';
 
 /**
  * Gets the mean or median of an immutable list of values
@@ -65,5 +68,27 @@ export const buildQueueRequestList = (queue, startYearMonth) => {
   }).filter(item => item !== null);
 
   return JSON.stringify(reqList.toJS());
+};
+
+/**
+ * @function getEditable
+ * @param {string} column: the column being edited
+ * @param {Dispatcher} dispatcher: store
+ * @param {integer} row: row of item
+ * @param {integer} col: column of item
+ * @param {mixed} value: value of item
+ * @param {string} page: page of item
+ * @param {boolean} active: whether item is being edited
+ * @returns {Editable}: the correct editable react component class
+ */
+export const getEditable = (column, dispatcher, row, col, value, page, active) => {
+  if (column === 'date') {
+    return <EditableDate dispatcher={dispatcher} row={row} col={col}
+      value={value} page={page} active={active} />;
+  }
+
+  // default is currency
+  return <EditableCost dispatcher={dispatcher} row={row} col={col}
+    value={value} page={page} active={active} />;
 };
 

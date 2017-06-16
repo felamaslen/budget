@@ -36,7 +36,7 @@ export const rActivateEditable = (reduction, editable) => {
   const queue = reduction.getIn(['appState', 'edit', 'queue']);
 
   // confirm the previous item's edits
-  if (active && active.get('value') !== active.get('originalValue')) {
+  if (active && active.get('value') !== active.get('originalValue') && active.get('row') > -1) {
     // add last item to queue for saving on API
     newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
 
@@ -46,11 +46,8 @@ export const rActivateEditable = (reduction, editable) => {
 
   // can pass null to deactivate editing
   if (!editable) {
-    if (active.get('row') === -1) {
-      return reduction;
-    }
     return reduction.setIn(['appState', 'edit', 'active'], map({
-      row: 0,
+      row: active.get('row') === -1 ? -1 : 0,
       col: -1,
       page: null,
       item: null,
