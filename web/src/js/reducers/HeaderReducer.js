@@ -10,8 +10,7 @@ import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
 import {
-  PAGES,
-  LIST_COLS_PAGES,
+  PAGES, LIST_PAGES, LIST_COLS_PAGES,
   SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
 import { buildQueueRequestList } from '../misc/data.jsx';
@@ -42,22 +41,36 @@ const handleNav = (reduction, dx, dy) => {
     return rActivateEditable(reduction, null);
   }
   const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
-  const numRows = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']);
+  let numRows = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']);
   const numCols = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numCols']);
   if (!numRows || !numCols || !editing) {
     return reduction;
   }
 
+  const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
+  if (pageIsList) {
+    numRows++; // include add row
+  }
+
+  let currentRow = editing.get('row');
+  const currentCol = editing.get('col');
+  if (pageIsList) {
+    currentRow++;
+  }
+
   let row;
   let col;
-  if (editing.get('col') === -1 && editing.get('row') <= 0 && dx < 0) {
+  if (currentCol === -1 && currentRow <= 0 && dx < 0) {
     row = numRows - 1;
     col = numCols - 1;
   }
   else {
-    row = (editing.get('row') + dy +
-              Math.floor((editing.get('col') + dx) / numCols)) % numRows;
-    col = (editing.get('col') + dx) % numCols;
+    row = (currentRow + dy +
+              Math.floor((currentCol + dx) / numCols) + numRows) % numRows;
+    col = (editing.get('col') + dx + numCols) % numCols;
+  }
+  if (pageIsList) {
+    row--;
   }
   const page = PAGES[pageIndex];
   const itemValue = getItemValue(reduction, page, pageIndex, row, col);
