@@ -28,7 +28,7 @@ export default new Record({
       active: {
         row: 0,
         col: -1,
-        page: null,
+        pageIndex: null,
         item: null,
         value: null,
         originalValue: null

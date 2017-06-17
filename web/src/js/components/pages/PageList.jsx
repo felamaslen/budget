@@ -1,15 +1,15 @@
 /**
- * Food page component
+ * List page component
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
-import { LIST_COLS_PAGES, PAGES } from '../../misc/const';
+import { LIST_COLS_PAGES } from '../../misc/const';
 import { getEditable } from '../../misc/data.jsx';
 
-export class PageFood extends PureControllerView {
+export class PageList extends PureControllerView {
   renderLiAdd() {
     return (
       <li className='li-add'>
@@ -17,7 +17,7 @@ export class PageFood extends PureControllerView {
           const value = this.props.add.get(key);
           const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
           const editItem = getEditable(
-            column, this.props.dispatcher, -1, key, value, PAGES[this.props.index], active);
+            this.props.dispatcher, -1, key, column, value, this.props.index, active);
 
           return (
             <span key={key} className={column}>
@@ -37,7 +37,7 @@ export class PageFood extends PureControllerView {
         const value = row.getIn(['cols', colKey]);
         const active = this.props.edit.get('row') === rowKey && this.props.edit.get('col') === colKey;
         const editItem = getEditable(
-          column, this.props.dispatcher, rowKey, colKey, value, PAGES[this.props.index], active);
+          this.props.dispatcher, rowKey, colKey, column, value, this.props.index, active);
 
         return (
           <span key={colKey} className={column}>
@@ -78,7 +78,7 @@ export class PageFood extends PureControllerView {
   }
 }
 
-PageFood.propTypes = {
+PageList.propTypes = {
   data: PropTypes.instanceOf(map),
   edit: PropTypes.instanceOf(map),
   add: PropTypes.instanceOf(list),

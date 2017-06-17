@@ -35,7 +35,7 @@ export class PageOverview extends PureControllerView {
         if (cell.get('editable')) {
           // editable balance column
           const active = this.props.edit.get('row') === key && this.props.edit.get('col') === 0;
-          span = getEditable('cost', this.props.dispatcher, key, 0, cell.get('value'), 'overview', active);
+          span = getEditable(this.props.dispatcher, key, 0, 'cost', cell.get('value'), 0, active);
 
           cellClasses['editable-outer'] = true;
           cellClasses.editing = active;

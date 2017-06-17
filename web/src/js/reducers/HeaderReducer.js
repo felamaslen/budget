@@ -15,13 +15,13 @@ import {
 } from '../misc/const';
 import { buildQueueRequestList } from '../misc/data.jsx';
 
-const getItemValue = (reduction, page, pageIndex, row, col) => {
+const getItemValue = (reduction, pageIndex, row, col) => {
   let item = null;
   let value = null;
-  if (page === 'overview') {
+  if (PAGES[pageIndex] === 'overview') {
     value = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'cost', 'balance', row]);
   }
-  else if (page === 'food') {
+  else if (LIST_PAGES.indexOf(pageIndex) > -1) {
     value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
     item = LIST_COLS_PAGES[pageIndex][col];
   }
@@ -72,12 +72,11 @@ const handleNav = (reduction, dx, dy) => {
   if (pageIsList) {
     row--;
   }
-  const page = PAGES[pageIndex];
-  const itemValue = getItemValue(reduction, page, pageIndex, row, col);
+  const itemValue = getItemValue(reduction, pageIndex, row, col);
   const item = itemValue.item;
   const value = itemValue.value;
 
-  return rActivateEditable(reduction, map({ row, col, page, item, value }));
+  return rActivateEditable(reduction, map({ row, col, pageIndex, item, value }));
 };
 
 /**
@@ -174,8 +173,7 @@ export const rUpdateServer = reduction => {
   if (reduction.getIn(['appState', 'loadingApi'])) {
     return reduction;
   }
-  const queue = reduction.getIn(['appState', 'edit', 'queue']);
-  if (queue.size === 0) {
+  if (reduction.getIn(['appState', 'edit', 'queue']).size === 0) {
     // toggle the status to trigger another (delayed) update
     return reduction.setIn(
       ['appState', 'edit', 'status'],
@@ -184,8 +182,7 @@ export const rUpdateServer = reduction => {
   }
 
   const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-  const startYearMonth = reduction.getIn(['appState', 'pages', 0, 'data', 'startYearMonth']);
-  const reqList = buildQueueRequestList(queue, startYearMonth);
+  const reqList = buildQueueRequestList(reduction);
   const req = { apiKey, list: reqList };
 
   return reduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
