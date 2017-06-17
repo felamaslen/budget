@@ -317,7 +317,6 @@ button {
     padding: 24px 0 0 0;
     margin: 0;
     bottom: 0;
-    
     .progress {
       position: absolute;
       right: 2px;
@@ -340,6 +339,10 @@ button {
       border-right: 1px solid #ccc;
       vertical-align: top;
       overflow: hidden;
+      height: inherit;
+    }
+    .editable, .editable-input {
+      height: inherit;
     }
     .text {
       margin-right: 2px;
@@ -626,6 +629,8 @@ button {
 /* editable items */
 .editable {
   position: relative;
+  display: inline-block;
+  width: 100%;
 }
 .editable.editing,
 .li-add .editable {

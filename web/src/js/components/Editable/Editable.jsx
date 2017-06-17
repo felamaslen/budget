@@ -26,8 +26,17 @@ export default class Editable extends PureControllerView {
       }, 0);
     }
   }
+  format() {
+    return this.props.value;
+  }
+  getDefaultValue() {
+    return this.format();
+  }
+  getEditValue(rawInputValue) {
+    return rawInputValue;
+  }
   renderValue() {
-    const thisClassName = `editable-${this.editableType}`;
+    const thisClassName = `editable editable-${this.editableType}`;
     return (
       <span className={thisClassName} onMouseDown={() => this.activate()}>
         {this.format()}
