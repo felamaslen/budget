@@ -9,17 +9,15 @@ import { YMD } from '../../misc/date';
 export default class EditableDate extends Editable {
   constructor(props) {
     super(props);
-    this.inputProps = { type: 'date' };
+    this.inputProps = { type: 'text' };
     this.editableType = 'date';
   }
   format() {
     return this.props.value ? this.props.value.format() : '';
   }
-  getDefaultValue() {
-    return this.props.value ? this.props.value.formatISO() : '';
-  }
   getEditValue(rawInputValue) {
-    return new YMD(rawInputValue);
+    const ymd = new YMD(rawInputValue);
+    return ymd.valid ? ymd : this.props.value;
   }
 }
 
