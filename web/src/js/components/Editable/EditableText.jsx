@@ -8,7 +8,6 @@ import Editable from './Editable';
 export default class EditableText extends Editable {
   constructor(props) {
     super(props);
-    this.inputProps = { type: 'text' };
     this.editableType = 'text';
   }
 }

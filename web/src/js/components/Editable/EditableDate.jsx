@@ -9,7 +9,6 @@ import { YMD } from '../../misc/date';
 export default class EditableDate extends Editable {
   constructor(props) {
     super(props);
-    this.inputProps = { type: 'text' };
     this.editableType = 'date';
   }
   format() {

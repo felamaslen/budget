@@ -83,17 +83,18 @@ export const buildQueueRequestList = (queue, startYearMonth) => {
  * @returns {Editable}: the correct editable react component class
  */
 export const getEditable = (column, dispatcher, row, col, value, page, active) => {
-  if (column === 'date') {
+  switch (column) {
+  case 'date':
     return <EditableDate dispatcher={dispatcher} row={row} col={col}
       value={value} page={page} active={active} />;
-  }
-  if (column === 'cost') {
+
+  case 'cost':
     return <EditableCost dispatcher={dispatcher} row={row} col={col}
       value={value} page={page} active={active} />;
-  }
 
-  // default is text
-  return <EditableText dispatcher={dispatcher} row={row} col={col}
-    value={value} page={page} active={active} />;
+  default:
+    return <EditableText dispatcher={dispatcher} row={row} col={col}
+      value={value} page={page} active={active} />;
+  }
 };
 
