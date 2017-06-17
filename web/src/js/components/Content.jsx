@@ -14,11 +14,13 @@ import { PageFood } from './pages/PageFood';
 
 export class Content extends PureControllerView {
   renderPage() {
+    const data = this.props.pages.get(this.props.index);
+
     if (this.props.index === 0) {
       // overview page
       return (
         <PageOverview dispatcher={this.props.dispatcher}
-          data={this.props.pages.get(0)}
+          data={data}
           edit={this.props.edit} />
       );
     }
@@ -26,7 +28,7 @@ export class Content extends PureControllerView {
       // food page
       return (
         <PageFood dispatcher={this.props.dispatcher}
-          data={this.props.pages.get(0)}
+          data={data}
           edit={this.props.edit}
           add={this.props.add}
           index={this.props.index}
