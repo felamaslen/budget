@@ -17,7 +17,7 @@ export default class Editable extends PureControllerView {
     this.dispatchAction(aEditableActivated(map({
       row: this.props.row,
       col: this.props.col,
-      page: this.props.page,
+      pageIndex: this.props.pageIndex,
       item: this.props.item,
       value: this.props.value
     })));
@@ -70,7 +70,7 @@ Editable.propTypes = {
   active: PropTypes.bool,
   row: PropTypes.number,
   col: PropTypes.number,
-  page: PropTypes.string,
+  pageIndex: PropTypes.number,
   item: PropTypes.string,
   value: PropTypes.string
 };

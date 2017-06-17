@@ -2,8 +2,9 @@
  * Data methods (using immutable objects)
  */
 
-import { AVERAGE_MEDIAN } from './const';
 import React from 'react';
+import { Map as map } from 'immutable';
+import { AVERAGE_MEDIAN, PAGES, LIST_PAGES } from './const';
 import EditableDate from '../components/Editable/EditableDate';
 import EditableCost from '../components/Editable/EditableCost';
 import EditableText from '../components/Editable/EditableText';
@@ -48,53 +49,89 @@ export const randnBm = () => {
 
 /**
  * Builds a request list for updating the server
- * @param {List} queue: the queue of stuff to update
- * @param {array} startYearMonth: start year/month of the overview data
+ * @param {Record} reduction: app state
  * @returns {string} JSON-encoded list for ajax request
  */
-export const buildQueueRequestList = (queue, startYearMonth) => {
-  const startYear = startYearMonth[0];
-  const startMonth = startYearMonth[1];
-  const reqList = queue.map(dataItem => {
-    if (dataItem.get('page') === 'overview') {
+export const buildQueueRequestList = reduction => {
+  let startYearMonth = null; // for overview updates
+  const queue = reduction.getIn(['appState', 'edit', 'queue']);
+
+  // for multiple updates on the same page
+  let reqListPageList = map({});
+
+  let reqList = queue.map(dataItem => {
+    const pageIndex = dataItem.get('pageIndex');
+    const item = dataItem.get('item');
+    const value = dataItem.get('value');
+
+    if (PAGES[pageIndex] === 'overview') {
+      if (startYearMonth === null) {
+        startYearMonth = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'startYearMonth']);
+      }
       const key = dataItem.get('row');
-      const year = startYear + Math.floor((key + startMonth - 1) / 12);
-      const month = (startMonth + key - 1) % 12 + 1;
-      const balance = dataItem.get('value');
+      const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
+      const month = (startYearMonth[1] + key - 1) % 12 + 1;
+      const balance = value;
 
       return ['update/overview', {}, { year, month, balance }];
     }
 
+    if (PAGES[pageIndex] === 'analysis') {
+      return null; // TODO
+    }
+
+    if (LIST_PAGES.indexOf(pageIndex) > -1) {
+      const id = reduction.getIn(
+        ['appState', 'pages', pageIndex, 'rows', dataItem.get('row'), 'id']);
+
+      if (!reqListPageList.has(pageIndex)) {
+        reqListPageList = reqListPageList.set(pageIndex, map({}));
+      }
+      if (!reqListPageList.get(pageIndex).has(id)) {
+        reqListPageList = reqListPageList.setIn([pageIndex, id], map({}));
+      }
+      reqListPageList = reqListPageList.setIn(
+        [pageIndex, id, item], value.toString());
+
+      return null; // combine and add them later
+    }
+
     return null;
   }).filter(item => item !== null);
+
+  reqListPageList.forEach((item, pageIndex) => {
+    item.forEach((row, id) => {
+      reqList = reqList.push([`update/${PAGES[pageIndex]}`, {}, row.set('id', id).toJS()]);
+    });
+  });
 
   return JSON.stringify(reqList.toJS());
 };
 
 /**
  * @function getEditable
- * @param {string} column: the column being edited
  * @param {Dispatcher} dispatcher: store
  * @param {integer} row: row of item
  * @param {integer} col: column of item
+ * @param {string} item: the item being edited
  * @param {mixed} value: value of item
- * @param {string} page: page of item
+ * @param {integer} pageIndex: page index of item
  * @param {boolean} active: whether item is being edited
  * @returns {Editable}: the correct editable react component class
  */
-export const getEditable = (column, dispatcher, row, col, value, page, active) => {
-  switch (column) {
+export const getEditable = (dispatcher, row, col, item, value, pageIndex, active) => {
+  switch (item) {
   case 'date':
     return <EditableDate dispatcher={dispatcher} row={row} col={col}
-      value={value} page={page} active={active} />;
+      item={item} value={value} pageIndex={pageIndex} active={active} />;
 
   case 'cost':
     return <EditableCost dispatcher={dispatcher} row={row} col={col}
-      value={value} page={page} active={active} />;
+      item={item} value={value} pageIndex={pageIndex} active={active} />;
 
   default:
     return <EditableText dispatcher={dispatcher} row={row} col={col}
-      value={value} page={page} active={active} />;
+      item={item} value={value} pageIndex={pageIndex} active={active} />;
   }
 };
 

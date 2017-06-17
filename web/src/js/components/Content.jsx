@@ -6,11 +6,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from './PureControllerView';
 import { Map as map, List } from 'immutable';
-import { PAGES } from '../misc/const';
+import { PAGES, LIST_PAGES } from '../misc/const';
 
 import { Spinner } from './Spinner';
 import { PageOverview } from './pages/PageOverview';
-import { PageFood } from './pages/PageFood';
+import { PageList } from './pages/PageList';
 
 export class Content extends PureControllerView {
   renderPage() {
@@ -24,10 +24,10 @@ export class Content extends PureControllerView {
           edit={this.props.edit} />
       );
     }
-    if (this.props.index === 5) {
-      // food page
+    if (LIST_PAGES.indexOf(this.props.index) > -1) {
+      // list page (e.g. food)
       return (
-        <PageFood dispatcher={this.props.dispatcher}
+        <PageList dispatcher={this.props.dispatcher}
           data={data}
           edit={this.props.edit}
           add={this.props.add}

@@ -86,6 +86,10 @@ export class YMD {
     const numbers = this.formatNumbers();
     return `${numbers[0]}-${numbers[1]}-${numbers[2]}`;
   }
+  toString() {
+    // this format gets passed to API POST requests (for e.g. updating)
+    return `${this.year},${this.month},${this.date}`;
+  }
   timestamp() {
     return new Date(`${this.year}-${this.month}-${this.date}`).getTime();
   }
