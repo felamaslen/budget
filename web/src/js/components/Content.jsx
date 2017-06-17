@@ -28,6 +28,7 @@ export class Content extends PureControllerView {
         <PageFood dispatcher={this.props.dispatcher}
           data={this.props.pages.get(0)}
           edit={this.props.edit}
+          add={this.props.add}
           index={this.props.index}
           page={PAGES[this.props.index]} />
       );
@@ -55,7 +56,8 @@ export class Content extends PureControllerView {
 Content.propTypes = {
   pages: PropTypes.instanceOf(List),
   loaded: PropTypes.instanceOf(List),
-  index: PropTypes.number,
-  edit: PropTypes.instanceOf(map)
+  add: PropTypes.instanceOf(List),
+  edit: PropTypes.instanceOf(map),
+  index: PropTypes.number
 };
 

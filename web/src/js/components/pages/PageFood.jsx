@@ -5,24 +5,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
-import { Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import { LIST_COLS_PAGES } from '../../misc/const';
-import { YMD } from '../../misc/date';
 import { getEditable } from '../../misc/data.jsx';
-
-const getDefaultValue = column => {
-  if (column === 'date') {
-    return new YMD();
-  }
-  return null;
-};
 
 export class PageFood extends PureControllerView {
   render() {
     const liAdd = (
       <li className='li-add'>
         {LIST_COLS_PAGES[this.props.index].map((column, key) => {
-          const value = getDefaultValue(column);
+          const value = this.props.add.get(key);
           const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
           const editItem = getEditable(column, this.props.dispatcher, -1, key, value, 'food', active);
 
@@ -64,6 +56,7 @@ export class PageFood extends PureControllerView {
 PageFood.propTypes = {
   data: PropTypes.instanceOf(map),
   edit: PropTypes.instanceOf(map),
+  add: PropTypes.instanceOf(list),
   index: PropTypes.number,
   page: PropTypes.string
 };

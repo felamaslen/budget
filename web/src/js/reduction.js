@@ -33,6 +33,7 @@ export default new Record({
         value: null,
         originalValue: null
       },
+      add: [],
       queue: [],
       status: SERVER_UPDATE_IDLE
     }
