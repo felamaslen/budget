@@ -54,7 +54,7 @@ const getAddDefaultValues = pageIndex => {
     }
     if (column === 'item' || column === 'category' || column === 'shop' ||
       column === 'holiday' || column === 'society') {
-      return 0; // ''; TODO
+      return '';
     }
     return null;
   }));

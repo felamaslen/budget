@@ -6,6 +6,7 @@ import { AVERAGE_MEDIAN } from './const';
 import React from 'react';
 import EditableDate from '../components/Editable/EditableDate';
 import EditableCost from '../components/Editable/EditableCost';
+import EditableText from '../components/Editable/EditableText';
 
 /**
  * Gets the mean or median of an immutable list of values
@@ -86,9 +87,13 @@ export const getEditable = (column, dispatcher, row, col, value, page, active) =
     return <EditableDate dispatcher={dispatcher} row={row} col={col}
       value={value} page={page} active={active} />;
   }
+  if (column === 'cost') {
+    return <EditableCost dispatcher={dispatcher} row={row} col={col}
+      value={value} page={page} active={active} />;
+  }
 
-  // default is currency
-  return <EditableCost dispatcher={dispatcher} row={row} col={col}
+  // default is text
+  return <EditableText dispatcher={dispatcher} row={row} col={col}
     value={value} page={page} active={active} />;
 };
 
