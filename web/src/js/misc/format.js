@@ -33,7 +33,7 @@ export const numberFormat = value => {
  * @returns {string} formatted number
  */
 export const leadingZeroes = (value, numZeroes) => {
-  const numAdd = numZeroes - Math.ceil(Math.log10(value));
+  const numAdd = numZeroes - Math.ceil(Math.log10(Math.max(5, value)));
   const zeroes = Array.apply(null, new Array(numAdd)).map(() => '0').join('');
   return `${zeroes}${value}`;
 };

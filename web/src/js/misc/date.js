@@ -8,6 +8,12 @@ export const yearMonthDifference = (ym1, ym2) => {
   return 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1];
 };
 
+const monthDays = (month, year) => {
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const days = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return days[month - 1];
+};
+
 // year-month-date class
 export class YMD {
   constructor(value) {
@@ -17,7 +23,7 @@ export class YMD {
     this.valid = true;
 
     if (typeof value === 'string') {
-      if (value.match(/^[0-9]{1,2}\/[0-9]{1,2}\/([0-9]{2,4})?$/)) {
+      if (value.match(/^[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,4})?$/)) {
         // parse string initialiser
         const parts = value.split('/').map(item => parseInt(item, 10));
         if (parts.length === 3) {
@@ -50,10 +56,14 @@ export class YMD {
     else if (typeof value === 'undefined' || typeof value === 'number') {
       const dateObj = value ? new Date(value) : new Date();
       year = dateObj.getFullYear();
-      month = dateObj.getMonth();
+      month = dateObj.getMonth() + 1;
       date = dateObj.getDate();
     }
     else {
+      this.valid = false;
+    }
+
+    if (month < 1 || month > 12 || date < 1 || date > monthDays(month, year)) {
       this.valid = false;
     }
 
