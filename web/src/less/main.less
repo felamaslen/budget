@@ -225,8 +225,7 @@ button {
     overflow: hidden;
 
     span {
-      display: block;
-      line-height: 1em;
+      line-height: 3em;
       padding: 1em 2em;
       white-space: nowrap;
       max-width: 400px;
@@ -794,8 +793,11 @@ button {
     .cost {
       width: auto;
     }
-    .editable {
+    .editable-outer {
       width: 80px;
+      &.editing {
+        padding: 0;
+      }
     }
   }
 
@@ -803,18 +805,13 @@ button {
     .unimportant();
     line-height: .9em;
     font-size: .9em;
-    .editable {
-      position: relative;
-    }
     .editable-input {
       height: 16px;
     }
   }
   .editable-input {
-    position: absolute;
     right: 0;
     top: 0;
-    height: 20px;
     padding: 0;
   }
   .active {
@@ -826,10 +823,16 @@ button {
       font-weight: bold;
       color: white;
     }
+    .editable-input {
+      height: 23px;
+    }
   }
   .future {
     .month {
       background: @color_amber;
+    }
+    .editable-input {
+      height: 20px;
     }
   }
 

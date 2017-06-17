@@ -9,6 +9,10 @@ import PureControllerView from '../PureControllerView';
 import { aEditableActivated, aEditableChanged } from '../../actions/EditActions';
 
 export default class Editable extends PureControllerView {
+  constructor(props) {
+    super(props);
+    this.inputProps = { type: 'text' };
+  }
   activate() {
     this.dispatchAction(aEditableActivated(map({
       row: this.props.row,

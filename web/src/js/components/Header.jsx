@@ -2,6 +2,7 @@
  * Displays bar at the top of the page, including navigation
  */
 
+import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -12,6 +13,9 @@ import { ERROR_MSG_SERVER_UPDATE, TIMER_UPDATE_SERVER } from '../misc/config';
 import {
   aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo, aKeyPressed, aServerUpdated
 } from '../actions/HeaderActions';
+import {
+  aErrorOpened
+} from '../actions/ErrorActions';
 
 export class Header extends PureControllerView {
   logout() {
@@ -64,7 +68,7 @@ export class Header extends PureControllerView {
   componentWillReceiveProps(nextProps) {
     if (this.props.serverUpdateStatus !== nextProps.serverUpdateStatus) {
       if (nextProps.serverUpdateStatus === SERVER_UPDATE_ERROR) {
-        this.dispatchAction(aErrorOpened(map({
+        this.dispatchNext(aErrorOpened(map({
           level: ERROR_LEVEL_ERROR,
           text: ERROR_MSG_SERVER_UPDATE
         })));

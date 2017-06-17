@@ -9,7 +9,6 @@ import { formatCurrency } from '../../misc/format';
 export default class EditableCost extends Editable {
   constructor(props) {
     super(props);
-    this.inputProps = { type: 'number', step: '0.01' };
     this.editableType = 'cost';
   }
   format() {
@@ -19,7 +18,11 @@ export default class EditableCost extends Editable {
     return this.props.value / 100;
   }
   getEditValue(rawInputValue) {
-    return Math.round(parseFloat(rawInputValue, 10) * 100);
+    const value = Math.round(parseFloat(rawInputValue, 10) * 100);
+    if (isNaN(value)) {
+      return this.props.value;
+    }
+    return value;
   }
 }
 

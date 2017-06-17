@@ -195,11 +195,8 @@ export const rUpdateServer = reduction => {
 
 export const rHandleServerUpdate = (reduction, response) => {
   const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
-  let newReduction = reduction.setIn(['appState', 'loadingApi'], false)
-  .setIn(['appState', 'edit', 'status'], status);
-  if (!response.data.error) {
-    newReduction = newReduction.setIn(['appState', 'edit', 'queue'], list.of());
-  }
-  return newReduction;
+  return reduction.setIn(['appState', 'loadingApi'], false)
+  .setIn(['appState', 'edit', 'status'], status)
+  .setIn(['appState', 'edit', 'queue'], list([]));
 };
 
