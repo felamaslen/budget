@@ -2,10 +2,11 @@
  * Carries out actions for the content component
  */
 
-import { Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
-import { PAGES, LIST_PAGES } from '../misc/const';
+import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
+import { YMD } from '../misc/date';
 
 import processPageDataOverview from './data/overview';
 import { processPageDataFood } from './data/list';
@@ -40,6 +41,25 @@ const processPageData = (page, data) => {
   return null;
 };
 
+const getAddDefaultValues = pageIndex => {
+  if (!LIST_COLS_PAGES[pageIndex]) {
+    return list([]);
+  }
+  return list(LIST_COLS_PAGES[pageIndex].map(column => {
+    if (column === 'date') {
+      return new YMD();
+    }
+    if (column === 'cost') {
+      return 0;
+    }
+    if (column === 'item' || column === 'category' || column === 'shop' ||
+      column === 'holiday' || column === 'society') {
+      return 0; // ''; TODO
+    }
+    return null;
+  }));
+};
+
 export const rHandleContentResponse = (reduction, output) => {
   const pageIsList = LIST_PAGES.indexOf(output.page) > -1;
   const editing = map({
@@ -50,9 +70,11 @@ export const rHandleContentResponse = (reduction, output) => {
     value: null,
     originalValue: null
   });
+
   return reduction.setIn(['appState', 'pagesLoaded', output.page], true)
   .setIn(['appState', 'pagesRaw', output.page], output.response.data.data)
   .setIn(['appState', 'pages', output.page], processPageData(output.page, output.response.data.data))
-  .setIn(['appState', 'edit', 'active'], editing);
+  .setIn(['appState', 'edit', 'active'], editing)
+  .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.page));
 };
 

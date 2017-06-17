@@ -16,6 +16,16 @@ const applyEditsOverview = (reduction, item) => {
   .setIn(['appState', 'pages', 0, 'rows'], rGetOverviewRows(newData));
 };
 
+const applyEditsFood = (reduction, item) => {
+  // update list data in the UI
+  if (item.get('row') === -1) {
+    // add-item
+    return reduction.setIn(['appState', 'edit', 'add', item.get('col')], item.get('value'));
+  }
+  // TODO
+  return reduction;
+};
+
 /**
  * applyEdits: apply editItem edits to UI (API handled separately)
  * @param {Record} reduction: reduction to modify and return
@@ -27,6 +37,9 @@ const applyEdits = (reduction, item) => {
   if (page === 'overview') {
     return applyEditsOverview(reduction, item);
   }
+  if (page === 'food') {
+    return applyEditsFood(reduction, item);
+  }
   return reduction;
 };
 
@@ -36,9 +49,11 @@ export const rActivateEditable = (reduction, editable) => {
   const queue = reduction.getIn(['appState', 'edit', 'queue']);
 
   // confirm the previous item's edits
-  if (active && active.get('value') !== active.get('originalValue') && active.get('row') > -1) {
-    // add last item to queue for saving on API
-    newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
+  if (active && active.get('value') !== active.get('originalValue')) {
+    if (active.get('row') > -1) {
+      // add last item to queue for saving on API
+      newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
+    }
 
     // append the changes of the last item to the UI
     newReduction = applyEdits(newReduction, active);

@@ -16,20 +16,31 @@ export class YMD {
     let date;
     this.valid = true;
 
-    if (typeof value === 'string' && value.match(/^[0-9]{1,2}\/[0-9]{1,2}\/([0-9]{2,4})?$/)) {
-      // parse string initialiser
-      const parts = value.split('/').map(item => parseInt(item, 10));
-      if (parts.length === 3) {
-        year = parts[2];
-        if (year < 100) {
-          year += 2000;
+    if (typeof value === 'string') {
+      if (value.match(/^[0-9]{1,2}\/[0-9]{1,2}\/([0-9]{2,4})?$/)) {
+        // parse string initialiser
+        const parts = value.split('/').map(item => parseInt(item, 10));
+        if (parts.length === 3) {
+          year = parts[2];
+          if (year < 100) {
+            year += 2000;
+          }
         }
+        else {
+          year = new Date().getFullYear();
+        }
+        month = parts[1];
+        date = parts[0];
+      }
+      else if (value.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)) { // ISO-format
+        const parts = value.split('-').map(item => parseInt(item, 10));
+        year = parts[0];
+        month = parts[1];
+        date = parts[2];
       }
       else {
-        year = new Date().getFullYear();
+        this.valid = false;
       }
-      month = parts[1];
-      date = parts[0];
     }
     else if (typeof value === 'object') {
       year = value[0];
