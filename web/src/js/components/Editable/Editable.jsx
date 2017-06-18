@@ -27,7 +27,7 @@ export default class Editable extends PureControllerView {
     if ((!prevProps.active && this.props.active) ||
         (!prevProps.focus && this.props.focus)) {
       window.setTimeout(() => {
-        this.input && this.input.focus();
+        this.input && this.input.focus && this.input.focus();
       }, 0);
     }
   }

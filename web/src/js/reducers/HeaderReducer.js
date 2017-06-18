@@ -13,7 +13,7 @@ import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES,
   SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
-import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../misc/data.jsx';
+import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../misc/data';
 
 const getItemValue = (reduction, pageIndex, row, col) => {
   let id = null;

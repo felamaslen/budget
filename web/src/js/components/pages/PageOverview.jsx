@@ -9,7 +9,7 @@ import { Map as map } from 'immutable';
 import classNames from 'classnames';
 import { OVERVIEW_COLUMNS } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
-import { getEditable } from '../../misc/data';
+import { getEditable } from '../Editable/getEditable.jsx';
 
 export class PageOverview extends PureControllerView {
   format(value, abbreviate) {

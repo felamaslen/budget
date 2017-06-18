@@ -26,7 +26,10 @@ import {
 
   AC_EDIT_ACTIVATED,
   AC_EDIT_CHANGED,
-  AC_EDIT_LIST_ITEM_ADDED
+  AC_EDIT_LIST_ITEM_ADDED,
+  AC_EDIT_FUND_TRANSACTIONS_CHANGED,
+  AC_EDIT_FUND_TRANSACTIONS_ADDED,
+  AC_EDIT_FUND_TRANSACTIONS_REMOVED
 } from '../constants/actions';
 
 import {
@@ -56,7 +59,10 @@ import {
   rActivateEditable,
   rChangeEditable,
   rAddListItem,
-  rHandleServerAdd
+  rHandleServerAdd,
+  rChangeFundTransactions,
+  rAddFundTransactions,
+  rRemoveFundTransactions
 } from './EditReducer';
 
 export default (reduction, action) => {
@@ -108,6 +114,12 @@ export default (reduction, action) => {
     return rChangeEditable(reduction, action.payload);
   case AC_EDIT_LIST_ITEM_ADDED:
     return rAddListItem(reduction, action.payload);
+  case AC_EDIT_FUND_TRANSACTIONS_CHANGED:
+    return rChangeFundTransactions(reduction, action.payload);
+  case AC_EDIT_FUND_TRANSACTIONS_ADDED:
+    return rAddFundTransactions(reduction, action.payload);
+  case AC_EDIT_FUND_TRANSACTIONS_REMOVED:
+    return rRemoveFundTransactions(reduction, action.payload);
 
   default:
     // By default, the reduction is simply returned unchanged.

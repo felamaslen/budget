@@ -5,7 +5,7 @@
 import { PAGES, AVERAGE_MEDIAN, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
 import { FUTURE_INVESTMENT_RATE } from '../../misc/config';
 import { yearMonthDifference } from '../../misc/date';
-import { listAverage, randnBm } from '../../misc/data.jsx';
+import { listAverage, randnBm } from '../../misc/data';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../../misc/color';
 import { List as list, Map as map, fromJS } from 'immutable';
 

@@ -7,10 +7,10 @@ import buildMessage from '../messageBuilder';
 import { PAGES, LIST_PAGES } from '../misc/const';
 import {
   getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
-} from '../misc/data.jsx';
+} from '../misc/data';
 
 import processPageDataOverview from './data/overview';
-import { processPageDataList } from './data/list';
+import { processPageDataList, processPageDataFunds } from './data/list';
 
 export const rLoadContent = (reduction, page) => {
   if (!reduction.getIn(['appState', 'pagesLoaded', page])) {
@@ -34,6 +34,11 @@ const processPageData = (pageIndex, data) => {
   if (PAGES[pageIndex] === 'overview') {
     // overview
     return processPageDataOverview(data);
+  }
+
+  if (PAGES[pageIndex] === 'funds') {
+    // funds
+    return processPageDataFunds(data, pageIndex);
   }
 
   if (LIST_PAGES.indexOf(pageIndex) > -1) {

@@ -8,7 +8,7 @@ import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
 import { LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
-import { getEditable } from '../../misc/data.jsx';
+import { getEditable } from '../Editable/getEditable.jsx';
 import { aListItemAdded } from '../../actions/EditActions';
 
 export class PageList extends PureControllerView {
