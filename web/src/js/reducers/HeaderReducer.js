@@ -49,6 +49,8 @@ const handleNav = (reduction, dx, dy) => {
     return reduction;
   }
 
+  let newReduction = reduction;
+
   const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
   if (pageIsList) {
     numRows++; // include add row
@@ -57,12 +59,33 @@ const handleNav = (reduction, dx, dy) => {
   let currentRow = editing.get('row');
   const currentCol = editing.get('col');
   if (pageIsList) {
+    if (currentRow === -1 && currentCol === numCols - 1 && dx > 0) {
+      // highlight add button
+      return rActivateEditable(newReduction, null)
+      .setIn(['appState', 'edit', 'addBtnFocus'], true);
+    }
     currentRow++;
   }
 
   let row;
   let col;
-  if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
+  if (reduction.getIn(['appState', 'edit', 'addBtnFocus'])) {
+    // navigate from the add button
+    if (dx > 0) {
+      row = 1;
+      col = 0;
+    }
+    else {
+      col = numCols - 1;
+    }
+
+    if (dy < 0) {
+      row = numRows - 1;
+    }
+    newReduction = newReduction.setIn(['appState', 'edit', 'addBtnFocus'], false);
+  }
+  else if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
+    // go to the end if navigating backwards
     row = numRows - 1;
     col = numCols - 1;
   }
@@ -79,7 +102,7 @@ const handleNav = (reduction, dx, dy) => {
   const item = itemValue.item;
   const value = itemValue.value;
 
-  return rActivateEditable(reduction, map({ row, col, pageIndex, id, item, value }));
+  return rActivateEditable(newReduction, map({ row, col, pageIndex, id, item, value }));
 };
 
 /**
@@ -173,7 +196,9 @@ export const rNavigateToPage = (reduction, pageIndex) => {
   if (LIST_PAGES.indexOf(pageIndex) > -1) {
     newReduction = newReduction.setIn(
       ['appState', 'edit', 'add'], getAddDefaultValues(pageIndex)
-    ).setIn(['appState', 'edit', 'active'], getNullEditable(pageIndex));
+    ).setIn(
+      ['appState', 'edit', 'active'], getNullEditable(pageIndex)
+    ).setIn(['appState', 'edit', 'addBtnFocus'], false);
   }
   return newReduction;
 };

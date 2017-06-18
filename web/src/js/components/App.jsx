@@ -78,7 +78,8 @@ export default class App extends Component {
         loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
         index={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
         edit={this.state.reduction.getIn(['appState', 'edit', 'active'])}
-        add={this.state.reduction.getIn(['appState', 'edit', 'add'])} />
+        add={this.state.reduction.getIn(['appState', 'edit', 'add'])}
+        addBtnFocus={this.state.reduction.getIn(['appState', 'edit', 'addBtnFocus'])} />
     ) : null;
 
     const spinner = loading ? <Spinner /> : null;
