@@ -31,4 +31,5 @@ export const TIMER_UPDATE_SERVER = 1000;
 // error messages
 export const ERROR_MSG_SERVER_UPDATE = 'Error updating server!';
 export const ERROR_MSG_BAD_DATA = 'Please enter valid data';
+export const ERROR_MSG_BUG_INVALID_ITEM = 'Bug: no date/cost on edited item';
 
