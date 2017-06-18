@@ -2,7 +2,9 @@
  * Carries out actions for the editable framework
  */
 
-import { Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
+import buildMessage from '../messageBuilder';
+import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows } from '../reducers/data/overview';
 import { LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN } from '../misc/const';
 import { ERROR_MSG_BAD_DATA } from '../misc/config';
@@ -17,6 +19,24 @@ const applyEditsOverview = (reduction, item) => {
 
   return reduction.setIn(['appState', 'pages', 0, 'data'], newData)
   .setIn(['appState', 'pages', 0, 'rows'], rGetOverviewRows(newData));
+};
+
+const sortByDate = (reduction, pageIndex) => {
+  return reduction.setIn(
+    ['appState', 'pages', pageIndex, 'rows'],
+    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).sort((a, b) => {
+      if (a.getIn(['cols', 0]).isAfter(b.getIn(['cols', 0]))) {
+        return -1;
+      }
+      if (b.getIn(['cols', 0]).isAfter(a.getIn(['cols', 0]))) {
+        return 1;
+      }
+      if (a.get('id') > b.get('id')) {
+        return -1;
+      }
+      return 1;
+    })
+  );
 };
 
 const applyEditsList = (reduction, item, pageIndex) => {
@@ -43,21 +63,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
   newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
 
   // sort rows by date
-  newReduction = newReduction.setIn(
-    ['appState', 'pages', pageIndex, 'rows'],
-    newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).sort((a, b) => {
-      if (a.getIn(['cols', 0]).isAfter(b.getIn(['cols', 0]))) {
-        return -1;
-      }
-      if (b.getIn(['cols', 0]).isAfter(a.getIn(['cols', 0]))) {
-        return 1;
-      }
-      if (a.get('id') > b.get('id')) {
-        return -1;
-      }
-      return 1;
-    })
-  );
+  newReduction = sortByDate(newReduction, pageIndex);
 
   return newReduction;
 };
@@ -121,10 +127,28 @@ export const rChangeEditable = (reduction, value) => {
 };
 
 export const rAddListItem = (reduction, items) => {
+  if (reduction.getIn(['appState', 'loadingApi'])) {
+    return reduction;
+  }
+
   // validate items
-  const valid = items.reduce((a, b) => {
-    const thisValid = b.props.item === 'item' ?
-      b.props.value.length > 0 : true; // others are self-validating
+  const active = reduction.getIn(['appState', 'edit', 'active']);
+  let activeItem = null;
+  let activeValue = null;
+  if (active && active.get('row') === -1) {
+    activeItem = active.get('item');
+    activeValue = active.get('value');
+  }
+
+  const theItems = items.map(column => {
+    const item = column.props.item;
+    const value = item === activeItem ? activeValue : column.props.value;
+
+    return { item, value };
+  });
+
+  const valid = theItems.reduce((a, b) => {
+    const thisValid = b.item === 'item' ? b.value.length > 0 : true; // others are self-validating
     return thisValid ? a : false;
   }, true);
 
@@ -135,6 +159,46 @@ export const rAddListItem = (reduction, items) => {
     }));
   }
 
-  return reduction; // TODO
+  const item = {};
+  theItems.forEach(thisItem => {
+    item[thisItem.item] = thisItem.value.toString();
+  });
+
+  const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+  const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
+  const req = { apiKey, item, theItems, pageIndex };
+
+  return rActivateEditable(reduction, null)
+  .setIn(['appState', 'edit', 'add'], list([]))
+  .setIn(['appState', 'loadingApi'], true)
+  .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_ADD_REQUESTED, req)));
+};
+
+export const rHandleServerAdd = (reduction, response) => {
+  // handle the response from adding an item to a list page
+  let newReduction = reduction.setIn(['appState', 'loadingApi'], false);
+  if (response.response.data.error) {
+    return newReduction; // TODO
+  }
+  const pageIndex = response.pageIndex;
+  const item = response.item;
+  const id = response.response.data.id;
+  const newTotal = response.response.data.total;
+
+  newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
+
+  const cols = list(item.map(thisItem => thisItem.value));
+
+  newReduction = newReduction.setIn(
+    ['appState', 'pages', pageIndex, 'rows'],
+    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols })));
+
+  newReduction = newReduction.setIn(
+    ['appState', 'pages', pageIndex, 'data', 'numRows'],
+    newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).size);
+
+  newReduction = sortByDate(newReduction, pageIndex);
+
+  return newReduction;
 };
 

@@ -20,6 +20,7 @@ import {
   AC_KEY_PRESSED,
   AC_SERVER_UPDATED,
   AC_SERVER_UPDATE_RECEIVED,
+  AC_SERVER_ADD_RECEIVED,
 
   AC_CONTENT_LOADED,
 
@@ -54,7 +55,8 @@ import {
 import {
   rActivateEditable,
   rChangeEditable,
-  rAddListItem
+  rAddListItem,
+  rHandleServerAdd
 } from './EditReducer';
 
 export default (reduction, action) => {
@@ -92,6 +94,8 @@ export default (reduction, action) => {
     return rUpdateServer(reduction);
   case AC_SERVER_UPDATE_RECEIVED:
     return rHandleServerUpdate(reduction, action.payload);
+  case AC_SERVER_ADD_RECEIVED:
+    return rHandleServerAdd(reduction, action.payload);
 
   // content actions
   case AC_CONTENT_LOADED:

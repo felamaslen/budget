@@ -47,11 +47,9 @@ export const rErrorMessageClearOld = reduction => {
         );
       }
     }
-    else {
+    else if (age > ERROR_CLOSE_TIME) {
       // check if we need to delete it
-      if (age > ERROR_CLOSE_TIME) {
-        newReduction = rErrorMessageRemove(newReduction, msg.get('id'));
-      }
+      newReduction = rErrorMessageRemove(newReduction, msg.get('id'));
     }
   });
 

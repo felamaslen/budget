@@ -90,7 +90,7 @@ export const buildQueueRequestList = reduction => {
         reqListPageList = reqListPageList.setIn([pageIndex, id], map({}));
       }
       reqListPageList = reqListPageList.setIn(
-        [pageIndex, id, item], value.toString());
+        [pageIndex, id, item], (value.toString()));
 
       return null; // combine and add them later
     }
@@ -126,6 +126,9 @@ export const getEditable = (dispatcher, row, col, id, item, value, pageIndex, ac
       id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
 
   case 'cost':
+    if (!value) {
+      value = 0;
+    }
     return <EditableCost dispatcher={dispatcher} row={row} col={col}
       id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
 

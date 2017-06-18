@@ -6,11 +6,13 @@ import axios from 'axios';
 import querystring from 'querystring';
 import buildEffectHandler from '../effectHandlerBuilder';
 
+import { PAGES } from '../misc/const';
 import {
-  EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED, EF_SERVER_UPDATE_REQUESTED
+  EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
+  EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED
 } from '../constants/effects';
 
-import { aServerUpdateReceived } from '../actions/HeaderActions';
+import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
 import { aContentLoaded } from '../actions/ContentActions';
 
@@ -41,6 +43,17 @@ export default buildEffectHandler([
     }).then(
       response => dispatcher.dispatch(aServerUpdateReceived(response))
     );
-  }]
+  }],
 
+  [EF_SERVER_ADD_REQUESTED, (obj, dispatcher) => {
+    axios.post(`api?t=add/${PAGES[obj.pageIndex]}`, querystring.stringify(obj.item), {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => dispatcher.dispatch(aServerAddReceived({
+        response,
+        item: obj.theItems,
+        pageIndex: obj.pageIndex
+      }))
+    );
+  }]
 ]);

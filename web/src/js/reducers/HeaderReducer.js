@@ -174,6 +174,7 @@ export const rNavigateToPage = (reduction, page) => {
 
 export const rUpdateServer = reduction => {
   if (reduction.getIn(['appState', 'loadingApi'])) {
+    // only make one request at once
     return reduction;
   }
   if (reduction.getIn(['appState', 'edit', 'queue']).size === 0) {
