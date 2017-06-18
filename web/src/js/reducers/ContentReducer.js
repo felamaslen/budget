@@ -9,7 +9,7 @@ import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
 import { YMD } from '../misc/date';
 
 import processPageDataOverview from './data/overview';
-import { processPageDataFood } from './data/list';
+import { processPageDataList } from './data/list';
 
 export const rLoadContent = (reduction, page) => {
   if (!reduction.getIn(['appState', 'pagesLoaded', page])) {
@@ -25,19 +25,20 @@ export const rLoadContent = (reduction, page) => {
 
 /**
  * Processes response data into output fit for consumption by the view
- * @param {integer} page: page index
+ * @param {integer} pageIndex: page index
  * @param {object} data: response data
  * @returns {map}: page data for view
  */
-const processPageData = (page, data) => {
-  if (page === 0) {
+const processPageData = (pageIndex, data) => {
+  if (PAGES[pageIndex] === 'overview') {
     // overview
     return processPageDataOverview(data);
   }
-  if (page === 5) {
-    // food
-    return processPageDataFood(data);
+
+  if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    return processPageDataList(data, pageIndex);
   }
+
   return null;
 };
 
