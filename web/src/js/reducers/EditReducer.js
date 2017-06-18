@@ -100,6 +100,7 @@ export const rActivateEditable = (reduction, editable) => {
       row: active.get('row') === -1 ? -1 : 0,
       col: -1,
       pageIndex: null,
+      id: null,
       item: null,
       value: null,
       originalValue: null

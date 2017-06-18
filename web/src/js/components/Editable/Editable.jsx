@@ -18,6 +18,7 @@ export default class Editable extends PureControllerView {
       row: this.props.row,
       col: this.props.col,
       pageIndex: this.props.pageIndex,
+      id: this.props.id,
       item: this.props.item,
       value: this.props.value
     })));
@@ -71,6 +72,7 @@ Editable.propTypes = {
   row: PropTypes.number,
   col: PropTypes.number,
   pageIndex: PropTypes.number,
+  id: PropTypes.number,
   item: PropTypes.string,
   value: PropTypes.string
 };

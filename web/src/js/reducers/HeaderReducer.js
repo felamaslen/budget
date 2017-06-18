@@ -16,16 +16,18 @@ import {
 import { buildQueueRequestList } from '../misc/data.jsx';
 
 const getItemValue = (reduction, pageIndex, row, col) => {
+  let id = null;
   let item = null;
   let value = null;
   if (PAGES[pageIndex] === 'overview') {
     value = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'cost', 'balance', row]);
   }
   else if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'id']);
     value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
     item = LIST_COLS_PAGES[pageIndex][col];
   }
-  return { item, value };
+  return { id, item, value };
 };
 
 /**
@@ -73,10 +75,11 @@ const handleNav = (reduction, dx, dy) => {
     row--;
   }
   const itemValue = getItemValue(reduction, pageIndex, row, col);
+  const id = itemValue.id;
   const item = itemValue.item;
   const value = itemValue.value;
 
-  return rActivateEditable(reduction, map({ row, col, pageIndex, item, value }));
+  return rActivateEditable(reduction, map({ row, col, pageIndex, id, item, value }));
 };
 
 /**
