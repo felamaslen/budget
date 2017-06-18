@@ -212,7 +212,8 @@ export const rUpdateServer = reduction => {
     // only make one request at once
     return reduction;
   }
-  if (reduction.getIn(['appState', 'edit', 'queue']).size === 0) {
+  if (reduction.getIn(['appState', 'edit', 'queue']).size === 0 &
+     reduction.getIn(['appState', 'edit', 'queueDelete']).size === 0) {
     // toggle the status to trigger another (delayed) update
     return reduction.setIn(
       ['appState', 'edit', 'status'],
@@ -233,6 +234,7 @@ export const rHandleServerUpdate = (reduction, response) => {
   const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
   return reduction.setIn(['appState', 'loadingApi'], false)
   .setIn(['appState', 'edit', 'status'], status)
-  .setIn(['appState', 'edit', 'queue'], list([]));
+  .setIn(['appState', 'edit', 'queue'], list([]))
+  .setIn(['appState', 'edit', 'queueDelete'], list([]));
 };
 

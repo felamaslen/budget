@@ -27,6 +27,8 @@ import {
   AC_EDIT_ACTIVATED,
   AC_EDIT_CHANGED,
   AC_EDIT_LIST_ITEM_ADDED,
+  AC_EDIT_LIST_ITEM_DELETED,
+
   AC_EDIT_FUND_TRANSACTIONS_CHANGED,
   AC_EDIT_FUND_TRANSACTIONS_ADDED,
   AC_EDIT_FUND_TRANSACTIONS_REMOVED
@@ -59,6 +61,8 @@ import {
   rActivateEditable,
   rChangeEditable,
   rAddListItem,
+  rDeleteListItem,
+
   rHandleServerAdd,
   rChangeFundTransactions,
   rAddFundTransactions,
@@ -114,6 +118,9 @@ export default (reduction, action) => {
     return rChangeEditable(reduction, action.payload);
   case AC_EDIT_LIST_ITEM_ADDED:
     return rAddListItem(reduction, action.payload);
+  case AC_EDIT_LIST_ITEM_DELETED:
+    return rDeleteListItem(reduction, action.payload);
+
   case AC_EDIT_FUND_TRANSACTIONS_CHANGED:
     return rChangeFundTransactions(reduction, action.payload);
   case AC_EDIT_FUND_TRANSACTIONS_ADDED:

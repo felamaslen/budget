@@ -133,6 +133,19 @@ export const rChangeEditable = (reduction, value) => {
   return reduction.setIn(['appState', 'edit', 'active', 'value'], value);
 };
 
+export const rDeleteListItem = (reduction, item) => {
+  const pageIndex = item.pageIndex;
+  const id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'id']);
+
+  return reduction.setIn(
+    ['appState', 'edit', 'queueDelete'],
+    reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
+  ).setIn(
+    ['appState', 'pages', pageIndex, 'rows'],
+    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).splice(item.key, 1)
+  );
+};
+
 export const rAddListItem = (reduction, items) => {
   if (reduction.getIn(['appState', 'loadingApi'])) {
     return reduction;

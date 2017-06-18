@@ -37,6 +37,7 @@ export default new Record({
       add: [],
       addBtnFocus: false,
       queue: [],
+      queueDelete: [],
       status: SERVER_UPDATE_IDLE
     }
   }),
