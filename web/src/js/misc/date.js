@@ -82,7 +82,7 @@ export class YMD {
     const numbers = this.formatNumbers();
     return `${numbers[2]}/${numbers[1]}/${numbers[0]}`;
   }
-  formatISO() {
+  valueOf() {
     const numbers = this.formatNumbers();
     return `${numbers[0]}-${numbers[1]}-${numbers[2]}`;
   }
