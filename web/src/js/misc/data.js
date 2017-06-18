@@ -140,6 +140,7 @@ export const randnBm = () => {
 export const buildQueueRequestList = reduction => {
   let startYearMonth = null; // for overview updates
   const queue = reduction.getIn(['appState', 'edit', 'queue']);
+  const queueDelete = reduction.getIn(['appState', 'edit', 'queueDelete']);
 
   // for multiple updates on the same page
   let reqListPageList = map({});
@@ -181,7 +182,9 @@ export const buildQueueRequestList = reduction => {
     }
 
     return null;
-  }).filter(item => item !== null);
+  }).concat(queueDelete.map(dataItem => {
+    return [`delete/${PAGES[dataItem.pageIndex]}`, {}, { id: dataItem.id }];
+  })).filter(item => item !== null);
 
   reqListPageList.forEach((item, pageIndex) => {
     item.forEach((row, id) => {

@@ -25,6 +25,8 @@ export const AC_CONTENT_LOADED = 0xacc1;
 export const AC_EDIT_ACTIVATED = 0xaceea;
 export const AC_EDIT_CHANGED = 0xaceec;
 export const AC_EDIT_LIST_ITEM_ADDED = 0xace1a;
+export const AC_EDIT_LIST_ITEM_DELETED = 0xace1d;
+
 export const AC_EDIT_FUND_TRANSACTIONS_CHANGED = 0xacef1;
 export const AC_EDIT_FUND_TRANSACTIONS_ADDED = 0xacef3;
 export const AC_EDIT_FUND_TRANSACTIONS_REMOVED = 0xacef2;

@@ -9,7 +9,7 @@ import { List as list, Map as map } from 'immutable';
 import { LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable.jsx';
-import { aListItemAdded } from '../../actions/EditActions';
+import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
 
 export class PageList extends PureControllerView {
   addItem() {
@@ -65,6 +65,18 @@ export class PageList extends PureControllerView {
   renderList() {
     return this.props.data.get('rows').map((row, rowKey) => {
       const id = row.get('id');
+
+      const deleteBtn = (
+        <span className='delete'>
+          <a onClick={() => {
+            this.dispatchAction(aListItemDeleted({
+              pageIndex: this.props.index,
+              key: rowKey
+            }));
+          }}>&times;</a>
+        </span>
+      );
+
       const items = LIST_COLS_PAGES[this.props.index].map((column, colKey) => {
         const value = row.getIn(['cols', colKey]);
         const active = this.props.edit.get('row') === rowKey && this.props.edit.get('col') === colKey;
@@ -77,13 +89,18 @@ export class PageList extends PureControllerView {
           </span>
         );
       });
-      const daily = this.props.daily && row.has('daily') ?
-        formatCurrency(row.get('daily')) : null;
+
+      const dailyText = this.props.daily && row.has('daily')
+        ? formatCurrency(row.get('daily')) : null;
+      const daily = this.props.daily ? (
+        <span className='daily'>{dailyText}</span>
+      ) : null;
 
       return (
         <li key={rowKey}>
           {items}
           {daily}
+          {deleteBtn}
         </li>
       );
     });
