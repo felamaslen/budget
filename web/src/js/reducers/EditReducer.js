@@ -5,11 +5,13 @@
 import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
-import { rGetOverviewRows } from '../reducers/data/overview';
+import { rGetOverviewRows, rCalculateOverview } from '../reducers/data/overview';
 import {
-  LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
+  PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
 } from '../misc/const';
-import { ERROR_MSG_BAD_DATA, ERROR_MSG_API_FAILED } from '../misc/config';
+import {
+  ERROR_MSG_BAD_DATA, ERROR_MSG_API_FAILED, ERROR_MSG_BUG_INVALID_ITEM
+} from '../misc/config';
 import { getNullEditable } from '../misc/data.jsx';
 import { rErrorMessageOpen } from './ErrorReducer';
 
@@ -63,10 +65,27 @@ const applyEditsList = (reduction, item, pageIndex) => {
     return a + b.getIn(['cols', costKey]);
   }, 0);
 
-  newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
-
   // sort rows by date
-  newReduction = sortByDate(newReduction, pageIndex);
+  newReduction = sortByDate(
+    newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal), pageIndex);
+
+  // recalculate overview data if the cost or date changed
+  if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
+    if (item.get('item') === 'cost') {
+      const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+      const date = newReduction.getIn(
+        ['appState', 'pages', pageIndex, 'rows', item.get('row'), 'cols', dateKey]);
+
+      newReduction = rCalculateOverview(
+        newReduction, pageIndex, date, date, item.get('value'), item.get('originalValue'));
+    }
+    else if (item.get('item') === 'date') {
+      const cost = newRow.getIn(['cols', costKey]);
+
+      newReduction = rCalculateOverview(
+        newReduction, pageIndex, item.get('value'), item.get('originalValue'), cost, cost);
+    }
+  }
 
   return newReduction;
 };
@@ -183,19 +202,31 @@ export const rHandleServerAdd = (reduction, response) => {
   const id = response.response.data.id;
   const newTotal = response.response.data.total;
 
-  newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
-
   const cols = list(item.map(thisItem => thisItem.value));
 
-  newReduction = newReduction.setIn(
+  // update total and push new item to the data store list, then sort by date
+  newReduction = sortByDate(newReduction.setIn(
+    ['appState', 'pages', pageIndex, 'data', 'total'], newTotal
+  ).setIn(
     ['appState', 'pages', pageIndex, 'rows'],
-    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols })));
-
-  newReduction = newReduction.setIn(
+    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols }))
+  ).setIn(
     ['appState', 'pages', pageIndex, 'data', 'numRows'],
-    newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).size);
+    newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']) + 1
+  ), pageIndex);
 
-  newReduction = sortByDate(newReduction, pageIndex);
+  // recalculate overview data
+  if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
+    const costItem = item.find(thisItem => thisItem.item === 'cost');
+    const dateItem = item.find(thisItem => thisItem.item === 'date');
+    if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
+      return rErrorMessageOpen(newReduction, map({
+        level: ERROR_LEVEL_WARN,
+        text: ERROR_MSG_BUG_INVALID_ITEM
+      }));
+    }
+    newReduction = rCalculateOverview(newReduction, pageIndex, dateItem.value, costItem.value, 0);
+  }
 
   return newReduction;
 };

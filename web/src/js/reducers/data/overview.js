@@ -2,12 +2,21 @@
  * Process overview data
  */
 
-import { AVERAGE_MEDIAN, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
+import { PAGES, AVERAGE_MEDIAN, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
 import { FUTURE_INVESTMENT_RATE } from '../../misc/config';
 import { yearMonthDifference } from '../../misc/date';
 import { listAverage, randnBm } from '../../misc/data.jsx';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../../misc/color';
 import { List as list, Map as map, fromJS } from 'immutable';
+
+const getYearMonthFromKey = (key, startYear, startMonth) => {
+  const year = startYear + Math.floor((startMonth - 1 + key) / 12);
+  const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed
+  return { year, month };
+};
+const getKeyFromYearMonth = (year, month, startYear, startMonth) => {
+  return 12 * (year - startYear) + month - startMonth;
+};
 
 /**
  * Calculate futures from past averages / predictions
@@ -63,9 +72,8 @@ const calculateFutures = (data, futureKey) => {
 const calculateTableData = (data, futureData, startYear, startMonth, futureKey) => {
   // add month column
   const months = list(Array.apply(null, new Array(futureData.get(0).size)).map((_, key) => {
-    const month = MONTHS_SHORT[(startMonth - 1 + key) % 12];
-    const year = startYear + Math.floor((startMonth - 1 + key) / 12);
-    return `${month}-${year}`;
+    const yearMonth = getYearMonthFromKey(key, startYear, startMonth);
+    return `${MONTHS_SHORT[yearMonth.month - 1]}-${yearMonth.year}`;
   }));
 
   // add income column
@@ -161,18 +169,19 @@ export const rGetOverviewRows = data => {
 
   // translate the data into table cells for display in the view
   const rows = tableData.get(0).map((monthText, key) => {
-    const year = startYear + Math.floor((startMonth - 1 + key) / 12);
-    const month = (startMonth + key + 11) % 12 + 1; // 1-indexed
+    const yearMonth = getYearMonthFromKey(key, startYear, startMonth);
 
-    const past = year < currentYear || (year === currentYear && month < currentMonth);
-    const active = year === currentYear && month === currentMonth;
+    const past = yearMonth.year < currentYear ||
+      (yearMonth.year === currentYear && yearMonth.month < currentMonth);
+    const active = yearMonth.year === currentYear && yearMonth.month === currentMonth;
     const future = !past && !active;
 
     const cells = list(OVERVIEW_COLUMNS).map((column, colKey) => {
       const value = tableData.getIn([colKey, key]);
       let rgb = null;
       if (colKey > 0 && categoryColor[colKey - 1]) {
-        rgb = getOverviewScoreColor(value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]);
+        rgb = getOverviewScoreColor(
+          value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]);
       }
       const editable = column === 'Balance';
 
@@ -188,6 +197,52 @@ export const rGetOverviewRows = data => {
   });
 
   return rows;
+};
+
+/**
+ * @function rCalculateOverview
+ * @param {Record} reduction: modified reduction
+ * @param {integer} pageIndex: page which is modified
+ * @param {YMD} newDate: modified item date
+ * @param {YMD} oldDate: original item date
+ * @param {integer} newCost: modified item cost
+ * @param {integer} oldCost: original item cost
+ * @returns {Record} reduction with re-calculated overview data
+ */
+export const rCalculateOverview = (reduction, pageIndex, newDate, oldDate, newCost, oldCost) => {
+  const startYearMonth = reduction.getIn(['appState', 'pages', 0, 'data', 'startYearMonth']);
+  const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
+  const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
+  const overviewKey = PAGES.indexOf('overview');
+
+  // update the changed rows in the overview page
+  let newReduction;
+  if (oldKey === newKey) {
+    newReduction = reduction.setIn(
+      ['appState', 'pages', overviewKey, 'data', 'cost', PAGES[pageIndex], oldKey],
+      reduction.getIn(
+        ['appState', 'pages', overviewKey, 'data', 'cost', PAGES[pageIndex], oldKey]
+      ) + newCost - oldCost
+    );
+  }
+  else {
+    newReduction = reduction.setIn(
+      ['appState', 'pages', overviewKey, 'data', 'cost', PAGES[pageIndex], oldKey],
+      reduction.getIn(
+        ['appState', 'pages', overviewKey, 'data', 'cost', PAGES[pageIndex], oldKey]
+      ) - oldCost
+    ).setIn(
+      ['appState', 'pages', overviewKey, 'data', 'cost', PAGES[pageIndex], newKey],
+      reduction.getIn(
+        ['appState', 'pages', overviewKey, 'data', 'cost', PAGES[pageIndex], newKey]
+      ) + newCost
+    );
+  }
+
+  return newReduction.setIn(
+    ['appState', 'pages', overviewKey, 'rows'],
+    rGetOverviewRows(newReduction.getIn(['appState', 'pages', overviewKey, 'data']))
+  );
 };
 
 /**
