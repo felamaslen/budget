@@ -5,7 +5,7 @@
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
 import { PAGES, LIST_PAGES } from '../misc/const';
-import { getNullEditable, getAddDefaultValues } from '../misc/data.jsx';
+import { getNullEditable, getAddDefaultValues, sortRowsByDate } from '../misc/data.jsx';
 
 import processPageDataOverview from './data/overview';
 import { processPageDataList } from './data/list';
@@ -35,7 +35,8 @@ const processPageData = (pageIndex, data) => {
   }
 
   if (LIST_PAGES.indexOf(pageIndex) > -1) {
-    return processPageDataList(data, pageIndex);
+    const page = processPageDataList(data, pageIndex);
+    return page.set('rows', sortRowsByDate(page.get('rows'), pageIndex));
   }
 
   return null;

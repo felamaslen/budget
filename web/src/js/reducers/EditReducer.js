@@ -13,7 +13,7 @@ import {
   ERROR_MSG_BAD_DATA, ERROR_MSG_API_FAILED, ERROR_MSG_BUG_INVALID_ITEM
 } from '../misc/config';
 import { YMD } from '../misc/date';
-import { getNullEditable, getAddDefaultValues } from '../misc/data.jsx';
+import { getNullEditable, getAddDefaultValues, sortRowsByDate } from '../misc/data.jsx';
 import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
@@ -25,24 +25,6 @@ const applyEditsOverview = (reduction, item) => {
 
   return reduction.setIn(['appState', 'pages', 0, 'data'], newData)
   .setIn(['appState', 'pages', 0, 'rows'], rGetOverviewRows(newData));
-};
-
-const sortByDate = (reduction, pageIndex) => {
-  return reduction.setIn(
-    ['appState', 'pages', pageIndex, 'rows'],
-    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).sort((a, b) => {
-      if (a.getIn(['cols', 0]).isAfter(b.getIn(['cols', 0]))) {
-        return -1;
-      }
-      if (b.getIn(['cols', 0]).isAfter(a.getIn(['cols', 0]))) {
-        return 1;
-      }
-      if (a.get('id') > b.get('id')) {
-        return -1;
-      }
-      return 1;
-    })
-  );
 };
 
 const applyEditsList = (reduction, item, pageIndex) => {
@@ -67,8 +49,12 @@ const applyEditsList = (reduction, item, pageIndex) => {
   }, 0);
 
   // sort rows by date
-  newReduction = sortByDate(
-    newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal), pageIndex);
+  newReduction = newReduction.setIn(
+    ['appState', 'pages', pageIndex, 'data', 'total'], newTotal
+  ).setIn(
+    ['appState', 'pages', pageIndex, 'rows'],
+    sortRowsByDate(newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex)
+  );
 
   // recalculate overview data if the cost or date changed
   if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
@@ -205,15 +191,18 @@ export const rHandleServerAdd = (reduction, response) => {
   const cols = list(item.map(thisItem => thisItem.value));
 
   // update total and push new item to the data store list, then sort by date
-  newReduction = sortByDate(newReduction.setIn(
+  newReduction = newReduction.setIn(
     ['appState', 'pages', pageIndex, 'data', 'total'], newTotal
   ).setIn(
     ['appState', 'pages', pageIndex, 'rows'],
-    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols }))
+    sortRowsByDate(
+      reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols })),
+      pageIndex
+    )
   ).setIn(
     ['appState', 'pages', pageIndex, 'data', 'numRows'],
     newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']) + 1
-  ), pageIndex);
+  );
 
   // recalculate overview data
   if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
