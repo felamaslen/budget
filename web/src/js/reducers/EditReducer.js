@@ -29,7 +29,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
     ['appState', 'pages', pageIndex, 'rows', item.get('row')])
     .setIn(['cols', item.get('col')], item.get('value'));
 
-  const newReduction = reduction.setIn(
+  let newReduction = reduction.setIn(
     ['appState', 'pages', pageIndex, 'rows', item.get('row')], newRow);
 
   // recalculate total
@@ -38,7 +38,26 @@ const applyEditsList = (reduction, item, pageIndex) => {
     return a + b.getIn(['cols', costKey]);
   }, 0);
 
-  return newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
+  newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
+
+  // sort rows by date
+  newReduction = newReduction.setIn(
+    ['appState', 'pages', pageIndex, 'rows'],
+    newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).sort((a, b) => {
+      if (a.getIn(['cols', 0]).isAfter(b.getIn(['cols', 0]))) {
+        return -1;
+      }
+      if (b.getIn(['cols', 0]).isAfter(a.getIn(['cols', 0]))) {
+        return 1;
+      }
+      if (a.get('id') > b.get('id')) {
+        return -1;
+      }
+      return 1;
+    })
+  );
+
+  return newReduction;
 };
 
 /**

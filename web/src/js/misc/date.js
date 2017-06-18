@@ -93,5 +93,10 @@ export class YMD {
   timestamp() {
     return new Date(`${this.year}-${this.month}-${this.date}`).getTime();
   }
+  isAfter(ymd) {
+    return this.year > ymd.year ||
+      (this.year === ymd.year &&
+       (this.month > ymd.month || (this.month === ymd.month && this.date > ymd.date)));
+  }
 }
 
