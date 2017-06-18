@@ -4,11 +4,11 @@
 
 import { List as list, Map as map } from 'immutable';
 import { YMD } from '../../misc/date';
-import { LIST_COLS_SHORT } from '../../misc/const';
+import { LIST_COLS_SHORT, LIST_COLS_PAGES } from '../../misc/const';
 
 export const processPageDataList = (raw, pageIndex) => {
   const numRows = raw.data.length;
-  const numCols = 5; // date, item, category, cost, shop
+  const numCols = LIST_COLS_PAGES[pageIndex].length;
   const total = raw.total;
 
   const data = map({
