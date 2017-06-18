@@ -180,3 +180,37 @@ export const getAddDefaultValues = pageIndex => {
     return null;
   }));
 };
+
+/**
+ * Sort list rows by date, and add daily tallies
+ * @param {list} rows: rows to sort
+ * @param {integer} pageIndex: page which rows are on
+ * @returns {list} sorted rows
+ */
+export const sortRowsByDate = (rows, pageIndex) => {
+  const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+  const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
+  let dailySum = 0;
+  return rows.sort((a, b) => {
+    if (a.getIn(['cols', 0]).isAfter(b.getIn(['cols', 0]))) {
+      return -1;
+    }
+    if (b.getIn(['cols', 0]).isAfter(a.getIn(['cols', 0]))) {
+      return 1;
+    }
+    if (a.get('id') > b.get('id')) {
+      return -1;
+    }
+    return 1;
+  }).map((row, rowKey) => {
+    const lastInDay = rowKey === rows.size - 1 ||
+      row.getIn(['cols', dateKey]).isAfter(rows.getIn([rowKey + 1, 'cols', dateKey]));
+    dailySum += row.getIn(['cols', costKey]);
+    const newRow = lastInDay ? row.set('daily', dailySum) : row.delete('daily');
+    if (lastInDay) {
+      dailySum = 0;
+    }
+    return newRow;
+  });
+};
+

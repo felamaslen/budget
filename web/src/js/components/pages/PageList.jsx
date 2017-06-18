@@ -7,12 +7,27 @@ import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
 import { LIST_COLS_PAGES } from '../../misc/const';
+import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../../misc/data.jsx';
 import { aListItemAdded } from '../../actions/EditActions';
 
 export class PageList extends PureControllerView {
   addItem() {
     this.dispatchAction(aListItemAdded(this.addItems));
+  }
+  renderListHead() {
+    return (
+      <div className='list-head noselect'>
+        {LIST_COLS_PAGES[this.props.index].map((column, key) => {
+          return <span key={key} className={column}>{column}</span>;
+        })}
+        <span>Daily Tally</span>
+        <span>Total:</span>
+        <span>{formatCurrency(
+          this.props.data.getIn(['data', 'total']), { abbreviate: true }
+        )}</span>
+      </div>
+    );
   }
   renderLiAdd() {
     this.addItems = [];
@@ -52,10 +67,12 @@ export class PageList extends PureControllerView {
           </span>
         );
       });
+      const daily = row.has('daily') ? formatCurrency(row.get('daily')) : null;
 
       return (
         <li key={rowKey}>
           {items}
+          {daily}
         </li>
       );
     });
@@ -74,15 +91,9 @@ export class PageList extends PureControllerView {
       'list'
     ].join(' ');
 
-    const listHead = LIST_COLS_PAGES[this.props.index].map((column, key) => {
-      return <span key={key} className={column}>{column}</span>;
-    });
-
     return (
       <div className={listClasses}>
-        <div className='list-head noselect'>
-          {listHead}
-        </div>
+        {this.renderListHead()}
         <ul className='list-ul'>
           {this.renderLiAdd()}
           {this.renderList()}
