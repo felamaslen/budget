@@ -3,21 +3,22 @@
  */
 
 import React from 'react';
-import { Map as map } from 'immutable';
-import { AVERAGE_MEDIAN, PAGES, LIST_PAGES } from './const';
+import { List as list, Map as map } from 'immutable';
+import { AVERAGE_MEDIAN, PAGES, LIST_PAGES, LIST_COLS_PAGES } from './const';
+import { YMD } from './date';
 import EditableDate from '../components/Editable/EditableDate';
 import EditableCost from '../components/Editable/EditableCost';
 import EditableText from '../components/Editable/EditableText';
 
 /**
  * Gets the mean or median of an immutable list of values
- * @param {List} list: immutable list
+ * @param {List} theList: immutable list
  * @param {integer} offset: don't count the last <offset> values
  * @param {integer} mode: output either median or mean
  * @returns {integer} median / mean value
  */
-export const listAverage = (list, offset, mode) => {
-  const values = offset ? list.slice(0, -offset) : list;
+export const listAverage = (theList, offset, mode) => {
+  const values = offset ? theList.slice(0, -offset) : theList;
   if (mode === AVERAGE_MEDIAN) {
     // median
     const sorted = values.sort((a, b) => a < b ? -1 : 1);
@@ -33,7 +34,7 @@ export const listAverage = (list, offset, mode) => {
   }
 
   // mean
-  return list.reduce((a, b) => a + b, 0) / list.size;
+  return theList.reduce((a, b) => a + b, 0) / theList.size;
 };
 
 /**
@@ -156,3 +157,26 @@ export const getNullEditable = pageIndex => {
   });
 };
 
+/**
+ * @function getAddDefaultValues
+ * @param {integer} pageIndex: page we're on
+ * @returns {list} list of add-items to display on page load
+ */
+export const getAddDefaultValues = pageIndex => {
+  if (!LIST_COLS_PAGES[pageIndex]) {
+    return list([]);
+  }
+  return list(LIST_COLS_PAGES[pageIndex].map(column => {
+    if (column === 'date') {
+      return new YMD();
+    }
+    if (column === 'cost') {
+      return 0;
+    }
+    if (column === 'item' || column === 'category' || column === 'shop' ||
+      column === 'holiday' || column === 'society') {
+      return '';
+    }
+    return null;
+  }));
+};

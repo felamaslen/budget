@@ -225,7 +225,8 @@ export const rHandleServerAdd = (reduction, response) => {
         text: ERROR_MSG_BUG_INVALID_ITEM
       }));
     }
-    newReduction = rCalculateOverview(newReduction, pageIndex, dateItem.value, costItem.value, 0);
+    newReduction = rCalculateOverview(
+      newReduction, pageIndex, dateItem.value, dateItem.value, costItem.value, 0);
   }
 
   return newReduction;
