@@ -16,15 +16,24 @@ export class PageList extends PureControllerView {
     this.dispatchAction(aListItemAdded(this.addItems));
   }
   renderListHead() {
-    const daily = this.props.daily ? <span>Daily Tally</span> : null;
+    const daily = this.props.daily ? (
+      <span>
+        <span className='daily'>Daily</span>
+        <span className='weekly'>Weekly:</span>
+        <span className='weekly-value'>{formatCurrency(
+          this.props.data.getIn(['data', 'weekly']), { abbreviate: true, precision: 1 }
+        )}</span>
+      </span>
+    ) : null;
+
     return (
       <div className='list-head noselect'>
         {LIST_COLS_PAGES[this.props.index].map((column, key) => {
           return <span key={key} className={column}>{column}</span>;
         })}
         {daily}
-        <span>Total:</span>
-        <span>{formatCurrency(
+        <span className='total'>Total:</span>
+        <span className='total-value'>{formatCurrency(
           this.props.data.getIn(['data', 'total']), { abbreviate: true, precision: 1 }
         )}</span>
       </div>
