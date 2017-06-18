@@ -12,7 +12,8 @@ import {
 import {
   ERROR_MSG_BAD_DATA, ERROR_MSG_API_FAILED, ERROR_MSG_BUG_INVALID_ITEM
 } from '../misc/config';
-import { getNullEditable } from '../misc/data.jsx';
+import { YMD } from '../misc/date';
+import { getNullEditable, getAddDefaultValues } from '../misc/data.jsx';
 import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
@@ -229,6 +230,21 @@ export const rHandleServerAdd = (reduction, response) => {
       newReduction, pageIndex, dateItem.value, dateItem.value, costItem.value, 0);
   }
 
-  return newReduction;
+  if (reduction.getIn(['appState', 'currentPageIndex']) !== pageIndex) {
+    return newReduction;
+  }
+
+  // go back to the add form to add a new item
+  const now = new YMD();
+  return newReduction.setIn(['appState', 'edit', 'add'], getAddDefaultValues(pageIndex))
+  .setIn(['appState', 'edit', 'active'], map({
+    row: -1,
+    col: 0,
+    pageIndex,
+    id: null,
+    item: 'date',
+    value: now,
+    originalValue: now
+  }));
 };
 
