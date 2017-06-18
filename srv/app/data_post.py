@@ -1,7 +1,6 @@
 """ Methods to put or edit data in the database """
 
 import json
-
 from app.api_data_methods import Processor
 
 from app.misc import strng, list_data_schema, get_table_total, \
@@ -97,7 +96,7 @@ class UpdateData(Processor):
                 else:
                     raise ValueError("Form data for %s not supplied" % key)
 
-            raw_value = str(self.form_raw[key])
+            raw_value = self.form_raw[key]
 
             if not self.set_value_from_raw(key, raw_value, data_type):
                 raise ValueError("Bad form data for %s" % key)
