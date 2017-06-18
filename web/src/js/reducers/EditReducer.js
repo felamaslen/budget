@@ -42,16 +42,17 @@ const applyEditsList = (reduction, item, pageIndex) => {
   let newReduction = reduction.setIn(
     ['appState', 'pages', pageIndex, 'rows', item.get('row')], newRow);
 
-  // recalculate total
-  const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-  const newTotal = newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).reduce((a, b) => {
-    return a + b.getIn(['cols', costKey]);
-  }, 0);
+  // recalculate total if the cost has changed
+  if (item.get('item') === 'cost') {
+    newReduction = newReduction.setIn(
+      ['appState', 'pages', pageIndex, 'data', 'total'],
+      newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) +
+        item.get('value') - item.get('originalValue')
+    );
+  }
 
   // sort rows by date
   newReduction = newReduction.setIn(
-    ['appState', 'pages', pageIndex, 'data', 'total'], newTotal
-  ).setIn(
     ['appState', 'pages', pageIndex, 'rows'],
     sortRowsByDate(newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex)
   );
@@ -67,6 +68,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
         newReduction, pageIndex, date, date, item.get('value'), item.get('originalValue'));
     }
     else if (item.get('item') === 'date') {
+      const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
       const cost = newRow.getIn(['cols', costKey]);
 
       newReduction = rCalculateOverview(
