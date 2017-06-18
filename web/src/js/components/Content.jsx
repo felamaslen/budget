@@ -31,6 +31,7 @@ export class Content extends PureControllerView {
           data={data}
           edit={this.props.edit}
           add={this.props.add}
+          addBtnFocus={this.props.addBtnFocus}
           index={this.props.index}
           page={PAGES[this.props.index]} />
       );
@@ -59,6 +60,7 @@ Content.propTypes = {
   pages: PropTypes.instanceOf(List),
   loaded: PropTypes.instanceOf(List),
   add: PropTypes.instanceOf(List),
+  addBtnFocus: PropTypes.bool,
   edit: PropTypes.instanceOf(map),
   index: PropTypes.number
 };

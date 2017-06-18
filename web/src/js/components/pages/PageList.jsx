@@ -32,7 +32,7 @@ export class PageList extends PureControllerView {
           );
         })}
         <span>
-          <button onClick={() => { this.addItem(); }}>Add</button>
+          <button ref='addBtn' onClick={() => { this.addItem(); }}>Add</button>
         </span>
       </li>
     );
@@ -59,6 +59,13 @@ export class PageList extends PureControllerView {
         </li>
       );
     });
+  }
+  componentDidUpdate(prevProps) {
+    if (!prevProps.addBtnFocus && this.props.addBtnFocus) {
+      window.setTimeout(() => {
+        this.refs.addBtn && this.refs.addBtn.focus();
+      }, 0);
+    }
   }
   render() {
     const listClasses = [
@@ -89,6 +96,7 @@ PageList.propTypes = {
   data: PropTypes.instanceOf(map),
   edit: PropTypes.instanceOf(map),
   add: PropTypes.instanceOf(list),
+  addBtnFocus: PropTypes.bool,
   index: PropTypes.number,
   page: PropTypes.string
 };

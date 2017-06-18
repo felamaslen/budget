@@ -109,10 +109,10 @@ const applyEdits = (reduction, item, pageIndex) => {
 };
 
 export const rActivateEditable = (reduction, editable) => {
-  let newReduction = reduction;
   const active = reduction.getIn(['appState', 'edit', 'active']);
   const queue = reduction.getIn(['appState', 'edit', 'queue']);
   const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
+  let newReduction = reduction.setIn(['appState', 'edit', 'addBtnFocus'], false);
 
   // confirm the previous item's edits
   if (active && active.get('value') !== active.get('originalValue')) {
@@ -127,14 +127,13 @@ export const rActivateEditable = (reduction, editable) => {
 
   // can pass null to deactivate editing
   if (!editable) {
-    return reduction.setIn(['appState', 'edit', 'active'], getNullEditable(pageIndex));
+    return newReduction.setIn(['appState', 'edit', 'active'], getNullEditable(pageIndex));
   }
 
-  newReduction = newReduction.setIn(
+  return newReduction.setIn(
     ['appState', 'edit', 'active'],
     editable.set('originalValue', editable.get('value'))
   );
-  return newReduction;
 };
 
 export const rChangeEditable = (reduction, value) => {
@@ -245,6 +244,6 @@ export const rHandleServerAdd = (reduction, response) => {
     item: 'date',
     value: now,
     originalValue: now
-  }));
+  })).setIn(['appState', 'edit', 'addBtnFocus'], false);
 };
 
