@@ -5,6 +5,7 @@
 export const AC_ERROR_OPEN = 0xace0;
 export const AC_ERROR_CLOSE = 0xace1;
 export const AC_ERROR_REMOVE = 0xace2;
+export const AC_ERRORS_TIMEDOUT = 0xacee1;
 
 export const AC_LOGIN_FORM_INPUTTED = 0xacf1;
 export const AC_LOGIN_FORM_RESET = 0xacf0;
@@ -22,4 +23,5 @@ export const AC_CONTENT_LOADED = 0xacc1;
 
 export const AC_EDIT_ACTIVATED = 0xaceea;
 export const AC_EDIT_CHANGED = 0xaceec;
+export const AC_EDIT_LIST_ITEM_ADDED = 0xace1a;
 

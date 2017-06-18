@@ -7,6 +7,7 @@ import {
   AC_ERROR_OPEN,
   AC_ERROR_CLOSE,
   AC_ERROR_REMOVE,
+  AC_ERRORS_TIMEDOUT,
 
   AC_LOGIN_FORM_INPUTTED,
   AC_LOGIN_FORM_RESET,
@@ -23,13 +24,15 @@ import {
   AC_CONTENT_LOADED,
 
   AC_EDIT_ACTIVATED,
-  AC_EDIT_CHANGED
+  AC_EDIT_CHANGED,
+  AC_EDIT_LIST_ITEM_ADDED
 } from '../constants/actions';
 
 import {
   rErrorMessageOpen,
   rErrorMessageClose,
-  rErrorMessageRemove
+  rErrorMessageRemove,
+  rErrorMessageClearOld
 } from './ErrorReducer';
 import {
   rLoginFormInput,
@@ -50,7 +53,8 @@ import {
 } from './ContentReducer';
 import {
   rActivateEditable,
-  rChangeEditable
+  rChangeEditable,
+  rAddListItem
 } from './EditReducer';
 
 export default (reduction, action) => {
@@ -62,6 +66,8 @@ export default (reduction, action) => {
     return rErrorMessageClose(reduction, action.payload);
   case AC_ERROR_REMOVE:
     return rErrorMessageRemove(reduction, action.payload);
+  case AC_ERRORS_TIMEDOUT:
+    return rErrorMessageClearOld(reduction);
 
   // login form actions
   case AC_LOGIN_FORM_INPUTTED:
@@ -96,6 +102,8 @@ export default (reduction, action) => {
     return rActivateEditable(reduction, action.payload);
   case AC_EDIT_CHANGED:
     return rChangeEditable(reduction, action.payload);
+  case AC_EDIT_LIST_ITEM_ADDED:
+    return rAddListItem(reduction, action.payload);
 
   default:
     // By default, the reduction is simply returned unchanged.

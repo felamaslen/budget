@@ -14,7 +14,7 @@ import {
   aUserLoggedOut, aCookiesLoaded, aPageNavigatedTo, aKeyPressed, aServerUpdated
 } from '../actions/HeaderActions';
 import {
-  aErrorOpened
+  aErrorOpened, aErrorsTimedout
 } from '../actions/ErrorActions';
 
 export class Header extends PureControllerView {
@@ -64,6 +64,10 @@ export class Header extends PureControllerView {
     window.setTimeout(() => {
       this.dispatchAction(aServerUpdated());
     }, TIMER_UPDATE_SERVER);
+
+    window.setInterval(() => {
+      this.dispatchAction(aErrorsTimedout());
+    }, 1000);
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.serverUpdateStatus !== nextProps.serverUpdateStatus) {

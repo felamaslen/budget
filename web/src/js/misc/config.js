@@ -2,8 +2,8 @@
  * Main config parameters for budget web app
  */
 
-// show error messages for <delay> milliseconds
-export const ERROR_MESSAGE_DELAY = 8000;
+// show error messages for at least <delay> milliseconds
+export const ERROR_MESSAGE_DELAY = 5000;
 
 // investment rate of return (assumed, per annum)
 export const FUTURE_INVESTMENT_RATE = 0.1;
@@ -30,4 +30,5 @@ export const TIMER_UPDATE_SERVER = 1000;
 
 // error messages
 export const ERROR_MSG_SERVER_UPDATE = 'Error updating server!';
+export const ERROR_MSG_BAD_DATA = 'Please enter valid data';
 
