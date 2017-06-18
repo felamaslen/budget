@@ -15,8 +15,8 @@ import { PageList } from './pages/PageList';
 export class Content extends PureControllerView {
   renderPage() {
     const data = this.props.pages.get(this.props.index);
-
-    if (this.props.index === 0) {
+    const page = PAGES[this.props.index];
+    if (page === 'overview') {
       // overview page
       return (
         <PageOverview dispatcher={this.props.dispatcher}
@@ -34,7 +34,7 @@ export class Content extends PureControllerView {
           addBtnFocus={this.props.addBtnFocus}
           daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
-          page={PAGES[this.props.index]} />
+          page={page} />
       );
     }
     return <div>TODO: page {this.props.index}</div>;

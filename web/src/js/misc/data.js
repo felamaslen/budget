@@ -2,15 +2,97 @@
  * Data methods (using immutable objects)
  */
 
-import React from 'react';
 import { List as list, Map as map } from 'immutable';
 import {
   AVERAGE_MEDIAN, PAGES, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
 } from './const';
 import { YMD } from './date';
-import EditableDate from '../components/Editable/EditableDate';
-import EditableCost from '../components/Editable/EditableCost';
-import EditableText from '../components/Editable/EditableText';
+
+const sortByDate = (a, b) => {
+  if (a.get('date') < b.get('date')) {
+    return -1;
+  }
+  return 1;
+};
+
+/**
+ * data type to hold transactions list for funds
+ */
+export class TransactionsList {
+  constructor(raw, noJson) {
+    this.idCount = 0;
+    const aList = noJson ? raw : list(JSON.parse(raw)).map(item => {
+      return map({
+        id: this.idCount++,
+        date: new YMD(item.d),
+        units: parseFloat(item.u, 10),
+        cost: parseInt(item.c, 10)
+      });
+    });
+    this.list = aList.sort(sortByDate);
+    this.size = this.list.size;
+  }
+  toString() {
+    return JSON.stringify(this.list.map(item => {
+      return {
+        d: item.get('date').toString(),
+        u: item.get('units'),
+        c: item.get('cost').toString()
+      };
+    }).toJS());
+  }
+  valueOf() {
+    return this.list;
+  }
+  maxId() {
+    return this.size > 0 ? this.list.map(item => item.get('id')).max() : 0;
+  }
+  remove(key) {
+    return new TransactionsList(this.list.splice(key, 1), true);
+  }
+  setIn(a, b) {
+    return new TransactionsList(this.list.setIn(a, b), true);
+  }
+  push(item) {
+    return new TransactionsList(this.list.push(map({
+      id: this.maxId() + 1,
+      date: item.date,
+      units: item.units,
+      cost: item.cost
+    })), true);
+  }
+  getUnits(aList) {
+    return aList.reduce((a, b) => a + b.get('units'), 0);
+  }
+  getCost() {
+    return aList.reduce((a, b) => a + b.get('cost'), 0);
+  }
+  getTotalUnits() {
+    return this.getUnits(this.list);
+  }
+  getTotalCost() {
+    return this.getCost(this.list);
+  }
+  getLastUnits() {
+    let length = this.size - 1;
+    if (this.list.getIn([length, 'units']) < 0) {
+      // don't include last item if it is a "sell"
+      length--;
+    }
+    return this.getUnits(this.list.slice(0, length));
+  }
+  getLastCost() {
+    let length = this.size - 1;
+    if (this.list.getIn([length, 'cost']) < 0) {
+      // don't include last item if it is a "sell"
+      length--;
+    }
+    return this.getCost(this.list.slice(0, length));
+  }
+  isSold() {
+    return this.getTotalUnits() === 0;
+  }
+}
 
 /**
  * Gets the mean or median of an immutable list of values
@@ -111,37 +193,6 @@ export const buildQueueRequestList = reduction => {
 };
 
 /**
- * @function getEditable
- * @param {Dispatcher} dispatcher: store
- * @param {integer} row: row of item
- * @param {integer} col: column of item
- * @param {integer} id: the id of the item being edited (for list items)
- * @param {string} item: the item being edited
- * @param {mixed} value: value of item
- * @param {integer} pageIndex: page index of item
- * @param {boolean} active: whether item is being edited
- * @returns {Editable}: the correct editable react component class
- */
-export const getEditable = (dispatcher, row, col, id, item, value, pageIndex, active) => {
-  switch (item) {
-  case 'date':
-    return <EditableDate dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
-
-  case 'cost':
-    if (!value) {
-      value = 0;
-    }
-    return <EditableCost dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
-
-  default:
-    return <EditableText dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
-  }
-};
-
-/**
  * @function getNullEditable
  * @param {integer} pageIndex: page we're on
  * @returns {map} null-editable object ready for navigating
@@ -179,6 +230,9 @@ export const getAddDefaultValues = pageIndex => {
       column === 'holiday' || column === 'society') {
       return '';
     }
+    if (column === 'transactions') {
+      return new TransactionsList(list([]), true);
+    }
     return null;
   }));
 };
@@ -194,10 +248,10 @@ export const sortRowsByDate = (rows, pageIndex) => {
   const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
   let dailySum = 0;
   const sorted = rows.sort((a, b) => {
-    if (a.getIn(['cols', 0]).isAfter(b.getIn(['cols', 0]))) {
+    if (a.getIn(['cols', 0]) > b.getIn(['cols', 0])) {
       return -1;
     }
-    if (b.getIn(['cols', 0]).isAfter(a.getIn(['cols', 0]))) {
+    if (b.getIn(['cols', 0]) > (a.getIn(['cols', 0]))) {
       return 1;
     }
     if (a.get('id') > b.get('id')) {
@@ -209,7 +263,7 @@ export const sortRowsByDate = (rows, pageIndex) => {
   if (DAILY_PAGES[pageIndex]) {
     return sorted.map((row, rowKey) => {
       const lastInDay = rowKey === rows.size - 1 ||
-        row.getIn(['cols', dateKey]).isAfter(rows.getIn([rowKey + 1, 'cols', dateKey]));
+        row.getIn(['cols', dateKey]) > rows.getIn([rowKey + 1, 'cols', dateKey]);
       dailySum += row.getIn(['cols', costKey]);
       const newRow = lastInDay ? row.set('daily', dailySum) : row.delete('daily');
       if (lastInDay) {

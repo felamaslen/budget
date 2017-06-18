@@ -5,6 +5,7 @@
 import { List as list, Map as map } from 'immutable';
 import { YMD } from '../../misc/date';
 import { LIST_COLS_SHORT, LIST_COLS_PAGES } from '../../misc/const';
+import { TransactionsList } from '../../misc/data';
 
 export const processPageDataList = (raw, pageIndex) => {
   const numRows = raw.data.length;
@@ -30,5 +31,19 @@ export const processPageDataList = (raw, pageIndex) => {
   }));
 
   return map({ data, rows });
+};
+
+export const processPageDataFunds = (raw, pageIndex) => {
+  const pageData = processPageDataList(raw, pageIndex);
+
+  const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+  const rowsWithTransactions = pageData.get('rows').map(row => {
+    const transactionsJson = row.getIn(['cols', transactionsKey]);
+    const transactions = new TransactionsList(transactionsJson);
+
+    return row.setIn(['cols', transactionsKey], transactions);
+  });
+
+  return pageData.set('rows', rowsWithTransactions);
 };
 

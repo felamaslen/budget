@@ -15,7 +15,7 @@ import {
 import { YMD } from '../misc/date';
 import {
   getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
-} from '../misc/data.jsx';
+} from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
@@ -242,5 +242,41 @@ export const rHandleServerAdd = (reduction, response) => {
     value: now,
     originalValue: now
   })).setIn(['appState', 'edit', 'addBtnFocus'], false);
+};
+
+const rFundTransactions = (reduction, row, col, callback) => {
+  const pageIndex = PAGES.indexOf('funds');
+  const transactions = callback(reduction.getIn(
+    row > -1
+    ? ['appState', 'pages', pageIndex, 'rows', row, 'cols', col]
+    : ['appState', 'edit', 'add', col]
+  ));
+
+  if (row > -1) {
+    return reduction.setIn(
+      ['appState', 'pages', pageIndex, 'rows', row, 'cols', col], transactions
+    ).setIn(
+      ['appState', 'edit', 'active', 'value'], transactions
+    );
+  }
+
+  return reduction.setIn(
+    ['appState', 'edit', 'add', col], transactions
+  );
+};
+
+export const rChangeFundTransactions = (reduction, item) => {
+  return rFundTransactions(reduction,
+    item.row, item.col, transactions => transactions.setIn([item.key, item.column], item.value));
+};
+
+export const rAddFundTransactions = (reduction, item) => {
+  return rFundTransactions(reduction,
+    item.row, item.col, transactions => transactions.push(item));
+};
+
+export const rRemoveFundTransactions = (reduction, item) => {
+  return rFundTransactions(reduction,
+    item.row, item.col, transactions => transactions.remove(item.key));
 };
 
