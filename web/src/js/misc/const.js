@@ -51,7 +51,7 @@ export const LIST_COLS_SHORT = [
 ];
 
 // which pages to include daily tallies for
-export const DAILY_PAGES = [null, null, false, false, true, true, true, true, true];
+export const DAILY_PAGES = [null, null, false, false, false, true, true, true, true];
 
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
