@@ -2,7 +2,8 @@
  * Carries out actions for the error messages component
  */
 
-import { ERROR_MESSAGE_DELAY, ERROR_CLOSE_TIME } from '../misc/config';
+import { ERROR_MESSAGE_DELAY } from '../misc/config';
+import { ERROR_CLOSE_TIME } from '../misc/const';
 
 export const rErrorMessageOpen = (reduction, msg) => {
   const errorMsg = reduction.getIn(['appState', 'errorMsg']);
