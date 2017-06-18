@@ -62,7 +62,7 @@ const handleNav = (reduction, dx, dy) => {
 
   let row;
   let col;
-  if (currentCol === -1 && currentRow <= 0 && dx < 0) {
+  if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
     row = numRows - 1;
     col = numCols - 1;
   }
