@@ -129,6 +129,10 @@ export const rHandleKeyPress = (reduction, key) => {
     if (key.key === 'Escape') {
       return handleNav(reduction, null);
     }
+    if (key.key === 'Enter') {
+      // submit on enter
+      return rActivateEditable(reduction, null);
+    }
     return reduction;
   }
   // not logged in
