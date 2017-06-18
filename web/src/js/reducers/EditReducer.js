@@ -4,7 +4,9 @@
 
 import { Map as map } from 'immutable';
 import { rGetOverviewRows } from '../reducers/data/overview';
-import { LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
+import { LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN } from '../misc/const';
+import { ERROR_MSG_BAD_DATA } from '../misc/config';
+import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
   // update the balance for a row and recalculate overview data
@@ -116,5 +118,23 @@ export const rActivateEditable = (reduction, editable) => {
 
 export const rChangeEditable = (reduction, value) => {
   return reduction.setIn(['appState', 'edit', 'active', 'value'], value);
+};
+
+export const rAddListItem = (reduction, items) => {
+  // validate items
+  const valid = items.reduce((a, b) => {
+    const thisValid = b.props.item === 'item' ?
+      b.props.value.length > 0 : true; // others are self-validating
+    return thisValid ? a : false;
+  }, true);
+
+  if (!valid) {
+    return rErrorMessageOpen(reduction, map({
+      level: ERROR_LEVEL_WARN,
+      text: ERROR_MSG_BAD_DATA
+    }));
+  }
+
+  return reduction; // TODO
 };
 

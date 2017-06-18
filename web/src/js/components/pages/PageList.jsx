@@ -8,9 +8,14 @@ import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
 import { LIST_COLS_PAGES } from '../../misc/const';
 import { getEditable } from '../../misc/data.jsx';
+import { aListItemAdded } from '../../actions/EditActions';
 
 export class PageList extends PureControllerView {
+  addItem() {
+    this.dispatchAction(aListItemAdded(this.addItems));
+  }
   renderLiAdd() {
+    this.addItems = [];
     return (
       <li className='li-add'>
         {LIST_COLS_PAGES[this.props.index].map((column, key) => {
@@ -18,6 +23,7 @@ export class PageList extends PureControllerView {
           const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
           const editItem = getEditable(
             this.props.dispatcher, -1, key, null, column, value, this.props.index, active);
+          this.addItems.push(editItem);
 
           return (
             <span key={key} className={column}>
@@ -26,7 +32,7 @@ export class PageList extends PureControllerView {
           );
         })}
         <span>
-          <button>Add</button>
+          <button onClick={() => { this.addItem(); }}>Add</button>
         </span>
       </li>
     );
