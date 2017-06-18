@@ -8,6 +8,7 @@ import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows } from '../reducers/data/overview';
 import { LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN } from '../misc/const';
 import { ERROR_MSG_BAD_DATA } from '../misc/config';
+import { getNullEditable } from '../misc/data.jsx';
 import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
@@ -104,15 +105,7 @@ export const rActivateEditable = (reduction, editable) => {
 
   // can pass null to deactivate editing
   if (!editable) {
-    return reduction.setIn(['appState', 'edit', 'active'], map({
-      row: active.get('row') === -1 ? -1 : 0,
-      col: -1,
-      pageIndex: null,
-      id: null,
-      item: null,
-      value: null,
-      originalValue: null
-    }));
+    return reduction.setIn(['appState', 'edit', 'active'], getNullEditable(pageIndex));
   }
 
   newReduction = newReduction.setIn(
