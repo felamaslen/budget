@@ -9,7 +9,8 @@ import {
   AC_PAGE_NAVIGATED,
   AC_KEY_PRESSED,
   AC_SERVER_UPDATED,
-  AC_SERVER_UPDATE_RECEIVED
+  AC_SERVER_UPDATE_RECEIVED,
+  AC_SERVER_ADD_RECEIVED
 } from '../constants/actions';
 
 export const aUserLoggedOut = () => buildMessage(AC_USER_LOGGED_OUT);
@@ -18,4 +19,5 @@ export const aPageNavigatedTo = page => buildMessage(AC_PAGE_NAVIGATED, page);
 export const aKeyPressed = key => buildMessage(AC_KEY_PRESSED, key);
 export const aServerUpdated = () => buildMessage(AC_SERVER_UPDATED);
 export const aServerUpdateReceived = response => buildMessage(AC_SERVER_UPDATE_RECEIVED, response);
+export const aServerAddReceived = response => buildMessage(AC_SERVER_ADD_RECEIVED, response);
 

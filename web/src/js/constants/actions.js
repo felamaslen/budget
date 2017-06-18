@@ -18,6 +18,7 @@ export const AC_PAGE_NAVIGATED = 0xac52;
 export const AC_KEY_PRESSED = 0xac53;
 export const AC_SERVER_UPDATED = 0xac5f1;
 export const AC_SERVER_UPDATE_RECEIVED = 0xac5f2;
+export const AC_SERVER_ADD_RECEIVED = 0xac5f3;
 
 export const AC_CONTENT_LOADED = 0xacc1;
 
