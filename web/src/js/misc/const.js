@@ -38,6 +38,17 @@ export const LIST_COLS_PAGES = [
   ['date', 'item', 'holiday', 'cost', 'shop'], // holiday
   ['date', 'item', 'social', 'cost', 'shop'] // social
 ];
+export const LIST_COLS_SHORT = [
+  null,
+  null,
+  ['d', 'i', 't', 'c'],
+  ['d', 'i', 'c'],
+  ['d', 'i', 'c'],
+  ['d', 'i', 'k', 'c', 's'],
+  ['d', 'i', 'k', 'c', 's'],
+  ['d', 'i', 'h', 'c', 's'],
+  ['d', 'i', 'y', 'c', 's']
+];
 
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
