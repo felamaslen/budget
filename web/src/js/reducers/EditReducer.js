@@ -6,8 +6,10 @@ import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows } from '../reducers/data/overview';
-import { LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN } from '../misc/const';
-import { ERROR_MSG_BAD_DATA } from '../misc/config';
+import {
+  LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
+} from '../misc/const';
+import { ERROR_MSG_BAD_DATA, ERROR_MSG_API_FAILED } from '../misc/config';
 import { getNullEditable } from '../misc/data.jsx';
 import { rErrorMessageOpen } from './ErrorReducer';
 
@@ -171,7 +173,10 @@ export const rHandleServerAdd = (reduction, response) => {
   // handle the response from adding an item to a list page
   let newReduction = reduction.setIn(['appState', 'loadingApi'], false);
   if (response.response.data.error) {
-    return newReduction; // TODO
+    return rErrorMessageOpen(newReduction, map({
+      level: ERROR_LEVEL_ERROR,
+      text: `${ERROR_MSG_API_FAILED}: ${response.response.data.errorText}`
+    }));
   }
   const pageIndex = response.pageIndex;
   const item = response.item;
