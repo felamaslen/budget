@@ -25,7 +25,7 @@ export class PageList extends PureControllerView {
         {daily}
         <span>Total:</span>
         <span>{formatCurrency(
-          this.props.data.getIn(['data', 'total']), { abbreviate: true }
+          this.props.data.getIn(['data', 'total']), { abbreviate: true, precision: 1 }
         )}</span>
       </div>
     );
