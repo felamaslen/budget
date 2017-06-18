@@ -50,6 +50,9 @@ export const LIST_COLS_SHORT = [
   ['d', 'i', 'y', 'c', 's']
 ];
 
+// which pages to include daily tallies for
+export const DAILY_PAGES = [null, null, false, false, true, true, true, true, true];
+
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
 export const SERVER_UPDATE_IDLE = 0;

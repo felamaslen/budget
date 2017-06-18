@@ -6,7 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from './PureControllerView';
 import { Map as map, List } from 'immutable';
-import { PAGES, LIST_PAGES } from '../misc/const';
+import { PAGES, LIST_PAGES, DAILY_PAGES } from '../misc/const';
 
 import { Spinner } from './Spinner';
 import { PageOverview } from './pages/PageOverview';
@@ -32,6 +32,7 @@ export class Content extends PureControllerView {
           edit={this.props.edit}
           add={this.props.add}
           addBtnFocus={this.props.addBtnFocus}
+          daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
           page={PAGES[this.props.index]} />
       );
