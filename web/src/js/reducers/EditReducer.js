@@ -13,7 +13,9 @@ import {
   ERROR_MSG_BAD_DATA, ERROR_MSG_API_FAILED, ERROR_MSG_BUG_INVALID_ITEM
 } from '../misc/config';
 import { YMD } from '../misc/date';
-import { getNullEditable, getAddDefaultValues, sortRowsByDate } from '../misc/data.jsx';
+import {
+  getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
+} from '../misc/data.jsx';
 import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
@@ -52,10 +54,13 @@ const applyEditsList = (reduction, item, pageIndex) => {
   }
 
   // sort rows by date
-  newReduction = newReduction.setIn(
-    ['appState', 'pages', pageIndex, 'rows'],
-    sortRowsByDate(newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex)
-  );
+  const sortedRows = sortRowsByDate(
+    newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex);
+  const weeklyData = addWeeklyAverages(
+    newReduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
+
+  newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
+  .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
 
   // recalculate overview data if the cost or date changed
   if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
@@ -193,15 +198,16 @@ export const rHandleServerAdd = (reduction, response) => {
   const cols = list(item.map(thisItem => thisItem.value));
 
   // update total and push new item to the data store list, then sort by date
-  newReduction = newReduction.setIn(
-    ['appState', 'pages', pageIndex, 'data', 'total'], newTotal
-  ).setIn(
-    ['appState', 'pages', pageIndex, 'rows'],
-    sortRowsByDate(
-      reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols })),
-      pageIndex
-    )
-  ).setIn(
+  const sortedRows = sortRowsByDate(
+    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols })), pageIndex);
+  const weeklyData = addWeeklyAverages(
+    reduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
+
+  newReduction = newReduction
+  .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
+  .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData)
+  .setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal)
+  .setIn(
     ['appState', 'pages', pageIndex, 'data', 'numRows'],
     newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']) + 1
   );

@@ -8,9 +8,10 @@ export const yearMonthDifference = (ym1, ym2) => {
   return 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1];
 };
 
+const leapYear = year => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+
 const monthDays = (month, year) => {
-  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-  const days = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const days = [31, leapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return days[month - 1];
 };
 
@@ -83,8 +84,13 @@ export class YMD {
     return `${numbers[2]}/${numbers[1]}/${numbers[0]}`;
   }
   valueOf() {
-    const numbers = this.formatNumbers();
-    return `${numbers[0]}-${numbers[1]}-${numbers[2]}`;
+    const daysToYear = Array.apply(null, new Array(this.year - 1 - 2000)).reduce(
+      (total, _, year) => total + (leapYear(2000 + year) ? 366 : 365), 0);
+
+    const daysToMonth = Array.apply(null, new Array(this.month - 1)).reduce(
+      (total, _, key) => total + monthDays(key + 1, this.year), 0);
+
+    return daysToYear + daysToMonth + this.date;
   }
   toString() {
     // this format gets passed to API POST requests (for e.g. updating)

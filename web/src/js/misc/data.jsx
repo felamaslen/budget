@@ -184,7 +184,7 @@ export const getAddDefaultValues = pageIndex => {
 };
 
 /**
- * Sort list rows by date, and add daily tallies + weekly averages
+ * Sort list rows by date, and add daily tallies
  * @param {list} rows: rows to sort
  * @param {integer} pageIndex: page which rows are on
  * @returns {list} sorted rows
@@ -220,5 +220,31 @@ export const sortRowsByDate = (rows, pageIndex) => {
   }
 
   return sorted;
+};
+
+/**
+ * Add weekly averages (should be run after sortRowsByDate)
+ * @param {map} data: data to sort
+ * @param {list} rows: rows to sort
+ * @param {integer} pageIndex: page which rows are on
+ * @returns {map} data with averages
+ */
+export const addWeeklyAverages = (data, rows, pageIndex) => {
+  if (!DAILY_PAGES[pageIndex]) {
+    return data;
+  }
+  // note that this is calculated only based on the visible data,
+  // not past data
+  const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
+  const visibleTotal = rows.reduce((a, b) => {
+    return a + b.getIn(['cols', costKey]);
+  }, 0);
+
+  const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+  const firstDate = rows.first().getIn(['cols', dateKey]);
+  const lastDate = rows.last().getIn(['cols', dateKey]);
+  const numWeeks = (firstDate - lastDate) / 7;
+
+  return data.set('weekly', numWeeks ? visibleTotal / numWeeks : 0);
 };
 
