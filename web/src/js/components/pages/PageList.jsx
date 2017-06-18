@@ -16,12 +16,13 @@ export class PageList extends PureControllerView {
     this.dispatchAction(aListItemAdded(this.addItems));
   }
   renderListHead() {
+    const daily = this.props.daily ? <span>Daily Tally</span> : null;
     return (
       <div className='list-head noselect'>
         {LIST_COLS_PAGES[this.props.index].map((column, key) => {
           return <span key={key} className={column}>{column}</span>;
         })}
-        <span>Daily Tally</span>
+        {daily}
         <span>Total:</span>
         <span>{formatCurrency(
           this.props.data.getIn(['data', 'total']), { abbreviate: true }
@@ -67,7 +68,8 @@ export class PageList extends PureControllerView {
           </span>
         );
       });
-      const daily = row.has('daily') ? formatCurrency(row.get('daily')) : null;
+      const daily = this.props.daily && row.has('daily') ?
+        formatCurrency(row.get('daily')) : null;
 
       return (
         <li key={rowKey}>
@@ -108,6 +110,7 @@ PageList.propTypes = {
   edit: PropTypes.instanceOf(map),
   add: PropTypes.instanceOf(list),
   addBtnFocus: PropTypes.bool,
+  daily: PropTypes.bool,
   index: PropTypes.number,
   page: PropTypes.string
 };
