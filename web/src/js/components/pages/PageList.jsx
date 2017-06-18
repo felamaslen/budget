@@ -17,7 +17,7 @@ export class PageList extends PureControllerView {
           const value = this.props.add.get(key);
           const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
           const editItem = getEditable(
-            this.props.dispatcher, -1, key, column, value, this.props.index, active);
+            this.props.dispatcher, -1, key, null, column, value, this.props.index, active);
 
           return (
             <span key={key} className={column}>
@@ -33,11 +33,12 @@ export class PageList extends PureControllerView {
   }
   renderList() {
     return this.props.data.get('rows').map((row, rowKey) => {
+      const id = row.get('id');
       const items = LIST_COLS_PAGES[this.props.index].map((column, colKey) => {
         const value = row.getIn(['cols', colKey]);
         const active = this.props.edit.get('row') === rowKey && this.props.edit.get('col') === colKey;
         const editItem = getEditable(
-          this.props.dispatcher, rowKey, colKey, column, value, this.props.index, active);
+          this.props.dispatcher, rowKey, colKey, id, column, value, this.props.index, active);
 
         return (
           <span key={colKey} className={column}>

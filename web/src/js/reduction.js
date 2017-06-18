@@ -29,6 +29,7 @@ export default new Record({
         row: 0,
         col: -1,
         pageIndex: null,
+        id: null,
         item: null,
         value: null,
         originalValue: null
