@@ -2,11 +2,12 @@
  * Carries out actions for the content component
  */
 
-import { List as list, Map as map } from 'immutable';
+import { List as list } from 'immutable';
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
 import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
 import { YMD } from '../misc/date';
+import { getNullEditable } from '../misc/data.jsx';
 
 import processPageDataOverview from './data/overview';
 import { processPageDataList } from './data/list';
@@ -62,15 +63,7 @@ const getAddDefaultValues = pageIndex => {
 };
 
 export const rHandleContentResponse = (reduction, output) => {
-  const pageIsList = LIST_PAGES.indexOf(output.page) > -1;
-  const editing = map({
-    row: pageIsList ? -1 : 0,
-    col: -1,
-    page: null,
-    item: null,
-    value: null,
-    originalValue: null
-  });
+  const editing = getNullEditable(output.page);
 
   return reduction.setIn(['appState', 'pagesLoaded', output.page], true)
   .setIn(['appState', 'pagesRaw', output.page], output.response.data.data)

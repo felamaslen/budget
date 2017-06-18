@@ -138,3 +138,21 @@ export const getEditable = (dispatcher, row, col, id, item, value, pageIndex, ac
   }
 };
 
+/**
+ * @function getNullEditable
+ * @param {integer} pageIndex: page we're on
+ * @returns {map} null-editable object ready for navigating
+ */
+export const getNullEditable = pageIndex => {
+  const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
+  return map({
+    row: pageIsList ? -1 : 0,
+    col: -1,
+    pageIndex,
+    id: null,
+    item: null,
+    value: null,
+    originalValue: null
+  });
+};
+
