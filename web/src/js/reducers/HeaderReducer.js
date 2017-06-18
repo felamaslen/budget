@@ -13,7 +13,7 @@ import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES,
   SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
-import { buildQueueRequestList } from '../misc/data.jsx';
+import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../misc/data.jsx';
 
 const getItemValue = (reduction, pageIndex, row, col) => {
   let id = null;
@@ -22,7 +22,7 @@ const getItemValue = (reduction, pageIndex, row, col) => {
   if (PAGES[pageIndex] === 'overview') {
     value = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'cost', 'balance', row]);
   }
-  else if (LIST_PAGES.indexOf(pageIndex) > -1) {
+  else if (LIST_PAGES.indexOf(pageIndex) > -1 && row > -1) {
     id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'id']);
     value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
     item = LIST_COLS_PAGES[pageIndex][col];
@@ -160,16 +160,22 @@ export const rLoadCookies = reduction => {
 /**
  * Navigate to a page (index)
  * @param {Record} reduction application state
- * @param {integer} page: page index to navigate to
+ * @param {integer} pageIndex: page index to navigate to
  * @returns {Record} modified reduction
  */
-export const rNavigateToPage = (reduction, page) => {
-  Cookies.set('page', page, { expires: 7 });
+export const rNavigateToPage = (reduction, pageIndex) => {
+  Cookies.set('page', pageIndex, { expires: 7 });
   let newReduction = reduction;
-  if (!newReduction.getIn(['appState', 'pagesLoaded', page])) {
-    newReduction = rLoadContent(newReduction, page);
+  if (!newReduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
+    newReduction = rLoadContent(newReduction, pageIndex);
   }
-  return newReduction.setIn(['appState', 'currentPageIndex'], page);
+  newReduction = newReduction.setIn(['appState', 'currentPageIndex'], pageIndex);
+  if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    newReduction = newReduction.setIn(
+      ['appState', 'edit', 'add'], getAddDefaultValues(pageIndex)
+    ).setIn(['appState', 'edit', 'active'], getNullEditable(pageIndex));
+  }
+  return newReduction;
 };
 
 export const rUpdateServer = reduction => {
