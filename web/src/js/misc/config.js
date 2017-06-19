@@ -45,6 +45,10 @@ export const COLOR_CATEGORY = {
   balance: [36, 191, 55]
 };
 
+// fund colour scale
+export const COLOR_FUND_DOWN = [255, 44, 44];
+export const COLOR_FUND_UP = [0, 230, 18];
+
 // all other colour definitions
 export const COLOR_GRAPH_TITLE = '#000';
 export const COLOR_DARK = '#333';
