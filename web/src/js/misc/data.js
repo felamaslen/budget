@@ -75,7 +75,7 @@ export class TransactionsList {
   }
   getLastUnits() {
     let length = this.size;
-    if (this.list.getIn([length - 1, 'units']) < 0) {
+    if (this.isSold()) {
       // don't include last item if it is a "sell"
       length--;
     }
@@ -83,7 +83,7 @@ export class TransactionsList {
   }
   getLastCost() {
     let length = this.size;
-    if (this.list.getIn([length - 1, 'cost']) < 0) {
+    if (this.isSold()) {
       // don't include last item if it is a "sell"
       length--;
     }

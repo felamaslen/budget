@@ -6,6 +6,7 @@ import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from '../reducers/data/overview';
+import { getGainComparisons, addPriceHistory } from '../reducers/data/list';
 import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
 } from '../misc/const';
@@ -62,6 +63,17 @@ const applyEditsList = (reduction, item, pageIndex) => {
       newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) +
         item.get('value') - item.get('originalValue')
     );
+  }
+
+  // recalculate fund profits / losses if transactions have changed
+  if (PAGES[pageIndex] === 'funds' && item.get('item') === 'transactions') {
+    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+    const history = newReduction.getIn(['appState', 'pages', pageIndex, 'history']);
+    const oldRows = newReduction.getIn(['appState', 'pages', pageIndex, 'rows']);
+    const newRows = getGainComparisons(oldRows.map(row => {
+      return addPriceHistory(pageIndex, row, history, row.getIn(['cols', transactionsKey]));
+    }));
+    newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'rows'], newRows);
   }
 
   // sort rows by date
