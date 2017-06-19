@@ -22,6 +22,12 @@ export class Graph extends PureControllerView {
   draw() {
     return;
   }
+  beforeCanvas() {
+    return null;
+  }
+  afterCanvas() {
+    return null;
+  }
   componentDidMount() {
     this.ctx = this.refs.canvas.getContext('2d');
     this.supported = HTML_CANVAS_SUPPORTED;
@@ -42,7 +48,9 @@ export class Graph extends PureControllerView {
 
     return (
       <div className={classes}>
+        {this.beforeCanvas()}
         {canvas}
+        {this.afterCanvas()}
       </div>
     );
   }

@@ -84,6 +84,7 @@ export class PageOverview extends PureControllerView {
             startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
             currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
             yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
+            showAll={this.props.showAll}
             balance={this.props.data.getIn(['data', 'cost', 'balanceWithPredicted'])}
             balanceOld={this.props.data.getIn(['data', 'cost', 'old'])}
             funds={this.props.data.getIn(['data', 'cost', 'funds'])}
@@ -103,6 +104,7 @@ export class PageOverview extends PureControllerView {
 
 PageOverview.propTypes = {
   data: PropTypes.instanceOf(map),
-  edit: PropTypes.instanceOf(map)
+  edit: PropTypes.instanceOf(map),
+  showAll: PropTypes.bool
 };
 
