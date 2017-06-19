@@ -19,6 +19,16 @@ import {
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
+const recalculateFundProfits = (reduction, pageIndex) => {
+  const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+  const history = reduction.getIn(['appState', 'pages', pageIndex, 'history']);
+  const oldRows = reduction.getIn(['appState', 'pages', pageIndex, 'rows']);
+  const newRows = getGainComparisons(oldRows.map(row => {
+    return addPriceHistory(pageIndex, row, history, row.getIn(['cols', transactionsKey]));
+  }));
+  return reduction.setIn(['appState', 'pages', pageIndex, 'rows'], newRows);
+};
+
 const overviewKey = PAGES.indexOf('overview');
 const applyEditsOverview = (reduction, item) => {
   // update the balance for a row and recalculate overview data
@@ -67,13 +77,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
 
   // recalculate fund profits / losses if transactions have changed
   if (PAGES[pageIndex] === 'funds' && item.get('item') === 'transactions') {
-    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
-    const history = newReduction.getIn(['appState', 'pages', pageIndex, 'history']);
-    const oldRows = newReduction.getIn(['appState', 'pages', pageIndex, 'rows']);
-    const newRows = getGainComparisons(oldRows.map(row => {
-      return addPriceHistory(pageIndex, row, history, row.getIn(['cols', transactionsKey]));
-    }));
-    newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'rows'], newRows);
+    newReduction = recalculateFundProfits(newReduction, pageIndex);
   }
 
   // sort rows by date
@@ -173,12 +177,19 @@ export const rDeleteListItem = (reduction, item) => {
     newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, cost);
   }
 
-  return newReduction.setIn(
+  newReduction = newReduction.setIn(
     ['appState', 'edit', 'queueDelete'],
     reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
   ).setIn(
     ['appState', 'pages', pageIndex, 'rows'], sortedRows
   );
+
+  // recalculate fund profits / losses
+  if (PAGES[pageIndex] === 'funds') {
+    newReduction = recalculateFundProfits(newReduction, pageIndex);
+  }
+
+  return newReduction;
 };
 
 export const rAddListItem = (reduction, items) => {
