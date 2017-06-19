@@ -22,8 +22,20 @@ export const PAGES = [
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
   'August', 'September', 'October', 'November', 'December'];
 export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
-export const OVERVIEW_COLUMNS = ['Month', 'Stocks', 'Bills', 'Food', 'General', 'Holiday',
-  'Social', 'Income', 'Spending', 'Net', 'Predicted', 'Balance'];
+export const OVERVIEW_COLUMNS = [
+  [null, 'Month'],
+  ['funds', 'Stocks'],
+  ['bills', 'Bills'],
+  ['food', 'Food'],
+  ['general', 'General'],
+  ['holiday', 'Holiday'],
+  ['social', 'Social'],
+  ['income', 'Income'],
+  ['spending', 'Expenses'],
+  ['net', 'Net'],
+  ['predicted', 'Predicted'],
+  ['balance', 'Balance']
+];
 
 export const LIST_PAGES = [2, 3, 4, 5, 6, 7, 8];
 
@@ -67,7 +79,7 @@ const htmlCanvasSupported = () => {
 export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;
-export const GRAPH_BALANCE_CATEGORIES = [
+export const GRAPH_SPEND_CATEGORIES = [
   { name: 'bills', key: 15 },
   { name: 'food', key: 67 },
   { name: 'general', key: 125 },

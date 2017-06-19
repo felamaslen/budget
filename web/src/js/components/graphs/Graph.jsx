@@ -27,6 +27,7 @@ export class Graph extends PureControllerView {
     this.supported = HTML_CANVAS_SUPPORTED;
     this.width = this.props.width;
     this.height = this.props.height;
+    this.update();
   }
   componentDidUpdate() {
     this.update();

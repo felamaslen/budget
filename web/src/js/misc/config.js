@@ -34,15 +34,15 @@ export const GRAPH_BALANCE_NUM_TICKS = 5;
 
 // colours for overview score scale and page categories
 export const COLOR_CATEGORY = {
-  'Stocks': [84, 110, 122],
-  'Bills': [183, 28, 28],
-  'Food': [67, 160, 71],
-  'General': [1, 87, 155],
-  'Holiday': [0, 137, 123],
-  'Social': [191, 158, 36],
-  'Income': [36, 191, 55],
-  'Spending': [191, 36, 36],
-  'Balance': [36, 191, 55]
+  funds: [84, 110, 122],
+  bills: [183, 28, 28],
+  food: [67, 160, 71],
+  general: [1, 87, 155],
+  holiday: [0, 137, 123],
+  social: [191, 158, 36],
+  income: [36, 191, 55],
+  spending: [191, 36, 36],
+  balance: [36, 191, 55]
 };
 
 // all other colour definitions

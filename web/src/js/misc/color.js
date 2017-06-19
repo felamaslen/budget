@@ -17,15 +17,15 @@ export const rgb2hex = (rgb) => {
  * @returns {array} list of colour codes
  */
 export const getOverviewCategoryColor = () => {
-  return OVERVIEW_COLUMNS.slice(1).map(column => {
+  return OVERVIEW_COLUMNS.slice(1).map(item => item[0]).map(column => {
     if (COLOR_CATEGORY[column]) {
       return COLOR_CATEGORY[column];
     }
-    if (column === 'Net') {
-      return [COLOR_CATEGORY.Spending, COLOR_CATEGORY.Income];
+    if (column === 'net') {
+      return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
     }
-    if (column === 'Predicted') {
-      return COLOR_CATEGORY.Balance;
+    if (column === 'predicted') {
+      return COLOR_CATEGORY.balance;
     }
     return null;
   });
