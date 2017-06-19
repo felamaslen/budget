@@ -18,15 +18,16 @@ import {
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
+const overviewKey = PAGES.indexOf('overview');
 const applyEditsOverview = (reduction, item) => {
   // update the balance for a row and recalculate overview data
-  const overviewKey = PAGES.indexOf('overview');
   const value = item.get('value');
   const row = item.get('row');
 
   const newCost = reduction
   .getIn(['appState', 'pages', overviewKey, 'data', 'cost'])
   .setIn(['balance', row], value);
+
   const startYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'startYearMonth']);
   const endYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'endYearMonth']);
   const currentYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'currentYearMonth']);
@@ -73,7 +74,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
   .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
 
   // recalculate overview data if the cost or date changed
-  if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
+  if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
     if (item.get('item') === 'cost') {
       const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
       const date = newReduction.getIn(
@@ -144,15 +145,27 @@ export const rChangeEditable = (reduction, value) => {
 };
 
 export const rDeleteListItem = (reduction, item) => {
+  let newReduction = reduction;
+
   const pageIndex = item.pageIndex;
   const id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'id']);
+  const sortedRows = sortRowsByDate(
+    newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).splice(item.key, 1), pageIndex);
 
-  return reduction.setIn(
+  // recalculate overview data
+  if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
+    const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+    const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
+    const date = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', dateKey]);
+    const cost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
+    newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, cost);
+  }
+
+  return newReduction.setIn(
     ['appState', 'edit', 'queueDelete'],
     reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
   ).setIn(
-    ['appState', 'pages', pageIndex, 'rows'],
-    reduction.getIn(['appState', 'pages', pageIndex, 'rows']).splice(item.key, 1)
+    ['appState', 'pages', pageIndex, 'rows'], sortedRows
   );
 };
 
@@ -236,7 +249,7 @@ export const rHandleServerAdd = (reduction, response) => {
   );
 
   // recalculate overview data
-  if (reduction.getIn(['appState', 'pagesLoaded', PAGES.indexOf('overview')])) {
+  if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
     const costItem = item.find(thisItem => thisItem.item === 'cost');
     const dateItem = item.find(thisItem => thisItem.item === 'date');
     if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
