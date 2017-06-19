@@ -24,6 +24,7 @@ export default new Record({
     pagesRaw: PAGES.map(() => null),
     pagesLoaded: PAGES.map(() => false),
     currentPageIndex: -1,
+    showAllBalanceGraph: false,
     edit: {
       active: {
         row: 0,

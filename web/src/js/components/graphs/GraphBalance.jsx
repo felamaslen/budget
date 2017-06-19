@@ -3,7 +3,9 @@
  */
 
 import { List as list } from 'immutable';
+import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { LineGraph } from './LineGraph.jsx';
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../misc/data';
@@ -15,6 +17,7 @@ import {
   FONT_GRAPH_TITLE, FONT_GRAPH_KEY_SMALL, FONT_AXIS_LABEL,
   GRAPH_BALANCE_NUM_TICKS
 } from '../../misc/config';
+import { aShowAllToggled } from '../../actions/GraphActions';
 
 const hundredth = item => item / 100;
 const today = new YMD();
@@ -251,6 +254,20 @@ export class GraphBalance extends LineGraph {
     this.drawFundsLine();
 
     this.drawKey();
+  }
+  afterCanvas() {
+    const showAllClasses = classNames({
+      'show-all': true,
+      noselect: true,
+      enabled: this.props.showAll
+    });
+
+    return (
+      <span className={showAllClasses} onClick={() => this.dispatchAction(aShowAllToggled())}>
+        <span>Show all</span>
+        <a className='checkbox' />
+      </span>
+    );
   }
 }
 

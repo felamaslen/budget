@@ -21,7 +21,8 @@ export class Content extends PureControllerView {
       return (
         <PageOverview dispatcher={this.props.dispatcher}
           data={data}
-          edit={this.props.edit} />
+          edit={this.props.edit}
+          showAll={this.props.showAllBalanceGraph} />
       );
     }
     if (LIST_PAGES.indexOf(this.props.index) > -1) {
@@ -63,6 +64,7 @@ Content.propTypes = {
   add: PropTypes.instanceOf(List),
   addBtnFocus: PropTypes.bool,
   edit: PropTypes.instanceOf(map),
-  index: PropTypes.number
+  index: PropTypes.number,
+  showAllBalanceGraph: PropTypes.bool
 };
 

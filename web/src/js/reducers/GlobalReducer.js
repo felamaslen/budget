@@ -31,7 +31,9 @@ import {
 
   AC_EDIT_FUND_TRANSACTIONS_CHANGED,
   AC_EDIT_FUND_TRANSACTIONS_ADDED,
-  AC_EDIT_FUND_TRANSACTIONS_REMOVED
+  AC_EDIT_FUND_TRANSACTIONS_REMOVED,
+
+  AC_GRAPH_SHOWALL_TOGGLED
 } from '../constants/actions';
 
 import {
@@ -68,6 +70,9 @@ import {
   rAddFundTransactions,
   rRemoveFundTransactions
 } from './EditReducer';
+import {
+  rToggleShowAll
+} from './GraphReducer';
 
 export default (reduction, action) => {
   switch (action.type) {
@@ -127,6 +132,9 @@ export default (reduction, action) => {
     return rAddFundTransactions(reduction, action.payload);
   case AC_EDIT_FUND_TRANSACTIONS_REMOVED:
     return rRemoveFundTransactions(reduction, action.payload);
+
+  case AC_GRAPH_SHOWALL_TOGGLED:
+    return rToggleShowAll(reduction);
 
   default:
     // By default, the reduction is simply returned unchanged.
