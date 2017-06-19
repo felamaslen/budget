@@ -49,7 +49,7 @@ const getFundColor = (value, min, max) => {
  * @param {list} rows: item rows
  * @returns {list} modified rows
  */
-const getGainComparisons = rows => {
+export const getGainComparisons = rows => {
   const gains = rows.map(row => row.get('gain').pct);
   const min = gains.min();
   const max = gains.max();
@@ -68,7 +68,7 @@ const getGainComparisons = rows => {
  * @param {TransactionsList} transactions: item transactions list
  * @returns {map} modified row
 */
-const addPriceHistory = (pageIndex, row, history, transactions) => {
+export const addPriceHistory = (pageIndex, row, history, transactions) => {
   const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
   // add history to each fund item row
   let gainHistory = list([]);
