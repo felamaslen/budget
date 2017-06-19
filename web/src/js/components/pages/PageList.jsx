@@ -76,7 +76,7 @@ export class PageList extends PureControllerView {
               pageIndex: this.props.index,
               key: rowKey
             }));
-          }}>&times;</a>
+          }}>&minus;</a>
         </span>
       );
 
