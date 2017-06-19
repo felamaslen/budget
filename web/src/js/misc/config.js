@@ -8,6 +8,30 @@ export const ERROR_MESSAGE_DELAY = 5000;
 // investment rate of return (assumed, per annum)
 export const FUTURE_INVESTMENT_RATE = 0.1;
 
+// currency symbol
+export const SYMBOL_CURRENCY_HTML = '\u00a3';
+export const SYMBOL_CURRENCY_RAW = '£';
+
+// update changes regularly with the server
+export const TIMER_UPDATE_SERVER = 1000;
+
+// error messages
+export const ERROR_MSG_SERVER_UPDATE = 'Error updating server!';
+export const ERROR_MSG_BAD_DATA = 'Please enter valid data';
+export const ERROR_MSG_BUG_INVALID_ITEM = 'Bug: no date/cost on edited item';
+
+// font definitions
+export const FONT_AXIS_LABEL = '11px Arial, Helvetica, sans-serif';
+export const FONT_GRAPH_TITLE = '16px bold Arial, Helvetica, sans-serif';
+export const FONT_GRAPH_TITLE_LARGE = '18px bold Arial, Helvetica, sans-serif';
+export const FONT_GRAPH_KEY = '13px Arial, Helvetica, sans-serif';
+export const FONT_GRAPH_KEY_SMALL = '11px Arial, Helvetica, sans-serif';
+
+export const GRAPH_KEY_SIZE = 12;
+export const GRAPH_KEY_OFFSET_X = 5;
+export const GRAPH_KEY_OFFSET_Y = 34;
+export const GRAPH_BALANCE_NUM_TICKS = 5;
+
 // colours for overview score scale and page categories
 export const COLOR_CATEGORY = {
   'Stocks': [84, 110, 122],
@@ -21,15 +45,22 @@ export const COLOR_CATEGORY = {
   'Balance': [36, 191, 55]
 };
 
-// currency symbol
-export const SYMBOL_CURRENCY_HTML = '\u00a3';
-export const SYMBOL_CURRENCY_RAW = '£';
+// all other colour definitions
+export const COLOR_GRAPH_TITLE = '#000';
+export const COLOR_DARK = '#333';
+export const COLOR_LIGHT = '#eee';
+export const COLOR_LIGHT_GREY = '#999';
+export const COLOR_TRANSLUCENT_LIGHT = 'rgba(255, 255, 255, 0.5)';
 
-// update changes regularly with the server
-export const TIMER_UPDATE_SERVER = 1000;
+export const COLOR_PROFIT = '#0c3';
+export const COLOR_LOSS = '#c30';
+export const COLOR_PROFIT_LIGHT = '#f4fff4';
+export const COLOR_LOSS_LIGHT = '#fff4f4';
 
-// error messages
-export const ERROR_MSG_SERVER_UPDATE = 'Error updating server!';
-export const ERROR_MSG_BAD_DATA = 'Please enter valid data';
-export const ERROR_MSG_BUG_INVALID_ITEM = 'Bug: no date/cost on edited item';
+export const COLOR_BALANCE_ACTUAL = '#039';
+export const COLOR_BALANCE_PREDICTED = '#f00';
+export const COLOR_BALANCE_STOCKS = 'rgba(200, 200, 200, 0.5)';
+
+export const COLOR_GRAPH_FUND_ITEM = '#4286f4';
+export const COLOR_GRAPH_FUND_LINE = COLOR_GRAPH_TITLE;
 

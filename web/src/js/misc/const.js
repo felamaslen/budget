@@ -60,3 +60,18 @@ export const SERVER_UPDATE_REQUESTED = 0xf91;
 export const SERVER_UPDATE_RECEIVED = 0xf92;
 export const SERVER_UPDATE_ERROR = 0xf93;
 
+const htmlCanvasSupported = () => {
+  const elem = document.createElement('canvas');
+  return !!(elem.getContext && elem.getContext('2d'));
+};
+export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
+export const GRAPH_WIDTH = 500;
+export const GRAPH_HEIGHT = 300;
+export const GRAPH_BALANCE_CATEGORIES = [
+  { name: 'bills', key: 15 },
+  { name: 'food', key: 67 },
+  { name: 'general', key: 125 },
+  { name: 'holiday', key: 195 },
+  { name: 'social', key: 260 }
+];
+
