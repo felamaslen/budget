@@ -20,10 +20,6 @@ const hundredth = item => item / 100;
 const today = new YMD();
 
 export class GraphBalance extends LineGraph {
-  componentDidMount() {
-    super.componentDidMount();
-    this.update();
-  }
   update() {
     this.processData();
     this.padding = [40, 0, 0, 0];
@@ -65,10 +61,6 @@ export class GraphBalance extends LineGraph {
     /**
      * this doesn't really modify the data, it just puts it in a form ready for drawing
      */
-    this.currentYearMonthKey = getKeyFromYearMonth(
-      this.props.currentYearMonth[0], this.props.currentYearMonth[1],
-      this.props.yearMonths[0][0], this.props.yearMonths[0][1]
-    );
 
     // have an offset key when including old data
     const oldOffset = this.props.showAll ? this.props.balanceOld.size : 0;

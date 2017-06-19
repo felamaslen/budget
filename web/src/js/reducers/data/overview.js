@@ -202,7 +202,7 @@ export const rGetOverviewRows = data => {
         rgb = getOverviewScoreColor(
           value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]);
       }
-      const editable = column === 'Balance';
+      const editable = column[0] === 'balance';
 
       return map({
         column,

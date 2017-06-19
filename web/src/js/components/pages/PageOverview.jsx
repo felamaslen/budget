@@ -2,18 +2,20 @@
  * Overview page component
  */
 
+import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
 import { Map as map } from 'immutable';
 import classNames from 'classnames';
 import {
-  GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_BALANCE_CATEGORIES,
+  GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
   OVERVIEW_COLUMNS
 } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable.jsx';
 import { GraphBalance } from '../graphs/GraphBalance.jsx';
+import { GraphSpend } from '../graphs/GraphSpend.jsx';
 
 export class PageOverview extends PureControllerView {
   format(value, abbreviate) {
@@ -34,7 +36,7 @@ export class PageOverview extends PureControllerView {
         }
 
         const cellClasses = {};
-        cellClasses[cell.get('column').toLowerCase()] = true;
+        cellClasses[cell.get('column')[1].toLowerCase()] = true;
         let span;
         if (cell.get('editable')) {
           // editable balance column
@@ -59,12 +61,16 @@ export class PageOverview extends PureControllerView {
       return <tr key={key} className={rowClasses}>{cells}</tr>;
     });
 
+    const graphSpendData = list(GRAPH_SPEND_CATEGORIES).map(item => {
+      return this.props.data.getIn(['data', 'cost', item.name]);
+    });
+
     return (
       <div>
         <table className='table-insert table-overview noselect'>
           <thead>
             <tr>
-              {OVERVIEW_COLUMNS.map((column, key) => <th key={key}>{column}</th>)}
+              {OVERVIEW_COLUMNS.map((column, key) => <th key={key}>{column[1]}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -78,11 +84,17 @@ export class PageOverview extends PureControllerView {
             startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
             currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
             yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
-            categories={GRAPH_BALANCE_CATEGORIES}
             balance={this.props.data.getIn(['data', 'cost', 'balanceWithPredicted'])}
             balanceOld={this.props.data.getIn(['data', 'cost', 'old'])}
             funds={this.props.data.getIn(['data', 'cost', 'funds'])}
             fundsOld={this.props.data.getIn(['data', 'cost', 'fundsOld'])} />
+          <GraphSpend dispatcher={this.props.dispatcher}
+            width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
+            name='spend'
+            categories={GRAPH_SPEND_CATEGORIES}
+            data={graphSpendData}
+            yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
+            currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])} />
         </div>
       </div>
     );
