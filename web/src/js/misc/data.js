@@ -64,7 +64,7 @@ export class TransactionsList {
   getUnits(aList) {
     return aList.reduce((a, b) => a + b.get('units'), 0);
   }
-  getCost() {
+  getCost(aList) {
     return aList.reduce((a, b) => a + b.get('cost'), 0);
   }
   getTotalUnits() {
@@ -74,16 +74,16 @@ export class TransactionsList {
     return this.getCost(this.list);
   }
   getLastUnits() {
-    let length = this.size - 1;
-    if (this.list.getIn([length, 'units']) < 0) {
+    let length = this.size;
+    if (this.list.getIn([length - 1, 'units']) < 0) {
       // don't include last item if it is a "sell"
       length--;
     }
     return this.getUnits(this.list.slice(0, length));
   }
   getLastCost() {
-    let length = this.size - 1;
-    if (this.list.getIn([length, 'cost']) < 0) {
+    let length = this.size;
+    if (this.list.getIn([length - 1, 'cost']) < 0) {
       // don't include last item if it is a "sell"
       length--;
     }
