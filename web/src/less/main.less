@@ -1411,41 +1411,36 @@ button {
   body {
     overflow: auto;
   }
-  #main-outer, #main-inner,
-  #nav-inner,
-  #doc-outer, #doc-inner .doc-inner, #doc-inner > .page {
+  #content {
     width: @width_page_narrow;
-  }
-  #main-outer {
     margin: 0 auto;
     position: relative;
   }
-  #nav-inner {
-    margin: 0 auto;
-  }
-
-  /* hide navigation text */
-  #nav-outer {
-    .small-nav-link() {
-      text-indent: -9999px;
-      width: 30px;
-      padding: 0 0.5em;
-      &:before {
-        left: 0.5em;
-      }
+  #nav {
+    .inner {
+      width: @width_page_narrow;
+      margin: 0 auto;
     }
-
     .nav-list {
-      .nav-link, .nav-link-btn {
-        .small-nav-link();
+      /* hide navigation text */
+      .nav-link {
+        text-indent: -9999px;
+        width: 30px;
+        padding: 0 0.5em;
+        &:before {
+          left: 0.5em;
+        }
       }
     }
   }
 
   /* overview page */
-  #page-overview {
+  .page-overview {
     .table-overview {
       width: 100%;
+    }
+    .graph-container-outer {
+      position: static;
     }
     .graph-balance {
       position: relative;
@@ -1454,7 +1449,7 @@ button {
   }
 
   /* funds page */
-  #page-funds {
+  .page-funds {
     .fund-graph-cont {
       .graph-container {
       }
@@ -1475,7 +1470,7 @@ button {
   }
 
   /* in page */
-  #page-income {
+  .page-income {
     .graph-container-pie {
       width: 800px;
       margin-left: 100px;
