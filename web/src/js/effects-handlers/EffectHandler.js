@@ -30,10 +30,19 @@ export default buildEffectHandler([
   }],
 
   [EF_CONTENT_REQUESTED, (obj, dispatcher) => {
-    axios.get(`api?t=data/${obj.pageName}`, {
+    const pageIndex = obj.pageIndex;
+    const urlParam = { t: `data/${obj.pageName}` };
+    if (obj.urlParam) {
+      obj.urlParam.forEach(param => {
+        urlParam[param.name] = param.value;
+      });
+    }
+    const urlReq = querystring.stringify(urlParam);
+
+    axios.get(`api?${urlReq}`, {
       headers: { 'Authorization': obj.apiKey }
     }).then(
-      response => dispatcher.dispatch(aContentLoaded({ response, page: obj.page }))
+      response => dispatcher.dispatch(aContentLoaded({ response, pageIndex }))
     );
   }],
 

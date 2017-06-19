@@ -12,13 +12,21 @@ import {
 import processPageDataOverview from './data/overview';
 import { processPageDataList, processPageDataFunds } from './data/list';
 
-export const rLoadContent = (reduction, page) => {
-  if (!reduction.getIn(['appState', 'pagesLoaded', page])) {
+export const rLoadContent = (reduction, pageIndex) => {
+  if (!reduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
     const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-    const pageName = PAGES[page];
+    const pageName = PAGES[pageIndex];
+    const reqObj = { pageIndex, pageName, apiKey };
+
+    if (PAGES[pageIndex] === 'funds') {
+      reqObj.urlParam = [
+        { name: 'history', value: 'true' },
+        { name: 'period', value: 'year1' }
+      ];
+    }
 
     return reduction.set('effects', reduction.get('effects').push(
-      buildMessage(EF_CONTENT_REQUESTED, { page, pageName, apiKey })
+      buildMessage(EF_CONTENT_REQUESTED, reqObj)
     ));
   }
   return reduction;
@@ -41,7 +49,7 @@ const processPageData = (pageIndex, data) => {
     return processPageDataFunds(data, pageIndex);
   }
 
-  if (LIST_PAGES.indexOf(pageIndex) > -1) {
+  else if (LIST_PAGES.indexOf(pageIndex) > -1) {
     const page = processPageDataList(data, pageIndex);
     const sortedRows = sortRowsByDate(page.get('rows'), pageIndex);
     const weeklyData = addWeeklyAverages(page.get('data'), sortedRows, pageIndex);
@@ -52,10 +60,13 @@ const processPageData = (pageIndex, data) => {
 };
 
 export const rHandleContentResponse = (reduction, output) => {
-  return reduction.setIn(['appState', 'pagesLoaded', output.page], true)
-  .setIn(['appState', 'pagesRaw', output.page], output.response.data.data)
-  .setIn(['appState', 'pages', output.page], processPageData(output.page, output.response.data.data))
-  .setIn(['appState', 'edit', 'active'], getNullEditable(output.page))
-  .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.page));
+  return reduction.setIn(['appState', 'pagesLoaded', output.pageIndex], true)
+  .setIn(['appState', 'pagesRaw', output.pageIndex], output.response.data.data)
+  .setIn(
+    ['appState', 'pages', output.pageIndex],
+    processPageData(output.pageIndex, output.response.data.data)
+  )
+  .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
+  .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));
 };
 

@@ -14,7 +14,8 @@ export class Graph extends PureControllerView {
     this.width = null;
     this.height = null;
     this.supported = null;
-    this.padding = this.props.padding || [0, 0, 0, 0];
+    this.padding = [0, 0, 0, 0];
+    this.canvasProperties = {};
   }
   update() {
     return;
@@ -26,6 +27,9 @@ export class Graph extends PureControllerView {
     return null;
   }
   afterCanvas() {
+    return null;
+  }
+  canvasClasses() {
     return null;
   }
   componentDidMount() {
@@ -41,7 +45,9 @@ export class Graph extends PureControllerView {
   render() {
     const classes = `graph-container graph-${this.props.name}`;
     const canvas = HTML_CANVAS_SUPPORTED ? (
-      <canvas ref='canvas' width={this.props.width} height={this.props.height} />
+      <canvas ref='canvas' {...this.canvasProperties}
+        className={this.canvasClasses()}
+        width={this.props.width} height={this.props.height} />
     ) : (
       <span>Canvas not supported</span>
     );
@@ -59,7 +65,6 @@ export class Graph extends PureControllerView {
 Graph.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
-  name: PropTypes.string,
-  padding: PropTypes.object
+  name: PropTypes.string
 };
 

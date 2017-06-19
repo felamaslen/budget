@@ -8,7 +8,7 @@ import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
 import { LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
-import { getEditable } from '../Editable/getEditable.jsx';
+import { getEditable } from '../Editable/getEditable';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
 
 export class PageList extends PureControllerView {
@@ -62,6 +62,9 @@ export class PageList extends PureControllerView {
       </li>
     );
   }
+  renderListExtra() {
+    return null;
+  }
   renderList() {
     return this.props.data.get('rows').map((row, rowKey) => {
       const id = row.get('id');
@@ -100,6 +103,7 @@ export class PageList extends PureControllerView {
         <li key={rowKey}>
           {items}
           {daily}
+          {this.renderListExtra(row, rowKey)}
           {deleteBtn}
         </li>
       );
