@@ -87,3 +87,8 @@ export const GRAPH_SPEND_CATEGORIES = [
   { name: 'social', key: 260 }
 ];
 
+export const GRAPH_FUND_ITEM_WIDTH = 100;
+export const GRAPH_FUND_ITEM_HEIGHT = 48;
+export const GRAPH_FUND_ITEM_WIDTH_LARGE = 300;
+export const GRAPH_FUND_ITEM_HEIGHT_LARGE = 120;
+

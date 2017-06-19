@@ -3,7 +3,7 @@
  */
 
 import { List as list } from 'immutable';
-import { Graph } from './Graph.jsx';
+import { Graph } from './Graph';
 import { timeSeriesTicks } from '../../misc/date';
 
 // Hermite abbreviated functions
@@ -180,7 +180,7 @@ export class LineGraph extends Graph {
     this.ctx.closePath();
   }
   drawCubicLine(points, color, theOptions) {
-    if (points.length < 2) {
+    if (points.size < 2) {
       return;
     }
     const options = theOptions || { stroke: true };

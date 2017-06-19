@@ -13,9 +13,9 @@ import {
   OVERVIEW_COLUMNS
 } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
-import { getEditable } from '../Editable/getEditable.jsx';
-import { GraphBalance } from '../graphs/GraphBalance.jsx';
-import { GraphSpend } from '../graphs/GraphSpend.jsx';
+import { getEditable } from '../Editable/getEditable';
+import { GraphBalance } from '../graphs/GraphBalance';
+import { GraphSpend } from '../graphs/GraphSpend';
 
 export class PageOverview extends PureControllerView {
   format(value, abbreviate) {

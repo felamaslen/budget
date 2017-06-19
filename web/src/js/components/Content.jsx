@@ -11,6 +11,7 @@ import { PAGES, LIST_PAGES, DAILY_PAGES } from '../misc/const';
 import { Spinner } from './Spinner';
 import { PageOverview } from './pages/PageOverview';
 import { PageList } from './pages/PageList';
+import { PageFunds } from './pages/PageFunds';
 
 export class Content extends PureControllerView {
   renderPage() {
@@ -23,6 +24,19 @@ export class Content extends PureControllerView {
           data={data}
           edit={this.props.edit}
           showAll={this.props.showAllBalanceGraph} />
+      );
+    }
+    if (page === 'funds') {
+      // funds page
+      return (
+        <PageFunds dispatcher={this.props.dispatcher}
+          data={data}
+          edit={this.props.edit}
+          add={this.props.add}
+          addBtnFocus={this.props.addBtnFocus}
+          daily={DAILY_PAGES[this.props.index]}
+          index={this.props.index}
+          page={page} />
       );
     }
     if (LIST_PAGES.indexOf(this.props.index) > -1) {

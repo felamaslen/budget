@@ -32,4 +32,5 @@ export const AC_EDIT_FUND_TRANSACTIONS_ADDED = 0xacef3;
 export const AC_EDIT_FUND_TRANSACTIONS_REMOVED = 0xacef2;
 
 export const AC_GRAPH_SHOWALL_TOGGLED = 0xac81;
+export const AC_GRAPH_FUND_ITEM_TOGGLED = 0xac82;
 

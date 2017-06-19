@@ -6,7 +6,7 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { LineGraph } from './LineGraph.jsx';
+import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../misc/data';
 import { YMD } from '../../misc/date';
