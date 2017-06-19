@@ -5,7 +5,7 @@
 import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
-import { rGetOverviewRows, rCalculateOverview } from '../reducers/data/overview';
+import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from '../reducers/data/overview';
 import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
 } from '../misc/const';
@@ -20,13 +20,23 @@ import { rErrorMessageOpen } from './ErrorReducer';
 
 const applyEditsOverview = (reduction, item) => {
   // update the balance for a row and recalculate overview data
+  const overviewKey = PAGES.indexOf('overview');
   const value = item.get('value');
   const row = item.get('row');
-  const newData = reduction.getIn(['appState', 'pages', 0, 'data'])
-  .setIn(['cost', 'balance', row], value);
 
-  return reduction.setIn(['appState', 'pages', 0, 'data'], newData)
-  .setIn(['appState', 'pages', 0, 'rows'], rGetOverviewRows(newData));
+  const newCost = reduction
+  .getIn(['appState', 'pages', overviewKey, 'data', 'cost'])
+  .setIn(['balance', row], value);
+  const startYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'startYearMonth']);
+  const endYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'endYearMonth']);
+  const currentYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'currentYearMonth']);
+  const futureMonths = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'futureMonths']);
+
+  const newData = rProcessDataOverview(
+    newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths);
+
+  return reduction.setIn(['appState', 'pages', overviewKey, 'data'], newData)
+  .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 };
 
 const applyEditsList = (reduction, item, pageIndex) => {

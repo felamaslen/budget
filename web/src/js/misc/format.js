@@ -7,6 +7,16 @@ import {
 } from './config';
 
 /**
+ * @function capitalise
+ * @param {string} string: value to capitalise
+ * @returns {string} capitalised string
+ */
+export const capitalise = string => {
+  return string.substring(0, 1).toUpperCase() +
+    string.substring(1).toLowerCase();
+};
+
+/**
  * @function round
  * @param {float} value: value to round
  * @param {integer} precision: precision to round to
@@ -98,5 +108,33 @@ export const formatCurrency = (value, options) => {
   }
 
   return output;
+};
+
+/**
+ * Get tick sizes for graphs
+ * @param {float} min: minimum value
+ * @param {float} max: maximum value
+ * @param {integer} numTicks: number of ticks to produce
+ * @returns {float} tick length
+ */
+export const getTickSize = (min, max, numTicks) => {
+  const minimum = (max - min) / numTicks;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
+  const res = minimum / magnitude;
+  let tick;
+  if (res > 5) {
+    tick = 10 * magnitude;
+  }
+  else if (res > 2) {
+    tick = 5 * magnitude;
+  }
+  else if (res > 1) {
+    tick = 2 * magnitude;
+  }
+  else {
+    tick = magnitude;
+  }
+
+  return tick;
 };
 

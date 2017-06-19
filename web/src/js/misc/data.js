@@ -121,6 +121,17 @@ export const listAverage = (theList, offset, mode) => {
   return theList.reduce((a, b) => a + b, 0) / theList.size;
 };
 
+export const indexPoints = (value, key) => [key, value];
+
+export const getYearMonthFromKey = (key, startYear, startMonth) => {
+  const year = startYear + Math.floor((startMonth - 1 + key) / 12);
+  const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed
+  return [year, month];
+};
+export const getKeyFromYearMonth = (year, month, startYear, startMonth) => {
+  return 12 * (year - startYear) + month - startMonth;
+};
+
 /**
  * Generate random Gaussian increment for a brownian motion
  * Used in fund predictions
