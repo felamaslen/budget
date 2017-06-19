@@ -276,10 +276,11 @@ export const sortRowsByDate = (rows, pageIndex) => {
 
   if (DAILY_PAGES[pageIndex]) {
     return sorted.map((row, rowKey) => {
-      const lastInDay = rowKey === rows.size - 1 ||
-        row.getIn(['cols', dateKey]) > rows.getIn([rowKey + 1, 'cols', dateKey]);
+      const lastInDay = rowKey === sorted.size - 1 ||
+        row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
       dailySum += row.getIn(['cols', costKey]);
       const newRow = lastInDay ? row.set('daily', dailySum) : row.delete('daily');
+
       if (lastInDay) {
         dailySum = 0;
       }
