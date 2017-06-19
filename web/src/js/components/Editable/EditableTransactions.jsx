@@ -88,10 +88,12 @@ export default class EditableTransactions extends Editable {
                   <td>
                     <input defaultValue={units}
                       ref={input => { this.input.units[id] = input; }}
+                      onBlur={() => {
+                        this.input.units[id].value = this.props.value.list.getIn([key, 'units']);
+                      }}
                       onChange={evt => {
                         const thisUnits = parseFloat(evt.target.value, 10);
                         const value = isNaN(thisUnits) ? units : thisUnits;
-                        this.input.units[id].value = value;
                         this.dispatchAction(
                           aFundTransactionsChanged({ row, col, key, column: 'units', value }));
                       }}
@@ -100,10 +102,12 @@ export default class EditableTransactions extends Editable {
                   <td>
                     <input defaultValue={cost / 100}
                       ref={input => { this.input.cost[id] = input; }}
+                      onBlur={() => {
+                        this.input.cost[id].value = this.props.value.list.getIn([key, 'cost']) / 100;
+                      }}
                       onChange={evt => {
                         const thisCost = Math.round(100 * parseFloat(evt.target.value, 10));
                         const value = isNaN(thisCost) ? cost : thisCost;
-                        this.input.cost[id].value = value / 100;
                         this.dispatchAction(
                           aFundTransactionsChanged({ row, col, key, column: 'cost', value }));
                       }}
