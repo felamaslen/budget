@@ -34,4 +34,6 @@ export const AC_EDIT_FUND_TRANSACTIONS_REMOVED = 0xacef2;
 export const AC_GRAPH_SHOWALL_TOGGLED = 0xac81;
 export const AC_GRAPH_FUND_ITEM_TOGGLED = 0xac82;
 export const AC_GRAPH_FUNDS_CLICKED = 0xac83;
+export const AC_GRAPH_FUNDS_ZOOMED = 0xac84;
+export const AC_GRAPH_FUNDS_HOVERED = 0xac85;
 

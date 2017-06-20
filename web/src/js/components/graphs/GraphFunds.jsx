@@ -5,43 +5,61 @@
 import { List as list, Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { LineGraph } from './LineGraph';
-import { formatCurrency, getTickSize } from '../../misc/format';
+import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import {
   GRAPH_FUNDS_DEFAULT_PERIOD,
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE,
-  GRAPH_FUNDS_NUM_TICKS,
-  GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED
+  GRAPH_FUNDS_NUM_TICKS
 } from '../../misc/const';
 import {
-  GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES,
+  GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
   COLOR_DARK, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT, COLOR_LIGHT_GREY,
   COLOR_GRAPH_TITLE,
   FONT_AXIS_LABEL
 } from '../../misc/config';
-import { aFundsGraphClicked } from '../../actions/GraphActions';
+import {
+  aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered
+} from '../../actions/GraphActions';
 
 export class GraphFunds extends LineGraph {
   constructor(props) {
     super(props);
+    this.padding = [36, 0, 0, 0];
+    this.tension = GRAPH_FUNDS_TENSION;
     this.canvasProperties = {
       onClick: () => {
         this.dispatchAction(aFundsGraphClicked());
+      },
+      onWheel: evt => {
+        this.dispatchAction(aFundsGraphZoomed({
+          direction: evt.deltaY / Math.abs(evt.deltaY),
+          position: this.valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft)
+        }));
+        evt.preventDefault();
       }
     };
-    this.padding = [36, 0, 0, 0];
-    this.tension = GRAPH_FUNDS_TENSION;
+    this.outerProperties = {
+      onMouseMove: evt => {
+        const valX = this.valX(evt.pageX - evt.currentTarget.offsetLeft);
+        const valY = this.valY(evt.pageY - evt.currentTarget.offsetTop);
+        this.dispatchAction(aFundsGraphHovered({ valX, valY }));
+      },
+      onMouseOut: () => {
+        this.dispatchAction(aFundsGraphHovered(null));
+      }
+    };
   }
   update() {
     this.processData();
     this.draw();
   }
   setRangeValues() {
-    const minX = this.props.zoom.first();
-    const maxX = this.props.zoom.last();
+    const minX = this.props.zoom.get(0);
+    const maxX = this.props.zoom.get(1);
 
-    const valuesY = this.props.lines.map(line => line.last().map(item => item.last()));
+    const valuesY = this.props.lines.map(line => line.last().map(item => item.last()))
+    .filter(item => item.size > 0);
     let minY = valuesY.reduce((last, line) => {
       return Math.min(last, line.min());
     }, Infinity);
@@ -82,36 +100,6 @@ export class GraphFunds extends LineGraph {
       return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
     }
     return Math.round(100 * value) / 100;
-  }
-  zoomX(direction) {
-    if (this.hlPoint[0] === -1 || this.hlPoint[1] === -1 ||
-        (direction < 0 && this.dataVisiblegetIn([0, 1]).size < 4)) {
-      return;
-    }
-
-    const center = this.props.lines.getIn([this.hlPoint[0], 1, this.hlPoint[1], 0]);
-    const newRange = Math.max(
-      (this.originalRange[1] - this.originalRange[0]) * GRAPH_ZOOM_MAX,
-      (this.maxX - this.minX) * (1 + GRAPH_ZOOM_SPEED * direction)
-    );
-    let newMinXTarget = center - newRange / 2;
-    let newMaxXTarget = center + newRange / 2;
-    if (newMinXTarget < this.originalRange[0]) {
-      newMaxXTarget += this.originalRange[0] - newMinXTarget;
-      newMinXTarget = this.originalRange[0];
-    }
-    else if (newMaxXTarget > this.originalRange[1]) {
-      newMinXTarget -= newMaxXTarget - this.originalRange[1];
-      newMaxXTarget = this.originalRange[1];
-    }
-
-    const newMinX = Math.max(this.originalRange[0], Math.round(newMinXTarget));
-    const newMaxX = Math.min(this.originalRange[1], Math.round(newMaxXTarget));
-
-    this.setRange([newMinX, newMaxX, this.minY, this.maxY]);
-
-    this.calculateYRange();
-    this.draw();
   }
   drawAxes() {
     const axisTextColor = COLOR_DARK;
@@ -219,6 +207,17 @@ export class GraphFunds extends LineGraph {
         this.drawLine(line.last(), [line.first()]);
       }
     });
+
+    if (this.props.hlPoint) {
+      const hlPixX = this.pixX(this.props.hlPoint.get(0));
+      const hlPixY = this.pixY(this.props.hlPoint.get(1));
+      this.ctx.beginPath();
+      this.ctx.moveTo(hlPixX, hlPixY);
+      this.ctx.arc(hlPixX, hlPixY, GRAPH_FUNDS_POINT_RADIUS, 0, Math.PI * 2, false);
+      this.ctx.fillStyle = this.props.hlPoint.get(2);
+      this.ctx.fill();
+      this.ctx.closePath();
+    }
   }
   draw() {
     if (!this.supported) {
@@ -229,16 +228,32 @@ export class GraphFunds extends LineGraph {
 
     this.drawAxes();
     this.drawData();
-    // this.handleMouseover();
-    // this.drawModeIndicator();
   }
   afterCanvas() {
-    // funds list for selection
+    let label = null;
+    if (this.props.hlPoint) {
+      const ageSeconds = new Date().getTime() / 1000 -
+                   (this.props.hlPoint.get(0) + this.props.history.get('startTime'));
+      const ageText = formatAge(ageSeconds);
+      const valueText = this.formatValue(this.props.hlPoint.get(1));
+      const labelText = `${ageText}: ${valueText}`;
+
+      const labelStyle = {
+        left: this.pixX(this.props.hlPoint.get(0)),
+        top: this.pixY(this.props.hlPoint.get(1))
+      };
+
+      label = (
+        <span className='label' style={labelStyle}>{labelText}</span>
+      );
+    }
+
     return (
       <div>
         <span className='mode'>
           Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
         </span>
+        {label}
       </div>
     );
   }

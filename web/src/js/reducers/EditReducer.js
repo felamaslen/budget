@@ -164,15 +164,15 @@ export const rDeleteListItem = (reduction, item) => {
   let newReduction = reduction;
 
   const pageIndex = item.pageIndex;
+  const id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'id']);
   const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
   const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-  const id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'id']);
-  const cost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
+  const itemCost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
 
   // recalculate total
   newReduction = newReduction.setIn(
     ['appState', 'pages', pageIndex, 'data', 'total'],
-    newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) - cost
+    newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) - itemCost
   );
   // sort rows and recalculate weekly data
   const sortedRows = sortRowsByDate(
@@ -183,8 +183,7 @@ export const rDeleteListItem = (reduction, item) => {
   // recalculate overview data
   if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
     const date = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', dateKey]);
-    const cost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
-    newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, cost);
+    newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, itemCost);
   }
 
   newReduction = newReduction.setIn(
@@ -192,7 +191,7 @@ export const rDeleteListItem = (reduction, item) => {
     reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
   )
   .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
-  .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData)
+  .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
 
   // recalculate fund profits / losses
   if (PAGES[pageIndex] === 'funds') {
