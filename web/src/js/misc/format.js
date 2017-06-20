@@ -138,3 +138,30 @@ export const getTickSize = (min, max, numTicks) => {
   return tick;
 };
 
+/**
+ * Format age text
+ * @param {integer} seconds: number of seconds to age
+ * @param {boolean} shortAbbr: whether to abbreviate concisely
+ * @returns {string} age text
+ */
+export const formatAge = (seconds, shortAbbr) => {
+  const measures = [
+    [1, 's', 'second'],
+    [60, 'm', 'minute'],
+    [3600, 'h', 'hour'],
+    [86400, 'd', 'day'],
+    [86400 * 30, 'M', 'month'],
+    [86400 * 365, 'Y', 'year']
+  ];
+  const secondsNormalised = Math.max(seconds, 1);
+  const measure = measures.reverse().filter(item => {
+    return secondsNormalised >= item[0];
+  })[0];
+
+  const rounded = Math.round(seconds / measure[0]);
+  const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
+  const units = measure[shortAbbr ? 1 : 2] + plural;
+
+  return shortAbbr ? rounded + units : `${rounded} ${units} ago`;
+};
+

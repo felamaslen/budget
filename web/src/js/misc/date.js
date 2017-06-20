@@ -10,6 +10,7 @@ export const yearMonthDifference = (ym1, ym2) => {
 };
 
 const leapYear = year => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const monthDays = (month, year) => {
   const days = [31, leapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -188,7 +189,7 @@ class TimeTickHourDay extends TimeTick {
     };
   }
   label(t) {
-    return days[new Date(t).getDay()];
+    return WEEK_DAYS[new Date(t).getDay()];
   }
 }
 class TimeTickMinuteHour extends TimeTick {
@@ -220,7 +221,7 @@ class TimeTickMinuteHour extends TimeTick {
   label(t) {
     const obj = new Date(t);
     const hour = obj.getHours();
-    return hour === 0 ? days[obj.getDay()] : ((hour + 11) % 12 + 1) + (hour < 12 ? 'am' : 'pm');
+    return hour === 0 ? WEEK_DAYS[obj.getDay()] : ((hour + 11) % 12 + 1) + (hour < 12 ? 'am' : 'pm');
   }
 }
 class TimeTickSecondMinute extends TimeTick {

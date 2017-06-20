@@ -48,7 +48,7 @@ export default new Record({
       graphFunds: {
         mode: GRAPH_FUNDS_MODE_ROI,
         showOverall: true,
-        hlPoint: [-1, -1],
+        hlPoint: null,
         zoom: [null, null], // range to restrict to
         range: [null, null] // possible range
       }

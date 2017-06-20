@@ -16,6 +16,7 @@ export class Graph extends PureControllerView {
     this.supported = null;
     this.padding = [0, 0, 0, 0];
     this.canvasProperties = {};
+    this.outerProperties = {};
   }
   update() {
     return;
@@ -53,7 +54,7 @@ export class Graph extends PureControllerView {
     );
 
     return (
-      <div className={classes}>
+      <div className={classes} {...this.outerProperties}>
         {this.beforeCanvas()}
         {canvas}
         {this.afterCanvas()}

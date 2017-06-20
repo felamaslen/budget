@@ -87,17 +87,6 @@ export const addPriceHistory = (pageIndex, row, history, transactions) => {
   return row.set('history', gainHistory).set('gain', gain);
 };
 
-/*
-  getLinesPrice(index) {
-    return this.raw.map(item => {
-      if (!item[1][index]) {
-        return null;
-      }
-      return [item[0], item[1][index]];
-    }).filter(item => item !== null);
-  }
-*/
-
 const getLinesCostValue = (index, funds, history, callback) => {
   return history.get('history').map(item => {
     const prices = item.last().map((price, fundKey) => {
@@ -176,40 +165,34 @@ const getLines = (fundLines, getLine, getMain) => {
   return lines;
 };
 
-export const zoomFundLines = (lines, reduction) => {
+export const zoomFundLines = (linesAll, reduction) => {
   // restrict fund lines by zooming
-  return lines;
-  /*
-  let newLines;
-
-  const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']),
-  const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom'])
-  const hlPoint = reduction.getIn(['appState', 'other', 'graphFunds', 'hlPoints']);
-
-  if (zoom.first() !== null && zoom.last() !== null) {
-  newLines = lines.map(line => {
-    const points = line.last();
+  const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+  const minX = zoom.get(0);
+  const maxX = zoom.get(1);
+  const lines = linesAll.map(line => {
+    const points = line.get(1);
     return line.set(1, points.filter((point, pointKey) => {
+      const thisVisible = point.get(0) >= minX && point.get(0) <= maxX;
+      if (thisVisible) {
+        return true;
+      }
+      if (pointKey < points.size) {
+        const next = points.getIn([pointKey + 1, 0]);
+        if (next >= minX && next <= maxX) {
+          return true;
+        }
+      }
+      if (pointKey > 0) {
+        const prev = points.getIn([pointKey - 1, 0]);
+        if (prev >= minX && prev <= maxX) {
+          return true;
+        }
+      }
+      return false;
     }));
   });
-
-  itemInRange(points, key) {
-    const nextVisible = points.getIn([Math.min(points.size - 1, key + 1), 0]) >= this.minX;
-    const prevVisible = points.getIn([Math.max(0, key - 1), 0]) <= this.maxX;
-
-    return nextVisible && prevVisible;
-  }
-  filterDataVisible() {
-    return this.props.lines.map(line => {
-      const points = line.get(1);
-      return line.set(1, points.filter((point, pointKey) => {
-        return this.itemInRange(points, pointKey);
-      }));
-    });
-  }
-
-  return newLines;
-  */
+  return lines;
 };
 
 export const getFormattedHistory = (reduction, pageIndex, history) => {
@@ -236,16 +219,16 @@ export const getFormattedHistory = (reduction, pageIndex, history) => {
 
   const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
 
-  let lines;
+  let linesAll;
   switch (mode) {
   case GRAPH_FUNDS_MODE_PRICE:
-    lines = getLines(
+    linesAll = getLines(
       fundLines,
       index => getLinesPrice(data, funds, history, index, true)
     );
     break;
   case GRAPH_FUNDS_MODE_ABSOLUTE:
-    lines = getLines(
+    linesAll = getLines(
       fundLines,
       index => getLinesAbsolute(data, funds, history, index),
       () => getMainAbsolute(data, funds, history)
@@ -253,18 +236,18 @@ export const getFormattedHistory = (reduction, pageIndex, history) => {
     break;
   case GRAPH_FUNDS_MODE_ROI:
   default:
-    lines = getLines(
+    linesAll = getLines(
       fundLines,
       index => getLinesROI(data, funds, history, index),
       () => getMainROI(data, funds, history)
     );
   }
 
-  lines = zoomFundLines(lines, reduction);
+  const lines = zoomFundLines(linesAll, reduction);
 
   return reduction.setIn(
     ['appState', 'pages', pageIndex],
-    data.set('lines', lines).set('history', history)
+    data.set('linesAll', linesAll).set('lines', lines).set('history', history)
   );
 };
 
