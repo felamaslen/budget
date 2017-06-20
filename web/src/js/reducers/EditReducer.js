@@ -164,14 +164,24 @@ export const rDeleteListItem = (reduction, item) => {
   let newReduction = reduction;
 
   const pageIndex = item.pageIndex;
+  const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+  const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
   const id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'id']);
+  const cost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
+
+  // recalculate total
+  newReduction = newReduction.setIn(
+    ['appState', 'pages', pageIndex, 'data', 'total'],
+    newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) - cost
+  );
+  // sort rows and recalculate weekly data
   const sortedRows = sortRowsByDate(
     newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).splice(item.key, 1), pageIndex);
+  const weeklyData = addWeeklyAverages(
+    newReduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
 
   // recalculate overview data
   if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
-    const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
-    const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
     const date = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', dateKey]);
     const cost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
     newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, cost);
@@ -180,9 +190,9 @@ export const rDeleteListItem = (reduction, item) => {
   newReduction = newReduction.setIn(
     ['appState', 'edit', 'queueDelete'],
     reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
-  ).setIn(
-    ['appState', 'pages', pageIndex, 'rows'], sortedRows
-  );
+  )
+  .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
+  .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData)
 
   // recalculate fund profits / losses
   if (PAGES[pageIndex] === 'funds') {
