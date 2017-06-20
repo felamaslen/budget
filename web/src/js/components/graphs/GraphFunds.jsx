@@ -9,8 +9,8 @@ import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import {
   GRAPH_FUNDS_DEFAULT_PERIOD,
-  GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE,
-  GRAPH_FUNDS_NUM_TICKS
+  GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
+  GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
 } from '../../misc/const';
 import {
   GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
@@ -19,7 +19,8 @@ import {
   FONT_AXIS_LABEL
 } from '../../misc/config';
 import {
-  aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered
+  aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
+  aFundsGraphLineToggled
 } from '../../actions/GraphActions';
 
 export class GraphFunds extends LineGraph {
@@ -96,10 +97,7 @@ export class GraphFunds extends LineGraph {
     if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
       return value.toFixed(2) + '%';
     }
-    if (this.props.mode === GRAPH_FUNDS_MODE_ABSOLUTE) {
-      return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
-    }
-    return Math.round(100 * value) / 100;
+    return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
   }
   drawAxes() {
     const axisTextColor = COLOR_DARK;
@@ -250,6 +248,24 @@ export class GraphFunds extends LineGraph {
 
     return (
       <div>
+        <ul className='fund-sidebar noselect'>
+          <li>
+            <select defaultValue={this.props.period}>
+            {GRAPH_FUNDS_PERIODS.map((period, key) => {
+              return <option key={key} value={period[0]}>{period[1]}</option>;
+            })}
+            </select>
+          </li>
+          {this.props.fundLines.map((line, key) => {
+            return (
+              <li key={key} className={line.get('enabled') ? 'enabled' : null}
+                onClick={() => this.dispatchAction(aFundsGraphLineToggled(key))}>
+                <span className='checkbox' style={{ borderColor: line.get('color') }} />
+                <span className='fund'>{line.get('item')}</span>
+              </li>
+            );
+          })}
+        </ul>
         <span className='mode'>
           Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
         </span>
@@ -263,8 +279,9 @@ GraphFunds.propTypes = {
   history: PropTypes.instanceOf(map),
   lines: PropTypes.instanceOf(list),
   funds: PropTypes.instanceOf(list),
-  period: PropTypes.instanceOf('string'),
+  fundLines: PropTypes.instanceOf(list),
   mode: PropTypes.number,
+  period: PropTypes.string,
   showOverall: PropTypes.bool,
   zoom: PropTypes.instanceOf(list),
   hlPoint: PropTypes.instanceOf(list)

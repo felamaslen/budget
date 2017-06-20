@@ -97,7 +97,12 @@ export const GRAPH_FUNDS_HEIGHT = 300;
 export const GRAPH_FUNDS_MODE_ROI = 0;
 export const GRAPH_FUNDS_MODE_ABSOLUTE = 1;
 export const GRAPH_FUNDS_MODE_PRICE = 2;
-export const GRAPH_FUNDS_DEFAULT_PERIOD = 'year1';
+export const GRAPH_FUNDS_PERIODS = [
+  ['year1', '1 year'],
+  ['year5', '5 years'],
+  ['month1', '1 month'],
+  ['month3', '3 months']
+];
 export const GRAPH_FUNDS_NUM_TICKS = 10;
 
 export const GRAPH_ZOOM_SPEED = 0.1;

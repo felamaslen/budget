@@ -4,7 +4,7 @@
 
 import { List as list } from 'immutable';
 import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
-import { getFormattedHistory, zoomFundLines } from './data/funds';
+import { zoomFundLines, addFundLines } from './data/funds';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -23,11 +23,14 @@ export const rToggleFundItemGraph = (reduction, key) => {
 
 export const rToggleFundsGraphMode = reduction => {
   const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
-  return getFormattedHistory(
+  const fundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
+  const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
+  const funds = data.get('funds');
+  const history = data.get('history');
+
+  return addFundLines(
     reduction.setIn(['appState', 'other', 'graphFunds', 'mode'], newMode),
-    pageIndexFunds,
-    reduction.getIn(['appState', 'pages', pageIndexFunds, 'history'])
-  );
+    data, funds, history, pageIndexFunds, fundLines);
 };
 
 const numFundPointsVisible = (lines, minX, maxX) => {
@@ -100,5 +103,19 @@ export const rHoverFundsGraph = (reduction, position) => {
   const hlPoint = lines.getIn([closest[1], 1, closest[2]]);
   return reduction.setIn(
     ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint ? hlPoint.push(color) : null);
+};
+
+export const rToggleFundsGraphLine = (reduction, index) => {
+  const oldFundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
+  const newFundLines = oldFundLines.setIn([index, 'enabled'], !oldFundLines.getIn([index, 'enabled']));
+
+  const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
+  const funds = data.get('funds');
+  const history = data.get('history');
+  return addFundLines(reduction, data, funds, history, pageIndexFunds, newFundLines);
+};
+
+export const rChangeFundsGraphPeriod = (reduction, period) => {
+  return reduction; // TODO
 };
 

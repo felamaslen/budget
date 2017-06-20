@@ -2,7 +2,7 @@ import { Record, List, fromJS } from 'immutable';
 
 import {
   PAGES, SERVER_UPDATE_IDLE,
-  GRAPH_FUNDS_MODE_ROI
+  GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS
 } from './misc/const';
 
 // the state of the app (reduction) is stored as an immutable object,
@@ -46,6 +46,7 @@ export default new Record({
     other: {
       showAllBalanceGraph: false,
       graphFunds: {
+        period: GRAPH_FUNDS_PERIODS[0][0],
         mode: GRAPH_FUNDS_MODE_ROI,
         showOverall: true,
         hlPoint: null,
