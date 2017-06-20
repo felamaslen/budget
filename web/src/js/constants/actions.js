@@ -22,6 +22,18 @@ export const AC_SERVER_ADD_RECEIVED = 0xac5f3;
 
 export const AC_CONTENT_LOADED = 0xacc1;
 
+export const AC_ANALYSIS_PERIOD_CHANGED = 0xacaa1;
+export const AC_ANALYSIS_GROUPING_CHANGED = 0xacaa2;
+export const AC_ANALYSIS_TIME_INDEX_CHANGED = 0xacaa3;
+export const AC_ANALYSIS_DATA_REFRESHED = 0xacad1;
+export const AC_ANALYSIS_TREE_DISPLAY_TOGGLED = 0xacab1;
+export const AC_ANALYSIS_TREE_EXPAND_TOGGLED = 0xacab2;
+export const AC_ANALYSIS_TREE_HOVERED = 0xacab3;
+export const AC_ANALYSIS_BLOCK_SHALLOW_CLICKED = 0xacab4;
+export const AC_ANALYSIS_BLOCK_DEEP_CLICKED = 0xacab5;
+export const AC_ANALYSIS_BLOCK_SHALLOW_HOVERED = 0xacab6;
+export const AC_ANALYSIS_BLOCK_DEEP_HOVERED = 0xacab7;
+
 export const AC_EDIT_ACTIVATED = 0xaceea;
 export const AC_EDIT_CHANGED = 0xaceec;
 export const AC_EDIT_LIST_ITEM_ADDED = 0xace1a;

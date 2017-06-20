@@ -45,6 +45,14 @@ export default new Record({
     },
     other: {
       showAllBalanceGraph: false,
+      analysis: {
+        loading: false,
+        period: 0,
+        grouping: 0,
+        timeIndex: 0,
+        treeOpen: {},
+        treeVisible: { bills: false }
+      },
       graphFunds: {
         period: GRAPH_FUNDS_PERIODS[0][0],
         mode: GRAPH_FUNDS_MODE_ROI,

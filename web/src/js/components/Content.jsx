@@ -11,6 +11,7 @@ import { PAGES, LIST_PAGES, DAILY_PAGES } from '../misc/const';
 import { Spinner } from './Spinner';
 import { PageOverview } from './pages/PageOverview';
 import { PageList } from './pages/PageList';
+import { PageAnalysis } from './pages/PageAnalysis';
 import { PageFunds } from './pages/PageFunds';
 
 export class Content extends PureControllerView {
@@ -24,6 +25,21 @@ export class Content extends PureControllerView {
           data={data}
           edit={this.props.edit.get('active')}
           showAll={this.props.other.get('showAllBalanceGraph')} />
+      );
+    }
+    if (page === 'analysis') {
+      return (
+        <PageAnalysis dispatcher={this.props.dispatcher}
+          period={this.props.other.getIn(['analysis', 'period'])}
+          grouping={this.props.other.getIn(['analysis', 'grouping'])}
+          timeIndex={this.props.other.getIn(['analysis', 'timeIndex'])}
+          cost={data.get('cost')}
+          costTotal={data.get('costTotal')}
+          items={data.get('items')}
+          description={data.get('description')}
+          treeVisible={this.props.other.getIn(['analysis', 'treeVisible'])}
+          treeOpen={this.props.other.getIn(['analysis', 'treeOpen'])}
+        />
       );
     }
     if (page === 'funds') {
