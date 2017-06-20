@@ -8,7 +8,9 @@ import {
   LIST_COLS_SHORT, LIST_COLS_PAGES
 } from '../../misc/const';
 import { TransactionsList } from '../../misc/data';
-import { getGainComparisons, addPriceHistory, getFormattedHistory } from './funds';
+import {
+  getGainComparisons, addPriceHistory, getFormattedHistory, getXRange
+} from './funds';
 
 /**
  * process list page data response
@@ -59,13 +61,12 @@ export const processPageDataFunds = (reduction, pageIndex, data) => {
     .set('historyPopout', false);
   }));
 
-  const minX = 0;
-  const maxX = Math.floor(new Date().getTime() / 1000 - data.history.startTime);
+  const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
   newReduction = newReduction
   .setIn(['appState', 'pages', pageIndex, 'rows'], rows)
-  .setIn(['appState', 'other', 'graphFunds', 'zoom'], list([minX, maxX]))
-  .setIn(['appState', 'other', 'graphFunds', 'range'], list([minX, maxX]));
+  .setIn(['appState', 'other', 'fundHistoryCache', period], { data: { data: data.history } });
 
-  return getFormattedHistory(newReduction, pageIndex, history);
+  return getFormattedHistory(
+    getXRange(newReduction, data.history.startTime), pageIndex, history);
 };
 

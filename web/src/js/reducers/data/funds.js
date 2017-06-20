@@ -269,3 +269,11 @@ export const getFormattedHistory = (reduction, pageIndex, history) => {
   ), data, funds, history, pageIndex, fundLines);
 };
 
+export const getXRange = (reduction, startTime) => {
+  const minX = 0;
+  const maxX = Math.floor(new Date().getTime() / 1000 - startTime);
+  return reduction
+  .setIn(['appState', 'other', 'graphFunds', 'zoom'], list([minX, maxX]))
+  .setIn(['appState', 'other', 'graphFunds', 'range'], list([minX, maxX]));
+};
+

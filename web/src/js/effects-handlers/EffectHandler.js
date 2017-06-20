@@ -9,12 +9,14 @@ import buildEffectHandler from '../effectHandlerBuilder';
 import { PAGES } from '../misc/const';
 import {
   EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
-  EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED
+  EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
+  EF_FUNDS_PERIOD_REQUESTED
 } from '../constants/effects';
 
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
 import { aContentLoaded } from '../actions/ContentActions';
+import { aFundsPeriodLoaded } from '../actions/GraphActions';
 
 export default buildEffectHandler([
   /**
@@ -63,6 +65,18 @@ export default buildEffectHandler([
         item: obj.theItems,
         pageIndex: obj.pageIndex
       }))
+    );
+  }],
+
+  [EF_FUNDS_PERIOD_REQUESTED, (obj, dispatcher) => {
+    axios.get(`api?t=data/fund_history&period=${obj.period}`, {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => {
+        const period = obj.period;
+        const data = response;
+        dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
+      }
     );
   }]
 ]);

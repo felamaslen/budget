@@ -38,4 +38,5 @@ export const AC_GRAPH_FUNDS_ZOOMED = 0xac84;
 export const AC_GRAPH_FUNDS_HOVERED = 0xac85;
 export const AC_GRAPH_FUNDS_LINE_TOGGLED = 0xac86;
 export const AC_GRAPH_FUNDS_PERIOD_CHANGED = 0xac87;
+export const AC_GRAPH_FUNDS_PERIOD_LOADED = 0xac88;
 
