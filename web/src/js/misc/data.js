@@ -15,6 +15,8 @@ const sortByDate = (a, b) => {
   return 1;
 };
 
+export const notNull = item => item !== null;
+
 /**
  * data type to hold transactions list for funds
  */
@@ -60,6 +62,9 @@ export class TransactionsList {
       units: item.units,
       cost: item.cost
     })), true);
+  }
+  filter(callback) {
+    return new TransactionsList(this.list.filter(callback), true);
   }
   getUnits(aList) {
     return aList.reduce((a, b) => a + b.get('units'), 0);
@@ -195,7 +200,7 @@ export const buildQueueRequestList = reduction => {
     return null;
   }).concat(queueDelete.map(dataItem => {
     return [`delete/${PAGES[dataItem.pageIndex]}`, {}, { id: dataItem.id }];
-  })).filter(item => item !== null);
+  })).filter(notNull);
 
   reqListPageList.forEach((item, pageIndex) => {
     item.forEach((row, id) => {

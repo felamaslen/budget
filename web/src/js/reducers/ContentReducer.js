@@ -34,11 +34,12 @@ export const rLoadContent = (reduction, pageIndex) => {
 
 /**
  * Processes response data into output fit for consumption by the view
+ * @param {Record} reduction: app state
  * @param {integer} pageIndex: page index
  * @param {object} data: response data
  * @returns {map}: page data for view
  */
-const processPageData = (pageIndex, data) => {
+const processPageData = (reduction, pageIndex, data) => {
   if (PAGES[pageIndex] === 'overview') {
     // overview
     return processPageDataOverview(data);
@@ -46,7 +47,8 @@ const processPageData = (pageIndex, data) => {
 
   if (PAGES[pageIndex] === 'funds') {
     // funds
-    return processPageDataFunds(data, pageIndex);
+    return processPageDataFunds(
+      data, pageIndex, reduction.getIn(['appState', 'other', 'graphFundsMode']));
   }
 
   else if (LIST_PAGES.indexOf(pageIndex) > -1) {
@@ -64,7 +66,7 @@ export const rHandleContentResponse = (reduction, output) => {
   .setIn(['appState', 'pagesRaw', output.pageIndex], output.response.data.data)
   .setIn(
     ['appState', 'pages', output.pageIndex],
-    processPageData(output.pageIndex, output.response.data.data)
+    processPageData(reduction, output.pageIndex, output.response.data.data)
   )
   .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
   .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));

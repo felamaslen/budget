@@ -109,6 +109,9 @@ export class PageList extends PureControllerView {
       );
     });
   }
+  afterList() {
+    return null;
+  }
   componentDidUpdate(prevProps) {
     if (!prevProps.addBtnFocus && this.props.addBtnFocus) {
       window.setTimeout(() => {
@@ -124,12 +127,15 @@ export class PageList extends PureControllerView {
     ].join(' ');
 
     return (
-      <div className={listClasses}>
-        {this.renderListHead()}
-        <ul className='list-ul'>
-          {this.renderLiAdd()}
-          {this.renderList()}
-        </ul>
+      <div>
+        <div className={listClasses}>
+          {this.renderListHead()}
+          <ul className='list-ul'>
+            {this.renderLiAdd()}
+            {this.renderList()}
+          </ul>
+        </div>
+        {this.afterList()}
       </div>
     );
   }

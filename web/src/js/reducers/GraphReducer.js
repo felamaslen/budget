@@ -6,8 +6,8 @@ import { PAGES } from '../misc/const';
 
 export const rToggleShowAll = reduction => {
   return reduction.setIn(
-    ['appState', 'showAllBalanceGraph'],
-    !reduction.getIn(['appState', 'showAllBalanceGraph']));
+    ['appState', 'other', 'showAllBalanceGraph'],
+    !reduction.getIn(['appState', 'other', 'showAllBalanceGraph']));
 };
 
 export const rToggleFundItemGraph = (reduction, key) => {

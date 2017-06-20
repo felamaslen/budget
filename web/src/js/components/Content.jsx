@@ -22,8 +22,8 @@ export class Content extends PureControllerView {
       return (
         <PageOverview dispatcher={this.props.dispatcher}
           data={data}
-          edit={this.props.edit}
-          showAll={this.props.showAllBalanceGraph} />
+          edit={this.props.edit.get('active')}
+          showAll={this.props.other.get('showAllBalanceGraph')} />
       );
     }
     if (page === 'funds') {
@@ -31,12 +31,14 @@ export class Content extends PureControllerView {
       return (
         <PageFunds dispatcher={this.props.dispatcher}
           data={data}
-          edit={this.props.edit}
-          add={this.props.add}
-          addBtnFocus={this.props.addBtnFocus}
+          edit={this.props.edit.get('active')}
+          add={this.props.edit.get('add')}
+          addBtnFocus={this.props.edit.get('addBtnFocus')}
           daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
-          page={page} />
+          page={page}
+          graphFundsMode={this.props.other.get('graphFundsMode')}
+          showOverall={this.props.other.get('graphFundsShowOverall')} />
       );
     }
     if (LIST_PAGES.indexOf(this.props.index) > -1) {
@@ -44,9 +46,9 @@ export class Content extends PureControllerView {
       return (
         <PageList dispatcher={this.props.dispatcher}
           data={data}
-          edit={this.props.edit}
-          add={this.props.add}
-          addBtnFocus={this.props.addBtnFocus}
+          edit={this.props.edit.get('active')}
+          add={this.props.edit.get('add')}
+          addBtnFocus={this.props.edit.get('addBtnFocus')}
           daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
           page={page} />
@@ -78,7 +80,7 @@ Content.propTypes = {
   add: PropTypes.instanceOf(List),
   addBtnFocus: PropTypes.bool,
   edit: PropTypes.instanceOf(map),
-  index: PropTypes.number,
-  showAllBalanceGraph: PropTypes.bool
+  other: PropTypes.instanceOf(map),
+  index: PropTypes.number
 };
 
