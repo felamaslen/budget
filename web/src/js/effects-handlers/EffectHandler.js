@@ -9,6 +9,7 @@ import buildEffectHandler from '../effectHandlerBuilder';
 import { PAGES } from '../misc/const';
 import {
   EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
+  EF_ANALYSIS_DATA_REQUESTED,
   EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
   EF_FUNDS_PERIOD_REQUESTED
 } from '../constants/effects';
@@ -16,6 +17,7 @@ import {
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
 import { aContentLoaded } from '../actions/ContentActions';
+import { aAnalysisDataReceived } from '../actions/AnalysisActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
 
 export default buildEffectHandler([
@@ -33,7 +35,8 @@ export default buildEffectHandler([
 
   [EF_CONTENT_REQUESTED, (obj, dispatcher) => {
     const pageIndex = obj.pageIndex;
-    const urlParam = { t: `data/${obj.pageName}` };
+    const dataReq = ['data', obj.pageName].concat(obj.dataReq || []).join('/');
+    const urlParam = { t: dataReq };
     if (obj.urlParam) {
       obj.urlParam.forEach(param => {
         urlParam[param.name] = param.value;
@@ -53,6 +56,14 @@ export default buildEffectHandler([
       headers: { 'Authorization': obj.apiKey }
     }).then(
       response => dispatcher.dispatch(aServerUpdateReceived(response))
+    );
+  }],
+
+  [EF_ANALYSIS_DATA_REQUESTED, (obj, dispatcher) => {
+    axios.get(`api?t=data/analysis/${obj.period}/${obj.grouping}/${obj.timeIndex}`, {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => dispatcher.dispatch(aAnalysisDataReceived(response))
     );
   }],
 

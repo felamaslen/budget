@@ -24,6 +24,18 @@ import {
 
   AC_CONTENT_LOADED,
 
+  AC_ANALYSIS_PERIOD_CHANGED,
+  AC_ANALYSIS_GROUPING_CHANGED,
+  AC_ANALYSIS_TIME_INDEX_CHANGED,
+  AC_ANALYSIS_DATA_REFRESHED,
+  AC_ANALYSIS_TREE_DISPLAY_TOGGLED,
+  AC_ANALYSIS_TREE_EXPAND_TOGGLED,
+  AC_ANALYSIS_TREE_HOVERED,
+  AC_ANALYSIS_BLOCK_SHALLOW_CLICKED,
+  AC_ANALYSIS_BLOCK_DEEP_CLICKED,
+  AC_ANALYSIS_BLOCK_SHALLOW_HOVERED,
+  AC_ANALYSIS_BLOCK_DEEP_HOVERED,
+
   AC_EDIT_ACTIVATED,
   AC_EDIT_CHANGED,
   AC_EDIT_LIST_ITEM_ADDED,
@@ -66,6 +78,20 @@ import {
 import {
   rHandleContentResponse
 } from './ContentReducer';
+import {
+  rAnalysisChangePeriod,
+  rAnalysisChangeGrouping,
+  rAnalysisChangeTimeIndex,
+  rAnalysisHandleNewData,
+
+  rAnalysisTreeToggleDisplay,
+  rAnalysisTreeToggleExpand,
+  rAnalysisTreeHover,
+  rAnalysisBlockShallowClick,
+  rAnalysisBlockDeepClick,
+  rAnalysisBlockShallowHover,
+  rAnalysisBlockDeepHover
+} from './data/analysis';
 import {
   rActivateEditable,
   rChangeEditable,
@@ -130,6 +156,31 @@ export default (reduction, action) => {
   case AC_CONTENT_LOADED:
     return rHandleContentResponse(reduction, action.payload);
 
+  // analysis actions
+  case AC_ANALYSIS_PERIOD_CHANGED:
+    return rAnalysisChangePeriod(reduction, action.payload);
+  case AC_ANALYSIS_GROUPING_CHANGED:
+    return rAnalysisChangeGrouping(reduction, action.payload);
+  case AC_ANALYSIS_TIME_INDEX_CHANGED:
+    return rAnalysisChangeTimeIndex(reduction, action.payload);
+  case AC_ANALYSIS_DATA_REFRESHED:
+    return rAnalysisHandleNewData(reduction, action.payload);
+
+  case AC_ANALYSIS_TREE_DISPLAY_TOGGLED:
+    return rAnalysisTreeToggleDisplay(reduction, action.payload);
+  case AC_ANALYSIS_TREE_EXPAND_TOGGLED:
+    return rAnalysisTreeToggleExpand(reduction, action.payload);
+  case AC_ANALYSIS_TREE_HOVERED:
+    return rAnalysisTreeHover(reduction, action.payload);
+  case AC_ANALYSIS_BLOCK_SHALLOW_CLICKED:
+    return rAnalysisBlockShallowClick(reduction, action.payload);
+  case AC_ANALYSIS_BLOCK_DEEP_CLICKED:
+    return rAnalysisBlockDeepClick(reduction, action.payload);
+  case AC_ANALYSIS_BLOCK_SHALLOW_HOVERED:
+    return rAnalysisBlockShallowHover(reduction, action.payload);
+  case AC_ANALYSIS_BLOCK_DEEP_HOVERED:
+    return rAnalysisBlockDeepHover(reduction, action.payload);
+
   // editable actions
   case AC_EDIT_ACTIVATED:
     return rActivateEditable(reduction, action.payload);
@@ -147,6 +198,7 @@ export default (reduction, action) => {
   case AC_EDIT_FUND_TRANSACTIONS_REMOVED:
     return rRemoveFundTransactions(reduction, action.payload);
 
+  // graph actions
   case AC_GRAPH_SHOWALL_TOGGLED:
     return rToggleShowAll(reduction);
   case AC_GRAPH_FUND_ITEM_TOGGLED:

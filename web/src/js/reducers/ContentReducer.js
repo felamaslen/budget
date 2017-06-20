@@ -4,25 +4,37 @@
 
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
-import { PAGES, LIST_PAGES } from '../misc/const';
+import { PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
 import {
   getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
 
 import processPageDataOverview from './data/overview';
 import { processPageDataList, processPageDataFunds } from './data/list';
+import { processPageDataAnalysis } from './data/analysis';
 
 export const rLoadContent = (reduction, pageIndex) => {
   if (!reduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
     const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
     const pageName = PAGES[pageIndex];
+
     const reqObj = { pageIndex, pageName, apiKey };
 
-    if (PAGES[pageIndex] === 'funds') {
+    switch (PAGES[pageIndex]) {
+    case 'analysis':
+      const period = ANALYSIS_PERIODS[reduction.getIn(['appState', 'other', 'analysis', 'period'])];
+      const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['appState', 'other', 'analysis', 'grouping'])];
+      const timeIndex = reduction.getIn(['appState', 'other', 'analysis', 'timeIndex']);
+
+      reqObj.dataReq = [period, grouping, timeIndex];
+      break;
+
+    case 'funds':
       reqObj.urlParam = [
         { name: 'history', value: 'true' },
         { name: 'period', value: 'year1' }
       ];
+      break;
     }
 
     return reduction.set('effects', reduction.get('effects').push(
@@ -43,6 +55,11 @@ const processPageData = (reduction, pageIndex, data) => {
   if (PAGES[pageIndex] === 'overview') {
     // overview
     return processPageDataOverview(reduction, pageIndex, data);
+  }
+
+  if (PAGES[pageIndex] === 'analysis') {
+    // analysis
+    return processPageDataAnalysis(reduction, pageIndex, data);
   }
 
   if (PAGES[pageIndex] === 'funds') {

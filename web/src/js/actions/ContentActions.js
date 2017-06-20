@@ -1,5 +1,5 @@
 /**
- * Actions called to show/hide error messages
+ * Actions called on content
  */
 
 import buildMessage from '../messageBuilder';
