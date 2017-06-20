@@ -1,6 +1,9 @@
 import { Record, List, fromJS } from 'immutable';
 
-import { PAGES, SERVER_UPDATE_IDLE } from './misc/const';
+import {
+  PAGES, SERVER_UPDATE_IDLE,
+  GRAPH_FUNDS_MODE_ROI
+} from './misc/const';
 
 // the state of the app (reduction) is stored as an immutable object,
 // and returned (modified) by reducers
@@ -24,7 +27,6 @@ export default new Record({
     pagesRaw: PAGES.map(() => null),
     pagesLoaded: PAGES.map(() => false),
     currentPageIndex: -1,
-    showAllBalanceGraph: false,
     edit: {
       active: {
         row: 0,
@@ -40,6 +42,11 @@ export default new Record({
       queue: [],
       queueDelete: [],
       status: SERVER_UPDATE_IDLE
+    },
+    other: {
+      showAllBalanceGraph: false,
+      graphFundsMode: GRAPH_FUNDS_MODE_ROI,
+      graphFundsShowOverall: true
     }
   }),
   // side effects

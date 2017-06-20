@@ -92,3 +92,11 @@ export const GRAPH_FUND_ITEM_HEIGHT = 48;
 export const GRAPH_FUND_ITEM_WIDTH_LARGE = 300;
 export const GRAPH_FUND_ITEM_HEIGHT_LARGE = 120;
 
+export const GRAPH_FUNDS_WIDTH = 500;
+export const GRAPH_FUNDS_HEIGHT = 300;
+export const GRAPH_FUNDS_MODE_ROI = 0;
+export const GRAPH_FUNDS_MODE_ABSOLUTE = 1;
+export const GRAPH_FUNDS_MODE_PRICE = 2;
+export const GRAPH_FUNDS_DEFAULT_PERIOD = 'year1';
+export const GRAPH_FUNDS_NUM_TICKS = 10;
+

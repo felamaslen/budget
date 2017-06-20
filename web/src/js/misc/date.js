@@ -3,6 +3,7 @@
  */
 
 import { leadingZeroes } from './format';
+import { MONTHS_SHORT } from './const';
 
 export const yearMonthDifference = (ym1, ym2) => {
   return 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1];
@@ -129,7 +130,7 @@ class TimeTick {
     const obj = new Date(t);
 
     const date = obj.getDate();
-    const month = months[obj.getMonth()];
+    const month = MONTHS_SHORT[obj.getMonth()];
 
     return `${date} ${month}`;
   }
@@ -302,7 +303,7 @@ class TimeTickWeekMonth extends TimeTick {
       const year = obj.getFullYear();
       const month = obj.getMonth();
       const monthStart = new Date(year, month, 1, 0, 0, 0, 0);
-      const label = months[monthStart.getMonth()];
+      const label = MONTHS_SHORT[monthStart.getMonth()];
 
       extra = { t: monthStart.getTime(), major: 2, label };
     }

@@ -3,14 +3,17 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PageList } from './PageList';
 import {
   GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT,
-  GRAPH_FUND_ITEM_WIDTH_LARGE, GRAPH_FUND_ITEM_HEIGHT_LARGE
+  GRAPH_FUND_ITEM_WIDTH_LARGE, GRAPH_FUND_ITEM_HEIGHT_LARGE,
+  GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT
 } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import { GraphFundItem } from '../graphs/GraphFundItem';
+import { GraphFunds } from '../graphs/GraphFunds';
 
 export class PageFunds extends PageList {
   renderListExtra(row, rowKey) {
@@ -89,4 +92,26 @@ export class PageFunds extends PageList {
       </span>
     );
   }
+  afterList() {
+    // render graphs here
+    return (
+      <div className='graph-container-outer'>
+        <GraphFunds dispatcher={this.props.dispatcher}
+          name='fund-history'
+          width={GRAPH_FUNDS_WIDTH} height={GRAPH_FUNDS_HEIGHT}
+          history={this.props.data.get('history')}
+          lines={this.props.data.get('lines')}
+          funds={this.props.data.get('rows')}
+          mode={this.props.graphFundsMode}
+          showOverall={this.props.showOverall}
+        />
+      </div>
+    );
+  }
 }
+
+PageFunds.propTypes = {
+  graphFundsMode: PropTypes.number,
+  showOverall: PropTypes.bool
+};
+

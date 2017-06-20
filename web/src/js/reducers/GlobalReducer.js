@@ -34,7 +34,8 @@ import {
   AC_EDIT_FUND_TRANSACTIONS_REMOVED,
 
   AC_GRAPH_SHOWALL_TOGGLED,
-  AC_GRAPH_FUND_ITEM_TOGGLED
+  AC_GRAPH_FUND_ITEM_TOGGLED,
+  AC_GRAPH_FUNDS_CLICKED
 } from '../constants/actions';
 
 import {
@@ -73,7 +74,8 @@ import {
 } from './EditReducer';
 import {
   rToggleShowAll,
-  rToggleFundItemGraph
+  rToggleFundItemGraph,
+  rToggleFundsGraphMode
 } from './GraphReducer';
 
 export default (reduction, action) => {
@@ -139,6 +141,8 @@ export default (reduction, action) => {
     return rToggleShowAll(reduction);
   case AC_GRAPH_FUND_ITEM_TOGGLED:
     return rToggleFundItemGraph(reduction, action.payload);
+  case AC_GRAPH_FUNDS_CLICKED:
+    return rToggleFundsGraphMode(reduction);
 
   default:
     // By default, the reduction is simply returned unchanged.

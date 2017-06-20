@@ -6,7 +6,7 @@ import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from '../reducers/data/overview';
-import { getGainComparisons, addPriceHistory } from '../reducers/data/list';
+import { getGainComparisons, addPriceHistory } from '../reducers/data/funds';
 import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
 } from '../misc/const';

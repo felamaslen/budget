@@ -77,10 +77,8 @@ export default class App extends Component {
         pages={this.state.reduction.getIn(['appState', 'pages'])}
         loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
         index={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
-        edit={this.state.reduction.getIn(['appState', 'edit', 'active'])}
-        add={this.state.reduction.getIn(['appState', 'edit', 'add'])}
-        addBtnFocus={this.state.reduction.getIn(['appState', 'edit', 'addBtnFocus'])}
-        showAllBalanceGraph={this.state.reduction.getIn(['appState', 'showAllBalanceGraph'])} />
+        edit={this.state.reduction.getIn(['appState', 'edit'])}
+        other={this.state.reduction.getIn(['appState', 'other'])} />
     ) : null;
 
     const spinner = loading ? <Spinner /> : null;

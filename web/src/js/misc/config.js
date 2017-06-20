@@ -32,6 +32,8 @@ export const GRAPH_KEY_OFFSET_X = 5;
 export const GRAPH_KEY_OFFSET_Y = 34;
 export const GRAPH_BALANCE_NUM_TICKS = 5;
 
+export const GRAPH_FUNDS_TENSION = 0.65;
+
 // colours for overview score scale and page categories
 export const COLOR_CATEGORY = {
   funds: [84, 110, 122],
