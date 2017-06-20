@@ -42,31 +42,36 @@ export const rLoadContent = (reduction, pageIndex) => {
 const processPageData = (reduction, pageIndex, data) => {
   if (PAGES[pageIndex] === 'overview') {
     // overview
-    return processPageDataOverview(data);
+    return processPageDataOverview(reduction, pageIndex, data);
   }
 
   if (PAGES[pageIndex] === 'funds') {
     // funds
-    return processPageDataFunds(
-      data, pageIndex, reduction.getIn(['appState', 'other', 'graphFundsMode']));
+    return processPageDataFunds(reduction, pageIndex, data);
   }
 
   else if (LIST_PAGES.indexOf(pageIndex) > -1) {
-    const page = processPageDataList(data, pageIndex);
-    const sortedRows = sortRowsByDate(page.get('rows'), pageIndex);
-    const weeklyData = addWeeklyAverages(page.get('data'), sortedRows, pageIndex);
-    return page.set('rows', sortedRows).set('data', weeklyData);
+    const newReduction = processPageDataList(reduction, pageIndex, data);
+    const sortedRows = sortRowsByDate(
+      newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex);
+    const weeklyData = addWeeklyAverages(
+      newReduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
+
+    return newReduction
+    .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
+    .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
   }
 
-  return null;
+  return reduction;
 };
 
 export const rHandleContentResponse = (reduction, output) => {
-  return reduction.setIn(['appState', 'pagesLoaded', output.pageIndex], true)
-  .setIn(['appState', 'pagesRaw', output.pageIndex], output.response.data.data)
-  .setIn(
-    ['appState', 'pages', output.pageIndex],
-    processPageData(reduction, output.pageIndex, output.response.data.data)
+  return processPageData(
+    reduction
+    .setIn(['appState', 'pagesLoaded', output.pageIndex], true)
+    .setIn(['appState', 'pagesRaw', output.pageIndex], output.response.data.data),
+    output.pageIndex,
+    output.response.data.data
   )
   .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
   .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));

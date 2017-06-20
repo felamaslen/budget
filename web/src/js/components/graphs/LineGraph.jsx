@@ -215,4 +215,47 @@ export class LineGraph extends Graph {
       this.drawCubicLineCurve(curve, points, color);
     }
   }
+  drawLine(points, color) {
+    if (points.size < 2) {
+      return;
+    }
+    const dynamicColor = typeof color === 'function';
+    let theColor = dynamicColor ? color(points.getIn([0, 1])) : color;
+    let newColor;
+    let moved = false;
+    this.ctx.beginPath();
+    points.forEach(point => {
+      const xPix = this.pixX(point.first());
+      const yPix = this.pixY(point.last());
+
+      if (moved) {
+        this.ctx.lineTo(xPix, yPix);
+        if (dynamicColor) {
+          newColor = color(point.last());
+          if (newColor !== theColor) {
+            this.ctx.strokeStyle = theColor;
+            this.ctx.stroke();
+            this.ctx.closePath();
+            this.ctx.beginPath();
+            this.ctx.moveTo(xPix, yPix);
+            theColor = newColor;
+          }
+        }
+      }
+      else {
+        this.ctx.moveTo(xPix, yPix);
+        moved = true;
+      }
+    });
+
+    this.ctx.strokeStyle = theColor;
+    this.ctx.stroke();
+    if (this.fill) {
+      this.ctx.lineTo(this.pixX(points.last().first(), this.pixY(0)));
+      this.ctx.lineTo(this.pixX(points.first().first(), this.pixY(0)));
+      this.ctx.fillStyle = theColor;
+      this.ctx.fill();
+    }
+    this.ctx.closePath();
+  }
 }

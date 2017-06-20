@@ -10,7 +10,14 @@ import {
 import { TransactionsList } from '../../misc/data';
 import { getGainComparisons, addPriceHistory, getFormattedHistory } from './funds';
 
-export const processPageDataList = (raw, pageIndex) => {
+/**
+ * process list page data response
+ * @param {Record} reduction: app state
+ * @param {integer} pageIndex: page index
+ * @param {object} raw: api JSON data
+ * @returns {Record} modified reduction
+ */
+export const processPageDataList = (reduction, pageIndex, raw) => {
   const numRows = raw.data.length;
   const numCols = LIST_COLS_PAGES[pageIndex].length;
   const total = raw.total;
@@ -33,15 +40,17 @@ export const processPageDataList = (raw, pageIndex) => {
     });
   }));
 
-  return map({ data, rows });
+  return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
 };
 
-export const processPageDataFunds = (raw, pageIndex, graphFundsMode) => {
-  const pageData = processPageDataList(raw, pageIndex);
-  const history = fromJS(raw.history);
+export const processPageDataFunds = (reduction, pageIndex, data) => {
+  let newReduction = processPageDataList(reduction, pageIndex, data);
+  const history = fromJS(data.history);
 
   const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
-  const rows = getGainComparisons(pageData.get('rows').map(row => {
+  const rows = getGainComparisons(newReduction.getIn(
+    ['appState', 'pages', pageIndex, 'rows']
+  ).map(row => {
     const transactionsJson = row.getIn(['cols', transactionsKey]);
     const transactions = new TransactionsList(transactionsJson);
 
@@ -50,6 +59,13 @@ export const processPageDataFunds = (raw, pageIndex, graphFundsMode) => {
     .set('historyPopout', false);
   }));
 
-  return getFormattedHistory(pageData.set('rows', rows), history, graphFundsMode);
+  const minX = 0;
+  const maxX = Math.floor(new Date().getTime() / 1000 - data.history.startTime);
+  newReduction = newReduction
+  .setIn(['appState', 'pages', pageIndex, 'rows'], rows)
+  .setIn(['appState', 'other', 'graphFunds', 'zoom'], list([minX, maxX]))
+  .setIn(['appState', 'other', 'graphFunds', 'range'], list([minX, maxX]));
+
+  return getFormattedHistory(newReduction, pageIndex, history);
 };
 

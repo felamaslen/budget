@@ -8,14 +8,14 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize } from '../../misc/format';
-import { } from '../../misc/data';
 import {
   GRAPH_FUNDS_DEFAULT_PERIOD,
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE,
-  GRAPH_FUNDS_NUM_TICKS
+  GRAPH_FUNDS_NUM_TICKS,
+  GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED
 } from '../../misc/const';
 import {
-  GRAPH_FUNDS_TENSION,
+  GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES,
   COLOR_DARK, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT, COLOR_LIGHT_GREY,
   COLOR_GRAPH_TITLE,
   FONT_AXIS_LABEL
@@ -38,69 +38,40 @@ export class GraphFunds extends LineGraph {
     this.draw();
   }
   setRangeValues() {
-    const minX = 0;
-    const maxX = new Date().getTime() / 1000 - this.props.history.get('startTime');
+    const minX = this.props.zoom.first();
+    const maxX = this.props.zoom.last();
 
     const valuesY = this.props.lines.map(line => line.last().map(item => item.last()));
-    const minY = valuesY.reduce((last, line) => {
+    let minY = valuesY.reduce((last, line) => {
       return Math.min(last, line.min());
     }, Infinity);
-    const maxY = valuesY.reduce((last, line) => {
+    let maxY = valuesY.reduce((last, line) => {
       return Math.max(last, line.max());
     }, -Infinity);
-
-    this.originalRange = [minX, maxX, minY, maxY]; // for use in zooming
-    this.setRange([minX, maxX, minY, maxY]);
-  }
-  calculateYRange() {
-    // calculate new Y range based on truncating the data (zooming)
-    let minY = Infinity;
-    let maxY = -Infinity;
-    this.dataVisible.forEach(line => {
-      const valuesY = line.last().map(item => item.last());
-      minY = Math.min(minY, valuesY.min());
-      maxY = Math.max(maxY, valuesY.max());
-    });
-
     if (minY === maxY) {
       minY -= 0.5;
       maxY += 0.5;
     }
-
     if (this.props.mode === GRAPH_FUNDS_MODE_ROI && minY === 0) {
       minY = -maxY * 0.2;
     }
 
-    // return the tick size for the new range
+    // get the tick size for the new range
     this.tickSizeY = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
     if (!isNaN(this.tickSizeY)) {
       this.setRange([
-        this.minX, this.maxX,
+        minX, maxX,
         this.tickSizeY * Math.floor(minY / this.tickSizeY),
         this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
       ]);
     }
-  }
-  itemInRange(points, key) {
-    const nextVisible = points.getIn([Math.min(points.size - 1, key + 1), 0]) >= this.minX;
-    const prevVisible = points.getIn([Math.max(0, key - 1), 0]) <= this.maxX;
-
-    return nextVisible && prevVisible;
-  }
-  filterDataVisible() {
-    return this.props.lines.map(line => {
-      const points = line.get(1);
-      return line.set(1, points.filter((point, pointKey) => {
-        return this.itemInRange(points, pointKey);
-      }));
-    });
+    else {
+      this.setRange([minX, maxX, minY, maxY]);
+    }
   }
   processData() {
-    this.hlPoint = [-1, -1];
     this.setRangeValues();
     this.period = this.props.period || GRAPH_FUNDS_DEFAULT_PERIOD; // TODO
-    this.dataVisible = this.filterDataVisible();
-    this.calculateYRange();
     this.draw();
   }
   formatValue(value) {
@@ -111,6 +82,36 @@ export class GraphFunds extends LineGraph {
       return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
     }
     return Math.round(100 * value) / 100;
+  }
+  zoomX(direction) {
+    if (this.hlPoint[0] === -1 || this.hlPoint[1] === -1 ||
+        (direction < 0 && this.dataVisiblegetIn([0, 1]).size < 4)) {
+      return;
+    }
+
+    const center = this.props.lines.getIn([this.hlPoint[0], 1, this.hlPoint[1], 0]);
+    const newRange = Math.max(
+      (this.originalRange[1] - this.originalRange[0]) * GRAPH_ZOOM_MAX,
+      (this.maxX - this.minX) * (1 + GRAPH_ZOOM_SPEED * direction)
+    );
+    let newMinXTarget = center - newRange / 2;
+    let newMaxXTarget = center + newRange / 2;
+    if (newMinXTarget < this.originalRange[0]) {
+      newMaxXTarget += this.originalRange[0] - newMinXTarget;
+      newMinXTarget = this.originalRange[0];
+    }
+    else if (newMaxXTarget > this.originalRange[1]) {
+      newMinXTarget -= newMaxXTarget - this.originalRange[1];
+      newMaxXTarget = this.originalRange[1];
+    }
+
+    const newMinX = Math.max(this.originalRange[0], Math.round(newMinXTarget));
+    const newMaxX = Math.min(this.originalRange[1], Math.round(newMaxXTarget));
+
+    this.setRange([newMinX, newMaxX, this.minY, this.maxY]);
+
+    this.calculateYRange();
+    this.draw();
   }
   drawAxes() {
     const axisTextColor = COLOR_DARK;
@@ -206,20 +207,18 @@ export class GraphFunds extends LineGraph {
     const mainIndex = this.props.lines.size - 1;
 
     // plot past data
-    if (this.dataVisible) {
-      this.dataVisible.forEach((line, index) => {
-        const mainLine = index === mainIndex && this.props.showOverall &&
-          this.props.mode !== GRAPH_FUNDS_MODE_PRICE;
+    this.props.lines.forEach((line, index) => {
+      const mainLine = index === mainIndex && this.props.showOverall &&
+        this.props.mode !== GRAPH_FUNDS_MODE_PRICE;
 
-        this.ctx.lineWidth = mainLine ? 1.5 : 1;
-        if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-          this.drawCubicLine(line.last(), [line.first()]);
-        }
-        else {
-          this.drawLine(line.last(), line.first());
-        }
-      });
-    }
+      this.ctx.lineWidth = mainLine ? 1.5 : 1;
+      if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
+        this.drawCubicLine(line.last(), [line.first()]);
+      }
+      else {
+        this.drawLine(line.last(), [line.first()]);
+      }
+    });
   }
   draw() {
     if (!this.supported) {
@@ -235,7 +234,13 @@ export class GraphFunds extends LineGraph {
   }
   afterCanvas() {
     // funds list for selection
-    return null;
+    return (
+      <div>
+        <span className='mode'>
+          Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
+        </span>
+      </div>
+    );
   }
 }
 
@@ -245,6 +250,8 @@ GraphFunds.propTypes = {
   funds: PropTypes.instanceOf(list),
   period: PropTypes.instanceOf('string'),
   mode: PropTypes.number,
-  showOverall: PropTypes.bool
+  showOverall: PropTypes.bool,
+  zoom: PropTypes.instanceOf(list),
+  hlPoint: PropTypes.instanceOf(list)
 };
 
