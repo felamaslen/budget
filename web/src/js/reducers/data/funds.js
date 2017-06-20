@@ -8,7 +8,7 @@ import {
   COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
 } from '../../misc/config';
 import {
-  LIST_COLS_PAGES, PAGES,
+  LIST_COLS_PAGES,
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
 } from '../../misc/const';
 import { notNull } from '../../misc/data';
@@ -88,50 +88,6 @@ export const addPriceHistory = (pageIndex, row, history, transactions) => {
 };
 
 /*
-getLinesCostValue(index, callback) {
-    const units = this.funds.filter(item => item.item !== "Overall").map((fund, fundKey) => {
-      return (index === -1 || index === fundKey) && fund.transactions ? getFundUnits(fund) : null;
-    });
-    return this.raw.map(item => {
-      const prices = item[1].map((price, fundKey) => {
-        return index === -1 || index === fundKey ? price : null;
-      });
-
-      const currentTransactions = prices.map((price, fundKey) => {
-        return price ? units[fundKey].filter(thisUnits => thisUnits[0] <= item[0] + this.startTime) : null;
-      });
-
-      const currentUnits = currentTransactions.map(transactions => {
-        return transactions ? arraySum(transactions.map(transaction => transaction[1])) : 0;
-      });
-
-      const currentCost = arraySum(currentTransactions.map(transactions => {
-        return transactions ? arraySum(transactions.map(transaction => transaction[2])) : 0;
-      }));
-
-      const currentValue = arraySum(prices.map((price, fundKey) => price * currentUnits[fundKey]));
-
-      return callback(item, currentCost, currentValue);
-    }).filter(item => item !== null);
-  }
-  getLinesPercent(index) {
-    return this.getLinesCostValue(index, (item, cost, value) => {
-      return cost > 0 ? [item[0], 100 * (value - cost) / cost] : null;
-    });
-  }
-  getMainPercent() {
-    const line = this.getLinesPercent(-1);
-    return [COLOR_GRAPH_FUND_LINE, line];
-  }
-  getLinesAbsolute(index) {
-    return this.getLinesCostValue(index, (item, cost, value) => {
-      return value > 0 ? [item[0], value] : null;
-    });
-  }
-  getMainAbsolute() {
-    const line = this.getLinesAbsolute(-1);
-    return [COLOR_GRAPH_FUND_LINE, line];
-  }
   getLinesPrice(index) {
     return this.raw.map(item => {
       if (!item[1][index]) {
@@ -142,7 +98,7 @@ getLinesCostValue(index, callback) {
   }
 */
 
-const getLinesCostValue = (index, data, funds, history, callback) => {
+const getLinesCostValue = (index, funds, history, callback) => {
   return history.get('history').map(item => {
     const prices = item.last().map((price, fundKey) => {
       return index === -1 || index === fundKey ? price : null;
@@ -172,19 +128,30 @@ const getLinesCostValue = (index, data, funds, history, callback) => {
 };
 
 const getLinesROI = (data, funds, history, index) => {
-  return getLinesCostValue(index, data, funds, history, (item, cost, value) => {
+  return getLinesCostValue(index, funds, history, (item, cost, value) => {
     return cost > 0 ? item.set(1, 100 * (value - cost) / cost) : null;
   }).filter(notNull);
 };
 const getLinesAbsolute = (data, funds, history, index) => {
+  return getLinesCostValue(index, funds, history, (item, cost, value) => {
+    return value > 0 ? item.set(1, value) : null;
+  });
 };
 const getLinesPrice = (data, funds, history, index) => {
+  return history.get('history').map(item => {
+    if (!item.getIn([1, index])) {
+      return null;
+    }
+    return item.set(1, item.getIn([1, index]));
+  }).filter(notNull);
 };
 const getMainROI = (data, funds, history) => {
   const line = getLinesROI(data, funds, history, -1);
   return list([COLOR_GRAPH_FUND_LINE, line]);
 };
 const getMainAbsolute = (data, funds, history) => {
+  const line = getLinesAbsolute(data, funds, history, -1);
+  return list([COLOR_GRAPH_FUND_LINE, line]);
 };
 
 /**
@@ -209,16 +176,54 @@ const getLines = (fundLines, getLine, getMain) => {
   return lines;
 };
 
-export const getFormattedHistory = (data, history, mode) => {
+export const zoomFundLines = (lines, reduction) => {
+  // restrict fund lines by zooming
+  return lines;
+  /*
+  let newLines;
+
+  const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']),
+  const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom'])
+  const hlPoint = reduction.getIn(['appState', 'other', 'graphFunds', 'hlPoints']);
+
+  if (zoom.first() !== null && zoom.last() !== null) {
+  newLines = lines.map(line => {
+    const points = line.last();
+    return line.set(1, points.filter((point, pointKey) => {
+    }));
+  });
+
+  itemInRange(points, key) {
+    const nextVisible = points.getIn([Math.min(points.size - 1, key + 1), 0]) >= this.minX;
+    const prevVisible = points.getIn([Math.max(0, key - 1), 0]) <= this.maxX;
+
+    return nextVisible && prevVisible;
+  }
+  filterDataVisible() {
+    return this.props.lines.map(line => {
+      const points = line.get(1);
+      return line.set(1, points.filter((point, pointKey) => {
+        return this.itemInRange(points, pointKey);
+      }));
+    });
+  }
+
+  return newLines;
+  */
+};
+
+export const getFormattedHistory = (reduction, pageIndex, history) => {
   // format the data according to the mode
   const lastHistoryItem = history.get('history').last();
-  const pageIndex = PAGES.indexOf('funds');
   const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
   const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
 
+  const data = reduction.getIn(['appState', 'pages', pageIndex]);
+  const rows = data.get('rows');
+
   // associate funds with transactions
   const funds = history.getIn(['funds', 'items']).map(item => {
-    const transactions = data.get('rows')
+    const transactions = rows
     .find(row => row.getIn(['cols', itemKey]) === item)
     .getIn(['cols', transactionsKey]);
 
@@ -229,11 +234,15 @@ export const getFormattedHistory = (data, history, mode) => {
     return lastHistoryItem && lastHistoryItem.getIn([1, fundKey]) > 0;
   }).unshift(true); // overall line (TODO: toggle this)
 
+  const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+
   let lines;
   switch (mode) {
   case GRAPH_FUNDS_MODE_PRICE:
     lines = getLines(
-      fundLines, index => getLinesPrice(data, funds, history, index, true));
+      fundLines,
+      index => getLinesPrice(data, funds, history, index, true)
+    );
     break;
   case GRAPH_FUNDS_MODE_ABSOLUTE:
     lines = getLines(
@@ -251,6 +260,11 @@ export const getFormattedHistory = (data, history, mode) => {
     );
   }
 
-  return data.set('lines', lines).set('history', history);
+  lines = zoomFundLines(lines, reduction);
+
+  return reduction.setIn(
+    ['appState', 'pages', pageIndex],
+    data.set('lines', lines).set('history', history)
+  );
 };
 

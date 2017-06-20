@@ -100,3 +100,6 @@ export const GRAPH_FUNDS_MODE_PRICE = 2;
 export const GRAPH_FUNDS_DEFAULT_PERIOD = 'year1';
 export const GRAPH_FUNDS_NUM_TICKS = 10;
 
+export const GRAPH_ZOOM_SPEED = 0.1;
+export const GRAPH_ZOOM_MAX = 0.01;
+

@@ -2,6 +2,7 @@
  * Funds page component
  */
 
+import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -108,8 +109,10 @@ export class PageFunds extends PageList {
           history={this.props.data.get('history')}
           lines={this.props.data.get('lines')}
           funds={this.props.data.get('rows')}
-          mode={this.props.graphFundsMode}
-          showOverall={this.props.showOverall}
+          mode={this.props.graphProps.get('mode')}
+          showOverall={this.props.graphProps.get('showOverall')}
+          zoom={this.props.graphProps.get('zoom')}
+          hlPoint={this.props.graphProps.get('hlPoint')}
         />
       </div>
     );
@@ -117,7 +120,7 @@ export class PageFunds extends PageList {
 }
 
 PageFunds.propTypes = {
-  graphFundsMode: PropTypes.number,
+  graphProps: PropTypes.instanceOf(map),
   showOverall: PropTypes.bool
 };
 

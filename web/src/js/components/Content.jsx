@@ -37,8 +37,7 @@ export class Content extends PureControllerView {
           daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
           page={page}
-          graphFundsMode={this.props.other.get('graphFundsMode')}
-          showOverall={this.props.other.get('graphFundsShowOverall')} />
+          graphProps={this.props.other.get('graphFunds')} />
       );
     }
     if (LIST_PAGES.indexOf(this.props.index) > -1) {

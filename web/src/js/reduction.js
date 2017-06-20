@@ -45,8 +45,13 @@ export default new Record({
     },
     other: {
       showAllBalanceGraph: false,
-      graphFundsMode: GRAPH_FUNDS_MODE_ROI,
-      graphFundsShowOverall: true
+      graphFunds: {
+        mode: GRAPH_FUNDS_MODE_ROI,
+        showOverall: true,
+        hlPoint: [-1, -1],
+        zoom: [null, null], // range to restrict to
+        range: [null, null] // possible range
+      }
     }
   }),
   // side effects

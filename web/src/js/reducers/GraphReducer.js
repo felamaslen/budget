@@ -3,6 +3,9 @@
  */
 
 import { PAGES } from '../misc/const';
+import { getFormattedHistory } from './data/funds';
+
+const pageIndexFunds = PAGES.indexOf('funds');
 
 export const rToggleShowAll = reduction => {
   return reduction.setIn(
@@ -11,10 +14,18 @@ export const rToggleShowAll = reduction => {
 };
 
 export const rToggleFundItemGraph = (reduction, key) => {
-  const pageIndex = PAGES.indexOf('funds');
   return reduction.setIn(
-    ['appState', 'pages', pageIndex, 'rows', key, 'historyPopout'],
-    !reduction.getIn(['appState', 'pages', pageIndex, 'rows', key, 'historyPopout'])
+    ['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'],
+    !reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'])
+  );
+};
+
+export const rToggleFundsGraphMode = reduction => {
+  const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
+  return getFormattedHistory(
+    reduction.setIn(['appState', 'other', 'graphFunds', 'mode'], newMode),
+    pageIndexFunds,
+    reduction.getIn(['appState', 'pages', pageIndexFunds, 'history'])
   );
 };
 

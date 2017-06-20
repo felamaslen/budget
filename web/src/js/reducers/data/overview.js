@@ -267,14 +267,15 @@ export const rCalculateOverview = (reduction, pageIndex, newDate, oldDate, newIt
 
 /**
  * Called when data is first loaded
+ * @param {Record} reduction: app state
+ * @param {integer} pageIndex: page index
  * @param {object} raw: api JSON data
- * @returns {Map} immutable data for the store and view
+ * @returns {Record} modified reduction
  */
-export default raw => {
+export default (reduction, pageIndex, raw) => {
   const data = rProcessDataOverviewRaw(raw);
   const rows = rGetOverviewRows(data);
 
-  // this gets inserted into the "page" array of the store
-  return map({ data, rows });
+  return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
 };
 
