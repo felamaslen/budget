@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import {
-  GRAPH_FUNDS_DEFAULT_PERIOD,
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
   GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
 } from '../../misc/const';
@@ -20,7 +19,7 @@ import {
 } from '../../misc/config';
 import {
   aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
-  aFundsGraphLineToggled
+  aFundsGraphLineToggled, aFundsGraphPeriodChanged
 } from '../../actions/GraphActions';
 
 export class GraphFunds extends LineGraph {
@@ -90,7 +89,6 @@ export class GraphFunds extends LineGraph {
   }
   processData() {
     this.setRangeValues();
-    this.period = this.props.period || GRAPH_FUNDS_DEFAULT_PERIOD; // TODO
     this.draw();
   }
   formatValue(value) {
@@ -250,7 +248,9 @@ export class GraphFunds extends LineGraph {
       <div>
         <ul className='fund-sidebar noselect'>
           <li>
-            <select defaultValue={this.props.period}>
+            <select defaultValue={this.props.period} onChange={evt => {
+              this.dispatchAction(aFundsGraphPeriodChanged(evt.target.value));
+            }}>
             {GRAPH_FUNDS_PERIODS.map((period, key) => {
               return <option key={key} value={period[0]}>{period[1]}</option>;
             })}

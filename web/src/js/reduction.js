@@ -52,7 +52,8 @@ export default new Record({
         hlPoint: null,
         zoom: [null, null], // range to restrict to
         range: [null, null] // possible range
-      }
+      },
+      fundHistoryCache: {}
     }
   }),
   // side effects

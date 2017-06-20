@@ -2,9 +2,11 @@
  * Carries out actions for the graph components
  */
 
-import { List as list } from 'immutable';
+import { fromJS, List as list } from 'immutable';
+import buildMessage from '../messageBuilder';
+import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
 import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
-import { zoomFundLines, addFundLines } from './data/funds';
+import { zoomFundLines, addFundLines, getXRange } from './data/funds';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -115,7 +117,35 @@ export const rToggleFundsGraphLine = (reduction, index) => {
   return addFundLines(reduction, data, funds, history, pageIndexFunds, newFundLines);
 };
 
+export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
+  let newReduction = reduction;
+  if (!fromCache) {
+    newReduction = newReduction.setIn(
+      ['appState', 'other', 'fundHistoryCache', response.period], response.data);
+  }
+  const history = fromJS(response.data.data.data);
+  newReduction = newReduction.setIn(['appState', 'pages', pageIndexFunds, 'history'], history);
+
+  const fundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
+  const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
+  const funds = data.get('funds');
+
+  return addFundLines(
+    getXRange(newReduction, history.get('startTime')),
+    data, funds, history, pageIndexFunds, fundLines
+  );
+};
+
 export const rChangeFundsGraphPeriod = (reduction, period) => {
-  return reduction; // TODO
+  if (!reduction.getIn(['appState', 'other', 'fundHistoryCache']).has(period)) {
+    const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+    return reduction.set(
+      'effects', reduction.get('effects').push(
+        buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period })
+      )
+    );
+  }
+  const data = reduction.getIn(['appState', 'other', 'fundHistoryCache', period]);
+  return rHandleFundPeriodResponse(reduction, { period, data }, true);
 };
 
