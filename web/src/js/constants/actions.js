@@ -36,4 +36,6 @@ export const AC_GRAPH_FUND_ITEM_TOGGLED = 0xac82;
 export const AC_GRAPH_FUNDS_CLICKED = 0xac83;
 export const AC_GRAPH_FUNDS_ZOOMED = 0xac84;
 export const AC_GRAPH_FUNDS_HOVERED = 0xac85;
+export const AC_GRAPH_FUNDS_LINE_TOGGLED = 0xac86;
+export const AC_GRAPH_FUNDS_PERIOD_CHANGED = 0xac87;
 

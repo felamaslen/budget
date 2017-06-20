@@ -37,7 +37,9 @@ import {
   AC_GRAPH_FUND_ITEM_TOGGLED,
   AC_GRAPH_FUNDS_CLICKED,
   AC_GRAPH_FUNDS_ZOOMED,
-  AC_GRAPH_FUNDS_HOVERED
+  AC_GRAPH_FUNDS_HOVERED,
+  AC_GRAPH_FUNDS_LINE_TOGGLED,
+  AC_GRAPH_FUNDS_PERIOD_CHANGED
 } from '../constants/actions';
 
 import {
@@ -79,7 +81,9 @@ import {
   rToggleFundItemGraph,
   rToggleFundsGraphMode,
   rZoomFundsGraph,
-  rHoverFundsGraph
+  rHoverFundsGraph,
+  rToggleFundsGraphLine,
+  rChangeFundsGraphPeriod
 } from './GraphReducer';
 
 export default (reduction, action) => {
@@ -151,6 +155,10 @@ export default (reduction, action) => {
     return rZoomFundsGraph(reduction, action.payload);
   case AC_GRAPH_FUNDS_HOVERED:
     return rHoverFundsGraph(reduction, action.payload);
+  case AC_GRAPH_FUNDS_LINE_TOGGLED:
+    return rToggleFundsGraphLine(reduction, action.payload);
+  case AC_GRAPH_FUNDS_PERIOD_CHANGED:
+    return rChangeFundsGraphPeriod(reduction, action.payload);
 
   default:
     // By default, the reduction is simply returned unchanged.

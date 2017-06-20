@@ -109,7 +109,9 @@ export class PageFunds extends PageList {
           history={this.props.data.get('history')}
           lines={this.props.data.get('lines')}
           funds={this.props.data.get('rows')}
+          fundLines={this.props.data.get('fundLines')}
           mode={this.props.graphProps.get('mode')}
+          period={this.props.graphProps.get('period')}
           showOverall={this.props.graphProps.get('showOverall')}
           zoom={this.props.graphProps.get('zoom')}
           hlPoint={this.props.graphProps.get('hlPoint')}

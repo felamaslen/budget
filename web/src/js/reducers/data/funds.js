@@ -2,7 +2,7 @@
  * Process funds data
  */
 
-import { List as list } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import { colorKey, rgb2hex } from '../../misc/color';
 import {
   COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
@@ -151,15 +151,14 @@ const getMainAbsolute = (data, funds, history) => {
  * @returns {list} list of lines
  */
 const getLines = (fundLines, getLine, getMain) => {
-  const lines = fundLines.slice(1).map((status, index) => {
-    if (status) {
-      const color = colorKey(index + 1);
-      return list([color, getLine(index)]);
+  const lines = fundLines.slice(1).map((line, index) => {
+    if (line.get('enabled')) {
+      return list([line.get('color'), getLine(index)]);
     }
     return null;
   }).filter(notNull);
 
-  if (fundLines.first() && !!getMain) {
+  if (fundLines.getIn([0, 'enabled']) && !!getMain) {
     return lines.push(getMain());
   }
   return lines;
@@ -195,28 +194,7 @@ export const zoomFundLines = (linesAll, reduction) => {
   return lines;
 };
 
-export const getFormattedHistory = (reduction, pageIndex, history) => {
-  // format the data according to the mode
-  const lastHistoryItem = history.get('history').last();
-  const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
-  const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
-
-  const data = reduction.getIn(['appState', 'pages', pageIndex]);
-  const rows = data.get('rows');
-
-  // associate funds with transactions
-  const funds = history.getIn(['funds', 'items']).map(item => {
-    const transactions = rows
-    .find(row => row.getIn(['cols', itemKey]) === item)
-    .getIn(['cols', transactionsKey]);
-
-    return transactions ? { item, transactions } : null;
-  }).filter(fund => fund !== null);
-
-  const fundLines = funds.map((fund, fundKey) => {
-    return lastHistoryItem && lastHistoryItem.getIn([1, fundKey]) > 0;
-  }).unshift(true); // overall line (TODO: toggle this)
-
+export const addFundLines = (reduction, data, funds, history, pageIndex, fundLines) => {
   const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
 
   let linesAll;
@@ -247,7 +225,47 @@ export const getFormattedHistory = (reduction, pageIndex, history) => {
 
   return reduction.setIn(
     ['appState', 'pages', pageIndex],
-    data.set('linesAll', linesAll).set('lines', lines).set('history', history)
+    reduction.getIn(['appState', 'pages', pageIndex])
+    .set('linesAll', linesAll)
+    .set('lines', lines)
+    .set('fundLines', fundLines)
   );
+};
+
+export const getFormattedHistory = (reduction, pageIndex, history) => {
+  // format the data according to the mode
+  const lastHistoryItem = history.get('history').last();
+  const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
+  const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+
+  const data = reduction.getIn(['appState', 'pages', pageIndex]);
+  const rows = data.get('rows');
+
+  // associate funds with transactions
+  const funds = history.getIn(['funds', 'items']).map(item => {
+    const transactions = rows
+    .find(row => row.getIn(['cols', itemKey]) === item)
+    .getIn(['cols', transactionsKey]);
+
+    return transactions ? { item, transactions } : null;
+  }).filter(fund => fund !== null);
+
+  const fundLines = funds.map((fund, fundKey) => {
+    const enabled = lastHistoryItem && lastHistoryItem.getIn([1, fundKey]) > 0;
+    const item = fund.item;
+    const color = colorKey(fundKey + 1);
+    return map({ enabled, item, color });
+  }).unshift(map({
+    enabled: true,
+    item: 'Overall',
+    color: COLOR_GRAPH_FUND_LINE
+  }));
+
+  return addFundLines(reduction.setIn(
+    ['appState', 'pages', pageIndex],
+    data
+    .set('history', history)
+    .set('funds', funds)
+  ), data, funds, history, pageIndex, fundLines);
 };
 
