@@ -65,6 +65,9 @@ export class PageList extends PureControllerView {
   renderListExtra() {
     return null;
   }
+  listItemClasses() {
+    return null;
+  }
   renderList() {
     return this.props.data.get('rows').map((row, rowKey) => {
       const id = row.get('id');
@@ -100,7 +103,7 @@ export class PageList extends PureControllerView {
       ) : null;
 
       return (
-        <li key={rowKey}>
+        <li key={rowKey} className={this.listItemClasses(row)}>
           {items}
           {daily}
           {this.renderListExtra(row, rowKey)}

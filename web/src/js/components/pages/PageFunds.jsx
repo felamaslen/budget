@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PageList } from './PageList';
 import {
+  PAGES, LIST_COLS_PAGES,
   GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT,
   GRAPH_FUND_ITEM_WIDTH_LARGE, GRAPH_FUND_ITEM_HEIGHT_LARGE,
   GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT
@@ -15,7 +16,12 @@ import { formatCurrency } from '../../misc/format';
 import { GraphFundItem } from '../graphs/GraphFundItem';
 import { GraphFunds } from '../graphs/GraphFunds';
 
+const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
+
 export class PageFunds extends PageList {
+  listItemClasses(row) {
+    return row.getIn(['cols', transactionsKey]).isSold() ? 'sold' : null;
+  }
   renderListExtra(row, rowKey) {
     const name = row.getIn(['cols', 1]).toLowerCase().replace(/\W+/g, '-');
     const popout = row.get('historyPopout');
