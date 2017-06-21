@@ -109,7 +109,7 @@ export class PageAnalysis extends PureControllerView {
                 <div key={blockKey} className={classes} style={{
                   width: block.get('width'), height: block.get('height')
                 }} onClick={() => {
-                  this.dispatchAction(aBlockClicked([groupKey, blockKey]));
+                  this.dispatchAction(aBlockClicked(block.get('name')));
                 }}>
                 {block.get('blocks').map((subBlockGroup, subBlockGroupKey) => {
                   return (
