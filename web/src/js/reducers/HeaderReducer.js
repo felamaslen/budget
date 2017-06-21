@@ -157,6 +157,7 @@ export const rHandleKeyPress = (reduction, evt) => {
   }
 
   const direction = getNavDirection(evt.key, evt.shift);
+  const navigated = direction[0] !== 0 || direction[1] !== 0;
 
   if (reduction.getIn(['appState', 'user', 'uid'])) {
     // logged in
@@ -183,7 +184,7 @@ export const rHandleKeyPress = (reduction, evt) => {
       }
     }
     // handle page navigation
-    if (evt.ctrl || evt.key === 'Tab') {
+    if (navigated && (evt.ctrl || evt.key === 'Tab')) {
       return handleNav(reduction, direction[0], direction[1]);
     }
     if (evt.key === 'Escape') {
