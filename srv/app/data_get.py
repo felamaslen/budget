@@ -315,7 +315,7 @@ class Search(Processor):
         FROM `%s`
         WHERE uid = %d AND `%s` LIKE %%s
         GROUP BY col
-        ORDER BY matches DESC
+        ORDER BY matches DESC, col
         LIMIT %%s
         """ % (self.column, self.column, self.table, self.uid, self.column)
 
@@ -325,7 +325,7 @@ class Search(Processor):
         if result is False:
             return False
 
-        self.data = [strng(col) for (col, _) in result]
+        self.data = {'list': [strng(col) for (col, _) in result]}
 
         return True
 
