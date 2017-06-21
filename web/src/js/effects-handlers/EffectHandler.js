@@ -9,7 +9,7 @@ import buildEffectHandler from '../effectHandlerBuilder';
 import { PAGES } from '../misc/const';
 import {
   EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
-  EF_ANALYSIS_DATA_REQUESTED,
+  EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED,
   EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
   EF_FUNDS_PERIOD_REQUESTED
 } from '../constants/effects';
@@ -61,6 +61,14 @@ export default buildEffectHandler([
 
   [EF_ANALYSIS_DATA_REQUESTED, (obj, dispatcher) => {
     axios.get(`api?t=data/analysis/${obj.period}/${obj.grouping}/${obj.timeIndex}`, {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => dispatcher.dispatch(aAnalysisDataReceived(response))
+    );
+  }],
+
+  [EF_ANALYSIS_EXTRA_REQUESTED, (obj, dispatcher) => {
+    axios.get(`api?t=data/analysis_category/${obj.name}/${obj.period}/${obj.grouping}/${obj.timeIndex}`, {
       headers: { 'Authorization': obj.apiKey }
     }).then(
       response => dispatcher.dispatch(aAnalysisDataReceived(response))

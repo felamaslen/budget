@@ -131,7 +131,6 @@ export class BlockPacker {
     }
 
     const aspect = node.w / node.h;
-    let worst;
     const sum = row.reduce((a, b) => a + b, 0);
 
     if (aspect > 1) {
