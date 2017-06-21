@@ -234,10 +234,17 @@ export class GraphFunds extends LineGraph {
       const valueText = this.formatValue(this.props.hlPoint.get(1));
       const labelText = `${ageText}: ${valueText}`;
 
-      const labelStyle = {
-        left: this.pixX(this.props.hlPoint.get(0)),
-        top: this.pixY(this.props.hlPoint.get(1))
-      };
+      let left = 'initial';
+      let right = 'initial';
+      const pixX = this.pixX(this.props.hlPoint.get(0));
+      if (pixX > this.width / 2) {
+        right = this.width - pixX;
+      }
+      else {
+        left = pixX;
+      }
+      const top = this.pixY(this.props.hlPoint.get(1));
+      const labelStyle = { left, right, top };
 
       label = (
         <span className='label' style={labelStyle}>{labelText}</span>
