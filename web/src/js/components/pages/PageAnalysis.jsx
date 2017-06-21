@@ -79,8 +79,10 @@ export class PageAnalysis extends PureControllerView {
     );
   }
   blockTree() {
+    const active = this.props.other.get('active');
+    const deep = !!this.props.other.get('deepBlock');
     let blockClasses = ['block-tree', 'flex'];
-    if (this.props.other.get('deepBlock')) {
+    if (deep) {
       blockClasses = blockClasses.concat([
         'block-tree-deep',
         `block-tree-${this.props.other.get('deepBlock')}`
@@ -99,8 +101,9 @@ export class PageAnalysis extends PureControllerView {
             {group.get('bits').map((block, blockKey) => {
               const classes = classNames({
                 block: true,
+                active: active && active.length === 1 && active[0] === block.get('name'),
                 [`block-${block.get('color')}`]: true,
-                [`block-${block.get('name')}`]: !this.props.other.get('deepBlock')
+                [`block-${block.get('name')}`]: !deep
               });
               return (
                 <div key={blockKey} className={classes} style={{
@@ -114,13 +117,16 @@ export class PageAnalysis extends PureControllerView {
                       width: subBlockGroup.get('width'), height: subBlockGroup.get('height')
                     }}>
                     {subBlockGroup.get('bits').map((subBlock, subBlockKey) => {
+                      const subClasses = classNames({
+                        'sub-block': true,
+                        active: active && active.length === 2 && active[0] === block.get('name') &&
+                          active[1] === subBlock.get('name')
+                      });
                       return (
-                        <div key={subBlockKey} className='sub-block' style={{
+                        <div key={subBlockKey} className={subClasses} style={{
                           width: subBlock.get('width'), height: subBlock.get('height')
                         }} onMouseOver={() => {
-                          this.dispatchAction(aBlockHovered(
-                            [groupKey, blockKey, subBlockGroupKey, subBlockKey]
-                          ))
+                          this.dispatchAction(aBlockHovered({ block, subBlock }));
                         }}></div>
                       );
                     })}

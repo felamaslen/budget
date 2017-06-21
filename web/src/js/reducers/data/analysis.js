@@ -10,12 +10,22 @@ import {
   ANALYSIS_PERIODS, ANALYSIS_GROUPINGS,
   ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
 } from '../../misc/const';
-import { BlockPacker } from '../../misc/format';
+import { BlockPacker, capitalise, formatCurrency } from '../../misc/format';
+
+const pageIndexAnalysis = PAGES.indexOf('analysis');
 
 const sortTotal = (a, b) => {
   return a.get('total') > b.get('total') ? -1 : 1;
 };
 const addTotal = cost => cost.reduce((a, b) => a + b.get('total'), 0);
+
+const getBlocks = (cost, treeVisible) => {
+  const blockData = cost.filter(item => {
+    return treeVisible.has(item.get('name')) ? treeVisible.get(item.get('name')) : true;
+  });
+  const packer = new BlockPacker(blockData, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
+  return packer.blocks;
+};
 
 export const processPageDataAnalysis = (reduction, pageIndex, raw) => {
   const data = fromJS(raw);
@@ -38,11 +48,7 @@ export const processPageDataAnalysis = (reduction, pageIndex, raw) => {
 
   // block data
   const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible']);
-  const blockData = cost.filter(item => {
-    return treeVisible.has(item.get('name')) ? treeVisible.get(item.get('name')) : true;
-  });
-  const packer = new BlockPacker(blockData, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
-  const blocks = packer.blocks;
+  const blocks = getBlocks(cost, treeVisible);
 
   return reduction.setIn(
     ['appState', 'pages', pageIndex],
@@ -84,15 +90,20 @@ export const rAnalysisChangeTimeIndex = (reduction, timeIndex) => {
 };
 
 export const rAnalysisHandleNewData = (reduction, response) => {
-  return processPageDataAnalysis(reduction, PAGES.indexOf('analysis'), response.data.data)
+  return processPageDataAnalysis(reduction, pageIndexAnalysis, response.data.data)
   .setIn(['appState', 'other', 'analysis', 'loading'], false);
 };
 
 export const rAnalysisTreeToggleDisplay = (reduction, key) => {
-  const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible']);
+  const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible'])
   const newStatus = treeVisible.has(key) ? !treeVisible.get(key) : false;
 
-  return reduction.setIn(['appState', 'other', 'analysis', 'treeVisible', key], newStatus);
+  const cost = reduction.getIn(['appState', 'pages', pageIndexAnalysis, 'cost']);
+  const blocks = getBlocks(cost, treeVisible.set(key, newStatus));
+
+  return reduction.setIn(['appState', 'other', 'analysis', 'treeVisible', key], newStatus)
+  .setIn(['appState', 'pages', pageIndexAnalysis, 'blocks'], blocks)
+  .setIn(['appState', 'other', 'analysis', 'active'], null);
 };
 export const rAnalysisTreeToggleExpand = (reduction, key) => {
   const treeOpen = reduction.getIn(['appState', 'other', 'analysis', 'treeOpen']);
@@ -100,7 +111,16 @@ export const rAnalysisTreeToggleExpand = (reduction, key) => {
 
   return reduction.setIn(['appState', 'other', 'analysis', 'treeOpen', key], newStatus);
 };
-export const rAnalysisTreeHover = (reduction, key) => reduction;
+export const rAnalysisTreeHover = (reduction, key) => {
+  return reduction.setIn(['appState', 'other', 'analysis', 'active'], key);
+};
 export const rAnalysisBlockClick = (reduction, key) => reduction;
-export const rAnalysisBlockHover = (reduction, key) => reduction;
+export const rAnalysisBlockHover = (reduction, obj) => {
+  let newStatus = '';
+  if (obj !== null) {
+    const value = formatCurrency(obj.subBlock.get('value'), { raw: true });
+    newStatus = `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`;
+  }
+  return reduction.setIn(['appState', 'other', 'analysis', 'status'], newStatus);
+};
 

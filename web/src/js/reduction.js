@@ -53,7 +53,8 @@ export default new Record({
         treeOpen: {},
         treeVisible: { bills: false },
         deepBlock: null,
-        status: null
+        status: null,
+        active: null
       },
       graphFunds: {
         period: GRAPH_FUNDS_PERIODS[0][0],
