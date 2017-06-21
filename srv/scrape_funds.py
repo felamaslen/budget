@@ -253,6 +253,7 @@ class FundScraper(object):
                 new_total = sum([price * units for (_, _, price, units) \
                         in self.cache['queue']]) / 100
                 print "Current value: %f" % new_total
+                print "Current time: %d" % TIME_NOW
 
                 save_results = raw_input("Cache these results? [Y/n] ")
 
