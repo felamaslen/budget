@@ -281,10 +281,10 @@ class Search(Processor):
             'funds':    ['item'],
             'income':   ['item'],
             'bills':    ['item'],
-            'food':     ['item', 'category'],
-            'general':  ['item', 'category'],
-            'holiday':  ['item', 'holiday'],
-            'social':   ['item', 'society']
+            'food':     ['item', 'category', 'shop'],
+            'general':  ['item', 'category', 'shop'],
+            'holiday':  ['item', 'holiday', 'shop'],
+            'social':   ['item', 'society', 'shop']
         }
 
         default_max = 1
