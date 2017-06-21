@@ -196,10 +196,10 @@ export const rHandleKeyPress = (reduction, evt) => {
     return reduction;
   }
   // not logged in
-  if (key.key === 'Escape') {
+  if (evt.key === 'Escape') {
     return rLoginFormReset(reduction, 0);
   }
-  return rLoginFormInput(reduction, key.key);
+  return rLoginFormInput(reduction, evt.key);
 };
 
 /**
