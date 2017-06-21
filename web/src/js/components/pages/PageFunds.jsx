@@ -23,6 +23,24 @@ export class PageFunds extends PageList {
   listItemClasses(row) {
     return row.getIn(['cols', transactionsKey]).isSold() ? 'sold' : null;
   }
+  listHeadExtra() {
+    const cost = this.props.data.getIn(['data', 'total']);
+    const value = this.props.cachedValue.get('value');
+
+    const classes = classNames({
+      gain: true,
+      profit: cost < value,
+      loss: cost > value
+    });
+
+    return (
+      <span className={classes}>
+        <span className='gain-info'>Current value:</span>
+        <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
+        <span className='gain-info'>({this.props.cachedValue.get('ageText')})</span>
+      </span>
+    );
+  }
   renderListExtra(row, rowKey) {
     const name = row.getIn(['cols', 1]).toLowerCase().replace(/\W+/g, '-');
     const popout = row.get('historyPopout');
@@ -123,6 +141,7 @@ export class PageFunds extends PageList {
 
 PageFunds.propTypes = {
   graphProps: PropTypes.instanceOf(map),
+  cachedValue: PropTypes.instanceOf(map),
   showOverall: PropTypes.bool
 };
 

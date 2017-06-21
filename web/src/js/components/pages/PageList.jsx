@@ -16,6 +16,9 @@ export class PageList extends PureControllerView {
   addItem() {
     this.dispatchAction(aListItemAdded(this.addItems));
   }
+  listHeadExtra() {
+    return null;
+  }
   renderListHead() {
     const daily = this.props.daily ? (
       <span>
@@ -37,6 +40,7 @@ export class PageList extends PureControllerView {
         <span className='total-value'>{formatCurrency(
           this.props.data.getIn(['data', 'total']), { abbreviate: true, precision: 1 }
         )}</span>
+        {this.listHeadExtra()}
       </div>
     );
   }

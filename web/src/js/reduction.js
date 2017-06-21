@@ -70,6 +70,7 @@ export default new Record({
         zoom: [null, null], // range to restrict to
         range: [null, null] // possible range
       },
+      fundsCachedValue: { ageText: null, value: null },
       fundHistoryCache: {}
     }
   }),

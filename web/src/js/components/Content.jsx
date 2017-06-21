@@ -51,6 +51,7 @@ export class Content extends PureControllerView {
           index={this.props.index}
           page={page}
           graphProps={this.props.other.get('graphFunds')}
+          cachedValue={this.props.other.get('fundsCachedValue')}
           suggestions={null} />
       );
     }
