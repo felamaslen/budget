@@ -4,20 +4,22 @@
 
 import axios from 'axios';
 import querystring from 'querystring';
+import { List as list } from 'immutable';
 import buildEffectHandler from '../effectHandlerBuilder';
 
-import { PAGES } from '../misc/const';
+import { PAGES, MAX_SUGGESTIONS } from '../misc/const';
 import {
   EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
   EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED,
   EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
-  EF_FUNDS_PERIOD_REQUESTED
+  EF_FUNDS_PERIOD_REQUESTED, EF_SUGGESTIONS_REQUESTED
 } from '../constants/effects';
 
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
 import { aContentLoaded } from '../actions/ContentActions';
 import { aAnalysisDataReceived } from '../actions/AnalysisActions';
+import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
 
 export default buildEffectHandler([
@@ -95,6 +97,18 @@ export default buildEffectHandler([
         const period = obj.period;
         const data = response;
         dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
+      }
+    );
+  }],
+
+  [EF_SUGGESTIONS_REQUESTED, (obj, dispatcher) => {
+    axios.get(`api?t=data/search/${obj.page}/${obj.column}/${obj.value}/${MAX_SUGGESTIONS}`, {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => {
+        const items = list(response.data.data.list);
+        const reqId = obj.reqId;
+        dispatcher.dispatch(aSuggestionsReceived({ items, reqId }));
       }
     );
   }]

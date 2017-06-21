@@ -72,6 +72,9 @@ export const SERVER_UPDATE_REQUESTED = 0xf91;
 export const SERVER_UPDATE_RECEIVED = 0xf92;
 export const SERVER_UPDATE_ERROR = 0xf93;
 
+// maximum number of search suggestions to request
+export const MAX_SUGGESTIONS = 5;
+
 const htmlCanvasSupported = () => {
   const elem = document.createElement('canvas');
   return !!(elem.getContext && elem.getContext('2d'));

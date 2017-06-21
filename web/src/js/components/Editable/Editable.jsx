@@ -48,15 +48,22 @@ export default class Editable extends PureControllerView {
       </span>
     );
   }
+  handleChange(evt) {
+    this.dispatchAction(aEditableChanged(this.getEditValue(evt.target.value)));
+  }
+  afterInput() {
+    return null;
+  }
   renderInput() {
     return (
-      <input className='editable-input' {...this.inputProps}
-        defaultValue={this.getDefaultValue()}
-        ref={input => { this.input = input; }}
-        onChange={evt => {
-          this.dispatchAction(aEditableChanged(this.getEditValue(evt.target.value)));
-        }}
-      />
+      <span>
+        <input className='editable-input' {...this.inputProps}
+          defaultValue={this.getDefaultValue()}
+          ref={input => { this.input = input; }}
+          onChange={evt => this.handleChange(evt)}
+        />
+        {this.afterInput()}
+      </span>
     );
   }
   render() {

@@ -41,7 +41,13 @@ export default new Record({
       addBtnFocus: false,
       queue: [],
       queueDelete: [],
-      status: SERVER_UPDATE_IDLE
+      status: SERVER_UPDATE_IDLE,
+      suggestions: {
+        loading: false,
+        reqId: null,
+        list: [],
+        active: -1
+      }
     },
     other: {
       showAllBalanceGraph: false,

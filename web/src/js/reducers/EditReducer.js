@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
-import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
+import { EF_SERVER_ADD_REQUESTED, EF_SUGGESTIONS_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from '../reducers/data/overview';
 import { getGainComparisons, addPriceHistory } from '../reducers/data/funds';
 import {
@@ -15,7 +15,7 @@ import {
 } from '../misc/config';
 import { YMD } from '../misc/date';
 import {
-  getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
+  uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
@@ -128,21 +128,32 @@ const applyEdits = (reduction, item, pageIndex) => {
   return reduction;
 };
 
-export const rActivateEditable = (reduction, editable) => {
+export const rActivateEditable = (reduction, editable, cancel) => {
   const active = reduction.getIn(['appState', 'edit', 'active']);
   const queue = reduction.getIn(['appState', 'edit', 'queue']);
   const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
-  let newReduction = reduction.setIn(['appState', 'edit', 'addBtnFocus'], false);
+  let newReduction = reduction
+  .setIn(['appState', 'edit', 'addBtnFocus'], false)
+  .setIn(['appState', 'edit', 'suggestions', 'list'], list([]))
+  .setIn(['appState', 'edit', 'suggestions', 'active'], -1)
+  .setIn(['appState', 'edit', 'suggestions', 'loading'], false)
+  .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
 
   // confirm the previous item's edits
   if (active && active.get('value') !== active.get('originalValue')) {
-    if (active.get('row') > -1) {
-      // add last item to queue for saving on API
-      newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
+    if (cancel) {
+      // revert to previous state
+      newReduction = applyEdits(newReduction, active.set('value', active.get('originalValue')));
     }
+    else {
+      if (active.get('row') > -1) {
+        // add last item to queue for saving on API
+        newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
+      }
 
-    // append the changes of the last item to the UI
-    newReduction = applyEdits(newReduction, active, pageIndex);
+      // append the changes of the last item to the UI
+      newReduction = applyEdits(newReduction, active, pageIndex);
+    }
   }
 
   // can pass null to deactivate editing
@@ -310,6 +321,46 @@ export const rHandleServerAdd = (reduction, response) => {
     value: now,
     originalValue: now
   })).setIn(['appState', 'edit', 'addBtnFocus'], false);
+};
+
+export const rHandleSuggestions = (reduction, obj) => {
+  const newReduction = reduction
+  .setIn(['appState', 'edit', 'suggestions', 'loading'], false)
+  .setIn(['appState', 'edit', 'suggestions', 'active'], -1);
+
+  if (!obj || reduction.getIn(
+    ['appState', 'edit', 'suggestions', 'reqId']
+  ) !== obj.reqId) {
+    // null object (clear), or changed input while suggestions were loading
+    return newReduction
+    .setIn(['appState', 'edit', 'suggestions', 'list'], list([]))
+    .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
+  }
+  return newReduction.setIn(['appState', 'edit', 'suggestions', 'list'], obj.items);
+};
+
+export const rRequestSuggestions = (reduction, value) => {
+  if (reduction.getIn(['appState', 'edit', 'suggestions', 'loading'])) {
+    return reduction;
+  }
+  if (!value.length) {
+    return rHandleSuggestions(reduction, null);
+  }
+
+  const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+
+  const active = reduction.getIn(['appState', 'edit', 'active']);
+  const page = PAGES[active.get('pageIndex')];
+  const column = active.get('item');
+
+  const reqId = uuid(); // for keeping track of EditItem requests
+
+  const req = { reqId, apiKey, page, column, value };
+  return reduction.set('effects', reduction.get('effects').push(
+    buildMessage(EF_SUGGESTIONS_REQUESTED, req)
+  ))
+  .setIn(['appState', 'edit', 'suggestions', 'loading'], true)
+  .setIn(['appState', 'edit', 'suggestions', 'reqId'], reqId);
 };
 
 const rFundTransactions = (reduction, row, col, callback) => {
