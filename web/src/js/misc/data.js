@@ -18,6 +18,14 @@ const sortByDate = (a, b) => {
 export const notNull = item => item !== null;
 
 /**
+ * Produce a "unique" id
+ * @returns {number} "unique" id
+ */
+export const uuid = () => {
+  return Math.floor((1 + Math.random()) * 0x10000);
+};
+
+/**
  * data type to hold transactions list for funds
  */
 export class TransactionsList {

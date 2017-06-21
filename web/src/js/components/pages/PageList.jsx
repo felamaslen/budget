@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
+import classNames from 'classnames';
 import { LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable';
@@ -47,11 +48,17 @@ export class PageList extends PureControllerView {
           const value = this.props.add.get(key);
           const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
           const editItem = getEditable(
-            this.props.dispatcher, -1, key, null, column, value, this.props.index, active);
+            this.props.dispatcher, -1, key, null, column, value,
+            this.props.index, active, this.props.suggestions
+          );
           this.addItems.push(editItem);
 
+          const spanClasses = classNames({
+            [column]: true,
+            active
+          });
           return (
-            <span key={key} className={column}>
+            <span key={key} className={spanClasses}>
               {editItem}
             </span>
           );
@@ -87,10 +94,16 @@ export class PageList extends PureControllerView {
         const value = row.getIn(['cols', colKey]);
         const active = this.props.edit.get('row') === rowKey && this.props.edit.get('col') === colKey;
         const editItem = getEditable(
-          this.props.dispatcher, rowKey, colKey, id, column, value, this.props.index, active);
+          this.props.dispatcher, rowKey, colKey, id, column, value,
+          this.props.index, active, this.props.suggestions
+        );
 
+        const spanClasses = classNames({
+          [column]: true,
+          active
+        });
         return (
-          <span key={colKey} className={column}>
+          <span key={colKey} className={spanClasses}>
             {editItem}
           </span>
         );
@@ -148,6 +161,7 @@ PageList.propTypes = {
   data: PropTypes.instanceOf(map),
   edit: PropTypes.instanceOf(map),
   add: PropTypes.instanceOf(list),
+  suggestions: PropTypes.instanceOf(map),
   addBtnFocus: PropTypes.bool,
   daily: PropTypes.bool,
   index: PropTypes.number,

@@ -18,9 +18,12 @@ import EditableTransactions from './EditableTransactions';
  * @param {mixed} value: value of item
  * @param {integer} pageIndex: page index of item
  * @param {boolean} active: whether item is being edited
+ * @param {list} suggestions: search suggestions list
  * @returns {Editable}: the correct editable react component class
  */
-export const getEditable = (dispatcher, row, col, id, item, value, pageIndex, active) => {
+export const getEditable = (
+  dispatcher, row, col, id, item, value, pageIndex, active, suggestions
+) => {
   switch (item) {
   case 'date':
     return <EditableDate dispatcher={dispatcher} row={row} col={col}
@@ -39,7 +42,8 @@ export const getEditable = (dispatcher, row, col, id, item, value, pageIndex, ac
 
   default:
     return <EditableText dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
+      id={id} item={item} value={value} pageIndex={pageIndex} active={active}
+      suggestions={suggestions} />;
   }
 };
 

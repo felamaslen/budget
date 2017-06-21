@@ -22,12 +22,31 @@ const getItemValue = (reduction, pageIndex, row, col) => {
   if (PAGES[pageIndex] === 'overview') {
     value = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'cost', 'balance', row]);
   }
-  else if (LIST_PAGES.indexOf(pageIndex) > -1 && row > -1) {
-    id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'id']);
-    value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
-    item = LIST_COLS_PAGES[pageIndex][col];
+  else if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    if (row > -1) {
+      id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'id']);
+      value = reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
+      item = LIST_COLS_PAGES[pageIndex][col];
+    }
+    else {
+      value = reduction.getIn(['appState', 'edit', 'add', col]);
+      item = LIST_COLS_PAGES[pageIndex][col];
+    }
   }
   return { id, item, value };
+};
+
+/**
+ * Handle suggestions navigation
+ * @param {Record} reduction application state
+ * @param {integer} direction direction
+ * @param {map} suggestions suggestions object
+ * @returns {Record} modified reduction
+ */
+const handleSuggestionsNav = (reduction, direction, suggestions) => {
+  const newActive = ((suggestions.get('active') + 1 + direction) %
+                     (suggestions.get('list').size + 1)) - 1;
+  return reduction.setIn(['appState', 'edit', 'suggestions', 'active'], newActive);
 };
 
 /**
@@ -35,12 +54,13 @@ const getItemValue = (reduction, pageIndex, row, col) => {
  * @param {Record} reduction application state
  * @param {integer} dx x direction
  * @param {integer} dy y direction
+ * @param {boolean} cancel clear any changes
  * @returns {Record} modified reduction
  */
-const handleNav = (reduction, dx, dy) => {
+const handleNav = (reduction, dx, dy, cancel) => {
   const editing = reduction.getIn(['appState', 'edit', 'active']);
   if (dx === null) {
-    return rActivateEditable(reduction, null);
+    return rActivateEditable(reduction, null, cancel);
   }
   const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
   let numRows = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']);
@@ -97,6 +117,7 @@ const handleNav = (reduction, dx, dy) => {
   if (pageIsList) {
     row--;
   }
+
   const itemValue = getItemValue(reduction, pageIndex, row, col);
   const id = itemValue.id;
   const item = itemValue.item;
@@ -106,30 +127,69 @@ const handleNav = (reduction, dx, dy) => {
 };
 
 /**
+ * get x, y directions given a keypress (e.g. arrowRight -> [1, 0])
+ * @param {string} key: event key
+ * @param {boolean} shift: shift key was pressed
+ * @returns {array} direction to navigate
+ */
+const getNavDirection = (key, shift) => {
+  if (key === 'Tab') {
+    return [shift ? -1 : 1, 0];
+  }
+  const arrows = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
+  const arrowIndex = arrows.indexOf(key);
+  if (arrowIndex > -1) {
+    return [((arrowIndex % 4) - 1) % 2, (((arrowIndex - 1) % 4) - 1) % 2];
+  }
+  return [0, 0];
+};
+
+/**
  * Handle key presses
  * @param {Record} reduction application state
- * @param {string} key which key was pressed
+ * @param {object} evt key event
  * @returns {Record} modified reduction
  */
-export const rHandleKeyPress = (reduction, key) => {
+export const rHandleKeyPress = (reduction, evt) => {
+  if (evt.key === 'Control' || evt.key === 'Shift') {
+    // don't do anything until an actual key (not modifier) is pressed
+    return reduction;
+  }
+
+  const direction = getNavDirection(evt.key, evt.shift);
+
   if (reduction.getIn(['appState', 'user', 'uid'])) {
     // logged in
 
-    // handle navigation
-    if (key.key === 'Tab') {
-      return handleNav(reduction, key.shift ? -1 : 1, 0);
-    }
-    if (key.ctrl) {
-      const arrows = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
-      const arrowIndex = arrows.indexOf(key.key);
-      if (arrowIndex > -1) {
-        return handleNav(reduction, ((arrowIndex % 4) - 1) % 2, (((arrowIndex - 1) % 4) - 1) % 2);
+    // handle suggestions navigation
+    const suggestions = reduction.getIn(['appState', 'edit', 'suggestions']);
+    if (suggestions.get('list').size > 0) {
+      if (suggestions.get('active') > -1) {
+        if (evt.key === 'Escape') {
+          return reduction
+          .setIn(['appState', 'edit', 'suggestions', 'list'], list([]))
+          .setIn(['appState', 'edit', 'suggestions', 'active'], -1);
+        }
+        if (evt.key === 'Enter') {
+          return handleNav(reduction.setIn(
+            ['appState', 'edit', 'active', 'value'],
+            suggestions.getIn(['list', suggestions.get('active')])
+          ), 1, 0);
+        }
+      }
+      if (!evt.ctrl && (evt.key === 'Tab' || evt.key.indexOf('Arrow') > -1)) {
+        return handleSuggestionsNav(
+          reduction, direction[1] === 0 ? direction[0] : direction[1], suggestions);
       }
     }
-    if (key.key === 'Escape') {
-      return handleNav(reduction, null);
+    // handle page navigation
+    if (evt.ctrl || evt.key === 'Tab') {
+      return handleNav(reduction, direction[0], direction[1]);
     }
-    if (key.key === 'Enter') {
+    if (evt.key === 'Escape') {
+      return handleNav(reduction, null, null, true);
+    }
+    if (evt.key === 'Enter') {
       // submit on enter
       return rActivateEditable(reduction, null);
     }

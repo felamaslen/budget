@@ -50,7 +50,8 @@ export class Content extends PureControllerView {
           daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
           page={page}
-          graphProps={this.props.other.get('graphFunds')} />
+          graphProps={this.props.other.get('graphFunds')}
+          suggestions={null} />
       );
     }
     if (LIST_PAGES.indexOf(this.props.index) > -1) {
@@ -63,7 +64,9 @@ export class Content extends PureControllerView {
           addBtnFocus={this.props.edit.get('addBtnFocus')}
           daily={DAILY_PAGES[this.props.index]}
           index={this.props.index}
-          page={page} />
+          page={page}
+          suggestions={this.props.edit.get('suggestions')}
+        />
       );
     }
     return <div>TODO: page {this.props.index}</div>;
