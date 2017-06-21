@@ -106,9 +106,11 @@ export default buildEffectHandler([
       headers: { 'Authorization': obj.apiKey }
     }).then(
       response => {
-        const items = list(response.data.data.list);
-        const reqId = obj.reqId;
-        dispatcher.dispatch(aSuggestionsReceived({ items, reqId }));
+        if (!response.data.error) {
+          const items = list(response.data.data.list);
+          const reqId = obj.reqId;
+          dispatcher.dispatch(aSuggestionsReceived({ items, reqId }));
+        }
       }
     );
   }]

@@ -278,12 +278,13 @@ class Search(Processor):
 
     def prepare(self):
         table_cols = {
-            'funds':    ['item', 'cost'],
-            'bills':    ['item', 'cost'],
-            'food':     ['item', 'category', 'cost', 'shop'],
-            'general':  ['item', 'category', 'cost', 'shop'],
-            'holiday':  ['item', 'holiday', 'cost', 'shop'],
-            'social':   ['item', 'society', 'cost', 'shop']
+            'funds':    ['item'],
+            'income':   ['item'],
+            'bills':    ['item'],
+            'food':     ['item', 'category'],
+            'general':  ['item', 'category'],
+            'holiday':  ['item', 'holiday'],
+            'social':   ['item', 'society']
         }
 
         default_max = 1
