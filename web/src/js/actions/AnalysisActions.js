@@ -8,8 +8,7 @@ import {
   AC_ANALYSIS_TIME_INDEX_CHANGED, AC_ANALYSIS_DATA_REFRESHED,
   AC_ANALYSIS_TREE_DISPLAY_TOGGLED, AC_ANALYSIS_TREE_EXPAND_TOGGLED,
   AC_ANALYSIS_TREE_HOVERED,
-  AC_ANALYSIS_BLOCK_SHALLOW_CLICKED, AC_ANALYSIS_BLOCK_DEEP_CLICKED,
-  AC_ANALYSIS_BLOCK_SHALLOW_HOVERED, AC_ANALYSIS_BLOCK_DEEP_HOVERED
+  AC_ANALYSIS_BLOCK_CLICKED, AC_ANALYSIS_BLOCK_HOVERED,
 } from '../constants/actions';
 
 export const aPeriodChanged = period => buildMessage(AC_ANALYSIS_PERIOD_CHANGED, period);
@@ -21,8 +20,6 @@ export const aTreeItemDisplayToggled = key => buildMessage(AC_ANALYSIS_TREE_DISP
 export const aTreeItemExpandToggled = key => buildMessage(AC_ANALYSIS_TREE_EXPAND_TOGGLED, key);
 export const aTreeItemHovered = key => buildMessage(AC_ANALYSIS_TREE_HOVERED, key);
 
-export const aBlockShallowClicked = key => buildMessage(AC_ANALYSIS_BLOCK_SHALLOW_CLICKED, key);
-export const aBlockDeepClicked = key => buildMessage(AC_ANALYSIS_BLOCK_DEEP_CLICKED, key);
-export const aBlockShallowHovered = key => buildMessage(AC_ANALYSIS_BLOCK_SHALLOW_HOVERED, key);
-export const aBlockDeepHovered = key => buildMessage(AC_ANALYSIS_BLOCK_DEEP_HOVERED, key);
+export const aBlockClicked = key => buildMessage(AC_ANALYSIS_BLOCK_CLICKED, key);
+export const aBlockHovered = key => buildMessage(AC_ANALYSIS_BLOCK_HOVERED, key);
 

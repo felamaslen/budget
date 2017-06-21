@@ -51,7 +51,9 @@ export default new Record({
         grouping: 0,
         timeIndex: 0,
         treeOpen: {},
-        treeVisible: { bills: false }
+        treeVisible: { bills: false },
+        deepBlock: null,
+        status: null
       },
       graphFunds: {
         period: GRAPH_FUNDS_PERIODS[0][0],

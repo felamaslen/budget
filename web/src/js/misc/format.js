@@ -2,9 +2,156 @@
  * Text formatters
  */
 
+import { List as list, Map as map } from 'immutable';
 import {
   SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW
 } from './config';
+
+const percent = frac => `${100 * frac}%`;
+
+/**
+ * class to visualise data as a bunch of squares
+ */
+export class BlockPacker {
+  constructor(data, width, height) {
+    this.data = data;
+
+    this.width = width;
+    this.height = height;
+
+    this.numBlockColors = 16;
+    this.colorOffset = this.data.reduce((a, b) => a + (b.get('total') & 1), 0);
+
+    this.total = data.reduce((a, b) => a + b.get('total'), 0);
+    const totalArea = width * height;
+
+    this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
+    this.blocks = list([]);
+    this.root = { x: 0, y: 0, w: width, h: height };
+
+    const row = list([]);
+    this.rowCount = 0;
+
+    this.squarify(this.tree, row, this.root);
+  }
+  squarify(children, row, node) {
+    if (!children.size) {
+      return;
+    }
+    const row2 = row.push(children.first());
+    if (children.size === 1 && row.size === 0) {
+      // use all the remaining space for the last child
+      this.addNode(children, node);
+    }
+    else if (this.worst(row, node) >= this.worst(row2, node)) {
+      this.squarify(children.shift(), row2, node);
+    }
+    else {
+      const newNode = this.addNode(row, node);
+      this.squarify(children, list([]), newNode);
+    }
+  }
+  addNode(row, node) {
+    // returns a new node (the rest of the available space)
+    const wide = node.w > node.h;
+
+    let freeX = node.x;
+    let freeY = node.y; // measured from bottom
+
+    let freeWidth = node.w;
+    let freeHeight = node.h;
+
+    let blockWidth = node.w;
+    let blockHeight = node.h;
+
+    const sum = row.reduce((a, b) => a + b, 0);
+
+    if (wide) {
+      blockWidth = sum / node.h;
+      freeWidth -= blockWidth;
+      freeX += blockWidth;
+    }
+    else {
+      blockHeight = sum / node.w;
+      freeHeight -= blockHeight;
+      freeY += blockHeight;
+    }
+
+    // add row's blocks
+    const newNode = {
+      x: freeX,
+      y: freeY,
+      w: freeWidth,
+      h: freeHeight
+    };
+
+    const newBlockBits = row.map(item => {
+      const thisBlockWidth = wide ? 1 : (item / sum);
+
+      const thisBlockHeight = wide ? (item / sum) : 1;
+
+      const j = this.rowCount++;
+
+      const name = this.data.getIn([j, 'name']);
+      const color = (j + this.colorOffset) % this.numBlockColors;
+      const value = this.data.getIn([j, 'total']);
+      const newBlockBit = map({
+        width: percent(thisBlockWidth),
+        height: percent(thisBlockHeight),
+        name,
+        color,
+        value
+      });
+
+      if (this.data.getIn([j, 'subTree'])) {
+        const thisBlocks = new BlockPacker(
+          this.data.getIn([j, 'subTree']),
+          thisBlockWidth * blockWidth,
+          thisBlockHeight * blockHeight
+        );
+        return newBlockBit.set('blocks', thisBlocks.blocks);
+      }
+      return newBlockBit;
+    });
+
+    const newBlock = map({
+      width: percent(blockWidth / this.width),
+      height: percent(blockHeight / this.height),
+      bits: newBlockBits
+    });
+
+    this.blocks = this.blocks.push(newBlock);
+
+    return newNode;
+  }
+  worst(row, node) {
+    // row is a list of areas
+    if (row.size === 0) {
+      return Infinity;
+    }
+
+    const aspect = node.w / node.h;
+    let worst;
+    const sum = row.reduce((a, b) => a + b, 0);
+
+    if (aspect > 1) {
+      // wide, so fill the node from the left
+      const rowWidth = sum / node.h;
+      return row.reduce((a, b) => {
+        const thisAspect = rowWidth * rowWidth / b;
+        const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+        return worstAspect > a ? worstAspect : a;
+      }, 0);
+    }
+    // tall, so fill the node from the bottom
+    const rowHeight = sum / node.w;
+    return row.reduce((a, b) => {
+      const thisAspect = b / (rowHeight * rowHeight);
+      const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+      return worstAspect > a ? worstAspect : a;
+    }, 0);
+  }
+}
 
 /**
  * @function capitalise

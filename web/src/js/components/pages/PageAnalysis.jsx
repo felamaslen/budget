@@ -12,8 +12,7 @@ import { formatCurrency, capitalise } from '../../misc/format';
 import {
   aPeriodChanged, aGroupingChanged, aTimeIndexChanged,
   aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered,
-  aBlockShallowClicked, aBlockDeepClicked,
-  aBlockShallowHovered, aBlockDeepHovered
+  aBlockClicked, aBlockHovered
 } from '../../actions/AnalysisActions';
 
 export class PageAnalysis extends PureControllerView {
@@ -28,10 +27,11 @@ export class PageAnalysis extends PureControllerView {
           const itemTotal = item.get('total');
           const itemPct = (100 * itemTotal / this.props.costTotal).toFixed(1);
           const itemName = item.get('name');
-          const visible = this.props.treeVisible.has(itemName) ? this.props.treeVisible.get(itemName) : true;
+          const visible = this.props.other.get('treeVisible').has(itemName) ?
+            this.props.other.get('treeVisible').get(itemName) : true;
 
           let subTree = null;
-          const open = !!this.props.treeOpen.get(itemName);
+          const open = !!this.props.other.get('treeOpen').get(itemName);
           if (open) {
             subTree = (
               <ul className='sub-tree'>
@@ -79,7 +79,64 @@ export class PageAnalysis extends PureControllerView {
     );
   }
   blockTree() {
-    return null; // TODO
+    let blockClasses = ['block-tree', 'flex'];
+    if (this.props.other.get('deepBlock')) {
+      blockClasses = blockClasses.concat([
+        'block-tree-deep',
+        `block-tree-${this.props.other.get('deepBlock')}`
+      ]);
+    }
+    blockClasses = blockClasses.join(' ');
+
+    return (
+      <div className='block-view' onMouseOut={() => this.dispatchAction(aBlockHovered(null))}>
+        <div className={blockClasses}>
+        {this.props.blocks.map((group, groupKey) => {
+          return (
+            <div key={groupKey} className='block-group' style={{
+              width: group.get('width'), height: group.get('height')
+            }}>
+            {group.get('bits').map((block, blockKey) => {
+              const classes = classNames({
+                block: true,
+                [`block-${block.get('color')}`]: true,
+                [`block-${block.get('name')}`]: !this.props.other.get('deepBlock')
+              });
+              return (
+                <div key={blockKey} className={classes} style={{
+                  width: block.get('width'), height: block.get('height')
+                }} onClick={() => {
+                  this.dispatchAction(aBlockClicked([groupKey, blockKey]));
+                }}>
+                {block.get('blocks').map((subBlockGroup, subBlockGroupKey) => {
+                  return (
+                    <div key={subBlockGroupKey} className='block-group' style={{
+                      width: subBlockGroup.get('width'), height: subBlockGroup.get('height')
+                    }}>
+                    {subBlockGroup.get('bits').map((subBlock, subBlockKey) => {
+                      return (
+                        <div key={subBlockKey} className='sub-block' style={{
+                          width: subBlock.get('width'), height: subBlock.get('height')
+                        }} onMouseOver={() => {
+                          this.dispatchAction(aBlockHovered(
+                            [groupKey, blockKey, subBlockGroupKey, subBlockKey]
+                          ))
+                        }}></div>
+                      );
+                    })}
+                    </div>
+                  );
+                })}
+                </div>
+              );
+            })}
+            </div>
+          );
+        })}
+        </div>
+        <div className='status-bar'>{this.props.other.get('status')}</div>
+      </div>
+    );
   }
   render() {
     const listTree = this.listTree();
@@ -93,7 +150,7 @@ export class PageAnalysis extends PureControllerView {
             {ANALYSIS_PERIODS.map((period, key) => {
               return (
                 <span key={key}>
-                  <input type='radio' checked={this.props.period === key}
+                  <input type='radio' checked={this.props.other.get('period') === key}
                     onChange={() => this.dispatchAction(aPeriodChanged(key))} />
                   <span>{capitalise(period)}</span>
                 </span>
@@ -105,7 +162,7 @@ export class PageAnalysis extends PureControllerView {
             {ANALYSIS_GROUPINGS.map((grouping, key) => {
               return (
                 <span key={key}>
-                  <input type='radio' checked={this.props.grouping === key}
+                  <input type='radio' checked={this.props.other.get('grouping') === key}
                     onChange={() => this.dispatchAction(aGroupingChanged(key))} />
                   <span>{capitalise(grouping)}</span>
                 </span>
@@ -115,11 +172,11 @@ export class PageAnalysis extends PureControllerView {
           <div className='btns'>
             <button className='btn-previous'
               onClick={() => {
-                this.dispatchAction(aTimeIndexChanged(this.props.timeIndex + 1));
+                this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') + 1));
               }}>Previous</button>
-            <button className='btn-next' disabled={this.props.timeIndex === 0}
+            <button className='btn-next' disabled={this.props.other.get('timeIndex') === 0}
               onClick={() => {
-                this.dispatchAction(aTimeIndexChanged(this.props.timeIndex - 1));
+                this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') - 1));
               }}>Next</button>
           </div>
           <h3 className='period-title'>{this.props.description}</h3>
@@ -138,10 +195,7 @@ PageAnalysis.propTypes = {
   costTotal: PropTypes.number,
   items: PropTypes.instanceOf(map),
   description: PropTypes.string,
-  period: PropTypes.number,
-  grouping: PropTypes.number,
-  timeIndex: PropTypes.number,
-  treeVisible: PropTypes.instanceOf(map),
-  treeOpen: PropTypes.instanceOf(map)
+  blocks: PropTypes.instanceOf(list),
+  other: PropTypes.instanceOf(map)
 };
 
