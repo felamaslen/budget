@@ -40,7 +40,6 @@ gulp.task('watch_css', () => {
 gulp.task('build_css', ['less'], () => {
   return gulp.src('web/build/css/main.css')
   .pipe(cssmin())
-  .pipe(rename('main.min.css'))
   .pipe(gulp.dest('web/build/css/'));
 });
 
