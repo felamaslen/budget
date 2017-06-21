@@ -30,15 +30,12 @@ export class Content extends PureControllerView {
     if (page === 'analysis') {
       return (
         <PageAnalysis dispatcher={this.props.dispatcher}
-          period={this.props.other.getIn(['analysis', 'period'])}
-          grouping={this.props.other.getIn(['analysis', 'grouping'])}
-          timeIndex={this.props.other.getIn(['analysis', 'timeIndex'])}
+          other={this.props.other.get('analysis')}
           cost={data.get('cost')}
           costTotal={data.get('costTotal')}
           items={data.get('items')}
           description={data.get('description')}
-          treeVisible={this.props.other.getIn(['analysis', 'treeVisible'])}
-          treeOpen={this.props.other.getIn(['analysis', 'treeOpen'])}
+          blocks={data.get('blocks')}
         />
       );
     }

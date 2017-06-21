@@ -5,7 +5,12 @@
 import { fromJS, Map as map } from 'immutable';
 import buildMessage from '../../messageBuilder';
 import { EF_ANALYSIS_DATA_REQUESTED } from '../../constants/effects';
-import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../misc/const';
+import {
+  PAGES,
+  ANALYSIS_PERIODS, ANALYSIS_GROUPINGS,
+  ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
+} from '../../misc/const';
+import { BlockPacker } from '../../misc/format';
 
 const sortTotal = (a, b) => {
   return a.get('total') > b.get('total') ? -1 : 1;
@@ -15,6 +20,7 @@ const addTotal = cost => cost.reduce((a, b) => a + b.get('total'), 0);
 export const processPageDataAnalysis = (reduction, pageIndex, raw) => {
   const data = fromJS(raw);
 
+  // tree data
   const cost = data.get('cost').map(item => {
     const name = item.get(0);
     const subTree = item.get(1).map(subItem => {
@@ -26,16 +32,21 @@ export const processPageDataAnalysis = (reduction, pageIndex, raw) => {
   })
   .filter(item => item.get('total') > 0)
   .sort(sortTotal);
-
   const costTotal = addTotal(cost);
-
   const items = map({}); // TODO
-
   const description = data.get('description');
+
+  // block data
+  const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible']);
+  const blockData = cost.filter(item => {
+    return treeVisible.has(item.get('name')) ? treeVisible.get(item.get('name')) : true;
+  });
+  const packer = new BlockPacker(blockData, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
+  const blocks = packer.blocks;
 
   return reduction.setIn(
     ['appState', 'pages', pageIndex],
-    map({ cost, costTotal, items, description })
+    map({ blocks, cost, costTotal, items, description })
   );
 };
 
@@ -90,8 +101,6 @@ export const rAnalysisTreeToggleExpand = (reduction, key) => {
   return reduction.setIn(['appState', 'other', 'analysis', 'treeOpen', key], newStatus);
 };
 export const rAnalysisTreeHover = (reduction, key) => reduction;
-export const rAnalysisBlockShallowClick = (reduction, key) => reduction;
-export const rAnalysisBlockDeepClick = (reduction, key) => reduction;
-export const rAnalysisBlockShallowHover = (reduction, key) => reduction;
-export const rAnalysisBlockDeepHover = (reduction, key) => reduction;
+export const rAnalysisBlockClick = (reduction, key) => reduction;
+export const rAnalysisBlockHover = (reduction, key) => reduction;
 

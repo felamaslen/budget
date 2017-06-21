@@ -31,10 +31,8 @@ import {
   AC_ANALYSIS_TREE_DISPLAY_TOGGLED,
   AC_ANALYSIS_TREE_EXPAND_TOGGLED,
   AC_ANALYSIS_TREE_HOVERED,
-  AC_ANALYSIS_BLOCK_SHALLOW_CLICKED,
-  AC_ANALYSIS_BLOCK_DEEP_CLICKED,
-  AC_ANALYSIS_BLOCK_SHALLOW_HOVERED,
-  AC_ANALYSIS_BLOCK_DEEP_HOVERED,
+  AC_ANALYSIS_BLOCK_CLICKED,
+  AC_ANALYSIS_BLOCK_HOVERED,
 
   AC_EDIT_ACTIVATED,
   AC_EDIT_CHANGED,
@@ -87,10 +85,8 @@ import {
   rAnalysisTreeToggleDisplay,
   rAnalysisTreeToggleExpand,
   rAnalysisTreeHover,
-  rAnalysisBlockShallowClick,
-  rAnalysisBlockDeepClick,
-  rAnalysisBlockShallowHover,
-  rAnalysisBlockDeepHover
+  rAnalysisBlockClick,
+  rAnalysisBlockHover
 } from './data/analysis';
 import {
   rActivateEditable,
@@ -172,14 +168,10 @@ export default (reduction, action) => {
     return rAnalysisTreeToggleExpand(reduction, action.payload);
   case AC_ANALYSIS_TREE_HOVERED:
     return rAnalysisTreeHover(reduction, action.payload);
-  case AC_ANALYSIS_BLOCK_SHALLOW_CLICKED:
-    return rAnalysisBlockShallowClick(reduction, action.payload);
-  case AC_ANALYSIS_BLOCK_DEEP_CLICKED:
-    return rAnalysisBlockDeepClick(reduction, action.payload);
-  case AC_ANALYSIS_BLOCK_SHALLOW_HOVERED:
-    return rAnalysisBlockShallowHover(reduction, action.payload);
-  case AC_ANALYSIS_BLOCK_DEEP_HOVERED:
-    return rAnalysisBlockDeepHover(reduction, action.payload);
+  case AC_ANALYSIS_BLOCK_CLICKED:
+    return rAnalysisBlockClick(reduction, action.payload);
+  case AC_ANALYSIS_BLOCK_HOVERED:
+    return rAnalysisBlockHover(reduction, action.payload);
 
   // editable actions
   case AC_EDIT_ACTIVATED:
