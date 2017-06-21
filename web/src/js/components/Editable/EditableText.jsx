@@ -27,7 +27,8 @@ export default class EditableText extends Editable {
     }
   }
   afterInput() {
-    if (!this.props.active || this.props.suggestions.size === 0) {
+    if (!this.props.active || !this.props.suggestions ||
+        !this.props.suggestions.size) {
       return null;
     }
     return (
