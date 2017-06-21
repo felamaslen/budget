@@ -235,23 +235,32 @@ export const rCalculateOverview = (reduction, pageIndex, newDate, oldDate, newIt
   const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
   const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
 
-  // update the changed rows in the overview page
   const oldCost = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'cost']);
-  let newCost;
+  const numRows = oldCost.get(PAGES[pageIndex]).size;
+
+  // update the changed rows in the overview page
+  let newCost = oldCost;
   if (oldKey === newKey) {
-    newCost = oldCost.setIn(
-      [PAGES[pageIndex], oldKey],
-      oldCost.getIn([PAGES[pageIndex], oldKey]) + newItemCost - oldItemCost
-    );
+    if (oldKey < numRows) {
+      newCost = newCost.setIn(
+        [PAGES[pageIndex], oldKey],
+        oldCost.getIn([PAGES[pageIndex], oldKey]) + newItemCost - oldItemCost
+      );
+    }
   }
   else {
-    newCost = oldCost.setIn(
-      [PAGES[pageIndex], oldKey],
-      oldCost.getIn([PAGES[pageIndex], oldKey]) - oldItemCost
-    ).setIn(
-      [PAGES[pageIndex], newKey],
-      oldCost.getIn([PAGES[pageIndex], newKey]) + newItemCost
-    );
+    if (oldKey < numRows) {
+      newCost = newCost.setIn(
+        [PAGES[pageIndex], oldKey],
+        oldCost.getIn([PAGES[pageIndex], oldKey]) - oldItemCost
+      );
+    }
+    if (newKey < numRows) {
+      newCost = newCost.setIn(
+        [PAGES[pageIndex], newKey],
+        oldCost.getIn([PAGES[pageIndex], newKey]) + newItemCost
+      );
+    }
   }
 
   const endYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'endYearMonth']);
