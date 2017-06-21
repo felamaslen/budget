@@ -15,7 +15,7 @@ export default class EditableCost extends Editable {
     return formatCurrency(this.props.value);
   }
   getDefaultValue() {
-    return this.props.value / 100;
+    return this.props.value ? this.props.value / 100 : '';
   }
   getEditValue(rawInputValue) {
     const value = Math.round(parseFloat(rawInputValue, 10) * 100);
