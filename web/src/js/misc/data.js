@@ -29,16 +29,29 @@ export const uuid = () => {
  * data type to hold transactions list for funds
  */
 export class TransactionsList {
-  constructor(raw, noJson) {
+  constructor(raw, formatted, isList) {
     this.idCount = 0;
-    const aList = noJson ? raw : list(JSON.parse(raw)).map(item => {
-      return map({
-        id: this.idCount++,
-        date: new YMD(item.d),
-        units: parseFloat(item.u, 10),
-        cost: parseInt(item.c, 10)
-      });
-    });
+    let aList = raw;
+    if (!formatted) {
+      if (isList) {
+        aList = raw.map(item => {
+          return map({
+            id: this.idCount++,
+            date: new YMD(item.get('d').toJS()),
+            units: item.get('u'),
+            cost: item.get('c')
+          });
+        });
+      }
+      else {
+        aList = list(JSON.parse(raw)).map(item => map({
+          id: this.idCount++,
+          date: new YMD(item.d),
+          units: parseFloat(item.u, 10),
+          cost: parseInt(item.c, 10)
+        }));
+      }
+    }
     this.list = aList.sort(sortByDate);
     this.size = this.list.size;
   }

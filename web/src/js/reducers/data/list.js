@@ -8,6 +8,7 @@ import {
   LIST_COLS_SHORT, LIST_COLS_PAGES
 } from '../../misc/const';
 import { TransactionsList } from '../../misc/data';
+import { formatAge } from '../../misc/format';
 import {
   getGainComparisons, addPriceHistory, getFormattedHistory, getXRange
 } from './funds';
@@ -45,6 +46,20 @@ export const processPageDataList = (reduction, pageIndex, raw) => {
   return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
 };
 
+export const getFundsCachedValue = (reduction, pageIndex, history) => {
+  const ageText = formatAge(
+    new Date().getTime() / 1000 - history.get('totalTime') - history.get('startTime'));
+  const lastItem = history.get('history').last();
+  const value = lastItem.get(1).map((price, key) => {
+    const transactions = history.getIn(['funds', 'transactions', key]);
+    const transactionsList = new TransactionsList(transactions, false, true);
+    const units = transactionsList.getTotalUnits();
+    return units * price;
+  }).reduce((a, b) => a + b, 0);
+
+  return reduction.setIn(['appState', 'other', 'fundsCachedValue'], map({ ageText, value }));
+};
+
 export const processPageDataFunds = (reduction, pageIndex, data) => {
   let newReduction = processPageDataList(reduction, pageIndex, data);
   const history = fromJS(data.history);
@@ -62,9 +77,12 @@ export const processPageDataFunds = (reduction, pageIndex, data) => {
   }));
 
   const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
-  newReduction = newReduction
-  .setIn(['appState', 'pages', pageIndex, 'rows'], rows)
-  .setIn(['appState', 'other', 'fundHistoryCache', period], { data: { data: data.history } });
+  newReduction = getFundsCachedValue(
+    newReduction
+    .setIn(['appState', 'pages', pageIndex, 'rows'], rows)
+    .setIn(['appState', 'other', 'fundHistoryCache', period], { data: { data: data.history } }),
+    pageIndex, history
+  );
 
   return getFormattedHistory(
     getXRange(newReduction, data.history.startTime), pageIndex, history);
