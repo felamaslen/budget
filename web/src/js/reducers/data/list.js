@@ -47,9 +47,11 @@ export const processPageDataList = (reduction, pageIndex, raw) => {
 };
 
 export const getFundsCachedValue = (reduction, pageIndex, history) => {
-  const ageText = formatAge(
-    new Date().getTime() / 1000 - history.get('totalTime') - history.get('startTime'));
   const lastItem = history.get('history').last();
+
+  const valueTime = history.get('startTime') + lastItem.get(0);
+  const ageText = formatAge(new Date().getTime() / 1000 - valueTime);
+
   const value = lastItem.get(1).map((price, key) => {
     const transactions = history.getIn(['funds', 'transactions', key]);
     const transactionsList = new TransactionsList(transactions, false, true);
