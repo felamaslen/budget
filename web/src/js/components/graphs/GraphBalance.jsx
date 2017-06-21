@@ -36,7 +36,7 @@ export class GraphBalance extends LineGraph {
       return today.timestamp();
     }
     // return the last day of this month
-    return Math.floor(new Date(yearMonth[0], yearMonth[1] - 1, 1).getTime() / 1000) - 86400;
+    return Math.floor(new Date(yearMonth[0], yearMonth[1], 1).getTime() / 1000) - 86400;
   }
   setRanges() {
     const dataY = this.dataBalance.map(item => item.last());
