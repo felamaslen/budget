@@ -16,6 +16,7 @@ import {
 import { formatCurrency } from '../../misc/format';
 import { GraphFundItem } from '../graphs/GraphFundItem';
 import { GraphFunds } from '../graphs/GraphFunds';
+import { StocksList } from '../StocksList';
 
 const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
 
@@ -118,7 +119,7 @@ export class PageFunds extends PageList {
     );
   }
   afterList() {
-    // render graphs here
+    // render graphs and stuff here
     return (
       <div className='graph-container-outer'>
         <GraphFunds dispatcher={this.props.dispatcher}
@@ -134,6 +135,14 @@ export class PageFunds extends PageList {
           zoom={this.props.graphProps.get('zoom')}
           hlPoint={this.props.graphProps.get('hlPoint')}
         />
+        <StocksList dispatcher={this.props.dispatcher}
+          stocks={this.props.stocksListProps.get('stocks')}
+          indices={this.props.stocksListProps.get('indices')}
+          lastPriceUpdate={this.props.stocksListProps.get('lastPriceUpdate')}
+          history={this.props.stocksListProps.get('history')}
+          weightedGain={this.props.stocksListProps.get('weightedGain')}
+          oldWeightedGain={this.props.stocksListProps.get('oldWeightedGain')}
+        />
       </div>
     );
   }
@@ -141,6 +150,7 @@ export class PageFunds extends PageList {
 
 PageFunds.propTypes = {
   graphProps: PropTypes.instanceOf(map),
+  stocksListProps: PropTypes.instanceOf(map),
   cachedValue: PropTypes.instanceOf(map),
   showOverall: PropTypes.bool
 };

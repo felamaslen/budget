@@ -36,6 +36,17 @@ export const GRAPH_FUNDS_TENSION = 0.65;
 export const GRAPH_FUNDS_MODES = ['ROI', 'Value', 'Price'];
 export const GRAPH_FUNDS_POINT_RADIUS = 3;
 
+export const STOCK_INDICES = {
+  'LON:CTY': 'CTY',
+  'INDEXFTSE:UKX': 'FTSE 100',
+  'INDEXSP:.INX': 'S&P 500',
+  'INDEXDJX:.DJI': 'DJIA',
+  'INDEXNASDAQ:NDX': 'NASDAQ 100',
+  'INDEXNIKKEI:NI225': 'Nikkei 225'
+};
+
+export const STOCKS_GRAPH_RESOLUTION = 50;
+
 // colours for overview score scale and page categories
 export const COLOR_CATEGORY = {
   funds: [84, 110, 122],
