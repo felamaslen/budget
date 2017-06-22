@@ -45,6 +45,7 @@ export const STOCK_INDICES = {
   'INDEXNIKKEI:NI225': 'Nikkei 225'
 };
 
+export const DO_STOCKS_LIST = true;
 export const STOCKS_GRAPH_RESOLUTION = 50;
 
 // colours for overview score scale and page categories
@@ -70,6 +71,7 @@ export const COLOR_DARK = '#333';
 export const COLOR_LIGHT = '#eee';
 export const COLOR_LIGHT_GREY = '#999';
 export const COLOR_TRANSLUCENT_LIGHT = 'rgba(255, 255, 255, 0.5)';
+export const COLOR_TRANSLUCENT_DARK = 'rgba(255, 255, 255, 0.8)';
 
 export const COLOR_PROFIT = '#0c3';
 export const COLOR_LOSS = '#c30';

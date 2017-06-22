@@ -2,11 +2,14 @@
  * Carries out actions for the graph components
  */
 
-import { fromJS, List as list } from 'immutable';
+import { fromJS, List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
 import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
-import { zoomFundLines, addFundLines, getXRange } from './data/funds';
+import {
+  zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
+  getFundsWithTransactions, getFundLines
+} from './data/funds';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -50,9 +53,6 @@ export const rZoomFundsGraph = (reduction, obj) => {
   const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
   const lines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'lines']);
 
-  if (obj.direction < 0 && numFundPointsVisible(lines, zoom.get(0), zoom.get(1)) < 4) {
-    return reduction;
-  }
   const newRangeWidth = Math.min(range.last() - range.first(), Math.max(
     (range.last() - range.first()) * GRAPH_ZOOM_MAX,
     (zoom.last() - zoom.first()) * (1 + GRAPH_ZOOM_SPEED * obj.direction)
@@ -73,9 +73,12 @@ export const rZoomFundsGraph = (reduction, obj) => {
   const newMaxX = Math.min(range.last(), Math.round(newMaxXTarget));
   const newZoom = list([newMinX, newMaxX]);
 
+  if (numFundPointsVisible(lines, newZoom.get(0), newZoom.get(1)) < 4) {
+    return reduction;
+  }
+
   const newReduction = reduction
-  .setIn(['appState', 'other', 'graphFunds', 'zoom'], newZoom)
-  .setIn(['appState', 'other', 'graphFunds', 'hlPoint'], null);
+  .setIn(['appState', 'other', 'graphFunds', 'zoom'], newZoom);
 
   return newReduction.setIn(
     ['appState', 'pages', pageIndexFunds, 'lines'],
@@ -109,6 +112,10 @@ export const rHoverFundsGraph = (reduction, position) => {
 
 export const rToggleFundsGraphLine = (reduction, index) => {
   const oldFundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
+  const numEnabled = oldFundLines.filter(item => item.get('enabled')).size;
+  if (numEnabled === 1 && oldFundLines.getIn([index, 'enabled'])) {
+    return reduction;
+  }
   const newFundLines = oldFundLines.setIn([index, 'enabled'], !oldFundLines.getIn([index, 'enabled']));
 
   const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
@@ -124,16 +131,37 @@ export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
       ['appState', 'other', 'fundHistoryCache', response.period], response.data);
   }
   const history = fromJS(response.data.data.data);
-  newReduction = newReduction.setIn(['appState', 'pages', pageIndexFunds, 'history'], history);
 
-  const fundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
-  const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-  const funds = data.get('funds');
+  const oldData = reduction.getIn(['appState', 'pages', pageIndexFunds]);
 
-  return addFundLines(
+  const newFunds = getFundsWithTransactions(history, oldData.get('rows'), pageIndexFunds);
+
+  const oldFundLines = oldData.get('fundLines');
+  const newFundsItems = history.getIn(['funds', 'items']);
+  const newOldFundLines = map(oldFundLines.filter(fundLine => {
+    return newFundsItems.indexOf(fundLine.get('item')) > -1;
+  }).map(fundLine=> list([fundLine.get('item'), fundLine])));
+
+  const fundsEnabled = newFunds.map(() => null); // enabled set by replace method
+  const overallEnabled = oldFundLines.first().get('enabled');
+  const newFundLines = getFundLines(newFunds, fundsEnabled, overallEnabled, (fund, fundLine) => {
+    if (newOldFundLines.has(fund.item)) {
+      return newOldFundLines.get(fund.item);
+    }
+    return fundLine;
+  });
+
+  const newData = oldData
+  .set('history', history)
+  .set('funds', newFunds)
+  .set('fundLines', newFundLines);
+
+  newReduction = newReduction.setIn(['appState', 'pages', pageIndexFunds], newData);
+
+  return getFundsCachedValue(addFundLines(
     getXRange(newReduction, history.get('startTime')),
-    data, funds, history, pageIndexFunds, fundLines
-  );
+    newData, newFunds, history, pageIndexFunds, newFundLines
+  ), pageIndexFunds, history);
 };
 
 export const rChangeFundsGraphPeriod = (reduction, period) => {

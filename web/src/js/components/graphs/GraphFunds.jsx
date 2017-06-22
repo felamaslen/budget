@@ -14,8 +14,8 @@ import {
 import {
   GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
   COLOR_DARK, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT, COLOR_LIGHT_GREY,
-  COLOR_GRAPH_TITLE,
-  FONT_AXIS_LABEL
+  COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK,
+  FONT_AXIS_LABEL, FONT_GRAPH_TITLE
 } from '../../misc/config';
 import {
   aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
@@ -32,9 +32,13 @@ export class GraphFunds extends LineGraph {
         this.dispatchAction(aFundsGraphClicked());
       },
       onWheel: evt => {
+        const position = this.props.hlPoint
+          ? this.props.hlPoint.get(0)
+          : this.valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
+
         this.dispatchAction(aFundsGraphZoomed({
           direction: evt.deltaY / Math.abs(evt.deltaY),
-          position: this.valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft)
+          position
         }));
         evt.preventDefault();
       }
@@ -215,6 +219,36 @@ export class GraphFunds extends LineGraph {
       this.ctx.closePath();
     }
   }
+  drawLabel() {
+    if (this.props.hlPoint) {
+      const ageSeconds = new Date().getTime() / 1000 -
+                   (this.props.hlPoint.get(0) + this.props.history.get('startTime'));
+      const ageText = formatAge(ageSeconds);
+      const valueText = this.formatValue(this.props.hlPoint.get(1));
+      const labelText = `${ageText}: ${valueText}`;
+
+      const paddingX = 2;
+      const paddingY = 1;
+      let alignLeft = true;
+      const pixX = this.pixX(this.props.hlPoint.get(0));
+      if (pixX > this.width / 2) {
+        alignLeft = false;
+      }
+      const pixY = this.pixY(this.props.hlPoint.get(1));
+
+      this.ctx.font = FONT_GRAPH_TITLE;
+      this.ctx.textAlign = alignLeft ? 'left' : 'right';
+      this.ctx.textBaseline = 'top';
+
+      const labelWidth = this.ctx.measureText(labelText).width + 2 * paddingX;
+      this.ctx.fillStyle = COLOR_TRANSLUCENT_DARK;
+      const left = alignLeft ? pixX : pixX - labelWidth;
+      this.ctx.fillRect(left, pixY, labelWidth, parseInt(this.ctx.font, 10) + 2 * paddingY);
+
+      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+      this.ctx.fillText(labelText, pixX + paddingX * (alignLeft ? 1 : -1), pixY + paddingY);
+    }
+  }
   draw() {
     if (!this.supported) {
       return;
@@ -224,33 +258,9 @@ export class GraphFunds extends LineGraph {
 
     this.drawAxes();
     this.drawData();
+    this.drawLabel();
   }
   afterCanvas() {
-    let label = null;
-    if (this.props.hlPoint) {
-      const ageSeconds = new Date().getTime() / 1000 -
-                   (this.props.hlPoint.get(0) + this.props.history.get('startTime'));
-      const ageText = formatAge(ageSeconds);
-      const valueText = this.formatValue(this.props.hlPoint.get(1));
-      const labelText = `${ageText}: ${valueText}`;
-
-      let left = 'initial';
-      let right = 'initial';
-      const pixX = this.pixX(this.props.hlPoint.get(0));
-      if (pixX > this.width / 2) {
-        right = this.width - pixX;
-      }
-      else {
-        left = pixX;
-      }
-      const top = this.pixY(this.props.hlPoint.get(1));
-      const labelStyle = { left, right, top };
-
-      label = (
-        <span className='label' style={labelStyle}>{labelText}</span>
-      );
-    }
-
     return (
       <div>
         <ul className='fund-sidebar noselect'>
@@ -276,7 +286,6 @@ export class GraphFunds extends LineGraph {
         <span className='mode'>
           Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
         </span>
-        {label}
       </div>
     );
   }

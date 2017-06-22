@@ -282,6 +282,11 @@ export const formatCurrency = (value, options) => {
 
   return output;
 };
+export const formatPercent = (frac, options) => {
+  options.suffix = '%';
+  options.noSymbol = true;
+  return formatCurrency(10000 * frac, options);
+};
 
 /**
  * Get tick sizes for graphs

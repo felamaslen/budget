@@ -3,7 +3,6 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import { colorKey, rgb2hex } from '../../misc/color';
 import {
   COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
 } from '../../misc/config';
@@ -11,7 +10,9 @@ import {
   LIST_COLS_PAGES,
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
 } from '../../misc/const';
-import { notNull } from '../../misc/data';
+import { colorKey, rgb2hex } from '../../misc/color';
+import { formatAge } from '../../misc/format';
+import { notNull, TransactionsList } from '../../misc/data';
 
 const getFundColor = (value, min, max) => {
   const color = value > 0 ? COLOR_FUND_UP : COLOR_FUND_DOWN;
@@ -22,18 +23,34 @@ const getFundColor = (value, min, max) => {
   return color.map(channel => Math.round(255 + (value / range) * (channel - 255)));
 };
 
+export const getFundsCachedValue = (reduction, pageIndex, history) => {
+  const lastItem = history.get('history').last();
+
+  const valueTime = history.get('startTime') + lastItem.get(0);
+  const ageText = formatAge(new Date().getTime() / 1000 - valueTime);
+
+  const value = lastItem.get(1).map((price, key) => {
+    const transactions = history.getIn(['funds', 'transactions', key]);
+    const transactionsList = new TransactionsList(transactions, false, true);
+    const units = transactionsList.getTotalUnits();
+    return units * price;
+  }).reduce((a, b) => a + b, 0);
+
+  return reduction.setIn(['appState', 'other', 'fundsCachedValue'], map({ ageText, value }));
+};
+
 /**
  * Compare gains and add colour scales
  * @param {list} rows: item rows
  * @returns {list} modified rows
  */
 export const getGainComparisons = rows => {
-  const gains = rows.map(row => row.get('gain').pct);
+  const gains = rows.map(row => row.get('gain').gain);
   const min = gains.min();
   const max = gains.max();
   return rows.map(row => {
     const gain = row.get('gain');
-    gain.color = rgb2hex(getFundColor(gain.pct, min, max));
+    gain.color = rgb2hex(getFundColor(gain.gain, min, max));
     return row.set('gain', gain);
   });
 };
@@ -53,9 +70,9 @@ export const addPriceHistory = (pageIndex, row, history, transactions) => {
 
   // for overall and daily profits / losses
   let value = 0;
-  let pct = 0;
+  let gain = 0;
   let abs = 0;
-  let dayPct = 0;
+  let dayGain = 0;
   let dayAbs = 0;
   const color = 'white';
 
@@ -77,14 +94,14 @@ export const addPriceHistory = (pageIndex, row, history, transactions) => {
       const units = transactions.getLastUnits();
       const cost = transactions.getLastCost();
       value = lastPrice * units;
-      pct = 100 * (value - cost) / cost;
+      gain = (value - cost) / cost;
       abs = value - cost;
-      dayPct = 100 * (lastPrice - nextPrice) / nextPrice;
+      dayGain = (lastPrice - nextPrice) / nextPrice;
       dayAbs = (lastPrice - nextPrice) * units;
     }
   }
-  const gain = { value, pct, abs, dayPct, dayAbs, color };
-  return row.set('history', gainHistory).set('gain', gain);
+  const rowGain = { value, gain, abs, dayGain, dayAbs, color };
+  return row.set('history', gainHistory).set('gain', rowGain);
 };
 
 const getLinesCostValue = (index, funds, history, callback) => {
@@ -232,34 +249,43 @@ export const addFundLines = (reduction, data, funds, history, pageIndex, fundLin
   );
 };
 
-export const getFormattedHistory = (reduction, pageIndex, history) => {
-  // format the data according to the mode
-  const lastHistoryItem = history.get('history').last();
+export const getFundsWithTransactions = (history, rows, pageIndex) => {
   const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
   const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
 
-  const data = reduction.getIn(['appState', 'pages', pageIndex]);
-  const rows = data.get('rows');
-
-  // associate funds with transactions
-  const funds = history.getIn(['funds', 'items']).map(item => {
+  return history.getIn(['funds', 'items']).map(item => {
     const transactions = rows
     .find(row => row.getIn(['cols', itemKey]) === item)
     .getIn(['cols', transactionsKey]);
 
     return transactions ? { item, transactions } : null;
   }).filter(fund => fund !== null);
-
-  const fundLines = funds.map((fund, fundKey) => {
-    const enabled = lastHistoryItem && lastHistoryItem.getIn([1, fundKey]) > 0;
+};
+export const getFundLines = (funds, fundsEnabled, overallEnabled, replace) => {
+  return funds.map((fund, fundKey) => {
+    const enabled = fundsEnabled.get(fundKey);
     const item = fund.item;
     const color = colorKey(fundKey + 1);
-    return map({ enabled, item, color });
+    const fundLine = map({ enabled, item, color });
+    return replace ? replace(fund, fundLine) : fundLine;
   }).unshift(map({
-    enabled: true,
+    enabled: overallEnabled,
     item: 'Overall',
     color: COLOR_GRAPH_FUND_LINE
   }));
+};
+
+export const getFormattedHistory = (reduction, pageIndex, history) => {
+  // format the data according to the mode
+  const lastHistoryItem = history.get('history').last();
+
+  const data = reduction.getIn(['appState', 'pages', pageIndex]);
+  const rows = data.get('rows');
+
+  // associate funds with transactions
+  const funds = getFundsWithTransactions(history, rows, pageIndex);
+  const fundsEnabled = lastHistoryItem.get(1).map(item => item > 0);
+  const fundLines = getFundLines(funds, fundsEnabled, true);
 
   return addFundLines(reduction.setIn(
     ['appState', 'pages', pageIndex],
