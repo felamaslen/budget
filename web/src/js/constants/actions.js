@@ -52,3 +52,8 @@ export const AC_GRAPH_FUNDS_LINE_TOGGLED = 0xac86;
 export const AC_GRAPH_FUNDS_PERIOD_CHANGED = 0xac87;
 export const AC_GRAPH_FUNDS_PERIOD_LOADED = 0xac88;
 
+export const AC_STOCKS_LIST_REQUESTED = 0xac91;
+export const AC_STOCKS_LIST_RECEIVED = 0xac92;
+export const AC_STOCKS_PRICES_REQUESTED = 0xac93;
+export const AC_STOCKS_PRICES_RECEIVED = 0xac94;
+

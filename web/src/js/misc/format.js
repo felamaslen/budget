@@ -183,6 +183,33 @@ export const numberFormat = value => {
 };
 
 /**
+ * round a number to a certain sig. figs
+ * @param {float} value: number to display
+ * @param {integer} figs: sig figs to restrict to
+ * @returns {string} formatted number
+ */
+export const sigFigs = (value, figs) => {
+  if (!value) {
+    return value.toFixed(figs - 1);
+  }
+  const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
+  const exp = Math.pow(10, Math.max(0, figs - numDigits));
+  const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
+
+  // add extra zeroes if necessary
+  const hasDot = absResult.indexOf('.') > -1;
+  const numDigitsVisible = absResult.length - (hasDot ? 1 : 0);
+  const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
+  const resultWithZeroes = numTrailingZeroes ?
+    absResult + (hasDot ? '' : '.') +
+    Array.apply(null, new Array(numTrailingZeroes)).map(() => '0').join('')
+  : absResult;
+
+  const sign = value < 0 ? '-' : '';
+  return `${sign}${resultWithZeroes}`;
+};
+
+/**
  * @function leadingZeroes
  * @param {integer} value: number to add zeroes to
  * @param {integer} numZeroes: number of zeroes to fill

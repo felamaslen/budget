@@ -1259,12 +1259,15 @@ button {
     left: 1000px;
   }
   .stocks-list {
-    width: 980px;
-    font-size: 1em;
+    width: 500px;
+    height: 300px;
+    font-size: 0.8em;
     font-family: hack, monospace;
     
     .stocks-list-ul {
-      width: 720px;
+      width: 350px;
+      height: 100%;
+      float: left;
       margin: 0;
       padding: 0;
       list-style: none;
@@ -1274,63 +1277,45 @@ button {
         white-space: nowrap;
       }
     }
-    .stock-sidebar {
+    .stocks-sidebar {
+      width: 150px;
+      height: 100%;
       float: right;
       text-align: right;
-      width: 260px;
       ul {
         margin: 0;
         padding: 0;
         list-style: none;
-        .label {
-          width: 89px;
-          white-space: nowrap;
-          padding-right: 1px;
-        }
-        .price {
-          width: 170px;
-          .absolute {
-            padding-right: 0.5em;
-          }
-        }
-        .stocks-list-overall {
-          background: yellow;
-          .label {
-            font-size: 1em;
-            font-weight: bold;
-            vertical-align: top;
-          }
-        }
+      }
+      .graph-container {
+        width: auto;
+        height: auto;
+        box-shadow: none;
+        position: static;
+        background: none;
       }
     }
     li {
-      height: 1.2em;
-      line-height: 1.2em;
-      vertical-align: top;
-      line-height: 1.2em;
+      height: 16px;
+      line-height: 16px;
+      vertical-align: middle;
     }
-    .label {
-      width: 50%;
+    .name {
+      width: 60%;
       text-align: right;
-      padding-right: 2%;
       display: inline-block;
+      vertical-align: middle;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.8em;
-      font-style: italic;
-      letter-spacing: -1px;
+      letter-spacing: -1.5px;
     }
     .price {
-      width: 45%;
+      width: 40%;
       display: inline-block;
-      position: relative;
-      height: 1.2em;
+      text-align: right;
       .absolute, .change {
         overflow: hidden;
         display: inline-block;
-      }
-      .absolute {
-        width: 50%;
       }
       .change {
         padding-right: 1.2em;
@@ -1338,25 +1323,24 @@ button {
       }
       &:after {
         content: "";
-        right: 0.2em;
-        top: 50%;
-        position: absolute;
-        width: 0.8em;
+        display: inline-block;
+        vertical-align: middle;
+        width: 5px;
         height: 2px;
         background: turquoise;
       }
     }
     .stocks-list-price-change() {
       .price:after {
-        border-left: 0.4em solid transparent;
-        border-right: 0.4em solid transparent;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
         border-top: none;
         background: none;
         width: 0;
         height: 0;
-        top: 0.2em;
+        top: 3px;
       }
-      .hl-up, .hl-down {
+      &.hl-up .price, &.hl-down .price {
         font-weight: bold;
       }
     }
@@ -1366,31 +1350,25 @@ button {
     .up {
       color: @color_bg_up;
       .price:after {
-        border-bottom: 0.8em solid #00c100;
+        border-bottom: 5px solid #00c100;
       }
-      .hl-up {
+      &.hl-up {
         background-color: @color_bg_up_hl;
       }
-      .hl-down {
+      &.hl-down {
         background-color: @color_bg_up_rev;
       }
     }
     .down {
       color: @color_bg_down;
       .price:after {
-        border-top: 0.8em solid #e22121;
+        border-top: 5px solid #e22121;
       }
-      .hl-down {
+      &.hl-down {
         background-color: @color_bg_down_hl;
       }
-      .hl-up {
+      &.hl-up {
         background-color: @color_bg_down_rev;
-      }
-    }
-    .change {
-      float: right;
-      &:after {
-        content: "%";
       }
     }
   }
@@ -1579,7 +1557,7 @@ button {
     margin: 0.5em 1em;
   }
 
-  /* in page */
+  /* income page */
   .page-income {
     .graph-container-pie {
       left: 400px;
@@ -1609,9 +1587,9 @@ button {
       left: 1000px;
       top: @top_nav + 40;
     }
-    .graph-world-map {
+    .stocks-list, .graph-world-map {
       top: @top_nav + 350;
-      left: 1030px;
+      left: 1000px;
     }
   }
 

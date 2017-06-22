@@ -70,6 +70,17 @@ export default new Record({
         zoom: [null, null], // range to restrict to
         range: [null, null] // possible range
       },
+      stocksList: {
+        loadedInitial: false,
+        lastPriceUpdate: -1,
+        loading: false,
+        stocks: {},
+        indices: {},
+        weightedGain: 0,
+        oldWeightedGain: 0,
+        history: [],
+        spliceKey: 1
+      },
       fundsCachedValue: { ageText: null, value: null },
       fundHistoryCache: {}
     }

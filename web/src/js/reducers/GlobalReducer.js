@@ -52,7 +52,12 @@ import {
   AC_GRAPH_FUNDS_HOVERED,
   AC_GRAPH_FUNDS_LINE_TOGGLED,
   AC_GRAPH_FUNDS_PERIOD_CHANGED,
-  AC_GRAPH_FUNDS_PERIOD_LOADED
+  AC_GRAPH_FUNDS_PERIOD_LOADED,
+
+  AC_STOCKS_LIST_REQUESTED,
+  AC_STOCKS_LIST_RECEIVED,
+  AC_STOCKS_PRICES_REQUESTED,
+  AC_STOCKS_PRICES_RECEIVED
 } from '../constants/actions';
 
 import {
@@ -112,6 +117,12 @@ import {
   rChangeFundsGraphPeriod,
   rHandleFundPeriodResponse
 } from './GraphReducer';
+import {
+  rLoadStocksList,
+  rHandleStocksListResponse,
+  rLoadStocksPrices,
+  rHandleStocksPricesResponse
+} from './StocksListReducer';
 
 export default (reduction, action) => {
   switch (action.type) {
@@ -214,6 +225,15 @@ export default (reduction, action) => {
     return rChangeFundsGraphPeriod(reduction, action.payload);
   case AC_GRAPH_FUNDS_PERIOD_LOADED:
     return rHandleFundPeriodResponse(reduction, action.payload);
+
+  case AC_STOCKS_LIST_REQUESTED:
+    return rLoadStocksList(reduction);
+  case AC_STOCKS_LIST_RECEIVED:
+    return rHandleStocksListResponse(reduction, action.payload);
+  case AC_STOCKS_PRICES_REQUESTED:
+    return rLoadStocksPrices(reduction);
+  case AC_STOCKS_PRICES_RECEIVED:
+    return rHandleStocksPricesResponse(reduction, action.payload);
 
   default:
     // By default, the reduction is simply returned unchanged.

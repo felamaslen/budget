@@ -108,8 +108,13 @@ export const GRAPH_FUNDS_PERIODS = [
 ];
 export const GRAPH_FUNDS_NUM_TICKS = 10;
 
+export const GRAPH_STOCKS_WIDTH = 150;
+export const GRAPH_STOCKS_HEIGHT = 72;
+
 export const GRAPH_ZOOM_SPEED = 0.1;
 export const GRAPH_ZOOM_MAX = 0.01;
+
+export const STOCK_PRICES_DELAY = 5000;
 
 export const ANALYSIS_PERIODS = ['year', 'month', 'week'];
 export const ANALYSIS_GROUPINGS = ['category', 'shop'];

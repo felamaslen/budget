@@ -3,6 +3,7 @@
  */
 
 import axios from 'axios';
+import jsonp from 'jsonp';
 import querystring from 'querystring';
 import { List as list } from 'immutable';
 import buildEffectHandler from '../effectHandlerBuilder';
@@ -12,7 +13,8 @@ import {
   EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
   EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED,
   EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
-  EF_FUNDS_PERIOD_REQUESTED, EF_SUGGESTIONS_REQUESTED
+  EF_FUNDS_PERIOD_REQUESTED, EF_SUGGESTIONS_REQUESTED,
+  EF_STOCKS_LIST_REQUESTED, EF_STOCKS_PRICES_REQUESTED
 } from '../constants/effects';
 
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
@@ -21,6 +23,7 @@ import { aContentLoaded } from '../actions/ContentActions';
 import { aAnalysisDataReceived } from '../actions/AnalysisActions';
 import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
+import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
 export default buildEffectHandler([
   /**
@@ -113,5 +116,26 @@ export default buildEffectHandler([
         }
       }
     );
+  }],
+
+  [EF_STOCKS_LIST_REQUESTED, (apiKey, dispatcher) => {
+    axios.get('api?t=data/stocks', {
+      headers: { 'Authorization': apiKey }
+    }).then(
+      response => {
+        if (!response.data.error) {
+          dispatcher.dispatch(aStocksListReceived(response.data.data));
+        }
+      }
+    );
+  }],
+
+  [EF_STOCKS_PRICES_REQUESTED, (symbols, dispatcher) => {
+    jsonp(`https://www.google.com/finance/info?client=ig&q=${symbols}`, null, (error, data) => {
+      if (error) {
+        console.error(error.message);
+      }
+      dispatcher.dispatch(aStocksPricesReceived(data));
+    });
   }]
 ]);
