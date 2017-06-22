@@ -31,8 +31,6 @@ export class GraphStocks extends LineGraph {
     const maxX = dataX.max();
 
     this.setRange([minX, maxX, minY, maxY]);
-
-    this.color = this.props.data.last().last() >= 0 ? COLOR_PROFIT : COLOR_LOSS;
   }
   drawAxes() {
     // draw axes
@@ -65,7 +63,7 @@ export class GraphStocks extends LineGraph {
     this.drawAxes();
 
     this.ctx.lineWidth = 1.5;
-    this.drawLine(this.props.data, this.color);
+    this.drawCubicLine(this.props.data, value => value < 0 ? COLOR_LOSS : COLOR_PROFIT);
   }
 }
 
