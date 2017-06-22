@@ -3,14 +3,14 @@
  */
 
 import { fromJS, List as list, Map as map } from 'immutable';
-import { YMD } from '../../misc/date';
 import {
   LIST_COLS_SHORT, LIST_COLS_PAGES
 } from '../../misc/const';
+import { YMD } from '../../misc/date';
 import { TransactionsList } from '../../misc/data';
-import { formatAge } from '../../misc/format';
 import {
-  getGainComparisons, addPriceHistory, getFormattedHistory, getXRange
+  getGainComparisons, addPriceHistory, getFormattedHistory, getXRange,
+  getFundsCachedValue
 } from './funds';
 
 /**
@@ -44,22 +44,6 @@ export const processPageDataList = (reduction, pageIndex, raw) => {
   }));
 
   return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
-};
-
-export const getFundsCachedValue = (reduction, pageIndex, history) => {
-  const lastItem = history.get('history').last();
-
-  const valueTime = history.get('startTime') + lastItem.get(0);
-  const ageText = formatAge(new Date().getTime() / 1000 - valueTime);
-
-  const value = lastItem.get(1).map((price, key) => {
-    const transactions = history.getIn(['funds', 'transactions', key]);
-    const transactionsList = new TransactionsList(transactions, false, true);
-    const units = transactionsList.getTotalUnits();
-    return units * price;
-  }).reduce((a, b) => a + b, 0);
-
-  return reduction.setIn(['appState', 'other', 'fundsCachedValue'], map({ ageText, value }));
 };
 
 export const processPageDataFunds = (reduction, pageIndex, data) => {

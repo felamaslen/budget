@@ -49,20 +49,9 @@ export const rHandleStocksListResponse = (reduction, response) => {
     })];
   }));
 
-  const weightedGain = stocks.reduce((last, item) => {
-    return item.get('gain') * item.get('weight') + last;
-  }, 0);
-
   return rLoadStocksPrices(reduction
   .setIn(['appState', 'other', 'stocksList', 'indices'], indices)
-  .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks))
-  .setIn(['appState', 'other', 'stocksList', 'weightedGain'], weightedGain)
-  .setIn(
-    ['appState', 'other', 'stocksList', 'history'],
-    reduction.getIn(['appState', 'other', 'stocksList', 'history']).push(
-      list([Math.round(new Date().getTime() / 1000), weightedGain])
-    )
-  );
+  .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks));
 };
 
 const updateStock = (item, row, loadedInitial) => {

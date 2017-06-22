@@ -7,13 +7,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PageList } from './PageList';
+import { DO_STOCKS_LIST } from '../../misc/config';
 import {
   PAGES, LIST_COLS_PAGES,
   GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT,
   GRAPH_FUND_ITEM_WIDTH_LARGE, GRAPH_FUND_ITEM_HEIGHT_LARGE,
   GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT
 } from '../../misc/const';
-import { formatCurrency } from '../../misc/format';
+import { formatCurrency, formatPercent } from '../../misc/format';
 import { GraphFundItem } from '../graphs/GraphFundItem';
 import { GraphFunds } from '../graphs/GraphFunds';
 import { StocksList } from '../StocksList';
@@ -27,6 +28,10 @@ export class PageFunds extends PageList {
   listHeadExtra() {
     const cost = this.props.data.getIn(['data', 'total']);
     const value = this.props.cachedValue.get('value');
+    const total = this.props.data.getIn(['data', 'total']);
+    const gainPct = formatPercent((value - total) / total, {
+      brackets: true, precision: 2
+    });
 
     const classes = classNames({
       gain: true,
@@ -38,6 +43,7 @@ export class PageFunds extends PageList {
       <span className={classes}>
         <span className='gain-info'>Current value:</span>
         <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
+        <span>{gainPct}</span>
         <span className='gain-info'>({this.props.cachedValue.get('ageText')})</span>
       </span>
     );
@@ -49,7 +55,7 @@ export class PageFunds extends PageList {
     const height = popout ? GRAPH_FUND_ITEM_HEIGHT_LARGE : GRAPH_FUND_ITEM_HEIGHT;
 
     const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
-    const formatOptionsPct = { brackets: true, precision: 2, noSymbol: true, suffix: '%' };
+    const formatOptionsPct = { brackets: true, precision: 2 };
 
     const gain = row.get('gain');
 
@@ -58,13 +64,13 @@ export class PageFunds extends PageList {
     };
     const gainOuterClasses = classNames({
       text: true,
-      profit: gain.pct >= 0,
-      loss: gain.pct < 0
+      profit: gain.gain >= 0,
+      loss: gain.gain < 0
     });
     const gainClasses = classNames({
       gain: true,
-      profit: gain.pct >= 0,
-      loss: gain.pct < 0
+      profit: gain.gain >= 0,
+      loss: gain.gain < 0
     });
     const gainAbsClasses = classNames({
       'gain-abs': true,
@@ -73,8 +79,8 @@ export class PageFunds extends PageList {
     });
     const dayGainClasses = classNames({
       'day-gain': true,
-      profit: gain.dayPct >= 0,
-      loss: gain.dayPct < 0
+      profit: gain.dayGain >= 0,
+      loss: gain.dayGain < 0
     });
     const dayGainAbsClasses = classNames({
       'day-gain-abs': true,
@@ -108,10 +114,10 @@ export class PageFunds extends PageList {
               {formatCurrency(gain.dayAbs, formatOptions)}
             </span>
             <span className={gainClasses}>
-              {formatCurrency(100 * gain.pct, formatOptionsPct)}
+              {formatPercent(gain.gain, formatOptionsPct)}
             </span>
             <span className={dayGainClasses}>
-              {formatCurrency(100 * gain.dayPct, formatOptionsPct)}
+              {formatPercent(gain.dayGain, formatOptionsPct)}
             </span>
           </span>
         </span>
@@ -120,6 +126,17 @@ export class PageFunds extends PageList {
   }
   afterList() {
     // render graphs and stuff here
+    const stocksList = DO_STOCKS_LIST ? (
+      <StocksList dispatcher={this.props.dispatcher}
+        stocks={this.props.stocksListProps.get('stocks')}
+        indices={this.props.stocksListProps.get('indices')}
+        lastPriceUpdate={this.props.stocksListProps.get('lastPriceUpdate')}
+        history={this.props.stocksListProps.get('history')}
+        weightedGain={this.props.stocksListProps.get('weightedGain')}
+        oldWeightedGain={this.props.stocksListProps.get('oldWeightedGain')}
+      />
+    ) : null;
+
     return (
       <div className='graph-container-outer'>
         <GraphFunds dispatcher={this.props.dispatcher}
@@ -135,14 +152,7 @@ export class PageFunds extends PageList {
           zoom={this.props.graphProps.get('zoom')}
           hlPoint={this.props.graphProps.get('hlPoint')}
         />
-        <StocksList dispatcher={this.props.dispatcher}
-          stocks={this.props.stocksListProps.get('stocks')}
-          indices={this.props.stocksListProps.get('indices')}
-          lastPriceUpdate={this.props.stocksListProps.get('lastPriceUpdate')}
-          history={this.props.stocksListProps.get('history')}
-          weightedGain={this.props.stocksListProps.get('weightedGain')}
-          oldWeightedGain={this.props.stocksListProps.get('oldWeightedGain')}
-        />
+        {stocksList}
       </div>
     );
   }
