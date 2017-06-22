@@ -199,7 +199,8 @@ export const sigFigs = (value, figs) => {
   // add extra zeroes if necessary
   const hasDot = absResult.indexOf('.') > -1;
   const numDigitsVisible = absResult.length - (hasDot ? 1 : 0);
-  const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
+  const numTrailingZeroes = Math.max(0, figs - numDigitsVisible) +
+    (Math.abs(value) < 1 ? 0 : 1);
   const resultWithZeroes = numTrailingZeroes ?
     absResult + (hasDot ? '' : '.') +
     Array.apply(null, new Array(numTrailingZeroes)).map(() => '0').join('')
