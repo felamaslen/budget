@@ -117,7 +117,7 @@ export default class EditableTransactions extends Editable {
                     <button onClick={() => {
                       this.dispatchAction(
                         aFundTransactionsRemoved({ row, col, key }));
-                    }}>-</button>
+                    }}>&minus;</button>
                   </td>
                 </tr>
               );
