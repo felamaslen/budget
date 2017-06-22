@@ -193,14 +193,13 @@ export const sigFigs = (value, figs) => {
     return value.toFixed(figs - 1);
   }
   const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
-  const exp = Math.pow(10, Math.max(0, figs - numDigits));
+  const exp = Math.pow(10, Math.min(figs - 1, Math.max(0, figs - numDigits)));
   const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
 
   // add extra zeroes if necessary
   const hasDot = absResult.indexOf('.') > -1;
   const numDigitsVisible = absResult.length - (hasDot ? 1 : 0);
-  const numTrailingZeroes = Math.max(0, figs - numDigitsVisible) +
-    (Math.abs(value) < 1 ? 0 : 1);
+  const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
   const resultWithZeroes = numTrailingZeroes ?
     absResult + (hasDot ? '' : '.') +
     Array.apply(null, new Array(numTrailingZeroes)).map(() => '0').join('')

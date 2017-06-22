@@ -16,7 +16,7 @@ import {
 } from '../misc/const';
 
 const renderStock = (stock, key) => {
-  const price = sigFigs(stock.get('gain'), 2) + '%';
+  const price = sigFigs(stock.get('gain'), 3) + '%';
   const name = stock.get('name');
   const title = `${stock.get('name')} (${stock.get('code')})`;
 
@@ -69,7 +69,7 @@ export class StocksList extends PureControllerView {
           <ul>
           <li className={overallClasses}>
             <span className='name'>Overall</span>
-            <span className='price'>{sigFigs(this.props.weightedGain, 2)}%</span>
+            <span className='price'>{sigFigs(this.props.weightedGain, 3)}%</span>
           </li>
           {this.props.indices.valueSeq().map(renderStock)}
           </ul>
