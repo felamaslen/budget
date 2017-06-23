@@ -10,7 +10,7 @@ import {
   LIST_COLS_PAGES,
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
 } from '../../misc/const';
-import { colorKey, rgb2hex } from '../../misc/color';
+import { colorKey } from '../../misc/color';
 import { formatAge } from '../../misc/format';
 import { notNull, TransactionsList } from '../../misc/data';
 
@@ -50,7 +50,7 @@ export const getGainComparisons = rows => {
   const max = gains.max();
   return rows.map(row => {
     const gain = row.get('gain');
-    gain.color = rgb2hex(getFundColor(gain.gain, min, max));
+    gain.color = getFundColor(gain.gain, min, max);
     return row.set('gain', gain);
   });
 };

@@ -7,6 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PageList } from './PageList';
+import { rgba } from '../../misc/color';
 import { DO_STOCKS_LIST } from '../../misc/config';
 import {
   PAGES, LIST_COLS_PAGES,
@@ -60,7 +61,7 @@ export class PageFunds extends PageList {
     const gain = row.get('gain');
 
     const gainStyle = {
-      backgroundColor: gain.color
+      backgroundColor: rgba(gain.color)
     };
     const gainOuterClasses = classNames({
       text: true,

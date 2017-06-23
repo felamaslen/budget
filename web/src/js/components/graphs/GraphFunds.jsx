@@ -7,6 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
+import { rgba } from '../../misc/color';
 import {
   GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
   GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
@@ -102,7 +103,7 @@ export class GraphFunds extends LineGraph {
     return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
   }
   drawAxes() {
-    const axisTextColor = COLOR_DARK;
+    const axisTextColor = rgba(COLOR_DARK);
     const timeTicks = this.getTimeScale(this.props.history.get('startTime'));
 
     this.ctx.lineWidth = 1;
@@ -111,12 +112,12 @@ export class GraphFunds extends LineGraph {
     if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
       const zero = this.pixY(Math.min(Math.max(0, this.minY), this.maxY));
       if (this.maxY > 0) {
-        this.ctx.fillStyle = COLOR_PROFIT_LIGHT;
+        this.ctx.fillStyle = rgba(COLOR_PROFIT_LIGHT);
         const y0 = this.pixY(this.maxY);
         this.ctx.fillRect(this.pixX(this.minX), y0, this.pixX(this.maxX), zero - y0);
       }
       if (this.minY < 0) {
-        this.ctx.fillStyle = COLOR_LOSS_LIGHT;
+        this.ctx.fillStyle = rgba(COLOR_LOSS_LIGHT);
         this.ctx.fillRect(this.pixX(this.minX), zero, this.pixX(this.maxX), this.pixY(this.minY) - zero);
       }
     }
@@ -131,7 +132,7 @@ export class GraphFunds extends LineGraph {
     });
 
     // draw horizontal lines
-    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+    this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
     ticksY.forEach(tick => {
       // draw horizontal line
       this.ctx.beginPath();
@@ -156,7 +157,7 @@ export class GraphFunds extends LineGraph {
       const thisTickSize = tickSize * 0.5 * (tick.major + 1);
 
       this.ctx.beginPath();
-      this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
+      this.ctx.strokeStyle = tick.major ? rgba(COLOR_GRAPH_TITLE) : rgba(COLOR_DARK);
       this.ctx.moveTo(tick.pix, y0);
       this.ctx.lineTo(tick.pix, y0 - thisTickSize);
       this.ctx.stroke();
@@ -164,7 +165,7 @@ export class GraphFunds extends LineGraph {
 
       if (tick.major > 1) {
         this.ctx.beginPath();
-        this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+        this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
         this.ctx.moveTo(tick.pix, y0 - thisTickSize);
         this.ctx.lineTo(tick.pix, this.padY1);
         this.ctx.stroke();
@@ -201,10 +202,10 @@ export class GraphFunds extends LineGraph {
 
       this.ctx.lineWidth = mainLine ? 1.5 : 1;
       if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-        this.drawCubicLine(line.last(), [line.first()]);
+        this.drawCubicLine(line.get(1), [rgba(line.get(0))]);
       }
       else {
-        this.drawLine(line.last(), [line.first()]);
+        this.drawLine(line.get(1), [rgba(line.get(0))]);
       }
     });
 
@@ -241,11 +242,11 @@ export class GraphFunds extends LineGraph {
       this.ctx.textBaseline = 'top';
 
       const labelWidth = this.ctx.measureText(labelText).width + 2 * paddingX;
-      this.ctx.fillStyle = COLOR_TRANSLUCENT_DARK;
+      this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_DARK);
       const left = alignLeft ? pixX : pixX - labelWidth;
       this.ctx.fillRect(left, pixY, labelWidth, parseInt(this.ctx.font, 10) + 2 * paddingY);
 
-      this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+      this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
       this.ctx.fillText(labelText, pixX + paddingX * (alignLeft ? 1 : -1), pixY + paddingY);
     }
   }
@@ -277,7 +278,7 @@ export class GraphFunds extends LineGraph {
             return (
               <li key={key} className={line.get('enabled') ? 'enabled' : null}
                 onClick={() => this.dispatchAction(aFundsGraphLineToggled(key))}>
-                <span className='checkbox' style={{ borderColor: line.get('color') }} />
+                <span className='checkbox' style={{ borderColor: rgba(line.get('color')) }} />
                 <span className='fund'>{line.get('item')}</span>
               </li>
             );

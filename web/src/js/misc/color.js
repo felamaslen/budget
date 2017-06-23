@@ -5,11 +5,15 @@
 import { OVERVIEW_COLUMNS } from './const';
 import { COLOR_CATEGORY } from './config';
 
-export const rgb2hex = (rgb) => {
-  return '#' + rgb.map(item => {
-    const hex = Math.max(0, Math.min(255, Math.round(item))).toString(16);
-    return hex.length < 2 ? `0${hex}` : hex;
-  }).join('');
+export const rgba = values => {
+  const roundedValues = values.slice(0, 3).map(
+    item => Math.max(0, Math.min(255, Math.round(item)))
+  ).concat(values.slice(3)).join(',');
+
+  if (values.length === 4) {
+    return `rgba(${roundedValues})`;
+  }
+  return `rgb(${roundedValues})`;
 };
 
 /**
@@ -102,6 +106,6 @@ const colorKeyRGB = index => {
   return colorKeyList[index % colorKeyList.length];
 };
 export const colorKey = index => {
-  return rgb2hex(colorKeyRGB(index));
+  return colorKeyRGB(index);
 };
 
