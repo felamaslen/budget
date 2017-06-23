@@ -23,13 +23,14 @@ const getFundColor = (value, min, max) => {
   return color.map(channel => Math.round(255 + (value / range) * (channel - 255)));
 };
 
+export const getFundsCachedValueAgeText = history => {
+  const valueTime = history.get('startTime') + history.get('history').last().get(0);
+  return formatAge(new Date().getTime() / 1000 - valueTime);
+};
 export const getFundsCachedValue = (reduction, pageIndex, history) => {
-  const lastItem = history.get('history').last();
+  const ageText = getFundsCachedValueAgeText(history);
 
-  const valueTime = history.get('startTime') + lastItem.get(0);
-  const ageText = formatAge(new Date().getTime() / 1000 - valueTime);
-
-  const value = lastItem.get(1).map((price, key) => {
+  const value = history.get('history').last().get(1).map((price, key) => {
     const transactions = history.getIn(['funds', 'transactions', key]);
     const transactionsList = new TransactionsList(transactions, false, true);
     const units = transactionsList.getTotalUnits();
