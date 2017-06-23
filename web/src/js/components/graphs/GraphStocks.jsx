@@ -64,7 +64,7 @@ export class GraphStocks extends LineGraph {
     this.drawAxes();
 
     this.ctx.lineWidth = 1.5;
-    this.drawCubicLine(this.props.data, value => value < 0 ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
+    this.drawLine(this.props.data, value => value < 0 ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
   }
 }
 
