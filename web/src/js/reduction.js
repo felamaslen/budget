@@ -78,8 +78,7 @@ export default new Record({
         indices: {},
         weightedGain: 0,
         oldWeightedGain: 0,
-        history: [],
-        spliceKey: 1
+        history: []
       },
       fundsCachedValue: { ageText: null, value: null },
       fundHistoryCache: {}
