@@ -12,6 +12,8 @@ export const yearMonthDifference = (ym1, ym2) => {
 const leapYear = year => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+const pmod = (i, n) => ((i % n) + n) % n;
+
 const monthDays = (month, year) => {
   const days = [31, leapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return days[month - 1];
