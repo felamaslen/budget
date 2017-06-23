@@ -56,6 +56,10 @@ export class GraphFunds extends LineGraph {
     };
   }
   update() {
+    if (!this.props.lines || !this.props.history) {
+      return;
+    }
+
     this.processData();
     this.draw();
   }
@@ -262,6 +266,17 @@ export class GraphFunds extends LineGraph {
     this.drawLabel();
   }
   afterCanvas() {
+    const fundLineToggles = this.props.fundLines ?
+      this.props.fundLines.map((line, key) => {
+        return (
+          <li key={key} className={line.get('enabled') ? 'enabled' : null}
+            onClick={() => this.dispatchAction(aFundsGraphLineToggled(key))}>
+            <span className='checkbox' style={{ borderColor: rgba(line.get('color')) }} />
+            <span className='fund'>{line.get('item')}</span>
+          </li>
+        );
+      }) : null;
+
     return (
       <div>
         <ul className='fund-sidebar noselect'>
@@ -274,15 +289,7 @@ export class GraphFunds extends LineGraph {
             })}
             </select>
           </li>
-          {this.props.fundLines.map((line, key) => {
-            return (
-              <li key={key} className={line.get('enabled') ? 'enabled' : null}
-                onClick={() => this.dispatchAction(aFundsGraphLineToggled(key))}>
-                <span className='checkbox' style={{ borderColor: rgba(line.get('color')) }} />
-                <span className='fund'>{line.get('item')}</span>
-              </li>
-            );
-          })}
+          {fundLineToggles}
         </ul>
         <span className='mode'>
           Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}

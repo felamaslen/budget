@@ -5,6 +5,7 @@
 import { List as list, Map as map } from 'immutable';
 import Cookies from 'js-cookie';
 import buildMessage from '../messageBuilder';
+import { resetAppState } from '../reduction';
 import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
@@ -171,7 +172,7 @@ export const rHandleKeyPress = (reduction, evt) => {
       if (suggestions.get('active') > -1) {
         if (evt.key === 'Escape') {
           return reduction
-          .setIn(['appState', 'edit', 'suggestions', 'list'], list([]))
+          .setIn(['appState', 'edit', 'suggestions', 'list'], list.of())
           .setIn(['appState', 'edit', 'suggestions', 'active'], -1);
         }
         if (evt.key === 'Enter') {
@@ -212,13 +213,11 @@ export const rHandleKeyPress = (reduction, evt) => {
  * @returns {Record} modified reduction
  */
 export const rLogout = reduction => {
+  if (reduction.getIn(['appState', 'loading'])) {
+    return reduction;
+  }
   Cookies.remove('pin');
-  return reduction.setIn(['appState', 'loginForm', 'values'], list.of())
-  .setIn(['appState', 'user', 'uid'], 0)
-  .setIn(['appState', 'user', 'name'], null)
-  .setIn(['appState', 'user', 'apiKey'], null)
-  .setIn(['appState', 'pages'], list(PAGES.map(() => null)))
-  .setIn(['appState', 'pagesLoaded'], list(PAGES.map(() => false)));
+  return reduction.set('appState', resetAppState(reduction.get('appState')));
 };
 
 /**
@@ -308,7 +307,7 @@ export const rHandleServerUpdate = (reduction, response) => {
   const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
   return reduction.setIn(['appState', 'loadingApi'], false)
   .setIn(['appState', 'edit', 'status'], status)
-  .setIn(['appState', 'edit', 'queue'], list([]))
-  .setIn(['appState', 'edit', 'queueDelete'], list([]));
+  .setIn(['appState', 'edit', 'queue'], list.of())
+  .setIn(['appState', 'edit', 'queueDelete'], list.of());
 };
 

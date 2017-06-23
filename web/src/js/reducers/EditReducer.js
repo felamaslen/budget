@@ -134,7 +134,7 @@ export const rActivateEditable = (reduction, editable, cancel) => {
   const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
   let newReduction = reduction
   .setIn(['appState', 'edit', 'addBtnFocus'], false)
-  .setIn(['appState', 'edit', 'suggestions', 'list'], list([]))
+  .setIn(['appState', 'edit', 'suggestions', 'list'], list.of())
   .setIn(['appState', 'edit', 'suggestions', 'active'], -1)
   .setIn(['appState', 'edit', 'suggestions', 'loading'], false)
   .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
@@ -255,7 +255,7 @@ export const rAddListItem = (reduction, items) => {
   const req = { apiKey, item, theItems, pageIndex };
 
   return rActivateEditable(reduction, null)
-  .setIn(['appState', 'edit', 'add'], list([]))
+  .setIn(['appState', 'edit', 'add'], list.of())
   .setIn(['appState', 'loadingApi'], true)
   .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_ADD_REQUESTED, req)));
 };
@@ -333,7 +333,7 @@ export const rHandleSuggestions = (reduction, obj) => {
   ) !== obj.reqId) {
     // null object (clear), or changed input while suggestions were loading
     return newReduction
-    .setIn(['appState', 'edit', 'suggestions', 'list'], list([]))
+    .setIn(['appState', 'edit', 'suggestions', 'list'], list.of())
     .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
   }
   return newReduction.setIn(['appState', 'edit', 'suggestions', 'list'], obj.items);

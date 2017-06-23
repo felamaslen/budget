@@ -44,12 +44,21 @@ export class TransactionsList {
         });
       }
       else {
-        aList = list(JSON.parse(raw)).map(item => map({
-          id: this.idCount++,
-          date: new YMD(item.d),
-          units: parseFloat(item.u, 10),
-          cost: parseInt(item.c, 10)
-        }));
+        let rawList;
+        try {
+          rawList = JSON.parse(raw);
+        }
+        catch (error) {
+          rawList = [];
+        }
+        finally {
+          aList = list(rawList).map(item => map({
+            id: this.idCount++,
+            date: new YMD(item.d),
+            units: parseFloat(item.u, 10),
+            cost: parseInt(item.c, 10)
+          }));
+        }
       }
     }
     this.list = aList.sort(sortByDate);
@@ -257,7 +266,7 @@ export const getNullEditable = pageIndex => {
  */
 export const getAddDefaultValues = pageIndex => {
   if (!LIST_COLS_PAGES[pageIndex]) {
-    return list([]);
+    return list.of();
   }
   return list(LIST_COLS_PAGES[pageIndex].map(column => {
     if (column === 'date') {
@@ -271,7 +280,7 @@ export const getAddDefaultValues = pageIndex => {
       return '';
     }
     if (column === 'transactions') {
-      return new TransactionsList(list([]), true);
+      return new TransactionsList(list.of(), true);
     }
     return null;
   }));
@@ -336,6 +345,9 @@ export const addWeeklyAverages = (data, rows, pageIndex) => {
   }, 0);
 
   const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+  if (!rows.size) {
+    return data.set('weekly', 0);
+  }
   const firstDate = rows.first().getIn(['cols', dateKey]);
   const lastDate = rows.last().getIn(['cols', dateKey]);
   const numWeeks = (firstDate - lastDate) / 7;
