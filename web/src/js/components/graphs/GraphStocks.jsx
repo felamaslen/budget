@@ -5,6 +5,7 @@
 import { List as list } from 'immutable';
 import PropTypes from 'prop-types';
 import { LineGraph } from './LineGraph';
+import { rgba } from '../../misc/color';
 import {
   COLOR_PROFIT, COLOR_LOSS, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../misc/config';
@@ -35,7 +36,7 @@ export class GraphStocks extends LineGraph {
   drawAxes() {
     // draw axes
     this.ctx.font = FONT_AXIS_LABEL;
-    this.ctx.fillStyle = COLOR_DARK;
+    this.ctx.fillStyle = rgba(COLOR_DARK);
     this.ctx.textAlign = 'left';
     this.ctx.textBaseline = 'bottom';
 
@@ -63,7 +64,7 @@ export class GraphStocks extends LineGraph {
     this.drawAxes();
 
     this.ctx.lineWidth = 1.5;
-    this.drawCubicLine(this.props.data, value => value < 0 ? COLOR_LOSS : COLOR_PROFIT);
+    this.drawCubicLine(this.props.data, value => value < 0 ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
   }
 }
 

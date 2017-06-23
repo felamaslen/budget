@@ -7,6 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { LineGraph } from './LineGraph';
+import { rgba } from '../../misc/color';
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../misc/data';
 import { YMD } from '../../misc/date';
@@ -99,11 +100,11 @@ export class GraphBalance extends LineGraph {
   }
   drawAxes() {
     // draw axes
-    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+    this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
     this.ctx.lineWidth = 1;
 
     this.ctx.font = FONT_AXIS_LABEL;
-    this.ctx.fillStyle = COLOR_DARK;
+    this.ctx.fillStyle = rgba(COLOR_DARK);
     this.ctx.textAlign = 'left';
     this.ctx.textBaseline = 'bottom';
 
@@ -128,7 +129,7 @@ export class GraphBalance extends LineGraph {
     };
 
     // draw minor Y ticks
-    this.ctx.strokeStyle = COLOR_LIGHT;
+    this.ctx.strokeStyle = rgba(COLOR_LIGHT);
     ticksY.filter(tick => !tick.major).forEach(drawTick);
 
     // draw time (X axis) ticks
@@ -141,7 +142,7 @@ export class GraphBalance extends LineGraph {
 
       // tick
       this.ctx.beginPath();
-      this.ctx.strokeStyle = tick.major ? COLOR_GRAPH_TITLE : COLOR_DARK;
+      this.ctx.strokeStyle = tick.major ? rgba(COLOR_GRAPH_TITLE) : rgba(COLOR_DARK);
       this.ctx.moveTo(tick.pix, y0);
       this.ctx.lineTo(tick.pix, y0 - thisTickSize);
       this.ctx.stroke();
@@ -149,7 +150,7 @@ export class GraphBalance extends LineGraph {
 
       // vertical line
       this.ctx.beginPath();
-      this.ctx.strokeStyle = tick.major > 1 ? COLOR_LIGHT_GREY : COLOR_LIGHT;
+      this.ctx.strokeStyle = tick.major > 1 ? rgba(COLOR_LIGHT_GREY) : rgba(COLOR_LIGHT);
       this.ctx.moveTo(tick.pix, y0 - thisTickSize);
       this.ctx.lineTo(tick.pix, 0);
       this.ctx.stroke();
@@ -165,7 +166,7 @@ export class GraphBalance extends LineGraph {
     });
 
     // draw major Y ticks
-    this.ctx.strokeStyle = COLOR_LIGHT_GREY;
+    this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
     const x0 = this.pixX(this.minX);
     const ticksMajor = ticksY.filter(tick => tick.value > 0 && tick.major);
     ticksMajor.forEach(drawTick);
@@ -179,12 +180,12 @@ export class GraphBalance extends LineGraph {
   drawKey() {
     // add title and key
     this.ctx.beginPath();
-    this.ctx.fillStyle = COLOR_TRANSLUCENT_LIGHT;
+    this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
     this.ctx.fillRect(45, 8, 200, 60);
     this.ctx.closePath();
 
     this.ctx.font = FONT_GRAPH_TITLE;
-    this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+    this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
     this.ctx.textAlign = 'left';
     this.ctx.textBaseline = 'top';
 
@@ -192,7 +193,7 @@ export class GraphBalance extends LineGraph {
 
     this.ctx.beginPath();
     this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = COLOR_BALANCE_ACTUAL;
+    this.ctx.strokeStyle = rgba(COLOR_BALANCE_ACTUAL);
     this.ctx.moveTo(50, 40);
     this.ctx.lineTo(74, 40);
     this.ctx.stroke();
@@ -200,12 +201,12 @@ export class GraphBalance extends LineGraph {
 
     this.ctx.font = FONT_GRAPH_KEY_SMALL;
     this.ctx.textBaseline = 'middle';
-    this.ctx.fillStyle = COLOR_DARK;
+    this.ctx.fillStyle = rgba(COLOR_DARK);
     this.ctx.fillText('Actual', 78, 40);
 
     this.ctx.beginPath();
     this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = COLOR_BALANCE_PREDICTED;
+    this.ctx.strokeStyle = rgba(COLOR_BALANCE_PREDICTED);
     this.ctx.moveTo(130, 40);
     this.ctx.lineTo(154, 40);
     this.ctx.stroke();
@@ -213,14 +214,14 @@ export class GraphBalance extends LineGraph {
     this.ctx.fillText('Predicted', 158, 40);
 
     this.ctx.fillText('Stocks', 78, 57);
-    this.ctx.fillStyle = COLOR_BALANCE_STOCKS;
+    this.ctx.fillStyle = rgba(COLOR_BALANCE_STOCKS);
     this.ctx.fillRect(50, 54, 24, 6);
   }
   drawFundsLine() {
     // plot funds data
     this.ctx.lineWidth = 2;
     this.drawCubicLine(
-      this.dataFunds, [COLOR_BALANCE_STOCKS], { fill: true, stroke: false, tension: 1 });
+      this.dataFunds, [rgba(COLOR_BALANCE_STOCKS)], { fill: true, stroke: false, tension: 1 });
   }
   drawNowLine() {
     // draw a line indicating where the present ends and the future starts
@@ -229,11 +230,11 @@ export class GraphBalance extends LineGraph {
     this.ctx.moveTo(nowLineX, this.pixY(this.minY));
     this.ctx.lineTo(nowLineX, this.pixY(this.maxY));
     this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = COLOR_DARK;
+    this.ctx.strokeStyle = rgba(COLOR_DARK);
     this.ctx.stroke();
     this.ctx.closePath();
 
-    this.ctx.fillStyle = COLOR_GRAPH_TITLE;
+    this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
     this.ctx.fillText('Now', nowLineX, this.pixY(this.maxY));
   }
   draw() {
@@ -248,7 +249,7 @@ export class GraphBalance extends LineGraph {
 
     // plot past + future predicted data
     this.ctx.lineWidth = 2;
-    this.drawCubicLine(this.dataBalance, [COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED]);
+    this.drawCubicLine(this.dataBalance, [rgba(COLOR_BALANCE_ACTUAL), rgba(COLOR_BALANCE_PREDICTED)]);
 
     // plot past + future predicted ISA stock value
     this.drawFundsLine();

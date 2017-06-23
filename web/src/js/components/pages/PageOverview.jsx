@@ -12,6 +12,7 @@ import {
   GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
   OVERVIEW_COLUMNS
 } from '../../misc/const';
+import { GRAPH_SPEND_NUM_ITEMS } from '../../misc/config';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable';
 import { GraphBalance } from '../graphs/GraphBalance';
@@ -62,7 +63,7 @@ export class PageOverview extends PureControllerView {
     });
 
     const graphSpendData = list(GRAPH_SPEND_CATEGORIES).map(item => {
-      return this.props.data.getIn(['data', 'cost', item.name]);
+      return this.props.data.getIn(['data', 'cost', item.name]).slice(-GRAPH_SPEND_NUM_ITEMS);
     });
 
     return (
@@ -92,9 +93,10 @@ export class PageOverview extends PureControllerView {
           <GraphSpend dispatcher={this.props.dispatcher}
             width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
             name='spend'
-            categories={GRAPH_SPEND_CATEGORIES}
+            categories={list(GRAPH_SPEND_CATEGORIES)}
             data={graphSpendData}
-            yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
+            income={this.props.data.getIn(['data', 'cost', 'income']).slice(-GRAPH_SPEND_NUM_ITEMS)}
+            yearMonths={this.props.data.getIn(['data', 'yearMonths']).slice(-GRAPH_SPEND_NUM_ITEMS)}
             currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])} />
         </div>
       </div>

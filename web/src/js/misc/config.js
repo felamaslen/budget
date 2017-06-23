@@ -31,6 +31,7 @@ export const GRAPH_KEY_SIZE = 12;
 export const GRAPH_KEY_OFFSET_X = 5;
 export const GRAPH_KEY_OFFSET_Y = 34;
 export const GRAPH_BALANCE_NUM_TICKS = 5;
+export const GRAPH_SPEND_NUM_ITEMS = 24;
 
 export const GRAPH_FUNDS_TENSION = 0.65;
 export const GRAPH_FUNDS_MODES = ['ROI', 'Value', 'Price'];
@@ -66,22 +67,22 @@ export const COLOR_FUND_DOWN = [255, 44, 44];
 export const COLOR_FUND_UP = [0, 230, 18];
 
 // all other colour definitions
-export const COLOR_GRAPH_TITLE = '#000';
-export const COLOR_DARK = '#333';
-export const COLOR_LIGHT = '#eee';
-export const COLOR_LIGHT_GREY = '#999';
-export const COLOR_TRANSLUCENT_LIGHT = 'rgba(255, 255, 255, 0.5)';
-export const COLOR_TRANSLUCENT_DARK = 'rgba(255, 255, 255, 0.8)';
+export const COLOR_GRAPH_TITLE = [0, 0, 0];
+export const COLOR_DARK = [51, 51, 51];
+export const COLOR_LIGHT = [238, 238, 238];
+export const COLOR_LIGHT_GREY = [153, 153, 153];
+export const COLOR_TRANSLUCENT_LIGHT = [255, 255, 255, 0.5];
+export const COLOR_TRANSLUCENT_DARK = [255, 255, 255, 0.8];
 
-export const COLOR_PROFIT = '#0c3';
-export const COLOR_LOSS = '#c30';
-export const COLOR_PROFIT_LIGHT = '#f4fff4';
-export const COLOR_LOSS_LIGHT = '#fff4f4';
+export const COLOR_PROFIT = [0, 204, 51];
+export const COLOR_LOSS = [204, 51, 0];
+export const COLOR_PROFIT_LIGHT = [244, 255, 244];
+export const COLOR_LOSS_LIGHT = [255, 244, 244];
 
-export const COLOR_BALANCE_ACTUAL = '#039';
-export const COLOR_BALANCE_PREDICTED = '#f00';
-export const COLOR_BALANCE_STOCKS = 'rgba(200, 200, 200, 0.5)';
+export const COLOR_BALANCE_ACTUAL = [0, 51, 153];
+export const COLOR_BALANCE_PREDICTED = [255, 0, 0];
+export const COLOR_BALANCE_STOCKS = [200, 200, 200, 0.5];
 
-export const COLOR_GRAPH_FUND_ITEM = '#4286f4';
+export const COLOR_GRAPH_FUND_ITEM = [66, 134, 244];
 export const COLOR_GRAPH_FUND_LINE = COLOR_GRAPH_TITLE;
 
