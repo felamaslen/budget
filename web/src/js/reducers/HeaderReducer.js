@@ -8,12 +8,15 @@ import buildMessage from '../messageBuilder';
 import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
+import { getFundsCachedValueAgeText } from './data/funds';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
 import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES,
   SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
 import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../misc/data';
+
+const pageIndexFunds = PAGES.indexOf('funds');
 
 const getItemValue = (reduction, pageIndex, row, col) => {
   let id = null;
@@ -269,14 +272,24 @@ export const rNavigateToPage = (reduction, pageIndex) => {
 };
 
 export const rUpdateServer = reduction => {
+  let newReduction = reduction;
+
+  // update funds cached value age
+  if (reduction.getIn(['appState', 'pages', pageIndexFunds])) {
+    const ageText = getFundsCachedValueAgeText(
+      reduction.getIn(['appState', 'pages', pageIndexFunds, 'history'])
+    );
+    newReduction = newReduction.setIn(['appState', 'other', 'fundsCachedValue', 'ageText'], ageText);
+  }
+
   if (reduction.getIn(['appState', 'loadingApi'])) {
     // only make one request at once
-    return reduction;
+    return newReduction;
   }
   if (reduction.getIn(['appState', 'edit', 'queue']).size === 0 &
      reduction.getIn(['appState', 'edit', 'queueDelete']).size === 0) {
     // toggle the status to trigger another (delayed) update
-    return reduction.setIn(
+    return newReduction.setIn(
       ['appState', 'edit', 'status'],
       (reduction.getIn(['appState', 'edit', 'status']) + 1) & 1
     );
@@ -286,7 +299,7 @@ export const rUpdateServer = reduction => {
   const reqList = buildQueueRequestList(reduction);
   const req = { apiKey, list: reqList };
 
-  return reduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
+  return newReduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
   .setIn(['appState', 'loadingApi'], true)
   .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_UPDATE_REQUESTED, req)));
 };

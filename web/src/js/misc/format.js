@@ -323,23 +323,35 @@ export const getTickSize = (min, max, numTicks) => {
  * @returns {string} age text
  */
 export const formatAge = (seconds, shortAbbr) => {
-  const measures = [
+  const measures = list([
     [1, 's', 'second'],
     [60, 'm', 'minute'],
     [3600, 'h', 'hour'],
     [86400, 'd', 'day'],
     [86400 * 30, 'M', 'month'],
     [86400 * 365, 'Y', 'year']
-  ];
+  ]);
+
+  const getMeasureText = (measure, thisSeconds) => {
+    const rounded = Math.round(thisSeconds / measure[0]);
+    const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
+    const units = measure[shortAbbr ? 1 : 2] + plural;
+
+    return shortAbbr ? `${rounded}${units}` : `${rounded} ${units}`;
+  };
+
   const secondsNormalised = Math.max(seconds, 1);
-  const measure = measures.reverse().filter(item => {
-    return secondsNormalised >= item[0];
-  })[0];
+  const mainMeasureIndex = measures.findLastIndex(item => item[0] <= secondsNormalised);
+  const mainMeasure = measures.get(mainMeasureIndex);
+  const measureText = [getMeasureText(mainMeasure, secondsNormalised)];
 
-  const rounded = Math.round(seconds / measure[0]);
-  const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
-  const units = measure[shortAbbr ? 1 : 2] + plural;
+  if (mainMeasureIndex > 0) {
+    const extraSeconds = secondsNormalised % mainMeasure[0];
+    if (extraSeconds > 0) {
+      measureText.push(getMeasureText(measures.get(mainMeasureIndex - 1), extraSeconds));
+    }
+  }
 
-  return shortAbbr ? rounded + units : `${rounded} ${units} ago`;
+  return measureText.join(', ') + (shortAbbr ? '' : ' ago');
 };
 
