@@ -95,13 +95,20 @@ export const rHandleStocksPricesResponse = (reduction, response) => {
       return item.get('gain') * item.get('weight') + last;
     }, 0);
 
+    // update stocks list graph
     let history = newReduction.getIn(['appState', 'other', 'stocksList', 'history']);
-    if (history.size > STOCKS_GRAPH_RESOLUTION) {
-      const spliceKey = newReduction.getIn(['appState', 'other', 'stocksList', 'spliceKey']);
-      history = history.splice(spliceKey, 1);
-      newReduction = newReduction.setIn(
-        ['appState', 'other', 'stocksList', 'spliceKey'], ((spliceKey + 1) % STOCKS_GRAPH_RESOLUTION) + 1);
+    while (history.size > STOCKS_GRAPH_RESOLUTION) {
+      const closestKey = history.slice(1).reduce((last, item, key) => {
+        const interval = item.get(0) - history.getIn([key, 0]);
+        if (interval < last[1]) {
+          return [key, interval];
+        }
+        return last;
+      }, [1, Infinity])[0] + 1;
+
+      history = history.splice(closestKey, 1);
     }
+
     return newReduction
     .setIn(['appState', 'other', 'stocksList', 'weightedGain'], weightedGain)
     .setIn(
