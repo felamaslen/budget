@@ -76,7 +76,11 @@ export default buildEffectHandler([
     axios.get(`api?t=data/analysis_category/${obj.name}/${obj.period}/${obj.grouping}/${obj.timeIndex}`, {
       headers: { 'Authorization': obj.apiKey }
     }).then(
-      response => dispatcher.dispatch(aAnalysisDataReceived(response))
+      response => {
+        const resObj = response;
+        resObj.deepBlock = obj.name;
+        dispatcher.dispatch(aAnalysisDataReceived(resObj));
+      }
     );
   }],
 
