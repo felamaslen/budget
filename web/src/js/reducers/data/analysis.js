@@ -99,11 +99,13 @@ export const rAnalysisChangeTimeIndex = (reduction, timeIndex) => {
 export const rAnalysisHandleNewData = (reduction, response) => {
   const newReduction = reduction.setIn(['appState', 'other', 'analysis', 'loading'], false);
 
-  const deep = reduction.getIn(['appState', 'other', 'analysis', 'deepBlock']);
+  const deep = !!response.deepBlock;
   if (deep) {
     const cost = getCost(fromJS(response.data.data.items));
     const blocks = getBlocks(cost);
-    return newReduction.setIn(['appState', 'pages', pageIndexAnalysis, 'blocks'], blocks);
+    return newReduction
+    .setIn(['appState', 'pages', pageIndexAnalysis, 'blocks'], blocks)
+    .setIn(['appState', 'other', 'analysis', 'deepBlock'], response.deepBlock);
   }
 
   return processPageDataAnalysis(newReduction, pageIndexAnalysis, response.data.data);
@@ -148,9 +150,9 @@ export const rAnalysisBlockClick = (reduction, name) => {
     const reqObj = { apiKey, name, period, grouping, timeIndex };
     return reduction
     .setIn(['appState', 'other', 'analysis', 'loading'], true)
-    .setIn(['appState', 'other', 'analysis', 'deepBlock'], name)
-    .set('effects', reduction.get('effects').push(buildMessage(
-      EF_ANALYSIS_EXTRA_REQUESTED, reqObj)));
+    .set('effects', reduction.get('effects').push(
+      buildMessage(EF_ANALYSIS_EXTRA_REQUESTED, reqObj)
+    ));
   }
 
   const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible']);
