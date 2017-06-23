@@ -62,7 +62,7 @@ const calculateTableData = data => {
     return `${MONTHS_SHORT[yearMonth[1] - 1]}-${yearMonth[0]}`;
   }));
 
-  return list([])
+  return list.of()
   .push(months)
   .push(cost.get('funds'))
   .push(cost.get('bills'))

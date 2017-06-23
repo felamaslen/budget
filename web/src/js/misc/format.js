@@ -26,10 +26,10 @@ export class BlockPacker {
     const totalArea = width * height;
 
     this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
-    this.blocks = list([]);
+    this.blocks = list.of();
     this.root = { x: 0, y: 0, w: width, h: height };
 
-    const row = list([]);
+    const row = list.of();
     this.rowCount = 0;
 
     this.squarify(this.tree, row, this.root);
@@ -48,7 +48,7 @@ export class BlockPacker {
     }
     else {
       const newNode = this.addNode(row, node);
-      this.squarify(children, list([]), newNode);
+      this.squarify(children, list.of(), newNode);
     }
   }
   addNode(row, node) {

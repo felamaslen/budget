@@ -24,10 +24,16 @@ const getFundColor = (value, min, max) => {
 };
 
 export const getFundsCachedValueAgeText = history => {
+  if (!history || !history.get('history').size === 0) {
+    return null;
+  }
   const valueTime = history.get('startTime') + history.get('history').last().get(0);
   return formatAge(new Date().getTime() / 1000 - valueTime);
 };
 export const getFundsCachedValue = (reduction, pageIndex, history) => {
+  if (!history || !history.get('history').size) {
+    return reduction;
+  }
   const ageText = getFundsCachedValueAgeText(history);
 
   const value = history.get('history').last().get(1).map((price, key) => {
@@ -67,7 +73,7 @@ export const getGainComparisons = rows => {
 export const addPriceHistory = (pageIndex, row, history, transactions) => {
   const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
   // add history to each fund item row
-  let gainHistory = list([]);
+  let gainHistory = list.of();
 
   // for overall and daily profits / losses
   let value = 0;
@@ -279,6 +285,9 @@ export const getFundLines = (funds, fundsEnabled, overallEnabled, replace) => {
 export const getFormattedHistory = (reduction, pageIndex, history) => {
   // format the data according to the mode
   const lastHistoryItem = history.get('history').last();
+  if (!lastHistoryItem) {
+    return reduction;
+  }
 
   const data = reduction.getIn(['appState', 'pages', pageIndex]);
   const rows = data.get('rows');

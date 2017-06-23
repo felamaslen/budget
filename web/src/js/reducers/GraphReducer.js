@@ -92,6 +92,9 @@ export const rHoverFundsGraph = (reduction, position) => {
   }
 
   const lines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'lines']);
+  if (!lines) {
+    return reduction;
+  }
   const closest = lines.reduce((last, line, lineKey) => {
     return line.last().reduce((thisLast, point, pointKey) => {
       const pointDistance = Math.sqrt(
