@@ -24,7 +24,9 @@ const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transac
 
 export class PageFunds extends PageList {
   listItemClasses(row) {
-    return row.getIn(['cols', transactionsKey]).isSold() ? 'sold' : null;
+    return {
+      sold: row.getIn(['cols', transactionsKey]).isSold()
+    };
   }
   listHeadExtra() {
     const cost = this.props.data.getIn(['data', 'total']);
