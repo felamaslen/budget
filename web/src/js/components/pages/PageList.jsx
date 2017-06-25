@@ -77,7 +77,7 @@ export class PageList extends PureControllerView {
     return null;
   }
   listItemClasses() {
-    return null;
+    return {};
   }
   renderList() {
     return this.props.data.get('rows').map((row, rowKey) => {
@@ -119,8 +119,12 @@ export class PageList extends PureControllerView {
         <span className='daily'>{dailyText}</span>
       ) : null;
 
+      const itemClasses = this.listItemClasses(row);
+      itemClasses.future = row.get('future');
+      itemClasses['first-present'] = row.get('first-present');
+
       return (
-        <li key={rowKey} className={this.listItemClasses(row)}>
+        <li key={rowKey} className={classNames(itemClasses)}>
           {items}
           {daily}
           {this.renderListExtra(row, rowKey)}

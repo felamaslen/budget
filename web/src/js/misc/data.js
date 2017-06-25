@@ -293,20 +293,29 @@ export const getAddDefaultValues = pageIndex => {
  * @returns {list} sorted rows
  */
 export const sortRowsByDate = (rows, pageIndex) => {
+  const today = new YMD();
   const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
   const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
   let dailySum = 0;
+  let lastFuture = false;
   const sorted = rows.sort((a, b) => {
-    if (a.getIn(['cols', 0]) > b.getIn(['cols', 0])) {
+    if (a.getIn(['cols', dateKey]) > b.getIn(['cols', dateKey])) {
       return -1;
     }
-    if (b.getIn(['cols', 0]) > (a.getIn(['cols', 0]))) {
+    if (b.getIn(['cols', dateKey]) > (a.getIn(['cols', dateKey]))) {
       return 1;
     }
     if (a.get('id') > b.get('id')) {
       return -1;
     }
     return 1;
+  }).map(row => {
+    const thisFuture = row.getIn(['cols', dateKey]) > today;
+    const thisLastFuture = lastFuture;
+    lastFuture = thisFuture;
+    return row
+    .set('future', thisFuture)
+    .set('first-present', !thisFuture && thisLastFuture);
   });
 
   if (DAILY_PAGES[pageIndex]) {
