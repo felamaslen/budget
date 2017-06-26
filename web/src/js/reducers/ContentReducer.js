@@ -4,7 +4,9 @@
 
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
-import { PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
+import {
+  PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS
+} from '../misc/const';
 import {
   getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
@@ -32,7 +34,7 @@ export const rLoadContent = (reduction, pageIndex) => {
     case 'funds':
       reqObj.urlParam = [
         { name: 'history', value: 'true' },
-        { name: 'period', value: 'year1' }
+        { name: 'period', value: GRAPH_FUNDS_PERIODS[0][0] }
       ];
       break;
     }

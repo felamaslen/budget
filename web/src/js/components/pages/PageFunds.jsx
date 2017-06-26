@@ -19,6 +19,7 @@ import { formatCurrency, formatPercent } from '../../misc/format';
 import { GraphFundItem } from '../graphs/GraphFundItem';
 import { GraphFunds } from '../graphs/GraphFunds';
 import { StocksList } from '../StocksList';
+import { aFundsGraphPeriodChanged } from '../../actions/GraphActions';
 
 const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
 
@@ -43,7 +44,7 @@ export class PageFunds extends PageList {
     });
 
     return (
-      <span className={classes}>
+      <span className={classes} onClick={() => this.dispatchAction(aFundsGraphPeriodChanged(null, true))}>
         <span className='gain-info'>Current value:</span>
         <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
         <span>{gainPct}</span>

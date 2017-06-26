@@ -5,10 +5,10 @@
 import { fromJS, List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
-import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { PAGES, LIST_COLS_PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import {
   zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
-  getFundsWithTransactions, getFundLines
+  getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
 } from './data/funds';
 
 const pageIndexFunds = PAGES.indexOf('funds');
@@ -133,18 +133,16 @@ export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
     newReduction = newReduction.setIn(
       ['appState', 'other', 'fundHistoryCache', response.period], response.data);
   }
+  const transactionsKey = LIST_COLS_PAGES[pageIndexFunds].indexOf('transactions');
   const history = fromJS(response.data.data.data);
 
   const oldData = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-
   const newFunds = getFundsWithTransactions(history, oldData.get('rows'), pageIndexFunds);
-
   const oldFundLines = oldData.get('fundLines');
   const newFundsItems = history.getIn(['funds', 'items']);
   const newOldFundLines = map(oldFundLines.filter(fundLine => {
     return newFundsItems.indexOf(fundLine.get('item')) > -1;
   }).map(fundLine=> list([fundLine.get('item'), fundLine])));
-
   const fundsEnabled = newFunds.map(() => null); // enabled set by replace method
   const overallEnabled = oldFundLines.first().get('enabled');
   const newFundLines = getFundLines(newFunds, fundsEnabled, overallEnabled, (fund, fundLine) => {
@@ -153,13 +151,20 @@ export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
     }
     return fundLine;
   });
+  const oldRows = oldData.get('rows');
+  const newRows = getGainComparisons(oldRows.map(row => {
+    return addPriceHistory(pageIndexFunds, row, history, row.getIn(['cols', transactionsKey]));
+  }));
 
   const newData = oldData
   .set('history', history)
   .set('funds', newFunds)
-  .set('fundLines', newFundLines);
+  .set('fundLines', newFundLines)
+  .set('rows', newRows);
 
-  newReduction = newReduction.setIn(['appState', 'pages', pageIndexFunds], newData);
+  newReduction = newReduction
+  .setIn(['appState', 'pages', pageIndexFunds], newData)
+  .setIn(['appState', 'other', 'graphFunds', 'period'], response.period);
 
   return getFundsCachedValue(addFundLines(
     getXRange(newReduction, history.get('startTime')),
@@ -167,8 +172,9 @@ export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
   ), pageIndexFunds, history);
 };
 
-export const rChangeFundsGraphPeriod = (reduction, period) => {
-  if (!reduction.getIn(['appState', 'other', 'fundHistoryCache']).has(period)) {
+export const rChangeFundsGraphPeriod = (reduction, req) => {
+  const period = req.period || reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
+  if (req.noCache || !reduction.getIn(['appState', 'other', 'fundHistoryCache']).has(period)) {
     const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
     return reduction.set(
       'effects', reduction.get('effects').push(
