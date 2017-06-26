@@ -332,8 +332,9 @@ export const formatAge = (seconds, shortAbbr) => {
     [86400 * 365, 'Y', 'year']
   ]);
 
-  const getMeasureText = (measure, thisSeconds) => {
-    const rounded = Math.round(thisSeconds / measure[0]);
+  const getMeasureText = (measure, thisSeconds, floor) => {
+    const value = thisSeconds / measure[0];
+    const rounded = floor ? Math.floor(value) : Math.round(value);
     const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
     const units = measure[shortAbbr ? 1 : 2] + plural;
 
@@ -343,7 +344,7 @@ export const formatAge = (seconds, shortAbbr) => {
   const secondsNormalised = Math.max(seconds, 1);
   const mainMeasureIndex = measures.findLastIndex(item => item[0] <= secondsNormalised);
   const mainMeasure = measures.get(mainMeasureIndex);
-  const measureText = [getMeasureText(mainMeasure, secondsNormalised)];
+  const measureText = [getMeasureText(mainMeasure, secondsNormalised, true)];
 
   if (mainMeasureIndex > 0) {
     const extraSeconds = secondsNormalised % mainMeasure[0];
