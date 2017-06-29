@@ -86,9 +86,12 @@ export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, curr
   const yearMonthsList = list(yearMonths);
 
   // separate funds into old and displayed
-  const funds = costMap.get('funds');
-  let cost = costMap.set('funds', funds.slice(-numRows))
-  .set('fundsOld', funds.slice(0, funds.size - numRows));
+  let cost = costMap;
+  if (!cost.has('fundsOld')) {
+    const funds = cost.get('funds');
+    cost = cost.set('funds', funds.slice(-numRows))
+    .set('fundsOld', funds.slice(0, funds.size - numRows));
+  }
 
   const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');
   const futureKey = yearMonthDifference(startYearMonth, currentYearMonth) + 1;
