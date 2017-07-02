@@ -176,10 +176,11 @@ class WebAPI(object):
         if multiple:
             # multiple requests at once
             self.res['res']['out'] = [{} for item in self.res['data']]
-            for (req_key, item) in enumerate(self.res['extra']):
-                if item is not None and len(item) > 0:
-                    for key in item:
-                        self.res['res']['out'][req_key][key] = item[key]
+            if self.res['extra'] is not None and len(self.res['extra']) > 0:
+                for (req_key, item) in enumerate(self.res['extra']):
+                    if item is not None and len(item) > 0:
+                        for key in item:
+                            self.res['res']['out'][req_key][key] = item[key]
 
             for (req_key, item) in enumerate(self.res['data']):
                 if len(item) > 0:

@@ -12,7 +12,7 @@ import {
   ANALYSIS_PERIODS, ANALYSIS_GROUPINGS,
   ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
 } from '../../misc/const';
-import { BlockPacker, capitalise, formatCurrency } from '../../misc/format';
+import { BlockPacker } from '../../misc/format';
 
 const pageIndexAnalysis = PAGES.indexOf('analysis');
 
@@ -56,10 +56,11 @@ export const processPageDataAnalysis = (reduction, pageIndex, raw) => {
   const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible']);
   const blocks = getBlocks(cost, treeVisible);
 
-  return reduction.setIn(
-    ['appState', 'pages', pageIndex],
-    map({ blocks, cost, costTotal, items, description })
-  );
+  return reduction
+  .setIn(['appState', 'other', 'blockView', 'blocks'], blocks)
+  .setIn(['appState', 'pages', pageIndex], map({
+    cost, costTotal, items, description
+  }));
 };
 
 const reloadAnalysis = (reduction, newReduction) => {
@@ -72,13 +73,15 @@ const reloadAnalysis = (reduction, newReduction) => {
   const period = ANALYSIS_PERIODS[newReduction.getIn(['appState', 'other', 'analysis', 'period'])];
   const grouping = ANALYSIS_GROUPINGS[newReduction.getIn(['appState', 'other', 'analysis', 'grouping'])];
   const timeIndex = newReduction.getIn(['appState', 'other', 'analysis', 'timeIndex']);
+  const loadKey = new Date().getTime();
 
   const reqObj = { apiKey, period, grouping, timeIndex };
 
   return newReduction
   .set('effects', reduction.get('effects').push(buildMessage(EF_ANALYSIS_DATA_REQUESTED, reqObj)))
   .setIn(['appState', 'other', 'analysis', 'loading'], true)
-  .setIn(['appState', 'other', 'analysis', 'deepBlock'], null);
+  .setIn(['appState', 'other', 'blockView', 'deep'], null)
+  .setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
 };
 
 export const rAnalysisChangePeriod = (reduction, period) => {
@@ -97,15 +100,18 @@ export const rAnalysisChangeTimeIndex = (reduction, timeIndex) => {
 };
 
 export const rAnalysisHandleNewData = (reduction, response) => {
-  const newReduction = reduction.setIn(['appState', 'other', 'analysis', 'loading'], false);
+  const newReduction = reduction
+  .setIn(['appState', 'other', 'analysis', 'loading'], false)
+  .setIn(['appState', 'other', 'blockView', 'loadKey'], null)
+  .setIn(['appState', 'other', 'blockView', 'status'], '');
 
   const deep = !!response.deepBlock;
   if (deep) {
     const cost = getCost(fromJS(response.data.data.items));
     const blocks = getBlocks(cost);
     return newReduction
-    .setIn(['appState', 'pages', pageIndexAnalysis, 'blocks'], blocks)
-    .setIn(['appState', 'other', 'analysis', 'deepBlock'], response.deepBlock);
+    .setIn(['appState', 'other', 'blockView', 'blocks'], blocks)
+    .setIn(['appState', 'other', 'blockView', 'deep'], response.deepBlock);
   }
 
   return processPageDataAnalysis(newReduction, pageIndexAnalysis, response.data.data);
@@ -119,8 +125,8 @@ export const rAnalysisTreeToggleDisplay = (reduction, key) => {
   const blocks = getBlocks(cost, treeVisible.set(key, newStatus));
 
   return reduction.setIn(['appState', 'other', 'analysis', 'treeVisible', key], newStatus)
-  .setIn(['appState', 'pages', pageIndexAnalysis, 'blocks'], blocks)
-  .setIn(['appState', 'other', 'analysis', 'active'], null);
+  .setIn(['appState', 'other', 'blockView', 'blocks'], blocks)
+  .setIn(['appState', 'other', 'blockView', 'active'], null);
 };
 export const rAnalysisTreeToggleExpand = (reduction, key) => {
   const treeOpen = reduction.getIn(['appState', 'other', 'analysis', 'treeOpen']);
@@ -129,13 +135,13 @@ export const rAnalysisTreeToggleExpand = (reduction, key) => {
   return reduction.setIn(['appState', 'other', 'analysis', 'treeOpen', key], newStatus);
 };
 export const rAnalysisTreeHover = (reduction, key) => {
-  return reduction.setIn(['appState', 'other', 'analysis', 'active'], key);
+  return reduction.setIn(['appState', 'other', 'blockView', 'active'], key);
 };
 export const rAnalysisBlockClick = (reduction, name) => {
   if (reduction.getIn(['appState', 'other', 'analysis', 'loading'])) {
     return reduction;
   }
-  const deep = reduction.getIn(['appState', 'other', 'analysis', 'deepBlock']);
+  const deep = reduction.getIn(['appState', 'other', 'blockView', 'deep']);
   if (deep === null) {
     // load a deeper view
     if (name === 'bills') {
@@ -159,15 +165,8 @@ export const rAnalysisBlockClick = (reduction, name) => {
   const cost = reduction.getIn(['appState', 'pages', pageIndexAnalysis, 'cost']);
   const blocks = getBlocks(cost, treeVisible);
 
-  return reduction.setIn(['appState', 'other', 'analysis', 'deepBlock'], null)
-  .setIn(['appState', 'pages', pageIndexAnalysis, 'blocks'], blocks);
-};
-export const rAnalysisBlockHover = (reduction, obj) => {
-  let newStatus = '';
-  if (obj !== null) {
-    const value = formatCurrency(obj.subBlock.get('value'), { raw: true });
-    newStatus = `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`;
-  }
-  return reduction.setIn(['appState', 'other', 'analysis', 'status'], newStatus);
+  return reduction.setIn(['appState', 'other', 'blockView', 'deep'], null)
+  .setIn(['appState', 'other', 'blockView', 'blocks'], blocks)
+  .setIn(['appState', 'other', 'blockView', 'status'], '');
 };
 

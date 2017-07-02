@@ -36,16 +36,20 @@ export const resetAppState = appState => {
   }))
   .set('other', map({
     showAllBalanceGraph: false,
+    blockView: map({
+      status: '',
+      loadKey: null,
+      blocks: null,
+      active: null,
+      deep: null
+    }),
     analysis: map({
       loading: false,
       period: 0,
       grouping: 0,
       timeIndex: 0,
       treeOpen: map.of(),
-      treeVisible: map({ bills: false }),
-      deepBlock: null,
-      status: null,
-      active: null
+      treeVisible: map({ bills: false })
     }),
     graphFunds: map({
       period: GRAPH_FUNDS_PERIODS[0][0],

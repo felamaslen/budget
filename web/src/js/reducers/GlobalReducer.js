@@ -23,6 +23,8 @@ import {
   AC_SERVER_ADD_RECEIVED,
 
   AC_CONTENT_LOADED,
+  AC_CONTENT_BLOCK_HOVERED,
+  AC_CONTENT_BLOCKS_RECEIVED,
 
   AC_ANALYSIS_PERIOD_CHANGED,
   AC_ANALYSIS_GROUPING_CHANGED,
@@ -32,7 +34,6 @@ import {
   AC_ANALYSIS_TREE_EXPAND_TOGGLED,
   AC_ANALYSIS_TREE_HOVERED,
   AC_ANALYSIS_BLOCK_CLICKED,
-  AC_ANALYSIS_BLOCK_HOVERED,
 
   AC_EDIT_ACTIVATED,
   AC_EDIT_CHANGED,
@@ -81,7 +82,9 @@ import {
   rHandleServerUpdate
 } from './HeaderReducer';
 import {
-  rHandleContentResponse
+  rHandleContentResponse,
+  rContentBlockHover,
+  rContentUpdateBlocks
 } from './ContentReducer';
 import {
   rAnalysisChangePeriod,
@@ -92,8 +95,7 @@ import {
   rAnalysisTreeToggleDisplay,
   rAnalysisTreeToggleExpand,
   rAnalysisTreeHover,
-  rAnalysisBlockClick,
-  rAnalysisBlockHover
+  rAnalysisBlockClick
 } from './data/analysis';
 import {
   rActivateEditable,
@@ -165,6 +167,10 @@ export default (reduction, action) => {
   // content actions
   case AC_CONTENT_LOADED:
     return rHandleContentResponse(reduction, action.payload);
+  case AC_CONTENT_BLOCK_HOVERED:
+    return rContentBlockHover(reduction, action.payload);
+  case AC_CONTENT_BLOCKS_RECEIVED:
+    return rContentUpdateBlocks(reduction, action.payload);
 
   // analysis actions
   case AC_ANALYSIS_PERIOD_CHANGED:
@@ -184,8 +190,6 @@ export default (reduction, action) => {
     return rAnalysisTreeHover(reduction, action.payload);
   case AC_ANALYSIS_BLOCK_CLICKED:
     return rAnalysisBlockClick(reduction, action.payload);
-  case AC_ANALYSIS_BLOCK_HOVERED:
-    return rAnalysisBlockHover(reduction, action.payload);
 
   // editable actions
   case AC_EDIT_ACTIVATED:

@@ -87,7 +87,7 @@ export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, curr
 
   // separate funds into old and displayed
   let cost = costMap;
-  if (!cost.has('fundsOld')) {
+  if (!cost.has('fundsOld') || !cost.get('fundsOld').size) {
     const funds = cost.get('funds');
     cost = cost.set('funds', funds.slice(-numRows))
     .set('fundsOld', funds.slice(0, funds.size - numRows));
