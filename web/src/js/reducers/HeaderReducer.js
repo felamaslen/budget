@@ -9,6 +9,7 @@ import { resetAppState } from '../reduction';
 import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
+import { loadBlocks } from './data/list';
 import { getFundsCachedValueAgeText } from './data/funds';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
 import {
@@ -267,7 +268,7 @@ export const rNavigateToPage = (reduction, pageIndex) => {
       ['appState', 'edit', 'active'], getNullEditable(pageIndex)
     ).setIn(['appState', 'edit', 'addBtnFocus'], false);
   }
-  return newReduction;
+  return loadBlocks(newReduction, pageIndex);
 };
 
 export const rUpdateServer = reduction => {
@@ -305,9 +306,11 @@ export const rUpdateServer = reduction => {
 
 export const rHandleServerUpdate = (reduction, response) => {
   const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
-  return reduction.setIn(['appState', 'loadingApi'], false)
+  const newReduction = reduction.setIn(['appState', 'loadingApi'], false)
   .setIn(['appState', 'edit', 'status'], status)
   .setIn(['appState', 'edit', 'queue'], list.of())
   .setIn(['appState', 'edit', 'queueDelete'], list.of());
+
+  return loadBlocks(newReduction, newReduction.getIn(['appState', 'currentPageIndex']), true);
 };
 

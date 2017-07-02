@@ -13,7 +13,7 @@ export class BlockView extends PureControllerView {
     const activeMain = this.props.active && this.props.active.length === 1;
     const activeSub = this.props.active && this.props.active.length === 2;
 
-    const blocks = this.props.blocks.map((group, groupKey) => {
+    const blocks = this.props.blocks ? this.props.blocks.map((group, groupKey) => {
       return (
         <div key={groupKey} className='block-group' style={{
           width: group.get('width'), height: group.get('height')
@@ -58,7 +58,7 @@ export class BlockView extends PureControllerView {
         })}
         </div>
       );
-    });
+    }) : null;
 
     return (
       <div className='block-view' onMouseOut={() => this.props.onBlockHover(null, null) }>
@@ -75,7 +75,7 @@ export class BlockView extends PureControllerView {
 
 export class BlockViewShallow extends PureControllerView {
   render() {
-    const blocks = this.props.blocks.map((group, groupKey) => {
+    const blocks = this.props.blocks ? this.props.blocks.map((group, groupKey) => {
       return (
         <div key={groupKey} className='block-group' style={{
           width: group.get('width'), height: group.get('height')
@@ -97,7 +97,7 @@ export class BlockViewShallow extends PureControllerView {
         })}
         </div>
       );
-    });
+    }) : null;
 
     return (
       <div className='block-view graph-container' onMouseOut={() => {
