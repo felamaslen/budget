@@ -15,15 +15,19 @@ import {
 import buildMessage from '../../messageBuilder';
 import { EF_BLOCKS_REQUESTED } from '../../constants/effects';
 
-export const loadBlocks = (reduction, pageIndex) => {
+export const loadBlocks = (reduction, pageIndex, noClear) => {
   if (BLOCK_PAGES.indexOf(pageIndex) === -1) {
     return reduction;
+  }
+  let newReduction = reduction;
+  if (!noClear) {
+    newReduction = newReduction.setIn(['appState', 'other', 'blockView', 'blocks'], null);
   }
   const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
   const table = PAGES[pageIndex];
   const loadKey = new Date().getTime();
 
-  return reduction.set('effects', reduction.get('effects').push(
+  return newReduction.set('effects', reduction.get('effects').push(
     buildMessage(EF_BLOCKS_REQUESTED, { apiKey, table, loadKey })
   )).setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
 };
