@@ -38,6 +38,7 @@ export const OVERVIEW_COLUMNS = [
 ];
 
 export const LIST_PAGES = [2, 3, 4, 5, 6, 7, 8];
+export const BLOCK_PAGES = [5, 6, 7, 8];
 
 export const LIST_COLS_PAGES = [
   null, // overview (not list)

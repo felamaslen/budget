@@ -4,7 +4,7 @@
 
 import { fromJS, List as list, Map as map } from 'immutable';
 import {
-  LIST_COLS_SHORT, LIST_COLS_PAGES
+  LIST_COLS_SHORT, LIST_COLS_PAGES, BLOCK_PAGES, PAGES
 } from '../../misc/const';
 import { YMD } from '../../misc/date';
 import { TransactionsList } from '../../misc/data';
@@ -12,6 +12,21 @@ import {
   getGainComparisons, addPriceHistory, getFormattedHistory, getXRange,
   getFundsCachedValue
 } from './funds';
+import buildMessage from '../../messageBuilder';
+import { EF_BLOCKS_REQUESTED } from '../../constants/effects';
+
+export const loadBlocks = (reduction, pageIndex) => {
+  if (BLOCK_PAGES.indexOf(pageIndex) === -1) {
+    return reduction;
+  }
+  const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+  const table = PAGES[pageIndex];
+  const loadKey = new Date().getTime();
+
+  return reduction.set('effects', reduction.get('effects').push(
+    buildMessage(EF_BLOCKS_REQUESTED, { apiKey, table, loadKey })
+  )).setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
+};
 
 /**
  * process list page data response
@@ -43,7 +58,11 @@ export const processPageDataList = (reduction, pageIndex, raw) => {
     });
   }));
 
-  return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
+  return loadBlocks(
+    reduction.setIn(
+      ['appState', 'pages', pageIndex], map({ data, rows })
+    ), pageIndex
+  );
 };
 
 export const processPageDataFunds = (reduction, pageIndex, data) => {

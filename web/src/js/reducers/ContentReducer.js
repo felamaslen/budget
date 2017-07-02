@@ -2,14 +2,17 @@
  * Carries out actions for the content component
  */
 
+import { List as list, Map as map } from 'immutable';
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
 import {
   PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS
 } from '../misc/const';
+import { LIST_BLOCK_WIDTH, LIST_BLOCK_HEIGHT } from '../misc/config';
 import {
   getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
+import { BlockPacker, capitalise, formatCurrency } from '../misc/format';
 
 import processPageDataOverview from './data/overview';
 import { processPageDataList, processPageDataFunds } from './data/list';
@@ -94,5 +97,46 @@ export const rHandleContentResponse = (reduction, output) => {
   )
   .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
   .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));
+};
+
+export const rContentBlockHover = (reduction, obj) => {
+  let newStatus = '';
+  const haveSubBlock = !!obj.subBlock;
+  if (obj.block) {
+    const theBlock = haveSubBlock ? obj.subBlock : obj.block;
+    const value = formatCurrency(theBlock.get('value'), { raw: true });
+    if (haveSubBlock) {
+      newStatus = `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`;
+    }
+    else {
+      newStatus = `${capitalise(obj.block.get('name'))} (${value})`;
+    }
+  }
+  return reduction.setIn(['appState', 'other', 'blockView', 'status'], newStatus);
+};
+export const rContentUpdateBlocks = (reduction, obj) => {
+  const loadKey = obj.loadKey;
+  const currentLoadKey = reduction.getIn(['appState', 'other', 'blockView', 'loadKey']);
+  if (loadKey !== currentLoadKey) {
+    // another load request has been made or the page has been changed
+    return reduction;
+  }
+
+  if (obj.response.data.error) {
+    return reduction; // TODO
+  }
+
+  const dataItem = obj.response.data.data.list[0];
+  const blockData = list(dataItem.data).map(item => {
+    return map({
+      name: item[0],
+      total: item[1]
+    });
+  });
+  const packer = new BlockPacker(blockData, LIST_BLOCK_WIDTH, LIST_BLOCK_HEIGHT);
+  const blocks = packer.blocks;
+
+  return reduction
+  .setIn(['appState', 'other', 'blockView', 'blocks'], blocks);
 };
 

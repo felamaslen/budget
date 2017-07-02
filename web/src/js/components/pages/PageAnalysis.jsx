@@ -12,8 +12,10 @@ import { formatCurrency, capitalise } from '../../misc/format';
 import {
   aPeriodChanged, aGroupingChanged, aTimeIndexChanged,
   aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered,
-  aBlockClicked, aBlockHovered
+  aBlockClicked
 } from '../../actions/AnalysisActions';
+import { aContentBlockHovered } from '../../actions/ContentActions';
+import { BlockView } from '../BlockPacker';
 
 export class PageAnalysis extends PureControllerView {
   format(value, abbreviate) {
@@ -79,69 +81,29 @@ export class PageAnalysis extends PureControllerView {
     );
   }
   blockTree() {
-    const active = this.props.other.get('active');
-    const deep = !!this.props.other.get('deepBlock');
+    const active = this.props.blocks.get('active');
+    const deep = this.props.blocks.get('deep');
     let blockClasses = ['block-tree', 'flex'];
     if (deep) {
       blockClasses = blockClasses.concat([
         'block-tree-deep',
-        `block-tree-${this.props.other.get('deepBlock')}`
+        `block-tree-${deep}`
       ]);
     }
     blockClasses = blockClasses.join(' ');
 
     return (
-      <div className='block-view' onMouseOut={() => this.dispatchAction(aBlockHovered(null))}>
-        <div className={blockClasses}>
-        {this.props.blocks.map((group, groupKey) => {
-          return (
-            <div key={groupKey} className='block-group' style={{
-              width: group.get('width'), height: group.get('height')
-            }}>
-            {group.get('bits').map((block, blockKey) => {
-              const classes = classNames({
-                block: true,
-                active: active && active.length === 1 && active[0] === block.get('name'),
-                [`block-${block.get('color')}`]: true,
-                [`block-${block.get('name')}`]: !deep
-              });
-              return (
-                <div key={blockKey} className={classes} style={{
-                  width: block.get('width'), height: block.get('height')
-                }} onClick={() => {
-                  this.dispatchAction(aBlockClicked(block.get('name')));
-                }}>
-                {block.get('blocks').map((subBlockGroup, subBlockGroupKey) => {
-                  return (
-                    <div key={subBlockGroupKey} className='block-group' style={{
-                      width: subBlockGroup.get('width'), height: subBlockGroup.get('height')
-                    }}>
-                    {subBlockGroup.get('bits').map((subBlock, subBlockKey) => {
-                      const subClasses = classNames({
-                        'sub-block': true,
-                        active: active && active.length === 2 && active[0] === block.get('name') &&
-                          active[1] === subBlock.get('name')
-                      });
-                      return (
-                        <div key={subBlockKey} className={subClasses} style={{
-                          width: subBlock.get('width'), height: subBlock.get('height')
-                        }} onMouseOver={() => {
-                          this.dispatchAction(aBlockHovered({ block, subBlock }));
-                        }}></div>
-                      );
-                    })}
-                    </div>
-                  );
-                })}
-                </div>
-              );
-            })}
-            </div>
-          );
-        })}
-        </div>
-        <div className='status-bar'>{this.props.other.get('status')}</div>
-      </div>
+      <BlockView dispatcher={this.props.dispatcher}
+        onBlockClick={block => {
+          this.dispatchAction(aBlockClicked(block.get('name')));
+        }}
+        onBlockHover={(block, subBlock) => { this.dispatchAction(aContentBlockHovered(block, subBlock)); }}
+        blocks={this.props.blocks.get('blocks')}
+        blockClasses={blockClasses}
+        active={active}
+        deep={!!deep}
+        status={this.props.blocks.get('status')}
+      />
     );
   }
   render() {
@@ -201,7 +163,7 @@ PageAnalysis.propTypes = {
   costTotal: PropTypes.number,
   items: PropTypes.instanceOf(map),
   description: PropTypes.string,
-  blocks: PropTypes.instanceOf(list),
+  blocks: PropTypes.instanceOf(map),
   other: PropTypes.instanceOf(map)
 };
 

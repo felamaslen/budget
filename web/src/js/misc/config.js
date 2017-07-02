@@ -49,6 +49,9 @@ export const STOCK_INDICES = {
 export const DO_STOCKS_LIST = true;
 export const STOCKS_GRAPH_RESOLUTION = 50;
 
+export const LIST_BLOCK_WIDTH = 500;
+export const LIST_BLOCK_HEIGHT = 300;
+
 // colours for overview score scale and page categories
 export const COLOR_CATEGORY = {
   funds: [84, 110, 122],

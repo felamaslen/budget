@@ -21,6 +21,8 @@ export const AC_SERVER_UPDATE_RECEIVED = 0xac5f2;
 export const AC_SERVER_ADD_RECEIVED = 0xac5f3;
 
 export const AC_CONTENT_LOADED = 0xacc1;
+export const AC_CONTENT_BLOCK_HOVERED = 0xacc2;
+export const AC_CONTENT_BLOCKS_RECEIVED = 0xacc3;
 
 export const AC_ANALYSIS_PERIOD_CHANGED = 0xacaa1;
 export const AC_ANALYSIS_GROUPING_CHANGED = 0xacaa2;
@@ -30,7 +32,6 @@ export const AC_ANALYSIS_TREE_DISPLAY_TOGGLED = 0xacab1;
 export const AC_ANALYSIS_TREE_EXPAND_TOGGLED = 0xacab2;
 export const AC_ANALYSIS_TREE_HOVERED = 0xacab3;
 export const AC_ANALYSIS_BLOCK_CLICKED = 0xacab4;
-export const AC_ANALYSIS_BLOCK_HOVERED = 0xacab5;
 
 export const AC_EDIT_ACTIVATED = 0xaceea;
 export const AC_EDIT_CHANGED = 0xaceec;

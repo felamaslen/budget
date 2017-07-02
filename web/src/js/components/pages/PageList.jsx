@@ -11,6 +11,8 @@ import { LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
+import { aContentBlockHovered } from '../../actions/ContentActions';
+import { BlockViewShallow } from '../BlockPacker';
 
 export class PageList extends PureControllerView {
   addItem() {
@@ -143,6 +145,32 @@ export class PageList extends PureControllerView {
       }, 0);
     }
   }
+  blockTree() {
+    const blockClasses = 'block-tree flex shallow';
+
+    return (
+      <BlockViewShallow dispatcher={this.props.dispatcher}
+        onBlockClick={() => null}
+        onBlockHover={(block, subBlock) => {
+          this.dispatchAction(aContentBlockHovered(block, subBlock));
+        }}
+        blocks={this.props.blocks.get('blocks')}
+        blockClasses={blockClasses}
+        active={this.props.blocks.get('active')}
+        status={this.props.blocks.get('status')}
+      />
+    );
+  }
+  afterList() {
+    if (!this.props.blocks.get('blocks')) {
+      return null;
+    }
+    return (
+      <div className='graph-container-outer'>
+        {this.blockTree()}
+      </div>
+    );
+  }
   render() {
     const listClasses = [
       'list-insert',
@@ -173,6 +201,7 @@ PageList.propTypes = {
   addBtnFocus: PropTypes.bool,
   daily: PropTypes.bool,
   index: PropTypes.number,
-  page: PropTypes.string
+  page: PropTypes.string,
+  blocks: PropTypes.instanceOf(map)
 };
 

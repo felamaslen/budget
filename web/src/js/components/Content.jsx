@@ -35,7 +35,7 @@ export class Content extends PureControllerView {
           costTotal={data.get('costTotal')}
           items={data.get('items')}
           description={data.get('description')}
-          blocks={data.get('blocks')}
+          blocks={this.props.other.get('blockView')}
         />
       );
     }
@@ -68,6 +68,7 @@ export class Content extends PureControllerView {
           index={this.props.index}
           page={page}
           suggestions={this.props.edit.get('suggestions')}
+          blocks={this.props.other.get('blockView')}
         />
       );
     }

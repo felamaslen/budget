@@ -236,7 +236,7 @@ class Pie(Processor):
                 'total':    total
             })
 
-        self.data = data
+        self.data = { 'list': data }
 
         return True
 

@@ -10,7 +10,8 @@ import buildEffectHandler from '../effectHandlerBuilder';
 
 import { PAGES, MAX_SUGGESTIONS } from '../misc/const';
 import {
-  EF_LOGIN_FORM_SUBMIT, EF_CONTENT_REQUESTED,
+  EF_LOGIN_FORM_SUBMIT,
+  EF_CONTENT_REQUESTED, EF_BLOCKS_REQUESTED,
   EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED,
   EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
   EF_FUNDS_PERIOD_REQUESTED, EF_SUGGESTIONS_REQUESTED,
@@ -19,7 +20,7 @@ import {
 
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
-import { aContentLoaded } from '../actions/ContentActions';
+import { aContentLoaded, aContentBlocksReceived } from '../actions/ContentActions';
 import { aAnalysisDataReceived } from '../actions/AnalysisActions';
 import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
@@ -52,7 +53,17 @@ export default buildEffectHandler([
     axios.get(`api?${urlReq}`, {
       headers: { 'Authorization': obj.apiKey }
     }).then(
-      response => dispatcher.dispatch(aContentLoaded({ response, pageIndex }))
+      response => dispatcher.dispatch(aContentLoaded(response, pageIndex))
+    );
+  }],
+
+  [EF_BLOCKS_REQUESTED, (obj, dispatcher) => {
+    const loadKey = obj.loadKey;
+
+    axios.get(`api?t=pie/${obj.table}`, {
+      headers: { 'Authorization': obj.apiKey }
+    }).then(
+      response => dispatcher.dispatch(aContentBlocksReceived(response, loadKey))
     );
   }],
 

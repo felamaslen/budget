@@ -785,6 +785,124 @@ button {
   }
 }
 
+/* block packer graph */
+.block-view {
+  width: 500px;
+  height: 300px;
+  position: relative;
+  .status-bar {
+    position: absolute;
+    z-index: 2;
+    bottom: 0;
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #222;
+    color: #eaeaea;
+    margin-top: -1px;
+    .inner {
+      padding: 0 0.8em;
+    }
+  }
+  .block-tree-outer {
+    height: 280px;
+  }
+  .block-tree {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-shadow: 0 3px 13px rgba(60, 60, 60, 0.4);
+    .block-group {
+      float: left;
+    }
+    .expanded {
+      .block-group {
+        opacity: 0; /* for the expansion animation */
+      }
+    }
+
+    &.deep > .block-group {
+      display: none;
+    }
+    .deep-block-tree {
+      width: 100%;
+      height: 100%;
+    }
+    .block {
+      box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6);
+      z-index: 1;
+      &:hover {
+        z-index: 2;
+        box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6),
+                    0 0 16px 3px rgba(60, 60, 60, 0.8);
+      }
+    }
+    .sub-block, &.shallow .block {
+      transition: opacity 0.1s linear;
+      opacity: 1;
+      box-shadow: inset -1px -1px 13px rgba(30, 30, 30, 0.4);
+      background-image: linear-gradient(to bottom right,
+        rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.3));
+      &.hidden {
+        opacity: 0;
+      }
+    }
+
+    .all-blocks() {
+      float: left;
+      position: relative;
+      &.active {
+        background: rgba(255, 255, 0, 0.85);
+      }
+    }
+    .block, .sub-block {
+      .all-blocks();
+    }
+    
+    .block-0 { background: #d35400; }
+    .block-1 { background: #1abc9c; }
+    .block-2 { background: #f1c40f; }
+    .block-3 { background: #2980b9; }
+    .block-4 { background: #27ae60; }
+    .block-5 { background: #e74c3c; }
+    .block-6 { background: #9b59b6; }
+    .block-7 { background: #f70000; }
+    .block-8 { background: #f206ff; }
+    .block-9 { background: #29afd6; }
+    .block-10 { background: #4a9586; }
+    .block-11 { background: #b9264f; }
+    .block-12 { background: #c27e3a; }
+    .block-13 { background: #9d9d00; }
+    .block-14 { background: #75b4ff; }
+    .block-15 { background: #93bf96; }
+
+    .preview {
+      position: absolute;
+      z-index: 5;
+    }
+    .block-bills {
+      background: #b71c1c;
+    }
+    .block-food {
+      background: #43a047;
+    }
+    .block-general {
+      background: #01579b;
+    }
+    .block-holiday {
+      background: #00897b;
+    }
+    .block-social {
+      background: #bf9e24;
+    }
+  }
+}
+
 /* world map */
 .graph-world-map {
   .world {
@@ -911,112 +1029,6 @@ button {
     margin: 0.3em 0;
     font-size: 1.2em;
   }
-  .block-view {
-    width: 500px;
-    height: 500px;
-    flex: 0 0 500px;
-    .status-bar {
-      height: 32px;
-      line-height: 32px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      background: #222;
-      color: #eee;
-      padding: 0 0.8em;
-      margin-top: -1px;
-    }
-    .block-tree {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      box-shadow: 0 3px 13px rgba(60, 60, 60, 0.4);
-      .block-group {
-        float: left;
-      }
-      .expanded {
-        .block-group {
-          opacity: 0; /* for the expansion animation */
-        }
-      }
-
-      &.deep > .block-group {
-        display: none;
-      }
-      .deep-block-tree {
-        width: 100%;
-        height: 100%;
-      }
-      .block {
-        box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6);
-        z-index: 1;
-        &:hover {
-          z-index: 2;
-          box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6),
-                      0 0 16px 3px rgba(60, 60, 60, 0.8);
-        }
-      }
-      .sub-block {
-        transition: opacity 0.1s linear;
-        opacity: 1;
-        box-shadow: inset -1px -1px 13px rgba(30, 30, 30, 0.4);
-        background: linear-gradient(to bottom right,
-          rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.3));
-        &.hidden {
-          opacity: 0;
-        }
-      }
-
-      .all-blocks() {
-        float: left;
-        position: relative;
-        &.active {
-          background: rgba(255, 255, 0, 0.85);
-        }
-      }
-      .block, .sub-block {
-        .all-blocks();
-      }
-      
-      .block-0 { background: #d35400; }
-      .block-1 { background: #1abc9c; }
-      .block-2 { background: #f1c40f; }
-      .block-3 { background: #2980b9; }
-      .block-4 { background: #27ae60; }
-      .block-5 { background: #e74c3c; }
-      .block-6 { background: #9b59b6; }
-      .block-7 { background: #f70000; }
-      .block-8 { background: #f206ff; }
-      .block-9 { background: #29afd6; }
-      .block-10 { background: #4a9586; }
-      .block-11 { background: #b9264f; }
-      .block-12 { background: #c27e3a; }
-      .block-13 { background: #9d9d00; }
-      .block-14 { background: #75b4ff; }
-      .block-15 { background: #93bf96; }
-
-      .preview {
-        position: absolute;
-        z-index: 5;
-      }
-      .block-bills {
-        background: #b71c1c;
-      }
-      .block-food {
-        background: #43a047;
-      }
-      .block-general {
-        background: #01579b;
-      }
-      .block-holiday {
-        background: #00897b;
-      }
-      .block-social {
-        background: #bf9e24;
-      }
-    }
-  }
 
   .tree {
     margin: 1em;
@@ -1077,6 +1089,12 @@ button {
           font-size: 0.9em;
         }
       }
+    }
+  }
+  .block-view {
+    height: 500px;
+    .block-tree-outer {
+      height: 480px;
     }
   }
 }
@@ -1383,7 +1401,7 @@ button {
 /* income page */
 .page-income {
   .graph-container-pie {
-    width: 800px;
+    width: 824px;
   }
 }
 
@@ -1458,10 +1476,10 @@ button {
     }
   }
 
-  /* in page */
+  /* income page */
   .page-income {
     .graph-container-pie {
-      width: 800px;
+      width: 824px;
       margin-left: 100px;
     }
   }
@@ -1602,14 +1620,9 @@ button {
   .graph-toggle-btn {
     display: none;
   }
-  .graph-container-pie {
-    left: 800px;
+  .block-view.graph-container {
+    left: 824px;
     top: @top_nav + 40;
-  }
-  .graph-container-pie-1 {
-    top: @top_nav + 350;
-  }
-  .graph-container-pie-2 {
   }
 
   .list-head {

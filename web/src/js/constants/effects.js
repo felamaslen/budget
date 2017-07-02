@@ -6,6 +6,7 @@ export const EF_LOGIN_FORM_SUBMIT = 0xefa1;
 
 export const EF_CONTENT_REQUESTED = 0xefb1;
 export const EF_SUGGESTIONS_REQUESTED = 0xefb2;
+export const EF_BLOCKS_REQUESTED = 0xefb3;
 
 export const EF_SERVER_UPDATE_REQUESTED = 0xefc1;
 export const EF_SERVER_ADD_REQUESTED = 0xefc2;
