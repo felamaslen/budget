@@ -6,6 +6,7 @@ import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED, EF_SUGGESTIONS_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './data/overview';
+import { loadBlocks } from './data/list';
 import { getGainComparisons, addPriceHistory } from './data/funds';
 import {
   PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
@@ -304,6 +305,9 @@ export const rHandleServerAdd = (reduction, response) => {
     newReduction = rCalculateOverview(
       newReduction, pageIndex, dateItem.value, dateItem.value, costItem.value, 0);
   }
+
+  // reload block view
+  newReduction = loadBlocks(newReduction, pageIndex);
 
   if (reduction.getIn(['appState', 'currentPageIndex']) !== pageIndex) {
     return newReduction;
