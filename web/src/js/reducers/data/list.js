@@ -17,7 +17,8 @@ import { EF_BLOCKS_REQUESTED } from '../../constants/effects';
 
 export const loadBlocks = (reduction, pageIndex, noClear) => {
   if (BLOCK_PAGES.indexOf(pageIndex) === -1) {
-    return reduction;
+    return reduction
+    .setIn(['appState', 'other', 'blockView', 'blocks'], null);
   }
   let newReduction = reduction;
   if (!noClear) {
