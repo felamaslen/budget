@@ -63,7 +63,7 @@ export const processPageDataAnalysis = (reduction, pageIndex, raw) => {
   }));
 };
 
-const reloadAnalysis = (reduction, newReduction) => {
+export const reloadAnalysis = (reduction, newReduction) => {
   if (reduction.getIn(['appState', 'other', 'analysis', 'loading'])) {
     return reduction;
   }

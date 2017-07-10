@@ -10,6 +10,7 @@ import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormR
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
 import { loadBlocks } from './data/list';
+import { reloadAnalysis } from './data/analysis';
 import { getFundsCachedValueAgeText } from './data/funds';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
 import {
@@ -267,6 +268,9 @@ export const rNavigateToPage = (reduction, pageIndex) => {
     ).setIn(
       ['appState', 'edit', 'active'], getNullEditable(pageIndex)
     ).setIn(['appState', 'edit', 'addBtnFocus'], false);
+  }
+  if (PAGES[pageIndex] === 'analysis') {
+    newReduction = reloadAnalysis(newReduction, newReduction);
   }
   return loadBlocks(newReduction, pageIndex);
 };
