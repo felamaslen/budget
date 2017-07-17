@@ -55,7 +55,10 @@ export const rHandleStocksListResponse = (reduction, response) => {
 };
 
 const updateStock = (item, row, loadedInitial) => {
-  const newGain = parseFloat(row.cp);
+  let newGain = parseFloat(row.cp);
+  if (isNaN(newGain)) {
+    newGain = 0;
+  }
   const up = loadedInitial && newGain > item.get('gain');
   const down = loadedInitial && newGain < item.get('gain');
   return item.set('gain', newGain).set('up', up).set('down', down);
