@@ -49,7 +49,7 @@ export const LIST_COLS_PAGES = [
   ['date', 'item', 'category', 'cost', 'shop'], // food
   ['date', 'item', 'category', 'cost', 'shop'], // general
   ['date', 'item', 'holiday', 'cost', 'shop'], // holiday
-  ['date', 'item', 'social', 'cost', 'shop'] // social
+  ['date', 'item', 'society', 'cost', 'shop'] // social
 ];
 export const LIST_COLS_SHORT = [
   null,
