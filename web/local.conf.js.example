@@ -2,5 +2,7 @@
  * This file must be renamed from .example and the correct values placed here
  */
 
-export const WEB_URI = 'http://budget.example.com';
+module.exports = {
+  WEB_URI: 'http://budget.example.com'
+};
 

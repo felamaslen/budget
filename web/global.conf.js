@@ -3,5 +3,7 @@
  */
 
 // port to use for the development server
-export const PORT_DEVSERVER = 8080;
+module.exports = {
+  PORT_DEVSERVER: 8080
+};
 

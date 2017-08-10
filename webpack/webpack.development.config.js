@@ -1,10 +1,10 @@
-import path from 'path';
-import webpack from 'webpack';
-import moduleConfig from './module.config';
+const path = require('path');
+const webpack = require('webpack');
+const moduleConfig = require('./module.config');
 
-import { PORT_DEVSERVER } from '../web/global.conf';
+const PORT_DEVSERVER = require('../web/global.conf').PORT_DEVSERVER;
 
-export default {
+module.exports = {
   devtool: 'source-map',
   entry: [
     'webpack-dev-server/client?http://0.0.0.0:' + PORT_DEVSERVER,

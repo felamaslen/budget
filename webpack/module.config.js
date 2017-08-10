@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   loaders: [
     {
       test: /\.jsx$|\.js$/,
