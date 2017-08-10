@@ -2,7 +2,9 @@
  * Code processor / entry point for development app
  */
 
+require('dotenv').config();
 const path = require('path');
+const nodemon = require('nodemon');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const rename = require('gulp-rename');
@@ -18,9 +20,6 @@ const WebpackDevServer = require('webpack-dev-server');
 
 const webpackConfigDev = require('./webpack/webpack.development.config');
 const webpackConfig = require('./webpack/webpack.staging.config');
-
-const WEB_URI = require('./web/local.conf').WEB_URI;
-const PORT_DEVSERVER = require('./web/global.conf').PORT_DEVSERVER;
 
 // less css preprocessor
 gulp.task('less', () => {
@@ -69,7 +68,23 @@ gulp.task('build_js', ['webpack']);
  * Builds the web client files, which are then served by nginx via
  * the uwsgi/python app
  */
-gulp.task('production', ['build_css', 'build_js']);
+gulp.task('build', ['build_css', 'build_js']);
+
+/**
+ * Production server
+ */
+gulp.task('server', () => {
+  const monitor = nodemon({
+    'script': './srv/index.js',
+    'ignore': './web/build/js/*.js'
+  });
+
+  process.once('SIGINT', () => {
+    monitor.once('exit', () => {
+      process.exit();
+    });
+  });
+});
 
 /**
  * Development server
@@ -89,22 +104,22 @@ gulp.task('dev_server', callback => {
       reasons: true
     },
     progress: true,
-    proxy: {
+    proxy: { // proxy to the express app
       '/**': {
-        target: WEB_URI,
+        target: `http://localhost:${process.env.PORT}`,
         secure: false,
-        changeOrigin: true,
+        changeOrigin: false,
       }
     },
     disableHostCheck: true
   });
 
   app.use(morgan('dev'));
-  app.listen(PORT_DEVSERVER);
-  console.log('Development server listening on port', PORT_DEVSERVER);
+  app.listen(process.env.PORT_WDS);
+  console.log('Development server listening on port', process.env.PORT_WDS);
 });
 
-gulp.task('dev', ['less', 'watch_css', 'dev_server']);
+gulp.task('dev', ['less', 'watch_css', 'server', 'dev_server']);
 
 gulp.task('default', ['production']);
 
