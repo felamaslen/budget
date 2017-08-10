@@ -5,6 +5,7 @@
 const express = require('express');
 const path = require('path');
 const version = require('../package.json').version;
+const api = require('./api.js');
 
 // initiate express web server
 const app = express();
@@ -15,9 +16,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, '../web/build')));
 
-app.get('/api', (req, res) => {
-  res.send('Budget API dummy endpoint'); // TODO
-});
+app.use('/api', api);
 
 // load home (app) page by default
 app.get('/', (req, res) => {
@@ -29,7 +28,7 @@ app.get('/', (req, res) => {
 });
 
 // error handling
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).send('File not found');
 });
 
