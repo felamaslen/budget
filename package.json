@@ -1,10 +1,11 @@
 {
   "name": "budget",
-  "version": "1.1.0",
+  "version": "1.2.0-2017081001",
   "description": "Personal finance app",
   "main": "gulpfile.js",
   "dependencies": {
     "dotenv": "^4.0.0",
+    "ejs": "^2.5.7",
     "nodemon": "^1.11.0"
   },
   "devDependencies": {
