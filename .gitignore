@@ -1,5 +1,6 @@
 node_modules
 node_modules/*
+npm-debug.log
 **/__pycache__
 Budget.egg-info
 env
@@ -11,5 +12,5 @@ resources/tickers.csv
 web/build/js/*.js
 web/build/js/*.js.map
 web/build/css/*.css
-local.conf.js
+.env
 **/.syncthing*

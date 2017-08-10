@@ -1,13 +1,12 @@
+require('dotenv').config();
 const path = require('path');
 const webpack = require('webpack');
 const moduleConfig = require('./module.config');
 
-const PORT_DEVSERVER = require('../web/global.conf').PORT_DEVSERVER;
-
 module.exports = {
   devtool: 'source-map',
   entry: [
-    'webpack-dev-server/client?http://0.0.0.0:' + PORT_DEVSERVER,
+    'webpack-dev-server/client?http://0.0.0.0:' + process.env.PORT_WDS,
     'webpack/hot/only-dev-server',
     './web/src/js/index.jsx'
   ],

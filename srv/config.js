@@ -3,6 +3,6 @@
  */
 
 module.exports = {
-  WEB_URI: 'http://budget.example.com'
+  WEB_URI: process.env.WEB_URI
 };
 

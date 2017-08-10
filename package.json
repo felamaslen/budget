@@ -2,8 +2,11 @@
   "name": "budget",
   "version": "1.1.0",
   "description": "Personal finance app",
-  "main": "gulpfile.babel.js",
-  "dependencies": {},
+  "main": "gulpfile.js",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "nodemon": "^1.11.0"
+  },
   "devDependencies": {
     "axios": "^0.16.1",
     "babel": "^6.5.2",
@@ -45,6 +48,9 @@
     "webpack-dev-server": "^1.16.2"
   },
   "scripts": {
+    "start": "./node_modules/.bin/gulp server",
+    "dev": "./node_modules/.bin/gulp dev",
+    "postinstall": "./node_modules/.bin/gulp build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
