@@ -11,7 +11,8 @@ module.exports = {
     unknownApiEndpoint: 'Unknown API endpoint',
     errorServerDb: 'Unknown database error',
     errorLoginBad: 'Bad PIN',
-    errorIpBanned: 'Banned'
+    errorIpBanned: 'Banned',
+    errorNotAuthorized: 'You need to authenticate to do that'
   }
 };
 
