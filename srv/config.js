@@ -3,6 +3,7 @@
  */
 
 module.exports = {
-  WEB_URI: process.env.WEB_URI
+  mongoUri: process.env.MONGO_URI,
+  webUri: process.env.WEB_URI
 };
 
