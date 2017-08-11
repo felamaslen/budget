@@ -7,7 +7,7 @@ const api = require('express').Router();
 api.use((req, res, next) => {
   // redirect requests like ?t=foo/bar to foo/bar
   if (req.query.t) {
-    return res.redirect(req.query.t);
+    return res.redirect(`${req.query.t}?old=true`);
   }
 
   next();
