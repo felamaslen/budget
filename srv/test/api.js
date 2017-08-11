@@ -78,6 +78,7 @@ describe('Backend API', () => {
 
     it('should handle bad logins', done => {
       request.post(`${this.url}/login`, { form: { pin: 1000 } }, (err, res, body) => {
+        expect(res.statusCode).to.be.equal(403);
         expect(JSON.parse(body).error).to.be.equal(true);
         done();
       });
