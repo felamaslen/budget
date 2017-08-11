@@ -2,6 +2,8 @@
  * Code processor / entry point for development app
  */
 
+'use strict';
+
 require('dotenv').config();
 const path = require('path');
 const nodemon = require('nodemon');
