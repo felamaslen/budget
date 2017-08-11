@@ -3,6 +3,10 @@
  */
 
 require('dotenv').config();
+process.env.IP_BAN_TIME = 0.5;
+process.env.IP_BAN_LIMIT=2
+process.env.IP_BAN_TRIES=1
+
 const config = require('../config.js');
 
 const expect = require('chai').expect;
@@ -75,17 +79,52 @@ describe('Backend API', () => {
           done();
         });
     });
+    before(done => {
+      this.db.collection('ipBan')
+        .drop()
+        .then(() => done())
+        .catch(() => done());
+    });
     it('should have a method for adding users');
 
     it('should handle bad logins', done => {
       request.post(`${this.url}/login`, { form: { pin: 1000 } }, (err, res, body) => {
+        expect(err).to.be.equal(null);
         expect(res.statusCode).to.be.equal(403);
-        expect(JSON.parse(body).error).to.be.equal(true);
+        const result = JSON.parse(body);
+        expect(result.error).to.be.equal(true);
+        expect(result.errorMessage).to.be.equal(config.msg.errorLoginBad);
         done();
       });
     });
 
-    it('should throttle bad logins');
+    it('should throttle bad logins', done => {
+      request.post(`${this.url}/login`, { form: { pin: 1000 } }, (err, res, body) => {
+        expect(err).to.be.equal(null);
+        expect(res.statusCode).to.be.equal(403);
+        const result = JSON.parse(body);
+        expect(result.error).to.be.equal(true);
+        expect(result.errorMessage).to.be.equal(config.msg.errorLoginBad);
+
+        request.post(`${this.url}/login`, { form: { pin: 1234 } }, (err, res, body) => {
+          // we've made bad requests, so should be banned now
+          expect(err).to.be.equal(null);
+          expect(res.statusCode).to.be.equal(403);
+          const result = JSON.parse(body);
+          expect(result.error).to.be.equal(true);
+          expect(result.errorMessage).to.be.equal(config.msg.errorIpBanned);
+
+          setTimeout(() => {
+            request.post(`${this.url}/login`, { form: { pin: 1234 } }, (err, res, body) => {
+              // we've waited for the ban to expire, so should be let in with the correct PIN
+              expect(err).to.be.equal(null);
+              expect(JSON.parse(body).error).to.be.equal(false);
+              done();
+            });
+          }, 800);
+        });
+      });
+    });
 
     describe('good login', () => {
       before(done => {
@@ -113,6 +152,7 @@ describe('Backend API', () => {
     after(() => {
       // clean up data
       this.db.collection('users').drop();
+      this.db.collection('ipBan').drop();
     });
   });
 
