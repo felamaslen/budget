@@ -3,10 +3,15 @@
  */
 
 require('dotenv').config();
+const config = require('../config');
 const expect = require('chai').expect;
 const express = require('express');
 const http = require('http');
 const request = require('request');
+const MongoClient = require('mongodb').MongoClient;
+
+// use testing database
+config.mongoUri = process.env.MONGO_URI_TEST;
 
 const api = require('../api.js');
 const apiPort = parseInt(process.env.PORT_WDS, 10) + 2;
@@ -19,9 +24,22 @@ describe('Backend API', () => {
     this.url = `http://localhost:${apiPort}`;
   });
 
+  before(done => {
+    // connect to the database
+    MongoClient.connect(config.mongoUri, (err, db) => {
+      expect(err).to.be.equal(null);
+      this.db = db;
+      done();
+    });
+  });
+
+  it('should connect to the database', () => {
+      expect(this.db).to.be.ok;
+  });
+
   it('should handle requests like ?t=some/task', done => {
     request.get(`${this.url}/?t=foo/bar`, (err, res, body) => {
-      expect(res.request.uri.href).to.be.equal(`${this.url}/foo/bar`);
+      expect(res.request.uri.href).to.be.equal(`${this.url}/foo/bar?old=true`);
       done();
     });
   });
@@ -62,6 +80,9 @@ describe('Backend API', () => {
     });
   });
 
+  after(done => {
+    this.db.close(done);
+  });
   after(done => {
     this.server.close(done);
   });
