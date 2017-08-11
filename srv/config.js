@@ -10,7 +10,8 @@ module.exports = {
   msg: {
     unknownApiEndpoint: 'Unknown API endpoint',
     errorServerDb: 'Unknown database error',
-    errorLoginBad: 'Bad PIN'
+    errorLoginBad: 'Bad PIN',
+    errorIpBanned: 'Banned'
   }
 };
 
