@@ -46,10 +46,14 @@ gulp.task('build_css', ['less'], () => {
 
 // verify es6 code is good
 gulp.task('lint', () => {
-  return gulp.src('web/src/js/**')
-  .pipe(eslint())
-  .pipe(eslint.format())
-  .pipe(eslint.failOnError());
+  return gulp
+    .src([
+      'web/src/js/**',
+      'srv/**/*.js'
+    ])
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failOnError());
 });
 
 // process es6 to es5 using babel
