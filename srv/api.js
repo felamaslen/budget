@@ -23,7 +23,7 @@ function apiPostLogin(req, res, db) {
     .then(result => {
       if (!result) {
         // bad login
-        res.status(400).json({
+        res.status(403).json({
           error: true,
           errorMessage: config.msg.errorLoginBad
         });
