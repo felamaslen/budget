@@ -282,6 +282,11 @@ describe('Backend API', () => {
       it('should insert data');
     });
 
+    describe('search', () => {
+      it('should require authentication');
+      it('should get data');
+    });
+
     describe('all', () => {
       it('should require authentication');
       it('should get all data');
