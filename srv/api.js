@@ -3,11 +3,11 @@
  */
 
 require('dotenv').config();
-const config = require('./config');
+const config = require('./config.js');
 
 const router = require('express').Router();
 
-const user = require('./user');
+const user = require('./user.js');
 
 // define api methods here
 function apiPostLogin(req, res, db) {

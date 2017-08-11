@@ -3,7 +3,7 @@
  */
 
 require('dotenv').config();
-const config = require('../config');
+const config = require('../config.js');
 
 const expect = require('chai').expect;
 const express = require('express');
@@ -18,7 +18,8 @@ config.mongoUri = process.env.MONGO_URI_TEST;
 const api = require('../api.js');
 const apiPort = parseInt(process.env.PORT_WDS, 10) + 2;
 
-const user = require('../user');
+const user = require('../user.js');
+const apiTestData = require('./apiTestData.js');
 
 describe('Backend API', () => {
   before(done => {
@@ -116,28 +117,7 @@ describe('Backend API', () => {
   });
 
   describe('data methods:', () => {
-    describe('overview', () => {
-      it('should require authentication');
-      it('should return valid data');
-      it('should expose an update data method');
-    });
-
-    describe('analysis', () => {
-      it('should be handled');
-      it('should paginate');
-      describe('time period', () => {
-        it('should filter by year');
-        it('should filter by month');
-        it('should filter by week');
-      });
-      describe('category', () => {
-        it('should filter by category');
-        it('should filter by shop');
-      });
-      describe('deep filter', () => {
-        it('should filter by table');
-      });
-    });
+    apiTestData(this.db);
   });
 
   after(done => {
