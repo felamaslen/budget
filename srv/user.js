@@ -9,7 +9,7 @@ const sha1 = require('sha1');
 
 function userPinHash(pin, salt) {
   return sha1(`${pin}${salt}`);
-};
+}
 
 function generateToken(pin) {
   // just return the same hashed value as stored in the database
@@ -54,9 +54,11 @@ function apiPostLogin(req, res, db) {
       if (banned) {
         const banExpired = new Date().getTime() - log.time > banTime;
         if (!banExpired) {
-          res.status(403).json({
-            error: true,
-            errorMessage: config.msg.errorIpBanned
+          db.collection('ipBan').find({}).toArray((err, bans) => {
+            res.status(403).json({
+              error: true,
+              errorMessage: config.msg.errorIpBanned
+            });
           });
           return;
         }
@@ -72,7 +74,7 @@ function apiPostLogin(req, res, db) {
 
         res.json({
           error,
-          api_key: apiKey,
+          'api_key': apiKey,
           uid,
           name
         });

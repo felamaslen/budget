@@ -14,7 +14,7 @@ const api = require('./api.js');
 const MongoClient = require('mongodb').MongoClient;
 
 function connectToDatabase() {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     if (config.debug) {
       console.log('Connecting to database...');
     }
@@ -28,7 +28,7 @@ function connectToDatabase() {
 }
 
 function serverApp() {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     connectToDatabase().then(db => {
       // initiate express web server
       const app = express();
