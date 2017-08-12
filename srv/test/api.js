@@ -8,6 +8,9 @@ require('dotenv').config();
 process.env.IP_BAN_TIME = 0.5;
 process.env.IP_BAN_LIMIT = 2;
 process.env.IP_BAN_TRIES = 2;
+process.env.MONGO_URI = process.env.MONGO_URI_TEST;
+process.env.PORT = parseInt(process.env.PORT_WDS, 10) + 2;
+process.env.DEBUG = false;
 
 const config = require('../config.js');
 
@@ -19,38 +22,20 @@ const request = require('request-promise-native');
 const requestJson = require('request-json');
 const MongoClient = require('mongodb').MongoClient;
 
-// use testing database
-config.mongoUri = process.env.MONGO_URI_TEST;
-
+const serverApp = require('../server.js');
 const api = require('../api.js');
-const apiPort = parseInt(process.env.PORT_WDS, 10) + 2;
 
 const user = require('../user.js');
 
 describe('Backend API', () => {
   before(done => {
-    // connect to the database
-    if (this.db) {
-      return done();
-    }
-    return MongoClient.connect(config.mongoUri, (err, db) => {
-      expect(err).to.be.equal(null);
-      this.db = db;
+    // run the server with test environment variables (e.g. database)
+    serverApp().then(server => {
+      this.db = server.db;
+      this.url = `http://localhost:${server.port}/`;
+      this.api = requestJson.createClient(`${this.url}api/`);
       done();
     });
-  });
-
-  before(() => {
-    const app = express();
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use('/', api(this.db));
-    this.server = http.createServer(app).listen(apiPort);
-    this.url = `http://localhost:${apiPort}/`;
-    this.api = requestJson.createClient(this.url);
-  });
-
-  it('should connect to the database', () => {
-    expect(this.db).to.be.ok;
   });
 
   it('should handle GET requests like ?t=some/task', done => {
@@ -98,7 +83,7 @@ describe('Backend API', () => {
     const loginRequestOptions = (url, bad) => {
       return {
         method: 'POST',
-        uri: `${url}login`,
+        uri: `${url}api/login`,
         form: {
           pin: bad ? 1000 : 1234
         },
@@ -346,13 +331,6 @@ describe('Backend API', () => {
       this.db.collection('holiday').drop();
       this.db.collection('social').drop();
     });
-  });
-
-  after(done => {
-    this.db.close(done);
-  });
-  after(done => {
-    this.server.close(done);
   });
 });
 

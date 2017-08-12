@@ -8,11 +8,9 @@ const config = require('./config');
 const serverApp = require('./server');
 
 // listen to web requests
-const port = process.env.PORT || 3000;
-serverApp().then(app => {
-  app.listen(port);
+serverApp().then(server => {
   if (config.debug) {
-    console.log(`App is listening on port ${port}!`);
+    console.log(`App is listening on port ${server.port}!`);
   }
 });
 
