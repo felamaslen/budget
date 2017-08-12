@@ -199,7 +199,8 @@ describe('Backend API', () => {
   });
 
   describe('data methods', () => {
-    before(done => {
+    before(() => {
+      // fill the database with test data
       let testData;
       try {
         testData = require('./apiTestData.json');
@@ -209,31 +210,46 @@ describe('Backend API', () => {
                         'You can get this data by running the API endpoint `data/all`.');
       }
 
-      this.db.collection('bills')
-        .insertMany(
-          testData.data.bills.data.map(row => {
-            return {
-              item: row.i,
-              cost: row.c,
-              date: row.d,
-              uid: 1
-            };
-          })
-          .concat([
-            {
-              item: 'Should not see this',
-              cost: 100,
-              date: [2017, 6, 1],
-              uid: 2
+      const dataTables = [
+        ['income', { d: 'date', i: 'item', c: 'cost' }],
+        ['bills', { d: 'date', i: 'item', c: 'cost' }],
+        ['food', { d: 'date', i: 'item', c: 'cost', k: 'category', s: 'shop' }],
+        ['general', { d: 'date', i: 'item', c: 'cost', k: 'category', s: 'shop' }],
+        ['holiday', { d: 'date', i: 'item', c: 'cost', h: 'holiday', s: 'shop' }],
+        ['social', { d: 'date', i: 'item', c: 'cost', y: 'society', s: 'shop' }]
+      ];
+
+      const dataInsertPromises = dataTables.map(table => {
+        const tableName = table[0];
+        const columns = table[1];
+
+        const testDataInsert = testData.data[tableName].data
+          .slice(0, 100)
+          .map(row => {
+            const doc = {};
+
+            for (const shortName in columns) {
+              const dbColumnName = columns[shortName];
+
+              doc[dbColumnName] = row[shortName];
             }
-          ]),
-          err => {
+
+            return doc;
+          });
+
+        const promise = new Promise((resolve, reject) => {
+          this.db.collection(tableName).insertMany(testDataInsert, err => {
             if (err) {
               throw err;
             }
-            done();
-          }
-        );
+            resolve();
+          });
+        });
+
+        return promise;
+      });
+
+      return Promise.all(dataInsertPromises);
     });
 
     describe('overview', () => {
