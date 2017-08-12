@@ -5,7 +5,8 @@
 require('dotenv').config();
 const config = require('./config.js');
 
-const router = require('express').Router();
+const Router = require('express').Router;
+const router = new Router();
 
 const user = require('./user.js');
 const data = require('./data.js');
@@ -31,7 +32,7 @@ function api(db) {
         if (status) {
           return next();
         }
-        res.status(403).json({
+        return res.status(403).json({
           error: true,
           errorText: config.msg.errorNotAuthorized
         });

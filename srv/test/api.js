@@ -6,8 +6,8 @@
 
 require('dotenv').config();
 process.env.IP_BAN_TIME = 0.5;
-process.env.IP_BAN_LIMIT=2;
-process.env.IP_BAN_TRIES=2;
+process.env.IP_BAN_LIMIT = 2;
+process.env.IP_BAN_TRIES = 2;
 
 const config = require('../config.js');
 
@@ -15,7 +15,7 @@ const expect = require('chai').expect;
 const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
-const request = require('request');
+const request = require('request-promise-native');
 const requestJson = require('request-json');
 const MongoClient = require('mongodb').MongoClient;
 
@@ -27,23 +27,13 @@ const apiPort = parseInt(process.env.PORT_WDS, 10) + 2;
 
 const user = require('../user.js');
 
-let testData;
-try {
-  testData = require('./apiTestData.json');
-}
-catch (err) {
-  console.log('Please put some test data in srv/test/apiTestData.json. You can get this data by running the API endpoint `data/all`.');
-
-  process.exit();
-}
-
 describe('Backend API', () => {
   before(done => {
     // connect to the database
     if (this.db) {
       return done();
     }
-    MongoClient.connect(config.mongoUri, (err, db) => {
+    return MongoClient.connect(config.mongoUri, (err, db) => {
       expect(err).to.be.equal(null);
       this.db = db;
       done();
@@ -60,17 +50,23 @@ describe('Backend API', () => {
   });
 
   it('should connect to the database', () => {
-      expect(this.db).to.be.ok;
+    expect(this.db).to.be.ok;
   });
 
   it('should handle GET requests like ?t=some/task', done => {
     this.api.get('?t=foo/bar', (err, res, result) => {
+      if (err) {
+        throw err;
+      }
       expect(result.url).to.be.equal('/foo/bar');
       done();
     });
   });
   it('should handle POST requests like ?t=some/task', done => {
     this.api.post('?t=bar/baz', {}, (err, res, result) => {
+      if (err) {
+        throw err;
+      }
       expect(result.url).to.be.equal('/bar/baz');
       done();
     });
@@ -99,65 +95,114 @@ describe('Backend API', () => {
     });
     it('should have a method for adding users');
 
-    it('should handle bad logins', done => {
-      this.api.post(`${this.url}login`, { form: { pin: 1000 } }, (err, res, result) => {
-        expect(err).to.be.equal(null);
-        expect(res.statusCode).to.be.equal(403);
-        expect(result.error).to.be.equal(true);
-        expect(result.errorMessage).to.be.equal(config.msg.errorLoginBad);
-        done();
+    const loginRequestOptions = (url, bad) => {
+      return {
+        method: 'POST',
+        uri: `${url}login`,
+        form: {
+          pin: bad ? 1000 : 1234
+        },
+        json: true,
+        resolveWithFullResponse: true,
+        simple: false
+      };
+    };
+
+    const badLoginResponseTest = res => {
+      expect(res.statusCode).to.be.equal(403);
+      expect(res.body).to.deep.equal({
+        error: true,
+        errorMessage: config.msg.errorLoginBad
       });
+      return Promise.resolve(res);
+    };
+
+    const bannedResponseTest = res => {
+      expect(res.body).to.be.deep.equal({
+        error: true,
+        errorMessage: config.msg.errorIpBanned
+      });
+      return Promise.resolve(res);
+    };
+
+    const goodLoginResponseTest = res => {
+      expect(res.body.error).to.be.equal(false);
+      return Promise.resolve(res);
+    };
+
+    it('should handle bad logins', done => {
+      const badLogin = loginRequestOptions(this.url, true);
+
+      request(badLogin)
+        .then(badLoginResponseTest)
+        .then(() => done())
+        .catch(err => {
+          throw err;
+        });
     });
 
     it('should throttle bad logins', done => {
-      request.post(`${this.url}login`, { form: { pin: 1000 } }, (err, res, body) => {
-        expect(err).to.be.equal(null);
-        expect(res.statusCode).to.be.equal(403);
-        const result = JSON.parse(body);
-        expect(result.error).to.be.equal(true);
-        expect(result.errorMessage).to.be.equal(config.msg.errorLoginBad);
+      const badLogin = loginRequestOptions(this.url, true);
+      const goodLogin = loginRequestOptions(this.url, false);
 
-        request.post(`${this.url}login`, { form: { pin: 1234 } }, (err, res, body) => {
-          // we've made bad requests, so should be banned now
-          expect(err).to.be.equal(null);
-          expect(res.statusCode).to.be.equal(403);
-          const result = JSON.parse(body);
-          expect(result.error).to.be.equal(true);
-          expect(result.errorMessage).to.be.equal(config.msg.errorIpBanned);
-
+      request(badLogin)
+        .then(badLoginResponseTest)
+        .then(() => {
+          // make another bad login, to trigger the automatic throttler
+          return request(badLogin);
+        })
+        .then(badLoginResponseTest)
+        .then(() => {
+          // make a good login; we should be banned at this point
+          return request(goodLogin);
+        })
+        .then(bannedResponseTest)
+        .then(() => {
+          // wait for the ban to expire, then test that we're not banned
+          // by making another good login
           setTimeout(() => {
-            request.post(`${this.url}login`, { form: { pin: 1234 } }, (err, res, body) => {
-              // we've waited for the ban to expire, so should be let in with the correct PIN
-              expect(err).to.be.equal(null);
-              const result = JSON.parse(body);
-              expect(result.error).to.be.equal(false);
-              done();
-            });
+            request(goodLogin)
+              .then(res => {
+                goodLoginResponseTest(res);
+                done();
+              })
+              .catch(err => {
+                throw err;
+              });
           }, 800);
+        })
+        .catch(err => {
+          throw err;
         });
-      });
     });
 
     describe('good login', () => {
+      let goodLoginResult = null;
+
       before(done => {
-        request.post(`${this.url}login`, { form: { pin: 1234 } }, (err, res, result) => {
-          expect(err).to.be.equal(null);
-          this.goodLoginResult = JSON.parse(result);
-          done();
-        });
+        const goodLogin = loginRequestOptions(this.url, false);
+        request(goodLogin)
+          // .then(goodLoginResponseTest)
+          .then(res => {
+            goodLoginResult = res.body;
+            done();
+          })
+          .catch(err => {
+            throw err;
+          });
       });
 
       it('should return an error status of false', () => {
-        expect(this.goodLoginResult.error).to.be.equal(false);
+        expect(goodLoginResult.error).to.be.equal(false);
       });
       it('should return a token', () => {
-        expect(this.goodLoginResult.api_key).to.be.a('string').of.length(40); // sha-1 length
+        expect(goodLoginResult.api_key).to.be.a('string').of.length(40); // sha-1 length
       });
       it('should return a uid', () => {
-        expect(this.goodLoginResult.uid).to.be.a('number');
+        expect(goodLoginResult.uid).to.be.a('number');
       });
       it('should return a name', () => {
-        expect(this.goodLoginResult.name).to.be.a('string').of.length.greaterThan(0);
+        expect(goodLoginResult.name).to.be.a('string').of.length.greaterThan(0);
       });
     });
 
@@ -170,10 +215,18 @@ describe('Backend API', () => {
 
   describe('data methods', () => {
     before(done => {
+      let testData;
+      try {
+        testData = require('./apiTestData.json');
+      }
+      catch (err) {
+        throw new Error('Please put some test data in srv/test/apiTestData.json. ' +
+                        'You can get this data by running the API endpoint `data/all`.');
+      }
+
       this.db.collection('bills')
         .insertMany(
-          /*
-          testData.data.bills.map(row => {
+          testData.data.bills.data.map(row => {
             return {
               item: row.i,
               cost: row.c,
@@ -181,15 +234,6 @@ describe('Backend API', () => {
               uid: 1
             };
           })
-          */
-          [
-            {
-              item: 'Should see this',
-              cost: 150,
-              date: [2017, 7, 3],
-              uid: 1
-            }
-          ]
           .concat([
             {
               item: 'Should not see this',
@@ -311,5 +355,4 @@ describe('Backend API', () => {
     this.server.close(done);
   });
 });
-
 

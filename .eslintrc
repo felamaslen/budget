@@ -121,7 +121,7 @@
     "yoda": [1, "never"],
 
     /* Strict Mode */
-    "strict": [1, "never"],
+    "strict": 0,
 
     /* Variables */
     "no-catch-shadow": 0,
