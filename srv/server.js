@@ -62,7 +62,10 @@ function serverApp() {
         res.status(404).send('File not found');
       });
 
-      resolve(app);
+      const port = process.env.PORT || 3000;
+      app.listen(port);
+
+      resolve({ port, app, db });
     });
   });
 }
