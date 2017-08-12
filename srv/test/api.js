@@ -15,15 +15,14 @@ process.env.DEBUG = false;
 const config = require('../config.js');
 
 const expect = require('chai').expect;
+require('it-each')();
 const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
 const request = require('request-promise-native');
-const requestJson = require('request-json');
 const MongoClient = require('mongodb').MongoClient;
 
 const serverApp = require('../server.js');
-const api = require('../api.js');
 
 const user = require('../user.js');
 
@@ -33,28 +32,43 @@ describe('Backend API', () => {
     serverApp().then(server => {
       this.db = server.db;
       this.url = `http://localhost:${server.port}/`;
-      this.api = requestJson.createClient(`${this.url}api/`);
       done();
     });
   });
 
   it('should handle GET requests like ?t=some/task', done => {
-    this.api.get('?t=foo/bar', (err, res, result) => {
-      if (err) {
+    const taskParameterTestGet = {
+      url: `${this.url}api?t=foo/bar`,
+      json: true,
+      simple: false
+    };
+
+    request(taskParameterTestGet)
+      .then(result => {
+        expect(result.url).to.be.equal('/foo/bar');
+        done();
+      })
+      .catch(err => {
         throw err;
-      }
-      expect(result.url).to.be.equal('/foo/bar');
-      done();
-    });
+      });
   });
   it('should handle POST requests like ?t=some/task', done => {
-    this.api.post('?t=bar/baz', {}, (err, res, result) => {
-      if (err) {
+    const taskParameterTestPost = {
+      method: 'POST',
+      url: `${this.url}api?t=bar/baz`,
+      form: {},
+      json: true,
+      simple: false
+    };
+
+    request(taskParameterTestPost)
+      .then(result => {
+        expect(result.url).to.be.equal('/bar/baz');
+        done();
+      })
+      .catch(err => {
         throw err;
-      }
-      expect(result.url).to.be.equal('/bar/baz');
-      done();
-    });
+      });
   });
 
   describe('user login', () => {
@@ -83,7 +97,7 @@ describe('Backend API', () => {
     const loginRequestOptions = (url, bad) => {
       return {
         method: 'POST',
-        uri: `${url}api/login`,
+        url: `${url}api/login`,
         form: {
           pin: bad ? 1000 : 1234
         },
@@ -201,9 +215,8 @@ describe('Backend API', () => {
   describe('data methods', () => {
     before(() => {
       // fill the database with test data
-      let testData;
       try {
-        testData = require('./apiTestData.json');
+        this.testData = require('./apiTestData.json');
       }
       catch (err) {
         throw new Error('Please put some test data in srv/test/apiTestData.json. ' +
@@ -223,8 +236,8 @@ describe('Backend API', () => {
         const tableName = table[0];
         const columns = table[1];
 
-        const testDataInsert = testData.data[tableName].data
-          .slice(0, 100)
+        const testDataInsert = this.testData.data[tableName].data
+          .slice(0, 10)
           .map(row => {
             const doc = {};
 
@@ -252,14 +265,59 @@ describe('Backend API', () => {
       return Promise.all(dataInsertPromises);
     });
 
+    const dataRequest = (url, type, authToken, path, handleError) => {
+      const options = {
+        url: `${url}api/data/${type}`,
+        json: true,
+        resolveWithFullResponse: true,
+        simple: !handleError
+      };
+
+      if (authToken) {
+        options.headers = {
+          Authorization: authToken
+        };
+      }
+
+      if (path) {
+        options.url += path;
+      }
+
+      return options;
+    };
+
+    const authTestTypes = [
+      { type: 'overview' },
+      { type: 'analysis' },
+      { type: 'funds' },
+      { type: 'income' },
+      { type: 'bills' },
+      { type: 'food' },
+      { type: 'general' },
+      { type: 'holiday' },
+      { type: 'social' },
+      { type: 'search' }
+    ];
+
+    it.each(authTestTypes, '%s should require authentication', ['type'], (element, next) => {
+      request(dataRequest(this.url, element, null, null, true))
+        .then(res => {
+          expect(res.statusCode).to.be.equal(403); // haven't provided authentication token
+          expect(res.body.error).to.be.equal(true);
+          expect(res.body.errorText).to.be.equal(config.msg.errorNotAuthorized);
+          next();
+        })
+        .catch(err => {
+          throw err;
+        });
+    });
+
     describe('overview', () => {
-      it('should require authentication');
       it('should return valid data');
       it('should update data');
     });
 
     describe('analysis', () => {
-      it('should require authentication');
       it('should be handled');
       it('should paginate');
       describe('time period', () => {
@@ -277,7 +335,6 @@ describe('Backend API', () => {
     });
 
     describe('funds', () => {
-      it('should require authentication');
       it('should get data without history');
       it('should get data with history');
       it('should get data with history limited by period');
@@ -289,51 +346,50 @@ describe('Backend API', () => {
     });
 
     describe('income', () => {
-      it('should require authentication');
-      it('should get data');
+      it('should get data', done => {
+        request(dataRequest(this.url, 'income', this.token))
+          .then(result => {
+            console.log('testData', this.testData);
+            expect(result.data.total).to.be.a('number');
+            expect(result.data.data).to.be.an('array').of.length.greaterThan(0);
+            expect(result.data.data[0].I).to.be.a('number'); // id
+            expect(result.data.data[0].i).to.be.a('string'); // item
+            expect(result.data.data[0].c).to.be.a('number'); // cost
+            expect(result.data.data[0].d).to.be.an('array').lengthOf(3); // date
+            done();
+          })
+          .catch(err => {
+            throw err;
+          });
+      });
       it('should insert data');
     });
     describe('bills', () => {
-      it('should require authentication', done => {
-        this.api.get('data/bills', (err, res, body) => {
-          expect(err).to.not.be.ok;
-          expect(res.statusCode).to.be.equal(403); // haven't provided authentication token
-          expect(body.error).to.be.equal(true);
-          expect(body.errorText).to.be.equal(config.msg.errorNotAuthorized);
-          done();
-        });
-      });
       it('should get data');
       it('should insert data');
     });
     describe('food', () => {
-      it('should require authentication');
       it('should get data');
       it('should insert data');
     });
     describe('general', () => {
-      it('should require authentication');
       it('should get data');
       it('should insert data');
     });
     describe('holiday', () => {
-      it('should require authentication');
       it('should get data');
       it('should insert data');
     });
     describe('social', () => {
-      it('should require authentication');
       it('should get data');
       it('should insert data');
     });
 
     describe('search', () => {
-      it('should require authentication');
       it('should get data');
     });
 
     describe('all', () => {
-      it('should require authentication');
       it('should get all data');
     });
 
