@@ -16,11 +16,7 @@ const config = require('../config.js');
 
 const expect = require('chai').expect;
 require('it-each')();
-const express = require('express');
-const bodyParser = require('body-parser');
-const http = require('http');
 const request = require('request-promise-native');
-const MongoClient = require('mongodb').MongoClient;
 
 const serverApp = require('../server.js');
 
@@ -75,7 +71,12 @@ describe('Backend API', () => {
     before(done => {
       // create a test user
       this.token = user.generateToken(1234);
-      this.db.collection('users')
+
+      if (process.env.NO_INSERT) {
+        return done();
+      }
+
+      return this.db.collection('users')
         .insert({
           uid: 1,
           email: 'someone@example.com',
@@ -207,13 +208,19 @@ describe('Backend API', () => {
 
     // clean up data
     after(() => {
-      this.db.collection('users').drop();
+      if (!process.env.NO_DROP) {
+        this.db.collection('users').drop();
+      }
       this.db.collection('ipBan').drop();
     });
   });
 
   describe('data methods', () => {
     before(() => {
+      if (process.env.NO_INSERT) {
+        return Promise.resolve(true);
+      }
+
       // fill the database with test data
       try {
         this.testData = require('./apiTestData.json');
@@ -250,7 +257,7 @@ describe('Backend API', () => {
             return doc;
           });
 
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise(resolve => {
           this.db.collection(tableName).insertMany(testDataInsert, err => {
             if (err) {
               throw err;
@@ -300,7 +307,7 @@ describe('Backend API', () => {
     ];
 
     it.each(authTestTypes, '%s should require authentication', ['type'], (element, next) => {
-      request(dataRequest(this.url, element, null, null, true))
+      request(dataRequest(this.url, element.type, null, null, true))
         .then(res => {
           expect(res.statusCode).to.be.equal(403); // haven't provided authentication token
           expect(res.body.error).to.be.equal(true);
@@ -346,22 +353,49 @@ describe('Backend API', () => {
     });
 
     describe('income', () => {
-      it('should get data', done => {
+      let result = null;
+
+      before(done => {
         request(dataRequest(this.url, 'income', this.token))
-          .then(result => {
-            console.log('testData', this.testData);
-            expect(result.data.total).to.be.a('number');
-            expect(result.data.data).to.be.an('array').of.length.greaterThan(0);
-            expect(result.data.data[0].I).to.be.a('number'); // id
-            expect(result.data.data[0].i).to.be.a('string'); // item
-            expect(result.data.data[0].c).to.be.a('number'); // cost
-            expect(result.data.data[0].d).to.be.an('array').lengthOf(3); // date
+          .then(res => {
+            result = res.body;
             done();
           })
           .catch(err => {
             throw err;
           });
       });
+
+      it('should retrieve data', () => {
+        expect(result).to.be.an('object');
+        expect(result.error).to.be.equal(false);
+        expect(result.data).to.be.an('object');
+
+        expect(result.data.total).to.be.a('number');
+        expect(result.data.data).to.be.an('array').of.length.greaterThan(0);
+
+        const now = new Date();
+        const nowYear = now.getFullYear();
+        const nowMonth = now.getMonth();
+
+        const item = result.data.data[0];
+        expect(item).to.be.an('object');
+        expect(item.I).to.be.a('string'); // id
+        expect(item.i).to.be.a('string'); // item
+        expect(item.c).to.be.a('number'); // cost
+        expect(item.d).to.be.an('array').lengthOf(3); // date
+
+        // make sure the date is in the past three months
+        const year = result.data.data[0].d[0];
+        const month = result.data.data[0].d[1];
+
+        const monthsOld = nowMonth - month + 12 * (nowYear - year);
+
+        // can get data from the arbitrary future, but no more than
+        // three months in the past
+        expect(monthsOld).to.be.lessThan(3);
+      });
+
       it('should insert data');
     });
     describe('bills', () => {
@@ -395,13 +429,15 @@ describe('Backend API', () => {
 
     after(()=> {
       // clean up data
-      this.db.collection('funds').drop();
-      this.db.collection('income').drop();
-      this.db.collection('bills').drop();
-      this.db.collection('food').drop();
-      this.db.collection('general').drop();
-      this.db.collection('holiday').drop();
-      this.db.collection('social').drop();
+      if (!process.env.NO_DROP) {
+        this.db.collection('funds').drop();
+        this.db.collection('income').drop();
+        this.db.collection('bills').drop();
+        this.db.collection('food').drop();
+        this.db.collection('general').drop();
+        this.db.collection('holiday').drop();
+        this.db.collection('social').drop();
+      }
     });
   });
 });

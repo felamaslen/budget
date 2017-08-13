@@ -54,13 +54,10 @@ function apiPostLogin(req, res, db) {
       if (banned) {
         const banExpired = new Date().getTime() - log.time > banTime;
         if (!banExpired) {
-          db.collection('ipBan').find({}).toArray((err, bans) => {
-            res.status(403).json({
-              error: true,
-              errorMessage: config.msg.errorIpBanned
-            });
+          return res.status(403).json({
+            error: true,
+            errorMessage: config.msg.errorIpBanned
           });
-          return;
         }
         db.collection('ipBan').remove({ ip });
       }
@@ -72,13 +69,12 @@ function apiPostLogin(req, res, db) {
         const uid = user.uid;
         const name = user.name;
 
-        res.json({
+        return res.json({
           error,
           'api_key': apiKey,
           uid,
           name
         });
-        return;
       }
 
       const newCount = !logExpired && !banned
@@ -91,7 +87,7 @@ function apiPostLogin(req, res, db) {
         count: newCount
       }, { upsert: true });
 
-      res.status(403).json({
+      return res.status(403).json({
         error: true,
         errorMessage: config.msg.errorLoginBad
       });

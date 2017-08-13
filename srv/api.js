@@ -25,7 +25,7 @@ function api(db) {
   router.post('/login', (req, res) => user.apiPostLogin(req, res, db));
 
   router.get('/data/*', (req, res, next) => {
-    const basicAuthToken = req.authorization;
+    const basicAuthToken = req.headers.authorization;
     user
       .checkAuthToken(basicAuthToken, db)
       .then(status => {
@@ -41,7 +41,12 @@ function api(db) {
         throw new Error(err);
       });
   });
-  router.get('/data/bills', new data.ApiDataGetBills(db).run);
+
+  const dataRoutes = {
+    income: new data.ApiDataGetIncome(db)
+  };
+
+  router.get('/data/income', (req, res) => dataRoutes.income.run(req, res));
 
   router.use((req, res) => {
     // catch-all api endpoint
