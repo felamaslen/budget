@@ -19,6 +19,9 @@ function connectToDatabase() {
       console.log('Connecting to database...');
     }
     MongoClient.connect(config.mongoUri, (err, db) => {
+      if (config.debug) {
+        console.log('Connected!');
+      }
       if (err) {
         throw new Error('Couldn\'t connect to database');
       }
