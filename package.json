@@ -62,7 +62,8 @@
     "start": "./node_modules/.bin/gulp server",
     "dev": "./node_modules/.bin/gulp dev",
     "postinstall": "./node_modules/.bin/gulp build",
-    "test": "./node_modules/.bin/gulp lint && ./node_modules/.bin/mocha test.js --reporter spec"
+    "lint": "./node_modules/.bin/gulp lint",
+    "test": "./node_modules/.bin/mocha test.js --bail --reporter spec"
   },
   "repository": {
     "type": "git",
