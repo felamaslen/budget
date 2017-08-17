@@ -9,78 +9,78 @@ import PureControllerView from '../PureControllerView';
 import { aEditableActivated, aEditableChanged } from '../../actions/EditActions';
 
 export default class Editable extends PureControllerView {
-  constructor(props) {
-    super(props);
-    this.inputProps = { type: 'text' };
-  }
-  activate() {
-    this.dispatchAction(aEditableActivated(map({
-      row: this.props.row,
-      col: this.props.col,
-      pageIndex: this.props.pageIndex,
-      id: this.props.id,
-      item: this.props.item,
-      value: this.props.value
-    })));
-  }
-  componentDidUpdate(prevProps) {
-    if ((!prevProps.active && this.props.active) ||
+    constructor(props) {
+        super(props);
+        this.inputProps = { type: 'text' };
+    }
+    activate() {
+        this.dispatchAction(aEditableActivated(map({
+            row: this.props.row,
+            col: this.props.col,
+            pageIndex: this.props.pageIndex,
+            id: this.props.id,
+            item: this.props.item,
+            value: this.props.value
+        })));
+    }
+    componentDidUpdate(prevProps) {
+        if ((!prevProps.active && this.props.active) ||
         (!prevProps.focus && this.props.focus)) {
-      window.setTimeout(() => {
-        this.input && this.input.focus && this.input.focus();
-      }, 0);
+            window.setTimeout(() => {
+                this.input && this.input.focus && this.input.focus();
+            }, 0);
+        }
     }
-  }
-  format() {
-    return this.props.value;
-  }
-  getDefaultValue() {
-    return this.format();
-  }
-  getEditValue(rawInputValue) {
-    return rawInputValue;
-  }
-  renderValue() {
-    const thisClassName = `editable editable-${this.editableType}`;
-    return (
-      <span className={thisClassName} onMouseDown={() => this.activate()}>
-        {this.format()}
-      </span>
-    );
-  }
-  handleChange(evt) {
-    this.dispatchAction(aEditableChanged(this.getEditValue(evt.target.value)));
-  }
-  afterInput() {
-    return null;
-  }
-  renderInput() {
-    return (
-      <span>
-        <input className='editable-input' {...this.inputProps}
-          defaultValue={this.getDefaultValue()}
-          ref={input => { this.input = input; }}
-          onChange={evt => this.handleChange(evt)}
-        />
-        {this.afterInput()}
-      </span>
-    );
-  }
-  render() {
-    if (this.props.active) {
-      return this.renderInput();
+    format() {
+        return this.props.value;
     }
-    return this.renderValue();
-  }
+    getDefaultValue() {
+        return this.format();
+    }
+    getEditValue(rawInputValue) {
+        return rawInputValue;
+    }
+    renderValue() {
+        const thisClassName = `editable editable-${this.editableType}`;
+        return (
+            <span className={thisClassName} onMouseDown={() => this.activate()}>
+                {this.format()}
+            </span>
+        );
+    }
+    handleChange(evt) {
+        this.dispatchAction(aEditableChanged(this.getEditValue(evt.target.value)));
+    }
+    afterInput() {
+        return null;
+    }
+    renderInput() {
+        return (
+            <span>
+                <input className='editable-input' {...this.inputProps}
+                    defaultValue={this.getDefaultValue()}
+                    ref={input => { this.input = input; }}
+                    onChange={evt => this.handleChange(evt)}
+                />
+                {this.afterInput()}
+            </span>
+        );
+    }
+    render() {
+        if (this.props.active) {
+            return this.renderInput();
+        }
+        return this.renderValue();
+    }
 }
 
 Editable.propTypes = {
-  active: PropTypes.bool,
-  row: PropTypes.number,
-  col: PropTypes.number,
-  pageIndex: PropTypes.number,
-  id: PropTypes.number,
-  item: PropTypes.string,
-  value: PropTypes.string
+    active: PropTypes.bool,
+    row: PropTypes.number,
+    col: PropTypes.number,
+    pageIndex: PropTypes.number,
+    id: PropTypes.number,
+    item: PropTypes.string,
+    value: PropTypes.string
 };
 

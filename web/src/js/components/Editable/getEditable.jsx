@@ -22,28 +22,28 @@ import EditableTransactions from './EditableTransactions';
  * @returns {Editable}: the correct editable react component class
  */
 export const getEditable = (
-  dispatcher, row, col, id, item, value, pageIndex, active, suggestions
+    dispatcher, row, col, id, item, value, pageIndex, active, suggestions
 ) => {
-  switch (item) {
-  case 'date':
-    return <EditableDate dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
+    switch (item) {
+    case 'date':
+        return <EditableDate dispatcher={dispatcher} row={row} col={col}
+            id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
 
-  case 'cost':
-    if (!value) {
-      value = 0;
+    case 'cost':
+        if (!value) {
+            value = 0;
+        }
+        return <EditableCost dispatcher={dispatcher} row={row} col={col}
+            id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
+
+    case 'transactions':
+        return <EditableTransactions dispatcher={dispatcher} row={row} col={col}
+            id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
+
+    default:
+        return <EditableText dispatcher={dispatcher} row={row} col={col}
+            id={id} item={item} value={value} pageIndex={pageIndex} active={active}
+            suggestions={suggestions} />;
     }
-    return <EditableCost dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
-
-  case 'transactions':
-    return <EditableTransactions dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
-
-  default:
-    return <EditableText dispatcher={dispatcher} row={row} col={col}
-      id={id} item={item} value={value} pageIndex={pageIndex} active={active}
-      suggestions={suggestions} />;
-  }
 };
 

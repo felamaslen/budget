@@ -11,42 +11,42 @@ import { aSuggestionsRequested } from '../../actions/EditActions';
 import debounce from '../../misc/debounce';
 
 export default class EditableText extends Editable {
-  constructor(props) {
-    super(props);
-    this.editableType = 'text';
-    this.loadSuggestions = debounce(this.loadSuggestions, 100, false, this);
-  }
-  loadSuggestions(value) {
-    this.dispatchAction(aSuggestionsRequested(value));
-  }
-  handleChange(evt) {
-    super.handleChange(evt);
-    // load suggestions
-    if (this.props.suggestions) {
-      this.loadSuggestions(evt.target.value);
+    constructor(props) {
+        super(props);
+        this.editableType = 'text';
+        this.loadSuggestions = debounce(this.loadSuggestions, 100, false, this);
     }
-  }
-  afterInput() {
-    if (!this.props.active || !this.props.suggestions ||
+    loadSuggestions(value) {
+        this.dispatchAction(aSuggestionsRequested(value));
+    }
+    handleChange(evt) {
+        super.handleChange(evt);
+        // load suggestions
+        if (this.props.suggestions) {
+            this.loadSuggestions(evt.target.value);
+        }
+    }
+    afterInput() {
+        if (!this.props.active || !this.props.suggestions ||
         !this.props.suggestions.size) {
-      return null;
+            return null;
+        }
+        return (
+            <ul className='suggestions'>
+                {this.props.suggestions.get('list').map((item, key) => {
+                    const classes = classNames({
+                        suggestion: true,
+                        active: this.props.suggestions.get('active') === key
+                    });
+                    return <li key={key} className={classes}>{item}</li>;
+                })}
+            </ul>
+        );
     }
-    return (
-      <ul className='suggestions'>
-        {this.props.suggestions.get('list').map((item, key) => {
-          const classes = classNames({
-            suggestion: true,
-            active: this.props.suggestions.get('active') === key
-          });
-          return <li key={key} className={classes}>{item}</li>;
-        })}
-      </ul>
-    );
-  }
 }
 
 EditableText.propTypes = {
-  value: PropTypes.string,
-  suggestions: PropTypes.instanceOf(map)
+    value: PropTypes.string,
+    suggestions: PropTypes.instanceOf(map)
 };
 
