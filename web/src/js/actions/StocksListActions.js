@@ -5,10 +5,10 @@
 import buildMessage from '../messageBuilder';
 
 import {
-  AC_STOCKS_LIST_REQUESTED,
-  AC_STOCKS_LIST_RECEIVED,
-  AC_STOCKS_PRICES_REQUESTED,
-  AC_STOCKS_PRICES_RECEIVED
+    AC_STOCKS_LIST_REQUESTED,
+    AC_STOCKS_LIST_RECEIVED,
+    AC_STOCKS_PRICES_REQUESTED,
+    AC_STOCKS_PRICES_RECEIVED
 } from '../constants/actions';
 
 export const aStocksListRequested = () => buildMessage(AC_STOCKS_LIST_REQUESTED);

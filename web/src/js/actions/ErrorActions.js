@@ -4,7 +4,7 @@
 
 import buildMessage from '../messageBuilder';
 import {
-  AC_ERROR_OPEN, AC_ERROR_CLOSE, AC_ERROR_REMOVE, AC_ERRORS_TIMEDOUT
+    AC_ERROR_OPEN, AC_ERROR_CLOSE, AC_ERROR_REMOVE, AC_ERRORS_TIMEDOUT
 } from '../constants/actions';
 
 export const aErrorOpened = message => buildMessage(AC_ERROR_OPEN, message);

@@ -4,22 +4,22 @@
  */
 
 export default (callback, delay, immediate, context = this) => {
-  let timer = null;
-  let args = null;
-  let runOnce = false;
+    let timer = null;
+    let args = null;
+    let runOnce = false;
 
-  const later = () => callback.apply(context, args);
+    const later = () => callback.apply(context, args);
 
-  return function delayed() {
-    args = arguments;
-    if (immediate && !runOnce) {
-      later();
-      runOnce = true;
-    }
-    else {
-      clearTimeout(timer);
-      timer = setTimeout(later, delay);
-    }
-  };
+    return function delayed() {
+        args = arguments;
+        if (immediate && !runOnce) {
+            later();
+            runOnce = true;
+        }
+        else {
+            clearTimeout(timer);
+            timer = setTimeout(later, delay);
+        }
+    };
 };
 

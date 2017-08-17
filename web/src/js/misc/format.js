@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 import {
-  SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW
+    SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW
 } from './config';
 
 const percent = frac => `${100 * frac}%`;
@@ -13,143 +13,143 @@ const percent = frac => `${100 * frac}%`;
  * class to visualise data as a bunch of squares
  */
 export class BlockPacker {
-  constructor(data, width, height) {
-    this.data = data;
+    constructor(data, width, height) {
+        this.data = data;
 
-    this.width = width;
-    this.height = height;
+        this.width = width;
+        this.height = height;
 
-    this.numBlockColors = 16;
-    this.colorOffset = this.data.reduce((a, b) => a + (b.get('total') & 1), 0);
+        this.numBlockColors = 16;
+        this.colorOffset = this.data.reduce((a, b) => a + (b.get('total') & 1), 0);
 
-    this.total = data.reduce((a, b) => a + b.get('total'), 0);
-    const totalArea = width * height;
+        this.total = data.reduce((a, b) => a + b.get('total'), 0);
+        const totalArea = width * height;
 
-    this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
-    this.blocks = list.of();
-    this.root = { x: 0, y: 0, w: width, h: height };
+        this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
+        this.blocks = list.of();
+        this.root = { x: 0, y: 0, w: width, h: height };
 
-    const row = list.of();
-    this.rowCount = 0;
+        const row = list.of();
+        this.rowCount = 0;
 
-    this.squarify(this.tree, row, this.root);
-  }
-  squarify(children, row, node) {
-    if (!children.size) {
-      return;
+        this.squarify(this.tree, row, this.root);
     }
-    const row2 = row.push(children.first());
-    if (children.size === 1 && row.size === 0) {
-      // use all the remaining space for the last child
-      this.addNode(children, node);
+    squarify(children, row, node) {
+        if (!children.size) {
+            return;
+        }
+        const row2 = row.push(children.first());
+        if (children.size === 1 && row.size === 0) {
+            // use all the remaining space for the last child
+            this.addNode(children, node);
+        }
+        else if (this.worst(row, node) >= this.worst(row2, node)) {
+            this.squarify(children.shift(), row2, node);
+        }
+        else {
+            const newNode = this.addNode(row, node);
+            this.squarify(children, list.of(), newNode);
+        }
     }
-    else if (this.worst(row, node) >= this.worst(row2, node)) {
-      this.squarify(children.shift(), row2, node);
-    }
-    else {
-      const newNode = this.addNode(row, node);
-      this.squarify(children, list.of(), newNode);
-    }
-  }
-  addNode(row, node) {
+    addNode(row, node) {
     // returns a new node (the rest of the available space)
-    const wide = node.w > node.h;
+        const wide = node.w > node.h;
 
-    let freeX = node.x;
-    let freeY = node.y; // measured from bottom
+        let freeX = node.x;
+        let freeY = node.y; // measured from bottom
 
-    let freeWidth = node.w;
-    let freeHeight = node.h;
+        let freeWidth = node.w;
+        let freeHeight = node.h;
 
-    let blockWidth = node.w;
-    let blockHeight = node.h;
+        let blockWidth = node.w;
+        let blockHeight = node.h;
 
-    const sum = row.reduce((a, b) => a + b, 0);
+        const sum = row.reduce((a, b) => a + b, 0);
 
-    if (wide) {
-      blockWidth = sum / node.h;
-      freeWidth -= blockWidth;
-      freeX += blockWidth;
+        if (wide) {
+            blockWidth = sum / node.h;
+            freeWidth -= blockWidth;
+            freeX += blockWidth;
+        }
+        else {
+            blockHeight = sum / node.w;
+            freeHeight -= blockHeight;
+            freeY += blockHeight;
+        }
+
+        // add row's blocks
+        const newNode = {
+            x: freeX,
+            y: freeY,
+            w: freeWidth,
+            h: freeHeight
+        };
+
+        const newBlockBits = row.map(item => {
+            const thisBlockWidth = wide ? 1 : (item / sum);
+
+            const thisBlockHeight = wide ? (item / sum) : 1;
+
+            const j = this.rowCount++;
+
+            const name = this.data.getIn([j, 'name']);
+            const color = (j + this.colorOffset) % this.numBlockColors;
+            const value = this.data.getIn([j, 'total']);
+            const newBlockBit = map({
+                width: percent(thisBlockWidth),
+                height: percent(thisBlockHeight),
+                name,
+                color,
+                value
+            });
+
+            if (this.data.getIn([j, 'subTree'])) {
+                const thisBlocks = new BlockPacker(
+                    this.data.getIn([j, 'subTree']),
+                    thisBlockWidth * blockWidth,
+                    thisBlockHeight * blockHeight
+                );
+                return newBlockBit.set('blocks', thisBlocks.blocks);
+            }
+            return newBlockBit;
+        });
+
+        const newBlock = map({
+            width: percent(blockWidth / this.width),
+            height: percent(blockHeight / this.height),
+            bits: newBlockBits
+        });
+
+        this.blocks = this.blocks.push(newBlock);
+
+        return newNode;
     }
-    else {
-      blockHeight = sum / node.w;
-      freeHeight -= blockHeight;
-      freeY += blockHeight;
-    }
-
-    // add row's blocks
-    const newNode = {
-      x: freeX,
-      y: freeY,
-      w: freeWidth,
-      h: freeHeight
-    };
-
-    const newBlockBits = row.map(item => {
-      const thisBlockWidth = wide ? 1 : (item / sum);
-
-      const thisBlockHeight = wide ? (item / sum) : 1;
-
-      const j = this.rowCount++;
-
-      const name = this.data.getIn([j, 'name']);
-      const color = (j + this.colorOffset) % this.numBlockColors;
-      const value = this.data.getIn([j, 'total']);
-      const newBlockBit = map({
-        width: percent(thisBlockWidth),
-        height: percent(thisBlockHeight),
-        name,
-        color,
-        value
-      });
-
-      if (this.data.getIn([j, 'subTree'])) {
-        const thisBlocks = new BlockPacker(
-          this.data.getIn([j, 'subTree']),
-          thisBlockWidth * blockWidth,
-          thisBlockHeight * blockHeight
-        );
-        return newBlockBit.set('blocks', thisBlocks.blocks);
-      }
-      return newBlockBit;
-    });
-
-    const newBlock = map({
-      width: percent(blockWidth / this.width),
-      height: percent(blockHeight / this.height),
-      bits: newBlockBits
-    });
-
-    this.blocks = this.blocks.push(newBlock);
-
-    return newNode;
-  }
-  worst(row, node) {
+    worst(row, node) {
     // row is a list of areas
-    if (row.size === 0) {
-      return Infinity;
-    }
+        if (row.size === 0) {
+            return Infinity;
+        }
 
-    const aspect = node.w / node.h;
-    const sum = row.reduce((a, b) => a + b, 0);
+        const aspect = node.w / node.h;
+        const sum = row.reduce((a, b) => a + b, 0);
 
-    if (aspect > 1) {
-      // wide, so fill the node from the left
-      const rowWidth = sum / node.h;
-      return row.reduce((a, b) => {
-        const thisAspect = rowWidth * rowWidth / b;
-        const worstAspect = Math.max(thisAspect, 1 / thisAspect);
-        return worstAspect > a ? worstAspect : a;
-      }, 0);
+        if (aspect > 1) {
+            // wide, so fill the node from the left
+            const rowWidth = sum / node.h;
+            return row.reduce((a, b) => {
+                const thisAspect = rowWidth * rowWidth / b;
+                const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+                return worstAspect > a ? worstAspect : a;
+            }, 0);
+        }
+        // tall, so fill the node from the bottom
+        const rowHeight = sum / node.w;
+        return row.reduce((a, b) => {
+            const thisAspect = b / (rowHeight * rowHeight);
+            const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+            return worstAspect > a ? worstAspect : a;
+        }, 0);
     }
-    // tall, so fill the node from the bottom
-    const rowHeight = sum / node.w;
-    return row.reduce((a, b) => {
-      const thisAspect = b / (rowHeight * rowHeight);
-      const worstAspect = Math.max(thisAspect, 1 / thisAspect);
-      return worstAspect > a ? worstAspect : a;
-    }, 0);
-  }
 }
 
 /**
@@ -158,7 +158,7 @@ export class BlockPacker {
  * @returns {string} capitalised string
  */
 export const capitalise = string => {
-  return string.substring(0, 1).toUpperCase() +
+    return string.substring(0, 1).toUpperCase() +
     string.substring(1).toLowerCase();
 };
 
@@ -169,8 +169,8 @@ export const capitalise = string => {
  * @returns {float} rounded value
  */
 const round = (value, precision) => {
-  const exp = Math.pow(10, precision);
-  return Math.round(exp * value) / exp;
+    const exp = Math.pow(10, precision);
+    return Math.round(exp * value) / exp;
 };
 
 /**
@@ -179,7 +179,7 @@ const round = (value, precision) => {
  * @returns {string} formatted number
  */
 export const numberFormat = value => {
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 
 /**
@@ -189,24 +189,24 @@ export const numberFormat = value => {
  * @returns {string} formatted number
  */
 export const sigFigs = (value, figs) => {
-  if (!value) {
-    return value.toFixed(figs - 1);
-  }
-  const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
-  const exp = Math.pow(10, Math.min(figs - 1, Math.max(0, figs - numDigits)));
-  const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
+    if (!value) {
+        return value.toFixed(figs - 1);
+    }
+    const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
+    const exp = Math.pow(10, Math.min(figs - 1, Math.max(0, figs - numDigits)));
+    const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
 
-  // add extra zeroes if necessary
-  const hasDot = absResult.indexOf('.') > -1;
-  const numDigitsVisible = absResult.length - (hasDot ? 1 : 0);
-  const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
-  const resultWithZeroes = numTrailingZeroes ?
-    absResult + (hasDot ? '' : '.') +
+    // add extra zeroes if necessary
+    const hasDot = absResult.indexOf('.') > -1;
+    const numDigitsVisible = absResult.length - (hasDot ? 1 : 0);
+    const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
+    const resultWithZeroes = numTrailingZeroes ?
+        absResult + (hasDot ? '' : '.') +
     Array.apply(null, new Array(numTrailingZeroes)).map(() => '0').join('')
-  : absResult;
+        : absResult;
 
-  const sign = value < 0 ? '-' : '';
-  return `${sign}${resultWithZeroes}`;
+    const sign = value < 0 ? '-' : '';
+    return `${sign}${resultWithZeroes}`;
 };
 
 /**
@@ -216,9 +216,9 @@ export const sigFigs = (value, figs) => {
  * @returns {string} formatted number
  */
 export const leadingZeroes = (value, numZeroes) => {
-  const numAdd = numZeroes - Math.floor(Math.log10(value)) - 1;
-  const zeroes = Array.apply(null, new Array(numAdd)).map(() => '0').join('');
-  return `${zeroes}${value}`;
+    const numAdd = numZeroes - Math.floor(Math.log10(value)) - 1;
+    const zeroes = Array.apply(null, new Array(numAdd)).map(() => '0').join('');
+    return `${zeroes}${value}`;
 };
 
 /**
@@ -228,64 +228,64 @@ export const leadingZeroes = (value, numZeroes) => {
  * @returns {string} formatted value
  */
 export const formatCurrency = (value, options) => {
-  if (!options) {
-    options = {};
-  }
-  if (!options.precision) {
-    options.precision = 0;
-  }
-  let output = '';
-  if (!options.brackets) {
-    const sign = value < 0 ? '\u2212' : '';
-    output += sign;
-  }
-  if (!options.noSymbol) {
-    const symbol = options.raw ? SYMBOL_CURRENCY_RAW : SYMBOL_CURRENCY_HTML;
-    output += symbol;
-  }
+    if (!options) {
+        options = {};
+    }
+    if (!options.precision) {
+        options.precision = 0;
+    }
+    let output = '';
+    if (!options.brackets) {
+        const sign = value < 0 ? '\u2212' : '';
+        output += sign;
+    }
+    if (!options.noSymbol) {
+        const symbol = options.raw ? SYMBOL_CURRENCY_RAW : SYMBOL_CURRENCY_HTML;
+        output += symbol;
+    }
 
-  const absValue = Math.abs(value) / 100;
-  let log = 0;
-  let abbreviation = '';
-  if (options.abbreviate && value !== 0) {
-    const abbr = ['k', 'm', 'bn', 'tn'];
-    log = Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length);
+    const absValue = Math.abs(value) / 100;
+    let log = 0;
+    let abbreviation = '';
+    if (options.abbreviate && value !== 0) {
+        const abbr = ['k', 'm', 'bn', 'tn'];
+        log = Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length);
+        if (log > 0) {
+            abbreviation = abbr[log - 1];
+        }
+    }
+    if (options.suffix) {
+        abbreviation += options.suffix;
+    }
+    let valueRaw;
     if (log > 0) {
-      abbreviation = abbr[log - 1];
+        valueRaw = absValue / Math.pow(10, log * 3);
+        if (options.abbreviate) {
+            valueRaw = round(valueRaw, options.precision);
+        }
     }
-  }
-  if (options.suffix) {
-    abbreviation += options.suffix;
-  }
-  let valueRaw;
-  if (log > 0) {
-    valueRaw = absValue / Math.pow(10, log * 3);
-    if (options.abbreviate) {
-      valueRaw = round(valueRaw, options.precision);
+    else {
+        valueRaw = absValue;
+        if (!options.noPence) {
+            valueRaw = valueRaw.toFixed(2);
+        }
     }
-  }
-  else {
-    valueRaw = absValue;
-    if (!options.noPence) {
-      valueRaw = valueRaw.toFixed(2);
+    if (options.noPence) {
+        valueRaw = round(valueRaw, log ? options.precision : 0);
     }
-  }
-  if (options.noPence) {
-    valueRaw = round(valueRaw, log ? options.precision : 0);
-  }
-  const formatted = numberFormat(valueRaw);
+    const formatted = numberFormat(valueRaw);
 
-  output += formatted + abbreviation;
-  if (options.brackets && value < 0) {
-    output = `(${output})`;
-  }
+    output += formatted + abbreviation;
+    if (options.brackets && value < 0) {
+        output = `(${output})`;
+    }
 
-  return output;
+    return output;
 };
 export const formatPercent = (frac, options) => {
-  options.suffix = '%';
-  options.noSymbol = true;
-  return formatCurrency(10000 * frac, options);
+    options.suffix = '%';
+    options.noSymbol = true;
+    return formatCurrency(10000 * frac, options);
 };
 
 /**
@@ -296,24 +296,24 @@ export const formatPercent = (frac, options) => {
  * @returns {float} tick length
  */
 export const getTickSize = (min, max, numTicks) => {
-  const minimum = (max - min) / numTicks;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
-  const res = minimum / magnitude;
-  let tick;
-  if (res > 5) {
-    tick = 10 * magnitude;
-  }
-  else if (res > 2) {
-    tick = 5 * magnitude;
-  }
-  else if (res > 1) {
-    tick = 2 * magnitude;
-  }
-  else {
-    tick = magnitude;
-  }
+    const minimum = (max - min) / numTicks;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
+    const res = minimum / magnitude;
+    let tick;
+    if (res > 5) {
+        tick = 10 * magnitude;
+    }
+    else if (res > 2) {
+        tick = 5 * magnitude;
+    }
+    else if (res > 1) {
+        tick = 2 * magnitude;
+    }
+    else {
+        tick = magnitude;
+    }
 
-  return tick;
+    return tick;
 };
 
 /**
@@ -323,36 +323,36 @@ export const getTickSize = (min, max, numTicks) => {
  * @returns {string} age text
  */
 export const formatAge = (seconds, shortAbbr) => {
-  const measures = list([
-    [1, 's', 'second'],
-    [60, 'm', 'minute'],
-    [3600, 'h', 'hour'],
-    [86400, 'd', 'day'],
-    [86400 * 30, 'M', 'month'],
-    [86400 * 365, 'Y', 'year']
-  ]);
+    const measures = list([
+        [1, 's', 'second'],
+        [60, 'm', 'minute'],
+        [3600, 'h', 'hour'],
+        [86400, 'd', 'day'],
+        [86400 * 30, 'M', 'month'],
+        [86400 * 365, 'Y', 'year']
+    ]);
 
-  const getMeasureText = (measure, thisSeconds, floor) => {
-    const value = thisSeconds / measure[0];
-    const rounded = floor ? Math.floor(value) : Math.round(value);
-    const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
-    const units = measure[shortAbbr ? 1 : 2] + plural;
+    const getMeasureText = (measure, thisSeconds, floor) => {
+        const value = thisSeconds / measure[0];
+        const rounded = floor ? Math.floor(value) : Math.round(value);
+        const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
+        const units = measure[shortAbbr ? 1 : 2] + plural;
 
-    return shortAbbr ? `${rounded}${units}` : `${rounded} ${units}`;
-  };
+        return shortAbbr ? `${rounded}${units}` : `${rounded} ${units}`;
+    };
 
-  const secondsNormalised = Math.max(seconds, 1);
-  const mainMeasureIndex = measures.findLastIndex(item => item[0] <= secondsNormalised);
-  const mainMeasure = measures.get(mainMeasureIndex);
-  const measureText = [getMeasureText(mainMeasure, secondsNormalised, true)];
+    const secondsNormalised = Math.max(seconds, 1);
+    const mainMeasureIndex = measures.findLastIndex(item => item[0] <= secondsNormalised);
+    const mainMeasure = measures.get(mainMeasureIndex);
+    const measureText = [getMeasureText(mainMeasure, secondsNormalised, true)];
 
-  if (mainMeasureIndex > 0) {
-    const extraSeconds = secondsNormalised % mainMeasure[0];
-    if (extraSeconds > 0) {
-      measureText.push(getMeasureText(measures.get(mainMeasureIndex - 1), extraSeconds));
+    if (mainMeasureIndex > 0) {
+        const extraSeconds = secondsNormalised % mainMeasure[0];
+        if (extraSeconds > 0) {
+            measureText.push(getMeasureText(measures.get(mainMeasureIndex - 1), extraSeconds));
+        }
     }
-  }
 
-  return measureText.join(', ') + (shortAbbr ? '' : ' ago');
+    return measureText.join(', ') + (shortAbbr ? '' : ' ago');
 };
 

@@ -38,12 +38,12 @@ export const GRAPH_FUNDS_MODES = ['ROI', 'Value', 'Price'];
 export const GRAPH_FUNDS_POINT_RADIUS = 3;
 
 export const STOCK_INDICES = {
-  'LON:CTY': 'CTY',
-  'INDEXFTSE:UKX': 'FTSE 100',
-  'INDEXSP:.INX': 'S&P 500',
-  'INDEXDJX:.DJI': 'DJIA',
-  'INDEXNASDAQ:NDX': 'NASDAQ 100',
-  'INDEXNIKKEI:NI225': 'Nikkei 225'
+    'LON:CTY': 'CTY',
+    'INDEXFTSE:UKX': 'FTSE 100',
+    'INDEXSP:.INX': 'S&P 500',
+    'INDEXDJX:.DJI': 'DJIA',
+    'INDEXNASDAQ:NDX': 'NASDAQ 100',
+    'INDEXNIKKEI:NI225': 'Nikkei 225'
 };
 
 export const DO_STOCKS_LIST = true;
@@ -54,15 +54,15 @@ export const LIST_BLOCK_HEIGHT = 300;
 
 // colours for overview score scale and page categories
 export const COLOR_CATEGORY = {
-  funds: [84, 110, 122],
-  bills: [183, 28, 28],
-  food: [67, 160, 71],
-  general: [1, 87, 155],
-  holiday: [0, 137, 123],
-  social: [191, 158, 36],
-  income: [36, 191, 55],
-  spending: [191, 36, 36],
-  balance: [36, 191, 55]
+    funds: [84, 110, 122],
+    bills: [183, 28, 28],
+    food: [67, 160, 71],
+    general: [1, 87, 155],
+    holiday: [0, 137, 123],
+    social: [191, 158, 36],
+    income: [36, 191, 55],
+    spending: [191, 36, 36],
+    balance: [36, 191, 55]
 };
 
 // fund colour scale
