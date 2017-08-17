@@ -4,10 +4,10 @@
 
 import buildMessage from '../messageBuilder';
 import {
-  AC_LOGIN_FORM_INPUTTED,
-  AC_LOGIN_FORM_RESET,
-  AC_LOGIN_FORM_SUBMITTED,
-  AC_LOGIN_FORM_RESPONSE_GOT
+    AC_LOGIN_FORM_INPUTTED,
+    AC_LOGIN_FORM_RESET,
+    AC_LOGIN_FORM_SUBMITTED,
+    AC_LOGIN_FORM_RESPONSE_GOT
 } from '../constants/actions';
 
 export const aLoginFormInputted = input => buildMessage(AC_LOGIN_FORM_INPUTTED, input);

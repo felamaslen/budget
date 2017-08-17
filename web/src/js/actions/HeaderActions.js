@@ -4,13 +4,13 @@
 
 import buildMessage from '../messageBuilder';
 import {
-  AC_USER_LOGGED_OUT,
-  AC_COOKIES_LOADED,
-  AC_PAGE_NAVIGATED,
-  AC_KEY_PRESSED,
-  AC_SERVER_UPDATED,
-  AC_SERVER_UPDATE_RECEIVED,
-  AC_SERVER_ADD_RECEIVED
+    AC_USER_LOGGED_OUT,
+    AC_COOKIES_LOADED,
+    AC_PAGE_NAVIGATED,
+    AC_KEY_PRESSED,
+    AC_SERVER_UPDATED,
+    AC_SERVER_UPDATE_RECEIVED,
+    AC_SERVER_ADD_RECEIVED
 } from '../constants/actions';
 
 export const aUserLoggedOut = () => buildMessage(AC_USER_LOGGED_OUT);
