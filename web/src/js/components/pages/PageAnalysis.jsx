@@ -22,14 +22,14 @@ export class PageAnalysis extends PureControllerView {
     return formatCurrency(value, { abbreviate, precision: 1 });
   }
   listTreeHead(items) {
-    const getCost = list => {
+    const getCost = theList => {
       return formatCurrency(
-        list.reduce((last, item) => last + item.cost, 0)
+        theList.reduce((last, item) => last + item.cost, 0)
       );
     };
 
-    const getPct = list => {
-      return list
+    const getPct = theList => {
+      return theList
         .reduce((last, item) => last + item.pct, 0)
         .toFixed(1);
     };
