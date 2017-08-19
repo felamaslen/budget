@@ -2,25 +2,25 @@
  * Code processor / entry point for development app
  */
 
-import path from 'path';
-import gulp from 'gulp';
-import gutil from 'gulp-util';
-import rename from 'gulp-rename';
-import less from 'gulp-less';
-import concat from 'gulp-concat';
-import cssmin from 'gulp-cssmin';
-import eslint from 'gulp-eslint';
-import uglify from 'gulp-uglify';
-import pump from 'pump';
-import morgan from 'morgan';
-import webpack from 'webpack';
-import WebpackDevServer from 'webpack-dev-server';
+const path = require('path');
+const gulp = require('gulp');
+const gutil = require('gulp-util');
+const rename = require('gulp-rename');
+const less = require('gulp-less');
+const concat = require('gulp-concat');
+const cssmin = require('gulp-cssmin');
+const eslint = require('gulp-eslint');
+const uglify = require('gulp-uglify');
+const pump = require('pump');
+const morgan = require('morgan');
+const webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
 
-import webpackConfigDev from './webpack/webpack.development.config';
-import webpackConfig from './webpack/webpack.staging.config';
+const webpackConfigDev = require('./webpack/webpack.development.config');
+const webpackConfig = require('./webpack/webpack.staging.config');
 
-import { WEB_URI } from './web/local.conf';
-import { PORT_DEVSERVER } from './web/global.conf';
+const WEB_URI = require('./web/local.conf').WEB_URI;
+const PORT_DEVSERVER = require('./web/global.conf').PORT_DEVSERVER;
 
 // less css preprocessor
 gulp.task('less', () => {
