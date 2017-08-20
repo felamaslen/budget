@@ -3,62 +3,59 @@
  */
 
 require('dotenv').config();
-const config = require('./config.js');
+const config = require('./config.js')();
 
 const Router = require('express').Router;
 const router = new Router();
 
-const user = require('./user.js');
-const data = require('./data.js');
+// const user = require('./user.js');
 
-function api(db) {
-  router.use((req, res, next) => {
+function api() {
+    router.use((req, res, next) => {
     // redirect requests like ?t=foo/bar to foo/bar
-    if (req.query.t) {
-      req.url = `/${req.query.t}`;
-      req.query.old = true;
-    }
-
-    next();
-  });
-
-  router.post('/login', (req, res) => user.apiPostLogin(req, res, db));
-
-  router.get('/data/*', (req, res, next) => {
-    const basicAuthToken = req.headers.authorization;
-    user
-      .checkAuthToken(basicAuthToken, db)
-      .then(status => {
-        if (status) {
-          return next();
+        if (req.query.t) {
+            req.url = `/${req.query.t}`;
+            req.query.old = true;
         }
-        return res.status(403).json({
-          error: true,
-          errorText: config.msg.errorNotAuthorized
-        });
-      })
-      .catch(err => {
-        throw new Error(err);
-      });
-  });
 
-  const dataRoutes = {
-    income: new data.ApiDataGetIncome(db)
-  };
+        next();
+    });
 
-  router.get('/data/income', (req, res) => dataRoutes.income.run(req, res));
+    // TODO
+    // router.post('/login', (req, res) => user.apiPostLogin(req, res, db));
 
-  router.use((req, res) => {
+    // TODO
+    /*
+    router.get('/data/*', (req, res, next) => {
+        const basicAuthToken = req.headers.authorization;
+        user
+            .checkAuthToken(basicAuthToken, db)
+            .then(status => {
+                if (status) {
+                    return next();
+                }
+                return res.status(403).json({
+                    error: true,
+                    errorText: config.msg.errorNotAuthorized
+                });
+            })
+            .catch(err => {
+                throw new Error(err);
+            });
+    });
+    */
+
+    router.use((req, res) => {
     // catch-all api endpoint
-    const response = {
-      error: true,
-      errorMessage: config.msg.unknownApiEndpoint,
-      url: req.url
-    };
-    res.status(400).json(response);
-  });
+        const response = {
+            error: true,
+            errorMessage: config.msg.unknownApiEndpoint,
+            url: req.url
+        };
+        res.status(400).json(response);
+    });
 
-  return router;
+    return router;
 }
 
 module.exports = api;
