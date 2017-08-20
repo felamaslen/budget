@@ -1,4 +1,11 @@
+/**
+ * Returns webpack configuration objects
+ */
+
+require('dotenv').config();
+
 const path = require('path');
+const webpack = require('webpack');
 
 function moduleConfig() {
     return {
@@ -28,14 +35,15 @@ function webpackConfigProduction() {
     return {
         devtool: 'cheap-module-source-map',
         entry: [
-            './web/src/js/index.jsx'
+            './web/src/js/index'
         ],
         output: {
-            path: path.join(__dirname, '../web/build/js'),
+            path: path.join(__dirname, 'web/build/js'),
             filename: 'main.js'
         },
         resolve: {
-            extensions: ['.js', '.jsx']
+            extensions: ['', '.js', '.jsx'],
+            root: path.join(__dirname)
         },
         plugins: [
             new webpack.DefinePlugin({
@@ -57,7 +65,8 @@ function webpackConfigProduction() {
                 }
             })
         ],
-        module: moduleConfig()
+        module: moduleConfig(),
+        bail: true
     };
 }
 
@@ -67,19 +76,39 @@ function webpackConfigDevelopment() {
         entry: [
             `webpack-dev-server/client?http://0.0.0.0:${process.env.PORT_WDS}`,
             'webpack/hot/only-dev-server',
-            './web/src/js/index.jsx'
+            './web/src/js/index'
         ],
         output: {
             path: path.join(__dirname, 'dist'),
             filename: 'js/main.js'
         },
         resolve: {
-            extensions: ['.js', '.jsx']
+            extensions: ['', '.js', '.jsx']
         },
         plugins: [
             new webpack.HotModuleReplacementPlugin()
         ],
-        module: moduleConfig()
+        module: moduleConfig(),
+        devServer: {
+            stats: {
+                colors: true,
+                modules: false,
+                chunks: false,
+                reasons: true
+            },
+            progress: true,
+            hot: true,
+            quiet: false,
+            noInfo: false,
+            publicPath: '/',
+            port: process.env.PORT_WDS,
+            proxy: {
+                '/': {
+                    target: `http://localhost:${process.env.PORT}`,
+                    secure: false
+                }
+            }
+        }
     };
 }
 
