@@ -31,3 +31,7 @@ List (TODO)
 
 When making changes, please update the version number in `package.json` before submitting a pull request to master. This way, updates are pushed to clients, which may cache resources.
 
+## Documentation:
+
+Upon running the server, API documentation is available at `/docs/api`.
+
