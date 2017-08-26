@@ -1,26 +1,26 @@
-@color_grad_btn_from: #74ad5a;
-@color_grad_btn_to:   #68a54b;
-@color_shadow_btn:    #9acc85;
-@color_green:         #009933;
-@color_amber:         #fbe07f;
+$color_grad_btn_from: #74ad5a;
+$color_grad_btn_to:   #68a54b;
+$color_shadow_btn:    #9acc85;
+$color_green:         #009933;
+$color_amber:         #fbe07f;
 
-@color_bg_up:         #1e5413;
-@color_bg_up_hl:      #d4ffcc;
-@color_bg_up_rev:     #bdfcf8;
-@color_bg_down:       #a01e1e;
-@color_bg_down_hl:    #f2bfbf;
-@color_bg_down_rev:   #bfd7f2;
+$color_bg_up:         #1e5413;
+$color_bg_up_hl:      #d4ffcc;
+$color_bg_up_rev:     #bdfcf8;
+$color_bg_down:       #a01e1e;
+$color_bg_down_hl:    #f2bfbf;
+$color_bg_down_rev:   #bfd7f2;
 
-@width_page_narrow:   1000px;
-@width_page_wide:     1500px;
+$width_page_narrow:   1000px;
+$width_page_wide:     1500px;
 
-@width_logo:  30px;
-@height_logo: 30px;
-@height_nav:  49px;
+$width_logo:  30px;
+$height_logo: 30px;
+$height_nav:  49px;
 
-@top_nav:     @height_nav + 10;
+$top_nav:     $height_nav + 10;
 
-@nav_img: "../img/nav.png?v=2016103101";
+$nav_img: "../../build/img/nav.png?v=2016103101";
 
 @keyframes spin {
 	to { transform: rotate(1turn); }
@@ -54,9 +54,9 @@ body {
 }
 
 button {
-	box-shadow: inset 0px 1px 0px 0px @color_shadow_btn;
-	background: linear-gradient(to bottom, @color_grad_btn_from 5%, @color_grad_btn_to 100%);
-	background-color: @color_grad_btn_from;
+	box-shadow: inset 0px 1px 0px 0px $color_shadow_btn;
+	background: linear-gradient(to bottom, $color_grad_btn_from 5%, $color_grad_btn_to 100%);
+	background-color: $color_grad_btn_from;
 	border: 1px solid #3b6e22;
 	display: inline-block;
 	cursor: pointer;
@@ -72,14 +72,14 @@ button {
   z-index: 4;
 
   &:hover {
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, @color_grad_btn_to), color-stop(1, @color_grad_btn_from));
-    background: -moz-linear-gradient(top, @color_grad_btn_to 5%, @color_grad_btn_from 100%);
-    background: -webkit-linear-gradient(top, @color_grad_btn_to 5%, @color_grad_btn_from 100%);
-    background: -o-linear-gradient(top, @color_grad_btn_to 5%, @color_grad_btn_from 100%);
-    background: -ms-linear-gradient(top, @color_grad_btn_to 5%, @color_grad_btn_from 100%);
-    background: linear-gradient(to bottom, @color_grad_btn_to 5%, @color_grad_btn_from 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='@color_grad_btn_to', endColorstr='@color_grad_btn_from',GradientType=0);
-    background-color: @color_grad_btn_to;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, $color_grad_btn_to), color-stop(1, $color_grad_btn_from));
+    background: -moz-linear-gradient(top, $color_grad_btn_to 5%, $color_grad_btn_from 100%);
+    background: -webkit-linear-gradient(top, $color_grad_btn_to 5%, $color_grad_btn_from 100%);
+    background: -o-linear-gradient(top, $color_grad_btn_to 5%, $color_grad_btn_from 100%);
+    background: -ms-linear-gradient(top, $color_grad_btn_to 5%, $color_grad_btn_from 100%);
+    background: linear-gradient(to bottom, $color_grad_btn_to 5%, $color_grad_btn_from 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$color_grad_btn_to', endColorstr='$color_grad_btn_from',GradientType=0);
+    background-color: $color_grad_btn_to;
   }
   &:active {
     top: 0;
@@ -89,11 +89,11 @@ button {
   }
 }
 
-.unimportant() {
+@mixin unimportant {
   color: #333;
   font-style: italic;
 }
-
+    
 .flexbox {
   display: flex;
 }
@@ -105,7 +105,7 @@ button {
   width: 100%;
   height: 100%;
   z-index: 500;
-  top: @height_nav;
+  top: $height_nav;
   left: 0;
   background: rgba(255, 255, 255, 0.8);
 }
@@ -196,7 +196,7 @@ button {
   height: 100%;
   z-index: 1000;
   left: 0;
-  top: @height_nav;
+  top: $height_nav;
 }
 
 .noselect {
@@ -213,7 +213,7 @@ button {
 .messages-outer {
   z-index: 1001;
   position: fixed;
-  top: @height_nav;
+  top: $height_nav;
   right: 0;
   margin: 1em;
   .message {
@@ -258,7 +258,7 @@ button {
 
 /* document */
 #content {
-  padding-top: @top_nav;
+  padding-top: $top_nav;
   .inner {
     position: relative;
     &, & > div {
@@ -295,7 +295,7 @@ button {
 .list-insert {
   .list-head {
     position: fixed;
-    top: @top_nav;
+    top: $top_nav;
     left: 0;
     z-index: 4;
     background: white;
@@ -318,7 +318,7 @@ button {
   }
 
   .future {
-    .unimportant();
+      @include unimportant;
   }
   .first-present {
     border-top: 1px solid #666;
@@ -406,7 +406,7 @@ button {
   left: 0;
   right: 0;
   top: 0;
-  height: @height_nav;
+  height: $height_nav;
   z-index: 10;
   color: white;
   padding-bottom: 10px;
@@ -415,33 +415,33 @@ button {
     background: linear-gradient(to bottom, #d84d4d, #9f3030);
     box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
     width: 100%;
-    height: @height_nav;
+    height: $height_nav;
     &.hide-nav .nav-list {
       opacity: 0;
     }
   }
   .app-logo {
     float: right;
-    height: @height_nav;
+    height: $height_nav;
     margin: 0 1em 0 0.5em;
     .logo {
-      line-height: @height_nav;
+      line-height: $height_nav;
       font-family: Ubuntu, Georgia, serif;
       font-weight: bold;
       font-size: 22px;
       position: relative;
       &:before {
         content: '';
-        width: @width_logo;
-        height: @height_logo;
+        width: $width_logo;
+        height: $height_logo;
         display: inline-block;
         vertical-align: middle;
-        background: url(@nav_img) 0 -56px;
+        background: url($nav_img) 0 -56px;
         padding-right: 0.5em;
       }
       .loading-api {
-        width: @width_logo - 4;
-        height: @height_logo - 4;
+        width: $width_logo - 4;
+        height: $height_logo - 4;
         position: absolute;
         left: -2px;
         top: -2px;
@@ -452,10 +452,46 @@ button {
       }
     }
   }
+    
+  @mixin nav-link-template {
+    float: left;
+    line-height: 30px;
+    height: 27px;
+    padding: 0 0.5em 0 35px;
+    color: white;
+    border-bottom: 3px solid transparent;
+    border-radius: 3px 3px 0 0;
+    cursor: pointer;
+    position: relative;
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    &:active {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    &.active {
+      border-bottom-color: black !important;
+      cursor: default;
+      &, &:hover, &:active {
+        background: rgba(0, 0, 0, 0.7);
+      }
+    }
+    &:before {
+      /* icon */
+      content: '';
+      width: 28px;
+      height: 28px;
+      position: absolute;
+      left: 5px;
+      top: 0;
+      background-image: url($nav_img);
+    }
+  }
+    
   .nav-list {
     list-style: none;
     margin: 0;
-    padding: (@height_nav - 30) 0 0 0;
+    padding: ($height_nav - 30) 0 0 0;
     white-space: nowrap;
     transition: 0.2s opacity;
     li {
@@ -463,42 +499,8 @@ button {
       vertical-align: bottom;
       margin-right: 0.5em;
     }
-    .nav-link-template() {
-      float: left;
-      line-height: 30px;
-      height: 27px;
-      padding: 0 0.5em 0 35px;
-      color: white;
-      border-bottom: 3px solid transparent;
-      border-radius: 3px 3px 0 0;
-      cursor: pointer;
-      position: relative;
-      &:hover {
-        background: rgba(0, 0, 0, 0.3);
-      }
-      &:active {
-        background: rgba(0, 0, 0, 0.5);
-      }
-      &.active {
-        border-bottom-color: black !important;
-        cursor: default;
-        &, &:hover, &:active {
-          background: rgba(0, 0, 0, 0.7);
-        }
-      }
-      &:before {
-        /* icon */
-        content: '';
-        width: 28px;
-        height: 28px;
-        position: absolute;
-        left: 5px;
-        top: 0;
-        background-image: url(@nav_img);
-      }
-    }
     .nav-link, .nav-link-btn {
-      .nav-link-template();
+      @include nav-link-template;
     }
     #nav-link-overview {
       border-color: #424242;
@@ -853,15 +855,16 @@ button {
       }
     }
 
-    .all-blocks() {
+    @mixin all-blocks {
       float: left;
       position: relative;
       &.active {
         background: rgba(255, 255, 0, 0.85);
       }
     }
+
     .block, .sub-block {
-      .all-blocks();
+      @include all-blocks;
     }
     
     .block-0 { background: #d35400; }
@@ -902,7 +905,7 @@ button {
     }
   }
 }
-
+    
 /* world map */
 .graph-world-map {
   .world {
@@ -930,7 +933,7 @@ button {
   }
 
   .past {
-    .unimportant();
+    @include unimportant;
     line-height: .9em;
     font-size: .9em;
     .editable-input {
@@ -947,7 +950,7 @@ button {
     line-height: 1.1em;
     font-size: 1.1em;
     .month {
-      background: @color_green;
+      background: $color_green;
       font-weight: bold;
       color: white;
     }
@@ -957,7 +960,7 @@ button {
   }
   .future {
     .month {
-      background: @color_amber;
+      background: $color_amber;
     }
     .editable-input {
       height: 20px;
@@ -1287,6 +1290,22 @@ button {
     height: 300px;
     font-size: 0.8em;
     font-family: hack, monospace;
+
+    @mixin stocks-list-price-change {
+      .price:after {
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: none;
+        background: none;
+        width: 0;
+        height: 0;
+        top: 3px;
+      }
+      &.hl-up .price, &.hl-down .price {
+        font-weight: bold;
+      }
+    }
+
     
     .stocks-list-ul {
       width: 350px;
@@ -1354,45 +1373,31 @@ button {
         background: turquoise;
       }
     }
-    .stocks-list-price-change() {
-      .price:after {
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: none;
-        background: none;
-        width: 0;
-        height: 0;
-        top: 3px;
-      }
-      &.hl-up .price, &.hl-down .price {
-        font-weight: bold;
-      }
-    }
     .up, .down {
-      .stocks-list-price-change();
+      @include stocks-list-price-change;
     }
     .up {
-      color: @color_bg_up;
+      color: $color_bg_up;
       .price:after {
         border-bottom: 5px solid #00c100;
       }
       &.hl-up {
-        background-color: @color_bg_up_hl;
+        background-color: $color_bg_up_hl;
       }
       &.hl-down {
-        background-color: @color_bg_up_rev;
+        background-color: $color_bg_up_rev;
       }
     }
     .down {
-      color: @color_bg_down;
+      color: $color_bg_down;
       .price:after {
         border-top: 5px solid #e22121;
       }
       &.hl-down {
-        background-color: @color_bg_down_hl;
+        background-color: $color_bg_down_hl;
       }
       &.hl-up {
-        background-color: @color_bg_down_rev;
+        background-color: $color_bg_down_rev;
       }
     }
   }
@@ -1414,18 +1419,18 @@ button {
   font-style: italic;
 }
  
-@media screen and (max-width: @width_page_wide) {
+@media screen and (max-width: $width_page_wide) {
   body {
     overflow: auto;
   }
   #content {
-    width: @width_page_narrow;
+    width: $width_page_narrow;
     margin: 0 auto;
     position: relative;
   }
   #nav {
     .inner {
-      width: @width_page_narrow;
+      width: $width_page_narrow;
       margin: 0 auto;
     }
     .nav-list {
@@ -1488,7 +1493,7 @@ button {
     width: inherit;
     height: 299px;
     position: fixed;
-    top: @top_nav;
+    top: $top_nav;
     z-index: 5;
     box-shadow: 0 3px 16px rgba(60, 60, 60, .3);
     background: white;
@@ -1526,8 +1531,8 @@ button {
       width: 1000px;
       left: 50%;
       margin-left: -500px;
-      top: @height_nav + 299;
-      padding-top: @top_nav - @height_nav;
+      top: $height_nav + 299;
+      padding-top: $top_nav - $height_nav;
       transition: top .3s ease-in-out;
     }
     .list-ul {
@@ -1538,10 +1543,10 @@ button {
   }
   .graph-hidden {
     .list-head {
-      top: @top_nav;
+      top: $top_nav;
     }
     .list-ul {
-      padding-top: @top_nav - @height_nav + 24;
+      padding-top: $top_nav - $height_nav + 24;
     }
     .graph-toggle-btn {
       margin-bottom: -10px;
@@ -1552,7 +1557,7 @@ button {
   }
 }
 
-@media screen and (min-width: @width_page_wide) {
+@media screen and (min-width: $width_page_wide) {
   html, body {
     height: 100%;
   }
@@ -1568,11 +1573,11 @@ button {
   .page-overview {
     .graph-balance {
       left: 900px;
-      top: @top_nav + 10
+      top: $top_nav + 10
     }
     .graph-spend {
       left: 900px;
-      top: @top_nav + 320;
+      top: $top_nav + 320;
     }
   }
 
@@ -1585,7 +1590,7 @@ button {
   .page-income {
     .graph-container-pie {
       left: 400px;
-      top: @top_nav + 60;
+      top: $top_nav + 60;
     }
   }
 
@@ -1609,10 +1614,10 @@ button {
     .graph-fund-history {
       width: 500px;
       left: 1000px;
-      top: @top_nav + 40;
+      top: $top_nav + 40;
     }
     .stocks-list, .graph-world-map {
-      top: @top_nav + 350;
+      top: $top_nav + 350;
       left: 1000px;
     }
   }
@@ -1622,7 +1627,7 @@ button {
   }
   .block-view.graph-container {
     left: 824px;
-    top: @top_nav + 40;
+    top: $top_nav + 40;
   }
 
   .list-head {

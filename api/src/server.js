@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const logger = require('morgan');
 
-const version = require('../package.json').version;
+const version = require('../../package.json').version;
 const api = require('./api.js');
 
 function connectToDatabase() {
@@ -28,7 +28,7 @@ async function serverApp() {
     const db = await connectToDatabase();
 
     // set up template engine
-    app.set('views', path.join(__dirname, 'templates'));
+    app.set('views', path.join(__dirname, '../../web/src/templates'));
     app.set('view engine', 'ejs');
 
     // accept REST data parameters
@@ -36,7 +36,7 @@ async function serverApp() {
     app.use(bodyParser.urlencoded({ extended: true }));
 
     // API docs
-    app.use('/docs/api', express.static(path.join(__dirname, '../docs/api')));
+    app.use('/docs/api', express.static(path.join(__dirname, '../../docs/api')));
 
     // API
     app.use('/api', api(db)); // TODO

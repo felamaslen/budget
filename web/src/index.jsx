@@ -6,6 +6,8 @@ import React from 'react';
 import { render } from 'react-dom';
 // import App from './components/App';
 
+import './sass/index';
+
 if (process.env.NODE_ENV !== 'test') {
     render(
         // <App />,
