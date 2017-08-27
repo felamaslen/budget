@@ -1,28 +1,41 @@
 # Budget
 
+Personal finance app for web and android
+
+## Architecture
+
+There is a web-based API written in Node.js, which also runs a web app. The Android app connects to this API.
+
 ## Instructions:
 
 ### Installation:
- - Install Python 2.7 and MySQL
- - Create MySQL database called "budget"
- - Install nodejs dependencies: `npm i`
- - Update `web/local.conf.js` (rename from `.example`) with correct parameters
- - Build resources:
-  * `gulp`
- - Install Python environment and MySQL database:
-  * `./scripts/setup.sh install`
- - Configure MySQL username and password in `srv/app/db_info.py` (rename from `.example`)
- - Set up nginx or apache. An example nginx configuration is given in `resources/nginx.example.conf`
+    - Install dependencies (MySQL server)
+    - Create MySQL database
+    - Run `npm install`
+    - Run `npm run build` to build the app (this is included on postinstall)
 
-#### Extra (for devs):
- - To update/create minified JavaScript and CSS, run:
-  * `./scripts/update_cache.sh [js] [css]`
+#### Environment variables:
 
-### Operation:
- - To run the server:
-  *  `./scripts/init_server.sh`
- - To scrape fund values, run from the command line or as a cron job:
-  *  `./scripts/scrape_funds.sh`
- - To scrape fund holdings:
-  *  `./scripts/scrape_holdings.sh`
+These environment variables must be set on your deployment environment, or in `.env`:
+
+List (TODO)
+
+### Production:
+    - Run `npm start` and access the app at `localhost:3001` by default
+
+### Maintenance:
+    - To scrape fund values: run script (TODO)
+
+### Development:
+    - Run `npm run dev:api` to run a development backend server
+    - Run `npm run dev:wds` to run a development web app
+    - This is accessible at `localhost:3001` by default
+
+#### Notes: 
+
+When making changes, please update the version number in `package.json` before submitting a pull request to master. This way, updates are pushed to clients, which may cache resources.
+
+## Documentation:
+
+Upon running the server, API documentation is available at `/docs/api`.
 

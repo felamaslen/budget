@@ -1,29 +1,4 @@
 {
-  "ecmaFeatures": {
-    "arrowFunctions": true,
-    "binaryLiterals": false,
-    "blockBindings": true,
-    "classes": true,
-    "defaultParams": true,
-    "destructuring": true,
-    "forOf": true,
-    "generators": true,
-    "modules": false,
-    "objectLiteralComputedProperties": true,
-    "objectLiteralDuplicateProperties": false,
-    "objectLiteralShorthandMethods": true,
-    "objectLiteralShorthandProperties": true,
-    "octalLiterals": false,
-    "regexUFlag": false,
-    "regexYFlag": false,
-    "restParams": true,
-    "spread": true,
-    "superInFunctions": true,
-    "templateStrings": true,
-    "unicodePointEscapes": true,
-    "globalReturn": false,
-    "jsx": true
-  },
   "env": {
     "browser": true,
     "es6": true
@@ -155,7 +130,7 @@
     "eol-last": 1,
     "func-names": 1,
     "func-style": 0,
-    "indent": [1, 2],
+    "indent": [1, 4],
     "linebreak-style": 0,
     "max-nested-callbacks": [0, 3],
     "new-cap": 0, // see Babel section
