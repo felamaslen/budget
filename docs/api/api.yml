@@ -47,6 +47,49 @@
           description: Resources related to purchased items
     
     paths:
+        /user/login:
+            post:
+                summary: Get an API key for logging in
+                operationId: login
+                description: |
+                    Log in to the app
+                produces:
+                - application/json
+                parameters:
+                - in: body
+                  name: pin
+                  description: The PIN of the user to retrieve an API key for
+                  required: true
+                  type: string
+                responses:
+                    201:
+                        description: successful login
+                        schema:
+                            type: object
+                            properties:
+                                error:
+                                    type: boolean
+                                    example: false
+                                api_key:
+                                    type: string
+                                    example: f1d2d2f924e986ac86fdf7b36c94bcdf32beec15
+                                uid:
+                                    type: number
+                                    example: 1
+                                name:
+                                    type: string
+                                    example: user1
+                    401:
+                        description: unsuccessful login
+                        schema:
+                            type: object
+                            properties:
+                                error:
+                                    type: boolean
+                                    example: true
+                                errorText:
+                                    type: string
+                                    example: Bad PIN
         /data/{dataType}:
             get:
                 summary: Get budget data
