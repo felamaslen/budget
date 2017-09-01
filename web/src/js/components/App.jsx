@@ -55,6 +55,9 @@ export default class App extends Component {
     const loading = this.state.reduction.getIn(['appState', 'loading']);
     const loadingApi = this.state.reduction.getIn(['appState', 'loadingApi']);
 
+    const queueSize = this.state.reduction.getIn(['appState', 'edit', 'queue']).size +
+      this.state.reduction.getIn(['appState', 'edit', 'queueDelete']).size;
+
     const errorMessages = (
       <ErrorMessages dispatcher={this.state.dispatcher}
         list={this.state.reduction.getIn(['appState', 'errorMsg'])}
@@ -65,7 +68,8 @@ export default class App extends Component {
         showNav={loggedIn}
         loadingApi={loadingApi}
         navPageIndex={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
-        serverUpdateStatus={this.state.reduction.getIn(['appState', 'edit', 'status'])} />
+        serverUpdateStatus={this.state.reduction.getIn(['appState', 'edit', 'status'])}
+        queueSize={queueSize} />
     );
     const loginForm = loggedIn || loading ? null : (
       <LoginForm dispatcher={this.state.dispatcher}
