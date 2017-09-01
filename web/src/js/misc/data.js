@@ -178,6 +178,16 @@ export const randnBm = () => {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 };
 
+export const pushToRequestQueue = (reduction, active, deleteItem) => {
+  const queueKey = deleteItem
+    ? 'queueDelete'
+    : 'queue';
+
+  const queue = reduction.getIn(['appState', 'edit', queueKey]);
+
+  return reduction.setIn(['appState', 'edit', queueKey], queue.push(active));
+}
+
 /**
  * Builds a request list for updating the server
  * @param {Record} reduction: app state
@@ -229,7 +239,7 @@ export const buildQueueRequestList = reduction => {
 
     return null;
   }).concat(queueDelete.map(dataItem => {
-    return [`delete/${PAGES[dataItem.pageIndex]}`, {}, { id: dataItem.id }];
+    return [`delete/${PAGES[dataItem.get('pageIndex')]}`, {}, { id: dataItem.get('id') }];
   })).filter(notNull);
 
   reqListPageList.forEach((item, pageIndex) => {
