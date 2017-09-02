@@ -6,7 +6,9 @@ import React from 'react';
 import { render } from 'react-dom';
 // import App from './components/App';
 
-import './sass/index';
+// import styles and favicon
+import './sass/index.scss';
+import './images/favicon.png';
 
 if (process.env.NODE_ENV !== 'test') {
     render(

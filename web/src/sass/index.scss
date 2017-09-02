@@ -20,7 +20,7 @@ $height_nav:  49px;
 
 $top_nav:     $height_nav + 10;
 
-$nav_img: "../../build/img/nav.png?v=2016103101";
+$nav_img: "../images/nav.png";
 
 @keyframes spin {
 	to { transform: rotate(1turn); }
