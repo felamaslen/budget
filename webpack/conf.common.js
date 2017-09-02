@@ -6,10 +6,10 @@ module.exports = {
     entry: ['./web/src/index'],
     output: {
         path: path.join(__dirname, '../web/build'),
-        filename: 'js/main.js'
+        filename: 'js/bundle.js'
     },
     resolve: {
-        extensions: ['*', '.js', '.jsx', '.scss']
+        extensions: ['*', '.js', '.jsx']
     },
     plugins
 };

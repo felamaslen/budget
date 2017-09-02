@@ -10,39 +10,49 @@ const path = require('path');
 const logger = require('morgan');
 
 const version = require('../../package.json').version;
-const api = require('./api.js');
+const api = require('./api');
 
 function connectToDatabase() {
-    // TODO: connect to a MySQL database
+    // will connect to a MySQL database
     return Promise.resolve(null);
 }
 
-async function serverApp() {
-    // initiate express web server
-    const app = express();
-
+function setupLogging(app) {
     if (config.debug) {
         app.use(logger('dev'));
     }
+}
 
-    const db = await connectToDatabase();
-
+function setupStaticViews(app) {
     // set up template engine
     app.set('views', path.join(__dirname, '../../web/src/templates'));
     app.set('view engine', 'ejs');
+}
 
+function setupDataInput(app) {
     // accept REST data parameters
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
+}
 
+function setupApiDocs(app) {
     // API docs
     app.use('/docs/api', express.static(path.join(__dirname, '../../docs/api')));
+}
 
+function setupApi(app, db) {
     // API
     app.use('/api', api(db)); // TODO
 
+    setupApiDocs(app);
+}
+
+function setupWebApp(app) {
+    // set up views engine
+    setupStaticViews(app);
+
     // web app static files
-    app.use('/', express.static(path.join(__dirname, '../web/build')));
+    app.use('/', express.static(path.join(__dirname, '../../web/build')));
 
     // index template
     app.get('/', (req, res) => {
@@ -52,16 +62,43 @@ async function serverApp() {
             pieTolerance
         });
     });
+}
 
+function setupErorHandling(app) {
     // error handling
     app.use((req, res) => {
         res.status(404).send('File not found');
     });
+}
 
+function listen(app, port) {
+    return new Promise((resolve, reject) => {
+        app.listen(port, err => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve({ app, port });
+        });
+    });
+}
+
+async function serverApp() {
+    // initiate express web server
+    const app = express();
     const port = process.env.PORT || 3000;
-    app.listen(port);
 
-    return { port, app, db };
+    const db = await connectToDatabase();
+
+    setupLogging(app);
+    setupDataInput(app);
+    setupApi(app, db);
+    setupWebApp(app);
+    setupErorHandling(app);
+
+    const server = await listen(app, port);
+
+    return server;
 }
 
 module.exports = serverApp;
