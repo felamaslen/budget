@@ -12,11 +12,6 @@ const logger = require('morgan');
 const version = require('../../package.json').version;
 const api = require('./api');
 
-function connectToDatabase() {
-    // will connect to a MySQL database
-    return Promise.resolve(null);
-}
-
 function setupLogging(app) {
     if (config.debug) {
         app.use(logger('dev'));
@@ -40,9 +35,10 @@ function setupApiDocs(app) {
     app.use('/docs/api', express.static(path.join(__dirname, '../../docs/api')));
 }
 
-function setupApi(app, db) {
+function setupApi(app) {
     // API
-    app.use('/api', api(db)); // TODO
+    const apiRouter = new express.Router();
+    app.use('/api', api(apiRouter));
 
     setupApiDocs(app);
 }
@@ -88,11 +84,9 @@ async function serverApp() {
     const app = express();
     const port = process.env.PORT || 3000;
 
-    const db = await connectToDatabase();
-
     setupLogging(app);
     setupDataInput(app);
-    setupApi(app, db);
+    setupApi(app);
     setupWebApp(app);
     setupErorHandling(app);
 
