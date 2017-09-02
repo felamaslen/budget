@@ -2,6 +2,7 @@
  * Launch script for the server
  */
 
+require('dotenv').config();
 const serverApp = require('./server');
 
 // listen to web requests

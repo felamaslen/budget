@@ -2,51 +2,17 @@
  * API endpoints for backend
  */
 
-require('dotenv').config();
 const config = require('./config.js')();
 
-const Router = require('express').Router;
-const router = new Router();
+const user = require('./routes/user');
 
-// const user = require('./user.js');
+function apiRouter(app) {
+    // TODO: middleware to redirect old requests to the new API format
 
-function api() {
-    router.use((req, res, next) => {
-    // redirect requests like ?t=foo/bar to foo/bar
-        if (req.query.t) {
-            req.url = `/${req.query.t}`;
-            req.query.old = true;
-        }
+    app.post('/user/login', (req, res) => user.login(req, res));
 
-        next();
-    });
-
-    // TODO
-    // router.post('/login', (req, res) => user.apiPostLogin(req, res, db));
-
-    // TODO
-    /*
-    router.get('/data/*', (req, res, next) => {
-        const basicAuthToken = req.headers.authorization;
-        user
-            .checkAuthToken(basicAuthToken, db)
-            .then(status => {
-                if (status) {
-                    return next();
-                }
-                return res.status(403).json({
-                    error: true,
-                    errorText: config.msg.errorNotAuthorized
-                });
-            })
-            .catch(err => {
-                throw new Error(err);
-            });
-    });
-    */
-
-    router.use((req, res) => {
-    // catch-all api endpoint
+    app.use((req, res) => {
+        // catch-all api endpoint
         const response = {
             error: true,
             errorMessage: config.msg.unknownApiEndpoint,
@@ -55,8 +21,8 @@ function api() {
         res.status(400).json(response);
     });
 
-    return router;
+    return app;
 }
 
-module.exports = api;
+module.exports = apiRouter;
 
