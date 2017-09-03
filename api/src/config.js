@@ -20,6 +20,16 @@ module.exports = () => {
             errorIpBanned: 'Banned',
             errorNotAuthorized: 'You need to authenticate to do that',
             errorBadAuthorization: 'Bad authentication token'
+        },
+        data: {
+            listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
+            fundSalt: process.env.FUND_SALT || '',
+            overview: {
+                numLast: 25,
+                numFuture: 12,
+                startYear: 2014,
+                startMonth: 9
+            }
         }
     };
 };
