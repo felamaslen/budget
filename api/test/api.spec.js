@@ -2,13 +2,13 @@
  * API tests
  */
 
+require('dotenv').config();
 const expect = require('chai').expect;
 
 const api = require('../src/api');
-
 const common = require('./common');
 
-describe('API routes:', () => {
+describe('API', () => {
     let app = null;
     before(() => {
         app = new common.DummyExpress();
@@ -16,11 +16,56 @@ describe('API routes:', () => {
         api(app, null);
     });
 
-    it('should run a POST route at /user/login', () => {
-        const routes = app.routes
-            .filter(route => route.method === 'post' && route.path === '/user/login');
+    describe('POST -> /user/login', () => {
+        it('should run', () => {
+            const routes = app.routes.filter(route => {
+                return route.method === 'post' &&
+                    route.path === '/user/login';
+            });
 
-        expect(routes).to.have.lengthOf.greaterThan(0);
+            expect(routes).to.have.lengthOf(1);
+        });
+    });
+
+    describe('* -> /data/*', () => {
+        let middleware = null;
+        before(() => {
+            middleware = app.routes.filter(route => {
+                return route.method === 'middleware' &&
+                    route.path === '/data/*';
+            });
+        });
+
+        it('should activate authentication middleware', () => {
+            const route = middleware.filter(item => {
+                return item.callback.name === 'authMiddleware';
+            });
+
+            expect(route).to.have.lengthOf(1);
+        });
+
+        it('should activate database middleware', () => {
+            const route = middleware.filter(item => {
+                return item.callback.name === 'dbMiddleware';
+            });
+
+            expect(route).to.have.lengthOf(1);
+        });
+
+        it('shouldn\'t activate any other middleware', () => {
+            expect(middleware).to.have.lengthOf(2);
+        });
+    });
+
+    describe('GET -> /data/overview', () => {
+        it('should run', () => {
+            const routes = app.routes.filter(route => {
+                return route.method === 'get' &&
+                    route.path === '/data/overview';
+            });
+
+            expect(routes).to.have.lengthOf(1);
+        });
     });
 
     it('should catch unknown requests', () => {

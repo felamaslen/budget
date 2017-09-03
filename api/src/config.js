@@ -18,7 +18,8 @@ module.exports = () => {
             errorServerDb: 'Unknown database error',
             errorLoginBad: 'Bad PIN',
             errorIpBanned: 'Banned',
-            errorNotAuthorized: 'You need to authenticate to do that'
+            errorNotAuthorized: 'You need to authenticate to do that',
+            errorBadAuthorization: 'Bad authentication token'
         }
     };
 };

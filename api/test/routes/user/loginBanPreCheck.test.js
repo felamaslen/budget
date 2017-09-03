@@ -4,97 +4,6 @@ const common = require('../../common');
 const user = require('../../../src/routes/user');
 const config = require('../../../src/config')();
 
-class DummyDbWithUser extends common.DummyDb {
-    constructor() {
-        super();
-
-        this.ipLog = [];
-    }
-    handleLogin(match) {
-        const testGoodApiKey = 'test_good_api_key';
-
-        if (match[1] === testGoodApiKey) {
-            return [{
-                uid: 1,
-                name: 'johnsmith',
-                'api_key': testGoodApiKey
-            }];
-        }
-
-        return [];
-    }
-    handleGetIpLog(match) {
-        const ip = match[1];
-
-        return this.ipLog
-            .filter(item => item.ip === ip);
-    }
-    handleRemoveIpLog(match, query) {
-        const ip = match[1];
-
-        this.ipLog = this.ipLog.filter(item => item.ip !== ip);
-
-        return query;
-    }
-    handleUpdateIpLog(match, query) {
-        const ip = match[1];
-        const time = parseInt(match[2], 10);
-        const count = parseInt(match[3], 10);
-
-        const index = this.ipLog.findIndex(item => item.ip === ip);
-        if (index === -1) {
-            this.ipLog.push({ ip, time, count });
-        }
-        else {
-            this.ipLog[index].time = time;
-            this.ipLog[index].count = count;
-        }
-
-        return query;
-    }
-    query(sql, ...args) {
-        const rawQuery = super.query(sql, ...args);
-
-        const getUserQueryMatch = rawQuery.match(
-            /^SELECT uid, user, api_key FROM users WHERE api_key = '(\w+)' LIMIT 1$/
-        );
-
-        const getIpLogMatch = rawQuery.match(
-            /^SELECT time, count FROM ip_login_req WHERE ip = '([0-9.]+)' LIMIT 1$/
-        );
-
-        const removeIpLogMatch = rawQuery.match(
-            /^DELETE FROM ip_login_req WHERE ip = '([0-9.]+)'$/
-        );
-
-        const updateIpLogMatch = rawQuery.match(new RegExp(
-            '^INSERT INTO ip_login_req \\(ip, time, count\\) ' +
-            'VALUES\\(\'([0-9.]+)\', ([0-9]+), ([0-9]+)\\) ' +
-            'ON DUPLICATE KEY UPDATE time = \\2, count = \\3'
-        ));
-
-        // console.log({ rawQuery, getUserQueryMatch, removeIpLogMatch, getIpLogMatch, updateIpLogMatch });
-
-        if (getUserQueryMatch) {
-            return this.handleLogin(getUserQueryMatch);
-        }
-
-        if (getIpLogMatch) {
-            return this.handleGetIpLog(getIpLogMatch);
-        }
-
-        if (removeIpLogMatch) {
-            return this.handleRemoveIpLog(removeIpLogMatch, rawQuery);
-        }
-
-        if (updateIpLogMatch) {
-            return this.handleUpdateIpLog(updateIpLogMatch, rawQuery);
-        }
-
-        return rawQuery;
-    }
-}
-
 module.exports = () => {
     let db = null;
     const ip = '1.2.3.4';
@@ -105,7 +14,7 @@ module.exports = () => {
     };
 
     before(() => {
-        db = new DummyDbWithUser();
+        db = new common.DummyDbWithUser();
     });
 
     it('should accept good login #1', async () => {
