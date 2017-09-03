@@ -203,6 +203,25 @@ function getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices) {
         });
 }
 
+async function getMonthlyValuesQuery(db, user, yearMonths, category) {
+    const joinedUnion = yearMonths
+        .slice(1)
+        .map(item => `SELECT ${item[0]}, ${item[1]}`)
+        .join(' UNION ');
+
+    const union = `SELECT ${yearMonths[0][0]} AS year, ${yearMonths[0][1]} AS month
+    UNION ${joinedUnion}`;
+
+    const result = await db.query(`
+    SELECT SUM(cost) AS month_cost FROM (${union}) AS dates
+    LEFT JOIN \`${category}\` AS list
+    ON uid = ? AND list.year = dates.year AND list.month = dates.month
+    GROUP BY list.year, list.month
+    `, user.uid);
+
+    return result;
+}
+
 module.exports = {
     getStartYearMonth,
     getEndYearMonth,
@@ -213,6 +232,7 @@ module.exports = {
     queryFundTransactions,
     processFundTransactions,
     getMonthlyTotalFundValues,
+    getMonthlyValuesQuery,
     handler
 };
 

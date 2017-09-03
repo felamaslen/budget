@@ -300,6 +300,29 @@ class DummyDbWithFunds extends DummyDb {
     }
 }
 
+class DummyDbWithListOverview extends DummyDb {
+    query(sql, ...args) {
+        const rawQuery = super.query(sql, ...args);
+
+        const listOverviewMatch = rawQuery.match(new RegExp(
+            '^SELECT SUM\\(cost\\) AS month_cost FROM \\(' +
+            'SELECT [0-9]+ AS year, [0-9]+ AS month' +
+            '( UNION SELECT [0-9]+, [0-9]+)*' +
+            '\\) AS dates ' +
+            'LEFT JOIN `\\w+` AS list ON uid = [0-9]+ ' +
+            'AND list.year = dates.year AND list.month = dates.month ' +
+            'GROUP BY list.year, list.month' +
+            ''
+        ));
+
+        if (listOverviewMatch) {
+            return [1068, 7150, 9173];
+        }
+
+        return rawQuery;
+    }
+}
+
 module.exports = {
     Req,
     Res,
@@ -308,5 +331,6 @@ module.exports = {
     DummyDbWithUser,
     testPricesQueryResponse,
     testTransactionsQueryResponse,
-    DummyDbWithFunds
+    DummyDbWithFunds,
+    DummyDbWithListOverview
 }
