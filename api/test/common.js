@@ -2,6 +2,8 @@
  * Common stuff for testing
  */
 
+/* eslint max-lines: 0 */
+
 const mysql = require('mysql');
 
 const config = require('../src/config')();
@@ -303,22 +305,21 @@ class DummyDbWithFunds extends DummyDb {
 class DummyDbWithListOverview extends DummyDb {
     getData() {
         return [1068, 7150, 9173].map(monthCost => {
-            return {monthCost };
+            return { monthCost };
         });
     }
     async query(sql, ...args) {
         const rawQuery = super.query(sql, ...args);
 
-        const listOverviewMatch = rawQuery.match(new RegExp(
+        const listOverviewMatch = rawQuery.match(new RegExp(String(
             '^SELECT SUM\\(cost\\) AS monthCost FROM \\(' +
             'SELECT [0-9]+ AS year, [0-9]+ AS month' +
             '( UNION SELECT [0-9]+, [0-9]+)*' +
             '\\) AS dates ' +
             'LEFT JOIN `\\w+` AS list ON uid = [0-9]+ ' +
             'AND list.year = dates.year AND list.month = dates.month ' +
-            'GROUP BY dates.year, dates.month' +
-            ''
-        ));
+            'GROUP BY dates.year, dates.month'
+        )));
 
         if (listOverviewMatch) {
             const data = await this.getData();

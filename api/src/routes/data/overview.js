@@ -49,6 +49,18 @@ function getYearMonths(options) {
     return yearMonths;
 }
 
+function mapOldToYearMonths(yearMonths, old) {
+    return old
+        .map((oldBalanceValue, key) => {
+            const year = yearMonths[0][0] +
+                Math.floor((yearMonths[0][1] - (old.length + 1 - key)) / 12);
+
+            const month = (((yearMonths[0][1] - (old.length - key)) % 12) + 11) % 12 + 1;
+
+            return [year, month];
+        });
+}
+
 function getFundValue(year, month, transactions, prices) {
     const unitsToDate = transactions.reduce((sum, item) => {
         if (year > item.date[0] || year === item.date[0] && month >= item.date[1]) {
@@ -177,14 +189,18 @@ function processFundTransactions(queryResult) {
         }, {});
 }
 
-function getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices) {
+function getMonthlyTotalFundValues(yearMonths, old, fundTransactions, fundPrices) {
     const transactionsIds = Object.keys(fundTransactions);
     const pricesIds = Object.keys(fundPrices);
 
     const idsWithPricesAndTransactions = pricesIds
         .filter(id => transactionsIds.indexOf(id) !== -1);
 
-    return yearMonths
+    // get as many old fund values as there are old balance items
+    const oldYearMonths = mapOldToYearMonths(yearMonths, old);
+
+    return oldYearMonths
+        .concat(yearMonths)
         .map(yearMonth => {
             const year = yearMonth[0];
             const month = yearMonth[1];
@@ -225,7 +241,7 @@ async function getMonthlyValuesQuery(db, user, yearMonths, category) {
     return result;
 }
 
-async function getMonthlyValues(db, user, yearMonths, category) {
+async function getMonthlyValues(db, user, yearMonths, category, old) {
     if (category === 'funds') {
         const transactionsQuery = await queryFundTransactions(db, user);
         const fundTransactions = processFundTransactions(transactionsQuery);
@@ -233,7 +249,7 @@ async function getMonthlyValues(db, user, yearMonths, category) {
         const pricesQuery = await queryFundPrices(db, user);
         const fundPrices = processFundPrices(pricesQuery);
 
-        return getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices);
+        return getMonthlyTotalFundValues(yearMonths, old, fundTransactions, fundPrices);
     }
 
     const queryResult = await getMonthlyValuesQuery(db, user, yearMonths, category);
@@ -304,9 +320,9 @@ function getMonthlyBalance(queryResult, yearMonths) {
     return { balance, old };
 }
 
-async function getMonthlyCategoryValues(db, user, yearMonths, categories) {
+async function getMonthlyCategoryValues(db, user, yearMonths, categories, old) {
     const promises = categories.map(
-        category => getMonthlyValues(db, user, yearMonths, category)
+        category => getMonthlyValues(db, user, yearMonths, category, old)
     );
 
     const results = await Promise.all(promises);
@@ -328,14 +344,17 @@ async function handler(req, res) {
         startMonth: config.data.overview.startMonth
     });
 
+    const balanceQuery = await getMonthlyBalanceQuery(req.db, req.user);
+    const balance = getMonthlyBalance(balanceQuery, yearMonths);
+
     const monthCost = await getMonthlyCategoryValues(
-        req.db, req.user, yearMonths, config.data.listCategories
+        req.db, req.user, yearMonths, config.data.listCategories, balance.old
     );
 
     return res.json({
         error: false,
         data: {
-            cost: monthCost
+            cost: Object.assign({}, monthCost, balance)
         }
     });
 }
@@ -344,6 +363,7 @@ module.exports = {
     getStartYearMonth,
     getEndYearMonth,
     getYearMonths,
+    mapOldToYearMonths,
     getFundValue,
     queryFundPrices,
     processFundPrices,
