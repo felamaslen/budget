@@ -141,6 +141,14 @@ function processFundPrices(queryResult) {
         }, {});
 }
 
+async function queryFundTransactions(db, user) {
+    const result = await db.query(`
+    SELECT id, transactions FROM funds WHERE uid = ?
+    `, user.uid);
+
+    return result;
+}
+
 function handler(req, res) {
     return res.end('Overview data not done');
 }
@@ -152,6 +160,7 @@ module.exports = {
     getFundValue,
     queryFundPrices,
     processFundPrices,
+    queryFundTransactions,
     handler
 };
 
