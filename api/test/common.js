@@ -4,6 +4,8 @@
 
 const mysql = require('mysql');
 
+const config = require('../src/config')();
+
 class Req {
     constructor(options = {}) {
         this.headers = options.headers || {};
@@ -257,10 +259,37 @@ class DummyDbWithUser extends DummyDb {
     }
 }
 
+class DummyDbWithFunds extends DummyDb {
+    query(sql, ...args) {
+        const rawQuery = super.query(sql, ...args);
+
+        const getFundPricesMatch = rawQuery.match(new RegExp(
+            '^SELECT ft.time, GROUP_CONCAT\\(f.id\\) AS id, GROUP_CONCAT\\(fc.price\\) AS price ' +
+            'FROM fund_cache fc ' +
+            'INNER JOIN fund_hash fh ON fh.fid = fc.fid ' +
+            'INNER JOIN fund_cache_time ft ON ft.cid = fc.cid AND ft.done = 1 ' +
+            `INNER JOIN funds f ON MD5\\(CONCAT\\(f.item, '${config.data.fundSalt}'\\)\\) = fh.hash ` +
+            'AND f.uid = 1 GROUP BY ft.cid ORDER BY ft.time DESC$'
+        ));
+
+        if (getFundPricesMatch) {
+            // test fund price data
+            return [
+                { time: 1504285261, id: '11,3', price: '100,123' },
+                { time: 1504198862, id: '3,11', price: '121,99.13' },
+                { time: 1504112461, id: '11,3', price: '124.04,95.49' }
+            ];
+        }
+
+        return rawQuery;
+    }
+}
+
 module.exports = {
     Req,
     Res,
     DummyExpress,
     DummyDb,
-    DummyDbWithUser
+    DummyDbWithUser,
+    DummyDbWithFunds
 }
