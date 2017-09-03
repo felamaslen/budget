@@ -199,7 +199,7 @@ function getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices) {
                 })
                 .reduce((sum, value) => sum + value, 0);
 
-            return totalFundsValue;
+            return Math.round(totalFundsValue);
         });
 }
 
