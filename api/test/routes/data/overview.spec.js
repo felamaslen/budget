@@ -7,7 +7,7 @@
 require('dotenv').config();
 const expect = require('chai').expect;
 
-const common = require('../../common');
+const common = require('../../test.common');
 const config = require('../../../src/config')();
 const overview = require('../../../src/routes/data/overview');
 
