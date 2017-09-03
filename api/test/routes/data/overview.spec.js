@@ -2,6 +2,8 @@
  * data/overview API spec
  */
 
+/* eslint max-lines: 0 */
+
 require('dotenv').config();
 const expect = require('chai').expect;
 
@@ -146,6 +148,28 @@ describe('/api/data/overview', () => {
         });
     });
 
+    describe('mapOldToYearMonths', () => {
+        it('should work as expected', () => {
+            const yearMonths = [
+                [2016, 2],
+                [2016, 3],
+                [2016, 4]
+            ];
+
+            const old = new Array(5).fill(0);
+
+            const expectedResult = [
+                [2015, 9],
+                [2015, 10],
+                [2015, 11],
+                [2015, 12],
+                [2016, 1]
+            ];
+
+            expect(overview.mapOldToYearMonths(yearMonths, old)).to.deep.equal(expectedResult);
+        });
+    });
+
     describe('getFundValue', () => {
         it('should get the correct fund price at a specified date', () => {
             const transactions = testTransactionsProcessedResponse['11'];
@@ -227,11 +251,20 @@ describe('/api/data/overview', () => {
                 [2018, 10]
             ];
 
+            const old = [
+                [2016, 4],
+                [2016, 5],
+                [2016, 6]
+            ];
+
             const result = overview.getMonthlyTotalFundValues(
-                yearMonths, testTransactionsProcessedResponse, testPricesProcessedResponse
+                yearMonths, old, testTransactionsProcessedResponse, testPricesProcessedResponse
             );
 
             const expectedResult = [
+                0,
+                0,
+                0,
                 0,
                 10000,
                 110000 + 200000,
@@ -284,7 +317,7 @@ describe('/api/data/overview', () => {
                 [2017, 9],
                 [2017, 10]
             ];
-            const result = await overview.getMonthlyValues(db, user, yearMonths, 'funds');
+            const result = await overview.getMonthlyValues(db, user, yearMonths, 'funds', []);
 
             expect(result).to.deep.equal([
                 99.13 * (89.095 + 894.134 - 883.229) + 56.01 * (1678.42 + 846.38),
