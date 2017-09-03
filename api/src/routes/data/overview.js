@@ -57,7 +57,7 @@ function getFundValue(year, month, transactions, prices) {
     }, 0);
 
     const pricesToDate = prices.filter(price => {
-        return year > price.date[0] || year === price.date[0] && month >= price.date[1];
+        return year > price.year || year === price.year && month >= price.month;
     });
 
     if (!pricesToDate.length) {
@@ -96,6 +96,51 @@ async function queryFundPrices(db, user) {
     return result;
 }
 
+function processFundPrices(queryResult) {
+    return queryResult
+        .map(item => {
+            const ids = item.id.split(',').map(id => parseInt(id, 10));
+            const prices = item.price.split(',').map(price => parseFloat(price, 10));
+
+            const dateTime = new Date(item.time * 1000);
+            const year = dateTime.getFullYear();
+            const month = dateTime.getMonth() + 1;
+
+            return { ids, prices, year, month };
+        })
+        .reduce((items, item) => {
+            if (!items) {
+                return [item];
+            }
+
+            if (item.year !== items[items.length - 1].year ||
+                item.month !== items[items.length - 1].month) {
+
+                items.push(item);
+            }
+
+            return items;
+        }, null)
+        .reduce((obj, item) => {
+            item.ids.forEach((id, key) => {
+                const itemObj = {
+                    year: item.year,
+                    month: item.month,
+                    price: item.prices[key]
+                };
+
+                if (id in obj) {
+                    obj[id].push(itemObj);
+                }
+                else {
+                    obj[id] = [itemObj];
+                }
+            });
+
+            return obj;
+        }, {});
+}
+
 function handler(req, res) {
     return res.end('Overview data not done');
 }
@@ -106,6 +151,7 @@ module.exports = {
     getYearMonths,
     getFundValue,
     queryFundPrices,
+    processFundPrices,
     handler
 };
 
