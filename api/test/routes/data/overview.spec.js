@@ -102,5 +102,35 @@ describe('/api/data/overview', () => {
             ]);
         });
     });
+
+    describe('getFundValue', () => {
+        let transactions = null;
+        let prices = null;
+        before(() => {
+            transactions = [
+                { date: [2015, 3, 25], units: 1, cost: 13 },
+                { date: [2015, 3, 30], units: 5, cost: 56 },
+                { date: [2015, 5, 1], units: 10, cost: 134 },
+                { date: [2015, 7, 13], units: 3, cost: 76 }
+            ];
+
+            prices = [
+                { date: [2015, 7, 31], value: 100 },
+                { date: [2015, 7, 10], value: 90 },
+                { date: [2015, 6, 10], value: 96 },
+                { date: [2015, 4, 2], value: 86 }
+            ];
+        });
+
+        it('should get the correct fund price at a specified date', () => {
+            expect(overview.getFundValue(2015, 2, transactions, prices)).to.equal(0);
+            expect(overview.getFundValue(2015, 3, transactions, prices)).to.equal(13 + 56);
+            expect(overview.getFundValue(2015, 4, transactions, prices)).to.equal((1 + 5) * 86);
+            expect(overview.getFundValue(2015, 5, transactions, prices)).to.equal((1 + 5 + 10) * 86);
+            expect(overview.getFundValue(2015, 6, transactions, prices)).to.equal((1 + 5 + 10) * 96);
+            expect(overview.getFundValue(2015, 7, transactions, prices)).to.equal((1 + 5 + 10 + 3) * 100);
+            expect(overview.getFundValue(2016, 3, transactions, prices)).to.equal((1 + 5 + 10 + 3) * 100);
+        });
+    });
 });
 
