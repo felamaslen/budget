@@ -335,7 +335,7 @@ async function getMonthlyCategoryValues(db, user, yearMonths, categories, old) {
         }, {});
 }
 
-async function handler(req, res) {
+async function getData(db, user) {
     const yearMonths = getYearMonths({
         now: new Date(),
         pastMonths: config.data.overview.numLast,
@@ -344,18 +344,24 @@ async function handler(req, res) {
         startMonth: config.data.overview.startMonth
     });
 
-    const balanceQuery = await getMonthlyBalanceQuery(req.db, req.user);
+    const balanceQuery = await getMonthlyBalanceQuery(db, user);
     const balance = getMonthlyBalance(balanceQuery, yearMonths);
 
     const monthCost = await getMonthlyCategoryValues(
-        req.db, req.user, yearMonths, config.data.listCategories, balance.old
+        db, user, yearMonths, config.data.listCategories, balance.old
     );
+
+    return {
+        cost: Object.assign({}, monthCost, balance)
+    };
+}
+
+async function handler(req, res) {
+    const data = await getData(req.db, req.user);
 
     return res.json({
         error: false,
-        data: {
-            cost: Object.assign({}, monthCost, balance)
-        }
+        data
     });
 }
 
@@ -375,6 +381,7 @@ module.exports = {
     getMonthlyBalanceQuery,
     getMonthlyBalance,
     getMonthlyCategoryValues,
+    getData,
     handler
 };
 
