@@ -56,4 +56,48 @@ describe('Config', () => {
             expect(config.msg[elem.item]).to.be.a('string').lengthOf.greaterThan(0);
         });
     });
+
+    describe('data', () => {
+        it('should be defined', () => {
+            expect(config.data).to.be.an('object');
+        });
+
+        it('should define listCategories', () => {
+            expect(config.data.listCategories).to.deep.equal([
+                'funds',
+                'income',
+                'bills',
+                'food',
+                'general',
+                'holiday',
+                'social'
+            ]);
+        });
+
+        it('should define fundSalt', () => {
+            expect(config.data.fundSalt).to.be.a('string').lengthOf.greaterThan(0);
+        });
+
+        describe('overview', () => {
+            it('should be defined', () => {
+                expect(config.data.overview).to.be.an('object');
+            });
+
+            it('should define numLast', () => {
+                expect(config.data.overview.numLast).to.be.a('number');
+            });
+
+            it('should define numFuture', () => {
+                expect(config.data.overview.numFuture).to.be.a('number');
+            });
+
+            it('should define startYear', () => {
+                expect(config.data.overview.startYear).to.be.a('number');
+            });
+
+            it('should define startMonth', () => {
+                expect(config.data.overview.startMonth).to.be.a('number');
+            });
+        });
+    });
 });
