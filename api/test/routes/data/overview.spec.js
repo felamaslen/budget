@@ -235,5 +235,34 @@ describe('/api/data/overview', () => {
             expect(result).to.deep.equal(expectedResult);
         });
     });
+
+    describe('getMonthlyValuesQuery', () => {
+        it('should run a valid query', async () => {
+            const db = new common.DummyDbWithListOverview();
+            const user = { uid: 1 };
+            const yearMonths = [
+                [2016, 7],
+                [2016, 8],
+                [2016, 9]
+            ];
+            const category = 'food';
+
+            const result = await overview.getMonthlyValuesQuery(db, user, yearMonths, category);
+
+            const expectedQuery = 'SELECT SUM(cost) AS month_cost FROM (' +
+                'SELECT 2016 AS year, 7 AS month ' +
+                'UNION SELECT 2016, 8 ' +
+                'UNION SELECT 2016, 9' +
+                ') AS dates ' +
+                'LEFT JOIN `food` AS list ON uid = 1 ' +
+                'AND list.year = dates.year AND list.month = dates.month ' +
+                'GROUP BY list.year, list.month'
+
+            expect(db.queries[0]).to.equal(expectedQuery);
+
+            // test data
+            expect(result).to.deep.equal([1068, 7150, 9173]);
+        });
+    });
 });
 
