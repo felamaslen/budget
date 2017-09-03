@@ -126,7 +126,7 @@ function processFundPrices(queryResult) {
                 const itemObj = {
                     year: item.year,
                     month: item.month,
-                    price: item.prices[key]
+                    value: item.prices[key]
                 };
 
                 if (id in obj) {
@@ -179,6 +179,30 @@ function handler(req, res) {
     return res.end('Overview data not done');
 }
 
+function getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices) {
+    const transactionsIds = Object.keys(fundTransactions);
+    const pricesIds = Object.keys(fundPrices);
+
+    const idsWithPricesAndTransactions = pricesIds
+        .filter(id => transactionsIds.indexOf(id) !== -1);
+
+    return yearMonths
+        .map(yearMonth => {
+            const year = yearMonth[0];
+            const month = yearMonth[1];
+
+            const totalFundsValue = idsWithPricesAndTransactions
+                .map(id => {
+                    const value = getFundValue(year, month, fundTransactions[id], fundPrices[id]);
+
+                    return value;
+                })
+                .reduce((sum, value) => sum + value, 0);
+
+            return totalFundsValue;
+        });
+}
+
 module.exports = {
     getStartYearMonth,
     getEndYearMonth,
@@ -188,6 +212,7 @@ module.exports = {
     processFundPrices,
     queryFundTransactions,
     processFundTransactions,
+    getMonthlyTotalFundValues,
     handler
 };
 

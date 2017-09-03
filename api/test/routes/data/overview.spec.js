@@ -10,18 +10,37 @@ const config = require('../../../src/config')();
 const overview = require('../../../src/routes/data/overview');
 
 describe('/api/data/overview', () => {
-    let testTransactionsQueryResponse = null;
+    let testPricesProcessedResponse = null;
+    let testTransactionsProcessedResponse = null;
+
     before(() => {
-        testTransactionsQueryResponse = [
-            {
-                id: 3,
-                transactions: '[{"c":200000,"u":1678.42,"d":[2016,9,19]},{"c":100000,"u":846.38,"d":[2017,2,14]}]'
-            },
-            {
-                id: 11,
-                transactions: '[{"c":10000,"u":89.095,"d":[2016,8,24]},{"c":100000,"u":894.134,"d":[2016,9,19]},{"c":-110000,"u":-983.229,"d":[2017,4,27]}]'
-            }
-        ];
+        testPricesProcessedResponse = {
+            '1': [
+                { year: 2017, month: 9, value: 123 },
+                { year: 2017, month: 8, value: 121 }
+            ],
+            '3': [
+                { year: 2017, month: 9, value: 50.97 },
+                { year: 2017, month: 8, value: 56.01 }
+            ],
+            '11': [
+                { year: 2017, month: 9, value: 100 },
+                { year: 2017, month: 8, value: 99.13 },
+                { year: 2016, month: 11, value: 95.3 }
+            ]
+        };
+
+        testTransactionsProcessedResponse = {
+            '3': [
+                { date: [2016, 9, 19], units: 1678.42, cost: 200000 },
+                { date: [2017, 2, 14], units: 846.38, cost: 100000 }
+            ],
+            '11': [
+                { date: [2016, 8, 24], units: 89.095, cost: 10000 },
+                { date: [2016, 9, 19], units: 894.134, cost: 100000 },
+                { date: [2017, 4, 27], units: -883.229, cost: -90000 }
+            ]
+        };
     });
 
     describe('getStartYearMonth', () => {
@@ -119,32 +138,33 @@ describe('/api/data/overview', () => {
     });
 
     describe('getFundValue', () => {
-        let transactions = null;
-        let prices = null;
-        before(() => {
-            transactions = [
-                { date: [2015, 3, 25], units: 1, cost: 13 },
-                { date: [2015, 3, 30], units: 5, cost: 56 },
-                { date: [2015, 5, 1], units: 10, cost: 134 },
-                { date: [2015, 7, 13], units: 3, cost: 76 }
-            ];
-
-            prices = [
-                { year: 2015, month: 7, value: 100 },
-                { year: 2015, month: 7, value: 90 },
-                { year: 2015, month: 6, value: 96 },
-                { year: 2015, month: 4, value: 86 }
-            ];
-        });
-
         it('should get the correct fund price at a specified date', () => {
-            expect(overview.getFundValue(2015, 2, transactions, prices)).to.equal(0);
-            expect(overview.getFundValue(2015, 3, transactions, prices)).to.equal(13 + 56);
-            expect(overview.getFundValue(2015, 4, transactions, prices)).to.equal((1 + 5) * 86);
-            expect(overview.getFundValue(2015, 5, transactions, prices)).to.equal((1 + 5 + 10) * 86);
-            expect(overview.getFundValue(2015, 6, transactions, prices)).to.equal((1 + 5 + 10) * 96);
-            expect(overview.getFundValue(2015, 7, transactions, prices)).to.equal((1 + 5 + 10 + 3) * 100);
-            expect(overview.getFundValue(2016, 3, transactions, prices)).to.equal((1 + 5 + 10 + 3) * 100);
+            const transactions = testTransactionsProcessedResponse['11'];
+            const prices = testPricesProcessedResponse['11'];
+
+            expect(overview.getFundValue(2016, 7, transactions, prices))
+                .to.equal(0);
+
+            expect(overview.getFundValue(2016, 8, transactions, prices))
+                .to.equal(10000);
+
+            expect(overview.getFundValue(2016, 9, transactions, prices))
+                .to.equal(110000);
+
+            expect(overview.getFundValue(2016, 11, transactions, prices))
+                .to.equal(95.3 * (89.095 + 894.134));
+
+            expect(overview.getFundValue(2017, 1, transactions, prices))
+                .to.equal(95.3 * (89.095 + 894.134));
+
+            expect(overview.getFundValue(2017, 4, transactions, prices))
+                .to.equal(95.3 * (89.095 + 894.134 - 883.229));
+
+            expect(overview.getFundValue(2017, 8, transactions, prices))
+                .to.equal(99.13 * (89.095 + 894.134 - 883.229));
+
+            expect(overview.getFundValue(2017, 9, transactions, prices))
+                .to.equal(100 * (89.095 + 894.134 - 883.229));
         });
     });
 
@@ -154,35 +174,17 @@ describe('/api/data/overview', () => {
 
             const result = await overview.queryFundPrices(db, { uid: 1 });
 
-            expect(result).to.deep.equal([
-                { time: 1504285261, id: '11,3', price: '100,123' },
-                { time: 1504198862, id: '3,11', price: '121,99.13' },
-                { time: 1504112461, id: '11,3', price: '124.04,95.49' }
-            ]);
+            expect(result).to.deep.equal(common.testPricesQueryResponse);
         });
     });
 
     describe('processFundPrices', () => {
         it('should return a map of fund IDs to dated lists of prices', () => {
-            const queryResult = [
-                { time: 1504285261, id: '11,3', price: '100,123' },
-                { time: 1504198862, id: '3,11', price: '121,99.13' },
-                { time: 1504112461, id: '11,3', price: '124.04,95.49' }
-            ];
+            const queryResult = common.testPricesQueryResponse;
+
             const result = overview.processFundPrices(queryResult);
 
-            const expectedResult = {
-                '3': [
-                    { year: 2017, month: 9, price: 123 },
-                    { year: 2017, month: 8, price: 121 }
-                ],
-                '11': [
-                    { year: 2017, month: 9, price: 100 },
-                    { year: 2017, month: 8, price: 99.13 }
-                ]
-            };
-
-            expect(result).to.deep.equal(expectedResult);
+            expect(result).to.deep.equal(testPricesProcessedResponse);
         });
     });
 
@@ -192,25 +194,45 @@ describe('/api/data/overview', () => {
 
             const result = await overview.queryFundTransactions(db, { uid: 1 });
 
-            expect(result).to.deep.equal(testTransactionsQueryResponse);
+            expect(result).to.deep.equal(common.testTransactionsQueryResponse);
         });
     });
 
     describe('processFundTransactions', () => {
         it('should return a valid map of IDs to lists of transactions', () => {
-            const result = overview.processFundTransactions(testTransactionsQueryResponse);
+            const result = overview.processFundTransactions(common.testTransactionsQueryResponse);
 
-            expect(result).to.deep.equal({
-                '3': [
-                    { date: [2016, 9, 19], units: 1678.42, cost: 200000 },
-                    { date: [2017, 2, 14], units: 846.38, cost: 100000 }
-                ],
-                '11': [
-                    { date: [2016, 8, 24], units: 89.095, cost: 10000 },
-                    { date: [2016, 9, 19], units: 894.134, cost: 100000 },
-                    { date: [2017, 4, 27], units: -983.229, cost: -110000 }
-                ]
-            });
+            expect(result).to.deep.equal(testTransactionsProcessedResponse);
+        });
+    });
+
+    describe('getMonthlyTotalFundValues', () => {
+        it('should get the correct fund values', () => {
+            const yearMonths = [
+                [2016, 7],
+                [2016, 8],
+                [2016, 9],
+                [2016, 11],
+                [2017, 8],
+                [2017, 9],
+                [2018, 10]
+            ];
+
+            const result = overview.getMonthlyTotalFundValues(
+                yearMonths, testTransactionsProcessedResponse, testPricesProcessedResponse
+            );
+
+            const expectedResult = [
+                0,
+                10000,
+                110000 + 200000,
+                95.3 * (89.095 + 894.134) + 200000,
+                99.13 * (89.095 + 894.134 - 883.229) + 56.01 * (1678.42 + 846.38),
+                100 * (89.095 + 894.134 - 883.229) + 50.97 * (1678.42 + 846.38),
+                100 * (89.095 + 894.134 - 883.229) + 50.97 * (1678.42 + 846.38)
+            ];
+
+            expect(result).to.deep.equal(expectedResult);
         });
     });
 });
