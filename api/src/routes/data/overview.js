@@ -5,11 +5,13 @@
 /* eslint max-lines: [1, 500] */
 
 const config = require('../../config')();
+const common = require('../../common');
 
 function getStartYearMonth(options) {
-    let startMonth = (((options.now.getMonth() + 1 - options.pastMonths) % 12 + 11) % 12) + 1;
-    let startYear = options.now.getFullYear() - Math.max(
-        0, Math.ceil((options.pastMonths - options.now.getMonth()) / 12)
+    let startMonth = common.monthAdd(options.now.getMonth() + 1, -options.pastMonths);
+
+    let startYear = common.yearAddMonth(
+        options.now.getFullYear(), options.now.getMonth() + 1, -options.pastMonths, -Infinity, 0
     );
 
     if (startYear < config.data.overview.startYear ||
@@ -23,9 +25,10 @@ function getStartYearMonth(options) {
 }
 
 function getEndYearMonth(options) {
-    const endMonth = (options.now.getMonth() + options.futureMonths) % 12 + 1;
-    const endYear = options.now.getFullYear() + Math.floor(
-        (options.futureMonths + options.now.getMonth() + 1) / 12
+    const endMonth = common.monthAdd(options.now.getMonth() + 1, options.futureMonths);
+
+    const endYear = common.yearAddMonth(
+        options.now.getFullYear(), options.now.getMonth() + 1, options.futureMonths
     );
 
     return { endYear, endMonth };
@@ -40,8 +43,8 @@ function getYearMonths(options) {
     const yearMonths = new Array(numMonths)
         .fill(0)
         .map((item, key) => {
-            const year = startYear + Math.ceil((key + startMonth - 12) / 12);
-            const month = (startMonth + key - 1) % 12 + 1;
+            const year = common.yearAddMonth(startYear, startMonth, key);
+            const month = common.monthAdd(startMonth, key);
 
             return [year, month];
         });
@@ -52,10 +55,8 @@ function getYearMonths(options) {
 function mapOldToYearMonths(yearMonths, old) {
     return old
         .map((oldBalanceValue, key) => {
-            const year = yearMonths[0][0] +
-                Math.floor((yearMonths[0][1] - (old.length + 1 - key)) / 12);
-
-            const month = (((yearMonths[0][1] - (old.length - key)) % 12) + 11) % 12 + 1;
+            const year = common.yearAddMonth(yearMonths[0][0], yearMonths[0][1], key - old.length);
+            const month = common.monthAdd(yearMonths[0][1], key - old.length);
 
             return [year, month];
         });
