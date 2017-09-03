@@ -259,6 +259,18 @@ class DummyDbWithUser extends DummyDb {
     }
 }
 
+const testPricesQueryResponse = [
+    { time: 1504285261, id: '11,1,3', price: '100,123,50.97' },
+    { time: 1504198862, id: '1,11,3', price: '121,99.13,56.01' },
+    { time: 1504112461, id: '11,1,3', price: '124.04,95.49,49.52' },
+    { time: 1478500000, id: '11', price: '95.3' }
+];
+
+const testTransactionsQueryResponse = [
+    { id: 3, transactions: '[{"c":200000,"u":1678.42,"d":[2016,9,19]},{"c":100000,"u":846.38,"d":[2017,2,14]}]' },
+    { id: 11, transactions: '[{"c":10000,"u":89.095,"d":[2016,8,24]},{"c":100000,"u":894.134,"d":[2016,9,19]},{"c":-90000,"u":-883.229,"d":[2017,4,27]}]' }
+];
+
 class DummyDbWithFunds extends DummyDb {
     query(sql, ...args) {
         const rawQuery = super.query(sql, ...args);
@@ -276,19 +288,12 @@ class DummyDbWithFunds extends DummyDb {
 
         if (getFundPricesMatch) {
             // test fund price data
-            return [
-                { time: 1504285261, id: '11,3', price: '100,123' },
-                { time: 1504198862, id: '3,11', price: '121,99.13' },
-                { time: 1504112461, id: '11,3', price: '124.04,95.49' }
-            ];
+            return testPricesQueryResponse;
         }
 
         if (getFundTransactionsMatch) {
             // test fund transactions data
-            return [
-                { id: 3, transactions: '[{"c":200000,"u":1678.42,"d":[2016,9,19]},{"c":100000,"u":846.38,"d":[2017,2,14]}]' },
-                { id: 11, transactions: '[{"c":10000,"u":89.095,"d":[2016,8,24]},{"c":100000,"u":894.134,"d":[2016,9,19]},{"c":-110000,"u":-983.229,"d":[2017,4,27]}]' }
-            ]
+            return testTransactionsQueryResponse;
         }
 
         return rawQuery;
@@ -301,5 +306,7 @@ module.exports = {
     DummyExpress,
     DummyDb,
     DummyDbWithUser,
+    testPricesQueryResponse,
+    testTransactionsQueryResponse,
     DummyDbWithFunds
 }
