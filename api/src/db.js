@@ -75,19 +75,21 @@ class Connection {
     }
 }
 
-async function getConnection(res) {
+async function dbMiddleware(req, res, next) {
     const info = parseConnectionURI(config.mysqlUri);
 
     const db = new Connection(info);
 
     await db.connect(res);
 
-    return db;
+    req.db = db;
+
+    return next();
 }
 
 module.exports = {
     parseConnectionURI,
     Connection,
-    getConnection
+    dbMiddleware
 };
 
