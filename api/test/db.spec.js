@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const expect = require('chai').expect;
 
-const common = require('./common');
+const common = require('./test.common');
 const Database = require('../src/db');
 
 describe('Database', () => {
