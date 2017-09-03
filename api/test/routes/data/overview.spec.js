@@ -264,5 +264,51 @@ describe('/api/data/overview', () => {
             expect(result).to.deep.equal([1068, 7150, 9173]);
         });
     });
+
+    describe('getMonthlyBalanceQuery', () => {
+        it('should run a valid query', async () => {
+            const db = new common.DummyDb();
+            const user = { uid: 1 };
+
+            const result = await overview.getMonthlyBalanceQuery(db, user);
+
+            const expectedQuery = 'SELECT year, month, balance FROM balance WHERE uid = 1 ORDER BY year, month';
+
+            expect(result).to.equal(expectedQuery);
+        });
+    });
+
+    describe('getMonthlyBalance', () => {
+        it('should return valid data', () => {
+            const queryResult = [
+                { year: 2014, month: 4, balance: 478293 },
+                { year: 2014, month: 6, balance: 500000 },
+                { year: 2014, month: 11, balance: 600000 },
+                { year: 2014, month: 12, balance: 605000 },
+                { year: 2015, month: 1, balance: 1200000 },
+                { year: 2015, month: 2, balance: 1150000 }
+            ];
+
+            const yearMonths = [
+                [2014, 9],
+                [2014, 10],
+                [2014, 11],
+                [2014, 12],
+                [2015, 1],
+                [2015, 2],
+                [2015, 3],
+                [2015, 4]
+            ];
+
+            const result = overview.getMonthlyBalance(queryResult, yearMonths);
+
+            const expectedResult = {
+                balance: [0, 0, 600000, 605000, 1200000, 1150000, 0, 0],
+                old: [478293, 0, 500000, 0, 0]
+            };
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
 });
 

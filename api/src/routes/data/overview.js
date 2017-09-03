@@ -2,6 +2,8 @@
  * Overview data methods
  */
 
+/* eslint max-lines: [1, 500] */
+
 const config = require('../../config')();
 
 function getStartYearMonth(options) {
@@ -222,6 +224,68 @@ async function getMonthlyValuesQuery(db, user, yearMonths, category) {
     return result;
 }
 
+async function getMonthlyBalanceQuery(db, user) {
+    const result = await db.query(`
+    SELECT year, month, balance
+    FROM balance
+    WHERE uid = ?
+    ORDER BY year, month
+    `, user.uid);
+
+    return result;
+}
+
+function getMonthlyBalance(queryResult, yearMonths) {
+    const balance = yearMonths
+        .map(item => {
+            const value = queryResult
+                .filter(result => result.year === item[0] && result.month === item[1])
+                .map(result => result.balance);
+
+            return value.length
+                ? value[0]
+                : 0;
+        });
+
+    const oldRed = queryResult
+        .filter(result => {
+            return result.year < yearMonths[0][0] ||
+                result.year === yearMonths[0][0] && result.month < yearMonths[0][1];
+        })
+        .reduce((last, result) => {
+            const numZeroesAfter = Math.max(
+                0,
+                12 * (yearMonths[0][0] - result.year) + yearMonths[0][1] - result.month - 1
+            );
+
+            const red = {
+                year: result.year,
+                month: result.month,
+                numZeroesAfter
+            };
+
+            if (!last.values.length) {
+                return Object.assign({}, red, { values: [result.balance] });
+            }
+
+            const gapSinceLast = 12 * (result.year - last.year) + result.month - last.month - 1;
+
+            if (gapSinceLast > 0) {
+                return Object.assign({}, red, {
+                    values: last.values
+                        .concat(new Array(gapSinceLast).fill(0))
+                        .concat([result.balance])
+                });
+            }
+
+            return Object.assign({}, red, { values: last.values.concat([result.balance]) });
+        }, { numZeroesAfter: 0, values: [] });
+
+    const old = oldRed.values.concat(new Array(oldRed.numZeroesAfter).fill(0));
+
+    return { balance, old };
+}
+
 module.exports = {
     getStartYearMonth,
     getEndYearMonth,
@@ -233,6 +297,8 @@ module.exports = {
     processFundTransactions,
     getMonthlyTotalFundValues,
     getMonthlyValuesQuery,
+    getMonthlyBalanceQuery,
+    getMonthlyBalance,
     handler
 };
 
