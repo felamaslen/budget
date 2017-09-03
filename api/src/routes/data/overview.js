@@ -7,7 +7,7 @@
 const config = require('../../config')();
 
 function getStartYearMonth(options) {
-    let startMonth = (options.now.getMonth() + 1 - options.pastMonths + 11) % 12 + 1;
+    let startMonth = (((options.now.getMonth() + 1 - options.pastMonths) % 12 + 11) % 12) + 1;
     let startYear = options.now.getFullYear() - Math.max(
         0, Math.ceil((options.pastMonths - options.now.getMonth()) / 12)
     );
@@ -177,10 +177,6 @@ function processFundTransactions(queryResult) {
         }, {});
 }
 
-function handler(req, res) {
-    return res.end('Overview data not done');
-}
-
 function getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices) {
     const transactionsIds = Object.keys(fundTransactions);
     const pricesIds = Object.keys(fundPrices);
@@ -206,22 +202,44 @@ function getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices) {
 }
 
 async function getMonthlyValuesQuery(db, user, yearMonths, category) {
-    const joinedUnion = yearMonths
+    const subUnion = yearMonths
         .slice(1)
         .map(item => `SELECT ${item[0]}, ${item[1]}`)
-        .join(' UNION ');
+        .reduce((red, item, key) => {
+            if (key > 0) {
+                return `${red} UNION ${item}`;
+            }
 
-    const union = `SELECT ${yearMonths[0][0]} AS year, ${yearMonths[0][1]} AS month
-    UNION ${joinedUnion}`;
+            return ` UNION ${item}`;
+        }, '');
+
+    const union = `SELECT ${yearMonths[0][0]} AS year, ${yearMonths[0][1]} AS month${subUnion}`;
 
     const result = await db.query(`
-    SELECT SUM(cost) AS month_cost FROM (${union}) AS dates
+    SELECT SUM(cost) AS monthCost FROM (${union}) AS dates
     LEFT JOIN \`${category}\` AS list
     ON uid = ? AND list.year = dates.year AND list.month = dates.month
-    GROUP BY list.year, list.month
+    GROUP BY dates.year, dates.month
     `, user.uid);
 
     return result;
+}
+
+async function getMonthlyValues(db, user, yearMonths, category) {
+    if (category === 'funds') {
+        const transactionsQuery = await queryFundTransactions(db, user);
+        const fundTransactions = processFundTransactions(transactionsQuery);
+
+        const pricesQuery = await queryFundPrices(db, user);
+        const fundPrices = processFundPrices(pricesQuery);
+
+        return getMonthlyTotalFundValues(yearMonths, fundTransactions, fundPrices);
+    }
+
+    const queryResult = await getMonthlyValuesQuery(db, user, yearMonths, category);
+
+    return queryResult
+        .map(item => item.monthCost || 0);
 }
 
 async function getMonthlyBalanceQuery(db, user) {
@@ -286,6 +304,42 @@ function getMonthlyBalance(queryResult, yearMonths) {
     return { balance, old };
 }
 
+async function getMonthlyCategoryValues(db, user, yearMonths, categories) {
+    const promises = categories.map(
+        category => getMonthlyValues(db, user, yearMonths, category)
+    );
+
+    const results = await Promise.all(promises);
+
+    return results
+        .reduce((obj, result, key) => {
+            obj[categories[key]] = result;
+
+            return obj;
+        }, {});
+}
+
+async function handler(req, res) {
+    const yearMonths = getYearMonths({
+        now: new Date(),
+        pastMonths: config.data.overview.numLast,
+        futureMonths: config.data.overview.numFuture,
+        startYear: config.data.overview.startYear,
+        startMonth: config.data.overview.startMonth
+    });
+
+    const monthCost = await getMonthlyCategoryValues(
+        req.db, req.user, yearMonths, config.data.listCategories
+    );
+
+    return res.json({
+        error: false,
+        data: {
+            cost: monthCost
+        }
+    });
+}
+
 module.exports = {
     getStartYearMonth,
     getEndYearMonth,
@@ -297,8 +351,10 @@ module.exports = {
     processFundTransactions,
     getMonthlyTotalFundValues,
     getMonthlyValuesQuery,
+    getMonthlyValues,
     getMonthlyBalanceQuery,
     getMonthlyBalance,
+    getMonthlyCategoryValues,
     handler
 };
 

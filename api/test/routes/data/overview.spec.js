@@ -53,6 +53,15 @@ describe('/api/data/overview', () => {
                 startMonth: 11
             });
         });
+        it('should handle spanning multiple years', () => {
+            expect(overview.getStartYearMonth({
+                now: new Date('2017-09-26'),
+                pastMonths: 25
+            })).to.deep.equal({
+                startYear: 2015,
+                startMonth: 8
+            });
+        });
         it('should handle configured limit', () => {
             expect(overview.getStartYearMonth({
                 now: new Date(config.data.overview.startYear, config.data.overview.startMonth + 2),
@@ -249,18 +258,48 @@ describe('/api/data/overview', () => {
 
             const result = await overview.getMonthlyValuesQuery(db, user, yearMonths, category);
 
-            const expectedQuery = 'SELECT SUM(cost) AS month_cost FROM (' +
+            const expectedQuery = 'SELECT SUM(cost) AS monthCost FROM (' +
                 'SELECT 2016 AS year, 7 AS month ' +
                 'UNION SELECT 2016, 8 ' +
                 'UNION SELECT 2016, 9' +
                 ') AS dates ' +
                 'LEFT JOIN `food` AS list ON uid = 1 ' +
                 'AND list.year = dates.year AND list.month = dates.month ' +
-                'GROUP BY list.year, list.month'
+                'GROUP BY dates.year, dates.month'
 
             expect(db.queries[0]).to.equal(expectedQuery);
 
-            // test data
+            expect(result).to.deep.equal([1068, 7150, 9173].map(monthCost => {
+                return { monthCost };
+            }));
+        });
+    });
+
+    describe('getMonthlyValues', () => {
+        it('should get fund values', async () => {
+            const db = new common.DummyDbWithFunds();
+            const user = { uid: 1 };
+            const yearMonths = [
+                [2017, 8],
+                [2017, 9],
+                [2017, 10]
+            ];
+            const result = await overview.getMonthlyValues(db, user, yearMonths, 'funds');
+
+            expect(result).to.deep.equal([
+                99.13 * (89.095 + 894.134 - 883.229) + 56.01 * (1678.42 + 846.38),
+                100 * (89.095 + 894.134 - 883.229) + 50.97 * (1678.42 + 846.38),
+                100 * (89.095 + 894.134 - 883.229) + 50.97 * (1678.42 + 846.38)
+            ].map(item => Math.round(item)));
+        });
+        it('should get other values', async () => {
+            const db = new common.DummyDbWithListOverview();
+            const user = { uid: 1 };
+            const yearMonths = [
+                [2016, 7]
+            ];
+            const result = await overview.getMonthlyValues(db, user, yearMonths, 'food');
+
             expect(result).to.deep.equal([1068, 7150, 9173]);
         });
     });
@@ -305,6 +344,39 @@ describe('/api/data/overview', () => {
             const expectedResult = {
                 balance: [0, 0, 600000, 605000, 1200000, 1150000, 0, 0],
                 old: [478293, 0, 500000, 0, 0]
+            };
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    describe('getMonthlyCategoryValues', () => {
+        it('should run multiple queries in parallel and return the results', async () => {
+            const db = new common.DummyDbWithListOverviewDelay();
+            const user = { uid: 1 };
+            const yearMonths = [
+                [2016, 7],
+                [2016, 8],
+                [2016, 9]
+            ];
+            // testing category name doesn't matter
+            const categories = ['food', 'general', 'someCategory', 'foo', 'bar'];
+
+            const now = new Date().getTime();
+            const result = await overview.getMonthlyCategoryValues(db, user, yearMonths, categories);
+
+            const timeDiff = new Date().getTime() - now;
+            expect(timeDiff).to.be.greaterThan(9);
+            // this is impossible if the 10ms delays are sequential
+            // [WARNING] on a very slow PC, this test could fail
+            expect(timeDiff).to.be.lessThan(50);
+
+            const expectedResult = {
+                food: [1068, 7150, 9173],
+                general: [1068, 7150, 9173],
+                someCategory: [1068, 7150, 9173],
+                foo: [1068, 7150, 9173],
+                bar: [1068, 7150, 9173]
             };
 
             expect(result).to.deep.equal(expectedResult);
