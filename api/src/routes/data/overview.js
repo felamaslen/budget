@@ -47,6 +47,38 @@ function getYearMonths(options) {
     return yearMonths;
 }
 
+function getFundValue(year, month, transactions, prices) {
+    const unitsToDate = transactions.reduce((sum, item) => {
+        if (year > item.date[0] || year === item.date[0] && month >= item.date[1]) {
+            return sum + item.units;
+        }
+
+        return sum;
+    }, 0);
+
+    const pricesToDate = prices.filter(price => {
+        return year > price.date[0] || year === price.date[0] && month >= price.date[1];
+    });
+
+    if (!pricesToDate.length) {
+        // there is no accurate price cached, so revert to the cost of the fund
+        // (neglecting growth)
+        const costToDate = transactions.reduce((sum, item) => {
+            if (year > item.date[0] || year === item.date[0] && month >= item.date[1]) {
+                return sum + item.cost;
+            }
+
+            return sum;
+        }, 0);
+
+        return costToDate;
+    }
+
+    // it is assumed that prices is ordered by date descending
+    // we want the latest price, which will be the first item
+    return pricesToDate[0].value * unitsToDate;
+}
+
 function handler(req, res) {
     return res.end('Overview data not done');
 }
@@ -55,6 +87,7 @@ module.exports = {
     getStartYearMonth,
     getEndYearMonth,
     getYearMonths,
+    getFundValue,
     handler
 };
 
