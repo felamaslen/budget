@@ -116,10 +116,10 @@ describe('/api/data/overview', () => {
             ];
 
             prices = [
-                { date: [2015, 7, 31], value: 100 },
-                { date: [2015, 7, 10], value: 90 },
-                { date: [2015, 6, 10], value: 96 },
-                { date: [2015, 4, 2], value: 86 }
+                { year: 2015, month: 7, value: 100 },
+                { year: 2015, month: 7, value: 90 },
+                { year: 2015, month: 6, value: 96 },
+                { year: 2015, month: 4, value: 86 }
             ];
         });
 
@@ -145,6 +145,30 @@ describe('/api/data/overview', () => {
                 { time: 1504198862, id: '3,11', price: '121,99.13' },
                 { time: 1504112461, id: '11,3', price: '124.04,95.49' }
             ]);
+        });
+    });
+
+    describe('processFundPrices', () => {
+        it('should return a map of fund IDs to dated lists of prices', () => {
+            const queryResult = [
+                { time: 1504285261, id: '11,3', price: '100,123' },
+                { time: 1504198862, id: '3,11', price: '121,99.13' },
+                { time: 1504112461, id: '11,3', price: '124.04,95.49' }
+            ];
+            const result = overview.processFundPrices(queryResult);
+
+            const expectedResult = {
+                '3': [
+                    { year: 2017, month: 9, price: 123 },
+                    { year: 2017, month: 8, price: 121 }
+                ],
+                '11': [
+                    { year: 2017, month: 9, price: 100 },
+                    { year: 2017, month: 8, price: 99.13 }
+                ]
+            };
+
+            expect(result).to.deep.equal(expectedResult);
         });
     });
 });
