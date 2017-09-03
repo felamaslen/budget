@@ -171,5 +171,24 @@ describe('/api/data/overview', () => {
             expect(result).to.deep.equal(expectedResult);
         });
     });
+
+    describe('queryFundTransactions', () => {
+        it('should run the correct query', async () => {
+            const db = new common.DummyDbWithFunds();
+
+            const result = await overview.queryFundTransactions(db, { uid: 1 });
+
+            expect(result).to.deep.equal([
+                {
+                    id: 3,
+                    transactions: '[{"c":200000,"u":1678.42,"d":[2016,9,19]},{"c":100000,"u":846.38,"d":[2017,2,14]}]'
+                },
+                {
+                    id: 11,
+                    transactions: '[{"c":10000,"u":89.095,"d":[2016,8,24]},{"c":100000,"u":894.134,"d":[2016,9,19]},{"c":-110000,"u":-983.229,"d":[2017,4,27]}]'
+                }
+            ]);
+        });
+    });
 });
 
