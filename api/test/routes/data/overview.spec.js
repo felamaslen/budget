@@ -5,6 +5,7 @@
 require('dotenv').config();
 const expect = require('chai').expect;
 
+const common = require('../../common');
 const config = require('../../../src/config')();
 const overview = require('../../../src/routes/data/overview');
 
@@ -130,6 +131,20 @@ describe('/api/data/overview', () => {
             expect(overview.getFundValue(2015, 6, transactions, prices)).to.equal((1 + 5 + 10) * 96);
             expect(overview.getFundValue(2015, 7, transactions, prices)).to.equal((1 + 5 + 10 + 3) * 100);
             expect(overview.getFundValue(2016, 3, transactions, prices)).to.equal((1 + 5 + 10 + 3) * 100);
+        });
+    });
+
+    describe('queryFundPrices', () => {
+        it('should run the correct query', async () => {
+            const db = new common.DummyDbWithFunds();
+
+            const result = await overview.queryFundPrices(db, { uid: 1 });
+
+            expect(result).to.deep.equal([
+                { time: 1504285261, id: '11,3', price: '100,123' },
+                { time: 1504198862, id: '3,11', price: '121,99.13' },
+                { time: 1504112461, id: '11,3', price: '124.04,95.49' }
+            ]);
         });
     });
 });

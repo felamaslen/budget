@@ -79,6 +79,23 @@ function getFundValue(year, month, transactions, prices) {
     return pricesToDate[0].value * unitsToDate;
 }
 
+async function queryFundPrices(db, user) {
+    const result = await db.query(`
+    SELECT
+        ft.time,
+        GROUP_CONCAT(f.id) AS id,
+        GROUP_CONCAT(fc.price) AS price
+    FROM fund_cache fc
+    INNER JOIN fund_hash fh ON fh.fid = fc.fid
+    INNER JOIN fund_cache_time ft ON ft.cid = fc.cid AND ft.done = 1
+    INNER JOIN funds f ON MD5(CONCAT(f.item, ?)) = fh.hash AND f.uid = ?
+    GROUP BY ft.cid
+    ORDER BY ft.time DESC
+    `, config.data.fundSalt, user.uid);
+
+    return result;
+}
+
 function handler(req, res) {
     return res.end('Overview data not done');
 }
@@ -88,6 +105,7 @@ module.exports = {
     getEndYearMonth,
     getYearMonths,
     getFundValue,
+    queryFundPrices,
     handler
 };
 
