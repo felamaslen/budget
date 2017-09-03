@@ -5,7 +5,8 @@
 const mysql = require('mysql');
 
 class Req {
-    constructor(options) {
+    constructor(options = {}) {
+        this.headers = options.headers || {};
         this.path = options.path;
         this.method = options.method || 'get';
         this.params = options.params || {};
@@ -28,8 +29,10 @@ class Res {
 
         return this;
     }
-    end(string) {
-        this.response = string.toString();
+    end(string = null) {
+        if (string) {
+            this.response = string.toString();
+        }
         this.ended = true;
 
         return this;
@@ -110,15 +113,20 @@ class DummyExpress {
             return res;
         }, res);
     }
-    use(pathParam, callbackParam) {
-        const path = callbackParam
-            ? pathParam
-            : null;
-        const callback = callbackParam || pathParam;
+    use(pathParam, ...callbacks) {
+        let path = null;
+        if (typeof pathParam === 'function') {
+            callbacks.unshift(pathParam);
+        }
+        else {
+            path = pathParam;
+        }
 
         const method = 'middleware';
 
-        this.routes.push({ method, path, callback });
+        callbacks.forEach(callback => {
+            this.routes.push({ method, path, callback });
+        });
     }
     addRoute(method, path, callback) {
         this.routes.push({ method, path, callback });
@@ -140,6 +148,7 @@ class DummyExpress {
 class DummyDb {
     constructor() {
         this.queries = [];
+        this.ended = false;
     }
     query(sql, ...args) {
         const rawQuery = sql
@@ -152,11 +161,106 @@ class DummyDb {
 
         return rawQuery;
     }
+    end() {
+        this.ended = true;
+    }
+}
+
+class DummyDbWithUser extends DummyDb {
+    constructor() {
+        super();
+
+        this.ipLog = [];
+    }
+    handleLogin(match) {
+        const testGoodApiKey = 'test_good_api_key';
+
+        if (match[3] === testGoodApiKey) {
+            return [{
+                uid: 1,
+                name: 'johnsmith',
+                'api_key': testGoodApiKey
+            }];
+        }
+
+        return [];
+    }
+    handleGetIpLog(match) {
+        const ip = match[1];
+
+        return this.ipLog
+            .filter(item => item.ip === ip);
+    }
+    handleRemoveIpLog(match, query) {
+        const ip = match[1];
+
+        this.ipLog = this.ipLog.filter(item => item.ip !== ip);
+
+        return query;
+    }
+    handleUpdateIpLog(match, query) {
+        const ip = match[1];
+        const time = parseInt(match[2], 10);
+        const count = parseInt(match[3], 10);
+
+        const index = this.ipLog.findIndex(item => item.ip === ip);
+        if (index === -1) {
+            this.ipLog.push({ ip, time, count });
+        }
+        else {
+            this.ipLog[index].time = time;
+            this.ipLog[index].count = count;
+        }
+
+        return query;
+    }
+    query(sql, ...args) {
+        const rawQuery = super.query(sql, ...args);
+
+        const getUserQueryMatch = rawQuery.match(
+            /^SELECT uid, user( AS name)?(, api_key)? FROM users WHERE api_key = '(\w+)' LIMIT 1$/
+        );
+
+        const getIpLogMatch = rawQuery.match(
+            /^SELECT time, count FROM ip_login_req WHERE ip = '([0-9.]+)' LIMIT 1$/
+        );
+
+        const removeIpLogMatch = rawQuery.match(
+            /^DELETE FROM ip_login_req WHERE ip = '([0-9.]+)'$/
+        );
+
+        const updateIpLogMatch = rawQuery.match(new RegExp(
+            '^INSERT INTO ip_login_req \\(ip, time, count\\) ' +
+            'VALUES\\(\'([0-9.]+)\', ([0-9]+), ([0-9]+)\\) ' +
+            'ON DUPLICATE KEY UPDATE time = \\2, count = \\3'
+        ));
+
+        // console.log({ rawQuery, getUserQueryMatch, removeIpLogMatch, getIpLogMatch, updateIpLogMatch });
+
+        if (getUserQueryMatch) {
+            return this.handleLogin(getUserQueryMatch);
+        }
+
+        if (getIpLogMatch) {
+            return this.handleGetIpLog(getIpLogMatch);
+        }
+
+        if (removeIpLogMatch) {
+            return this.handleRemoveIpLog(removeIpLogMatch, rawQuery);
+        }
+
+        if (updateIpLogMatch) {
+            return this.handleUpdateIpLog(updateIpLogMatch, rawQuery);
+        }
+
+        return rawQuery;
+    }
 }
 
 module.exports = {
     Req,
     Res,
     DummyExpress,
-    DummyDb
+    DummyDb,
+    DummyDbWithUser
 }

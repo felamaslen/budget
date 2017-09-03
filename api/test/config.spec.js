@@ -3,11 +3,11 @@
  */
 
 /* eslint no-unused-expressions: 0 */
+require('dotenv').config();
 
 const expect = require('chai').expect;
 require('it-each')({ testPerIteration: true });
 
-require('dotenv').config();
 const config = require('../src/config')();
 
 describe('Config', () => {

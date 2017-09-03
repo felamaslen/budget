@@ -5,11 +5,16 @@
 const config = require('./config.js')();
 
 const user = require('./routes/user');
+const data = require('./routes/data');
 
 function apiRouter(app) {
     // TODO: middleware to redirect old requests to the new API format
 
-    app.post('/user/login', (req, res) => user.login(req, res));
+    // user routes
+    user.handler(app);
+
+    // data routes
+    data.handler(app);
 
     app.use((req, res) => {
         // catch-all api endpoint

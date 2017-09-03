@@ -24,13 +24,14 @@ async function checkAuthToken(db, token) {
     SELECT uid, user AS name
     FROM users
     WHERE api_key = ?
+    LIMIT 1
     `, token);
 
-    if (!userResult) {
+    if (!userResult || !userResult.length) {
         return null;
     }
 
-    return { uid: userResult.uid, name: userResult.name };
+    return { uid: userResult[0].uid, name: userResult[0].name };
 }
 
 function processLoginRequest(req) {
@@ -157,12 +158,10 @@ function handleLoginStatus(res, loginStatus, token) {
 }
 
 async function login(req, res) {
-    const db = await Database.getConnection(res);
-
     try {
         const { ip, hash, token } = processLoginRequest(req);
 
-        const loginStatus = await loginBanPreCheck(db, hash, ip);
+        const loginStatus = await loginBanPreCheck(req.db, hash, ip);
 
         handleLoginStatus(res, loginStatus, token);
     }
@@ -175,8 +174,14 @@ async function login(req, res) {
             });
     }
     finally {
-        await db.end(res);
+        await req.db.end(res);
     }
+}
+
+function handler(app) {
+    app.use('/user/login', Database.dbMiddleware);
+
+    app.post('/user/login', (req, res) => login(req, res));
 }
 
 module.exports = {
@@ -191,6 +196,7 @@ module.exports = {
     getNewBadLoginCount,
     loginBanPreCheck,
     handleLoginStatus,
-    login
+    login,
+    handler
 };
 
