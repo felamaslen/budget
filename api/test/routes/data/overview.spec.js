@@ -10,6 +10,20 @@ const config = require('../../../src/config')();
 const overview = require('../../../src/routes/data/overview');
 
 describe('/api/data/overview', () => {
+    let testTransactionsQueryResponse = null;
+    before(() => {
+        testTransactionsQueryResponse = [
+            {
+                id: 3,
+                transactions: '[{"c":200000,"u":1678.42,"d":[2016,9,19]},{"c":100000,"u":846.38,"d":[2017,2,14]}]'
+            },
+            {
+                id: 11,
+                transactions: '[{"c":10000,"u":89.095,"d":[2016,8,24]},{"c":100000,"u":894.134,"d":[2016,9,19]},{"c":-110000,"u":-983.229,"d":[2017,4,27]}]'
+            }
+        ];
+    });
+
     describe('getStartYearMonth', () => {
         it('should get the correct start year/month', () => {
             expect(overview.getStartYearMonth({
@@ -178,16 +192,25 @@ describe('/api/data/overview', () => {
 
             const result = await overview.queryFundTransactions(db, { uid: 1 });
 
-            expect(result).to.deep.equal([
-                {
-                    id: 3,
-                    transactions: '[{"c":200000,"u":1678.42,"d":[2016,9,19]},{"c":100000,"u":846.38,"d":[2017,2,14]}]'
-                },
-                {
-                    id: 11,
-                    transactions: '[{"c":10000,"u":89.095,"d":[2016,8,24]},{"c":100000,"u":894.134,"d":[2016,9,19]},{"c":-110000,"u":-983.229,"d":[2017,4,27]}]'
-                }
-            ]);
+            expect(result).to.deep.equal(testTransactionsQueryResponse);
+        });
+    });
+
+    describe('processFundTransactions', () => {
+        it('should return a valid map of IDs to lists of transactions', () => {
+            const result = overview.processFundTransactions(testTransactionsQueryResponse);
+
+            expect(result).to.deep.equal({
+                '3': [
+                    { date: [2016, 9, 19], units: 1678.42, cost: 200000 },
+                    { date: [2017, 2, 14], units: 846.38, cost: 100000 }
+                ],
+                '11': [
+                    { date: [2016, 8, 24], units: 89.095, cost: 10000 },
+                    { date: [2016, 9, 19], units: 894.134, cost: 100000 },
+                    { date: [2017, 4, 27], units: -983.229, cost: -110000 }
+                ]
+            });
         });
     });
 });

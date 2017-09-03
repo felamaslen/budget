@@ -149,6 +149,32 @@ async function queryFundTransactions(db, user) {
     return result;
 }
 
+function processFundTransactions(queryResult) {
+    return queryResult
+        .reduce((obj, item) => {
+            let transactions = [];
+
+            try {
+                transactions = JSON.parse(item.transactions)
+                    .map(transaction => {
+                        return {
+                            date: transaction.d,
+                            units: transaction.u,
+                            cost: transaction.c
+                        };
+                    });
+            }
+            catch (err) {
+                // invalid JSON stored in database - why?
+            }
+            finally {
+                obj[item.id] = transactions;
+            }
+
+            return obj;
+        }, {});
+}
+
 function handler(req, res) {
     return res.end('Overview data not done');
 }
@@ -161,6 +187,7 @@ module.exports = {
     queryFundPrices,
     processFundPrices,
     queryFundTransactions,
+    processFundTransactions,
     handler
 };
 
