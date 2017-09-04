@@ -16,8 +16,19 @@ function yearAddMonth(
     )));
 }
 
+function getBeginningOfWeek(date) {
+    return new Date(date.getTime() - 86400 * 1000 * date.getDay());
+}
+
+function strip(string) {
+    return string
+        .replace(/\s+/g, ' ');
+}
+
 module.exports = {
     monthAdd,
-    yearAddMonth
+    yearAddMonth,
+    getBeginningOfWeek,
+    strip
 };
 
