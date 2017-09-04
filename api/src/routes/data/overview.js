@@ -112,6 +112,10 @@ async function queryFundPrices(db, user) {
 }
 
 function processFundPrices(queryResult) {
+    if (typeof queryResult === 'string') {
+        return {};
+    }
+
     return queryResult
         .map(item => {
             const ids = item.id.split(',').map(id => parseInt(id, 10));
@@ -165,6 +169,10 @@ async function queryFundTransactions(db, user) {
 }
 
 function processFundTransactions(queryResult) {
+    if (typeof queryResult === 'string') {
+        return {};
+    }
+
     return queryResult
         .reduce((obj, item) => {
             let transactions = [];
@@ -255,6 +263,10 @@ async function getMonthlyValues(db, user, yearMonths, category, old) {
 
     const queryResult = await getMonthlyValuesQuery(db, user, yearMonths, category);
 
+    if (typeof queryResult === 'string') {
+        return [];
+    }
+
     return queryResult
         .map(item => item.monthCost || 0);
 }
@@ -271,15 +283,21 @@ async function getMonthlyBalanceQuery(db, user) {
 }
 
 function getMonthlyBalance(queryResult, yearMonths) {
+    if (typeof queryResult === 'string') {
+        return { balance: yearMonths.map(() => 0), old: [] };
+    }
+
     const balance = yearMonths
         .map(item => {
             const value = queryResult
                 .filter(result => result.year === item[0] && result.month === item[1])
                 .map(result => result.balance);
 
-            return value.length
-                ? value[0]
-                : 0;
+            if (value.length) {
+                return value[0];
+            }
+
+            return 0;
         });
 
     const oldRed = queryResult
@@ -337,12 +355,17 @@ async function getMonthlyCategoryValues(db, user, yearMonths, categories, old) {
 }
 
 async function getData(db, user) {
+    const now = new Date();
+    const futureMonths = config.data.overview.numFuture;
+    const startYear = config.data.overview.startYear;
+    const startMonth = config.data.overview.startMonth;
+
     const yearMonths = getYearMonths({
-        now: new Date(),
+        now,
         pastMonths: config.data.overview.numLast,
-        futureMonths: config.data.overview.numFuture,
-        startYear: config.data.overview.startYear,
-        startMonth: config.data.overview.startMonth
+        futureMonths,
+        startYear,
+        startMonth
     });
 
     const balanceQuery = await getMonthlyBalanceQuery(db, user);
@@ -353,6 +376,11 @@ async function getData(db, user) {
     );
 
     return {
+        startYearMonth: yearMonths[0],
+        endYearMonth: yearMonths[yearMonths.length - 1],
+        currentYear: now.getFullYear(),
+        currentMonth: now.getMonth() + 1,
+        futureMonths,
         cost: Object.assign({}, monthCost, balance)
     };
 }
