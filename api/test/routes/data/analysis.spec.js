@@ -111,5 +111,17 @@ describe('/data/analysis', () => {
                 .to.equal('year = 2015 AND month = 10');
         });
     });
+
+    describe('periodConditionYearly', () => {
+        it('should return a valid condition with the expected year', () => {
+            expect(analysis.periodConditionYearly(2015))
+                .to.equal('year = 2015');
+        });
+
+        it('should handle pagination', () => {
+            expect(analysis.periodConditionYearly(2015, 5))
+                .to.equal('year = 2010');
+        });
+    });
 });
 
