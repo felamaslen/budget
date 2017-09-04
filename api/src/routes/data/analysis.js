@@ -56,6 +56,13 @@ function periodConditionWeekly(beginningOfWeek, pageIndex = 0) {
     return query;
 }
 
+function periodConditionMonthly(year, month, pageIndex = 0) {
+    const conditionYear = common.yearAddMonth(year, month, -pageIndex);
+    const conditionMonth = common.monthAdd(month, -pageIndex);
+
+    return `year = ${conditionYear} AND month = ${conditionMonth}`;
+}
+
 function handler(req, res) {
     return res.end('Analysis data not done yet');
 }
@@ -63,6 +70,7 @@ function handler(req, res) {
 module.exports = {
     getCategoryColumn,
     periodConditionWeekly,
+    periodConditionMonthly,
     handler
 };
 
