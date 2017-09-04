@@ -388,6 +388,8 @@ async function getData(db, user) {
 async function handler(req, res) {
     const data = await getData(req.db, req.user);
 
+    await req.db.end();
+
     return res.json({
         error: false,
         data
