@@ -123,5 +123,40 @@ describe('/data/analysis', () => {
                 .to.equal('year = 2010');
         });
     });
+
+    describe('periodCondition', () => {
+        it('should get weekly periods', () => {
+            const date = new Date('2017-09-04');
+
+            expect(analysis.periodCondition(date, 'week')).to.equal(
+                analysis.periodConditionWeekly(new Date('2017-09-03'))
+            );
+            expect(analysis.periodCondition(date, 'week', 3)).to.equal(
+                analysis.periodConditionWeekly(new Date('2017-09-03'), 3)
+            );
+        });
+
+        it('should get monthly periods', () => {
+            const date = new Date('2017-09-04');
+
+            expect(analysis.periodCondition(date, 'month')).to.equal(
+                analysis.periodConditionMonthly(2017, 9)
+            );
+            expect(analysis.periodCondition(date, 'month', 10)).to.equal(
+                analysis.periodConditionMonthly(2017, 9, 10)
+            );
+        });
+
+        it('should get yearly periods', () => {
+            const date = new Date('2017-09-04');
+
+            expect(analysis.periodCondition(date, 'year')).to.equal(
+                analysis.periodConditionYearly(2017)
+            );
+            expect(analysis.periodCondition(date, 'year', 5)).to.equal(
+                analysis.periodConditionYearly(2017, 5)
+            );
+        });
+    });
 });
 
