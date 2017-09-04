@@ -5,7 +5,7 @@
 require('dotenv').config();
 const expect = require('chai').expect;
 
-const common = require('../common');
+const common = require('../test.common');
 const authMiddleware = require('../../src/routes/authMiddleware');
 
 describe('authMiddleware', () => {
