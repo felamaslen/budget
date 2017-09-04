@@ -31,7 +31,7 @@ describe('/data/analysis', () => {
                 new Date('2016-03-27')
             ];
 
-            const expectedResults = [
+            const expectedConditions = [
                 `(
                     year > 2014 OR (year = 2014 AND (
                         month > 12 OR (month = 12 AND date >= 28)
@@ -61,9 +61,19 @@ describe('/data/analysis', () => {
                 )`
             ].map(string => string.replace(/\s+/g, ' '));
 
+            const expectedDescriptions = [
+                'Week beginning Dec 28, 2014',
+                'Week beginning Sep 3, 2017',
+                'Week beginning Mar 27, 2016'
+            ];
+
+            const expectedResults = expectedConditions.map((condition, key) => {
+                return { condition, description: expectedDescriptions[key] };
+            });
+
             exampleDates.forEach((date, key) => {
                 expect(analysis.periodConditionWeekly(date))
-                    .to.equal(expectedResults[key]);
+                    .to.deep.equal(expectedResults[key]);
             });
         });
 
@@ -71,56 +81,73 @@ describe('/data/analysis', () => {
             const date = new Date('2014-12-21');
 
             const expectedResult = index => {
-                return `(
-                    year > 2014 OR (year = 2014 AND (
-                        month > 12 OR (month = 12 AND date >= ${21 - 7 * index})
-                    ))
-                ) AND (
-                    year < 2014 OR (year = 2014 AND (
-                        month < 12 OR (month = 12 AND date <= ${27 - 7 * index})
-                    ))
-                )`.replace(/\s+/g, ' ');
+                return {
+                    condition: `(
+                        year > 2014 OR (year = 2014 AND (
+                            month > 12 OR (month = 12 AND date >= ${21 - 7 * index})
+                        ))
+                    ) AND (
+                        year < 2014 OR (year = 2014 AND (
+                            month < 12 OR (month = 12 AND date <= ${27 - 7 * index})
+                        ))
+                    )`.replace(/\s+/g, ' '),
+                    description: `Week beginning Dec ${21 - 7 * index}, 2014`
+                };
             };
 
             new Array(3)
                 .fill(0)
                 .forEach((zero, index) => {
                     expect(analysis.periodConditionWeekly(date, index))
-                        .to.equal(expectedResult(index));
+                        .to.deep.equal(expectedResult(index));
                 });
         });
     });
 
     describe('periodConditionMonthly', () => {
         it('should return a valid condition with the expected year and month', () => {
-            expect(analysis.periodConditionMonthly(2016, 4))
-                .to.equal('year = 2016 AND month = 4');
+            expect(analysis.periodConditionMonthly(2016, 4)).to.deep.equal({
+                condition: 'year = 2016 AND month = 4',
+                description: 'Apr 2016'
+            });
 
-            expect(analysis.periodConditionMonthly(2015, 7))
-                .to.equal('year = 2015 AND month = 7');
+            expect(analysis.periodConditionMonthly(2015, 7)).to.deep.equal({
+                condition: 'year = 2015 AND month = 7',
+                description: 'Jul 2015'
+            });
         });
 
         it('should handle pagination', () => {
-            expect(analysis.periodConditionMonthly(2016, 4, 3))
-                .to.equal('year = 2016 AND month = 1');
+            expect(analysis.periodConditionMonthly(2016, 4, 3)).to.deep.equal({
+                condition: 'year = 2016 AND month = 1',
+                description: 'Jan 2016'
+            });
 
-            expect(analysis.periodConditionMonthly(2017, 3, 7))
-                .to.equal('year = 2016 AND month = 8');
+            expect(analysis.periodConditionMonthly(2017, 3, 7)).to.deep.equal({
+                condition: 'year = 2016 AND month = 8',
+                description: 'Aug 2016'
+            });
 
-            expect(analysis.periodConditionMonthly(2017, 3, 17))
-                .to.equal('year = 2015 AND month = 10');
+            expect(analysis.periodConditionMonthly(2017, 3, 17)).to.deep.equal({
+                condition: 'year = 2015 AND month = 10',
+                description: 'Oct 2015'
+            });
         });
     });
 
     describe('periodConditionYearly', () => {
         it('should return a valid condition with the expected year', () => {
-            expect(analysis.periodConditionYearly(2015))
-                .to.equal('year = 2015');
+            expect(analysis.periodConditionYearly(2015)).to.deep.equal({
+                condition: 'year = 2015',
+                description: '2015'
+            });
         });
 
         it('should handle pagination', () => {
-            expect(analysis.periodConditionYearly(2015, 5))
-                .to.equal('year = 2010');
+            expect(analysis.periodConditionYearly(2015, 5)).to.deep.equal({
+                condition: 'year = 2010',
+                description: '2010'
+            });
         });
     });
 
@@ -128,10 +155,10 @@ describe('/data/analysis', () => {
         it('should get weekly periods', () => {
             const date = new Date('2017-09-04');
 
-            expect(analysis.periodCondition(date, 'week')).to.equal(
+            expect(analysis.periodCondition(date, 'week')).to.deep.equal(
                 analysis.periodConditionWeekly(new Date('2017-09-03'))
             );
-            expect(analysis.periodCondition(date, 'week', 3)).to.equal(
+            expect(analysis.periodCondition(date, 'week', 3)).to.deep.equal(
                 analysis.periodConditionWeekly(new Date('2017-09-03'), 3)
             );
         });
@@ -139,10 +166,10 @@ describe('/data/analysis', () => {
         it('should get monthly periods', () => {
             const date = new Date('2017-09-04');
 
-            expect(analysis.periodCondition(date, 'month')).to.equal(
+            expect(analysis.periodCondition(date, 'month')).to.deep.equal(
                 analysis.periodConditionMonthly(2017, 9)
             );
-            expect(analysis.periodCondition(date, 'month', 10)).to.equal(
+            expect(analysis.periodCondition(date, 'month', 10)).to.deep.equal(
                 analysis.periodConditionMonthly(2017, 9, 10)
             );
         });
@@ -150,10 +177,10 @@ describe('/data/analysis', () => {
         it('should get yearly periods', () => {
             const date = new Date('2017-09-04');
 
-            expect(analysis.periodCondition(date, 'year')).to.equal(
+            expect(analysis.periodCondition(date, 'year')).to.deep.equal(
                 analysis.periodConditionYearly(2017)
             );
-            expect(analysis.periodCondition(date, 'year', 5)).to.equal(
+            expect(analysis.periodCondition(date, 'year', 5)).to.deep.equal(
                 analysis.periodConditionYearly(2017, 5)
             );
         });
