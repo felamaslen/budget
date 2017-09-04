@@ -1,4 +1,5 @@
 const common = require('../../common');
+const config = require('../../config')();
 
 function getCategoryColumn(category, grouping) {
     // get database column corresponding to "category" type
@@ -29,6 +30,10 @@ function getCategoryColumn(category, grouping) {
     return null;
 }
 
+function periodDescriptionWeekly(year, month, date) {
+    return `Week beginning ${config.months[month - 1]} ${date}, ${year}`;
+}
+
 function periodConditionWeekly(beginningOfWeek, pageIndex = 0) {
     const referenceTime = beginningOfWeek.getTime() - 86400 * 1000 * pageIndex * 7;
 
@@ -43,7 +48,7 @@ function periodConditionWeekly(beginningOfWeek, pageIndex = 0) {
     const monthEnd = dateTimeEnd.getMonth() + 1;
     const dateEnd = dateTimeEnd.getDate();
 
-    const query = common.strip(`(
+    const condition = common.strip(`(
         year > ${yearStart} OR (year = ${yearStart} AND (
             month > ${monthStart} OR (month = ${monthStart} AND date >= ${dateStart})
         ))
@@ -53,18 +58,38 @@ function periodConditionWeekly(beginningOfWeek, pageIndex = 0) {
         ))
     )`);
 
-    return query;
+    const description = periodDescriptionWeekly(yearStart, monthStart, dateStart);
+
+    return { condition, description };
+}
+
+function periodDescriptionMonthly(year, month) {
+    return `${config.months[month - 1]} ${year}`;
 }
 
 function periodConditionMonthly(year, month, pageIndex = 0) {
     const conditionYear = common.yearAddMonth(year, month, -pageIndex);
     const conditionMonth = common.monthAdd(month, -pageIndex);
 
-    return `year = ${conditionYear} AND month = ${conditionMonth}`;
+    const condition = `year = ${conditionYear} AND month = ${conditionMonth}`;
+
+    const description = periodDescriptionMonthly(conditionYear, conditionMonth);
+
+    return { condition, description };
+}
+
+function periodDescriptionYearly(year) {
+    return year.toString();
 }
 
 function periodConditionYearly(year, pageIndex = 0) {
-    return `year = ${year - pageIndex}`;
+    const conditionYear = year - pageIndex;
+
+    const condition = `year = ${conditionYear}`;
+
+    const description = periodDescriptionYearly(conditionYear);
+
+    return { condition, description };
 }
 
 function periodCondition(now, period, pageIndex = 0) {

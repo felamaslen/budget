@@ -30,7 +30,8 @@ module.exports = () => {
                 startYear: 2014,
                 startMonth: 9
             }
-        }
+        },
+        months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     };
 };
 
