@@ -193,6 +193,48 @@
                                                 type: array
                                                 example: ["bills", [6500, 12300]]
 
+        /data/analysis/deep/{category}/{period}/{groupBy}/{pageIndex}:
+            get:
+                summary: Get deep analysis data
+                operationId: getDataAnalysisDeep
+                description: |
+                    Get weekly / monthly / yearly analysis data, broken down by category into paged items
+                produces:
+                - application/json
+                parameters:
+                - in: path
+                  name: category
+                  description: category of data to retrieve
+                  required: true
+                  type: string
+                - in: path
+                  name: period
+                  description: one of week, month, year
+                  required: true
+                  type: string
+                - in: path
+                  name: groupBy
+                  description: one of category, shop
+                  required: true
+                  type: string
+                - in: path
+                  name: pageIndex
+                  description: page to retrieve, starting with 0
+                  type: integer
+                responses:
+                    200:
+                        description: successful operation
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    properties:
+                                        items:
+                                            type: array
+                                            example: ["bills", [["Electricity", 6500], ["Water", 12300]]]
+
+
         /data/{dataType}:
             get:
                 summary: Get budget data
