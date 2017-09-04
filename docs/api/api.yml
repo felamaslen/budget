@@ -316,6 +316,36 @@
                                                         type: string
                                                         example: "[{\"c\":50000,\"u\":502.51,\"d\":[2017,4,1]}]"
                                                         description: JSON-encoded list of transactions relating to this holding
+
+            post:
+                summary: Insert funds data
+                operationId: postDataFunds
+                description: |
+                    Insert a new fund holding into the database
+                produces:
+                - application/json
+                parameters:
+                - in: body
+                  name: date
+                  required: true
+                  type: array
+                - in: body
+                  name: item
+                  required: true
+                  type: string
+                - in: body
+                  name: transactions
+                  required: true
+                  type: array
+                - in: body
+                  name: cost
+                  required: true
+                  type: integer
+                responses:
+                    201:
+                        description: successful operation
+                        schema:
+                            $ref: "#/definitions/DataResponsePostList"
         
         /data/{dataType}:
             get:
@@ -391,6 +421,20 @@
         DataResponse:
             type: object
             properties:
+                error:
+                    type: boolean
+                    example: false
+        DataResponsePostList:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    example: 18281
+                    description: newly-inserted ID
+                total:
+                    type: integer
+                    example: 481829
+                    description: new total cost of list data
                 error:
                     type: boolean
                     example: false
