@@ -90,5 +90,26 @@ describe('/data/analysis', () => {
                 });
         });
     });
+
+    describe('periodConditionMonthly', () => {
+        it('should return a valid condition with the expected year and month', () => {
+            expect(analysis.periodConditionMonthly(2016, 4))
+                .to.equal('year = 2016 AND month = 4');
+
+            expect(analysis.periodConditionMonthly(2015, 7))
+                .to.equal('year = 2015 AND month = 7');
+        });
+
+        it('should handle pagination', () => {
+            expect(analysis.periodConditionMonthly(2016, 4, 3))
+                .to.equal('year = 2016 AND month = 1');
+
+            expect(analysis.periodConditionMonthly(2017, 3, 7))
+                .to.equal('year = 2016 AND month = 8');
+
+            expect(analysis.periodConditionMonthly(2017, 3, 17))
+                .to.equal('year = 2015 AND month = 10');
+        });
+    });
 });
 
