@@ -6,7 +6,7 @@ require('dotenv').config();
 const expect = require('chai').expect;
 
 const api = require('../src/api');
-const common = require('./common');
+const common = require('./test.common');
 
 describe('API', () => {
     let app = null;

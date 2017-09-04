@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 
-const common = require('../../common');
+const common = require('../../test.common');
 const user = require('../../../src/routes/user');
 const config = require('../../../src/config')();
 

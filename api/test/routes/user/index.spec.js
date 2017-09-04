@@ -9,7 +9,7 @@ require('it-each')();
 const sha1 = require('sha1');
 
 const config = require('../../../src/config')();
-const common = require('../../common');
+const common = require('../../test.common');
 const user = require('../../../src/routes/user');
 
 const loginBanPreCheck = require('./loginBanPreCheck.test');
