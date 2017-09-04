@@ -312,7 +312,4 @@
                 error:
                     type: boolean
                     example: false
-    host: budget.bristol.fela.london
-    basePath: /api
-    schemes:
-        - https
+
