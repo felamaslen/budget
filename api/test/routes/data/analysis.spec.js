@@ -5,6 +5,7 @@
 require('dotenv').config();
 const expect = require('chai').expect;
 
+const common = require('../../test.common');
 const analysis = require('../../../src/routes/data/analysis');
 
 describe('/data/analysis', () => {
@@ -183,6 +184,81 @@ describe('/data/analysis', () => {
             expect(analysis.periodCondition(date, 'year', 5)).to.deep.equal(
                 analysis.periodConditionYearly(2017, 5)
             );
+        });
+    });
+
+    describe('getPeriodCostForCategory', () => {
+        it('should get valid data', async () => {
+            const db = new common.DummyDbWithAnalysis();
+            const user = { uid: 1 };
+
+            const result = await analysis.getPeriodCostForCategory(
+                db, user, 'year = 2015', 'food', 'category'
+            );
+
+            expect(result).to.deep.equal([
+                { itemCol: 'f', cost: 10 },
+                { itemCol: 'g', cost: 103 }
+            ]);
+        });
+    });
+
+    describe('getPeriodCost', () => {
+        it('should get cost data and a period description', async () => {
+            const db = new common.DummyDbWithAnalysis();
+            const user = { uid: 1 };
+            const now = new Date('2017-09-04');
+            const period = 'month';
+            const groupBy = 'category';
+            const pageIndex = 0;
+
+            const result = await analysis.getPeriodCost(
+                db, user, now, period, groupBy, pageIndex
+            );
+
+            const expectedResult = {
+                cost: [
+                    ['bills', [
+                        ['a', 999], ['b', 1923], ['c', 110], ['d', 91], ['e', 110]]
+                    ],
+                    ['food', [['f', 10], ['g', 103]]],
+                    ['general', [['f', 10], ['g', 103]]],
+                    ['holiday', [['m', 191239], ['n', 9912]]],
+                    ['social', [['k', 15], ['l', 1000]]]
+                ],
+                description: 'Sep 2017'
+            };
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    describe('validateParams', () => {
+        it('should work for good values', () => {
+            expect(analysis.validateParams('week', 'category', 0).isValid)
+                .to.equal(true);
+            expect(analysis.validateParams('year', 'shop', 0).isValid)
+                .to.equal(true);
+            expect(analysis.validateParams('month', 'shop', 3).isValid)
+                .to.equal(true);
+        });
+        it('should reject bad periods', () => {
+            expect(analysis.validateParams('foo')).to.deep.equal({
+                isValid: false, param: 'period'
+            });
+        });
+        it('should reject bad groupings', () => {
+            expect(analysis.validateParams('year', 'bar')).to.deep.equal({
+                isValid: false, param: 'groupBy'
+            });
+        });
+        it('should reject bad page indices', () => {
+            expect(analysis.validateParams('year', 'shop', NaN)).to.deep.equal({
+                isValid: false, param: 'pageIndex'
+            });
+            expect(analysis.validateParams('year', 'shop', -4)).to.deep.equal({
+                isValid: false, param: 'pageIndex'
+            });
         });
     });
 });

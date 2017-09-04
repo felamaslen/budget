@@ -8,7 +8,7 @@ function handler(app) {
     app.use('/data/*', Database.dbMiddleware, authMiddleware);
 
     app.get('/data/overview', overview);
-    app.get('/data/analysis', analysis);
+    app.get('/data/analysis/:period/:groupBy/:pageIndex?', analysis);
 }
 
 module.exports = {

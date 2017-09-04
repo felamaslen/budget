@@ -341,6 +341,48 @@ class DummyDbWithListOverviewDelay extends DummyDbWithListOverview {
     }
 }
 
+class DummyDbWithAnalysis extends DummyDb {
+    constructor() {
+        super();
+
+        const testData = {
+            item: [['a', 999], ['b', 1923], ['c', 110], ['d', 91], ['e', 110]],
+            category: [['f', 10], ['g', 103]],
+            shop: [['h', 166], ['i', 82], ['j', 991]],
+            society: [['k', 15], ['l', 1000]],
+            holiday: [['m', 191239], ['n', 9912]]
+        }
+
+        this.data = ['bills', 'food', 'general', 'holiday', 'social']
+            .reduce((data, category) => {
+                data[category] = Object.assign({}, testData);
+
+                return data;
+            }, {});
+    }
+    query(sql, ...args) {
+        const rawQuery = super.query(sql, ...args);
+
+        const analysisMatch = rawQuery.match(new RegExp([
+            String('^SELECT (\\w+) AS itemCol, SUM\\(cost\\) AS cost '),
+            'FROM (\\w+) ',
+            'WHERE (.*) AND uid = 1 ',
+            'GROUP BY itemCol'
+        ].join('')));
+
+        if (analysisMatch) {
+            const groupBy = analysisMatch[1];
+            const category = analysisMatch[2];
+
+            return this.data[category][groupBy].map(item => {
+                return { itemCol: item[0], cost: item[1] };
+            });
+        }
+
+        return rawQuery;
+    }
+}
+
 module.exports = {
     Req,
     Res,
@@ -351,5 +393,6 @@ module.exports = {
     testTransactionsQueryResponse,
     DummyDbWithFunds,
     DummyDbWithListOverview,
-    DummyDbWithListOverviewDelay
+    DummyDbWithListOverviewDelay,
+    DummyDbWithAnalysis
 }
