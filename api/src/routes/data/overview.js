@@ -124,7 +124,7 @@ function processFundPrices(queryResult) {
             return { ids, prices, year, month };
         })
         .reduce((items, item) => {
-            if (!items) {
+            if (!items.length) {
                 return [item];
             }
 
@@ -135,7 +135,7 @@ function processFundPrices(queryResult) {
             }
 
             return items;
-        }, null)
+        }, [])
         .reduce((obj, item) => {
             item.ids.forEach((id, key) => {
                 const itemObj = {
