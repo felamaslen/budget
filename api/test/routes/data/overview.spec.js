@@ -415,5 +415,23 @@ describe('/api/data/overview', () => {
             expect(result).to.deep.equal(expectedResult);
         });
     });
+
+    describe('getData', () => {
+        it('should return the correct data', async () => {
+            const db = new common.DummyDb();
+            const user = { uid: 1 };
+
+            const data = await overview.getData(db, user);
+
+            // note that we are only testing the existence of these properties here
+            // the data which the properties contain are tested in other unit tests
+            expect(data.startYearMonth).to.be.an('array').lengthOf(2);
+            expect(data.endYearMonth).to.be.an('array').lengthOf(2);
+            expect(data.currentYear).to.be.a('number');
+            expect(data.currentMonth).to.be.a('number').within(1, 12);
+            expect(data.futureMonths).to.be.a('number');
+            expect(data.cost).to.be.an('object');
+        });
+    });
 });
 
