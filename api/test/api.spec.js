@@ -68,6 +68,17 @@ describe('API', () => {
         });
     });
 
+    describe('GET -> /data/analysis', () => {
+        it('should run', () => {
+            const routes = app.routes.filter(route => {
+                return route.method === 'get' &&
+                    route.path === '/data/analysis/:period/:groupBy/:pageIndex?';
+            });
+
+            expect(routes).to.have.lengthOf(1);
+        });
+    });
+
     it('should catch unknown requests', () => {
         const badRes = app.test({
             path: '/foo/bar'
