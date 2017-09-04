@@ -52,7 +52,7 @@
     "url": "git+https://github.com/felamaslen/budget.git"
   },
   "author": "Fela Maslen",
-  "license": "GPL-2.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/felamaslen/budget/issues"
   },
