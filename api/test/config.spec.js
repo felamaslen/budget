@@ -100,4 +100,10 @@ describe('Config', () => {
             });
         });
     });
+
+    it('should define months', () => {
+        expect(config.months).to.deep.equal(
+            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        );
+    });
 });
