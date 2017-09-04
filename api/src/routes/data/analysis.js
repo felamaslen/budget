@@ -67,6 +67,26 @@ function periodConditionYearly(year, pageIndex = 0) {
     return `year = ${year - pageIndex}`;
 }
 
+function periodCondition(now, period, pageIndex = 0) {
+    if (period === 'week') {
+        return periodConditionWeekly(common.getBeginningOfWeek(now), pageIndex);
+    }
+
+    const year = now.getFullYear();
+
+    if (period === 'month') {
+        const month = now.getMonth() + 1;
+
+        return periodConditionMonthly(year, month, pageIndex);
+    }
+
+    if (period === 'year') {
+        return periodConditionYearly(year, pageIndex);
+    }
+
+    return null;
+}
+
 function handler(req, res) {
     return res.end('Analysis data not done yet');
 }
@@ -76,6 +96,7 @@ module.exports = {
     periodConditionWeekly,
     periodConditionMonthly,
     periodConditionYearly,
+    periodCondition,
     handler
 };
 
