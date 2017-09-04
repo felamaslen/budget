@@ -42,5 +42,39 @@ describe('Common methods', () => {
             expect(common.yearAddMonth(2015, 1, -12, 0, Infinity)).to.equal(2015);
         });
     });
+
+    describe('getBeginningOfWeek', () => {
+        it('should return the first sunday of the week', () => {
+            expect(common.getBeginningOfWeek(new Date('2014-12-28')).getTime())
+                .to.equal(new Date('2014-12-28').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2015-01-03')).getTime())
+                .to.equal(new Date('2014-12-28').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-03')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-04')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-05')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-06')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-07')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-08')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-09')).getTime())
+                .to.equal(new Date('2017-09-03').getTime());
+
+            expect(common.getBeginningOfWeek(new Date('2017-09-10')).getTime())
+                .to.equal(new Date('2017-09-10').getTime());
+        });
+    });
 });
 
