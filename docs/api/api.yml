@@ -346,6 +346,35 @@
                         description: successful operation
                         schema:
                             $ref: "#/definitions/DataResponsePostList"
+
+            put:
+                summary: Update funds data
+                operationId: putDataFunds
+                description: |
+                    Update an existing fund holding in the database
+                produces:
+                - application/json
+                parameters:
+                - in: body
+                  name: id
+                  required: true
+                  type: integer
+                - in: body
+                  name: date
+                  required: false
+                  type: array
+                - in: body
+                  name: item
+                  required: false
+                  type: string
+                - in: body
+                  name: transactions
+                  required: false
+                  type: array
+                - in: body
+                  name: cost
+                  required: false
+                  type: integer
         
         /data/{dataType}:
             get:
