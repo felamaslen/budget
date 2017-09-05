@@ -57,12 +57,12 @@ function getQuery(db, user, table, columns, limitCondition = null) {
     `, user.uid);
 }
 
-function formatResults(queryResult, columnMap) {
+function formatResults(queryResult, columnMap, addData = null) {
     const dateKeys = ['year', 'month', 'date'];
 
     return queryResult
         .map(row => {
-            return Object.keys(row)
+            const processedRow = Object.keys(row)
                 .reduce((obj, key) => {
                     const value = row[key];
 
@@ -78,6 +78,12 @@ function formatResults(queryResult, columnMap) {
 
                     return obj;
                 }, { 'd': [] });
+
+            if (addData) {
+                return addData(processedRow);
+            }
+
+            return processedRow;
         });
 }
 
@@ -87,7 +93,9 @@ function getTotalCostQuery(db, user, table) {
     `, user.uid);
 }
 
-async function getResults(db, user, now, table, columnMapExtra, limit = null) {
+async function getResults(
+    db, user, now, table, columnMapExtra, addData = null, limit = null
+) {
     const columnMap = Object.assign({}, columnMapExtra, {
         id: 'I'
     });
@@ -115,7 +123,7 @@ async function getResults(db, user, now, table, columnMapExtra, limit = null) {
 
     const queryResult = await getQuery(db, user, table, columns, limitCondition);
 
-    const data = formatResults(queryResult, columnMap);
+    const data = formatResults(queryResult, columnMap, addData);
 
     const total = await getTotalCostQuery(db, user, table);
 

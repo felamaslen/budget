@@ -37,6 +37,7 @@
     "express": "^4.15.4",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
+    "md5": "^2.2.1",
     "mysql": "^2.14.1",
     "node-sass": "^4.5.3",
     "optimize-css-assets-webpack-plugin": "^3.1.1",
