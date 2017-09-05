@@ -43,13 +43,21 @@
     
     # tags are used for organising operations
     tags:
-        - name: Purchase
-          description: Resources related to purchased items
+        - name: authentication
+          description: Resources related to application authentication
+        - name: overview
+          description: Resources related to cash flow data
+        - name: analysis
+          description: Resources related to analysis data
+        - name: funds
+          description: Resources related to funds data
     
     paths:
         /user/login:
             post:
                 summary: Get an API key for logging in
+                tags:
+                    - authentication
                 operationId: login
                 description: |
                     Log in to the app
@@ -90,9 +98,12 @@
                                 errorText:
                                     type: string
                                     example: Bad PIN
+        
         /data/overview:
             get:
                 summary: Get overview budget data
+                tags:
+                    - overview
                 operationId: getDataOverview
                 description: |
                     Get monthly cash flow data, broken down into categories
@@ -158,6 +169,8 @@
         /data/balance:
             post:
                 summary: Insert balance data
+                tags:
+                    - overview
                 operationId: postDataBalance
                 description: |
                     Insert balance data for a year/month
@@ -183,6 +196,8 @@
                             $ref: "#/definitions/DataResponse"
             put:
                 summary: Update balance data
+                tags:
+                    - overview
                 operationId: putDataBalance
                 description: |
                     Update balance data for year/month
@@ -210,6 +225,8 @@
         /data/analysis/{period}/{groupBy}/{pageIndex}:
             get:
                 summary: Get analysis data
+                tags:
+                    - analysis
                 operationId: getDataAnalysis
                 description: |
                     Get weekly / monthly / yearly analysis data, broken down into paged categories
@@ -248,6 +265,8 @@
         /data/analysis/deep/{category}/{period}/{groupBy}/{pageIndex}:
             get:
                 summary: Get deep analysis data
+                tags:
+                    - analysis
                 operationId: getDataAnalysisDeep
                 description: |
                     Get weekly / monthly / yearly analysis data, broken down by category into paged items
@@ -289,6 +308,8 @@
         /data/stocks:
             get:
                 summary: Get stocks data
+                tags:
+                    - funds
                 operationId: getDataStocks
                 description: |
                     Get a weighted list of stocks holdings
@@ -315,6 +336,8 @@
         /data/funds:
             get:
                 summary: Get funds data
+                tags:
+                    - funds
                 operationId: getDataFunds
                 description: |
                     Get a list of fund holdings, optionally with price history
@@ -371,6 +394,8 @@
 
             post:
                 summary: Insert funds data
+                tags:
+                    - funds
                 operationId: postDataFunds
                 description: |
                     Insert a new fund holding into the database
@@ -401,6 +426,8 @@
 
             put:
                 summary: Update funds data
+                tags:
+                    - funds
                 operationId: putDataFunds
                 description: |
                     Update an existing fund holding in the database
@@ -439,6 +466,8 @@
 
             delete:
                 summary: Delete funds data
+                tags:
+                    - funds
                 operationId: deleteDataFunds
                 description: |
                     Delete an existing fund holding in the database
@@ -459,6 +488,80 @@
                         schema:
                             $ref: "#/definitions/ErrorResponse"
 
+        /data/funds/history/{period}/{length}:
+            get:
+                summary: Get cached fund holdings' price history
+                tags:
+                    - funds
+                operationId: getDataFundsHistory
+                description: |
+                    Get an in-depth historical list of fund prices including sold holdings
+                produces:
+                - application/json
+                parameters:
+                - in: path
+                  name: period
+                  description: How far to go back (units)
+                  required: false
+                  type: string
+                  example: year
+                - in: path
+                  name: length
+                  description: How far to go back (length)
+                  required: false
+                  type: integer
+                  example: 3
+                responses:
+                    200:
+                        description: successful operation
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    properties:
+                                        totalTime:
+                                            type: integer
+                                            example: 88812382
+                                            description: Time since the first cached price in the list
+                                        funds:
+                                            type: object
+                                            properties:
+                                                items:
+                                                    type: array
+                                                    items:
+                                                        type: string
+                                                        description: Names of holdings
+                                                        example: Morgan Stanley Sterling Corporate Bond Class F (accum.)
+                                                transactions:
+                                                    type: array
+                                                    items:
+                                                        type: array
+                                                        items:
+                                                            type: object
+                                                            properties:
+                                                                c:
+                                                                    type: integer
+                                                                    description: Cost of transaction
+                                                                    example: 200000
+                                                                u:
+                                                                    type: float
+                                                                    description: Units purchased (or sold)
+                                                                    example: 1499.7
+                                                                d:
+                                                                    type: array
+                                                                    description: Date of transaction
+                                                                    example: [2016, 9, 21]
+                                        startTime:
+                                            type: integer
+                                            description: Timestamp of first cached price in list
+                                            example: 1502125261
+                                        history:
+                                            type: array
+                                            items:
+                                                type: array
+                                                example: [86391, [123.15]]
+                                                description: Cached price. The first element is the relative time; the second is an array of prices corresponding to the list of funds.
         
         /data/{dataType}:
             get:
