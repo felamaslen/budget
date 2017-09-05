@@ -119,12 +119,23 @@ describe('Common list data functions', () => {
 
             expect(listCommon.formatResults(queryResult, columnMap)).to.deep.equal([
                 {
-                    d: [2017, 9, 2], i: 'foo', k: 'bar'
+                    'd': [2017, 9, 2], 'i': 'foo', 'k': 'bar'
                 },
                 {
-                    d: [2017, 8, 29], i: 'baz', k: 'bak'
+                    'd': [2017, 8, 29], 'i': 'baz', 'k': 'bak'
                 }
             ]);
+        });
+    });
+
+    describe('getTotalCostQuery', () => {
+        it('should return the correct query', () => {
+            const db = new common.DummyDb();
+            const user = { uid: 1 };
+
+            expect(listCommon.getTotalCostQuery(db, user, 'food')).to.equal(
+                'SELECT SUM(cost) AS total FROM food WHERE uid = 1'
+            );
         });
     });
 });
