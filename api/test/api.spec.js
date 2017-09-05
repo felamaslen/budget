@@ -9,6 +9,13 @@ const api = require('../src/api');
 const common = require('./test.common');
 
 describe('API', () => {
+    function testRoute(routes, method, path) {
+        expect(routes.filter(route => {
+            return route.method === method && route.path === path;
+        }))
+            .to.have.lengthOf(1);
+    }
+
     let app = null;
     before(() => {
         app = new common.DummyExpress();
@@ -17,14 +24,7 @@ describe('API', () => {
     });
 
     describe('POST -> /user/login', () => {
-        it('should run', () => {
-            const routes = app.routes.filter(route => {
-                return route.method === 'post' &&
-                    route.path === '/user/login';
-            });
-
-            expect(routes).to.have.lengthOf(1);
-        });
+        it('should run', () => testRoute(app.routes, 'post', '/user/login'));
     });
 
     describe('* -> /data/*', () => {
@@ -58,25 +58,18 @@ describe('API', () => {
     });
 
     describe('GET -> /data/overview', () => {
-        it('should run', () => {
-            const routes = app.routes.filter(route => {
-                return route.method === 'get' &&
-                    route.path === '/data/overview';
-            });
-
-            expect(routes).to.have.lengthOf(1);
-        });
+        it('should run', () => testRoute(app.routes, 'get', '/data/overview'));
     });
 
     describe('GET -> /data/analysis', () => {
-        it('should run', () => {
-            const routes = app.routes.filter(route => {
-                return route.method === 'get' &&
-                    route.path === '/data/analysis/:period/:groupBy/:pageIndex?';
-            });
-
-            expect(routes).to.have.lengthOf(1);
-        });
+        it('should run', () => testRoute(
+            app.routes, 'get', '/data/analysis/:period/:groupBy/:pageIndex?')
+        );
+    });
+    describe('GET -> /data/analysis/deep', () => {
+        it('should run', () => testRoute(
+            app.routes, 'get', '/data/analysis/deep/:category/:period/:groupBy/:pageIndex?')
+        );
     });
 
     it('should catch unknown requests', () => {
