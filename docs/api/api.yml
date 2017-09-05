@@ -92,7 +92,7 @@
                                     example: Bad PIN
         /data/overview:
             get:
-                sumary: Get overview budget data
+                summary: Get overview budget data
                 operationId: getDataOverview
                 description: |
                     Get monthly cash flow data, broken down into categories
@@ -154,6 +154,58 @@
                                         currentMonth:
                                             type: integer
                                             example: 9
+
+        /data/balance:
+            post:
+                summary: Insert balance data
+                operationId: postDataBalance
+                description: |
+                    Insert balance data for a year/month
+                produces:
+                - application/json
+                parameters:
+                - in: body
+                  name: year
+                  type: integer
+                  required: true
+                - in: body
+                  name: month
+                  type: integer
+                  required: true
+                - in: body
+                  name: balance
+                  type: integer
+                  required: true
+                responses:
+                    201:
+                        description: successful operation
+                        schema:
+                            $ref: "#/definitions/DataResponse"
+            put:
+                summary: Update balance data
+                operationId: putDataBalance
+                description: |
+                    Update balance data for year/month
+                produces:
+                - application/json
+                parameters:
+                - in: body
+                  name: year
+                  type: integer
+                  required: true
+                - in: body
+                  name: month
+                  type: integer
+                  required: true
+                - in: body
+                  name: balance
+                  type: integer
+                  required: true
+                responses:
+                    200:
+                        description: successful operation
+                        schema:
+                            $ref: "#/definitions/DataResponse"
 
         /data/analysis/{period}/{groupBy}/{pageIndex}:
             get:
