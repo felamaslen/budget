@@ -3,6 +3,7 @@
  */
 
 const overview = require('./overview');
+const updateBalance = require('./updateBalance');
 
 async function routeGet(req, res) {
     const data = await overview.getData(req.db, req.user);
@@ -15,12 +16,12 @@ async function routeGet(req, res) {
     });
 }
 
-async function routePost(req, res) {
-    return res.end('not done yet');
+function routePost(req, res) {
+    return updateBalance.updateData(req, res);
 }
 
-async function routePut(req, res) {
-    return res.end('not done yet');
+function routePut(req, res) {
+    return updateBalance.updateData(req, res, false);
 }
 
 module.exports = {
