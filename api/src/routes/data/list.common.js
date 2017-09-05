@@ -87,12 +87,57 @@ function getTotalCostQuery(db, user, table) {
     `, user.uid);
 }
 
+async function getResults(db, user, now, table, columnMapExtra, limit = null) {
+    const columnMap = Object.assign({}, columnMapExtra, {
+        id: 'I'
+    });
+    const columns = ['year', 'month', 'date']
+        .concat(Object.keys(columnMap));
+
+    let olderExists = null;
+    let limitCondition = null;
+
+    if (limit) {
+        const { startYear, startMonth, endYear, endMonth } = getLimitCondition(
+            now, limit.numMonths, limit.offset
+        );
+
+        limitCondition = getQueryLimitCondition(
+            startYear, startMonth, endYear, endMonth, limit.offset > 0
+        );
+
+        const olderExistsQuery = await getOlderExistsQuery(
+            db, user, table, startYear, startMonth
+        );
+
+        olderExists = olderExistsQuery.count > 0;
+    }
+
+    const queryResult = await getQuery(db, user, table, columns, limitCondition);
+
+    const data = formatResults(queryResult, columnMap);
+
+    const total = await getTotalCostQuery(db, user, table);
+
+    const result = {
+        data,
+        total
+    };
+
+    if (olderExists !== null) {
+        result.olderExists = olderExists;
+    }
+
+    return result;
+}
+
 module.exports = {
     getLimitCondition,
     getQueryLimitCondition,
     getOlderExistsQuery,
     getQuery,
     formatResults,
-    getTotalCostQuery
+    getTotalCostQuery,
+    getResults
 };
 
