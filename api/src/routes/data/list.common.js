@@ -81,11 +81,18 @@ function formatResults(queryResult, columnMap) {
         });
 }
 
+function getTotalCostQuery(db, user, table) {
+    return db.query(`
+    SELECT SUM(cost) AS total FROM ${table} WHERE uid = ?
+    `, user.uid);
+}
+
 module.exports = {
     getLimitCondition,
     getQueryLimitCondition,
     getOlderExistsQuery,
     getQuery,
-    formatResults
+    formatResults,
+    getTotalCostQuery
 };
 
