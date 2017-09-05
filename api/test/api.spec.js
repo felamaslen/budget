@@ -60,6 +60,10 @@ describe('API', () => {
     describe('GET -> /data/overview', () => {
         it('should run', () => testRoute(app.routes, 'get', '/data/overview'));
     });
+    describe('/data/balance', () => {
+        it('should run POST route', () => testRoute(app.routes, 'post', '/data/balance'));
+        it('should run PUT route', () => testRoute(app.routes, 'put', '/data/balance'));
+    });
 
     describe('GET -> /data/analysis', () => {
         it('should run', () => testRoute(
@@ -70,6 +74,13 @@ describe('API', () => {
         it('should run', () => testRoute(
             app.routes, 'get', '/data/analysis/deep/:category/:period/:groupBy/:pageIndex?')
         );
+    });
+
+    describe('/data/funds', () => {
+        it('should run GET route', () => testRoute(app.routes, 'get', '/data/funds'));
+        it('should run POST route', () => testRoute(app.routes, 'post', '/data/funds'));
+        it('should run PUT route', () => testRoute(app.routes, 'put', '/data/funds'));
+        it('should run DELETE route', () => testRoute(app.routes, 'delete', '/data/funds'));
     });
 
     it('should catch unknown requests', () => {

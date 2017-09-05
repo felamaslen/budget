@@ -4,8 +4,8 @@
 
 /* eslint max-lines: [1, 500] */
 
-const config = require('../../config')();
-const common = require('../../common');
+const config = require('../../../config')();
+const common = require('../../../common');
 
 function getStartYearMonth(options) {
     let startMonth = common.monthAdd(options.now.getMonth() + 1, -options.pastMonths);
@@ -385,7 +385,7 @@ async function getData(db, user) {
     };
 }
 
-async function handler(req, res) {
+async function routeGet(req, res) {
     const data = await getData(req.db, req.user);
 
     await req.db.end();
@@ -394,6 +394,14 @@ async function handler(req, res) {
         error: false,
         data
     });
+}
+
+async function routePost(req, res) {
+    return res.end('not done yet');
+}
+
+async function routePut(req, res) {
+    return res.end('not done yet');
 }
 
 module.exports = {
@@ -413,6 +421,8 @@ module.exports = {
     getMonthlyBalance,
     getMonthlyCategoryValues,
     getData,
-    handler
+    routeGet,
+    routePost,
+    routePut
 };
 

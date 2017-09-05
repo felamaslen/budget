@@ -1,4 +1,4 @@
-const common = require('./common');
+const common = require('../common');
 
 async function getPeriodCostDeep(db, user, now, period, groupBy, pageIndex = 0, category) {
     const categoryColumn = common.getCategoryColumn(category, groupBy);
@@ -35,7 +35,7 @@ function processDataResponse(result) {
         });
 }
 
-async function handler(req, res) {
+async function routeGet(req, res) {
     const params = [
         req.params.period,
         req.params.groupBy,
@@ -59,6 +59,6 @@ async function handler(req, res) {
 module.exports = {
     getPeriodCostDeep,
     processDataResponse,
-    handler
+    routeGet
 };
 

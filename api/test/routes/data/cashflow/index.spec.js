@@ -7,9 +7,9 @@
 require('dotenv').config();
 const expect = require('chai').expect;
 
-const common = require('../../test.common');
-const config = require('../../../src/config')();
-const overview = require('../../../src/routes/data/overview');
+const common = require('../../../test.common');
+const config = require('../../../../src/config')();
+const overview = require('../../../../src/routes/data/cashflow');
 
 describe('/api/data/overview', () => {
     let testPricesProcessedResponse = null;
