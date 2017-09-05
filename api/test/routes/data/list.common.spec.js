@@ -104,5 +104,28 @@ describe('Common list data functions', () => {
                     ' ORDER BY year DESC, month DESC, date DESC, id DESC');
         });
     });
+
+    describe('formatResults', () => {
+        it('should work as expected', () => {
+            const queryResult = [
+                { year: 2017, month: 9, date: 2, item: 'foo', category: 'bar' },
+                { year: 2017, month: 8, date: 29, item: 'baz', category: 'bak' }
+            ];
+
+            const columnMap = {
+                item: 'i',
+                category: 'k'
+            };
+
+            expect(listCommon.formatResults(queryResult, columnMap)).to.deep.equal([
+                {
+                    d: [2017, 9, 2], i: 'foo', k: 'bar'
+                },
+                {
+                    d: [2017, 8, 29], i: 'baz', k: 'bak'
+                }
+            ]);
+        });
+    });
 });
 

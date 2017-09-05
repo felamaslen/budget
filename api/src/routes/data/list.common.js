@@ -57,10 +57,35 @@ function getQuery(db, user, table, columns, limitCondition = null) {
     `, user.uid);
 }
 
+function formatResults(queryResult, columnMap) {
+    const dateKeys = ['year', 'month', 'date'];
+
+    return queryResult
+        .map(row => {
+            return Object.keys(row)
+                .reduce((obj, key) => {
+                    const value = row[key];
+
+                    const dateKey = dateKeys.indexOf(key);
+                    if (dateKey === -1) {
+                        const column = columnMap[key];
+
+                        obj[column] = value;
+                    }
+                    else {
+                        obj.d[dateKey] = value;
+                    }
+
+                    return obj;
+                }, { 'd': [] });
+        });
+}
+
 module.exports = {
     getLimitCondition,
     getQueryLimitCondition,
     getOlderExistsQuery,
-    getQuery
+    getQuery,
+    formatResults
 };
 
