@@ -6,7 +6,7 @@ require('dotenv').config();
 const expect = require('chai').expect;
 
 const common = require('../../../test.common');
-const analysis = require('../../../../src/routes/data/analysis/shallow');
+const analysis = require('../../../../src/routes/data/analysis');
 
 describe('/data/analysis', () => {
     describe('getPeriodCostForCategory', () => {
