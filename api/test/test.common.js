@@ -359,16 +359,25 @@ class DummyDbWithAnalysis extends DummyDb {
 
                 return data;
             }, {});
+
+        this.dataDeep = {
+            food: {
+                category: [
+                    { item: 'Flour', itemCol: 'Bread', cost: 80 },
+                    { item: 'Eggs', itemCol: 'Dairy', cost: 130 }
+                ]
+            }
+        };
     }
     query(sql, ...args) {
         const rawQuery = super.query(sql, ...args);
 
         const analysisMatch = rawQuery.match(new RegExp([
-            String('^SELECT (\\w+) AS itemCol, SUM\\(cost\\) AS cost '),
-            'FROM (\\w+) ',
-            'WHERE (.*) AND uid = 1 ',
+            String('^SELECT (\\w+) AS itemCol, SUM\\(cost\\) AS cost'),
+            'FROM (\\w+)',
+            'WHERE (.*) AND uid = 1',
             'GROUP BY itemCol'
-        ].join('')));
+        ].join(' ')));
 
         if (analysisMatch) {
             const groupBy = analysisMatch[1];
@@ -377,6 +386,21 @@ class DummyDbWithAnalysis extends DummyDb {
             return this.data[category][groupBy].map(item => {
                 return { itemCol: item[0], cost: item[1] };
             });
+        }
+
+        const analysisDeepMatch = rawQuery.match(new RegExp([
+            String('^SELECT item, (\\w+) AS itemCol, SUM\\(cost\\) AS cost'),
+            'FROM (\\w+)',
+            'WHERE (.*) AND uid = 1 AND cost > 0',
+            'GROUP BY item, itemCol',
+            'ORDER BY itemCol'
+        ].join(' ')));
+
+        if (analysisDeepMatch) {
+            const groupBy = analysisDeepMatch[1];
+            const category = analysisDeepMatch[2];
+
+            return this.dataDeep[category][groupBy];
         }
 
         return rawQuery;
