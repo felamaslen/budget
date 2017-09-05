@@ -1,5 +1,5 @@
-const common = require('../../common');
-const config = require('../../config')();
+const common = require('../../../common');
+const config = require('../../../config')();
 
 function getCategoryColumn(category, groupBy) {
     // get database column corresponding to "category" type
@@ -112,42 +112,7 @@ function periodCondition(now, period, pageIndex = 0) {
     return null;
 }
 
-async function getPeriodCostForCategory(db, user, condition, category, groupBy) {
-    const categoryColumn = getCategoryColumn(category, groupBy);
-
-    const result = await db.query(`
-    SELECT ${categoryColumn} AS itemCol, SUM(cost) AS cost
-    FROM ${category}
-    WHERE ${condition} AND uid = ?
-    GROUP BY itemCol
-    `, user.uid);
-
-    return result;
-}
-
-async function getPeriodCost(db, user, now, period, groupBy, pageIndex) {
-    const categories = ['bills', 'food', 'general', 'holiday', 'social'];
-
-    const queryCondition = periodCondition(now, period, pageIndex);
-
-    const promises = await Promise.all(categories.map(
-        category => getPeriodCostForCategory(
-            db, user, queryCondition.condition, category, groupBy
-        )
-    ));
-
-    const cost = promises
-        .map((result, key) => {
-            return [
-                categories[key],
-                result.map(item => [item.itemCol, item.cost])
-            ];
-        });
-
-    return { cost, description: queryCondition.description };
-}
-
-function validateParams(period, groupBy, pageIndex) {
+function validateParams(period, groupBy, pageIndex, category = null) {
     const allowedPeriods = ['week', 'month', 'year'];
 
     if (allowedPeriods.indexOf(period) === -1) {
@@ -164,31 +129,26 @@ function validateParams(period, groupBy, pageIndex) {
         return { isValid: false, param: 'pageIndex' };
     }
 
+    const allowedCategories = ['food', 'general', 'social', 'holiday'];
+    if (category && allowedCategories.indexOf(category) === -1) {
+        return { isValid: false, param: 'category' };
+    }
+
     return { isValid: true };
 }
 
-async function handler(req, res) {
-    const period = req.params.period;
-    const groupBy = req.params.groupBy;
-    const pageIndex = parseInt(req.params.pageIndex || 0, 10);
+async function handlerInvalidParams(req, res, validationStatus) {
+    await req.db.end();
 
-    const validationStatus = validateParams(period, groupBy, pageIndex);
+    return res
+        .status(400)
+        .json({
+            error: true,
+            errorMessage: `Invalid parameter value for ${validationStatus.param}`
+        });
+}
 
-    if (!validationStatus.isValid) {
-        await req.db.end();
-
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: `Invalid parameter value for ${validationStatus.param}`
-            });
-    }
-
-    const result = await getPeriodCost(
-        req.db, req.user, new Date(), period, groupBy, pageIndex
-    );
-
+async function handlerValidResult(req, res, result) {
     await req.db.end();
 
     return res.json({
@@ -203,9 +163,8 @@ module.exports = {
     periodConditionMonthly,
     periodConditionYearly,
     periodCondition,
-    getPeriodCostForCategory,
-    getPeriodCost,
     validateParams,
-    handler
+    handlerInvalidParams,
+    handlerValidResult
 };
 
