@@ -1,4 +1,5 @@
 const common = require('../../common');
+const config = require('../../config')();
 
 function getLimitCondition(now, numMonths, offset = 0) {
     const currentMonth = now.getMonth() + 1;
@@ -218,12 +219,14 @@ async function insertItem(db, user, table, validData) {
         return insertedId;
     }
     catch (err) {
-        const duplicateMatch = err.message.match(/^ER_DUP_ENTRY: .* for key '([\w\s]+)'$/);
+        const duplicateMatch = err.message.match(
+            /^ER_DUP_ENTRY: .* for key '([\w\s]+)'$/
+        );
         if (duplicateMatch) {
             throw new Error(duplicateMatch[1]);
         }
 
-        throw err;
+        throw new Error(config.msg.errorServerDb);
     }
 }
 

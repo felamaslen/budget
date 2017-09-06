@@ -289,7 +289,13 @@ async function routePost(req, res) {
         response.id = insertedId;
     }
     catch (err) {
-        statusCode = 400;
+        if (err.message === config.errorServerDb) {
+            statusCode = 500;
+        }
+        else {
+            statusCode = 400;
+        }
+
         response.errorMessage = err.message;
     }
 
