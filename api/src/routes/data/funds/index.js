@@ -158,6 +158,53 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     return row;
 }
 
+function validateInsertData(data) {
+    const validData = listCommon.validateInsertData(data);
+
+    if (!('transactions' in data)) {
+        throw new Error('didn\'t provide transactions data');
+    }
+
+    const transactions = data.transactions;
+
+    if (!Array.isArray(transactions)) {
+        throw new Error('transactions must be an array');
+    }
+
+    const validTransactions = transactions.map(transaction => {
+        const validTransaction = {};
+
+        ['cost', 'units'].forEach(item => {
+            if (!(item in transaction)) {
+                throw new Error(
+                    `transactions must have ${item}`
+                );
+            }
+
+            const value = parseFloat(transaction[item], 10);
+            if (isNaN(value)) {
+                throw new Error(
+                    `transactions ${item} must be numerical`
+                );
+            }
+
+            const key = item.substring(0, 1);
+            validTransaction[key] = value;
+        });
+
+        const { year, month, date } = listCommon.validateDate(transaction);
+
+        // eslint-disable-next-line id-length
+        validTransaction.d = [year, month, date];
+
+        return validTransaction;
+    });
+
+    validData.transactions = JSON.stringify(validTransactions);
+
+    return validData;
+}
+
 async function routeGet(req, res) {
     const now = new Date();
 
@@ -207,6 +254,8 @@ async function routeGet(req, res) {
         data.cacheTimes = priceHistory.times;
     }
 
+    await req.db.end();
+
     return res.json({
         error: false,
         data
@@ -214,7 +263,41 @@ async function routeGet(req, res) {
 }
 
 async function routePost(req, res) {
-    return res.end('not done yet');
+    const db = req.db;
+    const user = req.user;
+
+    const table = 'funds';
+
+    const rawData = req.body;
+    let validData = null;
+
+    let statusCode = 201;
+    const response = {
+        error: false
+    };
+
+    try {
+        validData = validateInsertData(rawData);
+
+        const insertedId = await listCommon.insertItem(
+            db, user, table, validData
+        );
+
+        const newTotal = await listCommon.getTotalCost(db, user, table);
+
+        response.total = newTotal;
+        response.id = insertedId;
+    }
+    catch (err) {
+        statusCode = 400;
+        response.errorMessage = err.message;
+    }
+
+    await req.db.end();
+
+    return res
+        .status(statusCode)
+        .json(response);
 }
 
 async function routePut(req, res) {
@@ -232,6 +315,7 @@ module.exports = {
     processFundHistory,
     fundHash,
     getFundHistoryMappedToFundIds,
+    validateInsertData,
     routeGet,
     routePost,
     routePut,
