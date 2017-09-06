@@ -79,7 +79,7 @@ function getAllHistoryForFundsQuery(
 
 function processFundHistory(queryResult) {
     // return a map of fund holding IDs to historical prices
-    const idMap = queryResult
+    const keyMap = queryResult
         .reduce((map, row, rowKey) => {
             const rowIds = row.id
                 .split(',')
@@ -90,14 +90,17 @@ function processFundHistory(queryResult) {
                 .map(price => parseFloat(price, 10));
 
             rowIds.forEach((id, idKey) => {
-                if (!(id in map)) {
-                    map[id] = new Array(rowKey).fill(0);
+                if (!(id in map.idMap)) {
+                    map.idMap[id] = [];
+
+                    // startIndex is to save printing lots of zeroes
+                    map.startIndex[id] = rowKey;
                 }
-                map[id].push(rowPrices[idKey]);
+                map.idMap[id].push(rowPrices[idKey]);
             });
 
             return map;
-        }, {});
+        }, { idMap: {}, startIndex: {} });
 
     let startTime = null;
 
@@ -112,7 +115,7 @@ function processFundHistory(queryResult) {
             return timeDiff;
         });
 
-    return { idMap, startTime, times };
+    return Object.assign(keyMap, { startTime, times });
 }
 
 function fundHash(fundName, salt) {
@@ -138,7 +141,7 @@ async function getFundHistoryMappedToFundIds(
     return processFundHistory(fundHistory);
 }
 
-function postProcessListRow(row, pricesIdMap = null) {
+function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     // transactions
     row.tr = row.t
         ? JSON.parse(row.t)
@@ -146,8 +149,10 @@ function postProcessListRow(row, pricesIdMap = null) {
 
     Reflect.deleteProperty(row, 't');
 
-    if (pricesIdMap) {
-        row.pr = pricesIdMap[row.I] || [];
+    if (getPriceHistory) {
+        row.pr = priceHistory.idMap[row.I] || [];
+
+        row.prStartIndex = priceHistory.startIndex[row.I];
     }
 
     return row;
@@ -189,7 +194,7 @@ async function routeGet(req, res) {
         );
 
         addData = row => {
-            return postProcessListRow(row, priceHistory.idMap);
+            return postProcessListRow(row, getPriceHistory, priceHistory);
         }
     }
 
