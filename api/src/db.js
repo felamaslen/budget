@@ -65,6 +65,16 @@ class Connection {
     query(sql, ...args) {
         return new Promise((resolve, reject) => {
             this.conn.query(sql, args, (err, results) => {
+                if (process.env.SQLDEBUG === 'true') {
+                    const rawQuery = sql
+                        .replace(/\?/g, () => mysql.escape(args.shift()))
+                        .replace(/\s+/g, ' ')
+                        .replace(/^\s+/, '')
+                        .replace(/\s+$/, '');
+
+                    console.log({ rawQuery });
+                }
+
                 if (err) {
                     return reject(err);
                 }
