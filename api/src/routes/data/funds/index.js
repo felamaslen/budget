@@ -311,6 +311,7 @@ async function routePost(req, res) {
         const status = common.getErrorStatus(err);
         statusCode = status.statusCode;
         response.errorMessage = status.errorMessage;
+        response.error = true;
     }
 
     await req.db.end();
@@ -346,6 +347,7 @@ async function routePut(req, res) {
         const status = common.getErrorStatus(err);
         statusCode = status.statusCode;
         response.errorMessage = status.errorMessage;
+        response.error = true;
     }
 
     await req.db.end();
@@ -356,7 +358,39 @@ async function routePut(req, res) {
 }
 
 async function routeDelete(req, res) {
-    return res.end('not done yet');
+    const db = req.db;
+    const user = req.user;
+
+    const table = 'funds';
+
+    const rawData = req.body;
+
+    let statusCode = 200;
+    const response = {
+        error: false
+    };
+
+    try {
+        const id = listCommon.validateDeleteData(rawData);
+
+        await listCommon.deleteItem(db, user, table, id);
+
+        const newTotal = await listCommon.getTotalCost(db, user, table);
+
+        response.total = newTotal;
+    }
+    catch (err) {
+        const status = common.getErrorStatus(err);
+        statusCode = status.statusCode;
+        response.errorMessage = status.errorMessage;
+        response.error = true;
+    }
+
+    await req.db.end();
+
+    res
+        .status(statusCode)
+        .json(response);
 }
 
 module.exports = {
