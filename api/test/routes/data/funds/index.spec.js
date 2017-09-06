@@ -11,17 +11,43 @@ const common = require('../../../test.common');
 const funds = require('../../../../src/routes/data/funds');
 
 describe('/data/funds', () => {
+    describe('getMaxAge', () => {
+        it('should return the correct timestamp', () => {
+            const now = new Date('2017-09-05');
+
+            expect(funds.getMaxAge(now, 'year', 1)).to.be.equal(
+                Math.floor(new Date('2016-09-05').getTime() / 1000)
+            );
+
+            expect(funds.getMaxAge(now, 'year', 3)).to.be.equal(
+                Math.floor(new Date('2014-09-05').getTime() / 1000)
+            );
+
+            expect(funds.getMaxAge(now, 'month', 6)).to.be.equal(
+                Math.floor(new Date('2017-03-06').getTime() / 1000)
+            );
+        });
+
+        it('should handle invalid parameters', () => {
+            const now = new Date('2017-09-05');
+
+            expect(funds.getMaxAge(now, 'year', 0)).to.equal(0);
+            expect(funds.getMaxAge(now, 'foo')).to.equal(0);
+        });
+    });
+
     describe('getNumResultsQuery', () => {
         it('should return the correct query', () => {
             const db = new common.DummyDb();
             const user = { uid: 1 };
 
-            expect(funds.getNumResultsQuery(db, user, 'somesalt')).to.equal([
+            expect(funds.getNumResultsQuery(db, user, 'somesalt', 10)).to.equal([
                 'SELECT COUNT(*) AS numResults FROM (',
                 'SELECT c.cid FROM funds AS f',
                 'LEFT JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, \'somesalt\'))',
                 'LEFT JOIN fund_cache fc ON fh.fid = fc.fid',
                 'LEFT JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1',
+                'AND c.time > 10',
                 'WHERE f.uid = 1 GROUP BY c.cid ) results'
             ].join(' '));
         });
@@ -33,7 +59,7 @@ describe('/data/funds', () => {
             const user = { uid: 1 };
 
             expect(funds.getAllHistoryForFundsQuery(
-                db, user, 'somesalt', 100, 50
+                db, user, 'somesalt', 100, 50, 10
             )).to.equal([
                 'SELECT * FROM (',
                 'SELECT id, time, price, cNum, FLOOR(cNum % (100 / 50)) AS period',
@@ -60,6 +86,7 @@ describe('/data/funds', () => {
                 'ON fh.hash = MD5(CONCAT(f.item, \'somesalt\'))',
                 'INNER JOIN fund_cache fc ON fh.fid = fc.fid',
                 'INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid',
+                'AND c.time > 10',
                 'GROUP BY c.cid',
                 'ORDER BY time',
                 ') prices',
