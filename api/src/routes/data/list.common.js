@@ -269,7 +269,7 @@ async function insertItem(db, user, table, validData) {
 
         const insertedId = insertQuery.insertId;
 
-        return insertedId;
+        return { id: insertedId };
     }
     catch (err) {
         const duplicateMatch = err.message.match(
@@ -295,6 +295,8 @@ async function updateItem(db, user, table, validData) {
         UPDATE ${table} SET ${keyValues.join(', ')}
         WHERE id = ? AND uid = ?
         `, ...values, validData.id, user.uid);
+
+        return null;
     }
     catch (err) {
         throw new Error(config.msg.errorServerDb);
@@ -306,10 +308,59 @@ async function deleteItem(db, user, table, id) {
         await db.query(`
         DELETE FROM ${table} WHERE id = ? AND uid = ?
         `, id, user.uid);
+
+        return null;
     }
     catch (err) {
         throw new Error(config.msg.errorServerDb);
     }
+}
+
+async function route(req, res, table, validate, operation, successCode = 200) {
+    const db = req.db;
+    const user = req.user;
+
+    const rawData = req.body;
+    let validData = null;
+
+    let statusCode = successCode;
+    let response = { error: false };
+
+    try {
+        validData = validate(rawData);
+
+        const operationResult = await operation(db, user, table, validData);
+
+        if (operationResult) {
+            response = Object.assign({}, response, operationResult);
+        }
+
+        response.total = await getTotalCost(db, user, table);
+    }
+    catch (err) {
+        const status = common.getErrorStatus(err);
+        statusCode = status.statusCode;
+        response.errorMessage = status.errorMessage;
+        response.error = true;
+    }
+
+    await req.db.end();
+
+    return res
+        .status(statusCode)
+        .json(response);
+}
+
+function routePost(req, res, table, validate) {
+    return route(req, res, table, validate, insertItem, 201);
+}
+
+function routePut(req, res, table, validate) {
+    return route(req, res, table, validate, updateItem);
+}
+
+function routeDelete(req, res, table) {
+    return route(req, res, table, validateDeleteData, deleteItem);
 }
 
 module.exports = {
@@ -325,8 +376,8 @@ module.exports = {
     validateInsertData,
     validateUpdateData,
     validateDeleteData,
-    insertItem,
-    updateItem,
-    deleteItem
+    routePost,
+    routePut,
+    routeDelete
 };
 
