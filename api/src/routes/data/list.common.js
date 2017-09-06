@@ -208,11 +208,6 @@ async function insertItem(db, user, table, validData) {
     const columns = Object.keys(validData);
     const values = Object.values(validData);
 
-    console.log({ columns, values });
-
-    console.log(columns.join(', '));
-    console.log(values.map(() => '?').join(', '));
-
     try {
         const insertQuery = await db.query(`
         INSERT INTO ${table} (uid, ${columns.join(', ')})
