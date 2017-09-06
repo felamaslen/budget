@@ -443,9 +443,17 @@
                 - application/json
                 parameters:
                 - in: body
+                  name: year
+                  required: true
+                  type: number
+                - in: body
+                  name: month
+                  required: true
+                  type: number
+                - in: body
                   name: date
                   required: true
-                  type: array
+                  type: number
                 - in: body
                   name: item
                   required: true
@@ -479,9 +487,17 @@
                   required: true
                   type: integer
                 - in: body
+                  name: year
+                  required: true
+                  type: number
+                - in: body
+                  name: month
+                  required: true
+                  type: number
+                - in: body
                   name: date
-                  required: false
-                  type: array
+                  required: true
+                  type: number
                 - in: body
                   name: item
                   required: false
