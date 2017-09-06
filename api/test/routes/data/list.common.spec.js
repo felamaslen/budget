@@ -138,5 +138,107 @@ describe('Common list data functions', () => {
             );
         });
     });
+
+    describe('validateInsertData', () => {
+        it('should require valid years', () => {
+            expect(() => listCommon.validateInsertData({})).to.throw('didn\'t provide year');
+            [NaN, null, 'foo'].forEach(year => {
+                expect(() => listCommon.validateInsertData(
+                    { year }
+                )).to.throw('invalid year');
+            });
+        });
+
+        it('should require valid months', () => {
+            expect(() => listCommon.validateInsertData({ year: 2017 }))
+                .to.throw('didn\'t provide month');
+
+            [NaN, null, 'foo'].forEach(month => {
+                expect(() => listCommon.validateInsertData(
+                    { year: 2017, month }
+                )).to.throw('invalid month');
+            });
+
+            expect(() => listCommon.validateInsertData(
+                { year: 2017, month: 0, date: 1 })
+            )
+                .to.throw('month out of range');
+            expect(() => listCommon.validateInsertData(
+                { year: 2017, month: -1, date: 1 })
+            )
+                .to.throw('month out of range');
+            expect(() => listCommon.validateInsertData(
+                { year: 2017, month: 13, date: 1 })
+            )
+                .to.throw('month out of range');
+            expect(() => listCommon.validateInsertData(
+                { year: 2017, month: 1000, date: 1 })
+            )
+                .to.throw('month out of range');
+        });
+        it('should require valid dates', () => {
+            expect(() => listCommon.validateDate({ year: 2017, month: 5 }))
+                .to.throw('didn\'t provide date');
+            [NaN, null, 'foo'].forEach(date => {
+                expect(() => listCommon.validateDate(
+                    { year: 2017, month: 5, date }
+                )).to.throw('invalid date');
+            });
+
+            expect(() => listCommon.validateDate({ year: 2017, month: 1, date: 0 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 1, date: -1 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 1, date: 32 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 1, date: 1000 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 2, date: 29 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2016, month: 2, date: 29 }))
+                .to.not.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 3, date: 32 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 4, date: 31 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 5, date: 32 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 6, date: 31 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 7, date: 32 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 8, date: 32 }))
+                .to.throw('date out of range');
+            expect(() => listCommon.validateDate({ year: 2017, month: 9, date: 31 }))
+                .to.throw('date out of range');
+        });
+
+        it('should require valid item strings', () => {
+            expect(() => listCommon.validateInsertData({ year: 2017, month: 9, date: 15 }))
+                .to.throw('didn\'t provide data for `item`');
+        });
+        it('should require valid costs', () => {
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15, item: 'foo'
+            }))
+                .to.throw('didn\'t provide data for `cost`');
+
+            [NaN, null, 'foo'].forEach(cost => {
+                expect(() => listCommon.validateInsertData({
+                    year: 2017, month: 9, date: 15, item: 'foo', cost
+                }))
+                    .to.throw('invalid cost data');
+            });
+        });
+
+        it('should return the validated data', () => {
+            expect(listCommon.validateInsertData({
+                year: 2017, month: 9, date: 4, item: 'foo', cost: 10
+            }))
+                .to.deep.equal({
+                    year: 2017, month: 9, date: 4, item: 'foo', cost: 10
+                });
+        });
+    });
 });
 

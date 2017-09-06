@@ -93,6 +93,12 @@ function getTotalCostQuery(db, user, table) {
     `, user.uid);
 }
 
+async function getTotalCost(db, user, table) {
+    const result = await getTotalCostQuery(db, user, table);
+
+    return result[0].total;
+}
+
 async function getResults(
     db, user, now, table, columnMapExtra, addData = null, limit = null
 ) {
@@ -125,11 +131,11 @@ async function getResults(
 
     const data = formatResults(queryResult, columnMap, addData);
 
-    const total = await getTotalCostQuery(db, user, table);
+    const total = await getTotalCost(db, user, table);
 
     const result = {
         data,
-        total: total[0].total
+        total
     };
 
     if (olderExists !== null) {
@@ -139,6 +145,93 @@ async function getResults(
     return result;
 }
 
+function validateDate(data) {
+    ['year', 'month', 'date'].forEach(dateItem => {
+        if (!(dateItem in data)) {
+            throw new Error(`didn't provide ${dateItem}`);
+        }
+
+        const item = parseInt(data[dateItem], 10);
+
+        if (isNaN(item)) {
+            throw new Error(`invalid ${dateItem}`);
+        }
+    });
+
+    const year = parseInt(data.year, 10);
+    const month = parseInt(data.month, 10);
+    const date = parseInt(data.date, 10);
+
+    if (month < 1 || month > 12) {
+        throw new Error('month out of range');
+    }
+
+    if (date < 1 || date > common.monthLength(year, month)) {
+        throw new Error('date out of range');
+    }
+
+    return { year, month, date };
+}
+
+function validateInsertData(data) {
+    const validData = {};
+
+    // validate dates
+    const { year, month, date } = validateDate(data);
+    validData.year = year;
+    validData.month = month;
+    validData.date = date;
+
+    // validate item
+    if (!('item' in data) || !data.item.toString().length) {
+        throw new Error('didn\'t provide data for `item`');
+    }
+
+    validData.item = data.item.toString();
+
+    // validate cost
+    if (!('cost' in data)) {
+        throw new Error('didn\'t provide data for `cost`');
+    }
+
+    const cost = parseInt(data.cost, 10);
+    if (isNaN(cost)) {
+        throw new Error('invalid cost data');
+    }
+
+    validData.cost = cost;
+
+    return validData;
+}
+
+async function insertItem(db, user, table, validData) {
+    const columns = Object.keys(validData);
+    const values = Object.values(validData);
+
+    console.log({ columns, values });
+
+    console.log(columns.join(', '));
+    console.log(values.map(() => '?').join(', '));
+
+    try {
+        const insertQuery = await db.query(`
+        INSERT INTO ${table} (uid, ${columns.join(', ')})
+        VALUES (?, ${values.map(() => '?').join(', ')})`, user.uid, ...values);
+
+        const insertedId = insertQuery.insertId;
+
+        return insertedId;
+    }
+    catch (err) {
+        const duplicateMatch = err.message.match(/^ER_DUP_ENTRY: .* for key '([\w\s]+)'$/);
+        if (duplicateMatch) {
+            throw new Error(duplicateMatch[1]);
+        }
+
+        throw err;
+    }
+}
+
 module.exports = {
     getLimitCondition,
     getQueryLimitCondition,
@@ -146,6 +239,10 @@ module.exports = {
     getQuery,
     formatResults,
     getTotalCostQuery,
-    getResults
+    getTotalCost,
+    getResults,
+    validateDate,
+    validateInsertData,
+    insertItem
 };
 
