@@ -23,7 +23,10 @@ module.exports = () => {
         },
         data: {
             listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
-            fundSalt: process.env.FUND_SALT || '',
+            funds: {
+                salt: process.env.FUND_SALT || '',
+                historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10)
+            },
             overview: {
                 numLast: 25,
                 numFuture: 12,
