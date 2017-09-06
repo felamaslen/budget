@@ -12,7 +12,8 @@ const config = require('../../../../src/config')();
 const funds = require('../../../../src/routes/data/funds');
 
 describe('/data/funds', () => {
-    describe('getLatestCachedValues', () => {
+
+    describe('getLatestCachedPricesQuery', () => {
         it('should return the correct query', () => {
             const db = new common.DummyDb();
 
@@ -24,6 +25,20 @@ describe('/data/funds', () => {
                 'INNER JOIN fund_hash fh ON fh.fid = fc.fid',
                 'GROUP BY fc.fid'
             ].join(' '));
+        });
+    });
+
+    describe('getLatestCachedPrices', () => {
+        it('should return a map from fund hashes to prices', () => {
+            const queryResult = [
+                { hash: 'hash1', prices: '100.3,90,86,97' },
+                { hash: 'hash2', prices: '20,23,21.5' }
+            ];
+
+            expect(funds.getLatestCachedPrices(queryResult)).to.deep.equal({
+                hash1: 97,
+                hash2: 21.5
+            });
         });
     });
 
