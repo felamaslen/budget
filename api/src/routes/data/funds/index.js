@@ -3,7 +3,23 @@ const md5 = require('md5');
 const config = require('../../../config')();
 const listCommon = require('../list.common');
 
-function getNumResultsQuery(db, user, salt) {
+function getMaxAge(now, period, length) {
+    const periodMap = {
+        year: 365.25,
+        month: 365.25 / 12
+    };
+
+    if (!(period in periodMap) || length < 1) {
+        return 0;
+    }
+
+    const minTimestamp = Math.floor(now.getTime() / 1000) -
+        (86400 * Math.round(periodMap[period] * length));
+
+    return minTimestamp;
+}
+
+function getNumResultsQuery(db, user, salt, minTimestamp) {
     return db.query(`
     SELECT COUNT(*) AS numResults FROM (
         SELECT c.cid
@@ -11,12 +27,15 @@ function getNumResultsQuery(db, user, salt) {
         LEFT JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, ?))
         LEFT JOIN fund_cache fc ON fh.fid = fc.fid
         LEFT JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
+            AND c.time > ${minTimestamp}
         WHERE f.uid = ?
         GROUP BY c.cid
     ) results`, salt, user.uid);
 }
 
-function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay) {
+function getAllHistoryForFundsQuery(
+    db, user, salt, numResults, numDisplay, minTimestamp
+) {
     return db.query(`
     SELECT * FROM (
         SELECT id, time, price, cNum, FLOOR(cNum % (? / ?)) AS period FROM (
@@ -45,6 +64,7 @@ function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay) {
                 INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, ?))
                 INNER JOIN fund_cache fc ON fh.fid = fc.fid
                 INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
+                    AND c.time > ${minTimestamp}
                 GROUP BY c.cid
                 ORDER BY time
             ) prices
@@ -99,15 +119,19 @@ function fundHash(fundName, salt) {
     return md5(`${fundName}${salt}`);
 }
 
-async function getFundHistoryMappedToFundIds(db, user, numDisplay, salt) {
-    const numResultsQuery = await getNumResultsQuery(db, user, salt);
+async function getFundHistoryMappedToFundIds(
+    db, user, now, period, length, numDisplay, salt
+) {
+    const minTimestamp = getMaxAge(now, period, length);
+
+    const numResultsQuery = await getNumResultsQuery(db, user, salt, minTimestamp);
     const numResults = parseInt(numResultsQuery[0].numResults, 10);
 
     let fundHistory = { idMap: {}, startTime: 0, times: [] };
 
     if (!isNaN(numResults)) {
         fundHistory = await getAllHistoryForFundsQuery(
-            db, user, salt, numResults, numDisplay
+            db, user, salt, numResults, numDisplay, minTimestamp
         );
     }
 
@@ -128,15 +152,29 @@ function postProcessListRow(row, pricesIdMap) {
 }
 
 async function routeGet(req, res) {
+    const now = new Date();
+
     const columnMap = {
         item: 'i',
         transactions: 't',
         cost: 'c'
     };
 
+    let period = null;
+    let length = null;
+    if (['year', 'month'].indexOf(req.query.period) > -1 &&
+        !isNaN(parseInt(req.query.length, 10))) {
+
+        period = req.query.period;
+        length = parseInt(req.query.length, 10);
+    }
+
     const { idMap, startTime, times } = await getFundHistoryMappedToFundIds(
         req.db,
         req.user,
+        now,
+        period,
+        length,
         config.data.funds.historyResolution,
         config.data.funds.salt
     );
@@ -146,7 +184,7 @@ async function routeGet(req, res) {
     }
 
     const data = await listCommon.getResults(
-        req.db, req.user, new Date(), 'funds', columnMap, addData
+        req.db, req.user, now, 'funds', columnMap, addData
     );
 
     data.startTime = startTime;
@@ -171,6 +209,7 @@ async function routeDelete(req, res) {
 }
 
 module.exports = {
+    getMaxAge,
     getNumResultsQuery,
     getAllHistoryForFundsQuery,
     processFundHistory,
