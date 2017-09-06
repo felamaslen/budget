@@ -7,6 +7,30 @@ const expect = require('chai').expect;
 const common = require('../src/common');
 
 describe('Common methods', () => {
+    describe('monthLength', () => {
+        it('should return correct month lengths', () => {
+            expect(common.monthLength(2017, 1)).to.equal(31);
+            expect(common.monthLength(2017, 2)).to.equal(28);
+            expect(common.monthLength(2017, 3)).to.equal(31);
+            expect(common.monthLength(2017, 4)).to.equal(30);
+            expect(common.monthLength(2017, 5)).to.equal(31);
+            expect(common.monthLength(2017, 6)).to.equal(30);
+            expect(common.monthLength(2017, 7)).to.equal(31);
+            expect(common.monthLength(2017, 8)).to.equal(31);
+            expect(common.monthLength(2017, 9)).to.equal(30);
+            expect(common.monthLength(2017, 10)).to.equal(31);
+            expect(common.monthLength(2017, 11)).to.equal(30);
+            expect(common.monthLength(2017, 12)).to.equal(31);
+        });
+        it('should handle leap years', () => {
+            expect(common.monthLength(2016, 2)).to.equal(29);
+            expect(common.monthLength(2000, 2)).to.equal(29);
+            expect(common.monthLength(1732, 2)).to.equal(29);
+            expect(common.monthLength(1700, 2)).to.equal(28);
+            expect(common.monthLength(1600, 2)).to.equal(29);
+        });
+    });
+
     describe('monthAdd', () => {
         it('should work as expected', () => {
             expect(common.monthAdd(1, 4)).to.equal(5);
