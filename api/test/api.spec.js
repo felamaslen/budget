@@ -76,6 +76,12 @@ describe('API', () => {
         );
     });
 
+    describe('GET -> /data/stocks', () => {
+        it('should run', () => testRoute(
+            app.routes, 'get', '/data/stocks'
+        ));
+    });
+
     describe('/data/funds', () => {
         it('should run GET route', () => testRoute(app.routes, 'get', '/data/funds'));
         it('should run POST route', () => testRoute(app.routes, 'post', '/data/funds'));
