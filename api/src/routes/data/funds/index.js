@@ -1,7 +1,6 @@
 const md5 = require('md5');
 
 const config = require('../../../config')();
-const common = require('../../../common');
 const listCommon = require('../list.common');
 
 function getMaxAge(now, period, length) {
@@ -283,114 +282,16 @@ async function routeGet(req, res) {
     });
 }
 
-async function routePost(req, res) {
-    const db = req.db;
-    const user = req.user;
-
-    const table = 'funds';
-
-    const rawData = req.body;
-    let validData = null;
-
-    let statusCode = 201;
-    const response = {
-        error: false
-    };
-
-    try {
-        validData = validateInsertData(rawData);
-
-        const insertedId = await listCommon.insertItem(db, user, table, validData);
-
-        const newTotal = await listCommon.getTotalCost(db, user, table);
-
-        response.total = newTotal;
-        response.id = insertedId;
-    }
-    catch (err) {
-        const status = common.getErrorStatus(err);
-        statusCode = status.statusCode;
-        response.errorMessage = status.errorMessage;
-        response.error = true;
-    }
-
-    await req.db.end();
-
-    return res
-        .status(statusCode)
-        .json(response);
+function routePost(req, res) {
+    return listCommon.routePost(req, res, 'funds', validateInsertData);
 }
 
-async function routePut(req, res) {
-    const db = req.db;
-    const user = req.user;
-
-    const table = 'funds';
-
-    const rawData = req.body;
-
-    let statusCode = 200;
-    const response = {
-        error: false
-    };
-
-    try {
-        const validData = validateUpdateData(rawData);
-
-        await listCommon.updateItem(db, user, table, validData);
-
-        const newTotal = await listCommon.getTotalCost(db, user, table);
-
-        response.total = newTotal;
-    }
-    catch (err) {
-        const status = common.getErrorStatus(err);
-        statusCode = status.statusCode;
-        response.errorMessage = status.errorMessage;
-        response.error = true;
-    }
-
-    await req.db.end();
-
-    return res
-        .status(statusCode)
-        .json(response);
+function routePut(req, res) {
+    return listCommon.routePut(req, res, 'funds', validateUpdateData);
 }
 
-async function routeDelete(req, res) {
-    const db = req.db;
-    const user = req.user;
-
-    const table = 'funds';
-
-    const rawData = req.body;
-
-    let statusCode = 200;
-    const response = {
-        error: false
-    };
-
-    try {
-        const id = listCommon.validateDeleteData(rawData);
-
-        await listCommon.deleteItem(db, user, table, id);
-
-        const newTotal = await listCommon.getTotalCost(db, user, table);
-
-        response.total = newTotal;
-    }
-    catch (err) {
-        const status = common.getErrorStatus(err);
-        statusCode = status.statusCode;
-        response.errorMessage = status.errorMessage;
-        response.error = true;
-    }
-
-    await req.db.end();
-
-    res
-        .status(statusCode)
-        .json(response);
+function routeDelete(req, res) {
+    return listCommon.routeDelete(req, res, 'funds');
 }
 
 module.exports = {
