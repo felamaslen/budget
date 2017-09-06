@@ -146,12 +146,28 @@ async function getResults(
     return result;
 }
 
-function validateDate(data) {
-    ['year', 'month', 'date'].forEach(dateItem => {
-        if (!(dateItem in data)) {
-            throw new Error(`didn't provide ${dateItem}`);
+function getUndefinedItem(items, data) {
+    return items.reduce((status, item) => {
+        if (status || item in data) {
+            return status;
         }
 
+        return item;
+    }, null);
+}
+
+function validateDate(data, allRequired = true) {
+    const undefinedItem = getUndefinedItem(['year', 'month', 'date'], data);
+
+    if (undefinedItem) {
+        if (allRequired) {
+            throw new Error(`didn't provide ${undefinedItem}`);
+        }
+
+        return {};
+    }
+
+    ['year', 'month', 'date'].forEach(dateItem => {
         const item = parseInt(data[dateItem], 10);
 
         if (isNaN(item)) {
@@ -174,35 +190,59 @@ function validateDate(data) {
     return { year, month, date };
 }
 
-function validateInsertData(data) {
+function validateInsertData(data, allRequired = true) {
     const validData = {};
 
     // validate dates
-    const { year, month, date } = validateDate(data);
-    validData.year = year;
-    validData.month = month;
-    validData.date = date;
-
-    // validate item
-    if (!('item' in data) || !data.item.toString().length) {
-        throw new Error('didn\'t provide data for `item`');
+    const { year, month, date } = validateDate(data, allRequired);
+    if (year && month && date) {
+        validData.year = year;
+        validData.month = month;
+        validData.date = date;
     }
 
-    validData.item = data.item.toString();
-
-    // validate cost
-    if (!('cost' in data)) {
-        throw new Error('didn\'t provide data for `cost`');
+    const undefinedItem = getUndefinedItem(['item', 'cost'], data);
+    if (undefinedItem && allRequired) {
+        throw new Error(`didn't provide ${undefinedItem}`);
     }
 
-    const cost = parseInt(data.cost, 10);
-    if (isNaN(cost)) {
-        throw new Error('invalid cost data');
+    if ('item' in data) {
+        validData.item = data.item.toString();
     }
 
-    validData.cost = cost;
+    if ('cost' in data) {
+        const cost = parseInt(data.cost, 10);
+        if (isNaN(cost)) {
+            throw new Error('invalid cost data');
+        }
+
+        validData.cost = cost;
+    }
 
     return validData;
+}
+
+function validateUpdateData(data) {
+    if (!('id' in data)) {
+        throw new Error('didn\'t provide id');
+    }
+
+    const id = parseInt(data.id, 10);
+    if (isNaN(id) || id < 1) {
+        throw new Error('invalid id');
+    }
+
+    const dataWithoutId = Object.keys(data).reduce((obj, key) => {
+        if (key !== 'id') {
+            obj[key] = data[key];
+        }
+
+        return obj;
+    }, {});
+
+    const values = validateInsertData(dataWithoutId, false);
+
+    return { id, values };
 }
 
 async function insertItem(db, user, table, validData) {
@@ -230,6 +270,23 @@ async function insertItem(db, user, table, validData) {
     }
 }
 
+async function updateItem(db, user, table, validData) {
+    const columns = Object.keys(validData.values);
+    const values = Object.values(validData.values);
+
+    const keyValues = columns
+        .map(col => `${col} = ?`);
+
+    try {
+        await db.query(`
+        UPDATE ${table} SET ${keyValues.join(', ')}
+        WHERE id = ? AND uid = ?`, ...values, validData.id, user.uid);
+    }
+    catch (err) {
+        throw new Error(config.msg.errorServerDb);
+    }
+}
+
 module.exports = {
     getLimitCondition,
     getQueryLimitCondition,
@@ -241,6 +298,8 @@ module.exports = {
     getResults,
     validateDate,
     validateInsertData,
-    insertItem
+    validateUpdateData,
+    insertItem,
+    updateItem
 };
 

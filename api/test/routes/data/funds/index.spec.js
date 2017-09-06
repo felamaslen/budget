@@ -150,24 +150,36 @@ describe('/data/funds', () => {
         });
     });
 
-    describe('validateInsertData', () => {
-        const standardData = {
-            year: 2017, month: 9, date: 4, item: 'foo fund', cost: 1000
-        };
+    const standardData = {
+        year: 2017, month: 9, date: 4, item: 'foo fund', cost: 1000
+    };
 
+    const standardTransactions = [
+        { cost: 10, units: 5, year: 2017, month: 1, date: 1 },
+        { cost: 13, units: 7, year: 2017, month: 3, date: 10 },
+        { cost: -3, units: -1, year: 2017, month: 7, date: 29 }
+    ];
+
+    const transactionsJson = `[${[
+        '{"c":10,"u":5,"d":[2017,1,1]}',
+        '{"c":13,"u":7,"d":[2017,3,10]}',
+        '{"c":-3,"u":-1,"d":[2017,7,29]}'
+    ].join(',')}]`;
+
+    describe('validateTransactions', () => {
         describe('transactions', () => {
             it('should be an array', () => {
-                expect(() => funds.validateInsertData({ ...standardData }))
+                expect(() => funds.validateExtraData({ ...standardData }))
                     .to.throw('didn\'t provide transactions');
 
-                expect(() => funds.validateInsertData(
+                expect(() => funds.validateExtraData(
                     { ...standardData, transactions: 'foo' })
                 )
                     .to.throw('transactions must be an array');
             });
 
             it('should define cost and units', () => {
-                expect(() => funds.validateInsertData({
+                expect(() => funds.validateExtraData({
                     ...standardData,
                     transactions: [
                         {}
@@ -175,7 +187,7 @@ describe('/data/funds', () => {
                 }))
                     .to.throw('transactions must have cost');
 
-                expect(() => funds.validateInsertData({
+                expect(() => funds.validateExtraData({
                     ...standardData,
                     transactions: [
                         { cost: 10 }
@@ -186,7 +198,7 @@ describe('/data/funds', () => {
 
             it('should define cost numerically', () => {
                 [NaN, null, 'foo'].forEach(cost => {
-                    expect(() => funds.validateInsertData({
+                    expect(() => funds.validateExtraData({
                         ...standardData,
                         transactions: [
                             { cost }
@@ -207,25 +219,51 @@ describe('/data/funds', () => {
                 });
             });
         });
+    });
+
+    describe('validateExtraData', () => {
+        it('should throw an error if data isn\'t provided', () => {
+            expect(() => funds.validateExtraData({}, true))
+                .to.throw('didn\'t provide transactions data');
+        });
 
         it('should return valid data', () => {
-            const expectedTransactions = [
-                '{"c":10,"u":5,"d":[2017,1,1]}',
-                '{"c":13,"u":7,"d":[2017,3,10]}',
-                '{"c":-3,"u":-1,"d":[2017,7,29]}'
-            ].join(',');
+            expect(funds.validateExtraData({
+                ...standardData,
+                transactions: standardTransactions
+            }))
+                .to.deep.equal({
+                    transactions: transactionsJson
+                });
+        });
+    });
 
+    describe('validateInsertData', () => {
+        it('should return valid data', () => {
             expect(funds.validateInsertData({
                 ...standardData,
-                transactions: [
-                    { cost: 10, units: 5, year: 2017, month: 1, date: 1 },
-                    { cost: 13, units: 7, year: 2017, month: 3, date: 10 },
-                    { cost: -3, units: -1, year: 2017, month: 7, date: 29 }
-                ]
+                transactions: standardTransactions
             }))
                 .to.deep.equal({
                     ...standardData,
-                    transactions: `[${expectedTransactions}]`
+                    transactions: transactionsJson
+                });
+        });
+    });
+
+    describe('validateUpdateData', () => {
+        it('should return valid data', () => {
+            expect(funds.validateUpdateData({
+                id: 1,
+                ...standardData,
+                transactions: standardTransactions
+            }))
+                .to.deep.equal({
+                    id: 1,
+                    values: {
+                        ...standardData,
+                        transactions: transactionsJson
+                    }
                 });
         });
     });

@@ -399,7 +399,7 @@ describe('/api/data/overview', () => {
             const result = await overview.getMonthlyCategoryValues(db, user, yearMonths, categories);
 
             const timeDiff = new Date().getTime() - now;
-            expect(timeDiff).to.be.greaterThan(9);
+            expect(timeDiff).to.be.greaterThan(10);
             // this is impossible if the 10ms delays are sequential
             // [WARNING] on a very slow PC, this test could fail
             expect(timeDiff).to.be.lessThan(50);

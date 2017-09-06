@@ -1,6 +1,7 @@
 const md5 = require('md5');
 
 const config = require('../../../config')();
+const common = require('../../../common');
 const listCommon = require('../list.common');
 
 function getMaxAge(now, period, length) {
@@ -158,20 +159,12 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     return row;
 }
 
-function validateInsertData(data) {
-    const validData = listCommon.validateInsertData(data);
-
-    if (!('transactions' in data)) {
-        throw new Error('didn\'t provide transactions data');
-    }
-
-    const transactions = data.transactions;
-
+function validateTransactions(transactions) {
     if (!Array.isArray(transactions)) {
         throw new Error('transactions must be an array');
     }
 
-    const validTransactions = transactions.map(transaction => {
+    return transactions.map(transaction => {
         const validTransaction = {};
 
         ['cost', 'units'].forEach(item => {
@@ -199,8 +192,36 @@ function validateInsertData(data) {
 
         return validTransaction;
     });
+}
 
-    validData.transactions = JSON.stringify(validTransactions);
+function validateExtraData(data, allRequired = true) {
+    const haveTransactions = 'transactions' in data;
+
+    if (allRequired && !haveTransactions) {
+        throw new Error('didn\'t provide transactions data');
+    }
+
+    const result = {};
+
+    if (haveTransactions) {
+        const validTransactions = validateTransactions(data.transactions);
+
+        result.transactions = JSON.stringify(validTransactions);
+    }
+
+    return result;
+}
+
+function validateInsertData(data) {
+    const validData = listCommon.validateInsertData(data);
+
+    return Object.assign({}, validData, validateExtraData(data, true));
+}
+
+function validateUpdateData(data) {
+    const validData = listCommon.validateUpdateData(data);
+
+    validData.values = Object.assign(validData.values, validateExtraData(data, false));
 
     return validData;
 }
@@ -279,9 +300,7 @@ async function routePost(req, res) {
     try {
         validData = validateInsertData(rawData);
 
-        const insertedId = await listCommon.insertItem(
-            db, user, table, validData
-        );
+        const insertedId = await listCommon.insertItem(db, user, table, validData);
 
         const newTotal = await listCommon.getTotalCost(db, user, table);
 
@@ -289,14 +308,9 @@ async function routePost(req, res) {
         response.id = insertedId;
     }
     catch (err) {
-        if (err.message === config.errorServerDb) {
-            statusCode = 500;
-        }
-        else {
-            statusCode = 400;
-        }
-
-        response.errorMessage = err.message;
+        const status = common.getErrorStatus(err);
+        statusCode = status.statusCode;
+        response.errorMessage = status.errorMessage;
     }
 
     await req.db.end();
@@ -307,7 +321,38 @@ async function routePost(req, res) {
 }
 
 async function routePut(req, res) {
-    return res.end('not done yet');
+    const db = req.db;
+    const user = req.user;
+
+    const table = 'funds';
+
+    const rawData = req.body;
+
+    let statusCode = 200;
+    const response = {
+        error: false
+    };
+
+    try {
+        const validData = validateUpdateData(rawData);
+
+        await listCommon.updateItem(db, user, table, validData);
+
+        const newTotal = await listCommon.getTotalCost(db, user, table);
+
+        response.total = newTotal;
+    }
+    catch (err) {
+        const status = common.getErrorStatus(err);
+        statusCode = status.statusCode;
+        response.errorMessage = status.errorMessage;
+    }
+
+    await req.db.end();
+
+    return res
+        .status(statusCode)
+        .json(response);
 }
 
 async function routeDelete(req, res) {
@@ -321,7 +366,9 @@ module.exports = {
     processFundHistory,
     fundHash,
     getFundHistoryMappedToFundIds,
+    validateExtraData,
     validateInsertData,
+    validateUpdateData,
     routeGet,
     routePost,
     routePut,
