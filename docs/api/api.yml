@@ -349,6 +349,18 @@
                   description: whether or not to retrieve price history with holdings data
                   required: false
                   type: boolean
+                - in: query
+                  name: period
+                  description: period of time to retrieve price history over
+                  required: false
+                  type: string
+                  example: year
+                - in: query
+                  name: length
+                  description: number of periods to retrive price history for
+                  required: false
+                  type: integer
+                  example: 3
                 responses:
                     200:
                         description: successful operation
@@ -379,18 +391,46 @@
                                                         type: array
                                                         example: [2017, 4, 1]
                                                         description: Date of first purchase
-                                                    P:
-                                                        type: float
-                                                        example: 103.4
-                                                        description: Latest cached asset price
                                                     i:
                                                         type: string
                                                         example: Gold ETF
                                                         description: Name of holding
-                                                    t:
-                                                        type: string
-                                                        example: "[{\"c\":50000,\"u\":502.51,\"d\":[2017,4,1]}]"
-                                                        description: JSON-encoded list of transactions relating to this holding
+                                                    tr:
+                                                        type: array
+                                                        description: List of transactions for this holding
+                                                        items:
+                                                            type: array
+                                                            items:
+                                                                type: object
+                                                                properties:
+                                                                    c:
+                                                                        type: integer
+                                                                        description: Cost of transaction
+                                                                        example: 200000
+                                                                    u:
+                                                                        type: float
+                                                                        description: Units purchased (or sold)
+                                                                        example: 1499.7
+                                                                    d:
+                                                                        type: array
+                                                                        description: Date of transaction
+                                                                        example: [2016, 9, 21]
+                                                    pr:
+                                                        type: array
+                                                        example: [103.4, 102.97, 103.94]
+                                                        description: List of cached asset prices
+                                                    prStartIndex:
+                                                        type: integer
+                                                        example: 1
+                                                        description: Where in the list of price-cache times this holding first appears
+                                        startTime:
+                                            type: integer
+                                            description: Timestamp of the first price cache time
+                                            example: 1475661661
+                                        cacheTimes:
+                                            type: array
+                                            description: Timestamps of all of the price cache times, relative to startTime
+                                            example: [0, 259200, 518400]
 
             post:
                 summary: Insert funds data
@@ -488,81 +528,6 @@
                         schema:
                             $ref: "#/definitions/ErrorResponse"
 
-        /data/funds/history/{period}/{length}:
-            get:
-                summary: Get cached fund holdings' price history
-                tags:
-                    - funds
-                operationId: getDataFundsHistory
-                description: |
-                    Get an in-depth historical list of fund prices including sold holdings
-                produces:
-                - application/json
-                parameters:
-                - in: path
-                  name: period
-                  description: How far to go back (units)
-                  required: false
-                  type: string
-                  example: year
-                - in: path
-                  name: length
-                  description: How far to go back (length)
-                  required: false
-                  type: integer
-                  example: 3
-                responses:
-                    200:
-                        description: successful operation
-                        schema:
-                            type: object
-                            properties:
-                                data:
-                                    type: object
-                                    properties:
-                                        totalTime:
-                                            type: integer
-                                            example: 88812382
-                                            description: Time since the first cached price in the list
-                                        funds:
-                                            type: object
-                                            properties:
-                                                items:
-                                                    type: array
-                                                    items:
-                                                        type: string
-                                                        description: Names of holdings
-                                                        example: Morgan Stanley Sterling Corporate Bond Class F (accum.)
-                                                transactions:
-                                                    type: array
-                                                    items:
-                                                        type: array
-                                                        items:
-                                                            type: object
-                                                            properties:
-                                                                c:
-                                                                    type: integer
-                                                                    description: Cost of transaction
-                                                                    example: 200000
-                                                                u:
-                                                                    type: float
-                                                                    description: Units purchased (or sold)
-                                                                    example: 1499.7
-                                                                d:
-                                                                    type: array
-                                                                    description: Date of transaction
-                                                                    example: [2016, 9, 21]
-                                        startTime:
-                                            type: integer
-                                            description: Timestamp of first cached price in list
-                                            example: 1502125261
-                                        history:
-                                            type: array
-                                            items:
-                                                type: array
-                                                example: [86391, [123.15]]
-                                                description: Cached price. The first element is the relative time; the second is an array of prices corresponding to the list of funds.
-        
         /data/{dataType}:
             get:
                 summary: Get budget data
