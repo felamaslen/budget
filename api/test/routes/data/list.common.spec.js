@@ -139,39 +139,39 @@ describe('Common list data functions', () => {
         });
     });
 
-    describe('validateInsertData', () => {
+    describe('validateDate', () => {
         it('should require valid years', () => {
-            expect(() => listCommon.validateInsertData({})).to.throw('didn\'t provide year');
+            expect(() => listCommon.validateDate({})).to.throw('didn\'t provide year');
             [NaN, null, 'foo'].forEach(year => {
-                expect(() => listCommon.validateInsertData(
-                    { year }
+                expect(() => listCommon.validateDate(
+                    { year, month: 9, date: 1 }
                 )).to.throw('invalid year');
             });
         });
 
         it('should require valid months', () => {
-            expect(() => listCommon.validateInsertData({ year: 2017 }))
+            expect(() => listCommon.validateDate({ year: 2017 }))
                 .to.throw('didn\'t provide month');
 
             [NaN, null, 'foo'].forEach(month => {
-                expect(() => listCommon.validateInsertData(
-                    { year: 2017, month }
+                expect(() => listCommon.validateDate(
+                    { year: 2017, month, date: 1 }
                 )).to.throw('invalid month');
             });
 
-            expect(() => listCommon.validateInsertData(
+            expect(() => listCommon.validateDate(
                 { year: 2017, month: 0, date: 1 })
             )
                 .to.throw('month out of range');
-            expect(() => listCommon.validateInsertData(
+            expect(() => listCommon.validateDate(
                 { year: 2017, month: -1, date: 1 })
             )
                 .to.throw('month out of range');
-            expect(() => listCommon.validateInsertData(
+            expect(() => listCommon.validateDate(
                 { year: 2017, month: 13, date: 1 })
             )
                 .to.throw('month out of range');
-            expect(() => listCommon.validateInsertData(
+            expect(() => listCommon.validateDate(
                 { year: 2017, month: 1000, date: 1 })
             )
                 .to.throw('month out of range');
@@ -212,16 +212,19 @@ describe('Common list data functions', () => {
             expect(() => listCommon.validateDate({ year: 2017, month: 9, date: 31 }))
                 .to.throw('date out of range');
         });
+    });
 
+    describe('validateInsertData', () => {
         it('should require valid item strings', () => {
-            expect(() => listCommon.validateInsertData({ year: 2017, month: 9, date: 15 }))
-                .to.throw('didn\'t provide data for `item`');
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15 }))
+                .to.throw('didn\'t provide item');
         });
         it('should require valid costs', () => {
             expect(() => listCommon.validateInsertData({
                 year: 2017, month: 9, date: 15, item: 'foo'
             }))
-                .to.throw('didn\'t provide data for `cost`');
+                .to.throw('didn\'t provide cost');
 
             [NaN, null, 'foo'].forEach(cost => {
                 expect(() => listCommon.validateInsertData({
@@ -237,6 +240,34 @@ describe('Common list data functions', () => {
             }))
                 .to.deep.equal({
                     year: 2017, month: 9, date: 4, item: 'foo', cost: 10
+                });
+        });
+    });
+
+    describe('validateUpdateData', () => {
+        it('should require a valid id', () => {
+            expect(() => listCommon.validateUpdateData({}))
+                .to.throw('didn\'t provide id');
+
+            [NaN, null, 'foo'].forEach(id => {
+                expect(() => listCommon.validateUpdateData({ id }))
+                    .to.throw('invalid id')
+            });
+        });
+
+        it('should return the id with values', () => {
+            expect(listCommon.validateUpdateData({
+                id: 1, year: 2017, month: 9, date: 4, item: 'foo', cost: 10
+            }))
+                .to.deep.equal({
+                    id: 1,
+                    values: {
+                        year: 2017,
+                        month: 9,
+                        date: 4,
+                        item: 'foo',
+                        cost: 10
+                    }
                 });
         });
     });
