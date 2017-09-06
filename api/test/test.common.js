@@ -336,7 +336,7 @@ class DummyDbWithListOverviewDelay extends DummyDbWithListOverview {
         const result = super.getData();
 
         return new Promise(resolve => {
-            setTimeout(() => resolve(result), 10);
+            setTimeout(() => resolve(result), 15);
         });
     }
 }
