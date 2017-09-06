@@ -17,6 +17,8 @@ const holiday = require('./holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const stocks = require('./funds/stocks');
+
 function handler(app) {
     // all of the following routes require database and authentication middleware
     app.use('/data/*', Database.dbMiddleware, authMiddleware);
@@ -37,6 +39,9 @@ function handler(app) {
         app.put(`/data/${category}`, listDataProcessor[category].routePut);
         app.delete(`/data/${category}`, listDataProcessor[category].routeDelete);
     });
+
+    // stocks route
+    app.get('/data/stocks', stocks.routeGet);
 }
 
 module.exports = {
