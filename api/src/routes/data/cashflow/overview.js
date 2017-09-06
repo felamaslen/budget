@@ -106,7 +106,7 @@ async function queryFundPrices(db, user) {
     INNER JOIN funds f ON MD5(CONCAT(f.item, ?)) = fh.hash AND f.uid = ?
     GROUP BY ft.cid
     ORDER BY ft.time DESC
-    `, config.data.fundSalt, user.uid);
+    `, config.data.funds.salt, user.uid);
 
     return result;
 }

@@ -129,7 +129,7 @@ async function getResults(
 
     const result = {
         data,
-        total
+        total: total[0].total
     };
 
     if (olderExists !== null) {

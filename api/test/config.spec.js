@@ -74,8 +74,17 @@ describe('Config', () => {
             ]);
         });
 
-        it('should define fundSalt', () => {
-            expect(config.data.fundSalt).to.be.a('string').lengthOf.greaterThan(0);
+        describe('funds', () => {
+            it('should be defined', () => {
+                expect(config.data.funds).to.be.an('object');
+            });
+            it('should define salt', () => {
+                expect(config.data.funds.salt).to.be.a('string').lengthOf.greaterThan(0);
+            });
+            it('should define resolution', () => {
+                expect(config.data.funds.historyResolution)
+                    .to.be.a('number').greaterThan(0);
+            });
         });
 
         describe('overview', () => {
