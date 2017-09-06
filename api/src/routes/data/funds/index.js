@@ -138,7 +138,7 @@ async function getFundHistoryMappedToFundIds(
     return processFundHistory(fundHistory);
 }
 
-function postProcessListRow(row, pricesIdMap) {
+function postProcessListRow(row, pricesIdMap = null) {
     // transactions
     row.tr = row.t
         ? JSON.parse(row.t)
@@ -146,7 +146,9 @@ function postProcessListRow(row, pricesIdMap) {
 
     Reflect.deleteProperty(row, 't');
 
-    row.pr = pricesIdMap[row.I] || [];
+    if (pricesIdMap) {
+        row.pr = pricesIdMap[row.I] || [];
+    }
 
     return row;
 }
@@ -160,35 +162,45 @@ async function routeGet(req, res) {
         cost: 'c'
     };
 
-    let period = null;
-    let length = null;
-    if (['year', 'month'].indexOf(req.query.period) > -1 &&
-        !isNaN(parseInt(req.query.length, 10))) {
+    let addData = row => postProcessListRow(row);
 
-        period = req.query.period;
-        length = parseInt(req.query.length, 10);
-    }
+    const getPriceHistory = 'history' in req.query &&
+        req.query.history !== 'false';
+    let priceHistory = null;
 
-    const { idMap, startTime, times } = await getFundHistoryMappedToFundIds(
-        req.db,
-        req.user,
-        now,
-        period,
-        length,
-        config.data.funds.historyResolution,
-        config.data.funds.salt
-    );
+    if (getPriceHistory) {
+        let period = null;
+        let length = null;
+        if (['year', 'month'].indexOf(req.query.period) > -1 &&
+            !isNaN(parseInt(req.query.length, 10))) {
 
-    const addData = row => {
-        return postProcessListRow(row, idMap);
+            period = req.query.period;
+            length = parseInt(req.query.length, 10);
+        }
+
+        priceHistory = await getFundHistoryMappedToFundIds(
+            req.db,
+            req.user,
+            now,
+            period,
+            length,
+            config.data.funds.historyResolution,
+            config.data.funds.salt
+        );
+
+        addData = row => {
+            return postProcessListRow(row, priceHistory.idMap);
+        }
     }
 
     const data = await listCommon.getResults(
         req.db, req.user, now, 'funds', columnMap, addData
     );
 
-    data.startTime = startTime;
-    data.cacheTimes = times;
+    if (getPriceHistory) {
+        data.startTime = priceHistory.startTime;
+        data.cacheTimes = priceHistory.times;
+    }
 
     return res.json({
         error: false,
