@@ -245,6 +245,19 @@ function validateUpdateData(data) {
     return { id, values };
 }
 
+function validateDeleteData(data) {
+    if (!('id' in data)) {
+        throw new Error('didn\'t provide id');
+    }
+
+    const id = parseInt(data.id, 10);
+    if (isNaN(id) || id < 1) {
+        throw new Error('invalid id');
+    }
+
+    return id;
+}
+
 async function insertItem(db, user, table, validData) {
     const columns = Object.keys(validData);
     const values = Object.values(validData);
@@ -280,7 +293,19 @@ async function updateItem(db, user, table, validData) {
     try {
         await db.query(`
         UPDATE ${table} SET ${keyValues.join(', ')}
-        WHERE id = ? AND uid = ?`, ...values, validData.id, user.uid);
+        WHERE id = ? AND uid = ?
+        `, ...values, validData.id, user.uid);
+    }
+    catch (err) {
+        throw new Error(config.msg.errorServerDb);
+    }
+}
+
+async function deleteItem(db, user, table, id) {
+    try {
+        await db.query(`
+        DELETE FROM ${table} WHERE id = ? AND uid = ?
+        `, id, user.uid);
     }
     catch (err) {
         throw new Error(config.msg.errorServerDb);
@@ -299,7 +324,9 @@ module.exports = {
     validateDate,
     validateInsertData,
     validateUpdateData,
+    validateDeleteData,
     insertItem,
-    updateItem
+    updateItem,
+    deleteItem
 };
 
