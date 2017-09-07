@@ -24,6 +24,36 @@ function processStocks(queryResult) {
     return { stocks, total };
 }
 
+/**
+ * @swagger
+ * /data/stocks:
+ *     get:
+ *         summary: Get stocks data
+ *         tags:
+ *             - Funds
+ *         operationId: getDataStocks
+ *         description: |
+ *             Get a weighted list of stocks holdings
+ *         produces:
+ *         - application/json
+ *         responses:
+ *             200:
+ *                 description: successful operation
+ *                 schema:
+ *                     type: object
+ *                     properties:
+ *                         data:
+ *                             type: object
+ *                             properties:
+ *                                 total:
+ *                                     type: integer
+ *                                     description: total weight
+ *                                 stocks:
+ *                                     type: array
+ *                                     items:
+ *                                         type: array
+ *                                         example: ["NASDAQ:GOOGL", "Alphabet Inc Class A", 11239]
+ */
 async function routeGet(req, res) {
     const stocksQueryResult = await getStocks(req.db, req.user);
 
