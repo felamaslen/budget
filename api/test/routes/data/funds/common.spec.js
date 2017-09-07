@@ -8,7 +8,7 @@ const md5 = require('md5');
 
 const common = require('../../../test.common');
 
-const funds = require('../../../../src/routes/data/funds');
+const funds = require('../../../../src/routes/data/funds/common');
 
 describe('/data/funds', () => {
     describe('getMaxAge', () => {

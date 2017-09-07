@@ -1,5 +1,5 @@
 const Database = require('../../db');
-const authMiddleware = require('../authMiddleware');
+const authMiddleware = require('../../authMiddleware');
 
 const config = require('../../config')();
 
@@ -17,11 +17,11 @@ const holiday = require('./holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
-const stocks = require('./funds/stocks');
+const stocks = require('./stocks');
 
 function handler(app) {
     // all of the following routes require database and authentication middleware
-    app.use('/data/*', Database.dbMiddleware, authMiddleware);
+    app.use('/data/*', Database.dbMiddleware, authMiddleware.authMiddleware);
 
     // cash flow routes
     app.get('/data/overview', cashflow.routeGet);
