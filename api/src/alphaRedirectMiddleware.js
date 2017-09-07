@@ -2,23 +2,6 @@
  * Redirect requests in the old-style format (pre-v3) to the current version
  */
 
-function getNewTaskFromOld(task) {
-    const tasks = task.split('/');
-    const arg = tasks.shift();
-
-    if (arg === 'login') {
-        return 'user/login';
-    }
-
-    if (arg === 'update' || arg === 'add' || arg === 'delete') {
-        const table = tasks.shift();
-
-        return `data/${table}`;
-    }
-
-    return task;
-}
-
 function getYearMonthDateFromSplit(ymdString) {
     const ymd = ymdString.split(',').map(item => parseInt(item, 10));
 
@@ -102,6 +85,46 @@ function getNewMethodBodyFromOld(oldMethod, oldBody, task) {
     return { method: oldMethod, body: oldBody };
 }
 
+function getNewTaskFromOld(task) {
+    const tasks = task.split('/');
+    const arg = tasks.shift();
+
+    if (arg === 'login') {
+        return 'user/login';
+    }
+
+    if (arg === 'update' || arg === 'add' || arg === 'delete') {
+        const table = tasks.shift();
+
+        return `data/${table}`;
+    }
+
+    return task;
+}
+
+function getNewQueryFromOld(oldQuery, task) {
+    const tasks = task.split('/');
+    const arg = tasks.shift();
+
+    if (arg === 'data' && tasks.shift() === 'funds') {
+        const history = 'history' in oldQuery && oldQuery.history !== 'false'
+            ? 'true'
+            : 'false';
+
+        if ('period' in oldQuery) {
+            const oldPeriodMatch = oldQuery.period.match(/^([A-Za-z]+)([0-9]+)$/);
+            if (oldPeriodMatch) {
+                const period = oldPeriodMatch[1];
+                const length = oldPeriodMatch[2];
+
+                return Object.assign({}, oldQuery, { period, length, history });
+            }
+        }
+    }
+
+    return oldQuery;
+}
+
 function handler(req, res, next) {
     if (req.baseUrl.indexOf('/api') === -1) {
         return next();
@@ -128,10 +151,13 @@ function handler(req, res, next) {
             .end();
     }
 
-    req.method = method;
-    req.body = body;
+    const newQuery = getNewQueryFromOld(req.query, task);
 
     req.url = `/v3/${newTask}`;
+    req.method = method;
+    req.body = body;
+    req.query = newQuery;
+
     req.query.alpha = true;
 
     return next();
