@@ -59,6 +59,7 @@ function handler(app) {
 }
 
 module.exports = {
+    routeGet,
     handler
 };
 
