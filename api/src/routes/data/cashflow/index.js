@@ -85,10 +85,83 @@ async function routeGet(req, res) {
     });
 }
 
+/**
+ * @swagger
+ * /data/balance:
+ *     post:
+ *         summary: Insert balance data
+ *         tags:
+ *             - Overview
+ *         operationId: postDataBalance
+ *         description: |
+ *             Insert balance data for a year/month
+ *         produces:
+ *         - application/json
+ *         consumes:
+ *         - application/json
+ *         parameters:
+ *         - in: body
+ *           name: item
+ *           schema:
+ *                type: object
+ *                required:
+ *                - year
+ *                - month
+ *                - balance
+ *                properties:
+ *                    year:
+ *                        type: number
+ *                    month:
+ *                        type: number
+ *                    balance:
+ *                        type: number
+ *         responses:
+ *             201:
+ *                 description: successful operation
+ *                 schema:
+ *                     $ref: "#/definitions/DataResponse"
+ *
+ */
 function routePost(req, res) {
     return updateBalance.updateData(req, res);
 }
 
+/**
+ * @swagger
+ * /data/balance:
+ *     put:
+ *         summary: Update balance data
+ *         tags:
+ *             - Overview
+ *         operationId: putDataBalance
+ *         description: |
+ *             Update balance data for year/month
+ *         produces:
+ *         - application/json
+ *         consumes:
+ *         - application/json
+ *         parameters:
+ *         - in: body
+ *           name: item
+ *           schema:
+ *                type: object
+ *                required:
+ *                - year
+ *                - month
+ *                - balance
+ *                properties:
+ *                    year:
+ *                        type: number
+ *                    month:
+ *                        type: number
+ *                    balance:
+ *                        type: number
+ *         responses:
+ *             200:
+ *                 description: successful operation
+ *                 schema:
+ *                     $ref: "#/definitions/DataResponse"
+ */
 function routePut(req, res) {
     return updateBalance.updateData(req, res, false);
 }
