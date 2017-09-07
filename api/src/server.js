@@ -13,6 +13,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 
 const version = require('../../package.json').version;
 const api = require('./api');
+const alphaRedirectMiddleware = require('./alphaRedirectMiddleware');
 
 function setupLogging(app) {
     if (config.debug) {
@@ -72,6 +73,8 @@ function setupApiDocs(app) {
 
 function setupApi(app) {
     // API
+    app.use('/api', alphaRedirectMiddleware.handler);
+
     const apiRouter = new express.Router();
     app.use('/api/v3', api(apiRouter));
 
