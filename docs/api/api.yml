@@ -1028,7 +1028,7 @@
             delete:
                 summary: Delete general data
                 tags:
-                    - food
+                    - general
                 operationId: deleteDataGeneral
                 description: |
                     Delete an existing general item in the database
@@ -1152,7 +1152,7 @@
             delete:
                 summary: Delete social data
                 tags:
-                    - food
+                    - social
                 operationId: deleteDataSocial
                 description: |
                     Delete an existing social item in the database
@@ -1276,7 +1276,7 @@
             delete:
                 summary: Delete holiday data
                 tags:
-                    - food
+                    - holiday
                 operationId: deleteDataHoliday
                 description: |
                     Delete an existing holiday item in the database
