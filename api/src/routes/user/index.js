@@ -142,7 +142,7 @@ function handleLoginStatus(res, loginStatus, token) {
         // logged in
         return res.json({
             error: false,
-            'api_key': token,
+            apiKey: token,
             uid: loginStatus.user.uid,
             name: loginStatus.user.name
         });
@@ -181,6 +181,61 @@ async function login(req, res) {
 function handler(app) {
     app.use('/user/login', Database.dbMiddleware);
 
+    /**
+     * @swagger
+     * /user/login:
+     *     post:
+     *         summary: Get an API key for logging in
+     *         tags:
+     *             - Authentication
+     *         operationId: login
+     *         description: |
+     *             Log in to the app
+     *         produces:
+     *         - application/json
+     *         consumes:
+     *         - application/json
+     *         parameters:
+     *         - in: body
+     *           name: authRequest
+     *           description: The PIN of the user to retrieve an API key for
+     *           schema:
+     *              type: object
+     *              required:
+     *              - pin
+     *              properties:
+     *                  pin:
+     *                      type: integer
+     *         responses:
+     *             201:
+     *                 description: successful login
+     *                 schema:
+     *                     type: object
+     *                     properties:
+     *                         error:
+     *                             type: boolean
+     *                             example: false
+     *                         apiKey:
+     *                             type: string
+     *                             example: f1d2d2f924e986ac86fdf7b36c94bcdf32beec15
+     *                         uid:
+     *                             type: number
+     *                             example: 1
+     *                         name:
+     *                             type: string
+     *                             example: user1
+     *             401:
+     *                 description: unsuccessful login
+     *                 schema:
+     *                     type: object
+     *                     properties:
+     *                         error:
+     *                             type: boolean
+     *                             example: true
+     *                         errorText:
+     *                             type: string
+     *                             example: Bad PIN
+     */
     app.post('/user/login', (req, res) => login(req, res));
 }
 

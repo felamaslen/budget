@@ -8,6 +8,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const logger = require('morgan');
+const swaggerUiDist = require('swagger-ui-dist');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 const version = require('../../package.json').version;
 const api = require('./api');
@@ -32,7 +34,42 @@ function setupDataInput(app) {
 
 function setupApiDocs(app) {
     // API docs
-    app.use('/docs/api', express.static(path.join(__dirname, '../../docs/api')));
+    const swaggerDefinition = {
+        info: {
+            title: 'Budget API',
+            version: '3.0.0',
+            description: 'Personal finance manager API'
+        },
+        host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
+        schemes: [config.webUrl.substring(0, config.webUrl.indexOf(':'))],
+        basePath: '/api' // TODO: change to /v3
+    };
+
+    const swaggerOptions = {
+        swaggerDefinition,
+        apis: [
+            path.join(__dirname, './routes/**/index.js')
+        ]
+    };
+
+    const swaggerSpec = swaggerJSDoc(swaggerOptions);
+
+    app.get('/docs/api/spec.json', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(swaggerSpec);
+    });
+
+    const swaggerUiAssetPath = swaggerUiDist.getAbsoluteFSPath();
+
+    app.get('/docs/api', (req, res) => {
+        return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
+    });
+    app.get('/docs/api/favicon.png', (req, res) => {
+        return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
+    });
+    app.use('/docs/api/', express.static(swaggerUiAssetPath));
+
+    // app.use('/docs/api', express.static(path.join(__dirname, '../../docs/api')));
 }
 
 function setupApi(app) {
