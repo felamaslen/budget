@@ -27,34 +27,6 @@ describe('/api/user', () => {
         });
     });
 
-    describe('checkAuthToken', () => {
-        it('should check an authentication token against the database', async () => {
-            const db = new common.DummyDbWithUser();
-            await user.checkAuthToken(db, 'foo_token');
-
-            expect(db.queries[0]).to.equal(
-                'SELECT uid, user AS name FROM users WHERE api_key = \'foo_token\' LIMIT 1'
-            );
-        });
-
-        it('should return null for a bad token', async () => {
-            const db = new common.DummyDbWithUser();
-            const result = await user.checkAuthToken(db, 'some_bad_token');
-
-            expect(result).to.equal(null);
-        });
-
-        it('should return user info for a good token', async () => {
-            const db = new common.DummyDbWithUser();
-            const result = await user.checkAuthToken(db, 'test_good_api_key');
-
-            expect(result).to.deep.equal({
-                uid: 1,
-                name: 'johnsmith'
-            });
-        });
-    });
-
     describe('processLoginRequest', () => {
         const testReq = {
             body: {
