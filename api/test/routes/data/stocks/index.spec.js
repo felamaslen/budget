@@ -7,7 +7,7 @@ const expect = require('chai').expect;
 
 const common = require('../../../test.common');
 
-const stocks = require('../../../../src/routes/data/funds/stocks');
+const stocks = require('../../../../src/routes/data/stocks');
 
 describe('/data/stocks', () => {
     describe('getStocks', () => {
