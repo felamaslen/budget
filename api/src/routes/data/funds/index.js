@@ -1,145 +1,10 @@
-const md5 = require('md5');
+/**
+ * Funds routes
+ */
 
 const config = require('../../../config')();
+const funds = require('./common');
 const listCommon = require('../list.common');
-
-function getMaxAge(now, period, length) {
-    const periodMap = {
-        year: 365.25,
-        month: 365.25 / 12
-    };
-
-    if (!(period in periodMap) || length < 1) {
-        return 0;
-    }
-
-    const minTimestamp = Math.floor(now.getTime() / 1000) -
-        (86400 * Math.round(periodMap[period] * length));
-
-    return minTimestamp;
-}
-
-function getNumResultsQuery(db, user, salt, minTimestamp) {
-    return db.query(`
-    SELECT COUNT(*) AS numResults FROM (
-        SELECT c.cid
-        FROM funds AS f
-        LEFT JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, ?))
-        LEFT JOIN fund_cache fc ON fh.fid = fc.fid
-        LEFT JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
-            AND c.time > ${minTimestamp}
-        WHERE f.uid = ?
-        GROUP BY c.cid
-    ) results`, salt, user.uid);
-}
-
-function getAllHistoryForFundsQuery(
-    db, user, salt, numResults, numDisplay, minTimestamp
-) {
-    return db.query(`
-    SELECT * FROM (
-        SELECT id, time, price, cNum, FLOOR(cNum % (? / ?)) AS period FROM (
-            SELECT id, time, price, (
-                CASE prices.cid
-                    WHEN @lastCid THEN @cNum
-                    ELSE @cNum := @cNum + 1
-                END
-            ) AS cNum,
-            @lastCid := prices.cid AS last_cid
-            FROM (
-                SELECT
-                    c.cid,
-                    c.time,
-                    GROUP_CONCAT(f.id
-                        ORDER BY f.year DESC, f.month DESC, f.date DESC
-                    ) AS id,
-                    GROUP_CONCAT(fc.price
-                        ORDER BY f.year DESC, f.month DESC, f.date DESC
-                    ) AS price
-                FROM (
-                    SELECT DISTINCT id, year, month, date, item
-                    FROM funds
-                    WHERE uid = ?
-                ) f
-                INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, ?))
-                INNER JOIN fund_cache fc ON fh.fid = fc.fid
-                INNER JOIN fund_cache_time c ON c.done = 1 AND c.cid = fc.cid
-                    AND c.time > ${minTimestamp}
-                GROUP BY c.cid
-                ORDER BY time
-            ) prices
-            JOIN (
-                SELECT @cNum := -1, @lastCid := 0
-            ) counter
-        ) ranked
-    ) results
-    WHERE period = 0 OR cNum = ?
-    `, numResults, numDisplay, user.uid, salt, numResults - 1);
-}
-
-function processFundHistory(queryResult) {
-    // return a map of fund holding IDs to historical prices
-    const keyMap = queryResult
-        .reduce((map, row, rowKey) => {
-            const rowIds = row.id
-                .split(',')
-                .map(id => parseInt(id, 10));
-
-            const rowPrices = row.price
-                .split(',')
-                .map(price => parseFloat(price, 10));
-
-            rowIds.forEach((id, idKey) => {
-                if (!(id in map.idMap)) {
-                    map.idMap[id] = [];
-
-                    // startIndex is to save printing lots of zeroes
-                    map.startIndex[id] = rowKey;
-                }
-                map.idMap[id].push(rowPrices[idKey]);
-            });
-
-            return map;
-        }, { idMap: {}, startIndex: {} });
-
-    let startTime = null;
-
-    const times = queryResult
-        .map(row => {
-            const time = row.time;
-            if (startTime === null) {
-                startTime = time;
-            }
-            const timeDiff = time - startTime;
-
-            return timeDiff;
-        });
-
-    return Object.assign(keyMap, { startTime, times });
-}
-
-function fundHash(fundName, salt) {
-    return md5(`${fundName}${salt}`);
-}
-
-async function getFundHistoryMappedToFundIds(
-    db, user, now, period, length, numDisplay, salt
-) {
-    const minTimestamp = getMaxAge(now, period, length);
-
-    const numResultsQuery = await getNumResultsQuery(db, user, salt, minTimestamp);
-    const numResults = parseInt(numResultsQuery[0].numResults, 10);
-
-    let fundHistory = { idMap: {}, startTime: 0, times: [] };
-
-    if (!isNaN(numResults)) {
-        fundHistory = await getAllHistoryForFundsQuery(
-            db, user, salt, numResults, numDisplay, minTimestamp
-        );
-    }
-
-    return processFundHistory(fundHistory);
-}
 
 function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     // transactions
@@ -158,73 +23,107 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     return row;
 }
 
-function validateTransactions(transactions) {
-    if (!Array.isArray(transactions)) {
-        throw new Error('transactions must be an array');
-    }
-
-    return transactions.map(transaction => {
-        const validTransaction = {};
-
-        ['cost', 'units'].forEach(item => {
-            if (!(item in transaction)) {
-                throw new Error(
-                    `transactions must have ${item}`
-                );
-            }
-
-            const value = parseFloat(transaction[item], 10);
-            if (isNaN(value)) {
-                throw new Error(
-                    `transactions ${item} must be numerical`
-                );
-            }
-
-            const key = item.substring(0, 1);
-            validTransaction[key] = value;
-        });
-
-        const { year, month, date } = listCommon.validateDate(transaction);
-
-        // eslint-disable-next-line id-length
-        validTransaction.d = [year, month, date];
-
-        return validTransaction;
-    });
-}
-
-function validateExtraData(data, allRequired = true) {
-    const haveTransactions = 'transactions' in data;
-
-    if (allRequired && !haveTransactions) {
-        throw new Error('didn\'t provide transactions data');
-    }
-
-    const result = {};
-
-    if (haveTransactions) {
-        const validTransactions = validateTransactions(data.transactions);
-
-        result.transactions = JSON.stringify(validTransactions);
-    }
-
-    return result;
-}
-
-function validateInsertData(data) {
-    const validData = listCommon.validateInsertData(data);
-
-    return Object.assign({}, validData, validateExtraData(data, true));
-}
-
-function validateUpdateData(data) {
-    const validData = listCommon.validateUpdateData(data);
-
-    validData.values = Object.assign(validData.values, validateExtraData(data, false));
-
-    return validData;
-}
-
+/**
+ * @swagger
+ * /data/funds:
+ *     get:
+ *         summary: Get funds data
+ *         tags:
+ *             - Funds
+ *         operationId: getDataFunds
+ *         description: |
+ *             Get a list of fund holdings, optionally with price history
+ *         produces:
+ *         - application/json
+ *         parameters:
+ *         - in: query
+ *           name: history
+ *           description: whether or not to retrieve price history with holdings data
+ *           required: false
+ *           type: boolean
+ *         - in: query
+ *           name: period
+ *           description: period of time to retrieve price history over
+ *           required: false
+ *           type: string
+ *           example: year
+ *         - in: query
+ *           name: length
+ *           description: number of periods to retrive price history for
+ *           required: false
+ *           type: integer
+ *           example: 3
+ *         responses:
+ *             200:
+ *                 description: successful operation
+ *                 schema:
+ *                     type: object
+ *                     properties:
+ *                         data:
+ *                             type: object
+ *                             properties:
+ *                                 total:
+ *                                     type: integer
+ *                                     example: 1000000
+ *                                     description: Total-to-date purchase cost of all holdings
+ *                                 data:
+ *                                     type: array
+ *                                     items:
+ *                                         type: object
+ *                                         properties:
+ *                                             I:
+ *                                                 type: integer
+ *                                                 example: 11
+ *                                                 description: ID of holding
+ *                                             c:
+ *                                                 type: integer
+ *                                                 example: 50000
+ *                                                 description: To-date cost of this holding
+ *                                             d:
+ *                                                 type: array
+ *                                                 example: [2017, 4, 1]
+ *                                                 description: Date of first purchase
+ *                                             i:
+ *                                                 type: string
+ *                                                 example: Gold ETF
+ *                                                 description: Name of holding
+ *                                             tr:
+ *                                                 type: array
+ *                                                 description: List of transactions for this holding
+ *                                                 items:
+ *                                                     type: array
+ *                                                     items:
+ *                                                         type: object
+ *                                                         properties:
+ *                                                             c:
+ *                                                                 type: integer
+ *                                                                 description: Cost of transaction
+ *                                                                 example: 200000
+ *                                                             u:
+ *                                                                 type: float
+ *                                                                 description: Units purchased (or sold)
+ *                                                                 example: 1499.7
+ *                                                             d:
+ *                                                                 type: array
+ *                                                                 description: Date of transaction
+ *                                                                 example: [2016, 9, 21]
+ *                                             pr:
+ *                                                 type: array
+ *                                                 example: [103.4, 102.97, 103.94]
+ *                                                 description: List of cached asset prices
+ *                                             prStartIndex:
+ *                                                 type: integer
+ *                                                 example: 1
+ *                                                 description: Where in the list of price-cache times this holding first appears
+ *                                 startTime:
+ *                                     type: integer
+ *                                     description: Timestamp of the first price cache time
+ *                                     example: 1475661661
+ *                                 cacheTimes:
+ *                                     type: array
+ *                                     description: Timestamps of all of the price cache times, relative to startTime
+ *                                     example: [0, 259200, 518400]
+ */
 async function routeGet(req, res) {
     const now = new Date();
 
@@ -250,7 +149,7 @@ async function routeGet(req, res) {
             length = parseInt(req.query.length, 10);
         }
 
-        priceHistory = await getFundHistoryMappedToFundIds(
+        priceHistory = await funds.getFundHistoryMappedToFundIds(
             req.db,
             req.user,
             now,
@@ -282,28 +181,140 @@ async function routeGet(req, res) {
     });
 }
 
+/**
+ * @swagger
+ * /data/funds:
+ *     post:
+ *         summary: Insert funds data
+ *         tags:
+ *             - Funds
+ *         operationId: postDataFunds
+ *         description: |
+ *             Insert a new fund holding into the database
+ *         produces:
+ *         - application/json
+ *         parameters:
+ *         - in: body
+ *           name: year
+ *           required: true
+ *           type: number
+ *         - in: body
+ *           name: month
+ *           required: true
+ *           type: number
+ *         - in: body
+ *           name: date
+ *           required: true
+ *           type: number
+ *         - in: body
+ *           name: item
+ *           required: true
+ *           type: string
+ *         - in: body
+ *           name: transactions
+ *           required: true
+ *           type: array
+ *         - in: body
+ *           name: cost
+ *           required: true
+ *           type: integer
+ *         responses:
+ *             201:
+ *                 description: successful operation
+ *                 schema:
+ *                     $ref: "#/definitions/DataResponsePostList"
+ */
 function routePost(req, res) {
-    return listCommon.routePost(req, res, 'funds', validateInsertData);
+    return listCommon.routePost(req, res, 'funds', funds.validateInsertData);
 }
 
+/**
+ * @swagger
+ * /data/funds:
+ *     put:
+ *         summary: Update funds data
+ *         tags:
+ *             - Funds
+ *         operationId: putDataFunds
+ *         description: |
+ *             Update an existing fund holding in the database
+ *         produces:
+ *         - application/json
+ *         parameters:
+ *         - in: body
+ *           name: id
+ *           required: true
+ *           type: integer
+ *         - in: body
+ *           name: year
+ *           required: true
+ *           type: number
+ *         - in: body
+ *           name: month
+ *           required: true
+ *           type: number
+ *         - in: body
+ *           name: date
+ *           required: true
+ *           type: number
+ *         - in: body
+ *           name: item
+ *           required: false
+ *           type: string
+ *         - in: body
+ *           name: transactions
+ *           required: false
+ *           type: array
+ *         - in: body
+ *           name: cost
+ *           required: false
+ *           type: integer
+ *         responses:
+ *             200:
+ *                 description: successful operation
+ *                 schema:
+ *                     $ref: "#/definitions/DataResponsePutList"
+ *             400:
+ *                 description: invalid id
+ *                 schema:
+ *                     $ref: "#/definitions/ErrorResponse"
+ */
 function routePut(req, res) {
-    return listCommon.routePut(req, res, 'funds', validateUpdateData);
+    return listCommon.routePut(req, res, 'funds', funds.validateUpdateData);
 }
 
+/**
+ * @swagger
+ * /data/funds:
+ *     delete:
+ *         summary: Delete funds data
+ *         tags:
+ *             - Funds
+ *         operationId: deleteDataFunds
+ *         description: |
+ *             Delete an existing fund holding in the database
+ *         produces:
+ *         - application/json
+ *         parameters:
+ *         - in: body
+ *           name: id
+ *           required: true
+ *           type: integer
+ *         responses:
+ *             200:
+ *                 description: successful operation
+ *                 schema:
+ *                     $ref: "#/definitions/DataResponsePutList"
+ *             400:
+ *                 description: invalid id
+ *                 schema:
+ *                     $ref: "#/definitions/ErrorResponse"
+ */
 function routeDelete(req, res) {
     return listCommon.routeDelete(req, res, 'funds');
 }
 
 module.exports = {
-    getMaxAge,
-    getNumResultsQuery,
-    getAllHistoryForFundsQuery,
-    processFundHistory,
-    fundHash,
-    getFundHistoryMappedToFundIds,
-    validateExtraData,
-    validateInsertData,
-    validateUpdateData,
     routeGet,
     routePost,
     routePut,
