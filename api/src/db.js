@@ -76,6 +76,10 @@ class Connection {
                 }
 
                 if (err) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log('DB error:', err);
+                    }
+
                     return reject(err);
                 }
 
