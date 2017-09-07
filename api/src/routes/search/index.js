@@ -1,4 +1,8 @@
 /**
+ * Search route
+ */
+
+/**
  * @swagger
  * /search/{dataType}/{column}/{searchTerm}/{numResults}:
  *     get:
@@ -50,7 +54,11 @@ function routeGet(req, res) {
     return res.end('not done yet');
 }
 
+function handler(app) {
+    app.get('/data/search/:dataType/:column/:searchTerm/:numResults?', routeGet);
+}
+
 module.exports = {
-    routeGet
+    handler
 };
 
