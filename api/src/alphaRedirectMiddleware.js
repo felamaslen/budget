@@ -94,9 +94,7 @@ function getNewTaskFromOld(task) {
     }
 
     if (arg === 'update' || arg === 'add' || arg === 'delete') {
-        const table = tasks.shift();
-
-        return `data/${table}`;
+        return `data/${tasks.join(',')}`;
     }
 
     return task;
