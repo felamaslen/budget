@@ -10,7 +10,7 @@ module.exports = () => {
     const testUser = {
         uid: 1,
         name: 'johnsmith',
-        'api_key': 'test_good_api_key'
+        apiKey: 'test_good_api_key'
     };
 
     before(() => {

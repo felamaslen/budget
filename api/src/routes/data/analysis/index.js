@@ -35,6 +35,48 @@ async function getPeriodCost(db, user, now, period, groupBy, pageIndex) {
     return { cost, description: queryCondition.description };
 }
 
+/**
+ * @swagger
+ * /data/analysis/{period}/{groupBy}/{pageIndex}:
+ *     get:
+ *         summary: Get analysis data
+ *         tags:
+ *             - Analysis
+ *         operationId: getDataAnalysis
+ *         description: |
+ *             Get weekly / monthly / yearly analysis data, broken down into paged categories
+ *         produces:
+ *         - application/json
+ *         parameters:
+ *         - in: path
+ *           name: period
+ *           description: one of week, month, year
+ *           required: true
+ *           type: string
+ *         - in: path
+ *           name: groupBy
+ *           description: one of category, shop
+ *           required: true
+ *           type: string
+ *         - in: path
+ *           name: pageIndex
+ *           description: page to retrieve, starting with 0
+ *           type: integer
+ *         responses:
+ *             200:
+ *                 description: successful operation
+ *                 schema:
+ *                     type: object
+ *                     properties:
+ *                         data:
+ *                             type: object
+ *                             properties:
+ *                                 cost:
+ *                                     type: array
+ *                                     items:
+ *                                         type: array
+ *                                         example: ["bills", [6500, 12300]]
+ */
 async function routeGet(req, res) {
     const params = [
         req.params.period,
