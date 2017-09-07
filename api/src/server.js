@@ -42,7 +42,7 @@ function setupApiDocs(app) {
         },
         host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
         schemes: [config.webUrl.substring(0, config.webUrl.indexOf(':'))],
-        basePath: '/api' // TODO: change to /v3
+        basePath: '/api/v3'
     };
 
     const swaggerOptions = {
@@ -68,14 +68,12 @@ function setupApiDocs(app) {
         return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
     });
     app.use('/docs/api/', express.static(swaggerUiAssetPath));
-
-    // app.use('/docs/api', express.static(path.join(__dirname, '../../docs/api')));
 }
 
 function setupApi(app) {
     // API
     const apiRouter = new express.Router();
-    app.use('/api', api(apiRouter));
+    app.use('/api/v3', api(apiRouter));
 
     setupApiDocs(app);
 }
