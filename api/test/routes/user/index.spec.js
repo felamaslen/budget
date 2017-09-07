@@ -166,7 +166,7 @@ describe('/api/user', () => {
             expect(res.statusCode).to.equal(200);
             expect(res.response).to.deep.equal({
                 error: false,
-                'api_key': 'test_token',
+                apiKey: 'test_token',
                 uid: 1,
                 name: 'johnsmith'
             });
