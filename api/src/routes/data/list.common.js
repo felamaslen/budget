@@ -178,7 +178,7 @@ function validateDate(data, allRequired = true) {
 
     if (undefinedItem) {
         if (allRequired) {
-            throw new Error(`didn't provide ${undefinedItem}`);
+            throw new common.ErrorBadRequest(`didn't provide ${undefinedItem}`);
         }
 
         return {};
@@ -188,7 +188,7 @@ function validateDate(data, allRequired = true) {
         const item = parseInt(data[dateItem], 10);
 
         if (isNaN(item)) {
-            throw new Error(`invalid ${dateItem}`);
+            throw new common.ErrorBadRequest(`invalid ${dateItem}`);
         }
     });
 
@@ -197,11 +197,11 @@ function validateDate(data, allRequired = true) {
     const date = parseInt(data.date, 10);
 
     if (month < 1 || month > 12) {
-        throw new Error('month out of range');
+        throw new common.ErrorBadRequest('month out of range');
     }
 
     if (date < 1 || date > common.monthLength(year, month)) {
-        throw new Error('date out of range');
+        throw new common.ErrorBadRequest('date out of range');
     }
 
     return { year, month, date };
@@ -220,7 +220,7 @@ function validateInsertData(data, allRequired = true) {
 
     const undefinedItem = getUndefinedItem(['item', 'cost'], data);
     if (undefinedItem && allRequired) {
-        throw new Error(`didn't provide ${undefinedItem}`);
+        throw new common.ErrorBadRequest(`didn't provide ${undefinedItem}`);
     }
 
     if ('item' in data) {
@@ -230,7 +230,7 @@ function validateInsertData(data, allRequired = true) {
     if ('cost' in data) {
         const cost = parseInt(data.cost, 10);
         if (isNaN(cost)) {
-            throw new Error('invalid cost data');
+            throw new common.ErrorBadRequest('invalid cost data');
         }
 
         validData.cost = cost;
@@ -241,12 +241,12 @@ function validateInsertData(data, allRequired = true) {
 
 function validateUpdateData(data) {
     if (!('id' in data)) {
-        throw new Error('didn\'t provide id');
+        throw new common.ErrorBadRequest('didn\'t provide id');
     }
 
     const id = parseInt(data.id, 10);
     if (isNaN(id) || id < 1) {
-        throw new Error('invalid id');
+        throw new common.ErrorBadRequest('invalid id');
     }
 
     const dataWithoutId = Object.keys(data).reduce((obj, key) => {
@@ -258,7 +258,7 @@ function validateUpdateData(data) {
     }, {});
 
     if (!Object.keys(dataWithoutId).length) {
-        throw new Error('no data provided');
+        throw new common.ErrorBadRequest('no data provided');
     }
 
     const values = validateInsertData(dataWithoutId, false);
@@ -268,12 +268,12 @@ function validateUpdateData(data) {
 
 function validateDeleteData(data) {
     if (!('id' in data)) {
-        throw new Error('didn\'t provide id');
+        throw new common.ErrorBadRequest('didn\'t provide id');
     }
 
     const id = parseInt(data.id, 10);
     if (isNaN(id) || id < 1) {
-        throw new Error('invalid id');
+        throw new common.ErrorBadRequest('invalid id');
     }
 
     return id;
@@ -283,25 +283,13 @@ async function insertItem(db, user, table, validData) {
     const columns = Object.keys(validData);
     const values = Object.values(validData);
 
-    try {
-        const insertQuery = await db.query(`
-        INSERT INTO ${table} (uid, ${columns.join(', ')})
-        VALUES (?, ${values.map(() => '?').join(', ')})`, user.uid, ...values);
+    const insertQuery = await db.query(`
+    INSERT INTO ${table} (uid, ${columns.join(', ')})
+    VALUES (?, ${values.map(() => '?').join(', ')})`, user.uid, ...values);
 
-        const insertedId = insertQuery.insertId;
+    const insertedId = insertQuery.insertId;
 
-        return { id: insertedId };
-    }
-    catch (err) {
-        const duplicateMatch = err.message.match(
-            /^ER_DUP_ENTRY: .* for key '([\w\s]+)'$/
-        );
-        if (duplicateMatch) {
-            throw new Error(duplicateMatch[1]);
-        }
-
-        throw new Error(config.msg.errorServerDb);
-    }
+    return { id: insertedId };
 }
 
 async function updateItem(db, user, table, validData) {
@@ -311,29 +299,25 @@ async function updateItem(db, user, table, validData) {
     const keyValues = columns
         .map(col => `${col} = ?`);
 
-    try {
-        await db.query(`
-        UPDATE ${table} SET ${keyValues.join(', ')}
-        WHERE id = ? AND uid = ?
-        `, ...values, validData.id, user.uid);
+    const result = await db.query(`
+    UPDATE ${table} SET ${keyValues.join(', ')}
+    WHERE id = ? AND uid = ?
+    `, ...values, validData.id, user.uid);
 
-        return null;
+    if (!result.affectedRows) {
+        throw new common.ErrorBadRequest('unknown id', 404);
     }
-    catch (err) {
-        throw new Error(config.msg.errorServerDb);
-    }
+
+    return null;
 }
 
 async function deleteItem(db, user, table, id) {
-    try {
-        await db.query(`
-        DELETE FROM ${table} WHERE id = ? AND uid = ?
-        `, id, user.uid);
+    const result = await db.query(`
+    DELETE FROM ${table} WHERE id = ? AND uid = ?
+    `, id, user.uid);
 
-        return null;
-    }
-    catch (err) {
-        throw new Error(config.msg.errorServerDb);
+    if (!result.affectedRows) {
+        throw new common.ErrorBadRequest('unknown id', 404);
     }
 }
 
@@ -361,10 +345,15 @@ async function routeModify(
         response.total = await getTotalCost(db, user, table);
     }
     catch (err) {
-        const status = common.getErrorStatus(err);
-        statusCode = status.statusCode;
-        response.errorMessage = status.errorMessage;
+        if (err instanceof common.ErrorBadRequest) {
+            statusCode = err.statusCode;
+        }
+        else {
+            statusCode = 500;
+        }
+
         response.error = true;
+        response.errorMessage = err.message;
     }
 
     await req.db.end();

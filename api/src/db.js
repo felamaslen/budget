@@ -4,6 +4,7 @@
 
 const mysql = require('mysql');
 
+const common = require('./common');
 const config = require('./config')();
 
 function parseConnectionURI(uri) {
@@ -28,6 +29,15 @@ function parseConnectionURI(uri) {
     };
 }
 
+class ErrorDuplicateEntry extends common.ErrorBadRequest {
+}
+
+class ErrorOutOfRange extends common.ErrorBadRequest {
+}
+
+class ErrorDatabase extends Error {
+}
+
 // promise wrapper for the mysql library
 class Connection {
     constructor(options) {
@@ -35,6 +45,27 @@ class Connection {
             supportBigNumbers: true
         }));
     }
+
+    static handleError(reject, err) {
+        const duplicateMatch = err.message.match(
+            /^ER_DUP_ENTRY: .* for key '([\w\s]+)'$/
+        );
+
+        if (duplicateMatch) {
+            return reject(new ErrorDuplicateEntry(duplicateMatch[1]));
+        }
+
+        const outOfRange = err.message.match(
+            /^ER_WARN_DATA_OUT_OF_RANGE: .* for column '([\w\s]+)'/
+        );
+
+        if (outOfRange) {
+            return reject(new ErrorOutOfRange(`${outOfRange[1]} out of range`));
+        }
+
+        return reject(new ErrorDatabase(config.msg.errorServerDb));
+    }
+
     wrapSimple(func, res) {
         return new Promise((resolve, reject) => {
             this.conn[func](err => {
@@ -49,7 +80,7 @@ class Connection {
                             .end();
                     }
 
-                    return reject(err);
+                    return Connection.handleError(reject, err);
                 }
 
                 return resolve(this);
@@ -80,7 +111,7 @@ class Connection {
                         console.log('DB error:', err);
                     }
 
-                    return reject(err);
+                    return Connection.handleError(reject, err);
                 }
 
                 return resolve(results);
@@ -103,6 +134,7 @@ async function dbMiddleware(req, res, next) {
 
 module.exports = {
     parseConnectionURI,
+    ErrorDuplicateEntry,
     Connection,
     dbMiddleware
 };
