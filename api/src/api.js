@@ -6,15 +6,17 @@ const config = require('./config.js')();
 
 const user = require('./routes/user');
 const data = require('./routes/data');
+const search = require('./routes/search');
 
 function apiRouter(app) {
-    // TODO: middleware to redirect old requests to the new API format
-
     // user routes
     user.handler(app);
 
     // data routes
     data.handler(app);
+
+    // search route
+    search.handler(app);
 
     app.use((req, res) => {
         // catch-all api endpoint
