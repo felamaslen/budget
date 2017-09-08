@@ -1,3 +1,5 @@
+const listCommon = require('../list.common');
+
 /**
  * @swagger
  * /data/bills/{page}:
@@ -23,7 +25,12 @@
  *                     $ref: "#/definitions/DataResponse"
  */
 function routeGet(req, res) {
-    return res.end('not done yet');
+    const columnMap = {
+        item: 'i',
+        cost: 'c'
+    };
+
+    return listCommon.routeGet(req, res, 'bills', columnMap, 6);
 }
 
 /**
@@ -67,7 +74,7 @@ function routeGet(req, res) {
  *                     $ref: "#/definitions/DataResponsePostList"
  */
 function routePost(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePost(req, res, 'bills');
 }
 
 /**
@@ -88,7 +95,7 @@ function routePost(req, res) {
  *         - in: body
  *           name: id
  *           type: number
- *           requierd: true
+ *           required: true
  *         - in: body
  *           name: year
  *           type: number
@@ -117,7 +124,7 @@ function routePost(req, res) {
  *                     $ref: "#/definitions/DataResponsePutList"
  */
 function routePut(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePut(req, res, 'bills');
 }
 
 /**
@@ -150,7 +157,7 @@ function routePut(req, res) {
  *                     $ref: "#/definitions/ErrorResponse"
  */
 function routeDelete(req, res) {
-    return res.end('not done yet');
+    return listCommon.routeDelete(req, res, 'bills');
 }
 
 module.exports = {
