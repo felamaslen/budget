@@ -125,7 +125,7 @@ async function getResults(
             db, user, table, startYear, startMonth
         );
 
-        olderExists = olderExistsQuery.count > 0;
+        olderExists = olderExistsQuery[0].count > 0;
     }
 
     const queryResult = await getQuery(db, user, table, columns, limitCondition);
