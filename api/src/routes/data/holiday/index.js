@@ -1,3 +1,5 @@
+const listCommon = require('../list.common');
+
 /**
  * @swagger
  * /data/holiday/{page}:
@@ -23,7 +25,14 @@
  *                     $ref: "#/definitions/DataResponse"
  */
 function routeGet(req, res) {
-    return res.end('not done yet');
+    const columnMap = {
+        item: 'i',
+        cost: 'c',
+        holiday: 'h',
+        shop: 's'
+    };
+
+    return listCommon.routeGet(req, res, 'holiday', columnMap, 12);
 }
 
 /**
