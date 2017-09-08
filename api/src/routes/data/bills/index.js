@@ -157,7 +157,7 @@ function routePut(req, res) {
  *                     $ref: "#/definitions/ErrorResponse"
  */
 function routeDelete(req, res) {
-    return res.end('not done yet');
+    return listCommon.routeDelete(req, res, 'bills');
 }
 
 module.exports = {
