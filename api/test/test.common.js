@@ -147,6 +147,9 @@ class DummyExpress {
     delete(path, callback) {
         this.addRoute('delete', path, callback);
     }
+    patch(path, callback) {
+        this.addRoute('patch', path, callback);
+    }
 }
 
 class DummyDb {

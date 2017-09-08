@@ -1,5 +1,4 @@
 const common = require('../../common');
-const config = require('../../config')();
 
 function getLimitCondition(now, numMonths, offset = 0) {
     const currentMonth = now.getMonth() + 1;
