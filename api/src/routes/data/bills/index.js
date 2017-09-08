@@ -95,7 +95,7 @@ function routePost(req, res) {
  *         - in: body
  *           name: id
  *           type: number
- *           requierd: true
+ *           required: true
  *         - in: body
  *           name: year
  *           type: number

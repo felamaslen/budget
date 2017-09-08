@@ -44,6 +44,8 @@ class Connection {
         this.conn = mysql.createConnection(Object.assign({}, options, {
             supportBigNumbers: true
         }));
+
+        this.requireForceToEnd = false;
     }
 
     static handleError(reject, err) {
@@ -61,6 +63,10 @@ class Connection {
 
         if (outOfRange) {
             return reject(new ErrorOutOfRange(`${outOfRange[1]} out of range`));
+        }
+
+        if (config.debugSql) {
+            console.log('SQL error:', err);
         }
 
         return reject(new ErrorDatabase(config.msg.errorServerDb));
@@ -90,13 +96,17 @@ class Connection {
     connect(res) {
         return this.wrapSimple('connect', res);
     }
-    end(res) {
+    end(res, force = false) {
+        if (this.requireForceToEnd && !force) {
+            return this;
+        }
+
         return this.wrapSimple('end', res);
     }
     query(sql, ...args) {
         return new Promise((resolve, reject) => {
             this.conn.query(sql, args, (err, results) => {
-                if (process.env.SQLDEBUGGER === 'true') {
+                if (config.debugSql) {
                     const rawQuery = sql
                         .replace(/\?/g, () => mysql.escape(args.shift()))
                         .replace(/\s+/g, ' ')
