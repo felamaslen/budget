@@ -370,7 +370,7 @@ async function routeModify(
         .json(response);
 }
 
-function routePost(req, res, table, validate) {
+function routePost(req, res, table, validate = validateInsertData) {
     return routeModify(req, res, table, validate, insertItem, 201);
 }
 
