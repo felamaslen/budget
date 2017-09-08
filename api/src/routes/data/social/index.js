@@ -1,5 +1,18 @@
 const listCommon = require('../list.common');
 
+const extraStringColumns = [
+    { name: 'society', notEmpty: true },
+    { name: 'shop' }
+];
+
+function validateInsertData(data) {
+    return listCommon.validateInsertData(data, true, extraStringColumns);
+}
+
+function validateUpdateData(data) {
+    return listCommon.validateUpdateData(data, extraStringColumns);
+}
+
 /**
  * @swagger
  * /data/social/{page}:
@@ -76,7 +89,7 @@ function routeGet(req, res) {
  *                     $ref: "#/definitions/DataResponsePostList"
  */
 function routePost(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePost(req, res, 'social', validateInsertData);
 }
 
 /**
@@ -126,7 +139,7 @@ function routePost(req, res) {
  *                     $ref: "#/definitions/DataResponsePutList"
  */
 function routePut(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePut(req, res, 'social', validateUpdateData);
 }
 
 /**
