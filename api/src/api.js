@@ -9,8 +9,6 @@ const data = require('./routes/data');
 const search = require('./routes/search');
 
 function apiRouter(app) {
-    // TODO: middleware to redirect old requests to the new API format
-
     // user routes
     user.handler(app);
 

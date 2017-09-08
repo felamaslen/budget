@@ -5,6 +5,7 @@
 module.exports = () => {
     return {
         debug: process.env.NODE_ENV !== 'production',
+        debugSql: process.env.SQLDEBUGGER === 'true',
         mysqlUri: process.env.MYSQL_URI,
         webUrl: process.env.WEB_URL,
         user: {
