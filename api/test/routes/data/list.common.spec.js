@@ -220,6 +220,7 @@ describe('Common list data functions', () => {
                 year: 2017, month: 9, date: 15 }))
                 .to.throw('didn\'t provide item');
         });
+
         it('should require valid costs', () => {
             expect(() => listCommon.validateInsertData({
                 year: 2017, month: 9, date: 15, item: 'foo'
@@ -232,6 +233,40 @@ describe('Common list data functions', () => {
                 }))
                     .to.throw('invalid cost data');
             });
+        });
+
+        it('should accept an allRequired parameter', () => {
+            expect(() => listCommon.validateInsertData({}, false))
+                .to.not.throw();
+        });
+
+        it('should accept extra string columns to validate', () => {
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15, item: 'foo', cost: 1
+            }, true, [{ name: 'bar' }]))
+                .to.throw('didn\'t provide bar');
+
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: 'baz'
+            }, true, [{ name: 'bar' }]))
+                .to.not.throw();
+        });
+
+        it('should accept non-empty rules for extra string columns', () => {
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: ''
+            }, true, [{ name: 'bar', notEmpty: true }]))
+                .to.throw('bar must not be empty');
+
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: ''
+            }, true, [{ name: 'bar', notEmpty: false }]))
+                .to.not.throw();
+
+            expect(() => listCommon.validateInsertData({
+                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: 'baz'
+            }, true, [{ name: 'bar', notEmpty: true }]))
+                .to.not.throw();
         });
 
         it('should return the validated data', () => {
@@ -269,6 +304,11 @@ describe('Common list data functions', () => {
                         cost: 10
                     }
                 });
+        });
+
+        it('should require at least one value', () => {
+            expect(() => listCommon.validateUpdateData({ id: 1 }))
+                .to.throw('no data provided');
         });
     });
 });

@@ -2,8 +2,6 @@
  * Common methods / functions
  */
 
-const config = require('./config')();
-
 function monthLength(year, month) {
     // month is 1-indexed here
     if (month === 2) {
@@ -46,15 +44,12 @@ function strip(string) {
         .replace(/\s+/g, ' ');
 }
 
-function getErrorStatus(err) {
-    let statusCode = 400;
-    const errorMessage = err.message;
+class ErrorBadRequest extends Error {
+    constructor(message, code = 400) {
+        super(message);
 
-    if (err.message === config.errorServerDb) {
-        statusCode = 500;
+        this.statusCode = code;
     }
-
-    return { statusCode, errorMessage };
 }
 
 module.exports = {
@@ -63,6 +58,6 @@ module.exports = {
     yearAddMonth,
     getBeginningOfWeek,
     strip,
-    getErrorStatus
+    ErrorBadRequest
 };
 
