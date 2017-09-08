@@ -6,21 +6,21 @@
   <title>Budget 3.0 API docs</title>
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
-  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QkHESorXzjEYAAAAghJREFUWMPFlz1oFEEUgL85BUEQT/CnC5jmDaigFhbpUonFBZJgKzZpLGwFK3+wtxa0sVMT8CyFaJNGUyq8V6hoYSHERCKIlTazsp6bnZndzTrN3d7em++74715b6HD5UWyYwYdw4deZLF3gQA/AHwAnniRUW8CJfgn4GD4eJwq4TqGT+43p2bPdkUgAZ4k4XYZHpVwPcBrJVxP8B0lXI/wSgnXAv4UeA58BqaBy8DJXAnXAL4NnFGz9+XvqBleZB5YSZRYVLMV1+CXH1azDS9yBxgBN9VsuRRzEXhUs+0v4BtwHNgaZMJvB/gScB34DqyVm5CaPQbeReBTwJaaVR/FNQl3P7zOAm/VbAa4oGaTsQ8i8O0iZpCT7Wr2Mdy/B5zwIgrc8iKHQuxVYF9IzCj8H4FYqXmR/WqGmr0E7gICDNVs04uMgRtq9hM4kgL/qwoS6/wS8DC8Pw28AX4Ae0J1TIccWQNmYvA/AhmHzBc1O1aUXYh9BWyq2Xkv4oCzwHoKHGBvMcmEYSJ2wh31Ii/UbLbIfDU750WG4f4U8DoVXv4HFoDljON0A7gGjIGvwClgCbiSA5/MgVHYsM3KglOR5W0ksuGVvaChRCP4js0oU6IxvLYbJkq0gkfbcUSiNTx1HqiS6ASeMxGVJTqDJz8ZhfFpLlx2Bm8yFS8Aq8Uw8V9Wk0fwuvUbr8IXAwtGLogAAAAASUVORK5CYII=" />
   <style>
     html
     {
-        box-sizing: border-box;
-        overflow: -moz-scrollbars-vertical;
-        overflow-y: scroll;
+      box-sizing: border-box;
+      overflow: -moz-scrollbars-vertical;
+      overflow-y: scroll;
     }
     *,
     *:before,
     *:after
     {
-        box-sizing: inherit;
+      box-sizing: inherit;
     }
-    
+
     body {
       margin:0;
       background: #fafafa;
@@ -70,15 +70,19 @@
 <script src="./swagger-ui-standalone-preset.js"> </script>
 <script>
 window.onload = function() {
+  
   // Build a system
   const ui = SwaggerUIBundle({
-    url: "api.yml",
+    url: "spec.json",
     dom_id: '#swagger-ui',
+    deepLinking: true,
     presets: [
       SwaggerUIBundle.presets.apis,
       SwaggerUIStandalonePreset
     ],
-    plugins: [],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl
+    ],
     layout: "StandaloneLayout"
   })
 

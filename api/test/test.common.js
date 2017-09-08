@@ -183,7 +183,7 @@ class DummyDbWithUser extends DummyDb {
             return [{
                 uid: 1,
                 name: 'johnsmith',
-                'api_key': testGoodApiKey
+                apiKey: testGoodApiKey
             }];
         }
 
