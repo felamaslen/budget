@@ -34,7 +34,11 @@ function handler(app) {
 
     // list data routes
     config.data.listCategories.forEach(category => {
-        app.get(`/data/${category}/:page?`, listDataProcessor[category].routeGet);
+        const pageParam = category === 'funds'
+            ? ''
+            : '/:page?';
+
+        app.get(`/data/${category}${pageParam}`, listDataProcessor[category].routeGet);
         app.post(`/data/${category}`, listDataProcessor[category].routePost);
         app.put(`/data/${category}`, listDataProcessor[category].routePut);
         app.delete(`/data/${category}`, listDataProcessor[category].routeDelete);
