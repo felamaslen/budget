@@ -207,7 +207,7 @@ function validateDate(data, allRequired = true) {
     return { year, month, date };
 }
 
-function validateInsertData(data, allRequired = true) {
+function validateInsertData(data, allRequired = true, extraStringColumns = []) {
     const validData = {};
 
     // validate dates
@@ -218,13 +218,22 @@ function validateInsertData(data, allRequired = true) {
         validData.date = date;
     }
 
-    const undefinedItem = getUndefinedItem(['item', 'cost'], data);
+    const undefinedItem = getUndefinedItem(['item', 'cost'].concat(
+        extraStringColumns.map(column => column.name)
+    ), data);
+
     if (undefinedItem && allRequired) {
         throw new common.ErrorBadRequest(`didn't provide ${undefinedItem}`);
     }
 
     if ('item' in data) {
-        validData.item = data.item.toString();
+        const itemValue = data.item.toString();
+
+        if (!itemValue.length) {
+            throw new common.ErrorBadRequest('item must not be empty');
+        }
+
+        validData.item = itemValue;
     }
 
     if ('cost' in data) {
@@ -236,10 +245,22 @@ function validateInsertData(data, allRequired = true) {
         validData.cost = cost;
     }
 
+    extraStringColumns.forEach(column => {
+        if (column.name in data) {
+            const value = data[column.name].toString();
+
+            if (column.notEmpty && !value.length) {
+                throw new common.ErrorBadRequest(`${column.name} must not be empty`);
+            }
+
+            validData[column.name] = value;
+        }
+    });
+
     return validData;
 }
 
-function validateUpdateData(data) {
+function validateUpdateData(data, extraStringColumns = []) {
     if (!('id' in data)) {
         throw new common.ErrorBadRequest('didn\'t provide id');
     }
@@ -261,7 +282,7 @@ function validateUpdateData(data) {
         throw new common.ErrorBadRequest('no data provided');
     }
 
-    const values = validateInsertData(dataWithoutId, false);
+    const values = validateInsertData(dataWithoutId, false, extraStringColumns);
 
     return { id, values };
 }
