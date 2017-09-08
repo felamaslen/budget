@@ -11,7 +11,8 @@
     "test": "./node_modules/.bin/mocha -w \"./api/test/**/*.spec.js\" --bail --reporter spec",
     "test:ui": "./node_modules/.bin/mocha -w \"./web/test/**/*.spec.js\" --bail --reporter spec",
     "lint": "./node_modules/.bin/eslint webpack.config.js webpack api/src api/test web/src web/test",
-    "install_db": "node ./api/scripts/createSchema.js"
+    "install_db": "node ./api/scripts/createSchema.js",
+    "test:install_db": "NODE_ENV=test node ./api/scripts/createSchema.js"
   },
   "repository": {
     "type": "git",
