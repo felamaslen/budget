@@ -124,7 +124,7 @@ function routePost(req, res) {
  *                     $ref: "#/definitions/DataResponsePutList"
  */
 function routePut(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePut(req, res, 'bills');
 }
 
 /**
