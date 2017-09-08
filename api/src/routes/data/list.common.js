@@ -257,6 +257,10 @@ function validateUpdateData(data) {
         return obj;
     }, {});
 
+    if (!Object.keys(dataWithoutId).length) {
+        throw new Error('no data provided');
+    }
+
     const values = validateInsertData(dataWithoutId, false);
 
     return { id, values };
@@ -374,7 +378,7 @@ function routePost(req, res, table, validate = validateInsertData) {
     return routeModify(req, res, table, validate, insertItem, 201);
 }
 
-function routePut(req, res, table, validate) {
+function routePut(req, res, table, validate = validateUpdateData) {
     return routeModify(req, res, table, validate, updateItem);
 }
 
