@@ -74,7 +74,7 @@ function routeGet(req, res) {
  *                     $ref: "#/definitions/DataResponsePostList"
  */
 function routePost(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePost(req, res, 'income');
 }
 
 /**
@@ -124,7 +124,7 @@ function routePost(req, res) {
  *                     $ref: "#/definitions/DataResponsePutList"
  */
 function routePut(req, res) {
-    return res.end('not done yet');
+    return listCommon.routePut(req, res, 'income');
 }
 
 /**
