@@ -1,5 +1,6 @@
 const md5 = require('md5');
 
+const common = require('../../../common');
 const listCommon = require('../list.common');
 
 function getMaxAge(now, period, length) {
@@ -142,7 +143,7 @@ async function getFundHistoryMappedToFundIds(
 
 function validateTransactions(transactions) {
     if (!Array.isArray(transactions)) {
-        throw new Error('transactions must be an array');
+        throw new common.ErrorBadRequest('transactions must be an array');
     }
 
     return transactions.map(transaction => {
@@ -150,14 +151,14 @@ function validateTransactions(transactions) {
 
         ['cost', 'units'].forEach(item => {
             if (!(item in transaction)) {
-                throw new Error(
+                throw new common.ErrorBadRequest(
                     `transactions must have ${item}`
                 );
             }
 
             const value = parseFloat(transaction[item], 10);
             if (isNaN(value)) {
-                throw new Error(
+                throw new common.ErrorBadRequest(
                     `transactions ${item} must be numerical`
                 );
             }
@@ -179,7 +180,7 @@ function validateExtraData(data, allRequired = true) {
     const haveTransactions = 'transactions' in data;
 
     if (allRequired && !haveTransactions) {
-        throw new Error('didn\'t provide transactions data');
+        throw new common.ErrorBadRequest('didn\'t provide transactions data');
     }
 
     const result = {};
