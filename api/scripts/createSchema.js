@@ -8,21 +8,9 @@ if (process.env.NODE_ENV === 'test') {
     process.env.MYSQL_URI = process.env.MYSQL_URI_TEST;
 }
 
-const config = require('../src/config')();
-const { logger } = require('./common');
+const { logger, connectToDatabase } = require('./common');
 
-const Database = require('../src/db');
 const { userPinHash } = require('../src/routes/user');
-
-async function connectToDatabase() {
-    const info = Database.parseConnectionURI(config.mysqlUri);
-
-    const db = new Database.Connection(info);
-
-    await db.connect();
-
-    return db;
-}
 
 function generateRandomPin() {
     return 1000 + Math.floor(Math.random() * 8999);
