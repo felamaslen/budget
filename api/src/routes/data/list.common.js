@@ -146,6 +146,23 @@ async function getResults(
     return result;
 }
 
+async function routeGet(req, res, table, columnMap, numMonths = 3) {
+    const offset = parseInt(req.params.page || 0, 10);
+
+    const limit = { numMonths, offset };
+
+    const data = await getResults(
+        req.db, req.user, new Date(), table, columnMap, null, limit
+    );
+
+    await req.db.end();
+
+    return res.json({
+        error: false,
+        data
+    });
+}
+
 function getUndefinedItem(items, data) {
     return items.reduce((status, item) => {
         if (status || item in data) {
@@ -374,6 +391,7 @@ module.exports = {
     getTotalCostQuery,
     getTotalCost,
     getResults,
+    routeGet,
     validateDate,
     validateInsertData,
     validateUpdateData,
