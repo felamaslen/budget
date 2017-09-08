@@ -3,6 +3,11 @@
  */
 
 require('dotenv').config();
+
+if (process.env.NODE_ENV === 'test') {
+    process.env.MYSQL_URI = process.env.MYSQL_URI_TEST;
+}
+
 const config = require('../src/config')();
 const { logger } = require('./common');
 
@@ -11,6 +16,7 @@ const { userPinHash } = require('../src/routes/user');
 
 async function connectToDatabase() {
     const info = Database.parseConnectionURI(config.mysqlUri);
+
     const db = new Database.Connection(info);
 
     await db.connect();
@@ -317,6 +323,13 @@ async function run() {
 
     try {
         await createSchema(db);
+
+        if (process.env.NODE_ENV === 'test') {
+            logger('Created schema in testing database.');
+        }
+        else {
+            logger('Created empty database with tables from schema.');
+        }
     }
     catch (err) {
         logger(`An error occurred: ${err}`, 'ERROR');
