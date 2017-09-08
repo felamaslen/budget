@@ -46,6 +46,7 @@ class Connection {
         }));
 
         this.requireForceToEnd = false;
+        this.debug = 0;
     }
 
     static handleError(reject, err) {
@@ -106,7 +107,7 @@ class Connection {
     query(sql, ...args) {
         return new Promise((resolve, reject) => {
             this.conn.query(sql, args, (err, results) => {
-                if (config.debugSql) {
+                if (this.debug >= 2 || config.debugSql) {
                     const rawQuery = sql
                         .replace(/\?/g, () => mysql.escape(args.shift()))
                         .replace(/\s+/g, ' ')
@@ -117,7 +118,7 @@ class Connection {
                 }
 
                 if (err) {
-                    if (process.env.NODE_ENV === 'development') {
+                    if (this.debug > 0 || process.env.NODE_ENV === 'development') {
                         console.log('DB error:', err);
                     }
 
