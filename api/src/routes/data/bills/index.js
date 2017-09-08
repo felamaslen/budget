@@ -24,29 +24,13 @@ const listCommon = require('../list.common');
  *                 schema:
  *                     $ref: "#/definitions/DataResponse"
  */
-async function routeGet(req, res) {
+function routeGet(req, res) {
     const columnMap = {
         item: 'i',
         cost: 'c'
     };
 
-    const page = parseInt(req.params.page || 0, 10);
-
-    const limit = {
-        numMonths: 3,
-        offset: page
-    };
-
-    const data = await listCommon.getResults(
-        req.db, req.user, new Date(), 'bills', columnMap, null, limit
-    );
-
-    await req.db.end();
-
-    return res.json({
-        error: false,
-        data
-    });
+    return listCommon.routeGet(req, res, 'bills', columnMap, 6);
 }
 
 /**
