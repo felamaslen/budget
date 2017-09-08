@@ -270,6 +270,11 @@ describe('Common list data functions', () => {
                     }
                 });
         });
+
+        it('should require at least one value', () => {
+            expect(() => listCommon.validateUpdateData({ id: 1 }))
+                .to.throw('no data provided');
+        });
     });
 });
 
