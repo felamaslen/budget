@@ -316,7 +316,9 @@ async function deleteItem(db, user, table, id) {
     }
 }
 
-async function route(req, res, table, validate, operation, successCode = 200) {
+async function routeModify(
+    req, res, table, validate, operation, successCode = 200
+) {
     const db = req.db;
     const user = req.user;
 
@@ -352,15 +354,15 @@ async function route(req, res, table, validate, operation, successCode = 200) {
 }
 
 function routePost(req, res, table, validate) {
-    return route(req, res, table, validate, insertItem, 201);
+    return routeModify(req, res, table, validate, insertItem, 201);
 }
 
 function routePut(req, res, table, validate) {
-    return route(req, res, table, validate, updateItem);
+    return routeModify(req, res, table, validate, updateItem);
 }
 
 function routeDelete(req, res, table) {
-    return route(req, res, table, validateDeleteData, deleteItem);
+    return routeModify(req, res, table, validateDeleteData, deleteItem);
 }
 
 module.exports = {
