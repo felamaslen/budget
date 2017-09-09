@@ -4,9 +4,12 @@
 
 module.exports = () => {
     return {
+        test: process.env.NODE_ENV === 'test',
         debug: process.env.NODE_ENV !== 'production',
         debugSql: process.env.SQLDEBUGGER === 'true',
-        mysqlUri: process.env.MYSQL_URI,
+        mysqlUri: process.env.NODE_ENV === 'test'
+            ? process.env.MYSQL_URI_TEST
+            : process.env.MYSQL_URI,
         webUrl: process.env.WEB_URL,
         user: {
             hashSalt: process.env.USER_HASH_SALT,

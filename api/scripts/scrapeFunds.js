@@ -84,6 +84,11 @@ function getPricesFromData(funds, data, flags) {
 function getFundUrlHL(fund) {
     // returns a URL like:
     // http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
+    if (config.test) {
+        // return a testing URL
+        return process.env.FUND_TEST_URL;
+    }
+
     const matches = fund.name.match(config.data.funds.scraper.regex);
 
     const humanName = matches[1];
