@@ -536,12 +536,14 @@ describe('Fund scraper', () => {
                 {
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
-                    name: TEST_FUND_NAMES[1]
+                    name: TEST_FUND_NAMES[1],
+                    units: 54
                 },
                 {
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
-                    name: TEST_FUND_NAMES[0]
+                    name: TEST_FUND_NAMES[0],
+                    units: 10
                 }
             ]);
         });
@@ -572,12 +574,14 @@ describe('Fund scraper', () => {
                 {
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
-                    name: TEST_FUND_NAMES[1]
+                    name: TEST_FUND_NAMES[1],
+                    units: 54
                 },
                 {
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
-                    name: TEST_FUND_NAMES[0]
+                    name: TEST_FUND_NAMES[0],
+                    units: 30
                 }
             ]);
         });

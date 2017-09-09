@@ -271,6 +271,16 @@ async function scrapeFundPrices(db, funds, data, flags, now = new Date()) {
     }
     const fundsWithPrices = getPricesFromData(funds, data, flags);
 
+    const currentValuePence = fundsWithPrices.reduce(
+        (value, fund) => value + (fund.units * fund.price), 0
+    );
+
+    const currentValue = Math.round(currentValuePence) / 100;
+
+    if (!flags.quiet) {
+        logger(`Total value: ${config.data.currencyUnit}${currentValue}`);
+    }
+
     if (flags.verbose) {
         logger('Inserting prices into database');
     }
@@ -322,7 +332,8 @@ function getEligibleFunds(queryResult) {
                     return {
                         hash: fundHash(fund.name, config.data.funds.salt),
                         broker,
-                        name: fund.name
+                        name: fund.name,
+                        units
                     };
                 }
 
@@ -336,9 +347,13 @@ function getEligibleFunds(queryResult) {
         .filter(item => item !== null)
         .reduce((red, fund) => {
             // filter by unique fund hash
-            if (red.hashes.indexOf(fund.hash) === -1) {
+            const hashIndex = red.hashes.indexOf(fund.hash);
+            if (hashIndex === -1) {
                 red.hashes.push(fund.hash);
                 red.funds.push(fund);
+            }
+            else {
+                red.funds[hashIndex].units += fund.units;
             }
 
             return red;
