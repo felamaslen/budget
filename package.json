@@ -13,7 +13,8 @@
     "lint": "./node_modules/.bin/eslint webpack.config.js webpack api/src api/test web/src web/test",
     "install_db": "node ./api/scripts/createSchema.js",
     "test:install_db": "NODE_ENV=test node ./api/scripts/createSchema.js",
-    "scrape_funds": "node ./api/scripts/scrapeFunds.js"
+    "scrape_funds": "node ./api/scripts/scrapeFunds.js -q",
+    "dev:scrape_funds": "node ./api/scripts/scrapeFunds.js -v"
   },
   "repository": {
     "type": "git",
@@ -32,7 +33,9 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "body-parser": "^1.17.2",
+    "colors": "^1.1.2",
     "css-loader": "^0.28.5",
+    "dateformat": "^2.0.0",
     "dotenv": "^4.0.0",
     "dotenv-webpack": "^1.5.4",
     "ejs": "^2.5.7",
