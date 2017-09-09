@@ -12,6 +12,10 @@ const config = require('../src/config')();
 const { fundHash } = require('../src/routes/data/funds/common');
 const { logger, connectToDatabase } = require('./common');
 
+const ERR_DB = 1;
+const ERR_FUNDS_LIST = 2;
+const ERR_SCRAPE = 3;
+
 function getPriceFromDataHL(data) {
     // gets the fund price from raw html (HL)
 
@@ -60,8 +64,8 @@ function getPricesFromData(funds, data, flags) {
             try {
                 price = getPriceFromData(fund, data[index]);
 
-                if (flags.verbose) {
-                    logger(`Got price: ${price} for ${fund.name}`, 'SUCCESS');
+                if (!flags.quiet) {
+                    logger(`Price: ${price} for ${fund.name}`, 'SUCCESS');
                 }
             }
             catch (err) {
@@ -134,7 +138,7 @@ function getCacheUrlMap(funds, flags) {
             url = getFundUrl(fund);
 
             if (flags.verbose) {
-                logger(`Got url ${url} for ${fund.name}`, 'SUCCESS');
+                logger(`URL: \`${fund.name}\` -> \`${url}\``, 'DEBUG');
             }
         }
         catch (err) {
@@ -172,9 +176,9 @@ function downloadUrl(url, flags, requester = request) {
         followAllRedirects: true
     });
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         if (flags.verbose) {
-            logger(`[dl] ${url}`);
+            logger(`Downloading: ${url}`, 'DEBUG');
         }
 
         return req.get({
@@ -184,7 +188,7 @@ function downloadUrl(url, flags, requester = request) {
             }
         }, (err, res) => {
             if (err) {
-                return resolve(null);
+                return reject(err);
             }
 
             return resolve(res.body);
@@ -355,14 +359,14 @@ function isArgumentEnabled(name) {
         process.argv.indexOf(long) !== -1;
 }
 
-async function run() {
+async function processScrape() {
     const flags = {
         verbose: isArgumentEnabled('verbose'),
         quiet: isArgumentEnabled('quiet')
     };
 
     if (!flags.quiet) {
-        logger('Scraping funds....');
+        logger('Starting fund scraper...');
     }
 
     const getHoldings = isArgumentEnabled('holdings');
@@ -379,7 +383,7 @@ async function run() {
             logger(err.stack, 'DEBUG');
         }
 
-        return;
+        return ERR_DB;
     }
 
     let funds = null;
@@ -392,7 +396,7 @@ async function run() {
             logger(err.stack, 'DEBUG');
         }
 
-        return;
+        return ERR_FUNDS_LIST;
     }
 
     if (!funds.length) {
@@ -400,27 +404,51 @@ async function run() {
             logger('No funds to scrape!', 'WARN');
         }
 
-        return;
+        return 0;
     }
 
-    if (flags.verbose) {
-        logger('Fetching data...');
+    let dataMapped = null;
+    try {
+        dataMapped = await getRawData(funds, flags);
     }
-    const dataMapped = await getRawData(funds, flags);
+    catch (err) {
+        logger('Error scraping data!', 'FATAL');
+        if (flags.verbose) {
+            logger(err.stack, 'DEBUG');
+        }
+
+        await db.end();
+
+        return ERR_SCRAPE;
+    }
 
     if (getHoldings) {
+        if (!flags.quiet) {
+            logger('Getting holdings...');
+        }
         await scrapeFundHoldings(db, funds, dataMapped, flags);
     }
 
     if (getPrices) {
+        if (!flags.quiet) {
+            logger('Getting prices...');
+        }
         await scrapeFundPrices(db, funds, dataMapped, flags);
     }
 
     await db.end();
 
     if (!flags.quiet) {
-        logger('Finished scraping funds');
+        logger('Finished scraping funds', 'SUCCESS');
     }
+
+    return 0;
+}
+
+async function run() {
+    const status = await processScrape();
+
+    process.exit(status); // eslint-disable-line no-process-exit
 }
 
 if (require.main === module) {

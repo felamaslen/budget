@@ -16,6 +16,7 @@ function logger(message, key = 'MSG') {
 
     if (key === 'FATAL') {
         pre = colors.red.underline(pre);
+        post = colors.red(post);
     }
     else if (key === 'ERROR') {
         pre = colors.red(pre);
