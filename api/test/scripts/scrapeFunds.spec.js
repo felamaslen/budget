@@ -2,6 +2,8 @@
  * Spec for fund price scraper
  */
 
+/* eslint max-lines: 0, max-statements: 0 */
+
 require('dotenv').config();
 const expect = require('chai').expect;
 const fs = require('fs-extra');
@@ -9,8 +11,10 @@ const path = require('path');
 const md5 = require('md5');
 
 const common = require('../test.common');
-
 const scraper = require('../../scripts/scrapeFunds');
+
+const config = require('../../src/config')();
+const { fundHash } = require('../../src/routes/data/funds/common');
 
 class DummyRequest {
     constructor(res) {
@@ -30,7 +34,7 @@ class DummyRequest {
         this.requests.push(options.url);
         this.requestHeaders.push(options.headers);
 
-        return callback(null, this.res(options.url));
+        return callback(null, { body: this.res(options.url) });
     }
 }
 
@@ -106,9 +110,14 @@ class DummyDbWithFundHashes extends common.DummyDb {
     }
 }
 
+const TEST_FUND_NAMES = [
+    'HL Multi-Manager UK Growth (accum.)',
+    'City of London Investment Trust ORD 25p (share)'
+];
+
 describe('Fund scraper', () => {
     const testFunds = {};
-    const testFundsList = [];
+    let testFundsList = [];
     const testFundsListData = [];
 
     before(async () => {
@@ -121,14 +130,14 @@ describe('Fund scraper', () => {
         testFunds.hl = {
             fund: {
                 fund: {
-                    name: 'HL Multi-Manager UK Growth (accum.)',
+                    name: TEST_FUND_NAMES[0],
                     broker: 'hl'
                 },
                 data: testDataFundHL
             },
             share: {
                 fund: {
-                    name: 'City of London Investment Trust ORD 25p (share)',
+                    name: TEST_FUND_NAMES[1],
                     broker: 'hl'
                 },
                 data: testDataShareHL
@@ -136,9 +145,15 @@ describe('Fund scraper', () => {
         };
 
         testFundsList.push(testFunds.hl.fund.fund);
-        testFundsListData.push(testFunds.hl.fund.data);
-
         testFundsList.push(testFunds.hl.share.fund);
+
+        testFundsList = testFundsList.map(item => {
+            return Object.assign({}, item, {
+                hash: md5(item.name)
+            });
+        });
+
+        testFundsListData.push(testFunds.hl.fund.data);
         testFundsListData.push(testFunds.hl.share.data);
     });
 
@@ -196,12 +211,14 @@ describe('Fund scraper', () => {
             expect(scraper.getPricesFromData(funds, data, flags)).to.deep.equal([
                 {
                     broker: 'hl',
-                    name: 'HL Multi-Manager UK Growth (accum.)',
+                    name: TEST_FUND_NAMES[0],
+                    hash: md5(TEST_FUND_NAMES[0]),
                     price: 130.31
                 },
                 {
                     broker: 'hl',
-                    name: 'City of London Investment Trust ORD 25p (share)',
+                    name: TEST_FUND_NAMES[1],
+                    hash: md5(TEST_FUND_NAMES[1]),
                     price: 424.1
                 }
             ]);
@@ -219,7 +236,8 @@ describe('Fund scraper', () => {
             expect(scraper.getPricesFromData(funds, data, flags)).to.deep.equal([
                 {
                     broker: 'hl',
-                    name: 'HL Multi-Manager UK Growth (accum.)',
+                    name: TEST_FUND_NAMES[0],
+                    hash: md5(TEST_FUND_NAMES[0]),
                     price: 130.31
                 },
                 {
@@ -244,7 +262,7 @@ describe('Fund scraper', () => {
 
         it('should handle shares', () => {
             const fund = {
-                name: 'City of London Investment Trust ORD 25p (share)'
+                name: TEST_FUND_NAMES[1]
             };
 
             const url = 'http://www.hl.co.uk/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p';
@@ -334,26 +352,24 @@ describe('Fund scraper', () => {
             const db = new DummyDbWithFundHashes();
 
             const fund = testFundsList[0];
-            fund.hash = 'some_hash_foo';
 
             await scraper.insertNewSinglePriceCache(db, 1000, fund);
 
             expect(db.fundHash).to.deep.equal([
-                { fid: 100, broker: 'hl', hash: 'some_hash_foo' }
+                { fid: 100, broker: 'hl', hash: md5(TEST_FUND_NAMES[0]) }
             ]);
         });
 
         it('should use an existing fund hash if there is one', async () => {
             const db = new DummyDbWithFundHashes();
-            db.fundHash.push({ fid: 200, broker: 'hl', hash: 'some_hash_foo' });
+            db.fundHash.push({ fid: 200, broker: 'hl', hash: md5(TEST_FUND_NAMES[0]) });
 
             const fund = testFundsList[0];
-            fund.hash = 'some_hash_foo';
 
             await scraper.insertNewSinglePriceCache(db, 1000, fund);
 
             expect(db.fundHash).to.deep.equal([
-                { fid: 200, broker: 'hl', hash: 'some_hash_foo' }
+                { fid: 200, broker: 'hl', hash: md5(TEST_FUND_NAMES[0]) }
             ]);
         });
 
@@ -361,7 +377,6 @@ describe('Fund scraper', () => {
             const db = new DummyDbWithFundHashes();
 
             const fund = testFundsList[0];
-            fund.hash = 'some_hash_foo';
             fund.price = 666.456;
 
             await scraper.insertNewSinglePriceCache(db, 1000, fund);
@@ -383,25 +398,188 @@ describe('Fund scraper', () => {
                 .concat(testFundsList.slice(1))
                 .map(fund => Object.assign({}, fund, { hash: md5(fund.name) }));
 
-            await scraper.insertNewPriceCache(db, fundsWithPrices);
+            const now = new Date('2017-09-05');
+            const nowTimestamp = Math.floor(now.getTime() / 1000);
+
+            await scraper.insertNewPriceCache(db, fundsWithPrices, now);
 
             expect(db.fundCacheTime).to.have.lengthOf(1);
-            expect(db.fundCacheTime[0].cid).to.be.equal(1000);
+            expect(db.fundCacheTime[0].cid).to.equal(1000);
+            expect(db.fundCacheTime[0].time).to.equal(nowTimestamp);
             expect(db.fundCache).to.have.lengthOf(2);
-            expect(db.fundCache[0].cid).to.be.equal(1000);
-            expect(db.fundCache[0].fid).to.be.equal(100);
-            expect(db.fundCache[1].cid).to.be.equal(1000);
-            expect(db.fundCache[1].fid).to.be.equal(101);
+            expect(db.fundCache[0].cid).to.equal(1000);
+            expect(db.fundCache[0].fid).to.equal(100);
+            expect(db.fundCache[1].cid).to.equal(1000);
+            expect(db.fundCache[1].fid).to.equal(101);
 
-            await scraper.insertNewPriceCache(db, fundsWithPrices.reverse());
+            const next = new Date('2017-09-06');
+            const nextTimestamp = Math.floor(next.getTime() / 1000);
+
+            await scraper.insertNewPriceCache(db, fundsWithPrices.reverse(), next);
 
             expect(db.fundCacheTime).to.have.lengthOf(2);
-            expect(db.fundCacheTime[1].cid).to.be.equal(1001);
+            expect(db.fundCacheTime[1].cid).to.equal(1001);
+            expect(db.fundCacheTime[1].time).to.equal(nextTimestamp);
             expect(db.fundCache).to.have.lengthOf(4);
-            expect(db.fundCache[2].cid).to.be.equal(1001);
-            expect(db.fundCache[2].fid).to.be.equal(101);
-            expect(db.fundCache[3].cid).to.be.equal(1001);
-            expect(db.fundCache[3].fid).to.be.equal(100);
+            expect(db.fundCache[2].cid).to.equal(1001);
+            expect(db.fundCache[2].fid).to.equal(101);
+            expect(db.fundCache[3].cid).to.equal(1001);
+            expect(db.fundCache[3].fid).to.equal(100);
+        });
+    });
+
+    describe('scrapeFundPrices', () => {
+        let db = null;
+        before(() => {
+            db = new DummyDbWithFundHashes();
+        });
+
+        it('should process and insert fund price data', async () => {
+            const funds = testFundsList;
+            const data = testFundsListData;
+
+            const flags = { quiet: true };
+
+            const now = new Date('2017-09-05');
+            const nowTimestamp = Math.floor(now.getTime() / 1000);
+
+            await scraper.scrapeFundPrices(db, funds, data, flags, now);
+
+            expect(db.fundHash).to.have.lengthOf(2);
+
+            expect(db.fundHash[0].fid).to.equal(100);
+            expect(db.fundHash[0].hash).to.equal(md5(TEST_FUND_NAMES[0]));
+            expect(db.fundHash[0].broker).to.equal('hl');
+
+            expect(db.fundHash[1].fid).to.equal(101);
+            expect(db.fundHash[1].hash).to.equal(md5(TEST_FUND_NAMES[1]));
+            expect(db.fundHash[1].broker).to.equal('hl');
+
+            expect(db.fundCacheTime).to.have.lengthOf(1);
+            expect(db.fundCacheTime[0].cid).to.equal(1000);
+            expect(db.fundCacheTime[0].time).to.equal(nowTimestamp);
+
+            expect(db.fundCache).to.have.lengthOf(2);
+
+            expect(db.fundCache[0].cid).to.equal(1000);
+            expect(db.fundCache[0].fid).to.equal(100);
+            expect(db.fundCache[0].price).to.equal(130.31);
+
+            expect(db.fundCache[1].cid).to.equal(1000);
+            expect(db.fundCache[1].fid).to.equal(101);
+            expect(db.fundCache[1].price).to.equal(424.1);
+        });
+    });
+
+    describe('getBroker', () => {
+        it('should return HL for valid fund names', () => {
+            expect(scraper.getBroker(TEST_FUND_NAMES[0])).to.equal('hl');
+            expect(scraper.getBroker(TEST_FUND_NAMES[1])).to.equal('hl');
+        });
+
+        it('should throw an error for invalid fund names', () => {
+            expect(() => scraper.getBroker('foo')).to.throw('invalid fund name');
+        });
+    });
+
+    describe('getEligibleFunds', () => {
+        it('should return an empty array for an invalid or empty result', () => {
+            expect(scraper.getEligibleFunds(null)).to.deep.equal([]);
+            expect(scraper.getEligibleFunds(NaN)).to.deep.equal([]);
+            expect(scraper.getEligibleFunds([])).to.deep.equal([]);
+        });
+
+        it('should map and filter funds by validity', () => {
+            const queryResultAllInvalid = [
+                {},
+                null,
+                { name: 'foo' },
+                { name: TEST_FUND_NAMES[0], transactions: null },
+                { name: TEST_FUND_NAMES[0], transactions: '' },
+                { name: TEST_FUND_NAMES[0], transactions: 'gobbledegook' }
+            ];
+
+            expect(scraper.getEligibleFunds(queryResultAllInvalid)).to.deep.equal([]);
+
+            const queryResultSomeInvalid = [
+                null,
+                { name: TEST_FUND_NAMES[0], transactions: '' },
+                {
+                    name: TEST_FUND_NAMES[0],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 6, 1], 'u': 10, 'c': 10 },
+                        { 'd': [2017, 6, 1], 'u': -10, 'c': -8 }
+                    ])
+                },
+                {
+                    name: TEST_FUND_NAMES[1],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 6, 1], 'u': 100, 'c': 240 },
+                        { 'd': [2016, 10, 1], 'u': -46, 'c': -89 }
+                    ])
+                },
+                {
+                    name: TEST_FUND_NAMES[0],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 6, 1], 'u': 0, 'c': 10 }
+                    ])
+                },
+                {
+                    name: TEST_FUND_NAMES[0],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 6, 1], 'u': 10, 'c': 10 }
+                    ])
+                }
+            ];
+
+            expect(scraper.getEligibleFunds(queryResultSomeInvalid)).to.deep.equal([
+                {
+                    hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[1]
+                },
+                {
+                    hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[0]
+                }
+            ]);
+        });
+        it('should filter funds by uniqueness', () => {
+            const queryResultSomeDuplicate = [
+                {
+                    name: TEST_FUND_NAMES[1],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 6, 1], 'u': 100, 'c': 240 },
+                        { 'd': [2016, 10, 1], 'u': -46, 'c': -89 }
+                    ])
+                },
+                {
+                    name: TEST_FUND_NAMES[0],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 6, 1], 'u': 20, 'c': 19 }
+                    ])
+                },
+                {
+                    name: TEST_FUND_NAMES[0],
+                    transactions: JSON.stringify([
+                        { 'd': [2016, 9, 1], 'u': 10, 'c': 10 }
+                    ])
+                }
+            ];
+
+            expect(scraper.getEligibleFunds(queryResultSomeDuplicate)).to.deep.equal([
+                {
+                    hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[1]
+                },
+                {
+                    hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[0]
+                }
+            ]);
         });
     });
 });
