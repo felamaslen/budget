@@ -59,10 +59,17 @@ function getPricesFromData(funds, data, flags) {
             let price = null;
             try {
                 price = getPriceFromData(fund, data[index]);
+
+                if (flags.verbose) {
+                    logger(`Got price: ${price} for ${fund.name}`, 'SUCCESS');
+                }
             }
             catch (err) {
                 if (!flags.quiet) {
                     logger(`Couldn't get price for ${fund.name}!`, 'ERROR');
+                    if (flags.verbose) {
+                        logger(err.stack, 'DEBUG');
+                    }
                 }
             }
 
@@ -99,15 +106,16 @@ function getFundUrlHL(fund) {
         urlParts.push('shares/shares-search-results');
         urlParts.push(firstLetter);
         urlParts.push(systemName);
-
-        return urlParts.join('/');
+    }
+    else {
+        urlParts.push('funds/fund-discounts,-prices--and--factsheets/search-results');
+        urlParts.push(firstLetter);
+        urlParts.push(`${systemName}-${systemType}`);
     }
 
-    urlParts.push('funds/fund-discounts,-prices--and--factsheets/search-results');
-    urlParts.push(firstLetter);
-    urlParts.push(`${systemName}-${systemType}`);
+    const url = urlParts.join('/');
 
-    return urlParts.join('/');
+    return url;
 }
 
 function getFundUrl(fund) {
@@ -124,10 +132,17 @@ function getCacheUrlMap(funds, flags) {
         let url = null;
         try {
             url = getFundUrl(fund);
+
+            if (flags.verbose) {
+                logger(`Got url ${url} for ${fund.name}`, 'SUCCESS');
+            }
         }
         catch (err) {
             if (!flags.quiet) {
-                logger(err, 'WARN');
+                logger(`Couldn't get fund URL for ${fund.name}!`, 'WARN');
+                if (flags.verbose) {
+                    logger(err.stack, 'DEBUG');
+                }
             }
 
             return red;
@@ -172,7 +187,7 @@ function downloadUrl(url, flags, requester = request) {
                 return resolve(null);
             }
 
-            return resolve(res);
+            return resolve(res.body);
         });
     });
 }
@@ -188,7 +203,7 @@ async function getRawData(funds, flags, requester = request) {
     const dataMapped = cacheUrlMap.urlIndices.map(urlIndex => data[urlIndex]);
 
     if (flags.verbose) {
-        logger('Data fetched');
+        logger('Data fetched', 'SUCCESS');
     }
 
     return dataMapped;
@@ -200,7 +215,7 @@ async function scrapeFundHoldings(db, funds, data, flags) {
 
 async function insertNewSinglePriceCache(db, cid, fund) {
     // add this fund to the hash list if it's not there
-    const hashExistsQuery = db.query(`
+    const hashExistsQuery = await db.query(`
     SELECT fid FROM fund_hash
     WHERE hash = ? AND broker = ?
     `, fund.hash, fund.broker);
@@ -221,16 +236,12 @@ async function insertNewSinglePriceCache(db, cid, fund) {
     await db.query(`
     INSERT INTO fund_cache (cid, fid, price) VALUES (?, ?, ?)
     `, cid, fid, fund.price);
-
-    return 0;
 }
 
-async function insertNewPriceCache(db, fundsWithPrices) {
-    const now = Math.floor(new Date().getTime() / 1000);
-
+async function insertNewPriceCache(db, fundsWithPrices, now) {
     const insertQuery = await db.query(`
     INSERT INTO fund_cache_time (time, done) VALUES (?, 0)
-    `, now);
+    `, Math.floor(now / 1000));
 
     const cid = insertQuery.insertId;
 
@@ -240,10 +251,12 @@ async function insertNewPriceCache(db, fundsWithPrices) {
 
     await Promise.all(promises);
 
-    return 0;
+    await db.query(`
+    UPDATE fund_cache_time SET done = 1 WHERE cid = ?
+    `, cid);
 }
 
-async function scrapeFundPrices(db, funds, data, flags) {
+async function scrapeFundPrices(db, funds, data, flags, now = new Date()) {
     if (flags.verbose) {
         logger('Processing prices from data');
     }
@@ -252,9 +265,17 @@ async function scrapeFundPrices(db, funds, data, flags) {
     if (flags.verbose) {
         logger('Inserting prices into database');
     }
-    await insertNewPriceCache(db, fundsWithPrices);
-
-    return 0;
+    try {
+        await insertNewPriceCache(db, fundsWithPrices, now);
+    }
+    catch (err) {
+        if (!flags.quiet) {
+            logger('Error inserting prices into database', 'ERROR');
+            if (flags.verbose) {
+                logger(err.stack, 'DEBUG');
+            }
+        }
+    }
 }
 
 function getBroker(name) {
@@ -264,7 +285,7 @@ function getBroker(name) {
         return 'hl';
     }
 
-    return null;
+    throw new Error('invalid fund name');
 }
 
 function getEligibleFunds(queryResult) {
@@ -292,10 +313,7 @@ function getEligibleFunds(queryResult) {
                     return {
                         hash: fundHash(fund.name, config.data.funds.salt),
                         broker,
-                        name: fund.item,
-                        uid: fund.uid,
-                        units,
-                        cost: fund.cost
+                        name: fund.name
                     };
                 }
 
@@ -306,12 +324,22 @@ function getEligibleFunds(queryResult) {
                 return null;
             }
         })
-        .filter(item => item !== null);
+        .filter(item => item !== null)
+        .reduce((red, fund) => {
+            // filter by unique fund hash
+            if (red.hashes.indexOf(fund.hash) === -1) {
+                red.hashes.push(fund.hash);
+                red.funds.push(fund);
+            }
+
+            return red;
+        }, { hashes: [], funds: [] })
+        .funds;
 }
 
 async function getFunds(db) {
     const result = await db.query(`
-    SELECT item, uid, transactions, cost
+    SELECT item AS name, transactions
     FROM funds
     WHERE transactions != '' AND cost > 0
     `);
@@ -328,12 +356,14 @@ function isArgumentEnabled(name) {
 }
 
 async function run() {
-    logger('Scraping funds....');
-
     const flags = {
         verbose: isArgumentEnabled('verbose'),
         quiet: isArgumentEnabled('quiet')
     };
+
+    if (!flags.quiet) {
+        logger('Scraping funds....');
+    }
 
     const getHoldings = isArgumentEnabled('holdings');
     const getPrices = !getHoldings;
@@ -341,9 +371,15 @@ async function run() {
     let db = null;
     try {
         db = await connectToDatabase();
+        db.debug = 1;
     }
     catch (err) {
-        return logger(`Couldn't connect to database: ${err}`, 'FATAL');
+        logger('Couldn\'t connect to database!', 'FATAL');
+        if (!flags.quiet) {
+            logger(err.stack, 'DEBUG');
+        }
+
+        return;
     }
 
     let funds = null;
@@ -351,15 +387,20 @@ async function run() {
         funds = await getFunds(db);
     }
     catch (err) {
-        return logger(`Error getting list of funds: ${err}`, 'FATAL');
+        logger('Error getting list of funds!', 'FATAL');
+        if (!flags.quiet) {
+            logger(err.stack, 'DEBUG');
+        }
+
+        return;
     }
 
     if (!funds.length) {
         if (!flags.quiet) {
-            logger('No funds to scrape!');
+            logger('No funds to scrape!', 'WARN');
         }
 
-        return 0;
+        return;
     }
 
     if (flags.verbose) {
@@ -380,8 +421,6 @@ async function run() {
     if (!flags.quiet) {
         logger('Finished scraping funds');
     }
-
-    return 0;
 }
 
 if (require.main === module) {
