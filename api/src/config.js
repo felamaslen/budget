@@ -27,6 +27,7 @@ module.exports = () => {
         },
         data: {
             listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
+            currencyUnit: '£',
             funds: {
                 salt: process.env.FUND_SALT || '',
                 historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10),
