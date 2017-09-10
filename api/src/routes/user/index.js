@@ -104,8 +104,7 @@ async function loginBanPreCheck(db, hash, ip) {
     const user = result[0][0] || null;
     const log = result[1][0] || { count: 0, time: 0 };
 
-
-    const now = new Date().getTime();
+    const now = Math.floor(new Date().getTime() / 1000);
 
     const logExpired = now - log.time > config.user.banLimit;
     const banExpired = now - log.time > config.user.banTime;
