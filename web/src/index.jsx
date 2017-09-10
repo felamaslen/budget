@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-// import App from './components/App';
+import App from './components/App';
 
 // import styles and favicon
 import './sass/index.scss';
@@ -12,8 +12,7 @@ import './images/favicon.png';
 
 if (process.env.NODE_ENV !== 'test') {
     render(
-        // <App />,
-        <h1>It works!</h1>,
+        <App />,
         document.getElementById('root')
     );
 }
