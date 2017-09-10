@@ -135,6 +135,17 @@ async function createTableFunds(db) {
         FOREIGN KEY (uid) REFERENCES users(uid)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
     `);
+
+    logger('Creating stock_codes table');
+    await db.query(`
+    CREATE TABLE stock_codes (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+        code varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+        PRIMARY KEY (id),
+        UNIQUE KEY \`name,code\` (name,code)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    `);
 }
 
 async function createTableIncome(db) {
@@ -263,6 +274,7 @@ async function dropTables(db) {
         'fund_cache_time',
         'fund_hash',
         'stocks',
+        'stock_codes',
         'income',
         'bills',
         'food',
