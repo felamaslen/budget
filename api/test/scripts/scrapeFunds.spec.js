@@ -110,9 +110,111 @@ class DummyDbWithFundHashes extends common.DummyDb {
     }
 }
 
+class DummyDbWithStocks extends common.DummyDb {
+    query(sql, ...args) {
+        const rawQuery = super.query(sql, ...args);
+
+        if (rawQuery.match(/^SELECT name, code FROM stock_codes$/)) {
+            return [
+                { name: 'SomeStock', code: 'EXG:SSX' },
+                { name: 'Company Blah', code: 'X75:CMPB' },
+                { name: 'Company X plc ord 25p', code: 'EXG:CX' }
+            ];
+        }
+
+        return rawQuery;
+    }
+}
+
 const TEST_FUND_NAMES = [
     'HL Multi-Manager UK Growth (accum.)',
     'City of London Investment Trust ORD 25p (share)'
+];
+
+const holdingsTestData1 = [
+    {
+        name: 'Majedie UK Equity Class X',
+        value: 9.85
+    },
+    {
+        name: 'Woodford CF Woodford Equity Income Class Z',
+        value: 9.79
+    },
+    {
+        name: 'J O Hambro CM UK Equity Income Class B',
+        value: 9.69
+    },
+    {
+        name: 'Jupiter UK Special Situations Class I',
+        value: 9.67
+    },
+    {
+        name: 'River &amp; Mercantile UK Dynamic Equity Class B',
+        value: 9.2
+    },
+    {
+        name: 'Lindsell Train UK Equity Class D Accumulation Shares',
+        value: 9.17
+    },
+    {
+        name: 'Marlborough UK Micro-Cap Growth Class P',
+        value: 9.04
+    },
+    {
+        name: 'Old Mutual Global Investors (Offshore) UK Smaller Companies Focus Class A',
+        value: 7.86
+    },
+    {
+        name: 'Marlborough Multi Cap Income Class P',
+        value: 7.61
+    },
+    {
+        name: 'AXA Framlington UK Select Opportunities Class ZI',
+        value: 6.97
+    }
+];
+
+const holdingsTestData2 = [
+    {
+        name: 'British American Tobacco plc Ordinary 25p',
+        value: 4.94
+    },
+    {
+        name: 'HSBC Holdings plc Ordinary USD0.50',
+        value: 4.34
+    },
+    {
+        name: 'Diageo plc Ordinary 28 101/108p',
+        value: 2.95
+    },
+    {
+        name: 'Royal Dutch Shell Plc B Shares EUR0.07',
+        value: 2.87
+    },
+    {
+        name: 'Unilever plc Ordinary 3.11p',
+        value: 2.73
+    },
+    {
+        name: 'Vodafone Group plc USD0.20 20/21',
+        value: 2.71
+    },
+    {
+        name: 'Prudential plc Ordinary 5p',
+        value: 2.68
+    },
+    {
+        name: 'GlaxoSmithKline plc Ordinary 25p',
+        value: 2.54
+    },
+    {
+        name: 'Lloyds Banking Group plc Ordinary 10p',
+        value: 2.53
+    },
+    {
+        name: 'BP Plc Ordinary US$0.25',
+        value: 2.5
+    }
 ];
 
 describe('Fund scraper', () => {
@@ -131,14 +233,16 @@ describe('Fund scraper', () => {
             fund: {
                 fund: {
                     name: TEST_FUND_NAMES[0],
-                    broker: 'hl'
+                    broker: 'hl',
+                    uid: 1
                 },
                 data: testDataFundHL
             },
             share: {
                 fund: {
                     name: TEST_FUND_NAMES[1],
-                    broker: 'hl'
+                    broker: 'hl',
+                    uid: 2
                 },
                 data: testDataShareHL
             }
@@ -155,6 +259,112 @@ describe('Fund scraper', () => {
 
         testFundsListData.push(testFunds.hl.fund.data);
         testFundsListData.push(testFunds.hl.share.data);
+    });
+
+    describe('isHLFundShare', () => {
+        it('should return the correct status', () => {
+            expect(scraper.isHLFundShare(testFunds.hl.fund.fund)).to.equal(false);
+            expect(scraper.isHLFundShare(testFunds.hl.share.fund)).to.equal(true);
+        });
+    });
+
+    describe('getHoldingsFromDataHL', () => {
+        it('should return holdings for funds', () => {
+            const fund = testFunds.hl.fund.fund;
+            const data = testFunds.hl.fund.data;
+
+            const result = scraper.getHoldingsFromDataHL(fund, data);
+
+            const expectedResult = holdingsTestData1;
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+
+        it('should return holdings for shares', () => {
+            const fund = testFunds.hl.share.fund;
+            const data = testFunds.hl.share.data;
+
+            const result = scraper.getHoldingsFromDataHL(fund, data);
+
+            const expectedResult = holdingsTestData2;
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    describe('getFundHoldings', () => {
+        it('should handle null data', () => {
+            const fund = {};
+            const data = null;
+
+            expect(() => scraper.getFundHoldings(fund, data))
+                .to.throw('data empty');
+        });
+        it('should handle broker: HL', () => {
+            const fund = testFunds.hl.fund.fund;
+            const data = testFunds.hl.fund.data;
+
+            expect(() => scraper.getFundHoldings(fund, data))
+                .to.not.throw();
+        });
+        it('should handle null broker', () => {
+            const fund = {};
+            const data = 'flkjsdflkjsdf';
+
+            expect(() => scraper.getPriceFromData(fund, data))
+                .to.throw('unknown broker');
+        });
+    });
+
+    describe('getHoldingsFromData', () => {
+        it('should add holdings to funds', () => {
+            const funds = testFundsList;
+            const data = testFundsListData;
+
+            const flags = { quiet: true };
+
+            expect(scraper.getHoldingsFromData(funds, data, flags)).to.deep.equal([
+                {
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[0],
+                    uid: 1,
+                    hash: md5(TEST_FUND_NAMES[0]),
+                    holdings: holdingsTestData1
+                },
+                {
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[1],
+                    uid: 2,
+                    hash: md5(TEST_FUND_NAMES[1]),
+                    holdings: holdingsTestData2
+                }
+            ]);
+        });
+
+        it('should handle null data', () => {
+            const funds = testFundsList.slice(0, 1).concat([{
+                broker: 'hl',
+                name: 'somename'
+            }]);
+            const data = testFundsListData.slice(0, 1).concat(['flkjasdlkjsdf']);
+
+            const flags = { quiet: true };
+
+            expect(scraper.getPricesFromData(funds, data, flags)).to.deep.equal([
+                {
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[0],
+                    uid: 1,
+                    hash: md5(TEST_FUND_NAMES[0]),
+                    price: 130.31
+                },
+                {
+                    broker: 'hl',
+                    name: 'somename',
+                    price: null
+                }
+            ]);
+        });
     });
 
     describe('getPriceFromDataHL', () => {
@@ -212,12 +422,14 @@ describe('Fund scraper', () => {
                 {
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     hash: md5(TEST_FUND_NAMES[0]),
                     price: 130.31
                 },
                 {
                     broker: 'hl',
                     name: TEST_FUND_NAMES[1],
+                    uid: 2,
                     hash: md5(TEST_FUND_NAMES[1]),
                     price: 424.1
                 }
@@ -237,6 +449,7 @@ describe('Fund scraper', () => {
                 {
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     hash: md5(TEST_FUND_NAMES[0]),
                     price: 130.31
                 },
@@ -343,8 +556,68 @@ describe('Fund scraper', () => {
         });
     });
 
-    describe('scrapeFundHoldings', () => {
-        it('should do something [TODO]');
+    describe('getStockCodes', () => {
+        it('should return the correct result', async () => {
+            const db = new DummyDbWithStocks();
+
+            const result = await scraper.getStockCodes(db);
+
+            const expectedResult = {
+                SomeStock: 'EXG:SSX',
+                'Company Blah': 'X75:CMPB',
+                'Company X plc ord 25p': 'EXG:CX'
+            };
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    describe('saveStockCodes', () => {
+        it('should return the correct query', async () => {
+            const db = new common.DummyDb();
+
+            const stockCodes = {
+                SomeStock: 'EXG:SSX',
+                'Company Blah': 'X75:CMPB',
+                'Company X plc ord 25p': 'EXG:CX'
+            };
+
+            const result = await scraper.saveStockCodes(db, stockCodes);
+
+            const expectedResult = [
+                'INSERT INTO stock_codes (name, code)',
+                'VALUES (\'SomeStock\', \'EXG:SSX\'),',
+                '(\'Company Blah\', \'X75:CMPB\'),',
+                '(\'Company X plc ord 25p\', \'EXG:CX\')'
+            ].join(' ');
+
+            expect(result).to.equal(expectedResult);
+        });
+    });
+
+    describe('saveStocksList', () => {
+        it('should return an insert query', async () => {
+            const db = new common.DummyDb();
+
+            const stocksList = [
+                { uid: 1, name: 'foo', weight: 1000, subweight: 9.67, code: 'ABC1' },
+                { uid: 1, name: 'bar', weight: 1000, subweight: 7.69, code: 'ABC2' },
+                { uid: 1, name: 'baz', weight: 2000, subweight: 4.44, code: 'ABC3' },
+                { uid: 2, name: 'zab', weight: 1500, subweight: 9.18, code: 'ABC4' }
+            ];
+
+            const result = await scraper.saveStocksList(db, stocksList);
+
+            const expectedResult = [
+                'INSERT INTO stocks (uid, name, weight, subweight, code)',
+                'VALUES (1, \'foo\', 1000, 9.67, \'ABC1\'),',
+                '(1, \'bar\', 1000, 7.69, \'ABC2\'),',
+                '(1, \'baz\', 2000, 4.44, \'ABC3\'),',
+                '(2, \'zab\', 1500, 9.18, \'ABC4\')'
+            ].join(' ');
+
+            expect(result).to.equal(expectedResult);
+        });
     });
 
     describe('insertNewSinglePriceCache', () => {
@@ -506,6 +779,7 @@ describe('Fund scraper', () => {
                 { name: TEST_FUND_NAMES[0], transactions: '' },
                 {
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     transactions: JSON.stringify([
                         { 'd': [2016, 6, 1], 'u': 10, 'c': 10 },
                         { 'd': [2017, 6, 1], 'u': -10, 'c': -8 }
@@ -513,6 +787,7 @@ describe('Fund scraper', () => {
                 },
                 {
                     name: TEST_FUND_NAMES[1],
+                    uid: 2,
                     transactions: JSON.stringify([
                         { 'd': [2016, 6, 1], 'u': 100, 'c': 240 },
                         { 'd': [2016, 10, 1], 'u': -46, 'c': -89 }
@@ -520,12 +795,14 @@ describe('Fund scraper', () => {
                 },
                 {
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     transactions: JSON.stringify([
                         { 'd': [2016, 6, 1], 'u': 0, 'c': 10 }
                     ])
                 },
                 {
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     transactions: JSON.stringify([
                         { 'd': [2016, 6, 1], 'u': 10, 'c': 10 }
                     ])
@@ -537,12 +814,16 @@ describe('Fund scraper', () => {
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[1],
+                    uid: 2,
+                    cost: 151,
                     units: 54
                 },
                 {
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
+                    cost: 10,
                     units: 10
                 }
             ]);
@@ -551,6 +832,7 @@ describe('Fund scraper', () => {
             const queryResultSomeDuplicate = [
                 {
                     name: TEST_FUND_NAMES[1],
+                    uid: 2,
                     transactions: JSON.stringify([
                         { 'd': [2016, 6, 1], 'u': 100, 'c': 240 },
                         { 'd': [2016, 10, 1], 'u': -46, 'c': -89 }
@@ -558,12 +840,14 @@ describe('Fund scraper', () => {
                 },
                 {
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     transactions: JSON.stringify([
                         { 'd': [2016, 6, 1], 'u': 20, 'c': 19 }
                     ])
                 },
                 {
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
                     transactions: JSON.stringify([
                         { 'd': [2016, 9, 1], 'u': 10, 'c': 10 }
                     ])
@@ -575,16 +859,19 @@ describe('Fund scraper', () => {
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[1],
+                    uid: 2,
+                    cost: 151,
                     units: 54
                 },
                 {
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
+                    uid: 1,
+                    cost: 29,
                     units: 30
                 }
             ]);
         });
     });
 });
-
