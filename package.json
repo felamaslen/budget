@@ -15,7 +15,9 @@
     "test:install_db": "NODE_ENV=test node ./api/scripts/createSchema.js",
     "scrape_funds": "node ./api/scripts/scrapeFunds.js -q",
     "dev:scrape_funds": "node ./api/scripts/scrapeFunds.js -v",
-    "test:scrape_funds": "NODE_ENV=test node ./api/scripts/scrapeFunds.js -v"
+    "test:scrape_funds": "NODE_ENV=test node ./api/scripts/scrapeFunds.js -v",
+    "scrape_holdings": "node ./api/scripts/scrapeFunds.js -h",
+    "test:scrape_holdings": "NODE_ENV=test node ./api/scripts/scrapeFunds.js -h -v"
   },
   "repository": {
     "type": "git",
@@ -47,6 +49,7 @@
     "mysql": "^2.14.1",
     "node-sass": "^4.5.3",
     "optimize-css-assets-webpack-plugin": "^3.1.1",
+    "prompt": "^1.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "sass-loader": "^6.0.6",

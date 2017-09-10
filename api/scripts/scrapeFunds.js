@@ -2,11 +2,12 @@
  * Script to scrape fund prices from broker
  */
 
-/* eslint max-statements: 0 */
+/* eslint max-lines: 0, max-statements: 0 */
 
 require('dotenv').config();
 
 const request = require('request');
+const prompt = require('prompt');
 
 const config = require('../src/config')();
 const { fundHash } = require('../src/routes/data/funds/common');
@@ -15,6 +16,125 @@ const { logger, connectToDatabase } = require('./common');
 const ERR_DB = 1;
 const ERR_FUNDS_LIST = 2;
 const ERR_SCRAPE = 3;
+const ERR_SCRAPE_PRICES = 4;
+const ERR_SCRAPE_HOLDINGS = 5;
+const ERR_USER = 6;
+
+function promptUser(schema) {
+    return new Promise((resolve, reject) => {
+        prompt.start();
+
+        prompt.get(schema, (err, result) => {
+            if (err) {
+                return reject(err);
+            }
+
+            return resolve(result);
+        });
+    });
+}
+
+function removeWhitespace(data) {
+    return data
+        .replace(/\n/g, '')
+        .replace(/\r/g, '')
+        .replace(/\t/g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s+>/g, '>');
+}
+
+function isHLFundShare(fund) {
+    return Boolean(fund.name.match(/^.*\(share\.?\)$/));
+}
+
+function getHoldingsFromDataHL(fund, data) {
+    // gets the top holdings from raw HTML data (HL)
+    const isShare = isHLFundShare(fund);
+
+    const dataWithoutNewLines = removeWhitespace(data);
+
+    const table = isShare
+        ? '<table class="factsheet-table" summary="Top 10 exposures">'
+        : '<table class="factsheet-table" summary="Top 10 holdings">';
+
+    const matchTable = dataWithoutNewLines.match(new RegExp([
+        table,
+        '(.*?)',
+        '<\\/table>'
+    ].join('')));
+
+    if (!matchTable || !matchTable[0]) {
+        throw new Error('invalid data');
+    }
+
+    const matchRows = matchTable[0].match(/<tr[^>]*><td(.*?)<\/tr>/g);
+
+    const regexCells = /<td[^>]*>(.*?)<\/td>/g;
+
+    const holdings = matchRows
+        .map(row => {
+            const matchCells = row.match(regexCells);
+
+            try {
+                const name = matchCells[0].replace(/<[^>]*>/g, '');
+
+                const value = parseFloat(matchCells[1].replace(/[^\d.]/g, ''), 10);
+
+                return { name, value };
+            }
+            catch (err) {
+                return null;
+            }
+        });
+
+    return holdings;
+}
+
+function getFundHoldings(fund, data) {
+    // get the top stock holdings for a fund
+    if (!data) {
+        throw new Error('data empty');
+    }
+
+    if (fund.broker === 'hl') {
+        return getHoldingsFromDataHL(fund, data);
+    }
+
+    throw new Error('unknown broker');
+}
+
+function getHoldingsFromData(funds, data, flags) {
+    // get the top stock holdings for a list of funds and add it to the array
+    return funds
+        .map((fund, index) => {
+            let holdings = null;
+            try {
+                holdings = getFundHoldings(fund, data[index]);
+
+                if (!flags.quiet) {
+                    logger(`Processed holdings for ${fund.name}`, 'SUCCESS');
+                }
+
+                const numErrors = holdings.filter(item => item === null).length;
+
+                if (numErrors > 0 && !flags.quiet) {
+                    logger(`Couldn't process ${numErrors} item(s)`, 'WARN');
+                }
+
+                holdings = holdings.filter(item => item !== null);
+            }
+            catch (err) {
+                if (!flags.quiet) {
+                    logger(`Couldn't get holdings for ${fund.name}!`, 'ERROR');
+                    if (flags.verbose) {
+                        logger(err.stack, 'DEBUG');
+                    }
+                }
+            }
+
+            return Object.assign({}, fund, { holdings });
+        });
+}
 
 function getPriceFromDataHL(data) {
     // gets the fund price from raw html (HL)
@@ -27,12 +147,7 @@ function getPriceFromDataHL(data) {
         '<span class="bid price-divide"[^>]*>([0-9]+(\\.[0-9]*)?)p<\\/span>'
     ].join(''));
 
-    const dataWithoutNewLines = data
-        .replace(/\n/g, '')
-        .replace(/\r/g, '')
-        .replace(/\t/g, '')
-        .replace(/\s+/g, ' ')
-        .replace(/\s+>/g, '>');
+    const dataWithoutNewLines = removeWhitespace(data);
 
     const matches = dataWithoutNewLines.match(regex);
 
@@ -84,11 +199,6 @@ function getPricesFromData(funds, data, flags) {
 function getFundUrlHL(fund) {
     // returns a URL like:
     // http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
-    if (config.test) {
-        // return a testing URL
-        return process.env.FUND_TEST_URL;
-    }
-
     const matches = fund.name.match(config.data.funds.scraper.regex);
 
     const humanName = matches[1];
@@ -107,9 +217,20 @@ function getFundUrlHL(fund) {
         systemType = 'share';
     }
 
+    const isShare = systemType === 'share';
+
     const firstLetter = systemName.substring(0, 1);
 
     const urlParts = ['http://www.hl.co.uk'];
+
+    if (config.test) {
+        // return a testing URL
+        if (isShare) {
+            return process.env.FUND_TEST_URL_SHARE;
+        }
+
+        return process.env.FUND_TEST_URL;
+    }
 
     if (systemType === 'share') {
         urlParts.push('shares/shares-search-results');
@@ -196,6 +317,10 @@ function downloadUrl(url, flags, requester = request) {
                 return reject(err);
             }
 
+            if (!flags.quiet) {
+                logger(`Downloaded: ${url}`, 'SUCCESS');
+            }
+
             return resolve(res.body);
         });
     });
@@ -218,8 +343,181 @@ async function getRawData(funds, flags, requester = request) {
     return dataMapped;
 }
 
+async function getStockCodes(db) {
+    // get a saved map of saved stock codes so that the user doesn't need to enter
+    // them every time
+    const results = await db.query(`
+    SELECT name, code FROM stock_codes
+    `);
+
+    return results.reduce((map, row) => {
+        map[row.name] = row.code;
+
+        return map;
+    }, {});
+}
+
+function saveStockCodes(db, stockCodes) {
+    const names = Object.keys(stockCodes);
+    const codes = Object.values(stockCodes);
+
+    if (!names.length) {
+        return null;
+    }
+
+    const queryValues = names.map(() => '(?, ?)');
+
+    const args = codes.reduce((list, code, key) => {
+        return list.concat([names[key], code]);
+    }, []);
+
+    return db.query(`
+    INSERT INTO stock_codes (name, code)
+    VALUES ${queryValues.join(', ')}
+    `, ...args);
+}
+
+async function saveStocksList(db, stocksList) {
+    await db.query(`
+    TRUNCATE stocks
+    `);
+
+    if (!stocksList.length) {
+        return null;
+    }
+
+    const queryValues = stocksList.map(row => {
+        const placeholders = Object.keys(row).map(() => '?');
+
+        return `(${placeholders.join(', ')})`;
+    });
+
+    const args = stocksList.reduce((list, row) => {
+        return list.concat(Object.values(row));
+    }, []);
+
+    const keys = Object.keys(stocksList[0]).join(', ');
+
+    return db.query(`
+    INSERT INTO stocks (${keys})
+    VALUES ${queryValues.join(', ')}
+    `, ...args);
+}
+
+async function getCodeForStock(name, stockCodes, newStockCodes, flags) {
+    if (name in stockCodes) {
+        return stockCodes[name];
+    }
+    if (name in newStockCodes) {
+        return newStockCodes[name];
+    }
+
+    if (flags.quiet) {
+        return null;
+    }
+
+    const result = await promptUser({
+        properties: {
+            code: {
+                description: `Enter code for ${name}`
+            }
+        }
+    });
+
+    return result.code;
+}
+
+async function updateHoldings(db, fundsWithHoldings, flags) {
+    if (flags.verbose) {
+        logger('Getting list of stock codes from database', 'DEBUG');
+    }
+    const stockCodes = await getStockCodes(db);
+
+    const fundsHoldings = fundsWithHoldings
+        .filter(fund => fund.holdings)
+        .reduce((rows, fund) => {
+            const holdings = fund.holdings;
+            const uid = fund.uid;
+            const weight = fund.cost;
+
+            return rows.concat(holdings.map(holding => {
+                const name = holding.name;
+                const subweight = holding.value;
+
+                return { uid, name, weight, subweight };
+            }));
+        }, []);
+
+    const newStocks = [];
+    const newStockCodes = {};
+
+    if (flags.verbose) {
+        logger('Getting any missing stock codes from user input', 'DEBUG');
+    }
+    for (const row of fundsHoldings) {
+        const name = row.name;
+
+        let code = null;
+        try {
+            // eslint-disable-next-line no-await-in-loop
+            code = await getCodeForStock(name, stockCodes, newStockCodes, flags);
+        }
+        catch (err) {
+            if (err.message === 'canceled') {
+                // this happens iff the user cancels a prompt for a stock code
+                // in this case, we exit the entire process (for good UX)
+                logger('Process cancelled by user', 'WARN');
+
+                return ERR_USER;
+            }
+        }
+
+        if (!(name in stockCodes)) {
+            newStockCodes[name] = code || null;
+        }
+
+        if (code) {
+            newStocks.push(Object.assign({}, row, { code }));
+        }
+        else if (!flags.quiet) {
+            logger(`Skipped null code for stock: ${name}`, 'WARN');
+        }
+    }
+
+    if (flags.verbose) {
+        logger('Saving updated stock codes to database', 'DEBUG');
+    }
+    await saveStockCodes(db, newStockCodes);
+
+    if (!flags.quiet) {
+        logger('Inserting stocks list into database');
+    }
+    await saveStocksList(db, newStocks);
+
+    return 0;
+}
+
 async function scrapeFundHoldings(db, funds, data, flags) {
-    // TODO
+    if (flags.verbose) {
+        logger('Processing holdings from data');
+    }
+    const fundsWithHoldings = getHoldingsFromData(funds, data, flags);
+
+    try {
+        const status = await updateHoldings(db, fundsWithHoldings, flags);
+
+        return status;
+    }
+    catch (err) {
+        if (!flags.quiet) {
+            logger('Error inserting holdings into database', 'ERROR');
+            if (flags.verbose) {
+                logger(err.stack, 'DEBUG');
+            }
+        }
+
+        return ERR_SCRAPE_HOLDINGS;
+    }
 }
 
 async function insertNewSinglePriceCache(db, cid, fund) {
@@ -286,6 +584,8 @@ async function scrapeFundPrices(db, funds, data, flags, now = new Date()) {
     }
     try {
         await insertNewPriceCache(db, fundsWithPrices, now);
+
+        return 0;
     }
     catch (err) {
         if (!flags.quiet) {
@@ -294,6 +594,8 @@ async function scrapeFundPrices(db, funds, data, flags, now = new Date()) {
                 logger(err.stack, 'DEBUG');
             }
         }
+
+        return ERR_SCRAPE_PRICES;
     }
 }
 
@@ -317,8 +619,9 @@ function getEligibleFunds(queryResult) {
             try {
                 const transactions = JSON.parse(fund.transactions);
                 const units = transactions.reduce((sum, item) => sum + item.u, 0);
+                const cost = transactions.reduce((sum, item) => sum + item.c, 0);
 
-                if (!units) {
+                if (!units || !cost) {
                     return null;
                 }
 
@@ -330,10 +633,12 @@ function getEligibleFunds(queryResult) {
 
                 if (units > 0) {
                     return {
+                        name: fund.name,
+                        uid: fund.uid,
                         hash: fundHash(fund.name, config.data.funds.salt),
                         broker,
-                        name: fund.name,
-                        units
+                        units,
+                        cost
                     };
                 }
 
@@ -354,6 +659,7 @@ function getEligibleFunds(queryResult) {
             }
             else {
                 red.funds[hashIndex].units += fund.units;
+                red.funds[hashIndex].cost += fund.cost;
             }
 
             return red;
@@ -363,7 +669,7 @@ function getEligibleFunds(queryResult) {
 
 async function getFunds(db) {
     const result = await db.query(`
-    SELECT item AS name, transactions
+    SELECT item AS name, uid, transactions
     FROM funds
     WHERE transactions != '' AND cost > 0
     `);
@@ -442,27 +748,33 @@ async function processScrape() {
         return ERR_SCRAPE;
     }
 
+    let status = 0;
+
     if (getHoldings) {
         if (!flags.quiet) {
             logger('Getting holdings...');
         }
-        await scrapeFundHoldings(db, funds, dataMapped, flags);
+        const holdingsStatus = await scrapeFundHoldings(db, funds, dataMapped, flags);
+
+        status += holdingsStatus;
     }
 
     if (getPrices) {
         if (!flags.quiet) {
             logger('Getting prices...');
         }
-        await scrapeFundPrices(db, funds, dataMapped, flags);
+        const pricesStatus = await scrapeFundPrices(db, funds, dataMapped, flags);
+
+        status += pricesStatus;
     }
 
     await db.end();
 
-    if (!flags.quiet) {
+    if (!flags.quiet && !status) {
         logger('Finished scraping funds', 'SUCCESS');
     }
 
-    return 0;
+    return status;
 }
 
 async function run() {
@@ -476,6 +788,10 @@ if (require.main === module) {
 }
 
 module.exports = {
+    isHLFundShare,
+    getHoldingsFromDataHL,
+    getFundHoldings,
+    getHoldingsFromData,
     getPriceFromDataHL,
     getPriceFromData,
     getPricesFromData,
@@ -484,6 +800,10 @@ module.exports = {
     getCacheUrlMap,
     downloadUrl,
     getRawData,
+    getStockCodes,
+    saveStockCodes,
+    saveStocksList,
+    getCodeForStock,
     scrapeFundHoldings,
     insertNewSinglePriceCache,
     insertNewPriceCache,
