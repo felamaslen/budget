@@ -4,9 +4,12 @@
 
 module.exports = () => {
     return {
+        test: process.env.NODE_ENV === 'test',
         debug: process.env.NODE_ENV !== 'production',
         debugSql: process.env.SQLDEBUGGER === 'true',
-        mysqlUri: process.env.MYSQL_URI,
+        mysqlUri: process.env.NODE_ENV === 'test'
+            ? process.env.MYSQL_URI_TEST
+            : process.env.MYSQL_URI,
         webUrl: process.env.WEB_URL,
         user: {
             hashSalt: process.env.USER_HASH_SALT,
@@ -24,9 +27,14 @@ module.exports = () => {
         },
         data: {
             listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
+            currencyUnit: '£',
             funds: {
                 salt: process.env.FUND_SALT || '',
-                historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10)
+                historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10),
+                scraper: {
+                    regex: /^(.*)\s\((accum|inc|share)\.?\)$/i,
+                    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+                }
             },
             overview: {
                 numLast: 25,
