@@ -49,7 +49,7 @@ class ResponseMultiple {
 }
 
 function getOverallStatusCode(results) {
-    return results.reduce((status, taskRes) => {
+    const statusCode = results.reduce((status, taskRes) => {
         // use the following status codes, in order of precedence
         if (taskRes.statusCode >= 500) {
             // server error
@@ -78,6 +78,12 @@ function getOverallStatusCode(results) {
 
         return status;
     }, 0);
+
+    if (!statusCode) {
+        return 500;
+    }
+
+    return statusCode;
 }
 
 function validateTaskList(list) {
