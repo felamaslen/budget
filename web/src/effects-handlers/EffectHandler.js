@@ -34,9 +34,13 @@ export default buildEffectHandler([
    * @returns {void}
    */
     [EF_LOGIN_FORM_SUBMIT, (pin, dispatcher) => {
-        axios.post('api?t=login', querystring.stringify({ pin })).then(
-            response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
-        );
+        axios.post('api?t=login', querystring.stringify({ pin }))
+            .then(
+                response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
+            )
+            .catch(
+                err => dispatcher.dispatch(aLoginFormResponseGot({ err }))
+            );
     }],
 
     [EF_CONTENT_REQUESTED, (obj, dispatcher) => {
