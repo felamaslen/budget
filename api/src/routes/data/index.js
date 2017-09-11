@@ -49,6 +49,10 @@ class ResponseMultiple {
 }
 
 function getOverallStatusCode(results) {
+    if (!results.length) {
+        return 200;
+    }
+
     const statusCode = results.reduce((status, taskRes) => {
         // use the following status codes, in order of precedence
         if (taskRes.statusCode >= 500) {
