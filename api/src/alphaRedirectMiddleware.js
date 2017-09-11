@@ -157,16 +157,14 @@ function getNewQueryFromOld(oldQuery, tasks) {
     return oldQuery;
 }
 
-function handleRoutesDataAnalysis(req, res, path) {
-    const pathItem = path.shift();
-
+function handleRoutesDataAnalysis(req, res, arg, path) {
     if (!req.params) {
         req.params = {};
     }
 
-    const minPathLength = pathItem === 'deep'
+    const minPathLength = arg === 'analysis_category'
         ? 3
-        : 1;
+        : 2;
 
     if (path.length < minPathLength) {
         return res
@@ -177,7 +175,7 @@ function handleRoutesDataAnalysis(req, res, path) {
             });
     }
 
-    if (pathItem === 'deep') {
+    if (arg === 'analysis_category') {
         req.params.category = path.shift();
         req.params.period = path.shift();
         req.params.groupBy = path.shift();
@@ -189,7 +187,7 @@ function handleRoutesDataAnalysis(req, res, path) {
         return analysisDeep(req, res);
     }
 
-    req.params.period = pathItem;
+    req.params.period = path.shift();
     req.params.groupBy = path.shift();
 
     if (path.length) {
@@ -227,8 +225,10 @@ async function handleRoutesData(req, res, path) {
         }
     }
 
-    if (pathItem === 'analysis' && req.method === 'get') {
-        return handleRoutesDataAnalysis(req, res, path);
+    if (['analysis', 'analysis_category'].indexOf(pathItem) !== -1 &&
+        req.method === 'get') {
+
+        return handleRoutesDataAnalysis(req, res, pathItem, path);
     }
 
     if (pathItem in listDataProcessor) {

@@ -97,7 +97,7 @@ async function routeGet(req, res) {
 
     const items = await getPeriodCostDeep(req.db, req.user, new Date(), ...params);
 
-    const result = processDataResponse(items);
+    const result = { items: processDataResponse(items) };
 
     return common.handlerValidResult(req, res, result);
 }
