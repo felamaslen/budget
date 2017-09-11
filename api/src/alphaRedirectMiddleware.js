@@ -80,8 +80,7 @@ function getNewBodyFunds(oldBody) {
     }
 }
 
-function getNewMethodBodyFromOld(oldMethod, oldBody, task) {
-    const tasks = task.split('/');
+function getNewMethodBodyFromOld(oldMethod, oldBody, tasks) {
     const arg = tasks.shift();
 
     let method = oldMethod;
@@ -114,23 +113,29 @@ function getNewMethodBodyFromOld(oldMethod, oldBody, task) {
     return { method: oldMethod, body: oldBody };
 }
 
-function getNewTaskFromOld(task) {
-    const tasks = task.split('/');
+function getNewTaskFromOld(tasks) {
     const arg = tasks.shift();
 
     if (arg === 'login') {
-        return 'user/login';
+        return ['user', 'login'];
     }
 
     if (arg === 'update' || arg === 'add' || arg === 'delete') {
-        return `data/${tasks.join(',')}`;
+        let pathName = tasks.shift();
+        if (pathName === 'overview') {
+            pathName = 'balance';
+        }
+
+        return ['data', pathName]
+            .concat(tasks);
     }
 
-    return task;
+    tasks.unshift(arg);
+
+    return tasks;
 }
 
-function getNewQueryFromOld(oldQuery, task) {
-    const tasks = task.split('/');
+function getNewQueryFromOld(oldQuery, tasks) {
     const arg = tasks.shift();
 
     if (arg === 'data' && tasks.shift() === 'funds') {
@@ -266,12 +271,12 @@ async function handleRoutesData(req, res, path) {
         });
 }
 
-function handleRoutesSearch(req, res, task) {
+function handleRoutesSearch(req, res, tasks) {
     if (!req.params) {
         req.params = {};
     }
 
-    if (task.length < 3) {
+    if (tasks.length < 3) {
         return res
             .status(400)
             .json({
@@ -280,20 +285,18 @@ function handleRoutesSearch(req, res, task) {
             });
     }
 
-    req.params.table = task.shift();
-    req.params.column = task.shift();
-    req.params.searchTerm = task.shift();
+    req.params.table = tasks.shift();
+    req.params.column = tasks.shift();
+    req.params.searchTerm = tasks.shift();
 
-    if (task.length) {
-        req.params.numResults = task.shift();
+    if (tasks.length) {
+        req.params.numResults = tasks.shift();
     }
 
     return search.routeGet(req, res);
 }
 
-function handleRoutes(req, res, task) {
-    const tasks = task.split('/');
-
+function handleRoutes(req, res, tasks) {
     const firstTask = tasks.shift();
 
     if (firstTask === 'user' && tasks.shift() === 'login' && req.method === 'post') {
@@ -305,7 +308,7 @@ function handleRoutes(req, res, task) {
     }
 
     if (firstTask === 'search') {
-        return handleRoutesSearch(req, res, task);
+        return handleRoutesSearch(req, res, tasks);
     }
 
     return res
@@ -323,10 +326,12 @@ function processRequest(req, res, next) {
         return next();
     }
 
-    const newTask = getNewTaskFromOld(task);
+    const tasks = task.split('/');
+
+    const newTask = getNewTaskFromOld([].concat(tasks));
 
     const { method, body } = getNewMethodBodyFromOld(
-        req.method.toLowerCase(), req.body, task
+        req.method.toLowerCase(), req.body, [].concat(tasks)
     );
 
     if (!method || !body) {
@@ -339,9 +344,9 @@ function processRequest(req, res, next) {
             .end();
     }
 
-    const newQuery = getNewQueryFromOld(req.query, task);
+    const newQuery = getNewQueryFromOld(req.query, tasks);
 
-    req.url = `/v3/${newTask}`;
+    req.url = `/v3/${newTask.join('/')}`;
     req.method = method;
     req.body = body;
     req.query = newQuery;
@@ -365,12 +370,11 @@ async function processMultipleRequest(req, res, next) {
         req.body.list = list
             .map(item => {
                 const tasks = item[0].split('/');
-                const route = tasks
-                    .slice(1)
-                    .join('/');
+
+                const route = getNewTaskFromOld(tasks).slice(-1)[0];
 
                 const { method, body } = getNewMethodBodyFromOld(
-                    'post', item[2], item[0]
+                    'post', item[2], tasks
                 );
 
                 if (!method || !body) {
