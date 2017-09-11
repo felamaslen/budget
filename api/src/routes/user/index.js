@@ -126,7 +126,7 @@ async function loginBanPreCheck(db, hash, ip) {
     return { user, banned };
 }
 
-function handleLoginStatus(res, loginStatus, token) {
+function handleLoginStatus(req, res, loginStatus, token) {
     if (loginStatus.banned) {
         // IP is banned
         return res
@@ -139,9 +139,14 @@ function handleLoginStatus(res, loginStatus, token) {
 
     if (loginStatus.user) {
         // logged in
+        let key = 'apiKey';
+        if (req.query.alpha) {
+            key = 'api_key';
+        }
+
         return res.json({
             error: false,
-            apiKey: token,
+            [key]: token,
             uid: loginStatus.user.uid,
             name: loginStatus.user.name
         });
@@ -162,7 +167,7 @@ async function login(req, res) {
 
         const loginStatus = await loginBanPreCheck(req.db, hash, ip);
 
-        handleLoginStatus(res, loginStatus, token);
+        handleLoginStatus(req, res, loginStatus, token);
     }
     catch (err) {
         res

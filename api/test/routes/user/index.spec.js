@@ -138,8 +138,9 @@ describe('/api/user', () => {
 
     describe('handleLoginStatus', () => {
         it('should respond with a banned message for banned IPs', () => {
+            const req = new common.Req();
             const res = new common.Res();
-            user.handleLoginStatus(res, { banned: true }, null);
+            user.handleLoginStatus(req, res, { banned: true }, null);
 
             expect(res.statusCode).to.equal(401);
             expect(res.response).to.deep.equal({
@@ -149,8 +150,9 @@ describe('/api/user', () => {
         });
 
         it('should respond with an unauthorised message for bad logins', () => {
+            const req = new common.Req();
             const res = new common.Res();
-            user.handleLoginStatus(res, { user: null }, null);
+            user.handleLoginStatus(req, res, { user: null }, null);
 
             expect(res.statusCode).to.equal(401);
             expect(res.response).to.deep.equal({
@@ -161,12 +163,32 @@ describe('/api/user', () => {
 
         it('should respond with user details for good logins', () => {
             const res = new common.Res();
-            user.handleLoginStatus(res, { user: { uid: 1, name: 'johnsmith' } }, 'test_token');
+            const req = new common.Req();
+
+            user.handleLoginStatus(req, res, {
+                user: { uid: 1, name: 'johnsmith' }
+            }, 'test_token');
 
             expect(res.statusCode).to.equal(200);
             expect(res.response).to.deep.equal({
                 error: false,
                 apiKey: 'test_token',
+                uid: 1,
+                name: 'johnsmith'
+            });
+        });
+
+        it('should implement a kludge for backwards compatibility', () => {
+            const res = new common.Res();
+            const req = new common.Req({ query: { alpha: true } });
+
+            user.handleLoginStatus(req, res, {
+                user: { uid: 1, name: 'johnsmith' }
+            }, 'test_token');
+
+            expect(res.response).to.deep.equal({
+                error: false,
+                'api_key': 'test_token',
                 uid: 1,
                 name: 'johnsmith'
             });
