@@ -55,7 +55,7 @@ function setupApiDocs(app) {
 
     const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
-    app.get('/docs/api/spec.json', (req, res) => {
+    app.get('/docs/spec.json', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         res.send(swaggerSpec);
     });
@@ -65,10 +65,7 @@ function setupApiDocs(app) {
     app.get('/docs/api', (req, res) => {
         return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
     });
-    app.get('/docs/api/favicon.png', (req, res) => {
-        return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
-    });
-    app.use('/docs/api/', express.static(swaggerUiAssetPath));
+    app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
 function setupApi(app) {
