@@ -73,9 +73,9 @@ export const rLoginFormHandleResponse = (reduction, output) => {
         reduction.setIn(['appState', 'loginForm', 'loading'], false)
             .setIn(['appState', 'loading'], false), 0);
 
-    if (output.response.data.error) {
+    if (output.err) {
         const message = map({
-            text: `Login error: ${output.response.data.errorText}`,
+            text: `Login error: ${output.err.response.data.errorMessage}`,
             level: ERROR_LEVEL_ERROR
         });
         return rErrorMessageOpen(newReduction, message);
