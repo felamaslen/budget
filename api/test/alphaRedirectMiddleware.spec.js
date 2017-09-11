@@ -60,20 +60,22 @@ describe('Redirect middleware', () => {
 
     describe('getNewMethodBodyFromOld', () => {
         it('should map get -> get', () => {
-            expect(alpha.getNewMethodBodyFromOld('get', {}, 'data/overview')).to.deep.equal({
-                method: 'get',
-                body: {}
-            });
+            expect(alpha.getNewMethodBodyFromOld('get', {}, ['data', 'overview']))
+                .to.deep.equal({
+                    method: 'get',
+                    body: {}
+                });
         });
 
         it('should map post -> post', () => {
             ['funds', 'income', 'food', 'general', 'holiday', 'social'].forEach(category => {
                 expect(alpha.getNewMethodBodyFromOld('post', {
                     date: '2016,5,1', item: 'foo'
-                }, `add/${category}`)).to.deep.equal({
-                    method: 'post',
-                    body: { year: 2016, month: 5, date: 1, item: 'foo' }
-                });
+                }, ['add', category]))
+                    .to.deep.equal({
+                        method: 'post',
+                        body: { year: 2016, month: 5, date: 1, item: 'foo' }
+                    });
             });
         });
 
@@ -81,10 +83,11 @@ describe('Redirect middleware', () => {
             ['funds', 'income', 'food', 'general', 'holiday', 'social'].forEach(category => {
                 expect(alpha.getNewMethodBodyFromOld('post', {
                     id: 100
-                }, `delete/${category}`)).to.deep.equal({
-                    method: 'delete',
-                    body: { id: 100 }
-                });
+                }, ['delete', category]))
+                    .to.deep.equal({
+                        method: 'delete',
+                        body: { id: 100 }
+                    });
             });
         });
 
@@ -92,25 +95,26 @@ describe('Redirect middleware', () => {
             ['funds', 'income', 'food', 'general', 'holiday', 'social'].forEach(category => {
                 expect(alpha.getNewMethodBodyFromOld('post', {
                     date: '2016,5,1', item: 'foo'
-                }, `update/${category}`)).to.deep.equal({
-                    method: 'put',
-                    body: { year: 2016, month: 5, date: 1, item: 'foo' }
-                });
+                }, ['update', category]))
+                    .to.deep.equal({
+                        method: 'put',
+                        body: { year: 2016, month: 5, date: 1, item: 'foo' }
+                    });
             });
         });
     });
 
     describe('getNewTaskFromOld', () => {
         it('should handle user routes', () => {
-            expect(alpha.getNewTaskFromOld('login')).to.equal('user/login');
+            expect(alpha.getNewTaskFromOld(['login'])).to.deep.equal(['user', 'login']);
         });
         it('should handle data routes', () => {
-            expect(alpha.getNewTaskFromOld('update/foo')).to.equal('data/foo');
-            expect(alpha.getNewTaskFromOld('add/foo')).to.equal('data/foo');
-            expect(alpha.getNewTaskFromOld('delete/foo')).to.equal('data/foo');
+            expect(alpha.getNewTaskFromOld(['update', 'foo'])).to.deep.equal(['data', 'foo']);
+            expect(alpha.getNewTaskFromOld(['add', 'foo'])).to.deep.equal(['data', 'foo']);
+            expect(alpha.getNewTaskFromOld(['delete', 'foo'])).to.deep.equal(['data', 'foo']);
         });
         it('should return the task for unknown routes', () => {
-            expect(alpha.getNewTaskFromOld('foobar')).to.equal('foobar');
+            expect(alpha.getNewTaskFromOld(['foo', 'bar'])).to.deep.equal(['foo', 'bar']);
         });
     });
 
@@ -118,19 +122,19 @@ describe('Redirect middleware', () => {
         it('should handle funds query', () => {
             expect(alpha.getNewQueryFromOld({
                 period: 'year1'
-            }, 'data/funds'))
+            }, ['data', 'funds']))
                 .to.deep.equal({ period: 'year', length: '1', history: 'false' });
 
             expect(alpha.getNewQueryFromOld({
                 period: 'month3',
                 history: ''
-            }, 'data/funds'))
+            }, ['data', 'funds']))
                 .to.deep.equal({ period: 'month', length: '3', history: 'true' });
 
             expect(alpha.getNewQueryFromOld({
                 period: 'month3',
                 history: 'false'
-            }, 'data/funds'))
+            }, ['data', 'funds']))
                 .to.deep.equal({ period: 'month', length: '3', history: 'false' });
         });
     });
