@@ -2,6 +2,31 @@
  * Redirect requests in the old-style format (pre-v3) to the current version
  */
 
+const Database = require('./db');
+
+const authMiddleware = require('./authMiddleware');
+
+const { login } = require('./routes/user');
+
+const { multipleUpdateRequestMiddleware } = require('./routes/data');
+const cashflow = require('./routes/data/cashflow');
+const analysis = require('./routes/data/analysis').routeGet;
+const analysisDeep = require('./routes/data/analysis/deep').routeGet;
+
+const income = require('./routes/data/income');
+const bills = require('./routes/data/bills');
+const funds = require('./routes/data/funds');
+const food = require('./routes/data/food');
+const general = require('./routes/data/general');
+const social = require('./routes/data/social');
+const holiday = require('./routes/data/holiday');
+
+const listDataProcessor = { income, bills, funds, food, general, social, holiday };
+
+const stocks = require('./routes/data/stocks');
+
+const search = require('./routes/search');
+
 function getYearMonthDateFromSplit(ymdString) {
     const ymd = ymdString.split(',').map(item => parseInt(item, 10));
 
@@ -13,6 +38,10 @@ function getYearMonthDateFromSplit(ymdString) {
 }
 
 function replaceDateInBody(oldBody) {
+    if (!('date' in oldBody)) {
+        return oldBody;
+    }
+
     try {
         const { year, month, date } = getYearMonthDateFromSplit(oldBody.date);
 
@@ -123,12 +152,173 @@ function getNewQueryFromOld(oldQuery, task) {
     return oldQuery;
 }
 
-function handler(req, res, next) {
-    if (req.baseUrl.indexOf('/api') === -1) {
-        return next();
+function handleRoutesDataAnalysis(req, res, path) {
+    const pathItem = path.shift();
+
+    if (!req.params) {
+        req.params = {};
     }
 
+    const minPathLength = pathItem === 'deep'
+        ? 3
+        : 1;
+
+    if (path.length < minPathLength) {
+        return res
+            .status(400)
+            .json({
+                error: true,
+                errorMessage: 'bad request'
+            });
+    }
+
+    if (pathItem === 'deep') {
+        req.params.category = path.shift();
+        req.params.period = path.shift();
+        req.params.groupBy = path.shift();
+
+        if (path.length) {
+            req.params.pageIndex = path.shift();
+        }
+
+        return analysisDeep(req, res);
+    }
+
+    req.params.period = pathItem;
+    req.params.groupBy = path.shift();
+
+    if (path.length) {
+        req.params.pageIndex = path.shift();
+    }
+
+    return analysis(req, res);
+}
+
+// eslint-disable-next-line max-statements
+async function handleRoutesData(req, res, path) {
+    try {
+        await authMiddleware.authMiddleware(req, res, null);
+    }
+    catch (err) {
+        return null;
+    }
+
+    const pathItem = path.shift();
+    if (pathItem === 'multiple' && req.method === 'patch') {
+        return multipleUpdateRequestMiddleware(req, res);
+    }
+
+    if (pathItem === 'overview' && req.method === 'get') {
+        return cashflow.routeGet(req, res);
+    }
+
+    if (pathItem === 'balance') {
+        if (req.method === 'put') {
+            return cashflow.routePost(req, res);
+        }
+
+        if (req.method === 'post') {
+            return cashflow.routePost(req, res);
+        }
+    }
+
+    if (pathItem === 'analysis' && req.method === 'get') {
+        return handleRoutesDataAnalysis(req, res, path);
+    }
+
+    if (pathItem in listDataProcessor) {
+        const processor = listDataProcessor[pathItem];
+
+        if (pathItem !== 'funds' && path.length > 0) {
+            if (!req.params) {
+                req.params = {};
+            }
+
+            req.params.page = path.shift();
+        }
+
+        if (req.method === 'get') {
+            return processor.routeGet(req, res);
+        }
+
+        if (req.method === 'post') {
+            return processor.routePost(req, res);
+        }
+
+        if (req.method === 'put') {
+            return processor.routePut(req, res);
+        }
+
+        if (req.method === 'delete') {
+            return processor.routeDelete(req, res);
+        }
+    }
+
+    if (pathItem === 'stocks' && req.method === 'get') {
+        return stocks.routeGet(req, res);
+    }
+
+    return res
+        .status(400)
+        .json({
+            error: true,
+            errorMessage: 'unknown request'
+        });
+}
+
+function handleRoutesSearch(req, res, task) {
+    if (!req.params) {
+        req.params = {};
+    }
+
+    if (task.length < 3) {
+        return res
+            .status(400)
+            .json({
+                error: true,
+                errorMessage: 'bad request'
+            });
+    }
+
+    req.params.table = task.shift();
+    req.params.column = task.shift();
+    req.params.searchTerm = task.shift();
+
+    if (task.length) {
+        req.params.numResults = task.shift();
+    }
+
+    return search.routeGet(req, res);
+}
+
+function handleRoutes(req, res, task) {
+    const tasks = task.split('/');
+
+    const firstTask = tasks.shift();
+
+    if (firstTask === 'user' && tasks.shift() === 'login' && req.method === 'post') {
+        return login(req, res);
+    }
+
+    if (firstTask === 'data') {
+        return handleRoutesData(req, res, tasks);
+    }
+
+    if (firstTask === 'search') {
+        return handleRoutesSearch(req, res, task);
+    }
+
+    return res
+        .status(400)
+        .json({
+            error: true,
+            errorMessage: 'unknown request'
+        });
+}
+
+function processRequest(req, res, next) {
     const task = req.query.t;
+
     if (!task) {
         return next();
     }
@@ -158,12 +348,85 @@ function handler(req, res, next) {
 
     req.query.alpha = true;
 
-    return next();
+    return handleRoutes(req, res, newTask);
+}
+
+async function processMultipleRequest(req, res, next) {
+    try {
+        await authMiddleware.authMiddleware(req, res, null);
+    }
+    catch (err) {
+        return null;
+    }
+
+    try {
+        const list = JSON.parse(req.body.list)
+
+        req.body.list = list
+            .map(item => {
+                const tasks = item[0].split('/');
+                const route = tasks
+                    .slice(1)
+                    .join('/');
+
+                const { method, body } = getNewMethodBodyFromOld(
+                    'post', item[2], item[0]
+                );
+
+                if (!method || !body) {
+                    return res
+                        .status(400)
+                        .json({
+                            error: true,
+                            errorMessage: 'bad request data'
+                        })
+                        .end();
+                }
+
+                const query = item[1];
+
+                return { method, route, query, body };
+            });
+
+        req.method = 'patch';
+
+        return multipleUpdateRequestMiddleware(req, res);
+    }
+    catch (err) {
+        return next();
+    }
+}
+
+async function handler(req, res, next) {
+    const requestApi = req.url.indexOf('/api') !== -1;
+    const requestOldApi = requestApi && req.url.indexOf('/api/v') === -1;
+
+    if (!requestOldApi) {
+        return next();
+    }
+
+    await Database.dbMiddleware(req, res, () => null);
+
+    if (req.query.t && req.query.t === 'multiple') {
+        return processMultipleRequest(req, res, next);
+    }
+
+    return processRequest(req, res, next);
 }
 
 module.exports = {
-    getNewTaskFromOld,
+    getYearMonthDateFromSplit,
+    replaceDateInBody,
+    getNewBodyFunds,
     getNewMethodBodyFromOld,
+    getNewTaskFromOld,
+    getNewQueryFromOld,
+    handleRoutesDataAnalysis,
+    handleRoutesData,
+    handleRoutesSearch,
+    handleRoutes,
+    processRequest,
+    processMultipleRequest,
     handler
 };
 

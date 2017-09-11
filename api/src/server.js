@@ -73,7 +73,7 @@ function setupApiDocs(app) {
 
 function setupApi(app) {
     // API
-    app.use('/api', alphaRedirectMiddleware.handler);
+    app.use(alphaRedirectMiddleware.handler);
 
     const apiRouter = new express.Router();
     app.use('/api/v3', api(apiRouter));

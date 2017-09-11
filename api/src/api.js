@@ -4,19 +4,10 @@
 
 const config = require('./config.js')();
 
-const user = require('./routes/user');
-const data = require('./routes/data');
-const search = require('./routes/search');
+const routes = require('./routes');
 
 function apiRouter(app) {
-    // user routes
-    user.handler(app);
-
-    // data routes
-    data.handler(app);
-
-    // search route
-    search.handler(app);
+    routes(app);
 
     app.use((req, res) => {
         // catch-all api endpoint
