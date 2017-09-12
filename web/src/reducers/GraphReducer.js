@@ -27,16 +27,22 @@ export const rToggleFundItemGraph = (reduction, key) => {
     );
 };
 
-export function rToggleFundsGraphMode(reduction) {
-    const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
+function reloadFundHistory(reduction, mode = null, enabledList = null) {
+    const newMode = mode || reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
 
     const rows = reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows']);
     const startTime = reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']);
     const cacheTimes = reduction.getIn(['appState', 'other', 'graphFunds', 'cacheTimes']);
 
-    const fundHistory = getFormattedHistory(
-        rows, newMode, pageIndexFunds, startTime, cacheTimes
+    return getFormattedHistory(
+        rows, newMode, pageIndexFunds, startTime, cacheTimes, enabledList
     );
+}
+
+export function rToggleFundsGraphMode(reduction) {
+    const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
+
+    const fundHistory = reloadFundHistory(reduction, newMode);
 
     return reduction
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
@@ -118,19 +124,34 @@ export const rHoverFundsGraph = (reduction, position) => {
         ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint ? hlPoint.push(color) : null);
 };
 
-export const rToggleFundsGraphLine = (reduction, index) => {
-    const oldFundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
-    const numEnabled = oldFundLines.filter(item => item.get('enabled')).size;
-    if (numEnabled === 1 && oldFundLines.getIn([index, 'enabled'])) {
-        return reduction;
-    }
-    const newFundLines = oldFundLines.setIn([index, 'enabled'], !oldFundLines.getIn([index, 'enabled']));
+export function rToggleFundsGraphLine(reduction, index) {
+    let statusBefore = false;
 
-    const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-    const funds = data.get('funds');
-    const history = data.get('history');
-    return addFundLines(reduction, data, funds, history, pageIndexFunds, newFundLines);
-};
+    let enabledList = reduction
+        .getIn(['appState', 'other', 'graphFunds', 'data', 'fundItems'])
+        .reduce((enabled, item, itemIndex) => {
+            if (item.get('enabled')) {
+                if (itemIndex === index) {
+                    statusBefore = true;
+
+                    return enabled;
+                }
+
+                return enabled.push(itemIndex - 1);
+            }
+
+            return enabled;
+        }, list.of());
+
+    if (!statusBefore || !enabledList.size) {
+        enabledList = enabledList.push(index - 1);
+    }
+
+    const fundHistory = reloadFundHistory(reduction, null, enabledList);
+
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
+}
 
 export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
     let newReduction = reduction;
