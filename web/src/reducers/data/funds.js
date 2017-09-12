@@ -418,7 +418,9 @@ export function getFormattedHistory(
         }, list.of())
         .push(-1);
 
-    const { prices, units, costs } = getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes);
+    const { prices, units, costs } = getPriceUnitsCosts(
+        rows, pageIndex, startTime, cacheTimes
+    );
 
     const times = list([
         list(new Array(maxLength).fill(0))

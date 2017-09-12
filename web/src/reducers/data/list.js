@@ -32,25 +32,8 @@ export const loadBlocks = (reduction, pageIndex, noClear) => {
     )).setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
 };
 
-/**
- * process list page data response
- * @param {Record} reduction: app state
- * @param {integer} pageIndex: page index
- * @param {object} raw: api JSON data
- * @returns {Record} modified reduction
- */
-export const processPageDataList = (reduction, pageIndex, raw) => {
-    const numRows = raw.data.length;
-    const numCols = LIST_COLS_PAGES[pageIndex].length;
-    const total = raw.total;
-
-    const data = map({
-        numRows,
-        numCols,
-        total
-    });
-
-    const rows = list(raw.data.map(item => {
+export function processRawListRows(data, pageIndex) {
+    return list(data.map(item => {
         const otherProps = Object.keys(item)
             .filter(
                 key => LIST_COLS_STANDARD.indexOf(key) === -1
@@ -78,13 +61,34 @@ export const processPageDataList = (reduction, pageIndex, raw) => {
             ...otherProps
         });
     }));
+}
+
+/**
+ * process list page data response
+ * @param {Record} reduction: app state
+ * @param {integer} pageIndex: page index
+ * @param {object} raw: api JSON data
+ * @returns {Record} modified reduction
+ */
+export function processPageDataList(reduction, pageIndex, raw) {
+    const numRows = raw.data.length;
+    const numCols = LIST_COLS_PAGES[pageIndex].length;
+    const total = raw.total;
+
+    const data = map({
+        numRows,
+        numCols,
+        total
+    });
+
+    const rows = processRawListRows(raw.data, pageIndex);
 
     return loadBlocks(
         reduction.setIn(
             ['appState', 'pages', pageIndex], map({ data, rows })
         ), pageIndex
     );
-};
+}
 
 export function processPageDataFunds(reduction, pageIndex, data, now = new Date()) {
     const startTime = data.startTime;
@@ -107,7 +111,7 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
 
     return newReduction
         .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps)
-        .setIn(['appState', 'other', 'fundHistoryCache', period], JSON.stringify(data))
+        .setIn(['appState', 'other', 'fundHistoryCache', period], data)
         .setIn(['appState', 'other', 'fundsCachedValue'], fundsCachedValue)
         .setIn(['appState', 'other', 'graphFunds', 'startTime'], startTime)
         .setIn(['appState', 'other', 'graphFunds', 'cacheTimes'], cacheTimes)

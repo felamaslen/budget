@@ -112,12 +112,13 @@ export default buildEffectHandler([
     }],
 
     [EF_FUNDS_PERIOD_REQUESTED, (obj, dispatcher) => {
-        axios.get(`api?t=data/fund_history&period=${obj.period}`, {
+        axios.get(`api?t=data/funds&period=${obj.period}&history`, {
             headers: { 'Authorization': obj.apiKey }
         }).then(
             response => {
                 const period = obj.period;
-                const data = response;
+                const data = response.data.data;
+
                 dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
             }
         );
