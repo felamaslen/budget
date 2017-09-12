@@ -41,6 +41,10 @@ module.exports = () => {
                 numFuture: 12,
                 startYear: 2014,
                 startMonth: 9
+            },
+            pie: {
+                tolerance: parseFloat(process.env.PIE_TOLERANCE || 0.075, 10),
+                detail: parseInt(process.env.PIE_DETAIL || 30, 10)
             }
         },
         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
