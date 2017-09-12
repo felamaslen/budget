@@ -156,35 +156,41 @@ export function getExtraRowProps(rows, startTime, cacheTimes, pageIndex) {
     return rowsWithPriceHistory;
 }
 
-export function zoomFundLines(linesAll, reduction) {
+export function zoomFundLines(linesAll, zoom) {
     // restrict fund lines by zooming
-    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
     const minX = zoom.get(0);
     const maxX = zoom.get(1);
-    const lines = linesAll.map(line => {
-        const points = line.get(1);
 
-        return line.set(1, points.filter((point, pointKey) => {
-            const thisVisible = point.get(0) >= minX && point.get(0) <= maxX;
-            if (thisVisible) {
-                return true;
-            }
-            if (pointKey < points.size) {
-                const next = points.getIn([pointKey + 1, 0]);
-                if (next >= minX && next <= maxX) {
+    if (minX === null || maxX === null) {
+        return linesAll.slice();
+    }
+
+    const lines = linesAll
+        .map(line => {
+            const points = line.get('line');
+
+            return line.set('line', points.filter((point, pointKey) => {
+                const thisVisible = point.get(0) >= minX && point.get(0) <= maxX;
+                if (thisVisible) {
                     return true;
                 }
-            }
-            if (pointKey > 0) {
-                const prev = points.getIn([pointKey - 1, 0]);
-                if (prev >= minX && prev <= maxX) {
-                    return true;
+                if (pointKey < points.size) {
+                    const next = points.getIn([pointKey + 1, 0]);
+                    if (next >= minX && next <= maxX) {
+                        return true;
+                    }
                 }
-            }
+                if (pointKey > 0) {
+                    const prev = points.getIn([pointKey - 1, 0]);
+                    if (prev >= minX && prev <= maxX) {
+                        return true;
+                    }
+                }
 
-            return false;
-        }));
-    });
+                return false;
+            }));
+        })
+        .filter(line => line.get('line').size > 1);
 
     return lines;
 }
@@ -389,7 +395,7 @@ function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
 }
 
 export function getFormattedHistory(
-    rows, mode, pageIndex, startTime, cacheTimes, enabledList = null
+    rows, mode, pageIndex, startTime, cacheTimes, zoom, enabledList = null
 ) {
     // get a formatted list of lines for display in the fund price / value graph
     const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
@@ -442,10 +448,12 @@ export function getFormattedHistory(
         })))
         .map((item, key) => item.set('color', colors.get(key)));
 
-    const fundLines = getFundLines(
+    const fundLinesAll = getFundLines(
         times, timeOffsets, prices, units, costs, mode, fundsEnabled
     );
 
-    return map({ fundItems, fundLines });
+    const fundLines = zoomFundLines(fundLinesAll, zoom);
+
+    return map({ fundItems, fundLines, fundLinesAll });
 }
 

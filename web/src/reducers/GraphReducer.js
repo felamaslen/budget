@@ -11,6 +11,7 @@ import {
     zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
     getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
 } from './data/funds';
+import { rgba } from '../misc/color';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -33,11 +34,13 @@ function reloadFundHistory(reduction, mode = null, enabledList = null) {
         : mode;
 
     const rows = reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows']);
+
     const startTime = reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']);
     const cacheTimes = reduction.getIn(['appState', 'other', 'graphFunds', 'cacheTimes']);
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
 
     return getFormattedHistory(
-        rows, newMode, pageIndexFunds, startTime, cacheTimes, enabledList
+        rows, newMode, pageIndexFunds, startTime, cacheTimes, enabledList, zoom
     );
 }
 
@@ -52,20 +55,28 @@ export function rToggleFundsGraphMode(reduction) {
         .setIn(['appState', 'other', 'graphFunds', 'mode'], newMode);
 }
 
-const numFundPointsVisible = (lines, minX, maxX) => {
-    return lines.reduce((last, line) => {
-        return Math.max(last, line.last().filter(item => {
-            const xValue = item.first();
-            return xValue >= minX && xValue <= maxX;
-        }).size);
-    }, 0);
-};
+function numFundPointsVisible(lines, minX, maxX) {
+    return lines.reduce((sum, line) => {
+        return Math.max(sum, line
+            .get('line')
+            .filter(item => {
+                const xValue = item.get(0);
 
-export const rZoomFundsGraph = (reduction, obj) => {
+                return xValue >= minX && xValue <= maxX;
+            })
+            .size
+        );
+    }, 0);
+}
+
+export function rZoomFundsGraph(reduction, obj) {
     // direction: in is negative, out is positive
     const range = reduction.getIn(['appState', 'other', 'graphFunds', 'range']);
     const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
-    const lines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'lines']);
+    const lines = reduction.getIn(['appState', 'other', 'graphFunds', 'data', 'fundLines']);
+    const linesAll = reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'data', 'fundLinesAll']
+    );
 
     const newRangeWidth = Math.min(range.last() - range.first(), Math.max(
         (range.last() - range.first()) * GRAPH_ZOOM_MAX,
@@ -91,14 +102,12 @@ export const rZoomFundsGraph = (reduction, obj) => {
         return reduction;
     }
 
-    const newReduction = reduction
-        .setIn(['appState', 'other', 'graphFunds', 'zoom'], newZoom);
+    const zoomedLines = zoomFundLines(linesAll, newZoom);
 
-    return newReduction.setIn(
-        ['appState', 'pages', pageIndexFunds, 'lines'],
-        zoomFundLines(newReduction.getIn(['appState', 'pages', pageIndexFunds, 'linesAll']), newReduction)
-    );
-};
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'zoom'], newZoom)
+        .setIn(['appState', 'other', 'graphFunds', 'data', 'fundLines'], zoomedLines);
+}
 
 export function rHoverFundsGraph(reduction, position) {
     if (!position) {
@@ -131,13 +140,20 @@ export function rHoverFundsGraph(reduction, position) {
 
     }, { dist: Infinity, lineKey: null, pointKey: null });
 
-    const color = reduction.getIn([
-        'appState', 'other', 'graphFunds', 'data', 'fundItems', closest.lineKey, 'color'
-    ]);
+    const lineIndex = reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'data', 'fundLines', closest.lineKey, 'index']
+    );
 
-    const hlPoint = lines
-        .getIn([closest.lineKey, 'line', closest.pointKey])
-        .push(color);
+    const color = reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'data', 'fundItems', lineIndex, 'color']
+    );
+
+    let hlPoint = lines
+        .getIn([closest.lineKey, 'line', closest.pointKey]);
+
+    if (hlPoint) {
+        hlPoint = hlPoint.push(rgba(color));
+    }
 
     return reduction.setIn(
         ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint
