@@ -17,6 +17,7 @@ const holiday = require('./holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const pie = require('./pie');
 const stocks = require('./stocks');
 
 class ResponseMultiple {
@@ -250,6 +251,9 @@ function handler(app) {
         app.put(`/data/${category}`, listDataProcessor[category].routePut);
         app.delete(`/data/${category}`, listDataProcessor[category].routeDelete);
     });
+
+    // pie charts
+    app.get('/data/pie/:category', (req, res) => pie.routeGet(req, res));
 
     // stocks route
     app.get('/data/stocks', stocks.routeGet);
