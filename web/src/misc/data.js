@@ -29,40 +29,29 @@ export const uuid = () => {
  * data type to hold transactions list for funds
  */
 export class TransactionsList {
-    constructor(raw, formatted, isList) {
+    constructor(data, isShort = true) {
+        this.list = data;
         this.idCount = 0;
-        let aList = raw;
-        if (!formatted) {
-            if (isList) {
-                aList = raw.map(item => {
+
+        if (isShort) {
+            // turn a short list into a descriptive list
+            this.list = list(data)
+                .map(item => {
                     return map({
-                        id: this.idCount++,
-                        date: new YMD(item.get('d').toJS()),
-                        units: item.get('u'),
-                        cost: item.get('c')
-                    });
-                });
-            }
-            else {
-                let rawList;
-                try {
-                    rawList = JSON.parse(raw);
-                }
-                catch (error) {
-                    rawList = [];
-                }
-                finally {
-                    aList = list(rawList).map(item => map({
-                        id: this.idCount++,
+                        id: ++this.idCount,
                         date: new YMD(item.d),
-                        units: parseFloat(item.u, 10),
-                        cost: parseInt(item.c, 10)
-                    }));
-                }
-            }
+                        units: item.u,
+                        cost: item.c
+                    });
+                })
+                .sort(sortByDate);
+
+            this.size = this.list.size;
         }
-        this.list = aList.sort(sortByDate);
-        this.size = this.list.size;
+        else {
+            this.idCount = this.list.size;
+            this.size = this.list.size;
+        }
     }
     toString() {
         return JSON.stringify(this.list.map(item => {
@@ -77,13 +66,17 @@ export class TransactionsList {
         return this.list;
     }
     maxId() {
-        return this.size > 0 ? this.list.map(item => item.get('id')).max() : 0;
+        if (this.size > 0) {
+            return this.list.map(item => item.get('id')).max();
+        }
+
+        return 0;
     }
     remove(key) {
-        return new TransactionsList(this.list.splice(key, 1), true);
+        return new TransactionsList(this.list.splice(key, 1), false);
     }
-    setIn(a, b) {
-        return new TransactionsList(this.list.setIn(a, b), true);
+    setIn(key, value) {
+        return new TransactionsList(this.list.setIn(key, value), false);
     }
     push(item) {
         return new TransactionsList(this.list.push(map({
@@ -94,19 +87,19 @@ export class TransactionsList {
         })), true);
     }
     filter(callback) {
-        return new TransactionsList(this.list.filter(callback), true);
+        return new TransactionsList(this.list.filter(callback), false);
     }
-    getUnits(aList) {
-        return aList.reduce((a, b) => a + b.get('units'), 0);
+    static getUnits(aList) {
+        return aList.reduce((sum, item) => sum + item.get('units'), 0);
     }
-    getCost(aList) {
-        return aList.reduce((a, b) => a + b.get('cost'), 0);
+    static getCost(aList) {
+        return aList.reduce((sum, item) => sum + item.get('cost'), 0);
     }
     getTotalUnits() {
-        return this.getUnits(this.list);
+        return TransactionsList.getUnits(this.list);
     }
     getTotalCost() {
-        return this.getCost(this.list);
+        return TransactionsList.getCost(this.list);
     }
     getLastUnits() {
         let length = this.size;
@@ -114,7 +107,8 @@ export class TransactionsList {
             // don't include last item if it is a "sell"
             length--;
         }
-        return this.getUnits(this.list.slice(0, length));
+
+        return TransactionsList.getUnits(this.list.slice(0, length));
     }
     getLastCost() {
         let length = this.size;
@@ -122,7 +116,8 @@ export class TransactionsList {
             // don't include last item if it is a "sell"
             length--;
         }
-        return this.getCost(this.list.slice(0, length));
+
+        return TransactionsList.getCost(this.list.slice(0, length));
     }
     isSold() {
         return this.getTotalUnits() === 0;

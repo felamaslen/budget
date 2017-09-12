@@ -46,7 +46,7 @@ export const STOCK_INDICES = {
     'INDEXNIKKEI:NI225': 'Nikkei 225'
 };
 
-export const DO_STOCKS_LIST = true;
+export const DO_STOCKS_LIST = process.env.DO_STOCKS_LIST === 'true';
 export const STOCKS_GRAPH_RESOLUTION = 50;
 
 export const LIST_BLOCK_WIDTH = 500;
