@@ -11,6 +11,9 @@ import {
     zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
     getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
 } from './data/funds';
+import {
+    processRawListRows
+} from './data/list';
 import { rgba } from '../misc/color';
 
 const pageIndexFunds = PAGES.indexOf('funds');
@@ -189,62 +192,53 @@ export function rToggleFundsGraphLine(reduction, index) {
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
 }
 
-export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
+export function rHandleFundPeriodResponse(reduction, response, fromCache) {
     let newReduction = reduction;
     if (!fromCache) {
         newReduction = newReduction.setIn(
-            ['appState', 'other', 'fundHistoryCache', response.period], response.data);
+            ['appState', 'other', 'fundHistoryCache', response.period], response.data
+        );
     }
-    const transactionsKey = LIST_COLS_PAGES[pageIndexFunds].indexOf('transactions');
-    const history = fromJS(response.data.data.data);
 
-    const oldData = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-    const newFunds = getFundsWithTransactions(history, oldData.get('rows'), pageIndexFunds);
-    const oldFundLines = oldData.get('fundLines');
-    const newFundsItems = history.getIn(['funds', 'items']);
-    const newOldFundLines = map(oldFundLines.filter(fundLine => {
-        return newFundsItems.indexOf(fundLine.get('item')) > -1;
-    }).map(fundLine=> list([fundLine.get('item'), fundLine])));
-    const fundsEnabled = newFunds.map(() => null); // enabled set by replace method
-    const overallEnabled = oldFundLines.first().get('enabled');
-    const newFundLines = getFundLines(newFunds, fundsEnabled, overallEnabled, (fund, fundLine) => {
-        if (newOldFundLines.has(fund.item)) {
-            return newOldFundLines.get(fund.item);
-        }
-        return fundLine;
-    });
-    const oldRows = oldData.get('rows');
-    const newRows = getGainComparisons(oldRows.map(row => {
-        return addPriceHistory(pageIndexFunds, row, history, row.getIn(['cols', transactionsKey]));
-    }));
+    const rows = processRawListRows(response.data.data, pageIndexFunds);
+    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+    const startTime = response.data.startTime;
+    const cacheTimes = list(response.data.cacheTimes);
 
-    const newData = oldData
-        .set('history', history)
-        .set('funds', newFunds)
-        .set('fundLines', newFundLines)
-        .set('rows', newRows);
+    // reset the zoom when changing data
+    const zoom = list([0, new Date().getTime() / 1000 - startTime]);
 
-    newReduction = newReduction
-        .setIn(['appState', 'pages', pageIndexFunds], newData)
-        .setIn(['appState', 'other', 'graphFunds', 'period'], response.period);
+    const fundHistory = getFormattedHistory(
+        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom
+    );
 
-    return getFundsCachedValue(addFundLines(
-        getXRange(newReduction, history.get('startTime')),
-        newData, newFunds, history, pageIndexFunds, newFundLines
-    ), pageIndexFunds, history);
-};
+    return newReduction
+        .setIn(['appState', 'other', 'graphFunds', 'startTime'], startTime)
+        .setIn(['appState', 'other', 'graphFunds', 'cacheTimes'], cacheTimes)
+        .setIn(['appState', 'other', 'graphFunds', 'zoom'], zoom)
+        .setIn(['appState', 'other', 'graphFunds', 'range'], zoom.slice())
+        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory);
+}
 
-export const rChangeFundsGraphPeriod = (reduction, req) => {
-    const period = req.period || reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
-    if (req.noCache || !reduction.getIn(['appState', 'other', 'fundHistoryCache']).has(period)) {
+export function rChangeFundsGraphPeriod(reduction, req) {
+    const period = req.period || reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'period']
+    );
+
+    if (req.noCache || !reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache']
+    ).has(period)) {
         const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+
         return reduction.set(
             'effects', reduction.get('effects').push(
                 buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period })
             )
         );
     }
+
     const data = reduction.getIn(['appState', 'other', 'fundHistoryCache', period]);
+
     return rHandleFundPeriodResponse(reduction, { period, data }, true);
-};
+}
 
