@@ -326,20 +326,23 @@ export function getFundLineProcessed(
 }
 
 export function getFundLines(
-    times, timeOffsets, prices, units, costs, mode, overallEnabled, fundsEnabled
+    times, timeOffsets, prices, units, costs, mode, fundsEnabled
 ) {
     let lines = list.of();
 
-    if (overallEnabled) {
+    if (fundsEnabled.includes(-1)) {
         lines = lines.push(getFundLineProcessed(
             times.first(), timeOffsets, prices, units, costs, mode, -1)
         );
     }
 
     return lines
-        .concat(fundsEnabled.map(index => getFundLineProcessed(
-            times.get(index + 1), null, prices, units, costs, mode, index
-        )))
+        .concat(fundsEnabled
+            .filter(index => index > -1)
+            .map(index => getFundLineProcessed(
+                times.get(index + 1), null, prices, units, costs, mode, index
+            ))
+        )
         .filter(item => item !== null);
 }
 
@@ -385,7 +388,9 @@ function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
     });
 }
 
-export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes) {
+export function getFormattedHistory(
+    rows, mode, pageIndex, startTime, cacheTimes, enabledList = null
+) {
     // get a formatted list of lines for display in the fund price / value graph
     const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
 
@@ -397,14 +402,15 @@ export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes
 
     const maxLength = rowLengths.max();
 
-    const fundsEnabled = rowLengths
+    const fundsEnabled = enabledList || rowLengths
         .reduce((keys, length, key) => {
             if (length >= maxLength) {
                 return keys.push(key);
             }
 
             return keys;
-        }, list.of());
+        }, list.of())
+        .push(-1);
 
     const { prices, units, costs } = getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes);
 
@@ -427,17 +433,17 @@ export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes
     const fundItems = list([
         map({
             item: 'Overall',
-            enabled: true
+            enabled: fundsEnabled.includes(-1)
         })
     ])
         .concat(rows.map((row, key) => map({
             item: row.getIn(['cols', itemKey]),
-            enabled: fundsEnabled.indexOf(key) > -1
+            enabled: fundsEnabled.includes(key)
         })))
         .map((item, key) => item.set('color', colors.get(key)));
 
     const fundLines = getFundLines(
-        times, timeOffsets, prices, units, costs, mode, true, fundsEnabled
+        times, timeOffsets, prices, units, costs, mode, fundsEnabled
     );
 
     return map({ fundItems, fundLines });
