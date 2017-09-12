@@ -210,11 +210,10 @@ export class GraphFunds extends LineGraph {
                 : 1;
 
             if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-                this.drawCubicLine(line.get('line'), [color]);
+                return this.drawCubicLine(line.get('line'), [color]);
             }
-            else {
-                this.drawLine(data, [color]);
-            }
+
+            return this.drawLine(line.get('line'), [color]);
         });
 
         /*
@@ -269,11 +268,9 @@ export class GraphFunds extends LineGraph {
 
         this.drawAxes();
         this.drawData();
-        // this.drawLabel();
+        this.drawLabel();
     }
     afterCanvas() {
-        return null;
-
         const fundLineToggles = this.props.fundItems
             ? this.props.fundItems.map((item, key) => {
                 const className = classNames({ enabled: item.get('enabled') });
@@ -283,9 +280,9 @@ export class GraphFunds extends LineGraph {
                 };
 
                 return (
-                    <li key={key} className={className}
-                        onClick={onClick}>
-                        <span className='fund'>{item.get('item')}</span>
+                    <li key={key} className={className} onClick={onClick}>
+                        <span className="checkbox" style={style}></span>
+                        <span className="fund">{item.get('item')}</span>
                     </li>
                 );
             })

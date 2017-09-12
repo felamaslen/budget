@@ -331,12 +331,14 @@ export function getFundLines(
     let lines = list.of();
 
     if (overallEnabled) {
-        lines = lines.push(getFundLineProcessed(times.first(), timeOffsets, prices, units, costs, mode, -1));
+        lines = lines.push(getFundLineProcessed(
+            times.first(), timeOffsets, prices, units, costs, mode, -1)
+        );
     }
 
-    return lines.concat(fundsEnabled.map(
-        index => getFundLineProcessed(times.get(index + 1), null, prices, units, costs, mode, index)
-    ));
+    return lines.concat(fundsEnabled.map(index => getFundLineProcessed(
+        times.get(index + 1), null, prices, units, costs, mode, index
+    )));
 }
 
 function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
