@@ -95,12 +95,11 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
 
     const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
-    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
 
     const rows = newReduction.getIn(['appState', 'pages', pageIndex, 'rows']);
-
     const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes, pageIndex);
 
+    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
     const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex);
     const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes);
 
