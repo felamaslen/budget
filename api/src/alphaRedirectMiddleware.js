@@ -264,6 +264,10 @@ async function handleRoutesData(req, res, path) {
         }
     }
 
+    if (pathItem === 'search') {
+        return handleRoutesSearch(req, res, path);
+    }
+
     if (pathItem === 'pie' && req.method === 'get') {
         if (!req.params) {
             req.params = {};
@@ -320,10 +324,6 @@ function handleRoutes(req, res, tasks) {
 
     if (firstTask === 'data') {
         return handleRoutesData(req, res, tasks);
-    }
-
-    if (firstTask === 'search') {
-        return handleRoutesSearch(req, res, tasks);
     }
 
     return res
