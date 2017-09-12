@@ -216,7 +216,6 @@ export class GraphFunds extends LineGraph {
             return this.drawLine(line.get('line'), [color]);
         });
 
-        /*
         if (this.props.hlPoint) {
             const hlPixX = this.pixX(this.props.hlPoint.get(0));
             const hlPixY = this.pixY(this.props.hlPoint.get(1));
@@ -227,7 +226,6 @@ export class GraphFunds extends LineGraph {
             this.ctx.fill();
             this.ctx.closePath();
         }
-        */
     }
     drawLabel() {
         if (this.props.hlPoint) {

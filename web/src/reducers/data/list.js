@@ -100,8 +100,10 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
     const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes, pageIndex);
 
     const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+
     const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex);
-    const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes);
+    const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes, zoom);
 
     return newReduction
         .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps)
