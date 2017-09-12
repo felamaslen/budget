@@ -324,29 +324,10 @@ export function getFundLines(
     ));
 }
 
-export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes) {
-    // get a formatted list of lines for display in the fund price / value graph
-    const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
+function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
     const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
 
-    const timeOffsets = rows.map(row => row.get('prStartIndex'));
-
-    const rowLengths = rows.map((row, index) => {
-        return row.get('pr').size + timeOffsets.get(index);
-    });
-
-    const maxLength = rowLengths.max();
-
-    const fundsEnabled = rowLengths
-        .reduce((keys, length, key) => {
-            if (length >= maxLength) {
-                return keys.push(key);
-            }
-
-            return keys;
-        }, list.of());
-
-    const { prices, units, costs } = rows.reduce((obj, row) => {
+    return rows.reduce((obj, row) => {
         const transactions = row.getIn(['cols', transactionsKey]);
 
         const thisPrices = row.get('pr');
@@ -383,6 +364,30 @@ export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes
         units: list.of(),
         costs: list.of()
     });
+}
+
+export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes) {
+    // get a formatted list of lines for display in the fund price / value graph
+    const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
+
+    const timeOffsets = rows.map(row => row.get('prStartIndex'));
+
+    const rowLengths = rows.map((row, index) => {
+        return row.get('pr').size + timeOffsets.get(index);
+    });
+
+    const maxLength = rowLengths.max();
+
+    const fundsEnabled = rowLengths
+        .reduce((keys, length, key) => {
+            if (length >= maxLength) {
+                return keys.push(key);
+            }
+
+            return keys;
+        }, list.of());
+
+    const { prices, units, costs } = getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes);
 
     const times = list([
         list(new Array(maxLength).fill(0))
