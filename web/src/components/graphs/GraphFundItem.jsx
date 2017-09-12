@@ -64,7 +64,7 @@ export class GraphFundItem extends LineGraph {
             Array.apply(null, new Array(numTicks)).forEach((tick, key) => {
                 const tickValue = start + key * increment;
                 const tickPos = Math.floor(this.pixY(tickValue)) + 0.5;
-                const tickName = tickValue.toFixed(1) + '%';
+                const tickName = `${tickValue.toFixed(1)}p`;
                 this.ctx.fillText(tickName, this.pixX(this.minX), tickPos);
             });
         }
