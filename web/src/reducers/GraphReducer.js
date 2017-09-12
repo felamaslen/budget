@@ -7,6 +7,7 @@ import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
 import { PAGES, LIST_COLS_PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import {
+    getFormattedHistory,
     zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
     getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
 } from './data/funds';
@@ -26,17 +27,21 @@ export const rToggleFundItemGraph = (reduction, key) => {
     );
 };
 
-export const rToggleFundsGraphMode = reduction => {
+export function rToggleFundsGraphMode(reduction) {
     const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
-    const fundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
-    const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-    const funds = data.get('funds');
-    const history = data.get('history');
 
-    return addFundLines(
-        reduction.setIn(['appState', 'other', 'graphFunds', 'mode'], newMode),
-        data, funds, history, pageIndexFunds, fundLines);
-};
+    const rows = reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows']);
+    const startTime = reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']);
+    const cacheTimes = reduction.getIn(['appState', 'other', 'graphFunds', 'cacheTimes']);
+
+    const fundHistory = getFormattedHistory(
+        rows, newMode, pageIndexFunds, startTime, cacheTimes
+    );
+
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
+        .setIn(['appState', 'other', 'graphFunds', 'mode'], newMode);
+}
 
 const numFundPointsVisible = (lines, minX, maxX) => {
     return lines.reduce((last, line) => {
