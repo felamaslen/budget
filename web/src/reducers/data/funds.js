@@ -226,7 +226,7 @@ function getROI(values, costs) {
             return 0;
         }
 
-        return (value - cost) / cost;
+        return 100 * (value - cost) / cost;
     });
 }
 
@@ -275,16 +275,6 @@ export function getOverallLine(prices, units, costs, mode) {
     return null;
 }
 
-export function getOverallLineWithColor(prices, units, costs, mode) {
-    const line = getOverallLine(prices, units, costs, mode);
-
-    if (!line) {
-        return null;
-    }
-
-    return map({ line, index: 0 });
-}
-
 export function getFundLine(prices, units, costs, mode, index) {
     if (mode === GRAPH_FUNDS_MODE_ABSOLUTE) {
         return getFundLineAbsolute(prices, units, index);
@@ -301,25 +291,36 @@ export function getFundLine(prices, units, costs, mode, index) {
     return null;
 }
 
-export function getFundLineWithColor(prices, units, costs, mode, index) {
-    const line = getFundLine(prices, units, costs, mode, index);
+export function getFundLineProcessed(times, prices, units, costs, mode, index) {
+    const line = index > -1
+        ? getFundLine(prices, units, costs, mode, index)
+        : getOverallLine(prices, units, costs, mode);
 
     if (!line) {
         return null;
     }
 
-    return map({ line, index: index + 1 });
+    const lineIndex = index + 1;
+
+    const lineWithTimes = line.map((value, key) => list([times.get(key), value]));
+
+    return map({
+        line: lineWithTimes,
+        index: lineIndex
+    });
 }
 
-export function getFundLines(prices, units, costs, mode, overallEnabled, fundsEnabled) {
+export function getFundLines(
+    times, prices, units, costs, mode, overallEnabled, fundsEnabled
+) {
     let lines = list.of();
 
     if (overallEnabled) {
-        lines = lines.push(getOverallLineWithColor(prices, units, costs, mode));
+        lines = lines.push(getFundLineProcessed(times.first(), prices, units, costs, mode, -1));
     }
 
     return lines.concat(fundsEnabled.map(
-        index => getFundLineWithColor(prices, units, costs, mode, index)
+        index => getFundLineProcessed(times.get(index + 1), prices, units, costs, mode, index)
     ));
 }
 
@@ -328,42 +329,71 @@ export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes
     const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
     const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
 
-    const maxLength = rows.reduce(
-        (length, row) => Math.max(row.get('pr').size, length), 0
-    );
+    const timeOffsets = rows.map(row => row.get('prStartIndex'));
 
-    const fundsEnabled = rows.reduce((keys, row, key) => {
-        if (row.get('pr').size >= maxLength) {
-            return keys.push(key);
-        }
+    const rowLengths = rows.map((row, index) => {
+        return row.get('pr').size + timeOffsets.get(index);
+    });
 
-        return keys;
-    }, list.of());
+    const maxLength = rowLengths.max();
+
+    const fundsEnabled = rowLengths
+        .reduce((keys, length, key) => {
+            if (length >= maxLength) {
+                return keys.push(key);
+            }
+
+            return keys;
+        }, list.of());
 
     const { prices, units, costs } = rows.reduce((obj, row) => {
         const transactions = row.getIn(['cols', transactionsKey]);
 
         const thisPrices = row.get('pr');
+        const timeOffset = row.get('prStartIndex');
 
-        const { thisUnits, thisCosts } = thisPrices.reduce((unitsCost, price, key) => {
+        const {
+            thisUnits,
+            thisCosts
+        } = thisPrices.reduce((red, price, priceKey) => {
+            const time = cacheTimes.get(priceKey + timeOffset);
+
             const transactionsToNow = transactions
-                .filter(item => item.get('date') < startTime + cacheTimes.get(key));
+                .filter(item => item.get('date') < startTime + time);
 
             const thisPriceUnits = transactionsToNow.getLastUnits();
             const thisPriceCost = transactionsToNow.getLastCost();
 
             return {
-                thisUnits: unitsCost.thisUnits.push(thisPriceUnits),
-                thisCosts: unitsCost.thisCosts.push(thisPriceCost)
+                thisUnits: red.thisUnits.push(thisPriceUnits),
+                thisCosts: red.thisCosts.push(thisPriceCost)
             };
-        }, { thisUnits: list.of(), thisCosts: list.of() });
+        }, {
+            thisUnits: list.of(),
+            thisCosts: list.of()
+        });
 
         return {
             prices: obj.prices.push(thisPrices),
             units: obj.units.push(thisUnits),
             costs: obj.costs.push(thisCosts)
         };
-    }, { prices: list.of(), units: list.of(), costs: list.of() });
+    }, {
+        prices: list.of(),
+        units: list.of(),
+        costs: list.of()
+    });
+
+    const times = list([
+        list(new Array(maxLength).fill(0))
+            .map((item, key) => cacheTimes.get(key))
+    ])
+        .concat(rowLengths.map((length, index) => {
+            const timeOffset = timeOffsets.get(index);
+
+            return list(new Array(length).fill(0))
+                .map((item, key) => cacheTimes.get(key + timeOffset));
+        }));
 
     const colors = list([COLOR_GRAPH_FUND_LINE]).concat(rows.map(
         (row, key) => colorKey(key + 1)
@@ -382,7 +412,9 @@ export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes
         })))
         .map((item, key) => item.set('color', colors.get(key)));
 
-    const fundLines = getFundLines(prices, units, costs, mode, true, fundsEnabled);
+    const fundLines = getFundLines(
+        times, prices, units, costs, mode, true, fundsEnabled
+    );
 
     return map({ fundItems, fundLines });
 }
