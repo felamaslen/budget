@@ -23,6 +23,7 @@ const holiday = require('./routes/data/holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const pie = require('./routes/data/pie');
 const stocks = require('./routes/data/stocks');
 
 const search = require('./routes/search');
@@ -128,6 +129,10 @@ function getNewTaskFromOld(tasks) {
 
         return ['data', pathName]
             .concat(tasks);
+    }
+
+    if (arg === 'pie') {
+        return ['data', 'pie'].concat(tasks);
     }
 
     tasks.unshift(arg);
@@ -257,6 +262,16 @@ async function handleRoutesData(req, res, path) {
         if (req.method === 'delete') {
             return processor.routeDelete(req, res);
         }
+    }
+
+    if (pathItem === 'pie' && req.method === 'get') {
+        if (!req.params) {
+            req.params = {};
+        }
+
+        req.params.category = path.shift();
+
+        return pie.routeGet(req, res);
     }
 
     if (pathItem === 'stocks' && req.method === 'get') {
