@@ -28,7 +28,9 @@ export const rToggleFundItemGraph = (reduction, key) => {
 };
 
 function reloadFundHistory(reduction, mode = null, enabledList = null) {
-    const newMode = mode || reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+    const newMode = typeof mode === 'undefined'
+        ? reduction.getIn(['appState', 'other', 'graphFunds', 'mode'])
+        : mode;
 
     const rows = reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows']);
     const startTime = reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']);
@@ -40,7 +42,8 @@ function reloadFundHistory(reduction, mode = null, enabledList = null) {
 }
 
 export function rToggleFundsGraphMode(reduction) {
-    const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
+    const oldMode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+    const newMode = (oldMode + 1) % 3;
 
     const fundHistory = reloadFundHistory(reduction, newMode);
 
@@ -97,32 +100,49 @@ export const rZoomFundsGraph = (reduction, obj) => {
     );
 };
 
-export const rHoverFundsGraph = (reduction, position) => {
+export function rHoverFundsGraph(reduction, position) {
     if (!position) {
         return reduction.setIn(['appState', 'other', 'graphFunds', 'hlPoint'], null);
     }
 
-    const lines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'lines']);
-    if (!lines) {
+    const lines = reduction.getIn(['appState', 'other', 'graphFunds', 'data', 'fundLines']);
+
+    if (!lines || !lines.size) {
         return reduction;
     }
-    const closest = lines.reduce((last, line, lineKey) => {
-        return line.last().reduce((thisLast, point, pointKey) => {
-            const pointDistance = Math.sqrt(
-                Math.pow(point.first() - position.valX, 2) + Math.pow(point.last() - position.valY, 2)
-            );
-            if (pointDistance < thisLast[0]) {
-                return [pointDistance, lineKey, pointKey];
-            }
-            return thisLast;
-        }, last);
-    }, [Infinity, null]);
 
-    const color = lines.getIn([closest[1], 0]);
-    const hlPoint = lines.getIn([closest[1], 1, closest[2]]);
+    const closest = lines.reduce((last, line, lineKey) => {
+        return line
+            .get('line')
+            .reduce((thisLast, point, pointKey) => {
+                const pointDistance = Math.sqrt(
+                    Math.pow(point.get(0) - position.valX, 2) +
+                    Math.pow(point.get(1) - position.valY, 2)
+                );
+
+                if (pointDistance < thisLast.dist) {
+                    thisLast.dist = pointDistance;
+                    thisLast.lineKey = lineKey;
+                    thisLast.pointKey = pointKey;
+                }
+
+                return thisLast;
+            }, last);
+
+    }, { dist: Infinity, lineKey: null, pointKey: null });
+
+    const color = reduction.getIn([
+        'appState', 'other', 'graphFunds', 'data', 'fundItems', closest.lineKey, 'color'
+    ]);
+
+    const hlPoint = lines
+        .getIn([closest.lineKey, 'line', closest.pointKey])
+        .push(color);
+
     return reduction.setIn(
-        ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint ? hlPoint.push(color) : null);
-};
+        ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint
+    );
+}
 
 export function rToggleFundsGraphLine(reduction, index) {
     let statusBefore = false;
