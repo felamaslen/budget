@@ -54,7 +54,7 @@ export const LIST_COLS_PAGES = [
 export const LIST_COLS_SHORT = [
     null,
     null,
-    ['d', 'i', 't', 'c'],
+    ['d', 'i', 'tr', 'c'],
     ['d', 'i', 'c'],
     ['d', 'i', 'c'],
     ['d', 'i', 'k', 'c', 's'],
@@ -62,6 +62,8 @@ export const LIST_COLS_SHORT = [
     ['d', 'i', 'h', 'c', 's'],
     ['d', 'i', 'y', 'c', 's']
 ];
+
+export const LIST_COLS_STANDARD = ['I', 'd', 'i', 'c', 'k', 'h', 'y', 's', 'tr'];
 
 // which pages to include daily tallies for
 export const DAILY_PAGES = [null, null, false, false, false, true, true, true, true];
@@ -77,6 +79,10 @@ export const SERVER_UPDATE_ERROR = 0xf93;
 export const MAX_SUGGESTIONS = 5;
 
 const htmlCanvasSupported = () => {
+    if (navigator.userAgent === 'node.js') {
+        return false;
+    }
+
     const elem = document.createElement('canvas');
     return !!(elem.getContext && elem.getContext('2d'));
 };
