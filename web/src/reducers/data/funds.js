@@ -263,13 +263,26 @@ export function getFundLinePrice(prices, index) {
     return prices.get(index);
 }
 
-export function getOverallLine(prices, units, costs, mode) {
+export function getOverallLine(prices, units, costs, mode, timeOffsets) {
+    const addOffsets = item => item.map((itemList, rowKey) => {
+        return list(new Array(timeOffsets.get(rowKey)).fill(0))
+            .concat(itemList);
+    });
+
+    const pricesWithOffsets = addOffsets(prices);
+    const unitsWithOffsets = addOffsets(units);
+    const costsWithOffsets = addOffsets(costs);
+
     if (mode === GRAPH_FUNDS_MODE_ABSOLUTE) {
-        return getOverallAbsolute(prices, units, costs);
+        return getOverallAbsolute(
+            pricesWithOffsets, unitsWithOffsets, costsWithOffsets
+        );
     }
 
     if (mode === GRAPH_FUNDS_MODE_ROI) {
-        return getOverallROI(prices, units, costs);
+        return getOverallROI(
+            pricesWithOffsets, unitsWithOffsets, costsWithOffsets
+        );
     }
 
     return null;
@@ -291,10 +304,12 @@ export function getFundLine(prices, units, costs, mode, index) {
     return null;
 }
 
-export function getFundLineProcessed(times, prices, units, costs, mode, index) {
+export function getFundLineProcessed(
+    times, timeOffsets, prices, units, costs, mode, index
+) {
     const line = index > -1
         ? getFundLine(prices, units, costs, mode, index)
-        : getOverallLine(prices, units, costs, mode);
+        : getOverallLine(prices, units, costs, mode, timeOffsets);
 
     if (!line) {
         return null;
@@ -311,16 +326,16 @@ export function getFundLineProcessed(times, prices, units, costs, mode, index) {
 }
 
 export function getFundLines(
-    times, prices, units, costs, mode, overallEnabled, fundsEnabled
+    times, timeOffsets, prices, units, costs, mode, overallEnabled, fundsEnabled
 ) {
     let lines = list.of();
 
     if (overallEnabled) {
-        lines = lines.push(getFundLineProcessed(times.first(), prices, units, costs, mode, -1));
+        lines = lines.push(getFundLineProcessed(times.first(), timeOffsets, prices, units, costs, mode, -1));
     }
 
     return lines.concat(fundsEnabled.map(
-        index => getFundLineProcessed(times.get(index + 1), prices, units, costs, mode, index)
+        index => getFundLineProcessed(times.get(index + 1), null, prices, units, costs, mode, index)
     ));
 }
 
@@ -418,7 +433,7 @@ export function getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes
         .map((item, key) => item.set('color', colors.get(key)));
 
     const fundLines = getFundLines(
-        times, prices, units, costs, mode, true, fundsEnabled
+        times, timeOffsets, prices, units, costs, mode, true, fundsEnabled
     );
 
     return map({ fundItems, fundLines });
