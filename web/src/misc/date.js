@@ -88,17 +88,11 @@ export class YMD {
         return `${numbers[2]}/${numbers[1]}/${numbers[0]}`;
     }
     valueOf() {
-        const daysToYear = Array.apply(null, new Array(this.year - 1 - 2000)).reduce(
-            (total, _, year) => total + (leapYear(2000 + year) ? 366 : 365), 0);
-
-        const daysToMonth = Array.apply(null, new Array(this.month - 1)).reduce(
-            (total, _, key) => total + monthDays(key + 1, this.year), 0);
-
-        return daysToYear + daysToMonth + this.date;
+        return this.timestamp();
     }
     toString() {
-    // this format gets passed to API POST requests (for e.g. updating)
-        return `${this.year},${this.month},${this.date}`;
+        // this format gets passed to API POST/PUT requests
+        return { year: this.year, month: this.month, date: this.date };
     }
     timestamp() {
         return Math.floor(new Date(this.year, this.month - 1, this.date).getTime() / 1000);
