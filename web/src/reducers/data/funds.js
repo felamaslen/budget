@@ -336,9 +336,11 @@ export function getFundLines(
         );
     }
 
-    return lines.concat(fundsEnabled.map(index => getFundLineProcessed(
-        times.get(index + 1), null, prices, units, costs, mode, index
-    )));
+    return lines
+        .concat(fundsEnabled.map(index => getFundLineProcessed(
+            times.get(index + 1), null, prices, units, costs, mode, index
+        )))
+        .filter(item => item !== null);
 }
 
 function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
