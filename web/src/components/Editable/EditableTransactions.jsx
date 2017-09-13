@@ -82,7 +82,11 @@ export default class EditableTransactions extends Editable {
             { row, col, key, column: 'cost', value }
         ));
     }
-    format() {
+    getModal() {
+        if (!this.props.active) {
+            return null;
+        }
+
         const row = this.props.row;
         const col = this.props.col;
 
@@ -147,7 +151,7 @@ export default class EditableTransactions extends Editable {
             );
         });
 
-        const modal = this.props.active ? (
+        return (
             <div className='modal'>
                 <div className='inner'>
                     <table>
@@ -172,9 +176,14 @@ export default class EditableTransactions extends Editable {
                     </table>
                 </div>
             </div>
-        ) : null;
+        );
+    }
+    format() {
+        const modal = this.getModal();
 
-        const size = this.props.value && this.props.value.size ? this.props.value.size : 0;
+        const size = this.props.value && this.props.value.size
+            ? this.props.value.size
+            : 0;
 
         return (
             <span>
