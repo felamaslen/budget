@@ -47,7 +47,7 @@ function processLoginRequest(req) {
 
 function findUser(db, hash) {
     return db.query(`
-    SELECT uid, user, api_key
+    SELECT uid, user AS name, api_key
     FROM users
     WHERE api_key = ?
     LIMIT 1

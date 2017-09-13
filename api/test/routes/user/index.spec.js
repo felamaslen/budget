@@ -61,7 +61,7 @@ describe('/api/user', () => {
             await user.findUser(db, 'some_hash');
 
             expect(db.queries[0]).to.equal(
-                'SELECT uid, user, api_key FROM users WHERE api_key = \'some_hash\' LIMIT 1'
+                'SELECT uid, user AS name, api_key FROM users WHERE api_key = \'some_hash\' LIMIT 1'
             );
         });
     });
