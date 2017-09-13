@@ -24,6 +24,10 @@ export function getFundsCachedValue(
     const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
 
     const value = rows.reduce((sum, row) => {
+        if (!row.get('pr').size) {
+            return sum;
+        }
+
         return sum + (
             row.get('pr').last() * row.getIn(['cols', transactionsKey]).getTotalUnits()
         );
@@ -63,9 +67,20 @@ export function getGains(rows, startTime, cacheTimes, pageIndex) {
     const roundGain = value => Math.round(10000 * value) / 10000;
     const roundAbs = value => Math.round(value);
 
+    const rowsWithPrices = rows.reduce((keys, row, key) => {
+        if (row.has('pr') && row.get('pr').size > 0) {
+            return keys.push(key);
+        }
+
+        return keys;
+    }, list.of());
+
     const {
         gains, dayGains, gainsAbs, dayGainsAbs, values
-    } = rows.reduce((obj, row) => {
+    } = rows.reduce((obj, row, key) => {
+        if (!rowsWithPrices.includes(key)) {
+            return obj;
+        }
 
         const prices = row.get('pr');
         const timeOffset = row.get('prStartIndex');
@@ -117,7 +132,13 @@ export function getGains(rows, startTime, cacheTimes, pageIndex) {
     const min = gains.min();
     const max = gains.max();
 
-    return rows.map((row, key) => {
+    return rows.map((row, rowKey) => {
+        const key = rowsWithPrices.indexOf(rowKey);
+
+        if (key === -1) {
+            return row;
+        }
+
         const value = values.get(key);
 
         const gain = gains.get(key);
