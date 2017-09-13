@@ -4,6 +4,7 @@
   "description": "Personal finance app",
   "main": "gulpfile.js",
   "scripts": {
+    "preinstall": "rm -rf ./node_modules",
     "postinstall": "./node_modules/.bin/webpack",
     "start": "NODE_ENV=production node ./api/src/index.js",
     "dev:api": "NODE_ENV=development nodemon -w ./api/src ./api/src/index.js",
