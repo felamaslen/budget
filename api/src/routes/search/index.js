@@ -35,9 +35,11 @@ function validateParams(table, column, searchTerm, numResults) {
 
 /**
  * @swagger
- * /search/{dataType}/{column}/{searchTerm}/{numResults}:
+ * /data/search/{dataType}/{column}/{searchTerm}/{numResults}:
  *     get:
  *         summary: Search suggestions
+ *         tags:
+ *         - Search
  *         operationId: search
  *         description: |
  *             Get search suggestions for data input

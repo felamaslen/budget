@@ -53,6 +53,12 @@ export class PageFunds extends PageList {
         );
     }
     renderListExtra(row, rowKey) {
+        const gain = row.get('gain');
+
+        if (!gain) {
+            return null;
+        }
+
         const name = row.getIn(['cols', 1]).toLowerCase().replace(/\W+/g, '-');
         const popout = row.get('historyPopout');
         const width = popout ? GRAPH_FUND_ITEM_WIDTH_LARGE : GRAPH_FUND_ITEM_WIDTH;
@@ -61,35 +67,33 @@ export class PageFunds extends PageList {
         const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
         const formatOptionsPct = { brackets: true, precision: 2 };
 
-        const gain = row.get('gain');
-
         const gainStyle = {
-            backgroundColor: rgba(gain.color)
+            backgroundColor: rgba(gain.get('color'))
         };
         const gainOuterClasses = classNames({
             text: true,
-            profit: gain.gain >= 0,
-            loss: gain.gain < 0
+            profit: gain.get('gain') >= 0,
+            loss: gain.get('gain') < 0
         });
         const gainClasses = classNames({
             gain: true,
-            profit: gain.gain >= 0,
-            loss: gain.gain < 0
+            profit: gain.get('gain') >= 0,
+            loss: gain.get('gain') < 0
         });
         const gainAbsClasses = classNames({
             'gain-abs': true,
-            profit: gain.abs >= 0,
-            loss: gain.abs < 0
+            profit: gain.get('gainAbs') >= 0,
+            loss: gain.get('gainAbs') < 0
         });
         const dayGainClasses = classNames({
             'day-gain': true,
-            profit: gain.dayGain >= 0,
-            loss: gain.dayGain < 0
+            profit: gain.get('dayGain') >= 0,
+            loss: gain.get('dayGain') < 0
         });
         const dayGainAbsClasses = classNames({
             'day-gain-abs': true,
-            profit: gain.dayAbs >= 0,
-            loss: gain.dayAbs < 0
+            profit: gain.get('dayGainAbs') >= 0,
+            loss: gain.get('dayGainAbs') < 0
         });
 
         return (
@@ -100,7 +104,7 @@ export class PageFunds extends PageList {
                             width={width}
                             height={height}
                             name={name}
-                            data={row.get('history')}
+                            data={row.get('prices')}
                             popout={row.get('historyPopout')}
                             rowKey={rowKey}
                         />
@@ -109,19 +113,19 @@ export class PageFunds extends PageList {
                 <span className='gain'>
                     <span className={gainOuterClasses} style={gainStyle}>
                         <span className='value'>
-                            {formatCurrency(gain.value, formatOptions)}
+                            {formatCurrency(gain.get('value'), formatOptions)}
                         </span>
                         <span className={gainAbsClasses}>
-                            {formatCurrency(gain.abs, formatOptions)}
+                            {formatCurrency(gain.get('gainAbs'), formatOptions)}
                         </span>
                         <span className={dayGainAbsClasses}>
-                            {formatCurrency(gain.dayAbs, formatOptions)}
+                            {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
                         </span>
                         <span className={gainClasses}>
-                            {formatPercent(gain.gain, formatOptionsPct)}
+                            {formatPercent(gain.get('gain'), formatOptionsPct)}
                         </span>
                         <span className={dayGainClasses}>
-                            {formatPercent(gain.dayGain, formatOptionsPct)}
+                            {formatPercent(gain.get('dayGain'), formatOptionsPct)}
                         </span>
                     </span>
                 </span>
@@ -145,11 +149,12 @@ export class PageFunds extends PageList {
             <div className='graph-container-outer'>
                 <GraphFunds dispatcher={this.props.dispatcher}
                     name='fund-history'
-                    width={GRAPH_FUNDS_WIDTH} height={GRAPH_FUNDS_HEIGHT}
-                    history={this.props.data.get('history')}
-                    lines={this.props.data.get('lines')}
-                    funds={this.props.data.get('rows')}
-                    fundLines={this.props.data.get('fundLines')}
+                    width={GRAPH_FUNDS_WIDTH}
+                    height={GRAPH_FUNDS_HEIGHT}
+                    fundItems={this.props.graphProps.getIn(['data', 'fundItems'])}
+                    fundLines={this.props.graphProps.getIn(['data', 'fundLines'])}
+                    startTime={this.props.graphProps.get('startTime')}
+                    cacheTimes={this.props.graphProps.get('cacheTimes')}
                     mode={this.props.graphProps.get('mode')}
                     period={this.props.graphProps.get('period')}
                     showOverall={this.props.graphProps.get('showOverall')}

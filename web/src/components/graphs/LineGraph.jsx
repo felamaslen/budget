@@ -95,6 +95,9 @@ export class LineGraph extends Graph {
 
             // interpolate the curve between this point and the next
             const numPoints = Math.max(1, Math.floor(xPixelGoal - xPixel));
+            if (!numPoints) {
+                return list.of();
+            }
             const curvePiece = list(Array.apply(null, new Array(numPoints)).map((_, pieceKey) => {
                 const xValue = this.valX(xPixel + pieceKey);
                 const yValue1 = points.getIn([key, 1]);

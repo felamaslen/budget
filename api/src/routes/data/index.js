@@ -17,6 +17,7 @@ const holiday = require('./holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const pie = require('./pie');
 const stocks = require('./stocks');
 
 class ResponseMultiple {
@@ -49,7 +50,11 @@ class ResponseMultiple {
 }
 
 function getOverallStatusCode(results) {
-    return results.reduce((status, taskRes) => {
+    if (!results.length) {
+        return 200;
+    }
+
+    const statusCode = results.reduce((status, taskRes) => {
         // use the following status codes, in order of precedence
         if (taskRes.statusCode >= 500) {
             // server error
@@ -78,6 +83,12 @@ function getOverallStatusCode(results) {
 
         return status;
     }, 0);
+
+    if (!statusCode) {
+        return 500;
+    }
+
+    return statusCode;
 }
 
 function validateTaskList(list) {
@@ -194,7 +205,20 @@ async function multipleUpdateRequestMiddleware(req, res) {
         })
         .filter(item => item !== null);
 
-    const results = await Promise.all(promises);
+    let results = null;
+    try {
+        results = await Promise.all(promises);
+    }
+    catch (err) {
+        await req.db.end(null, true);
+
+        return res
+            .status(400)
+            .json({
+                error: true,
+                errorMessage: err.message
+            });
+    }
 
     const data = results.map(taskRes => taskRes.result);
 
@@ -240,6 +264,9 @@ function handler(app) {
         app.put(`/data/${category}`, listDataProcessor[category].routePut);
         app.delete(`/data/${category}`, listDataProcessor[category].routeDelete);
     });
+
+    // pie charts
+    app.get('/data/pie/:category', (req, res) => pie.routeGet(req, res));
 
     // stocks route
     app.get('/data/stocks', stocks.routeGet);

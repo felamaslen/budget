@@ -5,6 +5,7 @@
 import { List as list, Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import { rgba } from '../../misc/color';
@@ -56,7 +57,7 @@ export class GraphFunds extends LineGraph {
         };
     }
     update() {
-        if (!this.props.lines || !this.props.history) {
+        if (!this.props.fundLines || this.props.cacheTimes.size < 2) {
             return;
         }
 
@@ -67,14 +68,15 @@ export class GraphFunds extends LineGraph {
         const minX = this.props.zoom.get(0);
         const maxX = this.props.zoom.get(1);
 
-        const valuesY = this.props.lines.map(line => line.last().map(item => item.last()))
-            .filter(item => item.size > 0);
-        let minY = valuesY.reduce((last, line) => {
-            return Math.min(last, line.min());
-        }, Infinity);
-        let maxY = valuesY.reduce((last, line) => {
-            return Math.max(last, line.max());
-        }, -Infinity);
+        const valuesY = this.props.fundLines.map(line => {
+            return line
+                .get('line')
+                .map(item => item.get(1));
+        });
+
+        let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
+        let maxY = valuesY.reduce((max, line) => Math.max(max, line.max()), -Infinity);
+
         if (minY === maxY) {
             minY -= 0.5;
             maxY += 0.5;
@@ -108,7 +110,7 @@ export class GraphFunds extends LineGraph {
     }
     drawAxes() {
         const axisTextColor = rgba(COLOR_DARK);
-        const timeTicks = this.getTimeScale(this.props.history.get('startTime'));
+        const timeTicks = this.getTimeScale(this.props.startTime);
 
         this.ctx.lineWidth = 1;
 
@@ -197,20 +199,21 @@ export class GraphFunds extends LineGraph {
         });
     }
     drawData() {
-        const mainIndex = this.props.lines.size - 1;
-
         // plot past data
-        this.props.lines.forEach((line, index) => {
-            const mainLine = index === mainIndex && this.props.showOverall &&
-        this.props.mode !== GRAPH_FUNDS_MODE_PRICE;
+        this.props.fundLines.forEach(line => {
+            const mainLine = line.get('index') === 0;
 
-            this.ctx.lineWidth = mainLine ? 1.5 : 1;
+            const color = rgba(this.props.fundItems.getIn([line.get('index'), 'color']));
+
+            this.ctx.lineWidth = mainLine
+                ? 1.5
+                : 1;
+
             if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-                this.drawCubicLine(line.get(1), [rgba(line.get(0))]);
+                return this.drawCubicLine(line.get('line'), [color]);
             }
-            else {
-                this.drawLine(line.get(1), [rgba(line.get(0))]);
-            }
+
+            return this.drawLine(line.get('line'), [color]);
         });
 
         if (this.props.hlPoint) {
@@ -227,7 +230,7 @@ export class GraphFunds extends LineGraph {
     drawLabel() {
         if (this.props.hlPoint) {
             const ageSeconds = new Date().getTime() / 1000 -
-                   (this.props.hlPoint.get(0) + this.props.history.get('startTime'));
+                   (this.props.hlPoint.get(0) + this.props.startTime);
             const ageText = formatAge(ageSeconds);
             const valueText = this.formatValue(this.props.hlPoint.get(1));
             const labelText = `${ageText}: ${valueText}`;
@@ -266,27 +269,37 @@ export class GraphFunds extends LineGraph {
         this.drawLabel();
     }
     afterCanvas() {
-        const fundLineToggles = this.props.fundLines ?
-            this.props.fundLines.map((line, key) => {
+        const fundLineToggles = this.props.fundItems
+            ? this.props.fundItems.map((item, key) => {
+                const className = classNames({ enabled: item.get('enabled') });
+                const onClick = () => this.dispatchAction(aFundsGraphLineToggled(key));
+                const style = {
+                    borderColor: rgba(item.get('color'))
+                };
+
                 return (
-                    <li key={key} className={line.get('enabled') ? 'enabled' : null}
-                        onClick={() => this.dispatchAction(aFundsGraphLineToggled(key))}>
-                        <span className='checkbox' style={{ borderColor: rgba(line.get('color')) }} />
-                        <span className='fund'>{line.get('item')}</span>
+                    <li key={key} className={className} onClick={onClick}>
+                        <span className="checkbox" style={style}></span>
+                        <span className="fund">{item.get('item')}</span>
                     </li>
                 );
-            }) : null;
+            })
+            : null;
+
+        const onChange = evt => {
+            this.dispatchAction(aFundsGraphPeriodChanged(evt.target.value));
+        };
+
+        const periodOptions = GRAPH_FUNDS_PERIODS.map((period, key) => {
+            return <option key={key} value={period[0]}>{period[1]}</option>;
+        });
 
         return (
             <div>
                 <ul className='fund-sidebar noselect'>
                     <li>
-                        <select defaultValue={this.props.period} onChange={evt => {
-                            this.dispatchAction(aFundsGraphPeriodChanged(evt.target.value));
-                        }}>
-                            {GRAPH_FUNDS_PERIODS.map((period, key) => {
-                                return <option key={key} value={period[0]}>{period[1]}</option>;
-                            })}
+                        <select defaultValue={this.props.period} onChange={onChange}>
+                            {periodOptions}
                         </select>
                     </li>
                     {fundLineToggles}
@@ -300,10 +313,11 @@ export class GraphFunds extends LineGraph {
 }
 
 GraphFunds.propTypes = {
-    history: PropTypes.instanceOf(map),
-    lines: PropTypes.instanceOf(list),
-    funds: PropTypes.instanceOf(list),
+    fundItems: PropTypes.instanceOf(list),
     fundLines: PropTypes.instanceOf(list),
+    startTime: PropTypes.number,
+    cacheTimes: PropTypes.instanceOf(list),
+    funds: PropTypes.instanceOf(list),
     mode: PropTypes.number,
     period: PropTypes.string,
     showOverall: PropTypes.bool,
