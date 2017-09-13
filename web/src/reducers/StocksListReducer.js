@@ -9,18 +9,23 @@ import {
 } from '../constants/effects';
 import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '../misc/config';
 
-export const rLoadStocksPrices = reduction => {
+export function rLoadStocksPrices(reduction) {
     const symbols = reduction.getIn(['appState', 'other', 'stocksList', 'stocks'])
-        .map(item => item.get('code'))
+        .reduce((codes, item, code) => codes.push(code), list.of())
         .concat(
             reduction.getIn(['appState', 'other', 'stocksList', 'indices'])
-                .map(item => item.get('code'))
-        ).join(',');
+                .reduce((codes, item) => codes.push(item.get('code')), list.of())
+        )
+        .toJS();
+
+    const apiKey = reduction.getIn(['appState', 'other', 'stocksList', 'apiKey']);
+
+    const req = { symbols, apiKey };
 
     return reduction.set('effects', reduction.get('effects').push(buildMessage(
-        EF_STOCKS_PRICES_REQUESTED, symbols
+        EF_STOCKS_PRICES_REQUESTED, req
     )));
-};
+}
 
 export const rLoadStocksList = reduction => {
     return reduction.set('effects', reduction.get('effects').push(buildMessage(
@@ -51,19 +56,26 @@ export const rHandleStocksListResponse = (reduction, response) => {
 
     return rLoadStocksPrices(reduction
         .setIn(['appState', 'other', 'stocksList', 'indices'], indices)
-        .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks));
+        .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks)
+        .setIn(['appState', 'other', 'stocksList', 'apiKey'], response.apiKey)
+    );
 };
 
-const updateStock = (item, row, loadedInitial) => {
-    let newGain = parseFloat(row.cp);
+function updateStock(item, row, loadedInitial) {
+    const latest = Object.values(row['Time Series (Daily)'])[0];
+    const open = latest['1. open'];
+    const close = latest['4. close'];
+
+    let newGain = parseFloat(100 * (close - open) / open, 10);
     if (isNaN(newGain)) {
         newGain = 0;
     }
     const up = loadedInitial && newGain > item.get('gain');
     const down = loadedInitial && newGain < item.get('gain');
     return item.set('gain', newGain).set('up', up).set('down', down);
-};
-export const rHandleStocksPricesResponse = (reduction, response) => {
+}
+
+export function rHandleStocksPricesResponse(reduction, response) {
     let indices = reduction.getIn(['appState', 'other', 'stocksList', 'indices'])
         .map(item => item.set('up', false).set('down', false));
 
@@ -76,11 +88,16 @@ export const rHandleStocksPricesResponse = (reduction, response) => {
         .setIn(['appState', 'other', 'stocksList', 'loadedInitial'], true)
         .setIn(['appState', 'other', 'stocksList', 'lastPriceUpdate'], time);
 
+    if (!response) {
+        return newReduction;
+    }
+
     const loadedInitial = reduction.getIn(['appState', 'other', 'stocksList', 'loadedInitial']);
 
     try {
         response.forEach(row => {
-            const code = `${row.e}:${row.t}`;
+            const code = row['Meta Data']['2. Symbol'];
+
             if (indices.has(code)) {
                 indices = indices.set(code, updateStock(indices.get(code), row, loadedInitial));
             }
@@ -123,5 +140,5 @@ export const rHandleStocksPricesResponse = (reduction, response) => {
                 history.push(list([time, weightedGain]))
             );
     }
-};
+}
 
