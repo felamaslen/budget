@@ -202,6 +202,31 @@ function handleRoutesDataAnalysis(req, res, arg, path) {
     return analysis(req, res);
 }
 
+function handleRoutesSearch(req, res, tasks) {
+    if (!req.params) {
+        req.params = {};
+    }
+
+    if (tasks.length < 3) {
+        return res
+            .status(400)
+            .json({
+                error: true,
+                errorMessage: 'bad request'
+            });
+    }
+
+    req.params.table = tasks.shift();
+    req.params.column = tasks.shift();
+    req.params.searchTerm = tasks.shift();
+
+    if (tasks.length) {
+        req.params.numResults = tasks.shift();
+    }
+
+    return search.routeGet(req, res);
+}
+
 // eslint-disable-next-line max-statements
 async function handleRoutesData(req, res, path) {
     try {
@@ -212,10 +237,6 @@ async function handleRoutesData(req, res, path) {
     }
 
     const pathItem = path.shift();
-    if (pathItem === 'multiple' && req.method === 'patch') {
-        return multipleUpdateRequestMiddleware(req, res);
-    }
-
     if (pathItem === 'overview' && req.method === 'get') {
         return cashflow.routeGet(req, res);
     }
@@ -290,31 +311,6 @@ async function handleRoutesData(req, res, path) {
         });
 }
 
-function handleRoutesSearch(req, res, tasks) {
-    if (!req.params) {
-        req.params = {};
-    }
-
-    if (tasks.length < 3) {
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: 'bad request'
-            });
-    }
-
-    req.params.table = tasks.shift();
-    req.params.column = tasks.shift();
-    req.params.searchTerm = tasks.shift();
-
-    if (tasks.length) {
-        req.params.numResults = tasks.shift();
-    }
-
-    return search.routeGet(req, res);
-}
-
 function handleRoutes(req, res, tasks) {
     const firstTask = tasks.shift();
 
@@ -386,7 +382,7 @@ async function processMultipleRequest(req, res, next) {
             .map(item => {
                 const tasks = item[0].split('/');
 
-                const route = getNewTaskFromOld(tasks).slice(-1)[0];
+                const route = getNewTaskFromOld(tasks.slice()).slice(-1)[0];
 
                 const { method, body } = getNewMethodBodyFromOld(
                     'post', item[2], tasks
