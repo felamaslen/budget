@@ -15,6 +15,10 @@ const version = require('../../package.json').version;
 const api = require('./api');
 const alphaRedirectMiddleware = require('./alphaRedirectMiddleware');
 
+function getVersion() {
+    return version.substring(0, version.indexOf('-'));
+}
+
 function setupLogging(app) {
     if (config.debug) {
         app.use(logger('dev'));
@@ -38,7 +42,7 @@ function setupApiDocs(app) {
     const swaggerDefinition = {
         info: {
             title: 'Budget API',
-            version: '3.0.0',
+            version: getVersion(),
             description: 'Personal finance manager API'
         },
         host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
