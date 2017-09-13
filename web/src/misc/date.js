@@ -91,8 +91,12 @@ export class YMD {
         return this.timestamp();
     }
     toString() {
-    // this format gets passed to API POST requests (for e.g. updating)
-        return `${this.year},${this.month},${this.date}`;
+        // this format gets passed to API POST / PUT requests (for e.g. updating)
+        return {
+            year: this.year,
+            month: this.month,
+            date: this.date
+        };
     }
     timestamp() {
         return Math.floor(new Date(this.year, this.month - 1, this.date).getTime() / 1000);

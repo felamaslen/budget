@@ -217,19 +217,20 @@ describe('Common list data functions', () => {
     describe('validateInsertData', () => {
         it('should require valid item strings', () => {
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15 }))
+                date: { year: 2017, month: 9, date: 15 }
+            }))
                 .to.throw('didn\'t provide item');
         });
 
         it('should require valid costs', () => {
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15, item: 'foo'
+                date: { year: 2017, month: 9, date: 15 }, item: 'foo'
             }))
                 .to.throw('didn\'t provide cost');
 
             [NaN, null, 'foo'].forEach(cost => {
                 expect(() => listCommon.validateInsertData({
-                    year: 2017, month: 9, date: 15, item: 'foo', cost
+                    date: { year: 2017, month: 9, date: 15 }, item: 'foo', cost
                 }))
                     .to.throw('invalid cost data');
             });
@@ -242,36 +243,36 @@ describe('Common list data functions', () => {
 
         it('should accept extra string columns to validate', () => {
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15, item: 'foo', cost: 1
+                date: { year: 2017, month: 9, date: 15 }, item: 'foo', cost: 1
             }, true, [{ name: 'bar' }]))
                 .to.throw('didn\'t provide bar');
 
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: 'baz'
+                date: { year: 2017, month: 9, date: 15 }, item: 'foo', cost: 1, bar: 'baz'
             }, true, [{ name: 'bar' }]))
                 .to.not.throw();
         });
 
         it('should accept non-empty rules for extra string columns', () => {
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: ''
+                date: { year: 2017, month: 9, date: 15 }, item: 'foo', cost: 1, bar: ''
             }, true, [{ name: 'bar', notEmpty: true }]))
                 .to.throw('bar must not be empty');
 
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: ''
+                date: { year: 2017, month: 9, date: 15 }, item: 'foo', cost: 1, bar: ''
             }, true, [{ name: 'bar', notEmpty: false }]))
                 .to.not.throw();
 
             expect(() => listCommon.validateInsertData({
-                year: 2017, month: 9, date: 15, item: 'foo', cost: 1, bar: 'baz'
+                date: { year: 2017, month: 9, date: 15 }, item: 'foo', cost: 1, bar: 'baz'
             }, true, [{ name: 'bar', notEmpty: true }]))
                 .to.not.throw();
         });
 
         it('should return the validated data', () => {
             expect(listCommon.validateInsertData({
-                year: 2017, month: 9, date: 4, item: 'foo', cost: 10
+                date: { year: 2017, month: 9, date: 4 }, item: 'foo', cost: 10
             }))
                 .to.deep.equal({
                     year: 2017, month: 9, date: 4, item: 'foo', cost: 10
@@ -292,7 +293,7 @@ describe('Common list data functions', () => {
 
         it('should return the id with values', () => {
             expect(listCommon.validateUpdateData({
-                id: 1, year: 2017, month: 9, date: 4, item: 'foo', cost: 10
+                id: 1, date: { year: 2017, month: 9, date: 4 }, item: 'foo', cost: 10
             }))
                 .to.deep.equal({
                     id: 1,
