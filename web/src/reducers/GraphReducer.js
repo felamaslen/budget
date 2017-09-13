@@ -260,13 +260,16 @@ export function rHandleFundPeriodResponse(reduction, response, fromCache) {
 }
 
 export function rChangeFundsGraphPeriod(reduction, req) {
-    const { period, length } = getPeriodMatch(req.period || reduction.getIn(
+    const shortPeriod = req.period || reduction.getIn(
         ['appState', 'other', 'graphFunds', 'period']
-    ));
+    );
+
+    const { period, length } = getPeriodMatch(shortPeriod);
 
     if (req.noCache || !reduction.getIn(
         ['appState', 'other', 'fundHistoryCache']
-    ).has(period)) {
+    ).has(shortPeriod)) {
+
         const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
 
         return reduction.set(
@@ -276,8 +279,8 @@ export function rChangeFundsGraphPeriod(reduction, req) {
         );
     }
 
-    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, shortPeriod);
 
-    return changePeriod(reduction, period, rows, startTime, cacheTimes);
+    return changePeriod(reduction, shortPeriod, rows, startTime, cacheTimes);
 }
 
