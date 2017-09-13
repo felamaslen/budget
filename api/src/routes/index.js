@@ -71,10 +71,10 @@ const user = require('./user');
  *                    example: false
  */
 
-function handler(router) {
-    user(router);
-    data(router);
-    search(router);
+function handler(app) {
+    user.handler(app);
+    data.handler(app);
+    search.handler(app);
 }
 
 module.exports = handler;

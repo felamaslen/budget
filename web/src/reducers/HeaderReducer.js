@@ -281,8 +281,11 @@ export const rUpdateServer = reduction => {
     // update funds cached value age
     if (reduction.getIn(['appState', 'pages', pageIndexFunds])) {
         const ageText = getFundsCachedValueAgeText(
-            reduction.getIn(['appState', 'pages', pageIndexFunds, 'history'])
+            reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']),
+            reduction.getIn(['appState', 'other', 'graphFunds', 'cacheTimes']),
+            new Date()
         );
+
         newReduction = newReduction.setIn(['appState', 'other', 'fundsCachedValue', 'ageText'], ageText);
     }
 

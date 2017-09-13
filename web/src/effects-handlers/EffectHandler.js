@@ -3,7 +3,6 @@
  */
 
 import axios from 'axios';
-import jsonp from 'jsonp';
 import querystring from 'querystring';
 import { List as list } from 'immutable';
 import buildEffectHandler from '../effectHandlerBuilder';
@@ -34,9 +33,13 @@ export default buildEffectHandler([
    * @returns {void}
    */
     [EF_LOGIN_FORM_SUBMIT, (pin, dispatcher) => {
-        axios.post('api?t=login', querystring.stringify({ pin })).then(
-            response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
-        );
+        axios.post('api?t=login', querystring.stringify({ pin }))
+            .then(
+                response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
+            )
+            .catch(
+                err => dispatcher.dispatch(aLoginFormResponseGot({ err }))
+            );
     }],
 
     [EF_CONTENT_REQUESTED, (obj, dispatcher) => {
@@ -108,12 +111,13 @@ export default buildEffectHandler([
     }],
 
     [EF_FUNDS_PERIOD_REQUESTED, (obj, dispatcher) => {
-        axios.get(`api?t=data/fund_history&period=${obj.period}`, {
+        axios.get(`api?t=data/funds&period=${obj.period}&history`, {
             headers: { 'Authorization': obj.apiKey }
         }).then(
             response => {
                 const period = obj.period;
-                const data = response;
+                const data = response.data.data;
+
                 dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
             }
         );
@@ -145,12 +149,31 @@ export default buildEffectHandler([
         );
     }],
 
-    [EF_STOCKS_PRICES_REQUESTED, (symbols, dispatcher) => {
-        jsonp(`https://www.google.com/finance/info?client=ig&q=${symbols}`, null, (error, data) => {
-            if (error) {
-                console.error(error.message);
-            }
-            dispatcher.dispatch(aStocksPricesReceived(data));
+    [EF_STOCKS_PRICES_REQUESTED, (req, dispatcher) => {
+        const promises = req.symbols.map(symbol => {
+            const url = 'https://www.alphavantage.co/query';
+            const query = {
+                function: 'TIME_SERIES_DAILY',
+                symbol,
+                apikey: req.apiKey,
+                datatype: 'json'
+            };
+
+            const requestUrl = `${url}?${querystring.stringify(query)}`;
+
+            return axios.get(requestUrl);
         });
+
+        return Promise.all(promises)
+            .then(responses => {
+                const data = responses.map(response => response.data);
+
+                return dispatcher.dispatch(aStocksPricesReceived(data));
+            })
+            .catch(err => {
+                console.error('Error fetching stock prices', err.message);
+
+                return dispatcher.dispatch(aStocksPricesReceived(null));
+            });
     }]
 ]);

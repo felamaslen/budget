@@ -34,13 +34,18 @@ module.exports = () => {
                 scraper: {
                     regex: /^(.*)\s\((accum|inc|share)\.?\)$/i,
                     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
-                }
+                },
+                stocksApiKey: process.env.STOCKS_API_KEY || ''
             },
             overview: {
                 numLast: 25,
                 numFuture: 12,
                 startYear: 2014,
                 startMonth: 9
+            },
+            pie: {
+                tolerance: parseFloat(process.env.PIE_TOLERANCE || 0.075, 10),
+                detail: parseInt(process.env.PIE_DETAIL || 30, 10)
             }
         },
         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

@@ -15,6 +15,7 @@ class Req {
         this.method = options.method || 'get';
         this.params = options.params || {};
         this.form = options.form || {};
+        this.query = options.query || {};
     }
 }
 class Res {

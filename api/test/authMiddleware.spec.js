@@ -41,6 +41,8 @@ describe('authMiddleware', () => {
         const req = new common.Req();
         const res = new common.Res();
 
+        req.db = new common.DummyDb();
+
         await authMiddleware.authMiddleware(req, res, () => null);
 
         expect(res.statusCode).to.equal(401);
