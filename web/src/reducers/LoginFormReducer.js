@@ -96,7 +96,7 @@ export const rLoginFormHandleResponse = (reduction, output) => {
     // set user data
     newReduction = newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
         .setIn(['appState', 'user', 'name'], output.response.data.name)
-        .setIn(['appState', 'user', 'apiKey'], output.response.data.api_key);
+        .setIn(['appState', 'user', 'apiKey'], output.response.data.apiKey);
 
     // set side effect to load page data
     newReduction = rLoadContent(newReduction, page);
