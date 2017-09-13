@@ -65,6 +65,7 @@ export const resetAppState = appState => {
                 loadedInitial: false,
                 lastPriceUpdate: -1,
                 loading: false,
+                apiKey: '',
                 stocks: map.of(),
                 indices: map.of(),
                 weightedGain: 0,
