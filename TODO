@@ -1,0 +1,8 @@
+- Make client work
+- Update client for new API
+- Client coding standards
+- Client response data validation
+- Write unit tests for client
+- Use logger function instead of console.log
+- Update Android app for new API
+- Optimise client for mobile devices
