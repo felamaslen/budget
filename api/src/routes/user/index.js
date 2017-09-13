@@ -211,7 +211,7 @@ function handler(app) {
      *                  pin:
      *                      type: integer
      *         responses:
-     *             201:
+     *             200:
      *                 description: successful login
      *                 schema:
      *                     type: object
