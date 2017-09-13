@@ -205,7 +205,20 @@ async function multipleUpdateRequestMiddleware(req, res) {
         })
         .filter(item => item !== null);
 
-    const results = await Promise.all(promises);
+    let results = null;
+    try {
+        results = await Promise.all(promises);
+    }
+    catch (err) {
+        await req.db.end(null, true);
+
+        return res
+            .status(400)
+            .json({
+                error: true,
+                errorMessage: err.message
+            });
+    }
 
     const data = results.map(taskRes => taskRes.result);
 
