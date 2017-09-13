@@ -94,8 +94,8 @@ class Connection {
             });
         });
     }
-    connect(res) {
-        return this.wrapSimple('connect', res);
+    connect() {
+        return this.wrapSimple('connect', null);
     }
     end(res, force = false) {
         if (this.requireForceToEnd && !force) {
@@ -134,9 +134,22 @@ class Connection {
 async function dbMiddleware(req, res, next) {
     const info = parseConnectionURI(config.mysqlUri);
 
-    const db = new Connection(info);
+    let db = null;
+    try {
+        db = new Connection(info);
 
-    await db.connect(res);
+        await db.connect();
+    }
+    catch (err) {
+        // some error occurred connecting to the database
+        return res
+            .status(503)
+            .json({
+                error: true,
+                errorMessage: 'Server database failure'
+            })
+            .end();
+    }
 
     req.db = db;
 
