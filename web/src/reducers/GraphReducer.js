@@ -259,9 +259,9 @@ export function rHandleFundPeriodResponse(reduction, response, fromCache) {
 }
 
 export function rChangeFundsGraphPeriod(reduction, req) {
-    const period = req.period || reduction.getIn(
+    const { period, length } = getPeriodMatch(req.period || reduction.getIn(
         ['appState', 'other', 'graphFunds', 'period']
-    );
+    ));
 
     if (req.noCache || !reduction.getIn(
         ['appState', 'other', 'fundHistoryCache']
@@ -270,7 +270,7 @@ export function rChangeFundsGraphPeriod(reduction, req) {
 
         return reduction.set(
             'effects', reduction.get('effects').push(
-                buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period })
+                buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period, length })
             )
         );
     }

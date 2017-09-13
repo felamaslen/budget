@@ -2,6 +2,8 @@
  * Constant items
  */
 
+export const API_VERSION = 3;
+
 export const ERROR_LEVEL_ERROR = 0xe0;
 export const ERROR_LEVEL_WARN = 0xe1;
 export const ERROR_LEVEL_DEBUG = 0xe2;

@@ -15,7 +15,15 @@ const sortByDate = (a, b) => {
     return 1;
 };
 
-export const notNull = item => item !== null;
+export function getPeriodMatch(shortPeriod) {
+    const match = shortPeriod.match(/^([a-z]+)([0-9]+)$/);
+
+    if (!match) {
+        return { period: 'year', length: '1' };
+    }
+
+    return { period: match[1], length: match[2] };
+}
 
 /**
  * Produce a "unique" id
@@ -54,13 +62,15 @@ export class TransactionsList {
         }
     }
     toString() {
-        return JSON.stringify(this.list.map(item => {
-            return {
-                d: item.get('date').toString(),
-                u: item.get('units'),
-                c: item.get('cost').toString()
-            };
-        }).toJS());
+        return this.list
+            .toJS()
+            .map(item => {
+                return {
+                    date: item.get('date'),
+                    units: item.get('units'),
+                    cost: item.get('cost')
+                };
+            });
     }
     valueOf() {
         return this.list;
@@ -178,63 +188,78 @@ export const randnBm = () => {
  * @param {Record} reduction: app state
  * @returns {string} JSON-encoded list for ajax request
  */
-export const buildQueueRequestList = reduction => {
+export function buildQueueRequestList(reduction) {
     let startYearMonth = null; // for overview updates
     const queue = reduction.getIn(['appState', 'edit', 'queue']);
     const queueDelete = reduction.getIn(['appState', 'edit', 'queueDelete']);
 
-    // for multiple updates on the same page
-    let reqListPageList = map({});
+    const reqList = queue
+        .reduce((reqs, dataItem) => {
+            const pageIndex = dataItem.get('pageIndex');
+            const item = dataItem.get('item');
+            const value = dataItem.get('value');
 
-    let reqList = queue.map(dataItem => {
-        const pageIndex = dataItem.get('pageIndex');
-        const item = dataItem.get('item');
-        const value = dataItem.get('value');
+            if (PAGES[pageIndex] === 'overview') {
+                if (startYearMonth === null) {
+                    startYearMonth = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'startYearMonth']);
+                }
+                const key = dataItem.get('row');
+                const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
+                const month = (startYearMonth[1] + key - 1) % 12 + 1;
+                const balance = value;
 
-        if (PAGES[pageIndex] === 'overview') {
-            if (startYearMonth === null) {
-                startYearMonth = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'startYearMonth']);
+                return reqs.push(map({
+                    pageIndex,
+                    req: map({
+                        method: 'post',
+                        route: 'balance',
+                        query: map.of(),
+                        body: map({ year, month, balance })
+                    })
+                }));
             }
-            const key = dataItem.get('row');
-            const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
-            const month = (startYearMonth[1] + key - 1) % 12 + 1;
-            const balance = value;
 
-            return ['update/overview', {}, { year, month, balance }];
-        }
+            if (LIST_PAGES.indexOf(pageIndex) > -1) {
+                const id = dataItem.get('id');
 
-        if (PAGES[pageIndex] === 'analysis') {
-            return null; // TODO
-        }
+                const reqPageIndex = reqs.findIndex(req => {
+                    return req.get('pageIndex') === pageIndex &&
+                        req.getIn(['req', 'body', 'id']) === id;
+                });
 
-        if (LIST_PAGES.indexOf(pageIndex) > -1) {
-            const id = dataItem.get('id');
+                if (reqPageIndex > -1) {
+                    return reqs.setIn([reqPageIndex, 'req', 'body', item], value);
+                }
 
-            if (!reqListPageList.has(pageIndex)) {
-                reqListPageList = reqListPageList.set(pageIndex, map({}));
+                return reqs.push(map({
+                    pageIndex,
+                    req: map({
+                        method: 'put',
+                        route: PAGES[pageIndex],
+                        query: map.of(),
+                        body: map({ id, [item]: value })
+                    })
+                }));
             }
-            if (!reqListPageList.get(pageIndex).has(id)) {
-                reqListPageList = reqListPageList.setIn([pageIndex, id], map({}));
-            }
-            reqListPageList = reqListPageList.setIn(
-                [pageIndex, id, item], (value.toString()));
 
-            return null; // combine and add them later
-        }
+            return reqs;
 
-        return null;
-    }).concat(queueDelete.map(dataItem => {
-        return [`delete/${PAGES[dataItem.pageIndex]}`, {}, { id: dataItem.id }];
-    })).filter(notNull);
+        }, list.of())
+        .concat(queueDelete.map(dataItem => {
+            return map({
+                req: map({
+                    method: 'delete',
+                    route: PAGES[dataItem.pageIndex],
+                    query: map.of(),
+                    body: map({ id: dataItem.id })
+                })
+            });
+        }))
+        .map(item => item.get('req'))
+        .toJS();
 
-    reqListPageList.forEach((item, pageIndex) => {
-        item.forEach((row, id) => {
-            reqList = reqList.push([`update/${PAGES[pageIndex]}`, {}, row.set('id', id).toJS()]);
-        });
-    });
-
-    return JSON.stringify(reqList.toJS());
-};
+    return reqList;
+}
 
 /**
  * @function getNullEditable
