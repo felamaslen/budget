@@ -31,27 +31,45 @@ export const rToggleFundItemGraph = (reduction, key) => {
     );
 };
 
-function reloadFundHistory(reduction, mode = null, enabledList = null) {
-    const newMode = typeof mode === 'undefined'
-        ? reduction.getIn(['appState', 'other', 'graphFunds', 'mode'])
-        : mode;
-
-    const rows = reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows']);
-
-    const startTime = reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']);
-    const cacheTimes = reduction.getIn(['appState', 'other', 'graphFunds', 'cacheTimes']);
-    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
-
-    return getFormattedHistory(
-        rows, newMode, pageIndexFunds, startTime, cacheTimes, enabledList, zoom
+function getCacheData(reduction, period) {
+    const rows = reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache', period, 'rows']
     );
+    const startTime = reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache', period, 'startTime']
+    );
+    const cacheTimes = reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache', period, 'cacheTimes']
+    );
+
+    return { rows, startTime, cacheTimes };
+}
+
+function getCurrentlyEnabledFunds(reduction) {
+    return reduction
+        .getIn(['appState', 'other', 'graphFunds', 'data', 'fundItems'])
+        .reduce((enabled, item, itemIndex) => {
+            if (item.get('enabled')) {
+                return enabled.push(itemIndex - 1);
+            }
+
+            return enabled;
+        }, list.of());
 }
 
 export function rToggleFundsGraphMode(reduction) {
     const oldMode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
     const newMode = (oldMode + 1) % 3;
 
-    const fundHistory = reloadFundHistory(reduction, newMode);
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+    const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
+
+    const enabledList = getCurrentlyEnabledFunds(reduction);
+
+    const fundHistory = getFormattedHistory(
+        rows, newMode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
+    );
 
     return reduction
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
@@ -186,38 +204,58 @@ export function rToggleFundsGraphLine(reduction, index) {
         enabledList = enabledList.push(index - 1);
     }
 
-    const fundHistory = reloadFundHistory(reduction, null, enabledList);
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+    const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
+
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
+    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode'])
+
+    const fundHistory = getFormattedHistory(
+        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
+    );
 
     return reduction
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
 }
 
-export function rHandleFundPeriodResponse(reduction, response, fromCache) {
-    let newReduction = reduction;
-    if (!fromCache) {
-        newReduction = newReduction.setIn(
-            ['appState', 'other', 'fundHistoryCache', response.period], response.data
-        );
-    }
-
-    const rows = processRawListRows(response.data.data, pageIndexFunds);
+function changePeriod(reduction, period, rows, startTime, cacheTimes) {
     const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
-    const startTime = response.data.startTime;
-    const cacheTimes = list(response.data.cacheTimes);
 
     // reset the zoom when changing data
     const zoom = list([0, new Date().getTime() / 1000 - startTime]);
 
+    const enabledList = getCurrentlyEnabledFunds(reduction);
+
     const fundHistory = getFormattedHistory(
-        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom
+        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
     );
 
-    return newReduction
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'period'], period)
         .setIn(['appState', 'other', 'graphFunds', 'startTime'], startTime)
         .setIn(['appState', 'other', 'graphFunds', 'cacheTimes'], cacheTimes)
         .setIn(['appState', 'other', 'graphFunds', 'zoom'], zoom)
         .setIn(['appState', 'other', 'graphFunds', 'range'], zoom.slice())
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory);
+}
+
+export function rHandleFundPeriodResponse(reduction, response, fromCache) {
+    let newReduction = reduction;
+
+    const rows = processRawListRows(response.data.data, pageIndexFunds);
+    const startTime = response.data.startTime;
+    const cacheTimes = list(response.data.cacheTimes);
+
+    if (!fromCache) {
+        newReduction = newReduction.setIn(
+            ['appState', 'other', 'fundHistoryCache', response.period],
+            map({ rows, startTime, cacheTimes })
+        );
+    }
+
+    return changePeriod(
+        newReduction, response.period, rows, startTime, cacheTimes
+    );
 }
 
 export function rChangeFundsGraphPeriod(reduction, req) {
@@ -237,8 +275,8 @@ export function rChangeFundsGraphPeriod(reduction, req) {
         );
     }
 
-    const data = reduction.getIn(['appState', 'other', 'fundHistoryCache', period]);
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
 
-    return rHandleFundPeriodResponse(reduction, { period, data }, true);
+    return changePeriod(reduction, period, rows, startTime, cacheTimes);
 }
 
