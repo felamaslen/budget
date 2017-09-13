@@ -25,9 +25,127 @@ export default class EditableTransactions extends Editable {
         };
         this.inputAdd = {};
     }
+    addTransaction(row, col) {
+        const date = new YMD(this.inputAdd.date.value);
+        const units = parseFloat(this.inputAdd.units.value, 10);
+        const cost = Math.round(100 * parseFloat(this.inputAdd.cost.value, 10));
+
+        if (!date.valid || isNaN(units) || isNaN(cost)) {
+            return;
+        }
+
+        this.dispatchAction(aFundTransactionsAdded(
+            { row, col, date, units, cost }
+        ));
+        this.inputAdd.date.value = '';
+        this.inputAdd.units.value = '';
+        this.inputAdd.cost.value = '';
+    }
+    onDateBlur(key, id) {
+        this.input.date[id].value = this.props.value.list
+            .getIn([key, 'date'])
+            .format();
+    }
+    onDateChange(row, col, key, value) {
+        const ymd = new YMD(value);
+        if (ymd.valid) {
+            this.dispatchAction(aFundTransactionsChanged({
+                row, col, key, column: 'date', value
+            }));
+        }
+    }
+    onUnitsBlur(key, id) {
+        this.input.units[id].value = this.props.value.list.getIn([key, 'units']);
+    }
+    onUnitsChange(row, col, key, newUnits, units) {
+        const thisUnits = parseFloat(newUnits, 10);
+
+        const value = isNaN(thisUnits)
+            ? units
+            : thisUnits;
+
+        this.dispatchAction(aFundTransactionsChanged({
+            row, col, key, column: 'units', value
+        }));
+    }
+    onCostBlur(key, id) {
+        this.input.cost[id].value = this.props.value.list.getIn([key, 'cost']) / 100;
+    }
+    onCostChange(row, col, key, newCost, cost) {
+        const thisCost = Math.round(100 * parseFloat(newCost, 10));
+
+        const value = isNaN(thisCost)
+            ? cost
+            : thisCost;
+
+        this.dispatchAction(aFundTransactionsChanged(
+            { row, col, key, column: 'cost', value }
+        ));
+    }
     format() {
         const row = this.props.row;
         const col = this.props.col;
+
+        const addOnClick = () => this.addTransaction(row, col);
+
+        const editList = this.props.value.list.map((transaction, key) => {
+            const date = transaction.get('date');
+            const units = transaction.get('units');
+            const cost = transaction.get('cost');
+
+            const id = transaction.get('id');
+
+            const onDateBlur = () => this.onDateBlur(key, id);
+
+            const onDateChange = evt => this.onDateChange(
+                row, col, key, evt.target.value
+            );
+
+            const onUnitsBlur = () => this.onUnitsBlur(key, id);
+
+            const onUnitsChange = evt => this.onUnitsChange(
+                row, col, key, evt.target.value, units
+            );
+
+            const onCostBlur = () => this.onCostBlur(key, id);
+
+            const onCostChange = evt => this.onCostChange(
+                row, col, key, evt.target.value, cost
+            );
+
+            const removeOnClick = () => this.dispatchAction(
+                aFundTransactionsRemoved({ row, col, key })
+            );
+
+            return (
+                <tr key={id}>
+                    <td>
+                        <input defaultValue={date.format()}
+                            ref={input => { this.input.date[id] = input; }}
+                            onBlur={onDateBlur}
+                            onChange={onDateChange}
+                        />
+                    </td>
+                    <td>
+                        <input defaultValue={units}
+                            ref={input => { this.input.units[id] = input; }}
+                            onBlur={onUnitsBlur}
+                            onChange={onUnitsChange}
+                        />
+                    </td>
+                    <td>
+                        <input defaultValue={cost / 100}
+                            ref={input => { this.input.cost[id] = input; }}
+                            onBlur={onCostBlur}
+                            onChange={onCostChange}
+                        />
+                    </td>
+                    <td>
+                        <button onClick={removeOnClick}>&minus;</button>
+                    </td>
+                </tr>
+            );
+        });
 
         const modal = this.props.active ? (
             <div className='modal'>
@@ -46,82 +164,10 @@ export default class EditableTransactions extends Editable {
                                 <td><input ref={input => { this.inputAdd.units = input; }} /></td>
                                 <td><input ref={input => { this.inputAdd.cost = input; }} /></td>
                                 <td>
-                                    <button onClick={() => {
-                                        const date = new YMD(this.inputAdd.date.value);
-                                        const units = parseFloat(this.inputAdd.units.value, 10);
-                                        const cost = Math.round(100 * parseFloat(this.inputAdd.cost.value, 10));
-                                        if (!date.valid || isNaN(units) || isNaN(cost)) {
-                                            return;
-                                        }
-                                        this.dispatchAction(
-                                            aFundTransactionsAdded({ row, col, date, units, cost }));
-                                        this.inputAdd.date.value = '';
-                                        this.inputAdd.units.value = '';
-                                        this.inputAdd.cost.value = '';
-                                    }}>+</button>
+                                    <button onClick={addOnClick}>+</button>
                                 </td>
                             </tr>
-                            {this.props.value.list.map((transaction, key) => {
-                                const date = transaction.get('date');
-                                const units = transaction.get('units');
-                                const cost = transaction.get('cost');
-
-                                const id = transaction.get('id');
-
-                                return (
-                                    <tr key={id}>
-                                        <td>
-                                            <input defaultValue={date.format()}
-                                                ref={input => { this.input.date[id] = input; }}
-                                                onBlur={() => {
-                                                    this.input.date[id].value = this.props.value.list.getIn([key, 'date']).format();
-                                                }}
-                                                onChange={evt => {
-                                                    const value = new YMD(evt.target.value);
-                                                    if (value.valid) {
-                                                        this.dispatchAction(
-                                                            aFundTransactionsChanged({ row, col, key, column: 'date', value }));
-                                                    }
-                                                }}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input defaultValue={units}
-                                                ref={input => { this.input.units[id] = input; }}
-                                                onBlur={() => {
-                                                    this.input.units[id].value = this.props.value.list.getIn([key, 'units']);
-                                                }}
-                                                onChange={evt => {
-                                                    const thisUnits = parseFloat(evt.target.value, 10);
-                                                    const value = isNaN(thisUnits) ? units : thisUnits;
-                                                    this.dispatchAction(
-                                                        aFundTransactionsChanged({ row, col, key, column: 'units', value }));
-                                                }}
-                                            />
-                                        </td>
-                                        <td>
-                                            <input defaultValue={cost / 100}
-                                                ref={input => { this.input.cost[id] = input; }}
-                                                onBlur={() => {
-                                                    this.input.cost[id].value = this.props.value.list.getIn([key, 'cost']) / 100;
-                                                }}
-                                                onChange={evt => {
-                                                    const thisCost = Math.round(100 * parseFloat(evt.target.value, 10));
-                                                    const value = isNaN(thisCost) ? cost : thisCost;
-                                                    this.dispatchAction(
-                                                        aFundTransactionsChanged({ row, col, key, column: 'cost', value }));
-                                                }}
-                                            />
-                                        </td>
-                                        <td>
-                                            <button onClick={() => {
-                                                this.dispatchAction(
-                                                    aFundTransactionsRemoved({ row, col, key }));
-                                            }}>&minus;</button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                            {editList}
                         </tbody>
                     </table>
                 </div>
