@@ -336,14 +336,18 @@ export function getFundLines(
 ) {
     let lines = list.of();
 
-    if (fundsEnabled.includes(-1)) {
+    const fundsValid = fundsEnabled.filter(index => {
+        return times.get(index + 1).size > 1;
+    });
+
+    if (fundsValid.includes(-1)) {
         lines = lines.push(getFundLineProcessed(
             times.first(), timeOffsets, prices, units, costs, mode, -1)
         );
     }
 
     return lines
-        .concat(fundsEnabled
+        .concat(fundsValid
             .filter(index => index > -1)
             .map(index => getFundLineProcessed(
                 times.get(index + 1), null, prices, units, costs, mode, index
