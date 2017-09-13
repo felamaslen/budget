@@ -109,7 +109,7 @@ export class PageAnalysis extends PureControllerView {
         const listTreeBody = costPct.map((item, key) => {
             const classes = classNames({
                 'tree-list-item': true,
-                open
+                open: item.open
             });
 
             const subTree = this.subTree(item);
