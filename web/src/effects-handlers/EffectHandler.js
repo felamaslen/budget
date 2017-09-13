@@ -123,7 +123,7 @@ export default buildEffectHandler([
             headers: { 'Authorization': req.apiKey }
         }).then(
             response => {
-                const period = req.period;
+                const period = `${req.period}${req.length}`;
                 const data = response.data.data;
 
                 dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
