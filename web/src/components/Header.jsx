@@ -30,11 +30,18 @@ export class Header extends PureControllerView {
    */
     renderNavBar() {
         const pageLinksList = PAGES.map((item, key) => {
+            const onClick = () => this.navToPage(key);
+
+            const className = classNames({
+                'nav-link': true,
+                active: key === this.props.navPageIndex
+            });
+
+            const id = `nav-link-${item}`;
+
             return (
                 <li key={key}>
-                    <a onClick={() => this.navToPage(key)} className={classNames({
-                        'nav-link': true, active: key === this.props.navPageIndex
-                    })} id={`nav-link-${item}`}>{capitalise(item)}</a>
+                    <a onClick={onClick} className={className} id={id}>{capitalise(item)}</a>
                 </li>
             );
         });
