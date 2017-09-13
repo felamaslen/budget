@@ -113,7 +113,13 @@ export default buildEffectHandler([
     }],
 
     [EF_FUNDS_PERIOD_REQUESTED, (req, dispatcher) => {
-        axios.get(`${apiPrefix}/data/funds?period=${req.period}&history=true`, {
+        const query = querystring.stringify({
+            period: req.period,
+            length: req.length,
+            history: true
+        });
+
+        axios.get(`${apiPrefix}/data/funds?${query}`, {
             headers: { 'Authorization': req.apiKey }
         }).then(
             response => {
