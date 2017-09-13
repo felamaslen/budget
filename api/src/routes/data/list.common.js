@@ -209,20 +209,25 @@ function validateDate(data, allRequired = true) {
 function validateInsertData(data, allRequired = true, extraStringColumns = []) {
     const validData = {};
 
-    // validate dates
-    const { year, month, date } = validateDate(data, allRequired);
-    if (year && month && date) {
-        validData.year = year;
-        validData.month = month;
-        validData.date = date;
-    }
-
-    const undefinedItem = getUndefinedItem(['item', 'cost'].concat(
+    const undefinedItem = getUndefinedItem(['date', 'item', 'cost'].concat(
         extraStringColumns.map(column => column.name)
     ), data);
 
     if (undefinedItem && allRequired) {
         throw new common.ErrorBadRequest(`didn't provide ${undefinedItem}`);
+    }
+
+    if ('date' in data) {
+        if (typeof data.date !== 'object') {
+            throw new common.ErrorBadRequest('invalid date object');
+        }
+
+        const { year, month, date } = validateDate(data.date, allRequired);
+        if (year && month && date) {
+            validData.year = year;
+            validData.month = month;
+            validData.date = date;
+        }
     }
 
     if ('item' in data) {
