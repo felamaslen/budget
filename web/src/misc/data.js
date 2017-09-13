@@ -183,6 +183,16 @@ export const randnBm = () => {
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 };
 
+export function pushToRequestQueue(reduction, active, deleteItem = false) {
+    const queueKey = deleteItem
+        ? 'queueDelete'
+        : 'queue';
+
+    const queue = reduction.getIn(['appState', 'edit', queueKey]);
+
+    return reduction.setIn(['appState', 'edit', queueKey], queue.push(active));
+}
+
 /**
  * Builds a request list for updating the server
  * @param {Record} reduction: app state
@@ -249,9 +259,9 @@ export function buildQueueRequestList(reduction) {
             return map({
                 req: map({
                     method: 'delete',
-                    route: PAGES[dataItem.pageIndex],
+                    route: PAGES[dataItem.get('pageIndex')],
                     query: map.of(),
-                    body: map({ id: dataItem.id })
+                    body: map({ id: dataItem.get('id') })
                 })
             });
         }))

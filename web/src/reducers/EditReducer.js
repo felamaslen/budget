@@ -16,7 +16,8 @@ import {
 } from '../misc/config';
 import { YMD } from '../misc/date';
 import {
-    uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
+    uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
+    pushToRequestQueue
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
@@ -130,9 +131,8 @@ const applyEdits = (reduction, item, pageIndex) => {
     return reduction;
 };
 
-export const rActivateEditable = (reduction, editable, cancel) => {
+export function rActivateEditable(reduction, editable, cancel) {
     const active = reduction.getIn(['appState', 'edit', 'active']);
-    const queue = reduction.getIn(['appState', 'edit', 'queue']);
     const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
     let newReduction = reduction
         .setIn(['appState', 'edit', 'addBtnFocus'], false)
@@ -150,7 +150,7 @@ export const rActivateEditable = (reduction, editable, cancel) => {
         else {
             if (active.get('row') > -1) {
                 // add last item to queue for saving on API
-                newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
+                newReduction = pushToRequestQueue(newReduction, active);
             }
 
             // append the changes of the last item to the UI
@@ -167,7 +167,7 @@ export const rActivateEditable = (reduction, editable, cancel) => {
         ['appState', 'edit', 'active'],
         editable.set('originalValue', editable.get('value'))
     );
-};
+}
 
 export const rChangeEditable = (reduction, value) => {
     return reduction.setIn(['appState', 'edit', 'active', 'value'], value);
@@ -199,10 +199,7 @@ export const rDeleteListItem = (reduction, item) => {
         newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, itemCost);
     }
 
-    newReduction = newReduction.setIn(
-        ['appState', 'edit', 'queueDelete'],
-        reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
-    )
+    newReduction = pushToRequestQueue(newReduction, map({ pageIndex, id }), true)
         .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
         .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
 
