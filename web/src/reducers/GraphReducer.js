@@ -6,6 +6,7 @@ import { fromJS, List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
 import { PAGES, LIST_COLS_PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { getPeriodMatch } from '../misc/data';
 import {
     getFormattedHistory,
     zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
