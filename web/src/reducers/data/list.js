@@ -111,6 +111,8 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
 
     return newReduction
         .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps)
+        .setIn(['appState', 'pages', pageIndex, 'startTime'], startTime)
+        .setIn(['appState', 'pages', pageIndex, 'cacheTimes'], cacheTimes)
         .setIn(
             ['appState', 'other', 'fundHistoryCache', period],
             map({ rows, startTime, cacheTimes })

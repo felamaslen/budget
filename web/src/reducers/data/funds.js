@@ -63,7 +63,10 @@ export function getGains(rows, startTime, cacheTimes, pageIndex) {
     const roundGain = value => Math.round(10000 * value) / 10000;
     const roundAbs = value => Math.round(value);
 
-    const { gains, dayGains, gainsAbs, dayGainsAbs, values } = rows.reduce((obj, row) => {
+    const {
+        gains, dayGains, gainsAbs, dayGainsAbs, values
+    } = rows.reduce((obj, row) => {
+
         const prices = row.get('pr');
         const timeOffset = row.get('prStartIndex');
         const transactions = row.getIn(['cols', transactionsKey]);

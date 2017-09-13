@@ -84,7 +84,7 @@ export class TransactionsList {
             date: item.date,
             units: item.units,
             cost: item.cost
-        })), true);
+        })), false);
     }
     filter(callback) {
         return new TransactionsList(this.list.filter(callback), false);
