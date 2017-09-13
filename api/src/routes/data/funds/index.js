@@ -17,7 +17,7 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     if (getPriceHistory) {
         row.pr = priceHistory.idMap[row.I] || [];
 
-        row.prStartIndex = priceHistory.startIndex[row.I];
+        row.prStartIndex = priceHistory.startIndex[row.I] || 0;
     }
 
     return row;

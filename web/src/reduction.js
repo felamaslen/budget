@@ -57,12 +57,15 @@ export const resetAppState = appState => {
                 showOverall: true,
                 hlPoint: null,
                 zoom: list([null, null]), // range to restrict to
-                range: list([null, null]) // possible range
+                range: list([null, null]), // possible range
+                startTime: 0,
+                cacheTimes: list.of()
             }),
             stocksList: map({
                 loadedInitial: false,
                 lastPriceUpdate: -1,
                 loading: false,
+                apiKey: '',
                 stocks: map.of(),
                 indices: map.of(),
                 weightedGain: 0,
