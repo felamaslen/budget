@@ -233,7 +233,7 @@ export const rLoadCookies = reduction => {
     // remember user logins
     const pin = Cookies.get('pin');
     if (pin && pin.match(/^[0-9]{4}$/)) {
-        const values = pin.split('').map(item => parseInt(item, 10));
+        const values = list(pin.split('')).map(item => parseInt(item, 10));
         newReduction = rLoginFormSubmit(
             newReduction.setIn(['appState', 'loading'], true)
                 .setIn(['appState', 'loginForm', 'loadedCookie'], true)
