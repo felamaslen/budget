@@ -389,13 +389,7 @@ async function processMultipleRequest(req, res, next) {
                 );
 
                 if (!method || !body) {
-                    return res
-                        .status(400)
-                        .json({
-                            error: true,
-                            errorMessage: 'bad request data'
-                        })
-                        .end();
+                    throw new Error('bad request data');
                 }
 
                 const query = item[1];
@@ -408,6 +402,17 @@ async function processMultipleRequest(req, res, next) {
         return multipleUpdateRequestMiddleware(req, res);
     }
     catch (err) {
+        if (err.message === 'bad request data') {
+            await req.db.end(null, true);
+
+            return res
+                .status(400)
+                .json({
+                    error: true,
+                    errorMessage: err.message
+                });
+        }
+
         return next();
     }
 }
