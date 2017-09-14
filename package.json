@@ -16,10 +16,11 @@
     "install_db": "node ./api/scripts/createSchema.js",
     "test:install_db": "NODE_ENV=test node ./api/scripts/createSchema.js",
     "scrape_funds": "node ./api/scripts/scrapeFunds.js -q",
-    "dev:scrape_funds": "node ./api/scripts/scrapeFunds.js -v",
+    "dev:scrape_funds": "NODE_ENV=development node ./api/scripts/scrapeFunds.js -v",
     "test:scrape_funds": "NODE_ENV=test node ./api/scripts/scrapeFunds.js -v",
     "scrape_holdings": "node ./api/scripts/scrapeFunds.js -h",
-    "test:scrape_holdings": "NODE_ENV=test node ./api/scripts/scrapeFunds.js -h -v"
+    "test:scrape_holdings": "NODE_ENV=test node ./api/scripts/scrapeFunds.js -h -v",
+    "dev:scrape_holdings": "NODE_ENV=development node ./api/scripts/scrapeFunds.js -h -v"
   },
   "repository": {
     "type": "git",

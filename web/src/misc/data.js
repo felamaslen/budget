@@ -63,14 +63,16 @@ export class TransactionsList {
     }
     toString() {
         return this.list
-            .toJS()
             .map(item => {
-                return {
-                    date: item.get('date'),
-                    units: item.get('units'),
-                    cost: item.get('cost')
-                };
-            });
+                const { year, month, date } = item.get('date').toString();
+
+                return item
+                    .delete('id')
+                    .set('year', year)
+                    .set('month', month)
+                    .set('date', date);
+            })
+            .toJS();
     }
     valueOf() {
         return this.list;
@@ -193,6 +195,22 @@ export function pushToRequestQueue(reduction, active, deleteItem = false) {
     return reduction.setIn(['appState', 'edit', queueKey], queue.push(active));
 }
 
+export function getValueForTransmit(value) {
+    if (typeof value === 'number') {
+        return value;
+    }
+
+    if (value instanceof YMD || value instanceof TransactionsList) {
+        return value.toString();
+    }
+
+    if (typeof value === 'object') {
+        return value;
+    }
+
+    return value.toString();
+}
+
 /**
  * Builds a request list for updating the server
  * @param {Record} reduction: app state
@@ -207,7 +225,7 @@ export function buildQueueRequestList(reduction) {
         .reduce((reqs, dataItem) => {
             const pageIndex = dataItem.get('pageIndex');
             const item = dataItem.get('item');
-            const value = dataItem.get('value');
+            const value = getValueForTransmit(dataItem.get('value'));
 
             if (PAGES[pageIndex] === 'overview') {
                 if (startYearMonth === null) {
