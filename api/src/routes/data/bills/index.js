@@ -25,12 +25,7 @@ const listCommon = require('../list.common');
  *                     $ref: "#/definitions/DataResponse"
  */
 function routeGet(req, res) {
-    const columnMap = {
-        item: 'i',
-        cost: 'c'
-    };
-
-    return listCommon.routeGet(req, res, 'bills', columnMap, 6);
+    return listCommon.routeGet(req, res, 'bills');
 }
 
 /**

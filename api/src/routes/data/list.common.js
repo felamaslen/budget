@@ -1,3 +1,4 @@
+const config = require('../../config')();
 const common = require('../../common');
 
 function getLimitCondition(now, numMonths, offset = 0) {
@@ -100,10 +101,15 @@ async function getTotalCost(db, user, table) {
 }
 
 async function getResults(
-    db, user, now, table, columnMapExtra, addData = null, limit = null
+    db, user, now, table, addData = null, limit = null
 ) {
+    const columnMapExtra = config.data.columnMapExtra[table];
+
     const columnMap = Object.assign({}, columnMapExtra, {
-        id: 'I'
+        id: 'I',
+        date: 'd',
+        item: 'i',
+        cost: 'c'
     });
     const columns = ['year', 'month', 'date']
         .concat(Object.keys(columnMap));
@@ -145,13 +151,22 @@ async function getResults(
     return result;
 }
 
-async function routeGet(req, res, table, columnMap, numMonths = 3) {
-    const offset = parseInt(req.params.page || 0, 10);
+function getPageLimit(table, offset = 0) {
+    if (table in config.data.listPageLimits) {
+        const numMonths = config.data.listPageLimits[table];
 
-    const limit = { numMonths, offset };
+        return { numMonths, offset };
+    }
+
+    return null;
+}
+
+async function routeGet(req, res, table) {
+    const offset = parseInt(req.params.page || 0, 10);
+    const limit = getPageLimit(table, offset);
 
     const data = await getResults(
-        req.db, req.user, new Date(), table, columnMap, null, limit
+        req.db, req.user, new Date(), table, null, limit
     );
 
     await req.db.end();
@@ -409,6 +424,7 @@ module.exports = {
     getTotalCostQuery,
     getTotalCost,
     getResults,
+    getPageLimit,
     routeGet,
     validateDate,
     validateInsertData,
