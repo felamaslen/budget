@@ -1,7 +1,9 @@
 - Make client work [DONE]
 - Update client for new API [DONE]
 - Fix bugs with different database states (e.g. empty) [DONE?]
+- [URGENT] Route for "all data"
 - Client coding standards
+- More sophisticated authentication
 - Client response data validation
 - Write unit tests for client
 - Use logger function instead of console.log
