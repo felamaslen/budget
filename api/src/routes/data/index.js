@@ -18,6 +18,8 @@ const holiday = require('./holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const dataAll = require('./all');
+
 const pie = require('./pie');
 const stocks = require('./stocks');
 
@@ -49,6 +51,8 @@ function handler(app) {
         app.put(`/data/${category}`, listDataProcessor[category].routePut);
         app.delete(`/data/${category}`, listDataProcessor[category].routeDelete);
     });
+
+    app.get('/data/all', dataAll.routeGet);
 
     // pie charts
     app.get('/data/pie/:category', (req, res) => pie.routeGet(req, res));

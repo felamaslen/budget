@@ -38,14 +38,7 @@ function validateUpdateData(data) {
  *                     $ref: "#/definitions/DataResponse"
  */
 function routeGet(req, res) {
-    const columnMap = {
-        item: 'i',
-        cost: 'c',
-        holiday: 'h',
-        shop: 's'
-    };
-
-    return listCommon.routeGet(req, res, 'holiday', columnMap, 12);
+    return listCommon.routeGet(req, res, 'holiday');
 }
 
 /**

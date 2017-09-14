@@ -23,6 +23,7 @@ const holiday = require('./routes/data/holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const all = require('./routes/data/all');
 const pie = require('./routes/data/pie');
 const stocks = require('./routes/data/stocks');
 
@@ -287,6 +288,10 @@ async function handleRoutesData(req, res, path) {
 
     if (pathItem === 'search') {
         return handleRoutesSearch(req, res, path);
+    }
+
+    if (pathItem === 'all' && req.method === 'get') {
+        return all.routeGet(req, res);
     }
 
     if (pathItem === 'pie' && req.method === 'get') {

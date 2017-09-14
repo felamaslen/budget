@@ -28,6 +28,37 @@ module.exports = () => {
         data: {
             listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
             currencyUnit: '£',
+            columnMapExtra: {
+                funds: {
+                    transactions: 't'
+                },
+                income: {},
+                bills: {},
+                food: {
+                    category: 'k',
+                    shop: 's'
+                },
+                general: {
+                    category: 'k',
+                    shop: 's'
+                },
+                social: {
+                    society: 'y',
+                    shop: 's'
+                },
+                holiday: {
+                    holiday: 'h',
+                    shop: 's'
+                }
+            },
+            listPageLimits: {
+                income: 12,
+                bills: 6,
+                food: 2,
+                general: 4,
+                social: 6,
+                holiday: 12
+            },
             funds: {
                 salt: process.env.FUND_SALT || '',
                 historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10),
