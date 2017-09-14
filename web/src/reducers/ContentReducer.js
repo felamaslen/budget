@@ -10,6 +10,7 @@ import {
 } from '../misc/const';
 import { LIST_BLOCK_WIDTH, LIST_BLOCK_HEIGHT } from '../misc/config';
 import {
+    getPeriodMatch,
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
 import { BlockPacker, capitalise, formatCurrency } from '../misc/format';
@@ -18,36 +19,59 @@ import processPageDataOverview from './data/overview';
 import { processPageDataList, processPageDataFunds } from './data/list';
 import { processPageDataAnalysis } from './data/analysis';
 
-export const rLoadContent = (reduction, pageIndex) => {
+export function getAnalysisReq(reduction, req) {
+    const shortPeriod = ANALYSIS_PERIODS[reduction.getIn(
+        ['appState', 'other', 'analysis', 'period']
+    )];
+
+    const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['appState', 'other', 'analysis', 'grouping'])];
+    const timeIndex = reduction.getIn(['appState', 'other', 'analysis', 'timeIndex']);
+
+    const dataReq = [shortPeriod, grouping, timeIndex];
+
+    return Object.assign({}, req, { dataReq });
+}
+
+export function getFundsReq(req) {
+    const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
+
+    const urlParam = [
+        { name: 'history', value: 'true' },
+        { name: 'period', value: period },
+        { name: 'length', value: length }
+    ];
+
+    return Object.assign({}, req, { urlParam });
+}
+
+export function getReqObj(reduction, pageIndex, apiKey) {
+    const pageName = PAGES[pageIndex];
+    const reqObj = { pageIndex, pageName, apiKey };
+
+    if (pageName === 'analysis') {
+        return getAnalysisReq(reduction, reqObj);
+    }
+
+    if (pageName === 'funds') {
+        return getFundsReq(reqObj);
+    }
+
+    return reqObj;
+}
+
+export function rLoadContent(reduction, pageIndex) {
     if (!reduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
         const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-        const pageName = PAGES[pageIndex];
 
-        const reqObj = { pageIndex, pageName, apiKey };
-
-        switch (PAGES[pageIndex]) {
-        case 'analysis':
-            const period = ANALYSIS_PERIODS[reduction.getIn(['appState', 'other', 'analysis', 'period'])];
-            const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['appState', 'other', 'analysis', 'grouping'])];
-            const timeIndex = reduction.getIn(['appState', 'other', 'analysis', 'timeIndex']);
-
-            reqObj.dataReq = [period, grouping, timeIndex];
-            break;
-
-        case 'funds':
-            reqObj.urlParam = [
-                { name: 'history', value: 'true' },
-                { name: 'period', value: GRAPH_FUNDS_PERIODS[0][0] }
-            ];
-            break;
-        }
+        const reqObj = getReqObj(reduction, pageIndex, apiKey);
 
         return reduction.set('effects', reduction.get('effects').push(
             buildMessage(EF_CONTENT_REQUESTED, reqObj)
         ));
     }
+
     return reduction;
-};
+}
 
 /**
  * Processes response data into output fit for consumption by the view

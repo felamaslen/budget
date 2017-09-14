@@ -17,7 +17,7 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
     if (getPriceHistory) {
         row.pr = priceHistory.idMap[row.I] || [];
 
-        row.prStartIndex = priceHistory.startIndex[row.I];
+        row.prStartIndex = priceHistory.startIndex[row.I] || 0;
     }
 
     return row;
@@ -127,12 +127,6 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
 async function routeGet(req, res) {
     const now = new Date();
 
-    const columnMap = {
-        item: 'i',
-        transactions: 't',
-        cost: 'c'
-    };
-
     let addData = row => postProcessListRow(row);
 
     const getPriceHistory = 'history' in req.query &&
@@ -165,7 +159,7 @@ async function routeGet(req, res) {
     }
 
     const data = await listCommon.getResults(
-        req.db, req.user, now, 'funds', columnMap, addData
+        req.db, req.user, now, 'funds', addData
     );
 
     if (getPriceHistory) {

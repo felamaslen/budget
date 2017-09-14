@@ -23,6 +23,8 @@ const holiday = require('./routes/data/holiday');
 
 const listDataProcessor = { income, bills, funds, food, general, social, holiday };
 
+const all = require('./routes/data/all');
+const pie = require('./routes/data/pie');
 const stocks = require('./routes/data/stocks');
 
 const search = require('./routes/search');
@@ -130,6 +132,10 @@ function getNewTaskFromOld(tasks) {
             .concat(tasks);
     }
 
+    if (arg === 'pie') {
+        return ['data', 'pie'].concat(tasks);
+    }
+
     tasks.unshift(arg);
 
     return tasks;
@@ -197,6 +203,31 @@ function handleRoutesDataAnalysis(req, res, arg, path) {
     return analysis(req, res);
 }
 
+function handleRoutesSearch(req, res, tasks) {
+    if (!req.params) {
+        req.params = {};
+    }
+
+    if (tasks.length < 3) {
+        return res
+            .status(400)
+            .json({
+                error: true,
+                errorMessage: 'bad request'
+            });
+    }
+
+    req.params.table = tasks.shift();
+    req.params.column = tasks.shift();
+    req.params.searchTerm = tasks.shift();
+
+    if (tasks.length) {
+        req.params.numResults = tasks.shift();
+    }
+
+    return search.routeGet(req, res);
+}
+
 // eslint-disable-next-line max-statements
 async function handleRoutesData(req, res, path) {
     try {
@@ -207,10 +238,6 @@ async function handleRoutesData(req, res, path) {
     }
 
     const pathItem = path.shift();
-    if (pathItem === 'multiple' && req.method === 'patch') {
-        return multipleUpdateRequestMiddleware(req, res);
-    }
-
     if (pathItem === 'overview' && req.method === 'get') {
         return cashflow.routeGet(req, res);
     }
@@ -259,6 +286,24 @@ async function handleRoutesData(req, res, path) {
         }
     }
 
+    if (pathItem === 'search') {
+        return handleRoutesSearch(req, res, path);
+    }
+
+    if (pathItem === 'all' && req.method === 'get') {
+        return all.routeGet(req, res);
+    }
+
+    if (pathItem === 'pie' && req.method === 'get') {
+        if (!req.params) {
+            req.params = {};
+        }
+
+        req.params.category = path.shift();
+
+        return pie.routeGet(req, res);
+    }
+
     if (pathItem === 'stocks' && req.method === 'get') {
         return stocks.routeGet(req, res);
     }
@@ -271,31 +316,6 @@ async function handleRoutesData(req, res, path) {
         });
 }
 
-function handleRoutesSearch(req, res, tasks) {
-    if (!req.params) {
-        req.params = {};
-    }
-
-    if (tasks.length < 3) {
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: 'bad request'
-            });
-    }
-
-    req.params.table = tasks.shift();
-    req.params.column = tasks.shift();
-    req.params.searchTerm = tasks.shift();
-
-    if (tasks.length) {
-        req.params.numResults = tasks.shift();
-    }
-
-    return search.routeGet(req, res);
-}
-
 function handleRoutes(req, res, tasks) {
     const firstTask = tasks.shift();
 
@@ -305,10 +325,6 @@ function handleRoutes(req, res, tasks) {
 
     if (firstTask === 'data') {
         return handleRoutesData(req, res, tasks);
-    }
-
-    if (firstTask === 'search') {
-        return handleRoutesSearch(req, res, tasks);
     }
 
     return res
@@ -371,20 +387,14 @@ async function processMultipleRequest(req, res, next) {
             .map(item => {
                 const tasks = item[0].split('/');
 
-                const route = getNewTaskFromOld(tasks).slice(-1)[0];
+                const route = getNewTaskFromOld(tasks.slice()).slice(-1)[0];
 
                 const { method, body } = getNewMethodBodyFromOld(
                     'post', item[2], tasks
                 );
 
                 if (!method || !body) {
-                    return res
-                        .status(400)
-                        .json({
-                            error: true,
-                            errorMessage: 'bad request data'
-                        })
-                        .end();
+                    throw new Error('bad request data');
                 }
 
                 const query = item[1];
@@ -397,6 +407,17 @@ async function processMultipleRequest(req, res, next) {
         return multipleUpdateRequestMiddleware(req, res);
     }
     catch (err) {
+        if (err.message === 'bad request data') {
+            await req.db.end(null, true);
+
+            return res
+                .status(400)
+                .json({
+                    error: true,
+                    errorMessage: err.message
+                });
+        }
+
         return next();
     }
 }

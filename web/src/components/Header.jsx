@@ -28,16 +28,26 @@ export class Header extends PureControllerView {
    * render a navigation bar with links to different pages
    * @returns {object} React <ul> element
    */
-    renderNavBar() {
-        const pageLinksList = PAGES.map((item, key) => {
-            return (
-                <li key={key}>
-                    <a onClick={() => this.navToPage(key)} className={classNames({
-                        'nav-link': true, active: key === this.props.navPageIndex
-                    })} id={`nav-link-${item}`}>{capitalise(item)}</a>
-                </li>
-            );
+    renderNavListItem(item, key) {
+        const classes = classNames({
+            'nav-link': true,
+            active: key === this.props.navPageIndex
         });
+
+        const id = `nav-link-${item}`;
+
+        const onClick = () => this.navToPage(key);
+
+        return (
+            <li key={key}>
+                <a onClick={onClick} className={classes} id={id}>{capitalise(item)}</a>
+            </li>
+        );
+    }
+    renderNavBar() {
+        const pageLinksList = PAGES.map(
+            (item, key) => this.renderNavListItem(item, key)
+        );
 
         return (
             <ul className="nav-list noselect">
@@ -88,10 +98,15 @@ export class Header extends PureControllerView {
             <span className="loading-api"></span>
         ) : null;
 
+        const queueNotSaved = this.props.queueSize > 0
+            ? <span className="queue-not-saved">Unsaved changes!</span>
+            : null;
+
         return (
             <div id="nav">
                 <div className="inner">
                     <div className="app-logo">
+                        {queueNotSaved}
                         <a className="logo">
                             <span>Budget</span>
                             {loadingApiSpinner}
@@ -108,5 +123,7 @@ Header.propTypes = {
     showNav: PropTypes.bool,
     loadingApi: PropTypes.bool,
     navPageIndex: PropTypes.number,
-    serverUpdateStatus: PropTypes.number
+    serverUpdateStatus: PropTypes.number,
+    queueSize: PropTypes.number
 };
+

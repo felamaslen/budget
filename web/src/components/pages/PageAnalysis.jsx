@@ -21,61 +21,122 @@ export class PageAnalysis extends PureControllerView {
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
     }
-    listTree() {
+    listTreeHead(items) {
+        const getCost = itemList => {
+            return formatCurrency(
+                itemList.reduce((last, item) => last + item.cost, 0)
+            );
+        };
+
+        const getPct = itemList => {
+            return itemList
+                .reduce((last, item) => last + item.pct, 0)
+                .toFixed(1);
+        };
+
+        const itemsSelected = items.filter(item => item.visible);
+
+        const costTotal = getCost(items);
+        const pctTotal = getPct(items);
+
+        const costSelected = getCost(itemsSelected);
+        const pctSelected = getPct(itemsSelected);
+
         return (
-            <div className='tree'>
-                <ul className='tree-list flex'>
-                    {this.props.cost.map((item, key) => {
-                        const itemTotal = item.get('total');
-                        const itemPct = (100 * itemTotal / this.props.costTotal).toFixed(1);
-                        const itemName = item.get('name');
-                        const visible = this.props.other.get('treeVisible').has(itemName) ?
-                            this.props.other.get('treeVisible').get(itemName) : true;
+            <li className="tree-list-item head">
+                <div className="inner">
+                    <span className="title">Total:</span>
+                    <span className="cost">
+                        <div className="total">{costTotal}</div>
+                        <div className="selected">{costSelected}</div>
+                    </span>
+                    <span className="pct">
+                        <div className="total">{pctTotal}%</div>
+                        <div className="selected">{pctSelected}%</div>
+                    </span>
+                </div>
+            </li>
+        );
+    }
+    subTree(item) {
+        if (!item.open) {
+            return null;
+        }
 
-                        let subTree = null;
-                        const open = !!this.props.other.get('treeOpen').get(itemName);
-                        if (open) {
-                            subTree = (
-                                <ul className='sub-tree'>
-                                    {item.get('subTree').map((subItem, subKey) => {
-                                        const subItemTotal = subItem.get('total');
-                                        const subItemPct = (100 * subItemTotal / itemTotal).toFixed(1);
-                                        const subItemName = subItem.get('name');
+        const subTreeItems = item.subTree.map((subItem, subKey) => {
+            const subItemTotal = subItem.get('total');
+            const subItemPct = (100 * subItemTotal / item.cost).toFixed(1);
+            const subItemName = subItem.get('name');
 
-                                        return (
-                                            <li key={subKey} className='tree-list-item'
-                                                onMouseOver={() => this.dispatchAction(aTreeItemHovered([itemName, subItemName]))}
-                                                onMouseOut={() => this.dispatchAction(aTreeItemHovered(null))}>
-                                                <div className='main'>
-                                                    <span className='title'>{subItemName}</span>
-                                                    <span className='cost'>{formatCurrency(subItemTotal)}</span>
-                                                    <span className='pct'>&nbsp;({subItemPct}%)</span>
-                                                </div>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            );
-                        }
+            return (
+                <li key={subKey} className="tree-list-item"
+                    onMouseOver={() => this.dispatchAction(aTreeItemHovered([item.name, subItemName]))}
+                    onMouseOut={() => this.dispatchAction(aTreeItemHovered(null))}>
 
-                        const classes = classNames({ 'tree-list-item': true, open });
+                    <div className="main">
+                        <span className="title">{subItemName}</span>
+                        <span className="cost">{formatCurrency(subItemTotal)}</span>
+                        <span className="pct">&nbsp;({subItemPct}%)</span>
+                    </div>
+                </li>
+            );
+        });
 
-                        return (
-                            <li key={key} className={classes}>
-                                <div className='main'
-                                    onClick={() => this.dispatchAction(aTreeItemExpandToggled(itemName))}
-                                    onMouseOver={() => this.dispatchAction(aTreeItemHovered([itemName]))}
-                                    onMouseOut={() => this.dispatchAction(aTreeItemHovered(null))}>
-                                    <input type='checkbox' checked={visible}
-                                        onChange={() => this.dispatchAction(aTreeItemDisplayToggled(itemName))} />
-                                    <span className='title'>{itemName}</span>
-                                    <span className='cost'>{formatCurrency(itemTotal)}</span>
-                                    <span className='pct'>&nbsp;({itemPct}%)</span>
-                                </div>
-                                {subTree}
-                            </li>
-                        );
-                    })}
+        return (
+            <ul className="sub-tree">
+                {subTreeItems}
+            </ul>
+        );
+    }
+    listTree() {
+        const costPct = this.props.cost.map(item => {
+            const cost = item.get('total');
+            const pct = 100 * cost / this.props.costTotal;
+            const name = item.get('name');
+            const visible = this.props.other.get('treeVisible').has(name)
+                ? this.props.other.get('treeVisible').get(name)
+                : true;
+
+            const open = Boolean(this.props.other.get('treeOpen').get(name));
+
+            const subTree = item.get('subTree');
+
+            return { name, cost, pct, visible, open, subTree };
+        });
+
+        const listTreeHead = this.listTreeHead(costPct);
+
+        const listTreeBody = costPct.map((item, key) => {
+            const classes = classNames({
+                'tree-list-item': true,
+                open: item.open
+            });
+
+            const subTree = this.subTree(item);
+
+            const onToggle = () => this.dispatchAction(aTreeItemDisplayToggled(item.name));
+
+            return (
+                <li key={key} className={classes}>
+                    <div className="main"
+                        onClick={() => this.dispatchAction(aTreeItemExpandToggled(item.name))}
+                        onMouseOver={() => this.dispatchAction(aTreeItemHovered([item.name]))}
+                        onMouseOut={() => this.dispatchAction(aTreeItemHovered(null))}>
+                        <input type="checkbox" checked={item.visible} onChange={onToggle} />
+                        <span className="title">{item.name}</span>
+                        <span className="cost">{formatCurrency(item.cost)}</span>
+                        <span className="pct">&nbsp;({item.pct.toFixed(1)}%)</span>
+                    </div>
+                    {subTree}
+                </li>
+            );
+        })
+
+        return (
+            <div className="tree">
+                <ul className="tree-list flex">
+                    {listTreeHead}
+                    {listTreeBody}
                 </ul>
             </div>
         );

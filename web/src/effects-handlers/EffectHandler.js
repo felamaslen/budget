@@ -3,12 +3,11 @@
  */
 
 import axios from 'axios';
-import jsonp from 'jsonp';
 import querystring from 'querystring';
 import { List as list } from 'immutable';
 import buildEffectHandler from '../effectHandlerBuilder';
 
-import { PAGES, MAX_SUGGESTIONS } from '../misc/const';
+import { PAGES, MAX_SUGGESTIONS, API_VERSION } from '../misc/const';
 import {
     EF_LOGIN_FORM_SUBMIT,
     EF_CONTENT_REQUESTED, EF_BLOCKS_REQUESTED,
@@ -26,6 +25,8 @@ import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
+const apiPrefix = `api/v${API_VERSION}`;
+
 export default buildEffectHandler([
     /**
    * submit the user login form
@@ -34,7 +35,7 @@ export default buildEffectHandler([
    * @returns {void}
    */
     [EF_LOGIN_FORM_SUBMIT, (pin, dispatcher) => {
-        axios.post('api?t=login', querystring.stringify({ pin }))
+        axios.post(`${apiPrefix}/user/login`, { pin })
             .then(
                 response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
             )
@@ -45,16 +46,16 @@ export default buildEffectHandler([
 
     [EF_CONTENT_REQUESTED, (obj, dispatcher) => {
         const pageIndex = obj.pageIndex;
-        const dataReq = ['data', obj.pageName].concat(obj.dataReq || []).join('/');
-        const urlParam = { t: dataReq };
-        if (obj.urlParam) {
-            obj.urlParam.forEach(param => {
-                urlParam[param.name] = param.value;
-            });
-        }
-        const urlReq = querystring.stringify(urlParam);
 
-        axios.get(`api?${urlReq}`, {
+        const path = ['data', obj.pageName].concat(obj.dataReq || []);
+
+        const query = (obj.urlParam || []).reduce((items, item) => {
+            items[item.name] = item.value;
+
+            return items;
+        }, {});
+
+        axios.get(`${apiPrefix}/${path.join('/')}?${querystring.stringify(query)}`, {
             headers: { 'Authorization': obj.apiKey }
         }).then(
             response => dispatcher.dispatch(aContentLoaded(response, pageIndex))
@@ -64,67 +65,74 @@ export default buildEffectHandler([
     [EF_BLOCKS_REQUESTED, (obj, dispatcher) => {
         const loadKey = obj.loadKey;
 
-        axios.get(`api?t=pie/${obj.table}`, {
+        axios.get(`${apiPrefix}/data/pie/${obj.table}`, {
             headers: { 'Authorization': obj.apiKey }
         }).then(
             response => dispatcher.dispatch(aContentBlocksReceived(response, loadKey))
         );
     }],
 
-    [EF_SERVER_UPDATE_REQUESTED, (obj, dispatcher) => {
-        axios.post('api?t=multiple', querystring.stringify({ list: obj.list }), {
-            headers: { 'Authorization': obj.apiKey }
+    [EF_SERVER_UPDATE_REQUESTED, (req, dispatcher) => {
+        axios.patch(`${apiPrefix}/data/multiple`, { list: req.list }, {
+            headers: { 'Authorization': req.apiKey }
         }).then(
             response => dispatcher.dispatch(aServerUpdateReceived(response))
         );
     }],
 
-    [EF_ANALYSIS_DATA_REQUESTED, (obj, dispatcher) => {
-        axios.get(`api?t=data/analysis/${obj.period}/${obj.grouping}/${obj.timeIndex}`, {
-            headers: { 'Authorization': obj.apiKey }
+    [EF_ANALYSIS_DATA_REQUESTED, (req, dispatcher) => {
+        axios.get(`${apiPrefix}/data/analysis/${req.period}/${req.grouping}/${req.timeIndex}`, {
+            headers: { 'Authorization': req.apiKey }
         }).then(
             response => dispatcher.dispatch(aAnalysisDataReceived(response))
         );
     }],
 
-    [EF_ANALYSIS_EXTRA_REQUESTED, (obj, dispatcher) => {
-        axios.get(`api?t=data/analysis_category/${obj.name}/${obj.period}/${obj.grouping}/${obj.timeIndex}`, {
-            headers: { 'Authorization': obj.apiKey }
+    [EF_ANALYSIS_EXTRA_REQUESTED, (req, dispatcher) => {
+        axios.get(`${apiPrefix}/data/analysis/deep/${req.name}/${req.period}/${req.grouping}/${req.timeIndex}`, {
+            headers: { 'Authorization': req.apiKey }
         }).then(
             response => {
-                const resObj = response;
-                resObj.deepBlock = obj.name;
-                dispatcher.dispatch(aAnalysisDataReceived(resObj));
+                const res = Object.assign({}, response, { deepBlock: req.name });
+
+                return dispatcher.dispatch(aAnalysisDataReceived(res));
             }
         );
     }],
 
-    [EF_SERVER_ADD_REQUESTED, (obj, dispatcher) => {
-        axios.post(`api?t=add/${PAGES[obj.pageIndex]}`, querystring.stringify(obj.item), {
-            headers: { 'Authorization': obj.apiKey }
+    [EF_SERVER_ADD_REQUESTED, (req, dispatcher) => {
+        axios.post(`${apiPrefix}/data/${PAGES[req.pageIndex]}`, req.item, {
+            headers: { 'Authorization': req.apiKey }
         }).then(
             response => dispatcher.dispatch(aServerAddReceived({
                 response,
-                item: obj.theItems,
-                pageIndex: obj.pageIndex
+                item: req.theItems,
+                pageIndex: req.pageIndex
             }))
         );
     }],
 
-    [EF_FUNDS_PERIOD_REQUESTED, (obj, dispatcher) => {
-        axios.get(`api?t=data/fund_history&period=${obj.period}`, {
-            headers: { 'Authorization': obj.apiKey }
+    [EF_FUNDS_PERIOD_REQUESTED, (req, dispatcher) => {
+        const query = querystring.stringify({
+            period: req.period,
+            length: req.length,
+            history: true
+        });
+
+        axios.get(`${apiPrefix}/data/funds?${query}`, {
+            headers: { 'Authorization': req.apiKey }
         }).then(
             response => {
-                const period = obj.period;
-                const data = response;
+                const period = `${req.period}${req.length}`;
+                const data = response.data.data;
+
                 dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
             }
         );
     }],
 
     [EF_SUGGESTIONS_REQUESTED, (obj, dispatcher) => {
-        axios.get(`api?t=data/search/${obj.page}/${obj.column}/${obj.value}/${MAX_SUGGESTIONS}`, {
+        axios.get(`${apiPrefix}/data/search/${obj.page}/${obj.column}/${obj.value}/${MAX_SUGGESTIONS}`, {
             headers: { 'Authorization': obj.apiKey }
         }).then(
             response => {
@@ -138,7 +146,7 @@ export default buildEffectHandler([
     }],
 
     [EF_STOCKS_LIST_REQUESTED, (apiKey, dispatcher) => {
-        axios.get('api?t=data/stocks', {
+        axios.get(`${apiPrefix}/data/stocks`, {
             headers: { 'Authorization': apiKey }
         }).then(
             response => {
@@ -149,12 +157,31 @@ export default buildEffectHandler([
         );
     }],
 
-    [EF_STOCKS_PRICES_REQUESTED, (symbols, dispatcher) => {
-        jsonp(`https://www.google.com/finance/info?client=ig&q=${symbols}`, null, (error, data) => {
-            if (error) {
-                console.error(error.message);
-            }
-            dispatcher.dispatch(aStocksPricesReceived(data));
+    [EF_STOCKS_PRICES_REQUESTED, (req, dispatcher) => {
+        const promises = req.symbols.map(symbol => {
+            const url = 'https://www.alphavantage.co/query';
+            const query = {
+                function: 'TIME_SERIES_DAILY',
+                symbol,
+                apikey: req.apiKey,
+                datatype: 'json'
+            };
+
+            const requestUrl = `${url}?${querystring.stringify(query)}`;
+
+            return axios.get(requestUrl);
         });
+
+        return Promise.all(promises)
+            .then(responses => {
+                const data = responses.map(response => response.data);
+
+                return dispatcher.dispatch(aStocksPricesReceived(data));
+            })
+            .catch(err => {
+                console.error('Error fetching stock prices', err.message);
+
+                return dispatcher.dispatch(aStocksPricesReceived(null));
+            });
     }]
 ]);

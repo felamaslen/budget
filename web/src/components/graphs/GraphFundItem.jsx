@@ -64,14 +64,17 @@ export class GraphFundItem extends LineGraph {
             Array.apply(null, new Array(numTicks)).forEach((tick, key) => {
                 const tickValue = start + key * increment;
                 const tickPos = Math.floor(this.pixY(tickValue)) + 0.5;
-                const tickName = tickValue.toFixed(1) + '%';
+                const tickName = `${tickValue.toFixed(1)}p`;
                 this.ctx.fillText(tickName, this.pixX(this.minX), tickPos);
             });
         }
 
         // plot data
         this.ctx.lineWidth = 1.5;
-        this.drawCubicLine(this.props.data, value => value < 0 ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
+
+        const initialValue = this.props.data.getIn([0, 1]);
+
+        this.drawCubicLine(this.props.data, value => value < initialValue ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
     }
 }
 

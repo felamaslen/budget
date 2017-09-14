@@ -151,7 +151,7 @@ describe('/data/funds', () => {
     });
 
     const standardData = {
-        year: 2017, month: 9, date: 4, item: 'foo fund', cost: 1000
+        date: { year: 2017, month: 9, date: 4 }, item: 'foo fund', cost: 1000
     };
 
     const standardTransactions = [
@@ -244,10 +244,10 @@ describe('/data/funds', () => {
                 ...standardData,
                 transactions: standardTransactions
             }))
-                .to.deep.equal({
+                .to.deep.equal(Object.assign({
                     ...standardData,
                     transactions: transactionsJson
-                });
+                }, { year: 2017, month: 9, date: 4 }));
         });
     });
 
@@ -260,10 +260,10 @@ describe('/data/funds', () => {
             }))
                 .to.deep.equal({
                     id: 1,
-                    values: {
+                    values: Object.assign({
                         ...standardData,
                         transactions: transactionsJson
-                    }
+                    }, { year: 2017, month: 9, date: 4 })
                 });
         });
     });

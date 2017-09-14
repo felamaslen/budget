@@ -2,6 +2,8 @@
  * Constant items
  */
 
+export const API_VERSION = 3;
+
 export const ERROR_LEVEL_ERROR = 0xe0;
 export const ERROR_LEVEL_WARN = 0xe1;
 export const ERROR_LEVEL_DEBUG = 0xe2;
@@ -121,7 +123,7 @@ export const GRAPH_STOCKS_HEIGHT = 72;
 export const GRAPH_ZOOM_SPEED = 0.1;
 export const GRAPH_ZOOM_MAX = 0.01;
 
-export const STOCK_PRICES_DELAY = 5000;
+export const STOCK_PRICES_DELAY = 30000;
 
 export const ANALYSIS_PERIODS = ['year', 'month', 'week'];
 export const ANALYSIS_GROUPINGS = ['category', 'shop'];

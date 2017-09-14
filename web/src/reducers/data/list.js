@@ -32,25 +32,8 @@ export const loadBlocks = (reduction, pageIndex, noClear) => {
     )).setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
 };
 
-/**
- * process list page data response
- * @param {Record} reduction: app state
- * @param {integer} pageIndex: page index
- * @param {object} raw: api JSON data
- * @returns {Record} modified reduction
- */
-export const processPageDataList = (reduction, pageIndex, raw) => {
-    const numRows = raw.data.length;
-    const numCols = LIST_COLS_PAGES[pageIndex].length;
-    const total = raw.total;
-
-    const data = map({
-        numRows,
-        numCols,
-        total
-    });
-
-    const rows = list(raw.data.map(item => {
+export function processRawListRows(data, pageIndex) {
+    return list(data.map(item => {
         const otherProps = Object.keys(item)
             .filter(
                 key => LIST_COLS_STANDARD.indexOf(key) === -1
@@ -78,13 +61,34 @@ export const processPageDataList = (reduction, pageIndex, raw) => {
             ...otherProps
         });
     }));
+}
+
+/**
+ * process list page data response
+ * @param {Record} reduction: app state
+ * @param {integer} pageIndex: page index
+ * @param {object} raw: api JSON data
+ * @returns {Record} modified reduction
+ */
+export function processPageDataList(reduction, pageIndex, raw) {
+    const numRows = raw.data.length;
+    const numCols = LIST_COLS_PAGES[pageIndex].length;
+    const total = raw.total;
+
+    const data = map({
+        numRows,
+        numCols,
+        total
+    });
+
+    const rows = processRawListRows(raw.data, pageIndex);
 
     return loadBlocks(
         reduction.setIn(
             ['appState', 'pages', pageIndex], map({ data, rows })
         ), pageIndex
     );
-};
+}
 
 export function processPageDataFunds(reduction, pageIndex, data, now = new Date()) {
     const startTime = data.startTime;
@@ -95,18 +99,24 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
 
     const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
-    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
 
     const rows = newReduction.getIn(['appState', 'pages', pageIndex, 'rows']);
-
     const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes, pageIndex);
 
+    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+
     const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex);
-    const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes);
+    const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes, zoom);
 
     return newReduction
         .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps)
-        .setIn(['appState', 'other', 'fundHistoryCache', period], JSON.stringify(data))
+        .setIn(['appState', 'pages', pageIndex, 'startTime'], startTime)
+        .setIn(['appState', 'pages', pageIndex, 'cacheTimes'], cacheTimes)
+        .setIn(
+            ['appState', 'other', 'fundHistoryCache', period],
+            map({ rows, startTime, cacheTimes })
+        )
         .setIn(['appState', 'other', 'fundsCachedValue'], fundsCachedValue)
         .setIn(['appState', 'other', 'graphFunds', 'startTime'], startTime)
         .setIn(['appState', 'other', 'graphFunds', 'cacheTimes'], cacheTimes)

@@ -7,7 +7,7 @@ import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED, EF_SUGGESTIONS_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './data/overview';
 import { loadBlocks } from './data/list';
-import { getGainComparisons, addPriceHistory } from './data/funds';
+import { getExtraRowProps as reloadFundsRows } from './data/funds';
 import {
     PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
 } from '../misc/const';
@@ -16,18 +16,20 @@ import {
 } from '../misc/config';
 import { YMD } from '../misc/date';
 import {
-    uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
+    uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
+    pushToRequestQueue
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
-const recalculateFundProfits = (reduction, pageIndex) => {
-    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
-    const history = reduction.getIn(['appState', 'pages', pageIndex, 'history']);
-    const oldRows = reduction.getIn(['appState', 'pages', pageIndex, 'rows']);
-    const newRows = getGainComparisons(oldRows.map(row => {
-        return addPriceHistory(pageIndex, row, history, row.getIn(['cols', transactionsKey]));
-    }));
-    return reduction.setIn(['appState', 'pages', pageIndex, 'rows'], newRows);
+function recalculateFundProfits(reduction, pageIndex) {
+    const rows = reduction.getIn(['appState', 'pages', pageIndex, 'rows']);
+    const startTime = reduction.getIn(['appState', 'pages', pageIndex, 'startTime']);
+    const cacheTimes = reduction.getIn(['appState', 'pages', pageIndex, 'cacheTimes']);
+
+    const rowsWithExtraProps = reloadFundsRows(rows, startTime, cacheTimes, pageIndex);
+
+    return reduction
+        .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps);
 };
 
 const overviewKey = PAGES.indexOf('overview');
@@ -129,9 +131,8 @@ const applyEdits = (reduction, item, pageIndex) => {
     return reduction;
 };
 
-export const rActivateEditable = (reduction, editable, cancel) => {
+export function rActivateEditable(reduction, editable, cancel) {
     const active = reduction.getIn(['appState', 'edit', 'active']);
-    const queue = reduction.getIn(['appState', 'edit', 'queue']);
     const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
     let newReduction = reduction
         .setIn(['appState', 'edit', 'addBtnFocus'], false)
@@ -149,7 +150,7 @@ export const rActivateEditable = (reduction, editable, cancel) => {
         else {
             if (active.get('row') > -1) {
                 // add last item to queue for saving on API
-                newReduction = newReduction.setIn(['appState', 'edit', 'queue'], queue.push(active));
+                newReduction = pushToRequestQueue(newReduction, active);
             }
 
             // append the changes of the last item to the UI
@@ -166,7 +167,7 @@ export const rActivateEditable = (reduction, editable, cancel) => {
         ['appState', 'edit', 'active'],
         editable.set('originalValue', editable.get('value'))
     );
-};
+}
 
 export const rChangeEditable = (reduction, value) => {
     return reduction.setIn(['appState', 'edit', 'active', 'value'], value);
@@ -198,10 +199,7 @@ export const rDeleteListItem = (reduction, item) => {
         newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, itemCost);
     }
 
-    newReduction = newReduction.setIn(
-        ['appState', 'edit', 'queueDelete'],
-        reduction.getIn(['appState', 'edit', 'queueDelete']).push({ pageIndex, id })
-    )
+    newReduction = pushToRequestQueue(newReduction, map({ pageIndex, id }), true)
         .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
         .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
 
@@ -367,7 +365,7 @@ export const rRequestSuggestions = (reduction, value) => {
         .setIn(['appState', 'edit', 'suggestions', 'reqId'], reqId);
 };
 
-const rFundTransactions = (reduction, row, col, callback) => {
+function rFundTransactions(reduction, row, col, callback) {
     const pageIndex = PAGES.indexOf('funds');
     const transactions = callback(reduction.getIn(
         row > -1
@@ -393,7 +391,7 @@ export const rChangeFundTransactions = (reduction, item) => {
         item.row, item.col, transactions => transactions.setIn([item.key, item.column], item.value));
 };
 
-export const rAddFundTransactions = (reduction, item) => {
+export function rAddFundTransactions(reduction, item) {
     return rFundTransactions(reduction,
         item.row, item.col, transactions => transactions.push(item));
 };

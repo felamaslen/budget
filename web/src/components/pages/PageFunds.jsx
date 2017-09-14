@@ -33,7 +33,12 @@ export class PageFunds extends PageList {
         const cost = this.props.data.getIn(['data', 'total']);
         const value = this.props.cachedValue.get('value');
         const total = this.props.data.getIn(['data', 'total']);
-        const gainPct = formatPercent((value - total) / total, {
+
+        const gain = total
+            ? (value - total) / total
+            : 0;
+
+        const gainPct = formatPercent(gain, {
             brackets: true, precision: 2
         });
 
@@ -53,6 +58,12 @@ export class PageFunds extends PageList {
         );
     }
     renderListExtra(row, rowKey) {
+        const gain = row.get('gain');
+
+        if (!gain) {
+            return null;
+        }
+
         const name = row.getIn(['cols', 1]).toLowerCase().replace(/\W+/g, '-');
         const popout = row.get('historyPopout');
         const width = popout ? GRAPH_FUND_ITEM_WIDTH_LARGE : GRAPH_FUND_ITEM_WIDTH;
@@ -60,8 +71,6 @@ export class PageFunds extends PageList {
 
         const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
         const formatOptionsPct = { brackets: true, precision: 2 };
-
-        const gain = row.get('gain');
 
         const gainStyle = {
             backgroundColor: rgba(gain.get('color'))

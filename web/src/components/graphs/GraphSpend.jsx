@@ -59,7 +59,12 @@ export class GraphSpend extends LineGraph {
         this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
         this.ctx.lineWidth = 1;
 
-        const ticksX = Array.apply(null, new Array(this.maxX - 1)).map((_, key) => {
+        const numTicksX = this.maxX - 1;
+        if (!numTicksX) {
+            return null;
+        }
+
+        const ticksX = Array.apply(null, new Array(numTicksX)).map((_, key) => {
             const tickPos = Math.floor(this.pixX(key + 1)) + 0.5;
             // draw vertical lines
             this.ctx.beginPath();
@@ -74,9 +79,13 @@ export class GraphSpend extends LineGraph {
         const tickSize = getTickSize(this.minY, this.maxY, 10);
 
         // draw Y axis ticks
-        const numTicks = Math.ceil((this.maxY - this.minY) / tickSize);
+        const numTicksY = Math.ceil((this.maxY - this.minY) / tickSize);
+        if (!numTicksY) {
+            return null;
+        }
+
         const firstTick = Math.ceil(this.minY / tickSize) * tickSize;
-        const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
+        const ticksY = Array.apply(null, new Array(numTicksY)).map((_, key) => {
             const value = firstTick + key * tickSize;
             const pos = Math.floor(this.pixY(value)) + 0.5;
 
@@ -94,6 +103,10 @@ export class GraphSpend extends LineGraph {
         return { ticksX, ticksY, tickSize };
     }
     drawAxesTicks(axes) {
+        if (!axes) {
+            return;
+        }
+
         this.ctx.font = FONT_AXIS_LABEL;
         this.ctx.textBaseline = 'bottom';
         this.ctx.textAlign = 'left';

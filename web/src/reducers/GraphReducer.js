@@ -6,10 +6,16 @@ import { fromJS, List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
 import { PAGES, LIST_COLS_PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { getPeriodMatch } from '../misc/data';
 import {
+    getFormattedHistory,
     zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
     getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
 } from './data/funds';
+import {
+    processRawListRows
+} from './data/list';
+import { rgba } from '../misc/color';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -26,32 +32,73 @@ export const rToggleFundItemGraph = (reduction, key) => {
     );
 };
 
-export const rToggleFundsGraphMode = reduction => {
-    const newMode = (reduction.getIn(['appState', 'other', 'graphFunds', 'mode']) + 1) % 3;
-    const fundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
-    const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-    const funds = data.get('funds');
-    const history = data.get('history');
+function getCacheData(reduction, period) {
+    const rows = reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache', period, 'rows']
+    );
+    const startTime = reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache', period, 'startTime']
+    );
+    const cacheTimes = reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache', period, 'cacheTimes']
+    );
 
-    return addFundLines(
-        reduction.setIn(['appState', 'other', 'graphFunds', 'mode'], newMode),
-        data, funds, history, pageIndexFunds, fundLines);
-};
+    return { rows, startTime, cacheTimes };
+}
 
-const numFundPointsVisible = (lines, minX, maxX) => {
-    return lines.reduce((last, line) => {
-        return Math.max(last, line.last().filter(item => {
-            const xValue = item.first();
-            return xValue >= minX && xValue <= maxX;
-        }).size);
+function getCurrentlyEnabledFunds(reduction) {
+    return reduction
+        .getIn(['appState', 'other', 'graphFunds', 'data', 'fundItems'])
+        .reduce((enabled, item, itemIndex) => {
+            if (item.get('enabled')) {
+                return enabled.push(itemIndex - 1);
+            }
+
+            return enabled;
+        }, list.of());
+}
+
+export function rToggleFundsGraphMode(reduction) {
+    const oldMode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+    const newMode = (oldMode + 1) % 3;
+
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+    const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
+
+    const enabledList = getCurrentlyEnabledFunds(reduction);
+
+    const fundHistory = getFormattedHistory(
+        rows, newMode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
+    );
+
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
+        .setIn(['appState', 'other', 'graphFunds', 'mode'], newMode);
+}
+
+function numFundPointsVisible(lines, minX, maxX) {
+    return lines.reduce((sum, line) => {
+        return Math.max(sum, line
+            .get('line')
+            .filter(item => {
+                const xValue = item.get(0);
+
+                return xValue >= minX && xValue <= maxX;
+            })
+            .size
+        );
     }, 0);
-};
+}
 
-export const rZoomFundsGraph = (reduction, obj) => {
+export function rZoomFundsGraph(reduction, obj) {
     // direction: in is negative, out is positive
     const range = reduction.getIn(['appState', 'other', 'graphFunds', 'range']);
     const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
-    const lines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'lines']);
+    const lines = reduction.getIn(['appState', 'other', 'graphFunds', 'data', 'fundLines']);
+    const linesAll = reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'data', 'fundLinesAll']
+    );
 
     const newRangeWidth = Math.min(range.last() - range.first(), Math.max(
         (range.last() - range.first()) * GRAPH_ZOOM_MAX,
@@ -77,112 +124,163 @@ export const rZoomFundsGraph = (reduction, obj) => {
         return reduction;
     }
 
-    const newReduction = reduction
-        .setIn(['appState', 'other', 'graphFunds', 'zoom'], newZoom);
+    const zoomedLines = zoomFundLines(linesAll, newZoom);
 
-    return newReduction.setIn(
-        ['appState', 'pages', pageIndexFunds, 'lines'],
-        zoomFundLines(newReduction.getIn(['appState', 'pages', pageIndexFunds, 'linesAll']), newReduction)
-    );
-};
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'zoom'], newZoom)
+        .setIn(['appState', 'other', 'graphFunds', 'data', 'fundLines'], zoomedLines);
+}
 
-export const rHoverFundsGraph = (reduction, position) => {
+export function rHoverFundsGraph(reduction, position) {
     if (!position) {
         return reduction.setIn(['appState', 'other', 'graphFunds', 'hlPoint'], null);
     }
 
-    const lines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'lines']);
-    if (!lines) {
+    const lines = reduction.getIn(['appState', 'other', 'graphFunds', 'data', 'fundLines']);
+
+    if (!lines || !lines.size) {
         return reduction;
     }
+
     const closest = lines.reduce((last, line, lineKey) => {
-        return line.last().reduce((thisLast, point, pointKey) => {
-            const pointDistance = Math.sqrt(
-                Math.pow(point.first() - position.valX, 2) + Math.pow(point.last() - position.valY, 2)
-            );
-            if (pointDistance < thisLast[0]) {
-                return [pointDistance, lineKey, pointKey];
-            }
-            return thisLast;
-        }, last);
-    }, [Infinity, null]);
+        return line
+            .get('line')
+            .reduce((thisLast, point, pointKey) => {
+                const pointDistance = Math.sqrt(
+                    Math.pow(point.get(0) - position.valX, 2) +
+                    Math.pow(point.get(1) - position.valY, 2)
+                );
 
-    const color = lines.getIn([closest[1], 0]);
-    const hlPoint = lines.getIn([closest[1], 1, closest[2]]);
-    return reduction.setIn(
-        ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint ? hlPoint.push(color) : null);
-};
+                if (pointDistance < thisLast.dist) {
+                    thisLast.dist = pointDistance;
+                    thisLast.lineKey = lineKey;
+                    thisLast.pointKey = pointKey;
+                }
 
-export const rToggleFundsGraphLine = (reduction, index) => {
-    const oldFundLines = reduction.getIn(['appState', 'pages', pageIndexFunds, 'fundLines']);
-    const numEnabled = oldFundLines.filter(item => item.get('enabled')).size;
-    if (numEnabled === 1 && oldFundLines.getIn([index, 'enabled'])) {
-        return reduction;
+                return thisLast;
+            }, last);
+
+    }, { dist: Infinity, lineKey: null, pointKey: null });
+
+    const lineIndex = reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'data', 'fundLines', closest.lineKey, 'index']
+    );
+
+    const color = reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'data', 'fundItems', lineIndex, 'color']
+    );
+
+    let hlPoint = lines
+        .getIn([closest.lineKey, 'line', closest.pointKey]);
+
+    if (hlPoint) {
+        hlPoint = hlPoint.push(rgba(color));
     }
-    const newFundLines = oldFundLines.setIn([index, 'enabled'], !oldFundLines.getIn([index, 'enabled']));
 
-    const data = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-    const funds = data.get('funds');
-    const history = data.get('history');
-    return addFundLines(reduction, data, funds, history, pageIndexFunds, newFundLines);
-};
+    return reduction.setIn(
+        ['appState', 'other', 'graphFunds', 'hlPoint'], hlPoint
+    );
+}
 
-export const rHandleFundPeriodResponse = (reduction, response, fromCache) => {
+export function rToggleFundsGraphLine(reduction, index) {
+    let statusBefore = false;
+
+    let enabledList = reduction
+        .getIn(['appState', 'other', 'graphFunds', 'data', 'fundItems'])
+        .reduce((enabled, item, itemIndex) => {
+            if (item.get('enabled')) {
+                if (itemIndex === index) {
+                    statusBefore = true;
+
+                    return enabled;
+                }
+
+                return enabled.push(itemIndex - 1);
+            }
+
+            return enabled;
+        }, list.of());
+
+    if (!statusBefore || !enabledList.size) {
+        enabledList = enabledList.push(index - 1);
+    }
+
+    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+    const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
+
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
+    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode'])
+
+    const fundHistory = getFormattedHistory(
+        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
+    );
+
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory)
+}
+
+function changePeriod(reduction, period, rows, startTime, cacheTimes) {
+    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
+
+    // reset the zoom when changing data
+    const zoom = list([0, new Date().getTime() / 1000 - startTime]);
+
+    const enabledList = getCurrentlyEnabledFunds(reduction);
+
+    const fundHistory = getFormattedHistory(
+        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
+    );
+
+    return reduction
+        .setIn(['appState', 'other', 'graphFunds', 'period'], period)
+        .setIn(['appState', 'other', 'graphFunds', 'startTime'], startTime)
+        .setIn(['appState', 'other', 'graphFunds', 'cacheTimes'], cacheTimes)
+        .setIn(['appState', 'other', 'graphFunds', 'zoom'], zoom)
+        .setIn(['appState', 'other', 'graphFunds', 'range'], zoom.slice())
+        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory);
+}
+
+export function rHandleFundPeriodResponse(reduction, response, fromCache) {
     let newReduction = reduction;
+
+    const rows = processRawListRows(response.data.data, pageIndexFunds);
+    const startTime = response.data.startTime;
+    const cacheTimes = list(response.data.cacheTimes);
+
     if (!fromCache) {
         newReduction = newReduction.setIn(
-            ['appState', 'other', 'fundHistoryCache', response.period], response.data);
+            ['appState', 'other', 'fundHistoryCache', response.period],
+            map({ rows, startTime, cacheTimes })
+        );
     }
-    const transactionsKey = LIST_COLS_PAGES[pageIndexFunds].indexOf('transactions');
-    const history = fromJS(response.data.data.data);
 
-    const oldData = reduction.getIn(['appState', 'pages', pageIndexFunds]);
-    const newFunds = getFundsWithTransactions(history, oldData.get('rows'), pageIndexFunds);
-    const oldFundLines = oldData.get('fundLines');
-    const newFundsItems = history.getIn(['funds', 'items']);
-    const newOldFundLines = map(oldFundLines.filter(fundLine => {
-        return newFundsItems.indexOf(fundLine.get('item')) > -1;
-    }).map(fundLine=> list([fundLine.get('item'), fundLine])));
-    const fundsEnabled = newFunds.map(() => null); // enabled set by replace method
-    const overallEnabled = oldFundLines.first().get('enabled');
-    const newFundLines = getFundLines(newFunds, fundsEnabled, overallEnabled, (fund, fundLine) => {
-        if (newOldFundLines.has(fund.item)) {
-            return newOldFundLines.get(fund.item);
-        }
-        return fundLine;
-    });
-    const oldRows = oldData.get('rows');
-    const newRows = getGainComparisons(oldRows.map(row => {
-        return addPriceHistory(pageIndexFunds, row, history, row.getIn(['cols', transactionsKey]));
-    }));
+    return changePeriod(
+        newReduction, response.period, rows, startTime, cacheTimes
+    );
+}
 
-    const newData = oldData
-        .set('history', history)
-        .set('funds', newFunds)
-        .set('fundLines', newFundLines)
-        .set('rows', newRows);
+export function rChangeFundsGraphPeriod(reduction, req) {
+    const shortPeriod = req.period || reduction.getIn(
+        ['appState', 'other', 'graphFunds', 'period']
+    );
 
-    newReduction = newReduction
-        .setIn(['appState', 'pages', pageIndexFunds], newData)
-        .setIn(['appState', 'other', 'graphFunds', 'period'], response.period);
+    const { period, length } = getPeriodMatch(shortPeriod);
 
-    return getFundsCachedValue(addFundLines(
-        getXRange(newReduction, history.get('startTime')),
-        newData, newFunds, history, pageIndexFunds, newFundLines
-    ), pageIndexFunds, history);
-};
+    if (req.noCache || !reduction.getIn(
+        ['appState', 'other', 'fundHistoryCache']
+    ).has(shortPeriod)) {
 
-export const rChangeFundsGraphPeriod = (reduction, req) => {
-    const period = req.period || reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
-    if (req.noCache || !reduction.getIn(['appState', 'other', 'fundHistoryCache']).has(period)) {
         const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+
         return reduction.set(
             'effects', reduction.get('effects').push(
-                buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period })
+                buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period, length })
             )
         );
     }
-    const data = reduction.getIn(['appState', 'other', 'fundHistoryCache', period]);
-    return rHandleFundPeriodResponse(reduction, { period, data }, true);
-};
+
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, shortPeriod);
+
+    return changePeriod(reduction, shortPeriod, rows, startTime, cacheTimes);
+}
 

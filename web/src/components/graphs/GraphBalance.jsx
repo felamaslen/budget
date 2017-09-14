@@ -111,6 +111,11 @@ export class GraphBalance extends LineGraph {
         // calculate tick range
         const minorTicks = 5;
         const numTicks = GRAPH_BALANCE_NUM_TICKS * minorTicks;
+
+        if (!numTicks) {
+            return;
+        }
+
         const tickSize = getTickSize(this.minY, this.maxY, numTicks);
         const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
             const pos = Math.floor(this.pixY(key * tickSize)) + 0.5;
