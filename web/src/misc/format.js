@@ -163,10 +163,10 @@ export class BlockPacker {
  * @param {string} string: value to capitalise
  * @returns {string} capitalised string
  */
-export const capitalise = string => {
+export function capitalise(string) {
     return string.substring(0, 1).toUpperCase() +
     string.substring(1).toLowerCase();
-};
+}
 
 /**
  * @function round
@@ -174,20 +174,20 @@ export const capitalise = string => {
  * @param {integer} precision: precision to round to
  * @returns {float} rounded value
  */
-const round = (value, precision) => {
+function round(value, precision) {
     const exp = Math.pow(10, precision);
 
     return Math.round(exp * value) / exp;
-};
+}
 
 /**
  * @function numberFormat
  * @param {float} value: value to format
  * @returns {string} formatted number
  */
-export const numberFormat = value => {
+export function numberFormat(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
+}
 
 export function getSign(number) {
     if (number < 0) {
@@ -203,7 +203,7 @@ export function getSign(number) {
  * @param {integer} figs: sig figs to restrict to
  * @returns {string} formatted number
  */
-export const sigFigs = (value, figs) => {
+export function sigFigs(value, figs) {
     if (value === 0) {
         return value.toFixed(figs - 1);
     }
@@ -230,7 +230,7 @@ export const sigFigs = (value, figs) => {
     }
 
     return `${sign}${absResult}`;
-};
+}
 
 /**
  * @function leadingZeroes
@@ -238,7 +238,7 @@ export const sigFigs = (value, figs) => {
  * @param {integer} numZeroes: number of zeroes to fill
  * @returns {string} formatted number
  */
-export const leadingZeroes = (value, numZeroes) => {
+export function leadingZeroes(value, numZeroes) {
     const numAdd = value
         ? numZeroes - Math.floor(Math.log10(value)) - 1
         : numZeroes - 1;
@@ -252,7 +252,7 @@ export const leadingZeroes = (value, numZeroes) => {
     }
 
     return value.toString();
-};
+}
 
 /**
  * Format currency values for display
@@ -260,7 +260,7 @@ export const leadingZeroes = (value, numZeroes) => {
  * @param {object} options: options to pass to formatter
  * @returns {string} formatted value
  */
-export const formatCurrency = (value, options) => {
+export function formatCurrency(value, options) {
     if (!options) {
         options = {};
     }
@@ -314,13 +314,14 @@ export const formatCurrency = (value, options) => {
     }
 
     return output;
-};
-export const formatPercent = (frac, options) => {
+}
+
+export function formatPercent(frac, options) {
     options.suffix = '%';
     options.noSymbol = true;
 
     return formatCurrency(10000 * frac, options);
-};
+}
 
 /**
  * Get tick sizes for graphs
@@ -329,7 +330,7 @@ export const formatPercent = (frac, options) => {
  * @param {integer} numTicks: number of ticks to produce
  * @returns {float} tick length
  */
-export const getTickSize = (min, max, numTicks) => {
+export function getTickSize(min, max, numTicks) {
     const minimum = (max - min) / numTicks;
     const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
     const res = minimum / magnitude;
@@ -348,7 +349,7 @@ export const getTickSize = (min, max, numTicks) => {
     }
 
     return tick;
-};
+}
 
 /**
  * Format age text
@@ -356,7 +357,7 @@ export const getTickSize = (min, max, numTicks) => {
  * @param {boolean} shortAbbr: whether to abbreviate concisely
  * @returns {string} age text
  */
-export const formatAge = (seconds, shortAbbr) => {
+export function formatAge(seconds, shortAbbr) {
     const measures = list([
         [1, 's', 'second'],
         [60, 'm', 'minute'],
@@ -388,5 +389,5 @@ export const formatAge = (seconds, shortAbbr) => {
     }
 
     return measureText.join(', ') + (shortAbbr ? '' : ' ago');
-};
+}
 

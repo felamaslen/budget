@@ -3,7 +3,7 @@
  * the callback immediately on the first run
  */
 
-export default (callback, delay, immediate, context = this) => {
+export default function debounce(callback, delay, immediate, context = this) {
     let timer = null;
     let args = null;
     let runOnce = false;
@@ -21,5 +21,5 @@ export default (callback, delay, immediate, context = this) => {
             timer = setTimeout(later, delay);
         }
     };
-};
+}
 

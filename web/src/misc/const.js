@@ -93,6 +93,7 @@ const htmlCanvasSupported = () => {
 
     return Boolean(elem.getContext && elem.getContext('2d'));
 };
+
 export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;

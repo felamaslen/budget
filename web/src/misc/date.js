@@ -9,16 +9,21 @@ export const yearMonthDifference = (ym1, ym2) => {
     return 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1];
 };
 
-const leapYear = year => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+function leapYear(year) {
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const pmod = (i, n) => ((i % n) + n) % n;
+function pmod(i, n) {
+    return ((i % n) + n) % n;
+}
 
-const monthDays = (month, year) => {
+function monthDays(month, year) {
     const days = [31, leapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     return days[month - 1];
-};
+}
 
 // year-month-date class
 export class YMD {
@@ -352,7 +357,7 @@ class TimeTickMonthYear extends TimeTick {
  * @param {integer} end UNIX timestamp (secs)
  * @return {array} range of ticks
  */
-export const timeSeriesTicks = (begin, end) => {
+export function timeSeriesTicks(begin, end) {
     const range = end - begin;
     let ticker;
 
@@ -380,5 +385,5 @@ export const timeSeriesTicks = (begin, end) => {
     }
 
     return ticker.genTicks(begin * 1000, end * 1000);
-};
+}
 

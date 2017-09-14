@@ -8,13 +8,13 @@ import {
 } from './const';
 import { YMD } from './date';
 
-const sortByDate = (a, b) => {
+function sortByDate(a, b) {
     if (a.get('date') < b.get('date')) {
         return -1;
     }
 
     return 1;
-};
+}
 
 export function getPeriodMatch(shortPeriod) {
     const match = shortPeriod.match(/^([a-z]+)([0-9]+)$/);
@@ -30,9 +30,9 @@ export function getPeriodMatch(shortPeriod) {
  * Produce a "unique" id
  * @returns {number} "unique" id
  */
-export const uuid = () => {
+export function uuid() {
     return Math.floor((1 + Math.random()) * 0x10000);
-};
+}
 
 /**
  * data type to hold transactions list for funds
@@ -144,7 +144,7 @@ export class TransactionsList {
  * @param {integer} mode: output either median or mean
  * @returns {integer} median / mean value
  */
-export const listAverage = (theList, offset, mode) => {
+export function listAverage(theList, offset, mode) {
     const values = offset ? theList.slice(0, -offset) : theList;
     if (mode === AVERAGE_MEDIAN) {
     // median
@@ -162,31 +162,32 @@ export const listAverage = (theList, offset, mode) => {
 
     // mean
     return theList.reduce((a, b) => a + b, 0) / theList.size;
-};
+}
 
 export const indexPoints = (value, key) => [key, value];
 
-export const getYearMonthFromKey = (key, startYear, startMonth) => {
+export function getYearMonthFromKey(key, startYear, startMonth) {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
     const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed
 
     return [year, month];
-};
-export const getKeyFromYearMonth = (year, month, startYear, startMonth) => {
+}
+
+export function getKeyFromYearMonth(year, month, startYear, startMonth) {
     return 12 * (year - startYear) + month - startMonth;
-};
+}
 
 /**
  * Generate random Gaussian increment for a brownian motion
  * Used in fund predictions
  * @returns {float} random value
  */
-export const randnBm = () => {
+export function randnBm() {
     const u = 1 - Math.random();
     const v = 1 - Math.random();
 
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-};
+}
 
 export function pushToRequestQueue(reduction, active, deleteItem = false) {
     const queueKey = deleteItem
@@ -297,7 +298,7 @@ export function buildQueueRequestList(reduction) {
  * @param {integer} pageIndex: page we're on
  * @returns {map} null-editable object ready for navigating
  */
-export const getNullEditable = pageIndex => {
+export function getNullEditable(pageIndex) {
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
 
     return map({
@@ -309,14 +310,14 @@ export const getNullEditable = pageIndex => {
         value: null,
         originalValue: null
     });
-};
+}
 
 /**
  * @function getAddDefaultValues
  * @param {integer} pageIndex: page we're on
  * @returns {list} list of add-items to display on page load
  */
-export const getAddDefaultValues = pageIndex => {
+export function getAddDefaultValues(pageIndex) {
     if (!LIST_COLS_PAGES[pageIndex]) {
         return list.of();
     }
@@ -338,7 +339,7 @@ export const getAddDefaultValues = pageIndex => {
 
         return null;
     }));
-};
+}
 
 /**
  * Sort list rows by date, and add daily tallies
@@ -346,7 +347,7 @@ export const getAddDefaultValues = pageIndex => {
  * @param {integer} pageIndex: page which rows are on
  * @returns {list} sorted rows
  */
-export const sortRowsByDate = (rows, pageIndex) => {
+export function sortRowsByDate(rows, pageIndex) {
     const today = new YMD();
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
@@ -390,7 +391,7 @@ export const sortRowsByDate = (rows, pageIndex) => {
     }
 
     return sorted;
-};
+}
 
 /**
  * Add weekly averages (should be run after sortRowsByDate)
@@ -399,7 +400,7 @@ export const sortRowsByDate = (rows, pageIndex) => {
  * @param {integer} pageIndex: page which rows are on
  * @returns {map} data with averages
  */
-export const addWeeklyAverages = (data, rows, pageIndex) => {
+export function addWeeklyAverages(data, rows, pageIndex) {
     if (!DAILY_PAGES[pageIndex]) {
         return data;
     }
@@ -419,5 +420,5 @@ export const addWeeklyAverages = (data, rows, pageIndex) => {
     const numWeeks = (firstDate - lastDate) / 7;
 
     return data.set('weekly', numWeeks ? visibleTotal / numWeeks : 0);
-};
+}
 

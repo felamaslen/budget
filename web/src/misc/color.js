@@ -5,7 +5,7 @@
 import { OVERVIEW_COLUMNS } from './const';
 import { COLOR_CATEGORY } from './config';
 
-export const rgba = values => {
+export function rgba(values) {
     const roundedValues = values.slice(0, 3).map(
         item => Math.max(0, Math.min(255, Math.round(item)))
     ).concat(values.slice(3)).join(',');
@@ -15,13 +15,13 @@ export const rgba = values => {
     }
 
     return `rgb(${roundedValues})`;
-};
+}
 
 /**
  * Get colours for colouring the table
  * @returns {array} list of colour codes
  */
-export const getOverviewCategoryColor = () => {
+export function getOverviewCategoryColor() {
     return OVERVIEW_COLUMNS.slice(1).map(item => item[0]).map(column => {
         if (COLOR_CATEGORY[column]) {
             return COLOR_CATEGORY[column];
@@ -35,7 +35,7 @@ export const getOverviewCategoryColor = () => {
 
         return null;
     });
-};
+}
 
 /**
  * Get a colour on a scale, based on value (linear)
@@ -45,7 +45,7 @@ export const getOverviewCategoryColor = () => {
  * @param {array} color: color scale(s) to use
  * @returns {array} rgb values
  */
-export const getOverviewScoreColor = (value, range, median, color) => {
+export function getOverviewScoreColor(value, range, median, color) {
     if (range[0] === range[1]) {
         return [255, 255, 255]; // white
     }
@@ -77,7 +77,7 @@ export const getOverviewScoreColor = (value, range, median, color) => {
     }
 
     return theColor.map(item => Math.round(255 - (255 - item) * score));
-};
+}
 
 const colorKeyList = [
     [1, 0, 103],
@@ -108,7 +108,8 @@ const colorKeyRGB = index => {
 
     return colorKeyList[index % colorKeyList.length];
 };
-export const colorKey = index => {
+
+export function colorKey(index) {
     return colorKeyRGB(index);
-};
+}
 

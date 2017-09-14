@@ -27,12 +27,12 @@ export function rLoadStocksPrices(reduction) {
     )));
 }
 
-export const rLoadStocksList = reduction => {
+export function rLoadStocksList(reduction) {
     return reduction.set('effects', reduction.get('effects').push(buildMessage(
         EF_STOCKS_LIST_REQUESTED, reduction.getIn(['appState', 'user', 'apiKey'])
     )));
-};
-export const rHandleStocksListResponse = (reduction, response) => {
+}
+export function rHandleStocksListResponse(reduction, response) {
     const indices = map(STOCK_INDICES).map((item, code) => {
         return map({
             code,
@@ -59,7 +59,7 @@ export const rHandleStocksListResponse = (reduction, response) => {
         .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks)
         .setIn(['appState', 'other', 'stocksList', 'apiKey'], response.apiKey)
     );
-};
+}
 
 function updateStock(item, row, loadedInitial) {
     const latest = Object.values(row['Time Series (Daily)'])[0];

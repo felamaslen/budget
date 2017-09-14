@@ -17,7 +17,7 @@ import { List as list, Map as map, fromJS } from 'immutable';
  * @param {integer} futureKey: key to separate between past/present and future
  * @returns {list} first six columns of data for overview table
  */
-const calculateFutures = (cost, futureCategories, futureMonths, futureKey) => {
+function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
     return futureCategories.map(category => {
         const categoryCost = cost.get(category);
 
@@ -58,7 +58,7 @@ const calculateFutures = (cost, futureCategories, futureMonths, futureKey) => {
 
         return newCost;
     });
-};
+}
 
 /**
  * Calculate the remaining table data, e.g. net income
@@ -66,7 +66,7 @@ const calculateFutures = (cost, futureCategories, futureMonths, futureKey) => {
  * @param {map} data: processed data
  * @returns {list} all twelve columns of data for overview table
  */
-const calculateTableData = data => {
+function calculateTableData(data) {
     const cost = data.get('cost');
     const numRows = data.get('numRows');
     const startYear = data.get('startYearMonth')[0];
@@ -97,9 +97,11 @@ const calculateTableData = data => {
         .push(cost.get('net'))
         .push(cost.get('predicted'))
         .push(cost.get('balance'));
-};
+}
 
-export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, currentYearMonth, futureMonths) => {
+export function rProcessDataOverview(
+    costMap, startYearMonth, endYearMonth, currentYearMonth, futureMonths
+) {
     const numRows = yearMonthDifference(startYearMonth, endYearMonth) + 1;
     const numCols = 1;
 
@@ -179,27 +181,27 @@ export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, curr
         yearMonths,
         cost
     });
-};
+}
 
 /**
  * Process data for insertion into the store
  * @param {object} raw: api JSON data response
  * @returns {Map} immutable data
  */
-const rProcessDataOverviewRaw = raw => {
+function rProcessDataOverviewRaw(raw) {
     const currentYearMonth = [raw.currentYear, raw.currentMonth];
     const costMap = fromJS(raw.cost);
 
     return rProcessDataOverview(
         costMap, raw.startYearMonth, raw.endYearMonth, currentYearMonth, raw.futureMonths);
-};
+}
 
 /**
  * Get rows for display in the view
  * @param {List} data: processed data
  * @returns {List} rows for the view
  */
-export const rGetOverviewRows = data => {
+export function rGetOverviewRows(data) {
     const currentYear = data.get('currentYearMonth')[0];
     const currentMonth = data.get('currentYearMonth')[1];
 
@@ -248,7 +250,7 @@ export const rGetOverviewRows = data => {
     });
 
     return rows;
-};
+}
 
 /**
  * @function rCalculateOverview
@@ -260,7 +262,9 @@ export const rGetOverviewRows = data => {
  * @param {integer} oldItemCost: original item cost
  * @returns {Record} reduction with re-calculated overview data
  */
-export const rCalculateOverview = (reduction, pageIndex, newDate, oldDate, newItemCost, oldItemCost) => {
+export function rCalculateOverview(
+    reduction, pageIndex, newDate, oldDate, newItemCost, oldItemCost
+) {
     const overviewKey = PAGES.indexOf('overview');
     const startYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'startYearMonth']);
 
@@ -304,7 +308,7 @@ export const rCalculateOverview = (reduction, pageIndex, newDate, oldDate, newIt
 
     return reduction.setIn(['appState', 'pages', overviewKey, 'data'], newData)
         .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
-};
+}
 
 /**
  * Called when data is first loaded
@@ -313,10 +317,10 @@ export const rCalculateOverview = (reduction, pageIndex, newDate, oldDate, newIt
  * @param {object} raw: api JSON data
  * @returns {Record} modified reduction
  */
-export default (reduction, pageIndex, raw) => {
+export default function rProcessOverview(reduction, pageIndex, raw) {
     const data = rProcessDataOverviewRaw(raw);
     const rows = rGetOverviewRows(data);
 
     return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
-};
+}
 

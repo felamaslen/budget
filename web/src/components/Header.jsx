@@ -7,7 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PureControllerView from './PureControllerView';
-import { capitalise } from '../misc/text';
+import { capitalise } from '../misc/format';
 import { PAGES, SERVER_UPDATE_ERROR, ERROR_LEVEL_ERROR } from '../misc/const';
 import { ERROR_MSG_SERVER_UPDATE, TIMER_UPDATE_SERVER } from '../misc/config';
 import {

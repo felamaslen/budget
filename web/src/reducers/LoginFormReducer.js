@@ -17,14 +17,14 @@ import { rLoadContent } from './ContentReducer';
  * @param {Record} reduction: app state
  * @returns {Record} new app state
  */
-export const rLoginFormSubmit = reduction => {
+export function rLoginFormSubmit(reduction) {
     const pin = reduction.getIn(['appState', 'loginForm', 'values']).join('');
 
     return reduction.setIn(['appState', 'loginForm', 'loading'], true)
         .set('effects', reduction.get('effects').push(
             buildMessage(EF_LOGIN_FORM_SUBMIT, pin)
         ));
-};
+}
 
 /**
  * put a digit on the login form PIN input
@@ -32,7 +32,7 @@ export const rLoginFormSubmit = reduction => {
  * @param {number} input: digit to add to the form
  * @returns {Record} new app state
  */
-export const rLoginFormInput = (reduction, input) => {
+export function rLoginFormInput(reduction, input) {
     const inputString = input.toString();
     if (!inputString.match(/^[0-9]$/) || reduction.getIn(['appState', 'loginForm', 'loading'])) {
     // don't do anything if the input is non-numeric, or
@@ -48,7 +48,7 @@ export const rLoginFormInput = (reduction, input) => {
     );
     // if the pin is complete, submit the form
     return values.size < LOGIN_INPUT_LENGTH - 1 ? newReduction : rLoginFormSubmit(newReduction);
-};
+}
 
 /**
  * reset the login form PIN input to a certain point
@@ -56,12 +56,12 @@ export const rLoginFormInput = (reduction, input) => {
  * @param {number} index: where to reset to
  * @returns {Record} new app state
  */
-export const rLoginFormReset = (reduction, index) => {
+export function rLoginFormReset(reduction, index) {
     return reduction.setIn(
         ['appState', 'loginForm', 'values'],
         reduction.getIn(['appState', 'loginForm', 'values']).slice(0, index)
     ).setIn(['appState', 'loginForm', 'inputStep'], index);
-};
+}
 
 /**
  * handle login form API response
@@ -69,7 +69,7 @@ export const rLoginFormReset = (reduction, index) => {
  * @param {object} output: pin and API response (JSON)
  * @returns {Record} new app state
  */
-export const rLoginFormHandleResponse = (reduction, output) => {
+export function rLoginFormHandleResponse(reduction, output) {
     let newReduction = rLoginFormReset(
         reduction.setIn(['appState', 'loginForm', 'loading'], false)
             .setIn(['appState', 'loading'], false), 0);
@@ -104,5 +104,5 @@ export const rLoginFormHandleResponse = (reduction, output) => {
     newReduction = rLoadContent(newReduction, page);
 
     return newReduction;
-};
+}
 

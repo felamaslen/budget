@@ -33,7 +33,7 @@ function recalculateFundProfits(reduction, pageIndex) {
 }
 
 const overviewKey = PAGES.indexOf('overview');
-const applyEditsOverview = (reduction, item) => {
+function applyEditsOverview(reduction, item) {
     // update the balance for a row and recalculate overview data
     const value = item.get('value');
     const row = item.get('row');
@@ -52,9 +52,9 @@ const applyEditsOverview = (reduction, item) => {
 
     return reduction.setIn(['appState', 'pages', overviewKey, 'data'], newData)
         .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
-};
+}
 
-const applyEditsList = (reduction, item, pageIndex) => {
+function applyEditsList(reduction, item, pageIndex) {
     // update list data in the UI
     if (item.get('row') === -1) {
     // add-item
@@ -112,7 +112,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
     }
 
     return newReduction;
-};
+}
 
 /**
  * applyEdits: apply editItem edits to UI (API handled separately)
@@ -121,7 +121,7 @@ const applyEditsList = (reduction, item, pageIndex) => {
  * @param {integer} pageIndex: index of the page on which edits are being done
  * @returns {Record} modified reduction
  */
-const applyEdits = (reduction, item, pageIndex) => {
+function applyEdits(reduction, item, pageIndex) {
     if (pageIndex === 0) {
         return applyEditsOverview(reduction, item);
     }
@@ -130,7 +130,7 @@ const applyEdits = (reduction, item, pageIndex) => {
     }
 
     return reduction;
-};
+}
 
 export function rActivateEditable(reduction, editable, cancel) {
     const active = reduction.getIn(['appState', 'edit', 'active']);
@@ -170,11 +170,11 @@ export function rActivateEditable(reduction, editable, cancel) {
     );
 }
 
-export const rChangeEditable = (reduction, value) => {
+export function rChangeEditable(reduction, value) {
     return reduction.setIn(['appState', 'edit', 'active', 'value'], value);
-};
+}
 
-export const rDeleteListItem = (reduction, item) => {
+export function rDeleteListItem(reduction, item) {
     let newReduction = reduction;
 
     const pageIndex = item.pageIndex;
@@ -210,9 +210,9 @@ export const rDeleteListItem = (reduction, item) => {
     }
 
     return newReduction;
-};
+}
 
-export const rAddListItem = (reduction, items) => {
+export function rAddListItem(reduction, items) {
     if (reduction.getIn(['appState', 'loadingApi'])) {
         return reduction;
     }
@@ -259,9 +259,9 @@ export const rAddListItem = (reduction, items) => {
         .setIn(['appState', 'edit', 'add'], list.of())
         .setIn(['appState', 'loadingApi'], true)
         .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_ADD_REQUESTED, req)));
-};
+}
 
-export const rHandleServerAdd = (reduction, response) => {
+export function rHandleServerAdd(reduction, response) {
     // handle the response from adding an item to a list page
     let newReduction = reduction.setIn(['appState', 'loadingApi'], false);
     if (response.response.data.error) {
@@ -326,9 +326,9 @@ export const rHandleServerAdd = (reduction, response) => {
             value: now,
             originalValue: now
         })).setIn(['appState', 'edit', 'addBtnFocus'], false);
-};
+}
 
-export const rHandleSuggestions = (reduction, obj) => {
+export function rHandleSuggestions(reduction, obj) {
     const newReduction = reduction
         .setIn(['appState', 'edit', 'suggestions', 'loading'], false)
         .setIn(['appState', 'edit', 'suggestions', 'active'], -1);
@@ -343,9 +343,9 @@ export const rHandleSuggestions = (reduction, obj) => {
     }
 
     return newReduction.setIn(['appState', 'edit', 'suggestions', 'list'], obj.items);
-};
+}
 
-export const rRequestSuggestions = (reduction, value) => {
+export function rRequestSuggestions(reduction, value) {
     if (reduction.getIn(['appState', 'edit', 'suggestions', 'loading'])) {
         return reduction;
     }
@@ -368,7 +368,7 @@ export const rRequestSuggestions = (reduction, value) => {
     ))
         .setIn(['appState', 'edit', 'suggestions', 'loading'], true)
         .setIn(['appState', 'edit', 'suggestions', 'reqId'], reqId);
-};
+}
 
 function rFundTransactions(reduction, row, col, callback) {
     const pageIndex = PAGES.indexOf('funds');
@@ -391,18 +391,18 @@ function rFundTransactions(reduction, row, col, callback) {
     );
 }
 
-export const rChangeFundTransactions = (reduction, item) => {
+export function rChangeFundTransactions(reduction, item) {
     return rFundTransactions(reduction,
         item.row, item.col, transactions => transactions.setIn([item.key, item.column], item.value));
-};
+}
 
 export function rAddFundTransactions(reduction, item) {
     return rFundTransactions(reduction,
         item.row, item.col, transactions => transactions.push(item));
 }
 
-export const rRemoveFundTransactions = (reduction, item) => {
+export function rRemoveFundTransactions(reduction, item) {
     return rFundTransactions(reduction,
         item.row, item.col, transactions => transactions.remove(item.key));
-};
+}
 

@@ -21,7 +21,7 @@ import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
-const getItemValue = (reduction, pageIndex, row, col) => {
+function getItemValue(reduction, pageIndex, row, col) {
     let id = null;
     let item = null;
     let value = null;
@@ -41,7 +41,7 @@ const getItemValue = (reduction, pageIndex, row, col) => {
     }
 
     return { id, item, value };
-};
+}
 
 /**
  * Handle suggestions navigation
@@ -50,12 +50,12 @@ const getItemValue = (reduction, pageIndex, row, col) => {
  * @param {map} suggestions suggestions object
  * @returns {Record} modified reduction
  */
-const handleSuggestionsNav = (reduction, direction, suggestions) => {
+function handleSuggestionsNav(reduction, direction, suggestions) {
     const newActive = ((suggestions.get('active') + 1 + direction) %
                      (suggestions.get('list').size + 1)) - 1;
 
     return reduction.setIn(['appState', 'edit', 'suggestions', 'active'], newActive);
-};
+}
 
 /**
  * Handle navigation
@@ -65,7 +65,7 @@ const handleSuggestionsNav = (reduction, direction, suggestions) => {
  * @param {boolean} cancel clear any changes
  * @returns {Record} modified reduction
  */
-const handleNav = (reduction, dx, dy, cancel) => {
+function handleNav(reduction, dx, dy, cancel) {
     const editing = reduction.getIn(['appState', 'edit', 'active']);
     if (dx === null) {
         return rActivateEditable(reduction, null, cancel);
@@ -132,7 +132,7 @@ const handleNav = (reduction, dx, dy, cancel) => {
     const value = itemValue.value;
 
     return rActivateEditable(newReduction, map({ row, col, pageIndex, id, item, value }));
-};
+}
 
 /**
  * get x, y directions given a keypress (e.g. arrowRight -> [1, 0])
@@ -140,7 +140,7 @@ const handleNav = (reduction, dx, dy, cancel) => {
  * @param {boolean} shift: shift key was pressed
  * @returns {array} direction to navigate
  */
-const getNavDirection = (key, shift) => {
+function getNavDirection(key, shift) {
     if (key === 'Tab') {
         return [shift ? -1 : 1, 0];
     }
@@ -151,7 +151,7 @@ const getNavDirection = (key, shift) => {
     }
 
     return [0, 0];
-};
+}
 
 /**
  * Handle key presses
@@ -159,7 +159,7 @@ const getNavDirection = (key, shift) => {
  * @param {object} evt key event
  * @returns {Record} modified reduction
  */
-export const rHandleKeyPress = (reduction, evt) => {
+export function rHandleKeyPress(reduction, evt) {
     if (evt.key === 'Control' || evt.key === 'Shift') {
     // don't do anything until an actual key (not modifier) is pressed
         return reduction;
@@ -212,7 +212,7 @@ export const rHandleKeyPress = (reduction, evt) => {
     }
 
     return rLoginFormInput(reduction, evt.key);
-};
+}
 
 /**
  * Log out of the system
@@ -261,7 +261,7 @@ export const rLoadCookies = reduction => {
  * @param {integer} pageIndex: page index to navigate to
  * @returns {Record} modified reduction
  */
-export const rNavigateToPage = (reduction, pageIndex) => {
+export function rNavigateToPage(reduction, pageIndex) {
     Cookies.set('page', pageIndex, { expires: 7 });
     let newReduction = reduction;
     if (!newReduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
@@ -280,9 +280,9 @@ export const rNavigateToPage = (reduction, pageIndex) => {
     }
 
     return loadBlocks(newReduction, pageIndex);
-};
+}
 
-export const rUpdateServer = reduction => {
+export function rUpdateServer(reduction) {
     let newReduction = reduction;
 
     // update funds cached value age
@@ -316,9 +316,9 @@ export const rUpdateServer = reduction => {
     return newReduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
         .setIn(['appState', 'loadingApi'], true)
         .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_UPDATE_REQUESTED, req)));
-};
+}
 
-export const rHandleServerUpdate = (reduction, response) => {
+export function rHandleServerUpdate(reduction, response) {
     const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
     const newReduction = reduction.setIn(['appState', 'loadingApi'], false)
         .setIn(['appState', 'edit', 'status'], status)
@@ -326,5 +326,5 @@ export const rHandleServerUpdate = (reduction, response) => {
         .setIn(['appState', 'edit', 'queueDelete'], list.of());
 
     return loadBlocks(newReduction, newReduction.getIn(['appState', 'currentPageIndex']), true);
-};
+}
 

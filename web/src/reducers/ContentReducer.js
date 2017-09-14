@@ -80,7 +80,7 @@ export function rLoadContent(reduction, pageIndex) {
  * @param {object} data: response data
  * @returns {map}: page data for view
  */
-const processPageData = (reduction, pageIndex, data) => {
+function processPageData(reduction, pageIndex, data) {
     if (PAGES[pageIndex] === 'overview') {
     // overview
         return processPageDataOverview(reduction, pageIndex, data);
@@ -109,9 +109,9 @@ const processPageData = (reduction, pageIndex, data) => {
     }
 
     return reduction;
-};
+}
 
-export const rHandleContentResponse = (reduction, output) => {
+export function rHandleContentResponse(reduction, output) {
     return processPageData(
         reduction
             .setIn(['appState', 'pagesLoaded', output.pageIndex], true)
@@ -121,9 +121,9 @@ export const rHandleContentResponse = (reduction, output) => {
     )
         .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
         .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));
-};
+}
 
-export const rContentBlockHover = (reduction, obj) => {
+export function rContentBlockHover (reduction, obj) {
     let newStatus = '';
     const haveSubBlock = Boolean(obj.subBlock);
     if (obj.block) {
@@ -138,8 +138,8 @@ export const rContentBlockHover = (reduction, obj) => {
     }
 
     return reduction.setIn(['appState', 'other', 'blockView', 'status'], newStatus);
-};
-export const rContentUpdateBlocks = (reduction, obj) => {
+}
+export function rContentUpdateBlocks(reduction, obj) {
     const loadKey = obj.loadKey;
     const currentLoadKey = reduction.getIn(['appState', 'other', 'blockView', 'loadKey']);
     if (loadKey !== currentLoadKey) {
@@ -163,5 +163,5 @@ export const rContentUpdateBlocks = (reduction, obj) => {
 
     return reduction
         .setIn(['appState', 'other', 'blockView', 'blocks'], blocks);
-};
+}
 

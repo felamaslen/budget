@@ -25,12 +25,12 @@ export const rToggleShowAll = reduction => {
         !reduction.getIn(['appState', 'other', 'showAllBalanceGraph']));
 };
 
-export const rToggleFundItemGraph = (reduction, key) => {
+export function rToggleFundItemGraph(reduction, key) {
     return reduction.setIn(
         ['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'],
         !reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'])
     );
-};
+}
 
 function getCacheData(reduction, period) {
     const rows = reduction.getIn(
