@@ -133,10 +133,10 @@ describe('funds', () => {
 
             const expectedResult = [
                 0,
-                -380 / 15000,
-                -501 / 15200,
-                -1080 / 14000,
-                8 / 10800
+                -100 * 380 / 15000,
+                -100 * 501 / 15200,
+                -100 * 1080 / 14000,
+                100 * 8 / 10800
             ];
 
             expect(result.toJS()).to.deep.equal(expectedResult);
@@ -150,7 +150,7 @@ describe('funds', () => {
             const cacheTimes = testCacheTimes;
 
             const result = rFunds.getFormattedHistory(
-                testRows, mode, pageIndex, startTime, cacheTimes
+                testRows, mode, pageIndex, startTime, cacheTimes, list([null, null])
             );
 
             expect(result.get('fundItems').toJS()).to.deep.equal([

@@ -81,6 +81,10 @@ export const SERVER_UPDATE_ERROR = 0xf93;
 export const MAX_SUGGESTIONS = 5;
 
 const htmlCanvasSupported = () => {
+    if (typeof navigator === 'undefined') {
+        return false;
+    }
+
     if (navigator.userAgent === 'node.js') {
         return false;
     }

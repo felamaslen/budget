@@ -12,7 +12,8 @@ describe('list', () => {
                     pages: list([null, null, null]),
                     other: map({
                         graphFunds: map({
-                            period: 'year1'
+                            period: 'year1',
+                            zoom: list([null, null])
                         })
                     })
                 })
@@ -51,10 +52,11 @@ describe('list', () => {
             };
 
             const result = rList.processPageDataFunds(reduction, pageIndex, data, now);
+
             const other = result.getIn(['appState', 'other']);
 
             expect(other.getIn(['fundHistoryCache', 'year1']))
-                .to.be.a('string').lengthOf.greaterThan(0);
+                .to.be.ok;
 
             expect(other.get('fundsCachedValue')).to.be.ok;
 
