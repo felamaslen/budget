@@ -27,7 +27,11 @@ There is a web-based API written in Node.js, which also runs a web app. The Andr
 
 ### Maintenance:
 
-- To scrape fund values: run script (TODO)
+- Run `npm run install_db` to drop all data and create clean tables in the database
+
+- Run `npm run scrape_funds` to scrape and cache current fund prices
+
+- Run `npm run scrape_holdings` to scrape and cache current fund holdings
 
 ### Development:
 
