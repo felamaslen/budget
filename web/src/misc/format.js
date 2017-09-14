@@ -109,8 +109,10 @@ export class BlockPacker {
                     thisBlockWidth * blockWidth,
                     thisBlockHeight * blockHeight
                 );
+
                 return newBlockBit.set('blocks', thisBlocks.blocks);
             }
+
             return newBlockBit;
         });
 
@@ -136,17 +138,21 @@ export class BlockPacker {
         if (aspect > 1) {
             // wide, so fill the node from the left
             const rowWidth = sum / node.h;
+
             return row.reduce((a, b) => {
                 const thisAspect = rowWidth * rowWidth / b;
                 const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+
                 return worstAspect > a ? worstAspect : a;
             }, 0);
         }
         // tall, so fill the node from the bottom
         const rowHeight = sum / node.w;
+
         return row.reduce((a, b) => {
             const thisAspect = b / (rowHeight * rowHeight);
             const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+
             return worstAspect > a ? worstAspect : a;
         }, 0);
     }
@@ -170,6 +176,7 @@ export const capitalise = string => {
  */
 const round = (value, precision) => {
     const exp = Math.pow(10, precision);
+
     return Math.round(exp * value) / exp;
 };
 
@@ -182,6 +189,14 @@ export const numberFormat = value => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 
+export function getSign(number) {
+    if (number < 0) {
+        return '-';
+    }
+
+    return '';
+}
+
 /**
  * round a number to a certain sig. figs
  * @param {float} value: number to display
@@ -189,24 +204,32 @@ export const numberFormat = value => {
  * @returns {string} formatted number
  */
 export const sigFigs = (value, figs) => {
-    if (!value) {
+    if (value === 0) {
         return value.toFixed(figs - 1);
     }
+
     const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
     const exp = Math.pow(10, Math.min(figs - 1, Math.max(0, figs - numDigits)));
     const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
 
     // add extra zeroes if necessary
     const hasDot = absResult.indexOf('.') > -1;
-    const numDigitsVisible = absResult.length - (hasDot ? 1 : 0);
+    const numDigitsVisible = absResult.length - (hasDot >> 0);
     const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
-    const resultWithZeroes = numTrailingZeroes ?
-        absResult + (hasDot ? '' : '.') +
-    Array.apply(null, new Array(numTrailingZeroes)).map(() => '0').join('')
-        : absResult;
 
-    const sign = value < 0 ? '-' : '';
-    return `${sign}${resultWithZeroes}`;
+    const sign = getSign(value);
+
+    if (numTrailingZeroes > 0) {
+        const dot = hasDot
+            ? ''
+            : '.';
+
+        const zeroes = new Array(numTrailingZeroes).fill('0');
+
+        return `${sign}${absResult}${dot}${zeroes.join('')}`;
+    }
+
+    return `${sign}${absResult}`;
 };
 
 /**
@@ -216,9 +239,19 @@ export const sigFigs = (value, figs) => {
  * @returns {string} formatted number
  */
 export const leadingZeroes = (value, numZeroes) => {
-    const numAdd = numZeroes - Math.floor(Math.log10(value)) - 1;
-    const zeroes = Array.apply(null, new Array(numAdd)).map(() => '0').join('');
-    return `${zeroes}${value}`;
+    const numAdd = value
+        ? numZeroes - Math.floor(Math.log10(value)) - 1
+        : numZeroes - 1;
+
+    if (numAdd > 0) {
+        const zeroes = new Array(numAdd)
+            .fill('0')
+            .join('');
+
+        return `${zeroes}${value}`;
+    }
+
+    return value.toString();
 };
 
 /**
@@ -285,6 +318,7 @@ export const formatCurrency = (value, options) => {
 export const formatPercent = (frac, options) => {
     options.suffix = '%';
     options.noSymbol = true;
+
     return formatCurrency(10000 * frac, options);
 };
 

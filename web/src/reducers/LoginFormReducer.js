@@ -19,6 +19,7 @@ import { rLoadContent } from './ContentReducer';
  */
 export const rLoginFormSubmit = reduction => {
     const pin = reduction.getIn(['appState', 'loginForm', 'values']).join('');
+
     return reduction.setIn(['appState', 'loginForm', 'loading'], true)
         .set('effects', reduction.get('effects').push(
             buildMessage(EF_LOGIN_FORM_SUBMIT, pin)
@@ -78,6 +79,7 @@ export const rLoginFormHandleResponse = (reduction, output) => {
             text: `Login error: ${output.err.response.data.errorMessage}`,
             level: ERROR_LEVEL_ERROR
         });
+
         return rErrorMessageOpen(newReduction, message);
     }
 

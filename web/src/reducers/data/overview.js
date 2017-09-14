@@ -25,21 +25,37 @@ const calculateFutures = (cost, futureCategories, futureMonths, futureKey) => {
             // randomly generate fund income projections
             const oldOffset = categoryCost.size - cost.get('balance').size;
             let Xt = categoryCost.get(oldOffset + futureKey - 1);
-            return categoryCost.slice(oldOffset, oldOffset + futureKey).concat(list(
-                Array.apply(null, new Array(categoryCost.size - oldOffset - futureKey)).map(() => {
-                    Xt *= (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100);
-                    return Math.round(Xt);
-                })
-            ));
+
+            let futureItems = [];
+            if (categoryCost.size > oldOffset + futureKey) {
+                futureItems = new Array(categoryCost.size - oldOffset - futureKey)
+                    .fill(0)
+                    .map(() => {
+                        Xt *= (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100);
+
+                        return Math.round(Xt);
+                    });
+            }
+
+            return categoryCost.slice(oldOffset, oldOffset + futureKey)
+                .concat(list(futureItems))
         }
 
         // find the average value and make predictions based on that
-        const average = Math.round(listAverage(categoryCost, futureMonths, AVERAGE_MEDIAN));
-        const newCost = categoryCost.slice(
-            0, categoryCost.size - futureMonths
-        ).concat(
-            list(Array.apply(null, new Array(futureMonths)).map(() => average))
-        );
+        let futureItems = [];
+
+        if (futureMonths > 0) {
+            const average = Math.round(listAverage(
+                categoryCost, futureMonths, AVERAGE_MEDIAN
+            ));
+
+            futureItems = new Array(futureMonths).fill(average);
+        }
+
+        const newCost = categoryCost
+            .slice(0, categoryCost.size - futureMonths)
+            .concat(list(futureItems));
+
         return newCost;
     });
 };
@@ -57,13 +73,19 @@ const calculateTableData = data => {
     const startMonth = data.get('startYearMonth')[1];
 
     // add month column
-    const months = list(Array.apply(null, new Array(numRows)).map((_, key) => {
-        const yearMonth = getYearMonthFromKey(key, startYear, startMonth);
-        return `${MONTHS_SHORT[yearMonth[1] - 1]}-${yearMonth[0]}`;
-    }));
+    let months = [];
+    if (numRows > 0) {
+        months = new Array(numRows)
+            .fill(0)
+            .map((item, key) => {
+                const yearMonth = getYearMonthFromKey(key, startYear, startMonth);
+
+                return `${MONTHS_SHORT[yearMonth[1] - 1]}-${yearMonth[0]}`;
+            });
+    }
 
     return list.of()
-        .push(months)
+        .push(list(months))
         .push(cost.get('funds'))
         .push(cost.get('bills'))
         .push(cost.get('food'))
@@ -80,9 +102,13 @@ const calculateTableData = data => {
 export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, currentYearMonth, futureMonths) => {
     const numRows = yearMonthDifference(startYearMonth, endYearMonth) + 1;
     const numCols = 1;
-    const yearMonths = Array.apply(null, new Array(numRows)).map((_, key) => {
-        return getYearMonthFromKey(key, startYearMonth[0], startYearMonth[1]);
-    });
+
+    const yearMonths = new Array(numRows)
+        .fill(0)
+        .map((item, key) => getYearMonthFromKey(
+            key, startYearMonth[0], startYearMonth[1]
+        ));
+
     const yearMonthsList = list(yearMonths);
 
     // separate funds into old and displayed
@@ -114,6 +140,7 @@ export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, curr
     // add predicted (random) fund income to the net cash flow
         const fundIncome = key === 0 || key < futureKey ? 0
             : cost.getIn(['funds', key]) - cost.getIn(['funds', key - 1]);
+
         return cost.getIn(['income', key]) - spending.get(key) + fundIncome;
     });
 
@@ -123,10 +150,12 @@ export const rProcessDataOverview = (costMap, startYearMonth, endYearMonth, curr
         if (key > 0 && (key < futureKey ||
                     (key === futureKey) && cost.getIn(['balance', key - 1]) > 0)) {
             lastPredicted = cost.getIn(['balance', key - 1]) + net.get(key);
+
             return lastPredicted;
         }
         const newPredicted = lastPredicted + net.get(key);
         lastPredicted = newPredicted;
+
         return newPredicted;
     });
 

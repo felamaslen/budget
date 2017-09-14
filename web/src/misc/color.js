@@ -13,6 +13,7 @@ export const rgba = values => {
     if (values.length === 4) {
         return `rgba(${roundedValues})`;
     }
+
     return `rgb(${roundedValues})`;
 };
 
@@ -31,6 +32,7 @@ export const getOverviewCategoryColor = () => {
         if (column === 'predicted') {
             return COLOR_CATEGORY.balance;
         }
+
         return null;
     });
 };
@@ -103,6 +105,7 @@ const colorKeyRGB = index => {
     if (index === 0) {
         return [0, 0, 0];
     }
+
     return colorKeyList[index % colorKeyList.length];
 };
 export const colorKey = index => {

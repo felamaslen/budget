@@ -12,6 +12,7 @@ const sortByDate = (a, b) => {
     if (a.get('date') < b.get('date')) {
         return -1;
     }
+
     return 1;
 };
 
@@ -168,6 +169,7 @@ export const indexPoints = (value, key) => [key, value];
 export const getYearMonthFromKey = (key, startYear, startMonth) => {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
     const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed
+
     return [year, month];
 };
 export const getKeyFromYearMonth = (year, month, startYear, startMonth) => {
@@ -182,6 +184,7 @@ export const getKeyFromYearMonth = (year, month, startYear, startMonth) => {
 export const randnBm = () => {
     const u = 1 - Math.random();
     const v = 1 - Math.random();
+
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 };
 
@@ -296,6 +299,7 @@ export function buildQueueRequestList(reduction) {
  */
 export const getNullEditable = pageIndex => {
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
+
     return map({
         row: pageIsList ? -1 : 0,
         col: -1,
@@ -316,6 +320,7 @@ export const getAddDefaultValues = pageIndex => {
     if (!LIST_COLS_PAGES[pageIndex]) {
         return list.of();
     }
+
     return list(LIST_COLS_PAGES[pageIndex].map(column => {
         if (column === 'date') {
             return new YMD();
@@ -330,6 +335,7 @@ export const getAddDefaultValues = pageIndex => {
         if (column === 'transactions') {
             return new TransactionsList(list.of(), true);
         }
+
         return null;
     }));
 };
@@ -356,11 +362,13 @@ export const sortRowsByDate = (rows, pageIndex) => {
         if (a.get('id') > b.get('id')) {
             return -1;
         }
+
         return 1;
     }).map(row => {
         const thisFuture = row.getIn(['cols', dateKey]) > today;
         const thisLastFuture = lastFuture;
         lastFuture = thisFuture;
+
         return row
             .set('future', thisFuture)
             .set('first-present', !thisFuture && thisLastFuture);
@@ -376,6 +384,7 @@ export const sortRowsByDate = (rows, pageIndex) => {
             if (lastInDay) {
                 dailySum = 0;
             }
+
             return newRow;
         });
     }

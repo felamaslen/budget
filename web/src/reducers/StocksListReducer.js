@@ -72,6 +72,7 @@ function updateStock(item, row, loadedInitial) {
     }
     const up = loadedInitial && newGain > item.get('gain');
     const down = loadedInitial && newGain < item.get('gain');
+
     return item.set('gain', newGain).set('up', up).set('down', down);
 }
 
@@ -123,6 +124,7 @@ export function rHandleStocksPricesResponse(reduction, response) {
                 if (interval < last[1]) {
                     return [key, interval];
                 }
+
                 return last;
             }, [1, Infinity])[0] + 1;
 

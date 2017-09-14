@@ -16,6 +16,7 @@ const pmod = (i, n) => ((i % n) + n) % n;
 
 const monthDays = (month, year) => {
     const days = [31, leapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
     return days[month - 1];
 };
 
@@ -85,6 +86,7 @@ export class YMD {
     }
     format() {
         const numbers = this.formatNumbers();
+
         return `${numbers[2]}/${numbers[1]}/${numbers[0]}`;
     }
     valueOf() {
@@ -221,6 +223,7 @@ class TimeTickMinuteHour extends TimeTick {
     label(t) {
         const obj = new Date(t);
         const hour = obj.getHours();
+
         return hour === 0 ? WEEK_DAYS[obj.getDay()] : ((hour + 11) % 12 + 1) + (hour < 12 ? 'am' : 'pm');
     }
 }
@@ -236,6 +239,7 @@ class TimeTickSecondMinute extends TimeTick {
     start(obj) {
         const time = Math.floor(obj.getTime() / 1000 / this.tick) * 1000 * this.tick;
         const index = this.getIndex(obj) % this.major;
+
         return { time, index };
     }
     next(i, t) {
@@ -270,6 +274,7 @@ class TimeTickSecondMinute2 extends TimeTickSecondMinute {
     getIndex(obj) {
         const seconds = obj.getSeconds();
         const minutes = obj.getMinutes();
+
         return (seconds + minutes * 60);
     }
 }

@@ -28,6 +28,7 @@ import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksLis
 const apiPrefix = `api/v${API_VERSION}`;
 
 export default buildEffectHandler([
+
     /**
    * submit the user login form
    * @param {string} pin: the pin to send to the API for authorisation

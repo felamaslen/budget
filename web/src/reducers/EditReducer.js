@@ -30,7 +30,7 @@ function recalculateFundProfits(reduction, pageIndex) {
 
     return reduction
         .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps);
-};
+}
 
 const overviewKey = PAGES.indexOf('overview');
 const applyEditsOverview = (reduction, item) => {
@@ -128,6 +128,7 @@ const applyEdits = (reduction, item, pageIndex) => {
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
         return applyEditsList(reduction, item, pageIndex);
     }
+
     return reduction;
 };
 
@@ -234,6 +235,7 @@ export const rAddListItem = (reduction, items) => {
 
     const valid = theItems.reduce((a, b) => {
         const thisValid = b.item === 'item' ? b.value.length > 0 : true; // others are self-validating
+
         return thisValid ? a : false;
     }, true);
 
@@ -313,6 +315,7 @@ export const rHandleServerAdd = (reduction, response) => {
 
     // go back to the add form to add a new item
     const now = new YMD();
+
     return newReduction.setIn(['appState', 'edit', 'add'], getAddDefaultValues(pageIndex))
         .setIn(['appState', 'edit', 'active'], map({
             row: -1,
@@ -338,6 +341,7 @@ export const rHandleSuggestions = (reduction, obj) => {
             .setIn(['appState', 'edit', 'suggestions', 'list'], list.of())
             .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
     }
+
     return newReduction.setIn(['appState', 'edit', 'suggestions', 'list'], obj.items);
 };
 
@@ -358,6 +362,7 @@ export const rRequestSuggestions = (reduction, value) => {
     const reqId = uuid(); // for keeping track of EditItem requests
 
     const req = { reqId, apiKey, page, column, value };
+
     return reduction.set('effects', reduction.get('effects').push(
         buildMessage(EF_SUGGESTIONS_REQUESTED, req)
     ))
@@ -384,7 +389,7 @@ function rFundTransactions(reduction, row, col, callback) {
     return reduction.setIn(
         ['appState', 'edit', 'add', col], transactions
     );
-};
+}
 
 export const rChangeFundTransactions = (reduction, item) => {
     return rFundTransactions(reduction,
@@ -394,7 +399,7 @@ export const rChangeFundTransactions = (reduction, item) => {
 export function rAddFundTransactions(reduction, item) {
     return rFundTransactions(reduction,
         item.row, item.col, transactions => transactions.push(item));
-};
+}
 
 export const rRemoveFundTransactions = (reduction, item) => {
     return rFundTransactions(reduction,

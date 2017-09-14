@@ -125,7 +125,7 @@ export const rHandleContentResponse = (reduction, output) => {
 
 export const rContentBlockHover = (reduction, obj) => {
     let newStatus = '';
-    const haveSubBlock = !!obj.subBlock;
+    const haveSubBlock = Boolean(obj.subBlock);
     if (obj.block) {
         const theBlock = haveSubBlock ? obj.subBlock : obj.block;
         const value = formatCurrency(theBlock.get('value'), { raw: true });
@@ -136,6 +136,7 @@ export const rContentBlockHover = (reduction, obj) => {
             newStatus = `${capitalise(obj.block.get('name'))} (${value})`;
         }
     }
+
     return reduction.setIn(['appState', 'other', 'blockView', 'status'], newStatus);
 };
 export const rContentUpdateBlocks = (reduction, obj) => {

@@ -39,6 +39,7 @@ const getItemValue = (reduction, pageIndex, row, col) => {
             item = LIST_COLS_PAGES[pageIndex][col];
         }
     }
+
     return { id, item, value };
 };
 
@@ -52,6 +53,7 @@ const getItemValue = (reduction, pageIndex, row, col) => {
 const handleSuggestionsNav = (reduction, direction, suggestions) => {
     const newActive = ((suggestions.get('active') + 1 + direction) %
                      (suggestions.get('list').size + 1)) - 1;
+
     return reduction.setIn(['appState', 'edit', 'suggestions', 'active'], newActive);
 };
 
@@ -147,6 +149,7 @@ const getNavDirection = (key, shift) => {
     if (arrowIndex > -1) {
         return [((arrowIndex % 4) - 1) % 2, (((arrowIndex - 1) % 4) - 1) % 2];
     }
+
     return [0, 0];
 };
 
@@ -200,12 +203,14 @@ export const rHandleKeyPress = (reduction, evt) => {
             // submit on enter
             return rActivateEditable(reduction, null);
         }
+
         return reduction;
     }
     // not logged in
     if (evt.key === 'Escape') {
         return rLoginFormReset(reduction, 0);
     }
+
     return rLoginFormInput(reduction, evt.key);
 };
 
@@ -219,6 +224,7 @@ export const rLogout = reduction => {
         return reduction;
     }
     Cookies.remove('pin');
+
     return reduction.set('appState', resetAppState(reduction.get('appState')));
 };
 
@@ -272,6 +278,7 @@ export const rNavigateToPage = (reduction, pageIndex) => {
     if (PAGES[pageIndex] === 'analysis') {
         newReduction = reloadAnalysis(newReduction, newReduction);
     }
+
     return loadBlocks(newReduction, pageIndex);
 };
 

@@ -90,7 +90,8 @@ const htmlCanvasSupported = () => {
     }
 
     const elem = document.createElement('canvas');
-    return !!(elem.getContext && elem.getContext('2d'));
+
+    return Boolean(elem.getContext && elem.getContext('2d'));
 };
 export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
 export const GRAPH_WIDTH = 500;

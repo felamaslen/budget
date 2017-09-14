@@ -26,6 +26,7 @@ const getBlocks = (cost, treeVisible) => {
         return treeVisible.has(item.get('name')) ? treeVisible.get(item.get('name')) : true;
     }) : cost;
     const packer = new BlockPacker(blockData, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
+
     return packer.blocks;
 };
 
@@ -105,10 +106,11 @@ export const rAnalysisHandleNewData = (reduction, response) => {
         .setIn(['appState', 'other', 'blockView', 'loadKey'], null)
         .setIn(['appState', 'other', 'blockView', 'status'], '');
 
-    const deep = !!response.deepBlock;
+    const deep = Boolean(response.deepBlock);
     if (deep) {
         const cost = getCost(fromJS(response.data.data.items));
         const blocks = getBlocks(cost);
+
         return newReduction
             .setIn(['appState', 'other', 'blockView', 'blocks'], blocks)
             .setIn(['appState', 'other', 'blockView', 'deep'], response.deepBlock);
@@ -154,6 +156,7 @@ export const rAnalysisBlockClick = (reduction, name) => {
         const timeIndex = reduction.getIn(['appState', 'other', 'analysis', 'timeIndex']);
 
         const reqObj = { apiKey, name, period, grouping, timeIndex };
+
         return reduction
             .setIn(['appState', 'other', 'analysis', 'loading'], true)
             .set('effects', reduction.get('effects').push(

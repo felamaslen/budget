@@ -18,6 +18,7 @@ export const rErrorMessageClose = (reduction, msgId) => {
             if (msg.get('id') === msgId) {
                 return msg.set('closed', true);
             }
+
             return msg;
         }));
 };
