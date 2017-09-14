@@ -13,9 +13,11 @@ Object.keys(window).forEach(property => {
     }
 });
 
-global.nvagiator = {
+global.navigator = {
     userAgent: 'node.js'
 };
+
+global.HTMLElement = global.window.HTMLElement;
 
 documentRef = document; // eslint-disable-line no-undef
 
