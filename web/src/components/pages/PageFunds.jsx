@@ -33,7 +33,12 @@ export class PageFunds extends PageList {
         const cost = this.props.data.getIn(['data', 'total']);
         const value = this.props.cachedValue.get('value');
         const total = this.props.data.getIn(['data', 'total']);
-        const gainPct = formatPercent((value - total) / total, {
+
+        const gain = total
+            ? (value - total) / total
+            : 0;
+
+        const gainPct = formatPercent(gain, {
             brackets: true, precision: 2
         });
 
