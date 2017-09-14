@@ -15,22 +15,25 @@ export class LoginForm extends PureControllerView {
         this.dispatchAction(aLoginFormInputted(digit));
     }
     renderNumberInput() {
-        const digits = Array.apply(null, new Array(10)).map((_, key) => {
+        const digits = Array(...new Array(10)).map((_, key) => {
             const digit = (key + 1) % 10;
             const btnClass = `btn-digit btn-digit-${digit}`;
+
             return (
                 <button key={key} className={btnClass}
                     onClick={() => this.input(digit)}>{digit}</button>
             );
         });
-        return <div className='number-input noselect'>{digits}</div>;
+
+        return <div className="number-input noselect">{digits}</div>;
     }
     render() {
         const numberInput = this.renderNumberInput();
+
         return (
-            <div id='login-form'>
+            <div id="login-form">
                 <h3>Enter your PIN:</h3>
-                {Array.apply(null, new Array(LOGIN_INPUT_LENGTH)).map((_, key) => {
+                {Array(...new Array(LOGIN_INPUT_LENGTH)).map((_, key) => {
                     return (
                         <div key={key} className={classNames({
                             'input-pin': true,

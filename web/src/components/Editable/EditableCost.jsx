@@ -22,6 +22,7 @@ export default class EditableCost extends Editable {
         if (isNaN(value)) {
             return this.props.value;
         }
+
         return value;
     }
 }

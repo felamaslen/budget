@@ -16,6 +16,7 @@ export default class EditableDate extends Editable {
     }
     getEditValue(rawInputValue) {
         const ymd = new YMD(rawInputValue);
+
         return ymd.valid ? ymd : this.props.value;
     }
 }

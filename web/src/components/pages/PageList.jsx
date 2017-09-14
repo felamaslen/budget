@@ -24,22 +24,22 @@ export class PageList extends PureControllerView {
     renderListHead() {
         const daily = this.props.daily ? (
             <span>
-                <span className='daily'>Daily</span>
-                <span className='weekly'>Weekly:</span>
-                <span className='weekly-value'>{formatCurrency(
+                <span className="daily">Daily</span>
+                <span className="weekly">Weekly:</span>
+                <span className="weekly-value">{formatCurrency(
                     this.props.data.getIn(['data', 'weekly']), { abbreviate: true, precision: 1 }
                 )}</span>
             </span>
         ) : null;
 
         return (
-            <div className='list-head noselect'>
+            <div className="list-head noselect">
                 {LIST_COLS_PAGES[this.props.index].map((column, key) => {
                     return <span key={key} className={column}>{column}</span>;
                 })}
                 {daily}
-                <span className='total'>Total:</span>
-                <span className='total-value'>{formatCurrency(
+                <span className="total">Total:</span>
+                <span className="total-value">{formatCurrency(
                     this.props.data.getIn(['data', 'total']), { abbreviate: true, precision: 1 }
                 )}</span>
                 {this.listHeadExtra()}
@@ -48,8 +48,9 @@ export class PageList extends PureControllerView {
     }
     renderLiAdd() {
         this.addItems = [];
+
         return (
-            <li className='li-add'>
+            <li className="li-add">
                 {LIST_COLS_PAGES[this.props.index].map((column, key) => {
                     const value = this.props.add.get(key);
                     const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
@@ -63,6 +64,7 @@ export class PageList extends PureControllerView {
                         [column]: true,
                         active
                     });
+
                     return (
                         <span key={key} className={spanClasses}>
                             {editItem}
@@ -70,7 +72,7 @@ export class PageList extends PureControllerView {
                     );
                 })}
                 <span>
-                    <button ref='addBtn' onClick={() => { this.addItem(); }}>Add</button>
+                    <button ref="addBtn" onClick={() => { this.addItem(); }}>Add</button>
                 </span>
             </li>
         );
@@ -86,7 +88,7 @@ export class PageList extends PureControllerView {
             const id = row.get('id');
 
             const deleteBtn = (
-                <span className='delete'>
+                <span className="delete">
                     <a onClick={() => {
                         this.dispatchAction(aListItemDeleted({
                             pageIndex: this.props.index,
@@ -108,6 +110,7 @@ export class PageList extends PureControllerView {
                     [column]: true,
                     active
                 });
+
                 return (
                     <span key={colKey} className={spanClasses}>
                         {editItem}
@@ -118,7 +121,7 @@ export class PageList extends PureControllerView {
             const dailyText = this.props.daily && row.has('daily')
                 ? formatCurrency(row.get('daily')) : null;
             const daily = this.props.daily ? (
-                <span className='daily'>{dailyText}</span>
+                <span className="daily">{dailyText}</span>
             ) : null;
 
             const itemClasses = this.listItemClasses(row);
@@ -165,8 +168,9 @@ export class PageList extends PureControllerView {
         if (!this.props.blocks.get('blocks')) {
             return null;
         }
+
         return (
-            <div className='graph-container-outer'>
+            <div className="graph-container-outer">
                 {this.blockTree()}
             </div>
         );
@@ -182,7 +186,7 @@ export class PageList extends PureControllerView {
             <div>
                 <div className={listClasses}>
                     {this.renderListHead()}
-                    <ul className='list-ul'>
+                    <ul className="list-ul">
                         {this.renderLiAdd()}
                         {this.renderList()}
                     </ul>

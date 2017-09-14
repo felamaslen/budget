@@ -36,9 +36,11 @@ export class GraphSpend extends LineGraph {
         // data is a list of columns
         this.data = this.props.data.first().map((point, monthKey) => {
             let sum = 0;
+
             return this.props.categories.map((category, categoryKey) => {
                 const thisItem = Math.max(0, this.props.data.getIn([categoryKey, monthKey]));
                 sum += thisItem;
+
                 return sum;
             }).reverse();
         });
@@ -64,7 +66,7 @@ export class GraphSpend extends LineGraph {
             return null;
         }
 
-        const ticksX = Array.apply(null, new Array(numTicksX)).map((_, key) => {
+        const ticksX = Array(...new Array(numTicksX)).map((_, key) => {
             const tickPos = Math.floor(this.pixX(key + 1)) + 0.5;
             // draw vertical lines
             this.ctx.beginPath();
@@ -85,7 +87,7 @@ export class GraphSpend extends LineGraph {
         }
 
         const firstTick = Math.ceil(this.minY / tickSize) * tickSize;
-        const ticksY = Array.apply(null, new Array(numTicksY)).map((_, key) => {
+        const ticksY = Array(...new Array(numTicksY)).map((_, key) => {
             const value = firstTick + key * tickSize;
             const pos = Math.floor(this.pixY(value)) + 0.5;
 
@@ -127,8 +129,8 @@ export class GraphSpend extends LineGraph {
         const tickAngle = -Math.PI * 0.29;
         const y0 = this.pixY(this.minY) + 10;
         axes.ticksX.forEach(tick => {
-            const tickName = MONTHS_SHORT[this.props.yearMonths[tick[0]][1] - 1] + '-' +
-        (this.props.yearMonths[tick[0]][0] % 100).toString();
+            const tickName = `${MONTHS_SHORT[this.props.yearMonths[tick[0]][1] - 1]}-${
+                (this.props.yearMonths[tick[0]][0] % 100).toString()}`;
 
             this.ctx.save();
             this.ctx.translate(this.pixX(tick[0] + 1), y0);

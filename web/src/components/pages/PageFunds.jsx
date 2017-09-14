@@ -50,10 +50,10 @@ export class PageFunds extends PageList {
 
         return (
             <span className={classes} onClick={() => this.dispatchAction(aFundsGraphPeriodChanged(null, true))}>
-                <span className='gain-info'>Current value:</span>
+                <span className="gain-info">Current value:</span>
                 <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
                 <span>{gainPct}</span>
-                <span className='gain-info'>({this.props.cachedValue.get('ageText')})</span>
+                <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
             </span>
         );
     }
@@ -103,8 +103,8 @@ export class PageFunds extends PageList {
 
         return (
             <span>
-                <span className='fund-graph'>
-                    <div className='fund-graph-cont'>
+                <span className="fund-graph">
+                    <div className="fund-graph-cont">
                         <GraphFundItem dispatcher={this.props.dispatcher}
                             width={width}
                             height={height}
@@ -115,9 +115,9 @@ export class PageFunds extends PageList {
                         />
                     </div>
                 </span>
-                <span className='gain'>
+                <span className="gain">
                     <span className={gainOuterClasses} style={gainStyle}>
-                        <span className='value'>
+                        <span className="value">
                             {formatCurrency(gain.get('value'), formatOptions)}
                         </span>
                         <span className={gainAbsClasses}>
@@ -151,9 +151,9 @@ export class PageFunds extends PageList {
         ) : null;
 
         return (
-            <div className='graph-container-outer'>
+            <div className="graph-container-outer">
                 <GraphFunds dispatcher={this.props.dispatcher}
-                    name='fund-history'
+                    name="fund-history"
                     width={GRAPH_FUNDS_WIDTH}
                     height={GRAPH_FUNDS_HEIGHT}
                     fundItems={this.props.graphProps.getIn(['data', 'fundItems'])}

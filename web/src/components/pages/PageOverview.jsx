@@ -25,9 +25,9 @@ export class PageOverview extends PureControllerView {
     render() {
         const rows = this.props.data.get('rows').map((row, key) => {
             const rowClasses = classNames({
-                past: !!row.get('past'),
-                active: !!row.get('active'),
-                future: !!row.get('future')
+                past: Boolean(row.get('past')),
+                active: Boolean(row.get('active')),
+                future: Boolean(row.get('future'))
             });
 
             const cells = row.get('cells').map((cell, cellKey) => {
@@ -49,7 +49,7 @@ export class PageOverview extends PureControllerView {
                 }
                 else {
                     const value = cellKey > 0 ? this.format(cell.get('value'), true) : cell.get('value');
-                    span = <span className='text'>{value}</span>;
+                    span = <span className="text">{value}</span>;
                 }
 
                 return (
@@ -68,7 +68,7 @@ export class PageOverview extends PureControllerView {
 
         return (
             <div>
-                <table className='table-insert table-overview noselect'>
+                <table className="table-insert table-overview noselect">
                     <thead>
                         <tr>
                             {OVERVIEW_COLUMNS.map((column, key) => <th key={key}>{column[1]}</th>)}
@@ -78,10 +78,10 @@ export class PageOverview extends PureControllerView {
                         {rows}
                     </tbody>
                 </table>
-                <div className='graph-container-outer'>
+                <div className="graph-container-outer">
                     <GraphBalance dispatcher={this.props.dispatcher}
                         width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
-                        name='balance'
+                        name="balance"
                         startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
                         currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
                         yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
@@ -92,7 +92,7 @@ export class PageOverview extends PureControllerView {
                         fundsOld={this.props.data.getIn(['data', 'cost', 'fundsOld'])} />
                     <GraphSpend dispatcher={this.props.dispatcher}
                         width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
-                        name='spend'
+                        name="spend"
                         categories={list(GRAPH_SPEND_CATEGORIES)}
                         data={graphSpendData}
                         income={this.props.data.getIn(['data', 'cost', 'income']).slice(-GRAPH_SPEND_NUM_ITEMS)}

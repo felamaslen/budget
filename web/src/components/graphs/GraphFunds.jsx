@@ -104,8 +104,9 @@ export class GraphFunds extends LineGraph {
     }
     formatValue(value) {
         if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-            return value.toFixed(2) + '%';
+            return `${value.toFixed(2)}%`;
         }
+
         return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
     }
     drawAxes() {
@@ -129,11 +130,12 @@ export class GraphFunds extends LineGraph {
         }
 
         // calculate tick range
-        const numTicks = isNaN(this.tickSizeY) ? 0 :
-            Math.floor((this.maxY - this.minY) / this.tickSizeY);
-        const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
+        const numTicks = isNaN(this.tickSizeY) ? 0
+            : Math.floor((this.maxY - this.minY) / this.tickSizeY);
+        const ticksY = Array(...new Array(numTicks)).map((_, key) => {
             const value = this.minY + (key + 1) * this.tickSizeY;
             const pos = Math.floor(this.pixY(value)) + 0.5;
+
             return { value, pos };
         });
 
@@ -296,7 +298,7 @@ export class GraphFunds extends LineGraph {
 
         return (
             <div>
-                <ul className='fund-sidebar noselect'>
+                <ul className="fund-sidebar noselect">
                     <li>
                         <select defaultValue={this.props.period} onChange={onChange}>
                             {periodOptions}
@@ -304,7 +306,7 @@ export class GraphFunds extends LineGraph {
                     </li>
                     {fundLineToggles}
                 </ul>
-                <span className='mode'>
+                <span className="mode">
           Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
                 </span>
             </div>

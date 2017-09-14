@@ -57,11 +57,13 @@ export class GraphBalance extends LineGraph {
             if (thisJump > last[0]) {
                 return [thisJump, value];
             }
+
             return last;
         }, [0, 0])[0];
         this.tension = maxJump > 10 * minYValue ? 1 : 0.5;
     }
     processData() {
+
     /**
      * this doesn't really modify the data, it just puts it in a form ready for drawing
      */
@@ -82,6 +84,7 @@ export class GraphBalance extends LineGraph {
 
         this.dataBalance = dataBalance.map((value, key) => {
             const time = this.getTime(key, oldOffset);
+
             return list([time, value]);
         });
 
@@ -117,7 +120,7 @@ export class GraphBalance extends LineGraph {
         }
 
         const tickSize = getTickSize(this.minY, this.maxY, numTicks);
-        const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
+        const ticksY = Array(...new Array(numTicks)).map((_, key) => {
             const pos = Math.floor(this.pixY(key * tickSize)) + 0.5;
             const major = key % minorTicks === 0;
             const value = key * tickSize * 100;
@@ -271,7 +274,7 @@ export class GraphBalance extends LineGraph {
         return (
             <span className={showAllClasses} onClick={() => this.dispatchAction(aShowAllToggled())}>
                 <span>Show all</span>
-                <a className='checkbox' />
+                <a className="checkbox" />
             </span>
         );
     }

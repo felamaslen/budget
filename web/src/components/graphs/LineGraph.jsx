@@ -14,7 +14,7 @@ const h11 = t => Math.pow(t, 2) * (t - 1);
 const hermiteF = (x, xk1, yk1, xk2, yk2, mk1, mk2) => {
     const t = (x - xk1) / (xk2 - xk1);
 
-    return  h00(t) * yk1 +
+    return h00(t) * yk1 +
           h10(t) * (xk2 - xk1) * mk1 +
           h01(t) * yk2 +
           h11(t) * (xk2 - xk1) * mk2;
@@ -28,8 +28,8 @@ export class LineGraph extends Graph {
         this.tension = 0.5; // for cubic lines
     }
     pixX(x) {
-        return this.padding[3] + (x - this.minX) / (this.maxX - this.minX)
-      * (this.width - this.padding[3] - this.padding[1]);
+        return this.padding[3] + (x - this.minX) / (this.maxX - this.minX) *
+      (this.width - this.padding[3] - this.padding[1]);
     }
     valX(pix) {
         return (pix - this.padding[3]) * (this.maxX - this.minX) /
@@ -55,6 +55,7 @@ export class LineGraph extends Graph {
         const ticks = timeSeriesTicks(
             offset + this.minX, offset + this.maxX
         );
+
         return ticks ? ticks.map(tick => {
             return {
                 major: tick.major,
@@ -80,6 +81,7 @@ export class LineGraph extends Graph {
             if (key === secants.size) {
                 return secants.last();
             }
+
             return (1 - tension) * (secants.get(key - 1) + secants.get(key));
         });
 
@@ -98,7 +100,7 @@ export class LineGraph extends Graph {
             if (!numPoints) {
                 return list.of();
             }
-            const curvePiece = list(Array.apply(null, new Array(numPoints)).map((_, pieceKey) => {
+            const curvePiece = list(Array(...new Array(numPoints)).map((_, pieceKey) => {
                 const xValue = this.valX(xPixel + pieceKey);
                 const yValue1 = points.getIn([key, 1]);
                 const yValue2 = points.getIn([key + 1, 1]);
@@ -110,6 +112,7 @@ export class LineGraph extends Graph {
             }));
 
             xValue1 = xValue2;
+
             return curvePiece;
         });
 

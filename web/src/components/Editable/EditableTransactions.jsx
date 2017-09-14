@@ -152,14 +152,14 @@ export default class EditableTransactions extends Editable {
         });
 
         return (
-            <div className='modal'>
-                <div className='inner'>
+            <div className="modal">
+                <div className="inner">
                     <table>
                         <thead>
                             <tr>
                                 <th>Date</th>
                                 <th>Units</th>
-                                <th colSpan='2'>Cost</th>
+                                <th colSpan="2">Cost</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -187,7 +187,7 @@ export default class EditableTransactions extends Editable {
 
         return (
             <span>
-                <span className='num-transactions'>{size}</span>
+                <span className="num-transactions">{size}</span>
                 {modal}
             </span>
         );

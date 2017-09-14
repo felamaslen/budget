@@ -19,10 +19,10 @@ export class Graph extends PureControllerView {
         this.outerProperties = {};
     }
     update() {
-        return;
+
     }
     draw() {
-        return;
+
     }
     beforeCanvas() {
         return null;
@@ -46,7 +46,7 @@ export class Graph extends PureControllerView {
     render() {
         const classes = `graph-container graph-${this.props.name}`;
         const canvas = HTML_CANVAS_SUPPORTED ? (
-            <canvas ref='canvas' {...this.canvasProperties}
+            <canvas ref="canvas" {...this.canvasProperties}
                 className={this.canvasClasses()}
                 width={this.props.width} height={this.props.height} />
         ) : (

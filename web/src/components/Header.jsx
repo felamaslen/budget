@@ -24,6 +24,7 @@ export class Header extends PureControllerView {
     navToPage(page) {
         this.dispatchAction(aPageNavigatedTo(page));
     }
+
     /**
    * render a navigation bar with links to different pages
    * @returns {object} React <ul> element
@@ -53,7 +54,7 @@ export class Header extends PureControllerView {
             <ul className="nav-list noselect">
                 {pageLinksList}
                 <li>
-                    <a className='nav-link' id='nav-link-logout' onClick={() => this.logout()}>Log out</a>
+                    <a className="nav-link" id="nav-link-logout" onClick={() => this.logout()}>Log out</a>
                 </li>
             </ul>
         );

@@ -33,6 +33,7 @@ export const getEditable = (
         if (!value) {
             value = 0;
         }
+
         return <EditableCost dispatcher={dispatcher} row={row} col={col}
             id={id} item={item} value={value} pageIndex={pageIndex} active={active} />;
 

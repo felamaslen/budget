@@ -15,7 +15,7 @@ export class BlockView extends PureControllerView {
 
         const blocks = this.props.blocks ? this.props.blocks.map((group, groupKey) => {
             return (
-                <div key={groupKey} className='block-group' style={{
+                <div key={groupKey} className="block-group" style={{
                     width: group.get('width'), height: group.get('height')
                 }}>
                     {group.get('bits').map((block, blockKey) => {
@@ -44,7 +44,7 @@ export class BlockView extends PureControllerView {
                             });
 
                             return (
-                                <div key={subBlockGroupKey} className='block-group' style={{
+                                <div key={subBlockGroupKey} className="block-group" style={{
                                     width: subBlockGroup.get('width'), height: subBlockGroup.get('height')
                                 }}>{blockBits}</div>
                             );
@@ -61,12 +61,12 @@ export class BlockView extends PureControllerView {
         }) : null;
 
         return (
-            <div className='block-view' onMouseOut={() => this.props.onBlockHover(null, null) }>
-                <div className='block-tree-outer'>
+            <div className="block-view" onMouseOut={() => this.props.onBlockHover(null, null) }>
+                <div className="block-tree-outer">
                     <div className={this.props.blockClasses}>{blocks}</div>
                 </div>
-                <div className='status-bar'>
-                    <span className='inner'>{this.props.status}</span>
+                <div className="status-bar">
+                    <span className="inner">{this.props.status}</span>
                 </div>
             </div>
         );
@@ -77,7 +77,7 @@ export class BlockViewShallow extends PureControllerView {
     render() {
         const blocks = this.props.blocks ? this.props.blocks.map((group, groupKey) => {
             return (
-                <div key={groupKey} className='block-group' style={{
+                <div key={groupKey} className="block-group" style={{
                     width: group.get('width'), height: group.get('height')
                 }}>
                     {group.get('bits').map((block, blockKey) => {
@@ -100,14 +100,14 @@ export class BlockViewShallow extends PureControllerView {
         }) : null;
 
         return (
-            <div className='block-view graph-container' onMouseOut={() => {
+            <div className="block-view graph-container" onMouseOut={() => {
                 this.props.onBlockHover(null, null);
             }}>
-                <div className='block-tree-outer'>
+                <div className="block-tree-outer">
                     <div className={this.props.blockClasses}>{blocks}</div>
                 </div>
-                <div className='status-bar'>
-                    <span className='inner'>{this.props.status}</span>
+                <div className="status-bar">
+                    <span className="inner">{this.props.status}</span>
                 </div>
             </div>
         );
