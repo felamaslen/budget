@@ -46,9 +46,9 @@ export default class EditableTransactions extends Editable {
             .getIn([key, 'date'])
             .format();
     }
-    onDateChange(row, col, key, value) {
-        const ymd = new YMD(value);
-        if (ymd.valid) {
+    onDateChange(row, col, key, rawValue) {
+        const value = new YMD(rawValue);
+        if (value.valid) {
             this.dispatchAction(aFundTransactionsChanged({
                 row, col, key, column: 'date', value
             }));

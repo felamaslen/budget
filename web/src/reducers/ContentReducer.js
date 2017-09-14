@@ -5,7 +5,9 @@
 import { List as list, Map as map } from 'immutable';
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
+import { rErrorMessageOpen } from './ErrorReducer';
 import {
+    ERROR_LEVEL_WARN,
     PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS
 } from '../misc/const';
 import { LIST_BLOCK_WIDTH, LIST_BLOCK_HEIGHT } from '../misc/config';
@@ -127,14 +129,15 @@ export function rContentBlockHover (reduction, obj) {
     let newStatus = '';
     const haveSubBlock = Boolean(obj.subBlock);
     if (obj.block) {
-        const theBlock = haveSubBlock ? obj.subBlock : obj.block;
+        const theBlock = haveSubBlock
+            ? obj.subBlock
+            : obj.block;
+
         const value = formatCurrency(theBlock.get('value'), { raw: true });
-        if (haveSubBlock) {
-            newStatus = `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`;
-        }
-        else {
-            newStatus = `${capitalise(obj.block.get('name'))} (${value})`;
-        }
+
+        newStatus = haveSubBlock
+            ? `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`
+            : `${capitalise(obj.block.get('name'))} (${value})`;
     }
 
     return reduction.setIn(['appState', 'other', 'blockView', 'status'], newStatus);
@@ -148,7 +151,10 @@ export function rContentUpdateBlocks(reduction, obj) {
     }
 
     if (obj.response.data.error) {
-        return reduction; // TODO
+        return rErrorMessageOpen(reduction, map({
+            text: `Error loading blocks: ${obj.response.data.errorMessage}`,
+            level: ERROR_LEVEL_WARN
+        }));
     }
 
     const dataItem = obj.response.data.data.list[0];

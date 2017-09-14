@@ -228,15 +228,19 @@ export function rAddListItem(reduction, items) {
 
     const theItems = items.map(column => {
         const item = column.props.item;
-        const value = item === activeItem ? activeValue : column.props.value;
+        const value = item === activeItem
+            ? activeValue
+            : column.props.value;
 
         return { item, value };
     });
 
-    const valid = theItems.reduce((a, b) => {
-        const thisValid = b.item === 'item' ? b.value.length > 0 : true; // others are self-validating
+    const valid = theItems.reduce((status, item) => {
+        if (item.item !== 'item' || item.value.length > 0) {
+            return status;
+        }
 
-        return thisValid ? a : false;
+        return false;
     }, true);
 
     if (!valid) {
@@ -316,7 +320,8 @@ export function rHandleServerAdd(reduction, response) {
     // go back to the add form to add a new item
     const now = new YMD();
 
-    return newReduction.setIn(['appState', 'edit', 'add'], getAddDefaultValues(pageIndex))
+    return newReduction
+        .setIn(['appState', 'edit', 'add'], getAddDefaultValues(pageIndex))
         .setIn(['appState', 'edit', 'active'], map({
             row: -1,
             col: 0,
@@ -325,7 +330,8 @@ export function rHandleServerAdd(reduction, response) {
             item: 'date',
             value: now,
             originalValue: now
-        })).setIn(['appState', 'edit', 'addBtnFocus'], false);
+        }))
+        .setIn(['appState', 'edit', 'addBtnFocus'], false);
 }
 
 export function rHandleSuggestions(reduction, obj) {
@@ -370,13 +376,18 @@ export function rRequestSuggestions(reduction, value) {
         .setIn(['appState', 'edit', 'suggestions', 'reqId'], reqId);
 }
 
-function rFundTransactions(reduction, row, col, callback) {
+function getTransactionsForRow(reduction, row, col) {
     const pageIndex = PAGES.indexOf('funds');
-    const transactions = callback(reduction.getIn(
-        row > -1
-            ? ['appState', 'pages', pageIndex, 'rows', row, 'cols', col]
-            : ['appState', 'edit', 'add', col]
-    ));
+
+    if (row > -1) {
+        return reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
+    }
+
+    return reduction.getIn(['appState', 'edit', 'add', col]);
+}
+
+function rFundTransactions(reduction, row, col, transactions) {
+    const pageIndex = PAGES.indexOf('funds');
 
     if (row > -1) {
         return reduction.setIn(
@@ -392,17 +403,23 @@ function rFundTransactions(reduction, row, col, callback) {
 }
 
 export function rChangeFundTransactions(reduction, item) {
-    return rFundTransactions(reduction,
-        item.row, item.col, transactions => transactions.setIn([item.key, item.column], item.value));
+    const transactions = getTransactionsForRow(reduction, item.row, item.col)
+        .setIn([item.key, item.column], item.value);
+
+    return rFundTransactions(reduction, item.row, item.col, transactions);
 }
 
 export function rAddFundTransactions(reduction, item) {
-    return rFundTransactions(reduction,
-        item.row, item.col, transactions => transactions.push(item));
+    const transactions = getTransactionsForRow(reduction, item.row, item.col)
+        .push(item);
+
+    return rFundTransactions(reduction, item.row, item.col, transactions);
 }
 
 export function rRemoveFundTransactions(reduction, item) {
-    return rFundTransactions(reduction,
-        item.row, item.col, transactions => transactions.remove(item.key));
+    const transactions = getTransactionsForRow(reduction, item.row, item.col)
+        .remove(item.key);
+
+    return rFundTransactions(reduction, item.row, item.col, transactions);
 }
 

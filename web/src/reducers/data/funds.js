@@ -7,7 +7,7 @@ import {
     COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
 } from '../../misc/config';
 import {
-    LIST_COLS_PAGES, LIST_COLS_SHORT,
+    LIST_COLS_PAGES,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
 } from '../../misc/const';
 import { colorKey } from '../../misc/color';

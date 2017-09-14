@@ -140,7 +140,8 @@ export function rProcessDataOverview(
     // add net cash flow column
     const net = yearMonthsList.map((month, key) => {
     // add predicted (random) fund income to the net cash flow
-        const fundIncome = key === 0 || key < futureKey ? 0
+        const fundIncome = key === 0 || key < futureKey
+            ? 0
             : cost.getIn(['funds', key]) - cost.getIn(['funds', key - 1]);
 
         return cost.getIn(['income', key]) - spending.get(key) + fundIncome;
@@ -209,12 +210,23 @@ export function rGetOverviewRows(data) {
 
     // get value ranges and medians for calculating colours
     const values = OVERVIEW_COLUMNS.slice(1).map((column, colKey) => tableData.get(colKey + 1));
-    const valueRange = values.map(valuesItem => [valuesItem.min(), valuesItem.max()]);
+
+    const valueRange = values.map(valuesItem => {
+        return {
+            min: valuesItem.min(),
+            max: valuesItem.max()
+        };
+    });
+
     const median = values.map(valuesItem => {
-        return [
-            listAverage(valuesItem.filter(item => item >= 0), 0, AVERAGE_MEDIAN), // median of positive values
-            listAverage(valuesItem.filter(item => item < 0), 0, AVERAGE_MEDIAN) // median of negative values
-        ];
+        return {
+            positive: listAverage(valuesItem.filter(
+                item => item >= 0
+            ), 0, AVERAGE_MEDIAN),
+            negative: listAverage(valuesItem.filter(
+                item => item < 0), 0, AVERAGE_MEDIAN
+            )
+        };
     });
 
     const categoryColor = getOverviewCategoryColor();
@@ -225,7 +237,7 @@ export function rGetOverviewRows(data) {
             key, data.get('startYearMonth')[0], data.get('startYearMonth')[1]);
 
         const past = yearMonth[0] < currentYear ||
-      (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
+            (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
         const active = yearMonth[0] === currentYear && yearMonth[1] === currentMonth;
         const future = !past && !active;
 
@@ -234,7 +246,8 @@ export function rGetOverviewRows(data) {
             let rgb = null;
             if (colKey > 0 && categoryColor[colKey - 1]) {
                 rgb = getOverviewScoreColor(
-                    value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]);
+                    value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]
+                );
             }
             const editable = column[0] === 'balance';
 

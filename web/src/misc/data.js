@@ -8,8 +8,8 @@ import {
 } from './const';
 import { YMD } from './date';
 
-function sortByDate(a, b) {
-    if (a.get('date') < b.get('date')) {
+function sortByDate(prev, next) {
+    if (prev.get('date') < next.get('date')) {
         return -1;
     }
 
@@ -145,14 +145,26 @@ export class TransactionsList {
  * @returns {integer} median / mean value
  */
 export function listAverage(theList, offset, mode) {
-    const values = offset ? theList.slice(0, -offset) : theList;
+    const values = offset
+        ? theList.slice(0, -offset)
+        : theList;
+
     if (mode === AVERAGE_MEDIAN) {
     // median
-        const sorted = values.sort((a, b) => a < b ? -1 : 1);
-        if (sorted.size & 1) {
+        const sorted = values.sort((prev, next) => {
+            if (prev < next) {
+                return -1;
+            }
+
+            return 1;
+        });
+
+        const oddLength = sorted.size & 1;
+        if (oddLength) {
             // odd: get the middle value
             return sorted.get(Math.floor((sorted.size - 1) / 2));
         }
+
         // even: get the middle two values and find the average of them
         const low = sorted.get(Math.floor(sorted.size / 2) - 1);
         const high = sorted.get(Math.floor(sorted.size / 2));
@@ -161,7 +173,7 @@ export function listAverage(theList, offset, mode) {
     }
 
     // mean
-    return theList.reduce((a, b) => a + b, 0) / theList.size;
+    return theList.reduce((sum, value) => sum + value, 0) / theList.size;
 }
 
 export const indexPoints = (value, key) => [key, value];
@@ -183,10 +195,10 @@ export function getKeyFromYearMonth(year, month, startYear, startMonth) {
  * @returns {float} random value
  */
 export function randnBm() {
-    const u = 1 - Math.random();
-    const v = 1 - Math.random();
+    const rand1 = 1 - Math.random();
+    const rand2 = 1 - Math.random();
 
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
 
 export function pushToRequestQueue(reduction, active, deleteItem = false) {
@@ -301,8 +313,12 @@ export function buildQueueRequestList(reduction) {
 export function getNullEditable(pageIndex) {
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
 
+    const row = pageIsList
+        ? -1
+        : 0;
+
     return map({
-        row: pageIsList ? -1 : 0,
+        row,
         col: -1,
         pageIndex,
         id: null,
@@ -353,14 +369,14 @@ export function sortRowsByDate(rows, pageIndex) {
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
     let dailySum = 0;
     let lastFuture = false;
-    const sorted = rows.sort((a, b) => {
-        if (a.getIn(['cols', dateKey]) > b.getIn(['cols', dateKey])) {
+    const sorted = rows.sort((prev, next) => {
+        if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
             return -1;
         }
-        if (b.getIn(['cols', dateKey]) > (a.getIn(['cols', dateKey]))) {
+        if (prev.getIn(['cols', dateKey]) > (next.getIn(['cols', dateKey]))) {
             return 1;
         }
-        if (a.get('id') > b.get('id')) {
+        if (prev.get('id') > next.get('id')) {
             return -1;
         }
 
@@ -380,7 +396,9 @@ export function sortRowsByDate(rows, pageIndex) {
             const lastInDay = rowKey === sorted.size - 1 ||
         row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
             dailySum += row.getIn(['cols', costKey]);
-            const newRow = lastInDay ? row.set('daily', dailySum) : row.delete('daily');
+            const newRow = lastInDay
+                ? row.set('daily', dailySum)
+                : row.delete('daily');
 
             if (lastInDay) {
                 dailySum = 0;
@@ -407,8 +425,8 @@ export function addWeeklyAverages(data, rows, pageIndex) {
     // note that this is calculated only based on the visible data,
     // not past data
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-    const visibleTotal = rows.reduce((a, b) => {
-        return a + b.getIn(['cols', costKey]);
+    const visibleTotal = rows.reduce((sum, item) => {
+        return sum + item.getIn(['cols', costKey]);
     }, 0);
 
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
@@ -419,6 +437,10 @@ export function addWeeklyAverages(data, rows, pageIndex) {
     const lastDate = rows.last().getIn(['cols', dateKey]);
     const numWeeks = (firstDate - lastDate) / 7;
 
-    return data.set('weekly', numWeeks ? visibleTotal / numWeeks : 0);
+    const weeklyAverage = numWeeks
+        ? visibleTotal / numWeeks
+        : 0;
+
+    return data.set('weekly', weeklyAverage);
 }
 

@@ -16,15 +16,33 @@ import { BlockPacker } from '../../misc/format';
 
 const pageIndexAnalysis = PAGES.indexOf('analysis');
 
-function sortTotal(a, b) {
-    return a.get('total') > b.get('total') ? -1 : 1;
+function sortTotal(prev, next) {
+    if (prev.get('total') > next.get('total')) {
+        return -1;
+    }
+
+    return 1;
 }
-const addTotal = cost => cost.reduce((a, b) => a + b.get('total'), 0);
+
+const addTotal = cost => cost.reduce((sum, item) => sum + item.get('total'), 0);
+
+function getBlockData(cost, treeVisible) {
+    if (treeVisible) {
+        return cost.filter(item => {
+            if (treeVisible.has(item.get('name'))) {
+                return treeVisible.get(item.get('name'));
+            }
+
+            return true;
+        });
+    }
+
+    return cost;
+}
 
 function getBlocks(cost, treeVisible) {
-    const blockData = treeVisible ? cost.filter(item => {
-        return treeVisible.has(item.get('name')) ? treeVisible.get(item.get('name')) : true;
-    }) : cost;
+    const blockData = getBlockData(cost, treeVisible);
+
     const packer = new BlockPacker(blockData, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
 
     return packer.blocks;
@@ -33,9 +51,10 @@ function getBlocks(cost, treeVisible) {
 function getCost(costData) {
     return costData.map(item => {
         const name = item.get(0);
-        const subTree = item.get(1).map(subItem => {
-            return map({ name: subItem.get(0), total: subItem.get(1) });
-        }).sort(sortTotal);
+        const subTree = item.get(1)
+            .map(subItem => map({ name: subItem.get(0), total: subItem.get(1) }))
+            .sort(sortTotal);
+
         const total = addTotal(subTree);
 
         return map({ name, total, subTree });
@@ -50,7 +69,7 @@ export function processPageDataAnalysis(reduction, pageIndex, raw) {
     // tree data
     const cost = getCost(data.get('cost'));
     const costTotal = addTotal(cost);
-    const items = map({}); // TODO
+    const items = map({});
     const description = data.get('description');
 
     // block data
@@ -121,7 +140,9 @@ export function rAnalysisHandleNewData(reduction, response) {
 
 export function rAnalysisTreeToggleDisplay(reduction, key) {
     const treeVisible = reduction.getIn(['appState', 'other', 'analysis', 'treeVisible']);
-    const newStatus = treeVisible.has(key) ? !treeVisible.get(key) : false;
+    const newStatus = treeVisible.has(key)
+        ? !treeVisible.get(key)
+        : false;
 
     const cost = reduction.getIn(['appState', 'pages', pageIndexAnalysis, 'cost']);
     const blocks = getBlocks(cost, treeVisible.set(key, newStatus));
@@ -133,7 +154,9 @@ export function rAnalysisTreeToggleDisplay(reduction, key) {
 
 export function rAnalysisTreeToggleExpand(reduction, key) {
     const treeOpen = reduction.getIn(['appState', 'other', 'analysis', 'treeOpen']);
-    const newStatus = treeOpen.has(key) ? !treeOpen.get(key) : true;
+    const newStatus = treeOpen.has(key)
+        ? !treeOpen.get(key)
+        : true;
 
     return reduction.setIn(['appState', 'other', 'analysis', 'treeOpen', key], newStatus);
 }

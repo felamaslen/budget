@@ -73,7 +73,36 @@ function updateStock(item, row, loadedInitial) {
     const up = loadedInitial && newGain > item.get('gain');
     const down = loadedInitial && newGain < item.get('gain');
 
-    return item.set('gain', newGain).set('up', up).set('down', down);
+    return item
+        .set('gain', newGain)
+        .set('up', up)
+        .set('down', down);
+}
+
+export function limitTimeSeriesLength(timeSeries, limit) {
+    return new Array(timeSeries.size)
+        .fill(0)
+        .reduce(itemList => {
+            if (itemList.size <= limit) {
+                return itemList;
+            }
+
+            const closestKey = itemList
+                .slice(1)
+                .reduce((last, item, key) => {
+                    const thisInterval = item.get(0) - itemList.getIn([key, 0]);
+                    if (thisInterval < last.interval) {
+                        last.key = key;
+                        last.interval = thisInterval;
+                    }
+
+                    return last;
+                }, { key: 1, interval: Infinity })
+                .key;
+
+            return itemList.splice(closestKey, 1);
+
+        }, timeSeries);
 }
 
 export function rHandleStocksPricesResponse(reduction, response) {
@@ -111,36 +140,28 @@ export function rHandleStocksPricesResponse(reduction, response) {
             .setIn(['appState', 'other', 'stocksList', 'indices'], indices)
             .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks);
     }
-    finally {
-        const weightedGain = stocks.reduce((last, item) => {
-            return item.get('gain') * item.get('weight') + last;
-        }, 0);
-
-        // update stocks list graph
-        let history = newReduction.getIn(['appState', 'other', 'stocksList', 'history']);
-        while (history.size > STOCKS_GRAPH_RESOLUTION) {
-            const closestKey = history.slice(1).reduce((last, item, key) => {
-                const interval = item.get(0) - history.getIn([key, 0]);
-                if (interval < last[1]) {
-                    return [key, interval];
-                }
-
-                return last;
-            }, [1, Infinity])[0] + 1;
-
-            history = history.splice(closestKey, 1);
-        }
-
-        return newReduction
-            .setIn(['appState', 'other', 'stocksList', 'weightedGain'], weightedGain)
-            .setIn(
-                ['appState', 'other', 'stocksList', 'oldWeightedGain'],
-                reduction.getIn(['appState', 'other', 'stocksList', 'weightedGain'])
-            )
-            .setIn(
-                ['appState', 'other', 'stocksList', 'history'],
-                history.push(list([time, weightedGain]))
-            );
+    catch (err) {
+        // don't do anything
     }
+
+    const weightedGain = stocks.reduce((last, item) => {
+        return item.get('gain') * item.get('weight') + last;
+    }, 0);
+
+    // update stocks list graph
+    const history = limitTimeSeriesLength(newReduction.getIn(
+        ['appState', 'other', 'stocksList', 'history']
+    ), STOCKS_GRAPH_RESOLUTION);
+
+    return newReduction
+        .setIn(['appState', 'other', 'stocksList', 'weightedGain'], weightedGain)
+        .setIn(
+            ['appState', 'other', 'stocksList', 'oldWeightedGain'],
+            reduction.getIn(['appState', 'other', 'stocksList', 'weightedGain'])
+        )
+        .setIn(
+            ['appState', 'other', 'stocksList', 'history'],
+            history.push(list([time, weightedGain]))
+        );
 }
 

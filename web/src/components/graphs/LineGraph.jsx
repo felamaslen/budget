@@ -58,7 +58,7 @@ export class LineGraph extends Graph {
         return ticks ? ticks.map(tick => {
             return {
                 major: tick.major,
-                pix: Math.floor(this.pixX(tick.t - offset)) + 0.5,
+                pix: Math.floor(this.pixX(tick.time - offset)) + 0.5,
                 text: tick.label || null
             };
         }) : [];

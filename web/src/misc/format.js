@@ -20,14 +20,19 @@ export class BlockPacker {
         this.height = height;
 
         this.numBlockColors = 16;
-        this.colorOffset = this.data.reduce((a, b) => a + (b.get('total') & 1), 0);
+        this.colorOffset = this.data.reduce((sum, item) => sum + (item.get('total') & 1), 0);
 
-        this.total = data.reduce((a, b) => a + b.get('total'), 0);
+        this.total = data.reduce((sum, item) => sum + item.get('total'), 0);
         const totalArea = width * height;
 
         this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
         this.blocks = list.of();
-        this.root = { x: 0, y: 0, w: width, h: height };
+        this.root = {
+            xPos: 0,
+            yPos: 0,
+            width,
+            height
+        };
 
         const row = list.of();
         this.rowCount = 0;
@@ -52,49 +57,53 @@ export class BlockPacker {
         }
     }
     addNode(row, node) {
-    // returns a new node (the rest of the available space)
-        const wide = node.w > node.h;
+        // returns a new node (the rest of the available space)
+        const wide = node.width > node.height;
 
-        let freeX = node.x;
-        let freeY = node.y; // measured from bottom
+        let freeX = node.xPos;
+        let freeY = node.yPos; // measured from bottom
 
-        let freeWidth = node.w;
-        let freeHeight = node.h;
+        let freeWidth = node.width;
+        let freeHeight = node.height;
 
-        let blockWidth = node.w;
-        let blockHeight = node.h;
+        let blockWidth = node.width;
+        let blockHeight = node.height;
 
-        const sum = row.reduce((a, b) => a + b, 0);
+        const totalArea = row.reduce((sum, area) => sum + area, 0);
 
         if (wide) {
-            blockWidth = sum / node.h;
+            blockWidth = totalArea / node.height;
             freeWidth -= blockWidth;
             freeX += blockWidth;
         }
         else {
-            blockHeight = sum / node.w;
+            blockHeight = totalArea / node.width;
             freeHeight -= blockHeight;
             freeY += blockHeight;
         }
 
         // add row's blocks
         const newNode = {
-            x: freeX,
-            y: freeY,
-            w: freeWidth,
-            h: freeHeight
+            xPos: freeX,
+            yPos: freeY,
+            width: freeWidth,
+            height: freeHeight
         };
 
         const newBlockBits = row.map(item => {
-            const thisBlockWidth = wide ? 1 : (item / sum);
+            const thisBlockWidth = wide
+                ? 1
+                : item / totalArea;
 
-            const thisBlockHeight = wide ? (item / sum) : 1;
+            const thisBlockHeight = wide
+                ? item / totalArea
+                : 1;
 
-            const j = this.rowCount++;
+            const key = this.rowCount++;
 
-            const name = this.data.getIn([j, 'name']);
-            const color = (j + this.colorOffset) % this.numBlockColors;
-            const value = this.data.getIn([j, 'total']);
+            const name = this.data.getIn([key, 'name']);
+            const color = (key + this.colorOffset) % this.numBlockColors;
+            const value = this.data.getIn([key, 'total']);
             const newBlockBit = map({
                 width: percent(thisBlockWidth),
                 height: percent(thisBlockHeight),
@@ -103,9 +112,9 @@ export class BlockPacker {
                 value
             });
 
-            if (this.data.getIn([j, 'subTree'])) {
+            if (this.data.getIn([key, 'subTree'])) {
                 const thisBlocks = new BlockPacker(
-                    this.data.getIn([j, 'subTree']),
+                    this.data.getIn([key, 'subTree']),
                     thisBlockWidth * blockWidth,
                     thisBlockHeight * blockHeight
                 );
@@ -127,33 +136,44 @@ export class BlockPacker {
         return newNode;
     }
     worst(row, node) {
-    // row is a list of areas
+        // row is a list of areas
         if (row.size === 0) {
             return Infinity;
         }
 
-        const aspect = node.w / node.h;
-        const sum = row.reduce((a, b) => a + b, 0);
+        const nodeAspect = node.width / node.height;
 
-        if (aspect > 1) {
+        const totalArea = row.reduce((sum, area) => sum + area, 0);
+
+        if (nodeAspect > 1) {
             // wide, so fill the node from the left
-            const rowWidth = sum / node.h;
+            const rowWidth = totalArea / node.height;
 
-            return row.reduce((a, b) => {
-                const thisAspect = rowWidth * rowWidth / b;
-                const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+            return row.reduce((worstAspect, area) => {
+                const thisAspect = rowWidth * rowWidth / area;
+                const thisWorst = Math.max(thisAspect, 1 / thisAspect);
 
-                return worstAspect > a ? worstAspect : a;
+                if (thisWorst > worstAspect) {
+                    return thisWorst;
+                }
+
+                return worstAspect;
             }, 0);
         }
+
         // tall, so fill the node from the bottom
-        const rowHeight = sum / node.w;
+        const rowHeight = totalArea / node.width;
 
-        return row.reduce((a, b) => {
-            const thisAspect = b / (rowHeight * rowHeight);
-            const worstAspect = Math.max(thisAspect, 1 / thisAspect);
+        // calculate the worst aspect ratio possible in the row
+        return row.reduce((worstAspect, area) => {
+            const thisAspect = area / (rowHeight * rowHeight);
+            const thisWorst = Math.max(thisAspect, 1 / thisAspect);
 
-            return worstAspect > a ? worstAspect : a;
+            if (thisWorst > worstAspect) {
+                return thisWorst;
+            }
+
+            return worstAspect;
         }, 0);
     }
 }
@@ -254,73 +274,88 @@ export function leadingZeroes(value, numZeroes) {
     return value.toString();
 }
 
+function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
+    if (log > 0) {
+        const measure = absValue / Math.pow(10, log * 3);
+
+        if (abbreviate || noPence) {
+            return round(measure, precision).toString();
+        }
+
+        return measure.toString();
+    }
+
+    if (noPence) {
+        return Math.round(absValue).toString();
+    }
+
+    return absValue.toFixed(2);
+}
+
 /**
  * Format currency values for display
  * @param {integer} value: value in GBX
  * @param {object} options: options to pass to formatter
  * @returns {string} formatted value
  */
-export function formatCurrency(value, options) {
-    if (!options) {
-        options = {};
-    }
-    if (!options.precision) {
-        options.precision = 0;
-    }
-    let output = '';
-    if (!options.brackets) {
-        const sign = value < 0 ? '\u2212' : '';
-        output += sign;
-    }
-    if (!options.noSymbol) {
-        const symbol = options.raw ? SYMBOL_CURRENCY_RAW : SYMBOL_CURRENCY_HTML;
-        output += symbol;
-    }
+export function formatCurrency(value, customOptions = {}) {
+    const options = Object.assign({
+        abbreviate: false,
+        precision: 0,
+        brackets: false,
+        noSymbol: false,
+        noPence: false,
+        suffix: null,
+        raw: false
+    }, customOptions);
+
+    const sign = options.brackets || value >= 0
+        ? ''
+        : '\u2212';
+
+    const setSymbol = options.raw
+        ? SYMBOL_CURRENCY_RAW
+        : SYMBOL_CURRENCY_HTML;
+
+    const symbol = options.noSymbol
+        ? ''
+        : setSymbol;
 
     const absValue = Math.abs(value) / 100;
-    let log = 0;
-    let abbreviation = '';
-    if (options.abbreviate && value !== 0) {
-        const abbr = ['k', 'm', 'bn', 'tn'];
-        log = Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length);
-        if (log > 0) {
-            abbreviation = abbr[log - 1];
-        }
-    }
-    if (options.suffix) {
-        abbreviation += options.suffix;
-    }
-    let valueRaw;
-    if (log > 0) {
-        valueRaw = absValue / Math.pow(10, log * 3);
-        if (options.abbreviate) {
-            valueRaw = round(valueRaw, options.precision);
-        }
-    }
-    else {
-        valueRaw = absValue;
-        if (!options.noPence) {
-            valueRaw = valueRaw.toFixed(2);
-        }
-    }
-    if (options.noPence) {
-        valueRaw = round(valueRaw, log ? options.precision : 0);
-    }
+
+    const abbr = ['k', 'm', 'bn', 'tn'];
+
+    const log = options.abbreviate && value !== 0
+        ? Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length)
+        : 0;
+
+    const abbreviation = log > 0
+        ? abbr[log - 1]
+        : '';
+
+    const suffix = options.suffix || '';
+
+    const valueRaw = getCurrencyValueRaw(
+        absValue, log, options.abbreviate, options.precision, options.noPence
+    );
+
     const formatted = numberFormat(valueRaw);
 
-    output += formatted + abbreviation;
     if (options.brackets && value < 0) {
-        output = `(${output})`;
+        return `(${symbol}${formatted}${abbreviation}${suffix})`;
     }
 
-    return output;
+    return `${sign}${symbol}${formatted}${abbreviation}${suffix}`;
 }
 
 export function formatPercent(frac, options) {
     options.suffix = '%';
     options.noSymbol = true;
 
-    return formatCurrency(10000 * frac, options);
+    return formatCurrency(100 * 100 * frac, {
+        noSymbol: true,
+        suffix: '%'
+    });
 }
 
 /**
@@ -334,21 +369,20 @@ export function getTickSize(min, max, numTicks) {
     const minimum = (max - min) / numTicks;
     const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
     const res = minimum / magnitude;
-    let tick;
+
     if (res > 5) {
-        tick = 10 * magnitude;
-    }
-    else if (res > 2) {
-        tick = 5 * magnitude;
-    }
-    else if (res > 1) {
-        tick = 2 * magnitude;
-    }
-    else {
-        tick = magnitude;
+        return 10 * magnitude;
     }
 
-    return tick;
+    if (res > 2) {
+        return 5 * magnitude;
+    }
+
+    if (res > 1) {
+        return 2 * magnitude;
+    }
+
+    return magnitude;
 }
 
 /**
@@ -369,11 +403,25 @@ export function formatAge(seconds, shortAbbr) {
 
     const getMeasureText = (measure, thisSeconds, floor) => {
         const value = thisSeconds / measure[0];
-        const rounded = floor ? Math.floor(value) : Math.round(value);
-        const plural = !shortAbbr ? (rounded === 1 ? '' : 's') : '';
-        const units = measure[shortAbbr ? 1 : 2] + plural;
+        const rounded = floor
+            ? Math.floor(value)
+            : Math.round(value);
 
-        return shortAbbr ? `${rounded}${units}` : `${rounded} ${units}`;
+        const plural = shortAbbr || rounded === 1
+            ? ''
+            : 's';
+
+        const measureIndex = shortAbbr
+            ? 1
+            : 2;
+
+        const units = measure[measureIndex] + plural;
+
+        if (shortAbbr) {
+            return `${rounded}${units}`;
+        }
+
+        return `${rounded} ${units}`;
     };
 
     const secondsNormalised = Math.max(seconds, 1);
@@ -388,6 +436,10 @@ export function formatAge(seconds, shortAbbr) {
         }
     }
 
-    return measureText.join(', ') + (shortAbbr ? '' : ' ago');
+    const abbr = shortAbbr
+        ? ''
+        : ' ago';
+
+    return `${measureText.join(', ')}${abbr}`;
 }
 

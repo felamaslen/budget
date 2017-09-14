@@ -46,8 +46,13 @@ export function rLoginFormInput(reduction, input) {
         ['appState', 'loginForm', 'inputStep'],
         reduction.getIn(['appState', 'loginForm', 'inputStep']) + 1
     );
-    // if the pin is complete, submit the form
-    return values.size < LOGIN_INPUT_LENGTH - 1 ? newReduction : rLoginFormSubmit(newReduction);
+
+    // if the pin is incomplete, do nothing
+    if (values.size < LOGIN_INPUT_LENGTH - 1) {
+        return newReduction;
+    }
+
+    return rLoginFormSubmit(newReduction);
 }
 
 /**
