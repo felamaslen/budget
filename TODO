@@ -3,7 +3,7 @@
 - Fix bugs with different database states (e.g. empty) [DONE?]
 - Route for "all data" [DONE]
 - Client coding standards [DONE]
-- [BUG] refreshing fund price cache doesn't reload gain text etc.
+- refreshing fund price cache doesn't reload gain text etc. [FIXED]
 - Handle API response codes
 - Fix realtime stock prices
 - More sophisticated authentication
