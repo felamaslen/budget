@@ -28,7 +28,7 @@ export const FONT_GRAPH_KEY = '13px Arial, Helvetica, sans-serif';
 export const FONT_GRAPH_KEY_SMALL = '11px Arial, Helvetica, sans-serif';
 
 export const GRAPH_KEY_SIZE = 12;
-export const GRAPH_KEY_OFFSET_X = 5;
+export const GRAPH_KEY_OFFSET_X = 45;
 export const GRAPH_KEY_OFFSET_Y = 34;
 export const GRAPH_BALANCE_NUM_TICKS = 5;
 export const GRAPH_SPEND_NUM_ITEMS = 24;
