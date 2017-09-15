@@ -15,33 +15,42 @@ export class LoginForm extends PureControllerView {
         this.dispatchAction(aLoginFormInputted(digit));
     }
     renderNumberInput() {
-        const digits = Array(...new Array(10)).map((_, key) => {
-            const digit = (key + 1) % 10;
-            const btnClass = `btn-digit btn-digit-${digit}`;
+        const digits = new Array(10)
+            .fill(0)
+            .map((item, key) => {
+                const digit = (key + 1) % 10;
+                const btnClass = `btn-digit btn-digit-${digit}`;
 
-            return (
-                <button key={key} className={btnClass}
-                    onClick={() => this.input(digit)}>{digit}</button>
-            );
-        });
+                const onClick = () => this.input(digit);
+
+                return (
+                    <button key={key} className={btnClass} onClick={onClick}>
+                        {digit}
+                    </button>
+                );
+            });
 
         return <div className="number-input noselect">{digits}</div>;
     }
     render() {
         const numberInput = this.renderNumberInput();
 
+        const digitBoxes = new Array(LOGIN_INPUT_LENGTH)
+            .fill(0)
+            .map((item, key) => {
+                const className = classNames({
+                    'input-pin': true,
+                    active: key === this.props.inputStep,
+                    done: key < this.props.inputStep
+                });
+
+                return <div key={key} className={className} />;
+            });
+
         return (
             <div id="login-form">
                 <h3>Enter your PIN:</h3>
-                {Array(...new Array(LOGIN_INPUT_LENGTH)).map((_, key) => {
-                    return (
-                        <div key={key} className={classNames({
-                            'input-pin': true,
-                            active: key === this.props.inputStep,
-                            done: key < this.props.inputStep
-                        })} />
-                    );
-                })}
+                {digitBoxes}
                 {numberInput}
             </div>
         );

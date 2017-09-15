@@ -22,26 +22,40 @@ export class PageList extends PureControllerView {
         return null;
     }
     renderListHead() {
-        const daily = this.props.daily ? (
-            <span>
-                <span className="daily">Daily</span>
-                <span className="weekly">Weekly:</span>
-                <span className="weekly-value">{formatCurrency(
-                    this.props.data.getIn(['data', 'weekly']), { abbreviate: true, precision: 1 }
-                )}</span>
-            </span>
-        ) : null;
+        const weeklyValue = formatCurrency(this.props.data.getIn(
+            ['data', 'weekly']
+        ), {
+            abbreviate: true,
+            precision: 1
+        });
+
+        const daily = this.props.daily
+            ? (
+                <span>
+                    <span className="daily">Daily</span>
+                    <span className="weekly">Weekly:</span>
+                    <span className="weekly-value">{weeklyValue}</span>
+                </span>
+            )
+            : null;
+
+        const listHeadMain = LIST_COLS_PAGES[this.props.index].map((column, key) => {
+            return <span key={key} className={column}>{column}</span>;
+        });
+
+        const totalValue = formatCurrency(this.props.data.getIn(
+            ['data', 'total']
+        ), {
+            abbreviate: true,
+            precision: 1
+        });
 
         return (
             <div className="list-head noselect">
-                {LIST_COLS_PAGES[this.props.index].map((column, key) => {
-                    return <span key={key} className={column}>{column}</span>;
-                })}
+                {listHeadMain}
                 {daily}
                 <span className="total">Total:</span>
-                <span className="total-value">{formatCurrency(
-                    this.props.data.getIn(['data', 'total']), { abbreviate: true, precision: 1 }
-                )}</span>
+                <span className="total-value">{totalValue}</span>
                 {this.listHeadExtra()}
             </div>
         );
@@ -49,30 +63,39 @@ export class PageList extends PureControllerView {
     renderLiAdd() {
         this.addItems = [];
 
+        const addRow = LIST_COLS_PAGES[this.props.index].map((column, key) => {
+            const value = this.props.add.get(key);
+            const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
+            const editItem = getEditable(
+                this.props.dispatcher, -1, key, null, column, value,
+                this.props.index, active, this.props.suggestions
+            );
+            this.addItems.push(editItem);
+
+            const spanClasses = classNames({
+                [column]: true,
+                active
+            });
+
+            return (
+                <span key={key} className={spanClasses}>
+                    {editItem}
+                </span>
+            );
+        });
+
+        const addBtnOnClick = () => this.addItem();
+        const addBtnRef = () => {
+            return btn => {
+                this.addBtn = btn;
+            };
+        };
+
         return (
             <li className="li-add">
-                {LIST_COLS_PAGES[this.props.index].map((column, key) => {
-                    const value = this.props.add.get(key);
-                    const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
-                    const editItem = getEditable(
-                        this.props.dispatcher, -1, key, null, column, value,
-                        this.props.index, active, this.props.suggestions
-                    );
-                    this.addItems.push(editItem);
-
-                    const spanClasses = classNames({
-                        [column]: true,
-                        active
-                    });
-
-                    return (
-                        <span key={key} className={spanClasses}>
-                            {editItem}
-                        </span>
-                    );
-                })}
+                {addRow}
                 <span>
-                    <button ref="addBtn" onClick={() => { this.addItem(); }}>Add</button>
+                    <button ref={addBtnRef()} onClick={addBtnOnClick}>Add</button>
                 </span>
             </li>
         );
@@ -119,7 +142,8 @@ export class PageList extends PureControllerView {
             });
 
             const dailyText = this.props.daily && row.has('daily')
-                ? formatCurrency(row.get('daily')) : null;
+                ? formatCurrency(row.get('daily'))
+                : null;
             const daily = this.props.daily ? (
                 <span className="daily">{dailyText}</span>
             ) : null;
@@ -138,13 +162,10 @@ export class PageList extends PureControllerView {
             );
         });
     }
-    afterList() {
-        return null;
-    }
     componentDidUpdate(prevProps) {
-        if (!prevProps.addBtnFocus && this.props.addBtnFocus) {
+        if (!prevProps.addBtnFocus && this.props.addBtnFocus && this.addBtn) {
             window.setTimeout(() => {
-                this.refs.addBtn && this.refs.addBtn.focus();
+                this.addBtn.focus();
             }, 0);
         }
     }

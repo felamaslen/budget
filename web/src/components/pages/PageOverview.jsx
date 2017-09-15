@@ -2,11 +2,10 @@
  * Overview page component
  */
 
-import { List as list } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from '../PureControllerView';
-import { Map as map } from 'immutable';
 import classNames from 'classnames';
 import {
     GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
@@ -38,7 +37,7 @@ export class PageOverview extends PureControllerView {
 
                 const cellClasses = {};
                 cellClasses[cell.get('column')[1].toLowerCase()] = true;
-                let span;
+                let span = null;
                 if (cell.get('editable')) {
                     // editable balance column
                     const active = this.props.edit.get('row') === key && this.props.edit.get('col') === 0;
@@ -48,7 +47,10 @@ export class PageOverview extends PureControllerView {
                     cellClasses.editing = active;
                 }
                 else {
-                    const value = cellKey > 0 ? this.format(cell.get('value'), true) : cell.get('value');
+                    const value = cellKey > 0
+                        ? this.format(cell.get('value'), true)
+                        : cell.get('value');
+
                     span = <span className="text">{value}</span>;
                 }
 
@@ -66,12 +68,16 @@ export class PageOverview extends PureControllerView {
             return this.props.data.getIn(['data', 'cost', item.name]).slice(-GRAPH_SPEND_NUM_ITEMS);
         });
 
+        const overviewHead = OVERVIEW_COLUMNS.map(
+            (column, key) => <th key={key}>{column[1]}</th>
+        );
+
         return (
             <div>
                 <table className="table-insert table-overview noselect">
                     <thead>
                         <tr>
-                            {OVERVIEW_COLUMNS.map((column, key) => <th key={key}>{column[1]}</th>)}
+                            {overviewHead}
                         </tr>
                     </thead>
                     <tbody>

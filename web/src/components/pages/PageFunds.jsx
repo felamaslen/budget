@@ -64,10 +64,16 @@ export class PageFunds extends PageList {
             return null;
         }
 
-        const name = row.getIn(['cols', 1]).toLowerCase().replace(/\W+/g, '-');
+        const name = row.getIn(['cols', 1])
+            .toLowerCase()
+            .replace(/\W+/g, '-');
         const popout = row.get('historyPopout');
-        const width = popout ? GRAPH_FUND_ITEM_WIDTH_LARGE : GRAPH_FUND_ITEM_WIDTH;
-        const height = popout ? GRAPH_FUND_ITEM_HEIGHT_LARGE : GRAPH_FUND_ITEM_HEIGHT;
+        const width = popout
+            ? GRAPH_FUND_ITEM_WIDTH_LARGE
+            : GRAPH_FUND_ITEM_WIDTH;
+        const height = popout
+            ? GRAPH_FUND_ITEM_HEIGHT_LARGE
+            : GRAPH_FUND_ITEM_HEIGHT;
 
         const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
         const formatOptionsPct = { brackets: true, precision: 2 };

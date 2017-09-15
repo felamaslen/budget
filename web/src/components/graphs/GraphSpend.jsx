@@ -13,7 +13,7 @@ import {
     COLOR_CATEGORY,
     COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_LIGHT, COLOR_TRANSLUCENT_DARK,
     COLOR_DARK, COLOR_LIGHT_GREY,
-    COLOR_PROFIT, COLOR_LOSS,
+    COLOR_PROFIT,
     FONT_GRAPH_TITLE, FONT_GRAPH_KEY, FONT_AXIS_LABEL,
     GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE
 } from '../../misc/config';
@@ -70,16 +70,18 @@ export class GraphSpend extends LineGraph {
             return null;
         }
 
-        const ticksX = Array(...new Array(numTicksX)).map((_, key) => {
-            const tickPos = Math.floor(this.pixX(key + 1)) + 0.5;
-            // draw vertical lines
-            this.ctx.beginPath();
-            this.ctx.moveTo(tickPos, this.pixY(this.maxY));
-            this.ctx.lineTo(tickPos, this.pixY(this.minY) + 8 - 3 * (key % 2));
-            this.ctx.stroke();
+        const ticksX = new Array(numTicksX)
+            .fill(0)
+            .map((item, key) => {
+                const tickPos = Math.floor(this.pixX(key + 1)) + 0.5;
+                // draw vertical lines
+                this.ctx.beginPath();
+                this.ctx.moveTo(tickPos, this.pixY(this.maxY));
+                this.ctx.lineTo(tickPos, this.pixY(this.minY) + 8 - 3 * (key % 2));
+                this.ctx.stroke();
 
-            return [key, tickPos];
-        });
+                return [key, tickPos];
+            });
 
         // calculate tick range
         const tickSize = getTickSize(this.minY, this.maxY, 10);
@@ -91,12 +93,15 @@ export class GraphSpend extends LineGraph {
         }
 
         const firstTick = Math.ceil(this.minY / tickSize) * tickSize;
-        const ticksY = Array(...new Array(numTicksY)).map((_, key) => {
-            const value = firstTick + key * tickSize;
-            const pos = Math.floor(this.pixY(value)) + 0.5;
+        const ticksY = new Array(numTicksY)
+            .fill(0)
+            .map((item, key) => {
+                const value = firstTick + key * tickSize;
+                const pos = Math.floor(this.pixY(value)) + 0.5;
 
-            return { value, pos };
-        }).filter(tick => tick.value <= this.maxY);
+                return { value, pos };
+            })
+            .filter(tick => tick.value <= this.maxY);
 
         // draw horizontal lines
         ticksY.forEach(tick => {

@@ -94,10 +94,13 @@ export class Header extends PureControllerView {
         }
     }
     render() {
-        const navBar = this.props.showNav ? this.renderNavBar() : null;
-        const loadingApiSpinner = this.props.loadingApi ? (
-            <span className="loading-api"></span>
-        ) : null;
+        const navBar = this.props.showNav
+            ? this.renderNavBar()
+            : null;
+
+        const loadingApiSpinner = this.props.loadingApi
+            ? <span className="loading-api"></span>
+            : null;
 
         const queueNotSaved = this.props.queueSize > 0
             ? <span className="queue-not-saved">Unsaved changes!</span>

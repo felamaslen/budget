@@ -24,10 +24,12 @@ export default class Editable extends PureControllerView {
         })));
     }
     componentDidUpdate(prevProps) {
-        if ((!prevProps.active && this.props.active) ||
-        (!prevProps.focus && this.props.focus)) {
+        if (this.input && (
+            (!prevProps.active && this.props.active) ||
+            (!prevProps.focus && this.props.focus)
+        )) {
             window.setTimeout(() => {
-                this.input && this.input.focus && this.input.focus();
+                this.input.focus();
             }, 0);
         }
     }

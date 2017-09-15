@@ -74,7 +74,17 @@ export class GraphFundItem extends LineGraph {
 
         const initialValue = this.props.data.getIn([0, 1]);
 
-        this.drawCubicLine(this.props.data, value => value < initialValue ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
+        const colorLoss = rgba(COLOR_LOSS);
+        const colorProfit = rgba(COLOR_PROFIT);
+        const colorValue = value => {
+            if (value < initialValue) {
+                return colorLoss;
+            }
+
+            return colorProfit;
+        };
+
+        this.drawCubicLine(this.props.data, colorValue);
     }
 }
 

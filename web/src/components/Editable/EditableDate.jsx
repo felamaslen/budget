@@ -12,12 +12,20 @@ export default class EditableDate extends Editable {
         this.editableType = 'date';
     }
     format() {
-        return this.props.value ? this.props.value.format() : '';
+        if (this.props.value) {
+            return this.props.value.format();
+        }
+
+        return '';
     }
     getEditValue(rawInputValue) {
         const ymd = new YMD(rawInputValue);
 
-        return ymd.valid ? ymd : this.props.value;
+        if (ymd.valid) {
+            return ymd;
+        }
+
+        return this.props.value;
     }
 }
 
