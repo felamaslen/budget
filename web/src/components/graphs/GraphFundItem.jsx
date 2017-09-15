@@ -61,7 +61,7 @@ export class GraphFundItem extends LineGraph {
             const increment = Math.round(Math.max(20, this.height / range) / (this.height / range) / 2) * 2;
             const start = Math.ceil(this.minY / increment) * increment;
             const numTicks = Math.ceil((this.maxY - this.minY) / increment);
-            Array.apply(null, new Array(numTicks)).forEach((tick, key) => {
+            Array(...new Array(numTicks)).forEach((tick, key) => {
                 const tickValue = start + key * increment;
                 const tickPos = Math.floor(this.pixY(tickValue)) + 0.5;
                 const tickName = `${tickValue.toFixed(1)}p`;
@@ -74,7 +74,17 @@ export class GraphFundItem extends LineGraph {
 
         const initialValue = this.props.data.getIn([0, 1]);
 
-        this.drawCubicLine(this.props.data, value => value < initialValue ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
+        const colorLoss = rgba(COLOR_LOSS);
+        const colorProfit = rgba(COLOR_PROFIT);
+        const colorValue = value => {
+            if (value < initialValue) {
+                return colorLoss;
+            }
+
+            return colorProfit;
+        };
+
+        this.drawCubicLine(this.props.data, colorValue);
     }
 }
 

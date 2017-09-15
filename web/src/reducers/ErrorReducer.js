@@ -2,33 +2,39 @@
  * Carries out actions for the error messages component
  */
 
+import { Map as map } from 'immutable';
 import { ERROR_MESSAGE_DELAY } from '../misc/config';
-import { ERROR_CLOSE_TIME } from '../misc/const';
+import { ERROR_CLOSE_TIME, ERROR_LEVEL_ERROR } from '../misc/const';
 
-export const rErrorMessageOpen = (reduction, msg) => {
+export function rErrorMessageOpen(reduction, msg) {
+    const theMessage = typeof msg === 'string'
+        ? map({ level: ERROR_LEVEL_ERROR, text: msg })
+        : msg;
+
     const errorMsg = reduction.getIn(['appState', 'errorMsg']);
-    const item = msg.set('id', errorMsg.size)
+    const item = theMessage.set('id', errorMsg.size)
         .set('time', new Date().getTime());
 
     return reduction.setIn(['appState', 'errorMsg'], errorMsg.push(item));
-};
-export const rErrorMessageClose = (reduction, msgId) => {
+}
+export function rErrorMessageClose(reduction, msgId) {
     return reduction.setIn(
         ['appState', 'errorMsg'], reduction.getIn(['appState', 'errorMsg']).map(msg => {
             if (msg.get('id') === msgId) {
                 return msg.set('closed', true);
             }
+
             return msg;
         }));
-};
-export const rErrorMessageRemove = (reduction, msgId) => {
+}
+export function rErrorMessageRemove(reduction, msgId) {
     return reduction.setIn(
         ['appState', 'errorMsg'], reduction.getIn(['appState', 'errorMsg']).filter(
             msg => msg.get('id') !== msgId
         ));
-};
+}
 
-export const rErrorMessageClearOld = reduction => {
+export function rErrorMessageClearOld(reduction) {
     // automatically clear any messages which are older than the timeout period
     const msgs = reduction.getIn(['appState', 'errorMsg']);
     const now = new Date().getTime();
@@ -54,5 +60,5 @@ export const rErrorMessageClearOld = reduction => {
     });
 
     return newReduction;
-};
+}
 

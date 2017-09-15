@@ -31,13 +31,15 @@ export default class EditableText extends Editable {
         !this.props.suggestions.size) {
             return null;
         }
+
         return (
-            <ul className='suggestions'>
+            <ul className="suggestions">
                 {this.props.suggestions.get('list').map((item, key) => {
                     const classes = classNames({
                         suggestion: true,
                         active: this.props.suggestions.get('active') === key
                     });
+
                     return <li key={key} className={classes}>{item}</li>;
                 })}
             </ul>

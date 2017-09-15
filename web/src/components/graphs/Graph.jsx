@@ -19,10 +19,10 @@ export class Graph extends PureControllerView {
         this.outerProperties = {};
     }
     update() {
-        return;
+        return null;
     }
     draw() {
-        return;
+        return null;
     }
     beforeCanvas() {
         return null;
@@ -33,9 +33,11 @@ export class Graph extends PureControllerView {
     canvasClasses() {
         return null;
     }
-    componentDidMount() {
-        this.ctx = this.refs.canvas.getContext('2d');
+    componentWillMount() {
         this.supported = HTML_CANVAS_SUPPORTED;
+    }
+    componentDidMount() {
+        this.ctx = this.canvas.getContext('2d');
         this.width = this.props.width;
         this.height = this.props.height;
         this.update();
@@ -43,15 +45,26 @@ export class Graph extends PureControllerView {
     componentDidUpdate() {
         this.update();
     }
-    render() {
-        const classes = `graph-container graph-${this.props.name}`;
-        const canvas = HTML_CANVAS_SUPPORTED ? (
-            <canvas ref='canvas' {...this.canvasProperties}
+    getCanvas() {
+        if (!this.supported) {
+            return <span>Canvas not supported</span>;
+        }
+
+        const canvasRef = () => {
+            return elem => {
+                this.canvas = elem;
+            };
+        };
+
+        return (
+            <canvas ref={canvasRef()} {...this.canvasProperties}
                 className={this.canvasClasses()}
                 width={this.props.width} height={this.props.height} />
-        ) : (
-            <span>Canvas not supported</span>
         );
+    }
+    render() {
+        const classes = `graph-container graph-${this.props.name}`;
+        const canvas = this.getCanvas();
 
         return (
             <div className={classes} {...this.outerProperties}>

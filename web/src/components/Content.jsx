@@ -72,6 +72,7 @@ export class Content extends PureControllerView {
                 />
             );
         }
+
         return <div>TODO: page {this.props.index}</div>;
     }
     render() {
@@ -83,8 +84,8 @@ export class Content extends PureControllerView {
         const pageName = `page-${PAGES[this.props.index]}`;
 
         return (
-            <div id='content' className={pageName}>
-                <div className='inner'>
+            <div id="content" className={pageName}>
+                <div className="inner">
                     {page}
                 </div>
             </div>

@@ -33,7 +33,12 @@ export class PageFunds extends PageList {
         const cost = this.props.data.getIn(['data', 'total']);
         const value = this.props.cachedValue.get('value');
         const total = this.props.data.getIn(['data', 'total']);
-        const gainPct = formatPercent((value - total) / total, {
+
+        const gain = total
+            ? (value - total) / total
+            : 0;
+
+        const gainPct = formatPercent(gain, {
             brackets: true, precision: 2
         });
 
@@ -43,12 +48,14 @@ export class PageFunds extends PageList {
             loss: cost > value
         });
 
+        const reloadFundPrices = () => this.dispatchAction(aFundsGraphPeriodChanged(null, true, true));
+
         return (
-            <span className={classes} onClick={() => this.dispatchAction(aFundsGraphPeriodChanged(null, true))}>
-                <span className='gain-info'>Current value:</span>
+            <span className={classes} onClick={reloadFundPrices}>
+                <span className="gain-info">Current value:</span>
                 <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
                 <span>{gainPct}</span>
-                <span className='gain-info'>({this.props.cachedValue.get('ageText')})</span>
+                <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
             </span>
         );
     }
@@ -59,10 +66,16 @@ export class PageFunds extends PageList {
             return null;
         }
 
-        const name = row.getIn(['cols', 1]).toLowerCase().replace(/\W+/g, '-');
+        const name = row.getIn(['cols', 1])
+            .toLowerCase()
+            .replace(/\W+/g, '-');
         const popout = row.get('historyPopout');
-        const width = popout ? GRAPH_FUND_ITEM_WIDTH_LARGE : GRAPH_FUND_ITEM_WIDTH;
-        const height = popout ? GRAPH_FUND_ITEM_HEIGHT_LARGE : GRAPH_FUND_ITEM_HEIGHT;
+        const width = popout
+            ? GRAPH_FUND_ITEM_WIDTH_LARGE
+            : GRAPH_FUND_ITEM_WIDTH;
+        const height = popout
+            ? GRAPH_FUND_ITEM_HEIGHT_LARGE
+            : GRAPH_FUND_ITEM_HEIGHT;
 
         const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
         const formatOptionsPct = { brackets: true, precision: 2 };
@@ -98,8 +111,8 @@ export class PageFunds extends PageList {
 
         return (
             <span>
-                <span className='fund-graph'>
-                    <div className='fund-graph-cont'>
+                <span className="fund-graph">
+                    <div className="fund-graph-cont">
                         <GraphFundItem dispatcher={this.props.dispatcher}
                             width={width}
                             height={height}
@@ -110,9 +123,9 @@ export class PageFunds extends PageList {
                         />
                     </div>
                 </span>
-                <span className='gain'>
+                <span className="gain">
                     <span className={gainOuterClasses} style={gainStyle}>
-                        <span className='value'>
+                        <span className="value">
                             {formatCurrency(gain.get('value'), formatOptions)}
                         </span>
                         <span className={gainAbsClasses}>
@@ -146,9 +159,9 @@ export class PageFunds extends PageList {
         ) : null;
 
         return (
-            <div className='graph-container-outer'>
+            <div className="graph-container-outer">
                 <GraphFunds dispatcher={this.props.dispatcher}
-                    name='fund-history'
+                    name="fund-history"
                     width={GRAPH_FUNDS_WIDTH}
                     height={GRAPH_FUNDS_HEIGHT}
                     fundItems={this.props.graphProps.getIn(['data', 'fundItems'])}

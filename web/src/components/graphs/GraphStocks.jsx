@@ -34,7 +34,7 @@ export class GraphStocks extends LineGraph {
         this.setRange([minX, maxX, minY, maxY]);
     }
     drawAxes() {
-    // draw axes
+        // draw axes
         this.ctx.font = FONT_AXIS_LABEL;
         this.ctx.fillStyle = rgba(COLOR_DARK);
         this.ctx.textAlign = 'left';
@@ -64,7 +64,16 @@ export class GraphStocks extends LineGraph {
         this.drawAxes();
 
         this.ctx.lineWidth = 1.5;
-        this.drawLine(this.props.data, value => value < 0 ? rgba(COLOR_LOSS) : rgba(COLOR_PROFIT));
+        const colorLoss = rgba(COLOR_LOSS);
+        const colorProfit = rgba(COLOR_PROFIT);
+        const valueColor = value => {
+            if (value < 0) {
+                return colorLoss;
+            }
+
+            return colorProfit;
+        };
+        this.drawLine(this.props.data, valueColor);
     }
 }
 

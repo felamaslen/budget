@@ -2,15 +2,16 @@
  * Carries out actions for the graph components
  */
 
-import { fromJS, List as list, Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
-import { PAGES, LIST_COLS_PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import { getPeriodMatch } from '../misc/data';
 import {
     getFormattedHistory,
-    zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
-    getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
+    zoomFundLines,
+    getExtraRowProps,
+    getFundsCachedValue
 } from './data/funds';
 import {
     processRawListRows
@@ -25,12 +26,12 @@ export const rToggleShowAll = reduction => {
         !reduction.getIn(['appState', 'other', 'showAllBalanceGraph']));
 };
 
-export const rToggleFundItemGraph = (reduction, key) => {
+export function rToggleFundItemGraph(reduction, key) {
     return reduction.setIn(
         ['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'],
         !reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'])
     );
-};
+}
 
 function getCacheData(reduction, period) {
     const rows = reduction.getIn(
@@ -147,7 +148,7 @@ export function rHoverFundsGraph(reduction, position) {
             .get('line')
             .reduce((thisLast, point, pointKey) => {
                 const pointDistance = Math.sqrt(
-                    Math.pow(point.get(0) - position.valX, 2) +
+                    Math.pow((point.get(0) - position.valX) / 1000, 2) +
                     Math.pow(point.get(1) - position.valY, 2)
                 );
 
@@ -240,23 +241,37 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory);
 }
 
-export function rHandleFundPeriodResponse(reduction, response, fromCache) {
-    let newReduction = reduction;
-
+export function rHandleFundPeriodResponse(reduction, response) {
     const rows = processRawListRows(response.data.data, pageIndexFunds);
     const startTime = response.data.startTime;
     const cacheTimes = list(response.data.cacheTimes);
 
-    if (!fromCache) {
-        newReduction = newReduction.setIn(
+    const newReduction = changePeriod(
+        reduction.setIn(
             ['appState', 'other', 'fundHistoryCache', response.period],
             map({ rows, startTime, cacheTimes })
+        ),
+        response.period,
+        rows,
+        startTime,
+        cacheTimes
+    );
+
+    if (response.reloadPagePrices) {
+        const rowsWithExtraProps = getExtraRowProps(
+            rows, startTime, cacheTimes, pageIndexFunds
         );
+
+        const fundsCachedValue = getFundsCachedValue(
+            rows, startTime, cacheTimes, new Date(), pageIndexFunds
+        );
+
+        return newReduction
+            .setIn(['appState', 'pages', pageIndexFunds, 'rows'], rowsWithExtraProps)
+            .setIn(['appState', 'other', 'fundsCachedValue'], fundsCachedValue);
     }
 
-    return changePeriod(
-        newReduction, response.period, rows, startTime, cacheTimes
-    );
+    return newReduction;
 }
 
 export function rChangeFundsGraphPeriod(reduction, req) {
@@ -271,10 +286,16 @@ export function rChangeFundsGraphPeriod(reduction, req) {
     ).has(shortPeriod)) {
 
         const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+        const reloadPagePrices = Boolean(req.reloadPagePrices);
 
         return reduction.set(
             'effects', reduction.get('effects').push(
-                buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period, length })
+                buildMessage(EF_FUNDS_PERIOD_REQUESTED, {
+                    apiKey,
+                    period,
+                    length,
+                    reloadPagePrices
+                })
             )
         );
     }

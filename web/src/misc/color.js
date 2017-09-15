@@ -5,35 +5,44 @@
 import { OVERVIEW_COLUMNS } from './const';
 import { COLOR_CATEGORY } from './config';
 
-export const rgba = values => {
-    const roundedValues = values.slice(0, 3).map(
-        item => Math.max(0, Math.min(255, Math.round(item)))
-    ).concat(values.slice(3)).join(',');
+export function rgba(values) {
+    const roundedValues = values
+        .slice(0, 3)
+        .map(
+            item => Math.max(0, Math.min(255, Math.round(item)))
+        )
+        .concat(values.slice(3))
+        .join(',');
 
     if (values.length === 4) {
         return `rgba(${roundedValues})`;
     }
+
     return `rgb(${roundedValues})`;
-};
+}
 
 /**
  * Get colours for colouring the table
  * @returns {array} list of colour codes
  */
-export const getOverviewCategoryColor = () => {
-    return OVERVIEW_COLUMNS.slice(1).map(item => item[0]).map(column => {
-        if (COLOR_CATEGORY[column]) {
-            return COLOR_CATEGORY[column];
-        }
-        if (column === 'net') {
-            return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
-        }
-        if (column === 'predicted') {
-            return COLOR_CATEGORY.balance;
-        }
-        return null;
-    });
-};
+export function getOverviewCategoryColor() {
+    return OVERVIEW_COLUMNS
+        .slice(1)
+        .map(item => item[0])
+        .map(column => {
+            if (COLOR_CATEGORY[column]) {
+                return COLOR_CATEGORY[column];
+            }
+            if (column === 'net') {
+                return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
+            }
+            if (column === 'predicted') {
+                return COLOR_CATEGORY.balance;
+            }
+
+            return null;
+        });
+}
 
 /**
  * Get a colour on a scale, based on value (linear)
@@ -43,39 +52,40 @@ export const getOverviewCategoryColor = () => {
  * @param {array} color: color scale(s) to use
  * @returns {array} rgb values
  */
-export const getOverviewScoreColor = (value, range, median, color) => {
-    if (range[0] === range[1]) {
+export function getOverviewScoreColor(value, range, median, color) {
+    if (range.min === range.max) {
         return [255, 255, 255]; // white
     }
 
-    let score;
+    const medianValue = value < 0
+        ? median.negative
+        : median.positive;
 
-    let medianValue = median[0];
-    let cost = value;
-    let max = range[1];
-    if (value < 0) {
-        medianValue = -median[1];
-        cost *= -1;
-        max = -range[0];
-    }
+    const cost = value > 0
+        ? value
+        : -value;
 
-    if (cost > medianValue) {
-        score = 0.5 * (1 + (cost - medianValue) / (max - medianValue));
-    }
-    else {
-        score = 0.5 * cost / medianValue;
-    }
+    const max = value > 0
+        ? range.max
+        : -range.min;
 
-    const split = color.length === 2 && (range[0] < 0 || range[1] > 0);
+    const score = cost > medianValue
+        ? 0.5 * (1 + (cost - medianValue) / (max - medianValue))
+        : 0.5 * cost / medianValue;
+
+    const split = color.length === 2 && (range.min < 0 || range.max > 0);
+
     let theColor = color;
     if (split) {
-    // score separately for positive vs. negative
-        const end = value < 0 ? 0 : 1;
+        // score separately for positive vs. negative
+        const end = value < 0
+            ? 0
+            : 1;
         theColor = color[end];
     }
 
     return theColor.map(item => Math.round(255 - (255 - item) * score));
-};
+}
 
 const colorKeyList = [
     [1, 0, 103],
@@ -103,9 +113,11 @@ const colorKeyRGB = index => {
     if (index === 0) {
         return [0, 0, 0];
     }
+
     return colorKeyList[index % colorKeyList.length];
 };
-export const colorKey = index => {
+
+export function colorKey(index) {
     return colorKeyRGB(index);
-};
+}
 

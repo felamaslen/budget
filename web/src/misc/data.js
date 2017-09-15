@@ -8,12 +8,13 @@ import {
 } from './const';
 import { YMD } from './date';
 
-const sortByDate = (a, b) => {
-    if (a.get('date') < b.get('date')) {
+function sortByDate(prev, next) {
+    if (prev.get('date') < next.get('date')) {
         return -1;
     }
+
     return 1;
-};
+}
 
 export function getPeriodMatch(shortPeriod) {
     const match = shortPeriod.match(/^([a-z]+)([0-9]+)$/);
@@ -29,9 +30,9 @@ export function getPeriodMatch(shortPeriod) {
  * Produce a "unique" id
  * @returns {number} "unique" id
  */
-export const uuid = () => {
+export function uuid() {
     return Math.floor((1 + Math.random()) * 0x10000);
-};
+}
 
 /**
  * data type to hold transactions list for funds
@@ -63,14 +64,16 @@ export class TransactionsList {
     }
     toString() {
         return this.list
-            .toJS()
             .map(item => {
-                return {
-                    date: item.get('date'),
-                    units: item.get('units'),
-                    cost: item.get('cost')
-                };
-            });
+                const { year, month, date } = item.get('date').toString();
+
+                return item
+                    .delete('id')
+                    .set('year', year)
+                    .set('month', month)
+                    .set('date', date);
+            })
+            .toJS();
     }
     valueOf() {
         return this.list;
@@ -141,15 +144,27 @@ export class TransactionsList {
  * @param {integer} mode: output either median or mean
  * @returns {integer} median / mean value
  */
-export const listAverage = (theList, offset, mode) => {
-    const values = offset ? theList.slice(0, -offset) : theList;
+export function listAverage(theList, offset, mode) {
+    const values = offset
+        ? theList.slice(0, -offset)
+        : theList;
+
     if (mode === AVERAGE_MEDIAN) {
     // median
-        const sorted = values.sort((a, b) => a < b ? -1 : 1);
-        if (sorted.size & 1) {
+        const sorted = values.sort((prev, next) => {
+            if (prev < next) {
+                return -1;
+            }
+
+            return 1;
+        });
+
+        const oddLength = sorted.size & 1;
+        if (oddLength) {
             // odd: get the middle value
             return sorted.get(Math.floor((sorted.size - 1) / 2));
         }
+
         // even: get the middle two values and find the average of them
         const low = sorted.get(Math.floor(sorted.size / 2) - 1);
         const high = sorted.get(Math.floor(sorted.size / 2));
@@ -158,30 +173,33 @@ export const listAverage = (theList, offset, mode) => {
     }
 
     // mean
-    return theList.reduce((a, b) => a + b, 0) / theList.size;
-};
+    return theList.reduce((sum, value) => sum + value, 0) / theList.size;
+}
 
 export const indexPoints = (value, key) => [key, value];
 
-export const getYearMonthFromKey = (key, startYear, startMonth) => {
+export function getYearMonthFromKey(key, startYear, startMonth) {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
     const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed
+
     return [year, month];
-};
-export const getKeyFromYearMonth = (year, month, startYear, startMonth) => {
+}
+
+export function getKeyFromYearMonth(year, month, startYear, startMonth) {
     return 12 * (year - startYear) + month - startMonth;
-};
+}
 
 /**
  * Generate random Gaussian increment for a brownian motion
  * Used in fund predictions
  * @returns {float} random value
  */
-export const randnBm = () => {
-    const u = 1 - Math.random();
-    const v = 1 - Math.random();
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-};
+export function randnBm() {
+    const rand1 = 1 - Math.random();
+    const rand2 = 1 - Math.random();
+
+    return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
+}
 
 export function pushToRequestQueue(reduction, active, deleteItem = false) {
     const queueKey = deleteItem
@@ -191,6 +209,22 @@ export function pushToRequestQueue(reduction, active, deleteItem = false) {
     const queue = reduction.getIn(['appState', 'edit', queueKey]);
 
     return reduction.setIn(['appState', 'edit', queueKey], queue.push(active));
+}
+
+export function getValueForTransmit(value) {
+    if (typeof value === 'number') {
+        return value;
+    }
+
+    if (value instanceof YMD || value instanceof TransactionsList) {
+        return value.toString();
+    }
+
+    if (typeof value === 'object') {
+        return value;
+    }
+
+    return value.toString();
 }
 
 /**
@@ -207,7 +241,7 @@ export function buildQueueRequestList(reduction) {
         .reduce((reqs, dataItem) => {
             const pageIndex = dataItem.get('pageIndex');
             const item = dataItem.get('item');
-            const value = dataItem.get('value');
+            const value = getValueForTransmit(dataItem.get('value'));
 
             if (PAGES[pageIndex] === 'overview') {
                 if (startYearMonth === null) {
@@ -276,10 +310,15 @@ export function buildQueueRequestList(reduction) {
  * @param {integer} pageIndex: page we're on
  * @returns {map} null-editable object ready for navigating
  */
-export const getNullEditable = pageIndex => {
+export function getNullEditable(pageIndex) {
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
+
+    const row = pageIsList
+        ? -1
+        : 0;
+
     return map({
-        row: pageIsList ? -1 : 0,
+        row,
         col: -1,
         pageIndex,
         id: null,
@@ -287,17 +326,18 @@ export const getNullEditable = pageIndex => {
         value: null,
         originalValue: null
     });
-};
+}
 
 /**
  * @function getAddDefaultValues
  * @param {integer} pageIndex: page we're on
  * @returns {list} list of add-items to display on page load
  */
-export const getAddDefaultValues = pageIndex => {
+export function getAddDefaultValues(pageIndex) {
     if (!LIST_COLS_PAGES[pageIndex]) {
         return list.of();
     }
+
     return list(LIST_COLS_PAGES[pageIndex].map(column => {
         if (column === 'date') {
             return new YMD();
@@ -312,9 +352,10 @@ export const getAddDefaultValues = pageIndex => {
         if (column === 'transactions') {
             return new TransactionsList(list.of(), true);
         }
+
         return null;
     }));
-};
+}
 
 /**
  * Sort list rows by date, and add daily tallies
@@ -322,27 +363,29 @@ export const getAddDefaultValues = pageIndex => {
  * @param {integer} pageIndex: page which rows are on
  * @returns {list} sorted rows
  */
-export const sortRowsByDate = (rows, pageIndex) => {
+export function sortRowsByDate(rows, pageIndex) {
     const today = new YMD();
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
     let dailySum = 0;
     let lastFuture = false;
-    const sorted = rows.sort((a, b) => {
-        if (a.getIn(['cols', dateKey]) > b.getIn(['cols', dateKey])) {
+    const sorted = rows.sort((prev, next) => {
+        if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
             return -1;
         }
-        if (b.getIn(['cols', dateKey]) > (a.getIn(['cols', dateKey]))) {
+        if (prev.getIn(['cols', dateKey]) > (next.getIn(['cols', dateKey]))) {
             return 1;
         }
-        if (a.get('id') > b.get('id')) {
+        if (prev.get('id') > next.get('id')) {
             return -1;
         }
+
         return 1;
     }).map(row => {
         const thisFuture = row.getIn(['cols', dateKey]) > today;
         const thisLastFuture = lastFuture;
         lastFuture = thisFuture;
+
         return row
             .set('future', thisFuture)
             .set('first-present', !thisFuture && thisLastFuture);
@@ -353,17 +396,20 @@ export const sortRowsByDate = (rows, pageIndex) => {
             const lastInDay = rowKey === sorted.size - 1 ||
         row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
             dailySum += row.getIn(['cols', costKey]);
-            const newRow = lastInDay ? row.set('daily', dailySum) : row.delete('daily');
+            const newRow = lastInDay
+                ? row.set('daily', dailySum)
+                : row.delete('daily');
 
             if (lastInDay) {
                 dailySum = 0;
             }
+
             return newRow;
         });
     }
 
     return sorted;
-};
+}
 
 /**
  * Add weekly averages (should be run after sortRowsByDate)
@@ -372,15 +418,15 @@ export const sortRowsByDate = (rows, pageIndex) => {
  * @param {integer} pageIndex: page which rows are on
  * @returns {map} data with averages
  */
-export const addWeeklyAverages = (data, rows, pageIndex) => {
+export function addWeeklyAverages(data, rows, pageIndex) {
     if (!DAILY_PAGES[pageIndex]) {
         return data;
     }
     // note that this is calculated only based on the visible data,
     // not past data
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-    const visibleTotal = rows.reduce((a, b) => {
-        return a + b.getIn(['cols', costKey]);
+    const visibleTotal = rows.reduce((sum, item) => {
+        return sum + item.getIn(['cols', costKey]);
     }, 0);
 
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
@@ -391,6 +437,10 @@ export const addWeeklyAverages = (data, rows, pageIndex) => {
     const lastDate = rows.last().getIn(['cols', dateKey]);
     const numWeeks = (firstDate - lastDate) / 7;
 
-    return data.set('weekly', numWeeks ? visibleTotal / numWeeks : 0);
-};
+    const weeklyAverage = numWeeks
+        ? visibleTotal / numWeeks
+        : 0;
+
+    return data.set('weekly', weeklyAverage);
+}
 

@@ -24,10 +24,12 @@ export default class Editable extends PureControllerView {
         })));
     }
     componentDidUpdate(prevProps) {
-        if ((!prevProps.active && this.props.active) ||
-        (!prevProps.focus && this.props.focus)) {
+        if (this.input && (
+            (!prevProps.active && this.props.active) ||
+            (!prevProps.focus && this.props.focus)
+        )) {
             window.setTimeout(() => {
-                this.input && this.input.focus && this.input.focus();
+                this.input.focus();
             }, 0);
         }
     }
@@ -42,6 +44,7 @@ export default class Editable extends PureControllerView {
     }
     renderValue() {
         const thisClassName = `editable editable-${this.editableType}`;
+
         return (
             <span className={thisClassName} onMouseDown={() => this.activate()}>
                 {this.format()}
@@ -57,7 +60,7 @@ export default class Editable extends PureControllerView {
     renderInput() {
         return (
             <span>
-                <input className='editable-input' {...this.inputProps}
+                <input className="editable-input" {...this.inputProps}
                     defaultValue={this.getDefaultValue()}
                     ref={input => { this.input = input; }}
                     onChange={evt => this.handleChange(evt)}
@@ -70,6 +73,7 @@ export default class Editable extends PureControllerView {
         if (this.props.active) {
             return this.renderInput();
         }
+
         return this.renderValue();
     }
 }

@@ -21,7 +21,7 @@ import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
-const getItemValue = (reduction, pageIndex, row, col) => {
+function getItemValue(reduction, pageIndex, row, col) {
     let id = null;
     let item = null;
     let value = null;
@@ -39,8 +39,9 @@ const getItemValue = (reduction, pageIndex, row, col) => {
             item = LIST_COLS_PAGES[pageIndex][col];
         }
     }
+
     return { id, item, value };
-};
+}
 
 /**
  * Handle suggestions navigation
@@ -49,11 +50,98 @@ const getItemValue = (reduction, pageIndex, row, col) => {
  * @param {map} suggestions suggestions object
  * @returns {Record} modified reduction
  */
-const handleSuggestionsNav = (reduction, direction, suggestions) => {
+function handleSuggestionsNav(reduction, direction, suggestions) {
     const newActive = ((suggestions.get('active') + 1 + direction) %
                      (suggestions.get('list').size + 1)) - 1;
+
     return reduction.setIn(['appState', 'edit', 'suggestions', 'active'], newActive);
-};
+}
+
+export function getNavRow(
+    dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
+) {
+    const listOffset = pageIsList
+        ? -1
+        : 0;
+
+    if (addBtnFocus) {
+        // navigate from the add button
+        if (dy < 0) {
+            return numRows + listOffset - 1;
+        }
+
+        if (dx > 0) {
+            return listOffset + 1;
+        }
+    }
+
+    if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
+        // go to the end if navigating backwards
+        return numRows + listOffset - 1;
+    }
+
+    return listOffset + ((currentRow + dy + Math.floor(
+        (currentCol + dx) / numCols
+    ) + numRows) % numRows);
+}
+
+export function getNavCol(
+    dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus
+) {
+    if (addBtnFocus) {
+        // navigate from the add button
+        if (dx > 0) {
+            return 0;
+        }
+
+        return numCols - 1;
+    }
+
+    if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
+        // go to the end if navigating backwards
+        return numCols - 1;
+    }
+
+    return (editing.get('col') + dx + numCols) % numCols;
+}
+
+export function getNavRowCol(
+    dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
+) {
+    const row = getNavRow(
+        dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
+    );
+
+    const col = getNavCol(
+        dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus
+    );
+
+    return { row, col };
+}
+
+function getNumRowsCols(reduction, pageIndex, pageIsList) {
+    let numRows = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']);
+    const numCols = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numCols']);
+
+    if (pageIsList) {
+        // include add row
+        numRows += 1;
+    }
+
+    return { numRows, numCols };
+}
+
+function getCurrentRowCol(editing, pageIsList) {
+    let currentRow = editing.get('row');
+    const currentCol = editing.get('col');
+
+    if (pageIsList) {
+        // include add row
+        currentRow += 1;
+    }
+
+    return { currentRow, currentCol };
+}
 
 /**
  * Handle navigation
@@ -63,74 +151,43 @@ const handleSuggestionsNav = (reduction, direction, suggestions) => {
  * @param {boolean} cancel clear any changes
  * @returns {Record} modified reduction
  */
-const handleNav = (reduction, dx, dy, cancel) => {
-    const editing = reduction.getIn(['appState', 'edit', 'active']);
+function handleNav(reduction, dx, dy, cancel) {
     if (dx === null) {
         return rActivateEditable(reduction, null, cancel);
     }
+
     const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
-    let numRows = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']);
-    const numCols = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'numCols']);
+    const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
+    const { numRows, numCols } = getNumRowsCols(reduction, pageIndex, pageIsList);
+    const editing = reduction.getIn(['appState', 'edit', 'active']);
+
     if (!numRows || !numCols || !editing) {
         return reduction;
     }
 
-    let newReduction = reduction;
+    const { currentRow, currentCol } = getCurrentRowCol(editing, pageIsList);
 
-    const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
-    if (pageIsList) {
-        numRows++; // include add row
-    }
-
-    let currentRow = editing.get('row');
-    const currentCol = editing.get('col');
-    if (pageIsList) {
-        if (currentRow === -1 && currentCol === numCols - 1 && dx > 0) {
-            // highlight add button
-            return rActivateEditable(newReduction, null)
-                .setIn(['appState', 'edit', 'addBtnFocus'], true);
-        }
-        currentRow++;
+    if (pageIsList && currentRow === 0 && currentCol === numCols - 1 && dx > 0) {
+        // highlight add button
+        return rActivateEditable(reduction, null)
+            .setIn(['appState', 'edit', 'addBtnFocus'], true);
     }
 
-    let row;
-    let col;
-    if (reduction.getIn(['appState', 'edit', 'addBtnFocus'])) {
-    // navigate from the add button
-        if (dx > 0) {
-            row = 1;
-            col = 0;
-        }
-        else {
-            col = numCols - 1;
-        }
-
-        if (dy < 0) {
-            row = numRows - 1;
-        }
-        newReduction = newReduction.setIn(['appState', 'edit', 'addBtnFocus'], false);
-    }
-    else if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
-    // go to the end if navigating backwards
-        row = numRows - 1;
-        col = numCols - 1;
-    }
-    else {
-        row = (currentRow + dy +
-              Math.floor((currentCol + dx) / numCols) + numRows) % numRows;
-        col = (editing.get('col') + dx + numCols) % numCols;
-    }
-    if (pageIsList) {
-        row--;
-    }
+    const addBtnFocus = reduction.getIn(['appState', 'edit', 'addBtnFocus']);
+    const { row, col } = getNavRowCol(
+        dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
+    );
 
     const itemValue = getItemValue(reduction, pageIndex, row, col);
     const id = itemValue.id;
     const item = itemValue.item;
     const value = itemValue.value;
 
-    return rActivateEditable(newReduction, map({ row, col, pageIndex, id, item, value }));
-};
+    return rActivateEditable(
+        reduction, map({ row, col, pageIndex, id, item, value })
+    )
+        .setIn(['appState', 'edit', 'addBtnFocus'], false);
+}
 
 /**
  * get x, y directions given a keypress (e.g. arrowRight -> [1, 0])
@@ -138,17 +195,28 @@ const handleNav = (reduction, dx, dy, cancel) => {
  * @param {boolean} shift: shift key was pressed
  * @returns {array} direction to navigate
  */
-const getNavDirection = (key, shift) => {
+function getNavDirection(key, shift) {
     if (key === 'Tab') {
-        return [shift ? -1 : 1, 0];
+        const dx = shift
+            ? -1
+            : 1;
+
+        const dy = 0;
+
+        return [dx, dy];
     }
+
     const arrows = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
     const arrowIndex = arrows.indexOf(key);
     if (arrowIndex > -1) {
-        return [((arrowIndex % 4) - 1) % 2, (((arrowIndex - 1) % 4) - 1) % 2];
+        return [
+            ((arrowIndex % 4) - 1) % 2,
+            (((arrowIndex - 1) % 4) - 1) % 2
+        ];
     }
+
     return [0, 0];
-};
+}
 
 /**
  * Handle key presses
@@ -156,7 +224,7 @@ const getNavDirection = (key, shift) => {
  * @param {object} evt key event
  * @returns {Record} modified reduction
  */
-export const rHandleKeyPress = (reduction, evt) => {
+export function rHandleKeyPress(reduction, evt) {
     if (evt.key === 'Control' || evt.key === 'Shift') {
     // don't do anything until an actual key (not modifier) is pressed
         return reduction;
@@ -184,30 +252,39 @@ export const rHandleKeyPress = (reduction, evt) => {
                     ), 1, 0);
                 }
             }
+
             if (!evt.ctrl && (evt.key === 'Tab' || evt.key.indexOf('Arrow') > -1)) {
-                return handleSuggestionsNav(
-                    reduction, direction[1] === 0 ? direction[0] : direction[1], suggestions);
+                const theDirection = direction[1] === 0
+                    ? direction[0]
+                    : direction[1];
+
+                return handleSuggestionsNav(reduction, theDirection, suggestions);
             }
         }
+
         // handle page navigation
         if (navigated && (evt.ctrl || evt.key === 'Tab')) {
             return handleNav(reduction, direction[0], direction[1]);
         }
+
         if (evt.key === 'Escape') {
             return handleNav(reduction, null, null, true);
         }
+
         if (evt.key === 'Enter') {
             // submit on enter
             return rActivateEditable(reduction, null);
         }
+
         return reduction;
     }
     // not logged in
     if (evt.key === 'Escape') {
         return rLoginFormReset(reduction, 0);
     }
+
     return rLoginFormInput(reduction, evt.key);
-};
+}
 
 /**
  * Log out of the system
@@ -219,6 +296,7 @@ export const rLogout = reduction => {
         return reduction;
     }
     Cookies.remove('pin');
+
     return reduction.set('appState', resetAppState(reduction.get('appState')));
 };
 
@@ -255,7 +333,7 @@ export const rLoadCookies = reduction => {
  * @param {integer} pageIndex: page index to navigate to
  * @returns {Record} modified reduction
  */
-export const rNavigateToPage = (reduction, pageIndex) => {
+export function rNavigateToPage(reduction, pageIndex) {
     Cookies.set('page', pageIndex, { expires: 7 });
     let newReduction = reduction;
     if (!newReduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
@@ -263,22 +341,27 @@ export const rNavigateToPage = (reduction, pageIndex) => {
     }
     newReduction = newReduction.setIn(['appState', 'currentPageIndex'], pageIndex);
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
-        newReduction = newReduction.setIn(
-            ['appState', 'edit', 'add'], getAddDefaultValues(pageIndex)
-        ).setIn(
-            ['appState', 'edit', 'active'], getNullEditable(pageIndex)
-        ).setIn(['appState', 'edit', 'addBtnFocus'], false);
+        newReduction = newReduction
+            .setIn(
+                ['appState', 'edit', 'add'], getAddDefaultValues(pageIndex)
+            )
+            .setIn(
+                ['appState', 'edit', 'active'], getNullEditable(pageIndex)
+            )
+            .setIn(['appState', 'edit', 'addBtnFocus'], false);
     }
+
     if (PAGES[pageIndex] === 'analysis') {
         newReduction = reloadAnalysis(newReduction, newReduction);
     }
-    return loadBlocks(newReduction, pageIndex);
-};
 
-export const rUpdateServer = reduction => {
+    return loadBlocks(newReduction, pageIndex);
+}
+
+export function rUpdateServer(reduction) {
+    // update funds cached value age
     let newReduction = reduction;
 
-    // update funds cached value age
     if (reduction.getIn(['appState', 'pages', pageIndexFunds])) {
         const ageText = getFundsCachedValueAgeText(
             reduction.getIn(['appState', 'other', 'graphFunds', 'startTime']),
@@ -286,16 +369,21 @@ export const rUpdateServer = reduction => {
             new Date()
         );
 
-        newReduction = newReduction.setIn(['appState', 'other', 'fundsCachedValue', 'ageText'], ageText);
+        newReduction = newReduction.setIn(
+            ['appState', 'other', 'fundsCachedValue', 'ageText'], ageText
+        );
     }
 
     if (reduction.getIn(['appState', 'loadingApi'])) {
-    // only make one request at once
+        // only make one request at once
         return newReduction;
     }
-    if (reduction.getIn(['appState', 'edit', 'queue']).size === 0 &
-     reduction.getIn(['appState', 'edit', 'queueDelete']).size === 0) {
-    // toggle the status to trigger another (delayed) update
+
+    if (
+        reduction.getIn(['appState', 'edit', 'queue']).size === 0 &&
+        reduction.getIn(['appState', 'edit', 'queueDelete']).size === 0
+    ) {
+        // toggle the status to trigger another (delayed) update
         return newReduction.setIn(
             ['appState', 'edit', 'status'],
             (reduction.getIn(['appState', 'edit', 'status']) + 1) & 1
@@ -306,18 +394,24 @@ export const rUpdateServer = reduction => {
     const reqList = buildQueueRequestList(reduction);
     const req = { apiKey, list: reqList };
 
-    return newReduction.setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
+    return newReduction
+        .setIn(['appState', 'edit', 'status'], SERVER_UPDATE_REQUESTED)
         .setIn(['appState', 'loadingApi'], true)
-        .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_UPDATE_REQUESTED, req)));
-};
+        .set('effects', reduction.get('effects').push(
+            buildMessage(EF_SERVER_UPDATE_REQUESTED, req)
+        ));
+}
 
-export const rHandleServerUpdate = (reduction, response) => {
-    const status = response.data.error ? SERVER_UPDATE_ERROR : SERVER_UPDATE_RECEIVED;
+export function rHandleServerUpdate(reduction, response) {
+    const status = response.data.error
+        ? SERVER_UPDATE_ERROR
+        : SERVER_UPDATE_RECEIVED;
+
     const newReduction = reduction.setIn(['appState', 'loadingApi'], false)
         .setIn(['appState', 'edit', 'status'], status)
         .setIn(['appState', 'edit', 'queue'], list.of())
         .setIn(['appState', 'edit', 'queueDelete'], list.of());
 
     return loadBlocks(newReduction, newReduction.getIn(['appState', 'currentPageIndex']), true);
-};
+}
 
