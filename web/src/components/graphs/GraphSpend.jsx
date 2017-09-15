@@ -143,15 +143,19 @@ export class GraphSpend extends LineGraph {
             this.ctx.restore();
         });
     }
-    drawKey() {
-    // draw rectangle over area which is predicted based on the past
+    drawFutureArea() {
         const future0 = this.pixX(this.currentYearMonthKey + 1);
         const future1 = this.pixY(this.maxY);
         const futureW = this.pixX(this.maxX) - future0;
         const futureH = this.pixY(this.minY) - future1;
+
         this.ctx.beginPath();
         this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
         this.ctx.fillRect(future0, future1, futureW, futureH);
+
+    }
+    drawKey() {
+        this.drawFutureArea();
 
         // background on key
         this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_DARK);
@@ -210,6 +214,13 @@ export class GraphSpend extends LineGraph {
         this.ctx.fillStyle = color;
         this.ctx.fill();
     }
+    drawCashFlowArrows() {
+        this.netFlows.forEach((value, key) => {
+            const posX = this.pixX(key + 1);
+
+            this.drawArrow(posX + 0.5, this.netFlows.get(key));
+        });
+    }
     drawData() {
     // plot data
         const y0 = this.pixY(0);
@@ -229,9 +240,12 @@ export class GraphSpend extends LineGraph {
                 this.ctx.fillStyle = colors.get(categoryKey);
                 this.ctx.fillRect(posX, thisPosY, 8, y0 - thisPosY);
             });
-
-            this.drawArrow(posX + 0.5, this.netFlows.get(monthKey));
         });
+
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        this.drawCashFlowArrows();
     }
     draw() {
         if (!this.supported) {
