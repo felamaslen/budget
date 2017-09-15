@@ -2,7 +2,7 @@
  * Graph general cash flow (balance over time)
  */
 
-import { List as list, Map as map } from 'immutable';
+import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -10,8 +10,7 @@ import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import { rgba } from '../../misc/color';
 import {
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
-    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
+    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
 } from '../../misc/const';
 import {
     GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
@@ -47,8 +46,10 @@ export class GraphFunds extends LineGraph {
         };
         this.outerProperties = {
             onMouseMove: evt => {
-                const valX = this.valX(evt.pageX - evt.currentTarget.offsetLeft);
-                const valY = this.valY(evt.pageY - evt.currentTarget.offsetTop);
+                const rect = evt.currentTarget.getBoundingClientRect();
+                const valX = this.valX(evt.pageX - rect.left);
+                const valY = this.valY(evt.pageY - rect.top);
+
                 this.dispatchAction(aFundsGraphHovered({ valX, valY }));
             },
             onMouseOut: () => {
@@ -87,15 +88,15 @@ export class GraphFunds extends LineGraph {
 
         // get the tick size for the new range
         this.tickSizeY = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
-        if (!isNaN(this.tickSizeY)) {
+        if (isNaN(this.tickSizeY)) {
+            this.setRange([minX, maxX, minY, maxY]);
+        }
+        else {
             this.setRange([
                 minX, maxX,
                 this.tickSizeY * Math.floor(minY / this.tickSizeY),
                 this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
             ]);
-        }
-        else {
-            this.setRange([minX, maxX, minY, maxY]);
         }
     }
     processData() {
@@ -104,39 +105,52 @@ export class GraphFunds extends LineGraph {
     }
     formatValue(value) {
         if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-            return value.toFixed(2) + '%';
+            return `${value.toFixed(2)}%`;
         }
+
         return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
     }
-    drawAxes() {
-        const axisTextColor = rgba(COLOR_DARK);
-        const timeTicks = this.getTimeScale(this.props.startTime);
-
-        this.ctx.lineWidth = 1;
-
-        // draw profit / loss backgrounds
-        if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-            const zero = this.pixY(Math.min(Math.max(0, this.minY), this.maxY));
-            if (this.maxY > 0) {
-                this.ctx.fillStyle = rgba(COLOR_PROFIT_LIGHT);
-                const y0 = this.pixY(this.maxY);
-                this.ctx.fillRect(this.pixX(this.minX), y0, this.pixX(this.maxX), zero - y0);
-            }
-            if (this.minY < 0) {
-                this.ctx.fillStyle = rgba(COLOR_LOSS_LIGHT);
-                this.ctx.fillRect(this.pixX(this.minX), zero, this.pixX(this.maxX), this.pixY(this.minY) - zero);
-            }
+    drawProfitLossBackground() {
+        if (this.props.mode !== GRAPH_FUNDS_MODE_ROI) {
+            return;
         }
 
+        const zero = this.pixY(Math.min(Math.max(0, this.minY), this.maxY));
+        if (this.maxY > 0) {
+            this.ctx.fillStyle = rgba(COLOR_PROFIT_LIGHT);
+            const y0 = this.pixY(this.maxY);
+            this.ctx.fillRect(this.pixX(this.minX), y0, this.pixX(this.maxX), zero - y0);
+        }
+        if (this.minY < 0) {
+            this.ctx.fillStyle = rgba(COLOR_LOSS_LIGHT);
+            this.ctx.fillRect(
+                this.pixX(this.minX),
+                zero,
+                this.pixX(this.maxX),
+                this.pixY(this.minY) - zero
+            );
+        }
+    }
+    calculateTicksY() {
         // calculate tick range
-        const numTicks = isNaN(this.tickSizeY) ? 0 :
-            Math.floor((this.maxY - this.minY) / this.tickSizeY);
-        const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
-            const value = this.minY + (key + 1) * this.tickSizeY;
-            const pos = Math.floor(this.pixY(value)) + 0.5;
-            return { value, pos };
-        });
+        const numTicks = isNaN(this.tickSizeY)
+            ? 0
+            : Math.floor((this.maxY - this.minY) / this.tickSizeY);
 
+        if (!numTicks) {
+            return [];
+        }
+
+        return new Array(numTicks)
+            .fill(0)
+            .map((item, key) => {
+                const value = this.minY + (key + 1) * this.tickSizeY;
+                const pos = Math.floor(this.pixY(value)) + 0.5;
+
+                return { value, pos };
+            });
+    }
+    drawTicksY(ticksY, axisTextColor) {
         // draw horizontal lines
         this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
         ticksY.forEach(tick => {
@@ -148,8 +162,19 @@ export class GraphFunds extends LineGraph {
             this.ctx.closePath();
         });
 
-        // draw time (X axis) ticks
-        const y0 = this.pixY(this.minY);
+        // draw Y axis
+        this.ctx.fillStyle = axisTextColor;
+        this.ctx.textBaseline = 'bottom';
+        this.ctx.textAlign = 'right';
+        this.ctx.font = FONT_AXIS_LABEL;
+
+        ticksY.forEach(tick => {
+            const tickName = this.formatValue(tick.value, true, true);
+            this.ctx.fillText(tickName, this.pixX(this.maxX), tick.pos);
+        });
+    }
+    drawTimeTicks(axisTextColor) {
+        const timeTicks = this.getTimeScale(this.props.startTime);
 
         this.ctx.font = FONT_AXIS_LABEL;
         this.ctx.fillStyle = axisTextColor;
@@ -159,11 +184,15 @@ export class GraphFunds extends LineGraph {
         const tickAngle = -Math.PI / 6;
         const tickSize = 10;
 
+        const y0 = this.pixY(this.minY);
+
         timeTicks.forEach(tick => {
             const thisTickSize = tickSize * 0.5 * (tick.major + 1);
 
             this.ctx.beginPath();
-            this.ctx.strokeStyle = tick.major ? rgba(COLOR_GRAPH_TITLE) : rgba(COLOR_DARK);
+            this.ctx.strokeStyle = tick.major
+                ? rgba(COLOR_GRAPH_TITLE)
+                : rgba(COLOR_DARK);
             this.ctx.moveTo(tick.pix, y0);
             this.ctx.lineTo(tick.pix, y0 - thisTickSize);
             this.ctx.stroke();
@@ -186,17 +215,19 @@ export class GraphFunds extends LineGraph {
                 this.ctx.restore();
             }
         });
+    }
+    drawAxes() {
+        const axisTextColor = rgba(COLOR_DARK);
 
-        // draw Y axis
-        this.ctx.fillStyle = axisTextColor;
-        this.ctx.textBaseline = 'bottom';
-        this.ctx.textAlign = 'right';
-        this.ctx.font = FONT_AXIS_LABEL;
+        this.ctx.lineWidth = 1;
 
-        ticksY.forEach(tick => {
-            const tickName = this.formatValue(tick.value, true, true);
-            this.ctx.fillText(tickName, this.pixX(this.maxX), tick.pos);
-        });
+        this.drawProfitLossBackground();
+
+        const ticksY = this.calculateTicksY();
+
+        this.drawTicksY(ticksY, axisTextColor);
+
+        this.drawTimeTicks(axisTextColor);
     }
     drawData() {
         // plot past data
@@ -245,16 +276,23 @@ export class GraphFunds extends LineGraph {
             const pixY = this.pixY(this.props.hlPoint.get(1));
 
             this.ctx.font = FONT_GRAPH_TITLE;
-            this.ctx.textAlign = alignLeft ? 'left' : 'right';
+            this.ctx.textAlign = alignLeft
+                ? 'left'
+                : 'right';
             this.ctx.textBaseline = 'top';
 
             const labelWidth = this.ctx.measureText(labelText).width + 2 * paddingX;
             this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_DARK);
-            const left = alignLeft ? pixX : pixX - labelWidth;
+            const left = alignLeft
+                ? pixX
+                : pixX - labelWidth;
             this.ctx.fillRect(left, pixY, labelWidth, parseInt(this.ctx.font, 10) + 2 * paddingY);
 
             this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
-            this.ctx.fillText(labelText, pixX + paddingX * (alignLeft ? 1 : -1), pixY + paddingY);
+            const align = alignLeft
+                ? 1
+                : -1;
+            this.ctx.fillText(labelText, pixX + paddingX * align, pixY + paddingY);
         }
     }
     draw() {
@@ -296,7 +334,7 @@ export class GraphFunds extends LineGraph {
 
         return (
             <div>
-                <ul className='fund-sidebar noselect'>
+                <ul className="fund-sidebar noselect">
                     <li>
                         <select defaultValue={this.props.period} onChange={onChange}>
                             {periodOptions}
@@ -304,7 +342,7 @@ export class GraphFunds extends LineGraph {
                     </li>
                     {fundLineToggles}
                 </ul>
-                <span className='mode'>
+                <span className="mode">
           Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
                 </span>
             </div>

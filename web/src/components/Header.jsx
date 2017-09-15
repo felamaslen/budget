@@ -7,7 +7,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PureControllerView from './PureControllerView';
-import { capitalise } from '../misc/text';
+import { capitalise } from '../misc/format';
 import { PAGES, SERVER_UPDATE_ERROR, ERROR_LEVEL_ERROR } from '../misc/const';
 import { ERROR_MSG_SERVER_UPDATE, TIMER_UPDATE_SERVER } from '../misc/config';
 import {
@@ -24,6 +24,7 @@ export class Header extends PureControllerView {
     navToPage(page) {
         this.dispatchAction(aPageNavigatedTo(page));
     }
+
     /**
    * render a navigation bar with links to different pages
    * @returns {object} React <ul> element
@@ -53,7 +54,7 @@ export class Header extends PureControllerView {
             <ul className="nav-list noselect">
                 {pageLinksList}
                 <li>
-                    <a className='nav-link' id='nav-link-logout' onClick={() => this.logout()}>Log out</a>
+                    <a className="nav-link" id="nav-link-logout" onClick={() => this.logout()}>Log out</a>
                 </li>
             </ul>
         );
@@ -93,10 +94,13 @@ export class Header extends PureControllerView {
         }
     }
     render() {
-        const navBar = this.props.showNav ? this.renderNavBar() : null;
-        const loadingApiSpinner = this.props.loadingApi ? (
-            <span className="loading-api"></span>
-        ) : null;
+        const navBar = this.props.showNav
+            ? this.renderNavBar()
+            : null;
+
+        const loadingApiSpinner = this.props.loadingApi
+            ? <span className="loading-api"></span>
+            : null;
 
         const queueNotSaved = this.props.queueSize > 0
             ? <span className="queue-not-saved">Unsaved changes!</span>

@@ -81,13 +81,19 @@ export const SERVER_UPDATE_ERROR = 0xf93;
 export const MAX_SUGGESTIONS = 5;
 
 const htmlCanvasSupported = () => {
+    if (typeof navigator === 'undefined') {
+        return false;
+    }
+
     if (navigator.userAgent === 'node.js') {
         return false;
     }
 
     const elem = document.createElement('canvas');
-    return !!(elem.getContext && elem.getContext('2d'));
+
+    return Boolean(elem.getContext && elem.getContext('2d'));
 };
+
 export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;

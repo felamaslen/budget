@@ -14,7 +14,7 @@ import {
 import buildMessage from '../../messageBuilder';
 import { EF_BLOCKS_REQUESTED } from '../../constants/effects';
 
-export const loadBlocks = (reduction, pageIndex, noClear) => {
+export function loadBlocks(reduction, pageIndex, noClear) {
     if (BLOCK_PAGES.indexOf(pageIndex) === -1) {
         return reduction
             .setIn(['appState', 'other', 'blockView', 'blocks'], null);
@@ -30,7 +30,7 @@ export const loadBlocks = (reduction, pageIndex, noClear) => {
     return newReduction.set('effects', reduction.get('effects').push(
         buildMessage(EF_BLOCKS_REQUESTED, { apiKey, table, loadKey })
     )).setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
-};
+}
 
 export function processRawListRows(data, pageIndex) {
     return list(data.map(item => {

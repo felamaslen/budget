@@ -5,7 +5,9 @@
 import { List as list, Map as map } from 'immutable';
 import { EF_CONTENT_REQUESTED } from '../constants/effects';
 import buildMessage from '../messageBuilder';
+import { rErrorMessageOpen } from './ErrorReducer';
 import {
+    ERROR_LEVEL_WARN,
     PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS
 } from '../misc/const';
 import { LIST_BLOCK_WIDTH, LIST_BLOCK_HEIGHT } from '../misc/config';
@@ -80,7 +82,7 @@ export function rLoadContent(reduction, pageIndex) {
  * @param {object} data: response data
  * @returns {map}: page data for view
  */
-const processPageData = (reduction, pageIndex, data) => {
+function processPageData(reduction, pageIndex, data) {
     if (PAGES[pageIndex] === 'overview') {
     // overview
         return processPageDataOverview(reduction, pageIndex, data);
@@ -109,9 +111,9 @@ const processPageData = (reduction, pageIndex, data) => {
     }
 
     return reduction;
-};
+}
 
-export const rHandleContentResponse = (reduction, output) => {
+export function rHandleContentResponse(reduction, output) {
     return processPageData(
         reduction
             .setIn(['appState', 'pagesLoaded', output.pageIndex], true)
@@ -121,24 +123,26 @@ export const rHandleContentResponse = (reduction, output) => {
     )
         .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
         .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));
-};
+}
 
-export const rContentBlockHover = (reduction, obj) => {
+export function rContentBlockHover (reduction, obj) {
     let newStatus = '';
-    const haveSubBlock = !!obj.subBlock;
+    const haveSubBlock = Boolean(obj.subBlock);
     if (obj.block) {
-        const theBlock = haveSubBlock ? obj.subBlock : obj.block;
+        const theBlock = haveSubBlock
+            ? obj.subBlock
+            : obj.block;
+
         const value = formatCurrency(theBlock.get('value'), { raw: true });
-        if (haveSubBlock) {
-            newStatus = `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`;
-        }
-        else {
-            newStatus = `${capitalise(obj.block.get('name'))} (${value})`;
-        }
+
+        newStatus = haveSubBlock
+            ? `${capitalise(obj.block.get('name'))}: ${obj.subBlock.get('name')} (${value})`
+            : `${capitalise(obj.block.get('name'))} (${value})`;
     }
+
     return reduction.setIn(['appState', 'other', 'blockView', 'status'], newStatus);
-};
-export const rContentUpdateBlocks = (reduction, obj) => {
+}
+export function rContentUpdateBlocks(reduction, obj) {
     const loadKey = obj.loadKey;
     const currentLoadKey = reduction.getIn(['appState', 'other', 'blockView', 'loadKey']);
     if (loadKey !== currentLoadKey) {
@@ -147,7 +151,10 @@ export const rContentUpdateBlocks = (reduction, obj) => {
     }
 
     if (obj.response.data.error) {
-        return reduction; // TODO
+        return rErrorMessageOpen(reduction, map({
+            text: `Error loading blocks: ${obj.response.data.errorMessage}`,
+            level: ERROR_LEVEL_WARN
+        }));
     }
 
     const dataItem = obj.response.data.data.list[0];
@@ -162,5 +169,5 @@ export const rContentUpdateBlocks = (reduction, obj) => {
 
     return reduction
         .setIn(['appState', 'other', 'blockView', 'blocks'], blocks);
-};
+}
 

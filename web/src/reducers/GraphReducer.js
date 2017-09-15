@@ -2,15 +2,14 @@
  * Carries out actions for the graph components
  */
 
-import { fromJS, List as list, Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
-import { PAGES, LIST_COLS_PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import { getPeriodMatch } from '../misc/data';
 import {
     getFormattedHistory,
-    zoomFundLines, addFundLines, getXRange, getFundsCachedValue,
-    getFundsWithTransactions, getFundLines, getGainComparisons, addPriceHistory
+    zoomFundLines
 } from './data/funds';
 import {
     processRawListRows
@@ -25,12 +24,12 @@ export const rToggleShowAll = reduction => {
         !reduction.getIn(['appState', 'other', 'showAllBalanceGraph']));
 };
 
-export const rToggleFundItemGraph = (reduction, key) => {
+export function rToggleFundItemGraph(reduction, key) {
     return reduction.setIn(
         ['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'],
         !reduction.getIn(['appState', 'pages', pageIndexFunds, 'rows', key, 'historyPopout'])
     );
-};
+}
 
 function getCacheData(reduction, period) {
     const rows = reduction.getIn(
@@ -147,7 +146,7 @@ export function rHoverFundsGraph(reduction, position) {
             .get('line')
             .reduce((thisLast, point, pointKey) => {
                 const pointDistance = Math.sqrt(
-                    Math.pow(point.get(0) - position.valX, 2) +
+                    Math.pow((point.get(0) - position.valX) / 1000, 2) +
                     Math.pow(point.get(1) - position.valY, 2)
                 );
 

@@ -71,11 +71,13 @@ export default class App extends Component {
                 serverUpdateStatus={this.state.reduction.getIn(['appState', 'edit', 'status'])}
                 queueSize={queueSize} />
         );
-        const loginForm = loggedIn || loading ? null : (
-            <LoginForm dispatcher={this.state.dispatcher}
+
+        const loginForm = loggedIn || loading
+            ? null
+            : <LoginForm dispatcher={this.state.dispatcher}
                 inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
-                loading={this.state.reduction.getIn(['appState', 'loginForm', 'loading'])} />
-        );
+                loading={this.state.reduction.getIn(['appState', 'loginForm', 'loading'])} />;
+
         const content = loggedIn && !loading ? (
             <Content dispatcher={this.state.dispatcher}
                 pages={this.state.reduction.getIn(['appState', 'pages'])}
@@ -85,7 +87,9 @@ export default class App extends Component {
                 other={this.state.reduction.getIn(['appState', 'other'])} />
         ) : null;
 
-        const spinner = loading ? <Spinner /> : null;
+        const spinner = loading
+            ? <Spinner />
+            : null;
 
         return (
             <div id="main">

@@ -35,7 +35,7 @@ export class ErrorMessages extends PureControllerView {
         });
 
         return (
-            <ul className='messages-outer'>
+            <ul className="messages-outer">
                 {messages}
             </ul>
         );

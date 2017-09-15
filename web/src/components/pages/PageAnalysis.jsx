@@ -162,7 +162,7 @@ export class PageAnalysis extends PureControllerView {
                 blocks={this.props.blocks.get('blocks')}
                 blockClasses={blockClasses}
                 active={active}
-                deep={!!deep}
+                deep={Boolean(deep)}
                 status={this.props.blocks.get('status')}
             />
         );
@@ -172,44 +172,44 @@ export class PageAnalysis extends PureControllerView {
         const blockTree = this.blockTree();
 
         return (
-            <div className='page-analysis'>
-                <div className='upper'>
-                    <span className='input-period'>
+            <div className="page-analysis">
+                <div className="upper">
+                    <span className="input-period">
                         <span>Period:</span>
                         {ANALYSIS_PERIODS.map((period, key) => {
                             return (
                                 <span key={key}>
-                                    <input type='radio' checked={this.props.other.get('period') === key}
+                                    <input type="radio" checked={this.props.other.get('period') === key}
                                         onChange={() => this.dispatchAction(aPeriodChanged(key))} />
                                     <span>{capitalise(period)}</span>
                                 </span>
                             );
                         })}
                     </span>
-                    <span className='input-grouping'>
+                    <span className="input-grouping">
                         <span>Grouping:</span>
                         {ANALYSIS_GROUPINGS.map((grouping, key) => {
                             return (
                                 <span key={key}>
-                                    <input type='radio' checked={this.props.other.get('grouping') === key}
+                                    <input type="radio" checked={this.props.other.get('grouping') === key}
                                         onChange={() => this.dispatchAction(aGroupingChanged(key))} />
                                     <span>{capitalise(grouping)}</span>
                                 </span>
                             );
                         })}
                     </span>
-                    <div className='btns'>
-                        <button className='btn-previous'
+                    <div className="btns">
+                        <button className="btn-previous"
                             onClick={() => {
                                 this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') + 1));
                             }}>Previous</button>
-                        <button className='btn-next' disabled={this.props.other.get('timeIndex') === 0}
+                        <button className="btn-next" disabled={this.props.other.get('timeIndex') === 0}
                             onClick={() => {
                                 this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') - 1));
                             }}>Next</button>
                     </div>
-                    <h3 className='period-title'>{this.props.description}</h3>
-                    <div className='flexbox'>
+                    <h3 className="period-title">{this.props.description}</h3>
+                    <div className="flexbox">
                         {listTree}
                         {blockTree}
                     </div>

@@ -30,12 +30,13 @@ export class GraphBalance extends LineGraph {
         this.draw();
     }
     getTime(key, offset) {
-    // converts a key index to a UNIX time stamp
+        // converts a key index to a UNIX time stamp
         const yearMonth = getYearMonthFromKey(
             key - offset, this.props.startYearMonth[0], this.props.startYearMonth[1]);
         if (yearMonth[0] === today.year && yearMonth[1] === today.month) { // today is 1-indexed
             return today.timestamp();
         }
+
         // return the last day of this month
         return Math.floor(new Date(yearMonth[0], yearMonth[1], 1).getTime() / 1000) - 86400;
     }
@@ -57,17 +58,21 @@ export class GraphBalance extends LineGraph {
             if (thisJump > last[0]) {
                 return [thisJump, value];
             }
+
             return last;
         }, [0, 0])[0];
-        this.tension = maxJump > 10 * minYValue ? 1 : 0.5;
+
+        this.tension = maxJump > 10 * minYValue
+            ? 1
+            : 0.5;
     }
     processData() {
-    /**
-     * this doesn't really modify the data, it just puts it in a form ready for drawing
-     */
+        // this doesn't really modify the data, it just puts it in a form ready for drawing
 
-    // have an offset key when including old data
-        const oldOffset = this.props.showAll ? this.props.balanceOld.size : 0;
+        // have an offset key when including old data
+        const oldOffset = this.props.showAll
+            ? this.props.balanceOld.size
+            : 0;
 
         // futureKey is used to separate past from future data
         const futureKey = oldOffset + getKeyFromYearMonth(
@@ -82,6 +87,7 @@ export class GraphBalance extends LineGraph {
 
         this.dataBalance = dataBalance.map((value, key) => {
             const time = this.getTime(key, oldOffset);
+
             return list([time, value]);
         });
 
@@ -98,8 +104,24 @@ export class GraphBalance extends LineGraph {
         this.colorTransition = [futureKey - 1];
         this.setRanges();
     }
+    getTicksY() {
+        const minorTicks = 5;
+        const numTicks = GRAPH_BALANCE_NUM_TICKS * minorTicks;
+
+        const tickSize = getTickSize(this.minY, this.maxY, numTicks);
+
+        return new Array(numTicks)
+            .fill(0)
+            .map((item, key) => {
+                const pos = Math.floor(this.pixY(key * tickSize)) + 0.5;
+                const major = key % minorTicks === 0;
+                const value = key * tickSize * 100;
+
+                return { pos, major, value };
+            });
+    }
     drawAxes() {
-    // draw axes
+        // draw axes
         this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
         this.ctx.lineWidth = 1;
 
@@ -108,22 +130,7 @@ export class GraphBalance extends LineGraph {
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'bottom';
 
-        // calculate tick range
-        const minorTicks = 5;
-        const numTicks = GRAPH_BALANCE_NUM_TICKS * minorTicks;
-
-        if (!numTicks) {
-            return;
-        }
-
-        const tickSize = getTickSize(this.minY, this.maxY, numTicks);
-        const ticksY = Array.apply(null, new Array(numTicks)).map((_, key) => {
-            const pos = Math.floor(this.pixY(key * tickSize)) + 0.5;
-            const major = key % minorTicks === 0;
-            const value = key * tickSize * 100;
-
-            return { pos, major, value };
-        });
+        const ticksY = this.getTicksY();
 
         const drawTick = tick => {
             this.ctx.beginPath();
@@ -147,7 +154,9 @@ export class GraphBalance extends LineGraph {
 
             // tick
             this.ctx.beginPath();
-            this.ctx.strokeStyle = tick.major ? rgba(COLOR_GRAPH_TITLE) : rgba(COLOR_DARK);
+            this.ctx.strokeStyle = tick.major
+                ? rgba(COLOR_GRAPH_TITLE)
+                : rgba(COLOR_DARK);
             this.ctx.moveTo(tick.pix, y0);
             this.ctx.lineTo(tick.pix, y0 - thisTickSize);
             this.ctx.stroke();
@@ -155,7 +164,9 @@ export class GraphBalance extends LineGraph {
 
             // vertical line
             this.ctx.beginPath();
-            this.ctx.strokeStyle = tick.major > 1 ? rgba(COLOR_LIGHT_GREY) : rgba(COLOR_LIGHT);
+            this.ctx.strokeStyle = tick.major > 1
+                ? rgba(COLOR_LIGHT_GREY)
+                : rgba(COLOR_LIGHT);
             this.ctx.moveTo(tick.pix, y0 - thisTickSize);
             this.ctx.lineTo(tick.pix, 0);
             this.ctx.stroke();
@@ -182,20 +193,13 @@ export class GraphBalance extends LineGraph {
             this.ctx.fillText(tickName, x0, tick.pos);
         });
     }
-    drawKey() {
-    // add title and key
+    drawKeyBackground() {
         this.ctx.beginPath();
         this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
         this.ctx.fillRect(45, 8, 200, 60);
         this.ctx.closePath();
-
-        this.ctx.font = FONT_GRAPH_TITLE;
-        this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
-        this.ctx.textAlign = 'left';
-        this.ctx.textBaseline = 'top';
-
-        this.ctx.fillText('Balance', 65, 10);
-
+    }
+    drawKeyActual() {
         this.ctx.beginPath();
         this.ctx.lineWidth = 2;
         this.ctx.strokeStyle = rgba(COLOR_BALANCE_ACTUAL);
@@ -209,6 +213,8 @@ export class GraphBalance extends LineGraph {
         this.ctx.fillStyle = rgba(COLOR_DARK);
         this.ctx.fillText('Actual', 78, 40);
 
+    }
+    drawKeyPredicted() {
         this.ctx.beginPath();
         this.ctx.lineWidth = 2;
         this.ctx.strokeStyle = rgba(COLOR_BALANCE_PREDICTED);
@@ -217,16 +223,41 @@ export class GraphBalance extends LineGraph {
         this.ctx.stroke();
         this.ctx.closePath();
         this.ctx.fillText('Predicted', 158, 40);
-
+    }
+    drawKeyFunds() {
         this.ctx.fillText('Stocks', 78, 57);
         this.ctx.fillStyle = rgba(COLOR_BALANCE_STOCKS);
         this.ctx.fillRect(50, 54, 24, 6);
     }
+    drawTitle() {
+        this.ctx.font = FONT_GRAPH_TITLE;
+        this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'top';
+
+        this.ctx.fillText('Balance', 65, 10);
+    }
+    drawKey() {
+        // add title and key
+        this.drawKeyBackground();
+        this.drawKeyActual();
+        this.drawKeyPredicted();
+        this.drawKeyFunds();
+
+        this.drawTitle();
+    }
     drawFundsLine() {
-    // plot funds data
+        // plot funds data
         this.ctx.lineWidth = 2;
         this.drawCubicLine(
-            this.dataFunds, [rgba(COLOR_BALANCE_STOCKS)], { fill: true, stroke: false, tension: 1 });
+            this.dataFunds,
+            [rgba(COLOR_BALANCE_STOCKS)],
+            {
+                fill: true,
+                stroke: false,
+                tension: 1
+            }
+        );
     }
     drawNowLine() {
     // draw a line indicating where the present ends and the future starts
@@ -271,7 +302,7 @@ export class GraphBalance extends LineGraph {
         return (
             <span className={showAllClasses} onClick={() => this.dispatchAction(aShowAllToggled())}>
                 <span>Show all</span>
-                <a className='checkbox' />
+                <a className="checkbox" />
             </span>
         );
     }

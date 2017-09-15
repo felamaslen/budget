@@ -3,15 +3,16 @@
  * the callback immediately on the first run
  */
 
-export default (callback, delay, immediate, context = this) => {
+export default function debounce(callback, delay, immediate, context) {
     let timer = null;
-    let args = null;
+    let args = [];
     let runOnce = false;
 
-    const later = () => callback.apply(context, args);
+    const later = () => Reflect.apply(callback, context, args);
 
-    return function delayed() {
-        args = arguments;
+    return function delayed(...delayedArgs) {
+        args = delayedArgs;
+
         if (immediate && !runOnce) {
             later();
             runOnce = true;
@@ -21,5 +22,5 @@ export default (callback, delay, immediate, context = this) => {
             timer = setTimeout(later, delay);
         }
     };
-};
+}
 

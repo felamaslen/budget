@@ -27,101 +27,131 @@ import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksLis
 
 const apiPrefix = `api/v${API_VERSION}`;
 
-export default buildEffectHandler([
-    /**
-   * submit the user login form
-   * @param {string} pin: the pin to send to the API for authorisation
-   * @param {Dispatcher} dispatcher: action dispatcher
-   * @returns {void}
-   */
-    [EF_LOGIN_FORM_SUBMIT, (pin, dispatcher) => {
-        axios.post(`${apiPrefix}/user/login`, { pin })
-            .then(
-                response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
-            )
-            .catch(
-                err => dispatcher.dispatch(aLoginFormResponseGot({ err }))
-            );
-    }],
+function submitLoginForm(pin, dispatcher) {
+    return axios
+        .post(`${apiPrefix}/user/login`, { pin })
+        .then(
+            response => dispatcher.dispatch(aLoginFormResponseGot({ response, pin }))
+        )
+        .catch(
+            err => dispatcher.dispatch(aLoginFormResponseGot({ err }))
+        );
+}
 
-    [EF_CONTENT_REQUESTED, (obj, dispatcher) => {
-        const pageIndex = obj.pageIndex;
+function requestContent(req, dispatcher) {
+    const pageIndex = req.pageIndex;
 
-        const path = ['data', obj.pageName].concat(obj.dataReq || []);
+    const path = ['data', req.pageName].concat(req.dataReq || []);
 
-        const query = (obj.urlParam || []).reduce((items, item) => {
-            items[item.name] = item.value;
+    const query = (req.urlParam || []).reduce((items, item) => {
+        items[item.name] = item.value;
 
-            return items;
-        }, {});
+        return items;
+    }, {});
 
-        axios.get(`${apiPrefix}/${path.join('/')}?${querystring.stringify(query)}`, {
-            headers: { 'Authorization': obj.apiKey }
-        }).then(
+    return axios
+        .get(`${apiPrefix}/${path.join('/')}?${querystring.stringify(query)}`, {
+            headers: { 'Authorization': req.apiKey }
+        })
+        .then(
             response => dispatcher.dispatch(aContentLoaded(response, pageIndex))
         );
-    }],
+}
 
-    [EF_BLOCKS_REQUESTED, (obj, dispatcher) => {
-        const loadKey = obj.loadKey;
+function requestBlocks(req, dispatcher) {
+    const loadKey = req.loadKey;
 
-        axios.get(`${apiPrefix}/data/pie/${obj.table}`, {
-            headers: { 'Authorization': obj.apiKey }
-        }).then(
-            response => dispatcher.dispatch(aContentBlocksReceived(response, loadKey))
-        );
-    }],
-
-    [EF_SERVER_UPDATE_REQUESTED, (req, dispatcher) => {
-        axios.patch(`${apiPrefix}/data/multiple`, { list: req.list }, {
+    return axios
+        .get(`${apiPrefix}/data/pie/${req.table}`, {
             headers: { 'Authorization': req.apiKey }
-        }).then(
+        })
+        .then(
+            response => dispatcher.dispatch(
+                aContentBlocksReceived(response, loadKey)
+            )
+        );
+}
+
+function updateServerData(req, dispatcher) {
+    return axios
+        .patch(`${apiPrefix}/data/multiple`, { list: req.list }, {
+            headers: { 'Authorization': req.apiKey }
+        })
+        .then(
             response => dispatcher.dispatch(aServerUpdateReceived(response))
         );
-    }],
+}
 
-    [EF_ANALYSIS_DATA_REQUESTED, (req, dispatcher) => {
-        axios.get(`${apiPrefix}/data/analysis/${req.period}/${req.grouping}/${req.timeIndex}`, {
+function addServerData(req, dispatcher) {
+    return axios
+        .post(`${apiPrefix}/data/${PAGES[req.pageIndex]}`, req.item, {
             headers: { 'Authorization': req.apiKey }
-        }).then(
-            response => dispatcher.dispatch(aAnalysisDataReceived(response))
-        );
-    }],
-
-    [EF_ANALYSIS_EXTRA_REQUESTED, (req, dispatcher) => {
-        axios.get(`${apiPrefix}/data/analysis/deep/${req.name}/${req.period}/${req.grouping}/${req.timeIndex}`, {
-            headers: { 'Authorization': req.apiKey }
-        }).then(
-            response => {
-                const res = Object.assign({}, response, { deepBlock: req.name });
-
-                return dispatcher.dispatch(aAnalysisDataReceived(res));
-            }
-        );
-    }],
-
-    [EF_SERVER_ADD_REQUESTED, (req, dispatcher) => {
-        axios.post(`${apiPrefix}/data/${PAGES[req.pageIndex]}`, req.item, {
-            headers: { 'Authorization': req.apiKey }
-        }).then(
+        })
+        .then(
             response => dispatcher.dispatch(aServerAddReceived({
                 response,
                 item: req.theItems,
                 pageIndex: req.pageIndex
             }))
         );
-    }],
+}
 
-    [EF_FUNDS_PERIOD_REQUESTED, (req, dispatcher) => {
-        const query = querystring.stringify({
-            period: req.period,
-            length: req.length,
-            history: true
-        });
+function requestAnalysisData(req, dispatcher) {
+    const url = [
+        apiPrefix,
+        'data',
+        'analysis',
+        req.period,
+        req.grouping,
+        req.timeIndex
+    ].join('/');
 
-        axios.get(`${apiPrefix}/data/funds?${query}`, {
+    return axios
+        .get(url, {
             headers: { 'Authorization': req.apiKey }
-        }).then(
+        })
+        .then(
+            response => dispatcher.dispatch(aAnalysisDataReceived(response))
+        );
+}
+
+function requestDeepAnalysisData(req, dispatcher) {
+    const url = [
+        apiPrefix,
+        'data',
+        'analysis',
+        'deep',
+        req.name,
+        req.period,
+        req.grouping,
+        req.timeIndex
+    ].join('/');
+
+    return axios
+        .get(url, {
+            headers: { 'Authorization': req.apiKey }
+        })
+        .then(
+            response => {
+                const res = Object.assign({}, response, { deepBlock: req.name });
+
+                return dispatcher.dispatch(aAnalysisDataReceived(res));
+            }
+        );
+}
+
+function requestFundPeriodData(req, dispatcher) {
+    const query = querystring.stringify({
+        period: req.period,
+        length: req.length,
+        history: true
+    });
+
+    return axios
+        .get(`${apiPrefix}/data/funds?${query}`, {
+            headers: { 'Authorization': req.apiKey }
+        })
+        .then(
             response => {
                 const period = `${req.period}${req.length}`;
                 const data = response.data.data;
@@ -129,59 +159,97 @@ export default buildEffectHandler([
                 dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
             }
         );
-    }],
+}
 
-    [EF_SUGGESTIONS_REQUESTED, (obj, dispatcher) => {
-        axios.get(`${apiPrefix}/data/search/${obj.page}/${obj.column}/${obj.value}/${MAX_SUGGESTIONS}`, {
-            headers: { 'Authorization': obj.apiKey }
-        }).then(
+function requestSuggestions(req, dispatcher) {
+    const url = [
+        apiPrefix,
+        'data',
+        'search',
+        req.page,
+        req.column,
+        req.value,
+        MAX_SUGGESTIONS
+    ].join('/');
+
+    return axios
+        .get(url, {
+            headers: { 'Authorization': req.apiKey }
+        })
+        .then(
             response => {
                 if (!response.data.error) {
                     const items = list(response.data.data.list);
-                    const reqId = obj.reqId;
+                    const reqId = req.reqId;
                     dispatcher.dispatch(aSuggestionsReceived({ items, reqId }));
                 }
             }
         );
-    }],
+}
 
-    [EF_STOCKS_LIST_REQUESTED, (apiKey, dispatcher) => {
-        axios.get(`${apiPrefix}/data/stocks`, {
+function requestStocksList(apiKey, dispatcher) {
+    return axios
+        .get(`${apiPrefix}/data/stocks`, {
             headers: { 'Authorization': apiKey }
-        }).then(
+        })
+        .then(
             response => {
                 if (!response.data.error) {
                     dispatcher.dispatch(aStocksListReceived(response.data.data));
                 }
             }
         );
-    }],
+}
 
-    [EF_STOCKS_PRICES_REQUESTED, (req, dispatcher) => {
-        const promises = req.symbols.map(symbol => {
-            const url = 'https://www.alphavantage.co/query';
-            const query = {
-                function: 'TIME_SERIES_DAILY',
-                symbol,
-                apikey: req.apiKey,
-                datatype: 'json'
-            };
+function requestStockPrices(req, dispatcher) {
+    const promises = req.symbols.map(symbol => {
+        const url = 'https://www.alphavantage.co/query';
+        const query = {
+            function: 'TIME_SERIES_DAILY',
+            symbol,
+            apikey: req.apiKey,
+            datatype: 'json'
+        };
 
-            const requestUrl = `${url}?${querystring.stringify(query)}`;
+        const requestUrl = `${url}?${querystring.stringify(query)}`;
 
-            return axios.get(requestUrl);
+        return axios.get(requestUrl);
+    });
+
+    return Promise.all(promises)
+        .then(responses => {
+            const data = responses.map(response => response.data);
+
+            return dispatcher.dispatch(aStocksPricesReceived(data));
+        })
+        .catch(err => {
+            console.error('Error fetching stock prices', err.message);
+
+            return dispatcher.dispatch(aStocksPricesReceived(null));
         });
+}
 
-        return Promise.all(promises)
-            .then(responses => {
-                const data = responses.map(response => response.data);
+export default buildEffectHandler([
+    [EF_LOGIN_FORM_SUBMIT, submitLoginForm],
 
-                return dispatcher.dispatch(aStocksPricesReceived(data));
-            })
-            .catch(err => {
-                console.error('Error fetching stock prices', err.message);
+    [EF_CONTENT_REQUESTED, requestContent],
 
-                return dispatcher.dispatch(aStocksPricesReceived(null));
-            });
-    }]
+    [EF_BLOCKS_REQUESTED, requestBlocks],
+
+    [EF_SERVER_UPDATE_REQUESTED, updateServerData],
+
+    [EF_ANALYSIS_DATA_REQUESTED, requestAnalysisData],
+
+    [EF_ANALYSIS_EXTRA_REQUESTED, requestDeepAnalysisData],
+
+    [EF_SERVER_ADD_REQUESTED, addServerData],
+
+    [EF_FUNDS_PERIOD_REQUESTED, requestFundPeriodData],
+
+    [EF_SUGGESTIONS_REQUESTED, requestSuggestions],
+
+    [EF_STOCKS_LIST_REQUESTED, requestStocksList],
+
+    [EF_STOCKS_PRICES_REQUESTED, requestStockPrices]
 ]);
+
