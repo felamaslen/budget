@@ -12,7 +12,8 @@ import { MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
 import {
     COLOR_CATEGORY,
     COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_LIGHT, COLOR_TRANSLUCENT_DARK,
-    COLOR_DARK, COLOR_LIGHT_GREY, COLOR_PROFIT,
+    COLOR_DARK, COLOR_LIGHT_GREY,
+    COLOR_PROFIT, COLOR_LOSS,
     FONT_GRAPH_TITLE, FONT_GRAPH_KEY, FONT_AXIS_LABEL,
     GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE
 } from '../../misc/config';
@@ -39,20 +40,23 @@ export class GraphSpend extends LineGraph {
 
             return this.props.categories.map((category, categoryKey) => {
                 const thisItem = Math.max(0, this.props.data.getIn([categoryKey, monthKey]));
-                sum += thisItem;
+                sum -= thisItem;
 
                 return sum;
             }).reverse();
         });
 
-        let maxY = this.data.reduce((last, column) => {
-            return Math.max(last, column.first());
-        }, -Infinity);
-        maxY = this.props.income.reduce(
-            (last, value) => Math.max(last, Math.min(1.5 * last, value)), maxY
+        this.netFlows = this.props.income.map((item, key) => {
+            return item + this.data.get(key).first();
+        });
+
+        const maxY = this.props.income.reduce(
+            (max, value) => Math.max(max, value), -Infinity
         );
 
-        const minY = 0;
+        const minY = this.data.reduce(
+            (min, column) => Math.min(min, column.last()), Infinity
+        );
 
         this.setRange([0, this.props.yearMonths.length + 1, minY, maxY]);
     }
@@ -151,7 +155,7 @@ export class GraphSpend extends LineGraph {
 
         // background on key
         this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_DARK);
-        this.ctx.fillRect(0, 0, 400, 64);
+        this.ctx.fillRect(45, 0, 400, 48);
         this.ctx.closePath();
 
         // add title and key
@@ -160,7 +164,7 @@ export class GraphSpend extends LineGraph {
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
 
-        this.ctx.fillText('Cash flow', 15, 10);
+        this.ctx.fillText('Cash flow', 65, 10);
 
         this.ctx.textBaseline = 'middle';
         this.ctx.font = FONT_GRAPH_KEY;
@@ -176,6 +180,36 @@ export class GraphSpend extends LineGraph {
             );
         });
     }
+    drawArrow(xPix, value) {
+        const color = rgba(COLOR_GRAPH_TITLE);
+
+        this.ctx.beginPath();
+
+        this.ctx.moveTo(xPix, this.pixY(0));
+        this.ctx.lineTo(xPix, this.pixY(value));
+
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = color;
+        this.ctx.stroke();
+
+        // draw the arrow head
+        const direction = value > 0
+            ? 1
+            : -1;
+
+        const spreadWidth = 3;
+        const spreadHeight = 6;
+
+        this.ctx.beginPath();
+
+        this.ctx.moveTo(xPix - spreadWidth, this.pixY(value) + direction * spreadHeight);
+        this.ctx.lineTo(xPix, this.pixY(value));
+        this.ctx.lineTo(xPix + spreadWidth, this.pixY(value) + direction * spreadHeight);
+        this.ctx.lineTo(xPix, this.pixY(value) + direction * spreadHeight * 0.7);
+
+        this.ctx.fillStyle = color;
+        this.ctx.fill();
+    }
     drawData() {
     // plot data
         const y0 = this.pixY(0);
@@ -186,15 +220,17 @@ export class GraphSpend extends LineGraph {
             // draw income bar
             const posY = this.pixY(this.props.income.get(monthKey));
             this.ctx.fillStyle = rgba(COLOR_PROFIT);
-            this.ctx.fillRect(posX - 4, posY, 9, y0 - posY);
+            this.ctx.fillRect(posX - 8, posY, 8, y0 - posY);
 
             // draw spending column
             const colors = this.colors.reverse();
             column.forEach((item, categoryKey) => {
                 const thisPosY = Math.round(this.pixY(item)) + 0.5;
                 this.ctx.fillStyle = colors.get(categoryKey);
-                this.ctx.fillRect(posX - 8, thisPosY, 17, y0 - thisPosY);
+                this.ctx.fillRect(posX, thisPosY, 8, y0 - thisPosY);
             });
+
+            this.drawArrow(posX + 0.5, this.netFlows.get(monthKey));
         });
     }
     draw() {
