@@ -47,8 +47,10 @@ export class GraphFunds extends LineGraph {
         };
         this.outerProperties = {
             onMouseMove: evt => {
-                const valX = this.valX(evt.pageX - evt.currentTarget.offsetLeft);
-                const valY = this.valY(evt.pageY - evt.currentTarget.offsetTop);
+                const rect = evt.currentTarget.getBoundingClientRect();
+                const valX = this.valX(evt.pageX - rect.left);
+                const valY = this.valY(evt.pageY - rect.top);
+
                 this.dispatchAction(aFundsGraphHovered({ valX, valY }));
             },
             onMouseOut: () => {

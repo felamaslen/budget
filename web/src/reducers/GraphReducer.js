@@ -146,7 +146,7 @@ export function rHoverFundsGraph(reduction, position) {
             .get('line')
             .reduce((thisLast, point, pointKey) => {
                 const pointDistance = Math.sqrt(
-                    Math.pow(point.get(0) - position.valX, 2) +
+                    Math.pow((point.get(0) - position.valX) / 1000, 2) +
                     Math.pow(point.get(1) - position.valY, 2)
                 );
 
