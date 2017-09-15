@@ -2,12 +2,17 @@
  * Carries out actions for the error messages component
  */
 
+import { Map as map } from 'immutable';
 import { ERROR_MESSAGE_DELAY } from '../misc/config';
-import { ERROR_CLOSE_TIME } from '../misc/const';
+import { ERROR_CLOSE_TIME, ERROR_LEVEL_ERROR } from '../misc/const';
 
 export function rErrorMessageOpen(reduction, msg) {
+    const theMessage = typeof msg === 'string'
+        ? map({ level: ERROR_LEVEL_ERROR, text: msg })
+        : msg;
+
     const errorMsg = reduction.getIn(['appState', 'errorMsg']);
-    const item = msg.set('id', errorMsg.size)
+    const item = theMessage.set('id', errorMsg.size)
         .set('time', new Date().getTime());
 
     return reduction.setIn(['appState', 'errorMsg'], errorMsg.push(item));
