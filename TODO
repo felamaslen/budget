@@ -3,6 +3,7 @@
 - Fix bugs with different database states (e.g. empty) [DONE?]
 - Route for "all data" [DONE]
 - Client coding standards
+- [BUG] refreshing fund price cache doesn't reload gain text etc.
 - More sophisticated authentication
 - Pagination on list data
 - Client response data validation
