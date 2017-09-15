@@ -9,7 +9,9 @@ import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import { getPeriodMatch } from '../misc/data';
 import {
     getFormattedHistory,
-    zoomFundLines
+    zoomFundLines,
+    getExtraRowProps,
+    getFundsCachedValue
 } from './data/funds';
 import {
     processRawListRows
@@ -239,23 +241,37 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
         .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory);
 }
 
-export function rHandleFundPeriodResponse(reduction, response, fromCache) {
-    let newReduction = reduction;
-
+export function rHandleFundPeriodResponse(reduction, response) {
     const rows = processRawListRows(response.data.data, pageIndexFunds);
     const startTime = response.data.startTime;
     const cacheTimes = list(response.data.cacheTimes);
 
-    if (!fromCache) {
-        newReduction = newReduction.setIn(
+    const newReduction = changePeriod(
+        reduction.setIn(
             ['appState', 'other', 'fundHistoryCache', response.period],
             map({ rows, startTime, cacheTimes })
+        ),
+        response.period,
+        rows,
+        startTime,
+        cacheTimes
+    );
+
+    if (response.reloadPagePrices) {
+        const rowsWithExtraProps = getExtraRowProps(
+            rows, startTime, cacheTimes, pageIndexFunds
         );
+
+        const fundsCachedValue = getFundsCachedValue(
+            rows, startTime, cacheTimes, new Date(), pageIndexFunds
+        );
+
+        return newReduction
+            .setIn(['appState', 'pages', pageIndexFunds, 'rows'], rowsWithExtraProps)
+            .setIn(['appState', 'other', 'fundsCachedValue'], fundsCachedValue);
     }
 
-    return changePeriod(
-        newReduction, response.period, rows, startTime, cacheTimes
-    );
+    return newReduction;
 }
 
 export function rChangeFundsGraphPeriod(reduction, req) {
@@ -270,10 +286,16 @@ export function rChangeFundsGraphPeriod(reduction, req) {
     ).has(shortPeriod)) {
 
         const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+        const reloadPagePrices = Boolean(req.reloadPagePrices);
 
         return reduction.set(
             'effects', reduction.get('effects').push(
-                buildMessage(EF_FUNDS_PERIOD_REQUESTED, { apiKey, period, length })
+                buildMessage(EF_FUNDS_PERIOD_REQUESTED, {
+                    apiKey,
+                    period,
+                    length,
+                    reloadPagePrices
+                })
             )
         );
     }
