@@ -156,7 +156,11 @@ function requestFundPeriodData(req, dispatcher) {
                 const period = `${req.period}${req.length}`;
                 const data = response.data.data;
 
-                dispatcher.dispatch(aFundsPeriodLoaded({ period, data }));
+                dispatcher.dispatch(aFundsPeriodLoaded({
+                    reloadPagePrices: req.reloadPagePrices,
+                    period,
+                    data
+                }));
             }
         );
 }

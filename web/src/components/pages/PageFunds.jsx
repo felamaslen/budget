@@ -48,8 +48,10 @@ export class PageFunds extends PageList {
             loss: cost > value
         });
 
+        const reloadFundPrices = () => this.dispatchAction(aFundsGraphPeriodChanged(null, true, true));
+
         return (
-            <span className={classes} onClick={() => this.dispatchAction(aFundsGraphPeriodChanged(null, true))}>
+            <span className={classes} onClick={reloadFundPrices}>
                 <span className="gain-info">Current value:</span>
                 <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
                 <span>{gainPct}</span>
