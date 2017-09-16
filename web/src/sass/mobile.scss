@@ -80,6 +80,11 @@
     padding-top: $height_header_mobile + $height_nav_mobile;
 }
 
+.graph-container {
+    width: 100%;
+    position: relative;
+}
+
 .page-overview {
     .stocks, .bills, .food, .general, .holiday, .social,
     .net, .predicted {

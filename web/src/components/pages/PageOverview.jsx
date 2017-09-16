@@ -80,6 +80,8 @@ export class PageOverview extends PureControllerView {
             </div>;
         });
 
+        const graphWidth = Math.min(GRAPH_WIDTH, window.innerWidth);
+
         return (
             <div>
                 <div className="table-flex table-insert table-overview noselect">
@@ -90,7 +92,7 @@ export class PageOverview extends PureControllerView {
                 </div>
                 <div className="graph-container-outer">
                     <GraphBalance dispatcher={this.props.dispatcher}
-                        width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
+                        width={graphWidth} height={GRAPH_HEIGHT}
                         name="balance"
                         startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
                         currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
@@ -101,7 +103,7 @@ export class PageOverview extends PureControllerView {
                         funds={this.props.data.getIn(['data', 'cost', 'funds'])}
                         fundsOld={this.props.data.getIn(['data', 'cost', 'fundsOld'])} />
                     <GraphSpend dispatcher={this.props.dispatcher}
-                        width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
+                        width={graphWidth} height={GRAPH_HEIGHT}
                         name="spend"
                         categories={list(GRAPH_SPEND_CATEGORIES)}
                         data={graphSpendData}
