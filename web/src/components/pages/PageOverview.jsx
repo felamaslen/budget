@@ -75,7 +75,9 @@ export class PageOverview extends PureControllerView {
                 column[1].toLowerCase()
             ].join(' ');
 
-            return <div className={className} key={key}>{column[1]}</div>;
+            return <div className={className} key={key}>
+                <span className="text">{column[1]}</span>
+            </div>;
         });
 
         return (

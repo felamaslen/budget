@@ -33,7 +33,7 @@ export const OVERVIEW_COLUMNS = [
     ['holiday', 'Holiday'],
     ['social', 'Social'],
     ['income', 'Income'],
-    ['spending', 'Expenses'],
+    ['spending', 'Out'],
     ['net', 'Net'],
     ['predicted', 'Predicted'],
     ['balance', 'Balance']

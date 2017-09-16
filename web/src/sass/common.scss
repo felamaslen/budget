@@ -827,6 +827,19 @@ button {
 
 /* overview page */
 .page-overview {
+    .table-flex {
+        .active {
+            .month {
+                background: $color_green;
+                color: white;
+            }
+        }
+        .future {
+            .month {
+                background: $color_amber;
+            }
+        }
+    }
     .month {
         text-align: right;
     }
