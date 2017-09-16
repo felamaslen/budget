@@ -3,14 +3,28 @@
  */
 
 const config = require('../../../config')();
-const overview = require('../cashflow/overview');
-const listCommon = require('../list.common');
 
-function getListData(db, user, now, table) {
-    const limit = listCommon.getPageLimit(table);
+const routeGetOverview = require('../cashflow').routeGet;
+const routeGetFunds = require('../funds').routeGet;
+const routeGetIncome = require('../income').routeGet;
+const routeGetBills = require('../bills').routeGet;
+const routeGetFood = require('../food').routeGet;
+const routeGetGeneral = require('../general').routeGet;
+const routeGetSocial = require('../social').routeGet;
+const routeGetHoliday = require('../holiday').routeGet;
 
-    return listCommon.getResults(db, user, now, table, null, limit);
-}
+const routeGetCategory = {
+    overview: routeGetOverview,
+    funds: routeGetFunds,
+    income: routeGetIncome,
+    bills: routeGetBills,
+    food: routeGetFood,
+    general: routeGetGeneral,
+    social: routeGetSocial,
+    holiday: routeGetHoliday
+};
+
+const ResponseMultiple = require('../../../responseMultiple');
 
 /**
  * @swagger
@@ -67,17 +81,18 @@ async function routeGet(req, res) {
 
     req.db.requireForceToEnd = true;
 
-    const now = new Date();
+    const categories = ['overview'].concat(config.data.listCategories);
 
-    const dataPromises = [overview.getData(req.db, req.user)]
-        .concat(config.data.listCategories.map(
-            category => getListData(req.db, req.user, now, category)
-        ));
+    const responses = categories.map(() => new ResponseMultiple());
 
-    const results = await Promise.all(dataPromises);
+    const dataPromises = categories.map(
+        (category, key) => routeGetCategory[category](req, responses[key])
+    );
 
-    const data = results.reduce((map, result, key) => {
-        map[tables[key]] = result;
+    await Promise.all(dataPromises);
+
+    const data = responses.reduce((map, result, key) => {
+        map[tables[key]] = result.result.data;
 
         return map;
     }, {});
