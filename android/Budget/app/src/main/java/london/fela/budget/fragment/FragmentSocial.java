@@ -15,41 +15,41 @@ import london.fela.budget.app.AppConfig;
  * Displays an editable table showing each social item
  */
 public class FragmentSocial extends FragmentList {
-  @Override
-  public void setProps() {
-    this.pageName  = "social";
+    @Override
+    public void setProps() {
+        this.pageName  = "social";
 
-    this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_SOCIAL;
-    this.loadingMsg    = "Loading social data...";
+        this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_SOCIAL;
+        this.loadingMsg    = "Loading social data...";
 
-    this.props = new String[] { "society", "shop" };
-  }
-
-  public HashMap<String, String> getOtherProps(JSONObject json) {
-    HashMap<String, String> values = new HashMap<>();
-
-    try {
-      values.put("society", json.getString("y"));
-      values.put("shop", json.getString("s"));
-    }
-    catch (JSONException e) {
-      e.printStackTrace();
+        this.props = new String[] { "society", "shop" };
     }
 
-    return values;
-  }
+    public HashMap<String, String> getOtherProps(JSONObject json) {
+        HashMap<String, String> values = new HashMap<>();
 
-  @Override
-  public Intent getDialogIntent() {
-    return new Intent(getActivity(), DialogSocial.class);
-  }
+        try {
+            values.put("society", json.getString("y"));
+            values.put("shop", json.getString("s"));
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-  public static FragmentSocial newInstance() {
-    FragmentSocial fragmentSocial = new FragmentSocial();
+        return values;
+    }
 
-    Bundle args = new Bundle();
-    fragmentSocial.setArguments(args);
+    @Override
+    public Intent getDialogIntent() {
+        return new Intent(getActivity(), DialogSocial.class);
+    }
 
-    return fragmentSocial;
-  }
+    public static FragmentSocial newInstance() {
+        FragmentSocial fragmentSocial = new FragmentSocial();
+
+        Bundle args = new Bundle();
+        fragmentSocial.setArguments(args);
+
+        return fragmentSocial;
+    }
 }

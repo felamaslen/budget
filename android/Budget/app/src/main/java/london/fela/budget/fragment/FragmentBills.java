@@ -10,25 +10,25 @@ import london.fela.budget.app.AppConfig;
  * Displays an editable table showing each bill
  */
 public class FragmentBills extends FragmentList {
-  @Override
-  public void setProps() {
-    this.pageName  = "bills";
+    @Override
+    public void setProps() {
+        this.pageName  = "bills";
 
-    this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_BILLS;
-    this.loadingMsg    = "Loading bills data...";
-  }
+        this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_BILLS;
+        this.loadingMsg    = "Loading bills data...";
+    }
 
-  @Override
-  public Intent getDialogIntent() {
-    return new Intent(getActivity(), DialogBills.class);
-  }
+    @Override
+    public Intent getDialogIntent() {
+        return new Intent(getActivity(), DialogBills.class);
+    }
 
-  public static FragmentBills newInstance() {
-    FragmentBills fragmentBills = new FragmentBills();
+    public static FragmentBills newInstance() {
+        FragmentBills fragmentBills = new FragmentBills();
 
-    Bundle args = new Bundle();
-    fragmentBills.setArguments(args);
+        Bundle args = new Bundle();
+        fragmentBills.setArguments(args);
 
-    return fragmentBills;
-  }
+        return fragmentBills;
+    }
 }
