@@ -147,7 +147,7 @@
                 flex-grow: 1;
                 border-right: 3px solid #222;
             }
-            &.stocks, &.bills, &.food, &.general, &.holiday, &.social, &.net {
+            &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.net {
                 flex-grow: 0.7;
             }
             &.income {
@@ -161,6 +161,9 @@
             }
             .text {
                 padding: 0 2px;
+            }
+            &.balancePred {
+                display: none;
             }
         }
         .editable-input {

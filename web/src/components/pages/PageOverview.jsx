@@ -37,7 +37,7 @@ export class PageOverview extends PureControllerView {
                 }
 
                 const cellClasses = { col: true };
-                cellClasses[cell.get('column')[1].toLowerCase()] = true;
+                cellClasses[cell.getIn(['column', 0])] = true;
                 let span = null;
                 if (cell.get('editable')) {
                     // editable balance column
@@ -72,7 +72,7 @@ export class PageOverview extends PureControllerView {
         const overviewHead = OVERVIEW_COLUMNS.map((column, key) => {
             const className = [
                 'col',
-                column[1].toLowerCase()
+                column[0]
             ].join(' ');
 
             return <div className={className} key={key}>

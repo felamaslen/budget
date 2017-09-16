@@ -64,7 +64,8 @@ export const COLOR_CATEGORY = {
     social: [191, 158, 36],
     income: [36, 191, 55],
     spending: [191, 36, 36],
-    balance: [36, 191, 55]
+    balance: [36, 191, 55],
+    balancePred: [36, 191, 55]
 };
 
 // fund colour scale

@@ -86,8 +86,8 @@
 }
 
 .page-overview {
-    .stocks, .bills, .food, .general, .holiday, .social,
-    .net, .predicted {
+    .funds, .bills, .food, .general, .holiday, .social,
+    .net, .predicted, .balance {
         display: none;
     }
     .table-flex {
@@ -104,10 +104,10 @@
             .income {
                 background: $color_mob_overview_tbl_income;
             }
-            .out {
-                background: $color_mob_overview_tbl_out;
+            .spending {
+                background: $color_mob_overview_tbl_spending;
             }
-            .balance {
+            .balancePred {
                 background: $color_mob_overview_tbl_balance;
             }
         }
