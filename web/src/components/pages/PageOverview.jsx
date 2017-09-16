@@ -9,18 +9,15 @@ import PureControllerView from '../PureControllerView';
 import classNames from 'classnames';
 import Media from 'react-media';
 import {
+    mediaQueries,
     GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
     OVERVIEW_COLUMNS
 } from '../../misc/const';
 import { GRAPH_SPEND_NUM_ITEMS } from '../../misc/config';
-import { widthPageMobile } from '../../constants/styles';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable';
 import { GraphBalance } from '../graphs/GraphBalance';
 import { GraphSpend } from '../graphs/GraphSpend';
-
-const mediaQueryMobile = `(max-device-width: ${widthPageMobile}px)`;
-const mediaQueryDesktop = `(min-device-width: ${widthPageMobile + 1}px)`;
 
 export class PageOverview extends PureControllerView {
     format(value, abbreviate) {
@@ -118,8 +115,8 @@ export class PageOverview extends PureControllerView {
         return (
             <div className="table-flex table-insert table-overview noselect">
                 {this.renderHeader()}
-                <Media query={mediaQueryMobile}>{mobileRows}</Media>
-                <Media query={mediaQueryDesktop}>{desktopRows}</Media>
+                <Media query={mediaQueries.mobile}>{mobileRows}</Media>
+                <Media query={mediaQueries.desktop}>{desktopRows}</Media>
             </div>
         );
     }
@@ -168,13 +165,13 @@ export class PageOverview extends PureControllerView {
     renderGraphs() {
         return (
             <div className="graph-container-outer">
-                <Media query={mediaQueryMobile}>
+                <Media query={mediaQueries.mobile}>
                     {matches => this.renderGraphBalance(matches)}
                 </Media>
-                <Media query={mediaQueryDesktop}>
+                <Media query={mediaQueries.desktop}>
                     {matches => this.renderGraphBalance(matches)}
                 </Media>
-                <Media query={mediaQueryDesktop}>
+                <Media query={mediaQueries.desktop}>
                     {matches => this.renderGraphSpend(matches)}
                 </Media>
             </div>
