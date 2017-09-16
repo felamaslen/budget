@@ -11,6 +11,9 @@ module.exports = {
     resolve: {
         extensions: ['*', '.js', '.jsx']
     },
+    resolveLoader: {
+        modules: ['node_modules', __dirname]
+    },
     plugins
 };
 

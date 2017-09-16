@@ -16,10 +16,10 @@ $color_bg_down:         #a01e1e;
 $color_bg_down_hl:      #f2bfbf;
 $color_bg_down_rev:     #bfd7f2;
 
-// responsive design parameters
-$width_page_mobile_small: 360px;
-$width_page_mobile: 500px;
-$width_page_tablet: 1500px;
+// responsive design parameters (injected from webpack)
+$width_page_mobile_small: $widthPageMobileSmall + px;
+$width_page_mobile: $widthPageMobile + px;
+$width_page_tablet: $widthPageTablet + px;
 
 // common variables
 $width_logo:  30px;
