@@ -1,0 +1,28 @@
+@mixin all-blocks {
+    float: left;
+    position: relative;
+    &.active {
+        background: rgba(255, 255, 0, 0.85);
+    }
+}
+        
+@mixin stocks-list-price-change {
+    .price:after {
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: none;
+        background: none;
+        width: 0;
+        height: 0;
+        top: 3px;
+    }
+    &.hl-up .price, &.hl-down .price {
+        font-weight: bold;
+    }
+}
+
+@mixin unimportant {
+    color: #333;
+    font-style: italic;
+}
+        

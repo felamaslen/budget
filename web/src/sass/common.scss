@@ -65,11 +65,6 @@ button {
     }
 }
 
-@mixin unimportant {
-    color: #333;
-    font-style: italic;
-}
-        
 .flexbox {
     display: flex;
 }
@@ -375,7 +370,6 @@ button {
     height: $height_nav;
     z-index: 10;
     color: white;
-    padding-bottom: 10px;
     background: white;
     .inner {
         background: linear-gradient(to bottom, #d84d4d, #9f3030);
@@ -419,95 +413,31 @@ button {
             }
         }
     }
-        
-    @mixin nav-link-template {
+    .nav-link-li {
+        vertical-align: bottom;
         float: left;
+    }
+    .nav-list {
+        margin: 0;
+        list-style: none;
+        white-space: nowrap;
+        transition: 0.2s opacity;
+    }
+    .nav-link, .nav-link-btn {
         line-height: 30px;
-        height: 27px;
-        padding: 0 0.5em 0 35px;
-        color: white;
-        border-bottom: 3px solid transparent;
-        border-radius: 3px 3px 0 0;
         cursor: pointer;
-        position: relative;
         &:hover {
             background: rgba(0, 0, 0, 0.3);
         }
         &:active {
             background: rgba(0, 0, 0, 0.5);
         }
-        &.active {
-            border-bottom-color: black !important;
-            cursor: default;
-            &, &:hover, &:active {
-                background: rgba(0, 0, 0, 0.7);
-            }
-        }
         &:before {
-            /* icon */
+            // icon
             content: $none;
+            background-image: url($nav_img);
             width: 28px;
             height: 28px;
-            position: absolute;
-            left: 5px;
-            top: 0;
-            background-image: url($nav_img);
-        }
-    }
-        
-    .nav-list {
-        margin: 0;
-        list-style: none;
-        padding: ($height_nav - 30) 0 0 0;
-        white-space: nowrap;
-        transition: 0.2s opacity;
-        li {
-            display: inline-block;
-            vertical-align: bottom;
-            margin-right: 0.5em;
-        }
-        .nav-link, .nav-link-btn {
-            @include nav-link-template;
-        }
-        .nav-link-overview {
-            border-color: #424242;
-            &:before { background-position: 0 0; }
-        }
-        .nav-link-analysis {
-            border-color: #f4a742;
-            &:before { background-position: -28px 0; }
-        }
-        .nav-link-funds {
-            border-color: #546e7a;
-            &:before { background-position: -56px 0; }
-        }
-        .nav-link-income {
-            border-color: #d84315;
-            &:before { background-position: -84px 0; }
-        }
-        .nav-link-bills {
-            border-color: rgb(183, 28, 28);
-            &:before { background-position: -112px 0; }
-        }
-        .nav-link-food {
-            border-color: rgb(67, 160, 71);
-            &:before { background-position: -140px 0; }
-        }
-        .nav-link-general {
-            border-color: rgb(1, 87, 155);
-            &:before { background-position: -168px 0; }
-        }
-        .nav-link-holiday {
-            border-color: rgb(0, 137, 123);
-            &:before { background-position: 0 -28px; }
-        }
-        .nav-link-social {
-            border-color: rgb(191, 158, 36);
-            &:before { background-position: -28px -28px; }
-        }
-        .nav-link-logout {
-            border-color: #eee;
-            &:before { background-position: -56px -28px; }
         }
     }
 }
@@ -817,14 +747,6 @@ button {
                 rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.3));
             &.hidden {
                 opacity: 0;
-            }
-        }
-
-        @mixin all-blocks {
-            float: left;
-            position: relative;
-            &.active {
-                background: rgba(255, 255, 0, 0.85);
             }
         }
 
@@ -1267,21 +1189,6 @@ button {
         height: 300px;
         font-size: 0.8em;
         font-family: hack, monospace;
-
-        @mixin stocks-list-price-change {
-            .price:after {
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-top: none;
-                background: none;
-                width: 0;
-                height: 0;
-                top: 3px;
-            }
-            &.hl-up .price, &.hl-down .price {
-                font-weight: bold;
-            }
-        }
 
         
         .stocks-list-ul {

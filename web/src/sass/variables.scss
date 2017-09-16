@@ -6,6 +6,7 @@ $color_green:           #009933;
 $color_amber:           #fbe07f;
 
 $color_primary:         #fffef7;
+$color_primary_light:   #f5b831;
 $color_primary_dark:    #9f3030;
 $color_accent:          #ffa040;
 
@@ -30,7 +31,7 @@ $top_nav: $height_nav + 10;
 $nav_img: "../images/nav.png";
 
 // mobile variables
-$height_nav_mobile: 30;
+$height_nav_mobile: 40px;
 
 // text
 $text_show_graph: "Show";

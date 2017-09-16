@@ -4,20 +4,71 @@
     .app-logo {
         width: 100%;
         height: $height_nav;
+        padding: 0 0.5em;
     }
     .nav-list {
         display: flex;
         flex-direction: row;
         padding: 0;
-        li {
-            margin-right: 0;
-            flex: 1 0 0;
+    }
+    .nav-link-li {
+        flex: 1 0 0;
+        border-bottom: 5px solid transparent;
+        &.active {
+            border-color: $color_primary_light;
         }
+    }
+    .nav-link {
+        display: block;
+        height: $height_nav_mobile - 15;
+        text-align: center;
+        text-indent: -9999px;
+        overflow: hidden;
+        padding: 5px 0;
+    }
+    .nav-link, .nav-link-btn {
+        &:before {
+            display: block;
+            margin: 0 auto;
+        }
+    }
+    .nav-link-overview .nav-link:before {
+        background-position: -200px 0;
+    }
+    .nav-link-analysis {
+        display: none;
         .nav-link {
-            text-indent: -9999px;
-            border-color: transparent !important;
-            &.active {
-                border-color: $color_primary_dark !important;
+            &:before {
+                background-position: -228px 0;
+            }
+        }
+    }
+    .nav-link-funds .nav-link:before {
+        background-position: -256px 0;
+    }
+    .nav-link-income .nav-link:before {
+        background-position: -284px 0;
+    }
+    .nav-link-bills .nav-link:before {
+        background-position: -312px 0;
+    }
+    .nav-link-food .nav-link:before {
+        background-position: -340px 0;
+    }
+    .nav-link-general .nav-link:before {
+        background-position: -368px 0;
+    }
+    .nav-link-holiday .nav-link:before {
+        background-position: -200px -28px;
+    }
+    .nav-link-social .nav-link:before {
+        background-position: -228px -28px;
+    }
+    .nav-link-logout {
+        display: none;
+        .nav-link {
+            &:before {
+                background-position: -256px -28px;
             }
         }
     }
