@@ -369,43 +369,47 @@ export function sortRowsByDate(rows, pageIndex) {
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
     let dailySum = 0;
     let lastFuture = false;
-    const sorted = rows.sort((prev, next) => {
-        if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
-            return -1;
-        }
-        if (prev.getIn(['cols', dateKey]) < (next.getIn(['cols', dateKey]))) {
-            return 1;
-        }
-        if (prev.get('id') > next.get('id')) {
-            return -1;
-        }
-
-        return 1;
-    }).map(row => {
-        const thisFuture = row.getIn(['cols', dateKey]) > today;
-        const thisLastFuture = lastFuture;
-        lastFuture = thisFuture;
-
-        return row
-            .set('future', thisFuture)
-            .set('first-present', !thisFuture && thisLastFuture);
-    });
-
-    if (DAILY_PAGES[pageIndex]) {
-        return sorted.map((row, rowKey) => {
-            const lastInDay = rowKey === sorted.size - 1 ||
-        row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
-            dailySum += row.getIn(['cols', costKey]);
-            const newRow = lastInDay
-                ? row.set('daily', dailySum)
-                : row.delete('daily');
-
-            if (lastInDay) {
-                dailySum = 0;
+    const sorted = rows
+        .sort((prev, next) => {
+            if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
+                return -1;
+            }
+            if (prev.getIn(['cols', dateKey]) < (next.getIn(['cols', dateKey]))) {
+                return 1;
+            }
+            if (prev.get('id') > next.get('id')) {
+                return -1;
             }
 
-            return newRow;
+            return 1;
+        })
+        .map(row => {
+            const thisFuture = row.getIn(['cols', dateKey]) > today;
+            const thisLastFuture = lastFuture;
+            lastFuture = thisFuture;
+
+            return row
+                .set('future', thisFuture)
+                .set('first-present', !thisFuture && thisLastFuture);
         });
+
+    if (DAILY_PAGES[pageIndex]) {
+        return sorted
+            .map((row, rowKey) => {
+                const lastInDay = rowKey === sorted.size - 1 ||
+                    row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
+
+                dailySum += row.getIn(['cols', costKey]);
+                const newRow = lastInDay
+                    ? row.set('daily', dailySum)
+                    : row.delete('daily');
+
+                if (lastInDay) {
+                    dailySum = 0;
+                }
+
+                return newRow;
+            });
     }
 
     return sorted;
