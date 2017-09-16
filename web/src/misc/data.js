@@ -373,7 +373,7 @@ export function sortRowsByDate(rows, pageIndex) {
         if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
             return -1;
         }
-        if (prev.getIn(['cols', dateKey]) > (next.getIn(['cols', dateKey]))) {
+        if (prev.getIn(['cols', dateKey]) < (next.getIn(['cols', dateKey]))) {
             return 1;
         }
         if (prev.get('id') > next.get('id')) {
