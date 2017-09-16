@@ -1,8 +1,3 @@
-// responsive design parameters (injected from webpack)
-$width_page_mobile_small: $widthPageMobileSmall;
-$width_page_mobile: 500px; // $widthPageMobile;
-$width_page_tablet: 1500px; // $widthPageTablet;
-
 @import "./variables.scss";
 @import "./mixins.scss";
 
