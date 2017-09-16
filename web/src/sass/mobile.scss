@@ -144,3 +144,16 @@
     }
 }
 
+// extra rules for extra-small screens
+@media screen and (max-width: $width_page_mobile_small) {
+    .page-overview {
+        .table-flex {
+            .col {
+                .text, .editable {
+                    padding: 4px 1px;
+                }
+            }
+        }
+    }
+}
+
