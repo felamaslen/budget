@@ -39,7 +39,7 @@ public class DialogOverviewEdit extends Activity implements Api {
 
   /** api stuff */
   @Override
-  public void apiResponse(int tag, String response) {
+  public void apiResponse(int tag) {
     switch (tag) {
       case API_TAG_POST_EDIT:
 
@@ -59,24 +59,16 @@ public class DialogOverviewEdit extends Activity implements Api {
     }
   }
   @Override
-  public void apiJSONError(int tag, String msg) {
-    AppController.alert(getApplicationContext(), "Error: " + msg);
-  }
-  @Override
-  public void apiJSONException(int tag, JSONException e, String response) {
-    AppController.alert(getApplicationContext(), "Bug: API error");
-  }
-  @Override
   public void apiError(int tag, VolleyError error) {
-    switch (tag) {
-      case API_TAG_POST_EDIT:
-        AppController.alert(getApplicationContext(), "Bug: API error");
+    if (tag == API_TAG_POST_EDIT) {
+      AppController.alert(getApplicationContext(), "Error: " + error.getMessage());
+      progressBar.setVisibility(View.INVISIBLE);
 
-        break;
+      return;
     }
   }
   @Override
-  public void apiResponseEnd(int tag, String response) {
+  public void apiResponseEnd(int tag) {
     // close the dialog whatever happened
     progressBar.setVisibility(View.INVISIBLE);
 
@@ -85,7 +77,7 @@ public class DialogOverviewEdit extends Activity implements Api {
 
   private ApiCaller api;
   private void apiSetup() {
-    api = new ApiCaller(AppConfig.api_url(getResources()));
+    api = new ApiCaller(AppConfig.apiUrl(getResources()));
     api.addListener(this);
   }
 
@@ -131,20 +123,27 @@ public class DialogOverviewEdit extends Activity implements Api {
           newBalance = (int)(Math.round(balanceDouble * 100.0));
 
           if (newBalance != balance) {
-            HashMap<String, String> params = new HashMap<>();
+            JSONObject data = new JSONObject();
 
-            params.put("balance", String.valueOf(newBalance));
-            params.put("year", String.valueOf(year));
-            params.put("month", String.valueOf(month));
+            try {
+              data.put("balance", newBalance);
+              data.put("year", year);
+              data.put("month", month);
+            }
+            catch (JSONException e) {
+              AppController.alert(getApplicationContext(), "Bug!11!1");
+
+              return;
+            }
 
             progressBar.setVisibility(View.VISIBLE);
 
             api.request(
               API_TAG_POST_EDIT,
               "req_update_overview",
-              "POST",
+              "post",
               AppConfig.URL_UPDATE_OVERVIEW,
-              params
+              data
             );
           }
           else {

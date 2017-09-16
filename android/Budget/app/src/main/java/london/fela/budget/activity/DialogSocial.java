@@ -22,8 +22,7 @@ public class DialogSocial extends DialogUpdate {
     setContentView(R.layout.dialog_edit_social);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_SOCIAL;
-    apiUrlAdd     = AppConfig.URL_ADD_SOCIAL;
+    apiUrl = AppConfig.URL_SOCIAL;
 
     /** define custom columns */
     String[] cols = {"date", "item", "society", "cost", "shop"};

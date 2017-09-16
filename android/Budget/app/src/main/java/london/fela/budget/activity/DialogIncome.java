@@ -22,8 +22,7 @@ public class DialogIncome extends DialogUpdate {
     setContentView(R.layout.dialog_edit_basic);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_INCOME;
-    apiUrlAdd     = AppConfig.URL_ADD_INCOME;
+    apiUrl = AppConfig.URL_INCOME;
 
     /** define custom columns */
     String[] cols = {"date", "item", "cost"};

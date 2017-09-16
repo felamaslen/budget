@@ -22,8 +22,7 @@ public class DialogHoliday extends DialogUpdate {
     setContentView(R.layout.dialog_edit_holiday);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_HOLIDAY;
-    apiUrlAdd     = AppConfig.URL_ADD_HOLIDAY;
+    apiUrl = AppConfig.URL_HOLIDAY;
 
     /** define custom columns */
     String[] cols = {"date", "item", "holiday", "cost", "shop"};

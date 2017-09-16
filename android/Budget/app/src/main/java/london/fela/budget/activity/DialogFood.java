@@ -22,8 +22,7 @@ public class DialogFood extends DialogUpdate {
     setContentView(R.layout.dialog_edit_general);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_FOOD;
-    apiUrlAdd     = AppConfig.URL_ADD_FOOD;
+    apiUrl = AppConfig.URL_FOOD;
 
     /** define custom columns */
     String[] cols = {"date", "item", "category", "cost", "shop"};

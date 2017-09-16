@@ -45,9 +45,8 @@ public class DialogUpdate extends Activity {
 
   private ProgressBar progressBar;
 
-  private String apiUrl;
-  String apiUrlAdd = null;
-  String apiUrlUpdate = null;
+  public String method;
+  public String apiUrl;
 
   private final int API_TAG_POST_EDIT  = 163;
   private final int API_TAG_POST_ADD   = 187;
@@ -63,9 +62,7 @@ public class DialogUpdate extends Activity {
 
   /** api stuff */
   private final Api apiObject = new Api() {
-    @Override
-    public void apiResponse(int tag, String response) {
-    }
+    @Override public void apiResponse(int tag) {}
 
     @Override
     public void apiJSONSuccess(int tag, JSONObject res) {
@@ -96,18 +93,8 @@ public class DialogUpdate extends Activity {
     }
 
     @Override
-    public void apiJSONError(int tag, String msg) {
-      AppController.alert(getApplicationContext(), "Error: " + msg);
-    }
-
-    @Override
-    public void apiJSONException(int tag, JSONException e, String response) {
-      AppController.alert(getApplicationContext(), "Bug: API error");
-    }
-
-    @Override
     public void apiError(int tag, VolleyError error) {
-      AppController.alert(getApplicationContext(), "Bug: API error");
+      AppController.alert(getApplicationContext(), "Error: " + error.getMessage());
 
       switch (tag) {
         // close the dialog whatever happened
@@ -121,7 +108,7 @@ public class DialogUpdate extends Activity {
     }
 
     @Override
-    public void apiResponseEnd(int tag, String response) {
+    public void apiResponseEnd(int tag) {
       switch (tag) {
         // close the dialog whatever happened
         case API_TAG_POST_EDIT:
@@ -136,83 +123,114 @@ public class DialogUpdate extends Activity {
 
   private ApiCaller api;
   private void apiSetup() {
-    api = new ApiCaller(AppConfig.api_url(getResources()));
+    api = new ApiCaller(AppConfig.apiUrl(getResources()));
     api.addListener(apiObject);
   }
 
   final class SubmitForm {
-    private final HashMap<String, String> params = new HashMap<>();
+    private final JSONObject data = new JSONObject();
 
     private boolean noneChanged = true;
     private boolean invalid = false;
 
+    private class InvalidFieldException extends Exception {
+      public InvalidFieldException(String message) {
+        super(message);
+      }
+    }
+
     /**
      * validate form values and add them to the request parameters
      */
-    private void validateFields() {
-      for (FormField field : fields) {
-        boolean checkEmpty = true;
+    private int validateField(FormField field) {
+      try {
+        if (field.type == FIELD_TYPE_DATE) {
+          // the date dialog changes these values itself, so no need to update newItem here
+          YMD newDate = YMD.deserialise(newItem.data.get(field.name));
 
-        String formValue = null;
+          data.put(field.name, newDate.getValuesForTransfer());
 
-        switch (field.type) {
-          case FIELD_TYPE_DATE:
-            checkEmpty = false;
+          // see if the value has been changed
+          if (noneChanged && !newDate.isEqual(YMD.deserialise(oldValues.get(field.name)))) {
+            noneChanged = false;
+          }
 
-            // the date dialog changes these values itself, so no need to update newItem here
-
-            YMD newDate = YMD.deserialise(newItem.data.get(field.name));
-
-            params.put(field.name, newDate.serialise());
-
-            // see if the value has been changed
-            if (noneChanged && !newDate.isEqual(YMD.deserialise(oldValues.get(field.name)))) {
-              noneChanged = false;
-            }
-
-            break;
-
-          case FIELD_TYPE_STRING:
-            formValue = field.getFormValue();
-
-            newItem.data.put(field.name, formValue);
-
-            params.put(field.name, formValue);
-
-            // see if the value has been changed
-            if (noneChanged && !formValue.equals(oldValues.get(field.name))) {
-              noneChanged = false;
-            }
-
-            break;
-
-          case FIELD_TYPE_COST:
-            formValue = field.getFormValue().trim()
-              .replaceAll("[^0-9\\.]", "");
-
-            double costDouble = Double.valueOf(formValue);
-
-            int costInt = (int)Math.round(costDouble * 100.0);
-
-            String costString = String.valueOf(costInt);
-
-            newItem.data.put(field.name, costString);
-
-            params.put(field.name, costString);
-
-            // see if the value has been changed
-            if (noneChanged && !costString.equals(oldValues.get(field.name))) {
-              noneChanged = false;
-            }
-
-            break;
+          return 0;
         }
 
-        if (checkEmpty && formValue != null && formValue.isEmpty()) {
+        if (field.type == FIELD_TYPE_STRING) {
+          String formValue = field.getFormValue();
+
+          newItem.data.put(field.name, formValue);
+
+          try {
+            data.put(field.name, formValue);
+          } catch (JSONException e) {
+            throw e;
+          }
+
+          // see if the value has been changed
+          if (noneChanged && !formValue.equals(oldValues.get(field.name))) {
+            noneChanged = false;
+          }
+
+          if (formValue != null && formValue.isEmpty()) {
+            throw new InvalidFieldException(field.name);
+          }
+
+          return 0;
+        }
+
+        if (field.type == FIELD_TYPE_COST) {
+          String formValue = field.getFormValue()
+                  .trim()
+                  .replaceAll("[^0-9.]", "");
+
+          double costDouble = Double.valueOf(formValue);
+
+          int costInt = (int) Math.round(costDouble * 100.0);
+
+          String costString = String.valueOf(costInt);
+
+          newItem.data.put(field.name, costString);
+
+          data.put(field.name, costInt);
+
+          // see if the value has been changed
+          if (noneChanged && !costString.equals(oldValues.get(field.name))) {
+            noneChanged = false;
+          }
+
+          if (formValue != null && formValue.isEmpty()) {
+            throw new InvalidFieldException(field.name);
+          }
+
+          return 0;
+        }
+      }
+      catch (InvalidFieldException e) {
+        return 1;
+      }
+      catch (JSONException e) {
+        return 2;
+      }
+
+      return 0;
+    }
+    private void validateFields() {
+      for (FormField field : fields) {
+        int status = validateField(field);
+
+        if (status == 1) {
           AppController.alert(getApplicationContext(), "Please enter data!");
 
           invalid = true;
+        }
+        else if (status == 2) {
+          AppController.alert(getApplicationContext(), "Unknown data error");
+        }
 
+        if (status > 0) {
           break;
         }
       }
@@ -223,7 +241,12 @@ public class DialogUpdate extends Activity {
         if (!noneChanged) {
           if (id != null) {
             // add the ID parameter
-            params.put("id", id);
+            try {
+              data.put("id", id);
+            }
+            catch(JSONException e) {
+              return;
+            }
           }
 
           progressBar.setVisibility(View.VISIBLE);
@@ -231,9 +254,9 @@ public class DialogUpdate extends Activity {
           api.request(
             API_TAG,
             "req_update_item",
-            "POST",
+            method,
             apiUrl,
-            params
+            data
           );
         } else {
           // nothing changed - no point making an API request
@@ -374,14 +397,14 @@ public class DialogUpdate extends Activity {
       titleText = getString(R.string.dialog_title_add);
 
       API_TAG = API_TAG_POST_ADD;
-      apiUrl = apiUrlAdd;
+      method = "post";
     }
     else {
       id = values.data.get("id");
       titleText = getString(R.string.dialog_title) + " id#" + id;
 
       API_TAG = API_TAG_POST_EDIT;
-      apiUrl  = apiUrlUpdate;
+      method = "put";
     }
 
     // set up the API caller

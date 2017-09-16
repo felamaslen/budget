@@ -39,7 +39,7 @@ public class MainActivity extends Activity implements Api {
 
   // api stuff
   private ApiCaller api;
-  @Override public void apiResponse(int tag, String response) {
+  @Override public void apiResponse(int tag) {
     switch (tag) {
       case API_TAG_FETCH_DATA:
 
@@ -54,16 +54,10 @@ public class MainActivity extends Activity implements Api {
         break;
     }
   }
-  @Override public void apiJSONError(int tag, String msg) {
-    AppController.alert(getApplicationContext(), "Error fetching data: " + msg);
-  }
-  @Override public void apiJSONException(int tag, JSONException e, String response) {
-    AppController.alert(getApplicationContext(), "Bug: API error");
-  }
   @Override public void apiError(int tag, VolleyError error) {
-    AppController.alert(getApplicationContext(), "Bug: API error");
+    AppController.alert(getApplicationContext(), "Error :" + error.getMessage());
   }
-  @Override public void apiResponseEnd(int tag, String response) {
+  @Override public void apiResponseEnd(int tag) {
     switch (tag) {
       case API_TAG_FETCH_DATA:
         AppController.endDialogMessage(AppConfig.DIALOG_MSG_LOADING_ALL);
@@ -71,7 +65,7 @@ public class MainActivity extends Activity implements Api {
     }
   }
   private void apiSetup() {
-    api = new ApiCaller(AppConfig.api_url(getResources()));
+    api = new ApiCaller(AppConfig.apiUrl(getResources()));
     api.addListener(this);
   }
 
@@ -195,7 +189,7 @@ public class MainActivity extends Activity implements Api {
     api.request(
       API_TAG_FETCH_DATA,
       "req_data_all",
-      "GET",
+      "get",
       AppConfig.URL_DATA_ALL,
       null
     );

@@ -13,26 +13,19 @@ import london.fela.budget.R;
  * Application-specific constants
  */
 public class AppConfig {
-  public static final String URL_LOGIN = "login";
+  public static final String URL_LOGIN = "user/login";
 
   public static final String URL_DATA_ALL = "data/all";
+  
+  public static final String URL_UPDATE_OVERVIEW = "data/balance";
 
-  public static final String URL_UPDATE_OVERVIEW  = "update/overview";
-  public static final String URL_UPDATE_FUNDS     = "update/funds";
-  public static final String URL_UPDATE_INCOME    = "update/income";
-  public static final String URL_UPDATE_BILLS     = "update/bills";
-  public static final String URL_UPDATE_FOOD      = "update/food";
-  public static final String URL_UPDATE_GENERAL   = "update/general";
-  public static final String URL_UPDATE_HOLIDAY   = "update/holiday";
-  public static final String URL_UPDATE_SOCIAL    = "update/social";
-
-  public static final String URL_ADD_FUNDS    = "add/funds";
-  public static final String URL_ADD_INCOME   = "add/income";
-  public static final String URL_ADD_BILLS    = "add/bills";
-  public static final String URL_ADD_FOOD     = "add/food";
-  public static final String URL_ADD_GENERAL  = "add/general";
-  public static final String URL_ADD_HOLIDAY  = "add/holiday";
-  public static final String URL_ADD_SOCIAL   = "add/social";
+  public static final String URL_FUNDS    = "data/funds";
+  public static final String URL_INCOME   = "data/income";
+  public static final String URL_BILLS    = "data/bills";
+  public static final String URL_FOOD     = "data/food";
+  public static final String URL_GENERAL  = "data/general";
+  public static final String URL_HOLIDAY  = "data/holiday";
+  public static final String URL_SOCIAL   = "data/social";
 
   public static final int DIALOG_MSG_LOADING_ALL      = 71885;
   public static final int DIALOG_MSG_LOADING_FUNDS    = 91784;
@@ -76,7 +69,7 @@ public class AppConfig {
     }
   }
 
-  public static String api_url(Resources resources) {
-    return resources.getString(R.string.api_url) + "/api?t=";
+  public static String apiUrl(Resources resources) {
+    return resources.getString(R.string.api_url) + "/api/v3/";
   }
 }

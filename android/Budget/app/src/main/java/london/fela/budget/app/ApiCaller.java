@@ -6,7 +6,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,10 +21,30 @@ import london.fela.budget.helper.Data;
 public class ApiCaller {
   private final List<Api> listeners = new ArrayList<>();
 
-  private static String api_url;
+  private static String apiUrl;
+
+  private static int getHttpMethod(String methodString) {
+    if (methodString == "get") {
+      return Request.Method.GET;
+    }
+    if (methodString == "post") {
+      return Request.Method.POST;
+    }
+    if (methodString == "put") {
+      return Request.Method.PUT;
+    }
+    if (methodString == "delete") {
+      return Request.Method.DELETE;
+    }
+    if (methodString == "patch") {
+      return Request.Method.PATCH;
+    }
+    
+    throw new IllegalArgumentException("invalid request method");
+  }
 
   public ApiCaller(String url) {
-    api_url = url;
+    apiUrl = url;
   }
 
   public void addListener(Api listener) {
@@ -32,80 +52,47 @@ public class ApiCaller {
   }
 
   /**
-   * does a request to the REST Api
+   * makes a request to the REST Api
    *
    * @param tag_int_req    // tag used to identify the request to the implementation
    * @param tag_string_req // tag used to cancel the request
-   * @param req_type       // GET or POST
+   * @param method         // GET, POST, PUT, DELETE and PATCH are implemented
    * @param args           // arguments to add to the URL
    */
   public void request(
     final int tag_int_req,
     String tag_string_req,
-    String req_type,
+    String method,
     String args,
-    final Map<String, String> params
+    final JSONObject data
   ) {
-    final int httpMethod;
+    final int httpMethod = ApiCaller.getHttpMethod(method.toLowerCase());
 
-    if (req_type.equals("POST")) {
-      httpMethod = Request.Method.POST;
-    } else {
-      httpMethod = Request.Method.GET;
-    }
+    final String url = apiUrl + args;
 
-    final String url = api_url + args;
-
-    StringRequest strReq = new StringRequest(
+    JsonObjectRequest jsObjRequest = new JsonObjectRequest(
       httpMethod,
       url,
-      new Response.Listener<String>() {
+      data,
+      new Response.Listener<JSONObject>() {
         @Override
-        public void onResponse(String response) {
+        public void onResponse(JSONObject response) {
           for (Api listener : listeners) {
-            listener.apiResponse(tag_int_req, response);
-          }
+            listener.apiResponse(tag_int_req);
 
-          try {
-            JSONObject res = new JSONObject(response);
-
-            boolean error;
-            try {
-              error = res.getBoolean("error");
-            }
-            catch (JSONException e) {
-              error = false;
-            }
-
-            // check for error node in json
-            if (!error) {
-              for (Api listener : listeners) {
-                listener.apiJSONSuccess(tag_int_req, res);
-              }
-            } else {
-              // error with request, get the error message
-              String errorMsg = res.getString("errorText");
-              for (Api listener : listeners) {
-                listener.apiJSONError(tag_int_req, errorMsg);
-              }
-            }
-          } catch (JSONException e) {
-            e.printStackTrace();
-
-            for (Api listener : listeners) {
-              listener.apiJSONException(tag_int_req, e, response);
-            }
+            listener.apiJSONSuccess(tag_int_req, response);
           }
 
           for (Api listener : listeners) {
-            listener.apiResponseEnd(tag_int_req, response);
+            listener.apiResponseEnd(tag_int_req);
           }
         }
       },
       new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-          Log.e(AppController.TAG, "API error: " + error.getMessage() + " (" + url + ")");
+          Log.e(AppController.TAG, "API error: " + error.getMessage());
+          Log.e(AppController.TAG, "details: " + data.toString());
 
           for (Api listener : listeners) {
             listener.apiError(tag_int_req, error);
@@ -132,25 +119,9 @@ public class ApiCaller {
 
         return reqHeaders;
       }
-
-      /**
-       * add custom parameters
-       *
-       * @return params
-       */
-      @Override
-      protected Map<String, String> getParams() {
-        Map<String, String> reqParams = new HashMap<>();
-
-        if (params != null) {
-          reqParams.putAll(params);
-        }
-
-        return reqParams;
-      }
     };
 
     // add request to request queue
-    AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    AppController.getInstance().addToRequestQueue(jsObjRequest, tag_string_req);
   }
 }

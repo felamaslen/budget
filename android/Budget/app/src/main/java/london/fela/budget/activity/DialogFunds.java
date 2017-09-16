@@ -22,8 +22,7 @@ public class DialogFunds extends DialogUpdate {
     setContentView(R.layout.dialog_edit_basic);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_FUNDS;
-    apiUrlAdd     = AppConfig.URL_ADD_FUNDS;
+    apiUrl = AppConfig.URL_FUNDS;
 
     /** define custom columns */
     String[] cols = {"date", "item", "cost", "value"};

@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements Api {
 
   /** api stuff */
   @Override
-  public void apiResponse(int tag, String response) {
+  public void apiResponse(int tag) {
     switch (tag) {
       case API_TAG_LOGIN:
         AppController.hideDialog(pDialog);
@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity implements Api {
         try {
           uid = res.getString("uid");
           name = res.getString("name");
-          apiKey = res.getString("api_key");
+          apiKey = res.getString("apiKey");
         }
         catch (JSONException e) {
           return;
@@ -76,18 +76,10 @@ public class LoginActivity extends AppCompatActivity implements Api {
     }
   }
   @Override
-  public void apiJSONError(int tag, String msg) {
-    AppController.alert(getApplicationContext(), "Error: " + msg);
-  }
-  @Override
-  public void apiJSONException(int tag, JSONException e, String response) {
-    AppController.alert(getApplicationContext(), "Bug: API error logging in");
-  }
-  @Override
   public void apiError(int tag, VolleyError error) {
     switch (tag) {
       case API_TAG_LOGIN:
-        AppController.alert(getApplicationContext(), "Bug: API error logging in");
+        AppController.alert(getApplicationContext(), "Wrong credentials");
 
         AppController.hideDialog(pDialog);
 
@@ -95,12 +87,12 @@ public class LoginActivity extends AppCompatActivity implements Api {
     }
   }
   @Override
-  public void apiResponseEnd(int tag, String response) {
+  public void apiResponseEnd(int tag) {
   }
 
   private ApiCaller api;
   private void apiSetup() {
-    api = new ApiCaller(AppConfig.api_url(getResources()));
+    api = new ApiCaller(AppConfig.apiUrl(getResources()));
     api.addListener(this);
   }
   
@@ -158,16 +150,22 @@ public class LoginActivity extends AppCompatActivity implements Api {
     pDialog.setMessage("Logging in...");
     AppController.showDialog(pDialog);
 
-    Map<String, String> params = new HashMap<>();
+    JSONObject data = new JSONObject();
+    try {
+      data.put("pin", pin);
+    }
+    catch (JSONException e) {
+      AppController.alert(getApplicationContext(), "Bug!11!1");
 
-    params.put("pin", pin);
+      return;
+    }
 
     api.request(
       API_TAG_LOGIN,
       "req_login",
-      "POST",
+      "post",
       AppConfig.URL_LOGIN,
-      params
+      data
     );
   }
 }

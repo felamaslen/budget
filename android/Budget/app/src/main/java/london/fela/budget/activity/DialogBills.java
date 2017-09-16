@@ -22,8 +22,7 @@ public class DialogBills extends DialogUpdate {
     setContentView(R.layout.dialog_edit_basic);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_BILLS;
-    apiUrlAdd     = AppConfig.URL_ADD_BILLS;
+    apiUrl = AppConfig.URL_BILLS;
 
     /** define custom columns */
     String[] cols = {"date", "item", "cost"};

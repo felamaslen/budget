@@ -2,6 +2,9 @@ package london.fela.budget.app;
 
 import java.util.Calendar;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import london.fela.budget.helper.Data;
 
 /**
@@ -37,6 +40,21 @@ public class YMD {
     return String.valueOf(year) + separator +
       String.valueOf(month) + separator +
       String.valueOf(date);
+  }
+  
+  public JSONObject getValuesForTransfer() {
+    JSONObject data = new JSONObject();
+
+    try {
+      data.put("year", year);
+      data.put("month", month);
+      data.put("date", date);
+    }
+    catch (JSONException e) {
+      return null;
+    }
+
+    return data;
   }
 
   public static YMD deserialise(String serial) {

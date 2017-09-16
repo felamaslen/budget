@@ -22,8 +22,7 @@ public class DialogGeneral extends DialogUpdate {
     setContentView(R.layout.dialog_edit_general);
 
     /** define api URL for this page */
-    apiUrlUpdate  = AppConfig.URL_UPDATE_GENERAL;
-    apiUrlAdd     = AppConfig.URL_ADD_GENERAL;
+    apiUrl = AppConfig.URL_GENERAL;
 
     /** define custom columns */
     String[] cols = {"date", "item", "category", "cost", "shop"};

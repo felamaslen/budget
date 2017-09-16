@@ -21,7 +21,7 @@ public class UPCProduct implements Api {
 
   // api stuff
   private ApiCaller api;
-  @Override public void apiResponse(int tag, String response) {
+  @Override public void apiResponse(int tag) {
     switch (tag) {
       case API_TAG_FETCH_PRODUCT:
         AppController.endDialogMessage(AppConfig.DIALOG_MSG_LOADING_SCAN);
@@ -37,14 +37,10 @@ public class UPCProduct implements Api {
         break;
     }
   }
-  @Override public void apiJSONError(int tag, String msg) {
-  }
-  @Override public void apiJSONException(int tag, JSONException e, String response) {
-  }
   @Override public void apiError(int tag, VolleyError error) {
     productFetchFailed();
   }
-  @Override public void apiResponseEnd(int tag, String response) {
+  @Override public void apiResponseEnd(int tag) {
   }
   private void apiSetup() {
     api = new ApiCaller("");
@@ -69,7 +65,7 @@ public class UPCProduct implements Api {
 
     String requestUrl = apiUrl + GTIN + "?apikey=" + apiKey;
 
-    api.request(API_TAG_FETCH_PRODUCT, "api_fetch_product", "GET", requestUrl, null);
+    api.request(API_TAG_FETCH_PRODUCT, "api_fetch_product", "get", requestUrl, null);
   }
 
   public void productFetched(JSONObject res) {
