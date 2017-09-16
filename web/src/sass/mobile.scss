@@ -111,12 +111,6 @@
                 background: $color_mob_overview_tbl_balance;
             }
         }
-        .row {
-            &:nth-child(n+2):nth-child(-n+20) {
-                // hide older items on small screens
-                display: none;
-            }
-        }
         .col {
             .text, .editable {
                 padding: 4px 10px;

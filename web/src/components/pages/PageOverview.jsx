@@ -19,6 +19,9 @@ import { getEditable } from '../Editable/getEditable';
 import { GraphBalance } from '../graphs/GraphBalance';
 import { GraphSpend } from '../graphs/GraphSpend';
 
+const mediaQueryMobile = `(max-device-width: ${widthPageMobile}px)`;
+const mediaQueryDesktop = `(min-device-width: ${widthPageMobile + 1}px)`;
+
 export class PageOverview extends PureControllerView {
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
@@ -37,16 +40,9 @@ export class PageOverview extends PureControllerView {
 
         return <div className="row header">{header}</div>;
     }
-    renderRows() {
-        return this.props.data.get('rows').map((row, key) => {
-            const rowClasses = classNames({
-                row: true,
-                past: Boolean(row.get('past')),
-                active: Boolean(row.get('active')),
-                future: Boolean(row.get('future'))
-            });
-
-            const cells = row.get('cells').map((cell, cellKey) => {
+    renderCells(row, rowKey) {
+        return row.get('cells')
+            .map((cell, cellKey) => {
                 const style = {};
                 if (cell.get('rgb')) {
                     style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
@@ -57,8 +53,12 @@ export class PageOverview extends PureControllerView {
                 let span = null;
                 if (cell.get('editable')) {
                     // editable balance column
-                    const active = this.props.edit.get('row') === key && this.props.edit.get('col') === 0;
-                    span = getEditable(this.props.dispatcher, key, 0, null, 'cost', cell.get('value'), 0, active);
+                    const active = this.props.edit.get('row') === rowKey &&
+                        this.props.edit.get('col') === 0;
+
+                    span = getEditable(
+                        this.props.dispatcher, rowKey, 0, null, 'cost', cell.get('value'), 0, active
+                    );
 
                     cellClasses['editable-outer'] = true;
                     cellClasses.editing = active;
@@ -77,15 +77,49 @@ export class PageOverview extends PureControllerView {
                     </div>
                 );
             });
+    }
+    renderRows(numToSkip) {
+        const rows = this.props.data.get('rows')
+            .slice(numToSkip)
+            .map((row, key) => {
+                const rowKey = key + numToSkip;
 
-            return <div key={key} className={rowClasses}>{cells}</div>;
-        });
+                const rowClasses = classNames({
+                    row: true,
+                    past: Boolean(row.get('past')),
+                    active: Boolean(row.get('active')),
+                    future: Boolean(row.get('future'))
+                });
+
+                const cells = this.renderCells(row, rowKey);
+
+                return <div key={key} className={rowClasses}>{cells}</div>;
+            });
+
+        return <div>{rows}</div>;
     }
     renderTable() {
+        const mobileRows = render => {
+            if (render) {
+                return this.renderRows(19);
+            }
+
+            return null;
+        };
+
+        const desktopRows = render => {
+            if (render) {
+                return this.renderRows(0);
+            }
+
+            return null;
+        }
+
         return (
             <div className="table-flex table-insert table-overview noselect">
                 {this.renderHeader()}
-                {this.renderRows()}
+                <Media query={mediaQueryMobile}>{mobileRows}</Media>
+                <Media query={mediaQueryDesktop}>{desktopRows}</Media>
             </div>
         );
     }
@@ -132,9 +166,6 @@ export class PageOverview extends PureControllerView {
         );
     }
     renderGraphs() {
-        const mediaQueryMobile = `(max-device-width: ${widthPageMobile}px)`;
-        const mediaQueryDesktop = `(min-device-width: ${widthPageMobile + 1}px)`;
-
         return (
             <div className="graph-container-outer">
                 <Media query={mediaQueryMobile}>
