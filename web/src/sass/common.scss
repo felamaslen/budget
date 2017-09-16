@@ -394,15 +394,6 @@ button {
     z-index: 10;
     color: white;
     background: white;
-    .inner {
-        background: linear-gradient(to bottom, #d84d4d, #9f3030);
-        box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
-        width: 100%;
-        height: $height_nav;
-        &.hide-nav .nav-list {
-            opacity: 0;
-        }
-    }
     .app-logo {
         height: $height_nav;
         .queue-not-saved {

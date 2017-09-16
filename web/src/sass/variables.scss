@@ -8,7 +8,6 @@ $color_amber:           #fbe07f;
 $color_primary:         #fffef7;
 $color_primary_light:   #f5b831;
 $color_primary_dark:    #9f3030;
-$color_accent:          #ffa040;
 
 $color_bg_up:           #1e5413;
 $color_bg_up_hl:        #d4ffcc;
@@ -31,7 +30,11 @@ $top_nav: $height_nav + 10;
 $nav_img: "../images/nav.png";
 
 // mobile variables
-$height_nav_mobile: 40px;
+$height_header_mobile: 55px;
+$height_nav_mobile: 45px;
+$color_mob_primary: #fffef7;
+$color_mob_primary_dark: #9f3030;
+$color_mob_accent: #ffa040;
 $color_mob_overview_tbl_month: #fffca3;
 $color_mob_overview_tbl_income: #b7ffa3;
 $color_mob_overview_tbl_out: #ffa3a3;
