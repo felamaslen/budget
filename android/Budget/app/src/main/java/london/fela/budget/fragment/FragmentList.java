@@ -43,467 +43,467 @@ import static android.app.Activity.RESULT_OK;
  */
 @SuppressWarnings("unused")
 public class FragmentList extends Fragment {
-  String pageName   = null;
-  String[] props    = new String[] {};
-  int loadingMsgId  = 0;
-  String loadingMsg;
+    String pageName   = null;
+    String[] props    = new String[] {};
+    int loadingMsgId  = 0;
+    String loadingMsg;
 
-  public void setProps() {
-  }
-  public HashMap<String, String> getOtherProps(JSONObject json) {
-    return new HashMap<>();
-  }
-
-  Intent getDialogIntent() { return null; }
-
-  private final int EDIT_ADD_LIST_ITEM = 711021;
-
-  public ListAdapter listAdapter;
-  public final ArrayList<ListItem> itemList = new ArrayList<>();
-  public ListView list;
-  
-  private class IntentDialog {
-    public ListItem item;
-    final HashMap<String, String> map = new HashMap<>();
-
-    public void setMap(int position, String item) {
+    public void setProps() {
+    }
+    public HashMap<String, String> getOtherProps(JSONObject json) {
+        return new HashMap<>();
     }
 
-    IntentDialog(int position, String item) {
-      setMap(position, item);
+    Intent getDialogIntent() { return null; }
 
-      EditParcel values = new EditParcel(map);
+    private final int EDIT_ADD_LIST_ITEM = 711021;
 
-      Intent intent = getDialogIntent();
+    public ListAdapter listAdapter;
+    public final ArrayList<ListItem> itemList = new ArrayList<>();
+    public ListView list;
+    
+    private class IntentDialog {
+        public ListItem item;
+        final HashMap<String, String> map = new HashMap<>();
 
-      intent.putExtra("values", values);
-      intent.putExtra("dataIndex", position);
-
-      startActivityForResult(intent, EDIT_ADD_LIST_ITEM);
-    }
-  }
-  private class IntentDialogEdit extends IntentDialog {
-    IntentDialogEdit(int position) {
-      super(position, null);
-    }
-
-    @Override
-    public void setMap(int position, String _item) {
-      ListItem item = itemList.get(position);
-
-      map.put("id", String.valueOf(item.id));
-      map.put("date", item.date.serialise());
-      map.put("item", item.item);
-      map.put("cost", String.valueOf(item.cost));
-
-      for (String prop : props) {
-        map.put(prop, item.otherProps.get(prop));
-      }
-    }
-  }
-  private class IntentDialogAdd extends IntentDialog {
-    IntentDialogAdd(String item) {
-      super(-1, item);
-    }
-
-    @Override
-    public void setMap(int position, String item) {
-      map.put("date", ""); // this resolves to the current date
-      map.put("item", item);
-      map.put("cost", "0");
-
-      for (String prop: props) {
-        map.put(prop, ""); // default values are all empty for these non-essential items
-      }
-    }
-  }
-
-  private int editingPosition;
-  
-  private void intentDialogAdd(String item) {
-    editingPosition = -1;
-    new IntentDialogAdd(item);
-  }
-  
-  private void intentDialogEdit(int position) {
-    editingPosition = position;
-    new IntentDialogEdit(position);
-  }
-
-  @Override
-  public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    if (requestCode == AppConfig.SCAN_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-      String code = intent.getStringExtra("SCAN_RESULT");
-      // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-
-      final UPCProduct product = new UPCProduct(code, getActivity()) {
-        @Override
-        public void productFetched(JSONObject res) {
-          try {
-            String productName = res.getJSONObject("attributes").getString("Brand");
-
-            intentDialogAdd(productName);
-          } catch (JSONException e) {
-            e.printStackTrace();
-
-            Toast.makeText(getActivity(), "Invalid barcode response", Toast.LENGTH_LONG).show();
-          }
+        public void setMap(int position, String item) {
         }
-      };
 
-      product.request();
+        IntentDialog(int position, String item) {
+            setMap(position, item);
+
+            EditParcel values = new EditParcel(map);
+
+            Intent intent = getDialogIntent();
+
+            intent.putExtra("values", values);
+            intent.putExtra("dataIndex", position);
+
+            startActivityForResult(intent, EDIT_ADD_LIST_ITEM);
+        }
     }
-    else if (requestCode == EDIT_ADD_LIST_ITEM && resultCode == RESULT_OK) {
-      EditParcel item = intent.getParcelableExtra("editParcel");
+    private class IntentDialogEdit extends IntentDialog {
+        IntentDialogEdit(int position) {
+            super(position, null);
+        }
 
-      this.setItemData(editingPosition, item);
+        @Override
+        public void setMap(int position, String _item) {
+            ListItem item = itemList.get(position);
+
+            map.put("id", String.valueOf(item.id));
+            map.put("date", item.date.serialise());
+            map.put("item", item.item);
+            map.put("cost", String.valueOf(item.cost));
+
+            for (String prop : props) {
+                map.put(prop, item.otherProps.get(prop));
+            }
+        }
     }
-  }
+    private class IntentDialogAdd extends IntentDialog {
+        IntentDialogAdd(String item) {
+            super(-1, item);
+        }
 
-  // listener for ListView touch (edit item)
-  private final AdapterView.OnItemClickListener listenerEdit = new AdapterView.OnItemClickListener() {
+        @Override
+        public void setMap(int position, String item) {
+            map.put("date", ""); // this resolves to the current date
+            map.put("item", item);
+            map.put("cost", "0");
+
+            for (String prop: props) {
+                map.put(prop, ""); // default values are all empty for these non-essential items
+            }
+        }
+    }
+
+    private int editingPosition;
+    
+    private void intentDialogAdd(String item) {
+        editingPosition = -1;
+        new IntentDialogAdd(item);
+    }
+    
+    private void intentDialogEdit(int position) {
+        editingPosition = position;
+        new IntentDialogEdit(position);
+    }
+
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-      intentDialogEdit(position);
-    }
-  };
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == AppConfig.SCAN_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            String code = intent.getStringExtra("SCAN_RESULT");
+            // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
 
-  // listener for addBtn touch (add item)
-  private final Button.OnClickListener listenerAdd = new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-      intentDialogAdd("");
-    }
-  };
+            final UPCProduct product = new UPCProduct(code, getActivity()) {
+                @Override
+                public void productFetched(JSONObject res) {
+                    try {
+                        String productName = res.getJSONObject("attributes").getString("Brand");
 
-  // listener for scanBtn touch (scan barcode)
-  private final Button.OnClickListener listenerScan = new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-      try {
-        Intent intent = new Intent(AppConfig.ACTION_SCAN);
-        intent.putExtra("SCAN_MODE", "PRODUCT_MODE");
-        startActivityForResult(intent, AppConfig.SCAN_REQUEST_CODE);
-      } catch (ActivityNotFoundException e) {
-        Toast.makeText(
-          getActivity(), "Barcode scanner app not installed!", Toast.LENGTH_LONG
-        ).show();
-      }
-    }
-  };
+                        intentDialogAdd(productName);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
 
-  /**
-   * Called by edit/add dialog after data has been successfully submitted
-   * @param position        : position in the list
-   * @param newRowParcel    : parcel containing new data
-   */
-  private void setItemData(
-    int position, Parcelable newRowParcel
-  ) {
+                        Toast.makeText(getActivity(), "Invalid barcode response", Toast.LENGTH_LONG).show();
+                    }
+                }
+            };
 
-    boolean itemIsNew = position == -1;
+            product.request();
+        }
+        else if (requestCode == EDIT_ADD_LIST_ITEM && resultCode == RESULT_OK) {
+            EditParcel item = intent.getParcelableExtra("editParcel");
 
-    EditParcel newRow = (EditParcel)newRowParcel;
-
-    YMD newDate     = YMD.deserialise(newRow.data.get("date"));
-    String newItem  = newRow.data.get("item");
-    int newCost     = Integer.valueOf(newRow.data.get("cost"));
-
-    Map<String, String> otherProps = new HashMap<>();
-    for (String prop : props) {
-      otherProps.put(prop, newRow.data.get(prop));
+            this.setItemData(editingPosition, item);
+        }
     }
 
-    YMD oldDate = newDate;
-    int oldCost = 0;
+    // listener for ListView touch (edit item)
+    private final AdapterView.OnItemClickListener listenerEdit = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            intentDialogEdit(position);
+        }
+    };
 
-    if (itemIsNew) {
-      // add list item
-      int newId = Integer.valueOf(newRow.data.get("id"));
+    // listener for addBtn touch (add item)
+    private final Button.OnClickListener listenerAdd = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            intentDialogAdd("");
+        }
+    };
 
-      ListItem listItem = new ListItem(
-        newId, newDate, newItem, newCost, otherProps
-      );
+    // listener for scanBtn touch (scan barcode)
+    private final Button.OnClickListener listenerScan = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            try {
+                Intent intent = new Intent(AppConfig.ACTION_SCAN);
+                intent.putExtra("SCAN_MODE", "PRODUCT_MODE");
+                startActivityForResult(intent, AppConfig.SCAN_REQUEST_CODE);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(
+                    getActivity(), "Barcode scanner app not installed!", Toast.LENGTH_LONG
+                ).show();
+            }
+        }
+    };
 
-      addListItem(listItem);
+    /**
+     * Called by edit/add dialog after data has been successfully submitted
+     * @param position        : position in the list
+     * @param newRowParcel    : parcel containing new data
+     */
+    private void setItemData(
+        int position, Parcelable newRowParcel
+    ) {
 
-      // add item to cache
-      Data.Cache.Pages.get(pageName).id.put(
-        Data.Cache.Pages.get(pageName).numItems++, newId
-      );
+        boolean itemIsNew = position == -1;
 
-      Data.Cache.Pages.get(pageName).date.put(newId, newDate);
-      Data.Cache.Pages.get(pageName).item.put(newId, newItem);
-      Data.Cache.Pages.get(pageName).cost.put(newId, newCost);
-      Data.Cache.Pages.get(pageName).other.put(newId, otherProps);
-    }
-    else {
-      // update list item
-      ListItem listItem = itemList.get(position);
+        EditParcel newRow = (EditParcel)newRowParcel;
 
-      oldDate = listItem.date;
-      oldCost = listItem.cost;
+        YMD newDate     = YMD.deserialise(newRow.data.get("date"));
+        String newItem  = newRow.data.get("item");
+        int newCost     = Integer.valueOf(newRow.data.get("cost"));
 
-      listItem.date = newDate;
-      listItem.item = newItem;
-      listItem.cost = newCost;
+        Map<String, String> otherProps = new HashMap<>();
+        for (String prop : props) {
+            otherProps.put(prop, newRow.data.get(prop));
+        }
 
-      listItem.otherProps = otherProps;
+        YMD oldDate = newDate;
+        int oldCost = 0;
 
-      itemList.set(position, listItem);
+        if (itemIsNew) {
+            // add list item
+            int newId = Integer.valueOf(newRow.data.get("id"));
 
-      // update the cache item
-      int id = listItem.id;
+            ListItem listItem = new ListItem(
+                newId, newDate, newItem, newCost, otherProps
+            );
 
-      Data.Cache.Pages.get(pageName).date.put(id, newDate);
-      Data.Cache.Pages.get(pageName).item.put(id, newItem);
-      Data.Cache.Pages.get(pageName).cost.put(id, newCost);
-      Data.Cache.Pages.get(pageName).other.put(id, otherProps);
-    }
+            addListItem(listItem);
 
-    // update this page's list
-    updateList();
+            // add item to cache
+            Data.Cache.Pages.get(pageName).id.put(
+                Data.Cache.Pages.get(pageName).numItems++, newId
+            );
 
-    // update the cache data for this page
+            Data.Cache.Pages.get(pageName).date.put(newId, newDate);
+            Data.Cache.Pages.get(pageName).item.put(newId, newItem);
+            Data.Cache.Pages.get(pageName).cost.put(newId, newCost);
+            Data.Cache.Pages.get(pageName).other.put(newId, otherProps);
+        }
+        else {
+            // update list item
+            ListItem listItem = itemList.get(position);
 
-    // update the overview cache data
-    int oldMonthKey = Data.yearMonthDifference(
-      oldDate.getYear(), oldDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
-    );
+            oldDate = listItem.date;
+            oldCost = listItem.cost;
 
-    int newMonthKey = Data.yearMonthDifference(
-      newDate.getYear(), newDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
-    );
+            listItem.date = newDate;
+            listItem.item = newItem;
+            listItem.cost = newCost;
 
-    // refresh the overview page, if it exists
-    try {
-      int[] cacheItem = Data.Cache.Overview.cost.get(pageName);
-      try {
-        cacheItem[oldMonthKey] -= oldCost;
-        cacheItem[newMonthKey] += newCost;
-      }
-      catch (ArrayIndexOutOfBoundsException e) {
-        // cache is out of overview date range
-      }
+            listItem.otherProps = otherProps;
 
-      Data.Cache.Overview.cost.put(pageName, cacheItem);
+            itemList.set(position, listItem);
 
-      try {
-        FragmentOverview overviewPage = (FragmentOverview)(
-          ((MainActivity)getActivity()).pagerAdapter.getRegisteredFragment(0)
+            // update the cache item
+            int id = listItem.id;
+
+            Data.Cache.Pages.get(pageName).date.put(id, newDate);
+            Data.Cache.Pages.get(pageName).item.put(id, newItem);
+            Data.Cache.Pages.get(pageName).cost.put(id, newCost);
+            Data.Cache.Pages.get(pageName).other.put(id, otherProps);
+        }
+
+        // update this page's list
+        updateList();
+
+        // update the cache data for this page
+
+        // update the overview cache data
+        int oldMonthKey = Data.yearMonthDifference(
+            oldDate.getYear(), oldDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
         );
 
-        overviewPage.reloadDataFromCache();
-      }
-      catch (Exception e) {
-        // the overview page isn't loaded, do nothing
-      }
-    }
-    catch (Exception e) {
-      // serious error
-      e.printStackTrace();
-    }
-  }
-
-  public void reloadDataFromCache() {
-    itemList.clear();
-
-    fetchDataFromCache();
-  }
-
-  @Override
-  public View onCreateView(
-    LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
-  ) {
-    View view = inflater.inflate(R.layout.fragment_list, container, false);
-
-    // this is the android ListView widget
-    list = (ListView) view.findViewById(R.id.main_list);
-
-    // remove dividing lines
-    list.setDividerHeight(0);
-    list.setDivider(null);
-
-    // sets the column titles according to each page
-    setProps();
-
-    LinearLayout bg = (LinearLayout) view.findViewById(R.id.list_outer);
-
-    bg.setBackgroundColor(AppConfig.PageColor.getBg(pageName));
-
-    // button to add a new item
-    Button addBtn = (Button) view.findViewById(R.id.button_add);
-
-    // button to scan a barcode
-    Button scanBtn = (Button) view.findViewById(R.id.button_scan);
-
-    drawList();
-
-    if (itemList.size() == 0) {
-      fetchDataFromCache();
-    }
-
-    list.setOnItemClickListener(listenerEdit);
-
-    addBtn.setOnClickListener(listenerAdd);
-
-    scanBtn.setOnClickListener(listenerScan);
-
-    return view;
-  }
-
-  private void addListItem(ListItem item) {
-    itemList.add(item);
-  }
-
-  /**
-   * draw table of in data
-   */
-  public void drawList() {
-    listAdapter = new ListAdapter(
-      getActivity(),
-      itemList
-    );
-
-    list.setAdapter(listAdapter);
-  }
-
-  private void sortList() {
-    Collections.sort(itemList);
-  }
-
-  private void updateList() {
-    sortList();
-
-    listAdapter.notifyDataSetChanged();
-  }
-
-  /**
-   * fetch data from the cache for this list
-   */
-  private void fetchDataFromCache() {
-    // fetch data from the cache, which was loaded by MainActivity
-    if (Data.dataPreLoaded) {
-      PageCache pageCache = Data.Cache.Pages.get(pageName);
-
-      for (int i = 0; i < pageCache.numItems; i++) {
-        int id = pageCache.id.get(i);
-
-        ListItem item = new ListItem(
-          id,
-          pageCache.date.get(id),
-          pageCache.item.get(id),
-          pageCache.cost.get(id),
-          pageCache.other.get(id)
+        int newMonthKey = Data.yearMonthDifference(
+            newDate.getYear(), newDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
         );
 
-        addListItem(item);
-      }
+        // refresh the overview page, if it exists
+        try {
+            int[] cacheItem = Data.Cache.Overview.cost.get(pageName);
+            try {
+                cacheItem[oldMonthKey] -= oldCost;
+                cacheItem[newMonthKey] += newCost;
+            }
+            catch (ArrayIndexOutOfBoundsException e) {
+                // cache is out of overview date range
+            }
 
-      updateList();
+            Data.Cache.Overview.cost.put(pageName, cacheItem);
+
+            try {
+                FragmentOverview overviewPage = (FragmentOverview)(
+                    ((MainActivity)getActivity()).pagerAdapter.getRegisteredFragment(0)
+                );
+
+                overviewPage.reloadDataFromCache();
+            }
+            catch (Exception e) {
+                // the overview page isn't loaded, do nothing
+            }
+        }
+        catch (Exception e) {
+            // serious error
+            e.printStackTrace();
+        }
     }
-  }
+
+    public void reloadDataFromCache() {
+        itemList.clear();
+
+        fetchDataFromCache();
+    }
+
+    @Override
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    ) {
+        View view = inflater.inflate(R.layout.fragment_list, container, false);
+
+        // this is the android ListView widget
+        list = (ListView) view.findViewById(R.id.main_list);
+
+        // remove dividing lines
+        list.setDividerHeight(0);
+        list.setDivider(null);
+
+        // sets the column titles according to each page
+        setProps();
+
+        LinearLayout bg = (LinearLayout) view.findViewById(R.id.list_outer);
+
+        bg.setBackgroundColor(AppConfig.PageColor.getBg(pageName));
+
+        // button to add a new item
+        Button addBtn = (Button) view.findViewById(R.id.button_add);
+
+        // button to scan a barcode
+        Button scanBtn = (Button) view.findViewById(R.id.button_scan);
+
+        drawList();
+
+        if (itemList.size() == 0) {
+            fetchDataFromCache();
+        }
+
+        list.setOnItemClickListener(listenerEdit);
+
+        addBtn.setOnClickListener(listenerAdd);
+
+        scanBtn.setOnClickListener(listenerScan);
+
+        return view;
+    }
+
+    private void addListItem(ListItem item) {
+        itemList.add(item);
+    }
+
+    /**
+     * draw table of in data
+     */
+    public void drawList() {
+        listAdapter = new ListAdapter(
+            getActivity(),
+            itemList
+        );
+
+        list.setAdapter(listAdapter);
+    }
+
+    private void sortList() {
+        Collections.sort(itemList);
+    }
+
+    private void updateList() {
+        sortList();
+
+        listAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * fetch data from the cache for this list
+     */
+    private void fetchDataFromCache() {
+        // fetch data from the cache, which was loaded by MainActivity
+        if (Data.dataPreLoaded) {
+            PageCache pageCache = Data.Cache.Pages.get(pageName);
+
+            for (int i = 0; i < pageCache.numItems; i++) {
+                int id = pageCache.id.get(i);
+
+                ListItem item = new ListItem(
+                    id,
+                    pageCache.date.get(id),
+                    pageCache.item.get(id),
+                    pageCache.cost.get(id),
+                    pageCache.other.get(id)
+                );
+
+                addListItem(item);
+            }
+
+            updateList();
+        }
+    }
 }
 
 class ListItem implements Comparable<ListItem> {
-  public final int id;
+    public final int id;
 
-  public YMD date;
-  public String item;
-  public int cost;
+    public YMD date;
+    public String item;
+    public int cost;
 
-  // custom properties, e.g. "society" for the Socials page
-  // these are necessarily strings (TODO: support other property types)
-  public Map<String, String> otherProps = new HashMap<>();
+    // custom properties, e.g. "society" for the Socials page
+    // these are necessarily strings (TODO: support other property types)
+    public Map<String, String> otherProps = new HashMap<>();
 
-  public ListItem(
-    int theId, YMD startDate,  String startItem, int startCost, Map<String, String> startOtherProps
-  ) {
-    id          = theId;
-    date        = startDate;
-    item        = startItem;
-    cost        = startCost;
-    otherProps  = startOtherProps;
-  }
+    public ListItem(
+        int theId, YMD startDate,  String startItem, int startCost, Map<String, String> startOtherProps
+    ) {
+        id          = theId;
+        date        = startDate;
+        item        = startItem;
+        cost        = startCost;
+        otherProps  = startOtherProps;
+    }
 
-  public int compareTo(@NonNull ListItem item) {
-    return item.date.isAfter(date) ? 1 : (
-      date.isAfter(item.date) ? -1 : (
-        item.id > id ? 1 : (item.id < id ? -1 : 0)
-      )
-    );
-  }
+    public int compareTo(@NonNull ListItem item) {
+        return item.date.isAfter(date) ? 1 : (
+            date.isAfter(item.date) ? -1 : (
+                item.id > id ? 1 : (item.id < id ? -1 : 0)
+            )
+        );
+    }
 }
 
 class ListAdapter extends BaseAdapter {
-  private final ArrayList<ListItem> itemList;
-  LayoutInflater inflater;
-  boolean abbreviateCost = false;
+    private final ArrayList<ListItem> itemList;
+    LayoutInflater inflater;
+    boolean abbreviateCost = false;
 
-  ListAdapter(Activity context, ArrayList<ListItem> itemList) {
-    super();
+    ListAdapter(Activity context, ArrayList<ListItem> itemList) {
+        super();
 
-    this.itemList = itemList;
+        this.itemList = itemList;
 
-    if (context != null) {
-      this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
-  }
-
-  SparseArray<String> getTextViews(ListItem item) {
-    SparseArray<String> idValues = new SparseArray<>();
-    idValues.put(R.id.rowDate, item.date.format());
-    idValues.put(R.id.rowItem, item.item);
-    idValues.put(R.id.rowCost, Data.formatCurrency(item.cost, this.abbreviateCost));
-
-    return idValues;
-  }
-
-  View getConvertView(ViewGroup parent) {
-    return inflater.inflate(R.layout.row_list, parent, false);
-  }
-
-  @Override
-  public int getCount() {
-    return itemList.size();
-  }
-
-  @Override
-  public Object getItem(int position) {
-    return itemList.get(position);
-  }
-
-  @Override
-  public long getItemId(int position) {
-    return 0;
-  }
-
-  private static class ViewHolder {
-    final SparseArray<TextView> tv = new SparseArray<>();
-  }
-
-  @Override
-  public View getView(final int position, View convertView, ViewGroup parent) {
-    ViewHolder holder = convertView == null ? new ViewHolder() : (ViewHolder) convertView.getTag();
-
-    ListItem item = itemList.get(position);
-    SparseArray<String> idValues = getTextViews(item);
-
-    if (convertView == null) {
-      convertView = getConvertView(parent);
-      convertView.setTag(holder);
-
-      for (int i = 0; i < idValues.size(); i++) {
-        holder.tv.append(i, (TextView) convertView.findViewById(idValues.keyAt(i)));
-        holder.tv.valueAt(i).setText(idValues.valueAt(i));
-      }
-    }
-    else {
-      for (int i = 0; i < idValues.size(); i++) {
-        holder.tv.valueAt(i).setText(idValues.valueAt(i));
-      }
+        if (context != null) {
+            this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
     }
 
-    return convertView;
-  }
+    SparseArray<String> getTextViews(ListItem item) {
+        SparseArray<String> idValues = new SparseArray<>();
+        idValues.put(R.id.rowDate, item.date.format());
+        idValues.put(R.id.rowItem, item.item);
+        idValues.put(R.id.rowCost, Data.formatCurrency(item.cost, this.abbreviateCost));
+
+        return idValues;
+    }
+
+    View getConvertView(ViewGroup parent) {
+        return inflater.inflate(R.layout.row_list, parent, false);
+    }
+
+    @Override
+    public int getCount() {
+        return itemList.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return itemList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    private static class ViewHolder {
+        final SparseArray<TextView> tv = new SparseArray<>();
+    }
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        ViewHolder holder = convertView == null ? new ViewHolder() : (ViewHolder) convertView.getTag();
+
+        ListItem item = itemList.get(position);
+        SparseArray<String> idValues = getTextViews(item);
+
+        if (convertView == null) {
+            convertView = getConvertView(parent);
+            convertView.setTag(holder);
+
+            for (int i = 0; i < idValues.size(); i++) {
+                holder.tv.append(i, (TextView) convertView.findViewById(idValues.keyAt(i)));
+                holder.tv.valueAt(i).setText(idValues.valueAt(i));
+            }
+        }
+        else {
+            for (int i = 0; i < idValues.size(); i++) {
+                holder.tv.valueAt(i).setText(idValues.valueAt(i));
+            }
+        }
+
+        return convertView;
+    }
 }

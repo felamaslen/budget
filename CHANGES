@@ -1,0 +1,7 @@
+Release:
+
+- 3.0.0-alpha-7
+    - Added this file
+    - Made Android app work with new API
+    - Fixed major web app bug where list items weren't sorted correctly
+

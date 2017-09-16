@@ -38,371 +38,394 @@ import london.fela.budget.fragment.EditParcel;
  * - override onCreate method:
  */
 public class DialogUpdate extends Activity {
-  private String id;
-  private EditParcel newItem;
+    private String id;
+    private EditParcel newItem;
 
-  private final HashMap<String, String> oldValues = new HashMap<>();
+    private final HashMap<String, String> oldValues = new HashMap<>();
 
-  private ProgressBar progressBar;
+    private ProgressBar progressBar;
 
-  private String apiUrl;
-  String apiUrlAdd = null;
-  String apiUrlUpdate = null;
+    public String method;
+    public String apiUrl;
 
-  private final int API_TAG_POST_EDIT  = 163;
-  private final int API_TAG_POST_ADD   = 187;
+    private final int API_TAG_POST_EDIT  = 163;
+    private final int API_TAG_POST_ADD   = 187;
 
-  private int API_TAG;
+    private int API_TAG;
 
-  private void updateFragment(EditParcel item) {
-    /** call this after successful api call */
-    Intent intent = this.getIntent();
-    intent.putExtra("editParcel", item);
-    this.setResult(RESULT_OK, intent);
-  }
-
-  /** api stuff */
-  private final Api apiObject = new Api() {
-    @Override
-    public void apiResponse(int tag, String response) {
+    private void updateFragment(EditParcel item) {
+        /** call this after successful api call */
+        Intent intent = this.getIntent();
+        intent.putExtra("editParcel", item);
+        this.setResult(RESULT_OK, intent);
     }
 
-    @Override
-    public void apiJSONSuccess(int tag, JSONObject res) {
-      switch (tag) {
-        case API_TAG_POST_ADD:
-          // if we're adding an item, we want to get the ID which was inserted
-          int newId = 0;
-          try {
-            newId = res.getInt("id");
-          }
-          catch (JSONException e) {
-            e.printStackTrace();
-          }
+    /** api stuff */
+    private final Api apiObject = new Api() {
+        @Override public void apiResponse(int tag) {}
 
-          newItem.data.put("id", String.valueOf(newId));
+        @Override
+        public void apiJSONSuccess(int tag, JSONObject res) {
+            switch (tag) {
+                case API_TAG_POST_ADD:
+                    // if we're adding an item, we want to get the ID which was inserted
+                    int newId = 0;
+                    try {
+                        newId = res.getInt("id");
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
-          // don't break, because we want to continue as if we're editing an item
+                    newItem.data.put("id", String.valueOf(newId));
 
-        case API_TAG_POST_EDIT:
-          // successfully posted edit/add
-          updateFragment(newItem);
+                    // don't break, because we want to continue as if we're editing an item
 
-          progressBar.setVisibility(View.INVISIBLE);
-          finish();
+                case API_TAG_POST_EDIT:
+                    // successfully posted edit/add
+                    updateFragment(newItem);
 
-          break;
-      }
-    }
+                    progressBar.setVisibility(View.INVISIBLE);
+                    finish();
 
-    @Override
-    public void apiJSONError(int tag, String msg) {
-      AppController.alert(getApplicationContext(), "Error: " + msg);
-    }
-
-    @Override
-    public void apiJSONException(int tag, JSONException e, String response) {
-      AppController.alert(getApplicationContext(), "Bug: API error");
-    }
-
-    @Override
-    public void apiError(int tag, VolleyError error) {
-      AppController.alert(getApplicationContext(), "Bug: API error");
-
-      switch (tag) {
-        // close the dialog whatever happened
-        case API_TAG_POST_EDIT:
-        case API_TAG_POST_ADD:
-          progressBar.setVisibility(View.INVISIBLE);
-          finish();
-
-          break;
-      }
-    }
-
-    @Override
-    public void apiResponseEnd(int tag, String response) {
-      switch (tag) {
-        // close the dialog whatever happened
-        case API_TAG_POST_EDIT:
-        case API_TAG_POST_ADD:
-          progressBar.setVisibility(View.INVISIBLE);
-          finish();
-
-          break;
-      }
-    }
-  };
-
-  private ApiCaller api;
-  private void apiSetup() {
-    api = new ApiCaller(AppConfig.api_url(getResources()));
-    api.addListener(apiObject);
-  }
-
-  final class SubmitForm {
-    private final HashMap<String, String> params = new HashMap<>();
-
-    private boolean noneChanged = true;
-    private boolean invalid = false;
-
-    /**
-     * validate form values and add them to the request parameters
-     */
-    private void validateFields() {
-      for (FormField field : fields) {
-        boolean checkEmpty = true;
-
-        String formValue = null;
-
-        switch (field.type) {
-          case FIELD_TYPE_DATE:
-            checkEmpty = false;
-
-            // the date dialog changes these values itself, so no need to update newItem here
-
-            YMD newDate = YMD.deserialise(newItem.data.get(field.name));
-
-            params.put(field.name, newDate.serialise());
-
-            // see if the value has been changed
-            if (noneChanged && !newDate.isEqual(YMD.deserialise(oldValues.get(field.name)))) {
-              noneChanged = false;
+                    break;
             }
-
-            break;
-
-          case FIELD_TYPE_STRING:
-            formValue = field.getFormValue();
-
-            newItem.data.put(field.name, formValue);
-
-            params.put(field.name, formValue);
-
-            // see if the value has been changed
-            if (noneChanged && !formValue.equals(oldValues.get(field.name))) {
-              noneChanged = false;
-            }
-
-            break;
-
-          case FIELD_TYPE_COST:
-            formValue = field.getFormValue().trim()
-              .replaceAll("[^0-9\\.]", "");
-
-            double costDouble = Double.valueOf(formValue);
-
-            int costInt = (int)Math.round(costDouble * 100.0);
-
-            String costString = String.valueOf(costInt);
-
-            newItem.data.put(field.name, costString);
-
-            params.put(field.name, costString);
-
-            // see if the value has been changed
-            if (noneChanged && !costString.equals(oldValues.get(field.name))) {
-              noneChanged = false;
-            }
-
-            break;
         }
 
-        if (checkEmpty && formValue != null && formValue.isEmpty()) {
-          AppController.alert(getApplicationContext(), "Please enter data!");
+        @Override
+        public void apiError(int tag, VolleyError error) {
+            AppController.alert(getApplicationContext(), "Error: " + error.getMessage());
 
-          invalid = true;
+            switch (tag) {
+                // close the dialog whatever happened
+                case API_TAG_POST_EDIT:
+                case API_TAG_POST_ADD:
+                    progressBar.setVisibility(View.INVISIBLE);
+                    finish();
 
-          break;
+                    break;
+            }
         }
-      }
-    }
 
-    private void submit() {
-      if (!invalid) {
-        if (!noneChanged) {
-          if (id != null) {
-            // add the ID parameter
-            params.put("id", id);
-          }
+        @Override
+        public void apiResponseEnd(int tag) {
+            switch (tag) {
+                // close the dialog whatever happened
+                case API_TAG_POST_EDIT:
+                case API_TAG_POST_ADD:
+                    progressBar.setVisibility(View.INVISIBLE);
+                    finish();
 
-          progressBar.setVisibility(View.VISIBLE);
-
-          api.request(
-            API_TAG,
-            "req_update_item",
-            "POST",
-            apiUrl,
-            params
-          );
-        } else {
-          // nothing changed - no point making an API request
-          finish();
+                    break;
+            }
         }
-      }
-    }
-
-    public SubmitForm() {
-      validateFields();
-
-      submit();
-    }
-  }
-
-  private final View.OnClickListener btnSubmitListener = new View.OnClickListener() {
-    public void onClick(View view) { new SubmitForm(); }
-  };
-
-  //public final int FIELD_TYPE_INT = 0; // TODO
-  final int FIELD_TYPE_STRING = 1;
-  final int FIELD_TYPE_COST = 2;
-  private final int FIELD_TYPE_DATE = 3;
-
-  public class FormField {
-    public final String name;
-    @SuppressWarnings("unused")
-    public final String title;
-
-    int type;
-
-    // this should be modified for each field
-    public String getFormValue() {
-      return "";
-    }
-
-    FormField(String theName, String theTitle) {
-      name = theName;
-      title = theTitle;
-    }
-  }
-  public class FormFieldText extends FormField {
-    final EditText input;
-
-    public String getFormValue() {
-      return input.getText().toString();
-    }
-
-    FormFieldText(
-      String theName, String theTitle, EditText theInput, int theType
-    ) {
-      super(theName, theTitle);
-
-      input = theInput;
-      type = theType;
-
-      String value = oldValues.get(name);
-
-      if (type == FIELD_TYPE_COST) {
-        value = Data.formatCurrency(Integer.valueOf(value));
-        input.setText(value);
-
-        Data.setInputCurrency(input);
-      }
-      else {
-        input.setText(value);
-      }
-    }
-  }
-  @SuppressWarnings("SameParameterValue")
-  public class FormFieldDate extends FormField {
-    public final TextView display;
-    public final Button btnChange;
-
-    final DatePickerDialog datePicker;
-
-    public final DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
-      @Override
-      public void onDateSet(DatePicker view, int year, int month, int date) {
-        YMD newDate = new YMD(year, ++month, date);
-
-        newItem.data.put(name, newDate.serialise());
-
-        display.setText(newDate.format());
-      }
     };
 
-    public FormFieldDate(
-      String theName, String theTitle, TextView theDisplay, Button theButton, Context context
-    ) {
-      super(theName, theTitle);
+    private ApiCaller api;
+    private void apiSetup() {
+        api = new ApiCaller(AppConfig.apiUrl(getResources()));
+        api.addListener(apiObject);
+    }
 
-      display = theDisplay;
-      btnChange = theButton;
+    final class SubmitForm {
+        private final JSONObject data = new JSONObject();
 
-      type = FIELD_TYPE_DATE;
+        private boolean noneChanged = true;
+        private boolean invalid = false;
 
-      YMD oldDate = YMD.deserialise(oldValues.get(name));
-
-      display.setText(oldDate.format());
-
-      datePicker = new DatePickerDialog(
-        context, R.style.dialogTheme, datePickerListener,
-        oldDate.getYear(), oldDate.getMonth()-1, oldDate.getDate()
-      );
-      datePicker.setCancelable(false);
-      datePicker.setTitle("Select a date");
-      btnChange.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-          datePicker.show();
+        private class InvalidFieldException extends Exception {
+            public InvalidFieldException(String message) {
+                super(message);
+            }
         }
-      });
+
+        /**
+         * validate form values and add them to the request parameters
+         */
+        private int validateField(FormField field) {
+            try {
+                if (field.type == FIELD_TYPE_DATE) {
+                    // the date dialog changes these values itself, so no need to update newItem here
+                    YMD newDate = YMD.deserialise(newItem.data.get(field.name));
+
+                    data.put(field.name, newDate.getValuesForTransfer());
+
+                    // see if the value has been changed
+                    if (noneChanged && !newDate.isEqual(YMD.deserialise(oldValues.get(field.name)))) {
+                        noneChanged = false;
+                    }
+
+                    return 0;
+                }
+
+                if (field.type == FIELD_TYPE_STRING) {
+                    String formValue = field.getFormValue();
+
+                    newItem.data.put(field.name, formValue);
+
+                    try {
+                        data.put(field.name, formValue);
+                    } catch (JSONException e) {
+                        throw e;
+                    }
+
+                    // see if the value has been changed
+                    if (noneChanged && !formValue.equals(oldValues.get(field.name))) {
+                        noneChanged = false;
+                    }
+
+                    if (formValue != null && formValue.isEmpty()) {
+                        throw new InvalidFieldException(field.name);
+                    }
+
+                    return 0;
+                }
+
+                if (field.type == FIELD_TYPE_COST) {
+                    String formValue = field.getFormValue()
+                                    .trim()
+                                    .replaceAll("[^0-9.]", "");
+
+                    double costDouble = Double.valueOf(formValue);
+
+                    int costInt = (int) Math.round(costDouble * 100.0);
+
+                    String costString = String.valueOf(costInt);
+
+                    newItem.data.put(field.name, costString);
+
+                    data.put(field.name, costInt);
+
+                    // see if the value has been changed
+                    if (noneChanged && !costString.equals(oldValues.get(field.name))) {
+                        noneChanged = false;
+                    }
+
+                    if (formValue != null && formValue.isEmpty()) {
+                        throw new InvalidFieldException(field.name);
+                    }
+
+                    return 0;
+                }
+            }
+            catch (InvalidFieldException e) {
+                return 1;
+            }
+            catch (JSONException e) {
+                return 2;
+            }
+
+            return 0;
+        }
+        private void validateFields() {
+            for (FormField field : fields) {
+                int status = validateField(field);
+
+                if (status == 1) {
+                    AppController.alert(getApplicationContext(), "Please enter data!");
+
+                    invalid = true;
+                }
+                else if (status == 2) {
+                    AppController.alert(getApplicationContext(), "Unknown data error");
+                }
+
+                if (status > 0) {
+                    break;
+                }
+            }
+        }
+
+        private void submit() {
+            if (!invalid) {
+                if (!noneChanged) {
+                    if (id != null) {
+                        // add the ID parameter
+                        try {
+                            data.put("id", id);
+                        }
+                        catch(JSONException e) {
+                            return;
+                        }
+                    }
+
+                    progressBar.setVisibility(View.VISIBLE);
+
+                    api.request(
+                        API_TAG,
+                        "req_update_item",
+                        method,
+                        apiUrl,
+                        data
+                    );
+                } else {
+                    // nothing changed - no point making an API request
+                    finish();
+                }
+            }
+        }
+
+        public SubmitForm() {
+            validateFields();
+
+            submit();
+        }
     }
-  }
 
-  final ArrayList<FormField> fields = new ArrayList<>();
+    private final View.OnClickListener btnSubmitListener = new View.OnClickListener() {
+        public void onClick(View view) { new SubmitForm(); }
+    };
 
-  void onCreateCommon(String[] cols) {
-    // get values parcel from page activity
-    EditParcel values = getIntent().getParcelableExtra("values");
+    //public final int FIELD_TYPE_INT = 0; // TODO
+    final int FIELD_TYPE_STRING = 1;
+    final int FIELD_TYPE_COST = 2;
+    private final int FIELD_TYPE_DATE = 3;
 
-    // set original values, for comparison on submit
-    for (String col : cols) {
-      oldValues.put(col, values.data.get(col));
+    public class FormField {
+        public final String name;
+        @SuppressWarnings("unused")
+        public final String title;
+
+        int type;
+
+        // this should be modified for each field
+        public String getFormValue() {
+            return "";
+        }
+
+        FormField(String theName, String theTitle) {
+            name = theName;
+            title = theTitle;
+        }
+    }
+    public class FormFieldText extends FormField {
+        final EditText input;
+
+        public String getFormValue() {
+            return input.getText().toString();
+        }
+
+        FormFieldText(
+            String theName, String theTitle, EditText theInput, int theType
+        ) {
+            super(theName, theTitle);
+
+            input = theInput;
+            type = theType;
+
+            String value = oldValues.get(name);
+
+            if (type == FIELD_TYPE_COST) {
+                value = Data.formatCurrency(Integer.valueOf(value));
+                input.setText(value);
+
+                Data.setInputCurrency(input);
+            }
+            else {
+                input.setText(value);
+            }
+        }
+    }
+    @SuppressWarnings("SameParameterValue")
+    public class FormFieldDate extends FormField {
+        public final TextView display;
+        public final Button btnChange;
+
+        final DatePickerDialog datePicker;
+
+        public final DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int date) {
+                YMD newDate = new YMD(year, ++month, date);
+
+                newItem.data.put(name, newDate.serialise());
+
+                display.setText(newDate.format());
+            }
+        };
+
+        public FormFieldDate(
+            String theName, String theTitle, TextView theDisplay, Button theButton, Context context
+        ) {
+            super(theName, theTitle);
+
+            display = theDisplay;
+            btnChange = theButton;
+
+            type = FIELD_TYPE_DATE;
+
+            YMD oldDate = YMD.deserialise(oldValues.get(name));
+
+            display.setText(oldDate.format());
+
+            datePicker = new DatePickerDialog(
+                context, R.style.dialogTheme, datePickerListener,
+                oldDate.getYear(), oldDate.getMonth()-1, oldDate.getDate()
+            );
+            datePicker.setCancelable(false);
+            datePicker.setTitle("Select a date");
+            btnChange.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    datePicker.show();
+                }
+            });
+        }
     }
 
-    // create parcel for transfer back to the page activity on submit
-    newItem = new EditParcel(values.data);
+    final ArrayList<FormField> fields = new ArrayList<>();
 
-    String titleText;
+    void onCreateCommon(String[] cols) {
+        // get values parcel from page activity
+        EditParcel values = getIntent().getParcelableExtra("values");
 
-    // determine if this is a edit or add form, and set title accordingly
-    int dataIndex = getIntent().getExtras().getInt("dataIndex");
+        // set original values, for comparison on submit
+        for (String col : cols) {
+            oldValues.put(col, values.data.get(col));
+        }
 
-    if (dataIndex == -1) {
-      // this is an add form
-      titleText = getString(R.string.dialog_title_add);
+        // create parcel for transfer back to the page activity on submit
+        newItem = new EditParcel(values.data);
 
-      API_TAG = API_TAG_POST_ADD;
-      apiUrl = apiUrlAdd;
+        String titleText;
+
+        // determine if this is a edit or add form, and set title accordingly
+        int dataIndex = getIntent().getExtras().getInt("dataIndex");
+
+        if (dataIndex == -1) {
+            // this is an add form
+            titleText = getString(R.string.dialog_title_add);
+
+            API_TAG = API_TAG_POST_ADD;
+            method = "post";
+        }
+        else {
+            id = values.data.get("id");
+            titleText = getString(R.string.dialog_title) + " id#" + id;
+
+            API_TAG = API_TAG_POST_EDIT;
+            method = "put";
+        }
+
+        // set up the API caller
+        apiSetup();
+
+        // views common to all pages
+        Button btnSubmit = (Button) findViewById(R.id.btn_submit);
+        Button btnCancel = (Button) findViewById(R.id.btn_cancel);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        TextView tvTitle = (TextView) findViewById(R.id.tvtitle);
+
+        tvTitle.setText(titleText);
+
+        // submit button click event
+        btnSubmit.setOnClickListener(btnSubmitListener);
+
+        // cancel button click event
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
-    else {
-      id = values.data.get("id");
-      titleText = getString(R.string.dialog_title) + " id#" + id;
-
-      API_TAG = API_TAG_POST_EDIT;
-      apiUrl  = apiUrlUpdate;
-    }
-
-    // set up the API caller
-    apiSetup();
-
-    // views common to all pages
-    Button btnSubmit = (Button) findViewById(R.id.btn_submit);
-    Button btnCancel = (Button) findViewById(R.id.btn_cancel);
-    progressBar = (ProgressBar) findViewById(R.id.progressBar);
-    TextView tvTitle = (TextView) findViewById(R.id.tvtitle);
-
-    tvTitle.setText(titleText);
-
-    // submit button click event
-    btnSubmit.setOnClickListener(btnSubmitListener);
-
-    // cancel button click event
-    btnCancel.setOnClickListener(new View.OnClickListener() {
-      public void onClick(View view) {
-        finish();
-      }
-    });
-  }
 }

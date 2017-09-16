@@ -35,288 +35,282 @@ import london.fela.budget.helper.SQLiteHandler;
 import london.fela.budget.helper.SessionManager;
 
 public class MainActivity extends Activity implements Api {
-  private static final int API_TAG_FETCH_DATA = 87;
+    private static final int API_TAG_FETCH_DATA = 87;
 
-  // api stuff
-  private ApiCaller api;
-  @Override public void apiResponse(int tag, String response) {
-    switch (tag) {
-      case API_TAG_FETCH_DATA:
+    // api stuff
+    private ApiCaller api;
+    @Override public void apiResponse(int tag) {
+        switch (tag) {
+            case API_TAG_FETCH_DATA:
 
-        break;
+                break;
+        }
     }
-  }
-  @Override public void apiJSONSuccess(int tag, JSONObject res) {
-    switch (tag) {
-      case API_TAG_FETCH_DATA:
-        insertCache(res);
+    @Override public void apiJSONSuccess(int tag, JSONObject res) {
+        switch (tag) {
+            case API_TAG_FETCH_DATA:
+                insertCache(res);
 
-        break;
+                break;
+        }
     }
-  }
-  @Override public void apiJSONError(int tag, String msg) {
-    AppController.alert(getApplicationContext(), "Error fetching data: " + msg);
-  }
-  @Override public void apiJSONException(int tag, JSONException e, String response) {
-    AppController.alert(getApplicationContext(), "Bug: API error");
-  }
-  @Override public void apiError(int tag, VolleyError error) {
-    AppController.alert(getApplicationContext(), "Bug: API error");
-  }
-  @Override public void apiResponseEnd(int tag, String response) {
-    switch (tag) {
-      case API_TAG_FETCH_DATA:
-        AppController.endDialogMessage(AppConfig.DIALOG_MSG_LOADING_ALL);
-        break;
+    @Override public void apiError(int tag, VolleyError error) {
+        AppController.alert(getApplicationContext(), "Error :" + error.getMessage());
     }
-  }
-  private void apiSetup() {
-    api = new ApiCaller(AppConfig.api_url(getResources()));
-    api.addListener(this);
-  }
+    @Override public void apiResponseEnd(int tag) {
+        switch (tag) {
+            case API_TAG_FETCH_DATA:
+                AppController.endDialogMessage(AppConfig.DIALOG_MSG_LOADING_ALL);
+                break;
+        }
+    }
+    private void apiSetup() {
+        api = new ApiCaller(AppConfig.apiUrl(getResources()));
+        api.addListener(this);
+    }
 
-  public static ProgressDialog pDialog;
+    public static ProgressDialog pDialog;
 
-  private SQLiteHandler db;
-  private SessionManager session;
-  public PagerAdapter pagerAdapter;
+    private SQLiteHandler db;
+    private SessionManager session;
+    public PagerAdapter pagerAdapter;
 
-  private void translateCacheData(JSONObject data) {
-    try {
-      // insert overview data into cache
-      JSONObject jOverview = data.getJSONObject("overview");
-      JSONObject jOverviewCost = jOverview.getJSONObject("cost");
-      Iterator<?> keys = jOverviewCost.keys();
-
-      while (keys.hasNext()) {
-        String category = (String) keys.next();
-
-        JSONArray jValues = jOverviewCost.getJSONArray(category);
+    private void translateCacheData(JSONObject data) {
         try {
-          int[] values = new int[jValues.length()];
-          for (int i = 0; i < jValues.length(); i++) {
-            values[i] = jValues.getInt(i);
-          }
-          Data.Cache.Overview.cost.put(category, values);
-        } catch (Exception e) {
-          // serious error
-          e.printStackTrace();
+            // insert overview data into cache
+            JSONObject jOverview = data.getJSONObject("overview");
+            JSONObject jOverviewCost = jOverview.getJSONObject("cost");
+            Iterator<?> keys = jOverviewCost.keys();
+
+            while (keys.hasNext()) {
+                String category = (String) keys.next();
+
+                JSONArray jValues = jOverviewCost.getJSONArray(category);
+                try {
+                    int[] values = new int[jValues.length()];
+                    for (int i = 0; i < jValues.length(); i++) {
+                        values[i] = jValues.getInt(i);
+                    }
+                    Data.Cache.Overview.cost.put(category, values);
+                } catch (Exception e) {
+                    // serious error
+                    e.printStackTrace();
+                }
+            }
+
+            JSONArray startYearMonth = jOverview.getJSONArray("startYearMonth");
+            JSONArray endYearMonth = jOverview.getJSONArray("endYearMonth");
+
+            Data.Cache.Overview.startYear = startYearMonth.getInt(0);
+            Data.Cache.Overview.startMonth = startYearMonth.getInt(1);
+            Data.Cache.Overview.endYear = endYearMonth.getInt(0);
+            Data.Cache.Overview.endMonth = endYearMonth.getInt(1);
+            Data.Cache.Overview.currentYear = jOverview.getInt("currentYear");
+            Data.Cache.Overview.currentMonth = jOverview.getInt("currentMonth");
+
+            // insert pages' data into cache
+            for (String page : AppConfig.pages) {
+                JSONArray pageJson = data.getJSONObject(page).getJSONArray("data");
+                PageCache newPage = new PageCache();
+                newPage.numItems = pageJson.length();
+
+                for (int i = 0; i < pageJson.length(); i++) {
+                    JSONObject li = pageJson.getJSONObject(i);
+
+                    // item ID
+                    int id = li.getInt("I");
+                    // item date
+                    JSONArray jDate = li.getJSONArray("d");
+                    YMD date = new YMD(jDate.getInt(0), jDate.getInt(1), jDate.getInt(2));
+                    // item name
+                    String item = li.getString("i");
+                    // item cost
+                    int cost = li.getInt("c");
+                    // custom properties
+                    HashMap<String, String> otherProps = Data.getOtherProps(page, li, cost);
+
+                    newPage.id.put(i, id);
+                    newPage.date.put(id, date);
+                    newPage.item.put(id, item);
+                    newPage.cost.put(id, cost);
+                    newPage.other.put(id, otherProps);
+                }
+
+                Data.Cache.Pages.put(page, newPage);
+            }
         }
-      }
+        catch (JSONException e) {
+            // serious error
+            e.printStackTrace();
+        }
+    }
 
-      JSONArray startYearMonth = jOverview.getJSONArray("startYearMonth");
-      JSONArray endYearMonth = jOverview.getJSONArray("endYearMonth");
-
-      Data.Cache.Overview.startYear = startYearMonth.getInt(0);
-      Data.Cache.Overview.startMonth = startYearMonth.getInt(1);
-      Data.Cache.Overview.endYear = endYearMonth.getInt(0);
-      Data.Cache.Overview.endMonth = endYearMonth.getInt(1);
-      Data.Cache.Overview.currentYear = jOverview.getInt("currentYear");
-      Data.Cache.Overview.currentMonth = jOverview.getInt("currentMonth");
-
-      // insert pages' data into cache
-      for (String page : AppConfig.pages) {
-        JSONArray pageJson = data.getJSONObject(page).getJSONArray("data");
-        PageCache newPage = new PageCache();
-        newPage.numItems = pageJson.length();
-
-        for (int i = 0; i < pageJson.length(); i++) {
-          JSONObject li = pageJson.getJSONObject(i);
-
-          // item ID
-          int id = li.getInt("I");
-          // item date
-          JSONArray jDate = li.getJSONArray("d");
-          YMD date = new YMD(jDate.getInt(0), jDate.getInt(1), jDate.getInt(2));
-          // item name
-          String item = li.getString("i");
-          // item cost
-          int cost = li.getInt("c");
-          // custom properties
-          HashMap<String, String> otherProps = Data.getOtherProps(page, li, cost);
-
-          newPage.id.put(i, id);
-          newPage.date.put(id, date);
-          newPage.item.put(id, item);
-          newPage.cost.put(id, cost);
-          newPage.other.put(id, otherProps);
+    private void updateVisibleViewsData() {
+        // load the data into the first view
+        try {
+            FragmentOverview overviewPage = (FragmentOverview)
+                pagerAdapter.getRegisteredFragment(0);
+            overviewPage.reloadDataFromCache();
+        }
+        catch (Exception e) {
+            // the overview page isn't loaded (don't do anything)
         }
 
-        Data.Cache.Pages.put(page, newPage);
-      }
-    }
-    catch (JSONException e) {
-      // serious error
-      e.printStackTrace();
-    }
-  }
+        // load data into any existing list views
+        for (int p = 1; p < AppConfig.tabs.length; p++) {
+            try {
+                FragmentList page = (FragmentList) pagerAdapter.getRegisteredFragment(p);
 
-  private void updateVisibleViewsData() {
-    // load the data into the first view
-    try {
-      FragmentOverview overviewPage = (FragmentOverview)
-        pagerAdapter.getRegisteredFragment(0);
-      overviewPage.reloadDataFromCache();
-    }
-    catch (Exception e) {
-      // the overview page isn't loaded (don't do anything)
+                page.reloadDataFromCache();
+            }
+            catch (Exception e) {
+                // page hasn't loaded yet (don't do anything)
+            }
+        }
     }
 
-    // load data into any existing list views
-    for (int p = 1; p < AppConfig.tabs.length; p++) {
-      try {
-        FragmentList page = (FragmentList) pagerAdapter.getRegisteredFragment(p);
+    private void insertCache(JSONObject res) {
+        Data.dataPreLoaded = true;
 
-        page.reloadDataFromCache();
-      }
-      catch (Exception e) {
-        // page hasn't loaded yet (don't do anything)
-      }
-    }
-  }
-
-  private void insertCache(JSONObject res) {
-    Data.dataPreLoaded = true;
-
-    try {
-      JSONObject data = res.getJSONObject("data");
-      translateCacheData(data);
-      updateVisibleViewsData();
-    }
-    catch (JSONException e) {
-      // misconfigured api
-      AppController.alert(getApplicationContext(), "Bug: Misconfigured API");
-    }
-  }
-
-  private void loadCache() {
-    AppController.startDialogMessage(AppConfig.DIALOG_MSG_LOADING_ALL, "Loading data...");
-
-    api.request(
-      API_TAG_FETCH_DATA,
-      "req_data_all",
-      "GET",
-      AppConfig.URL_DATA_ALL,
-      null
-    );
-  }
-
-  private void clearCache() {
-    Data.Cache.Overview.cost = new HashMap<>();
-
-    Data.Cache.Overview.startYear = 0;
-    Data.Cache.Overview.startMonth = 0;
-    Data.Cache.Overview.endYear = 0;
-    Data.Cache.Overview.endMonth = 0;
-    Data.Cache.Overview.currentYear = 0;
-    Data.Cache.Overview.currentMonth = 0;
-
-    Data.Cache.Pages = new HashMap<>();
-    
-    Data.dataPreLoaded = false;
-  }
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-
-    pDialog = new ProgressDialog(this);
-    pDialog.setCancelable(false);
-
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
-    this.setActionBar(toolbar);
-
-    ViewPager pager = (ViewPager) findViewById(R.id.pager);
-
-    pagerAdapter = new PagerAdapter(getFragmentManager());
-    pager.setAdapter(pagerAdapter);
-
-    TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-    tabLayout.setTabMode(TabLayout.MODE_FIXED);
-    tabLayout.setupWithViewPager(pager);
-
-    for (int i = 0; i < AppConfig.tabs.length; i++) {
-      TabLayout.Tab tab = tabLayout.getTabAt(i);
-
-      if (tab != null) {
-        tab.setIcon(pagerAdapter.getIcon(i));
-      }
+        try {
+            JSONObject data = res.getJSONObject("data");
+            translateCacheData(data);
+            updateVisibleViewsData();
+        }
+        catch (JSONException e) {
+            // misconfigured api
+            AppController.alert(getApplicationContext(), "Bug: Misconfigured API");
+        }
     }
 
-    // sqlite database handler
-    db = new SQLiteHandler(getApplicationContext());
+    private void loadCache() {
+        AppController.startDialogMessage(AppConfig.DIALOG_MSG_LOADING_ALL, "Loading data...");
 
-    // session manager
-    session = new SessionManager(getApplicationContext());
-
-    if (!session.isLoggedIn()) {
-      logoutUser();
+        api.request(
+            API_TAG_FETCH_DATA,
+            "req_data_all",
+            "get",
+            AppConfig.URL_DATA_ALL,
+            null
+        );
     }
 
-    // fetch user details from sqlite
-    db.getUserDetails();
+    private void clearCache() {
+        Data.Cache.Overview.cost = new HashMap<>();
 
-    apiSetup();
+        Data.Cache.Overview.startYear = 0;
+        Data.Cache.Overview.startMonth = 0;
+        Data.Cache.Overview.endYear = 0;
+        Data.Cache.Overview.endMonth = 0;
+        Data.Cache.Overview.currentYear = 0;
+        Data.Cache.Overview.currentMonth = 0;
 
-    // fetch all the data
-    if (!Data.dataPreLoaded) {
-      loadCache();
+        Data.Cache.Pages = new HashMap<>();
+        
+        Data.dataPreLoaded = false;
     }
-  }
 
-  /**
-   * handle menus
-   */
-  @Override
-  public boolean onPrepareOptionsMenu(Menu menu) {
-    MenuItem userInfo = menu.findItem(R.id.menu_user_status);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-    String userText = "Logged in as " + Data.user.get("name");
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
 
-    userInfo.setTitle(userText);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-    return super.onPrepareOptionsMenu(menu);
-  }
+        this.setActionBar(toolbar);
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.activity_main_actions, menu);
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
 
-    //return super.onCreateOptionsMenu(menu);
-    return true;
-  }
+        pagerAdapter = new PagerAdapter(getFragmentManager());
+        pager.setAdapter(pagerAdapter);
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.action_logout:
-        logoutUser();
-        break;
-      case R.id.action_reload_cache:
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
+        tabLayout.setupWithViewPager(pager);
+
+        for (int i = 0; i < AppConfig.tabs.length; i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+
+            if (tab != null) {
+                tab.setIcon(pagerAdapter.getIcon(i));
+            }
+        }
+
+        // sqlite database handler
+        db = new SQLiteHandler(getApplicationContext());
+
+        // session manager
+        session = new SessionManager(getApplicationContext());
+
+        if (!session.isLoggedIn()) {
+            logoutUser();
+        }
+
+        // fetch user details from sqlite
+        db.getUserDetails();
+
+        apiSetup();
+
+        // fetch all the data
+        if (!Data.dataPreLoaded) {
+            loadCache();
+        }
+    }
+
+    /**
+     * handle menus
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem userInfo = menu.findItem(R.id.menu_user_status);
+
+        String userText = "Logged in as " + Data.user.get("name");
+
+        userInfo.setTitle(userText);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_main_actions, menu);
+
+        //return super.onCreateOptionsMenu(menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                logoutUser();
+                break;
+            case R.id.action_reload_cache:
+                clearCache();
+                loadCache();
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * log out the user. Sets isLoggedIn flag to false in shared preferences, clears the user data
+     * from sqlite users table
+     */
+    private void logoutUser() {
+        session.setLogin(false);
+
+        db.deleteUsers();
+        
         clearCache();
-        loadCache();
-        break;
+
+        // launch the login activity
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
-    return true;
-  }
-
-  /**
-   * log out the user. Sets isLoggedIn flag to false in shared preferences, clears the user data
-   * from sqlite users table
-   */
-  private void logoutUser() {
-    session.setLogin(false);
-
-    db.deleteUsers();
-    
-    clearCache();
-
-    // launch the login activity
-    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-    startActivity(intent);
-    finish();
-  }
 }

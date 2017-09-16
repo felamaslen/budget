@@ -18,91 +18,91 @@ import london.fela.budget.activity.MainActivity;
  * Main app controller
  */
 public class AppController extends Application {
-  public static final String TAG = AppController.class.getSimpleName();
+    public static final String TAG = AppController.class.getSimpleName();
 
-  private RequestQueue mRequestQueue;
+    private RequestQueue mRequestQueue;
 
-  private static AppController mInstance;
+    private static AppController mInstance;
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    mInstance = this;
-  }
-
-  public static synchronized AppController getInstance() {
-    return mInstance;
-  }
-
-  private RequestQueue getRequestQueue() {
-    if (mRequestQueue == null) {
-      mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mInstance = this;
     }
 
-    return mRequestQueue;
-  }
-
-  public <T> void addToRequestQueue(Request<T> req, String tag) {
-    req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
-    getRequestQueue().add(req);
-  }
-
-  @SuppressWarnings("unused")
-  public void cancelPendingRequests(Object tag) {
-    if (mRequestQueue != null) {
-      mRequestQueue.cancelAll(tag);
+    public static synchronized AppController getInstance() {
+        return mInstance;
     }
-  }
 
-  public static void alert(Context context, String msg) {
-    Toast.makeText(
-      context, msg, Toast.LENGTH_LONG
-    ).show();
-  }
+    private RequestQueue getRequestQueue() {
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        }
 
-  public static void showDialog(ProgressDialog dialog) {
-    if (!dialog.isShowing()) {
-      dialog.show();
+        return mRequestQueue;
     }
-  }
 
-  public static void hideDialog(ProgressDialog dialog) {
-    if (dialog.isShowing()) {
-      dialog.dismiss();
+    public <T> void addToRequestQueue(Request<T> req, String tag) {
+        req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        getRequestQueue().add(req);
     }
-  }
 
-  private static final LinkedHashMap<Integer, String> dialogMessages = new LinkedHashMap<>();
-
-  private static void showNextMessage() {
-    LinkedHashMap.Entry<Integer, String> entry = dialogMessages.entrySet().iterator().next();
-
-    String showMessage = entry.getValue();
-
-    try {
-      MainActivity.pDialog.setMessage(showMessage);
-
-      showDialog(MainActivity.pDialog);
+    @SuppressWarnings("unused")
+    public void cancelPendingRequests(Object tag) {
+        if (mRequestQueue != null) {
+            mRequestQueue.cancelAll(tag);
+        }
     }
-    catch (Exception e) {
-      e.printStackTrace();
+
+    public static void alert(Context context, String msg) {
+        Toast.makeText(
+            context, msg, Toast.LENGTH_LONG
+        ).show();
     }
-  }
 
-  public static void startDialogMessage(int msgId, String msg) {
-    dialogMessages.put(msgId, msg);
-
-    showNextMessage();
-  }
-
-  public static void endDialogMessage(int msgId) {
-    dialogMessages.remove(msgId);
-
-    if (dialogMessages.size() > 0) {
-      showNextMessage();
+    public static void showDialog(ProgressDialog dialog) {
+        if (!dialog.isShowing()) {
+            dialog.show();
+        }
     }
-    else {
-      hideDialog(MainActivity.pDialog);
+
+    public static void hideDialog(ProgressDialog dialog) {
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
-  }
+
+    private static final LinkedHashMap<Integer, String> dialogMessages = new LinkedHashMap<>();
+
+    private static void showNextMessage() {
+        LinkedHashMap.Entry<Integer, String> entry = dialogMessages.entrySet().iterator().next();
+
+        String showMessage = entry.getValue();
+
+        try {
+            MainActivity.pDialog.setMessage(showMessage);
+
+            showDialog(MainActivity.pDialog);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void startDialogMessage(int msgId, String msg) {
+        dialogMessages.put(msgId, msg);
+
+        showNextMessage();
+    }
+
+    public static void endDialogMessage(int msgId) {
+        dialogMessages.remove(msgId);
+
+        if (dialogMessages.size() > 0) {
+            showNextMessage();
+        }
+        else {
+            hideDialog(MainActivity.pDialog);
+        }
+    }
 }

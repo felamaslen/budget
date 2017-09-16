@@ -15,41 +15,41 @@ import london.fela.budget.app.AppConfig;
  * Displays an editable table showing each general item
  */
 public class FragmentGeneral extends FragmentList {
-  @Override
-  public void setProps() {
-    this.pageName  = "general";
+    @Override
+    public void setProps() {
+        this.pageName  = "general";
 
-    this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_GENERAL;
-    this.loadingMsg    = "Loading general data...";
+        this.loadingMsgId  = AppConfig.DIALOG_MSG_LOADING_GENERAL;
+        this.loadingMsg    = "Loading general data...";
 
-    this.props = new String[] { "category", "shop" };
-  }
-
-  public HashMap<String, String> getOtherProps(JSONObject json) {
-    HashMap<String, String> values = new HashMap<>();
-
-    try {
-      values.put("category", json.getString("k"));
-      values.put("shop", json.getString("s"));
-    }
-    catch (JSONException e) {
-      e.printStackTrace();
+        this.props = new String[] { "category", "shop" };
     }
 
-    return values;
-  }
+    public HashMap<String, String> getOtherProps(JSONObject json) {
+        HashMap<String, String> values = new HashMap<>();
 
-  @Override
-  public Intent getDialogIntent() {
-    return new Intent(getActivity(), DialogGeneral.class);
-  }
+        try {
+            values.put("category", json.getString("k"));
+            values.put("shop", json.getString("s"));
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-  public static FragmentGeneral newInstance() {
-    FragmentGeneral fragmentGeneral = new FragmentGeneral();
+        return values;
+    }
 
-    Bundle args = new Bundle();
-    fragmentGeneral.setArguments(args);
+    @Override
+    public Intent getDialogIntent() {
+        return new Intent(getActivity(), DialogGeneral.class);
+    }
 
-    return fragmentGeneral;
-  }
+    public static FragmentGeneral newInstance() {
+        FragmentGeneral fragmentGeneral = new FragmentGeneral();
+
+        Bundle args = new Bundle();
+        fragmentGeneral.setArguments(args);
+
+        return fragmentGeneral;
+    }
 }

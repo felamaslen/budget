@@ -1,6 +1,6 @@
 {
   "name": "budget",
-  "version": "3.0.0-2017091601",
+  "version": "3.0.0-2017091602",
   "description": "Personal finance app",
   "main": "gulpfile.js",
   "scripts": {
