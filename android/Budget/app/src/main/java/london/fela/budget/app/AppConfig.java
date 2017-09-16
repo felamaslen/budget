@@ -15,7 +15,7 @@ import london.fela.budget.R;
 public class AppConfig {
   public static final String URL_LOGIN = "user/login";
 
-  public static final String URL_DATA_ALL = "data/all";
+  public static final String URL_DATA_ALL = "data/all?history=true&period=month&length=1";
   
   public static final String URL_UPDATE_OVERVIEW = "data/balance";
 

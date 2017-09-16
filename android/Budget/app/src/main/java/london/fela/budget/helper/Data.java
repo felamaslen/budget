@@ -70,19 +70,24 @@ public class Data {
           break;
 
         case "funds":
-          int value = cost;
           try {
-            JSONArray transactions = new JSONArray(json.getString("t"));
-            double price = json.getDouble("P"); // latest cached price
-            double units = 0;
+              JSONArray transactions = json.getJSONArray("tr");
+              JSONArray prices = json.getJSONArray("pr");
+
+              double latestPrice = prices.getDouble(prices.length() - 1);
+
+            double latestUnits = 0;
             for (int i = 0; i < transactions.length(); i++) {
               JSONObject transaction = transactions.getJSONObject(i);
-              units += transaction.getDouble("u");
+              latestUnits += transaction.getDouble("u");
             }
-            value = (int)(units * price);
+
+            int value = (int)(latestUnits * latestPrice);
+
+              values.put("value", formatCurrency(value, true));
           }
-          finally {
-            values.put("value", formatCurrency(value, true));
+          catch (JSONException e) {
+              values.put("value", "-");
           }
       }
     }
