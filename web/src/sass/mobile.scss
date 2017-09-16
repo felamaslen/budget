@@ -1,4 +1,4 @@
-#nav {
+.navbar {
     height: $height_nav_mobile + $height_nav;
     padding-bottom: 0;
     .app-logo {
@@ -23,7 +23,7 @@
     }
 }
 
-#content {
+.page-wrapper {
     padding-top: $height_nav_mobile + $height_nav;
 }
 

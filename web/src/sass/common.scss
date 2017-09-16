@@ -165,16 +165,6 @@ button {
     }
 }
 
-#bg {
-    position: fixed;
-    background: #fff;
-    width: 100%;
-    height: 100%;
-    z-index: 1000;
-    left: 0;
-    top: $height_nav;
-}
-
 .noselect {
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none;   /* Chrome/Safari/Opera */
@@ -233,7 +223,7 @@ button {
 }
 
 /* document */
-#content {
+.page-wrapper {
     padding-top: $top_nav;
     .inner {
         position: relative;
@@ -377,7 +367,7 @@ button {
 }
 
 /* navigation */
-#nav {
+.navbar {
     position: fixed;
     left: 0;
     right: 0;
@@ -397,7 +387,6 @@ button {
         }
     }
     .app-logo {
-        float: right;
         height: $height_nav;
         .queue-not-saved {
             padding-right: 1em;
@@ -480,50 +469,50 @@ button {
         .nav-link, .nav-link-btn {
             @include nav-link-template;
         }
-        #nav-link-overview {
+        .nav-link-overview {
             border-color: #424242;
             &:before { background-position: 0 0; }
         }
-        #nav-link-analysis {
+        .nav-link-analysis {
             border-color: #f4a742;
             &:before { background-position: -28px 0; }
         }
-        #nav-link-funds {
+        .nav-link-funds {
             border-color: #546e7a;
             &:before { background-position: -56px 0; }
         }
-        #nav-link-income {
+        .nav-link-income {
             border-color: #d84315;
             &:before { background-position: -84px 0; }
         }
-        #nav-link-bills {
+        .nav-link-bills {
             border-color: rgb(183, 28, 28);
             &:before { background-position: -112px 0; }
         }
-        #nav-link-food {
+        .nav-link-food {
             border-color: rgb(67, 160, 71);
             &:before { background-position: -140px 0; }
         }
-        #nav-link-general {
+        .nav-link-general {
             border-color: rgb(1, 87, 155);
             &:before { background-position: -168px 0; }
         }
-        #nav-link-holiday {
+        .nav-link-holiday {
             border-color: rgb(0, 137, 123);
             &:before { background-position: 0 -28px; }
         }
-        #nav-link-social {
+        .nav-link-social {
             border-color: rgb(191, 158, 36);
             &:before { background-position: -28px -28px; }
         }
-        #nav-link-logout {
+        .nav-link-logout {
             border-color: #eee;
             &:before { background-position: -56px -28px; }
         }
     }
 }
 
-#login-form {
+.login-form {
     z-index: 1001;
     position: fixed;
     left: 50%;
@@ -1399,7 +1388,7 @@ button {
 }
 
 /* footer */
-#footer-outer {
+.footer-outer {
     margin: 5em 0;
     font-size: .9em;
     color: #666;

@@ -1,12 +1,12 @@
 body {
     overflow: auto;
 }
-#content {
+.page-wrapper {
     margin: 0 auto;
     width: $width_page_tablet;
     position: relative;
 }
-#nav {
+.navbar {
     .inner {
         margin: 0 auto;
         width: $width_page_tablet;

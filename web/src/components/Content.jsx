@@ -81,10 +81,11 @@ export class Content extends PureControllerView {
         }
 
         const page = this.renderPage();
-        const pageName = `page-${PAGES[this.props.index]}`;
+
+        const className = `page-wrapper page-${PAGES[this.props.index]}`;
 
         return (
-            <div id="content" className={pageName}>
+            <div className={className}>
                 <div className="inner">
                     {page}
                 </div>
