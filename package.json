@@ -63,6 +63,7 @@
     "prompt": "^1.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-media": "^1.6.1",
     "react-pure-render": "^1.0.2",
     "sass-loader": "^6.0.6",
     "sha1": "^1.1.1",
