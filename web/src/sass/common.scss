@@ -228,6 +228,29 @@ button {
     }
 }
 
+/* flexible table */
+.table-flex {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    .row {
+        display: flex;
+        flex-flow: row nowrap;
+        width: 100%;
+
+        &.header {
+            font-weight: bold;
+        }
+    }
+    .col {
+        display: flex;
+        flex-flow: row nowrap;
+        flex-grow: 1;
+        flex-basis: 0;
+    }
+}
+
 /* insert table */
 .table-insert {
     border-collapse: collapse;
@@ -804,56 +827,6 @@ button {
 
 /* overview page */
 .page-overview {
-    .table-overview {
-        width: 890px;
-        transition: .1s height ease-in-out;
-        cursor: default;
-        .cost {
-            width: auto;
-        }
-        .editable-outer {
-            width: 80px;
-            &.editing {
-                padding: 0;
-            }
-        }
-    }
-
-    .past {
-        @include unimportant;
-        line-height: .9em;
-        font-size: .9em;
-        .editable-input {
-            height: 16px;
-        }
-    }
-    .editable-input {
-        right: 0;
-        top: 0;
-        padding: 0;
-    }
-    .active {
-        font-weight: bold;
-        line-height: 1.1em;
-        font-size: 1.1em;
-        .month {
-            background: $color_green;
-            font-weight: bold;
-            color: white;
-        }
-        .editable-input {
-            height: 23px;
-        }
-    }
-    .future {
-        .month {
-            background: $color_amber;
-        }
-        .editable-input {
-            height: 20px;
-        }
-    }
-
     .month {
         text-align: right;
     }

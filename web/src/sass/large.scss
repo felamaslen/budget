@@ -118,3 +118,76 @@
     }
 }
 
+.page-overview {
+    .table-flex {
+        width: 890px;
+        cursor: default;
+        .editable-outer {
+            width: 80px;
+            &.editing {
+                padding: 0;
+            }
+        }
+        .col {
+            &.month {
+                flex-grow: 1;
+                border-right: 3px solid #222;
+            }
+            &.stocks, &.bills, &.food, &.general, &.holiday, &.social, &.net {
+                flex-grow: 0.7;
+            }
+            &.income {
+                border-left: 3px solid #222;
+            }
+            &.net {
+                border-right: 3px solid #efefef;
+            }
+            &.balance {
+                flex-grow: 1.2;
+            }
+            .text {
+                padding: 0 2px;
+            }
+        }
+        .editable-input {
+            right: 0;
+            top: 0;
+            padding: 0;
+        }
+        .past {
+            @include unimportant;
+            height: 16px;
+            line-height: 16px;
+            font-size: 13px;
+            .editable-input {
+                height: 16px;
+            }
+        }
+        .active {
+            font-weight: bold;
+            font-size: 16px;
+            height: 24px;
+            line-height: 24px;
+            .month {
+                background: $color_green;
+                font-weight: bold;
+                color: white;
+            }
+            .editable-input {
+                height: 23px;
+            }
+        }
+        .future {
+            font-size: 15px;
+            height: 20px;
+            line-height: 20px;
+            .month {
+                background: $color_amber;
+            }
+            .editable-input {
+                height: 20px;
+            }
+        }
+    }
+}
+

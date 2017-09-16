@@ -82,5 +82,14 @@
     .stocks, .bills, .food, .general, .holiday, .social {
         display: none;
     }
+    .table-overview {
+        display: flex;
+        tr {
+            display: flex;
+        }
+        th, td {
+            flex: 1 0 0;
+        }
+    }
 }
 

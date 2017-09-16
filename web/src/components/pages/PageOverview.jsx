@@ -24,6 +24,7 @@ export class PageOverview extends PureControllerView {
     render() {
         const rows = this.props.data.get('rows').map((row, key) => {
             const rowClasses = classNames({
+                row: true,
                 past: Boolean(row.get('past')),
                 active: Boolean(row.get('active')),
                 future: Boolean(row.get('future'))
@@ -35,7 +36,7 @@ export class PageOverview extends PureControllerView {
                     style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
                 }
 
-                const cellClasses = {};
+                const cellClasses = { col: true };
                 cellClasses[cell.get('column')[1].toLowerCase()] = true;
                 let span = null;
                 if (cell.get('editable')) {
@@ -55,35 +56,36 @@ export class PageOverview extends PureControllerView {
                 }
 
                 return (
-                    <td key={cellKey} className={classNames(cellClasses)} style={style}>
+                    <div key={cellKey} className={classNames(cellClasses)} style={style}>
                         {span}
-                    </td>
+                    </div>
                 );
             });
 
-            return <tr key={key} className={rowClasses}>{cells}</tr>;
+            return <div key={key} className={rowClasses}>{cells}</div>;
         });
 
         const graphSpendData = list(GRAPH_SPEND_CATEGORIES).map(item => {
             return this.props.data.getIn(['data', 'cost', item.name]).slice(-GRAPH_SPEND_NUM_ITEMS);
         });
 
-        const overviewHead = OVERVIEW_COLUMNS.map(
-            (column, key) => <th key={key}>{column[1]}</th>
-        );
+        const overviewHead = OVERVIEW_COLUMNS.map((column, key) => {
+            const className = [
+                'col',
+                column[1].toLowerCase()
+            ].join(' ');
+
+            return <div className={className} key={key}>{column[1]}</div>;
+        });
 
         return (
             <div>
-                <table className="table-insert table-overview noselect">
-                    <thead>
-                        <tr>
-                            {overviewHead}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows}
-                    </tbody>
-                </table>
+                <div className="table-flex table-insert table-overview noselect">
+                    <div className="row header">
+                        {overviewHead}
+                    </div>
+                    {rows}
+                </div>
                 <div className="graph-container-outer">
                     <GraphBalance dispatcher={this.props.dispatcher}
                         width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
