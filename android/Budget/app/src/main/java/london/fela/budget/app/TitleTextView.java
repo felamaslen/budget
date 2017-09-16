@@ -9,9 +9,9 @@ import android.widget.TextView;
  * Title text view (custom font)
  */
 public class TitleTextView extends TextView {
-  public TitleTextView(Context context, AttributeSet attrs) {
-    super(context, attrs);
+    public TitleTextView(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
-    this.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Bitter-Bold.ttf"));
-  }
+        this.setTypeface(Typeface.createFromAsset(context.getAssets(), "fonts/Bitter-Bold.ttf"));
+    }
 }

@@ -6,7 +6,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,138 +19,109 @@ import java.util.Map;
 import london.fela.budget.helper.Data;
 
 public class ApiCaller {
-  private final List<Api> listeners = new ArrayList<>();
+    private final List<Api> listeners = new ArrayList<>();
 
-  private static String api_url;
+    private static String apiUrl;
 
-  public ApiCaller(String url) {
-    api_url = url;
-  }
-
-  public void addListener(Api listener) {
-    listeners.add(listener);
-  }
-
-  /**
-   * does a request to the REST Api
-   *
-   * @param tag_int_req    // tag used to identify the request to the implementation
-   * @param tag_string_req // tag used to cancel the request
-   * @param req_type       // GET or POST
-   * @param args           // arguments to add to the URL
-   */
-  public void request(
-    final int tag_int_req,
-    String tag_string_req,
-    String req_type,
-    String args,
-    final Map<String, String> params
-  ) {
-    final int httpMethod;
-
-    if (req_type.equals("POST")) {
-      httpMethod = Request.Method.POST;
-    } else {
-      httpMethod = Request.Method.GET;
+    private static int getHttpMethod(String methodString) {
+        if (methodString == "get") {
+            return Request.Method.GET;
+        }
+        if (methodString == "post") {
+            return Request.Method.POST;
+        }
+        if (methodString == "put") {
+            return Request.Method.PUT;
+        }
+        if (methodString == "delete") {
+            return Request.Method.DELETE;
+        }
+        if (methodString == "patch") {
+            return Request.Method.PATCH;
+        }
+        
+        throw new IllegalArgumentException("invalid request method");
     }
 
-    final String url = api_url + args;
+    public ApiCaller(String url) {
+        apiUrl = url;
+    }
 
-    StringRequest strReq = new StringRequest(
-      httpMethod,
-      url,
-      new Response.Listener<String>() {
-        @Override
-        public void onResponse(String response) {
-          for (Api listener : listeners) {
-            listener.apiResponse(tag_int_req, response);
-          }
+    public void addListener(Api listener) {
+        listeners.add(listener);
+    }
 
-          try {
-            JSONObject res = new JSONObject(response);
-
-            boolean error;
-            try {
-              error = res.getBoolean("error");
-            }
-            catch (JSONException e) {
-              error = false;
-            }
-
-            // check for error node in json
-            if (!error) {
-              for (Api listener : listeners) {
-                listener.apiJSONSuccess(tag_int_req, res);
-              }
-            } else {
-              // error with request, get the error message
-              String errorMsg = res.getString("errorText");
-              for (Api listener : listeners) {
-                listener.apiJSONError(tag_int_req, errorMsg);
-              }
-            }
-          } catch (JSONException e) {
-            e.printStackTrace();
-
-            for (Api listener : listeners) {
-              listener.apiJSONException(tag_int_req, e, response);
-            }
-          }
-
-          for (Api listener : listeners) {
-            listener.apiResponseEnd(tag_int_req, response);
-          }
-        }
-      },
-      new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-          Log.e(AppController.TAG, "API error: " + error.getMessage() + " (" + url + ")");
-
-          for (Api listener : listeners) {
-            listener.apiError(tag_int_req, error);
-          }
-        }
-      }
+    /**
+     * makes a request to the REST Api
+     *
+     * @param tag_int_req    // tag used to identify the request to the implementation
+     * @param tag_string_req // tag used to cancel the request
+     * @param method         // GET, POST, PUT, DELETE and PATCH are implemented
+     * @param args           // arguments to add to the URL
+     */
+    public void request(
+        final int tag_int_req,
+        String tag_string_req,
+        String method,
+        String args,
+        final JSONObject data
     ) {
+        final int httpMethod = ApiCaller.getHttpMethod(method.toLowerCase());
 
-      /**
-       * add authorisation header for the REST Api
-       *
-       * @return headers
-       * @throws AuthFailureError
-       */
-      @Override
-      public Map<String, String> getHeaders() throws AuthFailureError {
-        HashMap<String, String> reqHeaders = new HashMap<>();
+        final String url = apiUrl + args;
 
-        String apiKey = Data.user.get("apiKey");
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(
+            httpMethod,
+            url,
+            data,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    for (Api listener : listeners) {
+                        listener.apiResponse(tag_int_req);
 
-        if (apiKey != null) {
-          reqHeaders.put("Authorization", apiKey);
-        }
+                        listener.apiJSONSuccess(tag_int_req, response);
+                    }
 
-        return reqHeaders;
-      }
+                    for (Api listener : listeners) {
+                        listener.apiResponseEnd(tag_int_req);
+                    }
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e(AppController.TAG, "API error: " + error.getMessage());
+                    Log.e(AppController.TAG, "details: " + data.toString());
 
-      /**
-       * add custom parameters
-       *
-       * @return params
-       */
-      @Override
-      protected Map<String, String> getParams() {
-        Map<String, String> reqParams = new HashMap<>();
+                    for (Api listener : listeners) {
+                        listener.apiError(tag_int_req, error);
+                    }
+                }
+            }
+        ) {
 
-        if (params != null) {
-          reqParams.putAll(params);
-        }
+            /**
+             * add authorisation header for the REST Api
+             *
+             * @return headers
+             * @throws AuthFailureError
+             */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> reqHeaders = new HashMap<>();
 
-        return reqParams;
-      }
-    };
+                String apiKey = Data.user.get("apiKey");
 
-    // add request to request queue
-    AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-  }
+                if (apiKey != null) {
+                    reqHeaders.put("Authorization", apiKey);
+                }
+
+                return reqHeaders;
+            }
+        };
+
+        // add request to request queue
+        AppController.getInstance().addToRequestQueue(jsObjRequest, tag_string_req);
+    }
 }
