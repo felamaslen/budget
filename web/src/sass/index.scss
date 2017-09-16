@@ -6,6 +6,10 @@
     @import "./mobile.scss";
 }
 
+@media screen and (min-width: $width_page_mobile) {
+    @import "./large.scss";
+}
+
 @media screen and (min-width: $width_page_mobile) and (max-width: $width_page_tablet) {
     @import "./tablet.scss";
 }

@@ -1,19 +1,26 @@
-$color_grad_btn_from: #74ad5a;
-$color_grad_btn_to:   #68a54b;
-$color_shadow_btn:    #9acc85;
-$color_green:         #009933;
-$color_amber:         #fbe07f;
+// colors
+$color_grad_btn_from:   #74ad5a;
+$color_grad_btn_to:     #68a54b;
+$color_shadow_btn:      #9acc85;
+$color_green:           #009933;
+$color_amber:           #fbe07f;
 
-$color_bg_up:         #1e5413;
-$color_bg_up_hl:      #d4ffcc;
-$color_bg_up_rev:     #bdfcf8;
-$color_bg_down:       #a01e1e;
-$color_bg_down_hl:    #f2bfbf;
-$color_bg_down_rev:   #bfd7f2;
+$color_primary:         #fffef7;
+$color_primary_dark:    #9f3030;
+$color_accent:          #ffa040;
 
+$color_bg_up:           #1e5413;
+$color_bg_up_hl:        #d4ffcc;
+$color_bg_up_rev:       #bdfcf8;
+$color_bg_down:         #a01e1e;
+$color_bg_down_hl:      #f2bfbf;
+$color_bg_down_rev:     #bfd7f2;
+
+// responsive design parameters
 $width_page_mobile: 500px;
 $width_page_tablet: 1500px;
 
+// common variables
 $width_logo:  30px;
 $height_logo: 30px;
 $height_nav:  49px;
@@ -21,4 +28,7 @@ $height_nav:  49px;
 $top_nav: $height_nav + 10;
 
 $nav_img: "../images/nav.png";
+
+// mobile variables
+$height_nav_mobile: 30;
 

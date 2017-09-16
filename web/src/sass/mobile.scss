@@ -1,3 +1,35 @@
-.nav {
+#nav {
+    height: $height_nav_mobile + $height_nav;
+    padding-bottom: 0;
+    .app-logo {
+        width: 100%;
+        height: $height_nav;
+    }
+    .nav-list {
+        display: flex;
+        flex-direction: row;
+        padding: 0;
+        li {
+            margin-right: 0;
+            flex: 1 0 0;
+        }
+        .nav-link {
+            text-indent: -9999px;
+            border-color: transparent !important;
+            &.active {
+                border-color: $color_primary_dark !important;
+            }
+        }
+    }
+}
+
+#content {
+    padding-top: $height_nav_mobile + $height_nav;
+}
+
+.page-overview {
+    .stocks, .bills, .food, .general, .holiday, .social {
+        display: none;
+    }
 }
 
