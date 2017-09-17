@@ -23,12 +23,13 @@ $color_general:         #01579b;
 $color_holiday:         #00897b;
 $color_social:          #bf9e24;
 
-$color_income_light:    #f6b4a0;
-$color_bills_light:     #f2abab;
-$color_food_light:      #bde3be;
-$color_general_light:   #a9d9fe;
-$color_holiday_light:   #d5fffb;
-$color_social_light:    #efe0aa;
+$color_funds_light:     rgb(194, 221, 234);
+$color_income_light:    rgb(255, 197, 179);
+$color_bills_light:     rgb(234, 190, 182);
+$color_food_light:      rgb(165, 212, 166);
+$color_general_light:   rgb(170, 200, 224);
+$color_holiday_light:   rgb(162, 222, 215);
+$color_social_light:    rgb(217, 202, 148);
 
 // responsive design parameters (injected from webpack)
 $width_page_mobile_small: $widthPageMobileSmall + px;
