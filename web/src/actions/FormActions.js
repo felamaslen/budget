@@ -21,8 +21,8 @@ export const aMobileAddDialogOpened = pageIndex => {
 export const aMobileEditDialogClosed = submit => {
     return buildMessage(FORM_EDIT_DIALOG_CLOSED, { submit });
 };
-export const aMobileAddDialogClosed = submit => {
-    return buildMessage(FORM_ADD_DIALOG_CLOSED, { submit });
+export const aMobileAddDialogClosed = pageIndex => {
+    return buildMessage(FORM_ADD_DIALOG_CLOSED, pageIndex);
 };
 export const aFormFieldChanged = () => {
     return buildMessage(FORM_INPUT_CHANGED, {});

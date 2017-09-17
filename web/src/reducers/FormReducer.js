@@ -28,8 +28,16 @@ export function rCloseFormDialogEdit(reduction, req) {
     return reduction;
 }
 
-export function rCloseFormDialogAdd(reduction, req) {
-    return reduction;
+export function rCloseFormDialogAdd(reduction, pageIndex) {
+    if (pageIndex === null) {
+        // cancel dialog
+        return reduction
+            .setIn(['appState', 'modalDialog', 'active'], false)
+            .setIn(['appState', 'modalDialog', 'type'], null)
+            .setIn(['appState', 'modalDialog', 'fields'], list.of())
+    }
+
+    debugger;
 }
 
 export function rHandleFormInputChange(reduction, req) {

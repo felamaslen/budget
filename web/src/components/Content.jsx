@@ -82,6 +82,7 @@ export class Content extends PureControllerView {
         }
 
         return <ModalDialog
+            dispatcher={this.props.dispatcher}
             type={this.props.modalDialog.get('type')}
             pageIndex={this.props.index}
             row={this.props.modalDialog.get('row')}

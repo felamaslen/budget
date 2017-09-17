@@ -9,6 +9,10 @@ import { List as list } from 'immutable';
 
 import getFormField from './FormField';
 
+import {
+    aMobileAddDialogClosed, aMobileEditDialogClosed
+} from '../actions/FormActions';
+
 export class ModalDialog extends PureControllerView {
     renderTitle() {
         if (this.props.id) {
@@ -33,9 +37,14 @@ export class ModalDialog extends PureControllerView {
             });
     }
     renderButtons() {
+        const onCancel = () => this.props.dispatcher.dispatch(aMobileAddDialogClosed(null));
+        const onSubmit = () => this.props.dispatcher.dispatch(aMobileAddDialogClosed(this.props.pageIndex));
+
         return <div className="buttons">
-            <button type="button" className="button-cancel">nope.avi</button>
-            <button type="button" className="button-submit">Do it.</button>
+            <button type="button" className="button-cancel"
+                onClick={onCancel}>nope.avi</button>
+            <button type="button" className="button-submit"
+                onClick={onSubmit}>Do it.</button>
         </div>;
     }
     render() {
