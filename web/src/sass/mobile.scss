@@ -167,6 +167,7 @@
             & > span {
                 display: flex;
                 flex-basis: 0;
+                min-width: 0;
                 white-space: nowrap;
                 padding: 0 2px;
 
@@ -190,6 +191,30 @@
     }
 }
 
+.list-funds {
+    &, .list-head {
+        background: $color_funds_light;
+    }
+    .list-head, .list-ul {
+        .date {
+            flex-grow: 8;
+        }
+        .item {
+            flex-grow: 12;
+        }
+        .cost {
+            flex-grow: 10;
+            font-size: 90%;
+        }
+        .cost-value, .actual-value {
+            display: flex;
+            flex-grow: 1;
+        }
+        .actual-value {
+            font-weight: bold;
+        }
+    }
+}
 .list-income {
     &, .list-head {
         background: $color_income_light;
@@ -218,6 +243,46 @@
 .list-social {
     &, .list-head {
         background: $color_social_light;
+    }
+}
+
+.funds-info {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    .gain {
+        display: flex;
+        flex-flow: row wrap;
+        padding: 10px 24px;
+        background: rgba(255, 255, 255, 0.7);
+        &.profit {
+            background: rgba(100, 255, 100, 0.7);
+        }
+        &.loss {
+            background: rgba(255, 100, 100, 0.7);
+        }
+    }
+    .gain-info {
+        flex-grow: 1;
+        font-size: 90%;
+    }
+    .value {
+        flex-grow: 5;
+        font-size: 150%;
+        font-weight: bold;
+        padding: 0 1em;
+    }
+    .gain-pct {
+        flex-grow: 1;
+        font-weight: bold;
+        font-style: italic;
+    }
+    .cache-age {
+        flex-grow: 6;
+        flex-wrap: wrap;
+        text-align: right;
+        font-size: 80%;
     }
 }
 

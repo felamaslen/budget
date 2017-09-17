@@ -132,16 +132,19 @@ export class PageList extends PureControllerView {
             </span>
         );
     }
-    renderListRowMobile(row, rowKey, columns, colKeys) {
+    renderListRowItemsMobile(row, rowKey, columns, colKeys) {
         const id = row.get('id');
 
-        const items = columns
+        return columns
             .map((column, key) => {
                 const colKey = colKeys[key];
                 const value = row.getIn(['cols', colKey]);
 
                 return this.renderListItem(rowKey, colKey, id, column, value);
             });
+    }
+    renderListRowMobile(row, rowKey, columns, colKeys) {
+        const items = this.renderListRowItemsMobile(row, rowKey, columns, colKeys);
 
         return <li key={rowKey}>{items}</li>;
     }

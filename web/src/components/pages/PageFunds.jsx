@@ -30,7 +30,7 @@ export class PageFunds extends PageList {
             sold: row.getIn(['cols', transactionsKey]).isSold()
         };
     }
-    listHeadExtra() {
+    getGainInfo() {
         const cost = this.props.data.getIn(['data', 'total']);
         const value = this.props.cachedValue.get('value');
         const total = this.props.data.getIn(['data', 'total']);
@@ -49,22 +49,23 @@ export class PageFunds extends PageList {
             loss: cost > value
         });
 
+        return { classes, gainPct };
+    }
+    listHeadExtra() {
         const reloadFundPrices = () => this.dispatchAction(aFundsGraphPeriodChanged(null, true, true));
 
+        const gainInfo = this.getGainInfo();
+
         return (
-            <span className={classes} onClick={reloadFundPrices}>
+            <span className={gainInfo.classes} onClick={reloadFundPrices}>
                 <span className="gain-info">Current value:</span>
                 <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
-                <span>{gainPct}</span>
+                <span>{gainInfo.gainPct}</span>
                 <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
             </span>
         );
     }
-    renderFundGraph(render, row, rowKey) {
-        if (!render) {
-            return null;
-        }
-
+    renderFundGraph(row, rowKey) {
         const popout = row.get('historyPopout');
 
         const width = popout
@@ -93,7 +94,7 @@ export class PageFunds extends PageList {
             </span>
         );
     }
-    renderListExtra(row, rowKey) {
+    renderGainInfo(row) {
         const gain = row.get('gain');
 
         if (!gain) {
@@ -133,31 +134,70 @@ export class PageFunds extends PageList {
         });
 
         return (
-            <span>
-                <Media query={mediaQueries.desktop}>
-                    {render => this.renderFundGraph(render, row, rowKey)}
-                </Media>
-                <span className="gain">
-                    <span className={gainOuterClasses} style={gainStyle}>
-                        <span className="value">
-                            {formatCurrency(gain.get('value'), formatOptions)}
-                        </span>
-                        <span className={gainAbsClasses}>
-                            {formatCurrency(gain.get('gainAbs'), formatOptions)}
-                        </span>
-                        <span className={dayGainAbsClasses}>
-                            {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
-                        </span>
-                        <span className={gainClasses}>
-                            {formatPercent(gain.get('gain'), formatOptionsPct)}
-                        </span>
-                        <span className={dayGainClasses}>
-                            {formatPercent(gain.get('dayGain'), formatOptionsPct)}
-                        </span>
+            <span className="gain">
+                <span className={gainOuterClasses} style={gainStyle}>
+                    <span className="value">
+                        {formatCurrency(gain.get('value'), formatOptions)}
+                    </span>
+                    <span className={gainAbsClasses}>
+                        {formatCurrency(gain.get('gainAbs'), formatOptions)}
+                    </span>
+                    <span className={dayGainAbsClasses}>
+                        {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
+                    </span>
+                    <span className={gainClasses}>
+                        {formatPercent(gain.get('gain'), formatOptionsPct)}
+                    </span>
+                    <span className={dayGainClasses}>
+                        {formatPercent(gain.get('dayGain'), formatOptionsPct)}
                     </span>
                 </span>
             </span>
         );
+    }
+    renderListExtra(row, rowKey) {
+        return (
+            <span>
+                {this.renderFundGraph(row, rowKey)}
+                {this.renderGainInfo(row)}
+            </span>
+        );
+    }
+    renderGainInfoMobile(cost, gain) {
+        if (!gain) {
+            return null;
+        }
+
+        const formatOptions = {
+            abbreviate: true,
+            precision: 1
+        };
+
+        const costValue = <span className="cost-value">
+            {formatCurrency(cost, formatOptions)}
+        </span>;
+
+        const value = cost
+            ? formatCurrency(gain.get('value'), formatOptions)
+            : '\u2013';
+
+        const actualValue = <span className="actual-value">{value}</span>;
+
+        return <span className="cost">
+            {costValue}
+            {actualValue}
+        </span>;
+    }
+    renderListRowMobile(row, rowKey, columns, colKeys) {
+        const items = super.renderListRowItemsMobile(row, rowKey, columns.slice(0, 2), colKeys);
+
+        const gain = row.get('gain');
+        const gainInfo = this.renderGainInfoMobile(row.getIn(['cols', colKeys[2]]), gain);
+
+        return <li key={rowKey}>
+            {items}
+            {gainInfo}
+        </li>;
     }
     renderStocksList(render) {
         if (!render || !DO_STOCKS_LIST) {
@@ -206,9 +246,28 @@ export class PageFunds extends PageList {
             {fundsGraph}
         </span>;
     }
+    renderAfterListMobile(render) {
+        if (!render) {
+            return null;
+        }
+
+        const gainInfo = this.getGainInfo();
+
+        return (
+            <span className={gainInfo.classes}>
+                <span className="gain-info">Current value:</span>
+                <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
+                <span className="gain-pct">{gainInfo.gainPct}</span>
+                <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
+            </span>
+        );
+    }
     afterList() {
         // render graphs and stuff here
-        return <Media query={mediaQueries.desktop}>{render => this.renderAfterList(render)}</Media>;
+        return <div className="funds-info">
+            <Media query={mediaQueries.desktop}>{render => this.renderAfterList(render)}</Media>
+            <Media query={mediaQueries.mobile}>{render => this.renderAfterListMobile(render)}</Media>
+        </div>;
     }
 }
 
