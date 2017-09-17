@@ -26,10 +26,10 @@ export class ModalDialog extends PureControllerView {
                     value: field.get('value')
                 });
 
-                return <span key={fieldKey}>
-                    <span className="name">{field.get('item')}</span>
-                    <span className="value">{item}</span>
-                </span>;
+                return <li key={fieldKey} className="form-row">
+                    <span className="form-label">{field.get('item')}</span>
+                    {item}
+                </li>;
             });
     }
     renderButtons() {
@@ -47,7 +47,9 @@ export class ModalDialog extends PureControllerView {
         return <div className={className}>
             <div className="dialog">
                 <span className="title">{title}</span>
-                {fields}
+                <ul className="form-list">
+                    {fields}
+                </ul>
                 {buttons}
             </div>
         </div>;

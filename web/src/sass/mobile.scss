@@ -1,3 +1,18 @@
+button {
+    margin: 0 6px;
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    padding: 1em 0;
+    width: 100%;
+    font-size: 0.6em;
+    border: none;
+    border-radius: 3px;
+    outline: none;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
 .navbar {
     height: $height_header_mobile + $height_nav_mobile;
     .app-logo {
@@ -80,6 +95,98 @@
     padding-top: $height_header_mobile + $height_nav_mobile;
 }
 
+// modal dialogs
+.modal-dialog-outer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: transparent;
+    .dialog {
+        flex-flow: column nowrap;
+        width: 260px;
+        padding: 30px 30px 20px 30px;
+        font-size: 1.3em;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 3px;
+        box-shadow: 0 3px 7px rgba(60, 60, 60, 0.5);
+    }
+    .title {
+        font-size: 1.2em;
+    }
+    .form-list {
+        display: flex;
+        margin: 1em 0;
+        padding: 0;
+        list-style: none;
+        flex-flow: column nowrap;
+    }
+    .form-row {
+        display: flex;
+        line-height: 32px;
+        flex-flow: row nowrap;
+        .form-label {
+            flex-basis: 0;
+            flex-grow: 1;
+            text-transform: capitalize;
+            &:after {
+                content: ":";
+            }
+        }
+        .form-field {
+            display: flex;
+            flex-flow: column nowrap;
+            flex-basis: 0;
+            flex-grow: 2;
+            border: 0;
+            line-height: 28px;
+            &:after {
+                display: block;
+                content: $none;
+                width: 100%;
+                height: 4px;
+                border: 1px solid #ccc;
+                border-top: none;
+            }
+            input[type=text],
+            input[type=number],
+            input[type=date] {
+                display: block;
+                border: none;
+                outline: none;
+                line-height: 28px;
+                width: 100%;
+                font-size: 16px;
+            }
+        }
+    }
+    .buttons {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: bottom;
+        margin-top: 1em;
+    }
+    .button-cancel {
+        background: #ccc;
+        color: black;
+        &:after {
+            content: $none;
+            display: block;
+            height: 100%;
+            width: 0;
+            border-right: 1px solid #ccc;
+        }
+    }
+    .button-submit {
+        background: #09e;
+        color: white;
+    }
+}
+
 // graphs
 .graph-container {
     width: 100%;
@@ -159,6 +266,7 @@
     .list-ul {
         display: flex;
         flex-flow: column nowrap;
+        margin-bottom: 50px;
         li {
             display: flex;
             flex-flow: row nowrap;
@@ -188,6 +296,24 @@
         .cost {
             flex-grow: 4;
         }
+    }
+    .button-add-outer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        font-size: 1.5em;
+        background: rgba(255, 255, 255, 0.7);
+    }
+    .button-add {
+        width: 120px;
+        flex-grow: 0;
+        background: $color_mob_primary_dark;
+        color: white;
     }
 }
 
