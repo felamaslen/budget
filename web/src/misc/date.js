@@ -125,9 +125,15 @@ export class YMD {
         ];
     }
     format() {
-        const numbers = this.formatNumbers();
-
-        return `${numbers[2]}/${numbers[1]}/${numbers[0]}`;
+        return this
+            .formatNumbers()
+            .reverse()
+            .join('/');
+    }
+    formatISO() {
+        return this
+            .formatNumbers()
+            .join('-');
     }
     valueOf() {
         return this.timestamp();
@@ -143,6 +149,7 @@ export class YMD {
     timestamp() {
         return Math.floor(new Date(this.year, this.month - 1, this.date).getTime() / 1000);
     }
+
 }
 
 class TimeTick {

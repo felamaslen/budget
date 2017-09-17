@@ -5,10 +5,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from './PureControllerView';
-import { Map as map, List } from 'immutable';
+import { Map as map, List as list } from 'immutable';
 import { PAGES, LIST_PAGES, DAILY_PAGES } from '../misc/const';
 
 import { Spinner } from './Spinner';
+import { ModalDialog } from './ModalDialog';
 import { PageOverview } from './pages/PageOverview';
 import { PageList } from './pages/PageList';
 import { PageAnalysis } from './pages/PageAnalysis';
@@ -75,6 +76,20 @@ export class Content extends PureControllerView {
 
         return <div>TODO: page {this.props.index}</div>;
     }
+    renderModalDialog() {
+        if (!this.props.modalDialog.get('active')) {
+            return null;
+        }
+
+        return <ModalDialog
+            type={this.props.modalDialog.get('type')}
+            pageIndex={this.props.index}
+            row={this.props.modalDialog.get('row')}
+            col={this.props.modalDialog.get('col')}
+            id={this.props.modalDialog.get('id')}
+            fields={this.props.modalDialog.get('fields')}
+        />;
+    }
     render() {
         if (!this.props.loaded.get(this.props.index)) {
             return <Spinner />;
@@ -84,22 +99,26 @@ export class Content extends PureControllerView {
 
         const className = `page-wrapper page-${PAGES[this.props.index]}`;
 
+        const modalDialog = this.renderModalDialog();
+
         return (
             <div className={className}>
                 <div className="inner">
                     {page}
                 </div>
+                {modalDialog}
             </div>
         );
     }
 }
 
 Content.propTypes = {
-    pages: PropTypes.instanceOf(List),
-    loaded: PropTypes.instanceOf(List),
-    add: PropTypes.instanceOf(List),
+    pages: PropTypes.instanceOf(list),
+    loaded: PropTypes.instanceOf(list),
+    add: PropTypes.instanceOf(list),
     addBtnFocus: PropTypes.bool,
     edit: PropTypes.instanceOf(map),
+    modalDialog: PropTypes.instanceOf(map),
     other: PropTypes.instanceOf(map),
     index: PropTypes.number
 };

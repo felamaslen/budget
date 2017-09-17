@@ -23,10 +23,6 @@ export const SERVER_ADD_RECEIVED = 0xac5f3;
 export const CONTENT_LOADED = 0xacc1;
 export const CONTENT_BLOCK_HOVERED = 0xacc2;
 export const CONTENT_BLOCKS_RECEIVED = 0xacc3;
-export const CONTENT_EDIT_DIALOG_OPENED = 0xacc4;
-export const CONTENT_EDIT_DIALOG_CLOSED = 0xacc5;
-export const CONTENT_ADD_DIALOG_OPENED = 0xacc6;
-export const CONTENT_ADD_DIALOG_CLOSED = 0xacc7;
 
 export const ANALYSIS_PERIOD_CHANGED = 0xacaa1;
 export const ANALYSIS_GROUPING_CHANGED = 0xacaa2;
@@ -47,6 +43,12 @@ export const EDIT_SUGGESTIONS_RECEIVED = 0xace82;
 export const EDIT_FUND_TRANSACTIONS_CHANGED = 0xacef1;
 export const EDIT_FUND_TRANSACTIONS_ADDED = 0xacef3;
 export const EDIT_FUND_TRANSACTIONS_REMOVED = 0xacef2;
+
+export const FORM_EDIT_DIALOG_OPENED = 0xac0f1;
+export const FORM_EDIT_DIALOG_CLOSED = 0xac0f2;
+export const FORM_ADD_DIALOG_OPENED = 0xac0f3;
+export const FORM_ADD_DIALOG_CLOSED = 0xac0f4;
+export const FORM_INPUT_CHANGED = 0xac0f5;
 
 export const GRAPH_SHOWALL_TOGGLED = 0xac81;
 export const GRAPH_FUND_ITEM_TOGGLED = 0xac82;

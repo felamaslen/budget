@@ -15,7 +15,7 @@ import {
 } from '../../misc/const';
 import { GRAPH_SPEND_NUM_ITEMS } from '../../misc/config';
 import { formatCurrency } from '../../misc/format';
-import { getEditable } from '../Editable/getEditable';
+import getEditable from '../Editable';
 import { GraphBalance } from '../graphs/GraphBalance';
 import { GraphSpend } from '../graphs/GraphSpend';
 

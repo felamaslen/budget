@@ -28,11 +28,7 @@ import {
 import {
     rHandleContentResponse,
     rContentBlockHover,
-    rContentUpdateBlocks,
-    rContentEditDialogOpened,
-    rContentEditDialogClosed,
-    rContentAddDialogOpened,
-    rContentAddDialogClosed
+    rContentUpdateBlocks
 } from './ContentReducer';
 import {
     rAnalysisChangePeriod,
@@ -57,6 +53,13 @@ import {
     rAddFundTransactions,
     rRemoveFundTransactions
 } from './EditReducer';
+import {
+    rOpenFormDialogEdit,
+    rOpenFormDialogAdd,
+    rCloseFormDialogEdit,
+    rCloseFormDialogAdd,
+    rHandleFormInputChange
+} from './FormReducer';
 import {
     rToggleShowAll,
     rToggleFundItemGraph,
@@ -136,15 +139,6 @@ export default (reduction, action) => {
     case AC.CONTENT_BLOCKS_RECEIVED:
         return rContentUpdateBlocks(reduction, action.payload);
 
-    case AC.CONTENT_EDIT_DIALOG_OPENED:
-        return rContentEditDialogOpened(reduction, action.payload);
-    case AC.CONTENT_ADD_DIALOG_OPENED:
-        return rContentAddDialogOpened(reduction, action.payload);
-    case AC.CONTENT_EDIT_DIALOG_CLOSED:
-        return rContentEditDialogClosed(reduction, action.payload);
-    case AC.CONTENT_ADD_DIALOG_CLOSED:
-        return rContentAddDialogClosed(reduction, action.payload);
-
     // analysis actions
     case AC.ANALYSIS_PERIOD_CHANGED:
         return rAnalysisChangePeriod(reduction, action.payload);
@@ -199,6 +193,22 @@ export default (reduction, action) => {
 
     case AC.EDIT_FUND_TRANSACTIONS_REMOVED:
         return rRemoveFundTransactions(reduction, action.payload);
+
+    // mobile form actions
+    case AC.FORM_EDIT_DIALOG_OPENED:
+        return rOpenFormDialogEdit(reduction, action.payload);
+
+    case AC.FORM_ADD_DIALOG_OPENED:
+        return rOpenFormDialogAdd(reduction, action.payload);
+
+    case AC.FORM_EDIT_DIALOG_CLOSED:
+        return rCloseFormDialogEdit(reduction, action.payload);
+
+    case AC.FORM_ADD_DIALOG_CLOSED:
+        return rCloseFormDialogAdd(reduction, action.payload);
+
+    case AC.FORM_INPUT_CHANGED:
+        return rHandleFormInputChange(reduction, action.payload);
 
     // graph actions
     case AC.GRAPH_SHOWALL_TOGGLED:

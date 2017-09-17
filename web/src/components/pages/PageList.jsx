@@ -10,15 +10,15 @@ import classNames from 'classnames';
 import Media from 'react-media';
 import { mediaQueries, LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
-import { getEditable } from '../Editable/getEditable';
+import getEditable from '../Editable';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
+import { aContentBlockHovered } from '../../actions/ContentActions';
 import {
-    aContentBlockHovered,
     aMobileEditDialogOpened,
     aMobileEditDialogClosed,
     aMobileAddDialogOpened,
     aMobileAddDialogClosed
-} from '../../actions/ContentActions';
+} from '../../actions/FormActions';
 import { BlockViewShallow } from '../BlockPacker';
 
 export class PageList extends PureControllerView {
@@ -158,6 +158,15 @@ export class PageList extends PureControllerView {
 
         return <li onTouchEnd={onTouchEnd} key={rowKey}>{items}</li>;
     }
+    renderAddButton() {
+        const onTouchEnd = () => this.dispatchAction(aMobileAddDialogOpened(this.props.index));
+
+        return <div className="button-add-outer">
+            <button type="button" className="button-add" onTouchEnd={onTouchEnd}>
+                Add
+            </button>
+        </div>;
+    }
     renderListMobile(render) {
         if (!render) {
             return null;
@@ -174,6 +183,7 @@ export class PageList extends PureControllerView {
             <div>
                 {this.renderListHeadMobile(columns)}
                 <ul className="list-ul">{rows}</ul>
+                {this.renderAddButton()}
             </div>
         );
     }

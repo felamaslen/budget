@@ -34,6 +34,14 @@ export const resetAppState = appState => {
                 active: -1
             })
         }))
+        .set('modalDialog', map({
+            active: false,
+            type: null,
+            row: null,
+            col: null,
+            id: null,
+            fields: list.of()
+        }))
         .set('other', map({
             showAllBalanceGraph: false,
             blockView: map({
