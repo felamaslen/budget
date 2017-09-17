@@ -164,6 +164,9 @@
             flex-flow: row nowrap;
             span {
                 display: flex;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         }
     }
@@ -181,22 +184,34 @@
 }
 
 .list-income {
-    background: $color_income_light;
+    &, .list-head {
+        background: $color_income_light;
+    }
 }
 .list-bills {
-    background: $color_bills_light;
+    &, .list-head {
+        background: $color_bills_light;
+    }
 }
 .list-food {
-    background: $color_food_light;
+    &, .list-head {
+        background: $color_food_light;
+    }
 }
 .list-general {
+&, .list-head {
     background: $color_general_light;
+    }
 }
 .list-holiday {
-    background: $color_holiday_light;
+    &, .list-head {
+        background: $color_holiday_light;
+    }
 }
 .list-social {
-    background: $color_social_light;
+    &, .list-head {
+        background: $color_social_light;
+    }
 }
 
 // extra rules for extra-small screens
