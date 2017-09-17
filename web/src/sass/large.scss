@@ -70,7 +70,7 @@
         }
     }
     .nav-link-income {
-        border-color: #d84315;
+        border-color: $color_income;
         .nav-link {
             &:before {
                 background-position: -84px 0;
@@ -78,7 +78,7 @@
         }
     }
     .nav-link-bills {
-        border-color: rgb(183, 28, 28);
+        border-color: $color_bills;
         .nav-link {
             &:before {
                 background-position: -112px 0;
@@ -86,7 +86,7 @@
         }
     }
     .nav-link-food {
-        border-color: rgb(67, 160, 71);
+        border-color: $color_food;
         .nav-link {
             &:before {
                 background-position: -140px 0;
@@ -94,7 +94,7 @@
         }
     }
     .nav-link-general {
-        border-color: rgb(1, 87, 155);
+        border-color: $color_general;
         .nav-link {
             &:before {
                 background-position: -168px 0;
@@ -102,7 +102,7 @@
         }
     }
     .nav-link-holiday {
-        border-color: rgb(0, 137, 123);
+        border-color: $color_holiday;
         .nav-link {
             &:before {
                 background-position: 0 -28px;
@@ -110,7 +110,7 @@
         }
     }
     .nav-link-social {
-        border-color: rgb(191, 158, 36);
+        border-color: $color_social;
         .nav-link {
             &:before {
                 background-position: -28px -28px;
@@ -139,6 +139,77 @@
         border-bottom: 1px solid #999;
         height: 24px;
         background: white;
+    }
+    .list-ul {
+        bottom: 0;
+        .progress {
+            position: absolute;
+            right: 2px;
+            top: 3px;
+        }
+
+        & > li {
+            width: 100%;
+            height: 24px;
+            line-height: 24px;
+            white-space: nowrap;
+        }
+        & > li:nth-child(2n) {
+            background: rgba(220, 220, 220, 0.4);
+        }
+        li > span {
+            display: inline-block;
+            position: relative;
+            text-overflow: ellipsis;
+            border-right: 1px solid #ccc;
+            vertical-align: top;
+            overflow: hidden;
+            height: inherit;
+            &.active {
+                overflow: visible;
+            }
+        }
+        .editable, .editable-input {
+            height: inherit;
+        }
+        .text {
+            margin-right: 2px;
+            padding: 0 2px;
+        }
+        .delete {
+            display: inline-block;
+            margin: 4px;
+            cursor: pointer;
+            color: white;
+            background: #de3737;
+            font-size: 20px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            vertical-align: middle;
+            text-align: center;
+            border-radius: 100%;
+        }
+        .suggestions {
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .suggestion {
+            margin: 1px 0;
+            padding: 2px;
+            cursor: default;
+        }
+        .suggestion.active {
+            background: #09e;
+            color: white;
+        }
     }
 }
 

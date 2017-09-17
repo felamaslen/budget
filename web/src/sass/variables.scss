@@ -16,6 +16,20 @@ $color_bg_down:         #a01e1e;
 $color_bg_down_hl:      #f2bfbf;
 $color_bg_down_rev:     #bfd7f2;
 
+$color_income:          #d84315;
+$color_bills:           #b71c1c;
+$color_food:            #43a047;
+$color_general:         #01579b;
+$color_holiday:         #00897b;
+$color_social:          #bf9e24;
+
+$color_income_light:    #f6b4a0;
+$color_bills_light:     #f2abab;
+$color_food_light:      #bde3be;
+$color_general_light:   #a9d9fe;
+$color_holiday_light:   #d5fffb;
+$color_social_light:    #efe0aa;
+
 // responsive design parameters (injected from webpack)
 $width_page_mobile_small: $widthPageMobileSmall + px;
 $width_page_mobile: $widthPageMobile + px;

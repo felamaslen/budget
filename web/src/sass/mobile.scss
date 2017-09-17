@@ -86,13 +86,6 @@
     position: relative;
 }
 
-// lists
-.list-insert {
-    .list-head {
-        top: $height_header_mobile + $height_nav_mobile;
-    }
-}
-
 .page-overview {
     .funds, .bills, .food, .general, .holiday, .social,
     .net, .predicted, .balance {
@@ -144,6 +137,66 @@
         .future {
         }
     }
+}
+
+// lists
+.list-insert {
+    position: fixed;
+    top: $height_nav_mobile + $height_header_mobile;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: scroll;
+    .list-head {
+        display: flex;
+        flex-flow: row nowrap;
+        top: $height_header_mobile + $height_nav_mobile;
+        width: 100%;
+        span {
+            display: flex;
+        }
+    }
+    .list-ul {
+        display: flex;
+        flex-flow: column nowrap;
+        li {
+            display: flex;
+            flex-flow: row nowrap;
+            span {
+                display: flex;
+            }
+        }
+    }
+    .list-head, .list-ul {
+        .date {
+            flex-grow: 3;
+        }
+        .item {
+            flex-grow: 4;
+        }
+        .cost {
+            flex-grow: 2;
+        }
+    }
+}
+
+.list-income {
+    background: $color_income_light;
+}
+.list-bills {
+    background: $color_bills_light;
+}
+.list-food {
+    background: $color_food_light;
+}
+.list-general {
+    background: $color_general_light;
+}
+.list-holiday {
+    background: $color_holiday_light;
+}
+.list-social {
+    background: $color_social_light;
 }
 
 // extra rules for extra-small screens

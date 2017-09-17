@@ -303,80 +303,10 @@ button {
     .first-present {
         border-top: 1px solid #666;
     }
-
     .list-ul {
         margin: 0;
-        list-style: none;
         padding: 24px 0 0 0;
-        bottom: 0;
-        .progress {
-            position: absolute;
-            right: 2px;
-            top: 3px;
-        }
-
-        & > li {
-            width: 100%;
-            height: 24px;
-            line-height: 24px;
-            white-space: nowrap;
-        }
-        & > li:nth-child(2n) {
-            background: rgba(220, 220, 220, 0.4);
-        }
-        li > span {
-            display: inline-block;
-            position: relative;
-            text-overflow: ellipsis;
-            border-right: 1px solid #ccc;
-            vertical-align: top;
-            overflow: hidden;
-            height: inherit;
-            &.active {
-                overflow: visible;
-            }
-        }
-        .editable, .editable-input {
-            height: inherit;
-        }
-        .text {
-            margin-right: 2px;
-            padding: 0 2px;
-        }
-        .delete {
-            display: inline-block;
-            margin: 4px;
-            cursor: pointer;
-            color: white;
-            background: #de3737;
-            font-size: 20px;
-            width: 16px;
-            height: 16px;
-            line-height: 16px;
-            vertical-align: middle;
-            text-align: center;
-            border-radius: 100%;
-        }
-        .suggestions {
-            margin: 0;
-            padding: 0;
-            position: absolute;
-            width: 100%;
-            z-index: 10;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.9);
-        }
-        .suggestion {
-            margin: 1px 0;
-            padding: 2px;
-            cursor: default;
-        }
-        .suggestion.active {
-            background: #09e;
-            color: white;
-        }
+        list-style: none;
     }
 }
 
@@ -785,19 +715,19 @@ button {
             z-index: 5;
         }
         .block-bills {
-            background: #b71c1c;
+            background: $color_bills;
         }
         .block-food {
-            background: #43a047;
+            background: $color_food;
         }
         .block-general {
-            background: #01579b;
+            background: $color_general;
         }
         .block-holiday {
-            background: #00897b;
+            background: $color_holiday;
         }
         .block-social {
-            background: #bf9e24;
+            background: $color_social;
         }
     }
 }
