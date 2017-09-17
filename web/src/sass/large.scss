@@ -132,6 +132,16 @@
     width: 500px;
 }
 
+// lists
+.list-insert {
+    .list-head {
+        top: $top_nav;
+        border-bottom: 1px solid #999;
+        height: 24px;
+        background: white;
+    }
+}
+
 .page-overview {
     .table-flex {
         width: 890px;
@@ -199,4 +209,3 @@
         }
     }
 }
-

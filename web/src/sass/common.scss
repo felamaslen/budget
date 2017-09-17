@@ -279,13 +279,9 @@ button {
 .list-insert {
     .list-head {
         position: fixed;
-        top: $top_nav;
         left: 0;
         z-index: 4;
-        background: white;
         font-weight: bold;
-        border-bottom: 1px solid #999;
-        height: 24px;
         line-height: 24px;
         text-transform: capitalize;
         white-space: nowrap;

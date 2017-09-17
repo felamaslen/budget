@@ -80,9 +80,17 @@
     padding-top: $height_header_mobile + $height_nav_mobile;
 }
 
+// graphs
 .graph-container {
     width: 100%;
     position: relative;
+}
+
+// lists
+.list-insert {
+    .list-head {
+        top: $height_header_mobile + $height_nav_mobile;
+    }
 }
 
 .page-overview {

@@ -22,7 +22,19 @@ export class PageList extends PureControllerView {
     listHeadExtra() {
         return null;
     }
-    renderListHead() {
+    renderListHeadMain(columns) {
+        return columns.map((column, key) => {
+            return <span key={key} className={column}>{column}</span>;
+        });
+    }
+    renderListHeadMobile(columns) {
+        return (
+            <div className="list-head noselect">
+                {this.renderListHeadMain(columns)}
+            </div>
+        );
+    }
+    renderListHeadDesktop() {
         const weeklyValue = formatCurrency(this.props.data.getIn(
             ['data', 'weekly']
         ), {
@@ -40,10 +52,6 @@ export class PageList extends PureControllerView {
             )
             : null;
 
-        const listHeadMain = LIST_COLS_PAGES[this.props.index].map((column, key) => {
-            return <span key={key} className={column}>{column}</span>;
-        });
-
         const totalValue = formatCurrency(this.props.data.getIn(
             ['data', 'total']
         ), {
@@ -53,7 +61,7 @@ export class PageList extends PureControllerView {
 
         return (
             <div className="list-head noselect">
-                {listHeadMain}
+                {this.renderListHeadMain(LIST_COLS_PAGES[this.props.index])}
                 {daily}
                 <span className="total">Total:</span>
                 <span className="total-value">{totalValue}</span>
@@ -149,7 +157,12 @@ export class PageList extends PureControllerView {
         const rows = this.props.data.get('rows')
             .map((row, rowKey) => this.renderListRowMobile(row, rowKey, columns, colKeys));
 
-        return <ul className="list-ul">{rows}</ul>;
+        return (
+            <div>
+                {this.renderListHeadMobile(columns)}
+                <ul className="list-ul">{rows}</ul>
+            </div>
+        );
     }
     renderListRowDesktop(row, rowKey) {
         const id = row.get('id');
@@ -203,10 +216,13 @@ export class PageList extends PureControllerView {
             .map((row, rowKey) => this.renderListRowDesktop(row, rowKey));
 
         return (
-            <ul className="list-ul">
-                {this.renderLiAdd()}
-                {rows}
-            </ul>
+            <div>
+                {this.renderListHeadDesktop()}
+                <ul className="list-ul">
+                    {this.renderLiAdd()}
+                    {rows}
+                </ul>
+            </div>
         );
     }
     renderList() {
@@ -267,7 +283,6 @@ export class PageList extends PureControllerView {
         return (
             <div>
                 <div className={listClasses}>
-                    {this.renderListHead()}
                     {this.renderList()}
                 </div>
                 {this.afterList()}
