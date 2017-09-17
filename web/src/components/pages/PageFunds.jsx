@@ -9,8 +9,9 @@ import classNames from 'classnames';
 import { PageList } from './PageList';
 import { rgba } from '../../misc/color';
 import { DO_STOCKS_LIST } from '../../misc/config';
+import Media from 'react-media';
 import {
-    PAGES, LIST_COLS_PAGES,
+    mediaQueries, PAGES, LIST_COLS_PAGES,
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT,
     GRAPH_FUND_ITEM_WIDTH_LARGE, GRAPH_FUND_ITEM_HEIGHT_LARGE,
     GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT
@@ -59,23 +60,45 @@ export class PageFunds extends PageList {
             </span>
         );
     }
-    renderListExtra(row, rowKey) {
-        const gain = row.get('gain');
-
-        if (!gain) {
+    renderFundGraph(render, row, rowKey) {
+        if (!render) {
             return null;
         }
 
-        const name = row.getIn(['cols', 1])
-            .toLowerCase()
-            .replace(/\W+/g, '-');
         const popout = row.get('historyPopout');
+
         const width = popout
             ? GRAPH_FUND_ITEM_WIDTH_LARGE
             : GRAPH_FUND_ITEM_WIDTH;
         const height = popout
             ? GRAPH_FUND_ITEM_HEIGHT_LARGE
             : GRAPH_FUND_ITEM_HEIGHT;
+
+        const name = row.getIn(['cols', 1])
+            .toLowerCase()
+            .replace(/\W+/g, '-');
+
+        return (
+            <span className="fund-graph">
+                <div className="fund-graph-cont">
+                    <GraphFundItem dispatcher={this.props.dispatcher}
+                        width={width}
+                        height={height}
+                        name={name}
+                        data={row.get('prices')}
+                        popout={row.get('historyPopout')}
+                        rowKey={rowKey}
+                    />
+                </div>
+            </span>
+        );
+    }
+    renderListExtra(row, rowKey) {
+        const gain = row.get('gain');
+
+        if (!gain) {
+            return null;
+        }
 
         const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
         const formatOptionsPct = { brackets: true, precision: 2 };
@@ -111,18 +134,9 @@ export class PageFunds extends PageList {
 
         return (
             <span>
-                <span className="fund-graph">
-                    <div className="fund-graph-cont">
-                        <GraphFundItem dispatcher={this.props.dispatcher}
-                            width={width}
-                            height={height}
-                            name={name}
-                            data={row.get('prices')}
-                            popout={row.get('historyPopout')}
-                            rowKey={rowKey}
-                        />
-                    </div>
-                </span>
+                <Media query={mediaQueries.desktop}>
+                    {render => this.renderFundGraph(render, row, rowKey)}
+                </Media>
                 <span className="gain">
                     <span className={gainOuterClasses} style={gainStyle}>
                         <span className="value">
@@ -145,18 +159,24 @@ export class PageFunds extends PageList {
             </span>
         );
     }
-    afterList() {
-    // render graphs and stuff here
-        const stocksList = DO_STOCKS_LIST ? (
-            <StocksList dispatcher={this.props.dispatcher}
-                stocks={this.props.stocksListProps.get('stocks')}
-                indices={this.props.stocksListProps.get('indices')}
-                lastPriceUpdate={this.props.stocksListProps.get('lastPriceUpdate')}
-                history={this.props.stocksListProps.get('history')}
-                weightedGain={this.props.stocksListProps.get('weightedGain')}
-                oldWeightedGain={this.props.stocksListProps.get('oldWeightedGain')}
-            />
-        ) : null;
+    renderStocksList(render) {
+        if (!render || !DO_STOCKS_LIST) {
+            return null;
+        }
+
+        return <StocksList dispatcher={this.props.dispatcher}
+            stocks={this.props.stocksListProps.get('stocks')}
+            indices={this.props.stocksListProps.get('indices')}
+            lastPriceUpdate={this.props.stocksListProps.get('lastPriceUpdate')}
+            history={this.props.stocksListProps.get('history')}
+            weightedGain={this.props.stocksListProps.get('weightedGain')}
+            oldWeightedGain={this.props.stocksListProps.get('oldWeightedGain')}
+        />;
+    }
+    renderFundsGraph(render) {
+        if (!render) {
+            return null;
+        }
 
         return (
             <div className="graph-container-outer">
@@ -174,9 +194,21 @@ export class PageFunds extends PageList {
                     zoom={this.props.graphProps.get('zoom')}
                     hlPoint={this.props.graphProps.get('hlPoint')}
                 />
-                {stocksList}
             </div>
         );
+    }
+    renderAfterList(render) {
+        const stocksList = this.renderStocksList(render);
+        const fundsGraph = this.renderFundsGraph(render);
+
+        return <span>
+            {stocksList}
+            {fundsGraph}
+        </span>;
+    }
+    afterList() {
+        // render graphs and stuff here
+        return <Media query={mediaQueries.desktop}>{render => this.renderAfterList(render)}</Media>;
     }
 }
 
