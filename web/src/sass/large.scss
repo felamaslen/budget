@@ -1,5 +1,24 @@
 // Common rules for anything larger than a mobile phone
 
+* {
+    &::-webkit-scrollbar {
+        width: 0.5em;
+    }
+    &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 16px -4px rgba(0, 0, 0, 0.3);
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 0.5em;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    &::-webkit-scrollbar-thumb:active {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+}
+
 .navbar {
     padding-bottom: 10px;
     .inner {
@@ -130,6 +149,45 @@
 // graphs
 .graph-container {
     width: 500px;
+}
+
+// editable items
+.editable {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    &.editing {
+        .text {
+            display: none;
+        }
+    }
+}
+.editable.editing,
+.li-add .editable {
+    overflow: visible !important;
+}
+.editable-input {
+    margin: 0;
+    min-width: 10px;
+    width: 100%;
+    border: 0;
+    padding: 0;
+    outline: none;
+    font: inherit;
+    text-align: left;
+    box-shadow: inset 0 0 0px 1px darkorange;
+}
+.editable-suggestion {
+    color: #2062ab;
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: inherit;
+}
+
+.editable-value,
+.editable-cost {
+    text-align: right;
 }
 
 // lists
