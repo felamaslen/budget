@@ -171,3 +171,16 @@ export function rContentUpdateBlocks(reduction, obj) {
         .setIn(['appState', 'other', 'blockView', 'blocks'], blocks);
 }
 
+export function rContentEditDialogOpened(reduction, req) {
+    return reduction;
+}
+export function rContentAddDialogOpened(reduction, req) {
+    return reduction;
+}
+export function rContentEditDialogClosed(reduction, req) {
+    return reduction;
+}
+export function rContentAddDialogClosed(reduction, req) {
+    return reduction;
+}
+

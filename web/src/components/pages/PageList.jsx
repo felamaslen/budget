@@ -12,7 +12,13 @@ import { mediaQueries, LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import { getEditable } from '../Editable/getEditable';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
-import { aContentBlockHovered } from '../../actions/ContentActions';
+import {
+    aContentBlockHovered,
+    aMobileEditDialogOpened,
+    aMobileEditDialogClosed,
+    aMobileAddDialogOpened,
+    aMobileAddDialogClosed
+} from '../../actions/ContentActions';
 import { BlockViewShallow } from '../BlockPacker';
 
 export class PageList extends PureControllerView {
@@ -146,7 +152,11 @@ export class PageList extends PureControllerView {
     renderListRowMobile(row, rowKey, columns, colKeys) {
         const items = this.renderListRowItemsMobile(row, rowKey, columns, colKeys);
 
-        return <li key={rowKey}>{items}</li>;
+        const onTouchEnd = () => {
+            this.dispatchAction(aMobileEditDialogOpened(this.props.index, rowKey));
+        };
+
+        return <li onTouchEnd={onTouchEnd} key={rowKey}>{items}</li>;
     }
     renderListMobile(render) {
         if (!render) {
@@ -283,12 +293,15 @@ export class PageList extends PureControllerView {
             'list'
         ].join(' ');
 
+        const listRendered = this.renderList();
+        const afterList = this.afterList();
+
         return (
             <div>
                 <div className={listClasses}>
-                    {this.renderList()}
+                    {listRendered}
                 </div>
-                {this.afterList()}
+                {afterList}
             </div>
         );
     }
