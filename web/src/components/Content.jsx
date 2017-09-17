@@ -89,6 +89,7 @@ export class Content extends PureControllerView {
             col={this.props.modalDialog.get('col')}
             id={this.props.modalDialog.get('id')}
             fields={this.props.modalDialog.get('fields')}
+            invalidKeys={this.props.modalDialog.get('invalidKeys')}
         />;
     }
     render() {

@@ -44,9 +44,16 @@ export class YMD {
             values.month >= 1 && values.month <= 12 &&
             values.date >= 1 && values.date <= monthDays(values.month, values.year);
 
-        this.year = values.year;
-        this.month = values.month;
-        this.date = values.date;
+        if (this.valid) {
+            this.year = values.year;
+            this.month = values.month;
+            this.date = values.date;
+        }
+        else {
+            this.year = null;
+            this.month = null;
+            this.date = null;
+        }
     }
     static getYear(parts) {
         if (parts.length === 3) {

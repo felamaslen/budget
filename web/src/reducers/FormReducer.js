@@ -2,6 +2,7 @@ import { Map as map, List as list } from 'immutable';
 
 import { getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES } from '../misc/const';
+import { getInvalidInsertDataKeys, rAddListItem } from './EditReducer';
 
 export function rOpenFormDialogEdit(reduction, req) {
     return reduction;
@@ -20,7 +21,8 @@ export function rOpenFormDialogAdd(reduction, req) {
             row: null,
             col: null,
             id: null,
-            fields
+            fields,
+            invalidKeys: list.of()
         }));
 }
 
@@ -29,17 +31,44 @@ export function rCloseFormDialogEdit(reduction, req) {
 }
 
 export function rCloseFormDialogAdd(reduction, pageIndex) {
+    const resetDialog = red => red
+        .setIn(['appState', 'modalDialog', 'active'], false)
+        .setIn(['appState', 'modalDialog', 'type'], null)
+        .setIn(['appState', 'modalDialog', 'fields'], list.of())
+        .setIn(['appState', 'modalDialog', 'invalidKeys'], list.of());
+
     if (pageIndex === null) {
-        // cancel dialog
-        return reduction
-            .setIn(['appState', 'modalDialog', 'active'], false)
-            .setIn(['appState', 'modalDialog', 'type'], null)
-            .setIn(['appState', 'modalDialog', 'fields'], list.of())
+        return resetDialog(reduction);
     }
 
-    debugger;
+    if (reduction.getIn(['appState', 'loadingApi'])) {
+        return reduction;
+    }
+
+    const fields = reduction.getIn(['appState', 'modalDialog', 'fields']);
+    const invalidKeys = getInvalidInsertDataKeys(fields);
+
+    if (invalidKeys.size > 0) {
+        return reduction
+            .setIn(['appState', 'modalDialog', 'invalidKeys'], invalidKeys);
+    }
+
+    const items = fields.map(field => {
+        return {
+            props: {
+                item: field.get('item'),
+                value: field.get('value')
+            }
+        };
+    });
+
+    return resetDialog(
+        rAddListItem(reduction, items)
+    );
 }
 
 export function rHandleFormInputChange(reduction, req) {
+    return reduction
+        .setIn(['appState', 'modalDialog', 'fields', req.fieldKey, 'value'], req.value);
 }
 

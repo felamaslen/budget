@@ -40,7 +40,8 @@ export const resetAppState = appState => {
             row: null,
             col: null,
             id: null,
-            fields: list.of()
+            fields: list.of(),
+            invalidKeys: list.of()
         }))
         .set('other', map({
             showAllBalanceGraph: false,

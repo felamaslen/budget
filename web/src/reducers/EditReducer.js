@@ -212,6 +212,19 @@ export function rDeleteListItem(reduction, item) {
     return newReduction;
 }
 
+export function getInvalidInsertDataKeys(items) {
+    return items.reduce((keys, item, itemKey) => {
+        const itemValid = item.valid || item.get('value').length > 0 ||
+            ['item', 'category', 'society', 'holiday'].indexOf(item.get('item')) === -1;
+
+        if (itemValid) {
+            return keys;
+        }
+
+        return keys.push(itemKey);
+    }, list.of());
+}
+
 export function rAddListItem(reduction, items) {
     if (reduction.getIn(['appState', 'loadingApi'])) {
         return reduction;
@@ -232,16 +245,11 @@ export function rAddListItem(reduction, items) {
             ? activeValue
             : column.props.value;
 
-        return { item, value };
+        return map({ item, value });
     });
 
-    const valid = theItems.reduce((status, item) => {
-        if (item.item !== 'item' || item.value.length > 0) {
-            return status;
-        }
-
-        return false;
-    }, true);
+    const invalidKeys = getInvalidInsertDataKeys(theItems);
+    const valid = invalidKeys.size === 0;
 
     if (!valid) {
         return rErrorMessageOpen(reduction, map({
@@ -250,10 +258,13 @@ export function rAddListItem(reduction, items) {
         }));
     }
 
-    const item = {};
-    theItems.forEach(thisItem => {
-        item[thisItem.item] = thisItem.value.toString();
-    });
+    const item = theItems.reduce((obj, thisItem) => {
+        obj[thisItem.get('item')] = thisItem
+            .get('value')
+            .toString();
+
+        return obj;
+    }, {});
 
     const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
     const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
@@ -262,7 +273,10 @@ export function rAddListItem(reduction, items) {
     return rActivateEditable(reduction, null)
         .setIn(['appState', 'edit', 'add'], list.of())
         .setIn(['appState', 'loadingApi'], true)
-        .set('effects', reduction.get('effects').push(buildMessage(EF_SERVER_ADD_REQUESTED, req)));
+        .set('effects', reduction
+            .get('effects')
+            .push(buildMessage(EF_SERVER_ADD_REQUESTED, req))
+        );
 }
 
 export function rHandleServerAdd(reduction, response) {
@@ -279,7 +293,7 @@ export function rHandleServerAdd(reduction, response) {
     const id = response.response.data.id;
     const newTotal = response.response.data.total;
 
-    const cols = list(item.map(thisItem => thisItem.value));
+    const cols = list(item.map(thisItem => thisItem.get('value')));
 
     // update total and push new item to the data store list, then sort by date
     const sortedRows = sortRowsByDate(
@@ -298,8 +312,8 @@ export function rHandleServerAdd(reduction, response) {
 
     // recalculate overview data
     if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
-        const costItem = item.find(thisItem => thisItem.item === 'cost');
-        const dateItem = item.find(thisItem => thisItem.item === 'date');
+        const costItem = item.find(thisItem => thisItem.get('item') === 'cost');
+        const dateItem = item.find(thisItem => thisItem.get('item') === 'date');
         if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
             return rErrorMessageOpen(newReduction, map({
                 level: ERROR_LEVEL_WARN,
@@ -307,7 +321,13 @@ export function rHandleServerAdd(reduction, response) {
             }));
         }
         newReduction = rCalculateOverview(
-            newReduction, pageIndex, dateItem.value, dateItem.value, costItem.value, 0);
+            newReduction,
+            pageIndex,
+            dateItem.get('value'),
+            dateItem.get('value'),
+            costItem.get('value'),
+            0
+        );
     }
 
     // reload block view

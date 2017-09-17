@@ -163,6 +163,11 @@ button {
                 font-size: 16px;
             }
         }
+        &.invalid {
+            .form-field:after {
+                border-color: #900;
+            }
+        }
     }
     .buttons {
         display: flex;

@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PureControllerView from './PureControllerView';
 import { List as list } from 'immutable';
+import classNames from 'classnames';
 
 import getFormField from './FormField';
 
@@ -30,7 +31,14 @@ export class ModalDialog extends PureControllerView {
                     value: field.get('value')
                 });
 
-                return <li key={fieldKey} className="form-row">
+                const invalid = this.props.invalidKeys.includes(fieldKey);
+
+                const className = classNames({
+                    'form-row': true,
+                    invalid
+                });
+
+                return <li key={fieldKey} className={className}>
                     <span className="form-label">{field.get('item')}</span>
                     {item}
                 </li>;
@@ -71,6 +79,7 @@ ModalDialog.propTypes = {
     row: PropTypes.number,
     col: PropTypes.number,
     id: PropTypes.number,
-    fields: PropTypes.instanceOf(list)
+    fields: PropTypes.instanceOf(list),
+    invalidKeys: PropTypes.instanceOf(list)
 }
 

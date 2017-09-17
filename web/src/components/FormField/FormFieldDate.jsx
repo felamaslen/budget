@@ -14,9 +14,11 @@ export default class FormFieldDate extends FormField {
         return this.props.onChange(processed);
     }
     renderInput() {
+        const onChange = evt => this.onChange(evt);
+
         return <input type="date"
             defaultValue={this.props.value.formatISO()}
-            onChange={this.onChange} />;
+            onChange={onChange} />;
     }
 }
 

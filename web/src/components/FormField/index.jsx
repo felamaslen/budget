@@ -15,7 +15,7 @@ import { aFormFieldChanged } from '../../actions/FormActions';
 
 export default function getFormField(dispatcher, req) {
     const onChange = value => {
-        return req.dispatcher.dispatch(aFormFieldChanged(req.fieldKey, value));
+        return dispatcher.dispatch(aFormFieldChanged(req.fieldKey, value));
     };
 
     if (req.item === 'date') {
@@ -33,7 +33,7 @@ export default function getFormField(dispatcher, req) {
     if (req.item === 'transactions') {
         const modifyTransactionsList = (transactionsList, value, key, trKey) => {
             if (value === null) {
-                return req.dispatcher.dispatch(aFormFieldChanged(req.fieldKey, null));
+                return dispatcher.dispatch(aFormFieldChanged(req.fieldKey, null));
             }
 
             const newList = transactionsList.list
