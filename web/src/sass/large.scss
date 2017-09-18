@@ -309,7 +309,6 @@ button {
 
 .page-overview {
     .table-flex {
-        width: 890px;
         cursor: default;
         .editable-outer {
             width: 80px;
@@ -317,9 +316,15 @@ button {
                 padding: 0;
             }
         }
+        .header {
+            .col {
+                &.month, &.income {
+                    border: none;
+                }
+            }
+        }
         .col {
             &.month {
-                flex-grow: 1;
                 border-right: 3px solid #222;
             }
             &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.net {
@@ -348,29 +353,11 @@ button {
         }
         .past {
             @include unimportant;
-            height: 16px;
-            line-height: 16px;
-            font-size: 13px;
-            .editable-input {
-                height: 16px;
-            }
         }
         .active {
             font-weight: bold;
-            font-size: 16px;
-            height: 24px;
-            line-height: 24px;
-            .editable-input {
-                height: 23px;
-            }
         }
         .future {
-            font-size: 15px;
-            height: 20px;
-            line-height: 20px;
-            .editable-input {
-                height: 20px;
-            }
         }
     }
 }

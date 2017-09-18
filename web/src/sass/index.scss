@@ -7,15 +7,15 @@
     @import "./mobile.scss";
 }
 
-@media screen and (min-width: $width_page_mobile) {
+@media screen and (min-width: $width_page_tablet_min + px) {
     @import "./large.scss";
 }
 
-@media screen and (min-width: $width_page_mobile) and (max-width: $width_page_tablet) {
+@media screen and (min-width: $width_page_tablet_min + px) and (max-width: $width_page_tablet) {
     @import "./tablet.scss";
 }
 
-@media screen and (min-width: $width_page_tablet) {
+@media screen and (min-width: $width_page_desktop_min + px) {
     @import "./desktop.scss";
 }
 

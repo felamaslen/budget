@@ -34,7 +34,10 @@ $color_social_light:    rgb(217, 202, 148);
 // responsive design parameters (injected from webpack)
 $width_page_mobile_small: $widthPageMobileSmall + px;
 $width_page_mobile: $widthPageMobile + px;
+$width_page_tablet_min: $widthPageMobile + 1;
 $width_page_tablet: $widthPageTablet + px;
+$width_page_tablet_small: $widthPageTabletSmall + px;
+$width_page_desktop_min: $widthPageTablet + 1;
 
 // common variables
 $width_logo:  30px;

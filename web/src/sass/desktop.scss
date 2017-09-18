@@ -11,6 +11,33 @@ html, body {
 
 /* overview page */
 .page-overview {
+    .table-flex {
+        width: 890px;
+        .past {
+            font-size: 13px;
+            height: 16px;
+            line-height: 16px;
+            .editable-input {
+                height: 16px;
+            }
+        }
+        .active {
+            font-size: 16px;
+            height: 24px;
+            line-height: 24px;
+            .editable-input {
+                height: 23px;
+            }
+        }
+        .future {
+            font-size: 15px;
+            height: 20px;
+            line-height: 20px;
+            .editable-input {
+                height: 20px;
+            }
+        }
+    }
     .graph-balance {
         left: 900px;
         top: $top_nav + 10

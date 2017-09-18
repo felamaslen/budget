@@ -5,7 +5,8 @@
 module.exports = {
     // responsive design parameters
     widthPageMobileSmall: 350,
-    widthPageMobile: 500,
-    widthPageTablet: 1500
+    widthPageMobile: 690,
+    widthPageTabletSmall: 1000,
+    widthPageTablet: 1400
 };
 
