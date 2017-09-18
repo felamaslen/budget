@@ -21,7 +21,7 @@ import {
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
-function recalculateFundProfits(reduction, pageIndex) {
+export function recalculateFundProfits(reduction, pageIndex) {
     const rows = reduction.getIn(['appState', 'pages', pageIndex, 'rows']);
     const startTime = reduction.getIn(['appState', 'pages', pageIndex, 'startTime']);
     const cacheTimes = reduction.getIn(['appState', 'pages', pageIndex, 'cacheTimes']);
@@ -54,10 +54,24 @@ function applyEditsOverview(reduction, item) {
         .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 }
 
+export function resortListRows(reduction, pageIndex) {
+    // sort rows by date
+    const sortedRows = sortRowsByDate(reduction.getIn(
+        ['appState', 'pages', pageIndex, 'rows']), pageIndex
+    );
+    const weeklyData = addWeeklyAverages(reduction.getIn(
+        ['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex
+    );
+
+    return reduction
+        .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
+        .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
+}
+
 function applyEditsList(reduction, item, pageIndex) {
     // update list data in the UI
     if (item.get('row') === -1) {
-    // add-item
+        // add-item
         return reduction.setIn(['appState', 'edit', 'add', item.get('col')], item.get('value'));
     }
 
@@ -74,7 +88,7 @@ function applyEditsList(reduction, item, pageIndex) {
         newReduction = newReduction.setIn(
             ['appState', 'pages', pageIndex, 'data', 'total'],
             newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) +
-        item.get('value') - item.get('originalValue')
+                item.get('value') - item.get('originalValue')
         );
     }
 
@@ -83,31 +97,37 @@ function applyEditsList(reduction, item, pageIndex) {
         newReduction = recalculateFundProfits(newReduction, pageIndex);
     }
 
-    // sort rows by date
-    const sortedRows = sortRowsByDate(
-        newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex);
-    const weeklyData = addWeeklyAverages(
-        newReduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
-
-    newReduction = newReduction.setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
-        .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
+    newReduction = resortListRows(newReduction, pageIndex);
 
     // recalculate overview data if the cost or date changed
     if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
         if (item.get('item') === 'cost') {
             const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
             const date = newReduction.getIn(
-                ['appState', 'pages', pageIndex, 'rows', item.get('row'), 'cols', dateKey]);
+                ['appState', 'pages', pageIndex, 'rows', item.get('row'), 'cols', dateKey]
+            );
 
             newReduction = rCalculateOverview(
-                newReduction, pageIndex, date, date, item.get('value'), item.get('originalValue'));
+                newReduction,
+                pageIndex,
+                date,
+                date,
+                item.get('value'),
+                item.get('originalValue')
+            );
         }
         else if (item.get('item') === 'date') {
             const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
             const cost = newRow.getIn(['cols', costKey]);
 
             newReduction = rCalculateOverview(
-                newReduction, pageIndex, item.get('value'), item.get('originalValue'), cost, cost);
+                newReduction,
+                pageIndex,
+                item.get('value'),
+                item.get('originalValue'),
+                cost,
+                cost
+            );
         }
     }
 
@@ -190,13 +210,21 @@ export function rDeleteListItem(reduction, item) {
     );
     // sort rows and recalculate weekly data
     const sortedRows = sortRowsByDate(
-        newReduction.getIn(['appState', 'pages', pageIndex, 'rows']).splice(item.key, 1), pageIndex);
+        newReduction
+            .getIn(['appState', 'pages', pageIndex, 'rows'])
+            .splice(item.key, 1), pageIndex
+    );
     const weeklyData = addWeeklyAverages(
-        newReduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
+        newReduction.getIn(['appState', 'pages', pageIndex, 'data']),
+        sortedRows,
+        pageIndex
+    );
 
     // recalculate overview data
     if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
-        const date = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', dateKey]);
+        const date = reduction.getIn(
+            ['appState', 'pages', pageIndex, 'rows', item.key, 'cols', dateKey]
+        );
         newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, itemCost);
     }
 
@@ -233,7 +261,7 @@ export function stringifyFields(fields) {
                 .toString();
 
             return obj;
-    }, {});
+        }, {});
 }
 
 export function rAddListItem(reduction, items) {

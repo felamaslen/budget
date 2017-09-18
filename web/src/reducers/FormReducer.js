@@ -1,8 +1,14 @@
 import { Map as map, List as list } from 'immutable';
 
-import { getAddDefaultValues } from '../misc/data';
-import { LIST_COLS_PAGES } from '../misc/const';
-import { getInvalidInsertDataKeys, stringifyFields } from './EditReducer';
+import { rCalculateOverview } from './data/overview';
+import { dataEquals, getAddDefaultValues } from '../misc/data';
+import { LIST_COLS_PAGES, PAGES } from '../misc/const';
+import {
+    getInvalidInsertDataKeys,
+    stringifyFields,
+    resortListRows,
+    recalculateFundProfits
+} from './EditReducer';
 
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
@@ -57,7 +63,73 @@ function resetModalDialog(reduction) {
 }
 
 export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
-    return reduction; // TODO
+    const rowKey = reduction.getIn(['appState', 'modalDialog', 'row']);
+
+    const oldRow = reduction.getIn(['appState', 'pages', pageIndex, 'rows', rowKey]);
+
+    const newRow = oldRow.set('cols', fields.map(field => field.get('value')));
+
+    let newReduction = resetModalDialog(reduction);
+
+    const changed = newRow
+        .get('cols')
+        .reduce((status, item, key) => {
+            if (status || !dataEquals(item, oldRow.getIn(['cols', key]))) {
+                return true;
+            }
+
+            return false;
+        }, false);
+
+    if (!changed) {
+        return newReduction;
+    }
+
+    const overviewKey = PAGES.indexOf('overview');
+    const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
+    const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
+
+    const oldTotal = reduction.getIn(
+        ['appState', 'pages', pageIndex, 'data', 'total']
+    );
+    const newTotal = oldTotal + newRow.getIn(['cols', costKey]) -
+        oldRow.getIn(['cols', costKey]);
+
+    if (PAGES[pageIndex] === 'funds') {
+        newReduction = recalculateFundProfits(newReduction, pageIndex);
+    }
+
+    newReduction = resortListRows(newReduction, pageIndex);
+
+    if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
+        const newDate = newRow.getIn(['cols', dateKey]);
+        const oldDate = oldRow.getIn(['cols', dateKey]);
+
+        const newCost = newRow.getIn(['cols', costKey]);
+        const oldCost = oldRow.getIn(['cols', costKey]);
+
+        newReduction = rCalculateOverview(
+            newReduction,
+            pageIndex,
+            newDate,
+            oldDate,
+            newCost,
+            oldCost
+        );
+    }
+
+    const id = reduction.getIn(['appState', 'modalDialog', 'id']);
+    const fieldsWithIds = id
+        ? fields.map(field => field.set('id', id))
+        : fields;
+
+    const queue = reduction.getIn(['appState', 'edit', 'queue'])
+        .concat(fieldsWithIds.map(field => field.set('pageIndex', pageIndex)));
+
+    return resetModalDialog(newReduction)
+        .setIn(['appState', 'edit', 'queue'], queue)
+        .setIn(['appState', 'pages', pageIndex, 'rows', rowKey], newRow)
+        .setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
 }
 
 export function rCloseFormDialogAdd(reduction, pageIndex, fields) {

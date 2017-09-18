@@ -15,9 +15,7 @@ import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
 import { aContentBlockHovered } from '../../actions/ContentActions';
 import {
     aMobileEditDialogOpened,
-    aMobileEditDialogClosed,
-    aMobileAddDialogOpened,
-    aMobileAddDialogClosed
+    aMobileAddDialogOpened
 } from '../../actions/FormActions';
 import { BlockViewShallow } from '../BlockPacker';
 
