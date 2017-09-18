@@ -4,6 +4,8 @@
 - Route for "all data" [DONE]
 - Client coding standards [DONE]
 - refreshing fund price cache doesn't reload gain text etc. [FIXED]
+- Optimise client for mobile devices [INCOMPLETE]
+- Include pie data with add / edit responses
 - Handle API response codes
 - Fix realtime stock prices
 - More sophisticated authentication
@@ -12,4 +14,3 @@
 - Write unit tests for client
 - Use logger function instead of console.log
 - Update Android app for new API
-- Optimise client for mobile devices

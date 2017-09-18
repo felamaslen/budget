@@ -5,7 +5,27 @@ import { LIST_COLS_PAGES } from '../misc/const';
 import { getInvalidInsertDataKeys, rAddListItem } from './EditReducer';
 
 export function rOpenFormDialogEdit(reduction, req) {
-    return reduction;
+    const pageIndex = req.pageIndex;
+    const rowItem = reduction.getIn(['appState', 'pages', pageIndex, 'rows', req.rowKey]);
+
+    const fields = rowItem.get('cols')
+        .map((value, key) => {
+            const item = LIST_COLS_PAGES[pageIndex][key];
+
+            return map({ item, value });
+        });
+
+    const id = rowItem.get('id');
+
+    return reduction
+        .setIn(['appState', 'modalDialog'], map({
+            active: true,
+            type: 'edit',
+            row: req.rowKey,
+            id,
+            fields,
+            invalidKeys: list.of()
+        }));
 }
 
 export function rOpenFormDialogAdd(reduction, req) {
@@ -19,7 +39,6 @@ export function rOpenFormDialogAdd(reduction, req) {
             active: true,
             type: 'add',
             row: null,
-            col: null,
             id: null,
             fields,
             invalidKeys: list.of()

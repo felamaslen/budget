@@ -10,9 +10,7 @@ import classNames from 'classnames';
 
 import getFormField from './FormField';
 
-import {
-    aMobileAddDialogClosed, aMobileEditDialogClosed
-} from '../actions/FormActions';
+import { aMobileDialogClosed } from '../actions/FormActions';
 
 export class ModalDialog extends PureControllerView {
     renderTitle() {
@@ -45,8 +43,10 @@ export class ModalDialog extends PureControllerView {
             });
     }
     renderButtons() {
-        const onCancel = () => this.props.dispatcher.dispatch(aMobileAddDialogClosed(null));
-        const onSubmit = () => this.props.dispatcher.dispatch(aMobileAddDialogClosed(this.props.pageIndex));
+        const onCancel = () => this.props.dispatcher.dispatch(aMobileDialogClosed(null));
+        const onSubmit = () => this.props.dispatcher.dispatch(aMobileDialogClosed(
+            this.props.pageIndex
+        ));
 
         return <div className="buttons">
             <button type="button" className="button-cancel"

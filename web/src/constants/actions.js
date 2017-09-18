@@ -45,10 +45,9 @@ export const EDIT_FUND_TRANSACTIONS_ADDED = 0xacef3;
 export const EDIT_FUND_TRANSACTIONS_REMOVED = 0xacef2;
 
 export const FORM_EDIT_DIALOG_OPENED = 0xac0f1;
-export const FORM_EDIT_DIALOG_CLOSED = 0xac0f2;
-export const FORM_ADD_DIALOG_OPENED = 0xac0f3;
-export const FORM_ADD_DIALOG_CLOSED = 0xac0f4;
-export const FORM_INPUT_CHANGED = 0xac0f5;
+export const FORM_ADD_DIALOG_OPENED = 0xac0f2;
+export const FORM_DIALOG_CLOSED = 0xac0f3;
+export const FORM_INPUT_CHANGED = 0xac0f4;
 
 export const GRAPH_SHOWALL_TOGGLED = 0xac81;
 export const GRAPH_FUND_ITEM_TOGGLED = 0xac82;
