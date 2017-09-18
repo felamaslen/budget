@@ -21,8 +21,13 @@ button {
         padding: 0 0.5em;
         background: $color_mob_primary_dark;
     }
+    .queue-not-saved {
+        float: right;
+        line-height: $height_header_mobile;
+    }
     .nav-list {
         display: flex;
+        width: 100%;
         flex-direction: row;
         padding: 0;
         box-shadow: 0 3px 9px rgba(100, 100, 100, 0.5),
