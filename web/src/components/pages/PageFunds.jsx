@@ -20,6 +20,7 @@ import { formatCurrency, formatPercent } from '../../misc/format';
 import { GraphFundItem } from '../graphs/GraphFundItem';
 import { GraphFunds } from '../graphs/GraphFunds';
 import { StocksList } from '../StocksList';
+import { aMobileEditDialogOpened } from '../../actions/FormActions';
 import { aFundsGraphPeriodChanged } from '../../actions/GraphActions';
 
 const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
@@ -194,7 +195,11 @@ export class PageFunds extends PageList {
         const gain = row.get('gain');
         const gainInfo = this.renderGainInfoMobile(row.getIn(['cols', colKeys[2]]), gain);
 
-        return <li key={rowKey}>
+        const onClick = () => {
+            this.dispatchAction(aMobileEditDialogOpened(this.props.index, rowKey));
+        };
+
+        return <li key={rowKey} onClick={onClick}>
             {items}
             {gainInfo}
         </li>;

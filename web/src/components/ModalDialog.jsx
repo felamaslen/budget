@@ -33,8 +33,18 @@ export class ModalDialog extends PureControllerView {
 
                 const className = classNames({
                     'form-row': true,
+                    [field.get('item')]: true,
                     invalid
                 });
+
+                if (field.get('item') === 'transactions') {
+                    return <li key={fieldKey} className={className}>
+                        <div className="inner">
+                            <span className="form-label">{field.get('item')}</span>
+                            {item}
+                        </div>
+                    </li>;
+                }
 
                 return <li key={fieldKey} className={className}>
                     <span className="form-label">{field.get('item')}</span>

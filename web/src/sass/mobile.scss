@@ -110,11 +110,15 @@ button {
     right: 0;
     top: 0;
     bottom: 0;
+    z-index: 10;
     background: transparent;
     .dialog {
         flex-flow: column nowrap;
-        width: 260px;
-        padding: 30px 30px 20px 30px;
+        width: 360px;
+        max-width: 95vw;
+        max-height: 95vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
         font-size: 1.3em;
         background: rgba(255, 255, 255, 0.95);
         border-radius: 3px;
@@ -122,11 +126,13 @@ button {
     }
     .title {
         font-size: 1.2em;
+        padding: 15px 20px 0 20px;
+        display: block;
     }
     .form-list {
         display: flex;
         margin: 1em 0;
-        padding: 0;
+        padding: 0 10px;
         list-style: none;
         flex-flow: column nowrap;
     }
@@ -134,6 +140,9 @@ button {
         display: flex;
         line-height: 32px;
         flex-flow: row nowrap;
+        .inner {
+            display: flex;
+        }
         .form-label {
             flex-basis: 0;
             flex-grow: 1;
@@ -173,12 +182,35 @@ button {
                 border-color: #900;
             }
         }
+        &.transactions {
+            .inner {
+                flex-flow: column nowrap;
+                & > .form-field:after {
+                    display: none;
+                }
+            }
+            .form-label, .form-field {
+                flex-basis: auto;
+            }
+            .transactions-list {
+                font-size: 85%;
+                li, .row {
+                    display: flex;
+                    flex-flow: row nowrap;
+                }
+                li:not(:last-child) {
+                    padding-bottom: 3px;
+                    border-bottom: 1px solid #999;
+                }
+            }
+        }
     }
     .buttons {
         display: flex;
         flex-flow: row nowrap;
         align-items: bottom;
         margin-top: 1em;
+        padding: 0 20px 20px 20px;
     }
     .button-cancel {
         background: #ccc;
