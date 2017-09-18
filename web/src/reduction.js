@@ -38,7 +38,6 @@ export const resetAppState = appState => {
             active: false,
             type: null,
             row: null,
-            col: null,
             id: null,
             fields: list.of(),
             invalidKeys: list.of()

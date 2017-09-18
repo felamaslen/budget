@@ -9,9 +9,11 @@ export default class FormFieldCost extends FormField {
         return this.props.onChange(processed);
     }
     renderInput() {
+        const onChange = evt => this.onChange(evt);
+
         return <input type="number" step="0.01"
             defaultValue={this.props.value / 100}
-            onChange={this.onChange} />;
+            onChange={onChange} />;
     }
 }
 

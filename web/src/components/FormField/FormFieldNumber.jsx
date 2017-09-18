@@ -7,9 +7,11 @@ export default class FormFieldNumber extends FormField {
         return this.props.onChange(parseFloat(evt.target.value, 10));
     }
     renderInput() {
+        const onChange = evt => this.onChange(evt);
+
         return <input type="number"
             defaultValue={this.props.value}
-            onChange={this.onChange} />;
+            onChange={onChange} />;
     }
 }
 

@@ -56,8 +56,7 @@ import {
 import {
     rOpenFormDialogEdit,
     rOpenFormDialogAdd,
-    rCloseFormDialogEdit,
-    rCloseFormDialogAdd,
+    rCloseFormDialog,
     rHandleFormInputChange
 } from './FormReducer';
 import {
@@ -201,11 +200,8 @@ export default (reduction, action) => {
     case AC.FORM_ADD_DIALOG_OPENED:
         return rOpenFormDialogAdd(reduction, action.payload);
 
-    case AC.FORM_EDIT_DIALOG_CLOSED:
-        return rCloseFormDialogEdit(reduction, action.payload);
-
-    case AC.FORM_ADD_DIALOG_CLOSED:
-        return rCloseFormDialogAdd(reduction, action.payload);
+    case AC.FORM_DIALOG_CLOSED:
+        return rCloseFormDialog(reduction, action.payload);
 
     case AC.FORM_INPUT_CHANGED:
         return rHandleFormInputChange(reduction, action.payload);

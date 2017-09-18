@@ -137,6 +137,42 @@ export class TransactionsList {
     }
 }
 
+export function dataEquals(item, compare) {
+    if (item instanceof YMD) {
+        if (compare instanceof YMD) {
+            return item.timestamp() === compare.timestamp();
+        }
+
+        return false;
+    }
+
+    if (item instanceof TransactionsList) {
+        if (compare instanceof TransactionsList) {
+            if (item.size !== compare.size) {
+                return false;
+            }
+
+            return item.list
+                .reduce((equal, listItem, key) => {
+                    if (!equal || !dataEquals(
+                        listItem.get('date'),
+                        compare.list.getIn([key, 'date'])
+                    ) || listItem.get('units') !== compare.list.getIn([key, 'units']) ||
+                        listItem.get('cost') !== compare.list.getIn([key, 'cost'])
+                    ) {
+                        return false;
+                    }
+
+                    return true;
+                }, true);
+        }
+
+        return false;
+    }
+
+    return item !== compare;
+}
+
 /**
  * Gets the mean or median of an immutable list of values
  * @param {List} theList: immutable list
@@ -245,7 +281,9 @@ export function buildQueueRequestList(reduction) {
 
             if (PAGES[pageIndex] === 'overview') {
                 if (startYearMonth === null) {
-                    startYearMonth = reduction.getIn(['appState', 'pages', pageIndex, 'data', 'startYearMonth']);
+                    startYearMonth = reduction.getIn(
+                        ['appState', 'pages', pageIndex, 'data', 'startYearMonth']
+                    );
                 }
                 const key = dataItem.get('row');
                 const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);

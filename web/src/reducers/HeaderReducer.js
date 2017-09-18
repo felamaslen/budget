@@ -9,7 +9,6 @@ import { resetAppState } from '../reduction';
 import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
-import { loadBlocks } from './data/list';
 import { reloadAnalysis } from './data/analysis';
 import { getFundsCachedValueAgeText } from './data/funds';
 import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
@@ -355,7 +354,7 @@ export function rNavigateToPage(reduction, pageIndex) {
         newReduction = reloadAnalysis(newReduction, newReduction);
     }
 
-    return loadBlocks(newReduction, pageIndex);
+    return newReduction;
 }
 
 export function rUpdateServer(reduction) {
@@ -412,6 +411,6 @@ export function rHandleServerUpdate(reduction, response) {
         .setIn(['appState', 'edit', 'queue'], list.of())
         .setIn(['appState', 'edit', 'queueDelete'], list.of());
 
-    return loadBlocks(newReduction, newReduction.getIn(['appState', 'currentPageIndex']), true);
+    return newReduction;
 }
 
