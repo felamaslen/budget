@@ -152,17 +152,17 @@ export class PageList extends PureControllerView {
     renderListRowMobile(row, rowKey, columns, colKeys) {
         const items = this.renderListRowItemsMobile(row, rowKey, columns, colKeys);
 
-        const onTouchEnd = () => {
+        const onClick = () => {
             this.dispatchAction(aMobileEditDialogOpened(this.props.index, rowKey));
         };
 
-        return <li onTouchEnd={onTouchEnd} key={rowKey}>{items}</li>;
+        return <li onClick={onClick} key={rowKey}>{items}</li>;
     }
     renderAddButton() {
-        const onTouchEnd = () => this.dispatchAction(aMobileAddDialogOpened(this.props.index));
+        const onClick = () => this.dispatchAction(aMobileAddDialogOpened(this.props.index));
 
         return <div className="button-add-outer">
-            <button type="button" className="button-add" onTouchEnd={onTouchEnd}>
+            <button type="button" className="button-add" onClick={onClick}>
                 Add
             </button>
         </div>;
