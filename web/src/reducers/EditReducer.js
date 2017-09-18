@@ -6,7 +6,6 @@ import { List as list, Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 import { EF_SERVER_ADD_REQUESTED, EF_SUGGESTIONS_REQUESTED } from '../constants/effects';
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './data/overview';
-import { loadBlocks } from './data/list';
 import { getExtraRowProps as reloadFundsRows } from './data/funds';
 import {
     PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR
@@ -362,9 +361,6 @@ export function rHandleServerAdd(reduction, response) {
             0
         );
     }
-
-    // reload block view
-    newReduction = loadBlocks(newReduction, pageIndex);
 
     if (reduction.getIn(['appState', 'currentPageIndex']) !== pageIndex) {
         return newReduction;

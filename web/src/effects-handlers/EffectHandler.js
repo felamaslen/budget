@@ -10,7 +10,7 @@ import buildEffectHandler from '../effectHandlerBuilder';
 import { PAGES, MAX_SUGGESTIONS, API_VERSION } from '../misc/const';
 import {
     EF_LOGIN_FORM_SUBMIT,
-    EF_CONTENT_REQUESTED, EF_BLOCKS_REQUESTED,
+    EF_CONTENT_REQUESTED,
     EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED,
     EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
     EF_FUNDS_PERIOD_REQUESTED, EF_SUGGESTIONS_REQUESTED,
@@ -21,7 +21,7 @@ import { aErrorOpened } from '../actions/ErrorActions';
 
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/HeaderActions';
 import { aLoginFormResponseGot } from '../actions/LoginActions';
-import { aContentLoaded, aContentBlocksReceived } from '../actions/ContentActions';
+import { aContentLoaded } from '../actions/ContentActions';
 import { aAnalysisDataReceived } from '../actions/AnalysisActions';
 import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
@@ -66,23 +66,6 @@ async function requestContent(req, dispatcher) {
     }
     catch (err) {
         return dispatcher.dispatch(aErrorOpened('An error occurred loading content'));
-    }
-}
-
-async function requestBlocks(req, dispatcher) {
-    const loadKey = req.loadKey;
-
-    try {
-        const response = await axios.get(`${apiPrefix}/data/pie/${req.table}`, {
-            headers: { 'Authorization': req.apiKey }
-        });
-
-        return dispatcher.dispatch(aContentBlocksReceived(response, loadKey));
-    }
-    catch (err) {
-        console.warn('Error loading block data for list');
-
-        return null;
     }
 }
 
@@ -266,8 +249,6 @@ export default buildEffectHandler([
     [EF_LOGIN_FORM_SUBMIT, submitLoginForm],
 
     [EF_CONTENT_REQUESTED, requestContent],
-
-    [EF_BLOCKS_REQUESTED, requestBlocks],
 
     [EF_SERVER_UPDATE_REQUESTED, updateServerData],
 
