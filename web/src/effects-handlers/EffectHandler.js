@@ -109,7 +109,7 @@ async function addServerData(req, dispatcher) {
 
         return dispatcher.dispatch(aServerAddReceived({
             response,
-            item: req.theItems,
+            item: req.fields,
             pageIndex: req.pageIndex
         }));
     }

@@ -2,7 +2,10 @@ import { Map as map, List as list } from 'immutable';
 
 import { getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES } from '../misc/const';
-import { getInvalidInsertDataKeys, rAddListItem } from './EditReducer';
+import { getInvalidInsertDataKeys, stringifyFields } from './EditReducer';
+
+import buildMessage from '../messageBuilder';
+import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 
 export function rOpenFormDialogEdit(reduction, req) {
     const pageIndex = req.pageIndex;
@@ -45,23 +48,33 @@ export function rOpenFormDialogAdd(reduction, req) {
         }));
 }
 
-export function rCloseFormDialogEdit(reduction, req) {
-    return reduction;
-}
-
-export function rCloseFormDialogAdd(reduction, pageIndex) {
-    const resetDialog = red => red
+function resetModalDialog(reduction) {
+    return reduction
         .setIn(['appState', 'modalDialog', 'active'], false)
         .setIn(['appState', 'modalDialog', 'type'], null)
         .setIn(['appState', 'modalDialog', 'fields'], list.of())
         .setIn(['appState', 'modalDialog', 'invalidKeys'], list.of());
+}
 
+export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
+    return reduction; // TODO
+}
+
+export function rCloseFormDialogAdd(reduction, pageIndex, fields) {
+    const item = stringifyFields(fields);
+    const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+    const req = { apiKey, item, fields, pageIndex };
+
+    return resetModalDialog(reduction)
+        .set('effects', reduction
+            .get('effects')
+            .push(buildMessage(EF_SERVER_ADD_REQUESTED, req))
+        );
+}
+
+export function rCloseFormDialog(reduction, pageIndex) {
     if (pageIndex === null) {
-        return resetDialog(reduction);
-    }
-
-    if (reduction.getIn(['appState', 'loadingApi'])) {
-        return reduction;
+        return resetModalDialog(reduction);
     }
 
     const fields = reduction.getIn(['appState', 'modalDialog', 'fields']);
@@ -72,18 +85,17 @@ export function rCloseFormDialogAdd(reduction, pageIndex) {
             .setIn(['appState', 'modalDialog', 'invalidKeys'], invalidKeys);
     }
 
-    const items = fields.map(field => {
-        return {
-            props: {
-                item: field.get('item'),
-                value: field.get('value')
-            }
-        };
-    });
+    const type = reduction.getIn(['appState', 'modalDialog', 'type']);
 
-    return resetDialog(
-        rAddListItem(reduction, items)
-    );
+    if (type === 'edit') {
+        return rCloseFormDialogEdit(reduction, pageIndex, fields);
+    }
+
+    if (type === 'add') {
+        return rCloseFormDialogAdd(reduction, pageIndex, fields);
+    }
+
+    return reduction;
 }
 
 export function rHandleFormInputChange(reduction, req) {

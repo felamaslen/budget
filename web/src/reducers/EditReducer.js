@@ -225,6 +225,17 @@ export function getInvalidInsertDataKeys(items) {
     }, list.of());
 }
 
+export function stringifyFields(fields) {
+    return fields
+        .reduce((obj, thisItem) => {
+            obj[thisItem.get('item')] = thisItem
+                .get('value')
+                .toString();
+
+            return obj;
+    }, {});
+}
+
 export function rAddListItem(reduction, items) {
     if (reduction.getIn(['appState', 'loadingApi'])) {
         return reduction;
@@ -239,7 +250,7 @@ export function rAddListItem(reduction, items) {
         activeValue = active.get('value');
     }
 
-    const theItems = items.map(column => {
+    const fields = items.map(column => {
         const item = column.props.item;
         const value = item === activeItem
             ? activeValue
@@ -248,7 +259,7 @@ export function rAddListItem(reduction, items) {
         return map({ item, value });
     });
 
-    const invalidKeys = getInvalidInsertDataKeys(theItems);
+    const invalidKeys = getInvalidInsertDataKeys(fields);
     const valid = invalidKeys.size === 0;
 
     if (!valid) {
@@ -258,17 +269,11 @@ export function rAddListItem(reduction, items) {
         }));
     }
 
-    const item = theItems.reduce((obj, thisItem) => {
-        obj[thisItem.get('item')] = thisItem
-            .get('value')
-            .toString();
-
-        return obj;
-    }, {});
+    const item = stringifyFields(fields);
 
     const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
     const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
-    const req = { apiKey, item, theItems, pageIndex };
+    const req = { apiKey, item, fields, pageIndex };
 
     return rActivateEditable(reduction, null)
         .setIn(['appState', 'edit', 'add'], list.of())
