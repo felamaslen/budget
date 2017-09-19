@@ -14,20 +14,33 @@ export class LoginForm extends PureControllerView {
     input(digit) {
         this.dispatchAction(aLoginFormInputted(digit));
     }
+    renderDigit(digit) {
+        const btnClass = `btn-digit btn-digit-${digit}`;
+
+        const onClick = () => this.input(digit);
+
+        return <button key={digit} className={btnClass}
+            onClick={onClick}>{digit}</button>;
+    }
     renderNumberInput() {
-        const digits = new Array(10)
+        const digits = new Array(4)
             .fill(0)
-            .map((item, key) => {
-                const digit = (key + 1) % 10;
-                const btnClass = `btn-digit btn-digit-${digit}`;
+            .map((item, rowKey) => {
+                if (rowKey < 3) {
+                    const row = new Array(3)
+                        .fill(0)
+                        .map((column, colKey) => {
+                            const digit = (rowKey * 3 + colKey + 1) % 10;
 
-                const onClick = () => this.input(digit);
+                            return this.renderDigit(digit);
+                        });
 
-                return (
-                    <button key={key} className={btnClass} onClick={onClick}>
-                        {digit}
-                    </button>
-                );
+                    return <div key={rowKey} className="number-input-row">{row}</div>;
+                }
+
+                return <div key={rowKey} className="number-input-row">
+                    {this.renderDigit(0)}
+                </div>;
             });
 
         return <div className="number-input noselect">{digits}</div>;
@@ -50,7 +63,9 @@ export class LoginForm extends PureControllerView {
         return (
             <div className="login-form">
                 <h3>Enter your PIN:</h3>
-                {digitBoxes}
+                <div className="pin-display">
+                    {digitBoxes}
+                </div>
                 {numberInput}
             </div>
         );
