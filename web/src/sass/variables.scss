@@ -1,0 +1,70 @@
+// colors
+$color_grad_btn_from:   #74ad5a;
+$color_grad_btn_to:     #68a54b;
+$color_shadow_btn:      #9acc85;
+$color_green:           #009933;
+$color_amber:           #fbe07f;
+
+$color_primary:         #fffef7;
+$color_primary_light:   #f5b831;
+$color_primary_dark:    #9f3030;
+
+$color_bg_up:           #1e5413;
+$color_bg_up_hl:        #d4ffcc;
+$color_bg_up_rev:       #bdfcf8;
+$color_bg_down:         #a01e1e;
+$color_bg_down_hl:      #f2bfbf;
+$color_bg_down_rev:     #bfd7f2;
+
+$color_income:          #d84315;
+$color_bills:           #b71c1c;
+$color_food:            #43a047;
+$color_general:         #01579b;
+$color_holiday:         #00897b;
+$color_social:          #bf9e24;
+
+$color_funds_light:     rgb(194, 221, 234);
+$color_income_light:    rgb(255, 197, 179);
+$color_bills_light:     rgb(234, 190, 182);
+$color_food_light:      rgb(165, 212, 166);
+$color_general_light:   rgb(170, 200, 224);
+$color_holiday_light:   rgb(162, 222, 215);
+$color_social_light:    rgb(217, 202, 148);
+
+// responsive design parameters (injected from webpack)
+$width_page_mobile_small: $widthPageMobileSmall + px;
+$width_page_mobile: $widthPageMobile + px;
+$width_page_tablet_min: $widthPageMobile + 1;
+$width_page_tablet: $widthPageTablet + px;
+$width_page_tablet_small: $widthPageTabletSmall + px;
+$width_page_desktop_min: $widthPageTablet + 1;
+
+// common variables
+$width_logo:  30px;
+$height_logo: 30px;
+$height_nav:  49px;
+
+$top_nav: $height_nav + 10;
+
+$nav_img: "../images/nav.png";
+
+// mobile variables
+$height_header_mobile: 55px;
+$height_nav_mobile: 45px;
+$color_mob_primary: #fffef7;
+$color_mob_primary_dark: #9f3030;
+$color_mob_accent: #ffa040;
+$color_mob_overview_tbl_month: #fffca3;
+$color_mob_overview_tbl_income: #b7ffa3;
+$color_mob_overview_tbl_spending: #ffa3a3;
+$color_mob_overview_tbl_balance: #a3baff;
+
+// text
+$text_show_graph: "Show";
+$text_hide_graph: "Hide";
+$none: "";
+$text_down_arrow: "\25be";
+$text_up_arrow: "\25b4";
+$bracket_left: "(";
+$bracket_right: ")";
+

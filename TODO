@@ -4,6 +4,10 @@
 - Route for "all data" [DONE]
 - Client coding standards [DONE]
 - refreshing fund price cache doesn't reload gain text etc. [FIXED]
+- Optimise client for mobile devices [DONE]
+- Use react router
+- Don't use .toString() for JSON data passing (use .valueOf())
+- Include pie data with add / edit responses
 - Handle API response codes
 - Fix realtime stock prices
 - More sophisticated authentication
@@ -12,4 +16,3 @@
 - Write unit tests for client
 - Use logger function instead of console.log
 - Update Android app for new API
-- Optimise client for mobile devices

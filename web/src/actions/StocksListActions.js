@@ -5,14 +5,14 @@
 import buildMessage from '../messageBuilder';
 
 import {
-    AC_STOCKS_LIST_REQUESTED,
-    AC_STOCKS_LIST_RECEIVED,
-    AC_STOCKS_PRICES_REQUESTED,
-    AC_STOCKS_PRICES_RECEIVED
+    STOCKS_LIST_REQUESTED,
+    STOCKS_LIST_RECEIVED,
+    STOCKS_PRICES_REQUESTED,
+    STOCKS_PRICES_RECEIVED
 } from '../constants/actions';
 
-export const aStocksListRequested = () => buildMessage(AC_STOCKS_LIST_REQUESTED);
-export const aStocksListReceived = response => buildMessage(AC_STOCKS_LIST_RECEIVED, response);
-export const aStocksPricesRequested = () => buildMessage(AC_STOCKS_PRICES_REQUESTED);
-export const aStocksPricesReceived = response => buildMessage(AC_STOCKS_PRICES_RECEIVED, response);
+export const aStocksListRequested = () => buildMessage(STOCKS_LIST_REQUESTED);
+export const aStocksListReceived = response => buildMessage(STOCKS_LIST_RECEIVED, response);
+export const aStocksPricesRequested = () => buildMessage(STOCKS_PRICES_REQUESTED);
+export const aStocksPricesReceived = response => buildMessage(STOCKS_PRICES_RECEIVED, response);
 

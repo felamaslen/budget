@@ -4,21 +4,21 @@
 
 import buildMessage from '../messageBuilder';
 import {
-    AC_EDIT_ACTIVATED, AC_EDIT_CHANGED, AC_EDIT_LIST_ITEM_ADDED,
-    AC_EDIT_LIST_ITEM_DELETED,
-    AC_EDIT_FUND_TRANSACTIONS_CHANGED, AC_EDIT_FUND_TRANSACTIONS_ADDED,
-    AC_EDIT_FUND_TRANSACTIONS_REMOVED,
-    AC_EDIT_SUGGESTIONS_REQUESTED, AC_EDIT_SUGGESTIONS_RECEIVED
+    EDIT_ACTIVATED, EDIT_CHANGED, EDIT_LIST_ITEM_ADDED,
+    EDIT_LIST_ITEM_DELETED,
+    EDIT_FUND_TRANSACTIONS_CHANGED, EDIT_FUND_TRANSACTIONS_ADDED,
+    EDIT_FUND_TRANSACTIONS_REMOVED,
+    EDIT_SUGGESTIONS_REQUESTED, EDIT_SUGGESTIONS_RECEIVED
 } from '../constants/actions';
 
-export const aEditableActivated = editable => buildMessage(AC_EDIT_ACTIVATED, editable);
-export const aEditableChanged = value => buildMessage(AC_EDIT_CHANGED, value);
-export const aListItemAdded = items => buildMessage(AC_EDIT_LIST_ITEM_ADDED, items);
-export const aListItemDeleted = item => buildMessage(AC_EDIT_LIST_ITEM_DELETED, item);
-export const aSuggestionsRequested = value => buildMessage(AC_EDIT_SUGGESTIONS_REQUESTED, value);
-export const aSuggestionsReceived = response => buildMessage(AC_EDIT_SUGGESTIONS_RECEIVED, response);
+export const aEditableActivated = editable => buildMessage(EDIT_ACTIVATED, editable);
+export const aEditableChanged = value => buildMessage(EDIT_CHANGED, value);
+export const aListItemAdded = items => buildMessage(EDIT_LIST_ITEM_ADDED, items);
+export const aListItemDeleted = item => buildMessage(EDIT_LIST_ITEM_DELETED, item);
+export const aSuggestionsRequested = value => buildMessage(EDIT_SUGGESTIONS_REQUESTED, value);
+export const aSuggestionsReceived = response => buildMessage(EDIT_SUGGESTIONS_RECEIVED, response);
 
-export const aFundTransactionsChanged = obj => buildMessage(AC_EDIT_FUND_TRANSACTIONS_CHANGED, obj);
-export const aFundTransactionsAdded = obj => buildMessage(AC_EDIT_FUND_TRANSACTIONS_ADDED, obj);
-export const aFundTransactionsRemoved = obj => buildMessage(AC_EDIT_FUND_TRANSACTIONS_REMOVED, obj);
+export const aFundTransactionsChanged = obj => buildMessage(EDIT_FUND_TRANSACTIONS_CHANGED, obj);
+export const aFundTransactionsAdded = obj => buildMessage(EDIT_FUND_TRANSACTIONS_ADDED, obj);
+export const aFundTransactionsRemoved = obj => buildMessage(EDIT_FUND_TRANSACTIONS_REMOVED, obj);
 

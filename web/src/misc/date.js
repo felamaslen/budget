@@ -44,9 +44,16 @@ export class YMD {
             values.month >= 1 && values.month <= 12 &&
             values.date >= 1 && values.date <= monthDays(values.month, values.year);
 
-        this.year = values.year;
-        this.month = values.month;
-        this.date = values.date;
+        if (this.valid) {
+            this.year = values.year;
+            this.month = values.month;
+            this.date = values.date;
+        }
+        else {
+            this.year = null;
+            this.month = null;
+            this.date = null;
+        }
     }
     static getYear(parts) {
         if (parts.length === 3) {
@@ -125,9 +132,15 @@ export class YMD {
         ];
     }
     format() {
-        const numbers = this.formatNumbers();
-
-        return `${numbers[2]}/${numbers[1]}/${numbers[0]}`;
+        return this
+            .formatNumbers()
+            .reverse()
+            .join('/');
+    }
+    formatISO() {
+        return this
+            .formatNumbers()
+            .join('-');
     }
     valueOf() {
         return this.timestamp();
@@ -143,6 +156,7 @@ export class YMD {
     timestamp() {
         return Math.floor(new Date(this.year, this.month - 1, this.date).getTime() / 1000);
     }
+
 }
 
 class TimeTick {

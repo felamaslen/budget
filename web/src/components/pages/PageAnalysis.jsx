@@ -171,42 +171,50 @@ export class PageAnalysis extends PureControllerView {
         const listTree = this.listTree();
         const blockTree = this.blockTree();
 
+        const periodSwitcher = ANALYSIS_PERIODS.map((period, key) => {
+            return (
+                <span key={key}>
+                    <input type="radio" checked={this.props.other.get('period') === key}
+                        onChange={() => this.dispatchAction(aPeriodChanged(key))} />
+                    <span>{capitalise(period)}</span>
+                </span>
+            );
+        });
+
+        const groupingSwitcher = ANALYSIS_GROUPINGS.map((grouping, key) => {
+            return (
+                <span key={key}>
+                    <input type="radio" checked={this.props.other.get('grouping') === key}
+                        onChange={() => this.dispatchAction(aGroupingChanged(key))} />
+                    <span>{capitalise(grouping)}</span>
+                </span>
+            );
+        });
+
+        const previousPeriod = () => {
+            this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') + 1));
+        };
+
+        const nextPeriod = () => {
+            this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') - 1));
+        };
+
         return (
             <div className="page-analysis">
                 <div className="upper">
                     <span className="input-period">
                         <span>Period:</span>
-                        {ANALYSIS_PERIODS.map((period, key) => {
-                            return (
-                                <span key={key}>
-                                    <input type="radio" checked={this.props.other.get('period') === key}
-                                        onChange={() => this.dispatchAction(aPeriodChanged(key))} />
-                                    <span>{capitalise(period)}</span>
-                                </span>
-                            );
-                        })}
+                        {periodSwitcher}
                     </span>
                     <span className="input-grouping">
                         <span>Grouping:</span>
-                        {ANALYSIS_GROUPINGS.map((grouping, key) => {
-                            return (
-                                <span key={key}>
-                                    <input type="radio" checked={this.props.other.get('grouping') === key}
-                                        onChange={() => this.dispatchAction(aGroupingChanged(key))} />
-                                    <span>{capitalise(grouping)}</span>
-                                </span>
-                            );
-                        })}
+                        {groupingSwitcher}
                     </span>
                     <div className="btns">
                         <button className="btn-previous"
-                            onClick={() => {
-                                this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') + 1));
-                            }}>Previous</button>
+                            onClick={previousPeriod}>Previous</button>
                         <button className="btn-next" disabled={this.props.other.get('timeIndex') === 0}
-                            onClick={() => {
-                                this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') - 1));
-                            }}>Next</button>
+                            onClick={nextPeriod}>Next</button>
                     </div>
                     <h3 className="period-title">{this.props.description}</h3>
                     <div className="flexbox">

@@ -1,5 +1,8 @@
 Release:
 
+- 3.0.1-alpha-1
+    - Responsive layout for mobile and tablet
+
 - 3.0.0-alpha-7
     - Added this file
     - Made Android app work with new API
