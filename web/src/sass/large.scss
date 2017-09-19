@@ -667,13 +667,16 @@ button {
         float: right;
     }
     .period-title {
-        margin: 0.3em 0;
+        margin: 0.3em 1em;
         font-size: 1.2em;
     }
-
+    .flexbox {
+        flex-flow: row wrap;
+    }
     .tree {
         margin: 1em;
-        flex: 1;
+        flex-grow: 1;
+        min-width: 400px;
         .title {
             text-transform: capitalize;
         }
