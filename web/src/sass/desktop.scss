@@ -39,6 +39,9 @@ html, body {
         left: 900px;
         top: $top_nav + 320;
     }
+    .graph-balance, .graph-spend {
+        position: fixed;
+    }
 }
 
 /* analysis page */

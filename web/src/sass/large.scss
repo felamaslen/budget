@@ -56,7 +56,6 @@ button {
 }
 
 .navbar {
-    padding-bottom: 10px;
     .inner {
         background: linear-gradient(to bottom, #d84d4d, #9f3030);
         box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
@@ -235,7 +234,8 @@ button {
 // lists
 .list-insert {
     .list-head {
-        top: $top_nav;
+        top: $top_nav - 10;
+        padding-top: 10px;
         border-bottom: 1px solid #999;
         width: 100%;
         height: 24px;
