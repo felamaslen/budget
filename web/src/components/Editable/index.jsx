@@ -21,7 +21,7 @@ import EditableTransactions from './EditableTransactions';
  * @param {list} suggestions: search suggestions list
  * @returns {Editable}: the correct editable react component class
  */
-export function getEditable(
+export default function getEditable(
     dispatcher, row, col, id, item, value, pageIndex, active, suggestions
 ) {
     if (item === 'date') {

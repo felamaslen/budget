@@ -3,6 +3,7 @@
   "version": "3.0.0-next",
   "description": "Personal finance app",
   "main": "gulpfile.js",
+  "sasslintConfig": ".sass-lint.yml",
   "scripts": {
     "preinstall": "rm -rf ./node_modules",
     "postinstall": "./node_modules/.bin/webpack",
@@ -13,6 +14,7 @@
     "test:web": "./node_modules/.bin/mocha --compilers js:babel-core/register -w \"./web/test/**/*.spec.js\" --bail --reporter spec",
     "test:webui": "./node_modules/.bin/mocha -w \"./web/test.ui/index.js\" --bail --reporter spec",
     "lint": "./node_modules/.bin/eslint webpack.config.js webpack api/src api/test web/src web/test",
+    "sass-lint": "./node_modules/.bin/sass-lint -qv \"./web/src/sass/**/*.scss\"",
     "install_db": "node ./api/scripts/createSchema.js",
     "test:install_db": "NODE_ENV=test node ./api/scripts/createSchema.js",
     "scrape_funds": "node ./api/scripts/scrapeFunds.js -q",
@@ -61,6 +63,7 @@
     "prompt": "^1.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-media": "^1.6.1",
     "react-pure-render": "^1.0.2",
     "sass-loader": "^6.0.6",
     "sha1": "^1.1.1",
@@ -82,6 +85,7 @@
     "morgan": "^1.8.2",
     "nodemon": "^1.11.0",
     "react-test-renderer": "^15.6.1",
+    "sass-lint": "^1.11.1",
     "webpack-dev-server": "^2.7.1"
   }
 }

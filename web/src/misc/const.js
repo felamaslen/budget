@@ -2,6 +2,13 @@
  * Constant items
  */
 
+import { widthPageMobile } from '../constants/styles';
+
+export const mediaQueries = {
+    mobile: `(max-device-width: ${widthPageMobile}px)`,
+    desktop: `(min-device-width: ${widthPageMobile + 1}px)`
+};
+
 export const API_VERSION = 3;
 
 export const ERROR_LEVEL_ERROR = 0xe0;
@@ -25,7 +32,7 @@ export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', '
     'August', 'September', 'October', 'November', 'December'];
 export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
 export const OVERVIEW_COLUMNS = [
-    [null, 'Month'],
+    ['month', 'Month'],
     ['funds', 'Stocks'],
     ['bills', 'Bills'],
     ['food', 'Food'],
@@ -33,10 +40,11 @@ export const OVERVIEW_COLUMNS = [
     ['holiday', 'Holiday'],
     ['social', 'Social'],
     ['income', 'Income'],
-    ['spending', 'Expenses'],
+    ['spending', 'Out'],
     ['net', 'Net'],
     ['predicted', 'Predicted'],
-    ['balance', 'Balance']
+    ['balance', 'Balance'],
+    ['balancePred', 'Balance']
 ];
 
 export const LIST_PAGES = [2, 3, 4, 5, 6, 7, 8];

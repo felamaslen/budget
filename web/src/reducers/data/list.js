@@ -4,33 +4,13 @@
 
 import { fromJS, List as list, Map as map } from 'immutable';
 import {
-    LIST_COLS_SHORT, LIST_COLS_STANDARD, LIST_COLS_PAGES, BLOCK_PAGES, PAGES
+    LIST_COLS_SHORT, LIST_COLS_STANDARD, LIST_COLS_PAGES
 } from '../../misc/const';
 import { YMD } from '../../misc/date';
 import { TransactionsList } from '../../misc/data';
 import {
     getFormattedHistory, getFundsCachedValue, getExtraRowProps
 } from './funds';
-import buildMessage from '../../messageBuilder';
-import { EF_BLOCKS_REQUESTED } from '../../constants/effects';
-
-export function loadBlocks(reduction, pageIndex, noClear) {
-    if (BLOCK_PAGES.indexOf(pageIndex) === -1) {
-        return reduction
-            .setIn(['appState', 'other', 'blockView', 'blocks'], null);
-    }
-    let newReduction = reduction;
-    if (!noClear) {
-        newReduction = newReduction.setIn(['appState', 'other', 'blockView', 'blocks'], null);
-    }
-    const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-    const table = PAGES[pageIndex];
-    const loadKey = new Date().getTime();
-
-    return newReduction.set('effects', reduction.get('effects').push(
-        buildMessage(EF_BLOCKS_REQUESTED, { apiKey, table, loadKey })
-    )).setIn(['appState', 'other', 'blockView', 'loadKey'], loadKey);
-}
 
 export function processRawListRows(data, pageIndex) {
     return list(data.map(item => {
@@ -83,10 +63,8 @@ export function processPageDataList(reduction, pageIndex, raw) {
 
     const rows = processRawListRows(raw.data, pageIndex);
 
-    return loadBlocks(
-        reduction.setIn(
-            ['appState', 'pages', pageIndex], map({ data, rows })
-        ), pageIndex
+    return reduction.setIn(
+        ['appState', 'pages', pageIndex], map({ data, rows })
     );
 }
 

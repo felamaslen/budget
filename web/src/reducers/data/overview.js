@@ -96,7 +96,8 @@ function calculateTableData(data) {
         .push(cost.get('spending'))
         .push(cost.get('net'))
         .push(cost.get('predicted'))
-        .push(cost.get('balance'));
+        .push(cost.get('balance'))
+        .push(cost.get('balanceWithPredicted'));
 }
 
 export function rProcessDataOverview(
@@ -252,7 +253,7 @@ export function rGetOverviewRows(data) {
             const editable = column[0] === 'balance';
 
             return map({
-                column,
+                column: list(column),
                 value,
                 rgb,
                 editable
@@ -317,9 +318,11 @@ export function rCalculateOverview(
     const futureMonths = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'futureMonths']);
 
     const newData = rProcessDataOverview(
-        newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths);
+        newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths
+    );
 
-    return reduction.setIn(['appState', 'pages', overviewKey, 'data'], newData)
+    return reduction
+        .setIn(['appState', 'pages', overviewKey, 'data'], newData)
         .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 }
 

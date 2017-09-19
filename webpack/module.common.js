@@ -1,7 +1,14 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+const jsonToSassVars = require('./jsonToSassVars');
+
+const sassVariablesObj = require('../web/src/constants/styles');
+const sassVariables = encodeURIComponent(jsonToSassVars(
+    sassVariablesObj
+));
+
 const sassLoader = ExtractTextPlugin.extract(
-    'css-loader!sass-loader'
+    `css-loader!sass-loader!prepend-loader?data=${sassVariables}`
 );
 
 const babelOptions = JSON.stringify({

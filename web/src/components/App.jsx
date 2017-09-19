@@ -84,6 +84,7 @@ export default class App extends Component {
                 loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
                 index={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
                 edit={this.state.reduction.getIn(['appState', 'edit'])}
+                modalDialog={this.state.reduction.getIn(['appState', 'modalDialog'])}
                 other={this.state.reduction.getIn(['appState', 'other'])} />
         ) : null;
 

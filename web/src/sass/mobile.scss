@@ -1,0 +1,479 @@
+button {
+    margin: 0 6px;
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    padding: 1em 0;
+    width: 100%;
+    font-size: 0.6em;
+    border: none;
+    border-radius: 3px;
+    outline: none;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.navbar {
+    height: $height_header_mobile + $height_nav_mobile;
+    .app-logo {
+        width: 100%;
+        height: $height_header_mobile;
+        padding: 0 0.5em;
+        background: $color_mob_primary_dark;
+    }
+    .queue-not-saved {
+        float: right;
+        line-height: $height_header_mobile;
+    }
+    .nav-list {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        padding: 0;
+        box-shadow: 0 3px 9px rgba(100, 100, 100, 0.5),
+        0 -2px 6px rgba(0, 0, 0, 0.3);
+    }
+    .nav-link-li {
+        flex: 1 0 0;
+        border-bottom: 4px solid transparent;
+        &.active {
+            border-color: $color_mob_accent;
+        }
+    }
+    .nav-link {
+        display: block;
+        height: $height_nav_mobile - 12;
+        text-align: center;
+        text-indent: -9999px;
+        overflow: hidden;
+        padding-top: 8px;
+    }
+    .nav-link, .nav-link-btn {
+        &:before {
+            display: block;
+            margin: 0 auto;
+        }
+    }
+    .nav-link-overview .nav-link:before {
+        background-position: -200px 0;
+    }
+    .nav-link-analysis {
+        display: none;
+        .nav-link {
+            &:before {
+                background-position: -228px 0;
+            }
+        }
+    }
+    .nav-link-funds .nav-link:before {
+        background-position: -256px 0;
+    }
+    .nav-link-income .nav-link:before {
+        background-position: -284px 0;
+    }
+    .nav-link-bills .nav-link:before {
+        background-position: -312px 0;
+    }
+    .nav-link-food .nav-link:before {
+        background-position: -340px 0;
+    }
+    .nav-link-general .nav-link:before {
+        background-position: -368px 0;
+    }
+    .nav-link-holiday .nav-link:before {
+        background-position: -200px -28px;
+    }
+    .nav-link-social .nav-link:before {
+        background-position: -228px -28px;
+    }
+    .nav-link-logout {
+        display: none;
+        .nav-link {
+            &:before {
+                background-position: -256px -28px;
+            }
+        }
+    }
+}
+
+.page-wrapper {
+    padding-top: $height_header_mobile + $height_nav_mobile;
+}
+
+// modal dialogs
+.modal-dialog-outer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    background: transparent;
+    .dialog {
+        flex-flow: column nowrap;
+        width: 360px;
+        max-width: 95vw;
+        max-height: 95vh;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        font-size: 1.3em;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 3px;
+        box-shadow: 0 3px 7px rgba(60, 60, 60, 0.5);
+    }
+    .title {
+        font-size: 1.2em;
+        padding: 15px 20px 0 20px;
+        display: block;
+    }
+    .form-list {
+        display: flex;
+        margin: 1em 0;
+        padding: 0 10px;
+        list-style: none;
+        flex-flow: column nowrap;
+    }
+    .form-row {
+        display: flex;
+        line-height: 32px;
+        flex-flow: row nowrap;
+        .inner {
+            display: flex;
+        }
+        .form-label {
+            flex-basis: 0;
+            flex-grow: 1;
+            text-transform: capitalize;
+            &:after {
+                content: ":";
+            }
+        }
+        .form-field {
+            display: flex;
+            flex-flow: column nowrap;
+            flex-basis: 0;
+            flex-grow: 2;
+            border: 0;
+            line-height: 28px;
+            &:after {
+                display: block;
+                content: $none;
+                width: 100%;
+                height: 4px;
+                border: 1px solid #ccc;
+                border-top: none;
+            }
+            input[type=text],
+            input[type=number],
+            input[type=date] {
+                display: block;
+                border: none;
+                outline: none;
+                line-height: 28px;
+                width: 100%;
+                font-size: 16px;
+            }
+        }
+        &.invalid {
+            .form-field:after {
+                border-color: #900;
+            }
+        }
+        &.transactions {
+            .inner {
+                flex-flow: column nowrap;
+                & > .form-field:after {
+                    display: none;
+                }
+            }
+            .form-label, .form-field {
+                flex-basis: auto;
+            }
+            .transactions-list {
+                font-size: 85%;
+                li, .row {
+                    display: flex;
+                    flex-flow: row nowrap;
+                }
+                li:not(:last-child) {
+                    padding-bottom: 3px;
+                    border-bottom: 1px solid #999;
+                }
+            }
+        }
+    }
+    .buttons {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: bottom;
+        margin-top: 1em;
+        padding: 0 20px 20px 20px;
+    }
+    .button-cancel {
+        background: #ccc;
+        color: black;
+        &:after {
+            content: $none;
+            display: block;
+            height: 100%;
+            width: 0;
+            border-right: 1px solid #ccc;
+        }
+    }
+    .button-submit {
+        background: #09e;
+        color: white;
+    }
+}
+
+// graphs
+.graph-container {
+    width: 100%;
+    position: relative;
+}
+
+.page-overview {
+    .funds, .bills, .food, .general, .holiday, .social,
+    .net, .predicted, .balance {
+        display: none;
+    }
+    .table-flex {
+        width: 100%;
+        .header {
+            .col .text {
+                text-align: center;
+                height: 20px;
+                line-height: 20px;
+            }
+            .month {
+                background: $color_mob_overview_tbl_month;
+            }
+            .income {
+                background: $color_mob_overview_tbl_income;
+            }
+            .spending {
+                background: $color_mob_overview_tbl_spending;
+            }
+            .balancePred {
+                background: $color_mob_overview_tbl_balance;
+            }
+        }
+        .col {
+            .text, .editable {
+                padding: 4px 10px;
+                display: inline-block;
+                width: 100%;
+                vertical-align: middle;
+                text-align: left;
+                height: 32px;
+                line-height: 32px;
+            }
+        }
+        .past {
+            font-style: italic;
+            color: #666;
+
+            .month {
+                background: #eee;
+            }
+        }
+        .active {
+            font-weight: bold;
+        }
+        .future {
+        }
+    }
+}
+
+// lists
+.list-insert {
+    position: fixed;
+    top: $height_nav_mobile + $height_header_mobile;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: scroll;
+    .list-head {
+        display: flex;
+        flex-flow: row nowrap;
+        top: $height_header_mobile + $height_nav_mobile;
+        width: 100%;
+        span {
+            text-align: center;
+        }
+    }
+    .list-ul {
+        display: flex;
+        flex-flow: column nowrap;
+        margin-bottom: 50px;
+        li {
+            display: flex;
+            flex-flow: row nowrap;
+            line-height: 36px;
+            height: 36px;
+            & > span {
+                display: flex;
+                flex-basis: 0;
+                min-width: 0;
+                white-space: nowrap;
+                padding: 0 2px;
+
+                span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+    }
+    .list-head, .list-ul {
+        .date {
+            flex-grow: 4;
+        }
+        .item {
+            flex-grow: 7;
+        }
+        .cost {
+            flex-grow: 4;
+        }
+    }
+    .button-add-outer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        font-size: 1.5em;
+        background: rgba(255, 255, 255, 0.7);
+    }
+    .button-add {
+        width: 120px;
+        flex-grow: 0;
+        background: $color_mob_primary_dark;
+        color: white;
+    }
+}
+
+.list-funds {
+    &, .list-head {
+        background: $color_funds_light;
+    }
+    .list-head {
+        top: $height_header_mobile + $height_nav_mobile + 65;
+    }
+    .list-ul {
+        margin-top: 65px;
+    }
+    .list-head, .list-ul {
+        .date {
+            flex-grow: 8;
+        }
+        .item {
+            flex-grow: 12;
+        }
+        .cost {
+            flex-grow: 10;
+            font-size: 90%;
+        }
+        .cost-value, .actual-value {
+            display: flex;
+            flex-grow: 1;
+        }
+        .actual-value {
+            font-weight: bold;
+        }
+    }
+}
+.list-income {
+    &, .list-head {
+        background: $color_income_light;
+    }
+}
+.list-bills {
+    &, .list-head {
+        background: $color_bills_light;
+    }
+}
+.list-food {
+    &, .list-head {
+        background: $color_food_light;
+    }
+}
+.list-general {
+&, .list-head {
+    background: $color_general_light;
+    }
+}
+.list-holiday {
+    &, .list-head {
+        background: $color_holiday_light;
+    }
+}
+.list-social {
+    &, .list-head {
+        background: $color_social_light;
+    }
+}
+
+.funds-info {
+    position: fixed;
+    top: $height_header_mobile + $height_nav_mobile;
+    left: 0;
+    right: 0;
+    background: beige;
+    .gain {
+        display: flex;
+        flex-flow: row wrap;
+        height: 45px;
+        overflow: hidden;
+        padding: 10px 24px;
+        background: rgba(255, 255, 255, 0.7);
+        &.profit {
+            background: rgba(100, 255, 100, 0.7);
+        }
+        &.loss {
+            background: rgba(255, 100, 100, 0.7);
+        }
+    }
+    .gain-info {
+        display: none;
+    }
+    .value {
+        flex-grow: 3;
+        font-size: 150%;
+        font-weight: bold;
+    }
+    .gain-pct {
+        flex-grow: 1;
+        font-weight: bold;
+        font-style: italic;
+        text-align: right;
+    }
+    .cache-age {
+        flex-grow: 1;
+        flex-wrap: wrap;
+        color: #333;
+        font-style: italic;
+        text-align: right;
+        font-size: 80%;
+    }
+}
+
+// extra rules for extra-small screens
+@media screen and (max-width: $width_page_mobile_small) {
+    .page-overview {
+        .table-flex {
+            .col {
+                .text, .editable {
+                    padding: 4px 1px;
+                }
+            }
+        }
+    }
+}
+

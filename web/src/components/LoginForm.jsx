@@ -48,7 +48,7 @@ export class LoginForm extends PureControllerView {
             });
 
         return (
-            <div id="login-form">
+            <div className="login-form">
                 <h3>Enter your PIN:</h3>
                 {digitBoxes}
                 {numberInput}

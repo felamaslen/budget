@@ -30,18 +30,24 @@ export class Header extends PureControllerView {
    * @returns {object} React <ul> element
    */
     renderNavListItem(item, key) {
-        const classes = classNames({
-            'nav-link': true,
-            active: key === this.props.navPageIndex
+        const active = key === this.props.navPageIndex;
+
+        const classNameLi = classNames({
+            'nav-link-li': true,
+            [`nav-link-${item}`]: true,
+            active
         });
 
-        const id = `nav-link-${item}`;
+        const classNameA = classNames({
+            'nav-link': true,
+            active
+        });
 
         const onClick = () => this.navToPage(key);
 
         return (
-            <li key={key}>
-                <a onClick={onClick} className={classes} id={id}>{capitalise(item)}</a>
+            <li key={key} className={classNameLi}>
+                <a className={classNameA} onClick={onClick}>{capitalise(item)}</a>
             </li>
         );
     }
@@ -53,8 +59,8 @@ export class Header extends PureControllerView {
         return (
             <ul className="nav-list noselect">
                 {pageLinksList}
-                <li>
-                    <a className="nav-link" id="nav-link-logout" onClick={() => this.logout()}>Log out</a>
+                <li className="nav-link-li nav-link-logout">
+                    <a className="nav-link" onClick={() => this.logout()}>Log out</a>
                 </li>
             </ul>
         );
@@ -107,7 +113,7 @@ export class Header extends PureControllerView {
             : null;
 
         return (
-            <div id="nav">
+            <div className="navbar">
                 <div className="inner">
                     <div className="app-logo">
                         {queueNotSaved}
