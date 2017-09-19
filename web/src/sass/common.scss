@@ -347,13 +347,18 @@ body {
         text-align: center;
         color: #fefefe;
     }
+    .pin-display {
+        display: flex;
+        flex-flow: row nowrap;
+        margin-bottom: 24px;
+    }
     .input-pin {
+        flex-grow: 1;
         margin: 0 6px;
         font-size: 64px;
         width: 60px;
         height: 80px;
         position: relative;
-        float: left;
         border: none;
         border-radius: 4px;
         background: #333;
@@ -378,15 +383,21 @@ body {
         }
     }
     .number-input {
-        margin: 90px 14px 0 14px;
+        display: flex;
+        flex-flow: column nowrap;
+        height: 200px;
         background: #3e3e3e;
         box-shadow: inset 0 0 13px rgba(0, 0, 0, 0.5);
         padding: 0 10px 5px 10px;
+        .number-input-row {
+            display: flex;
+            flex-flow: row nowrap;
+            flex-grow: 1;
+            align-items: center;
+        }
         .btn-digit {
-            margin: 10px 5px;
-            width: 70px;
-            height: 35px;
-            line-height: 35px;
+            flex-grow: 1;
+            // margin: 10px 5px;
             top: 0;
             padding: 0;
             background-color: #868686;
@@ -413,10 +424,6 @@ body {
                 0 0 0 1px rgba(0, 0, 0, 0.4);
                 transform: translateY(10px);
             }
-        }
-
-        .btn-digit-0 {
-            margin-left: 85px;
         }
     }
 }
