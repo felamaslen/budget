@@ -2,15 +2,35 @@ html, body {
     height: 100%;
 }
 
-.graph-container {
-    position: fixed;
-    z-index: 2;
-    background: rgba(255, 255, 255, .8);
-    box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
-}
-
 /* overview page */
 .page-overview {
+    .table-flex {
+        width: 890px;
+        .past {
+            font-size: 13px;
+            height: 16px;
+            line-height: 16px;
+            .editable-input {
+                height: 16px;
+            }
+        }
+        .active {
+            font-size: 16px;
+            height: 24px;
+            line-height: 24px;
+            .editable-input {
+                height: 23px;
+            }
+        }
+        .future {
+            font-size: 15px;
+            height: 20px;
+            line-height: 20px;
+            .editable-input {
+                height: 20px;
+            }
+        }
+    }
     .graph-balance {
         left: 900px;
         top: $top_nav + 10
@@ -18,6 +38,9 @@ html, body {
     .graph-spend {
         left: 900px;
         top: $top_nav + 320;
+    }
+    .graph-balance, .graph-spend {
+        position: fixed;
     }
 }
 
@@ -51,11 +74,6 @@ html, body {
             background-color: rgba(240, 240, 240, 0.8);
         }
     }
-    .graph-fund-history {
-        width: 500px;
-        left: 1000px;
-        top: $top_nav + 40;
-    }
     .stocks-list, .graph-world-map {
         top: $top_nav + 350;
         left: 1000px;
@@ -70,7 +88,12 @@ html, body {
     top: $top_nav + 40;
 }
 
-.list-head {
-    width: 100%;
+@media screen and (min-width: 1500px) {
+    .page-funds {
+        .graph-fund-history {
+            position: fixed;
+            left: 1000px;
+            top: 100px;
+        }
+    }
 }
-

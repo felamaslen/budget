@@ -3,13 +3,12 @@ body {
 }
 .page-wrapper {
     margin: 0 auto;
-    width: $width_page_tablet;
     position: relative;
 }
 .navbar {
     .inner {
         margin: 0 auto;
-        width: $width_page_tablet;
+        width: 100%;
     }
     .nav-list {
         /* hide navigation text */
@@ -26,8 +25,27 @@ body {
 
 /* overview page */
 .page-overview {
-    .table-overview {
+    .table-flex {
         width: 100%;
+        .row {
+            height: 28px;
+            line-height: 28px;
+            font-size: 16px;
+            &.header {
+                font-size: 18px;
+            }
+            .editable-input {
+                height: 27px;
+            }
+        }
+        .past {
+            font-size: 14px;
+            height: 24px;
+            line-height: 24px;
+            .editable-input {
+                height: 23px;
+            }
+        }
     }
     .graph-container-outer {
         position: static;
@@ -45,7 +63,6 @@ body {
         }
     }
     .graph-fund-history {
-        float: right;
         position: relative;
         canvas {
             position: absolute;
@@ -68,14 +85,6 @@ body {
 }
 
 .graph-container-outer {
-    width: inherit;
-    height: 299px;
-    position: fixed;
-    top: $top_nav;
-    z-index: 5;
-    box-shadow: 0 3px 16px rgba(60, 60, 60, .3);
-    background: white;
-    transition: height .3s ease-in-out;
 }
 .graph-container-inner {
     width: 100%;
@@ -104,21 +113,6 @@ body {
         bottom: -25px;
     }
 }
-.list-insert {
-    .list-head {
-        width: 1000px;
-        left: 50%;
-        margin-left: -500px;
-        top: $height_nav + 299;
-        padding-top: $top_nav - $height_nav;
-        transition: top .3s ease-in-out;
-    }
-    .list-ul {
-        padding-top: 324px;
-        width: inherit;
-        transition: padding-top .3s ease-in-out;
-    }
-}
 .graph-hidden {
     .list-head {
         top: $top_nav;
@@ -130,6 +124,21 @@ body {
         margin-bottom: -10px;
         &::after {
             content: $text_show_graph;
+        }
+    }
+}
+
+@media screen and (max-width: $width_page_tablet_small) {
+    .page-overview {
+        .table-flex {
+            .col {
+                &.funds, &.bills, &.food, &.general, &.holiday, &.social {
+                    display: none;
+                }
+                &.month {
+                    border-right: none;
+                }
+            }
         }
     }
 }

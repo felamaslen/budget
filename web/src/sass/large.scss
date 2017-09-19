@@ -56,7 +56,6 @@ button {
 }
 
 .navbar {
-    padding-bottom: 10px;
     .inner {
         background: linear-gradient(to bottom, #d84d4d, #9f3030);
         box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
@@ -226,11 +225,19 @@ button {
     text-align: right;
 }
 
+.graph-container {
+    z-index: 2;
+    background: rgba(255, 255, 255, .8);
+    box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
+}
+
 // lists
 .list-insert {
     .list-head {
-        top: $top_nav;
+        top: $top_nav - 10;
+        padding-top: 10px;
         border-bottom: 1px solid #999;
+        width: 100%;
         height: 24px;
         background: white;
     }
@@ -309,7 +316,6 @@ button {
 
 .page-overview {
     .table-flex {
-        width: 890px;
         cursor: default;
         .editable-outer {
             width: 80px;
@@ -317,9 +323,15 @@ button {
                 padding: 0;
             }
         }
+        .header {
+            .col {
+                &.month, &.income {
+                    border: none;
+                }
+            }
+        }
         .col {
             &.month {
-                flex-grow: 1;
                 border-right: 3px solid #222;
             }
             &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.net {
@@ -348,29 +360,11 @@ button {
         }
         .past {
             @include unimportant;
-            height: 16px;
-            line-height: 16px;
-            font-size: 13px;
-            .editable-input {
-                height: 16px;
-            }
         }
         .active {
             font-weight: bold;
-            font-size: 16px;
-            height: 24px;
-            line-height: 24px;
-            .editable-input {
-                height: 23px;
-            }
         }
         .future {
-            font-size: 15px;
-            height: 20px;
-            line-height: 20px;
-            .editable-input {
-                height: 20px;
-            }
         }
     }
 }
@@ -524,6 +518,9 @@ button {
             text-align: right;
         }
     }
+    .graph-fund-history {
+        position: relative;
+    }
     .graph-stocks {
         position: static;
         box-shadow: none;
@@ -670,13 +667,16 @@ button {
         float: right;
     }
     .period-title {
-        margin: 0.3em 0;
+        margin: 0.3em 1em;
         font-size: 1.2em;
     }
-
+    .flexbox {
+        flex-flow: row wrap;
+    }
     .tree {
         margin: 1em;
-        flex: 1;
+        flex-grow: 1;
+        min-width: 400px;
         .title {
             text-transform: capitalize;
         }
