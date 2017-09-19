@@ -12,12 +12,10 @@ import { mediaQueries, LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import getEditable from '../Editable';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
-import { aContentBlockHovered } from '../../actions/ContentActions';
 import {
     aMobileEditDialogOpened,
     aMobileAddDialogOpened
 } from '../../actions/FormActions';
-import { BlockViewShallow } from '../BlockPacker';
 
 export class PageList extends PureControllerView {
     addItem() {
@@ -261,38 +259,8 @@ export class PageList extends PureControllerView {
             }, 0);
         }
     }
-    blockTree(render) {
-        if (!render) {
-            return null;
-        }
-
-        const blockClasses = 'block-tree flex shallow';
-
-        const onBlockHover = (block, subBlock) => {
-            this.dispatchAction(aContentBlockHovered(block, subBlock));
-        };
-
-        return (
-            <div className="graph-container-outer">
-                <BlockViewShallow dispatcher={this.props.dispatcher}
-                    onBlockClick={() => null}
-                    onBlockHover={onBlockHover}
-                    blocks={this.props.blocks.get('blocks')}
-                    blockClasses={blockClasses}
-                    active={this.props.blocks.get('active')}
-                    status={this.props.blocks.get('status')}
-                />
-            </div>
-        );
-    }
     afterList() {
-        if (!this.props.blocks.get('blocks')) {
-            return null;
-        }
-
-        const blockTree = render => this.blockTree(render);
-
-        return <Media query={mediaQueries.desktop}>{blockTree}</Media>;
+        return null;
     }
     render() {
         const listClasses = [
