@@ -4,7 +4,7 @@
 - Route for "all data" [DONE]
 - Client coding standards [DONE]
 - refreshing fund price cache doesn't reload gain text etc. [FIXED]
-- Optimise client for mobile devices [INCOMPLETE]
+- Optimise client for mobile devices [DONE]
 - Use react router
 - Don't use .toString() for JSON data passing (use .valueOf())
 - Include pie data with add / edit responses
