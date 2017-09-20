@@ -20,7 +20,7 @@ export class LoginForm extends PureControllerView {
         const onClick = () => this.input(digit);
 
         return <button key={digit} className={btnClass}
-            onClick={onClick}>{digit}</button>;
+            onMouseDown={onClick}>{digit}</button>;
     }
     renderNumberInput() {
         const digits = new Array(4)
