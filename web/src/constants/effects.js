@@ -3,6 +3,8 @@
  */
 
 export const EF_LOGIN_FORM_SUBMIT = 0xefa1;
+export const EF_LOGIN_CREDENTIALS_RETRIEVED = 0xefa2;
+export const EF_LOGIN_CREDENTIALS_SAVED = 0xefa3;
 
 export const EF_CONTENT_REQUESTED = 0xefb1;
 export const EF_SUGGESTIONS_REQUESTED = 0xefb2;

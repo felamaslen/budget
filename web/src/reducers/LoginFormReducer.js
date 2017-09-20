@@ -3,10 +3,9 @@
  */
 
 import { Map as map } from 'immutable';
-import Cookies from 'js-cookie';
 import buildMessage from '../messageBuilder';
 import {
-    EF_LOGIN_FORM_SUBMIT
+    EF_LOGIN_FORM_SUBMIT, EF_LOGIN_CREDENTIALS_SAVED
 } from '../constants/effects';
 import { LOGIN_INPUT_LENGTH, ERROR_LEVEL_ERROR } from '../misc/const';
 import { rErrorMessageOpen } from './ErrorReducer';
@@ -61,11 +60,13 @@ export function rLoginFormInput(reduction, input) {
  * @param {number} index: where to reset to
  * @returns {Record} new app state
  */
-export function rLoginFormReset(reduction, index) {
-    return reduction.setIn(
-        ['appState', 'loginForm', 'values'],
-        reduction.getIn(['appState', 'loginForm', 'values']).slice(0, index)
-    ).setIn(['appState', 'loginForm', 'inputStep'], index);
+export function rLoginFormReset(reduction, index = 0) {
+    return reduction
+        .setIn(
+            ['appState', 'loginForm', 'values'],
+            reduction.getIn(['appState', 'loginForm', 'values']).slice(0, index)
+        )
+        .setIn(['appState', 'loginForm', 'inputStep'], index);
 }
 
 /**
@@ -74,40 +75,38 @@ export function rLoginFormReset(reduction, index) {
  * @param {object} output: pin and API response (JSON)
  * @returns {Record} new app state
  */
-export function rLoginFormHandleResponse(reduction, output) {
-    let newReduction = rLoginFormReset(
-        reduction.setIn(['appState', 'loginForm', 'loading'], false)
-            .setIn(['appState', 'loading'], false), 0);
+export function rLoginFormHandleResponse(reduction, req) {
+    const newReduction = rLoginFormReset(reduction)
+        .setIn(['appState', 'loginForm', 'loading'], false)
+        .setIn(['appState', 'loading'], false);
 
-    if (output.err) {
+    if (!req) {
+        return newReduction;
+    }
+
+    if (req.err) {
         const message = map({
-            text: `Login error: ${output.err.response.data.errorMessage}`,
+            text: `Login error: ${req.err.response.data.errorMessage}`,
             level: ERROR_LEVEL_ERROR
         });
 
         return rErrorMessageOpen(newReduction, message);
     }
 
-    // save a cookie to remember the session
-    if (!newReduction.getIn(['appState', 'loginForm', 'loadedCookie'])) {
-        Cookies.set('pin', output.pin, { expires: 7 });
-    }
-
     // go to the first page after logging in
-    let page = newReduction.getIn(['appState', 'currentPageIndex']);
-    if (page < 0) {
-        page = 0;
-        newReduction = newReduction.setIn(['appState', 'currentPageIndex'], page);
-    }
+    const page = Math.max(0, newReduction.getIn(['appState', 'currentPageIndex']));
 
-    // set user data
-    newReduction = newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
-        .setIn(['appState', 'user', 'name'], output.response.data.name)
-        .setIn(['appState', 'user', 'apiKey'], output.response.data.apiKey);
-
-    // set side effect to load page data
-    newReduction = rLoadContent(newReduction, page);
-
-    return newReduction;
+    return rLoadContent(
+        newReduction
+            .setIn(['appState', 'loginForm', 'loading'], false)
+            .setIn(['appState', 'currentPageIndex'], page)
+            .setIn(['appState', 'user', 'uid'], req.response.data.uid)
+            .setIn(['appState', 'user', 'name'], req.response.data.name)
+            .setIn(['appState', 'user', 'apiKey'], req.response.data.apiKey)
+            .set('effects', newReduction.get('effects')
+                .push(buildMessage(EF_LOGIN_CREDENTIALS_SAVED, req.pin))
+            ),
+        page
+    );
 }
 

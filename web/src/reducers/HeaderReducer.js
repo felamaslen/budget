@@ -3,15 +3,18 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import Cookies from 'js-cookie';
 import buildMessage from '../messageBuilder';
 import { resetAppState } from '../reduction';
-import { rLoginFormSubmit, rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
+import { rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
 import { reloadAnalysis } from './data/analysis';
 import { getFundsCachedValueAgeText } from './data/funds';
-import { EF_SERVER_UPDATE_REQUESTED } from '../constants/effects';
+import {
+    EF_SERVER_UPDATE_REQUESTED,
+    EF_LOGIN_CREDENTIALS_RETRIEVED,
+    EF_LOGIN_CREDENTIALS_SAVED
+} from '../constants/effects';
 import {
     PAGES, LIST_PAGES, LIST_COLS_PAGES,
     SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
@@ -294,9 +297,12 @@ export const rLogout = reduction => {
     if (reduction.getIn(['appState', 'loading'])) {
         return reduction;
     }
-    Cookies.remove('pin');
 
-    return reduction.set('appState', resetAppState(reduction.get('appState')));
+    return reduction
+        .set('appState', resetAppState(reduction.get('appState')))
+        .set('effects', reduction.get('effects').push(
+            buildMessage(EF_LOGIN_CREDENTIALS_SAVED, null)
+        ));
 };
 
 /**
@@ -305,25 +311,10 @@ export const rLogout = reduction => {
  * @returns {Record} modified reduction
  */
 export const rLoadCookies = reduction => {
-    let newReduction = reduction;
-
-    // remember user logins
-    const pin = Cookies.get('pin');
-    if (pin && pin.match(/^[0-9]{4}$/)) {
-        const values = list(pin.split('')).map(item => parseInt(item, 10));
-        newReduction = rLoginFormSubmit(
-            newReduction.setIn(['appState', 'loading'], true)
-                .setIn(['appState', 'loginForm', 'loadedCookie'], true)
-                .setIn(['appState', 'loginForm', 'values'], values)
+    return reduction
+        .set('effects', reduction.get('effects')
+            .push(buildMessage(EF_LOGIN_CREDENTIALS_RETRIEVED))
         );
-    }
-
-    const page = Cookies.get('page');
-    if (page && page.match(/^[0-9]+$/)) {
-        newReduction = newReduction.setIn(['appState', 'currentPageIndex'], parseInt(page, 10));
-    }
-
-    return newReduction;
 };
 
 /**
@@ -333,7 +324,6 @@ export const rLoadCookies = reduction => {
  * @returns {Record} modified reduction
  */
 export function rNavigateToPage(reduction, pageIndex) {
-    Cookies.set('page', pageIndex, { expires: 7 });
     let newReduction = reduction;
     if (!newReduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
         newReduction = rLoadContent(newReduction, pageIndex);

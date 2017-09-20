@@ -8,14 +8,7 @@ import { List as list } from 'immutable';
 import buildEffectHandler from '../effectHandlerBuilder';
 
 import { PAGES, MAX_SUGGESTIONS, API_VERSION } from '../misc/const';
-import {
-    EF_LOGIN_FORM_SUBMIT,
-    EF_CONTENT_REQUESTED,
-    EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED,
-    EF_SERVER_UPDATE_REQUESTED, EF_SERVER_ADD_REQUESTED,
-    EF_FUNDS_PERIOD_REQUESTED, EF_SUGGESTIONS_REQUESTED,
-    EF_STOCKS_LIST_REQUESTED, EF_STOCKS_PRICES_REQUESTED
-} from '../constants/effects';
+import * as ef from '../constants/effects';
 
 import { aErrorOpened } from '../actions/ErrorActions';
 
@@ -38,6 +31,36 @@ async function submitLoginForm(pin, dispatcher) {
     catch (err) {
         return dispatcher.dispatch(aLoginFormResponseGot({ err }));
     }
+}
+
+function getLoginCredentials(payload, dispatcher) {
+    if (!localStorage || !localStorage.getItem) {
+        return null;
+    }
+
+    const pin = localStorage.getItem('pin');
+
+    if (pin) {
+        return submitLoginForm(parseInt(pin, 10), dispatcher);
+    }
+
+    setTimeout(() => {
+        dispatcher.dispatch(aLoginFormResponseGot(null));
+    }, 0);
+
+    return null;
+}
+
+function saveLoginCredentials(pin) {
+    if (!localStorage || !localStorage.getItem) {
+        return null;
+    }
+
+    if (!pin) {
+        return localStorage.removeItem('pin');
+    }
+
+    return localStorage.setItem('pin', pin);
 }
 
 async function requestContent(req, dispatcher) {
@@ -246,24 +269,21 @@ async function requestStockPrices(req, dispatcher) {
 }
 
 export default buildEffectHandler([
-    [EF_LOGIN_FORM_SUBMIT, submitLoginForm],
+    [ef.EF_LOGIN_FORM_SUBMIT, submitLoginForm],
+    [ef.EF_LOGIN_CREDENTIALS_RETRIEVED, getLoginCredentials],
+    [ef.EF_LOGIN_CREDENTIALS_SAVED, saveLoginCredentials],
 
-    [EF_CONTENT_REQUESTED, requestContent],
+    [ef.EF_CONTENT_REQUESTED, requestContent],
+    [ef.EF_SERVER_UPDATE_REQUESTED, updateServerData],
+    [ef.EF_SERVER_ADD_REQUESTED, addServerData],
 
-    [EF_SERVER_UPDATE_REQUESTED, updateServerData],
+    [ef.EF_ANALYSIS_DATA_REQUESTED, requestAnalysisData],
+    [ef.EF_ANALYSIS_EXTRA_REQUESTED, requestDeepAnalysisData],
 
-    [EF_ANALYSIS_DATA_REQUESTED, requestAnalysisData],
+    [ef.EF_FUNDS_PERIOD_REQUESTED, requestFundPeriodData],
+    [ef.EF_STOCKS_LIST_REQUESTED, requestStocksList],
+    [ef.EF_STOCKS_PRICES_REQUESTED, requestStockPrices],
 
-    [EF_ANALYSIS_EXTRA_REQUESTED, requestDeepAnalysisData],
-
-    [EF_SERVER_ADD_REQUESTED, addServerData],
-
-    [EF_FUNDS_PERIOD_REQUESTED, requestFundPeriodData],
-
-    [EF_SUGGESTIONS_REQUESTED, requestSuggestions],
-
-    [EF_STOCKS_LIST_REQUESTED, requestStocksList],
-
-    [EF_STOCKS_PRICES_REQUESTED, requestStockPrices]
+    [ef.EF_SUGGESTIONS_REQUESTED, requestSuggestions]
 ]);
 

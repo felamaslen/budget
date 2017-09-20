@@ -96,7 +96,7 @@ export default new Record({
         loginForm: map({
             inputStep: 0,
             values: list.of(),
-            loading: false,
+            loading: true,
             loadedCookie: false
         })
     })),

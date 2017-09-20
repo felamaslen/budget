@@ -49,10 +49,32 @@ export default class App extends Component {
             reduction: new Reduction()
         };
     }
+    renderContent(loading, loggedIn) {
+        if (loading || !loggedIn) {
+            return null;
+        }
 
+        return <Content dispatcher={this.state.dispatcher}
+            pages={this.state.reduction.getIn(['appState', 'pages'])}
+            loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
+            index={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
+            edit={this.state.reduction.getIn(['appState', 'edit'])}
+            modalDialog={this.state.reduction.getIn(['appState', 'modalDialog'])}
+            other={this.state.reduction.getIn(['appState', 'other'])} />;
+    }
+    renderLoginForm(loading, loadingLogin, loggedIn) {
+        if (loading || loadingLogin || loggedIn) {
+            return null;
+        }
+
+        return <LoginForm dispatcher={this.state.dispatcher}
+            inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
+            loading={this.state.reduction.getIn(['appState', 'loginForm', 'loading'])} />;
+    }
     render() {
         const loggedIn = this.state.reduction.getIn(['appState', 'user', 'uid']) > 0;
         const loading = this.state.reduction.getIn(['appState', 'loading']);
+        const loadingLogin = this.state.reduction.getIn(['appState', 'loginForm', 'loading']);
         const loadingApi = this.state.reduction.getIn(['appState', 'loadingApi']);
 
         const queueSize = this.state.reduction.getIn(['appState', 'edit', 'queue']).size +
@@ -72,21 +94,9 @@ export default class App extends Component {
                 queueSize={queueSize} />
         );
 
-        const loginForm = loggedIn || loading
-            ? null
-            : <LoginForm dispatcher={this.state.dispatcher}
-                inputStep={this.state.reduction.getIn(['appState', 'loginForm', 'inputStep'])}
-                loading={this.state.reduction.getIn(['appState', 'loginForm', 'loading'])} />;
+        const loginForm = this.renderLoginForm(loading, loadingLogin, loggedIn);
 
-        const content = loggedIn && !loading ? (
-            <Content dispatcher={this.state.dispatcher}
-                pages={this.state.reduction.getIn(['appState', 'pages'])}
-                loaded={this.state.reduction.getIn(['appState', 'pagesLoaded'])}
-                index={this.state.reduction.getIn(['appState', 'currentPageIndex'])}
-                edit={this.state.reduction.getIn(['appState', 'edit'])}
-                modalDialog={this.state.reduction.getIn(['appState', 'modalDialog'])}
-                other={this.state.reduction.getIn(['appState', 'other'])} />
-        ) : null;
+        const content = this.renderContent(loading, loggedIn);
 
         const spinner = loading
             ? <Spinner />
