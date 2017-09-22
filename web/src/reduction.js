@@ -1,12 +1,11 @@
-import { Record, List as list, Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 
 import {
-    PAGES, SERVER_UPDATE_IDLE,
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS
+    PAGES, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS
 } from './misc/const';
 
-export const resetAppState = appState => {
-    return appState
+export function resetAppState(state) {
+    return state
         .set('user', map({ uid: 0, name: null, apiKey: null }))
         .set('pages', list(PAGES).map(() => null))
         .set('pagesRaw', list(PAGES).map(() => null))
@@ -26,7 +25,7 @@ export const resetAppState = appState => {
             addBtnFocus: false,
             queue: list.of(),
             queueDelete: list.of(),
-            status: SERVER_UPDATE_IDLE,
+            requestList: list.of(),
             suggestions: map({
                 loading: false,
                 reqId: null,
@@ -84,23 +83,19 @@ export const resetAppState = appState => {
             fundHistoryCache: map.of()
         }))
         .setIn(['loginForm', 'values'], list.of());
-};
+}
 
 // the state of the app (reduction) is stored as an immutable object,
 // and returned (modified) by reducers
-export default new Record({
-    appState: resetAppState(map({
-        errorMsg: list.of(),
-        loading: false, // for big (disruptive) things like loading pages
-        loadingApi: false, // for small things like edit updates
-        loginForm: map({
-            inputStep: 0,
-            values: list.of(),
-            loading: false,
-            loadedCookie: false
-        })
-    })),
-    // side effects
-    effects: list.of()
-});
+export default resetAppState(map({
+    errorMsg: list.of(),
+    loading: false, // for big (disruptive) things like loading pages
+    loadingApi: false, // for small things like edit updates
+    loginForm: map({
+        inputStep: 0,
+        values: list.of(),
+        visible: false,
+        loadedCookie: false
+    })
+}));
 

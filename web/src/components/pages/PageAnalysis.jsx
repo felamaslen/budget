@@ -3,21 +3,20 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import { connect } from 'react-redux';
+
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PureControllerView from '../PureControllerView';
 import classNames from 'classnames';
-import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../misc/const';
+import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../misc/const';
 import { formatCurrency, capitalise } from '../../misc/format';
 import {
     aPeriodChanged, aGroupingChanged, aTimeIndexChanged,
-    aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered,
-    aBlockClicked
+    aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered
 } from '../../actions/AnalysisActions';
-import { aContentBlockHovered } from '../../actions/ContentActions';
-import { BlockView } from '../BlockPacker';
+import BlockPacker from '../BlockPacker';
 
-export class PageAnalysis extends PureControllerView {
+export class PageAnalysis extends Component {
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
     }
@@ -93,11 +92,11 @@ export class PageAnalysis extends PureControllerView {
             const cost = item.get('total');
             const pct = 100 * cost / this.props.costTotal;
             const name = item.get('name');
-            const visible = this.props.other.get('treeVisible').has(name)
-                ? this.props.other.get('treeVisible').get(name)
+            const visible = this.props.treeVisible.has(name)
+                ? this.props.treeVisible.get(name)
                 : true;
 
-            const open = Boolean(this.props.other.get('treeOpen').get(name));
+            const open = Boolean(this.props.treeOpen.get(name));
 
             const subTree = item.get('subTree');
 
@@ -132,107 +131,100 @@ export class PageAnalysis extends PureControllerView {
             );
         })
 
-        return (
-            <div className="tree">
-                <ul className="tree-list flex">
-                    {listTreeHead}
-                    {listTreeBody}
-                </ul>
-            </div>
-        );
-    }
-    blockTree() {
-        const active = this.props.blocks.get('active');
-        const deep = this.props.blocks.get('deep');
-        let blockClasses = ['block-tree', 'flex'];
-        if (deep) {
-            blockClasses = blockClasses.concat([
-                'block-tree-deep',
-                `block-tree-${deep}`
-            ]);
-        }
-        blockClasses = blockClasses.join(' ');
-
-        return (
-            <BlockView dispatcher={this.props.dispatcher}
-                onBlockClick={block => {
-                    this.dispatchAction(aBlockClicked(block.get('name')));
-                }}
-                onBlockHover={(block, subBlock) => { this.dispatchAction(aContentBlockHovered(block, subBlock)); }}
-                blocks={this.props.blocks.get('blocks')}
-                blockClasses={blockClasses}
-                active={active}
-                deep={Boolean(deep)}
-                status={this.props.blocks.get('status')}
-            />
-        );
+        return <div className="tree">
+            <ul className="tree-list flex">
+                {listTreeHead}
+                {listTreeBody}
+            </ul>
+        </div>;
     }
     render() {
         const listTree = this.listTree();
-        const blockTree = this.blockTree();
 
-        const periodSwitcher = ANALYSIS_PERIODS.map((period, key) => {
-            return (
-                <span key={key}>
-                    <input type="radio" checked={this.props.other.get('period') === key}
-                        onChange={() => this.dispatchAction(aPeriodChanged(key))} />
-                    <span>{capitalise(period)}</span>
+        const periodSwitcher = ANALYSIS_PERIODS.map((period, key) => <span key={key}>
+            <input type="radio" checked={this.props.period === key}
+                onChange={() => this.props.changePeriod(key)} />
+            <span>{capitalise(period)}</span>
+        </span>);
+
+        const groupingSwitcher = ANALYSIS_GROUPINGS.map((grouping, key) => <span key={key}>
+            <input type="radio" checked={this.props.grouping === key}
+                onChange={() => this.props.changeGrouping(key)} />
+            <span>{capitalise(grouping)}</span>
+        </span>);
+
+        const previousPeriod = () => this.props.previousPeriod(this.props.timeIndex);
+        const nextPeriod = () => this.props.nextPeriod(this.props.timeIndex);
+
+        return <div className="page-analysis">
+            <div className="upper">
+                <span className="input-period">
+                    <span>Period:</span>
+                    {periodSwitcher}
                 </span>
-            );
-        });
-
-        const groupingSwitcher = ANALYSIS_GROUPINGS.map((grouping, key) => {
-            return (
-                <span key={key}>
-                    <input type="radio" checked={this.props.other.get('grouping') === key}
-                        onChange={() => this.dispatchAction(aGroupingChanged(key))} />
-                    <span>{capitalise(grouping)}</span>
+                <span className="input-grouping">
+                    <span>Grouping:</span>
+                    {groupingSwitcher}
                 </span>
-            );
-        });
-
-        const previousPeriod = () => {
-            this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') + 1));
-        };
-
-        const nextPeriod = () => {
-            this.dispatchAction(aTimeIndexChanged(this.props.other.get('timeIndex') - 1));
-        };
-
-        return (
-            <div className="page-analysis">
-                <div className="upper">
-                    <span className="input-period">
-                        <span>Period:</span>
-                        {periodSwitcher}
-                    </span>
-                    <span className="input-grouping">
-                        <span>Grouping:</span>
-                        {groupingSwitcher}
-                    </span>
-                    <div className="btns">
-                        <button className="btn-previous"
-                            onClick={previousPeriod}>Previous</button>
-                        <button className="btn-next" disabled={this.props.other.get('timeIndex') === 0}
-                            onClick={nextPeriod}>Next</button>
-                    </div>
-                    <h3 className="period-title">{this.props.description}</h3>
-                    <div className="flexbox">
-                        {listTree}
-                        {blockTree}
-                    </div>
+                <div className="btns">
+                    <button className="btn-previous"
+                        onClick={previousPeriod}>Previous</button>
+                    <button className="btn-next" disabled={this.props.timeIndex === 0}
+                        onClick={nextPeriod}>Next</button>
+                </div>
+                <h3 className="period-title">{this.props.description}</h3>
+                <div className="flexbox">
+                    {listTree}
+                    <BlockPacker />
                 </div>
             </div>
-        );
+        </div>;
     }
 }
 
 PageAnalysis.propTypes = {
+    period: PropTypes.string.isRequired,
+    grouping: PropTypes.string.isRequired,
     cost: PropTypes.instanceOf(list),
     costTotal: PropTypes.number,
     items: PropTypes.instanceOf(map),
     description: PropTypes.string,
     blocks: PropTypes.instanceOf(map),
-    other: PropTypes.instanceOf(map)
+    treeVisible: PropTypes.bool.isRequired,
+    treeOpen: PropTypes.bool.isRequired,
+    timeIndex: PropTypes.number.isRequired,
+    deep: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+    changePeriod: PropTypes.func.isRequired,
+    changeGrouping: PropTypes.func.isRequired,
+    nextPeriod: PropTypes.func.isRequired,
+    previousPeriod: PropTypes.func.isRequired
 };
+
+const mapStateToProps = state => {
+    const pageIndex = PAGES.indexOf('analysis');
+
+    return {
+        treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
+        treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
+        timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
+        period: state.getIn(['global', 'other', 'analysis', 'period']),
+        grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
+        blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
+        status: state.getIn(['global', 'other', 'blockView', 'status']),
+        deep: state.getIn(['global', 'other', 'blockView', 'deep']),
+        cost: state.getIn(['global', 'pages', pageIndex, 'cost']),
+        costTotal: state.getIn(['global', 'pages', pageIndex, 'costTotal']),
+        description: state.getIn(['global', 'pages', pageIndex, 'description'])
+    };
+};
+
+const mapDispatchToProps = dispatch => ({
+    changePeriod: key => dispatch(aPeriodChanged(key)),
+    changeGrouping: key => dispatch(aGroupingChanged(key)),
+    nextPeriod: timeIndex => dispatch(aTimeIndexChanged(timeIndex - 1)),
+    previousPeriod: timeIndex => dispatch(aTimeIndexChanged(timeIndex + 1))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);
 

@@ -7,48 +7,47 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Editable from './Editable';
-import { aSuggestionsRequested } from '../../actions/EditActions';
-import debounce from '../../misc/debounce';
 
 export default class EditableText extends Editable {
     constructor(props) {
         super(props);
+
         this.editableType = 'text';
-        this.loadSuggestions = debounce(this.loadSuggestions, 100, false, this);
-    }
-    loadSuggestions(value) {
-        this.dispatchAction(aSuggestionsRequested(value));
     }
     handleChange(evt) {
         super.handleChange(evt);
+
         // load suggestions
-        if (this.props.suggestions) {
-            this.loadSuggestions(evt.target.value);
+        if (this.props.suggestionsList) {
+            this.props.requestSuggestions(evt.target.value);
         }
     }
     afterInput() {
-        if (!this.props.active || !this.props.suggestions ||
-        !this.props.suggestions.size) {
+        if (!this.props.active || !this.props.suggestionsList ||
+            !this.props.suggestionsList.size) {
+
             return null;
         }
 
-        return (
-            <ul className="suggestions">
-                {this.props.suggestions.get('list').map((item, key) => {
-                    const classes = classNames({
-                        suggestion: true,
-                        active: this.props.suggestions.get('active') === key
-                    });
+        const suggestionsList = this.props.suggestionsList
+            .map((item, key) => {
+                const classes = classNames({
+                    suggestion: true,
+                    active: this.props.suggestionsActive === key
+                });
 
-                    return <li key={key} className={classes}>{item}</li>;
-                })}
-            </ul>
-        );
+                return <li key={key} className={classes}>{item}</li>;
+            });
+
+        return <ul className="suggestions">
+            {suggestionsList}
+        </ul>;
     }
 }
 
 EditableText.propTypes = {
-    value: PropTypes.string,
-    suggestions: PropTypes.instanceOf(map)
+    value: PropTypes.string.isRequired,
+    suggestionsList: PropTypes.instanceOf(map),
+    suggestionsActive: PropTypes.number
 };
 

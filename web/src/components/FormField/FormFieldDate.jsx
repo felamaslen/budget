@@ -23,6 +23,6 @@ export default class FormFieldDate extends FormField {
 }
 
 FormFieldDate.propTypes = {
-    value: PropTypes.instanceOf(YMD)
+    value: PropTypes.instanceOf(YMD).isRequired
 };
 

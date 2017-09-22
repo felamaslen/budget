@@ -19,4 +19,3 @@ FormFieldNumber.propTypes = {
     value: PropTypes.number.isRequired
 };
 
-

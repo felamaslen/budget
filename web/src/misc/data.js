@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 import {
-    AVERAGE_MEDIAN, PAGES, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
+    AVERAGE_MEDIAN, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
 } from './const';
 import { YMD } from './date';
 
@@ -237,16 +237,6 @@ export function randnBm() {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
 
-export function pushToRequestQueue(reduction, active, deleteItem = false) {
-    const queueKey = deleteItem
-        ? 'queueDelete'
-        : 'queue';
-
-    const queue = reduction.getIn(['appState', 'edit', queueKey]);
-
-    return reduction.setIn(['appState', 'edit', queueKey], queue.push(active));
-}
-
 export function getValueForTransmit(value) {
     if (typeof value === 'number') {
         return value;
@@ -261,86 +251,6 @@ export function getValueForTransmit(value) {
     }
 
     return value.toString();
-}
-
-/**
- * Builds a request list for updating the server
- * @param {Record} reduction: app state
- * @returns {string} JSON-encoded list for ajax request
- */
-export function buildQueueRequestList(reduction) {
-    let startYearMonth = null; // for overview updates
-    const queue = reduction.getIn(['appState', 'edit', 'queue']);
-    const queueDelete = reduction.getIn(['appState', 'edit', 'queueDelete']);
-
-    const reqList = queue
-        .reduce((reqs, dataItem) => {
-            const pageIndex = dataItem.get('pageIndex');
-            const item = dataItem.get('item');
-            const value = getValueForTransmit(dataItem.get('value'));
-
-            if (PAGES[pageIndex] === 'overview') {
-                if (startYearMonth === null) {
-                    startYearMonth = reduction.getIn(
-                        ['appState', 'pages', pageIndex, 'data', 'startYearMonth']
-                    );
-                }
-                const key = dataItem.get('row');
-                const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
-                const month = (startYearMonth[1] + key - 1) % 12 + 1;
-                const balance = value;
-
-                return reqs.push(map({
-                    pageIndex,
-                    req: map({
-                        method: 'post',
-                        route: 'balance',
-                        query: map.of(),
-                        body: map({ year, month, balance })
-                    })
-                }));
-            }
-
-            if (LIST_PAGES.indexOf(pageIndex) > -1) {
-                const id = dataItem.get('id');
-
-                const reqPageIndex = reqs.findIndex(req => {
-                    return req.get('pageIndex') === pageIndex &&
-                        req.getIn(['req', 'body', 'id']) === id;
-                });
-
-                if (reqPageIndex > -1) {
-                    return reqs.setIn([reqPageIndex, 'req', 'body', item], value);
-                }
-
-                return reqs.push(map({
-                    pageIndex,
-                    req: map({
-                        method: 'put',
-                        route: PAGES[pageIndex],
-                        query: map.of(),
-                        body: map({ id, [item]: value })
-                    })
-                }));
-            }
-
-            return reqs;
-
-        }, list.of())
-        .concat(queueDelete.map(dataItem => {
-            return map({
-                req: map({
-                    method: 'delete',
-                    route: PAGES[dataItem.get('pageIndex')],
-                    query: map.of(),
-                    body: map({ id: dataItem.get('id') })
-                })
-            });
-        }))
-        .map(item => item.get('req'))
-        .toJS();
-
-    return reqList;
 }
 
 /**

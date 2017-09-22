@@ -3,12 +3,16 @@
  */
 
 import { List as list } from 'immutable';
-import React from 'react';
+import { connect } from 'react-redux';
+
+import { aBlockClicked } from '../actions/AnalysisActions';
+import { aContentBlockHovered } from '../actions/ContentActions';
+
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import PureControllerView from './PureControllerView';
 
-export class BlockView extends PureControllerView {
+export class BlockView extends Component {
     renderBlocks(activeMain, activeSub) {
         if (!this.props.blocks) {
             return null;
@@ -78,15 +82,23 @@ export class BlockView extends PureControllerView {
         });
     }
     render() {
+        const blockClasses = classNames({
+            'block-tree': true,
+            flex: true,
+            'block-tree-deep': this.props.isDeep,
+            [`block-tree-${this.props.deep}`]: this.props.isDeep
+        });
+
+        const onMouseOut = () => this.props.onBlockHover(null, null);
         const activeMain = this.props.active && this.props.active.length === 1;
         const activeSub = this.props.active && this.props.active.length === 2;
 
         const blocks = this.renderBlocks(activeMain, activeSub);
 
         return (
-            <div className="block-view" onMouseOut={() => this.props.onBlockHover(null, null) }>
+            <div className="block-view" onMouseOut={onMouseOut}>
                 <div className="block-tree-outer">
-                    <div className={this.props.blockClasses}>{blocks}</div>
+                    <div className={blockClasses}>{blocks}</div>
                 </div>
                 <div className="status-bar">
                     <span className="inner">{this.props.status}</span>
@@ -96,73 +108,29 @@ export class BlockView extends PureControllerView {
     }
 }
 
-export class BlockViewShallow extends PureControllerView {
-    renderBlocks() {
-        if (!this.props.blocks) {
-            return null;
-        }
-
-        return this.props.blocks.map((group, groupKey) => {
-            const groupBlocks = group.get('bits').map((block, blockKey) => {
-                const classes = classNames({
-                    block: true,
-                    [`block-${block.get('color')}`]: true,
-                    [`block-${block.get('name')}`]: !this.props.deep
-                });
-
-                const groupBlockStyle = {
-                    width: block.get('width'),
-                    height: block.get('height')
-                };
-
-                const onMouseOver = () => {
-                    this.props.onBlockHover(block);
-                };
-
-                return <div key={blockKey} className={classes} style={groupBlockStyle}
-                    onMouseOver={onMouseOver} />;
-            });
-
-            const blockStyle = {
-                width: group.get('width'),
-                height: group.get('height')
-            };
-
-            return (
-                <div key={groupKey} className="block-group" style={blockStyle}>
-                    {groupBlocks}
-                </div>
-            );
-        });
-    }
-    render() {
-        const blocks = this.renderBlocks();
-
-        return (
-            <div className="block-view graph-container" onMouseOut={() => {
-                this.props.onBlockHover(null, null);
-            }}>
-                <div className="block-tree-outer">
-                    <div className={this.props.blockClasses}>{blocks}</div>
-                </div>
-                <div className="status-bar">
-                    <span className="inner">{this.props.status}</span>
-                </div>
-            </div>
-        );
-    }
-}
-
-const BlockViewPropTypes = {
+BlockView.propTypes = {
     blocks: PropTypes.instanceOf(list),
     blockClasses: PropTypes.string,
-    onBlockClick: PropTypes.func,
-    onBlockHover: PropTypes.func,
     active: PropTypes.array,
-    deep: PropTypes.bool,
-    status: PropTypes.string
+    deep: PropTypes.string,
+    isDeep: PropTypes.bool.isRequired,
+    status: PropTypes.string,
+    onBlockClick: PropTypes.func.isRequired,
+    onBlockHover: PropTypes.func.isRequired
 };
 
-BlockView.propTypes = BlockViewPropTypes;
-BlockViewShallow.propTypes = BlockViewPropTypes;
+const mapStateToProps = state => ({
+    active: state.getIn(['global', 'other', 'blockView', 'active']),
+    blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
+    deep: state.getIn(['global', 'other', 'blockView', 'deep']),
+    isDeep: Boolean(state.getIn(['global', 'other', 'blockView', 'deep'])),
+    status: state.getIn(['global', 'other', 'blockView', 'status'])
+});
+
+const mapDispatchToProps = dispatch => ({
+    onBlockClick: block => dispatch(aBlockClicked(block.get('name'))),
+    onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered(block, subBlock))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(BlockView);
 

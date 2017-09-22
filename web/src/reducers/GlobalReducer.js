@@ -3,6 +3,8 @@
  * reducer to run based on the action given.
  */
 
+import { createReducer } from 'redux-create-reducer';
+
 import * as AC from '../constants/actions';
 
 import {
@@ -19,14 +21,15 @@ import {
 } from './LoginFormReducer';
 import {
     rLogout,
-    rLoadCookies,
     rNavigateToPage,
     rHandleKeyPress,
+    rUpdateTime,
     rUpdateServer,
     rHandleServerUpdate
-} from './HeaderReducer';
+} from './AppReducer';
 import {
     rHandleContentResponse,
+    rRequestContent,
     rContentBlockHover,
     rContentUpdateBlocks
 } from './ContentReducer';
@@ -76,177 +79,87 @@ import {
     rHandleStocksPricesResponse
 } from './StocksListReducer';
 
-// eslint-disable-next-line complexity
-export default (reduction, action) => {
-    switch (action.type) {
-    // error message actions
+import initialState from '../reduction';
 
-    case AC.ERROR_OPEN:
-        return rErrorMessageOpen(reduction, action.payload);
+function createReducerObject(array) {
+    return array.reduce((obj, item) => {
+        obj[item[0]] = (reduction, action) => item[1](reduction, action.payload);
 
-    case AC.ERROR_CLOSE:
-        return rErrorMessageClose(reduction, action.payload);
+        return obj;
+    });
+}
 
-    case AC.ERROR_REMOVE:
-        return rErrorMessageRemove(reduction, action.payload);
-
-    case AC.ERRORS_TIMEDOUT:
-        return rErrorMessageClearOld(reduction);
+const reducers = createReducerObject([
+    [AC.ERROR_OPEN, rErrorMessageOpen],
+    [AC.ERROR_CLOSE, rErrorMessageClose],
+    [AC.ERROR_REMOVE, rErrorMessageRemove],
+    [AC.ERRORS_TIMEDOUT, rErrorMessageClearOld],
 
     // login form actions
-    case AC.LOGIN_FORM_INPUTTED:
-        return rLoginFormInput(reduction, action.payload);
+    [AC.LOGIN_FORM_INPUTTED, rLoginFormInput],
+    [AC.LOGIN_FORM_RESET, rLoginFormReset],
+    [AC.LOGIN_FORM_SUBMITTED, rLoginFormSubmit], [AC.LOGIN_FORM_RESPONSE_GOT, rLoginFormHandleResponse],
 
-    case AC.LOGIN_FORM_RESET:
-        return rLoginFormReset(reduction, action.payload);
-
-    case AC.LOGIN_FORM_SUBMITTED:
-        return rLoginFormSubmit(reduction);
-
-    case AC.LOGIN_FORM_RESPONSE_GOT:
-        return rLoginFormHandleResponse(reduction, action.payload);
-
-    // header / app actions
-    case AC.USER_LOGGED_OUT:
-        return rLogout(reduction);
-
-    case AC.COOKIES_LOADED:
-        return rLoadCookies(reduction);
-
-    case AC.PAGE_NAVIGATED:
-        return rNavigateToPage(reduction, action.payload);
-
-    case AC.KEY_PRESSED:
-        return rHandleKeyPress(reduction, action.payload);
-
-    case AC.SERVER_UPDATED:
-        return rUpdateServer(reduction);
-
-    case AC.SERVER_UPDATE_RECEIVED:
-        return rHandleServerUpdate(reduction, action.payload);
-
-    case AC.SERVER_ADD_RECEIVED:
-        return rHandleServerAdd(reduction, action.payload);
+    // app actions
+    [AC.USER_LOGGED_OUT, rLogout],
+    [AC.PAGE_NAVIGATED, rNavigateToPage],
+    [AC.KEY_PRESSED, rHandleKeyPress],
+    [AC.TIME_UPDATED, rUpdateTime],
+    [AC.SERVER_UPDATED, rUpdateServer],
+    [AC.SERVER_UPDATE_RECEIVED, rHandleServerUpdate],
+    [AC.SERVER_ADD_RECEIVED, rHandleServerAdd],
 
     // content actions
-    case AC.CONTENT_LOADED:
-        return rHandleContentResponse(reduction, action.payload);
-
-    case AC.CONTENT_BLOCK_HOVERED:
-        return rContentBlockHover(reduction, action.payload);
-
-    case AC.CONTENT_BLOCKS_RECEIVED:
-        return rContentUpdateBlocks(reduction, action.payload);
+    [AC.CONTENT_LOADED, rHandleContentResponse],
+    [AC.CONTENT_REQUESTED, rRequestContent],
+    [AC.CONTENT_BLOCK_HOVERED, rContentBlockHover],
+    [AC.CONTENT_BLOCKS_RECEIVED, rContentUpdateBlocks],
 
     // analysis actions
-    case AC.ANALYSIS_PERIOD_CHANGED:
-        return rAnalysisChangePeriod(reduction, action.payload);
-
-    case AC.ANALYSIS_GROUPING_CHANGED:
-        return rAnalysisChangeGrouping(reduction, action.payload);
-
-    case AC.ANALYSIS_TIME_INDEX_CHANGED:
-        return rAnalysisChangeTimeIndex(reduction, action.payload);
-
-    case AC.ANALYSIS_DATA_REFRESHED:
-        return rAnalysisHandleNewData(reduction, action.payload);
-
-
-    case AC.ANALYSIS_TREE_DISPLAY_TOGGLED:
-        return rAnalysisTreeToggleDisplay(reduction, action.payload);
-
-    case AC.ANALYSIS_TREE_EXPAND_TOGGLED:
-        return rAnalysisTreeToggleExpand(reduction, action.payload);
-
-    case AC.ANALYSIS_TREE_HOVERED:
-        return rAnalysisTreeHover(reduction, action.payload);
-
-    case AC.ANALYSIS_BLOCK_CLICKED:
-        return rAnalysisBlockClick(reduction, action.payload);
+    [AC.ANALYSIS_PERIOD_CHANGED, rAnalysisChangePeriod],
+    [AC.ANALYSIS_GROUPING_CHANGED, rAnalysisChangeGrouping],
+    [AC.ANALYSIS_TIME_INDEX_CHANGED, rAnalysisChangeTimeIndex],
+    [AC.ANALYSIS_DATA_REFRESHED, rAnalysisHandleNewData],
+    [AC.ANALYSIS_TREE_DISPLAY_TOGGLED, rAnalysisTreeToggleDisplay],
+    [AC.ANALYSIS_TREE_EXPAND_TOGGLED, rAnalysisTreeToggleExpand],
+    [AC.ANALYSIS_TREE_HOVERED, rAnalysisTreeHover],
+    [AC.ANALYSIS_BLOCK_CLICKED, rAnalysisBlockClick],
 
     // editable actions
-    case AC.EDIT_ACTIVATED:
-        return rActivateEditable(reduction, action.payload);
+    [AC.EDIT_ACTIVATED, rActivateEditable],
+    [AC.EDIT_CHANGED, rChangeEditable],
+    [AC.EDIT_LIST_ITEM_ADDED, rAddListItem],
+    [AC.EDIT_LIST_ITEM_DELETED, rDeleteListItem],
+    [AC.EDIT_SUGGESTIONS_REQUESTED, rRequestSuggestions],
+    [AC.EDIT_SUGGESTIONS_RECEIVED, rHandleSuggestions],
 
-    case AC.EDIT_CHANGED:
-        return rChangeEditable(reduction, action.payload);
-
-    case AC.EDIT_LIST_ITEM_ADDED:
-        return rAddListItem(reduction, action.payload);
-
-    case AC.EDIT_LIST_ITEM_DELETED:
-        return rDeleteListItem(reduction, action.payload);
-
-    case AC.EDIT_SUGGESTIONS_REQUESTED:
-        return rRequestSuggestions(reduction, action.payload);
-
-    case AC.EDIT_SUGGESTIONS_RECEIVED:
-        return rHandleSuggestions(reduction, action.payload);
-
-
-    case AC.EDIT_FUND_TRANSACTIONS_CHANGED:
-        return rChangeFundTransactions(reduction, action.payload);
-
-    case AC.EDIT_FUND_TRANSACTIONS_ADDED:
-        return rAddFundTransactions(reduction, action.payload);
-
-    case AC.EDIT_FUND_TRANSACTIONS_REMOVED:
-        return rRemoveFundTransactions(reduction, action.payload);
+    [AC.EDIT_FUND_TRANSACTIONS_CHANGED, rChangeFundTransactions],
+    [AC.EDIT_FUND_TRANSACTIONS_ADDED, rAddFundTransactions],
+    [AC.EDIT_FUND_TRANSACTIONS_REMOVED, rRemoveFundTransactions],
 
     // mobile form actions
-    case AC.FORM_EDIT_DIALOG_OPENED:
-        return rOpenFormDialogEdit(reduction, action.payload);
-
-    case AC.FORM_ADD_DIALOG_OPENED:
-        return rOpenFormDialogAdd(reduction, action.payload);
-
-    case AC.FORM_DIALOG_CLOSED:
-        return rCloseFormDialog(reduction, action.payload);
-
-    case AC.FORM_INPUT_CHANGED:
-        return rHandleFormInputChange(reduction, action.payload);
+    [AC.FORM_EDIT_DIALOG_OPENED, rOpenFormDialogEdit],
+    [AC.FORM_ADD_DIALOG_OPENED, rOpenFormDialogAdd],
+    [AC.FORM_DIALOG_CLOSED, rCloseFormDialog],
+    [AC.FORM_INPUT_CHANGED, rHandleFormInputChange],
 
     // graph actions
-    case AC.GRAPH_SHOWALL_TOGGLED:
-        return rToggleShowAll(reduction);
+    [AC.GRAPH_SHOWALL_TOGGLED, rToggleShowAll],
 
-    case AC.GRAPH_FUND_ITEM_TOGGLED:
-        return rToggleFundItemGraph(reduction, action.payload);
-
-    case AC.GRAPH_FUNDS_CLICKED:
-        return rToggleFundsGraphMode(reduction);
-
-    case AC.GRAPH_FUNDS_ZOOMED:
-        return rZoomFundsGraph(reduction, action.payload);
-
-    case AC.GRAPH_FUNDS_HOVERED:
-        return rHoverFundsGraph(reduction, action.payload);
-
-    case AC.GRAPH_FUNDS_LINE_TOGGLED:
-        return rToggleFundsGraphLine(reduction, action.payload);
-
-    case AC.GRAPH_FUNDS_PERIOD_CHANGED:
-        return rChangeFundsGraphPeriod(reduction, action.payload);
-
-    case AC.GRAPH_FUNDS_PERIOD_LOADED:
-        return rHandleFundPeriodResponse(reduction, action.payload);
+    [AC.GRAPH_FUND_ITEM_TOGGLED, rToggleFundItemGraph],
+    [AC.GRAPH_FUNDS_CLICKED, rToggleFundsGraphMode],
+    [AC.GRAPH_FUNDS_ZOOMED, rZoomFundsGraph],
+    [AC.GRAPH_FUNDS_HOVERED, rHoverFundsGraph],
+    [AC.GRAPH_FUNDS_LINE_TOGGLED, rToggleFundsGraphLine],
+    [AC.GRAPH_FUNDS_PERIOD_CHANGED, rChangeFundsGraphPeriod],
+    [AC.GRAPH_FUNDS_PERIOD_LOADED, rHandleFundPeriodResponse],
 
 
-    case AC.STOCKS_LIST_REQUESTED:
-        return rLoadStocksList(reduction);
+    [AC.STOCKS_LIST_REQUESTED, rLoadStocksList],
+    [AC.STOCKS_LIST_RECEIVED, rHandleStocksListResponse],
+    [AC.STOCKS_PRICES_REQUESTED, rLoadStocksPrices],
+    [AC.STOCKS_PRICES_RECEIVED, rHandleStocksPricesResponse]
+]);
 
-    case AC.STOCKS_LIST_RECEIVED:
-        return rHandleStocksListResponse(reduction, action.payload);
-
-    case AC.STOCKS_PRICES_REQUESTED:
-        return rLoadStocksPrices(reduction);
-
-    case AC.STOCKS_PRICES_RECEIVED:
-        return rHandleStocksPricesResponse(reduction, action.payload);
-
-    default:
-        // By default, the reduction is simply returned unchanged.
-        return reduction;
-    }
-};
+export default createReducer(initialState, reducers);
 

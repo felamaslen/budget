@@ -3,8 +3,6 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import { EF_CONTENT_REQUESTED } from '../constants/effects';
-import buildMessage from '../messageBuilder';
 import { rErrorMessageOpen } from './ErrorReducer';
 import {
     ERROR_LEVEL_WARN,
@@ -23,11 +21,11 @@ import { processPageDataAnalysis } from './data/analysis';
 
 export function getAnalysisReq(reduction, req) {
     const shortPeriod = ANALYSIS_PERIODS[reduction.getIn(
-        ['appState', 'other', 'analysis', 'period']
+        ['other', 'analysis', 'period']
     )];
 
-    const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['appState', 'other', 'analysis', 'grouping'])];
-    const timeIndex = reduction.getIn(['appState', 'other', 'analysis', 'timeIndex']);
+    const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['other', 'analysis', 'grouping'])];
+    const timeIndex = reduction.getIn(['other', 'analysis', 'timeIndex']);
 
     const dataReq = [shortPeriod, grouping, timeIndex];
 
@@ -61,20 +59,6 @@ export function getReqObj(reduction, pageIndex, apiKey) {
     return reqObj;
 }
 
-export function rLoadContent(reduction, pageIndex) {
-    if (!reduction.getIn(['appState', 'pagesLoaded', pageIndex])) {
-        const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-
-        const reqObj = getReqObj(reduction, pageIndex, apiKey);
-
-        return reduction.set('effects', reduction.get('effects').push(
-            buildMessage(EF_CONTENT_REQUESTED, reqObj)
-        ));
-    }
-
-    return reduction;
-}
-
 /**
  * Processes response data into output fit for consumption by the view
  * @param {Record} reduction: app state
@@ -101,28 +85,34 @@ function processPageData(reduction, pageIndex, data) {
     else if (LIST_PAGES.indexOf(pageIndex) > -1) {
         const newReduction = processPageDataList(reduction, pageIndex, data);
         const sortedRows = sortRowsByDate(
-            newReduction.getIn(['appState', 'pages', pageIndex, 'rows']), pageIndex);
+            newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex);
         const weeklyData = addWeeklyAverages(
-            newReduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
+            newReduction.getIn(['pages', pageIndex, 'data']), sortedRows, pageIndex);
 
         return newReduction
-            .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
-            .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
+            .setIn(['pages', pageIndex, 'rows'], sortedRows)
+            .setIn(['pages', pageIndex, 'data'], weeklyData);
     }
 
     return reduction;
 }
 
-export function rHandleContentResponse(reduction, output) {
+export function rHandleContentResponse(reduction, req) {
     return processPageData(
         reduction
-            .setIn(['appState', 'pagesLoaded', output.pageIndex], true)
-            .setIn(['appState', 'pagesRaw', output.pageIndex], output.response.data.data),
-        output.pageIndex,
-        output.response.data.data
+            .setIn(['pagesRaw', req.pageIndex], req.response.data.data),
+        req.pageIndex,
+        req.response.data.data
     )
-        .setIn(['appState', 'edit', 'active'], getNullEditable(output.pageIndex))
-        .setIn(['appState', 'edit', 'add'], getAddDefaultValues(output.pageIndex));
+        .set('loading', false)
+        .setIn(['pagesLoaded', req.pageIndex], true)
+        .setIn(['edit', 'active'], getNullEditable(req.pageIndex))
+        .setIn(['edit', 'add'], getAddDefaultValues(req.pageIndex));
+}
+
+export function rRequestContent(reduction) {
+    return reduction
+        .set('loading', true);
 }
 
 export function rContentBlockHover (reduction, obj) {
@@ -140,11 +130,11 @@ export function rContentBlockHover (reduction, obj) {
             : `${capitalise(obj.block.get('name'))} (${value})`;
     }
 
-    return reduction.setIn(['appState', 'other', 'blockView', 'status'], newStatus);
+    return reduction.setIn(['other', 'blockView', 'status'], newStatus);
 }
 export function rContentUpdateBlocks(reduction, obj) {
     const loadKey = obj.loadKey;
-    const currentLoadKey = reduction.getIn(['appState', 'other', 'blockView', 'loadKey']);
+    const currentLoadKey = reduction.getIn(['other', 'blockView', 'loadKey']);
     if (loadKey !== currentLoadKey) {
     // another load request has been made or the page has been changed
         return reduction;
@@ -168,6 +158,6 @@ export function rContentUpdateBlocks(reduction, obj) {
     const blocks = packer.blocks;
 
     return reduction
-        .setIn(['appState', 'other', 'blockView', 'blocks'], blocks);
+        .setIn(['other', 'blockView', 'blocks'], blocks);
 }
 

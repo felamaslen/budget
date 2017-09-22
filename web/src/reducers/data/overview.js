@@ -280,12 +280,12 @@ export function rCalculateOverview(
     reduction, pageIndex, newDate, oldDate, newItemCost, oldItemCost
 ) {
     const overviewKey = PAGES.indexOf('overview');
-    const startYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'startYearMonth']);
+    const startYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'startYearMonth']);
 
     const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
     const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
 
-    const oldCost = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'cost']);
+    const oldCost = reduction.getIn(['pages', overviewKey, 'data', 'cost']);
     const numRows = oldCost.get(PAGES[pageIndex]).size;
 
     // update the changed rows in the overview page
@@ -313,17 +313,17 @@ export function rCalculateOverview(
         }
     }
 
-    const endYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'endYearMonth']);
-    const currentYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'currentYearMonth']);
-    const futureMonths = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'futureMonths']);
+    const endYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'endYearMonth']);
+    const currentYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'currentYearMonth']);
+    const futureMonths = reduction.getIn(['pages', overviewKey, 'data', 'futureMonths']);
 
     const newData = rProcessDataOverview(
         newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths
     );
 
     return reduction
-        .setIn(['appState', 'pages', overviewKey, 'data'], newData)
-        .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
+        .setIn(['pages', overviewKey, 'data'], newData)
+        .setIn(['pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 }
 
 /**
@@ -337,6 +337,6 @@ export default function rProcessOverview(reduction, pageIndex, raw) {
     const data = rProcessDataOverviewRaw(raw);
     const rows = rGetOverviewRows(data);
 
-    return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
+    return reduction.setIn(['pages', pageIndex], map({ data, rows }));
 }
 

@@ -10,6 +10,7 @@ export const mediaQueries = {
 };
 
 export const API_VERSION = 3;
+export const API_PREFIX = `api/v${API_VERSION}`;
 
 export const ERROR_LEVEL_ERROR = 0xe0;
 export const ERROR_LEVEL_WARN = 0xe1;
@@ -80,10 +81,6 @@ export const DAILY_PAGES = [null, null, false, false, false, true, true, true, t
 
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
-export const SERVER_UPDATE_IDLE = 0;
-export const SERVER_UPDATE_REQUESTED = 0xf91;
-export const SERVER_UPDATE_RECEIVED = 0xf92;
-export const SERVER_UPDATE_ERROR = 0xf93;
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;

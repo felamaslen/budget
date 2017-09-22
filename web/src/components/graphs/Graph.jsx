@@ -2,14 +2,14 @@
  * React component to display a graph
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PureControllerView from '../PureControllerView';
 import { HTML_CANVAS_SUPPORTED } from '../../misc/const';
 
-export class Graph extends PureControllerView {
+export default class Graph extends Component {
     constructor(props) {
         super(props);
+
         this.ctx = null;
         this.width = null;
         this.height = null;

@@ -2,17 +2,29 @@
  * React component to display a form
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import PureControllerView from './PureControllerView';
-import classNames from 'classnames';
-import { aLoginFormInputted } from '../actions/LoginActions';
+import { connect } from 'react-redux';
+
+import {
+    aLoginFormInputted, aLoginFormSubmitted
+} from '../actions/LoginActions';
 import { LOGIN_INPUT_LENGTH } from '../misc/const';
 
-export class LoginForm extends PureControllerView {
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+
+export class LoginForm extends Component {
+    componentDidUpdate(prevProps) {
+        const pinWasComplete = prevProps.pin.length >= LOGIN_INPUT_LENGTH;
+        const pinIsComplete = this.props.pin.length >= LOGIN_INPUT_LENGTH;
+
+        if (!pinWasComplete && pinIsComplete) {
+            this.props.tryLogin(this.props.pin);
+        }
+    }
     // input a digit into the form
     input(digit) {
-        this.dispatchAction(aLoginFormInputted(digit));
+        this.props.inputDigit(digit);
     }
     renderDigit(digit) {
         const btnClass = `btn-digit btn-digit-${digit}`;
@@ -46,6 +58,10 @@ export class LoginForm extends PureControllerView {
         return <div className="number-input noselect">{digits}</div>;
     }
     render() {
+        if (!this.props.visible) {
+            return null;
+        }
+
         const numberInput = this.renderNumberInput();
 
         const digitBoxes = new Array(LOGIN_INPUT_LENGTH)
@@ -60,20 +76,33 @@ export class LoginForm extends PureControllerView {
                 return <div key={key} className={className} />;
             });
 
-        return (
-            <div className="login-form">
-                <h3>Enter your PIN:</h3>
-                <div className="pin-display">
-                    {digitBoxes}
-                </div>
-                {numberInput}
+        return <div className="login-form">
+            <h3>Enter your PIN:</h3>
+            <div className="pin-display">
+                {digitBoxes}
             </div>
-        );
+            {numberInput}
+        </div>;
     }
 }
 
 LoginForm.propTypes = {
-    loading: PropTypes.bool,
-    inputStep: PropTypes.number
+    inputStep: PropTypes.number.isRequired,
+    pin: PropTypes.string.isRequired,
+    visible: PropTypes.bool.isRequired,
+    tryLogin: PropTypes.func.isRequired
 };
+
+const mapStateToProps = state => ({
+    inputStep: state.getIn(['global', 'loginForm', 'inputStep']),
+    pin: state.getIn(['global', 'loginForm', 'values']).join(''),
+    visible: state.getIn(['global', 'loginForm', 'visible'])
+});
+
+const mapDispatchToProps = dispatch => ({
+    inputDigit: digit => dispatch(aLoginFormInputted(digit)),
+    tryLogin: pin => dispatch(aLoginFormSubmitted(pin))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
 

@@ -3,7 +3,7 @@
  */
 
 import { List as list } from 'immutable';
-import { Graph } from './Graph';
+import Graph from './Graph';
 import { timeSeriesTicks } from '../../misc/date';
 
 export class LineGraph extends Graph {

@@ -10,15 +10,15 @@ import {
 import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '../misc/config';
 
 export function rLoadStocksPrices(reduction) {
-    const symbols = reduction.getIn(['appState', 'other', 'stocksList', 'stocks'])
+    const symbols = reduction.getIn(['other', 'stocksList', 'stocks'])
         .reduce((codes, item, code) => codes.push(code), list.of())
         .concat(
-            reduction.getIn(['appState', 'other', 'stocksList', 'indices'])
+            reduction.getIn(['other', 'stocksList', 'indices'])
                 .reduce((codes, item) => codes.push(item.get('code')), list.of())
         )
         .toJS();
 
-    const apiKey = reduction.getIn(['appState', 'other', 'stocksList', 'apiKey']);
+    const apiKey = reduction.getIn(['other', 'stocksList', 'apiKey']);
 
     const req = { symbols, apiKey };
 
@@ -29,7 +29,7 @@ export function rLoadStocksPrices(reduction) {
 
 export function rLoadStocksList(reduction) {
     return reduction.set('effects', reduction.get('effects').push(buildMessage(
-        EF_STOCKS_LIST_REQUESTED, reduction.getIn(['appState', 'user', 'apiKey'])
+        EF_STOCKS_LIST_REQUESTED, reduction.getIn(['user', 'apiKey'])
     )));
 }
 export function rHandleStocksListResponse(reduction, response) {
@@ -55,9 +55,9 @@ export function rHandleStocksListResponse(reduction, response) {
     }));
 
     return rLoadStocksPrices(reduction
-        .setIn(['appState', 'other', 'stocksList', 'indices'], indices)
-        .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks)
-        .setIn(['appState', 'other', 'stocksList', 'apiKey'], response.apiKey)
+        .setIn(['other', 'stocksList', 'indices'], indices)
+        .setIn(['other', 'stocksList', 'stocks'], stocks)
+        .setIn(['other', 'stocksList', 'apiKey'], response.apiKey)
     );
 }
 
@@ -106,23 +106,23 @@ export function limitTimeSeriesLength(timeSeries, limit) {
 }
 
 export function rHandleStocksPricesResponse(reduction, response) {
-    let indices = reduction.getIn(['appState', 'other', 'stocksList', 'indices'])
+    let indices = reduction.getIn(['other', 'stocksList', 'indices'])
         .map(item => item.set('up', false).set('down', false));
 
-    let stocks = reduction.getIn(['appState', 'other', 'stocksList', 'stocks'])
+    let stocks = reduction.getIn(['other', 'stocksList', 'stocks'])
         .map(item => item.set('up', false).set('down', false));
 
     const time = Math.floor(new Date().getTime() / 1000);
 
     let newReduction = reduction
-        .setIn(['appState', 'other', 'stocksList', 'loadedInitial'], true)
-        .setIn(['appState', 'other', 'stocksList', 'lastPriceUpdate'], time);
+        .setIn(['other', 'stocksList', 'loadedInitial'], true)
+        .setIn(['other', 'stocksList', 'lastPriceUpdate'], time);
 
     if (!response) {
         return newReduction;
     }
 
-    const loadedInitial = reduction.getIn(['appState', 'other', 'stocksList', 'loadedInitial']);
+    const loadedInitial = reduction.getIn(['other', 'stocksList', 'loadedInitial']);
 
     try {
         response.forEach(row => {
@@ -137,8 +137,8 @@ export function rHandleStocksPricesResponse(reduction, response) {
         });
 
         newReduction = newReduction
-            .setIn(['appState', 'other', 'stocksList', 'indices'], indices)
-            .setIn(['appState', 'other', 'stocksList', 'stocks'], stocks);
+            .setIn(['other', 'stocksList', 'indices'], indices)
+            .setIn(['other', 'stocksList', 'stocks'], stocks);
     }
     catch (err) {
         // don't do anything
@@ -150,17 +150,17 @@ export function rHandleStocksPricesResponse(reduction, response) {
 
     // update stocks list graph
     const history = limitTimeSeriesLength(newReduction.getIn(
-        ['appState', 'other', 'stocksList', 'history']
+        ['other', 'stocksList', 'history']
     ), STOCKS_GRAPH_RESOLUTION);
 
     return newReduction
-        .setIn(['appState', 'other', 'stocksList', 'weightedGain'], weightedGain)
+        .setIn(['other', 'stocksList', 'weightedGain'], weightedGain)
         .setIn(
-            ['appState', 'other', 'stocksList', 'oldWeightedGain'],
-            reduction.getIn(['appState', 'other', 'stocksList', 'weightedGain'])
+            ['other', 'stocksList', 'oldWeightedGain'],
+            reduction.getIn(['other', 'stocksList', 'weightedGain'])
         )
         .setIn(
-            ['appState', 'other', 'stocksList', 'history'],
+            ['other', 'stocksList', 'history'],
             history.push(list([time, weightedGain]))
         );
 }

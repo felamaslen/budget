@@ -16,19 +16,19 @@ import {
 import { YMD } from '../misc/date';
 import {
     uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
-    pushToRequestQueue
+    getValueForTransmit
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 
 export function recalculateFundProfits(reduction, pageIndex) {
-    const rows = reduction.getIn(['appState', 'pages', pageIndex, 'rows']);
-    const startTime = reduction.getIn(['appState', 'pages', pageIndex, 'startTime']);
-    const cacheTimes = reduction.getIn(['appState', 'pages', pageIndex, 'cacheTimes']);
+    const rows = reduction.getIn(['pages', pageIndex, 'rows']);
+    const startTime = reduction.getIn(['pages', pageIndex, 'startTime']);
+    const cacheTimes = reduction.getIn(['pages', pageIndex, 'cacheTimes']);
 
     const rowsWithExtraProps = reloadFundsRows(rows, startTime, cacheTimes, pageIndex);
 
     return reduction
-        .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps);
+        .setIn(['pages', pageIndex, 'rows'], rowsWithExtraProps);
 }
 
 const overviewKey = PAGES.indexOf('overview');
@@ -38,55 +38,56 @@ function applyEditsOverview(reduction, item) {
     const row = item.get('row');
 
     const newCost = reduction
-        .getIn(['appState', 'pages', overviewKey, 'data', 'cost'])
+        .getIn(['pages', overviewKey, 'data', 'cost'])
         .setIn(['balance', row], value);
 
-    const startYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'startYearMonth']);
-    const endYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'endYearMonth']);
-    const currentYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'currentYearMonth']);
-    const futureMonths = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'futureMonths']);
+    const startYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'startYearMonth']);
+    const endYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'endYearMonth']);
+    const currentYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'currentYearMonth']);
+    const futureMonths = reduction.getIn(['pages', overviewKey, 'data', 'futureMonths']);
 
     const newData = rProcessDataOverview(
         newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths);
 
-    return reduction.setIn(['appState', 'pages', overviewKey, 'data'], newData)
-        .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
+    return reduction
+        .setIn(['pages', overviewKey, 'data'], newData)
+        .setIn(['pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 }
 
 export function resortListRows(reduction, pageIndex) {
     // sort rows by date
     const sortedRows = sortRowsByDate(reduction.getIn(
-        ['appState', 'pages', pageIndex, 'rows']), pageIndex
+        ['pages', pageIndex, 'rows']), pageIndex
     );
     const weeklyData = addWeeklyAverages(reduction.getIn(
-        ['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex
+        ['pages', pageIndex, 'data']), sortedRows, pageIndex
     );
 
     return reduction
-        .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
-        .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
+        .setIn(['pages', pageIndex, 'rows'], sortedRows)
+        .setIn(['pages', pageIndex, 'data'], weeklyData);
 }
 
 function applyEditsList(reduction, item, pageIndex) {
     // update list data in the UI
     if (item.get('row') === -1) {
         // add-item
-        return reduction.setIn(['appState', 'edit', 'add', item.get('col')], item.get('value'));
+        return reduction.setIn(['edit', 'add', item.get('col')], item.get('value'));
     }
 
     // update row
     const newRow = reduction.getIn(
-        ['appState', 'pages', pageIndex, 'rows', item.get('row')])
+        ['pages', pageIndex, 'rows', item.get('row')])
         .setIn(['cols', item.get('col')], item.get('value'));
 
     let newReduction = reduction.setIn(
-        ['appState', 'pages', pageIndex, 'rows', item.get('row')], newRow);
+        ['pages', pageIndex, 'rows', item.get('row')], newRow);
 
     // recalculate total if the cost has changed
     if (item.get('item') === 'cost') {
         newReduction = newReduction.setIn(
-            ['appState', 'pages', pageIndex, 'data', 'total'],
-            newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) +
+            ['pages', pageIndex, 'data', 'total'],
+            newReduction.getIn(['pages', pageIndex, 'data', 'total']) +
                 item.get('value') - item.get('originalValue')
         );
     }
@@ -99,11 +100,11 @@ function applyEditsList(reduction, item, pageIndex) {
     newReduction = resortListRows(newReduction, pageIndex);
 
     // recalculate overview data if the cost or date changed
-    if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
+    if (reduction.getIn(['pagesLoaded', overviewKey])) {
         if (item.get('item') === 'cost') {
             const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
             const date = newReduction.getIn(
-                ['appState', 'pages', pageIndex, 'rows', item.get('row'), 'cols', dateKey]
+                ['pages', pageIndex, 'rows', item.get('row'), 'cols', dateKey]
             );
 
             newReduction = rCalculateOverview(
@@ -151,15 +152,87 @@ function applyEdits(reduction, item, pageIndex) {
     return reduction;
 }
 
+export function addToRequestQueue(requestList, dataItem, startYearMonth = null) {
+    const pageIndex = dataItem.get('pageIndex');
+
+    if (dataItem.get('delete')) {
+        return requestList.push(map({
+            req: map({
+                method: 'delete',
+                route: PAGES[dataItem.get('pageIndex')],
+                query: map.of(),
+                body: map({ id: dataItem.get('id') })
+            })
+        }));
+    }
+
+    const item = dataItem.get('item');
+    const value = getValueForTransmit(dataItem.get('value'));
+
+    if (PAGES[pageIndex] === 'overview') {
+        const key = dataItem.get('row');
+        const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
+        const month = (startYearMonth[1] + key - 1) % 12 + 1;
+        const balance = value;
+
+        return requestList.push(map({
+            pageIndex,
+            req: map({
+                method: 'post',
+                route: 'balance',
+                query: map.of(),
+                body: map({ year, month, balance })
+            })
+        }));
+    }
+
+    if (LIST_PAGES.indexOf(pageIndex) > -1) {
+        const id = dataItem.get('id');
+
+        const reqPageIndex = requestList.findIndex(req => {
+            return req.get('pageIndex') === pageIndex &&
+                req.getIn(['req', 'body', 'id']) === id;
+        });
+
+        if (reqPageIndex > -1) {
+            return requestList.setIn([reqPageIndex, 'req', 'body', item], value);
+        }
+
+        return requestList.push(map({
+            pageIndex,
+            req: map({
+                method: 'put',
+                route: PAGES[pageIndex],
+                query: map.of(),
+                body: map({ id, [item]: value })
+            })
+        }));
+    }
+
+    return requestList;
+}
+
+export function pushToRequestQueue(reduction, dataItem) {
+    const startYearMonth = reduction.getIn(
+        ['pages', PAGES.indexOf('overview'), 'data', 'startYearMonth']
+    ) || null;
+
+    const requestList = reduction.getIn(['edit', 'requestList']);
+    const newRequestList = addToRequestQueue(requestList, dataItem, startYearMonth);
+
+    return reduction
+        .setIn(['edit', 'requestList'], newRequestList);
+}
+
 export function rActivateEditable(reduction, editable, cancel) {
-    const active = reduction.getIn(['appState', 'edit', 'active']);
-    const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
+    const active = reduction.getIn(['edit', 'active']);
+    const pageIndex = reduction.getIn(['currentPageIndex']);
     let newReduction = reduction
-        .setIn(['appState', 'edit', 'addBtnFocus'], false)
-        .setIn(['appState', 'edit', 'suggestions', 'list'], list.of())
-        .setIn(['appState', 'edit', 'suggestions', 'active'], -1)
-        .setIn(['appState', 'edit', 'suggestions', 'loading'], false)
-        .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
+        .setIn(['edit', 'addBtnFocus'], false)
+        .setIn(['edit', 'suggestions', 'list'], list.of())
+        .setIn(['edit', 'suggestions', 'active'], -1)
+        .setIn(['edit', 'suggestions', 'loading'], false)
+        .setIn(['edit', 'suggestions', 'reqId'], null);
 
     // confirm the previous item's edits
     if (active && active.get('value') !== active.get('originalValue')) {
@@ -170,7 +243,7 @@ export function rActivateEditable(reduction, editable, cancel) {
         else {
             if (active.get('row') > -1) {
                 // add last item to queue for saving on API
-                newReduction = pushToRequestQueue(newReduction, active);
+                newReduction = pushToRequestQueue(newReduction, active.set('pageIndex', pageIndex));
             }
 
             // append the changes of the last item to the UI
@@ -180,56 +253,56 @@ export function rActivateEditable(reduction, editable, cancel) {
 
     // can pass null to deactivate editing
     if (!editable) {
-        return newReduction.setIn(['appState', 'edit', 'active'], getNullEditable(pageIndex));
+        return newReduction.setIn(['edit', 'active'], getNullEditable(pageIndex));
     }
 
     return newReduction.setIn(
-        ['appState', 'edit', 'active'],
+        ['edit', 'active'],
         editable.set('originalValue', editable.get('value'))
     );
 }
 
 export function rChangeEditable(reduction, value) {
-    return reduction.setIn(['appState', 'edit', 'active', 'value'], value);
+    return reduction.setIn(['edit', 'active', 'value'], value);
 }
 
 export function rDeleteListItem(reduction, item) {
     let newReduction = reduction;
 
     const pageIndex = item.pageIndex;
-    const id = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'id']);
+    const id = reduction.getIn(['pages', pageIndex, 'rows', item.key, 'id']);
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-    const itemCost = reduction.getIn(['appState', 'pages', pageIndex, 'rows', item.key, 'cols', costKey]);
+    const itemCost = reduction.getIn(['pages', pageIndex, 'rows', item.key, 'cols', costKey]);
 
     // recalculate total
     newReduction = newReduction.setIn(
-        ['appState', 'pages', pageIndex, 'data', 'total'],
-        newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'total']) - itemCost
+        ['pages', pageIndex, 'data', 'total'],
+        newReduction.getIn(['pages', pageIndex, 'data', 'total']) - itemCost
     );
     // sort rows and recalculate weekly data
     const sortedRows = sortRowsByDate(
         newReduction
-            .getIn(['appState', 'pages', pageIndex, 'rows'])
+            .getIn(['pages', pageIndex, 'rows'])
             .splice(item.key, 1), pageIndex
     );
     const weeklyData = addWeeklyAverages(
-        newReduction.getIn(['appState', 'pages', pageIndex, 'data']),
+        newReduction.getIn(['pages', pageIndex, 'data']),
         sortedRows,
         pageIndex
     );
 
     // recalculate overview data
-    if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
+    if (reduction.getIn(['pagesLoaded', overviewKey])) {
         const date = reduction.getIn(
-            ['appState', 'pages', pageIndex, 'rows', item.key, 'cols', dateKey]
+            ['pages', pageIndex, 'rows', item.key, 'cols', dateKey]
         );
         newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, itemCost);
     }
 
-    newReduction = pushToRequestQueue(newReduction, map({ pageIndex, id }), true)
-        .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
-        .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData);
+    newReduction = pushToRequestQueue(newReduction, map({ pageIndex, id }), 'queueDelete')
+        .setIn(['pages', pageIndex, 'rows'], sortedRows)
+        .setIn(['pages', pageIndex, 'data'], weeklyData);
 
     // recalculate fund profits / losses
     if (PAGES[pageIndex] === 'funds') {
@@ -264,12 +337,12 @@ export function stringifyFields(fields) {
 }
 
 export function rAddListItem(reduction, items) {
-    if (reduction.getIn(['appState', 'loadingApi'])) {
+    if (reduction.getIn(['loadingApi'])) {
         return reduction;
     }
 
     // validate items
-    const active = reduction.getIn(['appState', 'edit', 'active']);
+    const active = reduction.getIn(['edit', 'active']);
     let activeItem = null;
     let activeValue = null;
     if (active && active.get('row') === -1) {
@@ -298,13 +371,13 @@ export function rAddListItem(reduction, items) {
 
     const item = stringifyFields(fields);
 
-    const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-    const pageIndex = reduction.getIn(['appState', 'currentPageIndex']);
+    const apiKey = reduction.getIn(['user', 'apiKey']);
+    const pageIndex = reduction.getIn(['currentPageIndex']);
     const req = { apiKey, item, fields, pageIndex };
 
     return rActivateEditable(reduction, null)
-        .setIn(['appState', 'edit', 'add'], list.of())
-        .setIn(['appState', 'loadingApi'], true)
+        .setIn(['edit', 'add'], list.of())
+        .setIn(['loadingApi'], true)
         .set('effects', reduction
             .get('effects')
             .push(buildMessage(EF_SERVER_ADD_REQUESTED, req))
@@ -313,7 +386,7 @@ export function rAddListItem(reduction, items) {
 
 export function rHandleServerAdd(reduction, response) {
     // handle the response from adding an item to a list page
-    let newReduction = reduction.setIn(['appState', 'loadingApi'], false);
+    let newReduction = reduction.setIn(['loadingApi'], false);
     if (response.response.data.error) {
         return rErrorMessageOpen(newReduction, map({
             level: ERROR_LEVEL_ERROR,
@@ -329,21 +402,21 @@ export function rHandleServerAdd(reduction, response) {
 
     // update total and push new item to the data store list, then sort by date
     const sortedRows = sortRowsByDate(
-        reduction.getIn(['appState', 'pages', pageIndex, 'rows']).push(map({ id, cols })), pageIndex);
+        reduction.getIn(['pages', pageIndex, 'rows']).push(map({ id, cols })), pageIndex);
     const weeklyData = addWeeklyAverages(
-        reduction.getIn(['appState', 'pages', pageIndex, 'data']), sortedRows, pageIndex);
+        reduction.getIn(['pages', pageIndex, 'data']), sortedRows, pageIndex);
 
     newReduction = newReduction
-        .setIn(['appState', 'pages', pageIndex, 'rows'], sortedRows)
-        .setIn(['appState', 'pages', pageIndex, 'data'], weeklyData)
-        .setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal)
+        .setIn(['pages', pageIndex, 'rows'], sortedRows)
+        .setIn(['pages', pageIndex, 'data'], weeklyData)
+        .setIn(['pages', pageIndex, 'data', 'total'], newTotal)
         .setIn(
-            ['appState', 'pages', pageIndex, 'data', 'numRows'],
-            newReduction.getIn(['appState', 'pages', pageIndex, 'data', 'numRows']) + 1
+            ['pages', pageIndex, 'data', 'numRows'],
+            newReduction.getIn(['pages', pageIndex, 'data', 'numRows']) + 1
         );
 
     // recalculate overview data
-    if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
+    if (reduction.getIn(['pagesLoaded', overviewKey])) {
         const costItem = item.find(thisItem => thisItem.get('item') === 'cost');
         const dateItem = item.find(thisItem => thisItem.get('item') === 'date');
         if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
@@ -362,7 +435,7 @@ export function rHandleServerAdd(reduction, response) {
         );
     }
 
-    if (reduction.getIn(['appState', 'currentPageIndex']) !== pageIndex) {
+    if (reduction.getIn(['currentPageIndex']) !== pageIndex) {
         return newReduction;
     }
 
@@ -370,8 +443,8 @@ export function rHandleServerAdd(reduction, response) {
     const now = new YMD();
 
     return newReduction
-        .setIn(['appState', 'edit', 'add'], getAddDefaultValues(pageIndex))
-        .setIn(['appState', 'edit', 'active'], map({
+        .setIn(['edit', 'add'], getAddDefaultValues(pageIndex))
+        .setIn(['edit', 'active'], map({
             row: -1,
             col: 0,
             pageIndex,
@@ -380,37 +453,37 @@ export function rHandleServerAdd(reduction, response) {
             value: now,
             originalValue: now
         }))
-        .setIn(['appState', 'edit', 'addBtnFocus'], false);
+        .setIn(['edit', 'addBtnFocus'], false);
 }
 
 export function rHandleSuggestions(reduction, obj) {
     const newReduction = reduction
-        .setIn(['appState', 'edit', 'suggestions', 'loading'], false)
-        .setIn(['appState', 'edit', 'suggestions', 'active'], -1);
+        .setIn(['edit', 'suggestions', 'loading'], false)
+        .setIn(['edit', 'suggestions', 'active'], -1);
 
     if (!obj || reduction.getIn(
-        ['appState', 'edit', 'suggestions', 'reqId']
+        ['edit', 'suggestions', 'reqId']
     ) !== obj.reqId) {
     // null object (clear), or changed input while suggestions were loading
         return newReduction
-            .setIn(['appState', 'edit', 'suggestions', 'list'], list.of())
-            .setIn(['appState', 'edit', 'suggestions', 'reqId'], null);
+            .setIn(['edit', 'suggestions', 'list'], list.of())
+            .setIn(['edit', 'suggestions', 'reqId'], null);
     }
 
-    return newReduction.setIn(['appState', 'edit', 'suggestions', 'list'], obj.items);
+    return newReduction.setIn(['edit', 'suggestions', 'list'], obj.items);
 }
 
 export function rRequestSuggestions(reduction, value) {
-    if (reduction.getIn(['appState', 'edit', 'suggestions', 'loading'])) {
+    if (reduction.getIn(['edit', 'suggestions', 'loading'])) {
         return reduction;
     }
     if (!value.length) {
         return rHandleSuggestions(reduction, null);
     }
 
-    const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
+    const apiKey = reduction.getIn(['user', 'apiKey']);
 
-    const active = reduction.getIn(['appState', 'edit', 'active']);
+    const active = reduction.getIn(['edit', 'active']);
     const page = PAGES[active.get('pageIndex')];
     const column = active.get('item');
 
@@ -421,18 +494,18 @@ export function rRequestSuggestions(reduction, value) {
     return reduction.set('effects', reduction.get('effects').push(
         buildMessage(EF_SUGGESTIONS_REQUESTED, req)
     ))
-        .setIn(['appState', 'edit', 'suggestions', 'loading'], true)
-        .setIn(['appState', 'edit', 'suggestions', 'reqId'], reqId);
+        .setIn(['edit', 'suggestions', 'loading'], true)
+        .setIn(['edit', 'suggestions', 'reqId'], reqId);
 }
 
 function getTransactionsForRow(reduction, row, col) {
     const pageIndex = PAGES.indexOf('funds');
 
     if (row > -1) {
-        return reduction.getIn(['appState', 'pages', pageIndex, 'rows', row, 'cols', col]);
+        return reduction.getIn(['pages', pageIndex, 'rows', row, 'cols', col]);
     }
 
-    return reduction.getIn(['appState', 'edit', 'add', col]);
+    return reduction.getIn(['edit', 'add', col]);
 }
 
 function rFundTransactions(reduction, row, col, transactions) {
@@ -440,14 +513,14 @@ function rFundTransactions(reduction, row, col, transactions) {
 
     if (row > -1) {
         return reduction.setIn(
-            ['appState', 'pages', pageIndex, 'rows', row, 'cols', col], transactions
+            ['pages', pageIndex, 'rows', row, 'cols', col], transactions
         ).setIn(
-            ['appState', 'edit', 'active', 'value'], transactions
+            ['edit', 'active', 'value'], transactions
         );
     }
 
     return reduction.setIn(
-        ['appState', 'edit', 'add', col], transactions
+        ['edit', 'add', col], transactions
     );
 }
 

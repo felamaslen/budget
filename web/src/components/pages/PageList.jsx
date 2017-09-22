@@ -2,24 +2,36 @@
  * List page component
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import PureControllerView from '../PureControllerView';
 import { List as list, Map as map } from 'immutable';
-import classNames from 'classnames';
-import Media from 'react-media';
-import { mediaQueries, LIST_COLS_PAGES } from '../../misc/const';
-import { formatCurrency } from '../../misc/format';
-import getEditable from '../Editable';
+import { connect } from 'react-redux';
+
+import { aContentRequested } from '../../actions/ContentActions';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
 import {
     aMobileEditDialogOpened,
     aMobileAddDialogOpened
 } from '../../actions/FormActions';
 
-export class PageList extends PureControllerView {
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import Media from 'react-media';
+import { mediaQueries, PAGES, DAILY_PAGES, LIST_COLS_PAGES } from '../../misc/const';
+import { formatCurrency } from '../../misc/format';
+import getEditable from '../Editable';
+import EditListItem from '../EditListItem';
+
+export class PageList extends Component {
+    componentDidMount() {
+        if (!this.props.loaded) {
+            this.props.loadContent({
+                apiKey: this.props.apiKey,
+                pageIndex: this.props.pageIndex
+            });
+        }
+    }
     addItem() {
-        this.dispatchAction(aListItemAdded(this.addItems));
+        this.props.addListItem(this.addItems);
     }
     listHeadExtra() {
         return null;
@@ -45,13 +57,11 @@ export class PageList extends PureControllerView {
         });
 
         const daily = this.props.daily
-            ? (
-                <span>
-                    <span className="daily">Daily</span>
-                    <span className="weekly">Weekly:</span>
-                    <span className="weekly-value">{weeklyValue}</span>
-                </span>
-            )
+            ? <span>
+                <span className="daily">Daily</span>
+                <span className="weekly">Weekly:</span>
+                <span className="weekly-value">{weeklyValue}</span>
+            </span>
             : null;
 
         const totalValue = formatCurrency(this.props.data.getIn(
@@ -63,7 +73,7 @@ export class PageList extends PureControllerView {
 
         return (
             <div className="list-head noselect">
-                {this.renderListHeadMain(LIST_COLS_PAGES[this.props.index])}
+                {this.renderListHeadMain(LIST_COLS_PAGES[this.props.pageIndex])}
                 {daily}
                 <span className="total">Total:</span>
                 <span className="total-value">{totalValue}</span>
@@ -72,27 +82,9 @@ export class PageList extends PureControllerView {
         );
     }
     renderLiAdd() {
-        this.addItems = [];
-
-        const addRow = LIST_COLS_PAGES[this.props.index].map((column, key) => {
-            const value = this.props.add.get(key);
-            const active = this.props.edit.get('row') === -1 && this.props.edit.get('col') === key;
-            const editItem = getEditable(
-                this.props.dispatcher, -1, key, null, column, value,
-                this.props.index, active, this.props.suggestions
-            );
-            this.addItems.push(editItem);
-
-            const spanClasses = classNames({
-                [column]: true,
-                active
-            });
-
-            return (
-                <span key={key} className={spanClasses}>
-                    {editItem}
-                </span>
-            );
+        this.addItems = LIST_COLS_PAGES[this.props.pageIndex].map((item, key) => {
+            return <EditListItem key={key} row="-1"
+                id={null} value={this.props.add.get(key)} />;
         });
 
         const addBtnOnClick = () => this.addItem();
@@ -102,14 +94,12 @@ export class PageList extends PureControllerView {
             };
         };
 
-        return (
-            <li className="li-add">
-                {addRow}
-                <span>
-                    <button ref={addBtnRef()} onClick={addBtnOnClick}>Add</button>
-                </span>
-            </li>
-        );
+        return <li className="li-add">
+            {this.addItems}
+            <span>
+                <button ref={addBtnRef()} onClick={addBtnOnClick}>Add</button>
+            </span>
+        </li>;
     }
     renderListExtra() {
         return null;
@@ -117,22 +107,25 @@ export class PageList extends PureControllerView {
     listItemClasses() {
         return {};
     }
-    renderListItem(rowKey, colKey, id, column, value, active = false) {
-        const editItem = getEditable(
-            this.props.dispatcher, rowKey, colKey, id, column, value,
-            this.props.index, active, this.props.suggestions
-        );
-
-        const spanClasses = classNames({
-            [column]: true,
+    renderListItem(rowKey, colKey, id, item, value, active = false) {
+        const editItem = getEditable({
+            row: rowKey,
+            col: colKey,
+            id,
+            item,
+            value,
+            pageIndex: this.props.pageIndex,
             active
         });
 
-        return (
-            <span key={colKey} className={spanClasses}>
-                {editItem}
-            </span>
-        );
+        const spanClasses = classNames({
+            [item]: true,
+            active
+        });
+
+        return <span key={colKey} className={spanClasses}>
+            {editItem}
+        </span>;
     }
     renderListRowItemsMobile(row, rowKey, columns, colKeys) {
         const id = row.get('id');
@@ -148,14 +141,12 @@ export class PageList extends PureControllerView {
     renderListRowMobile(row, rowKey, columns, colKeys) {
         const items = this.renderListRowItemsMobile(row, rowKey, columns, colKeys);
 
-        const onClick = () => {
-            this.dispatchAction(aMobileEditDialogOpened(this.props.index, rowKey));
-        };
+        const onClick = () => this.props.openMobileEditDialog(this.props.pageIndex, rowKey);
 
         return <li onClick={onClick} key={rowKey}>{items}</li>;
     }
     renderAddButton() {
-        const onClick = () => this.dispatchAction(aMobileAddDialogOpened(this.props.index));
+        const onClick = () => this.props.openMobileAddDialog(this.props.pageIndex);
 
         return <div className="button-add-outer">
             <button type="button" className="button-add" onClick={onClick}>
@@ -170,38 +161,35 @@ export class PageList extends PureControllerView {
 
         const columns = ['date', 'item', 'cost'];
         const colKeys = columns
-            .map(column => LIST_COLS_PAGES[this.props.index].indexOf(column));
+            .map(column => LIST_COLS_PAGES[this.props.pageIndex].indexOf(column));
 
         const rows = this.props.data.get('rows')
             .map((row, rowKey) => this.renderListRowMobile(row, rowKey, columns, colKeys));
 
-        return (
-            <div>
-                {this.renderListHeadMobile(columns)}
-                <ul className="list-ul">{rows}</ul>
-                {this.renderAddButton()}
-            </div>
-        );
+        return <div>
+            {this.renderListHeadMobile(columns)}
+            <ul className="list-ul">{rows}</ul>
+            {this.renderAddButton()}
+        </div>;
     }
     renderListRowDesktop(row, rowKey) {
         const id = row.get('id');
 
         const onClick = () => {
             this.dispatchAction(aListItemDeleted({
-                pageIndex: this.props.index,
+                pageIndex: this.props.pageIndex,
                 key: rowKey
             }));
         };
 
-        const deleteBtn = (
-            <span className="delete">
-                <a onClick={onClick}>&minus;</a>
-            </span>
-        );
+        const deleteBtn = <span className="delete">
+            <a onClick={onClick}>&minus;</a>
+        </span>;
 
-        const items = LIST_COLS_PAGES[this.props.index].map((column, colKey) => {
+        const items = LIST_COLS_PAGES[this.props.pageIndex].map((column, colKey) => {
             const value = row.getIn(['cols', colKey]);
-            const active = this.props.edit.get('row') === rowKey && this.props.edit.get('col') === colKey;
+            const active = this.props.editRow === rowKey &&
+                this.props.editCol === colKey;
 
             return this.renderListItem(rowKey, colKey, id, column, value, active);
         });
@@ -209,22 +197,20 @@ export class PageList extends PureControllerView {
         const dailyText = this.props.daily && row.has('daily')
             ? formatCurrency(row.get('daily'))
             : null;
-        const daily = this.props.daily ? (
-            <span className="daily">{dailyText}</span>
-        ) : null;
+        const daily = this.props.daily
+            ? <span className="daily">{dailyText}</span>
+            : null;
 
         const itemClasses = this.listItemClasses(row);
         itemClasses.future = row.get('future');
         itemClasses['first-present'] = row.get('first-present');
 
-        return (
-            <li key={rowKey} className={classNames(itemClasses)}>
-                {items}
-                {daily}
-                {this.renderListExtra(row, rowKey)}
-                {deleteBtn}
-            </li>
-        );
+        return <li key={rowKey} className={classNames(itemClasses)}>
+            {items}
+            {daily}
+            {this.renderListExtra(row, rowKey)}
+            {deleteBtn}
+        </li>;
     }
     renderListDesktop(render) {
         if (!render) {
@@ -234,23 +220,19 @@ export class PageList extends PureControllerView {
         const rows = this.props.data.get('rows')
             .map((row, rowKey) => this.renderListRowDesktop(row, rowKey));
 
-        return (
-            <div>
-                {this.renderListHeadDesktop()}
-                <ul className="list-ul">
-                    {this.renderLiAdd()}
-                    {rows}
-                </ul>
-            </div>
-        );
+        return <div>
+            {this.renderListHeadDesktop()}
+            <ul className="list-ul">
+                {this.renderLiAdd()}
+                {rows}
+            </ul>
+        </div>;
     }
     renderList() {
-        return (
-            <div>
-                <Media query={mediaQueries.mobile}>{render => this.renderListMobile(render)}</Media>
-                <Media query={mediaQueries.desktop}>{render => this.renderListDesktop(render)}</Media>
-            </div>
-        );
+        return <div>
+            <Media query={mediaQueries.mobile}>{render => this.renderListMobile(render)}</Media>
+            <Media query={mediaQueries.desktop}>{render => this.renderListDesktop(render)}</Media>
+        </div>;
     }
     componentDidUpdate(prevProps) {
         if (!prevProps.addBtnFocus && this.props.addBtnFocus && this.addBtn) {
@@ -265,33 +247,60 @@ export class PageList extends PureControllerView {
     render() {
         const listClasses = [
             'list-insert',
-            `list-${this.props.page}`,
+            `list-${PAGES[this.props.pageIndex]}`,
             'list'
         ].join(' ');
 
         const listRendered = this.renderList();
         const afterList = this.afterList();
 
-        return (
-            <div>
-                <div className={listClasses}>
-                    {listRendered}
-                </div>
-                {afterList}
+        return <div>
+            <div className={listClasses}>
+                {listRendered}
             </div>
-        );
+            {afterList}
+        </div>;
     }
 }
 
 PageList.propTypes = {
-    data: PropTypes.instanceOf(map),
-    edit: PropTypes.instanceOf(map),
+    apiKey: PropTypes.string.isRequired,
+    pageIndex: PropTypes.number.isRequired,
+    loaded: PropTypes.bool.isRequired,
+    data: PropTypes.instanceOf(map).isRequired,
+    editRow: PropTypes.number,
+    editCol: PropTypes.number,
     add: PropTypes.instanceOf(list),
-    suggestions: PropTypes.instanceOf(map),
     addBtnFocus: PropTypes.bool,
     daily: PropTypes.bool,
-    index: PropTypes.number,
-    page: PropTypes.string,
-    blocks: PropTypes.instanceOf(map)
+    addListItem: PropTypes.func.isRequired,
+    loadContent: PropTypes.func.isRequired,
+    openMobileEditDialog: PropTypes.func.isRequired,
+    openMobileAddDialog: PropTypes.func.isRequired
 };
+
+const mapStateToProps = state => {
+    const pageIndex = state.global.get('currentPageIndex');
+
+    return {
+        apiKey: state.getIn(['global', 'user', 'apiKey']),
+        pageIndex,
+        loaded: state.getIn(['global', 'pagesLoaded', pageIndex]),
+        data: state.getIn(['global', 'pages', pageIndex]),
+        editRow: state.getIn(['global', 'edit', 'row']),
+        editCol: state.getIn(['global', 'edit', 'col']),
+        add: state.getIn(['global', 'edit', 'add']),
+        addBtnFocus: state.getIn(['global', 'edit', 'addBtnFocus']),
+        daily: DAILY_PAGES[pageIndex]
+    };
+};
+
+const mapDispatchToProps = dispatch => ({
+    addListItem: items => dispatch(aListItemAdded(items)),
+    loadContent: req => dispatch(aContentRequested(req)),
+    openMobileEditDialog: (pageIndex, rowKey) => dispatch(aMobileEditDialogOpened(pageIndex, rowKey)),
+    openMobileAddDialog: pageIndex => dispatch(aMobileAddDialogOpened(pageIndex))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(PageList);
 

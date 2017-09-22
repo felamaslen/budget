@@ -64,7 +64,7 @@ export function processPageDataList(reduction, pageIndex, raw) {
     const rows = processRawListRows(raw.data, pageIndex);
 
     return reduction.setIn(
-        ['appState', 'pages', pageIndex], map({ data, rows })
+        ['pages', pageIndex], map({ data, rows })
     );
 }
 
@@ -75,31 +75,31 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
     // process list-related data
     const newReduction = processPageDataList(reduction, pageIndex, data);
 
-    const period = reduction.getIn(['appState', 'other', 'graphFunds', 'period']);
+    const period = reduction.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
 
-    const rows = newReduction.getIn(['appState', 'pages', pageIndex, 'rows']);
+    const rows = newReduction.getIn(['pages', pageIndex, 'rows']);
     const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes, pageIndex);
 
-    const mode = reduction.getIn(['appState', 'other', 'graphFunds', 'mode']);
-    const zoom = reduction.getIn(['appState', 'other', 'graphFunds', 'zoom']);
+    const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
+    const zoom = reduction.getIn(['other', 'graphFunds', 'zoom']);
 
     const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex);
     const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes, zoom);
 
     return newReduction
-        .setIn(['appState', 'pages', pageIndex, 'rows'], rowsWithExtraProps)
-        .setIn(['appState', 'pages', pageIndex, 'startTime'], startTime)
-        .setIn(['appState', 'pages', pageIndex, 'cacheTimes'], cacheTimes)
+        .setIn(['pages', pageIndex, 'rows'], rowsWithExtraProps)
+        .setIn(['pages', pageIndex, 'startTime'], startTime)
+        .setIn(['pages', pageIndex, 'cacheTimes'], cacheTimes)
         .setIn(
-            ['appState', 'other', 'fundHistoryCache', period],
+            ['other', 'fundHistoryCache', period],
             map({ rows, startTime, cacheTimes })
         )
-        .setIn(['appState', 'other', 'fundsCachedValue'], fundsCachedValue)
-        .setIn(['appState', 'other', 'graphFunds', 'startTime'], startTime)
-        .setIn(['appState', 'other', 'graphFunds', 'cacheTimes'], cacheTimes)
-        .setIn(['appState', 'other', 'graphFunds', 'zoom'], list([0, maxAge]))
-        .setIn(['appState', 'other', 'graphFunds', 'range'], list([0, maxAge]))
-        .setIn(['appState', 'other', 'graphFunds', 'data'], fundHistory);
+        .setIn(['other', 'fundsCachedValue'], fundsCachedValue)
+        .setIn(['other', 'graphFunds', 'startTime'], startTime)
+        .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)
+        .setIn(['other', 'graphFunds', 'zoom'], list([0, maxAge]))
+        .setIn(['other', 'graphFunds', 'range'], list([0, maxAge]))
+        .setIn(['other', 'graphFunds', 'data'], fundHistory);
 }
 

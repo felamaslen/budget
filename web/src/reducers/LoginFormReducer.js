@@ -2,28 +2,13 @@
  * Carries out actions for the Form component
  */
 
-import { Map as map } from 'immutable';
-import Cookies from 'js-cookie';
-import buildMessage from '../messageBuilder';
-import {
-    EF_LOGIN_FORM_SUBMIT
-} from '../constants/effects';
-import { LOGIN_INPUT_LENGTH, ERROR_LEVEL_ERROR } from '../misc/const';
-import { rErrorMessageOpen } from './ErrorReducer';
-import { rLoadContent } from './ContentReducer';
-
 /**
  * submit the login form
  * @param {Record} reduction: app state
  * @returns {Record} new app state
  */
 export function rLoginFormSubmit(reduction) {
-    const pin = reduction.getIn(['appState', 'loginForm', 'values']).join('');
-
-    return reduction.setIn(['appState', 'loginForm', 'loading'], true)
-        .set('effects', reduction.get('effects').push(
-            buildMessage(EF_LOGIN_FORM_SUBMIT, pin)
-        ));
+    return reduction.setIn(['loginForm', 'visible'], false);
 }
 
 /**
@@ -34,25 +19,23 @@ export function rLoginFormSubmit(reduction) {
  */
 export function rLoginFormInput(reduction, input) {
     const inputString = input.toString();
-    if (!inputString.match(/^[0-9]$/) || reduction.getIn(['appState', 'loginForm', 'loading'])) {
-    // don't do anything if the input is non-numeric, or
-    // we're still loading a login request
+    if (!inputString.match(/^[0-9]$/) || !reduction.getIn(['loginForm', 'visible'])) {
+        // don't do anything if the input is non-numeric, or
+        // we're still loading a login request
         return reduction;
     }
-    const values = reduction.getIn(['appState', 'loginForm', 'values']);
-    const newReduction = reduction.setIn(
-        ['appState', 'loginForm', 'values'], values.push(inputString)
-    ).setIn(
-        ['appState', 'loginForm', 'inputStep'],
-        reduction.getIn(['appState', 'loginForm', 'inputStep']) + 1
-    );
 
-    // if the pin is incomplete, do nothing
-    if (values.size < LOGIN_INPUT_LENGTH - 1) {
-        return newReduction;
-    }
+    const values = reduction.getIn(['loginForm', 'values']);
 
-    return rLoginFormSubmit(newReduction);
+    return reduction
+        .setIn(
+            ['loginForm', 'values'],
+            values.push(inputString)
+        )
+        .setIn(
+            ['loginForm', 'inputStep'],
+            reduction.getIn(['loginForm', 'inputStep']) + 1
+        );
 }
 
 /**
@@ -61,53 +44,32 @@ export function rLoginFormInput(reduction, input) {
  * @param {number} index: where to reset to
  * @returns {Record} new app state
  */
-export function rLoginFormReset(reduction, index) {
-    return reduction.setIn(
-        ['appState', 'loginForm', 'values'],
-        reduction.getIn(['appState', 'loginForm', 'values']).slice(0, index)
-    ).setIn(['appState', 'loginForm', 'inputStep'], index);
+export function rLoginFormReset(reduction, index = 0) {
+    return reduction
+        .setIn(
+            ['loginForm', 'values'],
+            reduction.getIn(['loginForm', 'values']).slice(0, index)
+        )
+        .setIn(['loginForm', 'inputStep'], index);
 }
 
-/**
- * handle login form API response
- * @param {Record} reduction: app state
- * @param {object} output: pin and API response (JSON)
- * @returns {Record} new app state
- */
-export function rLoginFormHandleResponse(reduction, output) {
-    let newReduction = rLoginFormReset(
-        reduction.setIn(['appState', 'loginForm', 'loading'], false)
-            .setIn(['appState', 'loading'], false), 0);
+export function rLoginFormHandleResponse(reduction, response) {
+    const newReduction = rLoginFormReset(reduction)
+        .setIn(['loginForm', 'visible'], true)
+        .setIn(['loading'], false);
 
-    if (output.err) {
-        const message = map({
-            text: `Login error: ${output.err.response.data.errorMessage}`,
-            level: ERROR_LEVEL_ERROR
-        });
-
-        return rErrorMessageOpen(newReduction, message);
-    }
-
-    // save a cookie to remember the session
-    if (!newReduction.getIn(['appState', 'loginForm', 'loadedCookie'])) {
-        Cookies.set('pin', output.pin, { expires: 7 });
+    if (!response) {
+        return newReduction;
     }
 
     // go to the first page after logging in
-    let page = newReduction.getIn(['appState', 'currentPageIndex']);
-    if (page < 0) {
-        page = 0;
-        newReduction = newReduction.setIn(['appState', 'currentPageIndex'], page);
-    }
+    const page = Math.max(0, newReduction.getIn(['currentPageIndex']));
 
-    // set user data
-    newReduction = newReduction.setIn(['appState', 'user', 'uid'], output.response.data.uid)
-        .setIn(['appState', 'user', 'name'], output.response.data.name)
-        .setIn(['appState', 'user', 'apiKey'], output.response.data.apiKey);
-
-    // set side effect to load page data
-    newReduction = rLoadContent(newReduction, page);
-
-    return newReduction;
+    return newReduction
+        .setIn(['currentPageIndex'], page)
+        .setIn(['loginForm', 'visible'], false)
+        .setIn(['user', 'uid'], response.data.uid)
+        .setIn(['user', 'name'], response.data.name)
+        .setIn(['user', 'apiKey'], response.data.apiKey);
 }
 

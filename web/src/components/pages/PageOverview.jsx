@@ -3,14 +3,18 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import { connect } from 'react-redux';
+
+import { aContentRequested } from '../../actions/ContentActions';
+
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PureControllerView from '../PureControllerView';
 import classNames from 'classnames';
 import Media from 'react-media';
+
 import {
     mediaQueries,
-    GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
+    PAGES, GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
     OVERVIEW_COLUMNS
 } from '../../misc/const';
 import { GRAPH_SPEND_NUM_ITEMS } from '../../misc/config';
@@ -19,7 +23,13 @@ import getEditable from '../Editable';
 import { GraphBalance } from '../graphs/GraphBalance';
 import { GraphSpend } from '../graphs/GraphSpend';
 
-export class PageOverview extends PureControllerView {
+export class PageOverview extends Component {
+    componentDidMount() {
+        this.props.loadContent({
+            apiKey: this.props.apiKey,
+            pageIndex: this.props.pageIndex
+        });
+    }
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
     }
@@ -37,6 +47,26 @@ export class PageOverview extends PureControllerView {
 
         return <div className="row header">{header}</div>;
     }
+    renderCellInner(cell, cellKey, rowKey, editable) {
+        if (editable) {
+            // editable balance column
+            const Editable = getEditable({
+                row: rowKey,
+                col: 0,
+                id: null,
+                item: 'cost',
+                value: cell.get('value')
+            });
+
+            return <Editable />;
+        }
+
+        const value = cellKey > 0
+            ? this.format(cell.get('value'), true)
+            : cell.get('value');
+
+        return <span className="text">{value}</span>;
+    }
     renderCells(row, rowKey) {
         return row.get('cells')
             .map((cell, cellKey) => {
@@ -45,34 +75,23 @@ export class PageOverview extends PureControllerView {
                     style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
                 }
 
-                const cellClasses = { col: true };
-                cellClasses[cell.getIn(['column', 0])] = true;
-                let span = null;
-                if (cell.get('editable')) {
-                    // editable balance column
-                    const active = this.props.edit.get('row') === rowKey &&
-                        this.props.edit.get('col') === 0;
+                const editable = cell.get('editable');
 
-                    span = getEditable(
-                        this.props.dispatcher, rowKey, 0, null, 'cost', cell.get('value'), 0, active
-                    );
+                const active = this.props.editRow === rowKey &&
+                    this.props.editCol === 0;
 
-                    cellClasses['editable-outer'] = true;
-                    cellClasses.editing = active;
-                }
-                else {
-                    const value = cellKey > 0
-                        ? this.format(cell.get('value'), true)
-                        : cell.get('value');
+                const cellClasses = {
+                    col: true,
+                    [cell.getIn(['column', 0])]: true,
+                    'editable-outer': editable,
+                    editing: editable && active
+                };
 
-                    span = <span className="text">{value}</span>;
-                }
+                const inner = this.renderCellInner(cell, cellKey, rowKey, editable);
 
-                return (
-                    <div key={cellKey} className={classNames(cellClasses)} style={style}>
-                        {span}
-                    </div>
-                );
+                return <div key={cellKey} className={classNames(cellClasses)} style={style}>
+                    {inner}
+                </div>;
             });
     }
     renderRows(numToSkip) {
@@ -127,20 +146,17 @@ export class PageOverview extends PureControllerView {
 
         const graphWidth = Math.min(GRAPH_WIDTH, window.innerWidth);
 
-        return (
-            <GraphBalance dispatcher={this.props.dispatcher}
-                width={graphWidth} height={GRAPH_HEIGHT}
-                name="balance"
-                startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
-                currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
-                yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
-                showAll={this.props.showAll}
-                balance={this.props.data.getIn(['data', 'cost', 'balanceWithPredicted'])}
-                balanceOld={this.props.data.getIn(['data', 'cost', 'old'])}
-                funds={this.props.data.getIn(['data', 'cost', 'funds'])}
-                fundsOld={this.props.data.getIn(['data', 'cost', 'fundsOld'])} />
-        );
-
+        return <GraphBalance
+            width={graphWidth} height={GRAPH_HEIGHT}
+            name="balance"
+            startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
+            currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
+            yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
+            showAll={this.props.showAll}
+            balance={this.props.data.getIn(['data', 'cost', 'balanceWithPredicted'])}
+            balanceOld={this.props.data.getIn(['data', 'cost', 'old'])}
+            funds={this.props.data.getIn(['data', 'cost', 'funds'])}
+            fundsOld={this.props.data.getIn(['data', 'cost', 'fundsOld'])} />;
     }
     renderGraphSpend(render) {
         if (!render) {
@@ -151,16 +167,14 @@ export class PageOverview extends PureControllerView {
             return this.props.data.getIn(['data', 'cost', item.name]).slice(-GRAPH_SPEND_NUM_ITEMS);
         });
 
-        return (
-            <GraphSpend dispatcher={this.props.dispatcher}
-                width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
-                name="spend"
-                categories={list(GRAPH_SPEND_CATEGORIES)}
-                data={graphSpendData}
-                income={this.props.data.getIn(['data', 'cost', 'income']).slice(-GRAPH_SPEND_NUM_ITEMS)}
-                yearMonths={this.props.data.getIn(['data', 'yearMonths']).slice(-GRAPH_SPEND_NUM_ITEMS)}
-                currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])} />
-        );
+        return <GraphSpend
+            width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
+            name="spend"
+            categories={list(GRAPH_SPEND_CATEGORIES)}
+            data={graphSpendData}
+            income={this.props.data.getIn(['data', 'cost', 'income']).slice(-GRAPH_SPEND_NUM_ITEMS)}
+            yearMonths={this.props.data.getIn(['data', 'yearMonths']).slice(-GRAPH_SPEND_NUM_ITEMS)}
+            currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])} />;
     }
     renderGraphs() {
         return (
@@ -178,18 +192,45 @@ export class PageOverview extends PureControllerView {
         );
     }
     render() {
-        return (
-            <div>
-                {this.renderTable()}
-                {this.renderGraphs()}
-            </div>
-        );
+        if (!this.props.active) {
+            return null;
+        }
+
+        return <div>
+            {this.renderTable()}
+            {this.renderGraphs()}
+        </div>;
     }
 }
 
 PageOverview.propTypes = {
+    apiKey: PropTypes.string.isRequired,
+    pageIndex: PropTypes.number.isRequired,
     data: PropTypes.instanceOf(map),
-    edit: PropTypes.instanceOf(map),
-    showAll: PropTypes.bool
+    active: PropTypes.bool.isRequired,
+    editRow: PropTypes.number,
+    editCol: PropTypes.number,
+    showAll: PropTypes.bool.isRequired,
+    loadContent: PropTypes.func.isRequired
 };
+
+const mapStateToProps = state => {
+    const pageIndex = PAGES.indexOf('overview');
+
+    return {
+        pageIndex,
+        apiKey: state.getIn(['global', 'user', 'apiKey']),
+        data: state.getIn(['global', 'pages', pageIndex]),
+        active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
+        editRow: state.getIn(['global', 'edit', 'row']),
+        editCol: state.getIn(['global', 'edit', 'col']),
+        showAll: state.getIn(['global', 'other', 'showAllBalanceGraph'])
+    };
+};
+
+const mapDispatchToProps = dispatch => ({
+    loadContent: req => dispatch(aContentRequested(req))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(PageOverview);
 

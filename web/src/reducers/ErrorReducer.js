@@ -11,15 +11,15 @@ export function rErrorMessageOpen(reduction, msg) {
         ? map({ level: ERROR_LEVEL_ERROR, text: msg })
         : msg;
 
-    const errorMsg = reduction.getIn(['appState', 'errorMsg']);
+    const errorMsg = reduction.getIn(['errorMsg']);
     const item = theMessage.set('id', errorMsg.size)
         .set('time', new Date().getTime());
 
-    return reduction.setIn(['appState', 'errorMsg'], errorMsg.push(item));
+    return reduction.setIn(['errorMsg'], errorMsg.push(item));
 }
 export function rErrorMessageClose(reduction, msgId) {
     return reduction.setIn(
-        ['appState', 'errorMsg'], reduction.getIn(['appState', 'errorMsg']).map(msg => {
+        ['errorMsg'], reduction.getIn(['errorMsg']).map(msg => {
             if (msg.get('id') === msgId) {
                 return msg.set('closed', true);
             }
@@ -29,14 +29,14 @@ export function rErrorMessageClose(reduction, msgId) {
 }
 export function rErrorMessageRemove(reduction, msgId) {
     return reduction.setIn(
-        ['appState', 'errorMsg'], reduction.getIn(['appState', 'errorMsg']).filter(
+        ['errorMsg'], reduction.getIn(['errorMsg']).filter(
             msg => msg.get('id') !== msgId
         ));
 }
 
 export function rErrorMessageClearOld(reduction) {
     // automatically clear any messages which are older than the timeout period
-    const msgs = reduction.getIn(['appState', 'errorMsg']);
+    const msgs = reduction.getIn(['errorMsg']);
     const now = new Date().getTime();
     let newReduction = reduction;
 
@@ -47,9 +47,9 @@ export function rErrorMessageClearOld(reduction) {
             // check if we need to close it
             if (age >= ERROR_MESSAGE_DELAY) {
                 newReduction = newReduction.setIn(
-                    ['appState', 'errorMsg', key, 'closed'], true
+                    ['errorMsg', key, 'closed'], true
                 ).setIn(
-                    ['appState', 'errorMsg', key, 'time'], now
+                    ['errorMsg', key, 'time'], now
                 );
             }
         }

@@ -2,9 +2,10 @@
  * Displays a modal dialog for editing / adding content
  */
 
-import React from 'react';
+import { connect } from 'react-redux';
+
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PureControllerView from './PureControllerView';
 import { List as list } from 'immutable';
 import classNames from 'classnames';
 
@@ -12,7 +13,7 @@ import getFormField from './FormField';
 
 import { aMobileDialogClosed } from '../actions/FormActions';
 
-export class ModalDialog extends PureControllerView {
+export class ModalDialog extends Component {
     renderTitle() {
         if (this.props.id) {
             return `Editing id#${this.props.id}`;
@@ -23,7 +24,7 @@ export class ModalDialog extends PureControllerView {
     renderFields() {
         return this.props.fields
             .map((field, fieldKey) => {
-                const item = getFormField(this.props.dispatcher, {
+                const FieldContainer = getFormField({
                     fieldKey,
                     item: field.get('item'),
                     value: field.get('value')
@@ -41,22 +42,20 @@ export class ModalDialog extends PureControllerView {
                     return <li key={fieldKey} className={className}>
                         <div className="inner">
                             <span className="form-label">{field.get('item')}</span>
-                            {item}
+                            {FieldContainer}
                         </div>
                     </li>;
                 }
 
                 return <li key={fieldKey} className={className}>
                     <span className="form-label">{field.get('item')}</span>
-                    {item}
+                    {FieldContainer}
                 </li>;
             });
     }
     renderButtons() {
-        const onCancel = () => this.props.dispatcher.dispatch(aMobileDialogClosed(null));
-        const onSubmit = () => this.props.dispatcher.dispatch(aMobileDialogClosed(
-            this.props.pageIndex
-        ));
+        const onCancel = () => this.props.onCancel();
+        const onSubmit = () => this.props.onSubmit(this.props.pageIndex);
 
         return <div className="buttons">
             <button type="button" className="button-cancel"
@@ -66,6 +65,10 @@ export class ModalDialog extends PureControllerView {
         </div>;
     }
     render() {
+        if (!this.props.active) {
+            return null;
+        }
+
         const className = `modal-dialog-outer ${this.props.type}`;
         const title = this.renderTitle();
         const fields = this.renderFields();
@@ -84,12 +87,32 @@ export class ModalDialog extends PureControllerView {
 }
 
 ModalDialog.propTypes = {
+    active: PropTypes.bool.isRequired,
     type: PropTypes.string,
-    pageIndex: PropTypes.number,
     row: PropTypes.number,
     col: PropTypes.number,
     id: PropTypes.number,
     fields: PropTypes.instanceOf(list),
-    invalidKeys: PropTypes.instanceOf(list)
+    invalidKeys: PropTypes.instanceOf(list),
+    pageIndex: PropTypes.number.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    onSubmit: PropTypes.func.isRequired
 }
+
+const mapStateToProps = state => ({
+    active: state.getIn(['global', 'modalDialog', 'active']),
+    type: state.getIn(['global', 'modalDialog', 'type']),
+    row: state.getIn(['global', 'modalDialog', 'row']),
+    col: state.getIn(['global', 'modalDialog', 'col']),
+    id: state.getIn(['global', 'modalDialog', 'id']),
+    fields: state.getIn(['global', 'modalDialog', 'fields']),
+    invalidKeys: state.getIn(['global', 'modalDialog', 'invalidKeys'])
+});
+
+const mapDispatchToProps = dispatch => ({
+    onCancel: () => dispatch(aMobileDialogClosed(null)),
+    onSubmit: page => dispatch(aMobileDialogClosed(page))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ModalDialog);
 
