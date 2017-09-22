@@ -10,6 +10,11 @@ module.exports = Object.assign({}, webpackConfig, {
         'webpack/hot/only-dev-server'
     ].concat(webpackConfig.entry),
     plugins: webpackConfig.plugins.concat([
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify('development')
+            }
+        }),
         new webpack.HotModuleReplacementPlugin()
     ]),
     module: moduleConfigDev,
