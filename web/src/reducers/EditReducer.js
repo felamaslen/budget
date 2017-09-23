@@ -238,12 +238,16 @@ export function rActivateEditable(reduction, editable, cancel) {
     if (active && active.get('value') !== active.get('originalValue')) {
         if (cancel) {
             // revert to previous state
-            newReduction = applyEdits(newReduction, active.set('value', active.get('originalValue')));
+            newReduction = applyEdits(
+                newReduction, active.set('value', active.get('originalValue'))
+            );
         }
         else {
             if (active.get('row') > -1) {
                 // add last item to queue for saving on API
-                newReduction = pushToRequestQueue(newReduction, active.set('pageIndex', pageIndex));
+                newReduction = pushToRequestQueue(
+                    newReduction, active.set('pageIndex', pageIndex)
+                );
             }
 
             // append the changes of the last item to the UI

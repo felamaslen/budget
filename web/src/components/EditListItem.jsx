@@ -8,7 +8,7 @@ import classNames from 'classnames';
 
 import getEditable from './Editable';
 
-export class EditListItem extends Component {
+class ListAddEditItem extends Component {
     render() {
         const Editable = getEditable({
             row: this.props.row,
@@ -30,7 +30,7 @@ export class EditListItem extends Component {
     }
 }
 
-EditListItem.propTypes = {
+ListAddEditItem.propTypes = {
     pageIndex: PropTypes.number.isRequired,
     apiKey: PropTypes.string.isRequired,
     row: PropTypes.number.isRequired,
@@ -43,6 +43,7 @@ EditListItem.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => ({
+    value: state.getIn(['global', 'edit', 'add', ownProps.col]),
     active: state.getIn(['global', 'edit', 'row']) === ownProps.row &&
         state.global.getIn(['edit', 'col']) === ownProps.col,
     item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col]
@@ -50,5 +51,5 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = () => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditListItem);
+export default connect(mapStateToProps, mapDispatchToProps)(ListAddEditItem);
 

@@ -92,8 +92,7 @@ export class PageList extends Component {
             };
 
             return <EditListItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
-                key={col} ref={ref} row={-1} col={col}
-                id={null} value={this.props.add.get(col)}
+                key={col} ref={ref} row={-1} col={col} id={null}
                 noSuggestions={true} />;
         });
 
@@ -282,7 +281,6 @@ PageList.propTypes = {
     weeklyValue: PropTypes.number,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
-    add: PropTypes.instanceOf(list),
     addBtnFocus: PropTypes.bool,
     daily: PropTypes.bool,
     addListItem: PropTypes.func.isRequired,
@@ -301,7 +299,6 @@ function getStateProps(pageIndex, extra) {
         weeklyValue: state.getIn(['global', 'pages', pageIndex, 'data', 'weekly']),
         editRow: state.getIn(['global', 'edit', 'row']),
         editCol: state.getIn(['global', 'edit', 'col']),
-        add: state.getIn(['global', 'edit', 'add']),
         addBtnFocus: state.getIn(['global', 'edit', 'addBtnFocus']),
         daily: DAILY_PAGES[pageIndex]
     });

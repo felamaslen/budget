@@ -17,7 +17,7 @@ import {
     PAGES, LIST_PAGES, LIST_COLS_PAGES,
     SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
 } from '../misc/const';
-import { buildQueueRequestList, getNullEditable, getAddDefaultValues } from '../misc/data';
+import { getNullEditable, getAddDefaultValues } from '../misc/data';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -185,8 +185,7 @@ function handleNav(reduction, dx, dy, cancel) {
 
     return rActivateEditable(
         reduction, map({ row, col, pageIndex, id, item, value })
-    )
-        .setIn(['edit', 'addBtnFocus'], false);
+    );
 }
 
 /**
@@ -218,68 +217,86 @@ function getNavDirection(key, shift) {
     return [0, 0];
 }
 
-/**
- * Handle key presses
- * @param {Record} reduction application state
- * @param {object} evt key event
- * @returns {Record} modified reduction
- */
-export function rHandleKeyPress(reduction, evt) {
-    if (evt.key === 'Control' || evt.key === 'Shift') {
-    // don't do anything until an actual key (not modifier) is pressed
-        return reduction;
+function handleNavInSuggestions(reduction, suggestions, escape, enter) {
+    if (escape) {
+        return reduction
+            .setIn(['edit', 'suggestions', 'list'], list.of())
+            .setIn(['edit', 'suggestions', 'active'], -1);
     }
 
+    if (enter) {
+        const reductionWithSuggestionValue = reduction
+            .setIn(
+                ['edit', 'active', 'value'],
+                suggestions.getIn(['list', suggestions.get('active')])
+            );
+
+        // navigate to the next field after filling the current one with
+        // the suggestion value
+        return handleNav(reductionWithSuggestionValue, 1, 0);
+    }
+
+    return reduction;
+}
+
+function handleNavFromSuggestions(reduction, suggestions, direction) {
+    if (direction[1] === 0) {
+        return handleSuggestionsNav(reduction, direction[0], suggestions);
+    }
+
+    return handleSuggestionsNav(reduction, direction[1], suggestions);
+}
+
+function handleKeyPressLoggedIn(reduction, evt) {
     const direction = getNavDirection(evt.key, evt.shift);
     const navigated = direction[0] !== 0 || direction[1] !== 0;
 
-    if (reduction.getIn(['user', 'uid'])) {
-        // logged in
+    const escape = evt.key === 'Escape';
+    const enter = evt.key === 'Enter';
 
-        // handle suggestions navigation
-        const suggestions = reduction.getIn(['edit', 'suggestions']);
-        if (suggestions.get('list').size > 0) {
-            if (suggestions.get('active') > -1) {
-                if (evt.key === 'Escape') {
-                    return reduction
-                        .setIn(['edit', 'suggestions', 'list'], list.of())
-                        .setIn(['edit', 'suggestions', 'active'], -1);
-                }
-                if (evt.key === 'Enter') {
-                    return handleNav(reduction.setIn(
-                        ['edit', 'active', 'value'],
-                        suggestions.getIn(['list', suggestions.get('active')])
-                    ), 1, 0);
-                }
-            }
+    const suggestions = reduction.getIn(['edit', 'suggestions']);
+    const haveSuggestions = suggestions.get('list').size > 0;
+    const suggestionActive = suggestions.get('active') > -1;
 
-            if (!evt.ctrl && (evt.key === 'Tab' || evt.key.indexOf('Arrow') > -1)) {
-                const theDirection = direction[1] === 0
-                    ? direction[0]
-                    : direction[1];
+    const navigateSuggestions = navigated && !evt.ctrl;
 
-                return handleSuggestionsNav(reduction, theDirection, suggestions);
-            }
-        }
+    if (haveSuggestions && suggestionActive) {
+        return handleNavInSuggestions(reduction, suggestions, escape, enter);
+    }
 
-        // handle page navigation
-        if (navigated && (evt.ctrl || evt.key === 'Tab')) {
-            return handleNav(reduction, direction[0], direction[1]);
-        }
+    if (haveSuggestions && navigateSuggestions) {
+        return handleNavFromSuggestions(reduction, suggestions, direction);
+    }
 
-        if (evt.key === 'Escape') {
-            return handleNav(reduction, null, null, true);
-        }
+    const navigateFromField = navigated && (evt.ctrl || evt.key === 'Tab');
 
-        if (evt.key === 'Enter') {
-            // submit on enter
-            return rActivateEditable(reduction, null);
-        }
+    if (navigateFromField) {
+        return handleNav(reduction, direction[0], direction[1]);
+    }
 
+    if (escape) {
+        return handleNav(reduction, null, null, true);
+    }
+
+    if (enter) {
+        return rActivateEditable(reduction, null);
+    }
+
+    return reduction;
+}
+
+export function rHandleKeyPress(reduction, evt) {
+    const keyIsModifier = evt.key === 'Control' || evt.key === 'Shift';
+    if (keyIsModifier) {
         return reduction;
     }
 
-    // not logged in
+    const loggedIn = reduction.getIn(['user', 'uid']) > 0;
+
+    if (loggedIn) {
+        return handleKeyPressLoggedIn(reduction, evt);
+    }
+
     if (evt.key === 'Escape') {
         return rLoginFormReset(reduction, 0);
     }
