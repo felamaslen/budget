@@ -54,7 +54,9 @@ class PageFunds extends PageList {
         return { classes, gainPct };
     }
     listHeadExtra() {
-        const reloadFundPrices = () => this.props.reloadFundPrices();
+        const reloadFundPrices = () => this.props.reloadFundPrices(
+            this.props.apiKey, this.props.shortPeriod
+        );
 
         const gainInfo = this.getGainInfo();
 
@@ -252,11 +254,17 @@ PageFunds.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue'])
+    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue']),
+    shortPeriod: state.getIn(['global', 'other', 'graphFunds', 'period'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    reloadFundPrices: () => dispatch(aFundsGraphPeriodChanged(null, true, true)),
+    reloadFundPrices: (apiKey, shortPeriod) => dispatch(aFundsGraphPeriodChanged({
+        apiKey,
+        shortPeriod,
+        noCache: true,
+        reloadPagePrices: true
+    })),
     loadContent: req => {
         const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
 

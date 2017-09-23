@@ -329,7 +329,7 @@ export class GraphFunds extends LineGraph {
         const onChange = evt => this.props.changePeriod({
             apiKey: this.props.apiKey,
             shortPeriod: evt.target.value,
-            reloadPagePrices: true,
+            reloadPagePrices: false,
             fundHistoryCache: this.props.fundHistoryCache
         });
 
