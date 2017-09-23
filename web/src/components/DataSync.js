@@ -11,14 +11,14 @@ import debounce from '../misc/debounce';
 import { aServerUpdated, aTimeUpdated } from '../actions/AppActions';
 import { aErrorOpened } from '../actions/ErrorActions';
 
-import { TIMER_UPDATE_SERVER } from '../misc/const';
+import { TIMER_UPDATE_SERVER } from '../misc/config';
 
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 
 export class DataSync extends Component {
     componentDidMount() {
-        window.setInterval(() => this.props.updateTime(), 1000);
+        setInterval(() => this.props.updateTime(), 1000);
     }
     componentDidUpdate(prevProps) {
         if (!this.props.requestList.equals(prevProps.requestList)) {
@@ -47,8 +47,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     updateServer: debounce(
         (apiKey, requestList) => dispatch(aServerUpdated(apiKey, requestList)),
-        TIMER_UPDATE_SERVER,
-        true
+        TIMER_UPDATE_SERVER
     ),
     openError: message => dispatch(aErrorOpened(message)),
     updateTime: () => dispatch(aTimeUpdated())

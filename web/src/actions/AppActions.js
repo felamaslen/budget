@@ -59,8 +59,6 @@ export const aServerUpdated = (apiKey, requestListWithIndex) => {
 
         const requestList = requestListWithIndex.map(item => item.get('req'));
 
-        console.log('aServerUpdated with', requestList.size, 'requests');
-
         if (requestList.size > 0) {
             try {
                 await updateServerData({ apiKey, requestList });
