@@ -42,7 +42,7 @@ class App extends Component {
             <div id="main">
                 <ErrorMessages />
                 <DataSync />
-                <Header />
+                <Route path="*" component={Header} />
                 <LoginForm />
                 <Route path="*" component={Content} />
                 <Spinner active={this.props.loading} />
