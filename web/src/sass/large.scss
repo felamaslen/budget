@@ -76,11 +76,13 @@ button {
         height: 27px;
         border-bottom: 3px solid transparent;
         margin-right: 0.5em;
+        text-transform: capitalize;
     }
     .nav-link {
         display: inline-block;
         float: left;
         position: relative;
+        text-decoration: none;
         padding: 0 0.5em 0 35px;
         border-radius: 3px 3px 0 0;
         color: white;
