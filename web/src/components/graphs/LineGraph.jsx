@@ -289,3 +289,4 @@ export class LineGraph extends Graph {
         this.ctx.closePath();
     }
 }
+

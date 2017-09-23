@@ -13,15 +13,9 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getPeriodMatch } from '../../misc/data';
 import { rgba } from '../../misc/color';
-import { GRAPH_FUNDS_PERIODS } from '../../misc/const';
 import { DO_STOCKS_LIST } from '../../misc/config';
 import Media from 'react-media';
-import {
-    mediaQueries, PAGES, LIST_COLS_PAGES,
-    GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT,
-    GRAPH_FUND_ITEM_WIDTH_LARGE, GRAPH_FUND_ITEM_HEIGHT_LARGE,
-    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT
-} from '../../misc/const';
+import { mediaQueries, PAGES, LIST_COLS_PAGES, GRAPH_FUNDS_PERIODS } from '../../misc/const';
 import { formatCurrency, formatPercent } from '../../misc/format';
 import GraphFundItem from '../graphs/GraphFundItem';
 import GraphFunds from '../graphs/GraphFunds';
@@ -34,7 +28,6 @@ const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transac
 const pageIndex = PAGES.indexOf('funds');
 
 class PageFunds extends PageList {
-    /*
     listItemClasses(row) {
         return {
             sold: row.getIn(['cols', transactionsKey]).isSold()
@@ -42,10 +35,10 @@ class PageFunds extends PageList {
     }
     getGainInfo() {
         const cost = this.props.totalCost;
-        const value = this.props.cachedValue;
+        const value = this.props.cachedValue.get('value');
 
-        const gain = total
-            ? (value - total) / total
+        const gain = cost
+            ? (value - cost) / cost
             : 0;
 
         const gainPct = formatPercent(gain, {
@@ -61,47 +54,27 @@ class PageFunds extends PageList {
         return { classes, gainPct };
     }
     listHeadExtra() {
-        const reloadFundPrices = this.props.reloadFundPrices();
+        const reloadFundPrices = () => this.props.reloadFundPrices();
 
         const gainInfo = this.getGainInfo();
 
-        return (
-            <span className={gainInfo.classes} onClick={reloadFundPrices}>
-                <span className="gain-info">Current value:</span>
-                <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
-                <span>{gainInfo.gainPct}</span>
-                <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
-            </span>
-        );
+        return <span className={gainInfo.classes} onClick={reloadFundPrices}>
+            <span className="gain-info">Current value:</span>
+            <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
+            <span>{gainInfo.gainPct}</span>
+            <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
+        </span>;
     }
     renderFundGraph(row, rowKey) {
-        const popout = row.get('historyPopout');
-
-        const width = popout
-            ? GRAPH_FUND_ITEM_WIDTH_LARGE
-            : GRAPH_FUND_ITEM_WIDTH;
-        const height = popout
-            ? GRAPH_FUND_ITEM_HEIGHT_LARGE
-            : GRAPH_FUND_ITEM_HEIGHT;
-
         const name = row.getIn(['cols', 1])
             .toLowerCase()
             .replace(/\W+/g, '-');
 
-        return (
-            <span className="fund-graph">
-                <div className="fund-graph-cont">
-                    <GraphFundItem dispatcher={this.props.dispatcher}
-                        width={width}
-                        height={height}
-                        name={name}
-                        data={row.get('prices')}
-                        popout={row.get('historyPopout')}
-                        rowKey={rowKey}
-                    />
-                </div>
-            </span>
-        );
+        return <span className="fund-graph">
+            <div className="fund-graph-cont">
+                <GraphFundItem name={name} rowKey={rowKey} />;
+            </div>
+        </span>;
     }
     renderGainInfo(row) {
         const gain = row.get('gain');
@@ -212,7 +185,6 @@ class PageFunds extends PageList {
             {gainInfo}
         </li>;
     }
-    */
     renderStocksList(render) {
         if (!render || !DO_STOCKS_LIST) {
             return null;

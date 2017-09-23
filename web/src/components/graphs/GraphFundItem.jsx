@@ -3,10 +3,16 @@
  */
 
 import { List as list } from 'immutable';
+import { connect } from 'react-redux';
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { LineGraph } from './LineGraph';
 import { rgba } from '../../misc/color';
+import {
+    PAGES, GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
+    GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE
+} from '../../misc/const';
 import {
     COLOR_LOSS, COLOR_PROFIT, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../misc/config';
@@ -15,10 +21,9 @@ import { aFundItemGraphToggled } from '../../actions/GraphActions';
 export class GraphFundItem extends LineGraph {
     constructor(props) {
         super(props);
+
         this.canvasProperties = {
-            onClick: () => {
-                this.dispatchAction(aFundItemGraphToggled(this.props.rowKey));
-            }
+            onClick: () => this.props.togglePopout(this.props.rowKey)
         };
     }
     canvasClasses() {
@@ -27,6 +32,20 @@ export class GraphFundItem extends LineGraph {
     update() {
         this.processData();
         this.draw();
+    }
+    getWidth() {
+        if (this.props.popout) {
+            return GRAPH_FUND_ITEM_WIDTH_LARGE;
+        }
+
+        return GRAPH_FUND_ITEM_WIDTH;
+    }
+    getHeight() {
+        if (this.props.popout) {
+            return GRAPH_FUND_ITEM_HEIGHT_LARGE;
+        }
+
+        return GRAPH_FUND_ITEM_HEIGHT;
     }
     processData() {
         const dataY = this.props.data.map(item => item.last());
@@ -39,8 +58,8 @@ export class GraphFundItem extends LineGraph {
 
         this.setRange([minX, maxX, minY, maxY]);
 
-        this.width = this.props.width;
-        this.height = this.props.height;
+        this.width = this.getWidth();
+        this.height = this.getHeight();
     }
     draw() {
         if (!this.supported) {
@@ -61,12 +80,17 @@ export class GraphFundItem extends LineGraph {
             const increment = Math.round(Math.max(20, this.height / range) / (this.height / range) / 2) * 2;
             const start = Math.ceil(this.minY / increment) * increment;
             const numTicks = Math.ceil((this.maxY - this.minY) / increment);
-            Array(...new Array(numTicks)).forEach((tick, key) => {
-                const tickValue = start + key * increment;
-                const tickPos = Math.floor(this.pixY(tickValue)) + 0.5;
-                const tickName = `${tickValue.toFixed(1)}p`;
-                this.ctx.fillText(tickName, this.pixX(this.minX), tickPos);
-            });
+
+            if (numTicks > 0) {
+                new Array(numTicks)
+                    .fill(0)
+                    .forEach((tick, key) => {
+                        const tickValue = start + key * increment;
+                        const tickPos = Math.floor(this.pixY(tickValue)) + 0.5;
+                        const tickName = `${tickValue.toFixed(1)}p`;
+                        this.ctx.fillText(tickName, this.pixX(this.minX), tickPos);
+                    });
+            }
         }
 
         // plot data
@@ -90,7 +114,24 @@ export class GraphFundItem extends LineGraph {
 
 GraphFundItem.propTypes = {
     data: PropTypes.instanceOf(list),
-    popout: PropTypes.bool,
-    rowKey: PropTypes.number
+    popout: PropTypes.bool.isRequired,
+    rowKey: PropTypes.number.isRequired
 };
+
+const pageIndex = PAGES.indexOf('funds');
+
+const mapStateToProps = (state, ownProps) => ({
+    data: state.getIn(
+        ['global', 'pages', pageIndex, 'rows', ownProps.rowKey, 'prices']
+    ),
+    popout: Boolean(state.getIn(
+        ['global', 'pages', pageIndex, 'rows', ownProps.rowKey, 'historyPopout']
+    ))
+});
+
+const mapDispatchToProps = dispatch => ({
+    togglePopout: rowKey => dispatch(aFundItemGraphToggled(rowKey))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GraphFundItem);
 
