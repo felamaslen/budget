@@ -11,16 +11,6 @@ export default class Editable extends Component {
 
         this.inputProps = { type: 'text' };
     }
-    componentDidUpdate(prevProps) {
-        if (this.input && (
-            (!prevProps.active && this.props.active) ||
-            (!prevProps.focus && this.props.focus)
-        )) {
-            window.setTimeout(() => {
-                this.input.focus();
-            }, 0);
-        }
-    }
     format() {
         return this.props.value;
     }
@@ -75,7 +65,6 @@ Editable.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.string,
     active: PropTypes.bool.isRequired,
-    focus: PropTypes.bool,
     onActivate: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired
 };

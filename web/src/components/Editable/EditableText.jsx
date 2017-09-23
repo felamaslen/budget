@@ -2,7 +2,7 @@
  * Editable form element component - currency
  */
 
-import { Map as map } from 'immutable';
+import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -47,7 +47,7 @@ export default class EditableText extends Editable {
 
 EditableText.propTypes = {
     value: PropTypes.string.isRequired,
-    suggestionsList: PropTypes.instanceOf(map),
+    suggestionsList: PropTypes.instanceOf(list),
     suggestionsActive: PropTypes.number
 };
 

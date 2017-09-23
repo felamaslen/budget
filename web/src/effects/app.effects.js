@@ -4,14 +4,12 @@
 
 import axios from 'axios';
 import querystring from 'querystring';
-import { List as list } from 'immutable';
 
-import { PAGES, MAX_SUGGESTIONS, API_PREFIX } from '../misc/const';
+import { PAGES, API_PREFIX } from '../misc/const';
 
 import { aErrorOpened } from '../actions/ErrorActions';
 
 import { aServerAddReceived } from '../actions/AppActions';
-import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
@@ -63,34 +61,6 @@ export async function requestFundPeriodData(dispatch, req) {
     }
     catch (err) {
         return dispatch(aErrorOpened('Error loading fund data'));
-    }
-}
-
-export async function requestSuggestions(dispatch, req) {
-    const url = [
-        API_PREFIX,
-        'data',
-        'search',
-        req.page,
-        req.column,
-        req.value,
-        MAX_SUGGESTIONS
-    ].join('/');
-
-    try {
-        const response = await axios.get(url, {
-            headers: { 'Authorization': req.apiKey }
-        });
-
-        const items = list(response.data.data.list);
-        const reqId = req.reqId;
-
-        return dispatch(aSuggestionsReceived({ items, reqId }));
-    }
-    catch (err) {
-        console.warn('Error loading search suggestions');
-
-        return null;
     }
 }
 

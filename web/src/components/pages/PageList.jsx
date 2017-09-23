@@ -2,8 +2,8 @@
  * List page component
  */
 
-import { List as list, Map as map } from 'immutable';
-import { connect } from 'react-redux';
+import { List as list } from 'immutable';
+import { connect as reduxConnect } from 'react-redux';
 
 import { aContentRequested } from '../../actions/ContentActions';
 import { aListItemAdded, aListItemDeleted } from '../../actions/EditActions';
@@ -22,6 +22,11 @@ import getEditable from '../Editable';
 import EditListItem from '../EditListItem';
 
 export class PageList extends Component {
+    constructor(props) {
+        super(props);
+
+        this.addItems = [];
+    }
     componentDidMount() {
         if (!this.props.loaded) {
             this.props.loadContent({
@@ -31,7 +36,10 @@ export class PageList extends Component {
         }
     }
     addItem() {
-        this.props.addListItem(this.addItems);
+        this.props.addListItem(this.addItems.map(editable => ({
+            item: editable.item,
+            value: editable.value
+        })));
     }
     listHeadExtra() {
         return null;
@@ -49,9 +57,7 @@ export class PageList extends Component {
         );
     }
     renderListHeadDesktop() {
-        const weeklyValue = formatCurrency(this.props.data.getIn(
-            ['data', 'weekly']
-        ), {
+        const weeklyValue = formatCurrency(this.props.weeklyValue, {
             abbreviate: true,
             precision: 1
         });
@@ -64,9 +70,7 @@ export class PageList extends Component {
             </span>
             : null;
 
-        const totalValue = formatCurrency(this.props.data.getIn(
-            ['data', 'total']
-        ), {
+        const totalValue = formatCurrency(this.props.totalCost, {
             abbreviate: true,
             precision: 1
         });
@@ -82,9 +86,14 @@ export class PageList extends Component {
         );
     }
     renderLiAdd() {
-        this.addItems = LIST_COLS_PAGES[this.props.pageIndex].map((item, key) => {
-            return <EditListItem key={key} row="-1"
-                id={null} value={this.props.add.get(key)} />;
+        const addItems = LIST_COLS_PAGES[this.props.pageIndex].map((item, col) => {
+            const ref = editable => {
+                this.addItems.push(editable);
+            };
+
+            return <EditListItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
+                key={col} ref={ref} row={-1} col={col}
+                id={null} value={this.props.add.get(col)} />;
         });
 
         const addBtnOnClick = () => this.addItem();
@@ -95,7 +104,7 @@ export class PageList extends Component {
         };
 
         return <li className="li-add">
-            {this.addItems}
+            {addItems}
             <span>
                 <button ref={addBtnRef()} onClick={addBtnOnClick}>Add</button>
             </span>
@@ -108,15 +117,7 @@ export class PageList extends Component {
         return {};
     }
     renderListItem(rowKey, colKey, id, item, value, active = false) {
-        const editItem = getEditable({
-            row: rowKey,
-            col: colKey,
-            id,
-            item,
-            value,
-            pageIndex: this.props.pageIndex,
-            active
-        });
+        const Editable = getEditable({ row: rowKey, col: colKey, id, item, value });
 
         const spanClasses = classNames({
             [item]: true,
@@ -124,7 +125,7 @@ export class PageList extends Component {
         });
 
         return <span key={colKey} className={spanClasses}>
-            {editItem}
+            <Editable />
         </span>;
     }
     renderListRowItemsMobile(row, rowKey, columns, colKeys) {
@@ -141,12 +142,12 @@ export class PageList extends Component {
     renderListRowMobile(row, rowKey, columns, colKeys) {
         const items = this.renderListRowItemsMobile(row, rowKey, columns, colKeys);
 
-        const onClick = () => this.props.openMobileEditDialog(this.props.pageIndex, rowKey);
+        const onClick = () => this.props.openMobileEditDialog(rowKey);
 
         return <li onClick={onClick} key={rowKey}>{items}</li>;
     }
     renderAddButton() {
-        const onClick = () => this.props.openMobileAddDialog(this.props.pageIndex);
+        const onClick = () => this.props.openMobileAddDialog();
 
         return <div className="button-add-outer">
             <button type="button" className="button-add" onClick={onClick}>
@@ -163,8 +164,9 @@ export class PageList extends Component {
         const colKeys = columns
             .map(column => LIST_COLS_PAGES[this.props.pageIndex].indexOf(column));
 
-        const rows = this.props.data.get('rows')
-            .map((row, rowKey) => this.renderListRowMobile(row, rowKey, columns, colKeys));
+        const rows = this.props.rows.map(
+            (row, rowKey) => this.renderListRowMobile(row, rowKey, columns, colKeys)
+        );
 
         return <div>
             {this.renderListHeadMobile(columns)}
@@ -175,7 +177,7 @@ export class PageList extends Component {
     renderListRowDesktop(row, rowKey) {
         const id = row.get('id');
 
-        const onClick = () => {
+        const onDelete = () => {
             this.dispatchAction(aListItemDeleted({
                 pageIndex: this.props.pageIndex,
                 key: rowKey
@@ -183,7 +185,7 @@ export class PageList extends Component {
         };
 
         const deleteBtn = <span className="delete">
-            <a onClick={onClick}>&minus;</a>
+            <a onClick={onDelete}>&minus;</a>
         </span>;
 
         const items = LIST_COLS_PAGES[this.props.pageIndex].map((column, colKey) => {
@@ -217,8 +219,9 @@ export class PageList extends Component {
             return null;
         }
 
-        const rows = this.props.data.get('rows')
-            .map((row, rowKey) => this.renderListRowDesktop(row, rowKey));
+        const rows = this.props.rows.map(
+            (row, rowKey) => this.renderListRowDesktop(row, rowKey)
+        );
 
         return <div>
             {this.renderListHeadDesktop()}
@@ -245,6 +248,10 @@ export class PageList extends Component {
         return null;
     }
     render() {
+        if (!this.props.loaded) {
+            return null;
+        }
+
         const listClasses = [
             'list-insert',
             `list-${PAGES[this.props.pageIndex]}`,
@@ -267,7 +274,9 @@ PageList.propTypes = {
     apiKey: PropTypes.string.isRequired,
     pageIndex: PropTypes.number.isRequired,
     loaded: PropTypes.bool.isRequired,
-    data: PropTypes.instanceOf(map).isRequired,
+    rows: PropTypes.instanceOf(list).isRequired,
+    totalCost: PropTypes.number.isRequired,
+    weeklyValue: PropTypes.number,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
     add: PropTypes.instanceOf(list),
@@ -279,28 +288,55 @@ PageList.propTypes = {
     openMobileAddDialog: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => {
-    const pageIndex = state.global.get('currentPageIndex');
-
-    return {
-        apiKey: state.getIn(['global', 'user', 'apiKey']),
+function getStateProps(pageIndex, extra) {
+    const mapStateToPropsDefault = state => ({
         pageIndex,
+        apiKey: state.getIn(['global', 'user', 'apiKey']),
         loaded: state.getIn(['global', 'pagesLoaded', pageIndex]),
-        data: state.getIn(['global', 'pages', pageIndex]),
+        rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
+        totalCost: state.getIn(['global', 'pages', pageIndex, 'data', 'total']),
+        weeklyValue: state.getIn(['global', 'pages', pageIndex, 'data', 'weekly']),
         editRow: state.getIn(['global', 'edit', 'row']),
         editCol: state.getIn(['global', 'edit', 'col']),
         add: state.getIn(['global', 'edit', 'add']),
         addBtnFocus: state.getIn(['global', 'edit', 'addBtnFocus']),
         daily: DAILY_PAGES[pageIndex]
-    };
-};
+    });
 
-const mapDispatchToProps = dispatch => ({
-    addListItem: items => dispatch(aListItemAdded(items)),
-    loadContent: req => dispatch(aContentRequested(req)),
-    openMobileEditDialog: (pageIndex, rowKey) => dispatch(aMobileEditDialogOpened(pageIndex, rowKey)),
-    openMobileAddDialog: pageIndex => dispatch(aMobileAddDialogOpened(pageIndex))
-});
+    if (extra) {
+        return (state, ownProps) => Object.assign(
+            mapStateToPropsDefault(state, ownProps),
+            extra(state, ownProps)
+        );
+    }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PageList);
+    return mapStateToPropsDefault;
+}
+
+function getDispatchProps(pageIndex, extra) {
+    const mapDispatchToPropsDefault = dispatch => ({
+        addListItem: items => dispatch(aListItemAdded(items)),
+        loadContent: req => dispatch(aContentRequested(req)),
+        openMobileEditDialog: rowKey => dispatch(
+            aMobileEditDialogOpened(pageIndex, rowKey)
+        ),
+        openMobileAddDialog: () => dispatch(aMobileAddDialogOpened(pageIndex))
+    });
+
+    if (extra) {
+        return (dispatch, ownProps) => Object.assign(
+            mapDispatchToPropsDefault(dispatch, ownProps),
+            extra(dispatch, ownProps)
+        );
+    }
+
+    return mapDispatchToPropsDefault;
+}
+
+export function connect(pageIndex, extraState = null, extraDispatch = null) {
+    const mapStateToProps = getStateProps(pageIndex, extraState);
+    const mapDispatchToProps = getDispatchProps(pageIndex, extraDispatch);
+
+    return reduxConnect(mapStateToProps, mapDispatchToProps);
+}
 

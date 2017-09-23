@@ -3,13 +3,17 @@
  */
 
 import { Map as map } from 'immutable';
-import { connect } from 'react-redux';
+
+import { PageList, connect } from './PageList';
+
+import { aContentRequested } from '../../actions/ContentActions';
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import PageList from './PageList';
+import { getPeriodMatch } from '../../misc/data';
 import { rgba } from '../../misc/color';
+import { GRAPH_FUNDS_PERIODS } from '../../misc/const';
 import { DO_STOCKS_LIST } from '../../misc/config';
 import Media from 'react-media';
 import {
@@ -19,24 +23,26 @@ import {
     GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT
 } from '../../misc/const';
 import { formatCurrency, formatPercent } from '../../misc/format';
-import { GraphFundItem } from '../graphs/GraphFundItem';
-import { GraphFunds } from '../graphs/GraphFunds';
+import GraphFundItem from '../graphs/GraphFundItem';
+import GraphFunds from '../graphs/GraphFunds';
 import { StocksList } from '../StocksList';
 import { aMobileEditDialogOpened } from '../../actions/FormActions';
 import { aFundsGraphPeriodChanged } from '../../actions/GraphActions';
 
 const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
 
-export class PageFunds extends PageList {
+const pageIndex = PAGES.indexOf('funds');
+
+class PageFunds extends PageList {
+    /*
     listItemClasses(row) {
         return {
             sold: row.getIn(['cols', transactionsKey]).isSold()
         };
     }
     getGainInfo() {
-        const cost = this.props.data.getIn(['data', 'total']);
-        const value = this.props.cachedValue.get('value');
-        const total = this.props.data.getIn(['data', 'total']);
+        const cost = this.props.totalCost;
+        const value = this.props.cachedValue;
 
         const gain = total
             ? (value - total) / total
@@ -55,7 +61,7 @@ export class PageFunds extends PageList {
         return { classes, gainPct };
     }
     listHeadExtra() {
-        const reloadFundPrices = () => this.dispatchAction(aFundsGraphPeriodChanged(null, true, true));
+        const reloadFundPrices = this.props.reloadFundPrices();
 
         const gainInfo = this.getGainInfo();
 
@@ -260,22 +266,25 @@ export class PageFunds extends PageList {
 
         const gainInfo = this.getGainInfo();
 
-        return (
-            <span className={gainInfo.classes}>
-                <span className="gain-info">Current value:</span>
-                <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
-                <span className="gain-pct">{gainInfo.gainPct}</span>
-                <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
-            </span>
-        );
+        return <span className={gainInfo.classes}>
+            <span className="gain-info">Current value:</span>
+            <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
+            <span className="gain-pct">{gainInfo.gainPct}</span>
+            <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
+        </span>;
     }
     afterList() {
         // render graphs and stuff here
         return <div className="funds-info">
-            <Media query={mediaQueries.desktop}>{render => this.renderAfterList(render)}</Media>
-            <Media query={mediaQueries.mobile}>{render => this.renderAfterListMobile(render)}</Media>
+            <Media query={mediaQueries.desktop}>
+                {render => this.renderAfterList(render)}
+            </Media>
+            <Media query={mediaQueries.mobile}>
+                {render => this.renderAfterListMobile(render)}
+            </Media>
         </div>;
     }
+    */
 }
 
 PageFunds.propTypes = {
@@ -285,9 +294,20 @@ PageFunds.propTypes = {
     showOverall: PropTypes.bool
 };
 
-const mapStateToProps = () => ({});
+const mapStateToProps = state => ({
+    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue'])
+});
 
-const mapDispatchToProps = () => ({});
+const mapDispatchToProps = dispatch => ({
+    reloadFundPrices: () => dispatch(aFundsGraphPeriodChanged(null, true, true)),
+    loadContent: req => {
+        const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
 
-export default connect(mapStateToProps, mapDispatchToProps)(PageFunds);
+        return dispatch(aContentRequested(Object.assign(req, {
+            query: { history: 'true', period, length }
+        })));
+    }
+});
+
+export default connect(pageIndex, mapStateToProps, mapDispatchToProps)(PageFunds);
 

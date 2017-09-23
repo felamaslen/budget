@@ -16,7 +16,7 @@ export class Navbar extends Component {
         const listItemClass = `nav-link-li nav-link-${item}`;
 
         return <li key={key} className={listItemClass}>
-            <NavLink to={path} activeClassName="active">{item}</NavLink>
+            <NavLink exact to={path} activeClassName="active" className="nav-link">{item}</NavLink>
         </li>;
     }
     render() {
@@ -41,14 +41,12 @@ export class Navbar extends Component {
 
 Navbar.propTypes = {
     active: PropTypes.bool.isRequired,
-    navPageIndex: PropTypes.number.isRequired,
     logout: PropTypes.func.isRequired,
     navigate: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    active: state.getIn(['global', 'user', 'uid']) > 0,
-    navPageIndex: state.getIn(['global', 'currentPageIndex'])
+    active: state.getIn(['global', 'user', 'uid']) > 0
 });
 
 const mapDispatchToProps = dispatch => ({

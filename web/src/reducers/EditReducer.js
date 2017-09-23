@@ -15,7 +15,7 @@ import {
 } from '../misc/config';
 import { YMD } from '../misc/date';
 import {
-    uuid, getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
+    getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
     getValueForTransmit
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
@@ -350,11 +350,10 @@ export function rAddListItem(reduction, items) {
         activeValue = active.get('value');
     }
 
-    const fields = items.map(column => {
-        const item = column.props.item;
-        const value = item === activeItem
-            ? activeValue
-            : column.props.value;
+    const fields = items.map(({ item, value }) => {
+        if (item === activeItem) {
+            return map({ item, value: activeValue });
+        }
 
         return map({ item, value });
     });
@@ -456,44 +455,23 @@ export function rHandleServerAdd(reduction, response) {
         .setIn(['edit', 'addBtnFocus'], false);
 }
 
-export function rHandleSuggestions(reduction, obj) {
+export function rHandleSuggestions(reduction, res) {
     const newReduction = reduction
         .setIn(['edit', 'suggestions', 'loading'], false)
         .setIn(['edit', 'suggestions', 'active'], -1);
 
-    if (!obj || reduction.getIn(
-        ['edit', 'suggestions', 'reqId']
-    ) !== obj.reqId) {
-    // null object (clear), or changed input while suggestions were loading
+    if (!res || reduction.getIn(['edit', 'suggestions', 'reqId']) !== res.reqId) {
+        // null object (clear), or changed input while suggestions were loading
         return newReduction
             .setIn(['edit', 'suggestions', 'list'], list.of())
             .setIn(['edit', 'suggestions', 'reqId'], null);
     }
 
-    return newReduction.setIn(['edit', 'suggestions', 'list'], obj.items);
+    return newReduction.setIn(['edit', 'suggestions', 'list'], res.items);
 }
 
-export function rRequestSuggestions(reduction, value) {
-    if (reduction.getIn(['edit', 'suggestions', 'loading'])) {
-        return reduction;
-    }
-    if (!value.length) {
-        return rHandleSuggestions(reduction, null);
-    }
-
-    const apiKey = reduction.getIn(['user', 'apiKey']);
-
-    const active = reduction.getIn(['edit', 'active']);
-    const page = PAGES[active.get('pageIndex')];
-    const column = active.get('item');
-
-    const reqId = uuid(); // for keeping track of EditItem requests
-
-    const req = { reqId, apiKey, page, column, value };
-
-    return reduction.set('effects', reduction.get('effects').push(
-        buildMessage(EF_SUGGESTIONS_REQUESTED, req)
-    ))
+export function rRequestSuggestions(reduction, reqId) {
+    return reduction
         .setIn(['edit', 'suggestions', 'loading'], true)
         .setIn(['edit', 'suggestions', 'reqId'], reqId);
 }

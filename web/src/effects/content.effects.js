@@ -6,11 +6,7 @@ import { API_PREFIX, PAGES } from '../misc/const';
 export function requestContent({ apiKey, pageIndex, params, query }) {
     const path = ['data', PAGES[pageIndex]].concat(params || []);
 
-    const queryObj = (query || []).reduce((items, item) => {
-        items[item.name] = item.value;
-
-        return items;
-    }, {});
+    const queryObj = query || {};
 
     const url = [
         API_PREFIX,

@@ -6,6 +6,7 @@ import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
 import debounce from '../../misc/debounce';
+import { PAGES } from '../../misc/const';
 import {
     aEditableActivated, aEditableChanged, aSuggestionsRequested,
     aFundTransactionsChanged, aFundTransactionsAdded, aFundTransactionsRemoved
@@ -44,7 +45,6 @@ function getStateProps(row, col, id, item, value, getSuggestions) {
             activeEditable.get('col') === col;
 
         const props = {
-            pageIndex: state.getIn(['global', 'currentPageIndex']),
             row,
             col,
             id,
@@ -63,22 +63,31 @@ function getStateProps(row, col, id, item, value, getSuggestions) {
 }
 
 function getDispatchProps(row, col, id, item, value, getSuggestions) {
-    return dispatch => {
+    return (dispatch, ownProps) => {
         const props = {
             onActivate: () => dispatch(aEditableActivated(map({ row, col, id, item, value }))),
             onChange: processedValue => dispatch(aEditableChanged(processedValue))
         };
 
         if (getSuggestions) {
-            const suggestionsTimeout = 100;
-            const immediate = true;
+            if (ownProps.noSuggestions) {
+                props.requestSuggestions = () => null;
+            }
+            else {
+                const suggestionsTimeout = 100;
+                const immediate = true;
 
-            props.requestSuggestions = debounce(
-                processedValue => dispatch(aSuggestionsRequested(processedValue)),
-                suggestionsTimeout,
-                immediate,
-                null
-            );
+                props.requestSuggestions = debounce(
+                    processedValue => dispatch(aSuggestionsRequested({
+                        apiKey: ownProps.apiKey,
+                        page: PAGES[ownProps.pageIndex],
+                        item,
+                        value: processedValue
+                    })),
+                    suggestionsTimeout,
+                    immediate
+                );
+            }
         }
 
         if (item === 'transactions') {

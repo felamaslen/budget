@@ -29,7 +29,7 @@ export function resetAppState(state) {
             suggestions: map({
                 loading: false,
                 reqId: null,
-                list: [],
+                list: list.of(),
                 active: -1
             })
         }))

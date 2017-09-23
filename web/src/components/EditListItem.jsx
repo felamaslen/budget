@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { LIST_COLS_PAGES } from '../misc/const';
+import { PAGES, LIST_COLS_PAGES } from '../misc/const';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -10,15 +10,13 @@ import getEditable from './Editable';
 
 export class EditListItem extends Component {
     render() {
-        const editItem = getEditable({
+        const Editable = getEditable({
             row: this.props.row,
-            col: this.props.key,
+            col: this.props.col,
             id: this.props.id,
             item: this.props.item,
-            value: this.props.value,
-            active: this.props.active
+            value: this.props.value
         });
-        this.addItems.push(editItem);
 
         const spanClasses = classNames({
             [this.props.item]: true,
@@ -26,24 +24,29 @@ export class EditListItem extends Component {
         });
 
         return <span className={spanClasses}>
-            {editItem}
+            <Editable pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
+                noSuggestions={this.props.noSuggestions} />
         </span>;
     }
 }
 
 EditListItem.propTypes = {
+    pageIndex: PropTypes.number.isRequired,
+    apiKey: PropTypes.string.isRequired,
     row: PropTypes.number.isRequired,
-    key: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
     id: PropTypes.number,
     item: PropTypes.string.isRequired,
     value: PropTypes.any.isRequired,
-    active: PropTypes.bool.isRequired
+    active: PropTypes.bool.isRequired,
+    noSuggestions: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
-    active: state.global.getIn(['edit', 'row']) === ownProps.row &&
-        state.global.getIn(['edit', 'col']) === ownProps.key,
-    item: LIST_COLS_PAGES[state.global.get('currentPageIndex')]
+    active: state.getIn(['global', 'edit', 'row']) === ownProps.row &&
+        state.global.getIn(['edit', 'col']) === ownProps.col,
+    item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col],
+    noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1
 });
 
 const mapDispatchToProps = () => ({});

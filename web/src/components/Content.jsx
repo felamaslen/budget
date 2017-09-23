@@ -65,6 +65,7 @@ export class Content extends Component {
             <div className="inner">
                 <Route exact path="/" component={PageOverview} />
                 <Route path="/analysis" component={PageAnalysis} />
+                <Route path="/funds" component={PageFunds} />
             </div>
             <ModalDialog />
         </div>;
