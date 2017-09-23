@@ -11,6 +11,11 @@ export default class Editable extends Component {
 
         this.inputProps = { type: 'text' };
     }
+    componentDidUpdate(prevProps) {
+        if (this.input && !prevProps.active && this.props.active) {
+            this.input.focus();
+        }
+    }
     format() {
         return this.props.value;
     }
