@@ -10,32 +10,25 @@ import { NavLink } from 'react-router-dom';
 import { PAGES, PAGES_PATHS } from '../misc/const';
 
 export class Navbar extends Component {
-    renderNavLink(item, key) {
-        const path = PAGES_PATHS[key];
-
-        const listItemClass = `nav-link-li nav-link-${item}`;
-
-        return <li key={key} className={listItemClass}>
-            <NavLink exact to={path} activeClassName="active" className="nav-link">{item}</NavLink>
-        </li>;
-    }
     render() {
         if (!this.props.active) {
             return null;
         }
 
-        const pageLinksList = PAGES.map(
-            (item, key) => this.renderNavLink(item, key)
-        );
+        const pageLinksList = PAGES.map((item, key) => {
+            const path = PAGES_PATHS[key];
+            const className = `nav-link nav-link-${item}`;
+
+            return <NavLink key={key} exact to={path}
+                activeClassName="active" className={className}>{item}</NavLink>;
+        });
 
         const logoutHandler = () => this.props.logout();
 
-        return <ul className="nav-list noselect">
+        return <nav className="nav-list noselect">
             {pageLinksList}
-            <li className="nav-link-li nav-link-logout">
-                <a className="nav-link" onClick={logoutHandler}>Log out</a>
-            </li>
-        </ul>;
+            <a className="nav-link nav-link-logout" onClick={logoutHandler}>Log out</a>
+        </nav>;
     }
 }
 
