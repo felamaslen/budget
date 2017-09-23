@@ -5,13 +5,15 @@
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
+import { aContentRequested } from '../../actions/ContentActions';
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../misc/const';
 import { formatCurrency, capitalise } from '../../misc/format';
 import {
-    aPeriodChanged, aGroupingChanged, aTimeIndexChanged,
+    aOptionChanged,
     aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered
 } from '../../actions/AnalysisActions';
 import BlockPacker from '../BlockPacker';
@@ -19,6 +21,17 @@ import BlockPacker from '../BlockPacker';
 const pageIndex = PAGES.indexOf('analysis');
 
 export class PageAnalysis extends Component {
+    componentDidMount() {
+        this.props.loadContent({
+            apiKey: this.props.apiKey,
+            pageIndex,
+            params: [
+                ANALYSIS_PERIODS[this.props.period],
+                ANALYSIS_GROUPINGS[this.props.grouping],
+                this.props.timeIndex
+            ]
+        });
+    }
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
     }
@@ -69,18 +82,18 @@ export class PageAnalysis extends Component {
             const subItemPct = (100 * subItemTotal / item.cost).toFixed(1);
             const subItemName = subItem.get('name');
 
-            return (
-                <li key={subKey} className="tree-list-item"
-                    onMouseOver={() => this.dispatchAction(aTreeItemHovered([item.name, subItemName]))}
-                    onMouseOut={() => this.dispatchAction(aTreeItemHovered(null))}>
+            const onMouseOver = () => this.props.onHoverTreeItem([item.name, subItemName]);
+            const onMouseOut = () => this.props.onHoverTreeItem(null);
 
-                    <div className="main">
-                        <span className="title">{subItemName}</span>
-                        <span className="cost">{formatCurrency(subItemTotal)}</span>
-                        <span className="pct">&nbsp;({subItemPct}%)</span>
-                    </div>
-                </li>
-            );
+            return <li key={subKey} className="tree-list-item"
+                onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+
+                <div className="main">
+                    <span className="title">{subItemName}</span>
+                    <span className="cost">{formatCurrency(subItemTotal)}</span>
+                    <span className="pct">&nbsp;({subItemPct}%)</span>
+                </div>
+            </li>;
         });
 
         return (
@@ -115,22 +128,25 @@ export class PageAnalysis extends Component {
 
             const subTree = this.subTree(item);
 
-            const onToggle = () => this.dispatchAction(aTreeItemDisplayToggled(item.name));
+            const onClick = () => this.props.onExpandTreeItem(item.name);
+            const onMouseOver = () => this.props.onHoverTreeItem([item.name]);
+            const onMouseOut = () => this.props.onHoverTreeItem(null);
 
-            return (
-                <li key={key} className={classes}>
-                    <div className="main"
-                        onClick={() => this.dispatchAction(aTreeItemExpandToggled(item.name))}
-                        onMouseOver={() => this.dispatchAction(aTreeItemHovered([item.name]))}
-                        onMouseOut={() => this.dispatchAction(aTreeItemHovered(null))}>
-                        <input type="checkbox" checked={item.visible} onChange={onToggle} />
-                        <span className="title">{item.name}</span>
-                        <span className="cost">{formatCurrency(item.cost)}</span>
-                        <span className="pct">&nbsp;({item.pct.toFixed(1)}%)</span>
-                    </div>
-                    {subTree}
-                </li>
-            );
+            const onToggle = () => this.props.onToggleTreeItem(item.name);
+            const stopPropagation = evt => evt.stopPropagation();
+
+            return <li key={key} className={classes}>
+                <div className="main"
+                    onClick={onClick} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+
+                    <input type="checkbox" checked={item.visible} onClick={stopPropagation}
+                        onChange={onToggle} />
+                    <span className="title">{item.name}</span>
+                    <span className="cost">{formatCurrency(item.cost)}</span>
+                    <span className="pct">&nbsp;({item.pct.toFixed(1)}%)</span>
+                </div>
+                {subTree}
+            </li>;
         })
 
         return <div className="tree">
@@ -140,25 +156,45 @@ export class PageAnalysis extends Component {
             </ul>
         </div>;
     }
+    changePeriod(periodKey) {
+        return this.props.changeOption(
+            this.props.apiKey, periodKey, this.props.grouping, 0
+        );
+    }
+    changeGrouping(groupingKey) {
+        return this.props.changeOption(
+            this.props.apiKey, this.props.period, groupingKey, this.props.timeIndex
+        );
+    }
+    changeTimeIndex(delta) {
+        return this.props.changeOption(
+            this.props.apiKey, this.props.period, this.props.grouping, this.props.timeIndex + delta
+        );
+    }
+    previousPeriod() {
+        return this.changeTimeIndex(1);
+    }
+    nextPeriod() {
+        return this.changeTimeIndex(-1);
+    }
     render() {
-        return <span>Analysis page</span>;
+        if (!this.props.active) {
+            return null;
+        }
 
         const listTree = this.listTree();
 
         const periodSwitcher = ANALYSIS_PERIODS.map((period, key) => <span key={key}>
             <input type="radio" checked={this.props.period === key}
-                onChange={() => this.props.changePeriod(key)} />
+                onChange={() => this.changePeriod(key)} />
             <span>{capitalise(period)}</span>
         </span>);
 
         const groupingSwitcher = ANALYSIS_GROUPINGS.map((grouping, key) => <span key={key}>
             <input type="radio" checked={this.props.grouping === key}
-                onChange={() => this.props.changeGrouping(key)} />
+                onChange={() => this.changeGrouping(key)} />
             <span>{capitalise(grouping)}</span>
         </span>);
-
-        const previousPeriod = () => this.props.previousPeriod(this.props.timeIndex);
-        const nextPeriod = () => this.props.nextPeriod(this.props.timeIndex);
 
         return <div className="page-analysis">
             <div className="upper">
@@ -172,9 +208,9 @@ export class PageAnalysis extends Component {
                 </span>
                 <div className="btns">
                     <button className="btn-previous"
-                        onClick={previousPeriod}>Previous</button>
+                        onClick={() => this.previousPeriod()}>Previous</button>
                     <button className="btn-next" disabled={this.props.timeIndex === 0}
-                        onClick={nextPeriod}>Next</button>
+                        onClick={() => this.nextPeriod()}>Next</button>
                 </div>
                 <h3 className="period-title">{this.props.description}</h3>
                 <div className="flexbox">
@@ -187,30 +223,35 @@ export class PageAnalysis extends Component {
 }
 
 PageAnalysis.propTypes = {
-    period: PropTypes.string.isRequired,
-    grouping: PropTypes.string.isRequired,
+    active: PropTypes.bool.isRequired,
+    apiKey: PropTypes.string.isRequired,
+    period: PropTypes.number.isRequired,
+    grouping: PropTypes.number.isRequired,
     cost: PropTypes.instanceOf(list),
     costTotal: PropTypes.number,
     items: PropTypes.instanceOf(map),
     description: PropTypes.string,
-    blocks: PropTypes.instanceOf(map),
-    treeVisible: PropTypes.bool.isRequired,
-    treeOpen: PropTypes.bool.isRequired,
+    blocks: PropTypes.instanceOf(list),
+    treeVisible: PropTypes.object.isRequired,
+    treeOpen: PropTypes.object.isRequired,
     timeIndex: PropTypes.number.isRequired,
-    deep: PropTypes.string.isRequired,
+    deep: PropTypes.string,
     status: PropTypes.string.isRequired,
-    changePeriod: PropTypes.func.isRequired,
-    changeGrouping: PropTypes.func.isRequired,
-    nextPeriod: PropTypes.func.isRequired,
-    previousPeriod: PropTypes.func.isRequired
+    changeOption: PropTypes.func.isRequired,
+    loadContent: PropTypes.func.isRequired,
+    onToggleTreeItem: PropTypes.func.isRequired,
+    onHoverTreeItem: PropTypes.func.isRequired,
+    onExpandTreeItem: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+    apiKey: state.getIn(['global', 'user', 'apiKey']),
+    active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
     treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
-    timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
     period: state.getIn(['global', 'other', 'analysis', 'period']),
     grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
+    timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
     blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
     status: state.getIn(['global', 'other', 'blockView', 'status']),
     deep: state.getIn(['global', 'other', 'blockView', 'deep']),
@@ -220,10 +261,13 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    changePeriod: key => dispatch(aPeriodChanged(key)),
-    changeGrouping: key => dispatch(aGroupingChanged(key)),
-    nextPeriod: timeIndex => dispatch(aTimeIndexChanged(timeIndex - 1)),
-    previousPeriod: timeIndex => dispatch(aTimeIndexChanged(timeIndex + 1))
+    changeOption: (apiKey, period, grouping, timeIndex) => dispatch(aOptionChanged(
+        { apiKey, pageIndex, period, grouping, timeIndex }
+    )),
+    loadContent: req => dispatch(aContentRequested(req)),
+    onToggleTreeItem: name => dispatch(aTreeItemDisplayToggled(name)),
+    onHoverTreeItem: req => dispatch(aTreeItemHovered(req)),
+    onExpandTreeItem: name => dispatch(aTreeItemExpandToggled(name))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);

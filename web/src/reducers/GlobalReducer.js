@@ -33,11 +33,8 @@ import {
     rContentUpdateBlocks
 } from './ContentReducer';
 import {
-    rAnalysisChangePeriod,
-    rAnalysisChangeGrouping,
-    rAnalysisChangeTimeIndex,
+    rAnalysisChangeOption,
     rAnalysisHandleNewData,
-
     rAnalysisTreeToggleDisplay,
     rAnalysisTreeToggleExpand,
     rAnalysisTreeHover,
@@ -114,9 +111,7 @@ const reducers = createReducerObject([
     [AC.CONTENT_BLOCKS_RECEIVED, rContentUpdateBlocks],
 
     // analysis actions
-    [AC.ANALYSIS_PERIOD_CHANGED, rAnalysisChangePeriod],
-    [AC.ANALYSIS_GROUPING_CHANGED, rAnalysisChangeGrouping],
-    [AC.ANALYSIS_TIME_INDEX_CHANGED, rAnalysisChangeTimeIndex],
+    [AC.ANALYSIS_OPTION_CHANGED, rAnalysisChangeOption],
     [AC.ANALYSIS_DATA_REFRESHED, rAnalysisHandleNewData],
     [AC.ANALYSIS_TREE_DISPLAY_TOGGLED, rAnalysisTreeToggleDisplay],
     [AC.ANALYSIS_TREE_EXPAND_TOGGLED, rAnalysisTreeToggleExpand],

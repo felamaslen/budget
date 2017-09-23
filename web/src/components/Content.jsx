@@ -23,11 +23,6 @@ import PageFunds from './pages/PageFunds';
 
 export class Content extends Component {
     renderPage() {
-        return <div>
-            <Route exact path="/" component={PageOverview} />
-            <Route path="/analysis" component={PageAnalysis} />
-        </div>;
-
         /*
 
         if (page === 'analysis') {
@@ -58,23 +53,20 @@ export class Content extends Component {
         }
 
         */
-
-        return <div>TODO: page {this.props.pageIndex}</div>;
     }
     render() {
         if (!this.props.loggedIn) {
             return null;
         }
 
-        const page = this.renderPage();
-
         const className = `page-wrapper page-${PAGES[this.props.pageIndex]}`;
 
         return <div className={className}>
             <div className="inner">
-                {page}
+                <Route exact path="/" component={PageOverview} />
+                <Route path="/analysis" component={PageAnalysis} />
             </div>
-            <ModalDialog pageIndex={this.props.pageIndex} />;
+            <ModalDialog />
         </div>;
     }
 }

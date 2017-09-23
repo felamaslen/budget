@@ -21,7 +21,6 @@ import GraphSpend from '../graphs/GraphSpend';
 const pageIndex = PAGES.indexOf('overview');
 
 export class PageOverview extends Component {
-    /*
     componentDidMount() {
         this.props.loadContent({
             apiKey: this.props.apiKey,
@@ -166,10 +165,7 @@ export class PageOverview extends Component {
             </div>
         );
     }
-    */
     render() {
-        return <span>Overview page</span>;
-
         if (!this.props.active) {
             return null;
         }

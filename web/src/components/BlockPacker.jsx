@@ -5,12 +5,18 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
+import {
+    PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS
+} from '../misc/const';
+
 import { aBlockClicked } from '../actions/AnalysisActions';
 import { aContentBlockHovered } from '../actions/ContentActions';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+
+const pageIndex = PAGES.indexOf('analysis');
 
 export class BlockView extends Component {
     renderBlocks(activeMain, activeSub) {
@@ -68,7 +74,14 @@ export class BlockView extends Component {
                     height: block.get('height')
                 };
 
-                const onClick = () => this.props.onBlockClick(block);
+                const onClick = () => this.props.onBlockClick({
+                    apiKey: this.props.apiKey,
+                    pageIndex,
+                    name: block.get('name'),
+                    period: ANALYSIS_PERIODS[this.props.period],
+                    grouping: ANALYSIS_GROUPINGS[this.props.grouping],
+                    timeIndex: this.props.timeIndex
+                }, this.props.deep);
 
                 return <div key={blockKey} className={classes} style={blockStyle}
                     onClick={onClick}>{bits}</div>;
@@ -95,40 +108,46 @@ export class BlockView extends Component {
 
         const blocks = this.renderBlocks(activeMain, activeSub);
 
-        return (
-            <div className="block-view" onMouseOut={onMouseOut}>
-                <div className="block-tree-outer">
-                    <div className={blockClasses}>{blocks}</div>
-                </div>
-                <div className="status-bar">
-                    <span className="inner">{this.props.status}</span>
-                </div>
+        return <div className="block-view" onMouseOut={onMouseOut}>
+            <div className="block-tree-outer">
+                <div className={blockClasses}>{blocks}</div>
             </div>
-        );
+            <div className="status-bar">
+                <span className="inner">{this.props.status}</span>
+            </div>
+        </div>;
     }
 }
 
 BlockView.propTypes = {
+    apiKey: PropTypes.string.isRequired,
     blocks: PropTypes.instanceOf(list),
     blockClasses: PropTypes.string,
     active: PropTypes.array,
     deep: PropTypes.string,
     isDeep: PropTypes.bool.isRequired,
     status: PropTypes.string,
+    period: PropTypes.number.isRequired,
+    grouping: PropTypes.number.isRequired,
+    timeIndex: PropTypes.number.isRequired,
     onBlockClick: PropTypes.func.isRequired,
     onBlockHover: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+    apiKey: state.getIn(['global', 'user', 'apiKey']),
     active: state.getIn(['global', 'other', 'blockView', 'active']),
     blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
     deep: state.getIn(['global', 'other', 'blockView', 'deep']),
     isDeep: Boolean(state.getIn(['global', 'other', 'blockView', 'deep'])),
-    status: state.getIn(['global', 'other', 'blockView', 'status'])
+    status: state.getIn(['global', 'other', 'blockView', 'status']),
+    period: state.getIn(['global', 'other', 'analysis', 'period']),
+    grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
+    timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    onBlockClick: block => dispatch(aBlockClicked(block.get('name'))),
+    onBlockClick: (block, deep) => dispatch(aBlockClicked(block, deep)),
     onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered(block, subBlock))
 });
 

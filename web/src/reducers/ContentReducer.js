@@ -110,9 +110,10 @@ export function rHandleContentResponse(reduction, req) {
         .setIn(['edit', 'add'], getAddDefaultValues(req.pageIndex));
 }
 
-export function rRequestContent(reduction) {
+export function rRequestContent(reduction, pageIndex) {
     return reduction
-        .set('loading', true);
+        .set('loading', true)
+        .set('currentPageIndex', pageIndex);
 }
 
 export function rContentBlockHover (reduction, obj) {

@@ -11,7 +11,6 @@ import { PAGES, MAX_SUGGESTIONS, API_PREFIX } from '../misc/const';
 import { aErrorOpened } from '../actions/ErrorActions';
 
 import { aServerAddReceived } from '../actions/AppActions';
-import { aAnalysisDataReceived } from '../actions/AnalysisActions';
 import { aSuggestionsReceived } from '../actions/EditActions';
 import { aFundsPeriodLoaded } from '../actions/GraphActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
@@ -38,54 +37,6 @@ export async function addServerData(dispatch, req) {
     }
     catch (err) {
         return dispatch(aErrorOpened('Error adding data to server!'));
-    }
-}
-
-export async function requestAnalysisData(dispatch, req) {
-    const url = [
-        API_PREFIX,
-        'data',
-        'analysis',
-        req.period,
-        req.grouping,
-        req.timeIndex
-    ].join('/');
-
-    try {
-        const response = await axios.get(url, {
-            headers: { 'Authorization': req.apiKey }
-        });
-
-        return dispatch(aAnalysisDataReceived(response));
-    }
-    catch (err) {
-        return dispatch(aErrorOpened('Error loading analysis blocks'));
-    }
-}
-
-export async function requestDeepAnalysisData(dispatch, req) {
-    const url = [
-        API_PREFIX,
-        'data',
-        'analysis',
-        'deep',
-        req.name,
-        req.period,
-        req.grouping,
-        req.timeIndex
-    ].join('/');
-
-    try {
-        const response = await axios.get(url, {
-            headers: { 'Authorization': req.apiKey }
-        });
-
-        const res = Object.assign({}, response, { deepBlock: req.name });
-
-        return dispatch(aAnalysisDataReceived(res));
-    }
-    catch (err) {
-        return dispatch(aErrorOpened('Error loading analysis blocks'));
     }
 }
 

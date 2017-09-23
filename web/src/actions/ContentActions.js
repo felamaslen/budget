@@ -16,7 +16,7 @@ export const aContentLoaded = (response, pageIndex) => {
 
 export const aContentRequested = ({ apiKey, pageIndex, params, query }) => {
     return async dispatch => {
-        dispatch(buildMessage(CONTENT_REQUESTED));
+        dispatch(buildMessage(CONTENT_REQUESTED, pageIndex));
 
         try {
             const response = await requestContent({ apiKey, pageIndex, params, query });
@@ -26,6 +26,8 @@ export const aContentRequested = ({ apiKey, pageIndex, params, query }) => {
         catch (err) {
             console.error(err.stack);
             dispatch(aErrorOpened('An error occurred loading content'));
+
+            dispatch(buildMessage(CONTENT_LOADED, null));
         }
     };
 };

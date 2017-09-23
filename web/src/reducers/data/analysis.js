@@ -3,14 +3,8 @@
  */
 
 import { fromJS, Map as map } from 'immutable';
-import buildMessage from '../../messageBuilder';
 import {
-    EF_ANALYSIS_DATA_REQUESTED, EF_ANALYSIS_EXTRA_REQUESTED
-} from '../../constants/effects';
-import {
-    PAGES,
-    ANALYSIS_PERIODS, ANALYSIS_GROUPINGS,
-    ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
+    PAGES, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
 } from '../../misc/const';
 import { BlockPacker } from '../../misc/format';
 
@@ -83,59 +77,31 @@ export function processPageDataAnalysis(reduction, pageIndex, raw) {
         }));
 }
 
-export function reloadAnalysis(reduction, newReduction) {
-    if (reduction.getIn(['other', 'analysis', 'loading'])) {
-        return reduction;
-    }
-
-    const apiKey = reduction.getIn(['user', 'apiKey']);
-
-    const period = ANALYSIS_PERIODS[newReduction.getIn(['other', 'analysis', 'period'])];
-    const grouping = ANALYSIS_GROUPINGS[newReduction.getIn(['other', 'analysis', 'grouping'])];
-    const timeIndex = newReduction.getIn(['other', 'analysis', 'timeIndex']);
-    const loadKey = new Date().getTime();
-
-    const reqObj = { apiKey, period, grouping, timeIndex };
-
-    return newReduction
-        .set('effects', reduction.get('effects').push(buildMessage(EF_ANALYSIS_DATA_REQUESTED, reqObj)))
+export function rAnalysisChangeOption(reduction, { period, grouping, timeIndex }) {
+    return reduction
         .setIn(['other', 'analysis', 'loading'], true)
-        .setIn(['other', 'blockView', 'deep'], null)
-        .setIn(['other', 'blockView', 'loadKey'], loadKey);
+        .setIn(['other', 'analysis', 'period'], period)
+        .setIn(['other', 'analysis', 'grouping'], grouping)
+        .setIn(['other', 'analysis', 'timeIndex'], timeIndex);
 }
 
-export function rAnalysisChangePeriod(reduction, period) {
-    return reloadAnalysis(reduction,
-        reduction.setIn(['other', 'analysis', 'period'], period));
-}
-
-export function rAnalysisChangeGrouping(reduction, grouping) {
-    return reloadAnalysis(reduction,
-        reduction.setIn(['other', 'analysis', 'grouping'], grouping));
-}
-
-export function rAnalysisChangeTimeIndex(reduction, timeIndex) {
-    return reloadAnalysis(reduction,
-        reduction.setIn(['other', 'analysis', 'timeIndex'], timeIndex));
-}
-
-export function rAnalysisHandleNewData(reduction, response) {
+export function rAnalysisHandleNewData(reduction, res) {
     const newReduction = reduction
         .setIn(['other', 'analysis', 'loading'], false)
         .setIn(['other', 'blockView', 'loadKey'], null)
         .setIn(['other', 'blockView', 'status'], '');
 
-    const deep = Boolean(response.deepBlock);
+    const deep = Boolean(res.deepBlock);
     if (deep) {
-        const cost = getCost(fromJS(response.data.data.items));
+        const cost = getCost(fromJS(res.response.data.data.items));
         const blocks = getBlocks(cost);
 
         return newReduction
             .setIn(['other', 'blockView', 'blocks'], blocks)
-            .setIn(['other', 'blockView', 'deep'], response.deepBlock);
+            .setIn(['other', 'blockView', 'deep'], res.deepBlock);
     }
 
-    return processPageDataAnalysis(newReduction, pageIndexAnalysis, response.data.data);
+    return processPageDataAnalysis(newReduction, pageIndexAnalysis, res.response.data.data);
 }
 
 export function rAnalysisTreeToggleDisplay(reduction, key) {
@@ -165,29 +131,15 @@ export function rAnalysisTreeHover(reduction, key) {
     return reduction.setIn(['other', 'blockView', 'active'], key);
 }
 
-export function rAnalysisBlockClick(reduction, name) {
-    if (reduction.getIn(['other', 'analysis', 'loading'])) {
-        return reduction;
-    }
-    const deep = reduction.getIn(['other', 'blockView', 'deep']);
-    if (deep === null) {
-    // load a deeper view
+export function rAnalysisBlockClick(reduction, deep) {
+    if (deep) {
+        // load a deeper view
         if (name === 'bills') {
             return reduction;
         }
-        const apiKey = reduction.getIn(['user', 'apiKey']);
-
-        const period = ANALYSIS_PERIODS[reduction.getIn(['other', 'analysis', 'period'])];
-        const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['other', 'analysis', 'grouping'])];
-        const timeIndex = reduction.getIn(['other', 'analysis', 'timeIndex']);
-
-        const reqObj = { apiKey, name, period, grouping, timeIndex };
 
         return reduction
             .setIn(['other', 'analysis', 'loading'], true)
-            .set('effects', reduction.get('effects').push(
-                buildMessage(EF_ANALYSIS_EXTRA_REQUESTED, reqObj)
-            ));
     }
 
     const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
