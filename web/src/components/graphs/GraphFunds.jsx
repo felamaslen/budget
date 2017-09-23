@@ -53,10 +53,10 @@ export class GraphFunds extends LineGraph {
                 const valX = this.valX(evt.pageX - rect.left);
                 const valY = this.valY(evt.pageY - rect.top);
 
-                this.dispatchAction(aFundsGraphHovered({ valX, valY }));
+                this.props.onHover({ valX, valY });
             },
             onMouseOut: () => {
-                this.dispatchAction(aFundsGraphHovered(null));
+                this.props.onHover(null);
             }
         };
     }
@@ -382,6 +382,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+    onHover: position => dispatch(aFundsGraphHovered(position))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);

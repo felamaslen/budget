@@ -3,6 +3,10 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import { combineReducers } from 'redux-immutable';
 
+import {
+    TIME_UPDATED, GRAPH_FUNDS_HOVERED
+} from './constants/actions';
+
 import globalReducer from './reducers/GlobalReducer';
 
 function getStore() {
@@ -13,7 +17,7 @@ function getStore() {
 
     const composeEnhancers = devTools
         ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-            actionsBlacklist: ['TIME_UPDATED']
+            actionsBlacklist: [TIME_UPDATED, GRAPH_FUNDS_HOVERED]
         })
         : compose;
 
