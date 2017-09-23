@@ -267,10 +267,12 @@ button {
             text-overflow: ellipsis;
             border-right: 1px solid #ccc;
             vertical-align: top;
-            overflow: hidden;
             height: inherit;
-            &.active {
-                overflow: visible;
+            & > span {
+                overflow: hidden;
+                &.active {
+                    overflow: visible;
+                }
             }
         }
         .editable, .editable-input {

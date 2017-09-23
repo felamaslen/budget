@@ -5,6 +5,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import classNames from 'classnames';
+
 export default class Editable extends Component {
     constructor(props) {
         super(props);
@@ -48,7 +50,9 @@ export default class Editable extends Component {
         const defaultValue = this.getDefaultValue();
         const onChange = evt => this.handleChange(evt);
 
-        return <span>
+        const outerClass = classNames({ active: this.props.active });
+
+        return <span className={outerClass}>
             <input ref={ref} className="editable-input" {...this.inputProps}
                 defaultValue={defaultValue} onChange={onChange} />
             {this.afterInput()}
