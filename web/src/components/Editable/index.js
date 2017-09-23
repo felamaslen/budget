@@ -11,8 +11,6 @@ import {
     aFundTransactionsChanged, aFundTransactionsAdded, aFundTransactionsRemoved
 } from '../../actions/EditActions';
 
-import React from 'react';
-
 import EditableDate from './EditableDate';
 import EditableCost from './EditableCost';
 import EditableText from './EditableText';
@@ -34,15 +32,19 @@ function getEditableComponent(item) {
     return EditableText;
 }
 
-function getStateProps(row, col, id, item, value, active, getSuggestions) {
+function getStateProps(row, col, id, item, value, getSuggestions) {
     let theValue = value;
     if (item === 'cost' && !value) {
         theValue = 0;
     }
 
     return state => {
+        const activeEditable = state.getIn(['global', 'edit', 'active']);
+        const active = activeEditable.get('row') === row &&
+            activeEditable.get('col') === col;
+
         const props = {
-            pageIndex: state.global.get('currentPageIndex'),
+            pageIndex: state.getIn(['global', 'currentPageIndex']),
             row,
             col,
             id,
@@ -89,12 +91,12 @@ function getDispatchProps(row, col, id, item, value, getSuggestions) {
     };
 }
 
-export default ({ row, col, id, item, value, active }) => {
-    const Component = getEditableComponent(row, col, id, item, value);
+export default ({ row, col, id, item, value }) => {
+    const Component = getEditableComponent(item);
 
     const getSuggestions = ['date', 'cost', 'transactions'].indexOf(item) === -1;
 
-    const mapStateToProps = getStateProps(row, col, id, item, value, active, getSuggestions);
+    const mapStateToProps = getStateProps(row, col, id, item, value, getSuggestions);
 
     const mapDispatchToProps = getDispatchProps(row, col, id, item, value, getSuggestions);
 
