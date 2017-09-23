@@ -10,8 +10,7 @@ import * as AC from '../constants/actions';
 import {
     rErrorMessageOpen,
     rErrorMessageClose,
-    rErrorMessageRemove,
-    rErrorMessageClearOld
+    rErrorMessageRemove
 } from './ErrorReducer';
 import {
     rLoginFormInput,
@@ -86,14 +85,13 @@ function createReducerObject(array) {
         obj[item[0]] = (reduction, action) => item[1](reduction, action.payload);
 
         return obj;
-    });
+    }, {});
 }
 
 const reducers = createReducerObject([
-    [AC.ERROR_OPEN, rErrorMessageOpen],
-    [AC.ERROR_CLOSE, rErrorMessageClose],
-    [AC.ERROR_REMOVE, rErrorMessageRemove],
-    [AC.ERRORS_TIMEDOUT, rErrorMessageClearOld],
+    [AC.ERROR_CLOSED, rErrorMessageClose],
+    [AC.ERROR_OPENED, rErrorMessageOpen],
+    [AC.ERROR_REMOVED, rErrorMessageRemove],
 
     // login form actions
     [AC.LOGIN_FORM_INPUTTED, rLoginFormInput],

@@ -11,18 +11,9 @@ import classNames from 'classnames';
 import {
     ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR, ERROR_CLOSE_TIME
 } from '../misc/const';
-import { aErrorClosed, aErrorRemoved, aErrorsTimedout } from '../actions/ErrorActions';
+import { aErrorClosed, aErrorRemoved } from '../actions/ErrorActions';
 
 class ErrorMessages extends Component {
-    closeMessage(key) {
-        this.dispatchAction(aErrorClosed(key));
-        window.setTimeout(() => this.dispatchAction(aErrorRemoved(key)), ERROR_CLOSE_TIME);
-    }
-    componentDidMount() {
-        window.setInterval(() => {
-            this.props.clearErrorMessages();
-        }, 1000);
-    }
     render() {
         const messages = this.props.list.map((msg, key) => {
             const msgClasses = classNames({
@@ -33,24 +24,22 @@ class ErrorMessages extends Component {
                 closed: msg.get('closed')
             });
 
-            return (
-                <li key={key} className={msgClasses} onClick={() => this.closeMessage(key)}>
-                    <span>{msg.get('text')}</span>
-                </li>
-            );
+            const closeMessage = () => this.props.closeMessage(msg.get('id'));
+
+            return <li key={key} className={msgClasses} onClick={closeMessage}>
+                <span>{msg.get('text')}</span>
+            </li>;
         });
 
-        return (
-            <ul className="messages-outer">
-                {messages}
-            </ul>
-        );
+        return <ul className="messages-outer">
+            {messages}
+        </ul>;
     }
 }
 
 ErrorMessages.propTypes = {
     list: PropTypes.instanceOf(List),
-    clearErrorMessages: PropTypes.func.isRequired
+    closeMessage: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -58,12 +47,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    closeMessage: key => {
-        dispatch(aErrorClosed(key));
+    closeMessage: msgId => {
+        dispatch(aErrorClosed(msgId));
 
-        setTimeout(() => dispatch(aErrorRemoved(key)), ERROR_CLOSE_TIME)
-    },
-    clearErrorMessages: () => dispatch(aErrorsTimedout())
+        setTimeout(() => dispatch(aErrorRemoved(msgId)), ERROR_CLOSE_TIME)
+    }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ErrorMessages);

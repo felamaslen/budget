@@ -2,10 +2,9 @@
  * Action constants
  */
 
-export const ERROR_OPEN = 'ERROR_OPEN';
-export const ERROR_CLOSE = 'ERROR_CLOSE';
-export const ERROR_REMOVE = 'ERROR_REMOVE';
-export const ERRORS_TIMEDOUT = 'ERRORS_TIMEDOUT';
+export const ERROR_OPENED = 'ERROR_OPENED';
+export const ERROR_CLOSED = 'ERROR_CLOSED';
+export const ERROR_REMOVED = 'ERROR_REMOVED';
 
 export const LOGIN_FORM_INPUTTED = 'LOGIN_FORM_INPUTTED';
 export const LOGIN_FORM_RESET = 'LOGIN_FORM_RESET';
