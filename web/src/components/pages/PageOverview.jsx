@@ -170,7 +170,7 @@ export class PageOverview extends Component {
             return null;
         }
 
-        return <div>
+        return <div className="page-overview">
             {this.renderTable()}
             {this.renderGraphs()}
         </div>;

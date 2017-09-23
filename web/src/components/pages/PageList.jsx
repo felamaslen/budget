@@ -262,7 +262,9 @@ export class PageList extends Component {
         const listRendered = this.renderList();
         const afterList = this.afterList();
 
-        return <div>
+        const pageClasses = `page-${PAGES[this.props.pageIndex]}`;
+
+        return <div className={pageClasses}>
             <div className={listClasses}>
                 {listRendered}
             </div>

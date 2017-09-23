@@ -10,10 +10,6 @@ import {
 import { aErrorOpened } from '../actions/ErrorActions';
 import { requestContent } from '../effects/content.effects';
 
-export const aContentLoaded = (response, pageIndex) => {
-    return buildMessage(CONTENT_LOADED, { response, pageIndex });
-};
-
 export const aContentRequested = ({ apiKey, pageIndex, params, query }) => {
     return async dispatch => {
         dispatch(buildMessage(CONTENT_REQUESTED, pageIndex));
@@ -24,7 +20,6 @@ export const aContentRequested = ({ apiKey, pageIndex, params, query }) => {
             dispatch(buildMessage(CONTENT_LOADED, { pageIndex, response }));
         }
         catch (err) {
-            console.error(err.stack);
             dispatch(aErrorOpened('An error occurred loading content'));
 
             dispatch(buildMessage(CONTENT_LOADED, null));

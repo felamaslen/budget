@@ -2,7 +2,6 @@
  * Calls different page components
  */
 
-import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
 import { aContentRequested } from '../actions/ContentActions';
@@ -26,9 +25,7 @@ export class Content extends Component {
             return null;
         }
 
-        const className = `page-wrapper page-${PAGES[this.props.pageIndex]}`;
-
-        return <div className={className}>
+        return <div className="page-wrapper">
             <div className="inner">
                 <Route exact path="/" component={PageOverview} />
                 <Route path="/analysis" component={PageAnalysis} />
@@ -47,16 +44,12 @@ export class Content extends Component {
 
 Content.propTypes = {
     pathname: PropTypes.string.isRequired,
-    loaded: PropTypes.instanceOf(list).isRequired,
-    loggedIn: PropTypes.bool.isRequired,
-    pageIndex: PropTypes.number.isRequired
+    loggedIn: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
     pathname: ownProps.location.pathname,
-    loaded: state.getIn(['global', 'pagesLoaded']),
-    loggedIn: state.getIn(['global', 'user', 'uid']) > 0,
-    pageIndex: state.getIn(['global', 'currentPageIndex'])
+    loggedIn: state.getIn(['global', 'user', 'uid']) > 0
 });
 
 const mapDispatchToProps = dispatch => ({

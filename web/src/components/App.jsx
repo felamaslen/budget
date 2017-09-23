@@ -45,26 +45,21 @@ class App extends Component {
                 <Route path="*" component={Header} />
                 <LoginForm />
                 <Route path="*" component={Content} />
-                <Spinner active={this.props.loading} />
+                <Spinner />
             </div>
         </Router>;
     }
 }
 
 App.propTypes = {
-    loading: PropTypes.bool.isRequired,
     handleKeyPress: PropTypes.func.isRequired,
     loadSettings: PropTypes.func.isRequired
 };
-
-const mapStateToProps = state => ({
-    loading: state.getIn(['global', 'loading'])
-});
 
 const mapDispatchToProps = dispatch => ({
     handleKeyPress: event => dispatch(aKeyPressed(event)),
     loadSettings: () => dispatch(aSettingsLoaded())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(null, mapDispatchToProps)(App);
 

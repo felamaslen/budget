@@ -2,10 +2,12 @@
  * Display a loading spinner
  */
 
+import { connect } from 'react-redux';
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-export default class Spinner extends Component {
+export class Spinner extends Component {
     render() {
         if (!this.props.active) {
             return null;
@@ -22,4 +24,8 @@ export default class Spinner extends Component {
 Spinner.propTypes = {
     active: PropTypes.bool.isRequired
 };
+
+const mapStateToProps = state => ({ active: state.getIn(['global', 'loading']) });
+
+export default connect(mapStateToProps)(Spinner);
 
