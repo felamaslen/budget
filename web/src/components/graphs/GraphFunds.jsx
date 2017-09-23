@@ -3,6 +3,8 @@
  */
 
 import { List as list } from 'immutable';
+import { connect } from 'react-redux';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -10,6 +12,7 @@ import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import { rgba } from '../../misc/color';
 import {
+    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
 } from '../../misc/const';
 import {
@@ -362,4 +365,24 @@ GraphFunds.propTypes = {
     zoom: PropTypes.instanceOf(list),
     hlPoint: PropTypes.instanceOf(list)
 };
+
+const mapStateToProps = state => ({
+    name: 'fund-history',
+    width: GRAPH_FUNDS_WIDTH,
+    height: GRAPH_FUNDS_HEIGHT,
+    fundItems: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundItems']),
+    fundLines: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundLines']),
+    startTime: state.getIn(['global', 'other', 'graphFunds', 'startTime']),
+    cacheTimes: state.getIn(['global', 'other', 'graphFunds', 'cacheTimes']),
+    mode: state.getIn(['global', 'other', 'graphFunds', 'mode']),
+    period: state.getIn(['global', 'other', 'graphFunds', 'period']),
+    showOverall: state.getIn(['global', 'other', 'graphFunds', 'showOverall']),
+    zoom: state.getIn(['global', 'other', 'graphFunds', 'zoom']),
+    hlPoint: state.getIn(['global', 'other', 'graphFunds', 'hlPoint'])
+});
+
+const mapDispatchToProps = dispatch => ({
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);
 

@@ -212,6 +212,7 @@ class PageFunds extends PageList {
             {gainInfo}
         </li>;
     }
+    */
     renderStocksList(render) {
         if (!render || !DO_STOCKS_LIST) {
             return null;
@@ -231,24 +232,9 @@ class PageFunds extends PageList {
             return null;
         }
 
-        return (
-            <div className="graph-container-outer">
-                <GraphFunds dispatcher={this.props.dispatcher}
-                    name="fund-history"
-                    width={GRAPH_FUNDS_WIDTH}
-                    height={GRAPH_FUNDS_HEIGHT}
-                    fundItems={this.props.graphProps.getIn(['data', 'fundItems'])}
-                    fundLines={this.props.graphProps.getIn(['data', 'fundLines'])}
-                    startTime={this.props.graphProps.get('startTime')}
-                    cacheTimes={this.props.graphProps.get('cacheTimes')}
-                    mode={this.props.graphProps.get('mode')}
-                    period={this.props.graphProps.get('period')}
-                    showOverall={this.props.graphProps.get('showOverall')}
-                    zoom={this.props.graphProps.get('zoom')}
-                    hlPoint={this.props.graphProps.get('hlPoint')}
-                />
-            </div>
-        );
+        return <div className="graph-container-outer">
+            <GraphFunds />
+        </div>;
     }
     renderAfterList(render) {
         const stocksList = this.renderStocksList(render);
@@ -284,7 +270,6 @@ class PageFunds extends PageList {
             </Media>
         </div>;
     }
-    */
 }
 
 PageFunds.propTypes = {
