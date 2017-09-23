@@ -93,7 +93,8 @@ export class PageList extends Component {
 
             return <EditListItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
                 key={col} ref={ref} row={-1} col={col}
-                id={null} value={this.props.add.get(col)} />;
+                id={null} value={this.props.add.get(col)}
+                noSuggestions={true} />;
         });
 
         const addBtnOnClick = () => this.addItem();
@@ -125,7 +126,7 @@ export class PageList extends Component {
         });
 
         return <span key={colKey} className={spanClasses}>
-            <Editable />
+            <Editable noSuggestions={true} />
         </span>;
     }
     renderListRowItemsMobile(row, rowKey, columns, colKeys) {

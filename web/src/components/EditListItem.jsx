@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { PAGES, LIST_COLS_PAGES } from '../misc/const';
+import { LIST_COLS_PAGES } from '../misc/const';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -39,14 +39,13 @@ EditListItem.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.any.isRequired,
     active: PropTypes.bool.isRequired,
-    noSuggestions: PropTypes.bool.isRequired
+    noSuggestions: PropTypes.bool
 };
 
 const mapStateToProps = (state, ownProps) => ({
     active: state.getIn(['global', 'edit', 'row']) === ownProps.row &&
         state.global.getIn(['edit', 'col']) === ownProps.col,
-    item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col],
-    noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1
+    item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col]
 });
 
 const mapDispatchToProps = () => ({});
