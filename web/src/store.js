@@ -12,7 +12,9 @@ function getStore() {
         window && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
 
     const composeEnhancers = devTools
-        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({})
+        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+            actionsBlacklist: ['TIME_UPDATED']
+        })
         : compose;
 
     const enhancer = composeEnhancers(
