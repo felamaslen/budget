@@ -49,6 +49,8 @@ export const aLoginFormSubmitted = pin => {
                 console.error(err);
                 console.error(err.stack);
             }
+
+            dispatch(buildMessage(LOGIN_FORM_RESPONSE_GOT, null));
         }
     };
 };
