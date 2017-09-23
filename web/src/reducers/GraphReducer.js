@@ -3,10 +3,7 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import buildMessage from '../messageBuilder';
-import { EF_FUNDS_PERIOD_REQUESTED } from '../constants/effects';
 import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
-import { getPeriodMatch } from '../misc/data';
 import {
     getFormattedHistory,
     zoomFundLines,
@@ -247,15 +244,11 @@ export function rHandleFundPeriodResponse(reduction, response) {
     const cacheTimes = list(response.data.cacheTimes);
 
     const newReduction = changePeriod(
-        reduction.setIn(
-            ['other', 'fundHistoryCache', response.period],
-            map({ rows, startTime, cacheTimes })
-        ),
-        response.period,
-        rows,
-        startTime,
-        cacheTimes
-    );
+        reduction, response.shortPeriod, rows, startTime, cacheTimes
+    )
+        .setIn(['other', 'fundHistoryCache', response.shortPeriod], map({
+            rows, startTime, cacheTimes
+        }));
 
     if (response.reloadPagePrices) {
         const rowsWithExtraProps = getExtraRowProps(
@@ -274,33 +267,10 @@ export function rHandleFundPeriodResponse(reduction, response) {
     return newReduction;
 }
 
-export function rChangeFundsGraphPeriod(reduction, req) {
-    const shortPeriod = req.period || reduction.getIn(
-        ['other', 'graphFunds', 'period']
-    );
+export function rChangeFundsGraphPeriod(reduction, shortPeriod) {
+    const theShortPeriod = shortPeriod || reduction.getIn(['other', 'graphFunds', 'period']);
 
-    const { period, length } = getPeriodMatch(shortPeriod);
-
-    if (req.noCache || !reduction.getIn(
-        ['other', 'fundHistoryCache']
-    ).has(shortPeriod)) {
-
-        const apiKey = reduction.getIn(['user', 'apiKey']);
-        const reloadPagePrices = Boolean(req.reloadPagePrices);
-
-        return reduction.set(
-            'effects', reduction.get('effects').push(
-                buildMessage(EF_FUNDS_PERIOD_REQUESTED, {
-                    apiKey,
-                    period,
-                    length,
-                    reloadPagePrices
-                })
-            )
-        );
-    }
-
-    const { rows, startTime, cacheTimes } = getCacheData(reduction, shortPeriod);
+    const { rows, startTime, cacheTimes } = getCacheData(reduction, theShortPeriod);
 
     return changePeriod(reduction, shortPeriod, rows, startTime, cacheTimes);
 }

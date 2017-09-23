@@ -2,7 +2,7 @@
  * Graph general cash flow (balance over time)
  */
 
-import { List as list } from 'immutable';
+import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
 
 import React from 'react';
@@ -326,7 +326,12 @@ export class GraphFunds extends LineGraph {
             })
             : null;
 
-        const onChange = evt => this.changePeriod(evt.target.value);
+        const onChange = evt => this.props.changePeriod({
+            apiKey: this.props.apiKey,
+            shortPeriod: evt.target.value,
+            reloadPagePrices: true,
+            fundHistoryCache: this.props.fundHistoryCache
+        });
 
         const periodOptions = GRAPH_FUNDS_PERIODS.map((period, key) => {
             return <option key={key} value={period[0]}>{period[1]}</option>;
@@ -351,6 +356,8 @@ export class GraphFunds extends LineGraph {
 }
 
 GraphFunds.propTypes = {
+    apiKey: PropTypes.string.isRequired,
+    fundHistoryCache: PropTypes.instanceOf(map),
     fundItems: PropTypes.instanceOf(list),
     fundLines: PropTypes.instanceOf(list),
     startTime: PropTypes.number,
@@ -367,6 +374,8 @@ const mapStateToProps = state => ({
     name: 'fund-history',
     width: GRAPH_FUNDS_WIDTH,
     height: GRAPH_FUNDS_HEIGHT,
+    apiKey: state.getIn(['global', 'user', 'apiKey']),
+    fundHistoryCache: state.getIn(['global', 'other', 'fundHistoryCache']),
     fundItems: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundItems']),
     fundLines: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundLines']),
     startTime: state.getIn(['global', 'other', 'graphFunds', 'startTime']),
@@ -381,7 +390,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     onHover: position => dispatch(aFundsGraphHovered(position)),
     toggleLine: key => dispatch(aFundsGraphLineToggled(key)),
-    changePeriod: period => dispatch(aFundsGraphPeriodChanged(period)),
+    changePeriod: req => dispatch(aFundsGraphPeriodChanged(req)),
     onClick: () => dispatch(aFundsGraphClicked()),
     zoomGraph: req => dispatch(aFundsGraphZoomed(req))
 });

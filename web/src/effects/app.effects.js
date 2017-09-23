@@ -10,7 +10,6 @@ import { PAGES, API_PREFIX } from '../misc/const';
 import { aErrorOpened } from '../actions/ErrorActions';
 
 import { aServerAddReceived } from '../actions/AppActions';
-import { aFundsPeriodLoaded } from '../actions/GraphActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
 export function updateServerData({ apiKey, requestList }) {
@@ -35,32 +34,6 @@ export async function addServerData(dispatch, req) {
     }
     catch (err) {
         return dispatch(aErrorOpened('Error adding data to server!'));
-    }
-}
-
-export async function requestFundPeriodData(dispatch, req) {
-    const query = querystring.stringify({
-        period: req.period,
-        length: req.length,
-        history: true
-    });
-
-    try {
-        const response = await axios.get(`${API_PREFIX}/data/funds?${query}`, {
-            headers: { 'Authorization': req.apiKey }
-        });
-
-        const period = `${req.period}${req.length}`;
-        const data = response.data.data;
-
-        return dispatch(aFundsPeriodLoaded({
-            reloadPagePrices: req.reloadPagePrices,
-            period,
-            data
-        }));
-    }
-    catch (err) {
-        return dispatch(aErrorOpened('Error loading fund data'));
     }
 }
 
