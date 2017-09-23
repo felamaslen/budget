@@ -297,8 +297,8 @@ export const rLogout = reduction => {
         return reduction;
     }
 
-    return reduction
-        .set(resetAppState(reduction.get('appState')));
+    return resetAppState(reduction)
+        .setIn(['loginForm', 'visible'], true);
 };
 
 /**

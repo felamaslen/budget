@@ -10,11 +10,12 @@ import {
     TIME_UPDATED,
     SERVER_UPDATED,
     SERVER_UPDATE_RECEIVED,
-    SERVER_ADD_RECEIVED
+    SERVER_ADD_RECEIVED,
+    LOGIN_FORM_RESPONSE_GOT
 } from '../constants/actions';
 
 import { aErrorOpened } from '../actions/ErrorActions';
-import { aLoginFormSubmitted, aLoginFormResponseGot } from '../actions/LoginActions';
+import { aLoginFormSubmitted } from '../actions/LoginActions';
 
 import { updateServerData } from '../effects/app.effects';
 import { getLoginCredentials, saveLoginCredentials } from '../effects/login.effects';
@@ -41,7 +42,7 @@ export const aSettingsLoaded = () => {
             dispatch(aLoginFormSubmitted(pin));
         }
         else {
-            dispatch(aLoginFormResponseGot(null));
+            dispatch(buildMessage(LOGIN_FORM_RESPONSE_GOT, null));
         }
     };
 };
