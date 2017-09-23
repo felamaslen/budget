@@ -2,7 +2,7 @@
  * Overview page component
  */
 
-import { List as list, Map as map } from 'immutable';
+import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
 import { aContentRequested } from '../../actions/ContentActions';
@@ -12,16 +12,11 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Media from 'react-media';
 
-import {
-    mediaQueries,
-    PAGES, GRAPH_WIDTH, GRAPH_HEIGHT, GRAPH_SPEND_CATEGORIES,
-    OVERVIEW_COLUMNS
-} from '../../misc/const';
-import { GRAPH_SPEND_NUM_ITEMS } from '../../misc/config';
+import { mediaQueries, PAGES, OVERVIEW_COLUMNS } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import getEditable from '../Editable';
-import { GraphBalance } from '../graphs/GraphBalance';
-import { GraphSpend } from '../graphs/GraphSpend';
+import GraphBalance from '../graphs/GraphBalance';
+import GraphSpend from '../graphs/GraphSpend';
 
 export class PageOverview extends Component {
     componentDidMount() {
@@ -144,37 +139,14 @@ export class PageOverview extends Component {
             return null;
         }
 
-        const graphWidth = Math.min(GRAPH_WIDTH, window.innerWidth);
-
-        return <GraphBalance
-            width={graphWidth} height={GRAPH_HEIGHT}
-            name="balance"
-            startYearMonth={this.props.data.getIn(['data', 'startYearMonth'])}
-            currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])}
-            yearMonths={this.props.data.getIn(['data', 'yearMonths'])}
-            showAll={this.props.showAll}
-            balance={this.props.data.getIn(['data', 'cost', 'balanceWithPredicted'])}
-            balanceOld={this.props.data.getIn(['data', 'cost', 'old'])}
-            funds={this.props.data.getIn(['data', 'cost', 'funds'])}
-            fundsOld={this.props.data.getIn(['data', 'cost', 'fundsOld'])} />;
+        return <GraphBalance name="balance" />;
     }
     renderGraphSpend(render) {
         if (!render) {
             return null;
         }
 
-        const graphSpendData = list(GRAPH_SPEND_CATEGORIES).map(item => {
-            return this.props.data.getIn(['data', 'cost', item.name]).slice(-GRAPH_SPEND_NUM_ITEMS);
-        });
-
-        return <GraphSpend
-            width={GRAPH_WIDTH} height={GRAPH_HEIGHT}
-            name="spend"
-            categories={list(GRAPH_SPEND_CATEGORIES)}
-            data={graphSpendData}
-            income={this.props.data.getIn(['data', 'cost', 'income']).slice(-GRAPH_SPEND_NUM_ITEMS)}
-            yearMonths={this.props.data.getIn(['data', 'yearMonths']).slice(-GRAPH_SPEND_NUM_ITEMS)}
-            currentYearMonth={this.props.data.getIn(['data', 'currentYearMonth'])} />;
+        return <GraphSpend name="spend" />;
     }
     renderGraphs() {
         return (
@@ -210,23 +182,19 @@ PageOverview.propTypes = {
     active: PropTypes.bool.isRequired,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
-    showAll: PropTypes.bool.isRequired,
     loadContent: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => {
-    const pageIndex = PAGES.indexOf('overview');
+const pageIndex = PAGES.indexOf('overview');
 
-    return {
-        pageIndex,
-        apiKey: state.getIn(['global', 'user', 'apiKey']),
-        data: state.getIn(['global', 'pages', pageIndex]),
-        active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
-        editRow: state.getIn(['global', 'edit', 'row']),
-        editCol: state.getIn(['global', 'edit', 'col']),
-        showAll: state.getIn(['global', 'other', 'showAllBalanceGraph'])
-    };
-};
+const mapStateToProps = state => ({
+    pageIndex,
+    apiKey: state.getIn(['global', 'user', 'apiKey']),
+    data: state.getIn(['global', 'pages', pageIndex]),
+    active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
+    editRow: state.getIn(['global', 'edit', 'row']),
+    editCol: state.getIn(['global', 'edit', 'col'])
+});
 
 const mapDispatchToProps = dispatch => ({
     loadContent: req => dispatch(aContentRequested(req))
