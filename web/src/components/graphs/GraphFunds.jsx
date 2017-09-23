@@ -29,21 +29,20 @@ import {
 export class GraphFunds extends LineGraph {
     constructor(props) {
         super(props);
+
         this.padding = [36, 0, 0, 0];
         this.tension = GRAPH_FUNDS_TENSION;
         this.canvasProperties = {
-            onClick: () => {
-                this.dispatchAction(aFundsGraphClicked());
-            },
+            onClick: () => this.props.onClick(),
             onWheel: evt => {
                 const position = this.props.hlPoint
                     ? this.props.hlPoint.get(0)
                     : this.valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
 
-                this.dispatchAction(aFundsGraphZoomed({
+                this.props.zoomGraph({
                     direction: evt.deltaY / Math.abs(evt.deltaY),
                     position
-                }));
+                });
                 evt.preventDefault();
             }
         };
@@ -313,7 +312,7 @@ export class GraphFunds extends LineGraph {
         const fundLineToggles = this.props.fundItems
             ? this.props.fundItems.map((item, key) => {
                 const className = classNames({ enabled: item.get('enabled') });
-                const onClick = () => this.dispatchAction(aFundsGraphLineToggled(key));
+                const onClick = () => this.props.toggleLine(key);
                 const style = {
                     borderColor: rgba(item.get('color'))
                 };
@@ -327,9 +326,7 @@ export class GraphFunds extends LineGraph {
             })
             : null;
 
-        const onChange = evt => {
-            this.dispatchAction(aFundsGraphPeriodChanged(evt.target.value));
-        };
+        const onChange = evt => this.changePeriod(evt.target.value);
 
         const periodOptions = GRAPH_FUNDS_PERIODS.map((period, key) => {
             return <option key={key} value={period[0]}>{period[1]}</option>;
@@ -382,7 +379,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    onHover: position => dispatch(aFundsGraphHovered(position))
+    onHover: position => dispatch(aFundsGraphHovered(position)),
+    toggleLine: key => dispatch(aFundsGraphLineToggled(key)),
+    changePeriod: period => dispatch(aFundsGraphPeriodChanged(period)),
+    onClick: () => dispatch(aFundsGraphClicked()),
+    zoomGraph: req => dispatch(aFundsGraphZoomed(req))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);
