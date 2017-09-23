@@ -2,7 +2,7 @@
  * Calls different page components
  */
 
-import { Map as map, List as list } from 'immutable';
+import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
 import { aContentRequested } from '../actions/ContentActions';
@@ -12,48 +12,15 @@ import PropTypes from 'prop-types';
 
 import { Route } from 'react-router-dom';
 
-import { PAGES, LIST_PAGES, DAILY_PAGES } from '../misc/const';
+import { PAGES } from '../misc/const';
 
-import Spinner from './Spinner';
 import ModalDialog from './ModalDialog';
 import PageOverview from './pages/PageOverview';
-import PageList from './pages/PageList';
+import getPageList from './pages/PageList';
 import PageAnalysis from './pages/PageAnalysis';
 import PageFunds from './pages/PageFunds';
 
 export class Content extends Component {
-    renderPage() {
-        /*
-
-        if (page === 'analysis') {
-            return <PageAnalysis />;
-        }
-
-        if (page === 'funds') {
-            // funds page
-            return (
-                <PageFunds
-                    data={data}
-                    edit={this.props.edit.get('active')}
-                    add={this.props.edit.get('add')}
-                    addBtnFocus={this.props.edit.get('addBtnFocus')}
-                    daily={DAILY_PAGES[this.props.index]}
-                    index={this.props.index}
-                    page={page}
-                    graphProps={this.props.other.get('graphFunds')}
-                    stocksListProps={this.props.other.get('stocksList')}
-                    cachedValue={this.props.other.get('fundsCachedValue')}
-                    suggestions={null} />
-            );
-        }
-
-        if (LIST_PAGES.indexOf(this.props.pageIndex) > -1) {
-            // list page (e.g. food)
-            return <PageList />;
-        }
-
-        */
-    }
     render() {
         if (!this.props.loggedIn) {
             return null;
@@ -66,6 +33,12 @@ export class Content extends Component {
                 <Route exact path="/" component={PageOverview} />
                 <Route path="/analysis" component={PageAnalysis} />
                 <Route path="/funds" component={PageFunds} />
+                <Route path="/income" component={getPageList(PAGES.indexOf('income'))} />
+                <Route path="/bills" component={getPageList(PAGES.indexOf('bills'))} />
+                <Route path="/food" component={getPageList(PAGES.indexOf('food'))} />
+                <Route path="/general" component={getPageList(PAGES.indexOf('general'))} />
+                <Route path="/holiday" component={getPageList(PAGES.indexOf('holiday'))} />
+                <Route path="/social" component={getPageList(PAGES.indexOf('social'))} />
             </div>
             <ModalDialog />
         </div>;

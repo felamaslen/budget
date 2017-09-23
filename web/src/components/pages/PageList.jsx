@@ -275,8 +275,8 @@ PageList.propTypes = {
     apiKey: PropTypes.string.isRequired,
     pageIndex: PropTypes.number.isRequired,
     loaded: PropTypes.bool.isRequired,
-    rows: PropTypes.instanceOf(list).isRequired,
-    totalCost: PropTypes.number.isRequired,
+    rows: PropTypes.instanceOf(list),
+    totalCost: PropTypes.number,
     weeklyValue: PropTypes.number,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
@@ -293,7 +293,7 @@ function getStateProps(pageIndex, extra) {
     const mapStateToPropsDefault = state => ({
         pageIndex,
         apiKey: state.getIn(['global', 'user', 'apiKey']),
-        loaded: state.getIn(['global', 'pagesLoaded', pageIndex]),
+        loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
         rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
         totalCost: state.getIn(['global', 'pages', pageIndex, 'data', 'total']),
         weeklyValue: state.getIn(['global', 'pages', pageIndex, 'data', 'weekly']),
@@ -340,4 +340,6 @@ export function connect(pageIndex, extraState = null, extraDispatch = null) {
 
     return reduxConnect(mapStateToProps, mapDispatchToProps);
 }
+
+export default pageIndex => connect(pageIndex)(PageList);
 
