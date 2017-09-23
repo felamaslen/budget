@@ -217,7 +217,7 @@ function getNavDirection(key, shift) {
     return [0, 0];
 }
 
-function handleNavInSuggestions(reduction, suggestions, escape, enter) {
+function handleNavFromSuggestions(reduction, suggestions, escape, enter) {
     if (escape) {
         return reduction
             .setIn(['edit', 'suggestions', 'list'], list.of())
@@ -239,7 +239,7 @@ function handleNavInSuggestions(reduction, suggestions, escape, enter) {
     return reduction;
 }
 
-function handleNavFromSuggestions(reduction, suggestions, direction) {
+function handleNavInSuggestions(reduction, suggestions, direction) {
     if (direction[1] === 0) {
         return handleSuggestionsNav(reduction, direction[0], suggestions);
     }
@@ -258,14 +258,15 @@ function handleKeyPressLoggedIn(reduction, evt) {
     const haveSuggestions = suggestions.get('list').size > 0;
     const suggestionActive = suggestions.get('active') > -1;
 
+    const navigateFromSuggestions = suggestionActive && (escape || enter);
     const navigateSuggestions = navigated && !evt.ctrl;
 
-    if (haveSuggestions && suggestionActive) {
-        return handleNavInSuggestions(reduction, suggestions, escape, enter);
+    if (haveSuggestions && navigateFromSuggestions) {
+        return handleNavFromSuggestions(reduction, suggestions, escape, enter);
     }
 
     if (haveSuggestions && navigateSuggestions) {
-        return handleNavFromSuggestions(reduction, suggestions, direction);
+        return handleNavInSuggestions(reduction, suggestions, direction);
     }
 
     const navigateFromField = navigated && (evt.ctrl || evt.key === 'Tab');
