@@ -4,6 +4,8 @@
  */
 
 import { connect } from 'react-redux';
+import { Router, Route } from 'react-router-dom';
+import createHistory from 'history/createBrowserHistory';
 
 import { aSettingsLoaded, aKeyPressed } from '../actions/AppActions';
 
@@ -16,6 +18,8 @@ import Spinner from './Spinner';
 import Header from './Header';
 import LoginForm from './LoginForm';
 import Content from './Content';
+
+const history = createHistory();
 
 class App extends Component {
     componentDidMount() {
@@ -34,14 +38,16 @@ class App extends Component {
         });
     }
     render() {
-        return <div id="main">
-            <ErrorMessages />
-            <DataSync />
-            <Header />
-            <LoginForm />
-            <Content />
-            <Spinner active={this.props.loading} />
-        </div>;
+        return <Router history={history}>
+            <div id="main">
+                <ErrorMessages />
+                <DataSync />
+                <Header />
+                <LoginForm />
+                <Route path="*" component={Content} />
+                <Spinner active={this.props.loading} />
+            </div>
+        </Router>;
     }
 }
 

@@ -65,7 +65,7 @@
     "react-media": "^1.6.1",
     "react-pure-render": "^1.0.2",
     "react-redux": "^5.0.6",
-    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
     "redux": "^3.7.2",
     "redux-create-reducer": "^1.1.1",
     "redux-immutable": "^4.0.0",

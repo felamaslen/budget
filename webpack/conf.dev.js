@@ -30,6 +30,7 @@ module.exports = Object.assign({}, webpackConfig, {
         noInfo: false,
         publicPath: '/',
         port: process.env.PORT_WDS,
+        historyApiFallback: true,
         proxy: {
             '/': {
                 target: `http://localhost:${process.env.PORT}`,

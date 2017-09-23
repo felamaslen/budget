@@ -16,6 +16,8 @@ import {
 } from '../../actions/AnalysisActions';
 import BlockPacker from '../BlockPacker';
 
+const pageIndex = PAGES.indexOf('analysis');
+
 export class PageAnalysis extends Component {
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
@@ -139,6 +141,8 @@ export class PageAnalysis extends Component {
         </div>;
     }
     render() {
+        return <span>Analysis page</span>;
+
         const listTree = this.listTree();
 
         const periodSwitcher = ANALYSIS_PERIODS.map((period, key) => <span key={key}>
@@ -201,23 +205,19 @@ PageAnalysis.propTypes = {
     previousPeriod: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => {
-    const pageIndex = PAGES.indexOf('analysis');
-
-    return {
-        treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
-        treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
-        timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
-        period: state.getIn(['global', 'other', 'analysis', 'period']),
-        grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
-        blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
-        status: state.getIn(['global', 'other', 'blockView', 'status']),
-        deep: state.getIn(['global', 'other', 'blockView', 'deep']),
-        cost: state.getIn(['global', 'pages', pageIndex, 'cost']),
-        costTotal: state.getIn(['global', 'pages', pageIndex, 'costTotal']),
-        description: state.getIn(['global', 'pages', pageIndex, 'description'])
-    };
-};
+const mapStateToProps = state => ({
+    treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
+    treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
+    timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
+    period: state.getIn(['global', 'other', 'analysis', 'period']),
+    grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
+    blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
+    status: state.getIn(['global', 'other', 'blockView', 'status']),
+    deep: state.getIn(['global', 'other', 'blockView', 'deep']),
+    cost: state.getIn(['global', 'pages', pageIndex, 'cost']),
+    costTotal: state.getIn(['global', 'pages', pageIndex, 'costTotal']),
+    description: state.getIn(['global', 'pages', pageIndex, 'description'])
+});
 
 const mapDispatchToProps = dispatch => ({
     changePeriod: key => dispatch(aPeriodChanged(key)),

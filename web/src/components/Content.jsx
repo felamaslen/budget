@@ -10,6 +10,8 @@ import { aContentRequested } from '../actions/ContentActions';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { Route } from 'react-router-dom';
+
 import { PAGES, LIST_PAGES, DAILY_PAGES } from '../misc/const';
 
 import Spinner from './Spinner';
@@ -21,13 +23,10 @@ import PageFunds from './pages/PageFunds';
 
 export class Content extends Component {
     renderPage() {
-        const page = PAGES[this.props.pageIndex];
-
-        console.log('render page', page);
-
-        if (page === 'overview') {
-            return <PageOverview />;
-        }
+        return <div>
+            <Route exact path="/" component={PageOverview} />
+            <Route path="/analysis" component={PageAnalysis} />
+        </div>;
 
         /*
 
@@ -63,7 +62,6 @@ export class Content extends Component {
         return <div>TODO: page {this.props.pageIndex}</div>;
     }
     render() {
-        console.log('render content', this.props.pageIndex, this.props.loggedIn, this.props.loaded.get(this.props.pageIndex));
         if (!this.props.loggedIn) {
             return null;
         }
@@ -82,12 +80,14 @@ export class Content extends Component {
 }
 
 Content.propTypes = {
+    pathname: PropTypes.string.isRequired,
     loaded: PropTypes.instanceOf(list).isRequired,
     loggedIn: PropTypes.bool.isRequired,
     pageIndex: PropTypes.number.isRequired
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, ownProps) => ({
+    pathname: ownProps.location.pathname,
     loaded: state.getIn(['global', 'pagesLoaded']),
     loggedIn: state.getIn(['global', 'user', 'uid']) > 0,
     pageIndex: state.getIn(['global', 'currentPageIndex'])

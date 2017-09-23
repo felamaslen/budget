@@ -29,6 +29,18 @@ export const PAGES = [
     'social'
 ];
 
+export const PAGES_PATHS = [
+    '/',
+    '/analysis',
+    '/funds',
+    '/income',
+    '/bills',
+    '/food',
+    '/general',
+    '/holiday',
+    '/social'
+];
+
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
 export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));

@@ -4,33 +4,20 @@ import { aUserLoggedOut, aPageNavigatedTo } from '../actions/AppActions';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
-import { capitalise } from '../misc/format';
-import { PAGES } from '../misc/const';
+import { NavLink } from 'react-router-dom';
+
+import { PAGES, PAGES_PATHS } from '../misc/const';
 
 export class Navbar extends Component {
-    renderNavListItem(item, key) {
-        const active = key === this.props.navPageIndex;
+    renderNavLink(item, key) {
+        const path = PAGES_PATHS[key];
 
-        const classNameLi = classNames({
-            'nav-link-li': true,
-            [`nav-link-${item}`]: true,
-            active
-        });
+        const listItemClass = `nav-link-li nav-link-${item}`;
 
-        const classNameA = classNames({
-            'nav-link': true,
-            active
-        });
-
-        const onClick = () => this.props.navigate(key);
-
-        return (
-            <li key={key} className={classNameLi}>
-                <a className={classNameA} onClick={onClick}>{capitalise(item)}</a>
-            </li>
-        );
+        return <li key={key} className={listItemClass}>
+            <NavLink to={path} activeClassName="active">{item}</NavLink>
+        </li>;
     }
     render() {
         if (!this.props.active) {
@@ -38,7 +25,7 @@ export class Navbar extends Component {
         }
 
         const pageLinksList = PAGES.map(
-            (item, key) => this.renderNavListItem(item, key)
+            (item, key) => this.renderNavLink(item, key)
         );
 
         const logoutHandler = () => this.props.logout();

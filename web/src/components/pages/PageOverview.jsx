@@ -18,11 +18,14 @@ import getEditable from '../Editable';
 import GraphBalance from '../graphs/GraphBalance';
 import GraphSpend from '../graphs/GraphSpend';
 
+const pageIndex = PAGES.indexOf('overview');
+
 export class PageOverview extends Component {
+    /*
     componentDidMount() {
         this.props.loadContent({
             apiKey: this.props.apiKey,
-            pageIndex: this.props.pageIndex
+            pageIndex
         });
     }
     format(value, abbreviate) {
@@ -163,7 +166,10 @@ export class PageOverview extends Component {
             </div>
         );
     }
+    */
     render() {
+        return <span>Overview page</span>;
+
         if (!this.props.active) {
             return null;
         }
@@ -177,7 +183,6 @@ export class PageOverview extends Component {
 
 PageOverview.propTypes = {
     apiKey: PropTypes.string.isRequired,
-    pageIndex: PropTypes.number.isRequired,
     data: PropTypes.instanceOf(map),
     active: PropTypes.bool.isRequired,
     editRow: PropTypes.number,
@@ -185,10 +190,7 @@ PageOverview.propTypes = {
     loadContent: PropTypes.func.isRequired
 };
 
-const pageIndex = PAGES.indexOf('overview');
-
 const mapStateToProps = state => ({
-    pageIndex,
     apiKey: state.getIn(['global', 'user', 'apiKey']),
     data: state.getIn(['global', 'pages', pageIndex]),
     active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
