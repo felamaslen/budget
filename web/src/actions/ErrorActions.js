@@ -2,10 +2,13 @@
  * Actions called to show/hide error messages
  */
 
+import { Map as map } from 'immutable';
 import buildMessage from '../messageBuilder';
 
 import { ERROR_MESSAGE_DELAY } from '../misc/config';
-import { ERROR_CLOSE_TIME } from '../misc/const';
+import {
+    ERROR_CLOSE_TIME, ERROR_LEVEL_ERROR
+} from '../misc/const';
 
 import { uuid } from '../misc/data';
 
@@ -26,10 +29,14 @@ function messageRemoved(msgId) {
 }
 
 export const aErrorOpened = message => {
+    const theMessage = typeof message === 'string'
+        ? map({ level: ERROR_LEVEL_ERROR, text: message })
+        : message;
+
     return async dispatch => {
         const msgId = uuid();
 
-        dispatch(buildMessage(ERROR_OPENED, message.set('id', msgId)));
+        dispatch(buildMessage(ERROR_OPENED, theMessage.set('id', msgId)));
 
         const actionMessageHidden = await messageHidden(msgId);
         dispatch(actionMessageHidden);

@@ -2,17 +2,10 @@
  * Carries out actions for the error messages component
  */
 
-import { Map as map } from 'immutable';
-import { ERROR_LEVEL_ERROR } from '../misc/const';
-
-export function rErrorMessageOpen(reduction, msg) {
-    const theMessage = typeof msg === 'string'
-        ? map({ level: ERROR_LEVEL_ERROR, text: msg })
-        : msg;
-
+export function rErrorMessageOpen(reduction, message) {
     const errorMsg = reduction.getIn(['errorMsg']);
 
-    const item = theMessage
+    const item = message
         .set('time', new Date().getTime());
 
     return reduction.setIn(['errorMsg'], errorMsg.push(item));
