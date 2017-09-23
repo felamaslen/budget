@@ -86,6 +86,8 @@ export class PageList extends Component {
         );
     }
     renderLiAdd() {
+        const noSuggestions = ['funds'].indexOf(PAGES[this.props.pageIndex]) !== -1;
+
         const addItems = LIST_COLS_PAGES[this.props.pageIndex].map((item, col) => {
             const ref = editable => {
                 this.addItems.push(editable);
@@ -93,7 +95,7 @@ export class PageList extends Component {
 
             return <ListAddEditItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
                 key={col} ref={ref} row={-1} col={col} id={null}
-                noSuggestions={true} />;
+                noSuggestions={noSuggestions} />;
         });
 
         const addBtnOnClick = () => this.addItem();
