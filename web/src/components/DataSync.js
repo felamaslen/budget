@@ -21,7 +21,9 @@ export class DataSync extends Component {
         setInterval(() => this.props.updateTime(), 1000);
     }
     componentDidUpdate(prevProps) {
-        if (!this.props.requestList.equals(prevProps.requestList)) {
+        if (this.props.requestList.size > 0 &&
+            !this.props.requestList.equals(prevProps.requestList)) {
+
             this.props.updateServer(this.props.apiKey, this.props.requestList);
         }
     }
