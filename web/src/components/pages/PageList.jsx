@@ -19,7 +19,7 @@ import Media from 'react-media';
 import { mediaQueries, PAGES, DAILY_PAGES, LIST_COLS_PAGES } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
 import getEditable from '../Editable';
-import EditListItem from '../EditListItem';
+import ListAddEditItem from '../ListAddEditItem';
 
 export class PageList extends Component {
     constructor(props) {
@@ -91,7 +91,7 @@ export class PageList extends Component {
                 this.addItems.push(editable);
             };
 
-            return <EditListItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
+            return <ListAddEditItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
                 key={col} ref={ref} row={-1} col={col} id={null}
                 noSuggestions={true} />;
         });
