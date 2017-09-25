@@ -72,6 +72,7 @@ export function processPageDataAnalysis(reduction, pageIndex, raw) {
 
     return reduction
         .setIn(['other', 'blockView', 'blocks'], blocks)
+        .setIn(['other', 'blockView', 'deep'], null)
         .setIn(['pages', pageIndex], map({
             cost, costTotal, items, description
         }));
@@ -85,23 +86,22 @@ export function rAnalysisChangeOption(reduction, { period, grouping, timeIndex }
         .setIn(['other', 'analysis', 'timeIndex'], timeIndex);
 }
 
-export function rAnalysisHandleNewData(reduction, res) {
+export function rAnalysisHandleNewData(reduction, { response, loadDeep, name }) {
     const newReduction = reduction
         .setIn(['other', 'analysis', 'loading'], false)
         .setIn(['other', 'blockView', 'loadKey'], null)
         .setIn(['other', 'blockView', 'status'], '');
 
-    const deep = Boolean(res.deepBlock);
-    if (deep) {
-        const cost = getCost(fromJS(res.response.data.data.items));
+    if (loadDeep) {
+        const cost = getCost(fromJS(response.data.data.items));
         const blocks = getBlocks(cost);
 
         return newReduction
             .setIn(['other', 'blockView', 'blocks'], blocks)
-            .setIn(['other', 'blockView', 'deep'], res.deepBlock);
+            .setIn(['other', 'blockView', 'deep'], name);
     }
 
-    return processPageDataAnalysis(newReduction, pageIndexAnalysis, res.response.data.data);
+    return processPageDataAnalysis(newReduction, pageIndexAnalysis, response.data.data);
 }
 
 export function rAnalysisTreeToggleDisplay(reduction, key) {
@@ -131,23 +131,26 @@ export function rAnalysisTreeHover(reduction, key) {
     return reduction.setIn(['other', 'blockView', 'active'], key);
 }
 
-export function rAnalysisBlockClick(reduction, deep) {
-    if (deep) {
-        // load a deeper view
-        if (name === 'bills') {
-            return reduction;
-        }
-
-        return reduction
-            .setIn(['other', 'analysis', 'loading'], true)
+export function rAnalysisBlockClick(reduction, { name, deepBlock }) {
+    if (name === 'bills') {
+        return reduction;
     }
 
-    const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
-    const cost = reduction.getIn(['pages', pageIndexAnalysis, 'cost']);
-    const blocks = getBlocks(cost, treeVisible);
+    const wasDeep = Boolean(deepBlock);
 
-    return reduction.setIn(['other', 'blockView', 'deep'], null)
-        .setIn(['other', 'blockView', 'blocks'], blocks)
-        .setIn(['other', 'blockView', 'status'], '');
+    if (wasDeep) {
+        // reset the view to how it was
+        const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
+        const cost = reduction.getIn(['pages', pageIndexAnalysis, 'cost']);
+        const blocks = getBlocks(cost, treeVisible);
+
+        return reduction.setIn(['other', 'blockView', 'deep'], null)
+            .setIn(['other', 'blockView', 'blocks'], blocks)
+            .setIn(['other', 'blockView', 'status'], '');
+    }
+
+    // load a deeper view
+    return reduction
+        .setIn(['other', 'analysis', 'loading'], true);
 }
 

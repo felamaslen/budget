@@ -3,21 +3,18 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import buildMessage from '../messageBuilder';
+
 import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './LoginFormReducer';
 import { rLoadContent } from './ContentReducer';
 import { rActivateEditable } from './EditReducer';
 import { reloadAnalysis } from './data/analysis';
 import { getFundsCachedValueAgeText } from './data/funds';
-import {
-    EF_SERVER_UPDATE_REQUESTED,
-} from '../constants/effects';
-import {
-    PAGES, LIST_PAGES, LIST_COLS_PAGES,
-    SERVER_UPDATE_REQUESTED, SERVER_UPDATE_ERROR, SERVER_UPDATE_RECEIVED
-} from '../misc/const';
+import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
 import { getNullEditable, getAddDefaultValues } from '../misc/data';
+
+import { loadSettings, updateServerData } from '../effects/app.effects';
+import { saveLoginCredentials } from '../effects/login.effects';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -305,26 +302,17 @@ export function rHandleKeyPress(reduction, evt) {
     return rLoginFormInput(reduction, evt.key);
 }
 
-/**
- * Log out of the system
- * @param {Record} reduction application state
- * @returns {Record} modified reduction
- */
-export const rLogout = reduction => {
+export function rLogout(reduction) {
     if (reduction.getIn(['loading'])) {
         return reduction;
     }
 
+    // yield sideEffect(saveLoginCredentials);
+
     return resetAppState(reduction)
         .setIn(['loginForm', 'visible'], true);
-};
+}
 
-/**
- * Navigate to a page (index)
- * @param {Record} reduction application state
- * @param {integer} pageIndex: page index to navigate to
- * @returns {Record} modified reduction
- */
 export function rNavigateToPage(reduction, pageIndex) {
     let newReduction = reduction;
     if (!newReduction.getIn(['pagesLoaded', pageIndex])) {
@@ -349,10 +337,6 @@ export function rNavigateToPage(reduction, pageIndex) {
     return newReduction;
 }
 
-export function rUpdateServer(reduction) {
-    return reduction.set('loadingApi', true);
-}
-
 export function rUpdateTime(reduction) {
     if (reduction.getIn(['pages', pageIndexFunds])) {
         const ageText = getFundsCachedValueAgeText(
@@ -369,9 +353,11 @@ export function rUpdateTime(reduction) {
     return reduction;
 }
 
+export function rUpdateServer(reduction) {
+    return reduction.set('loadingApi', true);
+}
+
 export function rHandleServerUpdate(reduction) {
-    return reduction
-        .set('loadingApi', false)
-        .setIn(['edit', 'requestList'], list.of());
+    return reduction.set('loadingApi', false);
 }
 

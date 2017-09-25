@@ -48,7 +48,7 @@ export function resetAppState(state) {
                 loadKey: null,
                 blocks: null,
                 active: null,
-                deep: null
+                deepBlock: null
             }),
             analysis: map({
                 loading: false,
@@ -82,7 +82,12 @@ export function resetAppState(state) {
             fundsCachedValue: map({ ageText: null, value: null }),
             fundHistoryCache: map.of()
         }))
-        .setIn(['loginForm', 'values'], list.of());
+        .set('loginForm', map({
+            inputStep: 0,
+            values: list.of(),
+            visible: false,
+            active: true
+        }));
 }
 
 // the state of the app (reduction) is stored as an immutable object,
@@ -90,12 +95,6 @@ export function resetAppState(state) {
 export default resetAppState(map({
     errorMsg: list.of(),
     loading: false, // for big (disruptive) things like loading pages
-    loadingApi: false, // for small things like edit updates
-    loginForm: map({
-        inputStep: 0,
-        values: list.of(),
-        visible: false,
-        loadedCookie: false
-    })
+    loadingApi: false // for small things like edit updates
 }));
 

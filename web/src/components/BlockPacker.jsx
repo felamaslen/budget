@@ -5,12 +5,7 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import {
-    PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS
-} from '../misc/const';
-
-import { aBlockClicked } from '../actions/AnalysisActions';
-import { aContentBlockHovered } from '../actions/ContentActions';
+import { PAGES } from '../misc/const';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -75,13 +70,13 @@ export class BlockView extends Component {
                 };
 
                 const onClick = () => this.props.onBlockClick({
-                    apiKey: this.props.apiKey,
                     pageIndex,
                     name: block.get('name'),
-                    period: ANALYSIS_PERIODS[this.props.period],
-                    grouping: ANALYSIS_GROUPINGS[this.props.grouping],
-                    timeIndex: this.props.timeIndex
-                }, this.props.deep);
+                    period: this.props.period,
+                    grouping: this.props.grouping,
+                    timeIndex: this.props.timeIndex,
+                    loadDeep: !this.props.deep
+                });
 
                 return <div key={blockKey} className={classes} style={blockStyle}
                     onClick={onClick}>{bits}</div>;
@@ -120,7 +115,6 @@ export class BlockView extends Component {
 }
 
 BlockView.propTypes = {
-    apiKey: PropTypes.string.isRequired,
     blocks: PropTypes.instanceOf(list),
     blockClasses: PropTypes.string,
     active: PropTypes.array,
@@ -135,7 +129,6 @@ BlockView.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    apiKey: state.getIn(['global', 'user', 'apiKey']),
     active: state.getIn(['global', 'other', 'blockView', 'active']),
     blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
     deep: state.getIn(['global', 'other', 'blockView', 'deep']),
@@ -146,10 +139,5 @@ const mapStateToProps = state => ({
     timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex'])
 });
 
-const mapDispatchToProps = dispatch => ({
-    onBlockClick: (block, deep) => dispatch(aBlockClicked(block, deep)),
-    onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered(block, subBlock))
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(BlockView);
+export default connect(mapStateToProps, null)(BlockView);
 

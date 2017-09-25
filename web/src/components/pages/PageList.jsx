@@ -29,17 +29,11 @@ export class PageList extends Component {
     }
     componentDidMount() {
         if (!this.props.loaded) {
-            this.props.loadContent({
-                apiKey: this.props.apiKey,
-                pageIndex: this.props.pageIndex
-            });
+            this.props.loadContent({ pageIndex: this.props.pageIndex });
         }
     }
     addItem() {
-        this.props.addListItem(this.addItems.map(editable => ({
-            item: editable.item,
-            value: editable.value
-        })));
+        this.props.addListItem(this.props.pageIndex);
     }
     listHeadExtra() {
         return null;
@@ -93,7 +87,7 @@ export class PageList extends Component {
                 this.addItems.push(editable);
             };
 
-            return <ListAddEditItem pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
+            return <ListAddEditItem pageIndex={this.props.pageIndex}
                 key={col} ref={ref} row={-1} col={col} id={null}
                 noSuggestions={noSuggestions} />;
         });
@@ -275,7 +269,6 @@ export class PageList extends Component {
 }
 
 PageList.propTypes = {
-    apiKey: PropTypes.string.isRequired,
     pageIndex: PropTypes.number.isRequired,
     loaded: PropTypes.bool.isRequired,
     rows: PropTypes.instanceOf(list),
@@ -294,7 +287,6 @@ PageList.propTypes = {
 function getStateProps(pageIndex, extra) {
     const mapStateToPropsDefault = state => ({
         pageIndex,
-        apiKey: state.getIn(['global', 'user', 'apiKey']),
         loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
         rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
         totalCost: state.getIn(['global', 'pages', pageIndex, 'data', 'total']),
@@ -317,7 +309,7 @@ function getStateProps(pageIndex, extra) {
 
 function getDispatchProps(pageIndex, extra) {
     const mapDispatchToPropsDefault = dispatch => ({
-        addListItem: items => dispatch(aListItemAdded(items)),
+        addListItem: () => dispatch(aListItemAdded(pageIndex)),
         loadContent: req => dispatch(aContentRequested(req)),
         openMobileEditDialog: rowKey => dispatch(
             aMobileEditDialogOpened(pageIndex, rowKey)

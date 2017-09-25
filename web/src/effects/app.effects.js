@@ -7,33 +7,61 @@ import querystring from 'querystring';
 
 import { PAGES, API_PREFIX } from '../misc/const';
 
-import { aErrorOpened } from '../actions/ErrorActions';
-
-import { aServerAddReceived } from '../actions/AppActions';
+import { aServerUpdateReceived, aServerAddReceived } from '../actions/AppActions';
+import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/LoginActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
-export function updateServerData({ apiKey, requestList }) {
-    return axios.patch(
-        `${API_PREFIX}/data/multiple`,
-        { list: requestList },
-        { headers: { 'Authorization': apiKey } }
-    );
+import { openTimedMessage } from './error.effects';
+import { getLoginCredentials, submitLoginForm } from './login.effects';
+
+export async function loadSettings(dispatch) {
+    if (!localStorage || !localStorage.getItem) {
+        console.warn('localStorage not available - settings not saved');
+
+        return;
+    }
+
+    const pin = await getLoginCredentials();
+
+    if (pin) {
+        dispatch(aLoginFormSubmitted(pin));
+
+        submitLoginForm(dispatch, null, pin, false);
+    }
+    else {
+        dispatch(aLoginFormResponseReceived(null));
+    }
 }
 
-export async function addServerData(dispatch, req) {
+export async function updateServerData(dispatch, reduction) {
+    const apiKey = reduction.getIn(['user', 'apiKey']);
+    const requestList = reduction.getIn(['edit', 'requestList'])
+        .map(item => item.get('req'));
+
     try {
-        const response = await axios.post(`${API_PREFIX}/data/${PAGES[req.pageIndex]}`, req.item, {
-            headers: { 'Authorization': req.apiKey }
+        const response = await axios.patch(`${API_PREFIX}/data/multiple`, {
+            list: requestList
+        }, {
+            headers: { 'Authorization': apiKey }
         });
 
-        return dispatch(aServerAddReceived({
-            response,
-            item: req.fields,
-            pageIndex: req.pageIndex
-        }));
+        dispatch(aServerUpdateReceived(response));
     }
     catch (err) {
-        return dispatch(aErrorOpened('Error adding data to server!'));
+        openTimedMessage(dispatch, 'Error updating data on server!');
+    }
+}
+
+export async function addServerData(dispatch, { apiKey, pageIndex, item, fields }) {
+    try {
+        const response = await axios.post(`${API_PREFIX}/data/${PAGES[pageIndex]}`, item, {
+            headers: { 'Authorization': apiKey }
+        });
+
+        dispatch(aServerAddReceived({ response, fields, pageIndex }));
+    }
+    catch (err) {
+        openTimedMessage(dispatch, 'Error adding data to server!');
     }
 }
 
@@ -50,6 +78,7 @@ export async function requestStocksList(dispatch, apiKey) {
     }
 }
 
+// TODO
 export async function requestStockPrices(dispatch, req) {
     const promises = req.symbols.map(symbol => {
         const url = 'https://www.alphavantage.co/query';

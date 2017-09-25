@@ -79,7 +79,6 @@ function getDispatchProps(row, col, id, item, value, getSuggestions) {
 
                 props.requestSuggestions = debounce(
                     processedValue => dispatch(aSuggestionsRequested({
-                        apiKey: ownProps.apiKey,
                         page: PAGES[ownProps.pageIndex],
                         item,
                         value: processedValue

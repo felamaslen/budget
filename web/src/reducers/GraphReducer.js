@@ -3,6 +3,8 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+
+
 import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import {
     getFormattedHistory,
@@ -14,6 +16,8 @@ import {
     processRawListRows
 } from './data/list';
 import { rgba } from '../misc/color';
+
+import { requestFundPeriodData } from '../effects/content.effects';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
@@ -238,19 +242,19 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
         .setIn(['other', 'graphFunds', 'data'], fundHistory);
 }
 
-export function rHandleFundPeriodResponse(reduction, response) {
-    const rows = processRawListRows(response.data.data, pageIndexFunds);
-    const startTime = response.data.startTime;
-    const cacheTimes = list(response.data.cacheTimes);
+export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPeriod, data }) {
+    const rows = processRawListRows(data.data, pageIndexFunds);
+    const startTime = data.startTime;
+    const cacheTimes = list(data.cacheTimes);
 
     const newReduction = changePeriod(
-        reduction, response.shortPeriod, rows, startTime, cacheTimes
+        reduction, shortPeriod, rows, startTime, cacheTimes
     )
-        .setIn(['other', 'fundHistoryCache', response.shortPeriod], map({
+        .setIn(['other', 'fundHistoryCache', shortPeriod], map({
             rows, startTime, cacheTimes
         }));
 
-    if (response.reloadPagePrices) {
+    if (reloadPagePrices) {
         const rowsWithExtraProps = getExtraRowProps(
             rows, startTime, cacheTimes, pageIndexFunds
         );
@@ -267,7 +271,17 @@ export function rHandleFundPeriodResponse(reduction, response) {
     return newReduction;
 }
 
-export function rChangeFundsGraphPeriod(reduction, shortPeriod) {
+export function rChangeFundsGraphPeriod(reduction, { shortPeriod, reloadPagePrices, noCache }) {
+    const loadFromCache = !noCache && reduction
+        .getIn(['global', 'other', 'fundHistoryCache'])
+        .has(shortPeriod);
+
+    if (loadFromCache) {
+        const apiKey = reduction.getIn(['user', 'apiKey']);
+
+        //yield sideEffect(requestFundPeriodData, { apiKey, shortPeriod, reloadPagePrices });
+    }
+
     const theShortPeriod = shortPeriod || reduction.getIn(['other', 'graphFunds', 'period']);
 
     const { rows, startTime, cacheTimes } = getCacheData(reduction, theShortPeriod);

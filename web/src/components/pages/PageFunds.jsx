@@ -54,9 +54,7 @@ class PageFunds extends PageList {
         return { classes, gainPct };
     }
     listHeadExtra() {
-        const reloadFundPrices = () => this.props.reloadFundPrices(
-            this.props.apiKey, this.props.shortPeriod
-        );
+        const reloadFundPrices = () => this.props.reloadFundPrices(this.props.shortPeriod);
 
         const gainInfo = this.getGainInfo();
 
@@ -259,8 +257,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    reloadFundPrices: (apiKey, shortPeriod) => dispatch(aFundsGraphPeriodChanged({
-        apiKey,
+    reloadFundPrices: shortPeriod => dispatch(aFundsGraphPeriodChanged({
         shortPeriod,
         noCache: true,
         reloadPagePrices: true

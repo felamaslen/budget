@@ -9,7 +9,6 @@ import { connect } from 'react-redux';
 import debounce from '../misc/debounce';
 
 import { aServerUpdated, aTimeUpdated } from '../actions/AppActions';
-import { aErrorOpened } from '../actions/ErrorActions';
 
 import { TIMER_UPDATE_SERVER } from '../misc/config';
 
@@ -24,7 +23,7 @@ export class DataSync extends Component {
         if (this.props.requestList.size > 0 &&
             !this.props.requestList.equals(prevProps.requestList)) {
 
-            this.props.updateServer(this.props.apiKey, this.props.requestList);
+            this.props.updateServer();
         }
     }
     render() {
@@ -33,25 +32,17 @@ export class DataSync extends Component {
 }
 
 DataSync.propTypes = {
-    apiKey: PropTypes.string,
     requestList: PropTypes.instanceOf(list).isRequired,
     updateServer: PropTypes.func.isRequired,
-    openError: PropTypes.func.isRequired,
     updateTime: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    apiKey: state.getIn(['global', 'user', 'apiKey']),
-    requestList: state.getIn(['global', 'edit', 'requestList']),
-    serverUpdateStatus: state.getIn(['global', 'edit', 'status'])
+    requestList: state.getIn(['global', 'edit', 'requestList'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    updateServer: debounce(
-        (apiKey, requestList) => dispatch(aServerUpdated(apiKey, requestList)),
-        TIMER_UPDATE_SERVER
-    ),
-    openError: message => dispatch(aErrorOpened(message)),
+    updateServer: debounce(() => dispatch(aServerUpdated()), TIMER_UPDATE_SERVER),
     updateTime: () => dispatch(aTimeUpdated())
 });
 

@@ -24,7 +24,9 @@ export class LoginForm extends Component {
     }
     // input a digit into the form
     input(digit) {
-        this.props.inputDigit(digit);
+        if (this.props.active) {
+            this.props.inputDigit(digit);
+        }
     }
     renderDigit(digit) {
         const btnClass = `btn-digit btn-digit-${digit}`;
@@ -76,7 +78,12 @@ export class LoginForm extends Component {
                 return <div key={key} className={className} />;
             });
 
-        return <div className="login-form">
+        const outerClasses = classNames({
+            'login-form': true,
+            active: this.props.active
+        });
+
+        return <div className={outerClasses}>
             <h3>Enter your PIN:</h3>
             <div className="pin-display">
                 {digitBoxes}
@@ -90,13 +97,16 @@ LoginForm.propTypes = {
     inputStep: PropTypes.number.isRequired,
     pin: PropTypes.string.isRequired,
     visible: PropTypes.bool.isRequired,
+    active: PropTypes.bool.isRequired,
+    inputDigit: PropTypes.func.isRequired,
     tryLogin: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
     inputStep: state.getIn(['global', 'loginForm', 'inputStep']),
     pin: state.getIn(['global', 'loginForm', 'values']).join(''),
-    visible: state.getIn(['global', 'loginForm', 'visible'])
+    visible: state.getIn(['global', 'loginForm', 'visible']),
+    active: state.getIn(['global', 'loginForm', 'active'])
 });
 
 const mapDispatchToProps = dispatch => ({

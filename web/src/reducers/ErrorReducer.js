@@ -3,16 +3,14 @@
  */
 
 export function rErrorMessageOpen(reduction, message) {
-    const errorMsg = reduction.getIn(['errorMsg']);
-
-    const item = message
-        .set('time', new Date().getTime());
-
-    return reduction.setIn(['errorMsg'], errorMsg.push(item));
+    return reduction.set('errorMsg', reduction
+        .get('errorMsg')
+        .push(message)
+    );
 }
 export function rErrorMessageClose(reduction, msgId) {
-    return reduction.setIn(['errorMsg'], reduction
-        .getIn(['errorMsg'])
+    return reduction.set('errorMsg', reduction
+        .get('errorMsg')
         .map(msg => {
             if (msg.get('id') === msgId) {
                 return msg.set('closed', true);
@@ -23,10 +21,9 @@ export function rErrorMessageClose(reduction, msgId) {
     );
 }
 export function rErrorMessageRemove(reduction, msgId) {
-    return reduction.setIn(['errorMsg'], reduction
-        .getIn(['errorMsg'])
+    return reduction.set('errorMsg', reduction
+        .get('errorMsg')
         .filter(msg => msg.get('id') !== msgId)
     );
 }
-
 

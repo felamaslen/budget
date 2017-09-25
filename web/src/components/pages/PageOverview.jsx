@@ -22,10 +22,7 @@ const pageIndex = PAGES.indexOf('overview');
 
 export class PageOverview extends Component {
     componentDidMount() {
-        this.props.loadContent({
-            apiKey: this.props.apiKey,
-            pageIndex
-        });
+        this.props.loadContent({ pageIndex });
     }
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
@@ -178,7 +175,6 @@ export class PageOverview extends Component {
 }
 
 PageOverview.propTypes = {
-    apiKey: PropTypes.string.isRequired,
     data: PropTypes.instanceOf(map),
     active: PropTypes.bool.isRequired,
     editRow: PropTypes.number,
@@ -187,7 +183,6 @@ PageOverview.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    apiKey: state.getIn(['global', 'user', 'apiKey']),
     data: state.getIn(['global', 'pages', pageIndex]),
     active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     editRow: state.getIn(['global', 'edit', 'row']),

@@ -5,17 +5,18 @@
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aContentRequested } from '../../actions/ContentActions';
+import { aContentRequested, aContentBlockHovered } from '../../actions/ContentActions';
+import {
+    aOptionChanged, aBlockClicked,
+    aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered
+} from '../../actions/AnalysisActions';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../misc/const';
 import { formatCurrency, capitalise } from '../../misc/format';
-import {
-    aOptionChanged,
-    aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered
-} from '../../actions/AnalysisActions';
+
 import BlockPacker from '../BlockPacker';
 
 const pageIndex = PAGES.indexOf('analysis');
@@ -23,7 +24,6 @@ const pageIndex = PAGES.indexOf('analysis');
 export class PageAnalysis extends Component {
     componentDidMount() {
         this.props.loadContent({
-            apiKey: this.props.apiKey,
             pageIndex,
             params: [
                 ANALYSIS_PERIODS[this.props.period],
@@ -158,17 +158,17 @@ export class PageAnalysis extends Component {
     }
     changePeriod(periodKey) {
         return this.props.changeOption(
-            this.props.apiKey, periodKey, this.props.grouping, 0
+            periodKey, this.props.grouping, 0
         );
     }
     changeGrouping(groupingKey) {
         return this.props.changeOption(
-            this.props.apiKey, this.props.period, groupingKey, this.props.timeIndex
+            this.props.period, groupingKey, this.props.timeIndex
         );
     }
     changeTimeIndex(delta) {
         return this.props.changeOption(
-            this.props.apiKey, this.props.period, this.props.grouping, this.props.timeIndex + delta
+            this.props.period, this.props.grouping, this.props.timeIndex + delta
         );
     }
     previousPeriod() {
@@ -215,7 +215,8 @@ export class PageAnalysis extends Component {
                 <h3 className="period-title">{this.props.description}</h3>
                 <div className="flexbox">
                     {listTree}
-                    <BlockPacker />
+                    <BlockPacker onBlockClick={this.props.onBlockClick}
+                        onBlockHover={this.props.onBlockHover} />
                 </div>
             </div>
         </div>;
@@ -224,7 +225,6 @@ export class PageAnalysis extends Component {
 
 PageAnalysis.propTypes = {
     active: PropTypes.bool.isRequired,
-    apiKey: PropTypes.string.isRequired,
     period: PropTypes.number.isRequired,
     grouping: PropTypes.number.isRequired,
     cost: PropTypes.instanceOf(list),
@@ -241,11 +241,12 @@ PageAnalysis.propTypes = {
     loadContent: PropTypes.func.isRequired,
     onToggleTreeItem: PropTypes.func.isRequired,
     onHoverTreeItem: PropTypes.func.isRequired,
-    onExpandTreeItem: PropTypes.func.isRequired
+    onExpandTreeItem: PropTypes.func.isRequired,
+    onBlockClick: PropTypes.func.isRequired,
+    onBlockHover: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    apiKey: state.getIn(['global', 'user', 'apiKey']),
     active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
     treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
@@ -254,20 +255,22 @@ const mapStateToProps = state => ({
     timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
     blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
     status: state.getIn(['global', 'other', 'blockView', 'status']),
-    deep: state.getIn(['global', 'other', 'blockView', 'deep']),
+    deepBlock: state.getIn(['global', 'other', 'blockView', 'deepBlock']),
     cost: state.getIn(['global', 'pages', pageIndex, 'cost']),
     costTotal: state.getIn(['global', 'pages', pageIndex, 'costTotal']),
     description: state.getIn(['global', 'pages', pageIndex, 'description'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    changeOption: (apiKey, period, grouping, timeIndex) => dispatch(aOptionChanged(
-        { apiKey, pageIndex, period, grouping, timeIndex }
+    changeOption: (period, grouping, timeIndex) => dispatch(aOptionChanged(
+        { period, grouping, timeIndex, pageIndex }
     )),
     loadContent: req => dispatch(aContentRequested(req)),
     onToggleTreeItem: name => dispatch(aTreeItemDisplayToggled(name)),
     onHoverTreeItem: req => dispatch(aTreeItemHovered(req)),
-    onExpandTreeItem: name => dispatch(aTreeItemExpandToggled(name))
+    onExpandTreeItem: name => dispatch(aTreeItemExpandToggled(name)),
+    onBlockClick: block => dispatch(aBlockClicked(block)),
+    onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered(block, subBlock))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);

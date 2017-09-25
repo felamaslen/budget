@@ -10,67 +10,19 @@ import {
     TIME_UPDATED,
     SERVER_UPDATED,
     SERVER_UPDATE_RECEIVED,
-    SERVER_ADD_RECEIVED,
-    LOGIN_FORM_RESPONSE_GOT
+    SERVER_ADD_RECEIVED
 } from '../constants/actions';
 
-import { aErrorOpened } from '../actions/ErrorActions';
-import { aLoginFormSubmitted } from '../actions/LoginActions';
+import {
+    LOCAL_SETTINGS_REQUESTED, SERVER_UPDATE_REQUESTED
+} from '../constants/effects';
 
-import { updateServerData } from '../effects/app.effects';
-import { getLoginCredentials, saveLoginCredentials } from '../effects/login.effects';
-
-export const aUserLoggedOut = () => {
-    return dispatch => {
-        saveLoginCredentials(null);
-
-        dispatch(buildMessage(USER_LOGGED_OUT));
-    };
-};
-
-export const aSettingsLoaded = () => {
-    return async dispatch => {
-        if (!localStorage || !localStorage.getItem) {
-            console.warn('localStorage not available - settings not saved');
-
-            return;
-        }
-
-        const pin = await getLoginCredentials();
-
-        if (pin) {
-            dispatch(aLoginFormSubmitted(pin));
-        }
-        else {
-            dispatch(buildMessage(LOGIN_FORM_RESPONSE_GOT, null));
-        }
-    };
-};
-
+export const aSettingsLoaded = () => buildMessage(LOCAL_SETTINGS_REQUESTED, null, LOCAL_SETTINGS_REQUESTED);
+export const aUserLoggedOut = () => buildMessage(USER_LOGGED_OUT);
 export const aPageNavigatedTo = page => buildMessage(PAGE_NAVIGATED, page);
-
 export const aKeyPressed = key => buildMessage(KEY_PRESSED, key);
-
 export const aTimeUpdated = () => buildMessage(TIME_UPDATED);
-
-export const aServerUpdated = (apiKey, requestListWithIndex) => {
-    return async dispatch => {
-        dispatch(buildMessage(SERVER_UPDATED));
-
-        const requestList = requestListWithIndex.map(item => item.get('req'));
-
-        if (requestList.size > 0) {
-            try {
-                await updateServerData({ apiKey, requestList });
-            }
-            catch (err) {
-                dispatch(aErrorOpened('Error updating data on server!'));
-            }
-        }
-
-        dispatch(buildMessage(SERVER_UPDATE_RECEIVED));
-    };
-};
-
+export const aServerUpdated = () => buildMessage(SERVER_UPDATED, null, SERVER_UPDATE_REQUESTED);
+export const aServerUpdateReceived = res => buildMessage(SERVER_UPDATE_RECEIVED, res);
 export const aServerAddReceived = response => buildMessage(SERVER_ADD_RECEIVED, response);
 

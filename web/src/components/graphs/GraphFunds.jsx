@@ -327,10 +327,8 @@ export class GraphFunds extends LineGraph {
             : null;
 
         const onChange = evt => this.props.changePeriod({
-            apiKey: this.props.apiKey,
             shortPeriod: evt.target.value,
-            reloadPagePrices: false,
-            fundHistoryCache: this.props.fundHistoryCache
+            reloadPagePrices: false
         });
 
         const periodOptions = GRAPH_FUNDS_PERIODS.map((period, key) => {
@@ -356,7 +354,6 @@ export class GraphFunds extends LineGraph {
 }
 
 GraphFunds.propTypes = {
-    apiKey: PropTypes.string.isRequired,
     fundHistoryCache: PropTypes.instanceOf(map),
     fundItems: PropTypes.instanceOf(list),
     fundLines: PropTypes.instanceOf(list),
@@ -374,7 +371,6 @@ const mapStateToProps = state => ({
     name: 'fund-history',
     width: GRAPH_FUNDS_WIDTH,
     height: GRAPH_FUNDS_HEIGHT,
-    apiKey: state.getIn(['global', 'user', 'apiKey']),
     fundHistoryCache: state.getIn(['global', 'other', 'fundHistoryCache']),
     fundItems: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundItems']),
     fundLines: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundLines']),

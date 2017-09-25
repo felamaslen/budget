@@ -29,8 +29,7 @@ import {
 import {
     rHandleContentResponse,
     rRequestContent,
-    rContentBlockHover,
-    rContentUpdateBlocks
+    rContentBlockHover
 } from './ContentReducer';
 import {
     rAnalysisChangeOption,
@@ -86,14 +85,16 @@ function createReducerObject(array) {
 }
 
 const reducers = createReducerObject([
-    [AC.ERROR_CLOSED, rErrorMessageClose],
-    [AC.ERROR_OPENED, rErrorMessageOpen],
-    [AC.ERROR_REMOVED, rErrorMessageRemove],
-
     // login form actions
     [AC.LOGIN_FORM_INPUTTED, rLoginFormInput],
     [AC.LOGIN_FORM_RESET, rLoginFormReset],
-    [AC.LOGIN_FORM_SUBMITTED, rLoginFormSubmit], [AC.LOGIN_FORM_RESPONSE_GOT, rLoginFormHandleResponse],
+    [AC.LOGIN_FORM_SUBMITTED, rLoginFormSubmit],
+    [AC.LOGIN_FORM_RESPONSE_GOT, rLoginFormHandleResponse],
+
+    // error messages actions
+    [AC.ERROR_CLOSED, rErrorMessageClose],
+    [AC.ERROR_OPENED, rErrorMessageOpen],
+    [AC.ERROR_REMOVED, rErrorMessageRemove],
 
     // app actions
     [AC.USER_LOGGED_OUT, rLogout],
@@ -108,7 +109,6 @@ const reducers = createReducerObject([
     [AC.CONTENT_LOADED, rHandleContentResponse],
     [AC.CONTENT_REQUESTED, rRequestContent],
     [AC.CONTENT_BLOCK_HOVERED, rContentBlockHover],
-    [AC.CONTENT_BLOCKS_RECEIVED, rContentUpdateBlocks],
 
     // analysis actions
     [AC.ANALYSIS_OPTION_CHANGED, rAnalysisChangeOption],

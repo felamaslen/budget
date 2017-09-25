@@ -3,8 +3,8 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import buildMessage from '../messageBuilder';
-import { EF_SERVER_ADD_REQUESTED, EF_SUGGESTIONS_REQUESTED } from '../constants/effects';
+
+
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './data/overview';
 import { getExtraRowProps as reloadFundsRows } from './data/funds';
 import {
@@ -16,9 +16,11 @@ import {
 import { YMD } from '../misc/date';
 import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
-    getValueForTransmit
+    getValueForTransmit, uuid
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
+import { addServerData } from '../effects/app.effects';
+import { requestSuggestions } from '../effects/suggestions.effects';
 
 export function recalculateFundProfits(reduction, pageIndex) {
     const rows = reduction.getIn(['pages', pageIndex, 'rows']);
@@ -213,12 +215,10 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
 }
 
 export function pushToRequestQueue(reduction, dataItem) {
-    const startYearMonth = reduction.getIn(
-        ['pages', PAGES.indexOf('overview'), 'data', 'startYearMonth']
-    ) || null;
+    const startYearMonth = reduction.getIn(['pages', PAGES.indexOf('overview'), 'data', 'startYearMonth']);
 
     const requestList = reduction.getIn(['edit', 'requestList']);
-    const newRequestList = addToRequestQueue(requestList, dataItem, startYearMonth);
+    const newRequestList = addToRequestQueue(requestList, dataItem, startYearMonth || null);
 
     return reduction
         .setIn(['edit', 'requestList'], newRequestList);
@@ -244,7 +244,7 @@ export function rActivateEditable(reduction, editable, cancel) {
         }
         else {
             if (active.get('row') > -1) {
-                // add last item to queue for saving on API
+                // add last update to API queue
                 newReduction = pushToRequestQueue(
                     newReduction, active.set('pageIndex', pageIndex)
                 );
@@ -340,11 +340,7 @@ export function stringifyFields(fields) {
         }, {});
 }
 
-export function rAddListItem(reduction, items) {
-    if (reduction.getIn(['loadingApi'])) {
-        return reduction;
-    }
-
+export function rAddListItem(reduction, pageIndex) {
     // validate items
     const active = reduction.getIn(['edit', 'active']);
     let activeItem = null;
@@ -353,6 +349,13 @@ export function rAddListItem(reduction, items) {
         activeItem = active.get('item');
         activeValue = active.get('value');
     }
+
+    const items = reduction
+        .getIn(['edit', 'add'])
+        .map((value, key) => ({
+            item: LIST_COLS_PAGES[pageIndex][key],
+            value
+        }));
 
     const fields = items.map(({ item, value }) => {
         if (item === activeItem) {
@@ -372,36 +375,28 @@ export function rAddListItem(reduction, items) {
         }));
     }
 
+    const apiKey = reduction.getIn(['user', 'apiKey']);
     const item = stringifyFields(fields);
 
-    const apiKey = reduction.getIn(['user', 'apiKey']);
-    const pageIndex = reduction.getIn(['currentPageIndex']);
-    const req = { apiKey, item, fields, pageIndex };
+    //yield sideEffect(addServerData, { apiKey, pageIndex, item, fields });
 
     return rActivateEditable(reduction, null)
-        .setIn(['edit', 'add'], list.of())
-        .setIn(['loadingApi'], true)
-        .set('effects', reduction
-            .get('effects')
-            .push(buildMessage(EF_SERVER_ADD_REQUESTED, req))
-        );
+        .setIn(['edit', 'add'], list.of());
 }
 
-export function rHandleServerAdd(reduction, response) {
+export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
     // handle the response from adding an item to a list page
     let newReduction = reduction.setIn(['loadingApi'], false);
-    if (response.response.data.error) {
+    if (response.data.error) {
         return rErrorMessageOpen(newReduction, map({
             level: ERROR_LEVEL_ERROR,
             text: `${ERROR_MSG_API_FAILED}: ${response.response.data.errorText}`
         }));
     }
-    const pageIndex = response.pageIndex;
-    const item = response.item;
-    const id = response.response.data.id;
-    const newTotal = response.response.data.total;
+    const id = response.data.id;
+    const newTotal = response.data.total;
 
-    const cols = list(item.map(thisItem => thisItem.get('value')));
+    const cols = list(fields.map(thisItem => thisItem.get('value')));
 
     // update total and push new item to the data store list, then sort by date
     const sortedRows = sortRowsByDate(
@@ -420,8 +415,8 @@ export function rHandleServerAdd(reduction, response) {
 
     // recalculate overview data
     if (reduction.getIn(['pagesLoaded', overviewKey])) {
-        const costItem = item.find(thisItem => thisItem.get('item') === 'cost');
-        const dateItem = item.find(thisItem => thisItem.get('item') === 'date');
+        const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
+        const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
         if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
             return rErrorMessageOpen(newReduction, map({
                 level: ERROR_LEVEL_WARN,
@@ -474,7 +469,12 @@ export function rHandleSuggestions(reduction, res) {
     return newReduction.setIn(['edit', 'suggestions', 'list'], res.items);
 }
 
-export function rRequestSuggestions(reduction, reqId) {
+export function rRequestSuggestions(reduction, req) {
+    const apiKey = reduction.getIn(['user', 'apiKey']);
+    const reqId = uuid();
+
+    //yield sideEffect(requestSuggestions, { apiKey, reqId, ...req });
+
     return reduction
         .setIn(['edit', 'suggestions', 'loading'], true)
         .setIn(['edit', 'suggestions', 'reqId'], reqId);

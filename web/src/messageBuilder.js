@@ -3,7 +3,18 @@
  * with possible side effects
  */
 
-export default (type, payload) => {
+function buildMessage(type, payload) {
     return { type, payload };
+}
+
+export default (type, payload, effect = null) => {
+    if (effect) {
+        return {
+            ...buildMessage(type, payload),
+            effect: buildMessage(effect, payload)
+        };
+    }
+
+    return buildMessage(type, payload);
 };
 

@@ -24,15 +24,13 @@ class ListAddEditItem extends Component {
         });
 
         return <span className={spanClasses}>
-            <Editable pageIndex={this.props.pageIndex} apiKey={this.props.apiKey}
-                noSuggestions={this.props.noSuggestions} />
+            <Editable pageIndex={this.props.pageIndex} noSuggestions={this.props.noSuggestions} />
         </span>;
     }
 }
 
 ListAddEditItem.propTypes = {
     pageIndex: PropTypes.number.isRequired,
-    apiKey: PropTypes.string.isRequired,
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
     id: PropTypes.number,
@@ -45,7 +43,7 @@ ListAddEditItem.propTypes = {
 const mapStateToProps = (state, ownProps) => ({
     value: state.getIn(['global', 'edit', 'add', ownProps.col]),
     active: state.getIn(['global', 'edit', 'row']) === ownProps.row &&
-        state.global.getIn(['edit', 'col']) === ownProps.col,
+        state.getIn(['global', 'edit', 'col']) === ownProps.col,
     item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col]
 });
 
