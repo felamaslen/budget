@@ -41,7 +41,19 @@ export async function requestContent(dispatch, reduction, { pageIndex, params, q
     }
 }
 
-export async function requestFundPeriodData(dispatch, { apiKey, shortPeriod, reloadPagePrices }) {
+export async function requestFundPeriodData(dispatch, reduction, {
+    shortPeriod, reloadPagePrices, noCache
+}) {
+    const loadFromCache = !noCache && reduction
+        .getIn(['other', 'fundHistoryCache'])
+        .has(shortPeriod);
+
+    if (loadFromCache) {
+        return;
+    }
+
+    const apiKey = reduction.getIn(['user', 'apiKey']);
+
     const { period, length } = getPeriodMatch(shortPeriod);
     const query = querystring.stringify({ period, length, history: true });
 
@@ -52,7 +64,7 @@ export async function requestFundPeriodData(dispatch, { apiKey, shortPeriod, rel
 
         const data = response.data.data;
 
-        dispatch(aFundsGraphPeriodReceived, { reloadPagePrices, shortPeriod, data });
+        dispatch(aFundsGraphPeriodReceived({ reloadPagePrices, shortPeriod, data }));
     }
     catch (err) {
         openTimedMessage(dispatch, 'Error loading fund data');

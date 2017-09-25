@@ -17,8 +17,6 @@ import {
 } from './data/list';
 import { rgba } from '../misc/color';
 
-import { requestFundPeriodData } from '../effects/content.effects';
-
 const pageIndexFunds = PAGES.indexOf('funds');
 
 export const rToggleShowAll = reduction => {
@@ -271,15 +269,14 @@ export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPe
     return newReduction;
 }
 
-export function rChangeFundsGraphPeriod(reduction, { shortPeriod, reloadPagePrices, noCache }) {
+export function rChangeFundsGraphPeriod(reduction, { shortPeriod, noCache }) {
     const loadFromCache = !noCache && reduction
-        .getIn(['global', 'other', 'fundHistoryCache'])
+        .getIn(['other', 'fundHistoryCache'])
         .has(shortPeriod);
 
-    if (loadFromCache) {
-        const apiKey = reduction.getIn(['user', 'apiKey']);
-
-        //yield sideEffect(requestFundPeriodData, { apiKey, shortPeriod, reloadPagePrices });
+    if (!loadFromCache) {
+        // the side effect will change the period when the content is loaded
+        return reduction;
     }
 
     const theShortPeriod = shortPeriod || reduction.getIn(['other', 'graphFunds', 'period']);
