@@ -20,7 +20,7 @@ export function getLoginCredentials() {
     });
 }
 
-export function saveLoginCredentials(pin = null) {
+export function saveLoginCredentials(dispatch, reduction, pin = null) {
     if (pin) {
         localStorage.setItem('pin', pin);
     }
@@ -35,7 +35,7 @@ export async function submitLoginForm(dispatch, reduction, pin, saveDetails = tr
 
         // logged in
         if (saveDetails) {
-            await saveLoginCredentials(pin);
+            await saveLoginCredentials(null, null, pin);
         }
 
         dispatch(aLoginFormResponseReceived(response));

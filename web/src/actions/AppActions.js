@@ -14,11 +14,11 @@ import {
 } from '../constants/actions';
 
 import {
-    LOCAL_SETTINGS_REQUESTED, SERVER_UPDATE_REQUESTED
+    LOCAL_SETTINGS_REQUESTED, SERVER_UPDATE_REQUESTED, LOGIN_CREDENTIALS_SAVED
 } from '../constants/effects';
 
 export const aSettingsLoaded = () => buildMessage(LOCAL_SETTINGS_REQUESTED, null, LOCAL_SETTINGS_REQUESTED);
-export const aUserLoggedOut = () => buildMessage(USER_LOGGED_OUT);
+export const aUserLoggedOut = () => buildMessage(USER_LOGGED_OUT, null, LOGIN_CREDENTIALS_SAVED);
 export const aPageNavigatedTo = page => buildMessage(PAGE_NAVIGATED, page);
 export const aKeyPressed = key => buildMessage(KEY_PRESSED, key);
 export const aTimeUpdated = () => buildMessage(TIME_UPDATED);

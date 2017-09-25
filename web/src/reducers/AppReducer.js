@@ -13,9 +13,6 @@ import { getFundsCachedValueAgeText } from './data/funds';
 import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
 import { getNullEditable, getAddDefaultValues } from '../misc/data';
 
-import { loadSettings, updateServerData } from '../effects/app.effects';
-import { saveLoginCredentials } from '../effects/login.effects';
-
 const pageIndexFunds = PAGES.indexOf('funds');
 
 function getItemValue(reduction, pageIndex, row, col) {
@@ -306,8 +303,6 @@ export function rLogout(reduction) {
     if (reduction.getIn(['loading'])) {
         return reduction;
     }
-
-    // yield sideEffect(saveLoginCredentials);
 
     return resetAppState(reduction)
         .setIn(['loginForm', 'visible'], true);
