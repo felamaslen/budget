@@ -80,8 +80,6 @@ export class PageList extends Component {
         );
     }
     renderLiAdd() {
-        const noSuggestions = ['funds'].indexOf(PAGES[this.props.pageIndex]) !== -1;
-
         const addItems = LIST_COLS_PAGES[this.props.pageIndex].map((item, col) => {
             const ref = editable => {
                 this.addItems.push(editable);
@@ -89,7 +87,7 @@ export class PageList extends Component {
 
             return <ListAddEditItem pageIndex={this.props.pageIndex}
                 key={col} ref={ref} row={-1} col={col} id={null}
-                noSuggestions={noSuggestions} />;
+                noSuggestions={this.props.noSuggestions} />;
         });
 
         const addBtnOnClick = () => this.addItem();
@@ -121,7 +119,8 @@ export class PageList extends Component {
         });
 
         return <span key={colKey} className={spanClasses}>
-            <Editable noSuggestions={true} />
+            <Editable noSuggestions={this.props.noSuggestions}
+                pageIndex={this.props.pageIndex} />
         </span>;
     }
     renderListRowItemsMobile(row, rowKey, columns, colKeys) {
@@ -270,6 +269,7 @@ export class PageList extends Component {
 
 PageList.propTypes = {
     pageIndex: PropTypes.number.isRequired,
+    noSuggestions: PropTypes.bool.isRequired,
     loaded: PropTypes.bool.isRequired,
     rows: PropTypes.instanceOf(list),
     totalCost: PropTypes.number,
@@ -287,6 +287,7 @@ PageList.propTypes = {
 function getStateProps(pageIndex, extra) {
     const mapStateToPropsDefault = state => ({
         pageIndex,
+        noSuggestions: ['funds'].indexOf(PAGES[pageIndex]) !== -1,
         loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
         rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
         totalCost: state.getIn(['global', 'pages', pageIndex, 'data', 'total']),

@@ -5,7 +5,12 @@ import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
 
 import { aSuggestionsReceived } from '../actions/EditActions';
 
-export async function requestSuggestions(dispatch, { apiKey, page, item, value, reqId }) {
+export async function requestSuggestions(dispatch, reduction, { reqId, page, item, value }) {
+    if (!value.length) {
+        dispatch(aSuggestionsReceived({ items: null }));
+    }
+
+    const apiKey = reduction.getIn(['user', 'apiKey']);
     const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
 
     try {

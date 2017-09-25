@@ -16,7 +16,7 @@ import {
 import { YMD } from '../misc/date';
 import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
-    getValueForTransmit, uuid
+    getValueForTransmit
 } from '../misc/data';
 import { rErrorMessageOpen } from './ErrorReducer';
 import { addServerData } from '../effects/app.effects';
@@ -454,27 +454,22 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
         .setIn(['edit', 'addBtnFocus'], false);
 }
 
-export function rHandleSuggestions(reduction, res) {
+export function rHandleSuggestions(reduction, { items, reqId }) {
     const newReduction = reduction
         .setIn(['edit', 'suggestions', 'loading'], false)
         .setIn(['edit', 'suggestions', 'active'], -1);
 
-    if (!res || reduction.getIn(['edit', 'suggestions', 'reqId']) !== res.reqId) {
+    if (!items || reduction.getIn(['edit', 'suggestions', 'reqId']) !== reqId) {
         // null object (clear), or changed input while suggestions were loading
         return newReduction
             .setIn(['edit', 'suggestions', 'list'], list.of())
             .setIn(['edit', 'suggestions', 'reqId'], null);
     }
 
-    return newReduction.setIn(['edit', 'suggestions', 'list'], res.items);
+    return newReduction.setIn(['edit', 'suggestions', 'list'], items);
 }
 
-export function rRequestSuggestions(reduction, req) {
-    const apiKey = reduction.getIn(['user', 'apiKey']);
-    const reqId = uuid();
-
-    //yield sideEffect(requestSuggestions, { apiKey, reqId, ...req });
-
+export function rRequestSuggestions(reduction, { reqId }) {
     return reduction
         .setIn(['edit', 'suggestions', 'loading'], true)
         .setIn(['edit', 'suggestions', 'reqId'], reqId);

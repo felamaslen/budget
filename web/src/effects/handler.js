@@ -3,8 +3,9 @@ import * as EF from '../constants/effects';
 import { loadSettings, updateServerData, addServerData } from './app.effects';
 import { submitLoginForm, saveLoginCredentials } from './login.effects';
 import {
-    requestContent, requestSuggestions, requestAnalysisData, requestFundPeriodData
+    requestContent, requestAnalysisData, requestFundPeriodData
 } from './content.effects';
+import { requestSuggestions } from './suggestions.effects';
 
 function createEffectHandler(effects) {
     return effects.reduce((obj, item) => {
