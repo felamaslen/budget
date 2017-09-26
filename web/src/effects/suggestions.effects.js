@@ -8,6 +8,8 @@ import { aSuggestionsReceived } from '../actions/EditActions';
 export async function requestSuggestions(dispatch, reduction, { reqId, page, item, value }) {
     if (!value.length) {
         dispatch(aSuggestionsReceived({ items: null }));
+
+        return;
     }
 
     const apiKey = reduction.getIn(['user', 'apiKey']);
