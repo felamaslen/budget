@@ -32,6 +32,13 @@ export class PageList extends Component {
             this.props.loadContent({ pageIndex: this.props.pageIndex });
         }
     }
+    shouldComponentUpdate(nextProps) {
+        if (nextProps.loaded && !this.props.loaded) {
+            return true;
+        }
+
+        return false;
+    }
     addItem() {
         this.props.addListItem(this.props.pageIndex);
     }

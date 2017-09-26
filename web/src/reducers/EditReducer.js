@@ -77,13 +77,13 @@ function applyEditsList(reduction, item, pageIndex) {
         return reduction.setIn(['edit', 'add', item.get('col')], item.get('value'));
     }
 
-    // update row
-    const newRow = reduction.getIn(
-        ['pages', pageIndex, 'rows', item.get('row')])
-        .setIn(['cols', item.get('col')], item.get('value'));
+    let newReduction = reduction;
 
-    let newReduction = reduction.setIn(
-        ['pages', pageIndex, 'rows', item.get('row')], newRow);
+    // update row
+    newReduction = newReduction.setIn(
+        ['pages', pageIndex, 'rows', item.get('row'), 'cols', item.get('col')],
+        item.get('value')
+    );
 
     // recalculate total if the cost has changed
     if (item.get('item') === 'cost') {

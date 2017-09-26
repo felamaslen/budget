@@ -33,23 +33,24 @@ function getEditableComponent(item) {
     return EditableText;
 }
 
-function getStateProps(row, col, id, item, value, getSuggestions) {
-    let theValue = value;
-    if (item === 'cost' && !value) {
-        theValue = 0;
-    }
-
-    return state => {
+function getStateProps(row, col, id, item, defaultValue, getSuggestions) {
+    return (state, ownProps) => {
         const activeEditable = state.getIn(['global', 'edit', 'active']);
         const active = activeEditable.get('row') === row &&
             activeEditable.get('col') === col;
+
+        const value = row === -1
+            ? defaultValue
+            : state.getIn(
+                ['global', 'pages', ownProps.pageIndex, 'rows', row, 'cols', col]
+            );
 
         const props = {
             row,
             col,
             id,
             item,
-            value: theValue,
+            value,
             active
         };
 

@@ -2,7 +2,7 @@
  * Overview page component
  */
 
-import { Map as map } from 'immutable';
+import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
 import { aContentRequested } from '../../actions/ContentActions';
@@ -52,7 +52,7 @@ export class PageOverview extends Component {
                 value: cell.get('value')
             });
 
-            return <Editable />;
+            return <Editable pageIndex={pageIndex} />;
         }
 
         const value = cellKey > 0
@@ -89,7 +89,7 @@ export class PageOverview extends Component {
             });
     }
     renderRows(numToSkip) {
-        const rows = this.props.data.get('rows')
+        const rows = this.props.rows
             .slice(numToSkip)
             .map((row, key) => {
                 const rowKey = key + numToSkip;
@@ -125,13 +125,11 @@ export class PageOverview extends Component {
             return null;
         }
 
-        return (
-            <div className="table-flex table-insert table-overview noselect">
-                {this.renderHeader()}
-                <Media query={mediaQueries.mobile}>{mobileRows}</Media>
-                <Media query={mediaQueries.desktop}>{desktopRows}</Media>
-            </div>
-        );
+        return <div className="table-flex table-insert table-overview noselect">
+            {this.renderHeader()}
+            <Media query={mediaQueries.mobile}>{mobileRows}</Media>
+            <Media query={mediaQueries.desktop}>{desktopRows}</Media>
+        </div>;
     }
     renderGraphBalance(render) {
         if (!render) {
@@ -148,19 +146,17 @@ export class PageOverview extends Component {
         return <GraphSpend name="spend" />;
     }
     renderGraphs() {
-        return (
-            <div className="graph-container-outer">
-                <Media query={mediaQueries.mobile}>
-                    {matches => this.renderGraphBalance(matches)}
-                </Media>
-                <Media query={mediaQueries.desktop}>
-                    {matches => this.renderGraphBalance(matches)}
-                </Media>
-                <Media query={mediaQueries.desktop}>
-                    {matches => this.renderGraphSpend(matches)}
-                </Media>
-            </div>
-        );
+        return <div className="graph-container-outer">
+            <Media query={mediaQueries.mobile}>
+                {matches => this.renderGraphBalance(matches)}
+            </Media>
+            <Media query={mediaQueries.desktop}>
+                {matches => this.renderGraphBalance(matches)}
+            </Media>
+            <Media query={mediaQueries.desktop}>
+                {matches => this.renderGraphSpend(matches)}
+            </Media>
+        </div>;
     }
     render() {
         if (!this.props.active) {
@@ -175,7 +171,7 @@ export class PageOverview extends Component {
 }
 
 PageOverview.propTypes = {
-    data: PropTypes.instanceOf(map),
+    rows: PropTypes.instanceOf(list),
     active: PropTypes.bool.isRequired,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
@@ -183,7 +179,7 @@ PageOverview.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    data: state.getIn(['global', 'pages', pageIndex]),
+    rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
     active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     editRow: state.getIn(['global', 'edit', 'row']),
     editCol: state.getIn(['global', 'edit', 'col'])

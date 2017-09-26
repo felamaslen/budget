@@ -233,35 +233,49 @@ export function rGetOverviewRows(data) {
     const categoryColor = getOverviewCategoryColor();
 
     // translate the data into table cells for display in the view
-    const rows = tableData.get(0).map((monthText, key) => {
-        const yearMonth = getYearMonthFromKey(
-            key, data.get('startYearMonth')[0], data.get('startYearMonth')[1]);
+    const rows = tableData
+        .get(0)
+        .map((monthText, key) => {
+            const yearMonth = getYearMonthFromKey(
+                key, data.get('startYearMonth')[0], data.get('startYearMonth')[1]);
 
-        const past = yearMonth[0] < currentYear ||
-            (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
-        const active = yearMonth[0] === currentYear && yearMonth[1] === currentMonth;
-        const future = !past && !active;
+            const past = yearMonth[0] < currentYear ||
+                (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
+            const active = yearMonth[0] === currentYear && yearMonth[1] === currentMonth;
+            const future = !past && !active;
 
-        const cells = list(OVERVIEW_COLUMNS).map((column, colKey) => {
-            const value = tableData.getIn([colKey, key]);
-            let rgb = null;
-            if (colKey > 0 && categoryColor[colKey - 1]) {
-                rgb = getOverviewScoreColor(
-                    value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]
-                );
-            }
-            const editable = column[0] === 'balance';
+            let cols = null;
 
-            return map({
-                column: list(column),
-                value,
-                rgb,
-                editable
-            });
+            const cells = list(OVERVIEW_COLUMNS)
+                .map((column, colKey) => {
+                    const value = tableData.getIn([colKey, key]);
+                    let rgb = null;
+                    if (colKey > 0 && categoryColor[colKey - 1]) {
+                        rgb = getOverviewScoreColor(
+                            value,
+                            valueRange[colKey - 1],
+                            median[colKey - 1],
+                            categoryColor[colKey - 1]
+                        );
+                    }
+
+                    const editable = column[0] === 'balance';
+
+                    if (editable) {
+                        // for use with editables
+                        cols = list([value]);
+                    }
+
+                    return map({
+                        column: list(column),
+                        value,
+                        rgb,
+                        editable
+                    });
+                });
+
+            return map({ cols, cells, past, active, future });
         });
-
-        return map({ cells, past, active, future });
-    });
 
     return rows;
 }
