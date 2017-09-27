@@ -340,59 +340,32 @@ export function stringifyFields(fields) {
         }, {});
 }
 
-export function rAddListItem(reduction, pageIndex) {
-    // validate items
-    const active = reduction.getIn(['edit', 'active']);
-    let activeItem = null;
-    let activeValue = null;
-    if (active && active.get('row') === -1) {
-        activeItem = active.get('item');
-        activeValue = active.get('value');
+export function rAddListItem(reduction, { pageIndex, sending }) {
+    if (sending) {
+        const now = new YMD();
+
+        return rActivateEditable(reduction, null)
+            .setIn(['edit', 'add'], getAddDefaultValues(pageIndex))
+            .setIn(['edit', 'active'], map({
+                row: -1,
+                col: 0,
+                pageIndex,
+                id: null,
+                item: 'date',
+                value: now,
+                originalValue: now
+            }))
+            .setIn(['edit', 'addBtnFocus'], false)
+            .set('loadingApi', true);
     }
 
-    const items = reduction
-        .getIn(['edit', 'add'])
-        .map((value, key) => ({
-            item: LIST_COLS_PAGES[pageIndex][key],
-            value
-        }));
-
-    const fields = items.map(({ item, value }) => {
-        if (item === activeItem) {
-            return map({ item, value: activeValue });
-        }
-
-        return map({ item, value });
-    });
-
-    const invalidKeys = getInvalidInsertDataKeys(fields);
-    const valid = invalidKeys.size === 0;
-
-    if (!valid) {
-        return rErrorMessageOpen(reduction, map({
-            level: ERROR_LEVEL_WARN,
-            text: ERROR_MSG_BAD_DATA
-        }));
-    }
-
-    const apiKey = reduction.getIn(['user', 'apiKey']);
-    const item = stringifyFields(fields);
-
-    //yield sideEffect(addServerData, { apiKey, pageIndex, item, fields });
-
-    return rActivateEditable(reduction, null)
-        .setIn(['edit', 'add'], list.of());
+    return reduction;
 }
 
 export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
     // handle the response from adding an item to a list page
-    let newReduction = reduction.setIn(['loadingApi'], false);
-    if (response.data.error) {
-        return rErrorMessageOpen(newReduction, map({
-            level: ERROR_LEVEL_ERROR,
-            text: `${ERROR_MSG_API_FAILED}: ${response.response.data.errorText}`
-        }));
-    }
+    let newReduction = reduction.set('loadingApi', false);
+
     const id = response.data.id;
     const newTotal = response.data.total;
 
@@ -400,9 +373,17 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
 
     // update total and push new item to the data store list, then sort by date
     const sortedRows = sortRowsByDate(
-        reduction.getIn(['pages', pageIndex, 'rows']).push(map({ id, cols })), pageIndex);
+        reduction
+            .getIn(['pages', pageIndex, 'rows'])
+            .push(map({ id, cols })),
+        pageIndex
+    );
+
     const weeklyData = addWeeklyAverages(
-        reduction.getIn(['pages', pageIndex, 'data']), sortedRows, pageIndex);
+        reduction.getIn(['pages', pageIndex, 'data']),
+        sortedRows,
+        pageIndex
+    );
 
     newReduction = newReduction
         .setIn(['pages', pageIndex, 'rows'], sortedRows)
@@ -433,25 +414,7 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
         );
     }
 
-    if (reduction.getIn(['currentPageIndex']) !== pageIndex) {
-        return newReduction;
-    }
-
-    // go back to the add form to add a new item
-    const now = new YMD();
-
-    return newReduction
-        .setIn(['edit', 'add'], getAddDefaultValues(pageIndex))
-        .setIn(['edit', 'active'], map({
-            row: -1,
-            col: 0,
-            pageIndex,
-            id: null,
-            item: 'date',
-            value: now,
-            originalValue: now
-        }))
-        .setIn(['edit', 'addBtnFocus'], false);
+    return newReduction;
 }
 
 export function rHandleSuggestions(reduction, { items, reqId }) {

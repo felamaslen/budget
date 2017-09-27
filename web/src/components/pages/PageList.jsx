@@ -27,9 +27,6 @@ export class PageList extends Component {
 
         this.addItems = [];
     }
-    addItem() {
-        this.props.addListItem(this.props.pageIndex);
-    }
     listHeadExtra() {
         return null;
     }
@@ -85,7 +82,7 @@ export class PageList extends Component {
                 noSuggestions={this.props.noSuggestions} />;
         });
 
-        const addBtnOnClick = () => this.addItem();
+        const addBtnOnClick = () => this.props.addListItem();
         const addBtnRef = input => {
             this.addBtn = input;
         };
@@ -234,7 +231,6 @@ export class PageList extends Component {
         }
     }
     shouldComponentUpdate(nextProps) {
-        const pageLoaded = !this.props.loaded && nextProps.loaded;
         const addBtnFocus = !this.props.addBtnFocus && nextProps.addBtnFocus;
 
         if (addBtnFocus && this.addBtn) {
@@ -243,7 +239,11 @@ export class PageList extends Component {
             return false;
         }
 
-        return pageLoaded;
+        const pageLoaded = !this.props.loaded && nextProps.loaded;
+        const rowAddedOrRemoved = this.props.rows && nextProps.rows &&
+            this.props.rows.size !== nextProps.rows.size;
+
+        return pageLoaded || rowAddedOrRemoved;
     }
     render() {
         if (!this.props.loaded) {
@@ -313,7 +313,7 @@ function getStateProps(pageIndex, extra) {
 
 function getDispatchProps(pageIndex, extra) {
     const mapDispatchToPropsDefault = dispatch => ({
-        addListItem: () => dispatch(aListItemAdded(pageIndex)),
+        addListItem: () => dispatch(aListItemAdded({ pageIndex })),
         loadContent: req => dispatch(aContentRequested(req)),
         openMobileEditDialog: rowKey => dispatch(
             aMobileEditDialogOpened(pageIndex, rowKey)

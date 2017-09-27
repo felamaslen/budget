@@ -2,14 +2,22 @@
  * Define side effects here (e.g. API calls)
  */
 
+import { Map as map } from 'immutable';
 import axios from 'axios';
 import querystring from 'querystring';
 
-import { PAGES, API_PREFIX } from '../misc/const';
+import {
+    PAGES, API_PREFIX, LIST_COLS_PAGES,
+    ERROR_LEVEL_WARN
+} from '../misc/const';
+import { ERROR_MSG_BAD_DATA } from '../misc/config';
 
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/AppActions';
 import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/LoginActions';
+import { aListItemAdded } from '../actions/EditActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
+
+import { getInvalidInsertDataKeys, stringifyFields } from '../reducers/EditReducer';
 
 import { openTimedMessage } from './error.effects';
 import { getLoginCredentials, submitLoginForm } from './login.effects';
@@ -52,7 +60,59 @@ export async function updateServerData(dispatch, reduction) {
     }
 }
 
-export async function addServerData(dispatch, { apiKey, pageIndex, item, fields }) {
+export async function addServerData(dispatch, reduction, { pageIndex, sending }) {
+    if (sending) {
+        return;
+    }
+
+    if (reduction.get('loadingApi')) {
+        openTimedMessage(
+            dispatch, 'Wait until the previous request has finished', ERROR_LEVEL_WARN
+        );
+
+        return;
+    }
+
+    const apiKey = reduction.getIn(['user', 'apiKey']);
+
+    // validate items
+    const active = reduction.getIn(['edit', 'active']);
+    let activeItem = null;
+    let activeValue = null;
+    if (active && active.get('row') === -1) {
+        activeItem = active.get('item');
+        activeValue = active.get('value');
+    }
+
+    const items = reduction
+        .getIn(['edit', 'add'])
+        .map((value, key) => ({
+            item: LIST_COLS_PAGES[pageIndex][key],
+            value
+        }));
+
+    const fields = items.map(({ item, value }) => {
+        if (item === activeItem) {
+            return map({ item, value: activeValue });
+        }
+
+        return map({ item, value });
+    });
+
+    const invalidKeys = getInvalidInsertDataKeys(fields);
+    const valid = invalidKeys.size === 0;
+
+    if (!valid) {
+        openTimedMessage(dispatch, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN);
+
+        return;
+    }
+
+    // data is validated
+    const item = stringifyFields(fields);
+
+    dispatch(aListItemAdded({ pageIndex, sending: true }));
+
     try {
         const response = await axios.post(`${API_PREFIX}/data/${PAGES[pageIndex]}`, item, {
             headers: { 'Authorization': apiKey }

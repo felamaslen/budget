@@ -12,13 +12,15 @@ import {
     EDIT_SUGGESTIONS_REQUESTED, EDIT_SUGGESTIONS_RECEIVED
 } from '../constants/actions';
 
-import { SUGGESTIONS_REQUESTED } from '../constants/effects';
+import { SUGGESTIONS_REQUESTED, SERVER_ADD_REQUESTED } from '../constants/effects';
 
 import { uuid } from '../misc/data';
 
 export const aEditableActivated = editable => buildMessage(EDIT_ACTIVATED, editable);
 export const aEditableChanged = value => buildMessage(EDIT_CHANGED, value);
-export const aListItemAdded = pageIndex => buildMessage(EDIT_LIST_ITEM_ADDED, pageIndex);
+export const aListItemAdded = pageIndex => buildMessage(
+    EDIT_LIST_ITEM_ADDED, pageIndex, SERVER_ADD_REQUESTED
+);
 export const aListItemDeleted = item => buildMessage(EDIT_LIST_ITEM_DELETED, item);
 export const aSuggestionsRequested = req => buildMessage(
     EDIT_SUGGESTIONS_REQUESTED,

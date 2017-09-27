@@ -146,8 +146,8 @@ function handleNav(reduction, direction, cancel) {
     }
 
     const { dx, dy } = direction;
-
     const pageIndex = reduction.getIn(['currentPageIndex']);
+
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
     const { numRows, numCols } = getNumRowsCols(reduction, pageIndex, pageIsList);
     const editing = reduction.getIn(['edit', 'active']);
@@ -251,6 +251,12 @@ function handleKeyPressLoggedIn(reduction, evt) {
 
     if (haveSuggestions && navigateSuggestions) {
         return handleNavInSuggestions(reduction, suggestions, { dx, dy });
+    }
+
+    const addBtn = reduction.getIn(['edit', 'addBtnFocus']);
+    if (addBtn && enter) {
+        // this is handled by the button
+        return reduction;
     }
 
     const navigateFromField = navigated && (evt.ctrl || evt.key === 'Tab');
