@@ -27,18 +27,6 @@ export class PageList extends Component {
 
         this.addItems = [];
     }
-    componentDidMount() {
-        if (!this.props.loaded) {
-            this.props.loadContent({ pageIndex: this.props.pageIndex });
-        }
-    }
-    shouldComponentUpdate(nextProps) {
-        if (nextProps.loaded && !this.props.loaded) {
-            return true;
-        }
-
-        return false;
-    }
     addItem() {
         this.props.addListItem(this.props.pageIndex);
     }
@@ -98,10 +86,8 @@ export class PageList extends Component {
         });
 
         const addBtnOnClick = () => this.addItem();
-        const addBtnRef = () => {
-            return btn => {
-                this.addBtn = btn;
-            };
+        const addBtnRef = () => btn => {
+            this.addBtn = btn;
         };
 
         return <li className="li-add">
@@ -239,15 +225,25 @@ export class PageList extends Component {
             <Media query={mediaQueries.desktop}>{render => this.renderListDesktop(render)}</Media>
         </div>;
     }
-    componentDidUpdate(prevProps) {
-        if (!prevProps.addBtnFocus && this.props.addBtnFocus && this.addBtn) {
-            window.setTimeout(() => {
-                this.addBtn.focus();
-            }, 0);
-        }
-    }
     afterList() {
         return null;
+    }
+    componentDidMount() {
+        if (!this.props.loaded) {
+            this.props.loadContent({ pageIndex: this.props.pageIndex });
+        }
+    }
+    shouldComponentUpdate(nextProps) {
+        const pageLoaded = !this.props.loaded && nextProps.loaded;
+        const addBtnFocus = !this.props.addBtnFocus && nextProps.addBtnFocus;
+
+        if (addBtnFocus && this.addBtn) {
+            this.addBtn.focus();
+
+            return false;
+        }
+
+        return pageLoaded;
     }
     render() {
         if (!this.props.loaded) {

@@ -37,51 +37,50 @@ function getItemValue(reduction, pageIndex, row, col) {
     return { id, item, value };
 }
 
-/**
- * Handle suggestions navigation
- * @param {Record} reduction application state
- * @param {integer} direction direction
- * @param {map} suggestions suggestions object
- * @returns {Record} modified reduction
- */
 function handleSuggestionsNav(reduction, direction, suggestions) {
     const newActive = ((suggestions.get('active') + 1 + direction) %
                      (suggestions.get('list').size + 1)) - 1;
 
-    return reduction.setIn(['edit', 'suggestions', 'active'], newActive);
+    return reduction.setIn(['editSuggestions', 'active'], newActive);
 }
 
-export function getNavRow(
-    dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
-) {
-    const listOffset = pageIsList
-        ? -1
-        : 0;
-
-    if (addBtnFocus) {
+export function getNavRow({
+    dx, dy, numRows, numCols, currentRow, currentCol, addBtnFocus, pageIsList
+}) {
+    if (pageIsList && addBtnFocus) {
         // navigate from the add button
         if (dy < 0) {
-            return numRows + listOffset - 1;
+            return numRows - 2;
         }
 
         if (dx > 0) {
-            return listOffset + 1;
+            return 0;
         }
     }
 
-    if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
+    if (currentCol === -1 && currentRow === 0 && (dx < 0 || dy < 0)) {
         // go to the end if navigating backwards
-        return numRows + listOffset - 1;
+        if (pageIsList) {
+            return numRows - 2;
+        }
+
+        return numRows - 1;
     }
 
-    return listOffset + ((currentRow + dy + Math.floor(
-        (currentCol + dx) / numCols
-    ) + numRows) % numRows);
+    const rowsJumped = Math.floor((currentCol + dx) / numCols);
+
+    const newRow = (currentRow + dy + rowsJumped + numRows) % numRows
+
+    if (pageIsList) {
+        return newRow - 1;
+    }
+
+    return newRow;
 }
 
-export function getNavCol(
-    dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus
-) {
+export function getNavCol({
+    dx, dy, numCols, currentRow, currentCol, addBtnFocus
+}) {
     if (addBtnFocus) {
         // navigate from the add button
         if (dx > 0) {
@@ -91,24 +90,24 @@ export function getNavCol(
         return numCols - 1;
     }
 
-    if (currentCol === -1 && currentRow <= 0 && (dx < 0 || dy < 0)) {
+    if (currentCol === -1 && currentRow === 0 && (dx < 0 || dy < 0)) {
         // go to the end if navigating backwards
         return numCols - 1;
     }
 
-    return (editing.get('col') + dx + numCols) % numCols;
+    return (currentCol + dx + numCols) % numCols;
 }
 
-export function getNavRowCol(
-    dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
-) {
-    const row = getNavRow(
-        dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
-    );
+export function getNavRowCol({
+    dx, dy, numRows, numCols, currentRow, currentCol, addBtnFocus, pageIsList
+}) {
+    const row = getNavRow({
+        dx, dy, numRows, numCols, currentRow, currentCol, addBtnFocus, pageIsList
+    });
 
-    const col = getNavCol(
-        dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus
-    );
+    const col = getNavCol({
+        dx, dy, numCols, currentRow, currentCol, addBtnFocus
+    });
 
     return { row, col };
 }
@@ -125,7 +124,7 @@ function getNumRowsCols(reduction, pageIndex, pageIsList) {
     return { numRows, numCols };
 }
 
-function getCurrentRowCol(editing, pageIsList) {
+export function getCurrentRowCol(editing, pageIsList = false) {
     let currentRow = editing.get('row');
     const currentCol = editing.get('col');
 
@@ -137,18 +136,12 @@ function getCurrentRowCol(editing, pageIsList) {
     return { currentRow, currentCol };
 }
 
-/**
- * Handle navigation
- * @param {Record} reduction application state
- * @param {integer} dx x direction
- * @param {integer} dy y direction
- * @param {boolean} cancel clear any changes
- * @returns {Record} modified reduction
- */
-function handleNav(reduction, dx, dy, cancel) {
-    if (dx === null) {
+function handleNav(reduction, direction, cancel) {
+    if (!direction) {
         return rActivateEditable(reduction, null, cancel);
     }
+
+    const { dx, dy } = direction;
 
     const pageIndex = reduction.getIn(['currentPageIndex']);
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
@@ -161,16 +154,17 @@ function handleNav(reduction, dx, dy, cancel) {
 
     const { currentRow, currentCol } = getCurrentRowCol(editing, pageIsList);
 
-    if (pageIsList && currentRow === 0 && currentCol === numCols - 1 && dx > 0) {
-        // highlight add button
+    const navigateToAddButton = currentRow === 0 && currentCol === numCols - 1 && dx > 0;
+
+    if (pageIsList && navigateToAddButton) {
         return rActivateEditable(reduction, null)
             .setIn(['edit', 'addBtnFocus'], true);
     }
 
     const addBtnFocus = reduction.getIn(['edit', 'addBtnFocus']);
-    const { row, col } = getNavRowCol(
-        dx, dy, numRows, numCols, currentRow, currentCol, editing, addBtnFocus, pageIsList
-    );
+    const { row, col } = getNavRowCol({
+        dx, dy, numRows, numCols, currentRow, currentCol, addBtnFocus, pageIsList
+    });
 
     const itemValue = getItemValue(reduction, pageIndex, row, col);
     const id = itemValue.id;
@@ -182,40 +176,32 @@ function handleNav(reduction, dx, dy, cancel) {
     );
 }
 
-/**
- * get x, y directions given a keypress (e.g. arrowRight -> [1, 0])
- * @param {string} key: event key
- * @param {boolean} shift: shift key was pressed
- * @returns {array} direction to navigate
- */
 function getNavDirection(key, shift) {
     if (key === 'Tab') {
-        const dx = shift
-            ? -1
-            : 1;
+        if (shift) {
+            return { dx: -1, dy: 0 };
+        }
 
-        const dy = 0;
-
-        return [dx, dy];
+        return { dx: 1, dy: 0 };
     }
 
     const arrows = ['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'];
     const arrowIndex = arrows.indexOf(key);
     if (arrowIndex > -1) {
-        return [
-            ((arrowIndex % 4) - 1) % 2,
-            (((arrowIndex - 1) % 4) - 1) % 2
-        ];
+        return {
+            dx: ((arrowIndex % 4) - 1) % 2,
+            dy: (((arrowIndex - 1) % 4) - 1) % 2
+        };
     }
 
-    return [0, 0];
+    return { dx: 0, dy: 0 };
 }
 
 function handleNavFromSuggestions(reduction, suggestions, escape, enter) {
     if (escape) {
         return reduction
-            .setIn(['edit', 'suggestions', 'list'], list.of())
-            .setIn(['edit', 'suggestions', 'active'], -1);
+            .setIn(['editSuggestions', 'list'], list.of())
+            .setIn(['editSuggestions', 'active'], -1);
     }
 
     if (enter) {
@@ -227,28 +213,28 @@ function handleNavFromSuggestions(reduction, suggestions, escape, enter) {
 
         // navigate to the next field after filling the current one with
         // the suggestion value
-        return handleNav(reductionWithSuggestionValue, 1, 0);
+        return handleNav(reductionWithSuggestionValue, { dx: 1, dy: 0 });
     }
 
     return reduction;
 }
 
-function handleNavInSuggestions(reduction, suggestions, direction) {
-    if (direction[1] === 0) {
-        return handleSuggestionsNav(reduction, direction[0], suggestions);
+function handleNavInSuggestions(reduction, suggestions, { dx, dy }) {
+    if (dy === 0) {
+        return handleSuggestionsNav(reduction, dx, suggestions);
     }
 
-    return handleSuggestionsNav(reduction, direction[1], suggestions);
+    return handleSuggestionsNav(reduction, dy, suggestions);
 }
 
 function handleKeyPressLoggedIn(reduction, evt) {
-    const direction = getNavDirection(evt.key, evt.shift);
-    const navigated = direction[0] !== 0 || direction[1] !== 0;
+    const { dx, dy } = getNavDirection(evt.key, evt.shift);
+    const navigated = dx !== 0 || dy !== 0;
 
     const escape = evt.key === 'Escape';
     const enter = evt.key === 'Enter';
 
-    const suggestions = reduction.getIn(['edit', 'suggestions']);
+    const suggestions = reduction.getIn(['editSuggestions']);
     const haveSuggestions = suggestions.get('list').size > 0;
     const suggestionActive = suggestions.get('active') > -1;
 
@@ -260,17 +246,17 @@ function handleKeyPressLoggedIn(reduction, evt) {
     }
 
     if (haveSuggestions && navigateSuggestions) {
-        return handleNavInSuggestions(reduction, suggestions, direction);
+        return handleNavInSuggestions(reduction, suggestions, { dx, dy });
     }
 
     const navigateFromField = navigated && (evt.ctrl || evt.key === 'Tab');
 
     if (navigateFromField) {
-        return handleNav(reduction, direction[0], direction[1]);
+        return handleNav(reduction, { dx, dy });
     }
 
     if (escape) {
-        return handleNav(reduction, null, null, true);
+        return handleNav(reduction, null, true);
     }
 
     if (enter) {

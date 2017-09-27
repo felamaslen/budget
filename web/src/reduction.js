@@ -25,13 +25,13 @@ export function resetAppState(state) {
             addBtnFocus: false,
             queue: list.of(),
             queueDelete: list.of(),
-            requestList: list.of(),
-            suggestions: map({
-                loading: false,
-                reqId: null,
-                list: list.of(),
-                active: -1
-            })
+            requestList: list.of()
+        }))
+        .set('editSuggestions', map({
+            loading: false,
+            reqId: null,
+            list: list.of(),
+            active: -1
         }))
         .set('modalDialog', map({
             active: false,

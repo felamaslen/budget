@@ -229,10 +229,10 @@ export function rActivateEditable(reduction, editable, cancel) {
     const pageIndex = reduction.getIn(['currentPageIndex']);
     let newReduction = reduction
         .setIn(['edit', 'addBtnFocus'], false)
-        .setIn(['edit', 'suggestions', 'list'], list.of())
-        .setIn(['edit', 'suggestions', 'active'], -1)
-        .setIn(['edit', 'suggestions', 'loading'], false)
-        .setIn(['edit', 'suggestions', 'reqId'], null);
+        .setIn(['editSuggestions', 'list'], list.of())
+        .setIn(['editSuggestions', 'active'], -1)
+        .setIn(['editSuggestions', 'loading'], false)
+        .setIn(['editSuggestions', 'reqId'], null);
 
     // confirm the previous item's edits
     if (active && active.get('value') !== active.get('originalValue')) {
@@ -456,23 +456,23 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
 
 export function rHandleSuggestions(reduction, { items, reqId }) {
     const newReduction = reduction
-        .setIn(['edit', 'suggestions', 'loading'], false)
-        .setIn(['edit', 'suggestions', 'active'], -1);
+        .setIn(['editSuggestions', 'loading'], false)
+        .setIn(['editSuggestions', 'active'], -1);
 
-    if (!items || reduction.getIn(['edit', 'suggestions', 'reqId']) !== reqId) {
+    if (!items || reduction.getIn(['editSuggestions', 'reqId']) !== reqId) {
         // null object (clear), or changed input while suggestions were loading
         return newReduction
-            .setIn(['edit', 'suggestions', 'list'], list.of())
-            .setIn(['edit', 'suggestions', 'reqId'], null);
+            .setIn(['editSuggestions', 'list'], list.of())
+            .setIn(['editSuggestions', 'reqId'], null);
     }
 
-    return newReduction.setIn(['edit', 'suggestions', 'list'], items);
+    return newReduction.setIn(['editSuggestions', 'list'], items);
 }
 
 export function rRequestSuggestions(reduction, { reqId }) {
     return reduction
-        .setIn(['edit', 'suggestions', 'loading'], true)
-        .setIn(['edit', 'suggestions', 'reqId'], reqId);
+        .setIn(['editSuggestions', 'loading'], true)
+        .setIn(['editSuggestions', 'reqId'], reqId);
 }
 
 function getTransactionsForRow(reduction, row, col) {

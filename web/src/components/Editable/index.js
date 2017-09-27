@@ -55,8 +55,8 @@ function getStateProps(row, col, id, item, defaultValue, getSuggestions) {
         };
 
         if (getSuggestions) {
-            props.suggestionsList = state.getIn(['global', 'edit', 'suggestions', 'list']);
-            props.suggestionsActive = state.getIn(['global', 'edit', 'suggestions', 'active']);
+            props.suggestionsList = state.getIn(['global', 'editSuggestions', 'list']);
+            props.suggestionsActive = state.getIn(['global', 'editSuggestions', 'active']);
         }
 
         return props;
