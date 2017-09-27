@@ -86,14 +86,14 @@ export class PageList extends Component {
         });
 
         const addBtnOnClick = () => this.addItem();
-        const addBtnRef = () => btn => {
-            this.addBtn = btn;
+        const addBtnRef = input => {
+            this.addBtn = input;
         };
 
         return <li className="li-add">
             {addItems}
             <span>
-                <button ref={addBtnRef()} onClick={addBtnOnClick}>Add</button>
+                <button ref={addBtnRef} onClick={addBtnOnClick}>Add</button>
             </span>
         </li>;
     }
@@ -238,7 +238,7 @@ export class PageList extends Component {
         const addBtnFocus = !this.props.addBtnFocus && nextProps.addBtnFocus;
 
         if (addBtnFocus && this.addBtn) {
-            this.addBtn.focus();
+            setTimeout(() => this.addBtn.focus(), 0);
 
             return false;
         }
