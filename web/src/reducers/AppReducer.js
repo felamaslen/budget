@@ -53,6 +53,10 @@ export function getNavRow({
             return numRows - 2;
         }
 
+        if (dx < 0) {
+            return -1;
+        }
+
         if (dx > 0) {
             return 0;
         }
