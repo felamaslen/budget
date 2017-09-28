@@ -387,7 +387,8 @@ export function addWeeklyAverages(data, rows, pageIndex) {
     }
     const firstDate = rows.first().getIn(['cols', dateKey]);
     const lastDate = rows.last().getIn(['cols', dateKey]);
-    const numWeeks = (firstDate - lastDate) / 7;
+
+    const numWeeks = (firstDate - lastDate) / 86400 / 7;
 
     const weeklyAverage = numWeeks
         ? visibleTotal / numWeeks
