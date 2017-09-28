@@ -35,7 +35,12 @@ export async function requestContent(dispatch, reduction, { pageIndex, params, q
         dispatch(aContentLoaded({ pageIndex, response }));
     }
     catch (err) {
-        openTimedMessage(dispatch, 'An error occurred loading content');
+        if (err.response) {
+            openTimedMessage(dispatch, 'An error occurred loading content');
+        }
+        else {
+            console.error(err.stack);
+        }
 
         dispatch(aContentLoaded({ pageIndex, response: null }));
     }
