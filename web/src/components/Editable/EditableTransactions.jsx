@@ -194,12 +194,10 @@ export default class EditableTransactions extends Editable {
             ? this.props.value.size
             : 0;
 
-        return (
-            <span>
-                <span className="num-transactions">{size}</span>
-                {modal}
-            </span>
-        );
+        return <span>
+            <span className="num-transactions">{size}</span>
+            {modal}
+        </span>;
     }
     render() {
         return this.renderValue();
