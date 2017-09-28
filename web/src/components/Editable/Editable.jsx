@@ -15,7 +15,7 @@ export default class Editable extends Component {
     }
     componentDidUpdate(prevProps) {
         if (this.input && !prevProps.active && this.props.active) {
-            this.input.focus();
+            setTimeout(() => this.input.focus(), 0);
         }
     }
     format() {
