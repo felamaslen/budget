@@ -101,7 +101,6 @@ export class PageList extends PureComponent {
         }
     }
     render() {
-        // console.log(Date.now(), 'PageList render');
         if (!this.props.loaded) {
             return null;
         }

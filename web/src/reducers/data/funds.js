@@ -355,9 +355,7 @@ export function getFundLineProcessed(
     });
 }
 
-export function getFundLines(
-    times, timeOffsets, prices, units, costs, mode, fundsEnabled
-) {
+export function getFundLines(times, timeOffsets, prices, units, costs, mode, fundsEnabled) {
     let lines = list.of();
 
     const fundsValid = fundsEnabled.filter(index => {
@@ -423,10 +421,12 @@ function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
 }
 
 export function getFormattedHistory(
-    rows, mode, pageIndex, startTime, cacheTimes, zoom, enabledList = null
+    rowsMap, mode, pageIndex, startTime, cacheTimes, zoom, enabledList = null
 ) {
     // get a formatted list of lines for display in the fund price / value graph
     const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
+
+    const rows = rowsMap.toList();
 
     const timeOffsets = rows.map(row => row.get('prStartIndex'));
 
