@@ -15,7 +15,7 @@ import { PAGES } from '../misc/const';
 
 import ModalDialog from './ModalDialog';
 import PageOverview from './pages/PageOverview';
-import getPageList from './pages/PageList';
+import getPageList from './PageList';
 import PageAnalysis from './pages/PageAnalysis';
 import PageFunds from './pages/PageFunds';
 

@@ -4,7 +4,7 @@
 
 import { Map as map } from 'immutable';
 
-import { PageList, connect } from './PageList';
+import { PageList, connect } from '../PageList';
 
 import { aContentRequested } from '../../actions/ContentActions';
 
