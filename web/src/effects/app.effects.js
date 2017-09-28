@@ -57,6 +57,8 @@ export async function updateServerData(dispatch, reduction) {
     }
     catch (err) {
         openTimedMessage(dispatch, 'Error updating data on server!');
+
+        dispatch(aServerUpdateReceived(null));
     }
 }
 
