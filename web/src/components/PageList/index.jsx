@@ -20,6 +20,7 @@ import Head from './Head';
 import Body from './Body';
 
 export class PageList extends PureComponent {
+    /*
     renderListHeadMobile(columns) {
         return (
             <div className="list-head noselect">
@@ -73,6 +74,7 @@ export class PageList extends PureComponent {
             {this.renderAddButton()}
         </div>;
     }
+    */
     renderListDesktop(render) {
         if (!render) {
             return null;
@@ -84,8 +86,9 @@ export class PageList extends PureComponent {
         </div>;
     }
     renderList() {
+        // <Media query={mediaQueries.mobile}>{render => this.renderListMobile(render)}</Media>
+
         return <div>
-            <Media query={mediaQueries.mobile}>{render => this.renderListMobile(render)}</Media>
             <Media query={mediaQueries.desktop}>{render => this.renderListDesktop(render)}</Media>
         </div>;
     }
@@ -98,6 +101,7 @@ export class PageList extends PureComponent {
         }
     }
     render() {
+        // console.log(Date.now(), 'PageList render');
         if (!this.props.loaded) {
             return null;
         }
@@ -125,9 +129,6 @@ export class PageList extends PureComponent {
 PageList.propTypes = {
     pageIndex: PropTypes.number.isRequired,
     loaded: PropTypes.bool.isRequired,
-    rows: PropTypes.instanceOf(list),
-    weeklyValue: PropTypes.number,
-    daily: PropTypes.bool,
     loadContent: PropTypes.func.isRequired,
     openMobileEditDialog: PropTypes.func.isRequired,
     openMobileAddDialog: PropTypes.func.isRequired
@@ -136,8 +137,7 @@ PageList.propTypes = {
 function getStateProps(pageIndex, extra) {
     const mapStateToPropsDefault = state => ({
         pageIndex,
-        loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
-        rows: state.getIn(['global', 'pages', pageIndex, 'rows'])
+        loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex]))
     });
 
     if (extra) {

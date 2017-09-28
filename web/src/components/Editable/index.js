@@ -33,22 +33,14 @@ function getEditableComponent(item) {
     return EditableText;
 }
 
-function getStateProps(row, col, id, item, defaultValue, getSuggestions) {
-    return (state, ownProps) => {
+function getStateProps(row, col, item, value, getSuggestions) {
+    return state => {
         const activeEditable = state.getIn(['global', 'edit', 'active']);
-        const active = activeEditable.get('row') === row &&
-            activeEditable.get('col') === col;
-
-        const value = row === -1
-            ? defaultValue
-            : state.getIn(
-                ['global', 'pages', ownProps.pageIndex, 'rows', row, 'cols', col]
-            );
+        const active = activeEditable.get('row') === row && activeEditable.get('col') === col;
 
         const props = {
             row,
             col,
-            id,
             item,
             value,
             active
@@ -63,10 +55,10 @@ function getStateProps(row, col, id, item, defaultValue, getSuggestions) {
     };
 }
 
-function getDispatchProps(row, col, id, item, value, getSuggestions) {
+function getDispatchProps(row, col, item, value, getSuggestions) {
     return (dispatch, ownProps) => {
         const props = {
-            onActivate: () => dispatch(aEditableActivated(map({ row, col, id, item, value }))),
+            onActivate: () => dispatch(aEditableActivated(map({ row, col, item, value }))),
             onChange: processedValue => dispatch(aEditableChanged(processedValue))
         };
 
@@ -100,14 +92,14 @@ function getDispatchProps(row, col, id, item, value, getSuggestions) {
     };
 }
 
-export default ({ row, col, id, item, value }) => {
+export default ({ row, col, item, value }) => {
     const Component = getEditableComponent(item);
 
     const getSuggestions = ['date', 'cost', 'transactions'].indexOf(item) === -1;
 
-    const mapStateToProps = getStateProps(row, col, id, item, value, getSuggestions);
+    const mapStateToProps = getStateProps(row, col, item, value, getSuggestions);
 
-    const mapDispatchToProps = getDispatchProps(row, col, id, item, value, getSuggestions);
+    const mapDispatchToProps = getDispatchProps(row, col, item, value, getSuggestions);
 
     return connect(mapStateToProps, mapDispatchToProps)(Component);
 };

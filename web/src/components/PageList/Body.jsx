@@ -9,9 +9,8 @@ import ListRow from './ListRow';
 
 export class Body extends PureComponent {
     render() {
-        const rows = this.props.rowKeys.map(
-            key => <ListRow key={key} rowKey={key}
-                pageIndex={this.props.pageIndex} />
+        const rows = this.props.rowIds.map(
+            id => <ListRow key={id} id={id} pageIndex={this.props.pageIndex} />
         );
 
         return <ul className="list-ul">
@@ -23,13 +22,14 @@ export class Body extends PureComponent {
 
 Body.propTypes = {
     pageIndex: PropTypes.number.isRequired,
-    rowKeys: PropTypes.instanceOf(list).isRequired
+    rowIds: PropTypes.instanceOf(list).isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
-    rowKeys: state
+    rowIds: state
         .getIn(['global', 'pages', ownProps.pageIndex, 'rows'])
-        .map((row, key) => key)
+        .keySeq()
+        .toList()
 });
 
 export default connect(mapStateToProps)(Body);

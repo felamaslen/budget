@@ -24,7 +24,8 @@ class ListAddEditItem extends Component {
         });
 
         return <span className={spanClasses}>
-            <Editable pageIndex={this.props.pageIndex} noSuggestions={this.props.noSuggestions} />
+            <Editable pageIndex={this.props.pageIndex}
+                noSuggestions={this.props.noSuggestions} />
         </span>;
     }
 }

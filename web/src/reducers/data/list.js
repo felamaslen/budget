@@ -13,7 +13,9 @@ import {
 } from './funds';
 
 export function processRawListRows(data, pageIndex) {
-    return list(data.map(item => {
+    return map(data.map(item => {
+        const id = item.I;
+
         const otherProps = Object.keys(item)
             .filter(
                 key => LIST_COLS_STANDARD.indexOf(key) === -1
@@ -24,22 +26,20 @@ export function processRawListRows(data, pageIndex) {
                 return obj;
             }, {});
 
-        return map({
-            id: item.I,
-            cols: list(LIST_COLS_SHORT[pageIndex].map(col => {
-                if (col === 'd') {
-                    return new YMD(item[col]);
-                }
+        const cols = list(LIST_COLS_SHORT[pageIndex].map(col => {
+            if (col === 'd') {
+                return new YMD(item[col]);
+            }
 
-                if (col === 'tr') {
-                    // transactions list
-                    return new TransactionsList(item.tr);
-                }
+            if (col === 'tr') {
+                // transactions list
+                return new TransactionsList(item.tr);
+            }
 
-                return item[col];
-            })),
-            ...otherProps
-        });
+            return item[col];
+        }));
+
+        return [id, map({ id, cols, ...otherProps })];
     }));
 }
 
@@ -55,11 +55,7 @@ export function processPageDataList(reduction, pageIndex, raw) {
     const numCols = LIST_COLS_PAGES[pageIndex].length;
     const total = raw.total;
 
-    const data = map({
-        numRows,
-        numCols,
-        total
-    });
+    const data = map({ numRows, numCols, total });
 
     const rows = processRawListRows(raw.data, pageIndex);
 

@@ -315,7 +315,6 @@ export function sortRowsByDate(rows, pageIndex) {
     const today = new YMD();
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-    let dailySum = 0;
     let lastFuture = false;
     const sorted = rows
         .sort((prev, next) => {
@@ -342,10 +341,16 @@ export function sortRowsByDate(rows, pageIndex) {
         });
 
     if (DAILY_PAGES[pageIndex]) {
+        let dailySum = 0;
+
+        const keys = sorted.keys();
+        keys.next();
+
         return sorted
-            .map((row, rowKey) => {
-                const lastInDay = rowKey === sorted.size - 1 ||
-                    row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
+            .map(row => {
+                const nextKey = keys.next().value;
+
+                const lastInDay = nextKey && row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
 
                 dailySum += row.getIn(['cols', costKey]);
                 const newRow = lastInDay

@@ -16,10 +16,9 @@ export class ListRow extends PureComponent {
     renderListExtra() {
         return null;
     }
-    renderColumn(id, colKey, colName, value, active = false) {
+    renderColumn(colKey, colName, value, active = false) {
         const Editable = getEditable({
-            id,
-            row: this.props.rowKey,
+            row: this.props.id,
             col: colKey,
             item: colName,
             value
@@ -52,8 +51,6 @@ export class ListRow extends PureComponent {
         return {};
     }
     render() {
-        const id = this.props.row.get('id');
-
         const onDelete = () => this.props.deleteRow();
 
         const deleteBtn = <span className="delete">
@@ -62,10 +59,10 @@ export class ListRow extends PureComponent {
 
         const items = LIST_COLS_PAGES[this.props.pageIndex].map((colName, colKey) => {
             const value = this.props.row.getIn(['cols', colKey]);
-            const active = this.props.editRow === this.props.rowKey &&
+            const active = this.props.editId === this.props.id &&
                 this.props.editCol === colKey;
 
-            return this.renderColumn(id, colKey, colName, value, active);
+            return this.renderColumn(colKey, colName, value, active);
         });
 
         const itemClasses = this.listItemClasses(this.props.row);
@@ -83,27 +80,28 @@ export class ListRow extends PureComponent {
 
 ListRow.propTypes = {
     pageIndex: PropTypes.number.isRequired,
-    rowKey: PropTypes.number.isRequired,
+    id: PropTypes.number.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     daily: PropTypes.number,
     getDaily: PropTypes.bool,
     noSuggestions: PropTypes.bool.isRequired,
-    editRow: PropTypes.number,
+    editId: PropTypes.number,
     editCol: PropTypes.number,
     deleteRow: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
-    row: state.getIn(['global', 'pages', ownProps.pageIndex, 'rows', ownProps.rowKey]),
+    row: state.getIn(['global', 'pages', ownProps.pageIndex, 'rows', ownProps.id]),
     getDaily: DAILY_PAGES[ownProps.pageIndex],
     noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1,
-    editRow: state.getIn(['global', 'edit', 'row']),
+    editId: state.getIn(['global', 'edit', 'row']),
     editCol: state.getIn(['global', 'edit', 'col'])
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     deleteRow: () => dispatch(aListItemDeleted({
-        pageIndex: ownProps.pageIndex
+        pageIndex: ownProps.pageIndex,
+        id: ownProps.id
     }))
 });
 
