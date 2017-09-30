@@ -57,19 +57,26 @@ export class ModalDialog extends Component {
         const onCancel = () => this.props.onCancel();
         const onSubmit = () => {
             this.props.onSubmit(this.props.pageIndex);
-            this.props.deactivate();
+
+            if (this.props.type !== 'add') {
+                this.props.deactivate();
+            }
         }
 
         return <div className="buttons">
             <button type="button" className="button-cancel"
+                disabled={this.props.loading}
                 onClick={onCancel}>nope.avi</button>
             <button type="button" className="button-submit"
+                disabled={this.props.loading}
                 onClick={onSubmit}>Do it.</button>
         </div>;
     }
     shouldComponentUpdate(nextProps) {
         return nextProps.active !== this.props.active ||
-            nextProps.visible !== this.props.visible;
+            nextProps.visible !== this.props.visible ||
+            nextProps.loading !== this.props.loading ||
+            nextProps.invalidKeys.size !== this.props.invalidKeys.size;
     }
     componentDidUpdate(prevProps) {
         if (prevProps.visible && !this.props.visible) {
@@ -85,7 +92,8 @@ export class ModalDialog extends Component {
 
         const dialogClass = classNames({
             dialog: true,
-            hidden: !this.props.visible
+            hidden: !this.props.visible,
+            loading: this.props.loading
         });
 
         const title = this.renderTitle();
@@ -107,6 +115,7 @@ export class ModalDialog extends Component {
 ModalDialog.propTypes = {
     active: PropTypes.bool.isRequired,
     visible: PropTypes.bool.isRequired,
+    loading: PropTypes.bool.isRequired,
     type: PropTypes.string,
     row: PropTypes.number,
     col: PropTypes.number,
@@ -123,6 +132,7 @@ const mapStateToProps = state => ({
     pageIndex: state.getIn(['global', 'currentPageIndex']),
     active: state.getIn(['global', 'modalDialog', 'active']),
     visible: state.getIn(['global', 'modalDialog', 'visible']),
+    loading: state.getIn(['global', 'modalDialog', 'loading']),
     type: state.getIn(['global', 'modalDialog', 'type']),
     row: state.getIn(['global', 'modalDialog', 'row']),
     col: state.getIn(['global', 'modalDialog', 'col']),

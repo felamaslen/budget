@@ -1,6 +1,6 @@
 import * as EF from '../constants/effects';
 
-import { loadSettings, updateServerData, addServerData } from './app.effects';
+import { loadSettings, updateServerData, addServerData, handleModal } from './app.effects';
 import { submitLoginForm, saveLoginCredentials } from './login.effects';
 import {
     requestContent, requestAnalysisData, requestFundPeriodData
@@ -24,6 +24,7 @@ export default createEffectHandler([
     [EF.SUGGESTIONS_REQUESTED, requestSuggestions],
     [EF.SERVER_UPDATE_REQUESTED, updateServerData],
     [EF.SERVER_ADD_REQUESTED, addServerData],
+    [EF.SERVER_MODAL_EFFECT_HANDLER, handleModal],
     [EF.ANALYSIS_DATA_REQUESTED, requestAnalysisData],
     [EF.FUNDS_PERIOD_REQUESTED, requestFundPeriodData]
 ]);

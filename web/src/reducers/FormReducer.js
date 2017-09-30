@@ -25,15 +25,16 @@ export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
             return map({ item, value });
         });
 
-    return reduction
-        .setIn(['modalDialog'], map({
-            active: true,
-            visible: true,
-            type: 'edit',
-            id,
-            fields,
-            invalidKeys: list.of()
-        }));
+    const modalDialog = reduction
+        .get('modalDialog')
+        .set('active', true)
+        .set('visible', true)
+        .set('type', 'edit')
+        .set('id', id)
+        .set('fields', fields)
+        .set('invalidKeys', list.of());
+
+    return reduction.set('modalDialog', modalDialog);
 }
 
 export function rOpenFormDialogAdd(reduction, { pageIndex }) {
@@ -41,27 +42,33 @@ export function rOpenFormDialogAdd(reduction, { pageIndex }) {
     const fields = list(LIST_COLS_PAGES[pageIndex])
         .map((item, key) => map({ item, value: values.get(key) }));
 
-    return reduction
-        .setIn(['modalDialog'], map({
-            active: true,
-            visible: true,
-            type: 'add',
-            id: null,
-            fields,
-            invalidKeys: list.of()
-        }));
+    const modalDialog = reduction
+        .get('modalDialog')
+        .set('active', true)
+        .set('visible', true)
+        .set('type', 'add')
+        .set('id', null)
+        .set('fields', fields)
+        .set('invalidKeys', list.of());
+
+    return reduction.set('modalDialog', modalDialog);
 }
 
 function resetModalDialog(reduction, remove = false) {
+    const newModalDialog = reduction
+        .get('modalDialog')
+        .set('loading', false);
+
     if (remove) {
-        return reduction
-            .setIn(['modalDialog', 'active'], false)
-            .setIn(['modalDialog', 'type'], null)
-            .setIn(['modalDialog', 'fields'], list.of())
-            .setIn(['modalDialog', 'invalidKeys'], list.of());
+        return reduction.set('modalDialog', newModalDialog
+            .set('active', false)
+            .set('type', null)
+            .set('fields', list.of())
+            .set('invalidKeys', list.of())
+        );
     }
 
-    return reduction.setIn(['modalDialog', 'visible'], false);
+    return reduction.set('modalDialog', newModalDialog.set('visible', false));
 }
 
 export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
@@ -135,16 +142,12 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
         .setIn(['pages', pageIndex, 'data', 'total'], newTotal);
 }
 
-export function rCloseFormDialogAdd(reduction, pageIndex, fields) {
-    const item = stringifyFields(fields);
-    const apiKey = reduction.getIn(['user', 'apiKey']);
-    const req = { apiKey, item, fields, pageIndex };
+export function validateFields(reduction) {
+    const fields = reduction.getIn(['modalDialog', 'fields']);
 
-    return resetModalDialog(reduction)
-        .set('effects', reduction
-            .get('effects')
-            .push(buildMessage(EF_SERVER_ADD_REQUESTED, req))
-        );
+    const invalidKeys = getInvalidInsertDataKeys(fields);
+
+    return { fields, invalidKeys };
 }
 
 export function rCloseFormDialog(reduction, req) {
@@ -158,22 +161,20 @@ export function rCloseFormDialog(reduction, req) {
         return resetModalDialog(reduction, true);
     }
 
-    const fields = reduction.getIn(['modalDialog', 'fields']);
-    const invalidKeys = getInvalidInsertDataKeys(fields);
+    const type = reduction.getIn(['modalDialog', 'type']);
 
-    if (invalidKeys.size > 0) {
+    const { fields, invalidKeys } = validateFields(reduction);
+    if (invalidKeys.size) {
         return reduction
             .setIn(['modalDialog', 'invalidKeys'], invalidKeys);
     }
 
-    const type = reduction.getIn(['modalDialog', 'type']);
+    if (type === 'add') {
+        return reduction.setIn(['modalDialog', 'loading'], true)
+    }
 
     if (type === 'edit') {
         return rCloseFormDialogEdit(reduction, pageIndex, fields);
-    }
-
-    if (type === 'add') {
-        return rCloseFormDialogAdd(reduction, pageIndex, fields);
     }
 
     return reduction;

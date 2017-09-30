@@ -4,6 +4,8 @@
 
 import buildMessage from '../messageBuilder';
 
+import { SERVER_MODAL_EFFECT_HANDLER } from '../constants/effects';
+
 import {
     FORM_EDIT_DIALOG_OPENED,
     FORM_ADD_DIALOG_OPENED,
@@ -17,8 +19,8 @@ export const aMobileEditDialogOpened = (pageIndex, id) => {
 export const aMobileAddDialogOpened = pageIndex => {
     return buildMessage(FORM_ADD_DIALOG_OPENED, { pageIndex });
 };
-export const aMobileDialogClosed = pageIndex => {
-    return buildMessage(FORM_DIALOG_CLOSED, pageIndex);
+export const aMobileDialogClosed = req => {
+    return buildMessage(FORM_DIALOG_CLOSED, req, SERVER_MODAL_EFFECT_HANDLER);
 };
 export const aFormFieldChanged = (fieldKey, value) => {
     return buildMessage(FORM_INPUT_CHANGED, { fieldKey, value });

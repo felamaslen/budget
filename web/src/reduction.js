@@ -36,6 +36,7 @@ export function resetAppState(state) {
         .set('modalDialog', map({
             active: false,
             visible: true,
+            loading: false,
             type: null,
             row: null,
             id: null,

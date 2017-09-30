@@ -15,9 +15,11 @@ import { ERROR_MSG_BAD_DATA } from '../misc/config';
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/AppActions';
 import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/LoginActions';
 import { aListItemAdded } from '../actions/EditActions';
+import { aMobileDialogClosed } from '../actions/FormActions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
 import { getInvalidInsertDataKeys, stringifyFields } from '../reducers/EditReducer';
+import { validateFields } from '../reducers/FormReducer';
 
 import { openTimedMessage } from './error.effects';
 import { getLoginCredentials, submitLoginForm } from './login.effects';
@@ -62,20 +64,37 @@ export async function updateServerData(dispatch, reduction) {
     }
 }
 
-export async function addServerData(dispatch, reduction, { pageIndex, sending }) {
-    if (sending) {
-        return;
-    }
-
+async function addServerDataRequest(dispatch, reduction, { item, fields, pageIndex }) {
     if (reduction.get('loadingApi')) {
         openTimedMessage(
             dispatch, 'Wait until the previous request has finished', ERROR_LEVEL_WARN
         );
 
-        return;
+        return 1;
     }
 
     const apiKey = reduction.getIn(['user', 'apiKey']);
+
+    try {
+        const response = await axios.post(`${API_PREFIX}/data/${PAGES[pageIndex]}`, item, {
+            headers: { 'Authorization': apiKey }
+        });
+
+        dispatch(aServerAddReceived({ response, fields, pageIndex }));
+
+        return 0;
+    }
+    catch (err) {
+        openTimedMessage(dispatch, 'Error adding data to server!');
+
+        return 1;
+    }
+}
+
+export function addServerData(dispatch, reduction, { pageIndex, sending }) {
+    if (sending) {
+        return;
+    }
 
     // validate items
     const active = reduction.getIn(['edit', 'active']);
@@ -115,16 +134,29 @@ export async function addServerData(dispatch, reduction, { pageIndex, sending })
 
     dispatch(aListItemAdded({ pageIndex, sending: true }));
 
-    try {
-        const response = await axios.post(`${API_PREFIX}/data/${PAGES[pageIndex]}`, item, {
-            headers: { 'Authorization': apiKey }
-        });
+    addServerDataRequest(dispatch, reduction, { pageIndex, item, fields });
+}
 
-        dispatch(aServerAddReceived({ response, fields, pageIndex }));
+export async function handleModal(dispatch, reduction, req) {
+    if (!req || req.deactivate || reduction.getIn(['modalDialog', 'type']) !== 'add') {
+        return;
     }
-    catch (err) {
-        openTimedMessage(dispatch, 'Error adding data to server!');
+
+    const { pageIndex } = req;
+
+    const { fields, invalidKeys } = validateFields(reduction);
+
+    if (invalidKeys.size) {
+        return;
     }
+
+    const item = stringifyFields(fields);
+
+    await addServerDataRequest(dispatch, reduction, { pageIndex, item, fields });
+
+    dispatch(aMobileDialogClosed(null));
+
+    setTimeout(() => dispatch(aMobileDialogClosed({ deactivate: true })), 305);
 }
 
 export async function requestStocksList(dispatch, apiKey) {
