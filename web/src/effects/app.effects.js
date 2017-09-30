@@ -87,7 +87,7 @@ export async function addServerData(dispatch, reduction, { pageIndex, sending })
     }
 
     const items = reduction
-        .getIn(['edit', 'add'])
+        .getIn(['edit', 'add', pageIndex])
         .map((value, key) => ({
             item: LIST_COLS_PAGES[pageIndex][key],
             value
