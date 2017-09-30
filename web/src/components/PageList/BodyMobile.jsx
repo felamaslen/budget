@@ -10,6 +10,11 @@ import PropTypes from 'prop-types';
 import { ListRowMobileContainer as getListRowMobileDefault } from './ListRowMobile';
 
 export class BodyMobile extends Body {
+    constructor(props) {
+        super(props);
+
+        this.ListRowMobile = getListRowMobileDefault(this.props.pageIndex);
+    }
     renderAddButton() {
         const onClick = () => this.props.openMobileAddDialog();
 
@@ -23,11 +28,9 @@ export class BodyMobile extends Body {
         const colKeys = LIST_COLS_MOBILE
             .map(column => LIST_COLS_PAGES[this.props.pageIndex].indexOf(column));
 
-        const ListRowMobile = getListRowMobileDefault(this.props.pageIndex);
-
         const rows = this.props.rowIds
             .map(
-                id => <ListRowMobile key={id} id={id} colKeys={colKeys} />
+                id => <this.ListRowMobile key={id} id={id} colKeys={colKeys} />
             );
 
         return <div>
@@ -41,9 +44,11 @@ BodyMobile.propTypes = {
     openMobileAddDialog: PropTypes.func.isRequired
 };
 
-const mapDispatchToProps = pageIndex => dispatch => ({
+export const mapDispatchToProps = pageIndex => dispatch => ({
     openMobileAddDialog: () => dispatch(aMobileAddDialogOpened(pageIndex))
 });
 
 export const BodyMobileContainer = pageIndex => bodyContainer(pageIndex)(null, mapDispatchToProps)(BodyMobile);
+
+export default pageIndex => bodyContainer(pageIndex);
 

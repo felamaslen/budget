@@ -10,8 +10,8 @@ import PropTypes from 'prop-types';
 import getEditable from '../Editable';
 
 export class ListRowMobile extends ListRow {
-    render() {
-        const items = LIST_COLS_MOBILE
+    renderItems(columns = LIST_COLS_MOBILE) {
+        return columns
             .map((column, key) => {
                 const colKey = this.props.colKeys[key];
 
@@ -28,6 +28,9 @@ export class ListRowMobile extends ListRow {
                     <Editable static={true} pageIndex={this.props.pageIndex} />
                 </span>;
             });
+    }
+    render() {
+        const items = this.renderItems();
 
         const onClick = () => this.props.openMobileEditDialog(this.props.id);
 
@@ -48,4 +51,6 @@ const mapDispatchToProps = pageIndex => dispatch => ({
 
 export const ListRowMobileContainer = pageIndex =>
     listRowContainer(pageIndex)(null, mapDispatchToProps)(ListRowMobile);
+
+export default pageIndex => listRowContainer(pageIndex);
 
