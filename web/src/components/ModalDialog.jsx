@@ -55,7 +55,10 @@ export class ModalDialog extends Component {
     }
     renderButtons() {
         const onCancel = () => this.props.onCancel();
-        const onSubmit = () => this.props.onSubmit(this.props.pageIndex);
+        const onSubmit = () => {
+            this.props.onSubmit(this.props.pageIndex);
+            this.props.deactivate();
+        }
 
         return <div className="buttons">
             <button type="button" className="button-cancel"
@@ -65,7 +68,13 @@ export class ModalDialog extends Component {
         </div>;
     }
     shouldComponentUpdate(nextProps) {
-        return nextProps.active !== this.props.active;
+        return nextProps.active !== this.props.active ||
+            nextProps.visible !== this.props.visible;
+    }
+    componentDidUpdate(prevProps) {
+        if (prevProps.visible && !this.props.visible) {
+            this.props.deactivate();
+        }
     }
     render() {
         if (!this.props.active) {
@@ -73,12 +82,18 @@ export class ModalDialog extends Component {
         }
 
         const className = `modal-dialog-outer ${this.props.type}`;
+
+        const dialogClass = classNames({
+            dialog: true,
+            hidden: !this.props.visible
+        });
+
         const title = this.renderTitle();
         const fields = this.renderFields();
         const buttons = this.renderButtons();
 
         return <div className={className}>
-            <div className="dialog">
+            <div className={dialogClass}>
                 <span className="title">{title}</span>
                 <ul className="form-list">
                     {fields}
@@ -91,6 +106,7 @@ export class ModalDialog extends Component {
 
 ModalDialog.propTypes = {
     active: PropTypes.bool.isRequired,
+    visible: PropTypes.bool.isRequired,
     type: PropTypes.string,
     row: PropTypes.number,
     col: PropTypes.number,
@@ -99,12 +115,14 @@ ModalDialog.propTypes = {
     invalidKeys: PropTypes.instanceOf(list),
     pageIndex: PropTypes.number.isRequired,
     onCancel: PropTypes.func.isRequired,
-    onSubmit: PropTypes.func.isRequired
+    onSubmit: PropTypes.func.isRequired,
+    deactivate: PropTypes.func.isRequired
 }
 
 const mapStateToProps = state => ({
     pageIndex: state.getIn(['global', 'currentPageIndex']),
     active: state.getIn(['global', 'modalDialog', 'active']),
+    visible: state.getIn(['global', 'modalDialog', 'visible']),
     type: state.getIn(['global', 'modalDialog', 'type']),
     row: state.getIn(['global', 'modalDialog', 'row']),
     col: state.getIn(['global', 'modalDialog', 'col']),
@@ -115,7 +133,10 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     onCancel: () => dispatch(aMobileDialogClosed(null)),
-    onSubmit: page => dispatch(aMobileDialogClosed(page))
+    onSubmit: pageIndex => dispatch(aMobileDialogClosed({ pageIndex })),
+    deactivate: () => setTimeout(
+        () => dispatch(aMobileDialogClosed({ deactivate: true })), 305
+    )
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModalDialog);

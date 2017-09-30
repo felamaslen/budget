@@ -28,6 +28,7 @@ export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
     return reduction
         .setIn(['modalDialog'], map({
             active: true,
+            visible: true,
             type: 'edit',
             id,
             fields,
@@ -43,6 +44,7 @@ export function rOpenFormDialogAdd(reduction, { pageIndex }) {
     return reduction
         .setIn(['modalDialog'], map({
             active: true,
+            visible: true,
             type: 'add',
             id: null,
             fields,
@@ -50,12 +52,16 @@ export function rOpenFormDialogAdd(reduction, { pageIndex }) {
         }));
 }
 
-function resetModalDialog(reduction) {
-    return reduction
-        .setIn(['modalDialog', 'active'], false)
-        .setIn(['modalDialog', 'type'], null)
-        .setIn(['modalDialog', 'fields'], list.of())
-        .setIn(['modalDialog', 'invalidKeys'], list.of());
+function resetModalDialog(reduction, remove = false) {
+    if (remove) {
+        return reduction
+            .setIn(['modalDialog', 'active'], false)
+            .setIn(['modalDialog', 'type'], null)
+            .setIn(['modalDialog', 'fields'], list.of())
+            .setIn(['modalDialog', 'invalidKeys'], list.of());
+    }
+
+    return reduction.setIn(['modalDialog', 'visible'], false);
 }
 
 export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
@@ -141,9 +147,15 @@ export function rCloseFormDialogAdd(reduction, pageIndex, fields) {
         );
 }
 
-export function rCloseFormDialog(reduction, pageIndex) {
-    if (pageIndex === null) {
+export function rCloseFormDialog(reduction, req) {
+    if (!req) {
         return resetModalDialog(reduction);
+    }
+
+    const { pageIndex, deactivate } = req;
+
+    if (deactivate) {
+        return resetModalDialog(reduction, true);
     }
 
     const fields = reduction.getIn(['modalDialog', 'fields']);

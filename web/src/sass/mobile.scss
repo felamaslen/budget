@@ -97,6 +97,33 @@ button {
 }
 
 // modal dialogs
+@mixin modal-enter-state {
+    transform: perspective(100px) rotateX(5deg) translateZ(-18px);
+    opacity: 0;
+}
+@mixin modal-normal-state {
+    transform: none;
+    opacity: 1;
+}
+@mixin modal-exit-state {
+    @include modal-enter-state;
+}
+@keyframes into-view {
+    from {
+        @include modal-enter-state;
+    }
+    to {
+        @include modal-normal-state;
+    }
+}
+@keyframes out-of-view {
+    from {
+        @include modal-normal-state;
+    }
+    to {
+        @include modal-exit-state;
+    }
+}
 .modal-dialog-outer {
     display: flex;
     align-items: center;
@@ -119,6 +146,13 @@ button {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 3px;
         box-shadow: 0 3px 7px rgba(60, 60, 60, 0.5);
+
+        animation: into-view 0.3s ease-out;
+        transform-origin: bottom;
+        &.hidden {
+            opacity: 0;
+            animation: out-of-view 0.3s ease-out;
+        }
     }
     .title {
         font-size: 1.2em;
