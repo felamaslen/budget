@@ -18,34 +18,47 @@ import { HeadContainer as getHead } from './Head';
 import { BodyContainer as getBody } from './Body';
 
 export class PageList extends PureComponent {
+    headMobile() {
+        const HeadMobile = getHeadMobile(this.props.pageIndex);
+
+        return <HeadMobile />;
+    }
+    bodyMobile() {
+        const BodyMobile = getBodyMobile(this.props.pageIndex);
+
+        return <BodyMobile />;
+    }
     renderListMobile(render) {
         if (!render) {
             return null;
         }
 
-        const HeadMobile = getHeadMobile(this.props.pageIndex);
-        const BodyMobile = getBodyMobile(this.props.pageIndex);
+        const headMobile = this.headMobile();
+        const bodyMobile = this.bodyMobile();
 
-        return <div>
-            <HeadMobile />
-            <BodyMobile />
-        </div>;
+        return <div>{headMobile}{bodyMobile}</div>;
+    }
+    headDesktop () {
+        const Head = getHead(this.props.pageIndex);
+
+        return <Head />;
+    }
+    bodyDesktop () {
+        const Body = getBody(this.props.pageIndex);
+
+        return <Body />;
     }
     renderListDesktop(render) {
         if (!render) {
             return null;
         }
 
-        const Head = getHead(this.props.pageIndex);
-        const Body = getBody(this.props.pageIndex);
+        const head = this.headDesktop();
+        const body = this.bodyDesktop();
 
-        return <div>
-            <Head />
-            <Body />
-        </div>;
+        return <div>{head}{body}</div>;
     }
     renderList() {
-
         return <div>
             <Media query={mediaQueries.mobile}>{render => this.renderListMobile(render)}</Media>
             <Media query={mediaQueries.desktop}>{render => this.renderListDesktop(render)}</Media>

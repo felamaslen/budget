@@ -29,20 +29,6 @@ const pageIndex = PAGES.indexOf('funds');
 
 class PageFunds extends PageList {
     /*
-    renderAfterListMobile(render) {
-        if (!render) {
-            return null;
-        }
-
-        const gainInfo = this.getGainInfo();
-
-        return <span className={gainInfo.classes}>
-            <span className="gain-info">Current value:</span>
-            <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
-            <span className="gain-pct">{gainInfo.gainPct}</span>
-            <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
-        </span>;
-    }
     renderGainInfoMobile(cost, gain) {
         if (!gain) {
             return null;
@@ -116,25 +102,38 @@ class PageFunds extends PageList {
             {fundsGraph}
         </span>;
     }
-    afterList() {
-        /*
-            <Media query={mediaQueries.mobile}>
-                {render => this.renderAfterListMobile(render)}
-            </Media>
-        */
+    renderAfterListMobile(render) {
+        if (!render) {
+            return null;
+        }
 
+        return <span className={this.props.gainInfo.classes}>
+            <span className="gain-info">Current value:</span>
+            <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
+            <span className="gain-pct">{this.props.gainInfo.gainPct}</span>
+            <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
+        </span>;
+    }
+    afterList() {
         // render graphs and stuff here
         return <div className="funds-info">
             <Media query={mediaQueries.desktop}>
                 {render => this.renderAfterList(render)}
             </Media>
+            <Media query={mediaQueries.mobile}>
+                {render => this.renderAfterListMobile(render)}
+            </Media>
         </div>;
     }
-    getHead() {
-        return getFundsHead(this.props.pageIndex, this.props.totalCost);
+    headDesktop() {
+        const HeadFunds = getFundsHead(this.props.pageIndex);
+
+        return <HeadFunds gainInfo={this.props.gainInfo} />;
     }
-    getBody() {
-        return getFundsBody(this.props.pageIndex);
+    bodyDesktop() {
+        const BodyFunds = getFundsBody(this.props.pageIndex);
+
+        return <BodyFunds />;
     }
 }
 
@@ -142,11 +141,34 @@ PageFunds.propTypes = {
     graphProps: PropTypes.instanceOf(map),
     stocksListProps: PropTypes.instanceOf(map),
     cachedValue: PropTypes.instanceOf(map),
-    showOverall: PropTypes.bool
+    showOverall: PropTypes.bool,
+    gainInfo: PropTypes.object
 };
 
+function getGainInfo(state) {
+    const cost = state.getIn(['global', 'pages', pageIndex, 'data', 'total']);
+    const value = state.getIn(['global', 'other', 'fundsCachedValue', 'value']);
+
+    const gain = cost
+        ? (value - cost) / cost
+        : 0;
+
+    const gainPct = formatPercent(gain, {
+        brackets: true, precision: 2
+    });
+
+    const classes = classNames({
+        gain: true,
+        profit: cost < value,
+        loss: cost > value
+    });
+
+    return { classes, gainPct };
+}
+
 const mapStateToProps = () => state => ({
-    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue'])
+    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue']),
+    gainInfo: getGainInfo(state)
 });
 
 const mapDispatchToProps = () => dispatch => ({

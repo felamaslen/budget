@@ -425,6 +425,7 @@ button {
     .gain {
         display: flex;
         flex-flow: row wrap;
+        align-items: center;
         height: 45px;
         overflow: hidden;
         padding: 10px 24px;
