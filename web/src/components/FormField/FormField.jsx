@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PureControllerView from '../PureControllerView';
 
-export default class FormField extends PureControllerView {
+export default class FormField extends Component {
     renderInput() {
         const onChange = evt => this.props.onChange(evt.target.value);
 
@@ -19,6 +18,6 @@ export default class FormField extends PureControllerView {
 
 FormField.propTypes = {
     value: PropTypes.string.isRequired,
-    onChange: PropTypes.func
+    onChange: PropTypes.func.isRequired
 };
 

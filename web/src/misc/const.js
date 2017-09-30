@@ -10,6 +10,7 @@ export const mediaQueries = {
 };
 
 export const API_VERSION = 3;
+export const API_PREFIX = `api/v${API_VERSION}`;
 
 export const ERROR_LEVEL_ERROR = 0xe0;
 export const ERROR_LEVEL_WARN = 0xe1;
@@ -26,6 +27,18 @@ export const PAGES = [
     'general',
     'holiday',
     'social'
+];
+
+export const PAGES_PATHS = [
+    '/',
+    '/analysis',
+    '/funds',
+    '/income',
+    '/bills',
+    '/food',
+    '/general',
+    '/holiday',
+    '/social'
 ];
 
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -72,23 +85,20 @@ export const LIST_COLS_SHORT = [
     ['d', 'i', 'h', 'c', 's'],
     ['d', 'i', 'y', 'c', 's']
 ];
-
 export const LIST_COLS_STANDARD = ['I', 'd', 'i', 'c', 'k', 'h', 'y', 's', 'tr'];
+
+export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
 // which pages to include daily tallies for
 export const DAILY_PAGES = [null, null, false, false, false, true, true, true, true];
 
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
-export const SERVER_UPDATE_IDLE = 0;
-export const SERVER_UPDATE_REQUESTED = 0xf91;
-export const SERVER_UPDATE_RECEIVED = 0xf92;
-export const SERVER_UPDATE_ERROR = 0xf93;
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
 
-const htmlCanvasSupported = () => {
+export const htmlCanvasSupported = () => {
     if (typeof navigator === 'undefined') {
         return false;
     }
@@ -102,7 +112,6 @@ const htmlCanvasSupported = () => {
     return Boolean(elem.getContext && elem.getContext('2d'));
 };
 
-export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;
 export const GRAPH_SPEND_CATEGORIES = [

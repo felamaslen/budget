@@ -90,7 +90,7 @@ function setupWebApp(app) {
     app.use('/', express.static(path.join(__dirname, '../../web/build')));
 
     // index template
-    app.get('/', (req, res) => {
+    app.get('/:pageName?', (req, res) => {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
         res.render('index', {
             version,

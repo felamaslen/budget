@@ -3,18 +3,25 @@
  */
 
 import { List as list } from 'immutable';
+import { connect } from 'react-redux';
+
 import PropTypes from 'prop-types';
 import { LineGraph } from './LineGraph';
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { rgba } from '../../misc/color';
 import { getKeyFromYearMonth } from '../../misc/data';
-import { MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
+import {
+    MONTHS_SHORT, OVERVIEW_COLUMNS, PAGES,
+    GRAPH_WIDTH, GRAPH_HEIGHT,
+    GRAPH_SPEND_CATEGORIES
+} from '../../misc/const';
 import {
     COLOR_CATEGORY,
     COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_LIGHT, COLOR_TRANSLUCENT_DARK,
     COLOR_DARK, COLOR_LIGHT_GREY,
     COLOR_PROFIT,
     FONT_GRAPH_TITLE, FONT_GRAPH_KEY, FONT_AXIS_LABEL,
+    GRAPH_SPEND_NUM_ITEMS,
     GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE
 } from '../../misc/config';
 
@@ -267,10 +274,33 @@ export class GraphSpend extends LineGraph {
 }
 
 GraphSpend.propTypes = {
-    data: PropTypes.instanceOf(list),
-    income: PropTypes.instanceOf(list),
-    categories: PropTypes.instanceOf(list),
-    currentYearMonth: PropTypes.array,
-    yearMonths: PropTypes.array
+    data: PropTypes.instanceOf(list).isRequired,
+    income: PropTypes.instanceOf(list).isRequired,
+    categories: PropTypes.instanceOf(list).isRequired,
+    yearMonths: PropTypes.array.isRequired,
+    currentYearMonth: PropTypes.array.isRequired
 };
+
+const pageIndex = PAGES.indexOf('overview');
+
+const mapStateToProps = state => ({
+    width: GRAPH_WIDTH,
+    height: GRAPH_HEIGHT,
+    data: list(GRAPH_SPEND_CATEGORIES).map(item => state
+        .getIn(['global', 'pages', pageIndex, 'data', 'cost', item.name])
+        .slice(-GRAPH_SPEND_NUM_ITEMS)
+    ),
+    income: state
+        .getIn(['global', 'pages', pageIndex, 'data', 'cost', 'income'])
+        .slice(-GRAPH_SPEND_NUM_ITEMS),
+    categories: list(GRAPH_SPEND_CATEGORIES),
+    yearMonths: state
+        .getIn(['global', 'pages', pageIndex, 'data', 'yearMonths'])
+        .slice(-GRAPH_SPEND_NUM_ITEMS),
+    currentYearMonth: state.getIn(['global', 'pages', pageIndex, 'data', 'currentYearMonth'])
+});
+
+const mapDispatchToProps = () => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GraphSpend);
 

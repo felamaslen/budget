@@ -2,35 +2,28 @@
  * Editable form element component
  */
 
-import { Map as map } from 'immutable';
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import PureControllerView from '../PureControllerView';
-import { aEditableActivated, aEditableChanged } from '../../actions/EditActions';
 
-export default class Editable extends PureControllerView {
+import classNames from 'classnames';
+
+export default class Editable extends Component {
     constructor(props) {
         super(props);
+
         this.inputProps = { type: 'text' };
     }
-    activate() {
-        this.dispatchAction(aEditableActivated(map({
-            row: this.props.row,
-            col: this.props.col,
-            pageIndex: this.props.pageIndex,
-            id: this.props.id,
-            item: this.props.item,
-            value: this.props.value
-        })));
+    focusInput() {
+        setTimeout(() => this.input && this.input.focus && this.input.focus(), 0);
+    }
+    componentDidMount() {
+        if (this.props.active) {
+            this.focusInput();
+        }
     }
     componentDidUpdate(prevProps) {
-        if (this.input && (
-            (!prevProps.active && this.props.active) ||
-            (!prevProps.focus && this.props.focus)
-        )) {
-            window.setTimeout(() => {
-                this.input.focus();
-            }, 0);
+        if (!prevProps.active && this.props.active) {
+            this.focusInput();
         }
     }
     format() {
@@ -45,29 +38,33 @@ export default class Editable extends PureControllerView {
     renderValue() {
         const thisClassName = `editable editable-${this.editableType}`;
 
-        return (
-            <span className={thisClassName} onMouseDown={() => this.activate()}>
-                {this.format()}
-            </span>
-        );
+        const onMouseDown = () => this.props.onActivate();
+
+        return <span className={thisClassName} onMouseDown={onMouseDown}>
+            {this.format()}
+        </span>;
     }
     handleChange(evt) {
-        this.dispatchAction(aEditableChanged(this.getEditValue(evt.target.value)));
+        return this.props.onChange(this.getEditValue(evt.target.value));
     }
     afterInput() {
         return null;
     }
     renderInput() {
-        return (
-            <span>
-                <input className="editable-input" {...this.inputProps}
-                    defaultValue={this.getDefaultValue()}
-                    ref={input => { this.input = input; }}
-                    onChange={evt => this.handleChange(evt)}
-                />
-                {this.afterInput()}
-            </span>
-        );
+        const ref = input => {
+            this.input = input;
+        };
+
+        const defaultValue = this.getDefaultValue();
+        const onChange = evt => this.handleChange(evt);
+
+        const outerClass = classNames({ active: this.props.active });
+
+        return <span className={outerClass}>
+            <input ref={ref} className="editable-input" {...this.inputProps}
+                defaultValue={defaultValue} onChange={onChange} />
+            {this.afterInput()}
+        </span>;
     }
     render() {
         if (this.props.active) {
@@ -79,12 +76,14 @@ export default class Editable extends PureControllerView {
 }
 
 Editable.propTypes = {
-    active: PropTypes.bool,
-    row: PropTypes.number,
-    col: PropTypes.number,
-    pageIndex: PropTypes.number,
+    row: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
     id: PropTypes.number,
-    item: PropTypes.string,
-    value: PropTypes.string
+    item: PropTypes.string.isRequired,
+    value: PropTypes.string,
+    active: PropTypes.bool.isRequired,
+    static: PropTypes.bool,
+    onActivate: PropTypes.func.isRequired,
+    onChange: PropTypes.func.isRequired
 };
 

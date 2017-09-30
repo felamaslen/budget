@@ -4,21 +4,24 @@
 
 import buildMessage from '../messageBuilder';
 import {
-    ANALYSIS_PERIOD_CHANGED, ANALYSIS_GROUPING_CHANGED,
-    ANALYSIS_TIME_INDEX_CHANGED, ANALYSIS_DATA_REFRESHED,
+    ANALYSIS_OPTION_CHANGED,
     ANALYSIS_TREE_DISPLAY_TOGGLED, ANALYSIS_TREE_EXPAND_TOGGLED,
-    ANALYSIS_TREE_HOVERED,
-    ANALYSIS_BLOCK_CLICKED
+    ANALYSIS_TREE_HOVERED, ANALYSIS_BLOCK_CLICKED,
+    ANALYSIS_DATA_REFRESHED
 } from '../constants/actions';
 
-export const aPeriodChanged = period => buildMessage(ANALYSIS_PERIOD_CHANGED, period);
-export const aGroupingChanged = grouping => buildMessage(ANALYSIS_GROUPING_CHANGED, grouping);
-export const aTimeIndexChanged = timeIndex => buildMessage(ANALYSIS_TIME_INDEX_CHANGED, timeIndex);
-export const aAnalysisDataReceived = response => buildMessage(ANALYSIS_DATA_REFRESHED, response);
+import {
+    ANALYSIS_DATA_REQUESTED
+} from '../constants/effects';
 
+export const aOptionChanged = req => buildMessage(
+    ANALYSIS_OPTION_CHANGED, req, ANALYSIS_DATA_REQUESTED
+);
 export const aTreeItemDisplayToggled = key => buildMessage(ANALYSIS_TREE_DISPLAY_TOGGLED, key);
 export const aTreeItemExpandToggled = key => buildMessage(ANALYSIS_TREE_EXPAND_TOGGLED, key);
 export const aTreeItemHovered = key => buildMessage(ANALYSIS_TREE_HOVERED, key);
-
-export const aBlockClicked = key => buildMessage(ANALYSIS_BLOCK_CLICKED, key);
+export const aBlockClicked = block => buildMessage(
+    ANALYSIS_BLOCK_CLICKED, block, ANALYSIS_DATA_REQUESTED
+);
+export const aAnalysisDataRefreshed = res => buildMessage(ANALYSIS_DATA_REFRESHED, res);
 

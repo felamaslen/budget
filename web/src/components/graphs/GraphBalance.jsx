@@ -3,6 +3,8 @@
  */
 
 import { List as list } from 'immutable';
+import { connect } from 'react-redux';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -11,6 +13,7 @@ import { rgba } from '../../misc/color';
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../misc/data';
 import { YMD } from '../../misc/date';
+import { PAGES, GRAPH_WIDTH, GRAPH_HEIGHT } from '../../misc/const';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
     COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_LIGHT, COLOR_LIGHT, COLOR_DARK,
@@ -260,7 +263,7 @@ export class GraphBalance extends LineGraph {
         );
     }
     drawNowLine() {
-    // draw a line indicating where the present ends and the future starts
+        // draw a line indicating where the present ends and the future starts
         const nowLineX = Math.floor(this.pixX(today.timestamp())) + 0.5;
         this.ctx.beginPath();
         this.ctx.moveTo(nowLineX, this.pixY(this.minY));
@@ -299,23 +302,45 @@ export class GraphBalance extends LineGraph {
             enabled: this.props.showAll
         });
 
-        return (
-            <span className={showAllClasses} onClick={() => this.dispatchAction(aShowAllToggled())}>
-                <span>Show all</span>
-                <a className="checkbox" />
-            </span>
-        );
+        const showAll = () => this.props.toggleShowAll();
+
+        return <span className={showAllClasses} onClick={showAll}>
+            <span>Show all</span>
+            <a className="checkbox" />
+        </span>;
     }
 }
 
 GraphBalance.propTypes = {
-    currentYearMonth: PropTypes.array,
-    startYearMonth: PropTypes.array,
-    yearMonths: PropTypes.array,
-    showAll: PropTypes.bool,
-    balance: PropTypes.instanceOf(list),
-    balanceOld: PropTypes.instanceOf(list),
-    funds: PropTypes.instanceOf(list),
-    fundsOld: PropTypes.instanceOf(list)
+    currentYearMonth: PropTypes.array.isRequired,
+    startYearMonth: PropTypes.array.isRequired,
+    yearMonths: PropTypes.array.isRequired,
+    showAll: PropTypes.bool.isRequired,
+    balance: PropTypes.instanceOf(list).isRequired,
+    balanceOld: PropTypes.instanceOf(list).isRequired,
+    funds: PropTypes.instanceOf(list).isRequired,
+    fundsOld: PropTypes.instanceOf(list).isRequired,
+    toggleShowAll: PropTypes.func.isRequired
 };
+
+const pageIndex = PAGES.indexOf('overview');
+
+const mapStateToProps = state => ({
+    width: Math.min(GRAPH_WIDTH, window.innerWidth),
+    height: GRAPH_HEIGHT,
+    currentYearMonth: state.getIn(['global', 'pages', pageIndex, 'data', 'currentYearMonth']),
+    startYearMonth: state.getIn(['global', 'pages', pageIndex, 'data', 'startYearMonth']),
+    yearMonths: state.getIn(['global', 'pages', pageIndex, 'data', 'yearMonths']),
+    showAll: state.getIn(['global', 'other', 'showAllBalanceGraph']),
+    balance: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'balanceWithPredicted']),
+    balanceOld: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'old']),
+    funds: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'funds']),
+    fundsOld: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'fundsOld'])
+});
+
+const mapDispatchToProps = dispatch => ({
+    toggleShowAll: () => dispatch(aShowAllToggled())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GraphBalance);
 

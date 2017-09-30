@@ -2,7 +2,7 @@
  * Main config parameters for budget web app
  */
 
-// show error messages for at least <delay> milliseconds
+// show error messages for at most <delay> milliseconds
 export const ERROR_MESSAGE_DELAY = 5000;
 
 // investment rate of return (assumed, per annum)
@@ -12,7 +12,7 @@ export const FUTURE_INVESTMENT_RATE = 0.1;
 export const SYMBOL_CURRENCY_HTML = '\u00a3';
 export const SYMBOL_CURRENCY_RAW = '£';
 
-// update changes regularly with the server
+// debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
 
 // error messages

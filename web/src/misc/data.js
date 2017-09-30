@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 import {
-    AVERAGE_MEDIAN, PAGES, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
+    AVERAGE_MEDIAN, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
 } from './const';
 import { YMD } from './date';
 
@@ -30,8 +30,8 @@ export function getPeriodMatch(shortPeriod) {
  * Produce a "unique" id
  * @returns {number} "unique" id
  */
-export function uuid() {
-    return Math.floor((1 + Math.random()) * 0x10000);
+export function uuid(rand = Math.random()) {
+    return Math.floor((1 + rand) * 0x10000);
 }
 
 /**
@@ -170,7 +170,7 @@ export function dataEquals(item, compare) {
         return false;
     }
 
-    return item !== compare;
+    return item === compare;
 }
 
 /**
@@ -186,7 +186,7 @@ export function listAverage(theList, offset, mode) {
         : theList;
 
     if (mode === AVERAGE_MEDIAN) {
-    // median
+        // median
         const sorted = values.sort((prev, next) => {
             if (prev < next) {
                 return -1;
@@ -209,10 +209,8 @@ export function listAverage(theList, offset, mode) {
     }
 
     // mean
-    return theList.reduce((sum, value) => sum + value, 0) / theList.size;
+    return values.reduce((sum, value) => sum + value, 0) / values.size;
 }
-
-export const indexPoints = (value, key) => [key, value];
 
 export function getYearMonthFromKey(key, startYear, startMonth) {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
@@ -230,21 +228,8 @@ export function getKeyFromYearMonth(year, month, startYear, startMonth) {
  * Used in fund predictions
  * @returns {float} random value
  */
-export function randnBm() {
-    const rand1 = 1 - Math.random();
-    const rand2 = 1 - Math.random();
-
+export function randnBm(rand1 = Math.random(), rand2 = Math.random()) {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
-}
-
-export function pushToRequestQueue(reduction, active, deleteItem = false) {
-    const queueKey = deleteItem
-        ? 'queueDelete'
-        : 'queue';
-
-    const queue = reduction.getIn(['appState', 'edit', queueKey]);
-
-    return reduction.setIn(['appState', 'edit', queueKey], queue.push(active));
 }
 
 export function getValueForTransmit(value) {
@@ -261,86 +246,6 @@ export function getValueForTransmit(value) {
     }
 
     return value.toString();
-}
-
-/**
- * Builds a request list for updating the server
- * @param {Record} reduction: app state
- * @returns {string} JSON-encoded list for ajax request
- */
-export function buildQueueRequestList(reduction) {
-    let startYearMonth = null; // for overview updates
-    const queue = reduction.getIn(['appState', 'edit', 'queue']);
-    const queueDelete = reduction.getIn(['appState', 'edit', 'queueDelete']);
-
-    const reqList = queue
-        .reduce((reqs, dataItem) => {
-            const pageIndex = dataItem.get('pageIndex');
-            const item = dataItem.get('item');
-            const value = getValueForTransmit(dataItem.get('value'));
-
-            if (PAGES[pageIndex] === 'overview') {
-                if (startYearMonth === null) {
-                    startYearMonth = reduction.getIn(
-                        ['appState', 'pages', pageIndex, 'data', 'startYearMonth']
-                    );
-                }
-                const key = dataItem.get('row');
-                const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
-                const month = (startYearMonth[1] + key - 1) % 12 + 1;
-                const balance = value;
-
-                return reqs.push(map({
-                    pageIndex,
-                    req: map({
-                        method: 'post',
-                        route: 'balance',
-                        query: map.of(),
-                        body: map({ year, month, balance })
-                    })
-                }));
-            }
-
-            if (LIST_PAGES.indexOf(pageIndex) > -1) {
-                const id = dataItem.get('id');
-
-                const reqPageIndex = reqs.findIndex(req => {
-                    return req.get('pageIndex') === pageIndex &&
-                        req.getIn(['req', 'body', 'id']) === id;
-                });
-
-                if (reqPageIndex > -1) {
-                    return reqs.setIn([reqPageIndex, 'req', 'body', item], value);
-                }
-
-                return reqs.push(map({
-                    pageIndex,
-                    req: map({
-                        method: 'put',
-                        route: PAGES[pageIndex],
-                        query: map.of(),
-                        body: map({ id, [item]: value })
-                    })
-                }));
-            }
-
-            return reqs;
-
-        }, list.of())
-        .concat(queueDelete.map(dataItem => {
-            return map({
-                req: map({
-                    method: 'delete',
-                    route: PAGES[dataItem.get('pageIndex')],
-                    query: map.of(),
-                    body: map({ id: dataItem.get('id') })
-                })
-            });
-        }))
-        .map(item => item.get('req'))
-        .toJS();
-
-    return reqList;
 }
 
 /**
@@ -405,7 +310,6 @@ export function sortRowsByDate(rows, pageIndex) {
     const today = new YMD();
     const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
-    let dailySum = 0;
     let lastFuture = false;
     const sorted = rows
         .sort((prev, next) => {
@@ -432,10 +336,16 @@ export function sortRowsByDate(rows, pageIndex) {
         });
 
     if (DAILY_PAGES[pageIndex]) {
+        let dailySum = 0;
+
+        const keys = sorted.keys();
+        keys.next();
+
         return sorted
-            .map((row, rowKey) => {
-                const lastInDay = rowKey === sorted.size - 1 ||
-                    row.getIn(['cols', dateKey]) > sorted.getIn([rowKey + 1, 'cols', dateKey]);
+            .map(row => {
+                const nextKey = keys.next().value;
+
+                const lastInDay = nextKey && row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
 
                 dailySum += row.getIn(['cols', costKey]);
                 const newRow = lastInDay
@@ -477,7 +387,8 @@ export function addWeeklyAverages(data, rows, pageIndex) {
     }
     const firstDate = rows.first().getIn(['cols', dateKey]);
     const lastDate = rows.last().getIn(['cols', dateKey]);
-    const numWeeks = (firstDate - lastDate) / 7;
+
+    const numWeeks = (firstDate - lastDate) / 86400 / 7;
 
     const weeklyAverage = numWeeks
         ? visibleTotal / numWeeks

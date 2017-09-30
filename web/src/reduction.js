@@ -1,17 +1,15 @@
-import { Record, List as list, Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 
 import {
-    PAGES, SERVER_UPDATE_IDLE,
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS
+    PAGES, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS
 } from './misc/const';
 
-export const resetAppState = appState => {
-    return appState
+export function resetAppState(state) {
+    return state
         .set('user', map({ uid: 0, name: null, apiKey: null }))
         .set('pages', list(PAGES).map(() => null))
         .set('pagesRaw', list(PAGES).map(() => null))
         .set('pagesLoaded', list(PAGES).map(() => null))
-        .set('currentPageIndex', -1)
         .set('edit', map({
             active: map({
                 row: 0,
@@ -22,20 +20,22 @@ export const resetAppState = appState => {
                 value: null,
                 originalValue: null
             }),
-            add: list.of(),
+            add: list(PAGES).map(() => null),
             addBtnFocus: false,
             queue: list.of(),
             queueDelete: list.of(),
-            status: SERVER_UPDATE_IDLE,
-            suggestions: map({
-                loading: false,
-                reqId: null,
-                list: [],
-                active: -1
-            })
+            requestList: list.of()
+        }))
+        .set('editSuggestions', map({
+            loading: false,
+            reqId: null,
+            list: list.of(),
+            active: -1
         }))
         .set('modalDialog', map({
             active: false,
+            visible: true,
+            loading: false,
             type: null,
             row: null,
             id: null,
@@ -49,7 +49,7 @@ export const resetAppState = appState => {
                 loadKey: null,
                 blocks: null,
                 active: null,
-                deep: null
+                deepBlock: null
             }),
             analysis: map({
                 loading: false,
@@ -83,24 +83,19 @@ export const resetAppState = appState => {
             fundsCachedValue: map({ ageText: null, value: null }),
             fundHistoryCache: map.of()
         }))
-        .setIn(['loginForm', 'values'], list.of());
-};
+        .set('loginForm', map({
+            inputStep: 0,
+            values: list.of(),
+            visible: false,
+            active: true
+        }));
+}
 
 // the state of the app (reduction) is stored as an immutable object,
 // and returned (modified) by reducers
-export default new Record({
-    appState: resetAppState(map({
-        errorMsg: list.of(),
-        loading: false, // for big (disruptive) things like loading pages
-        loadingApi: false, // for small things like edit updates
-        loginForm: map({
-            inputStep: 0,
-            values: list.of(),
-            loading: true,
-            loadedCookie: false
-        })
-    })),
-    // side effects
-    effects: list.of()
-});
+export default resetAppState(map({
+    errorMsg: list.of(),
+    loading: false, // for big (disruptive) things like loading pages
+    loadingApi: false // for small things like edit updates
+}));
 

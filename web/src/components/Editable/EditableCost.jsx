@@ -9,6 +9,7 @@ import { formatCurrency } from '../../misc/format';
 export default class EditableCost extends Editable {
     constructor(props) {
         super(props);
+
         this.editableType = 'cost';
     }
     format() {

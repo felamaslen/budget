@@ -2,6 +2,8 @@
  * Actions called on the stocks list
  */
 
+// TODO
+
 import buildMessage from '../messageBuilder';
 
 import {

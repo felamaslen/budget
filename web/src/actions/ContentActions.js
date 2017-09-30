@@ -4,17 +4,17 @@
 
 import buildMessage from '../messageBuilder';
 import {
-    CONTENT_LOADED, CONTENT_BLOCK_HOVERED, CONTENT_BLOCKS_RECEIVED
+    CONTENT_LOADED, CONTENT_REQUESTED, CONTENT_BLOCK_HOVERED
 } from '../constants/actions';
 
-export const aContentLoaded = (response, pageIndex) => {
-    return buildMessage(CONTENT_LOADED, { response, pageIndex });
-};
+import {
+    CONTENT_REQUESTED as EF_CONTENT_REQUESTED
+} from '../constants/effects';
 
-export const aContentBlockHovered = (block, subBlock) => {
-    return buildMessage(CONTENT_BLOCK_HOVERED, { block, subBlock });
-};
-export const aContentBlocksReceived = (response, loadKey) => {
-    return buildMessage(CONTENT_BLOCKS_RECEIVED, { response, loadKey });
-};
+export const aContentRequested = req => buildMessage(CONTENT_REQUESTED, req, EF_CONTENT_REQUESTED);
+export const aContentLoaded = res => buildMessage(CONTENT_LOADED, res);
+
+export const aContentBlockHovered = (block, subBlock) => buildMessage(
+    CONTENT_BLOCK_HOVERED, { block, subBlock }
+);
 
