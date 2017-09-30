@@ -339,14 +339,19 @@ button {
             &.month {
                 border-right: 3px solid #222;
             }
-            &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.net {
+            &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
                 flex-grow: 0.7;
             }
             &.income {
                 border-left: 3px solid #222;
             }
             &.net {
+                flex-grow: 1;
                 border-right: 3px solid #efefef;
+            }
+            &.predicted {
+                flex-grow: 0.9;
+                font-style: italic;
             }
             &.balance {
                 flex-grow: 1.2;
