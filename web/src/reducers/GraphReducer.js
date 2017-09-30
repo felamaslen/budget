@@ -4,17 +4,16 @@
 
 import { List as list, Map as map } from 'immutable';
 
-
-import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import {
     getFormattedHistory,
     zoomFundLines,
     getExtraRowProps,
     getFundsCachedValue
 } from './data/funds';
-import {
-    processRawListRows
-} from './data/list';
+import { processRawListRows } from './data/list';
+
+import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { sortRowsByDate } from '../misc/data';
 import { rgba } from '../misc/color';
 
 const pageIndexFunds = PAGES.indexOf('funds');
@@ -241,7 +240,7 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
 }
 
 export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPeriod, data }) {
-    const rows = processRawListRows(data.data, pageIndexFunds);
+    const rows = sortRowsByDate(processRawListRows(data.data, pageIndexFunds), pageIndexFunds);
     const startTime = data.startTime;
     const cacheTimes = list(data.cacheTimes);
 
