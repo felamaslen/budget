@@ -212,8 +212,6 @@ export function listAverage(theList, offset, mode) {
     return theList.reduce((sum, value) => sum + value, 0) / theList.size;
 }
 
-export const indexPoints = (value, key) => [key, value];
-
 export function getYearMonthFromKey(key, startYear, startMonth) {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
     const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed

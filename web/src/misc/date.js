@@ -5,9 +5,9 @@
 import { leadingZeroes } from './format';
 import { MONTHS_SHORT } from './const';
 
-export const yearMonthDifference = (ym1, ym2) => {
+export function yearMonthDifference(ym1, ym2) {
     return 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1];
-};
+}
 
 function leapYear(year) {
     return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);

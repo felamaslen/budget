@@ -98,7 +98,7 @@ export const AVERAGE_MEDIAN = 0xa1;
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
 
-const htmlCanvasSupported = () => {
+export const htmlCanvasSupported = () => {
     if (typeof navigator === 'undefined') {
         return false;
     }
@@ -112,7 +112,6 @@ const htmlCanvasSupported = () => {
     return Boolean(elem.getContext && elem.getContext('2d'));
 };
 
-export const HTML_CANVAS_SUPPORTED = htmlCanvasSupported();
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;
 export const GRAPH_SPEND_CATEGORIES = [

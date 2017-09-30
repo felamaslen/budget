@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { HTML_CANVAS_SUPPORTED } from '../../misc/const';
+import { htmlCanvasSupported } from '../../misc/const';
 
 export default class Graph extends Component {
     constructor(props) {
@@ -34,7 +34,7 @@ export default class Graph extends Component {
         return null;
     }
     componentWillMount() {
-        this.supported = HTML_CANVAS_SUPPORTED;
+        this.supported = htmlCanvasSupported();
     }
     componentDidMount() {
         this.ctx = this.canvas.getContext('2d');
