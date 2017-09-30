@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 export class AppLogo extends Component {
     renderUnsavedChanges() {
-        if (this.props.queueSize > 0) {
+        if (this.props.unsaved) {
             return <span className="queue-not-saved">Unsaved changes!</span>;
         }
 
@@ -31,13 +31,12 @@ export class AppLogo extends Component {
 
 AppLogo.propTypes = {
     loading: PropTypes.bool.isRequired,
-    queueSize: PropTypes.number.isRequired
+    unsaved: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = state => ({
     loading: state.getIn(['global', 'loadingApi']),
-    queueSize: state.getIn(['global', 'edit', 'queue']).size +
-        state.getIn(['global', 'edit', 'queueDelete']).size
+    unsaved: state.getIn(['global', 'edit', 'requestList']).size > 0
 });
 
 const mapDispatchToProps = () => ({});
