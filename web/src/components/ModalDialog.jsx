@@ -64,6 +64,9 @@ export class ModalDialog extends Component {
                 onClick={onSubmit}>Do it.</button>
         </div>;
     }
+    shouldComponentUpdate(nextProps) {
+        return nextProps.active !== this.props.active;
+    }
     render() {
         if (!this.props.active) {
             return null;
