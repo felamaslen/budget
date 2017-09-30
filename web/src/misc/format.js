@@ -208,7 +208,7 @@ export function numberFormat(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-export function getSign(number) {
+function getSign(number) {
     if (number < 0) {
         return '-';
     }
@@ -347,13 +347,9 @@ export function formatCurrency(value, customOptions = {}) {
     return `${sign}${symbol}${formatted}${abbreviation}${suffix}`;
 }
 
-export function formatPercent(frac, options) {
-    options.suffix = '%';
-    options.noSymbol = true;
-
+export function formatPercent(frac, options = {}) {
     return formatCurrency(100 * 100 * frac, {
-        noSymbol: true,
-        suffix: '%'
+        ...options, suffix: '%', noSymbol: true
     });
 }
 

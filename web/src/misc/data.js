@@ -30,8 +30,8 @@ export function getPeriodMatch(shortPeriod) {
  * Produce a "unique" id
  * @returns {number} "unique" id
  */
-export function uuid() {
-    return Math.floor((1 + Math.random()) * 0x10000);
+export function uuid(rand = Math.random()) {
+    return Math.floor((1 + rand) * 0x10000);
 }
 
 /**
@@ -186,7 +186,7 @@ export function listAverage(theList, offset, mode) {
         : theList;
 
     if (mode === AVERAGE_MEDIAN) {
-    // median
+        // median
         const sorted = values.sort((prev, next) => {
             if (prev < next) {
                 return -1;
@@ -209,7 +209,7 @@ export function listAverage(theList, offset, mode) {
     }
 
     // mean
-    return theList.reduce((sum, value) => sum + value, 0) / theList.size;
+    return values.reduce((sum, value) => sum + value, 0) / values.size;
 }
 
 export function getYearMonthFromKey(key, startYear, startMonth) {
@@ -228,10 +228,7 @@ export function getKeyFromYearMonth(year, month, startYear, startMonth) {
  * Used in fund predictions
  * @returns {float} random value
  */
-export function randnBm() {
-    const rand1 = 1 - Math.random();
-    const rand2 = 1 - Math.random();
-
+export function randnBm(rand1 = Math.random(), rand2 = Math.random()) {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
 
