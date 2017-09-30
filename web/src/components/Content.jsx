@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 
 import { aContentRequested } from '../actions/ContentActions';
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import { Route } from 'react-router-dom';
@@ -19,7 +19,7 @@ import { PageListContainer as getPageList } from './PageList';
 import PageAnalysis from './pages/PageAnalysis';
 import PageFunds from './pages/PageFunds';
 
-export class Content extends Component {
+export class Content extends PureComponent {
     render() {
         if (!this.props.loggedIn) {
             return null;

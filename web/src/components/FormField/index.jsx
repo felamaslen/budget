@@ -4,8 +4,6 @@
 
 import { connect } from 'react-redux';
 
-import React from 'react';
-
 import { TransactionsList } from '../../misc/data';
 
 import FormField from './FormField';
@@ -15,27 +13,31 @@ import FormFieldTransactions from './FormFieldTransactions';
 
 import { aFormFieldChanged } from '../../actions/FormActions';
 
-function getFormFieldComponent(item, value) {
+function getFormFieldComponent(item) {
     if (item === 'date') {
-        return <FormFieldDate value={value} />;
+        return FormFieldDate;
     }
 
     if (item === 'cost') {
-        const theValue = value || 0;
-
-        return <FormFieldCost value={theValue} />;
+        return FormFieldCost;
     }
 
     if (item === 'transactions') {
-
-
-        return <FormFieldTransactions value={value} />;
+        return FormFieldTransactions;
     }
 
-    return <FormField value={value} />;
+    return FormField;
 }
 
-function getDispatchMapping(fieldKey, item) {
+function getStateProps(item, defaultValue) {
+    const value = item === 'cost'
+        ? (defaultValue || 0)
+        : defaultValue;
+
+    return () => ({ value });
+}
+
+function getDispatchProps(fieldKey, item) {
     const onChange = (dispatch, fieldValue) => {
         return dispatch(aFormFieldChanged(fieldKey, fieldValue));
     };
@@ -71,11 +73,11 @@ function getDispatchMapping(fieldKey, item) {
 }
 
 export default ({ fieldKey, item, value }) => {
-    const Component = getFormFieldComponent(item, value);
+    const Component = getFormFieldComponent(item);
 
-    const mapStateToProps = () => ({});
+    const mapStateToProps = getStateProps(item, value);
 
-    const mapDispatchToProps = getDispatchMapping(fieldKey, item);
+    const mapDispatchToProps = getDispatchProps(fieldKey, item);
 
     return connect(mapStateToProps, mapDispatchToProps)(Component);
 }

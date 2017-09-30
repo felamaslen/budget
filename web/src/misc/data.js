@@ -170,7 +170,7 @@ export function dataEquals(item, compare) {
         return false;
     }
 
-    return item !== compare;
+    return item === compare;
 }
 
 /**

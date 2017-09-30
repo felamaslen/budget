@@ -25,9 +25,10 @@ export class BodyMobile extends Body {
 
         const ListRowMobile = getListRowMobileDefault(this.props.pageIndex);
 
-        const rows = this.props.rowIds.map(
-            id => <ListRowMobile key={id} id={id} colKeys={colKeys} />
-        );
+        const rows = this.props.rowIds
+            .map(
+                id => <ListRowMobile key={id} id={id} colKeys={colKeys} />
+            );
 
         return <div>
             <ul className="list-ul">{rows}</ul>

@@ -74,6 +74,7 @@ Editable.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.string,
     active: PropTypes.bool.isRequired,
+    static: PropTypes.bool,
     onActivate: PropTypes.func.isRequired,
     onChange: PropTypes.func.isRequired
 };

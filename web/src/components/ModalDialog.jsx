@@ -42,14 +42,14 @@ export class ModalDialog extends Component {
                     return <li key={fieldKey} className={className}>
                         <div className="inner">
                             <span className="form-label">{field.get('item')}</span>
-                            {FieldContainer}
+                            <FieldContainer />
                         </div>
                     </li>;
                 }
 
                 return <li key={fieldKey} className={className}>
                     <span className="form-label">{field.get('item')}</span>
-                    {FieldContainer}
+                    <FieldContainer />
                 </li>;
             });
     }

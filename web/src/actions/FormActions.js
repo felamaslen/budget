@@ -11,8 +11,8 @@ import {
     FORM_INPUT_CHANGED
 } from '../constants/actions';
 
-export const aMobileEditDialogOpened = (pageIndex, rowKey) => {
-    return buildMessage(FORM_EDIT_DIALOG_OPENED, { pageIndex, rowKey });
+export const aMobileEditDialogOpened = (pageIndex, id) => {
+    return buildMessage(FORM_EDIT_DIALOG_OPENED, { pageIndex, id });
 };
 export const aMobileAddDialogOpened = pageIndex => {
     return buildMessage(FORM_ADD_DIALOG_OPENED, { pageIndex });

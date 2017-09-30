@@ -25,7 +25,7 @@ export class ListRowMobile extends ListRow {
                 });
 
                 return <span key={key} className={column}>
-                    <Editable noSuggestions={true} pageIndex={this.props.pageIndex} />
+                    <Editable static={true} pageIndex={this.props.pageIndex} />
                 </span>;
             });
 

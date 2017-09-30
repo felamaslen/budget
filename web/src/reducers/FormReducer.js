@@ -1,23 +1,22 @@
 import { Map as map, List as list } from 'immutable';
 
 import { rCalculateOverview } from './data/overview';
-import {
-    dataEquals, getAddDefaultValues, buildQueueRequestList
-} from '../misc/data';
+import { dataEquals, getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES, PAGES } from '../misc/const';
 import {
     getInvalidInsertDataKeys,
     stringifyFields,
     resortListRows,
-    recalculateFundProfits
+    recalculateFundProfits,
+    addToRequestQueue
 } from './EditReducer';
 
 import buildMessage from '../messageBuilder';
+
 import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 
-export function rOpenFormDialogEdit(reduction, req) {
-    const pageIndex = req.pageIndex;
-    const rowItem = reduction.getIn(['pages', pageIndex, 'rows', req.rowKey]);
+export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
+    const rowItem = reduction.getIn(['pages', pageIndex, 'rows', id]);
 
     const fields = rowItem.get('cols')
         .map((value, key) => {
@@ -26,21 +25,17 @@ export function rOpenFormDialogEdit(reduction, req) {
             return map({ item, value });
         });
 
-    const id = rowItem.get('id');
-
     return reduction
         .setIn(['modalDialog'], map({
             active: true,
             type: 'edit',
-            row: req.rowKey,
             id,
             fields,
             invalidKeys: list.of()
         }));
 }
 
-export function rOpenFormDialogAdd(reduction, req) {
-    const pageIndex = req.pageIndex;
+export function rOpenFormDialogAdd(reduction, { pageIndex }) {
     const values = getAddDefaultValues(pageIndex);
     const fields = list(LIST_COLS_PAGES[pageIndex])
         .map((item, key) => map({ item, value: values.get(key) }));
@@ -49,7 +44,6 @@ export function rOpenFormDialogAdd(reduction, req) {
         .setIn(['modalDialog'], map({
             active: true,
             type: 'add',
-            row: null,
             id: null,
             fields,
             invalidKeys: list.of()
@@ -65,9 +59,9 @@ function resetModalDialog(reduction) {
 }
 
 export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
-    const rowKey = reduction.getIn(['modalDialog', 'row']);
+    const id = reduction.getIn(['modalDialog', 'id']);
 
-    const oldRow = reduction.getIn(['pages', pageIndex, 'rows', rowKey]);
+    const oldRow = reduction.getIn(['pages', pageIndex, 'rows', id]);
 
     const newRow = oldRow.set('cols', fields.map(field => field.get('value')));
 
@@ -120,22 +114,18 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
         );
     }
 
-    const id = reduction.getIn(['modalDialog', 'id']);
-    const fieldsWithIds = id
-        ? fields.map(field => field.set('id', id))
-        : fields;
+    const newRequestList = fields
+        .map(field => field
+            .set('id', id)
+            .set('pageIndex', pageIndex))
+        .reduce(
+            (requestList, field) => addToRequestQueue(requestList, field),
+            reduction.getIn(['edit', 'requestList'])
+        );
 
-    const queue = reduction.getIn(['edit', 'queue'])
-        .concat(fieldsWithIds.map(field => field.set('pageIndex', pageIndex)));
-
-    const requestList = buildQueueRequestList(
-        queue, reduction.getIn(['edit', 'queueDelete'])
-    );
-
-    return resetModalDialog(newReduction)
-        .setIn(['edit', 'queueRequestList'], requestList)
-        .setIn(['edit', 'queue'], queue)
-        .setIn(['pages', pageIndex, 'rows', rowKey], newRow)
+    return newReduction
+        .setIn(['edit', 'requestList'], newRequestList)
+        .setIn(['pages', pageIndex, 'rows', id], newRow)
         .setIn(['pages', pageIndex, 'data', 'total'], newTotal);
 }
 

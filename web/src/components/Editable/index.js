@@ -58,7 +58,13 @@ function getStateProps(row, col, item, value, getSuggestions) {
 function getDispatchProps(row, col, item, value, getSuggestions) {
     return (dispatch, ownProps) => {
         const props = {
-            onActivate: () => dispatch(aEditableActivated(map({ row, col, item, value }))),
+            onActivate: () => {
+                if (ownProps.static) {
+                    return;
+                }
+
+                dispatch(aEditableActivated(map({ row, col, item, value })));
+            },
             onChange: processedValue => dispatch(aEditableChanged(processedValue))
         };
 
