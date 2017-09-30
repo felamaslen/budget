@@ -47,7 +47,7 @@ export async function submitLoginForm(dispatch, reduction, pin, saveDetails = tr
             openTimedMessage(dispatch, message);
         }
         else {
-            openTimedMessage(dispatch, 'Unknown error logging in');
+            console.error(err.stack);
         }
 
         dispatch(aLoginFormResponseReceived(null));
