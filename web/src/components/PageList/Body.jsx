@@ -8,6 +8,11 @@ import AddForm from './AddForm';
 import { ListRowContainer as getListRowDefault } from './ListRow';
 
 export class Body extends PureComponent {
+    constructor(props) {
+        super(props);
+
+        this.ListRow = this.getListRow();
+    }
     getListRow() {
         return getListRowDefault(this.props.pageIndex);
     }
@@ -19,9 +24,7 @@ export class Body extends PureComponent {
         return true;
     }
     render() {
-        const ListRow = this.getListRow();
-
-        const rows = this.props.rowIds.map(id => <ListRow key={id} id={id} />);
+        const rows = this.props.rowIds.map(id => <this.ListRow key={id} id={id} />);
 
         return <ul className="list-ul">
             <AddForm pageIndex={this.props.pageIndex} />

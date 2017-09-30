@@ -1,8 +1,5 @@
 import connect, { Body } from '../../PageList/Body';
 
-import React from 'react';
-import PropTypes from 'prop-types';
-
 import ListRowFunds from './ListRowFunds';
 
 export class BodyFunds extends Body {
@@ -10,9 +7,6 @@ export class BodyFunds extends Body {
         return ListRowFunds;
     }
 }
-
-BodyFunds.propTypes = {
-};
 
 const mapStateToProps = () => () => ({});
 
