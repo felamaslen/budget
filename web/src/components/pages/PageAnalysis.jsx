@@ -27,16 +27,14 @@ const pageIndex = PAGES.indexOf('analysis');
 
 export class PageAnalysis extends Page {
     loadContent() {
-        if (!this.props.loaded) {
-            this.props.loadContent({
-                pageIndex,
-                params: [
-                    ANALYSIS_PERIODS[this.props.period],
-                    ANALYSIS_GROUPINGS[this.props.grouping],
-                    this.props.timeIndex
-                ]
-            });
-        }
+        this.props.loadContent({
+            pageIndex,
+            params: [
+                ANALYSIS_PERIODS[this.props.period],
+                ANALYSIS_GROUPINGS[this.props.grouping],
+                this.props.timeIndex
+            ]
+        });
     }
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
