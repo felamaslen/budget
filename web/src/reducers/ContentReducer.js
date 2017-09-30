@@ -71,12 +71,14 @@ function processPageData(reduction, pageIndex, data) {
         return processPageDataFunds(reduction, pageIndex, data);
     }
 
-    else if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    if (LIST_PAGES.indexOf(pageIndex) > -1) {
         const newReduction = processPageDataList(reduction, pageIndex, data);
         const sortedRows = sortRowsByDate(
-            newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex);
+            newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex
+        );
         const weeklyData = addWeeklyAverages(
-            newReduction.getIn(['pages', pageIndex, 'data']), sortedRows, pageIndex);
+            newReduction.getIn(['pages', pageIndex, 'data']), sortedRows, pageIndex
+        );
 
         return newReduction
             .setIn(['pages', pageIndex, 'rows'], sortedRows)

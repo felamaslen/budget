@@ -7,7 +7,7 @@ import {
     LIST_COLS_SHORT, LIST_COLS_STANDARD, LIST_COLS_PAGES
 } from '../../misc/const';
 import { YMD } from '../../misc/date';
-import { TransactionsList } from '../../misc/data';
+import { TransactionsList, sortRowsByDate } from '../../misc/data';
 import {
     getFormattedHistory, getFundsCachedValue, getExtraRowProps
 } from './funds';
@@ -74,7 +74,9 @@ export function processPageDataFunds(reduction, pageIndex, data, now = new Date(
     const period = reduction.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
 
-    const rows = newReduction.getIn(['pages', pageIndex, 'rows']);
+    const rows = sortRowsByDate(
+        newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex
+    );
     const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes, pageIndex);
 
     const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
