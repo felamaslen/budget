@@ -29,7 +29,7 @@ function getItemValue(reduction, pageIndex, row, col) {
             item = LIST_COLS_PAGES[pageIndex][col];
         }
         else {
-            value = reduction.getIn(['edit', 'add', col]);
+            value = reduction.getIn(['edit', 'add', pageIndex, col]);
             item = LIST_COLS_PAGES[pageIndex][col];
         }
     }
@@ -365,7 +365,7 @@ export function rNavigateToPage(reduction, pageIndex) {
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
         newReduction = newReduction
             .setIn(
-                ['edit', 'add'], getAddDefaultValues(pageIndex)
+                ['edit', 'add', pageIndex], getAddDefaultValues(pageIndex)
             )
             .setIn(
                 ['edit', 'active'], getNullEditable(pageIndex)

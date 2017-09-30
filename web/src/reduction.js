@@ -21,7 +21,7 @@ export function resetAppState(state) {
                 value: null,
                 originalValue: null
             }),
-            add: list.of(),
+            add: list(PAGES).map(() => null),
             addBtnFocus: false,
             queue: list.of(),
             queueDelete: list.of(),

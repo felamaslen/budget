@@ -42,7 +42,7 @@ ListAddEditItem.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => ({
-    value: state.getIn(['global', 'edit', 'add', ownProps.col]),
+    value: state.getIn(['global', 'edit', 'add', ownProps.pageIndex, ownProps.col]),
     active: state.getIn(['global', 'edit', 'row']) === ownProps.row &&
         state.getIn(['global', 'edit', 'col']) === ownProps.col,
     item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col]

@@ -126,6 +126,6 @@ export function rHandleContentResponse(reduction, { response, pageIndex }) {
         .set('loading', false)
         .setIn(['pagesLoaded', pageIndex], true)
         .setIn(['edit', 'active'], getNullEditable(pageIndex))
-        .setIn(['edit', 'add'], getAddDefaultValues(pageIndex));
+        .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex));
 }
 

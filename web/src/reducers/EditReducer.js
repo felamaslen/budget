@@ -70,7 +70,7 @@ function applyEditsList(reduction, item, pageIndex) {
     // update list data in the UI
     if (item.get('row') === -1) {
         // add-item
-        return reduction.setIn(['edit', 'add', item.get('col')], item.get('value'));
+        return reduction.setIn(['edit', 'add', pageIndex, item.get('col')], item.get('value'));
     }
 
     let newReduction = reduction;
@@ -351,7 +351,7 @@ export function rAddListItem(reduction, { pageIndex, sending }) {
         const now = new YMD();
 
         return rActivateEditable(reduction, null)
-            .setIn(['edit', 'add'], getAddDefaultValues(pageIndex))
+            .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex))
             .setIn(['edit', 'active'], map({
                 row: -1,
                 col: 0,
@@ -451,7 +451,7 @@ function getTransactionsForRow(reduction, row, col) {
         return reduction.getIn(['pages', pageIndex, 'rows', row, 'cols', col]);
     }
 
-    return reduction.getIn(['edit', 'add', col]);
+    return reduction.getIn(['edit', 'add', pageIndex, col]);
 }
 
 function rFundTransactions(reduction, row, col, transactions) {
@@ -466,7 +466,7 @@ function rFundTransactions(reduction, row, col, transactions) {
     }
 
     return reduction.setIn(
-        ['edit', 'add', col], transactions
+        ['edit', 'add', pageIndex, col], transactions
     );
 }
 
