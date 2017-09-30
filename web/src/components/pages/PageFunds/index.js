@@ -15,61 +15,19 @@ import classNames from 'classnames';
 
 import { getPeriodMatch } from '../../../misc/data';
 import { DO_STOCKS_LIST } from '../../../misc/config';
-import { mediaQueries, PAGES, LIST_COLS_PAGES, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
+import { mediaQueries, PAGES, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
 import { formatCurrency, formatPercent } from '../../../misc/format';
 import { StocksList } from '../../StocksList';
-import { aMobileEditDialogOpened } from '../../../actions/FormActions';
 
 import getFundsHead from './HeadFunds';
 import getFundsBody from './BodyFunds';
+import getFundsBodyMobile from './BodyFundsMobile';
 
 import GraphFunds from '../../graphs/GraphFunds';
 
 const pageIndex = PAGES.indexOf('funds');
 
 class PageFunds extends PageList {
-    /*
-    renderGainInfoMobile(cost, gain) {
-        if (!gain) {
-            return null;
-        }
-
-        const formatOptions = {
-            abbreviate: true,
-            precision: 1
-        };
-
-        const costValue = <span className="cost-value">
-            {formatCurrency(cost, formatOptions)}
-        </span>;
-
-        const value = cost
-            ? formatCurrency(gain.get('value'), formatOptions)
-            : '\u2013';
-
-        const actualValue = <span className="actual-value">{value}</span>;
-
-        return <span className="cost">
-            {costValue}
-            {actualValue}
-        </span>;
-    }
-    renderListRowMobile(row, rowKey, columns, colKeys) {
-        const items = super.renderListRowItemsMobile(row, rowKey, columns.slice(0, 2), colKeys);
-
-        const gain = row.get('gain');
-        const gainInfo = this.renderGainInfoMobile(row.getIn(['cols', colKeys[2]]), gain);
-
-        const onClick = () => {
-            this.dispatchAction(aMobileEditDialogOpened(this.props.index, rowKey));
-        };
-
-        return <li key={rowKey} onClick={onClick}>
-            {items}
-            {gainInfo}
-        </li>;
-    }
-    */
     renderStocksList(render) {
         if (!render || !DO_STOCKS_LIST) {
             return null;
@@ -134,6 +92,11 @@ class PageFunds extends PageList {
         const BodyFunds = getFundsBody(this.props.pageIndex);
 
         return <BodyFunds />;
+    }
+    bodyMobile() {
+        const BodyFundsMobile = getFundsBodyMobile(this.props.pageIndex);
+
+        return <BodyFundsMobile />;
     }
 }
 
