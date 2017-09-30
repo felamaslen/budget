@@ -56,9 +56,9 @@ export default class FormFieldTransactions extends FormField {
 }
 
 FormFieldTransactions.propTypes = {
-    value: PropTypes.instanceOf(TransactionsList),
-    onDateChange: PropTypes.func,
-    onUnitsChange: PropTypes.func,
-    onCostChange: PropTypes.func
+    value: PropTypes.instanceOf(TransactionsList).isRequired,
+    onDateChange: PropTypes.func.isRequired,
+    onUnitsChange: PropTypes.func.isRequired,
+    onCostChange: PropTypes.func.isRequired
 };
 

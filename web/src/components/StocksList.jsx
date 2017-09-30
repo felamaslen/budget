@@ -4,10 +4,11 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import { connect } from 'react-redux';
+
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import PureControllerView from './PureControllerView';
 import { GraphStocks } from './graphs/GraphStocks';
 import { aStocksListRequested, aStocksPricesRequested } from '../actions/StocksListActions';
 import { sigFigs } from '../misc/format';
@@ -35,9 +36,9 @@ const renderStock = (stock, key) => {
     );
 };
 
-export class StocksList extends PureControllerView {
+export class StocksList extends Component {
     componentWillMount() {
-        this.dispatchNext(aStocksListRequested());
+        this.props.requestStocksList();
     }
     componentDidUpdate(prevProps) {
         if (prevProps.lastPriceUpdate !== this.props.lastPriceUpdate) {
@@ -63,7 +64,7 @@ export class StocksList extends PureControllerView {
                     {this.props.stocks.valueSeq().map(renderStock)}
                 </ul>
                 <div className="stocks-sidebar">
-                    <GraphStocks dispatcher={this.props.dispatcher}
+                    <GraphStocks
                         name="graph-stocks"
                         width={GRAPH_STOCKS_WIDTH} height={GRAPH_STOCKS_HEIGHT}
                         data={this.props.history} />
@@ -81,12 +82,21 @@ export class StocksList extends PureControllerView {
 }
 
 StocksList.propTypes = {
-    loadedInitial: PropTypes.bool,
+    loadedInitial: PropTypes.bool.isRequired,
     stocks: PropTypes.instanceOf(map),
     indices: PropTypes.instanceOf(map),
     lastPriceUpdate: PropTypes.number,
     history: PropTypes.instanceOf(list),
     weightedGain: PropTypes.number,
-    oldWeightedGain: PropTypes.number
+    oldWeightedGain: PropTypes.number,
+    requestStocksList: PropTypes.func.isRequired
 };
+
+const mapStateToProps = () => ({});
+
+const mapDispatchToProps = dispatch => ({
+    requestStocksList: () => setTimeout(() => dispatch(aStocksListRequested()), 0)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(StocksList);
 

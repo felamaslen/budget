@@ -33,20 +33,18 @@ button {
         box-shadow: 0 3px 9px rgba(100, 100, 100, 0.5),
         0 -2px 6px rgba(0, 0, 0, 0.3);
     }
-    .nav-link-li {
+    .nav-link {
         flex: 1 0 0;
         border-bottom: 4px solid transparent;
-        &.active {
-            border-color: $color_mob_accent;
-        }
-    }
-    .nav-link {
         display: block;
         height: $height_nav_mobile - 12;
         text-align: center;
         text-indent: -9999px;
         overflow: hidden;
         padding-top: 8px;
+        &.active {
+            border-color: $color_mob_accent;
+        }
     }
     .nav-link, .nav-link-btn {
         &:before {
@@ -54,7 +52,7 @@ button {
             margin: 0 auto;
         }
     }
-    .nav-link-overview .nav-link:before {
+    .nav-link-overview:before {
         background-position: -200px 0;
     }
     .nav-link-analysis {
@@ -65,33 +63,31 @@ button {
             }
         }
     }
-    .nav-link-funds .nav-link:before {
+    .nav-link-funds:before {
         background-position: -256px 0;
     }
-    .nav-link-income .nav-link:before {
+    .nav-link-income:before {
         background-position: -284px 0;
     }
-    .nav-link-bills .nav-link:before {
+    .nav-link-bills:before {
         background-position: -312px 0;
     }
-    .nav-link-food .nav-link:before {
+    .nav-link-food:before {
         background-position: -340px 0;
     }
-    .nav-link-general .nav-link:before {
+    .nav-link-general:before {
         background-position: -368px 0;
     }
-    .nav-link-holiday .nav-link:before {
+    .nav-link-holiday:before {
         background-position: -200px -28px;
     }
-    .nav-link-social .nav-link:before {
+    .nav-link-social:before {
         background-position: -228px -28px;
     }
     .nav-link-logout {
         display: none;
-        .nav-link {
-            &:before {
-                background-position: -256px -28px;
-            }
+        &:before {
+            background-position: -256px -28px;
         }
     }
 }
@@ -101,6 +97,33 @@ button {
 }
 
 // modal dialogs
+@mixin modal-enter-state {
+    transform: perspective(100px) rotateX(5deg) translateZ(-18px);
+    opacity: 0;
+}
+@mixin modal-normal-state {
+    transform: none;
+    opacity: 1;
+}
+@mixin modal-exit-state {
+    @include modal-enter-state;
+}
+@keyframes into-view {
+    from {
+        @include modal-enter-state;
+    }
+    to {
+        @include modal-normal-state;
+    }
+}
+@keyframes out-of-view {
+    from {
+        @include modal-normal-state;
+    }
+    to {
+        @include modal-exit-state;
+    }
+}
 .modal-dialog-outer {
     display: flex;
     align-items: center;
@@ -123,6 +146,18 @@ button {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 3px;
         box-shadow: 0 3px 7px rgba(60, 60, 60, 0.5);
+        transition: filter 0.1s linear;
+
+        animation: into-view 0.3s ease-out;
+        transform-origin: bottom;
+        &.hidden {
+            opacity: 0;
+            animation: out-of-view 0.3s ease-out;
+        }
+
+        &.loading {
+            filter: grayscale(1) contrast(0.7);
+        }
     }
     .title {
         font-size: 1.2em;
@@ -429,6 +464,7 @@ button {
     .gain {
         display: flex;
         flex-flow: row wrap;
+        align-items: center;
         height: 45px;
         overflow: hidden;
         padding: 10px 24px;

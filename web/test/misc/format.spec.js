@@ -1,12 +1,30 @@
 import { expect } from 'chai';
 
 import {
+    capitalise,
+    numberFormat,
     sigFigs,
     leadingZeroes,
-    formatCurrency
+    formatCurrency,
+    formatPercent,
+    getTickSize,
+    formatAge
 } from '../../src/misc/format';
 
 describe('Format functions', () => {
+    describe('capitalise', () => {
+        it('should capitalise a word', () => {
+            expect(capitalise('foobar')).to.equal('Foobar');
+            expect(capitalise('fOoBaR')).to.equal('Foobar');
+        });
+    });
+    describe('numberFormat', () => {
+        it('should add comma separators', () => {
+            expect(numberFormat(1000)).to.equal('1,000');
+            expect(numberFormat(91239.192)).to.equal('91,239.192');
+            expect(numberFormat(192)).to.equal('192');
+        });
+    });
     describe('sigFigs', () => {
         it('should return strings of the expected width', () => {
             expect(sigFigs(1, 3)).to.equal('1.00');
@@ -23,7 +41,6 @@ describe('Format functions', () => {
             expect(sigFigs(0, 3)).to.equal('0.00');
         });
     });
-
     describe('leadingZeroes', () => {
         it('should add the expected number of zeroes to a number', () => {
             expect(leadingZeroes(0, 3)).to.equal('000');
@@ -123,6 +140,31 @@ describe('Format functions', () => {
                 raw: true
             }))
                 .to.equal('\u00a388.24');
+        });
+    });
+
+    describe('formatPercent', () => {
+        it('should add a percent symbol and round', () => {
+            expect(formatPercent(19 / 100)).to.equal('19.00%');
+            expect(formatPercent(38 / 50)).to.equal('76.00%');
+        });
+    });
+
+    describe('getTickSize', () => {
+        it('should get the correct tick size', () => {
+            expect(getTickSize(-1, 11, 10)).to.equal(2);
+            expect(getTickSize(0, 996, 5)).to.equal(200);
+            expect(getTickSize(0, 1001, 5)).to.equal(500);
+        });
+    });
+
+    describe('formatAge', () => {
+        it('should format the age properly', () => {
+            expect(formatAge(86450)).to.equal('1 day, 0 hours ago');
+            expect(formatAge(96450)).to.equal('1 day, 3 hours ago');
+            expect(formatAge(180450)).to.equal('2 days, 2 hours ago');
+            expect(formatAge(812391239)).to.equal('25 years, 9 months ago');
+            expect(formatAge(812391239, true)).to.equal('25Y, 9M');
         });
     });
 });

@@ -8,9 +8,7 @@ import { COLOR_CATEGORY } from './config';
 export function rgba(values) {
     const roundedValues = values
         .slice(0, 3)
-        .map(
-            item => Math.max(0, Math.min(255, Math.round(item)))
-        )
+        .map(item => Math.max(0, Math.min(255, Math.round(item))))
         .concat(values.slice(3))
         .join(',');
 
@@ -61,9 +59,7 @@ export function getOverviewScoreColor(value, range, median, color) {
         ? median.negative
         : median.positive;
 
-    const cost = value > 0
-        ? value
-        : -value;
+    const cost = Math.abs(value);
 
     const max = value > 0
         ? range.max
