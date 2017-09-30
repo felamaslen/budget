@@ -23,7 +23,7 @@ export class GraphFundItem extends LineGraph {
         super(props);
 
         this.canvasProperties = {
-            onClick: () => this.props.togglePopout(this.props.rowKey)
+            onClick: () => this.props.togglePopout(this.props.id)
         };
     }
     canvasClasses() {
@@ -113,24 +113,24 @@ export class GraphFundItem extends LineGraph {
 }
 
 GraphFundItem.propTypes = {
+    id: PropTypes.number.isRequired,
     data: PropTypes.instanceOf(list),
-    popout: PropTypes.bool.isRequired,
-    rowKey: PropTypes.number.isRequired
+    popout: PropTypes.bool.isRequired
 };
 
 const pageIndex = PAGES.indexOf('funds');
 
 const mapStateToProps = (state, ownProps) => ({
     data: state.getIn(
-        ['global', 'pages', pageIndex, 'rows', ownProps.rowKey, 'prices']
+        ['global', 'pages', pageIndex, 'rows', ownProps.id, 'prices']
     ),
     popout: Boolean(state.getIn(
-        ['global', 'pages', pageIndex, 'rows', ownProps.rowKey, 'historyPopout']
+        ['global', 'pages', pageIndex, 'rows', ownProps.id, 'historyPopout']
     ))
 });
 
 const mapDispatchToProps = dispatch => ({
-    togglePopout: rowKey => dispatch(aFundItemGraphToggled(rowKey))
+    togglePopout: id => dispatch(aFundItemGraphToggled(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFundItem);

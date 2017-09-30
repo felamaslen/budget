@@ -3,7 +3,7 @@
  */
 
 import { List as list } from 'immutable';
-import { connect as reduxConnect } from 'react-redux';
+import extendableContainer from '../containerExtender';
 
 import { aContentRequested } from '../../actions/ContentActions';
 import {
@@ -17,7 +17,7 @@ import Media from 'react-media';
 import { mediaQueries, PAGES, LIST_COLS_PAGES } from '../../misc/const';
 
 import Head from './Head';
-import Body from './Body';
+import { BodyContainer as getBody } from './Body';
 
 export class PageList extends PureComponent {
     /*
@@ -75,14 +75,19 @@ export class PageList extends PureComponent {
         </div>;
     }
     */
+    getListBody() {
+        return getBody(this.props.pageIndex);
+    }
     renderListDesktop(render) {
         if (!render) {
             return null;
         }
 
+        const ListBody = this.getListBody();
+
         return <div>
             <Head pageIndex={this.props.pageIndex} />
-            <Body pageIndex={this.props.pageIndex} />
+            <ListBody pageIndex={this.props.pageIndex} />
         </div>;
     }
     renderList() {
@@ -133,47 +138,21 @@ PageList.propTypes = {
     openMobileAddDialog: PropTypes.func.isRequired
 };
 
-function getStateProps(pageIndex, extra) {
-    const mapStateToPropsDefault = state => ({
-        pageIndex,
-        loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex]))
-    });
+const stateDefault = pageIndex => state => ({
+    pageIndex,
+    loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex]))
+});
 
-    if (extra) {
-        return (state, ownProps) => Object.assign(
-            mapStateToPropsDefault(state, ownProps),
-            extra(state, ownProps)
-        );
-    }
+const dispatchDefault = pageIndex => dispatch => ({
+    loadContent: req => dispatch(aContentRequested(req)),
+    openMobileEditDialog: rowKey => dispatch(
+        aMobileEditDialogOpened(pageIndex, rowKey)
+    ),
+    openMobileAddDialog: () => dispatch(aMobileAddDialogOpened(pageIndex))
+});
 
-    return mapStateToPropsDefault;
-}
+export const PageListContainer = pageIndex =>
+    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(PageList);
 
-function getDispatchProps(pageIndex, extra) {
-    const mapDispatchToPropsDefault = dispatch => ({
-        loadContent: req => dispatch(aContentRequested(req)),
-        openMobileEditDialog: rowKey => dispatch(
-            aMobileEditDialogOpened(pageIndex, rowKey)
-        ),
-        openMobileAddDialog: () => dispatch(aMobileAddDialogOpened(pageIndex))
-    });
-
-    if (extra) {
-        return (dispatch, ownProps) => Object.assign(
-            mapDispatchToPropsDefault(dispatch, ownProps),
-            extra(dispatch, ownProps)
-        );
-    }
-
-    return mapDispatchToPropsDefault;
-}
-
-export function connect(pageIndex, extraState = null, extraDispatch = null) {
-    const mapStateToProps = getStateProps(pageIndex, extraState);
-    const mapDispatchToProps = getDispatchProps(pageIndex, extraDispatch);
-
-    return reduxConnect(mapStateToProps, mapDispatchToProps);
-}
-
-export default pageIndex => connect(pageIndex)(PageList);
+export default extendableContainer(stateDefault, dispatchDefault);
 

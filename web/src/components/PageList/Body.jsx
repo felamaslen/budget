@@ -1,17 +1,20 @@
 import { List as list } from 'immutable';
-import { connect } from 'react-redux';
+import extendableContainer from '../containerExtender';
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import AddForm from './AddForm';
-import ListRow from './ListRow';
+import { ListRowContainer as getListRowDefault } from './ListRow';
 
 export class Body extends PureComponent {
+    getListRow() {
+        return getListRowDefault(this.props.pageIndex);
+    }
     render() {
-        const rows = this.props.rowIds.map(
-            id => <ListRow key={id} id={id} pageIndex={this.props.pageIndex} />
-        );
+        const ListRow = this.getListRow();
+
+        const rows = this.props.rowIds.map(id => <ListRow key={id} id={id} />);
 
         return <ul className="list-ul">
             <AddForm pageIndex={this.props.pageIndex} />
@@ -25,12 +28,17 @@ Body.propTypes = {
     rowIds: PropTypes.instanceOf(list).isRequired
 };
 
-const mapStateToProps = (state, ownProps) => ({
+const stateDefault = pageIndex => state => ({
     rowIds: state
-        .getIn(['global', 'pages', ownProps.pageIndex, 'rows'])
+        .getIn(['global', 'pages', pageIndex, 'rows'])
         .keySeq()
         .toList()
 });
 
-export default connect(mapStateToProps)(Body);
+const dispatchDefault = () => () => ({});
+
+export const BodyContainer = pageIndex =>
+    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(Body);
+
+export default extendableContainer(stateDefault, dispatchDefault);
 

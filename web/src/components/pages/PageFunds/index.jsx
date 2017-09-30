@@ -4,146 +4,44 @@
 
 import { Map as map } from 'immutable';
 
-import { PageList, connect } from '../PageList';
+import connect, { PageList } from '../../PageList';
 
-import { aContentRequested } from '../../actions/ContentActions';
+import { aContentRequested } from '../../../actions/ContentActions';
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { getPeriodMatch } from '../../misc/data';
-import { rgba } from '../../misc/color';
-import { DO_STOCKS_LIST } from '../../misc/config';
 import Media from 'react-media';
-import { mediaQueries, PAGES, LIST_COLS_PAGES, GRAPH_FUNDS_PERIODS } from '../../misc/const';
-import { formatCurrency, formatPercent } from '../../misc/format';
-import GraphFundItem from '../graphs/GraphFundItem';
-import GraphFunds from '../graphs/GraphFunds';
-import { StocksList } from '../StocksList';
-import { aMobileEditDialogOpened } from '../../actions/FormActions';
-import { aFundsGraphPeriodChanged } from '../../actions/GraphActions';
+import classNames from 'classnames';
 
-const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
+import { getPeriodMatch } from '../../../misc/data';
+import { DO_STOCKS_LIST } from '../../../misc/config';
+import { mediaQueries, PAGES, LIST_COLS_PAGES, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
+import { formatCurrency, formatPercent } from '../../../misc/format';
+import { StocksList } from '../../StocksList';
+import { aMobileEditDialogOpened } from '../../../actions/FormActions';
+import { aFundsGraphPeriodChanged } from '../../../actions/GraphActions';
+
+import getFundsBody from './BodyFunds';
+
+import GraphFunds from '../../graphs/GraphFunds';
 
 const pageIndex = PAGES.indexOf('funds');
 
 class PageFunds extends PageList {
-    listItemClasses(row) {
-        return {
-            sold: row.getIn(['cols', transactionsKey]).isSold()
-        };
-    }
-    getGainInfo() {
-        const cost = this.props.totalCost;
-        const value = this.props.cachedValue.get('value');
-
-        const gain = cost
-            ? (value - cost) / cost
-            : 0;
-
-        const gainPct = formatPercent(gain, {
-            brackets: true, precision: 2
-        });
-
-        const classes = classNames({
-            gain: true,
-            profit: cost < value,
-            loss: cost > value
-        });
-
-        return { classes, gainPct };
-    }
-    listHeadExtra() {
-        const reloadFundPrices = () => this.props.reloadFundPrices(this.props.shortPeriod);
-
-        const gainInfo = this.getGainInfo();
-
-        return <span className={gainInfo.classes} onClick={reloadFundPrices}>
-            <span className="gain-info">Current value:</span>
-            <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
-            <span>{gainInfo.gainPct}</span>
-            <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
-        </span>;
-    }
-    renderFundGraph(row, rowKey) {
-        const name = row.getIn(['cols', 1])
-            .toLowerCase()
-            .replace(/\W+/g, '-');
-
-        return <span className="fund-graph">
-            <div className="fund-graph-cont">
-                <GraphFundItem name={name} rowKey={rowKey} />;
-            </div>
-        </span>;
-    }
-    renderGainInfo(row) {
-        const gain = row.get('gain');
-
-        if (!gain) {
+    /*
+    renderAfterListMobile(render) {
+        if (!render) {
             return null;
         }
 
-        const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
-        const formatOptionsPct = { brackets: true, precision: 2 };
+        const gainInfo = this.getGainInfo();
 
-        const gainStyle = {
-            backgroundColor: rgba(gain.get('color'))
-        };
-        const gainOuterClasses = classNames({
-            text: true,
-            profit: gain.get('gain') >= 0,
-            loss: gain.get('gain') < 0
-        });
-        const gainClasses = classNames({
-            gain: true,
-            profit: gain.get('gain') >= 0,
-            loss: gain.get('gain') < 0
-        });
-        const gainAbsClasses = classNames({
-            'gain-abs': true,
-            profit: gain.get('gainAbs') >= 0,
-            loss: gain.get('gainAbs') < 0
-        });
-        const dayGainClasses = classNames({
-            'day-gain': true,
-            profit: gain.get('dayGain') >= 0,
-            loss: gain.get('dayGain') < 0
-        });
-        const dayGainAbsClasses = classNames({
-            'day-gain-abs': true,
-            profit: gain.get('dayGainAbs') >= 0,
-            loss: gain.get('dayGainAbs') < 0
-        });
-
-        return (
-            <span className="gain">
-                <span className={gainOuterClasses} style={gainStyle}>
-                    <span className="value">
-                        {formatCurrency(gain.get('value'), formatOptions)}
-                    </span>
-                    <span className={gainAbsClasses}>
-                        {formatCurrency(gain.get('gainAbs'), formatOptions)}
-                    </span>
-                    <span className={dayGainAbsClasses}>
-                        {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
-                    </span>
-                    <span className={gainClasses}>
-                        {formatPercent(gain.get('gain'), formatOptionsPct)}
-                    </span>
-                    <span className={dayGainClasses}>
-                        {formatPercent(gain.get('dayGain'), formatOptionsPct)}
-                    </span>
-                </span>
-            </span>
-        );
-    }
-    renderListExtra(row, rowKey) {
-        return (
-            <span>
-                {this.renderFundGraph(row, rowKey)}
-                {this.renderGainInfo(row)}
-            </span>
-        );
+        return <span className={gainInfo.classes}>
+            <span className="gain-info">Current value:</span>
+            <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
+            <span className="gain-pct">{gainInfo.gainPct}</span>
+            <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
+        </span>;
     }
     renderGainInfoMobile(cost, gain) {
         if (!gain) {
@@ -185,6 +83,39 @@ class PageFunds extends PageList {
             {gainInfo}
         </li>;
     }
+    */
+    getGainInfo() {
+        const cost = this.props.totalCost;
+        const value = this.props.cachedValue.get('value');
+
+        const gain = cost
+            ? (value - cost) / cost
+            : 0;
+
+        const gainPct = formatPercent(gain, {
+            brackets: true, precision: 2
+        });
+
+        const classes = classNames({
+            gain: true,
+            profit: cost < value,
+            loss: cost > value
+        });
+
+        return { classes, gainPct };
+    }
+    listHeadExtra() {
+        const reloadFundPrices = () => this.props.reloadFundPrices(this.props.shortPeriod);
+
+        const gainInfo = this.getGainInfo();
+
+        return <span className={gainInfo.classes} onClick={reloadFundPrices}>
+            <span className="gain-info">Current value:</span>
+            <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
+            <span>{gainInfo.gainPct}</span>
+            <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
+        </span>;
+    }
     renderStocksList(render) {
         if (!render || !DO_STOCKS_LIST) {
             return null;
@@ -217,30 +148,22 @@ class PageFunds extends PageList {
             {fundsGraph}
         </span>;
     }
-    renderAfterListMobile(render) {
-        if (!render) {
-            return null;
-        }
-
-        const gainInfo = this.getGainInfo();
-
-        return <span className={gainInfo.classes}>
-            <span className="gain-info">Current value:</span>
-            <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
-            <span className="gain-pct">{gainInfo.gainPct}</span>
-            <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
-        </span>;
-    }
     afterList() {
+        /*
+            <Media query={mediaQueries.mobile}>
+                {render => this.renderAfterListMobile(render)}
+            </Media>
+        */
+
         // render graphs and stuff here
         return <div className="funds-info">
             <Media query={mediaQueries.desktop}>
                 {render => this.renderAfterList(render)}
             </Media>
-            <Media query={mediaQueries.mobile}>
-                {render => this.renderAfterListMobile(render)}
-            </Media>
         </div>;
+    }
+    getListBody() {
+        return getFundsBody(this.props.pageIndex);
     }
 }
 
@@ -251,12 +174,12 @@ PageFunds.propTypes = {
     showOverall: PropTypes.bool
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = () => state => ({
     cachedValue: state.getIn(['global', 'other', 'fundsCachedValue']),
     shortPeriod: state.getIn(['global', 'other', 'graphFunds', 'period'])
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = () => dispatch => ({
     reloadFundPrices: shortPeriod => dispatch(aFundsGraphPeriodChanged({
         shortPeriod,
         noCache: true,
@@ -271,5 +194,5 @@ const mapDispatchToProps = dispatch => ({
     }
 });
 
-export default connect(pageIndex, mapStateToProps, mapDispatchToProps)(PageFunds);
+export default connect(pageIndex)(mapStateToProps, mapDispatchToProps)(PageFunds);
 

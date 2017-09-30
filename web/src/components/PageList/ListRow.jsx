@@ -1,5 +1,5 @@
 import { Map as map } from 'immutable';
-import { connect } from 'react-redux';
+import extendableContainer from '../containerExtender';
 
 import { aListItemDeleted } from '../../actions/EditActions';
 
@@ -65,7 +65,7 @@ export class ListRow extends PureComponent {
             return this.renderColumn(colKey, colName, value, active);
         });
 
-        const itemClasses = this.listItemClasses(this.props.row);
+        const itemClasses = this.listItemClasses();
         itemClasses.future = this.props.row.get('future');
         itemClasses['first-present'] = this.props.row.get('first-present');
 
@@ -90,20 +90,21 @@ ListRow.propTypes = {
     deleteRow: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state, ownProps) => ({
-    row: state.getIn(['global', 'pages', ownProps.pageIndex, 'rows', ownProps.id]),
-    getDaily: DAILY_PAGES[ownProps.pageIndex],
-    noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1,
+const stateDefault = pageIndex => (state, ownProps) => ({
+    pageIndex,
+    row: state.getIn(['global', 'pages', pageIndex, 'rows', ownProps.id]),
+    getDaily: DAILY_PAGES[pageIndex],
+    noSuggestions: ['funds'].indexOf(PAGES[pageIndex]) !== -1,
     editId: state.getIn(['global', 'edit', 'row']),
     editCol: state.getIn(['global', 'edit', 'col'])
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    deleteRow: () => dispatch(aListItemDeleted({
-        pageIndex: ownProps.pageIndex,
-        id: ownProps.id
-    }))
+const dispatchDefault = pageIndex => (dispatch, ownProps) => ({
+    deleteRow: () => dispatch(aListItemDeleted({ pageIndex, id: ownProps.id }))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ListRow);
+export const ListRowContainer = pageIndex =>
+    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(ListRow);
+
+export default extendableContainer(stateDefault, dispatchDefault);
 
