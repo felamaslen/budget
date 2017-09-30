@@ -221,9 +221,9 @@ export function pushToRequestQueue(reduction, dataItem) {
         .setIn(['edit', 'requestList'], newRequestList);
 }
 
-export function rActivateEditable(reduction, editable, cancel) {
+export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
     const active = reduction.getIn(['edit', 'active']);
-    const pageIndex = reduction.getIn(['currentPageIndex']);
+
     let newReduction = reduction
         .setIn(['edit', 'addBtnFocus'], false)
         .setIn(['editSuggestions', 'list'], list.of())
@@ -259,8 +259,8 @@ export function rActivateEditable(reduction, editable, cancel) {
         }
     }
 
-    // can pass null to deactivate editing
     if (!editable) {
+        // deactivate editing
         return newReduction.setIn(['edit', 'active'], getNullEditable(pageIndex));
     }
 
@@ -349,7 +349,7 @@ export function rAddListItem(reduction, { pageIndex, sending }) {
     if (sending) {
         const now = new YMD();
 
-        return rActivateEditable(reduction, null)
+        return rActivateEditable(reduction, { pageIndex })
             .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex))
             .setIn(['edit', 'active'], map({
                 row: -1,

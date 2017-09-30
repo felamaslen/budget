@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { Router, Route } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 
-import { aSettingsLoaded, aKeyPressed } from '../actions/AppActions';
+import { aSettingsLoaded } from '../actions/AppActions';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -24,18 +24,6 @@ const history = createHistory();
 class App extends Component {
     componentDidMount() {
         this.props.loadSettings();
-
-        window.addEventListener('keydown', evt => {
-            if (evt.key === 'Tab') {
-                evt.preventDefault();
-            }
-
-            this.props.handleKeyPress({
-                key: evt.key,
-                shift: evt.shiftKey,
-                ctrl: evt.ctrlKey
-            });
-        });
     }
     render() {
         return <Router history={history}>
@@ -52,12 +40,10 @@ class App extends Component {
 }
 
 App.propTypes = {
-    handleKeyPress: PropTypes.func.isRequired,
     loadSettings: PropTypes.func.isRequired
 };
 
 const mapDispatchToProps = dispatch => ({
-    handleKeyPress: event => dispatch(aKeyPressed(event)),
     loadSettings: () => dispatch(aSettingsLoaded())
 });
 

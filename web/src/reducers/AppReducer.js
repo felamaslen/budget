@@ -178,13 +178,10 @@ export function getCurrentRowCol(editing) {
     return { currentRow, currentCol };
 }
 
-function handleNav(reduction, direction, cancel) {
-    if (!direction) {
-        return rActivateEditable(reduction, null, cancel);
+function handleNav(reduction, { pageIndex, dx, dy, cancel }) {
+    if (cancel) {
+        return rActivateEditable(reduction, { pageIndex, cancel });
     }
-
-    const { dx, dy } = direction;
-    const pageIndex = reduction.getIn(['currentPageIndex']);
 
     const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
     const { numRows, numCols } = getNumRowsCols(reduction, pageIndex, pageIsList);
@@ -199,7 +196,7 @@ function handleNav(reduction, direction, cancel) {
     const navigateToAddButton = currentRow === -1 && currentCol === numCols - 1 && dx > 0;
 
     if (pageIsList && navigateToAddButton) {
-        return rActivateEditable(reduction, null)
+        return rActivateEditable(reduction, { pageIndex })
             .setIn(['edit', 'addBtnFocus'], true);
     }
 
@@ -228,7 +225,7 @@ function handleNav(reduction, direction, cancel) {
     const value = itemValue.value;
 
     return rActivateEditable(
-        reduction, map({ row, col, pageIndex, id, item, value })
+        reduction, { pageIndex, editable: map({ row, col, pageIndex, id, item, value }) }
     );
 }
 
@@ -253,7 +250,7 @@ function getNavDirection(key, shift) {
     return { dx: 0, dy: 0 };
 }
 
-function handleNavFromSuggestions(reduction, suggestions, escape, enter) {
+function handleNavFromSuggestions(reduction, { pageIndex, suggestions, escape, enter }) {
     if (escape) {
         return reduction
             .setIn(['editSuggestions', 'list'], list.of())
@@ -269,13 +266,13 @@ function handleNavFromSuggestions(reduction, suggestions, escape, enter) {
 
         // navigate to the next field after filling the current one with
         // the suggestion value
-        return handleNav(reductionWithSuggestionValue, { dx: 1, dy: 0 });
+        return handleNav(reductionWithSuggestionValue, { pageIndex, dx: 1, dy: 0 });
     }
 
     return reduction;
 }
 
-function handleNavInSuggestions(reduction, suggestions, { dx, dy }) {
+function handleNavInSuggestions(reduction, { suggestions, dx, dy }) {
     if (dy === 0) {
         return handleSuggestionsNav(reduction, dx, suggestions);
     }
@@ -283,26 +280,26 @@ function handleNavInSuggestions(reduction, suggestions, { dx, dy }) {
     return handleSuggestionsNav(reduction, dy, suggestions);
 }
 
-function handleKeyPressLoggedIn(reduction, evt) {
-    const { dx, dy } = getNavDirection(evt.key, evt.shift);
+function handleKeyPressLoggedIn(reduction, { pageIndex, key, shift, ctrl }) {
+    const { dx, dy } = getNavDirection(key, shift);
     const navigated = dx !== 0 || dy !== 0;
 
-    const escape = evt.key === 'Escape';
-    const enter = evt.key === 'Enter';
+    const escape = key === 'Escape';
+    const enter = key === 'Enter';
 
     const suggestions = reduction.getIn(['editSuggestions']);
     const haveSuggestions = suggestions.get('list').size > 0;
     const suggestionActive = suggestions.get('active') > -1;
 
     const navigateFromSuggestions = suggestionActive && (escape || enter);
-    const navigateSuggestions = navigated && !evt.ctrl;
+    const navigateSuggestions = navigated && !ctrl;
 
     if (haveSuggestions && navigateFromSuggestions) {
-        return handleNavFromSuggestions(reduction, suggestions, escape, enter);
+        return handleNavFromSuggestions(reduction, { pageIndex, suggestions, escape, enter });
     }
 
     if (haveSuggestions && navigateSuggestions) {
-        return handleNavInSuggestions(reduction, suggestions, { dx, dy });
+        return handleNavInSuggestions(reduction, { suggestions, dx, dy });
     }
 
     const addBtn = reduction.getIn(['edit', 'addBtnFocus']);
@@ -311,18 +308,18 @@ function handleKeyPressLoggedIn(reduction, evt) {
         return reduction;
     }
 
-    const navigateFromField = navigated && (evt.ctrl || evt.key === 'Tab');
+    const navigateFromField = navigated && (ctrl || key === 'Tab');
 
     if (navigateFromField) {
-        return handleNav(reduction, { dx, dy });
+        return handleNav(reduction, { pageIndex, dx, dy });
     }
 
     if (escape) {
-        return handleNav(reduction, null, true);
+        return handleNav(reduction, { pageIndex, cancel: true });
     }
 
     if (enter) {
-        return rActivateEditable(reduction, null);
+        return rActivateEditable(reduction, { pageIndex });
     }
 
     return reduction;

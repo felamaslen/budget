@@ -63,7 +63,10 @@ function getDispatchProps(row, col, item, value, getSuggestions) {
                     return;
                 }
 
-                dispatch(aEditableActivated(map({ row, col, item, value })));
+                dispatch(aEditableActivated({
+                    pageIndex: ownProps.pageIndex,
+                    editable: map({ row, col, item, value })
+                }));
             },
             onChange: processedValue => dispatch(aEditableChanged(processedValue))
         };

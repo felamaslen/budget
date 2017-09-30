@@ -10,7 +10,6 @@ export function resetAppState(state) {
         .set('pages', list(PAGES).map(() => null))
         .set('pagesRaw', list(PAGES).map(() => null))
         .set('pagesLoaded', list(PAGES).map(() => null))
-        .set('currentPageIndex', -1)
         .set('edit', map({
             active: map({
                 row: 0,

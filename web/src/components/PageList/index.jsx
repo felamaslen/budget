@@ -4,20 +4,22 @@
 
 import extendableContainer from '../containerExtender';
 
+import { aKeyPressed } from '../../actions/AppActions';
 import { aContentRequested } from '../../actions/ContentActions';
 
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
 import { mediaQueries, PAGES } from '../../misc/const';
 
+import Page from '../Page';
 import { HeadMobileContainer as getHeadMobile } from './HeadMobile';
 import { BodyMobileContainer as getBodyMobile } from './BodyMobile';
 
 import { HeadContainer as getHead } from './Head';
 import { BodyContainer as getBody } from './Body';
 
-export class PageList extends PureComponent {
+export class PageList extends Page {
     headMobile() {
         const HeadMobile = getHeadMobile(this.props.pageIndex);
 
@@ -67,11 +69,6 @@ export class PageList extends PureComponent {
     afterList() {
         return null;
     }
-    componentDidMount() {
-        if (!this.props.loaded) {
-            this.props.loadContent({ pageIndex: this.props.pageIndex });
-        }
-    }
     render() {
         if (!this.props.loaded) {
             return null;
@@ -98,8 +95,8 @@ export class PageList extends PureComponent {
 }
 
 PageList.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
     loaded: PropTypes.bool.isRequired,
+    pageIndex: PropTypes.number.isRequired,
     loadContent: PropTypes.func.isRequired
 };
 
@@ -109,7 +106,8 @@ const stateDefault = pageIndex => state => ({
 });
 
 const dispatchDefault = () => dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req))
+    loadContent: req => dispatch(aContentRequested(req)),
+    handleKeyPress: req => dispatch(aKeyPressed(req))
 });
 
 export const PageListContainer = pageIndex =>

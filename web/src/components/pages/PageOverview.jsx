@@ -5,12 +5,15 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
+import { aKeyPressed } from '../../actions/AppActions';
 import { aContentRequested } from '../../actions/ContentActions';
 
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Media from 'react-media';
+
+import Page from '../Page';
 
 import { mediaQueries, PAGES, OVERVIEW_COLUMNS } from '../../misc/const';
 import { formatCurrency } from '../../misc/format';
@@ -20,10 +23,7 @@ import GraphSpend from '../graphs/GraphSpend';
 
 const pageIndex = PAGES.indexOf('overview');
 
-export class PageOverview extends Component {
-    componentDidMount() {
-        this.props.loadContent({ pageIndex });
-    }
+export class PageOverview extends Page {
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
     }
@@ -175,10 +175,12 @@ PageOverview.propTypes = {
     active: PropTypes.bool.isRequired,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
+    handleKeyPress: PropTypes.func.isRequired,
     loadContent: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+    pageIndex,
     rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
     active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     editRow: state.getIn(['global', 'edit', 'row']),
@@ -186,7 +188,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req))
+    loadContent: req => dispatch(aContentRequested(req)),
+    handleKeyPress: event => dispatch(aKeyPressed(event))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageOverview);

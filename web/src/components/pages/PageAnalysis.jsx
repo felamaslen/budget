@@ -5,15 +5,19 @@
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
+import { aKeyPressed } from '../../actions/AppActions';
 import { aContentRequested, aContentBlockHovered } from '../../actions/ContentActions';
 import {
     aOptionChanged, aBlockClicked,
     aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered
 } from '../../actions/AnalysisActions';
 
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+
+import Page from '../Page';
+
 import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../misc/const';
 import { formatCurrency, capitalise } from '../../misc/format';
 
@@ -21,16 +25,18 @@ import BlockPacker from '../BlockPacker';
 
 const pageIndex = PAGES.indexOf('analysis');
 
-export class PageAnalysis extends Component {
-    componentDidMount() {
-        this.props.loadContent({
-            pageIndex,
-            params: [
-                ANALYSIS_PERIODS[this.props.period],
-                ANALYSIS_GROUPINGS[this.props.grouping],
-                this.props.timeIndex
-            ]
-        });
+export class PageAnalysis extends Page {
+    loadContent() {
+        if (!this.props.loaded) {
+            this.props.loadContent({
+                pageIndex,
+                params: [
+                    ANALYSIS_PERIODS[this.props.period],
+                    ANALYSIS_GROUPINGS[this.props.grouping],
+                    this.props.timeIndex
+                ]
+            });
+        }
     }
     format(value, abbreviate) {
         return formatCurrency(value, { abbreviate, precision: 1 });
@@ -178,7 +184,7 @@ export class PageAnalysis extends Component {
         return this.changeTimeIndex(-1);
     }
     render() {
-        if (!this.props.active) {
+        if (!this.props.loaded) {
             return null;
         }
 
@@ -224,7 +230,7 @@ export class PageAnalysis extends Component {
 }
 
 PageAnalysis.propTypes = {
-    active: PropTypes.bool.isRequired,
+    loaded: PropTypes.bool.isRequired,
     period: PropTypes.number.isRequired,
     grouping: PropTypes.number.isRequired,
     cost: PropTypes.instanceOf(list),
@@ -247,7 +253,8 @@ PageAnalysis.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
+    pageIndex,
+    loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
     treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
     period: state.getIn(['global', 'other', 'analysis', 'period']),
@@ -262,6 +269,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+    handleKeyPress: req => dispatch(aKeyPressed(req)),
     changeOption: (period, grouping, timeIndex) => dispatch(aOptionChanged(
         { period, grouping, timeIndex, pageIndex }
     )),
