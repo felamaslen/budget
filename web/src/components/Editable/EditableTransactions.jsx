@@ -87,19 +87,13 @@ export default class EditableTransactions extends Editable {
 
             const id = transaction.get('id');
 
-            const onDateBlur = () => this.onDateBlur(key, id);
-
             const onDateChange = evt => this.onDateChange(
                 row, col, key, evt.target.value
             );
 
-            const onUnitsBlur = () => this.onUnitsBlur(key, id);
-
             const onUnitsChange = evt => this.onUnitsChange(
                 row, col, key, evt.target.value, units
             );
-
-            const onCostBlur = () => this.onCostBlur(key, id);
 
             const onCostChange = evt => this.onCostChange(
                 row, col, key, evt.target.value, cost
@@ -120,20 +114,17 @@ export default class EditableTransactions extends Editable {
             return <tr key={id}>
                 <td>
                     <input defaultValue={date.format()} ref={dateRef}
-                        onBlur={onDateBlur}
-                        onChange={onDateChange}
+                        onBlur={onDateChange}
                     />
                 </td>
                 <td>
                     <input defaultValue={units} ref={unitsRef}
-                        onBlur={onUnitsBlur}
-                        onChange={onUnitsChange}
+                        onBlur={onUnitsChange}
                     />
                 </td>
                 <td>
                     <input defaultValue={cost / 100} ref={costRef}
-                        onBlur={onCostBlur}
-                        onChange={onCostChange}
+                        onBlur={onCostChange}
                     />
                 </td>
                 <td>
@@ -187,20 +178,23 @@ export default class EditableTransactions extends Editable {
             </div>
         </div>;
     }
-    format() {
-        const modal = this.getModal();
-
+    renderNumTransactions() {
         const size = this.props.value && this.props.value.size
             ? this.props.value.size
             : 0;
 
+        return <span className="num-transactions">{size}</span>;
+    }
+    renderInput() {
+        const modal = this.getModal();
+
         return <span>
-            <span className="num-transactions">{size}</span>
+            {this.renderNumTransactions()}
             {modal}
         </span>;
     }
-    render() {
-        return this.renderValue();
+    format() {
+        return this.renderNumTransactions();
     }
 }
 

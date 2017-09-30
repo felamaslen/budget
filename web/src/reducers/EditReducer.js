@@ -4,7 +4,6 @@
 
 import { List as list, Map as map } from 'immutable';
 
-
 import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './data/overview';
 import { getExtraRowProps as reloadFundsRows } from './data/funds';
 import {
@@ -458,11 +457,18 @@ function rFundTransactions(reduction, row, col, transactions) {
     const pageIndex = PAGES.indexOf('funds');
 
     if (row > -1) {
-        return reduction.setIn(
-            ['pages', pageIndex, 'rows', row, 'cols', col], transactions
-        ).setIn(
-            ['edit', 'active', 'value'], transactions
-        );
+        const item = map({
+            item: 'transactions',
+            row,
+            col,
+            value: transactions
+        });
+
+        return applyEditsList(reduction, item, pageIndex)
+            .setIn(
+                ['edit', 'active'],
+                reduction.getIn(['edit', 'active']).set('value', transactions)
+            );
     }
 
     return reduction.setIn(
