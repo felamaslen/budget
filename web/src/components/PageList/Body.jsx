@@ -16,13 +16,6 @@ export class Body extends PureComponent {
     getListRow() {
         return getListRowDefault(this.props.pageIndex);
     }
-    shouldComponentUpdate(nextProps) {
-        if (nextProps.rowIds.equals(this.props.rowIds)) {
-            return false;
-        }
-
-        return true;
-    }
     render() {
         const rows = this.props.rowIds.map(id => <this.ListRow key={id} id={id} />);
 

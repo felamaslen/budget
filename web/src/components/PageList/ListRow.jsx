@@ -59,8 +59,7 @@ export class ListRow extends PureComponent {
 
         const items = LIST_COLS_PAGES[this.props.pageIndex].map((colName, colKey) => {
             const value = this.props.row.getIn(['cols', colKey]);
-            const active = this.props.editId === this.props.id &&
-                this.props.editCol === colKey;
+            const active = this.props.activeCol === colKey;
 
             return this.renderColumn(colKey, colName, value, active);
         });
@@ -82,21 +81,21 @@ ListRow.propTypes = {
     pageIndex: PropTypes.number.isRequired,
     id: PropTypes.number.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
+    activeCol: PropTypes.number,
     daily: PropTypes.number,
     getDaily: PropTypes.bool,
     noSuggestions: PropTypes.bool.isRequired,
-    editId: PropTypes.number,
-    editCol: PropTypes.number,
     deleteRow: PropTypes.func.isRequired
 };
 
 const stateDefault = pageIndex => (state, ownProps) => ({
     pageIndex,
     row: state.getIn(['global', 'pages', pageIndex, 'rows', ownProps.id]),
+    activeCol: state.getIn(['global', 'edit', 'active', 'row']) === ownProps.id
+        ? state.getIn(['global', 'edit', 'active', 'col'])
+        : null,
     getDaily: DAILY_PAGES[pageIndex],
-    noSuggestions: ['funds'].indexOf(PAGES[pageIndex]) !== -1,
-    editId: state.getIn(['global', 'edit', 'row']),
-    editCol: state.getIn(['global', 'edit', 'col'])
+    noSuggestions: ['funds'].indexOf(PAGES[pageIndex]) !== -1
 });
 
 const dispatchDefault = pageIndex => (dispatch, ownProps) => ({
