@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import Media from 'react-media';
 import { mediaQueries, PAGES, LIST_COLS_PAGES } from '../../misc/const';
 
-import Head from './Head';
+import { HeadContainer as getHead } from './Head';
 import { BodyContainer as getBody } from './Body';
 
 export class PageList extends PureComponent {
@@ -75,7 +75,10 @@ export class PageList extends PureComponent {
         </div>;
     }
     */
-    getListBody() {
+    getHead() {
+        return getHead(this.props.pageIndex);
+    }
+    getBody() {
         return getBody(this.props.pageIndex);
     }
     renderListDesktop(render) {
@@ -83,11 +86,12 @@ export class PageList extends PureComponent {
             return null;
         }
 
-        const ListBody = this.getListBody();
+        const Head = this.getHead();
+        const Body = this.getBody();
 
         return <div>
-            <Head pageIndex={this.props.pageIndex} />
-            <ListBody pageIndex={this.props.pageIndex} />
+            <Head />
+            <Body />
         </div>;
     }
     renderList() {

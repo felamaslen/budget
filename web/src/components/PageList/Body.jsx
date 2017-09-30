@@ -29,6 +29,7 @@ Body.propTypes = {
 };
 
 const stateDefault = pageIndex => state => ({
+    pageIndex,
     rowIds: state
         .getIn(['global', 'pages', pageIndex, 'rows'])
         .keySeq()

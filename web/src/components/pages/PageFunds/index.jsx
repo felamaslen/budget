@@ -19,8 +19,8 @@ import { mediaQueries, PAGES, LIST_COLS_PAGES, GRAPH_FUNDS_PERIODS } from '../..
 import { formatCurrency, formatPercent } from '../../../misc/format';
 import { StocksList } from '../../StocksList';
 import { aMobileEditDialogOpened } from '../../../actions/FormActions';
-import { aFundsGraphPeriodChanged } from '../../../actions/GraphActions';
 
+import getFundsHead from './HeadFunds';
 import getFundsBody from './BodyFunds';
 
 import GraphFunds from '../../graphs/GraphFunds';
@@ -84,38 +84,6 @@ class PageFunds extends PageList {
         </li>;
     }
     */
-    getGainInfo() {
-        const cost = this.props.totalCost;
-        const value = this.props.cachedValue.get('value');
-
-        const gain = cost
-            ? (value - cost) / cost
-            : 0;
-
-        const gainPct = formatPercent(gain, {
-            brackets: true, precision: 2
-        });
-
-        const classes = classNames({
-            gain: true,
-            profit: cost < value,
-            loss: cost > value
-        });
-
-        return { classes, gainPct };
-    }
-    listHeadExtra() {
-        const reloadFundPrices = () => this.props.reloadFundPrices(this.props.shortPeriod);
-
-        const gainInfo = this.getGainInfo();
-
-        return <span className={gainInfo.classes} onClick={reloadFundPrices}>
-            <span className="gain-info">Current value:</span>
-            <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
-            <span>{gainInfo.gainPct}</span>
-            <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
-        </span>;
-    }
     renderStocksList(render) {
         if (!render || !DO_STOCKS_LIST) {
             return null;
@@ -162,7 +130,10 @@ class PageFunds extends PageList {
             </Media>
         </div>;
     }
-    getListBody() {
+    getHead() {
+        return getFundsHead(this.props.pageIndex, this.props.totalCost);
+    }
+    getBody() {
         return getFundsBody(this.props.pageIndex);
     }
 }
@@ -175,16 +146,10 @@ PageFunds.propTypes = {
 };
 
 const mapStateToProps = () => state => ({
-    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue']),
-    shortPeriod: state.getIn(['global', 'other', 'graphFunds', 'period'])
+    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue'])
 });
 
 const mapDispatchToProps = () => dispatch => ({
-    reloadFundPrices: shortPeriod => dispatch(aFundsGraphPeriodChanged({
-        shortPeriod,
-        noCache: true,
-        reloadPagePrices: true
-    })),
     loadContent: req => {
         const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
 

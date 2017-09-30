@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+import extendableContainer from '../containerExtender';
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
@@ -51,11 +51,17 @@ Head.propTypes = {
     totalCost: PropTypes.number
 };
 
-const mapStateToProps = (state, ownProps) => ({
-    weeklyValue: state.getIn(['global', 'pages', ownProps.pageIndex, 'data', 'weekly']),
-    daily: DAILY_PAGES[ownProps.pageIndex],
-    totalCost: state.getIn(['global', 'pages', ownProps.pageIndex, 'data', 'total'])
+const stateDefault = pageIndex => state => ({
+    pageIndex,
+    weeklyValue: state.getIn(['global', 'pages', pageIndex, 'data', 'weekly']),
+    daily: DAILY_PAGES[pageIndex],
+    totalCost: state.getIn(['global', 'pages', pageIndex, 'data', 'total'])
 });
 
-export default connect(mapStateToProps)(Head);
+const dispatchDefault = () => () => ({});
+
+export const HeadContainer = pageIndex =>
+    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(Head);
+
+export default extendableContainer(stateDefault, dispatchDefault);
 
