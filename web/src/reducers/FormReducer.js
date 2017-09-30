@@ -5,15 +5,10 @@ import { dataEquals, getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES, PAGES } from '../misc/const';
 import {
     getInvalidInsertDataKeys,
-    stringifyFields,
     resortListRows,
     recalculateFundProfits,
     addToRequestQueue
 } from './EditReducer';
-
-import buildMessage from '../messageBuilder';
-
-import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
 
 export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
     const rowItem = reduction.getIn(['pages', pageIndex, 'rows', id]);
