@@ -43,7 +43,6 @@
         ],
         "block-scoped-var": "error",
         "block-spacing": "error",
-        "callback-return": "error",
         "camelcase": "error",
         "capitalized-comments": "off",
         "comma-dangle": "error",

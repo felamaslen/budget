@@ -10,6 +10,11 @@ module.exports = Object.assign({}, webpackConfig, {
         'webpack/hot/only-dev-server'
     ].concat(webpackConfig.entry),
     plugins: webpackConfig.plugins.concat([
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify('development')
+            }
+        }),
         new webpack.HotModuleReplacementPlugin()
     ]),
     module: moduleConfigDev,
@@ -25,6 +30,7 @@ module.exports = Object.assign({}, webpackConfig, {
         noInfo: false,
         publicPath: '/',
         port: process.env.PORT_WDS,
+        historyApiFallback: true,
         proxy: {
             '/': {
                 target: `http://localhost:${process.env.PORT}`,

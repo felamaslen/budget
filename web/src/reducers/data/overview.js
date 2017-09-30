@@ -233,35 +233,49 @@ export function rGetOverviewRows(data) {
     const categoryColor = getOverviewCategoryColor();
 
     // translate the data into table cells for display in the view
-    const rows = tableData.get(0).map((monthText, key) => {
-        const yearMonth = getYearMonthFromKey(
-            key, data.get('startYearMonth')[0], data.get('startYearMonth')[1]);
+    const rows = tableData
+        .get(0)
+        .map((monthText, key) => {
+            const yearMonth = getYearMonthFromKey(
+                key, data.get('startYearMonth')[0], data.get('startYearMonth')[1]);
 
-        const past = yearMonth[0] < currentYear ||
-            (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
-        const active = yearMonth[0] === currentYear && yearMonth[1] === currentMonth;
-        const future = !past && !active;
+            const past = yearMonth[0] < currentYear ||
+                (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
+            const active = yearMonth[0] === currentYear && yearMonth[1] === currentMonth;
+            const future = !past && !active;
 
-        const cells = list(OVERVIEW_COLUMNS).map((column, colKey) => {
-            const value = tableData.getIn([colKey, key]);
-            let rgb = null;
-            if (colKey > 0 && categoryColor[colKey - 1]) {
-                rgb = getOverviewScoreColor(
-                    value, valueRange[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]
-                );
-            }
-            const editable = column[0] === 'balance';
+            let cols = null;
 
-            return map({
-                column: list(column),
-                value,
-                rgb,
-                editable
-            });
+            const cells = list(OVERVIEW_COLUMNS)
+                .map((column, colKey) => {
+                    const value = tableData.getIn([colKey, key]);
+                    let rgb = null;
+                    if (colKey > 0 && categoryColor[colKey - 1]) {
+                        rgb = getOverviewScoreColor(
+                            value,
+                            valueRange[colKey - 1],
+                            median[colKey - 1],
+                            categoryColor[colKey - 1]
+                        );
+                    }
+
+                    const editable = column[0] === 'balance';
+
+                    if (editable) {
+                        // for use with editables
+                        cols = list([value]);
+                    }
+
+                    return map({
+                        column: list(column),
+                        value,
+                        rgb,
+                        editable
+                    });
+                });
+
+            return map({ cols, cells, past, active, future });
         });
-
-        return map({ cells, past, active, future });
-    });
 
     return rows;
 }
@@ -280,12 +294,12 @@ export function rCalculateOverview(
     reduction, pageIndex, newDate, oldDate, newItemCost, oldItemCost
 ) {
     const overviewKey = PAGES.indexOf('overview');
-    const startYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'startYearMonth']);
+    const startYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'startYearMonth']);
 
     const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
     const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
 
-    const oldCost = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'cost']);
+    const oldCost = reduction.getIn(['pages', overviewKey, 'data', 'cost']);
     const numRows = oldCost.get(PAGES[pageIndex]).size;
 
     // update the changed rows in the overview page
@@ -313,17 +327,17 @@ export function rCalculateOverview(
         }
     }
 
-    const endYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'endYearMonth']);
-    const currentYearMonth = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'currentYearMonth']);
-    const futureMonths = reduction.getIn(['appState', 'pages', overviewKey, 'data', 'futureMonths']);
+    const endYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'endYearMonth']);
+    const currentYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'currentYearMonth']);
+    const futureMonths = reduction.getIn(['pages', overviewKey, 'data', 'futureMonths']);
 
     const newData = rProcessDataOverview(
         newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths
     );
 
     return reduction
-        .setIn(['appState', 'pages', overviewKey, 'data'], newData)
-        .setIn(['appState', 'pages', overviewKey, 'rows'], rGetOverviewRows(newData));
+        .setIn(['pages', overviewKey, 'data'], newData)
+        .setIn(['pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 }
 
 /**
@@ -337,6 +351,6 @@ export default function rProcessOverview(reduction, pageIndex, raw) {
     const data = rProcessDataOverviewRaw(raw);
     const rows = rGetOverviewRows(data);
 
-    return reduction.setIn(['appState', 'pages', pageIndex], map({ data, rows }));
+    return reduction.setIn(['pages', pageIndex], map({ data, rows }));
 }
 

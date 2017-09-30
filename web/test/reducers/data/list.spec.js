@@ -8,13 +8,11 @@ describe('list', () => {
     describe('processPageDataFunds', () => {
         it('should return formatted funds page data', () => {
             const reduction = map({
-                appState: map({
-                    pages: list([null, null, null]),
-                    other: map({
-                        graphFunds: map({
-                            period: 'year1',
-                            zoom: list([null, null])
-                        })
+                pages: list([null, null, null]),
+                other: map({
+                    graphFunds: map({
+                        period: 'year1',
+                        zoom: list([null, null])
                     })
                 })
             });
@@ -53,7 +51,7 @@ describe('list', () => {
 
             const result = rList.processPageDataFunds(reduction, pageIndex, data, now);
 
-            const other = result.getIn(['appState', 'other']);
+            const other = result.getIn(['other']);
 
             expect(other.getIn(['fundHistoryCache', 'year1']))
                 .to.be.ok;

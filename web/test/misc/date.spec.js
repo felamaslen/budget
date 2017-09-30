@@ -1,8 +1,17 @@
 import { expect } from 'chai';
 
-import { monthDays } from '../../src/misc/date';
+import {
+    yearMonthDifference,
+    monthDays
+} from '../../src/misc/date';
 
-describe('misc/date', () => {
+describe('Date', () => {
+    describe('yearMonthDifference', () => {
+        it('should return the correct difference', () => {
+            expect(yearMonthDifference([2015, 5], [2017, 3])).to.equal(22);
+        });
+    });
+
     describe('monthDays', () => {
         it('should return expected values', () => {
             expect(monthDays(1, 2017)).to.equal(31);

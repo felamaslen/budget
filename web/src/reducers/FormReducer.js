@@ -5,17 +5,13 @@ import { dataEquals, getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES, PAGES } from '../misc/const';
 import {
     getInvalidInsertDataKeys,
-    stringifyFields,
     resortListRows,
-    recalculateFundProfits
+    recalculateFundProfits,
+    addToRequestQueue
 } from './EditReducer';
 
-import buildMessage from '../messageBuilder';
-import { EF_SERVER_ADD_REQUESTED } from '../constants/effects';
-
-export function rOpenFormDialogEdit(reduction, req) {
-    const pageIndex = req.pageIndex;
-    const rowItem = reduction.getIn(['appState', 'pages', pageIndex, 'rows', req.rowKey]);
+export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
+    const rowItem = reduction.getIn(['pages', pageIndex, 'rows', id]);
 
     const fields = rowItem.get('cols')
         .map((value, key) => {
@@ -24,48 +20,56 @@ export function rOpenFormDialogEdit(reduction, req) {
             return map({ item, value });
         });
 
-    const id = rowItem.get('id');
+    const modalDialog = reduction
+        .get('modalDialog')
+        .set('active', true)
+        .set('visible', true)
+        .set('type', 'edit')
+        .set('id', id)
+        .set('fields', fields)
+        .set('invalidKeys', list.of());
 
-    return reduction
-        .setIn(['appState', 'modalDialog'], map({
-            active: true,
-            type: 'edit',
-            row: req.rowKey,
-            id,
-            fields,
-            invalidKeys: list.of()
-        }));
+    return reduction.set('modalDialog', modalDialog);
 }
 
-export function rOpenFormDialogAdd(reduction, req) {
-    const pageIndex = req.pageIndex;
+export function rOpenFormDialogAdd(reduction, { pageIndex }) {
     const values = getAddDefaultValues(pageIndex);
     const fields = list(LIST_COLS_PAGES[pageIndex])
         .map((item, key) => map({ item, value: values.get(key) }));
 
-    return reduction
-        .setIn(['appState', 'modalDialog'], map({
-            active: true,
-            type: 'add',
-            row: null,
-            id: null,
-            fields,
-            invalidKeys: list.of()
-        }));
+    const modalDialog = reduction
+        .get('modalDialog')
+        .set('active', true)
+        .set('visible', true)
+        .set('type', 'add')
+        .set('id', null)
+        .set('fields', fields)
+        .set('invalidKeys', list.of());
+
+    return reduction.set('modalDialog', modalDialog);
 }
 
-function resetModalDialog(reduction) {
-    return reduction
-        .setIn(['appState', 'modalDialog', 'active'], false)
-        .setIn(['appState', 'modalDialog', 'type'], null)
-        .setIn(['appState', 'modalDialog', 'fields'], list.of())
-        .setIn(['appState', 'modalDialog', 'invalidKeys'], list.of());
+function resetModalDialog(reduction, remove = false) {
+    const newModalDialog = reduction
+        .get('modalDialog')
+        .set('loading', false);
+
+    if (remove) {
+        return reduction.set('modalDialog', newModalDialog
+            .set('active', false)
+            .set('type', null)
+            .set('fields', list.of())
+            .set('invalidKeys', list.of())
+        );
+    }
+
+    return reduction.set('modalDialog', newModalDialog.set('visible', false));
 }
 
 export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
-    const rowKey = reduction.getIn(['appState', 'modalDialog', 'row']);
+    const id = reduction.getIn(['modalDialog', 'id']);
 
-    const oldRow = reduction.getIn(['appState', 'pages', pageIndex, 'rows', rowKey]);
+    const oldRow = reduction.getIn(['pages', pageIndex, 'rows', id]);
 
     const newRow = oldRow.set('cols', fields.map(field => field.get('value')));
 
@@ -90,7 +94,7 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
     const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
 
     const oldTotal = reduction.getIn(
-        ['appState', 'pages', pageIndex, 'data', 'total']
+        ['pages', pageIndex, 'data', 'total']
     );
     const newTotal = oldTotal + newRow.getIn(['cols', costKey]) -
         oldRow.getIn(['cols', costKey]);
@@ -101,7 +105,7 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
 
     newReduction = resortListRows(newReduction, pageIndex);
 
-    if (reduction.getIn(['appState', 'pagesLoaded', overviewKey])) {
+    if (reduction.getIn(['pagesLoaded', overviewKey])) {
         const newDate = newRow.getIn(['cols', dateKey]);
         const oldDate = oldRow.getIn(['cols', dateKey]);
 
@@ -118,53 +122,54 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
         );
     }
 
-    const id = reduction.getIn(['appState', 'modalDialog', 'id']);
-    const fieldsWithIds = id
-        ? fields.map(field => field.set('id', id))
-        : fields;
-
-    const queue = reduction.getIn(['appState', 'edit', 'queue'])
-        .concat(fieldsWithIds.map(field => field.set('pageIndex', pageIndex)));
-
-    return resetModalDialog(newReduction)
-        .setIn(['appState', 'edit', 'queue'], queue)
-        .setIn(['appState', 'pages', pageIndex, 'rows', rowKey], newRow)
-        .setIn(['appState', 'pages', pageIndex, 'data', 'total'], newTotal);
-}
-
-export function rCloseFormDialogAdd(reduction, pageIndex, fields) {
-    const item = stringifyFields(fields);
-    const apiKey = reduction.getIn(['appState', 'user', 'apiKey']);
-    const req = { apiKey, item, fields, pageIndex };
-
-    return resetModalDialog(reduction)
-        .set('effects', reduction
-            .get('effects')
-            .push(buildMessage(EF_SERVER_ADD_REQUESTED, req))
+    const newRequestList = fields
+        .map(field => field
+            .set('id', id)
+            .set('pageIndex', pageIndex))
+        .reduce(
+            (requestList, field) => addToRequestQueue(requestList, field),
+            reduction.getIn(['edit', 'requestList'])
         );
+
+    return newReduction
+        .setIn(['edit', 'requestList'], newRequestList)
+        .setIn(['pages', pageIndex, 'rows', id], newRow)
+        .setIn(['pages', pageIndex, 'data', 'total'], newTotal);
 }
 
-export function rCloseFormDialog(reduction, pageIndex) {
-    if (pageIndex === null) {
+export function validateFields(reduction) {
+    const fields = reduction.getIn(['modalDialog', 'fields']);
+
+    const invalidKeys = getInvalidInsertDataKeys(fields);
+
+    return { fields, invalidKeys };
+}
+
+export function rCloseFormDialog(reduction, req) {
+    if (!req) {
         return resetModalDialog(reduction);
     }
 
-    const fields = reduction.getIn(['appState', 'modalDialog', 'fields']);
-    const invalidKeys = getInvalidInsertDataKeys(fields);
+    const { pageIndex, deactivate } = req;
 
-    if (invalidKeys.size > 0) {
-        return reduction
-            .setIn(['appState', 'modalDialog', 'invalidKeys'], invalidKeys);
+    if (deactivate) {
+        return resetModalDialog(reduction, true);
     }
 
-    const type = reduction.getIn(['appState', 'modalDialog', 'type']);
+    const type = reduction.getIn(['modalDialog', 'type']);
 
-    if (type === 'edit') {
-        return rCloseFormDialogEdit(reduction, pageIndex, fields);
+    const { fields, invalidKeys } = validateFields(reduction);
+    if (invalidKeys.size) {
+        return reduction
+            .setIn(['modalDialog', 'invalidKeys'], invalidKeys);
     }
 
     if (type === 'add') {
-        return rCloseFormDialogAdd(reduction, pageIndex, fields);
+        return reduction.setIn(['modalDialog', 'loading'], true)
+    }
+
+    if (type === 'edit') {
+        return rCloseFormDialogEdit(reduction, pageIndex, fields);
     }
 
     return reduction;
@@ -172,6 +177,6 @@ export function rCloseFormDialog(reduction, pageIndex) {
 
 export function rHandleFormInputChange(reduction, req) {
     return reduction
-        .setIn(['appState', 'modalDialog', 'fields', req.fieldKey, 'value'], req.value);
+        .setIn(['modalDialog', 'fields', req.fieldKey, 'value'], req.value);
 }
 
