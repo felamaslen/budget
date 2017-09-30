@@ -85,8 +85,9 @@ export const LIST_COLS_SHORT = [
     ['d', 'i', 'h', 'c', 's'],
     ['d', 'i', 'y', 'c', 's']
 ];
-
 export const LIST_COLS_STANDARD = ['I', 'd', 'i', 'c', 'k', 'h', 'y', 's', 'tr'];
+
+export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
 // which pages to include daily tallies for
 export const DAILY_PAGES = [null, null, false, false, false, true, true, true, true];
