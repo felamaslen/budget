@@ -76,12 +76,18 @@ export async function requestFundPeriodData(dispatch, reduction, {
     }
 }
 
-export async function requestAnalysisData(dispatch, reduction, {
-    pageIndex, period, grouping, timeIndex, loadDeep, name
-}) {
+export async function requestAnalysisData(dispatch, reduction, req) {
+    const { pageIndex, name, period, grouping, timeIndex } = {
+        period: reduction.getIn(['other', 'analysis', 'period']),
+        grouping: reduction.getIn(['other', 'analysis', 'grouping']),
+        timeIndex: reduction.getIn(['other', 'analysis', 'timeIndex']),
+        ...req
+    };
+
     const apiKey = reduction.getIn(['user', 'apiKey']);
     let params = [ANALYSIS_PERIODS[period], ANALYSIS_GROUPINGS[grouping], timeIndex];
 
+    const loadDeep = name && !reduction.getIn(['other', 'blockView', 'deep']);
     if (loadDeep) {
         params = ['deep', name].concat(params);
     }
@@ -89,7 +95,7 @@ export async function requestAnalysisData(dispatch, reduction, {
     try {
         const response = await makeContentRequest(apiKey, { pageIndex, params });
 
-        dispatch(aAnalysisDataRefreshed({ response, loadDeep, name }));
+        dispatch(aAnalysisDataRefreshed({ pageIndex, response, name }));
     }
     catch (err) {
         console.error(err.stack);

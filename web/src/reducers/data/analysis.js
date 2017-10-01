@@ -86,12 +86,13 @@ export function rAnalysisChangeOption(reduction, { period, grouping, timeIndex }
         .setIn(['other', 'analysis', 'timeIndex'], timeIndex);
 }
 
-export function rAnalysisHandleNewData(reduction, { response, loadDeep, name }) {
+export function rAnalysisHandleNewData(reduction, { pageIndex, response, name }) {
     const newReduction = reduction
         .setIn(['other', 'analysis', 'loading'], false)
         .setIn(['other', 'blockView', 'loadKey'], null)
         .setIn(['other', 'blockView', 'status'], '');
 
+    const loadDeep = name && !reduction.getIn(['other', 'blockView', 'deep']);
     if (loadDeep) {
         const cost = getCost(fromJS(response.data.data.items));
         const blocks = getBlocks(cost);
@@ -101,7 +102,7 @@ export function rAnalysisHandleNewData(reduction, { response, loadDeep, name }) 
             .setIn(['other', 'blockView', 'deep'], name);
     }
 
-    return processPageDataAnalysis(newReduction, pageIndexAnalysis, response.data.data);
+    return processPageDataAnalysis(newReduction, pageIndex, response.data.data);
 }
 
 export function rAnalysisTreeToggleDisplay(reduction, key) {
@@ -131,17 +132,17 @@ export function rAnalysisTreeHover(reduction, key) {
     return reduction.setIn(['other', 'blockView', 'active'], key);
 }
 
-export function rAnalysisBlockClick(reduction, { name, deepBlock }) {
+export function rAnalysisBlockClick(reduction, { pageIndex, name }) {
     if (name === 'bills') {
         return reduction;
     }
 
-    const wasDeep = Boolean(deepBlock);
+    const wasDeep = Boolean(reduction.getIn(['other', 'blockView', 'deep']));
 
     if (wasDeep) {
         // reset the view to how it was
         const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
-        const cost = reduction.getIn(['pages', pageIndexAnalysis, 'cost']);
+        const cost = reduction.getIn(['pages', pageIndex, 'cost']);
         const blocks = getBlocks(cost, treeVisible);
 
         return reduction.setIn(['other', 'blockView', 'deep'], null)

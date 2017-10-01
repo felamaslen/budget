@@ -20,8 +20,8 @@ export const aOptionChanged = req => buildMessage(
 export const aTreeItemDisplayToggled = key => buildMessage(ANALYSIS_TREE_DISPLAY_TOGGLED, key);
 export const aTreeItemExpandToggled = key => buildMessage(ANALYSIS_TREE_EXPAND_TOGGLED, key);
 export const aTreeItemHovered = key => buildMessage(ANALYSIS_TREE_HOVERED, key);
-export const aBlockClicked = block => buildMessage(
-    ANALYSIS_BLOCK_CLICKED, block, ANALYSIS_DATA_REQUESTED
+export const aBlockClicked = req => buildMessage(
+    ANALYSIS_BLOCK_CLICKED, req, ANALYSIS_DATA_REQUESTED
 );
 export const aAnalysisDataRefreshed = res => buildMessage(ANALYSIS_DATA_REFRESHED, res);
 
