@@ -6,7 +6,8 @@ import { connect } from 'react-redux';
 
 import { aContentRequested } from '../actions/ContentActions';
 
-import React, { PureComponent } from 'react';
+import React from 'react';
+import PureComponent from './ImmutableComponent';
 import PropTypes from 'prop-types';
 
 import { Route } from 'react-router-dom';

@@ -8,7 +8,8 @@ import { aKeyPressed } from '../actions/AppActions';
 import { aLoginFormInputted, aLoginFormSubmitted } from '../actions/LoginActions';
 import { LOGIN_INPUT_LENGTH } from '../misc/const';
 
-import React, { PureComponent } from 'react';
+import React from 'react';
+import PureComponent from './ImmutableComponent';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 

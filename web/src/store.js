@@ -23,6 +23,13 @@ function sideEffectHandler() {
     };
 }
 
+const actionsBlacklist = [
+    TIME_UPDATED,
+    GRAPH_FUNDS_HOVERED,
+    CONTENT_BLOCK_HOVERED,
+    ANALYSIS_TREE_HOVERED
+]
+
 function getStore() {
     const middleware = [sideEffectHandler()];
 
@@ -30,14 +37,7 @@ function getStore() {
         window && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
 
     const composeEnhancers = devTools
-        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-            actionsBlacklist: [
-                TIME_UPDATED,
-                GRAPH_FUNDS_HOVERED,
-                CONTENT_BLOCK_HOVERED,
-                ANALYSIS_TREE_HOVERED
-            ]
-        })
+        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ actionsBlacklist })
         : compose;
 
     const enhancer = composeEnhancers(

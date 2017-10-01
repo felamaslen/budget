@@ -176,9 +176,7 @@ export function rHoverFundsGraph(reduction, position) {
         hlPoint = hlPoint.push(rgba(color));
     }
 
-    return reduction.setIn(
-        ['other', 'graphFunds', 'hlPoint'], hlPoint
-    );
+    return reduction.setIn(['other', 'graphFunds', 'hlPoint'], hlPoint);
 }
 
 export function rToggleFundsGraphLine(reduction, index) {

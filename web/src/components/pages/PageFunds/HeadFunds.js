@@ -1,3 +1,4 @@
+import { Map as map } from 'immutable';
 import connect, { Head } from '../../PageList/Head';
 
 import { aFundsGraphPeriodChanged } from '../../../actions/GraphActions';
@@ -11,17 +12,18 @@ export class HeadFunds extends Head {
     listHeadExtra() {
         const reloadFundPrices = () => this.props.reloadFundPrices(this.props.shortPeriod);
 
-        return <span className={this.props.gainInfo.classes} onClick={reloadFundPrices}>
+        return <span className={this.props.gainInfo.get('classes')} onClick={reloadFundPrices}>
             <span className="gain-info">Current value:</span>
             <span>{formatCurrency(this.props.cachedValue.get('value'))}</span>
-            <span>{this.props.gainInfo.gainPct}</span>
+            <span>{this.props.gainInfo.get('gainPct')}</span>
             <span className="gain-info">({this.props.cachedValue.get('ageText')})</span>
         </span>;
     }
 }
 
 HeadFunds.propTypes = {
-    shortPeriod: PropTypes.string.isRequired
+    shortPeriod: PropTypes.string.isRequired,
+    gainInfo: PropTypes.instanceOf(map).isRequired
 };
 
 const mapStateToProps = () => state => ({
