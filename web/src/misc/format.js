@@ -14,7 +14,7 @@ const percent = frac => `${100 * frac}%`;
  */
 export class BlockPacker {
     constructor(data, width, height) {
-        this.data = data;
+        this.data = data.filter(item => item.get('total') > 0);
 
         this.width = width;
         this.height = height;
@@ -22,7 +22,7 @@ export class BlockPacker {
         this.numBlockColors = 16;
         this.colorOffset = this.data.reduce((sum, item) => sum + (item.get('total') & 1), 0);
 
-        this.total = data.reduce((sum, item) => sum + item.get('total'), 0);
+        this.total = this.data.reduce((sum, item) => sum + item.get('total'), 0);
         const totalArea = width * height;
 
         this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
