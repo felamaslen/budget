@@ -30,7 +30,7 @@ export class BlockView extends Component {
                     block: true,
                     active: activeMain && this.props.active[0] === block.get('name'),
                     [`block-${block.get('color')}`]: true,
-                    [`block-${block.get('name')}`]: !this.props.deep
+                    [`block-${block.get('name')}`]: !this.props.deepBlock
                 });
 
                 const bits = block.get('blocks').map((subBlockGroup, subBlockGroupKey) => {
@@ -70,31 +70,24 @@ export class BlockView extends Component {
                 };
 
                 const onClick = () => this.props.onBlockClick({
-                    pageIndex,
-                    name: block.get('name'),
-                    period: this.props.period,
-                    grouping: this.props.grouping,
-                    timeIndex: this.props.timeIndex,
-                    loadDeep: !this.props.deep
+                    pageIndex, name: block.get('name')
                 });
 
                 return <div key={blockKey} className={classes} style={blockStyle}
                     onClick={onClick}>{bits}</div>;
             });
 
-            return (
-                <div key={groupKey} className="block-group" style={groupStyle}>
-                    {groupBits}
-                </div>
-            );
+            return <div key={groupKey} className="block-group" style={groupStyle}>
+                {groupBits}
+            </div>;
         });
     }
     render() {
         const blockClasses = classNames({
             'block-tree': true,
             flex: true,
-            'block-tree-deep': this.props.isDeep,
-            [`block-tree-${this.props.deep}`]: this.props.isDeep
+            'block-tree-deep': this.props.deepBlock,
+            [`block-tree-${this.props.deepBlock}`]: this.props.deepBlock
         });
 
         const onMouseOut = () => this.props.onBlockHover(null, null);
@@ -116,14 +109,9 @@ export class BlockView extends Component {
 
 BlockView.propTypes = {
     blocks: PropTypes.instanceOf(list),
-    blockClasses: PropTypes.string,
     active: PropTypes.array,
-    deep: PropTypes.string,
-    isDeep: PropTypes.bool.isRequired,
+    deepBlock: PropTypes.string,
     status: PropTypes.string,
-    period: PropTypes.number.isRequired,
-    grouping: PropTypes.number.isRequired,
-    timeIndex: PropTypes.number.isRequired,
     onBlockClick: PropTypes.func.isRequired,
     onBlockHover: PropTypes.func.isRequired
 };
@@ -131,12 +119,8 @@ BlockView.propTypes = {
 const mapStateToProps = state => ({
     active: state.getIn(['global', 'other', 'blockView', 'active']),
     blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
-    deep: state.getIn(['global', 'other', 'blockView', 'deep']),
-    isDeep: Boolean(state.getIn(['global', 'other', 'blockView', 'deep'])),
-    status: state.getIn(['global', 'other', 'blockView', 'status']),
-    period: state.getIn(['global', 'other', 'analysis', 'period']),
-    grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
-    timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex'])
+    deepBlock: state.getIn(['global', 'other', 'blockView', 'deep']),
+    status: state.getIn(['global', 'other', 'blockView', 'status'])
 });
 
 export default connect(mapStateToProps, null)(BlockView);

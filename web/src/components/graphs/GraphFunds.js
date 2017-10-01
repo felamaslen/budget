@@ -317,12 +317,10 @@ export class GraphFunds extends LineGraph {
                     borderColor: rgba(item.get('color'))
                 };
 
-                return (
-                    <li key={key} className={className} onClick={onClick}>
-                        <span className="checkbox" style={style}></span>
-                        <span className="fund">{item.get('item')}</span>
-                    </li>
-                );
+                return <li key={key} className={className} onClick={onClick}>
+                    <span className="checkbox" style={style}></span>
+                    <span className="fund">{item.get('item')}</span>
+                </li>;
             })
             : null;
 
@@ -335,21 +333,19 @@ export class GraphFunds extends LineGraph {
             return <option key={key} value={period[0]}>{period[1]}</option>;
         });
 
-        return (
-            <div>
-                <ul className="fund-sidebar noselect">
-                    <li>
-                        <select defaultValue={this.props.period} onChange={onChange}>
-                            {periodOptions}
-                        </select>
-                    </li>
-                    {fundLineToggles}
-                </ul>
-                <span className="mode">
-          Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
-                </span>
-            </div>
-        );
+        return <div>
+            <ul className="fund-sidebar noselect">
+                <li>
+                    <select defaultValue={this.props.period} onChange={onChange}>
+                        {periodOptions}
+                    </select>
+                </li>
+                {fundLineToggles}
+            </ul>
+            <span className="mode">
+      Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
+            </span>
+        </div>;
     }
 }
 
