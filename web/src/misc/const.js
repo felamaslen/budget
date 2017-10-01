@@ -94,6 +94,7 @@ export const DAILY_PAGES = [null, null, false, false, false, true, true, true, t
 
 export const LOGIN_INPUT_LENGTH = 4;
 export const AVERAGE_MEDIAN = 0xa1;
+export const AVERAGE_EXP = 0xa2;
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;

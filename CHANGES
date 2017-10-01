@@ -1,5 +1,9 @@
 Release:
 
+- 3.1.1-beta-2
+    - Web client:
+        - Use exponential averages instead of simple medians on the future spending predictions
+
 - 3.1.1-beta-1
     - Web client:
         - Use a custom PureComponent implementation adapted from https://www.npmjs.com/package/react-immutable-pure-component

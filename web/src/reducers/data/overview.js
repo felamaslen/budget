@@ -2,10 +2,14 @@
  * Process overview data
  */
 
-import { PAGES, AVERAGE_MEDIAN, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../../misc/const';
+import {
+    PAGES, AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS
+} from '../../misc/const';
 import { FUTURE_INVESTMENT_RATE } from '../../misc/config';
 import { yearMonthDifference } from '../../misc/date';
-import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../../misc/data';
+import {
+    getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm
+} from '../../misc/data';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../../misc/color';
 import { List as list, Map as map, fromJS } from 'immutable';
 
@@ -53,7 +57,7 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
         }
 
         const average = Math.round(listAverage(
-            categoryCost, futureMonths, AVERAGE_MEDIAN
+            categoryCost, futureMonths + 1, AVERAGE_EXP
         ));
 
         return currentItems.concat(list(new Array(futureMonths).fill(average)));
@@ -219,16 +223,14 @@ export function rGetOverviewRows(data) {
         };
     });
 
-    const median = values.map(valuesItem => {
-        return {
-            positive: listAverage(valuesItem.filter(
-                item => item >= 0
-            ), 0, AVERAGE_MEDIAN),
-            negative: listAverage(valuesItem.filter(
-                item => item < 0), 0, AVERAGE_MEDIAN
-            )
-        };
-    });
+    const median = values.map(valuesItem => ({
+        positive: listAverage(valuesItem.filter(
+            item => item >= 0
+        ), 0, AVERAGE_MEDIAN),
+        negative: listAverage(valuesItem.filter(
+            item => item < 0), 0, AVERAGE_MEDIAN
+        )
+    }));
 
     const categoryColor = getOverviewCategoryColor();
 
