@@ -112,9 +112,6 @@ BlockView.propTypes = {
     active: PropTypes.array,
     deepBlock: PropTypes.string,
     status: PropTypes.string,
-    period: PropTypes.number.isRequired,
-    grouping: PropTypes.number.isRequired,
-    timeIndex: PropTypes.number.isRequired,
     onBlockClick: PropTypes.func.isRequired,
     onBlockHover: PropTypes.func.isRequired
 };

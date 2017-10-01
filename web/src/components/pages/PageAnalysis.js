@@ -100,11 +100,9 @@ export class PageAnalysis extends Page {
             </li>;
         });
 
-        return (
-            <ul className="sub-tree">
-                {subTreeItems}
-            </ul>
-        );
+        return <ul className="sub-tree">
+            {subTreeItems}
+        </ul>;
     }
     listTree() {
         const costPct = this.props.cost.map(item => {
