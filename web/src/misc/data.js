@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 import {
-    AVERAGE_MEDIAN, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
+    AVERAGE_MEDIAN, AVERAGE_EXP, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
 } from './const';
 import { YMD } from './date';
 
@@ -185,6 +185,10 @@ export function listAverage(theList, offset, mode) {
         ? theList.slice(0, -offset)
         : theList;
 
+    if (!theList.size) {
+        return NaN;
+    }
+
     if (mode === AVERAGE_MEDIAN) {
         // median
         const sorted = values.sort((prev, next) => {
@@ -206,6 +210,19 @@ export function listAverage(theList, offset, mode) {
         const high = sorted.get(Math.floor(sorted.size / 2));
 
         return (low + high) / 2;
+    }
+
+    if (mode === AVERAGE_EXP) {
+        const weights = new Array(values.size)
+            .fill(0)
+            .map((item, key) => Math.pow(2, -(key + 1)))
+            .reverse();
+
+        const weightSum = weights.reduce((sum, value) => sum + value, 0);
+
+        return values.reduce(
+            (average, value, key) => average + value * weights[key], 0
+        ) / weightSum;
     }
 
     // mean
