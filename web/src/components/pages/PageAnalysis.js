@@ -126,7 +126,7 @@ export class PageAnalysis extends Page {
 
         const listTreeBody = costPct.map((item, key) => {
             const classes = classNames({
-                'tree-list-item': true,
+                [`tree-list-item ${item.name}`]: true,
                 open: item.open
             });
 
@@ -143,6 +143,7 @@ export class PageAnalysis extends Page {
                 <div className="main"
                     onClick={onClick} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
 
+                    <span className="indicator" />
                     <input type="checkbox" checked={item.visible} onClick={stopPropagation}
                         onChange={onToggle} />
                     <span className="title">{item.name}</span>
@@ -239,7 +240,7 @@ PageAnalysis.propTypes = {
     treeVisible: PropTypes.object.isRequired,
     treeOpen: PropTypes.object.isRequired,
     timeIndex: PropTypes.number.isRequired,
-    deep: PropTypes.string,
+    deepBlock: PropTypes.string,
     status: PropTypes.string.isRequired,
     changeOption: PropTypes.func.isRequired,
     loadContent: PropTypes.func.isRequired,
