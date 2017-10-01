@@ -24,39 +24,39 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
         if (category === 'funds') {
             // randomly generate fund income projections
             const oldOffset = categoryCost.size - cost.get('balance').size;
-            let Xt = categoryCost.get(oldOffset + futureKey - 1);
 
-            let futureItems = [];
-            if (categoryCost.size > oldOffset + futureKey) {
-                futureItems = new Array(categoryCost.size - oldOffset - futureKey)
-                    .fill(0)
-                    .map(() => {
-                        Xt *= (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100);
+            const currentItems = categoryCost.slice(oldOffset, oldOffset + futureKey);
 
-                        return Math.round(Xt);
-                    });
+            const numFutureItems = categoryCost.size - oldOffset - futureKey;
+            if (numFutureItems <= 0) {
+                return currentItems;
             }
 
-            return categoryCost.slice(oldOffset, oldOffset + futureKey)
-                .concat(list(futureItems))
+            const latestValue = categoryCost.get(oldOffset + futureKey - 1);
+
+            return currentItems.concat(new Array(numFutureItems).fill(0)
+                .reduce(
+                    result => result.push(result.last() *
+                        (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100)
+                    ),
+                    list([latestValue])
+                )
+                .shift()
+                .map(value => Math.round(value))
+            );
         }
 
         // find the average value and make predictions based on that
-        let futureItems = [];
-
-        if (futureMonths > 0) {
-            const average = Math.round(listAverage(
-                categoryCost, futureMonths, AVERAGE_MEDIAN
-            ));
-
-            futureItems = new Array(futureMonths).fill(average);
+        const currentItems = categoryCost.slice(0, categoryCost.size - futureMonths);
+        if (futureMonths <= 0) {
+            return currentItems;
         }
 
-        const newCost = categoryCost
-            .slice(0, categoryCost.size - futureMonths)
-            .concat(list(futureItems));
+        const average = Math.round(listAverage(
+            categoryCost, futureMonths, AVERAGE_MEDIAN
+        ));
 
-        return newCost;
+        return currentItems.concat(list(new Array(futureMonths).fill(average)));
     });
 }
 
