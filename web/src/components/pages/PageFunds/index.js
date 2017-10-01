@@ -3,7 +3,6 @@
  */
 
 import { Map as map } from 'immutable';
-
 import connect, { PageList } from '../../PageList';
 
 import { aContentRequested } from '../../../actions/ContentActions';
@@ -65,10 +64,10 @@ class PageFunds extends PageList {
             return null;
         }
 
-        return <span className={this.props.gainInfo.classes}>
+        return <span className={this.props.gainInfo.get('classes')}>
             <span className="gain-info">Current value:</span>
             <span className="value">{formatCurrency(this.props.cachedValue.get('value'))}</span>
-            <span className="gain-pct">{this.props.gainInfo.gainPct}</span>
+            <span className="gain-pct">{this.props.gainInfo.get('gainPct')}</span>
             <span className="cache-age">({this.props.cachedValue.get('ageText')})</span>
         </span>;
     }
@@ -105,7 +104,7 @@ PageFunds.propTypes = {
     stocksListProps: PropTypes.instanceOf(map),
     cachedValue: PropTypes.instanceOf(map),
     showOverall: PropTypes.bool,
-    gainInfo: PropTypes.object
+    gainInfo: PropTypes.instanceOf(map)
 };
 
 function getGainInfo(state) {
@@ -126,7 +125,7 @@ function getGainInfo(state) {
         loss: cost > value
     });
 
-    return { classes, gainPct };
+    return map({ classes, gainPct });
 }
 
 const mapStateToProps = () => state => ({

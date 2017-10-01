@@ -1,6 +1,7 @@
 import extendableContainer from '../containerExtender';
 
-import React, { PureComponent } from 'react';
+import React from 'react';
+import PureComponent from '../ImmutableComponent';
 import PropTypes from 'prop-types';
 
 import { formatCurrency } from '../../misc/format';

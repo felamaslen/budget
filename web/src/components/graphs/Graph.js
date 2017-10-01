@@ -2,11 +2,12 @@
  * React component to display a graph
  */
 
-import React, { Component } from 'react';
+import React from 'react';
+import PureComponent from '../ImmutableComponent';
 import PropTypes from 'prop-types';
 import { htmlCanvasSupported } from '../../misc/const';
 
-export default class Graph extends Component {
+export default class Graph extends PureComponent {
     constructor(props) {
         super(props);
 
@@ -56,23 +57,19 @@ export default class Graph extends Component {
             };
         };
 
-        return (
-            <canvas ref={canvasRef()} {...this.canvasProperties}
-                className={this.canvasClasses()}
-                width={this.props.width} height={this.props.height} />
-        );
+        return <canvas ref={canvasRef()} {...this.canvasProperties}
+            className={this.canvasClasses()}
+            width={this.props.width} height={this.props.height} />;
     }
     render() {
         const classes = `graph-container graph-${this.props.name}`;
         const canvas = this.getCanvas();
 
-        return (
-            <div className={classes} {...this.outerProperties}>
-                {this.beforeCanvas()}
-                {canvas}
-                {this.afterCanvas()}
-            </div>
-        );
+        return <div className={classes} {...this.outerProperties}>
+            {this.beforeCanvas()}
+            {canvas}
+            {this.afterCanvas()}
+        </div>;
     }
 }
 

@@ -1,4 +1,4 @@
-import { PureComponent } from 'react';
+import PureComponent from './ImmutableComponent';
 import PropTypes from 'prop-types';
 
 export default class Page extends PureComponent {

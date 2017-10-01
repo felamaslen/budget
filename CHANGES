@@ -1,5 +1,14 @@
 Release:
 
+- 3.1.1-beta-1
+    - Web client:
+        - Use a custom PureComponent implementation adapted from https://www.npmjs.com/package/react-immutable-pure-component
+        - Fix performance bugs with components re-rendering when not necessary
+
+- 3.1.0-alpha-1
+    - Web client:
+        - Use react-redux with react-router instead of flux
+
 - 3.0.1-alpha-1
     - Responsive layout for mobile and tablet
 

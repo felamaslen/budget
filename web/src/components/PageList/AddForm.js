@@ -2,7 +2,8 @@ import { connect } from 'react-redux';
 
 import { aListItemAdded } from '../../actions/EditActions';
 
-import React, { PureComponent } from 'react';
+import React from 'react';
+import PureComponent from '../ImmutableComponent';
 import PropTypes from 'prop-types';
 
 import { PAGES, LIST_COLS_PAGES } from '../../misc/const';
