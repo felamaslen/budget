@@ -159,7 +159,7 @@ export class PageOverview extends Page {
         </div>;
     }
     render() {
-        if (!this.props.active) {
+        if (!this.props.loaded) {
             return null;
         }
 
@@ -172,7 +172,7 @@ export class PageOverview extends Page {
 
 PageOverview.propTypes = {
     rows: PropTypes.instanceOf(list),
-    active: PropTypes.bool.isRequired,
+    loaded: PropTypes.bool.isRequired,
     editRow: PropTypes.number,
     editCol: PropTypes.number,
     handleKeyPress: PropTypes.func.isRequired,
@@ -182,7 +182,7 @@ PageOverview.propTypes = {
 const mapStateToProps = state => ({
     pageIndex,
     rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
-    active: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
+    loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
     editRow: state.getIn(['global', 'edit', 'row']),
     editCol: state.getIn(['global', 'edit', 'col'])
 });
