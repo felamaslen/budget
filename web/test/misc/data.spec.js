@@ -23,7 +23,7 @@ import {
 } from '../../src/misc/data';
 
 import { YMD } from '../../src/misc/date';
-import { AVERAGE_MEDIAN } from '../../src/misc/const';
+import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/misc/const';
 
 describe('misc/data', () => {
     describe('getPeriodMatch', () => {
@@ -76,6 +76,13 @@ describe('misc/data', () => {
 
             expect(listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), 0, AVERAGE_MEDIAN))
                 .to.equal(9.5);
+        });
+        it('should get an exponential average for a list of data', () => {
+            const theList = list([1, 2, 5, 10, 10, 11, 9, 3, 20]);
+
+            const averageExp = 13.105675146771038;
+
+            expect(listAverage(theList, null, AVERAGE_EXP)).to.equal(averageExp);
         });
         it('should get the mean by default', () => {
             expect(listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), 0))
