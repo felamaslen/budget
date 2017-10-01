@@ -106,13 +106,13 @@ button {
         }
     }
     .nav-link-analysis {
-        border-color: #f4a742;
+        border-color: $color_analysis;
         &:before {
             background-position: -28px 0;
         }
     }
     .nav-link-funds {
-        border-color: #546e7a;
+        border-color: $color_funds;
         &:before {
             background-position: -56px 0;
         }
@@ -691,19 +691,14 @@ button {
         margin: 1em;
         flex-grow: 1;
         min-width: 400px;
+
         .title {
+            flex-grow: 2;
             text-transform: capitalize;
         }
-        .cost {
-            width: 160px;
-            text-align: right;
-            position: absolute;
-            right: 100px;
-        }
-        .pct {
-            width: 80px;
-            text-align: right;
-            float: right;
+        .cost, .pct {
+            flex-grow: 1;
+            justify-content: flex-end;
         }
         .tree-list {
             margin: 0;
@@ -712,6 +707,15 @@ button {
             .head {
                 font-weight: bold;
                 height: 3em;
+                .inner {
+                    display: flex;
+                    flex-flow: row nowrap;
+                }
+                .cost, .pct {
+                    display: flex;
+                    flex-flow: column;
+                    text-align: right;
+                }
                 .selected {
                     &:before {
                         content: $bracket_left;
@@ -729,26 +733,62 @@ button {
                 &:nth-child(2n+1) > .main {
                     background: #ececec;
                 }
-                & > .main::before {
-                    display: inline-block;
-                    content: $none;
-                    border: 6px solid transparent;
-                    border-left-color: black;
-                    margin-right: 0.5em;
+                & > .main {
+                    display: flex;
+                    flex-flow: row;
+                    align-items: center;
+                    &:before {
+                        content: $none;
+                        position: absolute;
+                        width: 0;
+                        height: 0;
+                        border-style: solid;
+                        border-width: 5px 0 5px 8.7px;
+                        border-color: transparent;
+                        border-left-color: black;
+                    }
                 }
                 &.open > .main::before {
                     border-left-color: transparent;
                     border-top-color: black;
-                    vertical-align: bottom;
+                    border-width: 8.7px 5px 0 5px;
                 }
             }
             .tree-list-item {
+                display: flex;
+                flex-flow: column;
+
                 line-height: 1.5em;
                 white-space: nowrap;
                 cursor: pointer;
                 span {
-                    display: inline-block;
+                    display: flex;
+                    flex-basis: 0;
                 } 
+                
+                .indicator {
+                    display: flex;
+                    flex-basis: 16px;
+                    width: 16px;
+                    height: 16px;
+                    margin-left: 14px;
+                    background: transparent;
+                }
+                &.bills .indicator {
+                    background: $color_bills;
+                }
+                &.food .indicator {
+                    background: $color_food;
+                }
+                &.general .indicator {
+                    background: $color_general;
+                }
+                &.holiday .indicator {
+                    background: $color_holiday;
+                }
+                &.social .indicator {
+                    background: $color_social;
+                }
             }
             .sub-tree {
                 margin: 0 0.5em 0 3em;
@@ -756,6 +796,7 @@ button {
                 list-style: none;
                 background: #fffcda;
                 .main {
+                    display: flex;
                     font-size: 0.9em;
                 }
             }

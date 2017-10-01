@@ -2,7 +2,7 @@
  * Analysis page component
  */
 
-import { List as list, Map as map } from 'immutable';
+import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
 import { aKeyPressed } from '../../actions/AppActions';
@@ -60,21 +60,21 @@ export class PageAnalysis extends Page {
         const costSelected = getCost(itemsSelected);
         const pctSelected = getPct(itemsSelected);
 
-        return (
-            <li className="tree-list-item head">
-                <div className="inner">
-                    <span className="title">Total:</span>
-                    <span className="cost">
-                        <div className="total">{costTotal}</div>
-                        <div className="selected">{costSelected}</div>
-                    </span>
-                    <span className="pct">
-                        <div className="total">{pctTotal}%</div>
-                        <div className="selected">{pctSelected}%</div>
-                    </span>
-                </div>
-            </li>
-        );
+        return <li className="tree-list-item head">
+            <div className="inner">
+                <span className="indicator" />
+
+                <span className="title">Total:</span>
+                <span className="cost">
+                    <div className="total">{costTotal}</div>
+                    <div className="selected">{costSelected}</div>
+                </span>
+                <span className="pct">
+                    <div className="total">{pctTotal}%</div>
+                    <div className="selected">{pctSelected}%</div>
+                </span>
+            </div>
+        </li>;
     }
     subTree(item) {
         if (!item.open) {
@@ -100,11 +100,9 @@ export class PageAnalysis extends Page {
             </li>;
         });
 
-        return (
-            <ul className="sub-tree">
-                {subTreeItems}
-            </ul>
-        );
+        return <ul className="sub-tree">
+            {subTreeItems}
+        </ul>;
     }
     listTree() {
         const costPct = this.props.cost.map(item => {
@@ -126,7 +124,7 @@ export class PageAnalysis extends Page {
 
         const listTreeBody = costPct.map((item, key) => {
             const classes = classNames({
-                'tree-list-item': true,
+                [`tree-list-item ${item.name}`]: true,
                 open: item.open
             });
 
@@ -143,6 +141,7 @@ export class PageAnalysis extends Page {
                 <div className="main"
                     onClick={onClick} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
 
+                    <span className="indicator" />
                     <input type="checkbox" checked={item.visible} onClick={stopPropagation}
                         onChange={onToggle} />
                     <span className="title">{item.name}</span>
@@ -233,14 +232,10 @@ PageAnalysis.propTypes = {
     grouping: PropTypes.number.isRequired,
     cost: PropTypes.instanceOf(list),
     costTotal: PropTypes.number,
-    items: PropTypes.instanceOf(map),
     description: PropTypes.string,
-    blocks: PropTypes.instanceOf(list),
     treeVisible: PropTypes.object.isRequired,
     treeOpen: PropTypes.object.isRequired,
     timeIndex: PropTypes.number.isRequired,
-    deep: PropTypes.string,
-    status: PropTypes.string.isRequired,
     changeOption: PropTypes.func.isRequired,
     loadContent: PropTypes.func.isRequired,
     onToggleTreeItem: PropTypes.func.isRequired,
@@ -258,9 +253,6 @@ const mapStateToProps = state => ({
     period: state.getIn(['global', 'other', 'analysis', 'period']),
     grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
     timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
-    blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
-    status: state.getIn(['global', 'other', 'blockView', 'status']),
-    deepBlock: state.getIn(['global', 'other', 'blockView', 'deepBlock']),
     cost: state.getIn(['global', 'pages', pageIndex, 'cost']),
     costTotal: state.getIn(['global', 'pages', pageIndex, 'costTotal']),
     description: state.getIn(['global', 'pages', pageIndex, 'description'])
@@ -269,7 +261,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     handleKeyPress: req => dispatch(aKeyPressed(req)),
     changeOption: (period, grouping, timeIndex) => dispatch(aOptionChanged(
-        { period, grouping, timeIndex, pageIndex }
+        { pageIndex, period, grouping, timeIndex }
     )),
     loadContent: req => dispatch(aContentRequested(req)),
     onToggleTreeItem: name => dispatch(aTreeItemDisplayToggled(name)),
