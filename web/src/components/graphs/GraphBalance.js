@@ -26,7 +26,6 @@ import {
     GRAPH_BALANCE_NUM_TICKS
 } from '../../misc/config';
 
-const hundredth = item => item / 100;
 const today = new YMD();
 
 export class GraphBalance extends LineGraph {
@@ -38,8 +37,12 @@ export class GraphBalance extends LineGraph {
     getTime(key, offset) {
         // converts a key index to a UNIX time stamp
         const yearMonth = getYearMonthFromKey(
-            key - offset, this.props.startYearMonth[0], this.props.startYearMonth[1]);
-        if (yearMonth[0] === today.year && yearMonth[1] === today.month) { // today is 1-indexed
+            key - offset, this.props.startYearMonth[0], this.props.startYearMonth[1]
+        );
+
+        if (yearMonth[0] === today.year && yearMonth[1] === today.month) {
+            // today is 1-indexed
+
             return today.timestamp();
         }
 
@@ -75,34 +78,21 @@ export class GraphBalance extends LineGraph {
     processData() {
         // this doesn't really modify the data, it just puts it in a form ready for drawing
 
-        // have an offset key when including old data
-        const oldOffset = this.props.showAll
-            ? this.props.balanceOld.size
-            : 0;
-
         // futureKey is used to separate past from future data
-        const futureKey = oldOffset + getKeyFromYearMonth(
-            this.props.currentYearMonth[0], this.props.currentYearMonth[1],
-            this.props.startYearMonth[0], this.props.startYearMonth[1]
-        ) + 1;
+        const futureKey = this.props.oldOffset + 1 + getKeyFromYearMonth(
+            this.props.currentYearMonth[0],
+            this.props.currentYearMonth[1],
+            this.props.startYearMonth[0],
+            this.props.startYearMonth[1]
+        );
 
-        const dataBalance = (
-            this.props.showAll
-                ? this.props.balanceOld.concat(this.props.balance)
-                : this.props.balance).map(hundredth);
-
-        this.dataBalance = dataBalance.map((value, key) => {
-            const time = this.getTime(key, oldOffset);
+        this.dataBalance = this.props.balance.map((value, key) => {
+            const time = this.getTime(key, this.props.oldOffset);
 
             return list([time, value]);
         });
 
-        const dataFunds = (
-            this.props.showAll
-                ? this.props.fundsOld.concat(this.props.funds)
-                : this.props.funds).map(hundredth);
-
-        this.dataFunds = dataFunds.map((value, key) => {
+        this.dataFunds = this.props.funds.map((value, key) => {
             return list([this.dataBalance.getIn([key, 0]), value]);
         });
 
@@ -319,27 +309,50 @@ GraphBalance.propTypes = {
     startYearMonth: PropTypes.array.isRequired,
     yearMonths: PropTypes.array.isRequired,
     showAll: PropTypes.bool.isRequired,
+    oldOffset: PropTypes.number.isRequired,
     balance: PropTypes.instanceOf(list).isRequired,
-    balanceOld: PropTypes.instanceOf(list).isRequired,
     funds: PropTypes.instanceOf(list).isRequired,
-    fundsOld: PropTypes.instanceOf(list).isRequired,
     toggleShowAll: PropTypes.func.isRequired
 };
 
 const pageIndex = PAGES.indexOf('overview');
 
-const mapStateToProps = state => ({
-    width: Math.min(GRAPH_WIDTH, window.innerWidth),
-    height: GRAPH_HEIGHT,
-    currentYearMonth: state.getIn(['global', 'pages', pageIndex, 'data', 'currentYearMonth']),
-    startYearMonth: state.getIn(['global', 'pages', pageIndex, 'data', 'startYearMonth']),
-    yearMonths: state.getIn(['global', 'pages', pageIndex, 'data', 'yearMonths']),
-    showAll: state.getIn(['global', 'other', 'showAllBalanceGraph']),
-    balance: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'balanceWithPredicted']),
-    balanceOld: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'old']),
-    funds: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'funds']),
-    fundsOld: state.getIn(['global', 'pages', pageIndex, 'data', 'cost', 'fundsOld'])
-});
+function getBalanceWithFunds(cost, showAll) {
+    let oldOffset = 0;
+    let balance = cost.get('balanceWithPredicted');
+    let funds = cost.get('funds');
+
+    if (showAll) {
+        oldOffset = cost.get('old').size;
+        balance = cost.get('old').concat(balance);
+        funds = cost.get('fundsOld').concat(funds);
+    }
+
+    return { oldOffset, balance, funds };
+}
+
+const mapStateToProps = state => {
+    const showAll = state.getIn(['global', 'other', 'showAllBalanceGraph']);
+
+    const cost = state.getIn(['global', 'pages', pageIndex, 'data', 'cost']);
+    const { oldOffset, balance, funds } = getBalanceWithFunds(cost, showAll);
+
+    return {
+        width: Math.min(GRAPH_WIDTH, window.innerWidth),
+        height: GRAPH_HEIGHT,
+        currentYearMonth: state.getIn(
+            ['global', 'pages', pageIndex, 'data', 'currentYearMonth']
+        ),
+        startYearMonth: state.getIn(
+            ['global', 'pages', pageIndex, 'data', 'startYearMonth']
+        ),
+        yearMonths: state.getIn(['global', 'pages', pageIndex, 'data', 'yearMonths']),
+        showAll,
+        oldOffset,
+        balance,
+        funds
+    };
+};
 
 const mapDispatchToProps = dispatch => ({
     toggleShowAll: () => dispatch(aShowAllToggled())
