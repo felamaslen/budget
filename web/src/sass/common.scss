@@ -10,12 +10,6 @@ body {
     }
 }
 
-.flexbox {
-    display: flex;
-}
-.flex {
-}
-
 .progress-outer {
     position: fixed;
     width: 100%;
@@ -541,8 +535,6 @@ body {
 
 /* block packer graph */
 .block-view {
-    width: 500px;
-    height: 300px;
     position: relative;
     .status-bar {
         position: absolute;
@@ -563,7 +555,7 @@ body {
         }
     }
     .block-tree-outer {
-        height: 280px;
+        height: 100%;
     }
     .block-tree {
         position: relative;
@@ -606,11 +598,12 @@ body {
                 opacity: 0;
             }
         }
-
-        .block, .sub-block {
-            @include all-blocks;
-        }
         
+        .block, .sub-block {
+            float: left;
+            position: relative;
+        }
+
         .block-0 { background: #d35400; }
         .block-1 { background: #1abc9c; }
         .block-2 { background: #f1c40f; }
@@ -718,6 +711,124 @@ body {
                 .checkbox:after {
                     background: black;
                 }
+            }
+        }
+    }
+}
+
+/* analysis page */
+.page-analysis {
+    .analysis-outer {
+        display: flex;
+        flex-flow: row wrap;
+    }
+    .tree {
+        flex-grow: 1;
+
+        .title {
+            flex-grow: 2;
+            text-transform: capitalize;
+        }
+        .cost, .pct {
+            flex-grow: 1;
+            justify-content: flex-end;
+        }
+    }
+    .tree-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        .head {
+            font-weight: bold;
+            height: 3em;
+            .inner {
+                display: flex;
+                flex-flow: row nowrap;
+            }
+            .cost, .pct {
+                display: flex;
+                flex-flow: column;
+                text-align: right;
+            }
+            .selected {
+                &:before {
+                    content: $bracket_left;
+                }
+                &:after {
+                    content: $bracket_right;
+                }
+            }
+        }
+        & > .tree-list-item {
+            position: relative;
+            &:nth-child(2n+1) > .main {
+                background: #ececec;
+            }
+            & > .main {
+                display: flex;
+                flex-flow: row;
+                align-items: center;
+                &:before {
+                    content: $none;
+                    position: absolute;
+                    width: 0;
+                    height: 0;
+                    border-style: solid;
+                    border-width: 5px 0 5px 8.7px;
+                    border-color: transparent;
+                    border-left-color: black;
+                }
+            }
+            &.open > .main::before {
+                border-left-color: transparent;
+                border-top-color: black;
+                border-width: 8.7px 5px 0 5px;
+            }
+        }
+        .tree-list-item {
+            display: flex;
+            flex-flow: column;
+
+            line-height: 1.5em;
+            white-space: nowrap;
+            cursor: pointer;
+            span {
+                display: flex;
+                flex-basis: 0;
+            } 
+            
+            .indicator {
+                display: flex;
+                flex-basis: 16px;
+                width: 16px;
+                height: 16px;
+                margin-left: 14px;
+                background: transparent;
+            }
+            &.bills .indicator {
+                background: $color_bills;
+            }
+            &.food .indicator {
+                background: $color_food;
+            }
+            &.general .indicator {
+                background: $color_general;
+            }
+            &.holiday .indicator {
+                background: $color_holiday;
+            }
+            &.social .indicator {
+                background: $color_social;
+            }
+        }
+        .sub-tree {
+            margin: 0 0.5em 0 3em;
+            padding: 0;
+            list-style: none;
+            background: #fffcda;
+            .main {
+                display: flex;
+                font-size: 0.9em;
             }
         }
     }

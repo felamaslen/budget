@@ -90,7 +90,8 @@ export class PageAnalysis extends Page {
             const onMouseOut = () => this.props.onHoverTreeItem(null);
 
             return <li key={subKey} className="tree-list-item"
-                onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+                onMouseOver={onMouseOver} onMouseOut={onMouseOut}
+                onTouchStart={onMouseOver} onTouchEnd={onMouseOut}>
 
                 <div className="main">
                     <span className="title">{subItemName}</span>
@@ -153,7 +154,7 @@ export class PageAnalysis extends Page {
         })
 
         return <div className="tree">
-            <ul className="tree-list flex">
+            <ul className="tree-list">
                 {listTreeHead}
                 {listTreeBody}
             </ul>
@@ -216,7 +217,7 @@ export class PageAnalysis extends Page {
                         onClick={() => this.nextPeriod()}>Next</button>
                 </div>
                 <h3 className="period-title">{this.props.description}</h3>
-                <div className="flexbox">
+                <div className="analysis-outer">
                     {listTree}
                     <BlockPacker onBlockClick={this.props.onBlockClick}
                         onBlockHover={this.props.onBlockHover} />
@@ -267,7 +268,7 @@ const mapDispatchToProps = dispatch => ({
     onToggleTreeItem: name => dispatch(aTreeItemDisplayToggled(name)),
     onHoverTreeItem: req => dispatch(aTreeItemHovered(req)),
     onExpandTreeItem: name => dispatch(aTreeItemExpandToggled(name)),
-    onBlockClick: block => dispatch(aBlockClicked(block)),
+    onBlockClick: req => dispatch(aBlockClicked(req)),
     onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered(block, subBlock))
 });
 

@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { LineGraph } from './LineGraph';
+import LineGraph from './LineGraph';
 import { rgba } from '../../misc/color';
 import {
     PAGES, GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,

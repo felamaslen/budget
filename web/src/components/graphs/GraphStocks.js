@@ -4,8 +4,10 @@
 
 import { List as list } from 'immutable';
 import PropTypes from 'prop-types';
-import { LineGraph } from './LineGraph';
+
+import LineGraph from './LineGraph';
 import { rgba } from '../../misc/color';
+
 import {
     COLOR_PROFIT, COLOR_LOSS, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../misc/config';
