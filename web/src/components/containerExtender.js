@@ -2,10 +2,10 @@ import { connect as reduxConnect } from 'react-redux';
 
 function getStateProps(mapStateToPropsDefault, extra, ...args) {
     if (extra) {
-        return (state, ownProps) => Object.assign(
-            mapStateToPropsDefault(...args)(state, ownProps),
-            extra(...args)(state, ownProps)
-        );
+        return (state, ownProps) => ({
+            ...mapStateToPropsDefault(...args)(state, ownProps),
+            ...extra(...args)(state, ownProps)
+        });
     }
 
     return (state, ownProps) => mapStateToPropsDefault(...args)(state, ownProps);
@@ -13,10 +13,10 @@ function getStateProps(mapStateToPropsDefault, extra, ...args) {
 
 function getDispatchProps(mapDispatchToPropsDefault, extra, ...args) {
     if (extra) {
-        return (dispatch, ownProps) => Object.assign(
-            mapDispatchToPropsDefault(...args)(dispatch, ownProps),
-            extra(...args)(dispatch, ownProps)
-        );
+        return (dispatch, ownProps) => ({
+            ...mapDispatchToPropsDefault(...args)(dispatch, ownProps),
+            ...extra(...args)(dispatch, ownProps)
+        });
     }
 
     return (dispatch, ownProps) => mapDispatchToPropsDefault(...args)(dispatch, ownProps);

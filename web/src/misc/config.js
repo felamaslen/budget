@@ -30,8 +30,7 @@ export const FONT_GRAPH_KEY_SMALL = '11px Arial, Helvetica, sans-serif';
 export const GRAPH_KEY_SIZE = 12;
 export const GRAPH_KEY_OFFSET_X = 45;
 export const GRAPH_KEY_OFFSET_Y = 34;
-export const GRAPH_BALANCE_NUM_TICKS = 5;
-export const GRAPH_SPEND_NUM_ITEMS = 24;
+export const GRAPH_CASHFLOW_NUM_TICKS = 5;
 
 export const GRAPH_FUNDS_TENSION = 0.65;
 export const GRAPH_FUNDS_MODES = ['ROI', 'Value', 'Price'];
@@ -88,6 +87,7 @@ export const COLOR_LOSS_LIGHT = [255, 244, 244];
 export const COLOR_BALANCE_ACTUAL = [0, 51, 153];
 export const COLOR_BALANCE_PREDICTED = [255, 0, 0];
 export const COLOR_BALANCE_STOCKS = [200, 200, 200, 0.5];
+export const COLOR_SPENDING = [0, 51, 153];
 
 export const COLOR_GRAPH_FUND_ITEM = [66, 134, 244];
 export const COLOR_GRAPH_FUND_LINE = COLOR_GRAPH_TITLE;
