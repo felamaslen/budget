@@ -46,12 +46,11 @@ export class BlockView extends Component {
                             height: subBlock.get('height')
                         };
 
-                        const onMouseOver = () => {
-                            this.props.onBlockHover(block, subBlock);
-                        };
+                        const onBlockHover = () => this.props.onBlockHover(block, subBlock);
 
-                        return <div key={subBlockKey} className={subClasses} style={subBlockStyle}
-                            onMouseOver={onMouseOver}></div>;
+                        return <div key={subBlockKey} className={subClasses}
+                            style={subBlockStyle}
+                            onTouchStart={onBlockHover} onMouseOver={onBlockHover} />
                     });
 
                     const subBlockGroupStyle = {
@@ -69,8 +68,10 @@ export class BlockView extends Component {
                     height: block.get('height')
                 };
 
+                const wasDeep = Boolean(this.props.deepBlock);
+
                 const onClick = () => this.props.onBlockClick({
-                    pageIndex, name: block.get('name')
+                    pageIndex, name: block.get('name'), wasDeep
                 });
 
                 return <div key={blockKey} className={classes} style={blockStyle}
@@ -96,7 +97,8 @@ export class BlockView extends Component {
 
         const blocks = this.renderBlocks(activeMain, activeSub);
 
-        return <div className="block-view" onMouseOut={onMouseOut}>
+        return <div className="block-view"
+            onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>
             <div className="block-tree-outer">
                 <div className={blockClasses}>{blocks}</div>
             </div>
