@@ -55,13 +55,8 @@ button {
     .nav-link-overview:before {
         background-position: -200px 0;
     }
-    .nav-link-analysis {
-        display: none;
-        .nav-link {
-            &:before {
-                background-position: -228px 0;
-            }
-        }
+    .nav-link-analysis:before {
+        background-position: -228px 0;
     }
     .nav-link-funds:before {
         background-position: -256px 0;
@@ -497,6 +492,38 @@ button {
         font-style: italic;
         text-align: right;
         font-size: 80%;
+    }
+}
+
+.page-analysis {
+    .input-period, .input-grouping {
+        display: block;
+        margin: 0.3em 0;
+        text-align: center;
+    }
+    .btns {
+        display: flex;
+        flex-flow: row nowrap;
+        margin: 0.3em 0;
+
+        button {
+            margin: 0 0.3em;
+            flex-basis: 0;
+            flex-grow: 1;
+            font-size: 0.75em;
+            &:not(:disabled) {
+                background: #ffa35c;
+            }
+        }
+    }
+    .analysis-outer {
+        flex-flow: column-reverse;
+    }
+    .block-tree-outer {
+        height: 300px;
+    }
+    .tree {
+        padding: 0.3em;
     }
 }
 
