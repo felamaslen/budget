@@ -5,10 +5,14 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
+import { aShowAllToggled } from '../../actions/GraphActions';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { LineGraph } from './LineGraph';
+
+import LineGraph from './LineGraph';
+
 import { rgba } from '../../misc/color';
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../misc/data';
@@ -21,7 +25,6 @@ import {
     FONT_GRAPH_TITLE, FONT_GRAPH_KEY_SMALL, FONT_AXIS_LABEL,
     GRAPH_BALANCE_NUM_TICKS
 } from '../../misc/config';
-import { aShowAllToggled } from '../../actions/GraphActions';
 
 const hundredth = item => item / 100;
 const today = new YMD();

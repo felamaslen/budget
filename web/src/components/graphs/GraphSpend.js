@@ -6,7 +6,9 @@ import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
 import PropTypes from 'prop-types';
-import { LineGraph } from './LineGraph';
+
+import LineGraph from './LineGraph';
+
 import { formatCurrency, getTickSize } from '../../misc/format';
 import { rgba } from '../../misc/color';
 import { getKeyFromYearMonth } from '../../misc/data';
