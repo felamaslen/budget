@@ -55,13 +55,8 @@ button {
     .nav-link-overview:before {
         background-position: -200px 0;
     }
-    .nav-link-analysis {
-        display: none;
-        .nav-link {
-            &:before {
-                background-position: -228px 0;
-            }
-        }
+    .nav-link-analysis:before {
+        background-position: -228px 0;
     }
     .nav-link-funds:before {
         background-position: -256px 0;
