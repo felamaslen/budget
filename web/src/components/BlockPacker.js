@@ -86,7 +86,6 @@ export class BlockView extends Component {
     render() {
         const blockClasses = classNames({
             'block-tree': true,
-            flex: true,
             'block-tree-deep': this.props.deepBlock,
             [`block-tree-${this.props.deepBlock}`]: this.props.deepBlock
         });

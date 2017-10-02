@@ -90,7 +90,8 @@ export class PageAnalysis extends Page {
             const onMouseOut = () => this.props.onHoverTreeItem(null);
 
             return <li key={subKey} className="tree-list-item"
-                onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+                onMouseOver={onMouseOver} onMouseOut={onMouseOut}
+                onTouchStart={onMouseOver} onTouchEnd={onMouseOut}>
 
                 <div className="main">
                     <span className="title">{subItemName}</span>
@@ -153,7 +154,7 @@ export class PageAnalysis extends Page {
         })
 
         return <div className="tree">
-            <ul className="tree-list flex">
+            <ul className="tree-list">
                 {listTreeHead}
                 {listTreeBody}
             </ul>
