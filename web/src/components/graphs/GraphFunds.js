@@ -8,7 +8,9 @@ import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { LineGraph } from './LineGraph';
+
+import LineGraph from './LineGraph';
+
 import { formatCurrency, getTickSize, formatAge } from '../../misc/format';
 import { rgba } from '../../misc/color';
 import {
