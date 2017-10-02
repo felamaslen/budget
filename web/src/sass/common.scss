@@ -10,12 +10,6 @@ body {
     }
 }
 
-.flexbox {
-    display: flex;
-}
-.flex {
-}
-
 .progress-outer {
     position: fixed;
     width: 100%;
@@ -541,8 +535,6 @@ body {
 
 /* block packer graph */
 .block-view {
-    width: 500px;
-    height: 300px;
     position: relative;
     .status-bar {
         position: absolute;
@@ -563,7 +555,7 @@ body {
         }
     }
     .block-tree-outer {
-        height: 280px;
+        height: 100%;
     }
     .block-tree {
         position: relative;
@@ -720,6 +712,14 @@ body {
                 }
             }
         }
+    }
+}
+
+/* analysis page */
+.page-analysis {
+    .analysis-outer {
+        display: flex;
+        flex-flow: row wrap;
     }
 }
 

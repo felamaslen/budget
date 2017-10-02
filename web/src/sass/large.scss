@@ -684,9 +684,6 @@ button {
         margin: 0.3em 1em;
         font-size: 1.2em;
     }
-    .flexbox {
-        flex-flow: row wrap;
-    }
     .tree {
         margin: 1em;
         flex-grow: 1;
@@ -803,9 +800,9 @@ button {
         }
     }
     .block-view {
+        flex-basis: 500px;
         height: 500px;
         .block-tree-outer {
-            height: 480px;
         }
     }
 }
