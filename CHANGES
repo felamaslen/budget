@@ -1,5 +1,9 @@
 Release:
 
+- 3.1.5-beta
+    - Web client:
+        - Fixed stock price graph using Yahoo YQL
+
 - 3.1.4-beta
     - Web client:
         - Better support for mobile on the analysis page
