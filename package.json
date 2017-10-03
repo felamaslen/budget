@@ -1,6 +1,6 @@
 {
   "name": "budget",
-  "version": "3.1.4-2017100201",
+  "version": "3.1.5-2017100301",
   "description": "Personal finance app",
   "main": "api/src/index.js",
   "sasslintConfig": ".sass-lint.yml",
