@@ -11,7 +11,7 @@ export function getStockPricesFromYahoo(symbols) {
 
     const encodedQuery = encodeURIComponent(`${env} ${query}`);
 
-    const url = `http://query.yahooapis.com/v1/public/yql?q=${encodedQuery}&format=json`;
+    const url = `https://query.yahooapis.com/v1/public/yql?q=${encodedQuery}&format=json`;
 
     return new Promise((resolve, reject) => {
         jsonp(url, {}, (err, data) => {
