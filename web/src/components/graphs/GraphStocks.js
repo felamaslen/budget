@@ -3,6 +3,8 @@
  */
 
 import { List as list } from 'immutable';
+import { connect } from 'react-redux';
+
 import PropTypes from 'prop-types';
 
 import LineGraph from './LineGraph';
@@ -11,6 +13,8 @@ import { rgba } from '../../misc/color';
 import {
     COLOR_PROFIT, COLOR_LOSS, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../misc/config';
+
+import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '../../misc/const';
 
 export class GraphStocks extends LineGraph {
     update() {
@@ -82,4 +86,12 @@ export class GraphStocks extends LineGraph {
 GraphStocks.propTypes = {
     data: PropTypes.instanceOf(list)
 };
+
+const mapStateToProps = state => ({
+    width: GRAPH_STOCKS_WIDTH,
+    height: GRAPH_STOCKS_HEIGHT,
+    data: state.getIn(['global', 'other', 'stocksList', 'history'])
+});
+
+export default connect(mapStateToProps)(GraphStocks);
 

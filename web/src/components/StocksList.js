@@ -3,52 +3,58 @@
  * are based on the user's funds' top holdings
  */
 
-import { List as list, Map as map } from 'immutable';
+import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { GraphStocks } from './graphs/GraphStocks';
+
+import GraphStocks from './graphs/GraphStocks';
 import { aStocksListRequested, aStocksPricesRequested } from '../actions/StocksListActions';
 import { sigFigs } from '../misc/format';
-import {
-    STOCK_PRICES_DELAY, GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT
-} from '../misc/const';
-
-const renderStock = (stock, key) => {
-    const price = `${sigFigs(stock.get('gain'), 3)}%`;
-    const name = stock.get('name');
-    const title = `${stock.get('name')} (${stock.get('code')})`;
-
-    const classes = classNames({
-        up: stock.get('gain') > 0,
-        down: stock.get('gain') < 0,
-        'hl-up': stock.get('up'),
-        'hl-down': stock.get('down')
-    });
-
-    return (
-        <li key={key} className={classes} title={title}>
-            <span className="name">{name}</span>
-            <span className="price">{price}</span>
-        </li>
-    );
-};
+import { STOCK_PRICES_DELAY } from '../misc/config';
 
 export class StocksList extends Component {
     componentWillMount() {
         this.props.requestStocksList();
     }
     componentDidUpdate(prevProps) {
-        if (prevProps.lastPriceUpdate !== this.props.lastPriceUpdate) {
-            setTimeout(() => this.dispatchAction(aStocksPricesRequested()), STOCK_PRICES_DELAY);
+        const priceDidUpdate = prevProps.lastPriceUpdate !== this.props.lastPriceUpdate;
+        const listDidLoad = !prevProps.loadedList && this.props.loadedList;
+
+        if (priceDidUpdate) {
+            this.props.requestPrices();
         }
+        else if (listDidLoad) {
+            this.props.requestPrices(0);
+        }
+    }
+    renderStocksList(stockMap) {
+        return stockMap
+            .valueSeq()
+            .map(stock => {
+                const price = `${sigFigs(stock.get('gain'), 3)}%`;
+                const name = stock.get('name');
+                const title = `${stock.get('name')} (${stock.get('code')})`;
+
+                const classes = classNames({
+                    up: stock.get('gain') > 0,
+                    down: stock.get('gain') < 0,
+                    'hl-up': stock.get('up'),
+                    'hl-down': stock.get('down')
+                });
+
+                return <li key={stock.get('code')} className={classes} title={title}>
+                    <span className="name">{name}</span>
+                    <span className="price">{price}</span>
+                </li>;
+            });
     }
     render() {
         const classes = classNames({
             'stocks-list': true,
-            'graph-container': true, // for layout purposes
+            'graph-container': true,
             loading: !this.props.loadedInitial
         });
         const overallClasses = classNames({
@@ -58,44 +64,52 @@ export class StocksList extends Component {
             'hl-down': this.props.weightedGain < this.props.oldWeightedGain
         });
 
-        return (
-            <div className={classes}>
-                <ul className="stocks-list-ul">
-                    {this.props.stocks.valueSeq().map(renderStock)}
+        const stocksList = this.renderStocksList(this.props.stocks);
+        const indicesList = this.renderStocksList(this.props.indices);
+
+        return <div className={classes}>
+            <ul className="stocks-list-ul">{stocksList}</ul>
+            <div className="stocks-sidebar">
+                <GraphStocks name="graph-stocks" />
+                <ul>
+                    <li className={overallClasses}>
+                        <span className="name">Overall</span>
+                        <span className="price">{sigFigs(this.props.weightedGain, 3)}%</span>
+                    </li>
+                    {indicesList}
                 </ul>
-                <div className="stocks-sidebar">
-                    <GraphStocks
-                        name="graph-stocks"
-                        width={GRAPH_STOCKS_WIDTH} height={GRAPH_STOCKS_HEIGHT}
-                        data={this.props.history} />
-                    <ul>
-                        <li className={overallClasses}>
-                            <span className="name">Overall</span>
-                            <span className="price">{sigFigs(this.props.weightedGain, 3)}%</span>
-                        </li>
-                        {this.props.indices.valueSeq().map(renderStock)}
-                    </ul>
-                </div>
             </div>
-        );
+        </div>;
     }
 }
 
 StocksList.propTypes = {
+    loadedList: PropTypes.bool.isRequired,
     loadedInitial: PropTypes.bool.isRequired,
-    stocks: PropTypes.instanceOf(map),
-    indices: PropTypes.instanceOf(map),
-    lastPriceUpdate: PropTypes.number,
-    history: PropTypes.instanceOf(list),
-    weightedGain: PropTypes.number,
-    oldWeightedGain: PropTypes.number,
-    requestStocksList: PropTypes.func.isRequired
+    stocks: PropTypes.instanceOf(map).isRequired,
+    indices: PropTypes.instanceOf(map).isRequired,
+    lastPriceUpdate: PropTypes.number.isRequired,
+    weightedGain: PropTypes.number.isRequired,
+    oldWeightedGain: PropTypes.number.isRequired,
+    requestStocksList: PropTypes.func.isRequired,
+    requestPrices: PropTypes.func.isRequired
 };
 
-const mapStateToProps = () => ({});
+const mapStateToProps = state => ({
+    loadedList: state.getIn(['global', 'other', 'stocksList', 'loadedList']),
+    loadedInitial: state.getIn(['global', 'other', 'stocksList', 'loadedInitial']),
+    stocks: state.getIn(['global', 'other', 'stocksList', 'stocks']),
+    indices: state.getIn(['global', 'other', 'stocksList', 'indices']),
+    lastPriceUpdate: state.getIn(['global', 'other', 'stocksList', 'lastPriceUpdate']),
+    weightedGain: state.getIn(['global', 'other', 'stocksList', 'weightedGain']),
+    oldWeightedGain: state.getIn(['global', 'other', 'stocksList', 'oldWeightedGain'])
+});
 
 const mapDispatchToProps = dispatch => ({
-    requestStocksList: () => setTimeout(() => dispatch(aStocksListRequested()), 0)
+    requestStocksList: () => setTimeout(() => dispatch(aStocksListRequested()), 0),
+    requestPrices: (delay = STOCK_PRICES_DELAY) => setTimeout(
+        () => dispatch(aStocksPricesRequested()), delay
+    )
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(StocksList);

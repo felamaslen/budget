@@ -4,7 +4,6 @@
 
 import { Map as map } from 'immutable';
 import axios from 'axios';
-import querystring from 'querystring';
 
 import {
     PAGES, API_PREFIX, LIST_COLS_PAGES,
@@ -16,7 +15,6 @@ import { aServerUpdateReceived, aServerAddReceived } from '../actions/AppActions
 import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/LoginActions';
 import { aListItemAdded } from '../actions/EditActions';
 import { aMobileDialogClosed } from '../actions/FormActions';
-import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
 
 import { getInvalidInsertDataKeys, stringifyFields } from '../reducers/EditReducer';
 import { validateFields } from '../reducers/FormReducer';
@@ -157,48 +155,5 @@ export async function handleModal(dispatch, reduction, req) {
     dispatch(aMobileDialogClosed(null));
 
     setTimeout(() => dispatch(aMobileDialogClosed({ deactivate: true })), 305);
-}
-
-export async function requestStocksList(dispatch, apiKey) {
-    try {
-        const response = await axios.get(`${API_PREFIX}/data/stocks`, {
-            headers: { 'Authorization': apiKey }
-        });
-
-        return dispatch(aStocksListReceived(response.data.data));
-    }
-    catch (err) {
-        return dispatch(aStocksListReceived(null));
-    }
-}
-
-// TODO
-export async function requestStockPrices(dispatch, req) {
-    const promises = req.symbols.map(symbol => {
-        const url = 'https://www.alphavantage.co/query';
-        const query = {
-            function: 'TIME_SERIES_DAILY',
-            symbol,
-            apikey: req.apiKey,
-            datatype: 'json'
-        };
-
-        const requestUrl = `${url}?${querystring.stringify(query)}`;
-
-        return axios.get(requestUrl);
-    });
-
-    try {
-        const responses = await Promise.all(promises);
-
-        const data = responses.map(response => response.data);
-
-        return dispatch(aStocksPricesReceived(data));
-    }
-    catch (err) {
-        console.error('Error fetching stock prices', err.message);
-
-        return dispatch(aStocksPricesReceived(null));
-    }
 }
 

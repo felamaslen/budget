@@ -16,7 +16,7 @@ import { getPeriodMatch } from '../../../misc/data';
 import { DO_STOCKS_LIST } from '../../../misc/config';
 import { mediaQueries, PAGES, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
 import { formatCurrency, formatPercent } from '../../../misc/format';
-import { StocksList } from '../../StocksList';
+import StocksList from '../../StocksList';
 
 import getFundsHead from './HeadFunds';
 import getFundsBody from './BodyFunds';
@@ -32,14 +32,7 @@ class PageFunds extends PageList {
             return null;
         }
 
-        return <StocksList dispatcher={this.props.dispatcher}
-            stocks={this.props.stocksListProps.get('stocks')}
-            indices={this.props.stocksListProps.get('indices')}
-            lastPriceUpdate={this.props.stocksListProps.get('lastPriceUpdate')}
-            history={this.props.stocksListProps.get('history')}
-            weightedGain={this.props.stocksListProps.get('weightedGain')}
-            oldWeightedGain={this.props.stocksListProps.get('oldWeightedGain')}
-        />;
+        return <StocksList />;
     }
     renderFundsGraph(render) {
         if (!render) {

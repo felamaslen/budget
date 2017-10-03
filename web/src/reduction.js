@@ -70,6 +70,7 @@ export function resetAppState(state) {
                 cacheTimes: list.of()
             }),
             stocksList: map({
+                loadedList: false,
                 loadedInitial: false,
                 lastPriceUpdate: -1,
                 loading: false,

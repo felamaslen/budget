@@ -67,12 +67,7 @@ import {
     rChangeFundsGraphPeriod,
     rHandleFundPeriodResponse
 } from './GraphReducer';
-import {
-    rLoadStocksList,
-    rHandleStocksListResponse,
-    rLoadStocksPrices,
-    rHandleStocksPricesResponse
-} from './StocksListReducer';
+import { rHandleStocksListResponse, rHandleStocksPricesResponse } from './StocksListReducer';
 
 import initialState from '../reduction';
 
@@ -147,10 +142,7 @@ const reducers = createReducerObject([
     [AC.GRAPH_FUNDS_PERIOD_CHANGED, rChangeFundsGraphPeriod],
     [AC.GRAPH_FUNDS_PERIOD_LOADED, rHandleFundPeriodResponse],
 
-
-    [AC.STOCKS_LIST_REQUESTED, rLoadStocksList],
     [AC.STOCKS_LIST_RECEIVED, rHandleStocksListResponse],
-    [AC.STOCKS_PRICES_REQUESTED, rLoadStocksPrices],
     [AC.STOCKS_PRICES_RECEIVED, rHandleStocksPricesResponse]
 ]);
 
