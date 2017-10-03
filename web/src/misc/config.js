@@ -39,7 +39,7 @@ export const GRAPH_FUNDS_POINT_RADIUS = 3;
 export const STOCK_INDICES = (process.env.STOCK_INDICES || '')
     .split(',')
     .reduce((obj, item) => {
-        const match = item.match(/^([\w.:]+)\/([\w\s.]+)$/);
+        const match = item.match(/^([^/]+)\/([^/]+)$/);
         if (match) {
             obj[match[1]] = match[2];
         }
