@@ -6,6 +6,7 @@ import {
     requestContent, requestAnalysisData, requestFundPeriodData
 } from './content.effects';
 import { requestSuggestions } from './suggestions.effects';
+import { requestStocksList, requestStockPrices } from './stocks.effects';
 
 function createEffectHandler(effects) {
     return effects.reduce((obj, item) => {
@@ -26,6 +27,9 @@ export default createEffectHandler([
     [EF.SERVER_ADD_REQUESTED, addServerData],
     [EF.SERVER_MODAL_EFFECT_HANDLER, handleModal],
     [EF.ANALYSIS_DATA_REQUESTED, requestAnalysisData],
-    [EF.FUNDS_PERIOD_REQUESTED, requestFundPeriodData]
+
+    [EF.FUNDS_PERIOD_REQUESTED, requestFundPeriodData],
+    [EF.EF_STOCKS_LIST_REQUESTED, requestStocksList],
+    [EF.EF_STOCKS_PRICES_REQUESTED, requestStockPrices]
 ]);
 
