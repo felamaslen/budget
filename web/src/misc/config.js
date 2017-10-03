@@ -49,7 +49,7 @@ export const STOCK_INDICES = (process.env.STOCK_INDICES || '')
 
 export const DO_STOCKS_LIST = process.env.DO_STOCKS_LIST === 'true';
 export const STOCKS_GRAPH_RESOLUTION = 50;
-export const STOCK_PRICES_DELAY = 2000;
+export const STOCK_PRICES_DELAY = 10000;
 
 export const LIST_BLOCK_WIDTH = 500;
 export const LIST_BLOCK_HEIGHT = 300;

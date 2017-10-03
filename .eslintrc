@@ -239,7 +239,8 @@
         "quote-props": "off",
         "quotes": [
             "error",
-            "single"
+            "single",
+            { "allowTemplateLiterals": true }
         ],
         "radix": "error",
         "require-await": "error",

@@ -71,15 +71,7 @@ export function limitTimeSeriesLength(timeSeries, limit) {
 }
 
 export function rHandleStocksPricesResponse(reduction, res) {
-    let indices = reduction
-        .getIn(['other', 'stocksList', 'indices'])
-        .map(item => item.set('up', false).set('down', false));
-
-    let stocks = reduction
-        .getIn(['other', 'stocksList', 'stocks'])
-        .map(item => item.set('up', false).set('down', false));
-
-    const time = Math.floor(new Date().getTime() / 1000);
+    const time = Math.floor(Date.now() / 1000);
 
     let newReduction = reduction
         .setIn(['other', 'stocksList', 'loadedInitial'], true)
@@ -88,6 +80,14 @@ export function rHandleStocksPricesResponse(reduction, res) {
     if (!res) {
         return newReduction;
     }
+
+    let indices = reduction
+        .getIn(['other', 'stocksList', 'indices'])
+        .map(item => item.set('up', false).set('down', false));
+
+    let stocks = reduction
+        .getIn(['other', 'stocksList', 'stocks'])
+        .map(item => item.set('up', false).set('down', false));
 
     const loadedInitial = reduction.getIn(['other', 'stocksList', 'loadedInitial']);
 
