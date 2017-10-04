@@ -13,18 +13,11 @@ import Media from 'react-media';
 import { mediaQueries, PAGES } from '../../misc/const';
 
 import Page from '../Page';
-import { HeadMobileContainer as getHeadMobile } from './HeadMobile';
 import { BodyMobileContainer as getBodyMobile } from './BodyMobile';
 
-import { HeadContainer as getHead } from './Head';
 import { BodyContainer as getBody } from './Body';
 
 export class PageList extends Page {
-    headMobile() {
-        const HeadMobile = getHeadMobile(this.props.pageIndex);
-
-        return <HeadMobile />;
-    }
     bodyMobile() {
         const BodyMobile = getBodyMobile(this.props.pageIndex);
 
@@ -35,15 +28,7 @@ export class PageList extends Page {
             return null;
         }
 
-        const headMobile = this.headMobile();
-        const bodyMobile = this.bodyMobile();
-
-        return <div>{headMobile}{bodyMobile}</div>;
-    }
-    headDesktop () {
-        const Head = getHead(this.props.pageIndex);
-
-        return <Head />;
+        return <div>{this.bodyMobile()}</div>;
     }
     bodyDesktop () {
         const Body = getBody(this.props.pageIndex);
@@ -55,10 +40,7 @@ export class PageList extends Page {
             return null;
         }
 
-        const head = this.headDesktop();
-        const body = this.bodyDesktop();
-
-        return <div>{head}{body}</div>;
+        return <div>{this.bodyDesktop()}</div>;
     }
     renderList() {
         return <div>

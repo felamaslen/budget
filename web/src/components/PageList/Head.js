@@ -35,7 +35,7 @@ export class Head extends PureComponent {
             precision: 1
         });
 
-        return <div className="list-head noselect">
+        return <div className="list-head-inner noselect">
             {this.renderListHeadMain(LIST_COLS_PAGES[this.props.pageIndex])}
             {daily}
             <span className="total">Total:</span>

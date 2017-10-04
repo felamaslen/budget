@@ -54,7 +54,7 @@ export class StocksList extends Component {
     render() {
         const classes = classNames({
             'stocks-list': true,
-            'graph-container': true,
+            'graph-container-outer': true,
             loading: !this.props.loadedInitial
         });
         const overallClasses = classNames({
@@ -68,16 +68,18 @@ export class StocksList extends Component {
         const indicesList = this.renderStocksList(this.props.indices);
 
         return <div className={classes}>
-            <ul className="stocks-list-ul">{stocksList}</ul>
-            <div className="stocks-sidebar">
-                <GraphStocks name="graph-stocks" />
-                <ul>
-                    <li className={overallClasses}>
-                        <span className="name">Overall</span>
-                        <span className="price">{sigFigs(this.props.weightedGain, 3)}%</span>
-                    </li>
-                    {indicesList}
-                </ul>
+            <div className="graph-container">
+                <ul className="stocks-list-ul">{stocksList}</ul>
+                <div className="stocks-sidebar">
+                    <GraphStocks name="graph-stocks" />
+                    <ul>
+                        <li className={overallClasses}>
+                            <span className="name">Overall</span>
+                            <span className="price">{sigFigs(this.props.weightedGain, 3)}%</span>
+                        </li>
+                        {indicesList}
+                    </ul>
+                </div>
             </div>
         </div>;
     }
