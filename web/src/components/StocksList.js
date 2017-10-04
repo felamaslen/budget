@@ -37,9 +37,13 @@ export class StocksList extends Component {
         return stockMap
             .valueSeq()
             .map(stock => {
-                const price = `${sigFigs(stock.get('gain'), 3)}%`;
-                const name = stock.get('name');
-                const title = `${stock.get('name')} (${stock.get('code')})`;
+                const code = stock.get('code');
+                const title = stock.get('name');
+                const price = stock.get('price')
+                    ? stock.get('price').toFixed(2)
+                    : '0.00';
+
+                const change = `${sigFigs(stock.get('gain'), 3)}%`;
 
                 const classes = classNames({
                     up: stock.get('gain') > 0,
@@ -49,8 +53,12 @@ export class StocksList extends Component {
                 });
 
                 return <li key={stock.get('code')} className={classes} title={title}>
-                    <span className="name">{name}</span>
+                    <span className="name-column">
+                        <span className="code">{code}</span>
+                        <span className="title">{title}</span>
+                    </span>
                     <span className="price">{price}</span>
+                    <span className="change">{change}</span>
                 </li>;
             });
     }
