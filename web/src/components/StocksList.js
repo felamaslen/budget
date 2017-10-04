@@ -19,6 +19,9 @@ export class StocksList extends Component {
     componentWillMount() {
         this.props.requestStocksList();
     }
+    componentWillUnmount() {
+        this.props.requestStocksList();
+    }
     componentDidUpdate(prevProps) {
         const priceDidUpdate = prevProps.lastPriceUpdate !== this.props.lastPriceUpdate;
         const listDidLoad = !prevProps.loadedList && this.props.loadedList;

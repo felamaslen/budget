@@ -31,6 +31,7 @@ export function rHandleStocksListResponse(reduction, response) {
         .setIn(['other', 'stocksList', 'loadedList'], true)
         .setIn(['other', 'stocksList', 'indices'], indices)
         .setIn(['other', 'stocksList', 'stocks'], stocks)
+        .setIn(['other', 'stocksList', 'lastPriceUpdate'], -1);
 }
 
 function updateStock(item, { open, close }, loadedInitial) {
@@ -71,7 +72,7 @@ export function limitTimeSeriesLength(timeSeries, limit) {
 }
 
 export function rHandleStocksPricesResponse(reduction, res) {
-    const time = Math.floor(Date.now() / 1000);
+    const time = Date.now();
 
     let newReduction = reduction
         .setIn(['other', 'stocksList', 'loadedInitial'], true)
@@ -128,7 +129,7 @@ export function rHandleStocksPricesResponse(reduction, res) {
         )
         .setIn(
             ['other', 'stocksList', 'history'],
-            history.push(list([time, weightedGain]))
+            history.push(list([time / 1000, weightedGain]))
         );
 }
 
