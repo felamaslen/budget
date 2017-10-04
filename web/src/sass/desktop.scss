@@ -60,7 +60,6 @@ html, body {
 /* funds page */
 .page-funds {
     .stocks-list {
-        z-index: 0;
         &::-webkit-scrollbar-track {
             -webkit-box-shadow: none;
         }
@@ -74,7 +73,8 @@ html, body {
             background-color: rgba(240, 240, 240, 0.8);
         }
     }
-    .stocks-list, .graph-world-map {
+    .stocks-list {
+        position: fixed;
         top: $top_nav + 350;
         left: 1000px;
     }
