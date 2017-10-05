@@ -678,6 +678,10 @@ button {
                 &.down.hl-down {
                     background-color: $color_bg_down_hl;
                 }
+
+                &:nth-child(2n+1) {
+                    background: #0e0e0e;
+                }
             }
             span {
                 display: inline-block;
