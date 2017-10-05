@@ -18,7 +18,6 @@ import { mediaQueries, PAGES, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
 import { formatCurrency, formatPercent } from '../../../misc/format';
 import StocksList from '../../StocksList';
 
-import getFundsHead from './HeadFunds';
 import getFundsBody from './BodyFunds';
 import getFundsBodyMobile from './BodyFundsMobile';
 
@@ -75,15 +74,10 @@ class PageFunds extends PageList {
             </Media>
         </div>;
     }
-    headDesktop() {
-        const HeadFunds = getFundsHead(this.props.pageIndex);
-
-        return <HeadFunds gainInfo={this.props.gainInfo} />;
-    }
     bodyDesktop() {
         const BodyFunds = getFundsBody(this.props.pageIndex);
 
-        return <BodyFunds />;
+        return <BodyFunds gainInfo={this.props.gainInfo} />;
     }
     bodyMobile() {
         const BodyFundsMobile = getFundsBodyMobile(this.props.pageIndex);
