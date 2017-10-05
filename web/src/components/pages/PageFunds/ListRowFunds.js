@@ -78,7 +78,7 @@ export class ListRowFunds extends ListRow {
         const graph = this.renderFundGraph();
         const gainInfo = this.renderGainInfo();
 
-        return <span>{graph}{gainInfo}</span>;
+        return <span className="fund-extra-info">{graph}{gainInfo}</span>;
     }
 }
 

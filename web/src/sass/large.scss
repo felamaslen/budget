@@ -185,6 +185,9 @@ button {
 }
 
 // graphs
+.graph-container-outer {
+    display: inline-block;
+}
 .graph-container {
     width: 500px;
 }
@@ -235,17 +238,83 @@ button {
 }
 
 // lists
+.list {
+}
+
 .list-insert {
     .list-head {
+        position: fixed;
+        left: 0;
+        z-index: 4;
+        font-weight: bold;
+        line-height: 24px;
+        text-transform: capitalize;
+        white-space: nowrap;
+
         top: $top_nav - 10;
+        
+        .weekly, .weekly-value, .total, .total-value {
+            margin-left: 0.2em;
+            padding-left: 0.2em;
+        }
+        span {
+            text-align: left;
+            padding-left: 1px;
+            vertical-align: middle;
+            line-height: 24px;
+        }
+    }
+    .list-head-inner {
+        display: flex;
+        flex-flow: row;
+        
         padding-top: 10px;
         border-bottom: 1px solid #999;
         width: 100%;
         height: 24px;
         background: white;
     }
+
+    li, .list-head-inner {
+        & > span {
+            flex-basis: 0;
+
+            &.date {
+                flex-basis: 96px;
+            }
+            &.item, &.category, &.society, &.holiday {
+                flex-basis: 192px;
+            }
+            &.value, &.cost {
+                flex-basis: 96px;
+                justify-content: right;
+            }
+            &.shop {
+                flex-basis: 128px;
+            }
+            &.daily {
+                flex-basis: 86px;
+            }
+        }
+    }
+
+    .future {
+        @include unimportant;
+    }
+    .first-present {
+        border-top: 1px solid #666;
+    }
+    
     .list-ul {
-        bottom: 0;
+        display: flex;
+        flex-flow: column;
+        
+        margin: 0;
+        padding: 24px 0 0 0;
+        list-style: none;
+        width: 100%;
+        overflow: hidden;
+
         .progress {
             position: absolute;
             right: 2px;
@@ -253,16 +322,17 @@ button {
         }
 
         & > li {
+            display: flex;
+            flex-flow: row;
+
             width: 100%;
             height: 24px;
             line-height: 24px;
-            white-space: nowrap;
         }
-        & > li:nth-child(2n) {
+        & > li:nth-child(2n+1) {
             background: rgba(220, 220, 220, 0.4);
         }
         li > span {
-            display: inline-block;
             position: relative;
             text-overflow: ellipsis;
             border-right: 1px solid #ccc;
@@ -283,7 +353,8 @@ button {
             padding: 0 2px;
         }
         .delete {
-            display: inline-block;
+            flex-basis: 16px;
+
             margin: 4px;
             cursor: pointer;
             color: white;
@@ -396,12 +467,17 @@ button {
             }
         }
     }
-    .list {
-        .item {
-            width: 376px;
+    .list-ul {
+        span.item {
+            flex-basis: 376px;
+        }
+        .fund-extra-info {
+            display: flex;
+            flex-basis: initial;
+            flex-wrap: nowrap;
         }
         .transactions {
-            width: 102px;
+            flex-basis: 102px;
             overflow: visible;
             .modal {
                 position: absolute;
@@ -433,7 +509,7 @@ button {
             display: block;
             text-align: center;
         }
-        &>li:not(.li-add) {
+        & > li:nth-child(n+3) {
             height: 48px;
             line-height: 48px;
         }
@@ -500,6 +576,7 @@ button {
                 height: 100%;
                 position: absolute;
                 top: 0;
+                left: 0;
                 background: rgba(255, 255, 255, 0.5);
                 z-index: 1;
             }
@@ -569,20 +646,100 @@ button {
         width: 500px;
         height: 300px;
         font-size: 0.8em;
-        font-family: hack, monospace;
+        .graph-container {
+            background: #121212;
+            color: white;
+        }
+        
+        span {
+            display: inline-block;
+        }
+        
+        li {
+            @include stocks-list-price-change;
+            border-bottom: 1px solid #222;
+            padding-top: 1px;
 
+            &.up.hl-up {
+                background-color: $color_bg_up_hl;
+            }
+            &.up.hl-down {
+                background-color: $color_bg_up_rev;
+            }
+            &.down.hl-up {
+                background-color: $color_bg_down_rev;
+            }
+            &.down.hl-down {
+                background-color: $color_bg_down_hl;
+            }
+
+            &:nth-child(2n+1) {
+                background: #0e0e0e;
+            }
+        }
+            
+        .change {
+            &:after {
+                display: inline-block;
+                width: 10px;
+                height: 2px;
+                content: $none;
+                vertical-align: middle;
+                background: turquoise;
+            }
+        }
         
         .stocks-list-ul {
             margin: 0;
             width: 350px;
             height: 100%;
+            overflow-y: scroll;
             float: left;
             padding: 0;
             list-style: none;
-            li {
-                display: inline-block;
-                width: 50%;
+            font-size: 13pt;
+
+            span {
                 white-space: nowrap;
+                line-height: 20px;
+                vertical-align: top;
+            }
+            .name-column {
+                width: 68%;
+                text-overflow: ellipsis;
+                overflow: hidden;
+
+                .code, .title {
+                }
+                .code {
+                    margin: 1px;
+                    padding-right: 4px;
+                    line-height: 18px;
+                    color: white;
+                    font-size: 11pt;
+                    background: rgba(0, 0, 0, 0.3);
+                }
+                .title {
+                    color: #999;
+                    font-size: 8pt;
+                    width: 100%;
+                }
+            }
+            .price, .change {
+                width: 16%;
+                font-size: 10pt;
+                color: white;
+                text-align: right;
+            }
+            .up .change {
+               color: $color_bg_up;
+            }
+            .down .change {
+               color: $color_bg_down;
+            }
+            
+            .hl-up, .hl-down {
+                font-weight: bold;
             }
         }
         .stocks-sidebar {
@@ -602,67 +759,19 @@ button {
                 position: static;
                 background: none;
             }
-        }
-        li {
-            height: 16px;
-            line-height: 16px;
-            vertical-align: middle;
-        }
-        .name {
-            display: inline-block;
-            width: 60%;
-            text-align: right;
-            vertical-align: middle;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            letter-spacing: -1.5px;
-        }
-        .price {
-            display: inline-block;
-            width: 40%;
-            text-align: right;
-            .absolute, .change {
-                display: inline-block;
-                overflow: hidden;
+            .name-column {
+                width: 60%;
+                color: #eee;
+                font-style: italic;
+                .title:after {
+                    content: ": ";
+                }
             }
-            .change {
-                padding-right: 1.2em;
-                text-align: right;
+            .code, .price {
+                display: none;
             }
-            &:after {
-                display: inline-block;
-                width: 10px;
-                height: 2px;
-                content: $none;
-                vertical-align: middle;
-                background: turquoise;
-            }
-        }
-        .up, .down {
-            @include stocks-list-price-change;
-        }
-        .up {
-            color: $color_bg_up;
-            .price:after {
-                border-bottom: 5px solid #00c100;
-            }
-            &.hl-up {
-                background-color: $color_bg_up_hl;
-            }
-            &.hl-down {
-                background-color: $color_bg_up_rev;
-            }
-        }
-        .down {
-            color: $color_bg_down;
-            .price:after {
-                border-top: 5px solid #e22121;
-            }
-            &.hl-down {
-                background-color: $color_bg_down_hl;
-            }
-            &.hl-up {
-                background-color: $color_bg_down_rev;
+            .price, .change {
+                width: 40%;
             }
         }
     }

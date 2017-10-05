@@ -60,7 +60,6 @@ html, body {
 /* funds page */
 .page-funds {
     .stocks-list {
-        z-index: 0;
         &::-webkit-scrollbar-track {
             -webkit-box-shadow: none;
         }
@@ -74,10 +73,6 @@ html, body {
             background-color: rgba(240, 240, 240, 0.8);
         }
     }
-    .stocks-list, .graph-world-map {
-        top: $top_nav + 350;
-        left: 1000px;
-    }
 }
 
 .graph-toggle-btn {
@@ -90,10 +85,15 @@ html, body {
 
 @media screen and (min-width: 1500px) {
     .page-funds {
-        .graph-fund-history {
+        .graph-fund-history, .stocks-list {
             position: fixed;
             left: 1000px;
+        }
+        .graph-fund-history {
             top: 100px;
+        }
+        .stocks-list {
+            top: $top_nav + 350;
         }
     }
 }
