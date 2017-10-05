@@ -651,6 +651,44 @@ button {
             color: white;
         }
         
+        span {
+            display: inline-block;
+        }
+        
+        li {
+            @include stocks-list-price-change;
+            border-bottom: 1px solid #222;
+            padding-top: 1px;
+
+            &.up.hl-up {
+                background-color: $color_bg_up_hl;
+            }
+            &.up.hl-down {
+                background-color: $color_bg_up_rev;
+            }
+            &.down.hl-up {
+                background-color: $color_bg_down_rev;
+            }
+            &.down.hl-down {
+                background-color: $color_bg_down_hl;
+            }
+
+            &:nth-child(2n+1) {
+                background: #0e0e0e;
+            }
+        }
+            
+        .change {
+            &:after {
+                display: inline-block;
+                width: 10px;
+                height: 2px;
+                content: $none;
+                vertical-align: middle;
+                background: turquoise;
+            }
+        }
+        
         .stocks-list-ul {
             margin: 0;
             width: 350px;
@@ -661,30 +699,7 @@ button {
             list-style: none;
             font-size: 13pt;
 
-            li {
-                @include stocks-list-price-change;
-                border-bottom: 1px solid #222;
-                padding-top: 1px;
-
-                &.up.hl-up {
-                    background-color: $color_bg_up_hl;
-                }
-                &.up.hl-down {
-                    background-color: $color_bg_up_rev;
-                }
-                &.down.hl-up {
-                    background-color: $color_bg_down_rev;
-                }
-                &.down.hl-down {
-                    background-color: $color_bg_down_hl;
-                }
-
-                &:nth-child(2n+1) {
-                    background: #0e0e0e;
-                }
-            }
             span {
-                display: inline-block;
                 white-space: nowrap;
                 line-height: 20px;
                 vertical-align: top;
@@ -726,16 +741,6 @@ button {
             .hl-up, .hl-down {
                 font-weight: bold;
             }
-            .change {
-                &:after {
-                    display: inline-block;
-                    width: 10px;
-                    height: 2px;
-                    content: $none;
-                    vertical-align: middle;
-                    background: turquoise;
-                }
-            }
         }
         .stocks-sidebar {
             width: 150px;
@@ -754,22 +759,19 @@ button {
                 position: static;
                 background: none;
             }
-            span {
-                display: inline-block;
-            }
-            li {
-                .name-column {
-                    width: 60%;
-                }
-                .code, .price {
-                    display: none;
-                }
-                .change {
-                    width: 40%;
+            .name-column {
+                width: 60%;
+                color: #eee;
+                font-style: italic;
+                .title:after {
+                    content: ": ";
                 }
             }
-            .up, .down {
-                @include stocks-list-price-change;
+            .code, .price {
+                display: none;
+            }
+            .price, .change {
+                width: 40%;
             }
         }
     }
