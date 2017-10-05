@@ -1,5 +1,5 @@
 @mixin stocks-list-price-change {
-    .price:after {
+    .change:after {
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
         border-top: none;
@@ -8,7 +8,33 @@
         height: 0;
         top: 3px;
     }
-    &.hl-up .price, &.hl-down .price {
+    &.up {
+        .change {
+            color: $color_bg_up;
+        }
+        .change:after {
+            border-bottom: 5px solid #00c100;
+        }
+        &.hl-up {
+            background-color: $color_bg_up_hl;
+        }
+        &.hl-down {
+            background-color: $color_bg_up_rev;
+        }
+    }
+    &.down {
+        color: $color_bg_down;
+        .change:after {
+            border-top: 5px solid #e22121;
+        }
+        &.hl-down {
+            background-color: $color_bg_down_hl;
+        }
+        &.hl-up {
+            background-color: $color_bg_down_rev;
+        }
+    }
+    &.hl-up .change, &.hl-down .change {
         font-weight: bold;
     }
 }

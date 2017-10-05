@@ -6,6 +6,10 @@ import { List as list, Map as map } from 'immutable';
 import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '../misc/config';
 
 export function rHandleStocksListResponse(reduction, response) {
+    if (!response) {
+        return reduction;
+    }
+
     const indices = map(STOCK_INDICES).map((item, code) => {
         return map({
             code,
@@ -22,6 +26,7 @@ export function rHandleStocksListResponse(reduction, response) {
             name: item[1],
             weight: item[2] / response.total,
             gain: 0,
+            price: 0,
             up: false,
             down: false
         })];
@@ -31,17 +36,19 @@ export function rHandleStocksListResponse(reduction, response) {
         .setIn(['other', 'stocksList', 'loadedList'], true)
         .setIn(['other', 'stocksList', 'indices'], indices)
         .setIn(['other', 'stocksList', 'stocks'], stocks)
+        .setIn(['other', 'stocksList', 'lastPriceUpdate'], -1);
 }
 
 function updateStock(item, { open, close }, loadedInitial) {
-    const newGain = 100 * (close - open) / open;
-    const up = loadedInitial && newGain > item.get('gain');
-    const down = loadedInitial && newGain < item.get('gain');
+    const changePct = 100 * (close - open) / open;
+    const up = loadedInitial && changePct > item.get('gain');
+    const down = loadedInitial && changePct < item.get('gain');
 
     return item
-        .set('gain', newGain)
+        .set('gain', changePct)
         .set('up', up)
-        .set('down', down);
+        .set('down', down)
+        .set('price', close);
 }
 
 export function limitTimeSeriesLength(timeSeries, limit) {
@@ -71,7 +78,7 @@ export function limitTimeSeriesLength(timeSeries, limit) {
 }
 
 export function rHandleStocksPricesResponse(reduction, res) {
-    const time = Math.floor(Date.now() / 1000);
+    const time = Date.now();
 
     let newReduction = reduction
         .setIn(['other', 'stocksList', 'loadedInitial'], true)
@@ -128,7 +135,7 @@ export function rHandleStocksPricesResponse(reduction, res) {
         )
         .setIn(
             ['other', 'stocksList', 'history'],
-            history.push(list([time, weightedGain]))
+            history.push(list([time / 1000, weightedGain]))
         );
 }
 

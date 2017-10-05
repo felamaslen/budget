@@ -11,7 +11,7 @@ import LineGraph from './LineGraph';
 import { rgba } from '../../misc/color';
 
 import {
-    COLOR_PROFIT, COLOR_LOSS, COLOR_DARK, FONT_AXIS_LABEL
+    COLOR_PROFIT, COLOR_LOSS, COLOR_LIGHT, FONT_AXIS_LABEL
 } from '../../misc/config';
 
 import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '../../misc/const';
@@ -42,7 +42,7 @@ export class GraphStocks extends LineGraph {
     drawAxes() {
         // draw axes
         this.ctx.font = FONT_AXIS_LABEL;
-        this.ctx.fillStyle = rgba(COLOR_DARK);
+        this.ctx.fillStyle = rgba(COLOR_LIGHT);
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'bottom';
 
@@ -69,7 +69,7 @@ export class GraphStocks extends LineGraph {
         this.ctx.clearRect(0, 0, this.width, this.height);
         this.drawAxes();
 
-        this.ctx.lineWidth = 1.5;
+        this.ctx.lineWidth = 1;
         const colorLoss = rgba(COLOR_LOSS);
         const colorProfit = rgba(COLOR_PROFIT);
         const valueColor = value => {

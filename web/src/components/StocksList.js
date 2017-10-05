@@ -19,6 +19,9 @@ export class StocksList extends Component {
     componentWillMount() {
         this.props.requestStocksList();
     }
+    componentWillUnmount() {
+        this.props.requestStocksList();
+    }
     componentDidUpdate(prevProps) {
         const priceDidUpdate = prevProps.lastPriceUpdate !== this.props.lastPriceUpdate;
         const listDidLoad = !prevProps.loadedList && this.props.loadedList;
@@ -34,9 +37,13 @@ export class StocksList extends Component {
         return stockMap
             .valueSeq()
             .map(stock => {
-                const price = `${sigFigs(stock.get('gain'), 3)}%`;
-                const name = stock.get('name');
-                const title = `${stock.get('name')} (${stock.get('code')})`;
+                const code = stock.get('code');
+                const title = stock.get('name');
+                const price = stock.get('price')
+                    ? stock.get('price').toFixed(2)
+                    : '0.00';
+
+                const change = `${sigFigs(stock.get('gain'), 3)}%`;
 
                 const classes = classNames({
                     up: stock.get('gain') > 0,
@@ -46,15 +53,19 @@ export class StocksList extends Component {
                 });
 
                 return <li key={stock.get('code')} className={classes} title={title}>
-                    <span className="name">{name}</span>
+                    <span className="name-column">
+                        <span className="code">{code}</span>
+                        <span className="title">{title}</span>
+                    </span>
                     <span className="price">{price}</span>
+                    <span className="change">{change}</span>
                 </li>;
             });
     }
     render() {
         const classes = classNames({
             'stocks-list': true,
-            'graph-container': true,
+            'graph-container-outer': true,
             loading: !this.props.loadedInitial
         });
         const overallClasses = classNames({
@@ -68,16 +79,18 @@ export class StocksList extends Component {
         const indicesList = this.renderStocksList(this.props.indices);
 
         return <div className={classes}>
-            <ul className="stocks-list-ul">{stocksList}</ul>
-            <div className="stocks-sidebar">
-                <GraphStocks name="graph-stocks" />
-                <ul>
-                    <li className={overallClasses}>
-                        <span className="name">Overall</span>
-                        <span className="price">{sigFigs(this.props.weightedGain, 3)}%</span>
-                    </li>
-                    {indicesList}
-                </ul>
+            <div className="graph-container">
+                <ul className="stocks-list-ul">{stocksList}</ul>
+                <div className="stocks-sidebar">
+                    <GraphStocks name="graph-stocks" />
+                    <ul>
+                        <li className={overallClasses}>
+                            <span className="name-column">Overall</span>
+                            <span className="change">{sigFigs(this.props.weightedGain, 3)}%</span>
+                        </li>
+                        {indicesList}
+                    </ul>
+                </div>
             </div>
         </div>;
     }
