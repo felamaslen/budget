@@ -646,19 +646,87 @@ button {
         width: 500px;
         height: 300px;
         font-size: 0.8em;
-        font-family: hack, monospace;
+        .graph-container {
+            background: #121212;
+            color: white;
+        }
         
         .stocks-list-ul {
             margin: 0;
             width: 350px;
             height: 100%;
+            overflow-y: scroll;
             float: left;
             padding: 0;
             list-style: none;
+            font-size: 13pt;
+
             li {
+                @include stocks-list-price-change;
+                height: 36px;
+
+                &.up.hl-up {
+                    background-color: $color_bg_up_hl;
+                }
+                &.up.hl-down {
+                    background-color: $color_bg_up_rev;
+                }
+                &.down.hl-up {
+                    background-color: $color_bg_down_rev;
+                }
+                &.down.hl-down {
+                    background-color: $color_bg_down_hl;
+                }
+            }
+            span {
                 display: inline-block;
-                width: 50%;
                 white-space: nowrap;
+                line-height: 36px;
+                vertical-align: top;
+            }
+            .name-column {
+                width: 60%;
+
+                .code, .title {
+                    line-height: 18px;
+                    display: block;
+                }
+                .code {
+                    font-size: 9pt;
+                }
+                .title {
+                    color: #999;
+                    font-size: 8pt;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    width: 100%;
+                }
+            }
+            .price, .change {
+                width: 20%;
+                font-size: 10pt;
+                color: white;
+                text-align: right;
+            }
+            .up .change {
+               color: $color_bg_up;
+            }
+            .down .change {
+               color: $color_bg_down;
+            }
+            
+            .hl-up, .hl-down {
+                font-weight: bold;
+            }
+            .change {
+                &:after {
+                    display: inline-block;
+                    width: 10px;
+                    height: 2px;
+                    content: $none;
+                    vertical-align: middle;
+                    background: turquoise;
+                }
             }
         }
         .stocks-sidebar {
@@ -678,67 +746,22 @@ button {
                 position: static;
                 background: none;
             }
-        }
-        li {
-            height: 16px;
-            line-height: 16px;
-            vertical-align: middle;
-        }
-        .name {
-            display: inline-block;
-            width: 60%;
-            text-align: right;
-            vertical-align: middle;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            letter-spacing: -1.5px;
-        }
-        .price {
-            display: inline-block;
-            width: 40%;
-            text-align: right;
-            .absolute, .change {
+            span {
                 display: inline-block;
-                overflow: hidden;
             }
-            .change {
-                padding-right: 1.2em;
-                text-align: right;
+            li {
+                .name-column {
+                    width: 60%;
+                }
+                .code, .price {
+                    display: none;
+                }
+                .change {
+                    width: 40%;
+                }
             }
-            &:after {
-                display: inline-block;
-                width: 10px;
-                height: 2px;
-                content: $none;
-                vertical-align: middle;
-                background: turquoise;
-            }
-        }
-        .up, .down {
-            @include stocks-list-price-change;
-        }
-        .up {
-            color: $color_bg_up;
-            .price:after {
-                border-bottom: 5px solid #00c100;
-            }
-            &.hl-up {
-                background-color: $color_bg_up_hl;
-            }
-            &.hl-down {
-                background-color: $color_bg_up_rev;
-            }
-        }
-        .down {
-            color: $color_bg_down;
-            .price:after {
-                border-top: 5px solid #e22121;
-            }
-            &.hl-down {
-                background-color: $color_bg_down_hl;
-            }
-            &.hl-up {
-                background-color: $color_bg_down_rev;
+            .up, .down {
+                @include stocks-list-price-change;
             }
         }
     }

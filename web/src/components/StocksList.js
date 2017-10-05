@@ -85,8 +85,8 @@ export class StocksList extends Component {
                     <GraphStocks name="graph-stocks" />
                     <ul>
                         <li className={overallClasses}>
-                            <span className="name">Overall</span>
-                            <span className="price">{sigFigs(this.props.weightedGain, 3)}%</span>
+                            <span className="name-column">Overall</span>
+                            <span className="change">{sigFigs(this.props.weightedGain, 3)}%</span>
                         </li>
                         {indicesList}
                     </ul>
