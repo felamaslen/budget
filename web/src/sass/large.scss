@@ -663,7 +663,9 @@ button {
 
             li {
                 @include stocks-list-price-change;
-                height: 36px;
+                border-bottom: 1px solid #222;
+                margin-bottom: 1px;
+                padding-bottom: 1px;
 
                 &.up.hl-up {
                     background-color: $color_bg_up_hl;
@@ -681,22 +683,23 @@ button {
             span {
                 display: inline-block;
                 white-space: nowrap;
-                line-height: 36px;
+                line-height: 20px;
                 vertical-align: top;
             }
             .name-column {
                 width: 60%;
 
                 .code, .title {
-                    line-height: 18px;
+                    line-height: 10px;
                     display: block;
                 }
                 .code {
-                    font-size: 9pt;
+                    color: white;
+                    font-size: 8pt;
                 }
                 .title {
                     color: #999;
-                    font-size: 8pt;
+                    font-size: 7pt;
                     text-overflow: ellipsis;
                     overflow: hidden;
                     width: 100%;
