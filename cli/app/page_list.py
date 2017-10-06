@@ -264,14 +264,26 @@ class PageFunds(PageList):
         return res['data']
 
     def calculate_data(self):
-        return [{
-            'id': item['I'],
-            'date': item['d'],
-            'item': item['i'],
-            'cost': item['c'],
-            'units': item['u'],
-            'value': float(item['u']) * float(item['P'])
-        } for item in self.data['data']]
+        processed = []
+
+        for item in self.data['data']:
+            try:
+                units = sum([transaction['u'] for transaction in item['tr']])
+            except KeyError:
+                units = 0
+
+            price = float(item['pr'][-1]) if 'pr' in item and len(item['pr']) > 0 else 0
+
+            processed.append({
+                'id': item['I'],
+                'date': item['d'],
+                'item': item['i'],
+                'cost': item['c'],
+                'units': units,
+                'value': units * price
+            })
+
+        return processed
 
     def draw_list_row(self, i, offset):
         list_row = super().draw_list_row(i, offset)
@@ -279,8 +291,10 @@ class PageFunds(PageList):
         if list_row is not False:
             j, col, selected = list_row
 
-            gain = float(self.list['list'][j]['value'] - self.list['list'][j]['cost']) / \
-                    self.list['list'][j]['cost'] * 100
+            cost = int(self.list['list'][j]['cost'])
+            value = float(self.list['list'][j]['value'])
+
+            gain = 100 * (value - cost) / cost if cost > 0 else 0
             sign = '-' if gain < 0 else '+'
             gain_text = "%s%0.1f%%" % (sign, abs(gain))
 
