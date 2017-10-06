@@ -152,7 +152,7 @@ class FormEdit(object):
             if btn_index == 1:
                 # submit
                 try:
-                    data = {'id': self.data['item']['id']}
+                    data = {'id': int(self.data['item']['id'])}
 
                     i = 0
                     for (_, _, index, _) in self.data['fields']:
@@ -162,7 +162,7 @@ class FormEdit(object):
                     self.status("Loading...")
 
                     try:
-                        res = self.api.req(['update', self.data['table']], method='post', form=data)
+                        res = self.api.req(['data', self.data['table']], method='put', form=data)
 
                         if res and res['error'] is False:
                             self.status("")
