@@ -1,12 +1,16 @@
 # Budget
 
-Personal finance app for web and android
+Personal finance app for web, cli and android
 
 ## Architecture
 
 There is a web-based API written in Node.js, which also runs a web app. The Android app connects to this API.
 
 - Node version: 8
+
+The CLI app is written in Python 3. See `cli/README.md` for setup info.
+
+For info on building the Android app, see `android/README.md`.
 
 ## Instructions:
 

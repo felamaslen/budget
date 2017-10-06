@@ -64,5 +64,8 @@ typings/
 
 # End of https://www.gitignore.io/api/node
 
+cli/env
+*.pyc
+
 web/build
 api/test/data/*test*.html
