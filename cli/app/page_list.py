@@ -461,9 +461,9 @@ class PageFunds(PageList):
 
         return True
 
-class PageIn(PageListBasic):
+class PageIncome(PageListBasic):
     def __init__(self, win, api, set_statusbar):
-        super().__init__(win, api, set_statusbar, 'in')
+        super().__init__(win, api, set_statusbar, 'income')
 
 class PageBills(PageListBasic):
     def __init__(self, win, api, set_statusbar):

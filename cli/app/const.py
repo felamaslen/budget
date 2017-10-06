@@ -13,7 +13,7 @@ load_dotenv(dotenv_path)
 
 SERVER = environ.get('WEB_URL')
 
-API_URL = SERVER + "/api"
+API_URL = SERVER + "/api/v3"
 
 LOGIN_FORM_TITLE = "Enter your PIN to log in: "
 LOGIN_FORM_WIDTH = 42
