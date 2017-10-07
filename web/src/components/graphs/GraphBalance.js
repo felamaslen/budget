@@ -31,20 +31,6 @@ export class GraphBalance extends GraphCashFlow {
         const maxX = dataX.max();
 
         this.setRange([minX, maxX, minY, maxY]);
-
-        // find the right tension, given the maximum jump in the data
-        const maxJump = dataY.reduce((last, value) => {
-            const thisJump = Math.abs(value - last[1]);
-            if (thisJump > last[0]) {
-                return [thisJump, value];
-            }
-
-            return last;
-        }, [0, 0])[0];
-
-        this.tension = maxJump > 10 * minYValue
-            ? 1
-            : 0.5;
     }
     processData() {
         // this doesn't really modify the data, it just puts it in a form ready for drawing

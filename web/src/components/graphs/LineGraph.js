@@ -2,9 +2,77 @@
  * React component to display a line graph (e.g. time series)
  */
 
-import { List as list } from 'immutable';
 import Graph from './Graph';
 import { timeSeriesTicks } from '../../misc/date';
+
+// Hermite functions
+function h00(value) {
+    return (1 + 2 * value) * Math.pow(1 - value, 2);
+}
+function h10(value) {
+    return value * Math.pow(1 - value, 2);
+}
+function h01(value) {
+    return Math.pow(value, 2) * (3 - 2 * value);
+}
+function h11(value) {
+    return Math.pow(value, 2) * (value - 1);
+}
+function hermite(x0, xA, yA, xB, yB, mA, mB) {
+    const value = (x0 - xA) / (xB - xA);
+
+    return h00(value) * yA +
+        h10(value) * (xB - xA) * mA +
+        h01(value) * yB +
+        h11(value) * (xB - xA) * mB;
+}
+function getTension(value) {
+    const exp1 = Math.exp(value / 100 + 0.5);
+    const exp2 = 1 / exp1;
+
+    const tension = (exp1 - exp2) / (exp1 + exp2);
+
+    if (isNaN(tension)) {
+        return 0;
+    }
+
+    return tension;
+}
+function getInterpolatorHermite(points) {
+    // secants
+    const secants = points
+        .slice(1)
+        .map((point, key) => (point[1] - points[key][1]) / (point[0] - points[key][0]));
+
+    // tangents
+    const tangents = points.map((point, key) => {
+        if (key === 0) {
+            return secants[0];
+        }
+        if (key === secants.length) {
+            return secants[key - 1];
+        }
+
+        const tension = getTension(Math.max(
+            Math.abs(secants[key] / secants[key - 1]),
+            key > 1
+                ? Math.abs(secants[key - 1] / secants[key - 2])
+                : 0
+        ));
+
+        return (1 - tension) * (secants[key - 1] + secants[key]);
+    });
+
+    return (key, pixel) => hermite(
+        points[key][0] + pixel,
+        points[key][0],
+        points[key][1],
+        points[key + 1][0],
+        points[key + 1][1],
+        tangents[key],
+        tangents[key + 1]
+    );
+}
 
 export default class LineGraph extends Graph {
     constructor(props) {
@@ -12,7 +80,6 @@ export default class LineGraph extends Graph {
 
         this.colorTransition = [null];
         this.setRange([0, 1, 0, 1]);
-        this.tension = 0.5; // for cubic lines
     }
     pixX(xValue) {
         return this.padding[3] +
@@ -56,87 +123,23 @@ export default class LineGraph extends Graph {
 
         return [];
     }
-    // Hermite functions
-    static h00(value) {
-        return (1 + 2 * value) * Math.pow(1 - value, 2);
-    }
-    static h10(value) {
-        return value * Math.pow(1 - value, 2);
-    }
-    static h01(value) {
-        return Math.pow(value, 2) * (3 - 2 * value);
-    }
-    static h11(value) {
-        return Math.pow(value, 2) * (value - 1);
-    }
-    static hermite(x0, xA, yA, xB, yB, mA, mB) {
-        const value = (x0 - xA) / (xB - xA);
 
-        return LineGraph.h00(value) * yA +
-            LineGraph.h10(value) * (xB - xA) * mA +
-            LineGraph.h01(value) * yB +
-            LineGraph.h11(value) * (xB - xA) * mB;
+    getCubicCurve(pointsList) {
+        // Hermite spline
+        const points = pointsList
+            .toJS()
+            .map(point => [this.pixX(point[0]), this.pixY(point[1])]);
+
+        const interpolator = getInterpolatorHermite(points);
+
+        return points
+            .slice(1)
+            .map((point, key) => new Array(Math.max(1, Math.floor(points[key + 1][0] - points[key][0])))
+                .fill(0)
+                .map((item, pixel) => [points[key][0] + pixel, interpolator(key, pixel)])
+            );
     }
 
-    getCubicSpline(points, tension) {
-        // Hermite spline (cardinal spline)
-
-        // secants
-        const secants = points.slice(0, -1).map((point, key) => {
-            return (points.getIn([key + 1, 1]) - points.getIn([key, 1])) /
-        (points.getIn([key + 1, 0]) - points.getIn([key, 0]));
-        });
-
-        // tangents
-        const tangents = points.map((point, key) => {
-            if (key === 0) {
-                return secants.first();
-            }
-            if (key === secants.size) {
-                return secants.last();
-            }
-
-            return (1 - tension) * (secants.get(key - 1) + secants.get(key));
-        });
-
-        let xPixel = null;
-        let xPixelGoal = this.pixX(points.getIn([0, 0])); // next point's pixel value
-        let xValue1 = points.getIn([0, 0]); // cumulative X value
-        let xValue2 = points.getIn([0, 0]);
-
-        const curve = secants.map((secant, key) => {
-            xValue2 += points.getIn([key + 1, 0]) - points.getIn([key, 0]);
-            xPixel = xPixelGoal; // previous goal is current start
-            xPixelGoal = this.pixX(xValue2);
-
-            // interpolate the curve between this point and the next
-            const numPoints = Math.max(1, Math.floor(xPixelGoal - xPixel));
-            if (!numPoints) {
-                return list.of();
-            }
-            const curvePiece = list(new Array(numPoints).fill(0))
-                .map((item, pieceKey) => {
-                    const xValue = this.valX(xPixel + pieceKey);
-                    const yValue1 = points.getIn([key, 1]);
-                    const yValue2 = points.getIn([key + 1, 1]);
-                    const yValue = LineGraph.hermite(
-                        xValue, xValue1, yValue1, xValue2, yValue2, tangents.get(key), tangents.get(key + 1)
-                    );
-
-                    return list([xPixel + pieceKey, this.pixY(yValue)]);
-                });
-
-            xValue1 = xValue2;
-
-            return curvePiece;
-        });
-
-        // add the last point
-        return curve.set(curve.size - 1, curve.last().push(list([
-            this.pixX(points.getIn([secants.size, 0])),
-            this.pixY(points.getIn([secants.size, 1]))
-        ])));
-    }
     drawCubicLineCurve(curve, points, color) {
         this.ctx.beginPath();
 
@@ -145,94 +148,99 @@ export default class LineGraph extends Graph {
         let colorTransitionKey = 0;
 
         const dynamicColor = typeof color === 'function';
-        let last = list([null, null]);
         let theColor = dynamicColor
-            ? color(this.valY(curve.getIn([0, 0, 1])))
+            ? color(curve[0][1])
             : color[0];
         this.ctx.strokeStyle = theColor;
 
-        curve.forEach((piece, key) => {
-            if (key === this.colorTransition[colorTransitionKey]) {
+        curve.forEach((piece, pieceKey) => {
+            if (pieceKey === this.colorTransition[colorTransitionKey]) {
                 colorTransitionKey++;
 
                 if (moved) {
-                    this.ctx.lineTo(piece.getIn([0, 0]), piece.getIn([0, 1]));
+                    this.ctx.lineTo(piece[0][0], piece[0][1]);
                     this.ctx.stroke();
                     this.ctx.closePath();
                     this.ctx.beginPath();
                 }
 
                 this.ctx.strokeStyle = dynamicColor
-                    ? color(this.valY(piece.getIn([0, 1])))
+                    ? color(piece[0][1])
                     : color[++colorKey % color.length];
+
                 moved = false;
             }
 
-            piece.forEach(point => {
+            piece.forEach((point, pointKey) => {
                 if (dynamicColor) {
-                    const newColor = color(this.valY(point.last()));
+                    const newColor = color(point[1]);
                     if (newColor !== theColor) {
                         if (moved) {
                             this.ctx.strokeStyle = theColor;
                             this.ctx.stroke();
                             this.ctx.closePath();
                             this.ctx.beginPath();
-                            this.ctx.moveTo(last.first(), last.last());
+
+                            if (pointKey > 0) {
+                                this.ctx.moveTo(piece[pointKey - 1][0], piece[pointKey - 1][1]);
+                            }
+                            else if (pieceKey > 0) {
+                                const lastCurve = curve[pieceKey - 1];
+                                const lastPoint = lastCurve[lastCurve.length - 1];
+
+                                this.ctx.moveTo(lastPoint[0], lastPoint[1]);
+                            }
                         }
                         theColor = newColor;
                     }
-                    last = point;
                 }
 
                 if (moved) {
-                    this.ctx.lineTo(point.first(), point.last());
+                    this.ctx.lineTo(point[0], point[1]);
                 }
                 else {
-                    this.ctx.moveTo(point.first(), point.last());
+                    this.ctx.moveTo(point[0], point[1]);
                     moved = true;
                 }
             });
         });
 
         // complete the line to the last point
-        this.ctx.lineTo(this.pixX(points.last().first()), this.pixY(points.last().last()));
+        this.ctx.lineTo(
+            this.pixX(points.getIn([points.size - 1, 0])),
+            this.pixY(points.getIn([points.size - 1, 1]))
+        );
 
         if (dynamicColor) {
             this.ctx.strokeStyle = theColor;
         }
+
         this.ctx.stroke();
         this.ctx.closePath();
     }
-    drawCubicLine(points, color, theOptions) {
+    drawCubicLine(points, color, theOptions = {}) {
         if (points.size < 2) {
             return;
         }
-        const options = theOptions || { stroke: true };
+        const options = { stroke: true, ...theOptions };
 
-        // the tension can be 0, which is falsey
-        const tension = typeof options.tension === 'undefined'
-            ? this.tension
-            : options.tension;
-        const curve = this.getCubicSpline(points, tension);
+        const curve = this.getCubicCurve(points);
 
         if (options.fill) {
             this.ctx.beginPath();
             this.ctx.fillStyle = color[0];
-            this.ctx.moveTo(this.pixX(points.getIn([0, 0])), this.pixY(points.getIn([0, 1])));
+            this.ctx.moveTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
 
             curve.forEach(piece => {
                 piece.forEach(point => {
-                    this.ctx.lineTo(point.first(), point.last());
+                    this.ctx.lineTo(point[0], point[1]);
                 });
             });
 
             // complete the filled graph
-            this.ctx.lineTo(
-                this.pixX(points.last().first()), this.pixY(points.last().last()));
-            this.ctx.lineTo(
-                this.pixX(points.last().first()), this.pixY(0));
-            this.ctx.lineTo(
-                this.pixX(points.first().first()), this.pixY(0));
+            this.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(points.last().get(1)));
+            this.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(0));
+            this.ctx.lineTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
 
             this.ctx.fill();
             this.ctx.closePath();

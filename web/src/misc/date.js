@@ -417,30 +417,39 @@ class TimeTickMonthYear extends TimeTick {
 
         return { time, index };
     }
+    label(month, dateTime) {
+        if (month === 0) {
+            return dateTime.getFullYear().toString();
+        }
+
+        if (month === 6) {
+            return 'H2';
+        }
+
+        return null;
+    }
+    getMajor(month) {
+        if (!month) {
+            // start of year
+            return 2;
+        }
+
+        return Math.floor((month % 7) / 6);
+    }
     next(key, time) {
         const dateTime = new Date(time);
         const month = dateTime.getMonth();
 
-        const major = month === 0
-            ? 2
-            : 0;
+        const major = this.getMajor(month);
 
-        const yearBreak = major
-            ? 1
-            : 0;
-
+        const yearBreak = month === 0;
         const year = dateTime.getFullYear() - yearBreak;
 
         const nextTime = new Date(year, (month + 11) % 12, 1).getTime();
 
-        const label = major
-            ? this.label(dateTime)
-            : null;
+        const label = this.label(month, dateTime);
 
         return { time, major, nextTime, label };
-    }
-    label(dateTime) {
-        return dateTime.getFullYear().toString();
     }
 }
 

@@ -512,13 +512,15 @@ button {
         & > li:nth-child(n+3) {
             height: 48px;
             line-height: 48px;
+            .fund-extra-info > .gain {
+                width: 200px;
+                height: 100%;
+            }
         }
         .fund-graph {
             height: 100%;
         }
         .gain {
-            width: 200px;
-            height: 100%;
             .text {
                 display: block;
                 width: 100%;
