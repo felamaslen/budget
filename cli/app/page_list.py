@@ -339,8 +339,6 @@ class PageFunds(PageList):
 
             fund_name = self.list['list'][self.list['selected']]['item']
 
-            index = self.data['history']['funds'].index(fund_name)
-
             if index < 0:
                 # invalid fund
                 self.graph['win'].addstr(2, 1, "Invalid fund.")
@@ -349,10 +347,17 @@ class PageFunds(PageList):
             else:
                 title = alignc(graph_w - 1, "Fund: {}".format(fund_name))
 
-                first_value = history[0][1][index] if len(history[0][1]) > index else 0
+                values = [item for item in history if item[1][index] > 0]
+
+                if len(values) == 0:
+                    self.graph['win'].addstr(2, 1, "No data.")
+
+                    return False
+
+                first_value = values[0][1][index] if len(values[0][1]) > index else 0
                 series = [first_value] * extra + [
-                    history[i][1][index] if len(history[i][1]) > index else 0
-                    for i in range(len(history))
+                    values[i][1][index] if len(values[i][1]) > index else 0
+                    for i in range(len(values))
                 ]
 
         return title, series
@@ -387,7 +392,7 @@ class PageFunds(PageList):
         series_height = graph['h'] - 3
 
         # draw line
-        for i in range(graph['w'] - 2):
+        for i in range(min(len(series), graph['w'] - 2)):
             val_y = int(series_height * (1 - (float(series[i] - graph_range[0]) / \
                     (graph_range[1] - graph_range[0]))))
 
@@ -425,20 +430,19 @@ class PageFunds(PageList):
 
         # fill out all the units values
         history = {'full': [], 'value': [], 'cut': []}
-        key = 0
-        for (time, funds) in self.data['history']['history']:
-            fund_key = 0
-            values = []
-            for price_units in funds:
-                units = price_units[1] if len(price_units) > 1 \
-                        else history['full'][key - 1][1][fund_key][1]
 
-                values.append([price_units[0], units])
-                fund_key += 1
-
-            key += 1
-
-            history['full'].append([time, values])
+        history['full'] = [
+                [time, [
+                    [
+                        (fund['pr'][time_key - fund['prStartIndex']]
+                        if time_key - fund['prStartIndex'] < len(fund['pr']) and time_key - fund['prStartIndex'] >= 0
+                        else 0),
+                        self.list['list'][fund_key]['units']
+                    ]
+                    for (fund_key, fund) in enumerate(self.data['data'])
+                ]]
+                for (time_key, time) in enumerate(self.data['cacheTimes'])
+        ]
 
         history['value'] = [[time, [fund[0] * fund[1] for fund in funds], \
                 sum([fund[0] * fund[1] for fund in funds])] \
