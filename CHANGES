@@ -1,5 +1,9 @@
 Release:
 
+- 3.1.8-beta
+    - Web client:
+        - Better handling of tension in Hermite spline graphs
+
 - 3.1.7-beta
     - CLI client:
         - Made it work with the new API (there are still fatal bugs)
