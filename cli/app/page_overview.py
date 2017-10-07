@@ -62,7 +62,7 @@ class PageOverview(Page):
 
         # net spending
         net = [
-            self.data['cost']['in'][i] - out_with_future[i]
+            self.data['cost']['income'][i] - out_with_future[i]
             for i in range(num_rows)
         ]
 
@@ -78,7 +78,7 @@ class PageOverview(Page):
             [
                 "{}-{}".format(months[(year_month_start[1] - 1 + i) % 12], \
                         (year_month_start[0] + (i - 1 + year_month_start[1]) // 12) % 1000),
-                format_currency(self.data['cost']['in'][i], self.cols[1][1] - 1),
+                format_currency(self.data['cost']['income'][i], self.cols[1][1] - 1),
                 format_currency(out_with_future[i], self.cols[2][1] - 1),
                 format_currency(net[i], self.cols[3][1] - 1),
                 format_currency(predicted[i], self.cols[4][1] - 1),

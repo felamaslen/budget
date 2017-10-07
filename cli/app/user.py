@@ -61,31 +61,38 @@ class User(object):
             login_status = self.login(pin_num)
 
             if login_status is True:
-                # logged in
                 self.logged_in()
-            else:
+
+            elif login_status is False:
                 self.display_login_form("Bad PIN")
 
-        except ValueError:
+            else:
+                self.display_login_form("Unknown error")
+
+        except ValueError as err:
             self.display_login_form("PIN must be numeric")
 
     def login(self, pin):
         self.display_result("Waiting...")
 
         try:
-            res = self.api.req(['login'], method='post', form={'pin': pin})
+            res = self.api.req(['user', 'login'], method='post', form={'pin': pin})
 
         except BudgetClientAPIError as code:
             self.display_result("Error: {}".format(code))
             return False
 
-        if res['error'] is not False:
-            self.display_result("Error: {}".format(res['errorText']))
-            return False
+        try:
+            if res['error'] is not False:
+                self.display_result("Error: {}".format(res['errorText']))
+                return False
 
-        self.state['uid'] = res['uid']
-        self.state['name'] = res['name']
-        self.state['token'] = res['api_key']
+            self.state['uid'] = res['uid']
+            self.state['name'] = res['name']
+            self.state['token'] = res['apiKey']
+
+        except KeyError:
+            return None
 
         return True
 

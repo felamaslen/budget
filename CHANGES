@@ -1,5 +1,11 @@
 Release:
 
+- 3.1.7-beta
+    - CLI client:
+        - Made it work with the new API (there are still fatal bugs)
+    - API:
+        - don't fail tests if scraper test files don't exist
+
 - 3.1.6-beta
     - Web client:
         - Bug fixes

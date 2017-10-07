@@ -2,7 +2,7 @@
  * Spec for fund price scraper
  */
 
-/* eslint max-lines: 0, max-statements: 0 */
+/* eslint-disable max-lines, max-statements, no-invalid-this */
 
 require('dotenv').config();
 const expect = require('chai').expect;
@@ -217,51 +217,85 @@ const holdingsTestData2 = [
     }
 ];
 
-describe('Fund scraper', () => {
-    const testFunds = {};
-    let testFundsList = [];
-    const testFundsListData = [];
+let testData = null;
+const testFunds = {};
+let testFundsList = [];
+const testFundsListData = [];
 
-    before(async () => {
-        const testDataFundHLFile = path.join(__dirname, '../data/fund-test-hl.html');
-        const testDataShareHLFile = path.join(__dirname, '../data/share-test-hl.html');
-
-        const testDataFundHL = await fs.readFile(testDataFundHLFile, 'utf8');
-        const testDataShareHL = await fs.readFile(testDataShareHLFile, 'utf8');
-
-        testFunds.hl = {
+function processTestFiles() {
+    testFunds.hl = {
+        fund: {
             fund: {
-                fund: {
-                    name: TEST_FUND_NAMES[0],
-                    broker: 'hl',
-                    uid: 1
-                },
-                data: testDataFundHL
+                name: TEST_FUND_NAMES[0],
+                broker: 'hl',
+                uid: 1
             },
-            share: {
-                fund: {
-                    name: TEST_FUND_NAMES[1],
-                    broker: 'hl',
-                    uid: 2
-                },
-                data: testDataShareHL
-            }
-        };
+            data: testData.testDataFundHL
+        },
+        share: {
+            fund: {
+                name: TEST_FUND_NAMES[1],
+                broker: 'hl',
+                uid: 2
+            },
+            data: testData.testDataShareHL
+        }
+    };
 
-        testFundsList.push(testFunds.hl.fund.fund);
-        testFundsList.push(testFunds.hl.share.fund);
+    testFundsList.push(testFunds.hl.fund.fund);
+    testFundsList.push(testFunds.hl.share.fund);
 
-        testFundsList = testFundsList.map(item => {
-            return Object.assign({}, item, {
-                hash: md5(item.name)
-            });
+    testFundsList = testFundsList.map(item => ({ ...item, hash: md5(item.name) }));
+
+    testFundsListData.push(testFunds.hl.fund.data);
+    testFundsListData.push(testFunds.hl.share.data);
+}
+
+function checkTestFiles(done) {
+    if (testData) {
+        done();
+
+        return;
+    }
+
+    if (testData === false) {
+        this.skip();
+
+        return;
+    }
+
+    const testDataFundHLFile = path.join(__dirname, '../data/fund-test-hl.html');
+    const testDataShareHLFile = path.join(__dirname, '../data/share-test-hl.html');
+
+    Promise.all([
+        fs.readFile(testDataFundHLFile, 'utf8'),
+        fs.readFile(testDataShareHLFile, 'utf8')
+    ])
+        .catch(() => {
+            testData = false;
+
+            this.skip();
+        })
+        .then(result => {
+            const testDataFundHL = result[0];
+            const testDataShareHL = result[1];
+
+            testData = { testDataFundHL, testDataShareHL };
+
+            processTestFiles();
+
+            done();
+        })
+        .catch(() => {
+            // this is needed to prevent "this.skip()" from
+            // triggering an unhandled rejection error
         });
+}
 
-        testFundsListData.push(testFunds.hl.fund.data);
-        testFundsListData.push(testFunds.hl.share.data);
-    });
-
+describe('Fund scraper', () => {
     describe('isHLFundShare', () => {
+        before(checkTestFiles);
+
         it('should return the correct status', () => {
             expect(scraper.isHLFundShare(testFunds.hl.fund.fund)).to.equal(false);
             expect(scraper.isHLFundShare(testFunds.hl.share.fund)).to.equal(true);
@@ -269,6 +303,8 @@ describe('Fund scraper', () => {
     });
 
     describe('getHoldingsFromDataHL', () => {
+        before(checkTestFiles);
+
         it('should return holdings for funds', () => {
             const fund = testFunds.hl.fund.fund;
             const data = testFunds.hl.fund.data;
@@ -300,23 +336,30 @@ describe('Fund scraper', () => {
             expect(() => scraper.getFundHoldings(fund, data))
                 .to.throw('data empty');
         });
-        it('should handle broker: HL', () => {
-            const fund = testFunds.hl.fund.fund;
-            const data = testFunds.hl.fund.data;
 
-            expect(() => scraper.getFundHoldings(fund, data))
-                .to.not.throw();
-        });
-        it('should handle null broker', () => {
-            const fund = {};
-            const data = 'flkjsdflkjsdf';
+        describe('data processors', () => {
+            before(checkTestFiles);
 
-            expect(() => scraper.getPriceFromData(fund, data))
-                .to.throw('unknown broker');
+            it('should handle broker: HL', () => {
+                const fund = testFunds.hl.fund.fund;
+                const data = testFunds.hl.fund.data;
+
+                expect(() => scraper.getFundHoldings(fund, data))
+                    .to.not.throw();
+            });
+            it('should handle null broker', () => {
+                const fund = {};
+                const data = 'flkjsdflkjsdf';
+
+                expect(() => scraper.getPriceFromData(fund, data))
+                    .to.throw('unknown broker');
+            });
         });
     });
 
     describe('getHoldingsFromData', () => {
+        before(checkTestFiles);
+
         it('should add holdings to funds', () => {
             const funds = testFundsList;
             const data = testFundsListData;
@@ -368,19 +411,22 @@ describe('Fund scraper', () => {
     });
 
     describe('getPriceFromDataHL', () => {
-        it('should successfully parse the test fund data', () => {
-            const result = scraper.getPriceFromDataHL(testFunds.hl.fund.data);
+        describe('data processors', () => {
+            before(checkTestFiles);
+            it('should successfully parse the test fund data', () => {
+                const result = scraper.getPriceFromDataHL(testFunds.hl.fund.data);
 
-            const expectedResult = 130.31;
+                const expectedResult = 130.31;
 
-            expect(result).to.equal(expectedResult);
-        });
-        it('should successfully parse the test share data', () => {
-            const result = scraper.getPriceFromDataHL(testFunds.hl.share.data);
+                expect(result).to.equal(expectedResult);
+            });
+            it('should successfully parse the test share data', () => {
+                const result = scraper.getPriceFromDataHL(testFunds.hl.share.data);
 
-            const expectedResult = 424.1;
+                const expectedResult = 424.1;
 
-            expect(result).to.equal(expectedResult);
+                expect(result).to.equal(expectedResult);
+            });
         });
         it('should handle bad data', () => {
             expect(() => scraper.getPriceFromDataHL('flkjsdflksjdf'))
@@ -389,18 +435,23 @@ describe('Fund scraper', () => {
     });
 
     describe('getPriceFromData', () => {
+        describe('data processors', () => {
+            before(checkTestFiles);
+
+            it('should handle broker: HL', () => {
+                const fund = testFunds.hl.fund.fund;
+                const data = testFunds.hl.fund.data;
+
+                expect(scraper.getPriceFromData(fund, data)).to.equal(130.31);
+            });
+        });
+
         it('should handle null data', () => {
             const fund = {};
             const data = null;
 
             expect(() => scraper.getPriceFromData(fund, data))
                 .to.throw('data empty');
-        });
-        it('should handle broker: HL', () => {
-            const fund = testFunds.hl.fund.fund;
-            const data = testFunds.hl.fund.data;
-
-            expect(scraper.getPriceFromData(fund, data)).to.equal(130.31);
         });
         it('should handle null broker', () => {
             const fund = {};
@@ -412,6 +463,8 @@ describe('Fund scraper', () => {
     });
 
     describe('getPricesFromData', () => {
+        before(checkTestFiles);
+
         it('should add prices to funds', () => {
             const funds = testFundsList;
             const data = testFundsListData;
@@ -495,6 +548,8 @@ describe('Fund scraper', () => {
     });
 
     describe('getCacheUrlMap', () => {
+        before(checkTestFiles);
+
         it('should map funds to urls to download', () => {
             const funds = testFundsList.concat(testFundsList.slice(1));
             const flags = { quiet: true };
@@ -537,6 +592,8 @@ describe('Fund scraper', () => {
     });
 
     describe('getRawData', () => {
+        before(checkTestFiles);
+
         let request = null;
         before(() => {
             request = new DummyRequest(url => md5(url));
@@ -621,6 +678,8 @@ describe('Fund scraper', () => {
     });
 
     describe('insertNewSinglePriceCache', () => {
+        before(checkTestFiles);
+
         it('should insert a fund hash if it doesn\'t exist', async () => {
             const db = new DummyDbWithFundHashes();
 
@@ -661,15 +720,17 @@ describe('Fund scraper', () => {
     });
 
     describe('insertNewPriceCache', () => {
+        before(checkTestFiles);
+
         it('should insert new cache items in parallel', async () => {
             const db = new DummyDbWithFundHashes();
 
             const prices = [101.56, 876.2, 11.330];
 
             const fundsWithPrices = testFundsList
-                .map((fund, key) => Object.assign({}, fund, { price: prices[key] }))
+                .map((fund, key) => ({ ...fund, price: prices[key] }))
                 .concat(testFundsList.slice(1))
-                .map(fund => Object.assign({}, fund, { hash: md5(fund.name) }));
+                .map(fund => ({ ...fund, hash: md5(fund.name) }));
 
             const now = new Date('2017-09-05');
             const nowTimestamp = Math.floor(now.getTime() / 1000);
@@ -702,6 +763,8 @@ describe('Fund scraper', () => {
     });
 
     describe('scrapeFundPrices', () => {
+        before(checkTestFiles);
+
         let db = null;
         before(() => {
             db = new DummyDbWithFundHashes();
