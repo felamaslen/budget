@@ -8,7 +8,7 @@ from app.api import BudgetClientAPI
 from app.user import User
 from app.methods import window_color, ellipsis, nav_key
 from app.page_overview import PageOverview
-from app.page_list import PageFunds, PageIn, PageBills, PageFood, PageGeneral, \
+from app.page_list import PageFunds, PageIncome, PageBills, PageFood, PageGeneral, \
         PageHoliday, PageSocial
 from app.const import NC_COLOR_BG, NC_COLOR_TAB, NC_COLOR_TAB_SEL, NC_COLOR_UP, \
         NC_COLOR_DOWN, NC_COLOR_UP_SEL, NC_COLOR_DOWN_SEL, \
@@ -29,7 +29,7 @@ class BudgetClient(object):
     """ main app """
     def __init__(self):
         self.state = {
-            'pages': ["Overview", "Funds", "In", "Bills", "Food", "General", \
+            'pages': ["Overview", "Funds", "Income", "Bills", "Food", "General", \
                 "Holiday", "Social"],
             'obj': {},
             'current': 0,
@@ -239,8 +239,8 @@ class BudgetClient(object):
             elif page == "Funds":
                 self.state['obj'][page] = PageFunds(self.win['page'], self.api, self.set_statusbar)
 
-            elif page == "In":
-                self.state['obj'][page] = PageIn(self.win['page'], self.api, self.set_statusbar)
+            elif page == "Income":
+                self.state['obj'][page] = PageIncome(self.win['page'], self.api, self.set_statusbar)
 
             elif page == "Bills":
                 self.state['obj'][page] = PageBills(self.win['page'], self.api, self.set_statusbar)

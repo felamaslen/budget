@@ -24,12 +24,25 @@ class BudgetClientAPI(object):
         if query is None:
             query = {}
 
-        query['t'] = '/'.join(task)
+        route = '/'.join(task)
+
+        url = "{}/{}".format(API_URL, route)
 
         if method == 'get':
-            res = self.session.get(API_URL, params=query)
+            res = self.session.get(url, params=query)
+
         elif method == 'post':
-            res = self.session.post(API_URL, params=query, data=form)
+            res = self.session.post(url, params=query, json=form)
+
+        elif method == 'put':
+            res = self.session.put(url, params=query, json=form)
+
+        elif method == 'delete':
+            res = self.session.delete(url, params=query, json=form)
+
+        elif method == 'patch':
+            res = self.session.patch(url, params=query, json=form)
+
         else:
             raise BudgetClientAPIError
 

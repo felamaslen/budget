@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!env/bin/python3
 
 """
 ncurses client for budget app

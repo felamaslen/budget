@@ -4,9 +4,16 @@ Constant values
 
 import curses
 
-from app.modify import SERVER
+from os import environ
+from os.path import join, dirname
+from dotenv import load_dotenv
 
-API_URL = SERVER + "/api"
+dotenv_path = join(dirname(__file__), '../.env');
+load_dotenv(dotenv_path)
+
+SERVER = environ.get('WEB_URL')
+
+API_URL = SERVER + "/api/v3"
 
 LOGIN_FORM_TITLE = "Enter your PIN to log in: "
 LOGIN_FORM_WIDTH = 42

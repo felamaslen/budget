@@ -27,9 +27,14 @@ def window_fill_color(window, height, width, color):
 class YMD(object):
     """ date object """
     def __init__(self, ymd):
-        self.year = ymd[0]
-        self.month = ymd[1]
-        self.date = ymd[2]
+        if isinstance(ymd, list):
+            self.year = ymd[0]
+            self.month = ymd[1]
+            self.date = ymd[2]
+        else:
+            self.year = ymd.year
+            self.month = ymd.month
+            self.date = ymd.date
 
     def format(self):
         return "%02d/%02d/%02d" % (self.date, self.month, self.year % 1000)
@@ -38,7 +43,7 @@ class YMD(object):
         return [self.year, self.month, self.date]
 
     def serialise_input(self):
-        return ','.join([str(self.year), str(self.month), str(self.date)])
+        return {'year': self.year, 'month': self.month, 'date': self.date}
 
 def get_item_attr(key, value):
     """ converts an item to an object, e.g. date to a date object """
@@ -138,7 +143,10 @@ def cost_from_input(item):
     return int(float(re.sub(r'[^0-9\.]', '', item)) * 100)
 
 def serialise(item, data_type):
-    """ user input -> REST output data """
+    """
+    user input -> REST output data
+    (only basic validation since this is a client)
+    """
 
     if data_type == 'date':
         return date_from_input(item).serialise()
@@ -147,33 +155,32 @@ def serialise(item, data_type):
         return cost_from_input(item)
 
     if data_type == 'units':
-        return str(float(item)) # make sure item is numeric
+        return float(item)
 
-    return item
-
-def deserialise(item, data_type, width=None):
-    """ REST output data -> user output display """
-
-    if data_type == 'date':
-        return YMD(item).format()
-
-    if data_type in ['cost', 'value']:
-        align = width is not None
-
-        return format_currency(item, width, align)
-
-    return item if width is None else ellipsis(item, width)
+    return str(item)
 
 def serialise_input(item, data_type):
-    """
-    user input -> REST input data
-    (only basic validation since this is a client)
-    """
-
+    """ user input -> REST input data """
     if data_type == 'date':
         return date_from_input(item).serialise_input()
 
     return serialise(item, data_type)
+
+def deserialise(item, data_type, width=None):
+    """ REST output data -> user output display """
+
+    try:
+        if data_type == 'date':
+            return YMD(item).format()
+
+        if data_type in ['cost', 'value']:
+            align = width is not None
+
+            return format_currency(item, width, align)
+
+        return item if width is None else ellipsis(item, width)
+    except:
+        return data_type # str(item)
 
 def display_input(item, data_type, width=None):
     """
