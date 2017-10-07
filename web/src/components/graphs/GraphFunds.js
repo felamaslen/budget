@@ -18,7 +18,7 @@ import {
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
 } from '../../misc/const';
 import {
-    GRAPH_FUNDS_TENSION, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
+    GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
     COLOR_DARK, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT, COLOR_LIGHT_GREY,
     COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK,
     FONT_AXIS_LABEL, FONT_GRAPH_TITLE
@@ -33,7 +33,6 @@ export class GraphFunds extends LineGraph {
         super(props);
 
         this.padding = [36, 0, 0, 0];
-        this.tension = GRAPH_FUNDS_TENSION;
         this.canvasProperties = {
             onClick: () => this.props.onClick(),
             onWheel: evt => {

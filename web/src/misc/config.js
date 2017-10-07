@@ -32,7 +32,6 @@ export const GRAPH_KEY_OFFSET_X = 45;
 export const GRAPH_KEY_OFFSET_Y = 34;
 export const GRAPH_CASHFLOW_NUM_TICKS = 5;
 
-export const GRAPH_FUNDS_TENSION = 0.65;
 export const GRAPH_FUNDS_MODES = ['ROI', 'Value', 'Price'];
 export const GRAPH_FUNDS_POINT_RADIUS = 3;
 
