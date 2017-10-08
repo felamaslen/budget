@@ -24,6 +24,9 @@ function setupLogging(app) {
         app.use(logger('dev'));
     }
     else {
+        logger.token('remote-addr', req => req.headers['x-real-ip'] ||
+            req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+
         app.use(logger('common', {
             skip: (req, res) => res.statusCode < 400,
             stream: process.stderr
