@@ -149,7 +149,7 @@ export default class LineGraph extends Graph {
 
         const dynamicColor = typeof color === 'function';
         let theColor = dynamicColor
-            ? color(curve[0][1])
+            ? color(points.getIn([0, 1]))
             : color[0];
         this.ctx.strokeStyle = theColor;
 
@@ -165,7 +165,7 @@ export default class LineGraph extends Graph {
                 }
 
                 this.ctx.strokeStyle = dynamicColor
-                    ? color(piece[0][1])
+                    ? color(this.valY(piece[0][1]))
                     : color[++colorKey % color.length];
 
                 moved = false;
@@ -173,7 +173,7 @@ export default class LineGraph extends Graph {
 
             piece.forEach((point, pointKey) => {
                 if (dynamicColor) {
-                    const newColor = color(point[1]);
+                    const newColor = color(this.valY(point[1]));
                     if (newColor !== theColor) {
                         if (moved) {
                             this.ctx.strokeStyle = theColor;
