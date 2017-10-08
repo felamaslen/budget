@@ -51,6 +51,7 @@
     "dotenv-webpack": "^1.5.4",
     "ejs": "^2.5.7",
     "express": "^4.15.4",
+    "express-cache-control": "^1.0.2",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
     "history": "^4.7.2",

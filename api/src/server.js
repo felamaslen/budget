@@ -6,6 +6,7 @@ const config = require('./config')();
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const CacheControl = require('express-cache-control');
 const path = require('path');
 const logger = require('morgan');
 const swaggerUiDist = require('swagger-ui-dist');
@@ -100,9 +101,6 @@ function setupWebApp(app) {
     // set up views engine
     setupStaticViews(app);
 
-    // web app static files
-    app.use('/', express.static(path.join(__dirname, '../../web/build')));
-
     // index template
     app.get('/:pageName?', (req, res) => {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
@@ -111,6 +109,10 @@ function setupWebApp(app) {
             pieTolerance
         });
     });
+
+    // web app static files
+    const cache = new CacheControl().middleware;
+    app.use('/', cache('days', 100), express.static(path.join(__dirname, '../../web/build')));
 }
 
 function setupErorHandling(app) {
