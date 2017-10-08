@@ -23,6 +23,17 @@ function setupLogging(app) {
     if (config.debug) {
         app.use(logger('dev'));
     }
+    else {
+        app.use(logger('common', {
+            skip: (req, res) => res.statusCode < 400,
+            stream: process.stderr
+        }));
+
+        app.use(logger('common', {
+            skip: (req, res) => res.statusCode >= 400,
+            stream: process.stdout
+        }));
+    }
 }
 
 function setupStaticViews(app) {
