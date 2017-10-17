@@ -24,7 +24,7 @@ export const aListItemAdded = req => buildMessage(
 export const aListItemDeleted = item => buildMessage(EDIT_LIST_ITEM_DELETED, item);
 export const aSuggestionsRequested = req => buildMessage(
     EDIT_SUGGESTIONS_REQUESTED,
-    Object.assign({}, req, { reqId: uuid() }),
+    { ...req, reqId: uuid() },
     SUGGESTIONS_REQUESTED
 );
 export const aSuggestionsReceived = res => buildMessage(EDIT_SUGGESTIONS_RECEIVED, res);

@@ -35,7 +35,7 @@ async function checkAuthToken(db, token) {
 }
 
 function processLoginRequest(req) {
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     const pin = parseInt(req.body.pin, 10);
     const hash = userPinHash(pin, config.userHashSalt);

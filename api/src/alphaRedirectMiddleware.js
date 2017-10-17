@@ -47,7 +47,7 @@ function replaceDateInBody(oldBody) {
     try {
         const { year, month, date } = getYearMonthDateFromSplit(oldBody.date);
 
-        return Object.assign({}, oldBody, { year, month, date });
+        return { ...oldBody, year, month, date };
     }
     catch (err) {
         return null;
@@ -75,7 +75,7 @@ function getNewBodyFunds(oldBody) {
                 };
             });
 
-        return Object.assign({}, oldBody, { transactions });
+        return { ...oldBody, transactions };
     }
     catch (err) {
         return null;
@@ -86,7 +86,7 @@ function getNewMethodBodyFromOld(oldMethod, oldBody, tasks) {
     const arg = tasks.shift();
 
     let method = oldMethod;
-    let body = Object.assign({}, oldBody);
+    let body = { ...oldBody };
 
     if (method === 'post') {
         if (arg === 'update' || arg === 'add') {
@@ -155,7 +155,7 @@ function getNewQueryFromOld(oldQuery, tasks) {
                 const period = oldPeriodMatch[1];
                 const length = oldPeriodMatch[2];
 
-                return Object.assign({}, oldQuery, { period, length, history });
+                return { ...oldQuery, period, length, history };
             }
         }
     }

@@ -318,20 +318,23 @@ function getMonthlyBalance(queryResult, yearMonths) {
             };
 
             if (!last.values.length) {
-                return Object.assign({}, red, { values: [result.balance] });
+                return { ...red, values: [result.balance] };
             }
 
             const gapSinceLast = 12 * (result.year - last.year) + result.month - last.month - 1;
 
             if (gapSinceLast > 0) {
-                return Object.assign({}, red, {
-                    values: last.values
-                        .concat(new Array(gapSinceLast).fill(0))
-                        .concat([result.balance])
-                });
+                return {
+                    ...red,
+                    values: [
+                        ...last.values,
+                        ...new Array(gapSinceLast).fill(0),
+                        result.balance
+                    ]
+                };
             }
 
-            return Object.assign({}, red, { values: last.values.concat([result.balance]) });
+            return { ...red, values: [...last.values, result.balance] };
         }, { numZeroesAfter: 0, values: [] });
 
     const old = oldRed.values.concat(new Array(oldRed.numZeroesAfter).fill(0));
@@ -381,7 +384,7 @@ async function getData(db, user) {
         currentYear: now.getFullYear(),
         currentMonth: now.getMonth() + 1,
         futureMonths,
-        cost: Object.assign({}, monthCost, balance)
+        cost: { ...monthCost, ...balance }
     };
 }
 

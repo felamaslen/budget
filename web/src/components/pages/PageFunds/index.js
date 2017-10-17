@@ -124,9 +124,10 @@ const mapDispatchToProps = () => dispatch => ({
     loadContent: req => {
         const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
 
-        return dispatch(aContentRequested(Object.assign(req, {
+        return dispatch(aContentRequested({
+            ...req,
             query: { history: 'true', period, length }
-        })));
+        }));
     }
 });
 

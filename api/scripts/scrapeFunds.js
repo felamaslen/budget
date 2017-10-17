@@ -135,7 +135,7 @@ function getHoldingsFromData(funds, data, flags) {
                 }
             }
 
-            return Object.assign({}, fund, { holdings });
+            return { ...fund, holdings };
         });
 }
 
@@ -195,7 +195,7 @@ function getPricesFromData(funds, data, flags) {
                 }
             }
 
-            return Object.assign({}, fund, { price });
+            return { ...fund, price };
         });
 }
 
@@ -480,7 +480,7 @@ async function updateHoldings(db, fundsWithHoldings, flags) {
         }
 
         if (code) {
-            newStocks.push(Object.assign({}, row, { code }));
+            newStocks.push({ ...row, code });
         }
         else if (!flags.quiet) {
             logger(`Skipped null code for stock: ${name}`, 'WARN');

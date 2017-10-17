@@ -25,7 +25,7 @@ export function getAnalysisReq(reduction, req) {
 
     const dataReq = [shortPeriod, grouping, timeIndex];
 
-    return Object.assign({}, req, { dataReq });
+    return { ...req, dataReq };
 }
 
 export function getFundsReq(req) {
@@ -37,7 +37,7 @@ export function getFundsReq(req) {
         { name: 'length', value: length }
     ];
 
-    return Object.assign({}, req, { urlParam });
+    return { ...req, urlParam };
 }
 
 export function getReqObj(reduction, pageIndex, apiKey) {

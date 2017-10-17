@@ -359,7 +359,7 @@ class DummyDbWithAnalysis extends DummyDb {
 
         this.data = ['bills', 'food', 'general', 'holiday', 'social']
             .reduce((data, category) => {
-                data[category] = Object.assign({}, testData);
+                data[category] = { ...testData };
 
                 return data;
             }, {});

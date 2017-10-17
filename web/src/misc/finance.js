@@ -37,8 +37,6 @@ export function getStockPricesFromYahoo(symbols) {
                 return resolve(res);
             }
             catch (dataErr) {
-                console.error(dataErr.stack);
-
                 return reject(dataErr);
             }
         });
