@@ -114,7 +114,7 @@ export class GraphFundItem extends LineGraph {
 
 GraphFundItem.propTypes = {
     id: PropTypes.number.isRequired,
-    data: PropTypes.instanceOf(list),
+    data: PropTypes.instanceOf(list).isRequired,
     popout: PropTypes.bool.isRequired
 };
 
@@ -123,7 +123,7 @@ const pageIndex = PAGES.indexOf('funds');
 const mapStateToProps = (state, ownProps) => ({
     data: state.getIn(
         ['global', 'pages', pageIndex, 'rows', ownProps.id, 'prices']
-    ),
+    ) || list.of(),
     popout: Boolean(state.getIn(
         ['global', 'pages', pageIndex, 'rows', ownProps.id, 'historyPopout']
     ))
