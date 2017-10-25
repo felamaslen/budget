@@ -1,22 +1,31 @@
 const webpack = require('webpack');
+const Dotenv = require('dotenv-webpack');
+const path = require('path');
 
 const webpackConfig = require('./conf.common');
 const moduleConfigDev = require('./module.dev');
 
-module.exports = Object.assign({}, webpackConfig, {
+module.exports = {
+    ...webpackConfig,
     devtool: 'source-map',
     entry: [
         `webpack-dev-server/client?http://0.0.0.0:${process.env.PORT_WDS}`,
-        'webpack/hot/only-dev-server'
-    ].concat(webpackConfig.entry),
-    plugins: webpackConfig.plugins.concat([
+        'webpack/hot/only-dev-server',
+        ...webpackConfig.entry
+    ],
+    plugins: [
+        ...webpackConfig.plugins,
+        new Dotenv({
+            path: path.join(__dirname, '../.env'),
+            safe: true
+        }),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify('development')
             }
         }),
         new webpack.HotModuleReplacementPlugin()
-    ]),
+    ],
     module: moduleConfigDev,
     devServer: {
         stats: {
@@ -38,5 +47,5 @@ module.exports = Object.assign({}, webpackConfig, {
             }
         }
     }
-});
+};
 
