@@ -2,6 +2,8 @@ const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const path = require('path');
 
+require('dotenv').config();
+
 const webpackConfig = require('./conf.common');
 const moduleConfigDev = require('./module.dev');
 
