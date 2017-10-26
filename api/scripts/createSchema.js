@@ -2,7 +2,10 @@
  * Script to create an empty database schema for the API
  */
 
-require('dotenv').config();
+const dotenv = require('dotenv');
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 if (process.env.NODE_ENV === 'test') {
     process.env.MYSQL_URI = process.env.MYSQL_URI_TEST;

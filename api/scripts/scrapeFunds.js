@@ -4,7 +4,10 @@
 
 /* eslint max-lines: 0, max-statements: 0 */
 
-require('dotenv').config();
+const dotenv = require('dotenv');
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 const request = require('request');
 const prompt = require('prompt');
