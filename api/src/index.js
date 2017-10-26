@@ -2,7 +2,11 @@
  * Launch script for the server
  */
 
-require('dotenv').config();
+const dotenv = require('dotenv');
+if (process.env.NODE_ENV === 'development') {
+    dotenv.config();
+}
+
 const serverApp = require('./server');
 
 async function main() {

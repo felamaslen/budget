@@ -4,12 +4,16 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const webpackConfig = require('./conf.common');
 const moduleConfigProd = require('./module.prod');
 
-module.exports = Object.assign({}, webpackConfig, {
+module.exports = {
+    ...webpackConfig,
     devtool: 'cheap-module-source-map',
-    plugins: webpackConfig.plugins.concat([
+    plugins: [
+        ...webpackConfig.plugins,
         new webpack.DefinePlugin({
             'process.env': {
-                NODE_ENV: JSON.stringify('production')
+                NODE_ENV: JSON.stringify('production'),
+                STOCK_INDICES: JSON.stringify(process.env.STOCK_INDICES || ''),
+                DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false')
             }
         }),
         new webpack.optimize.UglifyJsPlugin({
@@ -31,8 +35,8 @@ module.exports = Object.assign({}, webpackConfig, {
                 discardComments: { removeAll: true }
             }
         })
-    ]),
+    ],
     module: moduleConfigProd,
     bail: true
-});
+};
 
