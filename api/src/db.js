@@ -8,7 +8,7 @@ const common = require('./common');
 const config = require('./config')();
 
 function parseConnectionURI(uri) {
-    const matches = uri.match(/^mysql:\/\/(\w+):(\w+)@(\w+(\.\w+)*)(:([0-9]+))?\/(\w+)$/);
+    const matches = uri.match(/^mysql:\/\/(\w+):(\w+)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/);
 
     if (!matches) {
         return null;
