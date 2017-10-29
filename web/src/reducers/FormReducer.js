@@ -137,9 +137,7 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
         .setIn(['pages', pageIndex, 'data', 'total'], newTotal);
 }
 
-export function validateFields(reduction) {
-    const fields = reduction.getIn(['modalDialog', 'fields']);
-
+export function validateFields(fields) {
     const invalidKeys = getInvalidInsertDataKeys(fields);
 
     return { fields, invalidKeys };
@@ -157,8 +155,9 @@ export function rCloseFormDialog(reduction, req) {
     }
 
     const type = reduction.getIn(['modalDialog', 'type']);
+    const rawFields = reduction.getIn(['modalDialog', 'fields']);
 
-    const { fields, invalidKeys } = validateFields(reduction);
+    const { fields, invalidKeys } = validateFields(rawFields);
     if (invalidKeys.size) {
         return reduction
             .setIn(['modalDialog', 'invalidKeys'], invalidKeys);

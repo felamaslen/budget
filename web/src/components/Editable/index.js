@@ -35,7 +35,7 @@ function getEditableComponent(item) {
 
 function getStateProps(row, col, item, value, getSuggestions) {
     return state => {
-        const activeEditable = state.getIn(['global', 'edit', 'active']);
+        const activeEditable = state.getIn(['edit', 'active']);
         const active = activeEditable.get('row') === row && activeEditable.get('col') === col;
 
         const props = {
@@ -47,8 +47,8 @@ function getStateProps(row, col, item, value, getSuggestions) {
         };
 
         if (getSuggestions) {
-            props.suggestionsList = state.getIn(['global', 'editSuggestions', 'list']);
-            props.suggestionsActive = state.getIn(['global', 'editSuggestions', 'active']);
+            props.suggestionsList = state.getIn(['editSuggestions', 'list']);
+            props.suggestionsActive = state.getIn(['editSuggestions', 'active']);
         }
 
         return props;

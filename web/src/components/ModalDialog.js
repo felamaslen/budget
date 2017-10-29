@@ -129,16 +129,16 @@ ModalDialog.propTypes = {
 }
 
 const mapStateToProps = state => ({
-    pageIndex: state.getIn(['global', 'currentPageIndex']),
-    active: state.getIn(['global', 'modalDialog', 'active']),
-    visible: state.getIn(['global', 'modalDialog', 'visible']),
-    loading: state.getIn(['global', 'modalDialog', 'loading']),
-    type: state.getIn(['global', 'modalDialog', 'type']),
-    row: state.getIn(['global', 'modalDialog', 'row']),
-    col: state.getIn(['global', 'modalDialog', 'col']),
-    id: state.getIn(['global', 'modalDialog', 'id']),
-    fields: state.getIn(['global', 'modalDialog', 'fields']),
-    invalidKeys: state.getIn(['global', 'modalDialog', 'invalidKeys'])
+    pageIndex: state.getIn(['currentPageIndex']),
+    active: state.getIn(['modalDialog', 'active']),
+    visible: state.getIn(['modalDialog', 'visible']),
+    loading: state.getIn(['modalDialog', 'loading']),
+    type: state.getIn(['modalDialog', 'type']),
+    row: state.getIn(['modalDialog', 'row']),
+    col: state.getIn(['modalDialog', 'col']),
+    id: state.getIn(['modalDialog', 'id']),
+    fields: state.getIn(['modalDialog', 'fields']),
+    invalidKeys: state.getIn(['modalDialog', 'invalidKeys'])
 });
 
 const mapDispatchToProps = dispatch => ({

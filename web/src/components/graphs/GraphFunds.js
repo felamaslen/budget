@@ -368,16 +368,16 @@ const mapStateToProps = state => ({
     name: 'fund-history',
     width: GRAPH_FUNDS_WIDTH,
     height: GRAPH_FUNDS_HEIGHT,
-    fundHistoryCache: state.getIn(['global', 'other', 'fundHistoryCache']),
-    fundItems: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundItems']),
-    fundLines: state.getIn(['global', 'other', 'graphFunds', 'data', 'fundLines']),
-    startTime: state.getIn(['global', 'other', 'graphFunds', 'startTime']),
-    cacheTimes: state.getIn(['global', 'other', 'graphFunds', 'cacheTimes']),
-    mode: state.getIn(['global', 'other', 'graphFunds', 'mode']),
-    period: state.getIn(['global', 'other', 'graphFunds', 'period']),
-    showOverall: state.getIn(['global', 'other', 'graphFunds', 'showOverall']),
-    zoom: state.getIn(['global', 'other', 'graphFunds', 'zoom']),
-    hlPoint: state.getIn(['global', 'other', 'graphFunds', 'hlPoint'])
+    fundHistoryCache: state.getIn(['other', 'fundHistoryCache']),
+    fundItems: state.getIn(['other', 'graphFunds', 'data', 'fundItems']),
+    fundLines: state.getIn(['other', 'graphFunds', 'data', 'fundLines']),
+    startTime: state.getIn(['other', 'graphFunds', 'startTime']),
+    cacheTimes: state.getIn(['other', 'graphFunds', 'cacheTimes']),
+    mode: state.getIn(['other', 'graphFunds', 'mode']),
+    period: state.getIn(['other', 'graphFunds', 'period']),
+    showOverall: state.getIn(['other', 'graphFunds', 'showOverall']),
+    zoom: state.getIn(['other', 'graphFunds', 'zoom']),
+    hlPoint: state.getIn(['other', 'graphFunds', 'hlPoint'])
 });
 
 const mapDispatchToProps = dispatch => ({

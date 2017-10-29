@@ -4,6 +4,7 @@
 
 import buildMessage from '../messageBuilder';
 import {
+    SETTINGS_LOADED,
     USER_LOGGED_OUT,
     PAGE_NAVIGATED,
     KEY_PRESSED,
@@ -13,16 +14,12 @@ import {
     SERVER_ADD_RECEIVED
 } from '../constants/actions';
 
-import {
-    LOCAL_SETTINGS_REQUESTED, SERVER_UPDATE_REQUESTED, LOGIN_CREDENTIALS_SAVED
-} from '../constants/effects';
-
-export const aSettingsLoaded = () => buildMessage(LOCAL_SETTINGS_REQUESTED, null, LOCAL_SETTINGS_REQUESTED);
-export const aUserLoggedOut = () => buildMessage(USER_LOGGED_OUT, null, LOGIN_CREDENTIALS_SAVED);
+export const aSettingsLoaded = () => buildMessage(SETTINGS_LOADED);
+export const aUserLoggedOut = () => buildMessage(USER_LOGGED_OUT);
 export const aPageNavigatedTo = page => buildMessage(PAGE_NAVIGATED, page);
 export const aKeyPressed = key => buildMessage(KEY_PRESSED, key);
 export const aTimeUpdated = () => buildMessage(TIME_UPDATED);
-export const aServerUpdated = () => buildMessage(SERVER_UPDATED, null, SERVER_UPDATE_REQUESTED);
+export const aServerUpdated = () => buildMessage(SERVER_UPDATED);
 export const aServerUpdateReceived = res => buildMessage(SERVER_UPDATE_RECEIVED, res);
 export const aServerAddReceived = response => buildMessage(SERVER_ADD_RECEIVED, response);
 

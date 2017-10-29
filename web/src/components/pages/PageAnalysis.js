@@ -248,15 +248,15 @@ PageAnalysis.propTypes = {
 
 const mapStateToProps = state => ({
     pageIndex,
-    loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
-    treeVisible: state.getIn(['global', 'other', 'analysis', 'treeVisible']),
-    treeOpen: state.getIn(['global', 'other', 'analysis', 'treeOpen']),
-    period: state.getIn(['global', 'other', 'analysis', 'period']),
-    grouping: state.getIn(['global', 'other', 'analysis', 'grouping']),
-    timeIndex: state.getIn(['global', 'other', 'analysis', 'timeIndex']),
-    cost: state.getIn(['global', 'pages', pageIndex, 'cost']),
-    costTotal: state.getIn(['global', 'pages', pageIndex, 'costTotal']),
-    description: state.getIn(['global', 'pages', pageIndex, 'description'])
+    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex])),
+    treeVisible: state.getIn(['other', 'analysis', 'treeVisible']),
+    treeOpen: state.getIn(['other', 'analysis', 'treeOpen']),
+    period: state.getIn(['other', 'analysis', 'period']),
+    grouping: state.getIn(['other', 'analysis', 'grouping']),
+    timeIndex: state.getIn(['other', 'analysis', 'timeIndex']),
+    cost: state.getIn(['pages', pageIndex, 'cost']),
+    costTotal: state.getIn(['pages', pageIndex, 'costTotal']),
+    description: state.getIn(['pages', pageIndex, 'description'])
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -269,7 +269,7 @@ const mapDispatchToProps = dispatch => ({
     onHoverTreeItem: req => dispatch(aTreeItemHovered(req)),
     onExpandTreeItem: name => dispatch(aTreeItemExpandToggled(name)),
     onBlockClick: req => dispatch(aBlockClicked(req)),
-    onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered(block, subBlock))
+    onBlockHover: (block, subBlock) => dispatch(aContentBlockHovered({ block, subBlock }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);

@@ -25,7 +25,7 @@ Spinner.propTypes = {
     active: PropTypes.bool.isRequired
 };
 
-const mapStateToProps = state => ({ active: state.getIn(['global', 'loading']) });
+const mapStateToProps = state => ({ active: state.getIn(['loading']) });
 
 export default connect(mapStateToProps)(Spinner);
 

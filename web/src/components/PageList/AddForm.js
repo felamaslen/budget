@@ -61,7 +61,7 @@ AddForm.propTypes = {
 
 const mapStateToProps = (state, ownProps) => ({
     noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1,
-    addBtnFocus: state.getIn(['global', 'edit', 'addBtnFocus'])
+    addBtnFocus: state.getIn(['edit', 'addBtnFocus'])
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

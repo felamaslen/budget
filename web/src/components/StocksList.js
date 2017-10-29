@@ -109,13 +109,13 @@ StocksList.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    loadedList: state.getIn(['global', 'other', 'stocksList', 'loadedList']),
-    loadedInitial: state.getIn(['global', 'other', 'stocksList', 'loadedInitial']),
-    stocks: state.getIn(['global', 'other', 'stocksList', 'stocks']),
-    indices: state.getIn(['global', 'other', 'stocksList', 'indices']),
-    lastPriceUpdate: state.getIn(['global', 'other', 'stocksList', 'lastPriceUpdate']),
-    weightedGain: state.getIn(['global', 'other', 'stocksList', 'weightedGain']),
-    oldWeightedGain: state.getIn(['global', 'other', 'stocksList', 'oldWeightedGain'])
+    loadedList: state.getIn(['other', 'stocksList', 'loadedList']),
+    loadedInitial: state.getIn(['other', 'stocksList', 'loadedInitial']),
+    stocks: state.getIn(['other', 'stocksList', 'stocks']),
+    indices: state.getIn(['other', 'stocksList', 'indices']),
+    lastPriceUpdate: state.getIn(['other', 'stocksList', 'lastPriceUpdate']),
+    weightedGain: state.getIn(['other', 'stocksList', 'weightedGain']),
+    oldWeightedGain: state.getIn(['other', 'stocksList', 'oldWeightedGain'])
 });
 
 const mapDispatchToProps = dispatch => ({

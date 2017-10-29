@@ -38,7 +38,7 @@ DataSync.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    requestList: state.getIn(['global', 'edit', 'requestList'])
+    requestList: state.getIn(['edit', 'requestList'])
 });
 
 const mapDispatchToProps = dispatch => ({

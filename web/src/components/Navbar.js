@@ -39,7 +39,7 @@ Navbar.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    active: state.getIn(['global', 'user', 'uid']) > 0
+    active: state.getIn(['user', 'uid']) > 0
 });
 
 const mapDispatchToProps = dispatch => ({

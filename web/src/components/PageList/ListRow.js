@@ -91,9 +91,9 @@ ListRow.propTypes = {
 
 const stateDefault = pageIndex => (state, ownProps) => ({
     pageIndex,
-    row: state.getIn(['global', 'pages', pageIndex, 'rows', ownProps.id]),
-    activeCol: state.getIn(['global', 'edit', 'active', 'row']) === ownProps.id
-        ? state.getIn(['global', 'edit', 'active', 'col'])
+    row: state.getIn(['pages', pageIndex, 'rows', ownProps.id]),
+    activeCol: state.getIn(['edit', 'active', 'row']) === ownProps.id
+        ? state.getIn(['edit', 'active', 'col'])
         : null,
     getDaily: DAILY_PAGES[pageIndex],
     noSuggestions: ['funds'].indexOf(PAGES[pageIndex]) !== -1

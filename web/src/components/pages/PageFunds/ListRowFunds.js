@@ -87,9 +87,9 @@ ListRowFunds.propTypes = {
 };
 
 const mapStateToProps = () => (state, ownProps) => ({
-    sold: state.getIn(
-        ['global', 'pages', pageIndex, 'rows', ownProps.id, 'cols', transactionsKey]
-    ).isSold()
+    sold: state
+        .getIn(['pages', pageIndex, 'rows', ownProps.id, 'cols', transactionsKey])
+        .isSold()
 });
 
 export default connect(pageIndex)(mapStateToProps)(ListRowFunds);

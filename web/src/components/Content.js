@@ -50,7 +50,7 @@ Content.propTypes = {
 
 const mapStateToProps = (state, ownProps) => ({
     pathname: ownProps.location.pathname,
-    loggedIn: state.getIn(['global', 'user', 'uid']) > 0
+    loggedIn: state.getIn(['user', 'uid']) > 0
 });
 
 const mapDispatchToProps = dispatch => ({

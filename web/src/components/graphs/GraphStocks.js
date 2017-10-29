@@ -90,7 +90,7 @@ GraphStocks.propTypes = {
 const mapStateToProps = state => ({
     width: GRAPH_STOCKS_WIDTH,
     height: GRAPH_STOCKS_HEIGHT,
-    data: state.getIn(['global', 'other', 'stocksList', 'history'])
+    data: state.getIn(['other', 'stocksList', 'history'])
 });
 
 export default connect(mapStateToProps)(GraphStocks);

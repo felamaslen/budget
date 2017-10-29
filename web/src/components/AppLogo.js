@@ -35,8 +35,8 @@ AppLogo.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    loading: state.getIn(['global', 'loadingApi']),
-    unsaved: state.getIn(['global', 'edit', 'requestList']).size > 0
+    loading: state.getIn(['loadingApi']),
+    unsaved: state.getIn(['edit', 'requestList']).size > 0
 });
 
 const mapDispatchToProps = () => ({});

@@ -205,22 +205,17 @@ GraphCashFlow.propTypes = {
 };
 
 const stateDefault = pageIndex => state => {
-    const currentYearMonth = state.getIn(
-        ['global', 'pages', pageIndex, 'data', 'currentYearMonth']
-    );
-
-    const startYearMonth = state.getIn(
-        ['global', 'pages', pageIndex, 'data', 'startYearMonth']
-    );
+    const [currentYear, currentMonth] = state.getIn(['pages', pageIndex, 'data', 'currentYearMonth']);
+    const [startYear, startMonth] = state.getIn(['pages', pageIndex, 'data', 'startYearMonth']);
 
     return {
         width: Math.min(GRAPH_WIDTH, window.innerWidth),
         height: GRAPH_HEIGHT,
-        yearMonths: list(state.getIn(['global', 'pages', pageIndex, 'data', 'yearMonths'])),
-        currentYear: currentYearMonth[0],
-        currentMonth: currentYearMonth[1],
-        startYear: startYearMonth[0],
-        startMonth: startYearMonth[1],
+        yearMonths: list(state.getIn(['pages', pageIndex, 'data', 'yearMonths'])),
+        currentYear,
+        currentMonth,
+        startYear,
+        startMonth,
         oldOffset: 0
     };
 };

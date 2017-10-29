@@ -181,10 +181,10 @@ PageOverview.propTypes = {
 
 const mapStateToProps = state => ({
     pageIndex,
-    rows: state.getIn(['global', 'pages', pageIndex, 'rows']),
-    loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex])),
-    editRow: state.getIn(['global', 'edit', 'row']),
-    editCol: state.getIn(['global', 'edit', 'col'])
+    rows: state.getIn(['pages', pageIndex, 'rows']),
+    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex])),
+    editRow: state.getIn(['edit', 'row']),
+    editCol: state.getIn(['edit', 'col'])
 });
 
 const mapDispatchToProps = dispatch => ({

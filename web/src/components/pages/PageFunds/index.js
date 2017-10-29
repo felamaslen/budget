@@ -95,8 +95,8 @@ PageFunds.propTypes = {
 };
 
 function getGainInfo(state) {
-    const cost = state.getIn(['global', 'pages', pageIndex, 'data', 'total']);
-    const value = state.getIn(['global', 'other', 'fundsCachedValue', 'value']);
+    const cost = state.getIn(['pages', pageIndex, 'data', 'total']);
+    const value = state.getIn(['other', 'fundsCachedValue', 'value']);
 
     const gain = cost
         ? (value - cost) / cost
@@ -116,7 +116,7 @@ function getGainInfo(state) {
 }
 
 const mapStateToProps = () => state => ({
-    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue']),
+    cachedValue: state.getIn(['other', 'fundsCachedValue']),
     gainInfo: getGainInfo(state)
 });
 

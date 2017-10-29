@@ -10,18 +10,10 @@ import {
     ANALYSIS_DATA_REFRESHED
 } from '../constants/actions';
 
-import {
-    ANALYSIS_DATA_REQUESTED
-} from '../constants/effects';
-
-export const aOptionChanged = req => buildMessage(
-    ANALYSIS_OPTION_CHANGED, req, ANALYSIS_DATA_REQUESTED
-);
+export const aOptionChanged = req => buildMessage(ANALYSIS_OPTION_CHANGED, req);
 export const aTreeItemDisplayToggled = key => buildMessage(ANALYSIS_TREE_DISPLAY_TOGGLED, key);
 export const aTreeItemExpandToggled = key => buildMessage(ANALYSIS_TREE_EXPAND_TOGGLED, key);
 export const aTreeItemHovered = key => buildMessage(ANALYSIS_TREE_HOVERED, key);
-export const aBlockClicked = req => buildMessage(
-    ANALYSIS_BLOCK_CLICKED, req, ANALYSIS_DATA_REQUESTED
-);
+export const aBlockClicked = req => buildMessage(ANALYSIS_BLOCK_CLICKED, req);
 export const aAnalysisDataRefreshed = res => buildMessage(ANALYSIS_DATA_REFRESHED, res);
 

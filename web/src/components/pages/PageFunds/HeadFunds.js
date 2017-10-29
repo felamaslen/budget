@@ -27,8 +27,8 @@ HeadFunds.propTypes = {
 };
 
 const mapStateToProps = () => state => ({
-    cachedValue: state.getIn(['global', 'other', 'fundsCachedValue']),
-    shortPeriod: state.getIn(['global', 'other', 'graphFunds', 'period'])
+    cachedValue: state.getIn(['other', 'fundsCachedValue']),
+    shortPeriod: state.getIn(['other', 'graphFunds', 'period'])
 });
 
 const mapDispatchToProps = () => dispatch => ({

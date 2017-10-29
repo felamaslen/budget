@@ -118,10 +118,10 @@ BlockView.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    active: state.getIn(['global', 'other', 'blockView', 'active']),
-    blocks: state.getIn(['global', 'other', 'blockView', 'blocks']),
-    deepBlock: state.getIn(['global', 'other', 'blockView', 'deep']),
-    status: state.getIn(['global', 'other', 'blockView', 'status'])
+    active: state.getIn(['other', 'blockView', 'active']),
+    blocks: state.getIn(['other', 'blockView', 'blocks']),
+    deepBlock: state.getIn(['other', 'blockView', 'deep']),
+    status: state.getIn(['other', 'blockView', 'status'])
 });
 
 export default connect(mapStateToProps, null)(BlockView);

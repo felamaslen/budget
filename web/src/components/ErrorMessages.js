@@ -5,15 +5,29 @@
 import { List } from 'immutable';
 import { connect } from 'react-redux';
 
-import React, { Component } from 'react';
+import React from 'react';
+import ImmutableComponent from './ImmutableComponent';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import {
     ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR, ERROR_CLOSE_TIME
 } from '../misc/const';
+import { ERROR_MESSAGE_DELAY } from '../misc/config';
 import { aErrorClosed, aErrorRemoved } from '../actions/ErrorActions';
 
-class ErrorMessages extends Component {
+class ErrorMessages extends ImmutableComponent {
+    componentDidUpdate(prevProps) {
+        const messageAdded = prevProps.list.size < this.props.list.size;
+        if (messageAdded) {
+            const newIds = this.props.list
+                .filter(
+                    msg => prevProps.list.findIndex(old => old.get('id') === msg.get('id')) === -1
+                )
+                .map(msg => msg.get('id'));
+
+            newIds.forEach(msgId => setTimeout(() => this.props.closeMessage(msgId), ERROR_MESSAGE_DELAY));
+        }
+    }
     render() {
         const messages = this.props.list.map((msg, key) => {
             const msgClasses = classNames({
@@ -43,7 +57,7 @@ ErrorMessages.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    list: state.getIn(['global', 'errorMsg'])
+    list: state.getIn(['errorMsg'])
 });
 
 const mapDispatchToProps = dispatch => ({

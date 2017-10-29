@@ -84,7 +84,7 @@ PageList.propTypes = {
 
 const stateDefault = pageIndex => state => ({
     pageIndex,
-    loaded: Boolean(state.getIn(['global', 'pagesLoaded', pageIndex]))
+    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex]))
 });
 
 const dispatchDefault = () => dispatch => ({

@@ -153,9 +153,9 @@ function getBalanceWithFunds(cost, showAll) {
 }
 
 const mapStateToProps = pageIndex => state => {
-    const showAll = state.getIn(['global', 'other', 'showAllBalanceGraph']);
+    const showAll = state.getIn(['other', 'showAllBalanceGraph']);
 
-    const cost = state.getIn(['global', 'pages', pageIndex, 'data', 'cost']);
+    const cost = state.getIn(['pages', pageIndex, 'data', 'cost']);
     const { oldOffset, balance, funds } = getBalanceWithFunds(cost, showAll);
 
     return {

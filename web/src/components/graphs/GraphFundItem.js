@@ -121,12 +121,8 @@ GraphFundItem.propTypes = {
 const pageIndex = PAGES.indexOf('funds');
 
 const mapStateToProps = (state, ownProps) => ({
-    data: state.getIn(
-        ['global', 'pages', pageIndex, 'rows', ownProps.id, 'prices']
-    ) || list.of(),
-    popout: Boolean(state.getIn(
-        ['global', 'pages', pageIndex, 'rows', ownProps.id, 'historyPopout']
-    ))
+    data: state.getIn(['pages', pageIndex, 'rows', ownProps.id, 'prices']) || list.of(),
+    popout: Boolean(state.getIn(['pages', pageIndex, 'rows', ownProps.id, 'historyPopout']))
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -161,27 +161,20 @@ const mapStateToProps = pageIndex => state => ({
     categories: list(GRAPH_SPEND_CATEGORIES),
     dataNet: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
         return data.map((item, key) => {
-            const cost = state.getIn(
-                ['global', 'pages', pageIndex, 'data', 'cost', category.name, key]
-            );
+            const cost = state.getIn(['pages', pageIndex, 'data', 'cost', category.name, key]);
 
             return item - cost;
         });
-    }, state.getIn(
-        ['global', 'pages', pageIndex, 'data', 'cost', 'income']
-    )),
+    }, state.getIn(['pages', pageIndex, 'data', 'cost', 'income'])),
     dataSpending: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
         return data.map((item, key) => {
-            const cost = state.getIn(
-                ['global', 'pages', pageIndex, 'data', 'cost', category.name, key]
-            );
+            const cost = state
+                .getIn(['pages', pageIndex, 'data', 'cost', category.name, key]);
 
             return item + cost;
         });
     }, state
-        .getIn(
-            ['global', 'pages', pageIndex, 'data', 'cost', 'income']
-        )
+        .getIn(['pages', pageIndex, 'data', 'cost', 'income'])
         .map(() => 0)
     )
 });

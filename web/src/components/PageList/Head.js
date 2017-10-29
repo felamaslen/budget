@@ -54,9 +54,9 @@ Head.propTypes = {
 
 const stateDefault = pageIndex => state => ({
     pageIndex,
-    weeklyValue: state.getIn(['global', 'pages', pageIndex, 'data', 'weekly']),
+    weeklyValue: state.getIn(['pages', pageIndex, 'data', 'weekly']),
     daily: DAILY_PAGES[pageIndex],
-    totalCost: state.getIn(['global', 'pages', pageIndex, 'data', 'total'])
+    totalCost: state.getIn(['pages', pageIndex, 'data', 'total'])
 });
 
 const dispatchDefault = () => () => ({});
