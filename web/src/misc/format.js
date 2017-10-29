@@ -298,15 +298,16 @@ function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
  * @returns {string} formatted value
  */
 export function formatCurrency(value, customOptions = {}) {
-    const options = Object.assign({
+    const options = {
         abbreviate: false,
         precision: 0,
         brackets: false,
         noSymbol: false,
         noPence: false,
         suffix: null,
-        raw: false
-    }, customOptions);
+        raw: false,
+        ...customOptions
+    };
 
     const sign = options.brackets || value >= 0
         ? ''

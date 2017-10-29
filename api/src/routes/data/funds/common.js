@@ -115,7 +115,7 @@ function processFundHistory(queryResult) {
             return timeDiff;
         });
 
-    return Object.assign(keyMap, { startTime, times });
+    return { ...keyMap, startTime, times };
 }
 
 function fundHash(fundName, salt) {
@@ -197,13 +197,13 @@ function validateExtraData(data, allRequired = true) {
 function validateInsertData(data) {
     const validData = listCommon.validateInsertData(data);
 
-    return Object.assign({}, validData, validateExtraData(data, true));
+    return { ...validData, ...validateExtraData(data, true) };
 }
 
 function validateUpdateData(data) {
     const validData = listCommon.validateUpdateData(data);
 
-    validData.values = Object.assign(validData.values, validateExtraData(data, false));
+    validData.values = { ...validData.values, ...validateExtraData(data, false) };
 
     return validData;
 }

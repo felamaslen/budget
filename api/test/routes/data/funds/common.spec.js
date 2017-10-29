@@ -244,10 +244,13 @@ describe('/data/funds', () => {
                 ...standardData,
                 transactions: standardTransactions
             }))
-                .to.deep.equal(Object.assign({
+                .to.deep.equal({
                     ...standardData,
-                    transactions: transactionsJson
-                }, { year: 2017, month: 9, date: 4 }));
+                    transactions: transactionsJson,
+                    year: 2017,
+                    month: 9,
+                    date: 4
+                });
         });
     });
 
@@ -260,10 +263,13 @@ describe('/data/funds', () => {
             }))
                 .to.deep.equal({
                     id: 1,
-                    values: Object.assign({
+                    values: {
                         ...standardData,
-                        transactions: transactionsJson
-                    }, { year: 2017, month: 9, date: 4 })
+                        transactions: transactionsJson,
+                        year: 2017,
+                        month: 9,
+                        date: 4
+                    }
                 });
         });
     });

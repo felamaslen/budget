@@ -41,9 +41,10 @@ class ErrorDatabase extends Error {
 // promise wrapper for the mysql library
 class Connection {
     constructor(options) {
-        this.conn = mysql.createConnection(Object.assign({}, options, {
+        this.conn = mysql.createConnection({
+            ...options,
             supportBigNumbers: true
-        }));
+        });
 
         this.requireForceToEnd = false;
         this.debug = 0;

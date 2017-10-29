@@ -313,7 +313,6 @@ button {
         padding: 24px 0 0 0;
         list-style: none;
         width: 100%;
-        overflow: hidden;
 
         .progress {
             position: absolute;
@@ -332,16 +331,22 @@ button {
         & > li:nth-child(2n+1) {
             background: rgba(220, 220, 220, 0.4);
         }
-        li > span {
-            position: relative;
-            text-overflow: ellipsis;
-            border-right: 1px solid #ccc;
-            vertical-align: top;
-            height: inherit;
-            & > span {
+        li {
+            &:not(.li-add) > span {
                 overflow: hidden;
-                &.active {
-                    overflow: visible;
+            }
+            & > span {
+                position: relative;
+                text-overflow: ellipsis;
+                border-right: 1px solid #ccc;
+                vertical-align: top;
+                height: inherit;
+
+                & > span {
+                    white-space: nowrap;
+                    &.active {
+                        overflow: visible;
+                    }
                 }
             }
         }
@@ -476,7 +481,7 @@ button {
             flex-basis: initial;
             flex-wrap: nowrap;
         }
-        .transactions {
+        li > span.transactions {
             flex-basis: 102px;
             overflow: visible;
             .modal {

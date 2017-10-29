@@ -134,7 +134,7 @@ async function routePatch(req, res, listDataProcessor) {
             const query = task.query;
             const body = task.body;
 
-            const taskReq = Object.assign({}, req, { query, body });
+            const taskReq = { ...req, query, body };
             const taskRes = new ResponseMultiple();
 
             if (route === 'balance') {

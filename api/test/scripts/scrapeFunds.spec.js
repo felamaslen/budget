@@ -1,8 +1,8 @@
+/* eslint-disable max-lines, max-statements, no-invalid-this */
+
 /**
  * Spec for fund price scraper
  */
-
-/* eslint-disable max-lines, max-statements, no-invalid-this */
 
 require('dotenv').config();
 const expect = require('chai').expect;
@@ -26,7 +26,7 @@ class DummyRequest {
         this.requestHeaders = [];
     }
     defaults(props) {
-        this.props = Object.assign({}, this.props, props);
+        this.props = { ...this.props, ...props };
 
         return this;
     }

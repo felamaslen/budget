@@ -21,6 +21,8 @@ export function resetAppState(state) {
                 originalValue: null
             }),
             add: list(PAGES).map(() => null),
+            addFields: null,
+            addFieldsString: null,
             addBtnFocus: false,
             queue: list.of(),
             queueDelete: list.of(),
@@ -40,6 +42,8 @@ export function resetAppState(state) {
             row: null,
             id: null,
             fields: list.of(),
+            fieldsValidated: list.of(),
+            fieldsString: null,
             invalidKeys: list.of()
         }))
         .set('other', map({

@@ -105,12 +105,13 @@ async function getResults(
 ) {
     const columnMapExtra = config.data.columnMapExtra[table];
 
-    const columnMap = Object.assign({}, columnMapExtra, {
+    const columnMap = {
+        ...columnMapExtra,
         id: 'I',
         date: 'd',
         item: 'i',
         cost: 'c'
-    });
+    };
     const columns = ['year', 'month', 'date']
         .concat(Object.keys(columnMap));
 
@@ -379,7 +380,7 @@ async function routeModify(
         const operationResult = await operation(db, user, table, validData);
 
         if (operationResult) {
-            response = Object.assign({}, response, operationResult);
+            response = { ...response, ...operationResult };
         }
 
         response.total = await getTotalCost(db, user, table);

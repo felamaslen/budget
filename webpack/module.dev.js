@@ -1,12 +1,13 @@
 const moduleConfig = require('./module.common');
 
-moduleConfig.loaders = moduleConfig.loaders.map(loader => {
-    if (loader.test === /\.jsx?$/) {
-        loader.loaders.unshift('react-hot');
-    }
+module.exports = {
+    ...moduleConfig,
+    loaders: moduleConfig.loaders.map(loader => {
+        if (loader.test.toString() === '/\\.scss$/') {
+            return { ...loader, loader: `style-loader!${loader.loader}` };
+        }
 
-    return loader;
-});
-
-module.exports = moduleConfig;
+        return loader;
+    })
+};
 

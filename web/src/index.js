@@ -2,26 +2,38 @@
  * Main entry point for budget web app
  */
 
+/* eslint-disable global-require */
+
 import 'babel-polyfill';
 
 import React from 'react';
+import { AppContainer } from 'react-hot-loader';
 import { render } from 'react-dom';
-import { Provider } from 'react-redux';
 
-import getStore from './store';
-
-import App from './components/App';
+import store from './store';
+import Root from './containers/root';
 
 // import styles and favicon
 import './sass/index.scss';
 import './images/favicon.png';
 
-if (process.env.NODE_ENV !== 'test') {
+function renderApp(RootComponent = Root) {
     render(
-        <Provider store={getStore()}>
-            <App />
-        </Provider>,
+        <AppContainer>
+            <RootComponent store={store} />
+        </AppContainer>,
         document.getElementById('root')
+    );
+}
+
+if (process.env.NODE_ENV !== 'test') {
+    renderApp();
+}
+
+if (module.hot) {
+    module.hot.accept(
+        './containers/root',
+        () => renderApp(require('./containers/root'))
     );
 }
 

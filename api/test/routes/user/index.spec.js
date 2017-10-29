@@ -35,12 +35,8 @@ describe('/api/user', () => {
         };
 
         const requests = [
-            Object.assign(testReq, {
-                headers: { 'x-forwarded-for': '144.201.99.41' }
-            }),
-            Object.assign(testReq, {
-                connection: { remoteAddress: '144.201.99.41' }
-            })
+            { ...testReq, headers: { 'x-forwarded-for': '144.201.99.41' } },
+            { ...testReq, connection: { remoteAddress: '144.201.99.41' } }
         ];
 
         it.each(requests, 'should retrieve the IP, hash and token for a request', req => {
