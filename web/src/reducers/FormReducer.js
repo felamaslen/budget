@@ -99,6 +99,8 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
     const newTotal = oldTotal + newRow.getIn(['cols', costKey]) -
         oldRow.getIn(['cols', costKey]);
 
+    newReduction = newReduction.setIn(['pages', pageIndex, 'rows', id], newRow);
+
     if (PAGES[pageIndex] === 'funds') {
         newReduction = recalculateFundProfits(newReduction, pageIndex);
     }
@@ -133,7 +135,6 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
 
     return newReduction
         .setIn(['edit', 'requestList'], newRequestList)
-        .setIn(['pages', pageIndex, 'rows', id], newRow)
         .setIn(['pages', pageIndex, 'data', 'total'], newTotal);
 }
 
