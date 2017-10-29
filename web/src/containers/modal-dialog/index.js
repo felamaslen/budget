@@ -56,13 +56,7 @@ export class ModalDialog extends PureComponent {
         );
 
         const onCancel = () => this.props.onCancel();
-        const onSubmit = () => {
-            this.props.onSubmit(this.props.pageIndex);
-
-            if (this.props.type !== 'add') {
-                this.props.deactivate();
-            }
-        }
+        const onSubmit = () => this.props.onSubmit(this.props.pageIndex);
 
         return <div className={className}>
             <div className={dialogClass}>
