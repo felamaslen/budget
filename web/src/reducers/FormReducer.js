@@ -4,10 +4,7 @@ import { rCalculateOverview } from './data/overview';
 import { dataEquals, getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES, PAGES } from '../misc/const';
 import {
-    getInvalidInsertDataKeys,
-    resortListRows,
-    recalculateFundProfits,
-    addToRequestQueue
+    stringifyFields, getInvalidInsertDataKeys, resortListRows, recalculateFundProfits, addToRequestQueue
 } from './EditReducer';
 
 export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
@@ -27,6 +24,8 @@ export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
         .set('type', 'edit')
         .set('id', id)
         .set('fields', fields)
+        .set('fieldsValidated', list.of())
+        .set('fieldsString', null)
         .set('invalidKeys', list.of());
 
     return reduction.set('modalDialog', modalDialog);
@@ -44,6 +43,8 @@ export function rOpenFormDialogAdd(reduction, { pageIndex }) {
         .set('type', 'add')
         .set('id', null)
         .set('fields', fields)
+        .set('fieldsValidated', list.of())
+        .set('fieldsString', null)
         .set('invalidKeys', list.of());
 
     return reduction.set('modalDialog', modalDialog);
@@ -59,6 +60,8 @@ function resetModalDialog(reduction, remove = false) {
             .set('active', false)
             .set('type', null)
             .set('fields', list.of())
+            .set('fieldsString', null)
+            .set('fieldsValidated', list.of())
             .set('invalidKeys', list.of())
         );
     }
@@ -165,7 +168,10 @@ export function rCloseFormDialog(reduction, req) {
     }
 
     if (type === 'add') {
-        return reduction.setIn(['modalDialog', 'loading'], true)
+        return reduction
+            .setIn(['modalDialog', 'loading'], true)
+            .setIn(['modalDialog', 'fieldsString'], stringifyFields(fields))
+            .setIn(['modalDialog', 'fieldsValidated'], fields);
     }
 
     if (type === 'edit') {

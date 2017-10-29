@@ -6,8 +6,6 @@ import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
 
 import { aSuggestionsReceived } from '../actions/EditActions';
 import { aMobileDialogClosed } from '../actions/FormActions';
-import { validateFields } from '../reducers/FormReducer';
-import { stringifyFields } from '../reducers/EditReducer';
 import { addServerDataRequest } from './app.saga';
 
 export function *requestEditSuggestions({ payload }) {
@@ -34,31 +32,24 @@ export function *requestEditSuggestions({ payload }) {
 }
 
 export function *handleModal({ payload }) {
-    // TODO: move some of this stuff to reducer
     const modalDialogType = yield select(state => state.getIn(['modalDialog', 'type']));
+    const invalidKeys = yield select(state => state.getIn(['modalDialog', 'invalidKeys']));
+    const modalDialogLoading = yield select(state => state.getIn(['modalDialog', 'loading']));
 
-    if (!payload || payload.deactivate || modalDialogType !== 'add') {
+    const noContinue = !(payload && modalDialogType === 'add' &&
+        invalidKeys.size === 0 && modalDialogLoading);
+
+    if (noContinue) {
         return;
     }
 
     const { pageIndex } = payload;
 
-    const rawFields = yield select(state => state.getIn(['modalDialog', 'fields']));
-
-    const { fields, invalidKeys } = validateFields(rawFields);
-
-    if (invalidKeys.size) {
-        return;
-    }
-
-    const item = stringifyFields(fields);
+    const item = yield select(state => state.getIn(['modalDialog', 'fieldsString']));
+    const fields = yield select(state => state.getIn(['modalDialog', 'fieldsValidated']));
 
     yield addServerDataRequest({ item, fields, pageIndex });
 
     yield put(aMobileDialogClosed(null));
-
-    // TODO: fire this from the container
-    // setTimeout(() => dispatch(aMobileDialogClosed({ deactivate: true })), 305);
 }
-
 

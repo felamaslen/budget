@@ -40,6 +40,8 @@ export function resetAppState(state) {
             row: null,
             id: null,
             fields: list.of(),
+            fieldsValidated: list.of(),
+            fieldsString: null,
             invalidKeys: list.of()
         }))
         .set('other', map({
