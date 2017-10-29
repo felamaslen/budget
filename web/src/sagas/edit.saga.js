@@ -4,8 +4,8 @@ import axios from 'axios';
 
 import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
 
-import { aSuggestionsReceived } from '../actions/EditActions';
-import { aMobileDialogClosed } from '../actions/FormActions';
+import { aSuggestionsReceived } from '../actions/edit.actions';
+import { aMobileDialogClosed } from '../actions/form.actions';
 import { addServerDataRequest } from './app.saga';
 
 export function *requestEditSuggestions({ payload }) {

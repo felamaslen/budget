@@ -10,7 +10,7 @@ import { PAGES } from '../../misc/const';
 import {
     aEditableActivated, aEditableChanged, aSuggestionsRequested,
     aFundTransactionsChanged, aFundTransactionsAdded, aFundTransactionsRemoved
-} from '../../actions/EditActions';
+} from '../../actions/edit.actions';
 
 import EditableDate from '../../components/editable/date';
 import EditableCost from '../../components/editable/cost';

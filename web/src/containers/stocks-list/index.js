@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import GraphStocks from './stocks-graph';
-import { aStocksListRequested, aStocksPricesRequested } from '../../actions/StocksListActions';
+import { aStocksListRequested, aStocksPricesRequested } from '../../actions/stocks-list.actions';
 import { sigFigs } from '../../misc/format';
 import { STOCK_PRICES_DELAY } from '../../misc/config';
 

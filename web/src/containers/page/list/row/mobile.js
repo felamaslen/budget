@@ -2,7 +2,7 @@ import listRowContainer, { ListRow } from '../row';
 
 import { LIST_COLS_MOBILE } from '../../../../misc/const';
 
-import { aMobileEditDialogOpened } from '../../../../actions/FormActions';
+import { aMobileEditDialogOpened } from '../../../../actions/form.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

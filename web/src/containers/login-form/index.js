@@ -4,8 +4,8 @@
 
 import { connect } from 'react-redux';
 
-import { aKeyPressed } from '../../actions/AppActions';
-import { aLoginFormInputted, aLoginFormSubmitted } from '../../actions/LoginActions';
+import { aKeyPressed } from '../../actions/app.actions';
+import { aLoginFormInputted, aLoginFormSubmitted } from '../../actions/login.actions';
 import { LOGIN_INPUT_LENGTH } from '../../misc/const';
 
 import React from 'react';

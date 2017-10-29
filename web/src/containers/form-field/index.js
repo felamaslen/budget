@@ -11,7 +11,7 @@ import FormFieldDate from '../../components/form-field/date';
 import FormFieldCost from '../../components/form-field/cost';
 import FormFieldTransactions from '../../components/form-field/transactions';
 
-import { aFormFieldChanged } from '../../actions/FormActions';
+import { aFormFieldChanged } from '../../actions/form.actions';
 
 function getFormFieldComponent(item) {
     if (item === 'date') {

@@ -5,12 +5,12 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aKeyPressed } from '../../../actions/AppActions';
-import { aContentRequested, aContentBlockHovered } from '../../../actions/ContentActions';
+import { aKeyPressed } from '../../../actions/app.actions';
+import { aContentRequested, aContentBlockHovered } from '../../../actions/content.actions';
 import {
     aOptionChanged, aBlockClicked,
     aTreeItemDisplayToggled, aTreeItemExpandToggled, aTreeItemHovered
-} from '../../../actions/AnalysisActions';
+} from '../../../actions/analysis.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

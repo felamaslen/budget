@@ -5,7 +5,7 @@
 import { Map as map } from 'immutable';
 import connect, { PageList } from '../list';
 
-import { aContentRequested } from '../../../actions/ContentActions';
+import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

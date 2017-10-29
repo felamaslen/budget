@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { aListItemAdded } from '../../../actions/EditActions';
+import { aListItemAdded } from '../../../actions/edit.actions';
 
 import React from 'react';
 import PureComponent from '../../../immutable-component';

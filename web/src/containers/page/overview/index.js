@@ -5,8 +5,8 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aKeyPressed } from '../../../actions/AppActions';
-import { aContentRequested } from '../../../actions/ContentActions';
+import { aKeyPressed } from '../../../actions/app.actions';
+import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

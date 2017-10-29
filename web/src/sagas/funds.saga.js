@@ -6,8 +6,8 @@ import querystring from 'querystring';
 import { API_PREFIX } from '../misc/const';
 import { getPeriodMatch } from '../misc/data';
 
-import { aFundsGraphPeriodReceived } from '../actions/GraphActions';
-import { aStocksListReceived, aStocksPricesReceived } from '../actions/StocksListActions';
+import { aFundsGraphPeriodReceived } from '../actions/graph.actions';
+import { aStocksListReceived, aStocksPricesReceived } from '../actions/stocks-list.actions';
 import { getStockPricesFromYahoo } from '../misc/finance';
 
 import { openTimedMessage } from './error.saga';

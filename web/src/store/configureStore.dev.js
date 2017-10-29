@@ -11,7 +11,8 @@ import rootReducer from '../reducers';
 const sagaMiddleware = createSagaMiddleware();
 
 const SKIP_LOG_ACTIONS = [
-    actions.TIME_UPDATED
+    actions.TIME_UPDATED,
+    actions.KEY_PRESSED
 ];
 
 const logger = createLogger({

@@ -2,7 +2,7 @@ import bodyContainer, { Body } from '.';
 
 import { LIST_COLS_PAGES, LIST_COLS_MOBILE } from '../../../../misc/const';
 
-import { aMobileAddDialogOpened } from '../../../../actions/FormActions';
+import { aMobileAddDialogOpened } from '../../../../actions/form.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

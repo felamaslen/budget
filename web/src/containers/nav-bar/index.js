@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { aUserLoggedOut, aPageNavigatedTo } from '../../actions/AppActions';
+import { aUserLoggedOut, aPageNavigatedTo } from '../../actions/app.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

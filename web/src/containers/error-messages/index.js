@@ -13,7 +13,7 @@ import {
     ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR, ERROR_CLOSE_TIME
 } from '../../misc/const';
 import { ERROR_MESSAGE_DELAY } from '../../misc/config';
-import { aErrorClosed, aErrorRemoved } from '../../actions/ErrorActions';
+import { aErrorClosed, aErrorRemoved } from '../../actions/error.actions';
 
 class ErrorMessages extends PureComponent {
     componentDidUpdate(prevProps) {

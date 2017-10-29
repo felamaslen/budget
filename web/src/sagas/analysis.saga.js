@@ -4,7 +4,7 @@ import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
 
 import { makeContentRequest } from './content.saga';
 import { openTimedMessage } from './error.saga';
-import { aAnalysisDataRefreshed } from '../actions/AnalysisActions';
+import { aAnalysisDataRefreshed } from '../actions/analysis.actions';
 
 export function *requestAnalysisData({ payload }) {
     const stateProps = yield select(state => ({

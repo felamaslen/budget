@@ -5,7 +5,7 @@
 import { List as list } from 'immutable';
 import connect, { GraphCashFlow } from './cash-flow';
 
-import { aShowAllToggled } from '../../../../actions/GraphActions';
+import { aShowAllToggled } from '../../../../actions/graph.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

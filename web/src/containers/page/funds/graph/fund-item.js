@@ -16,7 +16,7 @@ import {
 import {
     COLOR_LOSS, COLOR_PROFIT, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../../../misc/config';
-import { aFundItemGraphToggled } from '../../../../actions/GraphActions';
+import { aFundItemGraphToggled } from '../../../../actions/graph.actions';
 
 export class GraphFundItem extends LineGraph {
     constructor(props) {

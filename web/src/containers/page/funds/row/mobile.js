@@ -1,6 +1,6 @@
 import connect, { ListRowMobile } from '../../list/row/mobile';
 
-import { aMobileEditDialogOpened } from '../../../../actions/FormActions';
+import { aMobileEditDialogOpened } from '../../../../actions/form.actions';
 
 import React from 'react';
 

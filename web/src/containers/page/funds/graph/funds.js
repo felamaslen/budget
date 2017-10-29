@@ -27,7 +27,7 @@ import LineGraph from '../../../../components/graph/line';
 import {
     aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
     aFundsGraphLineToggled, aFundsGraphPeriodChanged
-} from '../../../../actions/GraphActions';
+} from '../../../../actions/graph.actions';
 
 export class GraphFunds extends LineGraph {
     constructor(props) {

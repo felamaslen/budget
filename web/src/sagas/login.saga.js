@@ -3,7 +3,7 @@ import { put, call } from 'redux-saga/effects';
 
 import { API_PREFIX } from '../misc/const';
 
-import { aLoginFormResponseReceived } from '../actions/LoginActions';
+import { aLoginFormResponseReceived } from '../actions/login.actions';
 import { openTimedMessage } from './error.saga';
 
 export function getLoginCredentials() {

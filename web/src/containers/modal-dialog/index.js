@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { List as list } from 'immutable';
 import classNames from 'classnames';
 
-import { aMobileDialogClosed } from '../../actions/FormActions';
+import { aMobileDialogClosed } from '../../actions/form.actions';
 
 import ModalDialogField from '../../components/form-field/modal-dialog-field';
 

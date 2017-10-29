@@ -1,7 +1,7 @@
 import { Map as map } from 'immutable';
 import extendableContainer from '../../../container-extender';
 
-import { aListItemDeleted } from '../../../../actions/EditActions';
+import { aListItemDeleted } from '../../../../actions/edit.actions';
 
 import React from 'react';
 import PureComponent from '../../../../immutable-component';

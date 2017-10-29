@@ -5,7 +5,7 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aServerUpdated, aTimeUpdated } from '../../actions/AppActions';
+import { aServerUpdated, aTimeUpdated } from '../../actions/app.actions';
 
 import debounce from '../../misc/debounce';
 import { TIMER_UPDATE_SERVER } from '../../misc/config';

@@ -4,7 +4,7 @@
 
 import { connect } from 'react-redux';
 
-import { aContentRequested } from '../../actions/ContentActions';
+import { aContentRequested } from '../../actions/content.actions';
 
 import React from 'react';
 import { Route } from 'react-router-dom';

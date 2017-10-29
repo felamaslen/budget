@@ -5,7 +5,7 @@ import { select, put } from 'redux-saga/effects';
 import { PAGES, API_PREFIX } from '../misc/const';
 
 import { openTimedMessage } from './error.saga';
-import { aContentLoaded } from '../actions/ContentActions';
+import { aContentLoaded } from '../actions/content.actions';
 
 export function makeContentRequest(apiKey, { pageIndex, params, query }) {
     const path = ['data', PAGES[pageIndex]].concat(params || []);

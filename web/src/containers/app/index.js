@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { Router, Route } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 
-import { aSettingsLoaded } from '../../actions/AppActions';
+import { aSettingsLoaded } from '../../actions/app.actions';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';

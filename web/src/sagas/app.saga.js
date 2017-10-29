@@ -3,8 +3,8 @@ import axios from 'axios';
 
 import { API_PREFIX, PAGES } from '../misc/const';
 
-import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/LoginActions';
-import { aServerUpdateReceived, aServerAddReceived } from '../actions/AppActions';
+import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/login.actions';
+import { aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 import { openTimedMessage } from './error.saga';
 import { getLoginCredentials } from './login.saga';
 

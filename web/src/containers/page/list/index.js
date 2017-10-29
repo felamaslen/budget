@@ -4,8 +4,8 @@
 
 import extendableContainer from '../../container-extender';
 
-import { aKeyPressed } from '../../../actions/AppActions';
-import { aContentRequested } from '../../../actions/ContentActions';
+import { aKeyPressed } from '../../../actions/app.actions';
+import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';

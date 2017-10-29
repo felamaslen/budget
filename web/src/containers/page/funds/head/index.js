@@ -1,7 +1,7 @@
 import { Map as map } from 'immutable';
 import connect, { Head } from '../../list/head';
 
-import { aFundsGraphPeriodChanged } from '../../../../actions/GraphActions';
+import { aFundsGraphPeriodChanged } from '../../../../actions/graph.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';
