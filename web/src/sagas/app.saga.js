@@ -1,14 +1,10 @@
-import { Map as map } from 'immutable';
 import { select, put } from 'redux-saga/effects';
 import axios from 'axios';
 
-import { API_PREFIX, ERROR_LEVEL_WARN, LIST_COLS_PAGES, PAGES } from '../misc/const';
-import { ERROR_MSG_BAD_DATA } from '../misc/config';
+import { API_PREFIX, PAGES } from '../misc/const';
 
 import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/LoginActions';
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/AppActions';
-import { aListItemAdded } from '../actions/EditActions';
-import { stringifyFields, getInvalidInsertDataKeys } from '../reducers/EditReducer';
 import { openTimedMessage } from './error.saga';
 import { getLoginCredentials } from './login.saga';
 
@@ -52,13 +48,6 @@ export function *updateServerData() {
 }
 
 export function *addServerDataRequest({ item, fields, pageIndex }) {
-    const loadingApi = yield select(state => state.get('loadingApi'));
-    if (loadingApi) {
-        yield openTimedMessage('Wait until the previous request has finished', ERROR_LEVEL_WARN);
-
-        return 1;
-    }
-
     const apiKey = yield select(state => state.getIn(['user', 'apiKey']));
 
     try {
@@ -80,52 +69,16 @@ export function *addServerDataRequest({ item, fields, pageIndex }) {
 }
 
 export function *addServerData({ payload }) {
-    // TODO: refactor this so most of it is in the reducer
-    const { pageIndex, sending } = payload;
+    const { pageIndex } = payload;
 
-    if (sending) {
+    // data is validated by reducer
+    const fields = yield select(state => state.getIn(['edit', 'addFields']));
+    const item = yield select(state => state.getIn(['edit', 'addFieldsString']));
+
+    if (!(fields && item)) {
         return;
     }
-
-    // validate items
-    const active = yield select(state => state.getIn(['edit', 'active']));
-    let activeItem = null;
-    let activeValue = null;
-    if (active && active.get('row') === -1) {
-        activeItem = active.get('item');
-        activeValue = active.get('value');
-    }
-
-    const items = yield select(state => state
-        .getIn(['edit', 'add', pageIndex])
-        .map((value, key) => ({
-            item: LIST_COLS_PAGES[pageIndex][key],
-            value
-        }))
-    );
-
-    const fields = items.map(({ item, value }) => map({
-        item,
-        value: item === activeItem
-            ? activeValue
-            : value
-    }));
-
-    const invalidKeys = getInvalidInsertDataKeys(fields);
-    const valid = invalidKeys.size === 0;
-
-    if (!valid) {
-        yield openTimedMessage(ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN);
-
-        return;
-    }
-
-    // data is validated
-    const item = stringifyFields(fields);
 
     yield addServerDataRequest({ pageIndex, item, fields });
-
-    yield put(aListItemAdded({ pageIndex, sending: true }));
 }
-
 

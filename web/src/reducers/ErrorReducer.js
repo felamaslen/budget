@@ -2,10 +2,12 @@
  * Carries out actions for the error messages component
  */
 
+import { uuid } from '../misc/data';
+
 export function rErrorMessageOpen(reduction, message) {
     return reduction.set('errorMsg', reduction
         .get('errorMsg')
-        .push(message)
+        .push(message.set('id', uuid()))
     );
 }
 export function rErrorMessageClose(reduction, msgId) {

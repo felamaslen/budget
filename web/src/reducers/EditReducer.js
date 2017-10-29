@@ -9,7 +9,7 @@ import { getExtraRowProps as reloadFundsRows } from './data/funds';
 import {
     PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN
 } from '../misc/const';
-import { ERROR_MSG_BUG_INVALID_ITEM } from '../misc/config';
+import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA } from '../misc/config';
 import { YMD } from '../misc/date';
 import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
@@ -345,26 +345,69 @@ export function stringifyFields(fields) {
         }, {});
 }
 
-export function rAddListItem(reduction, { pageIndex, sending }) {
-    if (sending) {
-        const now = new YMD();
-
-        return rActivateEditable(reduction, { pageIndex })
-            .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex))
-            .setIn(['edit', 'active'], map({
-                row: -1,
-                col: 0,
-                pageIndex,
-                id: null,
-                item: 'date',
-                value: now,
-                originalValue: now
-            }))
-            .setIn(['edit', 'addBtnFocus'], false)
-            .set('loadingApi', true);
+export function rAddListItem(reduction, { pageIndex }) {
+    if (reduction.get('loadingApi')) {
+        return rErrorMessageOpen(reduction, map({
+            level: ERROR_LEVEL_WARN,
+            text: 'Wait until the previous request has finished'
+        }));
     }
 
-    return reduction;
+    const now = new YMD();
+
+    // validate items
+    const active = reduction.getIn(['edit', 'active']);
+    let activeItem = null;
+    let activeValue = null;
+    if (active && active.get('row') === -1) {
+        activeItem = active.get('item');
+        activeValue = active.get('value');
+    }
+
+    const items = reduction
+        .getIn(['edit', 'add', pageIndex])
+        .map((value, key) => ({
+            item: LIST_COLS_PAGES[pageIndex][key],
+            value
+        }));
+
+    const fields = items.map(({ item, value }) => map({
+        item,
+        value: item === activeItem
+            ? activeValue
+            : value
+    }));
+
+    const invalidKeys = getInvalidInsertDataKeys(fields);
+    const valid = invalidKeys.size === 0;
+
+    if (!valid) {
+        return rErrorMessageOpen(reduction, map({
+            level: ERROR_LEVEL_WARN,
+            text: ERROR_MSG_BAD_DATA
+        }))
+            .setIn(['edit', 'addFields'], null)
+            .setIn(['edit', 'addFieldsString'], null)
+            .set('loadingApi', false);
+    }
+
+    const fieldsString = stringifyFields(fields);
+
+    return rActivateEditable(reduction, { pageIndex })
+        .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex))
+        .setIn(['edit', 'addFields'], fields)
+        .setIn(['edit', 'addFieldsString'], fieldsString)
+        .setIn(['edit', 'active'], map({
+            row: -1,
+            col: 0,
+            pageIndex,
+            id: null,
+            item: 'date',
+            value: now,
+            originalValue: now
+        }))
+        .setIn(['edit', 'addBtnFocus'], false)
+        .set('loadingApi', true);
 }
 
 export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
