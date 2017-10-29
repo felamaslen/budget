@@ -481,7 +481,7 @@ button {
             flex-basis: initial;
             flex-wrap: nowrap;
         }
-        .transactions {
+        li > span.transactions {
             flex-basis: 102px;
             overflow: visible;
             .modal {
