@@ -106,6 +106,7 @@ function setupWebApp(app) {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
         res.render('index', {
             version,
+            development: process.env.NODE_ENV === 'development',
             pieTolerance
         });
     });

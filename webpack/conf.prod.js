@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const webpackConfig = require('./conf.common');
 const moduleConfigProd = require('./module.prod');
@@ -34,6 +35,9 @@ module.exports = {
             cssProcessorOptions: {
                 discardComments: { removeAll: true }
             }
+        }),
+        new ExtractTextPlugin('css/style.css', {
+            allChunks: true
         })
     ],
     module: moduleConfigProd,
