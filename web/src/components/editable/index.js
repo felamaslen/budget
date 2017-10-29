@@ -2,7 +2,7 @@
  * Editable form element component
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import PureComponent from '../../immutable-component';
 import classNames from 'classnames';
