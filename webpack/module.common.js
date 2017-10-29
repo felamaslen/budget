@@ -1,5 +1,3 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
 const jsonToSassVars = require('./jsonToSassVars');
 
 const sassVariablesObj = require('../web/src/constants/styles');
@@ -7,9 +5,7 @@ const sassVariables = encodeURIComponent(jsonToSassVars(
     sassVariablesObj
 ));
 
-const sassLoader = ExtractTextPlugin.extract(
-    `css-loader!sass-loader!prepend-loader?data=${sassVariables}`
-);
+const sassLoader = `css-loader!sass-loader!prepend-loader?data=${sassVariables}`;
 
 const babelOptions = JSON.stringify({
     presets: ['react', 'env']
@@ -21,7 +17,7 @@ module.exports = {
         {
             test: /\.jsx?$/,
             exclude: /node_modules/,
-            loaders: [babelLoader]
+            loader: babelLoader
         },
         {
             test: /favicon\.png/,
@@ -48,7 +44,7 @@ module.exports = {
         {
             test: /\.scss$/,
             exclude: /node_modules/,
-            loaders: sassLoader
+            loader: sassLoader
         }
     ]
 };
