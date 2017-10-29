@@ -68,4 +68,4 @@ cli/env
 *.pyc
 
 web/build
-api/test/data/*test*.html
+api/test/data
