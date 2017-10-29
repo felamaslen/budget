@@ -4,8 +4,10 @@
 
 import { List as list, Map as map } from 'immutable';
 
-import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './data/overview';
-import { getExtraRowProps as reloadFundsRows } from './data/funds';
+import { rGetOverviewRows, rCalculateOverview, rProcessDataOverview } from './overview.reducer';
+import { getExtraRowProps as reloadFundsRows } from './funds.reducer';
+import { rErrorMessageOpen } from './error.reducer';
+
 import {
     PAGES, LIST_PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN
 } from '../misc/const';
@@ -15,7 +17,6 @@ import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages,
     getValueForTransmit
 } from '../misc/data';
-import { rErrorMessageOpen } from './ErrorReducer';
 
 export function recalculateFundProfits(reduction, pageIndex) {
     const rows = reduction.getIn(['pages', pageIndex, 'rows']);

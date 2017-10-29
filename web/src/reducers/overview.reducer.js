@@ -2,16 +2,15 @@
  * Process overview data
  */
 
+import { List as list, Map as map, fromJS } from 'immutable';
+
 import {
     PAGES, AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS
-} from '../../misc/const';
-import { FUTURE_INVESTMENT_RATE } from '../../misc/config';
-import { yearMonthDifference } from '../../misc/date';
-import {
-    getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm
-} from '../../misc/data';
-import { getOverviewCategoryColor, getOverviewScoreColor } from '../../misc/color';
-import { List as list, Map as map, fromJS } from 'immutable';
+} from '../misc/const';
+import { FUTURE_INVESTMENT_RATE } from '../misc/config';
+import { yearMonthDifference } from '../misc/date';
+import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../misc/data';
+import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
 
 /**
  * Calculate futures from past averages / predictions

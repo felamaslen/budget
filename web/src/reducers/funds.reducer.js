@@ -5,13 +5,13 @@
 import { List as list, Map as map } from 'immutable';
 import {
     COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
-} from '../../misc/config';
+} from '../misc/config';
 import {
     LIST_COLS_PAGES,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
-} from '../../misc/const';
-import { colorKey } from '../../misc/color';
-import { formatAge } from '../../misc/format';
+} from '../misc/const';
+import { colorKey } from '../misc/color';
+import { formatAge } from '../misc/format';
 
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = (now.getTime() / 1000) - cacheTimes.last() - startTime;

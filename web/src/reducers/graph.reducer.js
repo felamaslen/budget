@@ -9,8 +9,8 @@ import {
     zoomFundLines,
     getExtraRowProps,
     getFundsCachedValue
-} from './data/funds';
-import { processRawListRows } from './data/list';
+} from './funds.reducer';
+import { processRawListRows } from './list.reducer';
 
 import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import { sortRowsByDate } from '../misc/data';

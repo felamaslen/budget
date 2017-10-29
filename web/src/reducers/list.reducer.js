@@ -3,14 +3,12 @@
  */
 
 import { fromJS, List as list, Map as map } from 'immutable';
-import {
-    LIST_COLS_SHORT, LIST_COLS_STANDARD, LIST_COLS_PAGES
-} from '../../misc/const';
-import { YMD } from '../../misc/date';
-import { TransactionsList, sortRowsByDate } from '../../misc/data';
-import {
-    getFormattedHistory, getFundsCachedValue, getExtraRowProps
-} from './funds';
+
+import { getFormattedHistory, getFundsCachedValue, getExtraRowProps } from './funds.reducer';
+
+import { LIST_COLS_SHORT, LIST_COLS_STANDARD, LIST_COLS_PAGES } from '../misc/const';
+import { YMD } from '../misc/date';
+import { TransactionsList, sortRowsByDate } from '../misc/data';
 
 export function processRawListRows(data, pageIndex) {
     return map(data.map(item => {

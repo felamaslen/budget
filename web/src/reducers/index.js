@@ -7,15 +7,15 @@ import { createReducer } from 'redux-create-reducer';
 
 import * as AC from '../constants/actions';
 
-import * as error from './ErrorReducer';
-import * as login from './LoginFormReducer';
-import * as app from './AppReducer';
-import * as content from './ContentReducer';
-import * as analysis from './data/analysis';
-import * as edit from './EditReducer';
-import * as form from './FormReducer';
-import * as graph from './GraphReducer';
-import * as stocksList from './StocksListReducer';
+import * as error from './error.reducer';
+import * as login from './login-form.reducer';
+import * as app from './app.reducer';
+import * as content from './content.reducer';
+import * as analysis from './analysis.reducer';
+import * as edit from './edit.reducer';
+import * as form from './form.reducer';
+import * as graph from './graph.reducer';
+import * as stocksList from './stocks-list.reducer';
 
 import initialState from '../reduction';
 

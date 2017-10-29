@@ -11,9 +11,9 @@ import {
 } from '../misc/data';
 import { capitalise, formatCurrency } from '../misc/format';
 
-import processPageDataOverview from './data/overview';
-import { processPageDataList, processPageDataFunds } from './data/list';
-import { processPageDataAnalysis } from './data/analysis';
+import processPageDataOverview from './overview.reducer';
+import { processPageDataList, processPageDataFunds } from './list.reducer';
+import { processPageDataAnalysis } from './analysis.reducer';
 
 export function getAnalysisReq(reduction, req) {
     const shortPeriod = ANALYSIS_PERIODS[reduction.getIn(

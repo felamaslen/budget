@@ -1,11 +1,12 @@
 import { Map as map, List as list } from 'immutable';
 
-import { rCalculateOverview } from './data/overview';
-import { dataEquals, getAddDefaultValues } from '../misc/data';
-import { LIST_COLS_PAGES, PAGES } from '../misc/const';
+import { rCalculateOverview } from './overview.reducer';
 import {
     stringifyFields, getInvalidInsertDataKeys, resortListRows, recalculateFundProfits, addToRequestQueue
-} from './EditReducer';
+} from './edit.reducer';
+
+import { dataEquals, getAddDefaultValues } from '../misc/data';
+import { LIST_COLS_PAGES, PAGES } from '../misc/const';
 
 export function rOpenFormDialogEdit(reduction, { pageIndex, id }) {
     const rowItem = reduction.getIn(['pages', pageIndex, 'rows', id]);

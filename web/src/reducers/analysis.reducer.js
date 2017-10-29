@@ -5,8 +5,8 @@
 import { fromJS, Map as map } from 'immutable';
 import {
     PAGES, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
-} from '../../misc/const';
-import { BlockPacker } from '../../misc/format';
+} from '../misc/const';
+import { BlockPacker } from '../misc/format';
 
 const pageIndexAnalysis = PAGES.indexOf('analysis');
 
