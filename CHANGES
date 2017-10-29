@@ -1,5 +1,11 @@
 Release:
 
+- 3.2.0-beta
+    - Web client:
+        - Use redux-saga for side effects
+        - Hot module replacement
+        - Refactor reducer and action filenames
+
 - 3.1.8-beta
     - Web client:
         - Better handling of tension in Hermite spline graphs
