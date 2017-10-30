@@ -13,5 +13,5 @@ import {
 export const aLoginFormInputted = input => buildMessage(LOGIN_FORM_INPUTTED, input);
 export const aLoginFormReset = index => buildMessage(LOGIN_FORM_RESET, index);
 export const aLoginFormSubmitted = pin => buildMessage(LOGIN_FORM_SUBMITTED, pin);
-export const aLoginFormResponseReceived = response => buildMessage(LOGIN_FORM_RESPONSE_GOT, response);
+export const aLoginFormResponseReceived = res => buildMessage(LOGIN_FORM_RESPONSE_GOT, res);
 
