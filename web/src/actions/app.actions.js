@@ -21,5 +21,5 @@ export const aKeyPressed = key => buildMessage(KEY_PRESSED, key);
 export const aTimeUpdated = () => buildMessage(TIME_UPDATED);
 export const aServerUpdated = () => buildMessage(SERVER_UPDATED);
 export const aServerUpdateReceived = res => buildMessage(SERVER_UPDATE_RECEIVED, res);
-export const aServerAddReceived = response => buildMessage(SERVER_ADD_RECEIVED, response);
+export const aServerAddReceived = res => buildMessage(SERVER_ADD_RECEIVED, res);
 
