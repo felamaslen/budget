@@ -2,7 +2,7 @@
 import { Map as map, List as list } from 'immutable';
 import { expect } from 'chai';
 
-import * as rList from '../../../src/reducers/data/list';
+import * as rList from '../../src/reducers/list.reducer';
 
 describe('list', () => {
     describe('processPageDataFunds', () => {

@@ -2,9 +2,9 @@ import 'babel-polyfill';
 import { Map as map } from 'immutable';
 import { expect } from 'chai';
 
-import * as R from '../../src/reducers/AppReducer';
+import * as R from '../../src/reducers/app.reducer';
 
-describe('AppReducer', () => {
+describe('app.reducer', () => {
     describe('getNavRow', () => {
         it('should get the correct row');
     });

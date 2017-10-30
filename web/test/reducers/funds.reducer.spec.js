@@ -5,10 +5,10 @@ import chai from 'chai';
 const expect = chai.expect;
 
 import { testRows, testLines, testStartTime, testCacheTimes }
-    from '../../test_data/testFunds';
+    from '../test_data/testFunds';
 
-import * as rFunds from '../../../src/reducers/data/funds';
-import { GRAPH_FUNDS_MODE_ROI } from '../../../src/misc/const';
+import * as rFunds from '../../src/reducers/funds.reducer';
+import { GRAPH_FUNDS_MODE_ROI } from '../../src/misc/const';
 
 const pageIndex = 2;
 

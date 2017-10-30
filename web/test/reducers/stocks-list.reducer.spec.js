@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { List as list } from 'immutable';
 
-import { limitTimeSeriesLength } from '../../src/reducers/StocksListReducer';
+import { limitTimeSeriesLength } from '../../src/reducers/stocks-list.reducer';
 
 describe('StocksListReducer', () => {
     describe('limitTimeSeriesLength', () => {
