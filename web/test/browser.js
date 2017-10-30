@@ -1,5 +1,3 @@
-require('babel-core/register')();
-
 const { JSDOM } = require('jsdom');
 
 const exposedProperties = ['window', 'navigator', 'document'];
@@ -18,6 +16,4 @@ global.navigator = {
 };
 
 global.HTMLElement = global.window.HTMLElement;
-
-documentRef = document; // eslint-disable-line no-undef
 
