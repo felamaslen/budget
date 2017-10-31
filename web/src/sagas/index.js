@@ -12,7 +12,7 @@ import { requestFundPeriodData, requestStocksList, requestStocksPrices } from '.
 export const selectApiKey = state => state.getIn(['user', 'apiKey'])
 
 export function *watchSettingsLoaded() {
-    yield takeLatest(actions.SETTINGS_LOADED, loadSettings);
+    yield takeLatest(actions.SETTINGS_LOADED, loadSettings)
 }
 export function *watchAuthentication() {
     yield all([

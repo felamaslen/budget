@@ -19,6 +19,10 @@ export function getLoginCredentials() {
 }
 
 export function saveLoginCredentials(pin = null) {
+    if (!(localStorage && localStorage.setItem && localStorage.removeItem)) {
+        return
+    }
+
     if (pin) {
         localStorage.setItem('pin', pin);
     }
@@ -31,11 +35,11 @@ export function *submitLoginForm({ payload }, saveDetails = true) {
     const pin = +payload;
 
     try {
-        const response = yield axios.post(`${API_PREFIX}/user/login`, { pin });
+        const response = yield call(axios.post, `${API_PREFIX}/user/login`, { pin });
 
         // logged in
         if (saveDetails) {
-            saveLoginCredentials(pin);
+            yield call(saveLoginCredentials, pin);
         }
 
         yield put(aLoginFormResponseReceived(response));
@@ -44,7 +48,7 @@ export function *submitLoginForm({ payload }, saveDetails = true) {
         if (err.response) {
             const message = `Login error: ${err.response.data.errorMessage}`;
 
-            yield openTimedMessage(message);
+            yield call(openTimedMessage, message);
         }
         else {
             console.error(err.stack);
