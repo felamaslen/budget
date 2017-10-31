@@ -1,4 +1,4 @@
-import { select, put } from 'redux-saga/effects';
+import { select, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { API_PREFIX, PAGES } from '../misc/const';
@@ -15,7 +15,7 @@ export function *loadSettings() {
         return;
     }
 
-    const pin = getLoginCredentials();
+    const pin = yield call(getLoginCredentials)
 
     if (pin) {
         yield put(aLoginFormSubmitted(pin));
