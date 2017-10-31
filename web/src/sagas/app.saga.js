@@ -24,18 +24,17 @@ export function *loadSettings() {
 export const selectRequestList = state => state.getIn(['edit', 'requestList'])
     .map(item => item.get('req'))
 
-export const makePatchRequest = (requestList, apiKey) => axios.patch(
-    `${API_PREFIX}/data/multiple`,
-    { list: requestList },
-    { headers: { 'Authorization': apiKey } }
-)
-
 export function *updateServerData() {
     const apiKey = yield select(selectApiKey)
     const requestList = yield select(selectRequestList)
 
     try {
-        const response = yield call(makePatchRequest, requestList, apiKey)
+        const response = yield call(
+            axios.patch,
+            `${API_PREFIX}/data/multiple`,
+            { list: requestList },
+            { headers: { 'Authorization': apiKey } }
+        )
 
         yield put(aServerUpdateReceived(response));
     }
@@ -46,17 +45,16 @@ export function *updateServerData() {
     }
 }
 
-export const makePostRequest = (item, pageIndex, apiKey) => axios.post(
-    `${API_PREFIX}/data/${PAGES[pageIndex]}`,
-    item,
-    { headers: { 'Authorization': apiKey } }
-)
-
 export function *addServerDataRequest({ item, fields, pageIndex }) {
     const apiKey = yield select(selectApiKey)
 
     try {
-        const response = yield call(makePostRequest, item, pageIndex, apiKey)
+        const response = yield call(
+            axios.post,
+            `${API_PREFIX}/data/${PAGES[pageIndex]}`,
+            item,
+            { headers: { 'Authorization': apiKey } }
+        )
 
         yield put(aServerAddReceived({ response, fields, pageIndex }));
 

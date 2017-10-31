@@ -4,6 +4,7 @@ import '../browser'
 import { fromJS } from 'immutable'
 import { expect } from 'chai'
 import { select, call, put } from 'redux-saga/effects'
+import axios from 'axios'
 
 import * as S from '../../src/sagas/app.saga'
 import { selectApiKey } from '../../src/sagas'
@@ -64,7 +65,11 @@ describe('app.saga', () => {
             next = iter.next([{ req1: 'foo' }])
         })
         it('should call the API with a patch request', () => {
-            expect(next.value).to.deep.equal(call(S.makePatchRequest, [{ req1: 'foo' }], 'some_api_key'))
+            expect(next.value).to.deep.equal(call(axios.patch, 'api/v3/data/multiple', {
+                list: [{ req1: 'foo' }]
+            }, {
+                headers: { 'Authorization': 'some_api_key' }
+            }))
         })
 
         describe('if the response is successful', () => {
@@ -98,7 +103,9 @@ describe('app.saga', () => {
             next = iter.next('some_api_key')
         })
         it('should call makePostRequest with the parameters', () => {
-            expect(next.value).to.deep.equal(call(S.makePostRequest, 'foo', 3, 'some_api_key'))
+            expect(next.value).to.deep.equal(call(axios.post, 'api/v3/data/income', 'foo', {
+                headers: { 'Authorization': 'some_api_key' }
+            }))
         })
 
         describe('if the response is successful', () => {
