@@ -40,7 +40,7 @@ export function *requestAnalysisData({ payload }) {
         yield put(aAnalysisDataRefreshed({ pageIndex, response, name }));
     }
     catch (err) {
-        yield openTimedMessage(`Error loading analysis data: ${err.message}`);
+        yield call(openTimedMessage, `Error loading analysis data: ${err.message}`)
     }
 }
 

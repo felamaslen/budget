@@ -9,7 +9,7 @@ import * as A from '../../src/actions/analysis.actions'
 import { aErrorOpened } from '../../src/actions/error.actions'
 import { selectApiKey } from '../../src/sagas'
 import { makeContentRequest } from '../../src/sagas/content.saga'
-import { ERROR_LEVEL_ERROR } from '../../src/misc/const'
+import { openTimedMessage } from '../../src/sagas/error.saga'
 
 describe('analysis.saga', () => {
     describe('selectStateProps', () => {
@@ -78,11 +78,8 @@ describe('analysis.saga', () => {
             iter.next()
 
             it('should pop up an error message', () => {
-                expect(iter.throw({ message: 'foo error' }).value._invoke().value)
-                    .to.deep.equal(put(aErrorOpened(map({
-                        text: 'Error loading analysis data: foo error',
-                        level: ERROR_LEVEL_ERROR
-                    }))))
+                expect(iter.throw({ message: 'foo error' }).value)
+                    .to.deep.equal(call(openTimedMessage, 'Error loading analysis data: foo error'))
             })
         })
     })
