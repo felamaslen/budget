@@ -1,9 +1,10 @@
 import axios from 'axios';
 import querystring from 'querystring';
-import { select, put } from 'redux-saga/effects';
+import { select, call, put } from 'redux-saga/effects';
 
 import { PAGES, API_PREFIX } from '../misc/const';
 
+import { selectApiKey } from '.'
 import { openTimedMessage } from './error.saga';
 import { aContentLoaded } from '../actions/content.actions';
 
@@ -18,13 +19,13 @@ export function makeContentRequest(apiKey, { pageIndex, params, query }) {
         `?${querystring.stringify(queryObj)}`
     ].join('/');
 
-    return axios.get(url, { headers: { 'Authorization': apiKey } });
+    return call(axios.get, url, { headers: { 'Authorization': apiKey } });
 }
 
 export function *requestContent({ payload }) {
     const { pageIndex, params, query } = payload;
 
-    const apiKey = yield select(state => state.getIn(['user', 'apiKey']));
+    const apiKey = yield select(selectApiKey)
 
     try {
         const response = yield makeContentRequest(apiKey, { pageIndex, params, query });
@@ -33,10 +34,7 @@ export function *requestContent({ payload }) {
     }
     catch (err) {
         if (err.response) {
-            yield openTimedMessage('An error occurred loading content');
-        }
-        else {
-            console.error(err.stack);
+            yield call(openTimedMessage, 'An error occurred loading content')
         }
 
         yield put(aContentLoaded({ pageIndex, response: null }));
