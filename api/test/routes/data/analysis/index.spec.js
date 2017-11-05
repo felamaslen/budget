@@ -39,6 +39,7 @@ describe('/data/analysis', () => {
             );
 
             const expectedResult = {
+                timeline: null,
                 cost: [
                     ['bills', [
                         ['a', 999], ['b', 1923], ['c', 110], ['d', 91], ['e', 110]]
@@ -54,5 +55,9 @@ describe('/data/analysis', () => {
             expect(result).to.deep.equal(expectedResult);
         });
     });
+
+    describe('getTimeline', () => {
+        it('should be tested')
+    })
 });
 

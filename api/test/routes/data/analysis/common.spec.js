@@ -108,29 +108,39 @@ describe('/data/analysis/deep?', () => {
         it('should return a valid condition with the expected year and month', () => {
             expect(analysis.periodConditionMonthly(2016, 4)).to.deep.equal({
                 condition: 'year = 2016 AND month = 4',
-                description: 'Apr 2016'
+                description: 'Apr 2016',
+                year: 2016,
+                month: 4
             });
 
             expect(analysis.periodConditionMonthly(2015, 7)).to.deep.equal({
                 condition: 'year = 2015 AND month = 7',
-                description: 'Jul 2015'
+                description: 'Jul 2015',
+                year: 2015,
+                month: 7
             });
         });
 
         it('should handle pagination', () => {
             expect(analysis.periodConditionMonthly(2016, 4, 3)).to.deep.equal({
                 condition: 'year = 2016 AND month = 1',
-                description: 'Jan 2016'
+                description: 'Jan 2016',
+                year: 2016,
+                month: 1
             });
 
             expect(analysis.periodConditionMonthly(2017, 3, 7)).to.deep.equal({
                 condition: 'year = 2016 AND month = 8',
-                description: 'Aug 2016'
+                description: 'Aug 2016',
+                year: 2016,
+                month: 8
             });
 
             expect(analysis.periodConditionMonthly(2017, 3, 17)).to.deep.equal({
                 condition: 'year = 2015 AND month = 10',
-                description: 'Oct 2015'
+                description: 'Oct 2015',
+                year: 2015,
+                month: 10
             });
         });
     });
@@ -139,14 +149,16 @@ describe('/data/analysis/deep?', () => {
         it('should return a valid condition with the expected year', () => {
             expect(analysis.periodConditionYearly(2015)).to.deep.equal({
                 condition: 'year = 2015',
-                description: '2015'
+                description: '2015',
+                year: 2015
             });
         });
 
         it('should handle pagination', () => {
             expect(analysis.periodConditionYearly(2015, 5)).to.deep.equal({
                 condition: 'year = 2010',
-                description: '2010'
+                description: '2010',
+                year: 2010
             });
         });
     });

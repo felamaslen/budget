@@ -75,7 +75,7 @@ function periodConditionMonthly(year, month, pageIndex = 0) {
 
     const description = periodDescriptionMonthly(conditionYear, conditionMonth);
 
-    return { condition, description };
+    return { condition, description, year: conditionYear, month: conditionMonth };
 }
 
 function periodDescriptionYearly(year) {
@@ -89,7 +89,7 @@ function periodConditionYearly(year, pageIndex = 0) {
 
     const description = periodDescriptionYearly(conditionYear);
 
-    return { condition, description };
+    return { condition, description, year: conditionYear };
 }
 
 function periodCondition(now, period, pageIndex = 0) {
