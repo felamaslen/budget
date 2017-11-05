@@ -10,11 +10,8 @@ import BlockPacker from '../../../src/components/block-packer'
 import Blocks from '../../../src/components/block-packer/blocks'
 
 describe('<BlockPacker />', () => {
-    let clicked = false
-    let hovered = false
-    const onClick = () => {
-        clicked = true
-    }
+    const onClick = () => null
+    let hovered = null
     const onHover = (...args) => {
         hovered = args
     }
@@ -58,6 +55,26 @@ describe('<BlockPacker />', () => {
         expect(inner.name()).to.equal('span')
         expect(inner.hasClass('inner')).to.be.ok
         expect(inner.text()).to.equal('bar')
+    })
+
+    it('should run onHover with null values on mouseout / touchend', () => {
+        wrapper.simulate('mouseout')
+
+        expect(hovered).to.deep.equal([null, null])
+        hovered = null
+
+        wrapper.simulate('touchend')
+
+        expect(hovered).to.deep.equal([null, null])
+        hovered = null
+    })
+
+    it('should not render blocks if blocks is null', () => {
+        const nullProps = { ...props, blocks: null }
+
+        const nullWrapper = shallow(<BlockPacker {...nullProps} />)
+
+        expect(nullWrapper.childAt(0).children()).to.have.length(0)
     })
 })
 
