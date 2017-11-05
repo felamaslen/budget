@@ -76,5 +76,28 @@ describe('<Blocks />', () => {
     it('should put width / height attributes on each block', () => {
         expect(wrapper.childAt(0)).to.have.style('width', '10px')
     })
+
+    it('should accept an active main block', () => {
+        const activeMainProps = { ...props, activeBlock: [0] }
+        const mounted = mount(<Blocks {...activeMainProps} />)
+
+        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeMain', true)
+        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeSub', false)
+    })
+    it('should accept an active sub block', () => {
+        const activeSubProps = { ...props, activeBlock: [0, 0] }
+        const mounted = mount(<Blocks {...activeSubProps} />)
+
+        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeMain', false)
+        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeSub', true)
+    })
+
+    it('should accept a deepBlock prop', () => {
+        const deepBlockProps = { ...props, deepBlock: 'foo' }
+        const mounted = mount(<Blocks {...deepBlockProps} />)
+
+        expect(mounted.hasClass('block-tree-deep')).to.be.ok
+        expect(mounted.hasClass('block-tree-foo')).to.be.ok
+    })
 })
 
