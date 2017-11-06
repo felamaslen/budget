@@ -14,11 +14,6 @@ describe('app.actions', () => {
             type: C.USER_LOGGED_OUT, payload: null
         }));
     });
-    describe('aPageNavigatedTo', () => {
-        it('should return PAGE_NAVIGATED with page', () => expect(A.aPageNavigatedTo(10)).to.deep.equal({
-            type: C.PAGE_NAVIGATED, payload: 10
-        }));
-    });
     describe('aKeyPressed', () => {
         it('should return KEY_PRESSED with key', () => expect(A.aKeyPressed(10)).to.deep.equal({
             type: C.KEY_PRESSED, payload: 10

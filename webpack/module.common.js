@@ -7,17 +7,12 @@ const sassVariables = encodeURIComponent(jsonToSassVars(
 
 const sassLoader = `css-loader!sass-loader!prepend-loader?data=${sassVariables}`;
 
-const babelOptions = JSON.stringify({
-    presets: ['react', 'env']
-});
-const babelLoader = `babel-loader?${babelOptions}`;
-
 module.exports = {
     loaders: [
         {
             test: /\.jsx?$/,
             exclude: /node_modules/,
-            loader: babelLoader
+            loader: 'babel-loader'
         },
         {
             test: /favicon\.png/,

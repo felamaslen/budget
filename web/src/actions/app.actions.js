@@ -16,7 +16,6 @@ import {
 
 export const aSettingsLoaded = () => buildMessage(SETTINGS_LOADED);
 export const aUserLoggedOut = () => buildMessage(USER_LOGGED_OUT);
-export const aPageNavigatedTo = page => buildMessage(PAGE_NAVIGATED, page);
 export const aKeyPressed = key => buildMessage(KEY_PRESSED, key);
 export const aTimeUpdated = () => buildMessage(TIME_UPDATED);
 export const aServerUpdated = () => buildMessage(SERVER_UPDATED);

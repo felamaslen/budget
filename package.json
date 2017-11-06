@@ -37,6 +37,45 @@
     "url": "https://github.com/felamaslen/budget/issues"
   },
   "homepage": "https://github.com/felamaslen/budget#readme",
+  "babel": {
+    "env": {
+      "production": {
+        "presets": [
+          "react",
+          [
+            "env",
+            {
+              "targets": {
+                "browsers": ["last 2 versions", "ie >= 10"]
+              }
+            }
+          ],
+          "stage-0"
+        ]
+      },
+      "development": {
+        "presets": [
+          "react",
+          "stage-0"
+        ],
+        "sourceMaps": "inline"
+      },
+      "testing": {
+        "presets": [
+          "react",
+          [
+            "env",
+            {
+              "targets": {
+                "node": "=8"
+              }
+            }
+          ],
+          "stage-0"
+        ]
+      }
+    }
+  },
   "dependencies": {
     "axios": "^0.16.2",
     "babel-core": "^6.26.0",
