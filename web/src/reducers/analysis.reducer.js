@@ -71,6 +71,7 @@ export function processPageDataAnalysis(reduction, pageIndex, raw) {
     const blocks = getBlocks(cost, treeVisible);
 
     return reduction
+        .setIn(['other', 'analysis', 'timeline'], data.get('timeline'))
         .setIn(['other', 'blockView', 'blocks'], blocks)
         .setIn(['other', 'blockView', 'deep'], null)
         .setIn(['pages', pageIndex], map({

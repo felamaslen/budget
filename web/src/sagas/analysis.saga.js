@@ -35,7 +35,7 @@ export function *requestAnalysisData({ payload }) {
     }
 
     try {
-        const response = yield call(makeContentRequest, apiKey, { pageIndex, params });
+        const response = yield makeContentRequest(apiKey, { pageIndex, params });
 
         yield put(aAnalysisDataRefreshed({ pageIndex, response, name }));
     }

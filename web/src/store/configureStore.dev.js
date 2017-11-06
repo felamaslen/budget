@@ -12,7 +12,9 @@ const sagaMiddleware = createSagaMiddleware();
 
 const SKIP_LOG_ACTIONS = [
     actions.TIME_UPDATED,
-    actions.KEY_PRESSED
+    actions.KEY_PRESSED,
+    actions.CONTENT_BLOCK_HOVERED,
+    actions.ANALYSIS_TREE_HOVERED
 ];
 
 const logger = createLogger({

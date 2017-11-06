@@ -60,6 +60,7 @@ export function resetAppState(state) {
                 period: 0,
                 grouping: 0,
                 timeIndex: 0,
+                timeline: null,
                 treeOpen: map.of(),
                 treeVisible: map({ bills: false })
             }),

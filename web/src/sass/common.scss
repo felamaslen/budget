@@ -661,6 +661,16 @@ body {
         display: flex;
         flex-flow: row wrap;
     }
+    .timeline-outer {
+        width: 100%;
+        height: 1em;
+        display: flex;
+        .data-item {
+            display: block;
+            flex-grow: 1;
+            height: 100%;
+        }
+    }
     .tree {
         flex-grow: 1;
 

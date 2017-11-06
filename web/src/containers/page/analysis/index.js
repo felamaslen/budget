@@ -17,6 +17,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import Page from '../../../components/page';
+import Timeline from './timeline'
 
 import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../../misc/const';
 import { formatCurrency, capitalise } from '../../../misc/format';
@@ -188,6 +189,11 @@ export class PageAnalysis extends Page {
 
         const listTree = this.listTree();
 
+        let timeline = null
+        if (this.props.timeline) {
+            timeline = <Timeline data={this.props.timeline} />
+        }
+
         const periodSwitcher = ANALYSIS_PERIODS.map((period, key) => <span key={key}>
             <input type="radio" checked={this.props.period === key}
                 onChange={() => this.changePeriod(key)} />
@@ -203,11 +209,11 @@ export class PageAnalysis extends Page {
         return <div className="page-analysis">
             <div className="upper">
                 <span className="input-period">
-                    <span>Period:</span>
+                    <span>{'Period:'}</span>
                     {periodSwitcher}
                 </span>
                 <span className="input-grouping">
-                    <span>Grouping:</span>
+                    <span>{'Grouping:'}</span>
                     {groupingSwitcher}
                 </span>
                 <div className="btns">
@@ -218,6 +224,7 @@ export class PageAnalysis extends Page {
                 </div>
                 <h3 className="period-title">{this.props.description}</h3>
                 <div className="analysis-outer">
+                    {timeline}
                     {listTree}
                     <BlockPacker
                         pageIndex={this.props.pageIndex}
@@ -243,6 +250,7 @@ PageAnalysis.propTypes = {
     treeVisible: PropTypes.object.isRequired,
     treeOpen: PropTypes.object.isRequired,
     timeIndex: PropTypes.number.isRequired,
+    timeline: PropTypes.instanceOf(list),
     blocks: PropTypes.instanceOf(list),
     activeBlock: PropTypes.array,
     deepBlock: PropTypes.string,
@@ -264,6 +272,7 @@ const mapStateToProps = state => ({
     period: state.getIn(['other', 'analysis', 'period']),
     grouping: state.getIn(['other', 'analysis', 'grouping']),
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex']),
+    timeline: state.getIn(['other', 'analysis', 'timeline']),
     cost: state.getIn(['pages', pageIndex, 'cost']),
     costTotal: state.getIn(['pages', pageIndex, 'costTotal']),
     description: state.getIn(['pages', pageIndex, 'description']),
