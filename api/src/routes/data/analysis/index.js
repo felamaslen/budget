@@ -19,30 +19,32 @@ async function getTimeline(db, user, now, period, pageIndex, { condition, ...par
         FROM ${category}
         WHERE ${condition} AND uid = ${user.uid}
         GROUP BY year, month, date`)
-        .join(' UNION ALL ')
 
-    const query = `SELECT year, month, date, SUM(cost) AS cost
-    FROM (${subQueries}) rows
-    GROUP BY year, month, date
-    ORDER BY year, month, date`
+    const results = await Promise.all(subQueries.map(query => db.query(query)))
 
-    const rows = await db.query(query)
-
-    if (!(rows && Array.isArray(rows))) {
-        return null
-    }
-
-    const rowsByDate = rows.reduce((obj, row) => {
-        if (!(row.year in obj)) {
-            obj[row.year] = {}
-        }
-        if (!(row.month in obj[row.year])) {
-            obj[row.year][row.month] = {}
+    const rowsByDate = results.reduce((obj, rows, groupKey) => {
+        if (!(rows && Array.isArray(rows))) {
+            return obj
         }
 
-        obj[row.year][row.month][row.date] = row.cost
+        return rows.reduce((subObj, row) => {
+            if (!(row.year in subObj)) {
+                subObj[row.year] = {}
+            }
+            if (!(row.month in subObj[row.year])) {
+                subObj[row.year][row.month] = {}
+            }
+            if (!(row.date in subObj[row.year][row.month])) {
+                subObj[row.year][row.month][row.date] = groupKey > 0
+                    ? new Array(groupKey).fill(0)
+                    : []
+            }
 
-        return obj
+            subObj[row.year][row.month][row.date].push(Math.max(0, row.cost))
+
+            return subObj
+
+        }, obj)
 
     }, {})
 
@@ -56,7 +58,7 @@ async function getTimeline(db, user, now, period, pageIndex, { condition, ...par
 
             if (year in rowsByDate && month in rowsByDate[year]) {
                 return items.concat(new Array(length).fill(0)
-                    .map((itemDate, dateKey) => rowsByDate[year][month][dateKey + 1] || 0))
+                    .map((itemDate, dateKey) => rowsByDate[year][month][dateKey + 1] || []))
             }
 
             return items.concat(new Array(length).fill(0))
@@ -69,7 +71,7 @@ async function getTimeline(db, user, now, period, pageIndex, { condition, ...par
         const length = monthLength(year, month)
 
         return new Array(length).fill(0)
-            .map((item, key) => rowsByDate[year][month][key + 1] || 0)
+            .map((item, key) => rowsByDate[year][month][key + 1] || [])
     }
 
     return null

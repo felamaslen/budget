@@ -4,6 +4,7 @@
 
 import { OVERVIEW_COLUMNS } from './const';
 import { COLOR_CATEGORY } from './config';
+import { listAverage } from './data';
 
 export function rgba(values) {
     const roundedValues = values
@@ -115,5 +116,17 @@ const colorKeyRGB = index => {
 
 export function colorKey(index) {
     return colorKeyRGB(index);
+}
+
+export function averageColor(colors) {
+    const red = colors.map(color => color[0]);
+    const green = colors.map(color => color[1]);
+    const blue = colors.map(color => color[2]);
+
+    return [
+        listAverage(red),
+        listAverage(green),
+        listAverage(blue)
+    ];
 }
 

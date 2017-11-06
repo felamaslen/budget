@@ -1,20 +1,35 @@
-import { List as list } from 'immutable'
-import React from 'react'
-import PropTypes from 'prop-types'
+import { List as list } from 'immutable';
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import { COLOR_CATEGORY } from '../../../misc/config';
+import { rgba, averageColor } from '../../../misc/color';
+
+const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 
 export default function Timeline({ data }) {
-    const dataPositive = data.map(item => Math.max(item, 0))
-
-    const range = dataPositive.max()
+    const sums = data.map(row => row.reduce((sum, value) => sum + value, 0));
+    const range = sums.reduce((max, sum) => Math.max(max, sum), -Infinity);
 
     const rB = 0.05;
     const rA = (Math.pow(Math.E, 1 / rB) - 1) / range;
     const fV = value => rB * Math.log(rA * value + 1);
 
-    const items = dataPositive
-        .map((value, timeKey) => {
-            const colorValue = Math.round(255 * (1 - fV(value)))
-            const style = { backgroundColor: `rgb(${colorValue}, ${colorValue}, ${colorValue})` }
+    const items = data
+        .map((row, timeKey) => {
+            const sum = sums.get(timeKey);
+            const score = fV(sum);
+
+            const categoryScores = row.map(value => score * value / sum);
+
+            const colors = categoryScores.map((value, categoryKey) => [
+                COLOR_CATEGORY[categories[categoryKey]][0] * (1 - value),
+                COLOR_CATEGORY[categories[categoryKey]][1] * (1 - value),
+                COLOR_CATEGORY[categories[categoryKey]][2] * (1 - value)
+            ]);
+
+            const backgroundColor = rgba(averageColor(colors));
+            const style = { backgroundColor };
 
             return <span key={timeKey} className="data-item" style={style} />
         })
