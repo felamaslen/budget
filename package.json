@@ -12,7 +12,7 @@
     "postinstall": "NODE_ENV=production ./node_modules/.bin/webpack",
     "start": "NODE_ENV=production node ./api/src/index.js",
     "dev:api": "NODE_ENV=development nodemon -w ./api/src ./api/src/index.js",
-    "dev:wds": "NODE_ENV=development ./node_modules/.bin/webpack-dev-server",
+    "dev:wds": "NODE_ENV=development ./node_modules/.bin/webpack-dev-server --open",
     "test:api": "./node_modules/.bin/mocha \"./api/test/**/*.spec.js\" --reporter spec",
     "test:web": "./node_modules/.bin/mocha --compilers js:babel-core/register -w \"./web/test/**/*.spec.js\" --reporter spec",
     "test": "npm run test:api && npm run test:web",
