@@ -805,8 +805,10 @@ button {
         min-width: 400px;
     }
     .tree-list {
-        & > .tree-list-item > .main:hover {
-            background: #039cff;
+        & > .tree-list-item > .main, .sub-tree .tree-list-item {
+            &:hover {
+                background: #039cff;
+            }
         }
     }
     .block-view {

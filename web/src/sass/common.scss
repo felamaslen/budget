@@ -671,6 +671,9 @@ body {
             height: 100%;
         }
     }
+    .input-period, .input-grouping {
+        text-transform: capitalize;
+    }
     .tree {
         flex-grow: 1;
 
