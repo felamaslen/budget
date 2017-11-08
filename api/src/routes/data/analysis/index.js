@@ -88,23 +88,37 @@ async function getPeriodCost(db, user, now, period, groupBy, pageIndex) {
 
     const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 
-    const promises = await Promise.all(categories.map(
-        category => getPeriodCostForCategory(
-            db, user, queryCondition.condition, category, groupBy
-        )
-    ));
+    const incomeQuery = db.query(`SELECT SUM(cost) AS cost
+    FROM income
+    WHERE uid = ? AND ${queryCondition.condition}`, user.uid);
 
-    const cost = promises
-        .map((result, key) => {
-            return [
-                categories[key],
-                result.map(item => [item.itemCol, item.cost])
-            ];
-        });
+    const results = await Promise.all([
+        incomeQuery,
+        ...categories.map(category => getPeriodCostForCategory(
+            db, user, queryCondition.condition, category, groupBy
+        ))
+    ]);
+
+    const cost = results
+        .slice(1)
+        .map((result, key) => [
+            categories[key],
+            result.map(item => [item.itemCol, item.cost])
+        ]);
+
+    let income = null;
+    if (Array.isArray(results[0])) {
+        income = results[0].reduce((sum, item) => sum + item.cost, 0);
+    }
+
+    const totalCost = results.slice(1).reduce((sum, result) =>
+        result.reduce((resultSum, item) => resultSum + item.cost, sum), 0);
+
+    const saved = Math.max(0, income - totalCost);
 
     const timeline = await getTimeline(db, user, now, period, pageIndex, queryCondition, categories)
 
-    return { timeline, cost, description: queryCondition.description };
+    return { timeline, cost, saved, description: queryCondition.description };
 }
 
 /**

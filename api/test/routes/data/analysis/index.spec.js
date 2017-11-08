@@ -49,6 +49,7 @@ describe('/data/analysis', () => {
                     ['holiday', [['m', 191239], ['n', 9912]]],
                     ['social', [['k', 15], ['l', 1000]]]
                 ],
+                saved: 0,
                 description: 'Sep 2017'
             };
 
