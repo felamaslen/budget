@@ -1,5 +1,13 @@
 .graph-container-outer {
-    display: inline-block;
+    display: flex;
+    margin: 1em 0;
+    align-items: center;
+    justify-content: center;
+
+    .graph-container {
+        margin: 0 2em;
+        overflow: hidden;
+    }
 }
 
 .graph-container {
