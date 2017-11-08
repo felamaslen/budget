@@ -34,7 +34,7 @@ const mapStateToProps = state => ({
     active: state.getIn(['other', 'blockView', 'active']),
     blocks: state.getIn(['other', 'blockView', 'blocks']),
     deep: state.getIn(['other', 'blockView', 'deep']),
-    blockStatus: state.getIn(['other', 'blockView', 'status'])
+    status: state.getIn(['other', 'blockView', 'status'])
 });
 
 const mapDispatchToProps = dispatch => ({

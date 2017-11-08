@@ -2,13 +2,13 @@
     .table-flex {
         .active {
             .month {
-                background: $color_green;
-                color: white;
+                background: $color-green;
+                color: $color-white;
             }
         }
         .future {
             .month {
-                background: $color_amber;
+                background: $color-amber;
             }
         }
     }
@@ -23,7 +23,7 @@
             font-size: 0.9em;
             line-height: 20px;
             padding: 0.1em 0.2em;
-            background: rgba(255, 255, 255, 0.4);
+            background: $color-translucent-l4;
             cursor: pointer;
             span {
                 vertical-align: middle;

@@ -16,17 +16,17 @@
         }
         .col {
             &.month {
-                border-right: 3px solid #222;
+                border-right: 3px solid $color-dark;
             }
             &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
                 flex-grow: 0.7;
             }
             &.income {
-                border-left: 3px solid #222;
+                border-left: 3px solid $color-dark;
             }
             &.net {
                 flex-grow: 1;
-                border-right: 3px solid #efefef;
+                border-right: 3px solid $color-light;
             }
             &.predicted {
                 flex-grow: 0.9;

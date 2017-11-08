@@ -37,10 +37,10 @@
         }
         .past {
             font-style: italic;
-            color: #666;
+            color: $color-medium-slightly-dark;
 
             .month {
-                background: #eee;
+                background: $color-light;
             }
         }
         .active {

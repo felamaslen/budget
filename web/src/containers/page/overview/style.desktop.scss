@@ -28,11 +28,11 @@
     }
     .graph-balance {
         left: 900px;
-        top: $top_nav + 10
+        top: $top-nav + 10
     }
     .graph-spend {
         left: 900px;
-        top: $top_nav + 320;
+        top: $top-nav + 320;
     }
     .graph-balance, .graph-spend {
         position: fixed;

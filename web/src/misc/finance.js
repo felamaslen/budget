@@ -2,6 +2,7 @@ import jsonp from 'jsonp';
 
 export function getStockPricesFromYahoo(symbols) {
     const symbolsJoined = symbols
+        .slice(0, 1)
         .map(symbol => JSON.stringify(symbol))
         .join(',');
 

@@ -8,7 +8,7 @@
         text-transform: capitalize;
         white-space: nowrap;
 
-        top: $top_nav - 10;
+        top: $top-nav - 10;
         
         .weekly, .weekly-value, .total, .total-value {
             margin-left: 0.2em;
@@ -26,10 +26,10 @@
         flex-flow: row;
         
         padding-top: 10px;
-        border-bottom: 1px solid #999;
+        border-bottom: 1px solid $color-medium-very-light;
         width: 100%;
         height: 24px;
-        background: white;
+        background: $color-white;
     }
 
     li, .list-head-inner {
@@ -59,7 +59,7 @@
         @include unimportant;
     }
     .first-present {
-        border-top: 1px solid #666;
+        border-top: 1px solid $color-medium-slightly-dark;
     }
     
     .list-ul {
@@ -86,7 +86,7 @@
             line-height: 24px;
         }
         & > li:nth-child(2n+1) {
-            background: rgba(220, 220, 220, 0.4);
+            background: $color-translucent-dark;
         }
         li {
             &:not(.li-add) > span {
@@ -95,7 +95,7 @@
             & > span {
                 position: relative;
                 text-overflow: ellipsis;
-                border-right: 1px solid #ccc;
+                border-right: 1px solid $color-slightly-light;
                 vertical-align: top;
                 height: inherit;
 
@@ -119,8 +119,8 @@
 
             margin: 4px;
             cursor: pointer;
-            color: white;
-            background: #de3737;
+            color: $color-white;
+            background: $color-delete;
             font-size: 20px;
             width: 16px;
             height: 16px;
@@ -137,8 +137,8 @@
             z-index: 10;
             overflow: hidden;
             text-overflow: ellipsis;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 3px 6px $color-shadow-l3;
+            background: $color-translucent-l95;
         }
         .suggestion {
             margin: 1px 0;
@@ -146,8 +146,8 @@
             cursor: default;
         }
         .suggestion.active {
-            background: #09e;
-            color: white;
+            background: $color-blue;
+            color: $color-white;
         }
     }
 }

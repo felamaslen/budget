@@ -1,5 +1,11 @@
 @keyframes spin {
-    to { transform: rotate(1turn); }
+    $offset: -15;
+    from {
+        transform: rotate(#{$offset}deg);
+    }
+    to {
+        transform: rotate(#{$offset + 360}deg);
+    }
 }
 
 @keyframes into-view {

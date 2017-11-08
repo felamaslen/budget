@@ -3,9 +3,9 @@
     width: 100%;
     height: 100%;
     z-index: 500;
-    top: $height_nav;
+    top: $height-nav;
     left: 0;
-    background: rgba(255, 255, 255, 0.8);
+    background: $color-translucent-l8;
 }
 .progress-inner {
     width: 20em;
@@ -16,9 +16,9 @@
     margin-left: -10em;
     margin-top: -10em;
     font-size: 6px;
-    background: white;
+    background: $color-white;
     border-radius: 2em;
-    box-shadow: inset 0 0 19px -3px rgba(60, 60, 60, 0.4);
+    box-shadow: inset 0 0 19px -3px $color-shadow-l2;
 
     .progress {
         margin: 7.5em;
@@ -28,9 +28,10 @@
 .progress {
     display: inline-block;
     position: relative;
-    width: 5em;
-    height: 5em;
-    text-indent: 999em;
+    $progress-width: 5em;
+    width: $progress-width;
+    height: $progress-width;
+    text-indent: -1000px;
     overflow: hidden;
     animation: spin 1s infinite steps(8);
     
@@ -38,31 +39,33 @@
     &:after,
     & > div:before,
     & > div:after {
+        $width: 0.5em;
+        $height: 1.5em;
         content: $none;
         position: absolute;
         top: 0;
-        left: 2.25em; /* (container width - part width)/2  */
-        width: .5em;
-        height: 1.5em;
+        left: ($progress-width - $width) / 2;
+        width: $width;
+        height: $height;
         border-radius: .2em;
-        background: #eee;
-        box-shadow: 0 3.5em #eee; /* container height - part height */
-        transform-origin: 50% 2.5em; /* container height / 2 */
+        background: $color-light;
+        box-shadow: 0 ($progress-width - $height) $color-light;
+        transform-origin: 50% ($progress-width / 2);
     }
     &:before {
-        background: #555;
+        background: $color-medium-dark-1;
     }
     &:after {
         transform: rotate(-45deg);
-        background: #777;
+        background: $color-medium;
     }
     & > div:before {
         transform: rotate(-90deg);
-        background: #999;
+        background: $color-medium-very-light;
     }
     & > div:after {
         transform: rotate(-135deg);
-        background: #bbb;
+        background: $color-slightly-light;
     }
 }
 
@@ -78,12 +81,12 @@
         width: 2px;
         height: 6px;
         border-radius: 2px;
-        box-shadow: 0 12px #8ecbff;
+        box-shadow: 0 12px $color-progress;
         transform-origin: 50% 9px;
-        background: #8ecbff;
+        background: $color-progress;
     }
     &:before {
-        background: #3c6b94;
+        background: $color-progress-before;
     }
 }
 
