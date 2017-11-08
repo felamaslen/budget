@@ -8,7 +8,6 @@
   },
   "sasslintConfig": ".sass-lint.yml",
   "scripts": {
-    "preinstall": "rm -rf ./node_modules",
     "postinstall": "NODE_ENV=production ./node_modules/.bin/webpack",
     "start": "NODE_ENV=production node ./api/src/index.js",
     "dev:api": "NODE_ENV=development nodemon -w ./api/src ./api/src/index.js",
@@ -111,6 +110,7 @@
     "prompt": "^1.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "react-hot-loader": "^3.1.1",
     "react-media": "^1.6.1",
     "react-pure-render": "^1.0.2",
     "react-redux": "^5.0.6",
@@ -138,7 +138,6 @@
     "jsdom": "^11.2.0",
     "mocha": "^3.5.0",
     "nodemon": "^1.11.0",
-    "react-hot-loader": "^3.1.1",
     "react-test-renderer": "^15.6.1",
     "redux-logger": "^3.0.6",
     "sass-lint": "^1.11.1",
