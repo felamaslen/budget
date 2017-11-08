@@ -61,7 +61,7 @@ async function getTimeline(db, user, now, period, pageIndex, { condition, ...par
                     .map((itemDate, dateKey) => rowsByDate[year][month][dateKey + 1] || []))
             }
 
-            return items.concat(new Array(length).fill(0))
+            return items.concat(new Array(length).fill([]))
 
         }, [])
     }

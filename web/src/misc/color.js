@@ -119,6 +119,10 @@ export function colorKey(index) {
 }
 
 export function averageColor(colors) {
+    if (!colors.size) {
+        return [255, 255, 255, 0];
+    }
+
     const red = colors.map(color => color[0]);
     const green = colors.map(color => color[1]);
     const blue = colors.map(color => color[2]);

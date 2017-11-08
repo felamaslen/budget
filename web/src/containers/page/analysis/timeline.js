@@ -11,7 +11,7 @@ export default function Timeline({ data }) {
     const sums = data.map(row => row.reduce((sum, value) => sum + value, 0));
     const range = sums.reduce((max, sum) => Math.max(max, sum), -Infinity);
 
-    const rB = 0.05;
+    const rB = 0.1;
     const rA = (Math.pow(Math.E, 1 / rB) - 1) / range;
     const fV = value => rB * Math.log(rA * value + 1);
 
@@ -23,9 +23,9 @@ export default function Timeline({ data }) {
             const categoryScores = row.map(value => score * value / sum);
 
             const colors = categoryScores.map((value, categoryKey) => [
-                COLOR_CATEGORY[categories[categoryKey]][0] * (1 - value),
-                COLOR_CATEGORY[categories[categoryKey]][1] * (1 - value),
-                COLOR_CATEGORY[categories[categoryKey]][2] * (1 - value)
+                255 - (255 - COLOR_CATEGORY[categories[categoryKey]][0]) * value,
+                255 - (255 - COLOR_CATEGORY[categories[categoryKey]][1]) * value,
+                255 - (255 - COLOR_CATEGORY[categories[categoryKey]][2]) * value
             ]);
 
             const backgroundColor = rgba(averageColor(colors));
