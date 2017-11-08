@@ -131,13 +131,6 @@ export class PageOverview extends Page {
             <Media query={mediaQueries.desktop}>{desktopRows}</Media>
         </div>;
     }
-    renderGraphBalance(render) {
-        if (!render) {
-            return null;
-        }
-
-        return <GraphBalance name="balance" />;
-    }
     renderGraphSpend(render) {
         if (!render) {
             return null;
@@ -147,12 +140,7 @@ export class PageOverview extends Page {
     }
     renderGraphs() {
         return <div className="graph-container-outer">
-            <Media query={mediaQueries.mobile}>
-                {matches => this.renderGraphBalance(matches)}
-            </Media>
-            <Media query={mediaQueries.desktop}>
-                {matches => this.renderGraphBalance(matches)}
-            </Media>
+            <GraphBalance name="balance" />
             <Media query={mediaQueries.desktop}>
                 {matches => this.renderGraphSpend(matches)}
             </Media>

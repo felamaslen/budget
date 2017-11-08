@@ -39,7 +39,7 @@ describe('/data/analysis', () => {
             );
 
             const expectedResult = {
-                timeline: null,
+                timeline: new Array(30).fill([]),
                 cost: [
                     ['bills', [
                         ['a', 999], ['b', 1923], ['c', 110], ['d', 91], ['e', 110]]
@@ -49,6 +49,7 @@ describe('/data/analysis', () => {
                     ['holiday', [['m', 191239], ['n', 9912]]],
                     ['social', [['k', 15], ['l', 1000]]]
                 ],
+                saved: 0,
                 description: 'Sep 2017'
             };
 

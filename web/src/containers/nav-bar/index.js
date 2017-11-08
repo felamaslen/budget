@@ -9,7 +9,7 @@ import { NavLink } from 'react-router-dom';
 
 import { PAGES, PAGES_PATHS } from '../../misc/const';
 
-export function Navbar({ active }) {
+export function Navbar({ active, logout }) {
     if (!active) {
         return null;
     }
@@ -22,7 +22,7 @@ export function Navbar({ active }) {
             activeClassName="active" className={className}>{item}</NavLink>;
     });
 
-    const logoutHandler = () => this.props.logout();
+    const logoutHandler = () => logout();
 
     return <nav className="nav-list noselect">
         {pageLinksList}

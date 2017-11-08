@@ -2,7 +2,7 @@
  * Process analysis data
  */
 
-import { fromJS, Map as map } from 'immutable';
+import { fromJS, Map as map, List as list } from 'immutable';
 import {
     PAGES, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
 } from '../misc/const';
@@ -34,7 +34,7 @@ function getBlockData(cost, treeVisible) {
     return cost;
 }
 
-function getBlocks(cost, treeVisible) {
+function getBlocks(cost, treeVisible = false) {
     const blockData = getBlockData(cost, treeVisible);
 
     const packer = new BlockPacker(blockData, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
@@ -42,7 +42,7 @@ function getBlocks(cost, treeVisible) {
     return packer.blocks;
 }
 
-function getCost(costData) {
+function getCost(costData, saved) {
     return costData.map(item => {
         const name = item.get(0);
         const subTree = item.get(1)
@@ -53,6 +53,13 @@ function getCost(costData) {
 
         return map({ name, total, subTree });
     })
+        .push(map({
+            name: 'saved',
+            total: saved,
+            subTree: list([
+                map({ name: 'Saved', total: saved })
+            ])
+        }))
         .filter(item => item.get('total') > 0)
         .sort(sortTotal);
 }
@@ -61,7 +68,7 @@ export function processPageDataAnalysis(reduction, pageIndex, raw) {
     const data = fromJS(raw);
 
     // tree data
-    const cost = getCost(data.get('cost'));
+    const cost = getCost(data.get('cost'), data.get('saved'));
     const costTotal = addTotal(cost);
     const items = map({});
     const description = data.get('description');

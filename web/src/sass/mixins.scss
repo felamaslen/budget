@@ -10,28 +10,28 @@
     }
     &.up {
         .change {
-            color: $color_bg_up;
+            color: $color-bg-up;
         }
         .change:after {
-            border-bottom: 5px solid #00c100;
+            border-bottom: 5px solid $color-border-up;
         }
         &.hl-up {
-            background-color: $color_bg_up_hl;
+            background-color: $color-bg-up-hl;
         }
         &.hl-down {
-            background-color: $color_bg_up_rev;
+            background-color: $color-bg-up-rev;
         }
     }
     &.down {
-        color: $color_bg_down;
+        color: $color-bg-down;
         .change:after {
-            border-top: 5px solid #e22121;
+            border-top: 5px solid $color-border-down;
         }
         &.hl-down {
-            background-color: $color_bg_down_hl;
+            background-color: $color-bg-down-hl;
         }
         &.hl-up {
-            background-color: $color_bg_down_rev;
+            background-color: $color-bg-down-rev;
         }
     }
     &.hl-up .change, &.hl-down .change {
@@ -63,5 +63,10 @@
 }
 @mixin modal-exit-state {
     @include modal-enter-state;
+}
+
+@mixin diagonal-bg($size: 16px) {
+    background-image: linear-gradient(45deg, $color-translucent-light 25%, transparent 25%, transparent 50%, $color-translucent-light 50%, $color-translucent-light 75%, transparent 75%, transparent 0);
+    background-size: $size $size;
 }
 
