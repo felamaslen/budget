@@ -1,0 +1,106 @@
+.navbar {
+    .inner {
+        background: linear-gradient(to bottom, #d84d4d, #9f3030);
+        box-shadow: 0 0 6px rgba(40, 40, 40, 0.8);
+        width: 100%;
+        height: $height_nav;
+        &.hide-nav .nav-list {
+            opacity: 0;
+        }
+    }
+    .app-logo {
+        margin: 0 1em 0 0.5em;
+        float: right;
+    }
+    .nav-list {
+        padding: ($height_nav - 30) 0 0 0;
+    }
+    .nav-link {
+        height: 27px;
+        border-bottom: 3px solid transparent;
+        margin-right: 0.5em;
+        text-transform: capitalize;
+        display: inline-block;
+        float: left;
+        position: relative;
+        text-decoration: none;
+        padding: 0 0.5em 0 35px;
+        border-radius: 3px 3px 0 0;
+        color: white;
+        &.active {
+            border-bottom-color: black;
+            cursor: default;
+            &, &:hover, &:active {
+                background: rgba(0, 0, 0, 0.7);
+            }
+        }
+    }
+    .nav-link, .nav-link-btn {
+        &:before {
+            position: absolute;
+            left: 5px;
+            top: 0;
+        }
+    }
+    .nav-link-overview {
+        border-color: #424242;
+        &:before {
+            background-position: 0 0;
+        }
+    }
+    .nav-link-analysis {
+        border-color: $color_analysis;
+        &:before {
+            background-position: -28px 0;
+        }
+    }
+    .nav-link-funds {
+        border-color: $color_funds;
+        &:before {
+            background-position: -56px 0;
+        }
+    }
+    .nav-link-income {
+        border-color: $color_income;
+        &:before {
+            background-position: -84px 0;
+        }
+    }
+    .nav-link-bills {
+        border-color: $color_bills;
+        &:before {
+            background-position: -112px 0;
+        }
+    }
+    .nav-link-food {
+        border-color: $color_food;
+        &:before {
+            background-position: -140px 0;
+        }
+    }
+    .nav-link-general {
+        border-color: $color_general;
+        &:before {
+            background-position: -168px 0;
+        }
+    }
+    .nav-link-holiday {
+        border-color: $color_holiday;
+        &:before {
+            background-position: 0 -28px;
+        }
+    }
+    .nav-link-social {
+        border-color: $color_social;
+        &:before {
+            background-position: -28px -28px;
+        }
+    }
+    .nav-link-logout {
+        border-color: #eee;
+        &:before {
+            background-position: -56px -28px;
+        }
+    }
+}
+

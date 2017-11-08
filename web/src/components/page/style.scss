@@ -1,0 +1,72 @@
+.page-wrapper {
+    padding-top: $top_nav;
+    .inner {
+        position: relative;
+        &, & > div {
+            width: inherit;
+        }
+    }
+}
+
+.page {
+    display: none;
+    position: relative;
+}
+
+.table-flex {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    .row {
+        display: flex;
+        flex-flow: row nowrap;
+        width: 100%;
+
+        &.header {
+            font-weight: bold;
+        }
+    }
+    .col {
+        display: flex;
+        flex-flow: row nowrap;
+        flex-grow: 1;
+        flex-basis: 0;
+    }
+}
+
+.table-insert {
+    border-collapse: collapse;
+    th {
+        text-transform: capitalize;
+        text-align: center;
+    }
+    td {
+        font-size: .9em;
+        padding: 2px 3px;
+    }
+    .cost {
+        text-align: right;
+        width: 96px;
+    }
+    .date {
+        width: 96px;
+    }
+    .item,
+    .category {
+        width: 192px;
+    }
+}
+
+.li-add button {
+    z-index: 0;
+}
+
+.footer-outer {
+    margin: 5em 0;
+    font-size: .9em;
+    color: #666;
+    text-align: center;
+    font-style: italic;
+}
+

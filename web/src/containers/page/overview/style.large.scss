@@ -1,0 +1,60 @@
+.page-overview {
+    .table-flex {
+        cursor: default;
+        .editable-outer {
+            width: 80px;
+            &.editing {
+                padding: 0;
+            }
+        }
+        .header {
+            .col {
+                &.month, &.income {
+                    border: none;
+                }
+            }
+        }
+        .col {
+            &.month {
+                border-right: 3px solid #222;
+            }
+            &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
+                flex-grow: 0.7;
+            }
+            &.income {
+                border-left: 3px solid #222;
+            }
+            &.net {
+                flex-grow: 1;
+                border-right: 3px solid #efefef;
+            }
+            &.predicted {
+                flex-grow: 0.9;
+                font-style: italic;
+            }
+            &.balance {
+                flex-grow: 1.2;
+            }
+            .text {
+                padding: 0 2px;
+            }
+            &.balancePred {
+                display: none;
+            }
+        }
+        .editable-input {
+            right: 0;
+            top: 0;
+            padding: 0;
+        }
+        .past {
+            @include unimportant;
+        }
+        .active {
+            font-weight: bold;
+        }
+        .future {
+        }
+    }
+}
+

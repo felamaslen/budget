@@ -1,21 +1,27 @@
-@import "./variables.scss";
-@import "./mixins.scss";
+@import './variables.scss';
+@import './mixins.scss';
+@import './animations.scss';
 
-@import "./common.scss";
+@import '../components/**/style.scss';
+@import '../containers/**/style.scss';
 
-@media screen and (max-width: $width_page_mobile) {
-    @import "./mobile.scss";
+@media screen and (max-width: $width-page-mobile) {
+    @import '../components/**/style.mobile.scss';
+    @import '../containers/**/style.mobile.scss';
 }
 
-@media screen and (min-width: $width_page_tablet_min + px) {
-    @import "./large.scss";
+@media screen and (min-width: $width-page-tablet-min + px) {
+    @import '../components/**/style.large.scss';
+    @import '../containers/**/style.large.scss';
 }
 
-@media screen and (min-width: $width_page_tablet_min + px) and (max-width: $width_page_tablet) {
-    @import "./tablet.scss";
+@media screen and (min-width: $width-page-tablet-min + px) and (max-width: $width-page-tablet) {
+    @import '../components/**/style.tablet.scss';
+    @import '../containers/**/style.tablet.scss';
 }
 
-@media screen and (min-width: $width_page_desktop_min + px) {
-    @import "./desktop.scss";
+@media screen and (min-width: $width-page-desktop-min + px) {
+    @import '../components/**/style.desktop.scss';
+    @import '../containers/**/style.desktop.scss';
 }
 

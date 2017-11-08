@@ -38,6 +38,11 @@ module.exports = {
         },
         {
             test: /\.scss$/,
+            enforce: 'pre',
+            loaders: 'import-glob-loader'
+        },
+        {
+            test: /\.scss$/,
             exclude: /node_modules/,
             loader: sassLoader
         }

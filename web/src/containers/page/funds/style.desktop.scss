@@ -1,0 +1,32 @@
+.page-funds {
+    .stocks-list {
+        &::-webkit-scrollbar-track {
+            -webkit-box-shadow: none;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(240, 240, 240, 0.3);
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(160, 160, 160, 0.9);
+        }
+        &::-webkit-scrollbar-thumb:active {
+            background-color: rgba(240, 240, 240, 0.8);
+        }
+    }
+}
+
+@media screen and (min-width: 1500px) {
+    .page-funds {
+        .graph-fund-history, .stocks-list {
+            position: fixed;
+            left: 1000px;
+        }
+        .graph-fund-history {
+            top: 100px;
+        }
+        .stocks-list {
+            top: $top_nav + 350;
+        }
+    }
+}
+
