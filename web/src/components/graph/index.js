@@ -12,6 +12,7 @@ export default class Graph extends PureComponent {
         super(props);
 
         this.ctx = null;
+        this.canvas = null;
         this.width = null;
         this.height = null;
         this.supported = null;
@@ -38,7 +39,6 @@ export default class Graph extends PureComponent {
         this.supported = htmlCanvasSupported();
     }
     componentDidMount() {
-        this.ctx = this.canvas.getContext('2d');
         this.width = this.props.width;
         this.height = this.props.height;
         this.update();
@@ -46,28 +46,21 @@ export default class Graph extends PureComponent {
     componentDidUpdate() {
         this.update();
     }
-    getCanvas() {
-        if (!this.supported) {
-            return <span>Canvas not supported</span>;
-        }
-
-        const canvasRef = () => {
-            return elem => {
-                this.canvas = elem;
-            };
-        };
-
-        return <canvas ref={canvasRef()} {...this.canvasProperties}
-            className={this.canvasClasses()}
-            width={this.props.width} height={this.props.height} />;
-    }
     render() {
         const classes = `graph-container graph-${this.props.name}`;
-        const canvas = this.getCanvas();
+
+        const canvasRef = canvas => {
+            this.canvas = canvas;
+            if (canvas) {
+                this.ctx = canvas.getContext('2d');
+            }
+        }
 
         return <div className={classes} {...this.outerProperties}>
             {this.beforeCanvas()}
-            {canvas}
+            <canvas ref={canvasRef} {...this.canvasProperties}
+                className={this.canvasClasses()}
+                width={this.props.width} height={this.props.height} />
             {this.afterCanvas()}
         </div>;
     }

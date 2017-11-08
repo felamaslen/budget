@@ -1,0 +1,337 @@
+.page-funds {
+    .list-head {
+        .gain {
+            margin-left: 0.5em;
+            text-transform: none;
+            span {
+                padding: 0 0.25em;
+                margin-left: 0.25em;
+            }
+            &.profit {
+                background: #ccffd5;
+            }
+            &.loss {
+                background: #ffa7a7;
+            }
+        }
+    }
+    .list-ul {
+        span.item {
+            flex-basis: 376px;
+        }
+        .fund-extra-info {
+            display: flex;
+            flex-basis: initial;
+            flex-wrap: nowrap;
+
+            &.popout {
+                z-index: 10;
+                overflow: visible;
+
+                .graph-container {
+                    box-shadow: none;
+                }
+            }
+        }
+        li > span.transactions {
+            flex-basis: 102px;
+            overflow: visible !important;
+            .modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 300px;
+                min-height: 100px;
+                z-index: 5;
+                line-height: 26px;
+                background: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 3px 6px rgba(60, 60, 60, 0.3);
+                input {
+                    width: 95%;
+                }
+                thead {
+                    font-size: 0.9em;
+                }
+                .inner {
+                    padding: 0.2em;
+                }
+            }
+            .text {
+                display: none;
+            }
+        }
+    }
+    .list-ul {
+        .num-transactions {
+            display: block;
+            text-align: center;
+        }
+        & > li:nth-child(n+3) {
+            height: 48px;
+            line-height: 48px;
+            .fund-extra-info > .gain {
+                width: 200px;
+                height: 100%;
+            }
+        }
+        .fund-graph {
+            height: 100%;
+        }
+        .gain {
+            .text {
+                display: block;
+                width: 100%;
+                > span {
+                    padding: 0;
+                }
+            }
+            .profit {
+                color: #483be4;
+            }
+            .loss {
+                color: #ff2c2c;
+            }
+            .value {
+                font-size: 1.1em;
+                width: 40%;
+                color: #333;
+            }
+            .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
+                font-size: 0.8em;
+                line-height: 24px;
+                height: 24px;
+                background: rgba(255, 255, 255, 0.8);
+            }
+            .gain-abs, .day-gain-abs {
+                width: 15%;
+                &.profit:before {
+                    content: $text_up_arrow;
+                }
+                &.loss:before {
+                    content: $text_down_arrow;
+                }
+                &:before {
+                    font-style: normal;
+                    font-weight: normal;
+                    margin-right: 0.2em;
+                }
+            }
+            .gain-abs, .day-gain-abs, .gain, .day-gain {
+                width: 30%;
+            }
+        }
+        .sold {
+            color: #ccc;
+            .fund-graph {
+                filter: grayscale(100%);
+            }
+            .gain {
+                font-style: italic;
+                font-weight: normal;
+            }
+            .fund-graph:before, .gain:before {
+                content: $none;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                background: rgba(255, 255, 255, 0.5);
+                z-index: 1;
+            }
+        }
+    }
+    .gain {
+        display: inline-block;
+        .text {
+            padding: 0;
+            height: 100%;
+            background: #666;
+            &>span {
+                float: left;
+                padding: 0 1px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                text-align: center;
+            }
+        }
+        .value {
+            width: 68px;
+            text-align: left;
+        }
+        .abs {
+            width: 64px;
+            text-align: left ;
+        }
+        .pct {
+            width: 62px;
+            text-align: right;
+        }
+    }
+    .graph-fund-history {
+        position: relative;
+    }
+    .graph-stocks {
+        position: static;
+        box-shadow: none;
+        width: 260px;
+        height: 50px;
+    }
+    .fund-graph {
+        display: inline-block;
+        width: 100px;
+        .fund-graph-cont {
+            .graph-container {
+                width: 100px;
+                height: 48px;
+                position: static;
+                background: transparent;
+            }
+            .popout {
+                z-index: 10;
+                background: rgba(255, 255, 255, 0.8);
+                box-shadow: 0 3px 7px rgba(20, 20, 20, 0.3);
+                width: 300px;
+                height: 120px;
+            }
+        }
+    }
+    .graph-container-pie {
+        width: 500px;
+        left: 1000px;
+    }
+    .stocks-list {
+        width: 500px;
+        height: 300px;
+        font-size: 0.8em;
+        .graph-container {
+            background: #121212;
+            color: white;
+        }
+        
+        span {
+            display: inline-block;
+        }
+        
+        li {
+            @include stocks-list-price-change;
+            border-bottom: 1px solid #222;
+            padding-top: 1px;
+
+            &.up.hl-up {
+                background-color: $color_bg_up_hl;
+            }
+            &.up.hl-down {
+                background-color: $color_bg_up_rev;
+            }
+            &.down.hl-up {
+                background-color: $color_bg_down_rev;
+            }
+            &.down.hl-down {
+                background-color: $color_bg_down_hl;
+            }
+
+            &:nth-child(2n+1) {
+                background: #0e0e0e;
+            }
+        }
+            
+        .change {
+            &:after {
+                display: inline-block;
+                width: 10px;
+                height: 2px;
+                content: $none;
+                vertical-align: middle;
+                background: turquoise;
+            }
+        }
+        
+        .stocks-list-ul {
+            margin: 0;
+            width: 350px;
+            height: 100%;
+            overflow-y: scroll;
+            float: left;
+            padding: 0;
+            list-style: none;
+            font-size: 13pt;
+
+            span {
+                white-space: nowrap;
+                line-height: 20px;
+                vertical-align: top;
+            }
+            .name-column {
+                width: 68%;
+                text-overflow: ellipsis;
+                overflow: hidden;
+
+                .code, .title {
+                }
+                .code {
+                    margin: 1px;
+                    padding-right: 4px;
+                    line-height: 18px;
+                    color: white;
+                    font-size: 11pt;
+                    background: rgba(0, 0, 0, 0.3);
+                }
+                .title {
+                    color: #999;
+                    font-size: 8pt;
+                    width: 100%;
+                }
+            }
+            .price, .change {
+                width: 16%;
+                font-size: 10pt;
+                color: white;
+                text-align: right;
+            }
+            .up .change {
+               color: $color_bg_up;
+            }
+            .down .change {
+               color: $color_bg_down;
+            }
+            
+            .hl-up, .hl-down {
+                font-weight: bold;
+            }
+        }
+        .stocks-sidebar {
+            width: 150px;
+            height: 100%;
+            float: right;
+            text-align: right;
+            ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            .graph-container {
+                width: auto;
+                height: auto;
+                box-shadow: none;
+                position: static;
+                background: none;
+            }
+            .name-column {
+                width: 60%;
+                color: #eee;
+                font-style: italic;
+                .title:after {
+                    content: ": ";
+                }
+            }
+            .code, .price {
+                display: none;
+            }
+            .price, .change {
+                width: 40%;
+            }
+        }
+    }
+}
+

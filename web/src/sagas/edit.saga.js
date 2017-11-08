@@ -1,11 +1,13 @@
 import { List as list } from 'immutable';
-import { select, put } from 'redux-saga/effects';
+import { select, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
 
 import { aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';
+
+import { selectApiKey } from '.'
 import { addServerDataRequest } from './app.saga';
 
 export function *requestEditSuggestions({ payload }) {
@@ -16,11 +18,12 @@ export function *requestEditSuggestions({ payload }) {
         return;
     }
 
-    const apiKey = yield select(state => state.getIn(['user', 'apiKey']));
+    const apiKey = yield select(selectApiKey)
+
     const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
 
     try {
-        const response = yield axios.get(url, { headers: { 'Authorization': apiKey } });
+        const response = yield call(axios.get, url, { headers: { 'Authorization': apiKey } });
 
         const items = list(response.data.data.list);
 
@@ -31,10 +34,16 @@ export function *requestEditSuggestions({ payload }) {
     }
 }
 
+export const selectModalState = state => ({
+    modalDialogType: state.getIn(['modalDialog', 'type']),
+    invalidKeys: state.getIn(['modalDialog', 'invalidKeys']),
+    modalDialogLoading: state.getIn(['modalDialog', 'loading']),
+    item: state.getIn(['modalDialog', 'fieldsString']),
+    fields: state.getIn(['modalDialog', 'fieldsValidated'])
+})
+
 export function *handleModal({ payload }) {
-    const modalDialogType = yield select(state => state.getIn(['modalDialog', 'type']));
-    const invalidKeys = yield select(state => state.getIn(['modalDialog', 'invalidKeys']));
-    const modalDialogLoading = yield select(state => state.getIn(['modalDialog', 'loading']));
+    const { modalDialogType, invalidKeys, modalDialogLoading, item, fields } = yield select(selectModalState)
 
     const noContinue = !(payload && modalDialogType === 'add' &&
         invalidKeys.size === 0 && modalDialogLoading);
@@ -45,10 +54,7 @@ export function *handleModal({ payload }) {
 
     const { pageIndex } = payload;
 
-    const item = yield select(state => state.getIn(['modalDialog', 'fieldsString']));
-    const fields = yield select(state => state.getIn(['modalDialog', 'fieldsValidated']));
-
-    yield addServerDataRequest({ item, fields, pageIndex });
+    yield call(addServerDataRequest, { item, fields, pageIndex });
 
     yield put(aMobileDialogClosed(null));
 }

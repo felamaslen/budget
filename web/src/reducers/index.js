@@ -39,7 +39,6 @@ const reducers = createReducerObject([
 
     // app actions
     [AC.USER_LOGGED_OUT, app.rLogout],
-    [AC.PAGE_NAVIGATED, app.rNavigateToPage],
     [AC.KEY_PRESSED, app.rHandleKeyPress],
     [AC.TIME_UPDATED, app.rUpdateTime],
     [AC.SERVER_UPDATED, app.rUpdateServer],

@@ -1,0 +1,71 @@
+.navbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: $height_nav;
+    z-index: 10;
+    color: white;
+    background: white;
+    .app-logo {
+        height: $height_nav;
+        .queue-not-saved {
+            padding-right: 1em;
+        }
+        .logo {
+            line-height: $height_nav;
+            font-family: Ubuntu, Georgia, serif;
+            font-weight: bold;
+            font-size: 22px;
+            position: relative;
+            &:before {
+                display: inline-block;
+                content: $none;
+                width: $width_logo;
+                height: $height_logo;
+                vertical-align: middle;
+                background: url($nav_img) 0 -56px;
+                padding-right: 0.5em;
+            }
+            .loading-api {
+                width: $width_logo - 4;
+                height: $height_logo - 4;
+                position: absolute;
+                left: -2px;
+                top: -2px;
+                border-radius: 100%;
+                border: 4px solid transparent;
+                border-top: 4px solid yellow;
+                animation: spin 1s infinite steps(64);
+            }
+        }
+    }
+    .nav-link-li {
+        vertical-align: bottom;
+        float: left;
+    }
+    .nav-list {
+        margin: 0;
+        list-style: none;
+        white-space: nowrap;
+        transition: 0.2s opacity;
+    }
+    .nav-link, .nav-link-btn {
+        line-height: 30px;
+        cursor: pointer;
+        &:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        &:active {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        &:before {
+            // icon
+            content: $none;
+            background-image: url($nav_img);
+            width: 28px;
+            height: 28px;
+        }
+    }
+}
+

@@ -1,0 +1,23 @@
+.login-form {
+    width: 300px;
+    height: 450px;
+    margin-top: -225px;
+    margin-left: -150px;
+    h3 {
+        height: 60px;
+        line-height: 60px;
+    }
+    .pin-display {
+        margin: 0 12px 16px 12px;
+        .input-pin {
+            height: 80px;
+        }
+    }
+    .number-input {
+        height: 280px;
+        .btn-digit {
+            font-size: 40px;
+        }
+    }
+}
+
