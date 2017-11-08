@@ -100,20 +100,29 @@
             position: absolute;
             z-index: 5;
         }
+        .block-saved {
+            background-color: $color-saved;
+            background-image: none;
+
+            .sub-block {
+                background-image: linear-gradient(45deg, rgba(255,255,255,0.2) 25%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, rgba(0,0,0,0) 75%, rgba(0,0,0,0) 0);
+                background-size: 16px 16px;
+            }
+        }
         .block-bills {
-            background: $color_bills;
+            background: $color-bills;
         }
         .block-food {
-            background: $color_food;
+            background: $color-food;
         }
         .block-general {
-            background: $color_general;
+            background: $color-general;
         }
         .block-holiday {
-            background: $color_holiday;
+            background: $color-holiday;
         }
         .block-social {
-            background: $color_social;
+            background: $color-social;
         }
     }
 }

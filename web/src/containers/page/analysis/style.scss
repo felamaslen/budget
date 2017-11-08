@@ -46,10 +46,10 @@
             }
             .selected {
                 &:before {
-                    content: $bracket_left;
+                    content: $bracket-left;
                 }
                 &:after {
-                    content: $bracket_right;
+                    content: $bracket-right;
                 }
             }
         }
@@ -99,20 +99,23 @@
                 margin-left: 14px;
                 background: transparent;
             }
+            &.saved .indicator {
+                background: $color-saved;
+            }
             &.bills .indicator {
-                background: $color_bills;
+                background: $color-bills;
             }
             &.food .indicator {
-                background: $color_food;
+                background: $color-food;
             }
             &.general .indicator {
-                background: $color_general;
+                background: $color-general;
             }
             &.holiday .indicator {
-                background: $color_holiday;
+                background: $color-holiday;
             }
             &.social .indicator {
-                background: $color_social;
+                background: $color-social;
             }
         }
         .sub-tree {
