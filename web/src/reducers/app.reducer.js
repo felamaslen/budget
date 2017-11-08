@@ -6,7 +6,6 @@ import { List as list, Map as map } from 'immutable';
 
 import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
-import { rLoadContent } from './content.reducer';
 import { rActivateEditable } from './edit.reducer';
 import { reloadAnalysis } from './analysis.reducer';
 import { getFundsCachedValueAgeText } from './funds.reducer';
@@ -351,30 +350,6 @@ export function rLogout(reduction) {
 
     return resetAppState(reduction)
         .setIn(['loginForm', 'visible'], true);
-}
-
-export function rNavigateToPage(reduction, pageIndex) {
-    let newReduction = reduction;
-    if (!newReduction.getIn(['pagesLoaded', pageIndex])) {
-        newReduction = rLoadContent(newReduction, pageIndex);
-    }
-    newReduction = newReduction.setIn(['currentPageIndex'], pageIndex);
-    if (LIST_PAGES.indexOf(pageIndex) > -1) {
-        newReduction = newReduction
-            .setIn(
-                ['edit', 'add', pageIndex], getAddDefaultValues(pageIndex)
-            )
-            .setIn(
-                ['edit', 'active'], getNullEditable(pageIndex)
-            )
-            .setIn(['edit', 'addBtnFocus'], false);
-    }
-
-    if (PAGES[pageIndex] === 'analysis') {
-        newReduction = reloadAnalysis(newReduction, newReduction);
-    }
-
-    return newReduction;
 }
 
 export function rUpdateTime(reduction) {

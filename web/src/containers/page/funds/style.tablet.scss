@@ -1,0 +1,19 @@
+.page-funds {
+    .fund-graph-cont {
+        .graph-container {
+        }
+    }
+    .graph-fund-history {
+        position: relative;
+        canvas {
+            position: absolute;
+            right: 0;
+        }
+    }
+    .graph-container-pie {
+    }
+    .gain span.gain-info {
+        display: none;
+    }
+}
+

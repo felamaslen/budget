@@ -1,0 +1,22 @@
+@keyframes spin {
+    to { transform: rotate(1turn); }
+}
+
+@keyframes into-view {
+    from {
+        @include modal-enter-state;
+    }
+    to {
+        @include modal-normal-state;
+    }
+}
+
+@keyframes out-of-view {
+    from {
+        @include modal-normal-state;
+    }
+    to {
+        @include modal-exit-state;
+    }
+}
+

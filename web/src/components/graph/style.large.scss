@@ -1,0 +1,22 @@
+.graph-container-outer {
+    display: flex;
+    margin: 1em 0;
+    align-items: center;
+    justify-content: center;
+
+    .graph-container {
+        margin: 0 2em;
+        overflow: hidden;
+    }
+}
+
+.graph-container {
+    width: 500px;
+}
+
+.graph-container {
+    z-index: 2;
+    background: rgba(255, 255, 255, .8);
+    box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
+}
+

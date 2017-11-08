@@ -8,12 +8,9 @@ import connect, { GraphCashFlow } from './cash-flow';
 import PropTypes from 'prop-types';
 
 import { rgba } from '../../../../misc/color';
+import { PAGES, GRAPH_SPEND_CATEGORIES } from '../../../../misc/const';
 import {
-    PAGES, GRAPH_SPEND_CATEGORIES, OVERVIEW_COLUMNS,
-    GRAPH_KEY_OFFSET_X, GRAPH_KEY_OFFSET_Y, GRAPH_KEY_SIZE
-} from '../../../../misc/const';
-import {
-    COLOR_DARK, COLOR_CATEGORY,
+    COLOR_DARK,
     COLOR_LOSS, COLOR_PROFIT, COLOR_TRANSLUCENT_LIGHT, COLOR_SPENDING,
     FONT_GRAPH_KEY_SMALL, FONT_GRAPH_KEY
 } from '../../../../misc/config';
@@ -70,20 +67,6 @@ export class GraphSpend extends GraphCashFlow {
 
         this.ctx.textBaseline = 'middle';
         this.ctx.font = FONT_GRAPH_KEY;
-
-        this.props.categories.forEach(category => {
-            const humanName = OVERVIEW_COLUMNS.find(item => item[0] === category.name)[1];
-            this.ctx.fillStyle = rgba(COLOR_DARK);
-            this.ctx.fillText(humanName, GRAPH_KEY_OFFSET_X + category.key, 40);
-
-            this.ctx.fillStyle = rgba(COLOR_CATEGORY[category.name]);
-            this.ctx.fillRect(
-                GRAPH_KEY_OFFSET_X + category.key - 15,
-                GRAPH_KEY_OFFSET_Y,
-                GRAPH_KEY_SIZE,
-                GRAPH_KEY_SIZE
-            );
-        });
     }
     drawArrow(xPix, value) {
         const color = value > 0

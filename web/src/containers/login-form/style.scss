@@ -1,0 +1,106 @@
+.login-form {
+    z-index: 1001;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 240px;
+    height: 300px;;
+    margin-top: -150px;
+    margin-left: -120px;
+    background: #111;
+    border-radius: 4px;
+    box-shadow: 0 26px 90px rgba(60, 60, 60, .9);
+    h3 {
+        margin: 0;
+        height: 48px;
+        line-height: 48px;
+        font-size: 24px;
+        text-align: center;
+        color: #fefefe;
+    }
+    .pin-display {
+        display: flex;
+        flex-flow: row nowrap;
+        margin-bottom: 10px;
+    }
+    .input-pin {
+        flex-grow: 1;
+        font-size: 64px;
+        height: 60px;
+        margin: 0 6px;
+        position: relative;
+        border: none;
+        border-radius: 4px;
+        background: #333;
+        color: transparent;
+        text-shadow: 0 0 0px #fefefe;
+        text-align: center;
+        outline: none;
+        transition: background-color linear .1s;
+        &.active {
+            background-color: #fefefe;
+            text-shadow: 0 0 0px #111;
+        }
+        &.done:after {
+            content: $none;
+            width: 16px;
+            height: 16px;
+            background: #fefefe;
+            border-radius: 16px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+        }
+    }
+    .number-input {
+        display: flex;
+        flex-flow: column nowrap;
+        height: 170px;
+        margin: 0 6px 12px 6px;
+        background: #3e3e3e;
+        box-shadow: inset 0 0 13px rgba(0, 0, 0, 0.5);
+        .number-input-row {
+            display: flex;
+            flex-flow: row nowrap;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-digit {
+            flex-grow: 1;
+            margin: 0 3.166666666%;
+            padding: 0;
+            background-color: #868686;
+            background-image: linear-gradient(167deg, rgba(255, 255, 255, 0.1) 50%, rgba(0, 0, 0, 0) 55%),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0));
+            box-shadow: inset 0 0 0 1px #868686,
+            inset 0 0 0 2px rgba(255, 255, 255, 0.15),
+            0 8px 0 0 #737373,
+            0 8px 0 1px rgba(0, 0, 0, 0.4),
+            0 8px 8px 1px rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-family: "Lucida Grande", Arial, sans-serif;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: -1px;
+            position: relative;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+            transition: 0.05s;
+            &:active {
+                box-shadow: inset 0 0 0 1px #737373,
+                inset 0 0 0 2px rgba(255, 255, 255, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.4);
+                transform: translateY(10px);
+            }
+        }
+        .btn-digit-0 {
+            flex-grow: 0;
+            flex-basis: 27%;
+        }
+    }
+}
+

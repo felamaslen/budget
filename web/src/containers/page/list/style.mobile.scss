@@ -1,0 +1,133 @@
+.list-insert {
+    position: fixed;
+    top: $height-nav-mobile + $height-header-mobile;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: scroll;
+    .list-head {
+        display: flex;
+        flex-flow: row nowrap;
+        top: $height-header-mobile + $height-nav-mobile;
+        width: 100%;
+        span {
+            text-align: center;
+        }
+    }
+    .list-ul {
+        display: flex;
+        flex-flow: column nowrap;
+        margin: 0 0 50px 0;
+        padding: 0;
+
+        li {
+            display: flex;
+            flex-flow: row nowrap;
+            line-height: 36px;
+            height: 36px;
+            & > span {
+                display: flex;
+                flex-basis: 0;
+                min-width: 0;
+                white-space: nowrap;
+                padding: 0 2px;
+
+                span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+    }
+    .list-head, .list-ul {
+        .date {
+            flex-grow: 4;
+        }
+        .item {
+            flex-grow: 7;
+        }
+        .cost {
+            flex-grow: 4;
+        }
+    }
+    .button-add-outer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        font-size: 1.5em;
+        background: rgba(255, 255, 255, 0.7);
+    }
+    .button-add {
+        width: 120px;
+        flex-grow: 0;
+        background: $color-mob-primary-dark;
+        color: white;
+    }
+}
+
+.list-funds {
+    &, .list-head {
+        background: $color-funds-light;
+    }
+    .list-head {
+        top: $height-header-mobile + $height-nav-mobile + 65;
+    }
+    .list-ul {
+        margin-top: 65px;
+    }
+    .list-head, .list-ul {
+        .date {
+            flex-grow: 8;
+        }
+        .item {
+            flex-grow: 12;
+        }
+        .cost {
+            flex-grow: 10;
+            font-size: 90%;
+        }
+        .cost-value, .actual-value {
+            display: flex;
+            flex-grow: 1;
+        }
+        .actual-value {
+            font-weight: bold;
+        }
+    }
+}
+.list-income {
+    &, .list-head {
+        background: $color-income-light;
+    }
+}
+.list-bills {
+    &, .list-head {
+        background: $color-bills-light;
+    }
+}
+.list-food {
+    &, .list-head {
+        background: $color-food-light;
+    }
+}
+.list-general {
+&, .list-head {
+    background: $color-general-light;
+    }
+}
+.list-holiday {
+    &, .list-head {
+        background: $color-holiday-light;
+    }
+}
+.list-social {
+    &, .list-head {
+        background: $color-social-light;
+    }
+}
+

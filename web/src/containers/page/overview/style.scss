@@ -1,0 +1,63 @@
+.page-overview {
+    .table-flex {
+        .active {
+            .month {
+                background: $color_green;
+                color: white;
+            }
+        }
+        .future {
+            .month {
+                background: $color_amber;
+            }
+        }
+    }
+    .month {
+        text-align: right;
+    }
+    .graph-balance {
+        .show-all {
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-size: 0.9em;
+            line-height: 20px;
+            padding: 0.1em 0.2em;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            span {
+                vertical-align: middle;
+            }
+            .checkbox {
+                width: 20px;
+                height: 20px;
+                float: left;
+                position: relative;
+                &:before {
+                    left: 4px;
+                    top: 4px;
+                    width: 12px;
+                    height: 12px;
+                    box-shadow: 0 0 0 1px black;
+                }
+                &:after {
+                    left: 7px;
+                    top: 7px;
+                    width: 6px;
+                    height: 6px;
+                }
+                &:before, &:after {
+                    content: $none;
+                    position: absolute;
+                    border-radius: 100%;
+                }
+            }
+            &.enabled {
+                .checkbox:after {
+                    background: black;
+                }
+            }
+        }
+    }
+}
+

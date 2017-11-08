@@ -1,72 +1,72 @@
 // colors
-$color_grad_btn_from:   #74ad5a;
-$color_grad_btn_to:     #68a54b;
-$color_shadow_btn:      #9acc85;
-$color_green:           #009933;
-$color_amber:           #fbe07f;
+$color-grad-btn-from:   #74ad5a;
+$color-grad-btn-to:     #68a54b;
+$color-shadow-btn:      #9acc85;
+$color-green:           #009933;
+$color-amber:           #fbe07f;
 
-$color_primary:         #fffef7;
-$color_primary_light:   #f5b831;
-$color_primary_dark:    #9f3030;
+$color-primary:         #fffef7;
+$color-primary-light:   #f5b831;
+$color-primary-dark:    #9f3030;
 
-$color_bg_up:           #55e836;
-$color_bg_up_hl:        #122d0c;
-$color_bg_up_rev:       #332c2c;
-$color_bg_down:         #ff1717;
-$color_bg_down_hl:      #2f0f0f;
-$color_bg_down_rev:     #2c332d;
+$color-bg-up:           #55e836;
+$color-bg-up-hl:        #122d0c;
+$color-bg-up-rev:       #332c2c;
+$color-bg-down:         #ff1717;
+$color-bg-down-hl:      #2f0f0f;
+$color-bg-down-rev:     #2c332d;
 
-$color_analysis:        #f4a742;
-$color_funds:           #546e7a;
-$color_income:          #d84315;
-$color_bills:           #b71c1c;
-$color_food:            #43a047;
-$color_general:         #01579b;
-$color_holiday:         #00897b;
-$color_social:          #bf9e24;
+$color-analysis:        #f4a742;
+$color-funds:           #546e7a;
+$color-income:          #d84315;
+$color-bills:           #b71c1c;
+$color-food:            #43a047;
+$color-general:         #01579b;
+$color-holiday:         #00897b;
+$color-social:          #bf9e24;
 
-$color_funds_light:     rgb(194, 221, 234);
-$color_income_light:    rgb(255, 197, 179);
-$color_bills_light:     rgb(234, 190, 182);
-$color_food_light:      rgb(165, 212, 166);
-$color_general_light:   rgb(170, 200, 224);
-$color_holiday_light:   rgb(162, 222, 215);
-$color_social_light:    rgb(217, 202, 148);
+$color-funds-light:     rgb(194, 221, 234);
+$color-income-light:    rgb(255, 197, 179);
+$color-bills-light:     rgb(234, 190, 182);
+$color-food-light:      rgb(165, 212, 166);
+$color-general-light:   rgb(170, 200, 224);
+$color-holiday-light:   rgb(162, 222, 215);
+$color-social-light:    rgb(217, 202, 148);
 
 // responsive design parameters (injected from webpack)
-$width_page_mobile_small: $widthPageMobileSmall + px;
-$width_page_mobile: $widthPageMobile + px;
-$width_page_tablet_min: $widthPageMobile + 1;
-$width_page_tablet: $widthPageTablet + px;
-$width_page_tablet_small: $widthPageTabletSmall + px;
-$width_page_desktop_min: $widthPageTablet + 1;
+$width-page-mobile-small: $widthPageMobileSmall + px;
+$width-page-mobile: $widthPageMobile + px;
+$width-page-tablet-min: $widthPageMobile + 1;
+$width-page-tablet: $widthPageTablet + px;
+$width-page-tablet-small: $widthPageTabletSmall + px;
+$width-page-desktop-min: $widthPageTablet + 1;
 
 // common variables
-$width_logo:  30px;
-$height_logo: 30px;
-$height_nav:  49px;
+$width-logo:  30px;
+$height-logo: 30px;
+$height-nav:  49px;
 
-$top_nav: $height_nav + 10;
+$top-nav: $height-nav + 10;
 
-$nav_img: "../images/nav.png";
+$nav-img: "../images/nav.png";
 
 // mobile variables
-$height_header_mobile: 55px;
-$height_nav_mobile: 45px;
-$color_mob_primary: #fffef7;
-$color_mob_primary_dark: #9f3030;
-$color_mob_accent: #ffa040;
-$color_mob_overview_tbl_month: #fffca3;
-$color_mob_overview_tbl_income: #b7ffa3;
-$color_mob_overview_tbl_spending: #ffa3a3;
-$color_mob_overview_tbl_balance: #a3baff;
+$height-header-mobile: 55px;
+$height-nav-mobile: 45px;
+$color-mob-primary: #fffef7;
+$color-mob-primary-dark: #9f3030;
+$color-mob-accent: #ffa040;
+$color-mob-overview-tbl-month: #fffca3;
+$color-mob-overview-tbl-income: #b7ffa3;
+$color-mob-overview-tbl-spending: #ffa3a3;
+$color-mob-overview-tbl-balance: #a3baff;
 
 // text
-$text_show_graph: "Show";
-$text_hide_graph: "Hide";
+$text-show-graph: "Show";
+$text-hide-graph: "Hide";
 $none: "";
-$text_down_arrow: "\25be";
-$text_up_arrow: "\25b4";
-$bracket_left: "(";
-$bracket_right: ")";
+$text-down-arrow: "\25be";
+$text-up-arrow: "\25b4";
+$bracket-left: "(";
+$bracket-right: ")";
 

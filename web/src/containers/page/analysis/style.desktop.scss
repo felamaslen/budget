@@ -1,0 +1,11 @@
+.page-analysis {
+    margin: 0.5em 1em;
+}
+
+.block-view {
+    &.graph-container {
+        left: 824px;
+        top: $top_nav + 40;
+    }
+}
+

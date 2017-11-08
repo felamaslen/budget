@@ -9,8 +9,10 @@ import { requestEditSuggestions, handleModal } from './edit.saga';
 import { requestAnalysisData } from './analysis.saga';
 import { requestFundPeriodData, requestStocksList, requestStocksPrices } from './funds.saga';
 
+export const selectApiKey = state => state.getIn(['user', 'apiKey'])
+
 export function *watchSettingsLoaded() {
-    yield takeLatest(actions.SETTINGS_LOADED, loadSettings);
+    yield takeLatest(actions.SETTINGS_LOADED, loadSettings)
 }
 export function *watchAuthentication() {
     yield all([

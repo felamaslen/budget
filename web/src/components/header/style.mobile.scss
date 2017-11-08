@@ -1,0 +1,74 @@
+.navbar {
+    height: $height_header_mobile + $height_nav_mobile;
+    .app-logo {
+        width: 100%;
+        height: $height_header_mobile;
+        padding: 0 0.5em;
+        background: $color_mob_primary_dark;
+    }
+    .queue-not-saved {
+        float: right;
+        line-height: $height_header_mobile;
+    }
+    .nav-list {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        padding: 0;
+        box-shadow: 0 3px 9px rgba(100, 100, 100, 0.5),
+        0 -2px 6px rgba(0, 0, 0, 0.3);
+    }
+    .nav-link {
+        flex: 1 0 0;
+        border-bottom: 4px solid transparent;
+        display: block;
+        height: $height_nav_mobile - 12;
+        text-align: center;
+        text-indent: -9999px;
+        overflow: hidden;
+        padding-top: 8px;
+        &.active {
+            border-color: $color_mob_accent;
+        }
+    }
+    .nav-link, .nav-link-btn {
+        &:before {
+            display: block;
+            margin: 0 auto;
+        }
+    }
+    .nav-link-overview:before {
+        background-position: -200px 0;
+    }
+    .nav-link-analysis:before {
+        background-position: -228px 0;
+    }
+    .nav-link-funds:before {
+        background-position: -256px 0;
+    }
+    .nav-link-income:before {
+        background-position: -284px 0;
+    }
+    .nav-link-bills:before {
+        background-position: -312px 0;
+    }
+    .nav-link-food:before {
+        background-position: -340px 0;
+    }
+    .nav-link-general:before {
+        background-position: -368px 0;
+    }
+    .nav-link-holiday:before {
+        background-position: -200px -28px;
+    }
+    .nav-link-social:before {
+        background-position: -228px -28px;
+    }
+    .nav-link-logout {
+        display: none;
+        &:before {
+            background-position: -256px -28px;
+        }
+    }
+}
+

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { aUserLoggedOut, aPageNavigatedTo } from '../../actions/app.actions';
+import { aUserLoggedOut } from '../../actions/app.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -32,8 +32,7 @@ export function Navbar({ active }) {
 
 Navbar.propTypes = {
     active: PropTypes.bool.isRequired,
-    logout: PropTypes.func.isRequired,
-    navigate: PropTypes.func.isRequired
+    logout: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -41,8 +40,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    logout: () => dispatch(aUserLoggedOut()),
-    navigate: page => dispatch(aPageNavigatedTo(page))
+    logout: () => dispatch(aUserLoggedOut())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
