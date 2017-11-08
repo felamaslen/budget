@@ -78,18 +78,25 @@ export class ListRowFunds extends ListRow {
         const graph = this.renderFundGraph();
         const gainInfo = this.renderGainInfo();
 
-        return <span className="fund-extra-info">{graph}{gainInfo}</span>;
+        const className = classNames({
+            'fund-extra-info': true,
+            popout: this.props.popout
+        });
+
+        return <span className={className}>{graph}{gainInfo}</span>;
     }
 }
 
 ListRowFunds.propTypes = {
-    sold: PropTypes.bool.isRequired
+    sold: PropTypes.bool.isRequired,
+    popout: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = () => (state, ownProps) => ({
     sold: state
         .getIn(['pages', pageIndex, 'rows', ownProps.id, 'cols', transactionsKey])
-        .isSold()
+        .isSold(),
+    popout: Boolean(state.getIn(['pages', pageIndex, 'rows', ownProps.id, 'historyPopout']))
 });
 
 export default connect(pageIndex)(mapStateToProps)(ListRowFunds);

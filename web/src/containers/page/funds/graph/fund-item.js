@@ -65,7 +65,10 @@ export class GraphFundItem extends LineGraph {
         if (!this.supported) {
             return;
         }
+
         // clear canvas
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         // draw axes
