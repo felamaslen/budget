@@ -39,7 +39,7 @@ describe('/data/analysis', () => {
             );
 
             const expectedResult = {
-                timeline: null,
+                timeline: new Array(30).fill([]),
                 cost: [
                     ['bills', [
                         ['a', 999], ['b', 1923], ['c', 110], ['d', 91], ['e', 110]]

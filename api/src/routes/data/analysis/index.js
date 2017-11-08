@@ -71,7 +71,13 @@ async function getTimeline(db, user, now, period, pageIndex, { condition, ...par
         const length = monthLength(year, month)
 
         return new Array(length).fill(0)
-            .map((item, key) => rowsByDate[year][month][key + 1] || [])
+            .map((item, key) => {
+                if (year in rowsByDate && month in rowsByDate[year]) {
+                    return rowsByDate[year][month][key + 1] || [];
+                }
+
+                return [];
+            });
     }
 
     return null
