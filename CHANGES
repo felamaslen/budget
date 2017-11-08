@@ -1,5 +1,10 @@
 Release:
 
+- 3.2.1-beta
+    - Web client:
+        - Timeline on analysis page
+        - Bug fixes
+
 - 3.2.0-beta
     - Web client:
         - Use redux-saga for side effects
