@@ -10,20 +10,6 @@
 .graph-hidden .graph-container-outer {
     height: 0;
 }
-.graph-toggle-btn {
-    position: absolute;
-    right: 0;
-    bottom: -24px;
-    top: initial !important;
-    padding: 3px 10px;
-    box-shadow: 0 3px 10px rgba(60, 60, 60, .6);
-    &:after {
-        content: $text-hide-graph;
-    }
-    &:active {
-        bottom: -25px;
-    }
-}
 .graph-hidden {
     .list-head {
         top: $top-nav;

@@ -8,10 +8,10 @@
                 margin-left: 0.25em;
             }
             &.profit {
-                background: #ccffd5;
+                background: $color-profit-light;
             }
             &.loss {
-                background: #ffa7a7;
+                background: $color-loss-light;
             }
         }
     }
@@ -44,8 +44,8 @@
                 min-height: 100px;
                 z-index: 5;
                 line-height: 26px;
-                background: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 3px 6px rgba(60, 60, 60, 0.3);
+                background: $color-translucent-l8;
+                box-shadow: 0 3px 6px $color-shadow-l2;
                 input {
                     width: 95%;
                 }
@@ -86,29 +86,29 @@
                 }
             }
             .profit {
-                color: #483be4;
+                color: $color-profit;
             }
             .loss {
-                color: #ff2c2c;
+                color: $color-loss;
             }
             .value {
                 font-size: 1.1em;
                 width: 40%;
-                color: #333;
+                color: $color-slightly-dark;
             }
             .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
                 font-size: 0.8em;
                 line-height: 24px;
                 height: 24px;
-                background: rgba(255, 255, 255, 0.8);
+                background: $color-translucent-l8;
             }
             .gain-abs, .day-gain-abs {
                 width: 15%;
                 &.profit:before {
-                    content: $text_up_arrow;
+                    content: $text-up-arrow;
                 }
                 &.loss:before {
-                    content: $text_down_arrow;
+                    content: $text-down-arrow;
                 }
                 &:before {
                     font-style: normal;
@@ -121,7 +121,7 @@
             }
         }
         .sold {
-            color: #ccc;
+            color: $color-slightly-light;
             .fund-graph {
                 filter: grayscale(100%);
             }
@@ -136,7 +136,7 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                background: rgba(255, 255, 255, 0.5);
+                background: $color-translucent-l5;
                 z-index: 1;
             }
         }
@@ -146,7 +146,7 @@
         .text {
             padding: 0;
             height: 100%;
-            background: #666;
+            background: $color-medium-slightly-dark;
             &>span {
                 float: left;
                 padding: 0 1px;
@@ -189,8 +189,8 @@
             }
             .popout {
                 z-index: 10;
-                background: rgba(255, 255, 255, 0.8);
-                box-shadow: 0 3px 7px rgba(20, 20, 20, 0.3);
+                background: $color-translucent-l8;
+                box-shadow: 0 3px 7px $color-shadow-l2;
                 width: 300px;
                 height: 120px;
             }
@@ -201,12 +201,10 @@
         left: 1000px;
     }
     .stocks-list {
-        width: 500px;
-        height: 300px;
         font-size: 0.8em;
         .graph-container {
-            background: #121212;
-            color: white;
+            background: $color-very-dark;
+            color: $color-white;
         }
         
         span {
@@ -215,24 +213,24 @@
         
         li {
             @include stocks-list-price-change;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid $color-dark;
             padding-top: 1px;
 
             &.up.hl-up {
-                background-color: $color_bg_up_hl;
+                background-color: $color-bg-up-hl;
             }
             &.up.hl-down {
-                background-color: $color_bg_up_rev;
+                background-color: $color-bg-up-rev;
             }
             &.down.hl-up {
-                background-color: $color_bg_down_rev;
+                background-color: $color-bg-down-rev;
             }
             &.down.hl-down {
-                background-color: $color_bg_down_hl;
+                background-color: $color-bg-down-hl;
             }
 
             &:nth-child(2n+1) {
-                background: #0e0e0e;
+                background: $color-very-dark-1;
             }
         }
             
@@ -273,12 +271,12 @@
                     margin: 1px;
                     padding-right: 4px;
                     line-height: 18px;
-                    color: white;
+                    color: $color-white;
                     font-size: 11pt;
-                    background: rgba(0, 0, 0, 0.3);
+                    background: $color-shadow-l3;
                 }
                 .title {
-                    color: #999;
+                    color: $color-medium-very-light;
                     font-size: 8pt;
                     width: 100%;
                 }
@@ -286,14 +284,14 @@
             .price, .change {
                 width: 16%;
                 font-size: 10pt;
-                color: white;
+                color: $color-white;
                 text-align: right;
             }
             .up .change {
-               color: $color_bg_up;
+               color: $color-bg-up;
             }
             .down .change {
-               color: $color_bg_down;
+               color: $color-bg-down;
             }
             
             .hl-up, .hl-down {
@@ -319,7 +317,7 @@
             }
             .name-column {
                 width: 60%;
-                color: #eee;
+                color: $color-light;
                 font-style: italic;
                 .title:after {
                     content: ": ";

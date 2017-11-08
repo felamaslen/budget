@@ -20,7 +20,7 @@
     .tree-list {
         & > .tree-list-item > .main, .sub-tree .tree-list-item {
             &:hover {
-                background: #039cff;
+                background: $color-blue;
             }
         }
     }
@@ -31,7 +31,7 @@
         }
         .block, .sub-block {
             &.active {
-                background: rgba(255, 255, 0, 0.85);
+                background: $color-highlight;
             }
         }
     }

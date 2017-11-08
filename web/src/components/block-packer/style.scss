@@ -13,8 +13,8 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        background: #222;
-        color: #eaeaea;
+        background: $color-bg-analysis-status;
+        color: $color-analysis-status;
         margin-top: -1px;
         .inner {
             padding: 0 0.8em;
@@ -35,7 +35,7 @@
         bottom: 0;
         width: 100%;
         height: 100%;
-        box-shadow: 0 3px 13px rgba(60, 60, 60, 0.4);
+        box-shadow: 0 3px 13px $color-shadow-l6;
 
         .block-group {
             float: left;
@@ -55,20 +55,18 @@
             height: 100%;
         }
         .block {
-            box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6);
+            box-shadow: inset 0 0 13px $color-shadow-l6;
             z-index: 1;
             &:hover {
                 z-index: 2;
-                box-shadow: inset 0 0 13px rgba(60, 60, 60, 0.6),
-                0 0 16px 3px rgba(60, 60, 60, 0.8);
+                box-shadow: inset 0 0 13px $color-shadow-l2, 0 0 16px 3px $color-shadow-l4;
             }
         }
         .sub-block, &.shallow .block {
             transition: opacity 0.1s linear;
             opacity: 1;
-            box-shadow: inset -1px -1px 13px rgba(30, 30, 30, 0.4);
-            background-image: linear-gradient(to bottom right,
-                rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.3));
+            box-shadow: inset -1px -1px 13px $color-shadow-l4;
+            background-image: linear-gradient(to bottom right, $color-translucent-l6, $color-shadow-l3);
             &.hidden {
                 opacity: 0;
             }
@@ -79,22 +77,22 @@
             position: relative;
         }
 
-        .block-0 { background: #d35400; }
-        .block-1 { background: #1abc9c; }
-        .block-2 { background: #f1c40f; }
-        .block-3 { background: #2980b9; }
-        .block-4 { background: #27ae60; }
-        .block-5 { background: #e74c3c; }
-        .block-6 { background: #9b59b6; }
-        .block-7 { background: #f70000; }
-        .block-8 { background: #f206ff; }
-        .block-9 { background: #29afd6; }
-        .block-10 { background: #4a9586; }
-        .block-11 { background: #b9264f; }
-        .block-12 { background: #c27e3a; }
-        .block-13 { background: #9d9d00; }
-        .block-14 { background: #75b4ff; }
-        .block-15 { background: #93bf96; }
+        .block-0 { background: $color-block0; }
+        .block-1 { background: $color-block1; }
+        .block-2 { background: $color-block2; }
+        .block-3 { background: $color-block3; }
+        .block-4 { background: $color-block4; }
+        .block-5 { background: $color-block5; }
+        .block-6 { background: $color-block6; }
+        .block-7 { background: $color-block7; }
+        .block-8 { background: $color-block8; }
+        .block-9 { background: $color-block9; }
+        .block-10 { background: $color-block10; }
+        .block-11 { background: $color-block11; }
+        .block-12 { background: $color-block12; }
+        .block-13 { background: $color-block13; }
+        .block-14 { background: $color-block14; }
+        .block-15 { background: $color-block15; }
 
         .preview {
             position: absolute;
@@ -105,8 +103,7 @@
             background-image: none;
 
             .sub-block {
-                background-image: linear-gradient(45deg, rgba(255,255,255,0.2) 25%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, rgba(0,0,0,0) 75%, rgba(0,0,0,0) 0);
-                background-size: 16px 16px;
+                @include diagonal-bg(16px);
             }
         }
         .block-bills {

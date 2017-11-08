@@ -17,9 +17,9 @@
         overflow-y: scroll;
         overflow-x: hidden;
         font-size: 1.3em;
-        background: rgba(255, 255, 255, 0.95);
+        background: $color-translucent-slight;
         border-radius: 3px;
-        box-shadow: 0 3px 7px rgba(60, 60, 60, 0.5);
+        box-shadow: 0 3px 7px $color-shadow-l3;
         transition: filter 0.1s linear;
 
         animation: into-view 0.3s ease-out;
@@ -72,7 +72,7 @@
                 content: $none;
                 width: 100%;
                 height: 4px;
-                border: 1px solid #ccc;
+                border: 1px solid $color-slightly-light;
                 border-top: none;
             }
             input[type=text],
@@ -88,7 +88,7 @@
         }
         &.invalid {
             .form-field:after {
-                border-color: #900;
+                border-color: $color-error;
             }
         }
         &.transactions {
@@ -109,7 +109,7 @@
                 }
                 li:not(:last-child) {
                     padding-bottom: 3px;
-                    border-bottom: 1px solid #999;
+                    border-bottom: 1px solid $color-medium-very-light;
                 }
             }
         }
@@ -122,19 +122,19 @@
         padding: 0 20px 20px 20px;
     }
     .button-cancel {
-        background: #ccc;
+        background: $color-slightly-light;
         color: black;
         &:after {
             content: $none;
             display: block;
             height: 100%;
             width: 0;
-            border-right: 1px solid #ccc;
+            border-right: 1px solid $color-medium-very-light;
         }
     }
     .button-submit {
-        background: #09e;
-        color: white;
+        background: $color-blue;
+        color: $color-white;
     }
 }
 

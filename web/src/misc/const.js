@@ -5,8 +5,8 @@
 import { widthPageMobile } from '../constants/styles';
 
 export const mediaQueries = {
-    mobile: `(max-device-width: ${widthPageMobile}px)`,
-    desktop: `(min-device-width: ${widthPageMobile + 1}px)`
+    mobile: `(max-width: ${widthPageMobile}px)`,
+    desktop: `(min-width: ${widthPageMobile + 1}px)`
 };
 
 export const API_VERSION = 3;

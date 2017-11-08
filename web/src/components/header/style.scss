@@ -3,17 +3,17 @@
     left: 0;
     right: 0;
     top: 0;
-    height: $height_nav;
+    height: $height-nav;
     z-index: 10;
-    color: white;
-    background: white;
+    color: $color-white;
+    background: $color-white;
     .app-logo {
-        height: $height_nav;
+        height: $height-nav;
         .queue-not-saved {
             padding-right: 1em;
         }
         .logo {
-            line-height: $height_nav;
+            line-height: $height-nav;
             font-family: Ubuntu, Georgia, serif;
             font-weight: bold;
             font-size: 22px;
@@ -21,22 +21,22 @@
             &:before {
                 display: inline-block;
                 content: $none;
-                width: $width_logo;
-                height: $height_logo;
+                width: $width-logo;
+                height: $height-logo;
                 vertical-align: middle;
-                background: url($nav_img) 0 -56px;
+                background: url($nav-img) 0 -56px;
                 padding-right: 0.5em;
             }
             .loading-api {
-                width: $width_logo - 4;
-                height: $height_logo - 4;
+                width: $width-logo - 4;
+                height: $height-logo - 4;
                 position: absolute;
                 left: -2px;
                 top: -2px;
                 border-radius: 100%;
                 border: 4px solid transparent;
-                border-top: 4px solid yellow;
-                animation: spin 1s infinite steps(64);
+                border-top: 4px solid $color-amber;
+                animation: spin 1s infinite ease;
             }
         }
     }
@@ -54,15 +54,15 @@
         line-height: 30px;
         cursor: pointer;
         &:hover {
-            background: rgba(0, 0, 0, 0.3);
+            background: $color-shadow-l3;
         }
         &:active {
-            background: rgba(0, 0, 0, 0.5);
+            background: $color-shadow-l5;
         }
         &:before {
             // icon
             content: $none;
-            background-image: url($nav_img);
+            background-image: url($nav-img);
             width: 28px;
             height: 28px;
         }

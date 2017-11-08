@@ -11,5 +11,8 @@ button {
     outline: none;
     text-transform: uppercase;
     font-weight: bold;
+    
+    &:not(:disabled) {
+        background: $color-button-bg-mobile;
+    }
 }
-

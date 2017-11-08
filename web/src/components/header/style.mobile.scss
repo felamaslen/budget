@@ -1,34 +1,33 @@
 .navbar {
-    height: $height_header_mobile + $height_nav_mobile;
+    height: $height-header-mobile + $height-nav-mobile;
     .app-logo {
         width: 100%;
-        height: $height_header_mobile;
+        height: $height-header-mobile;
         padding: 0 0.5em;
-        background: $color_mob_primary_dark;
+        background: $color-mob-primary-dark;
     }
     .queue-not-saved {
         float: right;
-        line-height: $height_header_mobile;
+        line-height: $height-header-mobile;
     }
     .nav-list {
         display: flex;
         width: 100%;
         flex-direction: row;
         padding: 0;
-        box-shadow: 0 3px 9px rgba(100, 100, 100, 0.5),
-        0 -2px 6px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 3px 9px $color-shadow-l3, 0 -2px 6px $color-shadow-l3;
     }
     .nav-link {
         flex: 1 0 0;
         border-bottom: 4px solid transparent;
         display: block;
-        height: $height_nav_mobile - 12;
+        height: $height-nav-mobile - 12;
         text-align: center;
         text-indent: -9999px;
         overflow: hidden;
         padding-top: 8px;
         &.active {
-            border-color: $color_mob_accent;
+            border-color: $color-mob-accent;
         }
     }
     .nav-link, .nav-link-btn {

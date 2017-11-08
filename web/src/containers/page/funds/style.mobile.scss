@@ -11,12 +11,12 @@
         height: 45px;
         overflow: hidden;
         padding: 10px 24px;
-        background: rgba(255, 255, 255, 0.7);
+        background: $color-translucent-l7;
         &.profit {
-            background: rgba(100, 255, 100, 0.7);
+            background: $color-profit-translucent;
         }
         &.loss {
-            background: rgba(255, 100, 100, 0.7);
+            background: $color-loss-translucent;
         }
     }
     .gain-info {
@@ -36,7 +36,7 @@
     .cache-age {
         flex-grow: 1;
         flex-wrap: wrap;
-        color: #333;
+        color: $color-very-dark;
         font-style: italic;
         text-align: right;
         font-size: 80%;
