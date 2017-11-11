@@ -33,7 +33,7 @@ if (process.env.NODE_ENV !== 'test') {
 if (module.hot) {
     module.hot.accept(
         './containers/root',
-        () => renderApp(require('./containers/root'))
+        () => renderApp(require('./containers/root').default)
     );
 }
 

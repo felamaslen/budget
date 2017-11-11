@@ -226,7 +226,7 @@ function getFundUrlHL(fund) {
 
     const urlParts = ['http://www.hl.co.uk'];
 
-    if (config.test) {
+    if (config.testIntegration) {
         // return a testing URL
         if (isShare) {
             return process.env.FUND_TEST_URL_SHARE;
