@@ -1,12 +1,11 @@
 /* eslint-disable no-underscore-dangle */
 import 'babel-polyfill'
-import { fromJS, Map as map } from 'immutable'
+import { fromJS } from 'immutable'
 import { expect } from 'chai'
 import { select, call, put } from 'redux-saga/effects'
 
 import * as S from '../../src/sagas/analysis.saga'
 import * as A from '../../src/actions/analysis.actions'
-import { aErrorOpened } from '../../src/actions/error.actions'
 import { selectApiKey } from '../../src/sagas'
 import { makeContentRequest } from '../../src/sagas/content.saga'
 import { openTimedMessage } from '../../src/sagas/error.saga'
@@ -54,7 +53,7 @@ describe('analysis.saga', () => {
                 expect(next.value).to.deep.equal(select(selectApiKey))
 
                 next = iter.next('some_api_key')
-                expect(next.value).to.deep.equal(call(makeContentRequest, 'some_api_key', {
+                expect(next.value).to.deep.equal(makeContentRequest('some_api_key', {
                     pageIndex: 1,
                     params: ['deep', 'foo', 'month', 'category', 3]
                 }))
