@@ -80,27 +80,51 @@ function getAllHistoryForFundsQuery(
 function processFundHistory(queryResult) {
     // return a map of fund holding IDs to historical prices
     const keyMap = queryResult
-        .reduce((map, row, rowKey) => {
-            const rowIds = row.id
+        .reduce(({ rowIds, data }, row, rowKey) => {
+            const thisRowIds = row.id
                 .split(',')
-                .map(id => parseInt(id, 10));
+                .map(id => Number(id));
 
             const rowPrices = row.price
                 .split(',')
-                .map(price => parseFloat(price, 10));
+                .map(price => Number(price));
 
-            rowIds.forEach((id, idKey) => {
-                if (!(id in map.idMap)) {
-                    map.idMap[id] = [];
-
-                    // startIndex is to save printing lots of zeroes
-                    map.startIndex[id] = rowKey;
+            const newData = thisRowIds.reduce(({ idMap, startIndex }, id, idKey) => {
+                if (!(id in idMap)) {
+                    return {
+                        idMap: { ...idMap, [id]: [rowPrices[idKey]] },
+                        startIndex: { ...startIndex, [id]: rowKey }
+                    };
                 }
-                map.idMap[id].push(rowPrices[idKey]);
-            });
 
-            return map;
-        }, { idMap: {}, startIndex: {} });
+                // if (for e.g.) we buy a holding, sell it, then buy some more at a later date,
+                // there should be a number of zeroes between the last sell and buy
+                const numZeroes = rowIds
+                    .reduce(({ num, found }, lastResult) => {
+                        if (found || lastResult.indexOf(id) !== -1) {
+                            return { num, found: true };
+                        }
+
+                        return { num: num + 1, found: false };
+                    }, { num: 0, found: false })
+                    .num;
+
+                const zeroes = new Array(numZeroes).fill(0);
+
+                return {
+                    idMap: {
+                        ...idMap,
+                        [id]: [...idMap[id], ...zeroes, rowPrices[idKey]]
+                    },
+                    startIndex
+                };
+
+            }, data);
+
+            return { rowIds: [thisRowIds, ...rowIds], data: newData };
+
+        }, { rowIds: [], data: { idMap: {}, startIndex: {} } })
+        .data;
 
     let startTime = null;
 
@@ -122,13 +146,13 @@ function fundHash(fundName, salt) {
     return md5(`${fundName}${salt}`);
 }
 
-async function getFundHistoryMappedToFundIds(
-    db, user, now, period, length, numDisplay, salt
-) {
+async function getFundHistoryMappedToFundIds(db, user, now, {
+    period, length, numDisplay, salt
+}) {
     const minTimestamp = getMaxAge(now, period, length);
 
     const numResultsQuery = await getNumResultsQuery(db, user, salt, minTimestamp);
-    const numResults = parseInt(numResultsQuery[0].numResults, 10);
+    const numResults = Number(numResultsQuery[0].numResults);
 
     let fundHistory = { idMap: {}, startTime: 0, times: [] };
 
