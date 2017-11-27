@@ -18,9 +18,7 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
 
     return formatAge(age);
 }
-export function getFundsCachedValue(
-    rows, startTime, cacheTimes, now, pageIndex
-) {
+export function getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex) {
     const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
 
     const value = rows.reduce((sum, row) => {
@@ -56,28 +54,22 @@ export function getFundColor(value, min, max) {
     );
 }
 
-/**
- * Compare gains and add colour scales
- * @param {list} rows: item rows
- * @returns {list} modified rows
- */
-export function getGains(rows, startTime, cacheTimes, pageIndex) {
-    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
-
-    const roundGain = value => Math.round(10000 * value) / 10000;
-    const roundAbs = value => Math.round(value);
-
-    const rowsWithPrices = rows.reduce((keys, row, key) => {
+export function getRowsWithPrices(rows) {
+    return rows.reduce((keys, row, key) => {
         if (row.has('pr') && row.get('pr').size > 0) {
             return keys.push(key);
         }
 
         return keys;
     }, list.of());
+}
 
-    const {
-        gains, dayGains, gainsAbs, dayGainsAbs, values
-    } = rows.reduce((obj, row, key) => {
+export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes, pageIndex) {
+    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+    const roundGain = value => Math.round(10000 * value) / 10000;
+    const roundAbs = value => Math.round(value);
+
+    return rows.reduce((obj, row, key) => {
         if (!rowsWithPrices.includes(key)) {
             return obj;
         }
@@ -128,6 +120,14 @@ export function getGains(rows, startTime, cacheTimes, pageIndex) {
         gainsAbs: list.of(),
         dayGainsAbs: list.of()
     });
+}
+
+export function getGains(rows, startTime, cacheTimes, pageIndex) {
+    const rowsWithPrices = getRowsWithPrices(rows);
+
+    const { gains, dayGains, gainsAbs, dayGainsAbs, values } = getRowGains(
+        rows, rowsWithPrices, startTime, cacheTimes, pageIndex
+    );
 
     const min = gains.min();
     const max = gains.max();
@@ -387,17 +387,14 @@ function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
         const thisPrices = row.get('pr');
         const timeOffset = row.get('prStartIndex');
 
-        const {
-            thisUnits,
-            thisCosts
-        } = thisPrices.reduce((red, price, priceKey) => {
+        const { thisUnits, thisCosts } = thisPrices.reduce((red, price, priceKey) => {
             const time = cacheTimes.get(priceKey + timeOffset);
 
             const transactionsToNow = transactions
                 .filter(item => item.get('date') < startTime + time);
 
-            const thisPriceUnits = transactionsToNow.getLastUnits();
-            const thisPriceCost = transactionsToNow.getLastCost();
+            const thisPriceUnits = transactionsToNow.getTotalUnits();
+            const thisPriceCost = transactionsToNow.getTotalCost();
 
             return {
                 thisUnits: red.thisUnits.push(thisPriceUnits),

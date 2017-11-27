@@ -24,6 +24,8 @@ import {
 
 import LineGraph from '../../../../components/graph/line';
 
+import { separateLine } from './helpers';
+
 import {
     aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
     aFundsGraphLineToggled, aFundsGraphPeriodChanged
@@ -240,15 +242,21 @@ export class GraphFunds extends LineGraph {
 
             const color = rgba(this.props.fundItems.getIn([line.get('index'), 'color']));
 
+            const separatedLines = separateLine(line.get('line'));
+
             this.ctx.lineWidth = mainLine
                 ? 1.5
                 : 1;
 
             if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-                return this.drawCubicLine(line.get('line'), [color]);
+                return separatedLines.forEach(linePart =>
+                    this.drawCubicLine(linePart, [color])
+                );
             }
 
-            return this.drawLine(line.get('line'), [color]);
+            return separatedLines.forEach(linePart =>
+                this.drawLine(linePart, [color])
+            );
         });
 
         if (this.props.hlPoint) {

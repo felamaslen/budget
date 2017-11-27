@@ -14,7 +14,8 @@ const SKIP_LOG_ACTIONS = [
     actions.TIME_UPDATED,
     actions.KEY_PRESSED,
     actions.CONTENT_BLOCK_HOVERED,
-    actions.ANALYSIS_TREE_HOVERED
+    actions.ANALYSIS_TREE_HOVERED,
+    actions.GRAPH_FUNDS_HOVERED
 ];
 
 const logger = createLogger({

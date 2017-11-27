@@ -18,6 +18,8 @@ import {
 } from '../../../../misc/config';
 import { aFundItemGraphToggled } from '../../../../actions/graph.actions';
 
+import { separateLine } from './helpers';
+
 export class GraphFundItem extends LineGraph {
     constructor(props) {
         super(props);
@@ -48,8 +50,11 @@ export class GraphFundItem extends LineGraph {
         return GRAPH_FUND_ITEM_HEIGHT;
     }
     processData() {
-        const dataY = this.props.data.map(item => item.last());
-        const dataX = this.props.data.map(item => item.first());
+        const validData = this.props.data
+            .filter(item => item.last() !== 0);
+
+        const dataY = validData.map(item => item.last());
+        const dataX = validData.map(item => item.first());
 
         const minY = dataY.min();
         const maxY = dataY.max();
@@ -111,7 +116,9 @@ export class GraphFundItem extends LineGraph {
             return colorProfit;
         };
 
-        this.drawCubicLine(this.props.data, colorValue);
+        const lines = separateLine(this.props.data);
+
+        lines.forEach(line => this.drawCubicLine(line, colorValue));
     }
 }
 

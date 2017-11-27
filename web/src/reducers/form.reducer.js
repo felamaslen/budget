@@ -1,9 +1,9 @@
 import { Map as map, List as list } from 'immutable';
 
 import { rCalculateOverview } from './overview.reducer';
-import {
-    stringifyFields, getInvalidInsertDataKeys, resortListRows, recalculateFundProfits, addToRequestQueue
-} from './edit.reducer';
+import { addToRequestQueue } from './request-queue.reducer';
+import { resortListRows, recalculateFundProfits } from './editable-updates.reducer';
+import { stringifyFields, getInvalidInsertDataKeys } from './edit.reducer';
 
 import { dataEquals, getAddDefaultValues } from '../misc/data';
 import { LIST_COLS_PAGES, PAGES } from '../misc/const';

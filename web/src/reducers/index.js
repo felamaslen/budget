@@ -13,6 +13,7 @@ import * as app from './app.reducer';
 import * as content from './content.reducer';
 import * as analysis from './analysis.reducer';
 import * as edit from './edit.reducer';
+import * as editUpdates from './editable-updates.reducer';
 import * as form from './form.reducer';
 import * as graph from './graph.reducer';
 import * as stocksList from './stocks-list.reducer';
@@ -62,7 +63,7 @@ const reducers = createReducerObject([
     [AC.EDIT_ACTIVATED, edit.rActivateEditable],
     [AC.EDIT_CHANGED, edit.rChangeEditable],
     [AC.EDIT_LIST_ITEM_ADDED, edit.rAddListItem],
-    [AC.EDIT_LIST_ITEM_DELETED, edit.rDeleteListItem],
+    [AC.EDIT_LIST_ITEM_DELETED, editUpdates.rDeleteListItem],
     [AC.EDIT_SUGGESTIONS_REQUESTED, edit.rRequestSuggestions],
     [AC.EDIT_SUGGESTIONS_RECEIVED, edit.rHandleSuggestions],
 

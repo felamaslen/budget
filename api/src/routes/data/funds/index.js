@@ -129,33 +129,27 @@ async function routeGet(req, res) {
 
     let addData = row => postProcessListRow(row);
 
-    const getPriceHistory = 'history' in req.query &&
-        req.query.history !== 'false';
     let priceHistory = null;
-
+    const getPriceHistory = 'history' in req.query && req.query.history !== 'false';
     if (getPriceHistory) {
         let period = null;
         let length = null;
-        if (['year', 'month'].indexOf(req.query.period) > -1 &&
-            !isNaN(parseInt(req.query.length, 10))) {
+        const hasPeriod = ['year', 'month'].indexOf(req.query.period) > -1 &&
+            !isNaN(Number(req.query.length));
 
+        if (hasPeriod) {
             period = req.query.period;
-            length = parseInt(req.query.length, 10);
+            length = Number(req.query.length);
         }
 
-        priceHistory = await funds.getFundHistoryMappedToFundIds(
-            req.db,
-            req.user,
-            now,
+        priceHistory = await funds.getFundHistoryMappedToFundIds(req.db, req.user, now, {
             period,
             length,
-            config.data.funds.historyResolution,
-            config.data.funds.salt
-        );
+            numDisplay: config.data.funds.historyResolution,
+            salt: config.data.funds.salt
+        });
 
-        addData = row => {
-            return postProcessListRow(row, getPriceHistory, priceHistory);
-        }
+        addData = row => postProcessListRow(row, getPriceHistory, priceHistory);
     }
 
     const data = await listCommon.getResults(

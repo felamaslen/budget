@@ -6,7 +6,6 @@ import buildMessage from '../messageBuilder';
 import {
     SETTINGS_LOADED,
     USER_LOGGED_OUT,
-    PAGE_NAVIGATED,
     KEY_PRESSED,
     TIME_UPDATED,
     SERVER_UPDATED,
