@@ -12,5 +12,5 @@ function webpackConfig() {
     return require('./webpack/conf.prod');
 }
 
-module.exports = webpackConfig();
+module.exports = () => webpackConfig();
 

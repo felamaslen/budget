@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -8,6 +9,10 @@ const moduleConfigProd = require('./module.prod');
 module.exports = {
     ...webpackConfig,
     devtool: 'cheap-module-source-map',
+    output: {
+        path: path.join(__dirname, '../web/build'),
+        filename: 'js/bundle.js'
+    },
     plugins: [
         ...webpackConfig.plugins,
         new webpack.DefinePlugin({

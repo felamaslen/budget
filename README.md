@@ -39,11 +39,9 @@ For info on building the Android app, see `android/README.md`.
 
 ### Development:
 
-- Run `npm run dev:api` to run a development backend server
+- Run `npm run dev` to run a development server with hot module replacement
 
-- Run `npm run dev:wds` to run a development web app
-
-- This is accessible at `http://localhost:3001` by default
+- This is accessible at `http://localhost:3000` by default
 
 #### Notes: 
 
@@ -60,8 +58,7 @@ These environment variables must be set on your deployment environment, or in `.
 
 Note that the development variables are optional on a production environment.
 
-- `PORT`: the port to run the API and web app on
-- `PORT_WDS`: the port to run the development web app on
+- `PORT`: the port to listen on
 - `MYSQL_URI`: URI for connecting to the production database
 - `MYSQL_URI_TEST`: URI for connecting to a testing database
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts

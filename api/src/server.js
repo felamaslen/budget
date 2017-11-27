@@ -2,6 +2,8 @@
  * Express API and web server
  */
 
+/* eslint-disable global-require */
+
 const config = require('./config')();
 
 const express = require('express');
@@ -11,6 +13,8 @@ const path = require('path');
 const logger = require('morgan');
 const swaggerUiDist = require('swagger-ui-dist');
 const swaggerJSDoc = require('swagger-jsdoc');
+const webpack = require('webpack');
+const webpackConfig = require('../../webpack.config');
 
 const version = require('../../package.json').version;
 const api = require('./api');
@@ -97,9 +101,34 @@ function setupApi(app) {
     setupApiDocs(app);
 }
 
+function setupDevServer(app) {
+    const conf = webpackConfig();
+    const compiler = webpack(conf);
+
+    app.use(require('webpack-dev-middleware')(compiler, {
+        publicPath: conf.output.publicPath,
+        stats: {
+            colors: true,
+            modules: false,
+            chunks: false,
+            reasons: false
+        },
+        hot: true,
+        quiet: false
+    }));
+
+    app.use(require('webpack-hot-middleware')(compiler, {
+        log: console.log
+    }));
+}
+
 function setupWebApp(app) {
     // set up views engine
     setupStaticViews(app);
+
+    if (process.env.NODE_ENV === 'development') {
+        setupDevServer(app);
+    }
 
     // index template
     app.get('/:pageName?', (req, res) => {
@@ -135,7 +164,7 @@ function listen(app, port) {
     });
 }
 
-async function serverApp() {
+function serverApp() {
     // initiate express web server
     const app = express();
     const port = process.env.PORT || 3000;
@@ -146,9 +175,7 @@ async function serverApp() {
     setupWebApp(app);
     setupErorHandling(app);
 
-    const server = await listen(app, port);
-
-    return server;
+    return listen(app, port);
 }
 
 module.exports = serverApp;
