@@ -1,5 +1,13 @@
 Release:
 
+- 3.2.3
+    - Web client:
+        - Bug fixes and dev env improvements
+
+- 3.2.2-beta
+    - Web client:
+        - Saved income on analysis page
+
 - 3.2.1-beta
     - Web client:
         - Timeline on analysis page
