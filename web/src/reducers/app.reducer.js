@@ -7,10 +7,8 @@ import { List as list, Map as map } from 'immutable';
 import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
-import { reloadAnalysis } from './analysis.reducer';
 import { getFundsCachedValueAgeText } from './funds.reducer';
 import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
-import { getNullEditable, getAddDefaultValues } from '../misc/data';
 
 const pageIndexFunds = PAGES.indexOf('funds');
 
