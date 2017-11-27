@@ -123,12 +123,12 @@ function setupDevServer(app) {
 }
 
 function setupWebApp(app) {
-    // set up views engine
-    setupStaticViews(app);
-
     if (process.env.NODE_ENV === 'development') {
         setupDevServer(app);
     }
+
+    // set up views engine
+    setupStaticViews(app);
 
     // index template
     app.get('/:pageName?', (req, res) => {

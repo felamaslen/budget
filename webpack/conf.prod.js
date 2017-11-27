@@ -2,13 +2,12 @@ const webpack = require('webpack');
 const path = require('path');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const sassLoader = require('./sass-loader');
 
 const webpackConfig = require('./conf.common');
-const moduleConfigProd = require('./module.prod');
 
 module.exports = {
     ...webpackConfig,
-    devtool: 'cheap-module-source-map',
     output: {
         path: path.join(__dirname, '../web/build'),
         filename: 'js/bundle.js'
@@ -45,7 +44,17 @@ module.exports = {
             allChunks: true
         })
     ],
-    module: moduleConfigProd,
+    module: {
+        ...webpackConfig.module,
+        loaders: [
+            ...webpackConfig.module.loaders,
+            {
+                test: /\.scss$/,
+                exclude: /node_modules/,
+                loader: ExtractTextPlugin.extract(sassLoader())
+            }
+        ]
+    },
     bail: true
 };
 

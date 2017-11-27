@@ -3,7 +3,7 @@
  */
 
 const dotenv = require('dotenv');
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
     dotenv.config();
 }
 

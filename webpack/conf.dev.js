@@ -1,10 +1,8 @@
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
-
-require('dotenv').config();
+const sassLoader = require('./sass-loader');
 
 const webpackConfig = require('./conf.common');
-const moduleConfigDev = require('./module.dev');
 
 module.exports = {
     ...webpackConfig,
@@ -30,6 +28,16 @@ module.exports = {
         new webpack.HotModuleReplacementPlugin(),
         new Dotenv({ path: '.env' })
     ],
-    module: moduleConfigDev
+    module: {
+        ...webpackConfig.module,
+        loaders: [
+            ...webpackConfig.module.loaders,
+            {
+                test: /\.scss$/,
+                exclude: /node_modules/,
+                loader: sassLoader()
+            }
+        ]
+    }
 };
 
