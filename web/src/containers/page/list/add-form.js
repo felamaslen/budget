@@ -45,7 +45,7 @@ export class AddForm extends PureComponent {
 
         return <li className="li-add">
             {addItems}
-            <span>
+            <span className="add-button-outer">
                 <button ref={addBtnRef} onClick={addBtnOnClick}>Add</button>
             </span>
         </li>;
