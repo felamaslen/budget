@@ -1,4 +1,22 @@
 .page-funds {
+    .list-ul {
+        li, .list-head-inner {
+            & > span {
+                &.fund-extra-info {
+                    flex: 0 0 180px;
+                }
+                &.add-button-outer {
+                    flex: 0 0 200px;
+                }
+            }
+        }
+        .fund-graph {
+            display: none;
+        }
+        .fund-extra-info > .gain {
+            flex: 0 0 180px;
+        }
+    }
     .fund-graph-cont {
         .graph-container {
         }
@@ -14,6 +32,47 @@
     }
     .gain span.gain-info {
         display: none;
+    }
+}
+
+@media screen and (orientation: portrait) {
+    .page-funds {
+        .list-ul {
+            li, .list-head-inner {
+                & > span {
+                    &.fund-extra-info {
+                        flex: 0 0 100px;
+                    }
+                    &.add-button-outer {
+                        flex: 0 0 121px;
+                    }
+                }
+            }
+            .fund-extra-info > .gain {
+                flex: 0 0 100px;
+
+                .text {
+                    margin: 0;
+                    width: 100px;
+                }
+
+                .day-gain-abs, .day-gain {
+                    display: none;
+                }
+                .value {
+                    flex: 1 0 0;
+                }
+                .breakdown {
+                    flex: 1 0 0;
+                    flex-flow: column;
+
+                    & > span {
+                        width: 100%;
+                        flex: 1 0 0;
+                    }
+                }
+            }
+        }
     }
 }
 

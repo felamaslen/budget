@@ -22,7 +22,7 @@ export class ListRowFunds extends ListRow {
 
         return <span className="fund-graph">
             <div className="fund-graph-cont">
-                <GraphFundItem name={name} id={this.props.id} />;
+                <GraphFundItem name={name} id={this.props.id} />
             </div>
         </span>;
     }
@@ -56,17 +56,19 @@ export class ListRowFunds extends ListRow {
                 <span className="value">
                     {formatCurrency(gain.get('value'), formatOptions)}
                 </span>
-                <span className={gainAbsClasses}>
-                    {formatCurrency(gain.get('gainAbs'), formatOptions)}
-                </span>
-                <span className={dayGainAbsClasses}>
-                    {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
-                </span>
-                <span className={gainClasses}>
-                    {formatPercent(gain.get('gain'), formatOptionsPct)}
-                </span>
-                <span className={dayGainClasses}>
-                    {formatPercent(gain.get('dayGain'), formatOptionsPct)}
+                <span className="breakdown">
+                    <span className={gainAbsClasses}>
+                        {formatCurrency(gain.get('gainAbs'), formatOptions)}
+                    </span>
+                    <span className={dayGainAbsClasses}>
+                        {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
+                    </span>
+                    <span className={gainClasses}>
+                        {formatPercent(gain.get('gain'), formatOptionsPct)}
+                    </span>
+                    <span className={dayGainClasses}>
+                        {formatPercent(gain.get('dayGain'), formatOptionsPct)}
+                    </span>
                 </span>
             </span>
         </span>;

@@ -16,20 +16,28 @@
         }
     }
     .list-ul {
-        span.item {
-            flex-basis: 376px;
-        }
-        .fund-extra-info {
-            display: flex;
-            flex-basis: initial;
-            flex-wrap: nowrap;
+        li, .list-head-inner {
+            & > span {
+                &.item {
+                    flex: 0 1 376px;
+                }
+                &.fund-extra-info {
+                    display: flex;
+                    flex: 0 0 300px;
+                    flex-wrap: nowrap;
 
-            &.popout {
-                z-index: 10;
-                overflow: visible;
+                    &.popout {
+                        z-index: 10;
+                        overflow: visible;
 
-                .graph-container {
-                    box-shadow: none;
+                        .graph-container {
+                            box-shadow: none;
+                        }
+                    }
+                }
+                &.add-button-outer {
+                    flex: 0 0 320px;
+                    border-right: none;
                 }
             }
         }
@@ -60,8 +68,6 @@
                 display: none;
             }
         }
-    }
-    .list-ul {
         .num-transactions {
             display: block;
             text-align: center;
@@ -70,18 +76,22 @@
             height: 48px;
             line-height: 48px;
             .fund-extra-info > .gain {
-                width: 200px;
                 height: 100%;
             }
         }
         .fund-graph {
             height: 100%;
+            flex: 0 0 100px;
         }
-        .gain {
+        .fund-extra-info > .gain {
+            display: flex;
+            flex: 0 0 200px;
+
             .text {
-                display: block;
+                display: flex;
+                padding: 0;
                 width: 100%;
-                > span {
+                & > span {
                     padding: 0;
                 }
             }
@@ -92,9 +102,19 @@
                 color: $color-loss;
             }
             .value {
+                flex: 1 1 0;
                 font-size: 1.1em;
-                width: 40%;
                 color: $color-slightly-dark;
+            }
+            .breakdown {
+                display: flex;
+                flex: 2 1 0;
+                flex-wrap: wrap;
+
+                & > span {
+                    flex: 1 1 50%;
+                    height: 50%;
+                }
             }
             .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
                 font-size: 0.8em;
@@ -179,7 +199,6 @@
     }
     .fund-graph {
         display: inline-block;
-        width: 100px;
         .fund-graph-cont {
             .graph-container {
                 width: 100px;

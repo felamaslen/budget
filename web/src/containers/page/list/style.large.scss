@@ -34,23 +34,23 @@
 
     li, .list-head-inner {
         & > span {
-            flex-basis: 0;
+            flex: 0 0 auto;
 
             &.date {
-                flex-basis: 96px;
+                flex: 0 0 96px;
             }
             &.item, &.category, &.society, &.holiday {
-                flex-basis: 192px;
+                flex: 0 0 192px;
             }
             &.value, &.cost {
-                flex-basis: 96px;
+                flex: 0 0 96px;
                 justify-content: right;
             }
             &.shop {
-                flex-basis: 128px;
+                flex: 0 0 128px;
             }
             &.daily {
-                flex-basis: 86px;
+                flex: 0 0 86px;
             }
         }
     }
@@ -115,19 +115,25 @@
             padding: 0 2px;
         }
         .delete {
-            flex-basis: 16px;
+            display: flex;
+            flex: 0 0 20px;
+            align-items: center;
+            justify-content: center;
+            border-right: none;
 
-            margin: 4px;
-            cursor: pointer;
-            color: $color-white;
-            background: $color-delete;
-            font-size: 20px;
-            width: 16px;
-            height: 16px;
-            line-height: 16px;
-            vertical-align: middle;
-            text-align: center;
-            border-radius: 100%;
+            a {
+                display: block;
+                cursor: pointer;
+                color: $color-white;
+                background: $color-delete;
+                font-size: 20px;
+                width: 16px;
+                height: 16px;
+                line-height: 16px;
+                vertical-align: middle;
+                text-align: center;
+                border-radius: 100%;
+            }
         }
         .suggestions {
             margin: 0;
