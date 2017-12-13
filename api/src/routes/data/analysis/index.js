@@ -1,3 +1,4 @@
+const merge = require('deepmerge');
 const common = require('./common');
 
 const { monthLength } = require('../../../common');
@@ -13,40 +14,35 @@ function getPeriodCostForCategory(db, user, condition, category, groupBy) {
     `, user.uid);
 }
 
-async function getTimeline(db, user, now, period, pageIndex, { condition, ...params }, categories) {
-    const subQueries = categories
-        .map(category => `SELECT year, month, date, SUM(cost) AS cost
-        FROM ${category}
-        WHERE ${condition} AND uid = ${user.uid}
-        GROUP BY year, month, date`);
-
-    const results = await Promise.all(subQueries.map(query => db.query(query)));
-
-    const rowsByDate = results.reduce((obj, rows, groupKey) => {
+function getRowsByDate(results) {
+    return results.reduce((obj, rows, groupKey) => {
         if (!(rows && Array.isArray(rows))) {
             return obj;
         }
 
-        return rows.reduce((subObj, row) => {
-            if (!(row.year in subObj)) {
-                subObj[row.year] = {};
-            }
-            if (!(row.month in subObj[row.year])) {
-                subObj[row.year][row.month] = {};
-            }
-            if (!(row.date in subObj[row.year][row.month])) {
-                subObj[row.year][row.month][row.date] = groupKey > 0
-                    ? new Array(groupKey).fill(0)
-                    : [];
+        return rows.reduce((subObj, { year, month, date, cost }) => {
+            const value = Math.max(0, cost);
+
+            let preceding = [];
+            if (!(year in subObj && month in subObj[year] && date in subObj[year][month]) && groupKey > 0) {
+                preceding = new Array(groupKey).fill(0);
             }
 
-            subObj[row.year][row.month][row.date].push(Math.max(0, row.cost));
-
-            return subObj;
+            return merge(subObj, {
+                [year]: {
+                    [month]: {
+                        [date]: [...preceding, value]
+                    }
+                }
+            });
 
         }, obj);
 
     }, {});
+}
+
+function processTimelineData(results, period, params) {
+    const rowsByDate = getRowsByDate(results);
 
     if (period === 'year') {
         const { year } = params;
@@ -81,6 +77,18 @@ async function getTimeline(db, user, now, period, pageIndex, { condition, ...par
     }
 
     return null;
+}
+
+async function getTimeline(db, user, now, period, pageIndex, { condition, ...params }, categories) {
+    const subQueries = categories
+        .map(category => `SELECT year, month, date, SUM(cost) AS cost
+        FROM ${category}
+        WHERE ${condition} AND uid = ${user.uid}
+        GROUP BY year, month, date`);
+
+    const results = await Promise.all(subQueries.map(query => db.query(query)));
+
+    return processTimelineData(results, period, params);
 }
 
 async function getPeriodCost(db, user, now, period, groupBy, pageIndex) {
@@ -182,6 +190,8 @@ async function routeGet(req, res) {
 }
 
 module.exports = {
+    getRowsByDate,
+    processTimelineData,
     getPeriodCostForCategory,
     getPeriodCost,
     routeGet

@@ -91,6 +91,7 @@
     "css-loader": "^0.28.5",
     "cssnano": "^3.10.0",
     "dateformat": "^2.0.0",
+    "deepmerge": "^2.0.1",
     "dotenv": "^4.0.0",
     "dotenv-webpack": "^1.5.4",
     "ejs": "^2.5.7",
