@@ -86,8 +86,7 @@ describe('Config', () => {
                     .to.be.a('number').greaterThan(0);
             });
             it('should define stocks api key', () => {
-                expect(config.data.funds.stocksApiKey)
-                    .to.be.a('string').lengthOf.greaterThan(0);
+                expect(config.data.funds.stocksApiKey).to.be.a('string');
             });
         });
 
