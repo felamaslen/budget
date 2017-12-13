@@ -220,14 +220,19 @@ export function rHandleSuggestions(reduction, { items, reqId }) {
         .setIn(['editSuggestions', 'loading'], false)
         .setIn(['editSuggestions', 'active'], -1);
 
-    if (!items || reduction.getIn(['editSuggestions', 'reqId']) !== reqId) {
+    if (!(items && reduction.getIn(['editSuggestions', 'reqId']) === reqId)) {
         // null object (clear), or changed input while suggestions were loading
         return newReduction
             .setIn(['editSuggestions', 'list'], list.of())
             .setIn(['editSuggestions', 'reqId'], null);
     }
 
-    return newReduction.setIn(['editSuggestions', 'list'], items);
+    const editValue = reduction
+        .getIn(['edit', 'active', 'value'])
+        .toLowerCase();
+
+    return newReduction
+        .setIn(['editSuggestions', 'list'], items.filter(item => item.toLowerCase() !== editValue));
 }
 
 export function rRequestSuggestions(reduction, { reqId }) {
