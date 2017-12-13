@@ -6,12 +6,12 @@ import { API_PREFIX, PAGES } from '../misc/const';
 import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/login.actions';
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 
-import { selectApiKey } from '.'
+import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
 import { getLoginCredentials } from './login.saga';
 
 export function *loadSettings() {
-    const pin = yield call(getLoginCredentials)
+    const pin = yield call(getLoginCredentials);
 
     if (pin) {
         yield put(aLoginFormSubmitted(pin));
@@ -22,11 +22,11 @@ export function *loadSettings() {
 }
 
 export const selectRequestList = state => state.getIn(['edit', 'requestList'])
-    .map(item => item.get('req'))
+    .map(item => item.get('req'));
 
 export function *updateServerData() {
-    const apiKey = yield select(selectApiKey)
-    const requestList = yield select(selectRequestList)
+    const apiKey = yield select(selectApiKey);
+    const requestList = yield select(selectRequestList);
 
     try {
         const response = yield call(
@@ -34,19 +34,19 @@ export function *updateServerData() {
             `${API_PREFIX}/data/multiple`,
             { list: requestList },
             { headers: { 'Authorization': apiKey } }
-        )
+        );
 
         yield put(aServerUpdateReceived(response));
     }
     catch (err) {
-        yield call(openTimedMessage, 'Error updating data on server!')
+        yield call(openTimedMessage, 'Error updating data on server!');
 
         yield put(aServerUpdateReceived(null));
     }
 }
 
 export function *addServerDataRequest({ item, fields, pageIndex }) {
-    const apiKey = yield select(selectApiKey)
+    const apiKey = yield select(selectApiKey);
 
     try {
         const response = yield call(
@@ -54,7 +54,7 @@ export function *addServerDataRequest({ item, fields, pageIndex }) {
             `${API_PREFIX}/data/${PAGES[pageIndex]}`,
             item,
             { headers: { 'Authorization': apiKey } }
-        )
+        );
 
         yield put(aServerAddReceived({ response, fields, pageIndex }));
 
@@ -70,13 +70,13 @@ export function *addServerDataRequest({ item, fields, pageIndex }) {
 export const selectAddData = state => ({
     fields: state.getIn(['edit', 'addFields']),
     item: state.getIn(['edit', 'addFieldsString'])
-})
+});
 
 export function *addServerData({ payload }) {
     const { pageIndex } = payload;
 
     // data is validated by reducer
-    const { fields, item } = yield select(selectAddData)
+    const { fields, item } = yield select(selectAddData);
 
     if (!(fields && item)) {
         return;

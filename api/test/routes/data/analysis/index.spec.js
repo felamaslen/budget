@@ -58,7 +58,7 @@ describe('/data/analysis', () => {
     });
 
     describe('getTimeline', () => {
-        it('should be tested')
-    })
+        it('should be tested');
+    });
 });
 

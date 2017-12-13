@@ -24,7 +24,7 @@ describe('content.actions', () => {
         })).to.deep.equal({
             type: C.CONTENT_BLOCK_HOVERED,
             payload: { foo: 'bar' }
-        }))
+        }));
     });
 });
 

@@ -287,7 +287,7 @@ describe('Common list data functions', () => {
 
             [NaN, null, 'foo'].forEach(id => {
                 expect(() => listCommon.validateUpdateData({ id }))
-                    .to.throw('invalid id')
+                    .to.throw('invalid id');
             });
         });
 

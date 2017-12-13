@@ -298,7 +298,7 @@ describe('/api/data/overview', () => {
                 ') AS dates ' +
                 'LEFT JOIN `food` AS list ON uid = 1 ' +
                 'AND list.year = dates.year AND list.month = dates.month ' +
-                'GROUP BY dates.year, dates.month'
+                'GROUP BY dates.year, dates.month';
 
             expect(db.queries[0]).to.equal(expectedQuery);
 

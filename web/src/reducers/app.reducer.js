@@ -58,7 +58,7 @@ export function getNavRow({ dx, dy, numRows, numCols, currentRow, currentCol }) 
 
     const rowsJumped = Math.floor((currentCol + dx) / numCols);
 
-    const newRow = (currentRow + dy + rowsJumped + numRows) % numRows
+    const newRow = (currentRow + dy + rowsJumped + numRows) % numRows;
 
     return newRow;
 }
@@ -89,7 +89,7 @@ export function getNavRowList({ dx, dy, rowKeys, numCols, currentRow, currentCol
         return -1;
     }
 
-    const backwardsFromTop = currentCol === 0 && currentRow === 0 && (dx < 0 || dy < 0)
+    const backwardsFromTop = currentCol === 0 && currentRow === 0 && (dx < 0 || dy < 0);
     if (backwardsFromTop) {
         return rowKeys.last();
     }

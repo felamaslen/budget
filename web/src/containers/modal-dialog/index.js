@@ -91,7 +91,7 @@ ModalDialog.propTypes = {
     onCancel: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
     deactivate: PropTypes.func.isRequired
-}
+};
 
 const mapStateToProps = state => ({
     pageIndex: state.getIn(['currentPageIndex']),

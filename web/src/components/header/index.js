@@ -14,7 +14,7 @@ export default function Header({ location }) {
             <AppLogo />
             <Navbar pathname={location.pathname} />
         </div>
-    </div>
+    </div>;
 }
 
 Header.propTypes = {

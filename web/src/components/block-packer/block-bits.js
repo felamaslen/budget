@@ -37,7 +37,7 @@ export default function BlockBits({
 
             return <div key={subBlockKey} className={subClasses}
                 style={subBlockStyle}
-                onTouchStart={onBlockHover} onMouseOver={onBlockHover} />
+                onTouchStart={onBlockHover} onMouseOver={onBlockHover} />;
         });
 
         const subBlockGroupStyle = {

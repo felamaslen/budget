@@ -7,7 +7,7 @@ import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
 import { aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';
 
-import { selectApiKey } from '.'
+import { selectApiKey } from '.';
 import { addServerDataRequest } from './app.saga';
 
 export function *requestEditSuggestions({ payload }) {
@@ -18,7 +18,7 @@ export function *requestEditSuggestions({ payload }) {
         return;
     }
 
-    const apiKey = yield select(selectApiKey)
+    const apiKey = yield select(selectApiKey);
 
     const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
 
@@ -40,10 +40,10 @@ export const selectModalState = state => ({
     modalDialogLoading: state.getIn(['modalDialog', 'loading']),
     item: state.getIn(['modalDialog', 'fieldsString']),
     fields: state.getIn(['modalDialog', 'fieldsValidated'])
-})
+});
 
 export function *handleModal({ payload }) {
-    const { modalDialogType, invalidKeys, modalDialogLoading, item, fields } = yield select(selectModalState)
+    const { modalDialogType, invalidKeys, modalDialogLoading, item, fields } = yield select(selectModalState);
 
     const noContinue = !(payload && modalDialogType === 'add' &&
         invalidKeys.size === 0 && modalDialogLoading);

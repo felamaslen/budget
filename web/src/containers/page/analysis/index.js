@@ -41,9 +41,9 @@ export class PageAnalysis extends Page {
             return null;
         }
 
-        let timeline = null
+        let timeline = null;
         if (this.props.timeline) {
-            timeline = <Timeline data={this.props.timeline} />
+            timeline = <Timeline data={this.props.timeline} />;
         }
 
         return <div className="page-analysis">

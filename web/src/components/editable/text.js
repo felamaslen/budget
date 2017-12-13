@@ -23,16 +23,15 @@ export default class EditableText extends Editable {
         }
     }
     afterInput() {
-        if (!this.props.active || !this.props.suggestionsList ||
-            !this.props.suggestionsList.size) {
+        if (!(this.props.active && this.props.suggestionsList &&
+            this.props.suggestionsList.size)) {
 
             return null;
         }
 
         const suggestionsList = this.props.suggestionsList
             .map((item, key) => {
-                const classes = classNames({
-                    suggestion: true,
+                const classes = classNames('suggestion', {
                     active: this.props.suggestionsActive === key
                 });
 

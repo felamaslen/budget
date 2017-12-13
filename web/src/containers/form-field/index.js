@@ -80,5 +80,5 @@ export default ({ fieldKey, item, value }) => {
     const mapDispatchToProps = getDispatchProps(fieldKey, item);
 
     return connect(mapStateToProps, mapDispatchToProps)(Component);
-}
+};
 

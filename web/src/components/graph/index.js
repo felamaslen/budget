@@ -54,7 +54,7 @@ export default class Graph extends PureComponent {
             if (canvas) {
                 this.ctx = canvas.getContext('2d');
             }
-        }
+        };
 
         return <div className={classes} {...this.outerProperties}>
             {this.beforeCanvas()}

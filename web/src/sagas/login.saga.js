@@ -20,7 +20,7 @@ export function getLoginCredentials() {
 
 export function saveLoginCredentials(pin = null) {
     if (!(localStorage && localStorage.setItem && localStorage.removeItem)) {
-        return
+        return;
     }
 
     if (pin) {

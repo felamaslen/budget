@@ -206,14 +206,14 @@ export function rToggleFundsGraphLine(reduction, index) {
     const period = reduction.getIn(['other', 'graphFunds', 'period']);
 
     const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
-    const mode = reduction.getIn(['other', 'graphFunds', 'mode'])
+    const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
 
     const fundHistory = getFormattedHistory(
         rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
     );
 
     return reduction
-        .setIn(['other', 'graphFunds', 'data'], fundHistory)
+        .setIn(['other', 'graphFunds', 'data'], fundHistory);
 }
 
 function changePeriod(reduction, period, rows, startTime, cacheTimes) {
