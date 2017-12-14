@@ -312,7 +312,7 @@ class DummyDbWithListOverview extends DummyDb {
             return { monthCost };
         });
     }
-    async query(sql, ...args) {
+    query(sql, ...args) {
         const rawQuery = super.query(sql, ...args);
 
         const listOverviewMatch = rawQuery.match(new RegExp(String(
@@ -326,7 +326,7 @@ class DummyDbWithListOverview extends DummyDb {
         )));
 
         if (listOverviewMatch) {
-            const data = await this.getData();
+            const data = this.getData();
 
             return data;
         }
