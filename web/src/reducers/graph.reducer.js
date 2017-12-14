@@ -130,14 +130,14 @@ export function rZoomFundsGraph(reduction, obj) {
         .setIn(['other', 'graphFunds', 'data', 'fundLines'], zoomedLines);
 }
 
-export function rHoverFundsGraph(reduction, position) {
+export function rHoverFundsGraph(reduction, { position }) {
     if (!position) {
         return reduction.setIn(['other', 'graphFunds', 'hlPoint'], null);
     }
 
     const lines = reduction.getIn(['other', 'graphFunds', 'data', 'fundLines']);
 
-    if (!lines || !lines.size) {
+    if (!(lines && lines.size)) {
         return reduction;
     }
 
@@ -179,7 +179,7 @@ export function rHoverFundsGraph(reduction, position) {
     return reduction.setIn(['other', 'graphFunds', 'hlPoint'], hlPoint);
 }
 
-export function rToggleFundsGraphLine(reduction, index) {
+export function rToggleFundsGraphLine(reduction, { index }) {
     let statusBefore = false;
 
     let enabledList = reduction
@@ -198,7 +198,7 @@ export function rToggleFundsGraphLine(reduction, index) {
             return enabled;
         }, list.of());
 
-    if (!statusBefore || !enabledList.size) {
+    if (!(statusBefore && enabledList.size)) {
         enabledList = enabledList.push(index - 1);
     }
 

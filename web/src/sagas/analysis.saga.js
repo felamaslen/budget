@@ -13,8 +13,8 @@ export const selectStateProps = state => ({
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
 });
 
-export function *requestAnalysisData({ payload }) {
-    if (payload.wasDeep) {
+export function *requestAnalysisData({ wasDeep, ...payload }) {
+    if (wasDeep) {
         return;
     }
 
@@ -22,6 +22,7 @@ export function *requestAnalysisData({ payload }) {
 
     const { pageIndex, name, period, grouping, timeIndex } = {
         ...stateProps,
+        wasDeep,
         ...payload
     };
 

@@ -2,13 +2,11 @@
  * Actions called to show/hide error messages
  */
 
-import buildMessage from '../messageBuilder';
+import { uuid } from '../misc/data';
 
-import {
-    ERROR_OPENED, ERROR_CLOSED, ERROR_REMOVED
-} from '../constants/actions';
+import * as A from '../constants/actions';
 
-export const aErrorOpened = message => buildMessage(ERROR_OPENED, message);
-export const aErrorClosed = msgId => buildMessage(ERROR_CLOSED, msgId);
-export const aErrorRemoved = msgId => buildMessage(ERROR_REMOVED, msgId);
+export const aErrorOpened = message => ({ type: A.ERROR_OPENED, message, msgId: uuid() });
+export const aErrorClosed = msgId => ({ type: A.ERROR_CLOSED, msgId });
+export const aErrorRemoved = msgId => ({ type: A.ERROR_REMOVED, msgId });
 

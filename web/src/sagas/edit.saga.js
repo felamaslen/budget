@@ -10,9 +10,8 @@ import { aMobileDialogClosed } from '../actions/form.actions';
 import { selectApiKey } from '.';
 import { addServerDataRequest } from './app.saga';
 
-export function *requestEditSuggestions({ payload }) {
-    const { reqId, page, item, value } = payload;
-    if (!value.length) {
+export function *requestEditSuggestions({ reqId, page, item, value }) {
+    if (!(value && value.length)) {
         yield put(aSuggestionsReceived({ items: null }));
 
         return;
@@ -42,17 +41,17 @@ export const selectModalState = state => ({
     fields: state.getIn(['modalDialog', 'fieldsValidated'])
 });
 
-export function *handleModal({ payload }) {
-    const { modalDialogType, invalidKeys, modalDialogLoading, item, fields } = yield select(selectModalState);
+export function *handleModal({ pageIndex }) {
+    const {
+        modalDialogType, invalidKeys, modalDialogLoading, item, fields
+    } = yield select(selectModalState);
 
-    const noContinue = !(payload && modalDialogType === 'add' &&
+    const noContinue = !(typeof pageIndex !== 'undefined' && modalDialogType === 'add' &&
         invalidKeys.size === 0 && modalDialogLoading);
 
     if (noContinue) {
         return;
     }
-
-    const { pageIndex } = payload;
 
     yield call(addServerDataRequest, { item, fields, pageIndex });
 

@@ -32,9 +32,9 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
     if (active && active.get('value') !== active.get('originalValue')) {
         if (cancel) {
             // revert to previous state
-            newReduction = applyEdits(
-                newReduction, active.set('value', active.get('originalValue'))
-            );
+            newReduction = applyEdits(newReduction, {
+                item: active.set('value', active.get('originalValue'))
+            });
         }
         else {
             if (active.get('row') > -1) {
@@ -52,7 +52,7 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
             }
 
             // append the changes of the last item to the UI
-            newReduction = applyEdits(newReduction, active, pageIndex);
+            newReduction = applyEdits(newReduction, { item: active, pageIndex });
         }
     }
 
@@ -67,7 +67,7 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
     );
 }
 
-export function rChangeEditable(reduction, value) {
+export function rChangeEditable(reduction, { value }) {
     return reduction.setIn(['edit', 'active', 'value'], value);
 }
 
@@ -262,7 +262,7 @@ function rFundTransactions(reduction, row, col, transactions) {
             value: transactions
         });
 
-        return applyEditsList(reduction, item, pageIndex)
+        return applyEditsList(reduction, { item, pageIndex })
             .setIn(
                 ['edit', 'active'],
                 reduction.getIn(['edit', 'active']).set('value', transactions)
@@ -274,24 +274,26 @@ function rFundTransactions(reduction, row, col, transactions) {
     );
 }
 
-export function rChangeFundTransactions(reduction, item) {
-    const transactions = getTransactionsForRow(reduction, item.row, item.col)
-        .setIn([item.key, item.column], item.value);
+export function rChangeFundTransactions(reduction, { row, col, key, column, value }) {
+    const transactions = getTransactionsForRow(reduction, row, col)
+        .setIn([key, column], value);
 
-    return rFundTransactions(reduction, item.row, item.col, transactions);
+    return rFundTransactions(reduction, row, col, transactions);
 }
 
 export function rAddFundTransactions(reduction, item) {
-    const transactions = getTransactionsForRow(reduction, item.row, item.col)
+    const { row, col } = item;
+
+    const transactions = getTransactionsForRow(reduction, row, col)
         .push(item);
 
-    return rFundTransactions(reduction, item.row, item.col, transactions);
+    return rFundTransactions(reduction, row, col, transactions);
 }
 
-export function rRemoveFundTransactions(reduction, item) {
-    const transactions = getTransactionsForRow(reduction, item.row, item.col)
-        .remove(item.key);
+export function rRemoveFundTransactions(reduction, { row, col, key }) {
+    const transactions = getTransactionsForRow(reduction, row, col)
+        .remove(key);
 
-    return rFundTransactions(reduction, item.row, item.col, transactions);
+    return rFundTransactions(reduction, row, col, transactions);
 }
 

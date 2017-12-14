@@ -15,9 +15,7 @@ import { openTimedMessage } from './error.saga';
 
 export const selectFundHistoryCache = state => state.getIn(['other', 'fundHistoryCache']);
 
-export function *requestFundPeriodData({ payload }) {
-    const { shortPeriod, reloadPagePrices, noCache } = payload;
-
+export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache }) {
     const fundHistoryCache = yield select(selectFundHistoryCache);
 
     const loadFromCache = !noCache && fundHistoryCache.has(shortPeriod);

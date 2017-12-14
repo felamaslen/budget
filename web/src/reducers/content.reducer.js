@@ -11,7 +11,7 @@ import {
 } from '../misc/data';
 import { capitalise, formatCurrency } from '../misc/format';
 
-import processPageDataOverview from './overview.reducer';
+import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList, processPageDataFunds } from './list.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';
 
@@ -55,24 +55,24 @@ export function getReqObj(reduction, pageIndex, apiKey) {
     return reqObj;
 }
 
-function processPageData(reduction, pageIndex, data) {
+function processPageData(reduction, { pageIndex, raw }) {
     if (PAGES[pageIndex] === 'overview') {
         // overview
-        return processPageDataOverview(reduction, pageIndex, data);
+        return processPageDataOverview(reduction, { pageIndex, raw });
     }
 
     if (PAGES[pageIndex] === 'analysis') {
         // analysis
-        return processPageDataAnalysis(reduction, pageIndex, data);
+        return processPageDataAnalysis(reduction, { pageIndex, raw });
     }
 
     if (PAGES[pageIndex] === 'funds') {
         // funds
-        return processPageDataFunds(reduction, pageIndex, data);
+        return processPageDataFunds(reduction, { pageIndex, raw });
     }
 
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
-        const newReduction = processPageDataList(reduction, pageIndex, data);
+        const newReduction = processPageDataList(reduction, { pageIndex, raw });
         const sortedRows = sortRowsByDate(
             newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex
         );
@@ -120,8 +120,7 @@ export function rHandleContentResponse(reduction, { response, pageIndex }) {
     return processPageData(
         reduction
             .setIn(['pagesRaw', pageIndex], response.data.data),
-        pageIndex,
-        response.data.data
+        { pageIndex, raw: response.data.data }
     )
         .set('loading', false)
         .setIn(['pagesLoaded', pageIndex], true)

@@ -48,7 +48,7 @@ export function processRawListRows(data, pageIndex) {
  * @param {object} raw: api JSON data
  * @returns {Record} modified reduction
  */
-export function processPageDataList(reduction, pageIndex, raw) {
+export function processPageDataList(reduction, { pageIndex, raw }) {
     const numRows = raw.data.length;
     const numCols = LIST_COLS_PAGES[pageIndex].length;
     const total = raw.total;
@@ -62,12 +62,12 @@ export function processPageDataList(reduction, pageIndex, raw) {
     );
 }
 
-export function processPageDataFunds(reduction, pageIndex, data, now = new Date()) {
-    const startTime = data.startTime;
-    const cacheTimes = list(data.cacheTimes);
+export function processPageDataFunds(reduction, { pageIndex, raw }, now = new Date()) {
+    const startTime = raw.startTime;
+    const cacheTimes = list(raw.cacheTimes);
 
     // process list-related data
-    const newReduction = processPageDataList(reduction, pageIndex, data);
+    const newReduction = processPageDataList(reduction, { pageIndex, raw });
 
     const period = reduction.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);

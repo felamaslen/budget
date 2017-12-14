@@ -28,13 +28,13 @@ export function rLoginFormSubmit(reduction) {
     return reduction.setIn(['loginForm', 'active'], false);
 }
 
-export function rLoginFormHandleResponse(reduction, response) {
+export function rLoginFormHandleResponse(reduction, { data }) {
     const newReduction = rLoginFormReset(reduction)
         .setIn(['loginForm', 'active'], true)
         .setIn(['loginForm', 'visible'], true)
         .setIn(['loading'], false);
 
-    if (!response) {
+    if (!(data)) {
         return newReduction;
     }
 
@@ -44,8 +44,8 @@ export function rLoginFormHandleResponse(reduction, response) {
     return newReduction
         .setIn(['currentPageIndex'], page)
         .setIn(['loginForm', 'visible'], false)
-        .setIn(['user', 'uid'], response.data.uid)
-        .setIn(['user', 'name'], response.data.name)
-        .setIn(['user', 'apiKey'], response.data.apiKey);
+        .setIn(['user', 'uid'], data.uid)
+        .setIn(['user', 'name'], data.name)
+        .setIn(['user', 'apiKey'], data.apiKey);
 }
 

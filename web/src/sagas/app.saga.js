@@ -72,9 +72,7 @@ export const selectAddData = state => ({
     item: state.getIn(['edit', 'addFieldsString'])
 });
 
-export function *addServerData({ payload }) {
-    const { pageIndex } = payload;
-
+export function *addServerData({ pageIndex }) {
     // data is validated by reducer
     const { fields, item } = yield select(selectAddData);
 

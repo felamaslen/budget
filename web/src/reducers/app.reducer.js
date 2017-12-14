@@ -322,8 +322,8 @@ function handleKeyPressLoggedIn(reduction, { pageIndex, key, shift, ctrl }) {
     return reduction;
 }
 
-export function rHandleKeyPress(reduction, evt) {
-    const keyIsModifier = evt.key === 'Control' || evt.key === 'Shift';
+export function rHandleKeyPress(reduction, req) {
+    const keyIsModifier = req.key === 'Control' || req.key === 'Shift';
     if (keyIsModifier) {
         return reduction;
     }
@@ -331,14 +331,14 @@ export function rHandleKeyPress(reduction, evt) {
     const loggedIn = reduction.getIn(['user', 'uid']) > 0;
 
     if (loggedIn) {
-        return handleKeyPressLoggedIn(reduction, evt);
+        return handleKeyPressLoggedIn(reduction, req);
     }
 
-    if (evt.key === 'Escape') {
+    if (req.key === 'Escape') {
         return rLoginFormReset(reduction, 0);
     }
 
-    return rLoginFormInput(reduction, evt.key);
+    return rLoginFormInput(reduction, req.key);
 }
 
 export function rLogout(reduction) {

@@ -30,7 +30,11 @@ export function getPeriodMatch(shortPeriod) {
  * Produce a "unique" id
  * @returns {number} "unique" id
  */
-export function uuid(rand = Math.random()) {
+export function uuid(rand = Math.random(), random = false) {
+    if (process.env.NODE_ENV === 'test' && !random) {
+        return 0x4812;
+    }
+
     return Math.floor((1 + rand) * 0x10000);
 }
 

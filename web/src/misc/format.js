@@ -7,7 +7,7 @@ import {
     SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW
 } from './config';
 
-const percent = frac => `${100 * frac}%`;
+const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
 
 /**
  * class to visualise data as a bunch of squares

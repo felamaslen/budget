@@ -291,9 +291,9 @@ export function rGetOverviewRows(data) {
  * @param {integer} oldItemCost: original item cost
  * @returns {Record} reduction with re-calculated overview data
  */
-export function rCalculateOverview(
-    reduction, pageIndex, newDate, oldDate, newItemCost, oldItemCost
-) {
+export function rCalculateOverview(reduction, {
+    pageIndex, newDate, oldDate, newItemCost, oldItemCost
+}) {
     const overviewKey = PAGES.indexOf('overview');
     const startYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'startYearMonth']);
 
@@ -348,7 +348,7 @@ export function rCalculateOverview(
  * @param {object} raw: api JSON data
  * @returns {Record} modified reduction
  */
-export default function rProcessOverview(reduction, pageIndex, raw) {
+export function processPageDataOverview(reduction, { pageIndex, raw }) {
     const data = rProcessDataOverviewRaw(raw);
     const rows = rGetOverviewRows(data);
 

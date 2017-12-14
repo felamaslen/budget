@@ -9,7 +9,7 @@ import { openTimedMessage } from './error.saga';
 import { aContentLoaded } from '../actions/content.actions';
 
 export function makeContentRequest(apiKey, { pageIndex, params, query }) {
-    const path = ['data', PAGES[pageIndex]].concat(params || []);
+    const path = ['data', PAGES[pageIndex], ...params || []];
 
     const queryObj = query || {};
 
@@ -19,12 +19,10 @@ export function makeContentRequest(apiKey, { pageIndex, params, query }) {
         `?${querystring.stringify(queryObj)}`
     ].join('/');
 
-    return call(axios.get, url, { headers: { 'Authorization': apiKey } });
+    return call(axios.get, url, { headers: { Authorization: apiKey } });
 }
 
-export function *requestContent({ payload }) {
-    const { pageIndex, params, query } = payload;
-
+export function *requestContent({ pageIndex, params, query }) {
     const apiKey = yield select(selectApiKey);
 
     try {

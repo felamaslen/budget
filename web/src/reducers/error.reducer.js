@@ -2,15 +2,13 @@
  * Carries out actions for the error messages component
  */
 
-import { uuid } from '../misc/data';
-
-export function rErrorMessageOpen(reduction, message) {
+export function rErrorMessageOpen(reduction, { message, msgId }) {
     return reduction.set('errorMsg', reduction
         .get('errorMsg')
-        .push(message.set('id', uuid()))
+        .push(message.set('id', msgId))
     );
 }
-export function rErrorMessageClose(reduction, msgId) {
+export function rErrorMessageClose(reduction, { msgId }) {
     return reduction.set('errorMsg', reduction
         .get('errorMsg')
         .map(msg => {
@@ -22,7 +20,7 @@ export function rErrorMessageClose(reduction, msgId) {
         })
     );
 }
-export function rErrorMessageRemove(reduction, msgId) {
+export function rErrorMessageRemove(reduction, { msgId }) {
     return reduction.set('errorMsg', reduction
         .get('errorMsg')
         .filter(msg => msg.get('id') !== msgId)
