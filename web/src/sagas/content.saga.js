@@ -1,7 +1,8 @@
 import axios from 'axios';
 import querystring from 'querystring';
-import { select, call, put } from 'redux-saga/effects';
+import { all, select, takeLatest, call, put } from 'redux-saga/effects';
 
+import { CONTENT_REQUESTED } from '../constants/actions';
 import { PAGES, API_PREFIX } from '../misc/const';
 
 import { selectApiKey } from '.';
@@ -41,5 +42,11 @@ export function *requestContent({ pageIndex, loading, params, query }) {
 
         yield put(aContentLoaded({ pageIndex, response: null }));
     }
+}
+
+export default function *contentSaga() {
+    yield all([
+        takeLatest(CONTENT_REQUESTED, requestContent)
+    ]);
 }
 

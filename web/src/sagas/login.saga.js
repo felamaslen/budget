@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { put, call } from 'redux-saga/effects';
+import { all, takeLatest, put, call } from 'redux-saga/effects';
 
+import { SETTINGS_LOADED, USER_LOGGED_OUT, LOGIN_FORM_SUBMITTED } from '../constants/actions';
 import { API_PREFIX } from '../misc/const';
 
-import { aLoginFormResponseReceived } from '../actions/login.actions';
+import { aLoginFormResponseReceived, aLoginFormSubmitted } from '../actions/login.actions';
 import { openTimedMessage } from './error.saga';
 
 export function *getLoginCredentials() {
@@ -35,16 +36,14 @@ export function *saveLoginCredentials(pin = null) {
     }
 }
 
-export function *submitLoginForm({ pin }, saveDetails = true) {
+function *submitLoginForm({ pin }) {
     const data = { pin: Number(pin) };
 
     try {
         const response = yield call(axios.post, `${API_PREFIX}/user/login`, data);
 
         // logged in
-        if (saveDetails) {
-            yield call(saveLoginCredentials, Number(pin));
-        }
+        yield call(saveLoginCredentials, Number(pin));
 
         yield put(aLoginFormResponseReceived(response));
     }
@@ -60,10 +59,28 @@ export function *submitLoginForm({ pin }, saveDetails = true) {
 
         yield put(aLoginFormResponseReceived(null));
     }
-
 }
 
-export function *logoutUser() {
+function *autoLogin() {
+    const pin = yield call(getLoginCredentials);
+
+    if (pin) {
+        yield put(aLoginFormSubmitted(pin));
+    }
+    else {
+        yield put(aLoginFormResponseReceived(null));
+    }
+}
+
+function *logoutUser() {
     yield call(saveLoginCredentials);
+}
+
+export default function *loginSaga() {
+    yield all([
+        takeLatest(LOGIN_FORM_SUBMITTED, submitLoginForm),
+        takeLatest(SETTINGS_LOADED, autoLogin),
+        takeLatest(USER_LOGGED_OUT, logoutUser)
+    ]);
 }
 

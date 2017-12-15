@@ -1,7 +1,8 @@
 import { List as list } from 'immutable';
-import { select, call, put } from 'redux-saga/effects';
+import { all, select, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
+import { FORM_DIALOG_CLOSED, EDIT_SUGGESTIONS_REQUESTED } from '../constants/actions';
 import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
 
 import { aSuggestionsReceived } from '../actions/edit.actions';
@@ -11,25 +12,24 @@ import { selectApiKey } from '.';
 import { addServerDataRequest } from './app.saga';
 
 export function *requestEditSuggestions({ reqId, page, item, value }) {
-    if (!(value && value.length)) {
+    if (value && value.length) {
+        const apiKey = yield select(selectApiKey);
+
+        const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
+
+        try {
+            const response = yield call(axios.get, url, { headers: { 'Authorization': apiKey } });
+
+            const items = list(response.data.data.list);
+
+            yield put(aSuggestionsReceived({ items, reqId }));
+        }
+        catch (err) {
+            console.warn('Error loading search suggestions');
+        }
+    }
+    else {
         yield put(aSuggestionsReceived({ items: null }));
-
-        return;
-    }
-
-    const apiKey = yield select(selectApiKey);
-
-    const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
-
-    try {
-        const response = yield call(axios.get, url, { headers: { 'Authorization': apiKey } });
-
-        const items = list(response.data.data.list);
-
-        yield put(aSuggestionsReceived({ items, reqId }));
-    }
-    catch (err) {
-        console.warn('Error loading search suggestions');
     }
 }
 
@@ -56,5 +56,12 @@ export function *handleModal({ pageIndex }) {
     yield call(addServerDataRequest, { item, fields, pageIndex });
 
     yield put(aMobileDialogClosed(null));
+}
+
+export default function *editSaga() {
+    yield all([
+        takeLatest(EDIT_SUGGESTIONS_REQUESTED, requestEditSuggestions),
+        takeLatest(FORM_DIALOG_CLOSED, handleModal)
+    ]);
 }
 

@@ -1,8 +1,9 @@
 import { List as list } from 'immutable';
-import { select, call, put } from 'redux-saga/effects';
+import { all, select, takeEvery, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 import querystring from 'querystring';
 
+import { GRAPH_FUNDS_PERIOD_CHANGED, STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '../constants/actions';
 import { API_PREFIX } from '../misc/const';
 import { getPeriodMatch } from '../misc/data';
 
@@ -81,5 +82,13 @@ export function *requestStocksPrices() {
     catch (err) {
         yield put(aStocksPricesReceived(null));
     }
+}
+
+export default function *fundsSaga() {
+    yield all([
+        takeEvery(GRAPH_FUNDS_PERIOD_CHANGED, requestFundPeriodData),
+        takeEvery(STOCKS_LIST_REQUESTED, requestStocksList),
+        takeEvery(STOCKS_PRICES_REQUESTED, requestStocksPrices)
+    ]);
 }
 

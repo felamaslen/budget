@@ -1,25 +1,13 @@
-import { select, call, put } from 'redux-saga/effects';
+import { all, select, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
+import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
 import { API_PREFIX, PAGES } from '../misc/const';
 
-import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/login.actions';
 import { aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
-import { getLoginCredentials } from './login.saga';
-
-export function *loadSettings() {
-    const pin = yield call(getLoginCredentials);
-
-    if (pin) {
-        yield put(aLoginFormSubmitted(pin));
-    }
-    else {
-        yield put(aLoginFormResponseReceived(null));
-    }
-}
 
 export const selectRequestList = state => state.getIn(['edit', 'requestList'])
     .map(item => item.get('req'));
@@ -76,10 +64,15 @@ export function *addServerData({ pageIndex }) {
     // data is validated by reducer
     const { fields, item } = yield select(selectAddData);
 
-    if (!(fields && item)) {
-        return;
+    if (fields && item) {
+        yield call(addServerDataRequest, { pageIndex, item, fields });
     }
+}
 
-    yield call(addServerDataRequest, { pageIndex, item, fields });
+export default function *appSaga() {
+    yield all([
+        takeEvery(EDIT_LIST_ITEM_ADDED, addServerData),
+        takeLatest(SERVER_UPDATED, updateServerData)
+    ]);
 }
 

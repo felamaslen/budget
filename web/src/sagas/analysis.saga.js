@@ -1,5 +1,6 @@
-import { select, put, call } from 'redux-saga/effects';
+import { all, select, takeEvery, put, call } from 'redux-saga/effects';
 
+import { ANALYSIS_BLOCK_CLICKED, ANALYSIS_OPTION_CHANGED } from '../constants/actions';
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
 
 import { selectApiKey } from '.';
@@ -22,7 +23,6 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
 
     const { pageIndex, name, period, grouping, timeIndex } = {
         ...stateProps,
-        wasDeep,
         ...payload
     };
 
@@ -43,5 +43,12 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
     catch (err) {
         yield call(openTimedMessage, `Error loading analysis data: ${err.message}`);
     }
+}
+
+export default function *analysisSaga() {
+    yield all([
+        takeEvery(ANALYSIS_BLOCK_CLICKED, requestAnalysisData),
+        takeEvery(ANALYSIS_OPTION_CHANGED, requestAnalysisData)
+    ]);
 }
 
