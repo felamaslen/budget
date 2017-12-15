@@ -39,10 +39,10 @@ export function rLoginFormHandleResponse(reduction, { data }) {
     }
 
     // go to the first page after logging in
-    const page = Math.max(0, newReduction.getIn(['currentPageIndex']));
+    const pageIndex = Math.max(0, newReduction.get('currentPageIndex'));
 
     return newReduction
-        .setIn(['currentPageIndex'], page)
+        .set('currentPageIndex', pageIndex)
         .setIn(['loginForm', 'visible'], false)
         .setIn(['user', 'uid'], data.uid)
         .setIn(['user', 'name'], data.name)
