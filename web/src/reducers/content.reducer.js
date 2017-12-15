@@ -106,9 +106,9 @@ export function rContentBlockHover(reduction, { block, subBlock }) {
     return reduction.setIn(['other', 'blockView', 'status'], newStatus);
 }
 
-export function rRequestContent(reduction, { pageIndex }) {
+export function rRequestContent(reduction, { pageIndex, loading }) {
     return reduction
-        .set('loading', true)
+        .set('loading', loading)
         .set('currentPageIndex', pageIndex);
 }
 

@@ -94,7 +94,7 @@ ModalDialog.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    pageIndex: state.getIn(['currentPageIndex']),
+    pageIndex: state.get('currentPageIndex'),
     active: state.getIn(['modalDialog', 'active']),
     visible: state.getIn(['modalDialog', 'visible']),
     loading: state.getIn(['modalDialog', 'loading']),

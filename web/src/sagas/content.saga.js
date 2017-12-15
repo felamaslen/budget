@@ -22,7 +22,11 @@ export function makeContentRequest(apiKey, { pageIndex, params, query }) {
     return call(axios.get, url, { headers: { Authorization: apiKey } });
 }
 
-export function *requestContent({ pageIndex, params, query }) {
+export function *requestContent({ pageIndex, loading, params, query }) {
+    if (!loading) {
+        return;
+    }
+
     const apiKey = yield select(selectApiKey);
 
     try {

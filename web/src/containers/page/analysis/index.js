@@ -26,6 +26,7 @@ export class PageAnalysis extends Page {
     loadContent() {
         this.props.loadContent({
             pageIndex,
+            loading: true,
             params: [
                 ANALYSIS_PERIODS[this.props.periodKey],
                 ANALYSIS_GROUPINGS[this.props.groupingKey],

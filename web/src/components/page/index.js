@@ -19,9 +19,10 @@ export default class Page extends PureComponent {
         };
     }
     loadContent() {
-        if (!this.props.loaded) {
-            this.props.loadContent({ pageIndex: this.props.pageIndex });
-        }
+        this.props.loadContent({
+            pageIndex: this.props.pageIndex,
+            loading: !this.props.loaded
+        });
     }
     componentDidMount() {
         this.loadContent();
