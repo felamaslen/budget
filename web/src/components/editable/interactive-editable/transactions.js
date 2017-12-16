@@ -142,7 +142,6 @@ export default class InteractiveEditableTransactions extends PureComponent {
             </tr>;
         });
 
-
         const className = classNames('active', 'editable', 'editable-transactions');
 
         return <span className={className}>

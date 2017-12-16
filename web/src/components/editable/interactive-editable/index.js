@@ -30,7 +30,7 @@ export default class InteractiveEditable extends PureComponent {
             getEditValue(item, value, evt.target.value)
         );
 
-        const className = classNames('active', 'editable', `editable=${item}`);
+        const className = classNames('active', 'editable', `editable-${item}`);
 
         const inputClassName = classNames('editable-input');
 
