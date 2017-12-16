@@ -1,15 +1,51 @@
 import { List as list } from 'immutable';
-import { all, select, takeLatest, call, put } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
+import { all, fork, select, takeLatest, take, cancel, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
-import { FORM_DIALOG_CLOSED, EDIT_SUGGESTIONS_REQUESTED } from '../constants/actions';
-import { API_PREFIX, MAX_SUGGESTIONS } from '../misc/const';
+import { FORM_DIALOG_CLOSED, EDIT_CHANGED, EDIT_SUGGESTIONS_REQUESTED } from '../constants/actions';
+import { API_PREFIX, PAGES, MAX_SUGGESTIONS, LIST_COLS_SUGGESTIONS } from '../misc/const';
 
-import { aSuggestionsReceived } from '../actions/edit.actions';
+import { aSuggestionsRequested, aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';
 
 import { selectApiKey } from '.';
 import { addServerDataRequest } from './app.saga';
+
+export const suggestionsInfo = reduction => ({
+    pageIndex: reduction.get('currentPageIndex'),
+    item: reduction.getIn(['edit', 'active', 'item']),
+    value: reduction.getIn(['edit', 'active', 'value'])
+});
+
+export function *triggerEditSuggestionsRequest({ pageIndex, item, value }) {
+    yield call(delay, 100);
+
+    yield put(aSuggestionsRequested({
+        page: PAGES[pageIndex],
+        item,
+        value
+    }));
+}
+
+export function *watchTextInput() {
+    let task = null;
+
+    while (true) {
+        yield take(EDIT_CHANGED);
+
+        const { pageIndex, item, value } = yield select(suggestionsInfo);
+
+        const itemIsSuggestionCapable = LIST_COLS_SUGGESTIONS[pageIndex].indexOf(item) !== -1;
+        if (itemIsSuggestionCapable) {
+            if (task) {
+                yield cancel(task);
+            }
+
+            task = yield fork(triggerEditSuggestionsRequest, { pageIndex, item, value });
+        }
+    }
+}
 
 export function *requestEditSuggestions({ reqId, page, item, value }) {
     if (value && value.length) {
@@ -60,6 +96,7 @@ export function *handleModal({ pageIndex }) {
 
 export default function *editSaga() {
     yield all([
+        fork(watchTextInput),
         takeLatest(EDIT_SUGGESTIONS_REQUESTED, requestEditSuggestions),
         takeLatest(FORM_DIALOG_CLOSED, handleModal)
     ]);

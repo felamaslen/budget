@@ -5,33 +5,8 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 
-import debounce from '../../misc/debounce';
-import { PAGES } from '../../misc/const';
-import {
-    aEditableActivated, aEditableChanged, aSuggestionsRequested,
-    aFundTransactionsChanged, aFundTransactionsAdded, aFundTransactionsRemoved
-} from '../../actions/edit.actions';
-
-import EditableDate from '../../components/editable/date';
-import EditableCost from '../../components/editable/cost';
-import EditableText from '../../components/editable/text';
-import EditableTransactions from '../../components/editable/transactions';
-
-function getEditableComponent(item) {
-    if (item === 'date') {
-        return EditableDate;
-    }
-
-    if (item === 'cost') {
-        return EditableCost;
-    }
-
-    if (item === 'transactions') {
-        return EditableTransactions;
-    }
-
-    return EditableText;
-}
+import * as actions from '../../actions/edit.actions';
+import Editable from '../../components/editable';
 
 function getStateProps(row, col, item, value, getSuggestions) {
     return state => {
@@ -55,7 +30,7 @@ function getStateProps(row, col, item, value, getSuggestions) {
     };
 }
 
-function getDispatchProps(row, col, item, value, getSuggestions) {
+function getDispatchProps(row, col, item, value) {
     return (dispatch, ownProps) => {
         const props = {
             onActivate: () => {
@@ -63,38 +38,18 @@ function getDispatchProps(row, col, item, value, getSuggestions) {
                     return;
                 }
 
-                dispatch(aEditableActivated({
+                dispatch(actions.aEditableActivated({
                     pageIndex: ownProps.pageIndex,
                     editable: map({ row, col, item, value })
                 }));
             },
-            onChange: processedValue => dispatch(aEditableChanged(processedValue))
+            onChange: processedValue => dispatch(actions.aEditableChanged(processedValue))
         };
 
-        if (getSuggestions) {
-            if (ownProps.noSuggestions) {
-                props.requestSuggestions = () => null;
-            }
-            else {
-                const suggestionsTimeout = 100;
-                const immediate = true;
-
-                props.requestSuggestions = debounce(
-                    processedValue => dispatch(aSuggestionsRequested({
-                        page: PAGES[ownProps.pageIndex],
-                        item,
-                        value: processedValue
-                    })),
-                    suggestionsTimeout,
-                    immediate
-                );
-            }
-        }
-
         if (item === 'transactions') {
-            props.addTransaction = transaction => dispatch(aFundTransactionsAdded(transaction));
-            props.editTransaction = transaction => dispatch(aFundTransactionsChanged(transaction));
-            props.removeTransaction = transaction => dispatch(aFundTransactionsRemoved(transaction));
+            props.addTransaction = transaction => dispatch(actions.aFundTransactionsAdded(transaction));
+            props.editTransaction = transaction => dispatch(actions.aFundTransactionsChanged(transaction));
+            props.removeTransaction = transaction => dispatch(actions.aFundTransactionsRemoved(transaction));
         }
 
         return props;
@@ -102,14 +57,12 @@ function getDispatchProps(row, col, item, value, getSuggestions) {
 }
 
 export default ({ row, col, item, value }) => {
-    const Component = getEditableComponent(item);
-
     const getSuggestions = ['date', 'cost', 'transactions'].indexOf(item) === -1;
 
     const mapStateToProps = getStateProps(row, col, item, value, getSuggestions);
 
     const mapDispatchToProps = getDispatchProps(row, col, item, value, getSuggestions);
 
-    return connect(mapStateToProps, mapDispatchToProps)(Component);
+    return connect(mapStateToProps, mapDispatchToProps)(Editable);
 };
 
