@@ -14,7 +14,9 @@ export default function FormFieldDate({ value, onChange }) {
         return onChange(null);
     };
 
-    return <input type="date" defaultValue={procValue} onChange={procOnChange} />;
+    return <div className="form-field form-field-date">
+        <input type="date" defaultValue={procValue} onChange={procOnChange} />
+    </div>;
 }
 
 FormFieldDate.propTypes = {

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 export default function FormFieldCost({ value, onChange }) {
     const procValue = value / 100;
-    const procOnChange = evt => onChange(Math.round(100 * (+evt.target.value)));
+    const procOnChange = evt => onChange(Math.round(100 * Number(evt.target.value)));
 
     return <div className="form-field form-field-cost">
         <input type="number" step="0.01" defaultValue={procValue} onChange={procOnChange} />
