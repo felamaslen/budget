@@ -4,9 +4,9 @@
  */
 
 import { Router, Route } from 'react-router-dom';
-import createHistory from 'history/createBrowserHistory';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import ErrorMessages from '../../containers/error-messages';
 import Spinner from '../../containers/spinner';
@@ -15,11 +15,9 @@ import Content from '../../containers/content';
 
 import Header from '../header';
 
-const history = createHistory();
-
-export default function App() {
+export default function App({ history }) {
     return <Router history={history}>
-        <div id="main">
+        <div className="main">
             <ErrorMessages />
             <Route path="*" component={Header} />
             <LoginForm />
@@ -28,4 +26,8 @@ export default function App() {
         </div>
     </Router>;
 }
+
+App.propTypes = {
+    history: PropTypes.object.isRequired
+};
 

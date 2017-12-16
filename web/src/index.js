@@ -9,9 +9,12 @@ import 'babel-polyfill';
 import React from 'react';
 import { AppContainer } from 'react-hot-loader';
 import { render } from 'react-dom';
+import createHistory from 'history/createBrowserHistory';
 
 import store from './store';
 import Root from './containers/root';
+
+const history = createHistory();
 
 // import styles and favicon
 import './sass/index.scss';
@@ -20,7 +23,7 @@ import './images/favicon.png';
 function renderApp(RootComponent = Root) {
     render(
         <AppContainer>
-            <RootComponent store={store} />
+            <RootComponent store={store} history={history} />
         </AppContainer>,
         document.getElementById('root')
     );
