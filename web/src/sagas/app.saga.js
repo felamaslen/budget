@@ -1,13 +1,51 @@
-import { all, select, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
+import { eventChannel } from 'redux-saga';
+import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
+import debounce from '../misc/debounce';
 
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
 import { API_PREFIX, PAGES } from '../misc/const';
 
-import { aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
+import { aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
+
+function keyPressEventChannel() {
+    return eventChannel(emitter => {
+        const keyPressHandler = debounce(evt => {
+            emitter(aKeyPressed({
+                key: evt.key,
+                shift: evt.shiftKey,
+                ctrl: evt.ctrlKey
+            }));
+        }, 1, true);
+
+        const onKeyPress = evt => {
+            if (evt.key === 'Tab') {
+                evt.preventDefault();
+            }
+
+            keyPressHandler(evt);
+        };
+
+        window.addEventListener('keydown', onKeyPress);
+
+        return () => {
+            window.removeEventListener('keydown', onKeyPress);
+        };
+    });
+}
+
+export function *watchKeyPress() {
+    const channel = keyPressEventChannel();
+
+    while (true) {
+        const action = yield take(channel);
+
+        yield put(action);
+    }
+}
 
 export const selectRequestList = state => state.getIn(['edit', 'requestList'])
     .map(item => item.get('req'));
@@ -71,6 +109,7 @@ export function *addServerData({ pageIndex }) {
 
 export default function *appSaga() {
     yield all([
+        fork(watchKeyPress),
         takeEvery(EDIT_LIST_ITEM_ADDED, addServerData),
         takeLatest(SERVER_UPDATED, updateServerData)
     ]);

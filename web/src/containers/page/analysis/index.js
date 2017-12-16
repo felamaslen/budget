@@ -5,7 +5,6 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aKeyPressed } from '../../../actions/app.actions';
 import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
@@ -77,7 +76,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    handleKeyPress: req => dispatch(aKeyPressed(req)),
     loadContent: req => dispatch(aContentRequested(req))
 });
 

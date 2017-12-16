@@ -277,13 +277,14 @@ function handleNavInSuggestions(reduction, { suggestions, dx, dy }) {
     return handleSuggestionsNav(reduction, dy, suggestions);
 }
 
-function handleKeyPressLoggedIn(reduction, { pageIndex, key, shift, ctrl }) {
+function handleKeyPressLoggedIn(reduction, { key, shift, ctrl }) {
     const { dx, dy } = getNavDirection(key, shift);
     const navigated = dx !== 0 || dy !== 0;
 
     const escape = key === 'Escape';
     const enter = key === 'Enter';
 
+    const pageIndex = reduction.get('currentPageIndex');
     const suggestions = reduction.getIn(['editSuggestions']);
     const haveSuggestions = suggestions.get('list').size > 0;
     const suggestionActive = suggestions.get('active') > -1;

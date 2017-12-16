@@ -5,7 +5,6 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aKeyPressed } from '../../../actions/app.actions';
 import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
@@ -35,7 +34,6 @@ export class PageOverview extends Page {
 PageOverview.propTypes = {
     rows: PropTypes.instanceOf(list),
     loaded: PropTypes.bool.isRequired,
-    handleKeyPress: PropTypes.func.isRequired,
     loadContent: PropTypes.func.isRequired
 };
 
@@ -46,8 +44,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req)),
-    handleKeyPress: event => dispatch(aKeyPressed(event))
+    loadContent: req => dispatch(aContentRequested(req))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageOverview);
