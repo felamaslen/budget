@@ -10,10 +10,7 @@ import React from 'react';
 import BlockBits from '../../../src/components/block-packer/block-bits';
 
 describe('BlockBits />', () => {
-    let hovered = null;
-    const onHover = (...args) => {
-        hovered = args;
-    };
+    const onHover = () => null;
 
     let clicked = null;
     const onClick = (...args) => {
@@ -39,10 +36,10 @@ describe('BlockBits />', () => {
     const wrapperWasDeep = mount(<BlockBits {...props} deepBlock="foo" />);
 
     it('should render its basic structure', () => {
-        expect(wrapper.hasClass('block')).to.be.ok;
-        expect(wrapper.hasClass('block-foo')).to.be.ok;
-        expect(wrapper.hasClass('active')).to.be.false;
-        expect(wrapperWasDeep.hasClass('block-foo')).to.be.false;
+        expect(wrapper.hasClass('block')).to.equal(true);
+        expect(wrapper.hasClass('block-foo')).to.equal(true);
+        expect(wrapper.hasClass('active')).to.equal(false);
+        expect(wrapperWasDeep.hasClass('block-foo')).to.equal(false);
     });
     it('should render block width and height', () => {
         expect(wrapper).to.have.style('width', '11px');
@@ -57,9 +54,7 @@ describe('BlockBits />', () => {
     });
 
     it('should add colour class', () => {
-        expect(wrapper.hasClass('block-red')).to.be.ok;
+        expect(wrapper.hasClass('block-red')).to.equal(true);
     });
-
-    it('should be completely tested');
 });
 
