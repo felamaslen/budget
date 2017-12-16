@@ -22,6 +22,9 @@ export class LoginForm extends PureComponent {
 
         this.keydownListener = evt => this.props.handleKeyPress({ key: evt.key });
     }
+    componentDidMount() {
+        window.addEventListener('keydown', this.keydownListener);
+    }
     componentDidUpdate(prevProps) {
         const pinWasComplete = prevProps.pin.length >= LOGIN_INPUT_LENGTH;
         const pinIsComplete = this.props.pin.length >= LOGIN_INPUT_LENGTH;
@@ -41,7 +44,6 @@ export class LoginForm extends PureComponent {
     componentWillUnmount() {
         window.removeEventListener('keydown', this.keydownListener);
     }
-
     render() {
         if (!this.props.visible) {
             return null;

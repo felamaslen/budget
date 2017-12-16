@@ -2,7 +2,7 @@
  * Carries out actions for the Form component
  */
 
-export function rLoginFormInput(reduction, input) {
+export function rLoginFormInput(reduction, { input }) {
     const inputString = input.toString();
     if (!inputString.match(/^[0-9]$/) || !reduction.getIn(['loginForm', 'visible'])) {
         // don't do anything if the input is non-numeric, or
@@ -17,7 +17,11 @@ export function rLoginFormInput(reduction, input) {
         .setIn(['loginForm', 'inputStep'], reduction.getIn(['loginForm', 'inputStep']) + 1);
 }
 
-export function rLoginFormReset(reduction, index = 0) {
+export function rLoginFormReset(reduction, req) {
+    const index = req
+        ? req.index
+        : 0;
+
     return reduction
         .setIn(['loginForm', 'values'],
             reduction.getIn(['loginForm', 'values']).slice(0, index))

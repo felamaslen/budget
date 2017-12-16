@@ -338,7 +338,7 @@ export function rHandleKeyPress(reduction, req) {
         return rLoginFormReset(reduction, 0);
     }
 
-    return rLoginFormInput(reduction, req.key);
+    return rLoginFormInput(reduction, { input: req.key });
 }
 
 export function rLogout(reduction) {
