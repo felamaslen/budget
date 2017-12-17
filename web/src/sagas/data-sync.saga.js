@@ -10,7 +10,7 @@ export const selectRequestList = reduction =>
 
 function dataSyncEventChannel() {
     return eventChannel(emitter => {
-        const timer = setInterval(() => emitter(aTimeUpdated()), 1000);
+        const timer = setInterval(() => emitter(aTimeUpdated(new Date())), 1000);
 
         const dataSync = setInterval(() => emitter(aServerUpdated()), TIMER_UPDATE_SERVER);
 

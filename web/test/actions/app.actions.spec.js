@@ -25,8 +25,9 @@ describe('app.actions', () => {
         }));
     });
     describe('aTimeUpdated', () => {
-        it('should return TIME_UPDATED', () => expect(A.aTimeUpdated()).to.deep.equal({
-            type: C.TIME_UPDATED
+        it('should return TIME_UPDATED with the time', () => expect(A.aTimeUpdated(10)).to.deep.equal({
+            type: C.TIME_UPDATED,
+            now: 10
         }));
     });
     describe('aServerUpdated', () => {
