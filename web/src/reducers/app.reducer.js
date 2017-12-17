@@ -218,12 +218,12 @@ export function rLogout(reduction) {
         .setIn(['loginForm', 'visible'], true);
 }
 
-export function rUpdateTime(reduction) {
+export function rUpdateTime(reduction, now = new Date()) {
     if (reduction.getIn(['pages', pageIndexFunds])) {
         const ageText = getFundsCachedValueAgeText(
             reduction.getIn(['other', 'graphFunds', 'startTime']),
             reduction.getIn(['other', 'graphFunds', 'cacheTimes']),
-            new Date()
+            now
         );
 
         return reduction.setIn(

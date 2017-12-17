@@ -4,7 +4,7 @@
 
 export function rLoginFormInput(reduction, { input }) {
     const inputString = input.toString();
-    if (!inputString.match(/^[0-9]$/) || !reduction.getIn(['loginForm', 'visible'])) {
+    if (!(inputString.match(/^[0-9]$/) && reduction.getIn(['loginForm', 'visible']))) {
         // don't do anything if the input is non-numeric, or
         // we're still loading a login request
         return reduction;
