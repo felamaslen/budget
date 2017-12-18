@@ -36,7 +36,7 @@ export function *saveLoginCredentials(pin = null) {
     }
 }
 
-function *submitLoginForm({ pin }) {
+export function *submitLoginForm({ pin }) {
     const data = { pin: Number(pin) };
 
     try {
@@ -61,7 +61,7 @@ function *submitLoginForm({ pin }) {
     }
 }
 
-function *autoLogin() {
+export function *autoLogin() {
     const pin = yield call(getLoginCredentials);
 
     if (pin) {
@@ -72,7 +72,7 @@ function *autoLogin() {
     }
 }
 
-function *logoutUser() {
+export function *logoutUser() {
     yield call(saveLoginCredentials);
 }
 
