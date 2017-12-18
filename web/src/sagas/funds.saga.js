@@ -33,7 +33,7 @@ export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache 
         const response = yield call(
             axios.get,
             `${API_PREFIX}/data/funds?${query}`,
-            { headers: { 'Authorization': apiKey } }
+            { headers: { Authorization: apiKey } }
         );
 
         const data = response.data.data;
