@@ -89,7 +89,7 @@ describe('app.reducer', () => {
             });
 
             it('should update the cached value age', () => {
-                expect(R.rUpdateTime(state, new Date('2017-11-10 10:00')).toJS())
+                expect(R.rUpdateTime(state, { now: new Date('2017-11-10 10:00') }).toJS())
                     .to.deep.equal({
                         other: {
                             fundsCachedValue: {
@@ -104,6 +104,13 @@ describe('app.reducer', () => {
                         },
                         pages: [null, null, {}]
                     });
+            });
+        });
+
+        describe('otherwise', () => {
+            it('should do nothing', () => {
+                expect(R.rUpdateTime(fromJS({ foo: 'bar' }), { now: null }).toJS())
+                    .to.deep.equal({ foo: 'bar' });
             });
         });
     });
