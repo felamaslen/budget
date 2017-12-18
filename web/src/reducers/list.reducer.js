@@ -62,7 +62,7 @@ export function processPageDataList(reduction, { pageIndex, raw }) {
     );
 }
 
-export function processPageDataFunds(reduction, { pageIndex, raw }, now = new Date()) {
+export function processPageDataFunds(reduction, { pageIndex, raw }, now) {
     const startTime = raw.startTime;
     const cacheTimes = list(raw.cacheTimes);
 

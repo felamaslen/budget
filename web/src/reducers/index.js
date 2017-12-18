@@ -21,7 +21,7 @@ import * as stocksList from './stocks-list.reducer';
 import initialState from '../reduction';
 
 const createReducerObject = array => array.reduce((obj, item) => {
-    obj[item[0]] = (state, action) => item[1](state, action);
+    obj[item[0]] = (state, action) => item[1](state, action, new Date());
 
     return obj;
 }, {});

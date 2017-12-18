@@ -55,7 +55,7 @@ export function getReqObj(reduction, pageIndex, apiKey) {
     return reqObj;
 }
 
-function processPageData(reduction, { pageIndex, raw }) {
+function processPageData(reduction, { pageIndex, raw }, now) {
     if (PAGES[pageIndex] === 'overview') {
         // overview
         return processPageDataOverview(reduction, { pageIndex, raw });
@@ -68,7 +68,7 @@ function processPageData(reduction, { pageIndex, raw }) {
 
     if (PAGES[pageIndex] === 'funds') {
         // funds
-        return processPageDataFunds(reduction, { pageIndex, raw });
+        return processPageDataFunds(reduction, { pageIndex, raw }, now);
     }
 
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
@@ -112,7 +112,7 @@ export function rRequestContent(reduction, { pageIndex, loading }) {
         .set('currentPageIndex', pageIndex);
 }
 
-export function rHandleContentResponse(reduction, { response, pageIndex }) {
+export function rHandleContentResponse(reduction, { response, pageIndex }, now) {
     if (!response) {
         return reduction.set('loading', false);
     }
@@ -120,7 +120,8 @@ export function rHandleContentResponse(reduction, { response, pageIndex }) {
     return processPageData(
         reduction
             .setIn(['pagesRaw', pageIndex], response.data.data),
-        { pageIndex, raw: response.data.data }
+        { pageIndex, raw: response.data.data },
+        now
     )
         .set('loading', false)
         .setIn(['pagesLoaded', pageIndex], true)
