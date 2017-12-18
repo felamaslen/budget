@@ -1,4 +1,5 @@
 import { all, select, takeEvery, put, call } from 'redux-saga/effects';
+import axios from 'axios';
 
 import { ANALYSIS_BLOCK_CLICKED, ANALYSIS_OPTION_CHANGED } from '../constants/actions';
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
@@ -36,7 +37,7 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
     }
 
     try {
-        const response = yield makeContentRequest(apiKey, { pageIndex, params });
+        const response = yield call(axios.get, ...makeContentRequest(apiKey, { pageIndex, params }));
 
         yield put(aAnalysisDataRefreshed({ pageIndex, response, name }));
     }

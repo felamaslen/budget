@@ -20,7 +20,7 @@ export function makeContentRequest(apiKey, { pageIndex, params, query }) {
         `?${querystring.stringify(queryObj)}`
     ].join('/');
 
-    return call(axios.get, url, { headers: { Authorization: apiKey } });
+    return [url, { headers: { Authorization: apiKey } }];
 }
 
 export function *requestContent({ pageIndex, loading, params, query }) {
@@ -31,7 +31,7 @@ export function *requestContent({ pageIndex, loading, params, query }) {
     const apiKey = yield select(selectApiKey);
 
     try {
-        const response = yield makeContentRequest(apiKey, { pageIndex, params, query });
+        const response = yield call(axios.get, ...makeContentRequest(apiKey, { pageIndex, params, query }));
 
         yield put(aContentLoaded({ pageIndex, response }));
     }

@@ -1,8 +1,8 @@
-/* eslint-disable no-underscore-dangle */
-import 'babel-polyfill';
+/* eslint-disable prefer-reflect */
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import { select, call, put } from 'redux-saga/effects';
+import { testSaga } from 'redux-saga-test-plan';
+import axios from 'axios';
 
 import * as S from '../../src/sagas/analysis.saga';
 import * as A from '../../src/actions/analysis.actions';
@@ -31,55 +31,44 @@ describe('analysis.saga', () => {
     });
 
     describe('requestAnalysisData', () => {
-        describe('if triggered by clicking a deep block', () => {
-            const iter = S.requestAnalysisData({
-                payload: { pageIndex: 1, name: 'foo', wasDeep: true }
-            });
-
-            it('should do nothing', () => expect(iter.next().value).to.be.undefined);
+        it('should do nothing if triggered by clicking a deep block', () => {
+            testSaga(S.requestAnalysisData, { wasDeep: true })
+                .next()
+                .isDone();
         });
 
-        describe('if the API returns a success response', () => {
-            const iter = S.requestAnalysisData({
-                payload: { pageIndex: 1, name: 'foo', wasDeep: false }
-            });
-
-            let next = null;
-            it('should prepare data from the state and call the API', () => {
-                next = iter.next();
-                expect(next.value).to.deep.equal(select(S.selectStateProps));
-
-                next = iter.next({ period: 1, grouping: 0, timeIndex: 3 });
-                expect(next.value).to.deep.equal(select(selectApiKey));
-
-                next = iter.next('some_api_key');
-                expect(next.value).to.deep.equal(makeContentRequest('some_api_key', {
+        it('should work as expected', () => {
+            testSaga(S.requestAnalysisData, { pageIndex: 1, name: 'foo', wasDeep: false })
+                .next()
+                .select(S.selectStateProps)
+                .next({ period: 1, grouping: 0, timeIndex: 3 })
+                .select(selectApiKey)
+                .next('some_api_key')
+                .call(axios.get, ...makeContentRequest('some_api_key', {
                     pageIndex: 1,
                     params: ['deep', 'foo', 'month', 'category', 3]
-                }));
-            });
-
-            it('should put aAnalysisDataRefreshed once the data comes in', () => {
-                next = iter.next({ data: 'foobar' });
-                expect(next.value).to.deep.equal(put(A.aAnalysisDataRefreshed({
-                    pageIndex: 1, response: { data: 'foobar' }, name: 'foo'
-                })));
-            });
+                }))
+                .next({ data: 'foobar' })
+                .put(A.aAnalysisDataRefreshed({ pageIndex: 1, response: { data: 'foobar' }, name: 'foo' }))
+                .next()
+                .isDone();
         });
 
-        describe('if the API returns an error', () => {
-            const iter = S.requestAnalysisData({
-                payload: { pageIndex: 1, name: 'foo', wasDeep: false }
-            });
-
-            iter.next();
-            iter.next();
-            iter.next();
-
-            it('should pop up an error message', () => {
-                expect(iter.throw({ message: 'foo error' }).value)
-                    .to.deep.equal(call(openTimedMessage, 'Error loading analysis data: foo error'));
-            });
+        it('should handle errors', () => {
+            testSaga(S.requestAnalysisData, { pageIndex: 1, name: 'foo', wasDeep: false })
+                .next()
+                .select(S.selectStateProps)
+                .next({ period: 1, grouping: 0, timeIndex: 3 })
+                .select(selectApiKey)
+                .next('some_api_key')
+                .call(axios.get, ...makeContentRequest('some_api_key', {
+                    pageIndex: 1,
+                    params: ['deep', 'foo', 'month', 'category', 3]
+                }))
+                .throw(new Error('some error'))
+                .call(openTimedMessage, 'Error loading analysis data: some error')
+                .next()
+                .isDone();
         });
     });
 });
