@@ -83,13 +83,9 @@ export function *addServerDataRequest({ item, fields, pageIndex }) {
         );
 
         yield put(aServerAddReceived({ response, fields, pageIndex }));
-
-        yield 0;
     }
     catch (err) {
         yield call(openTimedMessage, 'Error adding data to server!');
-
-        yield 1;
     }
 }
 
