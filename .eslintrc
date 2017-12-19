@@ -248,7 +248,7 @@
             "error",
             "never"
         ],
-        "semi": "off",
+        "semi": "error",
         "semi-spacing": "error",
         "semi-style": [
             "error",

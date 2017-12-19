@@ -99,6 +99,18 @@ export const AVERAGE_EXP = 0xa2;
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
 
+export const LIST_COLS_SUGGESTIONS = [
+    [], // overview (not list)
+    [], // analysis (not list)
+    [], // funds (no suggestions)
+    ['item'],
+    ['item'],
+    ['item', 'category', 'shop'],
+    ['item', 'category', 'shop'],
+    ['item', 'holiday', 'shop'],
+    ['item', 'society', 'shop']
+];
+
 export const htmlCanvasSupported = () => {
     if (typeof navigator === 'undefined') {
         return false;

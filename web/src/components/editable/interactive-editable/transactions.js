@@ -1,25 +1,20 @@
-/**
- * Editable form element component - fund transactions lists
- */
-
 import React from 'react';
+import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
-import Editable from '.';
-import { YMD } from '../../misc/date';
-import { TransactionsList } from '../../misc/data';
+import classNames from 'classnames';
+import { YMD } from '../../../misc/date';
+import { formatValue } from '../format';
 
-export default class EditableTransactions extends Editable {
+export default class InteractiveEditableTransactions extends PureComponent {
     constructor(props) {
         super(props);
-        this.editableType = 'transactions';
-        this.resetInputs();
-    }
-    resetInputs() {
+
         this.input = {
             date: {},
             units: {},
             cost: {}
         };
+
         this.inputAdd = {};
     }
     addTransaction(row, col) {
@@ -69,7 +64,7 @@ export default class EditableTransactions extends Editable {
         this.input.cost[id].value = this.props.value.list.getIn([key, 'cost']) / 100;
     }
     onCostChange(row, col, key, newCost, cost) {
-        const thisCost = Math.round(100 * parseFloat(newCost, 10));
+        const thisCost = Math.round(100 * Number(newCost));
 
         const value = isNaN(thisCost)
             ? cost
@@ -79,8 +74,22 @@ export default class EditableTransactions extends Editable {
             row, col, key, column: 'cost', value
         });
     }
-    renderEditList(row, col) {
-        return this.props.value.list.map((transaction, key) => {
+    render() {
+        const { item, value, row, col } = this.props;
+
+        const addDateRef = input => {
+            this.inputAdd.date = input;
+        };
+        const addUnitsRef = input => {
+            this.inputAdd.units = input;
+        };
+        const addCostRef = input => {
+            this.inputAdd.cost = input;
+        };
+
+        const addOnClick = () => this.addTransaction(row, col);
+
+        const editList = value.list.map((transaction, key) => {
             const date = transaction.get('date');
             const units = transaction.get('units');
             const cost = transaction.get('cost');
@@ -132,73 +141,48 @@ export default class EditableTransactions extends Editable {
                 </td>
             </tr>;
         });
-    }
-    getModal() {
-        if (!this.props.active) {
-            return null;
-        }
 
-        const row = this.props.row;
-        const col = this.props.col;
+        const className = classNames('active', 'editable', 'editable-transactions');
 
-        const addOnClick = () => this.addTransaction(row, col);
-
-        const addDateRef = input => {
-            this.inputAdd.date = input;
-        };
-        const addUnitsRef = input => {
-            this.inputAdd.units = input;
-        };
-        const addCostRef = input => {
-            this.inputAdd.cost = input;
-        };
-
-        return <div className="modal">
-            <div className="inner">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Units</th>
-                            <th colSpan="2">Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input ref={addDateRef} /></td>
-                            <td><input ref={addUnitsRef} /></td>
-                            <td><input ref={addCostRef} /></td>
-                            <td>
-                                <button onClick={addOnClick}>+</button>
-                            </td>
-                        </tr>
-                        {this.renderEditList(row, col)}
-                    </tbody>
-                </table>
-            </div>
-        </div>;
-    }
-    renderNumTransactions() {
-        const size = this.props.value && this.props.value.size
-            ? this.props.value.size
-            : 0;
-
-        return <span className="num-transactions">{size}</span>;
-    }
-    renderInput() {
-        const modal = this.getModal();
-
-        return <span>
-            {this.renderNumTransactions()}
-            {modal}
+        return <span className={className}>
+            <span className="num-transactions">
+                {formatValue(item, value)}
+            </span>
+            <div className="modal">
+                <div className="inner">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>{'Date'}</th>
+                                <th>{'Units'}</th>
+                                <th colSpan="2">{'Cost'}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input ref={addDateRef} /></td>
+                                <td><input ref={addUnitsRef} /></td>
+                                <td><input ref={addCostRef} /></td>
+                                <td>
+                                    <button onClick={addOnClick}>{'+'}</button>
+                                </td>
+                            </tr>
+                            {editList}
+                        </tbody>
+                    </table>
+                </div>
+            </div>;
         </span>;
-    }
-    format() {
-        return this.renderNumTransactions();
     }
 }
 
-EditableTransactions.propTypes = {
-    value: PropTypes.instanceOf(TransactionsList)
+InteractiveEditableTransactions.propTypes = {
+    item: PropTypes.string.isRequired,
+    value: PropTypes.object.isRequired,
+    row: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
+    addTransaction: PropTypes.func.isRequired,
+    editTransaction: PropTypes.func.isRequired,
+    removeTransaction: PropTypes.func.isRequired
 };
 

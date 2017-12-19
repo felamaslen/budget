@@ -31,15 +31,15 @@ export default function Timeline({ data }) {
             const backgroundColor = rgba(averageColor(colors));
             const style = { backgroundColor };
 
-            return <span key={timeKey} className="data-item" style={style} />
-        })
+            return <span key={timeKey} className="data-item" style={style} />;
+        });
 
     return <div className="timeline-outer">
         {items}
-    </div>
+    </div>;
 }
 
 Timeline.propTypes = {
     data: PropTypes.instanceOf(list)
-}
+};
 

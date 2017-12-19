@@ -65,7 +65,7 @@ const mapDispatchToProps = dispatch => ({
     closeMessage: msgId => {
         dispatch(aErrorClosed(msgId));
 
-        setTimeout(() => dispatch(aErrorRemoved(msgId)), ERROR_CLOSE_TIME)
+        setTimeout(() => dispatch(aErrorRemoved(msgId)), ERROR_CLOSE_TIME);
     }
 });
 

@@ -32,9 +32,9 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
     if (active && active.get('value') !== active.get('originalValue')) {
         if (cancel) {
             // revert to previous state
-            newReduction = applyEdits(
-                newReduction, active.set('value', active.get('originalValue'))
-            );
+            newReduction = applyEdits(newReduction, {
+                item: active.set('value', active.get('originalValue'))
+            });
         }
         else {
             if (active.get('row') > -1) {
@@ -52,7 +52,7 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
             }
 
             // append the changes of the last item to the UI
-            newReduction = applyEdits(newReduction, active, pageIndex);
+            newReduction = applyEdits(newReduction, { item: active, pageIndex });
         }
     }
 
@@ -67,32 +67,38 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
     );
 }
 
-export function rChangeEditable(reduction, value) {
+export function rChangeEditable(reduction, { value }) {
     return reduction.setIn(['edit', 'active', 'value'], value);
 }
 
 export function getInvalidInsertDataKeys(items) {
-    return items.reduce((keys, item, itemKey) => {
-        const itemValid = item.valid || item.get('value').length > 0 ||
-            ['item', 'category', 'society', 'holiday'].indexOf(item.get('item')) === -1;
-
-        if (itemValid) {
-            return keys;
+    const itemValid = item => {
+        if (item instanceof YMD) {
+            return item.valid;
         }
 
-        return keys.push(itemKey);
+        return item.get('value').length > 0 ||
+            ['item', 'category', 'society', 'holiday'].indexOf(item.get('item')) === -1;
+    };
+
+    return items.reduce((keys, item, itemKey) => {
+        if (!itemValid(item)) {
+            return keys.push(itemKey);
+        }
+
+        return keys;
+
     }, list.of());
 }
 
 export function stringifyFields(fields) {
     return fields
-        .reduce((obj, thisItem) => {
-            obj[thisItem.get('item')] = thisItem
+        .reduce((result, thisItem) => ({
+            ...result,
+            [thisItem.get('item')]: thisItem
                 .get('value')
-                .toString();
-
-            return obj;
-        }, {});
+                .toString()
+        }), {});
 }
 
 export function rAddListItem(reduction, { pageIndex }) {
@@ -220,14 +226,19 @@ export function rHandleSuggestions(reduction, { items, reqId }) {
         .setIn(['editSuggestions', 'loading'], false)
         .setIn(['editSuggestions', 'active'], -1);
 
-    if (!items || reduction.getIn(['editSuggestions', 'reqId']) !== reqId) {
+    if (!(items && reduction.getIn(['editSuggestions', 'reqId']) === reqId)) {
         // null object (clear), or changed input while suggestions were loading
         return newReduction
             .setIn(['editSuggestions', 'list'], list.of())
             .setIn(['editSuggestions', 'reqId'], null);
     }
 
-    return newReduction.setIn(['editSuggestions', 'list'], items);
+    const editValue = reduction
+        .getIn(['edit', 'active', 'value'])
+        .toLowerCase();
+
+    return newReduction
+        .setIn(['editSuggestions', 'list'], items.filter(item => item.toLowerCase() !== editValue));
 }
 
 export function rRequestSuggestions(reduction, { reqId }) {
@@ -257,7 +268,7 @@ function rFundTransactions(reduction, row, col, transactions) {
             value: transactions
         });
 
-        return applyEditsList(reduction, item, pageIndex)
+        return applyEditsList(reduction, { item, pageIndex })
             .setIn(
                 ['edit', 'active'],
                 reduction.getIn(['edit', 'active']).set('value', transactions)
@@ -269,24 +280,26 @@ function rFundTransactions(reduction, row, col, transactions) {
     );
 }
 
-export function rChangeFundTransactions(reduction, item) {
-    const transactions = getTransactionsForRow(reduction, item.row, item.col)
-        .setIn([item.key, item.column], item.value);
+export function rChangeFundTransactions(reduction, { row, col, key, column, value }) {
+    const transactions = getTransactionsForRow(reduction, row, col)
+        .setIn([key, column], value);
 
-    return rFundTransactions(reduction, item.row, item.col, transactions);
+    return rFundTransactions(reduction, row, col, transactions);
 }
 
 export function rAddFundTransactions(reduction, item) {
-    const transactions = getTransactionsForRow(reduction, item.row, item.col)
+    const { row, col } = item;
+
+    const transactions = getTransactionsForRow(reduction, row, col)
         .push(item);
 
-    return rFundTransactions(reduction, item.row, item.col, transactions);
+    return rFundTransactions(reduction, row, col, transactions);
 }
 
-export function rRemoveFundTransactions(reduction, item) {
-    const transactions = getTransactionsForRow(reduction, item.row, item.col)
-        .remove(item.key);
+export function rRemoveFundTransactions(reduction, { row, col, key }) {
+    const transactions = getTransactionsForRow(reduction, row, col)
+        .remove(key);
 
-    return rFundTransactions(reduction, item.row, item.col, transactions);
+    return rFundTransactions(reduction, row, col, transactions);
 }
 

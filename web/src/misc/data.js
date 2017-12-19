@@ -30,7 +30,11 @@ export function getPeriodMatch(shortPeriod) {
  * Produce a "unique" id
  * @returns {number} "unique" id
  */
-export function uuid(rand = Math.random()) {
+export function uuid(rand = Math.random(), random = false) {
+    if (process.env.NODE_ENV === 'test' && !random) {
+        return 0x4812;
+    }
+
     return Math.floor((1 + rand) * 0x10000);
 }
 
@@ -240,12 +244,20 @@ export function getKeyFromYearMonth(year, month, startYear, startMonth) {
     return 12 * (year - startYear) + month - startMonth;
 }
 
+const testableRandom = (key = 0) => {
+    if (process.env.NODE_ENV === 'test') {
+        return (0.36123 * (key + 1)) % 1;
+    }
+
+    return Math.random();
+};
+
 /**
  * Generate random Gaussian increment for a brownian motion
  * Used in fund predictions
  * @returns {float} random value
  */
-export function randnBm(rand1 = Math.random(), rand2 = Math.random()) {
+export function randnBm(rand1 = testableRandom(0), rand2 = testableRandom(1)) {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
 
@@ -305,12 +317,12 @@ export function getAddDefaultValues(pageIndex) {
         if (column === 'cost') {
             return 0;
         }
-        if (column === 'item' || column === 'category' || column === 'shop' ||
-      column === 'holiday' || column === 'society') {
-            return '';
-        }
         if (column === 'transactions') {
             return new TransactionsList(list.of(), true);
+        }
+
+        if (['item', 'category', 'shop', 'holiday', 'society'].indexOf(column) > -1) {
+            return '';
         }
 
         return null;

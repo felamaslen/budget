@@ -312,7 +312,7 @@ class DummyDbWithListOverview extends DummyDb {
             return { monthCost };
         });
     }
-    async query(sql, ...args) {
+    query(sql, ...args) {
         const rawQuery = super.query(sql, ...args);
 
         const listOverviewMatch = rawQuery.match(new RegExp(String(
@@ -326,7 +326,7 @@ class DummyDbWithListOverview extends DummyDb {
         )));
 
         if (listOverviewMatch) {
-            const data = await this.getData();
+            const data = this.getData();
 
             return data;
         }
@@ -355,7 +355,7 @@ class DummyDbWithAnalysis extends DummyDb {
             shop: [['h', 166], ['i', 82], ['j', 991]],
             society: [['k', 15], ['l', 1000]],
             holiday: [['m', 191239], ['n', 9912]]
-        }
+        };
 
         this.data = ['bills', 'food', 'general', 'holiday', 'social']
             .reduce((data, category) => {
@@ -423,4 +423,4 @@ module.exports = {
     DummyDbWithListOverview,
     DummyDbWithListOverviewDelay,
     DummyDbWithAnalysis
-}
+};

@@ -64,7 +64,7 @@ function getCost(costData, saved) {
         .sort(sortTotal);
 }
 
-export function processPageDataAnalysis(reduction, pageIndex, raw) {
+export function processPageDataAnalysis(reduction, { pageIndex, raw }) {
     const data = fromJS(raw);
 
     // tree data
@@ -110,10 +110,10 @@ export function rAnalysisHandleNewData(reduction, { pageIndex, response, name })
             .setIn(['other', 'blockView', 'deep'], name);
     }
 
-    return processPageDataAnalysis(newReduction, pageIndex, response.data.data);
+    return processPageDataAnalysis(newReduction, { pageIndex, raw: response.data.data });
 }
 
-export function rAnalysisTreeToggleDisplay(reduction, key) {
+export function rAnalysisTreeToggleDisplay(reduction, { key }) {
     const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
     const newStatus = treeVisible.has(key)
         ? !treeVisible.get(key)
@@ -127,7 +127,7 @@ export function rAnalysisTreeToggleDisplay(reduction, key) {
         .setIn(['other', 'blockView', 'active'], null);
 }
 
-export function rAnalysisTreeToggleExpand(reduction, key) {
+export function rAnalysisTreeToggleExpand(reduction, { key }) {
     const treeOpen = reduction.getIn(['other', 'analysis', 'treeOpen']);
     const newStatus = treeOpen.has(key)
         ? !treeOpen.get(key)
@@ -136,7 +136,7 @@ export function rAnalysisTreeToggleExpand(reduction, key) {
     return reduction.setIn(['other', 'analysis', 'treeOpen', key], newStatus);
 }
 
-export function rAnalysisTreeHover(reduction, key) {
+export function rAnalysisTreeHover(reduction, { key }) {
     return reduction.setIn(['other', 'blockView', 'active'], key);
 }
 

@@ -4,7 +4,6 @@
 
 import extendableContainer from '../../container-extender';
 
-import { aKeyPressed } from '../../../actions/app.actions';
 import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
@@ -88,8 +87,7 @@ const stateDefault = pageIndex => state => ({
 });
 
 const dispatchDefault = () => dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req)),
-    handleKeyPress: req => dispatch(aKeyPressed(req))
+    loadContent: req => dispatch(aContentRequested(req))
 });
 
 export const PageListContainer = pageIndex =>

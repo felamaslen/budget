@@ -1,3 +1,4 @@
+/* eslint-disable newline-per-chained-call */
 import { expect } from 'chai';
 
 import '../../browser';
@@ -11,22 +12,32 @@ import AppLogo from '../../../src/containers/app-logo';
 import Navbar from '../../../src/containers/nav-bar';
 
 describe('<Header/>', () => {
-    const location = { pathname: 'foo-pathname' };
-    const wrapper = shallow(<Header location={location} />);
-
-    it('should render a navbar', () => expect(wrapper.find('.navbar')).to.have.length(1));
-
-    const inner = wrapper.find('.navbar > .inner');
-    it('should render an inner div', () => expect(inner).to.have.length(1));
-
-    it('should render <AppLogo />', () => expect(inner.find(AppLogo)).to.have.length(1));
-
-    const navbar = inner.find(Navbar);
-    it('should render <Navbar />', () => expect(navbar).to.have.length(1));
-    it('should pass pathname as a prop to the Navbar', () => {
-        expect(navbar.props()).to.deep.equal({
+    const props = {
+        location: {
             pathname: 'foo-pathname'
-        });
+        }
+    };
+
+    it('should render its basic structure', () => {
+        const wrapper = shallow(<Header {...props} />);
+
+        expect(wrapper.is('div.navbar')).to.equal(true);
+        expect(wrapper.children()).to.have.length(1);
+        expect(wrapper.childAt(0).is('div.inner')).to.equal(true);
+        expect(wrapper.childAt(0).children()).to.have.length(2);
+    });
+
+    it('should render an <AppLogo />', () => {
+        const wrapper = shallow(<Header {...props} />);
+
+        expect(wrapper.childAt(0).childAt(0).is(AppLogo)).to.equal(true);
+    });
+
+    it('should render an <Navbar />', () => {
+        const wrapper = shallow(<Header {...props} />);
+
+        expect(wrapper.childAt(0).childAt(1).is(Navbar)).to.equal(true);
+        expect(wrapper.childAt(0).childAt(1).props()).to.have.property('pathname', 'foo-pathname');
     });
 });
 
