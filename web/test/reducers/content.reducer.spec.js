@@ -186,7 +186,7 @@ describe('Content reducer', () => {
                         null,
                         null,
                         [
-                            { year: 2017, month: 12, date: 18, valid: true },
+                            { year: 2017, month: 10, date: 14, valid: true },
                             '',
                             {
                                 idCount: 0,
