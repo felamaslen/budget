@@ -54,7 +54,7 @@ export function *requestEditSuggestions({ reqId, page, item, value }) {
         const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
 
         try {
-            const response = yield call(axios.get, url, { headers: { 'Authorization': apiKey } });
+            const response = yield call(axios.get, url, { headers: { Authorization: apiKey } });
 
             const items = list(response.data.data.list);
 
@@ -82,10 +82,10 @@ export function *handleModal({ pageIndex }) {
         modalDialogType, invalidKeys, modalDialogLoading, item, fields
     } = yield select(selectModalState);
 
-    const noContinue = !(typeof pageIndex !== 'undefined' && modalDialogType === 'add' &&
-        invalidKeys.size === 0 && modalDialogLoading);
+    const proceed = typeof pageIndex !== 'undefined' && modalDialogType === 'add' &&
+        invalidKeys.size === 0 && modalDialogLoading;
 
-    if (noContinue) {
+    if (!proceed) {
         return;
     }
 
