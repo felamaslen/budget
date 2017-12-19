@@ -6,10 +6,11 @@ import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
 import * as S from '../../src/sagas/funds.saga';
+import * as A from '../../src/actions/graph.actions';
+import * as B from '../../src/actions/stocks-list.actions';
 import { openTimedMessage } from '../../src/sagas/error.saga';
 import { selectApiKey } from '../../src/sagas';
-
-import { aFundsGraphPeriodReceived } from '../../src/actions/graph.actions';
+import { getStockPricesFromYahoo } from '../../src/misc/finance';
 
 describe('funds.saga', () => {
     describe('selectFundHistoryCache', () => {
@@ -42,7 +43,7 @@ describe('funds.saga', () => {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .next({ data: { data: 'yes' } })
-                .put(aFundsGraphPeriodReceived({
+                .put(A.aFundsGraphPeriodReceived({
                     shortPeriod: 'foo', data: 'yes', reloadPagePrices: false
                 }))
                 .next()
@@ -79,6 +80,38 @@ describe('funds.saga', () => {
                 stocks: 'foo',
                 indices: 'bar'
             });
+        });
+    });
+
+    describe('requestStocksPrices', () => {
+        it('should request stock prices', () => {
+            testSaga(S.requestStocksPrices)
+                .next()
+                .select(S.selectStocksListInfo)
+                .next({
+                    stocks: fromJS({ code1: 'code1', code2: 'code2', code3: 'code3' }),
+                    indices: fromJS([{ code: 'indice1' }, { code: 'indice2' }])
+                })
+                .call(getStockPricesFromYahoo, fromJS(['code1', 'code2', 'code3', 'indice1', 'indice2']))
+                .next({ foo: 'bar' })
+                .put(B.aStocksPricesReceived({ foo: 'bar' }))
+                .next()
+                .isDone();
+        });
+
+        it('should handle errors', () => {
+            testSaga(S.requestStocksPrices)
+                .next()
+                .select(S.selectStocksListInfo)
+                .next({
+                    stocks: fromJS({ code1: 'code1', code2: 'code2', code3: 'code3' }),
+                    indices: fromJS([{ code: 'indice1' }, { code: 'indice2' }])
+                })
+                .call(getStockPricesFromYahoo, fromJS(['code1', 'code2', 'code3', 'indice1', 'indice2']))
+                .throw(new Error('some error'))
+                .put(B.aStocksPricesReceived(null))
+                .next()
+                .isDone();
         });
     });
 });
