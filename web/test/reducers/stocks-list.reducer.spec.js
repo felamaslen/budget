@@ -3,7 +3,11 @@ import { List as list } from 'immutable';
 
 import { limitTimeSeriesLength } from '../../src/reducers/stocks-list.reducer';
 
-describe('StocksListReducer', () => {
+describe('Stocks list reducer', () => {
+    describe('rHandleStocksListResponse', () => {
+        it('should be tested');
+    });
+
     describe('limitTimeSeriesLength', () => {
         it('should filter time series according to a least-distance algorithm', () => {
             const series = list([
@@ -38,6 +42,10 @@ describe('StocksListReducer', () => {
                 [11.5, 91231]
             ]);
         });
+    });
+
+    describe('rHandleStocksPricesResponse', () => {
+        it('should be tested');
     });
 });
 

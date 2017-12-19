@@ -2,8 +2,55 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import * as R from '../../src/reducers/edit.reducer';
+import { YMD } from '../../src/misc/date';
 
 describe('Edit reducers', () => {
+    describe('rActivateEditable', () => {
+        it('should be tested');
+    });
+    describe('rChangeEditable', () => {
+        it('should be tested');
+    });
+    describe('getInvalidInsertDataKeys', () => {
+        it('should get a list of invalid data keys', () => {
+            const items = fromJS([
+                { item: 'item', value: '' },
+                { item: 'foo', value: '' },
+                { item: 'category', value: '' },
+                { item: 'category', value: 'foobar' },
+                { item: 'society', value: '' },
+                { item: 'holiday', value: '' },
+                { item: 'bar', value: '' },
+                new YMD('2017-10-13'),
+                new YMD('foo')
+            ]);
+
+            expect(R.getInvalidInsertDataKeys(items).toJS())
+                .to.deep.equal([0, 2, 4, 5, 8]);
+        });
+    });
+    describe('stringifyFields', () => {
+        it('should serialise fields into an object of strings', () => {
+            const fields = fromJS([
+                { item: 'foo1', value: 'bar' },
+                { item: 'foo2', value: new YMD('2017-10-13') },
+                { item: 'foo3', value: 10.43 }
+            ]);
+
+            expect(R.stringifyFields(fields)).to.deep.equal({
+                foo1: 'bar',
+                foo2: { year: 2017, month: 10, date: 13 },
+                foo3: '10.43'
+            });
+        });
+    });
+    describe('rHandleServerAdd', () => {
+        it('should be tested');
+    });
+    describe('rHandleSuggestions', () => {
+        it('should be tested');
+    });
+
     describe('rHandleSuggestions', () => {
         it('should set editSuggestions/loading to false', () => {
             expect(R.rHandleSuggestions(fromJS({
@@ -68,6 +115,19 @@ describe('Edit reducers', () => {
                     list: ['bar', 'baz']
                 });
         });
+    });
+
+    describe('rRequestSuggestions', () => {
+        it('should be tested');
+    });
+    describe('rChangeFundTransactions', () => {
+        it('should be tested');
+    });
+    describe('rAddFundTransactions', () => {
+        it('should be tested');
+    });
+    describe('rRemoveFundTransactions', () => {
+        it('should be tested');
     });
 });
 

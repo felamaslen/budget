@@ -72,27 +72,33 @@ export function rChangeEditable(reduction, { value }) {
 }
 
 export function getInvalidInsertDataKeys(items) {
-    return items.reduce((keys, item, itemKey) => {
-        const itemValid = item.valid || item.get('value').length > 0 ||
-            ['item', 'category', 'society', 'holiday'].indexOf(item.get('item')) === -1;
-
-        if (itemValid) {
-            return keys;
+    const itemValid = item => {
+        if (item instanceof YMD) {
+            return item.valid;
         }
 
-        return keys.push(itemKey);
+        return item.get('value').length > 0 ||
+            ['item', 'category', 'society', 'holiday'].indexOf(item.get('item')) === -1;
+    };
+
+    return items.reduce((keys, item, itemKey) => {
+        if (!itemValid(item)) {
+            return keys.push(itemKey);
+        }
+
+        return keys;
+
     }, list.of());
 }
 
 export function stringifyFields(fields) {
     return fields
-        .reduce((obj, thisItem) => {
-            obj[thisItem.get('item')] = thisItem
+        .reduce((result, thisItem) => ({
+            ...result,
+            [thisItem.get('item')]: thisItem
                 .get('value')
-                .toString();
-
-            return obj;
-        }, {});
+                .toString()
+        }), {});
 }
 
 export function rAddListItem(reduction, { pageIndex }) {

@@ -119,7 +119,7 @@ export function rProcessDataOverview(
 
     // separate funds into old and displayed
     let cost = costMap;
-    if (!cost.has('fundsOld') || !cost.get('fundsOld').size) {
+    if (!(cost.has('fundsOld') && cost.get('fundsOld').size)) {
         const funds = cost.get('funds');
         cost = cost.set('funds', funds.slice(-numRows))
             .set('fundsOld', funds.slice(0, funds.size - numRows));
@@ -133,17 +133,17 @@ export function rProcessDataOverview(
     });
 
     // add spending column
-    const spending = yearMonthsList.map((month, key) => {
-        return cost.getIn(['bills', key]) +
-      cost.getIn(['food', key]) +
-      cost.getIn(['general', key]) +
-      cost.getIn(['holiday', key]) +
-      cost.getIn(['social', key]);
-    });
+    const spending = yearMonthsList.map((month, key) =>
+        cost.getIn(['bills', key]) +
+        cost.getIn(['food', key]) +
+        cost.getIn(['general', key]) +
+        cost.getIn(['holiday', key]) +
+        cost.getIn(['social', key])
+    );
 
     // add net cash flow column
     const net = yearMonthsList.map((month, key) => {
-    // add predicted (random) fund income to the net cash flow
+        // add predicted (random) fund income to the net cash flow
         const fundIncome = key === 0 || key < futureKey
             ? 0
             : cost.getIn(['funds', key]) - cost.getIn(['funds', key - 1]);
@@ -153,13 +153,18 @@ export function rProcessDataOverview(
 
     // add predicted balance
     let lastPredicted = cost.getIn(['balance', 0]);
+
     const predicted = yearMonthsList.map((month, key) => {
-        if (key > 0 && (key < futureKey ||
-                    (key === futureKey) && cost.getIn(['balance', key - 1]) > 0)) {
+        const havePrevious = key > 0;
+        const past = key < futureKey;
+        const presentAndHaveLast = key === futureKey && cost.getIn(['balance', key - 1]) > 0;
+
+        if (havePrevious && (past || presentAndHaveLast)) {
             lastPredicted = cost.getIn(['balance', key - 1]) + net.get(key);
 
             return lastPredicted;
         }
+
         const newPredicted = lastPredicted + net.get(key);
         lastPredicted = newPredicted;
 

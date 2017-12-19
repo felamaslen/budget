@@ -23,7 +23,6 @@ describe('funds', () => {
                 .to.equal('1 hour ago');
         });
     });
-
     describe('getFundsCachedValue', () => {
         it('should return the correct value', () => {
             const now = new Date();
@@ -38,7 +37,15 @@ describe('funds', () => {
                 .to.equal(expectedValue);
         });
     });
-
+    describe('getFundColor', () => {
+        it('should be tested');
+    });
+    describe('getRowsWithPrices', () => {
+        it('should be tested');
+    });
+    describe('getRowGains', () => {
+        it('should be tested');
+    });
     describe('getGains', () => {
         it('should return the correct values', () => {
             const expectedResult = list([
@@ -85,7 +92,15 @@ describe('funds', () => {
             expect(gains.toJS()).to.deep.equal(expectedResult.toJS());
         });
     });
-
+    describe('getRowHistory', () => {
+        it('should be tested');
+    });
+    describe('getExtraRowProps', () => {
+        it('should be tested');
+    });
+    describe('zoomFundLines', () => {
+        it('should be tested');
+    });
     describe('getOverallAbsolute', () => {
         it('should sum prices and return a line', () => {
             const prices = list([
@@ -111,7 +126,9 @@ describe('funds', () => {
             expect(result.toJS()).to.deep.equal(expectedResult);
         });
     });
-
+    describe('getFundLineAbsolute', () => {
+        it('should be tested');
+    });
     describe('getOverallROI', () => {
         it('should get the correct values and return a line', () => {
             const prices = list([
@@ -142,7 +159,24 @@ describe('funds', () => {
             expect(result.toJS()).to.deep.equal(expectedResult);
         });
     });
-
+    describe('getFundLineROI', () => {
+        it('should be tested');
+    });
+    describe('getFundLinePrice', () => {
+        it('should be tested');
+    });
+    describe('getOverallLine', () => {
+        it('should be tested');
+    });
+    describe('getFundLine', () => {
+        it('should be tested');
+    });
+    describe('getFundLineProcessed', () => {
+        it('should be tested');
+    });
+    describe('getFundLines', () => {
+        it('should be tested');
+    });
     describe('getFormattedHistory', () => {
         it('should return expected data', () => {
             const mode = GRAPH_FUNDS_MODE_ROI;

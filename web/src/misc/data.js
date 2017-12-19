@@ -244,12 +244,20 @@ export function getKeyFromYearMonth(year, month, startYear, startMonth) {
     return 12 * (year - startYear) + month - startMonth;
 }
 
+const testableRandom = (key = 0) => {
+    if (process.env.NODE_ENV === 'test') {
+        return (0.36123 * (key + 1)) % 1;
+    }
+
+    return Math.random();
+};
+
 /**
  * Generate random Gaussian increment for a brownian motion
  * Used in fund predictions
  * @returns {float} random value
  */
-export function randnBm(rand1 = Math.random(), rand2 = Math.random()) {
+export function randnBm(rand1 = testableRandom(0), rand2 = testableRandom(1)) {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
 

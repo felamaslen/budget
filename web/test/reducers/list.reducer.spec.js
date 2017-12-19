@@ -5,6 +5,14 @@ import { expect } from 'chai';
 import * as rList from '../../src/reducers/list.reducer';
 
 describe('List page reducers', () => {
+    describe('processRawListRows', () => {
+        it('should be tested');
+    });
+
+    describe('processPageDataList', () => {
+        it('should be tested');
+    });
+
     describe('processPageDataFunds', () => {
         it('should return formatted funds page data', () => {
             const reduction = map({

@@ -24,7 +24,7 @@ export const rToggleShowAll = reduction => {
         !reduction.getIn(['other', 'showAllBalanceGraph']));
 };
 
-export function rToggleFundItemGraph(reduction, key) {
+export function rToggleFundItemGraph(reduction, { key }) {
     return reduction.setIn(
         ['pages', pageIndexFunds, 'rows', key, 'historyPopout'],
         !reduction.getIn(['pages', pageIndexFunds, 'rows', key, 'historyPopout'])
