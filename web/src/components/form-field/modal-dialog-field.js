@@ -14,11 +14,7 @@ export default function ModalDialogField({ field, fieldKey, invalidKeys }) {
 
     const invalid = invalidKeys.includes(fieldKey);
 
-    const className = classNames({
-        'form-row': true,
-        [field.get('item')]: true,
-        invalid
-    });
+    const className = classNames('form-row', field.get('item'), { invalid });
 
     if (field.get('item') === 'transactions') {
         return <li className={className}>

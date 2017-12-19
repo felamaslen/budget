@@ -6,7 +6,9 @@
 - refreshing fund price cache doesn't reload gain text etc. [FIXED]
 - Optimise client for mobile devices [DONE (mostly)]
 - Use react router [DONE]
+- Update Android app for new API [DONE]
 - Don't use .toString() for JSON data passing (use .valueOf())
+- Allow deep blocks on bills
 - Include pie data with add / edit responses
 - Handle API response codes
 - Fix realtime stock prices
@@ -15,4 +17,3 @@
 - Client response data validation
 - Write unit tests for client [IN PROGRESS]
 - Use logger function instead of console.log
-- Update Android app for new API

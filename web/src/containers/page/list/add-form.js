@@ -57,7 +57,7 @@ AddForm.propTypes = {
     noSuggestions: PropTypes.bool.isRequired,
     addListItem: PropTypes.func.isRequired,
     addBtnFocus: PropTypes.bool.isRequired
-}
+};
 
 const mapStateToProps = (state, ownProps) => ({
     noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1,

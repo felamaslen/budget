@@ -381,7 +381,7 @@ async function processMultipleRequest(req, res, next) {
     }
 
     try {
-        const list = JSON.parse(req.body.list)
+        const list = JSON.parse(req.body.list);
 
         req.body.list = list
             .map(item => {

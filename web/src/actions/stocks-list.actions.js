@@ -2,17 +2,10 @@
  * Actions called on the stocks list
  */
 
-import buildMessage from '../messageBuilder';
+import * as A from '../constants/actions';
 
-import {
-    STOCKS_LIST_REQUESTED,
-    STOCKS_LIST_RECEIVED,
-    STOCKS_PRICES_REQUESTED,
-    STOCKS_PRICES_RECEIVED
-} from '../constants/actions';
-
-export const aStocksListRequested = () => buildMessage(STOCKS_LIST_REQUESTED);
-export const aStocksListReceived = response => buildMessage(STOCKS_LIST_RECEIVED, response);
-export const aStocksPricesRequested = () => buildMessage(STOCKS_PRICES_REQUESTED);
-export const aStocksPricesReceived = response => buildMessage(STOCKS_PRICES_RECEIVED, response);
+export const aStocksListRequested = () => ({ type: A.STOCKS_LIST_REQUESTED });
+export const aStocksListReceived = res => ({ type: A.STOCKS_LIST_RECEIVED, ...res });
+export const aStocksPricesRequested = () => ({ type: A.STOCKS_PRICES_REQUESTED });
+export const aStocksPricesReceived = res => ({ type: A.STOCKS_PRICES_RECEIVED, ...res });
 

@@ -109,23 +109,22 @@ export function rCloseFormDialogEdit(reduction, pageIndex, fields) {
         newReduction = recalculateFundProfits(newReduction, pageIndex);
     }
 
-    newReduction = resortListRows(newReduction, pageIndex);
+    newReduction = resortListRows(newReduction, { pageIndex });
 
     if (reduction.getIn(['pagesLoaded', overviewKey])) {
         const newDate = newRow.getIn(['cols', dateKey]);
         const oldDate = oldRow.getIn(['cols', dateKey]);
 
-        const newCost = newRow.getIn(['cols', costKey]);
-        const oldCost = oldRow.getIn(['cols', costKey]);
+        const newItemCost = newRow.getIn(['cols', costKey]);
+        const oldItemCost = oldRow.getIn(['cols', costKey]);
 
-        newReduction = rCalculateOverview(
-            newReduction,
+        newReduction = rCalculateOverview(newReduction, {
             pageIndex,
             newDate,
             oldDate,
-            newCost,
-            oldCost
-        );
+            newItemCost,
+            oldItemCost
+        });
     }
 
     const newRequestList = fields
@@ -148,15 +147,9 @@ export function validateFields(fields) {
     return { fields, invalidKeys };
 }
 
-export function rCloseFormDialog(reduction, req) {
-    if (!req) {
-        return resetModalDialog(reduction);
-    }
-
-    const { pageIndex, deactivate } = req;
-
-    if (deactivate) {
-        return resetModalDialog(reduction, true);
+export function rCloseFormDialog(reduction, { pageIndex, deactivate }) {
+    if (deactivate || typeof pageIndex === 'undefined') {
+        return resetModalDialog(reduction, deactivate);
     }
 
     const type = reduction.getIn(['modalDialog', 'type']);

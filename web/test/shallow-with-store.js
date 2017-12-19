@@ -4,5 +4,5 @@ export default (component, store) => {
     const context = { store };
 
     return shallow(component, { context });
-}
+};
 

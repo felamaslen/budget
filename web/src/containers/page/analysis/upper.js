@@ -50,7 +50,7 @@ Upper.propTypes = {
     timeIndex: PropTypes.number.isRequired,
     description: PropTypes.string,
     changeOption: PropTypes.func.isRequired
-}
+};
 
 const mapStateToProps = state => ({
     periodKey: state.getIn(['other', 'analysis', 'period']),

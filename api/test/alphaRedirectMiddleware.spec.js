@@ -138,34 +138,5 @@ describe('Redirect middleware', () => {
                 .to.deep.equal({ period: 'month', length: '3', history: 'false' });
         });
     });
-
-
-    describe('handleRoutesDataAnalysis', () => {
-        it('should do something');
-    });
-
-    describe('handleRoutesData', () => {
-        it('should do something');
-    });
-
-    describe('handleRoutesSearch', () => {
-        it('should do something');
-    });
-
-    describe('handleRoutes', () => {
-        it('should do something');
-    });
-
-    describe('processRequest', () => {
-        it('should do something');
-    });
-
-    describe('processMultipleRequest', () => {
-        it('should do something');
-    });
-
-    describe('handler', () => {
-        it('should do something');
-    });
 });
 

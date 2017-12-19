@@ -1,32 +1,58 @@
-import { select, call, put } from 'redux-saga/effects';
+import { eventChannel } from 'redux-saga';
+import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
+import debounce from '../misc/debounce';
 
+import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
 import { API_PREFIX, PAGES } from '../misc/const';
 
-import { aLoginFormSubmitted, aLoginFormResponseReceived } from '../actions/login.actions';
-import { aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
+import { aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 
-import { selectApiKey } from '.'
+import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
-import { getLoginCredentials } from './login.saga';
 
-export function *loadSettings() {
-    const pin = yield call(getLoginCredentials)
+function keyPressEventChannel() {
+    return eventChannel(emitter => {
+        const keyPressHandler = debounce(evt => {
+            emitter(aKeyPressed({
+                key: evt.key,
+                shift: evt.shiftKey,
+                ctrl: evt.ctrlKey
+            }));
+        }, 1, true);
 
-    if (pin) {
-        yield put(aLoginFormSubmitted(pin));
-    }
-    else {
-        yield put(aLoginFormResponseReceived(null));
+        const onKeyPress = evt => {
+            if (evt.key === 'Tab') {
+                evt.preventDefault();
+            }
+
+            keyPressHandler(evt);
+        };
+
+        window.addEventListener('keydown', onKeyPress);
+
+        return () => {
+            window.removeEventListener('keydown', onKeyPress);
+        };
+    });
+}
+
+export function *watchKeyPress() {
+    const channel = keyPressEventChannel();
+
+    while (true) {
+        const action = yield take(channel);
+
+        yield put(action);
     }
 }
 
 export const selectRequestList = state => state.getIn(['edit', 'requestList'])
-    .map(item => item.get('req'))
+    .map(item => item.get('req'));
 
 export function *updateServerData() {
-    const apiKey = yield select(selectApiKey)
-    const requestList = yield select(selectRequestList)
+    const apiKey = yield select(selectApiKey);
+    const requestList = yield select(selectRequestList);
 
     try {
         const response = yield call(
@@ -34,19 +60,19 @@ export function *updateServerData() {
             `${API_PREFIX}/data/multiple`,
             { list: requestList },
             { headers: { 'Authorization': apiKey } }
-        )
+        );
 
         yield put(aServerUpdateReceived(response));
     }
     catch (err) {
-        yield call(openTimedMessage, 'Error updating data on server!')
+        yield call(openTimedMessage, 'Error updating data on server!');
 
         yield put(aServerUpdateReceived(null));
     }
 }
 
 export function *addServerDataRequest({ item, fields, pageIndex }) {
-    const apiKey = yield select(selectApiKey)
+    const apiKey = yield select(selectApiKey);
 
     try {
         const response = yield call(
@@ -54,34 +80,34 @@ export function *addServerDataRequest({ item, fields, pageIndex }) {
             `${API_PREFIX}/data/${PAGES[pageIndex]}`,
             item,
             { headers: { 'Authorization': apiKey } }
-        )
+        );
 
         yield put(aServerAddReceived({ response, fields, pageIndex }));
-
-        yield 0;
     }
     catch (err) {
         yield call(openTimedMessage, 'Error adding data to server!');
-
-        yield 1;
     }
 }
 
 export const selectAddData = state => ({
     fields: state.getIn(['edit', 'addFields']),
     item: state.getIn(['edit', 'addFieldsString'])
-})
+});
 
-export function *addServerData({ payload }) {
-    const { pageIndex } = payload;
-
+export function *addServerData({ pageIndex }) {
     // data is validated by reducer
-    const { fields, item } = yield select(selectAddData)
+    const { fields, item } = yield select(selectAddData);
 
-    if (!(fields && item)) {
-        return;
+    if (fields && item) {
+        yield call(addServerDataRequest, { pageIndex, item, fields });
     }
+}
 
-    yield call(addServerDataRequest, { pageIndex, item, fields });
+export default function *appSaga() {
+    yield all([
+        fork(watchKeyPress),
+        takeEvery(EDIT_LIST_ITEM_ADDED, addServerData),
+        takeLatest(SERVER_UPDATED, updateServerData)
+    ]);
 }
 

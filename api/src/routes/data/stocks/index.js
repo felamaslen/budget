@@ -76,5 +76,5 @@ module.exports = {
     getStocks,
     processStocks,
     routeGet
-}
+};
 

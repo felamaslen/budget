@@ -9,13 +9,15 @@ describe('content.actions', () => {
             foo: 'bar'
         })).to.deep.equal({
             type: C.CONTENT_REQUESTED,
-            payload: { foo: 'bar' }
+            foo: 'bar'
         }));
     });
     describe('aContentLoaded', () => {
-        it('should return CONTENT_LOADED', () => expect(A.aContentLoaded()).to.deep.equal({
+        it('should return CONTENT_LOADED with res object', () => expect(A.aContentLoaded({
+            foo: 'bar'
+        })).to.deep.equal({
             type: C.CONTENT_LOADED,
-            payload: null
+            foo: 'bar'
         }));
     });
     describe('aContentBlockHovered', () => {
@@ -23,8 +25,8 @@ describe('content.actions', () => {
             foo: 'bar'
         })).to.deep.equal({
             type: C.CONTENT_BLOCK_HOVERED,
-            payload: { foo: 'bar' }
-        }))
+            foo: 'bar'
+        }));
     });
 });
 

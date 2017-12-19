@@ -9,7 +9,7 @@ import { getExtraRowProps as reloadFundsRows } from './funds.reducer';
 
 const overviewKey = PAGES.indexOf('overview');
 
-export function resortListRows(reduction, pageIndex) {
+export function resortListRows(reduction, { pageIndex }) {
     // sort rows by date
     const sortedRows = sortRowsByDate(reduction.getIn(
         ['pages', pageIndex, 'rows']), pageIndex
@@ -23,7 +23,7 @@ export function resortListRows(reduction, pageIndex) {
         .setIn(['pages', pageIndex, 'data'], weeklyData);
 }
 
-export function recalculateFundProfits(reduction, pageIndex) {
+export function recalculateFundProfits(reduction, { pageIndex }) {
     const rows = reduction.getIn(['pages', pageIndex, 'rows']);
     const startTime = reduction.getIn(['pages', pageIndex, 'startTime']);
     const cacheTimes = reduction.getIn(['pages', pageIndex, 'cacheTimes']);
@@ -34,7 +34,7 @@ export function recalculateFundProfits(reduction, pageIndex) {
         .setIn(['pages', pageIndex, 'rows'], rowsWithExtraProps);
 }
 
-export function applyEditsOverview(reduction, item) {
+export function applyEditsOverview(reduction, { item }) {
     // update the balance for a row and recalculate overview data
     const value = item.get('value');
     const row = item.get('row');
@@ -56,7 +56,7 @@ export function applyEditsOverview(reduction, item) {
         .setIn(['pages', overviewKey, 'rows'], rGetOverviewRows(newData));
 }
 
-export function applyEditsList(reduction, item, pageIndex) {
+export function applyEditsList(reduction, { item, pageIndex }) {
     // update list data in the UI
     if (item.get('row') === -1) {
         // add-item
@@ -82,10 +82,10 @@ export function applyEditsList(reduction, item, pageIndex) {
 
     // recalculate fund profits / losses if transactions have changed
     if (PAGES[pageIndex] === 'funds' && item.get('item') === 'transactions') {
-        newReduction = recalculateFundProfits(newReduction, pageIndex);
+        newReduction = recalculateFundProfits(newReduction, { pageIndex });
     }
 
-    newReduction = resortListRows(newReduction, pageIndex);
+    newReduction = resortListRows(newReduction, { pageIndex });
 
     // recalculate overview data if the cost or date changed
     if (reduction.getIn(['pagesLoaded', overviewKey])) {
@@ -95,14 +95,13 @@ export function applyEditsList(reduction, item, pageIndex) {
                 ['pages', pageIndex, 'rows', item.get('row'), 'cols', dateKey]
             );
 
-            newReduction = rCalculateOverview(
-                newReduction,
+            newReduction = rCalculateOverview(newReduction, {
                 pageIndex,
-                date,
-                date,
-                item.get('value'),
-                item.get('originalValue')
-            );
+                newDate: date,
+                oldDate: date,
+                newItemCost: item.get('value'),
+                oldItemCost: item.get('originalValue')
+            });
         }
         else if (item.get('item') === 'date') {
             const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
@@ -110,26 +109,25 @@ export function applyEditsList(reduction, item, pageIndex) {
                 ['pages', pageIndex, 'rows', item.get('row'), 'cols', costKey]
             );
 
-            newReduction = rCalculateOverview(
-                newReduction,
+            newReduction = rCalculateOverview(newReduction, {
                 pageIndex,
-                item.get('value'),
-                item.get('originalValue'),
-                cost,
-                cost
-            );
+                newDate: item.get('value'),
+                oldDate: item.get('originalValue'),
+                newItemCost: cost,
+                oldItemCost: cost
+            });
         }
     }
 
     return newReduction;
 }
 
-export function applyEdits(reduction, item, pageIndex) {
+export function applyEdits(reduction, { item, pageIndex }) {
     if (pageIndex === 0) {
-        return applyEditsOverview(reduction, item);
+        return applyEditsOverview(reduction, { item });
     }
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
-        return applyEditsList(reduction, item, pageIndex);
+        return applyEditsList(reduction, { item, pageIndex });
     }
 
     return reduction;
@@ -165,7 +163,13 @@ export function rDeleteListItem(reduction, { pageIndex, id }) {
         const date = reduction.getIn(
             ['pages', pageIndex, 'rows', id, 'cols', dateKey]
         );
-        newReduction = rCalculateOverview(newReduction, pageIndex, date, date, 0, itemCost);
+        newReduction = rCalculateOverview(newReduction, {
+            pageIndex,
+            newDate: date,
+            oldDate: date,
+            newItemCost: 0,
+            oldItemCost: itemCost
+        });
     }
 
     newReduction = pushToRequestQueue(newReduction, map({
@@ -176,7 +180,7 @@ export function rDeleteListItem(reduction, { pageIndex, id }) {
 
     // recalculate fund profits / losses
     if (PAGES[pageIndex] === 'funds') {
-        newReduction = recalculateFundProfits(newReduction, pageIndex);
+        newReduction = recalculateFundProfits(newReduction, { pageIndex });
     }
 
     return newReduction;

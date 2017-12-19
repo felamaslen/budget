@@ -5,7 +5,6 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 
-import { aKeyPressed } from '../../../actions/app.actions';
 import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
@@ -26,6 +25,7 @@ export class PageAnalysis extends Page {
     loadContent() {
         this.props.loadContent({
             pageIndex,
+            loading: true,
             params: [
                 ANALYSIS_PERIODS[this.props.periodKey],
                 ANALYSIS_GROUPINGS[this.props.groupingKey],
@@ -41,9 +41,9 @@ export class PageAnalysis extends Page {
             return null;
         }
 
-        let timeline = null
+        let timeline = null;
         if (this.props.timeline) {
-            timeline = <Timeline data={this.props.timeline} />
+            timeline = <Timeline data={this.props.timeline} />;
         }
 
         return <div className="page-analysis">
@@ -76,7 +76,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    handleKeyPress: req => dispatch(aKeyPressed(req)),
     loadContent: req => dispatch(aContentRequested(req))
 });
 

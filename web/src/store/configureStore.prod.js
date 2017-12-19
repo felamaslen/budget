@@ -14,5 +14,5 @@ export default initialState => {
     sagaMiddleware.run(rootSaga);
 
     return store;
-}
+};
 

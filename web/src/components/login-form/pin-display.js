@@ -8,8 +8,7 @@ export default function PinDisplay({ inputStep }) {
     const digitBoxes = new Array(LOGIN_INPUT_LENGTH)
         .fill(0)
         .map((item, key) => {
-            const className = classNames({
-                'input-pin': true,
+            const className = classNames('input-pin', {
                 active: key === inputStep,
                 done: key < inputStep
             });

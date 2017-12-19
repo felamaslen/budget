@@ -2,77 +2,34 @@
  * Carries out actions for the content component
  */
 
+import { PAGES, LIST_PAGES } from '../misc/const';
 import {
-    PAGES, LIST_PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS
-} from '../misc/const';
-import {
-    getPeriodMatch,
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
 import { capitalise, formatCurrency } from '../misc/format';
 
-import processPageDataOverview from './overview.reducer';
+import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList, processPageDataFunds } from './list.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';
 
-export function getAnalysisReq(reduction, req) {
-    const shortPeriod = ANALYSIS_PERIODS[reduction.getIn(
-        ['other', 'analysis', 'period']
-    )];
-
-    const grouping = ANALYSIS_GROUPINGS[reduction.getIn(['other', 'analysis', 'grouping'])];
-    const timeIndex = reduction.getIn(['other', 'analysis', 'timeIndex']);
-
-    const dataReq = [shortPeriod, grouping, timeIndex];
-
-    return { ...req, dataReq };
-}
-
-export function getFundsReq(req) {
-    const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
-
-    const urlParam = [
-        { name: 'history', value: 'true' },
-        { name: 'period', value: period },
-        { name: 'length', value: length }
-    ];
-
-    return { ...req, urlParam };
-}
-
-export function getReqObj(reduction, pageIndex, apiKey) {
-    const pageName = PAGES[pageIndex];
-    const reqObj = { pageIndex, pageName, apiKey };
-
-    if (pageName === 'analysis') {
-        return getAnalysisReq(reduction, reqObj);
-    }
-
-    if (pageName === 'funds') {
-        return getFundsReq(reqObj);
-    }
-
-    return reqObj;
-}
-
-function processPageData(reduction, pageIndex, data) {
+function processPageData(reduction, { pageIndex, raw }, now) {
     if (PAGES[pageIndex] === 'overview') {
         // overview
-        return processPageDataOverview(reduction, pageIndex, data);
+        return processPageDataOverview(reduction, { pageIndex, raw });
     }
 
     if (PAGES[pageIndex] === 'analysis') {
         // analysis
-        return processPageDataAnalysis(reduction, pageIndex, data);
+        return processPageDataAnalysis(reduction, { pageIndex, raw });
     }
 
     if (PAGES[pageIndex] === 'funds') {
         // funds
-        return processPageDataFunds(reduction, pageIndex, data);
+        return processPageDataFunds(reduction, { pageIndex, raw }, now);
     }
 
     if (LIST_PAGES.indexOf(pageIndex) > -1) {
-        const newReduction = processPageDataList(reduction, pageIndex, data);
+        const newReduction = processPageDataList(reduction, { pageIndex, raw });
         const sortedRows = sortRowsByDate(
             newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex
         );
@@ -106,13 +63,13 @@ export function rContentBlockHover(reduction, { block, subBlock }) {
     return reduction.setIn(['other', 'blockView', 'status'], newStatus);
 }
 
-export function rRequestContent(reduction, { pageIndex }) {
+export function rRequestContent(reduction, { pageIndex, loading }) {
     return reduction
-        .set('loading', true)
+        .set('loading', loading)
         .set('currentPageIndex', pageIndex);
 }
 
-export function rHandleContentResponse(reduction, { response, pageIndex }) {
+export function rHandleContentResponse(reduction, { response, pageIndex }, now) {
     if (!response) {
         return reduction.set('loading', false);
     }
@@ -120,8 +77,8 @@ export function rHandleContentResponse(reduction, { response, pageIndex }) {
     return processPageData(
         reduction
             .setIn(['pagesRaw', pageIndex], response.data.data),
-        pageIndex,
-        response.data.data
+        { pageIndex, raw: response.data.data },
+        now
     )
         .set('loading', false)
         .setIn(['pagesLoaded', pageIndex], true)

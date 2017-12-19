@@ -1,59 +1,95 @@
-/* eslint-disable no-unused-expressions */
-import 'babel-polyfill'
-import '../browser'
-import { fromJS, List as list } from 'immutable'
-import { expect } from 'chai'
-import { select, call, put } from 'redux-saga/effects'
-import axios from 'axios'
-
-import { selectApiKey } from '../../src/sagas'
-import * as S from '../../src/sagas/edit.saga'
-import { addServerDataRequest } from '../../src/sagas/app.saga'
-
-import { aSuggestionsReceived } from '../../src/actions/edit.actions'
-import { aMobileDialogClosed } from '../../src/actions/form.actions'
+/* eslint-disable prefer-reflect */
+import '../browser';
+import { fromJS, List as list } from 'immutable';
+import { expect } from 'chai';
+import { testSaga } from 'redux-saga-test-plan';
+import { delay } from 'redux-saga';
+import axios from 'axios';
+import { selectApiKey } from '../../src/sagas';
+import * as S from '../../src/sagas/edit.saga';
+import { addServerDataRequest } from '../../src/sagas/app.saga';
+import * as A from '../../src/actions/edit.actions';
+import * as B from '../../src/actions/form.actions';
+import { EDIT_CHANGED } from '../../src/constants/actions';
 
 describe('edit.saga', () => {
+    describe('suggestionsInfo', () => {
+        it('should get required items from state', () => {
+            expect(S.suggestionsInfo(fromJS({
+                currentPageIndex: 3,
+                edit: {
+                    active: {
+                        item: 'foo',
+                        value: 'bar'
+                    }
+                }
+            })))
+                .to.deep.equal({
+                    pageIndex: 3,
+                    item: 'foo',
+                    value: 'bar'
+                });
+        });
+    });
+
+    describe('triggerEditSuggestionsRequest', () => {
+        it('should call the suggetions requester after a delay', () => {
+            testSaga(S.triggerEditSuggestionsRequest, { pageIndex: 3, item: 'foo', value: 'bar' })
+                .next()
+                .call(delay, 100)
+                .next()
+                .put(A.aSuggestionsRequested({ page: 'income', item: 'foo', value: 'bar' }))
+                .next()
+                .isDone();
+        });
+    });
+
+    describe('watchTextInput', () => {
+        it('should continuously watch the text input for changes, triggering suggestions request if appropriate', () => {
+            testSaga(S.watchTextInput)
+                .next()
+                .take(EDIT_CHANGED)
+                .next()
+                .select(S.suggestionsInfo)
+                .next({ pageIndex: 5, item: 'item', value: 'value' })
+                .fork(S.triggerEditSuggestionsRequest, { pageIndex: 5, item: 'item', value: 'value' })
+                .next()
+                .take(EDIT_CHANGED)
+                .next()
+                .select(S.suggestionsInfo)
+                .next({ pageIndex: 6, item: 'item', value: 'value' });
+
+            testSaga(S.watchTextInput)
+                .next()
+                .take(EDIT_CHANGED)
+                .next()
+                .select(S.suggestionsInfo)
+                .next({ pageIndex: 0, item: 'foo', value: 'bar' })
+                .take(EDIT_CHANGED);
+        });
+    });
+
     describe('requestEditSuggestions', () => {
-        it('should return after notifying the store if passed an empty value', () => {
-            const result = S.requestEditSuggestions({ payload: { value: '' } })
+        it('should request edit suggestions, if a value was typed', () => {
+            testSaga(S.requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: 'bar' })
+                .next()
+                .select(selectApiKey)
+                .next('some_api_key')
+                .call(axios.get, 'api/v3/data/search/food/foo/bar/5', { headers: { Authorization: 'some_api_key' } })
+                .next({ data: { data: { list: ['foo'] } } })
+                .put(A.aSuggestionsReceived({ items: list.of('foo'), reqId: 1 }))
+                .next()
+                .isDone();
+        });
 
-            expect(result.next().value).to.be.deep.equal(put(aSuggestionsReceived({ items: null })))
-            expect(result.next().value).to.be.undefined
-        })
-
-        const payload = { reqId: 12391, page: 'food', item: 'item', value: 'foo' }
-        const iter = S.requestEditSuggestions({ payload })
-
-        let next = iter.next()
-
-        it('should select the apiKey', () => {
-            expect(next.value).to.deep.equal(select(selectApiKey))
-            next = iter.next('some_api_key')
-        })
-        it('should call the API', () => {
-            expect(next.value).to.deep.equal(call(axios.get, 'api/v3/data/search/food/item/foo/5', {
-                headers: { 'Authorization': 'some_api_key' }
-            }))
-            next = iter.next({ data: { data: { list: [1, 2, 3] } } })
-        })
-
-        describe('if the API responded without an error', () => {
-            it('should notify the store with the response', () => {
-                expect(next.value).to.deep.equal(put(aSuggestionsReceived({
-                    items: list([1, 2, 3]), reqId: 12391
-                })))
-            })
-        })
-
-        describe('otherwise', () => {
-            const iter2 = S.requestEditSuggestions({ payload })
-            iter2.next() // select api key
-            iter2.next('some_api_key')
-
-            it('should log a message to the console')
-        })
-    })
+        it('should insert null into the suggestions, otherwise', () => {
+            testSaga(S.requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: '' })
+                .next()
+                .put(A.aSuggestionsReceived({ items: null }))
+                .next()
+                .isDone();
+        });
+    });
 
     describe('selectModalState', () => {
         it('should select the required info from the state', () => {
@@ -71,63 +107,65 @@ describe('edit.saga', () => {
                 modalDialogLoading: 'baz',
                 item: 'item',
                 fields: 'fields'
-            })
-        })
-    })
+            });
+        });
+    });
 
     describe('handleModal', () => {
-        it('should do nothing if no payload was sent', () => {
-            const iter = S.handleModal({ payload: null })
-            iter.next()
-            expect(iter.next({}).value).to.be.undefined
-        })
-        it('should do nothing if the modal dialog type isn\'t add', () => {
-            const iter = S.handleModal({ payload: 'something' })
-            iter.next()
-            expect(iter.next({ modalDialogType: 'not-add' }).value).to.be.undefined
-        })
-        it('should do nothing if there are invalid data', () => {
-            const iter = S.handleModal({ payload: 'something' })
-            iter.next()
-            expect(iter.next({ modalDialogType: 'add', invalidKeys: list.of(1, 2) }).value).to.be.undefined
-        })
-        it('should do nothing if the dialog wasn\'t set to loading', () => {
-            const iter = S.handleModal({ payload: 'something' })
-            iter.next()
-            expect(iter.next({
-                modalDialogType: 'add', invalidKeys: list.of(), modalDialogLoading: false
-            }).value).to.be.undefined
-        })
-
-        const iter = S.handleModal({
-            payload: {
-                pageIndex: 3
-            }
-        })
-        iter.next()
-
-        let next = iter.next({
+        const state = {
             modalDialogType: 'add',
             invalidKeys: list.of(),
             modalDialogLoading: true,
-            item: 'item',
-            fields: [{ field1: 'value' }]
-        })
+            item: 'foo',
+            fields: 'bar'
+        };
 
-        it('should call addServerDataRequest', () => {
-            expect(next.value).to.deep.equal(call(addServerDataRequest, {
-                item: 'item',
-                fields: [{ field1: 'value' }],
-                pageIndex: 3
-            }))
+        it('should work as expected', () => {
+            testSaga(S.handleModal, { pageIndex: 5 })
+                .next()
+                .select(S.selectModalState)
+                .next(state)
+                .call(addServerDataRequest, { item: 'foo', fields: 'bar', pageIndex: 5 })
+                .next()
+                .put(B.aMobileDialogClosed(null))
+                .next()
+                .isDone();
+        });
 
-            next = iter.next()
-        })
+        describe('should not proceed if', () => {
+            it('there is no pageIndex', () => {
+                testSaga(S.handleModal, {})
+                    .next()
+                    .select(S.selectModalState)
+                    .next(state)
+                    .isDone();
+            });
 
-        it('should notify the store that the dialog was closed', () => {
-            expect(next.value).to.deep.equal(put(aMobileDialogClosed(null)))
-        })
-    })
-})
+            it('the modal dialog isn\'t of tye "add" type', () => {
+                testSaga(S.handleModal, { pageIndex: 5 })
+                    .next()
+                    .select(S.selectModalState)
+                    .next({ ...state, modalDialogType: 'not add' })
+                    .isDone();
+            });
+
+            it('there are invalid data', () => {
+                testSaga(S.handleModal, { pageIndex: 5 })
+                    .next()
+                    .select(S.selectModalState)
+                    .next({ ...state, invalidKeys: list.of(1) })
+                    .isDone();
+            });
+
+            it('there dialog was not set to loading', () => {
+                testSaga(S.handleModal, { pageIndex: 5 })
+                    .next()
+                    .select(S.selectModalState)
+                    .next({ ...state, modalDialogLoading: false })
+                    .isDone();
+            });
+        });
+    });
+});
 
 

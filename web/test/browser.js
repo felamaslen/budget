@@ -15,5 +15,11 @@ global.navigator = {
     userAgent: 'node.js'
 };
 
+global.localStorage = {
+    getItem: () => null,
+    setItem: () => null,
+    removeItem: () => null
+};
+
 global.HTMLElement = global.window.HTMLElement;
 

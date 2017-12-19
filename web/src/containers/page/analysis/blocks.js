@@ -17,7 +17,7 @@ export function Blocks({ pageIndex, active, blocks, deep, status, onClick, onHov
         deepBlock={deep}
         status={status}
         onClick={onClick}
-        onHover={onHover} />
+        onHover={onHover} />;
 }
 
 Blocks.propTypes = {

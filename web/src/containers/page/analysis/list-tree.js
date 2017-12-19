@@ -56,7 +56,7 @@ export function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onH
             </div>
             <SubTree {...item} />
         </li>;
-    })
+    });
 
     return <div className="tree">
         <ul className="tree-list">
