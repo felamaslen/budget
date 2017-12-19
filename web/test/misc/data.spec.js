@@ -37,8 +37,8 @@ describe('misc/data', () => {
     });
     describe('uuid', () => {
         it('should map [0, 1] bijectively to a six-digit number', () => {
-            expect(uuid(0.6741)).to.equal(109713);
-            expect(uuid(0.99123)).to.equal(130497);
+            expect(uuid(0.6741, true)).to.equal(109713);
+            expect(uuid(0.99123, true)).to.equal(130497);
         });
     });
     describe('dataEquals', () => {

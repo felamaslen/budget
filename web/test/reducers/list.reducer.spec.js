@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import * as rList from '../../src/reducers/list.reducer';
 
-describe('list', () => {
+describe('List page reducers', () => {
     describe('processPageDataFunds', () => {
         it('should return formatted funds page data', () => {
             const reduction = map({
@@ -22,7 +22,7 @@ describe('list', () => {
             const now = new Date('2017-09-05');
             const startTime = Math.floor(new Date('2017-09-01').getTime() / 1000);
 
-            const data = {
+            const raw = {
                 data: [
                     {
                         d: [2016, 9, 1],
@@ -49,7 +49,7 @@ describe('list', () => {
                 cacheTimes: [0, 1, 2, 3, 4, 5, 6, 7]
             };
 
-            const result = rList.processPageDataFunds(reduction, pageIndex, data, now);
+            const result = rList.processPageDataFunds(reduction, { pageIndex, raw }, now);
 
             const other = result.getIn(['other']);
 
