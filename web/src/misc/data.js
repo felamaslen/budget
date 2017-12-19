@@ -309,12 +309,12 @@ export function getAddDefaultValues(pageIndex) {
         if (column === 'cost') {
             return 0;
         }
-        if (column === 'item' || column === 'category' || column === 'shop' ||
-      column === 'holiday' || column === 'society') {
-            return '';
-        }
         if (column === 'transactions') {
             return new TransactionsList(list.of(), true);
+        }
+
+        if (['item', 'category', 'shop', 'holiday', 'society'].indexOf(column) > -1) {
+            return '';
         }
 
         return null;

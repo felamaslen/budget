@@ -111,8 +111,13 @@ export class YMD {
         }
 
         if (typeof value === 'undefined' || typeof value === 'number') {
-            const dateTime = value
-                ? new Date(value)
+            let dateValue = value;
+            if (!value && process.env.NODE_ENV === 'test') {
+                dateValue = '2017-10-14';
+            }
+
+            const dateTime = dateValue
+                ? new Date(dateValue)
                 : new Date();
 
             const year = dateTime.getFullYear();
