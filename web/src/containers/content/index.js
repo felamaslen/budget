@@ -50,7 +50,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    loadContent: pageIndex => dispatch(aContentRequested(pageIndex))
+    loadContent: page => dispatch(aContentRequested(page))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Content);

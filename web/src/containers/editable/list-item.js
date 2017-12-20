@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { LIST_COLS_PAGES } from '../../misc/const';
+import { PAGES } from '../../misc/const';
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -8,35 +8,29 @@ import classNames from 'classnames';
 
 import getEditable from '.';
 
-export function ListAddEditItem({ pageIndex, row, col, id, item, value, active, noSuggestions }) {
+export function ListAddEditItem({ page, row, col, id, item, value, active }) {
     const Editable = getEditable({ row, col, id, item, value });
 
-    const spanClasses = classNames({
-        [item]: true,
-        active
-    });
-
-    return <span className={spanClasses}>
-        <Editable pageIndex={pageIndex} noSuggestions={noSuggestions} />
+    return <span className={classNames(item, { active })}>
+        <Editable page={page} />
     </span>;
 }
 
 ListAddEditItem.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
     id: PropTypes.number,
     item: PropTypes.string.isRequired,
     value: PropTypes.any.isRequired,
-    active: PropTypes.bool.isRequired,
-    noSuggestions: PropTypes.bool
+    active: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
-    value: state.getIn(['edit', 'add', ownProps.pageIndex, ownProps.col]),
+    value: state.getIn(['edit', 'add', ownProps.page, ownProps.col]),
     active: state.getIn(['edit', 'row']) === ownProps.row &&
         state.getIn(['edit', 'col']) === ownProps.col,
-    item: LIST_COLS_PAGES[ownProps.pageIndex][ownProps.col]
+    item: PAGES[ownProps.page].cols[ownProps.col]
 });
 
 const mapDispatchToProps = () => ({});

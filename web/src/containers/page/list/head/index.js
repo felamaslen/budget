@@ -5,7 +5,7 @@ import PureComponent from '../../../../immutable-component';
 import PropTypes from 'prop-types';
 
 import { formatCurrency } from '../../../../misc/format';
-import { LIST_COLS_PAGES, DAILY_PAGES } from '../../../../misc/const';
+import { PAGES } from '../../../../misc/const';
 
 export class Head extends PureComponent {
     renderListHeadMain(columns) {
@@ -17,28 +17,30 @@ export class Head extends PureComponent {
         return null;
     }
     render() {
-        const weeklyValue = formatCurrency(this.props.weeklyValue, {
+        const { page, weeklyValue, daily, totalCost } = this.props;
+
+        const weeklyValueFormatted = formatCurrency(weeklyValue, {
             abbreviate: true,
             precision: 1
         });
 
-        const daily = this.props.daily
+        const dailyValues = daily
             ? <span>
                 <span className="daily">Daily</span>
                 <span className="weekly">Weekly:</span>
-                <span className="weekly-value">{weeklyValue}</span>
+                <span className="weekly-value">{weeklyValueFormatted}</span>
             </span>
             : null;
 
-        const totalValue = formatCurrency(this.props.totalCost, {
+        const totalValue = formatCurrency(totalCost, {
             abbreviate: true,
             precision: 1
         });
 
         return <div className="list-head-inner noselect">
-            {this.renderListHeadMain(LIST_COLS_PAGES[this.props.pageIndex])}
-            {daily}
-            <span className="total">Total:</span>
+            {this.renderListHeadMain(PAGES[page].cols)}
+            {dailyValues}
+            <span className="total">{'Total:'}</span>
             <span className="total-value">{totalValue}</span>
             {this.listHeadExtra()}
         </div>;
@@ -46,23 +48,23 @@ export class Head extends PureComponent {
 }
 
 Head.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     weeklyValue: PropTypes.number,
     daily: PropTypes.bool,
     totalCost: PropTypes.number
 };
 
-const stateDefault = pageIndex => state => ({
-    pageIndex,
-    weeklyValue: state.getIn(['pages', pageIndex, 'data', 'weekly']),
-    daily: DAILY_PAGES[pageIndex],
-    totalCost: state.getIn(['pages', pageIndex, 'data', 'total'])
+const stateDefault = page => state => ({
+    page,
+    weeklyValue: state.getIn(['pages', page, 'data', 'weekly']),
+    daily: Boolean(PAGES[page].daily),
+    totalCost: state.getIn(['pages', page, 'data', 'total'])
 });
 
 const dispatchDefault = () => () => ({});
 
-export const HeadContainer = pageIndex =>
-    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(Head);
+export const HeadContainer = page =>
+    extendableContainer(stateDefault, dispatchDefault)(page)()(Head);
 
 export default extendableContainer(stateDefault, dispatchDefault);
 

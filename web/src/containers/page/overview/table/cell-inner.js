@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import getEditable from '../../../editable';
 import { formatCurrency } from '../../../../misc/format';
 
-export default function OverviewTableCellInner({ pageIndex, cell, cellKey, rowKey, editable }) {
+export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable }) {
     if (editable) {
         // editable balance column
         const Editable = getEditable({
@@ -15,7 +15,7 @@ export default function OverviewTableCellInner({ pageIndex, cell, cellKey, rowKe
             value: cell.get('value')
         });
 
-        return <Editable pageIndex={pageIndex} />;
+        return <Editable page="overview" />;
     }
 
     const value = cellKey > 0
@@ -26,7 +26,7 @@ export default function OverviewTableCellInner({ pageIndex, cell, cellKey, rowKe
 }
 
 OverviewTableCellInner.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     cell: PropTypes.instanceOf(map).isRequired,
     cellKey: PropTypes.number.isRequired,
     rowKey: PropTypes.number.isRequired,

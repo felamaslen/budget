@@ -10,8 +10,6 @@ import { testRows, testLines, testStartTime, testCacheTimes }
 import * as rFunds from '../../src/reducers/funds.reducer';
 import { GRAPH_FUNDS_MODE_ROI } from '../../src/misc/const';
 
-const pageIndex = 2;
-
 describe('funds', () => {
     describe('getFundsCachedValueAgeText', () => {
         it('should return the expected string', () => {
@@ -31,9 +29,9 @@ describe('funds', () => {
 
             const expectedValue = 399098.2;
 
-            expect(rFunds.getFundsCachedValue(
-                testRows, startTime, cacheTimes, now, pageIndex
-            ).get('value'))
+            expect(rFunds.getFundsCachedValue(testRows, startTime, cacheTimes, now)
+                .get('value')
+            )
                 .to.equal(expectedValue);
         });
     });
@@ -86,7 +84,7 @@ describe('funds', () => {
             const startTime = testStartTime;
             const cacheTimes = testCacheTimes;
 
-            const gains = rFunds.getGains(testRows, startTime, cacheTimes, pageIndex)
+            const gains = rFunds.getGains(testRows, startTime, cacheTimes)
                 .map(item => item.get('gain'));
 
             expect(gains.toJS()).to.deep.equal(expectedResult.toJS());
@@ -184,7 +182,7 @@ describe('funds', () => {
             const cacheTimes = testCacheTimes;
 
             const result = rFunds.getFormattedHistory(
-                testRows, mode, pageIndex, startTime, cacheTimes, list([null, null])
+                testRows, mode, startTime, cacheTimes, list([null, null])
             );
 
             expect(result.get('fundItems').toJS()).to.deep.equal([

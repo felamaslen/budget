@@ -16,15 +16,13 @@ import Upper from './upper';
 import ListTree from './list-tree';
 import Blocks from './blocks';
 
-import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../../misc/const';
+import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../../misc/const';
 import { formatCurrency } from '../../../misc/format';
-
-const pageIndex = PAGES.indexOf('analysis');
 
 export class PageAnalysis extends Page {
     loadContent() {
         this.props.loadContent({
-            pageIndex,
+            page: 'analysis',
             loading: true,
             params: [
                 ANALYSIS_PERIODS[this.props.periodKey],
@@ -50,8 +48,8 @@ export class PageAnalysis extends Page {
             <Upper />
             <div className="analysis-outer">
                 {timeline}
-                <ListTree pageIndex={pageIndex} />
-                <Blocks pageIndex={pageIndex} />
+                <ListTree />
+                <Blocks />
             </div>
         </div>;
     }
@@ -67,8 +65,7 @@ PageAnalysis.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    pageIndex,
-    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex])),
+    loaded: Boolean(state.getIn(['pagesLoaded', 'analysis'])),
     periodKey: state.getIn(['other', 'analysis', 'period']),
     groupingKey: state.getIn(['other', 'analysis', 'grouping']),
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex']),

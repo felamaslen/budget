@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 
 import BlockPacker from '../../../components/block-packer';
 
-export function Blocks({ pageIndex, active, blocks, deep, status, onClick, onHover }) {
+export function Blocks({ active, blocks, deep, status, onClick, onHover }) {
     return <BlockPacker
-        pageIndex={pageIndex}
+        page="analysis"
         activeBlock={active}
         blocks={blocks}
         deepBlock={deep}
@@ -21,7 +21,7 @@ export function Blocks({ pageIndex, active, blocks, deep, status, onClick, onHov
 }
 
 Blocks.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     blocks: PropTypes.instanceOf(list),
     status: PropTypes.string,
     active: PropTypes.array,

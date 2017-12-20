@@ -204,14 +204,14 @@ GraphCashFlow.propTypes = {
     breakAtToday: PropTypes.bool
 };
 
-const stateDefault = pageIndex => state => {
-    const [currentYear, currentMonth] = state.getIn(['pages', pageIndex, 'data', 'currentYearMonth']);
-    const [startYear, startMonth] = state.getIn(['pages', pageIndex, 'data', 'startYearMonth']);
+const stateDefault = () => state => {
+    const [currentYear, currentMonth] = state.getIn(['pages', 'overview', 'data', 'currentYearMonth']);
+    const [startYear, startMonth] = state.getIn(['pages', 'overview', 'data', 'startYearMonth']);
 
     return {
         width: Math.min(GRAPH_WIDTH, window.innerWidth),
         height: GRAPH_HEIGHT,
-        yearMonths: list(state.getIn(['pages', pageIndex, 'data', 'yearMonths'])),
+        yearMonths: list(state.getIn(['pages', 'overview', 'data', 'yearMonths'])),
         currentYear,
         currentMonth,
         startYear,
@@ -222,5 +222,5 @@ const stateDefault = pageIndex => state => {
 
 const dispatchDefault = () => () => ({});
 
-export default pageIndex => extendableContainer(stateDefault, dispatchDefault)(pageIndex);
+export default () => extendableContainer(stateDefault, dispatchDefault)();
 

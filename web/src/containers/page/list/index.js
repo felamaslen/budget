@@ -8,8 +8,9 @@ import { aContentRequested } from '../../../actions/content.actions';
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import Media from 'react-media';
-import { mediaQueries, PAGES } from '../../../misc/const';
+import { mediaQueries } from '../../../misc/const';
 
 import Page from '../../../components/page';
 
@@ -18,7 +19,7 @@ import { BodyContainer as getBody } from './body';
 
 export class PageList extends Page {
     bodyMobile() {
-        const BodyMobile = getBodyMobile(this.props.pageIndex);
+        const BodyMobile = getBodyMobile(this.props.page);
 
         return <BodyMobile />;
     }
@@ -30,7 +31,7 @@ export class PageList extends Page {
         return <div>{this.bodyMobile()}</div>;
     }
     bodyDesktop () {
-        const Body = getBody(this.props.pageIndex);
+        const Body = getBody(this.props.page);
 
         return <Body />;
     }
@@ -51,23 +52,21 @@ export class PageList extends Page {
         return null;
     }
     render() {
-        if (!this.props.loaded) {
+        const { loaded, page } = this.props;
+
+        if (!loaded) {
             return null;
         }
 
-        const listClasses = [
-            'list-insert',
-            `list-${PAGES[this.props.pageIndex]}`,
-            'list'
-        ].join(' ');
+        const listClassName = classNames('list-insert', `list-${page}`, 'list');
 
         const listRendered = this.renderList();
         const afterList = this.afterList();
 
-        const pageClasses = `page-${PAGES[this.props.pageIndex]}`;
+        const pageClassName = classNames(`page-${page}`);
 
-        return <div className={pageClasses}>
-            <div className={listClasses}>
+        return <div className={pageClassName}>
+            <div className={listClassName}>
                 {listRendered}
             </div>
             {afterList}
@@ -77,21 +76,21 @@ export class PageList extends Page {
 
 PageList.propTypes = {
     loaded: PropTypes.bool.isRequired,
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     loadContent: PropTypes.func.isRequired
 };
 
-const stateDefault = pageIndex => state => ({
-    pageIndex,
-    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex]))
+const stateDefault = page => state => ({
+    page,
+    loaded: Boolean(state.getIn(['pagesLoaded', page]))
 });
 
 const dispatchDefault = () => dispatch => ({
     loadContent: req => dispatch(aContentRequested(req))
 });
 
-export const PageListContainer = pageIndex =>
-    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(PageList);
+export const PageListContainer = page =>
+    extendableContainer(stateDefault, dispatchDefault)(page)()(PageList);
 
 export default extendableContainer(stateDefault, dispatchDefault);
 

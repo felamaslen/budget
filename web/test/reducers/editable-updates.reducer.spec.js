@@ -7,22 +7,27 @@ describe('Editable updates reducer', () => {
     describe('resortListRows', () => {
         it('should sort rows and add weekly averages', () => {
             const state = fromJS({
-                pages: [
-                    null,
-                    null,
-                    { rows: [], data: {} }
-                ]
+                pages: {
+                    funds: {
+                        rows: [],
+                        data: {}
+                    }
+                }
             });
 
-            const result = R.resortListRows(state, { pageIndex: 2 });
+            const result = R.resortListRows(state, { page: 'funds' });
 
-            expect(result.getIn(['pages', 2, 'rows']).toJS()).to.deep.equal(
-                M.sortRowsByDate(state.getIn(['pages', 2, 'rows']), 2)
+            expect(result.getIn(['pages', 'funds', 'rows']).toJS()).to.deep.equal(
+                M.sortRowsByDate(state.getIn(['pages', 'funds', 'rows']), 'funds')
                     .toJS()
             );
 
-            expect(result.getIn(['pages', 2, 'data']).toJS()).to.deep.equal(
-                M.addWeeklyAverages(state.getIn(['pages', 2, 'data']), 2)
+            expect(result.getIn(['pages', 'funds', 'data']).toJS()).to.deep.equal(
+                M.addWeeklyAverages(
+                    state.getIn(['pages', 'funds', 'data']),
+                    state.getIn(['pages', 'funds', 'rows']),
+                    'funds'
+                )
                     .toJS()
             );
         });

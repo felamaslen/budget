@@ -24,7 +24,7 @@ export class ListRowMobile extends ListRow {
             });
 
             return <span key={key} className={column}>
-                <Editable static={true} pageIndex={this.props.pageIndex} />
+                <Editable static={true} page={this.props.page} />
             </span>;
         });
     }
@@ -42,12 +42,12 @@ ListRowMobile.propTypes = {
     openMobileEditDialog: PropTypes.func.isRequired
 };
 
-const mapDispatchToProps = pageIndex => dispatch => ({
-    openMobileEditDialog: id => dispatch(aMobileEditDialogOpened(pageIndex, id))
+const mapDispatchToProps = page => dispatch => ({
+    openMobileEditDialog: id => dispatch(aMobileEditDialogOpened(page, id))
 });
 
-export const ListRowMobileContainer = pageIndex =>
-    listRowContainer(pageIndex)(null, mapDispatchToProps)(ListRowMobile);
+export const ListRowMobileContainer = page =>
+    listRowContainer(page)(null, mapDispatchToProps)(ListRowMobile);
 
-export default pageIndex => listRowContainer(pageIndex);
+export default page => listRowContainer(page);
 

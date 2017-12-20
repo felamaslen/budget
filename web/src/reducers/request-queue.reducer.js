@@ -1,16 +1,16 @@
 import { Map as map } from 'immutable';
 
-import { PAGES, LIST_PAGES } from '../misc/const';
+import { PAGES } from '../misc/const';
 import { getValueForTransmit } from '../misc/data';
 
 export function addToRequestQueue(requestList, dataItem, startYearMonth = null) {
-    const pageIndex = dataItem.get('pageIndex');
+    const page = dataItem.get('page');
 
     if (dataItem.get('delete')) {
         return requestList.push(map({
             req: map({
                 method: 'delete',
-                route: PAGES[dataItem.get('pageIndex')],
+                route: page,
                 query: map.of(),
                 body: map({ id: dataItem.get('id') })
             })
@@ -20,14 +20,14 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
     const item = dataItem.get('item');
     const value = getValueForTransmit(dataItem.get('value'));
 
-    if (PAGES[pageIndex] === 'overview') {
+    if (page === 'overview') {
         const key = dataItem.get('row');
         const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
         const month = (startYearMonth[1] + key - 1) % 12 + 1;
         const balance = value;
 
         return requestList.push(map({
-            pageIndex,
+            page,
             req: map({
                 method: 'post',
                 route: 'balance',
@@ -37,23 +37,22 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
         }));
     }
 
-    if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    if (PAGES[page].list) {
         const id = dataItem.get('id');
 
-        const reqPageIndex = requestList.findIndex(req => {
-            return req.get('pageIndex') === pageIndex &&
-                req.getIn(['req', 'body', 'id']) === id;
-        });
+        const reqPageIndex = requestList.findIndex(req =>
+            req.get('page') === page && req.getIn(['req', 'body', 'id']) === id
+        );
 
         if (reqPageIndex > -1) {
             return requestList.setIn([reqPageIndex, 'req', 'body', item], value);
         }
 
         return requestList.push(map({
-            pageIndex,
+            page,
             req: map({
                 method: 'put',
-                route: PAGES[pageIndex],
+                route: page,
                 query: map.of(),
                 body: map({ id, [item]: value })
             })
@@ -64,7 +63,7 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
 }
 
 export function pushToRequestQueue(reduction, dataItem) {
-    const startYearMonth = reduction.getIn(['pages', PAGES.indexOf('overview'), 'data', 'startYearMonth']);
+    const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
 
     const requestList = reduction.getIn(['edit', 'requestList']);
     const newRequestList = addToRequestQueue(requestList, dataItem, startYearMonth || null);

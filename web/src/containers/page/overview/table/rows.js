@@ -6,26 +6,26 @@ import PropTypes from 'prop-types';
 
 import Cells from './cells';
 
-export function OverviewTableRows({ pageIndex, rows, numToSkip }) {
+export function OverviewTableRows({ rows, numToSkip }) {
     const rowsDisplay = rows
         .slice(numToSkip)
         .map((row, key) => {
             const rowKey = key + numToSkip;
 
-            return <Cells key={key} pageIndex={pageIndex} row={row} rowKey={rowKey} />;
+            return <Cells key={key} row={row} rowKey={rowKey} />;
         });
 
     return <div>{rowsDisplay}</div>;
 }
 
 OverviewTableRows.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     rows: PropTypes.instanceOf(list).isRequired,
     numToSkip: PropTypes.number.isRequired
 };
 
-const mapStateToProps = (state, ownProps) => ({
-    rows: state.getIn(['pages', ownProps.pageIndex, 'rows'])
+const mapStateToProps = state => ({
+    rows: state.getIn(['pages', 'overview', 'rows'])
 });
 
 export default connect(mapStateToProps)(OverviewTableRows);

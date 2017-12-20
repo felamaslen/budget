@@ -7,7 +7,7 @@ import classNames from 'classnames';
 
 import CellInner from './cell-inner';
 
-export function OverviewTableCells({ pageIndex, row, rowKey, editRow, editCol }) {
+export function OverviewTableCells({ row, rowKey, editRow, editCol }) {
     const cells = row.get('cells')
         .map((cell, cellKey) => {
             const style = {};
@@ -19,31 +19,27 @@ export function OverviewTableCells({ pageIndex, row, rowKey, editRow, editCol })
 
             const active = editRow === rowKey && editCol === 0;
 
-            const cellClasses = {
-                col: true,
-                [cell.getIn(['column', 0])]: true,
+            const cellClassName = classNames('col', cell.getIn(['column', 0]), {
                 'editable-outer': editable,
                 editing: editable && active
-            };
+            });
 
-            return <div key={cellKey} className={classNames(cellClasses)} style={style}>
-                <CellInner pageIndex={pageIndex} cell={cell} cellKey={cellKey}
-                    rowKey={rowKey} editable={editable} />
+            return <div key={cellKey} className={cellClassName} style={style}>
+                <CellInner cell={cell} cellKey={cellKey} rowKey={rowKey} editable={editable} />
             </div>;
         });
 
-    const rowClasses = classNames({
-        row: true,
+    const rowClassName = classNames('row', {
         past: Boolean(row.get('past')),
         active: Boolean(row.get('active')),
         future: Boolean(row.get('future'))
     });
 
-    return <div className={rowClasses}>{cells}</div>;
+    return <div className={rowClassName}>{cells}</div>;
 }
 
 OverviewTableCells.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     rowKey: PropTypes.number.isRequired,
     editRow: PropTypes.number,

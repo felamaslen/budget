@@ -11,7 +11,7 @@ import { selectApiKey } from '../../src/sagas';
 describe('content.saga', () => {
     describe('makeContentRequest', () => {
         const result = S.makeContentRequest('some_api_key', {
-            pageIndex: 1, params: ['foo', 'bar'], query: { bar: 'baz' }
+            page: 'analysis', params: ['foo', 'bar'], query: { bar: 'baz' }
         });
 
         it('should call the API with the correct URL', () => {
@@ -26,31 +26,31 @@ describe('content.saga', () => {
 
     describe('requestContent', () => {
         it('should work as expected', () => {
-            testSaga(S.requestContent, { loading: true, pageIndex: 1, params: ['foo'], query: { bar: 'baz' } })
+            testSaga(S.requestContent, { loading: true, page: 'page1', params: ['foo'], query: { bar: 'baz' } })
                 .next()
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                    pageIndex: 1, params: ['foo'], query: { bar: 'baz' }
+                    page: 'page1', params: ['foo'], query: { bar: 'baz' }
                 }))
                 .next({ foo: 'bar' })
-                .put(aContentLoaded({ pageIndex: 1, response: { foo: 'bar' } }))
+                .put(aContentLoaded({ page: 'page1', response: { foo: 'bar' } }))
                 .next()
                 .isDone();
         });
 
         it('should handle errors', () => {
-            testSaga(S.requestContent, { loading: true, pageIndex: 1, params: ['foo'], query: { bar: 'baz' } })
+            testSaga(S.requestContent, { loading: true, page: 'page1', params: ['foo'], query: { bar: 'baz' } })
                 .next()
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                    pageIndex: 1, params: ['foo'], query: { bar: 'baz' }
+                    page: 'page1', params: ['foo'], query: { bar: 'baz' }
                 }))
                 .throw({ response: 'foo' })
                 .call(openTimedMessage, 'An error occurred loading content')
                 .next()
-                .put(aContentLoaded({ pageIndex: 1, response: null }))
+                .put(aContentLoaded({ page: 'page1', response: null }))
                 .next()
                 .isDone();
         });

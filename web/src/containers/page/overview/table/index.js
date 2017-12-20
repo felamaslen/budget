@@ -6,13 +6,13 @@ import { mediaQueries } from '../../../../misc/const';
 import Header from './header';
 import Rows from './rows';
 
-export default function OverviewTable({ pageIndex }) {
+export default function OverviewTable() {
     const rows = isMobile => {
         if (isMobile) {
-            return <Rows pageIndex={pageIndex} numToSkip={19} />;
+            return <Rows numToSkip={19} />;
         }
 
-        return <Rows pageIndex={pageIndex} numToSkip={0} />;
+        return <Rows numToSkip={0} />;
     };
 
     return <div className="table-flex table-insert table-overview noselect">
@@ -22,6 +22,6 @@ export default function OverviewTable({ pageIndex }) {
 }
 
 OverviewTable.propTypes = {
-    pageIndex: PropTypes.number.isRequired
+    page: PropTypes.string.isRequired
 };
 

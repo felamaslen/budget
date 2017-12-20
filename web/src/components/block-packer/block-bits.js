@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export default function BlockBits({
-    pageIndex,
+    page,
     block,
     activeMain,
     activeSub,
@@ -57,7 +57,7 @@ export default function BlockBits({
 
     const wasDeep = Boolean(deepBlock);
 
-    const onBlockClick = () => onClick({ pageIndex, name: block.get('name'), wasDeep });
+    const onBlockClick = () => onClick({ page, name: block.get('name'), wasDeep });
 
     return <div className={classes} style={blockStyle}
         onClick={onBlockClick}>
@@ -67,7 +67,7 @@ export default function BlockBits({
 
 BlockBits.propTypes = {
     block: PropTypes.instanceOf(map).isRequired,
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     activeMain: PropTypes.bool.isRequired,
     activeSub: PropTypes.bool.isRequired,
     activeBlock: PropTypes.array,

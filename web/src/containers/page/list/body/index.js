@@ -23,7 +23,7 @@ export class Body extends PureComponent {
             return null;
         }
 
-        const HeadMobile = getHeadMobile(this.props.pageIndex);
+        const HeadMobile = getHeadMobile(this.props.page);
 
         return <HeadMobile />;
     }
@@ -32,44 +32,46 @@ export class Body extends PureComponent {
             return null;
         }
 
-        const Head = getHead(this.props.pageIndex);
+        const Head = getHead(this.props.page);
 
         return <Head />;
     }
     listRow() {
-        return getListRowDefault(this.props.pageIndex);
+        return getListRowDefault(this.props.page);
     }
     render() {
-        const rows = this.props.rowIds.map(id => <this.ListRow key={id} id={id} />);
+        const { page, rowIds } = this.props;
+
+        const rows = rowIds.map(id => <this.ListRow key={id} id={id} />);
 
         return <ul className="list-ul">
             <li className="list-head">
                 <Media query={mediaQueries.mobile}>{render => this.headMobile(render)}</Media>
                 <Media query={mediaQueries.desktop}>{render => this.headDesktop(render)}</Media>
             </li>
-            <AddForm pageIndex={this.props.pageIndex} />
+            <AddForm page={page} />
             {rows}
         </ul>;
     }
 }
 
 Body.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     rowIds: PropTypes.instanceOf(list).isRequired
 };
 
-const stateDefault = pageIndex => state => ({
-    pageIndex,
+const stateDefault = page => state => ({
+    page,
     rowIds: state
-        .getIn(['pages', pageIndex, 'rows'])
+        .getIn(['pages', page, 'rows'])
         .keySeq()
         .toList()
 });
 
 const dispatchDefault = () => () => ({});
 
-export const BodyContainer = pageIndex =>
-    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(Body);
+export const BodyContainer = page =>
+    extendableContainer(stateDefault, dispatchDefault)(page)()(Body);
 
 export default extendableContainer(stateDefault, dispatchDefault);
 

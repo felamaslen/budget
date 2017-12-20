@@ -2,7 +2,7 @@
  * Carries out actions for the content component
  */
 
-import { PAGES, LIST_PAGES } from '../misc/const';
+import { PAGES } from '../misc/const';
 import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
@@ -12,34 +12,34 @@ import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList, processPageDataFunds } from './list.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';
 
-function processPageData(reduction, { pageIndex, raw }, now) {
-    if (PAGES[pageIndex] === 'overview') {
+function processPageData(reduction, { page, raw }, now) {
+    if (page === 'overview') {
         // overview
-        return processPageDataOverview(reduction, { pageIndex, raw });
+        return processPageDataOverview(reduction, { raw });
     }
 
-    if (PAGES[pageIndex] === 'analysis') {
+    if (page === 'analysis') {
         // analysis
-        return processPageDataAnalysis(reduction, { pageIndex, raw });
+        return processPageDataAnalysis(reduction, { raw });
     }
 
-    if (PAGES[pageIndex] === 'funds') {
+    if (page === 'funds') {
         // funds
-        return processPageDataFunds(reduction, { pageIndex, raw }, now);
+        return processPageDataFunds(reduction, { raw }, now);
     }
 
-    if (LIST_PAGES.indexOf(pageIndex) > -1) {
-        const newReduction = processPageDataList(reduction, { pageIndex, raw });
+    if (PAGES[page].list) {
+        const newReduction = processPageDataList(reduction, { page, raw });
         const sortedRows = sortRowsByDate(
-            newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex
+            newReduction.getIn(['pages', page, 'rows']), page
         );
         const weeklyData = addWeeklyAverages(
-            newReduction.getIn(['pages', pageIndex, 'data']), sortedRows, pageIndex
+            newReduction.getIn(['pages', page, 'data']), sortedRows, page
         );
 
         return newReduction
-            .setIn(['pages', pageIndex, 'rows'], sortedRows)
-            .setIn(['pages', pageIndex, 'data'], weeklyData);
+            .setIn(['pages', page, 'rows'], sortedRows)
+            .setIn(['pages', page, 'data'], weeklyData);
     }
 
     return reduction;
@@ -63,26 +63,25 @@ export function rContentBlockHover(reduction, { block, subBlock }) {
     return reduction.setIn(['other', 'blockView', 'status'], newStatus);
 }
 
-export function rRequestContent(reduction, { pageIndex, loading }) {
+export function rRequestContent(reduction, { page, loading }) {
     return reduction
         .set('loading', loading)
-        .set('currentPageIndex', pageIndex);
+        .set('currentPage', page);
 }
 
-export function rHandleContentResponse(reduction, { response, pageIndex }, now) {
+export function rHandleContentResponse(reduction, { response, page }, now) {
     if (!response) {
         return reduction.set('loading', false);
     }
 
     return processPageData(
-        reduction
-            .setIn(['pagesRaw', pageIndex], response.data.data),
-        { pageIndex, raw: response.data.data },
+        reduction.setIn(['pagesRaw', page], response.data.data),
+        { page, raw: response.data.data },
         now
     )
         .set('loading', false)
-        .setIn(['pagesLoaded', pageIndex], true)
-        .setIn(['edit', 'active'], getNullEditable(pageIndex))
-        .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex));
+        .setIn(['pagesLoaded', page], true)
+        .setIn(['edit', 'active'], getNullEditable(page))
+        .setIn(['edit', 'add', page], getAddDefaultValues(page));
 }
 

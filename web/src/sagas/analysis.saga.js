@@ -22,10 +22,7 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
 
     const stateProps = yield select(selectStateProps);
 
-    const { pageIndex, name, period, grouping, timeIndex } = {
-        ...stateProps,
-        ...payload
-    };
+    const { name, period, grouping, timeIndex } = { ...stateProps, ...payload };
 
     const apiKey = yield select(selectApiKey);
 
@@ -37,9 +34,9 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
     }
 
     try {
-        const response = yield call(axios.get, ...makeContentRequest(apiKey, { pageIndex, params }));
+        const response = yield call(axios.get, ...makeContentRequest(apiKey, { params }));
 
-        yield put(aAnalysisDataRefreshed({ pageIndex, response, name }));
+        yield put(aAnalysisDataRefreshed({ response, name }));
     }
     catch (err) {
         yield call(openTimedMessage, `Error loading analysis data: ${err.message}`);

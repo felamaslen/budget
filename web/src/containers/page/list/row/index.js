@@ -8,7 +8,7 @@ import PureComponent from '../../../../immutable-component';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { PAGES, LIST_COLS_PAGES, DAILY_PAGES } from '../../../../misc/const';
+import { PAGES } from '../../../../misc/const';
 import { formatCurrency } from '../../../../misc/format';
 
 import Column from './column';
@@ -34,29 +34,30 @@ export class ListRow extends PureComponent {
         return {};
     }
     render() {
-        const onDelete = () => this.props.deleteRow();
+        const { page, row, deleteRow } = this.props;
 
         const deleteBtn = <span className="delete">
-            <a onClick={onDelete}>&minus;</a>
+            <a onClick={() => deleteRow()}>&minus;</a>
         </span>;
 
-        const items = LIST_COLS_PAGES[this.props.pageIndex].map(
+        const items = PAGES[page].cols.map(
             (colName, colKey) => <Column key={colKey}
-                pageIndex={this.props.pageIndex}
+                page={page}
                 row={this.props.row}
                 colName={colName}
                 colKey={colKey}
                 id={this.props.id}
                 active={this.props.activeCol === colKey}
-                noSuggestions={this.props.noSuggestions}
             />
         );
 
-        const itemClasses = this.listItemClasses();
-        itemClasses.future = this.props.row.get('future');
-        itemClasses['first-present'] = this.props.row.get('first-present');
+        const itemClassName = classNames({
+            ...this.listItemClasses(),
+            future: row.get('future'),
+            'first-present': row.get('first-present')
+        });
 
-        return <li className={classNames(itemClasses)}>
+        return <li className={itemClassName}>
             {items}
             {this.dailyText()}
             {this.renderListExtra()}
@@ -66,32 +67,30 @@ export class ListRow extends PureComponent {
 }
 
 ListRow.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     id: PropTypes.number.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     activeCol: PropTypes.number,
     daily: PropTypes.number,
-    getDaily: PropTypes.bool,
-    noSuggestions: PropTypes.bool.isRequired,
+    getDaily: PropTypes.bool.isRequired,
     deleteRow: PropTypes.func.isRequired
 };
 
-const stateDefault = pageIndex => (state, ownProps) => ({
-    pageIndex,
-    row: state.getIn(['pages', pageIndex, 'rows', ownProps.id]),
+const stateDefault = page => (state, ownProps) => ({
+    page,
+    row: state.getIn(['pages', page, 'rows', ownProps.id]),
     activeCol: state.getIn(['edit', 'active', 'row']) === ownProps.id
         ? state.getIn(['edit', 'active', 'col'])
         : null,
-    getDaily: DAILY_PAGES[pageIndex],
-    noSuggestions: ['funds'].indexOf(PAGES[pageIndex]) !== -1
+    getDaily: Boolean(PAGES[page].daily)
 });
 
-const dispatchDefault = pageIndex => (dispatch, ownProps) => ({
-    deleteRow: () => dispatch(aListItemDeleted({ pageIndex, id: ownProps.id }))
+const dispatchDefault = page => (dispatch, ownProps) => ({
+    deleteRow: () => dispatch(aListItemDeleted({ page, id: ownProps.id }))
 });
 
-export const ListRowContainer = pageIndex =>
-    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(ListRow);
+export const ListRowContainer = page =>
+    extendableContainer(stateDefault, dispatchDefault)(page)()(ListRow);
 
 export default extendableContainer(stateDefault, dispatchDefault);
 

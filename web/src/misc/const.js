@@ -17,33 +17,67 @@ export const ERROR_LEVEL_WARN = 0xe1;
 export const ERROR_LEVEL_DEBUG = 0xe2;
 export const ERROR_CLOSE_TIME = 1000;
 
-export const PAGES = [
-    'overview',
-    'analysis',
-    'funds',
-    'income',
-    'bills',
-    'food',
-    'general',
-    'holiday',
-    'social'
-];
+export const DATA_KEY_ABBR = {
+    id: 'I',
+    date: 'd',
+    item: 'i',
+    cost: 'c',
+    shop: 's',
+    category: 'k',
+    holiday: 'h',
+    society: 'y',
+    transactions: 'tr'
+};
 
-export const PAGES_PATHS = [
-    '/',
-    '/analysis',
-    '/funds',
-    '/income',
-    '/bills',
-    '/food',
-    '/general',
-    '/holiday',
-    '/social'
-];
+export const PAGES = {
+    overview: {
+        path: '/'
+    },
+    analysis: {},
+    funds: {
+        list: true,
+        cols: ['date', 'item', 'transactions', 'cost']
+    },
+    income: {
+        list: true,
+        cols: ['date', 'item', 'cost']
+    },
+    bills: {
+        list: true,
+        cols: ['date', 'item', 'cost'],
+        suggestions: ['item']
+    },
+    food: {
+        list: true,
+        cols: ['date', 'item', 'category', 'cost', 'shop'],
+        daily: true,
+        suggestions: ['item', 'category', 'shop']
+    },
+    general: {
+        list: true,
+        cols: ['date', 'item', 'category', 'cost', 'shop'],
+        daily: true,
+        suggestions: ['item', 'category', 'shop']
+    },
+    holiday: {
+        list: true,
+        cols: ['date', 'item', 'holiday', 'cost', 'shop'],
+        daily: true,
+        suggestions: ['item', 'holiday', 'shop']
+    },
+    social: {
+        list: true,
+        cols: ['date', 'item', 'society', 'cost', 'shop'],
+        daily: true,
+        suggestions: ['item', 'society', 'shop']
+    }
+};
 
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
+
 export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
+
 export const OVERVIEW_COLUMNS = [
     ['month', 'Month'],
     ['funds', 'Stocks'],
@@ -60,56 +94,15 @@ export const OVERVIEW_COLUMNS = [
     ['balancePred', 'Balance']
 ];
 
-export const LIST_PAGES = [2, 3, 4, 5, 6, 7, 8];
-export const BLOCK_PAGES = [5, 6, 7, 8];
-
-export const LIST_COLS_PAGES = [
-    null, // overview (not list)
-    null, // analysis (not list)
-    ['date', 'item', 'transactions', 'cost'], // funds
-    ['date', 'item', 'cost'], // income
-    ['date', 'item', 'cost'], // bills
-    ['date', 'item', 'category', 'cost', 'shop'], // food
-    ['date', 'item', 'category', 'cost', 'shop'], // general
-    ['date', 'item', 'holiday', 'cost', 'shop'], // holiday
-    ['date', 'item', 'society', 'cost', 'shop'] // social
-];
-export const LIST_COLS_SHORT = [
-    null,
-    null,
-    ['d', 'i', 'tr', 'c'],
-    ['d', 'i', 'c'],
-    ['d', 'i', 'c'],
-    ['d', 'i', 'k', 'c', 's'],
-    ['d', 'i', 'k', 'c', 's'],
-    ['d', 'i', 'h', 'c', 's'],
-    ['d', 'i', 'y', 'c', 's']
-];
-export const LIST_COLS_STANDARD = ['I', 'd', 'i', 'c', 'k', 'h', 'y', 's', 'tr'];
-
 export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
-// which pages to include daily tallies for
-export const DAILY_PAGES = [null, null, false, false, false, true, true, true, true];
-
 export const LOGIN_INPUT_LENGTH = 4;
+
 export const AVERAGE_MEDIAN = 0xa1;
 export const AVERAGE_EXP = 0xa2;
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
-
-export const LIST_COLS_SUGGESTIONS = [
-    [], // overview (not list)
-    [], // analysis (not list)
-    [], // funds (no suggestions)
-    ['item'],
-    ['item'],
-    ['item', 'category', 'shop'],
-    ['item', 'category', 'shop'],
-    ['item', 'holiday', 'shop'],
-    ['item', 'society', 'shop']
-];
 
 export const htmlCanvasSupported = () => {
     if (typeof navigator === 'undefined') {

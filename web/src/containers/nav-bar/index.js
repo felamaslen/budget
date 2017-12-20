@@ -1,32 +1,27 @@
 import { connect } from 'react-redux';
-
 import { aUserLoggedOut } from '../../actions/app.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { NavLink } from 'react-router-dom';
-
-import { PAGES, PAGES_PATHS } from '../../misc/const';
+import { PAGES } from '../../misc/const';
 
 export function Navbar({ active, logout }) {
     if (!active) {
         return null;
     }
 
-    const pageLinksList = PAGES.map((item, key) => {
-        const path = PAGES_PATHS[key];
-        const className = `nav-link nav-link-${item}`;
+    const pageLinksList = Object.keys(PAGES).map(page => {
+        const path = PAGES[page].path || `/${page}`;
 
-        return <NavLink key={key} exact to={path}
-            activeClassName="active" className={className}>{item}</NavLink>;
+        const className = `nav-link nav-link-${page}`;
+
+        return <NavLink key={page} exact to={path}
+            activeClassName="active" className={className}>{page}</NavLink>;
     });
-
-    const logoutHandler = () => logout();
 
     return <nav className="nav-list noselect">
         {pageLinksList}
-        <a className="nav-link nav-link-logout" onClick={logoutHandler}>Log out</a>
+        <a className="nav-link nav-link-logout" onClick={() => logout()}>{'Log out'}</a>
     </nav>;
 }
 

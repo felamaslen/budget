@@ -13,7 +13,7 @@ export class BodyFunds extends Body {
             return null;
         }
 
-        const HeadFunds = getFundsHead(this.props.pageIndex);
+        const HeadFunds = getFundsHead();
 
         return <HeadFunds gainInfo={this.props.gainInfo} />;
     }
@@ -30,5 +30,5 @@ const mapStateToProps = () => () => ({});
 
 const mapDispatchToProps = () => () => ({});
 
-export default pageIndex => connect(pageIndex)(mapStateToProps, mapDispatchToProps)(BodyFunds);
+export default () => connect('funds')(mapStateToProps, mapDispatchToProps)(BodyFunds);
 

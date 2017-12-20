@@ -27,7 +27,7 @@ export default function BlockPacker({ status, ...props }) {
 }
 
 BlockPacker.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     blocks: PropTypes.instanceOf(list),
     activeBlock: PropTypes.array,
     deepBlock: PropTypes.string,

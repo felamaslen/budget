@@ -3,9 +3,7 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import {
-    AVERAGE_MEDIAN, AVERAGE_EXP, LIST_PAGES, LIST_COLS_PAGES, DAILY_PAGES
-} from './const';
+import { AVERAGE_MEDIAN, AVERAGE_EXP, PAGES } from './const';
 import { YMD } from './date';
 
 function sortByDate(prev, next) {
@@ -279,20 +277,19 @@ export function getValueForTransmit(value) {
 
 /**
  * @function getNullEditable
- * @param {integer} pageIndex: page we're on
+ * @param {string} page: page we're on
  * @returns {map} null-editable object ready for navigating
  */
-export function getNullEditable(pageIndex) {
-    const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
-
-    const row = pageIsList
-        ? -1
-        : 0;
+export function getNullEditable(page) {
+    let row = 0;
+    if (PAGES[page].list) {
+        row = -1;
+    }
 
     return map({
         row,
         col: -1,
-        pageIndex,
+        page,
         id: null,
         item: null,
         value: null,
@@ -302,15 +299,15 @@ export function getNullEditable(pageIndex) {
 
 /**
  * @function getAddDefaultValues
- * @param {integer} pageIndex: page we're on
+ * @param {string} page: page we're on
  * @returns {list} list of add-items to display on page load
  */
-export function getAddDefaultValues(pageIndex) {
-    if (!LIST_COLS_PAGES[pageIndex]) {
+export function getAddDefaultValues(page) {
+    if (!PAGES[page].list) {
         return list.of();
     }
 
-    return list(LIST_COLS_PAGES[pageIndex].map(column => {
+    return list(PAGES[page].cols).map(column => {
         if (column === 'date') {
             return new YMD();
         }
@@ -326,20 +323,22 @@ export function getAddDefaultValues(pageIndex) {
         }
 
         return null;
-    }));
+    });
 }
 
 /**
  * Sort list rows by date, and add daily tallies
  * @param {list} rows: rows to sort
- * @param {integer} pageIndex: page which rows are on
+ * @param {string} page: page which rows are on
  * @returns {list} sorted rows
  */
-export function sortRowsByDate(rows, pageIndex) {
+export function sortRowsByDate(rows, page) {
     const today = new YMD();
-    const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
-    const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
+
+    const dateKey = PAGES[page].cols.indexOf('date');
+    const costKey = PAGES[page].cols.indexOf('cost');
     let lastFuture = false;
+
     const sorted = rows
         .sort((prev, next) => {
             if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
@@ -364,29 +363,34 @@ export function sortRowsByDate(rows, pageIndex) {
                 .set('first-present', !thisFuture && thisLastFuture);
         });
 
-    if (DAILY_PAGES[pageIndex]) {
+    if (PAGES[page].daily) {
         let dailySum = 0;
 
         const keys = sorted.keys();
         keys.next();
 
         return sorted
-            .map(row => {
+            .reduce(({ dailySum, rows }, row) => {
                 const nextKey = keys.next().value;
 
                 const lastInDay = nextKey && row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
 
+                const cost = row.getIn(['cols', costKey]);
+
                 dailySum += row.getIn(['cols', costKey]);
                 const newRow = lastInDay
-                    ? row.set('daily', dailySum)
+                    ? row.set('daily', dailySum + cost)
                     : row.delete('daily');
 
-                if (lastInDay) {
-                    dailySum = 0;
-                }
+                return {
+                    rows: rows.push(newRow),
+                    dailySum: lastInDay
+                        ? 0
+                        : dailySum + cost
+                };
 
-                return newRow;
-            });
+            }, { rows: list.of(), dailySum: 0 })
+            .rows;
     }
 
     return sorted;
@@ -396,21 +400,22 @@ export function sortRowsByDate(rows, pageIndex) {
  * Add weekly averages (should be run after sortRowsByDate)
  * @param {map} data: data to sort
  * @param {list} rows: rows to sort
- * @param {integer} pageIndex: page which rows are on
+ * @param {string} page: page which rows are on
  * @returns {map} data with averages
  */
-export function addWeeklyAverages(data, rows, pageIndex) {
-    if (!DAILY_PAGES[pageIndex]) {
+export function addWeeklyAverages(data, rows, page) {
+    if (!PAGES[page].daily) {
         return data;
     }
     // note that this is calculated only based on the visible data,
     // not past data
-    const costKey = LIST_COLS_PAGES[pageIndex].indexOf('cost');
+    const costKey = PAGES[page].cols.indexOf('cost');
+    const dateKey = PAGES[page].cols.indexOf('date');
+
     const visibleTotal = rows.reduce((sum, item) => {
         return sum + item.getIn(['cols', costKey]);
     }, 0);
 
-    const dateKey = LIST_COLS_PAGES[pageIndex].indexOf('date');
     if (!rows.size) {
         return data.set('weekly', 0);
     }

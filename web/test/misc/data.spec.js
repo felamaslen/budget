@@ -133,10 +133,10 @@ describe('misc/data', () => {
     });
     describe('getNullEditable', () => {
         it('should return a list object for list pages', () => {
-            expect(M.getNullEditable(5).toJS()).to.deep.equal({
+            expect(M.getNullEditable('food').toJS()).to.deep.equal({
                 row: -1,
                 col: -1,
-                pageIndex: 5,
+                page: 'food',
                 id: null,
                 item: null,
                 value: null,
@@ -145,10 +145,10 @@ describe('misc/data', () => {
         });
 
         it('should return a normal object for non-list pages', () => {
-            expect(M.getNullEditable(0).toJS()).to.deep.equal({
+            expect(M.getNullEditable('overview').toJS()).to.deep.equal({
                 row: 0,
                 col: -1,
-                pageIndex: 0,
+                page: 'overview',
                 id: null,
                 item: null,
                 value: null,
@@ -157,12 +157,8 @@ describe('misc/data', () => {
         });
     });
     describe('getAddDefaultValues', () => {
-        let index = 0;
-
-        const pages = [
-            [],
-            [],
-            [
+        const pages = {
+            funds: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 {
@@ -172,52 +168,50 @@ describe('misc/data', () => {
                 },
                 0
             ],
-            [
+            income: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 0
             ],
-            [
+            bills: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 0
             ],
-            [
+            food: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 '',
                 0,
                 ''
             ],
-            [
+            general: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 '',
                 0,
                 ''
             ],
-            [
+            holiday: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 '',
                 0,
                 ''
             ],
-            [
+            social: [
                 { year: 2017, month: 10, date: 14, valid: true },
                 '',
                 '',
                 0,
                 ''
             ]
-        ];
+        };
 
-        it.each(pages, 'should return the appropriate value for each page', () => {
-            const result = M.getAddDefaultValues(index);
+        it.each(Object.keys(pages), 'should return the appropriate value for each page', page => {
+            const result = M.getAddDefaultValues(page);
 
-            expect(result.toJS()).to.deep.equal(pages[index]);
-
-            index++;
+            expect(result.toJS()).to.deep.equal(pages[page]);
         });
     });
     describe('sortRowsByDate', () => {
@@ -237,7 +231,7 @@ describe('misc/data', () => {
                 }
             ]);
 
-            const result = M.sortRowsByDate(rows, 5);
+            const result = M.sortRowsByDate(rows, 'food');
 
             expect(result.toJS()).to.deep.equal([
                 {
@@ -247,7 +241,7 @@ describe('misc/data', () => {
                         'bar3',
                         11
                     ],
-                    daily: 11,
+                    daily: 22,
                     'first-present': false,
                     future: false,
                     id: 3
@@ -279,7 +273,7 @@ describe('misc/data', () => {
     });
     describe('addWeeklyAverages', () => {
         it('should return the unprocessed data for non-daily pages', () => {
-            expect(M.addWeeklyAverages({ foo: 'bar' }, [], 3)).to.deep.equal({ foo: 'bar' });
+            expect(M.addWeeklyAverages({ foo: 'bar' }, [], 'funds')).to.deep.equal({ foo: 'bar' });
         });
 
         it('should return the data with a processed weekly value', () => {
@@ -300,7 +294,7 @@ describe('misc/data', () => {
                 }
             ]);
 
-            const result = M.addWeeklyAverages(data, rows, 5);
+            const result = M.addWeeklyAverages(data, rows, 'food');
 
             expect(result.toJS()).to.deep.equal({ weekly: 14 });
         });

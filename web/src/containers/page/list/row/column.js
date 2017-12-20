@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 import getEditable from '../../../editable';
 
-export default function Column({ pageIndex, id, row, colName, colKey, active, noSuggestions }) {
+export default function Column({ page, id, row, colName, colKey, active }) {
     const value = row.getIn(['cols', colKey]);
 
     const Editable = getEditable({
@@ -15,24 +15,20 @@ export default function Column({ pageIndex, id, row, colName, colKey, active, no
         value
     });
 
-    const spanClasses = classNames({
-        [colName]: true,
-        active
-    });
+    const spanClasses = classNames(colName, { active });
 
     return <span key={colKey} className={spanClasses}>
-        <Editable noSuggestions={noSuggestions} pageIndex={pageIndex} />
+        <Editable page={page} />
     </span>;
 
 }
 
 Column.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     id: PropTypes.number.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     colName: PropTypes.string.isRequired,
     colKey: PropTypes.number.isRequired,
-    active: PropTypes.bool.isRequired,
-    noSuggestions: PropTypes.bool.isRequired
+    active: PropTypes.bool.isRequired
 };
 

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 export default class Page extends PureComponent {
     loadContent() {
         this.props.loadContent({
-            pageIndex: this.props.pageIndex,
+            page: this.props.page,
             loading: !this.props.loaded
         });
     }
@@ -14,7 +14,7 @@ export default class Page extends PureComponent {
 }
 
 Page.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     loaded: PropTypes.bool.isRequired,
     loadContent: PropTypes.func.isRequired
 };

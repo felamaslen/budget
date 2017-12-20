@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import LineGraph from '../../../../components/graph/line';
 import { rgba } from '../../../../misc/color';
 import {
-    PAGES, GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
+    GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
     GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE
 } from '../../../../misc/const';
 import {
@@ -128,11 +128,9 @@ GraphFundItem.propTypes = {
     popout: PropTypes.bool.isRequired
 };
 
-const pageIndex = PAGES.indexOf('funds');
-
 const mapStateToProps = (state, ownProps) => ({
-    data: state.getIn(['pages', pageIndex, 'rows', ownProps.id, 'prices']) || list.of(),
-    popout: Boolean(state.getIn(['pages', pageIndex, 'rows', ownProps.id, 'historyPopout']))
+    data: state.getIn(['pages', 'funds', 'rows', ownProps.id, 'prices']) || list.of(),
+    popout: Boolean(state.getIn(['pages', 'funds', 'rows', ownProps.id, 'historyPopout']))
 });
 
 const mapDispatchToProps = dispatch => ({

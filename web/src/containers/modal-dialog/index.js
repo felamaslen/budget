@@ -56,7 +56,7 @@ export class ModalDialog extends PureComponent {
         );
 
         const onCancel = () => this.props.onCancel();
-        const onSubmit = () => this.props.onSubmit(this.props.pageIndex);
+        const onSubmit = () => this.props.onSubmit(this.props.page);
 
         return <div className={className}>
             <div className={dialogClass}>
@@ -87,14 +87,14 @@ ModalDialog.propTypes = {
     id: PropTypes.number,
     fields: PropTypes.instanceOf(list),
     invalidKeys: PropTypes.instanceOf(list),
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     onCancel: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
     deactivate: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    pageIndex: state.get('currentPageIndex'),
+    page: state.get('currentPage'),
     active: state.getIn(['modalDialog', 'active']),
     visible: state.getIn(['modalDialog', 'visible']),
     loading: state.getIn(['modalDialog', 'loading']),
@@ -108,7 +108,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     onCancel: () => dispatch(aMobileDialogClosed(null)),
-    onSubmit: pageIndex => dispatch(aMobileDialogClosed({ pageIndex })),
+    onSubmit: page => dispatch(aMobileDialogClosed({ page })),
     deactivate: () => setTimeout(
         () => dispatch(aMobileDialogClosed({ deactivate: true })), 305
     )

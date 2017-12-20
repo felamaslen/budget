@@ -12,7 +12,6 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { rgba } from '../../../../misc/color';
-import { PAGES } from '../../../../misc/const';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
     COLOR_DARK,
@@ -152,10 +151,10 @@ function getBalanceWithFunds(cost, showAll) {
     return { oldOffset, balance, funds };
 }
 
-const mapStateToProps = pageIndex => state => {
+const mapStateToProps = () => state => {
     const showAll = state.getIn(['other', 'showAllBalanceGraph']);
 
-    const cost = state.getIn(['pages', pageIndex, 'data', 'cost']);
+    const cost = state.getIn(['pages', 'overview', 'data', 'cost']);
     const { oldOffset, balance, funds } = getBalanceWithFunds(cost, showAll);
 
     return {
@@ -171,7 +170,7 @@ const mapDispatchToProps = () => dispatch => ({
     toggleShowAll: () => dispatch(aShowAllToggled())
 });
 
-export default connect(PAGES.indexOf('overview'))(
+export default connect()(
     mapStateToProps, mapDispatchToProps
 )(GraphBalance);
 

@@ -9,26 +9,24 @@ import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
 import { getFundsCachedValueAgeText } from './funds.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
-import { PAGES, LIST_PAGES, LIST_COLS_PAGES } from '../misc/const';
+import { PAGES } from '../misc/const';
 
-const pageIndexFunds = PAGES.indexOf('funds');
-
-function getItemValue(reduction, pageIndex, row, col) {
+function getItemValue(reduction, page, row, col) {
     let id = null;
     let item = null;
     let value = null;
-    if (PAGES[pageIndex] === 'overview') {
-        value = reduction.getIn(['pages', pageIndex, 'data', 'cost', 'balance', row]);
+    if (page === 'overview') {
+        value = reduction.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]);
     }
-    else if (LIST_PAGES.indexOf(pageIndex) > -1) {
+    else if (PAGES[page].list) {
         if (row > -1) {
-            id = reduction.getIn(['pages', pageIndex, 'rows', row, 'id']);
-            value = reduction.getIn(['pages', pageIndex, 'rows', row, 'cols', col]);
-            item = LIST_COLS_PAGES[pageIndex][col];
+            id = reduction.getIn(['pages', page, 'rows', row, 'id']);
+            value = reduction.getIn(['pages', page, 'rows', row, 'cols', col]);
+            item = PAGES[page].cols[col];
         }
         else {
-            value = reduction.getIn(['edit', 'add', pageIndex, col]);
-            item = LIST_COLS_PAGES[pageIndex][col];
+            value = reduction.getIn(['edit', 'add', page, col]);
+            item = PAGES[page].cols[col];
         }
     }
 
@@ -42,13 +40,13 @@ function handleSuggestionsNav(reduction, direction, suggestions) {
     return reduction.setIn(['editSuggestions', 'active'], newActive);
 }
 
-function handleNav(reduction, { pageIndex, dx, dy, cancel }) {
+function handleNav(reduction, { page, dx, dy, cancel }) {
     if (cancel) {
-        return rActivateEditable(reduction, { pageIndex, cancel });
+        return rActivateEditable(reduction, { page, cancel });
     }
 
-    const pageIsList = LIST_PAGES.indexOf(pageIndex) > -1;
-    const { numRows, numCols } = getNumRowsCols(reduction, pageIndex, pageIsList);
+    const pageIsList = Boolean(PAGES[page].list);
+    const { numRows, numCols } = getNumRowsCols(reduction, page, pageIsList);
     const editing = reduction.getIn(['edit', 'active']);
 
     if (!(numRows && numCols && editing)) {
@@ -60,7 +58,7 @@ function handleNav(reduction, { pageIndex, dx, dy, cancel }) {
     const navigateToAddButton = currentRow === -1 && currentCol === numCols - 1 && dx > 0;
 
     if (pageIsList && navigateToAddButton) {
-        return rActivateEditable(reduction, { pageIndex })
+        return rActivateEditable(reduction, { page })
             .setIn(['edit', 'addBtnFocus'], true);
     }
 
@@ -69,7 +67,7 @@ function handleNav(reduction, { pageIndex, dx, dy, cancel }) {
     let navTo = null;
     if (pageIsList) {
         const rowKeys = reduction
-            .getIn(['pages', pageIndex, 'rows'])
+            .getIn(['pages', page, 'rows'])
             .keySeq()
             .toList();
 
@@ -83,13 +81,13 @@ function handleNav(reduction, { pageIndex, dx, dy, cancel }) {
 
     const { row, col } = navTo;
 
-    const itemValue = getItemValue(reduction, pageIndex, row, col);
+    const itemValue = getItemValue(reduction, page, row, col);
     const id = itemValue.id;
     const item = itemValue.item;
     const value = itemValue.value;
 
     return rActivateEditable(
-        reduction, { pageIndex, editable: map({ row, col, pageIndex, id, item, value }) }
+        reduction, { page, editable: map({ row, col, page, id, item, value }) }
     );
 }
 
@@ -114,7 +112,7 @@ function getNavDirection(key, shift) {
     return { dx: 0, dy: 0 };
 }
 
-function handleNavFromSuggestions(reduction, { pageIndex, suggestions, escape, enter }) {
+function handleNavFromSuggestions(reduction, { page, suggestions, escape, enter }) {
     if (escape) {
         return reduction
             .setIn(['editSuggestions', 'list'], list.of())
@@ -130,7 +128,7 @@ function handleNavFromSuggestions(reduction, { pageIndex, suggestions, escape, e
 
         // navigate to the next field after filling the current one with
         // the suggestion value
-        return handleNav(reductionWithSuggestionValue, { pageIndex, dx: 1, dy: 0 });
+        return handleNav(reductionWithSuggestionValue, { page, dx: 1, dy: 0 });
     }
 
     return reduction;
@@ -151,7 +149,7 @@ function handleKeyPressLoggedIn(reduction, { key, shift, ctrl }) {
     const escape = key === 'Escape';
     const enter = key === 'Enter';
 
-    const pageIndex = reduction.get('currentPageIndex');
+    const page = reduction.get('currentPage');
     const suggestions = reduction.getIn(['editSuggestions']);
     const haveSuggestions = suggestions.get('list').size > 0;
     const suggestionActive = suggestions.get('active') > -1;
@@ -160,7 +158,7 @@ function handleKeyPressLoggedIn(reduction, { key, shift, ctrl }) {
     const navigateSuggestions = navigated && !ctrl;
 
     if (haveSuggestions && navigateFromSuggestions) {
-        return handleNavFromSuggestions(reduction, { pageIndex, suggestions, escape, enter });
+        return handleNavFromSuggestions(reduction, { page, suggestions, escape, enter });
     }
 
     if (haveSuggestions && navigateSuggestions) {
@@ -176,15 +174,15 @@ function handleKeyPressLoggedIn(reduction, { key, shift, ctrl }) {
     const navigateFromField = navigated && (ctrl || key === 'Tab');
 
     if (navigateFromField) {
-        return handleNav(reduction, { pageIndex, dx, dy });
+        return handleNav(reduction, { page, dx, dy });
     }
 
     if (escape) {
-        return handleNav(reduction, { pageIndex, cancel: true });
+        return handleNav(reduction, { page, cancel: true });
     }
 
     if (enter) {
-        return rActivateEditable(reduction, { pageIndex });
+        return rActivateEditable(reduction, { page });
     }
 
     return reduction;
@@ -219,7 +217,7 @@ export function rLogout(reduction) {
 }
 
 export function rUpdateTime(reduction, { now }) {
-    if (reduction.getIn(['pages', pageIndexFunds])) {
+    if (reduction.getIn(['pages', 'funds'])) {
         const ageText = getFundsCachedValueAgeText(
             reduction.getIn(['other', 'graphFunds', 'startTime']),
             reduction.getIn(['other', 'graphFunds', 'cacheTimes']),

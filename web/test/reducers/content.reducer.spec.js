@@ -72,8 +72,8 @@ describe('Content reducer', () => {
         });
 
         it('should set the current page index', () => {
-            expect(R.rRequestContent(fromJS({}), { pageIndex: 4 }).get('currentPageIndex'))
-                .to.equal(4);
+            expect(R.rRequestContent(fromJS({}), { page: 'page1' }).get('currentPage'))
+                .to.equal('page1');
         });
     });
 
@@ -88,12 +88,12 @@ describe('Content reducer', () => {
         it('set expected parameters in the state', () => {
             const state = fromJS({
                 loading: true,
-                pagesLoaded: [null, null, null],
-                pagesRaw: [null, null, null],
-                pages: [null, null, null],
+                pagesLoaded: {},
+                pagesRaw: {},
+                pages: {},
                 edit: {
                     active: null,
-                    add: [null, null, null]
+                    add: {}
                 },
                 other: {
                     graphFunds: {
@@ -116,31 +116,27 @@ describe('Content reducer', () => {
 
             const now = new Date('2017-11-10 09:34');
 
-            const result = R.rHandleContentResponse(state, { response, pageIndex: 2 }, now);
+            const result = R.rHandleContentResponse(state, { response, page: 'funds' }, now);
 
             expect(result.toJS()).to.deep.equal({
                 loading: false,
-                pages: [
-                    null,
-                    null,
-                    {
+                pages: {
+                    funds: {
                         cacheTimes: [191239],
                         data: { numCols: 4, numRows: 0, total: 0 },
                         rows: {},
                         startTime: 1508533928
                     }
-                ],
-                pagesLoaded: [null, null, true],
-                pagesRaw: [
-                    null,
-                    null,
-                    {
+                },
+                pagesLoaded: { funds: true },
+                pagesRaw: {
+                    funds: {
                         cacheTimes: [191239],
                         data: [],
                         startTime: 1508533928,
                         total: 0
                     }
-                ],
+                },
                 other: {
                     graphFunds: {
                         cacheTimes: [191239],
@@ -179,13 +175,11 @@ describe('Content reducer', () => {
                         id: null,
                         item: null,
                         originalValue: null,
-                        pageIndex: 2,
+                        page: 'funds',
                         value: null
                     },
-                    add: [
-                        null,
-                        null,
-                        [
+                    add: {
+                        funds: [
                             { year: 2017, month: 10, date: 14, valid: true },
                             '',
                             {
@@ -195,7 +189,7 @@ describe('Content reducer', () => {
                             },
                             0
                         ]
-                    ]
+                    }
                 }
             });
         });

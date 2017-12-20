@@ -14,9 +14,6 @@ import Page from '../../../components/page';
 
 import OverviewTable from './table';
 import OverviewGraphs from './graph';
-import { PAGES } from '../../../misc/const';
-
-const pageIndex = PAGES.indexOf('overview');
 
 export class PageOverview extends Page {
     render() {
@@ -25,7 +22,7 @@ export class PageOverview extends Page {
         }
 
         return <div className="page-overview">
-            <OverviewTable pageIndex={pageIndex} />
+            <OverviewTable />
             <OverviewGraphs />
         </div>;
     }
@@ -38,9 +35,8 @@ PageOverview.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    pageIndex,
-    rows: state.getIn(['pages', pageIndex, 'rows']),
-    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex]))
+    rows: state.getIn(['pages', 'overview', 'rows']),
+    loaded: Boolean(state.getIn(['pagesLoaded', 'overview']))
 });
 
 const mapDispatchToProps = dispatch => ({

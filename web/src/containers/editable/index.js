@@ -39,7 +39,7 @@ function getDispatchProps(row, col, item, value) {
                 }
 
                 dispatch(actions.aEditableActivated({
-                    pageIndex: ownProps.pageIndex,
+                    page: ownProps.page,
                     editable: map({ row, col, item, value })
                 }));
             },

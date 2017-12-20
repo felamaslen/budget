@@ -47,11 +47,11 @@ export class ListRowFundsMobile extends ListRowMobile {
     }
 }
 
-const mapDispatchToProps = pageIndex => dispatch => ({
+const mapDispatchToProps = () => dispatch => ({
     openMobileEditDialog: id => dispatch(
-        aMobileEditDialogOpened(pageIndex, id)
+        aMobileEditDialogOpened('funds', id)
     )
 });
 
-export default pageIndex => connect(pageIndex)(null, mapDispatchToProps)(ListRowFundsMobile);
+export default () => connect('funds')(null, mapDispatchToProps)(ListRowFundsMobile);
 
