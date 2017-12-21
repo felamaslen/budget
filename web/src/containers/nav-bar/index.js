@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { PAGES } from '../../misc/const';
 
-export function Navbar({ active, logout }) {
+export function Navbar({ active, onLogout }) {
     if (!active) {
         return null;
     }
@@ -21,13 +21,13 @@ export function Navbar({ active, logout }) {
 
     return <nav className="nav-list noselect">
         {pageLinksList}
-        <a className="nav-link nav-link-logout" onClick={() => logout()}>{'Log out'}</a>
+        <a className="nav-link nav-link-logout" onClick={() => onLogout()}>{'Log out'}</a>
     </nav>;
 }
 
 Navbar.propTypes = {
     active: PropTypes.bool.isRequired,
-    logout: PropTypes.func.isRequired
+    onLogout: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -35,7 +35,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    logout: () => dispatch(aUserLoggedOut())
+    onLogout: () => dispatch(aUserLoggedOut())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Navbar);

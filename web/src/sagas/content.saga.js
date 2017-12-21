@@ -3,7 +3,8 @@ import querystring from 'querystring';
 import { all, select, takeLatest, call, put } from 'redux-saga/effects';
 
 import { CONTENT_REQUESTED } from '../constants/actions';
-import { API_PREFIX } from '../misc/const';
+import { API_PREFIX, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS } from '../misc/const';
+import { getPeriodMatch } from '../misc/data';
 
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
@@ -23,8 +24,37 @@ export function makeContentRequest(apiKey, { page, params, query }) {
     return [url, { headers: { Authorization: apiKey } }];
 }
 
-export function *requestContent({ page, loading, params, query }) {
-    if (!loading) {
+export const getContentParamsAnalysis = state => ({
+    periodKey: state.getIn(['other', 'analysis', 'period']),
+    groupingKey: state.getIn(['other', 'analysis', 'grouping']),
+    timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
+});
+
+export const getLoadedStatus = (state, page) => Boolean(state.getIn(['pagesLoaded', page]));
+
+export function *requestContent({ page }) {
+    let loaded = yield select(getLoadedStatus, page);
+    let params = [];
+    let query = {};
+
+    if (page === 'analysis') {
+        loaded = false;
+
+        const { periodKey, groupingKey, timeIndex } = yield select(getContentParamsAnalysis);
+
+        params = [
+            ANALYSIS_PERIODS[periodKey],
+            ANALYSIS_GROUPINGS[groupingKey],
+            timeIndex
+        ];
+    }
+    else if (page === 'funds') {
+        const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
+
+        query = { history: 'true', period, length };
+    }
+
+    if (loaded) {
         return;
     }
 

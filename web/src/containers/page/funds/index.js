@@ -5,16 +5,13 @@
 import { Map as map } from 'immutable';
 import connect, { PageList } from '../list';
 
-import { aContentRequested } from '../../../actions/content.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
 import classNames from 'classnames';
 
-import { getPeriodMatch } from '../../../misc/data';
 import { DO_STOCKS_LIST } from '../../../misc/config';
-import { mediaQueries, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
+import { mediaQueries } from '../../../misc/const';
 import { formatCurrency, formatPercent } from '../../../misc/format';
 import StocksList from '../../stocks-list';
 
@@ -118,16 +115,5 @@ const mapStateToProps = () => state => ({
     gainInfo: getGainInfo(state)
 });
 
-const mapDispatchToProps = () => dispatch => ({
-    loadContent: req => {
-        const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
-
-        return dispatch(aContentRequested({
-            ...req,
-            query: { history: 'true', period, length }
-        }));
-    }
-});
-
-export default connect('funds')(mapStateToProps, mapDispatchToProps)(PageFunds);
+export default connect('funds')(mapStateToProps)(PageFunds);
 

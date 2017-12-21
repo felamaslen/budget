@@ -63,7 +63,10 @@ export function rContentBlockHover(reduction, { block, subBlock }) {
     return reduction.setIn(['other', 'blockView', 'status'], newStatus);
 }
 
-export function rRequestContent(reduction, { page, loading }) {
+export function rRequestContent(reduction, { page }) {
+    const loaded = reduction.getIn(['pagesLoaded', page]);
+    const loading = !(loaded && page !== 'analysis');
+
     return reduction
         .set('loading', loading)
         .set('currentPage', page);

@@ -3,21 +3,21 @@
  */
 
 import extendableContainer from '../../container-extender';
-
 import { aContentRequested } from '../../../actions/content.actions';
-
 import React from 'react';
+import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Media from 'react-media';
 import { mediaQueries } from '../../../misc/const';
 
-import Page from '../../../components/page';
-
 import { BodyMobileContainer as getBodyMobile } from './body/mobile';
 import { BodyContainer as getBody } from './body';
 
-export class PageList extends Page {
+export class PageList extends PureComponent {
+    componentDidMount() {
+        this.props.onLoad();
+    }
     bodyMobile() {
         const BodyMobile = getBodyMobile(this.props.page);
 
@@ -77,7 +77,7 @@ export class PageList extends Page {
 PageList.propTypes = {
     loaded: PropTypes.bool.isRequired,
     page: PropTypes.string.isRequired,
-    loadContent: PropTypes.func.isRequired
+    onLoad: PropTypes.func.isRequired
 };
 
 const stateDefault = page => state => ({
@@ -85,8 +85,8 @@ const stateDefault = page => state => ({
     loaded: Boolean(state.getIn(['pagesLoaded', page]))
 });
 
-const dispatchDefault = () => dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req))
+const dispatchDefault = page => dispatch => ({
+    onLoad: () => dispatch(aContentRequested({ page }))
 });
 
 export const PageListContainer = page =>

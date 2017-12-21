@@ -2,22 +2,22 @@
  * Overview page component
  */
 
-import { List as list } from 'immutable';
 import { connect } from 'react-redux';
-
 import { aContentRequested } from '../../../actions/content.actions';
-
 import React from 'react';
+import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
-
-import Page from '../../../components/page';
-
 import OverviewTable from './table';
 import OverviewGraphs from './graph';
 
-export class PageOverview extends Page {
+export class PageOverview extends PureComponent {
+    componentWillMount() {
+        this.props.onLoad();
+    }
     render() {
-        if (!this.props.loaded) {
+        const { loaded } = this.props;
+
+        if (!loaded) {
             return null;
         }
 
@@ -29,19 +29,17 @@ export class PageOverview extends Page {
 }
 
 PageOverview.propTypes = {
-    rows: PropTypes.instanceOf(list),
     loaded: PropTypes.bool.isRequired,
-    loadContent: PropTypes.func.isRequired
+    onLoad: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
     page: 'overview',
-    rows: state.getIn(['pages', 'overview', 'rows']),
     loaded: Boolean(state.getIn(['pagesLoaded', 'overview']))
 });
 
 const mapDispatchToProps = dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req))
+    onLoad: () => dispatch(aContentRequested({ page: 'overview' }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageOverview);

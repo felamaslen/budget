@@ -40,7 +40,7 @@ export function rLoginFormHandleResponse(reduction, { data }) {
         .setIn(['loginForm', 'visible'], true)
         .setIn(['loading'], false);
 
-    if (!(data)) {
+    if (!data) {
         return newReduction;
     }
 
