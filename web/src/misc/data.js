@@ -364,33 +364,31 @@ export function sortRowsByDate(rows, page) {
         });
 
     if (PAGES[page].daily) {
-        let dailySum = 0;
-
         const keys = sorted.keys();
         keys.next();
 
         return sorted
-            .reduce(({ dailySum, rows }, row) => {
+            .reduce(({ dailySum, results }, row) => {
                 const nextKey = keys.next().value;
 
                 const lastInDay = nextKey && row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
 
                 const cost = row.getIn(['cols', costKey]);
 
-                dailySum += row.getIn(['cols', costKey]);
-                const newRow = lastInDay
-                    ? row.set('daily', dailySum + cost)
-                    : row.delete('daily');
+                if (lastInDay) {
+                    return {
+                        results: results.push(row.set('daily', dailySum + cost)),
+                        dailySum: 0
+                    };
+                }
 
                 return {
-                    rows: rows.push(newRow),
-                    dailySum: lastInDay
-                        ? 0
-                        : dailySum + cost
+                    results: results.push(row.delete('daily')),
+                    dailySum: dailySum + cost
                 };
 
-            }, { rows: list.of(), dailySum: 0 })
-            .rows;
+            }, { results: list.of(), dailySum: 0 })
+            .results;
     }
 
     return sorted;

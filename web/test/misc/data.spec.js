@@ -222,6 +222,10 @@ describe('misc/data', () => {
                     cols: [new YMD('2017-10-11'), 'foo1', 'bar1', 3]
                 },
                 {
+                    id: 4,
+                    cols: [new YMD('2017-10-10'), 'foo4', 'bar4', 1]
+                },
+                {
                     id: 2,
                     cols: [new YMD('2017-10-11'), 'foo2', 'bar2', 5]
                 },
@@ -241,7 +245,7 @@ describe('misc/data', () => {
                         'bar3',
                         11
                     ],
-                    daily: 22,
+                    daily: 11,
                     'first-present': false,
                     future: false,
                     id: 3
@@ -264,9 +268,21 @@ describe('misc/data', () => {
                         'bar1',
                         3
                     ],
+                    daily: 8,
                     'first-present': false,
                     future: false,
                     id: 1
+                },
+                {
+                    cols: [
+                        { year: 2017, month: 10, date: 10, valid: true },
+                        'foo4',
+                        'bar4',
+                        1
+                    ],
+                    'first-present': false,
+                    future: false,
+                    id: 4
                 }
             ]);
         });
