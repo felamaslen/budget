@@ -12,9 +12,8 @@ import PropTypes from 'prop-types';
 
 import ModalDialog from '../modal-dialog';
 import PageOverview from '../page/overview';
-import { PageListContainer as getPageList } from '../page/list';
 import PageAnalysis from '../page/analysis';
-import PageFunds from '../page/funds';
+import PageList from '../page/list';
 
 export function Content({ loggedIn }) {
     if (!loggedIn) {
@@ -25,13 +24,13 @@ export function Content({ loggedIn }) {
         <div className="inner">
             <Route exact path="/" component={PageOverview} />
             <Route path="/analysis" component={PageAnalysis} />
-            <Route path="/funds" component={PageFunds} />
-            <Route path="/income" component={getPageList('income')} />
-            <Route path="/bills" component={getPageList('bills')} />
-            <Route path="/food" component={getPageList('food')} />
-            <Route path="/general" component={getPageList('general')} />
-            <Route path="/holiday" component={getPageList('holiday')} />
-            <Route path="/social" component={getPageList('social')} />
+            <Route path="/funds" render={() => <PageList page="funds" />} />
+            <Route path="/income" render={() => <PageList page="income" />} />
+            <Route path="/bills" render={() => <PageList page="bills" />} />
+            <Route path="/food" render={() => <PageList page="food" />} />
+            <Route path="/general" render={() => <PageList page="general" />} />
+            <Route path="/holiday" render={() => <PageList page="holiday" />} />
+            <Route path="/social" render={() => <PageList page="social" />} />
         </div>
         <ModalDialog />
     </div>;

@@ -3,22 +3,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import getEditable from '../../../editable';
+import Editable from '../../../editable';
 
 export default function Column({ page, id, row, colName, colKey, active }) {
-    const value = row.getIn(['cols', colKey]);
+    const spanClasses = classNames(colName, { active });
 
-    const Editable = getEditable({
+    const props = {
+        page,
         row: id,
         col: colKey,
         item: colName,
-        value
-    });
-
-    const spanClasses = classNames(colName, { active });
+        value: row.getIn(['cols', colKey])
+    };
 
     return <span key={colKey} className={spanClasses}>
-        <Editable page={page} />
+        <Editable {...props} />
     </span>;
 
 }

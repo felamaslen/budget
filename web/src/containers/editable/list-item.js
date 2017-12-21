@@ -6,13 +6,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import getEditable from '.';
+import Editable from '.';
 
-export function ListAddEditItem({ page, row, col, id, item, value, active }) {
-    const Editable = getEditable({ row, col, id, item, value });
-
-    return <span className={classNames(item, { active })}>
-        <Editable page={page} />
+export function ListAddEditItem({ active, ...props }) {
+    return <span className={classNames(props.item, { active })}>
+        <Editable {...props} />
     </span>;
 }
 
@@ -26,11 +24,11 @@ ListAddEditItem.propTypes = {
     active: PropTypes.bool.isRequired
 };
 
-const mapStateToProps = (state, ownProps) => ({
-    value: state.getIn(['edit', 'add', ownProps.page, ownProps.col]),
-    active: state.getIn(['edit', 'row']) === ownProps.row &&
-        state.getIn(['edit', 'col']) === ownProps.col,
-    item: PAGES[ownProps.page].cols[ownProps.col]
+const mapStateToProps = (state, { page, row, col }) => ({
+    value: state.getIn(['edit', 'add', page, col]),
+    active: state.getIn(['edit', 'row']) === row &&
+        state.getIn(['edit', 'col']) === col,
+    item: PAGES[page].cols[col]
 });
 
 const mapDispatchToProps = () => ({});

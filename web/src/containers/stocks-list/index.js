@@ -5,7 +5,7 @@
 
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-
+import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '../../misc/config';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -13,10 +13,9 @@ import classNames from 'classnames';
 import GraphStocks from './stocks-graph';
 import { aStocksListRequested, aStocksPricesRequested } from '../../actions/stocks-list.actions';
 import { sigFigs } from '../../misc/format';
-import { STOCK_PRICES_DELAY } from '../../misc/config';
 
 export class StocksList extends Component {
-    componentWillMount() {
+    componentDidMount() {
         this.props.requestStocksList();
     }
     componentWillUnmount() {
@@ -63,20 +62,24 @@ export class StocksList extends Component {
             });
     }
     render() {
-        const classes = classNames({
-            'stocks-list': true,
-            'graph-container-outer': true,
-            loading: !this.props.loadedInitial
+        if (!DO_STOCKS_LIST) {
+            return null;
+        }
+
+        const { loadedInitial, weightedGain, oldWeightedGain, stocks, indices } = this.props;
+
+        const classes = classNames('stocks-list', 'graph-container-outer', {
+            loading: !loadedInitial
         });
         const overallClasses = classNames({
-            up: this.props.weightedGain > 0,
-            down: this.props.weightedGain < 0,
-            'hl-up': this.props.weightedGain > this.props.oldWeightedGain,
-            'hl-down': this.props.weightedGain < this.props.oldWeightedGain
+            up: weightedGain > 0,
+            down: weightedGain < 0,
+            'hl-up': weightedGain > oldWeightedGain,
+            'hl-down': weightedGain < oldWeightedGain
         });
 
-        const stocksList = this.renderStocksList(this.props.stocks);
-        const indicesList = this.renderStocksList(this.props.indices);
+        const stocksList = this.renderStocksList(stocks);
+        const indicesList = this.renderStocksList(indices);
 
         return <div className={classes}>
             <div className="graph-container">
@@ -86,7 +89,7 @@ export class StocksList extends Component {
                     <ul>
                         <li className={overallClasses}>
                             <span className="name-column">Overall</span>
-                            <span className="change">{sigFigs(this.props.weightedGain, 3)}%</span>
+                            <span className="change">{sigFigs(weightedGain, 3)}%</span>
                         </li>
                         {indicesList}
                     </ul>

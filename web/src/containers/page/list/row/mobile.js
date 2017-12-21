@@ -1,53 +1,92 @@
-import listRowContainer, { ListRow } from '../row';
-
+import { Map as map } from 'immutable';
+import { connect } from 'react-redux';
 import { LIST_COLS_MOBILE } from '../../../../misc/const';
-
+import { formatCurrency } from '../../../../misc/format';
 import { aMobileEditDialogOpened } from '../../../../actions/form.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
+import Editable from '../../../editable';
 
-import getEditable from '../../../editable';
+const renderItems = ({ page, colKeys, row, id }) => cols => cols.map((column, key) => {
+    const colKey = colKeys[key];
 
-export class ListRowMobile extends ListRow {
-    renderItems(columns = LIST_COLS_MOBILE) {
-        return columns.map((column, key) => {
-            const colKey = this.props.colKeys[key];
+    const value = row.getIn(['cols', colKey]);
 
-            const value = this.props.row.getIn(['cols', colKey]);
+    const editableProps = {
+        page,
+        row: id,
+        col: colKey,
+        item: column,
+        value,
+        staticEdit: true
+    };
 
-            const Editable = getEditable({
-                row: this.props.id,
-                col: colKey,
-                item: column,
-                value
-            });
+    return <span key={key} className={column}>
+        <Editable {...editableProps} />
+    </span>;
+});
 
-            return <span key={key} className={column}>
-                <Editable static={true} page={this.props.page} />
-            </span>;
-        });
+function renderGainInfoMobile(cost, gain) {
+    if (!gain) {
+        return null;
     }
-    render() {
-        const items = this.renderItems();
 
-        const onClick = () => this.props.openMobileEditDialog(this.props.id);
+    const formatOptions = {
+        abbreviate: true,
+        precision: 1
+    };
 
-        return <li onClick={onClick}>{items}</li>;
+    const costValue = <span className="cost-value">
+        {formatCurrency(cost, formatOptions)}
+    </span>;
+
+    const value = cost
+        ? formatCurrency(gain.get('value'), formatOptions)
+        : '\u2013';
+
+    const actualValue = <span className="actual-value">{value}</span>;
+
+    return <span className="cost">
+        {costValue}
+        {actualValue}
+    </span>;
+}
+
+export function ListRowMobile({ onEdit, ...props }) {
+    const { page, id } = props;
+
+    const onClick = () => onEdit(id);
+
+    if (page === 'funds') {
+        const items = renderItems(props)(['date', 'item']);
+
+        const { colKeys, row } = props;
+
+        const gainInfo = renderGainInfoMobile(row.getIn(['cols', colKeys[2]]), row.get('gain'));
+
+        return <li onClick={onClick}>{items}{gainInfo}</li>;
     }
+
+    const items = renderItems(props)(LIST_COLS_MOBILE);
+
+    return <li onClick={onClick}>{items}</li>;
 }
 
 ListRowMobile.propTypes = {
+    page: PropTypes.string.isRequired,
     colKeys: PropTypes.array.isRequired,
-    openMobileEditDialog: PropTypes.func.isRequired
+    row: PropTypes.instanceOf(map).isRequired,
+    id: PropTypes.number.isRequired,
+    onEdit: PropTypes.func.isRequired
 };
 
-const mapDispatchToProps = page => dispatch => ({
-    openMobileEditDialog: id => dispatch(aMobileEditDialogOpened(page, id))
+const mapStateToProps = (state, { page, id }) => ({
+    row: state.getIn(['pages', page, 'rows', id])
 });
 
-export const ListRowMobileContainer = page =>
-    listRowContainer(page)(null, mapDispatchToProps)(ListRowMobile);
+const mapDispatchToProps = (dispatch, { page }) => ({
+    onEdit: id => dispatch(aMobileEditDialogOpened(page, id))
+});
 
-export default page => listRowContainer(page);
+export default connect(mapStateToProps, mapDispatchToProps)(ListRowMobile);
 

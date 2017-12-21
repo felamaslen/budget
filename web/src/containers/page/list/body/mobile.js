@@ -1,50 +1,37 @@
-import bodyContainer, { Body } from '.';
-
 import { PAGES, LIST_COLS_MOBILE } from '../../../../misc/const';
-
+import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../../../actions/form.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
+import ListRowMobile from '../row/mobile';
 
-import { ListRowMobileContainer as getListRowMobileDefault } from '../row/mobile';
-
-export class BodyMobile extends Body {
-    constructor(props) {
-        super(props);
-
-        this.ListRowMobile = this.listRowMobile();
-    }
-    listRowMobile() {
-        return getListRowMobileDefault(this.props.page);
-    }
-    render() {
-        const { page, rowIds, openMobileAddDialog } = this.props;
-
+function bodyMobile(propTypes) {
+    function BodyMobile({ page, rowIds, onAdd }) {
         const colKeys = LIST_COLS_MOBILE
             .map(column => PAGES[page].cols.indexOf(column));
 
-        const rows = rowIds.map(id => <this.ListRowMobile key={id} id={id} colKeys={colKeys} />);
+        const rows = rowIds.map(id => <ListRowMobile key={id} page={page} id={id} colKeys={colKeys} />);
 
         return <div>
             <ul className="list-ul">{rows}</ul>
             <div className="button-add-outer">
-                <button type="button" className="button-add" onClick={() => openMobileAddDialog()}>{'Add'}</button>
-            </div>;
+                <button type="button" className="button-add" onClick={() => onAdd()}>{'Add'}</button>
+            </div>
         </div>;
     }
+
+    BodyMobile.propTypes = {
+        ...propTypes,
+        onAdd: PropTypes.func.isRequired
+    };
+
+    return BodyMobile;
 }
 
-BodyMobile.propTypes = {
-    openMobileAddDialog: PropTypes.func.isRequired
-};
-
-export const mapDispatchToProps = page => dispatch => ({
-    openMobileAddDialog: () => dispatch(aMobileAddDialogOpened(page))
+const mapDispatchToProps = (dispatch, { page }) => ({
+    onAdd: () => dispatch(aMobileAddDialogOpened(page))
 });
 
-export const BodyMobileContainer = page =>
-    bodyContainer(page)(null, mapDispatchToProps)(BodyMobile);
-
-export default page => bodyContainer(page);
+export default (propTypes, mapStateToProps) =>
+    connect(mapStateToProps, mapDispatchToProps)(bodyMobile(propTypes));
 

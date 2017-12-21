@@ -71,7 +71,7 @@ export class ModalDialog extends PureComponent {
                     <button type="button" className="button-submit"
                         disabled={this.props.loading}
                         onClick={onSubmit}>Do it.</button>
-                </div>;
+                </div>
             </div>
         </div>;
     }
