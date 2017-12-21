@@ -10,8 +10,6 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
-import { PAGES } from '../../misc/const';
-
 import ModalDialog from '../modal-dialog';
 import PageOverview from '../page/overview';
 import { PageListContainer as getPageList } from '../page/list';
@@ -28,12 +26,12 @@ export function Content({ loggedIn }) {
             <Route exact path="/" component={PageOverview} />
             <Route path="/analysis" component={PageAnalysis} />
             <Route path="/funds" component={PageFunds} />
-            <Route path="/income" component={getPageList(PAGES.indexOf('income'))} />
-            <Route path="/bills" component={getPageList(PAGES.indexOf('bills'))} />
-            <Route path="/food" component={getPageList(PAGES.indexOf('food'))} />
-            <Route path="/general" component={getPageList(PAGES.indexOf('general'))} />
-            <Route path="/holiday" component={getPageList(PAGES.indexOf('holiday'))} />
-            <Route path="/social" component={getPageList(PAGES.indexOf('social'))} />
+            <Route path="/income" component={getPageList('income')} />
+            <Route path="/bills" component={getPageList('bills')} />
+            <Route path="/food" component={getPageList('food')} />
+            <Route path="/general" component={getPageList('general')} />
+            <Route path="/holiday" component={getPageList('holiday')} />
+            <Route path="/social" component={getPageList('social')} />
         </div>
         <ModalDialog />
     </div>;

@@ -19,7 +19,6 @@ export function OverviewTableRows({ rows, numToSkip }) {
 }
 
 OverviewTableRows.propTypes = {
-    page: PropTypes.string.isRequired,
     rows: PropTypes.instanceOf(list).isRequired,
     numToSkip: PropTypes.number.isRequired
 };

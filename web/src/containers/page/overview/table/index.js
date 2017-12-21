@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Media from 'react-media';
 import { mediaQueries } from '../../../../misc/const';
 
@@ -20,8 +19,4 @@ export default function OverviewTable() {
         <Media query={mediaQueries.mobile}>{rows}</Media>
     </div>;
 }
-
-OverviewTable.propTypes = {
-    page: PropTypes.string.isRequired
-};
 

@@ -45,7 +45,7 @@ describe('analysis.saga', () => {
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...makeContentRequest('some_api_key', {
-                    params: ['deep', 'foo', 'month', 'category', 3]
+                    page: 'analysis', params: ['deep', 'foo', 'month', 'category', 3]
                 }))
                 .next({ data: 'foobar' })
                 .put(A.aAnalysisDataRefreshed({ response: { data: 'foobar' }, name: 'foo' }))
@@ -61,7 +61,7 @@ describe('analysis.saga', () => {
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...makeContentRequest('some_api_key', {
-                    params: ['deep', 'foo', 'month', 'category', 3]
+                    page: 'analysis', params: ['deep', 'foo', 'month', 'category', 3]
                 }))
                 .throw(new Error('some error'))
                 .call(openTimedMessage, 'Error loading analysis data: some error')

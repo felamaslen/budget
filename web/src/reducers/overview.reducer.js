@@ -348,10 +348,10 @@ export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemC
  * @param {object} raw: api JSON data
  * @returns {Record} modified reduction
  */
-export function processPageDataOverview(reduction, { page, raw }) {
+export function processPageDataOverview(reduction, { raw }) {
     const data = rProcessDataOverviewRaw(raw);
     const rows = rGetOverviewRows(data);
 
-    return reduction.setIn(['pages', page], map({ data, rows }));
+    return reduction.setIn(['pages', 'overview'], map({ data, rows }));
 }
 

@@ -35,6 +35,7 @@ PageOverview.propTypes = {
 };
 
 const mapStateToProps = state => ({
+    page: 'overview',
     rows: state.getIn(['pages', 'overview', 'rows']),
     loaded: Boolean(state.getIn(['pagesLoaded', 'overview']))
 });

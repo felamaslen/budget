@@ -21,7 +21,6 @@ export function Blocks({ active, blocks, deep, status, onClick, onHover }) {
 }
 
 Blocks.propTypes = {
-    page: PropTypes.string.isRequired,
     blocks: PropTypes.instanceOf(list),
     status: PropTypes.string,
     active: PropTypes.array,

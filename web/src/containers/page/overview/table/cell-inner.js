@@ -26,7 +26,6 @@ export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable
 }
 
 OverviewTableCellInner.propTypes = {
-    page: PropTypes.string.isRequired,
     cell: PropTypes.instanceOf(map).isRequired,
     cellKey: PropTypes.number.isRequired,
     rowKey: PropTypes.number.isRequired,

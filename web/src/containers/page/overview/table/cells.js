@@ -39,7 +39,6 @@ export function OverviewTableCells({ row, rowKey, editRow, editCol }) {
 }
 
 OverviewTableCells.propTypes = {
-    page: PropTypes.string.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     rowKey: PropTypes.number.isRequired,
     editRow: PropTypes.number,

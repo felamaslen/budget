@@ -34,7 +34,7 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
     }
 
     try {
-        const response = yield call(axios.get, ...makeContentRequest(apiKey, { params }));
+        const response = yield call(axios.get, ...makeContentRequest(apiKey, { page: 'analysis', params }));
 
         yield put(aAnalysisDataRefreshed({ response, name }));
     }

@@ -6,6 +6,7 @@ export function resetAppState(state) {
     return state
         .set('user', map({ uid: 0, name: null, apiKey: null }))
         .set('pages', map.of())
+        .set('currentPage', null)
         .set('pagesRaw', map.of())
         .set('pagesLoaded', map.of())
         .set('edit', map({
