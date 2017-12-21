@@ -14,12 +14,15 @@ function keyPressEventChannel() {
             emitter(aKeyPressed({
                 key: evt.key,
                 shift: evt.shiftKey,
-                ctrl: evt.ctrlKey
+                ctrl: evt.ctrlKey || evt.metaKey
             }));
         }, 1, true);
 
         const onKeyPress = evt => {
-            if (evt.key === 'Tab') {
+            const tab = evt.key === 'Tab';
+            const nav = (evt.ctrlKey || evt.metaKey) && evt.key.indexOf('Arrow') === 0;
+
+            if (tab || nav) {
                 evt.preventDefault();
             }
 
