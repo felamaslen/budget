@@ -24,7 +24,7 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
         const key = dataItem.get('row');
         const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
         const month = (startYearMonth[1] + key - 1) % 12 + 1;
-        const balance = value;
+        const balance = Math.round(value);
 
         return requestList.push(map({
             page,
