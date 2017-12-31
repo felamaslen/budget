@@ -1,7 +1,6 @@
 import { expect } from 'chai';
-import React from 'react';
 import { shallow } from 'enzyme';
-import * as format from '../../../src/components/editable/format';
+import * as format from '../../../src/containers/editable/format';
 import { YMD } from '../../../src/misc/date';
 
 describe('Editable formatting functions', () => {

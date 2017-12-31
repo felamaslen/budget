@@ -1,51 +1,37 @@
-import bodyContainer, { Body } from '.';
-
-import { LIST_COLS_PAGES, LIST_COLS_MOBILE } from '../../../../misc/const';
-
+import { PAGES, LIST_COLS_MOBILE } from '../../../../misc/const';
+import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../../../actions/form.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
+import ListRowMobile from '../row/mobile';
 
-import { ListRowMobileContainer as getListRowMobileDefault } from '../row/mobile';
-
-export class BodyMobile extends Body {
-    constructor(props) {
-        super(props);
-
-        this.ListRowMobile = this.listRowMobile();
-    }
-    listRowMobile() {
-        return getListRowMobileDefault(this.props.pageIndex);
-    }
-    render() {
+function bodyMobile(propTypes) {
+    function BodyMobile({ page, rowIds, onAdd }) {
         const colKeys = LIST_COLS_MOBILE
-            .map(column => LIST_COLS_PAGES[this.props.pageIndex].indexOf(column));
+            .map(column => PAGES[page].cols.indexOf(column));
 
-        const rows = this.props.rowIds.map(
-            id => <this.ListRowMobile key={id} id={id} colKeys={colKeys} />
-        );
-
-        const onAdd = () => this.props.openMobileAddDialog();
+        const rows = rowIds.map(id => <ListRowMobile key={id} page={page} id={id} colKeys={colKeys} />);
 
         return <div>
             <ul className="list-ul">{rows}</ul>
             <div className="button-add-outer">
-                <button type="button" className="button-add" onClick={onAdd}>{'Add'}</button>
-            </div>;
+                <button type="button" className="button-add" onClick={() => onAdd()}>{'Add'}</button>
+            </div>
         </div>;
     }
+
+    BodyMobile.propTypes = {
+        ...propTypes,
+        onAdd: PropTypes.func.isRequired
+    };
+
+    return BodyMobile;
 }
 
-BodyMobile.propTypes = {
-    openMobileAddDialog: PropTypes.func.isRequired
-};
-
-export const mapDispatchToProps = pageIndex => dispatch => ({
-    openMobileAddDialog: () => dispatch(aMobileAddDialogOpened(pageIndex))
+const mapDispatchToProps = (dispatch, { page }) => ({
+    onAdd: () => dispatch(aMobileAddDialogOpened(page))
 });
 
-export const BodyMobileContainer = pageIndex => bodyContainer(pageIndex)(null, mapDispatchToProps)(BodyMobile);
-
-export default pageIndex => bodyContainer(pageIndex);
+export default (propTypes, mapStateToProps) =>
+    connect(mapStateToProps, mapDispatchToProps)(bodyMobile(propTypes));
 

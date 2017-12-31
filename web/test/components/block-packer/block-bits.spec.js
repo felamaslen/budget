@@ -18,7 +18,7 @@ describe('BlockBits />', () => {
     };
 
     const props = {
-        pageIndex: 1,
+        page: 'page1',
         block: fromJS({
             name: 'foo',
             color: 'red',
@@ -47,10 +47,10 @@ describe('BlockBits />', () => {
     });
     it('should accept an onClick handler', () => {
         wrapper.simulate('click');
-        expect(clicked).to.deep.equal([{ pageIndex: 1, name: 'foo', wasDeep: false }]);
+        expect(clicked).to.deep.equal([{ page: 'page1', name: 'foo', wasDeep: false }]);
 
         wrapperWasDeep.simulate('click');
-        expect(clicked).to.deep.equal([{ pageIndex: 1, name: 'foo', wasDeep: true }]);
+        expect(clicked).to.deep.equal([{ page: 'page1', name: 'foo', wasDeep: true }]);
     });
 
     it('should add colour class', () => {

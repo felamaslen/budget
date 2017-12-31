@@ -3,20 +3,13 @@ import { applyMiddleware, createStore, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 
 import { createLogger } from 'redux-logger';
-import * as actions from '../constants/actions';
 
 import rootSaga from '../sagas';
 import rootReducer from '../reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-const SKIP_LOG_ACTIONS = [
-    actions.TIME_UPDATED,
-    actions.KEY_PRESSED,
-    actions.CONTENT_BLOCK_HOVERED,
-    actions.ANALYSIS_TREE_HOVERED,
-    actions.GRAPH_FUNDS_HOVERED
-];
+const SKIP_LOG_ACTIONS = (process.env.SKIP_LOG_ACTIONS || '').split(',');
 
 const logger = createLogger({
     collapsed: true,

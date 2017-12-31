@@ -4,9 +4,7 @@
 
 import { List as list, Map as map, fromJS } from 'immutable';
 
-import {
-    PAGES, AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS
-} from '../misc/const';
+import { AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../misc/const';
 import { FUTURE_INVESTMENT_RATE } from '../misc/config';
 import { yearMonthDifference } from '../misc/date';
 import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../misc/data';
@@ -289,74 +287,71 @@ export function rGetOverviewRows(data) {
 /**
  * @function rCalculateOverview
  * @param {Record} reduction: modified reduction
- * @param {integer} pageIndex: page which is modified
+ * @param {string} page: page which is modified
  * @param {YMD} newDate: modified item date
  * @param {YMD} oldDate: original item date
  * @param {integer} newItemCost: modified item cost
  * @param {integer} oldItemCost: original item cost
  * @returns {Record} reduction with re-calculated overview data
  */
-export function rCalculateOverview(reduction, {
-    pageIndex, newDate, oldDate, newItemCost, oldItemCost
-}) {
-    const overviewKey = PAGES.indexOf('overview');
-    const startYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'startYearMonth']);
+export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemCost, oldItemCost }) {
+    const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
 
     const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
     const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
 
-    const oldCost = reduction.getIn(['pages', overviewKey, 'data', 'cost']);
-    const numRows = oldCost.get(PAGES[pageIndex]).size;
+    const oldCost = reduction.getIn(['pages', 'overview', 'data', 'cost']);
+    const numRows = oldCost.get(page).size;
 
     // update the changed rows in the overview page
     let newCost = oldCost;
     if (oldKey === newKey) {
         if (oldKey < numRows) {
             newCost = newCost.setIn(
-                [PAGES[pageIndex], oldKey],
-                oldCost.getIn([PAGES[pageIndex], oldKey]) + newItemCost - oldItemCost
+                [page, oldKey],
+                oldCost.getIn([page, oldKey]) + newItemCost - oldItemCost
             );
         }
     }
     else {
         if (oldKey < numRows) {
             newCost = newCost.setIn(
-                [PAGES[pageIndex], oldKey],
-                oldCost.getIn([PAGES[pageIndex], oldKey]) - oldItemCost
+                [page, oldKey],
+                oldCost.getIn([page, oldKey]) - oldItemCost
             );
         }
         if (newKey < numRows) {
             newCost = newCost.setIn(
-                [PAGES[pageIndex], newKey],
-                oldCost.getIn([PAGES[pageIndex], newKey]) + newItemCost
+                [page, newKey],
+                oldCost.getIn([page, newKey]) + newItemCost
             );
         }
     }
 
-    const endYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'endYearMonth']);
-    const currentYearMonth = reduction.getIn(['pages', overviewKey, 'data', 'currentYearMonth']);
-    const futureMonths = reduction.getIn(['pages', overviewKey, 'data', 'futureMonths']);
+    const endYearMonth = reduction.getIn(['pages', 'overview', 'data', 'endYearMonth']);
+    const currentYearMonth = reduction.getIn(['pages', 'overview', 'data', 'currentYearMonth']);
+    const futureMonths = reduction.getIn(['pages', 'overview', 'data', 'futureMonths']);
 
     const newData = rProcessDataOverview(
         newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths
     );
 
     return reduction
-        .setIn(['pages', overviewKey, 'data'], newData)
-        .setIn(['pages', overviewKey, 'rows'], rGetOverviewRows(newData));
+        .setIn(['pages', 'overview', 'data'], newData)
+        .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 
 /**
  * Called when data is first loaded
  * @param {Record} reduction: app state
- * @param {integer} pageIndex: page index
+ * @param {string} page: page index
  * @param {object} raw: api JSON data
  * @returns {Record} modified reduction
  */
-export function processPageDataOverview(reduction, { pageIndex, raw }) {
+export function processPageDataOverview(reduction, { raw }) {
     const data = rProcessDataOverviewRaw(raw);
     const rows = rGetOverviewRows(data);
 
-    return reduction.setIn(['pages', pageIndex], map({ data, rows }));
+    return reduction.setIn(['pages', 'overview'], map({ data, rows }));
 }
 

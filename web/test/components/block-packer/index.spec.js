@@ -17,7 +17,7 @@ describe('<BlockPacker />', () => {
     };
 
     const props = {
-        pageIndex: 0,
+        page: 'page1',
         blocks: list([1, 2, 3]),
         activeBlock: [0, 1],
         deepBlock: 'foo',

@@ -6,36 +6,34 @@ import { fromJS, List as list, Map as map } from 'immutable';
 
 import { getFormattedHistory, getFundsCachedValue, getExtraRowProps } from './funds.reducer';
 
-import { LIST_COLS_SHORT, LIST_COLS_STANDARD, LIST_COLS_PAGES } from '../misc/const';
+import { PAGES, DATA_KEY_ABBR } from '../misc/const';
 import { YMD } from '../misc/date';
 import { TransactionsList, sortRowsByDate } from '../misc/data';
 
-export function processRawListRows(data, pageIndex) {
+export function processRawListRows(data, page) {
     return map(data.map(item => {
-        const id = item.I;
+        const id = item[DATA_KEY_ABBR.id];
 
-        const otherProps = Object.keys(item)
-            .filter(
-                key => LIST_COLS_STANDARD.indexOf(key) === -1
-            )
-            .reduce((obj, key) => {
-                obj[key] = fromJS(item[key]);
+        const dataKeyAbbr = list(Object.values(DATA_KEY_ABBR));
 
-                return obj;
-            }, {});
+        const otherProps = list(Object.keys(item))
+            .filterNot(key => dataKeyAbbr.includes(key))
+            .reduce((result, key) => ({ ...result, [key]: fromJS(item[key]) }), {});
 
-        const cols = list(LIST_COLS_SHORT[pageIndex].map(col => {
-            if (col === 'd') {
-                return new YMD(item[col]);
+        const cols = list(PAGES[page].cols).map(col => {
+            const value = item[DATA_KEY_ABBR[col]];
+
+            if (col === 'date') {
+                return new YMD(value);
             }
 
-            if (col === 'tr') {
+            if (col === 'transactions') {
                 // transactions list
-                return new TransactionsList(item.tr);
+                return new TransactionsList(value);
             }
 
-            return item[col];
-        }));
+            return value;
+        });
 
         return [id, map({ id, cols, ...otherProps })];
     }));
@@ -44,53 +42,46 @@ export function processRawListRows(data, pageIndex) {
 /**
  * process list page data response
  * @param {Record} reduction: app state
- * @param {integer} pageIndex: page index
+ * @param {string} page: page to process
  * @param {object} raw: api JSON data
  * @returns {Record} modified reduction
  */
-export function processPageDataList(reduction, { pageIndex, raw }) {
+export function processPageDataList(reduction, { page, raw }) {
     const numRows = raw.data.length;
-    const numCols = LIST_COLS_PAGES[pageIndex].length;
+    const numCols = PAGES[page].cols.length;
     const total = raw.total;
 
     const data = map({ numRows, numCols, total });
 
-    const rows = processRawListRows(raw.data, pageIndex);
+    const rows = processRawListRows(raw.data, page);
 
-    return reduction.setIn(
-        ['pages', pageIndex], map({ data, rows })
-    );
+    return reduction.setIn(['pages', page], map({ data, rows }));
 }
 
-export function processPageDataFunds(reduction, { pageIndex, raw }, now) {
+export function processPageDataFunds(reduction, { raw }, now) {
     const startTime = raw.startTime;
     const cacheTimes = list(raw.cacheTimes);
 
     // process list-related data
-    const newReduction = processPageDataList(reduction, { pageIndex, raw });
+    const newReduction = processPageDataList(reduction, { page: 'funds', raw });
 
     const period = reduction.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
 
-    const rows = sortRowsByDate(
-        newReduction.getIn(['pages', pageIndex, 'rows']), pageIndex
-    );
-    const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes, pageIndex);
+    const rows = sortRowsByDate(newReduction.getIn(['pages', 'funds', 'rows']), 'funds');
+    const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes);
 
     const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
     const zoom = reduction.getIn(['other', 'graphFunds', 'zoom']);
 
-    const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex);
-    const fundHistory = getFormattedHistory(rows, mode, pageIndex, startTime, cacheTimes, zoom);
+    const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now);
+    const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, zoom);
 
     return newReduction
-        .setIn(['pages', pageIndex, 'rows'], rowsWithExtraProps)
-        .setIn(['pages', pageIndex, 'startTime'], startTime)
-        .setIn(['pages', pageIndex, 'cacheTimes'], cacheTimes)
-        .setIn(
-            ['other', 'fundHistoryCache', period],
-            map({ rows, startTime, cacheTimes })
-        )
+        .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
+        .setIn(['pages', 'funds', 'startTime'], startTime)
+        .setIn(['pages', 'funds', 'cacheTimes'], cacheTimes)
+        .setIn(['other', 'fundHistoryCache', period], map({ rows, startTime, cacheTimes }))
         .setIn(['other', 'fundsCachedValue'], fundsCachedValue)
         .setIn(['other', 'graphFunds', 'startTime'], startTime)
         .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)

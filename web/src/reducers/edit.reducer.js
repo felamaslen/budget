@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 
-import { PAGES, LIST_COLS_PAGES, ERROR_LEVEL_WARN } from '../misc/const';
+import { PAGES, ERROR_LEVEL_WARN } from '../misc/const';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA } from '../misc/config';
 import { YMD } from '../misc/date';
 import {
@@ -16,9 +16,7 @@ import { pushToRequestQueue } from './request-queue.reducer';
 import { applyEdits, applyEditsList } from './editable-updates.reducer';
 import { rCalculateOverview } from './overview.reducer';
 
-const overviewKey = PAGES.indexOf('overview');
-
-export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
+export function rActivateEditable(reduction, { page, editable, cancel }) {
     const active = reduction.getIn(['edit', 'active']);
 
     let newReduction = reduction
@@ -46,19 +44,19 @@ export function rActivateEditable(reduction, { pageIndex, editable, cancel }) {
                 newReduction = pushToRequestQueue(
                     newReduction,
                     active
-                        .set('pageIndex', pageIndex)
+                        .set('page', page)
                         .set('id', id)
                 );
             }
 
             // append the changes of the last item to the UI
-            newReduction = applyEdits(newReduction, { item: active, pageIndex });
+            newReduction = applyEdits(newReduction, { item: active, page });
         }
     }
 
     if (!editable) {
         // deactivate editing
-        return newReduction.setIn(['edit', 'active'], getNullEditable(pageIndex));
+        return newReduction.setIn(['edit', 'active'], getNullEditable(page));
     }
 
     return newReduction.setIn(
@@ -101,7 +99,7 @@ export function stringifyFields(fields) {
         }), {});
 }
 
-export function rAddListItem(reduction, { pageIndex }) {
+export function rAddListItem(reduction, { page }) {
     if (reduction.get('loadingApi')) {
         return rErrorMessageOpen(reduction, map({
             level: ERROR_LEVEL_WARN,
@@ -121,9 +119,9 @@ export function rAddListItem(reduction, { pageIndex }) {
     }
 
     const items = reduction
-        .getIn(['edit', 'add', pageIndex])
+        .getIn(['edit', 'add', page])
         .map((value, key) => ({
-            item: LIST_COLS_PAGES[pageIndex][key],
+            item: PAGES[page].cols[key],
             value
         }));
 
@@ -149,14 +147,14 @@ export function rAddListItem(reduction, { pageIndex }) {
 
     const fieldsString = stringifyFields(fields);
 
-    return rActivateEditable(reduction, { pageIndex })
-        .setIn(['edit', 'add', pageIndex], getAddDefaultValues(pageIndex))
+    return rActivateEditable(reduction, { page })
+        .setIn(['edit', 'add', page], getAddDefaultValues(page))
         .setIn(['edit', 'addFields'], fields)
         .setIn(['edit', 'addFieldsString'], fieldsString)
         .setIn(['edit', 'active'], map({
             row: -1,
             col: 0,
-            pageIndex,
+            page,
             id: null,
             item: 'date',
             value: now,
@@ -166,7 +164,7 @@ export function rAddListItem(reduction, { pageIndex }) {
         .set('loadingApi', true);
 }
 
-export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
+export function rHandleServerAdd(reduction, { response, fields, page }) {
     // handle the response from adding an item to a list page
     let newReduction = reduction.set('loadingApi', false);
 
@@ -178,28 +176,28 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
     // update total and push new item to the data store list, then sort by date
     const sortedRows = sortRowsByDate(
         reduction
-            .getIn(['pages', pageIndex, 'rows'])
+            .getIn(['pages', page, 'rows'])
             .set(id, map({ id, cols })),
-        pageIndex
+        page
     );
 
     const weeklyData = addWeeklyAverages(
-        reduction.getIn(['pages', pageIndex, 'data']),
+        reduction.getIn(['pages', page, 'data']),
         sortedRows,
-        pageIndex
+        page
     );
 
     newReduction = newReduction
-        .setIn(['pages', pageIndex, 'rows'], sortedRows)
-        .setIn(['pages', pageIndex, 'data'], weeklyData)
-        .setIn(['pages', pageIndex, 'data', 'total'], newTotal)
+        .setIn(['pages', page, 'rows'], sortedRows)
+        .setIn(['pages', page, 'data'], weeklyData)
+        .setIn(['pages', page, 'data', 'total'], newTotal)
         .setIn(
-            ['pages', pageIndex, 'data', 'numRows'],
-            newReduction.getIn(['pages', pageIndex, 'data', 'numRows']) + 1
+            ['pages', page, 'data', 'numRows'],
+            newReduction.getIn(['pages', page, 'data', 'numRows']) + 1
         );
 
     // recalculate overview data
-    if (reduction.getIn(['pagesLoaded', overviewKey])) {
+    if (reduction.getIn(['pagesLoaded', 'overview'])) {
         const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
         const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
         if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
@@ -208,14 +206,13 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
                 text: ERROR_MSG_BUG_INVALID_ITEM
             }));
         }
-        newReduction = rCalculateOverview(
-            newReduction,
-            pageIndex,
-            dateItem.get('value'),
-            dateItem.get('value'),
-            costItem.get('value'),
-            0
-        );
+        newReduction = rCalculateOverview(newReduction, {
+            page,
+            newDate: dateItem.get('value'),
+            oldDate: dateItem.get('value'),
+            newCost: costItem.get('value'),
+            oldCost: 0
+        });
     }
 
     return newReduction;
@@ -248,18 +245,14 @@ export function rRequestSuggestions(reduction, { reqId }) {
 }
 
 function getTransactionsForRow(reduction, row, col) {
-    const pageIndex = PAGES.indexOf('funds');
-
     if (row > -1) {
-        return reduction.getIn(['pages', pageIndex, 'rows', row, 'cols', col]);
+        return reduction.getIn(['pages', 'funds', 'rows', row, 'cols', col]);
     }
 
-    return reduction.getIn(['edit', 'add', pageIndex, col]);
+    return reduction.getIn(['edit', 'add', 'funds', col]);
 }
 
 function rFundTransactions(reduction, row, col, transactions) {
-    const pageIndex = PAGES.indexOf('funds');
-
     if (row > -1) {
         const item = map({
             item: 'transactions',
@@ -268,7 +261,7 @@ function rFundTransactions(reduction, row, col, transactions) {
             value: transactions
         });
 
-        return applyEditsList(reduction, { item, pageIndex })
+        return applyEditsList(reduction, { item, page: 'funds' })
             .setIn(
                 ['edit', 'active'],
                 reduction.getIn(['edit', 'active']).set('value', transactions)
@@ -276,7 +269,7 @@ function rFundTransactions(reduction, row, col, transactions) {
     }
 
     return reduction.setIn(
-        ['edit', 'add', pageIndex, col], transactions
+        ['edit', 'add', 'funds', col], transactions
     );
 }
 

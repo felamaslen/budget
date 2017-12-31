@@ -1,6 +1,6 @@
 import connect, { ListRow } from '../../list/row';
 
-import { PAGES, LIST_COLS_PAGES } from '../../../../misc/const';
+import { PAGES } from '../../../../misc/const';
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -11,8 +11,7 @@ import { formatCurrency, formatPercent } from '../../../../misc/format';
 
 import GraphFundItem from '../graph/fund-item';
 
-const pageIndex = PAGES.indexOf('funds');
-const transactionsKey = LIST_COLS_PAGES[PAGES.indexOf('funds')].indexOf('transactions');
+const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 
 export class ListRowFunds extends ListRow {
     renderFundGraph() {
@@ -96,10 +95,10 @@ ListRowFunds.propTypes = {
 
 const mapStateToProps = () => (state, ownProps) => ({
     sold: state
-        .getIn(['pages', pageIndex, 'rows', ownProps.id, 'cols', transactionsKey])
+        .getIn(['pages', 'funds', 'rows', ownProps.id, 'cols', transactionsKey])
         .isSold(),
-    popout: Boolean(state.getIn(['pages', pageIndex, 'rows', ownProps.id, 'historyPopout']))
+    popout: Boolean(state.getIn(['pages', 'funds', 'rows', ownProps.id, 'historyPopout']))
 });
 
-export default connect(pageIndex)(mapStateToProps)(ListRowFunds);
+export default connect('funds')(mapStateToProps)(ListRowFunds);
 

@@ -3,12 +3,8 @@
  */
 
 import { fromJS, Map as map, List as list } from 'immutable';
-import {
-    PAGES, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT
-} from '../misc/const';
+import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '../misc/const';
 import { BlockPacker } from '../misc/format';
-
-const pageIndexAnalysis = PAGES.indexOf('analysis');
 
 function sortTotal(prev, next) {
     if (prev.get('total') > next.get('total')) {
@@ -64,7 +60,7 @@ function getCost(costData, saved) {
         .sort(sortTotal);
 }
 
-export function processPageDataAnalysis(reduction, { pageIndex, raw }) {
+export function processPageDataAnalysis(reduction, { raw }) {
     const data = fromJS(raw);
 
     // tree data
@@ -81,9 +77,7 @@ export function processPageDataAnalysis(reduction, { pageIndex, raw }) {
         .setIn(['other', 'analysis', 'timeline'], data.get('timeline'))
         .setIn(['other', 'blockView', 'blocks'], blocks)
         .setIn(['other', 'blockView', 'deep'], null)
-        .setIn(['pages', pageIndex], map({
-            cost, costTotal, items, description
-        }));
+        .setIn(['pages', 'analysis'], map({ cost, costTotal, items, description }));
 }
 
 export function rAnalysisChangeOption(reduction, { period, grouping, timeIndex }) {
@@ -94,7 +88,7 @@ export function rAnalysisChangeOption(reduction, { period, grouping, timeIndex }
         .setIn(['other', 'analysis', 'timeIndex'], timeIndex);
 }
 
-export function rAnalysisHandleNewData(reduction, { pageIndex, response, name }) {
+export function rAnalysisHandleNewData(reduction, { response, name }) {
     const newReduction = reduction
         .setIn(['other', 'analysis', 'loading'], false)
         .setIn(['other', 'blockView', 'loadKey'], null)
@@ -110,7 +104,7 @@ export function rAnalysisHandleNewData(reduction, { pageIndex, response, name })
             .setIn(['other', 'blockView', 'deep'], name);
     }
 
-    return processPageDataAnalysis(newReduction, { pageIndex, raw: response.data.data });
+    return processPageDataAnalysis(newReduction, { raw: response.data.data });
 }
 
 export function rAnalysisTreeToggleDisplay(reduction, { key }) {
@@ -119,7 +113,7 @@ export function rAnalysisTreeToggleDisplay(reduction, { key }) {
         ? !treeVisible.get(key)
         : false;
 
-    const cost = reduction.getIn(['pages', pageIndexAnalysis, 'cost']);
+    const cost = reduction.getIn(['pages', 'analysis', 'cost']);
     const blocks = getBlocks(cost, treeVisible.set(key, newStatus));
 
     return reduction.setIn(['other', 'analysis', 'treeVisible', key], newStatus)
@@ -140,7 +134,7 @@ export function rAnalysisTreeHover(reduction, { key }) {
     return reduction.setIn(['other', 'blockView', 'active'], key);
 }
 
-export function rAnalysisBlockClick(reduction, { pageIndex, name }) {
+export function rAnalysisBlockClick(reduction, { name }) {
     if (name === 'bills') {
         return reduction;
     }
@@ -150,7 +144,7 @@ export function rAnalysisBlockClick(reduction, { pageIndex, name }) {
     if (wasDeep) {
         // reset the view to how it was
         const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
-        const cost = reduction.getIn(['pages', pageIndex, 'cost']);
+        const cost = reduction.getIn(['pages', 'analysis', 'cost']);
         const blocks = getBlocks(cost, treeVisible);
 
         return reduction.setIn(['other', 'blockView', 'deep'], null)

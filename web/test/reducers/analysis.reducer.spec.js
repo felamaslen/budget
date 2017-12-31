@@ -12,10 +12,9 @@ describe('Analysis reducers', () => {
                     },
                     blockView: {}
                 },
-                pages: [null, null]
+                pages: {}
             });
 
-            const pageIndex = 1;
             const raw = {
                 cost: [
                     ['foo', [['foo1', 10], ['foo2', 20]]],
@@ -26,7 +25,7 @@ describe('Analysis reducers', () => {
                 timeline: [1, 2, 3, 4, 5]
             };
 
-            const result = R.processPageDataAnalysis(reduction, { pageIndex, raw });
+            const result = R.processPageDataAnalysis(reduction, { raw });
 
             const expectedResult = {
                 other: {
@@ -157,9 +156,8 @@ describe('Analysis reducers', () => {
                         deep: null
                     }
                 },
-                pages: [
-                    null,
-                    {
+                pages: {
+                    analysis: {
                         cost: [
                             {
                                 name: 'bar',
@@ -190,7 +188,7 @@ describe('Analysis reducers', () => {
                         items: {},
                         description: 'barbaz'
                     }
-                ]
+                }
             };
 
             expect(result.toJS()).to.deep.equal(expectedResult);
@@ -235,7 +233,6 @@ describe('Analysis reducers', () => {
                 }
             });
 
-            const pageIndex = 1;
             const response = {
                 data: {
                     data: {
@@ -246,7 +243,7 @@ describe('Analysis reducers', () => {
 
             const name = 'deepblock1';
 
-            const result = R.rAnalysisHandleNewData(reduction, { pageIndex, response, name });
+            const result = R.rAnalysisHandleNewData(reduction, { response, name });
 
             const expectedResult = {
                 other: {
@@ -274,12 +271,9 @@ describe('Analysis reducers', () => {
                         treeVisible: {}
                     }
                 },
-                pages: [
-                    null,
-                    {
-                        cost: []
-                    }
-                ]
+                pages: {
+                    analysis: { cost: [] }
+                }
             });
 
             const key = 'food';
@@ -298,12 +292,9 @@ describe('Analysis reducers', () => {
                         active: null
                     }
                 },
-                pages: [
-                    null,
-                    {
-                        cost: []
-                    }
-                ]
+                pages: {
+                    analysis: { cost: [] }
+                }
             };
 
             expect(result.toJS()).to.deep.equal(expectedResult);
@@ -399,14 +390,12 @@ describe('Analysis reducers', () => {
                         deep: 'foo'
                     }
                 },
-                pages: [
-                    {
-                        cost: []
-                    }
-                ]
+                pages: {
+                    analysis: { cost: [] }
+                }
             };
 
-            const result = R.rAnalysisBlockClick(fromJS(state), { name: 'food', pageIndex: 0 });
+            const result = R.rAnalysisBlockClick(fromJS(state), { name: 'food' });
 
             expect(result.toJS()).to.deep.equal({
                 other: {
@@ -419,11 +408,9 @@ describe('Analysis reducers', () => {
                         status: ''
                     }
                 },
-                pages: [
-                    {
-                        cost: []
-                    }
-                ]
+                pages: {
+                    analysis: { cost: [] }
+                }
             });
         });
     });

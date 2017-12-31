@@ -76,7 +76,9 @@ describe('app.reducer', () => {
     describe('rUpdateTime', () => {
         describe('if on the funds page', () => {
             const state = fromJS({
-                pages: [null, null, {}],
+                pages: {
+                    funds: {}
+                },
                 other: {
                     graphFunds: {
                         startTime: 0,
@@ -102,7 +104,9 @@ describe('app.reducer', () => {
                                 startTime: 0
                             }
                         },
-                        pages: [null, null, {}]
+                        pages: {
+                            funds: {}
+                        }
                     });
             });
         });

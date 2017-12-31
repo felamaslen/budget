@@ -2,6 +2,8 @@
  * Carries out actions for the Form component
  */
 
+import { PAGES } from '../misc/const';
+
 export function rLoginFormInput(reduction, { input }) {
     const inputString = input.toString();
     if (!(inputString.match(/^[0-9]$/) && reduction.getIn(['loginForm', 'visible']))) {
@@ -38,15 +40,15 @@ export function rLoginFormHandleResponse(reduction, { data }) {
         .setIn(['loginForm', 'visible'], true)
         .setIn(['loading'], false);
 
-    if (!(data)) {
+    if (!data) {
         return newReduction;
     }
 
     // go to the first page after logging in
-    const pageIndex = Math.max(0, newReduction.get('currentPageIndex'));
+    const page = Object.keys(PAGES)[0];
 
     return newReduction
-        .set('currentPageIndex', pageIndex)
+        .set('currentPage', page)
         .setIn(['loginForm', 'visible'], false)
         .setIn(['user', 'uid'], data.uid)
         .setIn(['user', 'name'], data.name)

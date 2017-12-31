@@ -16,7 +16,7 @@ describe('edit.saga', () => {
     describe('suggestionsInfo', () => {
         it('should get required items from state', () => {
             expect(S.suggestionsInfo(fromJS({
-                currentPageIndex: 3,
+                currentPage: 'page1',
                 edit: {
                     active: {
                         item: 'foo',
@@ -25,7 +25,7 @@ describe('edit.saga', () => {
                 }
             })))
                 .to.deep.equal({
-                    pageIndex: 3,
+                    page: 'page1',
                     item: 'foo',
                     value: 'bar'
                 });
@@ -34,7 +34,7 @@ describe('edit.saga', () => {
 
     describe('triggerEditSuggestionsRequest', () => {
         it('should call the suggetions requester after a delay', () => {
-            testSaga(S.triggerEditSuggestionsRequest, { pageIndex: 3, item: 'foo', value: 'bar' })
+            testSaga(S.triggerEditSuggestionsRequest, { page: 'income', item: 'foo', value: 'bar' })
                 .next()
                 .call(delay, 100)
                 .next()
@@ -51,20 +51,20 @@ describe('edit.saga', () => {
                 .take(EDIT_CHANGED)
                 .next()
                 .select(S.suggestionsInfo)
-                .next({ pageIndex: 5, item: 'item', value: 'value' })
-                .fork(S.triggerEditSuggestionsRequest, { pageIndex: 5, item: 'item', value: 'value' })
+                .next({ page: 'food', item: 'item', value: 'value' })
+                .fork(S.triggerEditSuggestionsRequest, { page: 'food', item: 'item', value: 'value' })
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
                 .select(S.suggestionsInfo)
-                .next({ pageIndex: 6, item: 'item', value: 'value' });
+                .next({ page: 'general', item: 'item', value: 'value' });
 
             testSaga(S.watchTextInput)
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
                 .select(S.suggestionsInfo)
-                .next({ pageIndex: 0, item: 'foo', value: 'bar' })
+                .next({ page: 'overview', item: 'balance', value: 'bar' })
                 .take(EDIT_CHANGED);
         });
     });
@@ -121,11 +121,11 @@ describe('edit.saga', () => {
         };
 
         it('should work as expected', () => {
-            testSaga(S.handleModal, { pageIndex: 5 })
+            testSaga(S.handleModal, { page: 'page1' })
                 .next()
                 .select(S.selectModalState)
                 .next(state)
-                .call(addServerDataRequest, { item: 'foo', fields: 'bar', pageIndex: 5 })
+                .call(addServerDataRequest, { item: 'foo', fields: 'bar', page: 'page1' })
                 .next()
                 .put(B.aMobileDialogClosed(null))
                 .next()
@@ -133,7 +133,7 @@ describe('edit.saga', () => {
         });
 
         describe('should not proceed if', () => {
-            it('there is no pageIndex', () => {
+            it('there is no page', () => {
                 testSaga(S.handleModal, {})
                     .next()
                     .select(S.selectModalState)
@@ -142,7 +142,7 @@ describe('edit.saga', () => {
             });
 
             it('the modal dialog isn\'t of tye "add" type', () => {
-                testSaga(S.handleModal, { pageIndex: 5 })
+                testSaga(S.handleModal, { page: 'page1' })
                     .next()
                     .select(S.selectModalState)
                     .next({ ...state, modalDialogType: 'not add' })
@@ -150,7 +150,7 @@ describe('edit.saga', () => {
             });
 
             it('there are invalid data', () => {
-                testSaga(S.handleModal, { pageIndex: 5 })
+                testSaga(S.handleModal, { page: 'page1' })
                     .next()
                     .select(S.selectModalState)
                     .next({ ...state, invalidKeys: list.of(1) })
@@ -158,7 +158,7 @@ describe('edit.saga', () => {
             });
 
             it('there dialog was not set to loading', () => {
-                testSaga(S.handleModal, { pageIndex: 5 })
+                testSaga(S.handleModal, { page: 'page1' })
                     .next()
                     .select(S.selectModalState)
                     .next({ ...state, modalDialogLoading: false })

@@ -1,8 +1,9 @@
+import { List } from 'immutable';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import InteractiveEditable from '../../../../src/components/editable/interactive-editable';
-import SuggestionsList from '../../../../src/components/editable/suggestions-list';
+import InteractiveEditable from '../../../../src/containers/editable/interactive-editable';
+import SuggestionsList from '../../../../src/containers/editable/suggestions-list';
 
 describe('<InteractiveEditable />', () => {
     let changed = null;
@@ -13,7 +14,7 @@ describe('<InteractiveEditable />', () => {
     const props = {
         item: 'foo',
         value: 'bar',
-        suggestionsList: [],
+        suggestionsList: List.of(),
         suggestionsActive: -1,
         onChange
     };
@@ -50,7 +51,7 @@ describe('<InteractiveEditable />', () => {
 
         expect(wrapper.childAt(1).is(SuggestionsList)).to.equal(true);
         expect(wrapper.childAt(1).props()).to.deep.equal({
-            suggestionsList: [],
+            suggestionsList: List.of(),
             suggestionsActive: -1
         });
     });

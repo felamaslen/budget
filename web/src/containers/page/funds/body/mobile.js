@@ -3,9 +3,9 @@ import getListRowMobileFunds from '../row/mobile';
 
 export class BodyFundsMobile extends BodyMobile {
     listRowMobile() {
-        return getListRowMobileFunds(this.props.pageIndex);
+        return getListRowMobileFunds();
     }
 }
 
-export default pageIndex => connect(pageIndex)(null, mapDispatchToProps)(BodyFundsMobile);
+export default () => connect('funds')(null, mapDispatchToProps)(BodyFundsMobile);
 
