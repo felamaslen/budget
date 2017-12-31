@@ -38,32 +38,30 @@ describe('analysis.saga', () => {
         });
 
         it('should work as expected', () => {
-            testSaga(S.requestAnalysisData, { pageIndex: 1, name: 'foo', wasDeep: false })
+            testSaga(S.requestAnalysisData, { name: 'foo', wasDeep: false })
                 .next()
                 .select(S.selectStateProps)
                 .next({ period: 1, grouping: 0, timeIndex: 3 })
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...makeContentRequest('some_api_key', {
-                    pageIndex: 1,
-                    params: ['deep', 'foo', 'month', 'category', 3]
+                    page: 'analysis', params: ['deep', 'foo', 'month', 'category', 3]
                 }))
                 .next({ data: 'foobar' })
-                .put(A.aAnalysisDataRefreshed({ pageIndex: 1, response: { data: 'foobar' }, name: 'foo' }))
+                .put(A.aAnalysisDataRefreshed({ response: { data: 'foobar' }, name: 'foo' }))
                 .next()
                 .isDone();
         });
 
         it('should handle errors', () => {
-            testSaga(S.requestAnalysisData, { pageIndex: 1, name: 'foo', wasDeep: false })
+            testSaga(S.requestAnalysisData, { name: 'foo', wasDeep: false })
                 .next()
                 .select(S.selectStateProps)
                 .next({ period: 1, grouping: 0, timeIndex: 3 })
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...makeContentRequest('some_api_key', {
-                    pageIndex: 1,
-                    params: ['deep', 'foo', 'month', 'category', 3]
+                    page: 'analysis', params: ['deep', 'foo', 'month', 'category', 3]
                 }))
                 .throw(new Error('some error'))
                 .call(openTimedMessage, 'Error loading analysis data: some error')

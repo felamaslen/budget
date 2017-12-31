@@ -39,5 +39,5 @@ const mapDispatchToProps = () => dispatch => ({
     }))
 });
 
-export default pageIndex => connect(pageIndex)(mapStateToProps, mapDispatchToProps)(HeadFunds);
+export default () => connect('funds')(mapStateToProps, mapDispatchToProps)(HeadFunds);
 

@@ -7,19 +7,20 @@ import {
     COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
 } from '../misc/config';
 import {
-    LIST_COLS_PAGES,
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
+    PAGES, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
 } from '../misc/const';
 import { colorKey } from '../misc/color';
 import { formatAge } from '../misc/format';
+
+const transactionsKey = PAGES.funds.cols.indexOf('transactions');
+const itemKey = PAGES.funds.cols.indexOf('item');
 
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = (now.getTime() / 1000) - cacheTimes.last() - startTime;
 
     return formatAge(age);
 }
-export function getFundsCachedValue(rows, startTime, cacheTimes, now, pageIndex) {
-    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+export function getFundsCachedValue(rows, startTime, cacheTimes, now) {
 
     const value = rows.reduce((sum, row) => {
         if (!row.get('pr').size) {
@@ -64,8 +65,7 @@ export function getRowsWithPrices(rows) {
     }, list.of());
 }
 
-export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes, pageIndex) {
-    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
+export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
     const roundGain = value => Math.round(10000 * value) / 10000;
     const roundAbs = value => Math.round(value);
 
@@ -122,12 +122,11 @@ export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes, pageInd
     });
 }
 
-export function getGains(rows, startTime, cacheTimes, pageIndex) {
+export function getGains(rows, startTime, cacheTimes) {
     const rowsWithPrices = getRowsWithPrices(rows);
 
-    const { gains, dayGains, gainsAbs, dayGainsAbs, values } = getRowGains(
-        rows, rowsWithPrices, startTime, cacheTimes, pageIndex
-    );
+    const { gains, dayGains, gainsAbs, dayGainsAbs, values } =
+        getRowGains(rows, rowsWithPrices, startTime, cacheTimes);
 
     const min = gains.min();
     const max = gains.max();
@@ -172,8 +171,8 @@ export function getRowHistory(rows, startTime, cacheTimes) {
     ));
 }
 
-export function getExtraRowProps(rows, startTime, cacheTimes, pageIndex) {
-    const rowsWithGains = getGains(rows, startTime, cacheTimes, pageIndex);
+export function getExtraRowProps(rows, startTime, cacheTimes) {
+    const rowsWithGains = getGains(rows, startTime, cacheTimes);
 
     const rowsWithPriceHistory = getRowHistory(rowsWithGains, startTime, cacheTimes);
 
@@ -378,9 +377,7 @@ export function getFundLines(times, timeOffsets, prices, units, costs, mode, fun
         .filter(item => item !== null);
 }
 
-function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
-    const transactionsKey = LIST_COLS_PAGES[pageIndex].indexOf('transactions');
-
+function getPriceUnitsCosts(rows, startTime, cacheTimes) {
     return rows.reduce((obj, row) => {
         const transactions = row.getIn(['cols', transactionsKey]);
 
@@ -417,12 +414,8 @@ function getPriceUnitsCosts(rows, pageIndex, startTime, cacheTimes) {
     });
 }
 
-export function getFormattedHistory(
-    rowsMap, mode, pageIndex, startTime, cacheTimes, zoom, enabledList = null
-) {
+export function getFormattedHistory(rowsMap, mode, startTime, cacheTimes, zoom, enabledList = null) {
     // get a formatted list of lines for display in the fund price / value graph
-    const itemKey = LIST_COLS_PAGES[pageIndex].indexOf('item');
-
     const rows = rowsMap.toList();
 
     const timeOffsets = rows.map(row => row.get('prStartIndex'));
@@ -444,7 +437,7 @@ export function getFormattedHistory(
         .push(-1);
 
     const { prices, units, costs } = getPriceUnitsCosts(
-        rows, pageIndex, startTime, cacheTimes
+        rows, startTime, cacheTimes
     );
 
     const times = list([

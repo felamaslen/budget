@@ -63,7 +63,7 @@ describe('app.saga', () => {
 
     describe('addServerDataRequest', () => {
         it('should work as expected', () => {
-            testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], pageIndex: 4 })
+            testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
                 .next()
                 .select(selectApiKey)
                 .next('some_api_key')
@@ -71,13 +71,13 @@ describe('app.saga', () => {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .next({ data: 'something' })
-                .put(aServerAddReceived({ response: { data: 'something' }, fields: ['bar'], pageIndex: 4 }))
+                .put(aServerAddReceived({ response: { data: 'something' }, fields: ['bar'], page: 'bills' }))
                 .next()
                 .isDone();
         });
 
         it('should handle errors', () => {
-            testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], pageIndex: 4 })
+            testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
                 .next()
                 .select(selectApiKey)
                 .next('some_api_key')
@@ -104,11 +104,11 @@ describe('app.saga', () => {
 
     describe('addServerData', () => {
         it('should work as expected', () => {
-            testSaga(S.addServerData, { pageIndex: 3 })
+            testSaga(S.addServerData, { page: 'page1' })
                 .next()
                 .select(S.selectAddData)
                 .next({ fields: 'foo', item: 'bar' })
-                .call(S.addServerDataRequest, { pageIndex: 3, fields: 'foo', item: 'bar' })
+                .call(S.addServerDataRequest, { page: 'page1', fields: 'foo', item: 'bar' })
                 .next()
                 .isDone();
 

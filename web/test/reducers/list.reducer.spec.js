@@ -16,7 +16,7 @@ describe('List page reducers', () => {
     describe('processPageDataFunds', () => {
         it('should return formatted funds page data', () => {
             const reduction = map({
-                pages: list([null, null, null]),
+                pages: map.of(),
                 other: map({
                     graphFunds: map({
                         period: 'year1',
@@ -24,8 +24,6 @@ describe('List page reducers', () => {
                     })
                 })
             });
-
-            const pageIndex = 2;
 
             const now = new Date('2017-09-05');
             const startTime = Math.floor(new Date('2017-09-01').getTime() / 1000);
@@ -57,7 +55,7 @@ describe('List page reducers', () => {
                 cacheTimes: [0, 1, 2, 3, 4, 5, 6, 7]
             };
 
-            const result = rList.processPageDataFunds(reduction, { pageIndex, raw }, now);
+            const result = rList.processPageDataFunds(reduction, { raw }, now);
 
             const other = result.getIn(['other']);
 

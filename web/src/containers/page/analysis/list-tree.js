@@ -76,9 +76,9 @@ ListTree.propTypes = {
     onToggle: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state, { pageIndex }) => ({
-    cost: state.getIn(['pages', pageIndex, 'cost']),
-    costTotal: state.getIn(['pages', pageIndex, 'costTotal']),
+const mapStateToProps = state => ({
+    cost: state.getIn(['pages', 'analysis', 'cost']),
+    costTotal: state.getIn(['pages', 'analysis', 'costTotal']),
     treeVisible: state.getIn(['other', 'analysis', 'treeVisible']),
     treeOpen: state.getIn(['other', 'analysis', 'treeOpen'])
 });

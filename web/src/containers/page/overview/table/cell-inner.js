@@ -1,21 +1,22 @@
 import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import getEditable from '../../../editable';
+import Editable from '../../../editable';
 import { formatCurrency } from '../../../../misc/format';
 
-export default function OverviewTableCellInner({ pageIndex, cell, cellKey, rowKey, editable }) {
+export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable }) {
     if (editable) {
         // editable balance column
-        const Editable = getEditable({
+        const props = {
+            page: 'overview',
             row: rowKey,
             col: 0,
             id: null,
             item: 'cost',
             value: cell.get('value')
-        });
+        };
 
-        return <Editable pageIndex={pageIndex} />;
+        return <Editable {...props} />;
     }
 
     const value = cellKey > 0
@@ -26,7 +27,6 @@ export default function OverviewTableCellInner({ pageIndex, cell, cellKey, rowKe
 }
 
 OverviewTableCellInner.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
     cell: PropTypes.instanceOf(map).isRequired,
     cellKey: PropTypes.number.isRequired,
     rowKey: PropTypes.number.isRequired,

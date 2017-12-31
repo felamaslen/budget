@@ -5,18 +5,13 @@
 import { List as list, Map as map } from 'immutable';
 
 import {
-    getFormattedHistory,
-    zoomFundLines,
-    getExtraRowProps,
-    getFundsCachedValue
+    getFormattedHistory, zoomFundLines, getExtraRowProps, getFundsCachedValue
 } from './funds.reducer';
 import { processRawListRows } from './list.reducer';
 
-import { PAGES, GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
 import { sortRowsByDate } from '../misc/data';
 import { rgba } from '../misc/color';
-
-const pageIndexFunds = PAGES.indexOf('funds');
 
 export const rToggleShowAll = reduction => {
     return reduction.setIn(
@@ -26,8 +21,8 @@ export const rToggleShowAll = reduction => {
 
 export function rToggleFundItemGraph(reduction, { key }) {
     return reduction.setIn(
-        ['pages', pageIndexFunds, 'rows', key, 'historyPopout'],
-        !reduction.getIn(['pages', pageIndexFunds, 'rows', key, 'historyPopout'])
+        ['pages', 'funds', 'rows', key, 'historyPopout'],
+        !reduction.getIn(['pages', 'funds', 'rows', key, 'historyPopout'])
     );
 }
 
@@ -67,9 +62,7 @@ export function rToggleFundsGraphMode(reduction) {
 
     const enabledList = getCurrentlyEnabledFunds(reduction);
 
-    const fundHistory = getFormattedHistory(
-        rows, newMode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
-    );
+    const fundHistory = getFormattedHistory(rows, newMode, startTime, cacheTimes, zoom, enabledList);
 
     return reduction
         .setIn(['other', 'graphFunds', 'data'], fundHistory)
@@ -208,9 +201,7 @@ export function rToggleFundsGraphLine(reduction, { index }) {
     const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
     const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
 
-    const fundHistory = getFormattedHistory(
-        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
-    );
+    const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, zoom, enabledList);
 
     return reduction
         .setIn(['other', 'graphFunds', 'data'], fundHistory);
@@ -224,9 +215,7 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
 
     const enabledList = getCurrentlyEnabledFunds(reduction);
 
-    const fundHistory = getFormattedHistory(
-        rows, mode, pageIndexFunds, startTime, cacheTimes, zoom, enabledList
-    );
+    const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, zoom, enabledList);
 
     return reduction
         .setIn(['other', 'graphFunds', 'period'], period)
@@ -238,7 +227,7 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
 }
 
 export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPeriod, data }) {
-    const rows = sortRowsByDate(processRawListRows(data.data, pageIndexFunds), pageIndexFunds);
+    const rows = sortRowsByDate(processRawListRows(data.data, 'funds'), 'funds');
     const startTime = data.startTime;
     const cacheTimes = list(data.cacheTimes);
 
@@ -250,16 +239,12 @@ export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPe
         }));
 
     if (reloadPagePrices) {
-        const rowsWithExtraProps = getExtraRowProps(
-            rows, startTime, cacheTimes, pageIndexFunds
-        );
+        const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes);
 
-        const fundsCachedValue = getFundsCachedValue(
-            rows, startTime, cacheTimes, new Date(), pageIndexFunds
-        );
+        const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, new Date());
 
         return newReduction
-            .setIn(['pages', pageIndexFunds, 'rows'], rowsWithExtraProps)
+            .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
             .setIn(['other', 'fundsCachedValue'], fundsCachedValue);
     }
 

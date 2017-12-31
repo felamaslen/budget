@@ -5,8 +5,7 @@ import { aOptionChanged } from '../../../actions/analysis.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { PAGES, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../../misc/const';
-const pageIndex = PAGES.indexOf('analysis');
+import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../../misc/const';
 
 export function Upper({ periodKey, groupingKey, timeIndex, description, changeOption }) {
     const changePeriod = key => changeOption(key, groupingKey, 0);
@@ -56,13 +55,12 @@ const mapStateToProps = state => ({
     periodKey: state.getIn(['other', 'analysis', 'period']),
     groupingKey: state.getIn(['other', 'analysis', 'grouping']),
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex']),
-    description: state.getIn(['pages', pageIndex, 'description'])
+    description: state.getIn(['pages', 'analysis', 'description'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    changeOption: (period, grouping, timeIndex) => dispatch(aOptionChanged(
-        { pageIndex, period, grouping, timeIndex }
-    ))
+    changeOption: (period, grouping, timeIndex) =>
+        dispatch(aOptionChanged({ period, grouping, timeIndex }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Upper);

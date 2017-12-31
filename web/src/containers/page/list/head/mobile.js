@@ -14,5 +14,5 @@ export class HeadMobile extends Head {
     }
 }
 
-export const HeadMobileContainer = pageIndex => headContainer(pageIndex)()(HeadMobile);
+export const HeadMobileContainer = page => headContainer(page)()(HeadMobile);
 

@@ -3,36 +3,31 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import getEditable from '../../../editable';
+import Editable from '../../../editable';
 
-export default function Column({ pageIndex, id, row, colName, colKey, active, noSuggestions }) {
-    const value = row.getIn(['cols', colKey]);
+export default function Column({ page, id, row, colName, colKey, active }) {
+    const spanClasses = classNames(colName, { active });
 
-    const Editable = getEditable({
+    const props = {
+        page,
         row: id,
         col: colKey,
         item: colName,
-        value
-    });
-
-    const spanClasses = classNames({
-        [colName]: true,
-        active
-    });
+        value: row.getIn(['cols', colKey])
+    };
 
     return <span key={colKey} className={spanClasses}>
-        <Editable noSuggestions={noSuggestions} pageIndex={pageIndex} />
+        <Editable {...props} />
     </span>;
 
 }
 
 Column.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
+    page: PropTypes.string.isRequired,
     id: PropTypes.number.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     colName: PropTypes.string.isRequired,
     colKey: PropTypes.number.isRequired,
-    active: PropTypes.bool.isRequired,
-    noSuggestions: PropTypes.bool.isRequired
+    active: PropTypes.bool.isRequired
 };
 

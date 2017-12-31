@@ -8,7 +8,7 @@ import connect, { GraphCashFlow } from './cash-flow';
 import PropTypes from 'prop-types';
 
 import { rgba } from '../../../../misc/color';
-import { PAGES, GRAPH_SPEND_CATEGORIES } from '../../../../misc/const';
+import { GRAPH_SPEND_CATEGORIES } from '../../../../misc/const';
 import {
     COLOR_DARK,
     COLOR_LOSS, COLOR_PROFIT, COLOR_TRANSLUCENT_LIGHT, COLOR_SPENDING,
@@ -140,27 +140,27 @@ GraphSpend.propTypes = {
     dataSpending: PropTypes.instanceOf(list).isRequired
 };
 
-const mapStateToProps = pageIndex => state => ({
+const mapStateToProps = () => state => ({
     categories: list(GRAPH_SPEND_CATEGORIES),
     dataNet: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
         return data.map((item, key) => {
-            const cost = state.getIn(['pages', pageIndex, 'data', 'cost', category.name, key]);
+            const cost = state.getIn(['pages', 'overview', 'data', 'cost', category.name, key]);
 
             return item - cost;
         });
-    }, state.getIn(['pages', pageIndex, 'data', 'cost', 'income'])),
+    }, state.getIn(['pages', 'overview', 'data', 'cost', 'income'])),
     dataSpending: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
         return data.map((item, key) => {
             const cost = state
-                .getIn(['pages', pageIndex, 'data', 'cost', category.name, key]);
+                .getIn(['pages', 'overview', 'data', 'cost', category.name, key]);
 
             return item + cost;
         });
     }, state
-        .getIn(['pages', pageIndex, 'data', 'cost', 'income'])
+        .getIn(['pages', 'overview', 'data', 'cost', 'income'])
         .map(() => 0)
     )
 });
 
-export default connect(PAGES.indexOf('overview'))(mapStateToProps)(GraphSpend);
+export default connect()(mapStateToProps)(GraphSpend);
 

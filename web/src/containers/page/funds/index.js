@@ -5,16 +5,13 @@
 import { Map as map } from 'immutable';
 import connect, { PageList } from '../list';
 
-import { aContentRequested } from '../../../actions/content.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
 import classNames from 'classnames';
 
-import { getPeriodMatch } from '../../../misc/data';
 import { DO_STOCKS_LIST } from '../../../misc/config';
-import { mediaQueries, PAGES, GRAPH_FUNDS_PERIODS } from '../../../misc/const';
+import { mediaQueries } from '../../../misc/const';
 import { formatCurrency, formatPercent } from '../../../misc/format';
 import StocksList from '../../stocks-list';
 
@@ -22,8 +19,6 @@ import getFundsBody from './body';
 import getFundsBodyMobile from './body/mobile';
 
 import GraphFunds from './graph/funds';
-
-const pageIndex = PAGES.indexOf('funds');
 
 class PageFunds extends PageList {
     renderStocksList(render) {
@@ -75,12 +70,12 @@ class PageFunds extends PageList {
         </div>;
     }
     bodyDesktop() {
-        const BodyFunds = getFundsBody(this.props.pageIndex);
+        const BodyFunds = getFundsBody();
 
         return <BodyFunds gainInfo={this.props.gainInfo} />;
     }
     bodyMobile() {
-        const BodyFundsMobile = getFundsBodyMobile(this.props.pageIndex);
+        const BodyFundsMobile = getFundsBodyMobile();
 
         return <BodyFundsMobile />;
     }
@@ -95,7 +90,7 @@ PageFunds.propTypes = {
 };
 
 function getGainInfo(state) {
-    const cost = state.getIn(['pages', pageIndex, 'data', 'total']);
+    const cost = state.getIn(['pages', 'funds', 'data', 'total']);
     const value = state.getIn(['other', 'fundsCachedValue', 'value']);
 
     const gain = cost
@@ -120,16 +115,5 @@ const mapStateToProps = () => state => ({
     gainInfo: getGainInfo(state)
 });
 
-const mapDispatchToProps = () => dispatch => ({
-    loadContent: req => {
-        const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
-
-        return dispatch(aContentRequested({
-            ...req,
-            query: { history: 'true', period, length }
-        }));
-    }
-});
-
-export default connect(pageIndex)(mapStateToProps, mapDispatchToProps)(PageFunds);
+export default connect('funds')(mapStateToProps)(PageFunds);
 

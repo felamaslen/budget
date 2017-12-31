@@ -5,6 +5,7 @@ import querystring from 'querystring';
 
 import { GRAPH_FUNDS_PERIOD_CHANGED, STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '../constants/actions';
 import { API_PREFIX } from '../misc/const';
+import { DO_STOCKS_LIST } from '../misc/config';
 import { getPeriodMatch } from '../misc/data';
 
 import { aFundsGraphPeriodReceived } from '../actions/graph.actions';
@@ -46,6 +47,10 @@ export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache 
 }
 
 export function *requestStocksList() {
+    if (!DO_STOCKS_LIST) {
+        return;
+    }
+
     const apiKey = yield select(selectApiKey);
 
     try {

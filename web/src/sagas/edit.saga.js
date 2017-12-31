@@ -4,7 +4,7 @@ import { all, fork, select, takeLatest, take, cancel, call, put } from 'redux-sa
 import axios from 'axios';
 
 import { FORM_DIALOG_CLOSED, EDIT_CHANGED, EDIT_SUGGESTIONS_REQUESTED } from '../constants/actions';
-import { API_PREFIX, PAGES, MAX_SUGGESTIONS, LIST_COLS_SUGGESTIONS } from '../misc/const';
+import { API_PREFIX, MAX_SUGGESTIONS, PAGES } from '../misc/const';
 
 import { aSuggestionsRequested, aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';
@@ -13,19 +13,15 @@ import { selectApiKey } from '.';
 import { addServerDataRequest } from './app.saga';
 
 export const suggestionsInfo = reduction => ({
-    pageIndex: reduction.get('currentPageIndex'),
+    page: reduction.get('currentPage'),
     item: reduction.getIn(['edit', 'active', 'item']),
     value: reduction.getIn(['edit', 'active', 'value'])
 });
 
-export function *triggerEditSuggestionsRequest({ pageIndex, item, value }) {
+export function *triggerEditSuggestionsRequest({ page, item, value }) {
     yield call(delay, 100);
 
-    yield put(aSuggestionsRequested({
-        page: PAGES[pageIndex],
-        item,
-        value
-    }));
+    yield put(aSuggestionsRequested({ page, item, value }));
 }
 
 export function *watchTextInput() {
@@ -34,15 +30,17 @@ export function *watchTextInput() {
     while (true) {
         yield take(EDIT_CHANGED);
 
-        const { pageIndex, item, value } = yield select(suggestionsInfo);
+        const { page, item, value } = yield select(suggestionsInfo);
 
-        const itemIsSuggestionCapable = LIST_COLS_SUGGESTIONS[pageIndex].indexOf(item) !== -1;
+        const itemIsSuggestionCapable = PAGES[page].suggestions &&
+            PAGES[page].suggestions.indexOf(item) !== -1;
+
         if (itemIsSuggestionCapable) {
             if (task) {
                 yield cancel(task);
             }
 
-            task = yield fork(triggerEditSuggestionsRequest, { pageIndex, item, value });
+            task = yield fork(triggerEditSuggestionsRequest, { page, item, value });
         }
     }
 }
@@ -77,19 +75,19 @@ export const selectModalState = state => ({
     fields: state.getIn(['modalDialog', 'fieldsValidated'])
 });
 
-export function *handleModal({ pageIndex }) {
+export function *handleModal({ page }) {
     const {
         modalDialogType, invalidKeys, modalDialogLoading, item, fields
     } = yield select(selectModalState);
 
-    const proceed = typeof pageIndex !== 'undefined' && modalDialogType === 'add' &&
+    const proceed = typeof page !== 'undefined' && modalDialogType === 'add' &&
         invalidKeys.size === 0 && modalDialogLoading;
 
     if (!proceed) {
         return;
     }
 
-    yield call(addServerDataRequest, { item, fields, pageIndex });
+    yield call(addServerDataRequest, { item, fields, page });
 
     yield put(aMobileDialogClosed(null));
 }

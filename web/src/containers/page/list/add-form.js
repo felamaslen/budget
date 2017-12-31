@@ -6,7 +6,7 @@ import React from 'react';
 import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
 
-import { PAGES, LIST_COLS_PAGES } from '../../../misc/const';
+import { PAGES } from '../../../misc/const';
 
 import ListAddEditItem from '../../editable/list-item';
 
@@ -28,17 +28,17 @@ export class AddForm extends PureComponent {
         return true;
     }
     render() {
-        const addItems = LIST_COLS_PAGES[this.props.pageIndex].map((item, col) => {
+        const { page, addListItem } = this.props;
+
+        const addItems = PAGES[page].cols.map((item, col) => {
             const ref = editable => {
                 this.addItems.push(editable);
             };
 
-            return <ListAddEditItem pageIndex={this.props.pageIndex}
-                key={col} ref={ref} row={-1} col={col} id={null}
-                noSuggestions={this.props.noSuggestions} />;
+            return <ListAddEditItem key={col} ref={ref} page={page}
+                row={-1} col={col} id={null} />;
         });
 
-        const addBtnOnClick = () => this.props.addListItem();
         const addBtnRef = input => {
             this.addBtn = input;
         };
@@ -46,26 +46,24 @@ export class AddForm extends PureComponent {
         return <li className="li-add">
             {addItems}
             <span className="add-button-outer">
-                <button ref={addBtnRef} onClick={addBtnOnClick}>Add</button>
+                <button ref={addBtnRef} onClick={() => addListItem()}>{'Add'}</button>
             </span>
         </li>;
     }
 }
 
 AddForm.propTypes = {
-    pageIndex: PropTypes.number.isRequired,
-    noSuggestions: PropTypes.bool.isRequired,
+    page: PropTypes.string.isRequired,
     addListItem: PropTypes.func.isRequired,
     addBtnFocus: PropTypes.bool.isRequired
 };
 
-const mapStateToProps = (state, ownProps) => ({
-    noSuggestions: ['funds'].indexOf(PAGES[ownProps.pageIndex]) !== -1,
+const mapStateToProps = state => ({
     addBtnFocus: state.getIn(['edit', 'addBtnFocus'])
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    addListItem: () => dispatch(aListItemAdded({ pageIndex: ownProps.pageIndex }))
+const mapDispatchToProps = (dispatch, { page }) => ({
+    addListItem: () => dispatch(aListItemAdded({ page }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddForm);

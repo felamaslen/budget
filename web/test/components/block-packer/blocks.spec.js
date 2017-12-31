@@ -50,7 +50,7 @@ describe('<Blocks />', () => {
             }
         ]),
         activeBlock: null,
-        pageIndex: 1,
+        page: 'page1',
         onClick,
         onHover
     };

@@ -1,13 +1,10 @@
 import { eventChannel } from 'redux-saga';
 import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
-import debounce from '../misc/debounce';
-
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
-import { API_PREFIX, PAGES } from '../misc/const';
-
+import debounce from '../misc/debounce';
+import { API_PREFIX } from '../misc/const';
 import { aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
-
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
 
@@ -17,12 +14,15 @@ function keyPressEventChannel() {
             emitter(aKeyPressed({
                 key: evt.key,
                 shift: evt.shiftKey,
-                ctrl: evt.ctrlKey
+                ctrl: evt.ctrlKey || evt.metaKey
             }));
         }, 1, true);
 
         const onKeyPress = evt => {
-            if (evt.key === 'Tab') {
+            const tab = evt.key === 'Tab';
+            const nav = (evt.ctrlKey || evt.metaKey) && evt.key.indexOf('Arrow') === 0;
+
+            if (tab || nav) {
                 evt.preventDefault();
             }
 
@@ -71,18 +71,18 @@ export function *updateServerData() {
     }
 }
 
-export function *addServerDataRequest({ item, fields, pageIndex }) {
+export function *addServerDataRequest({ item, fields, page }) {
     const apiKey = yield select(selectApiKey);
 
     try {
         const response = yield call(
             axios.post,
-            `${API_PREFIX}/data/${PAGES[pageIndex]}`,
+            `${API_PREFIX}/data/${page}`,
             item,
             { headers: { 'Authorization': apiKey } }
         );
 
-        yield put(aServerAddReceived({ response, fields, pageIndex }));
+        yield put(aServerAddReceived({ response, fields, page }));
     }
     catch (err) {
         yield call(openTimedMessage, 'Error adding data to server!');
@@ -94,12 +94,12 @@ export const selectAddData = state => ({
     item: state.getIn(['edit', 'addFieldsString'])
 });
 
-export function *addServerData({ pageIndex }) {
+export function *addServerData({ page }) {
     // data is validated by reducer
     const { fields, item } = yield select(selectAddData);
 
     if (fields && item) {
-        yield call(addServerDataRequest, { pageIndex, item, fields });
+        yield call(addServerDataRequest, { page, item, fields });
     }
 }
 

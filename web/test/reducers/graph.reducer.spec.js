@@ -18,20 +18,16 @@ describe('Graph reducer', () => {
     describe('rToggleFundItemGraph', () => {
         it('should toggle historyPopout for the given key', () => {
             expect(R.rToggleFundItemGraph(fromJS({
-                pages: [
-                    null,
-                    null,
-                    { rows: [null, { historyPopout: false }, null] }
-                ]
-            }), { key: 1 }).getIn(['pages', 2, 'rows', 1, 'historyPopout'])).to.equal(true);
+                pages: {
+                    funds: { rows: [null, { historyPopout: false }, null] }
+                }
+            }), { key: 1 }).getIn(['pages', 'funds', 'rows', 1, 'historyPopout'])).to.equal(true);
 
             expect(R.rToggleFundItemGraph(fromJS({
-                pages: [
-                    null,
-                    null,
-                    { rows: [null, { historyPopout: true }, null] }
-                ]
-            }), { key: 1 }).getIn(['pages', 2, 'rows', 1, 'historyPopout'])).to.equal(false);
+                pages: {
+                    funds: { rows: [null, { historyPopout: true }, null] }
+                }
+            }), { key: 1 }).getIn(['pages', 'funds', 'rows', 1, 'historyPopout'])).to.equal(false);
         });
     });
     describe('rToggleFundsGraphMode', () => {

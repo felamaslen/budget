@@ -1,26 +1,25 @@
 import { List as list, Map as map } from 'immutable';
 
-import {
-    PAGES, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS
-} from './misc/const';
+import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS } from './misc/const';
 
 export function resetAppState(state) {
     return state
         .set('user', map({ uid: 0, name: null, apiKey: null }))
-        .set('pages', list(PAGES).map(() => null))
-        .set('pagesRaw', list(PAGES).map(() => null))
-        .set('pagesLoaded', list(PAGES).map(() => null))
+        .set('pages', map.of())
+        .set('currentPage', null)
+        .set('pagesRaw', map.of())
+        .set('pagesLoaded', map.of())
         .set('edit', map({
             active: map({
                 row: 0,
                 col: -1,
-                pageIndex: null,
+                page: null,
                 id: null,
                 item: null,
                 value: null,
                 originalValue: null
             }),
-            add: list(PAGES).map(() => null),
+            add: map.of(),
             addFields: null,
             addFieldsString: null,
             addBtnFocus: false,

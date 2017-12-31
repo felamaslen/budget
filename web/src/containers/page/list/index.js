@@ -2,96 +2,52 @@
  * List page component
  */
 
-import extendableContainer from '../../container-extender';
-
+import { connect } from 'react-redux';
 import { aContentRequested } from '../../../actions/content.actions';
-
 import React from 'react';
+import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
-import Media from 'react-media';
-import { mediaQueries, PAGES } from '../../../misc/const';
+import classNames from 'classnames';
+import Body from './body';
+import AfterList from './after-list';
 
-import Page from '../../../components/page';
-
-import { BodyMobileContainer as getBodyMobile } from './body/mobile';
-import { BodyContainer as getBody } from './body';
-
-export class PageList extends Page {
-    bodyMobile() {
-        const BodyMobile = getBodyMobile(this.props.pageIndex);
-
-        return <BodyMobile />;
-    }
-    renderListMobile(render) {
-        if (!render) {
-            return null;
-        }
-
-        return <div>{this.bodyMobile()}</div>;
-    }
-    bodyDesktop () {
-        const Body = getBody(this.props.pageIndex);
-
-        return <Body />;
-    }
-    renderListDesktop(render) {
-        if (!render) {
-            return null;
-        }
-
-        return <div>{this.bodyDesktop()}</div>;
-    }
-    renderList() {
-        return <div>
-            <Media query={mediaQueries.mobile}>{render => this.renderListMobile(render)}</Media>
-            <Media query={mediaQueries.desktop}>{render => this.renderListDesktop(render)}</Media>
-        </div>;
-    }
-    afterList() {
-        return null;
+class PageList extends PureComponent {
+    componentDidMount() {
+        this.props.onLoad();
     }
     render() {
-        if (!this.props.loaded) {
+        const { loaded, page } = this.props;
+
+        if (!loaded) {
             return null;
         }
 
-        const listClasses = [
-            'list-insert',
-            `list-${PAGES[this.props.pageIndex]}`,
-            'list'
-        ].join(' ');
+        const listClassName = classNames('list-insert', `list-${page}`, 'list');
 
-        const listRendered = this.renderList();
-        const afterList = this.afterList();
+        const pageClassName = classNames(`page-${page}`);
 
-        const pageClasses = `page-${PAGES[this.props.pageIndex]}`;
-
-        return <div className={pageClasses}>
-            <div className={listClasses}>
-                {listRendered}
+        return <div className={pageClassName}>
+            <div className={listClassName}>
+                <Body page={page} />
             </div>
-            {afterList}
+            <AfterList page={page} />
         </div>;
     }
 }
 
 PageList.propTypes = {
     loaded: PropTypes.bool.isRequired,
-    pageIndex: PropTypes.number.isRequired,
-    loadContent: PropTypes.func.isRequired
+    page: PropTypes.string.isRequired,
+    onLoad: PropTypes.func.isRequired
 };
 
-const stateDefault = pageIndex => state => ({
-    pageIndex,
-    loaded: Boolean(state.getIn(['pagesLoaded', pageIndex]))
+const mapStateToProps = (state, { page }) => ({
+    loaded: Boolean(state.getIn(['pagesLoaded', page]))
 });
 
-const dispatchDefault = () => dispatch => ({
-    loadContent: req => dispatch(aContentRequested(req))
+const mapDispatchToProps = (dispatch, { page }) => ({
+    onLoad: () => dispatch(aContentRequested({ page }))
 });
 
-export const PageListContainer = pageIndex =>
-    extendableContainer(stateDefault, dispatchDefault)(pageIndex)()(PageList);
-
-export default extendableContainer(stateDefault, dispatchDefault);
+export default connect(mapStateToProps, mapDispatchToProps)(PageList);
 

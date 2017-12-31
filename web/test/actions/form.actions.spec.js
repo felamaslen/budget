@@ -5,16 +5,16 @@ import * as C from '../../src/constants/actions';
 
 describe('form.actions', () => {
     describe('aMobileEditDialogOpened', () =>
-        it('should return FORM_EDIT_DIALOG_OPENED with pageIndex, id', () =>
+        it('should return FORM_EDIT_DIALOG_OPENED with page, id', () =>
             expect(A.aMobileEditDialogOpened(10, 11)).to.deep.equal({
-                type: C.FORM_EDIT_DIALOG_OPENED, pageIndex: 10, id: 11
+                type: C.FORM_EDIT_DIALOG_OPENED, page: 10, id: 11
             })
         )
     );
     describe('aMobileAddDialogOpened', () =>
-        it('should return FORM_ADD_DIALOG_OPENED with pageIndex', () =>
+        it('should return FORM_ADD_DIALOG_OPENED with page', () =>
             expect(A.aMobileAddDialogOpened(10)).to.deep.equal({
-                type: C.FORM_ADD_DIALOG_OPENED, pageIndex: 10
+                type: C.FORM_ADD_DIALOG_OPENED, page: 10
             })
         )
     );

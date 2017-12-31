@@ -2,7 +2,7 @@ import { List as list } from 'immutable';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import SuggestionsList from '../../../src/components/editable/suggestions-list';
+import SuggestionsList from '../../../src/containers/editable/suggestions-list';
 
 describe('<SuggestionsList />', () => {
     const props = {
