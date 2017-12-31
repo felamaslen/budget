@@ -208,14 +208,13 @@ export function rHandleServerAdd(reduction, { response, fields, pageIndex }) {
                 text: ERROR_MSG_BUG_INVALID_ITEM
             }));
         }
-        newReduction = rCalculateOverview(
-            newReduction,
+        newReduction = rCalculateOverview(newReduction, {
             pageIndex,
-            dateItem.get('value'),
-            dateItem.get('value'),
-            costItem.get('value'),
-            0
-        );
+            newDate: dateItem.get('value'),
+            oldDate: dateItem.get('value'),
+            newItemCost: costItem.get('value'),
+            oldItemCost: 0
+        });
     }
 
     return newReduction;
