@@ -216,29 +216,25 @@ describe('misc/data', () => {
     });
     describe('sortRowsByDate', () => {
         it('should sort rows by date and add a daily column', () => {
-            const rows = fromJS([
-                {
-                    id: 1,
+            const rows = fromJS({
+                1: {
                     cols: [new YMD('2017-10-11'), 'foo1', 'bar1', 3]
                 },
-                {
-                    id: 4,
+                4: {
                     cols: [new YMD('2017-10-10'), 'foo4', 'bar4', 1]
                 },
-                {
-                    id: 2,
+                2: {
                     cols: [new YMD('2017-10-11'), 'foo2', 'bar2', 5]
                 },
-                {
-                    id: 3,
+                3: {
                     cols: [new YMD('2017-10-12'), 'foo3', 'bar3', 11]
                 }
-            ]);
+            });
 
             const result = M.sortRowsByDate(rows, 'food');
 
-            expect(result.toJS()).to.deep.equal([
-                {
+            expect(result.toJS()).to.deep.equal({
+                3: {
                     cols: [
                         { year: 2017, month: 10, date: 12, valid: true },
                         'foo3',
@@ -247,10 +243,9 @@ describe('misc/data', () => {
                     ],
                     daily: 11,
                     'first-present': false,
-                    future: false,
-                    id: 3
+                    future: false
                 },
-                {
+                2: {
                     cols: [
                         { year: 2017, month: 10, date: 11, valid: true },
                         'foo2',
@@ -258,10 +253,9 @@ describe('misc/data', () => {
                         5
                     ],
                     'first-present': false,
-                    future: false,
-                    id: 2
+                    future: false
                 },
-                {
+                1: {
                     cols: [
                         { year: 2017, month: 10, date: 11, valid: true },
                         'foo1',
@@ -270,10 +264,9 @@ describe('misc/data', () => {
                     ],
                     daily: 8,
                     'first-present': false,
-                    future: false,
-                    id: 1
+                    future: false
                 },
-                {
+                4: {
                     cols: [
                         { year: 2017, month: 10, date: 10, valid: true },
                         'foo4',
@@ -281,10 +274,9 @@ describe('misc/data', () => {
                         1
                     ],
                     'first-present': false,
-                    future: false,
-                    id: 4
+                    future: false
                 }
-            ]);
+            });
         });
     });
     describe('addWeeklyAverages', () => {
