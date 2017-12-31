@@ -67,8 +67,6 @@ describe('Content reducer', () => {
         it('should set the loading status', () => {
             expect(R.rRequestContent(fromJS({}), { loading: true }).get('loading'))
                 .to.equal(true);
-            expect(R.rRequestContent(fromJS({}), { loading: false }).get('loading'))
-                .to.equal(false);
         });
 
         it('should set the current page index', () => {
