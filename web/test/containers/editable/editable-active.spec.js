@@ -6,7 +6,15 @@ import InteractiveEditable from '../../../src/containers/editable/interactive-ed
 import InteractiveEditableTransactions from '../../../src/containers/editable/interactive-editable/transactions';
 
 describe('<EditableActive />', () => {
-    const props = { foo: 'bar' };
+    const props = {
+        row: 1,
+        col: 1,
+        value: { foo: 'bar' },
+        onChange: () => null,
+        addTransaction: () => null,
+        editTransaction: () => null,
+        removeTransaction: () => null
+    };
 
     it('should render <InteractiveEditableTransactions /> for transactions items', () => {
         const wrapper = shallow(<EditableActive item="transactions" {...props} />);
