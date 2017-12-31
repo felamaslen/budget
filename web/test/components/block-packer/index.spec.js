@@ -7,7 +7,6 @@ import { shallow } from 'enzyme';
 import '../../browser';
 
 import BlockPacker from '../../../src/components/block-packer';
-import Blocks from '../../../src/components/block-packer/blocks';
 
 describe('<BlockPacker />', () => {
     const onClick = () => null;
