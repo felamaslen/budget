@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import InteractiveEditable from '../../../../src/components/editable/interactive-editable';
-import SuggestionsList from '../../../../src/components/editable/suggestions-list';
+import InteractiveEditable from '../../../../src/containers/editable/interactive-editable';
+import SuggestionsList from '../../../../src/containers/editable/suggestions-list';
 
 describe('<InteractiveEditable />', () => {
     let changed = null;

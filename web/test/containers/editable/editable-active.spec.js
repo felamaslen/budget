@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import EditableActive from '../../../src/components/editable/editable-active';
-import InteractiveEditable from '../../../src/components/editable/interactive-editable';
-import InteractiveEditableTransactions from '../../../src/components/editable/interactive-editable/transactions';
+import EditableActive from '../../../src/containers/editable/editable-active';
+import InteractiveEditable from '../../../src/containers/editable/interactive-editable';
+import InteractiveEditableTransactions from '../../../src/containers/editable/interactive-editable/transactions';
 
 describe('<EditableActive />', () => {
     const props = { foo: 'bar' };
