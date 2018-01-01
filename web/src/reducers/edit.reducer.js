@@ -210,8 +210,8 @@ export function rHandleServerAdd(reduction, { response, fields, page }) {
             page,
             newDate: dateItem.get('value'),
             oldDate: dateItem.get('value'),
-            newCost: costItem.get('value'),
-            oldCost: 0
+            newItemCost: costItem.get('value'),
+            oldItemCost: 0
         });
     }
 

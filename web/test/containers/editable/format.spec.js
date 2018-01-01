@@ -12,9 +12,6 @@ describe('Editable formatting functions', () => {
 
                 expect(format.getEditValue('date', 'foo', '10/11/17'))
                     .to.deep.equal(new YMD('10/11/17'));
-
-                expect(format.getEditValue('date', 'foo', '10/11'))
-                    .to.deep.equal(new YMD('10/11/17'));
             });
 
             it('should return the original value if it can\'t', () => {
