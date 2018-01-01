@@ -368,7 +368,7 @@ export function sortRowsByDate(rows, page) {
         keys.next();
 
         return sorted
-            .reduce(({ dailySum, results }, row) => {
+            .reduce(({ dailySum, results }, row, id) => {
                 const nextKey = keys.next().value;
 
                 const lastInDay = nextKey && row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
@@ -377,17 +377,17 @@ export function sortRowsByDate(rows, page) {
 
                 if (lastInDay) {
                     return {
-                        results: results.push(row.set('daily', dailySum + cost)),
+                        results: results.set(id, row.set('daily', dailySum + cost)),
                         dailySum: 0
                     };
                 }
 
                 return {
-                    results: results.push(row.delete('daily')),
+                    results: results.set(id, row.delete('daily')),
                     dailySum: dailySum + cost
                 };
 
-            }, { results: list.of(), dailySum: 0 })
+            }, { results: sorted, dailySum: 0 })
             .results;
     }
 
