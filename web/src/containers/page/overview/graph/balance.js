@@ -11,10 +11,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { formatCurrency } from '../../../../misc/format';
 import { rgba } from '../../../../misc/color';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
-    COLOR_DARK,
+    COLOR_DARK, COLOR_TRANSLUCENT_LIGHT,
     FONT_GRAPH_KEY_SMALL
 } from '../../../../misc/config';
 
@@ -99,6 +100,28 @@ export class GraphBalance extends GraphCashFlow {
             }
         );
     }
+    drawTargets() {
+        this.ctx.beginPath();
+        this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
+        this.ctx.fillRect(48, 70, 100, this.props.targets.size * 22 + 4);
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = rgba(COLOR_DARK);
+        this.ctx.font = FONT_GRAPH_KEY_SMALL;
+        this.ctx.textBaseline = 'top';
+
+        this.props.targets.forEach((target, key) => {
+            const tag = target.get('tag');
+            const value = formatCurrency(target.get('value'), {
+                raw: true, noPence: true, abbreviate: true, precision: 0
+            });
+
+            const xPix = 50;
+            const yPix = 72 + 22 * key;
+
+            this.ctx.fillText(`${value} (${tag})`, xPix, yPix);
+        });
+    }
     draw() {
         super.draw();
 
@@ -111,6 +134,8 @@ export class GraphBalance extends GraphCashFlow {
 
         // plot past + future predicted ISA stock value
         this.drawFundsLine();
+
+        this.drawTargets();
 
         this.drawKey();
     }
@@ -134,6 +159,7 @@ GraphBalance.propTypes = {
     showAll: PropTypes.bool.isRequired,
     balance: PropTypes.instanceOf(list).isRequired,
     funds: PropTypes.instanceOf(list).isRequired,
+    targets: PropTypes.instanceOf(list).isRequired,
     toggleShowAll: PropTypes.func.isRequired
 };
 
@@ -162,7 +188,8 @@ const mapStateToProps = () => state => {
         oldOffset,
         balance,
         funds,
-        breakAtToday: true
+        breakAtToday: true,
+        targets: state.getIn(['pages', 'overview', 'data', 'targets'])
     };
 };
 

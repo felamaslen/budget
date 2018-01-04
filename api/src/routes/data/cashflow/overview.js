@@ -357,6 +357,35 @@ async function getMonthlyCategoryValues(db, user, yearMonths, categories, old) {
         }, {});
 }
 
+function getTargets({ balance, old }, futureMonths) {
+    const periods = [
+        { last: 3, months: 12, tag: '1y' },
+        { last: 6, months: 36, tag: '3y' },
+        { last: 12, months: 60, tag: '5y' }
+    ];
+
+    const values = [...old, ...balance.slice(0, -futureMonths)].reverse();
+
+    if (values.length < 2) {
+        return [];
+    }
+
+    const saved = values
+        .slice(0, values.length - 1)
+        .map((value, key) => value - values[key + 1]);
+
+    const current = values[0];
+
+    return periods.map(({ last, months, tag }) => {
+        const valuesToAverage = saved.slice(0, last);
+
+        const average = valuesToAverage.reduce((sum, value) => sum + value, 0) /
+            valuesToAverage.length;
+
+        return { tag, value: Math.round(current + average * months) };
+    });
+}
+
 async function getData(db, user) {
     const now = new Date();
     const futureMonths = config.data.overview.numFuture;
@@ -378,12 +407,15 @@ async function getData(db, user) {
         db, user, yearMonths, config.data.listCategories, balance.old
     );
 
+    const targets = getTargets(balance, futureMonths);
+
     return {
         startYearMonth: yearMonths[0],
         endYearMonth: yearMonths[yearMonths.length - 1],
         currentYear: now.getFullYear(),
         currentMonth: now.getMonth() + 1,
         futureMonths,
+        targets,
         cost: { ...monthCost, ...balance }
     };
 }
@@ -404,6 +436,7 @@ module.exports = {
     getMonthlyBalanceQuery,
     getMonthlyBalance,
     getMonthlyCategoryValues,
+    getTargets,
     getData
 };
 
