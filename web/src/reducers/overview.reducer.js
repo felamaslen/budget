@@ -196,23 +196,12 @@ export function rProcessDataOverview(
  * @param {object} raw: api JSON data response
  * @returns {Map} immutable data
  */
-function rProcessDataOverviewRaw({
-    startYearMonth,
-    endYearMonth,
-    currentYear,
-    currentMonth,
-    futureMonths,
-    cost,
-    dailyCashflow
-}) {
-
-    const currentYearMonth = [currentYear, currentMonth];
-    const costMap = fromJS(cost);
+function rProcessDataOverviewRaw(raw) {
+    const currentYearMonth = [raw.currentYear, raw.currentMonth];
+    const costMap = fromJS(raw.cost);
 
     return rProcessDataOverview(
-        costMap, startYearMonth, endYearMonth, currentYearMonth, futureMonths
-    )
-        .set('dailyCashflow', list(dailyCashflow));
+        costMap, raw.startYearMonth, raw.endYearMonth, currentYearMonth, raw.futureMonths);
 }
 
 /**

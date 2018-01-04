@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import { rgba } from '../../../../misc/color';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
-    COLOR_DARK, COLOR_PROFIT, COLOR_LOSS,
+    COLOR_DARK,
     FONT_GRAPH_KEY_SMALL
 } from '../../../../misc/config';
 
@@ -99,30 +99,6 @@ export class GraphBalance extends GraphCashFlow {
             }
         );
     }
-    drawSpending() {
-        this.ctx.lineWidth = 1;
-
-        const now = Math.floor(Date.now() / 1000);
-        const y0 = this.pixY(0);
-
-        this.props.dailyCashflow.forEach((item, index) => {
-            const color = item < 0
-                ? COLOR_LOSS
-                : COLOR_PROFIT;
-
-            const value = Math.abs(item);
-
-            const xPix = Math.floor(this.pixX(now - index * 86400)) + 0.5;
-            const yPix = this.pixY(value);
-
-            this.ctx.strokeStyle = rgba(color);
-            this.ctx.beginPath();
-            this.ctx.moveTo(xPix, y0);
-            this.ctx.lineTo(xPix, yPix);
-
-            this.ctx.stroke();
-        });
-    }
     draw() {
         super.draw();
 
@@ -135,8 +111,6 @@ export class GraphBalance extends GraphCashFlow {
 
         // plot past + future predicted ISA stock value
         this.drawFundsLine();
-
-        this.drawSpending();
 
         this.drawKey();
     }
@@ -160,8 +134,7 @@ GraphBalance.propTypes = {
     showAll: PropTypes.bool.isRequired,
     balance: PropTypes.instanceOf(list).isRequired,
     funds: PropTypes.instanceOf(list).isRequired,
-    toggleShowAll: PropTypes.func.isRequired,
-    dailyCashflow: PropTypes.instanceOf(list).isRequired
+    toggleShowAll: PropTypes.func.isRequired
 };
 
 function getBalanceWithFunds(cost, showAll) {
@@ -182,7 +155,6 @@ const mapStateToProps = () => state => {
     const showAll = state.getIn(['other', 'showAllBalanceGraph']);
 
     const cost = state.getIn(['pages', 'overview', 'data', 'cost']);
-    const dailyCashflow = state.getIn(['pages', 'overview', 'data', 'dailyCashflow']);
     const { oldOffset, balance, funds } = getBalanceWithFunds(cost, showAll);
 
     return {
@@ -190,8 +162,7 @@ const mapStateToProps = () => state => {
         oldOffset,
         balance,
         funds,
-        breakAtToday: true,
-        dailyCashflow
+        breakAtToday: true
     };
 };
 
