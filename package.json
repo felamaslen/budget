@@ -12,7 +12,7 @@
     "build": "NODE_ENV=production DOTENV_INJECT=true ./node_modules/.bin/webpack",
     "start": "NODE_ENV=production node ./api/src/index.js",
     "devstart": "NODE_ENV=production DOTENV_INJECT=true node ./api/src/index.js",
-    "dev": "NODE_ENV=development nodemon -w ./api/src ./api/src/index.js",
+    "dev": "NODE_ENV=development nodemon --inspect -w ./api/src ./api/src/index.js",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --require babel-core/register -R spec \"./web/test/**/*.spec.js\" \"./api/test/**/*.spec.js\"",
     "lint": "./node_modules/.bin/eslint webpack.config.js webpack api/src api/test web/src web/test",
     "sass-lint": "./node_modules/.bin/sass-lint -qv \"./web/src/sass/**/*.scss\"",

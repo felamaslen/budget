@@ -200,8 +200,8 @@ function rProcessDataOverviewRaw(raw) {
     const currentYearMonth = [raw.currentYear, raw.currentMonth];
     const costMap = fromJS(raw.cost);
 
-    return rProcessDataOverview(
-        costMap, raw.startYearMonth, raw.endYearMonth, currentYearMonth, raw.futureMonths);
+    return rProcessDataOverview(costMap, raw.startYearMonth, raw.endYearMonth, currentYearMonth, raw.futureMonths)
+        .set('targets', fromJS(raw.targets));
 }
 
 /**
