@@ -11,10 +11,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { formatCurrency } from '../../../../misc/format';
 import { rgba } from '../../../../misc/color';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS,
-    COLOR_DARK, COLOR_PROFIT, COLOR_LOSS,
+    COLOR_DARK, COLOR_TRANSLUCENT_LIGHT,
     FONT_GRAPH_KEY_SMALL
 } from '../../../../misc/config';
 
@@ -99,28 +100,26 @@ export class GraphBalance extends GraphCashFlow {
             }
         );
     }
-    drawSpending() {
-        this.ctx.lineWidth = 1;
+    drawTargets() {
+        this.ctx.beginPath();
+        this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
+        this.ctx.fillRect(48, 70, 100, this.props.targets.size * 22 + 4);
+        this.ctx.closePath();
 
-        const now = Math.floor(Date.now() / 1000);
-        const y0 = this.pixY(0);
+        this.ctx.fillStyle = rgba(COLOR_DARK);
+        this.ctx.font = FONT_GRAPH_KEY_SMALL;
+        this.ctx.textBaseline = 'top';
 
-        this.props.dailyCashflow.forEach((item, index) => {
-            const color = item < 0
-                ? COLOR_LOSS
-                : COLOR_PROFIT;
+        this.props.targets.forEach((target, key) => {
+            const tag = target.get('tag');
+            const value = formatCurrency(target.get('value'), {
+                raw: true, noPence: true, abbreviate: true, precision: 0
+            });
 
-            const value = Math.abs(item);
+            const xPix = 50;
+            const yPix = 72 + 22 * key;
 
-            const xPix = Math.floor(this.pixX(now - index * 86400)) + 0.5;
-            const yPix = this.pixY(value);
-
-            this.ctx.strokeStyle = rgba(color);
-            this.ctx.beginPath();
-            this.ctx.moveTo(xPix, y0);
-            this.ctx.lineTo(xPix, yPix);
-
-            this.ctx.stroke();
+            this.ctx.fillText(`${value} (${tag})`, xPix, yPix);
         });
     }
     draw() {
@@ -136,7 +135,7 @@ export class GraphBalance extends GraphCashFlow {
         // plot past + future predicted ISA stock value
         this.drawFundsLine();
 
-        this.drawSpending();
+        this.drawTargets();
 
         this.drawKey();
     }
@@ -160,8 +159,8 @@ GraphBalance.propTypes = {
     showAll: PropTypes.bool.isRequired,
     balance: PropTypes.instanceOf(list).isRequired,
     funds: PropTypes.instanceOf(list).isRequired,
-    toggleShowAll: PropTypes.func.isRequired,
-    dailyCashflow: PropTypes.instanceOf(list).isRequired
+    targets: PropTypes.instanceOf(list).isRequired,
+    toggleShowAll: PropTypes.func.isRequired
 };
 
 function getBalanceWithFunds(cost, showAll) {
@@ -182,7 +181,6 @@ const mapStateToProps = () => state => {
     const showAll = state.getIn(['other', 'showAllBalanceGraph']);
 
     const cost = state.getIn(['pages', 'overview', 'data', 'cost']);
-    const dailyCashflow = state.getIn(['pages', 'overview', 'data', 'dailyCashflow']);
     const { oldOffset, balance, funds } = getBalanceWithFunds(cost, showAll);
 
     return {
@@ -191,7 +189,7 @@ const mapStateToProps = () => state => {
         balance,
         funds,
         breakAtToday: true,
-        dailyCashflow
+        targets: state.getIn(['pages', 'overview', 'data', 'targets'])
     };
 };
 

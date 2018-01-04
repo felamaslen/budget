@@ -357,81 +357,33 @@ async function getMonthlyCategoryValues(db, user, yearMonths, categories, old) {
         }, {});
 }
 
-async function getDailyCashflow(db, user, now) {
-    const spending = ['bills', 'food', 'general', 'holiday', 'social'];
-    const income = ['income'];
+function getTargets({ balance, old }, futureMonths) {
+    const periods = [
+        { last: 3, months: 12, tag: '1y' },
+        { last: 6, months: 36, tag: '3y' },
+        { last: 12, months: 60, tag: '5y' }
+    ];
 
-    const queries = [...spending, ...income].map(table => db.query(`
-    SELECT year, month, date, SUM(cost) AS cost
-    FROM ${table}
-    WHERE uid = ?
-    GROUP BY year, month, date
-    ORDER BY year DESC, month DESC, date DESC
-    `, user.uid));
+    const values = [...old, ...balance.slice(0, -futureMonths)].reverse();
 
-    const results = await Promise.all(queries);
-
-    const firstDate = results.reduce((first, items) => {
-        const { year, month, date } = items[items.length - 1];
-
-        if (year < first.year || (year === first.year && month < first.month) ||
-            (year === first.year && month === first.month && date < first.date)) {
-
-            return { year, month, date };
-        }
-
-        return first;
-
-    }, { year: Infinity, month: 0, date: 0 });
-
-    const { year: startYear, month: startMonth, date: startDate } = firstDate;
-
-    if (startYear === Infinity) {
+    if (values.length < 2) {
         return [];
     }
 
-    const numDates = Math.floor(
-        (now - new Date(`${startYear}-${startMonth}-${startDate}`).getTime()) /
-        86400000
-    );
+    const saved = values
+        .slice(0, values.length - 1)
+        .map((value, key) => value - values[key + 1]);
 
-    if (!numDates) {
-        return [];
-    }
+    const current = values[0];
 
-    return new Array(numDates).fill(0)
-        .map((item, key) => {
-            const dateTime = new Date(now - 86400000 * key);
+    return periods.map(({ last, months, tag }) => {
+        const valuesToAverage = saved.slice(0, last);
 
-            const thisYear = dateTime.getFullYear();
-            const thisMonth = dateTime.getMonth();
-            const thisDate = dateTime.getDate();
+        const average = valuesToAverage.reduce((sum, value) => sum + value, 0) /
+            valuesToAverage.length;
 
-            const spend = spending.reduce((sum, table, index) => {
-                const tableSpend = results[index]
-                    .find(({ year, month, date }) =>
-                        year === thisYear && month === thisMonth && date === thisDate
-                    );
-
-                if (!tableSpend) {
-                    return sum;
-                }
-
-                return tableSpend.cost + sum;
-
-            }, 0);
-
-            const incomeResult = results[spending.length].find(({ year, month, date }) =>
-                year === thisYear && month === thisMonth && date === thisDate
-            );
-
-            const incomeValue = incomeResult
-                ? incomeResult.cost
-                : 0;
-
-            return incomeValue - spend;
-
-        });
+        return { tag, value: Math.round(current + average * months) };
+    });
 }
 
 async function getData(db, user) {
@@ -455,7 +407,7 @@ async function getData(db, user) {
         db, user, yearMonths, config.data.listCategories, balance.old
     );
 
-    const dailyCashflow = await getDailyCashflow(db, user, now);
+    const targets = getTargets(balance, futureMonths);
 
     return {
         startYearMonth: yearMonths[0],
@@ -463,8 +415,8 @@ async function getData(db, user) {
         currentYear: now.getFullYear(),
         currentMonth: now.getMonth() + 1,
         futureMonths,
-        cost: { ...monthCost, ...balance },
-        dailyCashflow
+        targets,
+        cost: { ...monthCost, ...balance }
     };
 }
 
@@ -484,7 +436,7 @@ module.exports = {
     getMonthlyBalanceQuery,
     getMonthlyBalance,
     getMonthlyCategoryValues,
-    getDailyCashflow,
+    getTargets,
     getData
 };
 
