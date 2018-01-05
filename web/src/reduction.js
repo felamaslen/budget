@@ -64,7 +64,7 @@ export function resetAppState(state) {
                 treeVisible: map({ bills: false })
             }),
             graphFunds: map({
-                period: GRAPH_FUNDS_PERIODS[0][0],
+                period: process.env.DEFAULT_FUND_PERIOD || GRAPH_FUNDS_PERIODS[0][0],
                 mode: GRAPH_FUNDS_MODE_ROI,
                 showOverall: true,
                 hlPoint: null,

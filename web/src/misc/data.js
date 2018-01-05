@@ -14,11 +14,16 @@ function sortByDate(prev, next) {
     return 1;
 }
 
-export function getPeriodMatch(shortPeriod) {
-    const match = shortPeriod.match(/^([a-z]+)([0-9]+)$/);
+export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD) {
+    const periodRegex = /^([a-z]+)([0-9]+)$/;
 
+    let match = (shortPeriod || defaultPeriod).match(periodRegex);
     if (!match) {
-        return { period: 'year', length: '1' };
+        match = defaultPeriod.match(periodRegex);
+
+        if (!match) {
+            return { period: 'year', length: '1' };
+        }
     }
 
     return { period: match[1], length: match[2] };

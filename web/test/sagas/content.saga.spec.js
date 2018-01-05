@@ -111,6 +111,17 @@ describe('content.saga', () => {
         });
 
         describe('for the funds page', () => {
+            let envBefore = null;
+            before(() => {
+                envBefore = process.env.DEFAULT_FUND_PERIOD;
+
+                process.env.DEFAULT_FUND_PERIOD = 'year1';
+            });
+
+            after(() => {
+                process.env.DEFAULT_FUND_PERIOD = envBefore;
+            });
+
             it('should work as expected', () => {
                 testSaga(S.requestContent, { page: 'funds' })
                     .next()

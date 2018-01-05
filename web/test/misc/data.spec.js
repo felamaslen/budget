@@ -12,8 +12,21 @@ import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/misc/const';
 
 describe('misc/data', () => {
     describe('getPeriodMatch', () => {
-        it('should return year1 by default', () => {
-            expect(M.getPeriodMatch('foo')).to.deep.equal({ period: 'year', length: '1' });
+        let envBefore = null;
+        before(() => {
+            envBefore = process.env.DEFAULT_FUND_PERIOD;
+
+            process.env.DEFAULT_FUND_PERIOD = 'year11';
+        });
+
+        after(() => {
+            process.env.DEFAULT_FUND_PERIOD = envBefore;
+        });
+
+        it('should return env variable by default', () => {
+            expect(M.getPeriodMatch('foo')).to.deep.equal({ period: 'year', length: '11' });
+
+            process.env.DEFAULT_FUND_PERIOD = 'year11';
         });
         it('should split up a short period representation', () => {
             expect(M.getPeriodMatch('month5')).to.deep.equal({ period: 'month', length: '5' });
