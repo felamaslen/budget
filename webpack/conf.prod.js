@@ -18,7 +18,8 @@ module.exports = {
             'process.env': {
                 NODE_ENV: JSON.stringify('production'),
                 STOCK_INDICES: JSON.stringify(process.env.STOCK_INDICES || ''),
-                DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false')
+                DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false'),
+                DEFAULT_FUND_PERIOD: JSON.stringify(process.env.DEFAULT_FUND_PERIOD || 'year1')
             }
         }),
         new webpack.optimize.UglifyJsPlugin({
