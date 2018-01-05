@@ -24,9 +24,9 @@ function getNumResultsQuery(db, user, salt, minTimestamp) {
     SELECT COUNT(*) AS numResults FROM (
         SELECT c.cid
         FROM funds AS f
-        LEFT JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, ?))
-        LEFT JOIN fund_cache fc ON fh.fid = fc.fid
-        LEFT JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
+        INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, ?))
+        INNER JOIN fund_cache fc ON fh.fid = fc.fid
+        INNER JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1
             AND c.time > ${minTimestamp}
         WHERE f.uid = ?
         GROUP BY c.cid

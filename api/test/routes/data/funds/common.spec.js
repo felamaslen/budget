@@ -44,9 +44,9 @@ describe('/data/funds', () => {
             expect(funds.getNumResultsQuery(db, user, 'somesalt', 10)).to.equal([
                 'SELECT COUNT(*) AS numResults FROM (',
                 'SELECT c.cid FROM funds AS f',
-                'LEFT JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, \'somesalt\'))',
-                'LEFT JOIN fund_cache fc ON fh.fid = fc.fid',
-                'LEFT JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1',
+                'INNER JOIN fund_hash fh ON fh.hash = MD5(CONCAT(f.item, \'somesalt\'))',
+                'INNER JOIN fund_cache fc ON fh.fid = fc.fid',
+                'INNER JOIN fund_cache_time c ON c.cid = fc.cid AND c.done = 1',
                 'AND c.time > 10',
                 'WHERE f.uid = 1 GROUP BY c.cid ) results'
             ].join(' '));
