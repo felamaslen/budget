@@ -18,6 +18,10 @@ const itemKey = PAGES.funds.cols.indexOf('item');
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = (now.getTime() / 1000) - cacheTimes.last() - startTime;
 
+    if (isNaN(age)) {
+        return 'no values';
+    }
+
     return formatAge(age);
 }
 export function getFundsCachedValue(rows, startTime, cacheTimes, now) {

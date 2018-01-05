@@ -49,7 +49,7 @@ export function *requestContent({ page }) {
         ];
     }
     else if (page === 'funds') {
-        const { period, length } = getPeriodMatch(GRAPH_FUNDS_PERIODS[0][0]);
+        const { period, length } = getPeriodMatch();
 
         query = { history: 'true', period, length };
     }

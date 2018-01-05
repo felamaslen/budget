@@ -56,6 +56,16 @@ describe('app.reducer', () => {
     });
 
     describe('rLogout', () => {
+        let envBefore = null;
+        before(() => {
+            envBefore = process.env.DEFAULT_FUND_PERIOD;
+
+            process.env.DEFAULT_FUND_PERIOD = 'year1';
+        });
+        after(() => {
+            process.env.DEFAULT_FUND_PERIOD = envBefore;
+        });
+
         it('should not do anything if the state is loading', () => {
             expect(R.rLogout(fromJS({ loading: true })).toJS())
                 .to.deep.equal({ loading: true });

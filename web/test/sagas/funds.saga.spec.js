@@ -24,6 +24,17 @@ describe('funds.saga', () => {
     });
 
     describe('requestFundPeriodData', () => {
+        let envBefore = null;
+        before(() => {
+            envBefore = process.env.DEFAULT_FUND_PERIOD;
+
+            process.env.DEFAULT_FUND_PERIOD = 'year1';
+        });
+
+        after(() => {
+            process.env.DEFAULT_FUND_PERIOD = envBefore;
+        });
+
         it('should do nothing if loading from the cache', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()

@@ -353,7 +353,7 @@ export class GraphFunds extends LineGraph {
                 {fundLineToggles}
             </ul>
             <span className="mode">
-      Mode:&nbsp;{GRAPH_FUNDS_MODES[this.props.mode]}
+                {'Mode: '}{GRAPH_FUNDS_MODES[this.props.mode]}
             </span>
         </div>;
     }

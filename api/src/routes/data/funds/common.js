@@ -154,15 +154,15 @@ async function getFundHistoryMappedToFundIds(db, user, now, {
     const numResultsQuery = await getNumResultsQuery(db, user, salt, minTimestamp);
     const numResults = Number(numResultsQuery[0].numResults);
 
-    let fundHistory = { idMap: {}, startTime: 0, times: [] };
-
-    if (!isNaN(numResults)) {
-        fundHistory = await getAllHistoryForFundsQuery(
+    if (!isNaN(numResults) && numResults > 2) {
+        const fundHistory = await getAllHistoryForFundsQuery(
             db, user, salt, numResults, numDisplay, minTimestamp
         );
+
+        return processFundHistory(fundHistory);
     }
 
-    return processFundHistory(fundHistory);
+    return { idMap: {}, startIndex: {}, startTime: minTimestamp, times: [] };
 }
 
 function validateTransactions(transactions) {
