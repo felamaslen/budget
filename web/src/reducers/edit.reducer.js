@@ -31,7 +31,8 @@ export function rActivateEditable(reduction, { page, editable, cancel }) {
         if (cancel) {
             // revert to previous state
             newReduction = applyEdits(newReduction, {
-                item: active.set('value', active.get('originalValue'))
+                item: active.set('value', active.get('originalValue')),
+                page
             });
         }
         else {
