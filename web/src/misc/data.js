@@ -14,7 +14,7 @@ function sortByDate(prev, next) {
     return 1;
 }
 
-export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD) {
+export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD || '') {
     const periodRegex = /^([a-z]+)([0-9]+)$/;
 
     let match = (shortPeriod || defaultPeriod).match(periodRegex);
