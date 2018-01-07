@@ -19,9 +19,7 @@ export default class Graph extends PureComponent {
             canvas: null,
             width,
             height,
-            padding: padding || [0, 0, 0, 0],
-            canvasProperties: {},
-            outerProperties: {}
+            padding: padding || [0, 0, 0, 0]
         };
 
         this.onResize = debounce(() => {
@@ -56,7 +54,7 @@ export default class Graph extends PureComponent {
         this.draw();
     }
     render() {
-        const { name, canvasClasses, before, after } = this.props;
+        const { name, canvasClasses, canvasProperties, outerProperties, before, after } = this.props;
 
         const className = classNames('graph-container', `graph-${name}`);
 
@@ -65,14 +63,20 @@ export default class Graph extends PureComponent {
             ctx: canvas && canvas.getContext && canvas.getContext('2d')
         });
 
-        return <div className={className} {...this.state.outerProperties}>
+        const attachProps = (propsObject = {}) => Object.keys(propsObject)
+            .reduce((proc, key) => ({ ...proc, [key]: propsObject[key](this.props, this.state) }), {});
+
+        const outerPropertiesProc = attachProps(outerProperties);
+        const canvasPropertiesProc = attachProps(canvasProperties);
+
+        return <div className={className} {...outerPropertiesProc}>
             {before || null}
             <canvas
                 ref={canvasRef}
                 className={canvasClasses || ''}
                 width={this.state.width}
                 height={this.state.height}
-                {...this.state.canvasProperties}
+                {...canvasPropertiesProc}
             />
             {after || null}
         </div>;
@@ -85,6 +89,8 @@ Graph.propTypes = {
     height: PropTypes.number.isRequired,
     padding: PropTypes.array,
     canvasClasses: PropTypes.string,
+    canvasProperties: PropTypes.object,
+    outerProperties: PropTypes.object,
     before: PropTypes.object,
     after: PropTypes.object,
     onDraw: PropTypes.func.isRequired

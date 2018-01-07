@@ -75,25 +75,31 @@ function getInterpolatorHermite(points) {
     );
 }
 
+export const genPixX = ({ minX, maxX }, { width, padding: [, padRight, , padLeft] }) => value =>
+    padLeft + (value - minX) / (maxX - minX) * (width - padLeft - padRight);
+
+export const genPixY = ({ minY, maxY }, { height, padding: [padTop, , padBottom] }) => value =>
+    height - padBottom - (value - minY) / (maxY - minY) * (height - padTop - padBottom);
+
+export const genValX = ({ minX, maxX }, { width, padding: [, padRight, , padLeft] }) => pix =>
+    (pix - padLeft) * (maxX - minX) / (width - padLeft - padRight) + minX;
+
+export const genValY = ({ minY, maxY }, { height, padding: [padTop, , padBottom] }) => pix =>
+    (height - padBottom - pix) * (maxY - minY) / (height - padTop - padBottom) + minY;
+
 export default class LineGraph extends Graph {
-    pixX = xValue => {
-        return this.state.padding[3] +
-            (xValue - this.props.minX) / (this.props.maxX - this.props.minX) *
-            (this.state.width - this.state.padding[3] - this.state.padding[1]);
-    };
-    valX = pix => {
-        return (pix - this.state.padding[3]) * (this.props.maxX - this.props.minX) /
-            (this.state.width - this.state.padding[3] - this.state.padding[1]) + this.props.minX;
-    };
-    pixY = yValue => {
-        return this.state.height - this.state.padding[2] -
-            (yValue - this.props.minY) / (this.props.maxY - this.props.minY) *
-            (this.state.height - this.state.padding[0] - this.state.padding[2]);
-    };
-    valY = pix => {
-        return (this.state.height - this.state.padding[2] - pix) * (this.props.maxY - this.props.minY) /
-            (this.state.height - this.state.padding[0] - this.state.padding[2]) + this.props.minY;
-    };
+    constructor(props) {
+        super(props);
+
+        this.setCalcFunctions();
+    }
+    setCalcFunctions() {
+        this.pixX = genPixX(this.props, this.state);
+        this.pixY = genPixY(this.props, this.state);
+        this.valX = genValX(this.props, this.state);
+        this.valY = genValY(this.props, this.state);
+    }
+
     getTimeScale = offset => {
         // divides the time axis (horizontal) into appropriate chunks
         const ticks = timeSeriesTicks(offset + this.props.minX, offset + this.props.maxX);
@@ -124,8 +130,6 @@ export default class LineGraph extends Graph {
             );
     };
     drawCubicLineCurve = (curve, points, color) => {
-        this.state.ctx.beginPath();
-
         let colorKey = 0;
         let moved = false;
         let colorTransitionKey = 0;
@@ -134,6 +138,8 @@ export default class LineGraph extends Graph {
         let theColor = dynamicColor
             ? color(points.getIn([0, 1]))
             : color[0];
+
+        this.state.ctx.beginPath();
         this.state.ctx.strokeStyle = theColor;
 
         curve.forEach((piece, pieceKey) => {
@@ -279,6 +285,16 @@ export default class LineGraph extends Graph {
         }
         this.state.ctx.closePath();
     };
+
+    componentDidUpdate(prevProps) {
+        if (!(prevProps.minX === this.props.minX && prevProps.maxX === this.props.maxX &&
+            prevProps.minY === this.props.minY && prevProps.maxY === this.props.maxY)) {
+
+            this.setCalcFunctions();
+        }
+
+        return super.componentDidUpdate();
+    }
 }
 
 LineGraph.propTypes = {
