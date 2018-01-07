@@ -160,7 +160,7 @@ export function getValuesWithTime(data, {
     });
 }
 
-function drawNowLine(props, { ctx, minY, maxY }, { pixX, pixY }) {
+function drawNowLine({ minY, maxY }, { ctx }, { pixX, pixY }) {
     // draw a line indicating where the present ends and the future starts
     const nowLineX = Math.floor(pixX(today.timestamp())) + 0.5;
     ctx.beginPath();
