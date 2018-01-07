@@ -2,6 +2,7 @@
  * React component to display a line graph (e.g. time series)
  */
 
+import PropTypes from 'prop-types';
 import Graph from '.';
 import { timeSeriesTicks } from '../../misc/date';
 
@@ -75,56 +76,39 @@ function getInterpolatorHermite(points) {
 }
 
 export default class LineGraph extends Graph {
-    constructor(props) {
-        super(props);
-
-        this.colorTransition = [null];
-        this.setRange([0, 1, 0, 1]);
-    }
-    pixX(xValue) {
-        return this.padding[3] +
-            (xValue - this.minX) / (this.maxX - this.minX) *
-            (this.width - this.padding[3] - this.padding[1]);
-    }
-    valX(pix) {
-        return (pix - this.padding[3]) * (this.maxX - this.minX) /
-            (this.width - this.padding[3] - this.padding[1]) + this.minX;
-    }
-    pixY(yValue) {
-        return this.height - this.padding[2] -
-            (yValue - this.minY) / (this.maxY - this.minY) *
-            (this.height - this.padding[0] - this.padding[2]);
-    }
-    valY(pix) {
-        return (this.height - this.padding[2] - pix) * (this.maxY - this.minY) /
-            (this.height - this.padding[0] - this.padding[2]) + this.minY;
-    }
-    setRange(range) {
-        this.minX = range[0];
-        this.maxX = range[1];
-        this.minY = range[2];
-        this.maxY = range[3];
-    }
-    getTimeScale(offset) {
+    pixX = xValue => {
+        return this.state.padding[3] +
+            (xValue - this.props.minX) / (this.props.maxX - this.props.minX) *
+            (this.state.width - this.state.padding[3] - this.state.padding[1]);
+    };
+    valX = pix => {
+        return (pix - this.state.padding[3]) * (this.props.maxX - this.props.minX) /
+            (this.state.width - this.state.padding[3] - this.state.padding[1]) + this.props.minX;
+    };
+    pixY = yValue => {
+        return this.state.height - this.state.padding[2] -
+            (yValue - this.props.minY) / (this.props.maxY - this.props.minY) *
+            (this.state.height - this.state.padding[0] - this.state.padding[2]);
+    };
+    valY = pix => {
+        return (this.state.height - this.state.padding[2] - pix) * (this.props.maxY - this.props.minY) /
+            (this.state.height - this.state.padding[0] - this.state.padding[2]) + this.props.minY;
+    };
+    getTimeScale = offset => {
         // divides the time axis (horizontal) into appropriate chunks
-        const ticks = timeSeriesTicks(
-            offset + this.minX, offset + this.maxX
-        );
+        const ticks = timeSeriesTicks(offset + this.props.minX, offset + this.props.maxX);
 
         if (ticks) {
-            return ticks.map(tick => {
-                return {
-                    major: tick.major,
-                    pix: Math.floor(this.pixX(tick.time - offset)) + 0.5,
-                    text: tick.label || null
-                };
-            });
+            return ticks.map(tick => ({
+                major: tick.major,
+                pix: Math.floor(this.pixX(tick.time - offset)) + 0.5,
+                text: tick.label || null
+            }));
         }
 
         return [];
-    }
-
-    getCubicCurve(pointsList) {
+    };
+    getCubicCurve = pointsList => {
         // Hermite spline
         const points = pointsList
             .toJS()
@@ -138,10 +122,9 @@ export default class LineGraph extends Graph {
                 .fill(0)
                 .map((item, pixel) => [points[key][0] + pixel, interpolator(key, pixel)])
             );
-    }
-
-    drawCubicLineCurve(curve, points, color) {
-        this.ctx.beginPath();
+    };
+    drawCubicLineCurve = (curve, points, color) => {
+        this.state.ctx.beginPath();
 
         let colorKey = 0;
         let moved = false;
@@ -151,20 +134,20 @@ export default class LineGraph extends Graph {
         let theColor = dynamicColor
             ? color(points.getIn([0, 1]))
             : color[0];
-        this.ctx.strokeStyle = theColor;
+        this.state.ctx.strokeStyle = theColor;
 
         curve.forEach((piece, pieceKey) => {
-            if (pieceKey === this.colorTransition[colorTransitionKey]) {
+            if (pieceKey === this.props.colorTransition[colorTransitionKey]) {
                 colorTransitionKey++;
 
                 if (moved) {
-                    this.ctx.lineTo(piece[0][0], piece[0][1]);
-                    this.ctx.stroke();
-                    this.ctx.closePath();
-                    this.ctx.beginPath();
+                    this.state.ctx.lineTo(piece[0][0], piece[0][1]);
+                    this.state.ctx.stroke();
+                    this.state.ctx.closePath();
+                    this.state.ctx.beginPath();
                 }
 
-                this.ctx.strokeStyle = dynamicColor
+                this.state.ctx.strokeStyle = dynamicColor
                     ? color(this.valY(piece[0][1]))
                     : color[++colorKey % color.length];
 
@@ -176,19 +159,19 @@ export default class LineGraph extends Graph {
                     const newColor = color(this.valY(point[1]));
                     if (newColor !== theColor) {
                         if (moved) {
-                            this.ctx.strokeStyle = theColor;
-                            this.ctx.stroke();
-                            this.ctx.closePath();
-                            this.ctx.beginPath();
+                            this.state.ctx.strokeStyle = theColor;
+                            this.state.ctx.stroke();
+                            this.state.ctx.closePath();
+                            this.state.ctx.beginPath();
 
                             if (pointKey > 0) {
-                                this.ctx.moveTo(piece[pointKey - 1][0], piece[pointKey - 1][1]);
+                                this.state.ctx.moveTo(piece[pointKey - 1][0], piece[pointKey - 1][1]);
                             }
                             else if (pieceKey > 0) {
                                 const lastCurve = curve[pieceKey - 1];
                                 const lastPoint = lastCurve[lastCurve.length - 1];
 
-                                this.ctx.moveTo(lastPoint[0], lastPoint[1]);
+                                this.state.ctx.moveTo(lastPoint[0], lastPoint[1]);
                             }
                         }
                         theColor = newColor;
@@ -196,29 +179,29 @@ export default class LineGraph extends Graph {
                 }
 
                 if (moved) {
-                    this.ctx.lineTo(point[0], point[1]);
+                    this.state.ctx.lineTo(point[0], point[1]);
                 }
                 else {
-                    this.ctx.moveTo(point[0], point[1]);
+                    this.state.ctx.moveTo(point[0], point[1]);
                     moved = true;
                 }
             });
         });
 
         // complete the line to the last point
-        this.ctx.lineTo(
+        this.state.ctx.lineTo(
             this.pixX(points.getIn([points.size - 1, 0])),
             this.pixY(points.getIn([points.size - 1, 1]))
         );
 
         if (dynamicColor) {
-            this.ctx.strokeStyle = theColor;
+            this.state.ctx.strokeStyle = theColor;
         }
 
-        this.ctx.stroke();
-        this.ctx.closePath();
-    }
-    drawCubicLine(points, color, theOptions = {}) {
+        this.state.ctx.stroke();
+        this.state.ctx.closePath();
+    };
+    drawCubicLine = (points, color, theOptions = {}) => {
         if (points.size < 2) {
             return;
         }
@@ -227,30 +210,30 @@ export default class LineGraph extends Graph {
         const curve = this.getCubicCurve(points);
 
         if (options.fill) {
-            this.ctx.beginPath();
-            this.ctx.fillStyle = color[0];
-            this.ctx.moveTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
+            this.state.ctx.beginPath();
+            this.state.ctx.fillStyle = color[0];
+            this.state.ctx.moveTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
 
             curve.forEach(piece => {
                 piece.forEach(point => {
-                    this.ctx.lineTo(point[0], point[1]);
+                    this.state.ctx.lineTo(point[0], point[1]);
                 });
             });
 
             // complete the filled graph
-            this.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(points.last().get(1)));
-            this.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(0));
-            this.ctx.lineTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
+            this.state.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(points.last().get(1)));
+            this.state.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(0));
+            this.state.ctx.lineTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
 
-            this.ctx.fill();
-            this.ctx.closePath();
+            this.state.ctx.fill();
+            this.state.ctx.closePath();
         }
 
         if (options.stroke) {
             this.drawCubicLineCurve(curve, points, color);
         }
-    }
-    drawLine(points, color) {
+    };
+    drawLine = (points, color) => {
         if (points.size < 2) {
             return;
         }
@@ -261,40 +244,49 @@ export default class LineGraph extends Graph {
 
         let newColor = null;
         let moved = false;
-        this.ctx.beginPath();
+        this.state.ctx.beginPath();
         points.forEach(point => {
             const xPix = this.pixX(point.first());
             const yPix = this.pixY(point.last());
 
             if (moved) {
-                this.ctx.lineTo(xPix, yPix);
+                this.state.ctx.lineTo(xPix, yPix);
                 if (dynamicColor) {
                     newColor = color(point.last());
                     if (newColor !== theColor) {
-                        this.ctx.strokeStyle = theColor;
-                        this.ctx.stroke();
-                        this.ctx.closePath();
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(xPix, yPix);
+                        this.state.ctx.strokeStyle = theColor;
+                        this.state.ctx.stroke();
+                        this.state.ctx.closePath();
+                        this.state.ctx.beginPath();
+                        this.state.ctx.moveTo(xPix, yPix);
                         theColor = newColor;
                     }
                 }
             }
             else {
-                this.ctx.moveTo(xPix, yPix);
+                this.state.ctx.moveTo(xPix, yPix);
                 moved = true;
             }
         });
 
-        this.ctx.strokeStyle = theColor;
-        this.ctx.stroke();
-        if (this.fill) {
-            this.ctx.lineTo(this.pixX(points.last().first(), this.pixY(0)));
-            this.ctx.lineTo(this.pixX(points.first().first(), this.pixY(0)));
-            this.ctx.fillStyle = theColor;
-            this.ctx.fill();
+        this.state.ctx.strokeStyle = theColor;
+        this.state.ctx.stroke();
+        if (this.props.fill) {
+            this.state.ctx.lineTo(this.pixX(points.last().first(), this.pixY(0)));
+            this.state.ctx.lineTo(this.pixX(points.first().first(), this.pixY(0)));
+            this.state.ctx.fillStyle = theColor;
+            this.state.ctx.fill();
         }
-        this.ctx.closePath();
-    }
+        this.state.ctx.closePath();
+    };
 }
+
+LineGraph.propTypes = {
+    fill: PropTypes.bool,
+    minX: PropTypes.number,
+    maxX: PropTypes.number,
+    minY: PropTypes.number,
+    maxY: PropTypes.number,
+    colorTransition: PropTypes.array.isRequired
+};
 

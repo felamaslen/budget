@@ -5,70 +5,83 @@
 import React from 'react';
 import PureComponent from '../../immutable-component';
 import PropTypes from 'prop-types';
-import { htmlCanvasSupported } from '../../misc/const';
+import classNames from 'classnames';
+import debounce from '../../misc/debounce';
 
 export default class Graph extends PureComponent {
     constructor(props) {
         super(props);
 
-        this.ctx = null;
-        this.canvas = null;
-        this.width = null;
-        this.height = null;
-        this.supported = null;
-        this.padding = [0, 0, 0, 0];
-        this.canvasProperties = {};
-        this.outerProperties = {};
-    }
-    update() {
-        return null;
-    }
-    draw() {
-        return null;
-    }
-    beforeCanvas() {
-        return null;
-    }
-    afterCanvas() {
-        return null;
-    }
-    canvasClasses() {
-        return null;
-    }
-    componentWillMount() {
-        this.supported = htmlCanvasSupported();
-    }
-    componentDidMount() {
-        this.width = this.props.width;
-        this.height = this.props.height;
-        this.update();
-    }
-    componentDidUpdate() {
-        this.update();
-    }
-    render() {
-        const classes = `graph-container graph-${this.props.name}`;
+        const { width, height, padding } = props;
 
-        const canvasRef = canvas => {
-            this.canvas = canvas;
-            if (canvas) {
-                this.ctx = canvas.getContext('2d');
-            }
+        this.state = {
+            ctx: null,
+            canvas: null,
+            width,
+            height,
+            padding: padding || [0, 0, 0, 0],
+            canvasProperties: {},
+            outerProperties: {}
         };
 
-        return <div className={classes} {...this.outerProperties}>
-            {this.beforeCanvas()}
-            <canvas ref={canvasRef} {...this.canvasProperties}
-                className={this.canvasClasses()}
-                width={this.props.width} height={this.props.height} />
-            {this.afterCanvas()}
+        this.onResize = debounce(() => {
+            if (window.innerWidth < this.width) {
+                this.setState({
+                    width: window.innerWidth
+                });
+            }
+        }, 100);
+    }
+    draw() {
+        if (!this.state.ctx) {
+            return;
+        }
+
+        this.state.ctx.clearRect(0, 0, this.state.width, this.state.height);
+
+        this.props.onDraw(this.props, this.state, this);
+    }
+    componentDidMount() {
+        window.addEventListener('resize', this.onResize);
+    }
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onResize);
+    }
+    componentDidUpdate() {
+        this.draw();
+    }
+    render() {
+        const { name, canvasClasses, before, after } = this.props;
+
+        const className = classNames('graph-container', `graph-${name}`);
+
+        const canvasRef = canvas => this.setState({
+            canvas,
+            ctx: canvas && canvas.getContext && canvas.getContext('2d')
+        });
+
+        return <div className={className} {...this.state.outerProperties}>
+            {before || null}
+            <canvas
+                ref={canvasRef}
+                className={canvasClasses || ''}
+                width={this.state.width}
+                height={this.state.height}
+                {...this.state.canvasProperties}
+            />
+            {after || null}
         </div>;
     }
 }
 
 Graph.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    name: PropTypes.string
+    name: PropTypes.string,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    padding: PropTypes.array,
+    canvasClasses: PropTypes.string,
+    before: PropTypes.object,
+    after: PropTypes.object,
+    onDraw: PropTypes.func.isRequired
 };
 
