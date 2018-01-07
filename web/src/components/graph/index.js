@@ -25,9 +25,14 @@ export default class Graph extends PureComponent {
         };
 
         this.onResize = debounce(() => {
-            if (window.innerWidth < this.width) {
+            if (window.innerWidth < this.state.width) {
                 this.setState({
                     width: window.innerWidth
+                });
+            }
+            else if (this.state.width < this.props.width) {
+                this.setState({
+                    width: this.props.width
                 });
             }
         }, 100);
