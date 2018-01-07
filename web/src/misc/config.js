@@ -75,6 +75,7 @@ export const COLOR_FUND_UP = [0, 230, 18];
 export const COLOR_GRAPH_TITLE = [0, 0, 0];
 export const COLOR_DARK = [51, 51, 51];
 export const COLOR_LIGHT = [238, 238, 238];
+export const COLOR_LIGHT_MED = [200, 200, 200];
 export const COLOR_LIGHT_GREY = [153, 153, 153];
 export const COLOR_TRANSLUCENT_LIGHT = [255, 255, 255, 0.5];
 export const COLOR_TRANSLUCENT_DARK = [255, 255, 255, 0.8];

@@ -2,15 +2,7 @@
  * Graph general cash flow (balance over time)
  */
 
-import { List as list } from 'immutable';
-import connect, { GraphCashFlow } from './cash-flow';
-
-import { aShowAllToggled } from '../../../../actions/graph.actions';
-
-import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-
+import { Map as map, List as list } from 'immutable';
 import { formatCurrency } from '../../../../misc/format';
 import { rgba } from '../../../../misc/color';
 import {
@@ -19,152 +11,139 @@ import {
     FONT_GRAPH_KEY_SMALL
 } from '../../../../misc/config';
 
-export class GraphBalance extends GraphCashFlow {
-    setRanges() {
-        const dataY = this.dataBalance.map(item => item.last());
-        const dataX = this.dataBalance.map(item => item.first());
+import { connect } from 'react-redux';
+import { aShowAllToggled } from '../../../../actions/graph.actions';
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import GraphCashFlow, { getFutureKey, getValuesWithTime } from './cash-flow';
 
-        const minYValue = dataY.min();
-        const minY = Math.min(0, minYValue);
-        const maxY = dataY.max();
-        const minX = dataX.min();
-        const maxX = dataX.max();
+function AfterCanvas({ showAll, onShowAll }) {
+    const className = classNames('show-all', 'noselect', {
+        noselect: true,
+        enabled: showAll
+    });
 
-        this.setRange([minX, maxX, minY, maxY]);
-    }
-    processData() {
-        // this doesn't really modify the data, it just puts it in a form ready for drawing
+    const onClick = () => onShowAll();
 
-        // futureKey is used to separate past from future data
-        const futureKey = this.props.oldOffset + this.getFutureKey();
-
-        this.dataBalance = this.getValuesWithTime(this.props.balance);
-
-        this.dataFunds = this.props.funds.map((value, key) => {
-            return list([this.dataBalance.getIn([key, 0]), value]);
-        });
-
-        // for changing the colour
-        this.colorTransition = [futureKey - 1];
-        this.setRanges();
-    }
-    drawTitle() {
-        return super.drawTitle('Balance');
-    }
-    drawKeyFunds() {
-        this.ctx.fillText('Stocks', 78, 57);
-        this.ctx.fillStyle = rgba(COLOR_BALANCE_STOCKS);
-        this.ctx.fillRect(50, 54, 24, 6);
-    }
-    drawKeyActual() {
-        this.ctx.beginPath();
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = rgba(COLOR_BALANCE_ACTUAL);
-        this.ctx.moveTo(50, 40);
-        this.ctx.lineTo(74, 40);
-        this.ctx.stroke();
-        this.ctx.closePath();
-
-        this.ctx.font = FONT_GRAPH_KEY_SMALL;
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = rgba(COLOR_DARK);
-        this.ctx.fillText('Actual', 78, 40);
-    }
-    drawKeyPredicted() {
-        this.ctx.beginPath();
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = rgba(COLOR_BALANCE_PREDICTED);
-        this.ctx.moveTo(130, 40);
-        this.ctx.lineTo(154, 40);
-        this.ctx.stroke();
-        this.ctx.closePath();
-        this.ctx.fillText('Predicted', 158, 40);
-    }
-    drawKey() {
-        super.drawKey();
-
-        this.drawKeyActual();
-        this.drawKeyPredicted();
-        this.drawKeyFunds();
-    }
-    drawFundsLine() {
-        // plot funds data
-        this.ctx.lineWidth = 2;
-        this.drawCubicLine(
-            this.dataFunds,
-            [rgba(COLOR_BALANCE_STOCKS)],
-            {
-                fill: true,
-                stroke: false,
-                tension: 1
-            }
-        );
-    }
-    drawTargets() {
-        this.ctx.beginPath();
-        this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
-        this.ctx.fillRect(48, 70, 100, this.props.targets.size * 22 + 4);
-        this.ctx.closePath();
-
-        this.ctx.fillStyle = rgba(COLOR_DARK);
-        this.ctx.font = FONT_GRAPH_KEY_SMALL;
-        this.ctx.textBaseline = 'top';
-
-        this.props.targets.forEach((target, key) => {
-            const tag = target.get('tag');
-            const value = formatCurrency(target.get('value'), {
-                raw: true, noPence: true, abbreviate: true, precision: 0
-            });
-
-            const xPix = 50;
-            const yPix = 72 + 22 * key;
-
-            this.ctx.fillText(`${value} (${tag})`, xPix, yPix);
-        });
-    }
-    draw() {
-        super.draw();
-
-        // plot past + future predicted data
-        this.ctx.lineWidth = 2;
-        this.drawCubicLine(
-            this.dataBalance,
-            [rgba(COLOR_BALANCE_ACTUAL), rgba(COLOR_BALANCE_PREDICTED)]
-        );
-
-        // plot past + future predicted ISA stock value
-        this.drawFundsLine();
-
-        this.drawTargets();
-
-        this.drawKey();
-    }
-    afterCanvas() {
-        const showAllClasses = classNames({
-            'show-all': true,
-            noselect: true,
-            enabled: this.props.showAll
-        });
-
-        const showAll = () => this.props.toggleShowAll();
-
-        return <span className={showAllClasses} onClick={showAll}>
-            <span>Show all</span>
-            <a className="checkbox" />
-        </span>;
-    }
+    return <span className={className} onClick={onClick}>
+        <span>{'Show all'}</span>
+        <a className="checkbox" />
+    </span>;
 }
 
-GraphBalance.propTypes = {
+AfterCanvas.propTypes = {
     showAll: PropTypes.bool.isRequired,
-    balance: PropTypes.instanceOf(list).isRequired,
-    funds: PropTypes.instanceOf(list).isRequired,
-    targets: PropTypes.instanceOf(list).isRequired,
-    toggleShowAll: PropTypes.func.isRequired
+    onShowAll: PropTypes.func.isRequired
 };
 
-function getBalanceWithFunds(cost, showAll) {
+function drawFundsLine(dataFunds, ctx, drawCubicLine) {
+    // plot funds data
+    ctx.lineWidth = 2;
+    drawCubicLine(
+        dataFunds,
+        [rgba(COLOR_BALANCE_STOCKS)],
+        {
+            fill: true,
+            stroke: false,
+            tension: 1
+        }
+    );
+}
+
+function drawTargets(targets, ctx) {
+    ctx.beginPath();
+    ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
+    ctx.fillRect(48, 70, 100, targets.size * 22 + 4);
+    ctx.closePath();
+
+    ctx.fillStyle = rgba(COLOR_DARK);
+    ctx.font = FONT_GRAPH_KEY_SMALL;
+    ctx.textBaseline = 'top';
+
+    targets.forEach((target, key) => {
+        const tag = target.get('tag');
+        const value = formatCurrency(target.get('value'), {
+            raw: true, noPence: true, abbreviate: true, precision: 0
+        });
+
+        const xPix = 50;
+        const yPix = 72 + 22 * key;
+
+        ctx.fillText(`${value} (${tag})`, xPix, yPix);
+    });
+}
+
+function drawKeyActual(ctx) {
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = rgba(COLOR_BALANCE_ACTUAL);
+    ctx.moveTo(50, 40);
+    ctx.lineTo(74, 40);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.font = FONT_GRAPH_KEY_SMALL;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = rgba(COLOR_DARK);
+    ctx.fillText('Actual', 78, 40);
+}
+function drawKeyPredicted(ctx) {
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = rgba(COLOR_BALANCE_PREDICTED);
+    ctx.moveTo(130, 40);
+    ctx.lineTo(154, 40);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillText('Predicted', 158, 40);
+}
+function drawKeyFunds(ctx) {
+    ctx.fillText('Stocks', 78, 57);
+    ctx.fillStyle = rgba(COLOR_BALANCE_STOCKS);
+    ctx.fillRect(50, 54, 24, 6);
+}
+function drawKey(ctx) {
+    drawKeyActual(ctx);
+    drawKeyPredicted(ctx);
+    drawKeyFunds(ctx);
+}
+
+function onDraw({ targets, data: { dataBalance, dataFunds } }, { ctx }, { drawCubicLine }) {
+    // plot past + future predicted data
+    if (!(dataBalance && dataFunds)) {
+        return;
+    }
+
+    ctx.lineWidth = 2;
+    drawCubicLine(dataBalance, [
+        rgba(COLOR_BALANCE_ACTUAL), rgba(COLOR_BALANCE_PREDICTED)
+    ]);
+
+    // plot past + future predicted ISA stock value
+    drawFundsLine(dataFunds, ctx, drawCubicLine);
+
+    drawTargets(targets, ctx);
+
+    drawKey(ctx);
+}
+
+function getRanges(dataBalance) {
+    const dataY = dataBalance.map(item => item.last());
+    const dataX = dataBalance.map(item => item.first());
+
+    const minYValue = dataY.min();
+    const minY = Math.min(0, minYValue);
+    const maxY = dataY.max();
+    const minX = dataX.min();
+    const maxX = dataX.max();
+
+    return { minY, maxY, minX, maxX };
+}
+
+function processData({ cost, showAll, ...props }) {
     let oldOffset = 0;
+
     let balance = cost.get('balanceWithPredicted');
     let funds = cost.get('funds');
 
@@ -174,30 +153,57 @@ function getBalanceWithFunds(cost, showAll) {
         funds = cost.get('fundsOld').concat(funds);
     }
 
-    return { oldOffset, balance, funds };
-}
+    const futureKey = oldOffset + getFutureKey(props);
 
-const mapStateToProps = () => state => {
-    const showAll = state.getIn(['other', 'showAllBalanceGraph']);
+    const dataBalance = getValuesWithTime(balance, { oldOffset, ...props });
 
-    const cost = state.getIn(['pages', 'overview', 'data', 'cost']);
-    const { oldOffset, balance, funds } = getBalanceWithFunds(cost, showAll);
+    const dataFunds = funds.map((value, key) => list([
+        dataBalance.getIn([key, 0]),
+        value
+    ]));
+
+    const ranges = getRanges(dataBalance);
+
+    const colorTransition = [futureKey - 1];
 
     return {
-        showAll,
         oldOffset,
-        balance,
-        funds,
-        breakAtToday: true,
-        targets: state.getIn(['pages', 'overview', 'data', 'targets'])
+        ...ranges,
+        colorTransition,
+        data: { dataBalance, dataFunds }
     };
+}
+
+function GraphBalance(props) {
+    const after = <AfterCanvas {...props} />;
+
+    return <GraphCashFlow
+        title="Balance"
+        after={after}
+        onDraw={onDraw}
+        breakAtToday={true}
+        {...processData(props)}
+        {...props}
+    />;
+}
+
+GraphBalance.propTypes = {
+    cost: PropTypes.instanceOf(map).isRequired,
+    showAll: PropTypes.bool.isRequired,
+    targets: PropTypes.instanceOf(list).isRequired
 };
 
-const mapDispatchToProps = () => dispatch => ({
-    toggleShowAll: () => dispatch(aShowAllToggled())
+const mapStateToProps = state => ({
+    currentYearMonth: state.getIn(['pages', 'overview', 'data', 'currentYearMonth']),
+    startYearMonth: state.getIn(['pages', 'overview', 'data', 'startYearMonth']),
+    cost: state.getIn(['pages', 'overview', 'data', 'cost']),
+    showAll: state.getIn(['other', 'showAllBalanceGraph']),
+    targets: state.getIn(['pages', 'overview', 'data', 'targets'])
 });
 
-export default connect()(
-    mapStateToProps, mapDispatchToProps
-)(GraphBalance);
+const mapDispatchToProps = dispatch => ({
+    onShowAll: () => dispatch(aShowAllToggled())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GraphBalance);
 
