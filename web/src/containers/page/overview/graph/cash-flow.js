@@ -1,8 +1,4 @@
-import extendableContainer from '../../../container-extender';
-
 import { List as list } from 'immutable';
-import PropTypes from 'prop-types';
-
 import { GRAPH_WIDTH, GRAPH_HEIGHT } from '../../../../misc/const';
 import {
     COLOR_DARK, COLOR_LIGHT,
@@ -15,212 +11,222 @@ import { getTickSize, formatCurrency } from '../../../../misc/format';
 import { YMD } from '../../../../misc/date';
 import { rgba } from '../../../../misc/color';
 
+import { connect } from 'react-redux';
+import React from 'react';
+import PropTypes from 'prop-types';
 import LineGraph from '../../../../components/graph/line';
 
 const today = new YMD();
 
-export class GraphCashFlow extends LineGraph {
-    update() {
-        this.processData();
-        this.padding = [40, 0, 0, 0];
-        this.draw();
-    }
-    getTime(key, offset) {
-        // converts a key index to a UNIX time stamp
-        const yearMonth = getYearMonthFromKey(
-            key - offset, this.props.startYear, this.props.startMonth
-        );
-
-        if (this.props.breakAtToday &&
-            yearMonth[0] === today.year && yearMonth[1] === today.month) {
-            // today is 1-indexed
-
-            return today.timestamp();
-        }
-
-        // return the last day of this month
-        return Math.floor(new Date(yearMonth[0], yearMonth[1], 1).getTime() / 1000) - 86400;
-    }
-    getFutureKey() {
-        return 1 + getKeyFromYearMonth(
-            this.props.currentYear,
-            this.props.currentMonth,
-            this.props.startYear,
-            this.props.startMonth
-        );
-    }
-    getValuesWithTime(data) {
-        return data.map((value, key) => {
-            const time = this.getTime(key, this.props.oldOffset);
-
-            return list([time, value]);
-        });
-    }
-    drawNowLine() {
-        // draw a line indicating where the present ends and the future starts
-        const nowLineX = Math.floor(this.pixX(today.timestamp())) + 0.5;
-        this.ctx.beginPath();
-        this.ctx.moveTo(nowLineX, this.pixY(this.minY));
-        this.ctx.lineTo(nowLineX, this.pixY(this.maxY));
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = rgba(COLOR_DARK);
-        this.ctx.stroke();
-        this.ctx.closePath();
-
-        this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
-        this.ctx.fillText('Now', nowLineX, this.pixY(this.maxY));
-    }
-    getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
+function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
+    return (minY, maxY, pixY) => {
         const minorTicks = 5;
         const numTicks = numMajorTicks * minorTicks;
 
-        const tickSize = getTickSize(this.minY, this.maxY, numTicks);
-        const keyOffset = Math.ceil(this.minY / tickSize);
+        const tickSize = getTickSize(minY, maxY, numTicks);
+        const keyOffset = Math.ceil(minY / tickSize);
 
         return new Array(numTicks)
             .fill(0)
             .map((item, tickKey) => {
                 const key = tickKey + keyOffset;
 
-                const pos = Math.floor(this.pixY(key * tickSize)) + 0.5;
+                const pos = Math.floor(pixY(key * tickSize)) + 0.5;
                 const major = key % minorTicks === 0;
                 const value = key * tickSize;
 
                 return { pos, major, value };
             });
-    }
-    drawAxes() {
-        const ticksY = this.getTicksY();
+    };
+}
 
-        const drawTick = tick => {
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.pixX(this.minX), tick.pos);
-            this.ctx.lineTo(this.pixX(this.maxX), tick.pos);
-            this.ctx.stroke();
-            this.ctx.closePath();
-        };
+function drawAxes({ minX, minY, maxX, maxY }, { ctx }, { pixX, pixY, getTimeScale }) {
+    const ticksY = getTicksY()(minY, maxY, pixY);
 
-        // draw axes
-        this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
-        this.ctx.lineWidth = 1;
+    const drawTick = ({ pos }) => {
+        ctx.beginPath();
+        ctx.moveTo(pixX(minX), pos);
+        ctx.lineTo(pixX(maxX), pos);
+        ctx.stroke();
+        ctx.closePath();
+    };
 
-        this.ctx.font = FONT_AXIS_LABEL;
-        this.ctx.fillStyle = rgba(COLOR_DARK);
-        this.ctx.textAlign = 'left';
-        this.ctx.textBaseline = 'bottom';
+    // draw axes
+    ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
+    ctx.lineWidth = 1;
 
-        // draw minor Y ticks
-        this.ctx.strokeStyle = rgba(COLOR_LIGHT);
-        ticksY.filter(tick => !tick.major).forEach(drawTick);
+    ctx.font = FONT_AXIS_LABEL;
+    ctx.fillStyle = rgba(COLOR_DARK);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
 
-        // draw time (X axis) ticks
-        const y0 = this.pixY(this.minY);
-        const tickAngle = -Math.PI / 6;
-        const tickLength = 10;
-        const timeTicks = this.getTimeScale(0);
-        timeTicks.forEach(tick => {
-            const thisTickSize = tickLength * 0.5 * (tick.major + 1);
+    // draw minor Y ticks
+    ctx.strokeStyle = rgba(COLOR_LIGHT);
+    ticksY.filter(({ major }) => !major)
+        .forEach(drawTick);
 
-            // tick
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = tick.major
-                ? rgba(COLOR_GRAPH_TITLE)
-                : rgba(COLOR_DARK);
-            this.ctx.moveTo(tick.pix, y0);
-            this.ctx.lineTo(tick.pix, y0 - thisTickSize);
-            this.ctx.stroke();
-            this.ctx.closePath();
+    // draw time (X axis) ticks
+    const y0 = pixY(minY);
+    const tickAngle = -Math.PI / 6;
+    const tickLength = 10;
+    const timeTicks = getTimeScale(0);
+    timeTicks.forEach(({ text, pix, major }) => {
+        const thisTickSize = tickLength * 0.5 * (major + 1);
 
-            // vertical line
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = tick.major > 1
-                ? rgba(COLOR_LIGHT_GREY)
-                : rgba(COLOR_LIGHT);
-            this.ctx.moveTo(tick.pix, y0 - thisTickSize);
-            this.ctx.lineTo(tick.pix, 0);
-            this.ctx.stroke();
-            this.ctx.closePath();
+        // tick
+        ctx.beginPath();
+        ctx.strokeStyle = major
+            ? rgba(COLOR_GRAPH_TITLE)
+            : rgba(COLOR_DARK);
+        ctx.moveTo(pix, y0);
+        ctx.lineTo(pix, y0 - thisTickSize);
+        ctx.stroke();
+        ctx.closePath();
 
-            if (tick.text) {
-                this.ctx.save();
-                this.ctx.translate(tick.pix, y0 - thisTickSize);
-                this.ctx.rotate(tickAngle);
-                this.ctx.fillText(tick.text, 0, 0);
-                this.ctx.restore();
-            }
+        // vertical line
+        ctx.beginPath();
+        ctx.strokeStyle = major > 1
+            ? rgba(COLOR_LIGHT_GREY)
+            : rgba(COLOR_LIGHT);
+        ctx.moveTo(pix, y0 - thisTickSize);
+        ctx.lineTo(pix, 0);
+        ctx.stroke();
+        ctx.closePath();
+
+        if (text) {
+            ctx.save();
+            ctx.translate(pix, y0 - thisTickSize);
+            ctx.rotate(tickAngle);
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+        }
+    });
+
+    // draw major Y ticks
+    ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
+    const x0 = pixX(minX);
+
+    const ticksMajor = ticksY.filter(({ major }) => major);
+
+    ticksMajor.forEach(drawTick);
+    ticksMajor.forEach(({ value, pos }) => {
+        const tickName = formatCurrency(value, {
+            raw: true, noPence: true, abbreviate: true, precision: 1
         });
+        ctx.fillText(tickName, x0, pos);
+    });
+}
 
-        // draw major Y ticks
-        this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
-        const x0 = this.pixX(this.minX);
-        const ticksMajor = ticksY.filter(tick => tick.major);
-        ticksMajor.forEach(drawTick);
-        ticksMajor.forEach(tick => {
-            const tickName = formatCurrency(tick.value, {
-                raw: true, noPence: true, abbreviate: true, precision: 1
-            });
-            this.ctx.fillText(tickName, x0, tick.pos);
-        });
-    }
-    drawTitle(title) {
-        this.ctx.font = FONT_GRAPH_TITLE;
-        this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
-        this.ctx.textAlign = 'left';
-        this.ctx.textBaseline = 'top';
+export function getFutureKey({
+    currentYearMonth: [currentYear, currentMonth],
+    startYearMonth: [startYear, startMonth]
+}) {
+    return 1 + getKeyFromYearMonth(
+        currentYear,
+        currentMonth,
+        startYear,
+        startMonth
+    );
+}
 
-        this.ctx.fillText(title, 65, 10);
-    }
-    drawKeyBackground() {
-        this.ctx.beginPath();
-        this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
-        this.ctx.fillRect(45, 8, 200, 60);
-        this.ctx.closePath();
-    }
-    drawKey() {
-        // add title and key
-        this.drawKeyBackground();
+function getTime(offset, breakAtToday, startYear, startMonth) {
+    // converts a key index to a UNIX time stamp
+    return key => {
+        const [year, month] = getYearMonthFromKey(key - offset, startYear, startMonth);
 
-        this.drawTitle();
-    }
-    draw() {
-        if (!this.supported) {
-            return;
+        if (breakAtToday && year === today.year && month === today.month) {
+            // today is 1-indexed
+            return today.timestamp();
         }
 
-        // clear canvas
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.drawAxes();
-        this.drawNowLine();
-    }
+        // return the last day of this month
+        return Math.floor(new Date(year, month, 1).getTime() / 1000) - 86400;
+    };
+}
+
+export function getValuesWithTime(data, {
+    oldOffset,
+    breakAtToday,
+    startYearMonth: [startYear, startMonth]
+}) {
+
+    const timeGetter = getTime(oldOffset, breakAtToday, startYear, startMonth);
+
+    return data.map((value, index) => {
+
+        const time = timeGetter(index);
+
+        return list([time, value]);
+    });
+}
+
+function drawNowLine(props, { ctx, minY, maxY }, { pixX, pixY }) {
+    // draw a line indicating where the present ends and the future starts
+    const nowLineX = Math.floor(pixX(today.timestamp())) + 0.5;
+    ctx.beginPath();
+    ctx.moveTo(nowLineX, pixY(minY));
+    ctx.lineTo(nowLineX, pixY(maxY));
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = rgba(COLOR_DARK);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
+    ctx.fillText('Now', nowLineX, pixY(maxY));
+}
+
+function drawTitle({ title }, { ctx }) {
+    ctx.font = FONT_GRAPH_TITLE;
+    ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    ctx.fillText(title, 65, 10);
+}
+
+function drawKeyBackground(props, { ctx }) {
+    ctx.beginPath();
+    ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
+    ctx.fillRect(45, 8, 200, 60);
+    ctx.closePath();
+}
+
+export function drawKey(props, state, graph) {
+    // add title and key
+    drawKeyBackground(props, state, graph);
+    drawTitle(props, state, graph);
+}
+
+function GraphCashFlow({ onDraw, ...props }) {
+    const onDrawProc = (...args) => {
+        drawAxes(...args);
+        drawNowLine(...args);
+        onDraw(...args);
+    };
+
+    return <LineGraph
+        padding={[40, 0, 0, 0]}
+        onDraw={onDrawProc}
+        {...props}
+    />;
 }
 
 GraphCashFlow.propTypes = {
     yearMonths: PropTypes.instanceOf(list).isRequired,
-    currentYear: PropTypes.number.isRequired,
-    currentMonth: PropTypes.number.isRequired,
-    startYear: PropTypes.number.isRequired,
-    startMonth: PropTypes.number.isRequired,
+    currentYearMonth: PropTypes.array.isRequired,
+    startYearMonth: PropTypes.array.isRequired,
     oldOffset: PropTypes.number.isRequired,
-    breakAtToday: PropTypes.bool
+    data: PropTypes.object.isRequired,
+    breakAtToday: PropTypes.bool,
+    onDraw: PropTypes.func.isRequired
 };
 
-const stateDefault = () => state => {
-    const [currentYear, currentMonth] = state.getIn(['pages', 'overview', 'data', 'currentYearMonth']);
-    const [startYear, startMonth] = state.getIn(['pages', 'overview', 'data', 'startYearMonth']);
+const mapStateToProps = state => ({
+    width: Math.min(GRAPH_WIDTH, window.innerWidth),
+    height: GRAPH_HEIGHT,
+    yearMonths: list(state.getIn(['pages', 'overview', 'data', 'yearMonths'])),
+    oldOffset: 0
+});
 
-    return {
-        width: Math.min(GRAPH_WIDTH, window.innerWidth),
-        height: GRAPH_HEIGHT,
-        yearMonths: list(state.getIn(['pages', 'overview', 'data', 'yearMonths'])),
-        currentYear,
-        currentMonth,
-        startYear,
-        startMonth,
-        oldOffset: 0
-    };
-};
-
-const dispatchDefault = () => () => ({});
-
-export default () => extendableContainer(stateDefault, dispatchDefault)();
+export default connect(mapStateToProps)(GraphCashFlow);
 

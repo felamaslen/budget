@@ -3,153 +3,168 @@
  */
 
 import { List as list } from 'immutable';
-import connect, { GraphCashFlow } from './cash-flow';
-
-import PropTypes from 'prop-types';
-
 import { rgba } from '../../../../misc/color';
 import { GRAPH_SPEND_CATEGORIES } from '../../../../misc/const';
 import {
-    COLOR_DARK,
-    COLOR_LOSS, COLOR_PROFIT, COLOR_TRANSLUCENT_LIGHT, COLOR_SPENDING,
-    FONT_GRAPH_KEY_SMALL, FONT_GRAPH_KEY
+    COLOR_DARK, COLOR_LOSS, COLOR_PROFIT, COLOR_TRANSLUCENT_LIGHT, COLOR_SPENDING,
+    FONT_GRAPH_KEY_SMALL
 } from '../../../../misc/config';
 
-export class GraphSpend extends GraphCashFlow {
-    setRanges() {
-        const dataYNet = this.dataNet.map(item => item.last());
-        const dataX = this.dataNet.map(item => item.first());
+import { connect } from 'react-redux';
+import React from 'react';
+import PropTypes from 'prop-types';
+import GraphCashFlow, { getValuesWithTime, drawKey as drawBaseKey } from './cash-flow';
 
-        const minYValue = dataYNet.min();
-        const minY = Math.min(0, minYValue);
-        const maxY = dataYNet.max();
-        const minX = dataX.min();
-        const maxX = dataX.max();
+function drawFutureArea({ maxX, minY, maxY }, { ctx }, { pixX, pixY }) {
+    const future0 = pixX(Date.now() / 1000);
+    const future1 = pixY(maxY);
+    const futureW = pixX(maxX) - future0;
+    const futureH = pixY(minY) - future1;
 
-        this.setRange([minX, maxX, minY, maxY]);
-    }
-    processData() {
-        this.dataNet = this.getValuesWithTime(this.props.dataNet);
-        this.dataSpending = this.getValuesWithTime(this.props.dataSpending);
+    ctx.beginPath();
+    ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
+    ctx.fillRect(future0, future1, futureW, futureH);
+}
+function drawKeySpending(props, { ctx }) {
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = rgba(COLOR_SPENDING);
+    ctx.moveTo(50, 40);
+    ctx.lineTo(74, 40);
+    ctx.stroke();
+    ctx.closePath();
 
-        this.setRanges();
-    }
-    drawFutureArea() {
-        const future0 = this.pixX(Date.now() / 1000);
-        const future1 = this.pixY(this.maxY);
-        const futureW = this.pixX(this.maxX) - future0;
-        const futureH = this.pixY(this.minY) - future1;
+    ctx.font = FONT_GRAPH_KEY_SMALL;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = rgba(COLOR_DARK);
+    ctx.fillText('Spending', 78, 40);
+}
+function drawKey(...args) {
+    drawBaseKey(...args);
+    drawKeySpending(...args);
+    drawFutureArea(...args);
+}
 
-        this.ctx.beginPath();
-        this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
-        this.ctx.fillRect(future0, future1, futureW, futureH);
-    }
-    drawKeySpending() {
-        this.ctx.beginPath();
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = rgba(COLOR_SPENDING);
-        this.ctx.moveTo(50, 40);
-        this.ctx.lineTo(74, 40);
-        this.ctx.stroke();
-        this.ctx.closePath();
+function drawArrow(ctx, minY, maxY, pixY) {
+    const colorProfit = rgba(COLOR_PROFIT);
+    const colorLoss = rgba(COLOR_LOSS);
 
-        this.ctx.font = FONT_GRAPH_KEY_SMALL;
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = rgba(COLOR_DARK);
-        this.ctx.fillText('Spending', 78, 40);
-    }
-    drawKey() {
-        super.drawKey();
+    return (xPix, value) => {
+        let color = null;
+        let direction = null;
+        let sizeRatio = null;
 
-        this.drawKeySpending();
-
-        this.drawFutureArea();
-
-        this.ctx.textBaseline = 'middle';
-        this.ctx.font = FONT_GRAPH_KEY;
-    }
-    drawArrow(xPix, value) {
-        const color = value > 0
-            ? rgba(COLOR_PROFIT)
-            : rgba(COLOR_LOSS);
-
-        const direction = value > 0
-            ? 1
-            : -1;
-
-        const sizeRatio = value > 0
-            ? value / this.maxY
-            : value / this.minY;
+        if (value > 0) {
+            color = colorProfit;
+            direction = 1;
+            sizeRatio = value / maxY;
+        }
+        else {
+            color = colorLoss;
+            direction = -1;
+            sizeRatio = value / minY;
+        }
 
         const arrowWidth = 6 * (sizeRatio + 0.5);
         const arrowHeight = 10 * (sizeRatio + 0.5);
 
-        this.ctx.beginPath();
+        ctx.beginPath();
 
-        this.ctx.moveTo(xPix, this.pixY(0));
-        this.ctx.lineTo(xPix, this.pixY(value) + direction * arrowHeight / 2);
+        ctx.moveTo(xPix, pixY(0));
+        ctx.lineTo(xPix, pixY(value) + direction * arrowHeight / 2);
 
-        this.ctx.lineWidth = 3 * sizeRatio;
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
+        ctx.lineWidth = 3 * sizeRatio;
+        ctx.strokeStyle = color;
+        ctx.stroke();
 
         // draw the arrow head
-        this.ctx.beginPath();
+        ctx.beginPath();
 
-        this.ctx.moveTo(xPix - arrowWidth, this.pixY(value) + direction * arrowHeight);
-        this.ctx.lineTo(xPix, this.pixY(value));
-        this.ctx.lineTo(xPix + arrowWidth, this.pixY(value) + direction * arrowHeight);
-        this.ctx.lineTo(xPix, this.pixY(value) + direction * arrowHeight * 0.7);
+        ctx.moveTo(xPix - arrowWidth, pixY(value) + direction * arrowHeight);
+        ctx.lineTo(xPix, pixY(value));
+        ctx.lineTo(xPix + arrowWidth, pixY(value) + direction * arrowHeight);
+        ctx.lineTo(xPix, pixY(value) + direction * arrowHeight * 0.7);
 
-        this.ctx.fillStyle = color;
-        this.ctx.fill();
-    }
-    drawCashFlowArrows() {
-        this.dataNet.forEach(point => {
-            this.drawArrow(this.pixX(point.get(0)), point.get(1));
-        });
-    }
-    drawData() {
-        // plot data
-        this.ctx.lineWidth = 2;
-        this.drawCubicLine(this.dataSpending, [rgba(COLOR_SPENDING)]);
+        ctx.fillStyle = color;
+        ctx.fill();
+    };
+}
 
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        this.ctx.fillRect(0, 0, this.width, this.height);
+function drawData({
+    minY, maxY, data: { dataNet, dataSpending }
+}, {
+    ctx, width, height
+}, {
+    pixX, pixY, drawCubicLine
+}) {
+    ctx.lineWidth = 2;
+    drawCubicLine(dataSpending, [rgba(COLOR_SPENDING)]);
 
-        this.drawCashFlowArrows();
-    }
-    drawTitle() {
-        return super.drawTitle('Cash flow');
-    }
-    draw() {
-        super.draw();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(0, 0, width, height);
 
-        if (!this.supported) {
-            return;
-        }
+    const arrowDrawer = drawArrow(ctx, minY, maxY, pixY);
+    dataNet.forEach(point => {
+        arrowDrawer(pixX(point.get(0)), point.get(1));
+    });
+}
 
-        this.drawData();
-        this.drawKey();
-    }
+function onDraw(...args) {
+    drawData(...args);
+    drawKey(...args);
+}
+
+function getRanges(dataNet) {
+    const dataYNet = dataNet.map(item => item.last());
+    const dataX = dataNet.map(item => item.first());
+
+    const minYValue = dataYNet.min();
+    const minY = Math.min(0, minYValue);
+    const maxY = dataYNet.max();
+    const minX = dataX.min();
+    const maxX = dataX.max();
+
+    return { minX, maxX, minY, maxY };
+}
+
+function processData({ valuesNet, valuesSpending, ...props }) {
+    const dataNet = getValuesWithTime(valuesNet, { oldOffset: 0, ...props });
+    const dataSpending = getValuesWithTime(valuesSpending, { oldOffset: 0, ...props });
+
+    const ranges = getRanges(dataNet);
+
+    return {
+        ...ranges,
+        data: { dataNet, dataSpending }
+    };
+}
+
+function GraphSpend(props) {
+    return <GraphCashFlow
+        title="Cash flow"
+        onDraw={onDraw}
+        colorTransition={[null]}
+        {...processData(props)}
+        {...props}
+    />;
 }
 
 GraphSpend.propTypes = {
-    categories: PropTypes.instanceOf(list).isRequired,
-    dataNet: PropTypes.instanceOf(list).isRequired,
-    dataSpending: PropTypes.instanceOf(list).isRequired
+    valuesNet: PropTypes.instanceOf(list).isRequired,
+    valuesSpending: PropTypes.instanceOf(list).isRequired
 };
 
-const mapStateToProps = () => state => ({
-    categories: list(GRAPH_SPEND_CATEGORIES),
-    dataNet: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
+const mapStateToProps = state => ({
+    startYearMonth: state.getIn(['pages', 'overview', 'data', 'startYearMonth']),
+    currentYearMonth: state.getIn(['pages', 'overview', 'data', 'currentYearMonth']),
+    valuesNet: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
         return data.map((item, key) => {
             const cost = state.getIn(['pages', 'overview', 'data', 'cost', category.name, key]);
 
             return item - cost;
         });
     }, state.getIn(['pages', 'overview', 'data', 'cost', 'income'])),
-    dataSpending: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
+    valuesSpending: GRAPH_SPEND_CATEGORIES.reduce((data, category) => {
         return data.map((item, key) => {
             const cost = state
                 .getIn(['pages', 'overview', 'data', 'cost', category.name, key]);
@@ -162,5 +177,5 @@ const mapStateToProps = () => state => ({
     )
 });
 
-export default connect()(mapStateToProps)(GraphSpend);
+export default connect(mapStateToProps)(GraphSpend);
 

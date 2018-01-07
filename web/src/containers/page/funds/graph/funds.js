@@ -3,12 +3,6 @@
  */
 
 import { Map as map, List as list } from 'immutable';
-import { connect } from 'react-redux';
-
-import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-
 import { formatCurrency, getTickSize, formatAge } from '../../../../misc/format';
 import { rgba } from '../../../../misc/color';
 import {
@@ -17,346 +11,361 @@ import {
 } from '../../../../misc/const';
 import {
     GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS,
-    COLOR_DARK, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT, COLOR_LIGHT_GREY,
+    COLOR_DARK, COLOR_LIGHT_MED, COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT,
     COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK,
     FONT_AXIS_LABEL, FONT_GRAPH_TITLE
 } from '../../../../misc/config';
 
-import LineGraph from '../../../../components/graph/line';
-
-import { separateLine } from './helpers';
-
+import { connect } from 'react-redux';
 import {
     aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
     aFundsGraphLineToggled, aFundsGraphPeriodChanged
 } from '../../../../actions/graph.actions';
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import LineGraph, { genValX, genValY } from '../../../../components/graph/line';
+import { separateLine } from './helpers';
 
-export class GraphFunds extends LineGraph {
-    constructor(props) {
-        super(props);
+function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {
+    const fundLineToggles = fundItems
+        ? fundItems.map((item, key) => {
+            const className = classNames({ enabled: item.get('enabled') });
+            const onClick = () => toggleLine(key);
+            const style = {
+                borderColor: rgba(item.get('color'))
+            };
 
-        this.padding = [36, 0, 0, 0];
-        this.canvasProperties = {
-            onClick: () => this.props.onClick(),
-            onWheel: evt => {
-                const position = this.props.hlPoint
-                    ? this.props.hlPoint.get(0)
-                    : this.valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
+            return <li key={key} className={className} onClick={onClick}>
+                <span className="checkbox" style={style}></span>
+                <span className="fund">{item.get('item')}</span>
+            </li>;
+        })
+        : null;
 
-                this.props.zoomGraph({
-                    direction: evt.deltaY / Math.abs(evt.deltaY),
-                    position
-                });
+    const onChange = evt => changePeriod({
+        shortPeriod: evt.target.value,
+        reloadPagePrices: false
+    });
+
+    const periodOptions = GRAPH_FUNDS_PERIODS.map(([value, display], key) => {
+        return <option key={key} value={value}>{display}</option>;
+    });
+
+    return <div>
+        <ul className="fund-sidebar noselect">
+            <li>
+                <select defaultValue={period} onChange={onChange}>
+                    {periodOptions}
+                </select>
+            </li>
+            {fundLineToggles}
+        </ul>
+        <span className="mode">
+            {'Mode: '}{GRAPH_FUNDS_MODES[mode]}
+        </span>
+    </div>;
+}
+
+AfterCanvas.propTypes = {
+    period: PropTypes.string.isRequired,
+    mode: PropTypes.number.isRequired,
+    fundItems: PropTypes.instanceOf(list).isRequired,
+    toggleLine: PropTypes.func.isRequired,
+    changePeriod: PropTypes.func.isRequired
+};
+
+function formatValue(value, mode = null) {
+    if (mode === GRAPH_FUNDS_MODE_ROI) {
+        return `${value.toFixed(2)}%`;
+    }
+
+    return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
+}
+function drawProfitLossBackground({ minX, maxX, minY, maxY, mode }, { ctx }, { pixX, pixY }) {
+    if (mode !== GRAPH_FUNDS_MODE_ROI) {
+        return;
+    }
+
+    const zero = pixY(Math.min(Math.max(0, minY), maxY));
+    if (maxY > 0) {
+        ctx.fillStyle = rgba(COLOR_PROFIT_LIGHT);
+        const y0 = pixY(maxY);
+        ctx.fillRect(pixX(minX), y0, pixX(maxX), zero - y0);
+    }
+    if (minY < 0) {
+        ctx.fillStyle = rgba(COLOR_LOSS_LIGHT);
+        ctx.fillRect(
+            pixX(minX),
+            zero,
+            pixX(maxX),
+            pixY(minY) - zero
+        );
+    }
+}
+
+function calculateTicksY({ tickSizeY, minY, maxY }, pixY) {
+    // calculate tick range
+    const numTicks = typeof tickSizeY === 'undefined' || isNaN(tickSizeY)
+        ? 0
+        : Math.floor((maxY - minY) / tickSizeY);
+
+    if (!numTicks) {
+        return [];
+    }
+
+    return new Array(numTicks)
+        .fill(0)
+        .map((item, key) => {
+            const value = minY + (key + 1) * tickSizeY;
+            const pos = Math.floor(pixY(value)) + 0.5;
+
+            return { value, pos };
+        });
+}
+const drawTicksY = axisColor => ({ minX, maxX, mode, ...props }, { ctx }, { pixX, pixY }) => {
+    ctx.lineWidth = 1;
+
+    const ticksY = calculateTicksY(props, pixY);
+
+    // draw horizontal lines
+    ctx.strokeStyle = axisColor;
+    ticksY.forEach(({ pos }) => {
+        // draw horizontal line
+        ctx.beginPath();
+        ctx.moveTo(pixX(minX), pos);
+        ctx.lineTo(pixX(maxX), pos);
+        ctx.stroke();
+        ctx.closePath();
+    });
+
+    // draw Y axis
+    ctx.fillStyle = rgba(COLOR_DARK);
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = 'right';
+    ctx.font = FONT_AXIS_LABEL;
+
+    ticksY.forEach(({ pos, value }) => {
+        const tickName = formatValue(value, mode);
+        ctx.fillText(tickName, pixX(maxX), pos);
+    });
+};
+
+const drawTimeTicks = axisColor => ({
+    minY, startTime
+}, {
+    ctx, padding: [padY1]
+}, {
+    pixY, getTimeScale
+}) => {
+    const timeTicks = getTimeScale(startTime);
+
+    ctx.font = FONT_AXIS_LABEL;
+    ctx.fillStyle = rgba(COLOR_DARK);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+
+    const tickAngle = -Math.PI / 6;
+    const tickSize = 10;
+
+    const y0 = pixY(minY);
+
+    timeTicks.forEach(({ major, pix, text }) => {
+        const thisTickSize = tickSize * 0.5 * (major + 1);
+
+        ctx.beginPath();
+        ctx.strokeStyle = major
+            ? rgba(COLOR_GRAPH_TITLE)
+            : rgba(COLOR_DARK);
+        ctx.moveTo(pix, y0);
+        ctx.lineTo(pix, y0 - thisTickSize);
+        ctx.stroke();
+        ctx.closePath();
+
+        if (major > 1) {
+            ctx.beginPath();
+            ctx.strokeStyle = axisColor;
+            ctx.moveTo(pix, y0 - thisTickSize);
+            ctx.lineTo(pix, padY1);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        if (text) {
+            ctx.save();
+            ctx.translate(pix, y0 - thisTickSize);
+            ctx.rotate(tickAngle);
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+        }
+    });
+};
+
+function drawAxes(props, state, graph) {
+    drawProfitLossBackground(props, state, graph);
+
+    const axisColor = rgba(COLOR_LIGHT_MED);
+
+    drawTicksY(axisColor)(props, state, graph);
+
+    drawTimeTicks(axisColor)(props, state, graph);
+}
+
+function drawData({
+    fundLines, fundItems, mode, hlPoint
+}, {
+    ctx
+}, {
+    pixX, pixY, drawCubicLine, drawLine
+}) {
+    // plot past data
+    fundLines.forEach(line => {
+        const mainLine = line.get('index') === 0;
+        const color = rgba(fundItems.getIn([line.get('index'), 'color']));
+
+        const separatedLines = separateLine(line.get('line'));
+
+        ctx.lineWidth = 1 + 0.5 * (mainLine >> 0);
+
+        if (mode === GRAPH_FUNDS_MODE_ROI) {
+            return separatedLines.forEach(linePart => drawCubicLine(linePart, [color]));
+        }
+
+        return separatedLines.forEach(linePart => drawLine(linePart, [color]));
+    });
+
+    if (hlPoint) {
+        const hlPixX = pixX(hlPoint.get(0));
+        const hlPixY = pixY(hlPoint.get(1));
+        ctx.beginPath();
+        ctx.moveTo(hlPixX, hlPixY);
+        ctx.arc(hlPixX, hlPixY, GRAPH_FUNDS_POINT_RADIUS, 0, Math.PI * 2, false);
+        ctx.fillStyle = hlPoint.get(2);
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+function drawLabel({ hlPoint, startTime, mode }, { ctx, width }, { pixX, pixY }) {
+    if (hlPoint) {
+        const ageSeconds = Date.now() / 1000 -
+               (hlPoint.get(0) + startTime);
+        const ageText = formatAge(ageSeconds);
+        const valueText = formatValue(hlPoint.get(1), mode);
+        const labelText = `${ageText}: ${valueText}`;
+
+        const paddingX = 2;
+        const paddingY = 1;
+        const posX = pixX(hlPoint.get(0));
+        const alignLeft = posX < width / 2;
+        const posY = pixY(hlPoint.get(1));
+
+        ctx.font = FONT_GRAPH_TITLE;
+        ctx.textAlign = alignLeft
+            ? 'left'
+            : 'right';
+        ctx.textBaseline = 'top';
+
+        const labelWidth = ctx.measureText(labelText).width + 2 * paddingX;
+        const left = posX - labelWidth * (!alignLeft >> 0);
+
+        ctx.fillStyle = rgba(COLOR_TRANSLUCENT_DARK);
+        ctx.fillRect(left, posY, labelWidth, parseInt(ctx.font, 10) + 2 * paddingY);
+
+        const align = 2 * (alignLeft >> 0) - 1;
+
+        ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
+        ctx.fillText(labelText, posX + paddingX * align, posY + paddingY);
+    }
+}
+
+function onDraw(...args) {
+    drawAxes(...args);
+    drawData(...args);
+    drawLabel(...args);
+}
+
+function processData({ zoom, mode, fundLines, cacheTimes }) {
+    const minX = zoom.get(0);
+    const maxX = zoom.get(1);
+
+    if (!(fundLines && cacheTimes.size >= 2)) {
+        return { minX, maxX, minY: -1, maxY: 1 };
+    }
+
+    const valuesY = fundLines.map(line => line.get('line')
+        .map(item => item.get(1))
+    );
+
+    let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
+    let maxY = valuesY.reduce((max, line) => Math.max(max, line.max()), -Infinity);
+
+    if (minY === maxY) {
+        minY -= 0.5;
+        maxY += 0.5;
+    }
+    if (mode === GRAPH_FUNDS_MODE_ROI && minY === 0) {
+        minY = -maxY * 0.2;
+    }
+
+    // get the tick size for the new range
+    const tickSizeY = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
+
+    if (!isNaN(tickSizeY)) {
+        minY = tickSizeY * Math.floor(minY / tickSizeY);
+        maxY = tickSizeY * Math.ceil(maxY / tickSizeY);
+    }
+
+    return { minX, maxX, minY, maxY, tickSizeY };
+}
+
+export function GraphFunds({ onClick, onHover, onZoom, ...props }) {
+    const canvasProperties = {
+        onClick: () => onClick,
+        onWheel: (mProps, mState) => {
+            const valX = genValX(mProps, mState);
+
+            return evt => {
+                const position = props.hlPoint
+                    ? props.hlPoint.get(0)
+                    : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
+
+                onZoom({ direction: evt.deltaY / Math.abs(evt.deltaY), position });
+
                 evt.preventDefault();
-            }
-        };
-        this.outerProperties = {
-            onMouseMove: evt => {
-                const rect = evt.currentTarget.getBoundingClientRect();
-                const valX = this.valX(evt.pageX - rect.left);
-                const valY = this.valY(evt.pageY - rect.top);
-
-                this.props.onHover({ valX, valY });
-            },
-            onMouseOut: () => {
-                this.props.onHover(null);
-            }
-        };
-    }
-    update() {
-        if (!this.props.fundLines || this.props.cacheTimes.size < 2) {
-            return;
+            };
         }
+    };
 
-        this.processData();
-        this.draw();
-    }
-    setRangeValues() {
-        const minX = this.props.zoom.get(0);
-        const maxX = this.props.zoom.get(1);
+    const outerProperties = {
+        onMouseMove: (mProps, mState) => {
+            const valX = genValX(mProps, mState);
+            const valY = genValY(mProps, mState);
 
-        const valuesY = this.props.fundLines.map(line => {
-            return line
-                .get('line')
-                .map(item => item.get(1));
-        });
+            return ({ pageX, pageY, currentTarget }) => {
+                const { left, top } = currentTarget.getBoundingClientRect();
 
-        let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
-        let maxY = valuesY.reduce((max, line) => Math.max(max, line.max()), -Infinity);
+                onHover({
+                    valX: valX(pageX - left),
+                    valY: valY(pageY - top)
+                });
+            };
+        },
+        onMouseOut: () => () => onHover(null)
+    };
 
-        if (minY === maxY) {
-            minY -= 0.5;
-            maxY += 0.5;
-        }
-        if (this.props.mode === GRAPH_FUNDS_MODE_ROI && minY === 0) {
-            minY = -maxY * 0.2;
-        }
+    const after = <AfterCanvas {...props} />;
 
-        // get the tick size for the new range
-        this.tickSizeY = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
-        if (isNaN(this.tickSizeY)) {
-            this.setRange([minX, maxX, minY, maxY]);
-        }
-        else {
-            this.setRange([
-                minX, maxX,
-                this.tickSizeY * Math.floor(minY / this.tickSizeY),
-                this.tickSizeY * Math.ceil(maxY / this.tickSizeY)
-            ]);
-        }
-    }
-    processData() {
-        this.setRangeValues();
-        this.draw();
-    }
-    formatValue(value) {
-        if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-            return `${value.toFixed(2)}%`;
-        }
-
-        return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
-    }
-    drawProfitLossBackground() {
-        if (this.props.mode !== GRAPH_FUNDS_MODE_ROI) {
-            return;
-        }
-
-        const zero = this.pixY(Math.min(Math.max(0, this.minY), this.maxY));
-        if (this.maxY > 0) {
-            this.ctx.fillStyle = rgba(COLOR_PROFIT_LIGHT);
-            const y0 = this.pixY(this.maxY);
-            this.ctx.fillRect(this.pixX(this.minX), y0, this.pixX(this.maxX), zero - y0);
-        }
-        if (this.minY < 0) {
-            this.ctx.fillStyle = rgba(COLOR_LOSS_LIGHT);
-            this.ctx.fillRect(
-                this.pixX(this.minX),
-                zero,
-                this.pixX(this.maxX),
-                this.pixY(this.minY) - zero
-            );
-        }
-    }
-    calculateTicksY() {
-        // calculate tick range
-        const numTicks = isNaN(this.tickSizeY)
-            ? 0
-            : Math.floor((this.maxY - this.minY) / this.tickSizeY);
-
-        if (!numTicks) {
-            return [];
-        }
-
-        return new Array(numTicks)
-            .fill(0)
-            .map((item, key) => {
-                const value = this.minY + (key + 1) * this.tickSizeY;
-                const pos = Math.floor(this.pixY(value)) + 0.5;
-
-                return { value, pos };
-            });
-    }
-    drawTicksY(ticksY, axisTextColor) {
-        // draw horizontal lines
-        this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
-        ticksY.forEach(tick => {
-            // draw horizontal line
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.pixX(this.minX), tick.pos);
-            this.ctx.lineTo(this.pixX(this.maxX), tick.pos);
-            this.ctx.stroke();
-            this.ctx.closePath();
-        });
-
-        // draw Y axis
-        this.ctx.fillStyle = axisTextColor;
-        this.ctx.textBaseline = 'bottom';
-        this.ctx.textAlign = 'right';
-        this.ctx.font = FONT_AXIS_LABEL;
-
-        ticksY.forEach(tick => {
-            const tickName = this.formatValue(tick.value, true, true);
-            this.ctx.fillText(tickName, this.pixX(this.maxX), tick.pos);
-        });
-    }
-    drawTimeTicks(axisTextColor) {
-        const timeTicks = this.getTimeScale(this.props.startTime);
-
-        this.ctx.font = FONT_AXIS_LABEL;
-        this.ctx.fillStyle = axisTextColor;
-        this.ctx.textAlign = 'left';
-        this.ctx.textBaseline = 'bottom';
-
-        const tickAngle = -Math.PI / 6;
-        const tickSize = 10;
-
-        const y0 = this.pixY(this.minY);
-
-        timeTicks.forEach(tick => {
-            const thisTickSize = tickSize * 0.5 * (tick.major + 1);
-
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = tick.major
-                ? rgba(COLOR_GRAPH_TITLE)
-                : rgba(COLOR_DARK);
-            this.ctx.moveTo(tick.pix, y0);
-            this.ctx.lineTo(tick.pix, y0 - thisTickSize);
-            this.ctx.stroke();
-            this.ctx.closePath();
-
-            if (tick.major > 1) {
-                this.ctx.beginPath();
-                this.ctx.strokeStyle = rgba(COLOR_LIGHT_GREY);
-                this.ctx.moveTo(tick.pix, y0 - thisTickSize);
-                this.ctx.lineTo(tick.pix, this.padY1);
-                this.ctx.stroke();
-                this.ctx.closePath();
-            }
-
-            if (tick.text) {
-                this.ctx.save();
-                this.ctx.translate(tick.pix, y0 - thisTickSize);
-                this.ctx.rotate(tickAngle);
-                this.ctx.fillText(tick.text, 0, 0);
-                this.ctx.restore();
-            }
-        });
-    }
-    drawAxes() {
-        const axisTextColor = rgba(COLOR_DARK);
-
-        this.ctx.lineWidth = 1;
-
-        this.drawProfitLossBackground();
-
-        const ticksY = this.calculateTicksY();
-
-        this.drawTicksY(ticksY, axisTextColor);
-
-        this.drawTimeTicks(axisTextColor);
-    }
-    drawData() {
-        // plot past data
-        this.props.fundLines.forEach(line => {
-            const mainLine = line.get('index') === 0;
-
-            const color = rgba(this.props.fundItems.getIn([line.get('index'), 'color']));
-
-            const separatedLines = separateLine(line.get('line'));
-
-            this.ctx.lineWidth = mainLine
-                ? 1.5
-                : 1;
-
-            if (this.props.mode === GRAPH_FUNDS_MODE_ROI) {
-                return separatedLines.forEach(linePart =>
-                    this.drawCubicLine(linePart, [color])
-                );
-            }
-
-            return separatedLines.forEach(linePart =>
-                this.drawLine(linePart, [color])
-            );
-        });
-
-        if (this.props.hlPoint) {
-            const hlPixX = this.pixX(this.props.hlPoint.get(0));
-            const hlPixY = this.pixY(this.props.hlPoint.get(1));
-            this.ctx.beginPath();
-            this.ctx.moveTo(hlPixX, hlPixY);
-            this.ctx.arc(hlPixX, hlPixY, GRAPH_FUNDS_POINT_RADIUS, 0, Math.PI * 2, false);
-            this.ctx.fillStyle = this.props.hlPoint.get(2);
-            this.ctx.fill();
-            this.ctx.closePath();
-        }
-    }
-    drawLabel() {
-        if (this.props.hlPoint) {
-            const ageSeconds = new Date().getTime() / 1000 -
-                   (this.props.hlPoint.get(0) + this.props.startTime);
-            const ageText = formatAge(ageSeconds);
-            const valueText = this.formatValue(this.props.hlPoint.get(1));
-            const labelText = `${ageText}: ${valueText}`;
-
-            const paddingX = 2;
-            const paddingY = 1;
-            let alignLeft = true;
-            const pixX = this.pixX(this.props.hlPoint.get(0));
-            if (pixX > this.width / 2) {
-                alignLeft = false;
-            }
-            const pixY = this.pixY(this.props.hlPoint.get(1));
-
-            this.ctx.font = FONT_GRAPH_TITLE;
-            this.ctx.textAlign = alignLeft
-                ? 'left'
-                : 'right';
-            this.ctx.textBaseline = 'top';
-
-            const labelWidth = this.ctx.measureText(labelText).width + 2 * paddingX;
-            this.ctx.fillStyle = rgba(COLOR_TRANSLUCENT_DARK);
-            const left = alignLeft
-                ? pixX
-                : pixX - labelWidth;
-            this.ctx.fillRect(left, pixY, labelWidth, parseInt(this.ctx.font, 10) + 2 * paddingY);
-
-            this.ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
-            const align = alignLeft
-                ? 1
-                : -1;
-            this.ctx.fillText(labelText, pixX + paddingX * align, pixY + paddingY);
-        }
-    }
-    draw() {
-        if (!this.supported) {
-            return;
-        }
-        // clear canvas
-        this.ctx.clearRect(0, 0, this.width, this.height);
-
-        this.drawAxes();
-        this.drawData();
-        this.drawLabel();
-    }
-    afterCanvas() {
-        const fundLineToggles = this.props.fundItems
-            ? this.props.fundItems.map((item, key) => {
-                const className = classNames({ enabled: item.get('enabled') });
-                const onClick = () => this.props.toggleLine(key);
-                const style = {
-                    borderColor: rgba(item.get('color'))
-                };
-
-                return <li key={key} className={className} onClick={onClick}>
-                    <span className="checkbox" style={style}></span>
-                    <span className="fund">{item.get('item')}</span>
-                </li>;
-            })
-            : null;
-
-        const onChange = evt => this.props.changePeriod({
-            shortPeriod: evt.target.value,
-            reloadPagePrices: false
-        });
-
-        const periodOptions = GRAPH_FUNDS_PERIODS.map((period, key) => {
-            return <option key={key} value={period[0]}>{period[1]}</option>;
-        });
-
-        return <div>
-            <ul className="fund-sidebar noselect">
-                <li>
-                    <select defaultValue={this.props.period} onChange={onChange}>
-                        {periodOptions}
-                    </select>
-                </li>
-                {fundLineToggles}
-            </ul>
-            <span className="mode">
-                {'Mode: '}{GRAPH_FUNDS_MODES[this.props.mode]}
-            </span>
-        </div>;
-    }
+    return <LineGraph
+        padding={[36, 0, 0, 0]}
+        after={after}
+        onDraw={onDraw}
+        colorTransition={[null]}
+        canvasProperties={canvasProperties}
+        outerProperties={outerProperties}
+        {...processData(props)}
+        {...props}
+    />;
 }
 
 GraphFunds.propTypes = {
@@ -366,11 +375,14 @@ GraphFunds.propTypes = {
     startTime: PropTypes.number,
     cacheTimes: PropTypes.instanceOf(list),
     funds: PropTypes.instanceOf(list),
-    mode: PropTypes.number,
+    mode: PropTypes.number.isRequired,
     period: PropTypes.string,
     showOverall: PropTypes.bool,
     zoom: PropTypes.instanceOf(list),
-    hlPoint: PropTypes.instanceOf(list)
+    hlPoint: PropTypes.instanceOf(list),
+    onZoom: PropTypes.func.isRequired,
+    onClick: PropTypes.func.isRequired,
+    onHover: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -394,7 +406,7 @@ const mapDispatchToProps = dispatch => ({
     toggleLine: key => dispatch(aFundsGraphLineToggled(key)),
     changePeriod: req => dispatch(aFundsGraphPeriodChanged(req)),
     onClick: () => dispatch(aFundsGraphClicked()),
-    zoomGraph: req => dispatch(aFundsGraphZoomed(req))
+    onZoom: req => dispatch(aFundsGraphZoomed(req))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);
