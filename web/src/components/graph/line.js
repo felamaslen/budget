@@ -286,14 +286,15 @@ export default class LineGraph extends Graph {
         this.state.ctx.closePath();
     };
 
-    componentDidUpdate(prevProps) {
-        if (!(prevProps.minX === this.props.minX && prevProps.maxX === this.props.maxX &&
+    componentDidUpdate(prevProps, prevState) {
+        if (!(prevState.width === this.state.width && prevState.height === this.state.height &&
+            prevProps.minX === this.props.minX && prevProps.maxX === this.props.maxX &&
             prevProps.minY === this.props.minY && prevProps.maxY === this.props.maxY)) {
 
             this.setCalcFunctions();
         }
 
-        return super.componentDidUpdate();
+        return super.componentDidUpdate(prevProps);
     }
 }
 

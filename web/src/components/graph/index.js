@@ -50,7 +50,11 @@ export default class Graph extends PureComponent {
     componentWillUnmount() {
         window.removeEventListener('resize', this.onResize);
     }
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
+        if (!(prevProps.width === this.props.width && prevProps.height === this.props.height)) {
+            this.setState({ width: this.props.width, height: this.props.height });
+        }
+
         this.draw();
     }
     render() {

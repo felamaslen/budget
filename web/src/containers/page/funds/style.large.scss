@@ -28,7 +28,7 @@
 
                     &.popout {
                         z-index: 10;
-                        overflow: visible;
+                        overflow: visible !important;
 
                         .graph-container {
                             box-shadow: none;

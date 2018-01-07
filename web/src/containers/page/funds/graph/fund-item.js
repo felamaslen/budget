@@ -3,11 +3,7 @@
  */
 
 import { List as list } from 'immutable';
-import { connect } from 'react-redux';
 
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import LineGraph from '../../../../components/graph/line';
 import { rgba } from '../../../../misc/color';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
@@ -17,115 +13,105 @@ import {
     COLOR_LOSS, COLOR_PROFIT, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../../../misc/config';
 import { aFundItemGraphToggled } from '../../../../actions/graph.actions';
-
 import { separateLine } from './helpers';
 
-export class GraphFundItem extends LineGraph {
-    constructor(props) {
-        super(props);
+import { connect } from 'react-redux';
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import LineGraph from '../../../../components/graph/line';
 
-        this.canvasProperties = {
-            onClick: () => this.props.togglePopout(this.props.id)
-        };
+function onDraw({ minX, minY, maxY, data, popout }, { ctx, height }, { pixX, pixY, drawCubicLine }) {
+    // draw axes
+    ctx.lineWidth = 1;
+    if (popout) {
+        ctx.fillStyle = rgba(COLOR_DARK);
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.font = FONT_AXIS_LABEL;
+
+        const range = maxY - minY;
+        const increment = Math.round(Math.max(20, height / range) / (height / range) / 2) * 2;
+        const start = Math.ceil(minY / increment) * increment;
+        const numTicks = Math.ceil(range / increment);
+
+        if (numTicks > 0) {
+            new Array(numTicks)
+                .fill(0)
+                .forEach((tick, key) => {
+                    const tickValue = start + key * increment;
+                    const tickPos = Math.floor(pixY(tickValue)) + 0.5;
+                    const tickName = `${tickValue.toFixed(1)}p`;
+                    ctx.fillText(tickName, pixX(minX), tickPos);
+                });
+        }
     }
-    canvasClasses() {
-        return classNames({ popout: this.props.popout });
-    }
-    update() {
-        this.processData();
-        this.draw();
-    }
-    getWidth() {
-        if (this.props.popout) {
-            return GRAPH_FUND_ITEM_WIDTH_LARGE;
+
+    // plot data
+    ctx.lineWidth = 1.5;
+
+    const initialValue = data.getIn([0, 1]);
+
+    const colorLoss = rgba(COLOR_LOSS);
+    const colorProfit = rgba(COLOR_PROFIT);
+    const colorValue = value => {
+        if (value < initialValue) {
+            return colorLoss;
         }
 
-        return GRAPH_FUND_ITEM_WIDTH;
+        return colorProfit;
+    };
+
+    const lines = separateLine(data);
+
+    lines.forEach(line => drawCubicLine(line, colorValue));
+}
+
+function getDimensions({ popout }) {
+    if (popout) {
+        return { width: GRAPH_FUND_ITEM_WIDTH_LARGE, height: GRAPH_FUND_ITEM_HEIGHT_LARGE };
     }
-    getHeight() {
-        if (this.props.popout) {
-            return GRAPH_FUND_ITEM_HEIGHT_LARGE;
-        }
 
-        return GRAPH_FUND_ITEM_HEIGHT;
-    }
-    processData() {
-        const validData = this.props.data
-            .filter(item => item.last() !== 0);
+    return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT };
+}
 
-        const dataY = validData.map(item => item.last());
-        const dataX = validData.map(item => item.first());
+function processData({ data, ...props }) {
+    const validData = data.filter(item => item.last() !== 0);
 
-        const minY = dataY.min();
-        const maxY = dataY.max();
-        const minX = dataX.min();
-        const maxX = dataX.max();
+    const dataY = validData.map(item => item.last());
+    const dataX = validData.map(item => item.first());
 
-        this.setRange([minX, maxX, minY, maxY]);
+    const minY = dataY.min();
+    const maxY = dataY.max();
+    const minX = dataX.min();
+    const maxX = dataX.max();
 
-        this.width = this.getWidth();
-        this.height = this.getHeight();
-    }
-    draw() {
-        if (!this.supported) {
-            return;
-        }
+    return { minX, maxX, minY, maxY, ...getDimensions(props) };
+}
 
-        // clear canvas
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        this.ctx.clearRect(0, 0, this.width, this.height);
+function GraphFundItem({ id, onToggle, ...props }) {
+    const canvasProperties = {
+        onClick: () => () => onToggle(id)
+    };
 
-        // draw axes
-        this.ctx.lineWidth = 1;
-        if (this.props.popout) {
-            this.ctx.fillStyle = rgba(COLOR_DARK);
-            this.ctx.textBaseline = 'middle';
-            this.ctx.textAlign = 'left';
-            this.ctx.font = FONT_AXIS_LABEL;
+    const canvasClasses = classNames({ popout: props.popout });
 
-            const range = this.maxY - this.minY;
-            const increment = Math.round(Math.max(20, this.height / range) / (this.height / range) / 2) * 2;
-            const start = Math.ceil(this.minY / increment) * increment;
-            const numTicks = Math.ceil((this.maxY - this.minY) / increment);
-
-            if (numTicks > 0) {
-                new Array(numTicks)
-                    .fill(0)
-                    .forEach((tick, key) => {
-                        const tickValue = start + key * increment;
-                        const tickPos = Math.floor(this.pixY(tickValue)) + 0.5;
-                        const tickName = `${tickValue.toFixed(1)}p`;
-                        this.ctx.fillText(tickName, this.pixX(this.minX), tickPos);
-                    });
-            }
-        }
-
-        // plot data
-        this.ctx.lineWidth = 1.5;
-
-        const initialValue = this.props.data.getIn([0, 1]);
-
-        const colorLoss = rgba(COLOR_LOSS);
-        const colorProfit = rgba(COLOR_PROFIT);
-        const colorValue = value => {
-            if (value < initialValue) {
-                return colorLoss;
-            }
-
-            return colorProfit;
-        };
-
-        const lines = separateLine(this.props.data);
-
-        lines.forEach(line => this.drawCubicLine(line, colorValue));
-    }
+    return <LineGraph
+        name={id}
+        canvasProperties={canvasProperties}
+        canvasClasses={canvasClasses}
+        onDraw={onDraw}
+        colorTransition={[null]}
+        {...processData(props)}
+        {...props}
+    />;
 }
 
 GraphFundItem.propTypes = {
     id: PropTypes.number.isRequired,
     data: PropTypes.instanceOf(list).isRequired,
-    popout: PropTypes.bool.isRequired
+    popout: PropTypes.bool.isRequired,
+    onToggle: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
@@ -134,7 +120,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    togglePopout: id => dispatch(aFundItemGraphToggled(id))
+    onToggle: id => dispatch(aFundItemGraphToggled(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFundItem);
