@@ -47,6 +47,9 @@ export function applyEditsOverview(reduction, { item }) {
 
     return reduction
         .setIn(['pages', 'overview', 'data'], newData)
+        .setIn(['pages', 'overview', 'data', 'targets'],
+            reduction.getIn(['pages', 'overview', 'data', 'targets'])
+        )
         .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 

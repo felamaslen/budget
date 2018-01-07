@@ -181,7 +181,6 @@ function GraphBalance(props) {
         title="Balance"
         after={after}
         onDraw={onDraw}
-        breakAtToday={true}
         {...processData(props)}
         {...props}
     />;
