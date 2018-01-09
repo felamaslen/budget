@@ -1,41 +1,56 @@
-import { List as list } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-
 import BlockBits from './block-bits';
 
-export default function Blocks({ blocks, activeBlock, ...props }) {
+export function OuterBlockGroup({ group, activeMain, activeSub, activeBlock, ...props }) {
+    const style = {
+        width: group.get('width'),
+        height: group.get('height')
+    };
+
+    const groupBits = group.get('bits').map((block, key) => <BlockBits
+        key={key}
+        block={block}
+        activeMain={activeMain}
+        activeSub={activeSub}
+        activeBlock={activeBlock}
+        {...props}
+    />);
+
+    return <div className="block-group" style={style}>
+        {groupBits}
+    </div>;
+}
+
+OuterBlockGroup.propTypes = {
+    group: PropTypes.instanceOf(map).isRequired,
+    activeMain: PropTypes.bool.isRequired,
+    activeSub: PropTypes.bool.isRequired,
+    activeBlock: PropTypes.array
+};
+
+export default function Blocks({ blocks, activeBlock, deepBlock, ...props }) {
     const activeMain = Boolean(activeBlock && activeBlock.length === 1);
     const activeSub = Boolean(activeBlock && activeBlock.length === 2);
+    const activeDeep = Boolean(deepBlock);
 
-    const blockClasses = classNames({
-        'block-tree': true,
-        'block-tree-deep': props.deepBlock,
-        [`block-tree-${props.deepBlock}`]: props.deepBlock
+    const className = classNames('block-tree', {
+        'block-tree-deep': activeDeep,
+        [`block-tree-${deepBlock}`]: activeDeep
     });
 
-    const blocksList = blocks.map((group, groupKey) => {
-        const groupStyle = {
-            width: group.get('width'),
-            height: group.get('height')
-        };
+    const blocksList = blocks.map((group, key) => <OuterBlockGroup
+        key={key}
+        group={group}
+        activeMain={activeMain}
+        activeSub={activeSub}
+        activeBlock={activeBlock}
+        {...props}
+    />);
 
-        const groupBits = group.get('bits').map(block => <BlockBits
-            key={block.get('name')}
-            activeMain={activeMain}
-            activeSub={activeSub}
-            block={block}
-            activeBlock={activeBlock}
-            {...props}
-        />);
-
-        return <div key={groupKey} className="block-group" style={groupStyle}>
-            {groupBits}
-        </div>;
-    });
-
-    return <div className={blockClasses}>{blocksList}</div>;
+    return <div className={className}>{blocksList}</div>;
 }
 
 Blocks.propTypes = {
