@@ -3,54 +3,77 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export default function BlockBits({
-    page,
-    block,
-    activeMain,
-    activeSub,
-    activeBlock,
-    deepBlock,
-    onHover,
-    onClick
-}) {
-    const classes = classNames({
-        block: true,
-        active: activeMain && activeBlock[0] === block.get('name'),
-        [`block-${block.get('color')}`]: true,
-        [`block-${block.get('name')}`]: !deepBlock
+export function SubBlock({ name, value, subBlock, activeSub, activeBlock, onHover }) {
+    const active = activeSub &&
+        activeBlock[0] === name &&
+        activeBlock[1] === subBlock.get('name');
+
+    const className = classNames('sub-block', { active });
+
+    const style = {
+        width: subBlock.get('width'),
+        height: subBlock.get('height')
+    };
+
+    const onBlockHover = () => onHover(map({ name, value }), subBlock);
+
+    return <div
+        className={className}
+        style={style}
+        onTouchStart={onBlockHover}
+        onMouseOver={onBlockHover}
+    />;
+}
+
+SubBlock.propTypes = {
+    name: PropTypes.string.isRequired,
+    value: PropTypes.number.isRequired,
+    subBlock: PropTypes.instanceOf(map).isRequired,
+    activeSub: PropTypes.bool.isRequired,
+    activeBlock: PropTypes.array,
+    onHover: PropTypes.func.isRequired
+};
+
+export function BlockGroup({ group, ...props }) {
+    const blockBits = group.get('bits').map((subBlock, key) => <SubBlock
+        key={key}
+        subBlock={subBlock}
+        {...props}
+    />);
+
+    const style = {
+        width: group.get('width'),
+        height: group.get('height')
+    };
+
+    return <div className="block-group" style={style}>
+        {blockBits}
+    </div>;
+}
+
+BlockGroup.propTypes = {
+    group: PropTypes.instanceOf(map).isRequired
+};
+
+export default function BlockBits({ page, block, activeMain, activeBlock, deepBlock, onClick, ...props }) {
+    const name = block.get('name');
+    const value = block.get('value');
+
+    const className = classNames('block', `block-${block.get('color')}`, {
+        active: activeMain && activeBlock[0] === name,
+        [`block-${name}`]: !deepBlock
     });
 
-    const bits = block.get('blocks').map((subBlockGroup, subBlockGroupKey) => {
-        const blockBits = subBlockGroup.get('bits').map((subBlock, subBlockKey) => {
-            const active = activeSub &&
-                activeBlock[0] === block.get('name') &&
-                activeBlock[1] === subBlock.get('name');
+    const bits = block.get('blocks').map((group, key) => <BlockGroup
+        key={key}
+        activeBlock={activeBlock}
+        name={name}
+        value={value}
+        group={group}
+        {...props}
+    />);
 
-            const subClasses = classNames({ 'sub-block': true, active });
-
-            const subBlockStyle = {
-                width: subBlock.get('width'),
-                height: subBlock.get('height')
-            };
-
-            const onBlockHover = () => onHover(block, subBlock);
-
-            return <div key={subBlockKey} className={subClasses}
-                style={subBlockStyle}
-                onTouchStart={onBlockHover} onMouseOver={onBlockHover} />;
-        });
-
-        const subBlockGroupStyle = {
-            width: subBlockGroup.get('width'),
-            height: subBlockGroup.get('height')
-        };
-
-        return <div key={subBlockGroupKey} className="block-group" style={subBlockGroupStyle}>
-            {blockBits}
-        </div>;
-    });
-
-    const blockStyle = {
+    const style = {
         width: block.get('width'),
         height: block.get('height')
     };
@@ -59,7 +82,7 @@ export default function BlockBits({
 
     const onBlockClick = () => onClick({ page, name: block.get('name'), wasDeep });
 
-    return <div className={classes} style={blockStyle}
+    return <div className={className} style={style}
         onClick={onBlockClick}>
         {bits}
     </div>;

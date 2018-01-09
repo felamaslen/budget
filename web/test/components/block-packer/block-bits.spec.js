@@ -3,58 +3,109 @@ import { fromJS } from 'immutable';
 import 'babel-polyfill';
 import '../../browser';
 import chai, { expect } from 'chai';
+import itEach from 'it-each';
+itEach();
 import chaiEnzyme from 'chai-enzyme';
 chai.use(chaiEnzyme());
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
-import BlockBits from '../../../src/components/block-packer/block-bits';
+import BlockBits, { BlockGroup, SubBlock } from '../../../src/components/block-packer/block-bits';
 
-describe('BlockBits />', () => {
-    const onHover = () => null;
-
-    let clicked = null;
-    const onClick = (...args) => {
-        clicked = args;
+describe('<SubBlock />', () => {
+    const props = {
+        name: 'foo',
+        value: 101.5,
+        subBlock: fromJS({
+            name: 'bar',
+            width: 90,
+            height: 87
+        }),
+        activeSub: false,
+        activeBlock: [],
+        onHover: () => null
     };
 
+    const wrapper = shallow(<SubBlock {...props} />);
+
+    it('should render its basic structure', () => {
+        expect(wrapper.is('div.sub-block')).to.equal(true);
+        expect(wrapper).to.have.style('width', '90px');
+        expect(wrapper).to.have.style('height', '87px');
+    });
+});
+
+describe('<BlockGroup />', () => {
     const props = {
-        page: 'page1',
+        name: 'foo',
+        value: 987,
+        activeSub: false,
+        onHover: () => null,
+        group: fromJS({
+            bits: [
+                { foo: 'bar' },
+                { bar: 'baz' }
+            ],
+            width: 15,
+            height: 13
+        })
+    };
+
+    const wrapper = shallow(<BlockGroup {...props} />);
+
+    it('should render its basic structure', () => {
+        expect(wrapper.is('div.block-group')).to.equal(true);
+        expect(wrapper).to.have.style('width', '15px');
+        expect(wrapper).to.have.style('height', '13px');
+    });
+
+    it('should render block bits', () => {
+        expect(wrapper.children()).to.have.length(2);
+    });
+});
+
+describe('<BlockBits />', () => {
+    const props = {
         block: fromJS({
             name: 'foo',
+            value: 1001.3,
             color: 'red',
-            blocks: [],
+            blocks: [{ foo: 'bar' }, { bar: 'baz' }],
             width: 11,
             height: 13
         }),
+        page: 'page1',
         activeMain: false,
         activeSub: false,
-        onHover,
-        onClick
+        activeBlock: [],
+        onHover: () => null,
+        onClick: () => null
     };
 
-    const wrapper = mount(<BlockBits {...props} />);
-    const wrapperWasDeep = mount(<BlockBits {...props} deepBlock="foo" />);
+    const wrapper = shallow(<BlockBits {...props} />);
 
     it('should render its basic structure', () => {
-        expect(wrapper.hasClass('block')).to.equal(true);
-        expect(wrapper.hasClass('block-foo')).to.equal(true);
-        expect(wrapper.hasClass('active')).to.equal(false);
-        expect(wrapperWasDeep.hasClass('block-foo')).to.equal(false);
-    });
-    it('should render block width and height', () => {
-        expect(wrapper).to.have.style('width', '11px');
-        expect(wrapper).to.have.style('height', '13px');
-    });
-    it('should accept an onClick handler', () => {
-        wrapper.simulate('click');
-        expect(clicked).to.deep.equal([{ page: 'page1', name: 'foo', wasDeep: false }]);
-
-        wrapperWasDeep.simulate('click');
-        expect(clicked).to.deep.equal([{ page: 'page1', name: 'foo', wasDeep: true }]);
+        expect(wrapper.is('div.block.block-red')).to.equal(true);
+        expect(wrapper.children()).to.have.length(2);
     });
 
-    it('should add colour class', () => {
-        expect(wrapper.hasClass('block-red')).to.equal(true);
+    let key = null;
+    before(() => {
+        key = 0;
+    });
+    after(() => {
+        key = 0;
+    });
+
+    it.each(props.block.get('blocks').toJS(), 'should render a list of blocks', group => {
+        expect(wrapper.childAt(key).is(BlockGroup)).to.equal(true);
+        expect(wrapper.childAt(key).props()).to.deep.include({
+            activeBlock: [],
+            name: 'foo',
+            value: 1001.3,
+            group: fromJS(group)
+        });
+
+        key++;
     });
 });
 

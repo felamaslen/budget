@@ -14,6 +14,14 @@ describe('List page reducers', () => {
     });
 
     describe('processPageDataFunds', () => {
+        const envBefore = process.env.DEFAULT_FUND_PERIOD;
+        before(() => {
+            process.env.DEFAULT_FUND_PERIOD = 'year1';
+        });
+        after(() => {
+            process.env.DEFAULT_FUND_PERIOD = envBefore;
+        });
+
         it('should return formatted funds page data', () => {
             const reduction = map({
                 pages: map.of(),
@@ -57,7 +65,7 @@ describe('List page reducers', () => {
 
             const result = rList.processPageDataFunds(reduction, { raw }, now);
 
-            const other = result.getIn(['other']);
+            const other = result.get('other');
 
             expect(other.getIn(['fundHistoryCache', 'year1']))
                 .to.be.ok;
