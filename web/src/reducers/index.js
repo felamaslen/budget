@@ -30,7 +30,6 @@ const reducers = createReducerObject([
     // login form actions
     [AC.LOGIN_FORM_INPUTTED, login.rLoginFormInput],
     [AC.LOGIN_FORM_RESET, login.rLoginFormReset],
-    [AC.LOGIN_FORM_SUBMITTED, login.rLoginFormSubmit],
     [AC.LOGIN_FORM_RESPONSE_GOT, login.rLoginFormHandleResponse],
 
     // error messages actions

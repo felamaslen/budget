@@ -48,7 +48,8 @@ describe('app.reducer', () => {
                         loginForm: {
                             values: ['0', '1', '4'],
                             inputStep: 3,
-                            visible: true
+                            visible: true,
+                            active: true
                         }
                     });
             });

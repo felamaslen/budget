@@ -4,15 +4,81 @@ import { fromJS } from 'immutable';
 import chai, { expect } from 'chai';
 import chaiEnzyme from 'chai-enzyme';
 chai.use(chaiEnzyme());
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import '../../browser';
 import React from 'react';
-import Blocks from '../../../src/components/block-packer/blocks';
+import Blocks, { OuterBlockGroup } from '../../../src/components/block-packer/blocks';
+import BlockBits from '../../../src/components/block-packer/block-bits';
+
+describe('<OuterBlockGroup />', () => {
+    const props = {
+        page: 'page1',
+        group: fromJS({
+            width: 10.4,
+            height: 11.5,
+            value: 5,
+            bits: [
+                {
+                    name: 'foo',
+                    value: 5.1,
+                    blocks: [
+                        {
+                            bits: [
+                                { name: 'foo1' }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: 'bar',
+                    value: 5.2,
+                    blocks: [
+                        {
+                            bits: [
+                                { name: 'bar1' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }),
+        activeMain: true,
+        activeSub: false,
+        activeBlock: [1, 0],
+        onHover: () => null,
+        onClick: () => null
+    };
+
+    const wrapper = shallow(<OuterBlockGroup {...props} />);
+
+    it('should render its basic structure', () => {
+        expect(wrapper.is('div.block-group')).to.equal(true);
+    });
+    it('should render the block width and height', () => {
+        expect(wrapper).to.have.style('width', '10.4px');
+        expect(wrapper).to.have.style('height', '11.5px');
+    });
+    it('should render the block\'s bits', () => {
+        expect(wrapper.children()).to.have.length(2);
+
+        expect(wrapper.childAt(0).is(BlockBits)).to.equal(true);
+        expect(wrapper.childAt(0).props()).to.deep.include({
+            block: props.group.getIn(['bits', 0]),
+            activeMain: true,
+            activeSub: false,
+            activeBlock: [1, 0]
+        });
+
+        expect(wrapper.childAt(1).props()).to.deep.include({
+            block: props.group.getIn(['bits', 1]),
+            activeMain: true,
+            activeSub: false,
+            activeBlock: [1, 0]
+        });
+    });
+});
 
 describe('<Blocks />', () => {
-    const onClick = () => null;
-    const onHover = () => null;
-
     const props = {
         blocks: fromJS([
             {
@@ -51,53 +117,57 @@ describe('<Blocks />', () => {
         ]),
         activeBlock: null,
         page: 'page1',
-        onClick,
-        onHover
+        onClick: () => null,
+        onHover: () => null
     };
 
-    const wrapper = mount(<Blocks {...props} />);
+    const wrapper = shallow(<Blocks {...props} />);
 
     it('should render its basic structure', () => {
-        expect(wrapper.name()).to.equal('Blocks');
-        expect(wrapper.hasClass('block-tree')).to.be.ok;
-        expect(wrapper.hasClass('block-tree-deep')).to.be.false;
-
-        const blocks = wrapper.children();
-        expect(blocks).to.have.length(2);
-        expect(blocks.at(0).name()).to.equal('div');
-        expect(blocks.at(0).hasClass('block-group')).to.be.ok;
+        expect(wrapper.is('div.block-tree')).to.equal(true);
+        expect(wrapper.hasClass('block-tree-deep')).to.equal(false);
+        expect(wrapper.children()).to.have.length(2);
     });
 
-    it('should render each group inside each block', () => {
-        expect(wrapper.childAt(0).children()).to.have.length(2);
-        expect(wrapper.childAt(0).childAt(0).name()).to.equal('BlockBits');
-    });
+    it('should render a list of blocks', () => {
+        expect(wrapper.childAt(0).is(OuterBlockGroup)).to.equal(true);
+        expect(wrapper.childAt(0).props()).to.deep.include({
+            group: props.blocks.get(0),
+            activeMain: false,
+            activeSub: false,
+            activeBlock: null
+        });
 
-    it('should put width / height attributes on each block', () => {
-        expect(wrapper.childAt(0)).to.have.style('width', '10px');
+        expect(wrapper.childAt(1).is(OuterBlockGroup)).to.equal(true);
+        expect(wrapper.childAt(1).props()).to.deep.include({
+            group: props.blocks.get(1),
+            activeMain: false,
+            activeSub: false,
+            activeBlock: null
+        });
     });
 
     it('should accept an active main block', () => {
         const activeMainProps = { ...props, activeBlock: [0] };
-        const mounted = mount(<Blocks {...activeMainProps} />);
+        const activeWrapper = shallow(<Blocks {...activeMainProps} />);
 
-        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeMain', true);
-        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeSub', false);
+        expect(activeWrapper.childAt(0).props()).to.have.property('activeMain', true);
+        expect(activeWrapper.childAt(0).props()).to.have.property('activeSub', false);
     });
     it('should accept an active sub block', () => {
         const activeSubProps = { ...props, activeBlock: [0, 0] };
-        const mounted = mount(<Blocks {...activeSubProps} />);
+        const activeWrapper = shallow(<Blocks {...activeSubProps} />);
 
-        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeMain', false);
-        expect(mounted.childAt(0).childAt(0).props()).to.have.property('activeSub', true);
+        expect(activeWrapper.childAt(0).props()).to.have.property('activeMain', false);
+        expect(activeWrapper.childAt(0).props()).to.have.property('activeSub', true);
     });
 
     it('should accept a deepBlock prop', () => {
         const deepBlockProps = { ...props, deepBlock: 'foo' };
-        const mounted = mount(<Blocks {...deepBlockProps} />);
+        const deepWrapper = shallow(<Blocks {...deepBlockProps} />);
 
-        expect(mounted.hasClass('block-tree-deep')).to.be.ok;
-        expect(mounted.hasClass('block-tree-foo')).to.be.ok;
+        expect(deepWrapper.hasClass('block-tree-deep')).to.equal(true);
+        expect(deepWrapper.hasClass('block-tree-foo')).to.equal(true);
     });
 });
 

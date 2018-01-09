@@ -31,8 +31,7 @@ class ErrorMessages extends PureComponent {
     }
     render() {
         const messages = this.props.list.map((msg, key) => {
-            const msgClasses = classNames({
-                message: true,
+            const msgClasses = classNames('message', {
                 debug: msg.get('level') === ERROR_LEVEL_DEBUG,
                 warn: msg.get('level') === ERROR_LEVEL_WARN,
                 error: msg.get('level') === ERROR_LEVEL_ERROR,
