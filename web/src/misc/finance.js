@@ -24,8 +24,8 @@ export function getStockPricesFromYahoo(symbols) {
                 const res = data.query.results.quote
                     .map(item => {
                         const code = item.symbol;
-                        const open = parseFloat(item.PreviousClose, 10);
-                        const close = parseFloat(item.LastTradePriceOnly, 10);
+                        const open = Number(item.PreviousClose);
+                        const close = Number(item.LastTradePriceOnly);
 
                         if (isNaN(close) || isNaN(open)) {
                             return null;
