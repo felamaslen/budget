@@ -35,42 +35,37 @@ export class ModalDialog extends PureComponent {
         }
     }
     render() {
-        if (!this.props.active) {
+        const {
+            page, id, active, type, visible, loading, fields, onCancel, onSubmit
+        } = this.props;
+
+        if (!active) {
             return null;
         }
 
-        const className = `modal-dialog-outer ${this.props.type}`;
+        const className = classNames('modal-dialog-outer', type);
 
-        const dialogClass = classNames({
-            dialog: true,
-            hidden: !this.props.visible,
-            loading: this.props.loading
-        });
+        const dialogClass = classNames('dialog', { hidden: !visible, loading });
 
-        const fields = this.props.fields.map(
-            (field, fieldKey) => <ModalDialogField key={field.get('item')}
-                field={field}
-                fieldKey={fieldKey}
-                invalidKeys={this.props.invalidKeys}
-            />
-        );
-
-        const onCancel = () => this.props.onCancel();
-        const onSubmit = () => this.props.onSubmit(this.props.page);
+        const items = fields.map((field, fieldKey) => <ModalDialogField key={field.get('item')}
+            field={field}
+            fieldKey={fieldKey}
+            invalidKeys={this.props.invalidKeys}
+        />);
 
         return <div className={className}>
             <div className={dialogClass}>
-                <span className="title">{title(this.props.id)}</span>
+                <span className="title">{title(id)}</span>
                 <ul className="form-list">
-                    {fields}
+                    {items}
                 </ul>
                 <div className="buttons">
-                    <button type="button" className="button-cancel"
-                        disabled={this.props.loading}
-                        onClick={onCancel}>nope.avi</button>
-                    <button type="button" className="button-submit"
-                        disabled={this.props.loading}
-                        onClick={onSubmit}>Do it.</button>
+                    <button type="button" className="button-cancel" disabled={loading} onClick={onCancel}>
+                        {'nope.avi'}
+                    </button>
+                    <button type="button" className="button-submit" disabled={loading} onClick={() => onSubmit(page)}>
+                        {'Do it.'}
+                    </button>
                 </div>
             </div>
         </div>;
