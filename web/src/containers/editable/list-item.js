@@ -8,7 +8,7 @@ import classNames from 'classnames';
 
 import Editable from '.';
 
-export function ListAddEditItem({ active, ...props }) {
+function ListAddEditItem({ active, ...props }) {
     return <span className={classNames(props.item, { active })}>
         <Editable {...props} />
     </span>;
@@ -31,7 +31,5 @@ const mapStateToProps = (state, { page, row, col }) => ({
     item: PAGES[page].cols[col]
 });
 
-const mapDispatchToProps = () => ({});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ListAddEditItem);
+export default connect(mapStateToProps)(ListAddEditItem);
 
