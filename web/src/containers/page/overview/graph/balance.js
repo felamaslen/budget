@@ -16,7 +16,7 @@ import { aShowAllToggled } from '../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import GraphCashFlow, { getFutureKey, getValuesWithTime } from './cash-flow';
+import GraphCashFlow, { getFutureKey, getValuesWithTime, drawKey as drawBaseKey } from './cash-flow';
 
 function AfterCanvas({ showAll, onShowAll }) {
     const className = classNames('show-all', 'noselect', {
@@ -74,7 +74,7 @@ function drawTargets(targets, ctx) {
     });
 }
 
-function drawKeyActual(ctx) {
+function drawKeyActual(props, { ctx }) {
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = rgba(COLOR_BALANCE_ACTUAL);
@@ -88,7 +88,7 @@ function drawKeyActual(ctx) {
     ctx.fillStyle = rgba(COLOR_DARK);
     ctx.fillText('Actual', 78, 40);
 }
-function drawKeyPredicted(ctx) {
+function drawKeyPredicted(props, { ctx }) {
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = rgba(COLOR_BALANCE_PREDICTED);
@@ -98,18 +98,19 @@ function drawKeyPredicted(ctx) {
     ctx.closePath();
     ctx.fillText('Predicted', 158, 40);
 }
-function drawKeyFunds(ctx) {
+function drawKeyFunds(props, { ctx }) {
     ctx.fillText('Stocks', 78, 57);
     ctx.fillStyle = rgba(COLOR_BALANCE_STOCKS);
     ctx.fillRect(50, 54, 24, 6);
 }
-function drawKey(ctx) {
-    drawKeyActual(ctx);
-    drawKeyPredicted(ctx);
-    drawKeyFunds(ctx);
+function drawKey(...args) {
+    drawBaseKey(...args);
+    drawKeyActual(...args);
+    drawKeyPredicted(...args);
+    drawKeyFunds(...args);
 }
 
-function onDraw({ targets, data: { dataBalance, dataFunds } }, { ctx }, { drawCubicLine }) {
+function drawData({ targets, data: { dataBalance, dataFunds } }, { ctx }, { drawCubicLine }) {
     // plot past + future predicted data
     if (!(dataBalance && dataFunds)) {
         return;
@@ -124,8 +125,11 @@ function onDraw({ targets, data: { dataBalance, dataFunds } }, { ctx }, { drawCu
     drawFundsLine(dataFunds, ctx, drawCubicLine);
 
     drawTargets(targets, ctx);
+}
 
-    drawKey(ctx);
+function onDraw(...args) {
+    drawData(...args);
+    drawKey(...args);
 }
 
 function getRanges(dataBalance) {
