@@ -59,13 +59,13 @@ describe('<Blocks />', () => {
 
     it('should render its basic structure', () => {
         expect(wrapper.name()).to.equal('Blocks');
-        expect(wrapper.hasClass('block-tree')).to.be.ok;
+        expect(wrapper.hasClass('block-tree')).to.equal(true);
         expect(wrapper.hasClass('block-tree-deep')).to.be.false;
 
         const blocks = wrapper.children();
         expect(blocks).to.have.length(2);
         expect(blocks.at(0).name()).to.equal('div');
-        expect(blocks.at(0).hasClass('block-group')).to.be.ok;
+        expect(blocks.at(0).hasClass('block-group')).to.equal(true);
     });
 
     it('should render each group inside each block', () => {
@@ -96,8 +96,8 @@ describe('<Blocks />', () => {
         const deepBlockProps = { ...props, deepBlock: 'foo' };
         const mounted = mount(<Blocks {...deepBlockProps} />);
 
-        expect(mounted.hasClass('block-tree-deep')).to.be.ok;
-        expect(mounted.hasClass('block-tree-foo')).to.be.ok;
+        expect(mounted.hasClass('block-tree-deep')).to.equal(true);
+        expect(mounted.hasClass('block-tree-foo')).to.equal(true);
     });
 });
 

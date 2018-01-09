@@ -29,16 +29,16 @@ describe('<BlockPacker />', () => {
 
     it('should render its basic structure', () => {
         expect(wrapper.name()).to.equal('div');
-        expect(wrapper.hasClass('block-view')).to.be.ok;
+        expect(wrapper.hasClass('block-view')).to.equal(true);
         expect(wrapper.children()).to.have.length(2);
 
         const blockTreeOuter = wrapper.childAt(0);
         expect(blockTreeOuter.name()).to.equal('div');
-        expect(blockTreeOuter.hasClass('block-tree-outer')).to.be.ok;
+        expect(blockTreeOuter.hasClass('block-tree-outer')).to.equal(true);
 
         const statusBarOuter = wrapper.childAt(1);
         expect(statusBarOuter.name()).to.equal('div');
-        expect(statusBarOuter.hasClass('status-bar')).to.be.ok;
+        expect(statusBarOuter.hasClass('status-bar')).to.equal(true);
     });
 
     it('should render blocks', () => {
@@ -52,7 +52,7 @@ describe('<BlockPacker />', () => {
 
         const inner = wrapper.childAt(1).childAt(0);
         expect(inner.name()).to.equal('span');
-        expect(inner.hasClass('inner')).to.be.ok;
+        expect(inner.hasClass('inner')).to.equal(true);
         expect(inner.text()).to.equal('bar');
     });
 
