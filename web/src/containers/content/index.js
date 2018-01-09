@@ -15,7 +15,7 @@ import PageOverview from '../page/overview';
 import PageAnalysis from '../page/analysis';
 import PageList from '../page/list';
 
-export function Content({ loggedIn }) {
+function Content({ loggedIn }) {
     if (!loggedIn) {
         return null;
     }
