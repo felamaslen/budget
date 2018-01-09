@@ -2,7 +2,7 @@
  * Carries out actions for the Form component
  */
 
-import { PAGES } from '../misc/const';
+import { PAGES, LOGIN_INPUT_LENGTH } from '../misc/const';
 
 export function rLoginFormInput(reduction, { input }) {
     const inputString = input.toString();
@@ -14,9 +14,12 @@ export function rLoginFormInput(reduction, { input }) {
 
     const values = reduction.getIn(['loginForm', 'values']);
 
+    const active = values.size < LOGIN_INPUT_LENGTH - 1;
+
     return reduction
         .setIn(['loginForm', 'values'], values.push(inputString))
-        .setIn(['loginForm', 'inputStep'], reduction.getIn(['loginForm', 'inputStep']) + 1);
+        .setIn(['loginForm', 'inputStep'], reduction.getIn(['loginForm', 'inputStep']) + 1)
+        .setIn(['loginForm', 'active'], active);
 }
 
 export function rLoginFormReset(reduction, req) {
