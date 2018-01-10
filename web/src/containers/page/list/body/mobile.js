@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../../../actions/form.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ListRowMobile from '../row/mobile';
 
 function bodyMobile(propTypes) {
@@ -12,7 +13,16 @@ function bodyMobile(propTypes) {
 
         const rows = rowIds.map(id => <ListRowMobile key={id} page={page} id={id} colKeys={colKeys} />);
 
+        const listHeadInner = LIST_COLS_MOBILE.map(column => {
+            const className = classNames('list-head-column', column);
+
+            return <span key={column} className={className}>{column}</span>;
+        });
+
         return <div>
+            <div className="list-head noselect">
+                {listHeadInner}
+            </div>
             <ul className="list-ul">{rows}</ul>
             <div className="button-add-outer">
                 <button type="button" className="button-add" onClick={() => onAdd()}>{'Add'}</button>
