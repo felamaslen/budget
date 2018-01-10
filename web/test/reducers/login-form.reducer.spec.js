@@ -15,7 +15,8 @@ describe('Login form reducer', () => {
                 loginForm: {
                     values: ['4'],
                     inputStep: 1,
-                    visible: true
+                    visible: true,
+                    active: true
                 }
             });
         });
@@ -48,6 +49,38 @@ describe('Login form reducer', () => {
                     values: [],
                     inputStep: 0,
                     visible: false
+                }
+            });
+        });
+
+        it('should set the active state', () => {
+            expect(R.rLoginFormInput(fromJS({
+                loginForm: {
+                    values: ['3', '2', '1'],
+                    inputStep: 3,
+                    visible: true
+                }
+            }), { input: '4' }).toJS()).to.deep.equal({
+                loginForm: {
+                    values: ['3', '2', '1', '4'],
+                    inputStep: 4,
+                    visible: true,
+                    active: false
+                }
+            });
+
+            expect(R.rLoginFormInput(fromJS({
+                loginForm: {
+                    values: ['3', '2'],
+                    inputStep: 2,
+                    visible: true
+                }
+            }), { input: '4' }).toJS()).to.deep.equal({
+                loginForm: {
+                    values: ['3', '2', '4'],
+                    inputStep: 3,
+                    visible: true,
+                    active: true
                 }
             });
         });

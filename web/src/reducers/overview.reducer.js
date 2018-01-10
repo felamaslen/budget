@@ -19,8 +19,14 @@ import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
  * @returns {list} first six columns of data for overview table
  */
 function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
-    return futureCategories.map(category => {
-        const categoryCost = cost.get(category);
+    if (futureMonths <= 0) {
+        return cost;
+    }
+
+    return cost.map((categoryCost, category) => {
+        if (!futureCategories.includes(category)) {
+            return categoryCost;
+        }
 
         if (category === 'funds') {
             // randomly generate fund income projections
@@ -35,27 +41,24 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
 
             const latestValue = categoryCost.get(oldOffset + futureKey - 1);
 
-            return currentItems.concat(new Array(numFutureItems).fill(0)
-                .reduce(
-                    result => result.push(result.last() *
-                        (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100)
-                    ),
-                    list([latestValue])
-                )
-                .shift()
-                .map(value => Math.round(value))
-            );
+            return categoryCost
+                .slice(0, oldOffset + futureKey)
+                .concat(new Array(numFutureItems).fill(0)
+                    .reduce(
+                        result => result.push(result.last() *
+                            (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100)
+                        ),
+                        list([latestValue])
+                    )
+                    .shift()
+                    .map(value => Math.round(value))
+                );
         }
 
         // find the average value and make predictions based on that
         const currentItems = categoryCost.slice(0, categoryCost.size - futureMonths);
-        if (futureMonths <= 0) {
-            return currentItems;
-        }
 
-        const average = Math.round(listAverage(
-            categoryCost, futureMonths + 1, AVERAGE_EXP
-        ));
+        const average = Math.round(listAverage(categoryCost, futureMonths + 1, AVERAGE_EXP));
 
         return currentItems.concat(list(new Array(futureMonths).fill(average)));
     });
@@ -123,12 +126,9 @@ export function rProcessDataOverview(
             .set('fundsOld', funds.slice(0, funds.size - numRows));
     }
 
-    const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');
+    const futureCategories = list.of('funds', 'bills', 'food', 'general', 'holiday', 'social');
     const futureKey = yearMonthDifference(startYearMonth, currentYearMonth) + 1;
-    const futureData = calculateFutures(cost, futureCategories, futureMonths, futureKey);
-    futureCategories.forEach((category, key) => {
-        cost = cost.set(category, futureData.get(key));
-    });
+    cost = calculateFutures(cost, futureCategories, futureMonths, futureKey);
 
     // add spending column
     const spending = yearMonthsList.map((month, key) =>
@@ -338,6 +338,9 @@ export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemC
 
     return reduction
         .setIn(['pages', 'overview', 'data'], newData)
+        .setIn(['pages', 'overview', 'data', 'targets'],
+            reduction.getIn(['pages', 'overview', 'data', 'targets'])
+        )
         .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 

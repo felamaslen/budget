@@ -89,7 +89,7 @@
             background: $color-translucent-dark;
         }
         li {
-            &:not(.li-add) > span {
+            &:not(.li-add) > span:not(.active) {
                 overflow: hidden;
             }
             & > span {

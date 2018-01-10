@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function AppLogo({ loading, unsaved }) {
+function AppLogo({ loading, unsaved }) {
     const unsavedChanges = unsaved
         ? <span className="queue-not-saved">{'Unsaved changes!'}</span>
         : null;
@@ -15,7 +15,7 @@ export function AppLogo({ loading, unsaved }) {
     return <div className="app-logo">
         {unsavedChanges}
         <a className="logo">
-            <span>Budget</span>
+            <span>{'Budget'}</span>
             {loadingSpinner}
         </a>
     </div>;

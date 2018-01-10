@@ -14,11 +14,6 @@ describe('login.actions', () => {
             expect(A.aLoginFormReset(10)).to.deep.equal({ type: C.LOGIN_FORM_RESET, index: 10 })
         )
     );
-    describe('aLoginFormSubmitted', () =>
-        it('should return LOGIN_FORM_SUBMITTED with pin', () =>
-            expect(A.aLoginFormSubmitted(1929)).to.deep.equal({ type: C.LOGIN_FORM_SUBMITTED, pin: 1929 })
-        )
-    );
     describe('aLoginFormResponseReceived', () =>
         it('should return LOGIN_FORM_RESPONSE_GOT with res object', () =>
             expect(A.aLoginFormResponseReceived({ foo: 'bar' })).to.deep.equal({

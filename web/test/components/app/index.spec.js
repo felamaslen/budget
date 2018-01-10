@@ -37,7 +37,7 @@ describe('<App />', () => {
             component: Header
         });
     });
-    it('should render an <LoginForm /> container', () => {
+    it('should render a <LoginForm /> container', () => {
         expect(wrapper.childAt(0).childAt(2).is(LoginForm)).to.equal(true);
     });
     it('should render a <Content /> route', () => {
@@ -47,7 +47,7 @@ describe('<App />', () => {
             component: Content
         });
     });
-    it('should render an <Spinner /> container', () => {
+    it('should render a <Spinner /> container', () => {
         expect(wrapper.childAt(0).childAt(4).is(Spinner)).to.equal(true);
     });
 });

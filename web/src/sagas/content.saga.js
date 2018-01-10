@@ -3,7 +3,7 @@ import querystring from 'querystring';
 import { all, select, takeLatest, call, put } from 'redux-saga/effects';
 
 import { CONTENT_REQUESTED } from '../constants/actions';
-import { API_PREFIX, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS, GRAPH_FUNDS_PERIODS } from '../misc/const';
+import { API_PREFIX, ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
 import { getPeriodMatch } from '../misc/data';
 
 import { selectApiKey } from '.';

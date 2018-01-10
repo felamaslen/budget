@@ -19,8 +19,8 @@ export default class InteractiveEditableTransactions extends PureComponent {
     }
     addTransaction(row, col) {
         const date = new YMD(this.inputAdd.date.value);
-        const units = parseFloat(this.inputAdd.units.value, 10);
-        const cost = Math.round(100 * parseFloat(this.inputAdd.cost.value, 10));
+        const units = Number(this.inputAdd.units.value);
+        const cost = Math.round(100 * Number(this.inputAdd.cost.value));
 
         if (!date.valid || isNaN(units) || isNaN(cost)) {
             return;
@@ -50,7 +50,7 @@ export default class InteractiveEditableTransactions extends PureComponent {
         this.input.units[id].value = this.props.value.list.getIn([key, 'units']);
     }
     onUnitsChange(row, col, key, newUnits, units) {
-        const thisUnits = parseFloat(newUnits, 10);
+        const thisUnits = Number(newUnits);
 
         const value = isNaN(thisUnits)
             ? units

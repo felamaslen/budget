@@ -104,20 +104,6 @@ export const AVERAGE_EXP = 0xa2;
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
 
-export const htmlCanvasSupported = () => {
-    if (typeof navigator === 'undefined') {
-        return false;
-    }
-
-    if (navigator.userAgent === 'node.js') {
-        return false;
-    }
-
-    const elem = document.createElement('canvas');
-
-    return Boolean(elem.getContext && elem.getContext('2d'));
-};
-
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;
 export const GRAPH_SPEND_CATEGORIES = [
