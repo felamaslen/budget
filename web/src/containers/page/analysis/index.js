@@ -14,7 +14,7 @@ import Upper from './upper';
 import ListTree from './list-tree';
 import Blocks from './blocks';
 
-export class PageAnalysis extends PureComponent {
+class PageAnalysis extends PureComponent {
     componentDidMount() {
         this.props.onLoad();
     }

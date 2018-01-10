@@ -5,13 +5,15 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '../../../misc/format';
 
 export default function ListTreeHead({ items }) {
-    const getCost = itemList =>
-        formatCurrency(itemList.reduce((last, item) => last + item.itemCost, 0));
+    const getCost = itemList => formatCurrency(itemList
+        .reduce((last, { itemCost }) => last + itemCost, 0)
+    );
 
-    const getPct = itemList =>
-        itemList.reduce((last, item) => last + item.pct, 0).toFixed(1);
+    const getPct = itemList => itemList
+        .reduce((last, { pct }) => last + pct, 0)
+        .toFixed(1);
 
-    const itemsSelected = items.filter(item => item.visible);
+    const itemsSelected = items.filter(({ visible }) => visible);
 
     const costTotal = getCost(items);
     const pctTotal = getPct(items);

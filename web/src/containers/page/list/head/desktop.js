@@ -13,8 +13,8 @@ export function ListHeadDesktop({ page, weeklyValue, daily, totalCost }) {
 
     const dailyValues = daily
         ? <span>
-            <span className="daily">Daily</span>
-            <span className="weekly">Weekly:</span>
+            <span className="daily">{'Daily'}</span>
+            <span className="weekly">{'Weekly:'}</span>
             <span className="weekly-value">{weeklyValueFormatted}</span>
         </span>
         : null;

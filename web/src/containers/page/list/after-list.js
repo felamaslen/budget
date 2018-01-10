@@ -6,7 +6,7 @@ import GraphFunds from '../funds/graph/funds';
 import { ListHeadExtraFunds } from './head/extra';
 import Media from 'react-media';
 
-function AfterListFunds({ isMobile }) {
+export function AfterListFunds({ isMobile }) {
     if (isMobile) {
         return <ListHeadExtraFunds />;
     }
@@ -23,9 +23,11 @@ AfterListFunds.propTypes = {
 
 export default function AfterList({ page, ...props }) {
     if (page === 'funds') {
+        const item = isMobile => <AfterListFunds isMobile={isMobile} {...props} />;
+
         return <div className="funds-info">
             <Media query={mediaQueries.mobile}>
-                {isMobile => <AfterListFunds isMobile={isMobile} {...props} />}
+                {item}
             </Media>
         </div>;
     }

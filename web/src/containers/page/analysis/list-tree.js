@@ -14,7 +14,7 @@ import SubTree from './sub-tree';
 
 import { formatCurrency } from '../../../misc/format';
 
-export function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, onToggle }) {
+function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, onToggle }) {
     const costPct = cost.map(item => {
         const itemCost = item.get('total');
         const pct = 100 * itemCost / costTotal;
@@ -30,31 +30,30 @@ export function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onH
         return { name, itemCost, pct, visible, open, subTree };
     });
 
-    const listTreeBody = costPct.map(item => {
-        const classes = classNames({
-            [`tree-list-item ${item.name}`]: true,
-            open: item.open
-        });
+    const listTreeBody = costPct.map(({ visible, pct, ...item }) => {
+        const { name, open, itemCost } = item;
 
-        const onClick = () => onExpand(item.name);
-        const onMouseOver = () => onHover([item.name]);
+        const className = classNames('tree-list-item', name, { open });
+
+        const onClick = () => onExpand(name);
+        const onMouseOver = () => onHover([name]);
         const onMouseOut = () => onHover(null);
 
-        const onClickToggle = () => onToggle(item.name);
+        const onClickToggle = () => onToggle(name);
         const stopPropagation = evt => evt.stopPropagation();
 
-        return <li key={item.name} className={classes}>
+        return <li key={name} className={className}>
             <div className="main"
                 onClick={onClick} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
 
                 <span className="indicator" />
-                <input type="checkbox" checked={item.visible} onClick={stopPropagation}
+                <input type="checkbox" checked={visible} onClick={stopPropagation}
                     onChange={onClickToggle} />
-                <span className="title">{item.name}</span>
-                <span className="cost">{formatCurrency(item.itemCost)}</span>
-                <span className="pct">&nbsp;({item.pct.toFixed(1)}%)</span>
+                <span className="title">{name}</span>
+                <span className="cost">{formatCurrency(itemCost)}</span>
+                <span className="pct">&nbsp;({pct.toFixed(1)}%)</span>
             </div>
-            <SubTree {...item} />
+            <SubTree {...item} onHover={onHover} />
         </li>;
     });
 

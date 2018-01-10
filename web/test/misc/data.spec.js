@@ -39,6 +39,91 @@ describe('misc/data', () => {
             expect(M.uuid(0.99123, true)).to.equal(130497);
         });
     });
+    describe('TransactionsList', () => {
+        const lists = [
+            {
+                tList: new M.TransactionsList([
+                    { d: '10/11/2017', u: 5, c: 3 }, // eslint-disable-line id-length
+                    { d: '4/3/2018', u: -2, c: -4 }, // eslint-disable-line id-length
+                    { d: '1/5/2018', u: -3, c: -1 } // eslint-disable-line id-length
+                ]),
+                size: 3,
+                string: [
+                    { year: 2017, month: 11, date: 10, units: 5, cost: 3 },
+                    { year: 2018, month: 3, date: 4, units: -2, cost: -4 },
+                    { year: 2018, month: 5, date: 1, units: -3, cost: -1 }
+                ],
+                value: fromJS([
+                    { id: 1, date: new YMD('10/11/2017'), units: 5, cost: 3 },
+                    { id: 2, date: new YMD('4/3/2018'), units: -2, cost: -4 },
+                    { id: 3, date: new YMD('1/5/2018'), units: -3, cost: -1 }
+                ]),
+                maxId: 3,
+                totalUnits: 0,
+                totalCost: -2,
+                lastUnits: 3,
+                lastCost: -1,
+                sold: true
+            },
+            {
+                tList: new M.TransactionsList(fromJS([
+                    { id: 1, date: new YMD('10/11/2017'), units: 5, cost: 3 },
+                    { id: 5, date: new YMD('4/3/2018'), units: -2, cost: -4 }
+                ]), false),
+                size: 2,
+                string: [
+                    { year: 2017, month: 11, date: 10, units: 5, cost: 3 },
+                    { year: 2018, month: 3, date: 4, units: -2, cost: -4 }
+                ],
+                value: fromJS([
+                    { id: 1, date: new YMD('10/11/2017'), units: 5, cost: 3 },
+                    { id: 5, date: new YMD('4/3/2018'), units: -2, cost: -4 }
+                ]),
+                maxId: 5,
+                totalUnits: 3,
+                totalCost: -1,
+                lastUnits: 3,
+                lastCost: -1,
+                sold: false
+            }
+        ];
+
+        it.each(lists, 'should set a size parameter', ({ tList, size }) => {
+            expect(tList.size).to.equal(size);
+        });
+
+        it.each(lists, 'should be serialisable', ({ tList, string }) => {
+            expect(tList.toString()).to.deep.equal(string);
+        });
+
+        it.each(lists, 'should return their list as valueOf()', ({ tList, value }) => {
+            expect(tList.valueOf()).to.deep.equal(value);
+        });
+
+        it.each(lists, 'should be able to get their maxId', ({ tList, maxId }) => {
+            expect(tList.maxId()).to.equal(maxId);
+        });
+
+        it.each(lists, 'should be able to get total units', ({ tList, totalUnits }) => {
+            expect(tList.getTotalUnits()).to.equal(totalUnits);
+        });
+
+        it.each(lists, 'should be able to get total cost', ({ tList, totalCost }) => {
+            expect(tList.getTotalCost()).to.equal(totalCost);
+        });
+
+        it.each(lists, 'should be able to get units up to when sold', ({ tList, lastUnits }) => {
+            expect(tList.getLastUnits()).to.equal(lastUnits);
+        });
+
+        it.each(lists, 'should be able to get cost up to when sold', ({ tList, lastCost }) => {
+            expect(tList.getLastCost()).to.equal(lastCost);
+        });
+
+        it.each(lists, 'should be able to get sold status', ({ tList, sold }) => {
+            expect(tList.isSold()).to.equal(sold);
+        });
+    });
     describe('dataEquals', () => {
         it('should compare YMDs', () => {
             expect(M.dataEquals(new YMD([2017, 9, 1]), new YMD('1/9/17'))).to.equal(true);
