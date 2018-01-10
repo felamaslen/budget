@@ -11,33 +11,23 @@ import { PAGES } from '../../../misc/const';
 import ListAddEditItem from '../../editable/list-item';
 
 export class AddForm extends PureComponent {
-    constructor(props) {
-        super(props);
+    componentDidUpdate(prevProps) {
+        if (this.addBtn && this.addBtn.focus &&
+            !prevProps.addBtnFocus && this.props.addBtnFocus) {
 
-        this.addItems = [];
-    }
-    shouldComponentUpdate(nextProps) {
-        const addBtnFocus = !this.props.addBtnFocus && nextProps.addBtnFocus;
-
-        if (addBtnFocus && this.addBtn) {
             setTimeout(() => this.addBtn.focus(), 0);
-
-            return false;
         }
-
-        return true;
     }
     render() {
         const { page, addListItem } = this.props;
 
-        const addItems = PAGES[page].cols.map((item, col) => {
-            const ref = editable => {
-                this.addItems.push(editable);
-            };
-
-            return <ListAddEditItem key={col} ref={ref} page={page}
-                row={-1} col={col} id={null} />;
-        });
+        const addItems = PAGES[page].cols.map((item, col) => <ListAddEditItem
+            key={col}
+            page={page}
+            row={-1}
+            col={col}
+            id={null}
+        />);
 
         const addBtnRef = input => {
             this.addBtn = input;

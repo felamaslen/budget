@@ -79,7 +79,7 @@ ListRowExtraFundsComponent.propTypes = {
     popout: PropTypes.bool.isRequired
 };
 
-const ListRowExtraFunds = connect(
+export const ListRowExtraFunds = connect(
     (state, { id }) => ({
         row: state.getIn(['pages', 'funds', 'rows', id]),
         popout: Boolean(state.getIn(['pages', 'funds', 'rows', id, 'historyPopout']))

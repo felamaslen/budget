@@ -35,9 +35,9 @@ export function Upper({ periodKey, groupingKey, timeIndex, description, changeOp
         </span>
         <div className="btns">
             <button className="btn-previous"
-                onClick={() => changeTimeIndex(1)}>Previous</button>
+                onClick={() => changeTimeIndex(1)}>{'Previous'}</button>
             <button className="btn-next" disabled={timeIndex === 0}
-                onClick={() => changeTimeIndex(-1)}>Next</button>
+                onClick={() => changeTimeIndex(-1)}>{'Next'}</button>
         </div>
         <h3 className="period-title">{description}</h3>
     </div>;
