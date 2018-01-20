@@ -221,12 +221,8 @@ export function rGetOverviewRows(data) {
     });
 
     const median = values.map(valuesItem => ({
-        positive: listAverage(valuesItem.filter(
-            item => item >= 0
-        ), 0, AVERAGE_MEDIAN),
-        negative: listAverage(valuesItem.filter(
-            item => item < 0), 0, AVERAGE_MEDIAN
-        )
+        positive: listAverage(valuesItem.filter(item => item >= 0), 0, AVERAGE_MEDIAN),
+        negative: listAverage(valuesItem.filter(item => item < 0), 0, AVERAGE_MEDIAN)
     }));
 
     const categoryColor = getOverviewCategoryColor();
