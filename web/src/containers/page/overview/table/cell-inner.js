@@ -20,7 +20,11 @@ export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable
     }
 
     const value = cellKey > 0
-        ? formatCurrency(cell.get('value'), { abbreviate: true, precision: 1 })
+        ? formatCurrency(cell.get('value'), {
+            abbreviate: true,
+            precision: 1,
+            brackets: true
+        })
         : cell.get('value');
 
     return <span className="text">{value}</span>;

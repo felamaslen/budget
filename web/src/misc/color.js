@@ -52,8 +52,10 @@ export function getOverviewCategoryColor() {
  * @returns {array} rgb values
  */
 export function getOverviewScoreColor(value, range, median, color) {
+    const blank = [255, 255, 255]; // white
+
     if (range.min === range.max) {
-        return [255, 255, 255]; // white
+        return blank;
     }
 
     const medianValue = value < 0
@@ -79,6 +81,9 @@ export function getOverviewScoreColor(value, range, median, color) {
             ? 0
             : 1;
         theColor = color[end];
+    }
+    else if (value < 0) {
+        return blank;
     }
 
     return theColor.map(item => Math.round(255 - (255 - item) * score));

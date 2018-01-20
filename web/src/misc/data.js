@@ -187,17 +187,12 @@ export function dataEquals(item, compare) {
  * @param {integer} mode: output either median or mean
  * @returns {integer} median / mean value
  */
-export function listAverage(theList, offset = 0, mode = null) {
-    const values = offset
-        ? theList.slice(0, -offset)
-        : theList;
-
-    if (!theList.size) {
+export function listAverage(values, mode = null) {
+    if (!values.size) {
         return NaN;
     }
 
     if (mode === AVERAGE_MEDIAN) {
-        // median
         const sorted = values.sort((prev, next) => {
             if (prev < next) {
                 return -1;
