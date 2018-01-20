@@ -6,7 +6,7 @@ import { List as list, Map as map, fromJS } from 'immutable';
 
 import { AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../misc/const';
 import { FUTURE_INVESTMENT_RATE } from '../misc/config';
-import { yearMonthDifference } from '../misc/date';
+import { yearMonthDifference, monthDays } from '../misc/date';
 import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../misc/data';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
 
@@ -18,10 +18,12 @@ import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
  * @param {integer} futureKey: key to separate between past/present and future
  * @returns {list} first six columns of data for overview table
  */
-function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
+function calculateFutures(cost, futureCategories, futureMonths, futureKey, now = new Date()) {
     if (futureMonths <= 0) {
         return cost;
     }
+
+    const currentMonthRatio = monthDays(now.getMonth() + 1, now.getFullYear()) / now.getDate();
 
     return cost.map((categoryCost, category) => {
         if (!futureCategories.includes(category)) {
@@ -56,9 +58,12 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
         }
 
         // find the average value and make predictions based on that
-        const currentItems = categoryCost.slice(0, categoryCost.size - futureMonths);
+        const currentMonthExtrapolated = Math.round(categoryCost.get(futureKey - 1) * currentMonthRatio);
+        const currentItems = categoryCost
+            .slice(0, futureKey - 1)
+            .push(currentMonthExtrapolated);
 
-        const average = Math.round(listAverage(categoryCost, futureMonths + 1, AVERAGE_EXP));
+        const average = Math.round(listAverage(currentItems, AVERAGE_EXP));
 
         return currentItems.concat(list(new Array(futureMonths).fill(average)));
     });
@@ -126,7 +131,7 @@ export function rProcessDataOverview(
             .set('fundsOld', funds.slice(0, funds.size - numRows));
     }
 
-    const futureCategories = list.of('funds', 'bills', 'food', 'general', 'holiday', 'social');
+    const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');
     const futureKey = yearMonthDifference(startYearMonth, currentYearMonth) + 1;
     cost = calculateFutures(cost, futureCategories, futureMonths, futureKey);
 
@@ -140,14 +145,9 @@ export function rProcessDataOverview(
     );
 
     // add net cash flow column
-    const net = yearMonthsList.map((month, key) => {
-        // add predicted (random) fund income to the net cash flow
-        const fundIncome = key === 0 || key < futureKey
-            ? 0
-            : cost.getIn(['funds', key]) - cost.getIn(['funds', key - 1]);
-
-        return cost.getIn(['income', key]) - spending.get(key) + fundIncome;
-    });
+    const net = yearMonthsList.map((month, key) =>
+        cost.getIn(['income', key]) - spending.get(key)
+    );
 
     // add predicted balance
     let lastPredicted = cost.getIn(['balance', 0]);
@@ -218,20 +218,14 @@ export function rGetOverviewRows(data) {
     // get value ranges and medians for calculating colours
     const values = OVERVIEW_COLUMNS.slice(1).map((column, colKey) => tableData.get(colKey + 1));
 
-    const valueRange = values.map(valuesItem => {
-        return {
-            min: valuesItem.min(),
-            max: valuesItem.max()
-        };
-    });
+    const valueRange = values.map(valuesItem => ({
+        min: valuesItem.min(),
+        max: valuesItem.max()
+    }));
 
     const median = values.map(valuesItem => ({
-        positive: listAverage(valuesItem.filter(
-            item => item >= 0
-        ), 0, AVERAGE_MEDIAN),
-        negative: listAverage(valuesItem.filter(
-            item => item < 0), 0, AVERAGE_MEDIAN
-        )
+        positive: listAverage(valuesItem.filter(item => item >= 0), AVERAGE_MEDIAN),
+        negative: listAverage(valuesItem.filter(item => item < 0), AVERAGE_MEDIAN)
     }));
 
     const categoryColor = getOverviewCategoryColor();
