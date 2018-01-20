@@ -140,14 +140,9 @@ export function rProcessDataOverview(
     );
 
     // add net cash flow column
-    const net = yearMonthsList.map((month, key) => {
-        // add predicted (random) fund income to the net cash flow
-        const fundIncome = key === 0 || key < futureKey
-            ? 0
-            : cost.getIn(['funds', key]) - cost.getIn(['funds', key - 1]);
-
-        return cost.getIn(['income', key]) - spending.get(key) + fundIncome;
-    });
+    const net = yearMonthsList.map((month, key) =>
+        cost.getIn(['income', key]) - spending.get(key)
+    );
 
     // add predicted balance
     let lastPredicted = cost.getIn(['balance', 0]);
