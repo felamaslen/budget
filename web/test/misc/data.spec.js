@@ -154,10 +154,10 @@ describe('misc/data', () => {
     });
     describe('listAverage', () => {
         it('should get the median of a list of data', () => {
-            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), 0, AVERAGE_MEDIAN))
+            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN))
                 .to.equal(9);
 
-            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), 0, AVERAGE_MEDIAN))
+            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN))
                 .to.equal(9.5);
         });
         it('should get an exponential average for a list of data', () => {
@@ -165,21 +165,14 @@ describe('misc/data', () => {
 
             const averageExp = 13.105675146771038;
 
-            expect(M.listAverage(theList, null, AVERAGE_EXP)).to.equal(averageExp);
+            expect(M.listAverage(theList, AVERAGE_EXP)).to.equal(averageExp);
         });
         it('should get the mean by default', () => {
-            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), 0))
+            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20])))
                 .to.equal(71 / 9);
 
-            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), 0))
+            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20])))
                 .to.equal(8.625);
-        });
-        it('should slice the data if requested', () => {
-            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), 3))
-                .to.equal(6.5);
-
-            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), 3, AVERAGE_MEDIAN))
-                .to.equal(10);
         });
     });
     describe('getYearMonthFromKey', () => {
