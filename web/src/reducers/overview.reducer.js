@@ -124,41 +124,42 @@ export function rProcessDataOverview(
     const yearMonthsList = list(yearMonths);
 
     // separate funds into old and displayed
-    let cost = costMap;
-    if (!(cost.has('fundsOld') && cost.get('fundsOld').size)) {
-        const funds = cost.get('funds');
-        cost = cost.set('funds', funds.slice(-numRows))
+    let costActual = costMap;
+    if (!(costActual.has('fundsOld') && costActual.get('fundsOld').size)) {
+        const funds = costActual.get('funds');
+        costActual = costActual
+            .set('funds', funds.slice(-numRows))
             .set('fundsOld', funds.slice(0, funds.size - numRows));
     }
 
     const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');
     const futureKey = yearMonthDifference(startYearMonth, currentYearMonth) + 1;
-    cost = calculateFutures(cost, futureCategories, futureMonths, futureKey);
+    const costWithFutures = calculateFutures(costActual, futureCategories, futureMonths, futureKey);
 
     // add spending column
     const spending = yearMonthsList.map((month, key) =>
-        cost.getIn(['bills', key]) +
-        cost.getIn(['food', key]) +
-        cost.getIn(['general', key]) +
-        cost.getIn(['holiday', key]) +
-        cost.getIn(['social', key])
+        costWithFutures.getIn(['bills', key]) +
+        costWithFutures.getIn(['food', key]) +
+        costWithFutures.getIn(['general', key]) +
+        costWithFutures.getIn(['holiday', key]) +
+        costWithFutures.getIn(['social', key])
     );
 
     // add net cash flow column
     const net = yearMonthsList.map((month, key) =>
-        cost.getIn(['income', key]) - spending.get(key)
+        costWithFutures.getIn(['income', key]) - spending.get(key)
     );
 
     // add predicted balance
-    let lastPredicted = cost.getIn(['balance', 0]);
+    let lastPredicted = costWithFutures.getIn(['balance', 0]);
 
     const predicted = yearMonthsList.map((month, key) => {
         const havePrevious = key > 0;
         const past = key < futureKey;
-        const presentAndHaveLast = key === futureKey && cost.getIn(['balance', key - 1]) > 0;
+        const presentAndHaveLast = key === futureKey && costWithFutures.getIn(['balance', key - 1]) > 0;
 
         if (havePrevious && (past || presentAndHaveLast)) {
-            lastPredicted = cost.getIn(['balance', key - 1]) + net.get(key);
+            lastPredicted = costWithFutures.getIn(['balance', key - 1]) + net.get(key);
 
             return lastPredicted;
         }
@@ -169,10 +170,10 @@ export function rProcessDataOverview(
         return newPredicted;
     });
 
-    const balanceWithPredicted = cost.get('balance').slice(0, futureKey)
+    const balanceWithPredicted = costWithFutures.get('balance').slice(0, futureKey)
         .concat(predicted.slice(-numRows + futureKey));
 
-    cost = cost
+    const cost = costWithFutures
         .set('spending', spending)
         .set('net', net)
         .set('predicted', predicted)
@@ -187,7 +188,8 @@ export function rProcessDataOverview(
         endYearMonth,
         currentYearMonth,
         yearMonths,
-        cost
+        cost,
+        costActual
     });
 }
 
@@ -294,7 +296,7 @@ export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemC
     const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
     const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
 
-    const oldCost = reduction.getIn(['pages', 'overview', 'data', 'cost']);
+    const oldCost = reduction.getIn(['pages', 'overview', 'data', 'costActual']);
     const numRows = oldCost.get(page).size;
 
     // update the changed rows in the overview page
