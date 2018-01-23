@@ -50,21 +50,40 @@ function onDraw({ minX, minY, maxY, data, popout }, { ctx, height }, { pixX, pix
     // plot data
     ctx.lineWidth = 1.5;
 
-    const initialValue = data.getIn([0, 1]);
+    const { values: initialValues } = data
+        .map(item => item.get(1))
+        .reduce(({ values, last }, value, index) => {
+            if (last === 0 && value > 0) {
+                return {
+                    values: [...values, value],
+                    last: value
+                };
+            }
+
+            return { values, last: value };
+
+        }, {
+            values: [data.getIn([0, 1])],
+            last: data.getIn([0, 1])
+        });
 
     const colorLoss = rgba(COLOR_LOSS);
     const colorProfit = rgba(COLOR_PROFIT);
-    const colorValue = value => {
-        if (value < initialValue) {
-            return colorLoss;
-        }
+    const colorValue = lineKey => {
+        const initialValue = initialValues[lineKey];
 
-        return colorProfit;
+        return value => {
+            if (value < initialValue) {
+                return colorLoss;
+            }
+
+            return colorProfit;
+        };
     };
 
     const lines = separateLine(data);
 
-    lines.forEach(line => drawCubicLine(line, colorValue));
+    lines.forEach((line, key) => drawCubicLine(line, colorValue(key)));
 }
 
 function getDimensions({ popout }) {
