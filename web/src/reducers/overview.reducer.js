@@ -18,9 +18,14 @@ import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
  * @param {integer} futureKey: key to separate between past/present and future
  * @returns {list} first six columns of data for overview table
  */
-function calculateFutures(cost, futureCategories, futureMonths, futureKey, now = new Date()) {
+function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
     if (futureMonths <= 0) {
         return cost;
+    }
+
+    let now = new Date();
+    if (process.env.NODE_ENV === 'test') {
+        now = new Date('2018-01-22');
     }
 
     const currentMonthRatio = monthDays(now.getMonth() + 1, now.getFullYear()) / now.getDate();
