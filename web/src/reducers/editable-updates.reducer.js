@@ -34,7 +34,7 @@ export function applyEditsOverview(reduction, { item }) {
     const row = item.get('row');
 
     const newCost = reduction
-        .getIn(['pages', 'overview', 'data', 'cost'])
+        .getIn(['pages', 'overview', 'data', 'costActual'])
         .setIn(['balance', row], value);
 
     const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
