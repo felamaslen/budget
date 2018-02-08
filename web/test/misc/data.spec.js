@@ -181,6 +181,11 @@ describe('misc/data', () => {
             expect(M.getYearMonthFromKey(1, 2015, 9)).to.deep.equal([2015, 10]);
             expect(M.getYearMonthFromKey(10, 2015, 9)).to.deep.equal([2016, 7]);
         });
+        it('should work for negative offsets', () => {
+            expect(M.getYearMonthFromKey(-1, 2015, 9)).to.deep.equal([2015, 8]);
+            expect(M.getYearMonthFromKey(-10, 2015, 9)).to.deep.equal([2014, 11]);
+            expect(M.getYearMonthFromKey(-100, 2015, 9)).to.deep.equal([2007, 5]);
+        });
     });
     describe('getKeyFromYearMonth', () => {
         it('should return the correct key', () => {
