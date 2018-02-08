@@ -233,7 +233,7 @@ export function listAverage(values, mode = null) {
 
 export function getYearMonthFromKey(key, startYear, startMonth) {
     const year = startYear + Math.floor((startMonth - 1 + key) / 12);
-    const month = (startMonth + key + 11) % 12 + 1; // month is 1-indexed
+    const month = (((startMonth + key + 11) % 12) + 12) % 12 + 1; // month is 1-indexed
 
     return [year, month];
 }
