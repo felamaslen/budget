@@ -1,33 +1,51 @@
 import { Map as map } from 'immutable';
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Editable from '../../../editable';
 import { formatCurrency } from '../../../../misc/format';
 
-export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable }) {
-    if (editable) {
-        // editable balance column
-        const props = {
-            page: 'overview',
-            row: rowKey,
-            col: 0,
-            id: null,
-            item: 'cost',
-            value: cell.get('value')
-        };
+export default class OverviewTableCellInner extends Component {
+    constructor(props) {
+        super(props);
 
-        return <Editable {...props} />;
+        this.state = { hover: false };
     }
+    render() {
+        const { cell, cellKey, rowKey, editable } = this.props;
 
-    const value = cellKey > 0
-        ? formatCurrency(cell.get('value'), {
-            abbreviate: true,
-            precision: 1,
-            brackets: true
-        })
-        : cell.get('value');
+        if (editable) {
+            // editable balance column
+            const props = {
+                page: 'overview',
+                row: rowKey,
+                col: 0,
+                id: null,
+                item: 'cost',
+                value: cell.get('value')
+            };
 
-    return <span className="text">{value}</span>;
+            return <Editable {...props} />;
+        }
+
+        const onMouseOver = () => this.setState({ hover: true });
+        const onMouseOut = () => this.setState({ hover: false });
+
+        const value = cellKey > 0
+            ? formatCurrency(cell.get('value'), {
+                abbreviate: !this.state.hover,
+                precision: 1,
+                brackets: true
+            })
+            : cell.get('value');
+
+        return (
+            <span className="text"
+                onMouseOver={onMouseOver}
+                onMouseOut={onMouseOut}>
+                {value}
+            </span>
+        );
+    }
 }
 
 OverviewTableCellInner.propTypes = {
