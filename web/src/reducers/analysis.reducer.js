@@ -135,7 +135,7 @@ export function rAnalysisTreeHover(reduction, { key }) {
 }
 
 export function rAnalysisBlockClick(reduction, { name }) {
-    if (name === 'bills') {
+    if (name === 'bills' || name === 'saved') {
         return reduction;
     }
 

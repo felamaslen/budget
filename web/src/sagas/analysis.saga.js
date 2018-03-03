@@ -10,6 +10,7 @@ import { openTimedMessage } from './error.saga';
 import { aAnalysisDataRefreshed } from '../actions/analysis.actions';
 
 export const selectStateProps = state => ({
+    loading: state.getIn(['other', 'analysis', 'loading']),
     period: state.getIn(['other', 'analysis', 'period']),
     grouping: state.getIn(['other', 'analysis', 'grouping']),
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
@@ -22,14 +23,17 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
 
     const stateProps = yield select(selectStateProps);
 
-    const { name, period, grouping, timeIndex } = { ...stateProps, ...payload };
+    const { loading, name, period, grouping, timeIndex } = { ...stateProps, ...payload };
+
+    if (!loading) {
+        return;
+    }
 
     const apiKey = yield select(selectApiKey);
 
     let params = [ANALYSIS_PERIODS[period], ANALYSIS_GROUPINGS[grouping], timeIndex];
 
-    const loadDeep = Boolean(name);
-    if (loadDeep) {
+    if (name) {
         params = ['deep', name, ...params];
     }
 

@@ -9,28 +9,21 @@ import PropTypes from 'prop-types';
 
 import BlockPacker from '../../../components/block-packer';
 
-export function Blocks({ active, blocks, deep, status, onClick, onHover }) {
-    return <BlockPacker
-        page="analysis"
-        activeBlock={active}
-        blocks={blocks}
-        deepBlock={deep}
-        status={status}
-        onClick={onClick}
-        onHover={onHover} />;
+export function Blocks(props) {
+    return <BlockPacker page="analysis" {...props} />;
 }
 
 Blocks.propTypes = {
     blocks: PropTypes.instanceOf(list),
     status: PropTypes.string,
-    active: PropTypes.array,
+    activeBlock: PropTypes.array,
     deep: PropTypes.string,
     onClick: PropTypes.func.isRequired,
     onHover: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    active: state.getIn(['other', 'blockView', 'active']),
+    activeBlock: state.getIn(['other', 'blockView', 'active']),
     blocks: state.getIn(['other', 'blockView', 'blocks']),
     deep: state.getIn(['other', 'blockView', 'deep']),
     status: state.getIn(['other', 'blockView', 'status'])

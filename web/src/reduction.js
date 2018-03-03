@@ -52,7 +52,7 @@ export function resetAppState(state) {
                 loadKey: null,
                 blocks: null,
                 active: null,
-                deepBlock: null
+                deep: null
             }),
             analysis: map({
                 loading: false,
