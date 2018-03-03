@@ -1,11 +1,13 @@
 /* eslint-disable newline-per-chained-call */
 
-const joi = require('joi');
+const baseJoi = require('joi');
+const joiDateExtensions = require('joi-date-extensions');
+const joi = baseJoi.extend(joiDateExtensions);
 
 const transactionSchema = joi.object().keys({
     cost: joi.number().integer().required(),
     units: joi.number().required(),
-    date: joi.date().iso().required()
+    date: joi.date().format('YYYY-MM-DD').required()
 });
 
 const transactionListSchema = joi.array().items(transactionSchema);

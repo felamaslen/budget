@@ -2,25 +2,6 @@
  * Common methods / functions
  */
 
-function monthLength(year, month) {
-    // month is 1-indexed here
-    if (month === 2) {
-        // february may be a leap year
-        const yearIsLeap = year % 4 === 0 && (year % 400 === 0 || year % 100 !== 0);
-        if (yearIsLeap) {
-            return 29;
-        }
-
-        return 28;
-    }
-
-    if (month < 8) {
-        return 30 + (month % 2);
-    }
-
-    return 30 + ((month - 1) % 2);
-}
-
 function monthAdd(referenceMonth, monthDifference) {
     // note that `referenceMonth` is 1-indexed, and this function returns
     // a 1-index month
@@ -44,7 +25,6 @@ class ErrorBadRequest extends Error {
 }
 
 module.exports = {
-    monthLength,
     monthAdd,
     yearAddMonth,
     ErrorBadRequest

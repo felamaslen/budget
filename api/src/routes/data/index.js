@@ -44,10 +44,10 @@ function handler(config, db) {
             ? ''
             : '/:page?';
 
-        router.get(`/data/${category}${pageParam}`, listDataProcessor[category].routeGet(config, db));
-        router.post(`/data/${category}`, listDataProcessor[category].routePost(config, db));
-        router.put(`/data/${category}`, listDataProcessor[category].routePut(config, db));
-        router.delete(`/data/${category}`, listDataProcessor[category].routeDelete(config, db));
+        router.get(`/${category}${pageParam}`, listDataProcessor[category].routeGet(config, db));
+        router.post(`/${category}`, listDataProcessor[category].routePost(config, db));
+        router.put(`/${category}`, listDataProcessor[category].routePut(config, db));
+        router.delete(`/${category}`, listDataProcessor[category].routeDelete(config, db));
     });
 
     router.get('/all', dataAll.routeGet(config, db));

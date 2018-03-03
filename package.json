@@ -105,6 +105,7 @@
     "immutable": "^3.8.1",
     "import-glob-loader": "^1.1.0",
     "joi": "^13.1.2",
+    "joi-date-extensions": "^1.1.1",
     "jsonp": "^0.2.1",
     "knex": "^0.14.4",
     "md5": "^2.2.1",
