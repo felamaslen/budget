@@ -2,8 +2,6 @@
  * Piechart data
  */
 
-const config = require('../../../config')();
-
 function getPieCols(category) {
     if (category === 'funds') {
         return [['item', 'cost', 'Total']];
@@ -33,47 +31,48 @@ function getPieCols(category) {
     return null;
 }
 
-function getPieQuery(db, user, pieCol, category) {
-    const column = pieCol[0];
-    const type = pieCol[1];
+function getPieQuery(config, db, user, pieCol, category) {
+    const [column, type] = pieCol;
 
     const limit = config.data.pie.detail;
 
     if (type === 'cost') {
-        return db.query(`
-        SELECT ${column} AS col, SUM(cost) AS cost FROM ${category}
-        WHERE uid = ? AND cost > 0
-        GROUP BY col
-        ORDER BY cost DESC
-        LIMIT ?`, user.uid, limit);
+        return db.select(`${column} AS col`, 'SUM(cost) AS cost')
+            .from(category)
+            .where('cost', '>', 0)
+            .andWhere('uid', '=', user.uid)
+            .groupBy('col')
+            .orderby('cost', 'desc')
+            .limit(limit);
     }
 
     return null;
 }
 
 function processQueryResult(result, pieCol, threshold) {
-    let pieData = result.map(row => [row.col, row.cost]);
+    const [, type, title] = pieCol;
 
-    const total = pieData.reduce((sum, item) => sum + item[1], 0);
+    let data = result.map(row => ([row.col, row.cost]));
+
+    const total = data.reduce((sum, [, cost]) => sum + cost, 0);
 
     if (total > 0) {
         // concatenate very small slices into a slice called "other"
-        const other = pieData
-            .filter(item => item[1] / total < threshold)
-            .reduce((sum, value) => sum + value[1], 0);
+        const other = data
+            .filter(([, cost]) => cost < threshold * total)
+            .reduce((sum, [, cost]) => sum + cost, 0);
 
-        pieData = pieData
-            .filter(item => item[1] / total >= threshold);
+        const display = data.filter(([, cost]) => cost >= threshold * total);
 
-        if (other > 0) {
-            pieData.push(['Other', other]);
-        }
+        const all = other > 0
+            ? [...display, ['Other', other]]
+            : display;
 
-        pieData = pieData.sort((one, two) => {
-            if (one[1] > two[1]) {
+        data = all.sort(([, cost1], [, cost2]) => {
+            if (cost1 > cost2) {
                 return -1;
             }
-            if (one[1] < two[1]) {
+            if (cost1 < cost2) {
                 return 1;
             }
 
@@ -81,20 +80,14 @@ function processQueryResult(result, pieCol, threshold) {
         });
     }
 
-    return {
-        title: pieCol[2],
-        type: pieCol[1],
-        data: pieData,
-        total
-    };
+    return { title, type, data, total };
 }
 
-async function getPieData(db, user, pieCols, category) {
+async function getPieData(config, db, user, pieCols, category) {
     const threshold = config.data.pie.tolerance / (2 * Math.PI);
 
-    const queries = pieCols.map(pieCol => getPieQuery(db, user, pieCol, category));
-
-    const results = await Promise.all(queries);
+    const results = await Promise.all(pieCols.map(pieCol =>
+        getPieQuery(config, db, user, pieCol, category)));
 
     if (!results) {
         return null;
@@ -102,9 +95,7 @@ async function getPieData(db, user, pieCols, category) {
 
     return results
         .filter(result => result)
-        .reduce((list, result, key) => list.concat([processQueryResult(
-            result, pieCols[key], threshold
-        )]), []);
+        .map((result, key) => processQueryResult(result, pieCols[key], threshold));
 }
 
 /**
@@ -154,28 +145,25 @@ async function getPieData(db, user, pieCols, category) {
  *                                                 example: ["Tesco", 419232]
  *                                                 description: array linking the item to its summed cost
  */
-async function routeGet(req, res) {
-    const category = req.params.category;
+function routeGet(config, db) {
+    return async (req, res) => {
+        const category = req.params.category;
 
-    const pieCols = getPieCols(category);
+        const pieCols = getPieCols(category);
 
-    if (!pieCols) {
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: 'unknown category'
-            });
-    }
+        if (!pieCols) {
+            return res.status(400)
+                .json({
+                    errorMessage: 'unknown category'
+                });
+        }
 
-    const list = await getPieData(req.db, req.user, pieCols, category);
+        const list = await getPieData(config, db, req.user, pieCols, category);
 
-    const data = { list };
+        const data = { list };
 
-    return res.json({
-        error: false,
-        data
-    });
+        return res.json({ data });
+    };
 }
 
 module.exports = {

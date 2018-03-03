@@ -1,4 +1,3 @@
-const config = require('../../config')();
 const common = require('../../common');
 
 function getLimitCondition(now, numMonths, offset = 0) {
@@ -37,25 +36,23 @@ function getQueryLimitCondition(startYear, startMonth, endYear, endMonth, past =
 }
 
 function getOlderExistsQuery(db, user, table, startYear, startMonth) {
-    return db.query(`
-    SELECT COUNT(*) AS count
-    FROM ${table}
-    WHERE uid = ? AND (
-        year < ${startYear} OR (year = ${startYear} AND month < ${startMonth})
-    )`, user.uid);
+    return db.select('COUNT(*) AS count')
+        .from(table)
+        .where('date', '<', new Date(startYear, startMonth + 1, 1))
+        .andWhere('uid', '=', user.uid);
 }
 
 function getQuery(db, user, table, columns, limitCondition = null) {
-    const conditions = ['uid = ?'];
-    if (limitCondition) {
-        conditions.push(limitCondition);
-    }
+    const conditions = limitCondition
+        ? [limitCondition]
+        : [];
 
-    return db.query(`
-    SELECT ${columns.join(', ')} FROM ${table}
-    WHERE ${conditions.join(' AND ')}
-    ORDER BY year DESC, month DESC, date DESC, id DESC
-    `, user.uid);
+    return db.select(...columns)
+        .from(table)
+        .whereRaw(conditions.join(' AND '))
+        .andWhere('uid', '=', user.uid)
+        .orderBy('date', 'desc')
+        .orderBy('id', 'desc');
 }
 
 function formatResults(queryResult, columnMap, addData = null) {
@@ -89,9 +86,9 @@ function formatResults(queryResult, columnMap, addData = null) {
 }
 
 function getTotalCostQuery(db, user, table) {
-    return db.query(`
-    SELECT SUM(cost) AS total FROM ${table} WHERE uid = ?
-    `, user.uid);
+    return db.select('SUM(cost) AS total')
+        .from(table)
+        .where('uid', '=', user.uid);
 }
 
 async function getTotalCost(db, user, table) {
@@ -100,9 +97,7 @@ async function getTotalCost(db, user, table) {
     return result[0].total;
 }
 
-async function getResults(
-    db, user, now, table, addData = null, limit = null
-) {
+async function getResults(config, db, user, now, table, addData = null, limit = null) {
     const columnMapExtra = config.data.columnMapExtra[table];
 
     const columnMap = {
@@ -152,7 +147,7 @@ async function getResults(
     return result;
 }
 
-function getPageLimit(table, offset = 0) {
+function getPageLimit(config, table, offset = 0) {
     if (table in config.data.listPageLimits) {
         const numMonths = config.data.listPageLimits[table];
 
@@ -162,20 +157,15 @@ function getPageLimit(table, offset = 0) {
     return null;
 }
 
-async function routeGet(req, res, table) {
-    const offset = parseInt(req.params.page || 0, 10);
-    const limit = getPageLimit(table, offset);
+function routeGet(config, db, table) {
+    return async (req, res) => {
+        const offset = Math.floor(Number(req.params.page) || 0);
+        const limit = getPageLimit(config, table, offset);
 
-    const data = await getResults(
-        req.db, req.user, new Date(), table, null, limit
-    );
+        const data = await getResults(config, db, req.user, new Date(), table, null, limit);
 
-    await req.db.end();
-
-    return res.json({
-        error: false,
-        data
-    });
+        return res.json({ data });
+    };
 }
 
 function getUndefinedItem(items, data) {
@@ -321,31 +311,17 @@ function validateDeleteData(data) {
 }
 
 async function insertItem(db, user, table, validData) {
-    const columns = Object.keys(validData);
-    const values = Object.values(validData);
+    const [id] = await db.insert({ uid: user.uid, ...validData })
+        .into(table);
 
-    const insertQuery = await db.query(`
-    INSERT INTO ${table} (uid, ${columns.join(', ')})
-    VALUES (?, ${values.map(() => '?').join(', ')})`, user.uid, ...values);
-
-    const insertedId = insertQuery.insertId;
-
-    return { id: insertedId };
+    return { id };
 }
 
 async function updateItem(db, user, table, validData) {
-    const columns = Object.keys(validData.values);
-    const values = Object.values(validData.values);
+    const affectedRows = await db(table).where({ id: validData.id, uid: user.uid })
+        .update(validData);
 
-    const keyValues = columns
-        .map(col => `${col} = ?`);
-
-    const result = await db.query(`
-    UPDATE ${table} SET ${keyValues.join(', ')}
-    WHERE id = ? AND uid = ?
-    `, ...values, validData.id, user.uid);
-
-    if (!result.affectedRows) {
+    if (!affectedRows) {
         throw new common.ErrorBadRequest('unknown id', 404);
     }
 
@@ -353,67 +329,63 @@ async function updateItem(db, user, table, validData) {
 }
 
 async function deleteItem(db, user, table, id) {
-    const result = await db.query(`
-    DELETE FROM ${table} WHERE id = ? AND uid = ?
-    `, id, user.uid);
+    const affectedRows = await db(table).where({ id, uid: user.uid })
+        .del();
 
-    if (!result.affectedRows) {
+    if (!affectedRows) {
         throw new common.ErrorBadRequest('unknown id', 404);
     }
 }
 
-async function routeModify(
-    req, res, table, validate, operation, successCode = 200
-) {
-    const db = req.db;
-    const user = req.user;
+function routeModify(config, db, table, validate, operation, successCode = 200) {
+    return async (req, res) => {
+        const user = req.user;
 
-    const rawData = req.body;
-    let validData = null;
+        const rawData = req.body;
+        let validData = null;
 
-    let statusCode = successCode;
-    let response = { error: false };
+        let statusCode = successCode;
+        let response = { error: false };
 
-    try {
-        validData = validate(rawData);
+        try {
+            validData = validate(rawData);
 
-        const operationResult = await operation(db, user, table, validData);
+            const operationResult = await operation(db, user, table, validData);
 
-        if (operationResult) {
-            response = { ...response, ...operationResult };
+            if (operationResult) {
+                response = { ...response, ...operationResult };
+            }
+
+            response.total = await getTotalCost(db, user, table);
+        }
+        catch (err) {
+            if (err instanceof common.ErrorBadRequest) {
+                statusCode = err.statusCode;
+            }
+            else {
+                statusCode = 500;
+            }
+
+            response.error = true;
+            response.errorMessage = err.message;
         }
 
-        response.total = await getTotalCost(db, user, table);
-    }
-    catch (err) {
-        if (err instanceof common.ErrorBadRequest) {
-            statusCode = err.statusCode;
-        }
-        else {
-            statusCode = 500;
-        }
-
-        response.error = true;
-        response.errorMessage = err.message;
-    }
-
-    await req.db.end();
-
-    return res
-        .status(statusCode)
-        .json(response);
+        return res
+            .status(statusCode)
+            .json(response);
+    };
 }
 
-function routePost(req, res, table, validate = validateInsertData) {
-    return routeModify(req, res, table, validate, insertItem, 201);
+function routePost(config, db, table, validate = validateInsertData) {
+    return routeModify(config, db, table, validate, insertItem, 201);
 }
 
-function routePut(req, res, table, validate = validateUpdateData) {
-    return routeModify(req, res, table, validate, updateItem);
+function routePut(config, db, table, validate = validateUpdateData) {
+    return routeModify(config, db, table, validate, updateItem);
 }
 
-function routeDelete(req, res, table) {
-    return routeModify(req, res, table, validateDeleteData, deleteItem);
+function routeDelete(config, db, table) {
+    return routeModify(config, db, table, validateDeleteData, deleteItem);
 }
 
 module.exports = {

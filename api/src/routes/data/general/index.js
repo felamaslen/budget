@@ -37,8 +37,8 @@ function validateUpdateData(data) {
  *                 schema:
  *                     $ref: "#/definitions/DataResponse"
  */
-function routeGet(req, res) {
-    return listCommon.routeGet(req, res, 'general');
+function routeGet(config, db) {
+    return listCommon.routeGet(config, db, 'general');
 }
 
 /**
@@ -81,8 +81,8 @@ function routeGet(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/DataResponsePostList"
  */
-function routePost(req, res) {
-    return listCommon.routePost(req, res, 'general', validateInsertData);
+function routePost(config, db) {
+    return listCommon.routePost(config, db, 'general', validateInsertData);
 }
 
 /**
@@ -131,8 +131,8 @@ function routePost(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/DataResponsePutList"
  */
-function routePut(req, res) {
-    return listCommon.routePut(req, res, 'general', validateUpdateData);
+function routePut(config, db) {
+    return listCommon.routePut(config, db, 'general', validateUpdateData);
 }
 
 /**
@@ -164,8 +164,8 @@ function routePut(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/ErrorResponse"
  */
-function routeDelete(req, res) {
-    return listCommon.routeDelete(req, res, 'general');
+function routeDelete(config, db) {
+    return listCommon.routeDelete(config, db, 'general');
 }
 
 module.exports = {

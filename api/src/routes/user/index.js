@@ -2,16 +2,14 @@
  * User methods
  */
 
+const { Router } = require('express');
 const sha1 = require('sha1');
-
-const config = require('../../config')();
-const Database = require('../../db');
 
 function userPinHash(pin, salt) {
     return sha1(`${pin}${salt}`);
 }
 
-function generateToken(pin) {
+function generateToken(config, pin) {
     // just return the same hashed value as stored in the database
     // in the future, this should generate a time-based token based on
     // usernames / passwords
@@ -20,63 +18,59 @@ function generateToken(pin) {
 
 async function checkAuthToken(db, token) {
     // validate authentication token against the database
-    const userResult = await db.query(`
-    SELECT uid, user AS name
-    FROM users
-    WHERE api_key = ?
-    LIMIT 1
-    `, token);
+    const user = await db.select('uid', 'name')
+        .from('users')
+        .where('api_key', '=', token);
 
-    if (!userResult || !userResult.length) {
+    if (!user) {
         return null;
     }
 
-    return { uid: userResult[0].uid, name: userResult[0].name };
+    const { uid, name } = user;
+
+    return { uid, name };
 }
 
-function processLoginRequest(req) {
+function processLoginRequest(config, req) {
     const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    const pin = parseInt(req.body.pin, 10);
+    const pin = Number(req.body.pin);
     const hash = userPinHash(pin, config.userHashSalt);
 
-    const token = generateToken(pin);
+    const token = generateToken(config, pin);
 
     return { ip, hash, token };
 }
 
 function findUser(db, hash) {
-    return db.query(`
-    SELECT uid, user AS name, api_key
-    FROM users
-    WHERE api_key = ?
-    LIMIT 1
-    `, hash);
+    return db.select('uid', 'name', 'api_key')
+        .from('users')
+        .where('api_key', '=', hash);
 }
 
-function getIpLog(db, ip) {
-    return db.query(`
-    SELECT time, count
-    FROM ip_login_req
-    WHERE ip = ?
-    LIMIT 1
-    `, ip
-    );
+async function getIpLog(db, ip) {
+    const result = await db.select('time', 'count')
+        .from('ip_login_req')
+        .where('ip', '=', ip);
+
+    if (result) {
+        return result;
+    }
+
+    return { time: 0, count: 0 };
 }
 
 function removeIpLog(db, ip) {
-    return db.query(`
-    DELETE FROM ip_login_req
-    WHERE ip = ?
-    `, ip);
+    return db('ip_login_req').where('ip', '=', ip)
+        .del();
 }
 
 function updateIpLog(db, ip, time, count) {
-    return db.query(`
+    return db.raw(`
     INSERT INTO ip_login_req (ip, time, count)
     VALUES(?, ?, ?)
     ON DUPLICATE KEY UPDATE time = ?, count = ?
-    `, ip, time, count, time, count);
+    `, [ip, time, count, time, count]);
 }
 
 function getNewBadLoginCount(oldCount, banned, logExpired, banExpired) {
@@ -97,14 +91,11 @@ function getNewBadLoginCount(oldCount, banned, logExpired, banExpired) {
     return oldCount + 1;
 }
 
-async function loginBanPreCheck(db, hash, ip) {
+async function loginBanPreCheck(config, db, hash, ip) {
     // ban IPs which try to brute force
-    const result = [await findUser(db, hash), await getIpLog(db, ip)];
+    const [user, log] = [await findUser(db, hash), await getIpLog(db, ip)];
 
-    const user = result[0][0] || null;
-    const log = result[1][0] || { count: 0, time: 0 };
-
-    const now = Math.floor(new Date().getTime() / 1000);
+    const now = Date.now() / 1000;
 
     const logExpired = now - log.time > config.user.banLimit;
     const banExpired = now - log.time > config.user.banTime;
@@ -126,64 +117,48 @@ async function loginBanPreCheck(db, hash, ip) {
     return { user, banned };
 }
 
-function handleLoginStatus(req, res, loginStatus, token) {
+function handleLoginStatus(config, req, res, loginStatus, token) {
     if (loginStatus.banned) {
         // IP is banned
-        return res
-            .status(401)
-            .json({
-                error: true,
-                errorMessage: config.msg.errorIpBanned
-            });
+        return res.status(401)
+            .json({ errorMessage: config.msg.errorIpBanned });
     }
 
     if (loginStatus.user) {
         // logged in
-        let key = 'apiKey';
-        if (req.query.alpha) {
-            key = 'api_key';
-        }
-
         return res.json({
-            error: false,
-            [key]: token,
+            apiKey: token,
             uid: loginStatus.user.uid,
             name: loginStatus.user.name
         });
     }
 
     // not logged in
-    return res
-        .status(401)
-        .json({
-            error: true,
-            errorMessage: config.msg.errorLoginBad
-        });
+    return res.status(401)
+        .json({ errorMessage: config.msg.errorLoginBad });
 }
 
-async function login(req, res) {
-    try {
-        const { ip, hash, token } = processLoginRequest(req);
+function login(config, db) {
+    return async (req, res) => {
+        try {
+            const { ip, hash, token } = processLoginRequest(config, req);
 
-        const loginStatus = await loginBanPreCheck(req.db, hash, ip);
+            const loginStatus = await loginBanPreCheck(config, db, hash, ip);
 
-        handleLoginStatus(req, res, loginStatus, token);
-    }
-    catch (err) {
-        res
-            .status(500)
-            .json({
-                error: true,
-                errorMessage: `${config.msg.errorServerDb}: ${err}`
-            });
-    }
-    finally {
-        await req.db.end(res);
-    }
+            handleLoginStatus(config, req, res, loginStatus, token);
+        }
+        catch (err) {
+            res.status(500)
+                .json({
+                    error: true,
+                    errorMessage: `${config.msg.errorServerDb}: ${err.stack}`
+                });
+        }
+    };
 }
 
-function handler(app) {
-    app.use('/user/login', Database.dbMiddleware);
+function handler(config, db) {
+    const router = new Router();
 
     /**
      * @swagger
@@ -240,7 +215,9 @@ function handler(app) {
      *                             type: string
      *                             example: Bad PIN
      */
-    app.post('/user/login', (req, res) => login(req, res));
+    router.post('/login', login(config, db));
+
+    return router;
 }
 
 module.exports = {

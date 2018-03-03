@@ -2,7 +2,6 @@
  * Funds routes
  */
 
-const config = require('../../../config')();
 const funds = require('./common');
 const listCommon = require('../list.common');
 
@@ -124,49 +123,44 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
  *                                     description: Timestamps of all of the price cache times, relative to startTime
  *                                     example: [0, 259200, 518400]
  */
-async function routeGet(req, res) {
-    const now = new Date();
+function routeGet(config, db) {
+    return async (req, res) => {
+        const now = new Date();
 
-    let addData = row => postProcessListRow(row);
+        let addData = row => postProcessListRow(row);
 
-    let priceHistory = null;
-    const getPriceHistory = 'history' in req.query && req.query.history !== 'false';
-    if (getPriceHistory) {
-        let period = null;
-        let length = null;
-        const hasPeriod = ['year', 'month'].indexOf(req.query.period) > -1 &&
-            !isNaN(Number(req.query.length));
+        let priceHistory = null;
+        const getPriceHistory = 'history' in req.query && req.query.history !== 'false';
+        if (getPriceHistory) {
+            let period = null;
+            let length = null;
+            const hasPeriod = ['year', 'month'].indexOf(req.query.period) > -1 &&
+                !isNaN(Number(req.query.length));
 
-        if (hasPeriod) {
-            period = req.query.period;
-            length = Number(req.query.length);
+            if (hasPeriod) {
+                period = req.query.period;
+                length = Number(req.query.length);
+            }
+
+            priceHistory = await funds.getFundHistoryMappedToFundIds(db, req.user, now, {
+                period,
+                length,
+                numDisplay: config.data.funds.historyResolution,
+                salt: config.data.funds.salt
+            });
+
+            addData = row => postProcessListRow(row, getPriceHistory, priceHistory);
         }
 
-        priceHistory = await funds.getFundHistoryMappedToFundIds(req.db, req.user, now, {
-            period,
-            length,
-            numDisplay: config.data.funds.historyResolution,
-            salt: config.data.funds.salt
-        });
+        const data = await listCommon.getResults(db, req.user, now, 'funds', addData);
 
-        addData = row => postProcessListRow(row, getPriceHistory, priceHistory);
-    }
+        if (getPriceHistory) {
+            data.startTime = priceHistory.startTime;
+            data.cacheTimes = priceHistory.times;
+        }
 
-    const data = await listCommon.getResults(
-        req.db, req.user, now, 'funds', addData
-    );
-
-    if (getPriceHistory) {
-        data.startTime = priceHistory.startTime;
-        data.cacheTimes = priceHistory.times;
-    }
-
-    await req.db.end();
-
-    return res.json({
-        error: false,
-        data
-    });
+        return res.json({ data });
+    };
 }
 
 /**
@@ -212,8 +206,8 @@ async function routeGet(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/DataResponsePostList"
  */
-function routePost(req, res) {
-    return listCommon.routePost(req, res, 'funds', funds.validateInsertData);
+function routePost(config, db) {
+    return listCommon.routePost(config, db, 'funds', funds.validateInsertData);
 }
 
 /**
@@ -267,8 +261,8 @@ function routePost(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/ErrorResponse"
  */
-function routePut(req, res) {
-    return listCommon.routePut(req, res, 'funds', funds.validateUpdateData);
+function routePut(config, db) {
+    return listCommon.routePut(config, db, 'funds', funds.validateUpdateData);
 }
 
 /**
@@ -298,8 +292,8 @@ function routePut(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/ErrorResponse"
  */
-function routeDelete(req, res) {
-    return listCommon.routeDelete(req, res, 'funds');
+function routeDelete(config, db) {
+    return listCommon.routeDelete(config, db, 'funds');
 }
 
 module.exports = {

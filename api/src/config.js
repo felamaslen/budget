@@ -2,6 +2,10 @@
  * Configuration variables (mainly environment variables);
  */
 
+if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
+    require('dotenv').config(); // eslint-disable-line global-require
+}
+
 module.exports = () => ({
     test: process.env.NODE_ENV === 'test',
     testIntegration: process.env.NODE_ENV === 'testintegration',

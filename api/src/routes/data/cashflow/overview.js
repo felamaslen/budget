@@ -40,16 +40,13 @@ function getYearMonths(options) {
 
     const numMonths = 12 * (endYear - startYear) + endMonth - startMonth + 1;
 
-    const yearMonths = new Array(numMonths)
-        .fill(0)
+    return new Array(numMonths).fill(0)
         .map((item, key) => {
             const year = common.yearAddMonth(startYear, startMonth, key);
             const month = common.monthAdd(startMonth, key);
 
             return [year, month];
         });
-
-    return yearMonths;
 }
 
 function mapOldToYearMonths(yearMonths, old) {
@@ -71,9 +68,9 @@ function getFundValue(year, month, transactions, prices) {
         return sum;
     }, 0);
 
-    const pricesToDate = prices.filter(price => {
-        return year > price.year || year === price.year && month >= price.month;
-    });
+    const pricesToDate = prices.filter(price => year > price.year ||
+        (year === price.year && month >= price.month)
+    );
 
     if (!pricesToDate.length) {
         // there is no accurate price cached, so revert to the cost of the fund
@@ -95,7 +92,7 @@ function getFundValue(year, month, transactions, prices) {
 }
 
 async function queryFundPrices(db, user) {
-    const result = await db.query(`
+    const [rows] = await db.raw(`
     SELECT
         ft.time,
         GROUP_CONCAT(f.id) AS id,
@@ -106,9 +103,9 @@ async function queryFundPrices(db, user) {
     INNER JOIN funds f ON MD5(CONCAT(f.item, ?)) = fh.hash AND f.uid = ?
     GROUP BY ft.cid
     ORDER BY ft.time DESC
-    `, config.data.funds.salt, user.uid);
+    `, [config.data.funds.salt, user.uid]);
 
-    return result;
+    return rows;
 }
 
 function processFundPrices(queryResult) {
@@ -118,8 +115,8 @@ function processFundPrices(queryResult) {
 
     return queryResult
         .map(item => {
-            const ids = item.id.split(',').map(id => parseInt(id, 10));
-            const prices = item.price.split(',').map(price => parseFloat(price, 10));
+            const ids = item.id.split(',').map(id => Number(id));
+            const prices = item.price.split(',').map(price => Number(price));
 
             const dateTime = new Date(item.time * 1000);
             const year = dateTime.getFullYear();
@@ -160,12 +157,10 @@ function processFundPrices(queryResult) {
         }, {});
 }
 
-async function queryFundTransactions(db, user) {
-    const result = await db.query(`
-    SELECT id, transactions FROM funds WHERE uid = ?
-    `, user.uid);
-
-    return result;
+function queryFundTransactions(db, user) {
+    return db.select('id', 'transactions')
+        .from('funds')
+        .where('uid', '=', user.uid);
 }
 
 function processFundTransactions(queryResult) {
@@ -173,29 +168,24 @@ function processFundTransactions(queryResult) {
         return {};
     }
 
-    return queryResult
-        .reduce((obj, item) => {
-            let transactions = [];
+    return queryResult.reduce((rest, { id, transactions }) => {
+        try {
+            const items = JSON.parse(transactions)
+                .map(transaction => {
+                    return {
+                        date: transaction.d,
+                        units: transaction.u,
+                        cost: transaction.c
+                    };
+                });
 
-            try {
-                transactions = JSON.parse(item.transactions)
-                    .map(transaction => {
-                        return {
-                            date: transaction.d,
-                            units: transaction.u,
-                            cost: transaction.c
-                        };
-                    });
-            }
-            catch (err) {
-                // invalid JSON stored in database - why?
-            }
-            finally {
-                obj[item.id] = transactions;
-            }
+            return { ...rest, [id]: items };
+        }
+        catch (err) {
+            return { ...rest, [id]: [] };
+        }
 
-            return obj;
-        }, {});
+    }, {});
 }
 
 function getMonthlyTotalFundValues(yearMonths, old, fundTransactions, fundPrices) {
@@ -210,10 +200,7 @@ function getMonthlyTotalFundValues(yearMonths, old, fundTransactions, fundPrices
 
     return oldYearMonths
         .concat(yearMonths)
-        .map(yearMonth => {
-            const year = yearMonth[0];
-            const month = yearMonth[1];
-
+        .map(([year, month]) => {
             const totalFundsValue = idsWithPricesAndTransactions
                 .map(id => {
                     const value = getFundValue(year, month, fundTransactions[id], fundPrices[id]);
@@ -227,27 +214,30 @@ function getMonthlyTotalFundValues(yearMonths, old, fundTransactions, fundPrices
 }
 
 async function getMonthlyValuesQuery(db, user, yearMonths, category) {
-    const subUnion = yearMonths
-        .slice(1)
-        .map(item => `SELECT ${item[0]}, ${item[1]}`)
-        .reduce((red, item, key) => {
-            if (key > 0) {
-                return `${red} UNION ${item}`;
-            }
+    const dates = yearMonths.map(([year, month]) => `'${year}-${month}-1'`);
 
-            return ` UNION ${item}`;
-        }, '');
+    const dateRanges = dates.slice(0, -1)
+        .map((startOfMonth, index) => ([
+            `DATE(${startOfMonth})`,
+            `DATE_ADD(${dates[index + 1]}, INTERVAL -1 DAY)`
+        ]));
 
-    const union = `SELECT ${yearMonths[0][0]} AS year, ${yearMonths[0][1]} AS month${subUnion}`;
+    const union = dateRanges.slice(1)
+        .reduce((last, [startDate, endDate]) => {
+            return `${last}
+            UNION SELECT ${startDate}, ${endDate}`;
 
-    const result = await db.query(`
-    SELECT SUM(cost) AS monthCost FROM (${union}) AS dates
-    LEFT JOIN \`${category}\` AS list
-    ON uid = ? AND list.year = dates.year AND list.month = dates.month
-    GROUP BY dates.year, dates.month
+        }, `SELECT ${dateRanges[0][0]} AS startDate, ${dateRanges[0][1]} AS endDate`);
+
+    const [rows] = await db.raw(`
+    SELECT SUM(cost) AS monthCost
+    FROM (${union}) dates
+    LEFT JOIN ${category} AS list ON uid = ? AND list.date >= dates.startDate
+        AND list.date <= dates.endDate
+    GROUP BY dates.startDate
     `, user.uid);
 
-    return result;
+    return rows;
 }
 
 async function getMonthlyValues(db, user, yearMonths, category, old) {
@@ -261,25 +251,20 @@ async function getMonthlyValues(db, user, yearMonths, category, old) {
         return getMonthlyTotalFundValues(yearMonths, old, fundTransactions, fundPrices);
     }
 
-    const queryResult = await getMonthlyValuesQuery(db, user, yearMonths, category);
+    const result = await getMonthlyValuesQuery(db, user, yearMonths, category);
 
-    if (typeof queryResult === 'string') {
+    if (!result) {
         return [];
     }
 
-    return queryResult
-        .map(item => item.monthCost || 0);
+    return result.map(item => item.monthCost || 0);
 }
 
-async function getMonthlyBalanceQuery(db, user) {
-    const result = await db.query(`
-    SELECT year, month, balance
-    FROM balance
-    WHERE uid = ?
-    ORDER BY year, month
-    `, user.uid);
-
-    return result;
+function getMonthlyBalanceQuery(db, user) {
+    return db.select('date', 'balance')
+        .from('balance')
+        .where('uid', '=', user.uid)
+        .orderBy('date');
 }
 
 function getMonthlyBalance(queryResult, yearMonths) {
@@ -288,9 +273,9 @@ function getMonthlyBalance(queryResult, yearMonths) {
     }
 
     const balance = yearMonths
-        .map(item => {
+        .map(([year, month]) => {
             const value = queryResult
-                .filter(result => result.year === item[0] && result.month === item[1])
+                .filter(result => result.year === year && result.month === month)
                 .map(result => result.balance);
 
             if (value.length) {

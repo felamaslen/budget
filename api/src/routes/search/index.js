@@ -2,6 +2,7 @@
  * Search route
  */
 
+const { Router } = require('express');
 const common = require('../../common');
 
 function validateParams(table, column, searchTerm, numResults) {
@@ -83,62 +84,54 @@ function validateParams(table, column, searchTerm, numResults) {
  *                                     items:
  *                                         type: string
  */
-async function routeGet(req, res) {
-    const table = req.params.table;
-    const column = req.params.column;
-    const searchTerm = req.params.searchTerm;
-    const numResults = parseInt(req.params.numResults || 5, 10);
+function routeGet(config, db) {
+    return async (req, res) => {
+        const table = req.params.table;
+        const column = req.params.column;
+        const searchTerm = req.params.searchTerm;
+        const numResults = parseInt(req.params.numResults || 5, 10);
 
-    try {
-        validateParams(table, column, searchTerm, numResults);
-    }
-    catch (err) {
-        if (err instanceof common.ErrorBadRequest) {
-            return res
-                .status(400)
-                .json({
-                    error: true,
-                    errorMessage: err.message
-                });
+        try {
+            validateParams(table, column, searchTerm, numResults);
+        }
+        catch (err) {
+            if (err instanceof common.ErrorBadRequest) {
+                return res.status(400)
+                    .json({ errorMessage: err.message });
+            }
+
+            return res.end();
         }
 
-        return res.end();
-    }
+        try {
+            const result = await db.select(`${column} AS col`, `SUM(IF(${column} LIKE '${searchTerm}%', 1, 0)) AS matches`)
+                .from(table)
+                .where(column, 'like', `%${searchTerm}%`)
+                .andWhere('uid', '=', req.user.uid)
+                .groupBy('col')
+                .orderBy('matches', 'desc')
+                .orderBy('col')
+                .limit(numResults);
 
-    let result = null;
-    try {
-        result = await req.db.query(`
-        SELECT ${column} AS col, SUM(IF(${column} LIKE ?, 1, 0)) AS matches
-        FROM ${table}
-        WHERE uid = ? AND ${column} LIKE ?
-        GROUP BY col
-        ORDER BY matches DESC, col
-        LIMIT ?
-        `, `${searchTerm}%`, req.user.uid, `%${searchTerm}%`, numResults);
-    }
-    catch (err) {
-        return res
-            .status(500)
-            .json({
-                error: true,
-                errorMessage: err.message
-            });
-    }
+            const data = {
+                list: result.map(item => String(item.col))
+            };
 
-    await req.db.end();
-
-    const data = {
-        list: result.map(item => item.col.toString())
+            return res.json({ data });
+        }
+        catch (err) {
+            return res.status(500)
+                .json({ errorMessage: err.message });
+        }
     };
-
-    return res.json({
-        error: false,
-        data
-    });
 }
 
-function handler(app) {
-    app.get('/data/search/:table/:column/:searchTerm/:numResults?', routeGet);
+function handler(config, db) {
+    const router = new Router();
+
+    router.get('/:table/:column/:searchTerm/:numResults?', routeGet(config, db));
+
+    return router;
 }
 
 module.exports = {

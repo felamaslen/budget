@@ -3,23 +3,23 @@
  */
 
 function updateQuery(db, user, year, month, balance) {
-    return db.query(`
+    return db.raw(`
     INSERT INTO balance (uid, year, month, balance)
     VALUES (?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE year = ?, month = ?, balance = ?
-    `, user.uid, year, month, balance, year, month, balance);
+    `, [user.uid, year, month, balance, year, month, balance]);
 }
 
 function validateParams(req) {
-    const year = parseInt(req.body.year || null, 10);
+    const year = Number(req.body.year) || null;
 
-    if (isNaN(year)) {
+    if (!year) {
         return { isValid: false, param: 'year' };
     }
 
-    const month = parseInt(req.body.month || null, 10);
+    const month = Number(req.body.month) || null;
 
-    if (isNaN(month) || month < 1 || month > 12) {
+    if (!month || month < 1 || month > 12) {
         return { isValid: false, param: 'month' };
     }
 
@@ -27,36 +27,29 @@ function validateParams(req) {
         return { isValid: false, param: 'balance' };
     }
 
-    const balance = parseInt(req.body.balance, 10);
+    const balance = Math.round(Number(req.body.balance));
 
     return { isValid: true, year, month, balance };
 }
 
-async function updateData(req, res, post = true) {
-    const params = validateParams(req);
+function updateData(config, db, post = true) {
+    return async (req, res) => {
+        const params = validateParams(req);
 
-    if (!params.isValid) {
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: `Invalid value for ${params.param}`
-            });
-    }
+        if (!params.isValid) {
+            return res.status(400)
+                .json({ errorMessage: `Invalid value for ${params.param}` });
+        }
 
-    await updateQuery(req.db, req.user, params.year, params.month, params.balance);
+        await updateQuery(db, req.user, params.year, params.month, params.balance);
 
-    await req.db.end();
+        const statusCode = post
+            ? 201
+            : 200;
 
-    const statusCode = post
-        ? 201
-        : 200;
-
-    return res
-        .status(statusCode)
-        .json({
-            error: false
-        });
+        return res.status(statusCode)
+            .json({ success: true });
+    };
 }
 
 module.exports = {
