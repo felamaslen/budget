@@ -243,15 +243,15 @@ async function getMonthlyValues(config, db, user, yearMonths, union, category, o
 }
 
 async function getMonthlyBalanceQuery(db, user) {
-    const rows = await db.select('date', 'balance')
+    const rows = await db.select('date', 'value')
         .from('balance')
         .where('uid', '=', user.uid)
         .orderBy('date');
 
-    return rows.map(({ date, balance }) => ({
+    return rows.map(({ date, value }) => ({
         year: date.getFullYear(),
         month: date.getMonth() + 1,
-        balance
+        balance: value
     }));
 }
 

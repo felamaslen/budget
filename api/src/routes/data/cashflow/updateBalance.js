@@ -2,18 +2,21 @@
  * Update cash flow data
  */
 
+const moment = require('moment');
 const joi = require('joi');
 const { balanceSchema } = require('../../../schema');
 
 function updateQuery(db, user, value) {
     const { year, month, balance } = value;
-    const date = new Date(year, month - 1, 1);
+    const date = moment(new Date(year, month - 1, 1))
+        .endOf('month')
+        .format('YYYY-MM-DD');
 
     return db.raw(`
-    INSERT INTO balance (uid, date, balance)
+    INSERT INTO balance (uid, date, value)
     VALUES (?, ?, ?)
-    ON DUPLICATE KEY UPDATE balance = ?
-    `, [user.uid, date, balance, balance]);
+    ON DUPLICATE KEY UPDATE uid = ?, value = ?
+    `, [user.uid, date, balance, user.uid, balance]);
 }
 
 function updateData(config, db, post = true) {

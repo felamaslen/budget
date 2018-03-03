@@ -11,7 +11,7 @@ module.exports = {
             table.integer('uid').unsigned().notNullable();
             table.foreign('uid').references('users.uid');
             table.date('date').notNullable();
-            table.bigInteger('balance').notNullable();
+            table.bigInteger('value').notNullable();
             table.unique(['uid', 'date']);
         })
     ])),
