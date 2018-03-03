@@ -16,9 +16,24 @@ const balanceSchema = joi.object().keys({
     balance: joi.number().integer().required()
 });
 
+const analysisCommonSchema = {
+    period: joi.string().valid(['week', 'month', 'year']),
+    groupBy: joi.string().valid(['shop', 'category']),
+    pageIndex: joi.number().integer().min(0).default(0)
+};
+
+const analysisSchema = joi.object().keys(analysisCommonSchema);
+
+const analysisDeepSchema = joi.object().keys({
+    ...analysisCommonSchema,
+    category: joi.string().valid(['food', 'general', 'social', 'holiday'])
+});
+
 module.exports = {
     transactionSchema,
     transactionListSchema,
-    balanceSchema
+    balanceSchema,
+    analysisSchema,
+    analysisDeepSchema
 };
 

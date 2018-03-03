@@ -1,13 +1,19 @@
+const moment = require('moment');
+const joi = require('joi');
+const { analysisDeepSchema } = require('../../../../schema');
 const common = require('../common');
 
-function getPeriodCostDeep(db, user, now, period, groupBy, pageIndex = 0, category) {
+function getPeriodCostDeep(db, user, now, params) {
+    const { period, groupBy, pageIndex, category } = params;
+
     const categoryColumn = common.getCategoryColumn(category, groupBy);
 
-    const { condition } = common.periodCondition(now, period, pageIndex);
+    const { startTime, endTime } = common.periodCondition(now, period, pageIndex);
 
-    return db.select('item', `${categoryColumn} AS itemCol`, 'SUM(cost) AS cost')
+    return db.select('item', `${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
         .from(category)
-        .whereRaw(condition)
+        .where('date', '>=', startTime.format('YYYY-MM-DD'))
+        .andWhere('date', '<=', endTime.format('YYYY-MM-DD'))
         .andWhere('cost', '>', 0)
         .andWhere('uid', '=', user.uid)
         .groupBy('item', 'itemCol')
@@ -17,10 +23,10 @@ function getPeriodCostDeep(db, user, now, period, groupBy, pageIndex = 0, catego
 function processDataResponse(result) {
     const resultObj = result.reduce((obj, { itemCol, item, cost }) => {
         if (itemCol in obj) {
-            return { ...obj, [itemCol]: [...obj[itemCol], [item, cost]] };
+            return { ...obj, [itemCol]: [...obj[itemCol], [item, Number(cost)]] };
         }
 
-        return { ...obj, [itemCol]: [[item, cost]] };
+        return { ...obj, [itemCol]: [[item, Number(cost)]] };
     }, {});
 
     return Object.keys(resultObj).map(itemCol => ([itemCol, resultObj[itemCol]]));
@@ -74,24 +80,18 @@ function processDataResponse(result) {
  */
 function routeGet(config, db) {
     return async (req, res) => {
-        const params = [
-            req.params.period,
-            req.params.groupBy,
-            parseInt(req.params.pageIndex || 0, 10),
-            req.params.category
-        ];
+        const { error, value } = joi.validate(req.params, analysisDeepSchema);
 
-        const validationStatus = common.validateParams(...params);
-
-        if (!validationStatus.isValid) {
-            return common.handlerInvalidParams(req, res);
+        if (error) {
+            return res.status(400)
+                .json({ errorMessage: error.message });
         }
 
-        const items = await getPeriodCostDeep(db, req.user, new Date(), ...params);
+        const results = await getPeriodCostDeep(db, req.user, moment(), value);
 
-        const result = { items: processDataResponse(items) };
+        const items = processDataResponse(results);
 
-        return common.handlerValidResult(req, res, result);
+        return res.json({ data: { items } });
     };
 }
 

@@ -35,15 +35,6 @@ function yearAddMonth(
     )));
 }
 
-function getBeginningOfWeek(date) {
-    return new Date(date.getTime() - 86400 * 1000 * date.getDay());
-}
-
-function strip(string) {
-    return string
-        .replace(/\s+/g, ' ');
-}
-
 class ErrorBadRequest extends Error {
     constructor(message, code = 400) {
         super(message);
@@ -56,8 +47,6 @@ module.exports = {
     monthLength,
     monthAdd,
     yearAddMonth,
-    getBeginningOfWeek,
-    strip,
     ErrorBadRequest
 };
 
