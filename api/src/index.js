@@ -119,7 +119,8 @@ function setupDevServer(app) {
 }
 
 function setupWebApp(app) {
-    if (process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'development') {
+    const hot = process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'development';
+    if (hot) {
         setupDevServer(app);
     }
 
@@ -131,7 +132,7 @@ function setupWebApp(app) {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
         res.render('index', {
             version,
-            development: process.env.NODE_ENV === 'development',
+            hot,
             pieTolerance
         });
     });
