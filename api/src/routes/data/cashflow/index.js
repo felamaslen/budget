@@ -76,7 +76,7 @@ const updateBalance = require('./updateBalance');
  */
 function routeGet(config, db) {
     return async (req, res) => {
-        const data = await overview.getData(db, req.user);
+        const data = await overview.getData(config, db, req.user);
 
         return res.json({ data });
     };
