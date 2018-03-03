@@ -42,10 +42,12 @@ function processLoginRequest(config, req) {
     return { ip, hash, token };
 }
 
-function findUser(db, hash) {
-    return db.select('uid', 'name', 'api_key')
+async function findUser(db, hash) {
+    const [user] = await db.select('uid', 'name', 'api_key')
         .from('users')
         .where('api_key', '=', hash);
+
+    return user;
 }
 
 async function getIpLog(db, ip) {
