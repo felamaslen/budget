@@ -10,8 +10,9 @@ module.exports = {
             table.increments('id').unsigned().primary();
             table.integer('uid').unsigned().notNullable();
             table.foreign('uid').references('users.uid');
-            table.date('date').notNullable().unique();
+            table.date('date').notNullable();
             table.bigInteger('balance').notNullable();
+            table.unique(['uid', 'date']);
         })
     ])),
     down: (knex, Promise) => Promise.all([

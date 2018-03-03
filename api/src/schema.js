@@ -10,8 +10,15 @@ const transactionSchema = joi.object().keys({
 
 const transactionListSchema = joi.array().items(transactionSchema);
 
+const balanceSchema = joi.object().keys({
+    year: joi.number().integer().required(),
+    month: joi.number().integer().required(),
+    balance: joi.number().integer().required()
+});
+
 module.exports = {
     transactionSchema,
-    transactionListSchema
+    transactionListSchema,
+    balanceSchema
 };
 
