@@ -64,7 +64,7 @@ module.exports = () => ({
             holiday: 12
         },
         funds: {
-            salt: process.env.FUND_SALT || '',
+            salt: 'a963anx2',
             historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10),
             scraper: {
                 regex: /^(.*)\s\((accum|inc|share)\.?\)$/i,
