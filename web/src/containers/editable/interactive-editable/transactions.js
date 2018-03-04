@@ -95,17 +95,11 @@ export default class InteractiveEditableTransactions extends PureComponent {
 
             const id = transaction.get('id');
 
-            const onDateChange = evt => this.onDateChange(
-                row, col, key, evt.target.value
-            );
+            const onDateChange = evt => this.onDateChange(row, col, key, evt.target.value);
 
-            const onUnitsChange = evt => this.onUnitsChange(
-                row, col, key, evt.target.value, units
-            );
+            const onUnitsChange = evt => this.onUnitsChange(row, col, key, evt.target.value, units);
 
-            const onCostChange = evt => this.onCostChange(
-                row, col, key, evt.target.value, cost
-            );
+            const onCostChange = evt => this.onCostChange(row, col, key, evt.target.value, cost);
 
             const removeOnClick = () => this.props.removeTransaction({ row, col, key });
 
