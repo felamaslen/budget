@@ -14,6 +14,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 
 const { version } = require('../../package.json');
 const getConfig = require('./config');
+const getLogger = require('./modules/logger');
 const initDb = require('./modules/db');
 const routes = require('./routes');
 
@@ -150,9 +151,12 @@ function setupErorHandling(app) {
 }
 
 async function run() {
+    const config = getConfig();
+    const logger = getLogger();
+
     try {
-        const config = getConfig();
-        const db = await initDb(config);
+        const db = await initDb(config, logger);
+
         const app = express();
         const port = process.env.PORT || 3000;
 
@@ -163,11 +167,11 @@ async function run() {
         setupErorHandling(app);
 
         app.listen(port, () => {
-            console.log(`Server listening on port ${port}`);
+            logger.info('Server listening on port', port);
         });
     }
     catch (err) {
-        console.error('Server did not start:', err.message);
+        logger.error('Server did not start:', err.message);
     }
 }
 

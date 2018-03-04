@@ -22,15 +22,17 @@ function parseConnectionURI(uri = '') {
     };
 }
 
-async function initDb(config) {
+async function initDb(config, logger, migrate = true) {
     const db = knex({
         client: 'mysql2',
         connection: parseConnectionURI(config.mysqlUri)
     });
 
-    await db.migrate.latest();
+    if (migrate) {
+        await db.migrate.latest();
 
-    console.log('Database migrations complete');
+        logger.verbose('Database migrations complete');
+    }
 
     return db;
 }
