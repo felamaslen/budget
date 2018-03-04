@@ -210,7 +210,7 @@ function routeGet(config, db) {
  *                     $ref: "#/definitions/DataResponsePostList"
  */
 function routePost(config, db) {
-    return listCommon.routePost(config, db, 'funds', funds.validateInsertData);
+    return listCommon.routePost(config, db, 'funds');
 }
 
 /**

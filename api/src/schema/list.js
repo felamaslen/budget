@@ -22,7 +22,7 @@ const fundsKeys = {
         date: joi.date().format('YYYY-MM-DD').required(),
         units: joi.number().required(),
         cost: joi.number().integer().required()
-    })).default([])
+    }))
 };
 
 const schemaDeleteListItem = joi.object().keys({

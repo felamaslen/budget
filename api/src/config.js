@@ -17,9 +17,9 @@ module.exports = () => ({
     webUrl: process.env.WEB_URL || '',
     user: {
         hashSalt: process.env.USER_HASH_SALT || '',
-        banTime: parseFloat(process.env.IP_BAN_TIME || 300, 10) * 1000,
-        banLimit: parseFloat(process.env.IP_BAN_LIMIT || 60, 10) * 1000,
-        banTries: parseInt(process.env.IP_BAN_TRIES || 5, 10)
+        banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,
+        banLimit: (Number(process.env.IP_BAN_LIMIT) || 60) * 1000,
+        banTries: Math.round(Number(process.env.IP_BAN_TRIES) || 5)
     },
     msg: {
         unknownApiEndpoint: 'Unknown API endpoint',
@@ -65,7 +65,7 @@ module.exports = () => ({
         },
         funds: {
             salt: 'a963anx2',
-            historyResolution: parseInt(process.env.FUND_RESOLUTION || 100, 10),
+            historyResolution: Math.round(Number(process.env.FUND_RESOLUTION) || 100),
             scraper: {
                 regex: /^(.*)\s\((accum|inc|share)\.?\)$/i,
                 userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
@@ -79,8 +79,8 @@ module.exports = () => ({
             startMonth: 9
         },
         pie: {
-            tolerance: parseFloat(process.env.PIE_TOLERANCE || 0.075, 10),
-            detail: parseInt(process.env.PIE_DETAIL || 30, 10)
+            tolerance: Number(process.env.PIE_TOLERANCE) || 0.075,
+            detail: Number(process.env.PIE_DETAIL) || 30
         }
     },
     months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

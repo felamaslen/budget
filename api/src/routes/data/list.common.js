@@ -139,8 +139,21 @@ function routeGet(config, db, table) {
     };
 }
 
+function processRow(row, table) {
+    if (table === 'funds' && 'transactions' in row) {
+        const transactions = row.transactions.map(({ date, ...item }) => ({
+            ...item,
+            date: moment(date).format('YYYY-MM-DD')
+        }));
+
+        return { ...row, transactions: JSON.stringify(transactions) };
+    }
+
+    return row;
+}
+
 async function insertItem(db, user, table, data) {
-    const [id] = await db.insert({ uid: user.uid, ...data })
+    const [id] = await db.insert(processRow({ uid: user.uid, ...data }, table))
         .returning('id')
         .into(table);
 
@@ -150,7 +163,7 @@ async function insertItem(db, user, table, data) {
 async function updateItem(db, user, table, data) {
     const affectedRows = await db(table)
         .where({ id: data.id, uid: user.uid })
-        .update(data);
+        .update(processRow(data, table));
 
     if (!affectedRows) {
         throw new common.ErrorBadRequest('Unknown id', 404);
