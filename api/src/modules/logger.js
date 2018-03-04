@@ -11,15 +11,21 @@ const getLevel = () => {
     return 'verbose';
 };
 
-const getLogger = () => new winston.Logger({
-    transports: [
-        new winston.transports.Console({
-            level: getLevel(),
-            json: false,
-            colorize: true
-        })
-    ]
-});
+const getLogger = (suppress = false) => {
+    if (suppress) {
+        return new winston.Logger({ transports: [] });
+    }
+
+    return new winston.Logger({
+        transports: [
+            new winston.transports.Console({
+                level: getLevel(),
+                json: false,
+                colorize: true
+            })
+        ]
+    });
+};
 
 module.exports = getLogger;
 

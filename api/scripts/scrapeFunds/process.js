@@ -51,7 +51,7 @@ function getEligibleFunds(config, logger, rows) {
                     hash,
                     broker,
                     units: totalUnits,
-                    cost: totalUnits
+                    cost: totalCost
                 }
             };
         }
@@ -117,6 +117,8 @@ async function processScrape(config, flags, db, logger) {
 }
 
 module.exports = {
+    getBroker,
+    getEligibleFunds,
     processScrape
 };
 
