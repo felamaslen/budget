@@ -9,7 +9,7 @@ export const mediaQueries = {
     desktop: `(min-width: ${widthPageMobile + 1}px)`
 };
 
-export const API_VERSION = 3;
+export const API_VERSION = 4;
 export const API_PREFIX = `api/v${API_VERSION}`;
 
 export const ERROR_LEVEL_ERROR = 0xe0;

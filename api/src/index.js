@@ -18,6 +18,8 @@ const getLogger = require('./modules/logger');
 const initDb = require('./modules/db');
 const routes = require('./routes');
 
+const API_PREFIX = '/api/v4';
+
 function getVersion() {
     return version.substring(0, version.indexOf('-'));
 }
@@ -67,7 +69,7 @@ function setupApiDocs(app, config) {
         },
         host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
         schemes: [config.webUrl.substring(0, config.webUrl.indexOf(':'))],
-        basePath: '/api/v3'
+        basePath: API_PREFIX
     };
 
     const swaggerOptions = {
@@ -93,7 +95,7 @@ function setupApiDocs(app, config) {
 }
 
 function setupApi(app, config, db) {
-    app.use('/api/v3', routes(config, db));
+    app.use(API_PREFIX, routes(config, db));
 
     setupApiDocs(app, config);
 }
