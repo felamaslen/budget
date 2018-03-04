@@ -61,11 +61,7 @@ function formatResults(queryResult, columnMap, addData = null) {
                     const column = columnMap[key];
 
                     if (key === 'date') {
-                        const year = value.getFullYear();
-                        const month = value.getMonth() + 1;
-                        const date = value.getDate();
-
-                        return { ...item, 'd': [year, month, date] };
+                        return { ...item, 'd': moment(value).format('YYYY-MM-DD') };
                     }
 
                     return { ...item, [column]: value };

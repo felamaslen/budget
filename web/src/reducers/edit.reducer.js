@@ -3,12 +3,13 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+import moment from 'moment';
 
 import { PAGES, ERROR_LEVEL_WARN } from '../misc/const';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA } from '../misc/config';
-import { YMD } from '../misc/date';
+import { getNow } from '../misc/date';
 import {
-    getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
+    getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
 
 import { rErrorMessageOpen } from './error.reducer';
@@ -72,12 +73,12 @@ export function rChangeEditable(reduction, { value }) {
 
 export function getInvalidInsertDataKeys(items) {
     const itemValid = item => {
-        if (item instanceof YMD) {
-            return item.valid;
+        if (item instanceof moment) {
+            return true;
         }
 
         return item.get('value').length > 0 ||
-            ['item', 'category', 'society', 'holiday'].indexOf(item.get('item')) === -1;
+            !['item', 'category', 'society', 'holiday'].includes(item.get('item'));
     };
 
     return items.reduce((keys, item, itemKey) => {
@@ -94,9 +95,7 @@ export function stringifyFields(fields) {
     return fields
         .reduce((result, thisItem) => ({
             ...result,
-            [thisItem.get('item')]: thisItem
-                .get('value')
-                .toString()
+            [thisItem.get('item')]: getValueForTransmit(thisItem.get('value'))
         }), {});
 }
 
@@ -108,7 +107,7 @@ export function rAddListItem(reduction, { page }) {
         }));
     }
 
-    const now = new YMD();
+    const now = getNow();
 
     // validate items
     const active = reduction.getIn(['edit', 'active']);

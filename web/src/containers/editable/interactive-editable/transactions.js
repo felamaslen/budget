@@ -2,7 +2,8 @@ import React from 'react';
 import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { YMD } from '../../../misc/date';
+import { DATE_FORMAT_DISPLAY } from '../../../misc/config';
+import { dateInput } from '../../../misc/date';
 import { formatValue } from '../format';
 
 export default class InteractiveEditableTransactions extends PureComponent {
@@ -18,11 +19,11 @@ export default class InteractiveEditableTransactions extends PureComponent {
         this.inputAdd = {};
     }
     addTransaction(row, col) {
-        const date = new YMD(this.inputAdd.date.value);
+        const date = dateInput(this.inputAdd.date.value);
         const units = Number(this.inputAdd.units.value);
         const cost = Math.round(100 * Number(this.inputAdd.cost.value));
 
-        if (!date.valid || isNaN(units) || isNaN(cost)) {
+        if (!date || isNaN(units) || isNaN(cost)) {
             return;
         }
 
@@ -35,15 +36,13 @@ export default class InteractiveEditableTransactions extends PureComponent {
     onDateBlur(key, id) {
         this.input.date[id].value = this.props.value.list
             .getIn([key, 'date'])
-            .format();
+            .format(DATE_FORMAT_DISPLAY);
     }
     onDateChange(row, col, key, rawValue) {
-        const value = new YMD(rawValue);
+        const value = dateInput(rawValue);
 
-        if (value.valid) {
-            this.props.editTransaction({
-                row, col, key, column: 'date', value
-            });
+        if (value) {
+            this.props.editTransaction({ row, col, key, column: 'date', value });
         }
     }
     onUnitsBlur(key, id) {
@@ -122,7 +121,7 @@ export default class InteractiveEditableTransactions extends PureComponent {
 
             return <tr key={id}>
                 <td>
-                    <input defaultValue={date.format()} ref={dateRef}
+                    <input defaultValue={date.format(DATE_FORMAT_DISPLAY)} ref={dateRef}
                         onBlur={onDateChange}
                     />
                 </td>

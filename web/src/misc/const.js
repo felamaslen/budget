@@ -78,6 +78,8 @@ export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', '
 
 export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
 
+export const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 export const OVERVIEW_COLUMNS = [
     ['month', 'Month'],
     ['funds', 'Stocks'],
