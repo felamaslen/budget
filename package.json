@@ -16,12 +16,12 @@
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --require babel-core/register -R spec \"./web/test/**/*.spec.js\" \"./api/test/**/*.spec.js\"",
     "lint": "./node_modules/.bin/eslint webpack.config.js webpack api/src api/test web/src web/test",
     "sass-lint": "./node_modules/.bin/sass-lint -qv \"./web/src/sass/**/*.scss\"",
-    "scrape_funds": "NODE_ENV=production node ./api/scripts/scrapeFunds.js -q",
-    "dev:scrape_funds": "NODE_ENV=development node ./api/scripts/scrapeFunds.js -v",
-    "test:scrape_funds": "NODE_ENV=testintegration node ./api/scripts/scrapeFunds.js -v",
-    "scrape_holdings": "NODE_ENV=production node ./api/scripts/scrapeFunds.js -h",
-    "test:scrape_holdings": "NODE_ENV=testintegration node ./api/scripts/scrapeFunds.js -h -v",
-    "dev:scrape_holdings": "NODE_ENV=development node ./api/scripts/scrapeFunds.js -h -v"
+    "scrape_funds": "NODE_ENV=production node ./api/scripts/scrapeFunds/index.js --prices",
+    "dev:scrape_funds": "NODE_ENV=development node ./api/scripts/scrapeFunds/index.js --prices",
+    "test:scrape_funds": "NODE_ENV=testintegration node ./api/scripts/scrapeFunds/index.js --prices",
+    "scrape_holdings": "NODE_ENV=production node ./api/scripts/scrapeFunds/index.js --holdings",
+    "dev:scrape_holdings": "NODE_ENV=development node ./api/scripts/scrapeFunds/index.js --holdings",
+    "test:scrape_holdings": "NODE_ENV=testintegration node ./api/scripts/scrapeFunds/index.js --holdings"
   },
   "repository": {
     "type": "git",
@@ -90,6 +90,7 @@
     "body-parser": "^1.17.2",
     "classnames": "^2.2.5",
     "colors": "^1.1.2",
+    "command-line-args": "^5.0.2",
     "css-loader": "^0.28.5",
     "cssnano": "^3.10.0",
     "dateformat": "^2.0.0",
