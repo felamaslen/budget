@@ -96,7 +96,7 @@ export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
         if (prices.size > 1) {
             const yesterdayPriceTime = startTime + cacheTimes.get(timeOffset + prices.size - 2);
             const transactionsToYesterday = transactions.filter(
-                item => item.get('date') < yesterdayPriceTime
+                item => item.get('date').unix() < yesterdayPriceTime
             );
 
             const yesterdayPrice = prices.get(prices.size - 2);
@@ -392,7 +392,7 @@ function getPriceUnitsCosts(rows, startTime, cacheTimes) {
             const time = cacheTimes.get(priceKey + timeOffset);
 
             const transactionsToNow = transactions
-                .filter(item => item.get('date') < startTime + time);
+                .filter(item => item.get('date').unix() < startTime + time);
 
             const thisPriceUnits = transactionsToNow.getTotalUnits();
             const thisPriceCost = transactionsToNow.getTotalCost();

@@ -5,7 +5,7 @@
 import { List as list, Map as map } from 'immutable';
 import moment from 'moment';
 import { AVERAGE_MEDIAN, AVERAGE_EXP, PAGES } from './const';
-import { getNow, dateInput } from './date';
+import { getNow } from './date';
 
 function sortByDate(prev, next) {
     if (prev.get('date') < next.get('date')) {
@@ -52,7 +52,7 @@ export class TransactionsList {
                 .map(item => {
                     return map({
                         id: ++this.idCount,
-                        date: dateInput(item.date),
+                        date: moment(new Date(item.date)),
                         units: item.units,
                         cost: item.cost
                     });

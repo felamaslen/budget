@@ -2,6 +2,7 @@
  * Funds routes
  */
 
+const moment = require('moment');
 const funds = require('./common');
 const listCommon = require('../list.common');
 
@@ -125,7 +126,7 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
  */
 function routeGet(config, db) {
     return async (req, res) => {
-        const now = new Date();
+        const now = moment();
 
         let addData = row => postProcessListRow(row);
 
@@ -134,25 +135,27 @@ function routeGet(config, db) {
         if (getPriceHistory) {
             let period = null;
             let length = null;
-            const hasPeriod = ['year', 'month'].indexOf(req.query.period) > -1 &&
-                !isNaN(Number(req.query.length));
+
+            const hasPeriod = ['year', 'month'].includes(req.query.period) && !isNaN(Number(req.query.length));
 
             if (hasPeriod) {
                 period = req.query.period;
                 length = Number(req.query.length);
             }
 
-            priceHistory = await funds.getFundHistoryMappedToFundIds(db, req.user, now, {
+            const params = {
                 period,
                 length,
                 numDisplay: config.data.funds.historyResolution,
                 salt: config.data.funds.salt
-            });
+            };
+
+            priceHistory = await funds.getFundHistoryMappedToFundIds(db, req.user, now, params);
 
             addData = row => postProcessListRow(row, getPriceHistory, priceHistory);
         }
 
-        const data = await listCommon.getResults(db, req.user, now, 'funds', addData);
+        const data = await listCommon.getResults(config, db, req.user, now, 'funds', addData);
 
         if (getPriceHistory) {
             data.startTime = priceHistory.startTime;
