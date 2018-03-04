@@ -70,16 +70,8 @@ function periodCondition(now, period, pageIndex = 0) {
     throw new Error('Invalid period parameter');
 }
 
-function handlerValidResult(req, res, data) {
-    return res.json({ data });
-}
-
 module.exports = {
     getCategoryColumn,
-    periodConditionWeekly,
-    periodConditionMonthly,
-    periodConditionYearly,
-    periodCondition,
-    handlerValidResult
+    periodCondition
 };
 

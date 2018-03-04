@@ -326,6 +326,7 @@ async function getData(config, db, user) {
 
 module.exports = {
     getStartTime,
+    getMonths,
     mapOldToYearMonths,
     getFundValue,
     queryFundPrices,

@@ -2,12 +2,12 @@ const joi = require('joi');
 const { analysisSchema } = require('../../../schema');
 const moment = require('moment');
 const merge = require('deepmerge');
-const common = require('./common');
+const { periodCondition, getCategoryColumn } = require('./common');
 
 const CATEGORIES = ['bills', 'food', 'general', 'holiday', 'social'];
 
 function getPeriodCostForCategory(db, user, startTime, endTime, category, groupBy) {
-    const categoryColumn = common.getCategoryColumn(category, groupBy);
+    const categoryColumn = getCategoryColumn(category, groupBy);
 
     return db.select(`${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
         .from(category)
@@ -93,7 +93,7 @@ function processTimelineData(data, params, condition) {
 async function getPeriodCost(db, user, now, params) {
     const { period, groupBy, pageIndex } = params;
 
-    const condition = common.periodCondition(now, period, pageIndex);
+    const condition = periodCondition(now, period, pageIndex);
 
     const { startTime, endTime, description } = condition;
 

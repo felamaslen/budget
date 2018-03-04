@@ -15,7 +15,7 @@ async function checkAuthToken(db, token) {
 function authMiddleware(config, db) {
     return async (req, res, next) => {
         if (!req.headers.authorization) {
-            res.status(401)
+            return res.status(401)
                 .json({ errorMessage: config.msg.errorNotAuthorized });
         }
 
