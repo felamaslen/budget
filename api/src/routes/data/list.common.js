@@ -8,14 +8,16 @@ function getLimitCondition(now, limit) {
 
     const monthDiffStart = 1 - (offset + 1) * numMonths;
 
-    const startDate = now.add(monthDiffStart, 'months')
+    const startDate = now.clone()
+        .add(monthDiffStart, 'months')
         .startOf('month');
 
     if (!offset) {
         return { startDate, endDate: null };
     }
 
-    const endDate = startDate.add(numMonths - 1, 'months')
+    const endDate = startDate.clone()
+        .add(numMonths - 1, 'months')
         .endOf('month');
 
     return { startDate, endDate };

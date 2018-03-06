@@ -2,21 +2,39 @@
  * Analysis data spec
  */
 
-require('dotenv').config();
-const expect = require('chai').expect;
-
-const common = require('../../../test.common');
+const chai = require('chai');
+chai.use(require('sinon-chai'));
+const { expect } = chai;
+const moment = require('moment');
+const { prepareMockDb } = require('../../../test.common');
 const analysis = require('../../../../src/routes/data/analysis');
+
+const { db, tracker } = prepareMockDb();
 
 describe('/data/analysis', () => {
     describe('getPeriodCostForCategory', () => {
+        beforeEach(() => {
+            tracker.install();
+
+            tracker.on('query', query => {
+                expect(query.method).to.equal('select');
+
+                query.response([
+                    { itemCol: 'f', cost: 10 },
+                    { itemCol: 'g', cost: 103 }
+                ]);
+            });
+        });
+
+        afterEach(() => {
+            tracker.uninstall();
+        });
+
         it('should get valid data', async () => {
-            const db = new common.DummyDbWithAnalysis();
             const user = { uid: 1 };
 
             const result = await analysis.getPeriodCostForCategory(
-                db, user, 'year = 2015', 'food', 'category'
-            );
+                db, user, moment('2015'), moment('2016'), 'food', 'category');
 
             expect(result).to.deep.equal([
                 { itemCol: 'f', cost: 10 },
@@ -25,84 +43,52 @@ describe('/data/analysis', () => {
         });
     });
 
-    describe('getPeriodCost', () => {
-        it('should get cost data and a period description', async () => {
-            const db = new common.DummyDbWithAnalysis();
-            const user = { uid: 1 };
-            const now = new Date('2017-09-04');
-            const period = 'month';
-            const groupBy = 'category';
-            const pageIndex = 0;
-
-            const result = await analysis.getPeriodCost(
-                db, user, now, period, groupBy, pageIndex
-            );
-
-            const expectedResult = {
-                timeline: new Array(30).fill([]),
-                cost: [
-                    ['bills', [
-                        ['a', 999], ['b', 1923], ['c', 110], ['d', 91], ['e', 110]]
-                    ],
-                    ['food', [['f', 10], ['g', 103]]],
-                    ['general', [['f', 10], ['g', 103]]],
-                    ['holiday', [['m', 191239], ['n', 9912]]],
-                    ['social', [['k', 15], ['l', 1000]]]
-                ],
-                saved: 0,
-                description: 'Sep 2017'
-            };
-
-            expect(result).to.deep.equal(expectedResult);
-        });
-    });
-
     describe('getRowsByDate', () => {
         it('should work as expected', () => {
             const input = [
                 [
-                    { year: 2015, month: 1, date: 10, cost: 5 },
-                    { year: 2016, month: 12, date: 6, cost: 10 },
-                    { year: 2016, month: 12, date: 20, cost: 11 },
-                    { year: 2017, month: 1, date: 4, cost: 15 },
-                    { year: 2017, month: 9, date: 3, cost: 3 }
+                    { date: new Date('2015-01-10'), cost: 5 },
+                    { date: new Date('2016-12-06'), cost: 10 },
+                    { date: new Date('2016-12-20'), cost: 11 },
+                    { date: new Date('2017-01-04'), cost: 15 },
+                    { date: new Date('2017-09-03'), cost: 3 }
                 ],
                 [
-                    { year: 2015, month: 1, date: 10, cost: 1 },
-                    { year: 2015, month: 3, date: 4, cost: 50 },
-                    { year: 2017, month: 5, date: 30, cost: 17 }
+                    { date: new Date('2015-01-10'), cost: 1 },
+                    { date: new Date('2015-03-04'), cost: 50 },
+                    { date: new Date('2017-05-30'), cost: 17 }
                 ],
                 [
-                    { year: 2016, month: 4, date: 4, cost: 3 }
+                    { date: new Date('2016-04-04'), cost: 3 }
                 ]
             ];
 
             const expectedResult = {
                 2015: {
-                    1: {
+                    0: {
                         10: [5, 1]
                     },
-                    3: {
+                    2: {
                         4: [0, 50]
                     }
                 },
                 2016: {
-                    4: {
+                    3: {
                         4: [0, 0, 3]
                     },
-                    12: {
+                    11: {
                         6: [10],
                         20: [11]
                     }
                 },
                 2017: {
-                    1: {
+                    0: {
                         4: [15]
                     },
-                    5: {
+                    4: {
                         30: [0, 17]
                     },
-                    9: {
+                    8: {
                         3: [3]
                     }
                 }
@@ -115,26 +101,27 @@ describe('/data/analysis', () => {
     describe('processTimelineData', () => {
         describe('for yearly data', () => {
             it('should return an item for each day in the year', () => {
-                const results = [
+                const data = [
                     [
-                        { year: 2015, month: 1, date: 10, cost: 5 },
-                        { year: 2016, month: 12, date: 6, cost: 10 },
-                        { year: 2016, month: 12, date: 20, cost: 11 },
-                        { year: 2017, month: 1, date: 4, cost: 15 },
-                        { year: 2017, month: 9, date: 3, cost: 3 }
+                        { date: new Date('2015-01-10'), cost: 5 },
+                        { date: new Date('2016-12-06'), cost: 10 },
+                        { date: new Date('2016-12-20'), cost: 11 },
+                        { date: new Date('2017-01-04'), cost: 15 },
+                        { date: new Date('2017-09-03'), cost: 3 }
                     ],
                     [
-                        { year: 2015, month: 1, date: 10, cost: 1 },
-                        { year: 2015, month: 3, date: 4, cost: 50 },
-                        { year: 2017, month: 5, date: 30, cost: 17 }
+                        { date: new Date('2015-01-10'), cost: 1 },
+                        { date: new Date('2015-03-04'), cost: 50 },
+                        { date: new Date('2017-05-30'), cost: 17 }
                     ],
                     [
-                        { year: 2016, month: 4, date: 4, cost: 3 }
+                        { date: new Date('2016-04-04'), cost: 3 }
                     ]
                 ];
 
-                const period = 'year';
-                const params = { year: 2016 };
+                const params = { period: 'year' };
+
+                const condition = { startTime: moment(new Date('2016-01-01')) };
 
                 const expectedResult = [
                     ...new Array(31 + 29 + 31 + 3).fill([]),
@@ -146,32 +133,34 @@ describe('/data/analysis', () => {
                     ...new Array(11).fill([])
                 ];
 
-                expect(analysis.processTimelineData(results, period, params)).to.deep.equal(expectedResult);
+                expect(analysis.processTimelineData(data, params, condition))
+                    .to.deep.equal(expectedResult);
             });
         });
 
         describe('for monthly data', () => {
             it('should return an item for each day in the month', () => {
-                const results = [
+                const data = [
                     [
-                        { year: 2015, month: 1, date: 10, cost: 5 },
-                        { year: 2016, month: 12, date: 6, cost: 10 },
-                        { year: 2016, month: 12, date: 20, cost: 11 },
-                        { year: 2017, month: 1, date: 4, cost: 15 },
-                        { year: 2017, month: 9, date: 3, cost: 3 }
+                        { date: new Date('2015-01-10'), cost: 5 },
+                        { date: new Date('2016-12-06'), cost: 10 },
+                        { date: new Date('2016-12-20'), cost: 11 },
+                        { date: new Date('2017-01-04'), cost: 15 },
+                        { date: new Date('2017-09-03'), cost: 3 }
                     ],
                     [
-                        { year: 2015, month: 1, date: 10, cost: 1 },
-                        { year: 2015, month: 3, date: 4, cost: 50 },
-                        { year: 2017, month: 5, date: 30, cost: 17 }
+                        { date: new Date('2015-01-10'), cost: 1 },
+                        { date: new Date('2015-03-04'), cost: 50 },
+                        { date: new Date('2017-05-30'), cost: 17 }
                     ],
                     [
-                        { year: 2016, month: 4, date: 4, cost: 3 }
+                        { date: new Date('2016-04-04'), cost: 3 }
                     ]
                 ];
 
-                const period = 'month';
-                const params = { year: 2016, month: 12 };
+                const params = { period: 'month' };
+
+                const condition = { startTime: moment(new Date('2016-12-01')) };
 
                 const expectedResult = [
                     ...new Array(5).fill([]),
@@ -181,7 +170,8 @@ describe('/data/analysis', () => {
                     ...new Array(11).fill([])
                 ];
 
-                expect(analysis.processTimelineData(results, period, params)).to.deep.equal(expectedResult);
+                expect(analysis.processTimelineData(data, params, condition))
+                    .to.deep.equal(expectedResult);
             });
         });
 
@@ -191,5 +181,98 @@ describe('/data/analysis', () => {
             });
         });
     });
+
+    describe('getPeriodCost', () => {
+        const data = {
+            bills: [
+                { itemCol: 'Rent', cost: 72500 },
+                { itemCol: 'Electricity', cost: 3902 }
+            ],
+            food: [
+                { itemCol: 'Breakfast', cost: 19239 },
+                { itemCol: 'Lunch', cost: 91923 },
+                { itemCol: 'Snacks', cost: 2239 }
+            ],
+            general: [
+                { itemCol: 'Kitchen', cost: 1231 },
+                { itemCol: 'Household', cost: 9912 }
+            ],
+            holiday: [
+                { itemCol: 'Somewhere', cost: 11023 },
+                { itemCol: 'Otherplace', cost: 23991 }
+            ],
+            social: [
+                { itemCol: 'Friends', cost: 61923 }
+            ]
+        };
+
+        beforeEach(() => {
+            tracker.install();
+
+            const queries = {
+                income: {
+                    match: /^select SUM\(cost\) AS cost from `income` where `date` >= \? and `date` <= \? and `uid` = \?$/,
+                    response: () => [{ cost: '310342' }]
+                },
+                cost: {
+                    match: /^select `(\w+)` as `itemCol`, SUM\(cost\) AS cost from `(\w+)` where `date` >= \? and `date` <= \? and `uid` = \? group by `itemCol`$/,
+                    response: ([, , category]) => data[category]
+                },
+                timeline: {
+                    match: /^select `date`, SUM\(cost\) AS cost from `(\w+)` where `date` >= \? and `date` <= \? and `uid` = \? group by `date`$/,
+                    response: () => ([
+                        { date: new Date('2017-03-01'), cost: 3 },
+                        { date: new Date('2017-03-02'), cost: 4 }
+                    ])
+                }
+            };
+
+            tracker.on('query', query => {
+                const matchingQuery = Object.keys(queries).find(
+                    key => query.sql.match(queries[key].match));
+
+                if (!matchingQuery) {
+                    console.log(query.sql);
+                }
+
+                if (matchingQuery) {
+                    const { match, response } = queries[matchingQuery];
+
+                    query.response(response(query.sql.match(match)));
+                }
+                else {
+                    query.response(null);
+                }
+            });
+        });
+
+        afterEach(() => {
+            tracker.uninstall();
+        });
+
+        it('should get cost data and a period description', async () => {
+            const user = { uid: 1 };
+            const now = moment(new Date('2018-03-04'));
+            const params = { period: 'month', groupBy: 'category', pageIndex: 0 };
+
+            const result = await analysis.getPeriodCost(db, user, now, params);
+
+            const expectedResult = {
+                timeline: new Array(31).fill([]),
+                cost: [
+                    ['bills', [['Rent', 72500], ['Electricity', 3902]]],
+                    ['food', [['Breakfast', 19239], ['Lunch', 91923], ['Snacks', 2239]]],
+                    ['general', [['Kitchen', 1231], ['Household', 9912]]],
+                    ['holiday', [['Somewhere', 11023], ['Otherplace', 23991]]],
+                    ['social', [['Friends', 61923]]]
+                ],
+                saved: 12459,
+                description: 'March 2018'
+            };
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
 });
 

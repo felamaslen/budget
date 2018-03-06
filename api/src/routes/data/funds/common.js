@@ -8,9 +8,8 @@ function getMaxAge(now, period, length) {
         return 0;
     }
 
-    const minTime = now.add(-length, period).format('YYYY-MM-DD HH:mm:ss');
-
-    return minTime;
+    return now.clone().add(-length, period)
+        .format('YYYY-MM-DD HH:mm:ss');
 }
 
 function getNumResultsQuery(db, user, salt, minTime) {
@@ -67,20 +66,17 @@ function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay, minT
 function processFundHistory(queryResult) {
     // return a map of fund holding IDs to historical prices
     const keyMap = queryResult
-        .reduce(({ rowIds, data }, row, rowKey) => {
-            const thisRowIds = row.id
-                .split(',')
-                .map(id => Number(id));
+        .reduce(({ rowIds, data }, { id, price }, rowKey) => {
+            const [thisRowIds, rowPrices] = [id, price].map(item =>
+                item.split(',')
+                    .map(value => Number(value))
+            );
 
-            const rowPrices = row.price
-                .split(',')
-                .map(price => Number(price));
-
-            const newData = thisRowIds.reduce(({ idMap, startIndex }, id, idKey) => {
-                if (!(id in idMap)) {
+            const newData = thisRowIds.reduce(({ idMap, startIndex }, fundId, idKey) => {
+                if (!(fundId in idMap)) {
                     return {
-                        idMap: { ...idMap, [id]: [rowPrices[idKey]] },
-                        startIndex: { ...startIndex, [id]: rowKey }
+                        idMap: { ...idMap, [fundId]: [rowPrices[idKey]] },
+                        startIndex: { ...startIndex, [fundId]: rowKey }
                     };
                 }
 
@@ -88,11 +84,12 @@ function processFundHistory(queryResult) {
                 // there should be a number of zeroes between the last sell and buy
                 const numZeroes = rowIds
                     .reduce(({ num, found }, lastResult) => {
-                        if (found || lastResult.indexOf(id) !== -1) {
+                        if (found || lastResult.includes(fundId)) {
                             return { num, found: true };
                         }
 
                         return { num: num + 1, found: false };
+
                     }, { num: 0, found: false })
                     .num;
 
@@ -101,7 +98,7 @@ function processFundHistory(queryResult) {
                 return {
                     idMap: {
                         ...idMap,
-                        [id]: [...idMap[id], ...zeroes, rowPrices[idKey]]
+                        [fundId]: [...idMap[fundId], ...zeroes, rowPrices[idKey]]
                     },
                     startIndex
                 };
@@ -113,18 +110,11 @@ function processFundHistory(queryResult) {
         }, { rowIds: [], data: { idMap: {}, startIndex: {} } })
         .data;
 
-    let startTime = null;
+    const unixTimes = queryResult.map(({ time }) => moment(time).unix());
 
-    const times = queryResult
-        .map(row => {
-            const time = moment(row.time).unix();
-            if (startTime === null) {
-                startTime = time;
-            }
-            const timeDiff = time - startTime;
+    const startTime = unixTimes[0];
 
-            return timeDiff;
-        });
+    const times = unixTimes.map(time => time - startTime);
 
     return { ...keyMap, startTime, times };
 }
@@ -144,8 +134,7 @@ async function getFundHistoryMappedToFundIds(db, user, now, params) {
 
     if (!isNaN(numResults) && numResults > 2) {
         const [fundHistory] = await getAllHistoryForFundsQuery(
-            db, user, salt, numResults, numDisplay, minTime
-        );
+            db, user, salt, numResults, numDisplay, minTime);
 
         return processFundHistory(fundHistory);
     }
