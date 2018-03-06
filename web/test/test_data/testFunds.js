@@ -1,18 +1,18 @@
 /* eslint max-lines: 0 */
 import { List as list, Map as map } from 'immutable';
 import { TransactionsList } from '../../src/misc/data';
-import { YMD } from '../../src/misc/date';
+import { dateInput } from '../../src/misc/date';
 
 export const testRows = list([
     map({
         'cols': list([
-            new YMD([2017, 5, 9]),
+            dateInput('9/5/2017'),
             'some fund 1',
             new TransactionsList([
                 {
-                    'c': 400000,
-                    'u': 934,
-                    'd': [2017, 5, 9]
+                    cost: 400000,
+                    units: 934,
+                    date: '2017-05-09'
                 }
             ]),
             400000
@@ -54,18 +54,18 @@ export const testRows = list([
     }),
     map({
         cols: list([
-            new YMD(2017, 3, 2),
+            dateInput('2/3/2017'),
             'some fund 2',
             new TransactionsList([
                 {
-                    'c': 45000,
-                    'u': 450,
-                    'd': [2017, 3, 3]
+                    cost: 45000,
+                    units: 450,
+                    date: '2017-03-03'
                 },
                 {
-                    'c': -45000,
-                    'u': -450,
-                    'd': [2017, 4, 27]
+                    cost: -45000,
+                    units: -450,
+                    date: '2017-04-27'
                 }
             ]),
             0
@@ -93,18 +93,18 @@ export const testRows = list([
     }),
     map({
         cols: list([
-            new YMD(2017, 1, 11),
+            dateInput('11/1/2017'),
             'some fund 3',
             new TransactionsList([
                 {
-                    'c': 90000,
-                    'u': 1117.87,
-                    'd': [2017, 1, 11]
+                    cost: 90000,
+                    units: 1117.87,
+                    date: '2017-01-11'
                 },
                 {
-                    'c': -90000,
-                    'u': -1117.87,
-                    'd': [2017, 4, 27]
+                    cost: -90000,
+                    units: -1117.87,
+                    date: '2017-04-27'
                 }
             ]),
             0
@@ -148,18 +148,18 @@ export const testRows = list([
     }),
     map({
         cols: list([
-            new YMD([2016, 9, 21]),
+            dateInput('21/9/2016'),
             'test fund 4',
             new TransactionsList([
                 {
-                    'c': 200000,
-                    'u': 1499.7,
-                    'd': [2016, 9, 21]
+                    cost: 200000,
+                    units: 1499.7,
+                    date: '2016-09-21'
                 },
                 {
-                    'c': -200000,
-                    'u': -1499.7,
-                    'd': [2017, 4, 27]
+                    cost: -200000,
+                    units: -1499.7,
+                    date: '2017-04-27'
                 }
             ]),
             0

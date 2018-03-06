@@ -1,17 +1,17 @@
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import * as format from '../../../src/containers/editable/format';
-import { YMD } from '../../../src/misc/date';
+import { dateInput } from '../../../src/misc/date';
 
 describe('Editable formatting functions', () => {
     describe('getEditValue', () => {
         describe('for dates', () => {
             it('should try to make a date from the raw value', () => {
                 expect(format.getEditValue('date', 'foo', '10/11/2017'))
-                    .to.deep.equal(new YMD('10/11/2017'));
+                    .to.deep.equal(dateInput('10/11/2017'));
 
                 expect(format.getEditValue('date', 'foo', '10/11/17'))
-                    .to.deep.equal(new YMD('10/11/17'));
+                    .to.deep.equal(dateInput('10/11/17'));
             });
 
             it('should return the original value if it can\'t', () => {
@@ -47,7 +47,7 @@ describe('Editable formatting functions', () => {
     describe('formatValue', () => {
         describe('for dates', () => {
             it('should return the formatted date', () => {
-                expect(format.formatValue('date', new YMD('10/11/2017'))).to.equal('10/11/2017');
+                expect(format.formatValue('date', dateInput('10/11/2017'))).to.equal('10/11/2017');
             });
 
             it('should return an empty string for invalid values', () => {
@@ -88,7 +88,7 @@ describe('Editable formatting functions', () => {
     describe('getDefaultValue', () => {
         describe('for dates', () => {
             it('should return the formatted date', () => {
-                expect(format.getDefaultValue('date', new YMD('10/11/2017'))).to.equal('10/11/2017');
+                expect(format.getDefaultValue('date', dateInput('10/11/2017'))).to.equal('10/11/2017');
             });
         });
 

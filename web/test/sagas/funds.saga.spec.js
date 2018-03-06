@@ -50,7 +50,7 @@ describe('funds.saga', () => {
                 .next(fromJS({}))
                 .select(selectApiKey)
                 .next('some_api_key')
-                .call(axios.get, 'api/v3/data/funds?period=year&length=1&history=true', {
+                .call(axios.get, 'api/v4/data/funds?period=year&length=1&history=true', {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .next({ data: { data: 'yes' } })
@@ -68,7 +68,7 @@ describe('funds.saga', () => {
                 .next(fromJS({}))
                 .select(selectApiKey)
                 .next('some_api_key')
-                .call(axios.get, 'api/v3/data/funds?period=year&length=1&history=true', {
+                .call(axios.get, 'api/v4/data/funds?period=year&length=1&history=true', {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .throw(new Error('some error'))

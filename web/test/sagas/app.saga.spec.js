@@ -29,7 +29,7 @@ describe('app.saga', () => {
                 .next('some_api_key')
                 .select(S.selectRequestList)
                 .next([{ req1: 'foo' }])
-                .call(axios.patch, 'api/v3/data/multiple', {
+                .call(axios.patch, 'api/v4/data/multiple', {
                     list: [{ req1: 'foo' }]
                 }, {
                     headers: { Authorization: 'some_api_key' }
@@ -47,7 +47,7 @@ describe('app.saga', () => {
                 .next('some_api_key')
                 .select(S.selectRequestList)
                 .next([{ req1: 'foo' }])
-                .call(axios.patch, 'api/v3/data/multiple', {
+                .call(axios.patch, 'api/v4/data/multiple', {
                     list: [{ req1: 'foo' }]
                 }, {
                     headers: { Authorization: 'some_api_key' }
@@ -67,7 +67,7 @@ describe('app.saga', () => {
                 .next()
                 .select(selectApiKey)
                 .next('some_api_key')
-                .call(axios.post, 'api/v3/data/bills', 'foo', {
+                .call(axios.post, 'api/v4/data/bills', 'foo', {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .next({ data: 'something' })
@@ -81,7 +81,7 @@ describe('app.saga', () => {
                 .next()
                 .select(selectApiKey)
                 .next('some_api_key')
-                .call(axios.post, 'api/v3/data/bills', 'foo', {
+                .call(axios.post, 'api/v4/data/bills', 'foo', {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .throw(new Error('some error'))

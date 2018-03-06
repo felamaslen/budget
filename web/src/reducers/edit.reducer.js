@@ -77,8 +77,12 @@ export function getInvalidInsertDataKeys(items) {
             return true;
         }
 
-        return item.get('value').length > 0 ||
-            !['item', 'category', 'society', 'holiday'].includes(item.get('item'));
+        if (item && typeof item.get === 'function') {
+            return item.get('value').length > 0 ||
+                !['item', 'category', 'society', 'holiday'].includes(item.get('item'));
+        }
+
+        return false;
     };
 
     return items.reduce((keys, item, itemKey) => {

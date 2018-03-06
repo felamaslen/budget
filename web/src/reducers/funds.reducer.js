@@ -25,15 +25,13 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     return formatAge(age);
 }
 export function getFundsCachedValue(rows, startTime, cacheTimes, now) {
-
     const value = rows.reduce((sum, row) => {
         if (!row.get('pr').size) {
             return sum;
         }
 
-        return sum + (
-            row.get('pr').last() * row.getIn(['cols', transactionsKey]).getTotalUnits()
-        );
+        return sum + row.get('pr').last() * row.getIn(['cols', transactionsKey]).getTotalUnits();
+
     }, 0);
 
     const ageText = getFundsCachedValueAgeText(startTime, cacheTimes, now);

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
 import FormFieldDate from '../../../src/components/form-field/date';
-import { YMD } from '../../../src/misc/date';
+import { dateInput } from '../../../src/misc/date';
 
 describe('<FormFieldDate />', () => {
     let changed = null;
@@ -15,7 +15,7 @@ describe('<FormFieldDate />', () => {
     };
 
     const props = {
-        value: new YMD('10/11/2017'),
+        value: dateInput('10/11/2017'),
         onChange
     };
 
@@ -43,7 +43,7 @@ describe('<FormFieldDate />', () => {
 
         wrapper.childAt(0).simulate('change', { target: { value: '9/4/14' } });
 
-        expect(changed).to.deep.equal(new YMD('9/4/2014'));
+        expect(changed).to.deep.equal(dateInput('9/4/2014'));
     });
 
     it('should handle bad values', () => {

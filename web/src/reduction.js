@@ -2,6 +2,17 @@ import { List as list, Map as map } from 'immutable';
 
 import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS } from './misc/const';
 
+function getDefaultFundPeriod() {
+    if (process.env.DEFAULT_FUND_PERIOD && GRAPH_FUNDS_PERIODS
+        .map(([shortPeriod]) => shortPeriod)
+        .includes(process.env.DEFAULT_FUND_PERIOD)
+    ) {
+        return process.env.DEFAULT_FUND_PERIOD;
+    }
+
+    return GRAPH_FUNDS_PERIODS[0][0];
+}
+
 export function resetAppState(state) {
     return state
         .set('user', map({ uid: 0, name: null, apiKey: null }))
@@ -64,7 +75,7 @@ export function resetAppState(state) {
                 treeVisible: map({ bills: false })
             }),
             graphFunds: map({
-                period: process.env.DEFAULT_FUND_PERIOD || GRAPH_FUNDS_PERIODS[0][0],
+                period: getDefaultFundPeriod(),
                 mode: GRAPH_FUNDS_MODE_ROI,
                 showOverall: true,
                 hlPoint: null,

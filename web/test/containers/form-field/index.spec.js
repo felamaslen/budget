@@ -5,12 +5,12 @@ import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import getFormField from '../../../src/containers/form-field';
-import { YMD } from '../../../src/misc/date';
+import { dateInput } from '../../../src/misc/date';
 import { TransactionsList } from '../../../src/misc/data';
 
 describe('<FormField />', () => {
     describe('Date', () => {
-        const value = new YMD();
+        const value = dateInput(null, false);
 
         const FormField = getFormField({ fieldKey: 0, item: 'date', value });
 
