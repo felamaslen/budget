@@ -70,7 +70,7 @@ describe('Login saga', () => {
                 .next()
                 .select(S.getLoginPin)
                 .next(1024)
-                .call(axios.post, 'api/v3/user/login', { pin: 1024 })
+                .call(axios.post, 'api/v4/user/login', { pin: 1024 })
                 .next({ some: 'response' })
                 .call(S.saveLoginCredentials, 1024)
                 .next()
@@ -84,7 +84,7 @@ describe('Login saga', () => {
                 .next()
                 .select(S.getLoginPin)
                 .next(9999)
-                .call(axios.post, 'api/v3/user/login', { pin: 9999 })
+                .call(axios.post, 'api/v4/user/login', { pin: 9999 })
                 .throw({
                     response: {
                         data: {
@@ -102,7 +102,7 @@ describe('Login saga', () => {
         it('should accept a custom pin parameter', () => {
             testSaga(S.submitLoginForm, { customPin: 9999 })
                 .next()
-                .call(axios.post, 'api/v3/user/login', { pin: 9999 });
+                .call(axios.post, 'api/v4/user/login', { pin: 9999 });
         });
     });
 

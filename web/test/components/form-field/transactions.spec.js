@@ -6,10 +6,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import FormFieldTransactions from '../../../src/components/form-field/transactions';
 import { TransactionsList } from '../../../src/misc/data';
-import { YMD } from '../../../src/misc/date';
+import { dateInput } from '../../../src/misc/date';
 import FormFieldDate from '../../../src/components/form-field/date';
 import FormFieldNumber from '../../../src/components/form-field/number';
 import FormFieldCost from '../../../src/components/form-field/cost';
+
+const TEST_DATE_FORMAT = 'YYYY-MM-DD';
 
 describe('<FormFieldTransactions />', () => {
     let date = null;
@@ -29,8 +31,8 @@ describe('<FormFieldTransactions />', () => {
     };
 
     const transactions = [
-        { 'd': '10/11/17', 'u': 10.5, 'c': 50 },
-        { 'd': '5/9/18', 'u': -3, 'c': -40 }
+        { date: '2017-11-10', units: 10.5, cost: 50 },
+        { date: '2018-09-05', units: -3, cost: -40 }
     ];
 
     const value = new TransactionsList(transactions);
@@ -58,7 +60,10 @@ describe('<FormFieldTransactions />', () => {
     });
 
     // eslint-disable-next-line max-statements
-    it.each(transactions, 'should render a list of transactions', ({ 'd': iDate, 'u': iUnits, 'c': iCost }) => {
+    it.each(transactions, 'should render a list of transactions', ({
+        date: iDate, units: iUnits, cost: iCost
+    }) => {
+
         const wrapper = shallow(<FormFieldTransactions {...props} />);
 
         expect(wrapper.childAt(key).is('li')).to.equal(true);
@@ -75,12 +80,14 @@ describe('<FormFieldTransactions />', () => {
         expect(wrapper.childAt(key).childAt(0).childAt(0).childAt(1).children()).to.have.length(1);
         expect(wrapper.childAt(key).childAt(0).childAt(0).childAt(1).childAt(0).is(FormFieldDate))
             .to.equal(true);
-        expect(wrapper.childAt(key).childAt(0).childAt(0).childAt(1).childAt(0).props().value)
-            .to.deep.equal(new YMD(iDate));
+
+        expect(wrapper.childAt(key).childAt(0).childAt(0).childAt(1).childAt(0).props().value
+            .format(TEST_DATE_FORMAT))
+            .to.equal(iDate);
 
         expect(date).to.equal(null);
-        wrapper.childAt(key).childAt(0).childAt(0).childAt(1).childAt(0).props().onChange(new YMD('5/4/16'));
-        expect(date).to.deep.equal({ value, ymd: new YMD('5/4/16'), key });
+        wrapper.childAt(key).childAt(0).childAt(0).childAt(1).childAt(0).props().onChange(dateInput('5/4/16'));
+        expect(date).to.deep.equal({ value, ymd: dateInput('5/4/16'), key });
 
         // test the units input
         expect(wrapper.childAt(key).childAt(0).childAt(1).is('span.row')).to.equal(true);

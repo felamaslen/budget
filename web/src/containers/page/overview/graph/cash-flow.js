@@ -8,7 +8,7 @@ import {
 } from '../../../../misc/config';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../../../misc/data';
 import { getTickSize, formatCurrency } from '../../../../misc/format';
-import { YMD } from '../../../../misc/date';
+import { getNow } from '../../../../misc/date';
 import { rgba } from '../../../../misc/color';
 
 import { connect } from 'react-redux';
@@ -16,7 +16,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import LineGraph from '../../../../components/graph/line';
 
-const today = new YMD();
+const now = getNow();
+const today = {
+    year: now.get('year'),
+    month: now.get('month') + 1,
+    date: now.get('date')
+};
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     return (minY, maxY, pixY) => {
@@ -135,8 +140,7 @@ function getTime(offset, breakAtToday, startYear, startMonth) {
         const [year, month] = getYearMonthFromKey(key - offset, startYear, startMonth);
 
         if (breakAtToday && year === today.year && month === today.month) {
-            // today is 1-indexed
-            return today.timestamp();
+            return now.unix();
         }
 
         // return the last day of this month
@@ -162,7 +166,7 @@ export function getValuesWithTime(data, {
 
 function drawNowLine({ minY, maxY }, { ctx }, { pixX, pixY }) {
     // draw a line indicating where the present ends and the future starts
-    const nowLineX = Math.floor(pixX(today.timestamp())) + 0.5;
+    const nowLineX = Math.floor(pixX(now.unix())) + 0.5;
     ctx.beginPath();
     ctx.moveTo(nowLineX, pixY(minY));
     ctx.lineTo(nowLineX, pixY(maxY));

@@ -1,3 +1,4 @@
+const { Router } = require('express');
 const data = require('./data');
 const search = require('./search');
 const user = require('./user');
@@ -71,10 +72,14 @@ const user = require('./user');
  *                    example: false
  */
 
-function handler(app) {
-    user.handler(app);
-    data.handler(app);
-    search.handler(app);
+function handler(config, db) {
+    const router = new Router();
+
+    router.use('/user', user.handler(config, db));
+    router.use('/data', data.handler(config, db));
+    router.use('/data/search', search.handler(config, db));
+
+    return router;
 }
 
 module.exports = handler;

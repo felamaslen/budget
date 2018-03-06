@@ -2,66 +2,45 @@
  * Update cash flow data
  */
 
-function updateQuery(db, user, year, month, balance) {
-    return db.query(`
-    INSERT INTO balance (uid, year, month, balance)
-    VALUES (?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE year = ?, month = ?, balance = ?
-    `, user.uid, year, month, balance, year, month, balance);
+const moment = require('moment');
+const joi = require('joi');
+const { balanceSchema } = require('../../../schema');
+
+function updateQuery(db, user, value) {
+    const { year, month, balance } = value;
+    const date = moment(new Date(year, month - 1, 1))
+        .endOf('month')
+        .format('YYYY-MM-DD');
+
+    return db.raw(`
+    INSERT INTO balance (uid, date, value)
+    VALUES (?, ?, ?)
+    ON DUPLICATE KEY UPDATE uid = ?, value = ?
+    `, [user.uid, date, balance, user.uid, balance]);
 }
 
-function validateParams(req) {
-    const year = parseInt(req.body.year || null, 10);
+function updateData(config, db, post = true) {
+    return async (req, res) => {
+        const { error, value } = joi.validate(req.body, balanceSchema);
 
-    if (isNaN(year)) {
-        return { isValid: false, param: 'year' };
-    }
+        if (error) {
+            return res.status(400)
+                .json({ errorMessage: error.message });
+        }
 
-    const month = parseInt(req.body.month || null, 10);
+        await updateQuery(db, req.user, value);
 
-    if (isNaN(month) || month < 1 || month > 12) {
-        return { isValid: false, param: 'month' };
-    }
+        const statusCode = post
+            ? 201
+            : 200;
 
-    if (!('balance' in req.body) || isNaN(req.body.balance)) {
-        return { isValid: false, param: 'balance' };
-    }
-
-    const balance = parseInt(req.body.balance, 10);
-
-    return { isValid: true, year, month, balance };
-}
-
-async function updateData(req, res, post = true) {
-    const params = validateParams(req);
-
-    if (!params.isValid) {
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: `Invalid value for ${params.param}`
-            });
-    }
-
-    await updateQuery(req.db, req.user, params.year, params.month, params.balance);
-
-    await req.db.end();
-
-    const statusCode = post
-        ? 201
-        : 200;
-
-    return res
-        .status(statusCode)
-        .json({
-            error: false
-        });
+        return res.status(statusCode)
+            .json({ success: true });
+    };
 }
 
 module.exports = {
     updateQuery,
-    validateParams,
     updateData
 };
 

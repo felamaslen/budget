@@ -2,8 +2,8 @@
  * Multiple update request middleware
  */
 
-const cashflow = require('./routes/data/cashflow');
-const ResponseMultiple = require('./responseMultiple');
+const cashflow = require('../routes/data/cashflow');
+const ResponseMultiple = require('../responseMultiple');
 
 function validateTaskList(list) {
     if (!Array.isArray(list)) {
@@ -112,86 +112,64 @@ function getOverallStatusCode(results) {
  *                           schema:
  *                               $ref: "#/definitions/DataResponsePostList"
  */
-async function routePatch(req, res, listDataProcessor) {
-    if (!('list' in req.body) || !validateTaskList(req.body.list)) {
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: 'Must provide a list of tasks'
-            });
-    }
+function routePatch(config, db, listDataProcessor) {
+    return async (req, res) => {
+        if (!('list' in req.body) && validateTaskList(req.body.list)) {
+            return res.status(400)
+                .json({
+                    errorMessage: 'Must provide a list of tasks'
+                });
+        }
 
-    const tasks = req.body.list;
+        const tasks = req.body.list;
 
-    // prevent sub-routes from ending the database connection early
-    req.db.requireForceToEnd = true;
+        const promises = tasks
+            .map(({ route, method, query, body }) => {
+                const taskReq = { ...req, query, body };
+                const taskRes = new ResponseMultiple();
 
-    const promises = tasks
-        .map(task => {
-            const route = task.route;
-            const method = task.method;
-            const query = task.query;
-            const body = task.body;
-
-            const taskReq = { ...req, query, body };
-            const taskRes = new ResponseMultiple();
-
-            if (route === 'balance') {
-                return cashflow.routePost(taskReq, taskRes);
-            }
-
-            if (route in listDataProcessor) {
-                const processor = listDataProcessor[route];
-
-                if (method === 'post') {
-                    return processor.routePost(taskReq, taskRes);
+                if (route === 'balance') {
+                    return cashflow.routePost(config, db)(taskReq, taskRes);
                 }
 
-                if (method === 'put') {
-                    return processor.routePut(taskReq, taskRes);
+                if (route in listDataProcessor) {
+                    const processor = listDataProcessor[route];
+
+                    if (method === 'post') {
+                        return processor.routePost(config, db)(taskReq, taskRes);
+                    }
+
+                    if (method === 'put') {
+                        return processor.routePut(config, db)(taskReq, taskRes);
+                    }
+
+                    if (method === 'delete') {
+                        return processor.routeDelete(config, db)(taskReq, taskRes);
+                    }
                 }
 
-                if (method === 'delete') {
-                    return processor.routeDelete(taskReq, taskRes);
-                }
-            }
+                return null;
+            })
+            .filter(item => item !== null);
 
-            return null;
-        })
-        .filter(item => item !== null);
+        try {
+            const allResults = await Promise.all(promises);
 
-    let results = null;
-    try {
-        results = await Promise.all(promises);
-    }
-    catch (err) {
-        await req.db.end(null, true);
+            const data = allResults.map(({ result }) => result);
 
-        return res
-            .status(400)
-            .json({
-                error: true,
-                errorMessage: err.message
-            });
-    }
+            const error = allResults.reduce((status, { result }) => status || result.error, false);
 
-    const data = results.map(taskRes => taskRes.result);
+            const statusCode = getOverallStatusCode(allResults);
 
-    await req.db.end(null, true);
-
-    const error = results.reduce(
-        (status, taskRes) => status || taskRes.result.error, false
-    );
-
-    const statusCode = getOverallStatusCode(results);
-
-    return res
-        .status(statusCode)
-        .json({
-            error,
-            data
-        });
+            return res
+                .status(statusCode)
+                .json({ error, data });
+        }
+        catch (err) {
+            return res.status(400)
+                .json({ errorMessage: err.message });
+        }
+    };
 }
 
 module.exports = {

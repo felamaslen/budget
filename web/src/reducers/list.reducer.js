@@ -3,11 +3,11 @@
  */
 
 import { fromJS, List as list, Map as map } from 'immutable';
+import moment from 'moment';
 
 import { getFormattedHistory, getFundsCachedValue, getExtraRowProps } from './funds.reducer';
-
 import { PAGES, DATA_KEY_ABBR } from '../misc/const';
-import { YMD } from '../misc/date';
+import { dateInput } from '../misc/date';
 import { TransactionsList, sortRowsByDate } from '../misc/data';
 
 export function processRawListRows(data, page) {
@@ -24,7 +24,7 @@ export function processRawListRows(data, page) {
             const value = item[DATA_KEY_ABBR[col]];
 
             if (col === 'date') {
-                return new YMD(value);
+                return dateInput(value, false);
             }
 
             if (col === 'transactions') {

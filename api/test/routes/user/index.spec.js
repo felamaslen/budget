@@ -2,17 +2,19 @@
  * user API spec
  */
 
-require('dotenv').config();
-const expect = require('chai').expect;
+const chai = require('chai');
+chai.use(require('sinon-chai'));
+const { expect } = chai;
 require('it-each')();
+const { mockReq, mockRes } = require('sinon-express-mock');
 
 const sha1 = require('sha1');
 
 const config = require('../../../src/config')();
-const common = require('../../test.common');
+const { prepareMockDb } = require('../../test.common');
 const user = require('../../../src/routes/user');
 
-const loginBanPreCheck = require('./loginBanPreCheck.test');
+const { db, tracker } = prepareMockDb();
 
 describe('/api/user', () => {
     describe('userPinHash', () => {
@@ -23,81 +25,59 @@ describe('/api/user', () => {
 
     describe('generateToken', () => {
         it('should generate a salted hash value', () => {
-            expect(user.generateToken(1234)).to.equal(sha1(`1234${config.userHashSalt}`));
+            expect(user.generateToken(config, 1234)).to.equal(sha1(`1234${config.userHashSalt}`));
         });
     });
 
     describe('processLoginRequest', () => {
-        const testReq = {
-            body: {
-                pin: '8873'
-            }
-        };
-
-        const requests = [
-            { ...testReq, headers: { 'x-forwarded-for': '144.201.99.41' } },
-            { ...testReq, connection: { remoteAddress: '144.201.99.41' } }
+        const testReq = [
+            mockReq({
+                headers: {
+                    'x-forwarded-for': '144.201.99.41'
+                },
+                body: {
+                    pin: '8873'
+                }
+            }),
+            mockReq({
+                connection: {
+                    remoteAddress: '144.201.99.41'
+                },
+                body: {
+                    pin: '8873'
+                }
+            })
         ];
 
-        it.each(requests, 'should retrieve the IP, hash and token for a request', req => {
+        it.each(testReq, 'should retrieve the IP, hash and token for a request', req => {
             const expectedResult = {
                 ip: '144.201.99.41',
                 hash: sha1(`8873${config.userHashSalt}`),
                 token: sha1(`8873${config.userHashSalt}`)
             };
 
-            expect(user.processLoginRequest(req)).to.deep.equal(expectedResult);
+            expect(user.processLoginRequest(config, req)).to.deep.equal(expectedResult);
         });
     });
 
     describe('findUser', () => {
+        before(() => {
+            tracker.install();
+
+            tracker.on('query', query => {
+                query.response([query.sql]);
+            });
+        });
+
+        after(() => {
+            tracker.uninstall();
+        });
+
         it('should find a user by their hash', async () => {
-            const db = new common.DummyDb();
+            const result = await user.findUser(db, 'some_hash');
 
-            await user.findUser(db, 'some_hash');
-
-            expect(db.queries[0]).to.equal(
-                'SELECT uid, user AS name, api_key FROM users WHERE api_key = \'some_hash\' LIMIT 1'
-            );
-        });
-    });
-
-    describe('getIpLog', () => {
-        it('should query the database for an IP request log', async () => {
-            const db = new common.DummyDb();
-
-            await user.getIpLog(db, '123.123.231.132');
-
-            expect(db.queries[0]).to.equal(
-                'SELECT time, count FROM ip_login_req ' +
-                'WHERE ip = \'123.123.231.132\' LIMIT 1'
-            );
-        });
-    });
-
-    describe('removeIpLog', () => {
-        it('should query the database to remove an IP request log', async () => {
-            const db = new common.DummyDb();
-
-            await user.removeIpLog(db, '123.123.231.132');
-
-            expect(db.queries[0]).to.equal(
-                'DELETE FROM ip_login_req ' +
-                'WHERE ip = \'123.123.231.132\''
-            );
-        });
-    });
-
-    describe('updateIpLog', () => {
-        it('should query the database to update an IP request log', async () => {
-            const db = new common.DummyDb();
-
-            await user.updateIpLog(db, '123.123.231.132', 1181923991239, 4);
-
-            expect(db.queries[0]).to.equal(
-                'INSERT INTO ip_login_req (ip, time, count) ' +
-                'VALUES(\'123.123.231.132\', 1181923991239, 4) ' +
-                'ON DUPLICATE KEY UPDATE time = 1181923991239, count = 4'
+            expect(result).to.equal(
+                'select `uid`, `name`, `api_key` from `users` where `api_key` = ?'
             );
         });
     });
@@ -130,61 +110,39 @@ describe('/api/user', () => {
         });
     });
 
-    describe('loginBanPreCheck', loginBanPreCheck);
-
     describe('handleLoginStatus', () => {
         it('should respond with a banned message for banned IPs', () => {
-            const req = new common.Req();
-            const res = new common.Res();
-            user.handleLoginStatus(req, res, { banned: true }, null);
+            const req = mockReq();
+            const res = mockRes();
+            user.handleLoginStatus(config, req, res, { banned: true }, null);
 
-            expect(res.statusCode).to.equal(401);
-            expect(res.response).to.deep.equal({
-                error: true,
+            expect(res.status).to.be.calledWith(401);
+            expect(res.json).to.be.calledWith({
                 errorMessage: 'Banned'
             });
         });
 
         it('should respond with an unauthorised message for bad logins', () => {
-            const req = new common.Req();
-            const res = new common.Res();
-            user.handleLoginStatus(req, res, { user: null }, null);
+            const req = mockReq();
+            const res = mockRes();
+            user.handleLoginStatus(config, req, res, { user: null }, null);
 
-            expect(res.statusCode).to.equal(401);
-            expect(res.response).to.deep.equal({
-                error: true,
+            expect(res.status).to.be.calledWith(401);
+            expect(res.json).to.be.calledWith({
                 errorMessage: 'Bad PIN'
             });
         });
 
         it('should respond with user details for good logins', () => {
-            const res = new common.Res();
-            const req = new common.Req();
+            const req = mockReq();
+            const res = mockRes();
 
-            user.handleLoginStatus(req, res, {
+            user.handleLoginStatus(config, req, res, {
                 user: { uid: 1, name: 'johnsmith' }
             }, 'test_token');
 
-            expect(res.statusCode).to.equal(200);
-            expect(res.response).to.deep.equal({
-                error: false,
+            expect(res.json).to.be.calledWith({
                 apiKey: 'test_token',
-                uid: 1,
-                name: 'johnsmith'
-            });
-        });
-
-        it('should implement a kludge for backwards compatibility', () => {
-            const res = new common.Res();
-            const req = new common.Req({ query: { alpha: true } });
-
-            user.handleLoginStatus(req, res, {
-                user: { uid: 1, name: 'johnsmith' }
-            }, 'test_token');
-
-            expect(res.response).to.deep.equal({
-                error: false,
-                'api_key': 'test_token',
                 uid: 1,
                 name: 'johnsmith'
             });

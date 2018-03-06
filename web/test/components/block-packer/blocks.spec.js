@@ -162,8 +162,8 @@ describe('<Blocks />', () => {
         expect(activeWrapper.childAt(0).props()).to.have.property('activeSub', true);
     });
 
-    it('should accept a deepBlock prop', () => {
-        const deepBlockProps = { ...props, deepBlock: 'foo' };
+    it('should accept a deep prop', () => {
+        const deepBlockProps = { ...props, deep: 'foo' };
         const deepWrapper = shallow(<Blocks {...deepBlockProps} />);
 
         expect(deepWrapper.hasClass('block-tree-deep')).to.equal(true);

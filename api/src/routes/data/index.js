@@ -1,8 +1,7 @@
-const Database = require('../../db');
-const authMiddleware = require('../../authMiddleware');
-const multipleUpdateRequestMiddleware = require('../../multipleUpdateRequestMiddleware');
+const { Router } = require('express');
 
-const config = require('../../config')();
+const { authMiddleware } = require('../../middleware/auth');
+const { routePatch: routeMultipleUpdate } = require('../../middleware/multipleUpdateRequest');
 
 const cashflow = require('./cashflow');
 const analysis = require('./analysis');
@@ -23,22 +22,21 @@ const dataAll = require('./all');
 const pie = require('./pie');
 const stocks = require('./stocks');
 
-function handler(app) {
-    // all of the following routes require database and authentication middleware
-    app.use('/data/*', Database.dbMiddleware, authMiddleware.authMiddleware);
+function handler(config, db) {
+    const router = new Router();
 
-    app.patch('/data/multiple', (req, res) => {
-        return multipleUpdateRequestMiddleware.routePatch(req, res, listDataProcessor);
-    });
+    router.use('/*', authMiddleware(config, db));
+
+    router.patch('/multiple', routeMultipleUpdate(config, db, listDataProcessor));
 
     // cash flow routes
-    app.get('/data/overview', cashflow.routeGet);
-    app.post('/data/balance', cashflow.routePost);
-    app.put('/data/balance', cashflow.routePut);
+    router.get('/overview', cashflow.routeGet(config, db));
+    router.post('/balance', cashflow.routePost(config, db));
+    router.put('/balance', cashflow.routePut(config, db));
 
     // analysis routes
-    app.get('/data/analysis/:period/:groupBy/:pageIndex?', analysis.routeGet);
-    app.get('/data/analysis/deep/:category/:period/:groupBy/:pageIndex?', analysisDeep.routeGet);
+    router.get('/analysis/:period/:groupBy/:pageIndex?', analysis.routeGet(config, db));
+    router.get('/analysis/deep/:category/:period/:groupBy/:pageIndex?', analysisDeep.routeGet(config, db));
 
     // list data routes
     config.data.listCategories.forEach(category => {
@@ -46,23 +44,24 @@ function handler(app) {
             ? ''
             : '/:page?';
 
-        app.get(`/data/${category}${pageParam}`, listDataProcessor[category].routeGet);
-        app.post(`/data/${category}`, listDataProcessor[category].routePost);
-        app.put(`/data/${category}`, listDataProcessor[category].routePut);
-        app.delete(`/data/${category}`, listDataProcessor[category].routeDelete);
+        router.get(`/${category}${pageParam}`, listDataProcessor[category].routeGet(config, db));
+        router.post(`/${category}`, listDataProcessor[category].routePost(config, db));
+        router.put(`/${category}`, listDataProcessor[category].routePut(config, db));
+        router.delete(`/${category}`, listDataProcessor[category].routeDelete(config, db));
     });
 
-    app.get('/data/all', dataAll.routeGet);
+    router.get('/all', dataAll.routeGet(config, db));
 
     // pie charts
-    app.get('/data/pie/:category', (req, res) => pie.routeGet(req, res));
+    router.get('/pie/:category', pie.routeGet(config, db));
 
     // stocks route
-    app.get('/data/stocks', stocks.routeGet);
+    router.get('/stocks', stocks.routeGet(config, db));
+
+    return router;
 }
 
 module.exports = {
-    multipleUpdateRequestMiddleware,
     handler
 };
 

@@ -25,15 +25,13 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     return formatAge(age);
 }
 export function getFundsCachedValue(rows, startTime, cacheTimes, now) {
-
     const value = rows.reduce((sum, row) => {
         if (!row.get('pr').size) {
             return sum;
         }
 
-        return sum + (
-            row.get('pr').last() * row.getIn(['cols', transactionsKey]).getTotalUnits()
-        );
+        return sum + row.get('pr').last() * row.getIn(['cols', transactionsKey]).getTotalUnits();
+
     }, 0);
 
     const ageText = getFundsCachedValueAgeText(startTime, cacheTimes, now);
@@ -96,7 +94,7 @@ export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
         if (prices.size > 1) {
             const yesterdayPriceTime = startTime + cacheTimes.get(timeOffset + prices.size - 2);
             const transactionsToYesterday = transactions.filter(
-                item => item.get('date') < yesterdayPriceTime
+                item => item.get('date').unix() < yesterdayPriceTime
             );
 
             const yesterdayPrice = prices.get(prices.size - 2);
@@ -392,7 +390,7 @@ function getPriceUnitsCosts(rows, startTime, cacheTimes) {
             const time = cacheTimes.get(priceKey + timeOffset);
 
             const transactionsToNow = transactions
-                .filter(item => item.get('date') < startTime + time);
+                .filter(item => item.get('date').unix() < startTime + time);
 
             const thisPriceUnits = transactionsToNow.getTotalUnits();
             const thisPriceCost = transactionsToNow.getTotalCost();

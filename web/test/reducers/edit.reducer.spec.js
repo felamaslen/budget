@@ -2,7 +2,7 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import * as R from '../../src/reducers/edit.reducer';
-import { YMD } from '../../src/misc/date';
+import { dateInput } from '../../src/misc/date';
 
 describe('Edit reducers', () => {
     describe('rActivateEditable', () => {
@@ -21,8 +21,8 @@ describe('Edit reducers', () => {
                 { item: 'society', value: '' },
                 { item: 'holiday', value: '' },
                 { item: 'bar', value: '' },
-                new YMD('2017-10-13'),
-                new YMD('foo')
+                dateInput('13/10/17'),
+                dateInput('foo')
             ]);
 
             expect(R.getInvalidInsertDataKeys(items).toJS())
@@ -33,14 +33,14 @@ describe('Edit reducers', () => {
         it('should serialise fields into an object of strings', () => {
             const fields = fromJS([
                 { item: 'foo1', value: 'bar' },
-                { item: 'foo2', value: new YMD('2017-10-13') },
+                { item: 'foo2', value: dateInput('13/10/17') },
                 { item: 'foo3', value: 10.43 }
             ]);
 
             expect(R.stringifyFields(fields)).to.deep.equal({
                 foo1: 'bar',
-                foo2: { year: 2017, month: 10, date: 13 },
-                foo3: '10.43'
+                foo2: '2017-10-13',
+                foo3: 10.43
             });
         });
     });

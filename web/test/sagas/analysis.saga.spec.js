@@ -12,10 +12,11 @@ import { openTimedMessage } from '../../src/sagas/error.saga';
 
 describe('analysis.saga', () => {
     describe('selectStateProps', () => {
-        it('should get the period, grouping and timeIndex', () => {
+        it('should get the loading status, period, grouping and timeIndex', () => {
             expect(S.selectStateProps(fromJS({
                 other: {
                     analysis: {
+                        loading: true,
                         period: 100,
                         grouping: 200,
                         timeIndex: 300
@@ -23,6 +24,7 @@ describe('analysis.saga', () => {
                 }
             })))
                 .to.deep.equal({
+                    loading: true,
                     period: 100,
                     grouping: 200,
                     timeIndex: 300
@@ -37,11 +39,19 @@ describe('analysis.saga', () => {
                 .isDone();
         });
 
+        it('should do nothing if not set to loading', () => {
+            testSaga(S.requestAnalysisData, {})
+                .next()
+                .select(S.selectStateProps)
+                .next({ loading: false })
+                .isDone();
+        });
+
         it('should work as expected', () => {
             testSaga(S.requestAnalysisData, { name: 'foo', wasDeep: false })
                 .next()
                 .select(S.selectStateProps)
-                .next({ period: 1, grouping: 0, timeIndex: 3 })
+                .next({ loading: true, period: 1, grouping: 0, timeIndex: 3 })
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...makeContentRequest('some_api_key', {
@@ -57,7 +67,7 @@ describe('analysis.saga', () => {
             testSaga(S.requestAnalysisData, { name: 'foo', wasDeep: false })
                 .next()
                 .select(S.selectStateProps)
-                .next({ period: 1, grouping: 0, timeIndex: 3 })
+                .next({ loading: true, period: 1, grouping: 0, timeIndex: 3 })
                 .select(selectApiKey)
                 .next('some_api_key')
                 .call(axios.get, ...makeContentRequest('some_api_key', {

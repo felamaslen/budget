@@ -31,7 +31,7 @@ describe('Analysis page <Blocks />', () => {
             page: 'analysis',
             activeBlock: [0, 1],
             blocks: List.of({ foo: 'bar' }),
-            deepBlock: 'baz deepblock',
+            deep: 'baz deepblock',
             status: 'foo status'
         });
     });

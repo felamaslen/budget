@@ -6,29 +6,17 @@ import { List as list, Map as map, fromJS } from 'immutable';
 
 import { AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../misc/const';
 import { FUTURE_INVESTMENT_RATE } from '../misc/config';
-import { yearMonthDifference, monthDays } from '../misc/date';
+import { getNow, yearMonthDifference } from '../misc/date';
 import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../misc/data';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
 
-/**
- * Calculate futures from past averages / predictions
- * @param {list} cost: processed cost data
- * @param {list} futureCategories: categories to process
- * @param {integer} futureMonths: number of months going into the future
- * @param {integer} futureKey: key to separate between past/present and future
- * @returns {list} first six columns of data for overview table
- */
 function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
     if (futureMonths <= 0) {
         return cost;
     }
 
-    let now = new Date();
-    if (process.env.NODE_ENV === 'test') {
-        now = new Date('2018-01-22');
-    }
-
-    const currentMonthRatio = monthDays(now.getMonth() + 1, now.getFullYear()) / now.getDate();
+    const now = getNow();
+    const currentMonthRatio = now.daysInMonth() / now.get('date');
 
     return cost.map((categoryCost, category) => {
         if (!futureCategories.includes(category)) {
@@ -74,12 +62,6 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
     });
 }
 
-/**
- * Calculate the remaining table data, e.g. net income
- * Called after calculateFutures() which predicts future data
- * @param {map} data: processed data
- * @returns {list} all twelve columns of data for overview table
- */
 function calculateTableData(data) {
     const cost = data.get('cost');
     const numRows = data.get('numRows');
@@ -198,11 +180,6 @@ export function rProcessDataOverview(
     });
 }
 
-/**
- * Process data for insertion into the store
- * @param {object} raw: api JSON data response
- * @returns {Map} immutable data
- */
 function rProcessDataOverviewRaw(raw) {
     const currentYearMonth = [raw.currentYear, raw.currentMonth];
     const costMap = fromJS(raw.cost);
@@ -211,11 +188,6 @@ function rProcessDataOverviewRaw(raw) {
         .set('targets', fromJS(raw.targets));
 }
 
-/**
- * Get rows for display in the view
- * @param {List} data: processed data
- * @returns {List} rows for the view
- */
 export function rGetOverviewRows(data) {
     const currentYear = data.get('currentYearMonth')[0];
     const currentMonth = data.get('currentYearMonth')[1];
@@ -285,16 +257,6 @@ export function rGetOverviewRows(data) {
     return rows;
 }
 
-/**
- * @function rCalculateOverview
- * @param {Record} reduction: modified reduction
- * @param {string} page: page which is modified
- * @param {YMD} newDate: modified item date
- * @param {YMD} oldDate: original item date
- * @param {integer} newItemCost: modified item cost
- * @param {integer} oldItemCost: original item cost
- * @returns {Record} reduction with re-calculated overview data
- */
 export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemCost, oldItemCost }) {
     const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
 

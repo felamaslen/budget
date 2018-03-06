@@ -31,14 +31,14 @@ OuterBlockGroup.propTypes = {
     activeBlock: PropTypes.array
 };
 
-export default function Blocks({ blocks, activeBlock, deepBlock, ...props }) {
+export default function Blocks({ blocks, activeBlock, deep, ...props }) {
     const activeMain = Boolean(activeBlock && activeBlock.length === 1);
     const activeSub = Boolean(activeBlock && activeBlock.length === 2);
-    const activeDeep = Boolean(deepBlock);
+    const activeDeep = Boolean(deep);
 
     const className = classNames('block-tree', {
         'block-tree-deep': activeDeep,
-        [`block-tree-${deepBlock}`]: activeDeep
+        [`block-tree-${deep}`]: activeDeep
     });
 
     const blocksList = blocks.map((group, key) => <OuterBlockGroup
@@ -47,6 +47,7 @@ export default function Blocks({ blocks, activeBlock, deepBlock, ...props }) {
         activeMain={activeMain}
         activeSub={activeSub}
         activeBlock={activeBlock}
+        deep={deep}
         {...props}
     />);
 
@@ -56,6 +57,6 @@ export default function Blocks({ blocks, activeBlock, deepBlock, ...props }) {
 Blocks.propTypes = {
     blocks: PropTypes.instanceOf(list).isRequired,
     activeBlock: PropTypes.array,
-    deepBlock: PropTypes.string
+    deep: PropTypes.string
 };
 

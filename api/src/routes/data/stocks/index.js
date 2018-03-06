@@ -2,26 +2,20 @@
  * Retrieve stocks data for the stocks ticker
  */
 
-const config = require('../../../config')();
-
 function getStocks(db, user) {
-    return db.query(`
-    SELECT code, name, SUM(weight * subweight) AS sumWeight
-    FROM stocks
-    WHERE uid = ?
-    GROUP BY code, name
-    ORDER BY sumWeight DESC
-    `, user.uid);
+    return db.select('code', 'name', 'SUM(weight * subweight) AS sumWeight')
+        .from('stocks')
+        .where('uid', '=', user.uid)
+        .groupBy('code', 'name')
+        .orderBy('sumWeight', 'desc');
 }
 
 function processStocks(queryResult, apiKey) {
-    const stocks = queryResult.map(row => {
-        const weight = parseInt(row.sumWeight, 10);
+    const stocks = queryResult.map(({ code, name, sumWeight }) => ([
+        code, name, Number(sumWeight)
+    ]));
 
-        return [row.code, row.name, weight];
-    });
-
-    const total = stocks.reduce((sum, item) => sum + item[2], 0);
+    const total = stocks.reduce((sum, [, , weight]) => sum + weight, 0);
 
     return { stocks, total, apiKey };
 }
@@ -59,17 +53,14 @@ function processStocks(queryResult, apiKey) {
  *                                         type: array
  *                                         example: ["NASDAQ:GOOGL", "Alphabet Inc Class A", 11239]
  */
-async function routeGet(req, res) {
-    const stocksQueryResult = await getStocks(req.db, req.user);
+function routeGet(config, db) {
+    return async (req, res) => {
+        const stocksQueryResult = await getStocks(db, req.user);
 
-    const data = processStocks(stocksQueryResult, config.data.funds.stocksApiKey);
+        const data = processStocks(stocksQueryResult, config.data.funds.stocksApiKey);
 
-    await req.db.end();
-
-    return res.json({
-        error: false,
-        data
-    });
+        return res.json({ data });
+    };
 }
 
 module.exports = {

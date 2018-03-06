@@ -3,8 +3,9 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+import moment from 'moment';
 import { AVERAGE_MEDIAN, AVERAGE_EXP, PAGES } from './const';
-import { YMD } from './date';
+import { getNow } from './date';
 
 function sortByDate(prev, next) {
     if (prev.get('date') < next.get('date')) {
@@ -29,10 +30,6 @@ export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_
     return { period: match[1], length: match[2] };
 }
 
-/**
- * Produce a "unique" id
- * @returns {number} "unique" id
- */
 export function uuid(rand = Math.random(), random = false) {
     if (process.env.NODE_ENV === 'test' && !random) {
         return 0x4812;
@@ -55,9 +52,9 @@ export class TransactionsList {
                 .map(item => {
                     return map({
                         id: ++this.idCount,
-                        date: new YMD(item.d),
-                        units: item.u,
-                        cost: item.c
+                        date: moment(new Date(item.date)),
+                        units: item.units,
+                        cost: item.cost
                     });
                 })
                 .sort(sortByDate);
@@ -69,17 +66,9 @@ export class TransactionsList {
             this.size = this.list.size;
         }
     }
-    toString() {
-        return this.list
-            .map(item => {
-                const { year, month, date } = item.get('date').toString();
-
-                return item
-                    .delete('id')
-                    .set('year', year)
-                    .set('month', month)
-                    .set('date', date);
-            })
+    format() {
+        return this.list.map(item => item.delete('id')
+            .set('date', item.get('date').format('YYYY-MM-DD')))
             .toJS();
     }
     valueOf() {
@@ -145,9 +134,9 @@ export class TransactionsList {
 }
 
 export function dataEquals(item, compare) {
-    if (item instanceof YMD) {
-        if (compare instanceof YMD) {
-            return item.timestamp() === compare.timestamp();
+    if (item instanceof moment) {
+        if (compare instanceof moment) {
+            return item.isSame(compare);
         }
 
         return false;
@@ -159,19 +148,13 @@ export function dataEquals(item, compare) {
                 return false;
             }
 
-            return item.list
-                .reduce((equal, listItem, key) => {
-                    if (!equal || !dataEquals(
-                        listItem.get('date'),
-                        compare.list.getIn([key, 'date'])
-                    ) || listItem.get('units') !== compare.list.getIn([key, 'units']) ||
-                        listItem.get('cost') !== compare.list.getIn([key, 'cost'])
-                    ) {
-                        return false;
-                    }
+            return item.list.reduce((equal, listItem, key) => {
+                return equal &&
+                    listItem.get('date').isSame(compare.list.getIn([key, 'date'])) &&
+                    listItem.get('units') === compare.list.getIn([key, 'units']) &&
+                    listItem.get('cost') === compare.list.getIn([key, 'cost']);
 
-                    return true;
-                }, true);
+            }, true);
         }
 
         return false;
@@ -180,13 +163,6 @@ export function dataEquals(item, compare) {
     return item === compare;
 }
 
-/**
- * Gets the mean or median of an immutable list of values
- * @param {List} theList: immutable list
- * @param {integer} offset: don't count the last <offset> values
- * @param {integer} mode: output either median or mean
- * @returns {integer} median / mean value
- */
 export function listAverage(values, mode = null) {
     if (!values.size) {
         return NaN;
@@ -250,11 +226,6 @@ const testableRandom = (key = 0) => {
     return Math.random();
 };
 
-/**
- * Generate random Gaussian increment for a brownian motion
- * Used in fund predictions
- * @returns {float} random value
- */
 export function randnBm(rand1 = testableRandom(0), rand2 = testableRandom(1)) {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
@@ -264,8 +235,12 @@ export function getValueForTransmit(value) {
         return value;
     }
 
-    if (value instanceof YMD || value instanceof TransactionsList) {
-        return value.toString();
+    if (value instanceof moment) {
+        return value.format('YYYY-MM-DD');
+    }
+
+    if (value instanceof TransactionsList) {
+        return value.format();
     }
 
     if (typeof value === 'object') {
@@ -275,11 +250,6 @@ export function getValueForTransmit(value) {
     return value.toString();
 }
 
-/**
- * @function getNullEditable
- * @param {string} page: page we're on
- * @returns {map} null-editable object ready for navigating
- */
 export function getNullEditable(page) {
     let row = 0;
     if (PAGES[page].list) {
@@ -297,11 +267,6 @@ export function getNullEditable(page) {
     });
 }
 
-/**
- * @function getAddDefaultValues
- * @param {string} page: page we're on
- * @returns {list} list of add-items to display on page load
- */
 export function getAddDefaultValues(page) {
     if (!PAGES[page].list) {
         return list.of();
@@ -309,7 +274,7 @@ export function getAddDefaultValues(page) {
 
     return list(PAGES[page].cols).map(column => {
         if (column === 'date') {
-            return new YMD();
+            return getNow();
         }
         if (column === 'cost') {
             return 0;
@@ -326,14 +291,8 @@ export function getAddDefaultValues(page) {
     });
 }
 
-/**
- * Sort list rows by date, and add daily tallies
- * @param {list} rows: rows to sort
- * @param {string} page: page which rows are on
- * @returns {list} sorted rows
- */
 export function sortRowsByDate(rows, page) {
-    const today = new YMD();
+    const now = getNow();
 
     const dateKey = PAGES[page].cols.indexOf('date');
     const costKey = PAGES[page].cols.indexOf('cost');
@@ -341,12 +300,16 @@ export function sortRowsByDate(rows, page) {
 
     const sorted = rows
         .sort((prev, next) => {
-            if (prev.getIn(['cols', dateKey]) > next.getIn(['cols', dateKey])) {
+            const prevDate = prev.getIn(['cols', dateKey]);
+            const nextDate = next.getIn(['cols', dateKey]);
+
+            if (prevDate > nextDate) {
                 return -1;
             }
-            if (prev.getIn(['cols', dateKey]) < (next.getIn(['cols', dateKey]))) {
+            if (prevDate < nextDate) {
                 return 1;
             }
+
             if (prev.get('id') > next.get('id')) {
                 return -1;
             }
@@ -354,7 +317,7 @@ export function sortRowsByDate(rows, page) {
             return 1;
         })
         .map(row => {
-            const thisFuture = row.getIn(['cols', dateKey]) > today;
+            const thisFuture = row.getIn(['cols', dateKey]) > now;
             const thisLastFuture = lastFuture;
             lastFuture = thisFuture;
 
@@ -371,7 +334,8 @@ export function sortRowsByDate(rows, page) {
             .reduce(({ dailySum, results }, row, id) => {
                 const nextKey = keys.next().value;
 
-                const lastInDay = nextKey && row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
+                const lastInDay = nextKey &&
+                    row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
 
                 const cost = row.getIn(['cols', costKey]);
 
@@ -394,13 +358,6 @@ export function sortRowsByDate(rows, page) {
     return sorted;
 }
 
-/**
- * Add weekly averages (should be run after sortRowsByDate)
- * @param {map} data: data to sort
- * @param {list} rows: rows to sort
- * @param {string} page: page which rows are on
- * @returns {map} data with averages
- */
 export function addWeeklyAverages(data, rows, page) {
     if (!PAGES[page].daily) {
         return data;
@@ -410,9 +367,8 @@ export function addWeeklyAverages(data, rows, page) {
     const costKey = PAGES[page].cols.indexOf('cost');
     const dateKey = PAGES[page].cols.indexOf('date');
 
-    const visibleTotal = rows.reduce((sum, item) => {
-        return sum + item.getIn(['cols', costKey]);
-    }, 0);
+    const visibleTotal = rows.reduce((sum, item) =>
+        sum + item.getIn(['cols', costKey]), 0);
 
     if (!rows.size) {
         return data.set('weekly', 0);
@@ -420,7 +376,7 @@ export function addWeeklyAverages(data, rows, page) {
     const firstDate = rows.first().getIn(['cols', dateKey]);
     const lastDate = rows.last().getIn(['cols', dateKey]);
 
-    const numWeeks = (firstDate - lastDate) / 86400 / 7;
+    const numWeeks = firstDate.diff(lastDate, 'days') / 7;
 
     const weeklyAverage = numWeeks
         ? visibleTotal / numWeeks
