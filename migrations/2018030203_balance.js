@@ -5,7 +5,7 @@ module.exports = {
         knex.schema.dropTableIfExists('balance')
     ]).then(() => Promise.all([
         knex.schema.createTable('balance', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.integer('uid').unsigned().notNullable();

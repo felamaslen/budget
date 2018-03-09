@@ -10,7 +10,7 @@ module.exports = {
         knex.schema.dropTableIfExists('stock_codes')
     ]).then(() => Promise.all([
         knex.schema.createTable('funds', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.integer('uid').unsigned().notNullable();
@@ -22,7 +22,7 @@ module.exports = {
             table.unique(['uid', 'item']);
         }),
         knex.schema.createTable('fund_hash', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('fid').unsigned().primary();
             table.string('broker').notNullable();
@@ -30,14 +30,14 @@ module.exports = {
             table.unique(['broker', 'hash']);
         }),
         knex.schema.createTable('fund_cache_time', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('cid').unsigned().notNullable();
             table.dateTime('time').index().notNullable();
             table.boolean('done');
         }),
         knex.schema.createTable('fund_cache', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.integer('cid').unsigned();
@@ -48,7 +48,7 @@ module.exports = {
             table.unique(['cid', 'fid']);
         }),
         knex.schema.createTable('stocks', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.integer('uid').unsigned().notNullable();
@@ -59,7 +59,7 @@ module.exports = {
             table.float('subweight');
         }),
         knex.schema.createTable('stock_codes', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.string('name').notNullable();

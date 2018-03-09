@@ -10,7 +10,7 @@ module.exports = {
         knex.schema.dropTableIfExists('holiday')
     ]).then(() => Promise.all([
         knex.schema.createTable('income', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').primary();
             table.integer('uid').unsigned().notNullable();
@@ -20,7 +20,7 @@ module.exports = {
             table.integer('cost').notNullable();
         }),
         knex.schema.createTable('bills', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').primary();
             table.integer('uid').unsigned().notNullable();
@@ -30,7 +30,7 @@ module.exports = {
             table.integer('cost').notNullable();
         }),
         knex.schema.createTable('food', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').primary();
             table.integer('uid').unsigned().notNullable();
@@ -42,7 +42,7 @@ module.exports = {
             table.string('shop').notNullable().index();
         }),
         knex.schema.createTable('general', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').primary();
             table.integer('uid').unsigned().notNullable();
@@ -54,7 +54,7 @@ module.exports = {
             table.string('shop').notNullable().index();
         }),
         knex.schema.createTable('social', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').primary();
             table.integer('uid').unsigned().notNullable();
@@ -66,7 +66,7 @@ module.exports = {
             table.string('shop').notNullable().index();
         }),
         knex.schema.createTable('holiday', table => {
-            table.collate('utf8_unicode_ci');
+            table.collate('utf8mb4_unicode_ci');
 
             table.increments('id').primary();
             table.integer('uid').unsigned().notNullable();
