@@ -10,7 +10,7 @@
   "scripts": {
     "postinstall": "NODE_ENV=production ./node_modules/.bin/webpack",
     "build": "NODE_ENV=production DOTENV_INJECT=true ./node_modules/.bin/webpack",
-    "start": "node ./api/src/index.js",
+    "start": "node index.js",
     "dev": "NODE_ENV=development node index.js",
     "dev:api": "NODE_ENV=development SKIP_APP=true nodemon --inspect -w ./api/src index.js",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --require babel-core/register -R spec \"./web/test/**/*.spec.js\" \"./api/test/**/*.spec.js\"",
