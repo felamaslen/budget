@@ -1,4 +1,4 @@
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const joi = require('joi');
 const { listItemSchema } = require('../../schema/list');
 const common = require('../../common');
@@ -28,7 +28,7 @@ async function getOlderExists(db, user, table, limitCondition) {
 
     const [{ count }] = await db.select(db.raw('COUNT(*) AS count'))
         .from(table)
-        .where('date', '<', startDate.format('YYYY-MM-DD'))
+        .where('date', '<', startDate.toISODate())
         .andWhere('uid', '=', user.uid);
 
     return count > 0;
@@ -42,10 +42,10 @@ function getQuery(db, user, table, columns, limitCondition = null) {
     if (limitCondition) {
         const { startDate, endDate } = limitCondition;
 
-        query = query.andWhere('date', '>=', startDate.format('YYYY-MM-DD'));
+        query = query.andWhere('date', '>=', startDate.toISODate());
 
         if (endDate) {
-            query = query.andWhere('date', '<=', endDate.format('YYYY-MM-DD'));
+            query = query.andWhere('date', '<=', endDate.toISODate());
         }
     }
 
@@ -63,7 +63,7 @@ function formatResults(queryResult, columnMap, addData = null) {
                     const column = columnMap[key];
 
                     if (key === 'date') {
-                        return { ...item, 'd': moment(value).format('YYYY-MM-DD') };
+                        return { ...item, 'd': DateTime.fromJSDate(value).toISODate() };
                     }
 
                     return { ...item, [column]: value };
@@ -135,7 +135,7 @@ function routeGet(config, db, table) {
         const offset = Math.floor(Number(req.params.page) || 0);
         const limit = getPageLimit(config, table, offset);
 
-        const data = await getResults(config, db, req.user, moment(), table, null, limit);
+        const data = await getResults(config, db, req.user, DateTime.local(), table, null, limit);
 
         return res.json({ data });
     };
@@ -145,7 +145,7 @@ function processRow(row, table) {
     if (table === 'funds' && 'transactions' in row) {
         const transactions = row.transactions.map(({ date, ...item }) => ({
             ...item,
-            date: moment(date).format('YYYY-MM-DD')
+            date: DateTime.fromJSDate(date).toISODate()
         }));
 
         return { ...row, transactions: JSON.stringify(transactions) };
