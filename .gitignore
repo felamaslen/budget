@@ -69,3 +69,4 @@ cli/env
 
 web/build
 api/test/data
+android/budget.jks
