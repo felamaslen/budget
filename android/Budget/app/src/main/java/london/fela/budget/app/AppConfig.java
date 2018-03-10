@@ -70,6 +70,6 @@ public class AppConfig {
     }
 
     public static String apiUrl(Resources resources) {
-        return resources.getString(R.string.api_url) + "/api/v3/";
+        return resources.getString(R.string.api_url) + "/api/v4/";
     }
 }

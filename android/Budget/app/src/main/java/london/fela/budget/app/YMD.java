@@ -15,7 +15,15 @@ public class YMD {
     private final int month;
     private final int date;
 
-    private static final String separator = ",";
+    private static final String separator = "-";
+
+    private static String leadingZero(Integer number) {
+        if (number < 10) {
+            return "0" + String.valueOf(number);
+        }
+
+        return String.valueOf(number);
+    }
 
     public YMD(int theYear, int theMonth, int theDate) {
         year = theYear;
@@ -37,24 +45,9 @@ public class YMD {
     public int getDate() { return date; }
 
     public String serialise() {
-        return String.valueOf(year) + separator +
-            String.valueOf(month) + separator +
-            String.valueOf(date);
-    }
-    
-    public JSONObject getValuesForTransfer() {
-        JSONObject data = new JSONObject();
-
-        try {
-            data.put("year", year);
-            data.put("month", month);
-            data.put("date", date);
-        }
-        catch (JSONException e) {
-            return null;
-        }
-
-        return data;
+        return YMD.leadingZero(year) + separator +
+            YMD.leadingZero(month) + separator +
+            YMD.leadingZero(date);
     }
 
     public static YMD deserialise(String serial) {

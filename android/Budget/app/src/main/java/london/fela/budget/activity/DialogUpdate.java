@@ -148,7 +148,7 @@ public class DialogUpdate extends Activity {
                     // the date dialog changes these values itself, so no need to update newItem here
                     YMD newDate = YMD.deserialise(newItem.data.get(field.name));
 
-                    data.put(field.name, newDate.getValuesForTransfer());
+                    data.put(field.name, newDate.serialise());
 
                     // see if the value has been changed
                     if (noneChanged && !newDate.isEqual(YMD.deserialise(oldValues.get(field.name)))) {

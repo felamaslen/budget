@@ -120,8 +120,9 @@ public class MainActivity extends Activity implements Api {
                     // item ID
                     int id = li.getInt("I");
                     // item date
-                    JSONArray jDate = li.getJSONArray("d");
-                    YMD date = new YMD(jDate.getInt(0), jDate.getInt(1), jDate.getInt(2));
+                    String jDate = li.getString("d");
+                    YMD date = YMD.deserialise(jDate);
+
                     // item name
                     String item = li.getString("i");
                     // item cost
