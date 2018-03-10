@@ -185,7 +185,7 @@ describe('misc/data', () => {
             const result = M.sortRowsByDate(rows, 'food');
 
             expect(result.map(item => item
-                .setIn(['cols', 0], item.getIn(['cols', 0]).format('YYYY-MM-DD'))
+                .setIn(['cols', 0], item.getIn(['cols', 0]).toISODate())
             )
                 .toJS()
             )

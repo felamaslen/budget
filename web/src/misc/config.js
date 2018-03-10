@@ -12,7 +12,7 @@ export const FUTURE_INVESTMENT_RATE = 0.1;
 export const SYMBOL_CURRENCY_HTML = '\u00a3';
 export const SYMBOL_CURRENCY_RAW = '£';
 
-export const DATE_FORMAT_DISPLAY = 'DD/MM/YYYY';
+export const LOCALE = 'en-GB';
 
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;

@@ -41,9 +41,9 @@ describe('<FormFieldDate />', () => {
 
         expect(changed).to.equal(null);
 
-        wrapper.childAt(0).simulate('change', { target: { value: '9/4/14' } });
+        wrapper.childAt(0).simulate('change', { target: { value: '2014-04-09' } });
 
-        expect(changed).to.deep.equal(dateInput('9/4/2014'));
+        expect(changed.toString()).to.deep.equal(dateInput('9/4/2014').toString());
     });
 
     it('should handle bad values', () => {
@@ -53,6 +53,6 @@ describe('<FormFieldDate />', () => {
 
         wrapper.childAt(0).simulate('change', { target: { value: 'not a date' } });
 
-        expect(changed).to.equal(null);
+        expect(changed.toString()).to.equal('Invalid DateTime');
     });
 });

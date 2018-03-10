@@ -2,15 +2,15 @@
  * Date functions and classes
  */
 
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import { MONTHS_SHORT, WEEK_DAYS } from './const';
 
 export function getNow() {
     if (process.env.NODE_ENV === 'test') {
-        return moment(new Date('2018-01-22'));
+        return DateTime.fromISO('2018-01-22');
     }
 
-    return moment();
+    return DateTime.local();
 }
 
 export function yearMonthDifference([year1, month1], [year2, month2]) {
@@ -22,27 +22,30 @@ function pmod(number, denominator) {
 }
 
 export function dateInput(input = null, validate = true) {
-    // get a moment object from something like "10/11" or just "3", for quick insertion of data
+    // get a DateTime object from something like "10/11" or just "3", for quick insertion of data
 
     if (!validate) {
-        return moment(new Date(input));
+        return DateTime.fromISO(input);
     }
 
     const now = getNow();
 
     if (input && input.match(/^[0-9]{1,2}(\/[0-9]{1,2}(\/[0-9]{2,4})?)?$/)) {
-        const [date, monthInput, yearShort] = input.split('/');
+        const [day, monthInput, yearShort] = input.split('/');
 
-        let year = now.get('year');
+        let year = now.year;
         if (yearShort) {
-            year = yearShort.length === 2
-                ? `20${yearShort}`
-                : yearShort;
+            if (yearShort.length === 2) {
+                year = Number(`20${yearShort}`);
+            }
+            else {
+                year = Number(yearShort);
+            }
         }
 
-        const month = monthInput || now.get('month') + 1;
+        const month = Number(monthInput) || now.month;
 
-        return moment(new Date(year, Number(month) - 1, date));
+        return DateTime.fromObject({ year, month, day: Number(day) });
     }
 
     if (validate) {

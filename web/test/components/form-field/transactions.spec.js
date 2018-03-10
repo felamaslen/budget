@@ -11,8 +11,6 @@ import FormFieldDate from '../../../src/components/form-field/date';
 import FormFieldNumber from '../../../src/components/form-field/number';
 import FormFieldCost from '../../../src/components/form-field/cost';
 
-const TEST_DATE_FORMAT = 'YYYY-MM-DD';
-
 describe('<FormFieldTransactions />', () => {
     let date = null;
     let units = null;
@@ -82,7 +80,7 @@ describe('<FormFieldTransactions />', () => {
             .to.equal(true);
 
         expect(wrapper.childAt(key).childAt(0).childAt(0).childAt(1).childAt(0).props().value
-            .format(TEST_DATE_FORMAT))
+            .toISODate())
             .to.equal(iDate);
 
         expect(date).to.equal(null);
