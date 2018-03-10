@@ -8,16 +8,13 @@ const chai = require('chai');
 chai.use(require('sinon-chai'));
 const { expect } = chai;
 const { prepareMockDb } = require('../../../test.common');
-const moment = require('moment');
+const { DateTime } = require('luxon');
 
 const common = require('../../../test.common');
 const config = require('../../../../src/config')();
 const overview = require('../../../../src/routes/data/cashflow/overview');
 
 const { db, tracker } = prepareMockDb();
-
-const TEST_DATE_FORMAT = 'YYYY-M-D';
-const TEST_DATETIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 const testPricesProcessedResponse = {
     '1': [
@@ -51,53 +48,53 @@ describe('/api/data/overview', () => {
     describe('getStartTime', () => {
         it('should get the correct start time', () => {
             expect(overview.getStartTime({
-                now: moment(new Date('2015-4-26')),
+                now: DateTime.fromISO('2015-04-26'),
                 startYear: 2014,
                 startMonth: 9,
                 pastMonths: 5
-            }).format(TEST_DATE_FORMAT)).to.equal('2014-11-26');
+            }).toISODate()).to.equal('2014-11-26');
         });
         it('should handle spanning multiple years', () => {
             expect(overview.getStartTime({
-                now: moment(new Date('2017-9-21')),
+                now: DateTime.fromISO('2017-09-21'),
                 startYear: 2014,
                 startMonth: 9,
                 pastMonths: 15
-            }).format(TEST_DATE_FORMAT)).to.equal('2016-6-21');
+            }).toISODate()).to.equal('2016-06-21');
         });
         it('should handle configured limit', () => {
             expect(overview.getStartTime({
-                now: moment(new Date('2014-11-01')),
+                now: DateTime.fromISO('2014-11-01'),
                 startYear: 2014,
                 startMonth: 9,
                 pastMonths: 5
-            }).format(TEST_DATE_FORMAT)).to.equal('2014-10-1');
+            }).toISODate()).to.equal('2014-10-01');
         });
     });
 
     describe('getMonths', () => {
         it('should return a list of dates corresponding to each month', () => {
             expect(overview.getMonths({
-                now: moment(new Date('2015-06-13')),
+                now: DateTime.fromISO('2015-06-13'),
                 pastMonths: 5,
                 futureMonths: 8,
                 startYear: 2014,
                 startMonth: 9
-            }).map(date => date.format(TEST_DATE_FORMAT))).to.deep.equal([
-                '2015-1-31',
-                '2015-2-28',
-                '2015-3-31',
-                '2015-4-30',
-                '2015-5-31',
-                '2015-6-30',
-                '2015-7-31',
-                '2015-8-31',
-                '2015-9-30',
+            }).map(date => date.toISODate())).to.deep.equal([
+                '2015-01-31',
+                '2015-02-28',
+                '2015-03-31',
+                '2015-04-30',
+                '2015-05-31',
+                '2015-06-30',
+                '2015-07-31',
+                '2015-08-31',
+                '2015-09-30',
                 '2015-10-31',
                 '2015-11-30',
                 '2015-12-31',
-                '2016-1-31',
-                '2016-2-29'
+                '2016-01-31',
+                '2016-02-29'
             ]);
         });
     });
@@ -105,23 +102,23 @@ describe('/api/data/overview', () => {
     describe('mapOldToYearMonths', () => {
         it('should work as expected', () => {
             const months = [
-                moment(new Date('2016-02-29')),
-                moment(new Date('2016-03-31')),
-                moment(new Date('2016-04-30'))
+                DateTime.fromISO('2016-02-29'),
+                DateTime.fromISO('2016-03-31'),
+                DateTime.fromISO('2016-04-30')
             ];
 
             const old = new Array(5).fill(0);
 
             const expectedResult = [
-                '2015-9-29',
+                '2015-09-29',
                 '2015-10-29',
                 '2015-11-29',
                 '2015-12-29',
-                '2016-1-29'
+                '2016-01-29'
             ];
 
             expect(overview.mapOldToYearMonths(months, old)
-                .map(date => date.format(TEST_DATE_FORMAT))
+                .map(date => date.toISODate())
             )
                 .to.deep.equal(expectedResult);
         });
@@ -190,7 +187,8 @@ describe('/api/data/overview', () => {
                     ...items,
                     [key]: testPricesProcessedResponse[key].map(({ date, ...item }) => ({
                         ...item,
-                        date: moment(date).format(TEST_DATETIME_FORMAT)
+                        date: DateTime.fromJSDate(date)
+                            .toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
                     }))
                 }), {});
 
@@ -198,7 +196,7 @@ describe('/api/data/overview', () => {
                 ...items,
                 [key]: result[key].map(({ date, ...row }) => ({
                     ...row,
-                    date: date.format(TEST_DATETIME_FORMAT)
+                    date: date.toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
                 }))
             }), {})).to.deep.equal(expectedResult);
         });
@@ -232,15 +230,15 @@ describe('/api/data/overview', () => {
                 ...items,
                 [key]: result[key].map(({ date, ...row }) => ({
                     ...row,
-                    date: date.format(TEST_DATE_FORMAT)
+                    date: date.toISODate()
                 }))
             }), {})).to.deep.equal(Object.keys(testTransactionsProcessedResponse)
                 .reduce((items, key) => ({
                     ...items,
                     [key]: testTransactionsProcessedResponse[key].map(({ date, ...row }) => ({
                         ...row,
-                        date: moment(date).endOf('month')
-                            .format(TEST_DATE_FORMAT)
+                        date: DateTime.fromJSDate(date).endOf('month')
+                            .toISODate()
                     }))
                 }), {})
             );
@@ -250,19 +248,19 @@ describe('/api/data/overview', () => {
     describe('getMonthlyTotalFundValues', () => {
         it('should get the correct fund values', () => {
             const months = [
-                moment('2016-07-31'),
-                moment('2016-08-31'),
-                moment('2016-09-30'),
-                moment('2016-11-30'),
-                moment('2017-08-31'),
-                moment('2017-09-30'),
-                moment('2018-10-31')
+                DateTime.fromISO('2016-07-31'),
+                DateTime.fromISO('2016-08-31'),
+                DateTime.fromISO('2016-09-30'),
+                DateTime.fromISO('2016-11-30'),
+                DateTime.fromISO('2017-08-31'),
+                DateTime.fromISO('2017-09-30'),
+                DateTime.fromISO('2018-10-31')
             ];
 
             const old = [
-                moment('2016-04-30'),
-                moment('2016-05-31'),
-                moment('2016-06-30')
+                DateTime.fromISO('2016-04-30'),
+                DateTime.fromISO('2016-05-31'),
+                DateTime.fromISO('2016-06-30')
             ];
 
             const result = overview.getMonthlyTotalFundValues(
@@ -287,14 +285,14 @@ describe('/api/data/overview', () => {
             ];
 
             const months = [
-                moment('2014-09-30'),
-                moment('2014-10-31'),
-                moment('2014-11-30'),
-                moment('2014-12-31'),
-                moment('2015-01-31'),
-                moment('2015-02-28'),
-                moment('2015-03-31'),
-                moment('2015-04-30')
+                DateTime.fromISO('2014-09-30'),
+                DateTime.fromISO('2014-10-31'),
+                DateTime.fromISO('2014-11-30'),
+                DateTime.fromISO('2014-12-31'),
+                DateTime.fromISO('2015-01-31'),
+                DateTime.fromISO('2015-02-28'),
+                DateTime.fromISO('2015-03-31'),
+                DateTime.fromISO('2015-04-30')
             ];
 
             const result = overview.getMonthlyBalance(queryResult, months);

@@ -2,15 +2,15 @@
  * Update cash flow data
  */
 
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const joi = require('joi');
 const { balanceSchema } = require('../../../schema');
 
 function updateQuery(db, user, value) {
     const { year, month, balance } = value;
-    const date = moment(new Date(year, month - 1, 1))
+    const date = DateTime.fromObject({ year, month })
         .endOf('month')
-        .format('YYYY-MM-DD');
+        .toISODate();
 
     return db.raw(`
     INSERT INTO balance (uid, date, value)

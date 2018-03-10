@@ -2,19 +2,19 @@
  * Retrieve and process cash flow data, month-by-month
  */
 
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const joi = require('joi');
 const { transactionListSchema } = require('../../../schema');
 
-const getYearMonth = time => ([time.get('year'), time.get('month') + 1]);
+const getYearMonth = time => ([time.year, time.month]);
 
 function getStartTime(options) {
     const { now, startYear, startMonth, pastMonths } = options;
 
-    const startTime = now.clone().add(-pastMonths, 'months');
-    const minStartTime = moment(new Date(startYear, startMonth, 1));
+    const startTime = now.plus({ months: -pastMonths });
+    const minStartTime = DateTime.fromObject({ year: startYear, month: startMonth + 1 });
 
-    if (startTime.isAfter(minStartTime)) {
+    if (startTime > minStartTime) {
         return startTime;
     }
 
@@ -26,16 +26,16 @@ function getMonths(options) {
 
     const { now, futureMonths } = options;
 
-    const numMonths = futureMonths + 1 + now.diff(startTime, 'months');
+    const numMonths = futureMonths + 1 + Math.round(now.diff(startTime).as('months'));
 
     return new Array(numMonths).fill(0)
-        .map((item, key) => startTime.clone().add(key, 'months')
+        .map((item, key) => startTime.plus({ months: key })
             .endOf('month')
         );
 }
 
 function mapOldToYearMonths(months, old) {
-    return old.map((value, key) => months[0].clone().add(key - old.length, 'months'));
+    return old.map((value, key) => months[0].plus({ months: key - old.length }));
 }
 
 function getFundValue(monthDate, transactions, prices) {
@@ -77,7 +77,7 @@ function processFundPrices(rows) {
             const ids = id.split(',').map(item => Number(item));
             const prices = price.split(',').map(item => Number(item));
 
-            return { ids, prices, date: moment(time).endOf('month') };
+            return { ids, prices, date: DateTime.fromJSDate(time).endOf('month') };
         })
         .reduce((lastReduction, { date, ids, prices }) => {
             // filter out duplicate year/months
@@ -128,7 +128,7 @@ function processFundTransactions(rows) {
             }
 
             const items = value.map(({ date, ...item }) => ({
-                ...item, date: moment(date).endOf('month')
+                ...item, date: DateTime.fromJSDate(date).endOf('month')
             }));
 
             return { ...rest, [id]: items };
@@ -157,16 +157,16 @@ function getMonthlyTotalFundValues(months, old, fundTransactions, fundPrices) {
 }
 
 function getMonthlyValuesQueryDateUnion(months) {
-    const firstStart = months[0].clone().startOf('month')
-        .format('YYYY-MM-DD');
-    const firstEnd = months[0].format('YYYY-MM-DD');
+    const firstStart = months[0].startOf('month')
+        .toISODate();
+    const firstEnd = months[0].toISODate();
 
     return months
         .slice(1)
         .map(date => ({
-            start: `DATE('${date.clone().startOf('month')
-                .format('YYYY-MM-DD')}')`,
-            end: `DATE('${date.format('YYYY-MM-DD')}')`
+            start: `DATE('${date.startOf('month')
+                .toISODate()}')`,
+            end: `DATE('${date.toISODate()}')`
         }))
         .reduce(
             (last, { start, end }) => `${last} UNION SELECT ${start}, ${end}`,
@@ -208,9 +208,8 @@ function getMonthlyBalanceRows(db, user) {
 
 function getMonthlyBalance(rows, months) {
     const balance = months.map(month => {
-        const row = rows.find(({ date }) =>
-            date.getFullYear() === month.get('year') &&
-            date.getMonth() === month.get('month')
+        const row = rows.find(({ date }) => DateTime.fromJSDate(date)
+            .hasSame(month, 'month')
         );
 
         if (row) {
@@ -221,10 +220,10 @@ function getMonthlyBalance(rows, months) {
     });
 
     const { numZeroesAfter: zeroesSinceLastOld, values: oldValues } = rows
-        .map(({ date, ...row }) => ({ date: moment(date).endOf('month'), ...row }))
+        .map(({ date, ...row }) => ({ date: DateTime.fromJSDate(date).endOf('month'), ...row }))
         .filter(({ date }) => date < months[0])
         .reduce(({ values, ...last }, { date, value }) => {
-            const numZeroesAfter = Math.max(0, date.diff(months[0], 'months'));
+            const numZeroesAfter = Math.max(0, Math.round(date.diff(months[0]).as('months')));
 
             const rest = { date, numZeroesAfter };
 
@@ -232,7 +231,7 @@ function getMonthlyBalance(rows, months) {
                 return { ...rest, values: [value] };
             }
 
-            const gapSinceLast = date.diff(last.date, 'months') - 1;
+            const gapSinceLast = Math.round(date.diff(last.date).as('months')) - 1;
             if (gapSinceLast > 0) {
                 return {
                     ...rest,
@@ -296,7 +295,7 @@ function getTargets({ balance, old }, futureMonths) {
 }
 
 async function getData(config, db, user) {
-    const now = moment();
+    const now = DateTime.local();
 
     const {
         startYear, startMonth, numLast: pastMonths, numFuture: futureMonths
