@@ -3,7 +3,7 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import { AVERAGE_MEDIAN, AVERAGE_EXP, PAGES } from './const';
 import { getNow } from './date';
 
@@ -52,7 +52,7 @@ export class TransactionsList {
                 .map(item => {
                     return map({
                         id: ++this.idCount,
-                        date: moment(new Date(item.date)),
+                        date: DateTime.fromISO(item.date),
                         units: item.units,
                         cost: item.cost
                     });
@@ -68,7 +68,7 @@ export class TransactionsList {
     }
     format() {
         return this.list.map(item => item.delete('id')
-            .set('date', item.get('date').format('YYYY-MM-DD')))
+            .set('date', item.get('date').toISODate()))
             .toJS();
     }
     valueOf() {
@@ -134,9 +134,9 @@ export class TransactionsList {
 }
 
 export function dataEquals(item, compare) {
-    if (item instanceof moment) {
-        if (compare instanceof moment) {
-            return item.isSame(compare);
+    if (item instanceof DateTime) {
+        if (compare instanceof DateTime) {
+            return item.hasSame(compare, 'day');
         }
 
         return false;
@@ -150,7 +150,7 @@ export function dataEquals(item, compare) {
 
             return item.list.reduce((equal, listItem, key) => {
                 return equal &&
-                    listItem.get('date').isSame(compare.list.getIn([key, 'date'])) &&
+                    listItem.get('date').hasSame(compare.list.getIn([key, 'date']), 'day') &&
                     listItem.get('units') === compare.list.getIn([key, 'units']) &&
                     listItem.get('cost') === compare.list.getIn([key, 'cost']);
 
@@ -235,8 +235,8 @@ export function getValueForTransmit(value) {
         return value;
     }
 
-    if (value instanceof moment) {
-        return value.format('YYYY-MM-DD');
+    if (value instanceof DateTime) {
+        return value.toISODate();
     }
 
     if (value instanceof TransactionsList) {
@@ -376,7 +376,7 @@ export function addWeeklyAverages(data, rows, page) {
     const firstDate = rows.first().getIn(['cols', dateKey]);
     const lastDate = rows.last().getIn(['cols', dateKey]);
 
-    const numWeeks = firstDate.diff(lastDate, 'days') / 7;
+    const numWeeks = firstDate.diff(lastDate).as('days') / 7;
 
     const weeklyAverage = numWeeks
         ? visibleTotal / numWeeks

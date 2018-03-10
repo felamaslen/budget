@@ -3,7 +3,7 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import moment from 'moment';
+import { DateTime } from 'luxon';
 
 import { PAGES, ERROR_LEVEL_WARN } from '../misc/const';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA } from '../misc/config';
@@ -73,7 +73,7 @@ export function rChangeEditable(reduction, { value }) {
 
 export function getInvalidInsertDataKeys(items) {
     const itemValid = item => {
-        if (item instanceof moment) {
+        if (item instanceof DateTime) {
             return true;
         }
 

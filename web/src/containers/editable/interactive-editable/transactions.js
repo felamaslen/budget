@@ -2,9 +2,8 @@ import React from 'react';
 import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { DATE_FORMAT_DISPLAY } from '../../../misc/config';
-import { dateInput } from '../../../misc/date';
 import { formatValue } from '../format';
+import { dateInput } from '../../../misc/date';
 
 export default class InteractiveEditableTransactions extends PureComponent {
     constructor(props) {
@@ -34,9 +33,9 @@ export default class InteractiveEditableTransactions extends PureComponent {
         this.inputAdd.cost.value = '';
     }
     onDateBlur(key, id) {
-        this.input.date[id].value = this.props.value.list
+        this.input.date[id].value = formatValue('date', this.props.value.list
             .getIn([key, 'date'])
-            .format(DATE_FORMAT_DISPLAY);
+        );
     }
     onDateChange(row, col, key, rawValue) {
         const value = dateInput(rawValue);
@@ -115,7 +114,7 @@ export default class InteractiveEditableTransactions extends PureComponent {
 
             return <tr key={id}>
                 <td>
-                    <input defaultValue={date.format(DATE_FORMAT_DISPLAY)} ref={dateRef}
+                    <input defaultValue={formatValue('date', date)} ref={dateRef}
                         onBlur={onDateChange}
                     />
                 </td>

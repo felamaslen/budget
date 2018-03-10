@@ -1,4 +1,4 @@
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const joi = require('joi');
 const { analysisDeepSchema } = require('../../../../schema');
 const common = require('../common');
@@ -12,8 +12,8 @@ function getPeriodCostDeep(db, user, now, params) {
 
     return db.select('item', `${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
         .from(category)
-        .where('date', '>=', startTime.format('YYYY-MM-DD'))
-        .andWhere('date', '<=', endTime.format('YYYY-MM-DD'))
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
         .andWhere('cost', '>', 0)
         .andWhere('uid', '=', user.uid)
         .groupBy('item', 'itemCol')
@@ -87,7 +87,7 @@ function routeGet(config, db) {
                 .json({ errorMessage: error.message });
         }
 
-        const results = await getPeriodCostDeep(db, req.user, moment(), value);
+        const results = await getPeriodCostDeep(db, req.user, DateTime.local(), value);
 
         const items = processDataResponse(results);
 

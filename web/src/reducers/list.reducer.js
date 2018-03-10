@@ -3,7 +3,6 @@
  */
 
 import { fromJS, List as list, Map as map } from 'immutable';
-import moment from 'moment';
 
 import { getFormattedHistory, getFundsCachedValue, getExtraRowProps } from './funds.reducer';
 import { PAGES, DATA_KEY_ABBR } from '../misc/const';

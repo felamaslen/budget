@@ -3,11 +3,9 @@
  */
 
 const { expect } = require('chai');
-const moment = require('moment');
+const { DateTime } = require('luxon');
 
 const analysis = require('../../../../src/routes/data/analysis/common');
-
-const TEST_DATE_FORMAT = 'YYYY-MM-DD';
 
 describe('/data/analysis/deep?', () => {
     describe('getCategoryColumn', () => {
@@ -26,50 +24,50 @@ describe('/data/analysis/deep?', () => {
 
     describe('periodCondition', () => {
         it('should get weekly periods', () => {
-            const now = moment(new Date('2017-09-04'));
+            const now = DateTime.fromISO('2017-09-04');
 
             const result = analysis.periodCondition(now, 'week');
 
-            expect(result.startTime.format(TEST_DATE_FORMAT)).to.equal('2017-09-03');
-            expect(result.endTime.format(TEST_DATE_FORMAT)).to.equal('2017-09-09');
-            expect(result.description).to.equal('Week beginning September 3rd, 2017');
+            expect(result.startTime.toISODate()).to.equal('2017-09-04');
+            expect(result.endTime.toISODate()).to.equal('2017-09-10');
+            expect(result.description).to.equal('Week beginning September 4, 2017');
 
             const result3 = analysis.periodCondition(now, 'week', 3);
 
-            expect(result3.startTime.format(TEST_DATE_FORMAT)).to.equal('2017-08-13');
-            expect(result3.endTime.format(TEST_DATE_FORMAT)).to.equal('2017-08-19');
-            expect(result3.description).to.equal('Week beginning August 13th, 2017');
+            expect(result3.startTime.toISODate()).to.equal('2017-08-14');
+            expect(result3.endTime.toISODate()).to.equal('2017-08-20');
+            expect(result3.description).to.equal('Week beginning August 14, 2017');
         });
 
         it('should get monthly periods', () => {
-            const now = moment(new Date('2017-09-04'));
+            const now = DateTime.fromISO('2017-09-04');
 
             const result = analysis.periodCondition(now, 'month');
 
-            expect(result.startTime.format(TEST_DATE_FORMAT)).to.equal('2017-09-01');
-            expect(result.endTime.format(TEST_DATE_FORMAT)).to.equal('2017-09-30');
+            expect(result.startTime.toISODate()).to.equal('2017-09-01');
+            expect(result.endTime.toISODate()).to.equal('2017-09-30');
             expect(result.description).to.equal('September 2017');
 
             const result10 = analysis.periodCondition(now, 'month', 10);
 
-            expect(result10.startTime.format(TEST_DATE_FORMAT)).to.equal('2016-11-01');
-            expect(result10.endTime.format(TEST_DATE_FORMAT)).to.equal('2016-11-30');
+            expect(result10.startTime.toISODate()).to.equal('2016-11-01');
+            expect(result10.endTime.toISODate()).to.equal('2016-11-30');
             expect(result10.description).to.equal('November 2016');
         });
 
         it('should get yearly periods', () => {
-            const now = moment(new Date('2017-09-04'));
+            const now = DateTime.fromISO('2017-09-04');
 
             const result = analysis.periodCondition(now, 'year');
 
-            expect(result.startTime.format(TEST_DATE_FORMAT)).to.equal('2017-01-01');
-            expect(result.endTime.format(TEST_DATE_FORMAT)).to.equal('2017-12-31');
+            expect(result.startTime.toISODate()).to.equal('2017-01-01');
+            expect(result.endTime.toISODate()).to.equal('2017-12-31');
             expect(result.description).to.equal('2017');
 
             const result10 = analysis.periodCondition(now, 'year', 5);
 
-            expect(result10.startTime.format(TEST_DATE_FORMAT)).to.equal('2012-01-01');
-            expect(result10.endTime.format(TEST_DATE_FORMAT)).to.equal('2012-12-31');
+            expect(result10.startTime.toISODate()).to.equal('2012-01-01');
+            expect(result10.endTime.toISODate()).to.equal('2012-12-31');
             expect(result10.description).to.equal('2012');
         });
     });

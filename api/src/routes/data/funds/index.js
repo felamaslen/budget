@@ -2,7 +2,7 @@
  * Funds routes
  */
 
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const funds = require('./common');
 const listCommon = require('../list.common');
 
@@ -126,7 +126,7 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
  */
 function routeGet(config, db) {
     return async (req, res) => {
-        const now = moment();
+        const now = DateTime.local();
 
         let addData = row => postProcessListRow(row);
 

@@ -1,6 +1,7 @@
 import React from 'react';
+import { DateTime } from 'luxon';
 import { formatCurrency } from '../../misc/format';
-import { DATE_FORMAT_DISPLAY } from '../../misc/config';
+import { LOCALE } from '../../misc/config';
 import { dateInput } from '../../misc/date';
 
 export function getEditValue(item, value, edited) {
@@ -29,7 +30,8 @@ export function getEditValue(item, value, edited) {
 export function formatValue(item, value) {
     if (item === 'date') {
         if (value) {
-            return value.format(DATE_FORMAT_DISPLAY);
+            return value.setLocale(LOCALE)
+                .toLocaleString(DateTime.DATE_SHORT);
         }
 
         return '';
@@ -60,7 +62,8 @@ export function getDefaultValue(item, value) {
     }
 
     if (item === 'date') {
-        return value.format(DATE_FORMAT_DISPLAY);
+        return value.setLocale(LOCALE)
+            .toLocaleString(DateTime.DATE_SHORT);
     }
 
     return String(value);

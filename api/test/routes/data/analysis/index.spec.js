@@ -5,7 +5,7 @@
 const chai = require('chai');
 chai.use(require('sinon-chai'));
 const { expect } = chai;
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const { prepareMockDb } = require('../../../test.common');
 const analysis = require('../../../../src/routes/data/analysis');
 
@@ -34,7 +34,7 @@ describe('/data/analysis', () => {
             const user = { uid: 1 };
 
             const result = await analysis.getPeriodCostForCategory(
-                db, user, moment('2015'), moment('2016'), 'food', 'category');
+                db, user, DateTime.fromObject({ year: 2015 }), DateTime.fromObject({ year: 2016 }), 'food', 'category');
 
             expect(result).to.deep.equal([
                 { itemCol: 'f', cost: 10 },
@@ -121,7 +121,7 @@ describe('/data/analysis', () => {
 
                 const params = { period: 'year' };
 
-                const condition = { startTime: moment(new Date('2016-01-01')) };
+                const condition = { startTime: DateTime.fromISO('2016-01-01') };
 
                 const expectedResult = [
                     ...new Array(31 + 29 + 31 + 3).fill([]),
@@ -160,7 +160,7 @@ describe('/data/analysis', () => {
 
                 const params = { period: 'month' };
 
-                const condition = { startTime: moment(new Date('2016-12-01')) };
+                const condition = { startTime: DateTime.fromISO('2016-12-01') };
 
                 const expectedResult = [
                     ...new Array(5).fill([]),
@@ -252,7 +252,7 @@ describe('/data/analysis', () => {
 
         it('should get cost data and a period description', async () => {
             const user = { uid: 1 };
-            const now = moment(new Date('2018-03-04'));
+            const now = DateTime.fromISO('2018-03-04');
             const params = { period: 'month', groupBy: 'category', pageIndex: 0 };
 
             const result = await analysis.getPeriodCost(db, user, now, params);

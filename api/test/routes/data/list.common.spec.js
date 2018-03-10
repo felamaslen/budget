@@ -1,18 +1,15 @@
 const { expect } = require('chai');
 const { prepareMockDb } = require('../../test.common');
-const moment = require('moment');
+const { DateTime } = require('luxon');
 
-const common = require('../../test.common');
 const listCommon = require('../../../src/routes/data/list.common');
 
 const { db, tracker } = prepareMockDb();
 
-const TEST_DATE_FORMAT = 'YYYY-MM-DD';
-
 describe('Common list data functions', () => {
     describe('getLimitCondition', () => {
         it('should return a valid limit condition', () => {
-            const now = moment(new Date('2017-09-04'));
+            const now = DateTime.fromISO('2017-09-04');
             const numMonths = 3;
 
             const result = listCommon.getLimitCondition(now, { numMonths });
@@ -20,7 +17,7 @@ describe('Common list data functions', () => {
             expect(Object.keys(result).reduce((items, key) => ({
                 ...items,
                 [key]: result[key]
-                    ? result[key].format(TEST_DATE_FORMAT)
+                    ? result[key].toISODate()
                     : null
             }), {}))
                 .to.deep.equal({
@@ -29,7 +26,7 @@ describe('Common list data functions', () => {
                 });
         });
         it('should handle pagination', () => {
-            const now = moment(new Date('2017-09-03'));
+            const now = DateTime.fromISO('2017-09-03');
             const numMonths = 5;
             const offset = 1;
 
@@ -38,7 +35,7 @@ describe('Common list data functions', () => {
             expect(Object.keys(result).reduce((items, key) => ({
                 ...items,
                 [key]: result[key]
-                    ? result[key].format(TEST_DATE_FORMAT)
+                    ? result[key].toISODate()
                     : null
             }), {}))
                 .to.deep.equal({
@@ -67,7 +64,7 @@ describe('Common list data functions', () => {
         it('should return the correct query', () => {
             const user = { uid: 1 };
             const table = 'food';
-            const startDate = moment('2017-07-01');
+            const startDate = DateTime.fromISO('2017-07-01');
 
             listCommon.getOlderExists(db, user, table, { startDate });
         });

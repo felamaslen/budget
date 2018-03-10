@@ -1,6 +1,6 @@
 const joi = require('joi');
 const { analysisSchema } = require('../../../schema');
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const merge = require('deepmerge');
 const { periodCondition, getCategoryColumn } = require('./common');
 
@@ -11,8 +11,8 @@ function getPeriodCostForCategory(db, user, startTime, endTime, category, groupB
 
     return db.select(`${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
         .from(category)
-        .where('date', '>=', startTime.format('YYYY-MM-DD'))
-        .andWhere('date', '<=', endTime.format('YYYY-MM-DD'))
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
         .andWhere('uid', '=', user.uid)
         .groupBy('itemCol');
 }
@@ -53,13 +53,10 @@ function processTimelineData(data, params, condition) {
     const { startTime } = condition;
 
     if (period === 'year') {
-        const start = startTime.clone()
-            .add(-1, 'month');
-
-        const year = startTime.get('year');
+        const year = startTime.year;
 
         return new Array(12).fill(0)
-            .map(() => start.add(1, 'month').daysInMonth())
+            .map((item, index) => startTime.plus({ months: index }).daysInMonth)
             .reduce((items, daysInMonth, month) => {
                 if (year in rowsByDate && month in rowsByDate[year]) {
                     return [...items, ...new Array(daysInMonth).fill(0)
@@ -72,10 +69,9 @@ function processTimelineData(data, params, condition) {
     }
 
     if (period === 'month') {
-        const daysInMonth = startTime.daysInMonth();
-
-        const year = startTime.get('year');
-        const month = startTime.get('month');
+        const daysInMonth = startTime.daysInMonth;
+        const year = startTime.year;
+        const month = startTime.month - 1;
 
         return new Array(daysInMonth).fill(0)
             .map((item, key) => {
@@ -99,8 +95,8 @@ async function getPeriodCost(db, user, now, params) {
 
     const incomeQuery = db.select(db.raw('SUM(cost) AS cost'))
         .from('income')
-        .where('date', '>=', startTime.format('YYYY-MM-DD'))
-        .andWhere('date', '<=', endTime.format('YYYY-MM-DD'))
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
         .andWhere('uid', '=', user.uid);
 
     const costQueries = Promise.all(CATEGORIES.map(category =>
@@ -110,8 +106,8 @@ async function getPeriodCost(db, user, now, params) {
     const timelineQueries = Promise.all(CATEGORIES.map(category => db
         .select('date', db.raw('SUM(cost) AS cost'))
         .from(category)
-        .where('date', '>=', startTime.format('YYYY-MM-DD'))
-        .andWhere('date', '<=', endTime.format('YYYY-MM-DD'))
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
         .andWhere('uid', '=', user.uid)
         .groupBy('date')
     ));
@@ -188,7 +184,7 @@ function routeGet(config, db) {
                 .json({ errorMessage: error.message });
         }
 
-        const data = await getPeriodCost(db, req.user, moment(), value);
+        const data = await getPeriodCost(db, req.user, DateTime.local(), value);
 
         return res.json({ data });
     };

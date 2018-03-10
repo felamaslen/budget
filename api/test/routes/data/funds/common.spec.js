@@ -7,31 +7,29 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const { prepareMockDb } = require('../../../test.common');
 const md5 = require('md5');
-const moment = require('moment');
+const { DateTime } = require('luxon');
 
 const funds = require('../../../../src/routes/data/funds/common');
-
-const TEST_DATETIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 const { db } = prepareMockDb();
 
 describe('/data/funds', () => {
     describe('getMaxAge', () => {
         it('should return the correct timestamp', () => {
-            const now = moment(new Date('2017-09-05'));
+            const now = DateTime.fromISO('2017-09-05');
 
-            expect(funds.getMaxAge(now, 'year', 1)).to.be.equal(
-                moment(new Date('2016-09-05')).format(TEST_DATETIME_FORMAT));
+            expect(funds.getMaxAge(now, 'year', 1)).to.equal(
+                DateTime.fromISO('2016-09-05').toSQL({ includeOffset: false }));
 
-            expect(funds.getMaxAge(now, 'year', 3)).to.be.equal(
-                moment(new Date('2014-09-05')).format(TEST_DATETIME_FORMAT));
+            expect(funds.getMaxAge(now, 'year', 3)).to.equal(
+                DateTime.fromISO('2014-09-05').toSQL({ includeOffset: false }));
 
-            expect(funds.getMaxAge(now, 'month', 6)).to.be.equal(
-                moment(new Date('2017-03-05 01:00')).format(TEST_DATETIME_FORMAT));
+            expect(funds.getMaxAge(now, 'month', 6)).to.equal(
+                DateTime.fromISO('2017-03-05').toSQL({ includeOffset: false }));
         });
 
         it('should handle invalid parameters', () => {
-            const now = moment(new Date('2017-09-05'));
+            const now = DateTime.fromISO('2017-09-05');
 
             expect(funds.getMaxAge(now, 'year', 0)).to.equal(0);
             expect(funds.getMaxAge(now, 'foo')).to.equal(0);
@@ -88,7 +86,7 @@ describe('/data/funds', () => {
                     '25': 1,
                     '7': 2
                 },
-                startTime: moment(new Date('2017-04-03 14:23:49')).unix(),
+                startTime: Math.round(DateTime.fromISO('2017-04-03T14:23:49').ts / 1000),
                 times: [0, 1535772, 2405334, 2578037]
             };
 

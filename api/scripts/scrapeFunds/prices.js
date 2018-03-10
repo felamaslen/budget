@@ -1,4 +1,4 @@
-const moment = require('moment');
+const { DateTime } = require('luxon');
 const { getPriceFromDataHL } = require('./hl');
 
 function getPriceFromData(fund, data) {
@@ -57,7 +57,7 @@ async function insertNewSinglePriceCache(db, logger, cid, fund) {
 }
 
 async function insertNewPriceCache(db, logger, fundsWithPrices, now) {
-    const [cid] = await db.insert({ time: now.format('YYYY-MM-DD HH:mm:ss'), done: false })
+    const [cid] = await db.insert({ time: now.toSQL({ includeOffset: false }), done: false })
         .returning('cid')
         .into('fund_cache_time');
 
@@ -80,7 +80,7 @@ async function scrapeFundPrices(config, db, logger, funds, data) {
 
     logger.debug('Inserting prices into database');
 
-    await insertNewPriceCache(db, logger, fundsWithPrices, moment());
+    await insertNewPriceCache(db, logger, fundsWithPrices, DateTime.local());
 }
 
 module.exports = {

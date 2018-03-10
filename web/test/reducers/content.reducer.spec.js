@@ -117,7 +117,7 @@ describe('Content reducer', () => {
             const result = R.rHandleContentResponse(state, { response, page: 'funds' }, now);
 
             expect(result
-                .setIn(['edit', 'add', 'funds', 0], result.getIn(['edit', 'add', 'funds', 0]).format('YYYY-MM-DD'))
+                .setIn(['edit', 'add', 'funds', 0], result.getIn(['edit', 'add', 'funds', 0]).toISODate())
                 .toJS()
             )
                 .to.deep.equal({

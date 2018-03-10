@@ -16,7 +16,7 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
     }
 
     const now = getNow();
-    const currentMonthRatio = now.daysInMonth() / now.get('date');
+    const currentMonthRatio = now.daysInMonth / now.day;
 
     return cost.map((categoryCost, category) => {
         if (!futureCategories.includes(category)) {

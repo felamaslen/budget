@@ -1,3 +1,5 @@
+const { DateTime } = require('luxon');
+
 function getCategoryColumn(category, groupBy) {
     // get database column corresponding to "category" type
     if (category === 'bills') {
@@ -28,28 +30,28 @@ function getCategoryColumn(category, groupBy) {
 }
 
 function periodConditionWeekly(now, pageIndex = 0) {
-    const startTime = now.startOf('week').add(-pageIndex, 'weeks');
-    const endTime = startTime.clone().endOf('week');
+    const startTime = now.startOf('week').plus({ weeks: -pageIndex });
+    const endTime = startTime.endOf('week');
 
-    const description = `Week beginning ${startTime.format('MMMM Do, YYYY')}`;
+    const description = `Week beginning ${startTime.setLocale('en').toLocaleString(DateTime.DATE_FULL)}`;
 
     return { startTime, endTime, description };
 }
 
 function periodConditionMonthly(now, pageIndex = 0) {
-    const startTime = now.startOf('month').add(-pageIndex, 'months');
-    const endTime = startTime.clone().endOf('month');
+    const startTime = now.startOf('month').plus({ months: -pageIndex });
+    const endTime = startTime.endOf('month');
 
-    const description = `${startTime.format('MMMM YYYY')}`;
+    const description = startTime.toFormat('MMMM yyyy');
 
     return { startTime, endTime, description };
 }
 
 function periodConditionYearly(now, pageIndex = 0) {
-    const startTime = now.startOf('year').add(-pageIndex, 'years');
-    const endTime = startTime.clone().endOf('year');
+    const startTime = now.startOf('year').plus({ years: -pageIndex });
+    const endTime = startTime.endOf('year');
 
-    const description = startTime.format('YYYY');
+    const description = startTime.toFormat('yyyy');
 
     return { startTime, endTime, description };
 }
