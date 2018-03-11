@@ -1,72 +1,79 @@
+const joi = require('joi');
+const { analysisSchema } = require('../../../schema');
+const { DateTime } = require('luxon');
 const merge = require('deepmerge');
-const common = require('./common');
+const { periodCondition, getCategoryColumn } = require('./common');
 
-const { monthLength } = require('../../../common');
+const CATEGORIES = ['bills', 'food', 'general', 'holiday', 'social'];
 
-function getPeriodCostForCategory(db, user, condition, category, groupBy) {
-    const categoryColumn = common.getCategoryColumn(category, groupBy);
+function getPeriodCostForCategory(db, user, startTime, endTime, category, groupBy) {
+    const categoryColumn = getCategoryColumn(category, groupBy);
 
-    return db.query(`
-    SELECT ${categoryColumn} AS itemCol, SUM(cost) AS cost
-    FROM ${category}
-    WHERE ${condition} AND uid = ?
-    GROUP BY itemCol
-    `, user.uid);
+    return db.select(`${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
+        .from(category)
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
+        .andWhere('uid', '=', user.uid)
+        .groupBy('itemCol');
 }
 
 function getRowsByDate(results) {
-    return results.reduce((obj, rows, groupKey) => {
-        if (!(rows && Array.isArray(rows))) {
-            return obj;
-        }
-
-        return rows.reduce((subObj, { year, month, date, cost }) => {
+    return results.reduce((items, rows, categoryKey) => {
+        return rows.reduce((itemsByDate, { date, cost }) => {
             const value = Math.max(0, cost);
 
-            let preceding = [];
-            if (!(year in subObj && month in subObj[year] && date in subObj[year][month]) && groupKey > 0) {
-                preceding = new Array(groupKey).fill(0);
-            }
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const index = date.getDate();
 
-            return merge(subObj, {
+            const havePreceding = categoryKey === 0 || (year in itemsByDate &&
+                month in itemsByDate[year] &&
+                index in itemsByDate[year][month]);
+
+            const preceding = havePreceding
+                ? []
+                : new Array(categoryKey).fill(0);
+
+            return merge(itemsByDate, {
                 [year]: {
                     [month]: {
-                        [date]: [...preceding, value]
+                        [index]: [...preceding, value]
                     }
                 }
             });
 
-        }, obj);
-
+        }, items);
     }, {});
 }
 
-function processTimelineData(results, period, params) {
-    const rowsByDate = getRowsByDate(results);
+function processTimelineData(data, params, condition) {
+    const rowsByDate = getRowsByDate(data);
+
+    const { period } = params;
+    const { startTime } = condition;
 
     if (period === 'year') {
-        const { year } = params;
-        const monthLengths = new Array(12).fill(0)
-            .map((month, key) => monthLength(year, key + 1));
+        const year = startTime.year;
 
-        return monthLengths.reduce((items, length, key) => {
-            const month = key + 1;
+        return new Array(12).fill(0)
+            .map((item, index) => startTime.plus({ months: index }).daysInMonth)
+            .reduce((items, daysInMonth, month) => {
+                if (year in rowsByDate && month in rowsByDate[year]) {
+                    return [...items, ...new Array(daysInMonth).fill(0)
+                        .map((itemDate, dateKey) => rowsByDate[year][month][dateKey + 1] || [])];
+                }
 
-            if (year in rowsByDate && month in rowsByDate[year]) {
-                return items.concat(new Array(length).fill(0)
-                    .map((itemDate, dateKey) => rowsByDate[year][month][dateKey + 1] || []));
-            }
+                return [...items, ...new Array(daysInMonth).fill([])];
 
-            return items.concat(new Array(length).fill([]));
-
-        }, []);
+            }, []);
     }
 
     if (period === 'month') {
-        const { year, month } = params;
-        const length = monthLength(year, month);
+        const daysInMonth = startTime.daysInMonth;
+        const year = startTime.year;
+        const month = startTime.month - 1;
 
-        return new Array(length).fill(0)
+        return new Array(daysInMonth).fill(0)
             .map((item, key) => {
                 if (year in rowsByDate && month in rowsByDate[year]) {
                     return rowsByDate[year][month][key + 1] || [];
@@ -79,54 +86,51 @@ function processTimelineData(results, period, params) {
     return null;
 }
 
-async function getTimeline(db, user, now, period, pageIndex, { condition, ...params }, categories) {
-    const subQueries = categories
-        .map(category => `SELECT year, month, date, SUM(cost) AS cost
-        FROM ${category}
-        WHERE ${condition} AND uid = ${user.uid}
-        GROUP BY year, month, date`);
+async function getPeriodCost(db, user, now, params) {
+    const { period, groupBy, pageIndex } = params;
 
-    const results = await Promise.all(subQueries.map(query => db.query(query)));
+    const condition = periodCondition(now, period, pageIndex);
 
-    return processTimelineData(results, period, params);
-}
+    const { startTime, endTime, description } = condition;
 
-async function getPeriodCost(db, user, now, period, groupBy, pageIndex) {
-    const queryCondition = common.periodCondition(now, period, pageIndex);
+    const incomeQuery = db.select(db.raw('SUM(cost) AS cost'))
+        .from('income')
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
+        .andWhere('uid', '=', user.uid);
 
-    const categories = ['bills', 'food', 'general', 'holiday', 'social'];
+    const costQueries = Promise.all(CATEGORIES.map(category =>
+        getPeriodCostForCategory(db, user, startTime, endTime, category, groupBy)
+    ));
 
-    const incomeQuery = db.query(`SELECT SUM(cost) AS cost
-    FROM income
-    WHERE uid = ? AND ${queryCondition.condition}`, user.uid);
+    const timelineQueries = Promise.all(CATEGORIES.map(category => db
+        .select('date', db.raw('SUM(cost) AS cost'))
+        .from(category)
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
+        .andWhere('uid', '=', user.uid)
+        .groupBy('date')
+    ));
 
-    const results = await Promise.all([
-        incomeQuery,
-        ...categories.map(category => getPeriodCostForCategory(
-            db, user, queryCondition.condition, category, groupBy
-        ))
-    ]);
+    const results = await Promise.all([incomeQuery, costQueries, timelineQueries]);
 
-    const cost = results
-        .slice(1)
-        .map((result, key) => [
-            categories[key],
-            result.map(item => [item.itemCol, item.cost])
-        ]);
+    const [{ cost: income }] = results[0];
+    const costs = results[1];
+    const timelineData = results[2];
 
-    let income = null;
-    if (Array.isArray(results[0])) {
-        income = results[0].reduce((sum, item) => sum + item.cost, 0);
-    }
+    const itemCost = costs.map((rows, key) => ([
+        CATEGORIES[key],
+        rows.map(({ itemCol, cost }) => [itemCol, Number(cost)])
+    ]));
 
-    const totalCost = results.slice(1).reduce((sum, result) =>
-        result.reduce((resultSum, item) => resultSum + item.cost, sum), 0);
+    const totalCost = costs.reduce((sum, result) =>
+        result.reduce((resultSum, { cost }) => resultSum + Number(cost), sum), 0);
 
-    const saved = Math.max(0, income - totalCost);
+    const saved = Math.max(0, Number(income) - totalCost);
 
-    const timeline = await getTimeline(db, user, now, period, pageIndex, queryCondition, categories);
+    const timeline = processTimelineData(timelineData, params, condition);
 
-    return { timeline, cost, saved, description: queryCondition.description };
+    return { timeline, cost: itemCost, saved, description };
 }
 
 /**
@@ -171,22 +175,19 @@ async function getPeriodCost(db, user, now, period, groupBy, pageIndex) {
  *                                         type: array
  *                                         example: ["bills", [6500, 12300]]
  */
-async function routeGet(req, res) {
-    const params = [
-        req.params.period,
-        req.params.groupBy,
-        +(req.params.pageIndex || 0)
-    ];
+function routeGet(config, db) {
+    return async (req, res) => {
+        const { error, value } = joi.validate(req.params, analysisSchema);
 
-    const validationStatus = common.validateParams(...params);
+        if (error) {
+            return res.status(400)
+                .json({ errorMessage: error.message });
+        }
 
-    if (!validationStatus.isValid) {
-        return common.handlerInvalidParams(req, res);
-    }
+        const data = await getPeriodCost(db, req.user, DateTime.local(), value);
 
-    const result = await getPeriodCost(req.db, req.user, new Date(), ...params);
-
-    return common.handlerValidResult(req, res, result);
+        return res.json({ data });
+    };
 }
 
 module.exports = {

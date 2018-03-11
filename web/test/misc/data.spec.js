@@ -7,7 +7,7 @@ import itEach from 'it-each';
 itEach();
 import { fromJS, List as list } from 'immutable';
 import * as M from '../../src/misc/data';
-import { YMD } from '../../src/misc/date';
+import { dateInput } from '../../src/misc/date';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/misc/const';
 
 describe('misc/data', () => {
@@ -39,101 +39,16 @@ describe('misc/data', () => {
             expect(M.uuid(0.99123, true)).to.equal(130497);
         });
     });
-    describe('TransactionsList', () => {
-        const lists = [
-            {
-                tList: new M.TransactionsList([
-                    { d: '10/11/2017', u: 5, c: 3 }, // eslint-disable-line id-length
-                    { d: '4/3/2018', u: -2, c: -4 }, // eslint-disable-line id-length
-                    { d: '1/5/2018', u: -3, c: -1 } // eslint-disable-line id-length
-                ]),
-                size: 3,
-                string: [
-                    { year: 2017, month: 11, date: 10, units: 5, cost: 3 },
-                    { year: 2018, month: 3, date: 4, units: -2, cost: -4 },
-                    { year: 2018, month: 5, date: 1, units: -3, cost: -1 }
-                ],
-                value: fromJS([
-                    { id: 1, date: new YMD('10/11/2017'), units: 5, cost: 3 },
-                    { id: 2, date: new YMD('4/3/2018'), units: -2, cost: -4 },
-                    { id: 3, date: new YMD('1/5/2018'), units: -3, cost: -1 }
-                ]),
-                maxId: 3,
-                totalUnits: 0,
-                totalCost: -2,
-                lastUnits: 3,
-                lastCost: -1,
-                sold: true
-            },
-            {
-                tList: new M.TransactionsList(fromJS([
-                    { id: 1, date: new YMD('10/11/2017'), units: 5, cost: 3 },
-                    { id: 5, date: new YMD('4/3/2018'), units: -2, cost: -4 }
-                ]), false),
-                size: 2,
-                string: [
-                    { year: 2017, month: 11, date: 10, units: 5, cost: 3 },
-                    { year: 2018, month: 3, date: 4, units: -2, cost: -4 }
-                ],
-                value: fromJS([
-                    { id: 1, date: new YMD('10/11/2017'), units: 5, cost: 3 },
-                    { id: 5, date: new YMD('4/3/2018'), units: -2, cost: -4 }
-                ]),
-                maxId: 5,
-                totalUnits: 3,
-                totalCost: -1,
-                lastUnits: 3,
-                lastCost: -1,
-                sold: false
-            }
-        ];
-
-        it.each(lists, 'should set a size parameter', ({ tList, size }) => {
-            expect(tList.size).to.equal(size);
-        });
-
-        it.each(lists, 'should be serialisable', ({ tList, string }) => {
-            expect(tList.toString()).to.deep.equal(string);
-        });
-
-        it.each(lists, 'should return their list as valueOf()', ({ tList, value }) => {
-            expect(tList.valueOf()).to.deep.equal(value);
-        });
-
-        it.each(lists, 'should be able to get their maxId', ({ tList, maxId }) => {
-            expect(tList.maxId()).to.equal(maxId);
-        });
-
-        it.each(lists, 'should be able to get total units', ({ tList, totalUnits }) => {
-            expect(tList.getTotalUnits()).to.equal(totalUnits);
-        });
-
-        it.each(lists, 'should be able to get total cost', ({ tList, totalCost }) => {
-            expect(tList.getTotalCost()).to.equal(totalCost);
-        });
-
-        it.each(lists, 'should be able to get units up to when sold', ({ tList, lastUnits }) => {
-            expect(tList.getLastUnits()).to.equal(lastUnits);
-        });
-
-        it.each(lists, 'should be able to get cost up to when sold', ({ tList, lastCost }) => {
-            expect(tList.getLastCost()).to.equal(lastCost);
-        });
-
-        it.each(lists, 'should be able to get sold status', ({ tList, sold }) => {
-            expect(tList.isSold()).to.equal(sold);
-        });
-    });
     describe('dataEquals', () => {
         it('should compare YMDs', () => {
-            expect(M.dataEquals(new YMD([2017, 9, 1]), new YMD('1/9/17'))).to.equal(true);
-            expect(M.dataEquals(new YMD([2017, 9, 1]), new YMD('2/9/17'))).to.equal(false);
+            expect(M.dataEquals(dateInput('1/9/17'), dateInput('1/9/17'))).to.equal(true);
+            expect(M.dataEquals(dateInput('1/9/17'), dateInput('2/9/17'))).to.equal(false);
         });
         it('should compare TransactionsLists', () => {
-            const testList1 = new M.TransactionsList([{ 'd': '1/9/17', 'u': 2.5, 'c': 1 }]);
-            const testList2 = new M.TransactionsList([{ 'd': '2/9/17', 'u': 1, 'c': 1 }]);
-            const testList3 = new M.TransactionsList([{ 'd': '2017-09-01', 'u': 2.5, 'c': 1 }]);
-            const testList4 = new M.TransactionsList([{ 'd': '1/9/17', 'u': 1, 'c': 1 }]);
+            const testList1 = new M.TransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
+            const testList2 = new M.TransactionsList([{ date: '2017-09-02', units: 1, cost: 1 }]);
+            const testList3 = new M.TransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
+            const testList4 = new M.TransactionsList([{ date: '2017-09-01', units: 1, cost: 1 }]);
 
             expect(M.dataEquals(testList1, testList1)).to.equal(true);
             expect(M.dataEquals(testList1, testList2)).to.equal(false);
@@ -206,15 +121,13 @@ describe('misc/data', () => {
         });
 
         it('should return serialised dates', () => {
-            expect(M.getValueForTransmit(new YMD('2017-10-11'))).to.deep.equal({
-                year: 2017, month: 10, date: 11
-            });
+            expect(M.getValueForTransmit(dateInput('11/10/17'))).to.equal('2017-10-11');
         });
 
         it('should return serialised transactions lists', () => {
-            expect(M.getValueForTransmit(new M.TransactionsList([{ 'd': '2017-10-11', 'u': 1, 'c': 2 }])))
+            expect(M.getValueForTransmit(new M.TransactionsList([{ date: '2017-10-11', units: 1, cost: 2 }])))
                 .to.deep.equal([
-                    { year: 2017, month: 10, date: 11, cost: 2, units: 1 }
+                    { date: '2017-10-11', cost: 2, units: 1 }
                 ]);
         });
 
@@ -252,127 +165,74 @@ describe('misc/data', () => {
             });
         });
     });
-    describe('getAddDefaultValues', () => {
-        const pages = {
-            funds: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                {
-                    idCount: 0,
-                    list: list.of(),
-                    size: 0
-                },
-                0
-            ],
-            income: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                0
-            ],
-            bills: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                0
-            ],
-            food: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                '',
-                0,
-                ''
-            ],
-            general: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                '',
-                0,
-                ''
-            ],
-            holiday: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                '',
-                0,
-                ''
-            ],
-            social: [
-                { year: 2017, month: 10, date: 14, valid: true },
-                '',
-                '',
-                0,
-                ''
-            ]
-        };
-
-        it.each(Object.keys(pages), 'should return the appropriate value for each page', page => {
-            const result = M.getAddDefaultValues(page);
-
-            expect(result.toJS()).to.deep.equal(pages[page]);
-        });
-    });
     describe('sortRowsByDate', () => {
         it('should sort rows by date and add a daily column', () => {
             const rows = fromJS({
                 1: {
-                    cols: [new YMD('2017-10-11'), 'foo1', 'bar1', 3]
+                    cols: [dateInput('11/10/17'), 'foo1', 'bar1', 3]
                 },
                 4: {
-                    cols: [new YMD('2017-10-10'), 'foo4', 'bar4', 1]
+                    cols: [dateInput('10/10/17'), 'foo4', 'bar4', 1]
                 },
                 2: {
-                    cols: [new YMD('2017-10-11'), 'foo2', 'bar2', 5]
+                    cols: [dateInput('11/10/17'), 'foo2', 'bar2', 5]
                 },
                 3: {
-                    cols: [new YMD('2017-10-12'), 'foo3', 'bar3', 11]
+                    cols: [dateInput('12/10/17'), 'foo3', 'bar3', 11]
                 }
             });
 
             const result = M.sortRowsByDate(rows, 'food');
 
-            expect(result.toJS()).to.deep.equal({
-                3: {
-                    cols: [
-                        { year: 2017, month: 10, date: 12, valid: true },
-                        'foo3',
-                        'bar3',
-                        11
-                    ],
-                    daily: 11,
-                    'first-present': false,
-                    future: false
-                },
-                2: {
-                    cols: [
-                        { year: 2017, month: 10, date: 11, valid: true },
-                        'foo2',
-                        'bar2',
-                        5
-                    ],
-                    'first-present': false,
-                    future: false
-                },
-                1: {
-                    cols: [
-                        { year: 2017, month: 10, date: 11, valid: true },
-                        'foo1',
-                        'bar1',
-                        3
-                    ],
-                    daily: 8,
-                    'first-present': false,
-                    future: false
-                },
-                4: {
-                    cols: [
-                        { year: 2017, month: 10, date: 10, valid: true },
-                        'foo4',
-                        'bar4',
-                        1
-                    ],
-                    'first-present': false,
-                    future: false
-                }
-            });
+            expect(result.map(item => item
+                .setIn(['cols', 0], item.getIn(['cols', 0]).toISODate())
+            )
+                .toJS()
+            )
+                .to.deep.equal({
+                    3: {
+                        cols: [
+                            '2017-10-12',
+                            'foo3',
+                            'bar3',
+                            11
+                        ],
+                        daily: 11,
+                        'first-present': false,
+                        future: false
+                    },
+                    2: {
+                        cols: [
+                            '2017-10-11',
+                            'foo2',
+                            'bar2',
+                            5
+                        ],
+                        'first-present': false,
+                        future: false
+                    },
+                    1: {
+                        cols: [
+                            '2017-10-11',
+                            'foo1',
+                            'bar1',
+                            3
+                        ],
+                        daily: 8,
+                        'first-present': false,
+                        future: false
+                    },
+                    4: {
+                        cols: [
+                            '2017-10-10',
+                            'foo4',
+                            'bar4',
+                            1
+                        ],
+                        'first-present': false,
+                        future: false
+                    }
+                });
         });
     });
     describe('addWeeklyAverages', () => {
@@ -386,15 +246,15 @@ describe('misc/data', () => {
             const rows = fromJS([
                 {
                     id: 1,
-                    cols: [new YMD('2017-10-22'), 'foo1', 'bar1', 3]
+                    cols: [dateInput('22/10/17'), 'foo1', 'bar1', 3]
                 },
                 {
                     id: 2,
-                    cols: [new YMD('2017-10-12'), 'foo2', 'bar2', 10]
+                    cols: [dateInput('12/10/17'), 'foo2', 'bar2', 10]
                 },
                 {
                     id: 3,
-                    cols: [new YMD('2017-10-11'), 'foo3', 'bar3', 9]
+                    cols: [dateInput('11/10/17'), 'foo3', 'bar3', 9]
                 }
             ]);
 

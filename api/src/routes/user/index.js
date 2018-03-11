@@ -1,82 +1,65 @@
 /**
- * User methods
+ * User route
  */
 
-const sha1 = require('sha1');
+const { Router } = require('express');
+const joi = require('joi');
+const { DateTime } = require('luxon');
+const { checkLoggedIn, genToken } = require('../../modules/auth');
 
-const config = require('../../config')();
-const Database = require('../../db');
+const errorStatus = (err, code) => {
+    const res = new Error(err.message);
+    res.statusCode = code;
 
-function userPinHash(pin, salt) {
-    return sha1(`${pin}${salt}`);
-}
+    return res;
+};
 
-function generateToken(pin) {
-    // just return the same hashed value as stored in the database
-    // in the future, this should generate a time-based token based on
-    // usernames / passwords
-    return userPinHash(pin, config.userHashSalt);
-}
+async function attemptLogin(db, req) {
+    const { error, value: { uid, pin } } = joi.validate(req.body, joi.object().keys({
+        uid: joi.number().integer(),
+        pin: joi.number().integer()
+            .min(1000)
+            .max(9999)
+            .required()
+    }));
 
-async function checkAuthToken(db, token) {
-    // validate authentication token against the database
-    const userResult = await db.query(`
-    SELECT uid, user AS name
-    FROM users
-    WHERE api_key = ?
-    LIMIT 1
-    `, token);
-
-    if (!userResult || !userResult.length) {
-        return null;
+    if (error) {
+        throw errorStatus(error, 400);
     }
 
-    return { uid: userResult[0].uid, name: userResult[0].name };
+    try {
+        const { name, uid: userId } = await checkLoggedIn(db, uid, pin);
+
+        return { name, ...genToken({ uid: userId, pin }) };
+    }
+    catch (err) {
+        return { name: null, uid: null, apiKey: null };
+    }
 }
 
-function processLoginRequest(req) {
-    const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+async function getIpLog(db, ip) {
+    const result = await db.select('time', 'count')
+        .from('ip_login_req')
+        .where('ip', '=', ip);
 
-    const pin = parseInt(req.body.pin, 10);
-    const hash = userPinHash(pin, config.userHashSalt);
+    if (result && result.length) {
+        return result[0];
+    }
 
-    const token = generateToken(pin);
-
-    return { ip, hash, token };
-}
-
-function findUser(db, hash) {
-    return db.query(`
-    SELECT uid, user AS name, api_key
-    FROM users
-    WHERE api_key = ?
-    LIMIT 1
-    `, hash);
-}
-
-function getIpLog(db, ip) {
-    return db.query(`
-    SELECT time, count
-    FROM ip_login_req
-    WHERE ip = ?
-    LIMIT 1
-    `, ip
-    );
+    return { time: 0, count: 0 };
 }
 
 function removeIpLog(db, ip) {
-    return db.query(`
-    DELETE FROM ip_login_req
-    WHERE ip = ?
-    `, ip);
+    return db('ip_login_req').where('ip', '=', ip)
+        .del();
 }
 
 function updateIpLog(db, ip, time, count) {
-    return db.query(`
+    return db.raw(`
     INSERT INTO ip_login_req (ip, time, count)
     VALUES(?, ?, ?)
     ON DUPLICATE KEY UPDATE time = ?, count = ?
-    `, ip, time, count, time, count);
+    `, [ip, time, count, time, count]);
 }
 
 function getNewBadLoginCount(oldCount, banned, logExpired, banExpired) {
@@ -97,93 +80,64 @@ function getNewBadLoginCount(oldCount, banned, logExpired, banExpired) {
     return oldCount + 1;
 }
 
-async function loginBanPreCheck(db, hash, ip) {
+async function loginBanCheck(config, db, logger, loggedIn, ip) {
     // ban IPs which try to brute force
-    const result = [await findUser(db, hash), await getIpLog(db, ip)];
+    const { time, count } = await getIpLog(db, ip);
 
-    const user = result[0][0] || null;
-    const log = result[1][0] || { count: 0, time: 0 };
+    const now = DateTime.local();
+    const lastLogTime = DateTime.fromJSDate(time);
 
-    const now = Math.floor(new Date().getTime() / 1000);
+    const logExpired = now - lastLogTime > config.user.banLimit;
+    const banExpired = now - lastLogTime > config.user.banTime;
 
-    const logExpired = now - log.time > config.user.banLimit;
-    const banExpired = now - log.time > config.user.banTime;
+    const banned = !banExpired && count >= config.user.banTries;
 
-    const banned = !banExpired && log.count >= config.user.banTries;
-
-    if (user && log.count > 0 && (!banned || banExpired)) {
+    if (loggedIn && count > 0 && (!banned || banExpired)) {
         // good login attempt; ban expired so remove log
         await removeIpLog(db, ip);
     }
 
-    if (!user) {
+    if (!loggedIn) {
         // handle a bad login attempt
-        const newCount = getNewBadLoginCount(log.count, banned, logExpired, banExpired);
+        const newCount = getNewBadLoginCount(count, banned, logExpired, banExpired);
 
-        await updateIpLog(db, ip, now, newCount);
+        await updateIpLog(db, ip, now.toSQL({ includeOffset: false }), newCount);
     }
 
-    return { user, banned };
+    if (banned) {
+        throw errorStatus(new Error(config.msg.errorIpBanned), 401);
+    }
 }
 
-function handleLoginStatus(req, res, loginStatus, token) {
-    if (loginStatus.banned) {
-        // IP is banned
-        return res
-            .status(401)
-            .json({
-                error: true,
-                errorMessage: config.msg.errorIpBanned
-            });
-    }
+function login(config, db, logger) {
+    return async (req, res) => {
+        try {
+            const response = await attemptLogin(db, req);
 
-    if (loginStatus.user) {
-        // logged in
-        let key = 'apiKey';
-        if (req.query.alpha) {
-            key = 'api_key';
+            const loggedIn = Boolean(response.uid);
+
+            const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+            await loginBanCheck(config, db, logger, loggedIn, ip);
+
+            if (loggedIn) {
+                return res.json(response);
+            }
+
+            return res.status(401)
+                .json({ errorMessage: config.msg.errorLoginBad });
         }
+        catch (err) {
+            const statusCode = err.statusCode || 500;
 
-        return res.json({
-            error: false,
-            [key]: token,
-            uid: loginStatus.user.uid,
-            name: loginStatus.user.name
-        });
-    }
-
-    // not logged in
-    return res
-        .status(401)
-        .json({
-            error: true,
-            errorMessage: config.msg.errorLoginBad
-        });
+            return res.status(statusCode)
+                .json({ errorMessage: err.message });
+        }
+    };
 }
 
-async function login(req, res) {
-    try {
-        const { ip, hash, token } = processLoginRequest(req);
-
-        const loginStatus = await loginBanPreCheck(req.db, hash, ip);
-
-        handleLoginStatus(req, res, loginStatus, token);
-    }
-    catch (err) {
-        res
-            .status(500)
-            .json({
-                error: true,
-                errorMessage: `${config.msg.errorServerDb}: ${err}`
-            });
-    }
-    finally {
-        await req.db.end(res);
-    }
-}
-
-function handler(app) {
-    app.use('/user/login', Database.dbMiddleware);
+function handler(config, db, logger) {
+    const router = new Router();
 
     /**
      * @swagger
@@ -240,21 +194,14 @@ function handler(app) {
      *                             type: string
      *                             example: Bad PIN
      */
-    app.post('/user/login', (req, res) => login(req, res));
+    router.post('/login', login(config, db, logger));
+
+    return router;
 }
 
 module.exports = {
-    userPinHash,
-    generateToken,
-    checkAuthToken,
-    processLoginRequest,
-    findUser,
-    getIpLog,
-    removeIpLog,
-    updateIpLog,
     getNewBadLoginCount,
-    loginBanPreCheck,
-    handleLoginStatus,
+    loginBanCheck,
     login,
     handler
 };

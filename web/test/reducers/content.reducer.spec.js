@@ -116,80 +116,84 @@ describe('Content reducer', () => {
 
             const result = R.rHandleContentResponse(state, { response, page: 'funds' }, now);
 
-            expect(result.toJS()).to.deep.equal({
-                loading: false,
-                pages: {
-                    funds: {
-                        cacheTimes: [191239],
-                        data: { numCols: 4, numRows: 0, total: 0 },
-                        rows: {},
-                        startTime: 1508533928
-                    }
-                },
-                pagesLoaded: { funds: true },
-                pagesRaw: {
-                    funds: {
-                        cacheTimes: [191239],
-                        data: [],
-                        startTime: 1508533928,
-                        total: 0
-                    }
-                },
-                other: {
-                    graphFunds: {
-                        cacheTimes: [191239],
-                        period: 'fooperiod',
-                        data: {
-                            fundItems: [
-                                {
-                                    color: [0, 0, 0],
-                                    enabled: true,
-                                    item: 'Overall'
-                                }
-                            ],
-                            fundLinesAll: [],
-                            fundLines: []
-                        },
-                        range: [0, 1772512],
-                        startTime: 1508533928,
-                        zoom: [0, 1772512]
-                    },
-                    fundHistoryCache: {
-                        fooperiod: {
+            expect(result
+                .setIn(['edit', 'add', 'funds', 0], result.getIn(['edit', 'add', 'funds', 0]).toISODate())
+                .toJS()
+            )
+                .to.deep.equal({
+                    loading: false,
+                    pages: {
+                        funds: {
                             cacheTimes: [191239],
+                            data: { numCols: 4, numRows: 0, total: 0 },
                             rows: {},
                             startTime: 1508533928
                         }
                     },
-                    fundsCachedValue: {
-                        ageText: '18 days, 7 hours ago',
-                        value: 0
-                    }
-                },
-                edit: {
-                    active: {
-                        row: -1,
-                        col: -1,
-                        id: null,
-                        item: null,
-                        originalValue: null,
-                        page: 'funds',
-                        value: null
+                    pagesLoaded: { funds: true },
+                    pagesRaw: {
+                        funds: {
+                            cacheTimes: [191239],
+                            data: [],
+                            startTime: 1508533928,
+                            total: 0
+                        }
                     },
-                    add: {
-                        funds: [
-                            { year: 2017, month: 10, date: 14, valid: true },
-                            '',
-                            {
-                                idCount: 0,
-                                list: fromJS([]),
-                                size: 0
+                    other: {
+                        graphFunds: {
+                            cacheTimes: [191239],
+                            period: 'fooperiod',
+                            data: {
+                                fundItems: [
+                                    {
+                                        color: [0, 0, 0],
+                                        enabled: true,
+                                        item: 'Overall'
+                                    }
+                                ],
+                                fundLinesAll: [],
+                                fundLines: []
                             },
-                            0
-                        ]
+                            range: [0, 1772512],
+                            startTime: 1508533928,
+                            zoom: [0, 1772512]
+                        },
+                        fundHistoryCache: {
+                            fooperiod: {
+                                cacheTimes: [191239],
+                                rows: {},
+                                startTime: 1508533928
+                            }
+                        },
+                        fundsCachedValue: {
+                            ageText: '18 days, 7 hours ago',
+                            value: 0
+                        }
+                    },
+                    edit: {
+                        active: {
+                            row: -1,
+                            col: -1,
+                            id: null,
+                            item: null,
+                            originalValue: null,
+                            page: 'funds',
+                            value: null
+                        },
+                        add: {
+                            funds: [
+                                '2018-01-22',
+                                '',
+                                {
+                                    idCount: 0,
+                                    list: fromJS([]),
+                                    size: 0
+                                },
+                                0
+                            ]
+                        }
                     }
-                }
-            });
+                });
         });
     });
 });

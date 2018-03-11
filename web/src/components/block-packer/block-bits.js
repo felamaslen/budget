@@ -55,13 +55,13 @@ BlockGroup.propTypes = {
     group: PropTypes.instanceOf(map).isRequired
 };
 
-export default function BlockBits({ page, block, activeMain, activeBlock, deepBlock, onClick, ...props }) {
+export default function BlockBits({ page, block, activeMain, activeBlock, deep, onClick, ...props }) {
     const name = block.get('name');
     const value = block.get('value');
 
     const className = classNames('block', `block-${block.get('color')}`, {
         active: activeMain && activeBlock[0] === name,
-        [`block-${name}`]: !deepBlock
+        [`block-${name}`]: !deep
     });
 
     const bits = block.get('blocks').map((group, key) => <BlockGroup
@@ -78,9 +78,9 @@ export default function BlockBits({ page, block, activeMain, activeBlock, deepBl
         height: block.get('height')
     };
 
-    const wasDeep = Boolean(deepBlock);
+    const wasDeep = Boolean(deep);
 
-    const onBlockClick = () => onClick({ page, name: block.get('name'), wasDeep });
+    const onBlockClick = () => onClick({ wasDeep, page, name: block.get('name') });
 
     return <div className={className} style={style}
         onClick={onBlockClick}>
@@ -94,7 +94,7 @@ BlockBits.propTypes = {
     activeMain: PropTypes.bool.isRequired,
     activeSub: PropTypes.bool.isRequired,
     activeBlock: PropTypes.array,
-    deepBlock: PropTypes.string,
+    deep: PropTypes.string,
     onHover: PropTypes.func.isRequired,
     onClick: PropTypes.func.isRequired
 };

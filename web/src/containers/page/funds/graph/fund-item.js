@@ -52,7 +52,7 @@ function onDraw({ minX, minY, maxY, data, popout }, { ctx, height }, { pixX, pix
 
     const { values: initialValues } = data
         .map(item => item.get(1))
-        .reduce(({ values, last }, value, index) => {
+        .reduce(({ values, last }, value) => {
             if (last === 0 && value > 0) {
                 return {
                     values: [...values, value],

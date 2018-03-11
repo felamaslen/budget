@@ -68,7 +68,6 @@ Note that the development variables are optional on a production environment.
 - `WEB_URL`: the URL to access the web app at, without trailing slash
 - `PIE_TOLERANCE`: minimum slice of pie charts to include on list data
 - `PIE_DETAIL`:  maximum number of pie slices to return on list data
-- `FUND_SALT`: the salt to hash fund names with when scraping prices
 - `FUND_RESOLUTION`: detail to include on fund price graph
 - `FUND_TEST_URL`: URL to an example fund for the scraper to test with
 - `FUND_TEST_URL_SHARE`: URL to an example share-type fund for the scraper to test with

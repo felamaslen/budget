@@ -2,8 +2,6 @@
  * Get all list data
  */
 
-const config = require('../../../config')();
-
 const routeGetOverview = require('../cashflow').routeGet;
 const routeGetFunds = require('../funds').routeGet;
 const routeGetIncome = require('../income').routeGet;
@@ -76,33 +74,23 @@ const ResponseMultiple = require('../../../responseMultiple');
  *                                     description: Holiday data
  *
  */
-async function routeGet(req, res) {
-    const tables = ['overview'].concat(config.data.listCategories);
+function routeGet(config, db) {
+    return async (req, res) => {
+        const categories = ['overview', ...config.data.listCategories];
 
-    req.db.requireForceToEnd = true;
+        const responses = categories.map(() => new ResponseMultiple());
 
-    const categories = ['overview'].concat(config.data.listCategories);
+        await Promise.all(categories.map((category, key) =>
+            routeGetCategory[category](config, db)(req, responses[key])
+        ));
 
-    const responses = categories.map(() => new ResponseMultiple());
+        const data = responses.reduce((items, result, key) => ({
+            ...items,
+            [categories[key]]: result.result.data
+        }), {});
 
-    const dataPromises = categories.map(
-        (category, key) => routeGetCategory[category](req, responses[key])
-    );
-
-    await Promise.all(dataPromises);
-
-    const data = responses.reduce((map, result, key) => {
-        map[tables[key]] = result.result.data;
-
-        return map;
-    }, {});
-
-    await req.db.end(null, true);
-
-    return res.json({
-        error: false,
-        data
-    });
+        return res.json({ data });
+    };
 }
 
 module.exports = {

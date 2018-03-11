@@ -1,16 +1,14 @@
 import React from 'react';
+import { DateTime } from 'luxon';
 import { formatCurrency } from '../../misc/format';
-import { YMD } from '../../misc/date';
+import { LOCALE } from '../../misc/config';
+import { dateInput } from '../../misc/date';
 
 export function getEditValue(item, value, edited) {
     if (item === 'date') {
-        const ymd = new YMD(edited);
+        const validInput = dateInput(edited);
 
-        if (ymd.valid) {
-            return ymd;
-        }
-
-        return value;
+        return validInput || value;
     }
 
     if (item === 'cost') {
@@ -32,7 +30,8 @@ export function getEditValue(item, value, edited) {
 export function formatValue(item, value) {
     if (item === 'date') {
         if (value) {
-            return value.format();
+            return value.setLocale(LOCALE)
+                .toLocaleString(DateTime.DATE_SHORT);
         }
 
         return '';
@@ -63,7 +62,8 @@ export function getDefaultValue(item, value) {
     }
 
     if (item === 'date') {
-        return value.format();
+        return value.setLocale(LOCALE)
+            .toLocaleString(DateTime.DATE_SHORT);
     }
 
     return String(value);

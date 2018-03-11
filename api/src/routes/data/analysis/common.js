@@ -1,5 +1,4 @@
-const common = require('../../../common');
-const config = require('../../../config')();
+const { DateTime } = require('luxon');
 
 function getCategoryColumn(category, groupBy) {
     // get database column corresponding to "category" type
@@ -30,141 +29,51 @@ function getCategoryColumn(category, groupBy) {
     return null;
 }
 
-function periodDescriptionWeekly(year, month, date) {
-    return `Week beginning ${config.months[month - 1]} ${date}, ${year}`;
+function periodConditionWeekly(now, pageIndex = 0) {
+    const startTime = now.startOf('week').plus({ weeks: -pageIndex });
+    const endTime = startTime.endOf('week');
+
+    const description = `Week beginning ${startTime.setLocale('en').toLocaleString(DateTime.DATE_FULL)}`;
+
+    return { startTime, endTime, description };
 }
 
-function periodConditionWeekly(beginningOfWeek, pageIndex = 0) {
-    const referenceTime = beginningOfWeek.getTime() - 86400 * 1000 * pageIndex * 7;
+function periodConditionMonthly(now, pageIndex = 0) {
+    const startTime = now.startOf('month').plus({ months: -pageIndex });
+    const endTime = startTime.endOf('month');
 
-    const dateTimeStart = new Date(referenceTime);
-    const dateTimeEnd = new Date(referenceTime + 86400 * 1000 * 6);
+    const description = startTime.toFormat('MMMM yyyy');
 
-    const yearStart = dateTimeStart.getFullYear();
-    const monthStart = dateTimeStart.getMonth() + 1;
-    const dateStart = dateTimeStart.getDate();
-
-    const yearEnd = dateTimeEnd.getFullYear();
-    const monthEnd = dateTimeEnd.getMonth() + 1;
-    const dateEnd = dateTimeEnd.getDate();
-
-    const condition = common.strip(`(
-        year > ${yearStart} OR (year = ${yearStart} AND (
-            month > ${monthStart} OR (month = ${monthStart} AND date >= ${dateStart})
-        ))
-    ) AND (
-        year < ${yearEnd} OR (year = ${yearEnd} AND (
-            month < ${monthEnd} OR (month = ${monthEnd} AND date <= ${dateEnd})
-        ))
-    )`);
-
-    const description = periodDescriptionWeekly(yearStart, monthStart, dateStart);
-
-    return { condition, description };
+    return { startTime, endTime, description };
 }
 
-function periodDescriptionMonthly(year, month) {
-    return `${config.months[month - 1]} ${year}`;
-}
+function periodConditionYearly(now, pageIndex = 0) {
+    const startTime = now.startOf('year').plus({ years: -pageIndex });
+    const endTime = startTime.endOf('year');
 
-function periodConditionMonthly(year, month, pageIndex = 0) {
-    const conditionYear = common.yearAddMonth(year, month, -pageIndex);
-    const conditionMonth = common.monthAdd(month, -pageIndex);
+    const description = startTime.toFormat('yyyy');
 
-    const condition = `year = ${conditionYear} AND month = ${conditionMonth}`;
-
-    const description = periodDescriptionMonthly(conditionYear, conditionMonth);
-
-    return { condition, description, year: conditionYear, month: conditionMonth };
-}
-
-function periodDescriptionYearly(year) {
-    return year.toString();
-}
-
-function periodConditionYearly(year, pageIndex = 0) {
-    const conditionYear = year - pageIndex;
-
-    const condition = `year = ${conditionYear}`;
-
-    const description = periodDescriptionYearly(conditionYear);
-
-    return { condition, description, year: conditionYear };
+    return { startTime, endTime, description };
 }
 
 function periodCondition(now, period, pageIndex = 0) {
     if (period === 'week') {
-        return periodConditionWeekly(common.getBeginningOfWeek(now), pageIndex);
+        return periodConditionWeekly(now, pageIndex);
     }
 
-    const year = now.getFullYear();
-
     if (period === 'month') {
-        const month = now.getMonth() + 1;
-
-        return periodConditionMonthly(year, month, pageIndex);
+        return periodConditionMonthly(now, pageIndex);
     }
 
     if (period === 'year') {
-        return periodConditionYearly(year, pageIndex);
+        return periodConditionYearly(now, pageIndex);
     }
 
-    return null;
-}
-
-function validateParams(period, groupBy, pageIndex, category = null) {
-    const allowedPeriods = ['week', 'month', 'year'];
-
-    if (allowedPeriods.indexOf(period) === -1) {
-        return { isValid: false, param: 'period' };
-    }
-
-    const allowedGroupby = ['shop', 'category'];
-
-    if (allowedGroupby.indexOf(groupBy) === -1) {
-        return { isValid: false, param: 'groupBy' };
-    }
-
-    if (isNaN(pageIndex) || pageIndex < 0) {
-        return { isValid: false, param: 'pageIndex' };
-    }
-
-    const allowedCategories = ['food', 'general', 'social', 'holiday'];
-    if (category && allowedCategories.indexOf(category) === -1) {
-        return { isValid: false, param: 'category' };
-    }
-
-    return { isValid: true };
-}
-
-async function handlerInvalidParams(req, res, validationStatus) {
-    await req.db.end();
-
-    return res
-        .status(400)
-        .json({
-            error: true,
-            errorMessage: `Invalid parameter value for ${validationStatus.param}`
-        });
-}
-
-async function handlerValidResult(req, res, result) {
-    await req.db.end();
-
-    return res.json({
-        error: false,
-        data: result
-    });
+    throw new Error('Invalid period parameter');
 }
 
 module.exports = {
     getCategoryColumn,
-    periodConditionWeekly,
-    periodConditionMonthly,
-    periodConditionYearly,
-    periodCondition,
-    validateParams,
-    handlerInvalidParams,
-    handlerValidResult
+    periodCondition
 };
 

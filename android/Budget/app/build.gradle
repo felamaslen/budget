@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         config {
+            keyAlias 'budget-key0'
+            keyPassword '!v@JrVB&Q25ZVbE'
+            storeFile file('../../budget.jks')
+            storePassword '!v@JrVB&Q25ZVbE'
         }
     }
     compileSdkVersion 25

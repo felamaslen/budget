@@ -79,7 +79,7 @@ public class Data {
                                                 double latestUnits = 0;
                                                 for (int i = 0; i < transactions.length(); i++) {
                                                         JSONObject transaction = transactions.getJSONObject(i);
-                                                        latestUnits += transaction.getDouble("u");
+                                                        latestUnits += transaction.getDouble("units");
                                                 }
 
                                                 int value = (int)(latestUnits * latestPrice);

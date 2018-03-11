@@ -17,7 +17,7 @@ describe('content.saga', () => {
 
         it('should call the API with the correct URL', () => {
             expect(result).to.deep.equal([
-                'api/v3/data/analysis/foo/bar/?bar=baz',
+                'api/v4/data/analysis/foo/bar/?bar=baz',
                 {
                     headers: { Authorization: 'some_api_key' }
                 }

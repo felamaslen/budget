@@ -30,7 +30,7 @@ BlockPacker.propTypes = {
     page: PropTypes.string.isRequired,
     blocks: PropTypes.instanceOf(list),
     activeBlock: PropTypes.array,
-    deepBlock: PropTypes.string,
+    deep: PropTypes.string,
     status: PropTypes.string,
     onClick: PropTypes.func.isRequired,
     onHover: PropTypes.func.isRequired

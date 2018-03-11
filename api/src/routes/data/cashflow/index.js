@@ -74,15 +74,12 @@ const updateBalance = require('./updateBalance');
  *                                     type: integer
  *                                     example: 9
  */
-async function routeGet(req, res) {
-    const data = await overview.getData(req.db, req.user);
+function routeGet(config, db) {
+    return async (req, res) => {
+        const data = await overview.getData(config, db, req.user);
 
-    await req.db.end();
-
-    return res.json({
-        error: false,
-        data
-    });
+        return res.json({ data });
+    };
 }
 
 /**
@@ -122,8 +119,8 @@ async function routeGet(req, res) {
  *                     $ref: "#/definitions/DataResponse"
  *
  */
-function routePost(req, res) {
-    return updateBalance.updateData(req, res);
+function routePost(config, db) {
+    return updateBalance.updateData(config, db, true);
 }
 
 /**
@@ -162,8 +159,8 @@ function routePost(req, res) {
  *                 schema:
  *                     $ref: "#/definitions/DataResponse"
  */
-function routePut(req, res) {
-    return updateBalance.updateData(req, res, false);
+function routePut(config, db) {
+    return updateBalance.updateData(config, db, false);
 }
 
 module.exports = {

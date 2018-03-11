@@ -1,38 +1,35 @@
+const { DateTime } = require('luxon');
+const joi = require('joi');
+const { analysisDeepSchema } = require('../../../../schema');
 const common = require('../common');
 
-async function getPeriodCostDeep(db, user, now, period, groupBy, pageIndex = 0, category) {
+function getPeriodCostDeep(db, user, now, params) {
+    const { period, groupBy, pageIndex, category } = params;
+
     const categoryColumn = common.getCategoryColumn(category, groupBy);
 
-    const queryCondition = common.periodCondition(now, period, pageIndex);
+    const { startTime, endTime } = common.periodCondition(now, period, pageIndex);
 
-    const result = await db.query(`
-    SELECT item, ${categoryColumn} AS itemCol, SUM(cost) AS cost
-    FROM ${category}
-    WHERE ${queryCondition.condition} AND uid = ? AND cost > 0
-    GROUP BY item, itemCol
-    ORDER BY itemCol
-    `, user.uid);
-
-    return result;
+    return db.select('item', `${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
+        .from(category)
+        .where('date', '>=', startTime.toISODate())
+        .andWhere('date', '<=', endTime.toISODate())
+        .andWhere('cost', '>', 0)
+        .andWhere('uid', '=', user.uid)
+        .groupBy('item', 'itemCol')
+        .orderBy('itemCol');
 }
 
 function processDataResponse(result) {
-    const resultObj = result
-        .reduce((obj, item) => {
-            if (item.itemCol in obj) {
-                obj[item.itemCol].push([item.item, item.cost]);
-            }
-            else {
-                obj[item.itemCol] = [[item.item, item.cost]];
-            }
+    const resultObj = result.reduce((obj, { itemCol, item, cost }) => {
+        if (itemCol in obj) {
+            return { ...obj, [itemCol]: [...obj[itemCol], [item, Number(cost)]] };
+        }
 
-            return obj;
-        }, {});
+        return { ...obj, [itemCol]: [[item, Number(cost)]] };
+    }, {});
 
-    return Object.keys(resultObj)
-        .map(itemCol => {
-            return [itemCol, resultObj[itemCol]];
-        });
+    return Object.keys(resultObj).map(itemCol => ([itemCol, resultObj[itemCol]]));
 }
 
 /**
@@ -81,25 +78,21 @@ function processDataResponse(result) {
  *                                     example: ["bills", [["Electricity", 6500], ["Water", 12300]]]
  *
  */
-async function routeGet(req, res) {
-    const params = [
-        req.params.period,
-        req.params.groupBy,
-        parseInt(req.params.pageIndex || 0, 10),
-        req.params.category
-    ];
+function routeGet(config, db) {
+    return async (req, res) => {
+        const { error, value } = joi.validate(req.params, analysisDeepSchema);
 
-    const validationStatus = common.validateParams(...params);
+        if (error) {
+            return res.status(400)
+                .json({ errorMessage: error.message });
+        }
 
-    if (!validationStatus.isValid) {
-        return common.handlerInvalidParams(req, res);
-    }
+        const results = await getPeriodCostDeep(db, req.user, DateTime.local(), value);
 
-    const items = await getPeriodCostDeep(req.db, req.user, new Date(), ...params);
+        const items = processDataResponse(results);
 
-    const result = { items: processDataResponse(items) };
-
-    return common.handlerValidResult(req, res, result);
+        return res.json({ data: { items } });
+    };
 }
 
 module.exports = {

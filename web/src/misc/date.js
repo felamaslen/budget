@@ -2,166 +2,57 @@
  * Date functions and classes
  */
 
-import { leadingZeroes } from './format';
-import { MONTHS_SHORT } from './const';
+import { DateTime } from 'luxon';
+import { MONTHS_SHORT, WEEK_DAYS } from './const';
 
-export function yearMonthDifference(ym1, ym2) {
-    return 12 * (ym2[0] - ym1[0]) + ym2[1] - ym1[1];
+export function getNow() {
+    if (process.env.NODE_ENV === 'test') {
+        return DateTime.fromISO('2018-01-22');
+    }
+
+    return DateTime.local();
 }
 
-function leapYear(year) {
-    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+export function yearMonthDifference([year1, month1], [year2, month2]) {
+    return 12 * (year2 - year1) + month2 - month1;
 }
-
-const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function pmod(number, denominator) {
     return ((number % denominator) + denominator) % denominator;
 }
 
-export function monthDays(month, year) {
-    if (month === 2) {
-        if (leapYear(year)) {
-            return 29;
-        }
+export function dateInput(input = null, validate = true) {
+    // get a DateTime object from something like "10/11" or just "3", for quick insertion of data
 
-        return 28;
+    if (!validate) {
+        return DateTime.fromISO(input);
     }
 
-    if (month < 8) {
-        return 30 + (month % 2);
-    }
+    const now = getNow();
 
-    return 30 + ((month + 1) % 2);
-}
+    if (input && input.match(/^[0-9]{1,2}(\/[0-9]{1,2}(\/[0-9]{2,4})?)?$/)) {
+        const [day, monthInput, yearShort] = input.split('/');
 
-// year-month-date class
-export class YMD {
-    constructor(value) {
-        const values = YMD.getValues(value);
-
-        this.valid = values !== null && values.year &&
-            values.month >= 1 && values.month <= 12 &&
-            values.date >= 1 && values.date <= monthDays(values.month, values.year);
-
-        if (this.valid) {
-            this.year = values.year;
-            this.month = values.month;
-            this.date = values.date;
-        }
-        else {
-            this.year = null;
-            this.month = null;
-            this.date = null;
-        }
-    }
-    static getYear(parts) {
-        if (parts.length === 3) {
-            if (parts[2] < 100) {
-                return parts[2] + 2000;
+        let year = now.year;
+        if (yearShort) {
+            if (yearShort.length === 2) {
+                year = Number(`20${yearShort}`);
             }
-
-            return parts[2];
+            else {
+                year = Number(yearShort);
+            }
         }
 
-        return new Date().getFullYear();
+        const month = Number(monthInput) || now.month;
+
+        return DateTime.fromObject({ year, month, day: Number(day) });
     }
-    static getValuesFromSlashString(value) {
-        // parse string initialiser
-        const parts = value.split('/').map(item => parseInt(item, 10));
 
-        const year = YMD.getYear(parts);
-        const month = parts[1];
-        const date = parts[0];
-
-        return { year, month, date };
-    }
-    static getValuesFromISOString(value) {
-        const parts = value.split('-').map(item => parseInt(item, 10));
-
-        const year = parts[0];
-        const month = parts[1];
-        const date = parts[2];
-
-        return { year, month, date };
-    }
-    static getValuesFromString(value) {
-        if (value.match(/^[0-9]{1,2}\/[0-9]{1,2}(\/[0-9]{2,4})?$/)) {
-            return YMD.getValuesFromSlashString(value);
-        }
-
-        if (value.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)) {
-            return YMD.getValuesFromISOString(value);
-        }
-
+    if (validate) {
         return null;
     }
-    static getValues(value) {
-        // process a constructor object / string into year/month/date values
-        if (typeof value === 'string') {
-            return YMD.getValuesFromString(value);
-        }
 
-        if (typeof value === 'object') {
-            const year = value[0];
-            const month = value[1];
-            const date = value[2];
-
-            return { year, month, date };
-        }
-
-        if (typeof value === 'undefined' || typeof value === 'number') {
-            let dateValue = value;
-            if (!value && process.env.NODE_ENV === 'test') {
-                dateValue = '2017-10-14';
-            }
-
-            const dateTime = dateValue
-                ? new Date(dateValue)
-                : new Date();
-
-            const year = dateTime.getFullYear();
-            const month = dateTime.getMonth() + 1;
-            const date = dateTime.getDate();
-
-            return { year, month, date };
-        }
-
-        return null;
-    }
-    formatNumbers() {
-        return [
-            leadingZeroes(this.year, 4),
-            leadingZeroes(this.month, 2),
-            leadingZeroes(this.date, 2)
-        ];
-    }
-    format() {
-        return this
-            .formatNumbers()
-            .reverse()
-            .join('/');
-    }
-    formatISO() {
-        return this
-            .formatNumbers()
-            .join('-');
-    }
-    valueOf() {
-        return this.timestamp();
-    }
-    toString() {
-        // this format gets passed to API POST / PUT requests (for e.g. updating)
-        return {
-            year: this.year,
-            month: this.month,
-            date: this.date
-        };
-    }
-    timestamp() {
-        return Math.floor(new Date(this.year, this.month - 1, this.date).getTime() / 1000);
-    }
-
+    return now;
 }
 
 class TimeTick {
