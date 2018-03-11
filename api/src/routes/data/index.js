@@ -1,7 +1,9 @@
 const { Router } = require('express');
 
-const { authMiddleware } = require('../../middleware/auth');
+const { authMiddleware } = require('../../modules/auth');
 const { routePatch: routeMultipleUpdate } = require('../../middleware/multipleUpdateRequest');
+
+const search = require('../search');
 
 const cashflow = require('./cashflow');
 const analysis = require('./analysis');
@@ -22,12 +24,14 @@ const dataAll = require('./all');
 const pie = require('./pie');
 const stocks = require('./stocks');
 
-function handler(config, db) {
+function handler(config, db, logger) {
     const router = new Router();
 
-    router.use('/*', authMiddleware(config, db));
+    router.use('/*', authMiddleware(config, db, logger));
 
     router.patch('/multiple', routeMultipleUpdate(config, db, listDataProcessor));
+
+    router.use('/search', search.handler(config, db));
 
     // cash flow routes
     router.get('/overview', cashflow.routeGet(config, db));

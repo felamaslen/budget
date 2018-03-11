@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const data = require('./data');
-const search = require('./search');
 const user = require('./user');
 
 /**
@@ -72,12 +71,11 @@ const user = require('./user');
  *                    example: false
  */
 
-function handler(config, db) {
+function handler(config, db, logger) {
     const router = new Router();
 
-    router.use('/user', user.handler(config, db));
-    router.use('/data', data.handler(config, db));
-    router.use('/data/search', search.handler(config, db));
+    router.use('/user', user.handler(config, db, logger));
+    router.use('/data', data.handler(config, db, logger));
 
     return router;
 }
