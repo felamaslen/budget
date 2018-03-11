@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const CacheControl = require('express-cache-control');
 const path = require('path');
 const webLogger = require('morgan');
+const passport = require('passport');
 const swaggerUiDist = require('swagger-ui-dist');
 const swaggerJSDoc = require('swagger-jsdoc');
 
@@ -16,6 +17,7 @@ const { version } = require('../../package.json');
 const getConfig = require('./config');
 const getLogger = require('./modules/logger');
 const initDb = require('./modules/db');
+const { getStrategy } = require('./modules/auth');
 const routes = require('./routes');
 
 const API_PREFIX = '/api/v4';
@@ -94,8 +96,12 @@ function setupApiDocs(app, config) {
     app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
-function setupApi(app, config, db) {
-    app.use(API_PREFIX, routes(config, db));
+function setupApi(app, config, db, logger) {
+    passport.use('jwt', getStrategy(config, db, logger));
+
+    app.use(passport.initialize());
+
+    app.use(API_PREFIX, routes(config, db, logger));
 
     setupApiDocs(app, config);
 }
@@ -164,7 +170,7 @@ async function run() {
 
         setupLogging(app, config);
         setupDataInput(app);
-        setupApi(app, config, db);
+        setupApi(app, config, db, logger);
         setupWebApp(app);
         setupErorHandling(app);
 
@@ -173,7 +179,7 @@ async function run() {
         });
     }
     catch (err) {
-        logger.error('Server did not start:', err.message);
+        logger.error('Server did not start:', err.stack);
     }
 }
 
