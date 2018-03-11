@@ -140,7 +140,7 @@ function getTime(offset, breakAtToday, startYear, startMonth) {
         const [year, month] = getYearMonthFromKey(key - offset, startYear, startMonth);
 
         if (breakAtToday && year === today.year && month === today.month) {
-            return now.unix();
+            return now.ts / 1000;
         }
 
         // return the last day of this month
@@ -166,7 +166,7 @@ export function getValuesWithTime(data, {
 
 function drawNowLine({ minY, maxY }, { ctx }, { pixX, pixY }) {
     // draw a line indicating where the present ends and the future starts
-    const nowLineX = Math.floor(pixX(now.unix())) + 0.5;
+    const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;
     ctx.beginPath();
     ctx.moveTo(nowLineX, pixY(minY));
     ctx.lineTo(nowLineX, pixY(maxY));
