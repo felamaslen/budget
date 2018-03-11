@@ -12,8 +12,6 @@ function getStrategy(config, db, logger) {
     };
 
     return new Strategy(params, async (req, payload, done) => {
-        logger.verbose('Logged in by token');
-
         const { uid } = payload;
 
         const user = await db.select('name')
