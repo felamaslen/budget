@@ -14,7 +14,7 @@ export function getEditValue(item, value, edited) {
     if (item === 'cost') {
         const editedNumber = Number(edited);
         if (!isNaN(editedNumber)) {
-            return editedNumber * 100;
+            return Math.round(editedNumber * 100);
         }
 
         return 0;
