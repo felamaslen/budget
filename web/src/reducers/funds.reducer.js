@@ -253,7 +253,7 @@ function getROI(values, costs) {
     // convert a series of values and costs into a series of return-on-investment values
     return values.map((value, timeKey) => {
         const cost = costs.get(timeKey);
-        if (!cost) {
+        if (!(cost && value)) {
             return 0;
         }
 
@@ -266,8 +266,8 @@ export function getOverallROI(prices, units, costs) {
     const values = getOverallAbsolute(prices, units);
 
     const overallCosts = values.map((value, timeKey) => {
-        return costs.reduce((sum, row) => {
-            if (row.size < timeKey + 1) {
+        return costs.reduce((sum, row, fundKey) => {
+            if (row.size < timeKey + 1 || prices.getIn([fundKey, timeKey]) === 0) {
                 return sum;
             }
 
@@ -335,9 +335,7 @@ export function getFundLine(prices, units, costs, mode, index) {
     return null;
 }
 
-export function getFundLineProcessed(
-    times, timeOffsets, prices, units, costs, mode, index
-) {
+export function getFundLineProcessed(times, timeOffsets, prices, units, costs, mode, index) {
     const line = index > -1
         ? getFundLine(prices, units, costs, mode, index)
         : getOverallLine(prices, units, costs, mode, timeOffsets);
