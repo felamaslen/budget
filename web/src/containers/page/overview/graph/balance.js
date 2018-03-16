@@ -183,7 +183,7 @@ function processData({ cost, showAll, ...props }) {
                 key: 'balance',
                 data: dataBalance,
                 fill: false,
-                color: (valX, valY, index) => {
+                color: (point, index) => {
                     if (index < futureKey) {
                         return colorBalanceActual;
                     }

@@ -271,11 +271,13 @@ const drawLine = (points, color) => {
 };
 */
 
+const genPixXY = (data, pixX, pixY) => index => ([
+    Math.round(pixX(data.getIn([index, 0]))),
+    Math.round(pixY(data.getIn([index, 1])))
+].join(' '));
+
 function getLinePath({ width, height, data, fill, pixX, pixY }) {
-    const pixXY = index => ([
-        Math.round(pixX(data.getIn([index, 0]))),
-        Math.round(pixY(data.getIn([index, 1])))
-    ].join(' '));
+    const pixXY = genPixXY(data, pixX, pixY);
 
     const initial = `M${pixXY(0)}`;
 
@@ -292,13 +294,60 @@ function getLinePath({ width, height, data, fill, pixX, pixY }) {
     return line.join(' ');
 }
 
+function getLinePathsDynamic({ data, color, pixX, pixY }) {
+    const pixXY = genPixXY(data, pixX, pixY);
+
+    if (data.size < 2) {
+        return [{ color: color(data.get(0), 0), path: `L${pixXY(0)}` }];
+    }
+
+    return data.reduce(({ paths, currentPath, lastColor }, point, index) => {
+        if (index === data.size - 1) {
+            return [...paths, {
+                stroke: lastColor,
+                path: `${currentPath} L${pixXY(index)}`
+            }];
+        }
+
+        const nextColor = color(point, index);
+
+        if (index > 0 && nextColor === lastColor) {
+            return {
+                paths,
+                currentPath: `${currentPath} L${pixXY(index)}`,
+                lastColor
+            };
+        }
+
+        const beginPath = index > 0
+            ? `M${pixXY(index - 1)} L${pixXY(index)}`
+            : `M${pixXY(index)}`;
+
+        return {
+            paths: [...paths, { stroke: lastColor, path: currentPath }],
+            currentPath: beginPath,
+            lastColor: nextColor
+        };
+    }, { paths: [] });
+}
+
 function RenderedLine({ data, color, fill, ...props }) {
     if (!data.size) {
         return null;
     }
 
     if (typeof color === 'function') {
-        return null;
+        if (fill) {
+            throw new Error('Dynamically coloured, filled graph not implemented');
+        }
+
+        const linePaths = getLinePathsDynamic({ data, color, ...props });
+
+        const paths = linePaths.map(({ path, stroke }, key) => (
+            <path key={key} d={path} stroke={stroke} strokeWidth={2} fill="none" />
+        ));
+
+        return <g>{paths}</g>;
     }
 
     const linePath = getLinePath({ data, fill, ...props });
