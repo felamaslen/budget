@@ -70,43 +70,42 @@ Targets.propTypes = {
     targets: PropTypes.instanceOf(list).isRequired
 };
 
+function Key() {
+    const [fontSize, fontFamily] = FONT_GRAPH_KEY_SMALL;
+
+    return (
+        <g>
+            <rect x={45} y={8} width={200} height={60}
+                fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
+
+            <line x1={50} y1={40} x2={74} y2={40}
+                stroke={rgba(COLOR_BALANCE_ACTUAL)} strokeWidth={2} />
+            <text x={78} y={40}
+                fill={rgba(COLOR_DARK)}
+                fontFamily={fontFamily} fontSize={fontSize}
+                alignmentBaseline="middle"
+            >{'Actual'}</text>
+
+            <line x1={130} y1={40} x2={154} y2={40}
+                stroke={rgba(COLOR_BALANCE_PREDICTED)} strokeWidth={2} />
+            <text x={158} y={40}
+                fill={rgba(COLOR_DARK)}
+                fontFamily={fontFamily} fontSize={fontSize}
+                alignmentBaseline="middle"
+            >{'Predicted'}</text>
+
+            <rect x={50} y={54} width={24} height={6}
+                fill={rgba(COLOR_BALANCE_STOCKS)} />
+            <text x={78} y={57}
+                fill={rgba(COLOR_DARK)}
+                fontFamily={fontFamily} fontSize={fontSize}
+                alignmentBaseline="middle"
+            >{'Stocks'}</text>
+        </g>
+    );
+}
+
 /*
-function drawKeyActual(props, { ctx }) {
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = rgba(COLOR_BALANCE_ACTUAL);
-    ctx.moveTo(50, 40);
-    ctx.lineTo(74, 40);
-    ctx.stroke();
-    ctx.closePath();
-
-    ctx.font = FONT_GRAPH_KEY_SMALL;
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = rgba(COLOR_DARK);
-    ctx.fillText('Actual', 78, 40);
-}
-function drawKeyPredicted(props, { ctx }) {
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = rgba(COLOR_BALANCE_PREDICTED);
-    ctx.moveTo(130, 40);
-    ctx.lineTo(154, 40);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillText('Predicted', 158, 40);
-}
-function drawKeyFunds(props, { ctx }) {
-    ctx.fillText('Stocks', 78, 57);
-    ctx.fillStyle = rgba(COLOR_BALANCE_STOCKS);
-    ctx.fillRect(50, 54, 24, 6);
-}
-function drawKey(...args) {
-    drawBaseKey(...args);
-    drawKeyActual(...args);
-    drawKeyPredicted(...args);
-    drawKeyFunds(...args);
-}
-
 function drawData({ targets, data: { dataBalance, dataFunds } }, { ctx }, { drawCubicLine }) {
     // plot past + future predicted data
     if (!(dataBalance && dataFunds)) {
@@ -122,11 +121,6 @@ function drawData({ targets, data: { dataBalance, dataFunds } }, { ctx }, { draw
     drawFundsLine(dataFunds, ctx, drawCubicLine);
 
     drawTargets(targets, ctx);
-}
-
-function onDraw(...args) {
-    drawData(...args);
-    drawKey(...args);
 }
 */
 
@@ -209,6 +203,7 @@ function GraphBalance({ targets, ...props }) {
     return (
         <LineGraph {...graphProps}>
             <Targets targets={targets} />
+            <Key />
         </LineGraph>
     );
 }
