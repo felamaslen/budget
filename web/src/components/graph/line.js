@@ -271,31 +271,47 @@ const drawLine = (points, color) => {
 };
 */
 
-function getLinePath({ data, pixX, pixY }) {
-    const pixXYAtIndex = index => ([
+function getLinePath({ width, height, data, fill, pixX, pixY }) {
+    const pixXY = index => ([
         Math.round(pixX(data.getIn([index, 0]))),
         Math.round(pixY(data.getIn([index, 1])))
     ].join(' '));
 
-    const initial = `M${pixXYAtIndex(0)}`;
+    const initial = `M${pixXY(0)}`;
 
-    return data.slice(1)
+    const line = data.slice(1)
         .reduce((components, point, index) => ([
-            ...components, `L${pixXYAtIndex(index)}`
-        ]), [initial])
-        .join(' ');
+            ...components, `L${pixXY(index + 1)}`
+        ]), [initial]);
+
+    if (fill) {
+        return line.concat([`L${width} ${height}`])
+            .join(' ');
+    }
+
+    return line.join(' ');
 }
 
-function RenderedLine({ data, color, fill, pixX, pixY, valX, valY }) {
+function RenderedLine({ data, color, fill, ...props }) {
     if (!data.size) {
         return null;
     }
 
-    const linePath = getLinePath({ data, pixX, pixY });
+    if (typeof color === 'function') {
+        return null;
+    }
 
-    return (
-        <path d={linePath} stroke="#000" fill="none" />
-    );
+    const linePath = getLinePath({ data, fill, ...props });
+
+    const fillStyle = fill
+        ? color
+        : 'none';
+
+    const strokeStyle = fill
+        ? 'none'
+        : color;
+
+    return <path d={linePath} stroke={strokeStyle} strokeWidth={2} fill={fillStyle} />;
 }
 
 RenderedLine.propTypes = {
@@ -335,18 +351,26 @@ export const genPixelCompute = props => {
     };
 };
 
-export default function LineGraph({ lines, ...props }) {
+export default function LineGraph({ lines, width, height, ...props }) {
     const pixelCompute = genPixelCompute({
         padding: [0, 0, 0, 0],
+        width,
+        height,
         ...props
     });
 
     const renderedLines = lines.map(({ key, ...line }) => (
-        <RenderedLine key={key} {...line} {...pixelCompute} />
+        <RenderedLine
+            key={key}
+            width={width}
+            height={height}
+            {...line}
+            {...pixelCompute}
+        />
     ));
 
     return (
-        <Graph {...props}>
+        <Graph width={width} height={height} {...props}>
             {renderedLines}
         </Graph>
     );
