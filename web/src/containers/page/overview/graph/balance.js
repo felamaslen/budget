@@ -20,7 +20,6 @@ import classNames from 'classnames';
 import GraphCashFlow, { getFutureKey, getValuesWithTime, drawKey as drawBaseKey } from './cash-flow';
 import LineGraph from '../../../../components/graph/line';
 
-/*
 function AfterCanvas({ showAll, onShowAll }) {
     const className = classNames('show-all', 'noselect', {
         noselect: true,
@@ -40,6 +39,7 @@ AfterCanvas.propTypes = {
     onShowAll: PropTypes.func.isRequired
 };
 
+/*
 function drawFundsLine(dataFunds, ctx, drawCubicLine) {
     // plot funds data
     ctx.lineWidth = 2;
@@ -202,7 +202,7 @@ function processData({ cost, showAll, ...props }) {
 }
 
 function GraphBalance(props) {
-    const after = null; // <AfterCanvas {...props} />;
+    const after = <AfterCanvas {...props} />;
     const graphProps = {
         title: 'Balance',
         after,
