@@ -39,44 +39,38 @@ AfterCanvas.propTypes = {
     onShowAll: PropTypes.func.isRequired
 };
 
-/*
-function drawFundsLine(dataFunds, ctx, drawCubicLine) {
-    // plot funds data
-    ctx.lineWidth = 2;
-    drawCubicLine(
-        dataFunds,
-        [rgba(COLOR_BALANCE_STOCKS)],
-        {
-            fill: true,
-            stroke: false,
-            tension: 1
-        }
+function Targets({ targets }) {
+    const [fontSize, fontFamily] = FONT_GRAPH_KEY_SMALL;
+
+    const tags = targets.map(target => `${formatCurrency(target.get('value'), {
+        raw: true, noPence: true, abbreviate: true, precision: 0
+    })} (${target.get('tag')})`)
+        .map((target, key) => (
+            <text key={key}
+                x={50}
+                y={72 + 22 * key}
+                fill={rgba(COLOR_DARK)}
+                alignmentBaseline="hanging"
+                fontFamily={fontFamily}
+                fontSize={fontSize}>
+                {target}
+            </text>
+        ));
+
+    return (
+        <g>
+            <rect x={48} y={70} width={100} height={targets.size * 22 + 4}
+                fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
+            {tags}
+        </g>
     );
 }
 
-function drawTargets(targets, ctx) {
-    ctx.beginPath();
-    ctx.fillStyle = rgba(COLOR_TRANSLUCENT_LIGHT);
-    ctx.fillRect(48, 70, 100, targets.size * 22 + 4);
-    ctx.closePath();
+Targets.propTypes = {
+    targets: PropTypes.instanceOf(list).isRequired
+};
 
-    ctx.fillStyle = rgba(COLOR_DARK);
-    ctx.font = FONT_GRAPH_KEY_SMALL;
-    ctx.textBaseline = 'top';
-
-    targets.forEach((target, key) => {
-        const tag = target.get('tag');
-        const value = formatCurrency(target.get('value'), {
-            raw: true, noPence: true, abbreviate: true, precision: 0
-        });
-
-        const xPix = 50;
-        const yPix = 72 + 22 * key;
-
-        ctx.fillText(`${value} (${tag})`, xPix, yPix);
-    });
-}
-
+/*
 function drawKeyActual(props, { ctx }) {
     ctx.beginPath();
     ctx.lineWidth = 2;
@@ -201,22 +195,21 @@ function processData({ cost, showAll, ...props }) {
     };
 }
 
-function GraphBalance(props) {
+function GraphBalance({ targets, ...props }) {
     const after = <AfterCanvas {...props} />;
     const graphProps = {
+        width: GRAPH_WIDTH,
+        height: GRAPH_HEIGHT,
         title: 'Balance',
-        after,
-        ...props
+        ...processData(props),
+        ...props,
+        after
     };
 
     return (
-        <LineGraph
-            width={GRAPH_WIDTH}
-            height={GRAPH_HEIGHT}
-            {...processData(props)}
-            {...graphProps}
-            {...props}
-        />
+        <LineGraph {...graphProps}>
+            <Targets targets={targets} />
+        </LineGraph>
     );
 }
 

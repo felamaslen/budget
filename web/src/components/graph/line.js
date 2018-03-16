@@ -400,7 +400,7 @@ export const genPixelCompute = props => {
     };
 };
 
-export default function LineGraph({ lines, width, height, ...props }) {
+export default function LineGraph({ lines, width, height, children, ...props }) {
     const pixelCompute = genPixelCompute({
         padding: [0, 0, 0, 0],
         width,
@@ -421,6 +421,7 @@ export default function LineGraph({ lines, width, height, ...props }) {
     return (
         <Graph width={width} height={height} {...props}>
             {renderedLines}
+            {children}
         </Graph>
     );
 }
@@ -441,6 +442,10 @@ LineGraph.propTypes = {
     minX: PropTypes.number,
     maxX: PropTypes.number,
     minY: PropTypes.number,
-    maxY: PropTypes.number
+    maxY: PropTypes.number,
+    children: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.array
+    ])
 };
 
