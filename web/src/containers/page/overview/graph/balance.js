@@ -10,6 +10,7 @@ import {
     COLOR_DARK, COLOR_TRANSLUCENT_LIGHT,
     FONT_GRAPH_KEY_SMALL
 } from '../../../../misc/config';
+import { GRAPH_WIDTH, GRAPH_HEIGHT } from '../../../../misc/const';
 
 import { connect } from 'react-redux';
 import { aShowAllToggled } from '../../../../actions/graph.actions';
@@ -17,7 +18,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import GraphCashFlow, { getFutureKey, getValuesWithTime, drawKey as drawBaseKey } from './cash-flow';
+import LineGraph from '../../../../components/graph/line';
 
+/*
 function AfterCanvas({ showAll, onShowAll }) {
     const className = classNames('show-all', 'noselect', {
         noselect: true,
@@ -131,6 +134,7 @@ function onDraw(...args) {
     drawData(...args);
     drawKey(...args);
 }
+*/
 
 function getRanges(dataBalance) {
     const dataY = dataBalance.map(item => item.last());
@@ -168,26 +172,52 @@ function processData({ cost, showAll, ...props }) {
 
     const ranges = getRanges(dataBalance);
 
-    const colorTransition = [futureKey - 1];
+    const colorBalanceActual = rgba(COLOR_BALANCE_ACTUAL);
+    const colorBalancePredicted = rgba(COLOR_BALANCE_PREDICTED);
+    const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
 
     return {
-        oldOffset,
         ...ranges,
-        colorTransition,
-        data: { dataBalance, dataFunds }
+        lines: [
+            {
+                key: 'balance',
+                data: dataBalance,
+                fill: false,
+                color: (valX, valY, index) => {
+                    if (index < futureKey) {
+                        return colorBalanceActual;
+                    }
+
+                    return colorBalancePredicted;
+                }
+            },
+            {
+                key: 'funds',
+                data: dataFunds,
+                fill: true,
+                color: colorBalanceStocks
+            }
+        ]
     };
 }
 
 function GraphBalance(props) {
-    const after = <AfterCanvas {...props} />;
+    const after = null; // <AfterCanvas {...props} />;
+    const graphProps = {
+        title: 'Balance',
+        after,
+        ...props
+    };
 
-    return <GraphCashFlow
-        title="Balance"
-        after={after}
-        onDraw={onDraw}
-        {...processData(props)}
-        {...props}
-    />;
+    return (
+        <LineGraph
+            width={GRAPH_WIDTH}
+            height={GRAPH_HEIGHT}
+            {...processData(props)}
+            {...graphProps}
+            {...props}
+        />
+    );
 }
 
 GraphBalance.propTypes = {

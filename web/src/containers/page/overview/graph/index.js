@@ -8,6 +8,8 @@ import GraphSpending from './spending';
 
 export default function OverviewGraphs() {
     const graphSpending = render => {
+        return null; // TODO
+
         if (render) {
             return <GraphSpending name="spend" />;
         }
