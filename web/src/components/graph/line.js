@@ -58,12 +58,13 @@ function getControlPoints(data) {
 function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
     const getPixPoint = point => list.of(pixX(point.get(0)), pixY(point.get(1)));
 
-    const pixels = data.map(point => getPixPoint(point));
+    const pixelsNumeric = data.map(point => getPixPoint(point));
+    const pixels = pixelsNumeric.map(point => point.map(value => value.toFixed(1)));
 
     let line = null;
 
     if (smooth && pixels.size > 2) {
-        const controlPoints = getControlPoints(pixels);
+        const controlPoints = getControlPoints(pixelsNumeric);
 
         line = pixels.slice(0, pixels.size - 1)
             .map((point, index) => {
