@@ -6,7 +6,7 @@ import {
 } from '../../../../misc/config';
 import { rgba } from '../../../../misc/color';
 import { getTickSize, formatCurrency } from '../../../../misc/format';
-import { getTimeScale, genPixelCompute } from '../../../../components/graph/line';
+import { getTimeScale } from '../../../../components/graph/line';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     return (minY, maxY, pixY) => {

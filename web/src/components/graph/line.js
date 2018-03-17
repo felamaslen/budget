@@ -175,7 +175,7 @@ function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {
         const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
 
         const paths = linePaths.map(({ path, stroke }, key) => (
-            <path key={key} d={path} stroke={stroke} strokeWidth={2} fill="none" />
+            <path key={key} d={path} stroke={stroke} strokeWidth={props.strokeWidth || 2} fill="none" />
         ));
 
         return <g className="lines">{paths}</g>;
@@ -192,7 +192,7 @@ function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {
         : color;
 
     return <g className="line">
-        <path d={linePath} stroke={strokeStyle} strokeWidth={2} fill={fillStyle} />
+        <path d={linePath} stroke={strokeStyle} strokeWidth={props.strokeWidth || 2} fill={fillStyle} />
     </g>;
 }
 
@@ -202,6 +202,7 @@ RenderedLine.propTypes = {
         PropTypes.string,
         PropTypes.func
     ]).isRequired,
+    strokeWidth: PropTypes.number,
     fill: PropTypes.bool,
     smooth: PropTypes.bool,
     arrows: PropTypes.bool,
@@ -211,7 +212,7 @@ RenderedLine.propTypes = {
     valY: PropTypes.func.isRequired
 };
 
-export const genPixelCompute = props => {
+const genPixelCompute = props => {
     const {
         minX,
         maxX,
