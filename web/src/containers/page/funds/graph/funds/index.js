@@ -215,11 +215,11 @@ export function GraphFunds(props) {
                     valX: valX(pageX - left),
                     valY: valY(pageY - top)
                 });
-            }, 10);
+            }, 10, true);
 
             return ({ pageX, pageY, currentTarget }) => mouseMoveHandler(pageX, pageY, currentTarget);
         },
-        onMouseOut: () => () => onHover(null)
+        onMouseLeave: () => () => onHover(null)
     };
 
     const beforeLines = subProps => (
