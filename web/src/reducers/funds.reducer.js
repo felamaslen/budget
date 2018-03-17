@@ -346,9 +346,12 @@ export function getFundLineProcessed(times, timeOffsets, prices, units, costs, m
 
     const lineIndex = index + 1;
 
-    const lineWithTimes = line.map((value, key) => list([times.get(key), value, prices.getIn([index, key])]));
+    const lineWithTimes = line.map((value, key) => list([times.get(key), value]));
 
     return map({
+        prices: index === -1
+            ? null
+            : prices.get(index),
         line: lineWithTimes,
         index: lineIndex
     });

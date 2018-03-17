@@ -136,9 +136,10 @@ export function rHoverFundsGraph(reduction, { position }) {
 
     const closest = lines.reduce((last, line) => {
         const lineIndex = line.get('index');
+        const prices = line.get('prices');
 
         return line.get('line')
-            .filterNot(point => point.get(2) === 0)
+            .filterNot((point, pointKey) => prices && prices.get(pointKey) === 0)
             .reduce(({ dist: lastDist, lineIndex: lastIndex, point: lastPoint }, point) => {
                 const dist = (
                     ((point.get(0) - position.valX) / 1000) ** 2 +
