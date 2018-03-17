@@ -9,77 +9,6 @@ import Graph from '.';
 import { timeSeriesTicks } from '../../misc/date';
 
 /*
-// Hermite functions
-function h00(value) {
-    return (1 + 2 * value) * Math.pow(1 - value, 2);
-}
-function h10(value) {
-    return value * Math.pow(1 - value, 2);
-}
-function h01(value) {
-    return Math.pow(value, 2) * (3 - 2 * value);
-}
-function h11(value) {
-    return Math.pow(value, 2) * (value - 1);
-}
-function hermite(x0, xA, yA, xB, yB, mA, mB) {
-    const value = (x0 - xA) / (xB - xA);
-
-    return h00(value) * yA +
-        h10(value) * (xB - xA) * mA +
-        h01(value) * yB +
-        h11(value) * (xB - xA) * mB;
-}
-function getTension(value) {
-    const exp1 = Math.exp(value / 100 + 0.5);
-    const exp2 = 1 / exp1;
-
-    const tension = (exp1 - exp2) / (exp1 + exp2);
-
-    if (isNaN(tension)) {
-        return 0;
-    }
-
-    return tension;
-}
-function getInterpolatorHermite(points) {
-    // secants
-    const secants = points
-        .slice(1)
-        .map((point, key) => (point[1] - points[key][1]) / (point[0] - points[key][0]));
-
-    // tangents
-    const tangents = points.map((point, key) => {
-        if (key === 0) {
-            return secants[0];
-        }
-        if (key === secants.length) {
-            return secants[key - 1];
-        }
-
-        const tension = getTension(Math.max(
-            Math.abs(secants[key] / secants[key - 1]),
-            key > 1
-                ? Math.abs(secants[key - 1] / secants[key - 2])
-                : 0
-        ));
-
-        return (1 - tension) * (secants[key - 1] + secants[key]);
-    });
-
-    return (key, pixel) => hermite(
-        points[key][0] + pixel,
-        points[key][0],
-        points[key][1],
-        points[key + 1][0],
-        points[key + 1][1],
-        tangents[key],
-        tangents[key + 1]
-    );
-}
-*/
-
-/*
 const getTimeScale = offset => {
     // divides the time axis (horizontal) into appropriate chunks
     const ticks = timeSeriesTicks(offset + this.props.minX, offset + this.props.maxX);
@@ -94,244 +23,143 @@ const getTimeScale = offset => {
 
     return [];
 };
-
-const getCubicCurve = pointsList => {
-    // Hermite spline
-    const points = pointsList
-        .toJS()
-        .map(point => [this.pixX(point[0]), this.pixY(point[1])]);
-
-    const interpolator = getInterpolatorHermite(points);
-
-    return points
-        .slice(1)
-        .map((point, key) => new Array(Math.max(1, Math.floor(points[key + 1][0] - points[key][0])))
-            .fill(0)
-            .map((item, pixel) => [points[key][0] + pixel, interpolator(key, pixel)])
-        );
-};
-
-const drawCubicLineCurve = (curve, points, color) => {
-    let colorKey = 0;
-    let moved = false;
-    let colorTransitionKey = 0;
-
-    const dynamicColor = typeof color === 'function';
-    let theColor = dynamicColor
-        ? color(points.getIn([0, 1]))
-        : color[0];
-
-    this.state.ctx.beginPath();
-    this.state.ctx.strokeStyle = theColor;
-
-    curve.forEach((piece, pieceKey) => {
-        if (pieceKey === this.props.colorTransition[colorTransitionKey]) {
-            colorTransitionKey++;
-
-            if (moved) {
-                this.state.ctx.lineTo(piece[0][0], piece[0][1]);
-                this.state.ctx.stroke();
-                this.state.ctx.closePath();
-                this.state.ctx.beginPath();
-            }
-
-            this.state.ctx.strokeStyle = dynamicColor
-                ? color(this.valY(piece[0][1]))
-                : color[++colorKey % color.length];
-
-            moved = false;
-        }
-
-        piece.forEach((point, pointKey) => {
-            if (dynamicColor) {
-                const newColor = color(this.valY(point[1]));
-                if (newColor !== theColor) {
-                    if (moved) {
-                        this.state.ctx.strokeStyle = theColor;
-                        this.state.ctx.stroke();
-                        this.state.ctx.closePath();
-                        this.state.ctx.beginPath();
-
-                        if (pointKey > 0) {
-                            this.state.ctx.moveTo(piece[pointKey - 1][0], piece[pointKey - 1][1]);
-                        }
-                        else if (pieceKey > 0) {
-                            const lastCurve = curve[pieceKey - 1];
-                            const lastPoint = lastCurve[lastCurve.length - 1];
-
-                            this.state.ctx.moveTo(lastPoint[0], lastPoint[1]);
-                        }
-                    }
-                    theColor = newColor;
-                }
-            }
-
-            if (moved) {
-                this.state.ctx.lineTo(point[0], point[1]);
-            }
-            else {
-                this.state.ctx.moveTo(point[0], point[1]);
-                moved = true;
-            }
-        });
-    });
-
-    // complete the line to the last point
-    this.state.ctx.lineTo(
-        this.pixX(points.getIn([points.size - 1, 0])),
-        this.pixY(points.getIn([points.size - 1, 1]))
-    );
-
-    if (dynamicColor) {
-        this.state.ctx.strokeStyle = theColor;
-    }
-
-    this.state.ctx.stroke();
-    this.state.ctx.closePath();
-};
-
-const drawCubicLine = (points, color, theOptions = {}) => {
-    if (points.size < 2) {
-        return;
-    }
-    const options = { stroke: true, ...theOptions };
-
-    const curve = this.getCubicCurve(points);
-
-    if (options.fill) {
-        this.state.ctx.beginPath();
-        this.state.ctx.fillStyle = color[0];
-        this.state.ctx.moveTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
-
-        curve.forEach(piece => {
-            piece.forEach(point => {
-                this.state.ctx.lineTo(point[0], point[1]);
-            });
-        });
-
-        // complete the filled graph
-        this.state.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(points.last().get(1)));
-        this.state.ctx.lineTo(this.pixX(points.last().get(0)), this.pixY(0));
-        this.state.ctx.lineTo(this.pixX(points.first().get(0)), this.pixY(points.first().get(1)));
-
-        this.state.ctx.fill();
-        this.state.ctx.closePath();
-    }
-
-    if (options.stroke) {
-        this.drawCubicLineCurve(curve, points, color);
-    }
-};
-
-const drawLine = (points, color) => {
-    if (points.size < 2) {
-        return;
-    }
-    const dynamicColor = typeof color === 'function';
-    let theColor = dynamicColor
-        ? color(points.getIn([0, 1]))
-        : color;
-
-    let newColor = null;
-    let moved = false;
-    this.state.ctx.beginPath();
-    points.forEach(point => {
-        const xPix = this.pixX(point.first());
-        const yPix = this.pixY(point.last());
-
-        if (moved) {
-            this.state.ctx.lineTo(xPix, yPix);
-            if (dynamicColor) {
-                newColor = color(point.last());
-                if (newColor !== theColor) {
-                    this.state.ctx.strokeStyle = theColor;
-                    this.state.ctx.stroke();
-                    this.state.ctx.closePath();
-                    this.state.ctx.beginPath();
-                    this.state.ctx.moveTo(xPix, yPix);
-                    theColor = newColor;
-                }
-            }
-        }
-        else {
-            this.state.ctx.moveTo(xPix, yPix);
-            moved = true;
-        }
-    });
-
-    this.state.ctx.strokeStyle = theColor;
-    this.state.ctx.stroke();
-    if (this.props.fill) {
-        this.state.ctx.lineTo(this.pixX(points.last().first(), this.pixY(0)));
-        this.state.ctx.lineTo(this.pixX(points.first().first(), this.pixY(0)));
-        this.state.ctx.fillStyle = theColor;
-        this.state.ctx.fill();
-    }
-    this.state.ctx.closePath();
-};
 */
 
-const genPixXY = (data, pixX, pixY) => index => ([
-    Math.round(pixX(data.getIn([index, 0]))),
-    Math.round(pixY(data.getIn([index, 1])))
-].join(' '));
+function getControlPointsAtPoint([x0, y0], [x1, y1], [x2, y2]) {
+    const distLeft = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5;
+    const distRight = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5;
 
-function getLinePath({ width, height, data, fill, pixX, pixY }) {
-    const pixXY = genPixXY(data, pixX, pixY);
+    const curviness = 0.33;
 
-    const initial = `M${pixXY(0)}`;
+    const controlFactor0 = curviness * distLeft / (distLeft + distRight);
+    const controlFactor1 = curviness - controlFactor0;
 
-    const line = data.slice(1)
-        .reduce((components, point, index) => ([
-            ...components, `L${pixXY(index + 1)}`
-        ]), [initial]);
+    const controlX0 = Math.round(x1 - controlFactor0 * (x2 - x0));
+    const controlY0 = Math.round(y1 - controlFactor0 * (y2 - y0));
+
+    const controlX1 = Math.round(x1 + controlFactor1 * (x2 - x0));
+    const controlY1 = Math.round(y1 + controlFactor1 * (y2 - y0));
+
+    return list.of(list.of(controlX0, controlY0), list.of(controlX1, controlY1));
+}
+
+function getControlPoints(data) {
+    return data.map((point, index) => {
+        if (index === 0 || index === data.size - 1) {
+            return null;
+        }
+
+        return getControlPointsAtPoint(
+            data.get(index - 1),
+            point,
+            data.get(index + 1)
+        );
+    });
+}
+
+function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
+    const getPixPoint = point => list.of(pixX(point.get(0)), pixY(point.get(1)));
+
+    const pixels = data.map(point => getPixPoint(point));
+
+    let line = null;
+
+    if (smooth) {
+        const controlPoints = getControlPoints(pixels);
+
+        line = pixels.slice(0, pixels.size - 1)
+            .map((point, index) => {
+                if (index === 0) {
+                    return {
+                        start: point,
+                        type: 'Q',
+                        args: [controlPoints.getIn([index + 1, 0]), pixels.get(index + 1)]
+                    };
+                }
+                if (index === pixels.size - 2) {
+                    return {
+                        start: point,
+                        type: 'Q',
+                        args: [
+                            controlPoints.getIn([index, 1]),
+                            pixels.get(index + 1)
+                        ]
+                    };
+                }
+
+                return {
+                    start: point,
+                    type: 'C',
+                    args: [
+                        controlPoints.getIn([index, 1]),
+                        controlPoints.getIn([index + 1, 0]),
+                        pixels.get(index + 1)
+                    ]
+                };
+
+            });
+    }
+    else {
+        line = pixels.slice(1)
+            .map((point, index) => ({
+                start: pixels.get(index),
+                type: 'L',
+                args: [point]
+            }));
+    }
 
     if (fill) {
-        return line.concat([`L${width} ${height}`])
-            .join(' ');
+        return line.concat({
+            start: pixels.last(),
+            type: 'L',
+            args: [list.of(width, height)]
+        });
     }
 
-    return line.join(' ');
+    return line;
 }
 
-function getLinePathsDynamic({ data, color, pixX, pixY }) {
-    const pixXY = genPixXY(data, pixX, pixY);
+function getLinePathPart(linePath) {
+    const parts = linePath.map(({ type, args }) =>
+        `${type}${args.map(point => point.join(',')).join(' ')}`);
 
+    const start = linePath.get(0).start;
+
+    return `M${start.join(',')} ${parts.join(' ')}`;
+}
+
+function getSingleLinePath(props) {
+    return getLinePathPart(getLinePath(props));
+}
+
+function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
     if (data.size < 2) {
-        return [{ color: color(data.get(0), 0), path: `L${pixXY(0)}` }];
+        return null;
     }
 
-    return data.reduce(({ paths, currentPath, lastColor }, point, index) => {
-        if (index === data.size - 1) {
-            return [...paths, {
-                stroke: lastColor,
-                path: `${currentPath} L${pixXY(index)}`
-            }];
+    const linePath = getLinePath({ data, smooth, pixX, pixY });
+
+    const colors = data.map((point, index) => color(point, index));
+    const ends = colors.reduce((indexes, value, index) => {
+        const next = index === colors.size - 1 ||
+            (index > 0 && colors.get(index - 1) !== value);
+
+        if (next) {
+            return [...indexes, index];
         }
 
-        const nextColor = color(point, index);
+        return indexes;
 
-        if (index > 0 && nextColor === lastColor) {
-            return {
-                paths,
-                currentPath: `${currentPath} L${pixXY(index)}`,
-                lastColor
-            };
-        }
+    }, [0]);
 
-        const beginPath = index > 0
-            ? `M${pixXY(index - 1)} L${pixXY(index)}`
-            : `M${pixXY(index)}`;
-
-        return {
-            paths: [...paths, { stroke: lastColor, path: currentPath }],
-            currentPath: beginPath,
-            lastColor: nextColor
-        };
-    }, { paths: [] });
+    return ends.slice(1)
+        .map((end, endIndex) => ({
+            path: getLinePathPart(linePath.slice(ends[endIndex], end)),
+            stroke: colors.get(ends[endIndex])
+        }));
 }
 
-function RenderedLine({ data, color, fill, ...props }) {
+function RenderedLine({ data, smooth, color, fill, ...props }) {
     if (!data.size) {
         return null;
     }
@@ -341,7 +169,7 @@ function RenderedLine({ data, color, fill, ...props }) {
             throw new Error('Dynamically coloured, filled graph not implemented');
         }
 
-        const linePaths = getLinePathsDynamic({ data, color, ...props });
+        const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
 
         const paths = linePaths.map(({ path, stroke }, key) => (
             <path key={key} d={path} stroke={stroke} strokeWidth={2} fill="none" />
@@ -350,7 +178,7 @@ function RenderedLine({ data, color, fill, ...props }) {
         return <g>{paths}</g>;
     }
 
-    const linePath = getLinePath({ data, fill, ...props });
+    const linePath = getSingleLinePath({ data, smooth, fill, ...props });
 
     const fillStyle = fill
         ? color
@@ -370,7 +198,7 @@ RenderedLine.propTypes = {
         PropTypes.func
     ]).isRequired,
     fill: PropTypes.bool,
-    cubic: PropTypes.bool,
+    smooth: PropTypes.bool,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     valX: PropTypes.func.isRequired,
@@ -429,16 +257,7 @@ export default function LineGraph({ lines, width, height, children, ...props }) 
 LineGraph.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    lines: PropTypes.arrayOf(PropTypes.shape({
-        key: PropTypes.string.isRequired,
-        data: PropTypes.instanceOf(list).isRequired,
-        color: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.func
-        ]).isRequired,
-        fill: PropTypes.bool,
-        cubic: PropTypes.bool
-    })).isRequired,
+    lines: PropTypes.array.isRequired,
     minX: PropTypes.number,
     maxX: PropTypes.number,
     minY: PropTypes.number,

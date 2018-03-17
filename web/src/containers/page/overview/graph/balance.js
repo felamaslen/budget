@@ -171,6 +171,7 @@ function processData({ cost, showAll, ...props }) {
                 key: 'balance',
                 data: dataBalance,
                 fill: false,
+                smooth: true,
                 color: (point, index) => {
                     if (index < futureKey) {
                         return colorBalanceActual;
@@ -183,6 +184,7 @@ function processData({ cost, showAll, ...props }) {
                 key: 'funds',
                 data: dataFunds,
                 fill: true,
+                smooth: true,
                 color: colorBalanceStocks
             }
         ]
@@ -192,9 +194,10 @@ function processData({ cost, showAll, ...props }) {
 function GraphBalance({ targets, ...props }) {
     const after = <AfterCanvas {...props} />;
     const graphProps = {
+        title: 'Balance',
         width: GRAPH_WIDTH,
         height: GRAPH_HEIGHT,
-        title: 'Balance',
+        padding: [40, 0, 0, 0],
         ...processData(props),
         ...props,
         after
