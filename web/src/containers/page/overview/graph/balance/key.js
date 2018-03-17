@@ -1,12 +1,12 @@
 import React from 'react';
 import { BaseKey } from '../helpers';
 import {
-    FONT_GRAPH_KEY_SMALL, COLOR_DARK, COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
+    FONT_GRAPH_KEY, COLOR_DARK, COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
 } from '../../../../../misc/config';
 import { rgba } from '../../../../../misc/color';
 
 export default function Key() {
-    const [fontSize, fontFamily] = FONT_GRAPH_KEY_SMALL;
+    const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     return <BaseKey>
         <line x1={50} y1={40} x2={74} y2={40}

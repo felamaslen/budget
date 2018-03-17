@@ -1,12 +1,12 @@
 import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FONT_GRAPH_KEY_SMALL, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../../../../misc/config';
+import { FONT_GRAPH_KEY, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../../../../misc/config';
 import { formatCurrency } from '../../../../../misc/format';
 import { rgba } from '../../../../../misc/color';
 
 export default function Targets({ targets }) {
-    const [fontSize, fontFamily] = FONT_GRAPH_KEY_SMALL;
+    const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     const tags = targets.map(target => `${formatCurrency(target.get('value'), {
         raw: true, noPence: true, abbreviate: true, precision: 0

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import LineGraph from '../../../../components/graph/line';
 import Axes from './axes';
+import NowLine from './now-line';
 import { rgba } from '../../../../misc/color';
 import { GRAPH_WIDTH, GRAPH_HEIGHT } from '../../../../misc/const';
 import { COLOR_TRANSLUCENT_LIGHT } from '../../../../misc/config';
@@ -42,15 +43,13 @@ function getTime(now, offset, breakAtToday, startYear, startMonth) {
 }
 
 export function getValuesWithTime(data, props) {
-    const now = DateTime.local();
-
     const {
         oldOffset,
         breakAtToday,
         startYearMonth: [startYear, startMonth]
     } = props;
 
-    const timeGetter = getTime(now, oldOffset, breakAtToday, startYear, startMonth);
+    const timeGetter = getTime(props.now, oldOffset, breakAtToday, startYear, startMonth);
 
     return data.map((value, index) => list([timeGetter(index), value]));
 }
@@ -97,11 +96,13 @@ export function GraphCashFlow(props) {
         width: GRAPH_WIDTH,
         height: GRAPH_HEIGHT,
         padding: [40, 0, 0, 0],
+        now: DateTime.local(),
         ...ranges
     };
 
     const beforeLines = subProps => <g>
         <Axes {...subProps} />
+        <NowLine {...subProps} />
     </g>;
 
     const graphProps = {

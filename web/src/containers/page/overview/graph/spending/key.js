@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { BaseKey } from '../helpers';
 import {
-    COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK, FONT_GRAPH_KEY_SMALL
+    COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK, FONT_GRAPH_KEY
 } from '../../../../../misc/config';
 import { rgba } from '../../../../../misc/color';
 
 export default function Key({ pixX, pixY, maxX, minY, maxY }) {
-    const [fontSize, fontFamily] = FONT_GRAPH_KEY_SMALL;
+    const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     const future0 = pixX(Date.now() / 1000);
     const future1 = pixY(maxY);

@@ -23,11 +23,10 @@ export const ERROR_MSG_BAD_DATA = 'Please enter valid data';
 export const ERROR_MSG_BUG_INVALID_ITEM = 'Bug: no date/cost on edited item';
 
 // font definitions
-export const FONT_GRAPH_TITLE = '16px bold Arial, Helvetica, sans-serif';
-export const FONT_GRAPH_TITLE_LARGE = '18px bold Arial, Helvetica, sans-serif';
-export const FONT_GRAPH_KEY = '13px Arial, Helvetica, sans-serif';
-export const FONT_GRAPH_KEY_SMALL = [11, 'Arial, Helvetica, sans-serif'];
-export const FONT_AXIS_LABEL = FONT_GRAPH_KEY_SMALL;
+const defaultFont = 'Arial, Helvetica, sans-serif';
+export const FONT_GRAPH_TITLE = [16, defaultFont];
+export const FONT_GRAPH_KEY = [11, defaultFont];
+export const FONT_AXIS_LABEL = FONT_GRAPH_KEY;
 
 export const GRAPH_KEY_SIZE = 12;
 export const GRAPH_KEY_OFFSET_X = 45;

@@ -37,8 +37,8 @@ function processData({ cost, showAll, ...props }) {
         value
     ]));
 
-    const colorBalanceActual = rgba(COLOR_BALANCE_ACTUAL);
-    const colorBalancePredicted = rgba(COLOR_BALANCE_PREDICTED);
+    const colorBalance = [rgba(COLOR_BALANCE_PREDICTED), rgba(COLOR_BALANCE_ACTUAL)];
+
     const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
 
     return [
@@ -47,13 +47,7 @@ function processData({ cost, showAll, ...props }) {
             data: dataBalance,
             fill: false,
             smooth: true,
-            color: (point, index) => {
-                if (index < futureKey) {
-                    return colorBalanceActual;
-                }
-
-                return colorBalancePredicted;
-            }
+            color: (point, index) => colorBalance[(index < futureKey - 1) >> 0]
         },
         {
             key: 'funds',

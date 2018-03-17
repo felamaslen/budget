@@ -16,28 +16,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import LineGraph from '../../../../components/graph/line';
 
-const now = getNow();
-const today = {
-    year: now.get('year'),
-    month: now.get('month') + 1,
-    date: now.get('date')
-};
-
-function drawNowLine({ minY, maxY }, { ctx }, { pixX, pixY }) {
-    // draw a line indicating where the present ends and the future starts
-    const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;
-    ctx.beginPath();
-    ctx.moveTo(nowLineX, pixY(minY));
-    ctx.lineTo(nowLineX, pixY(maxY));
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = rgba(COLOR_DARK);
-    ctx.stroke();
-    ctx.closePath();
-
-    ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
-    ctx.fillText('Now', nowLineX, pixY(maxY));
-}
-
 function drawTitle({ title }, { ctx }) {
     ctx.font = FONT_GRAPH_TITLE;
     ctx.fillStyle = rgba(COLOR_GRAPH_TITLE);
@@ -63,7 +41,6 @@ export function drawKey(props, state, graph) {
 function GraphCashFlow({ onDraw, ...props }) {
     const onDrawProc = (...args) => {
         drawAxes(...args);
-        drawNowLine(...args);
         onDraw(...args);
     };
 
