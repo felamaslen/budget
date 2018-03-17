@@ -134,40 +134,32 @@ export function rHoverFundsGraph(reduction, { position }) {
         return reduction;
     }
 
-    const closest = lines.reduce((last, line, lineKey) => {
-        return line
-            .get('line')
-            .reduce((thisLast, point, pointKey) => {
-                const pointDistance = Math.sqrt(
-                    Math.pow((point.get(0) - position.valX) / 1000, 2) +
-                    Math.pow((point.get(1) - position.valY) / 100, 2)
-                );
+    const closest = lines.reduce((last, line) => {
+        const lineIndex = line.get('index');
+        const prices = line.get('prices');
 
-                if (pointDistance < thisLast.dist) {
-                    thisLast.dist = pointDistance;
-                    thisLast.lineKey = lineKey;
-                    thisLast.pointKey = pointKey;
+        return line.get('line')
+            .filterNot((point, pointKey) => prices && prices.get(pointKey) === 0)
+            .reduce(({ dist: lastDist, lineIndex: lastIndex, point: lastPoint }, point) => {
+                const dist = (
+                    ((point.get(0) - position.valX) / 1000) ** 2 +
+                    ((point.get(1) - position.valY) / 100) ** 2
+                ) ** 0.5;
+
+                if (dist < lastDist) {
+                    return { dist, lineIndex, point };
                 }
 
-                return thisLast;
+                return { dist: lastDist, lineIndex: lastIndex, point: lastPoint };
+
             }, last);
+    }, { dist: Infinity });
 
-    }, { dist: Infinity, lineKey: null, pointKey: null });
+    const color = reduction.getIn(['other', 'graphFunds', 'data', 'fundItems', closest.lineIndex, 'color']);
 
-    const lineIndex = reduction.getIn(
-        ['other', 'graphFunds', 'data', 'fundLines', closest.lineKey, 'index']
-    );
-
-    const color = reduction.getIn(
-        ['other', 'graphFunds', 'data', 'fundItems', lineIndex, 'color']
-    );
-
-    let hlPoint = lines
-        .getIn([closest.lineKey, 'line', closest.pointKey]);
-
-    if (hlPoint) {
-        hlPoint = hlPoint.push(rgba(color));
-    }
+    const hlPoint = closest.point
+        ? closest.point.set(2, rgba(color))
+        : null;
 
     return reduction.setIn(['other', 'graphFunds', 'hlPoint'], hlPoint);
 }
