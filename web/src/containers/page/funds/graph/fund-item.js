@@ -95,7 +95,7 @@ Axes.propTypes = {
     pixY: PropTypes.func.isRequired
 };
 
-function GraphFundItem({ id, data, onToggle, popout, ...props }) {
+export function GraphFundItem({ id, data, onToggle, popout, ...props }) {
     const dimensions = getDimensions(popout);
 
     const beforeLines = subProps => <Axes popout={popout} {...subProps} />;
