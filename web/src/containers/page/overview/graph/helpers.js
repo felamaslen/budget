@@ -7,20 +7,26 @@ import Axes from './axes';
 import NowLine from './now-line';
 import { rgba } from '../../../../misc/color';
 import { GRAPH_WIDTH, GRAPH_HEIGHT } from '../../../../misc/const';
-import { COLOR_TRANSLUCENT_LIGHT } from '../../../../misc/config';
+import {
+    COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE, FONT_GRAPH_TITLE
+} from '../../../../misc/config';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../../../misc/data';
 
-export function BaseKey({ children }) {
-    return (
-        <g className="key">
-            <rect x={45} y={8} width={200} height={60}
-                fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
-            {children}
-        </g>
-    );
+export function BaseKey({ title, children }) {
+    const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
+
+    return <g className="key">
+        <rect x={45} y={8} width={200} height={60}
+            fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
+
+        <text x={65} y={10} color={rgba(COLOR_GRAPH_TITLE)} alignmentBaseline="hanging"
+            fontSize={fontSize} fontFamily={fontFamily}>{title}</text>
+        {children}
+    </g>;
 }
 
 BaseKey.propTypes = {
+    title: PropTypes.string.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.object,
         PropTypes.array

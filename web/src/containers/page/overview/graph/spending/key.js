@@ -6,7 +6,7 @@ import {
 } from '../../../../../misc/config';
 import { rgba } from '../../../../../misc/color';
 
-export default function Key({ pixX, pixY, maxX, minY, maxY }) {
+export default function Key({ pixX, pixY, maxX, minY, maxY, title }) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     const future0 = pixX(Date.now() / 1000);
@@ -14,7 +14,7 @@ export default function Key({ pixX, pixY, maxX, minY, maxY }) {
     const futureW = pixX(maxX) - future0;
     const futureH = pixY(minY) - future1;
 
-    return <BaseKey>
+    return <BaseKey title={title}>
         <line x1={50} y1={40} x2={74} y2={40}
             stroke={rgba(COLOR_SPENDING)} strokeWidth={2} />
         <text x={78} y={40}
@@ -30,6 +30,7 @@ export default function Key({ pixX, pixY, maxX, minY, maxY }) {
 }
 
 Key.propTypes = {
+    title: PropTypes.string.isRequired,
     maxX: PropTypes.number.isRequired,
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,

@@ -64,13 +64,12 @@ function GraphBalance({ targets, ...props }) {
 
     const afterLines = () => <g>
         <Targets targets={targets} />
-        <Key />
+        <Key title="Balance" />
     </g>;
 
     const after = <AfterCanvas {...props} />;
 
     const graphProps = {
-        title: 'Balance',
         lines,
         afterLines,
         after,

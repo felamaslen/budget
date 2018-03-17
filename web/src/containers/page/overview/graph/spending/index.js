@@ -39,11 +39,10 @@ function GraphSpend(props) {
     const lines = processData(props);
 
     const afterLines = subProps => <g>
-        <Key {...subProps} />
+        <Key {...subProps} title="Cash flow" />
     </g>;
 
     const graphProps = {
-        title: 'Cash flow',
         lines,
         afterLines,
         ...props
