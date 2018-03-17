@@ -8,22 +8,20 @@ import React from 'react';
 import Graph from '.';
 import { timeSeriesTicks } from '../../misc/date';
 
-/*
-const getTimeScale = offset => {
+export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
     // divides the time axis (horizontal) into appropriate chunks
-    const ticks = timeSeriesTicks(offset + this.props.minX, offset + this.props.maxX);
+    const ticks = timeSeriesTicks(offset + minX, offset + maxX);
 
     if (ticks) {
         return ticks.map(tick => ({
             major: tick.major,
-            pix: Math.floor(this.pixX(tick.time - offset)) + 0.5,
+            pix: Math.floor(pixX(tick.time - offset)) + 0.5,
             text: tick.label || null
         }));
     }
 
     return [];
 };
-*/
 
 function getControlPointsAtPoint([x0, y0], [x1, y1], [x2, y2]) {
     const distLeft = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5;
@@ -175,7 +173,7 @@ function RenderedLine({ data, smooth, color, fill, ...props }) {
             <path key={key} d={path} stroke={stroke} strokeWidth={2} fill="none" />
         ));
 
-        return <g>{paths}</g>;
+        return <g className="lines">{paths}</g>;
     }
 
     const linePath = getSingleLinePath({ data, smooth, fill, ...props });
@@ -188,7 +186,9 @@ function RenderedLine({ data, smooth, color, fill, ...props }) {
         ? 'none'
         : color;
 
-    return <path d={linePath} stroke={strokeStyle} strokeWidth={2} fill={fillStyle} />;
+    return <g className="line">
+        <path d={linePath} stroke={strokeStyle} strokeWidth={2} fill={fillStyle} />
+    </g>;
 }
 
 RenderedLine.propTypes = {
@@ -228,7 +228,7 @@ export const genPixelCompute = props => {
     };
 };
 
-export default function LineGraph({ lines, width, height, children, ...props }) {
+export default function LineGraph({ lines, width, height, beforeLines, afterLines, ...props }) {
     const pixelCompute = genPixelCompute({
         padding: [0, 0, 0, 0],
         width,
@@ -248,8 +248,9 @@ export default function LineGraph({ lines, width, height, children, ...props }) 
 
     return (
         <Graph width={width} height={height} {...props}>
+            {beforeLines}
             {renderedLines}
-            {children}
+            {afterLines}
         </Graph>
     );
 }
@@ -257,6 +258,10 @@ export default function LineGraph({ lines, width, height, children, ...props }) 
 LineGraph.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    beforeLines: PropTypes.object,
+    afterLines: PropTypes.object,
+    before: PropTypes.object,
+    after: PropTypes.object,
     lines: PropTypes.array.isRequired,
     minX: PropTypes.number,
     maxX: PropTypes.number,
