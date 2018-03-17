@@ -2,7 +2,7 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function Arrow({ xv, yv, color, minY, maxY, pixX, pixY }) {
+export function Arrow({ xv, yv, color, minY, maxY, pixX, pixY }) {
     const xPix = pixX(xv);
 
     const direction = 2 * ((yv > 0) >> 0) - 1;
@@ -22,6 +22,7 @@ function Arrow({ xv, yv, color, minY, maxY, pixX, pixY }) {
         ['L', xPix + arrowWidth, arrowTop],
         ['L', xPix, pixY(yv) + direction * arrowHeight * 0.7]
     ]
+        .map(([type, ...part]) => [type, ...part.map(value => value.toFixed(1))])
         .map(([type, ...part]) => `${type}${part.join(' ')}`)
         .concat(['Z'])
         .join(' ');
