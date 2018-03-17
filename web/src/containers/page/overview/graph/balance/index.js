@@ -7,30 +7,14 @@ import { connect } from 'react-redux';
 import { aShowAllToggled } from '../../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { GRAPH_WIDTH, GRAPH_HEIGHT } from '../../../../../misc/const';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
 } from '../../../../../misc/config';
 import { rgba } from '../../../../../misc/color';
-import LineGraph from '../../../../../components/graph/line';
-import Axes from './axes';
 import Key from './key';
 import Targets from './targets';
 import AfterCanvas from './after-canvas';
-import { getValuesWithTime, getFutureKey } from '../cash-flow';
-
-function getRanges(dataBalance) {
-    const dataY = dataBalance.map(item => item.last());
-    const dataX = dataBalance.map(item => item.first());
-
-    const minYValue = dataY.min();
-    const minY = Math.min(0, minYValue);
-    const maxY = dataY.max();
-    const minX = dataX.min();
-    const maxX = dataX.max();
-
-    return { minY, maxY, minX, maxX };
-}
+import { GraphCashFlow, getValuesWithTime, getFutureKey } from '../helpers';
 
 function processData({ cost, showAll, ...props }) {
     let oldOffset = 0;
@@ -83,20 +67,8 @@ function processData({ cost, showAll, ...props }) {
 
 function GraphBalance({ targets, ...props }) {
     const lines = processData(props);
-    const ranges = getRanges(lines[0].data);
 
-    const coreProps = {
-        width: GRAPH_WIDTH,
-        height: GRAPH_HEIGHT,
-        padding: [40, 0, 0, 0],
-        ...ranges
-    };
-
-    const beforeLines = <g>
-        <Axes {...coreProps} />
-    </g>;
-
-    const afterLines = <g>
+    const afterLines = () => <g>
         <Targets targets={targets} />
         <Key />
     </g>;
@@ -105,17 +77,13 @@ function GraphBalance({ targets, ...props }) {
 
     const graphProps = {
         title: 'Balance',
-        beforeLines,
+        lines,
         afterLines,
         after,
-        lines,
-        ...coreProps,
         ...props
     };
 
-    return (
-        <LineGraph {...graphProps} />
-    );
+    return <GraphCashFlow {...graphProps} />;
 }
 
 GraphBalance.propTypes = {

@@ -6,6 +6,7 @@ import { List as list } from 'immutable';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Graph from '.';
+import ArrowLine from './arrows';
 import { timeSeriesTicks } from '../../misc/date';
 
 export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
@@ -157,9 +158,13 @@ function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
         }));
 }
 
-function RenderedLine({ data, smooth, color, fill, ...props }) {
+function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {
     if (!data.size) {
         return null;
+    }
+
+    if (arrows) {
+        return <ArrowLine data={data} color={color} {...props} />;
     }
 
     if (typeof color === 'function') {
@@ -199,6 +204,7 @@ RenderedLine.propTypes = {
     ]).isRequired,
     fill: PropTypes.bool,
     smooth: PropTypes.bool,
+    arrows: PropTypes.bool,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     valX: PropTypes.func.isRequired,
@@ -236,6 +242,13 @@ export default function LineGraph({ lines, width, height, beforeLines, afterLine
         ...props
     });
 
+    const subProps = {
+        width,
+        height,
+        ...props,
+        ...pixelCompute
+    };
+
     const renderedLines = lines.map(({ key, ...line }) => (
         <RenderedLine
             key={key}
@@ -243,14 +256,15 @@ export default function LineGraph({ lines, width, height, beforeLines, afterLine
             height={height}
             {...line}
             {...pixelCompute}
+            {...props}
         />
     ));
 
     return (
         <Graph width={width} height={height} {...props}>
-            {beforeLines}
+            {beforeLines && beforeLines(subProps)}
             {renderedLines}
-            {afterLines}
+            {afterLines && afterLines(subProps)}
         </Graph>
     );
 }
@@ -258,8 +272,8 @@ export default function LineGraph({ lines, width, height, beforeLines, afterLine
 LineGraph.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    beforeLines: PropTypes.object,
-    afterLines: PropTypes.object,
+    beforeLines: PropTypes.func,
+    afterLines: PropTypes.func,
     before: PropTypes.object,
     after: PropTypes.object,
     lines: PropTypes.array.isRequired,

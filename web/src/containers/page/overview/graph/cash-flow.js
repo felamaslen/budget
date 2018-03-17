@@ -23,48 +23,6 @@ const today = {
     date: now.get('date')
 };
 
-export function getFutureKey({
-    currentYearMonth: [currentYear, currentMonth],
-    startYearMonth: [startYear, startMonth]
-}) {
-    return 1 + getKeyFromYearMonth(
-        currentYear,
-        currentMonth,
-        startYear,
-        startMonth
-    );
-}
-
-function getTime(offset, breakAtToday, startYear, startMonth) {
-    // converts a key index to a UNIX time stamp
-    return key => {
-        const [year, month] = getYearMonthFromKey(key - offset, startYear, startMonth);
-
-        if (breakAtToday && year === today.year && month === today.month) {
-            return now.ts / 1000;
-        }
-
-        // return the last day of this month
-        return Math.floor(new Date(year, month, 1).getTime() / 1000) - 86400;
-    };
-}
-
-export function getValuesWithTime(data, {
-    oldOffset,
-    breakAtToday,
-    startYearMonth: [startYear, startMonth]
-}) {
-
-    const timeGetter = getTime(oldOffset, breakAtToday, startYear, startMonth);
-
-    return data.map((value, index) => {
-
-        const time = timeGetter(index);
-
-        return list([time, value]);
-    });
-}
-
 function drawNowLine({ minY, maxY }, { ctx }, { pixX, pixY }) {
     // draw a line indicating where the present ends and the future starts
     const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;

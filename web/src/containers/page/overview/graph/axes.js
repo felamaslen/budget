@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import {
     COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, GRAPH_CASHFLOW_NUM_TICKS, COLOR_GRAPH_TITLE,
     FONT_AXIS_LABEL
-} from '../../../../../misc/config';
-import { rgba } from '../../../../../misc/color';
-import { getTickSize, formatCurrency } from '../../../../../misc/format';
-import { getTimeScale, genPixelCompute } from '../../../../../components/graph/line';
+} from '../../../../misc/config';
+import { rgba } from '../../../../misc/color';
+import { getTickSize, formatCurrency } from '../../../../misc/format';
+import { getTimeScale, genPixelCompute } from '../../../../components/graph/line';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     return (minY, maxY, pixY) => {
@@ -30,10 +30,7 @@ function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     };
 }
 
-export default function Axes(props) {
-    const { minX, maxX, minY, maxY } = props;
-    const { pixX, pixY } = genPixelCompute(props);
-
+export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
     const x0 = pixX(minX);
     const xMax = pixX(maxX);
     const y0 = pixY(minY);
@@ -139,6 +136,8 @@ Axes.propTypes = {
     minX: PropTypes.number.isRequired,
     maxX: PropTypes.number.isRequired,
     minY: PropTypes.number.isRequired,
-    maxY: PropTypes.number.isRequired
+    maxY: PropTypes.number.isRequired,
+    pixX: PropTypes.func.isRequired,
+    pixY: PropTypes.func.isRequired
 };
 
