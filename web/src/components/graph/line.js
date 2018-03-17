@@ -63,7 +63,7 @@ function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
 
     let line = null;
 
-    if (smooth) {
+    if (smooth && pixels.size > 2) {
         const controlPoints = getControlPoints(pixels);
 
         line = pixels.slice(0, pixels.size - 1)
@@ -119,6 +119,10 @@ function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
 }
 
 function getLinePathPart(linePath) {
+    if (linePath.size < 1) {
+        return '';
+    }
+
     const parts = linePath.map(({ type, args }) =>
         `${type}${args.map(point => point.join(',')).join(' ')}`);
 
@@ -155,7 +159,8 @@ function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
         .map((end, endIndex) => ({
             path: getLinePathPart(linePath.slice(ends[endIndex], end)),
             stroke: colors.get(ends[endIndex])
-        }));
+        }))
+        .filter(({ path }) => path.length);
 }
 
 function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {

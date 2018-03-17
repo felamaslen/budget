@@ -336,6 +336,10 @@ export function GraphFunds(props) {
     const svgProperties = {
         onClick: () => onClick,
         onWheel: ({ valX }) => evt => {
+            if (!hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
+                return;
+            }
+
             const position = hlPoint
                 ? hlPoint.get(0)
                 : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
