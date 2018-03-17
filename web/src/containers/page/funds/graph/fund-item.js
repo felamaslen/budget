@@ -3,7 +3,12 @@
  */
 
 import { List as list } from 'immutable';
-
+import { aFundItemGraphToggled } from '../../../../actions/graph.actions';
+import { connect } from 'react-redux';
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import LineGraph from '../../../../components/graph/line';
 import { rgba } from '../../../../misc/color';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
@@ -12,13 +17,7 @@ import {
 import {
     COLOR_LOSS, COLOR_PROFIT, COLOR_DARK, FONT_AXIS_LABEL
 } from '../../../../misc/config';
-import { aFundItemGraphToggled } from '../../../../actions/graph.actions';
-
-import { connect } from 'react-redux';
-import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import LineGraph from '../../../../components/graph/line';
+import { separateLines } from './helpers';
 
 function getDimensions(popout) {
     if (popout) {
@@ -43,31 +42,13 @@ function processData(data, popout) {
 
     // split up the line into multiple sections, if there are gaps in the data
     // (this can happen if the fund is sold and then re-bought at a later date)
-    const lines = data.reduce(({ lastLines, lastValue }, point) => {
-        const value = point.get(1);
-
-        if (value === 0) {
-            return { lastLines, lastValue: 0 };
-        }
-        if (lastValue === 0) {
-            return { lastLines: lastLines.concat([list.of(point)]), lastValue: value };
-        }
-
-        return {
-            lastLines: lastLines.slice(0, lastLines.length - 1)
-                .concat([lastLines[lastLines.length - 1].push(point)]),
-            lastValue: value
-        };
-
-    }, { lastLines: [], lastValue: 0 })
-        .lastLines
-        .map((line, key) => ({
-            key,
-            data: line,
-            strokeWidth: 1 + 0.5 * (popout >> 0),
-            smooth: true,
-            color: point => colorProfitLoss[(point.get(1) > line.getIn([0, 1])) >> 0]
-        }));
+    const lines = separateLines(data).map((line, key) => ({
+        key,
+        data: line,
+        strokeWidth: 1 + 0.5 * (popout >> 0),
+        smooth: true,
+        color: point => colorProfitLoss[(point.get(1) > line.getIn([0, 1])) >> 0]
+    }));
 
     return { lines, minX, maxX, minY, maxY };
 }

@@ -25,7 +25,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph, { genValX, genValY } from '../../../../components/graph/line';
-import { separateLine } from './helpers';
+import { separateLines } from './helpers';
 
 function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {
     const fundLineToggles = fundItems
@@ -48,9 +48,9 @@ function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {
         reloadPagePrices: false
     });
 
-    const periodOptions = GRAPH_FUNDS_PERIODS.map(([value, display], key) => {
-        return <option key={key} value={value}>{display}</option>;
-    });
+    const periodOptions = GRAPH_FUNDS_PERIODS.map(([value, display], key) => (
+        <option key={key} value={value}>{display}</option>
+    ));
 
     return <div>
         <ul className="fund-sidebar noselect">
@@ -75,6 +75,7 @@ AfterCanvas.propTypes = {
     changePeriod: PropTypes.func.isRequired
 };
 
+/*
 function formatValue(value, mode = null) {
     if (mode === GRAPH_FUNDS_MODE_ROI) {
         return `${value.toFixed(2)}%`;
@@ -218,22 +219,6 @@ function drawData({
 }, {
     pixX, pixY, drawCubicLine, drawLine
 }) {
-    // plot past data
-    fundLines.forEach(line => {
-        const mainLine = line.get('index') === 0;
-        const color = rgba(fundItems.getIn([line.get('index'), 'color']));
-
-        const separatedLines = separateLine(line.get('line'));
-
-        ctx.lineWidth = 1 + 0.5 * (mainLine >> 0);
-
-        if (mode === GRAPH_FUNDS_MODE_ROI) {
-            return separatedLines.forEach(linePart => drawCubicLine(linePart, [color]));
-        }
-
-        return separatedLines.forEach(linePart => drawLine(linePart, [color]));
-    });
-
     if (hlPoint) {
         const hlPixX = pixX(hlPoint.get(0));
         const hlPixY = pixY(hlPoint.get(1));
@@ -284,8 +269,32 @@ function onDraw(...args) {
     drawData(...args);
     drawLabel(...args);
 }
+*/
 
-function processData({ zoom, mode, fundLines, cacheTimes }) {
+function getLines({ fundLines, fundItems, mode }) {
+    return fundLines.reduce((lines, item) => {
+        const mainLine = item.get('index') === 0;
+        const color = rgba(fundItems.getIn([item.get('index'), 'color']));
+
+        const parts = separateLines(item.get('line'));
+        const strokeWidth = 1 + 0.5 * (mainLine >> 0);
+
+        const itemLines = parts.map((data, key) => ({
+            key: `${item.get('index')}-${key}`,
+            data,
+            smooth: true,
+            color,
+            strokeWidth
+        }));
+
+        return lines.concat(itemLines);
+
+    }, []);
+}
+
+function processData(props) {
+    const { zoom, mode, fundLines, cacheTimes } = props;
+
     const minX = zoom.get(0);
     const maxX = zoom.get(1);
 
@@ -316,56 +325,51 @@ function processData({ zoom, mode, fundLines, cacheTimes }) {
         maxY = tickSizeY * Math.ceil(maxY / tickSizeY);
     }
 
-    return { minX, maxX, minY, maxY, tickSizeY };
+    const lines = getLines(props);
+
+    return { minX, maxX, minY, maxY, lines, tickSizeY };
 }
 
-export function GraphFunds({ onClick, onHover, onZoom, ...props }) {
-    const canvasProperties = {
+export function GraphFunds(props) {
+    const { onClick, onHover, onZoom, hlPoint } = props;
+
+    const svgProperties = {
         onClick: () => onClick,
-        onWheel: (mProps, mState) => {
-            const valX = genValX(mProps, mState);
+        onWheel: ({ valX }) => evt => {
+            const position = hlPoint
+                ? hlPoint.get(0)
+                : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
 
-            return evt => {
-                const position = props.hlPoint
-                    ? props.hlPoint.get(0)
-                    : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
+            onZoom({ direction: evt.deltaY / Math.abs(evt.deltaY), position });
 
-                onZoom({ direction: evt.deltaY / Math.abs(evt.deltaY), position });
-
-                evt.preventDefault();
-            };
+            evt.preventDefault();
         }
     };
 
     const outerProperties = {
-        onMouseMove: (mProps, mState) => {
-            const valX = genValX(mProps, mState);
-            const valY = genValY(mProps, mState);
+        onMouseMove: ({ valX, valY }) => ({ pageX, pageY, currentTarget }) => {
+            const { left, top } = currentTarget.getBoundingClientRect();
 
-            return ({ pageX, pageY, currentTarget }) => {
-                const { left, top } = currentTarget.getBoundingClientRect();
-
-                onHover({
-                    valX: valX(pageX - left),
-                    valY: valY(pageY - top)
-                });
-            };
+            onHover({
+                valX: valX(pageX - left),
+                valY: valY(pageY - top)
+            });
         },
         onMouseOut: () => () => onHover(null)
     };
 
     const after = <AfterCanvas {...props} />;
 
-    return <LineGraph
-        padding={[36, 0, 0, 0]}
-        after={after}
-        onDraw={onDraw}
-        colorTransition={[null]}
-        canvasProperties={canvasProperties}
-        outerProperties={outerProperties}
-        {...processData(props)}
-        {...props}
-    />;
+    const graphProps = {
+        padding: [36, 0, 0, 0],
+        after,
+        svgProperties,
+        outerProperties,
+        ...processData(props),
+        ...props
+    };
+
+    return <LineGraph {...graphProps} />;
 }
 
 GraphFunds.propTypes = {

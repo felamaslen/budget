@@ -1,34 +1,23 @@
 import { List as list } from 'immutable';
 
-export function separateLine(line) {
-    return line
-        .reduce(({ lastEnded, lines }, point) => {
-            const validValue = point.get(1) !== 0;
+export function separateLines(line) {
+    return line.reduce(({ lastLines, lastValue }, point) => {
+        const value = point.get(1);
 
-            if (lastEnded) {
-                if (validValue) {
-                    return {
-                        lines: lines.push(list.of(point)),
-                        lastEnded: false
-                    };
-                }
+        if (value === 0) {
+            return { lastLines, lastValue: 0 };
+        }
+        if (lastValue === 0) {
+            return { lastLines: lastLines.concat([list.of(point)]), lastValue: value };
+        }
 
-                return { lines, lastEnded };
-            }
+        return {
+            lastLines: lastLines.slice(0, lastLines.length - 1)
+                .concat([lastLines[lastLines.length - 1].push(point)]),
+            lastValue: value
+        };
 
-            if (validValue) {
-                return {
-                    lines: lines.set(lines.size - 1, lines.last().push(point)),
-                    lastEnded: false
-                };
-            }
-
-            return { lines, lastEnded: true };
-
-        }, {
-            lines: list.of(list.of()),
-            lastEnded: false
-        })
-        .lines;
+    }, { lastLines: [], lastValue: 0 })
+        .lastLines;
 }
 

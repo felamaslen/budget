@@ -262,7 +262,7 @@ export default function LineGraph({ lines, width, height, beforeLines, afterLine
     ));
 
     return (
-        <Graph width={width} height={height} {...props}>
+        <Graph width={width} height={height} {...props} {...pixelCompute}>
             {beforeLines && beforeLines(subProps)}
             {renderedLines}
             {afterLines && afterLines(subProps)}
