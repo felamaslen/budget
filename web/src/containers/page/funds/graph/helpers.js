@@ -1,4 +1,6 @@
 import { List as list } from 'immutable';
+import { GRAPH_FUNDS_MODE_ROI } from '../../../../misc/const';
+import { formatCurrency } from '../../../../misc/format';
 
 export function separateLines(line) {
     return line.reduce(({ lastLines, lastValue }, point) => {
@@ -19,5 +21,13 @@ export function separateLines(line) {
 
     }, { lastLines: [], lastValue: 0 })
         .lastLines;
+}
+
+export function formatValue(value, mode = null) {
+    if (mode === GRAPH_FUNDS_MODE_ROI) {
+        return `${value.toFixed(2)}%`;
+    }
+
+    return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
 }
 
