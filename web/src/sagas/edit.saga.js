@@ -1,4 +1,3 @@
-import { List as list } from 'immutable';
 import { delay } from 'redux-saga';
 import { all, fork, select, takeLatest, take, cancel, call, put } from 'redux-saga/effects';
 import axios from 'axios';
@@ -54,9 +53,9 @@ export function *requestEditSuggestions({ reqId, page, item, value }) {
         try {
             const response = yield call(axios.get, url, { headers: { Authorization: apiKey } });
 
-            const items = list(response.data.data.list);
+            const data = response.data.data;
 
-            yield put(aSuggestionsReceived({ items, reqId }));
+            yield put(aSuggestionsReceived({ data, reqId }));
         }
         catch (err) {
             console.warn('Error loading search suggestions');

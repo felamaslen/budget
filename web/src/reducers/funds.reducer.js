@@ -349,6 +349,9 @@ export function getFundLineProcessed(times, timeOffsets, prices, units, costs, m
     const lineWithTimes = line.map((value, key) => list([times.get(key), value]));
 
     return map({
+        prices: index === -1
+            ? null
+            : prices.get(index),
         line: lineWithTimes,
         index: lineIndex
     });
@@ -368,12 +371,9 @@ export function getFundLines(times, timeOffsets, prices, units, costs, mode, fun
     }
 
     return lines
-        .concat(fundsValid
-            .filter(index => index > -1)
+        .concat(fundsValid.filter(index => index > -1)
             .map(index => getFundLineProcessed(
-                times.get(index + 1), null, prices, units, costs, mode, index
-            ))
-        )
+                times.get(index + 1), null, prices, units, costs, mode, index)))
         .filter(item => item !== null);
 }
 
@@ -469,8 +469,7 @@ export function getFormattedHistory(rowsMap, mode, startTime, cacheTimes, zoom, 
         .map((item, key) => item.set('color', colors.get(key)));
 
     const fundLinesAll = getFundLines(
-        times, timeOffsets, prices, units, costs, mode, fundsEnabled
-    );
+        times, timeOffsets, prices, units, costs, mode, fundsEnabled);
 
     const fundLines = zoomFundLines(fundLinesAll, zoom);
 

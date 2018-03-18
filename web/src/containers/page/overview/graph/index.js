@@ -15,6 +15,7 @@ export default function OverviewGraphs() {
         return null;
     };
 
+
     return <div className="graph-container-outer">
         <GraphBalance name="balance" />
         <Media query={mediaQueries.desktop}>{graphSpending}</Media>
