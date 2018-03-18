@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { COLOR_DARK, COLOR_GRAPH_TITLE, FONT_GRAPH_KEY } from '../../../../misc/config';
+import { FONT_GRAPH_KEY } from '../../../../constants/graph';
+import { COLOR_DARK, COLOR_GRAPH_TITLE } from '../../../../constants/colors';
 import { rgba } from '../../../../misc/color';
 
 export default function NowLine({ now, minY, maxY, pixX, pixY }) {

@@ -5,7 +5,7 @@ import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import ErrorMessages from '../../../src/containers/error-messages';
-import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '../../../src/misc/const';
+import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '../../../src/constants/error';
 import { ERROR_CLOSED } from '../../../src/constants/actions';
 
 describe('<ErrorMessages />', () => {

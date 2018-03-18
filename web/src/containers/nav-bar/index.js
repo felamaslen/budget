@@ -3,7 +3,7 @@ import { aUserLoggedOut } from '../../actions/app.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
-import { PAGES } from '../../misc/const';
+import { PAGES } from '../../constants/data';
 
 export function Navbar({ active, onLogout }) {
     if (!active) {

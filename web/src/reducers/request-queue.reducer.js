@@ -1,6 +1,5 @@
 import { Map as map } from 'immutable';
-
-import { PAGES } from '../misc/const';
+import { PAGES } from '../constants/data';
 import { getValueForTransmit } from '../misc/data';
 
 export function addToRequestQueue(requestList, dataItem, startYearMonth = null) {

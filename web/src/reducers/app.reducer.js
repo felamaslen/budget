@@ -9,7 +9,7 @@ import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
 import { getFundsCachedValueAgeText } from './funds.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
-import { PAGES } from '../misc/const';
+import { PAGES } from '../constants/data';
 
 export const rOnWindowResize = (reduction, { size }) => reduction
     .setIn(['other', 'windowWidth'], size);

@@ -6,10 +6,9 @@ import LineGraph from '../../../../components/graph/line';
 import Axes from './axes';
 import NowLine from './now-line';
 import { rgba } from '../../../../misc/color';
-import { GRAPH_HEIGHT } from '../../../../misc/const';
-import {
-    COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE, FONT_GRAPH_TITLE
-} from '../../../../misc/config';
+import { GRAPH_HEIGHT } from '../../../../constants/graph';
+import { FONT_GRAPH_TITLE } from '../../../../constants/graph';
+import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '../../../../constants/colors';
 import { getYearMonthFromKey, getKeyFromYearMonth } from '../../../../misc/data';
 
 export function BaseKey({ title, children }) {

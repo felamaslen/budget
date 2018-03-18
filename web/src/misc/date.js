@@ -3,7 +3,7 @@
  */
 
 import { DateTime } from 'luxon';
-import { MONTHS_SHORT, WEEK_DAYS } from './const';
+import { MONTHS_SHORT, WEEK_DAYS } from '../constants';
 
 export function getNow() {
     if (process.env.NODE_ENV === 'test') {

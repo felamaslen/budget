@@ -1,4 +1,4 @@
-import { PAGES, LIST_COLS_MOBILE } from '../../../../misc/const';
+import { PAGES, LIST_COLS_MOBILE } from '../../../../constants/data';
 import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../../../actions/form.actions';
 import React from 'react';

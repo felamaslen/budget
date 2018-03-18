@@ -2,12 +2,11 @@
  * Carries out actions for the content component
  */
 
-import { PAGES } from '../misc/const';
+import { PAGES } from '../constants/data';
 import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../misc/data';
 import { capitalise, formatCurrency } from '../misc/format';
-
 import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList, processPageDataFunds } from './list.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';

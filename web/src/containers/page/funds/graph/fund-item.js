@@ -12,11 +12,9 @@ import LineGraph from '../../../../components/graph/line';
 import { rgba } from '../../../../misc/color';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
-    GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE
-} from '../../../../misc/const';
-import {
-    COLOR_LOSS, COLOR_PROFIT, COLOR_DARK, FONT_AXIS_LABEL
-} from '../../../../misc/config';
+    GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE, FONT_AXIS_LABEL
+} from '../../../../constants/graph';
+import { COLOR_LOSS, COLOR_PROFIT, COLOR_DARK } from '../../../../constants/colors';
 import { separateLines } from './helpers';
 
 function getDimensions(popout) {

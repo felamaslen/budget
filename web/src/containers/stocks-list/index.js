@@ -5,7 +5,7 @@
 
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '../../misc/config';
+import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '../../constants/stocks';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';

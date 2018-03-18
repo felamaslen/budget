@@ -1,6 +1,6 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { LIST_COLS_MOBILE } from '../../../../misc/const';
+import { LIST_COLS_MOBILE } from '../../../../constants/data';
 import { formatCurrency } from '../../../../misc/format';
 import { aMobileEditDialogOpened } from '../../../../actions/form.actions';
 import React from 'react';

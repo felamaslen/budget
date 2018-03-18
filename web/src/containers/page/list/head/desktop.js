@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ListHeadExtra from './extra';
 import { formatCurrency } from '../../../../misc/format';
-import { PAGES } from '../../../../misc/const';
+import { PAGES } from '../../../../constants/data';
 
 export function ListHeadDesktop({ page, weeklyValue, daily, totalCost }) {
     const weeklyValueFormatted = formatCurrency(weeklyValue, {

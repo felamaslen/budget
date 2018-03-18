@@ -3,7 +3,7 @@
  */
 
 import { fromJS, Map as map, List as list } from 'immutable';
-import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '../misc/const';
+import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '../constants/analysis';
 import { BlockPacker } from '../misc/format';
 
 function sortTotal(prev, next) {

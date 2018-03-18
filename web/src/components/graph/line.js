@@ -8,7 +8,7 @@ import React from 'react';
 import Graph from '.';
 import ArrowLine from './arrows';
 import { timeSeriesTicks } from '../../misc/date';
-import { GRAPH_CURVINESS } from '../../misc/config';
+import { GRAPH_CURVINESS } from '../../constants/graph';
 
 export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
     // divides the time axis (horizontal) into appropriate chunks

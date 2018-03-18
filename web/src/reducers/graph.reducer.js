@@ -9,7 +9,7 @@ import {
 } from './funds.reducer';
 import { processRawListRows } from './list.reducer';
 
-import { GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../misc/const';
+import { GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../constants/graph';
 import { sortRowsByDate } from '../misc/data';
 import { rgba } from '../misc/color';
 

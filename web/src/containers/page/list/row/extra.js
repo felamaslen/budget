@@ -1,6 +1,6 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { PAGES } from '../../../../misc/const';
+import { PAGES } from '../../../../constants/data';
 import { rgba } from '../../../../misc/color';
 import { formatCurrency, formatPercent } from '../../../../misc/format';
 import React from 'react';

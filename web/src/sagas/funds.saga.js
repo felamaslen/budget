@@ -4,8 +4,8 @@ import axios from 'axios';
 import querystring from 'querystring';
 
 import { GRAPH_FUNDS_PERIOD_CHANGED, STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '../constants/actions';
-import { API_PREFIX } from '../misc/const';
-import { DO_STOCKS_LIST } from '../misc/config';
+import { API_PREFIX } from '../constants/data';
+import { DO_STOCKS_LIST } from '../constants/stocks';
 import { getPeriodMatch } from '../misc/data';
 
 import { aFundsGraphPeriodReceived } from '../actions/graph.actions';

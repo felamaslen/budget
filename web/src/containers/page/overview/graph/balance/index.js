@@ -5,9 +5,7 @@
 import { Map as map, List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
-} from '../../../../../misc/config';
+import { COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS } from '../../../../../constants/colors';
 import { rgba } from '../../../../../misc/color';
 import Key from './key';
 import Targets from './targets';

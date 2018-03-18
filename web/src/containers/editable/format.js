@@ -1,7 +1,7 @@
 import React from 'react';
 import { DateTime } from 'luxon';
 import { formatCurrency } from '../../misc/format';
-import { LOCALE } from '../../misc/config';
+import { LOCALE } from '../../constants';
 import { dateInput } from '../../misc/date';
 
 export function getEditValue(item, value, edited) {

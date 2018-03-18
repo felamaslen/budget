@@ -6,7 +6,7 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { rgba } from '../../../../../misc/color';
-import { COLOR_SPENDING, COLOR_PROFIT, COLOR_LOSS } from '../../../../../misc/config';
+import { COLOR_SPENDING, COLOR_PROFIT, COLOR_LOSS } from '../../../../../constants/colors';
 import { GraphCashFlow, getValuesWithTime } from '../helpers';
 import Key from './key';
 

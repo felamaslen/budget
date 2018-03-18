@@ -2,8 +2,8 @@
  * Colour functions
  */
 
-import { OVERVIEW_COLUMNS } from './const';
-import { COLOR_CATEGORY } from './config';
+import { OVERVIEW_COLUMNS } from '../constants/data';
+import { COLOR_CATEGORY } from '../constants/colors';
 import { listAverage } from './data';
 
 export function rgba(values) {

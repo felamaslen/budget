@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BaseKey } from '../helpers';
-import {
-    COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK, FONT_GRAPH_KEY
-} from '../../../../../misc/config';
+import { FONT_GRAPH_KEY } from '../../../../../constants/graph';
+import { COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../../../../constants/colors';
 import { rgba } from '../../../../../misc/color';
 
 export default function Key({ pixX, pixY, maxX, minY, maxY, title }) {

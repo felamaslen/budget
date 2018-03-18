@@ -1,6 +1,6 @@
 import React from 'react';
 import Media from 'react-media';
-import { mediaQueries } from '../../../../misc/const';
+import { mediaQueries } from '../../../../constants';
 
 import Header from './header';
 import Rows from './rows';

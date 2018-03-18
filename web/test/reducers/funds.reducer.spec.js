@@ -1,14 +1,9 @@
 import { Map as map, List as list } from 'immutable';
 
-import chai from 'chai';
-
-const expect = chai.expect;
-
-import { testRows, testLines, testStartTime, testCacheTimes }
-    from '../test_data/testFunds';
-
+import { expect } from 'chai';
+import { testRows, testLines, testStartTime, testCacheTimes } from '../test_data/testFunds';
 import * as rFunds from '../../src/reducers/funds.reducer';
-import { GRAPH_FUNDS_MODE_ROI } from '../../src/misc/const';
+import { GRAPH_FUNDS_MODE_ROI } from '../../src/constants/graph';
 
 describe('funds', () => {
     describe('getFundsCachedValueAgeText', () => {

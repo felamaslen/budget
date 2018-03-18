@@ -1,7 +1,8 @@
 import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FONT_GRAPH_KEY, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../../../../misc/config';
+import { FONT_GRAPH_KEY } from '../../../../../constants/graph';
+import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../../../../constants/colors';
 import { formatCurrency } from '../../../../../misc/format';
 import { rgba } from '../../../../../misc/color';
 

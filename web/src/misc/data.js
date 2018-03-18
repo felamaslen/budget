@@ -4,7 +4,8 @@
 
 import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
-import { AVERAGE_MEDIAN, AVERAGE_EXP, PAGES } from './const';
+import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
+import { PAGES } from '../constants/data';
 import { getNow } from './date';
 
 function sortByDate(prev, next) {

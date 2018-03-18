@@ -1,5 +1,5 @@
 import { List as list } from 'immutable';
-import { GRAPH_FUNDS_MODE_ROI } from '../../../../misc/const';
+import { GRAPH_FUNDS_MODE_ROI } from '../../../../constants/graph';
 import { formatCurrency } from '../../../../misc/format';
 
 export function separateLines(line) {

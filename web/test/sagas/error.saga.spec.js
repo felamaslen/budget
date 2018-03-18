@@ -3,7 +3,7 @@ import { Map as map } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import * as S from '../../src/sagas/error.saga';
 import { aErrorOpened } from '../../src/actions/error.actions';
-import { ERROR_LEVEL_ERROR } from '../../src/misc/const';
+import { ERROR_LEVEL_ERROR } from '../../src/constants/error';
 
 describe('error.saga', () => {
     describe('openTimedMessage', () => {

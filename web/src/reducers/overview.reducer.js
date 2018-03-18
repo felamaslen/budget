@@ -4,8 +4,9 @@
 
 import { List as list, Map as map, fromJS } from 'immutable';
 
-import { AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../misc/const';
-import { FUTURE_INVESTMENT_RATE } from '../misc/config';
+import { AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT } from '../constants';
+import { OVERVIEW_COLUMNS } from '../constants/data';
+import { FUTURE_INVESTMENT_RATE } from '../constants/stocks';
 import { getNow, yearMonthDifference } from '../misc/date';
 import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../misc/data';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';

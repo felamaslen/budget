@@ -3,7 +3,8 @@ import { aShowAllToggled } from '../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
-import { mediaQueries, GRAPH_SPEND_CATEGORIES, GRAPH_WIDTH } from '../../../../misc/const';
+import { mediaQueries } from '../../../../constants';
+import { GRAPH_SPEND_CATEGORIES, GRAPH_WIDTH } from '../../../../constants/graph';
 import GraphBalance from './balance';
 import GraphSpending from './spending';
 

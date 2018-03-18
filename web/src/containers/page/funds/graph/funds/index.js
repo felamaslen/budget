@@ -14,12 +14,10 @@ import classNames from 'classnames';
 import LineGraph from '../../../../../components/graph/line';
 import { getTickSize, formatAge } from '../../../../../misc/format';
 import {
-    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT,
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS
-} from '../../../../../misc/const';
-import {
-    GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS, COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK, FONT_GRAPH_TITLE
-} from '../../../../../misc/config';
+    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT, FONT_GRAPH_TITLE,
+    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS
+} from '../../../../../constants/graph';
+import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../../../../constants/colors';
 import debounce from '../../../../../misc/debounce';
 import { rgba } from '../../../../../misc/color';
 import { separateLines, formatValue } from '../helpers';

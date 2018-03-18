@@ -5,7 +5,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListRowExtra from './extra';
-import { PAGES } from '../../../../misc/const';
+import { PAGES } from '../../../../constants/data';
 import { formatCurrency } from '../../../../misc/format';
 import Column from './column';
 

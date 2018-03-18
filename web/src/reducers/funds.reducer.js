@@ -3,12 +3,9 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import {
-    COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN
-} from '../misc/config';
-import {
-    PAGES, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE
-} from '../misc/const';
+import { COLOR_GRAPH_FUND_LINE, COLOR_FUND_UP, COLOR_FUND_DOWN } from '../constants/colors';
+import { PAGES } from '../constants/data';
+import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE } from '../constants/graph';
 import { colorKey } from '../misc/color';
 import { formatAge } from '../misc/format';
 

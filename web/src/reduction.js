@@ -1,6 +1,6 @@
 import { List as list, Map as map } from 'immutable';
 
-import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS } from './misc/const';
+import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS } from './constants/graph';
 
 function getDefaultFundPeriod() {
     if (process.env.DEFAULT_FUND_PERIOD && GRAPH_FUNDS_PERIODS
