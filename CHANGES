@@ -1,5 +1,10 @@
 Release:
 
+- 4.1.0
+    - Web client:
+        - Now using SVG instead of HTML5 canvas for graphs
+        - Automatic insertion of probable category after selection of suggestions during data insert
+
 - 4.0.2
     - All:
         - Many minor fixes
