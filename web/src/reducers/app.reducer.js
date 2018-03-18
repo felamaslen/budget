@@ -120,15 +120,27 @@ function handleNavFromSuggestions(reduction, { page, suggestions, escape, enter 
     }
 
     if (enter) {
-        const reductionWithSuggestionValue = reduction
-            .setIn(
-                ['edit', 'active', 'value'],
-                suggestions.getIn(['list', suggestions.get('active')])
-            );
-
         // navigate to the next field after filling the current one with
         // the suggestion value
-        return handleNav(reductionWithSuggestionValue, { page, dx: 1, dy: 0 });
+        const handle = next => handleNav(next, { page, dx: 1, dy: 0 });
+
+        const reductionWithSuggestionValue = reduction.setIn(
+            ['edit', 'active', 'value'],
+            suggestions.getIn(['list', suggestions.get('active')]));
+
+        const categoryCol = PAGES[page].cols.indexOf('category');
+
+        if (suggestions.get('nextCategory').size &&
+            reduction.getIn(['edit', 'active', 'row']) === -1 &&
+            !reduction.getIn(['edit', 'add', page, categoryCol]).length
+        ) {
+            return handle(reductionWithSuggestionValue.setIn(
+                ['edit', 'add', page, categoryCol], suggestions.getIn(
+                    ['nextCategory', suggestions.get('active')])
+            ));
+        }
+
+        return handle(reductionWithSuggestionValue);
     }
 
     return reduction;

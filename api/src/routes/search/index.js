@@ -6,6 +6,34 @@ const { Router } = require('express');
 const joi = require('joi');
 const { searchSchema } = require('../../schema');
 
+function getQuery(db, request, uid) {
+    const { table, column, searchTerm, numResults } = request;
+
+    const query = qb => qb.select(column, db.raw(`SUM(IF(${table}.${column} LIKE '${searchTerm}%', 1, 0)) AS matches`))
+        .from(table)
+        .where(`${table}.${column}`, 'like', `%${searchTerm}%`)
+        .andWhere(`${table}.${column}`, 'not like', searchTerm)
+        .andWhere(`${table}.uid`, '=', uid)
+        .groupBy(`${table}.${column}`)
+        .orderBy('matches', 'desc')
+        .orderBy(column)
+        .limit(numResults)
+        .as('items');
+
+    if (['food', 'general'].includes(table) && column === 'item') {
+        return db.select('items.item', db.raw('COALESCE(nextValues.category, \'\') as nextCategory'))
+            .from(query)
+            .leftJoin(`${table} as nextValues`, 'nextValues.id', qb => qb.select('id')
+                .from(table)
+                .where('item', '=', db.raw('items.item'))
+                .andWhere('uid', '=', uid)
+                .limit(1)
+            );
+    }
+
+    return query(db);
+}
+
 /**
  * @swagger
  * /data/search/{dataType}/{column}/{searchTerm}/{numResults}:
@@ -65,22 +93,18 @@ function routeGet(config, db) {
                 .json({ errorMessage: error.message });
         }
 
-        const { table, column, searchTerm, numResults } = value;
-
         try {
-            const result = await db
-                .select(db.raw(`${column}, SUM(IF(${column} LIKE '${searchTerm}%', 1, 0)) AS matches`))
-                .from(table)
-                .where(column, 'like', `%${searchTerm}%`)
-                .andWhere('uid', '=', req.user.uid)
-                .groupBy(column)
-                .orderBy('matches', 'desc')
-                .orderBy(column)
-                .limit(numResults);
+            const result = await getQuery(db, value, req.user.uid);
 
             const data = {
-                list: result.map(item => String(item[column]))
+                list: result.map(({ [value.column]: item }) => String(item))
             };
+
+            if (result.length && result[0].nextCategory) {
+                const nextCategory = result.map(({ nextCategory: item }) => String(item));
+
+                return res.json({ data: { ...data, nextCategory } });
+            }
 
             return res.json({ data });
         }

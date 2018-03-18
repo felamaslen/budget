@@ -77,7 +77,7 @@ describe('edit.saga', () => {
                 .next('some_api_key')
                 .call(axios.get, 'api/v4/data/search/food/foo/bar/5', { headers: { Authorization: 'some_api_key' } })
                 .next({ data: { data: { list: ['foo'] } } })
-                .put(A.aSuggestionsReceived({ items: list.of('foo'), reqId: 1 }))
+                .put(A.aSuggestionsReceived({ data: { list: ['foo'] }, reqId: 1 }))
                 .next()
                 .isDone();
         });

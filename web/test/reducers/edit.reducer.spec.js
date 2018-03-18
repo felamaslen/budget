@@ -91,7 +91,7 @@ describe('Edit reducers', () => {
             expect(resultWrongId.getIn(['editSuggestions', 'reqId'])).to.equal(null);
         });
 
-        it('should insert the list, excluding exact matches, into the state', () => {
+        it('should insert the list into the state', () => {
             expect(R.rHandleSuggestions(fromJS({
                 editSuggestions: {
                     loading: true,
@@ -105,14 +105,15 @@ describe('Edit reducers', () => {
                     }
                 }
             }), {
-                items: ['foo', 'Foo', 'fOo', 'bar', 'baz'],
+                data: { list: ['bar', 'baz'] },
                 reqId: 100
             }).get('editSuggestions').toJS())
                 .to.deep.equal({
                     loading: false,
                     active: -1,
                     reqId: 100,
-                    list: ['bar', 'baz']
+                    list: ['bar', 'baz'],
+                    nextCategory: []
                 });
         });
     });
