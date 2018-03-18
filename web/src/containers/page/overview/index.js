@@ -2,6 +2,7 @@
  * Overview page component
  */
 
+import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { aContentRequested } from '../../../actions/content.actions';
 import React from 'react';
@@ -15,14 +16,14 @@ export class PageOverview extends PureComponent {
         this.props.onLoad();
     }
     render() {
-        const { loaded } = this.props;
+        const { loaded, rows, editRow, editCol } = this.props;
 
         if (!loaded) {
             return null;
         }
 
         return <div className="page-overview">
-            <OverviewTable />
+            <OverviewTable rows={rows} editRow={editRow} editCol={editCol} />
             <OverviewGraphs />
         </div>;
     }
@@ -30,12 +31,18 @@ export class PageOverview extends PureComponent {
 
 PageOverview.propTypes = {
     loaded: PropTypes.bool.isRequired,
-    onLoad: PropTypes.func.isRequired
+    onLoad: PropTypes.func.isRequired,
+    rows: PropTypes.instanceOf(list),
+    editRow: PropTypes.number,
+    editCol: PropTypes.number
 };
 
 const mapStateToProps = state => ({
     page: 'overview',
-    loaded: Boolean(state.getIn(['pagesLoaded', 'overview']))
+    loaded: Boolean(state.getIn(['pagesLoaded', 'overview'])),
+    rows: state.getIn(['pages', 'overview', 'rows']),
+    editRow: state.getIn(['edit', 'row']),
+    editCol: state.getIn(['edit', 'col'])
 });
 
 const mapDispatchToProps = dispatch => ({

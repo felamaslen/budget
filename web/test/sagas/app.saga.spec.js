@@ -1,16 +1,34 @@
 /* eslint-disable prefer-reflect */
 import { fromJS } from 'immutable';
+import '../browser';
 import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
-
 import * as S from '../../src/sagas/app.saga';
 import { selectApiKey } from '../../src/sagas';
 import { openTimedMessage } from '../../src/sagas/error.saga';
 
-import { aServerUpdateReceived, aServerAddReceived } from '../../src/actions/app.actions';
+import { aWindowResized, aServerUpdateReceived, aServerAddReceived } from '../../src/actions/app.actions';
 
 describe('app.saga', () => {
+    describe('watchEventEmitter', () => {
+        it('should dispatch an action emitted by the channel', () => {
+            const channel = S.windowResizeEventChannel();
+
+            testSaga(S.watchEventEmitter, S.windowResizeEventChannel)
+                .next()
+                .call(S.windowResizeEventChannel)
+                .next(channel)
+                .take(channel)
+                .next(aWindowResized(100))
+                .put(aWindowResized(100))
+                .next()
+                .take(channel)
+                .next(aWindowResized(105))
+                .put(aWindowResized(105));
+        });
+    });
+
     describe('selectRequestList', () => {
         it('should get the requestList and map it to each request', () => {
             expect(S.selectRequestList(fromJS({

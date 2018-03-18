@@ -3,8 +3,6 @@
  */
 
 import { Map as map, List as list } from 'immutable';
-import { connect } from 'react-redux';
-import { aShowAllToggled } from '../../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -59,7 +57,7 @@ function processData({ cost, showAll, ...props }) {
     ];
 }
 
-function GraphBalance({ targets, ...props }) {
+export default function GraphBalance({ targets, ...props }) {
     const lines = processData(props);
 
     const afterLines = () => <g>
@@ -84,19 +82,5 @@ GraphBalance.propTypes = {
     showAll: PropTypes.bool.isRequired,
     targets: PropTypes.instanceOf(list).isRequired
 };
-
-const mapStateToProps = state => ({
-    currentYearMonth: state.getIn(['pages', 'overview', 'data', 'currentYearMonth']),
-    startYearMonth: state.getIn(['pages', 'overview', 'data', 'startYearMonth']),
-    cost: state.getIn(['pages', 'overview', 'data', 'cost']),
-    showAll: state.getIn(['other', 'showAllBalanceGraph']),
-    targets: state.getIn(['pages', 'overview', 'data', 'targets'])
-});
-
-const mapDispatchToProps = dispatch => ({
-    onShowAll: () => dispatch(aShowAllToggled())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(GraphBalance);
 
 

@@ -11,6 +11,9 @@ import { getFundsCachedValueAgeText } from './funds.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
 import { PAGES } from '../misc/const';
 
+export const rOnWindowResize = (reduction, { size }) => reduction
+    .setIn(['other', 'windowWidth'], size);
+
 function getItemValue(reduction, page, row, col) {
     let id = null;
     let item = null;

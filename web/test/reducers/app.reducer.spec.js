@@ -4,6 +4,13 @@ import * as R from '../../src/reducers/app.reducer';
 import reduction from '../../src/reduction';
 
 describe('app.reducer', () => {
+    describe('rOnWindowResize', () => {
+        it('should set the window size in state', () => {
+            expect(R.rOnWindowResize(fromJS({ other: { windowWidth: 100 } }), { size: 200 }).toJS())
+                .to.deep.equal({ other: { windowWidth: 200 } });
+        });
+    });
+
     describe('rHandleKeyPress', () => {
         it('should do nothing if the key is a modifier', () => {
             expect(R.rHandleKeyPress(fromJS({ foo: 'bar' }), { key: 'Control' }).toJS())

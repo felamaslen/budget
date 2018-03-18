@@ -38,6 +38,7 @@ const reducers = createReducerObject([
     [AC.ERROR_REMOVED, error.rErrorMessageRemove],
 
     // app actions
+    [AC.WINDOW_RESIZED, app.rOnWindowResize],
     [AC.USER_LOGGED_OUT, app.rLogout],
     [AC.KEY_PRESSED, app.rHandleKeyPress],
     [AC.TIME_UPDATED, app.rUpdateTime],

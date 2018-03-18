@@ -3,6 +3,25 @@
  * the callback immediately on the first run
  */
 
+export function buffer(callback, delay, context = null) {
+    let runInLastBuffer = false;
+
+    const later = args => Reflect.apply(callback, context, args);
+
+    return function buffered(...args) {
+        if (runInLastBuffer) {
+            return;
+        }
+
+        setTimeout(() => {
+            runInLastBuffer = false;
+        }, delay);
+
+        runInLastBuffer = true;
+        later(args);
+    };
+}
+
 export default function debounce(callback, delay, immediate, context = null) {
     let timer = null;
     let args = [];

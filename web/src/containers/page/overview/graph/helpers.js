@@ -6,7 +6,7 @@ import LineGraph from '../../../../components/graph/line';
 import Axes from './axes';
 import NowLine from './now-line';
 import { rgba } from '../../../../misc/color';
-import { GRAPH_WIDTH, GRAPH_HEIGHT } from '../../../../misc/const';
+import { GRAPH_HEIGHT } from '../../../../misc/const';
 import {
     COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE, FONT_GRAPH_TITLE
 } from '../../../../misc/config';
@@ -99,7 +99,7 @@ export function GraphCashFlow(props) {
     const ranges = getRanges(props.lines);
 
     const coreProps = {
-        width: GRAPH_WIDTH,
+        width: props.graphWidth,
         height: GRAPH_HEIGHT,
         padding: [40, 0, 0, 0],
         now: DateTime.local(),
@@ -121,6 +121,7 @@ export function GraphCashFlow(props) {
 }
 
 GraphCashFlow.propTypes = {
+    graphWidth: PropTypes.number.isRequired,
     lines: PropTypes.array.isRequired
 };
 

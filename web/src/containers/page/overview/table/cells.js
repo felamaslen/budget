@@ -1,13 +1,11 @@
 import { Map as map } from 'immutable';
-import { connect } from 'react-redux';
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import CellInner from './cell-inner';
 
-export function OverviewTableCells({ row, rowKey, editRow, editCol }) {
+export default function OverviewTableCells({ row, rowKey, editRow, editCol }) {
     const cells = row.get('cells')
         .map((cell, cellKey) => {
             const style = {};
@@ -44,11 +42,4 @@ OverviewTableCells.propTypes = {
     editRow: PropTypes.number,
     editCol: PropTypes.number
 };
-
-const mapStateToProps = state => ({
-    editRow: state.getIn(['edit', 'row']),
-    editCol: state.getIn(['edit', 'col'])
-});
-
-export default connect(mapStateToProps)(OverviewTableCells);
 

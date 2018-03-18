@@ -4,6 +4,11 @@ import * as A from '../../src/actions/app.actions';
 import * as C from '../../src/constants/actions';
 
 describe('app.actions', () => {
+    describe('aWindowResized', () => {
+        it('should return WINDOW_RESIZED', () => expect(A.aWindowResized(100)).to.deep.equal({
+            type: C.WINDOW_RESIZED, size: 100
+        }));
+    });
     describe('aSettingsLoaded', () => {
         it('should return SETTINGS_LOADED', () => expect(A.aSettingsLoaded()).to.deep.equal({
             type: C.SETTINGS_LOADED
