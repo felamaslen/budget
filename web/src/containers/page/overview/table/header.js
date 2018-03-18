@@ -1,16 +1,13 @@
 import React from 'react';
-
+import classNames from 'classnames';
 import { OVERVIEW_COLUMNS } from '../../../../misc/const';
 
 export default function OverviewTableHeader() {
-    const header = OVERVIEW_COLUMNS.map((column, key) => {
-        const className = [
-            'col',
-            column[0]
-        ].join(' ');
+    const header = OVERVIEW_COLUMNS.map(([columnClass, columnName], key) => {
+        const className = classNames('col', columnClass);
 
         return <div className={className} key={key}>
-            <span className="text">{column[1]}</span>
+            <span className="text">{columnName}</span>
         </div>;
     });
 
