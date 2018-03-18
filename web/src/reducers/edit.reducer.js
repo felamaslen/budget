@@ -222,24 +222,24 @@ export function rHandleServerAdd(reduction, { response, fields, page }) {
     return newReduction;
 }
 
-export function rHandleSuggestions(reduction, { items, reqId }) {
+export function rHandleSuggestions(reduction, { data, reqId }) {
     const newReduction = reduction
         .setIn(['editSuggestions', 'loading'], false)
         .setIn(['editSuggestions', 'active'], -1);
 
-    if (!(items && reduction.getIn(['editSuggestions', 'reqId']) === reqId)) {
+    if (!(data && reduction.getIn(['editSuggestions', 'reqId']) === reqId)) {
         // null object (clear), or changed input while suggestions were loading
         return newReduction
             .setIn(['editSuggestions', 'list'], list.of())
-            .setIn(['editSuggestions', 'reqId'], null);
+            .setIn(['editSuggestions', 'reqId'], null)
+            .setIn(['editSuggestions', 'nextCategory'], null);
     }
 
-    const editValue = reduction
-        .getIn(['edit', 'active', 'value'])
-        .toLowerCase();
+    const { list: items, nextCategory } = data;
 
     return newReduction
-        .setIn(['editSuggestions', 'list'], items.filter(item => item.toLowerCase() !== editValue));
+        .setIn(['editSuggestions', 'list'], list(items))
+        .setIn(['editSuggestions', 'nextCategory'], list(nextCategory || []));
 }
 
 export function rRequestSuggestions(reduction, { reqId }) {

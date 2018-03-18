@@ -12,6 +12,7 @@ function getQuery(db, request, uid) {
     const query = qb => qb.select(column, db.raw(`SUM(IF(${table}.${column} LIKE '${searchTerm}%', 1, 0)) AS matches`))
         .from(table)
         .where(`${table}.${column}`, 'like', `%${searchTerm}%`)
+        .andWhere(`${table}.${column}`, 'not like', searchTerm)
         .andWhere(`${table}.uid`, '=', uid)
         .groupBy(`${table}.${column}`)
         .orderBy('matches', 'desc')
@@ -99,7 +100,7 @@ function routeGet(config, db) {
                 list: result.map(({ [value.column]: item }) => String(item))
             };
 
-            if (result[0].nextCategory) {
+            if (result.length && result[0].nextCategory) {
                 const nextCategory = result.map(({ nextCategory: item }) => String(item));
 
                 return res.json({ data: { ...data, nextCategory } });

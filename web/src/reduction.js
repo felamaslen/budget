@@ -42,6 +42,7 @@ export function resetAppState(state) {
             loading: false,
             reqId: null,
             list: list.of(),
+            nextCategory: list.of(),
             active: -1
         }))
         .set('modalDialog', map({
