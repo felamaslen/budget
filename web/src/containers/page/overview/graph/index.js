@@ -3,7 +3,7 @@ import { aShowAllToggled } from '../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
-import { mediaQueries, GRAPH_SPEND_CATEGORIES } from '../../../../misc/const';
+import { mediaQueries, GRAPH_SPEND_CATEGORIES, GRAPH_WIDTH } from '../../../../misc/const';
 import GraphBalance from './balance';
 import GraphSpending from './spending';
 
@@ -26,6 +26,7 @@ export function OverviewGraphs({ spending, balance, ...props }) {
 OverviewGraphs.propTypes = {
     startYearMonth: PropTypes.array.isRequired,
     currentYearMonth: PropTypes.array.isRequired,
+    graphWidth: PropTypes.number.isRequired,
     spending: PropTypes.object.isRequired,
     balance: PropTypes.object.isRequired
 };
@@ -33,6 +34,7 @@ OverviewGraphs.propTypes = {
 const mapStateToProps = state => ({
     startYearMonth: state.getIn(['pages', 'overview', 'data', 'startYearMonth']),
     currentYearMonth: state.getIn(['pages', 'overview', 'data', 'currentYearMonth']),
+    graphWidth: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_WIDTH),
     spending: {
         valuesNet: GRAPH_SPEND_CATEGORIES.reduce(
             (data, { name }) => data.map((item, key) =>

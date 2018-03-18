@@ -157,6 +157,7 @@
     "full-icu": "^1.2.1",
     "it-each": "^0.3.1",
     "jsdom": "^11.2.0",
+    "match-media-mock": "^0.1.0",
     "mocha": "^3.5.0",
     "mock-knex": "^0.4.0",
     "nodemon": "^1.11.0",
