@@ -58,6 +58,7 @@ export function resetAppState(state) {
             invalidKeys: list.of()
         }))
         .set('other', map({
+            windowWidth: window.innerWidth,
             showAllBalanceGraph: false,
             blockView: map({
                 status: '',

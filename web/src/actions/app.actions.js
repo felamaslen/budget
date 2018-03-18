@@ -4,6 +4,7 @@
 
 import * as A from '../constants/actions';
 
+export const aWindowResized = size => ({ type: A.WINDOW_RESIZED, size });
 export const aSettingsLoaded = () => ({ type: A.SETTINGS_LOADED });
 export const aUserLoggedOut = () => ({ type: A.USER_LOGGED_OUT });
 export const aKeyPressed = req => ({ type: A.KEY_PRESSED, ...req });

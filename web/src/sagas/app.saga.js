@@ -4,11 +4,11 @@ import axios from 'axios';
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
 import debounce from '../misc/debounce';
 import { API_PREFIX } from '../misc/const';
-import { aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
+import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
 
-function keyPressEventChannel() {
+export function keyPressEventChannel() {
     return eventChannel(emitter => {
         const keyPressHandler = debounce(evt => {
             emitter(aKeyPressed({
@@ -31,14 +31,22 @@ function keyPressEventChannel() {
 
         window.addEventListener('keydown', onKeyPress);
 
-        return () => {
-            window.removeEventListener('keydown', onKeyPress);
-        };
+        return () => window.removeEventListener('keydown', onKeyPress);
     });
 }
 
-export function *watchKeyPress() {
-    const channel = keyPressEventChannel();
+export function windowResizeEventChannel() {
+    return eventChannel(emitter => {
+        const resizeHandler = debounce(() => emitter(aWindowResized(window.innerWidth)), 50, true);
+
+        window.addEventListener('resize', resizeHandler);
+
+        return () => window.removeEventListener('resize', resizeHandler);
+    });
+}
+
+export function *watchEventEmitter(channelCreator) {
+    const channel = yield call(channelCreator);
 
     while (true) {
         const action = yield take(channel);
@@ -105,7 +113,8 @@ export function *addServerData({ page }) {
 
 export default function *appSaga() {
     yield all([
-        fork(watchKeyPress),
+        fork(watchEventEmitter, keyPressEventChannel),
+        fork(watchEventEmitter, windowResizeEventChannel),
         takeEvery(EDIT_LIST_ITEM_ADDED, addServerData),
         takeLatest(SERVER_UPDATED, updateServerData)
     ]);
