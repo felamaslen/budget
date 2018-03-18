@@ -1,5 +1,22 @@
 Release:
 
+- 4.0.2
+    - All:
+        - Many minor fixes
+        - Some major fixes
+    - API:
+        - Now using knex for database migrations and ORM
+        - Now using luxon for date manipulation
+        - Now using joi for data validation
+        - Now using winston for logging
+        - Added indexes and utf8mb4 encoding to database
+        - Updated authentication logic to use passport with JWTs instead of ad-hoc solution
+    - Web client:
+        - Increased test coverage and refactors of many components
+        - Updated data structures
+        - Savings targets
+        - Tweaked overview table display format
+
 - 3.2.3
     - Web client:
         - Bug fixes and dev env improvements
