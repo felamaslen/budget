@@ -6,10 +6,8 @@ import LineGraph from '../../../../components/graph/line';
 import Axes from './axes';
 import NowLine from './now-line';
 import { rgba } from '../../../../misc/color';
-import { GRAPH_HEIGHT } from '../../../../constants/graph';
-import { FONT_GRAPH_TITLE } from '../../../../constants/graph';
+import { GRAPH_HEIGHT, FONT_GRAPH_TITLE } from '../../../../constants/graph';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '../../../../constants/colors';
-import { getYearMonthFromKey, getKeyFromYearMonth } from '../../../../misc/data';
 
 export function BaseKey({ title, children }) {
     const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
@@ -32,45 +30,25 @@ BaseKey.propTypes = {
     ])
 };
 
-function getTime(now, offset, breakAtToday, startYear, startMonth) {
+function getTime(now, offset, breakAtToday, startDate) {
     // converts a key index to a UNIX time stamp
     return key => {
-        const [year, month] = getYearMonthFromKey(key - offset, startYear, startMonth);
+        const date = startDate.plus({ months: key - offset });
 
-        if (breakAtToday && year === now.year && month === now.month) {
+        if (breakAtToday && date.year === now.year && date.month === now.month) {
             return now.ts / 1000;
         }
 
-        return DateTime.fromObject({ year, month })
-            .endOf('month')
-            .ts / 1000;
+        return date.endOf('month').ts / 1000;
     };
 }
 
 export function getValuesWithTime(data, props) {
-    const {
-        oldOffset,
-        breakAtToday,
-        startYearMonth: [startYear, startMonth]
-    } = props;
+    const { oldOffset, breakAtToday, startDate } = props;
 
-    const timeGetter = getTime(props.now, oldOffset, breakAtToday, startYear, startMonth);
+    const timeGetter = getTime(props.now, oldOffset, breakAtToday, startDate);
 
     return data.map((value, index) => list([timeGetter(index), value]));
-}
-
-export function getFutureKey(props) {
-    const {
-        currentYearMonth: [currentYear, currentMonth],
-        startYearMonth: [startYear, startMonth]
-    } = props;
-
-    return 1 + getKeyFromYearMonth(
-        currentYear,
-        currentMonth,
-        startYear,
-        startMonth
-    );
 }
 
 export function getRanges(lines) {

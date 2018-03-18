@@ -46,6 +46,11 @@ describe('Edit reducers', () => {
     });
     describe('rHandleServerAdd', () => {
         it('should be tested');
+
+        it('shouldn\'t do anything if an error occurred', () => {
+            expect(R.rHandleServerAdd(fromJS({ loadingApi: true, foo: 'bar' }), { err: true }).toJS())
+                .to.deep.equal({ loadingApi: false, foo: 'bar' });
+        });
     });
     describe('rHandleSuggestions', () => {
         it('should be tested');

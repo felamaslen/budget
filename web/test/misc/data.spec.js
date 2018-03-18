@@ -90,24 +90,6 @@ describe('misc/data', () => {
                 .to.equal(8.625);
         });
     });
-    describe('getYearMonthFromKey', () => {
-        it('should return the correct year / month', () => {
-            expect(M.getYearMonthFromKey(0, 2015, 9)).to.deep.equal([2015, 9]);
-            expect(M.getYearMonthFromKey(1, 2015, 9)).to.deep.equal([2015, 10]);
-            expect(M.getYearMonthFromKey(10, 2015, 9)).to.deep.equal([2016, 7]);
-        });
-        it('should work for negative offsets', () => {
-            expect(M.getYearMonthFromKey(-1, 2015, 9)).to.deep.equal([2015, 8]);
-            expect(M.getYearMonthFromKey(-10, 2015, 9)).to.deep.equal([2014, 11]);
-            expect(M.getYearMonthFromKey(-100, 2015, 9)).to.deep.equal([2007, 5]);
-        });
-    });
-    describe('getKeyFromYearMonth', () => {
-        it('should return the correct key', () => {
-            expect(M.getKeyFromYearMonth(2016, 9, 2015, 11)).to.equal(10);
-            expect(M.getKeyFromYearMonth(2017, 1, 2015, 11)).to.equal(14);
-        });
-    });
     describe('randnBm', () => {
         it('should return a Gaussian-incremented value from two random numbers', () => {
             expect(M.randnBm(0.13, 0.87)).to.equal(1.382792212427032);

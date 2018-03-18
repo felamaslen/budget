@@ -208,17 +208,6 @@ export function listAverage(values, mode = null) {
     return values.reduce((sum, value) => sum + value, 0) / values.size;
 }
 
-export function getYearMonthFromKey(key, startYear, startMonth) {
-    const year = startYear + Math.floor((startMonth - 1 + key) / 12);
-    const month = (((startMonth + key + 11) % 12) + 12) % 12 + 1; // month is 1-indexed
-
-    return [year, month];
-}
-
-export function getKeyFromYearMonth(year, month, startYear, startMonth) {
-    return 12 * (year - startYear) + month - startMonth;
-}
-
 const testableRandom = (key = 0) => {
     if (process.env.NODE_ENV === 'test') {
         return (0.36123 * (key + 1)) % 1;

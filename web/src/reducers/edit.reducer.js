@@ -168,9 +168,13 @@ export function rAddListItem(reduction, { page }) {
         .set('loadingApi', true);
 }
 
-export function rHandleServerAdd(reduction, { response, fields, page }) {
+export function rHandleServerAdd(reduction, { err, response, fields, page }) {
     // handle the response from adding an item to a list page
     let newReduction = reduction.set('loadingApi', false);
+
+    if (err) {
+        return newReduction;
+    }
 
     const id = response.data.id;
     const newTotal = response.data.total;

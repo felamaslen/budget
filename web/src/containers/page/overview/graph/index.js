@@ -3,8 +3,10 @@ import { aShowAllToggled } from '../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
+import { DateTime } from 'luxon';
 import { mediaQueries } from '../../../../constants';
-import { GRAPH_SPEND_CATEGORIES, GRAPH_WIDTH } from '../../../../constants/graph';
+import { GRAPH_WIDTH } from '../../../../constants/graph';
+import { getNow } from '../../../../misc/date';
 import GraphBalance from './balance';
 import GraphSpending from './spending';
 
@@ -25,33 +27,23 @@ export function OverviewGraphs({ spending, balance, ...props }) {
 }
 
 OverviewGraphs.propTypes = {
-    startYearMonth: PropTypes.array.isRequired,
-    currentYearMonth: PropTypes.array.isRequired,
+    now: PropTypes.instanceOf(DateTime).isRequired,
     graphWidth: PropTypes.number.isRequired,
     spending: PropTypes.object.isRequired,
     balance: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
-    startYearMonth: state.getIn(['pages', 'overview', 'data', 'startYearMonth']),
-    currentYearMonth: state.getIn(['pages', 'overview', 'data', 'currentYearMonth']),
+    now: getNow(),
+    startDate: state.getIn(['pages', 'overview', 'data', 'startDate']),
+    currentDate: state.getIn(['pages', 'overview', 'data', 'currentDate']),
     graphWidth: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_WIDTH),
     spending: {
-        valuesNet: GRAPH_SPEND_CATEGORIES.reduce(
-            (data, { name }) => data.map((item, key) =>
-                item - state.getIn(['pages', 'overview', 'data', 'cost', name, key])
-            ),
-            state.getIn(['pages', 'overview', 'data', 'cost', 'income'])
-        ),
-        valuesSpending: GRAPH_SPEND_CATEGORIES.reduce(
-            (data, { name }) => data.map((item, key) =>
-                item + state.getIn(['pages', 'overview', 'data', 'cost', name, key])
-            ),
-            state.getIn(['pages', 'overview', 'data', 'cost', 'income'])
-                .map(() => 0)
-        )
+        valuesNet: state.getIn(['pages', 'overview', 'data', 'cost', 'net']),
+        valuesSpending: state.getIn(['pages', 'overview', 'data', 'cost', 'spending'])
     },
     balance: {
+        futureMonths: state.getIn(['pages', 'overview', 'data', 'futureMonths']),
         cost: state.getIn(['pages', 'overview', 'data', 'cost']),
         showAll: state.getIn(['other', 'showAllBalanceGraph']),
         targets: state.getIn(['pages', 'overview', 'data', 'targets'])

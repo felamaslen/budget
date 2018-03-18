@@ -10,9 +10,9 @@ import { rgba } from '../../../../../misc/color';
 import Key from './key';
 import Targets from './targets';
 import AfterCanvas from './after-canvas';
-import { GraphCashFlow, getValuesWithTime, getFutureKey } from '../helpers';
+import { GraphCashFlow, getValuesWithTime } from '../helpers';
 
-function processData({ cost, showAll, ...props }) {
+function processData({ cost, showAll, futureMonths, ...props }) {
     let oldOffset = 0;
 
     let balance = cost.get('balanceWithPredicted');
@@ -24,7 +24,7 @@ function processData({ cost, showAll, ...props }) {
         funds = cost.get('fundsOld').concat(funds);
     }
 
-    const futureKey = oldOffset + getFutureKey(props);
+    const futureKey = oldOffset + cost.get('balanceWithPredicted').size - futureMonths;
 
     const dataBalance = getValuesWithTime(balance, { oldOffset, ...props });
 
@@ -78,7 +78,8 @@ export default function GraphBalance({ targets, ...props }) {
 GraphBalance.propTypes = {
     cost: PropTypes.instanceOf(map).isRequired,
     showAll: PropTypes.bool.isRequired,
-    targets: PropTypes.instanceOf(list).isRequired
+    targets: PropTypes.instanceOf(list).isRequired,
+    futureMonths: PropTypes.number.isRequired
 };
 
 

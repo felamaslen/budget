@@ -30,8 +30,7 @@ export const OVERVIEW_COLUMNS = [
     ['spending', 'Out'],
     ['net', 'Net'],
     ['predicted', 'Predicted'],
-    ['balance', 'Balance'],
-    ['balancePred', 'Balance']
+    ['balance', 'Balance']
 ];
 
 export const PAGES = {
