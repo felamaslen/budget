@@ -324,8 +324,8 @@ export function sortRowsByDate(rows, page) {
             .reduce(({ dailySum, results }, row, id) => {
                 const nextKey = keys.next().value;
 
-                const lastInDay = nextKey &&
-                    row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
+                const lastInDay = nextKey && !row.getIn(['cols', dateKey]).hasSame(
+                    sorted.getIn([nextKey, 'cols', dateKey]), 'day');
 
                 const cost = row.getIn(['cols', costKey]);
 

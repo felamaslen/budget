@@ -6,6 +6,7 @@ import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
 import { fromJS, List as list } from 'immutable';
+import { DateTime } from 'luxon';
 import * as M from '../../src/helpers/data';
 import { dateInput } from '../../src/helpers/date';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/constants';
@@ -160,7 +161,10 @@ describe('helpers/data', () => {
                     cols: [dateInput('11/10/17'), 'foo2', 'bar2', 5]
                 },
                 3: {
-                    cols: [dateInput('12/10/17'), 'foo3', 'bar3', 11]
+                    cols: [DateTime.fromObject({ year: 2017, month: 10, day: 12, hour: 13 }), 'foo3', 'bar3', 11]
+                },
+                5: {
+                    cols: [DateTime.fromObject({ year: 2017, month: 10, day: 12, hour: 11 }), 'foo5', 'bar5', 13]
                 }
             });
 
@@ -179,7 +183,17 @@ describe('helpers/data', () => {
                             'bar3',
                             11
                         ],
-                        daily: 11,
+                        'first-present': false,
+                        future: false
+                    },
+                    5: {
+                        cols: [
+                            '2017-10-12',
+                            'foo5',
+                            'bar5',
+                            13
+                        ],
+                        daily: 24,
                         'first-present': false,
                         future: false
                     },
