@@ -3,7 +3,7 @@ import PureComponent from '../../../immutable-component';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { formatValue } from '../format';
-import { dateInput } from '../../../misc/date';
+import { dateInput } from '../../../helpers/date';
 
 export default class InteractiveEditableTransactions extends PureComponent {
     constructor(props) {

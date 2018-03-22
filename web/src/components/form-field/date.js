@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
-import { dateInput } from '../../misc/date';
+import { dateInput } from '../../helpers/date';
 
 export default function FormFieldDate({ value, onChange }) {
     const procValue = value.toISODate();

@@ -2,7 +2,7 @@ import { all, select, takeEvery, put, call } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { ANALYSIS_BLOCK_CLICKED, ANALYSIS_OPTION_CHANGED } from '../constants/actions';
-import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../misc/const';
+import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../constants/analysis';
 
 import { selectApiKey } from '.';
 import { makeContentRequest } from './content.saga';

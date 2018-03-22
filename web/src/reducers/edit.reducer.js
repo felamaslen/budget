@@ -5,12 +5,12 @@
 import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
 
-import { PAGES, ERROR_LEVEL_WARN } from '../misc/const';
-import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA } from '../misc/config';
-import { getNow } from '../misc/date';
+import { PAGES } from '../constants/data';
+import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
+import { getNow } from '../helpers/date';
 import {
     getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
-} from '../misc/data';
+} from '../helpers/data';
 
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
@@ -168,9 +168,13 @@ export function rAddListItem(reduction, { page }) {
         .set('loadingApi', true);
 }
 
-export function rHandleServerAdd(reduction, { response, fields, page }) {
+export function rHandleServerAdd(reduction, { err, response, fields, page }) {
     // handle the response from adding an item to a list page
     let newReduction = reduction.set('loadingApi', false);
+
+    if (err) {
+        return newReduction;
+    }
 
     const id = response.data.id;
     const newTotal = response.data.total;

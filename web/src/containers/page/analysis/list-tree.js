@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import ListTreeHead from './list-tree-head';
 import SubTree from './sub-tree';
 
-import { formatCurrency } from '../../../misc/format';
+import { formatCurrency } from '../../../helpers/format';
 
 function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, onToggle }) {
     const costPct = cost.map(item => {

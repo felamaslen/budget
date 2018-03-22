@@ -3,9 +3,7 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import {
-    SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW
-} from './config';
+import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '../constants';
 
 const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
 

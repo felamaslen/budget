@@ -1,9 +1,9 @@
 import { eventChannel } from 'redux-saga';
 import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
+import { API_PREFIX } from '../constants/data';
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
-import debounce, { buffer } from '../misc/debounce';
-import { API_PREFIX } from '../misc/const';
+import debounce, { buffer } from '../helpers/debounce';
 import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
@@ -92,6 +92,8 @@ export function *addServerDataRequest({ item, fields, page }) {
     }
     catch (err) {
         yield call(openTimedMessage, 'Error adding data to server!');
+
+        yield put(aServerAddReceived({ err }));
     }
 }
 

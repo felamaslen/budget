@@ -5,16 +5,14 @@
 import { Map as map, List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
-} from '../../../../../misc/config';
-import { rgba } from '../../../../../misc/color';
+import { COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS } from '../../../../../constants/colors';
+import { rgba } from '../../../../../helpers/color';
 import Key from './key';
 import Targets from './targets';
 import AfterCanvas from './after-canvas';
-import { GraphCashFlow, getValuesWithTime, getFutureKey } from '../helpers';
+import { GraphCashFlow, getValuesWithTime } from '../helpers';
 
-function processData({ cost, showAll, ...props }) {
+function processData({ cost, showAll, futureMonths, ...props }) {
     let oldOffset = 0;
 
     let balance = cost.get('balanceWithPredicted');
@@ -26,7 +24,7 @@ function processData({ cost, showAll, ...props }) {
         funds = cost.get('fundsOld').concat(funds);
     }
 
-    const futureKey = oldOffset + getFutureKey(props);
+    const futureKey = oldOffset + cost.get('balanceWithPredicted').size - futureMonths;
 
     const dataBalance = getValuesWithTime(balance, { oldOffset, ...props });
 
@@ -80,7 +78,8 @@ export default function GraphBalance({ targets, ...props }) {
 GraphBalance.propTypes = {
     cost: PropTypes.instanceOf(map).isRequired,
     showAll: PropTypes.bool.isRequired,
-    targets: PropTypes.instanceOf(list).isRequired
+    targets: PropTypes.instanceOf(list).isRequired,
+    futureMonths: PropTypes.number.isRequired
 };
 
 

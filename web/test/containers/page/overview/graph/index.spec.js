@@ -4,6 +4,7 @@ import React from 'react';
 import shallow from '../../../../shallow-with-store';
 import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
+import { DateTime } from 'luxon';
 import OverviewGraphs from '../../../../../src/containers/page/overview/graph';
 import GraphBalance from '../../../../../src/containers/page/overview/graph/balance';
 import { aShowAllToggled } from '../../../../../src/actions/graph.actions';
@@ -13,8 +14,9 @@ describe('<OverviewGraphs />', () => {
         pages: map({
             overview: map({
                 data: map({
-                    startYearMonth: [2017, 2],
-                    currentYearMonth: [2018, 3],
+                    startDate: DateTime.fromObject({ year: 2017, month: 2 }),
+                    currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
+                    futureMonths: 5,
                     targets: fromJS([
                         {
                             tag: '1y',
@@ -65,8 +67,9 @@ describe('<OverviewGraphs />', () => {
             cost: state.getIn(['pages', 'overview', 'data', 'cost']),
             showAll: false,
             targets: state.getIn(['pages', 'overview', 'data', 'targets']),
-            startYearMonth: [2017, 2],
-            currentYearMonth: [2018, 3],
+            startDate: DateTime.fromObject({ year: 2017, month: 2 }),
+            currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
+            now: DateTime.fromObject({ year: 2018, month: 1, day: 22 }),
             graphWidth: 500
         });
     });

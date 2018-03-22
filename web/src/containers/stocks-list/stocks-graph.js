@@ -8,13 +8,10 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import LineGraph from '../../components/graph/line';
-import { rgba } from '../../misc/color';
+import { rgba } from '../../helpers/color';
 
-import {
-    COLOR_PROFIT, COLOR_LOSS, COLOR_LIGHT, FONT_AXIS_LABEL
-} from '../../misc/config';
-
-import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '../../misc/const';
+import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT, FONT_AXIS_LABEL } from '../../constants/graph';
+import { COLOR_PROFIT, COLOR_LOSS, COLOR_LIGHT } from '../../constants/colors';
 
 export class GraphStocks extends LineGraph {
     update() {

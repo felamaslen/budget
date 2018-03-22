@@ -9,7 +9,7 @@ import {
     formatPercent,
     getTickSize,
     formatAge
-} from '../../src/misc/format';
+} from '../../src/helpers/format';
 
 describe('Format functions', () => {
     describe('capitalise', () => {

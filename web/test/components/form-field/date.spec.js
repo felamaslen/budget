@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
 import FormFieldDate from '../../../src/components/form-field/date';
-import { dateInput } from '../../../src/misc/date';
+import { dateInput } from '../../../src/helpers/date';
 
 describe('<FormFieldDate />', () => {
     let changed = null;

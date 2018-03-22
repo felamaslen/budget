@@ -1,7 +1,7 @@
 import { List as list } from 'immutable';
 import { eventChannel } from 'redux-saga';
 import { fork, select, take, call, put } from 'redux-saga/effects';
-import { TIMER_UPDATE_SERVER } from '../misc/config';
+import { TIMER_UPDATE_SERVER } from '../constants/data';
 import { SERVER_UPDATED } from '../constants/actions';
 import { aSettingsLoaded, aTimeUpdated, aServerUpdated } from '../actions/app.actions';
 

@@ -5,8 +5,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListRowExtra from './extra';
-import { PAGES } from '../../../../misc/const';
-import { formatCurrency } from '../../../../misc/format';
+import { PAGES } from '../../../../constants/data';
+import { formatCurrency } from '../../../../helpers/format';
 import Column from './column';
 
 function getDailyText(getDaily, row) {

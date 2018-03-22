@@ -4,7 +4,8 @@
 
 import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
-import { AVERAGE_MEDIAN, AVERAGE_EXP, PAGES } from './const';
+import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
+import { PAGES } from '../constants/data';
 import { getNow } from './date';
 
 function sortByDate(prev, next) {
@@ -207,17 +208,6 @@ export function listAverage(values, mode = null) {
     return values.reduce((sum, value) => sum + value, 0) / values.size;
 }
 
-export function getYearMonthFromKey(key, startYear, startMonth) {
-    const year = startYear + Math.floor((startMonth - 1 + key) / 12);
-    const month = (((startMonth + key + 11) % 12) + 12) % 12 + 1; // month is 1-indexed
-
-    return [year, month];
-}
-
-export function getKeyFromYearMonth(year, month, startYear, startMonth) {
-    return 12 * (year - startYear) + month - startMonth;
-}
-
 const testableRandom = (key = 0) => {
     if (process.env.NODE_ENV === 'test') {
         return (0.36123 * (key + 1)) % 1;
@@ -334,8 +324,8 @@ export function sortRowsByDate(rows, page) {
             .reduce(({ dailySum, results }, row, id) => {
                 const nextKey = keys.next().value;
 
-                const lastInDay = nextKey &&
-                    row.getIn(['cols', dateKey]) > sorted.getIn([nextKey, 'cols', dateKey]);
+                const lastInDay = nextKey && !row.getIn(['cols', dateKey]).hasSame(
+                    sorted.getIn([nextKey, 'cols', dateKey]), 'day');
 
                 const cost = row.getIn(['cols', costKey]);
 

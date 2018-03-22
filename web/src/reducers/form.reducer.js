@@ -1,12 +1,10 @@
 import { Map as map, List as list } from 'immutable';
-
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
 import { resortListRows, recalculateFundProfits } from './editable-updates.reducer';
 import { stringifyFields, getInvalidInsertDataKeys } from './edit.reducer';
-
-import { dataEquals, getAddDefaultValues } from '../misc/data';
-import { PAGES } from '../misc/const';
+import { dataEquals, getAddDefaultValues } from '../helpers/data';
+import { PAGES } from '../constants/data';
 
 export function rOpenFormDialogEdit(reduction, { page, id }) {
     const rowItem = reduction.getIn(['pages', page, 'rows', id]);

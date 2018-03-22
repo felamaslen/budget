@@ -3,7 +3,7 @@ import { all, fork, select, takeLatest, take, cancel, call, put } from 'redux-sa
 import axios from 'axios';
 
 import { FORM_DIALOG_CLOSED, EDIT_CHANGED, EDIT_SUGGESTIONS_REQUESTED } from '../constants/actions';
-import { API_PREFIX, MAX_SUGGESTIONS, PAGES } from '../misc/const';
+import { API_PREFIX, MAX_SUGGESTIONS, PAGES } from '../constants/data';
 
 import { aSuggestionsRequested, aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';

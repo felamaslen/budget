@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { mediaQueries } from '../../../misc/const';
+import { mediaQueries } from '../../../constants';
 import StocksList from '../../stocks-list';
 import GraphFunds from '../funds/graph/funds';
 import { ListHeadExtraFunds } from './head/extra';

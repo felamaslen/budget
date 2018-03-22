@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import FormFieldDate from './date';
 import FormFieldNumber from './number';
 import FormFieldCost from './cost';
-import { TransactionsList } from '../../misc/data';
+import { TransactionsList } from '../../helpers/data';
 
 export default function FormFieldTransactions({ value, onDateChange, onUnitsChange, onCostChange }) {
     const transactionsList = value.list.map((item, key) => {

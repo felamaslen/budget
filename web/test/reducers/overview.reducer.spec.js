@@ -1,5 +1,6 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
+import { DateTime } from 'luxon';
 import * as R from '../../src/reducers/overview.reducer';
 
 describe('Overview reducer', () => {
@@ -17,37 +18,33 @@ describe('Overview reducer', () => {
             social: [50, 65, 134, 10, 0, 0, 0]
         });
 
-        const startYearMonth = [2017, 4];
-        const endYearMonth = [2017, 10];
-        const currentYearMonth = [2017, 6];
+        const startDate = DateTime.fromObject({ year: 2017, month: 4 });
+        const endDate = DateTime.fromObject({ year: 2017, month: 10 });
+        const currentDate = DateTime.fromObject({ year: 2017, month: 6 });
         const futureMonths = 4;
 
-        const result = R.rProcessDataOverview(
-            costMap, startYearMonth, endYearMonth, currentYearMonth, futureMonths
-        ).toJS();
+        const result = R.rProcessDataOverview({
+            costMap, startDate, endDate, currentDate, futureMonths
+        }).toJS();
 
         it('should return the correct number of rows and columns', () => {
             expect(result).to.have.property('numRows', 7);
             expect(result).to.have.property('numCols', 1);
         });
 
-        it('should return the correct future keys', () => {
-            expect(result).to.have.property('futureKey', 3);
-        });
-
         it('should return the correct year month values', () => {
             expect(result).to.have.property('futureMonths', 4);
-            expect(result).to.have.deep.property('startYearMonth', [2017, 4]);
-            expect(result).to.have.deep.property('endYearMonth', [2017, 10]);
-            expect(result).to.have.deep.property('currentYearMonth', [2017, 6]);
-            expect(result).to.have.deep.property('yearMonths', [
-                [2017, 4],
-                [2017, 5],
-                [2017, 6],
-                [2017, 7],
-                [2017, 8],
-                [2017, 9],
-                [2017, 10]
+            expect(result).to.have.deep.property('startDate', startDate);
+            expect(result).to.have.deep.property('endDate', endDate);
+            expect(result).to.have.deep.property('currentDate', currentDate);
+            expect(result).to.have.deep.property('dates', [
+                startDate.plus({ months: 0 }).endOf('month'),
+                startDate.plus({ months: 1 }).endOf('month'),
+                startDate.plus({ months: 2 }).endOf('month'),
+                startDate.plus({ months: 3 }).endOf('month'),
+                startDate.plus({ months: 4 }).endOf('month'),
+                startDate.plus({ months: 5 }).endOf('month'),
+                startDate.plus({ months: 6 }).endOf('month')
             ]);
         });
 
@@ -56,7 +53,7 @@ describe('Overview reducer', () => {
                 balance: [13000, 15000, 16000, 15500, 0, 0, 0],
                 balanceOld: [10000, 11500, 11200],
                 balanceWithPredicted: [13000, 15000, 16000, 17270, 18990, 20210, 22230],
-                predicted: [13740, 12832, 15735, 17270, 18990, 20210, 22230],
+                predicted: [13000, 12832, 15735, 17270, 18990, 20210, 22230],
                 spending: [1260, 2068, 765, 1230, 580, 580, 580],
                 net: [740, -168, 735, 1270, 1720, 1220, 2020],
                 income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],

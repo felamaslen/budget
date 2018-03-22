@@ -7,7 +7,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import AfterList, { AfterListFunds } from '../../../../src/containers/page/list/after-list';
 import Media from 'react-media';
-import { mediaQueries } from '../../../../src/misc/const';
+import { mediaQueries } from '../../../../src/constants';
 import StocksList from '../../../../src/containers/stocks-list';
 import GraphFunds from '../../../../src/containers/page/funds/graph/funds';
 import { ListHeadExtraFunds } from '../../../../src/containers/page/list/head/extra';

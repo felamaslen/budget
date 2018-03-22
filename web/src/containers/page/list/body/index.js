@@ -2,7 +2,7 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
-import { mediaQueries } from '../../../../misc/const';
+import { mediaQueries } from '../../../../constants';
 import bodyDesktop from './desktop';
 import bodyMobile from './mobile';
 

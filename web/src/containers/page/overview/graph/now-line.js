@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { COLOR_DARK, COLOR_GRAPH_TITLE, FONT_GRAPH_KEY } from '../../../../misc/config';
-import { rgba } from '../../../../misc/color';
+import { DateTime } from 'luxon';
+import { FONT_GRAPH_KEY } from '../../../../constants/graph';
+import { COLOR_DARK, COLOR_GRAPH_TITLE } from '../../../../constants/colors';
+import { rgba } from '../../../../helpers/color';
 
 export default function NowLine({ now, minY, maxY, pixX, pixY }) {
     const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;
@@ -18,7 +20,7 @@ export default function NowLine({ now, minY, maxY, pixX, pixY }) {
 }
 
 NowLine.propTypes = {
-    now: PropTypes.object.isRequired,
+    now: PropTypes.instanceOf(DateTime).isRequired,
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,

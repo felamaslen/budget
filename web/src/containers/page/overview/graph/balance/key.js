@@ -1,9 +1,10 @@
 import React from 'react';
 import { BaseKey } from '../helpers';
+import { FONT_GRAPH_KEY } from '../../../../../constants/graph';
 import {
-    FONT_GRAPH_KEY, COLOR_DARK, COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
-} from '../../../../../misc/config';
-import { rgba } from '../../../../../misc/color';
+    COLOR_DARK, COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
+} from '../../../../../constants/colors';
+import { rgba } from '../../../../../helpers/color';
 
 export default function Key(props) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;

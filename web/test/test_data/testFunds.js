@@ -1,7 +1,7 @@
 /* eslint max-lines: 0 */
 import { List as list, Map as map } from 'immutable';
-import { TransactionsList } from '../../src/misc/data';
-import { dateInput } from '../../src/misc/date';
+import { TransactionsList } from '../../src/helpers/data';
+import { dateInput } from '../../src/helpers/date';
 
 export const testRows = list([
     map({

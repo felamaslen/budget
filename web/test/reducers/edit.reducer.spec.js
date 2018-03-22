@@ -2,7 +2,7 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import * as R from '../../src/reducers/edit.reducer';
-import { dateInput } from '../../src/misc/date';
+import { dateInput } from '../../src/helpers/date';
 
 describe('Edit reducers', () => {
     describe('rActivateEditable', () => {
@@ -46,6 +46,11 @@ describe('Edit reducers', () => {
     });
     describe('rHandleServerAdd', () => {
         it('should be tested');
+
+        it('shouldn\'t do anything if an error occurred', () => {
+            expect(R.rHandleServerAdd(fromJS({ loadingApi: true, foo: 'bar' }), { err: true }).toJS())
+                .to.deep.equal({ loadingApi: false, foo: 'bar' });
+        });
     });
     describe('rHandleSuggestions', () => {
         it('should be tested');

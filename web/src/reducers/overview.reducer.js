@@ -3,20 +3,23 @@
  */
 
 import { List as list, Map as map, fromJS } from 'immutable';
+import { DateTime } from 'luxon';
+import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
+import { OVERVIEW_COLUMNS } from '../constants/data';
+import { FUTURE_INVESTMENT_RATE } from '../constants/stocks';
+import { GRAPH_SPEND_CATEGORIES } from '../constants/graph';
+import { getNow } from '../helpers/date';
+import { listAverage, randnBm } from '../helpers/data';
+import { getOverviewCategoryColor, getOverviewScoreColor } from '../helpers/color';
 
-import { AVERAGE_MEDIAN, AVERAGE_EXP, MONTHS_SHORT, OVERVIEW_COLUMNS } from '../misc/const';
-import { FUTURE_INVESTMENT_RATE } from '../misc/config';
-import { getNow, yearMonthDifference } from '../misc/date';
-import { getKeyFromYearMonth, getYearMonthFromKey, listAverage, randnBm } from '../misc/data';
-import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
-
-function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
+function calculateFutures(cost, futureCategories, futureMonths) {
     if (futureMonths <= 0) {
         return cost;
     }
 
     const now = getNow();
     const currentMonthRatio = now.daysInMonth / now.day;
+    const currentKey = cost.get('balance').size - futureMonths - 1;
 
     return cost.map((categoryCost, category) => {
         if (!futureCategories.includes(category)) {
@@ -25,35 +28,23 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
 
         if (category === 'funds') {
             // randomly generate fund income projections
-            const oldOffset = categoryCost.size - cost.get('balance').size;
-
-            const currentItems = categoryCost.slice(oldOffset, oldOffset + futureKey);
-
-            const numFutureItems = categoryCost.size - oldOffset - futureKey;
-            if (numFutureItems <= 0) {
-                return currentItems;
+            if (futureMonths <= 0) {
+                return categoryCost;
             }
 
-            const latestValue = categoryCost.get(oldOffset + futureKey - 1);
-
-            return categoryCost
-                .slice(0, oldOffset + futureKey)
-                .concat(new Array(numFutureItems).fill(0)
+            return categoryCost.slice(0, currentKey)
+                .concat(new Array(futureMonths).fill(0)
                     .reduce(
-                        result => result.push(result.last() *
-                            (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100)
-                        ),
-                        list([latestValue])
+                        result => result.push(result.last() * (1 + FUTURE_INVESTMENT_RATE / 12 + randnBm() / 100)),
+                        categoryCost.slice(currentKey, currentKey + 1)
                     )
-                    .shift()
-                    .map(value => Math.round(value))
+                    .map(Math.round)
                 );
         }
 
         // find the average value and make predictions based on that
-        const currentMonthExtrapolated = Math.round(categoryCost.get(futureKey - 1) * currentMonthRatio);
-        const currentItems = categoryCost
-            .slice(0, futureKey - 1)
+        const currentMonthExtrapolated = Math.round(categoryCost.get(currentKey) * currentMonthRatio);
+        const currentItems = categoryCost.slice(0, currentKey)
             .push(currentMonthExtrapolated);
 
         const average = Math.round(listAverage(currentItems, AVERAGE_EXP));
@@ -62,53 +53,15 @@ function calculateFutures(cost, futureCategories, futureMonths, futureKey) {
     });
 }
 
-function calculateTableData(data) {
-    const cost = data.get('cost');
-    const numRows = data.get('numRows');
-    const startYear = data.get('startYearMonth')[0];
-    const startMonth = data.get('startYearMonth')[1];
-
-    // add month column
-    let months = [];
-    if (numRows > 0) {
-        months = new Array(numRows)
-            .fill(0)
-            .map((item, key) => {
-                const yearMonth = getYearMonthFromKey(key, startYear, startMonth);
-
-                return `${MONTHS_SHORT[yearMonth[1] - 1]}-${yearMonth[0]}`;
-            });
-    }
-
-    return list.of()
-        .push(list(months))
-        .push(cost.get('funds'))
-        .push(cost.get('bills'))
-        .push(cost.get('food'))
-        .push(cost.get('general'))
-        .push(cost.get('holiday'))
-        .push(cost.get('social'))
-        .push(cost.get('income'))
-        .push(cost.get('spending'))
-        .push(cost.get('net'))
-        .push(cost.get('predicted'))
-        .push(cost.get('balance'))
-        .push(cost.get('balanceWithPredicted'));
-}
-
-export function rProcessDataOverview(
-    costMap, startYearMonth, endYearMonth, currentYearMonth, futureMonths
-) {
-    const numRows = yearMonthDifference(startYearMonth, endYearMonth) + 1;
+export function rProcessDataOverview({ costMap, startDate, currentDate, endDate, futureMonths }) {
+    const { months: monthDiff } = endDate.diff(startDate, 'months').toObject();
+    const numRows = Math.round(monthDiff) + 1;
     const numCols = 1;
 
-    const yearMonths = new Array(numRows)
-        .fill(0)
-        .map((item, key) => getYearMonthFromKey(
-            key, startYearMonth[0], startYearMonth[1]
-        ));
-
-    const yearMonthsList = list(yearMonths);
+    const dates = list(new Array(numRows).fill(0))
+        .map((item, key) => startDate.plus({ months: key })
+            .endOf('month')
+        );
 
     // separate funds into old and displayed
     let costActual = costMap;
@@ -120,45 +73,33 @@ export function rProcessDataOverview(
     }
 
     const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');
-    const futureKey = yearMonthDifference(startYearMonth, currentYearMonth) + 1;
-    const costWithFutures = calculateFutures(costActual, futureCategories, futureMonths, futureKey);
+    const costWithFutures = calculateFutures(costActual, futureCategories, futureMonths);
 
     // add spending column
-    const spending = yearMonthsList.map((month, key) =>
-        costWithFutures.getIn(['bills', key]) +
-        costWithFutures.getIn(['food', key]) +
-        costWithFutures.getIn(['general', key]) +
-        costWithFutures.getIn(['holiday', key]) +
-        costWithFutures.getIn(['social', key])
-    );
+    const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
+    const spending = dates.map((date, key) => spendingCategories.reduce((sum, category) =>
+        sum + costWithFutures.getIn([category, key]), 0));
 
     // add net cash flow column
-    const net = yearMonthsList.map((month, key) =>
-        costWithFutures.getIn(['income', key]) - spending.get(key)
-    );
+    const net = dates.map((date, key) =>
+        costWithFutures.getIn(['income', key]) - spending.get(key));
 
     // add predicted balance
-    let lastPredicted = costWithFutures.getIn(['balance', 0]);
-
-    const predicted = yearMonthsList.map((month, key) => {
-        const havePrevious = key > 0;
-        const past = key < futureKey;
-        const presentAndHaveLast = key === futureKey && costWithFutures.getIn(['balance', key - 1]) > 0;
-
-        if (havePrevious && (past || presentAndHaveLast)) {
-            lastPredicted = costWithFutures.getIn(['balance', key - 1]) + net.get(key);
-
-            return lastPredicted;
+    const predicted = dates.reduce((values, date, key) => {
+        if (key === 0) {
+            return values.push(costWithFutures.getIn(['balance', 0]));
         }
 
-        const newPredicted = lastPredicted + net.get(key);
-        lastPredicted = newPredicted;
+        if (dates.get(key - 1) < currentDate || dates.get(key - 1).hasSame(currentDate, 'month')) {
+            return values.push(costWithFutures.getIn(['balance', key - 1]) + net.get(key));
+        }
 
-        return newPredicted;
-    });
+        return values.push(values.last() + net.get(key));
 
-    const balanceWithPredicted = costWithFutures.get('balance').slice(0, futureKey)
-        .concat(predicted.slice(-numRows + futureKey));
+    }, list.of());
+
+    const balanceWithPredicted = costWithFutures.get('balance').slice(0, -futureMonths)
+        .concat(predicted.slice(-futureMonths));
 
     const cost = costWithFutures
         .set('spending', spending)
@@ -169,141 +110,125 @@ export function rProcessDataOverview(
     return map({
         numRows,
         numCols,
-        futureKey,
         futureMonths,
-        startYearMonth,
-        endYearMonth,
-        currentYearMonth,
-        yearMonths,
+        startDate,
+        endDate,
+        currentDate,
+        dates,
         cost,
         costActual
     });
 }
 
-function rProcessDataOverviewRaw(raw) {
-    const currentYearMonth = [raw.currentYear, raw.currentMonth];
-    const costMap = fromJS(raw.cost);
+function rProcessDataOverviewRaw(reduction, raw) {
+    const {
+        currentYear,
+        currentMonth,
+        startYearMonth: [startYear, startMonth],
+        endYearMonth: [endYear, endMonth],
+        cost,
+        futureMonths,
+        targets
+    } = raw;
 
-    return rProcessDataOverview(costMap, raw.startYearMonth, raw.endYearMonth, currentYearMonth, raw.futureMonths)
-        .set('targets', fromJS(raw.targets));
+    const startDate = DateTime.fromObject({ year: startYear, month: startMonth }).endOf('month');
+    const currentDate = DateTime.fromObject({ year: currentYear, month: currentMonth }).endOf('month');
+    const endDate = DateTime.fromObject({ year: endYear, month: endMonth }).endOf('month');
+
+    const costMap = fromJS(cost);
+
+    return rProcessDataOverview({ costMap, startDate, currentDate, endDate, futureMonths })
+        .set('targets', fromJS(targets));
 }
 
 export function rGetOverviewRows(data) {
-    const currentYear = data.get('currentYearMonth')[0];
-    const currentMonth = data.get('currentYearMonth')[1];
+    const currentDate = data.get('currentDate');
+    const dates = data.get('dates');
+    const months = dates.map(date => date.toFormat('LLL-yy'));
+    const values = OVERVIEW_COLUMNS.slice(1)
+        .map(([key]) => data.getIn(['cost', key]));
 
-    const tableData = calculateTableData(data);
-
-    // get value ranges and medians for calculating colours
-    const values = OVERVIEW_COLUMNS.slice(1).map((column, colKey) => tableData.get(colKey + 1));
-
-    const valueRange = values.map(valuesItem => ({
-        min: valuesItem.min(),
-        max: valuesItem.max()
-    }));
-
-    const median = values.map(valuesItem => ({
-        positive: listAverage(valuesItem.filter(item => item >= 0), AVERAGE_MEDIAN),
-        negative: listAverage(valuesItem.filter(item => item < 0), AVERAGE_MEDIAN)
+    const ranges = values.map(col => ({ min: col.min(), max: col.max() }));
+    const median = values.map(col => ({
+        positive: listAverage(col.filter(item => item >= 0), AVERAGE_MEDIAN),
+        negative: listAverage(col.filter(item => item < 0), AVERAGE_MEDIAN)
     }));
 
     const categoryColor = getOverviewCategoryColor();
 
-    // translate the data into table cells for display in the view
-    const rows = tableData
-        .get(0)
-        .map((monthText, key) => {
-            const yearMonth = getYearMonthFromKey(
-                key, data.get('startYearMonth')[0], data.get('startYearMonth')[1]);
+    return months.map((monthText, rowKey) => {
+        const date = dates.get(rowKey);
+        const past = date < currentDate;
+        const active = date <= currentDate && date >= currentDate;
+        const future = !past && !active;
 
-            const past = yearMonth[0] < currentYear ||
-                (yearMonth[0] === currentYear && yearMonth[1] < currentMonth);
-            const active = yearMonth[0] === currentYear && yearMonth[1] === currentMonth;
-            const future = !past && !active;
-
-            let cols = null;
-
-            const cells = list(OVERVIEW_COLUMNS)
-                .map((column, colKey) => {
-                    const value = tableData.getIn([colKey, key]);
-                    let rgb = null;
-                    if (colKey > 0 && categoryColor[colKey - 1]) {
-                        rgb = getOverviewScoreColor(
-                            value,
-                            valueRange[colKey - 1],
-                            median[colKey - 1],
-                            categoryColor[colKey - 1]
-                        );
-                    }
-
-                    const editable = column[0] === 'balance';
-
-                    if (editable) {
-                        // for use with editables
-                        cols = list([value]);
-                    }
-
-                    return map({
-                        column: list(column),
-                        value,
-                        rgb,
-                        editable
-                    });
+        const cells = list(OVERVIEW_COLUMNS.map(([key, display], colKey) => {
+            if (colKey === 0) {
+                return map({
+                    column: list([key, display]),
+                    value: monthText,
+                    rgb: null,
+                    editable: false
                 });
+            }
 
-            return map({ cols, cells, past, active, future });
-        });
+            const value = data.getIn(['cost', key, rowKey]);
 
-    return rows;
+            const rgb = getOverviewScoreColor(
+                value, ranges[colKey - 1], median[colKey - 1], categoryColor[colKey - 1]);
+
+            return map({
+                column: list([key, display]),
+                value,
+                rgb,
+                editable: key === 'balance'
+            });
+        }));
+
+        const cols = list([data.getIn(['cost', 'balance', rowKey])]);
+
+        return map({ cols, cells, past, active, future });
+    });
 }
 
-export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemCost, oldItemCost }) {
-    const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
+function getUpdatedCostMap(oldCost, dates, req) {
+    const { page, newDate, oldDate, newItemCost, oldItemCost } = req;
 
-    const newKey = getKeyFromYearMonth(newDate.year, newDate.month, startYearMonth[0], startYearMonth[1]);
-    const oldKey = getKeyFromYearMonth(oldDate.year, oldDate.month, startYearMonth[0], startYearMonth[1]);
+    const getKeyFromDate = date => dates.findIndex(item => date.hasSame(item, 'month'));
 
-    const oldCost = reduction.getIn(['pages', 'overview', 'data', 'costActual']);
-    const numRows = oldCost.get(page).size;
+    const newKey = getKeyFromDate(newDate);
+    const oldKey = getKeyFromDate(oldDate);
 
-    // update the changed rows in the overview page
-    let newCost = oldCost;
-    if (oldKey === newKey) {
-        if (oldKey < numRows) {
-            newCost = newCost.setIn(
-                [page, oldKey],
-                oldCost.getIn([page, oldKey]) + newItemCost - oldItemCost
-            );
+    const setCost = (key, diff) => costMap => {
+        if (key > -1) {
+            return costMap.setIn([page, key], costMap.getIn([page, key]) + diff);
         }
-    }
-    else {
-        if (oldKey < numRows) {
-            newCost = newCost.setIn(
-                [page, oldKey],
-                oldCost.getIn([page, oldKey]) - oldItemCost
-            );
-        }
-        if (newKey < numRows) {
-            newCost = newCost.setIn(
-                [page, newKey],
-                oldCost.getIn([page, newKey]) + newItemCost
-            );
-        }
-    }
 
-    const endYearMonth = reduction.getIn(['pages', 'overview', 'data', 'endYearMonth']);
-    const currentYearMonth = reduction.getIn(['pages', 'overview', 'data', 'currentYearMonth']);
+        return costMap;
+    };
+
+    const setOld = setCost(oldKey, -oldItemCost);
+    const setNew = setCost(newKey, +newItemCost);
+
+    return setOld(setNew(oldCost));
+}
+
+export function rCalculateOverview(reduction, req) {
+    const costMap = reduction.getIn(['pages', 'overview', 'data', 'costActual']);
+    const dates = reduction.getIn(['pages', 'overview', 'data', 'dates']);
+    const startDate = reduction.getIn(['pages', 'overview', 'data', 'startDate']);
+    const endDate = reduction.getIn(['pages', 'overview', 'data', 'endDate']);
+    const currentDate = reduction.getIn(['pages', 'overview', 'data', 'currentDate']);
     const futureMonths = reduction.getIn(['pages', 'overview', 'data', 'futureMonths']);
 
-    const newData = rProcessDataOverview(
-        newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths
-    );
+    const newCostMap = getUpdatedCostMap(costMap, dates, req);
+
+    // update the changed rows in the overview page
+    const newData = rProcessDataOverview({ costMap: newCostMap, startDate, currentDate, endDate, futureMonths });
 
     return reduction
-        .setIn(['pages', 'overview', 'data'], newData)
-        .setIn(['pages', 'overview', 'data', 'targets'],
-            reduction.getIn(['pages', 'overview', 'data', 'targets'])
-        )
+        .setIn(['pages', 'overview', 'data'], newData.set('targets',
+            reduction.getIn(['pages', 'overview', 'data', 'targets'])))
         .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 
@@ -315,7 +240,7 @@ export function rCalculateOverview(reduction, { page, newDate, oldDate, newItemC
  * @returns {Record} modified reduction
  */
 export function processPageDataOverview(reduction, { raw }) {
-    const data = rProcessDataOverviewRaw(raw);
+    const data = rProcessDataOverviewRaw(reduction, raw);
     const rows = rGetOverviewRows(data);
 
     return reduction.setIn(['pages', 'overview'], map({ data, rows }));

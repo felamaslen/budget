@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
 import ModalDialogField from '../../../src/components/form-field/modal-dialog-field';
-import { TransactionsList } from '../../../src/misc/data';
+import { TransactionsList } from '../../../src/helpers/data';
 
 describe('<ModalDialogField />', () => {
     const props = {

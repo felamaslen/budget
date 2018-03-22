@@ -2,8 +2,8 @@
  * Colour functions
  */
 
-import { OVERVIEW_COLUMNS } from './const';
-import { COLOR_CATEGORY } from './config';
+import { OVERVIEW_COLUMNS } from '../constants/data';
+import { COLOR_CATEGORY } from '../constants/colors';
 import { listAverage } from './data';
 
 export function rgba(values) {
@@ -25,21 +25,19 @@ export function rgba(values) {
  * @returns {array} list of colour codes
  */
 export function getOverviewCategoryColor() {
-    return OVERVIEW_COLUMNS
-        .slice(1)
-        .map(item => item[0])
-        .map(column => {
-            if (COLOR_CATEGORY[column]) {
-                return COLOR_CATEGORY[column];
+    return OVERVIEW_COLUMNS.slice(1)
+        .map(([key]) => {
+            if (COLOR_CATEGORY[key]) {
+                return COLOR_CATEGORY[key];
             }
-            if (column === 'net') {
+            if (key === 'net') {
                 return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
             }
-            if (column === 'predicted') {
+            if (key === 'predicted') {
                 return COLOR_CATEGORY.balance;
             }
 
-            return null;
+            throw new Error(`Unknown overview column: ${key}`);
         });
 }
 

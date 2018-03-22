@@ -1,8 +1,8 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { PAGES } from '../../../../misc/const';
-import { rgba } from '../../../../misc/color';
-import { formatCurrency, formatPercent } from '../../../../misc/format';
+import { PAGES } from '../../../../constants/data';
+import { rgba } from '../../../../helpers/color';
+import { formatCurrency, formatPercent } from '../../../../helpers/format';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';

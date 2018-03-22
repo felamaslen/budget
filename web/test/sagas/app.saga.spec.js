@@ -105,6 +105,8 @@ describe('app.saga', () => {
                 .throw(new Error('some error'))
                 .call(openTimedMessage, 'Error adding data to server!')
                 .next()
+                .put(aServerAddReceived({ err: new Error('some error') }))
+                .next()
                 .isDone();
         });
     });
