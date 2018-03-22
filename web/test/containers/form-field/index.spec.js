@@ -5,8 +5,8 @@ import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import getFormField from '../../../src/containers/form-field';
-import { dateInput } from '../../../src/misc/date';
-import { TransactionsList } from '../../../src/misc/data';
+import { dateInput } from '../../../src/helpers/date';
+import { TransactionsList } from '../../../src/helpers/data';
 
 describe('<FormField />', () => {
     describe('Date', () => {

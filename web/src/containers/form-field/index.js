@@ -4,7 +4,7 @@
 
 import { connect } from 'react-redux';
 
-import { TransactionsList } from '../../misc/data';
+import { TransactionsList } from '../../helpers/data';
 
 import FormFieldText from '../../components/form-field';
 import FormFieldDate from '../../components/form-field/date';

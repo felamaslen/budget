@@ -4,7 +4,7 @@ import { aFundsGraphPeriodChanged } from '../../../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency, formatPercent } from '../../../../misc/format';
+import { formatCurrency, formatPercent } from '../../../../helpers/format';
 
 function ListHeadExtraFundsComponent({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {
     const gain = totalCost

@@ -2,7 +2,7 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { formatCurrency } from '../../../misc/format';
+import { formatCurrency } from '../../../helpers/format';
 
 export default function ListTreeHead({ items }) {
     const getCost = itemList => formatCurrency(itemList

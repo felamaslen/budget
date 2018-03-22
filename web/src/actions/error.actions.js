@@ -2,7 +2,7 @@
  * Actions called to show/hide error messages
  */
 
-import { uuid } from '../misc/data';
+import { uuid } from '../helpers/data';
 
 import * as A from '../constants/actions';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { GRAPH_FUNDS_MODE_ROI } from '../../../../../constants/graph';
 import { COLOR_PROFIT_LIGHT, COLOR_LOSS_LIGHT } from '../../../../../constants/colors';
-import { rgba } from '../../../../../misc/color';
+import { rgba } from '../../../../../helpers/color';
 
 export default function ProfitLossBackground({ mode, width, minX, minY, maxY, pixX, pixY }) {
     if (mode !== GRAPH_FUNDS_MODE_ROI) {

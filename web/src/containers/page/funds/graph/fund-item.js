@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '../../../../components/graph/line';
-import { rgba } from '../../../../misc/color';
+import { rgba } from '../../../../helpers/color';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
     GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE, FONT_AXIS_LABEL

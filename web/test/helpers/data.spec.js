@@ -6,11 +6,11 @@ import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
 import { fromJS, List as list } from 'immutable';
-import * as M from '../../src/misc/data';
-import { dateInput } from '../../src/misc/date';
+import * as M from '../../src/helpers/data';
+import { dateInput } from '../../src/helpers/date';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/constants';
 
-describe('misc/data', () => {
+describe('helpers/data', () => {
     describe('getPeriodMatch', () => {
         let envBefore = null;
         before(() => {

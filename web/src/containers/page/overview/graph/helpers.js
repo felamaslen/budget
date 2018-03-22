@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import LineGraph from '../../../../components/graph/line';
 import Axes from './axes';
 import NowLine from './now-line';
-import { rgba } from '../../../../misc/color';
+import { rgba } from '../../../../helpers/color';
 import { GRAPH_HEIGHT, FONT_GRAPH_TITLE } from '../../../../constants/graph';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '../../../../constants/colors';
 

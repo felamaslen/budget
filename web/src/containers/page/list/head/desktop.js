@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 import ListHeadExtra from './extra';
-import { formatCurrency } from '../../../../misc/format';
+import { formatCurrency } from '../../../../helpers/format';
 import { PAGES } from '../../../../constants/data';
 
 export function ListHeadDesktop({ page, weeklyValue, daily, totalCost }) {

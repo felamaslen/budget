@@ -2,7 +2,7 @@ import { Map as map } from 'immutable';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Editable from '../../../editable';
-import { formatCurrency } from '../../../../misc/format';
+import { formatCurrency } from '../../../../helpers/format';
 
 export default class OverviewTableCellInner extends Component {
     constructor(props) {

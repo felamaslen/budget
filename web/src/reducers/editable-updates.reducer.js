@@ -1,7 +1,7 @@
 import { Map as map } from 'immutable';
 
 import { PAGES } from '../constants/data';
-import { sortRowsByDate, addWeeklyAverages } from '../misc/data';
+import { sortRowsByDate, addWeeklyAverages } from '../helpers/data';
 
 import { pushToRequestQueue } from './request-queue.reducer';
 import { rGetOverviewRows, rProcessDataOverview, rCalculateOverview } from './overview.reducer';

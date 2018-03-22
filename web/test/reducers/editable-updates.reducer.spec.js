@@ -1,7 +1,7 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import * as R from '../../src/reducers/editable-updates.reducer';
-import * as M from '../../src/misc/data';
+import * as M from '../../src/helpers/data';
 
 describe('Editable updates reducer', () => {
     describe('resortListRows', () => {

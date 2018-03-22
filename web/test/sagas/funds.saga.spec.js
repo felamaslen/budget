@@ -10,7 +10,7 @@ import * as A from '../../src/actions/graph.actions';
 import * as B from '../../src/actions/stocks-list.actions';
 import { openTimedMessage } from '../../src/sagas/error.saga';
 import { selectApiKey } from '../../src/sagas';
-import { getStockPricesFromYahoo } from '../../src/misc/finance';
+import { getStockPricesFromYahoo } from '../../src/helpers/finance';
 
 describe('funds.saga', () => {
     describe('selectFundHistoryCache', () => {

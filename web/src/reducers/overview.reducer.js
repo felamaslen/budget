@@ -8,9 +8,9 @@ import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
 import { OVERVIEW_COLUMNS } from '../constants/data';
 import { FUTURE_INVESTMENT_RATE } from '../constants/stocks';
 import { GRAPH_SPEND_CATEGORIES } from '../constants/graph';
-import { getNow } from '../misc/date';
-import { listAverage, randnBm } from '../misc/data';
-import { getOverviewCategoryColor, getOverviewScoreColor } from '../misc/color';
+import { getNow } from '../helpers/date';
+import { listAverage, randnBm } from '../helpers/data';
+import { getOverviewCategoryColor, getOverviewScoreColor } from '../helpers/color';
 
 function calculateFutures(cost, futureCategories, futureMonths) {
     if (futureMonths <= 0) {

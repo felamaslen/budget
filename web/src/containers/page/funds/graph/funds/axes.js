@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ProfitLossBackground from './profit-loss-background';
 import { FONT_AXIS_LABEL } from '../../../../../constants/graph';
 import { COLOR_LIGHT_MED, COLOR_DARK, COLOR_GRAPH_TITLE } from '../../../../../constants/colors';
-import { rgba } from '../../../../../misc/color';
+import { rgba } from '../../../../../helpers/color';
 import { getTimeScale } from '../../../../../components/graph/line';
 import { formatValue } from '../helpers';
 

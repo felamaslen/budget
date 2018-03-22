@@ -7,10 +7,10 @@ import { DateTime } from 'luxon';
 
 import { PAGES } from '../constants/data';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import { getNow } from '../misc/date';
+import { getNow } from '../helpers/date';
 import {
     getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
-} from '../misc/data';
+} from '../helpers/data';
 
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';

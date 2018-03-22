@@ -6,7 +6,7 @@ import Media from 'react-media';
 import { DateTime } from 'luxon';
 import { mediaQueries } from '../../../../constants';
 import { GRAPH_WIDTH } from '../../../../constants/graph';
-import { getNow } from '../../../../misc/date';
+import { getNow } from '../../../../helpers/date';
 import GraphBalance from './balance';
 import GraphSpending from './spending';
 

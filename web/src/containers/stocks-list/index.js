@@ -12,7 +12,7 @@ import classNames from 'classnames';
 
 import GraphStocks from './stocks-graph';
 import { aStocksListRequested, aStocksPricesRequested } from '../../actions/stocks-list.actions';
-import { sigFigs } from '../../misc/format';
+import { sigFigs } from '../../helpers/format';
 
 export class StocksList extends Component {
     componentDidMount() {

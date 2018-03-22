@@ -4,7 +4,7 @@
 
 import * as A from '../constants/actions';
 
-import { uuid } from '../misc/data';
+import { uuid } from '../helpers/data';
 
 export const aEditableActivated = req => ({ type: A.EDIT_ACTIVATED, ...req });
 export const aEditableChanged = value => ({ type: A.EDIT_CHANGED, value });

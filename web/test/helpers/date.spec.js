@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import * as date from '../../src/misc/date';
+import * as date from '../../src/helpers/date';
 
 describe('Date', () => {
     describe('dateInput', () => {

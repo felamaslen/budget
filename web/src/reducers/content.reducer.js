@@ -5,8 +5,8 @@
 import { PAGES } from '../constants/data';
 import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
-} from '../misc/data';
-import { capitalise, formatCurrency } from '../misc/format';
+} from '../helpers/data';
+import { capitalise, formatCurrency } from '../helpers/format';
 import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList, processPageDataFunds } from './list.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';

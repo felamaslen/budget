@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { COLOR_CATEGORY } from '../../../constants/colors';
-import { rgba, averageColor } from '../../../misc/color';
+import { rgba, averageColor } from '../../../helpers/color';
 
 const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 

@@ -1,6 +1,6 @@
 import { List as list } from 'immutable';
 import { GRAPH_FUNDS_MODE_ROI } from '../../../../constants/graph';
-import { formatCurrency } from '../../../../misc/format';
+import { formatCurrency } from '../../../../helpers/format';
 
 export function separateLines(line) {
     return line.reduce(({ lastLines, lastValue }, point) => {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { List as list } from 'immutable';
-import * as color from '../../src/misc/color';
+import * as color from '../../src/helpers/color';
 
 describe('Color', () => {
     describe('rgba', () => {

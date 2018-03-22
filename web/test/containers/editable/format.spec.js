@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import * as format from '../../../src/containers/editable/format';
-import { dateInput } from '../../../src/misc/date';
+import { dateInput } from '../../../src/helpers/date';
 
 describe('Editable formatting functions', () => {
     describe('getEditValue', () => {

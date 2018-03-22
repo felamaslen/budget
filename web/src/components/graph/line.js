@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Graph from '.';
 import ArrowLine from './arrows';
-import { timeSeriesTicks } from '../../misc/date';
+import { timeSeriesTicks } from '../../helpers/date';
 import { GRAPH_CURVINESS } from '../../constants/graph';
 
 export const getTimeScale = ({ minX, maxX, pixX }) => offset => {

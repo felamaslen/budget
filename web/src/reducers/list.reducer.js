@@ -6,8 +6,8 @@ import { fromJS, List as list, Map as map } from 'immutable';
 
 import { getFormattedHistory, getFundsCachedValue, getExtraRowProps } from './funds.reducer';
 import { PAGES, DATA_KEY_ABBR } from '../constants/data';
-import { dateInput } from '../misc/date';
-import { TransactionsList, sortRowsByDate } from '../misc/data';
+import { dateInput } from '../helpers/date';
+import { TransactionsList, sortRowsByDate } from '../helpers/data';
 
 export function processRawListRows(data, page) {
     return map(data.map(item => {
