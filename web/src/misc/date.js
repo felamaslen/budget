@@ -3,7 +3,6 @@
  */
 
 import { DateTime } from 'luxon';
-import { MONTHS_SHORT, WEEK_DAYS } from '../constants';
 
 export function getNow() {
     if (process.env.NODE_ENV === 'test') {
@@ -11,14 +10,6 @@ export function getNow() {
     }
 
     return DateTime.local();
-}
-
-export function yearMonthDifference([year1, month1], [year2, month2]) {
-    return 12 * (year2 - year1) + month2 - month1;
-}
-
-function pmod(number, denominator) {
-    return ((number % denominator) + denominator) % denominator;
 }
 
 export function dateInput(input = null, validate = true) {
@@ -55,335 +46,146 @@ export function dateInput(input = null, validate = true) {
     return now;
 }
 
-class TimeTick {
-    constructor() {
-        this.tick = 86400;
-        this.major = 7;
-    }
-    start(obj) {
-        const year = obj.getFullYear();
-        const month = obj.getMonth();
-        const date = obj.getDate();
+function timeTick(t0, t1, { start, measure, tickSize, numTicks, getMajor, label, extra }) {
+    const theStart = start || DateTime.fromJSDate(new Date(t0 * 1000)).startOf(measure);
 
-        const day = obj.getDay();
+    const theNumTicks = numTicks || Math.ceil((t1 - t0) / tickSize);
 
-        return {
-            time: new Date(year, month, date, 0, 0, 0, 0).getTime() + 86400,
-            index: day
-        };
-    }
-    next(key, time) {
-        const nextTime = time - this.tick * 1000;
+    const getTickTime = typeof tickSize === 'function'
+        ? index => tickSize(theStart, index)
+        : index => theStart.plus({ seconds: index * tickSize });
 
-        const major = key % this.major === 0
-            ? 2
-            : 0;
+    return new Array(theNumTicks).fill(0)
+        .reduce((ticks, tick, index) => {
+            const tickTime = getTickTime(index);
+            const major = getMajor(tickTime);
 
-        const label = major
-            ? this.label(time)
-            : null;
+            const mainTick = { time: tickTime.ts / 1000, major, label: major > 0 && label(tickTime) };
 
-        return { time, nextTime, major, label };
-    }
-    label(time) {
-        const obj = new Date(time);
-
-        const date = obj.getDate();
-        const month = MONTHS_SHORT[obj.getMonth()];
-
-        return `${date} ${month}`;
-    }
-    genTicks(t0, t1) {
-        const ticks = [];
-        const start = this.start(new Date(t1));
-        for (let key = start.index, time = start.time; time >= t0; key--) {
-            const next = this.next(key, time);
-            const tick = {
-                time: next.time / 1000,
-                major: next.major
-            };
-            if (next.label) {
-                tick.label = next.label;
-            }
-            ticks.push(tick);
-            time = next.nextTime;
-
-            if (next.extra) {
-                // extra tick
-                const extraTick = {
-                    time: next.extra.time / 1000,
-                    major: next.extra.major
-                };
-                if (next.extra.label) {
-                    extraTick.label = next.extra.label;
+            if (extra) {
+                const extraTick = extra(tickTime);
+                if (extraTick) {
+                    return ticks.concat([mainTick, extraTick]);
                 }
-                ticks.push(extraTick);
-            }
-        }
-
-        return ticks;
-    }
-}
-class TimeTickDayWeek extends TimeTick {
-}
-class TimeTickHourDay extends TimeTick {
-    constructor() {
-        super();
-        this.tick = 3600 * 3;
-        this.major = 8;
-    }
-    start(dateTime) {
-        const year = dateTime.getFullYear();
-        const month = dateTime.getMonth();
-        const date = dateTime.getDate();
-        const hour = Math.ceil(dateTime.getHours() / 3) * 3;
-
-        return {
-            time: new Date(year, month, date, hour, 0, 0, 0).getTime(),
-            index: hour / 3
-        };
-    }
-    label(time) {
-        return WEEK_DAYS[new Date(time).getDay()];
-    }
-}
-class TimeTickMinuteHour extends TimeTick {
-    constructor() {
-        super();
-        this.tick = 1800000;
-        this.major = 3; // every x *hours*
-        this.startMinute = 60 * this.tick / 3600000;
-    }
-    start(dateTime) {
-        const year = dateTime.getFullYear();
-        const month = dateTime.getMonth();
-        const date = dateTime.getDate();
-        const hour = dateTime.getHours();
-        const minute = Math.floor(dateTime.getMinutes() / this.startMinute) * this.startMinute;
-
-        return {
-            time: new Date(year, month, date, hour, minute, 0, 0).getTime(),
-            index: Math.round(hour * 2 + minute / this.startMinute)
-        };
-    }
-    getMajor(key) {
-        if (pmod(key, 2) === 0) {
-            if (pmod(key, 48) === 0) {
-                return 2;
             }
 
-            return 1;
-        }
+            return [...ticks, mainTick];
 
-        return 0;
-    }
-    next(key, time) {
-        const major = this.getMajor(key);
-        const label = pmod(key, 2) === 0
-            ? this.label(time)
-            : null;
-
-        const nextTime = time - this.tick;
-
-        return { time, nextTime, major, label };
-    }
-    label(time) {
-        const dateTime = new Date(time);
-        const hour = dateTime.getHours();
-
-        if (hour === 0) {
-            return WEEK_DAYS[dateTime.getDay()];
-        }
-
-        const hourText = (hour + 11) % 12 + 1;
-        const amPm = hour < 12
-            ? 'am'
-            : 'pm';
-
-        return `${hourText}${amPm}`;
-    }
-}
-class TimeTickSecondMinute extends TimeTick {
-    constructor() {
-        super();
-        this.tick = 30;
-        this.major = 60;
-    }
-    getIndex(dateTime) {
-        return dateTime.getSeconds();
-    }
-    start(dateTime) {
-        const time = Math.floor(dateTime.getTime() / 1000 / this.tick) * 1000 * this.tick;
-        const index = this.getIndex(dateTime) % this.major;
-
-        return { time, index };
-    }
-    next(key, time) {
-        const nextTime = time - this.tick * 1000;
-
-        const major = this.getIndex(new Date(time)) % this.major === 0
-            ? 2
-            : 0;
-
-        const label = major
-            ? this.label(time)
-            : null;
-
-        return { time, nextTime, major, label };
-    }
-    label(time) {
-        const dateTime = new Date(time);
-
-        let hour = dateTime.getHours();
-        if (hour < 10) {
-            hour = `0${hour}`;
-        }
-
-        let minute = dateTime.getMinutes();
-        if (minute < 10) {
-            minute = `0${minute}`;
-        }
-
-        return `${hour}:${minute}`;
-    }
-}
-class TimeTickSecondMinute2 extends TimeTickSecondMinute {
-    constructor() {
-        super();
-        this.tick = 60;
-        this.major = 600;
-    }
-    getIndex(dateTime) {
-        const seconds = dateTime.getSeconds();
-        const minutes = dateTime.getMinutes();
-
-        return (seconds + minutes * 60);
-    }
-}
-class TimeTickWeekMonth extends TimeTick {
-    constructor() {
-        super();
-        this.tick = 86400 * 7;
-        this.major = 4;
-    }
-    start(dateTime) {
-        const day = dateTime.getDay();
-        const startDate = new Date(dateTime.getTime() - day * 86400 * 1000);
-
-        const year = startDate.getFullYear();
-        const month = startDate.getMonth();
-        const date = startDate.getDate();
-
-        const time = new Date(year, month, date, 0, 0, 0, 0).getTime();
-        const startMonth = new Date(year, month, 1, 0, 0, 0, 0).getTime();
-
-        const index = Math.floor((time - startMonth) / 86400 / 7 / 1000);
-
-        return { time, index };
-    }
-    next(key, time) {
-        const nextTime = time - this.tick * 1000;
-        let extra = null;
-        const dateTime = new Date(time);
-        const date = dateTime.getDate();
-        if (date <= 7) {
-            // get the exact start of the month
-            const year = dateTime.getFullYear();
-            const month = dateTime.getMonth();
-            const monthStart = new Date(year, month, 1, 0, 0, 0, 0);
-            const label = MONTHS_SHORT[monthStart.getMonth()];
-
-            extra = { time: monthStart.getTime(), major: 2, label };
-        }
-
-        return { time, nextTime, major: 0, extra };
-    }
-}
-class TimeTickMonthYear extends TimeTick {
-    constructor() {
-        super();
-        this.major = 12;
-    }
-    start(obj) {
-        const year = obj.getFullYear();
-        const month = obj.getMonth();
-
-        const time = new Date(year, month, 1).getTime();
-        const index = month;
-
-        return { time, index };
-    }
-    label(month, dateTime) {
-        if (month === 0) {
-            return dateTime.getFullYear().toString();
-        }
-
-        if (month === 6) {
-            return 'H2';
-        }
-
-        return null;
-    }
-    getMajor(month) {
-        if (!month) {
-            // start of year
-            return 2;
-        }
-
-        return Math.floor((month % 7) / 6);
-    }
-    next(key, time) {
-        const dateTime = new Date(time);
-        const month = dateTime.getMonth();
-
-        const major = this.getMajor(month);
-
-        const yearBreak = month === 0;
-        const year = dateTime.getFullYear() - yearBreak;
-
-        const nextTime = new Date(year, (month + 11) % 12, 1).getTime();
-
-        const label = this.label(month, dateTime);
-
-        return { time, major, nextTime, label };
-    }
+        }, []);
 }
 
-export function getTimeSeriesTicker(range) {
-    // determine the tick processor to use
+function timeTickMonthYear(t0, t1) {
+    const t0Date = DateTime.fromJSDate(new Date(t0 * 1000));
+    const { months: diff } = DateTime.fromJSDate(new Date(t1 * 1000)).diff(t0Date, 'months');
+    const numTicks = Math.ceil(diff);
+
+    return timeTick(t0, t1, {
+        measure: 'month',
+        start: t0Date.startOf('month'),
+        tickSize: (start, index) => start.plus({ months: index }),
+        getMajor: time => (((time.month - 1) % 6 === 0) >> 0) + (((time.month - 1) % 12 === 0) >> 0),
+        numTicks,
+        label: time => {
+            if (time.month === 7) {
+                return 'H2';
+            }
+
+            return time.toFormat('y');
+        }
+    });
+}
+function timeTickWeekMonth(t0, t1) {
+    return timeTick(t0, t1, {
+        measure: 'week',
+        tickSize: 86400 * 7,
+        getMajor: () => 0,
+        label: () => false,
+        extra: time => {
+            if (time.plus({ weeks: 1 }).hasSame(time, 'month')) {
+                return null;
+            }
+
+            const endOfMonth = time.endOf('month').plus({ seconds: 1 });
+
+            return { time: Math.round(endOfMonth.ts / 1000), major: 2, label: endOfMonth.toFormat('LLL') };
+        }
+    });
+}
+
+function timeTickDayWeek(t0, t1) {
+    return timeTick(t0, t1, {
+        measure: 'day',
+        tickSize: 86400,
+        getMajor: time => (time.weekday === 7) >> 0,
+        label: time => time.toFormat('d LLL')
+    });
+}
+function timeTickHourDay(t0, t1) {
+    const startTime = DateTime.fromJSDate(new Date(t0 * 1000));
+    const hourOffset = startTime.hour % 3;
+
+    const start = startTime.startOf('hour').plus({ hours: -hourOffset });
+
+    return timeTick(t0, t1, {
+        start,
+        tickSize: 3600 * 3,
+        getMajor: time => (time.hour === 0) >> 0,
+        label: time => time.toFormat('ccc')
+    });
+}
+function timeTickMinuteHour(t0, t1) {
+    return timeTick(t0, t1, {
+        measure: 'hour',
+        tickSize: 1800,
+        getMajor: time => ((time.minute === 0) >> 0) + ((time.hour === 0 && time.minute === 0) >> 0),
+        label: time => {
+            if (time.hour === 0) {
+                return time.toFormat('ccc');
+            }
+
+            return time.toLocaleString(DateTime.TIME_SIMPLE);
+        }
+    });
+}
+function timeTickSecondMinute2(t0, t1) {
+    return timeTick(t0, t1, {
+        measure: 'minute',
+        tickSize: 60,
+        getMajor: time => (time.minute % 10 === 0) >> 0,
+        label: time => time.toLocaleString(DateTime.TIME_24_SIMPLE)
+    });
+}
+function timeTickSecondMinute(t0, t1) {
+    return timeTick(t0, t1, {
+        measure: 'minute',
+        tickSize: 30,
+        getMajor: time => (time.second === 0) >> 0,
+        label: time => time.toLocaleString(DateTime.TIME_24_SIMPLE)
+    });
+}
+
+export function timeSeriesTicks(t0, t1) {
+    const range = t1 - t0;
+
     if (range < 600) {
-        return new TimeTickSecondMinute();
+        return timeTickSecondMinute(t0, t1);
     }
     if (range < 3600) {
-        return new TimeTickSecondMinute2();
+        return timeTickSecondMinute2(t0, t1);
     }
     if (range < 86400 * 0.6) {
-        return new TimeTickMinuteHour();
+        return timeTickMinuteHour(t0, t1);
     }
     if (range < 86400 * 8) {
-        return new TimeTickHourDay();
+        return timeTickHourDay(t0, t1);
     }
     if (range < 86400 * 35) {
-        return new TimeTickDayWeek();
+        return timeTickDayWeek(t0, t1);
     }
     if (range < 86400 * 35 * 12) {
-        return new TimeTickWeekMonth();
+        return timeTickWeekMonth(t0, t1);
     }
 
-    return new TimeTickMonthYear();
-}
-
-/**
- * Gets an appropriate range of ticks based on the time range provided
- * @param {integer} begin UNIX timestamp (secs)
- * @param {integer} end UNIX timestamp (secs)
- * @return {array} range of ticks
- */
-export function timeSeriesTicks(begin, end) {
-    const range = end - begin;
-
-    const ticker = getTimeSeriesTicker(range);
-
-    return ticker.genTicks(begin * 1000, end * 1000);
+    return timeTickMonthYear(t0, t1);
 }
 

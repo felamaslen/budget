@@ -5,13 +5,6 @@ export const mediaQueries = {
     desktop: `(min-width: ${widthPageMobile + 1}px)`
 };
 
-export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-    'August', 'September', 'October', 'November', 'December'];
-
-export const MONTHS_SHORT = MONTHS.map(item => item.substring(0, 3));
-
-export const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 export const LOCALE = 'en-GB';
 export const SYMBOL_CURRENCY_HTML = '\u00a3';
 export const SYMBOL_CURRENCY_RAW = '£';
