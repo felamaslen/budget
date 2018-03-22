@@ -4,7 +4,7 @@ const { DateTime } = require('luxon');
 const { Strategy, ExtractJwt } = require('passport-jwt');
 const bcrypt = require('bcrypt');
 
-function getStrategy(config, db, logger) {
+function getStrategy(config, db) {
     const params = {
         secretOrKey: process.env.USER_TOKEN_SECRET,
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
