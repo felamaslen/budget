@@ -34,13 +34,13 @@ const testPricesProcessedResponse = {
 
 const testTransactionsProcessedResponse = {
     '3': [
-        { date: new Date('2016-09-19'), units: 1678.42, cost: 200000 },
-        { date: new Date('2017-02-14'), units: 846.38, cost: 100000 }
+        { date: DateTime.fromJSDate(new Date('2016-09-19')), units: 1678.42, cost: 200000 },
+        { date: DateTime.fromJSDate(new Date('2017-02-14')), units: 846.38, cost: 100000 }
     ],
     '11': [
-        { date: new Date('2016-08-24'), units: 89.095, cost: 10000 },
-        { date: new Date('2016-09-19'), units: 894.134, cost: 100000 },
-        { date: new Date('2017-04-27'), units: -883.229, cost: -90000 }
+        { date: DateTime.fromJSDate(new Date('2016-08-24')), units: 89.095, cost: 10000 },
+        { date: DateTime.fromJSDate(new Date('2016-09-19')), units: 894.134, cost: 100000 },
+        { date: DateTime.fromJSDate(new Date('2017-04-27')), units: -883.229, cost: -90000 }
     ]
 };
 
@@ -237,7 +237,7 @@ describe('/api/data/overview', () => {
                     ...items,
                     [key]: testTransactionsProcessedResponse[key].map(({ date, ...row }) => ({
                         ...row,
-                        date: DateTime.fromJSDate(date).endOf('month')
+                        date: date.endOf('month')
                             .toISODate()
                     }))
                 }), {})
@@ -267,7 +267,10 @@ describe('/api/data/overview', () => {
                 months, old, testTransactionsProcessedResponse, testPricesProcessedResponse
             );
 
-            const expectedResult = [0, 0, 0, 0, 10000, 310000, 310000, 309530, 151327, 137432];
+            const expectedResult = {
+                funds: [0, 0, 0, 0, 10000, 310000, 310000, 309530, 151327, 137432],
+                fundChanges: [0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
+            };
 
             expect(result).to.deep.equal(expectedResult);
         });
