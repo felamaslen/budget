@@ -149,11 +149,20 @@ function getMonthlyTotalFundValues(months, old, fundTransactions, fundPrices) {
     // get as many old fund values as there are old balance items
     const oldMonths = mapOldToYearMonths(months, old);
 
-    return [...oldMonths, ...months]
-        .map(date => Math.round(idsWithPricesAndTransactions
-            .map(id => getFundValue(date, fundTransactions[id], fundPrices[id]))
-            .reduce((sum, value) => sum + value, 0)
-        ));
+    const allMonths = [...oldMonths, ...months];
+
+    const funds = allMonths.map(date => Math.round(idsWithPricesAndTransactions
+        .map(id => getFundValue(date, fundTransactions[id], fundPrices[id]))
+        .reduce((sum, value) => sum + value, 0)
+    ));
+
+    const fundChanges = allMonths.map(monthDate => transactionsIds.reduce(
+        (status, id) => status ||
+            Boolean(fundTransactions[id].find(({ date }) => date.hasSame(monthDate, 'month'))),
+        false
+    ) >> 0);
+
+    return { funds, fundChanges };
 }
 
 function getMonthlyValuesQueryDateUnion(months) {
@@ -196,7 +205,7 @@ async function getMonthlyValues(config, db, user, yearMonths, union, category, o
 
     const result = await getMonthlyValuesQuery(db, user, union, category);
 
-    return result.map(({ monthCost }) => Number(monthCost) || 0);
+    return { [category]: result.map(({ monthCost }) => Number(monthCost) || 0) };
 }
 
 function getMonthlyBalanceRows(db, user) {
@@ -260,10 +269,7 @@ async function getMonthlyCategoryValues(config, db, user, months, old) {
 
     const results = await Promise.all(promises);
 
-    return results.reduce((items, result, key) => ({
-        ...items,
-        [categories[key]]: result
-    }), {});
+    return results.reduce((items, result) => ({ ...items, ...result }), {});
 }
 
 function getTargets({ balance, old }, futureMonths) {
