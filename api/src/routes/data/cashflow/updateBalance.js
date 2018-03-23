@@ -12,11 +12,16 @@ function updateQuery(db, user, value) {
         .endOf('month')
         .toISODate();
 
-    return db.raw(`
-    INSERT INTO balance (uid, date, value)
-    VALUES (?, ?, ?)
-    ON DUPLICATE KEY UPDATE uid = ?, value = ?
-    `, [user.uid, date, balance, user.uid, balance]);
+    return db.transaction(async trx => {
+        await trx('balance')
+            .whereRaw('YEAR(balance.date) = ?', year)
+            .whereRaw('MONTH(balance.date) = ?', month)
+            .where({ uid: user.uid })
+            .del();
+
+        await trx.insert({ date, value: balance, uid: user.uid })
+            .into('balance');
+    });
 }
 
 function updateData(config, db, post = true) {
