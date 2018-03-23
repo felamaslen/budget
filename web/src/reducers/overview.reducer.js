@@ -90,11 +90,17 @@ export function rProcessDataOverview({ costMap, startDate, currentDate, endDate,
             return values.push(costWithFutures.getIn(['balance', 0]));
         }
 
-        if (dates.get(key - 1) < currentDate || dates.get(key - 1).hasSame(currentDate, 'month')) {
-            return values.push(costWithFutures.getIn(['balance', key - 1]) + net.get(key));
+        const netChange = net.get(key) + costWithFutures.getIn(['fundChanges', key]) *
+            (costWithFutures.getIn(['funds', key]) - costWithFutures.getIn(['funds', key - 1]));
+
+        const pastOrPresent = dates.get(key - 1) < currentDate ||
+            dates.get(key - 1).hasSame(currentDate, 'month');
+
+        if (pastOrPresent) {
+            return values.push(costWithFutures.getIn(['balance', key - 1]) + netChange);
         }
 
-        return values.push(values.last() + net.get(key));
+        return values.push(values.last() + netChange);
 
     }, list.of());
 
