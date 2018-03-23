@@ -37,13 +37,12 @@ export function applyEditsOverview(reduction, { item }) {
         .getIn(['pages', 'overview', 'data', 'costActual'])
         .setIn(['balance', row], value);
 
-    const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
-    const endYearMonth = reduction.getIn(['pages', 'overview', 'data', 'endYearMonth']);
-    const currentYearMonth = reduction.getIn(['pages', 'overview', 'data', 'currentYearMonth']);
+    const startDate = reduction.getIn(['pages', 'overview', 'data', 'startDate']);
+    const endDate = reduction.getIn(['pages', 'overview', 'data', 'endDate']);
+    const currentDate = reduction.getIn(['pages', 'overview', 'data', 'currentDate']);
     const futureMonths = reduction.getIn(['pages', 'overview', 'data', 'futureMonths']);
 
-    const newData = rProcessDataOverview(
-        newCost, startYearMonth, endYearMonth, currentYearMonth, futureMonths);
+    const newData = rProcessDataOverview({ costMap: newCost, startDate, endDate, currentDate, futureMonths });
 
     return reduction
         .setIn(['pages', 'overview', 'data'], newData)
