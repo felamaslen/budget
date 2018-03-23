@@ -2,7 +2,7 @@ import { Map as map } from 'immutable';
 import { PAGES } from '../constants/data';
 import { getValueForTransmit } from '../helpers/data';
 
-export function addToRequestQueue(requestList, dataItem, startYearMonth = null) {
+export function addToRequestQueue(requestList, dataItem, startDate) {
     const page = dataItem.get('page');
 
     if (dataItem.get('delete')) {
@@ -21,8 +21,7 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
 
     if (page === 'overview') {
         const key = dataItem.get('row');
-        const year = startYearMonth[0] + Math.floor((key + startYearMonth[1] - 1) / 12);
-        const month = (startYearMonth[1] + key - 1) % 12 + 1;
+        const { year, month } = startDate.plus({ months: key });
         const balance = Math.round(value);
 
         return requestList.push(map({
@@ -62,10 +61,10 @@ export function addToRequestQueue(requestList, dataItem, startYearMonth = null) 
 }
 
 export function pushToRequestQueue(reduction, dataItem) {
-    const startYearMonth = reduction.getIn(['pages', 'overview', 'data', 'startYearMonth']);
+    const startDate = reduction.getIn(['pages', 'overview', 'data', 'startDate']);
 
     const requestList = reduction.getIn(['edit', 'requestList']);
-    const newRequestList = addToRequestQueue(requestList, dataItem, startYearMonth || null);
+    const newRequestList = addToRequestQueue(requestList, dataItem, startDate || null);
 
     return reduction
         .setIn(['edit', 'requestList'], newRequestList);

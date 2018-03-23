@@ -1,4 +1,5 @@
 import { fromJS, Map as map, List as list } from 'immutable';
+import { DateTime } from 'luxon';
 import { expect } from 'chai';
 import * as R from '../../src/reducers/request-queue.reducer';
 
@@ -11,7 +12,9 @@ describe('Request queue reducer', () => {
         it('should push to the request list', () => {
             const state = map({
                 pages: map({
-                    overview: map({ data: map({ startYearMonth: [2017, 8] }) })
+                    overview: map({
+                        data: map({ startDate: DateTime.fromObject({ year: 2017, month: 8 }) })
+                    })
                 }),
                 edit: map({ requestList: list.of() })
             });
@@ -25,7 +28,9 @@ describe('Request queue reducer', () => {
             expect(R.pushToRequestQueue(state, dataItem).toJS())
                 .to.deep.equal({
                     pages: {
-                        overview: { data: { startYearMonth: [2017, 8] } }
+                        overview: {
+                            data: { startDate: DateTime.fromObject({ year: 2017, month: 8 }) }
+                        }
                     },
                     edit: {
                         requestList: [
