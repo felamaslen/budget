@@ -1,5 +1,6 @@
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
+export const KEYPRESS_BUFFER_TIME = 10;
 
 export const API_VERSION = 4;
 export const API_PREFIX = `api/v${API_VERSION}`;
