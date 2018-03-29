@@ -1,7 +1,7 @@
 import { eventChannel } from 'redux-saga';
 import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
-import { API_PREFIX } from '../constants/data';
+import { API_PREFIX, KEYPRESS_BUFFER_TIME } from '../constants/data';
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
 import debounce, { buffer } from '../helpers/debounce';
 import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
@@ -14,7 +14,7 @@ export function keyPressEventChannel() {
             key: evt.key,
             shift: evt.shiftKey,
             ctrl: evt.ctrlKey || evt.metaKey
-        })), 75);
+        })), KEYPRESS_BUFFER_TIME);
 
         const onKeyPress = evt => {
             const tab = evt.key === 'Tab';

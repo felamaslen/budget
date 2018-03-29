@@ -43,6 +43,7 @@ function processData({ cost, showAll, futureMonths, ...props }) {
             data: dataBalance,
             fill: false,
             smooth: true,
+            movingAverage: 12,
             color: (point, index) => colorBalance[(index < futureKey - 1) >> 0]
         },
         {

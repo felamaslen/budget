@@ -16,13 +16,13 @@ module.exports = {
             table.integer('uid').unsigned().notNullable();
             table.foreign('uid').references('users.uid');
             table.date('date').notNullable();
-            table.string('item').notNullable();
+            table.string('item', 190).notNullable();
             table.text('transactions').notNullable();
             table.integer('cost').notNullable();
             table.unique(['uid', 'item']);
         }),
         knex.schema.createTable('fund_hash', table => {
-            table.collate('utf8mb4_unicode_ci');
+            table.collate('utf8_unicode_ci');
 
             table.increments('fid').unsigned().primary();
             table.string('broker').notNullable();
@@ -30,14 +30,14 @@ module.exports = {
             table.unique(['broker', 'hash']);
         }),
         knex.schema.createTable('fund_cache_time', table => {
-            table.collate('utf8mb4_unicode_ci');
+            table.collate('utf8_unicode_ci');
 
             table.increments('cid').unsigned().notNullable();
             table.dateTime('time').index().notNullable();
             table.boolean('done');
         }),
         knex.schema.createTable('fund_cache', table => {
-            table.collate('utf8mb4_unicode_ci');
+            table.collate('utf8_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.integer('cid').unsigned();
@@ -59,7 +59,7 @@ module.exports = {
             table.float('subweight');
         }),
         knex.schema.createTable('stock_codes', table => {
-            table.collate('utf8mb4_unicode_ci');
+            table.collate('utf8_unicode_ci');
 
             table.increments('id').unsigned().primary();
             table.string('name').notNullable();

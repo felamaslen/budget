@@ -8,7 +8,10 @@ import React from 'react';
 import Graph from '.';
 import ArrowLine from './arrows';
 import { timeSeriesTicks } from '../../helpers/date';
+import { listAverage } from '../../helpers/data';
+import { rgba } from '../../helpers/color';
 import { GRAPH_CURVINESS } from '../../constants/graph';
+import { COLOR_LIGHT_GREY } from '../../constants/colors';
 
 export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
     // divides the time axis (horizontal) into appropriate chunks
@@ -163,13 +166,38 @@ function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
         .filter(({ path }) => path.length);
 }
 
-function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {
+function RenderedLine({ data, smooth, arrows, color, fill, movingAverage, ...props }) {
     if (!data.size) {
         return null;
     }
 
     if (arrows) {
         return <ArrowLine data={data} color={color} {...props} />;
+    }
+
+    let averageLine = null;
+    if (movingAverage) {
+        const averageData = data.reduce(({ last, points }, point) => {
+            const nextLast = last.slice(1 - movingAverage).push(point.get(1));
+            const average = listAverage(nextLast);
+
+            return { last: nextLast, points: points.push(point.set(1, average)) };
+
+        }, { last: list.of(), points: list.of() })
+            .points;
+
+        const averageLinePath = getSingleLinePath({
+            ...props, data: averageData, smooth: true, fill: false
+        });
+
+        averageLine = (
+            <path d={averageLinePath}
+                stroke={rgba(COLOR_LIGHT_GREY)}
+                strokeDasharray="3,5"
+                strokeWidth={1}
+                fill="none"
+            />
+        );
     }
 
     if (typeof color === 'function') {
@@ -183,7 +211,7 @@ function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {
             <path key={key} d={path} stroke={stroke} strokeWidth={props.strokeWidth || 2} fill="none" />
         ));
 
-        return <g className="lines">{paths}</g>;
+        return <g className="lines">{averageLine}{paths}</g>;
     }
 
     const linePath = getSingleLinePath({ data, smooth, fill, ...props });
@@ -198,6 +226,7 @@ function RenderedLine({ data, smooth, arrows, color, fill, ...props }) {
 
     return <g className="line">
         <path d={linePath} stroke={strokeStyle} strokeWidth={props.strokeWidth || 2} fill={fillStyle} />
+        {averageLine}
     </g>;
 }
 
@@ -210,6 +239,7 @@ RenderedLine.propTypes = {
     strokeWidth: PropTypes.number,
     fill: PropTypes.bool,
     smooth: PropTypes.bool,
+    movingAverage: PropTypes.number,
     arrows: PropTypes.bool,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
