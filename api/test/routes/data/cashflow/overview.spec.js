@@ -269,7 +269,7 @@ describe('/api/data/overview', () => {
 
             const expectedResult = {
                 funds: [0, 0, 0, 0, 10000, 310000, 310000, 309530, 151327, 137432],
-                fundChanges: [0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
+                fundChanges: [1, 0, 0, 1, 1, 1, 1]
             };
 
             expect(result).to.deep.equal(expectedResult);

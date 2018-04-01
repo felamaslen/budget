@@ -156,11 +156,9 @@ function getMonthlyTotalFundValues(months, old, fundTransactions, fundPrices) {
         .reduce((sum, value) => sum + value, 0)
     ));
 
-    const fundChanges = allMonths.map(monthDate => transactionsIds.reduce(
-        (status, id) => status ||
-            Boolean(fundTransactions[id].find(({ date }) => date.hasSame(monthDate, 'month'))),
-        false
-    ) >> 0);
+    const fundChanges = months.map(monthDate => transactionsIds.reduce(
+        (status, id) => status && !(fundTransactions[id].find(({ date }) =>
+            date.hasSame(monthDate, 'month'))), true) >> 0);
 
     return { funds, fundChanges };
 }
