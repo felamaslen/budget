@@ -28,7 +28,8 @@ function processData({ valuesNet, valuesSpending, ...props }) {
             data: dataSpending,
             fill: false,
             smooth: true,
-            color: rgba(COLOR_SPENDING)
+            color: rgba(COLOR_SPENDING),
+            movingAverage: 6
         }
     ];
 }

@@ -13,12 +13,14 @@ module.exports = {
 
                 table.increments('uid').unsigned().primary();
                 table.string('name').notNullable();
-                table.string('pinHash').unique().notNullable();
+                table.string('pinHash').unique().notNullable()
+                    .collate('utf8_unicode_ci');
             }),
             knex.schema.createTable('ip_login_req', table => {
                 table.collate('utf8mb4_unicode_ci');
 
-                table.string('ip').primary();
+                table.string('ip').primary()
+                    .collate('utf8_unicode_ci');
                 table.timestamp('time').notNullable();
                 table.integer('count').notNullable().defaultTo(0);
             })
