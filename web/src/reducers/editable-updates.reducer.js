@@ -9,11 +9,11 @@ import { getExtraRowProps as reloadFundsRows } from './funds.reducer';
 
 export function resortListRows(reduction, { page }) {
     // sort rows by date
-    const sortedRows = sortRowsByDate(reduction.getIn(['pages', page, 'rows']), page);
+    const { sortedRows, rowIds } = sortRowsByDate(reduction.getIn(['pages', page, 'rows']), page);
     const weeklyData = addWeeklyAverages(reduction.getIn(['pages', page, 'data']), sortedRows, page);
 
-    return reduction
-        .setIn(['pages', page, 'rows'], sortedRows)
+    return reduction.setIn(['pages', page, 'rows'], sortedRows)
+        .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData);
 }
 
@@ -142,12 +142,12 @@ export function rDeleteListItem(reduction, { page, id }) {
         newReduction.getIn(['pages', page, 'data', 'total']) - itemCost
     );
     // sort rows and recalculate weekly data
-    const sortedRows = sortRowsByDate(
+    const { sortedRows, rowIds } = sortRowsByDate(
         newReduction
             .getIn(['pages', page, 'rows'])
             .delete(id),
-        page
-    );
+        page);
+
     const weeklyData = addWeeklyAverages(
         newReduction.getIn(['pages', page, 'data']),
         sortedRows,
@@ -168,6 +168,7 @@ export function rDeleteListItem(reduction, { page, id }) {
 
     newReduction = pushToRequestQueue(newReduction, map({ page, id, delete: true }))
         .setIn(['pages', page, 'rows'], sortedRows)
+        .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData);
 
     // recalculate fund profits / losses

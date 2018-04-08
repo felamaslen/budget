@@ -168,9 +168,9 @@ describe('helpers/data', () => {
                 }
             });
 
-            const result = M.sortRowsByDate(rows, 'food');
+            const { sortedRows, rowIds } = M.sortRowsByDate(rows, 'food');
 
-            expect(result.map(item => item
+            expect(sortedRows.map(item => item
                 .setIn(['cols', 0], item.getIn(['cols', 0]).toISODate())
             )
                 .toJS()
@@ -229,6 +229,8 @@ describe('helpers/data', () => {
                         future: false
                     }
                 });
+
+            expect(rowIds.toJS()).to.deep.equal(['3', '5', '2', '1', '4']);
         });
     });
     describe('addWeeklyAverages', () => {

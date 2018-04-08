@@ -182,12 +182,10 @@ export function rHandleServerAdd(reduction, { err, response, fields, page }) {
     const cols = list(fields.map(thisItem => thisItem.get('value')));
 
     // update total and push new item to the data store list, then sort by date
-    const sortedRows = sortRowsByDate(
-        reduction
-            .getIn(['pages', page, 'rows'])
+    const { sortedRows, rowIds } = sortRowsByDate(
+        reduction.getIn(['pages', page, 'rows'])
             .set(id, map({ id, cols })),
-        page
-    );
+        page);
 
     const weeklyData = addWeeklyAverages(
         reduction.getIn(['pages', page, 'data']),
@@ -197,6 +195,7 @@ export function rHandleServerAdd(reduction, { err, response, fields, page }) {
 
     newReduction = newReduction
         .setIn(['pages', page, 'rows'], sortedRows)
+        .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData)
         .setIn(['pages', page, 'data', 'total'], newTotal)
         .setIn(

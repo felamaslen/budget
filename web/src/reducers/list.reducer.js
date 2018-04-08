@@ -54,7 +54,9 @@ export function processPageDataList(reduction, { page, raw }) {
 
     const rows = processRawListRows(raw.data, page);
 
-    return reduction.setIn(['pages', page], map({ data, rows }));
+    const rowIds = rows.keySeq().toList();
+
+    return reduction.setIn(['pages', page], map({ data, rows, rowIds }));
 }
 
 export function processPageDataFunds(reduction, { raw }, now) {
@@ -67,20 +69,21 @@ export function processPageDataFunds(reduction, { raw }, now) {
     const period = reduction.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
 
-    const rows = sortRowsByDate(newReduction.getIn(['pages', 'funds', 'rows']), 'funds');
-    const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes);
+    const { sortedRows, rowIds } = sortRowsByDate(newReduction.getIn(['pages', 'funds', 'rows']), 'funds');
+    const rowsWithExtraProps = getExtraRowProps(sortedRows, startTime, cacheTimes);
 
     const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
     const zoom = reduction.getIn(['other', 'graphFunds', 'zoom']);
 
-    const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, now);
-    const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, zoom);
+    const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, now);
+    const fundHistory = getFormattedHistory(sortedRows, mode, startTime, cacheTimes, zoom);
 
     return newReduction
         .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
+        .setIn(['pages', 'funds', 'rowIds'], rowIds)
         .setIn(['pages', 'funds', 'startTime'], startTime)
         .setIn(['pages', 'funds', 'cacheTimes'], cacheTimes)
-        .setIn(['other', 'fundHistoryCache', period], map({ rows, startTime, cacheTimes }))
+        .setIn(['other', 'fundHistoryCache', period], map({ rows: sortedRows, startTime, cacheTimes }))
         .setIn(['other', 'fundsCachedValue'], fundsCachedValue)
         .setIn(['other', 'graphFunds', 'startTime'], startTime)
         .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)
