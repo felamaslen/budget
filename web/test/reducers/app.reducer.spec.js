@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import '../browser';
 import { expect } from 'chai';
 import * as R from '../../src/reducers/app.reducer';
 import reduction from '../../src/reduction';
@@ -21,7 +22,39 @@ describe('app.reducer', () => {
         });
 
         describe('if logged in', () => {
-            it('works', () => null);
+            const stateLoggedIn = {
+                user: {
+                    uid: 1
+                }
+            };
+
+            describe('if navigating from suggestions', () => {
+                const stateFromSuggestions = {
+                    ...stateLoggedIn,
+                    editSuggestions: {
+                        list: ['foo', 'bar'],
+                        active: 1
+                    }
+                };
+
+                it('should handle escape', () => {
+                    const state = fromJS(stateFromSuggestions);
+
+                    const result = R.rHandleKeyPress(state, { key: 'Escape' });
+
+                    const expectedResult = {
+                        ...stateLoggedIn,
+                        editSuggestions: {
+                            list: [],
+                            active: -1
+                        }
+                    };
+
+                    expect(result.toJS()).to.deep.equal(expectedResult);
+                });
+            });
+
+            it('should be tested further');
         });
 
         describe('if not logged in', () => {

@@ -9,12 +9,9 @@ import 'babel-polyfill';
 import React from 'react';
 import { AppContainer } from 'react-hot-loader';
 import { render } from 'react-dom';
-import createHistory from 'history/createBrowserHistory';
 
 import store from './store';
-import Root from './containers/root';
-
-const history = createHistory();
+import Root from './containers/Root';
 
 // import styles and favicon
 import './sass/index.scss';
@@ -35,8 +32,8 @@ if (process.env.NODE_ENV !== 'test') {
 
 if (module.hot) {
     module.hot.accept(
-        './containers/root',
-        () => renderApp(require('./containers/root').default)
+        './containers/Root',
+        () => renderApp(require('./containers/Root').default)
     );
 }
 
