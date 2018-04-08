@@ -45,30 +45,7 @@ describe('<ListRowFundsDesktop />', () => {
 
     it('should render gain info', () => {
         expect(wrapper.childAt(1).is(FundGainInfo)).to.equal(true);
-        // 'span.gain')).to.equal(true);
-        // expect(wrapper.childAt(1).children()).to.have.length(1);
-        // expect(wrapper.childAt(1).childAt(0).is('span.text.profit')).to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).children()).to.have.length(2);
-        // expect(wrapper.childAt(1).childAt(0).childAt(0).is('span.value')).to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).childAt(0).text()).to.equal('£5.6k');
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).is('span.breakdown')).to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).children()).to.have.length(4);
-
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(0).is('span.gain-abs.profit'))
-        //     .to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(0).text()).to.equal('£40');
-
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(1).is('span.day-gain-abs.loss'))
-        //     .to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(1).text()).to.equal('(£3)');
-
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(2).is('span.gain.profit'))
-        //     .to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(2).text()).to.equal('30.00%');
-
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(3).is('span.day-gain.loss'))
-        //     .to.equal(true);
-        // expect(wrapper.childAt(1).childAt(0).childAt(1).childAt(3).text()).to.equal('(2.00%)');
+        expect(wrapper.childAt(1).props()).to.have.property('gain', props.row.get('gain'));
     });
 });
 
