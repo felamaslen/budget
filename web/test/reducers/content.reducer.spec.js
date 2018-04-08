@@ -127,6 +127,7 @@ describe('Content reducer', () => {
                             cacheTimes: [191239],
                             data: { numCols: 4, numRows: 0, total: 0 },
                             rows: {},
+                            rowIds: [],
                             startTime: 1508533928
                         }
                     },

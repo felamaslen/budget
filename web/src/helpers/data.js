@@ -281,7 +281,7 @@ export function getAddDefaultValues(page) {
     });
 }
 
-export function sortRowsByDate(rows, page) {
+export function getRowsSortedByDate(rows, page) {
     const now = getNow();
 
     const dateKey = PAGES[page].cols.indexOf('date');
@@ -346,6 +346,14 @@ export function sortRowsByDate(rows, page) {
     }
 
     return sorted;
+}
+
+export function sortRowsByDate(rows, page) {
+    const sortedRows = getRowsSortedByDate(rows, page);
+    const rowIds = sortedRows.keySeq()
+        .toList();
+
+    return { sortedRows, rowIds };
 }
 
 export function addWeeklyAverages(data, rows, page) {

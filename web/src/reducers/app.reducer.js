@@ -69,10 +69,7 @@ function handleNav(reduction, { page, dx, dy, cancel }) {
 
     let navTo = null;
     if (pageIsList) {
-        const rowKeys = reduction
-            .getIn(['pages', page, 'rows'])
-            .keySeq()
-            .toList();
+        const rowKeys = reduction.getIn(['pages', page, 'rowIds']);
 
         navTo = getNavRowCol({
             dx, dy, rowKeys, numCols, currentRow, currentCol, addBtnFocus

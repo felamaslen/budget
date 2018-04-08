@@ -29,15 +29,14 @@ function processPageData(reduction, { page, raw }, now) {
 
     if (PAGES[page].list) {
         const newReduction = processPageDataList(reduction, { page, raw });
-        const sortedRows = sortRowsByDate(
-            newReduction.getIn(['pages', page, 'rows']), page
-        );
+        const { sortedRows, rowIds } = sortRowsByDate(
+            newReduction.getIn(['pages', page, 'rows']), page);
         const weeklyData = addWeeklyAverages(
-            newReduction.getIn(['pages', page, 'data']), sortedRows, page
-        );
+            newReduction.getIn(['pages', page, 'data']), sortedRows, page);
 
         return newReduction
             .setIn(['pages', page, 'rows'], sortedRows)
+            .setIn(['pages', page, 'rowIds'], rowIds)
             .setIn(['pages', page, 'data'], weeklyData);
     }
 
