@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListRowMobile from '../../containers/ListRowMobile';
 
-export default function BodyMobile({ page, rowIds, onMobileAdd, ...props }) {
+export default function ListBodyMobile({ page, rowIds, onMobileAdd, ...props }) {
     const colKeys = LIST_COLS_MOBILE
         .map(column => PAGES[page].cols.indexOf(column));
 
@@ -32,7 +32,7 @@ export default function BodyMobile({ page, rowIds, onMobileAdd, ...props }) {
     );
 }
 
-BodyMobile.propTypes = {
+ListBodyMobile.propTypes = {
     page: PropTypes.string.isRequired,
     rowIds: PropTypes.instanceOf(list).isRequired,
     onMobileAdd: PropTypes.func.isRequired

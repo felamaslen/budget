@@ -10,10 +10,10 @@ export default function FundsMeta() {
         <div className="funds-info">
             <Media query={mediaQueries.mobile}>{isMobile => isMobile &&
                 <ListHeadFundsMobile /> ||
-                <span className="after-list">
+                <div className="after-list">
                     <StocksList />
                     <GraphFunds />
-                </span>
+                </div>
             }</Media>
         </div>
     );

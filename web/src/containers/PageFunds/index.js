@@ -5,8 +5,8 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import PageList from '../PageList';
 import FundsMeta from '../../components/FundsMeta';
 import { PAGES } from '../../constants/data';
-import ListHeadFundsDesktop from '../../components/ListHeadFundsDesktop';
-import ListRowFundsDesktop from '../ListRowFundsDesktop';
+import ListHeadFundsDesktop from '../../containers/ListHeadFundsDesktop';
+import ListRowFundsDesktop from '../../components/ListRowFundsDesktop';
 import ListRowFundsMobile from '../../components/ListRowFundsMobile';
 
 function PageFunds({ sold }) {
