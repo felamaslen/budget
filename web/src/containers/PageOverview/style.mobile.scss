@@ -1,6 +1,6 @@
 .page-overview {
     .funds, .bills, .food, .general, .holiday, .social,
-    .net, .predicted, .balance {
+    .net, .balance {
         display: none;
     }
     .table-flex {
@@ -20,7 +20,7 @@
             .spending {
                 background: $color-mob-overview-tbl-spending;
             }
-            .balancePred {
+            .predicted {
                 background: $color-mob-overview-tbl-balance;
             }
         }
