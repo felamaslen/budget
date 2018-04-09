@@ -4,7 +4,7 @@
 
 import { List as list, Map as map, fromJS } from 'immutable';
 import { DateTime } from 'luxon';
-import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
+import { AVERAGE_MEDIAN } from '../constants';
 import { OVERVIEW_COLUMNS } from '../constants/data';
 import { FUTURE_INVESTMENT_RATE } from '../constants/stocks';
 import { GRAPH_SPEND_CATEGORIES } from '../constants/graph';
@@ -47,7 +47,7 @@ function calculateFutures(cost, futureCategories, futureMonths) {
         const currentItems = categoryCost.slice(0, currentKey)
             .push(currentMonthExtrapolated);
 
-        const average = Math.round(listAverage(currentItems, AVERAGE_EXP));
+        const average = Math.round(listAverage(currentItems, AVERAGE_MEDIAN));
 
         return currentItems.concat(list(new Array(futureMonths).fill(average)));
     });
