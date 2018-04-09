@@ -265,7 +265,7 @@ function routePost(config, db) {
  *                     $ref: "#/definitions/ErrorResponse"
  */
 function routePut(config, db) {
-    return listCommon.routePut(config, db, 'funds', funds.validateUpdateData);
+    return listCommon.routePut(config, db, 'funds');
 }
 
 /**
