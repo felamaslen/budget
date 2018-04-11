@@ -12,7 +12,7 @@ describe('<ListRowFundsDesktop />', () => {
         id: 10,
         row: map({
             historyPopout: true,
-            cols: list([null, 'foo-fund']),
+            cols: list(['foo-fund']),
             gain: map({
                 value: 561932,
                 gain: 0.3,
