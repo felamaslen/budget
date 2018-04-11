@@ -33,7 +33,7 @@ async function up(knex, Promise) {
                 .onDelete('CASCADE');
 
             table.date('date').notNullable();
-            table.float('units').notNullable();
+            table.double('units').notNullable();
             table.integer('cost').notNullable();
         }),
         knex.schema.createTable('fund_hash', table => {
