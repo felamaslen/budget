@@ -25,8 +25,11 @@ const testPricesQueryResponse = [
 ];
 
 const testTransactionsQueryResponse = [
-    { id: 3, transactions: '[{"cost":200000,"units":1678.42,"date":"2016-09-19"},{"cost":100000,"units":846.38,"date":"2017-02-14"}]' },
-    { id: 11, transactions: '[{"cost":10000,"units":89.095,"date":"2016-08-24"},{"cost":100000,"units":894.134,"date":"2016-09-19"},{"cost":-90000,"units":-883.229,"date":"2017-04-27"}]' }
+    { id: 3, date: new Date('2016-09-19'), units: 1678.42, cost: 200000 },
+    { id: 3, date: new Date('2017-02-14'), units: 846.38, cost: 100000 },
+    { id: 11, date: new Date('2016-08-24'), units: 89.095, cost: 10000 },
+    { id: 11, date: new Date('2016-09-19'), units: 894.134, cost: 100000 },
+    { id: 11, date: new Date('2017-04-27'), units: -883.229, cost: -90000 }
 ];
 
 module.exports = {
