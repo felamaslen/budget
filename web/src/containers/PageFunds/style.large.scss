@@ -1,0 +1,227 @@
+.page-funds {
+    .list-insert {
+        flex: 0 1 800px;
+        
+        .list-head {
+            .gain {
+                margin-left: 0.5em;
+                text-transform: none;
+                span {
+                    padding: 0 0.25em;
+                    margin-left: 0.25em;
+                }
+                &.profit {
+                    background: $color-profit-light;
+                }
+                &.loss {
+                    background: $color-loss-light;
+                }
+            }
+        }
+        .list-ul {
+            li, .list-head-inner {
+                & > span {
+                    &.item {
+                        flex: 0 1 376px;
+                    }
+                    &.fund-extra-info {
+                        display: flex;
+                        flex: 0 0 300px;
+                        flex-wrap: nowrap;
+
+                        &.popout {
+                            z-index: 10;
+                            overflow: visible !important;
+
+                            .graph-container {
+                                box-shadow: none;
+                            }
+                        }
+                    }
+                    &.add-button-outer {
+                        flex: 0 0 320px;
+                        border-right: none;
+                    }
+                }
+            }
+            li {
+                &:not(.li-add) > span {
+                    overflow: hidden;
+                }
+                & > span.transactions {
+                    flex-basis: 102px;
+                    overflow: visible !important;
+                    .modal {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 300px;
+                        min-height: 100px;
+                        z-index: 5;
+                        line-height: 26px;
+                        background: $color-translucent-l8;
+                        box-shadow: 0 3px 6px $color-shadow-l2;
+                        input {
+                            width: 95%;
+                        }
+                        thead {
+                            font-size: 0.9em;
+                        }
+                        .inner {
+                            padding: 0.2em;
+                        }
+                    }
+                    .text {
+                        display: none;
+                    }
+                }
+            }
+            .num-transactions {
+                display: block;
+                text-align: center;
+            }
+            & > li:nth-child(n+3) {
+                height: 48px;
+                line-height: 48px;
+                .fund-extra-info > .gain {
+                    height: 100%;
+                }
+            }
+            .fund-graph {
+                height: 100%;
+                flex: 0 0 100px;
+            }
+            .fund-extra-info > .gain {
+                display: flex;
+                flex: 0 0 200px;
+
+                .text {
+                    display: flex;
+                    margin-right: 0;
+                    padding: 0;
+                    width: 100%;
+                    & > span {
+                        padding: 0;
+                    }
+                }
+                .profit {
+                    color: $color-profit;
+                }
+                .loss {
+                    color: $color-loss;
+                }
+                .value {
+                    flex: 1 1 0;
+                    font-size: 1.1em;
+                    color: $color-slightly-dark;
+                }
+                .breakdown {
+                    display: flex;
+                    flex: 2 1 0;
+                    flex-wrap: wrap;
+
+                    & > span {
+                        flex: 1 1 50%;
+                        height: 50%;
+                    }
+                }
+                .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
+                    font-size: 0.8em;
+                    line-height: 24px;
+                    height: 24px;
+                    background: $color-translucent-l8;
+                }
+                .gain-abs, .day-gain-abs {
+                    width: 15%;
+                    &.profit:before {
+                        content: $text-up-arrow;
+                    }
+                    &.loss:before {
+                        content: $text-down-arrow;
+                    }
+                    &:before {
+                        font-style: normal;
+                        font-weight: normal;
+                        margin-right: 0.2em;
+                    }
+                }
+                .gain-abs, .day-gain-abs, .gain, .day-gain {
+                    width: 30%;
+                }
+            }
+            .sold {
+                color: $color-slightly-light;
+                .fund-graph {
+                    filter: grayscale(100%);
+                }
+                .gain {
+                    font-style: italic;
+                    font-weight: normal;
+                }
+                .fund-graph:before, .gain:before {
+                    content: $none;
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    background: $color-translucent-l5;
+                    z-index: 1;
+                }
+            }
+        }
+        .gain {
+            display: inline-block;
+            .text {
+                padding: 0;
+                height: 100%;
+                background: $color-medium-slightly-dark;
+                &>span {
+                    float: left;
+                    padding: 0 1px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: center;
+                }
+            }
+            .value {
+                width: 68px;
+                text-align: left;
+            }
+            .abs {
+                width: 64px;
+                text-align: left ;
+            }
+            .pct {
+                width: 62px;
+                text-align: right;
+            }
+        }
+    }
+
+    .stocks-list {
+        &::-webkit-scrollbar-track {
+            -webkit-box-shadow: none;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: $color-translucent-l4;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: $color-shadow-grey;
+        }
+        &::-webkit-scrollbar-thumb:active {
+            background-color: $color-translucent-l7;
+        }
+    }
+
+    .funds-info {
+        flex: 1 0 auto;
+        padding-top: 40px;
+    }
+
+    .graph-fund-history, .stocks-list {
+    }
+    .graph-fund-history {
+    }
+}
+
