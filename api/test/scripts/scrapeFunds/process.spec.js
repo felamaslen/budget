@@ -24,64 +24,56 @@ describe('scrapeFunds process', () => {
     describe('getEligibleFunds', () => {
         it('should map and filter funds by validity', () => {
             const queryResultAllInvalid = [
-                { name: 'foo' },
-                { name: TEST_FUND_NAMES[0], transactions: null },
-                { name: TEST_FUND_NAMES[0], transactions: '' },
-                { name: TEST_FUND_NAMES[0], transactions: 'gobbledegook' }
+                { item: TEST_FUND_NAMES[0], units: null, cost: null },
+                { item: TEST_FUND_NAMES[1], units: 5, cost: 3 },
+                { item: TEST_FUND_NAMES[1], units: -5, cost: -2 }
             ];
 
             expect(scraper.getEligibleFunds(config, logger, queryResultAllInvalid)).to.deep.equal([]);
 
             const queryResultSomeInvalid = [
-                { name: TEST_FUND_NAMES[0], transactions: '' },
+                { item: TEST_FUND_NAMES[0] },
                 {
-                    name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    transactions: JSON.stringify([
-                        { date: '2016-06-01', units: 10, cost: 10 },
-                        { date: '2017-06-01', units: -10, cost: -8 }
-                    ])
+                    item: TEST_FUND_NAMES[0],
+                    units: 10
                 },
                 {
-                    name: TEST_FUND_NAMES[1],
-                    uid: 2,
-                    transactions: JSON.stringify([
-                        { date: '2016-06-01', units: 100, cost: 240 },
-                        { date: '2016-10-01', units: -46, cost: -89 }
-                    ])
+                    item: TEST_FUND_NAMES[0],
+                    units: -10
                 },
                 {
-                    name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    transactions: JSON.stringify([
-                        { date: '2016-06-01', units: 0, cost: 10 }
-                    ])
+                    item: TEST_FUND_NAMES[1],
+                    units: 100
                 },
                 {
-                    name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    transactions: JSON.stringify([
-                        { date: '2016-06-01', units: 10, cost: 10 }
-                    ])
+                    item: TEST_FUND_NAMES[1],
+                    units: -46,
+                    cost: -89
+                },
+                {
+                    item: TEST_FUND_NAMES[0],
+                    units: 0,
+                    cost: 10
+                },
+                {
+                    item: TEST_FUND_NAMES[0],
+                    units: 10,
+                    cost: 10
                 }
             ];
 
             expect(scraper.getEligibleFunds(config, logger, queryResultSomeInvalid)).to.deep.equal([
                 {
-                    hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
-                    broker: 'hl',
-                    name: TEST_FUND_NAMES[1],
-                    uid: 2,
-                    cost: 151,
-                    units: 54
-                },
-                {
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    cost: 10,
                     units: 10
+                },
+                {
+                    hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
+                    broker: 'hl',
+                    name: TEST_FUND_NAMES[1],
+                    units: 54
                 }
             ]);
         });
@@ -89,26 +81,20 @@ describe('scrapeFunds process', () => {
         it('should filter funds by uniqueness', () => {
             const queryResultSomeDuplicate = [
                 {
-                    name: TEST_FUND_NAMES[1],
-                    uid: 2,
-                    transactions: JSON.stringify([
-                        { date: '2016-6-1', units: 100, cost: 240 },
-                        { date: '2016-10-1', units: -46, cost: -89 }
-                    ])
+                    item: TEST_FUND_NAMES[1],
+                    units: 100
                 },
                 {
-                    name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    transactions: JSON.stringify([
-                        { date: '2016-6-1', units: 20, cost: 19 }
-                    ])
+                    item: TEST_FUND_NAMES[1],
+                    units: -46
                 },
                 {
-                    name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    transactions: JSON.stringify([
-                        { date: '2016-9-1', units: 10, cost: 10 }
-                    ])
+                    item: TEST_FUND_NAMES[0],
+                    units: 20
+                },
+                {
+                    item: TEST_FUND_NAMES[0],
+                    units: 10
                 }
             ];
 
@@ -117,16 +103,12 @@ describe('scrapeFunds process', () => {
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[1],
-                    uid: 2,
-                    cost: 151,
                     units: 54
                 },
                 {
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
-                    uid: 1,
-                    cost: 29,
                     units: 30
                 }
             ]);
