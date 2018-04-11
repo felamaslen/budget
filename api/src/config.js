@@ -33,9 +33,6 @@ module.exports = () => ({
         listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
         currencyUnit: '£',
         columnMapExtra: {
-            funds: {
-                transactions: 't'
-            },
             income: {},
             bills: {},
             food: {

@@ -82,7 +82,7 @@ describe('Common list data functions', () => {
                 category: 'k'
             };
 
-            expect(listCommon.formatResults(queryResult, columnMap)).to.deep.equal([
+            expect(queryResult.map(listCommon.formatResults(columnMap))).to.deep.equal([
                 {
                     'd': '2017-09-12', 'i': 'foo', 'k': 'bar'
                 },
