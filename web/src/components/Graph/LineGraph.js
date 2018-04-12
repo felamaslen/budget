@@ -296,7 +296,7 @@ export default function LineGraph({ lines, width, height, beforeLines, afterLine
         ...pixelCompute
     };
 
-    if (!lines.size) {
+    if (!(lines && lines.size)) {
         return (
             <Graph width={width} height={height} />
         );
