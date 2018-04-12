@@ -8,17 +8,19 @@ const listCommon = require('../list.common');
 const schema = require('../../../schema/funds');
 
 function formatResults(columnMap, getPriceHistory, priceHistory = null) {
-    const addPrices = getPriceHistory
-        ? row => ({
+    const commonProps = listCommon.formatResults(columnMap);
+
+    if (getPriceHistory) {
+        const addPrices = row => ({
             ...row,
             pr: priceHistory.idMap[row.I] || [],
             prStartIndex: priceHistory.startIndex[row.I] || 0
-        })
-        : row => row;
+        });
 
-    const commonProps = listCommon.formatResults(columnMap);
+        return row => addPrices(commonProps(row));
+    }
 
-    return row => addPrices(commonProps(row));
+    return row => commonProps(row);
 }
 
 async function getQuery(db, user) {
