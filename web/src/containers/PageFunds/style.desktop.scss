@@ -1,0 +1,17 @@
+.page-funds {
+    .stocks-list {
+        &::-webkit-scrollbar-track {
+            -webkit-box-shadow: none;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: $color-translucent-l4;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: $color-shadow-grey;
+        }
+        &::-webkit-scrollbar-thumb:active {
+            background-color: $color-translucent-l7;
+        }
+    }
+}
+

@@ -3,8 +3,6 @@
  */
 
 const { DateTime } = require('luxon');
-const joi = require('joi');
-const { transactionListSchema } = require('../../../schema');
 
 const getYearMonth = time => ([time.year, time.month]);
 
@@ -109,33 +107,23 @@ function processFundPrices(rows) {
 }
 
 function queryFundTransactions(db, user) {
-    return db.select('id', 'transactions')
+    return db.select('funds.id', 'date', 'units', 'cost')
         .from('funds')
+        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
         .where('uid', '=', user.uid);
 }
 
 function processFundTransactions(rows) {
-    if (!rows) {
-        return {};
-    }
+    return rows.reduce((items, { id, date: dateRaw, units, cost }) => {
+        const date = DateTime.fromJSDate(dateRaw).endOf('month');
 
-    return rows.reduce((rest, { id, transactions }) => {
-        try {
-            const { error, value } = joi.validate(JSON.parse(transactions), transactionListSchema);
+        if (id in items) {
+            items[id].push({ date, units, cost });
 
-            if (error) {
-                throw error;
-            }
-
-            const items = value.map(({ date, ...item }) => ({
-                ...item, date: DateTime.fromJSDate(date).endOf('month')
-            }));
-
-            return { ...rest, [id]: items };
+            return items;
         }
-        catch (err) {
-            return { ...rest, [id]: [] };
-        }
+
+        return { ...items, [id]: [{ date, units, cost }] };
 
     }, {});
 }
@@ -156,11 +144,9 @@ function getMonthlyTotalFundValues(months, old, fundTransactions, fundPrices) {
         .reduce((sum, value) => sum + value, 0)
     ));
 
-    const fundChanges = allMonths.map(monthDate => transactionsIds.reduce(
-        (status, id) => status ||
-            Boolean(fundTransactions[id].find(({ date }) => date.hasSame(monthDate, 'month'))),
-        false
-    ) >> 0);
+    const fundChanges = months.map(monthDate => transactionsIds.reduce(
+        (status, id) => status && !(fundTransactions[id].find(({ date }) =>
+            date.hasSame(monthDate, 'month'))), true) >> 0);
 
     return { funds, fundChanges };
 }

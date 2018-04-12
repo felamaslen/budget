@@ -70,20 +70,18 @@ export function rToggleFundsGraphMode(reduction) {
 }
 
 function numFundPointsVisible(lines, minX, maxX) {
-    return lines.reduce((sum, line) => {
-        return Math.max(sum, line
-            .get('line')
-            .filter(item => {
-                const xValue = item.get(0);
+    return lines.reduce((sum, line) => Math.max(sum, line.get('line').reduce(
+        (last, part) => part.filter(item => {
+            const xValue = item.get(0);
 
-                return xValue >= minX && xValue <= maxX;
-            })
-            .size
-        );
-    }, 0);
+            return xValue >= minX && xValue <= maxX;
+        })
+            .size,
+        sum), 0)
+    );
 }
 
-export function rZoomFundsGraph(reduction, obj) {
+export function rZoomFundsGraph(reduction, { direction, position }) {
     // direction: in is negative, out is positive
     const range = reduction.getIn(['other', 'graphFunds', 'range']);
     const zoom = reduction.getIn(['other', 'graphFunds', 'zoom']);
@@ -94,11 +92,11 @@ export function rZoomFundsGraph(reduction, obj) {
 
     const newRangeWidth = Math.min(range.last() - range.first(), Math.max(
         (range.last() - range.first()) * GRAPH_ZOOM_MAX,
-        (zoom.last() - zoom.first()) * (1 + GRAPH_ZOOM_SPEED * obj.direction)
+        (zoom.last() - zoom.first()) * (1 + GRAPH_ZOOM_SPEED * direction)
     ));
 
-    let newMinXTarget = obj.position - newRangeWidth / 2;
-    let newMaxXTarget = obj.position + newRangeWidth / 2;
+    let newMinXTarget = position - newRangeWidth / 2;
+    let newMaxXTarget = position + newRangeWidth / 2;
     if (newMinXTarget < range.first()) {
         newMaxXTarget += range.first() - newMinXTarget;
         newMinXTarget = range.first();
@@ -136,11 +134,9 @@ export function rHoverFundsGraph(reduction, { position }) {
 
     const closest = lines.reduce((last, line) => {
         const lineIndex = line.get('index');
-        const prices = line.get('prices');
 
-        return line.get('line')
-            .filterNot((point, pointKey) => prices && prices.get(pointKey) === 0)
-            .reduce(({ dist: lastDist, lineIndex: lastIndex, point: lastPoint }, point) => {
+        return line.get('line').reduce(
+            (red, part) => part.reduce(({ dist: lastDist, lineIndex: lastIndex, point: lastPoint }, point) => {
                 const dist = (
                     ((point.get(0) - position.valX) / 1000) ** 2 +
                     ((point.get(1) - position.valY) / 100) ** 2
@@ -152,7 +148,10 @@ export function rHoverFundsGraph(reduction, { position }) {
 
                 return { dist: lastDist, lineIndex: lastIndex, point: lastPoint };
 
-            }, last);
+            }, red),
+            last
+        );
+
     }, { dist: Infinity });
 
     const color = reduction.getIn(['other', 'graphFunds', 'data', 'fundItems', closest.lineIndex, 'color']);
@@ -219,24 +218,25 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
 }
 
 export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPeriod, data }) {
-    const rows = sortRowsByDate(processRawListRows(data.data, 'funds'), 'funds');
+    const { sortedRows, rowIds } = sortRowsByDate(processRawListRows(data.data, 'funds'), 'funds');
     const startTime = data.startTime;
     const cacheTimes = list(data.cacheTimes);
 
     const newReduction = changePeriod(
-        reduction, shortPeriod, rows, startTime, cacheTimes
+        reduction, shortPeriod, sortedRows, startTime, cacheTimes
     )
         .setIn(['other', 'fundHistoryCache', shortPeriod], map({
-            rows, startTime, cacheTimes
+            rows: sortedRows, startTime, cacheTimes
         }));
 
     if (reloadPagePrices) {
-        const rowsWithExtraProps = getExtraRowProps(rows, startTime, cacheTimes);
+        const rowsWithExtraProps = getExtraRowProps(sortedRows, startTime, cacheTimes);
 
-        const fundsCachedValue = getFundsCachedValue(rows, startTime, cacheTimes, new Date());
+        const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, new Date());
 
         return newReduction
             .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
+            .setIn(['pages', 'funds', 'rowIds'], rowIds)
             .setIn(['other', 'fundsCachedValue'], fundsCachedValue);
     }
 

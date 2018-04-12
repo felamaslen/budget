@@ -3,24 +3,63 @@
  */
 
 const { DateTime } = require('luxon');
-const funds = require('./common');
+const common = require('./common');
 const listCommon = require('../list.common');
+const schema = require('../../../schema/funds');
 
-function postProcessListRow(row, getPriceHistory, priceHistory = null) {
-    // transactions
-    row.tr = row.t
-        ? JSON.parse(row.t)
-        : [];
+function formatResults(columnMap, getPriceHistory, priceHistory = null) {
+    const addPrices = getPriceHistory
+        ? row => ({
+            ...row,
+            pr: priceHistory.idMap[row.I] || [],
+            prStartIndex: priceHistory.startIndex[row.I] || 0
+        })
+        : row => row;
 
-    Reflect.deleteProperty(row, 't');
+    const commonProps = listCommon.formatResults(columnMap);
 
-    if (getPriceHistory) {
-        row.pr = priceHistory.idMap[row.I] || [];
+    return row => addPrices(commonProps(row));
+}
 
-        row.prStartIndex = priceHistory.startIndex[row.I] || 0;
-    }
+async function getQuery(db, user) {
+    const rows = await db.select(
+        'funds.id',
+        'funds.item',
+        'transactions.date',
+        'transactions.units',
+        'transactions.cost'
+    )
+        .from('funds')
+        .leftJoin('funds_transactions as transactions', 'transactions.fundId', 'funds.id')
+        .where('funds.uid', '=', user.uid);
 
-    return row;
+    const { items: funds } = rows.reduce(({ items, fundIds }, { id, item, date, units, cost }) => {
+        const transaction = date
+            ? { date, units, cost }
+            : null;
+
+        const idIndex = fundIds.indexOf(id);
+        if (idIndex > -1) {
+            items[idIndex].transactions.push(transaction);
+
+            return { items, fundIds };
+        }
+
+        const transactions = transaction
+            ? [transaction]
+            : [];
+
+        return {
+            items: [
+                ...items,
+                { id, item, transactions }
+            ],
+            fundIds: [...fundIds, id]
+        };
+
+    }, { items: [], fundIds: [] });
+
+    return funds;
 }
 
 /**
@@ -75,14 +114,6 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
  *                                                 type: integer
  *                                                 example: 11
  *                                                 description: ID of holding
- *                                             c:
- *                                                 type: integer
- *                                                 example: 50000
- *                                                 description: To-date cost of this holding
- *                                             d:
- *                                                 type: array
- *                                                 example: [2017, 4, 1]
- *                                                 description: Date of first purchase
  *                                             i:
  *                                                 type: string
  *                                                 example: Gold ETF
@@ -127,8 +158,14 @@ function postProcessListRow(row, getPriceHistory, priceHistory = null) {
 function routeGet(config, db) {
     return async (req, res) => {
         const now = DateTime.local();
+        const columnMap = {
+            id: 'I',
+            date: 'd',
+            item: 'i',
+            transactions: 'tr'
+        };
 
-        let addData = row => postProcessListRow(row);
+        const queryResult = await getQuery(db, req.user);
 
         let priceHistory = null;
         const getPriceHistory = 'history' in req.query && req.query.history !== 'false';
@@ -136,7 +173,8 @@ function routeGet(config, db) {
             let period = null;
             let length = null;
 
-            const hasPeriod = ['year', 'month'].includes(req.query.period) && !isNaN(Number(req.query.length));
+            const hasPeriod = ['year', 'month'].includes(req.query.period) &&
+                !isNaN(Number(req.query.length));
 
             if (hasPeriod) {
                 period = req.query.period;
@@ -150,20 +188,56 @@ function routeGet(config, db) {
                 salt: config.data.funds.salt
             };
 
-            priceHistory = await funds.getFundHistoryMappedToFundIds(db, req.user, now, params);
-
-            addData = row => postProcessListRow(row, getPriceHistory, priceHistory);
+            priceHistory = await common.getFundHistoryMappedToFundIds(db, req.user, now, params);
         }
 
-        const data = await listCommon.getResults(config, db, req.user, now, 'funds', addData);
+        const listData = queryResult.map(formatResults(columnMap, getPriceHistory, priceHistory));
+
+        const total = await listCommon.getTotalCost(db, req.user, 'funds');
+
+        const data = { data: listData, total };
 
         if (getPriceHistory) {
-            data.startTime = priceHistory.startTime;
-            data.cacheTimes = priceHistory.times;
+            const { startTime, times: cacheTimes } = priceHistory;
+
+            return res.json({ data: { ...data, startTime, cacheTimes } });
         }
 
         return res.json({ data });
     };
+}
+
+function insertTransactions(db, user, id, transactions) {
+    return db.transaction(trx => transactions.reduce(
+        (last, { date, units, cost }) => last.then(() => trx
+            .insert({ fundId: id, date, units, cost })
+            .into('funds_transactions')
+        ),
+        Promise.resolve()
+    ));
+}
+
+async function insertFund(db, user, table, data) {
+    const { item, transactions } = data;
+
+    const { id } = await listCommon.insertItem(db, user, 'funds', { item });
+
+    await insertTransactions(db, user, id, transactions);
+
+    return { id };
+}
+
+async function updateFund(db, user, table, data) {
+    const { id, item, transactions } = data;
+
+    await listCommon.updateItem(db, user, 'funds', { id, item });
+
+    if (transactions) {
+        await db('funds_transactions').where('fundId', '=', id)
+            .del();
+
+        await insertTransactions(db, user, id, transactions);
+    }
 }
 
 /**
@@ -180,18 +254,6 @@ function routeGet(config, db) {
  *         - application/json
  *         parameters:
  *         - in: body
- *           name: year
- *           required: true
- *           type: number
- *         - in: body
- *           name: month
- *           required: true
- *           type: number
- *         - in: body
- *           name: date
- *           required: true
- *           type: number
- *         - in: body
  *           name: item
  *           required: true
  *           type: string
@@ -199,10 +261,6 @@ function routeGet(config, db) {
  *           name: transactions
  *           required: true
  *           type: array
- *         - in: body
- *           name: cost
- *           required: true
- *           type: integer
  *         responses:
  *             201:
  *                 description: successful operation
@@ -210,7 +268,7 @@ function routeGet(config, db) {
  *                     $ref: "#/definitions/DataResponsePostList"
  */
 function routePost(config, db) {
-    return listCommon.routePost(config, db, 'funds');
+    return listCommon.routeModify(config, db, 'funds', schema.insert, insertFund, 201);
 }
 
 /**
@@ -231,18 +289,6 @@ function routePost(config, db) {
  *           required: true
  *           type: integer
  *         - in: body
- *           name: year
- *           required: true
- *           type: number
- *         - in: body
- *           name: month
- *           required: true
- *           type: number
- *         - in: body
- *           name: date
- *           required: true
- *           type: number
- *         - in: body
  *           name: item
  *           required: false
  *           type: string
@@ -250,10 +296,6 @@ function routePost(config, db) {
  *           name: transactions
  *           required: false
  *           type: array
- *         - in: body
- *           name: cost
- *           required: false
- *           type: integer
  *         responses:
  *             200:
  *                 description: successful operation
@@ -265,7 +307,7 @@ function routePost(config, db) {
  *                     $ref: "#/definitions/ErrorResponse"
  */
 function routePut(config, db) {
-    return listCommon.routePut(config, db, 'funds', funds.validateUpdateData);
+    return listCommon.routeModify(config, db, 'funds', schema.update, updateFund);
 }
 
 /**

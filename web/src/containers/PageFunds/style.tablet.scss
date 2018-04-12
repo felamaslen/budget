@@ -1,0 +1,17 @@
+@media screen and (orientation: portrait) {
+    .page-funds {
+        .list-ul {
+            li, .list-head-inner {
+                & > span {
+                    &.fund-extra-info {
+                        flex: 0 0 100px;
+                    }
+                    &.add-button-outer {
+                        flex: 0 0 121px;
+                    }
+                }
+            }
+        }
+    }
+}
+

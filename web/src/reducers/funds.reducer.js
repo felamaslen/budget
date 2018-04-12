@@ -8,6 +8,7 @@ import { PAGES } from '../constants/data';
 import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE } from '../constants/graph';
 import { colorKey } from '../helpers/color';
 import { formatAge } from '../helpers/format';
+import { separateLines } from '../helpers/funds';
 
 const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 const itemKey = PAGES.funds.cols.indexOf('item');
@@ -187,34 +188,29 @@ export function zoomFundLines(linesAll, zoom) {
         return linesAll.slice();
     }
 
-    const lines = linesAll
-        .map(line => {
-            const points = line.get('line');
-
-            return line.set('line', points.filter((point, pointKey) => {
-                const thisVisible = point.get(0) >= minX && point.get(0) <= maxX;
-                if (thisVisible) {
+    return linesAll.map(line => line.set('line', line.get('line')
+        .map(part => part.filter((point, pointKey) => {
+            const thisVisible = point.get(0) >= minX && point.get(0) <= maxX;
+            if (thisVisible) {
+                return true;
+            }
+            if (pointKey < part.size) {
+                const next = part.getIn([pointKey + 1, 0]);
+                if (next >= minX && next <= maxX) {
                     return true;
                 }
-                if (pointKey < points.size) {
-                    const next = points.getIn([pointKey + 1, 0]);
-                    if (next >= minX && next <= maxX) {
-                        return true;
-                    }
+            }
+            if (pointKey > 0) {
+                const prev = part.getIn([pointKey - 1, 0]);
+                if (prev >= minX && prev <= maxX) {
+                    return true;
                 }
-                if (pointKey > 0) {
-                    const prev = points.getIn([pointKey - 1, 0]);
-                    if (prev >= minX && prev <= maxX) {
-                        return true;
-                    }
-                }
+            }
 
-                return false;
-            }));
-        })
-        .filter(line => line.get('line').size > 1);
-
-    return lines;
+            return false;
+        }))
+        .filter(part => part.size)
+    ));
 }
 
 export function getOverallAbsolute(prices, units) {
@@ -363,15 +359,14 @@ export function getFundLines(times, timeOffsets, prices, units, costs, mode, fun
 
     if (fundsValid.includes(-1)) {
         lines = lines.push(getFundLineProcessed(
-            times.first(), timeOffsets, prices, units, costs, mode, -1)
-        );
+            times.first(), timeOffsets, prices, units, costs, mode, -1));
     }
 
-    return lines
-        .concat(fundsValid.filter(index => index > -1)
-            .map(index => getFundLineProcessed(
-                times.get(index + 1), null, prices, units, costs, mode, index)))
-        .filter(item => item !== null);
+    return lines.concat(fundsValid.filter(index => index > -1)
+        .map(index => getFundLineProcessed(times.get(index + 1), null, prices, units, costs, mode, index))
+    )
+        .filter(item => item !== null)
+        .map(item => item.set('line', separateLines(item.get('line'))));
 }
 
 function getPriceUnitsCosts(rows, startTime, cacheTimes) {

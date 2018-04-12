@@ -1,6 +1,6 @@
 {
   "name": "budget",
-  "version": "4.1.5",
+  "version": "4.1.9",
   "description": "Personal finance app",
   "main": "index.js",
   "engines": {
@@ -127,6 +127,7 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-hot-loader": "^3.1.1",
+    "react-immutable-proptypes": "^2.1.0",
     "react-media": "^1.6.1",
     "react-pure-render": "^1.0.2",
     "react-redux": "^5.0.6",

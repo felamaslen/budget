@@ -41,7 +41,7 @@ export const PAGES = {
     analysis: {},
     funds: {
         list: true,
-        cols: ['date', 'item', 'transactions', 'cost']
+        cols: ['item', 'transactions']
     },
     income: {
         list: true,

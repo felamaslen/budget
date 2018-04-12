@@ -19,6 +19,7 @@ describe('Editable updates reducer', () => {
 
             expect(result.getIn(['pages', 'funds', 'rows']).toJS()).to.deep.equal(
                 M.sortRowsByDate(state.getIn(['pages', 'funds', 'rows']), 'funds')
+                    .sortedRows
                     .toJS()
             );
 

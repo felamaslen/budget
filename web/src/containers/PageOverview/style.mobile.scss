@@ -1,0 +1,65 @@
+.page-overview {
+    .funds, .bills, .food, .general, .holiday, .social,
+    .net, .balance {
+        display: none;
+    }
+    .table-flex {
+        width: 100%;
+        .header {
+            .col .text {
+                text-align: center;
+                height: 20px;
+                line-height: 20px;
+            }
+            .month {
+                background: $color-mob-overview-tbl-month;
+            }
+            .income {
+                background: $color-mob-overview-tbl-income;
+            }
+            .spending {
+                background: $color-mob-overview-tbl-spending;
+            }
+            .predicted {
+                background: $color-mob-overview-tbl-balance;
+            }
+        }
+        .col {
+            .text, .editable {
+                padding: 4px 10px;
+                display: inline-block;
+                width: 100%;
+                vertical-align: middle;
+                text-align: left;
+                height: 32px;
+                line-height: 32px;
+            }
+        }
+        .past {
+            font-style: italic;
+            color: $color-medium-slightly-dark;
+
+            .month {
+                background: $color-light;
+            }
+        }
+        .active {
+            font-weight: bold;
+        }
+        .future {
+        }
+    }
+}
+
+@media screen and (max-width: $width-page-mobile-small) {
+    .page-overview {
+        .table-flex {
+            .col {
+                .text, .editable {
+                    padding: 4px 1px;
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,21 @@
+.fund-graph {
+    display: inline-block;
+    
+    .fund-graph-cont {
+        .graph-container {
+            z-index: 10;
+            width: 100px;
+            height: 48px;
+            position: static;
+            background: transparent;
+        }
+        .popout {
+            position: absolute;
+            background: $color-translucent-l8;
+            box-shadow: 0 3px 7px $color-shadow-l2;
+            width: 300px;
+            height: 120px;
+        }
+    }
+}
+

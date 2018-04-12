@@ -232,16 +232,17 @@ describe('/api/data/overview', () => {
                     ...row,
                     date: date.toISODate()
                 }))
-            }), {})).to.deep.equal(Object.keys(testTransactionsProcessedResponse)
-                .reduce((items, key) => ({
-                    ...items,
-                    [key]: testTransactionsProcessedResponse[key].map(({ date, ...row }) => ({
-                        ...row,
-                        date: date.endOf('month')
-                            .toISODate()
-                    }))
-                }), {})
-            );
+            }), {})).to.deep.equal({
+                '3': [
+                    { date: '2016-09-30', units: 1678.42, cost: 200000 },
+                    { date: '2017-02-28', units: 846.38, cost: 100000 }
+                ],
+                '11': [
+                    { date: '2016-08-31', units: 89.095, cost: 10000 },
+                    { date: '2016-09-30', units: 894.134, cost: 100000 },
+                    { date: '2017-04-30', units: -883.229, cost: -90000 }
+                ]
+            });
         });
     });
 
@@ -269,7 +270,7 @@ describe('/api/data/overview', () => {
 
             const expectedResult = {
                 funds: [0, 0, 0, 0, 10000, 310000, 310000, 309530, 151327, 137432],
-                fundChanges: [0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
+                fundChanges: [1, 0, 0, 1, 1, 1, 1]
             };
 
             expect(result).to.deep.equal(expectedResult);

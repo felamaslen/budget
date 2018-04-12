@@ -116,17 +116,15 @@ describe('Content reducer', () => {
 
             const result = R.rHandleContentResponse(state, { response, page: 'funds' }, now);
 
-            expect(result
-                .setIn(['edit', 'add', 'funds', 0], result.getIn(['edit', 'add', 'funds', 0]).toISODate())
-                .toJS()
-            )
+            expect(result.toJS())
                 .to.deep.equal({
                     loading: false,
                     pages: {
                         funds: {
                             cacheTimes: [191239],
-                            data: { numCols: 4, numRows: 0, total: 0 },
+                            data: { numCols: 2, numRows: 0, total: 0 },
                             rows: {},
+                            rowIds: [],
                             startTime: 1508533928
                         }
                     },
@@ -182,14 +180,12 @@ describe('Content reducer', () => {
                         },
                         add: {
                             funds: [
-                                '2018-01-22',
                                 '',
                                 {
                                     idCount: 0,
                                     list: fromJS([]),
                                     size: 0
-                                },
-                                0
+                                }
                             ]
                         }
                     }

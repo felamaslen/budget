@@ -1,18 +1,5 @@
 const listCommon = require('../list.common');
 
-const extraStringColumns = [
-    { name: 'holiday', notEmpty: true },
-    { name: 'shop' }
-];
-
-function validateInsertData(data) {
-    return listCommon.validateInsertData(data, true, extraStringColumns);
-}
-
-function validateUpdateData(data) {
-    return listCommon.validateUpdateData(data, extraStringColumns);
-}
-
 /**
  * @swagger
  * /data/holiday/{page}:
@@ -82,7 +69,7 @@ function routeGet(config, db) {
  *                     $ref: "#/definitions/DataResponsePostList"
  */
 function routePost(config, db) {
-    return listCommon.routePost(config, db, 'holiday', validateInsertData);
+    return listCommon.routePost(config, db, 'holiday');
 }
 
 /**
@@ -132,7 +119,7 @@ function routePost(config, db) {
  *                     $ref: "#/definitions/DataResponsePutList"
  */
 function routePut(config, db) {
-    return listCommon.routePut(config, db, 'holiday', validateUpdateData);
+    return listCommon.routePut(config, db, 'holiday');
 }
 
 /**
