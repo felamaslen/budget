@@ -15,18 +15,3 @@
     }
 }
 
-@media screen and (min-width: 1500px) {
-    .page-funds {
-        .graph-fund-history, .stocks-list {
-            position: fixed;
-            left: 1000px;
-        }
-        .graph-fund-history {
-            top: 100px;
-        }
-        .stocks-list {
-            top: $top-nav + 350;
-        }
-    }
-}
-

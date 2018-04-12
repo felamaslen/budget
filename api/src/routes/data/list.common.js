@@ -51,32 +51,35 @@ function getQuery(db, user, table, columns, limitCondition = null) {
         .orderBy('id', 'desc');
 }
 
-function formatResults(queryResult, columnMap, addData = null) {
-    return queryResult
-        .map(row => {
-            const processedRow = Object.keys(row)
-                .reduce((item, key) => {
-                    const value = row[key];
+function formatResults(columnMap) {
+    return row => Object.keys(row).reduce((item, key) => {
+        const value = row[key];
 
-                    const column = columnMap[key];
+        const column = columnMap[key];
 
-                    if (key === 'date') {
-                        return { ...item, 'd': DateTime.fromJSDate(value).toISODate() };
-                    }
+        if (key === 'date') {
+            return { ...item, 'd': DateTime.fromJSDate(value).toISODate() };
+        }
 
-                    return { ...item, [column]: value };
+        return { ...item, [column]: value };
 
-                }, {});
+    }, {});
+}
 
-            if (addData) {
-                return addData(processedRow);
-            }
+async function getTotalFundCost(db, user) {
+    const [{ total }] = await db.select(db.raw('SUM(cost) AS total'))
+        .from('funds')
+        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
+        .where('uid', '=', user.uid);
 
-            return processedRow;
-        });
+    return Number(total);
 }
 
 async function getTotalCost(db, user, table) {
+    if (table === 'funds') {
+        return getTotalFundCost(db, user);
+    }
+
     const [{ total }] = await db.select(db.raw('SUM(cost) AS total'))
         .from(table)
         .where('uid', '=', user.uid);
@@ -84,7 +87,7 @@ async function getTotalCost(db, user, table) {
     return Number(total);
 }
 
-async function getResults(config, db, user, now, table, addData = null, limit = null) {
+async function getResults(config, db, user, now, table, limit = null) {
     const columnMapExtra = config.data.columnMapExtra[table];
 
     const columnMap = {
@@ -107,7 +110,7 @@ async function getResults(config, db, user, now, table, addData = null, limit = 
 
     const queryResult = await getQuery(db, user, table, columns, limitCondition);
 
-    const data = formatResults(queryResult, columnMap, addData);
+    const data = queryResult.map(formatResults(columnMap));
 
     const total = await getTotalCost(db, user, table);
 
@@ -133,27 +136,14 @@ function routeGet(config, db, table) {
         const offset = Math.floor(Number(req.params.page) || 0);
         const limit = getPageLimit(config, table, offset);
 
-        const data = await getResults(config, db, req.user, DateTime.local(), table, null, limit);
+        const data = await getResults(config, db, req.user, DateTime.local(), table, limit);
 
         return res.json({ data });
     };
 }
 
-function processRow(row, table) {
-    if (table === 'funds' && 'transactions' in row) {
-        const transactions = row.transactions.map(({ date, ...item }) => ({
-            ...item,
-            date: DateTime.fromJSDate(date).toISODate()
-        }));
-
-        return { ...row, transactions: JSON.stringify(transactions) };
-    }
-
-    return row;
-}
-
 async function insertItem(db, user, table, data) {
-    const [id] = await db.insert(processRow({ uid: user.uid, ...data }, table))
+    const [id] = await db.insert({ uid: user.uid, ...data })
         .returning('id')
         .into(table);
 
@@ -163,13 +153,11 @@ async function insertItem(db, user, table, data) {
 async function updateItem(db, user, table, data) {
     const affectedRows = await db(table)
         .where({ id: data.id, uid: user.uid })
-        .update(processRow(data, table));
+        .update(data);
 
     if (!affectedRows) {
         throw new common.ErrorBadRequest('Unknown id', 404);
     }
-
-    return null;
 }
 
 async function deleteItem(db, user, table, data) {
@@ -236,6 +224,9 @@ module.exports = {
     getTotalCost,
     getResults,
     getPageLimit,
+    insertItem,
+    updateItem,
+    routeModify,
     routeGet,
     routePost,
     routePut,

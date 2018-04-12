@@ -16,15 +16,6 @@ const listItemKeysConsumable = (category = 'category') => ({
     shop: joi.string()
 });
 
-const fundsKeys = {
-    ...listItemKeysStandard,
-    transactions: joi.array().items(joi.object().keys({
-        date: joi.date().format('YYYY-MM-DD').required(),
-        units: joi.number().required(),
-        cost: joi.number().integer().required()
-    }))
-};
-
 const schemaDeleteListItem = joi.object().keys({
     id: joi.number().integer().required()
 });
@@ -59,16 +50,15 @@ const schemaUpdateConsumable = schemaCategoriesConsumable.reduce((items, key) =>
     ...items, [key]: schemaUpdate(listItemKeysConsumable(consumableCategories[key]))
 }), {});
 
-const schemaInsertFunds = schemaInsert(fundsKeys);
-const schemaUpdateFunds = schemaUpdate(fundsKeys);
-
 const listItemSchema = {
-    insert: { ...schemaInsertStandard, ...schemaInsertConsumable, funds: schemaInsertFunds },
-    update: { ...schemaUpdateStandard, ...schemaUpdateConsumable, funds: schemaUpdateFunds },
+    insert: { ...schemaInsertStandard, ...schemaInsertConsumable },
+    update: { ...schemaUpdateStandard, ...schemaUpdateConsumable },
     delete: schemaDeleteListItem
 };
 
 module.exports = {
-    listItemSchema
+    listItemSchema,
+    schemaInsert,
+    schemaUpdate
 };
 

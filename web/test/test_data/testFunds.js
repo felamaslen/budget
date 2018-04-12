@@ -1,12 +1,10 @@
 /* eslint max-lines: 0 */
 import { List as list, Map as map } from 'immutable';
 import { TransactionsList } from '../../src/helpers/data';
-import { dateInput } from '../../src/helpers/date';
 
 export const testRows = list([
     map({
         'cols': list([
-            dateInput('9/5/2017'),
             'some fund 1',
             new TransactionsList([
                 {
@@ -14,8 +12,7 @@ export const testRows = list([
                     units: 934,
                     date: '2017-05-09'
                 }
-            ]),
-            400000
+            ])
         ]),
         pr: list([
             429.5,
@@ -54,7 +51,6 @@ export const testRows = list([
     }),
     map({
         cols: list([
-            dateInput('2/3/2017'),
             'some fund 2',
             new TransactionsList([
                 {
@@ -67,8 +63,7 @@ export const testRows = list([
                     units: -450,
                     date: '2017-04-27'
                 }
-            ]),
-            0
+            ])
         ]),
         pr: list([
             99.86,
@@ -93,7 +88,6 @@ export const testRows = list([
     }),
     map({
         cols: list([
-            dateInput('11/1/2017'),
             'some fund 3',
             new TransactionsList([
                 {
@@ -106,8 +100,7 @@ export const testRows = list([
                     units: -1117.87,
                     date: '2017-04-27'
                 }
-            ]),
-            0
+            ])
         ]),
         pr: list([
             80.9,
@@ -148,7 +141,6 @@ export const testRows = list([
     }),
     map({
         cols: list([
-            dateInput('21/9/2016'),
             'test fund 4',
             new TransactionsList([
                 {
@@ -161,8 +153,7 @@ export const testRows = list([
                     units: -1499.7,
                     date: '2017-04-27'
                 }
-            ]),
-            0
+            ])
         ]),
         pr: list([
             137.77,

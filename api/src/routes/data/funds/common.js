@@ -47,9 +47,11 @@ function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay, minT
                     db.raw('GROUP_CONCAT(f.id ORDER BY f.date DESC) AS id'),
                     db.raw('GROUP_CONCAT(fc.price ORDER BY f.date DESC) AS price')
                 )
-                    .from(qb4 => qb4.distinct('id', 'date', 'item')
+                    .from(qb4 => qb4.distinct('funds.id', 'funds.item', db.raw('MIN(date) AS date'))
                         .from('funds')
+                        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
                         .where('uid', '=', user.uid)
+                        .groupBy('funds.id')
                         .as('f')
                     )
                     .innerJoin('fund_hash AS fh', 'fh.hash', db.raw('MD5(CONCAT(f.item, ?))', salt))
@@ -76,10 +78,7 @@ function processFundHistory(queryResult) {
     // return a map of fund holding IDs to historical prices
     const keyMap = queryResult
         .reduce(({ rowIds, data }, { id, price }, rowKey) => {
-            const [thisRowIds, rowPrices] = [id, price].map(item =>
-                item.split(',')
-                    .map(value => Number(value))
-            );
+            const [thisRowIds, rowPrices] = [id, price].map(item => item.split(',').map(Number));
 
             const newData = thisRowIds.reduce(({ idMap, startIndex }, fundId, idKey) => {
                 if (!(fundId in idMap)) {

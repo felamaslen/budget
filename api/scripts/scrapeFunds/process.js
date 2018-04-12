@@ -14,63 +14,43 @@ function getBroker(config, name) {
 }
 
 function getEligibleFunds(config, logger, rows) {
-    const fundsByHash = rows.reduce((funds, { name, transactions, uid }) => {
-        try {
-            const transactionsList = JSON.parse(transactions);
-            const totalUnits = transactionsList.reduce((sum, { units }) => sum + units, 0);
-            const totalCost = transactionsList.reduce((sum, { cost }) => sum + cost, 0);
-
-            if (!(totalUnits && totalCost)) {
-                return funds;
-            }
-
-            const broker = getBroker(config, name);
-            if (!broker) {
-                return funds;
-            }
-
-            const hash = fundHash(name, config.data.funds.salt);
-
-            // combine duplicate funds
-            if (hash in funds) {
-                return {
-                    ...funds,
-                    [hash]: {
-                        ...funds[hash],
-                        units: totalUnits + funds[hash].units,
-                        cost: totalUnits + funds[hash].cost
-                    }
-                };
-            }
-
-            return {
-                ...funds,
-                [hash]: {
-                    name,
-                    uid,
-                    hash,
-                    broker,
-                    units: totalUnits,
-                    cost: totalCost
-                }
-            };
+    const fundsByHash = rows.reduce((funds, { item, units }) => {
+        if (!units || isNaN(units)) {
+            return funds;
         }
-        catch (err) {
-            logger.warn(`Error processing fund with name "${name}":`, err.message);
+
+        const broker = getBroker(config, item);
+        if (!broker) {
+            return funds;
+        }
+
+        const hash = fundHash(item, config.data.funds.salt);
+
+        if (hash in funds) {
+            funds[hash].units += units;
 
             return funds;
         }
 
+        return {
+            ...funds,
+            [hash]: {
+                name: item,
+                hash,
+                broker,
+                units
+            }
+        };
     }, {});
 
-    return Object.keys(fundsByHash).map(hash => ({ hash, ...fundsByHash[hash] }));
+    return Object.keys(fundsByHash).filter(hash => fundsByHash[hash].units > 0)
+        .map(hash => fundsByHash[hash]);
 }
 
 async function getFunds(config, db, logger) {
-    const rows = await db.select('item AS name', 'uid', 'transactions')
+    const rows = await db.select('item', 'units')
         .from('funds')
-        .where('transactions', '!=', '')
-        .andWhere('cost', '>', 0);
+        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id');
 
     return getEligibleFunds(config, logger, rows);
 }
