@@ -216,6 +216,10 @@ function RenderedLine({ line, ...props }) {
 
         const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
 
+        if (!linePaths) {
+            return null;
+        }
+
         const paths = linePaths.map(({ path, stroke }, key) => (
             <path key={key} d={path} stroke={stroke} strokeWidth={strokeWidth || 2} fill="none" />
         ));

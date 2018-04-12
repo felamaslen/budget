@@ -2,7 +2,7 @@
 import { fromJS } from 'immutable';
 import '../../browser';
 import { expect } from 'chai';
-import { mount } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import LineGraph from '../../../src/components/Graph/LineGraph';
 
@@ -135,6 +135,32 @@ describe('<LineGraph />', () => {
             stroke: 'black',
             strokeWidth: 2
         });
+    });
+
+    it('should handle a dynamic-colour, smooth path with one point (returning an empty svg)', () => {
+        const propsEmpty = {
+            width: 200,
+            height: 100,
+            lines: fromJS([
+                {
+                    key: 'line1',
+                    data: [
+                        [100, 1]
+                    ],
+                    smooth: true,
+                    color: () => 'black'
+                }
+            ]),
+            minX: 100,
+            maxX: 103,
+            minY: -2,
+            maxY: 2
+        };
+
+        const wrapperEmpty = mount(<LineGraph {...propsEmpty} />);
+
+        expect(wrapperEmpty.childAt(0).childAt(0).children())
+            .to.have.length(0);
     });
 });
 
