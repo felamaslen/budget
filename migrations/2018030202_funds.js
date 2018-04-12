@@ -1,17 +1,5 @@
-async function down(knex) {
-    await knex.schema.dropTableIfExists('fund_cache');
-    await knex.schema.dropTableIfExists('fund_cache_time');
-    await knex.schema.dropTableIfExists('fund_hash');
-    await knex.schema.dropTableIfExists('funds_transactions');
-    await knex.schema.dropTableIfExists('funds');
-    await knex.schema.dropTableIfExists('stocks');
-    await knex.schema.dropTableIfExists('stock_codes');
-}
-
-async function up(knex, Promise) {
-    await down(knex);
-
-    await Promise.all([
+function up(knex, Promise) {
+    return Promise.all([
         knex.schema.createTable('funds', table => {
             table.collate('utf8mb4_unicode_ci');
 
@@ -98,5 +86,5 @@ async function up(knex, Promise) {
     ]);
 }
 
-module.exports = { up, down };
+module.exports = { up, down: () => null };
 
