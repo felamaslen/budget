@@ -1,6 +1,6 @@
 .page-overview {
     .table-flex {
-        width: 890px;
+        flex: 0 0 880px;
         .past {
             font-size: 13px;
             height: 16px;
@@ -26,16 +26,12 @@
             }
         }
     }
-    .graph-balance {
-        left: 900px;
-        top: $top-nav + 10
-    }
-    .graph-spend {
-        left: 900px;
-        top: $top-nav + 320;
-    }
-    .graph-balance, .graph-spend {
-        position: fixed;
+
+    .graph-container-outer {
+        flex: 1 0 500px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
     }
 }
 

@@ -6,15 +6,13 @@
 
     .graph-container {
         margin: 0.5em;
+        position: relative;
         overflow: hidden;
     }
 }
 
 .graph-container {
     width: 500px;
-}
-
-.graph-container {
     z-index: 2;
     background: $color-translucent-heavy;
     box-shadow: 0 3px 10px $color-shadow-l3;

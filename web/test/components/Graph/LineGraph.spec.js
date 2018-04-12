@@ -2,7 +2,7 @@
 import { fromJS } from 'immutable';
 import '../../browser';
 import { expect } from 'chai';
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import LineGraph from '../../../src/components/Graph/LineGraph';
 
@@ -79,7 +79,7 @@ describe('<LineGraph />', () => {
 
     it('should render a simple point-to-point path', () => {
         const line = wrapper.childAt(0).childAt(0);
-        expect(line.children()).to.have.length(1);
+        expect(line.children()).to.have.length(2);
         const path = line.childAt(0);
         expect(path.props()).to.deep.equal({
             'd': 'M0.0,25.0 L66.7,0.0 L133.3,75.0 L200.0,50.0',
@@ -91,7 +91,7 @@ describe('<LineGraph />', () => {
 
     it('should render a smooth curved path', () => {
         const line = wrapper.childAt(0).childAt(1);
-        expect(line.children()).to.have.length(1);
+        expect(line.children()).to.have.length(2);
         const path = line.childAt(0);
         expect(path.props()).to.deep.equal({
             'd': 'M0.0,25.0 Q47,-7 66.7,0.0 C94,10 106,65 133.3,75.0 Q153,82 200.0,50.0',
@@ -103,7 +103,7 @@ describe('<LineGraph />', () => {
 
     it('should handle a non-smooth path with only one point', () => {
         const line = wrapper.childAt(0).childAt(2);
-        expect(line.children()).to.have.length(1);
+        expect(line.children()).to.have.length(2);
         const path = line.childAt(0);
         expect(path.props()).to.deep.equal({
             'd': '',
@@ -115,7 +115,7 @@ describe('<LineGraph />', () => {
 
     it('should handle a smooth path with only one point', () => {
         const line = wrapper.childAt(0).childAt(3);
-        expect(line.children()).to.have.length(1);
+        expect(line.children()).to.have.length(2);
         const path = line.childAt(0);
         expect(path.props()).to.deep.equal({
             'd': '',
@@ -127,7 +127,7 @@ describe('<LineGraph />', () => {
 
     it('should handle a smooth path with two points', () => {
         const line = wrapper.childAt(0).childAt(4);
-        expect(line.children()).to.have.length(1);
+        expect(line.children()).to.have.length(2);
         const path = line.childAt(0);
         expect(path.props()).to.deep.equal({
             'd': 'M0.0,25.0 L133.3,0.0',
