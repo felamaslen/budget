@@ -7,6 +7,6 @@ module.exports = {
     widthPageMobileSmall: 350,
     widthPageMobile: 690,
     widthPageTabletSmall: 1000,
-    widthPageTablet: 1400
+    widthPageTablet: 1200
 };
 

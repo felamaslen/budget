@@ -17,6 +17,7 @@
         .col {
             &.month {
                 border-right: 3px solid $color-dark;
+                text-align: left;
             }
             &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
                 flex-grow: 0.7;
@@ -36,6 +37,8 @@
                 flex-grow: 1.2;
             }
             .text {
+                display: flex;
+                width: 100%;
                 padding: 0 2px;
             }
             &.balancePred {

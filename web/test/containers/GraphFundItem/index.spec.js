@@ -7,6 +7,7 @@ itEach();
 import { mount } from 'enzyme';
 import React from 'react';
 import { GraphFundItem } from '../../../src/containers/GraphFundItem';
+import { AverageLine } from '../../../src/components/Graph/LineGraph';
 
 describe('<GraphFundItem />', () => {
     const props = {
@@ -33,16 +34,17 @@ describe('<GraphFundItem />', () => {
         expect(wrapper.childAt(0).children()).to.have.length(3);
 
         expect(wrapper.childAt(0).childAt(1).name()).to.equal('RenderedLine');
-        expect(wrapper.childAt(0).childAt(1).children()).to.have.length(2);
-        expect(wrapper.childAt(0).childAt(1).childAt(0).name()).to.equal('path');
-        expect(wrapper.childAt(0).childAt(1).childAt(0).props()).to.deep.equal({
+        expect(wrapper.childAt(0).childAt(1).children()).to.have.length(3);
+        expect(wrapper.childAt(0).childAt(1).childAt(0).is(AverageLine)).to.equal(true);
+        expect(wrapper.childAt(0).childAt(1).childAt(1).name()).to.equal('path');
+        expect(wrapper.childAt(0).childAt(1).childAt(1).props()).to.deep.equal({
             'd': 'M0.0,97.6 Q38,129 50.0,120.0 C73,103 80,56 100.0,24.4',
             fill: 'none',
             stroke: 'rgb(204,51,0)',
             strokeWidth: 1.5
         });
-        expect(wrapper.childAt(0).childAt(1).childAt(1).name()).to.equal('path');
-        expect(wrapper.childAt(0).childAt(1).childAt(1).props()).to.deep.equal({
+        expect(wrapper.childAt(0).childAt(1).childAt(2).name()).to.equal('path');
+        expect(wrapper.childAt(0).childAt(1).childAt(2).props()).to.deep.equal({
             'd': 'M100.0,24.4 Q106,15 125.0,4.1',
             fill: 'none',
             stroke: 'rgb(0,204,51)',
@@ -50,9 +52,10 @@ describe('<GraphFundItem />', () => {
         });
 
         expect(wrapper.childAt(0).childAt(2).name()).to.equal('RenderedLine');
-        expect(wrapper.childAt(0).childAt(2).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(2).childAt(0).name()).to.equal('path');
-        expect(wrapper.childAt(0).childAt(2).childAt(0).props()).to.deep.equal({
+        expect(wrapper.childAt(0).childAt(2).children()).to.have.length(2);
+        expect(wrapper.childAt(0).childAt(2).childAt(0).is(AverageLine)).to.equal(true);
+        expect(wrapper.childAt(0).childAt(2).childAt(1).name()).to.equal('path');
+        expect(wrapper.childAt(0).childAt(2).childAt(1).props()).to.deep.equal({
             'd': 'M200.0,0.0 Q239,-7 250.0,4.1 Q274,26 300.0,93.6',
             fill: 'none',
             stroke: 'rgb(204,51,0)',

@@ -167,6 +167,39 @@ function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
         .filter(({ path }) => path.length);
 }
 
+export function AverageLine({ value, data, ...props }) {
+    if (!value) {
+        return null;
+    }
+
+    const averageData = data.reduce(({ last, points }, point) => {
+        const nextLast = last.slice(1 - value).push(point.get(1));
+        const average = listAverage(nextLast);
+
+        return { last: nextLast, points: points.push(point.set(1, average)) };
+
+    }, { last: list.of(), points: list.of() })
+        .points;
+
+    const averageLinePath = getSingleLinePath({
+        ...props, data: averageData, smooth: true, fill: false
+    });
+
+    return (
+        <path d={averageLinePath}
+            stroke={rgba(COLOR_LIGHT_GREY)}
+            strokeDasharray="3,5"
+            strokeWidth={1}
+            fill="none"
+        />
+    );
+}
+
+AverageLine.propTypes = {
+    value: PropTypes.number,
+    data: PropTypes.instanceOf(list).isRequired
+};
+
 function RenderedLine({ line, ...props }) {
     const data = line.get('data');
     const color = line.get('color');
@@ -184,30 +217,7 @@ function RenderedLine({ line, ...props }) {
         return <ArrowLine data={data} color={color} {...props} />;
     }
 
-    let averageLine = null;
-    if (movingAverage) {
-        const averageData = data.reduce(({ last, points }, point) => {
-            const nextLast = last.slice(1 - movingAverage).push(point.get(1));
-            const average = listAverage(nextLast);
-
-            return { last: nextLast, points: points.push(point.set(1, average)) };
-
-        }, { last: list.of(), points: list.of() })
-            .points;
-
-        const averageLinePath = getSingleLinePath({
-            ...props, data: averageData, smooth: true, fill: false
-        });
-
-        averageLine = (
-            <path d={averageLinePath}
-                stroke={rgba(COLOR_LIGHT_GREY)}
-                strokeDasharray="3,5"
-                strokeWidth={1}
-                fill="none"
-            />
-        );
-    }
+    const averageLine = <AverageLine {...props} data={data} value={movingAverage} />;
 
     if (typeof color === 'function') {
         if (fill) {
