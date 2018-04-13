@@ -14,7 +14,7 @@
     <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/rowHeadItem"
-        android:layout_weight="6"
+        android:layout_weight="12"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="16sp"
@@ -28,7 +28,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:textAlignment="center"
+        android:text="@string/lblCost">
+    </TextView>
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rowHeadValue"
+        android:layout_weight="5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:text="@string/lblValue">
     </TextView>
   </LinearLayout>
