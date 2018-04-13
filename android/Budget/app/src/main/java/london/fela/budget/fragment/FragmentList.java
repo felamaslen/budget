@@ -344,7 +344,7 @@ public class FragmentList extends Fragment {
         View view = inflater.inflate(getFragmentLayout(), container, false);
 
         // this is the android ListView widget
-        list = (ListView) view.findViewById(R.id.main_list);
+        list = view.findViewById(R.id.main_list);
 
         // remove dividing lines
         list.setDividerHeight(0);
@@ -353,15 +353,15 @@ public class FragmentList extends Fragment {
         // sets the column titles according to each page
         setProps();
 
-        LinearLayout bg = (LinearLayout) view.findViewById(R.id.list_outer);
+        LinearLayout bg = view.findViewById(R.id.list_outer);
 
         bg.setBackgroundColor(AppConfig.PageColor.getBg(pageName));
 
         // button to add a new item
-        Button addBtn = (Button) view.findViewById(R.id.button_add);
+        Button addBtn = view.findViewById(R.id.button_add);
 
         // button to scan a barcode
-        Button scanBtn = (Button) view.findViewById(R.id.button_scan);
+        Button scanBtn = view.findViewById(R.id.button_scan);
 
         drawList();
 
@@ -440,7 +440,7 @@ class ListItem implements Comparable<ListItem> {
 
     // custom properties, e.g. "society" for the Socials page
     // these are necessarily strings (TODO: support other property types)
-    public Map<String, String> otherProps = new HashMap<>();
+    public Map<String, String> otherProps;
 
     public ListItem(int mId, YMD mDate, String mItem, Integer mCost, Map<String, String> mOtherProps) {
         id = mId;

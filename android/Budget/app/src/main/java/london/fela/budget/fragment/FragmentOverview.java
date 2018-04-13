@@ -100,10 +100,10 @@ public class FragmentOverview extends Fragment {
         }
     }
 
-    /**
-     * Graph stuff
-     * This is commented out because I realised the graph is useless eye candy
-     * TODO: add a setting to enable the graph
+    /*
+      Graph stuff
+      This is commented out because I realised the graph is useless eye candy
+      TODO: add a setting to enable the graph
      */
     /**
     private static GraphOverview graph;
@@ -167,7 +167,7 @@ public class FragmentOverview extends Fragment {
         View view = inflater.inflate(R.layout.fragment_overview, container, false);
 
         // this is the android ListView widget
-        list = (ListView) view.findViewById(R.id.overview_list);
+        list = view.findViewById(R.id.overview_list);
 
         // remove dividing lines
         list.setDividerHeight(0);
@@ -623,7 +623,7 @@ class OverviewAdapter extends BaseAdapter {
         return 0;
     }
 
-    public static class ViewHolder {
+    static class ViewHolder {
         TextView tvMonth;
         TextView tvIncome;
         TextView tvOut;
@@ -651,6 +651,7 @@ class OverviewAdapter extends BaseAdapter {
         int b = (int) Math.round(255 - (255 - rgbVal[2]) * score);
 
         // 0..255 << 24 is the alpha channel (0x00000000..0xff000000)
+        //noinspection NumericOverflow,NumericOverflow
         return (255 << 24) + (r << 16) + (g << 8) + b;
     }
 
@@ -664,7 +665,7 @@ class OverviewAdapter extends BaseAdapter {
             TextView[] tv = new TextView[FragmentOverview.numVisibleCols + 1];
 
             // first one is the month label
-            tv[0] =(TextView) convertView.findViewById(R.id.rowOverviewMonth);
+            tv[0] = convertView.findViewById(R.id.rowOverviewMonth);
 
             int[] id = {
                 R.id.rowOverviewIn,
@@ -673,7 +674,7 @@ class OverviewAdapter extends BaseAdapter {
             };
 
             for (int i = 0; i < FragmentOverview.numVisibleCols; i++) {
-                tv[i + 1] = (TextView) convertView.findViewById(id[i]);
+                tv[i + 1] = convertView.findViewById(id[i]);
             }
 
             holder.tvMonth    = tv[0];

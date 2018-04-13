@@ -2,7 +2,6 @@ package london.fela.budget.app;
 
 import com.android.volley.VolleyError;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 @SuppressWarnings("UnusedParameters")

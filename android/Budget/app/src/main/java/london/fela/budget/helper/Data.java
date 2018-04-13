@@ -2,7 +2,6 @@ package london.fela.budget.helper;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.EditText;
 
 import org.json.JSONArray;
@@ -56,9 +55,11 @@ public class Data {
 			values.put(category, json.getString(categoryKey));
 			values.put("shop", json.getString("s"));
 		}
-		finally {
-			return values;
-		}
+		catch (JSONException e) {
+		    // do nothing
+        }
+
+		return values;
 	}
 
 	private static HashMap<String, String> getFundsProps(JSONObject json) {
@@ -106,16 +107,16 @@ public class Data {
 	}
 
 	public static HashMap<String, String> getOtherProps(String page, JSONObject json) {
-		if (page == "food" || page == "general") {
+		if (page.equals("food") || page.equals("general")) {
 			return getConsumableProps(json, "category", "k");
 		}
-		if (page == "holiday") {
+		if (page.equals("holiday")) {
 			return getConsumableProps(json, "holiday", "h");
 		}
-		if (page == "social") {
+		if (page.equals("social")) {
 			return getConsumableProps(json, "shop", "s");
 		}
-		if (page == "funds") {
+		if (page.equals("funds")) {
 			return getFundsProps(json);
 		}
 
@@ -279,24 +280,24 @@ public class Data {
 	 * get the rounded average (mean or median) value of an int[] array
 	 */
 	public static int intArrayAvg(int[] array, int limit, boolean median) {
-			int[] list = Arrays.copyOfRange(array, 0, limit);
-			if (median) {
-					Arrays.sort(list);
-					if ((list.length & 1) == 1) {
-							// odd: get the middle value
-							return list[(list.length - 1) / 2];
-					}
+        int[] list = Arrays.copyOfRange(array, 0, limit);
+        if (median) {
+            Arrays.sort(list);
+            if ((list.length & 1) == 1) {
+                // odd: get the middle value
+                return list[(list.length - 1) / 2];
+            }
+            // even: get the middle two values and find the average of them
+            int key = list.length / 2 - 1;
+            return (list[key] + list[key + 1]) / 2;
+        }
 
-					// even: get the middle two values and find the average of them
-					int key = list.length / 2 - 1;
-					return (list[key] + list[key + 1]) / 2;
-			}
+        int sum = 0;
+        for (int aList : list) {
+            sum += aList;
+        }
 
-			int sum = 0;
-			for (int i = 0; i < list.length; i++) {
-					sum += list[i];
-			}
-			return (int)Math.round((double)sum / list.length);
+        return (int)Math.round((double)sum / list.length);
 	}
 }
 

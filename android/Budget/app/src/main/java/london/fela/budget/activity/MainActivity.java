@@ -221,16 +221,16 @@ public class MainActivity extends Activity implements Api {
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
         this.setActionBar(toolbar);
 
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        ViewPager pager = findViewById(R.id.pager);
 
         pagerAdapter = new PagerAdapter(getFragmentManager());
         pager.setAdapter(pagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
         tabLayout.setupWithViewPager(pager);
 

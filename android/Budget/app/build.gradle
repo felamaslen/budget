@@ -9,12 +9,12 @@ android {
             storePassword '!v@JrVB&Q25ZVbE'
         }
     }
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "london.fela.budget"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -39,10 +39,10 @@ repositories {
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
-    api 'com.android.support:appcompat-v7:25.1.1'
-    api 'com.android.support:design:25.1.1'
-    api 'com.android.support:support-core-utils:25.1.1'
-    api 'com.android.support:support-v4:25.1.1'
-    api 'com.android.support:support-v13:25.1.1'
+    api 'com.android.support:appcompat-v7:26.1.0'
+    api 'com.android.support:design:26.1.0'
+    api 'com.android.support:support-core-utils:26.1.0'
+    api 'com.android.support:support-v4:26.1.0'
+    api 'com.android.support:support-v13:26.1.0'
     implementation 'com.android.volley:volley:1.0.0'
 }

@@ -2,9 +2,6 @@ package london.fela.budget.app;
 
 import java.util.Calendar;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import london.fela.budget.helper.Data;
 
 /**

@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import london.fela.budget.R;
 import london.fela.budget.app.Api;
@@ -45,8 +46,8 @@ public class DialogUpdate extends Activity {
 
     private ProgressBar progressBar;
 
-    public String method;
-    public String apiUrl;
+    private String method;
+    String apiUrl;
 
     private final int API_TAG_POST_EDIT  = 163;
     private final int API_TAG_POST_ADD   = 187;
@@ -54,7 +55,7 @@ public class DialogUpdate extends Activity {
     private int API_TAG;
 
     private void updateFragment(EditParcel item) {
-        /** call this after successful api call */
+        // call this after successful api call
         Intent intent = this.getIntent();
         intent.putExtra("editParcel", item);
         this.setResult(RESULT_OK, intent);
@@ -134,7 +135,7 @@ public class DialogUpdate extends Activity {
         private boolean invalid = false;
 
         private class InvalidFieldException extends Exception {
-            public InvalidFieldException(String message) {
+            InvalidFieldException(String message) {
                 super(message);
             }
         }
@@ -166,6 +167,8 @@ public class DialogUpdate extends Activity {
                     try {
                         data.put(field.name, formValue);
                     } catch (JSONException e) {
+                        e.printStackTrace();
+
                         throw e;
                     }
 
@@ -265,7 +268,7 @@ public class DialogUpdate extends Activity {
             }
         }
 
-        public SubmitForm() {
+        SubmitForm() {
             validateFields();
 
             submit();
@@ -281,15 +284,15 @@ public class DialogUpdate extends Activity {
     final int FIELD_TYPE_COST = 2;
     private final int FIELD_TYPE_DATE = 3;
 
-    public class FormField {
-        public final String name;
+    class FormField {
+        final String name;
         @SuppressWarnings("unused")
         public final String title;
 
         int type;
 
         // this should be modified for each field
-        public String getFormValue() {
+        String getFormValue() {
             return "";
         }
 
@@ -298,7 +301,7 @@ public class DialogUpdate extends Activity {
             title = theTitle;
         }
     }
-    public class FormFieldText extends FormField {
+    class FormFieldText extends FormField {
         final EditText input;
 
         public String getFormValue() {
@@ -327,13 +330,13 @@ public class DialogUpdate extends Activity {
         }
     }
     @SuppressWarnings("SameParameterValue")
-    public class FormFieldDate extends FormField {
-        public final TextView display;
-        public final Button btnChange;
+    class FormFieldDate extends FormField {
+        final TextView display;
+        final Button btnChange;
 
         final DatePickerDialog datePicker;
 
-        public final DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
+        final DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int date) {
                 YMD newDate = new YMD(year, ++month, date);
@@ -344,7 +347,7 @@ public class DialogUpdate extends Activity {
             }
         };
 
-        public FormFieldDate(
+        FormFieldDate(
             String theName, String theTitle, TextView theDisplay, Button theButton, Context context
         ) {
             super(theName, theTitle);
@@ -390,9 +393,7 @@ public class DialogUpdate extends Activity {
         String titleText;
 
         // determine if this is a edit or add form, and set title accordingly
-        int dataIndex = getIntent().getExtras().getInt("dataIndex");
-
-        if (dataIndex == -1) {
+        if (Objects.requireNonNull(getIntent().getExtras()).getInt("dataIndex") == -1) {
             // this is an add form
             titleText = getString(R.string.dialog_title_add);
 
@@ -411,10 +412,10 @@ public class DialogUpdate extends Activity {
         apiSetup();
 
         // views common to all pages
-        Button btnSubmit = (Button) findViewById(R.id.btn_submit);
-        Button btnCancel = (Button) findViewById(R.id.btn_cancel);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        TextView tvTitle = (TextView) findViewById(R.id.tvtitle);
+        Button btnSubmit = findViewById(R.id.btn_submit);
+        Button btnCancel = findViewById(R.id.btn_cancel);
+        progressBar = findViewById(R.id.progressBar);
+        TextView tvTitle = findViewById(R.id.tvtitle);
 
         tvTitle.setText(titleText);
 

@@ -2,7 +2,6 @@ package london.fela.budget.app;
 
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,19 +22,19 @@ public class ApiCaller {
     private static String apiUrl;
 
     private static int getHttpMethod(String methodString) {
-        if (methodString == "get") {
+        if (methodString.equals("get")) {
             return Request.Method.GET;
         }
-        if (methodString == "post") {
+        if (methodString.equals("post")) {
             return Request.Method.POST;
         }
-        if (methodString == "put") {
+        if (methodString.equals("put")) {
             return Request.Method.PUT;
         }
-        if (methodString == "delete") {
+        if (methodString.equals("delete")) {
             return Request.Method.DELETE;
         }
-        if (methodString == "patch") {
+        if (methodString.equals("patch")) {
             return Request.Method.PATCH;
         }
         
@@ -103,11 +102,10 @@ public class ApiCaller {
             /**
              * add authorisation header for the REST Api
              *
-             * @return headers
-             * @throws AuthFailureError
+             * @return headersr
              */
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 HashMap<String, String> reqHeaders = new HashMap<>();
 
                 String apiKey = Data.user.get("apiKey");
