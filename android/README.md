@@ -1,4 +1,4 @@
 # Budget Android app
 
-- Before building, you must put the correct values in `app/src/main/res/values/env.xml` after renaming it from `.example`
+- Before building, you must put the correct values in `app/src/main/res/values/env.xml` after renaming it from `env.example` in this directory
 
