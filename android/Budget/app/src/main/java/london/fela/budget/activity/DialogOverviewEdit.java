@@ -15,7 +15,7 @@ import com.android.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
+import java.util.Objects;
 
 import london.fela.budget.R;
 import london.fela.budget.app.Api;
@@ -23,7 +23,6 @@ import london.fela.budget.app.ApiCaller;
 import london.fela.budget.app.AppConfig;
 import london.fela.budget.app.AppController;
 import london.fela.budget.helper.Data;
-
 
 public class DialogOverviewEdit extends Activity implements Api {
     private int balance;
@@ -53,6 +52,7 @@ public class DialogOverviewEdit extends Activity implements Api {
                 // successfully posted edit
                 Intent intent = this.getIntent();
                 intent.putExtra("balance", newBalance);
+
                 this.setResult(RESULT_OK, intent);
 
                 break;
@@ -63,8 +63,6 @@ public class DialogOverviewEdit extends Activity implements Api {
         if (tag == API_TAG_POST_EDIT) {
             AppController.alert(getApplicationContext(), "Error: " + error.getMessage());
             progressBar.setVisibility(View.INVISIBLE);
-
-            return;
         }
     }
     @Override
@@ -90,16 +88,16 @@ public class DialogOverviewEdit extends Activity implements Api {
 
         apiSetup();
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
-        TextView tvTitle = (TextView) findViewById(R.id.tvtitle);
-        inputBalance = (EditText) findViewById(R.id.input_balance);
-        Button btnSubmit = (Button) findViewById(R.id.btn_submit);
-        Button btnCancel = (Button) findViewById(R.id.btn_cancel);
+        TextView tvTitle = findViewById(R.id.tvtitle);
+        inputBalance = findViewById(R.id.input_balance);
+        Button btnSubmit = findViewById(R.id.btn_submit);
+        Button btnCancel = findViewById(R.id.btn_cancel);
 
-        balance   = getIntent().getExtras().getInt("balance");
-        year      = getIntent().getExtras().getInt("year");
-        month     = getIntent().getExtras().getInt("month");
+        balance = Objects.requireNonNull(getIntent().getExtras()).getInt("balance");
+        year = getIntent().getExtras().getInt("year");
+        month = getIntent().getExtras().getInt("month");
 
         String titleText = getString(R.string.dialog_overview_edit) + " "
             + Data.yearMonth(year, month);

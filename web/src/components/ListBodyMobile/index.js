@@ -5,12 +5,18 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListRowMobile from '../../containers/ListRowMobile';
 
-export default function ListBodyMobile({ page, rowIds, onMobileAdd, ...props }) {
-    const colKeys = LIST_COLS_MOBILE
-        .map(column => PAGES[page].cols.indexOf(column));
+export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileAdd, ...props }) {
+    const colKeys = (listColsMobile || LIST_COLS_MOBILE).map(column =>
+        PAGES[page].cols.indexOf(column));
 
     const rows = rowIds.map(id => (
-        <ListRowMobile key={id} page={page} id={id} colKeys={colKeys} {...props} />
+        <ListRowMobile key={id}
+            page={page}
+            id={id}
+            colKeys={colKeys}
+            listColsMobile={listColsMobile}
+            {...props}
+        />
     ));
 
     const listHeadInner = LIST_COLS_MOBILE.map(column => {
@@ -35,6 +41,7 @@ export default function ListBodyMobile({ page, rowIds, onMobileAdd, ...props }) 
 ListBodyMobile.propTypes = {
     page: PropTypes.string.isRequired,
     rowIds: PropTypes.instanceOf(list).isRequired,
+    listColsMobile: PropTypes.array,
     onMobileAdd: PropTypes.func.isRequired
 };
 

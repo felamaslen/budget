@@ -2,14 +2,16 @@ import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '../../helpers/format';
+import { PAGES } from '../../constants/data';
 
-export default function ListRowFundsMobile({ row, colKeys }) {
-    const cost = row.getIn(['cols', colKeys[2]]);
+export default function ListRowFundsMobile({ row }) {
+    const transactions = row.getIn(['cols', PAGES.funds.cols.indexOf('transactions')]);
     const gain = row.get('gain');
-
     if (!gain) {
         return null;
     }
+
+    const cost = transactions.getTotalCost();
 
     const formatOptions = {
         abbreviate: true,

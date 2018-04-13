@@ -1,38 +1,40 @@
 <resources>
-  <string name="app_name">Budget</string>
-  <string name="logo_description">Application Logo</string>
+    <string name="app_name">Budget</string>
+    <string name="logo_description">Application Logo</string>
 
-  <string name="title_login">Enter your 4-digit PIN:</string>
-  <string name="button_login">Log in</string>
-  <string name="button_add">Add</string>
-  <string name="button_scan">Scan</string>
+    <string name="title_login">Enter your 4-digit PIN:</string>
+    <string name="button_login">Log in</string>
+    <string name="button_add">Add</string>
+    <string name="button_scan">Scan</string>
 
-  <string name="action_logout">Log out</string>
-  <string name="action_reload_cache">Reload</string>
+    <string name="action_logout">Log out</string>
+    <string name="action_reload_cache">Reload</string>
 
-  <string name="change_date">Change</string>
-  
-  <string name="tblOverviewHeadMonth">Month</string>
-  <string name="tblOverviewHeadIn">Income</string>
-  <string name="tblOverviewHeadOut">Out</string>
-  <string name="tblOverviewHeadBalance">Balance</string>
+    <string name="change_date">Change</string>
 
-  <string name="lblDate">Date</string>
-  <string name="lblItem">Item</string>
-  <string name="lblCost">Cost</string>
-  <string name="lblAmount">Amount</string>
-  <string name="lblCategory">Category</string>
-  <string name="lblShop">Shop</string>
-  <string name="lblHoliday">Holiday</string>
-  <string name="lblSociety">Society</string>
+    <string name="tblOverviewHeadMonth">Month</string>
+    <string name="tblOverviewHeadIn">Income</string>
+    <string name="tblOverviewHeadOut">Out</string>
+    <string name="tblOverviewHeadBalance">Balance</string>
 
-  <string name="dialog_submit">Do it.</string>
-  <string name="dialog_cancel">nope.avi</string>
+    <string name="lblDate">Date</string>
+    <string name="lblItem">Item</string>
+    <string name="lblCost">Cost</string>
+    <string name="lblAmount">Amount</string>
+    <string name="lblValue">Value</string>
+    <string name="lblTransactions">Use the web app to edit transactions</string>
+    <string name="lblCategory">Category</string>
+    <string name="lblShop">Shop</string>
+    <string name="lblHoliday">Holiday</string>
+    <string name="lblSociety">Society</string>
 
-  <string name="dialog_overview_edit">Update</string>
-  <string name="dialog_overview_label">Balance:</string>
-  <string name="dialog_title">Edit</string>
-  <string name="dialog_title_add">Add item</string>
+    <string name="dialog_submit">Do it.</string>
+    <string name="dialog_cancel">nope.avi</string>
 
-  <string name="old_months">5</string>
+    <string name="dialog_overview_edit">Update</string>
+    <string name="dialog_overview_label">Balance:</string>
+    <string name="dialog_title">Edit</string>
+    <string name="dialog_title_add">Add item</string>
+
+    <string name="old_months">5</string>
 </resources>

@@ -24,7 +24,7 @@ describe('<PageFunds />', () => {
             AfterHead: ListHeadFundsDesktop,
             AfterRow: ListRowFundsDesktop,
             AfterRowMobile: ListRowFundsMobile,
-            listColsMobile: ['date', 'item'],
+            listColsMobile: ['item'],
             rowClasses: OrderedMap.of()
         });
     });
