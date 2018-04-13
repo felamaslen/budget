@@ -18,7 +18,7 @@ function PageFunds({ sold }) {
             AfterHead={ListHeadFundsDesktop}
             AfterRow={ListRowFundsDesktop}
             AfterRowMobile={ListRowFundsMobile}
-            listColsMobile={['date', 'item']}
+            listColsMobile={['item']}
             rowClasses={rowClasses}
         />
     );
