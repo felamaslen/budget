@@ -6,7 +6,6 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import london.fela.budget.R;
@@ -68,7 +67,7 @@ public class UPCProduct implements Api {
         api.request(API_TAG_FETCH_PRODUCT, "api_fetch_product", "get", requestUrl, null);
     }
 
-    public void productFetched(JSONObject res) {
+    protected void productFetched(JSONObject res) {
         // needs to be overridden
         Log.d(TAG, "[log] productFetched default method");
     }

@@ -42,6 +42,11 @@ public class FragmentFunds extends FragmentList {
         list.setAdapter(listAdapter);
     }
 
+    @Override
+    public int getFragmentLayout() {
+        return R.layout.fragment_list_funds;
+    }
+
     public static FragmentFunds newInstance() {
         FragmentFunds fragmentFunds = new FragmentFunds();
 
@@ -62,6 +67,7 @@ class ListAdapterFunds extends ListAdapter {
     public SparseArray<String> getTextViews(ListItem item) {
         SparseArray<String> idValues = super.getTextViews(item);
         idValues.put(R.id.rowValue, item.otherProps.get("value"));
+        idValues.put(R.id.rowCost, item.otherProps.get("cost"));
 
         return idValues;
     }

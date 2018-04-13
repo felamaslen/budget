@@ -13,9 +13,6 @@ import com.android.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import london.fela.budget.R;
 import london.fela.budget.app.AppConfig;
 import london.fela.budget.app.AppController;
@@ -108,8 +105,8 @@ public class LoginActivity extends AppCompatActivity implements Api {
 
         Button btnLogin;
 
-        inputPin = (EditText) findViewById(R.id.loginPin);
-        btnLogin = (Button) findViewById(R.id.buttonLogin);
+        inputPin = findViewById(R.id.loginPin);
+        btnLogin = findViewById(R.id.buttonLogin);
 
         // sqlite database handler
         db = new SQLiteHandler(getApplicationContext());

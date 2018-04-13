@@ -7,9 +7,7 @@ import PropTypes from 'prop-types';
 import ListRowCellMobile from '../../components/ListRowCellMobile';
 
 export function ListRowMobile({ page, id, row, colKeys, listColsMobile, AfterRowMobile, onEdit }) {
-    const listCols = listColsMobile || LIST_COLS_MOBILE;
-
-    const cells = listCols.map((column, key) => (
+    const cells = (listColsMobile || LIST_COLS_MOBILE).map((column, key) => (
         <ListRowCellMobile key={column}
             page={page} colKey={colKeys[key]} row={row} id={id} column={column} />
     ));

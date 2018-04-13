@@ -21,7 +21,7 @@ export default function Graph(props) {
         children
     } = props;
 
-    const className = classNames('graph-container', `graph-${name}`);
+    const className = classNames('graph-container', { [`graph-${name}`]: name });
 
     const attachProps = (propsObject = {}) => Object.keys(propsObject)
         .reduce((proc, key) => ({ ...proc, [key]: propsObject[key](props) }), {});
