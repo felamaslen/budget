@@ -205,17 +205,17 @@ public class FragmentList extends Fragment {
 
         EditParcel newRow = (EditParcel)newRowParcel;
 
-        YMD newDate     = YMD.deserialise(newRow.data.get("date"));
-        String newItem  = newRow.data.get("item");
-        int newCost     = Integer.valueOf(newRow.data.get("cost"));
-
+        YMD newDate = YMD.deserialise(newRow.data.get("date"));
+        String newItem = newRow.data.get("item");
+        Integer newCost = Integer.valueOf(newRow.data.get("cost"));
         Map<String, String> otherProps = new HashMap<>();
+
         for (String prop : props) {
             otherProps.put(prop, newRow.data.get(prop));
         }
 
         YMD oldDate = newDate;
-        int oldCost = 0;
+        Integer oldCost = 0;
 
         if (itemIsNew) {
             // add list item
@@ -311,11 +311,15 @@ public class FragmentList extends Fragment {
         fetchDataFromCache();
     }
 
+    public int getFragmentLayout() {
+        return R.layout.fragment_list;
+    }
+
     @Override
     public View onCreateView(
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
     ) {
-        View view = inflater.inflate(R.layout.fragment_list, container, false);
+        View view = inflater.inflate(getFragmentLayout(), container, false);
 
         // this is the android ListView widget
         list = (ListView) view.findViewById(R.id.main_list);
@@ -408,30 +412,40 @@ public class FragmentList extends Fragment {
 class ListItem implements Comparable<ListItem> {
     public final int id;
 
-    public YMD date;
-    public String item;
-    public int cost;
+    public YMD date = null;
+    public String item = null;
+    public Integer cost = null;
 
     // custom properties, e.g. "society" for the Socials page
     // these are necessarily strings (TODO: support other property types)
     public Map<String, String> otherProps = new HashMap<>();
 
-    public ListItem(
-        int theId, YMD startDate,  String startItem, int startCost, Map<String, String> startOtherProps
-    ) {
-        id          = theId;
-        date        = startDate;
-        item        = startItem;
-        cost        = startCost;
-        otherProps  = startOtherProps;
+    public ListItem(int mId, YMD mDate, String mItem, Integer mCost, Map<String, String> mOtherProps) {
+        id = mId;
+        if (mDate != null) {
+            date = mDate;
+        }
+        if (mItem != null) {
+            item = mItem;
+        }
+        if (mCost != null) {
+            cost = mCost;
+        }
+
+        otherProps = mOtherProps;
     }
 
     public int compareTo(@NonNull ListItem item) {
-        return item.date.isAfter(date) ? 1 : (
-            date.isAfter(item.date) ? -1 : (
-                item.id > id ? 1 : (item.id < id ? -1 : 0)
-            )
-        );
+        if (date != null) {
+            if (item.date.isAfter(date)) {
+                return 1;
+            }
+            if (date.isAfter(item.date)) {
+                return -1;
+            }
+        }
+
+        return Integer.compare(item.id, id);
     }
 }
 
@@ -452,9 +466,16 @@ class ListAdapter extends BaseAdapter {
 
     SparseArray<String> getTextViews(ListItem item) {
         SparseArray<String> idValues = new SparseArray<>();
-        idValues.put(R.id.rowDate, item.date.format());
-        idValues.put(R.id.rowItem, item.item);
-        idValues.put(R.id.rowCost, Data.formatCurrency(item.cost, this.abbreviateCost));
+
+        if (item.date != null) {
+            idValues.put(R.id.rowDate, item.date.format());
+        }
+        if (item.item != null) {
+            idValues.put(R.id.rowItem, item.item);
+        }
+        if (item.cost != null) {
+            idValues.put(R.id.rowCost, Data.formatCurrency(item.cost, this.abbreviateCost));
+        }
 
         return idValues;
     }

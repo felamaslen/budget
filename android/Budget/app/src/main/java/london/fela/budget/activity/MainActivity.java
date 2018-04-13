@@ -4,12 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toolbar;
+import android.support.v4.view.ViewPager;
+import android.support.design.widget.TabLayout;
 
 import com.android.volley.VolleyError;
 
@@ -115,25 +115,27 @@ public class MainActivity extends Activity implements Api {
                 newPage.numItems = pageJson.length();
 
                 for (int i = 0; i < pageJson.length(); i++) {
-                    JSONObject li = pageJson.getJSONObject(i);
+                    JSONObject item = pageJson.getJSONObject(i);
 
-                    // item ID
-                    int id = li.getInt("I");
-                    // item date
-                    String jDate = li.getString("d");
-                    YMD date = YMD.deserialise(jDate);
-
-                    // item name
-                    String item = li.getString("i");
-                    // item cost
-                    int cost = li.getInt("c");
-                    // custom properties
-                    HashMap<String, String> otherProps = Data.getOtherProps(page, li, cost);
+                    int id = item.getInt("I");
 
                     newPage.id.put(i, id);
-                    newPage.date.put(id, date);
-                    newPage.item.put(id, item);
-                    newPage.cost.put(id, cost);
+
+                    if (item.has("d")) {
+                        String jDate = item.getString("d");
+                        YMD date = YMD.deserialise(jDate);
+                        newPage.date.put(id, date);
+                    }
+                    if (item.has("i")) {
+                        String name = item.getString("i");
+                        newPage.item.put(id, name);
+                    }
+                    if (item.has("c")) {
+                        int cost = item.getInt("c");
+                        newPage.cost.put(id, cost);
+                    }
+
+                    HashMap<String, String> otherProps = Data.getOtherProps(page, item);
                     newPage.other.put(id, otherProps);
                 }
 
