@@ -22,6 +22,7 @@
     <string name="lblCost">Cost</string>
     <string name="lblAmount">Amount</string>
     <string name="lblValue">Value</string>
+    <string name="lblTransactions">Use the web app to edit transactions</string>
     <string name="lblCategory">Category</string>
     <string name="lblShop">Shop</string>
     <string name="lblHoliday">Holiday</string>

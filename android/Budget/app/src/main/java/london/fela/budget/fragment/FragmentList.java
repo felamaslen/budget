@@ -92,9 +92,15 @@ public class FragmentList extends Fragment {
             ListItem item = itemList.get(position);
 
             map.put("id", String.valueOf(item.id));
-            map.put("date", item.date.serialise());
-            map.put("item", item.item);
-            map.put("cost", String.valueOf(item.cost));
+            if (item.date != null) {
+                map.put("date", item.date.serialise());
+            }
+            if (item.item != null) {
+                map.put("item", item.item);
+            }
+            if (item.cost != null) {
+                map.put("cost", String.valueOf(item.cost));
+            }
 
             for (String prop : props) {
                 map.put(prop, item.otherProps.get(prop));
@@ -192,88 +198,51 @@ public class FragmentList extends Fragment {
         }
     };
 
-    /**
-     * Called by edit/add dialog after data has been successfully submitted
-     * @param position        : position in the list
-     * @param newRowParcel    : parcel containing new data
-     */
-    private void setItemData(
-        int position, Parcelable newRowParcel
-    ) {
+    private void addCacheListItem(int newId, YMD date, String item, Integer cost, Map<String, String> otherProps) {
+        Data.Cache.Pages.get(pageName).id.put(Data.Cache.Pages.get(pageName).numItems++, newId);
 
-        boolean itemIsNew = position == -1;
-
-        EditParcel newRow = (EditParcel)newRowParcel;
-
-        YMD newDate = YMD.deserialise(newRow.data.get("date"));
-        String newItem = newRow.data.get("item");
-        Integer newCost = Integer.valueOf(newRow.data.get("cost"));
-        Map<String, String> otherProps = new HashMap<>();
-
-        for (String prop : props) {
-            otherProps.put(prop, newRow.data.get(prop));
+        if (date != null) {
+            Data.Cache.Pages.get(pageName).date.put(newId, date);
+        }
+        if (item != null) {
+            Data.Cache.Pages.get(pageName).item.put(newId, item);
+        }
+        if (cost != null) {
+            Data.Cache.Pages.get(pageName).cost.put(newId, cost);
         }
 
-        YMD oldDate = newDate;
-        Integer oldCost = 0;
+        Data.Cache.Pages.get(pageName).other.put(newId, otherProps);
+    }
 
-        if (itemIsNew) {
-            // add list item
-            int newId = Integer.valueOf(newRow.data.get("id"));
+    private void updateCachedListItem(int position, YMD newDate, String newItem, Integer newCost, Map<String, String> otherProps) {
+        ListItem listItem = itemList.get(position);
+        int id = listItem.id;
 
-            ListItem listItem = new ListItem(
-                newId, newDate, newItem, newCost, otherProps
-            );
-
-            addListItem(listItem);
-
-            // add item to cache
-            Data.Cache.Pages.get(pageName).id.put(
-                Data.Cache.Pages.get(pageName).numItems++, newId
-            );
-
-            Data.Cache.Pages.get(pageName).date.put(newId, newDate);
-            Data.Cache.Pages.get(pageName).item.put(newId, newItem);
-            Data.Cache.Pages.get(pageName).cost.put(newId, newCost);
-            Data.Cache.Pages.get(pageName).other.put(newId, otherProps);
-        }
-        else {
-            // update list item
-            ListItem listItem = itemList.get(position);
-
-            oldDate = listItem.date;
-            oldCost = listItem.cost;
-
+        if (newDate != null) {
             listItem.date = newDate;
-            listItem.item = newItem;
-            listItem.cost = newCost;
-
-            listItem.otherProps = otherProps;
-
-            itemList.set(position, listItem);
-
-            // update the cache item
-            int id = listItem.id;
-
             Data.Cache.Pages.get(pageName).date.put(id, newDate);
-            Data.Cache.Pages.get(pageName).item.put(id, newItem);
+        }
+        if (newCost != null) {
+            listItem.cost = newCost;
             Data.Cache.Pages.get(pageName).cost.put(id, newCost);
-            Data.Cache.Pages.get(pageName).other.put(id, otherProps);
+        }
+        if (newItem != null) {
+            listItem.item = newItem;
+            Data.Cache.Pages.get(pageName).item.put(id, newItem);
         }
 
-        // update this page's list
-        updateList();
+        listItem.otherProps = otherProps;
+        Data.Cache.Pages.get(pageName).other.put(id, otherProps);
 
-        // update the cache data for this page
+        itemList.set(position, listItem);
+    }
 
-        // update the overview cache data
+    private void updateOverviewData(YMD oldDate, YMD newDate, Integer oldCost, Integer newCost) {
         int oldMonthKey = Data.yearMonthDifference(
-            oldDate.getYear(), oldDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
-        );
+                oldDate.getYear(), oldDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth);
 
         int newMonthKey = Data.yearMonthDifference(
-            newDate.getYear(), newDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth
-        );
+                newDate.getYear(), newDate.getMonth(), FragmentOverview.startYear, FragmentOverview.startMonth);
 
         // refresh the overview page, if it exists
         try {
@@ -290,8 +259,7 @@ public class FragmentList extends Fragment {
 
             try {
                 FragmentOverview overviewPage = (FragmentOverview)(
-                    ((MainActivity)getActivity()).pagerAdapter.getRegisteredFragment(0)
-                );
+                        ((MainActivity)getActivity()).pagerAdapter.getRegisteredFragment(0));
 
                 overviewPage.reloadDataFromCache();
             }
@@ -302,6 +270,60 @@ public class FragmentList extends Fragment {
         catch (Exception e) {
             // serious error
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Called by edit/add dialog after data has been successfully submitted
+     * @param position        : position in the list
+     * @param newRowParcel    : parcel containing new data
+     */
+    private void setItemData(int position, Parcelable newRowParcel) {
+        boolean itemIsNew = position == -1;
+
+        EditParcel newRow = (EditParcel)newRowParcel;
+
+        String date = newRow.data.get("date");
+        YMD newDate = date == null ? null : YMD.deserialise((date));
+
+        String cost = newRow.data.get("cost");
+        Integer newCost = cost == null ? null : Integer.valueOf(cost);
+
+        String newItem = newRow.data.get("item");
+
+        Map<String, String> otherProps = new HashMap<>();
+        for (String prop : props) {
+            otherProps.put(prop, newRow.data.get(prop));
+        }
+
+        YMD oldDate = newDate;
+        Integer oldCost = 0;
+
+        if (itemIsNew) {
+            // add list item
+            int newId = Integer.valueOf(newRow.data.get("id"));
+
+            ListItem listItem = new ListItem(newId, newDate, newItem, newCost, otherProps);
+
+            addListItem(listItem);
+            addCacheListItem(newId, newDate, newItem, newCost, otherProps);
+        }
+        else {
+            ListItem oldListItem = itemList.get(position);
+            if (newDate != null) {
+                oldDate = oldListItem.date;
+            }
+            if (newCost != null) {
+                oldCost = oldListItem.cost;
+            }
+
+            updateCachedListItem(position, newDate, newItem, newCost, otherProps);
+        }
+
+        updateList();
+
+        if (newDate != null && newCost != null) {
+            updateOverviewData(oldDate, newDate, oldCost, newCost);
         }
     }
 

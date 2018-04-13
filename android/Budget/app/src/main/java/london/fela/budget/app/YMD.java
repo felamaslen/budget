@@ -55,7 +55,7 @@ public class YMD {
         
         int theYear, theMonth, theDate;
         
-        if (serial.length() > 0) {
+        if (serial != null && serial.length() > 0) {
             parts = serial.split(separator);
 
             theYear   = Integer.valueOf(parts[0]);
