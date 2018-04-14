@@ -3,15 +3,15 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '../../helpers/format';
 import { PAGES } from '../../constants/data';
 
-export default function ListHeadDesktop({ page, weeklyValue, daily, totalCost, AfterHead }) {
+export default function ListHeadDesktop({ page, weeklyValue, getDaily, totalCost, AfterHead }) {
     const weeklyValueFormatted = formatCurrency(weeklyValue, {
         abbreviate: true,
         precision: 1
     });
 
-    const dailyValues = daily
+    const dailyValues = getDaily
         ? <span>
-            <span className="daily">{'Daily'}</span>
+            <span className="daily">{'Daily |'}</span>
             <span className="weekly">{'Weekly:'}</span>
             <span className="weekly-value">{weeklyValueFormatted}</span>
         </span>
@@ -45,7 +45,7 @@ export default function ListHeadDesktop({ page, weeklyValue, daily, totalCost, A
 ListHeadDesktop.propTypes = {
     page: PropTypes.string.isRequired,
     weeklyValue: PropTypes.number,
-    daily: PropTypes.bool,
+    getDaily: PropTypes.bool,
     totalCost: PropTypes.number,
     AfterHead: PropTypes.func
 };
