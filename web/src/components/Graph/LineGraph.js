@@ -203,7 +203,6 @@ AverageLine.propTypes = {
 function RenderedLine({ line, ...props }) {
     const data = line.get('data');
     const color = line.get('color');
-    const strokeWidth = line.get('strokeWidth');
     const fill = line.get('fill');
     const smooth = line.get('smooth');
     const movingAverage = line.get('movingAverage');
@@ -215,6 +214,13 @@ function RenderedLine({ line, ...props }) {
 
     if (arrows) {
         return <ArrowLine data={data} color={color} {...props} />;
+    }
+
+    const pathProps = {
+        strokeWidth: line.get('strokeWidth') || 2
+    };
+    if (line.get('dashed')) {
+        pathProps.strokeDasharray = '3,5';
     }
 
     const averageLine = <AverageLine {...props} data={data} value={movingAverage} />;
@@ -231,7 +237,7 @@ function RenderedLine({ line, ...props }) {
         }
 
         const paths = linePaths.map(({ path, stroke }, key) => (
-            <path key={key} d={path} stroke={stroke} strokeWidth={strokeWidth || 2} fill="none" />
+            <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
         ));
 
         return <g className="lines">{averageLine}{paths}</g>;
@@ -248,7 +254,7 @@ function RenderedLine({ line, ...props }) {
         : color;
 
     return <g className="line">
-        <path d={linePath} stroke={strokeStyle} strokeWidth={strokeWidth || 2} fill={fillStyle} />
+        <path d={linePath} stroke={strokeStyle} {...pathProps} fill={fillStyle} />
         {averageLine}
     </g>;
 }
@@ -261,6 +267,7 @@ RenderedLine.propTypes = {
             PropTypes.func
         ]).isRequired,
         strokeWidth: PropTypes.number,
+        dashed: PropTypes.bool,
         fill: PropTypes.bool,
         smooth: PropTypes.bool,
         movingAverage: PropTypes.number,

@@ -8,25 +8,26 @@ import Axes from './Axes';
 import NowLine from './NowLine';
 import { GRAPH_HEIGHT } from '../../constants/graph';
 
-function getTime(now, offset, breakAtToday, startDate) {
+function getTime(key, now, offset, breakAtToday, startDate) {
     // converts a key index to a UNIX time stamp
-    return key => {
-        const date = startDate.plus({ months: key - offset });
+    const date = startDate.plus({ months: key - offset })
+        .endOf('month');
 
-        if (breakAtToday && date.year === now.year && date.month === now.month) {
-            return now.ts / 1000;
-        }
+    if (breakAtToday && date.year === now.year && date.month === now.month) {
+        return now;
+    }
 
-        return date.endOf('month').ts / 1000;
-    };
+    return date;
 }
 
 export function getValuesWithTime(data, props) {
     const { oldOffset, breakAtToday, startDate } = props;
 
-    const timeGetter = getTime(props.now, oldOffset, breakAtToday, startDate);
+    return data.map((value, index) => {
+        const date = getTime(index, props.now, oldOffset, breakAtToday, startDate);
 
-    return data.map((value, index) => list([timeGetter(index), value]));
+        return list([date.ts / 1000, value, date]);
+    });
 }
 
 export function getRanges(lines) {
