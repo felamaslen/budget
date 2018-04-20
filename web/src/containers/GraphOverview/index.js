@@ -4,15 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
 import { DateTime } from 'luxon';
-import { mediaQueries } from '../../constants';
+import { mediaQueryMobile } from '../../constants';
 import { GRAPH_WIDTH } from '../../constants/graph';
 import { getNow } from '../../helpers/date';
 import GraphBalance from '../../components/GraphBalance';
 import GraphSpending from '../../components/GraphSpending';
 
 function GraphOverview({ spending, balance, ...props }) {
-    const graphSpending = render => {
-        if (render) {
+    const graphSpending = isMobile => {
+        if (!isMobile) {
             return <GraphSpending name="spend" {...spending} {...props} />;
         }
 
@@ -22,7 +22,7 @@ function GraphOverview({ spending, balance, ...props }) {
 
     return <div className="graph-container-outer">
         <GraphBalance name="balance" {...balance} {...props} />
-        <Media query={mediaQueries.desktop}>{graphSpending}</Media>
+        <Media query={mediaQueryMobile}>{graphSpending}</Media>
     </div>;
 }
 

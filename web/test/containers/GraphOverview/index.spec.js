@@ -6,7 +6,7 @@ import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
 import { DateTime } from 'luxon';
 import Media from 'react-media';
-import { mediaQueries } from '../../../src/constants';
+import { mediaQueryMobile } from '../../../src/constants';
 import GraphOverview from '../../../src/containers/GraphOverview';
 import GraphBalance from '../../../src/components/GraphBalance';
 import { aShowAllToggled } from '../../../src/actions/graph.actions';
@@ -69,7 +69,7 @@ describe('<GraphOverview />', () => {
     it('should render a spending graph', () => {
         expect(wrapper.childAt(1).is(Media)).to.equal(true);
         expect(wrapper.childAt(1).props()).to.deep.include({
-            query: mediaQueries.desktop
+            query: mediaQueryMobile
         });
     });
 
