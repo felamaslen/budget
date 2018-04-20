@@ -1,9 +1,4 @@
 .navbar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    
     .inner {
         background: linear-gradient(to bottom, $color-primary, $color-primary-dark);
         box-shadow: 0 0 6px $color-shadow-l6;

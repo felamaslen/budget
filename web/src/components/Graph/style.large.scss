@@ -1,11 +1,11 @@
 .graph-container-outer {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     flex-flow: row wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
 
     .graph-container {
-        margin: 0.5em;
         position: relative;
         overflow: hidden;
     }
