@@ -58,7 +58,7 @@ export default function GraphCashFlow(props) {
 
     const coreProps = {
         width: props.graphWidth,
-        height: GRAPH_HEIGHT,
+        height: props.graphHeight || GRAPH_HEIGHT,
         padding: [40, 0, 0, 0],
         now: DateTime.local(),
         ...ranges
@@ -80,6 +80,7 @@ export default function GraphCashFlow(props) {
 
 GraphCashFlow.propTypes = {
     graphWidth: PropTypes.number.isRequired,
+    graphHeight: PropTypes.number,
     lines: ImmutablePropTypes.list.isRequired
 };
 

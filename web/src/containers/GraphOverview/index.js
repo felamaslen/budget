@@ -10,28 +10,39 @@ import { getNow } from '../../helpers/date';
 import GraphBalance from '../../components/GraphBalance';
 import GraphSpending from '../../components/GraphSpending';
 
-function GraphOverview({ spending, balance, ...props }) {
-    const graphSpending = isMobile => {
-        if (!isMobile) {
-            return <GraphSpending name="spend" {...spending} {...props} />;
-        }
+export function GraphOverviewWrapped({ spending, balance, ...props }) {
+    let graphSpending = null;
+    if (!props.isMobile) {
+        graphSpending = <GraphSpending name="spend" {...spending} {...props} />;
+    }
 
-        return null;
-    };
-
-
-    return <div className="graph-container-outer">
-        <GraphBalance name="balance" {...balance} {...props} />
-        <Media query={mediaQueryMobile}>{graphSpending}</Media>
-    </div>;
+    return (
+        <div className="graph-container-outer">
+            <GraphBalance name="balance" {...balance} {...props} />
+            {graphSpending}
+        </div>
+    );
 }
 
-GraphOverview.propTypes = {
+GraphOverviewWrapped.propTypes = {
+    isMobile: PropTypes.bool,
     now: PropTypes.instanceOf(DateTime).isRequired,
     graphWidth: PropTypes.number.isRequired,
     spending: PropTypes.object.isRequired,
     balance: PropTypes.object.isRequired
 };
+
+function mediaQueryWrapper(isMobile, props) {
+    return <GraphOverviewWrapped isMobile={isMobile} {...props} />;
+}
+
+function GraphOverview(props) {
+    return (
+        <Media query={mediaQueryMobile}>
+            {isMobile => mediaQueryWrapper(isMobile, props)}
+        </Media>
+    );
+}
 
 const mapStateToProps = state => ({
     now: getNow(),

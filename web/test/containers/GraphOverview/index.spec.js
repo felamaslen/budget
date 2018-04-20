@@ -1,14 +1,17 @@
+/* eslint-disable newline-per-chained-call */
 import { fromJS, Map as map } from 'immutable';
 import '../../browser';
 import React from 'react';
-import shallow from '../../shallow-with-store';
+import shallowWithStore from '../../shallow-with-store';
+import { shallow } from 'enzyme';
 import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
 import { DateTime } from 'luxon';
 import Media from 'react-media';
 import { mediaQueryMobile } from '../../../src/constants';
-import GraphOverview from '../../../src/containers/GraphOverview';
+import GraphOverview, { GraphOverviewWrapped } from '../../../src/containers/GraphOverview';
 import GraphBalance from '../../../src/components/GraphBalance';
+import GraphSpending from '../../../src/components/GraphSpending';
 import { aShowAllToggled } from '../../../src/actions/graph.actions';
 
 describe('<GraphOverview />', () => {
@@ -42,7 +45,9 @@ describe('<GraphOverview />', () => {
                         holiday: [17820, 33019, 52100, 112722, 0, 46352, 9880, 0, 0, 0, 0, 0, 0],
                         social: [5440, 4560, 900, 4370, 2545, 700, 2491, 0, 0, 0, 0, 0, 0, 0],
                         balance: [1242000, 1830000, 1860000, 1890000, 1980000, 2000000, 0, 0, 0],
-                        old: [488973, 332654, 247359, 208390, 156520, 839480, 641599, 543787, 556649, 649386]
+                        old: [488973, 332654, 247359, 208390, 156520, 839480, 641599, 543787, 556649, 649386],
+                        net: [100, -10, 125, 160, 14, 145, 96, 76, 1],
+                        spending: [143, 1032, 56891, 1923, 99130, 10, 1104, 9914, 8247]
                     })
                 })
             })
@@ -55,49 +60,58 @@ describe('<GraphOverview />', () => {
 
     const store = createMockStore(state);
 
-    const wrapper = shallow(<GraphOverview />, store).dive();
+    const wrapperContainer = shallowWithStore(<GraphOverview />, store);
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.graph-container-outer')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
-    });
+    const wrapperProps = wrapperContainer.props();
 
-    it('should render a balance graph', () => {
-        expect(wrapper.childAt(0).is(GraphBalance)).to.equal(true);
-    });
+    it('should render a media query', () => {
+        const wrapper = wrapperContainer.dive();
 
-    it('should render a spending graph', () => {
-        expect(wrapper.childAt(1).is(Media)).to.equal(true);
-        expect(wrapper.childAt(1).props()).to.deep.include({
+        expect(wrapper.is(Media)).to.equal(true);
+        expect(wrapper.props()).to.deep.include({
             query: mediaQueryMobile
-        });
-    });
-
-    it('should pass required props to the graphs', () => {
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            name: 'balance',
-            cost: state.getIn(['pages', 'overview', 'data', 'cost']),
-            showAll: false,
-            targets: state.getIn(['pages', 'overview', 'data', 'targets']),
-            startDate: DateTime.fromObject({ year: 2017, month: 2 }),
-            currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
-            now: DateTime.fromObject({ year: 2018, month: 1, day: 22 }),
-            graphWidth: 500
         });
     });
 
     it('should dispatch the show all action', () => {
         expect(store.isActionDispatched(aShowAllToggled())).to.equal(false);
-        wrapper.childAt(0).props()
-            .onShowAll();
+        wrapperContainer.props().onShowAll();
         expect(store.isActionDispatched(aShowAllToggled())).to.equal(true);
     });
 
-    it('should resize the graph for small screens', () => {
-        expect(shallow(<GraphOverview />, createMockStore(state.setIn(['other', 'windowWidth'], 430))).dive()
-            .childAt(0)
-            .props()
-        ).have.property('graphWidth', 430);
+    describe('<GraphOverviewWrapped />', () => {
+        const propsWrapped = {
+            ...wrapperProps,
+            isMobile: false
+        };
+
+        const wrapper = shallow(<GraphOverviewWrapped {...propsWrapped} />);
+
+        it('should render a container div', () => {
+            expect(wrapper.is('div.graph-container-outer')).to.equal(true);
+            expect(wrapper.children()).to.have.length(2);
+        });
+
+        it('should render a balance graph', () => {
+            expect(wrapper.childAt(0).is(GraphBalance)).to.equal(true);
+        });
+
+        it('should render a spending graph', () => {
+            expect(wrapper.childAt(1).is(GraphSpending)).to.equal(true);
+        });
+
+        it('should pass required props to the graphs', () => {
+            expect(wrapper.childAt(0).props()).to.deep.include({
+                name: 'balance',
+                cost: state.getIn(['pages', 'overview', 'data', 'cost']),
+                showAll: false,
+                targets: state.getIn(['pages', 'overview', 'data', 'targets']),
+                startDate: DateTime.fromObject({ year: 2017, month: 2 }),
+                currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
+                now: DateTime.fromObject({ year: 2018, month: 1, day: 22 }),
+                graphWidth: 500
+            });
+        });
     });
 });
 

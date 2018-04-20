@@ -7,6 +7,7 @@ module.exports = {
     widthPageMobileSmall: 350,
     widthPageMobile: 690,
     widthPageTabletSmall: 1000,
-    widthPageTablet: 1200
+    widthPageTablet: 1200,
+    graphOverviewHeightMobile: 240
 };
 
