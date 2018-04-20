@@ -1,9 +1,6 @@
 import { widthPageMobile } from './styles';
 
-export const mediaQueries = {
-    mobile: `(max-width: ${widthPageMobile}px)`,
-    desktop: `(min-width: ${widthPageMobile + 1}px)`
-};
+export const mediaQueryMobile = `(max-width: ${widthPageMobile}px)`;
 
 export const LOCALE = 'en-GB';
 export const SYMBOL_CURRENCY_HTML = '\u00a3';

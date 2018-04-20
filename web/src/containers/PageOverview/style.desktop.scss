@@ -1,37 +1,25 @@
 .page-overview {
+    flex-flow: row;
+    position: relative;
+
     .table-flex {
-        flex: 0 0 880px;
-        .past {
-            font-size: 13px;
-            height: 16px;
-            line-height: 16px;
-            .editable-input {
-                height: 16px;
-            }
-        }
-        .row > .active {
-            font-size: 16px;
-            height: 24px;
-            line-height: 24px;
-            .editable-input {
-                height: 23px;
-            }
-        }
-        .future {
-            font-size: 15px;
-            height: 20px;
-            line-height: 20px;
-            .editable-input {
-                height: 20px;
-            }
+        flex: 1 0 700px;
+        max-width: 1024px;
+        
+        .table-overview-rows {
+            flex: 1 1 auto;
+            overflow: auto;
         }
     }
 
     .graph-container-outer {
-        flex: 1 0 500px;
-        flex-wrap: wrap;
-        justify-content: flex-start;
+        flex: 0 1 520px;
+        justify-content: center;
         align-items: center;
+        overflow-y: auto;
+        max-height: 640px;
     }
 }
+
+@include hide-overview-columns(1380px);
 

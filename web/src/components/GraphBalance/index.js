@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS, COLOR_LIGHT_GREY
 } from '../../constants/colors';
+import { graphOverviewHeightMobile } from '../../constants/styles';
 import { rgba } from '../../helpers/color';
 import GraphCashFlow, { getValuesWithTime } from '../GraphCashFlow';
 import Key from './Key';
@@ -69,7 +70,7 @@ function processData({ cost, showAll, futureMonths, ...props }) {
     );
 }
 
-export default function GraphBalance({ targets, ...props }) {
+export default function GraphBalance({ targets, isMobile, ...props }) {
     const lines = processData(props);
 
     const afterLines = () => <g>
@@ -86,10 +87,15 @@ export default function GraphBalance({ targets, ...props }) {
         ...props
     };
 
+    if (isMobile) {
+        graphProps.graphHeight = graphOverviewHeightMobile;
+    }
+
     return <GraphCashFlow {...graphProps} />;
 }
 
 GraphBalance.propTypes = {
+    isMobile: PropTypes.bool,
     cost: PropTypes.instanceOf(map).isRequired,
     showAll: PropTypes.bool.isRequired,
     targets: PropTypes.instanceOf(list).isRequired,

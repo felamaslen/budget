@@ -1,5 +1,9 @@
 .page-overview {
+    display: flex;
+    
     .table-flex {
+        flex: 0 0 auto;
+
         cursor: default;
         .editable-outer {
             width: 80px;
@@ -13,6 +17,22 @@
                     border: none;
                 }
             }
+        }
+        @mixin row-height($height) {
+            height: $height;
+            line-height: $height;
+            .editable-input {
+                height: $height - 1px;
+            }
+        }
+        .row {
+            @include row-height(24px);
+            font-size: 16px;
+        }
+        .past {
+            @include unimportant;
+            @include row-height(16px);
+            font-size: 13px;
         }
         .col {
             &.month {
@@ -50,14 +70,15 @@
             top: 0;
             padding: 0;
         }
-        .past {
-            @include unimportant;
-        }
         .active {
             font-weight: bold;
         }
         .future {
         }
+    }
+
+    .graph-container-outer {
+        display: flex;
     }
 }
 
