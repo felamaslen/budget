@@ -1,5 +1,8 @@
 .navbar {
-    height: $height-header-mobile + $height-nav-mobile;
+    $navbar-height: $height-header-mobile + $height-nav-mobile;
+    height: $navbar-height;
+    flex: 0 0 $navbar-height;
+
     .app-logo {
         width: 100%;
         height: $height-header-mobile;

@@ -12,7 +12,11 @@ export default function OverviewTableRows({ rows, numToSkip, ...props }) {
             return <Cells {...props} key={key} row={row} rowKey={rowKey} />;
         });
 
-    return <div>{rowsDisplay}</div>;
+    return (
+        <div className="table-overview-rows">
+            {rowsDisplay}
+        </div>
+    );
 }
 
 OverviewTableRows.propTypes = {

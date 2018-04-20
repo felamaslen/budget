@@ -1,6 +1,6 @@
 import React from 'react';
 import Media from 'react-media';
-import { mediaQueries } from '../../constants';
+import { mediaQueryMobile } from '../../constants';
 
 import OverviewTableHeader from './OverviewTableHeader';
 import OverviewTableRows from './OverviewTableRows';
@@ -17,7 +17,7 @@ export default function OverviewTable(props) {
     return (
         <div className="table-flex table-insert table-overview noselect">
             <OverviewTableHeader />
-            <Media query={mediaQueries.mobile}>{tableRows}</Media>
+            <Media query={mediaQueryMobile}>{tableRows}</Media>
         </div>
     );
 }

@@ -1,11 +1,11 @@
 .graph-container-outer {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     flex-flow: row wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
 
     .graph-container {
-        margin: 0.5em;
         position: relative;
         overflow: hidden;
     }
@@ -13,6 +13,7 @@
 
 .graph-container {
     width: 500px;
+    height: 300px;
     z-index: 2;
     background: $color-translucent-heavy;
     box-shadow: 0 3px 10px $color-shadow-l3;

@@ -10,7 +10,7 @@ import shallowWithStore from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import FundsMeta from '../../../src/components/FundsMeta';
 import Media from 'react-media';
-import { mediaQueries } from '../../../src/constants';
+import { mediaQueryMobile } from '../../../src/constants';
 import StocksList from '../../../src/containers/StocksList';
 import GraphFunds from '../../../src/containers/GraphFunds';
 import ListHeadFundsMobile from '../../../src/containers/ListHeadFundsMobile';
@@ -22,7 +22,7 @@ describe('<FundsMeta />', () => {
         expect(wrapper.is('div.funds-info')).to.equal(true);
         expect(wrapper.children()).to.have.length(1);
         expect(wrapper.childAt(0).is(Media)).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.have.property('query', mediaQueries.mobile);
+        expect(wrapper.childAt(0).props()).to.have.property('query', mediaQueryMobile);
     });
 
     it('should render an after list section on desktop', () => {
