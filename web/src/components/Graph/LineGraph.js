@@ -200,6 +200,53 @@ AverageLine.propTypes = {
     data: PropTypes.instanceOf(list).isRequired
 };
 
+function getStyleProps(fill, color) {
+    if (fill) {
+        return { fill: color, stroke: 'none' };
+    }
+
+    return { fill: 'none', stroke: color };
+}
+
+function DynamicColorLine({ fill, data, smooth, color, children, pathProps, ...props }) {
+    if (fill) {
+        throw new Error('Dynamically coloured, filled graph not implemented');
+    }
+
+    const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
+
+    if (!linePaths) {
+        return null;
+    }
+
+    const paths = linePaths.map(({ path, stroke }, key) => (
+        <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
+    ));
+
+    return <g className="lines">{children}{paths}</g>;
+}
+
+DynamicColorLine.propTypes = {
+    fill: PropTypes.bool,
+    data: ImmutablePropTypes.list.isRequired,
+    smooth: PropTypes.bool,
+    color: PropTypes.func.isRequired,
+    children: PropTypes.object,
+    pathProps: PropTypes.object.isRequired
+};
+
+function getPathProps(line) {
+    const common = {
+        strokeWidth: line.get('strokeWidth') || 2
+    };
+
+    if (line.get('dashed')) {
+        return { ...common, strokeDasharray: '3,5' };
+    }
+
+    return common;
+}
+
 function RenderedLine({ line, ...props }) {
     const data = line.get('data');
     const color = line.get('color');
@@ -216,45 +263,25 @@ function RenderedLine({ line, ...props }) {
         return <ArrowLine data={data} color={color} {...props} />;
     }
 
-    const pathProps = {
-        strokeWidth: line.get('strokeWidth') || 2
-    };
-    if (line.get('dashed')) {
-        pathProps.strokeDasharray = '3,5';
-    }
+    const pathProps = getPathProps(line);
 
     const averageLine = <AverageLine {...props} data={data} value={movingAverage} />;
 
     if (typeof color === 'function') {
-        if (fill) {
-            throw new Error('Dynamically coloured, filled graph not implemented');
-        }
+        const lineProps = { data, color, fill, smooth, movingAverage, pathProps };
 
-        const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
-
-        if (!linePaths) {
-            return null;
-        }
-
-        const paths = linePaths.map(({ path, stroke }, key) => (
-            <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
-        ));
-
-        return <g className="lines">{averageLine}{paths}</g>;
+        return (
+            <DynamicColorLine {...lineProps} {...props}>
+                {averageLine}
+            </DynamicColorLine>
+        );
     }
 
     const linePath = getSingleLinePath({ data, smooth, fill, ...props });
-
-    const fillStyle = fill
-        ? color
-        : 'none';
-
-    const strokeStyle = fill
-        ? 'none'
-        : color;
+    const styleProps = getStyleProps(fill, color);
 
     return <g className="line">
-        <path d={linePath} stroke={strokeStyle} {...pathProps} fill={fillStyle} />
+        <path d={linePath} {...styleProps} {...pathProps} />
         {averageLine}
     </g>;
 }
