@@ -1,9 +1,6 @@
 .funds-info {
-    position: fixed;
-    top: $height-header-mobile + $height-nav-mobile;
-    left: 0;
-    right: 0;
     background: beige;
+
     .gain {
         display: flex;
         flex-flow: row wrap;

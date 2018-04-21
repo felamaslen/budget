@@ -26,7 +26,7 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
     });
 
     return (
-        <div>
+        <div className="list-mobile">
             <div className="list-head noselect">
                 {listHeadInner}
             </div>
