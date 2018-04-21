@@ -15,8 +15,10 @@ import LineGraph from '../../components/Graph/LineGraph';
 import { getTickSize, formatAge } from '../../helpers/format';
 import {
     GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT, FONT_GRAPH_TITLE,
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS
+    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
+    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS
 } from '../../constants/graph';
+import { graphFundsHeightMobile } from '../../constants/styles';
 import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../constants/colors';
 import debounce from '../../helpers/debounce';
 import { rgba } from '../../helpers/color';
@@ -48,19 +50,21 @@ function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {
         <option key={key} value={value}>{display}</option>
     ));
 
-    return <div>
-        <ul className="fund-sidebar noselect">
-            <li>
-                <select defaultValue={period} onChange={onChange}>
-                    {periodOptions}
-                </select>
-            </li>
-            {fundLineToggles}
-        </ul>
-        <span className="mode">
-            {'Mode: '}{GRAPH_FUNDS_MODES[mode]}
-        </span>
-    </div>;
+    return (
+        <div className="after-canvas">
+            <ul className="fund-sidebar noselect">
+                <li>
+                    <select defaultValue={period} onChange={onChange}>
+                        {periodOptions}
+                    </select>
+                </li>
+                {fundLineToggles}
+            </ul>
+            <span className="mode">
+                {'Mode: '}{GRAPH_FUNDS_MODES[mode]}
+            </span>
+        </div>
+    );
 }
 
 AfterCanvas.propTypes = {
@@ -125,9 +129,13 @@ HighlightPoint.propTypes = {
     width: PropTypes.number.isRequired
 };
 
-function getLines({ fundLines, fundItems, mode }) {
+function getLines({ isMobile, fundLines, fundItems, mode }) {
     return fundLines.reduce((lines, item) => {
         const mainLine = item.get('index') === 0;
+        if (isMobile && !mainLine && mode !== GRAPH_FUNDS_MODE_PRICE) {
+            return lines;
+        }
+
         const color = rgba(fundItems.getIn([item.get('index'), 'color']));
 
         const strokeWidth = 1 + 0.5 * (mainLine >> 0);
@@ -181,11 +189,17 @@ function processData(props) {
     return { minX, maxX, minY, maxY, lines, tickSizeY };
 }
 
-export function GraphFunds(props) {
-    const { onClick, onHover, onZoom, hlPoint } = props;
+function getSvgProperties({ isMobile, onClick, onZoom, hlPoint }) {
+    const common = {
+        onClick: () => onClick
+    };
 
-    const svgProperties = {
-        onClick: () => onClick,
+    if (isMobile) {
+        return common;
+    }
+
+    return {
+        ...common,
         onWheel: ({ valX }) => evt => {
             evt.preventDefault();
 
@@ -200,8 +214,14 @@ export function GraphFunds(props) {
             onZoom({ direction: evt.deltaY / Math.abs(evt.deltaY), position });
         }
     };
+}
 
-    const outerProperties = {
+function getOuterProperties({ isMobile, onHover }) {
+    if (isMobile) {
+        return {};
+    }
+
+    return {
         onMouseMove: ({ valX, valY }) => {
             const mouseMoveHandler = debounce((pageX, pageY, currentTarget) => {
                 const { left, top } = currentTarget.getBoundingClientRect();
@@ -216,19 +236,30 @@ export function GraphFunds(props) {
         },
         onMouseLeave: () => () => onHover(null)
     };
+}
+
+function AfterLines(subProps) {
+    return <HighlightPoint {...subProps} />;
+}
+
+export function GraphFunds(props) {
+    const svgProperties = getSvgProperties(props);
+    const outerProperties = getOuterProperties(props);
 
     const beforeLines = subProps => (
         <Axes {...subProps} />
     );
 
-    const afterLines = subProps => (
-        <HighlightPoint {...subProps} />
-    );
+    let afterLines = null;
+    let after = null;
+    if (!props.isMobile) {
+        afterLines = AfterLines;
+        after = <AfterCanvas {...props} />;
+    }
 
-    const after = <AfterCanvas {...props} />;
 
     const graphProps = {
-        padding: [36, 0, 0, 0],
+        padding: [36 * (!props.isMobile >> 0), 0, 0, 0],
         beforeLines,
         afterLines,
         after,
@@ -242,6 +273,7 @@ export function GraphFunds(props) {
 }
 
 GraphFunds.propTypes = {
+    isMobile: PropTypes.bool,
     fundHistoryCache: PropTypes.instanceOf(map),
     fundItems: PropTypes.instanceOf(list),
     fundLines: PropTypes.instanceOf(list),
@@ -258,10 +290,12 @@ GraphFunds.propTypes = {
     onHover: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, { isMobile }) => ({
     name: 'fund-history',
-    width: GRAPH_FUNDS_WIDTH,
-    height: GRAPH_FUNDS_HEIGHT,
+    width: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_FUNDS_WIDTH),
+    height: isMobile
+        ? graphFundsHeightMobile
+        : GRAPH_FUNDS_HEIGHT,
     fundHistoryCache: state.getIn(['other', 'fundHistoryCache']),
     fundItems: state.getIn(['other', 'graphFunds', 'data', 'fundItems']),
     fundLines: state.getIn(['other', 'graphFunds', 'data', 'fundLines']),

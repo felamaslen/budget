@@ -1,16 +1,30 @@
+.page-funds {
+    flex-direction: column-reverse;
+    flex: 1 0 0;
+
+    .list-funds {
+        flex: 1 1 auto;
+
+        .list-head {
+            display: none;
+        }
+    }
+
+    .graph-container {
+        height: $graph-funds-height-mobile;
+    }
+}
+
 .funds-info {
-    position: fixed;
-    top: $height-header-mobile + $height-nav-mobile;
-    left: 0;
-    right: 0;
-    background: beige;
+    background: $color-translucent-light;
+
     .gain {
         display: flex;
         flex-flow: row wrap;
         align-items: center;
         height: 45px;
         overflow: hidden;
-        padding: 10px 24px;
+        padding: 0 12px;
         background: $color-translucent-l7;
         &.profit {
             background: $color-profit-translucent;

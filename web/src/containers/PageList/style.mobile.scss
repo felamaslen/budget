@@ -1,15 +1,16 @@
 .list-insert {
-    position: fixed;
-    top: $height-nav-mobile + $height-header-mobile;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow-y: scroll;
+    display: flex;
+    flex-flow: column;
+    
     .list-head {
         display: flex;
+        flex: 0 0 28px;
+        align-items: center;
         flex-flow: row nowrap;
-        top: $height-header-mobile + $height-nav-mobile;
         width: 100%;
+
+        font-weight: bold;
+
         span {
             text-align: center;
             text-transform: capitalize;
@@ -17,15 +18,18 @@
     }
     .list-ul {
         display: flex;
-        flex-flow: column nowrap;
-        margin: 0 0 50px 0;
+        margin: 0;
         padding: 0;
+        flex-flow: column nowrap;
+        overflow-y: auto;
 
         li {
             display: flex;
             flex-flow: row nowrap;
-            line-height: 36px;
-            height: 36px;
+            $item-height: 36px;
+            flex: 0 0 $item-height;
+            line-height: $item-height;
+            height: $item-height;
             & > span {
                 display: flex;
                 flex-basis: 0;
@@ -53,13 +57,9 @@
     }
     .button-add-outer {
         display: flex;
+        flex: 0 0 48px;
         align-items: center;
         justify-content: center;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 48px;
         font-size: 1.5em;
         background: $color-translucent-l7;
     }
@@ -75,12 +75,6 @@
     &, .list-head {
         background: $color-funds-light;
     }
-    .list-head {
-        top: $height-header-mobile + $height-nav-mobile + 65;
-    }
-    .list-ul {
-        margin-top: 65px;
-    }
     .list-head, .list-ul {
         .date {
             flex-grow: 8;
@@ -93,8 +87,8 @@
             font-size: 90%;
         }
         .cost-value, .actual-value {
-            display: flex;
-            flex-grow: 1;
+            flex: 1 1 0;
+            text-align: center;
         }
         .actual-value {
             font-weight: bold;
