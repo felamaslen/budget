@@ -75,12 +75,6 @@
     &, .list-head {
         background: $color-funds-light;
     }
-    .list-head {
-        top: $height-header-mobile + $height-nav-mobile + 65;
-    }
-    .list-ul {
-        margin-top: 65px;
-    }
     .list-head, .list-ul {
         .date {
             flex-grow: 8;

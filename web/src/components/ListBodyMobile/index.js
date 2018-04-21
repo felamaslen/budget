@@ -6,7 +6,8 @@ import classNames from 'classnames';
 import ListRowMobile from '../../containers/ListRowMobile';
 
 export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileAdd, ...props }) {
-    const colKeys = (listColsMobile || LIST_COLS_MOBILE).map(column =>
+    const listCols = listColsMobile || LIST_COLS_MOBILE;
+    const colKeys = listCols.map(column =>
         PAGES[page].cols.indexOf(column));
 
     const rows = rowIds.map(id => (
@@ -19,7 +20,7 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
         />
     ));
 
-    const listHeadInner = LIST_COLS_MOBILE.map(column => {
+    const listHeadInner = listCols.map(column => {
         const className = classNames('list-head-column', column);
 
         return <span key={column} className={className}>{column}</span>;

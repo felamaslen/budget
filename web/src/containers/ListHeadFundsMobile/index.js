@@ -5,6 +5,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { formatCurrency, formatPercent } from '../../helpers/format';
+import GraphFunds from '../GraphFunds';
 
 function ListHeadFundsMobile({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {
     const gain = totalCost
@@ -17,12 +18,15 @@ function ListHeadFundsMobile({ totalCost, shortPeriod, cachedValue, onReloadPric
     });
 
     return (
-        <span className={className} onClick={onReloadPrices(shortPeriod)}>
-            <span className="gain-info">{'Current value:'}</span>
-            <span className="value">{formatCurrency(cachedValue.get('value'))}</span>
-            <span className="gain-pct">{formatPercent(gain, { brackets: true, precision: 2 })}</span>
-            <span className="cache-age">({cachedValue.get('ageText')})</span>
-        </span>
+        <div className="funds-info-inner">
+            <div className={className} onClick={onReloadPrices(shortPeriod)}>
+                <span className="gain-info">{'Current value:'}</span>
+                <span className="value">{formatCurrency(cachedValue.get('value'))}</span>
+                <span className="gain-pct">{formatPercent(gain, { brackets: true, precision: 2 })}</span>
+                <span className="cache-age">({cachedValue.get('ageText')})</span>
+            </div>
+            <GraphFunds isMobile={true} />
+        </div>
     );
 }
 
