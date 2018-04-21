@@ -87,8 +87,8 @@
             font-size: 90%;
         }
         .cost-value, .actual-value {
-            display: flex;
-            flex-grow: 1;
+            flex: 1 1 0;
+            text-align: center;
         }
         .actual-value {
             font-weight: bold;
