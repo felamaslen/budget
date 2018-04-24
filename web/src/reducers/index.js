@@ -50,6 +50,7 @@ const reducers = createReducerObject([
     [AC.CONTENT_LOADED, content.rHandleContentResponse],
     [AC.CONTENT_REQUESTED, content.rRequestContent],
     [AC.CONTENT_BLOCK_HOVERED, content.rContentBlockHover],
+    [AC.PAGE_SET, content.rSetPage],
 
     // analysis actions
     [AC.ANALYSIS_OPTION_CHANGED, analysis.rAnalysisChangeOption],

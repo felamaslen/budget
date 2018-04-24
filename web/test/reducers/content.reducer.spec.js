@@ -192,5 +192,12 @@ describe('Content reducer', () => {
                 });
         });
     });
+
+    describe('rSetPage', () => {
+        it('should set the current page', () => {
+            expect(R.rSetPage(fromJS({ currentPage: null }), { page: 'food' }).toJS())
+                .to.deep.equal({ currentPage: 'food' });
+        });
+    });
 });
 

@@ -13,6 +13,7 @@ import Navbar from '../../../src/components/Navbar';
 describe('<Navbar />', () => {
     const props = {
         active: true,
+        onPageSet: sinon.spy(),
         onLogout: sinon.spy()
     };
 
@@ -50,6 +51,9 @@ describe('<Navbar />', () => {
             activeClassName: 'active',
             className: `nav-link nav-link-${page}`
         });
+
+        wrapper.childAt(key).simulate('click');
+        expect(props.onPageSet).to.have.been.calledWith(page);
 
         key++;
     });

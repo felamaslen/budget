@@ -12,6 +12,7 @@ describe('<Header/>', () => {
         navActive: true,
         loadingApi: false,
         unsavedApi: false,
+        onPageSet: () => null,
         onLogout: () => null
     };
 

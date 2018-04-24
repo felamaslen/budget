@@ -86,3 +86,5 @@ export function rHandleContentResponse(reduction, { response, page }, now) {
         .setIn(['edit', 'add', page], getAddDefaultValues(page));
 }
 
+export const rSetPage = (reduction, { page }) => reduction.set('currentPage', page);
+
