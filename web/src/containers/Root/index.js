@@ -1,6 +1,6 @@
 import { connect, Provider } from 'react-redux';
 import { aUserLoggedOut } from '../../actions/app.actions';
-import { aContentRequested } from '../../actions/content.actions';
+import { aPageSet, aContentRequested } from '../../actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter } from 'react-router-dom';
@@ -40,6 +40,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+    onPageSet: page => () => dispatch(aPageSet(page)),
     onLogout: () => dispatch(aUserLoggedOut()),
     loadContent: page => dispatch(aContentRequested(page))
 });

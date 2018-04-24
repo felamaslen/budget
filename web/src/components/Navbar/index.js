@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { PAGES } from '../../constants/data';
 
-export default function Navbar({ active, onLogout }) {
+export default function Navbar({ active, onPageSet, onLogout }) {
     if (!active) {
         return null;
     }
@@ -13,8 +13,14 @@ export default function Navbar({ active, onLogout }) {
 
         const className = `nav-link nav-link-${page}`;
 
-        return <NavLink key={page} exact to={path}
-            activeClassName="active" className={className}>{page}</NavLink>;
+        return (
+            <NavLink key={page} exact to={path}
+                onClick={onPageSet(page)}
+                activeClassName="active"
+                className={className}>
+                {page}
+            </NavLink>
+        );
     });
 
     return (
@@ -27,6 +33,7 @@ export default function Navbar({ active, onLogout }) {
 
 Navbar.propTypes = {
     active: PropTypes.bool.isRequired,
+    onPageSet: PropTypes.func.isRequired,
     onLogout: PropTypes.func.isRequired
 };
 

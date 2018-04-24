@@ -28,5 +28,11 @@ describe('content.actions', () => {
             foo: 'bar'
         }));
     });
+    describe('aPageSet', () => {
+        it('should return PAGE_SET with page', () => expect(A.aPageSet('general')).to.deep.equal({
+            type: C.PAGE_SET,
+            page: 'general'
+        }));
+    });
 });
 
