@@ -6,10 +6,10 @@
 
     .table-flex {
         width: 100%;
-        flex: 1 1 auto;
-        overflow-y: auto;
 
         .header {
+            flex: 0 0 auto;
+
             .col .text {
                 text-align: center;
                 height: 20px;
@@ -28,6 +28,11 @@
                 background: $color-mob-overview-tbl-balance;
             }
         }
+        .table-overview-rows {
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+
         .col {
             .text, .editable {
                 padding: 4px 10px;
