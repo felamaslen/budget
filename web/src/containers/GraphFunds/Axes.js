@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ProfitLossBackground from './ProfitLossBackground';
 import { FONT_AXIS_LABEL } from '../../constants/graph';
 import { COLOR_LIGHT_MED, COLOR_DARK, COLOR_GRAPH_TITLE } from '../../constants/colors';
 import { rgba } from '../../helpers/color';
@@ -28,12 +27,12 @@ function calculateTicksY({ tickSizeY, minY, maxY, pixY }) {
 }
 
 export default function Axes(props) {
-    const axisColor = rgba(COLOR_LIGHT_MED);
     const textColor = rgba(COLOR_DARK);
     const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
     const { startTime, mode, minX, maxX, minY, maxY, pixX, pixY } = props;
 
+    const x0 = pixX(minX);
     const xMax = pixX(maxX);
     const y0 = pixY(minY);
     const yMax = pixY(maxY);
@@ -42,10 +41,18 @@ export default function Axes(props) {
     const tickAngle = -30;
     const transformText = (xPix, yPix) => `rotate(${tickAngle} ${xPix} ${yPix})`;
 
+    const axisColor = value => {
+        if (value === 0) {
+            return rgba(COLOR_DARK);
+        }
+
+        return rgba(COLOR_LIGHT_MED);
+    };
+
     const ticksY = calculateTicksY(props).map(({ pos, value }) => (
         <g key={value}>
-            <line x1={pixX(minX)} y1={pos} x2={pixX(maxX)} y2={pos}
-                stroke={axisColor} strokeWidth={1} />
+            <line x1={x0} y1={pos} x2={xMax} y2={pos}
+                stroke={axisColor(value)} strokeWidth={1} />
             <text x={xMax} y={pos - 2} color={textColor}
                 fontSize={fontSize} fontFamily={fontFamily}
                 alignmentBaseline="baseline" textAnchor="end">{formatValue(value, mode)}</text>
@@ -78,7 +85,6 @@ export default function Axes(props) {
         ));
 
     return <g className="axes">
-        <ProfitLossBackground {...props} />
         <g>{ticksY}</g>
         <g>{timeTicksSmall}</g>
         <g>{timeTicksMajor}</g>

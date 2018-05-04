@@ -4,6 +4,7 @@
 
 import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
+import { DateTime } from 'luxon';
 import {
     aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
     aFundsGraphLineToggled, aFundsGraphPeriodChanged
@@ -12,11 +13,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '../../components/Graph/LineGraph';
-import { getTickSize, formatAge } from '../../helpers/format';
+import { getTickSize } from '../../helpers/format';
 import {
     GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT, FONT_GRAPH_TITLE,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
-    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS
+    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
 } from '../../constants/graph';
 import { graphFundsHeightMobile } from '../../constants/styles';
 import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../constants/colors';
@@ -75,48 +76,69 @@ AfterCanvas.propTypes = {
     changePeriod: PropTypes.func.isRequired
 };
 
-function HighlightPoint({ mode, startTime, hlPoint, pixX, pixY, width }) {
+function HighlightPoint({ mode, startTime, hlPoint, pixX, pixY, width, height }) {
     if (!hlPoint) {
         return null;
     }
 
     const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-    const hlPixX = pixX(hlPoint.get(0));
-    const hlPixY = pixY(hlPoint.get(1));
+    const posX = Math.floor(pixX(hlPoint.get(0))) + 0.5;
+    const posY = Math.floor(pixY(hlPoint.get(1))) + 0.5;
 
-    const paddingX = 2;
-    const paddingY = 1;
-    const posX = pixX(hlPoint.get(0));
-    const alignLeft = posX < width / 2;
-    const align = 2 * (alignLeft >> 0) - 1;
-    const posY = pixY(hlPoint.get(1));
+    const labelWidthX = 88;
+    const labelWidthY = 50;
+    const labelHeight = fontSize + 2;
 
-    const ageSeconds = Date.now() / 1000 - (hlPoint.get(0) + startTime);
-    const ageText = formatAge(ageSeconds);
-    const valueText = formatValue(hlPoint.get(1), mode);
-    const labelText = `${ageText}: ${valueText}`;
-    const labelWidth = 224;
-    const labelHeight = fontSize + 2 * paddingY;
+    let anchorLabelX = 'middle';
+    let labelPosX = posX;
+    if (posX >= width - labelWidthX / 2) {
+        anchorLabelX = 'end';
+        labelPosX = width;
+    }
+    else if (posX < labelWidthX / 2) {
+        anchorLabelX = 'start';
+        labelPosX = 0;
+    }
 
-    const left = posX - labelWidth * (!alignLeft >> 0);
+    const labelTextX = DateTime.fromJSDate(new Date(1000 * (hlPoint.get(0) + startTime)))
+        .toLocaleString(DateTime.DATE_SHORT);
 
-    const textX = posX + paddingX * align;
-    const textY = posY + labelHeight / 2;
+    const labelTextY = formatValue(hlPoint.get(1), mode);
 
-    const textAnchor = alignLeft
-        ? 'start'
-        : 'end';
+    const pathVertical = `M${posX},0 L${posX},${height}`;
+    const pathHorizontal = `M0,${posY} L${width},${posY}`;
+
+    const lineColor = hlPoint.get(2);
+    const lineProps = { stroke: lineColor, strokeDasharray: '3,2' };
 
     return <g className="hl-point">
-        <circle cx={hlPixX} cy={hlPixY} r={GRAPH_FUNDS_POINT_RADIUS}
-            stroke="none" fill={hlPoint.get(2)} />
-        <rect x={left} y={posY} width={labelWidth} height={labelHeight}
+        <path d={pathVertical} {...lineProps} />
+        <path d={pathHorizontal} {...lineProps} />
+        <rect x={posX - labelWidthX / 2} y={height - labelHeight} width={labelWidthX} height={labelHeight}
             fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text x={textX} y={textY} fontSize={fontSize} fontFamily={fontFamily}
-            color={rgba(COLOR_GRAPH_TITLE)} textLength={labelWidth - 2 * paddingX}
-            textAnchor={textAnchor} alignmentBaseline="middle"
-        >{labelText}</text>
+        <text
+            x={labelPosX}
+            y={height - 2}
+            fontSize={fontSize}
+            fontFamily={fontFamily}
+            color={rgba(COLOR_GRAPH_TITLE)}
+            textAnchor={anchorLabelX}
+            alignmentBaseline="baseline">
+            {labelTextX}
+        </text>
+        <rect x={width - labelWidthY} y={posY - labelHeight / 2} width={labelWidthY} height={labelHeight}
+            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
+        <text
+            x={width}
+            y={posY}
+            fontSize={fontSize}
+            fontFamily={fontFamily}
+            color={rgba(COLOR_GRAPH_TITLE)}
+            textAnchor="end"
+            alignmentBaseline="middle">
+            {labelTextY}
+        </text>
     </g>;
 }
 
@@ -126,7 +148,8 @@ HighlightPoint.propTypes = {
     hlPoint: PropTypes.instanceOf(list),
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
-    width: PropTypes.number.isRequired
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired
 };
 
 function getLines({ isMobile, fundLines, fundItems, mode }) {
@@ -256,7 +279,6 @@ export function GraphFunds(props) {
         afterLines = AfterLines;
         after = <AfterCanvas {...props} />;
     }
-
 
     const graphProps = {
         padding: [36 * (!props.isMobile >> 0), 0, 0, 0],

@@ -139,9 +139,70 @@ function getSingleLinePath(props) {
     return getLinePathPart(getLinePath(props));
 }
 
+function joinChoppedPath(linePath, ends, color) {
+    return [...ends.slice(1), linePath.size].map((end, endIndex) => ({
+        path: getLinePathPart(linePath.slice(ends[endIndex], end)),
+        stroke: color(end, endIndex)
+    }))
+        .filter(({ path }) => path.length);
+}
+
+function getDynamicLinePathsStop({ data, color, smooth, pixX, pixY }) {
+    const { changes, values } = color;
+
+    const getColorIndex = value => changes.reduce((last, change, index) => {
+        if (value >= change) {
+            return index + 1;
+        }
+
+        return last;
+    }, 0);
+
+    const stops = data.slice(1)
+        .reduce(({ items, ends, colorIndexA }, point, index) => {
+            const colorIndexB = getColorIndex(point.get(1));
+
+            if (colorIndexB !== colorIndexA) {
+                // linearly interpolate to the cut off value between the two points
+                const pointBetween = list.of(
+                    (point.get(0) + data.getIn([index, 0])) / 2,
+                    changes[Math.min(colorIndexA, colorIndexB)]
+                );
+
+                return {
+                    items: items.concat(list.of(pointBetween, point)),
+                    ends: [...ends, items.size],
+                    colorIndexA: colorIndexB
+                };
+            }
+
+            return {
+                items: items.push(point),
+                ends,
+                colorIndexA: colorIndexB
+            };
+
+        }, {
+            items: data.slice(0, 1),
+            ends: [0],
+            colorIndexA: getColorIndex(data.getIn([0, 1]))
+        });
+
+    const { items, ends } = stops;
+
+    const linePath = getLinePath({ data: items, smooth, pixX, pixY });
+
+    return joinChoppedPath(linePath, ends,
+        end => values[getColorIndex(items.getIn([end - 1, 1]))]);
+}
+
 function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
     if (data.size < 2) {
         return null;
+    }
+
+    if (typeof color === 'object') {
+        return getDynamicLinePathsStop({ data, color, smooth, pixX, pixY });
     }
 
     const linePath = getLinePath({ data, smooth, pixX, pixY });
@@ -159,12 +220,7 @@ function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
 
     }, [0]);
 
-    return ends.slice(1)
-        .map((end, endIndex) => ({
-            path: getLinePathPart(linePath.slice(ends[endIndex], end)),
-            stroke: colors.get(ends[endIndex])
-        }))
-        .filter(({ path }) => path.length);
+    return joinChoppedPath(linePath, ends, (end, endIndex) => colors.get(ends[endIndex]));
 }
 
 export function AverageLine({ value, data, ...props }) {
@@ -214,7 +270,6 @@ function DynamicColorLine({ fill, data, smooth, color, children, pathProps, ...p
     }
 
     const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
-
     if (!linePaths) {
         return null;
     }
@@ -230,7 +285,13 @@ DynamicColorLine.propTypes = {
     fill: PropTypes.bool,
     data: ImmutablePropTypes.list.isRequired,
     smooth: PropTypes.bool,
-    color: PropTypes.func.isRequired,
+    color: PropTypes.oneOfType([
+        PropTypes.func,
+        PropTypes.shape({
+            changes: PropTypes.array.isRequired,
+            values: PropTypes.array.isRequired
+        })
+    ]).isRequired,
     children: PropTypes.object,
     pathProps: PropTypes.object.isRequired
 };
@@ -267,23 +328,23 @@ function RenderedLine({ line, ...props }) {
 
     const averageLine = <AverageLine {...props} data={data} value={movingAverage} />;
 
-    if (typeof color === 'function') {
-        const lineProps = { data, color, fill, smooth, movingAverage, pathProps };
+    if (typeof color === 'string') {
+        const linePath = getSingleLinePath({ data, smooth, fill, ...props });
+        const styleProps = getStyleProps(fill, color);
 
-        return (
-            <DynamicColorLine {...lineProps} {...props}>
-                {averageLine}
-            </DynamicColorLine>
-        );
+        return <g className="line">
+            <path d={linePath} {...styleProps} {...pathProps} />
+            {averageLine}
+        </g>;
     }
 
-    const linePath = getSingleLinePath({ data, smooth, fill, ...props });
-    const styleProps = getStyleProps(fill, color);
+    const lineProps = { data, color, fill, smooth, movingAverage, pathProps };
 
-    return <g className="line">
-        <path d={linePath} {...styleProps} {...pathProps} />
-        {averageLine}
-    </g>;
+    return (
+        <DynamicColorLine {...lineProps} {...props}>
+            {averageLine}
+        </DynamicColorLine>
+    );
 }
 
 RenderedLine.propTypes = {
@@ -291,7 +352,11 @@ RenderedLine.propTypes = {
         data: ImmutablePropTypes.list.isRequired,
         color: PropTypes.oneOfType([
             PropTypes.string,
-            PropTypes.func
+            PropTypes.func,
+            PropTypes.shape({
+                changes: PropTypes.array.isRequired,
+                values: PropTypes.array.isRequired
+            })
         ]).isRequired,
         strokeWidth: PropTypes.number,
         dashed: PropTypes.bool,

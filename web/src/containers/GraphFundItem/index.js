@@ -37,8 +37,6 @@ function processData(data, popout) {
     const minY = dataY.min();
     const maxY = dataY.max();
 
-    const colorProfitLoss = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
-
     // split up the line into multiple sections, if there are gaps in the data
     // (this can happen if the fund is sold and then re-bought at a later date)
     const lines = separateLines(data).map((line, key) => map({
@@ -46,7 +44,10 @@ function processData(data, popout) {
         data: line,
         strokeWidth: 1 + 0.5 * (popout >> 0),
         smooth: true,
-        color: point => colorProfitLoss[(point.get(1) > line.getIn([0, 1])) >> 0]
+        color: {
+            changes: [line.getIn([0, 1])],
+            values: [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)]
+        }
     }));
 
     return { lines, minX, maxX, minY, maxY };
