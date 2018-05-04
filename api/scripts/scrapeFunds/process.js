@@ -14,7 +14,7 @@ function getBroker(config, name) {
 }
 
 function getEligibleFunds(config, logger, rows) {
-    const fundsByHash = rows.reduce((funds, { item, units }) => {
+    const fundsByHash = rows.reduce((funds, { uid, item, units }) => {
         if (!units || isNaN(units)) {
             return funds;
         }
@@ -35,6 +35,7 @@ function getEligibleFunds(config, logger, rows) {
         return {
             ...funds,
             [hash]: {
+                uid,
                 name: item,
                 hash,
                 broker,
@@ -48,7 +49,7 @@ function getEligibleFunds(config, logger, rows) {
 }
 
 async function getFunds(config, db, logger) {
-    const rows = await db.select('item', 'units')
+    const rows = await db.select('uid', 'item', 'units')
         .from('funds')
         .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id');
 
