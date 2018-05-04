@@ -24,38 +24,47 @@ describe('scrapeFunds process', () => {
     describe('getEligibleFunds', () => {
         it('should map and filter funds by validity', () => {
             const queryResultAllInvalid = [
-                { item: TEST_FUND_NAMES[0], units: null, cost: null },
-                { item: TEST_FUND_NAMES[1], units: 5, cost: 3 },
-                { item: TEST_FUND_NAMES[1], units: -5, cost: -2 }
+                { uid: 1, item: TEST_FUND_NAMES[0], units: null, cost: null },
+                { uid: 1, item: TEST_FUND_NAMES[1], units: 5, cost: 3 },
+                { uid: 2, item: TEST_FUND_NAMES[1], units: -5, cost: -2 }
             ];
 
             expect(scraper.getEligibleFunds(config, logger, queryResultAllInvalid)).to.deep.equal([]);
 
             const queryResultSomeInvalid = [
-                { item: TEST_FUND_NAMES[0] },
                 {
+                    uid: 1,
+                    item: TEST_FUND_NAMES[0]
+                },
+                {
+                    uid: 1,
                     item: TEST_FUND_NAMES[0],
                     units: 10
                 },
                 {
+                    uid: 1,
                     item: TEST_FUND_NAMES[0],
                     units: -10
                 },
                 {
+                    uid: 2,
                     item: TEST_FUND_NAMES[1],
                     units: 100
                 },
                 {
+                    uid: 2,
                     item: TEST_FUND_NAMES[1],
                     units: -46,
                     cost: -89
                 },
                 {
+                    uid: 2,
                     item: TEST_FUND_NAMES[0],
                     units: 0,
                     cost: 10
                 },
                 {
+                    uid: 2,
                     item: TEST_FUND_NAMES[0],
                     units: 10,
                     cost: 10
@@ -64,12 +73,14 @@ describe('scrapeFunds process', () => {
 
             expect(scraper.getEligibleFunds(config, logger, queryResultSomeInvalid)).to.deep.equal([
                 {
+                    uid: 1,
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
                     units: 10
                 },
                 {
+                    uid: 2,
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[1],
@@ -81,18 +92,22 @@ describe('scrapeFunds process', () => {
         it('should filter funds by uniqueness', () => {
             const queryResultSomeDuplicate = [
                 {
+                    uid: 1,
                     item: TEST_FUND_NAMES[1],
                     units: 100
                 },
                 {
+                    uid: 1,
                     item: TEST_FUND_NAMES[1],
                     units: -46
                 },
                 {
+                    uid: 2,
                     item: TEST_FUND_NAMES[0],
                     units: 20
                 },
                 {
+                    uid: 2,
                     item: TEST_FUND_NAMES[0],
                     units: 10
                 }
@@ -100,12 +115,14 @@ describe('scrapeFunds process', () => {
 
             expect(scraper.getEligibleFunds(config, logger, queryResultSomeDuplicate)).to.deep.equal([
                 {
+                    uid: 1,
                     hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[1],
                     units: 54
                 },
                 {
+                    uid: 2,
                     hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
                     broker: 'hl',
                     name: TEST_FUND_NAMES[0],
