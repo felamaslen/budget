@@ -13,11 +13,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '../../components/Graph/LineGraph';
-import { getTickSize, formatAge } from '../../helpers/format';
+import { getTickSize } from '../../helpers/format';
 import {
     GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT, FONT_GRAPH_TITLE,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
-    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES, GRAPH_FUNDS_POINT_RADIUS
+    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
 } from '../../constants/graph';
 import { graphFundsHeightMobile } from '../../constants/styles';
 import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../constants/colors';
@@ -83,9 +83,6 @@ function HighlightPoint({ mode, startTime, hlPoint, pixX, pixY, width, height })
 
     const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-    const hlPixX = pixX(hlPoint.get(0));
-    const hlPixY = pixY(hlPoint.get(1));
-
     const posX = Math.floor(pixX(hlPoint.get(0))) + 0.5;
     const posY = Math.floor(pixY(hlPoint.get(1))) + 0.5;
 
@@ -118,8 +115,6 @@ function HighlightPoint({ mode, startTime, hlPoint, pixX, pixY, width, height })
     return <g className="hl-point">
         <path d={pathVertical} {...lineProps} />
         <path d={pathHorizontal} {...lineProps} />
-        <circle cx={hlPixX} cy={hlPixY} r={GRAPH_FUNDS_POINT_RADIUS}
-            stroke="none" fill={lineColor} />
         <rect x={posX - labelWidthX / 2} y={height - labelHeight} width={labelWidthX} height={labelHeight}
             fill={rgba(COLOR_TRANSLUCENT_DARK)} />
         <text
