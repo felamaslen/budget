@@ -9,6 +9,8 @@ import ListRowCell from '../../components/ListRowCell';
 import DailyText from '../../components/DailyText';
 
 function ListRowDesktop({ page, id, row, activeCol, getDaily, rowClasses = map.of(), AfterRow, onDelete }) {
+    const rowClass = rowClasses.get(id) || {};
+
     const items = PAGES[page].cols.map((colName, colKey) => (
         <ListRowCell key={colKey}
             page={page}
@@ -23,12 +25,12 @@ function ListRowDesktop({ page, id, row, activeCol, getDaily, rowClasses = map.o
     const itemClassName = classNames({
         future: row.get('future'),
         'first-present': row.get('first-present'),
-        ...(rowClasses.get(id) || {})
+        ...rowClass
     });
 
     let afterRow = null;
     if (AfterRow) {
-        afterRow = <AfterRow page={page} id={id} row={row} />;
+        afterRow = <AfterRow page={page} id={id} row={row} {...rowClass} />;
     }
 
     return (

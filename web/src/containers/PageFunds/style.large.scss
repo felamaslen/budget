@@ -77,6 +77,11 @@
                         display: none;
                     }
                 }
+
+                &.sold {
+                    height: 24px !important;
+                    line-height: 24px !important;
+                }
             }
             .num-transactions {
                 display: block;
@@ -120,21 +125,31 @@
                 .breakdown {
                     display: flex;
                     flex: 2 1 0;
-                    flex-wrap: wrap;
 
-                    & > span {
-                        flex: 1 1 50%;
-                        height: 50%;
+                    .overall, .day-gain-outer {
+                        display: flex;
+                        flex: 1 0 0;
+                        flex-flow: column;
+                    }
+                    .overall {
+                    }
+                    .day-gain-outer {
+                    }
+
+                    &.sold {
+                        .overall {
+                            flex-flow: row;
+                        }
                     }
                 }
                 .gain-abs, .day-gain-abs, .price, .gain, .day-gain {
+                    flex: 1 0 0;
                     font-size: 0.8em;
                     line-height: 24px;
                     height: 24px;
                     background: $color-translucent-l8;
                 }
                 .gain-abs, .day-gain-abs {
-                    width: 15%;
                     &.profit:before {
                         content: $text-up-arrow;
                     }
@@ -147,12 +162,10 @@
                         margin-right: 0.2em;
                     }
                 }
-                .gain-abs, .day-gain-abs, .gain, .day-gain {
-                    width: 30%;
-                }
             }
             .sold {
                 color: $color-slightly-light;
+
                 .fund-graph {
                     filter: grayscale(100%);
                 }

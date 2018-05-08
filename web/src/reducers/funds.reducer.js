@@ -65,7 +65,7 @@ export function getRowsWithPrices(rows) {
     }, list.of());
 }
 
-export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
+export function getRowGains(rows, rowsWithPrices) {
     const roundGain = value => Math.round(10000 * value) / 10000;
     const roundAbs = value => Math.round(value);
 
@@ -75,7 +75,6 @@ export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
         }
 
         const prices = row.get('pr');
-        const timeOffset = row.get('prStartIndex');
         const transactions = row.getIn(['cols', transactionsKey]);
 
         const price = prices.last();
@@ -90,19 +89,10 @@ export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
         let dayGain = 0;
 
         if (prices.size > 1) {
-            const yesterdayPriceTime = startTime + cacheTimes.get(timeOffset + prices.size - 2);
-            const transactionsToYesterday = transactions.filter(
-                item => item.get('date').ts < 1000 * yesterdayPriceTime
-            );
-
             const yesterdayPrice = prices.get(prices.size - 2);
 
-            const yesterdayUnits = transactionsToYesterday.getLastUnits();
-            const yesterdayCost = transactionsToYesterday.getLastCost();
-            const yesterdayValue = yesterdayUnits * yesterdayPrice;
-
-            dayGainAbs = roundAbs(value - yesterdayValue);
-            dayGain = roundGain((value - yesterdayValue) / yesterdayCost);
+            dayGainAbs = roundAbs((price - yesterdayPrice) * units);
+            dayGain = roundGain((price - yesterdayPrice) / yesterdayPrice);
         }
 
         return {
@@ -122,11 +112,10 @@ export function getRowGains(rows, rowsWithPrices, startTime, cacheTimes) {
     });
 }
 
-export function getGains(rows, startTime, cacheTimes) {
+export function getGains(rows) {
     const rowsWithPrices = getRowsWithPrices(rows);
 
-    const { gains, dayGains, gainsAbs, dayGainsAbs, values } =
-        getRowGains(rows, rowsWithPrices, startTime, cacheTimes);
+    const { gains, dayGains, gainsAbs, dayGainsAbs, values } = getRowGains(rows, rowsWithPrices);
 
     const min = gains.min();
     const max = gains.max();
@@ -172,7 +161,7 @@ export function getRowHistory(rows, startTime, cacheTimes) {
 }
 
 export function getExtraRowProps(rows, startTime, cacheTimes) {
-    const rowsWithGains = getGains(rows, startTime, cacheTimes);
+    const rowsWithGains = getGains(rows);
 
     const rowsWithPriceHistory = getRowHistory(rowsWithGains, startTime, cacheTimes);
 

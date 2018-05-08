@@ -13,7 +13,7 @@ function getMaxAge(now, period, length) {
 }
 
 function getNumResultsQuery(db, user, salt, minTime) {
-    return db.select(db.raw('COUNT(*) AS numResults'))
+    return db.select(db.raw('COUNT(1) AS numResults'))
         .from(qb1 => qb1.select('c.cid')
             .from('funds as f')
             .innerJoin('fund_hash as fh', 'fh.hash', db.raw('MD5(CONCAT(f.item, ?))', salt))
@@ -39,7 +39,7 @@ function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay, minT
                 db.raw(
                     '(CASE prices.cid WHEN @lastCid THEN @cNum ELSE @cNum := @cNum + 1 END) AS cNum'
                 ),
-                db.raw('@lastCid := prices.cid AS last_cid')
+                db.raw('@lastCid := prices.cid AS lastCid')
             )
                 .from(qb3 => qb3.select(
                     'c.cid',
@@ -71,7 +71,8 @@ function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay, minT
             .as('results')
         )
         .where('period', '=', 0)
-        .orWhere('cNum', '=', numResults - 1);
+        .orWhere('cNum', '=', numResults - 1)
+        .orWhere('cNum', '=', numResults - 2);
 }
 
 function processFundHistory(queryResult) {
