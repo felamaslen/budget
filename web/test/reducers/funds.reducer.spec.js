@@ -62,7 +62,7 @@ describe('funds', () => {
                     value: 87797.5098,
                     gain: -0.0245,
                     gainAbs: -2202,
-                    dayGain: 0.0148,
+                    dayGain: 0.0154,
                     dayGainAbs: 1330,
                     color: [255, 44, 44]
                 }),
@@ -70,7 +70,7 @@ describe('funds', () => {
                     value: 217366.518,
                     gain: 0.0868,
                     gainAbs: 17367,
-                    dayGain: 0.0055,
+                    dayGain: 0.0051,
                     dayGainAbs: 1095,
                     color: [0, 230, 18]
                 })
