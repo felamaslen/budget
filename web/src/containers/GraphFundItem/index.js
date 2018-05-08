@@ -18,9 +18,13 @@ import {
 } from '../../constants/graph';
 import { COLOR_LOSS, COLOR_PROFIT } from '../../constants/colors';
 
-function getDimensions(popout) {
+function getDimensions({ popout, sold }) {
     if (popout) {
         return { width: GRAPH_FUND_ITEM_WIDTH_LARGE, height: GRAPH_FUND_ITEM_HEIGHT_LARGE };
+    }
+
+    if (sold) {
+        return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT / 2 };
     }
 
     return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT };
@@ -53,8 +57,8 @@ function processData(data, popout) {
     return { lines, minX, maxX, minY, maxY };
 }
 
-export function GraphFundItem({ id, data, onToggle, popout, ...props }) {
-    const dimensions = getDimensions(popout);
+export function GraphFundItem({ id, data, onToggle, popout, sold, ...props }) {
+    const { width, height } = getDimensions({ popout, sold });
 
     const beforeLines = subProps => <Axes popout={popout} {...subProps} />;
 
@@ -64,7 +68,8 @@ export function GraphFundItem({ id, data, onToggle, popout, ...props }) {
         },
         svgClasses: classNames({ popout }),
         beforeLines,
-        ...dimensions,
+        width,
+        height,
         ...props,
         ...processData(data, popout)
     };
@@ -76,6 +81,7 @@ GraphFundItem.propTypes = {
     id: PropTypes.number.isRequired,
     data: PropTypes.instanceOf(list).isRequired,
     popout: PropTypes.bool.isRequired,
+    sold: PropTypes.bool,
     onToggle: PropTypes.func.isRequired
 };
 
