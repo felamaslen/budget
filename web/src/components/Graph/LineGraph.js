@@ -4,10 +4,11 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import ImmutableComponent from '../../ImmutableComponent';
+import ImmutableComponent, { propsEqual } from '../../ImmutableComponent';
 import debounce from '../../helpers/debounce';
 import { rgba } from '../../helpers/color';
 import { COLOR_GRAPH_TITLE } from '../../constants/colors';
+import { GRAPH_ZOOM_SPEED } from '../../constants/graph';
 import LineGraphDumb from './LineGraphDumb';
 
 function getClosest(lines, position) {
@@ -31,12 +32,47 @@ function getClosest(lines, position) {
     }, null);
 }
 
+const pointVisible = (valX, minX, maxX) => valX >= minX && valX <= maxX;
+
+function pointsVisible(lines) {
+    const threshold = 4;
+
+    return Boolean(lines.find(line => line.get('data').size > threshold));
+}
+
+function zoomLines(lines, minX, maxX) {
+    const result = lines.map(line => {
+        const data = line.get('data');
+
+        return line.set('data', data.filter((point, pointKey) => {
+            if (pointVisible(point.get(0), minX, maxX)) {
+                return true;
+            }
+            if (pointKey < data.size - 1 &&
+                pointVisible(data.getIn([pointKey + 1, 0]), minX, maxX)) {
+                return true;
+            }
+            if (pointKey > 0 &&
+                pointVisible(data.getIn([pointKey - 1, 0]), minX, maxX)) {
+                return true;
+            }
+
+            return false;
+        }));
+    });
+
+    return result;
+}
+
 export default class LineGraph extends ImmutableComponent {
     constructor(props) {
         super(props);
 
         this.state = {
-            hlPoint: null
+            hlPoint: null,
+            lines: props.lines,
+            zoom: props.zoomEffect || {},
+            zoomLevel: 0
         };
 
         this.updateCalc();
@@ -89,20 +125,83 @@ export default class LineGraph extends ImmutableComponent {
             this.onHover(null);
         };
     }
+    setZoom(position = null, zoomLevel = this.state.zoomLevel) {
+        const { minX, maxX } = this.props.zoomEffect;
+
+        let { minX: newMinX, maxX: newMaxX } = this.state.zoom;
+
+        if (position) {
+            const range = maxX - minX;
+            const newRange = range * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
+
+            let newMinXTarget = position - newRange / 2;
+            let newMaxXTarget = position + newRange / 2;
+            if (newMinXTarget < minX) {
+                newMaxXTarget += minX - newMinXTarget;
+                newMinXTarget = minX;
+            }
+            else if (newMaxXTarget > maxX) {
+                newMinXTarget -= newMaxXTarget - maxX;
+                newMaxXTarget = maxX;
+            }
+
+            newMinX = Math.max(minX, Math.round(newMinXTarget));
+            newMaxX = Math.min(maxX, Math.round(newMaxXTarget));
+        }
+
+        const zoomedLines = zoomLines(this.props.lines, newMinX, newMaxX);
+
+        if (!pointsVisible(zoomedLines)) {
+            return null;
+        }
+
+        return this.setState({
+            zoom: {
+                lines: zoomedLines,
+                minX: newMinX,
+                maxX: newMaxX
+            },
+            zoomLevel
+        });
+    }
+    onWheel(customHandler) {
+        return ({ valX }) => evt => {
+            customHandler(evt);
+            evt.preventDefault();
+
+            if (!this.state.hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
+                return null;
+            }
+
+            const position = this.state.hlPoint
+                ? this.state.hlPoint.valX
+                : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
+
+            // direction: in is -1, out is +1
+            const direction = evt.deltaY / Math.abs(evt.deltaY);
+            const zoomLevel = Math.max(0, this.state.zoomLevel - direction);
+
+            return this.setZoom(position, zoomLevel);
+        };
+    }
     getMouseEffects() {
-        if (this.props.isMobile || !this.props.hoverEffect) {
+        if (this.props.isMobile) {
             return {};
         }
 
-        const outerProps = this.props.outerProperties || {};
+        const outerProperties = { ...(this.props.outerProperties || {}) };
+        const svgProperties = { ...(this.props.svgProperties || {}) };
         const noop = () => null;
 
-        return {
-            outerProperties: {
-                onMouseMove: this.getOnMouseMove(outerProps.onMouseMove || noop),
-                onMouseLeave: this.getOnMouseLeave(outerProps.onMouseLeave || noop)
-            }
-        };
+        if (this.props.hoverEffect) {
+            outerProperties.onMouseMove = this.getOnMouseMove(outerProperties.onMouseMove || noop);
+            outerProperties.onMouseLeave = this.getOnMouseLeave(outerProperties.onMouseLeave || noop);
+        }
+        if (this.props.zoomEffect) {
+            svgProperties.onWheel = this.onWheel(svgProperties.onWheel || noop);
+        }
+
+        return { outerProperties, svgProperties };
     }
     componentWillUpdate(nextProps) {
         if (!(this.props.width === nextProps.width &&
@@ -111,18 +210,29 @@ export default class LineGraph extends ImmutableComponent {
             this.updateCalc();
         }
     }
+    componentDidUpdate(prevProps) {
+        if (!propsEqual(prevProps, this.props)) {
+            this.setZoom();
+        }
+    }
     render() {
         return (
             <LineGraphDumb
                 {...this.props}
                 {...this.mouseEffects}
                 hlPoint={this.state.hlPoint}
+                {...this.state.zoom}
             />
         );
     }
 }
 
 LineGraph.propTypes = {
-    isMobile: PropTypes.bool
+    isMobile: PropTypes.bool,
+    hoverEffect: PropTypes.object,
+    zoomEffect: PropTypes.shape({
+        minX: PropTypes.number.isRequired,
+        maxX: PropTypes.number.isRequired
+    })
 };
 

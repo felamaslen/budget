@@ -168,40 +168,6 @@ export function getExtraRowProps(rows, startTime, cacheTimes) {
     return rowsWithPriceHistory;
 }
 
-export function zoomFundLines(linesAll, zoom) {
-    // restrict fund lines by zooming
-    const minX = zoom.get(0);
-    const maxX = zoom.get(1);
-
-    if (minX === null || maxX === null) {
-        return linesAll.slice();
-    }
-
-    return linesAll.map(line => line.set('line', line.get('line')
-        .map(part => part.filter((point, pointKey) => {
-            const thisVisible = point.get(0) >= minX && point.get(0) <= maxX;
-            if (thisVisible) {
-                return true;
-            }
-            if (pointKey < part.size) {
-                const next = part.getIn([pointKey + 1, 0]);
-                if (next >= minX && next <= maxX) {
-                    return true;
-                }
-            }
-            if (pointKey > 0) {
-                const prev = part.getIn([pointKey - 1, 0]);
-                if (prev >= minX && prev <= maxX) {
-                    return true;
-                }
-            }
-
-            return false;
-        }))
-        .filter(part => part.size)
-    ));
-}
-
 export function getOverallAbsolute(prices, units) {
     // get the overall absolute value for each time point
     return prices.reduce((lineSum, fundPrices, key) => {
@@ -395,7 +361,7 @@ function getPriceUnitsCosts(rows, startTime, cacheTimes) {
     });
 }
 
-export function getFormattedHistory(rowsMap, mode, startTime, cacheTimes, zoom, enabledList = null) {
+export function getFormattedHistory(rowsMap, mode, startTime, cacheTimes, enabledList = null) {
     // get a formatted list of lines for display in the fund price / value graph
     const rows = rowsMap.toList();
 
@@ -449,11 +415,8 @@ export function getFormattedHistory(rowsMap, mode, startTime, cacheTimes, zoom, 
         })))
         .map((item, key) => item.set('color', colors.get(key)));
 
-    const fundLinesAll = getFundLines(
-        times, timeOffsets, prices, units, costs, mode, fundsEnabled);
+    const fundLines = getFundLines(times, timeOffsets, prices, units, costs, mode, fundsEnabled);
 
-    const fundLines = zoomFundLines(fundLinesAll, zoom);
-
-    return map({ fundItems, fundLines, fundLinesAll });
+    return map({ fundItems, fundLines });
 }
 

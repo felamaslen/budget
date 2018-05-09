@@ -82,7 +82,6 @@ const reducers = createReducerObject([
     [AC.GRAPH_SHOWALL_TOGGLED, graph.rToggleShowAll],
     [AC.GRAPH_FUND_ITEM_TOGGLED, graph.rToggleFundItemGraph],
     [AC.GRAPH_FUNDS_CLICKED, graph.rToggleFundsGraphMode],
-    [AC.GRAPH_FUNDS_ZOOMED, graph.rZoomFundsGraph],
     [AC.GRAPH_FUNDS_LINE_TOGGLED, graph.rToggleFundsGraphLine],
     [AC.GRAPH_FUNDS_PERIOD_CHANGED, graph.rChangeFundsGraphPeriod],
     [AC.GRAPH_FUNDS_PERIOD_LOADED, graph.rHandleFundPeriodResponse],
