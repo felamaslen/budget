@@ -4,7 +4,7 @@ import { COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE } from '..
 import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '../../constants/graph';
 import { rgba } from '../../helpers/color';
 import { getTickSize, formatCurrency } from '../../helpers/format';
-import { getTimeScale } from '../Graph/LineGraph';
+import { getTimeScale } from '../Graph/helpers';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     return (minY, maxY, pixY) => {
