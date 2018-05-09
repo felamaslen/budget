@@ -7,7 +7,7 @@ itEach();
 import { mount } from 'enzyme';
 import React from 'react';
 import { GraphFundItem } from '../../../src/containers/GraphFundItem';
-import { AverageLine } from '../../../src/components/Graph/LineGraph';
+import AverageLine from '../../../src/components/Graph/AverageLine';
 
 describe('<GraphFundItem />', () => {
     const props = {
