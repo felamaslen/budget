@@ -2,454 +2,261 @@
  * React component to display a line graph (e.g. time series)
  */
 
-import { List as list } from 'immutable';
 import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
 import React from 'react';
-import Graph from '.';
-import ArrowLine from './ArrowLine';
-import { timeSeriesTicks } from '../../helpers/date';
-import { listAverage } from '../../helpers/data';
+import ImmutableComponent, { propsEqual } from '../../ImmutableComponent';
+import debounce from '../../helpers/debounce';
 import { rgba } from '../../helpers/color';
-import { GRAPH_CURVINESS } from '../../constants/graph';
-import { COLOR_LIGHT_GREY } from '../../constants/colors';
+import { COLOR_GRAPH_TITLE } from '../../constants/colors';
+import { GRAPH_ZOOM_SPEED } from '../../constants/graph';
+import LineGraphDumb from './LineGraphDumb';
 
-export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
-    // divides the time axis (horizontal) into appropriate chunks
-    const ticks = timeSeriesTicks(offset + minX, offset + maxX);
-
-    if (ticks) {
-        return ticks.map(tick => ({
-            major: tick.major,
-            pix: Math.floor(pixX(tick.time - offset)) + 0.5,
-            text: tick.label || null
-        }));
+function getClosest(lines, position) {
+    if (!position) {
+        return null;
     }
 
-    return [];
-};
+    const { valX, valY } = position;
 
-function getControlPointsAtPoint([x0, y0], [x1, y1], [x2, y2]) {
-    const distLeft = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5;
-    const distRight = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5;
+    return lines.reduce((red, line, lineIndex) => {
+        return line.get('data').reduce((last, point, index) => {
+            const dist = (((point.get(0) - valX) ** 2) +
+                ((point.get(1) - valY) ** 2)) ** 0.5;
 
-    const controlFactor0 = GRAPH_CURVINESS * distLeft / (distLeft + distRight);
-    const controlFactor1 = GRAPH_CURVINESS - controlFactor0;
-
-    const controlX0 = Math.round(x1 - controlFactor0 * (x2 - x0));
-    const controlY0 = Math.round(y1 - controlFactor0 * (y2 - y0));
-
-    const controlX1 = Math.round(x1 + controlFactor1 * (x2 - x0));
-    const controlY1 = Math.round(y1 + controlFactor1 * (y2 - y0));
-
-    return list.of(list.of(controlX0, controlY0), list.of(controlX1, controlY1));
-}
-
-function getControlPoints(data) {
-    return data.map((point, index) => {
-        if (index === 0 || index === data.size - 1) {
-            return null;
-        }
-
-        return getControlPointsAtPoint(
-            data.get(index - 1),
-            point,
-            data.get(index + 1)
-        );
-    });
-}
-
-function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
-    const getPixPoint = point => list.of(pixX(point.get(0)), pixY(point.get(1)));
-
-    const pixelsNumeric = data.map(point => getPixPoint(point));
-    const pixels = pixelsNumeric.map(point => point.map(value => value.toFixed(1)));
-
-    let line = null;
-
-    if (smooth && pixels.size > 2) {
-        const controlPoints = getControlPoints(pixelsNumeric);
-
-        line = pixels.slice(0, pixels.size - 1)
-            .map((point, index) => {
-                if (index === 0) {
-                    return {
-                        start: point,
-                        type: 'Q',
-                        args: [controlPoints.getIn([index + 1, 0]), pixels.get(index + 1)]
-                    };
-                }
-                if (index === pixels.size - 2) {
-                    return {
-                        start: point,
-                        type: 'Q',
-                        args: [
-                            controlPoints.getIn([index, 1]),
-                            pixels.get(index + 1)
-                        ]
-                    };
-                }
-
-                return {
-                    start: point,
-                    type: 'C',
-                    args: [
-                        controlPoints.getIn([index, 1]),
-                        controlPoints.getIn([index + 1, 0]),
-                        pixels.get(index + 1)
-                    ]
-                };
-
-            });
-    }
-    else {
-        line = pixels.slice(1)
-            .map((point, index) => ({
-                start: pixels.get(index),
-                type: 'L',
-                args: [point]
-            }));
-    }
-
-    if (fill) {
-        return line.concat({
-            start: pixels.last(),
-            type: 'L',
-            args: [list.of(width, height)]
-        });
-    }
-
-    return line;
-}
-
-function getLinePathPart(linePath) {
-    if (linePath.size < 1) {
-        return '';
-    }
-
-    const parts = linePath.map(({ type, args }) =>
-        `${type}${args.map(point => point.join(',')).join(' ')}`);
-
-    const start = linePath.get(0).start;
-
-    return `M${start.join(',')} ${parts.join(' ')}`;
-}
-
-function getSingleLinePath(props) {
-    return getLinePathPart(getLinePath(props));
-}
-
-function joinChoppedPath(linePath, ends, color) {
-    return [...ends.slice(1), linePath.size].map((end, endIndex) => ({
-        path: getLinePathPart(linePath.slice(ends[endIndex], end)),
-        stroke: color(end, endIndex)
-    }))
-        .filter(({ path }) => path.length);
-}
-
-function getDynamicLinePathsStop({ data, color, smooth, pixX, pixY }) {
-    const { changes, values } = color;
-
-    const getColorIndex = value => changes.reduce((last, change, index) => {
-        if (value >= change) {
-            return index + 1;
-        }
-
-        return last;
-    }, 0);
-
-    const stops = data.slice(1)
-        .reduce(({ items, ends, colorIndexA }, point, index) => {
-            const colorIndexB = getColorIndex(point.get(1));
-
-            if (colorIndexB !== colorIndexA) {
-                // linearly interpolate to the cut off value between the two points
-                const pointBetween = list.of(
-                    (point.get(0) + data.getIn([index, 0])) / 2,
-                    changes[Math.min(colorIndexA, colorIndexB)]
-                );
-
-                return {
-                    items: items.concat(list.of(pointBetween, point)),
-                    ends: [...ends, items.size],
-                    colorIndexA: colorIndexB
-                };
+            if (last && dist > last.dist) {
+                return last;
             }
 
-            return {
-                items: items.push(point),
-                ends,
-                colorIndexA: colorIndexB
-            };
-
-        }, {
-            items: data.slice(0, 1),
-            ends: [0],
-            colorIndexA: getColorIndex(data.getIn([0, 1]))
-        });
-
-    const { items, ends } = stops;
-
-    const linePath = getLinePath({ data: items, smooth, pixX, pixY });
-
-    return joinChoppedPath(linePath, ends,
-        end => values[getColorIndex(items.getIn([end - 1, 1]))]);
+            return { dist, lineIndex, point, index };
+        }, red);
+    }, null);
 }
 
-function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
-    if (data.size < 2) {
-        return null;
+const pointVisible = (valX, minX, maxX) => valX >= minX && valX <= maxX;
+
+function pointsVisible(lines) {
+    const threshold = 4;
+
+    return Boolean(lines.find(line => line.get('data').size > threshold));
+}
+
+function zoomLines(lines, minX, maxX) {
+    const result = lines.map(line => {
+        const data = line.get('data');
+
+        return line.set('data', data.filter((point, pointKey) => {
+            if (pointVisible(point.get(0), minX, maxX)) {
+                return true;
+            }
+            if (pointKey < data.size - 1 &&
+                pointVisible(data.getIn([pointKey + 1, 0]), minX, maxX)) {
+                return true;
+            }
+            if (pointKey > 0 &&
+                pointVisible(data.getIn([pointKey - 1, 0]), minX, maxX)) {
+                return true;
+            }
+
+            return false;
+        }));
+    });
+
+    return result;
+}
+
+function getHlColor(color, point, index) {
+    if (typeof color === 'string') {
+        return color;
+    }
+    if (typeof color === 'function') {
+        return color(point, index);
     }
 
-    if (typeof color === 'object') {
-        return getDynamicLinePathsStop({ data, color, smooth, pixX, pixY });
+    return rgba(COLOR_GRAPH_TITLE);
+}
+
+export default class LineGraph extends ImmutableComponent {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            hlPoint: null,
+            lines: props.lines,
+            zoom: props.zoomEffect || {},
+            zoomLevel: 0
+        };
+
+        this.updateCalc();
     }
-
-    const linePath = getLinePath({ data, smooth, pixX, pixY });
-
-    const colors = data.map((point, index) => color(point, index));
-    const ends = colors.reduce((indexes, value, index) => {
-        const next = index === colors.size - 1 ||
-            (index > 0 && colors.get(index - 1) !== value);
-
-        if (next) {
-            return [...indexes, index];
+    onHover(position) {
+        const closest = getClosest(this.props.lines, position);
+        if (!closest) {
+            return this.setState({ hlPoint: null });
         }
 
-        return indexes;
+        const { lineIndex, point, index } = closest;
+        const color = getHlColor(this.props.lines.getIn([lineIndex, 'color']), point, index);
 
-    }, [0]);
-
-    return joinChoppedPath(linePath, ends, (end, endIndex) => colors.get(ends[endIndex]));
-}
-
-export function AverageLine({ value, data, ...props }) {
-    if (!value) {
-        return null;
+        return this.setState({
+            hlPoint: {
+                valX: point.get(0),
+                valY: point.get(1),
+                color
+            }
+        });
     }
-
-    const averageData = data.reduce(({ last, points }, point) => {
-        const nextLast = last.slice(1 - value).push(point.get(1));
-        const average = listAverage(nextLast);
-
-        return { last: nextLast, points: points.push(point.set(1, average)) };
-
-    }, { last: list.of(), points: list.of() })
-        .points;
-
-    const averageLinePath = getSingleLinePath({
-        ...props, data: averageData, smooth: true, fill: false
-    });
-
-    return (
-        <path d={averageLinePath}
-            stroke={rgba(COLOR_LIGHT_GREY)}
-            strokeDasharray="3,5"
-            strokeWidth={1}
-            fill="none"
-        />
-    );
-}
-
-AverageLine.propTypes = {
-    value: PropTypes.number,
-    data: PropTypes.instanceOf(list).isRequired
-};
-
-function getStyleProps(fill, color) {
-    if (fill) {
-        return { fill: color, stroke: 'none' };
+    updateCalc() {
+        this.mouseEffects = this.getMouseEffects();
     }
+    getOnMouseMove(customHandler) {
+        return ({ valX, valY }) => {
+            const handler = debounce((pageX, pageY, currentTarget) => {
+                const { left, top } = currentTarget.getBoundingClientRect();
 
-    return { fill: 'none', stroke: color };
-}
+                this.onHover({
+                    valX: valX(pageX - left),
+                    valY: valY(pageY - top)
+                });
+            }, 10, true);
 
-function DynamicColorLine({ fill, data, smooth, color, children, pathProps, ...props }) {
-    if (fill) {
-        throw new Error('Dynamically coloured, filled graph not implemented');
+            return evt => {
+                customHandler(evt);
+                const { pageX, pageY, currentTarget } = evt;
+
+                return handler(pageX, pageY, currentTarget);
+            };
+        };
     }
-
-    const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
-    if (!linePaths) {
-        return null;
+    getOnMouseLeave(customHandler) {
+        return () => evt => {
+            customHandler(evt);
+            this.onHover(null);
+        };
     }
+    setZoom(position = null, zoomLevel = this.state.zoomLevel) {
+        if (!this.props.zoomEffect) {
+            return;
+        }
 
-    const paths = linePaths.map(({ path, stroke }, key) => (
-        <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
-    ));
+        const { minX, maxX } = this.props.zoomEffect;
 
-    return <g className="lines">{children}{paths}</g>;
-}
+        let { minX: newMinX, maxX: newMaxX } = this.state.zoom;
 
-DynamicColorLine.propTypes = {
-    fill: PropTypes.bool,
-    data: ImmutablePropTypes.list.isRequired,
-    smooth: PropTypes.bool,
-    color: PropTypes.oneOfType([
-        PropTypes.func,
-        PropTypes.shape({
-            changes: PropTypes.array.isRequired,
-            values: PropTypes.array.isRequired
-        })
-    ]).isRequired,
-    children: PropTypes.object,
-    pathProps: PropTypes.object.isRequired
-};
+        if (position) {
+            const range = maxX - minX;
+            const newRange = range * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
 
-function getPathProps(line) {
-    const common = {
-        strokeWidth: line.get('strokeWidth') || 2
-    };
+            let newMinXTarget = position - newRange / 2;
+            let newMaxXTarget = position + newRange / 2;
+            if (newMinXTarget < minX) {
+                newMaxXTarget += minX - newMinXTarget;
+                newMinXTarget = minX;
+            }
+            else if (newMaxXTarget > maxX) {
+                newMinXTarget -= newMaxXTarget - maxX;
+                newMaxXTarget = maxX;
+            }
 
-    if (line.get('dashed')) {
-        return { ...common, strokeDasharray: '3,5' };
+            newMinX = Math.max(minX, Math.round(newMinXTarget));
+            newMaxX = Math.min(maxX, Math.round(newMaxXTarget));
+        }
+
+        const zoomedLines = zoomLines(this.props.lines, newMinX, newMaxX);
+
+        if (!pointsVisible(zoomedLines)) {
+            return;
+        }
+
+        this.setState({
+            zoom: {
+                lines: zoomedLines,
+                minX: newMinX,
+                maxX: newMaxX
+            },
+            zoomLevel
+        });
     }
+    onWheel(customHandler) {
+        return ({ valX }) => evt => {
+            customHandler(evt);
+            evt.preventDefault();
 
-    return common;
-}
+            if (!this.state.hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
+                return null;
+            }
 
-function RenderedLine({ line, ...props }) {
-    const data = line.get('data');
-    const color = line.get('color');
-    const fill = line.get('fill');
-    const smooth = line.get('smooth');
-    const movingAverage = line.get('movingAverage');
-    const arrows = line.get('arrows');
+            const position = this.state.hlPoint
+                ? this.state.hlPoint.valX
+                : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
 
-    if (!data.size) {
-        return null;
+            // direction: in is -1, out is +1
+            const direction = evt.deltaY / Math.abs(evt.deltaY);
+            const zoomLevel = Math.max(0, this.state.zoomLevel - direction);
+
+            return this.setZoom(position, zoomLevel);
+        };
     }
+    getMouseEffects() {
+        if (this.props.isMobile) {
+            return {};
+        }
 
-    if (arrows) {
-        return <ArrowLine data={data} color={color} {...props} />;
+        const outerProperties = { ...(this.props.outerProperties || {}) };
+        const svgProperties = { ...(this.props.svgProperties || {}) };
+        const noop = () => null;
+
+        if (this.props.hoverEffect) {
+            outerProperties.onMouseMove = this.getOnMouseMove(outerProperties.onMouseMove || noop);
+            outerProperties.onMouseLeave = this.getOnMouseLeave(outerProperties.onMouseLeave || noop);
+        }
+        if (this.props.zoomEffect) {
+            svgProperties.onWheel = this.onWheel(svgProperties.onWheel || noop);
+        }
+
+        return { outerProperties, svgProperties };
     }
+    componentWillUpdate(nextProps) {
+        if (!(this.props.width === nextProps.width &&
+            this.props.height === nextProps.height)) {
 
-    const pathProps = getPathProps(line);
-
-    const averageLine = <AverageLine {...props} data={data} value={movingAverage} />;
-
-    if (typeof color === 'string') {
-        const linePath = getSingleLinePath({ data, smooth, fill, ...props });
-        const styleProps = getStyleProps(fill, color);
-
-        return <g className="line">
-            <path d={linePath} {...styleProps} {...pathProps} />
-            {averageLine}
-        </g>;
+            this.updateCalc();
+        }
     }
+    componentDidUpdate(prevProps) {
+        const resetRange = this.props.zoomEffect &&
+            !(Object.keys(this.props.zoomEffect).every(key => this.props.zoomEffect[key] === prevProps.zoomEffect[key]));
 
-    const lineProps = { data, color, fill, smooth, movingAverage, pathProps };
-
-    return (
-        <DynamicColorLine {...lineProps} {...props}>
-            {averageLine}
-        </DynamicColorLine>
-    );
-}
-
-RenderedLine.propTypes = {
-    line: ImmutablePropTypes.contains({
-        data: ImmutablePropTypes.list.isRequired,
-        color: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.func,
-            PropTypes.shape({
-                changes: PropTypes.array.isRequired,
-                values: PropTypes.array.isRequired
-            })
-        ]).isRequired,
-        strokeWidth: PropTypes.number,
-        dashed: PropTypes.bool,
-        fill: PropTypes.bool,
-        smooth: PropTypes.bool,
-        movingAverage: PropTypes.number,
-        arrows: PropTypes.bool
-    }),
-    pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired,
-    valX: PropTypes.func.isRequired,
-    valY: PropTypes.func.isRequired
-};
-
-const genPixelCompute = props => {
-    const {
-        minX,
-        maxX,
-        minY,
-        maxY,
-        width,
-        height,
-        padding: [padTop, padRight, padBottom, padLeft]
-    } = props;
-
-    return {
-        pixX: value =>
-            padLeft + (value - minX) / (maxX - minX) * (width - padLeft - padRight),
-        pixY: value =>
-            height - padBottom - (value - minY) / (maxY - minY) * (height - padTop - padBottom),
-        valX: pix =>
-            (pix - padLeft) * (maxX - minX) / (width - padLeft - padRight) + minX,
-        valY: pix =>
-            (height - padBottom - pix) * (maxY - minY) / (height - padTop - padBottom) + minY
-    };
-};
-
-export default function LineGraph({ lines, width, height, beforeLines, afterLines, ...props }) {
-    const pixelCompute = genPixelCompute({
-        padding: [0, 0, 0, 0],
-        width,
-        height,
-        ...props
-    });
-
-    const subProps = {
-        width,
-        height,
-        ...props,
-        ...pixelCompute
-    };
-
-    if (!lines.size) {
+        if (resetRange) {
+            this.setState({
+                zoom: {
+                    lines: this.props.lines,
+                    ...this.props.zoomEffect
+                },
+                zoomLevel: 0
+            });
+        }
+        else if (!propsEqual(prevProps, this.props)) {
+            this.setZoom();
+        }
+    }
+    render() {
         return (
-            <Graph width={width} height={height} {...props} {...pixelCompute} />
+            <LineGraphDumb
+                {...this.props}
+                {...this.mouseEffects}
+                hlPoint={this.state.hlPoint}
+                {...this.state.zoom}
+            />
         );
     }
-
-    const renderedLines = lines.map(line => (
-        <RenderedLine
-            key={line.get('key')}
-            width={width}
-            height={height}
-            line={line}
-            {...pixelCompute}
-            {...props}
-        />
-    ));
-
-    return (
-        <Graph width={width} height={height} {...props} {...pixelCompute}>
-            {beforeLines && beforeLines(subProps)}
-            {renderedLines}
-            {afterLines && afterLines(subProps)}
-        </Graph>
-    );
 }
 
 LineGraph.propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    beforeLines: PropTypes.func,
-    afterLines: PropTypes.func,
-    before: PropTypes.object,
-    after: PropTypes.object,
-    lines: ImmutablePropTypes.list.isRequired,
-    minX: PropTypes.number,
-    maxX: PropTypes.number,
-    minY: PropTypes.number,
-    maxY: PropTypes.number,
-    children: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.array
-    ])
+    isMobile: PropTypes.bool,
+    hoverEffect: PropTypes.object,
+    zoomEffect: PropTypes.shape({
+        minX: PropTypes.number.isRequired,
+        maxX: PropTypes.number.isRequired
+    })
 };
 

@@ -76,10 +76,7 @@ describe('List page reducers', () => {
             expect(other.getIn(['graphFunds', 'cacheTimes']).toJS())
                 .to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7]);
 
-            expect(other.getIn(['graphFunds', 'zoom']).toJS())
-                .to.deep.equal([0, 86400 * 4]);
-
-            expect(other.getIn(['graphFunds', 'range']).toJS())
+            expect(other.getIn(['graphFunds', 'zoomRange']).toJS())
                 .to.deep.equal([0, 86400 * 4]);
 
             expect(other.getIn(['graphFunds', 'data'])).to.be.ok;
