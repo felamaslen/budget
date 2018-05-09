@@ -13,6 +13,7 @@ import { listAverage } from '../../helpers/data';
 import { rgba } from '../../helpers/color';
 import { GRAPH_CURVINESS } from '../../constants/graph';
 import { COLOR_LIGHT_GREY } from '../../constants/colors';
+import HighlightPoint from '../HighlightPoint';
 
 export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
     // divides the time axis (horizontal) into appropriate chunks
@@ -426,11 +427,17 @@ export default function LineGraph({ lines, width, height, beforeLines, afterLine
         />
     ));
 
+    let highlightPoint = null;
+    if (!props.isMobile && props.hoverEffect) {
+        highlightPoint = <HighlightPoint {...subProps} />;
+    }
+
     return (
         <Graph width={width} height={height} {...props} {...pixelCompute}>
             {beforeLines && beforeLines(subProps)}
             {renderedLines}
             {afterLines && afterLines(subProps)}
+            {highlightPoint}
         </Graph>
     );
 }
@@ -443,6 +450,8 @@ LineGraph.propTypes = {
     before: PropTypes.object,
     after: PropTypes.object,
     lines: ImmutablePropTypes.list.isRequired,
+    hoverEffect: PropTypes.object,
+    isMobile: PropTypes.bool,
     minX: PropTypes.number,
     maxX: PropTypes.number,
     minY: PropTypes.number,
