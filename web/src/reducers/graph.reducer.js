@@ -11,7 +11,6 @@ import { processRawListRows } from './list.reducer';
 
 import { GRAPH_ZOOM_MAX, GRAPH_ZOOM_SPEED } from '../constants/graph';
 import { sortRowsByDate } from '../helpers/data';
-import { rgba } from '../helpers/color';
 
 export const rToggleShowAll = reduction => {
     return reduction.setIn(
@@ -119,48 +118,6 @@ export function rZoomFundsGraph(reduction, { direction, position }) {
     return reduction
         .setIn(['other', 'graphFunds', 'zoom'], newZoom)
         .setIn(['other', 'graphFunds', 'data', 'fundLines'], zoomedLines);
-}
-
-export function rHoverFundsGraph(reduction, { position }) {
-    if (!position) {
-        return reduction.setIn(['other', 'graphFunds', 'hlPoint'], null);
-    }
-
-    const lines = reduction.getIn(['other', 'graphFunds', 'data', 'fundLines']);
-
-    if (!(lines && lines.size)) {
-        return reduction;
-    }
-
-    const closest = lines.reduce((last, line) => {
-        const lineIndex = line.get('index');
-
-        return line.get('line').reduce(
-            (red, part) => part.reduce(({ dist: lastDist, lineIndex: lastIndex, point: lastPoint }, point) => {
-                const dist = (
-                    ((point.get(0) - position.valX) / 1000) ** 2 +
-                    ((point.get(1) - position.valY) / 100) ** 2
-                ) ** 0.5;
-
-                if (dist < lastDist) {
-                    return { dist, lineIndex, point };
-                }
-
-                return { dist: lastDist, lineIndex: lastIndex, point: lastPoint };
-
-            }, red),
-            last
-        );
-
-    }, { dist: Infinity });
-
-    const color = reduction.getIn(['other', 'graphFunds', 'data', 'fundItems', closest.lineIndex, 'color']);
-
-    const hlPoint = closest.point
-        ? closest.point.set(2, rgba(color))
-        : null;
-
-    return reduction.setIn(['other', 'graphFunds', 'hlPoint'], hlPoint);
 }
 
 export function rToggleFundsGraphLine(reduction, { index }) {

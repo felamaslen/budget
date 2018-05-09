@@ -1,20 +1,20 @@
-import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FONT_GRAPH_TITLE } from '../../constants/graph';
 import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../constants/colors';
 import { rgba } from '../../helpers/color';
 
-export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect, ...props }) {
-    const { hlPoint } = hoverEffect;
+export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect, hlPoint, ...props }) {
     if (!hlPoint) {
         return null;
     }
 
     const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-    const posX = Math.floor(pixX(hlPoint.get(0))) + 0.5;
-    const posY = Math.floor(pixY(hlPoint.get(1))) + 0.5;
+    const { valX, valY, color } = hlPoint;
+
+    const posX = Math.floor(pixX(valX)) + 0.5;
+    const posY = Math.floor(pixY(valY)) + 0.5;
 
     const labelWidthX = 88;
     const labelWidthY = 50;
@@ -31,14 +31,13 @@ export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect,
         labelPosX = 0;
     }
 
-    const labelTextX = hoverEffect.labelX(hlPoint.get(0), props);
-    const labelTextY = hoverEffect.labelY(hlPoint.get(1), props);
+    const labelTextX = hoverEffect.labelX(valX, props);
+    const labelTextY = hoverEffect.labelY(valY, props);
 
     const pathVertical = `M${posX},0 L${posX},${height}`;
     const pathHorizontal = `M0,${posY} L${width},${posY}`;
 
-    const lineColor = hlPoint.get(2);
-    const lineProps = { stroke: lineColor, strokeDasharray: '3,2' };
+    const lineProps = { stroke: color, strokeDasharray: '3,2' };
 
     const textProps = { fontSize, fontFamily, color: rgba(COLOR_GRAPH_TITLE) };
     const textPropsX = {
@@ -69,9 +68,13 @@ export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect,
 HighlightPoint.propTypes = {
     hoverEffect: PropTypes.shape({
         labelX: PropTypes.func.isRequired,
-        labelY: PropTypes.func.isRequired,
-        hlPoint: PropTypes.instanceOf(list)
+        labelY: PropTypes.func.isRequired
     }).isRequired,
+    hlPoint: PropTypes.shape({
+        valX: PropTypes.number.isRequired,
+        valY: PropTypes.number.isRequired,
+        color: PropTypes.string.isRequired
+    }),
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,

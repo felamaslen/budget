@@ -20,7 +20,6 @@ import {
     GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
 } from '../../constants/graph';
 import { graphFundsHeightMobile } from '../../constants/styles';
-import debounce from '../../helpers/debounce';
 import { rgba } from '../../helpers/color';
 import { formatValue } from '../../helpers/funds';
 import Axes from './Axes';
@@ -162,31 +161,8 @@ function getSvgProperties({ isMobile, onClick, onZoom, hlPoint }) {
     };
 }
 
-function getOuterProperties({ isMobile, onHover }) {
-    if (isMobile) {
-        return {};
-    }
-
-    return {
-        onMouseMove: ({ valX, valY }) => {
-            const mouseMoveHandler = debounce((pageX, pageY, currentTarget) => {
-                const { left, top } = currentTarget.getBoundingClientRect();
-
-                onHover({
-                    valX: valX(pageX - left),
-                    valY: valY(pageY - top)
-                });
-            }, 10, true);
-
-            return ({ pageX, pageY, currentTarget }) => mouseMoveHandler(pageX, pageY, currentTarget);
-        },
-        onMouseLeave: () => () => onHover(null)
-    };
-}
-
-export function GraphFunds({ hlPoint, ...props }) {
+export function GraphFunds(props) {
     const svgProperties = getSvgProperties(props);
-    const outerProperties = getOuterProperties(props);
 
     const beforeLines = subProps => (
         <Axes {...subProps} />
@@ -202,13 +178,11 @@ export function GraphFunds({ hlPoint, ...props }) {
         beforeLines,
         after,
         svgProperties,
-        outerProperties,
         hoverEffect: {
             labelX: (value, { startTime }) =>
                 DateTime.fromJSDate(new Date(1000 * (value + startTime)))
                     .toLocaleString(DateTime.DATE_SHORT),
-            labelY: (value, { mode }) => formatValue(value, mode),
-            hlPoint
+            labelY: (value, { mode }) => formatValue(value, mode)
         },
         ...processData(props),
         ...props
@@ -229,10 +203,8 @@ GraphFunds.propTypes = {
     period: PropTypes.string,
     showOverall: PropTypes.bool,
     zoom: PropTypes.instanceOf(list),
-    hlPoint: PropTypes.instanceOf(list),
     onZoom: PropTypes.func.isRequired,
-    onClick: PropTypes.func.isRequired,
-    onHover: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state, { isMobile }) => ({
@@ -249,12 +221,10 @@ const mapStateToProps = (state, { isMobile }) => ({
     mode: state.getIn(['other', 'graphFunds', 'mode']),
     period: state.getIn(['other', 'graphFunds', 'period']),
     showOverall: state.getIn(['other', 'graphFunds', 'showOverall']),
-    zoom: state.getIn(['other', 'graphFunds', 'zoom']),
-    hlPoint: state.getIn(['other', 'graphFunds', 'hlPoint'])
+    zoom: state.getIn(['other', 'graphFunds', 'zoom'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    onHover: position => dispatch(aFundsGraphHovered(position)),
     toggleLine: key => dispatch(aFundsGraphLineToggled(key)),
     changePeriod: req => dispatch(aFundsGraphPeriodChanged(req)),
     onClick: () => dispatch(aFundsGraphClicked()),
