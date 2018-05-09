@@ -19,7 +19,7 @@ function getClosest(lines, position) {
     const { valX, valY } = position;
 
     return lines.reduce((red, line, lineIndex) => {
-        return line.get('data').reduce((last, point) => {
+        return line.get('data').reduce((last, point, index) => {
             const dist = (((point.get(0) - valX) ** 2) +
                 ((point.get(1) - valY) ** 2)) ** 0.5;
 
@@ -27,7 +27,7 @@ function getClosest(lines, position) {
                 return last;
             }
 
-            return { dist, lineIndex, point };
+            return { dist, lineIndex, point, index };
         }, red);
     }, null);
 }
@@ -64,6 +64,17 @@ function zoomLines(lines, minX, maxX) {
     return result;
 }
 
+function getHlColor(color, point, index) {
+    if (typeof color === 'string') {
+        return color;
+    }
+    if (typeof color === 'function') {
+        return color(point, index);
+    }
+
+    return rgba(COLOR_GRAPH_TITLE);
+}
+
 export default class LineGraph extends ImmutableComponent {
     constructor(props) {
         super(props);
@@ -83,11 +94,8 @@ export default class LineGraph extends ImmutableComponent {
             return this.setState({ hlPoint: null });
         }
 
-        const { lineIndex, point } = closest;
-        const lineColor = this.props.lines.getIn([lineIndex, 'color']);
-        const color = typeof lineColor === 'string'
-            ? lineColor
-            : rgba(COLOR_GRAPH_TITLE);
+        const { lineIndex, point, index } = closest;
+        const color = getHlColor(this.props.lines.getIn([lineIndex, 'color']), point, index);
 
         return this.setState({
             hlPoint: {
