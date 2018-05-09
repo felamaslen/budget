@@ -5,17 +5,14 @@
 import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { DateTime } from 'luxon';
-import {
-    aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
-    aFundsGraphLineToggled, aFundsGraphPeriodChanged
-} from '../../actions/graph.actions';
+import { aFundsGraphClicked, aFundsGraphLineToggled, aFundsGraphPeriodChanged } from '../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '../../components/Graph/LineGraph';
 import { getTickSize } from '../../helpers/format';
 import {
-    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT, FONT_GRAPH_TITLE,
+    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
     GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
 } from '../../constants/graph';
@@ -99,17 +96,16 @@ function getLines({ isMobile, fundLines, fundItems, mode }) {
 }
 
 function processData(props) {
-    const { zoom, mode, fundLines, cacheTimes } = props;
+    const { mode, zoomRange, fundLines, cacheTimes } = props;
 
-    const minX = zoom.get(0);
-    const maxX = zoom.get(1);
+    const minX = zoomRange.get(0);
+    const maxX = zoomRange.get(1);
 
     if (!(fundLines && cacheTimes.size >= 2)) {
         return { minX, maxX, minY: -1, maxY: 1 };
     }
 
     const lines = getLines(props);
-
     const valuesY = lines.map(line => line.get('data').map(item => item.get(1)));
 
     let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
@@ -134,39 +130,8 @@ function processData(props) {
     return { minX, maxX, minY, maxY, lines, tickSizeY };
 }
 
-function getSvgProperties({ isMobile, onClick, onZoom, hlPoint }) {
-    const common = {
-        onClick: () => onClick
-    };
-
-    if (isMobile) {
-        return common;
-    }
-
-    return {
-        ...common,
-        onWheel: ({ valX }) => evt => {
-            evt.preventDefault();
-
-            if (!hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
-                return;
-            }
-
-            const position = hlPoint
-                ? hlPoint.get(0)
-                : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
-
-            onZoom({ direction: evt.deltaY / Math.abs(evt.deltaY), position });
-        }
-    };
-}
-
 export function GraphFunds(props) {
-    const svgProperties = getSvgProperties(props);
-
-    const beforeLines = subProps => (
-        <Axes {...subProps} />
-    );
+    const beforeLines = subProps => <Axes {...subProps} />;
 
     let after = null;
     if (!props.isMobile) {
@@ -177,12 +142,16 @@ export function GraphFunds(props) {
         padding: [36 * (!props.isMobile >> 0), 0, 0, 0],
         beforeLines,
         after,
-        svgProperties,
+        svgProperties: { onClick: () => props.onClick },
         hoverEffect: {
             labelX: (value, { startTime }) =>
                 DateTime.fromJSDate(new Date(1000 * (value + startTime)))
                     .toLocaleString(DateTime.DATE_SHORT),
             labelY: (value, { mode }) => formatValue(value, mode)
+        },
+        zoomEffect: {
+            minX: props.zoomRange.get(0),
+            maxX: props.zoomRange.get(1)
         },
         ...processData(props),
         ...props
@@ -198,12 +167,11 @@ GraphFunds.propTypes = {
     fundLines: PropTypes.instanceOf(list),
     startTime: PropTypes.number,
     cacheTimes: PropTypes.instanceOf(list),
+    zoomRange: PropTypes.instanceOf(list),
     funds: PropTypes.instanceOf(list),
     mode: PropTypes.number.isRequired,
     period: PropTypes.string,
     showOverall: PropTypes.bool,
-    zoom: PropTypes.instanceOf(list),
-    onZoom: PropTypes.func.isRequired,
     onClick: PropTypes.func.isRequired
 };
 
@@ -218,17 +186,16 @@ const mapStateToProps = (state, { isMobile }) => ({
     fundLines: state.getIn(['other', 'graphFunds', 'data', 'fundLines']),
     startTime: state.getIn(['other', 'graphFunds', 'startTime']),
     cacheTimes: state.getIn(['other', 'graphFunds', 'cacheTimes']),
+    zoomRange: state.getIn(['other', 'graphFunds', 'zoomRange']),
     mode: state.getIn(['other', 'graphFunds', 'mode']),
     period: state.getIn(['other', 'graphFunds', 'period']),
-    showOverall: state.getIn(['other', 'graphFunds', 'showOverall']),
-    zoom: state.getIn(['other', 'graphFunds', 'zoom'])
+    showOverall: state.getIn(['other', 'graphFunds', 'showOverall'])
 });
 
 const mapDispatchToProps = dispatch => ({
     toggleLine: key => dispatch(aFundsGraphLineToggled(key)),
     changePeriod: req => dispatch(aFundsGraphPeriodChanged(req)),
-    onClick: () => dispatch(aFundsGraphClicked()),
-    onZoom: req => dispatch(aFundsGraphZoomed(req))
+    onClick: () => dispatch(aFundsGraphClicked())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);
