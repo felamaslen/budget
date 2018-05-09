@@ -1,16 +1,18 @@
 import { Component } from 'react';
 import { is } from 'immutable';
 
+export function propsEqual(prev, next, skip = false) {
+    if (skip) {
+        return true;
+    }
+
+    return Object.keys(next).every(key => is(next[key], prev[key]));
+}
+
 export default class ImmutablePureComponent extends Component {
-
     shouldComponentUpdate(nextProps, nextState) {
-        const state = this.state || {};
-
-        return !(this.updateOnProps || Object.keys(nextProps)).every(
-            propKey => is(nextProps[propKey], this.props[propKey])
-        ) || !(this.updateOnStates || Object.keys(nextState || {})).every(
-            stateKey => is(nextState[stateKey], state[stateKey])
-        );
+        return !propsEqual(this.props, nextProps, this.updateOnProps === false) ||
+            !propsEqual(this.state || {}, nextState, this.updateOnStates === false);
     }
 }
 

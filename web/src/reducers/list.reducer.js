@@ -73,10 +73,9 @@ export function processPageDataFunds(reduction, { raw }, now) {
     const rowsWithExtraProps = getExtraRowProps(sortedRows, startTime, cacheTimes);
 
     const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
-    const zoom = reduction.getIn(['other', 'graphFunds', 'zoom']);
 
     const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, now);
-    const fundHistory = getFormattedHistory(sortedRows, mode, startTime, cacheTimes, zoom);
+    const fundHistory = getFormattedHistory(sortedRows, mode, startTime, cacheTimes);
 
     return newReduction
         .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
@@ -87,8 +86,7 @@ export function processPageDataFunds(reduction, { raw }, now) {
         .setIn(['other', 'fundsCachedValue'], fundsCachedValue)
         .setIn(['other', 'graphFunds', 'startTime'], startTime)
         .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)
-        .setIn(['other', 'graphFunds', 'zoom'], list([0, maxAge]))
-        .setIn(['other', 'graphFunds', 'range'], list([0, maxAge]))
+        .setIn(['other', 'graphFunds', 'zoomRange'], list([0, maxAge]))
         .setIn(['other', 'graphFunds', 'data'], fundHistory);
 }
 

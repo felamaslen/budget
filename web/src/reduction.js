@@ -80,9 +80,7 @@ export function resetAppState(state) {
                 period: getDefaultFundPeriod(),
                 mode: GRAPH_FUNDS_MODE_ROI,
                 showOverall: true,
-                hlPoint: null,
-                zoom: list([null, null]), // range to restrict to
-                range: list([null, null]), // possible range
+                zoomRange: list([null, null]),
                 startTime: 0,
                 cacheTimes: list.of()
             }),

@@ -95,7 +95,7 @@ describe('Content reducer', () => {
                 },
                 other: {
                     graphFunds: {
-                        zoom: [null, null],
+                        zoomRange: [null, null],
                         period: 'fooperiod'
                     }
                 }
@@ -149,12 +149,10 @@ describe('Content reducer', () => {
                                         item: 'Overall'
                                     }
                                 ],
-                                fundLinesAll: [],
                                 fundLines: []
                             },
-                            range: [0, 1772512],
                             startTime: 1508533928,
-                            zoom: [0, 1772512]
+                            zoomRange: [0, 1772512]
                         },
                         fundHistoryCache: {
                             fooperiod: {

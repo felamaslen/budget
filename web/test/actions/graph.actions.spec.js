@@ -21,20 +21,6 @@ describe('graph.actions', () => {
             expect(A.aFundsGraphClicked()).to.deep.equal({ type: C.GRAPH_FUNDS_CLICKED })
         )
     );
-    describe('aFundsGraphZoomed', () =>
-        it('should return GRAPH_FUNDS_ZOOMED with req object', () =>
-            expect(A.aFundsGraphZoomed({ foo: 'bar' })).to.deep.equal({
-                type: C.GRAPH_FUNDS_ZOOMED, foo: 'bar'
-            })
-        )
-    );
-    describe('aFundsGraphHovered', () =>
-        it('should return GRAPH_FUNDS_HOVERED with position object', () =>
-            expect(A.aFundsGraphHovered({ posX: 10 })).to.deep.equal({
-                type: C.GRAPH_FUNDS_HOVERED, position: { posX: 10 }
-            })
-        )
-    );
     describe('aFundsGraphLineToggled', () =>
         it('should return GRAPH_FUNDS_LINE_TOGGLED with index', () =>
             expect(A.aFundsGraphLineToggled(10)).to.deep.equal({

@@ -7,6 +7,7 @@ import LineGraph from '../../components/Graph/LineGraph';
 import Axes from './Axes';
 import NowLine from './NowLine';
 import { GRAPH_HEIGHT } from '../../constants/graph';
+import { formatCurrency } from '../../helpers/format';
 
 function getTime(key, now, offset, breakAtToday, startDate) {
     // converts a key index to a UNIX time stamp
@@ -71,6 +72,12 @@ export default function GraphCashFlow(props) {
 
     const graphProps = {
         beforeLines,
+        hoverEffect: {
+            labelX: value => DateTime.fromJSDate(new Date(1000 * value))
+                .toFormat('LLL y'),
+            labelY: value => formatCurrency(value, { precision: 2 }),
+            labelWidthY: 88
+        },
         ...coreProps,
         ...props
     };

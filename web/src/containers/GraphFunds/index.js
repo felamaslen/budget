@@ -5,23 +5,18 @@
 import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { DateTime } from 'luxon';
-import {
-    aFundsGraphClicked, aFundsGraphZoomed, aFundsGraphHovered,
-    aFundsGraphLineToggled, aFundsGraphPeriodChanged
-} from '../../actions/graph.actions';
+import { aFundsGraphClicked, aFundsGraphLineToggled, aFundsGraphPeriodChanged } from '../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '../../components/Graph/LineGraph';
 import { getTickSize } from '../../helpers/format';
 import {
-    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT, FONT_GRAPH_TITLE,
+    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT,
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
     GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
 } from '../../constants/graph';
 import { graphFundsHeightMobile } from '../../constants/styles';
-import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../constants/colors';
-import debounce from '../../helpers/debounce';
 import { rgba } from '../../helpers/color';
 import { formatValue } from '../../helpers/funds';
 import Axes from './Axes';
@@ -76,82 +71,6 @@ AfterCanvas.propTypes = {
     changePeriod: PropTypes.func.isRequired
 };
 
-function HighlightPoint({ mode, startTime, hlPoint, pixX, pixY, width, height }) {
-    if (!hlPoint) {
-        return null;
-    }
-
-    const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
-
-    const posX = Math.floor(pixX(hlPoint.get(0))) + 0.5;
-    const posY = Math.floor(pixY(hlPoint.get(1))) + 0.5;
-
-    const labelWidthX = 88;
-    const labelWidthY = 50;
-    const labelHeight = fontSize + 2;
-
-    let anchorLabelX = 'middle';
-    let labelPosX = posX;
-    if (posX >= width - labelWidthX / 2) {
-        anchorLabelX = 'end';
-        labelPosX = width;
-    }
-    else if (posX < labelWidthX / 2) {
-        anchorLabelX = 'start';
-        labelPosX = 0;
-    }
-
-    const labelTextX = DateTime.fromJSDate(new Date(1000 * (hlPoint.get(0) + startTime)))
-        .toLocaleString(DateTime.DATE_SHORT);
-
-    const labelTextY = formatValue(hlPoint.get(1), mode);
-
-    const pathVertical = `M${posX},0 L${posX},${height}`;
-    const pathHorizontal = `M0,${posY} L${width},${posY}`;
-
-    const lineColor = hlPoint.get(2);
-    const lineProps = { stroke: lineColor, strokeDasharray: '3,2' };
-
-    return <g className="hl-point">
-        <path d={pathVertical} {...lineProps} />
-        <path d={pathHorizontal} {...lineProps} />
-        <rect x={posX - labelWidthX / 2} y={height - labelHeight} width={labelWidthX} height={labelHeight}
-            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text
-            x={labelPosX}
-            y={height - 2}
-            fontSize={fontSize}
-            fontFamily={fontFamily}
-            color={rgba(COLOR_GRAPH_TITLE)}
-            textAnchor={anchorLabelX}
-            alignmentBaseline="baseline">
-            {labelTextX}
-        </text>
-        <rect x={width - labelWidthY} y={posY - labelHeight / 2} width={labelWidthY} height={labelHeight}
-            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text
-            x={width}
-            y={posY}
-            fontSize={fontSize}
-            fontFamily={fontFamily}
-            color={rgba(COLOR_GRAPH_TITLE)}
-            textAnchor="end"
-            alignmentBaseline="middle">
-            {labelTextY}
-        </text>
-    </g>;
-}
-
-HighlightPoint.propTypes = {
-    mode: PropTypes.number.isRequired,
-    startTime: PropTypes.number.isRequired,
-    hlPoint: PropTypes.instanceOf(list),
-    pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
-};
-
 function getLines({ isMobile, fundLines, fundItems, mode }) {
     return fundLines.reduce((lines, item) => {
         const mainLine = item.get('index') === 0;
@@ -177,17 +96,16 @@ function getLines({ isMobile, fundLines, fundItems, mode }) {
 }
 
 function processData(props) {
-    const { zoom, mode, fundLines, cacheTimes } = props;
+    const { mode, zoomRange, fundLines, cacheTimes } = props;
 
-    const minX = zoom.get(0);
-    const maxX = zoom.get(1);
+    const minX = zoomRange.get(0);
+    const maxX = zoomRange.get(1);
 
     if (!(fundLines && cacheTimes.size >= 2)) {
         return { minX, maxX, minY: -1, maxY: 1 };
     }
 
     const lines = getLines(props);
-
     const valuesY = lines.map(line => line.get('data').map(item => item.get(1)));
 
     let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
@@ -212,82 +130,30 @@ function processData(props) {
     return { minX, maxX, minY, maxY, lines, tickSizeY };
 }
 
-function getSvgProperties({ isMobile, onClick, onZoom, hlPoint }) {
-    const common = {
-        onClick: () => onClick
-    };
+export function GraphFunds({ zoomRange, ...props }) {
+    const beforeLines = subProps => <Axes {...subProps} />;
 
-    if (isMobile) {
-        return common;
-    }
-
-    return {
-        ...common,
-        onWheel: ({ valX }) => evt => {
-            evt.preventDefault();
-
-            if (!hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
-                return;
-            }
-
-            const position = hlPoint
-                ? hlPoint.get(0)
-                : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
-
-            onZoom({ direction: evt.deltaY / Math.abs(evt.deltaY), position });
-        }
-    };
-}
-
-function getOuterProperties({ isMobile, onHover }) {
-    if (isMobile) {
-        return {};
-    }
-
-    return {
-        onMouseMove: ({ valX, valY }) => {
-            const mouseMoveHandler = debounce((pageX, pageY, currentTarget) => {
-                const { left, top } = currentTarget.getBoundingClientRect();
-
-                onHover({
-                    valX: valX(pageX - left),
-                    valY: valY(pageY - top)
-                });
-            }, 10, true);
-
-            return ({ pageX, pageY, currentTarget }) => mouseMoveHandler(pageX, pageY, currentTarget);
-        },
-        onMouseLeave: () => () => onHover(null)
-    };
-}
-
-function AfterLines(subProps) {
-    return <HighlightPoint {...subProps} />;
-}
-
-export function GraphFunds(props) {
-    const svgProperties = getSvgProperties(props);
-    const outerProperties = getOuterProperties(props);
-
-    const beforeLines = subProps => (
-        <Axes {...subProps} />
-    );
-
-    let afterLines = null;
     let after = null;
     if (!props.isMobile) {
-        afterLines = AfterLines;
         after = <AfterCanvas {...props} />;
     }
 
     const graphProps = {
         padding: [36 * (!props.isMobile >> 0), 0, 0, 0],
         beforeLines,
-        afterLines,
         after,
-        svgProperties,
-        outerProperties,
-        ...processData(props),
+        svgProperties: { onClick: () => props.onClick },
+        hoverEffect: {
+            labelX: (value, { startTime }) =>
+                DateTime.fromJSDate(new Date(1000 * (value + startTime)))
+                    .toLocaleString(DateTime.DATE_SHORT),
+            labelY: (value, { mode }) => formatValue(value, mode)
+        },
+        zoomEffect: {
+            minX: zoomRange.get(0),
+            maxX: zoomRange.get(1)
+        },
+        ...processData({ zoomRange, ...props }),
         ...props
     };
 
@@ -301,15 +167,12 @@ GraphFunds.propTypes = {
     fundLines: PropTypes.instanceOf(list),
     startTime: PropTypes.number,
     cacheTimes: PropTypes.instanceOf(list),
+    zoomRange: PropTypes.instanceOf(list),
     funds: PropTypes.instanceOf(list),
     mode: PropTypes.number.isRequired,
     period: PropTypes.string,
     showOverall: PropTypes.bool,
-    zoom: PropTypes.instanceOf(list),
-    hlPoint: PropTypes.instanceOf(list),
-    onZoom: PropTypes.func.isRequired,
-    onClick: PropTypes.func.isRequired,
-    onHover: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state, { isMobile }) => ({
@@ -323,19 +186,16 @@ const mapStateToProps = (state, { isMobile }) => ({
     fundLines: state.getIn(['other', 'graphFunds', 'data', 'fundLines']),
     startTime: state.getIn(['other', 'graphFunds', 'startTime']),
     cacheTimes: state.getIn(['other', 'graphFunds', 'cacheTimes']),
+    zoomRange: state.getIn(['other', 'graphFunds', 'zoomRange']),
     mode: state.getIn(['other', 'graphFunds', 'mode']),
     period: state.getIn(['other', 'graphFunds', 'period']),
-    showOverall: state.getIn(['other', 'graphFunds', 'showOverall']),
-    zoom: state.getIn(['other', 'graphFunds', 'zoom']),
-    hlPoint: state.getIn(['other', 'graphFunds', 'hlPoint'])
+    showOverall: state.getIn(['other', 'graphFunds', 'showOverall'])
 });
 
 const mapDispatchToProps = dispatch => ({
-    onHover: position => dispatch(aFundsGraphHovered(position)),
     toggleLine: key => dispatch(aFundsGraphLineToggled(key)),
     changePeriod: req => dispatch(aFundsGraphPeriodChanged(req)),
-    onClick: () => dispatch(aFundsGraphClicked()),
-    onZoom: req => dispatch(aFundsGraphZoomed(req))
+    onClick: () => dispatch(aFundsGraphClicked())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);
