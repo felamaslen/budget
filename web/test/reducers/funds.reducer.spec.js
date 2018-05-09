@@ -179,9 +179,7 @@ describe('funds', () => {
             const startTime = testStartTime;
             const cacheTimes = testCacheTimes;
 
-            const result = rFunds.getFormattedHistory(
-                testRows, mode, startTime, cacheTimes, list([null, null])
-            );
+            const result = rFunds.getFormattedHistory(testRows, mode, startTime, cacheTimes);
 
             expect(result.get('fundItems').toJS()).to.deep.equal([
                 {
