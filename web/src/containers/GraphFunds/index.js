@@ -130,7 +130,7 @@ function processData(props) {
     return { minX, maxX, minY, maxY, lines, tickSizeY };
 }
 
-export function GraphFunds(props) {
+export function GraphFunds({ zoomRange, ...props }) {
     const beforeLines = subProps => <Axes {...subProps} />;
 
     let after = null;
@@ -150,10 +150,10 @@ export function GraphFunds(props) {
             labelY: (value, { mode }) => formatValue(value, mode)
         },
         zoomEffect: {
-            minX: props.zoomRange.get(0),
-            maxX: props.zoomRange.get(1)
+            minX: zoomRange.get(0),
+            maxX: zoomRange.get(1)
         },
-        ...processData(props),
+        ...processData({ zoomRange, ...props }),
         ...props
     };
 
