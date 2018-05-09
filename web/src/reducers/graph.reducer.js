@@ -119,9 +119,7 @@ export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPe
     const startTime = data.startTime;
     const cacheTimes = list(data.cacheTimes);
 
-    const newReduction = changePeriod(
-        reduction, shortPeriod, sortedRows, startTime, cacheTimes
-    )
+    const newReduction = changePeriod(reduction, shortPeriod, sortedRows, startTime, cacheTimes)
         .setIn(['other', 'fundHistoryCache', shortPeriod], map({
             rows: sortedRows, startTime, cacheTimes
         }));
