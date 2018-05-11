@@ -40,7 +40,7 @@ function pointsVisible(lines) {
     return Boolean(lines.find(line => line.get('data').size > threshold));
 }
 
-function zoomLines(lines, minX, maxX) {
+function zoomLines(lines, { minX, maxX }) {
     const result = lines.map(line => {
         const data = line.get('data');
 
@@ -64,6 +64,36 @@ function zoomLines(lines, minX, maxX) {
     return result;
 }
 
+function getZoomedRange(props, state, position, zoomLevel) {
+    let { minX, maxX } = state.zoom;
+
+    if (position) {
+        const range = props.maxX - props.minX;
+        const newRange = range * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
+
+        let newMinXTarget = position - newRange / 2;
+        let newMaxXTarget = position + newRange / 2;
+        if (newMinXTarget < props.minX) {
+            newMaxXTarget += props.minX - newMinXTarget;
+            newMinXTarget = props.minX;
+        }
+        else if (newMaxXTarget > props.maxX) {
+            newMinXTarget -= newMaxXTarget - props.maxX;
+            newMaxXTarget = props.maxX;
+        }
+
+        minX = Math.max(props.minX, Math.round(newMinXTarget));
+        maxX = Math.min(props.maxX, Math.round(newMaxXTarget));
+    }
+
+    const zoomedLines = zoomLines(props.lines, { minX, maxX });
+    if (!pointsVisible(zoomedLines)) {
+        return null;
+    }
+
+    return props.zoomEffect(props, zoomedLines, { minX, maxX });
+}
+
 function getHlColor(color, point, index) {
     if (typeof color === 'string') {
         return color;
@@ -81,8 +111,7 @@ export default class LineGraph extends ImmutableComponent {
 
         this.state = {
             hlPoint: null,
-            lines: props.lines,
-            zoom: props.zoomEffect || {},
+            zoom: {},
             zoomLevel: 0
         };
 
@@ -134,45 +163,13 @@ export default class LineGraph extends ImmutableComponent {
         };
     }
     setZoom(position = null, zoomLevel = this.state.zoomLevel) {
-        if (!this.props.zoomEffect) {
-            return;
-        }
-
-        const { minX, maxX } = this.props.zoomEffect;
-
-        let { minX: newMinX, maxX: newMaxX } = this.state.zoom;
-
-        if (position) {
-            const range = maxX - minX;
-            const newRange = range * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
-
-            let newMinXTarget = position - newRange / 2;
-            let newMaxXTarget = position + newRange / 2;
-            if (newMinXTarget < minX) {
-                newMaxXTarget += minX - newMinXTarget;
-                newMinXTarget = minX;
-            }
-            else if (newMaxXTarget > maxX) {
-                newMinXTarget -= newMaxXTarget - maxX;
-                newMaxXTarget = maxX;
-            }
-
-            newMinX = Math.max(minX, Math.round(newMinXTarget));
-            newMaxX = Math.min(maxX, Math.round(newMaxXTarget));
-        }
-
-        const zoomedLines = zoomLines(this.props.lines, newMinX, newMaxX);
-
-        if (!pointsVisible(zoomedLines)) {
+        const zoom = getZoomedRange(this.props, this.state, position, zoomLevel);
+        if (!zoom) {
             return;
         }
 
         this.setState({
-            zoom: {
-                lines: zoomedLines,
-                minX: newMinX,
-                maxX: newMaxX
-            },
+            zoom,
             zoomLevel
         });
     }
@@ -223,19 +220,21 @@ export default class LineGraph extends ImmutableComponent {
         }
     }
     componentDidUpdate(prevProps) {
-        const resetRange = this.props.zoomEffect &&
-            !(Object.keys(this.props.zoomEffect).every(key => this.props.zoomEffect[key] === prevProps.zoomEffect[key]));
+        const resetRange = (this.props.zoomEffect || prevProps.zoomEffect) && !(
+            this.props.zoomEffect &&
+            this.props.minX === prevProps.minX &&
+            this.props.maxX === prevProps.maxX &&
+            this.props.minY === prevProps.minY &&
+            this.props.maxY === prevProps.maxY
+        );
 
         if (resetRange) {
             this.setState({
-                zoom: {
-                    lines: this.props.lines,
-                    ...this.props.zoomEffect
-                },
+                zoom: {},
                 zoomLevel: 0
             });
         }
-        else if (!propsEqual(prevProps, this.props)) {
+        else if (this.props.zoomEffect && !propsEqual(prevProps, this.props)) {
             this.setZoom();
         }
     }
@@ -254,9 +253,6 @@ export default class LineGraph extends ImmutableComponent {
 LineGraph.propTypes = {
     isMobile: PropTypes.bool,
     hoverEffect: PropTypes.object,
-    zoomEffect: PropTypes.shape({
-        minX: PropTypes.number.isRequired,
-        maxX: PropTypes.number.isRequired
-    })
+    zoomEffect: PropTypes.func
 };
 
