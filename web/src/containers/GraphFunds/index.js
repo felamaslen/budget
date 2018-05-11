@@ -95,18 +95,26 @@ function getLines({ isMobile, fundLines, fundItems, mode }) {
     }, list.of());
 }
 
-function processData(props) {
+function getRanges(props, lines, zoom = null) {
     const { mode, zoomRange, fundLines, cacheTimes } = props;
 
-    const minX = zoomRange.get(0);
-    const maxX = zoomRange.get(1);
+    let minX = null;
+    let maxX = null;
+    if (zoom) {
+        minX = zoom.minX;
+        maxX = zoom.maxX;
+    }
+    else {
+        minX = zoomRange.get(0);
+        maxX = zoomRange.get(1);
+    }
 
     if (!(fundLines && cacheTimes.size >= 2)) {
         return { minX, maxX, minY: -1, maxY: 1 };
     }
 
-    const lines = getLines(props);
-    const valuesY = lines.map(line => line.get('data').map(item => item.get(1)));
+    const valuesY = lines.map(line => line.get('data').map(item => item.get(1)))
+        .filter(item => item.size);
 
     let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
     let maxY = valuesY.reduce((max, line) => Math.max(max, line.max()), -Infinity);
@@ -130,6 +138,12 @@ function processData(props) {
     return { minX, maxX, minY, maxY, lines, tickSizeY };
 }
 
+function processData(props) {
+    const lines = getLines(props);
+
+    return { lines, ...getRanges(props, lines) };
+}
+
 export function GraphFunds({ zoomRange, ...props }) {
     const beforeLines = subProps => <Axes {...subProps} />;
 
@@ -149,10 +163,7 @@ export function GraphFunds({ zoomRange, ...props }) {
                     .toLocaleString(DateTime.DATE_SHORT),
             labelY: (value, { mode }) => formatValue(value, mode)
         },
-        zoomEffect: {
-            minX: zoomRange.get(0),
-            maxX: zoomRange.get(1)
-        },
+        zoomEffect: getRanges,
         ...processData({ zoomRange, ...props }),
         ...props
     };
