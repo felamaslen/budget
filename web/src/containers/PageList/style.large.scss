@@ -98,14 +98,13 @@
                 overflow: hidden;
             }
             & > span {
-                position: relative;
+                display: inline-flex;
                 text-overflow: ellipsis;
-                border-right: 1px solid $color-slightly-light;
                 vertical-align: top;
                 height: inherit;
 
                 & > span {
-                    white-space: nowrap;
+                    border-right: 1px solid $color-slightly-light;
                     &.active {
                         overflow: visible;
                     }

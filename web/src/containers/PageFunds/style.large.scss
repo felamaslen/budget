@@ -1,17 +1,16 @@
 .page-funds {
     overflow-y: auto;
-
+            
     .list-insert {
         flex: 0 1 800px;
-        
-        .list-head {
-            .gain {
+    
+        .list-head-inner {
+            .overall-gain {
                 margin-left: 0.5em;
+                padding: 0 0.25em;
+                flex: 0 0 auto;
                 text-transform: none;
-                span {
-                    padding: 0 0.25em;
-                    margin-left: 0.25em;
-                }
+                
                 &.profit {
                     background: $color-profit-light;
                 }
@@ -20,16 +19,21 @@
                 }
             }
         }
+        
         .list-ul {
             li, .list-head-inner {
                 & > span {
                     &.item {
                         flex: 0 1 376px;
                     }
+                    &.transactions {
+                        flex: 0 1 102px;
+                    }
                     &.fund-extra-info {
                         display: flex;
                         flex: 0 0 300px;
                         flex-wrap: nowrap;
+                        position: relative;
 
                         &.popout {
                             z-index: 10;
@@ -47,51 +51,49 @@
                 }
             }
             li {
-                &:not(.li-add) > span {
-                    overflow: hidden;
-                }
-                & > span.transactions {
-                    flex-basis: 102px;
-                    overflow: visible !important;
-                    .modal {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 300px;
-                        min-height: 100px;
-                        z-index: 5;
-                        line-height: 26px;
-                        background: $color-translucent-l8;
-                        box-shadow: 0 3px 6px $color-shadow-l2;
-                        input {
-                            width: 95%;
-                        }
-                        thead {
-                            font-size: 0.9em;
-                        }
-                        .inner {
-                            padding: 0.2em;
-                        }
-                    }
-                    .text {
-                        display: none;
+                &:nth-child(n+3) {
+                    height: 48px;
+                    line-height: 48px;
+                    .fund-extra-info > .gain {
+                        height: 100%;
                     }
                 }
-
                 &.sold {
-                    height: 24px !important;
-                    line-height: 24px !important;
+                    height: 24px;
+                    line-height: 24px;
+                    color: $color-slightly-light;
+
+                    .fund-graph {
+                        filter: grayscale(100%);
+                    }
+                    .gain {
+                        font-style: italic;
+                        font-weight: normal;
+                    }
+                    .fund-extra-info::after {
+                        content: $none;
+                        width: 100%;
+                        height: 100%;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        background: $color-translucent-l7;
+                        z-index: 1;
+                    }
                 }
-            }
-            .num-transactions {
-                display: block;
-                text-align: center;
-            }
-            & > li:nth-child(n+3) {
-                height: 48px;
-                line-height: 48px;
-                .fund-extra-info > .gain {
-                    height: 100%;
+                .transactions {
+                    .num-transactions {
+                        display: block;
+                        text-align: center;
+                    }
+                }
+                &:nth-last-child(-n + 3) {
+                    .transactions {
+                        .modal {
+                            top: initial;
+                            bottom: 0;
+                        }
+                    }
                 }
             }
             .fund-graph {
@@ -163,27 +165,6 @@
                     }
                 }
             }
-            .sold {
-                color: $color-slightly-light;
-
-                .fund-graph {
-                    filter: grayscale(100%);
-                }
-                .gain {
-                    font-style: italic;
-                    font-weight: normal;
-                }
-                .fund-graph:before, .gain:before {
-                    content: $none;
-                    width: 100%;
-                    height: 100%;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    background: $color-translucent-l5;
-                    z-index: 1;
-                }
-            }
         }
         .gain {
             display: inline-block;
@@ -191,7 +172,7 @@
                 padding: 0;
                 height: 100%;
                 background: $color-medium-slightly-dark;
-                &>span {
+                & > span {
                     float: left;
                     padding: 0 1px;
                     overflow: hidden;
