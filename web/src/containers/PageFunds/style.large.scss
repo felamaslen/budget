@@ -6,8 +6,6 @@
     
         .list-head-inner {
             .overall-gain {
-                margin-left: 0.5em;
-                padding: 0 0.25em;
                 flex: 0 0 auto;
                 text-transform: none;
                 
@@ -16,6 +14,24 @@
                 }
                 &.loss {
                     background: $color-loss-light;
+                }
+
+                .value {
+                    display: inline-flex;
+                    margin: 0 0.5em;
+                }
+
+                .gain-values {
+                    display: inline-flex;
+                   
+                    .gain-pct {
+                        margin: 0 0.25em;
+                    }
+                }
+
+                .cache-age {
+                    margin: 0 0.5em;
+                    font-style: italic;
                 }
             }
         }
@@ -152,13 +168,13 @@
                     background: $color-translucent-l8;
                 }
                 .gain-abs, .day-gain-abs {
-                    &.profit:before {
+                    &.profit::before {
                         content: $text-up-arrow;
                     }
-                    &.loss:before {
+                    &.loss::before {
                         content: $text-down-arrow;
                     }
-                    &:before {
+                    &::before {
                         font-style: normal;
                         font-weight: normal;
                         margin-right: 0.2em;
