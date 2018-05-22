@@ -3,6 +3,7 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+import humanizeDuration from 'humanize-duration';
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '../constants';
 
 const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
@@ -379,61 +380,28 @@ export function getTickSize(min, max, numTicks) {
     return magnitude;
 }
 
-/**
- * Format age text
- * @param {integer} seconds: number of seconds to age
- * @param {boolean} shortAbbr: whether to abbreviate concisely
- * @returns {string} age text
- */
-export function formatAge(seconds, shortAbbr) {
-    const measures = list([
-        [1, 's', 'second'],
-        [60, 'm', 'minute'],
-        [3600, 'h', 'hour'],
-        [86400, 'd', 'day'],
-        [86400 * 30, 'M', 'month'],
-        [86400 * 365, 'Y', 'year']
-    ]);
-
-    const getMeasureText = (measure, thisSeconds, floor) => {
-        const value = thisSeconds / measure[0];
-        const rounded = floor
-            ? Math.floor(value)
-            : Math.round(value);
-
-        const plural = shortAbbr || rounded === 1
-            ? ''
-            : 's';
-
-        const measureIndex = shortAbbr
-            ? 1
-            : 2;
-
-        const units = measure[measureIndex] + plural;
-
-        if (shortAbbr) {
-            return `${rounded}${units}`;
-        }
-
-        return `${rounded} ${units}`;
-    };
-
-    const secondsNormalised = Math.max(seconds, 1);
-    const mainMeasureIndex = measures.findLastIndex(item => item[0] <= secondsNormalised);
-    const mainMeasure = measures.get(mainMeasureIndex);
-    const measureText = [getMeasureText(mainMeasure, secondsNormalised, true)];
-
-    if (mainMeasureIndex > 0) {
-        const extraSeconds = secondsNormalised % mainMeasure[0];
-        if (extraSeconds > 0) {
-            measureText.push(getMeasureText(measures.get(mainMeasureIndex - 1), extraSeconds));
-        }
+export function formatAge(seconds, shortAbbr = false) {
+    if (shortAbbr) {
+        return humanizeDuration(seconds * 1000, {
+            round: true,
+            largest: 2,
+            spacer: '',
+            language: 'shortEn',
+            languages: {
+                shortEn: {
+                    'y': () => 'Y',
+                    mo: () => 'M',
+                    'w': () => 'w',
+                    'd': () => 'd',
+                    'h': () => 'h',
+                    'm': () => 'm',
+                    's': () => 's',
+                    ms: () => 'ms'
+                }
+            }
+        });
     }
 
-    const abbr = shortAbbr
-        ? ''
-        : ' ago';
-
-    return `${measureText.join(', ')}${abbr}`;
+    return `${humanizeDuration(seconds * 1000, { round: true, largest: 2 })} ago`;
 }
 

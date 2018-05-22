@@ -162,7 +162,7 @@ describe('Content reducer', () => {
                             }
                         },
                         fundsCachedValue: {
-                            ageText: '18 days, 7 hours ago',
+                            ageText: '2 weeks, 4 days ago',
                             value: 0
                         }
                     },

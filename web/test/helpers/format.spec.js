@@ -160,7 +160,20 @@ describe('Format functions', () => {
 
     describe('formatAge', () => {
         it('should format the age properly', () => {
-            expect(formatAge(86450)).to.equal('1 day, 0 hours ago');
+            expect(formatAge(0)).to.equal('0 seconds ago');
+            expect(formatAge(1)).to.equal('1 second ago');
+            expect(formatAge(2)).to.equal('2 seconds ago');
+            expect(formatAge(59)).to.equal('59 seconds ago');
+            expect(formatAge(59.4)).to.equal('59 seconds ago');
+            expect(formatAge(59.5)).to.equal('1 minute ago');
+            expect(formatAge(60)).to.equal('1 minute ago');
+            expect(formatAge(61)).to.equal('1 minute, 1 second ago');
+            expect(formatAge(93)).to.equal('1 minute, 33 seconds ago');
+            expect(formatAge(7175)).to.equal('2 hours ago');
+            expect(formatAge(7619)).to.equal('2 hours, 7 minutes ago');
+            expect(formatAge(86395)).to.equal('1 day ago');
+            expect(formatAge(86400)).to.equal('1 day ago');
+            expect(formatAge(86450)).to.equal('1 day ago');
             expect(formatAge(96450)).to.equal('1 day, 3 hours ago');
             expect(formatAge(180450)).to.equal('2 days, 2 hours ago');
             expect(formatAge(812391239)).to.equal('25 years, 9 months ago');
