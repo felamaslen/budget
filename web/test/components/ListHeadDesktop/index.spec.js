@@ -19,7 +19,7 @@ describe('List page <ListHeadDesktop />', () => {
 
     it('should render its basic structure', () => {
         expect(wrapper.is('div.list-head-inner.noselect')).to.equal(true);
-        expect(wrapper.children()).to.have.length(9);
+        expect(wrapper.children()).to.have.length(7);
     });
 
     it('should render a list head', () => {
@@ -54,16 +54,14 @@ describe('List page <ListHeadDesktop />', () => {
     });
 
     it('should render a total column', () => {
-        expect(wrapper.childAt(6).is('span.total')).to.equal(true);
-        expect(wrapper.childAt(6).text()).to.equal('Total:');
+        expect(wrapper.childAt(6).is('div.total-outer')).to.equal(true);
 
-        expect(wrapper.childAt(7).is('span.total-value')).to.equal(true);
-        expect(wrapper.childAt(7).text()).to.equal('£4.00');
-    });
+        expect(wrapper.childAt(6).children()).to.have.length(2);
 
-    it('should render any extra stuff', () => {
-        expect(wrapper.childAt(8).is(AfterHead)).to.equal(true);
-        expect(wrapper.childAt(8).props()).to.have.property('page', 'food');
+        expect(wrapper.childAt(6).childAt(0).text()).to.equal('Total:');
+
+        expect(wrapper.childAt(6).childAt(1).is('span.total-value')).to.equal(true);
+        expect(wrapper.childAt(6).childAt(1).text()).to.equal('£4.00');
     });
 });
 

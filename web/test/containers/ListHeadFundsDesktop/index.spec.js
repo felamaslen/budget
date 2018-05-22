@@ -36,10 +36,10 @@ describe('<ListHeadFundsDesktop />', () => {
     const wrapper = shallow(<ListHeadFundsDesktop {...props} />, store).dive();
 
     it('should render its basic structure', () => {
-        expect(wrapper.is('span.gain.profit')).to.equal(true);
+        expect(wrapper.is('span.overall-gain.profit')).to.equal(true);
         expect(wrapper.hasClass('loss')).to.equal(false);
 
-        expect(wrapper.children()).to.have.length(4);
+        expect(wrapper.children()).to.have.length(3);
     });
 
     it('should render a loss class', () => {
@@ -52,14 +52,16 @@ describe('<ListHeadFundsDesktop />', () => {
     });
 
     it('should render gain info', () => {
-        expect(wrapper.childAt(0).is('span.gain-info')).to.equal(true);
-        expect(wrapper.childAt(0).text()).to.equal('Current value:');
-        expect(wrapper.childAt(1).is('span.value')).to.equal(true);
-        expect(wrapper.childAt(1).text()).to.equal('£103.32');
-        expect(wrapper.childAt(2).is('span.gain-pct')).to.equal(true);
-        expect(wrapper.childAt(2).text()).to.equal('3.32%');
-        expect(wrapper.childAt(3).is('span.cache-age')).to.equal(true);
-        expect(wrapper.childAt(3).text()).to.equal('(3 hours ago)');
+        expect(wrapper.childAt(0).is('span.value')).to.equal(true);
+        expect(wrapper.childAt(0).text()).to.equal('£103.32');
+        expect(wrapper.childAt(1).is('span.gain-values')).to.equal(true);
+        expect(wrapper.childAt(1).children()).to.have.length(2);
+        expect(wrapper.childAt(1).childAt(0).is('span.gain-pct')).to.equal(true);
+        expect(wrapper.childAt(1).childAt(0).text()).to.equal('3.32%');
+        expect(wrapper.childAt(1).childAt(1).is('span.gain-abs')).to.equal(true);
+        expect(wrapper.childAt(1).childAt(1).text()).to.equal('£3.32');
+        expect(wrapper.childAt(2).is('span.cache-age')).to.equal(true);
+        expect(wrapper.childAt(2).text()).to.equal('(3 hours ago)');
     });
 
     it('should reload fund prices on click', () => {

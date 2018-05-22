@@ -1,6 +1,6 @@
 {
   "name": "budget",
-  "version": "4.2.3",
+  "version": "4.2.4",
   "description": "Personal finance app",
   "main": "index.js",
   "engines": {
@@ -104,6 +104,7 @@
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
     "history": "^4.7.2",
+    "humanize-duration": "^3.14.0",
     "immutable": "^3.8.1",
     "import-glob-loader": "^1.1.0",
     "intl-locales-supported": "^1.0.0",

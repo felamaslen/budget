@@ -3,7 +3,29 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '../../helpers/format';
 import { PAGES } from '../../constants/data';
 
-export default function ListHeadDesktop({ page, weeklyValue, getDaily, totalCost, AfterHead }) {
+export default function ListHeadDesktop({ TotalValue, ...props }) {
+    const { page, weeklyValue, getDaily, totalCost } = props;
+
+    let totalValue = null;
+    if (TotalValue) {
+        totalValue = (
+            <TotalValue {...props} />
+        );
+    }
+    else {
+        const value = formatCurrency(totalCost, {
+            abbreviate: true,
+            precision: 1
+        });
+
+        totalValue = (
+            <div className="total-outer">
+                <span className="total">{'Total:'}</span>
+                <span className="total-value">{value}</span>
+            </div>
+        );
+    }
+
     const weeklyValueFormatted = formatCurrency(weeklyValue, {
         abbreviate: true,
         precision: 1
@@ -17,27 +39,15 @@ export default function ListHeadDesktop({ page, weeklyValue, getDaily, totalCost
         </span>
         : null;
 
-    const totalValue = formatCurrency(totalCost, {
-        abbreviate: true,
-        precision: 1
-    });
-
     const listHead = PAGES[page].cols.map((column, key) => {
         return <span key={key} className={column}>{column}</span>;
     });
-
-    let afterHead = null;
-    if (AfterHead) {
-        afterHead = <AfterHead page={page} />;
-    }
 
     return (
         <div className="list-head-inner noselect">
             {listHead}
             {dailyValues}
-            <span className="total">{'Total:'}</span>
-            <span className="total-value">{totalValue}</span>
-            {afterHead}
+            {totalValue}
         </div>
     );
 }
@@ -47,6 +57,6 @@ ListHeadDesktop.propTypes = {
     weeklyValue: PropTypes.number,
     getDaily: PropTypes.bool,
     totalCost: PropTypes.number,
-    AfterHead: PropTypes.func
+    TotalValue: PropTypes.func
 };
 

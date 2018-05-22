@@ -7,21 +7,34 @@ import classNames from 'classnames';
 import { formatCurrency, formatPercent } from '../../helpers/format';
 
 function ListHeadFundsDesktop({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {
-    const gain = totalCost
-        ? (cachedValue.get('value') - totalCost) / totalCost
-        : 0;
+    let gainValues = null;
+    const currentValue = cachedValue.get('value');
+    const gainAbsValue = currentValue - totalCost;
 
-    const className = classNames('gain', {
-        profit: gain > 0,
-        loss: gain < 0
-    });
+    const profitClass = { profit: gainAbsValue > 0, loss: gainAbsValue < 0 };
 
-    return <span className={className} onClick={onReloadPrices(shortPeriod)}>
-        <span className="gain-info">{'Current value:'}</span>
-        <span className="value">{formatCurrency(cachedValue.get('value'))}</span>
-        <span className="gain-pct">{formatPercent(gain, { brackets: true, precision: 2 })}</span>
-        <span className="cache-age">({cachedValue.get('ageText')})</span>
-    </span>;
+    if (totalCost) {
+        const gainPctValue = gainAbsValue / totalCost;
+
+        const formatOptions = { brackets: true, precision: 2 };
+
+        gainValues = (
+            <span className="gain-values">
+                <span className="gain-pct">{formatPercent(gainPctValue, formatOptions)}</span>
+                <span className="gain-abs">{formatCurrency(gainAbsValue, formatOptions)}</span>
+            </span>
+        );
+    }
+
+    const className = classNames('overall-gain', profitClass);
+
+    return (
+        <span className={className} onClick={onReloadPrices(shortPeriod)}>
+            <span className="value">{formatCurrency(currentValue)}</span>
+            {gainValues}
+            <span className="cache-age">({cachedValue.get('ageText')})</span>
+        </span>
+    );
 }
 
 ListHeadFundsDesktop.propTypes = {

@@ -136,35 +136,37 @@ export default class InteractiveEditableTransactions extends ImmutableComponent 
 
         const className = classNames('active', 'editable', 'editable-transactions');
 
-        return <span className={className}>
-            <span className="num-transactions">
-                {formatValue(item, value)}
-            </span>
-            <div className="modal">
-                <div className="inner">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>{'Date'}</th>
-                                <th>{'Units'}</th>
-                                <th colSpan="2">{'Cost'}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><input ref={addDateRef} /></td>
-                                <td><input ref={addUnitsRef} /></td>
-                                <td><input ref={addCostRef} /></td>
-                                <td>
-                                    <button onClick={addOnClick}>{'+'}</button>
-                                </td>
-                            </tr>
-                            {editList}
-                        </tbody>
-                    </table>
+        return (
+            <span className={className}>
+                <span className="num-transactions">
+                    {formatValue(item, value)}
+                </span>
+                <div className="modal">
+                    <div className="inner">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>{'Date'}</th>
+                                    <th>{'Units'}</th>
+                                    <th colSpan="2">{'Cost'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input ref={addDateRef} /></td>
+                                    <td><input ref={addUnitsRef} /></td>
+                                    <td><input ref={addCostRef} /></td>
+                                    <td>
+                                        <button onClick={addOnClick}>{'+'}</button>
+                                    </td>
+                                </tr>
+                                {editList}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>;
-        </span>;
+            </span>
+        );
     }
 }
 

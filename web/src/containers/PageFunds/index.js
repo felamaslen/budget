@@ -15,7 +15,7 @@ function PageFunds({ sold }) {
     return (
         <PageList page="funds"
             After={FundsMeta}
-            AfterHead={ListHeadFundsDesktop}
+            TotalValue={ListHeadFundsDesktop}
             AfterRow={ListRowFundsDesktop}
             AfterRowMobile={ListRowFundsMobile}
             listColsMobile={['item']}
