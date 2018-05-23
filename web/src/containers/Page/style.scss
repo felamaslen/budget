@@ -1,0 +1,20 @@
+@import '../../sass/responsive.scss';
+
+// desktop
+@media screen and (min-width: $width-page-mobile) {
+    .page {
+        display: flex;
+        flex-flow: row;
+        flex-wrap: wrap;
+    }
+}
+
+
+// mobile
+@media screen and (max-width: $width-page-mobile) {
+    .page {
+        display: flex;
+        flex-flow: column;
+    }
+}
+

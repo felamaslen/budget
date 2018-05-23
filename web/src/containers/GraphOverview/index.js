@@ -1,3 +1,4 @@
+import './style.scss';
 import { connect } from 'react-redux';
 import { aShowAllToggled } from '../../actions/graph.actions';
 import React from 'react';

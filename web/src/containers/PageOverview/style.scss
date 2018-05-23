@@ -1,4 +1,25 @@
-.page-overview {
+@import '../../sass/responsive.scss';
+@import '../../sass/variables.scss';
+@import '../../sass/mixins.scss';
+
+@mixin hide-overview-columns($width) {
+    @media screen and (max-width: $width) {
+        .page.page-overview {
+            .table-flex {
+                .col {
+                    &.funds, &.bills, &.food, &.general, &.holiday, &.social {
+                        display: none;
+                    }
+                    &.month {
+                        border-right: none;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.page.page-overview {
     .table-flex {
         .active {
             .month {
@@ -55,6 +76,219 @@
             &.enabled {
                 .checkbox:after {
                     background: black;
+                }
+            }
+        }
+    }
+}
+
+.graph-container {
+    z-index: 2;
+}
+
+// desktop
+@media screen and (min-width: $width-page-mobile) {
+    .page.page-overview {
+        display: flex;
+        
+        .table-flex {
+            flex: 0 0 auto;
+
+            cursor: default;
+            .editable-outer {
+                width: 80px;
+                &.editing {
+                    padding: 0;
+                }
+            }
+            .header {
+                .col {
+                    &.month, &.income {
+                        border: none;
+                    }
+                }
+            }
+            @mixin row-height($height) {
+                height: $height;
+                line-height: $height;
+                .editable-input {
+                    height: $height - 1px;
+                }
+            }
+            .row {
+                @include row-height(24px);
+                font-size: 16px;
+            }
+            .past {
+                @include unimportant;
+                @include row-height(16px);
+                font-size: 13px;
+            }
+            .col {
+                &.month {
+                    border-right: 3px solid $color-dark;
+                    text-align: left;
+                }
+                &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
+                    flex-grow: 0.7;
+                }
+                &.income {
+                    border-left: 3px solid $color-dark;
+                }
+                &.net {
+                    flex-grow: 1;
+                    border-right: 3px solid $color-light;
+                }
+                &.predicted {
+                    flex-grow: 0.9;
+                    font-style: italic;
+                }
+                &.balance {
+                    flex-grow: 1.2;
+                }
+                .text {
+                    display: flex;
+                    width: 100%;
+                    padding: 0 2px;
+                }
+                &.balancePred {
+                    display: none;
+                }
+            }
+            .editable-input {
+                right: 0;
+                top: 0;
+                padding: 0;
+            }
+            .active {
+                font-weight: bold;
+            }
+            .future {
+            }
+        }
+
+        .graph-container-outer {
+            display: flex;
+        }
+    }
+}
+
+// desktop (large)
+@media screen and (min-width: $width-page-tablet) {
+    .page.page-overview {
+        flex-flow: row;
+        position: relative;
+
+        .table-flex {
+            flex: 1 0 700px;
+            max-width: 1024px;
+            
+            .table-overview-rows {
+                flex: 1 1 auto;
+                overflow: auto;
+            }
+        }
+
+        .graph-container-outer {
+            flex: 0 1 520px;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            max-height: 640px;
+        }
+    }
+
+    @include hide-overview-columns(1380px);
+}
+
+// tablet
+@media screen and (min-width: $width-page-mobile) and (max-width: $width-page-tablet) {
+    .page.page-overview {
+        flex-flow: column;
+        flex-wrap: nowrap;
+        overflow-y: auto;
+        padding-bottom: 1em;
+
+        .graph-container-outer {
+            flex: 0 0 300px;
+            height: 300px;
+        }
+    }
+
+    @include hide-overview-columns(880px);
+}
+
+// mobile
+@media screen and (max-width: $width-page-mobile) {
+    .page.page-overview {
+        .funds, .bills, .food, .general, .holiday, .social,
+        .net, .balance {
+            display: none;
+        }
+
+        .table-flex {
+            width: 100%;
+
+            .header {
+                flex: 0 0 auto;
+
+                .col .text {
+                    text-align: center;
+                    height: 20px;
+                    line-height: 20px;
+                }
+                .month {
+                    background: $color-mob-overview-tbl-month;
+                }
+                .income {
+                    background: $color-mob-overview-tbl-income;
+                }
+                .spending {
+                    background: $color-mob-overview-tbl-spending;
+                }
+                .predicted {
+                    background: $color-mob-overview-tbl-balance;
+                }
+            }
+            .table-overview-rows {
+                flex: 1 1 auto;
+                overflow-y: auto;
+            }
+
+            .col {
+                .text, .editable {
+                    padding: 4px 10px;
+                    display: inline-block;
+                    width: 100%;
+                    vertical-align: middle;
+                    text-align: left;
+                    height: 32px;
+                    line-height: 32px;
+                }
+            }
+            .past {
+                font-style: italic;
+                color: $color-medium-slightly-dark;
+
+                .month {
+                    background: $color-light;
+                }
+            }
+            .active {
+                font-weight: bold;
+            }
+            .future {
+            }
+        }
+    }
+
+    @media screen and (max-width: $width-page-mobile-small) {
+        .page-overview {
+            .table-flex {
+                .col {
+                    .text, .editable {
+                        padding: 4px 1px;
+                    }
                 }
             }
         }

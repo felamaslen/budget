@@ -1,6 +1,323 @@
+@import '../../sass/responsive.scss';
+@import '../../sass/variables.scss';
+@import '../../sass/mixins.scss';
+
 .page-income {
     .graph-container-pie {
         width: 824px;
     }
 }
+
+// desktop (large)
+@media screen and (min-width: $width-page-tablet) {
+}
+
+// desktop
+@media screen and (min-width: $width-page-mobile) {
+    .list-insert {
+        display: flex;
+        flex-flow: column;
+        flex: 1 0 auto;
+        overflow-y: auto;
+
+        .list-head {
+            position: fixed;
+            left: 0;
+            z-index: 4;
+            font-weight: bold;
+            line-height: 24px;
+            text-transform: capitalize;
+            white-space: nowrap;
+
+            top: $top-nav - 10;
+            
+            .weekly, .weekly-value, .total, .total-value {
+                margin-left: 0.2em;
+                padding-left: 0.2em;
+            }
+            span {
+                text-align: left;
+                padding-left: 1px;
+                vertical-align: middle;
+                line-height: 24px;
+            }
+        }
+        .list-head-inner {
+            display: flex;
+            flex-flow: row;
+            
+            border-bottom: 1px solid $color-medium-very-light;
+            width: 100%;
+            height: 24px;
+            background: $color-white;
+        }
+
+        li, .list-head-inner {
+            & > span {
+                flex: 0 0 auto;
+
+                &.date {
+                    flex: 0 0 96px;
+                }
+                &.item, &.category, &.society, &.holiday {
+                    flex: 0 0 192px;
+                }
+                &.value, &.cost {
+                    flex: 0 0 96px;
+                    justify-content: right;
+                }
+                &.shop {
+                    flex: 0 0 128px;
+                }
+                &.daily {
+                    flex: 0 0 86px;
+                }
+            }
+        }
+
+        .future {
+            @include unimportant;
+        }
+        .first-present {
+            border-top: 1px solid $color-medium-slightly-dark;
+        }
+        
+        .list-ul {
+            display: flex;
+            flex: 0 0 auto;
+            flex-flow: column;
+            
+            margin: 0;
+            padding: 24px 0 0 0;
+            list-style: none;
+            width: 100%;
+
+            .progress {
+                position: absolute;
+                right: 2px;
+                top: 3px;
+            }
+
+            & > li {
+                display: flex;
+                flex-flow: row;
+
+                width: 100%;
+                height: 24px;
+                line-height: 24px;
+            }
+            & > li:nth-child(2n+1) {
+                background: $color-translucent-dark;
+            }
+            li {
+                &:not(.li-add) > span:not(.active) {
+                    overflow: hidden;
+                }
+                & > span {
+                    display: inline-flex;
+                    text-overflow: ellipsis;
+                    vertical-align: top;
+                    height: inherit;
+
+                    & > span {
+                        border-right: 1px solid $color-slightly-light;
+                        &.active {
+                            overflow: visible;
+                        }
+                    }
+                }
+            }
+            .editable, .editable-input {
+                height: inherit;
+            }
+            .text {
+                margin-right: 2px;
+                padding: 0 2px;
+            }
+            .delete {
+                display: flex;
+                flex: 0 0 20px;
+                align-items: center;
+                justify-content: center;
+                border-right: none;
+
+                a {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                    background: $color-delete;
+                    font-size: 20px;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 100%;
+
+                    &::after {
+                        display: block;
+                        width: 80%;
+                        height: 3px;
+                        background: $color-white;
+                        content: '';
+                    }
+
+                    &:active {
+                        background: $color-delete-active;
+                    }
+                }
+            }
+            .suggestions {
+                margin: 0;
+                padding: 0;
+                position: absolute;
+                width: 100%;
+                z-index: 10;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                box-shadow: 0 3px 6px $color-shadow-l3;
+                background: $color-translucent-l95;
+            }
+            .suggestion {
+                margin: 1px 0;
+                padding: 2px;
+                cursor: default;
+            }
+            .suggestion.active {
+                background: $color-blue;
+                color: $color-white;
+            }
+        }
+    }
+}
+
+// mobile
+@media screen and (max-width: $width-page-mobile) {
+    .list-insert {
+        display: flex;
+        flex-flow: column;
+        
+        .list-head {
+            display: flex;
+            flex: 0 0 28px;
+            align-items: center;
+            flex-flow: row nowrap;
+            width: 100%;
+
+            font-weight: bold;
+
+            span {
+                text-align: center;
+                text-transform: capitalize;
+            }
+        }
+        .list-ul {
+            display: flex;
+            margin: 0;
+            padding: 0;
+            flex-flow: column nowrap;
+            overflow-y: auto;
+
+            li {
+                display: flex;
+                flex-flow: row nowrap;
+                $item-height: 36px;
+                flex: 0 0 $item-height;
+                line-height: $item-height;
+                height: $item-height;
+                & > span {
+                    display: flex;
+                    flex-basis: 0;
+                    min-width: 0;
+                    white-space: nowrap;
+                    padding: 0 2px;
+
+                    span {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+        }
+        .list-head, .list-ul {
+            .date {
+                flex-grow: 4;
+            }
+            .item {
+                flex-grow: 7;
+            }
+            .cost {
+                flex-grow: 4;
+            }
+        }
+        .button-add-outer {
+            display: flex;
+            flex: 0 0 48px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            background: $color-translucent-l7;
+        }
+        .button-add {
+            width: 120px;
+            flex-grow: 0;
+            background: $color-mob-primary-dark;
+            color: $color-white;
+        }
+    }
+
+    .list-funds {
+        &, .list-head {
+            background: $color-funds-light;
+        }
+        .list-head, .list-ul {
+            .date {
+                flex-grow: 8;
+            }
+            .item {
+                flex-grow: 12;
+            }
+            .cost {
+                flex-grow: 10;
+                font-size: 90%;
+            }
+            .cost-value, .actual-value {
+                flex: 1 1 0;
+                text-align: center;
+            }
+            .actual-value {
+                font-weight: bold;
+            }
+        }
+    }
+    .list-income {
+        &, .list-head {
+            background: $color-income-light;
+        }
+    }
+    .list-bills {
+        &, .list-head {
+            background: $color-bills-light;
+        }
+    }
+    .list-food {
+        &, .list-head {
+            background: $color-food-light;
+        }
+    }
+    .list-general {
+    &, .list-head {
+        background: $color-general-light;
+        }
+    }
+    .list-holiday {
+        &, .list-head {
+            background: $color-holiday-light;
+        }
+    }
+    .list-social {
+        &, .list-head {
+            background: $color-social-light;
+        }
+    }
+}
+
 

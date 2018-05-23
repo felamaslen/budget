@@ -1,3 +1,4 @@
+import './style.scss';
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { aContentRequested } from '../../actions/content.actions';

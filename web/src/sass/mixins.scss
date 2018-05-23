@@ -70,20 +70,3 @@
     background-size: $size $size;
 }
 
-@mixin hide-overview-columns($width) {
-    @media screen and (max-width: $width) {
-        .page-overview {
-            .table-flex {
-                .col {
-                    &.funds, &.bills, &.food, &.general, &.holiday, &.social {
-                        display: none;
-                    }
-                    &.month {
-                        border-right: none;
-                    }
-                }
-            }
-        }
-    }
-}
-

@@ -1,3 +1,6 @@
+@import '../../sass/responsive.scss';
+@import '../../sass/variables.scss';
+
 #root > .main {
     display: flex;
     flex-flow: column;
@@ -45,7 +48,6 @@
 }
 
 .table-insert {
-    border-collapse: collapse;
     th {
         text-transform: capitalize;
         text-align: center;
@@ -77,5 +79,13 @@
     color: $color-medium-slightly-dark;
     text-align: center;
     font-style: italic;
+}
+
+// tablet
+@media screen and (min-width: $width-page-mobile) and (max-width: $width-page-tablet) {
+    .page-wrapper {
+        margin: 0 auto;
+        position: relative;
+    }
 }
 

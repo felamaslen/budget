@@ -107,11 +107,11 @@ function setupApi(app, config, db, logger) {
 }
 
 function setupDevServer(app) {
-    const conf = require('../../webpack.config')();
+    const conf = require('../../webpack.config');
     const compiler = require('webpack')(conf);
 
     app.use(require('webpack-dev-middleware')(compiler, {
-        publicPath: conf.output.publicPath,
+        publicPath: '/',
         stats: {
             colors: true,
             modules: false,

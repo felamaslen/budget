@@ -2,6 +2,7 @@
  * get an editable component for use in another component
  */
 
+import './style.scss';
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import * as actions from '../../actions/edit.actions';

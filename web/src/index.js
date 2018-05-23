@@ -14,7 +14,6 @@ import store from './store';
 import Root from './containers/Root';
 
 // import styles and favicon
-import './sass/index.scss';
 import './images/favicon.png';
 
 function renderApp(RootComponent = Root) {

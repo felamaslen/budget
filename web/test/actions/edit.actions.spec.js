@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-
 import * as A from '../../src/actions/edit.actions';
 import * as C from '../../src/constants/actions';
 

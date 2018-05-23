@@ -2,8 +2,8 @@
  * Block packer component
  */
 
+import './style.scss';
 import { List as list } from 'immutable';
-
 import React from 'react';
 import PropTypes from 'prop-types';
 

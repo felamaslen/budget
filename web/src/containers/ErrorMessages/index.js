@@ -2,9 +2,9 @@
  * React component to display error messages
  */
 
+import './style.scss';
 import { List } from 'immutable';
 import { connect } from 'react-redux';
-
 import React from 'react';
 import PureComponent from '../../ImmutableComponent';
 import PropTypes from 'prop-types';

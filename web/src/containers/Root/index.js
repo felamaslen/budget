@@ -1,3 +1,4 @@
+import './style.scss';
 import { connect, Provider } from 'react-redux';
 import { aUserLoggedOut } from '../../actions/app.actions';
 import { aPageSet, aContentRequested } from '../../actions/content.actions';

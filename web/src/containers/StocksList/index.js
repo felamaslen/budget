@@ -3,6 +3,7 @@
  * are based on the user's funds' top holdings
  */
 
+import './style.scss';
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '../../constants/stocks';

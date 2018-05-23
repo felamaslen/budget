@@ -2,13 +2,14 @@
  * Graph general cash flow (balance over time)
  */
 
+import './style.scss';
 import { Map as map, List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
     COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS, COLOR_LIGHT_GREY
 } from '../../constants/colors';
-import { graphOverviewHeightMobile } from '../../constants/styles';
+import styles from '../../constants/styles.json';
 import { rgba } from '../../helpers/color';
 import GraphCashFlow, { getValuesWithTime } from '../GraphCashFlow';
 import Key from './Key';
@@ -88,7 +89,7 @@ export default function GraphBalance({ targets, isMobile, ...props }) {
     };
 
     if (isMobile) {
-        graphProps.graphHeight = graphOverviewHeightMobile;
+        graphProps.graphHeight = styles.graphOverviewHeightMobile;
     }
 
     return <GraphCashFlow {...graphProps} />;
