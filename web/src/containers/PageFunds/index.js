@@ -1,3 +1,4 @@
+import './style.scss';
 import { OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
 import React from 'react';

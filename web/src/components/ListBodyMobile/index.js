@@ -1,3 +1,4 @@
+import './style.scss';
 import { List as list } from 'immutable';
 import { PAGES, LIST_COLS_MOBILE } from '../../constants/data';
 import React from 'react';

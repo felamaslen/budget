@@ -3,9 +3,8 @@
  */
 
 import { connect } from 'react-redux';
-
+import './style.scss';
 import { aLoginFormInputted } from '../../actions/login.actions';
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';

@@ -2,6 +2,7 @@
  * Individual fund price graph
  */
 
+import './style.scss';
 import { List as list, Map as map } from 'immutable';
 import { aFundItemGraphToggled } from '../../actions/graph.actions';
 import { connect } from 'react-redux';

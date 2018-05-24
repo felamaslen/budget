@@ -1,3 +1,4 @@
+import './style.scss';
 import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../actions/form.actions';
 import { aListItemAdded } from '../../actions/edit.actions';

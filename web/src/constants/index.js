@@ -1,6 +1,6 @@
-import { widthPageMobile } from './styles';
+import styles from './styles.json';
 
-export const mediaQueryMobile = `(max-width: ${widthPageMobile}px)`;
+export const mediaQueryMobile = `(max-width: ${styles.widthPageMobile}px)`;
 
 export const LOCALE = 'en-GB';
 export const SYMBOL_CURRENCY_HTML = '\u00a3';

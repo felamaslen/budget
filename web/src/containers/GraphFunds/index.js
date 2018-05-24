@@ -2,6 +2,7 @@
  * Graph general cash flow (balance over time)
  */
 
+import './style.scss';
 import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { DateTime } from 'luxon';
@@ -16,7 +17,7 @@ import {
     GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
     GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
 } from '../../constants/graph';
-import { graphFundsHeightMobile } from '../../constants/styles';
+import styles from '../../constants/styles.json';
 import { rgba } from '../../helpers/color';
 import { formatValue } from '../../helpers/funds';
 import Axes from './Axes';
@@ -190,7 +191,7 @@ const mapStateToProps = (state, { isMobile }) => ({
     name: 'fund-history',
     width: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_FUNDS_WIDTH),
     height: isMobile
-        ? graphFundsHeightMobile
+        ? styles.graphFundsHeightMobile
         : GRAPH_FUNDS_HEIGHT,
     fundHistoryCache: state.getIn(['other', 'fundHistoryCache']),
     fundItems: state.getIn(['other', 'graphFunds', 'data', 'fundItems']),

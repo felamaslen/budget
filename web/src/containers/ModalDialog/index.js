@@ -3,7 +3,7 @@
  */
 
 import { connect } from 'react-redux';
-
+import './style.scss';
 import React from 'react';
 import PureComponent from '../../ImmutableComponent';
 import PropTypes from 'prop-types';

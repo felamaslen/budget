@@ -1,3 +1,4 @@
+import './style.scss';
 import { connect } from 'react-redux';
 import { aContentRequested } from '../../actions/content.actions';
 import React from 'react';
