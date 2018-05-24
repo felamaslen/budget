@@ -1,6 +1,12 @@
 @import '../../sass/responsive.scss';
 @import '../../sass/variables.scss';
 
+.editable {
+    &.active {
+        position: relative;
+    }
+}
+
 @media screen and (min-width: $width-page-mobile) {
     .editable {
         flex: 1 1 auto;
