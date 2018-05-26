@@ -22,19 +22,26 @@ describe('<GraphOverview />', () => {
                     startDate: DateTime.fromObject({ year: 2017, month: 2 }),
                     currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
                     futureMonths: 5,
-                    targets: fromJS([
-                        {
-                            tag: '1y',
-                            value: 2166836
-                        },
-                        {
-                            tag: '3y',
-                            value: 3480000
-                        },
-                        {
-                            tag: '5y',
-                            value: 2287935
-                        }
+                    dates: fromJS([
+                        DateTime.fromObject({ year: 2016, month: 9 }),
+                        DateTime.fromObject({ year: 2016, month: 10 }),
+                        DateTime.fromObject({ year: 2016, month: 11 }),
+                        DateTime.fromObject({ year: 2016, month: 12 }),
+                        DateTime.fromObject({ year: 2017, month: 1 }),
+                        DateTime.fromObject({ year: 2017, month: 2 }),
+                        DateTime.fromObject({ year: 2017, month: 3 }),
+                        DateTime.fromObject({ year: 2017, month: 4 }),
+                        DateTime.fromObject({ year: 2017, month: 5 }),
+                        DateTime.fromObject({ year: 2017, month: 6 }),
+                        DateTime.fromObject({ year: 2017, month: 7 }),
+                        DateTime.fromObject({ year: 2017, month: 8 }),
+                        DateTime.fromObject({ year: 2017, month: 9 }),
+                        DateTime.fromObject({ year: 2017, month: 10 }),
+                        DateTime.fromObject({ year: 2017, month: 11 }),
+                        DateTime.fromObject({ year: 2017, month: 12 }),
+                        DateTime.fromObject({ year: 2018, month: 1 }),
+                        DateTime.fromObject({ year: 2018, month: 2 }),
+                        DateTime.fromObject({ year: 2018, month: 3 })
                     ]),
                     cost: fromJS({
                         funds: [983204, 983204, 983204, 983204, 983204, 983204, 983204, 983204],
@@ -105,7 +112,6 @@ describe('<GraphOverview />', () => {
                 name: 'balance',
                 cost: state.getIn(['pages', 'overview', 'data', 'cost']),
                 showAll: false,
-                targets: state.getIn(['pages', 'overview', 'data', 'targets']),
                 startDate: DateTime.fromObject({ year: 2017, month: 2 }),
                 currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
                 now: DateTime.fromObject({ year: 2018, month: 1, day: 22 }),

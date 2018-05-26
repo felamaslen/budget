@@ -1,4 +1,5 @@
 import './style.scss';
+import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { aShowAllToggled } from '../../actions/graph.actions';
 import React from 'react';
@@ -8,6 +9,7 @@ import { DateTime } from 'luxon';
 import { mediaQueryMobile } from '../../constants';
 import { GRAPH_WIDTH } from '../../constants/graph';
 import { getNow } from '../../helpers/date';
+import { listAverage } from '../../helpers/data';
 import GraphBalance from '../../components/GraphBalance';
 import GraphSpending from '../../components/GraphSpending';
 
@@ -45,6 +47,34 @@ function GraphOverview(props) {
     );
 }
 
+function getTargets(state) {
+    const periods = list([
+        { last: 3, months: 12, tag: '1y' },
+        { last: 6, months: 36, tag: '3y' },
+        { last: 12, months: 60, tag: '5y' }
+    ]);
+
+    const futureMonths = state.getIn(['pages', 'overview', 'data', 'futureMonths']);
+
+    const values = state.getIn(['pages', 'overview', 'data', 'cost', 'balance'])
+        .slice(0, -futureMonths)
+        .reverse();
+
+    const currentValue = values.first();
+
+    return periods.map(({ last, months, tag }) => {
+        const from = state.getIn(['pages', 'overview', 'data', 'cost', 'balance',
+            -(futureMonths + 1 + last)]);
+
+        const date = state.getIn(['pages', 'overview', 'data', 'dates',
+            -(futureMonths + 1 + last)]).ts / 1000;
+
+        const value = from + (currentValue - from) * (months + last) / last;
+
+        return map({ date, from, months, last, tag, value });
+    });
+}
+
 const mapStateToProps = state => ({
     now: getNow(),
     startDate: state.getIn(['pages', 'overview', 'data', 'startDate']),
@@ -58,7 +88,7 @@ const mapStateToProps = state => ({
         futureMonths: state.getIn(['pages', 'overview', 'data', 'futureMonths']),
         cost: state.getIn(['pages', 'overview', 'data', 'cost']),
         showAll: state.getIn(['other', 'showAllBalanceGraph']),
-        targets: state.getIn(['pages', 'overview', 'data', 'targets'])
+        targets: getTargets(state)
     }
 });
 
