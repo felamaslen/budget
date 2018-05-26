@@ -29,9 +29,7 @@ const mapStateToProps = (state, { row, col, item, value }) => ({
     item,
     value,
     active: state.getIn(['edit', 'active', 'row']) === row &&
-        state.getIn(['edit', 'active', 'col']) === col,
-    suggestionsList: state.getIn(['editSuggestions', 'list']),
-    suggestionsActive: state.getIn(['editSuggestions', 'active'])
+        state.getIn(['edit', 'active', 'col']) === col
 });
 
 const mapDispatchToProps = dispatch => ({

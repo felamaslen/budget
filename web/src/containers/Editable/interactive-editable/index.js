@@ -13,22 +13,20 @@ export default class InteractiveEditable extends ImmutableComponent {
         this.input = null;
     }
     componentDidMount() {
-        setTimeout(() => {
+        setImmediate(() => {
             if (this.input && this.input.focus) {
                 this.input.focus();
             }
-        }, 0);
+        });
     }
     render() {
-        const { item, value, suggestionsList, suggestionsActive, onChange } = this.props;
+        const { item, value, onChange } = this.props;
 
         const inputRef = input => {
             this.input = input;
         };
 
-        const onInputChange = evt => onChange(
-            getEditValue(item, value, evt.target.value)
-        );
+        const onInputChange = evt => onChange(getEditValue(item, value, evt.target.value));
 
         const className = classNames('active', 'editable', `editable-${item}`);
 
@@ -42,7 +40,7 @@ export default class InteractiveEditable extends ImmutableComponent {
                 defaultValue={getDefaultValue(item, value)}
                 onChange={onInputChange}
             />
-            <SuggestionsList suggestionsList={suggestionsList} suggestionsActive={suggestionsActive} />
+            <SuggestionsList />
         </span>;
     }
 }
@@ -50,8 +48,6 @@ export default class InteractiveEditable extends ImmutableComponent {
 InteractiveEditable.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.any,
-    suggestionsList: PropTypes.instanceOf(list),
-    suggestionsActive: PropTypes.number,
     onChange: PropTypes.func.isRequired
 };
 

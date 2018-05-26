@@ -50,10 +50,6 @@ describe('<InteractiveEditable />', () => {
         const wrapper = shallow(<InteractiveEditable {...props} />);
 
         expect(wrapper.childAt(1).is(SuggestionsList)).to.equal(true);
-        expect(wrapper.childAt(1).props()).to.deep.equal({
-            suggestionsList: List.of(),
-            suggestionsActive: -1
-        });
     });
 });
 
