@@ -6,14 +6,18 @@ export default function Arrow({
     startY,
     length,
     angle,
-    arrowWidth = 6,
-    arrowHeight = 10,
+    arrowSize = 0,
     color,
     strokeWidth = 1,
+    fill,
+    dashed,
     pixX,
     pixY
 }) {
-    const radius = length - arrowHeight / 2;
+    const arrowWidth = 6 * (arrowSize + 0.5);
+    const arrowHeight = 10 * (arrowSize + 0.5);
+
+    const radius = length - (arrowHeight + strokeWidth / 2) * 0.6;
 
     const cosA = Math.cos(angle);
     const sinA = -Math.sin(angle);
@@ -25,29 +29,32 @@ export default function Arrow({
     const endPixY = startPixY + radius * sinA;
 
     const arrowHeadParts = [
-        [-arrowHeight / 2, -arrowWidth],
-        [arrowHeight / 2, 0],
-        [-arrowHeight / 2, arrowWidth],
-        [-arrowHeight * 0.2, 0]
+        [-(arrowHeight - strokeWidth) * 0.3, -(arrowWidth - strokeWidth / 2)],
+        [(arrowHeight - strokeWidth) * 0.6, 0],
+        [-(arrowHeight - strokeWidth) * 0.3, arrowWidth - strokeWidth / 2],
+        [0, 0]
     ]
         .map(([xPix, yPix]) => ([
             endPixX + (cosA * xPix - sinA * yPix),
             endPixY + (sinA * xPix + cosA * yPix)
         ]))
-        .reduce((path, [xPix, yPix], index) => {
-            const partKey = index
-                ? 'L'
-                : 'M';
-
-            return `${path} ${partKey}${xPix.toFixed(1)},${yPix.toFixed(1)}`;
+        .reduce((path, [xPix, yPix]) => {
+            return `${path} L${xPix.toFixed(1)},${yPix.toFixed(1)}`;
         }, '');
 
-    const arrowHead = `${arrowHeadParts}Z`;
+    const arrowHead = `M${startPixX},${startPixY} L${endPixX},${endPixY} ${arrowHeadParts}`;
+
+    const lineFill = fill
+        ? color
+        : 'none';
 
     return <g>
-        <line x1={startPixX} y1={startPixY} x2={endPixX} y2={endPixY}
-            stroke={color} strokeWidth={strokeWidth} />
-        <path d={arrowHead} stroke="none" fill={color} />
+        <path d={arrowHead}
+            stroke={color}
+            fill={lineFill}
+            strokeWidth={strokeWidth}
+            strokeDasharray={dashed || null }
+        />
     </g>;
 }
 
@@ -56,10 +63,11 @@ Arrow.propTypes = {
     startY: PropTypes.number.isRequired,
     length: PropTypes.number.isRequired,
     angle: PropTypes.number.isRequired,
-    arrowWidth: PropTypes.number,
-    arrowHeight: PropTypes.number,
+    arrowSize: PropTypes.number,
     color: PropTypes.string.isRequired,
     strokeWidth: PropTypes.number,
+    fill: PropTypes.bool,
+    dashed: PropTypes.string,
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,

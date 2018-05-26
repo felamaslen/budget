@@ -54,8 +54,10 @@ function getTargets(state) {
         { last: 12, months: 60, tag: '5y' }
     ]);
 
+    const futureMonths = state.getIn(['pages', 'overview', 'data', 'futureMonths']);
+
     const values = state.getIn(['pages', 'overview', 'data', 'cost', 'balance'])
-        .slice(0, -state.getIn(['pages', 'overview', 'data', 'futureMonths']))
+        .slice(0, -futureMonths)
         .reverse();
 
     const currentValue = values.first();
@@ -66,6 +68,9 @@ function getTargets(state) {
     const averageValue = last => listAverage(saved.slice(0, last));
 
     return periods.map(({ last, months, tag }) => map({
+        date: state.getIn(['pages', 'overview', 'data', 'dates', -(futureMonths + last)]).ts / 1000,
+        from: state.getIn(['pages', 'overview', 'data', 'cost', 'balance', -(futureMonths + last)]),
+        months,
         tag,
         value: currentValue + averageValue(last) * months
     }));

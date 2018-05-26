@@ -61,8 +61,8 @@ function processData({ cost, showAll, futureMonths, ...props }) {
 export default function GraphBalance({ targets, isMobile, ...props }) {
     const lines = processData(props);
 
-    const afterLines = () => <g>
-        <Targets targets={targets} />
+    const afterLines = subProps => <g>
+        <Targets {...subProps} targets={targets} />
         <Key title="Balance" />
     </g>;
 

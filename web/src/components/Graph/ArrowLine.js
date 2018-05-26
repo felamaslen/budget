@@ -22,9 +22,9 @@ export default function ArrowLine({ data, color, ...props }) {
             startY={0}
             length={Math.abs(props.pixY(yValue) - y0)}
             angle={Math.PI * (0.5 + ((yValue < 0) >> 0))}
-            arrowWidth={6 * (sizeRatio + 0.5)}
-            arrowHeight={10 * (sizeRatio + 0.5)}
+            arrowSize={sizeRatio}
             color={getColor(point)}
+            fill={true}
             strokeWidth={3 * sizeRatio}
             {...props}
         />);
