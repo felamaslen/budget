@@ -1,4 +1,5 @@
 import './style.scss';
+import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { aShowAllToggled } from '../../actions/graph.actions';
 import React from 'react';
@@ -8,6 +9,7 @@ import { DateTime } from 'luxon';
 import { mediaQueryMobile } from '../../constants';
 import { GRAPH_WIDTH } from '../../constants/graph';
 import { getNow } from '../../helpers/date';
+import { listAverage } from '../../helpers/data';
 import GraphBalance from '../../components/GraphBalance';
 import GraphSpending from '../../components/GraphSpending';
 
@@ -45,6 +47,30 @@ function GraphOverview(props) {
     );
 }
 
+function getTargets(state) {
+    const periods = list([
+        { last: 3, months: 12, tag: '1y' },
+        { last: 6, months: 36, tag: '3y' },
+        { last: 12, months: 60, tag: '5y' }
+    ]);
+
+    const values = state.getIn(['pages', 'overview', 'data', 'cost', 'balance'])
+        .slice(0, -state.getIn(['pages', 'overview', 'data', 'futureMonths']))
+        .reverse();
+
+    const currentValue = values.first();
+
+    const saved = values.slice(0, values.size - 1)
+        .map((value, index) => value - values.get(index + 1));
+
+    const averageValue = last => listAverage(saved.slice(0, last));
+
+    return periods.map(({ last, months, tag }) => map({
+        tag,
+        value: currentValue + averageValue(last) * months
+    }));
+}
+
 const mapStateToProps = state => ({
     now: getNow(),
     startDate: state.getIn(['pages', 'overview', 'data', 'startDate']),
@@ -58,7 +84,7 @@ const mapStateToProps = state => ({
         futureMonths: state.getIn(['pages', 'overview', 'data', 'futureMonths']),
         cost: state.getIn(['pages', 'overview', 'data', 'cost']),
         showAll: state.getIn(['other', 'showAllBalanceGraph']),
-        targets: state.getIn(['pages', 'overview', 'data', 'targets'])
+        targets: getTargets(state)
     }
 });
 

@@ -22,20 +22,6 @@ describe('<GraphOverview />', () => {
                     startDate: DateTime.fromObject({ year: 2017, month: 2 }),
                     currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
                     futureMonths: 5,
-                    targets: fromJS([
-                        {
-                            tag: '1y',
-                            value: 2166836
-                        },
-                        {
-                            tag: '3y',
-                            value: 3480000
-                        },
-                        {
-                            tag: '5y',
-                            value: 2287935
-                        }
-                    ]),
                     cost: fromJS({
                         funds: [983204, 983204, 983204, 983204, 983204, 983204, 983204, 983204],
                         income: [163613, 163613, 163613, 163613, 163613, 0, 0],
@@ -105,7 +91,6 @@ describe('<GraphOverview />', () => {
                 name: 'balance',
                 cost: state.getIn(['pages', 'overview', 'data', 'cost']),
                 showAll: false,
-                targets: state.getIn(['pages', 'overview', 'data', 'targets']),
                 startDate: DateTime.fromObject({ year: 2017, month: 2 }),
                 currentDate: DateTime.fromObject({ year: 2018, month: 3 }),
                 now: DateTime.fromObject({ year: 2018, month: 1, day: 22 }),
