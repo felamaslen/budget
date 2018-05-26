@@ -62,18 +62,17 @@ function getTargets(state) {
 
     const currentValue = values.first();
 
-    const saved = values.slice(0, values.size - 1)
-        .map((value, index) => value - values.get(index + 1));
+    return periods.map(({ last, months, tag }) => {
+        const from = state.getIn(['pages', 'overview', 'data', 'cost', 'balance',
+            -(futureMonths + 1 + last)]);
 
-    const averageValue = last => listAverage(saved.slice(0, last));
+        const date = state.getIn(['pages', 'overview', 'data', 'dates',
+            -(futureMonths + 1 + last)]).ts / 1000;
 
-    return periods.map(({ last, months, tag }) => map({
-        date: state.getIn(['pages', 'overview', 'data', 'dates', -(futureMonths + last)]).ts / 1000,
-        from: state.getIn(['pages', 'overview', 'data', 'cost', 'balance', -(futureMonths + last)]),
-        months,
-        tag,
-        value: currentValue + averageValue(last) * months
-    }));
+        const value = from + (currentValue - from) * (months + last) / last;
+
+        return map({ date, from, months, last, tag, value });
+    });
 }
 
 const mapStateToProps = state => ({

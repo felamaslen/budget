@@ -11,7 +11,7 @@ const formatTarget = target => `${formatCurrency(target.get('value'), {
     raw: true, noPence: true, abbreviate: true, precision: 0
 })} (${target.get('tag')})`;
 
-export default function Targets({ targets, ...props }) {
+export default function Targets({ showAll, targets, ...props }) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     const tags = targets.map((target, key) => (
@@ -30,13 +30,13 @@ export default function Targets({ targets, ...props }) {
 
     const arrowAngle = target =>
         Math.atan2(props.pixY(target.get('from')) - props.pixY(target.get('value')),
-            monthWidth * target.get('months'));
+            monthWidth * (target.get('months') + target.get('last')));
 
     const arrows = targets.map((target, key) => (
         <Arrow key={key}
             startX={target.get('date')}
             startY={target.get('from')}
-            length={Math.min(props.width / 2, target.get('months') * 5)}
+            length={100 * (1 + key) * 0.8 ** (showAll >> 0)}
             angle={arrowAngle(target)}
             color={rgba(COLOR_DARK)}
             strokeWidth={1}
@@ -56,6 +56,8 @@ export default function Targets({ targets, ...props }) {
 }
 
 Targets.propTypes = {
+    showAll: PropTypes.bool,
+    width: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     targets: PropTypes.instanceOf(list).isRequired
