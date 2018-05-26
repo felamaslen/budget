@@ -258,34 +258,6 @@ async function getMonthlyCategoryValues(config, db, user, months, old) {
     return results.reduce((items, result) => ({ ...items, ...result }), {});
 }
 
-function getTargets({ balance, old }, futureMonths) {
-    const periods = [
-        { last: 3, months: 12, tag: '1y' },
-        { last: 6, months: 36, tag: '3y' },
-        { last: 12, months: 60, tag: '5y' }
-    ];
-
-    const values = [...old, ...balance.slice(0, -futureMonths)].reverse();
-
-    if (values.length < 2) {
-        return [];
-    }
-
-    const saved = values
-        .slice(0, values.length - 1)
-        .map((value, key) => value - values[key + 1]);
-
-    const current = values[0];
-
-    return periods.map(({ last, months, tag }) => {
-        const valuesToAverage = saved.slice(0, last);
-
-        const average = valuesToAverage.reduce((sum, value) => sum + value, 0) / valuesToAverage.length;
-
-        return { tag, value: Math.round(current + average * months) };
-    });
-}
-
 async function getData(config, db, user) {
     const now = DateTime.local();
 
@@ -300,8 +272,6 @@ async function getData(config, db, user) {
 
     const monthCost = await getMonthlyCategoryValues(config, db, user, months, balance.old);
 
-    const targets = getTargets(balance, futureMonths);
-
     const [currentYear, currentMonth] = getYearMonth(now);
 
     return {
@@ -310,7 +280,6 @@ async function getData(config, db, user) {
         currentYear,
         currentMonth,
         futureMonths,
-        targets,
         cost: { ...monthCost, ...balance }
     };
 }
@@ -329,7 +298,6 @@ module.exports = {
     getMonthlyValues,
     getMonthlyBalance,
     getMonthlyCategoryValues,
-    getTargets,
     getData
 };
 

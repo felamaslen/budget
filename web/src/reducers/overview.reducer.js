@@ -133,8 +133,7 @@ function rProcessDataOverviewRaw(reduction, raw) {
         startYearMonth: [startYear, startMonth],
         endYearMonth: [endYear, endMonth],
         cost,
-        futureMonths,
-        targets
+        futureMonths
     } = raw;
 
     const startDate = DateTime.fromObject({ year: startYear, month: startMonth }).endOf('month');
@@ -143,8 +142,7 @@ function rProcessDataOverviewRaw(reduction, raw) {
 
     const costMap = fromJS(cost);
 
-    return rProcessDataOverview({ costMap, startDate, currentDate, endDate, futureMonths })
-        .set('targets', fromJS(targets));
+    return rProcessDataOverview({ costMap, startDate, currentDate, endDate, futureMonths });
 }
 
 export function rGetOverviewRows(data) {
@@ -232,10 +230,7 @@ export function rCalculateOverview(reduction, req) {
     // update the changed rows in the overview page
     const newData = rProcessDataOverview({ costMap: newCostMap, startDate, currentDate, endDate, futureMonths });
 
-    return reduction
-        .setIn(['pages', 'overview', 'data'], newData.set('targets',
-            reduction.getIn(['pages', 'overview', 'data', 'targets'])))
-        .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
+    return reduction.setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 
 /**

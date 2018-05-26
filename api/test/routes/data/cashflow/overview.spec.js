@@ -309,24 +309,5 @@ describe('/api/data/overview', () => {
             expect(result).to.deep.equal(expectedResult);
         });
     });
-
-    describe('getTargets', () => {
-        it('should get 1, 3 and 5 year savings predictions', () => {
-            const balance = {
-                old: [10, 5, 12, 15, 14, 20],
-                balance: [21, 19, 25, 26, 30, 35, 37, 41, 0, 0, 0]
-            };
-
-            const futureMonths = 3;
-
-            const expectedResult = [
-                { tag: '1y', value: 85 },
-                { tag: '3y', value: 173 },
-                { tag: '5y', value: 221 }
-            ];
-
-            expect(overview.getTargets(balance, futureMonths)).to.deep.equal(expectedResult);
-        });
-    });
 });
 
