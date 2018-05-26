@@ -1,21 +1,15 @@
 import { eventChannel } from 'redux-saga';
 import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
-import { API_PREFIX, KEYPRESS_BUFFER_TIME } from '../constants/data';
+import { API_PREFIX } from '../constants/data';
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
-import debounce, { buffer } from '../helpers/debounce';
+import debounce from '../helpers/debounce';
 import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
 import { selectApiKey } from '.';
 import { openTimedMessage } from './error.saga';
 
 export function keyPressEventChannel() {
     return eventChannel(emitter => {
-        const keyPressHandler = buffer(evt => emitter(aKeyPressed({
-            key: evt.key,
-            shift: evt.shiftKey,
-            ctrl: evt.ctrlKey || evt.metaKey
-        })), KEYPRESS_BUFFER_TIME);
-
         const onKeyPress = evt => {
             const tab = evt.key === 'Tab';
             const nav = (evt.ctrlKey || evt.metaKey) && evt.key.indexOf('Arrow') === 0;
@@ -24,7 +18,11 @@ export function keyPressEventChannel() {
                 evt.preventDefault();
             }
 
-            keyPressHandler(evt);
+            emitter(aKeyPressed({
+                key: evt.key,
+                shift: evt.shiftKey,
+                ctrl: evt.ctrlKey || evt.metaKey
+            }));
         };
 
         window.addEventListener('keydown', onKeyPress);

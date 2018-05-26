@@ -17,10 +17,6 @@ describe('<Editable />', () => {
                     row: 3,
                     col: 4
                 }
-            },
-            editSuggestions: {
-                list: ['baz'],
-                active: false
             }
         });
 
@@ -34,11 +30,7 @@ describe('<Editable />', () => {
         const wrapper = shallow(<Editable {...props} />, createMockStore(state)).dive();
 
         expect(wrapper.is(EditableActive)).to.equal(true);
-        expect(wrapper.props()).to.deep.include({
-            ...props,
-            suggestionsList: fromJS(['baz']),
-            suggestionsActive: false
-        });
+        expect(wrapper.props()).to.deep.include(props);
     });
 
     it.each([2, 3, 4], 'should render an inactive editable item, if not active', key => {
@@ -48,10 +40,6 @@ describe('<Editable />', () => {
                     row: 3,
                     col: 4
                 }
-            },
-            editSuggestions: {
-                list: ['baz'],
-                active: false
             }
         });
 
@@ -65,11 +53,7 @@ describe('<Editable />', () => {
         const wrapper = shallow(<Editable {...props} />, createMockStore(state)).dive();
 
         expect(wrapper.is(EditableInactive)).to.equal(true);
-        expect(wrapper.props()).to.deep.include({
-            ...props,
-            suggestionsList: fromJS(['baz']),
-            suggestionsActive: false
-        });
+        expect(wrapper.props()).to.deep.include(props);
     });
 });
 

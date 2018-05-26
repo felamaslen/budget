@@ -1,9 +1,10 @@
+import { connect } from 'react-redux';
 import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export default function SuggestionsList({ suggestionsList, suggestionsActive }) {
+function SuggestionsList({ suggestionsList, suggestionsActive }) {
     if (suggestionsList && suggestionsList.size) {
         const itemList = suggestionsList
             .map((suggestion, key) => {
@@ -26,4 +27,11 @@ SuggestionsList.propTypes = {
     suggestionsList: PropTypes.instanceOf(list),
     suggestionsActive: PropTypes.number
 };
+
+const mapStateToProps = state => ({
+    suggestionsList: state.getIn(['editSuggestions', 'list']),
+    suggestionsActive: state.getIn(['editSuggestions', 'active'])
+});
+
+export default connect(mapStateToProps)(SuggestionsList);
 
