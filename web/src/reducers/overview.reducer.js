@@ -230,7 +230,8 @@ export function rCalculateOverview(reduction, req) {
     // update the changed rows in the overview page
     const newData = rProcessDataOverview({ costMap: newCostMap, startDate, currentDate, endDate, futureMonths });
 
-    return reduction.setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
+    return reduction.setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData))
+        .setIn(['pages', 'overview', 'data'], newData);
 }
 
 /**
