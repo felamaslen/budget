@@ -1,6 +1,7 @@
 import './style.scss';
 import { OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
 import React from 'react';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import PageList from '../PageList';
@@ -31,9 +32,13 @@ PageFunds.propTypes = {
 
 const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 
+const getFundRows = state => state.getIn(['pages', 'funds', 'rows']) || OrderedMap.of();
+
+const selectSold = createSelector([getFundRows], rows =>
+    rows.map(item => item.getIn(['cols', transactionsKey]).isSold()));
+
 const mapStateToProps = state => ({
-    sold: (state.getIn(['pages', 'funds', 'rows']) || OrderedMap.of())
-        .map(item => item.getIn(['cols', transactionsKey]).isSold())
+    sold: selectSold(state)
 });
 
 export default connect(mapStateToProps)(PageFunds);
