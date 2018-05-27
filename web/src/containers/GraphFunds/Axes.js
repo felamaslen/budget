@@ -73,7 +73,7 @@ export default function Axes(props) {
     const timeTicksMajor = timeTicks.filter(({ major }) => major > 1)
         .map(({ pix, major }, key) => (
             <line key={key} x1={pix} y1={y0 - getTickSize(major)} x2={pix} y2={yMax}
-                stroke={axisColor} strokeWidth={1} />
+                stroke={axisColor(1)} strokeWidth={1} />
         ));
 
     const timeTicksText = timeTicks.filter(({ text }) => text)
