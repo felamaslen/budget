@@ -24,7 +24,7 @@ export default function SubTree({ open, subTree, name, itemCost, onHover }) {
             <div className="main">
                 <span className="title">{subItemName}</span>
                 <span className="cost">{formatCurrency(subItemTotal)}</span>
-                <span className="pct">&nbsp;({subItemPct}%)</span>
+                <span className="pct">{' ('}{subItemPct}{'%)'}</span>
             </div>
         </li>;
     });

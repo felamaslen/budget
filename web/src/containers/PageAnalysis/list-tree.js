@@ -47,7 +47,7 @@ function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, o
                     onChange={onClickToggle} />
                 <span className="title">{name}</span>
                 <span className="cost">{formatCurrency(itemCost)}</span>
-                <span className="pct">&nbsp;({pct.toFixed(1)}%)</span>
+                <span className="pct">{' ('}{pct.toFixed(1)}{'%)'}</span>
             </div>
             <SubTree {...item} onHover={onHover} />
         </li>;
