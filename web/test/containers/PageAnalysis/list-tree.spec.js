@@ -1,4 +1,5 @@
 /* eslint-disable newline-per-chained-call */
+import '../../browser';
 import { fromJS, List } from 'immutable';
 import { expect } from 'chai';
 import equal from 'deep-equal';

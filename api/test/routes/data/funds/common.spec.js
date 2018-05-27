@@ -18,14 +18,16 @@ describe('/data/funds', () => {
         it('should return the correct timestamp', () => {
             const now = DateTime.fromISO('2017-09-05');
 
-            expect(funds.getMaxAge(now, 'year', 1)).to.equal(
-                DateTime.fromISO('2016-09-05').toSQL({ includeOffset: false }));
+            const formatDate = date => date.toSQL({ includeOffset: false });
 
-            expect(funds.getMaxAge(now, 'year', 3)).to.equal(
-                DateTime.fromISO('2014-09-05').toSQL({ includeOffset: false }));
+            expect(formatDate(funds.getMaxAge(now, 'year', 1))).to.equal(
+                formatDate(DateTime.fromISO('2016-09-05')));
 
-            expect(funds.getMaxAge(now, 'month', 6)).to.equal(
-                DateTime.fromISO('2017-03-05').toSQL({ includeOffset: false }));
+            expect(formatDate(funds.getMaxAge(now, 'year', 3))).to.equal(
+                formatDate(DateTime.fromISO('2014-09-05')));
+
+            expect(formatDate(funds.getMaxAge(now, 'month', 6))).to.equal(
+                formatDate(DateTime.fromISO('2017-03-05')));
         });
 
         it('should handle invalid parameters', () => {

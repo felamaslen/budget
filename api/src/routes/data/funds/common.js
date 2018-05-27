@@ -8,8 +8,7 @@ function getMaxAge(now, period, length) {
         return 0;
     }
 
-    return now.plus({ [period]: -length })
-        .toSQL({ includeOffset: false });
+    return now.plus({ [period]: -length });
 }
 
 function getNumResultsQuery(db, user, salt, minTime) {
@@ -136,19 +135,20 @@ async function getFundHistoryMappedToFundIds(db, user, now, params) {
     const { period, length, numDisplay, salt } = params;
 
     const minTime = getMaxAge(now, period, length);
+    const minTimeSQL = minTime.toSQL({ includeOffset: false });
 
-    const rows = await getNumResultsQuery(db, user, salt, minTime);
+    const rows = await getNumResultsQuery(db, user, salt, minTimeSQL);
     let [{ numResults }] = rows;
     numResults = Number(numResults);
 
     if (!isNaN(numResults) && numResults > 2) {
         const fundHistory = await getAllHistoryForFundsQuery(
-            db, user, salt, numResults, numDisplay, minTime);
+            db, user, salt, numResults, numDisplay, minTimeSQL);
 
         return processFundHistory(fundHistory);
     }
 
-    return { idMap: {}, startIndex: {}, startTime: minTime, times: [] };
+    return { idMap: {}, startIndex: {}, startTime: Math.round(minTime.ts / 1000), times: [] };
 }
 
 module.exports = {

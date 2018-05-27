@@ -1,4 +1,3 @@
-import { List as list } from 'immutable';
 import React from 'react';
 import ImmutableComponent from '../../../ImmutableComponent';
 import PropTypes from 'prop-types';
@@ -14,8 +13,9 @@ export default class InteractiveEditable extends ImmutableComponent {
     }
     componentDidMount() {
         setImmediate(() => {
-            if (this.input && this.input.focus) {
+            if (this.input && this.input.focus && this.input.select) {
                 this.input.focus();
+                this.input.select();
             }
         });
     }
