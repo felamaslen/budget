@@ -9,7 +9,6 @@ import { DateTime } from 'luxon';
 import { mediaQueryMobile } from '../../constants';
 import { GRAPH_WIDTH } from '../../constants/graph';
 import { getNow } from '../../helpers/date';
-import { listAverage } from '../../helpers/data';
 import GraphBalance from '../../components/GraphBalance';
 import GraphSpending from '../../components/GraphSpending';
 
