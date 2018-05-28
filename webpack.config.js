@@ -123,7 +123,7 @@ module.exports = {
                 use: {
                     loader: 'file-loader',
                     options: {
-                        name: 'favicon.ico',
+                        name: 'assets/favicon.ico',
                         publicPath: '../'
                     }
                 }
