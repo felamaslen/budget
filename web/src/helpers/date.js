@@ -49,7 +49,7 @@ export function dateInput(input = null, validate = true) {
 function timeTick(t0, t1, { start, measure, tickSize, numTicks, getMajor, label, extra }) {
     const theStart = start || DateTime.fromJSDate(new Date(t0 * 1000)).startOf(measure);
 
-    const theNumTicks = numTicks || Math.ceil((t1 - t0) / tickSize);
+    const theNumTicks = numTicks || Math.ceil((t1 - t0) / tickSize) + 1;
 
     const getTickTime = typeof tickSize === 'function'
         ? index => tickSize(theStart, index)

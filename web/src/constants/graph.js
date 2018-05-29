@@ -7,7 +7,7 @@ export const GRAPH_CURVINESS = 0.35;
 export const GRAPH_WIDTH = 500;
 export const GRAPH_HEIGHT = 300;
 
-export const GRAPH_ZOOM_SPEED = 0.2;
+export const GRAPH_ZOOM_SPEED = 0.15;
 
 export const GRAPH_KEY_SIZE = 12;
 export const GRAPH_KEY_OFFSET_X = 45;
