@@ -29,6 +29,7 @@ module.exports = () => ({
         errorNotAuthorized: 'You need to authenticate to do that',
         errorBadAuthorization: 'Bad authentication token'
     },
+    timeZone: 'Europe/London',
     data: {
         listCategories: ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'],
         currencyUnit: '£',
