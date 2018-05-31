@@ -3,6 +3,7 @@
  */
 
 const { DateTime } = require('luxon');
+const { getNow } = require('../../../modules/time');
 
 const getYearMonth = time => ([time.year, time.month]);
 
@@ -259,7 +260,7 @@ async function getMonthlyCategoryValues(config, db, user, months, old) {
 }
 
 async function getData(config, db, user) {
-    const now = DateTime.local();
+    const now = getNow(config);
 
     const {
         startYear, startMonth, numLast: pastMonths, numFuture: futureMonths
