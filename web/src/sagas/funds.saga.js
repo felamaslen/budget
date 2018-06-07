@@ -11,21 +11,19 @@ import { getPeriodMatch } from '../helpers/data';
 import { aFundsGraphPeriodReceived } from '../actions/graph.actions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/stocks-list.actions';
 import { getStockPricesFromYahoo } from '../helpers/finance';
-
-import { selectApiKey } from '.';
+import { getApiKey } from '../selectors/app';
+import { getFundHistoryCache, getStocksListInfo } from '../selectors/funds';
 import { openTimedMessage } from './error.saga';
 
-export const selectFundHistoryCache = state => state.getIn(['other', 'fundHistoryCache']);
-
 export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache }) {
-    const fundHistoryCache = yield select(selectFundHistoryCache);
+    const fundHistoryCache = yield select(getFundHistoryCache);
 
     const loadFromCache = !noCache && fundHistoryCache.has(shortPeriod);
     if (loadFromCache) {
         return;
     }
 
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     const { period, length } = getPeriodMatch(shortPeriod);
     const query = querystring.stringify({ period, length, history: true });
@@ -51,7 +49,7 @@ export function *requestStocksList() {
         return;
     }
 
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     try {
         const response = yield call(
@@ -67,13 +65,8 @@ export function *requestStocksList() {
     }
 }
 
-export const selectStocksListInfo = state => ({
-    stocks: state.getIn(['other', 'stocksList', 'stocks']),
-    indices: state.getIn(['other', 'stocksList', 'indices'])
-});
-
 export function *requestStocksPrices() {
-    const { stocks, indices } = yield select(selectStocksListInfo);
+    const { stocks, indices } = yield select(getStocksListInfo);
 
     const symbols = stocks
         .reduce((codes, item, code) => codes.push(code), list.of())

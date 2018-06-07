@@ -1,11 +1,9 @@
 /* eslint-disable prefer-reflect */
-import { fromJS } from 'immutable';
 import '../browser';
-import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 import * as S from '../../src/sagas/app.saga';
-import { selectApiKey } from '../../src/sagas';
+import { getApiKey, getRequestList, getAddData } from '../../src/selectors/app';
 import { openTimedMessage } from '../../src/sagas/error.saga';
 
 import { aWindowResized, aServerUpdateReceived, aServerAddReceived } from '../../src/actions/app.actions';
@@ -29,23 +27,13 @@ describe('app.saga', () => {
         });
     });
 
-    describe('selectRequestList', () => {
-        it('should get the requestList and map it to each request', () => {
-            expect(S.selectRequestList(fromJS({
-                edit: {
-                    requestList: [{ req: 1, foo: 'bar' }, { req: 2, bar: 'baz' }]
-                }
-            })).toJS()).to.deep.equal([1, 2]);
-        });
-    });
-
     describe('updateServerData', () => {
         it('should work as expected', () => {
             testSaga(S.updateServerData)
                 .next()
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
-                .select(S.selectRequestList)
+                .select(getRequestList)
                 .next([{ req1: 'foo' }])
                 .call(axios.patch, 'api/v4/data/multiple', {
                     list: [{ req1: 'foo' }]
@@ -61,9 +49,9 @@ describe('app.saga', () => {
         it('should handle errors', () => {
             testSaga(S.updateServerData)
                 .next()
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
-                .select(S.selectRequestList)
+                .select(getRequestList)
                 .next([{ req1: 'foo' }])
                 .call(axios.patch, 'api/v4/data/multiple', {
                     list: [{ req1: 'foo' }]
@@ -83,7 +71,7 @@ describe('app.saga', () => {
         it('should work as expected', () => {
             testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
                 .next()
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
                 .call(axios.post, 'api/v4/data/bills', 'foo', {
                     headers: { Authorization: 'some_api_key' }
@@ -97,7 +85,7 @@ describe('app.saga', () => {
         it('should handle errors', () => {
             testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
                 .next()
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
                 .call(axios.post, 'api/v4/data/bills', 'foo', {
                     headers: { Authorization: 'some_api_key' }
@@ -111,22 +99,11 @@ describe('app.saga', () => {
         });
     });
 
-    describe('selectAddData', () => {
-        it('should get the fields and item', () => {
-            expect(S.selectAddData(fromJS({
-                edit: {
-                    addFields: 'foo',
-                    addFieldsString: 'bar'
-                }
-            }))).to.deep.equal({ fields: 'foo', item: 'bar' });
-        });
-    });
-
     describe('addServerData', () => {
         it('should work as expected', () => {
             testSaga(S.addServerData, { page: 'page1' })
                 .next()
-                .select(S.selectAddData)
+                .select(getAddData)
                 .next({ fields: 'foo', item: 'bar' })
                 .call(S.addServerDataRequest, { page: 'page1', fields: 'foo', item: 'bar' })
                 .next()

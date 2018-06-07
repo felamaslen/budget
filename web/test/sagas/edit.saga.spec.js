@@ -5,7 +5,8 @@ import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import { delay } from 'redux-saga';
 import axios from 'axios';
-import { selectApiKey } from '../../src/sagas';
+import { getApiKey } from '../../src/selectors/app';
+import { getModalState, suggestionsInfo } from '../../src/selectors/edit';
 import * as S from '../../src/sagas/edit.saga';
 import { addServerDataRequest } from '../../src/sagas/app.saga';
 import * as A from '../../src/actions/edit.actions';
@@ -13,25 +14,6 @@ import * as B from '../../src/actions/form.actions';
 import { EDIT_CHANGED } from '../../src/constants/actions';
 
 describe('edit.saga', () => {
-    describe('suggestionsInfo', () => {
-        it('should get required items from state', () => {
-            expect(S.suggestionsInfo(fromJS({
-                currentPage: 'page1',
-                edit: {
-                    active: {
-                        item: 'foo',
-                        value: 'bar'
-                    }
-                }
-            })))
-                .to.deep.equal({
-                    page: 'page1',
-                    item: 'foo',
-                    value: 'bar'
-                });
-        });
-    });
-
     describe('triggerEditSuggestionsRequest', () => {
         it('should call the suggetions requester after a delay', () => {
             testSaga(S.triggerEditSuggestionsRequest, { page: 'income', item: 'foo', value: 'bar' })
@@ -50,20 +32,20 @@ describe('edit.saga', () => {
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
-                .select(S.suggestionsInfo)
+                .select(suggestionsInfo)
                 .next({ page: 'food', item: 'item', value: 'value' })
                 .fork(S.triggerEditSuggestionsRequest, { page: 'food', item: 'item', value: 'value' })
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
-                .select(S.suggestionsInfo)
+                .select(suggestionsInfo)
                 .next({ page: 'general', item: 'item', value: 'value' });
 
             testSaga(S.watchTextInput)
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
-                .select(S.suggestionsInfo)
+                .select(suggestionsInfo)
                 .next({ page: 'overview', item: 'balance', value: 'bar' })
                 .take(EDIT_CHANGED);
         });
@@ -73,7 +55,7 @@ describe('edit.saga', () => {
         it('should request edit suggestions, if a value was typed', () => {
             testSaga(S.requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: 'bar' })
                 .next()
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
                 .call(axios.get, 'api/v4/data/search/food/foo/bar/5', { headers: { Authorization: 'some_api_key' } })
                 .next({ data: { data: { list: ['foo'] } } })
@@ -91,26 +73,6 @@ describe('edit.saga', () => {
         });
     });
 
-    describe('selectModalState', () => {
-        it('should select the required info from the state', () => {
-            expect(S.selectModalState(fromJS({
-                modalDialog: {
-                    type: 'foo',
-                    invalidKeys: 'bar',
-                    loading: 'baz',
-                    fieldsString: 'item',
-                    fieldsValidated: 'fields'
-                }
-            }))).to.deep.equal({
-                modalDialogType: 'foo',
-                invalidKeys: 'bar',
-                modalDialogLoading: 'baz',
-                item: 'item',
-                fields: 'fields'
-            });
-        });
-    });
-
     describe('handleModal', () => {
         const state = {
             modalDialogType: 'add',
@@ -123,7 +85,7 @@ describe('edit.saga', () => {
         it('should work as expected', () => {
             testSaga(S.handleModal, { page: 'page1' })
                 .next()
-                .select(S.selectModalState)
+                .select(getModalState)
                 .next(state)
                 .call(addServerDataRequest, { item: 'foo', fields: 'bar', page: 'page1' })
                 .next()
@@ -136,7 +98,7 @@ describe('edit.saga', () => {
             it('there is no page', () => {
                 testSaga(S.handleModal, {})
                     .next()
-                    .select(S.selectModalState)
+                    .select(getModalState)
                     .next(state)
                     .isDone();
             });
@@ -144,7 +106,7 @@ describe('edit.saga', () => {
             it('the modal dialog isn\'t of tye "add" type', () => {
                 testSaga(S.handleModal, { page: 'page1' })
                     .next()
-                    .select(S.selectModalState)
+                    .select(getModalState)
                     .next({ ...state, modalDialogType: 'not add' })
                     .isDone();
             });
@@ -152,7 +114,7 @@ describe('edit.saga', () => {
             it('there are invalid data', () => {
                 testSaga(S.handleModal, { page: 'page1' })
                     .next()
-                    .select(S.selectModalState)
+                    .select(getModalState)
                     .next({ ...state, invalidKeys: list.of(1) })
                     .isDone();
             });
@@ -160,7 +122,7 @@ describe('edit.saga', () => {
             it('there dialog was not set to loading', () => {
                 testSaga(S.handleModal, { page: 'page1' })
                     .next()
-                    .select(S.selectModalState)
+                    .select(getModalState)
                     .next({ ...state, modalDialogLoading: false })
                     .isDone();
             });

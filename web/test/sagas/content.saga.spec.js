@@ -1,13 +1,12 @@
 /* eslint-disable prefer-reflect */
-import { fromJS } from 'immutable';
 import '../browser';
 import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 import * as S from '../../src/sagas/content.saga';
+import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '../../src/selectors/app';
 import { aContentLoaded } from '../../src/actions/content.actions';
 import { openTimedMessage } from '../../src/sagas/error.saga';
-import { selectApiKey } from '../../src/sagas';
 
 describe('content.saga', () => {
     describe('makeContentRequest', () => {
@@ -25,42 +24,16 @@ describe('content.saga', () => {
         });
     });
 
-    describe('getContentParamsAnalysis', () => {
-        it('should get the periodKey and groupingKey from state', () => {
-            expect(S.getContentParamsAnalysis(fromJS({
-                other: {
-                    analysis: {
-                        period: 'foo',
-                        grouping: 'bar',
-                        timeIndex: 'baz'
-                    }
-                }
-            }))).to.deep.equal({
-                periodKey: 'foo',
-                groupingKey: 'bar',
-                timeIndex: 'baz'
-            });
-        });
-    });
-
-    describe('getLoadedStatus', () => {
-        it('should return the pagesLoaded status from state', () => {
-            expect(S.getLoadedStatus(fromJS({ pagesLoaded: { foo: true, bar: false } }), 'foo')).to.equal(true);
-            expect(S.getLoadedStatus(fromJS({ pagesLoaded: { foo: true, bar: false } }), 'bar')).to.equal(false);
-            expect(S.getLoadedStatus(fromJS({ pagesLoaded: { foo: true, bar: false } }), 'baz')).to.equal(false);
-        });
-    });
-
     describe('requestContent', () => {
         describe('for the analysis page', () => {
             it('should work as expected', () => {
                 testSaga(S.requestContent, { page: 'analysis' })
                     .next()
-                    .select(S.getLoadedStatus, 'analysis')
+                    .select(getLoadedStatus, 'analysis')
                     .next(false)
-                    .select(S.getContentParamsAnalysis)
+                    .select(getContentParamsAnalysis)
                     .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'analysis', params: ['year', 'category', 0], query: {}
@@ -74,11 +47,11 @@ describe('content.saga', () => {
             it('should request new data on every load', () => {
                 testSaga(S.requestContent, { page: 'analysis' })
                     .next()
-                    .select(S.getLoadedStatus, 'analysis')
+                    .select(getLoadedStatus, 'analysis')
                     .next(true)
-                    .select(S.getContentParamsAnalysis)
+                    .select(getContentParamsAnalysis)
                     .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'analysis', params: ['year', 'category', 0], query: {}
@@ -92,11 +65,11 @@ describe('content.saga', () => {
             it('should handle errors', () => {
                 testSaga(S.requestContent, { page: 'analysis' })
                     .next()
-                    .select(S.getLoadedStatus, 'analysis')
+                    .select(getLoadedStatus, 'analysis')
                     .next(false)
-                    .select(S.getContentParamsAnalysis)
+                    .select(getContentParamsAnalysis)
                     .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'analysis', params: ['year', 'category', 0], query: {}
@@ -125,9 +98,9 @@ describe('content.saga', () => {
             it('should work as expected', () => {
                 testSaga(S.requestContent, { page: 'funds' })
                     .next()
-                    .select(S.getLoadedStatus, 'funds')
+                    .select(getLoadedStatus, 'funds')
                     .next(false)
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'funds', params: [], query: { history: 'true', period: 'year', length: 1 }
@@ -141,7 +114,7 @@ describe('content.saga', () => {
             it('should not load data if it is already loaded', () => {
                 testSaga(S.requestContent, { page: 'funds' })
                     .next()
-                    .select(S.getLoadedStatus, 'funds')
+                    .select(getLoadedStatus, 'funds')
                     .next(true)
                     .isDone();
             });
@@ -149,9 +122,9 @@ describe('content.saga', () => {
             it('should handle errors', () => {
                 testSaga(S.requestContent, { page: 'funds' })
                     .next()
-                    .select(S.getLoadedStatus, 'funds')
+                    .select(getLoadedStatus, 'funds')
                     .next(false)
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'funds', params: [], query: { history: 'true', period: 'year', length: 1 }
@@ -169,9 +142,9 @@ describe('content.saga', () => {
             it('should work as expected', () => {
                 testSaga(S.requestContent, { page: 'page1' })
                     .next()
-                    .select(S.getLoadedStatus, 'page1')
+                    .select(getLoadedStatus, 'page1')
                     .next(false)
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'page1', params: [], query: {}
@@ -185,7 +158,7 @@ describe('content.saga', () => {
             it('should not load data if it is already loaded', () => {
                 testSaga(S.requestContent, { page: 'page1' })
                     .next()
-                    .select(S.getLoadedStatus, 'page1')
+                    .select(getLoadedStatus, 'page1')
                     .next(true)
                     .isDone();
             });
@@ -193,9 +166,9 @@ describe('content.saga', () => {
             it('should handle errors', () => {
                 testSaga(S.requestContent, { page: 'page1' })
                     .next()
-                    .select(S.getLoadedStatus, 'page1')
+                    .select(getLoadedStatus, 'page1')
                     .next(false)
-                    .select(selectApiKey)
+                    .select(getApiKey)
                     .next('some_api_key')
                     .call(axios.get, ...S.makeContentRequest('some_api_key', {
                         page: 'page1', params: [], query: {}

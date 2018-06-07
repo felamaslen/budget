@@ -5,7 +5,7 @@ import { CONTENT_REQUESTED } from '../constants/actions';
 import { API_PREFIX } from '../constants/data';
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../constants/analysis';
 import { getPeriodMatch } from '../helpers/data';
-import { selectApiKey } from '.';
+import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '../selectors/app';
 import { openTimedMessage } from './error.saga';
 import { aContentLoaded } from '../actions/content.actions';
 
@@ -22,14 +22,6 @@ export function makeContentRequest(apiKey, { page, params, query }) {
 
     return [url, { headers: { Authorization: apiKey } }];
 }
-
-export const getContentParamsAnalysis = state => ({
-    periodKey: state.getIn(['other', 'analysis', 'period']),
-    groupingKey: state.getIn(['other', 'analysis', 'grouping']),
-    timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
-});
-
-export const getLoadedStatus = (state, page) => Boolean(state.getIn(['pagesLoaded', page]));
 
 export function *requestContent({ page }) {
     let loaded = yield select(getLoadedStatus, page);
@@ -57,7 +49,7 @@ export function *requestContent({ page }) {
         return;
     }
 
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     try {
         const response = yield call(axios.get, ...makeContentRequest(apiKey, { page, params, query }));

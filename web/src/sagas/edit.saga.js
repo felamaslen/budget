@@ -7,15 +7,9 @@ import { API_PREFIX, MAX_SUGGESTIONS, PAGES } from '../constants/data';
 
 import { aSuggestionsRequested, aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';
-
-import { selectApiKey } from '.';
+import { getApiKey } from '../selectors/app';
+import { getModalState, suggestionsInfo } from '../selectors/edit';
 import { addServerDataRequest } from './app.saga';
-
-export const suggestionsInfo = reduction => ({
-    page: reduction.get('currentPage'),
-    item: reduction.getIn(['edit', 'active', 'item']),
-    value: reduction.getIn(['edit', 'active', 'value'])
-});
 
 export function *triggerEditSuggestionsRequest({ page, item, value }) {
     yield call(delay, 100);
@@ -46,7 +40,7 @@ export function *watchTextInput() {
 
 export function *requestEditSuggestions({ reqId, page, item, value }) {
     if (value && value.length) {
-        const apiKey = yield select(selectApiKey);
+        const apiKey = yield select(getApiKey);
 
         const url = `${API_PREFIX}/data/search/${page}/${item}/${value}/${MAX_SUGGESTIONS}`;
 
@@ -66,18 +60,10 @@ export function *requestEditSuggestions({ reqId, page, item, value }) {
     }
 }
 
-export const selectModalState = state => ({
-    modalDialogType: state.getIn(['modalDialog', 'type']),
-    invalidKeys: state.getIn(['modalDialog', 'invalidKeys']),
-    modalDialogLoading: state.getIn(['modalDialog', 'loading']),
-    item: state.getIn(['modalDialog', 'fieldsString']),
-    fields: state.getIn(['modalDialog', 'fieldsValidated'])
-});
-
 export function *handleModal({ page }) {
     const {
         modalDialogType, invalidKeys, modalDialogLoading, item, fields
-    } = yield select(selectModalState);
+    } = yield select(getModalState);
 
     const proceed = typeof page !== 'undefined' && modalDialogType === 'add' &&
         invalidKeys.size === 0 && modalDialogLoading;

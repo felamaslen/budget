@@ -5,7 +5,7 @@ import { API_PREFIX } from '../constants/data';
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
 import debounce from '../helpers/debounce';
 import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
-import { selectApiKey } from '.';
+import { getApiKey, getRequestList, getAddData } from '../selectors/app';
 import { openTimedMessage } from './error.saga';
 
 export function keyPressEventChannel() {
@@ -51,12 +51,9 @@ export function *watchEventEmitter(channelCreator) {
     }
 }
 
-export const selectRequestList = state => state.getIn(['edit', 'requestList'])
-    .map(item => item.get('req'));
-
 export function *updateServerData() {
-    const apiKey = yield select(selectApiKey);
-    const requestList = yield select(selectRequestList);
+    const apiKey = yield select(getApiKey);
+    const requestList = yield select(getRequestList);
 
     try {
         const response = yield call(
@@ -76,7 +73,7 @@ export function *updateServerData() {
 }
 
 export function *addServerDataRequest({ item, fields, page }) {
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     try {
         const response = yield call(
@@ -95,14 +92,9 @@ export function *addServerDataRequest({ item, fields, page }) {
     }
 }
 
-export const selectAddData = state => ({
-    fields: state.getIn(['edit', 'addFields']),
-    item: state.getIn(['edit', 'addFieldsString'])
-});
-
 export function *addServerData({ page }) {
     // data is validated by reducer
-    const { fields, item } = yield select(selectAddData);
+    const { fields, item } = yield select(getAddData);
 
     if (fields && item) {
         yield call(addServerDataRequest, { page, item, fields });

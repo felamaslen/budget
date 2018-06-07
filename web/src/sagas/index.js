@@ -8,8 +8,6 @@ import editSaga from './edit.saga';
 import analysisSaga from './analysis.saga';
 import fundsSaga from './funds.saga';
 
-export const selectApiKey = state => state.getIn(['user', 'apiKey']);
-
 export default function *rootSaga() {
     yield fork(appSaga);
     yield fork(loginSaga);
