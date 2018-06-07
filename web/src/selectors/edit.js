@@ -6,9 +6,9 @@ export const getModalState = state => ({
     fields: state.getIn(['modalDialog', 'fieldsValidated'])
 });
 
-export const suggestionsInfo = reduction => ({
-    page: reduction.get('currentPage'),
-    item: reduction.getIn(['edit', 'active', 'item']),
-    value: reduction.getIn(['edit', 'active', 'value'])
+export const suggestionsInfo = state => ({
+    page: state.get('currentPage'),
+    item: state.getIn(['edit', 'active', 'item']),
+    value: state.getIn(['edit', 'active', 'value'])
 });
 

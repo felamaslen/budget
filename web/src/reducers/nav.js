@@ -118,9 +118,9 @@ export function getNavRowCol(req, pageIsList = false) {
     return { row, col };
 }
 
-export function getNumRowsCols(reduction, page, pageIsList) {
-    let numRows = reduction.getIn(['pages', page, 'data', 'numRows']);
-    const numCols = reduction.getIn(['pages', page, 'data', 'numCols']);
+export function getNumRowsCols(state, page, pageIsList) {
+    let numRows = state.getIn(['pages', page, 'data', 'numRows']);
+    const numCols = state.getIn(['pages', page, 'data', 'numCols']);
 
     if (pageIsList) {
         // include add row

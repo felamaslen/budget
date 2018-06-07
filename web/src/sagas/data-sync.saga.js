@@ -5,8 +5,8 @@ import { TIMER_UPDATE_SERVER } from '../constants/data';
 import { SERVER_UPDATED } from '../constants/actions';
 import { aSettingsLoaded, aTimeUpdated, aServerUpdated } from '../actions/app.actions';
 
-export const selectRequestList = reduction =>
-    reduction.getIn(['edit', 'requestList']);
+export const selectRequestList = state =>
+    state.getIn(['edit', 'requestList']);
 
 function dataSyncEventChannel() {
     return eventChannel(emitter => {

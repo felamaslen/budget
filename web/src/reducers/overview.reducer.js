@@ -126,7 +126,7 @@ export function rProcessDataOverview({ costMap, startDate, currentDate, endDate,
     });
 }
 
-function rProcessDataOverviewRaw(reduction, raw) {
+function rProcessDataOverviewRaw(state, raw) {
     const {
         currentYear,
         currentMonth,
@@ -217,34 +217,34 @@ function getUpdatedCostMap(oldCost, dates, req) {
     return setOld(setNew(oldCost));
 }
 
-export function rCalculateOverview(reduction, req) {
-    const costMap = reduction.getIn(['pages', 'overview', 'data', 'costActual']);
-    const dates = reduction.getIn(['pages', 'overview', 'data', 'dates']);
-    const startDate = reduction.getIn(['pages', 'overview', 'data', 'startDate']);
-    const endDate = reduction.getIn(['pages', 'overview', 'data', 'endDate']);
-    const currentDate = reduction.getIn(['pages', 'overview', 'data', 'currentDate']);
-    const futureMonths = reduction.getIn(['pages', 'overview', 'data', 'futureMonths']);
+export function rCalculateOverview(state, req) {
+    const costMap = state.getIn(['pages', 'overview', 'data', 'costActual']);
+    const dates = state.getIn(['pages', 'overview', 'data', 'dates']);
+    const startDate = state.getIn(['pages', 'overview', 'data', 'startDate']);
+    const endDate = state.getIn(['pages', 'overview', 'data', 'endDate']);
+    const currentDate = state.getIn(['pages', 'overview', 'data', 'currentDate']);
+    const futureMonths = state.getIn(['pages', 'overview', 'data', 'futureMonths']);
 
     const newCostMap = getUpdatedCostMap(costMap, dates, req);
 
     // update the changed rows in the overview page
     const newData = rProcessDataOverview({ costMap: newCostMap, startDate, currentDate, endDate, futureMonths });
 
-    return reduction.setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData))
+    return state.setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData))
         .setIn(['pages', 'overview', 'data'], newData);
 }
 
 /**
  * Called when data is first loaded
- * @param {Record} reduction: app state
+ * @param {Record} state: app state
  * @param {string} page: page index
  * @param {object} raw: api JSON data
- * @returns {Record} modified reduction
+ * @returns {Record} modified state
  */
-export function processPageDataOverview(reduction, { raw }) {
-    const data = rProcessDataOverviewRaw(reduction, raw);
+export function processPageDataOverview(state, { raw }) {
+    const data = rProcessDataOverviewRaw(state, raw);
     const rows = rGetOverviewRows(data);
 
-    return reduction.setIn(['pages', 'overview'], map({ data, rows }));
+    return state.setIn(['pages', 'overview'], map({ data, rows }));
 }
 

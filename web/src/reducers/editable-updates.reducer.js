@@ -7,88 +7,88 @@ import { pushToRequestQueue } from './request-queue.reducer';
 import { rGetOverviewRows, rProcessDataOverview, rCalculateOverview } from './overview.reducer';
 import { getExtraRowProps as reloadFundsRows } from './funds.reducer';
 
-export function resortListRows(reduction, { page }) {
+export function resortListRows(state, { page }) {
     // sort rows by date
-    const { sortedRows, rowIds } = sortRowsByDate(reduction.getIn(['pages', page, 'rows']), page);
-    const weeklyData = addWeeklyAverages(reduction.getIn(['pages', page, 'data']), sortedRows, page);
+    const { sortedRows, rowIds } = sortRowsByDate(state.getIn(['pages', page, 'rows']), page);
+    const weeklyData = addWeeklyAverages(state.getIn(['pages', page, 'data']), sortedRows, page);
 
-    return reduction.setIn(['pages', page, 'rows'], sortedRows)
+    return state.setIn(['pages', page, 'rows'], sortedRows)
         .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData);
 }
 
-export function recalculateFundProfits(reduction) {
-    const rows = reduction.getIn(['pages', 'funds', 'rows']);
-    const startTime = reduction.getIn(['pages', 'funds', 'startTime']);
-    const cacheTimes = reduction.getIn(['pages', 'funds', 'cacheTimes']);
+export function recalculateFundProfits(state) {
+    const rows = state.getIn(['pages', 'funds', 'rows']);
+    const startTime = state.getIn(['pages', 'funds', 'startTime']);
+    const cacheTimes = state.getIn(['pages', 'funds', 'cacheTimes']);
 
     const rowsWithExtraProps = reloadFundsRows(rows, startTime, cacheTimes);
 
-    return reduction
+    return state
         .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps);
 }
 
-export function applyEditsOverview(reduction, { item }) {
+export function applyEditsOverview(state, { item }) {
     // update the balance for a row and recalculate overview data
     const value = item.get('value');
     const row = item.get('row');
 
-    const newCost = reduction
+    const newCost = state
         .getIn(['pages', 'overview', 'data', 'costActual'])
         .setIn(['balance', row], value);
 
-    const startDate = reduction.getIn(['pages', 'overview', 'data', 'startDate']);
-    const endDate = reduction.getIn(['pages', 'overview', 'data', 'endDate']);
-    const currentDate = reduction.getIn(['pages', 'overview', 'data', 'currentDate']);
-    const futureMonths = reduction.getIn(['pages', 'overview', 'data', 'futureMonths']);
+    const startDate = state.getIn(['pages', 'overview', 'data', 'startDate']);
+    const endDate = state.getIn(['pages', 'overview', 'data', 'endDate']);
+    const currentDate = state.getIn(['pages', 'overview', 'data', 'currentDate']);
+    const futureMonths = state.getIn(['pages', 'overview', 'data', 'futureMonths']);
 
     const newData = rProcessDataOverview({ costMap: newCost, startDate, endDate, currentDate, futureMonths });
 
-    return reduction
+    return state
         .setIn(['pages', 'overview', 'data'], newData)
         .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 
-export function applyEditsList(reduction, { item, page }) {
+export function applyEditsList(state, { item, page }) {
     // update list data in the UI
     if (item.get('row') === -1) {
         // add-item
-        return reduction.setIn(['edit', 'add', page, item.get('col')], item.get('value'));
+        return state.setIn(['edit', 'add', page, item.get('col')], item.get('value'));
     }
 
-    let newReduction = reduction;
+    let nextState = state;
 
     // update row
-    newReduction = newReduction.setIn(
+    nextState = nextState.setIn(
         ['pages', page, 'rows', item.get('row'), 'cols', item.get('col')],
         item.get('value')
     );
 
     // recalculate total if the cost has changed
     if (item.get('item') === 'cost') {
-        newReduction = newReduction.setIn(
+        nextState = nextState.setIn(
             ['pages', page, 'data', 'total'],
-            newReduction.getIn(['pages', page, 'data', 'total']) +
+            nextState.getIn(['pages', page, 'data', 'total']) +
                 item.get('value') - item.get('originalValue')
         );
     }
 
     // recalculate fund profits / losses if transactions have changed
     if (page === 'funds' && item.get('item') === 'transactions') {
-        newReduction = recalculateFundProfits(newReduction);
+        nextState = recalculateFundProfits(nextState);
     }
 
-    newReduction = resortListRows(newReduction, { page });
+    nextState = resortListRows(nextState, { page });
 
     // recalculate overview data if the cost or date changed
-    if (reduction.getIn(['pagesLoaded', 'overview'])) {
+    if (state.getIn(['pagesLoaded', 'overview'])) {
         if (item.get('item') === 'cost') {
             const dateKey = PAGES[page].cols.indexOf('date');
-            const date = newReduction.getIn(
+            const date = nextState.getIn(
                 ['pages', page, 'rows', item.get('row'), 'cols', dateKey]
             );
 
-            newReduction = rCalculateOverview(newReduction, {
+            nextState = rCalculateOverview(nextState, {
                 page,
                 newDate: date,
                 oldDate: date,
@@ -98,11 +98,11 @@ export function applyEditsList(reduction, { item, page }) {
         }
         else if (item.get('item') === 'date') {
             const costKey = PAGES[page].cols.indexOf('cost');
-            const cost = newReduction.getIn(
+            const cost = nextState.getIn(
                 ['pages', page, 'rows', item.get('row'), 'cols', costKey]
             );
 
-            newReduction = rCalculateOverview(newReduction, {
+            nextState = rCalculateOverview(nextState, {
                 page,
                 newDate: item.get('value'),
                 oldDate: item.get('originalValue'),
@@ -112,49 +112,49 @@ export function applyEditsList(reduction, { item, page }) {
         }
     }
 
-    return newReduction;
+    return nextState;
 }
 
-export function applyEdits(reduction, { item, page }) {
+export function applyEdits(state, { item, page }) {
     if (page === 'overview') {
-        return applyEditsOverview(reduction, { item });
+        return applyEditsOverview(state, { item });
     }
     if (PAGES[page].list) {
-        return applyEditsList(reduction, { item, page });
+        return applyEditsList(state, { item, page });
     }
 
-    return reduction;
+    return state;
 }
 
-export function rDeleteListItem(reduction, { page, id }) {
-    let newReduction = reduction;
+export function rDeleteListItem(state, { page, id }) {
+    let nextState = state;
 
     const dateKey = PAGES[page].cols.indexOf('date');
     const costKey = PAGES[page].cols.indexOf('cost');
-    const itemCost = reduction.getIn(['pages', page, 'rows', id, 'cols', costKey]);
+    const itemCost = state.getIn(['pages', page, 'rows', id, 'cols', costKey]);
 
     // recalculate total
-    newReduction = newReduction.setIn(
+    nextState = nextState.setIn(
         ['pages', page, 'data', 'total'],
-        newReduction.getIn(['pages', page, 'data', 'total']) - itemCost
+        nextState.getIn(['pages', page, 'data', 'total']) - itemCost
     );
     // sort rows and recalculate weekly data
     const { sortedRows, rowIds } = sortRowsByDate(
-        newReduction
+        nextState
             .getIn(['pages', page, 'rows'])
             .delete(id),
         page);
 
     const weeklyData = addWeeklyAverages(
-        newReduction.getIn(['pages', page, 'data']),
+        nextState.getIn(['pages', page, 'data']),
         sortedRows,
         page
     );
 
     // recalculate overview data
-    if (reduction.getIn(['pagesLoaded', 'overview'])) {
-        const date = reduction.getIn(['pages', page, 'rows', id, 'cols', dateKey]);
-        newReduction = rCalculateOverview(newReduction, {
+    if (state.getIn(['pagesLoaded', 'overview'])) {
+        const date = state.getIn(['pages', page, 'rows', id, 'cols', dateKey]);
+        nextState = rCalculateOverview(nextState, {
             page,
             newDate: date,
             oldDate: date,
@@ -163,16 +163,16 @@ export function rDeleteListItem(reduction, { page, id }) {
         });
     }
 
-    newReduction = pushToRequestQueue(newReduction, map({ page, id, delete: true }))
+    nextState = pushToRequestQueue(nextState, map({ page, id, delete: true }))
         .setIn(['pages', page, 'rows'], sortedRows)
         .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData);
 
     // recalculate fund profits / losses
     if (page === 'funds') {
-        newReduction = recalculateFundProfits(newReduction);
+        nextState = recalculateFundProfits(nextState);
     }
 
-    return newReduction;
+    return nextState;
 }
 

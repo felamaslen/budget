@@ -107,7 +107,7 @@ export function resetAppState(state) {
         }));
 }
 
-// the state of the app (reduction) is stored as an immutable object,
+// the state of the app (state) is stored as an immutable object,
 // and returned (modified) by reducers
 export default resetAppState(map({
     errorMsg: list.of(),

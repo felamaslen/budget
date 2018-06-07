@@ -9,35 +9,35 @@ import { processRawListRows } from './list.reducer';
 
 import { sortRowsByDate } from '../helpers/data';
 
-export const rToggleShowAll = reduction => {
-    return reduction.setIn(
+export const rToggleShowAll = state => {
+    return state.setIn(
         ['other', 'showAllBalanceGraph'],
-        !reduction.getIn(['other', 'showAllBalanceGraph']));
+        !state.getIn(['other', 'showAllBalanceGraph']));
 };
 
-export function rToggleFundItemGraph(reduction, { key }) {
-    return reduction.setIn(
+export function rToggleFundItemGraph(state, { key }) {
+    return state.setIn(
         ['pages', 'funds', 'rows', key, 'historyPopout'],
-        !reduction.getIn(['pages', 'funds', 'rows', key, 'historyPopout'])
+        !state.getIn(['pages', 'funds', 'rows', key, 'historyPopout'])
     );
 }
 
-function getCacheData(reduction, period) {
-    const rows = reduction.getIn(
+function getCacheData(state, period) {
+    const rows = state.getIn(
         ['other', 'fundHistoryCache', period, 'rows']
     );
-    const startTime = reduction.getIn(
+    const startTime = state.getIn(
         ['other', 'fundHistoryCache', period, 'startTime']
     );
-    const cacheTimes = reduction.getIn(
+    const cacheTimes = state.getIn(
         ['other', 'fundHistoryCache', period, 'cacheTimes']
     );
 
     return { rows, startTime, cacheTimes };
 }
 
-function getCurrentlyEnabledFunds(reduction) {
-    return reduction
+function getCurrentlyEnabledFunds(state) {
+    return state
         .getIn(['other', 'graphFunds', 'data', 'fundItems'])
         .reduce((enabled, item, itemIndex) => {
             if (item.get('enabled')) {
@@ -48,26 +48,26 @@ function getCurrentlyEnabledFunds(reduction) {
         }, list.of());
 }
 
-export function rToggleFundsGraphMode(reduction) {
-    const oldMode = reduction.getIn(['other', 'graphFunds', 'mode']);
+export function rToggleFundsGraphMode(state) {
+    const oldMode = state.getIn(['other', 'graphFunds', 'mode']);
     const newMode = (oldMode + 1) % 3;
 
-    const period = reduction.getIn(['other', 'graphFunds', 'period']);
-    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
+    const period = state.getIn(['other', 'graphFunds', 'period']);
+    const { rows, startTime, cacheTimes } = getCacheData(state, period);
 
-    const enabledList = getCurrentlyEnabledFunds(reduction);
+    const enabledList = getCurrentlyEnabledFunds(state);
 
     const fundHistory = getFormattedHistory(rows, newMode, startTime, cacheTimes, enabledList);
 
-    return reduction
+    return state
         .setIn(['other', 'graphFunds', 'data'], fundHistory)
         .setIn(['other', 'graphFunds', 'mode'], newMode);
 }
 
-export function rToggleFundsGraphLine(reduction, { index }) {
+export function rToggleFundsGraphLine(state, { index }) {
     let statusBefore = false;
 
-    let enabledList = reduction
+    let enabledList = state
         .getIn(['other', 'graphFunds', 'data', 'fundItems'])
         .reduce((enabled, item, itemIndex) => {
             if (item.get('enabled')) {
@@ -87,26 +87,26 @@ export function rToggleFundsGraphLine(reduction, { index }) {
         enabledList = enabledList.push(index - 1);
     }
 
-    const period = reduction.getIn(['other', 'graphFunds', 'period']);
+    const period = state.getIn(['other', 'graphFunds', 'period']);
 
-    const { rows, startTime, cacheTimes } = getCacheData(reduction, period);
-    const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
+    const { rows, startTime, cacheTimes } = getCacheData(state, period);
+    const mode = state.getIn(['other', 'graphFunds', 'mode']);
 
     const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, enabledList);
 
-    return reduction
+    return state
         .setIn(['other', 'graphFunds', 'data'], fundHistory);
 }
 
-function changePeriod(reduction, period, rows, startTime, cacheTimes) {
-    const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
+function changePeriod(state, period, rows, startTime, cacheTimes) {
+    const mode = state.getIn(['other', 'graphFunds', 'mode']);
 
     // reset the zoom range when changing data
     const zoomRange = list([0, Date.now() / 1000 - startTime]);
-    const enabledList = getCurrentlyEnabledFunds(reduction);
+    const enabledList = getCurrentlyEnabledFunds(state);
     const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, enabledList);
 
-    return reduction
+    return state
         .setIn(['other', 'graphFunds', 'period'], period)
         .setIn(['other', 'graphFunds', 'startTime'], startTime)
         .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)
@@ -114,12 +114,12 @@ function changePeriod(reduction, period, rows, startTime, cacheTimes) {
         .setIn(['other', 'graphFunds', 'data'], fundHistory);
 }
 
-export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPeriod, data }) {
+export function rHandleFundPeriodResponse(state, { reloadPagePrices, shortPeriod, data }) {
     const { sortedRows, rowIds } = sortRowsByDate(processRawListRows(data.data, 'funds'), 'funds');
     const startTime = data.startTime;
     const cacheTimes = list(data.cacheTimes);
 
-    const newReduction = changePeriod(reduction, shortPeriod, sortedRows, startTime, cacheTimes)
+    const nextState = changePeriod(state, shortPeriod, sortedRows, startTime, cacheTimes)
         .setIn(['other', 'fundHistoryCache', shortPeriod], map({
             rows: sortedRows, startTime, cacheTimes
         }));
@@ -129,29 +129,29 @@ export function rHandleFundPeriodResponse(reduction, { reloadPagePrices, shortPe
 
         const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, new Date());
 
-        return newReduction
+        return nextState
             .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
             .setIn(['pages', 'funds', 'rowIds'], rowIds)
             .setIn(['other', 'fundsCachedValue'], fundsCachedValue);
     }
 
-    return newReduction;
+    return nextState;
 }
 
-export function rChangeFundsGraphPeriod(reduction, { shortPeriod, noCache }) {
-    const loadFromCache = !noCache && reduction
+export function rChangeFundsGraphPeriod(state, { shortPeriod, noCache }) {
+    const loadFromCache = !noCache && state
         .getIn(['other', 'fundHistoryCache'])
         .has(shortPeriod);
 
     if (!loadFromCache) {
         // the side effect will change the period when the content is loaded
-        return reduction;
+        return state;
     }
 
-    const theShortPeriod = shortPeriod || reduction.getIn(['other', 'graphFunds', 'period']);
+    const theShortPeriod = shortPeriod || state.getIn(['other', 'graphFunds', 'period']);
 
-    const { rows, startTime, cacheTimes } = getCacheData(reduction, theShortPeriod);
+    const { rows, startTime, cacheTimes } = getCacheData(state, theShortPeriod);
 
-    return changePeriod(reduction, shortPeriod, rows, startTime, cacheTimes);
+    return changePeriod(state, shortPeriod, rows, startTime, cacheTimes);
 }
 

@@ -11,39 +11,39 @@ import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList, processPageDataFunds } from './list.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';
 
-function processPageData(reduction, { page, raw }, now) {
+function processPageData(state, { page, raw }, now) {
     if (page === 'overview') {
         // overview
-        return processPageDataOverview(reduction, { raw });
+        return processPageDataOverview(state, { raw });
     }
 
     if (page === 'analysis') {
         // analysis
-        return processPageDataAnalysis(reduction, { raw });
+        return processPageDataAnalysis(state, { raw });
     }
 
     if (page === 'funds') {
         // funds
-        return processPageDataFunds(reduction, { raw }, now);
+        return processPageDataFunds(state, { raw }, now);
     }
 
     if (PAGES[page].list) {
-        const newReduction = processPageDataList(reduction, { page, raw });
+        const nextState = processPageDataList(state, { page, raw });
         const { sortedRows, rowIds } = sortRowsByDate(
-            newReduction.getIn(['pages', page, 'rows']), page);
+            nextState.getIn(['pages', page, 'rows']), page);
         const weeklyData = addWeeklyAverages(
-            newReduction.getIn(['pages', page, 'data']), sortedRows, page);
+            nextState.getIn(['pages', page, 'data']), sortedRows, page);
 
-        return newReduction
+        return nextState
             .setIn(['pages', page, 'rows'], sortedRows)
             .setIn(['pages', page, 'rowIds'], rowIds)
             .setIn(['pages', page, 'data'], weeklyData);
     }
 
-    return reduction;
+    return state;
 }
 
-export function rContentBlockHover(reduction, { block, subBlock }) {
+export function rContentBlockHover(state, { block, subBlock }) {
     let newStatus = '';
     const haveSubBlock = Boolean(subBlock);
     if (block) {
@@ -58,25 +58,25 @@ export function rContentBlockHover(reduction, { block, subBlock }) {
             : `${capitalise(block.get('name'))} (${value})`;
     }
 
-    return reduction.setIn(['other', 'blockView', 'status'], newStatus);
+    return state.setIn(['other', 'blockView', 'status'], newStatus);
 }
 
-export function rRequestContent(reduction, { page }) {
-    const loaded = reduction.getIn(['pagesLoaded', page]);
+export function rRequestContent(state, { page }) {
+    const loaded = state.getIn(['pagesLoaded', page]);
     const loading = !(loaded && page !== 'analysis');
 
-    return reduction
+    return state
         .set('loading', loading)
         .set('currentPage', page);
 }
 
-export function rHandleContentResponse(reduction, { response, page }, now) {
+export function rHandleContentResponse(state, { response, page }, now) {
     if (!response) {
-        return reduction.set('loading', false);
+        return state.set('loading', false);
     }
 
     return processPageData(
-        reduction.setIn(['pagesRaw', page], response.data.data),
+        state.setIn(['pagesRaw', page], response.data.data),
         { page, raw: response.data.data },
         now
     )
@@ -86,5 +86,5 @@ export function rHandleContentResponse(reduction, { response, page }, now) {
         .setIn(['edit', 'add', page], getAddDefaultValues(page));
 }
 
-export const rSetPage = (reduction, { page }) => reduction.set('currentPage', page);
+export const rSetPage = (state, { page }) => state.set('currentPage', page);
 

@@ -60,7 +60,7 @@ function getCost(costData, saved) {
         .sort(sortTotal);
 }
 
-export function processPageDataAnalysis(reduction, { raw }) {
+export function processPageDataAnalysis(state, { raw }) {
     const data = fromJS(raw);
 
     // tree data
@@ -70,90 +70,90 @@ export function processPageDataAnalysis(reduction, { raw }) {
     const description = data.get('description');
 
     // block data
-    const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
+    const treeVisible = state.getIn(['other', 'analysis', 'treeVisible']);
     const blocks = getBlocks(cost, treeVisible);
 
-    return reduction
+    return state
         .setIn(['other', 'analysis', 'timeline'], data.get('timeline'))
         .setIn(['other', 'blockView', 'blocks'], blocks)
         .setIn(['other', 'blockView', 'deep'], null)
         .setIn(['pages', 'analysis'], map({ cost, costTotal, items, description }));
 }
 
-export function rAnalysisChangeOption(reduction, { period, grouping, timeIndex }) {
-    return reduction
+export function rAnalysisChangeOption(state, { period, grouping, timeIndex }) {
+    return state
         .setIn(['other', 'analysis', 'loading'], true)
         .setIn(['other', 'analysis', 'period'], period)
         .setIn(['other', 'analysis', 'grouping'], grouping)
         .setIn(['other', 'analysis', 'timeIndex'], timeIndex);
 }
 
-export function rAnalysisHandleNewData(reduction, { response, name }) {
-    const newReduction = reduction
+export function rAnalysisHandleNewData(state, { response, name }) {
+    const nextState = state
         .setIn(['other', 'analysis', 'loading'], false)
         .setIn(['other', 'blockView', 'loadKey'], null)
         .setIn(['other', 'blockView', 'status'], '');
 
-    const loadDeep = name && !reduction.getIn(['other', 'blockView', 'deep']);
+    const loadDeep = name && !state.getIn(['other', 'blockView', 'deep']);
     if (loadDeep) {
         const cost = getCost(fromJS(response.data.data.items));
         const blocks = getBlocks(cost);
 
-        return newReduction
+        return nextState
             .setIn(['other', 'blockView', 'blocks'], blocks)
             .setIn(['other', 'blockView', 'deep'], name);
     }
 
-    return processPageDataAnalysis(newReduction, { raw: response.data.data });
+    return processPageDataAnalysis(nextState, { raw: response.data.data });
 }
 
-export function rAnalysisTreeToggleDisplay(reduction, { key }) {
-    const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
+export function rAnalysisTreeToggleDisplay(state, { key }) {
+    const treeVisible = state.getIn(['other', 'analysis', 'treeVisible']);
     const newStatus = treeVisible.has(key)
         ? !treeVisible.get(key)
         : false;
 
-    const cost = reduction.getIn(['pages', 'analysis', 'cost']);
+    const cost = state.getIn(['pages', 'analysis', 'cost']);
     const blocks = getBlocks(cost, treeVisible.set(key, newStatus));
 
-    return reduction.setIn(['other', 'analysis', 'treeVisible', key], newStatus)
+    return state.setIn(['other', 'analysis', 'treeVisible', key], newStatus)
         .setIn(['other', 'blockView', 'blocks'], blocks)
         .setIn(['other', 'blockView', 'active'], null);
 }
 
-export function rAnalysisTreeToggleExpand(reduction, { key }) {
-    const treeOpen = reduction.getIn(['other', 'analysis', 'treeOpen']);
+export function rAnalysisTreeToggleExpand(state, { key }) {
+    const treeOpen = state.getIn(['other', 'analysis', 'treeOpen']);
     const newStatus = treeOpen.has(key)
         ? !treeOpen.get(key)
         : true;
 
-    return reduction.setIn(['other', 'analysis', 'treeOpen', key], newStatus);
+    return state.setIn(['other', 'analysis', 'treeOpen', key], newStatus);
 }
 
-export function rAnalysisTreeHover(reduction, { key }) {
-    return reduction.setIn(['other', 'blockView', 'active'], key);
+export function rAnalysisTreeHover(state, { key }) {
+    return state.setIn(['other', 'blockView', 'active'], key);
 }
 
-export function rAnalysisBlockClick(reduction, { name }) {
+export function rAnalysisBlockClick(state, { name }) {
     if (name === 'bills' || name === 'saved') {
-        return reduction;
+        return state;
     }
 
-    const wasDeep = Boolean(reduction.getIn(['other', 'blockView', 'deep']));
+    const wasDeep = Boolean(state.getIn(['other', 'blockView', 'deep']));
 
     if (wasDeep) {
         // reset the view to how it was
-        const treeVisible = reduction.getIn(['other', 'analysis', 'treeVisible']);
-        const cost = reduction.getIn(['pages', 'analysis', 'cost']);
+        const treeVisible = state.getIn(['other', 'analysis', 'treeVisible']);
+        const cost = state.getIn(['pages', 'analysis', 'cost']);
         const blocks = getBlocks(cost, treeVisible);
 
-        return reduction.setIn(['other', 'blockView', 'deep'], null)
+        return state.setIn(['other', 'blockView', 'deep'], null)
             .setIn(['other', 'blockView', 'blocks'], blocks)
             .setIn(['other', 'blockView', 'status'], '');
     }
 
     // load a deeper view
-    return reduction
+    return state
         .setIn(['other', 'analysis', 'loading'], true);
 }
 

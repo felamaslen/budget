@@ -6,9 +6,9 @@ import { List as list, Map as map } from 'immutable';
 
 import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '../constants/stocks';
 
-export function rHandleStocksListResponse(reduction, response) {
+export function rHandleStocksListResponse(state, response) {
     if (!response) {
-        return reduction;
+        return state;
     }
 
     const indices = map(STOCK_INDICES).map((item, code) => {
@@ -33,7 +33,7 @@ export function rHandleStocksListResponse(reduction, response) {
         })];
     }));
 
-    return reduction
+    return state
         .setIn(['other', 'stocksList', 'loadedList'], true)
         .setIn(['other', 'stocksList', 'indices'], indices)
         .setIn(['other', 'stocksList', 'stocks'], stocks)
@@ -78,26 +78,26 @@ export function limitTimeSeriesLength(timeSeries, limit) {
         }, timeSeries);
 }
 
-export function rHandleStocksPricesResponse(reduction, res) {
+export function rHandleStocksPricesResponse(state, res) {
     const time = Date.now();
 
-    let newReduction = reduction
+    let nextState = state
         .setIn(['other', 'stocksList', 'loadedInitial'], true)
         .setIn(['other', 'stocksList', 'lastPriceUpdate'], time);
 
     if (!res) {
-        return newReduction;
+        return nextState;
     }
 
-    let indices = reduction
+    let indices = state
         .getIn(['other', 'stocksList', 'indices'])
         .map(item => item.set('up', false).set('down', false));
 
-    let stocks = reduction
+    let stocks = state
         .getIn(['other', 'stocksList', 'stocks'])
         .map(item => item.set('up', false).set('down', false));
 
-    const loadedInitial = reduction.getIn(['other', 'stocksList', 'loadedInitial']);
+    const loadedInitial = state.getIn(['other', 'stocksList', 'loadedInitial']);
 
     try {
         res.forEach(row => {
@@ -111,7 +111,7 @@ export function rHandleStocksPricesResponse(reduction, res) {
             }
         });
 
-        newReduction = newReduction
+        nextState = nextState
             .setIn(['other', 'stocksList', 'indices'], indices)
             .setIn(['other', 'stocksList', 'stocks'], stocks);
     }
@@ -124,15 +124,15 @@ export function rHandleStocksPricesResponse(reduction, res) {
     }, 0);
 
     // update stocks list graph
-    const history = limitTimeSeriesLength(newReduction.getIn(
+    const history = limitTimeSeriesLength(nextState.getIn(
         ['other', 'stocksList', 'history']
     ), STOCKS_GRAPH_RESOLUTION);
 
-    return newReduction
+    return nextState
         .setIn(['other', 'stocksList', 'weightedGain'], weightedGain)
         .setIn(
             ['other', 'stocksList', 'oldWeightedGain'],
-            reduction.getIn(['other', 'stocksList', 'weightedGain'])
+            state.getIn(['other', 'stocksList', 'weightedGain'])
         )
         .setIn(
             ['other', 'stocksList', 'history'],

@@ -4,53 +4,53 @@
 
 import { PAGES, LOGIN_INPUT_LENGTH } from '../constants/data';
 
-export function rLoginFormInput(reduction, { input }) {
+export function rLoginFormInput(state, { input }) {
     const inputString = input.toString();
-    if (!(inputString.match(/^[0-9]$/) && reduction.getIn(['loginForm', 'visible']))) {
+    if (!(inputString.match(/^[0-9]$/) && state.getIn(['loginForm', 'visible']))) {
         // don't do anything if the input is non-numeric, or
         // we're still loading a login request
-        return reduction;
+        return state;
     }
 
-    const values = reduction.getIn(['loginForm', 'values']);
+    const values = state.getIn(['loginForm', 'values']);
 
     const active = values.size < LOGIN_INPUT_LENGTH - 1;
 
-    return reduction
+    return state
         .setIn(['loginForm', 'values'], values.push(inputString))
-        .setIn(['loginForm', 'inputStep'], reduction.getIn(['loginForm', 'inputStep']) + 1)
+        .setIn(['loginForm', 'inputStep'], state.getIn(['loginForm', 'inputStep']) + 1)
         .setIn(['loginForm', 'active'], active);
 }
 
-export function rLoginFormReset(reduction, req) {
+export function rLoginFormReset(state, req) {
     const index = req
         ? req.index
         : 0;
 
-    return reduction
+    return state
         .setIn(['loginForm', 'values'],
-            reduction.getIn(['loginForm', 'values']).slice(0, index))
+            state.getIn(['loginForm', 'values']).slice(0, index))
         .setIn(['loginForm', 'inputStep'], index);
 }
 
-export function rLoginFormSubmit(reduction) {
-    return reduction.setIn(['loginForm', 'active'], false);
+export function rLoginFormSubmit(state) {
+    return state.setIn(['loginForm', 'active'], false);
 }
 
-export function rLoginFormHandleResponse(reduction, { data }) {
-    const newReduction = rLoginFormReset(reduction)
+export function rLoginFormHandleResponse(state, { data }) {
+    const nextState = rLoginFormReset(state)
         .setIn(['loginForm', 'active'], true)
         .setIn(['loginForm', 'visible'], true)
         .setIn(['loading'], false);
 
     if (!data) {
-        return newReduction;
+        return nextState;
     }
 
     // go to the first page after logging in
     const page = Object.keys(PAGES)[0];
 
-    return newReduction
+    return nextState
         .set('currentPage', page)
         .setIn(['loginForm', 'visible'], false)
         .setIn(['user', 'uid'], data.uid)

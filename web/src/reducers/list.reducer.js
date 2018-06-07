@@ -40,12 +40,12 @@ export function processRawListRows(data, page) {
 
 /**
  * process list page data response
- * @param {Record} reduction: app state
+ * @param {Record} state: app state
  * @param {string} page: page to process
  * @param {object} raw: api JSON data
- * @returns {Record} modified reduction
+ * @returns {Record} modified state
  */
-export function processPageDataList(reduction, { page, raw }) {
+export function processPageDataList(state, { page, raw }) {
     const numRows = raw.data.length;
     const numCols = PAGES[page].cols.length;
     const total = raw.total;
@@ -56,28 +56,28 @@ export function processPageDataList(reduction, { page, raw }) {
 
     const rowIds = rows.keySeq().toList();
 
-    return reduction.setIn(['pages', page], map({ data, rows, rowIds }));
+    return state.setIn(['pages', page], map({ data, rows, rowIds }));
 }
 
-export function processPageDataFunds(reduction, { raw }, now) {
+export function processPageDataFunds(state, { raw }, now) {
     const startTime = raw.startTime;
     const cacheTimes = list(raw.cacheTimes);
 
     // process list-related data
-    const newReduction = processPageDataList(reduction, { page: 'funds', raw });
+    const nextState = processPageDataList(state, { page: 'funds', raw });
 
-    const period = reduction.getIn(['other', 'graphFunds', 'period']);
+    const period = state.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((now.getTime() / 1000) - startTime);
 
-    const { sortedRows, rowIds } = sortRowsByDate(newReduction.getIn(['pages', 'funds', 'rows']), 'funds');
+    const { sortedRows, rowIds } = sortRowsByDate(nextState.getIn(['pages', 'funds', 'rows']), 'funds');
     const rowsWithExtraProps = getExtraRowProps(sortedRows, startTime, cacheTimes);
 
-    const mode = reduction.getIn(['other', 'graphFunds', 'mode']);
+    const mode = state.getIn(['other', 'graphFunds', 'mode']);
 
     const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, now);
     const fundHistory = getFormattedHistory(sortedRows, mode, startTime, cacheTimes);
 
-    return newReduction
+    return nextState
         .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
         .setIn(['pages', 'funds', 'rowIds'], rowIds)
         .setIn(['pages', 'funds', 'startTime'], startTime)

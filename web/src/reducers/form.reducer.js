@@ -6,8 +6,8 @@ import { stringifyFields, getInvalidInsertDataKeys } from './edit.reducer';
 import { dataEquals, getAddDefaultValues } from '../helpers/data';
 import { PAGES } from '../constants/data';
 
-export function rOpenFormDialogEdit(reduction, { page, id }) {
-    const rowItem = reduction.getIn(['pages', page, 'rows', id]);
+export function rOpenFormDialogEdit(state, { page, id }) {
+    const rowItem = state.getIn(['pages', page, 'rows', id]);
 
     const fields = rowItem.get('cols')
         .map((value, key) => map({
@@ -15,7 +15,7 @@ export function rOpenFormDialogEdit(reduction, { page, id }) {
             value
         }));
 
-    const modalDialog = reduction
+    const modalDialog = state
         .get('modalDialog')
         .set('active', true)
         .set('visible', true)
@@ -26,15 +26,15 @@ export function rOpenFormDialogEdit(reduction, { page, id }) {
         .set('fieldsString', null)
         .set('invalidKeys', list.of());
 
-    return reduction.set('modalDialog', modalDialog);
+    return state.set('modalDialog', modalDialog);
 }
 
-export function rOpenFormDialogAdd(reduction, { page }) {
+export function rOpenFormDialogAdd(state, { page }) {
     const values = getAddDefaultValues(page);
     const fields = list(PAGES[page].cols)
         .map((item, key) => map({ item, value: values.get(key) }));
 
-    const modalDialog = reduction
+    const modalDialog = state
         .get('modalDialog')
         .set('active', true)
         .set('visible', true)
@@ -45,16 +45,16 @@ export function rOpenFormDialogAdd(reduction, { page }) {
         .set('fieldsString', null)
         .set('invalidKeys', list.of());
 
-    return reduction.set('modalDialog', modalDialog);
+    return state.set('modalDialog', modalDialog);
 }
 
-function resetModalDialog(reduction, remove = false) {
-    const newModalDialog = reduction
+function resetModalDialog(state, remove = false) {
+    const newModalDialog = state
         .get('modalDialog')
         .set('loading', false);
 
     if (remove) {
-        return reduction.set('modalDialog', newModalDialog
+        return state.set('modalDialog', newModalDialog
             .set('active', false)
             .set('type', null)
             .set('fields', list.of())
@@ -64,17 +64,17 @@ function resetModalDialog(reduction, remove = false) {
         );
     }
 
-    return reduction.set('modalDialog', newModalDialog.set('visible', false));
+    return state.set('modalDialog', newModalDialog.set('visible', false));
 }
 
-export function rCloseFormDialogEdit(reduction, { page, fields }) {
-    const id = reduction.getIn(['modalDialog', 'id']);
+export function rCloseFormDialogEdit(state, { page, fields }) {
+    const id = state.getIn(['modalDialog', 'id']);
 
-    const oldRow = reduction.getIn(['pages', page, 'rows', id]);
+    const oldRow = state.getIn(['pages', page, 'rows', id]);
 
     const newRow = oldRow.set('cols', fields.map(field => field.get('value')));
 
-    let newReduction = resetModalDialog(reduction);
+    let nextState = resetModalDialog(state);
 
     const changed = newRow
         .get('cols')
@@ -87,34 +87,34 @@ export function rCloseFormDialogEdit(reduction, { page, fields }) {
         }, false);
 
     if (!changed) {
-        return newReduction;
+        return nextState;
     }
 
     const dateKey = PAGES[page].cols.indexOf('date');
     const costKey = PAGES[page].cols.indexOf('cost');
 
-    const oldTotal = reduction.getIn(
+    const oldTotal = state.getIn(
         ['pages', page, 'data', 'total']
     );
     const newTotal = oldTotal + newRow.getIn(['cols', costKey]) -
         oldRow.getIn(['cols', costKey]);
 
-    newReduction = newReduction.setIn(['pages', page, 'rows', id], newRow);
+    nextState = nextState.setIn(['pages', page, 'rows', id], newRow);
 
     if (page === 'funds') {
-        newReduction = recalculateFundProfits(newReduction);
+        nextState = recalculateFundProfits(nextState);
     }
 
-    newReduction = resortListRows(newReduction, { page });
+    nextState = resortListRows(nextState, { page });
 
-    if (reduction.getIn(['pagesLoaded', 'overview'])) {
+    if (state.getIn(['pagesLoaded', 'overview'])) {
         const newDate = newRow.getIn(['cols', dateKey]);
         const oldDate = oldRow.getIn(['cols', dateKey]);
 
         const newItemCost = newRow.getIn(['cols', costKey]);
         const oldItemCost = oldRow.getIn(['cols', costKey]);
 
-        newReduction = rCalculateOverview(newReduction, {
+        nextState = rCalculateOverview(nextState, {
             page,
             newDate,
             oldDate,
@@ -129,10 +129,10 @@ export function rCloseFormDialogEdit(reduction, { page, fields }) {
             .set('page', page))
         .reduce(
             (requestList, field) => addToRequestQueue(requestList, field),
-            reduction.getIn(['edit', 'requestList'])
+            state.getIn(['edit', 'requestList'])
         );
 
-    return newReduction
+    return nextState
         .setIn(['edit', 'requestList'], newRequestList)
         .setIn(['pages', page, 'data', 'total'], newTotal);
 }
@@ -143,36 +143,36 @@ export function validateFields(fields) {
     return { fields, invalidKeys };
 }
 
-export function rCloseFormDialog(reduction, { page, deactivate }) {
+export function rCloseFormDialog(state, { page, deactivate }) {
     if (deactivate || typeof page === 'undefined') {
-        return resetModalDialog(reduction, deactivate);
+        return resetModalDialog(state, deactivate);
     }
 
-    const type = reduction.getIn(['modalDialog', 'type']);
-    const rawFields = reduction.getIn(['modalDialog', 'fields']);
+    const type = state.getIn(['modalDialog', 'type']);
+    const rawFields = state.getIn(['modalDialog', 'fields']);
 
     const { fields, invalidKeys } = validateFields(rawFields);
     if (invalidKeys.size) {
-        return reduction
+        return state
             .setIn(['modalDialog', 'invalidKeys'], invalidKeys);
     }
 
     if (type === 'add') {
-        return reduction
+        return state
             .setIn(['modalDialog', 'loading'], true)
             .setIn(['modalDialog', 'fieldsString'], stringifyFields(fields))
             .setIn(['modalDialog', 'fieldsValidated'], fields);
     }
 
     if (type === 'edit') {
-        return rCloseFormDialogEdit(reduction, { page, fields });
+        return rCloseFormDialogEdit(state, { page, fields });
     }
 
-    return reduction;
+    return state;
 }
 
-export function rHandleFormInputChange(reduction, req) {
-    return reduction
+export function rHandleFormInputChange(state, req) {
+    return state
         .setIn(['modalDialog', 'fields', req.fieldKey, 'value'], req.value);
 }
 
