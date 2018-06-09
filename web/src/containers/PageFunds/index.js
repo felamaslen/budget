@@ -1,19 +1,16 @@
 import './style.scss';
 import { OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { getProcessedFundsRows } from '../../selectors/funds';
 import React from 'react';
-import ImmutablePropTypes from 'react-immutable-proptypes';
+import PropTypes from 'prop-types';
 import PageList from '../PageList';
 import FundsMeta from '../../components/FundsMeta';
-import { PAGES } from '../../constants/data';
-import ListHeadFundsDesktop from '../../containers/ListHeadFundsDesktop';
+import ListHeadFundsDesktop from '../ListHeadFundsDesktop';
 import ListRowFundsDesktop from '../../components/ListRowFundsDesktop';
 import ListRowFundsMobile from '../../components/ListRowFundsMobile';
 
-function PageFunds({ sold }) {
-    const rowClasses = sold.map(value => ({ sold: value }));
-
+function PageFunds({ rows }) {
     return (
         <PageList page="funds"
             After={FundsMeta}
@@ -21,24 +18,17 @@ function PageFunds({ sold }) {
             AfterRow={ListRowFundsDesktop}
             AfterRowMobile={ListRowFundsMobile}
             listColsMobile={['item']}
-            rowClasses={rowClasses}
+            rows={rows}
         />
     );
 }
 
 PageFunds.propTypes = {
-    sold: ImmutablePropTypes.map.isRequired
+    rows: PropTypes.instanceOf(OrderedMap)
 };
 
-const transactionsKey = PAGES.funds.cols.indexOf('transactions');
-
-const getFundRows = state => state.getIn(['pages', 'funds', 'rows']) || OrderedMap.of();
-
-const selectSold = createSelector([getFundRows], rows =>
-    rows.map(item => item.getIn(['cols', transactionsKey]).isSold()));
-
 const mapStateToProps = state => ({
-    sold: selectSold(state)
+    rows: getProcessedFundsRows(state)
 });
 
 export default connect(mapStateToProps)(PageFunds);

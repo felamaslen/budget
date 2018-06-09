@@ -5,6 +5,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { formatCurrency, formatPercent } from '../../helpers/format';
+import { getFundsCachedValue } from '../../selectors/funds';
 
 function ListHeadFundsDesktop({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {
     let gainValues = null;
@@ -45,16 +46,14 @@ ListHeadFundsDesktop.propTypes = {
     onReloadPrices: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, props) => ({
     totalCost: state.getIn(['pages', 'funds', 'data', 'total']),
     shortPeriod: state.getIn(['other', 'graphFunds', 'period']),
-    cachedValue: state.getIn(['other', 'fundsCachedValue'])
+    cachedValue: getFundsCachedValue(state, props)
 });
 
 const mapDispatchToProps = dispatch => ({
-    onReloadPrices: shortPeriod => () => dispatch(aFundsGraphPeriodChanged({
-        shortPeriod, noCache: true, reloadPagePrices: true
-    }))
+    onReloadPrices: shortPeriod => () => dispatch(aFundsGraphPeriodChanged({ shortPeriod, noCache: true }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListHeadFundsDesktop);

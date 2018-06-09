@@ -1,27 +1,22 @@
 import './style.scss';
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
+import { DateTime } from 'luxon';
 import { aShowAllToggled } from '../../actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
 import { mediaQueryMobile } from '../../constants';
-import { getNow } from '../../helpers/date';
+import { getTargets } from '../../selectors/graph';
 import { GRAPH_WIDTH } from '../../constants/graph';
 import GraphBalance from '../../components/GraphBalance';
 import GraphSpending from '../../components/GraphSpending';
 
-export function GraphOverviewWrapped({
-    valuesNet, valuesSpending, futureMonths, cost, showAll, targets, ...props
-}) {
-    const now = getNow();
-
+export function GraphOverviewWrapped({ valuesNet, valuesSpending, futureMonths, cost, showAll, targets, ...props }) {
     let graphSpending = null;
     if (!props.isMobile) {
         graphSpending = (
             <GraphSpending name="spend"
-                now={now}
                 {...props}
                 valuesNet={valuesNet}
                 valuesSpending={valuesSpending}
@@ -32,7 +27,6 @@ export function GraphOverviewWrapped({
     return (
         <div className="graph-container-outer">
             <GraphBalance name="balance"
-                now={now}
                 {...props}
                 futureMonths={futureMonths}
                 cost={cost}
@@ -67,35 +61,8 @@ function GraphOverview(props) {
     );
 }
 
-const getTargetsData = state => state.getIn(['pages', 'overview', 'data']);
-
-const getTargets = createSelector([getTargetsData], data => {
-    const periods = list([
-        { last: 3, months: 12, tag: '1y' },
-        { last: 6, months: 36, tag: '3y' },
-        { last: 12, months: 60, tag: '5y' }
-    ]);
-
-    const futureMonths = data.get('futureMonths');
-
-    const values = data.getIn(['cost', 'balance'])
-        .slice(0, -futureMonths)
-        .reverse();
-
-    const currentValue = values.first();
-
-    return periods.map(({ last, months, tag }) => {
-        const from = data.getIn(['cost', 'balance', -(futureMonths + 1 + last)]);
-
-        const date = data.getIn(['dates', -(futureMonths + 1 + last)]).ts / 1000;
-
-        const value = from + (currentValue - from) * (months + last) / last;
-
-        return map({ date, from, months, last, tag, value });
-    });
-});
-
 const mapStateToProps = state => ({
+    now: state.get('now'),
     startDate: state.getIn(['pages', 'overview', 'data', 'startDate']),
     currentDate: state.getIn(['pages', 'overview', 'data', 'currentDate']),
     graphWidth: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_WIDTH),

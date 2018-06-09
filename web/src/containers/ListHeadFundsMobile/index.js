@@ -1,6 +1,7 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { aFundsGraphPeriodChanged } from '../../actions/graph.actions';
+import { getFundsCachedValue } from '../../selectors/funds';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -40,13 +41,11 @@ ListHeadFundsMobile.propTypes = {
 const mapStateToProps = state => ({
     totalCost: state.getIn(['pages', 'funds', 'data', 'total']),
     shortPeriod: state.getIn(['other', 'graphFunds', 'period']),
-    cachedValue: state.getIn(['other', 'fundsCachedValue'])
+    cachedValue: getFundsCachedValue(state)
 });
 
 const mapDispatchToProps = dispatch => ({
-    onReloadPrices: shortPeriod => () => dispatch(aFundsGraphPeriodChanged({
-        shortPeriod, noCache: true, reloadPagePrices: true
-    }))
+    onReloadPrices: shortPeriod => () => dispatch(aFundsGraphPeriodChanged({ shortPeriod, noCache: true }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListHeadFundsMobile);

@@ -4,8 +4,6 @@
 
 import './style.scss';
 import { List as list, Map as map } from 'immutable';
-import { aFundItemGraphToggled } from '../../actions/graph.actions';
-import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -65,42 +63,30 @@ function processData(data, popout) {
     return { lines, minX, maxX, minY, maxY };
 }
 
-export function GraphFundItem({ id, data, onToggle, popout, sold, ...props }) {
+export default function GraphFundItem({ sold, values, popout, onToggle, ...props }) {
     const { width, height } = getDimensions({ popout, sold });
 
-    const beforeLines = subProps => <Axes popout={popout} {...subProps} />;
+    const beforeLines = subProps => (<Axes popout={popout} {...subProps} />);
 
     const graphProps = {
         svgProperties: {
-            onClick: () => () => onToggle(id)
+            onClick: () => onToggle
         },
         svgClasses: classNames({ popout }),
         beforeLines,
         width,
         height,
         ...props,
-        ...processData(data, popout)
+        ...processData(values, popout)
     };
 
-    return <LineGraph {...graphProps} />;
+    return (<LineGraph {...graphProps} />);
 }
 
 GraphFundItem.propTypes = {
-    id: PropTypes.number.isRequired,
-    data: PropTypes.instanceOf(list).isRequired,
+    sold: PropTypes.bool.isRequired,
+    values: PropTypes.instanceOf(list).isRequired,
     popout: PropTypes.bool.isRequired,
-    sold: PropTypes.bool,
     onToggle: PropTypes.func.isRequired
 };
-
-const mapStateToProps = (state, { id }) => ({
-    data: state.getIn(['pages', 'funds', 'rows', id, 'prices']) || list.of(),
-    popout: Boolean(state.getIn(['pages', 'funds', 'rows', id, 'historyPopout']))
-});
-
-const mapDispatchToProps = dispatch => ({
-    onToggle: id => dispatch(aFundItemGraphToggled(id))
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(GraphFundItem);
 

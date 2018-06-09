@@ -1,5 +1,6 @@
 import './style.scss';
 import { connect } from 'react-redux';
+import { getLoadedStatus } from '../../selectors/app';
 import { aContentRequested } from '../../actions/content.actions';
 import React from 'react';
 import ImmutableComponent from '../../ImmutableComponent';
@@ -41,8 +42,8 @@ Page.propTypes = {
     onLoad: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state, { page }) => ({
-    loaded: Boolean(state.getIn(['pagesLoaded', page]))
+const mapStateToProps = (state, props) => ({
+    loaded: getLoadedStatus(state, props)
 });
 
 const mapDispatchToProps = dispatch => ({

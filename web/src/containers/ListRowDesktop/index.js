@@ -5,11 +5,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PAGES } from '../../constants/data';
+import { getPageRow } from '../../selectors/list';
 import ListRowCell from '../../components/ListRowCell';
 import DailyText from '../../components/DailyText';
 
-function ListRowDesktop({ page, id, row, activeCol, getDaily, rowClasses = map.of(), AfterRow, onDelete }) {
-    const rowClass = rowClasses.get(id) || {};
+function ListRowDesktop({ page, id, row, activeCol, getDaily, AfterRow, onDelete }) {
+    const rowClass = row.get('className') || '';
 
     const items = PAGES[page].cols.map((colName, colKey) => (
         <ListRowCell key={colKey}
@@ -22,10 +23,9 @@ function ListRowDesktop({ page, id, row, activeCol, getDaily, rowClasses = map.o
         />
     ));
 
-    const itemClassName = classNames({
+    const itemClassName = classNames(rowClass, {
         future: row.get('future'),
-        'first-present': row.get('first-present'),
-        ...rowClass
+        'first-present': row.get('first-present')
     });
 
     let afterRow = null;
@@ -49,7 +49,6 @@ ListRowDesktop.propTypes = {
     page: PropTypes.string.isRequired,
     id: PropTypes.number.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
-    rowClasses: PropTypes.instanceOf(map),
     activeCol: PropTypes.number,
     daily: PropTypes.number,
     getDaily: PropTypes.bool.isRequired,
@@ -57,12 +56,12 @@ ListRowDesktop.propTypes = {
     onDelete: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state, { page, id }) => ({
-    row: state.getIn(['pages', page, 'rows', id]),
-    activeCol: state.getIn(['edit', 'active', 'row']) === id
+const mapStateToProps = (state, props) => ({
+    row: getPageRow(state, props),
+    activeCol: state.getIn(['edit', 'active', 'row']) === props.id
         ? state.getIn(['edit', 'active', 'col'])
         : null,
-    getDaily: Boolean(PAGES[page].daily)
+    getDaily: Boolean(PAGES[props.page].daily)
 });
 
 const mapDispatchToProps = dispatch => ({

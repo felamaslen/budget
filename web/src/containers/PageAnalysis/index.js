@@ -39,7 +39,6 @@ PageAnalysis.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    loaded: Boolean(state.getIn(['pagesLoaded', 'analysis'])),
     timeline: state.getIn(['other', 'analysis', 'timeline'])
 });
 

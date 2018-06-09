@@ -4,8 +4,8 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import debounce from 'debounce';
 import ImmutableComponent, { propsEqual } from '../../ImmutableComponent';
-import debounce from '../../helpers/debounce';
 import { rgba } from '../../helpers/color';
 import { COLOR_GRAPH_TITLE } from '../../constants/colors';
 import { GRAPH_ZOOM_SPEED } from '../../constants/graph';
@@ -41,7 +41,7 @@ function pointsVisible(lines) {
 }
 
 function zoomLines(lines, { minX, maxX }) {
-    const result = lines.map(line => {
+    return lines.map(line => {
         const data = line.get('data');
 
         return line.set('data', data.filter((point, pointKey) => {
@@ -60,8 +60,6 @@ function zoomLines(lines, { minX, maxX }) {
             return false;
         }));
     });
-
-    return result;
 }
 
 function getZoomedRange(props, state, position, zoomLevel) {

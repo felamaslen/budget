@@ -8,7 +8,6 @@ import Axes from './Axes';
 import NowLine from './NowLine';
 import { GRAPH_HEIGHT } from '../../constants/graph';
 import { formatCurrency } from '../../helpers/format';
-import { getNow } from '../../helpers/date';
 
 function getTime(key, now, offset, breakAtToday, startDate) {
     // converts a key index to a UNIX time stamp
@@ -62,13 +61,12 @@ export default function GraphCashFlow(props) {
         width: props.graphWidth,
         height: props.graphHeight || GRAPH_HEIGHT,
         padding: [40, 0, 0, 0],
-        now: getNow(),
         ...ranges
     };
 
     const beforeLines = subProps => <g>
         <Axes {...subProps} />
-        <NowLine {...subProps} />
+        <NowLine {...subProps} now={props.now} />
     </g>;
 
     const graphProps = {
@@ -87,6 +85,7 @@ export default function GraphCashFlow(props) {
 }
 
 GraphCashFlow.propTypes = {
+    now: PropTypes.instanceOf(DateTime).isRequired,
     graphWidth: PropTypes.number.isRequired,
     graphHeight: PropTypes.number,
     lines: ImmutablePropTypes.list.isRequired
