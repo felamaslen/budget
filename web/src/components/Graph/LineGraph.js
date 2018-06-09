@@ -5,7 +5,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import debounce from 'debounce';
-import ImmutableComponent, { propsEqual } from '../../ImmutableComponent';
+import ImmutableComponent, { propsChanged } from '../../ImmutableComponent';
 import { rgba } from '../../helpers/color';
 import { COLOR_GRAPH_TITLE } from '../../constants/colors';
 import { GRAPH_ZOOM_SPEED } from '../../constants/graph';
@@ -232,7 +232,7 @@ export default class LineGraph extends ImmutableComponent {
                 zoomLevel: 0
             });
         }
-        else if (this.props.zoomEffect && !propsEqual(prevProps, this.props)) {
+        else if (this.props.zoomEffect && propsChanged(prevProps, this.props)) {
             this.setZoom();
         }
     }
