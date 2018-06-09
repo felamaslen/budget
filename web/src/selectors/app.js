@@ -1,7 +1,13 @@
+import { createSelector } from 'reselect';
+
+export const getNow = state => state.get('now');
+
 export const getApiKey = state => state.getIn(['user', 'apiKey']);
 
-export const getRequestList = state => state.getIn(['edit', 'requestList'])
-    .map(item => item.get('req'));
+const getRawRequestList = state => state.getIn(['edit', 'requestList']);
+
+export const getRequestList = createSelector([getRawRequestList], requestList =>
+    requestList.map(item => item.get('req')));
 
 export const getAddData = state => ({
     fields: state.getIn(['edit', 'addFields']),
@@ -14,5 +20,8 @@ export const getContentParamsAnalysis = state => ({
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
 });
 
-export const getLoadedStatus = (state, page) => Boolean(state.getIn(['pagesLoaded', page]));
+const getPages = state => state.get('pages').keySeq();
+const getPageProp = (state, { page }) => page;
+
+export const getLoadedStatus = createSelector([getPages, getPageProp], (pages, page) => pages.includes(page));
 
