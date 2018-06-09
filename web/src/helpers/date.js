@@ -11,7 +11,7 @@ export function dateInput(input = null, validate = true) {
         return DateTime.fromISO(input);
     }
 
-    const now = getNow();
+    const now = DateTime.local();
 
     if (input && input.match(/^[0-9]{1,2}(\/[0-9]{1,2}(\/[0-9]{2,4})?)?$/)) {
         const [day, monthInput, yearShort] = input.split('/');

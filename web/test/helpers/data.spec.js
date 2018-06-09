@@ -148,6 +148,20 @@ describe('helpers/data', () => {
             });
         });
     });
+    describe('getAddDefaultValues', () => {
+        it('should get the right values for the food page', () => {
+            const now = DateTime.local();
+
+            expect(M.getAddDefaultValues('food', now).toJS())
+                .to.deep.equal([
+                    now,
+                    '',
+                    '',
+                    0,
+                    ''
+                ]);
+        });
+    });
     describe('sortRowsByDate', () => {
         it('should sort rows by date and add a daily column', () => {
             const rows = fromJS({
@@ -168,7 +182,7 @@ describe('helpers/data', () => {
                 }
             });
 
-            const { sortedRows, rowIds } = M.sortRowsByDate(rows, 'food');
+            const sortedRows = M.sortRowsByDate(rows, 'food');
 
             expect(sortedRows.map(item => item
                 .setIn(['cols', 0], item.getIn(['cols', 0]).toISODate())
@@ -229,8 +243,6 @@ describe('helpers/data', () => {
                         future: false
                     }
                 });
-
-            expect(rowIds.toJS()).to.deep.equal(['3', '5', '2', '1', '4']);
         });
     });
     describe('addWeeklyAverages', () => {

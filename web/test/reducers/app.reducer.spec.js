@@ -1,6 +1,7 @@
 import { fromJS } from 'immutable';
 import '../browser';
 import { expect } from 'chai';
+import { DateTime } from 'luxon';
 import * as R from '../../src/reducers/app.reducer';
 import reduction from '../../src/reduction';
 
@@ -9,6 +10,34 @@ describe('app.reducer', () => {
         it('should set the window size in state', () => {
             expect(R.rOnWindowResize(fromJS({ other: { windowWidth: 100 } }), { size: 200 }).toJS())
                 .to.deep.equal({ other: { windowWidth: 200 } });
+        });
+    });
+
+    describe('getItemValue', () => {
+        const state = fromJS({
+            pages: {
+                overview: {
+                    data: {
+                        cost: {
+                            balance: [100, 1001, 392, 9913, 923]
+                        }
+                    }
+                }
+            }
+        });
+
+        describe('on the overview page', () => {
+            it('should get an object with the relevant value', () => {
+                expect(R.getItemValue(state, 'overview', 0))
+                    .to.deep.equal({ id: null, item: null, value: 100 });
+
+                expect(R.getItemValue(state, 'overview', 3))
+                    .to.deep.equal({ id: null, item: null, value: 9913 });
+            });
+        });
+
+        describe('on list pages', () => {
+            it('should be tested');
         });
     });
 
@@ -115,6 +144,7 @@ describe('app.reducer', () => {
         it('should reset the state and set the login form to visible', () => {
             expect(R.rLogout(fromJS({ loginForm: { visible: false } })).toJS())
                 .to.deep.equal(reduction
+                    .delete('now')
                     .setIn(['loginForm', 'visible'], true)
                     .deleteIn(['errorMsg'])
                     .deleteIn(['loading'])
@@ -125,48 +155,10 @@ describe('app.reducer', () => {
     });
 
     describe('rUpdateTime', () => {
-        describe('if on the funds page', () => {
-            const state = fromJS({
-                pages: {
-                    funds: {}
-                },
-                other: {
-                    graphFunds: {
-                        startTime: 0,
-                        cacheTimes: [new Date('2017-11-10 09:21').getTime() / 1000]
-                    },
-                    fundsCachedValue: {
-                        ageText: null
-                    }
-                }
-            });
+        it('should set the now property in the state', () => {
+            const now = DateTime.local();
 
-            it('should update the cached value age', () => {
-                expect(R.rUpdateTime(state, { now: new Date('2017-11-10 10:00') }).toJS())
-                    .to.deep.equal({
-                        other: {
-                            fundsCachedValue: {
-                                ageText: '39 minutes ago'
-                            },
-                            graphFunds: {
-                                cacheTimes: [
-                                    1510305660
-                                ],
-                                startTime: 0
-                            }
-                        },
-                        pages: {
-                            funds: {}
-                        }
-                    });
-            });
-        });
-
-        describe('otherwise', () => {
-            it('should do nothing', () => {
-                expect(R.rUpdateTime(fromJS({ foo: 'bar' }), { now: null }).toJS())
-                    .to.deep.equal({ foo: 'bar' });
-            });
+            expect(R.rUpdateTime(fromJS({ now: null }), { now }).toJS()).to.deep.equal({ now });
         });
     });
 

@@ -24,7 +24,9 @@ describe('Overview reducer', () => {
         const currentDate = DateTime.fromObject({ year: 2017, month: 6 });
         const futureMonths = 4;
 
-        const result = R.rProcessDataOverview({
+        const now = DateTime.fromISO('2018-01-22');
+
+        const result = R.rProcessDataOverview(now, {
             costMap, startDate, endDate, currentDate, futureMonths
         }).toJS();
 

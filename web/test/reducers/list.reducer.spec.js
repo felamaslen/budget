@@ -1,7 +1,7 @@
 /* eslint id-length: 0, no-unused-expressions: 0 */
-import { Map as map, List as list } from 'immutable';
 import { expect } from 'chai';
-
+import { DateTime } from 'luxon';
+import { Map as map, List as list } from 'immutable';
 import * as rList from '../../src/reducers/list.reducer';
 
 describe('List page reducers', () => {
@@ -9,77 +9,60 @@ describe('List page reducers', () => {
         it('should be tested');
     });
 
-    describe('processPageDataList', () => {
-        it('should be tested');
-    });
-
-    describe('processPageDataFunds', () => {
-        const envBefore = process.env.DEFAULT_FUND_PERIOD;
-        before(() => {
-            process.env.DEFAULT_FUND_PERIOD = 'year1';
-        });
-        after(() => {
-            process.env.DEFAULT_FUND_PERIOD = envBefore;
-        });
-
-        it('should return formatted funds page data', () => {
-            const reduction = map({
-                pages: map.of(),
-                other: map({
-                    graphFunds: map({
-                        period: 'year1',
-                        zoom: list([null, null])
-                    })
-                })
-            });
-
-            const now = new Date('2017-09-05');
-            const startTime = Math.floor(new Date('2017-09-01').getTime() / 1000);
-
+    describe('getListData', () => {
+        it('should get properties from the raw response', () => {
+            const page = 'food';
             const raw = {
-                data: [
-                    {
-                        d: [2016, 9, 1],
-                        i: 'some fund name',
-                        c: 100000,
-                        I: 1,
-                        tr: [
-                            { c: 700000, u: 100, d: [2016, 9, 1] },
-                            { c: 300000, u: 40, d: [2017, 1, 5] }
-                        ],
-                        pr: [
-                            100.5,
-                            102.3,
-                            101.9,
-                            99.76,
-                            98.1,
-                            99.12
-                        ],
-                        prStartIndex: 2
-                    }
-                ],
-                total: 100000,
-                startTime,
-                cacheTimes: [0, 1, 2, 3, 4, 5, 6, 7]
+                data: [1, 2, 3],
+                total: 1003
             };
 
-            const result = rList.processPageDataFunds(reduction, { raw }, now);
+            expect(rList.getListData(page, raw).toJS()).to.deep.equal({
+                numRows: 3, numCols: 5, total: 1003
+            });
+        });
+    });
 
-            const other = result.get('other');
+    describe('processPageDataList', () => {
+        it('should set the page data', () => {
+            const stateBefore = map({
+                pages: map.of()
+            });
 
-            expect(other.getIn(['fundHistoryCache', 'year1']))
-                .to.be.ok;
+            const page = 'food';
+            const raw = {
+                data: [
+                    { I: 300, 'd': '2018-05-03', 'i': 'foo', 'k': 'bar', 'c': 1939, 's': 'baz' }
+                ],
+                total: 1003
+            };
 
-            expect(other.get('fundsCachedValue')).to.be.ok;
+            const stateAfter = {
+                pages: {
+                    food: {
+                        data: {
+                            numRows: 1,
+                            numCols: 5,
+                            total: 1003
+                        },
+                        rows: {
+                            '300': {
+                                id: 300,
+                                cols: [
+                                    DateTime.fromISO('2018-05-03'),
+                                    'foo',
+                                    'bar',
+                                    1939,
+                                    'baz'
+                                ]
+                            }
+                        }
+                    }
+                }
+            };
 
-            expect(other.getIn(['graphFunds', 'startTime'])).to.equal(startTime);
-            expect(other.getIn(['graphFunds', 'cacheTimes']).toJS())
-                .to.deep.equal([0, 1, 2, 3, 4, 5, 6, 7]);
-
-            expect(other.getIn(['graphFunds', 'zoomRange']).toJS())
-                .to.deep.equal([0, 86400 * 4]);
-
-            expect(other.getIn(['graphFunds', 'data'])).to.be.ok;
+            expect(rList.processPageDataList(stateBefore, { page, raw }).toJS())
+                .to.deep.equal(stateAfter);
         });
     });
 });

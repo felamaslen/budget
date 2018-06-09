@@ -9,7 +9,7 @@ describe('Editable updates reducer', () => {
             const state = fromJS({
                 pages: {
                     funds: {
-                        rows: [],
+                        rows: {},
                         data: {}
                     }
                 }
@@ -19,7 +19,6 @@ describe('Editable updates reducer', () => {
 
             expect(result.getIn(['pages', 'funds', 'rows']).toJS()).to.deep.equal(
                 M.sortRowsByDate(state.getIn(['pages', 'funds', 'rows']), 'funds')
-                    .sortedRows
                     .toJS()
             );
 
@@ -32,10 +31,6 @@ describe('Editable updates reducer', () => {
                     .toJS()
             );
         });
-    });
-
-    describe('recalculateFundProfits', () => {
-        it('should be tested');
     });
 
     describe('applyEditsOverview', () => {
