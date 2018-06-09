@@ -3,6 +3,12 @@ import { expect } from 'chai';
 import * as S from '../../src/selectors/app';
 
 describe('App selectors', () => {
+    describe('getNow', () => {
+        it('should get the current time from the state', () => {
+            expect(S.getNow(fromJS({ now: 'foo' }))).to.equal('foo');
+        });
+    });
+
     describe('apiKey', () => {
         it('should get the API key from the state', () => {
             expect(S.getApiKey(fromJS({
@@ -54,9 +60,9 @@ describe('App selectors', () => {
 
     describe('getLoadedStatus', () => {
         it('should return the pagesLoaded status from state', () => {
-            expect(S.getLoadedStatus(fromJS({ pagesLoaded: { foo: true, bar: false } }), 'foo')).to.equal(true);
-            expect(S.getLoadedStatus(fromJS({ pagesLoaded: { foo: true, bar: false } }), 'bar')).to.equal(false);
-            expect(S.getLoadedStatus(fromJS({ pagesLoaded: { foo: true, bar: false } }), 'baz')).to.equal(false);
+            expect(S.getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'foo' })).to.equal(true);
+            expect(S.getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'bar' })).to.equal(false);
+            expect(S.getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'baz' })).to.equal(false);
         });
     });
 });

@@ -9,7 +9,8 @@ import * as A from '../../src/actions/graph.actions';
 import * as B from '../../src/actions/stocks-list.actions';
 import { openTimedMessage } from '../../src/sagas/error.saga';
 import { getApiKey } from '../../src/selectors/app';
-import { getFundHistoryCache, getStocksListInfo } from '../../src/selectors/funds';
+import { getFundsCache } from '../../src/selectors/funds/helpers';
+import { getStocksListInfo } from '../../src/selectors/funds/stocks';
 import { getStockPricesFromYahoo } from '../../src/helpers/finance';
 
 describe('funds.saga', () => {
@@ -28,7 +29,7 @@ describe('funds.saga', () => {
         it('should do nothing if loading from the cache', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()
-                .select(getFundHistoryCache)
+                .select(getFundsCache)
                 .next(fromJS({ foo: 'bar' }))
                 .isDone();
         });
@@ -36,7 +37,7 @@ describe('funds.saga', () => {
         it('should request new data', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()
-                .select(getFundHistoryCache)
+                .select(getFundsCache)
                 .next(fromJS({}))
                 .select(getApiKey)
                 .next('some_api_key')
@@ -45,7 +46,7 @@ describe('funds.saga', () => {
                 })
                 .next({ data: { data: 'yes' } })
                 .put(A.aFundsGraphPeriodReceived({
-                    shortPeriod: 'foo', data: 'yes', reloadPagePrices: false
+                    shortPeriod: 'foo', res: 'yes'
                 }))
                 .next()
                 .isDone();
@@ -54,7 +55,7 @@ describe('funds.saga', () => {
         it('should handle errors', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()
-                .select(getFundHistoryCache)
+                .select(getFundsCache)
                 .next(fromJS({}))
                 .select(getApiKey)
                 .next('some_api_key')

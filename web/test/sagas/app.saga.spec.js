@@ -1,5 +1,6 @@
 /* eslint-disable prefer-reflect */
 import '../browser';
+import { DateTime } from 'luxon';
 import { delay } from 'redux-saga';
 import { takeEvery, takeLatest } from 'redux-saga/effects';
 import { testSaga } from 'redux-saga-test-plan';
@@ -122,33 +123,15 @@ describe('app.saga', () => {
                 .next()
                 .call(delay, 1000)
                 .next()
-                .call(S.getDate)
+                .call(DateTime.local)
                 .next(date)
                 .put(aTimeUpdated(date))
                 .next()
                 .call(delay, 1000)
                 .next()
-                .call(S.getDate);
+                .call(DateTime.local);
 
             // etc.
-        });
-    });
-
-    describe('appSaga', () => {
-        it('should yield all the other sagas', () => {
-            testSaga(appSaga)
-                .next()
-                .fork(S.timeUpdater)
-                .next()
-                .fork(S.watchEventEmitter, S.keyPressEventChannel)
-                .next()
-                .fork(S.watchEventEmitter, S.windowResizeEventChannel)
-                .next()
-                .fork(takeEvery, [EDIT_LIST_ITEM_ADDED, S.addServerData])
-                .next()
-                .fork(takeLatest, [SERVER_UPDATED, S.updateServerData])
-                .next()
-                .isDone();
         });
     });
 });

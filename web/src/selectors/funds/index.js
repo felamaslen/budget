@@ -6,11 +6,14 @@ import { getNow } from '../app';
 import { transactionsKey, getFundsRows, getCurrentFundsCache } from './helpers';
 import { getRowGains, getGainsForRow } from './gains';
 
-function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
+export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = (now.ts / 1000) - cacheTimes.last() - startTime;
 
     if (isNaN(age)) {
         return 'no values';
+    }
+    if (age < 0) {
+        return 'in the future!';
     }
 
     return formatAge(age);
