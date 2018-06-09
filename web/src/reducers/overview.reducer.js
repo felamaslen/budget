@@ -8,16 +8,14 @@ import { AVERAGE_MEDIAN } from '../constants';
 import { OVERVIEW_COLUMNS } from '../constants/data';
 import { FUTURE_INVESTMENT_RATE } from '../constants/stocks';
 import { GRAPH_SPEND_CATEGORIES } from '../constants/graph';
-import { getNow } from '../helpers/date';
 import { listAverage, randnBm } from '../helpers/data';
 import { getOverviewCategoryColor, getOverviewScoreColor } from '../helpers/color';
 
-function calculateFutures(cost, futureCategories, futureMonths) {
+function calculateFutures(now, cost, futureCategories, futureMonths) {
     if (futureMonths <= 0) {
         return cost;
     }
 
-    const now = getNow();
     const currentMonthRatio = now.daysInMonth / now.day;
     const currentKey = cost.get('balance').size - futureMonths - 1;
 
@@ -53,7 +51,7 @@ function calculateFutures(cost, futureCategories, futureMonths) {
     });
 }
 
-export function rProcessDataOverview({ costMap, startDate, currentDate, endDate, futureMonths }) {
+export function rProcessDataOverview(now, { costMap, startDate, currentDate, endDate, futureMonths }) {
     const { months: monthDiff } = endDate.diff(startDate, 'months').toObject();
     const numRows = Math.round(monthDiff) + 1;
     const numCols = 1;
@@ -73,7 +71,7 @@ export function rProcessDataOverview({ costMap, startDate, currentDate, endDate,
     }
 
     const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');
-    const costWithFutures = calculateFutures(costActual, futureCategories, futureMonths);
+    const costWithFutures = calculateFutures(now, costActual, futureCategories, futureMonths);
 
     // add spending column
     const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
@@ -136,13 +134,15 @@ function rProcessDataOverviewRaw(state, raw) {
         futureMonths
     } = raw;
 
+    const now = state.get('now');
+
     const startDate = DateTime.fromObject({ year: startYear, month: startMonth }).endOf('month');
     const currentDate = DateTime.fromObject({ year: currentYear, month: currentMonth }).endOf('month');
     const endDate = DateTime.fromObject({ year: endYear, month: endMonth }).endOf('month');
 
     const costMap = fromJS(cost);
 
-    return rProcessDataOverview({ costMap, startDate, currentDate, endDate, futureMonths });
+    return rProcessDataOverview(now, { costMap, startDate, currentDate, endDate, futureMonths });
 }
 
 export function rGetOverviewRows(data) {

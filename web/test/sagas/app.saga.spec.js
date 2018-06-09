@@ -1,12 +1,14 @@
 /* eslint-disable prefer-reflect */
 import '../browser';
+import { delay } from 'redux-saga';
+import { takeEvery, takeLatest } from 'redux-saga/effects';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
-import * as S from '../../src/sagas/app.saga';
+import appSaga, * as S from '../../src/sagas/app.saga';
+import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../../src/constants/actions';
 import { getApiKey, getRequestList, getAddData } from '../../src/selectors/app';
 import { openTimedMessage } from '../../src/sagas/error.saga';
-
-import { aWindowResized, aServerUpdateReceived, aServerAddReceived } from '../../src/actions/app.actions';
+import { aWindowResized, aServerUpdateReceived, aServerAddReceived, aTimeUpdated } from '../../src/actions/app.actions';
 
 describe('app.saga', () => {
     describe('watchEventEmitter', () => {
@@ -109,6 +111,44 @@ describe('app.saga', () => {
                 .next()
                 .isDone();
 
+        });
+    });
+
+    describe('timeUpdater', () => {
+        it('should periodically call the time updater action', () => {
+            const date = new Date(150000000);
+
+            testSaga(S.timeUpdater)
+                .next()
+                .call(delay, 1000)
+                .next()
+                .call(S.getDate)
+                .next(date)
+                .put(aTimeUpdated(date))
+                .next()
+                .call(delay, 1000)
+                .next()
+                .call(S.getDate);
+
+            // etc.
+        });
+    });
+
+    describe('appSaga', () => {
+        it('should yield all the other sagas', () => {
+            testSaga(appSaga)
+                .next()
+                .fork(S.timeUpdater)
+                .next()
+                .fork(S.watchEventEmitter, S.keyPressEventChannel)
+                .next()
+                .fork(S.watchEventEmitter, S.windowResizeEventChannel)
+                .next()
+                .fork(takeEvery, [EDIT_LIST_ITEM_ADDED, S.addServerData])
+                .next()
+                .fork(takeLatest, [SERVER_UPDATED, S.updateServerData])
+                .next()
+                .isDone();
         });
     });
 });

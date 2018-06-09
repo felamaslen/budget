@@ -4,10 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 
-import { getFormattedHistory, getExtraRowProps, getFundsCachedValue } from './funds.reducer';
-import { processRawListRows } from './list.reducer';
-
-import { sortRowsByDate } from '../helpers/data';
+import { getInitialEnabledList, processPrices } from './funds.reducer';
 
 export const rToggleShowAll = state => {
     return state.setIn(
@@ -15,143 +12,59 @@ export const rToggleShowAll = state => {
         !state.getIn(['other', 'showAllBalanceGraph']));
 };
 
-export function rToggleFundItemGraph(state, { key }) {
-    return state.setIn(
-        ['pages', 'funds', 'rows', key, 'historyPopout'],
-        !state.getIn(['pages', 'funds', 'rows', key, 'historyPopout'])
-    );
-}
-
-function getCacheData(state, period) {
-    const rows = state.getIn(
-        ['other', 'fundHistoryCache', period, 'rows']
-    );
-    const startTime = state.getIn(
-        ['other', 'fundHistoryCache', period, 'startTime']
-    );
-    const cacheTimes = state.getIn(
-        ['other', 'fundHistoryCache', period, 'cacheTimes']
-    );
-
-    return { rows, startTime, cacheTimes };
-}
-
-function getCurrentlyEnabledFunds(state) {
-    return state
-        .getIn(['other', 'graphFunds', 'data', 'fundItems'])
-        .reduce((enabled, item, itemIndex) => {
-            if (item.get('enabled')) {
-                return enabled.push(itemIndex - 1);
-            }
-
-            return enabled;
-        }, list.of());
-}
-
 export function rToggleFundsGraphMode(state) {
-    const oldMode = state.getIn(['other', 'graphFunds', 'mode']);
-    const newMode = (oldMode + 1) % 3;
-
-    const period = state.getIn(['other', 'graphFunds', 'period']);
-    const { rows, startTime, cacheTimes } = getCacheData(state, period);
-
-    const enabledList = getCurrentlyEnabledFunds(state);
-
-    const fundHistory = getFormattedHistory(rows, newMode, startTime, cacheTimes, enabledList);
-
-    return state
-        .setIn(['other', 'graphFunds', 'data'], fundHistory)
-        .setIn(['other', 'graphFunds', 'mode'], newMode);
+    return state.setIn(['other', 'graphFunds', 'mode'],
+        (state.getIn(['other', 'graphFunds', 'mode']) + 1) % 3);
 }
 
 export function rToggleFundsGraphLine(state, { index }) {
-    let statusBefore = false;
+    const enabledList = state.getIn(['other', 'graphFunds', 'enabledList'])
+        .set(index, !state.getIn(['other', 'graphFunds', 'enabledList', index]));
 
-    let enabledList = state
-        .getIn(['other', 'graphFunds', 'data', 'fundItems'])
-        .reduce((enabled, item, itemIndex) => {
-            if (item.get('enabled')) {
-                if (itemIndex === index) {
-                    statusBefore = true;
-
-                    return enabled;
-                }
-
-                return enabled.push(itemIndex - 1);
-            }
-
-            return enabled;
-        }, list.of());
-
-    if (!(statusBefore && enabledList.size)) {
-        enabledList = enabledList.push(index - 1);
-    }
-
-    const period = state.getIn(['other', 'graphFunds', 'period']);
-
-    const { rows, startTime, cacheTimes } = getCacheData(state, period);
-    const mode = state.getIn(['other', 'graphFunds', 'mode']);
-
-    const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, enabledList);
-
-    return state
-        .setIn(['other', 'graphFunds', 'data'], fundHistory);
-}
-
-function changePeriod(state, period, rows, startTime, cacheTimes) {
-    const mode = state.getIn(['other', 'graphFunds', 'mode']);
-
-    // reset the zoom range when changing data
-    const zoomRange = list([0, Date.now() / 1000 - startTime]);
-    const enabledList = getCurrentlyEnabledFunds(state);
-    const fundHistory = getFormattedHistory(rows, mode, startTime, cacheTimes, enabledList);
-
-    return state
-        .setIn(['other', 'graphFunds', 'period'], period)
-        .setIn(['other', 'graphFunds', 'startTime'], startTime)
-        .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)
-        .setIn(['other', 'graphFunds', 'zoomRange'], zoomRange)
-        .setIn(['other', 'graphFunds', 'data'], fundHistory);
-}
-
-export function rHandleFundPeriodResponse(state, { reloadPagePrices, shortPeriod, data }) {
-    const { sortedRows, rowIds } = sortRowsByDate(processRawListRows(data.data, 'funds'), 'funds');
-    const startTime = data.startTime;
-    const cacheTimes = list(data.cacheTimes);
-
-    const nextState = changePeriod(state, shortPeriod, sortedRows, startTime, cacheTimes)
-        .setIn(['other', 'fundHistoryCache', shortPeriod], map({
-            rows: sortedRows, startTime, cacheTimes
-        }));
-
-    if (reloadPagePrices) {
-        const rowsWithExtraProps = getExtraRowProps(sortedRows, startTime, cacheTimes);
-
-        const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, new Date());
-
-        return nextState
-            .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
-            .setIn(['pages', 'funds', 'rowIds'], rowIds)
-            .setIn(['other', 'fundsCachedValue'], fundsCachedValue);
-    }
-
-    return nextState;
-}
-
-export function rChangeFundsGraphPeriod(state, { shortPeriod, noCache }) {
-    const loadFromCache = !noCache && state
-        .getIn(['other', 'fundHistoryCache'])
-        .has(shortPeriod);
-
-    if (!loadFromCache) {
-        // the side effect will change the period when the content is loaded
+    const numEnabled = enabledList.reduce((num, item) => num + (item >> 0), 0);
+    if (!numEnabled) {
         return state;
     }
 
-    const theShortPeriod = shortPeriod || state.getIn(['other', 'graphFunds', 'period']);
+    return state.setIn(['other', 'graphFunds', 'enabledList'], enabledList);
+}
 
-    const { rows, startTime, cacheTimes } = getCacheData(state, theShortPeriod);
+function changePeriod(state, period) {
+    const now = state.get('now');
+    const startTime = state.getIn(['pages', 'funds', 'cache', period, 'startTime']);
 
-    return changePeriod(state, shortPeriod, rows, startTime, cacheTimes);
+    // reset the zoom range when changing data
+    const zoomRange = list([0, now.ts / 1000 - startTime]);
+
+    return state.setIn(['other', 'graphFunds', 'period'], period)
+        .setIn(['other', 'graphFunds', 'zoomRange'], zoomRange);
+}
+
+export function rHandleFundPeriodResponse(state, { shortPeriod, res }) {
+    const startTime = res.startTime;
+    const cacheTimes = list(res.cacheTimes);
+    const prices = processPrices(res.data);
+
+    const rows = state.getIn(['pages', 'funds', 'rows']);
+
+    const stateWithCache = state.setIn(['pages', 'funds', 'cache', shortPeriod],
+        map({ prices, startTime, cacheTimes })
+    )
+        .setIn(['other', 'graphFunds', 'enabledList'], getInitialEnabledList(rows, prices));
+
+    return changePeriod(stateWithCache, shortPeriod);
+}
+
+export function rChangeFundsGraphPeriod(state, { shortPeriod, noCache }) {
+    const loadFromCache = !noCache && state.getIn(['pages', 'funds']) &&
+        state.getIn(['pages', 'funds', 'cache']).has(shortPeriod);
+
+    if (!loadFromCache) {
+        // data refresh handled from a saga
+
+        return state;
+    }
+
+    return changePeriod(state, shortPeriod || state.getIn(['other', 'graphFunds', 'period']));
 }
 

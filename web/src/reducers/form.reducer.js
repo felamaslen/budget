@@ -1,7 +1,7 @@
 import { Map as map, List as list } from 'immutable';
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
-import { resortListRows, recalculateFundProfits } from './editable-updates.reducer';
+import { resortListRows } from './editable-updates.reducer';
 import { stringifyFields, getInvalidInsertDataKeys } from './edit.reducer';
 import { dataEquals, getAddDefaultValues } from '../helpers/data';
 import { PAGES } from '../constants/data';
@@ -100,10 +100,6 @@ export function rCloseFormDialogEdit(state, { page, fields }) {
         oldRow.getIn(['cols', costKey]);
 
     nextState = nextState.setIn(['pages', page, 'rows', id], newRow);
-
-    if (page === 'funds') {
-        nextState = recalculateFundProfits(nextState);
-    }
 
     nextState = resortListRows(nextState, { page });
 

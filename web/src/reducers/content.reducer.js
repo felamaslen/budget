@@ -8,10 +8,11 @@ import {
 } from '../helpers/data';
 import { capitalise, formatCurrency } from '../helpers/format';
 import { processPageDataOverview } from './overview.reducer';
-import { processPageDataList, processPageDataFunds } from './list.reducer';
+import { processPageDataList } from './list.reducer';
+import { processPageDataFunds } from './funds.reducer';
 import { processPageDataAnalysis } from './analysis.reducer';
 
-function processPageData(state, { page, raw }, now) {
+function processPageData(state, { page, raw }) {
     if (page === 'overview') {
         // overview
         return processPageDataOverview(state, { raw });
@@ -24,19 +25,16 @@ function processPageData(state, { page, raw }, now) {
 
     if (page === 'funds') {
         // funds
-        return processPageDataFunds(state, { raw }, now);
+        return processPageDataFunds(state, { raw });
     }
 
     if (PAGES[page].list) {
         const nextState = processPageDataList(state, { page, raw });
-        const { sortedRows, rowIds } = sortRowsByDate(
-            nextState.getIn(['pages', page, 'rows']), page);
+        const sortedRows = sortRowsByDate(nextState.getIn(['pages', page, 'rows']), page);
         const weeklyData = addWeeklyAverages(
             nextState.getIn(['pages', page, 'data']), sortedRows, page);
 
-        return nextState
-            .setIn(['pages', page, 'rows'], sortedRows)
-            .setIn(['pages', page, 'rowIds'], rowIds)
+        return nextState.setIn(['pages', page, 'rows'], sortedRows)
             .setIn(['pages', page, 'data'], weeklyData);
     }
 
@@ -70,16 +68,12 @@ export function rRequestContent(state, { page }) {
         .set('currentPage', page);
 }
 
-export function rHandleContentResponse(state, { response, page }, now) {
-    if (!response) {
+export function rHandleContentResponse(state, { response, page }) {
+    if (!(response && response.data && response.data.data)) {
         return state.set('loading', false);
     }
 
-    return processPageData(
-        state.setIn(['pagesRaw', page], response.data.data),
-        { page, raw: response.data.data },
-        now
-    )
+    return processPageData(state, { page, raw: response.data.data })
         .set('loading', false)
         .setIn(['pagesLoaded', page], true)
         .setIn(['edit', 'active'], getNullEditable(page))

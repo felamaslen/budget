@@ -2,25 +2,18 @@
  * Process list data
  */
 
-import { fromJS, List as list, Map as map } from 'immutable';
+import { List as list, Map as map } from 'immutable';
 
-import { getFormattedHistory, getFundsCachedValue, getExtraRowProps } from './funds.reducer';
 import { PAGES, DATA_KEY_ABBR } from '../constants/data';
 import { dateInput } from '../helpers/date';
-import { TransactionsList, sortRowsByDate } from '../helpers/data';
+import { TransactionsList } from '../helpers/data';
 
-export function processRawListRows(data, page) {
-    return map(data.map(item => {
-        const id = item[DATA_KEY_ABBR.id];
+export function processRawListRows(rows, page) {
+    const listCols = list(PAGES[page].cols);
 
-        const dataKeyAbbr = list(Object.values(DATA_KEY_ABBR));
-
-        const otherProps = list(Object.keys(item))
-            .filterNot(key => dataKeyAbbr.includes(key))
-            .reduce((result, key) => ({ ...result, [key]: fromJS(item[key]) }), {});
-
-        const cols = list(PAGES[page].cols).map(col => {
-            const value = item[DATA_KEY_ABBR[col]];
+    return map(rows.map(({ [DATA_KEY_ABBR.id]: id, ...row }) => {
+        const cols = listCols.map(col => {
+            const value = row[DATA_KEY_ABBR[col]];
 
             if (col === 'date') {
                 return dateInput(value, false);
@@ -34,59 +27,22 @@ export function processRawListRows(data, page) {
             return value;
         });
 
-        return [id, map({ id, cols, ...otherProps })];
+        return [id, map({ id, cols })];
     }));
 }
 
-/**
- * process list page data response
- * @param {Record} state: app state
- * @param {string} page: page to process
- * @param {object} raw: api JSON data
- * @returns {Record} modified state
- */
-export function processPageDataList(state, { page, raw }) {
+export function getListData(page, raw) {
     const numRows = raw.data.length;
     const numCols = PAGES[page].cols.length;
     const total = raw.total;
 
-    const data = map({ numRows, numCols, total });
-
-    const rows = processRawListRows(raw.data, page);
-
-    const rowIds = rows.keySeq().toList();
-
-    return state.setIn(['pages', page], map({ data, rows, rowIds }));
+    return map({ numRows, numCols, total });
 }
 
-export function processPageDataFunds(state, { raw }, now) {
-    const startTime = raw.startTime;
-    const cacheTimes = list(raw.cacheTimes);
+export function processPageDataList(state, { page, raw }) {
+    const data = getListData(page, raw);
+    const rows = processRawListRows(raw.data, page);
 
-    // process list-related data
-    const nextState = processPageDataList(state, { page: 'funds', raw });
-
-    const period = state.getIn(['other', 'graphFunds', 'period']);
-    const maxAge = Math.floor((now.getTime() / 1000) - startTime);
-
-    const { sortedRows, rowIds } = sortRowsByDate(nextState.getIn(['pages', 'funds', 'rows']), 'funds');
-    const rowsWithExtraProps = getExtraRowProps(sortedRows, startTime, cacheTimes);
-
-    const mode = state.getIn(['other', 'graphFunds', 'mode']);
-
-    const fundsCachedValue = getFundsCachedValue(sortedRows, startTime, cacheTimes, now);
-    const fundHistory = getFormattedHistory(sortedRows, mode, startTime, cacheTimes);
-
-    return nextState
-        .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps)
-        .setIn(['pages', 'funds', 'rowIds'], rowIds)
-        .setIn(['pages', 'funds', 'startTime'], startTime)
-        .setIn(['pages', 'funds', 'cacheTimes'], cacheTimes)
-        .setIn(['other', 'fundHistoryCache', period], map({ rows: sortedRows, startTime, cacheTimes }))
-        .setIn(['other', 'fundsCachedValue'], fundsCachedValue)
-        .setIn(['other', 'graphFunds', 'startTime'], startTime)
-        .setIn(['other', 'graphFunds', 'cacheTimes'], cacheTimes)
-        .setIn(['other', 'graphFunds', 'zoomRange'], list([0, maxAge]))
-        .setIn(['other', 'graphFunds', 'data'], fundHistory);
+    return state.setIn(['pages', page], map({ data, rows }));
 }
 

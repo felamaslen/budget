@@ -1,10 +1,11 @@
-import { eventChannel } from 'redux-saga';
-import { all, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
+import { delay, eventChannel } from 'redux-saga';
+import { fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
+import { DateTime } from 'luxon';
+import debounce from 'debounce';
 import axios from 'axios';
 import { API_PREFIX } from '../constants/data';
 import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../constants/actions';
-import debounce from '../helpers/debounce';
-import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived } from '../actions/app.actions';
+import { aWindowResized, aKeyPressed, aServerUpdateReceived, aServerAddReceived, aTimeUpdated } from '../actions/app.actions';
 import { getApiKey, getRequestList, getAddData } from '../selectors/app';
 import { openTimedMessage } from './error.saga';
 
@@ -101,12 +102,21 @@ export function *addServerData({ page }) {
     }
 }
 
+export function *timeUpdater() {
+    while (true) {
+        yield call(delay, 1000);
+
+        const now = yield call(DateTime.local);
+
+        yield put(aTimeUpdated(now));
+    }
+}
+
 export default function *appSaga() {
-    yield all([
-        fork(watchEventEmitter, keyPressEventChannel),
-        fork(watchEventEmitter, windowResizeEventChannel),
-        takeEvery(EDIT_LIST_ITEM_ADDED, addServerData),
-        takeLatest(SERVER_UPDATED, updateServerData)
-    ]);
+    yield fork(timeUpdater);
+    yield fork(watchEventEmitter, keyPressEventChannel);
+    yield fork(watchEventEmitter, windowResizeEventChannel);
+    yield fork(takeEvery, EDIT_LIST_ITEM_ADDED, addServerData);
+    yield fork(takeLatest, SERVER_UPDATED, updateServerData);
 }
 

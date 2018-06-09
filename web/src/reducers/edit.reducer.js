@@ -7,11 +7,10 @@ import { DateTime } from 'luxon';
 
 import { PAGES } from '../constants/data';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import { getNow } from '../helpers/date';
 import {
     getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
 } from '../helpers/data';
-
+import { getNow } from '../selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
 import { applyEdits, applyEditsList } from './editable-updates.reducer';
@@ -111,7 +110,7 @@ export function rAddListItem(state, { page }) {
         }));
     }
 
-    const now = getNow();
+    const now = getNow(state);
 
     // validate items
     const active = state.getIn(['edit', 'active']);
@@ -182,7 +181,7 @@ export function rHandleServerAdd(state, { err, response, fields, page }) {
     const cols = list(fields.map(thisItem => thisItem.get('value')));
 
     // update total and push new item to the data store list, then sort by date
-    const { sortedRows, rowIds } = sortRowsByDate(
+    const sortedRows = sortRowsByDate(
         state.getIn(['pages', page, 'rows'])
             .set(id, map({ id, cols })),
         page);
@@ -195,7 +194,6 @@ export function rHandleServerAdd(state, { err, response, fields, page }) {
 
     nextState = nextState
         .setIn(['pages', page, 'rows'], sortedRows)
-        .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData)
         .setIn(['pages', page, 'data', 'total'], newTotal)
         .setIn(

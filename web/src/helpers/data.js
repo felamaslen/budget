@@ -6,15 +6,6 @@ import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
 import { PAGES } from '../constants/data';
-import { getNow } from './date';
-
-function sortByDate(prev, next) {
-    if (prev.get('date') < next.get('date')) {
-        return -1;
-    }
-
-    return 1;
-}
 
 export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD || '') {
     const periodRegex = /^([a-z]+)([0-9]+)$/;
@@ -58,7 +49,7 @@ export class TransactionsList {
                         cost: item.cost
                     });
                 })
-                .sort(sortByDate);
+                .sort((prev, next) => prev.get('date') - next.get('date'));
 
             this.size = this.list.size;
         }
@@ -257,14 +248,14 @@ export function getNullEditable(page) {
     });
 }
 
-export function getAddDefaultValues(page) {
+export function getAddDefaultValues(page, now) {
     if (!PAGES[page].list) {
         return list.of();
     }
 
     return list(PAGES[page].cols).map(column => {
         if (column === 'date') {
-            return getNow();
+            return now;
         }
         if (column === 'cost') {
             return 0;
@@ -281,9 +272,7 @@ export function getAddDefaultValues(page) {
     });
 }
 
-export function getRowsSortedByDate(rows, page) {
-    const now = getNow();
-
+export function sortRowsByDate(rows, page, now) {
     const dateKey = PAGES[page].cols.indexOf('date');
     const costKey = PAGES[page].cols.indexOf('cost');
     let lastFuture = false;
@@ -346,14 +335,6 @@ export function getRowsSortedByDate(rows, page) {
     }
 
     return sorted;
-}
-
-export function sortRowsByDate(rows, page) {
-    const sortedRows = getRowsSortedByDate(rows, page);
-    const rowIds = sortedRows.keySeq()
-        .toList();
-
-    return { sortedRows, rowIds };
 }
 
 export function addWeeklyAverages(data, rows, page) {

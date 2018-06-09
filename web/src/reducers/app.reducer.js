@@ -7,8 +7,8 @@ import { List as list, Map as map } from 'immutable';
 import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
-import { getFundsCachedValueAgeText } from './funds.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
+import { makeGetRowIds, getAllPageRows } from '../selectors/list';
 import { PAGES } from '../constants/data';
 
 export const rOnWindowResize = (state, { size }) => state
@@ -23,8 +23,12 @@ function getItemValue(state, page, row, col) {
     }
     else if (PAGES[page].list) {
         if (row > -1) {
-            id = state.getIn(['pages', page, 'rows', row, 'id']);
-            value = state.getIn(['pages', page, 'rows', row, 'cols', col]);
+            const rows = getAllPageRows(state, { page });
+
+            // TODO
+            id = row;
+            // id = rows.getIn([row, 'id']);
+            value = rows.getIn([id, 'cols', col]);
             item = PAGES[page].cols[col];
         }
         else {
@@ -42,6 +46,8 @@ function handleSuggestionsNav(state, direction, suggestions) {
 
     return state.setIn(['editSuggestions', 'active'], newActive);
 }
+
+const getRowKeys = makeGetRowIds();
 
 function handleNav(state, { page, dx, dy, cancel }) {
     if (cancel) {
@@ -69,7 +75,7 @@ function handleNav(state, { page, dx, dy, cancel }) {
 
     let navTo = null;
     if (pageIsList) {
-        const rowKeys = state.getIn(['pages', page, 'rowIds']);
+        const rowKeys = getRowKeys(state, { page });
 
         navTo = getNavRowCol({
             dx, dy, rowKeys, numCols, currentRow, currentCol, addBtnFocus
@@ -229,19 +235,7 @@ export function rLogout(state) {
 }
 
 export function rUpdateTime(state, { now }) {
-    if (state.getIn(['pages', 'funds'])) {
-        const ageText = getFundsCachedValueAgeText(
-            state.getIn(['other', 'graphFunds', 'startTime']),
-            state.getIn(['other', 'graphFunds', 'cacheTimes']),
-            now
-        );
-
-        return state.setIn(
-            ['other', 'fundsCachedValue', 'ageText'], ageText
-        );
-    }
-
-    return state;
+    return state.set('now', now);
 }
 
 export function rUpdateServer(state) {

@@ -5,27 +5,14 @@ import { sortRowsByDate, addWeeklyAverages } from '../helpers/data';
 
 import { pushToRequestQueue } from './request-queue.reducer';
 import { rGetOverviewRows, rProcessDataOverview, rCalculateOverview } from './overview.reducer';
-import { getExtraRowProps as reloadFundsRows } from './funds.reducer';
 
 export function resortListRows(state, { page }) {
     // sort rows by date
-    const { sortedRows, rowIds } = sortRowsByDate(state.getIn(['pages', page, 'rows']), page);
+    const sortedRows = sortRowsByDate(state.getIn(['pages', page, 'rows']), page);
     const weeklyData = addWeeklyAverages(state.getIn(['pages', page, 'data']), sortedRows, page);
 
     return state.setIn(['pages', page, 'rows'], sortedRows)
-        .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData);
-}
-
-export function recalculateFundProfits(state) {
-    const rows = state.getIn(['pages', 'funds', 'rows']);
-    const startTime = state.getIn(['pages', 'funds', 'startTime']);
-    const cacheTimes = state.getIn(['pages', 'funds', 'cacheTimes']);
-
-    const rowsWithExtraProps = reloadFundsRows(rows, startTime, cacheTimes);
-
-    return state
-        .setIn(['pages', 'funds', 'rows'], rowsWithExtraProps);
 }
 
 export function applyEditsOverview(state, { item }) {
@@ -71,11 +58,6 @@ export function applyEditsList(state, { item, page }) {
             nextState.getIn(['pages', page, 'data', 'total']) +
                 item.get('value') - item.get('originalValue')
         );
-    }
-
-    // recalculate fund profits / losses if transactions have changed
-    if (page === 'funds' && item.get('item') === 'transactions') {
-        nextState = recalculateFundProfits(nextState);
     }
 
     nextState = resortListRows(nextState, { page });
@@ -163,16 +145,9 @@ export function rDeleteListItem(state, { page, id }) {
         });
     }
 
-    nextState = pushToRequestQueue(nextState, map({ page, id, delete: true }))
+    return pushToRequestQueue(nextState, map({ page, id, delete: true }))
         .setIn(['pages', page, 'rows'], sortedRows)
         .setIn(['pages', page, 'rowIds'], rowIds)
         .setIn(['pages', page, 'data'], weeklyData);
-
-    // recalculate fund profits / losses
-    if (page === 'funds') {
-        nextState = recalculateFundProfits(nextState);
-    }
-
-    return nextState;
 }
 

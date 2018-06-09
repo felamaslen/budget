@@ -12,13 +12,14 @@ import { aFundsGraphPeriodReceived } from '../actions/graph.actions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/stocks-list.actions';
 import { getStockPricesFromYahoo } from '../helpers/finance';
 import { getApiKey } from '../selectors/app';
-import { getFundHistoryCache, getStocksListInfo } from '../selectors/funds';
+import { getFundsCache } from '../selectors/funds/helpers';
+import { getStocksListInfo } from '../selectors/funds/stocks';
 import { openTimedMessage } from './error.saga';
 
-export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache }) {
-    const fundHistoryCache = yield select(getFundHistoryCache);
+export function *requestFundPeriodData({ shortPeriod, noCache }) {
+    const cache = yield select(getFundsCache);
 
-    const loadFromCache = !noCache && fundHistoryCache.has(shortPeriod);
+    const loadFromCache = !noCache && cache && cache.has(shortPeriod);
     if (loadFromCache) {
         return;
     }
@@ -35,9 +36,9 @@ export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache 
             { headers: { Authorization: apiKey } }
         );
 
-        const data = response.data.data;
+        const res = response.data.data;
 
-        yield put(aFundsGraphPeriodReceived({ reloadPagePrices, shortPeriod, data }));
+        yield put(aFundsGraphPeriodReceived({ shortPeriod, res }));
     }
     catch (err) {
         yield call(openTimedMessage, 'Error loading fund data');
