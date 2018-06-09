@@ -39,8 +39,15 @@ function processData(data, popout) {
 
     const minX = dataX.min();
     const maxX = dataX.max();
-    const minY = dataY.min();
-    const maxY = dataY.max();
+    let minY = dataY.min();
+    let maxY = dataY.max();
+
+    if (minY === maxY) {
+        const range = minY / 100;
+
+        minY -= range;
+        maxY += range;
+    }
 
     // split up the line into multiple sections, if there are gaps in the data
     // (this can happen if the fund is sold and then re-bought at a later date)
