@@ -9,8 +9,8 @@ import { getRowLengths } from '../selectors/funds/helpers';
 import { getNow } from '../selectors/app';
 import { getListData, processRawListRows } from './list.reducer';
 
-export function getInitialEnabledList(rows, prices) {
-    const { rowLengths, maxLength } = getRowLengths(rows, prices);
+export function getInitialEnabledList(prices) {
+    const { rowLengths, maxLength } = getRowLengths(prices);
 
     return rowLengths.reduce((keys, length, id) =>
         keys.set(id, length >= maxLength), orderedMap({ overall: true }));
@@ -43,6 +43,6 @@ export function processPageDataFunds(state, { raw }) {
             [period]: map({ startTime, cacheTimes, prices })
         }))
         .setIn(['other', 'graphFunds', 'zoomRange'], list([0, maxAge]))
-        .setIn(['other', 'graphFunds', 'enabledList'], getInitialEnabledList(sortedRows, prices));
+        .setIn(['other', 'graphFunds', 'enabledList'], getInitialEnabledList(prices));
 }
 

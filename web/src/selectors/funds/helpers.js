@@ -4,7 +4,7 @@ import { PAGES } from '../../constants/data';
 export const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 export const itemKey = PAGES.funds.cols.indexOf('item');
 
-export function getRowLengths(rows, prices) {
+export function getRowLengths(prices) {
     const timeOffsets = prices.map(row => row.get('startIndex'));
     const rowLengths = prices.map((row, id) => row.get('values').size + timeOffsets.get(id));
 

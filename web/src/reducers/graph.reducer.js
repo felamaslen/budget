@@ -45,12 +45,10 @@ export function rHandleFundPeriodResponse(state, { shortPeriod, res }) {
     const cacheTimes = list(res.cacheTimes);
     const prices = processPrices(res.data);
 
-    const rows = state.getIn(['pages', 'funds', 'rows']);
-
     const stateWithCache = state.setIn(['pages', 'funds', 'cache', shortPeriod],
         map({ prices, startTime, cacheTimes })
     )
-        .setIn(['other', 'graphFunds', 'enabledList'], getInitialEnabledList(rows, prices));
+        .setIn(['other', 'graphFunds', 'enabledList'], getInitialEnabledList(prices));
 
     return changePeriod(stateWithCache, shortPeriod);
 }

@@ -98,7 +98,7 @@ const getFormattedHistory = createSelector([
 
     const priceUnitsCosts = getPriceUnitsCosts(rows, prices, startTime, cacheTimes);
 
-    const { timeOffsets, rowLengths, maxLength } = getRowLengths(rows, prices);
+    const { timeOffsets, rowLengths, maxLength } = getRowLengths(prices);
 
     const times = rowLengths.reduce(
         (items, length, id) =>
