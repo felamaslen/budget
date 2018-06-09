@@ -1,7 +1,6 @@
 import { Map as map } from 'immutable';
-
 import { PAGES } from '../constants/data';
-import { sortRowsByDate, addWeeklyAverages } from '../helpers/data';
+import { dataEquals, sortRowsByDate, addWeeklyAverages } from '../helpers/data';
 
 import { pushToRequestQueue } from './request-queue.reducer';
 import { rGetOverviewRows, rProcessDataOverview, rCalculateOverview } from './overview.reducer';
@@ -36,6 +35,20 @@ export function applyEditsOverview(state, { item }) {
         .setIn(['pages', 'overview', 'rows'], rGetOverviewRows(newData));
 }
 
+function updateRow(state, page, item) {
+    const row = item.get('row');
+    const col = item.get('col');
+
+    const oldValue = state.getIn(['pages', page, 'rows', row, 'cols', col]);
+    const newValue = item.get('value');
+
+    if (dataEquals(oldValue, newValue)) {
+        return state;
+    }
+
+    return state.setIn(['pages', page, 'rows', row, 'cols', col], newValue);
+}
+
 export function applyEditsList(state, { item, page }) {
     // update list data in the UI
     if (item.get('row') === -1) {
@@ -43,32 +56,23 @@ export function applyEditsList(state, { item, page }) {
         return state.setIn(['edit', 'add', page, item.get('col')], item.get('value'));
     }
 
-    let nextState = state;
+    let nextState = updateRow(state, page, item);
 
-    // update row
-    nextState = nextState.setIn(
-        ['pages', page, 'rows', item.get('row'), 'cols', item.get('col')],
-        item.get('value')
-    );
-
-    // recalculate total if the cost has changed
     if (item.get('item') === 'cost') {
-        nextState = nextState.setIn(
-            ['pages', page, 'data', 'total'],
-            nextState.getIn(['pages', page, 'data', 'total']) +
-                item.get('value') - item.get('originalValue')
-        );
+        const newTotal = nextState.getIn(['pages', page, 'data', 'total']) +
+            item.get('value') - item.get('originalValue');
+
+        nextState = nextState.setIn(['pages', page, 'data', 'total'], newTotal);
+    }
+    else if (item.get('item') === 'date') {
+        nextState = resortListRows(nextState, { page });
     }
 
-    nextState = resortListRows(nextState, { page });
-
     // recalculate overview data if the cost or date changed
-    if (state.getIn(['pagesLoaded', 'overview'])) {
+    if (state.get('pages').has('overview')) {
         if (item.get('item') === 'cost') {
             const dateKey = PAGES[page].cols.indexOf('date');
-            const date = nextState.getIn(
-                ['pages', page, 'rows', item.get('row'), 'cols', dateKey]
-            );
+            const date = nextState.getIn(['pages', page, 'rows', item.get('row'), 'cols', dateKey]);
 
             nextState = rCalculateOverview(nextState, {
                 page,

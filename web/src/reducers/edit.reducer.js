@@ -4,7 +4,6 @@
 
 import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
-
 import { PAGES } from '../constants/data';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
 import {
@@ -267,15 +266,12 @@ function rFundTransactions(state, row, col, transactions) {
         });
 
         return applyEditsList(state, { item, page: 'funds' })
-            .setIn(
-                ['edit', 'active'],
-                state.getIn(['edit', 'active']).set('value', transactions)
+            .setIn(['edit', 'active'], state.getIn(['edit', 'active'])
+                .set('value', transactions)
             );
     }
 
-    return state.setIn(
-        ['edit', 'add', 'funds', col], transactions
-    );
+    return state.setIn(['edit', 'add', 'funds', col], transactions);
 }
 
 export function rChangeFundTransactions(state, { row, col, key, column, value }) {

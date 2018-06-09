@@ -30,9 +30,6 @@ export function uuid(rand = Math.random(), random = false) {
     return Math.floor((1 + rand) * 0x10000);
 }
 
-/**
- * data type to hold transactions list for funds
- */
 export class TransactionsList {
     constructor(data, isShort = true) {
         this.list = data;
