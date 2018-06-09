@@ -25,7 +25,7 @@ export const testRows = map([
                     date: '2017-03-03'
                 },
                 {
-                    cost: -45000,
+                    cost: -50300,
                     units: -450,
                     date: '2017-04-27'
                 }
@@ -42,7 +42,7 @@ export const testRows = map([
                     date: '2017-01-11'
                 },
                 {
-                    cost: -90000,
+                    cost: -80760,
                     units: -1117.87,
                     date: '2017-04-27'
                 }
@@ -59,7 +59,7 @@ export const testRows = map([
                     date: '2016-09-21'
                 },
                 {
-                    cost: -200000,
+                    cost: -265622,
                     units: -1499.7,
                     date: '2017-04-27'
                 }

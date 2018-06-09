@@ -23,25 +23,19 @@ describe('Funds/gains selectors', () => {
                     dayGainAbs: 2989
                 })],
                 [3, map({
-                    value: 45616.5,
-                    gain: 0.0137,
-                    gainAbs: 617,
-                    dayGain: 0.0032,
-                    dayGainAbs: 144
+                    value: 50300,
+                    gain: 0.1178,
+                    gainAbs: 5300
                 })],
                 [1, map({
-                    value: 87797.5098,
-                    gain: -0.0245,
-                    gainAbs: -2202,
-                    dayGain: 0.0154,
-                    dayGainAbs: 1330
+                    value: 80760,
+                    gain: -0.1027,
+                    gainAbs: -9240
                 })],
                 [5, map({
-                    value: 217366.518,
-                    gain: 0.0868,
-                    gainAbs: 17367,
-                    dayGain: 0.0051,
-                    dayGainAbs: 1095
+                    value: 265622,
+                    gain: 0.3281,
+                    gainAbs: 65622
                 })]
             ]);
 

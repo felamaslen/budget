@@ -75,7 +75,7 @@ describe('Funds selectors', () => {
                 className: '',
                 sold: false,
                 gain: {
-                    color: [255, 235, 235],
+                    color: [255, 250, 250],
                     dayGain: 0.0075,
                     dayGainAbs: 2989,
                     gain: -0.0023,
@@ -89,11 +89,9 @@ describe('Funds selectors', () => {
                 sold: true,
                 gain: {
                     color: [255, 44, 44],
-                    dayGain: 0.0154,
-                    dayGainAbs: 1330,
-                    gain: -0.0245,
-                    gainAbs: -2202,
-                    value: 87797.5098
+                    gain: -0.1027,
+                    gainAbs: -9240,
+                    value: 80760
                 }
             });
         });

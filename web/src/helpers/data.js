@@ -99,24 +99,6 @@ export class TransactionsList {
     getTotalCost() {
         return TransactionsList.getCost(this.list);
     }
-    getLastUnits() {
-        let length = this.size;
-        if (this.isSold()) {
-            // don't include last item if it is a "sell"
-            length--;
-        }
-
-        return TransactionsList.getUnits(this.list.slice(0, length));
-    }
-    getLastCost() {
-        let length = this.size;
-        if (this.isSold()) {
-            // don't include last item if it is a "sell"
-            length--;
-        }
-
-        return TransactionsList.getCost(this.list.slice(0, length));
-    }
     isSold() {
         return this.getTotalUnits() === 0;
     }

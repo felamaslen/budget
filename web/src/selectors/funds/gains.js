@@ -24,6 +24,34 @@ function getFundColor(value, min, max) {
 const roundGain = value => Math.round(10000 * value) / 10000;
 const roundAbs = value => Math.round(value);
 
+function getCostValue(transactions, price, yesterdayPrice) {
+    if (transactions.isSold()) {
+        return transactions.list.reduce(({ cost, value }, item) => {
+            const itemCost = item.get('cost');
+
+            return {
+                cost: cost + itemCost * ((itemCost > 0) >> 0),
+                value: value - itemCost * ((itemCost < 0) >> 0)
+            };
+
+        }, { cost: 0, value: 0 });
+    }
+
+    const units = transactions.getTotalUnits();
+    const cost = transactions.getTotalCost();
+    const value = price * units;
+
+    let dayGainAbs = 0;
+    let dayGain = 0;
+
+    if (yesterdayPrice) {
+        dayGainAbs = roundAbs((price - yesterdayPrice) * units);
+        dayGain = roundGain((price - yesterdayPrice) / yesterdayPrice);
+    }
+
+    return { cost, value, dayGain, dayGainAbs };
+}
+
 export function getRowGains(rows, cache) {
     return rows.reduce((items, row, id) => {
         const rowCache = cache.getIn(['prices', id]);
@@ -32,26 +60,18 @@ export function getRowGains(rows, cache) {
         }
 
         const transactions = row.getIn(['cols', transactionsKey]);
-
         const price = rowCache.get('values').last();
-        const units = transactions.getLastUnits();
-        const cost = transactions.getLastCost();
-        const value = price * units;
+        const yesterdayPrice = rowCache.get('values').size > 1
+            ? rowCache.getIn(['values', -2])
+            : null;
 
-        const gainAbs = roundAbs(value - cost);
-        const gain = roundGain((value - cost) / cost);
+        const { cost, ...props } = getCostValue(transactions, price, yesterdayPrice);
 
-        let dayGainAbs = 0;
-        let dayGain = 0;
+        const gainAbs = roundAbs(props.value - cost);
+        const gain = roundGain((props.value - cost) / cost);
 
-        if (rowCache.get('values').size > 1) {
-            const yesterdayPrice = rowCache.getIn(['values', -2]);
+        return items.set(id, map({ ...props, gain, gainAbs }));
 
-            dayGainAbs = roundAbs((price - yesterdayPrice) * units);
-            dayGain = roundGain((price - yesterdayPrice) / yesterdayPrice);
-        }
-
-        return items.set(id, map({ value, gain, dayGain, gainAbs, dayGainAbs }));
     }, map.of());
 }
 
