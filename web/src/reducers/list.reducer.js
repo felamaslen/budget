@@ -31,13 +31,7 @@ export function processRawListRows(rows, page) {
     }));
 }
 
-export function getListData(page, raw) {
-    const numRows = raw.data.length;
-    const numCols = PAGES[page].cols.length;
-    const total = raw.total;
-
-    return map({ numRows, numCols, total });
-}
+export const getListData = (page, { total }) => map({ total });
 
 export function processPageDataList(state, { page, raw }) {
     const data = getListData(page, raw);

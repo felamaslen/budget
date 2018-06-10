@@ -2,6 +2,8 @@
  * Helper functions for the app reducer to decide how to navigate in the app
  */
 
+import { PAGES } from '../constants/data';
+
 function getNavRow({ dx, dy, numRows, numCols, currentRow, currentCol }) {
     const wasInactive = currentCol === -1 && currentRow === 0;
 
@@ -20,9 +22,7 @@ function getNavRow({ dx, dy, numRows, numCols, currentRow, currentCol }) {
 
     const rowsJumped = Math.floor((currentCol + dx) / numCols);
 
-    const newRow = (currentRow + dy + rowsJumped + numRows) % numRows;
-
-    return newRow;
+    return (currentRow + dy + rowsJumped + numRows) % numRows;
 }
 
 function getNavRowFromAddButton(dx, dy, rowKeys) {
@@ -119,13 +119,9 @@ export function getNavRowCol(req, pageIsList = false) {
 }
 
 export function getNumRowsCols(state, page, pageIsList) {
-    let numRows = state.getIn(['pages', page, 'data', 'numRows']);
-    const numCols = state.getIn(['pages', page, 'data', 'numCols']);
-
-    if (pageIsList) {
-        // include add row
-        numRows += 1;
-    }
+    const listAddRow = pageIsList >> 0;
+    const numRows = state.getIn(['pages', page, 'rows']).size + listAddRow;
+    const numCols = PAGES[page].cols.length;
 
     return { numRows, numCols };
 }

@@ -1,9 +1,4 @@
-/*
- * Carries out actions for the Form component
- */
-
 import { List as list, Map as map } from 'immutable';
-
 import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
@@ -159,50 +154,47 @@ function handleNavInSuggestions(state, { suggestions, dx, dy }) {
     return handleSuggestionsNav(state, dy, suggestions);
 }
 
-function handleKeyPressLoggedIn(state, { key, shift, ctrl }) {
+function handleKeyPressLoggedIn(state, { page, key, shift, ctrl, tab, escape, enter }) {
     const { dx, dy } = getNavDirection(key, shift);
-    const navigated = dx !== 0 || dy !== 0;
+    const navigated = !(dx === 0 && dy === 0);
 
-    const escape = key === 'Escape';
-    const enter = key === 'Enter';
-
-    const page = state.get('currentPage');
     const suggestions = state.getIn(['editSuggestions']);
     const haveSuggestions = suggestions.get('list').size > 0;
-    const suggestionActive = suggestions.get('active') > -1;
 
-    const navigateFromSuggestions = suggestionActive && (escape || enter);
-    const navigateSuggestions = navigated && !ctrl;
+    if (haveSuggestions) {
+        const suggestionActive = suggestions.get('active') > -1;
 
-    if (haveSuggestions && navigateFromSuggestions) {
-        return handleNavFromSuggestions(state, { page, suggestions, escape, enter });
+        if (suggestionActive && (escape || enter)) {
+            return handleNavFromSuggestions(state, { page, suggestions, escape, enter });
+        }
+        if (navigated && !ctrl) {
+            return handleNavInSuggestions(state, { suggestions, dx, dy });
+        }
     }
 
-    if (haveSuggestions && navigateSuggestions) {
-        return handleNavInSuggestions(state, { suggestions, dx, dy });
+    if (enter) {
+        if (state.getIn(['edit', 'addBtnFocus'])) {
+            return state;
+        }
+
+        return rActivateEditable(state, { page });
     }
-
-    const addBtn = state.getIn(['edit', 'addBtnFocus']);
-    if (addBtn && enter) {
-        // this is handled by the button
-        return state;
-    }
-
-    const navigateFromField = navigated && (ctrl || key === 'Tab');
-
-    if (navigateFromField) {
+    if (navigated && (ctrl || tab)) {
         return handleNav(state, { page, dx, dy });
     }
-
     if (escape) {
         return handleNav(state, { page, cancel: true });
     }
 
-    if (enter) {
-        return rActivateEditable(state, { page });
+    return state;
+}
+
+function handleKeyPressLoggedOut(state, { key, escape }) {
+    if (escape) {
+        return rLoginFormReset(state);
     }
 
-    return state;
+    return rLoginFormInput(state, { input: key });
 }
 
 export function rHandleKeyPress(state, req) {
@@ -211,17 +203,21 @@ export function rHandleKeyPress(state, req) {
         return state;
     }
 
+    const params = {
+        ...req,
+        escape: req.key === 'Escape',
+        enter: req.key === 'Enter',
+        tab: req.key === 'Tab',
+        page: state.get('currentPage')
+    };
+
     const loggedIn = state.getIn(['user', 'uid']) > 0;
 
     if (loggedIn) {
-        return handleKeyPressLoggedIn(state, req);
+        return handleKeyPressLoggedIn(state, params);
     }
 
-    if (req.key === 'Escape') {
-        return rLoginFormReset(state, 0);
-    }
-
-    return rLoginFormInput(state, { input: req.key });
+    return handleKeyPressLoggedOut(state, params);
 }
 
 export function rLogout(state) {
@@ -229,21 +225,13 @@ export function rLogout(state) {
         return state;
     }
 
-    return resetAppState(state)
-        .setIn(['loginForm', 'visible'], true);
+    return resetAppState(state).setIn(['loginForm', 'visible'], true);
 }
 
-export function rUpdateTime(state, { now }) {
-    return state.set('now', now);
-}
+export const rUpdateTime = (state, { now }) => state.set('now', now);
 
-export function rUpdateServer(state) {
-    return state.set('loadingApi', true);
-}
+export const rUpdateServer = state => state.set('loadingApi', true);
 
-export function rHandleServerUpdate(state) {
-    return state
-        .set('loadingApi', false)
-        .setIn(['edit', 'requestList'], list.of());
-}
+export const rHandleServerUpdate = state => state.set('loadingApi', false)
+    .setIn(['edit', 'requestList'], list.of());
 

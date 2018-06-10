@@ -22,16 +22,10 @@ export function rLoginFormInput(state, { input }) {
         .setIn(['loginForm', 'active'], active);
 }
 
-export function rLoginFormReset(state, req) {
-    const index = req
-        ? req.index
-        : 0;
-
-    return state
-        .setIn(['loginForm', 'values'],
-            state.getIn(['loginForm', 'values']).slice(0, index))
-        .setIn(['loginForm', 'inputStep'], index);
-}
+export const rLoginFormReset = (state, { index = 0 } = {}) => state
+    .setIn(['loginForm', 'values'],
+        state.getIn(['loginForm', 'values']).slice(0, index))
+    .setIn(['loginForm', 'inputStep'], index);
 
 export function rLoginFormSubmit(state) {
     return state.setIn(['loginForm', 'active'], false);
