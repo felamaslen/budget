@@ -138,7 +138,7 @@ export default class LineGraph extends ImmutableComponent {
         };
     }
     onHover(position, mvt) {
-        if (!this.props.lines) {
+        if (!this.props.lines || this.props.isMobile) {
             return;
         }
 
