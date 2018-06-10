@@ -40,6 +40,18 @@ const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (
 export const getFundsCachedValue = createSelector([getLastFundsValue, getFundCacheAge],
     (value, ageText) => map({ ageText, value }));
 
+export const getFundsCost = createSelector([getFundsRows], rows => {
+    return rows.reduce((sum, row) => {
+        const transactions = row.getIn(['cols', transactionsKey]);
+
+        if (transactions.isSold()) {
+            return sum;
+        }
+
+        return sum + transactions.getTotalCost();
+    }, 0);
+});
+
 function getPricesForRow(prices, id, startTime, cacheTimes) {
     if (!prices.get(id)) {
         return null;

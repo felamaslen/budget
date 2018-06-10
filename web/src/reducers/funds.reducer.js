@@ -7,7 +7,7 @@ import { DATA_KEY_ABBR } from '../constants/data';
 import { sortRowsByDate } from '../helpers/data';
 import { getRowLengths } from '../selectors/funds/helpers';
 import { getNow } from '../selectors/app';
-import { getListData, processRawListRows } from './list.reducer';
+import { processRawListRows } from './list.reducer';
 
 export function getInitialEnabledList(prices) {
     const { rowLengths, maxLength } = getRowLengths(prices);
@@ -37,8 +37,7 @@ export function processPageDataFunds(state, { raw }) {
 
     const prices = processPrices(raw.data);
 
-    return state.setIn(['pages', 'funds', 'data'], getListData('funds', raw))
-        .setIn(['pages', 'funds', 'rows'], sortedRows)
+    return state.setIn(['pages', 'funds', 'rows'], sortedRows)
         .setIn(['pages', 'funds', 'cache'], map({
             [period]: map({ startTime, cacheTimes, prices })
         }))

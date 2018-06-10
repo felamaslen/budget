@@ -5,7 +5,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { formatCurrency, formatPercent } from '../../helpers/format';
-import { getFundsCachedValue } from '../../selectors/funds';
+import { getFundsCachedValue, getFundsCost } from '../../selectors/funds';
 
 function ListHeadFundsDesktop({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {
     let gainValues = null;
@@ -47,7 +47,7 @@ ListHeadFundsDesktop.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-    totalCost: state.getIn(['pages', 'funds', 'data', 'total']),
+    totalCost: getFundsCost(state),
     shortPeriod: state.getIn(['other', 'graphFunds', 'period']),
     cachedValue: getFundsCachedValue(state, props)
 });
