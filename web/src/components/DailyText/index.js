@@ -3,24 +3,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '../../helpers/format';
 
-export default function DailyText({ enabled, row }) {
-    if (!enabled) {
+export default function DailyText({ value }) {
+    if (value === null) {
         return null;
     }
-
-    if (!row.has('daily')) {
-        return <span className="daily" />;
+    if (typeof value === 'undefined') {
+        return (<span className="daily" />);
     }
 
     return (
         <span className="daily">
-            {formatCurrency(row.get('daily'))}
+            {formatCurrency(value)}
         </span>
     );
 }
 
 DailyText.propTypes = {
-    enabled: PropTypes.bool.isRequired,
+    value: PropTypes.number,
     row: PropTypes.instanceOf(map).isRequired
 };
 

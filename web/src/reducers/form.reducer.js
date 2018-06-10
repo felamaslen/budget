@@ -1,10 +1,9 @@
 import { Map as map, List as list } from 'immutable';
-import { getLoadedStatus } from '../selectors/app';
+import { compose } from 'redux';
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
-import { resortListRows } from './editable-updates.reducer';
-import { stringifyFields, getInvalidInsertDataKeys } from './edit.reducer';
-import { dataEquals, getAddDefaultValues } from '../helpers/data';
+import { stringifyFields, getInvalidInsertDataKeys, updateTotal } from './edit.reducer';
+import { IDENTITY, dataEquals, getAddDefaultValues, resortListRows } from '../helpers/data';
 import { PAGES } from '../constants/data';
 
 export function rOpenFormDialogEdit(state, { page, id }) {
@@ -68,14 +67,27 @@ function resetModalDialog(state, remove = false) {
     return state.set('modalDialog', newModalDialog.set('visible', false));
 }
 
+function updateRows(page, id, newRow) {
+    return state => state.setIn(['pages', page, 'rows', id], newRow);
+}
+
+function updateRequestList(page, id, fields) {
+    return state => state.setIn(['edit', 'requestList'],
+        fields.map(field => field.set('id', id).set('page', page))
+            .reduce(
+                (requestList, field) => addToRequestQueue(requestList, field),
+                state.getIn(['edit', 'requestList'])
+            )
+    );
+}
+
 export function rCloseFormDialogEdit(state, { page, fields }) {
     const id = state.getIn(['modalDialog', 'id']);
 
     const oldRow = state.getIn(['pages', page, 'rows', id]);
-
     const newRow = oldRow.set('cols', fields.map(field => field.get('value')));
 
-    let nextState = resetModalDialog(state);
+    const nextState = resetModalDialog(state);
 
     const changed = newRow
         .get('cols')
@@ -91,47 +103,33 @@ export function rCloseFormDialogEdit(state, { page, fields }) {
         return nextState;
     }
 
+    let doOverview = IDENTITY;
+    let doTotal = IDENTITY;
+
     const dateKey = PAGES[page].cols.indexOf('date');
     const costKey = PAGES[page].cols.indexOf('cost');
-
-    const oldTotal = state.getIn(
-        ['pages', page, 'data', 'total']
-    );
-    const newTotal = oldTotal + newRow.getIn(['cols', costKey]) -
-        oldRow.getIn(['cols', costKey]);
-
-    nextState = nextState.setIn(['pages', page, 'rows', id], newRow);
-
-    nextState = resortListRows(nextState, { page });
-
-    if (getLoadedStatus(state, { page: 'overview' })) {
+    if (dateKey > -1 && costKey > -1) {
         const newDate = newRow.getIn(['cols', dateKey]);
         const oldDate = oldRow.getIn(['cols', dateKey]);
-
         const newItemCost = newRow.getIn(['cols', costKey]);
         const oldItemCost = oldRow.getIn(['cols', costKey]);
 
-        nextState = rCalculateOverview(nextState, {
-            page,
-            newDate,
-            oldDate,
-            newItemCost,
-            oldItemCost
-        });
+        doOverview = rCalculateOverview({ page, newDate, oldDate, newItemCost, oldItemCost });
+
+        const oldTotal = state.getIn(['pages', page, 'data', 'total']);
+        const newTotal = oldTotal + newRow.getIn(['cols', costKey]) -
+            oldRow.getIn(['cols', costKey]);
+
+        doTotal = updateTotal(page, newTotal);
     }
 
-    const newRequestList = fields
-        .map(field => field
-            .set('id', id)
-            .set('page', page))
-        .reduce(
-            (requestList, field) => addToRequestQueue(requestList, field),
-            state.getIn(['edit', 'requestList'])
-        );
-
-    return nextState
-        .setIn(['edit', 'requestList'], newRequestList)
-        .setIn(['pages', page, 'data', 'total'], newTotal);
+    return compose(
+        updateRequestList(page, id, fields),
+        doOverview,
+        doTotal,
+        resortListRows(page),
+        updateRows(page, id, newRow)
+    )(nextState);
 }
 
 export function validateFields(fields) {

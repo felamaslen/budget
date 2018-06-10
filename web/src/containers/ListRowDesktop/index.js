@@ -9,7 +9,7 @@ import { getPageRow } from '../../selectors/list';
 import ListRowCell from '../../components/ListRowCell';
 import DailyText from '../../components/DailyText';
 
-function ListRowDesktop({ page, id, row, activeCol, getDaily, AfterRow, onDelete }) {
+function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete }) {
     const rowClass = row.get('className') || '';
 
     const items = PAGES[page].cols.map((colName, colKey) => (
@@ -36,7 +36,7 @@ function ListRowDesktop({ page, id, row, activeCol, getDaily, AfterRow, onDelete
     return (
         <li className={itemClassName}>
             {items}
-            <DailyText enabled={getDaily} row={row} />
+            <DailyText value={daily} row={row} />
             {afterRow}
             <span className="delete">
                 <a onClick={() => onDelete(page, id)} />
@@ -51,7 +51,6 @@ ListRowDesktop.propTypes = {
     row: PropTypes.instanceOf(map).isRequired,
     activeCol: PropTypes.number,
     daily: PropTypes.number,
-    getDaily: PropTypes.bool.isRequired,
     AfterRow: PropTypes.func,
     onDelete: PropTypes.func.isRequired
 };
@@ -60,8 +59,7 @@ const mapStateToProps = (state, props) => ({
     row: getPageRow(state, props),
     activeCol: state.getIn(['edit', 'active', 'row']) === props.id
         ? state.getIn(['edit', 'active', 'col'])
-        : null,
-    getDaily: Boolean(PAGES[props.page].daily)
+        : null
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -5,6 +5,7 @@
 import { List as list, Map as map, fromJS } from 'immutable';
 import { compose } from 'redux';
 import { DateTime } from 'luxon';
+import { getLoadedStatus } from '../selectors/app';
 import { getRowDates } from '../selectors/overview';
 
 function getUpdatedCostMap(cost, dates, req) {
@@ -29,11 +30,17 @@ function getUpdatedCostMap(cost, dates, req) {
     )(cost);
 }
 
-export function rCalculateOverview(state, req) {
-    const cost = state.getIn(['pages', 'overview', 'cost']);
-    const dates = getRowDates(state);
+export function rCalculateOverview(req) {
+    return state => {
+        if (!getLoadedStatus(state, { page: 'overview' })) {
+            return state;
+        }
 
-    return state.setIn(['pages', 'overview', 'cost'], getUpdatedCostMap(cost, dates, req));
+        const cost = state.getIn(['pages', 'overview', 'cost']);
+        const dates = getRowDates(state);
+
+        return state.setIn(['pages', 'overview', 'cost'], getUpdatedCostMap(cost, dates, req));
+    };
 }
 
 export function processPageDataOverview(state, { raw }) {

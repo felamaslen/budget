@@ -3,13 +3,12 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+import { compose } from 'redux';
 import { DateTime } from 'luxon';
 import { PAGES } from '../constants/data';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import {
-    getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
-} from '../helpers/data';
-import { getNow, getLoadedStatus } from '../selectors/app';
+import { getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
+import { getNow } from '../selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
 import { applyEdits, applyEditsList } from './editable-updates.reducer';
@@ -166,60 +165,50 @@ export function rAddListItem(state, { page }) {
         .set('loadingApi', true);
 }
 
+export const updateTotal = (page, total) => state => state
+    .setIn(['pages', page, 'data', 'total'], total);
+
+function addRows(page, id, cols) {
+    return state => state.setIn(['pages', page, 'rows', id], map({ id, cols }));
+}
+
+function addOverviewData(page, fields) {
+    const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
+    const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
+
+    if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
+        return state => rErrorMessageOpen(state, map({
+            level: ERROR_LEVEL_WARN,
+            text: ERROR_MSG_BUG_INVALID_ITEM
+        }));
+    }
+
+    return rCalculateOverview({
+        page,
+        newDate: dateItem.get('value'),
+        oldDate: dateItem.get('value'),
+        newItemCost: costItem.get('value'),
+        oldItemCost: 0
+    });
+}
+
 export function rHandleServerAdd(state, { err, response, fields, page }) {
     // handle the response from adding an item to a list page
-    let nextState = state.set('loadingApi', false);
-
+    const nextState = state.set('loadingApi', false);
     if (err) {
         return nextState;
     }
 
     const id = response.data.id;
-    const newTotal = response.data.total;
 
     const cols = list(fields.map(thisItem => thisItem.get('value')));
 
-    // update total and push new item to the data store list, then sort by date
-    const sortedRows = sortRowsByDate(
-        state.getIn(['pages', page, 'rows'])
-            .set(id, map({ id, cols })),
-        page);
-
-    const weeklyData = addWeeklyAverages(
-        state.getIn(['pages', page, 'data']),
-        sortedRows,
-        page
-    );
-
-    nextState = nextState
-        .setIn(['pages', page, 'rows'], sortedRows)
-        .setIn(['pages', page, 'data'], weeklyData)
-        .setIn(['pages', page, 'data', 'total'], newTotal)
-        .setIn(
-            ['pages', page, 'data', 'numRows'],
-            nextState.getIn(['pages', page, 'data', 'numRows']) + 1
-        );
-
-    // recalculate overview data
-    if (getLoadedStatus(state, { page: 'overview' })) {
-        const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
-        const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
-        if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
-            return rErrorMessageOpen(nextState, map({
-                level: ERROR_LEVEL_WARN,
-                text: ERROR_MSG_BUG_INVALID_ITEM
-            }));
-        }
-        nextState = rCalculateOverview(nextState, {
-            page,
-            newDate: dateItem.get('value'),
-            oldDate: dateItem.get('value'),
-            newItemCost: costItem.get('value'),
-            oldItemCost: 0
-        });
-    }
-
-    return nextState;
+    return compose(
+        addOverviewData(page, fields),
+        resortListRows(page),
+        updateTotal(page, response.data.total),
+        addRows(page, id, cols)
+    )(nextState);
 }
 
 export function rHandleSuggestions(state, { data, reqId }) {

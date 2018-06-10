@@ -7,6 +7,8 @@ import { DateTime } from 'luxon';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
 import { PAGES } from '../constants/data';
 
+export const IDENTITY = state => state;
+
 export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD || '') {
     const periodRegex = /^([a-z]+)([0-9]+)$/;
 
@@ -253,26 +255,15 @@ export function getAddDefaultValues(page, now) {
 
 export function sortRowsByDate(rows, page, now) {
     const dateKey = PAGES[page].cols.indexOf('date');
-    const costKey = PAGES[page].cols.indexOf('cost');
     let lastFuture = false;
 
-    const sorted = rows
+    return rows
         .sort((prev, next) => {
             const prevDate = prev.getIn(['cols', dateKey]);
             const nextDate = next.getIn(['cols', dateKey]);
 
-            if (prevDate > nextDate) {
-                return -1;
-            }
-            if (prevDate < nextDate) {
-                return 1;
-            }
-
-            if (prev.get('id') > next.get('id')) {
-                return -1;
-            }
-
-            return 1;
+            return (nextDate - prevDate) ||
+                (next.get('id') - prev.get('id'));
         })
         .map(row => {
             const thisFuture = row.getIn(['cols', dateKey]) > now;
@@ -283,63 +274,10 @@ export function sortRowsByDate(rows, page, now) {
                 .set('future', thisFuture)
                 .set('first-present', !thisFuture && thisLastFuture);
         });
-
-    if (PAGES[page].daily) {
-        const keys = sorted.keys();
-        keys.next();
-
-        return sorted
-            .reduce(({ dailySum, results }, row, id) => {
-                const nextKey = keys.next().value;
-
-                const lastInDay = nextKey && !row.getIn(['cols', dateKey]).hasSame(
-                    sorted.getIn([nextKey, 'cols', dateKey]), 'day');
-
-                const cost = row.getIn(['cols', costKey]);
-
-                if (lastInDay) {
-                    return {
-                        results: results.set(id, row.set('daily', dailySum + cost)),
-                        dailySum: 0
-                    };
-                }
-
-                return {
-                    results: results.set(id, row.delete('daily')),
-                    dailySum: dailySum + cost
-                };
-
-            }, { results: sorted, dailySum: 0 })
-            .results;
-    }
-
-    return sorted;
 }
 
-export function addWeeklyAverages(data, rows, page) {
-    if (!PAGES[page].daily) {
-        return data;
-    }
-    // note that this is calculated only based on the visible data,
-    // not past data
-    const costKey = PAGES[page].cols.indexOf('cost');
-    const dateKey = PAGES[page].cols.indexOf('date');
-
-    const visibleTotal = rows.reduce((sum, item) =>
-        sum + item.getIn(['cols', costKey]), 0);
-
-    if (!rows.size) {
-        return data.set('weekly', 0);
-    }
-    const firstDate = rows.first().getIn(['cols', dateKey]);
-    const lastDate = rows.last().getIn(['cols', dateKey]);
-
-    const numWeeks = firstDate.diff(lastDate).as('days') / 7;
-
-    const weeklyAverage = numWeeks
-        ? visibleTotal / numWeeks
-        : 0;
-
-    return data.set('weekly', weeklyAverage);
+export function resortListRows(page) {
+    return state => state.setIn(['pages', page, 'rows'],
+        sortRowsByDate(state.getIn(['pages', page, 'rows']), page));
 }
 

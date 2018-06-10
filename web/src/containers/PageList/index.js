@@ -2,7 +2,7 @@ import './style.scss';
 import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../actions/form.actions';
 import { aListItemAdded } from '../../actions/edit.actions';
-import { makeGetRowIds } from '../../selectors/list';
+import { makeGetRowIds, makeGetDailyTotals, makeGetWeeklyAverages } from '../../selectors/list';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -37,13 +37,16 @@ PageList.propTypes = {
 
 const makeMapStateToProps = () => {
     const getRowIds = makeGetRowIds();
+    const getDailyTotals = makeGetDailyTotals();
+    const getWeeklyAverages = makeGetWeeklyAverages();
 
-    return (state, { page }) => ({
-        rowIds: getRowIds(state, { page }),
+    return (state, props) => ({
+        rowIds: getRowIds(state, props),
+        dailyTotals: getDailyTotals(state, props),
+        weeklyValue: getWeeklyAverages(state, props),
         addBtnFocus: state.getIn(['edit', 'addBtnFocus']),
-        weeklyValue: state.getIn(['pages', page, 'data', 'weekly']),
-        getDaily: Boolean(PAGES[page].daily),
-        totalCost: state.getIn(['pages', page, 'data', 'total'])
+        getDaily: Boolean(PAGES[props.page].daily),
+        totalCost: state.getIn(['pages', props.page, 'data', 'total'])
     });
 };
 

@@ -2,10 +2,9 @@
  * Carries out actions for the content component
  */
 
+import { compose } from 'redux';
 import { PAGES } from '../constants/data';
-import {
-    getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
-} from '../helpers/data';
+import { getNullEditable, getAddDefaultValues, resortListRows } from '../helpers/data';
 import { capitalise, formatCurrency } from '../helpers/format';
 import { getNow, getLoadedStatus } from '../selectors/app';
 import { processPageDataOverview } from './overview.reducer';
@@ -18,25 +17,20 @@ function processPageData(state, { page, raw }) {
         // overview
         return processPageDataOverview(state, { raw });
     }
-
     if (page === 'analysis') {
         // analysis
         return processPageDataAnalysis(state, { raw });
     }
-
     if (page === 'funds') {
         // funds
         return processPageDataFunds(state, { raw });
     }
 
     if (PAGES[page].list) {
-        const nextState = processPageDataList(state, { page, raw });
-        const sortedRows = sortRowsByDate(nextState.getIn(['pages', page, 'rows']), page);
-        const weeklyData = addWeeklyAverages(
-            nextState.getIn(['pages', page, 'data']), sortedRows, page);
-
-        return nextState.setIn(['pages', page, 'rows'], sortedRows)
-            .setIn(['pages', page, 'data'], weeklyData);
+        return compose(
+            resortListRows(page),
+            nextState => processPageDataList(nextState, { page, raw })
+        )(state);
     }
 
     return state;
