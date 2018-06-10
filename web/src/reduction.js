@@ -18,7 +18,6 @@ export function resetAppState(state) {
         .set('user', map({ uid: 0, name: null, apiKey: null }))
         .set('pages', map.of())
         .set('currentPage', null)
-        .set('pagesLoaded', map.of())
         .set('edit', map({
             active: map({
                 row: 0,

@@ -20,8 +20,5 @@ export const getContentParamsAnalysis = state => ({
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
 });
 
-const getPages = state => state.get('pages').keySeq();
-const getPageProp = (state, { page }) => page;
-
-export const getLoadedStatus = createSelector([getPages, getPageProp], (pages, page) => pages.includes(page));
+export const getLoadedStatus = (state, { page }) => state.get('pages').has(page);
 

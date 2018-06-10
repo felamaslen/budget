@@ -1,4 +1,5 @@
 import { Map as map, List as list } from 'immutable';
+import { getLoadedStatus } from '../selectors/app';
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
 import { resortListRows } from './editable-updates.reducer';
@@ -103,7 +104,7 @@ export function rCloseFormDialogEdit(state, { page, fields }) {
 
     nextState = resortListRows(nextState, { page });
 
-    if (state.getIn(['pagesLoaded', 'overview'])) {
+    if (getLoadedStatus(state, { page: 'overview' })) {
         const newDate = newRow.getIn(['cols', dateKey]);
         const oldDate = oldRow.getIn(['cols', dateKey]);
 

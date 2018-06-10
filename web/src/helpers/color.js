@@ -2,6 +2,7 @@
  * Colour functions
  */
 
+import { Map as map } from 'immutable';
 import { OVERVIEW_COLUMNS } from '../constants/data';
 import { COLOR_CATEGORY } from '../constants/colors';
 import { listAverage } from './data';
@@ -25,20 +26,21 @@ export function rgba(values) {
  * @returns {array} list of colour codes
  */
 export function getOverviewCategoryColor() {
-    return OVERVIEW_COLUMNS.slice(1)
+    return map(OVERVIEW_COLUMNS.slice(1)
         .map(([key]) => {
             if (COLOR_CATEGORY[key]) {
-                return COLOR_CATEGORY[key];
+                return [key, COLOR_CATEGORY[key]];
             }
             if (key === 'net') {
-                return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
+                return [key, [COLOR_CATEGORY.spending, COLOR_CATEGORY.income]];
             }
             if (key === 'predicted') {
-                return COLOR_CATEGORY.balance;
+                return [key, COLOR_CATEGORY.balance];
             }
 
             throw new Error(`Unknown overview column: ${key}`);
-        });
+        })
+    );
 }
 
 /**

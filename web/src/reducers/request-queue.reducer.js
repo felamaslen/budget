@@ -61,7 +61,7 @@ export function addToRequestQueue(requestList, dataItem, startDate) {
 }
 
 export function pushToRequestQueue(state, dataItem) {
-    const startDate = state.getIn(['pages', 'overview', 'data', 'startDate']);
+    const startDate = state.getIn(['pages', 'overview', 'startDate']);
 
     const requestList = state.getIn(['edit', 'requestList']);
     const newRequestList = addToRequestQueue(requestList, dataItem, startDate || null);

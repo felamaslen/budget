@@ -9,7 +9,7 @@ import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from
 import {
     getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
 } from '../helpers/data';
-import { getNow } from '../selectors/app';
+import { getNow, getLoadedStatus } from '../selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
 import { applyEdits, applyEditsList } from './editable-updates.reducer';
@@ -150,7 +150,7 @@ export function rAddListItem(state, { page }) {
     const fieldsString = stringifyFields(fields);
 
     return rActivateEditable(state, { page })
-        .setIn(['edit', 'add', page], getAddDefaultValues(page))
+        .setIn(['edit', 'add', page], getAddDefaultValues(page, now))
         .setIn(['edit', 'addFields'], fields)
         .setIn(['edit', 'addFieldsString'], fieldsString)
         .setIn(['edit', 'active'], map({
@@ -201,7 +201,7 @@ export function rHandleServerAdd(state, { err, response, fields, page }) {
         );
 
     // recalculate overview data
-    if (state.getIn(['pagesLoaded', 'overview'])) {
+    if (getLoadedStatus(state, { page: 'overview' })) {
         const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
         const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
         if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {

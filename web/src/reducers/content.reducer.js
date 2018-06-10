@@ -7,6 +7,7 @@ import {
     getNullEditable, getAddDefaultValues, sortRowsByDate, addWeeklyAverages
 } from '../helpers/data';
 import { capitalise, formatCurrency } from '../helpers/format';
+import { getNow, getLoadedStatus } from '../selectors/app';
 import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList } from './list.reducer';
 import { processPageDataFunds } from './funds.reducer';
@@ -60,7 +61,7 @@ export function rContentBlockHover(state, { block, subBlock }) {
 }
 
 export function rRequestContent(state, { page }) {
-    const loaded = state.getIn(['pagesLoaded', page]);
+    const loaded = getLoadedStatus(state, { page });
     const loading = !(loaded && page !== 'analysis');
 
     return state
@@ -73,11 +74,12 @@ export function rHandleContentResponse(state, { response, page }) {
         return state.set('loading', false);
     }
 
+    const now = getNow(state);
+
     return processPageData(state, { page, raw: response.data.data })
         .set('loading', false)
-        .setIn(['pagesLoaded', page], true)
         .setIn(['edit', 'active'], getNullEditable(page))
-        .setIn(['edit', 'add', page], getAddDefaultValues(page));
+        .setIn(['edit', 'add', page], getAddDefaultValues(page, now));
 }
 
 export const rSetPage = (state, { page }) => state.set('currentPage', page);
