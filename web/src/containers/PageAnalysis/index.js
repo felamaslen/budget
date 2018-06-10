@@ -33,7 +33,6 @@ function PageAnalysis({ timeline }) {
 }
 
 PageAnalysis.propTypes = {
-    loaded: PropTypes.bool.isRequired,
     timeline: PropTypes.instanceOf(list),
     onLoad: PropTypes.func.isRequired
 };
