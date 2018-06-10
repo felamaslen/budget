@@ -7,27 +7,31 @@ import React from 'react';
 import debounce from 'debounce';
 import ImmutableComponent, { propsChanged } from '../../ImmutableComponent';
 import { rgba } from '../../helpers/color';
+import { genPixelCompute } from './helpers';
 import { COLOR_GRAPH_TITLE } from '../../constants/colors';
 import { GRAPH_ZOOM_SPEED } from '../../constants/graph';
 import LineGraphDumb from './LineGraphDumb';
 
-function getClosest(lines, position) {
+function getClosest(lines, position, mvt) {
     if (!position) {
         return null;
     }
 
-    const { valX, valY } = position;
+    const { posX, posY } = position;
 
     return lines.reduce((red, line, lineIndex) => {
         return line.get('data').reduce((last, point, index) => {
-            const dist = (((point.get(0) - valX) ** 2) +
-                ((point.get(1) - valY) ** 2)) ** 0.5;
+            const distX = mvt.pixX(point.get(0)) - posX;
+            const distY = mvt.pixY(point.get(1)) - posY;
+
+            const dist = (distX ** 2) + (distY ** 2);
 
             if (last && dist > last.dist) {
                 return last;
             }
 
             return { dist, lineIndex, point, index };
+
         }, red);
     }, null);
 }
@@ -103,28 +107,52 @@ function getHlColor(color, point, index) {
     return rgba(COLOR_GRAPH_TITLE);
 }
 
+const noop = () => null;
+
 export default class LineGraph extends ImmutableComponent {
+    static propTypes = {
+        width: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired,
+        padding: PropTypes.array,
+        minX: PropTypes.number,
+        maxX: PropTypes.number,
+        minY: PropTypes.number,
+        maxY: PropTypes.number,
+        isMobile: PropTypes.bool,
+        hoverEffect: PropTypes.object,
+        outerProperties: PropTypes.object,
+        svgProperties: PropTypes.object,
+        zoomEffect: PropTypes.func
+    };
     constructor(props) {
         super(props);
 
         this.state = {
             hlPoint: null,
+            outerProperties: this.props.outerProperties || {},
+            svgProperties: this.props.svgProperties || {},
+            calc: null,
+            padding: this.props.padding || [0, 0, 0, 0],
             zoom: {},
             zoomLevel: 0
         };
-
-        this.updateCalc();
     }
-    onHover(position) {
-        const closest = getClosest(this.props.lines, position);
+    onHover(position, mvt) {
+        if (!this.props.lines) {
+            return;
+        }
+
+        const closest = getClosest(this.props.lines, position, mvt);
         if (!closest) {
-            return this.setState({ hlPoint: null });
+            this.setState({ hlPoint: null });
+
+            return;
         }
 
         const { lineIndex, point, index } = closest;
         const color = getHlColor(this.props.lines.getIn([lineIndex, 'color']), point, index);
 
-        return this.setState({
+        this.setState({
             hlPoint: {
                 valX: point.get(0),
                 valY: point.get(1),
@@ -132,18 +160,16 @@ export default class LineGraph extends ImmutableComponent {
             }
         });
     }
-    updateCalc() {
-        this.mouseEffects = this.getMouseEffects();
-    }
-    getOnMouseMove(customHandler) {
-        return ({ valX, valY }) => {
+    getOnMouseMove(customHandler = noop) {
+        return subProps => {
             const handler = debounce((pageX, pageY, currentTarget) => {
                 const { left, top } = currentTarget.getBoundingClientRect();
 
                 this.onHover({
-                    valX: valX(pageX - left),
-                    valY: valY(pageY - top)
-                });
+                    posX: pageX - left,
+                    posY: pageY - top
+                }, subProps);
+
             }, 10, true);
 
             return evt => {
@@ -154,7 +180,7 @@ export default class LineGraph extends ImmutableComponent {
             };
         };
     }
-    getOnMouseLeave(customHandler) {
+    getOnMouseLeave(customHandler = noop) {
         return () => evt => {
             customHandler(evt);
             this.onHover(null);
@@ -171,7 +197,11 @@ export default class LineGraph extends ImmutableComponent {
             zoomLevel
         });
     }
-    onWheel(customHandler) {
+    onWheel(customHandler = noop) {
+        if (!this.props.zoomEffect) {
+            return customHandler;
+        }
+
         return ({ valX }) => evt => {
             customHandler(evt);
             evt.preventDefault();
@@ -191,33 +221,41 @@ export default class LineGraph extends ImmutableComponent {
             return this.setZoom(position, zoomLevel);
         };
     }
-    getMouseEffects() {
-        if (this.props.isMobile) {
-            return {};
-        }
-
-        const outerProperties = { ...(this.props.outerProperties || {}) };
-        const svgProperties = { ...(this.props.svgProperties || {}) };
-        const noop = () => null;
-
-        if (this.props.hoverEffect) {
-            outerProperties.onMouseMove = this.getOnMouseMove(outerProperties.onMouseMove || noop);
-            outerProperties.onMouseLeave = this.getOnMouseLeave(outerProperties.onMouseLeave || noop);
-        }
-        if (this.props.zoomEffect) {
-            svgProperties.onWheel = this.onWheel(svgProperties.onWheel || noop);
-        }
-
-        return { outerProperties, svgProperties };
+    getPixelProps() {
+        return genPixelCompute({
+            padding: this.state.padding,
+            width: this.props.width,
+            height: this.props.height,
+            lines: this.props.lines,
+            minY: this.props.minY,
+            maxY: this.props.maxY,
+            minX: this.props.minX,
+            maxX: this.props.maxX,
+            ...this.state.zoom
+        });
     }
-    componentWillUpdate(nextProps) {
-        if (!(this.props.width === nextProps.width &&
-            this.props.height === nextProps.height)) {
-
-            this.updateCalc();
-        }
+    calculateState(nextCalc) {
+        this.setState({
+            calc: nextCalc || this.getPixelProps(),
+            outerProperties: {
+                ...(this.props.outerProperties || {}),
+                onMouseMove: this.getOnMouseMove(),
+                onMouseLeave: this.getOnMouseLeave()
+            },
+            svgProperties: {
+                ...(this.props.svgProperties || {}),
+                onWheel: this.props.isMobile
+                    ? noop
+                    : this.onWheel()
+            }
+        });
+    }
+    componentDidMount() {
+        this.calculateState();
     }
     componentDidUpdate(prevProps) {
+        const nextCalc = this.getPixelProps();
+
         const resetRange = (this.props.zoomEffect || prevProps.zoomEffect) && !(
             this.props.zoomEffect &&
             this.props.minX === prevProps.minX &&
@@ -235,22 +273,35 @@ export default class LineGraph extends ImmutableComponent {
         else if (this.props.zoomEffect && propsChanged(prevProps, this.props)) {
             this.setZoom();
         }
+
+        if (!(this.state.calc &&
+            this.state.calc.minX === nextCalc.minX &&
+            this.state.calc.maxX === nextCalc.maxX &&
+            this.state.calc.minY === nextCalc.minY &&
+            this.state.calc.maxY === nextCalc.maxY &&
+
+            prevProps.width === this.props.width &&
+            prevProps.height === this.props.height
+        )) {
+            this.calculateState(nextCalc);
+        }
     }
     render() {
+        if (!this.state.calc) {
+            return null;
+        }
+
         return (
             <LineGraphDumb
                 {...this.props}
                 {...this.mouseEffects}
-                hlPoint={this.state.hlPoint}
                 {...this.state.zoom}
+                calc={this.state.calc}
+                outerProperties={this.state.outerProperties}
+                svgProperties={this.state.svgProperties}
+                hlPoint={this.state.hlPoint}
             />
         );
     }
 }
-
-LineGraph.propTypes = {
-    isMobile: PropTypes.bool,
-    hoverEffect: PropTypes.object,
-    zoomEffect: PropTypes.func
-};
 

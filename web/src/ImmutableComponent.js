@@ -16,7 +16,7 @@ export function propsChanged(prev, next, skip = false) {
 export default class ImmutablePureComponent extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         return propsChanged(this.props, nextProps, this.updateOnProps === false) ||
-            propsChanged(this.state || {}, nextState, this.updateOnStates === false);
+            propsChanged(this.state, nextState, this.updateOnStates === false);
     }
 }
 
