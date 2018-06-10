@@ -3,7 +3,7 @@ import { List as list, Map as map } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import { shallow } from 'enzyme';
-import GraphFundItem from '../../../src/containers/GraphFundItem';
+import GraphFundItem from '../../../src/components/GraphFundItem';
 import ListRowFundsDesktop from '../../../src/components/ListRowFundsDesktop';
 import FundGainInfo from '../../../src/components/FundGainInfo';
 
@@ -11,8 +11,8 @@ describe('<ListRowFundsDesktop />', () => {
     const props = {
         id: 10,
         row: map({
-            historyPopout: true,
             cols: list(['foo-fund']),
+            prices: list.of(1, 2, 3),
             gain: map({
                 value: 561932,
                 gain: 0.3,
@@ -20,14 +20,15 @@ describe('<ListRowFundsDesktop />', () => {
                 dayGain: -0.02,
                 dayGainAbs: -341,
                 color: list([255, 128, 30])
-            })
+            }),
+            sold: false
         })
     };
 
     const wrapper = shallow(<ListRowFundsDesktop {...props} />);
 
     it('should render its basic structure', () => {
-        expect(wrapper.is('span.fund-extra-info.popout')).to.equal(true);
+        expect(wrapper.is('span.fund-extra-info')).to.equal(true);
         expect(wrapper.children()).to.have.length(2);
     });
 
@@ -39,7 +40,9 @@ describe('<ListRowFundsDesktop />', () => {
         expect(wrapper.childAt(0).childAt(0).childAt(0).is(GraphFundItem)).to.equal(true);
         expect(wrapper.childAt(0).childAt(0).childAt(0).props()).to.deep.include({
             name: 'foo-fund',
-            id: 10
+            sold: false,
+            values: list.of(1, 2, 3),
+            popout: false
         });
     });
 

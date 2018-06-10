@@ -90,4 +90,3 @@ GraphBalance.propTypes = {
     futureMonths: PropTypes.number.isRequired
 };
 
-

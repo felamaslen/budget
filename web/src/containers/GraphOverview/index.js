@@ -62,7 +62,6 @@ function GraphOverview(props) {
 const mapStateToProps = state => ({
     now: getCurrentDate(state),
     startDate: getStartDate(state),
-    currentDate: getCurrentDate(state),
     graphWidth: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_WIDTH),
     cost: getProcessedCost(state),
     futureMonths: getFutureMonths(state),

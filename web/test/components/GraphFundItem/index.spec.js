@@ -6,12 +6,12 @@ import itEach from 'it-each';
 itEach();
 import { mount } from 'enzyme';
 import React from 'react';
-import { GraphFundItem } from '../../../src/containers/GraphFundItem';
+import GraphFundItem from '../../../src/components/GraphFundItem';
 
 describe('<GraphFundItem />', () => {
     const props = {
         id: 3,
-        data: fromJS([
+        values: fromJS([
             [100, 42.3],
             [101, 41.2],
             [102, 45.9],
@@ -21,6 +21,7 @@ describe('<GraphFundItem />', () => {
             [105, 46.9],
             [106, 42.5]
         ]),
+        sold: false,
         popout: true,
         onToggle: () => null
     };

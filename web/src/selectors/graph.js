@@ -17,9 +17,11 @@ export const getTargets = createSelector([
     const currentValue = values.first();
 
     return periods.map(({ last, months, tag }) => {
-        const from = balance.get(-(futureMonths + 1 + last));
+        const index = -(futureMonths + 1 + last) % balance.size;
 
-        const date = dates.get(-(futureMonths + 1 + last)).ts / 1000;
+        const from = balance.get(index);
+
+        const date = dates.get(index).ts / 1000;
 
         const value = from + (currentValue - from) * (months + last) / last;
 
