@@ -13,7 +13,7 @@ describe('Request queue reducer', () => {
             const state = map({
                 pages: map({
                     overview: map({
-                        data: map({ startDate: DateTime.fromObject({ year: 2017, month: 8 }) })
+                        startDate: DateTime.fromISO('2017-08-31')
                     })
                 }),
                 edit: map({ requestList: list.of() })
@@ -29,7 +29,7 @@ describe('Request queue reducer', () => {
                 .to.deep.equal({
                     pages: {
                         overview: {
-                            data: { startDate: DateTime.fromObject({ year: 2017, month: 8 }) }
+                            startDate: DateTime.fromISO('2017-08-31')
                         }
                     },
                     edit: {

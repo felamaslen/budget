@@ -66,13 +66,21 @@ describe('Content reducer', () => {
 
     describe('rRequestContent', () => {
         it('should set the loading status', () => {
-            expect(R.rRequestContent(fromJS({}), { loading: true }).get('loading'))
-                .to.equal(true);
+            expect(R.rRequestContent(fromJS({ pages: {} }), { page: 'food' }).toJS())
+                .to.have.property('loading', true);
+
+            expect(R.rRequestContent(fromJS({ pages: { food: {} } }), { page: 'food' }).toJS())
+                .to.have.property('loading', false);
         });
 
-        it('should set the current page index', () => {
-            expect(R.rRequestContent(fromJS({}), { page: 'page1' }).get('currentPage'))
-                .to.equal('page1');
+        it('should always reload the analysis page', () => {
+            expect(R.rRequestContent(fromJS({ pages: { analysis: {} } }), { page: 'analysis' }).toJS())
+                .to.have.property('loading', true);
+        });
+
+        it('should set the current page', () => {
+            expect(R.rRequestContent(fromJS({ pages: {} }), { page: 'page1' }).toJS())
+                .to.have.property('currentPage', 'page1');
         });
     });
 
@@ -85,12 +93,11 @@ describe('Content reducer', () => {
         });
 
         it('set expected parameters in the state', () => {
-            const now = DateTime.fromJSDate(new Date('2017-11-10 09:34'));
+            const now = DateTime.fromISO('2017-11-10T09:34Z');
 
             const state = fromJS({
                 now,
                 loading: true,
-                pagesLoaded: {},
                 pages: {},
                 edit: {
                     active: null,
@@ -130,11 +137,9 @@ describe('Content reducer', () => {
                                     prices: {}
                                 }
                             },
-                            data: { numCols: 2, numRows: 0, total: 0 },
                             rows: {}
                         }
                     },
-                    pagesLoaded: { funds: true },
                     other: {
                         graphFunds: {
                             enabledList: {

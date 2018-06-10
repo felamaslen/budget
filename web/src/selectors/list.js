@@ -10,8 +10,6 @@ export const getAllPageRows = (state, { page }) => state.getIn(['pages', page, '
 export const makeGetRowIds = () => createSelector([getAllPageRows], rows =>
     rows && rows.keySeq().toList());
 
-const getPageTotal = (state, { page }) => state.getIn(['pages', page, 'data', 'total']);
-
 const getPageProp = (state, { page }) => page;
 
 export const makeGetDailyTotals = () => {
@@ -81,12 +79,11 @@ export const makeGetWeeklyAverages = () => {
         const lastDate = rows.last().getIn(['cols', dateKey]);
 
         const numWeeks = firstDate.diff(lastDate).as('days') / 7;
-
         if (!numWeeks) {
             return 0;
         }
 
-        return visibleTotal / numWeeks;
+        return Math.round(visibleTotal / numWeeks);
     });
 };
 

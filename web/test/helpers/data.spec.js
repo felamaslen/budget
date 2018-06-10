@@ -163,7 +163,7 @@ describe('helpers/data', () => {
         });
     });
     describe('sortRowsByDate', () => {
-        it('should sort rows by date and add a daily column', () => {
+        it('should sort rows by date', () => {
             const rows = fromJS({
                 1: {
                     cols: [dateInput('11/10/17'), 'foo1', 'bar1', 3]
@@ -207,7 +207,6 @@ describe('helpers/data', () => {
                             'bar5',
                             13
                         ],
-                        daily: 24,
                         'first-present': false,
                         future: false
                     },
@@ -228,7 +227,6 @@ describe('helpers/data', () => {
                             'bar1',
                             3
                         ],
-                        daily: 8,
                         'first-present': false,
                         future: false
                     },
@@ -243,34 +241,6 @@ describe('helpers/data', () => {
                         future: false
                     }
                 });
-        });
-    });
-    describe('addWeeklyAverages', () => {
-        it('should return the unprocessed data for non-daily pages', () => {
-            expect(M.addWeeklyAverages({ foo: 'bar' }, [], 'funds')).to.deep.equal({ foo: 'bar' });
-        });
-
-        it('should return the data with a processed weekly value', () => {
-            const data = fromJS({});
-
-            const rows = fromJS([
-                {
-                    id: 1,
-                    cols: [dateInput('22/10/17'), 'foo1', 'bar1', 3]
-                },
-                {
-                    id: 2,
-                    cols: [dateInput('12/10/17'), 'foo2', 'bar2', 10]
-                },
-                {
-                    id: 3,
-                    cols: [dateInput('11/10/17'), 'foo3', 'bar3', 9]
-                }
-            ]);
-
-            const result = M.addWeeklyAverages(data, rows, 'food');
-
-            expect(result.toJS()).to.deep.equal({ weekly: 14 });
         });
     });
 });

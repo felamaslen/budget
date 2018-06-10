@@ -55,7 +55,7 @@ export function processPageDataOverview(state, { raw }) {
 
     const { months: monthDiff } = endDate.diff(startDate, 'months').toObject();
 
-    const numRows = Math.round(monthDiff) + 1;
+    const numRows = Math.ceil(monthDiff) + 1;
     const numCols = 1;
 
     const { balance, ...otherCost } = costRaw;

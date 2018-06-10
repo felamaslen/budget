@@ -21,10 +21,6 @@ export function rgba(values) {
     return `rgb(${roundedValues})`;
 }
 
-/**
- * Get colours for colouring the table
- * @returns {array} list of colour codes
- */
 export function getOverviewCategoryColor() {
     return map(OVERVIEW_COLUMNS.slice(1)
         .map(([key]) => {
@@ -43,14 +39,6 @@ export function getOverviewCategoryColor() {
     );
 }
 
-/**
- * Get a colour on a scale, based on value (linear)
- * @param {integer} value: the value to score
- * @param {array} range: minimum and maximum of range
- * @param {array} median: median values in range
- * @param {array} color: color scale(s) to use
- * @returns {array} rgb values
- */
 export function getOverviewScoreColor(value, range, median, color) {
     const blank = [255, 255, 255]; // white
 

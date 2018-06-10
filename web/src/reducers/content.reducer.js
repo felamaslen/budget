@@ -36,23 +36,24 @@ function processPageData(state, { page, raw }) {
     return state;
 }
 
-export function rContentBlockHover(state, { block, subBlock }) {
-    let newStatus = '';
-    const haveSubBlock = Boolean(subBlock);
+function getNewBlockStatus(state, { block, subBlock }) {
     if (block) {
-        const theBlock = haveSubBlock
-            ? subBlock
-            : block;
+        const theBlock = subBlock || block;
 
         const value = formatCurrency(theBlock.get('value'), { raw: true });
 
-        newStatus = haveSubBlock
-            ? `${capitalise(block.get('name'))}: ${subBlock.get('name')} (${value})`
-            : `${capitalise(block.get('name'))} (${value})`;
+        if (subBlock) {
+            return `${capitalise(block.get('name'))}: ${subBlock.get('name')} (${value})`;
+        }
+
+        return `${capitalise(block.get('name'))} (${value})`;
     }
 
-    return state.setIn(['other', 'blockView', 'status'], newStatus);
+    return '';
 }
+
+export const rContentBlockHover = (state, action) =>
+    state.setIn(['other', 'blockView', 'status'], getNewBlockStatus(state, action));
 
 export function rRequestContent(state, { page }) {
     const loaded = getLoadedStatus(state, { page });

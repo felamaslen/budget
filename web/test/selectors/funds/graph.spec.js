@@ -38,7 +38,7 @@ describe('Funds/graph selectors', () => {
                 })
             });
 
-            const result = S.makeGetGraphProps()(state);
+            const result = S.makeGetGraphProps()(state, { isMobile: false });
 
             expect(result.fundItems.toJS()).to.deep.equal({
                 overall: { color: [0, 0, 0], enabled: true, item: 'Overall' },

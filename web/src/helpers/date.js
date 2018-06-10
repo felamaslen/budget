@@ -4,14 +4,12 @@
 
 import { DateTime } from 'luxon';
 
-export function dateInput(input = null, validate = true) {
+export function dateInput(input = null, validate = true, now = DateTime.local()) {
     // get a DateTime object from something like "10/11" or just "3", for quick insertion of data
 
     if (!validate) {
         return DateTime.fromISO(input);
     }
-
-    const now = DateTime.local();
 
     if (input && input.match(/^[0-9]{1,2}(\/[0-9]{1,2}(\/[0-9]{2,4})?)?$/)) {
         const [day, monthInput, yearShort] = input.split('/');
