@@ -14,20 +14,19 @@ import { PAGES } from '../constants/data';
 export const rOnWindowResize = (state, { size }) => state
     .setIn(['other', 'windowWidth'], size);
 
-function getItemValue(state, page, row, col) {
+export function getItemValue(state, page, row, col) {
     let id = null;
     let item = null;
     let value = null;
+
     if (page === 'overview') {
-        value = state.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]);
+        return { id, item, value: state.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]) };
     }
-    else if (PAGES[page].list) {
+    if (PAGES[page].list) {
         if (row > -1) {
             const rows = getAllPageRows(state, { page });
 
-            // TODO
             id = row;
-            // id = rows.getIn([row, 'id']);
             value = rows.getIn([id, 'cols', col]);
             item = PAGES[page].cols[col];
         }
@@ -35,9 +34,11 @@ function getItemValue(state, page, row, col) {
             value = state.getIn(['edit', 'add', page, col]);
             item = PAGES[page].cols[col];
         }
+
+        return { id, item, value };
     }
 
-    return { id, item, value };
+    return { id: null, item: null, value: null };
 }
 
 function handleSuggestionsNav(state, direction, suggestions) {
@@ -92,9 +93,7 @@ function handleNav(state, { page, dx, dy, cancel }) {
     const item = itemValue.item;
     const value = itemValue.value;
 
-    return rActivateEditable(
-        state, { page, editable: map({ row, col, page, id, item, value }) }
-    );
+    return rActivateEditable(state, { page, editable: map({ row, col, page, id, item, value }) });
 }
 
 function getNavDirection(key, shift) {
