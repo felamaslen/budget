@@ -144,5 +144,9 @@ function getGraphProps(mode, { startTime, cacheTimes, fundItems, fundLines }, is
     return { fundItems, fundLines, lines, startTime, cacheTimes };
 }
 
-export const makeGetGraphProps = () => createSelector([getGraphMode, getFormattedHistory], getGraphProps);
+const getMobileProp = (state, { isMobile }) => isMobile;
+
+export const makeGetGraphProps = () => createSelector([
+    getGraphMode, getFormattedHistory, getMobileProp
+], getGraphProps);
 

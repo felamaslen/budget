@@ -160,13 +160,13 @@ GraphFunds.propTypes = {
 const makeMapStateToProps = () => {
     const getGraphProps = makeGetGraphProps();
 
-    return (state, { isMobile }) => ({
+    return (state, props) => ({
         name: 'fund-history',
         width: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_FUNDS_WIDTH),
-        height: isMobile
+        height: props.isMobile
             ? styles.graphFundsHeightMobile
             : GRAPH_FUNDS_HEIGHT,
-        ...getGraphProps(state, isMobile),
+        ...getGraphProps(state, props),
         zoomRange: state.getIn(['other', 'graphFunds', 'zoomRange']),
         mode: state.getIn(['other', 'graphFunds', 'mode']),
         period: state.getIn(['other', 'graphFunds', 'period']),
