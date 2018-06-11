@@ -129,9 +129,13 @@ export default class LineGraph extends ImmutableComponent {
 
         this.state = {
             hlPoint: null,
-            outerProperties: this.props.outerProperties || {},
-            svgProperties: this.props.svgProperties || {},
-            calc: null,
+            outerProperties: {
+                onMouseMove: this.getOnMouseMove(),
+                onMouseLeave: this.getOnMouseLeave()
+            },
+            svgProperties: {
+                onWheel: this.getOnWheel()
+            },
             padding: this.props.padding || [0, 0, 0, 0],
             zoom: {},
             zoomLevel: 0
@@ -186,28 +190,17 @@ export default class LineGraph extends ImmutableComponent {
             this.onHover(null);
         };
     }
-    setZoom(position = null, zoomLevel = this.state.zoomLevel) {
-        const zoom = getZoomedRange(this.props, this.state, position, zoomLevel);
-        if (!zoom) {
-            return;
-        }
-
-        this.setState({
-            zoom,
-            zoomLevel
-        });
-    }
-    onWheel(customHandler = noop) {
-        if (!this.props.zoomEffect) {
-            return customHandler;
-        }
-
+    getOnWheel(customHandler = noop) {
         return ({ valX }) => evt => {
             customHandler(evt);
+            if (this.props.isMobile || !this.props.zoomEffect) {
+                return;
+            }
+
             evt.preventDefault();
 
             if (!this.state.hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
-                return null;
+                return;
             }
 
             const position = this.state.hlPoint
@@ -217,74 +210,65 @@ export default class LineGraph extends ImmutableComponent {
             // direction: in is -1, out is +1
             const direction = evt.deltaY / Math.abs(evt.deltaY);
             const zoomLevel = Math.max(0, this.state.zoomLevel - direction);
+            const zoom = getZoomedRange(this.props, this.state, position, zoomLevel);
+            if (!zoom) {
+                return;
+            }
 
-            return this.setZoom(position, zoomLevel);
+            const calc = genPixelCompute({
+                padding: this.state.padding,
+                width: this.props.width,
+                height: this.props.height,
+                lines: this.props.lines,
+                minY: this.props.minY,
+                maxY: this.props.maxY,
+                minX: this.props.minX,
+                maxX: this.props.maxX,
+                ...zoom,
+                zoomLevel
+            });
+
+            this.setState({ calc, zoom, zoomLevel });
         };
     }
-    getPixelProps() {
-        return genPixelCompute({
-            padding: this.state.padding,
-            width: this.props.width,
-            height: this.props.height,
-            lines: this.props.lines,
-            minY: this.props.minY,
-            maxY: this.props.maxY,
-            minX: this.props.minX,
-            maxX: this.props.maxX,
-            ...this.state.zoom
-        });
-    }
-    calculateState(nextCalc) {
-        this.setState({
-            calc: nextCalc || this.getPixelProps(),
-            outerProperties: {
-                ...(this.props.outerProperties || {}),
-                onMouseMove: this.getOnMouseMove(),
-                onMouseLeave: this.getOnMouseLeave()
-            },
-            svgProperties: {
-                ...(this.props.svgProperties || {}),
-                onWheel: this.props.isMobile
-                    ? noop
-                    : this.onWheel()
-            }
-        });
-    }
-    componentDidMount() {
-        this.calculateState();
-    }
-    componentDidUpdate(prevProps) {
-        const nextCalc = this.getPixelProps();
-
-        const resetRange = (this.props.zoomEffect || prevProps.zoomEffect) && !(
-            this.props.zoomEffect &&
-            this.props.minX === prevProps.minX &&
-            this.props.maxX === prevProps.maxX &&
-            this.props.minY === prevProps.minY &&
-            this.props.maxY === prevProps.maxY
-        );
-
-        if (resetRange) {
-            this.setState({
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (propsChanged(nextProps, prevState.range)) {
+            return {
+                ...prevState,
+                outerProperties: {
+                    ...prevState.outerProperties,
+                    ...nextProps.outerProperties
+                },
+                svgProperties: {
+                    ...prevState.svgProperties,
+                    ...nextProps.svgProperties
+                },
+                range: {
+                    minX: nextProps.minX,
+                    maxX: nextProps.maxX,
+                    minY: nextProps.minY,
+                    maxY: nextProps.maxY,
+                    width: nextProps.width,
+                    height: nextProps.height
+                },
+                calc: genPixelCompute({
+                    padding: prevState.padding,
+                    width: nextProps.width,
+                    height: nextProps.height,
+                    lines: nextProps.lines,
+                    minY: nextProps.minY,
+                    maxY: nextProps.maxY,
+                    minX: nextProps.minX,
+                    maxX: nextProps.maxX,
+                    zoom: {},
+                    zoomLevel: 0
+                }),
                 zoom: {},
                 zoomLevel: 0
-            });
-        }
-        else if (this.props.zoomEffect && propsChanged(prevProps, this.props)) {
-            this.setZoom();
+            };
         }
 
-        if (!(this.state.calc &&
-            this.state.calc.minX === nextCalc.minX &&
-            this.state.calc.maxX === nextCalc.maxX &&
-            this.state.calc.minY === nextCalc.minY &&
-            this.state.calc.maxY === nextCalc.maxY &&
-
-            prevProps.width === this.props.width &&
-            prevProps.height === this.props.height
-        )) {
-            this.calculateState(nextCalc);
-        }
+        return prevState;
     }
     render() {
         if (!this.state.calc) {
