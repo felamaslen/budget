@@ -53,15 +53,13 @@ describe('Color', () => {
         });
     });
     describe('colorKey', () => {
-        it('should return black for the first colour', () => {
-            expect(color.colorKey(0)).to.deep.equal([0, 0, 0]);
-        });
         it('should return different colours for other numbers', () => {
-            expect(color.colorKey(1)).to.be.an('array').lengthOf(3);
-            expect(color.colorKey(1)).to.not.deep.equal([0, 0, 0]);
+            expect(color.colorKey('foo')).to.be.an('array').lengthOf(3);
+            expect(color.colorKey('foo')).to.not.deep.equal([0, 0, 0]);
 
-            expect(color.colorKey(13)).to.be.an('array').lengthOf(3);
-            expect(color.colorKey(13)).to.not.deep.equal([0, 0, 0]);
+            expect(color.colorKey('bar')).to.be.an('array').lengthOf(3);
+            expect(color.colorKey('bar')).to.not.deep.equal([0, 0, 0]);
+            expect(color.colorKey('bar')).to.not.deep.equal(color.colorKey('foo'));
         });
     });
 

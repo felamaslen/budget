@@ -42,10 +42,10 @@ describe('Funds/graph selectors', () => {
 
             expect(result.fundItems.toJS()).to.deep.equal({
                 overall: { color: [0, 0, 0], enabled: true, item: 'Overall' },
-                '10': { color: [0, 125, 181], enabled: false, item: 'some fund 1' },
-                '1': { color: [255, 0, 86], enabled: true, item: 'some fund 3' },
-                '3': { color: [14, 76, 161], enabled: false, item: 'some fund 2' },
-                '5': { color: [149, 0, 58], enabled: false, item: 'test fund 4' }
+                '10': { color: [0, 74, 153], enabled: false, item: 'some fund 1' },
+                '1': { color: [0, 74, 153], enabled: true, item: 'some fund 3' },
+                '3': { color: [0, 74, 153], enabled: false, item: 'some fund 2' },
+                '5': { color: [0, 153, 99], enabled: false, item: 'test fund 4' }
             });
 
             expect(result.lines.toJS()).to.deep.equal(testLines);

@@ -11,7 +11,7 @@ const getGraphMode = state => state.getIn(['other', 'graphFunds', 'mode']);
 const getEnabledList = state => state.getIn(['other', 'graphFunds', 'enabledList']);
 
 function getFundItems(rows, enabledList) {
-    const colors = rows.map((row, id) => colorKey(id))
+    const colors = rows.map(row => colorKey(row.getIn(['cols', itemKey])))
         .set('overall', COLOR_GRAPH_FUND_LINE);
 
     return enabledList.map((enabled, id) => {

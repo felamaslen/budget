@@ -775,7 +775,7 @@ export const testLines = [
             ]
         ],
         'smooth': true,
-        'color': 'rgb(255,0,86)',
+        'color': 'rgb(0,74,153)',
         'strokeWidth': 1
     }
 ];

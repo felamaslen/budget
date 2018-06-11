@@ -3,6 +3,7 @@
  */
 
 import { Map as map } from 'immutable';
+import ColorHash from 'color-hash';
 import { OVERVIEW_COLUMNS } from '../constants/data';
 import { COLOR_CATEGORY } from '../constants/colors';
 import { listAverage } from './data';
@@ -77,38 +78,13 @@ export function getOverviewScoreColor(value, range, median, color) {
     return theColor.map(item => Math.round(255 - (255 - item) * score));
 }
 
-const colorKeyList = [
-    [1, 0, 103],
-    [255, 0, 86],
-    [158, 0, 142],
-    [14, 76, 161],
-    [0, 95, 57],
-    [149, 0, 58],
-    [255, 147, 126],
-    [0, 21, 68],
-    [107, 104, 130],
-    [0, 0, 255],
-    [0, 125, 181],
-    [106, 130, 108],
-    [0, 174, 126],
-    [194, 140, 159],
-    [190, 153, 112],
-    [0, 143, 156],
-    [95, 173, 78],
-    [255, 0, 0],
-    [255, 2, 157]
-];
+const colorHash = new ColorHash({
+    lightness: 0.3,
+    saturation: 1
+});
 
-const colorKeyRGB = index => {
-    if (index === 0) {
-        return [0, 0, 0];
-    }
-
-    return colorKeyList[index % colorKeyList.length];
-};
-
-export function colorKey(index) {
-    return colorKeyRGB(index);
+export function colorKey(string) {
+    return colorHash.rgb(string);
 }
 
 export function averageColor(colors) {
