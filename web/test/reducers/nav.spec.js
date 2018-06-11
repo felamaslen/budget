@@ -359,16 +359,24 @@ describe('Nav helpers', () => {
     describe('getNumRowsCols', () => {
         it('should return the number in the data, if the page isn\'t a list page', () => {
             expect(R.getNumRowsCols(fromJS({
-                pages: [{ data: { numRows: 5, numCols: 10 } }]
-            }), 0, false))
-                .to.deep.equal({ numRows: 5, numCols: 10 });
+                pages: {
+                    overview: {
+                        rows: [0, 0, 0, 0, 0, 0]
+                    }
+                }
+            }), 'overview', false))
+                .to.deep.equal({ numRows: 6, numCols: 1 });
         });
 
         it('should add one (for the add row) if the page is a list page', () => {
             expect(R.getNumRowsCols(fromJS({
-                pages: [{ data: { numRows: 5, numCols: 10 } }]
-            }), 0, true))
-                .to.deep.equal({ numRows: 6, numCols: 10 });
+                pages: {
+                    food: {
+                        rows: [0, 0, 0, 0, 0, 0]
+                    }
+                }
+            }), 'food', true))
+                .to.deep.equal({ numRows: 7, numCols: 5 });
         });
     });
 

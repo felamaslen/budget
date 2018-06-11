@@ -15,10 +15,11 @@ const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
 
 export const getStartDate = state => state.getIn(['pages', 'overview', 'startDate']);
 export const getEndDate = state => state.getIn(['pages', 'overview', 'endDate']);
-export const getNumRows = state => state.getIn(['pages', 'overview', 'data', 'numRows']);
 
 const getRows = state => state.getIn(['pages', 'overview', 'rows']);
 const getCost = state => state.getIn(['pages', 'overview', 'cost']);
+
+export const getNumRows = createSelector([getRows], rows => rows && rows.size);
 
 export const getBalance = createSelector([getRows], rows => rows && rows.map(item => item.get(0)));
 

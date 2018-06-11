@@ -59,8 +59,7 @@ export function rRequestContent(state, { page }) {
     const loaded = getLoadedStatus(state, { page });
     const loading = !(loaded && page !== 'analysis');
 
-    return state
-        .set('loading', loading)
+    return state.set('loading', loading)
         .set('currentPage', page);
 }
 

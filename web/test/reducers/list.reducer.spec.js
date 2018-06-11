@@ -1,7 +1,7 @@
 /* eslint id-length: 0, no-unused-expressions: 0 */
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
-import { Map as map, List as list } from 'immutable';
+import { Map as map } from 'immutable';
 import * as rList from '../../src/reducers/list.reducer';
 
 describe('List page reducers', () => {
@@ -17,9 +17,7 @@ describe('List page reducers', () => {
                 total: 1003
             };
 
-            expect(rList.getListData(page, raw).toJS()).to.deep.equal({
-                numRows: 3, numCols: 5, total: 1003
-            });
+            expect(rList.getListData(page, raw).toJS()).to.deep.equal({ total: 1003 });
         });
     });
 
@@ -41,8 +39,6 @@ describe('List page reducers', () => {
                 pages: {
                     food: {
                         data: {
-                            numRows: 1,
-                            numCols: 5,
                             total: 1003
                         },
                         rows: {

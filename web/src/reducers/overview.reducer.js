@@ -53,19 +53,13 @@ export function processPageDataOverview(state, { raw }) {
     const startDate = DateTime.fromObject({ year: startYear, month: startMonth }).endOf('month');
     const endDate = DateTime.fromObject({ year: endYear, month: endMonth }).endOf('month');
 
-    const { months: monthDiff } = endDate.diff(startDate, 'months').toObject();
-
-    const numRows = Math.ceil(monthDiff) + 1;
-    const numCols = 1;
-
     const { balance, ...otherCost } = costRaw;
 
     return state.setIn(['pages', 'overview'], map({
         startDate,
         endDate,
         cost: fromJS(otherCost),
-        rows: list(balance).map(value => list.of(value)),
-        data: map({ numRows, numCols })
+        rows: list(balance).map(value => list.of(value))
     }));
 }
 
