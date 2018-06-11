@@ -82,6 +82,7 @@
     "bcrypt": "^1.0.3",
     "body-parser": "^1.17.2",
     "classnames": "^2.2.5",
+    "color-hash": "^1.0.3",
     "colors": "^1.1.2",
     "command-line-args": "^5.0.2",
     "cssnano": "^3.10.0",
