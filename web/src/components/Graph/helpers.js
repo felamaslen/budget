@@ -14,6 +14,10 @@ export const genPixelCompute = props => {
     } = props;
 
     return {
+        minX,
+        maxX,
+        minY,
+        maxY,
         pixX: value =>
             padLeft + (value - minX) / (maxX - minX) * (width - padLeft - padRight),
         pixY: value =>

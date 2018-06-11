@@ -9,7 +9,9 @@ const { searchSchema } = require('../../schema');
 function getQuery(db, request, uid) {
     const { table, column, searchTerm, numResults } = request;
 
-    const query = qb => qb.select(column, db.raw(`SUM(IF(${table}.${column} LIKE '${searchTerm}%', 1, 0)) AS matches`))
+    const searchTermEscaped = searchTerm.replace(/[^\w]+/g, '');
+
+    const query = qb => qb.select(column, db.raw(`SUM(IF(??.?? LIKE '${searchTermEscaped}%', 1, 0)) AS matches`, [table, column]))
         .from(table)
         .where(`${table}.${column}`, 'like', `%${searchTerm}%`)
         .andWhere(`${table}.${column}`, 'not like', searchTerm)

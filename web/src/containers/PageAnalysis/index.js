@@ -33,13 +33,11 @@ function PageAnalysis({ timeline }) {
 }
 
 PageAnalysis.propTypes = {
-    loaded: PropTypes.bool.isRequired,
     timeline: PropTypes.instanceOf(list),
     onLoad: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    loaded: Boolean(state.getIn(['pagesLoaded', 'analysis'])),
     timeline: state.getIn(['other', 'analysis', 'timeline'])
 });
 

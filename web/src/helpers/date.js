@@ -4,22 +4,12 @@
 
 import { DateTime } from 'luxon';
 
-export function getNow() {
-    if (process.env.NODE_ENV === 'test') {
-        return DateTime.fromISO('2018-01-22');
-    }
-
-    return DateTime.local();
-}
-
-export function dateInput(input = null, validate = true) {
+export function dateInput(input = null, validate = true, now = DateTime.local()) {
     // get a DateTime object from something like "10/11" or just "3", for quick insertion of data
 
     if (!validate) {
         return DateTime.fromISO(input);
     }
-
-    const now = getNow();
 
     if (input && input.match(/^[0-9]{1,2}(\/[0-9]{1,2}(\/[0-9]{2,4})?)?$/)) {
         const [day, monthInput, yearShort] = input.split('/');

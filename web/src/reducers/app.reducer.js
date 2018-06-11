@@ -1,59 +1,61 @@
-/*
- * Carries out actions for the Form component
- */
-
 import { List as list, Map as map } from 'immutable';
-
 import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
-import { getFundsCachedValueAgeText } from './funds.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
+import { makeGetRowIds, getAllPageRows } from '../selectors/list';
 import { PAGES } from '../constants/data';
 
-export const rOnWindowResize = (reduction, { size }) => reduction
+export const rOnWindowResize = (state, { size }) => state
     .setIn(['other', 'windowWidth'], size);
 
-function getItemValue(reduction, page, row, col) {
+export function getItemValue(state, page, row, col) {
     let id = null;
     let item = null;
     let value = null;
+
     if (page === 'overview') {
-        value = reduction.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]);
+        return { id, item, value: state.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]) };
     }
-    else if (PAGES[page].list) {
+    if (PAGES[page].list) {
         if (row > -1) {
-            id = reduction.getIn(['pages', page, 'rows', row, 'id']);
-            value = reduction.getIn(['pages', page, 'rows', row, 'cols', col]);
+            const rows = getAllPageRows(state, { page });
+
+            id = row;
+            value = rows.getIn([id, 'cols', col]);
             item = PAGES[page].cols[col];
         }
         else {
-            value = reduction.getIn(['edit', 'add', page, col]);
+            value = state.getIn(['edit', 'add', page, col]);
             item = PAGES[page].cols[col];
         }
+
+        return { id, item, value };
     }
 
-    return { id, item, value };
+    return { id: null, item: null, value: null };
 }
 
-function handleSuggestionsNav(reduction, direction, suggestions) {
+function handleSuggestionsNav(state, direction, suggestions) {
     const newActive = ((suggestions.get('active') + 1 + direction) %
                      (suggestions.get('list').size + 1)) - 1;
 
-    return reduction.setIn(['editSuggestions', 'active'], newActive);
+    return state.setIn(['editSuggestions', 'active'], newActive);
 }
 
-function handleNav(reduction, { page, dx, dy, cancel }) {
+const getRowKeys = makeGetRowIds();
+
+function handleNav(state, { page, dx, dy, cancel }) {
     if (cancel) {
-        return rActivateEditable(reduction, { page, cancel });
+        return rActivateEditable(state, { page, cancel });
     }
 
     const pageIsList = Boolean(PAGES[page].list);
-    const { numRows, numCols } = getNumRowsCols(reduction, page, pageIsList);
-    const editing = reduction.getIn(['edit', 'active']);
+    const { numRows, numCols } = getNumRowsCols(state, page, pageIsList);
+    const editing = state.getIn(['edit', 'active']);
 
     if (!(numRows && numCols && editing)) {
-        return reduction;
+        return state;
     }
 
     const { currentRow, currentCol } = getCurrentRowCol(editing, pageIsList);
@@ -61,15 +63,15 @@ function handleNav(reduction, { page, dx, dy, cancel }) {
     const navigateToAddButton = currentRow === -1 && currentCol === numCols - 1 && dx > 0;
 
     if (pageIsList && navigateToAddButton) {
-        return rActivateEditable(reduction, { page })
+        return rActivateEditable(state, { page })
             .setIn(['edit', 'addBtnFocus'], true);
     }
 
-    const addBtnFocus = reduction.getIn(['edit', 'addBtnFocus']);
+    const addBtnFocus = state.getIn(['edit', 'addBtnFocus']);
 
     let navTo = null;
     if (pageIsList) {
-        const rowKeys = reduction.getIn(['pages', page, 'rowIds']);
+        const rowKeys = getRowKeys(state, { page });
 
         navTo = getNavRowCol({
             dx, dy, rowKeys, numCols, currentRow, currentCol, addBtnFocus
@@ -81,14 +83,12 @@ function handleNav(reduction, { page, dx, dy, cancel }) {
 
     const { row, col } = navTo;
 
-    const itemValue = getItemValue(reduction, page, row, col);
+    const itemValue = getItemValue(state, page, row, col);
     const id = itemValue.id;
     const item = itemValue.item;
     const value = itemValue.value;
 
-    return rActivateEditable(
-        reduction, { page, editable: map({ row, col, page, id, item, value }) }
-    );
+    return rActivateEditable(state, { page, editable: map({ row, col, page, id, item, value }) });
 }
 
 function getNavDirection(key, shift) {
@@ -112,9 +112,9 @@ function getNavDirection(key, shift) {
     return { dx: 0, dy: 0 };
 }
 
-function handleNavFromSuggestions(reduction, { page, suggestions, escape, enter }) {
+function handleNavFromSuggestions(state, { page, suggestions, escape, enter }) {
     if (escape) {
-        return reduction
+        return state
             .setIn(['editSuggestions', 'list'], list.of())
             .setIn(['editSuggestions', 'active'], -1);
     }
@@ -124,133 +124,114 @@ function handleNavFromSuggestions(reduction, { page, suggestions, escape, enter 
         // the suggestion value
         const handle = next => handleNav(next, { page, dx: 1, dy: 0 });
 
-        const reductionWithSuggestionValue = reduction.setIn(
+        const stateWithSuggestionValue = state.setIn(
             ['edit', 'active', 'value'],
             suggestions.getIn(['list', suggestions.get('active')]));
 
         const categoryCol = PAGES[page].cols.indexOf('category');
 
         if (suggestions.get('nextCategory').size &&
-            reduction.getIn(['edit', 'active', 'row']) === -1 &&
-            !reduction.getIn(['edit', 'add', page, categoryCol]).length
+            state.getIn(['edit', 'active', 'row']) === -1 &&
+            !state.getIn(['edit', 'add', page, categoryCol]).length
         ) {
-            return handle(reductionWithSuggestionValue.setIn(
+            return handle(stateWithSuggestionValue.setIn(
                 ['edit', 'add', page, categoryCol], suggestions.getIn(
                     ['nextCategory', suggestions.get('active')])
             ));
         }
 
-        return handle(reductionWithSuggestionValue);
+        return handle(stateWithSuggestionValue);
     }
 
-    return reduction;
+    return state;
 }
 
-function handleNavInSuggestions(reduction, { suggestions, dx, dy }) {
+function handleNavInSuggestions(state, { suggestions, dx, dy }) {
     if (dy === 0) {
-        return handleSuggestionsNav(reduction, dx, suggestions);
+        return handleSuggestionsNav(state, dx, suggestions);
     }
 
-    return handleSuggestionsNav(reduction, dy, suggestions);
+    return handleSuggestionsNav(state, dy, suggestions);
 }
 
-function handleKeyPressLoggedIn(reduction, { key, shift, ctrl }) {
+function handleKeyPressLoggedIn(state, { page, key, shift, ctrl, tab, escape, enter }) {
     const { dx, dy } = getNavDirection(key, shift);
-    const navigated = dx !== 0 || dy !== 0;
+    const navigated = !(dx === 0 && dy === 0);
 
-    const escape = key === 'Escape';
-    const enter = key === 'Enter';
-
-    const page = reduction.get('currentPage');
-    const suggestions = reduction.getIn(['editSuggestions']);
+    const suggestions = state.getIn(['editSuggestions']);
     const haveSuggestions = suggestions.get('list').size > 0;
-    const suggestionActive = suggestions.get('active') > -1;
 
-    const navigateFromSuggestions = suggestionActive && (escape || enter);
-    const navigateSuggestions = navigated && !ctrl;
+    if (haveSuggestions) {
+        const suggestionActive = suggestions.get('active') > -1;
 
-    if (haveSuggestions && navigateFromSuggestions) {
-        return handleNavFromSuggestions(reduction, { page, suggestions, escape, enter });
-    }
-
-    if (haveSuggestions && navigateSuggestions) {
-        return handleNavInSuggestions(reduction, { suggestions, dx, dy });
-    }
-
-    const addBtn = reduction.getIn(['edit', 'addBtnFocus']);
-    if (addBtn && enter) {
-        // this is handled by the button
-        return reduction;
-    }
-
-    const navigateFromField = navigated && (ctrl || key === 'Tab');
-
-    if (navigateFromField) {
-        return handleNav(reduction, { page, dx, dy });
-    }
-
-    if (escape) {
-        return handleNav(reduction, { page, cancel: true });
+        if (suggestionActive && (escape || enter)) {
+            return handleNavFromSuggestions(state, { page, suggestions, escape, enter });
+        }
+        if (navigated && !ctrl) {
+            return handleNavInSuggestions(state, { suggestions, dx, dy });
+        }
     }
 
     if (enter) {
-        return rActivateEditable(reduction, { page });
+        if (state.getIn(['edit', 'addBtnFocus'])) {
+            return state;
+        }
+
+        return rActivateEditable(state, { page });
+    }
+    if (navigated && (ctrl || tab)) {
+        return handleNav(state, { page, dx, dy });
+    }
+    if (escape) {
+        return handleNav(state, { page, cancel: true });
     }
 
-    return reduction;
+    return state;
 }
 
-export function rHandleKeyPress(reduction, req) {
+function handleKeyPressLoggedOut(state, { key, escape }) {
+    if (escape) {
+        return rLoginFormReset(state);
+    }
+
+    return rLoginFormInput(state, { input: key });
+}
+
+export function rHandleKeyPress(state, req) {
     const keyIsModifier = req.key === 'Control' || req.key === 'Shift';
     if (keyIsModifier) {
-        return reduction;
+        return state;
     }
 
-    const loggedIn = reduction.getIn(['user', 'uid']) > 0;
+    const params = {
+        ...req,
+        escape: req.key === 'Escape',
+        enter: req.key === 'Enter',
+        tab: req.key === 'Tab',
+        page: state.get('currentPage')
+    };
+
+    const loggedIn = state.getIn(['user', 'uid']) > 0;
 
     if (loggedIn) {
-        return handleKeyPressLoggedIn(reduction, req);
+        return handleKeyPressLoggedIn(state, params);
     }
 
-    if (req.key === 'Escape') {
-        return rLoginFormReset(reduction, 0);
+    return handleKeyPressLoggedOut(state, params);
+}
+
+export function rLogout(state) {
+    if (state.getIn(['loading'])) {
+        return state;
     }
 
-    return rLoginFormInput(reduction, { input: req.key });
+    return resetAppState(state).setIn(['loginForm', 'visible'], true);
 }
 
-export function rLogout(reduction) {
-    if (reduction.getIn(['loading'])) {
-        return reduction;
-    }
+export const rUpdateTime = (state, { now }) => state.set('now', now);
 
-    return resetAppState(reduction)
-        .setIn(['loginForm', 'visible'], true);
-}
+export const rUpdateServer = state => state.set('loadingApi', true);
 
-export function rUpdateTime(reduction, { now }) {
-    if (reduction.getIn(['pages', 'funds'])) {
-        const ageText = getFundsCachedValueAgeText(
-            reduction.getIn(['other', 'graphFunds', 'startTime']),
-            reduction.getIn(['other', 'graphFunds', 'cacheTimes']),
-            now
-        );
-
-        return reduction.setIn(
-            ['other', 'fundsCachedValue', 'ageText'], ageText
-        );
-    }
-
-    return reduction;
-}
-
-export function rUpdateServer(reduction) {
-    return reduction.set('loadingApi', true);
-}
-
-export function rHandleServerUpdate(reduction) {
-    return reduction
-        .set('loadingApi', false)
-        .setIn(['edit', 'requestList'], list.of());
-}
+export const rHandleServerUpdate = state => state.set('loadingApi', false)
+    .setIn(['edit', 'requestList'], list.of());
 

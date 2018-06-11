@@ -4,100 +4,115 @@ import { DateTime } from 'luxon';
 import * as R from '../../src/reducers/overview.reducer';
 
 describe('Overview reducer', () => {
-    describe('rProcessDataOverview', () => {
-        const costMap = fromJS({
-            balance: [13000, 15000, 16000, 15500, 0, 0, 0],
-            balanceOld: [10000, 11500, 11200],
-            funds: [100, 101, 102, 103, 0, 0, 0],
-            fundsOld: [94, 105, 110],
-            fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
-            income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
-            bills: [1000, 900, 400, 650, 0, 0, 0],
-            food: [50, 13, 20, 19, 0, 0, 0],
-            general: [150, 90, 10, 35, 0, 0, 0],
-            holiday: [10, 1000, 95, 13, 0, 0, 0],
-            social: [50, 65, 134, 10, 0, 0, 0]
-        });
-
-        const startDate = DateTime.fromObject({ year: 2017, month: 4 });
-        const endDate = DateTime.fromObject({ year: 2017, month: 10 });
-        const currentDate = DateTime.fromObject({ year: 2017, month: 6 });
-        const futureMonths = 4;
-
-        const result = R.rProcessDataOverview({
-            costMap, startDate, endDate, currentDate, futureMonths
-        }).toJS();
-
-        it('should return the correct number of rows and columns', () => {
-            expect(result).to.have.property('numRows', 7);
-            expect(result).to.have.property('numCols', 1);
-        });
-
-        it('should return the correct year month values', () => {
-            expect(result).to.have.property('futureMonths', 4);
-            expect(result).to.have.deep.property('startDate', startDate);
-            expect(result).to.have.deep.property('endDate', endDate);
-            expect(result).to.have.deep.property('currentDate', currentDate);
-            expect(result).to.have.deep.property('dates', [
-                startDate.plus({ months: 0 }).endOf('month'),
-                startDate.plus({ months: 1 }).endOf('month'),
-                startDate.plus({ months: 2 }).endOf('month'),
-                startDate.plus({ months: 3 }).endOf('month'),
-                startDate.plus({ months: 4 }).endOf('month'),
-                startDate.plus({ months: 5 }).endOf('month'),
-                startDate.plus({ months: 6 }).endOf('month')
-            ]);
-        });
-
-        it('should return the correct calculated cost values', () => {
-            expect(result).to.have.deep.property('cost', {
-                balance: [13000, 15000, 16000, 15500, 0, 0, 0],
-                balanceOld: [10000, 11500, 11200],
-                balanceWithPredicted: [13000, 15000, 16000, 17533, 19516, 21000, 23283],
-                predicted: [13000, 12832, 15736, 17533, 19516, 21000, 23283],
-                spending: [1260, 2068, 765, 967, 317, 317, 317],
-                net: [740, -168, 735, 1533, 1983, 1483, 2283],
-                income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
-                funds: [100, 101, 102, 103, 103, 104, 104],
-                fundsOld: [94, 105, 110],
-                fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
-                bills: [1000, 900, 400, 650, 0, 0, 0],
-                food: [50, 13, 28, 28, 28, 28, 28],
-                general: [150, 90, 14, 90, 90, 90, 90],
-                social: [50, 65, 189, 65, 65, 65, 65],
-                holiday: [10, 1000, 134, 134, 134, 134, 134]
-            });
-
-            expect(result).to.have.deep.property('costActual', {
-                balance: [13000, 15000, 16000, 15500, 0, 0, 0],
-                balanceOld: [10000, 11500, 11200],
-                income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
-                funds: [100, 101, 102, 103, 0, 0, 0],
-                fundsOld: [94, 105, 110],
-                fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
-                bills: [1000, 900, 400, 650, 0, 0, 0],
-                food: [50, 13, 20, 19, 0, 0, 0],
-                general: [150, 90, 10, 35, 0, 0, 0],
-                social: [50, 65, 134, 10, 0, 0, 0],
-                holiday: [10, 1000, 95, 13, 0, 0, 0]
-            });
-        });
-    });
-
-    describe('rProcessDataOverviewRaw', () => {
-        it('should be tested');
-    });
-
-    describe('rGetOverviewRows', () => {
-        it('should be tested');
-    });
-
     describe('rCalculateOverview', () => {
-        it('should be tested');
+        const state = fromJS({
+            now: DateTime.fromISO('2018-03-23T11:45:20Z'),
+            pages: {
+                overview: {
+                    startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),
+                    endDate: DateTime.fromISO('2018-06-30T23:59:59.999Z'),
+                    cost: {
+                        old: [10000, 11500, 11200],
+                        funds: [94, 105, 110, 100, 101, 102, 103, 0, 0, 0],
+                        fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
+                        income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
+                        bills: [1000, 900, 400, 650, 0, 0, 0],
+                        food: [50, 13, 20, 19, 0, 0, 0],
+                        general: [150, 90, 10, 35, 0, 0, 0],
+                        holiday: [10, 1000, 95, 13, 0, 0, 0],
+                        social: [50, 65, 134, 10, 0, 0, 0]
+                    },
+                    rows: [
+                        [100],
+                        [105],
+                        [913],
+                        [239],
+                        [0],
+                        [0],
+                        [0]
+                    ]
+                }
+            }
+        });
+
+        it('should handle adding income', () => {
+            const result = R.rCalculateOverview({
+                page: 'income',
+                newDate: DateTime.fromISO('2018-04-24T10:00:11Z'),
+                oldDate: DateTime.fromISO('2018-04-24T10:00:11Z'),
+                newItemCost: 87054,
+                oldItemCost: 0
+            })(state);
+
+            expect(result.getIn(['pages', 'overview', 'cost', 'income', 3]))
+                .to.equal(2500 + 87054);
+        });
+
+        it('should handle changing dates', () => {
+            const result = R.rCalculateOverview({
+                page: 'food',
+                newDate: DateTime.fromISO('2018-01-11T10:00:11Z'),
+                oldDate: DateTime.fromISO('2018-03-18T10:00:11Z'),
+                newItemCost: 19,
+                oldItemCost: 19
+            })(state);
+
+            expect(result.getIn(['pages', 'overview', 'cost', 'food', 0]))
+                .to.equal(50 + 19);
+
+            expect(result.getIn(['pages', 'overview', 'cost', 'food', 2]))
+                .to.equal(20 - 19);
+        });
     });
 
     describe('processPageDataOverview', () => {
-        it('should be tested');
+        it('should insert a simple map from the raw response', () => {
+            const raw = {
+                startYearMonth: [2018, 1],
+                endYearMonth: [2018, 6],
+                cost: {
+                    balance: [13502, 19220, 11876, 14981, 14230, 12678],
+                    old: [10000, 11500, 11200],
+                    funds: [94, 105, 110, 100, 101, 102, 103, 0, 0, 0],
+                    fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
+                    income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
+                    bills: [1000, 900, 400, 650, 0, 0, 0],
+                    food: [50, 13, 20, 19, 0, 0, 0],
+                    general: [150, 90, 10, 35, 0, 0, 0],
+                    holiday: [10, 1000, 95, 13, 0, 0, 0],
+                    social: [50, 65, 134, 10, 0, 0, 0]
+                }
+            };
+
+            const state = fromJS({
+                now: DateTime.fromISO('2018-03-23T11:45:20Z'),
+                pages: {}
+            });
+
+            const result = R.processPageDataOverview(state, { raw });
+
+            expect(result.toJS()).to.deep.equal({
+                now: DateTime.fromISO('2018-03-23T11:45:20Z'),
+                pages: {
+                    overview: {
+                        startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),
+                        endDate: DateTime.fromISO('2018-06-30T22:59:59.999Z'),
+                        cost: {
+                            old: [10000, 11500, 11200],
+                            funds: [94, 105, 110, 100, 101, 102, 103, 0, 0, 0],
+                            fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
+                            income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
+                            bills: [1000, 900, 400, 650, 0, 0, 0],
+                            food: [50, 13, 20, 19, 0, 0, 0],
+                            general: [150, 90, 10, 35, 0, 0, 0],
+                            holiday: [10, 1000, 95, 13, 0, 0, 0],
+                            social: [50, 65, 134, 10, 0, 0, 0]
+                        },
+                        rows: [[13502], [19220], [11876], [14981], [14230], [12678]]
+                    }
+                }
+            });
+        });
     });
 });
 

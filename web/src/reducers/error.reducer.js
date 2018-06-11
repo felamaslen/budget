@@ -2,14 +2,14 @@
  * Carries out actions for the error messages component
  */
 
-export function rErrorMessageOpen(reduction, { message, msgId }) {
-    return reduction.set('errorMsg', reduction
+export function rErrorMessageOpen(state, { message, msgId }) {
+    return state.set('errorMsg', state
         .get('errorMsg')
         .push(message.set('id', msgId))
     );
 }
-export function rErrorMessageClose(reduction, { msgId }) {
-    return reduction.set('errorMsg', reduction
+export function rErrorMessageClose(state, { msgId }) {
+    return state.set('errorMsg', state
         .get('errorMsg')
         .map(msg => {
             if (msg.get('id') === msgId) {
@@ -20,8 +20,8 @@ export function rErrorMessageClose(reduction, { msgId }) {
         })
     );
 }
-export function rErrorMessageRemove(reduction, { msgId }) {
-    return reduction.set('errorMsg', reduction
+export function rErrorMessageRemove(state, { msgId }) {
+    return state.set('errorMsg', state
         .get('errorMsg')
         .filter(msg => msg.get('id') !== msgId)
     );

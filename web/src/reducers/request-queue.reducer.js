@@ -60,13 +60,13 @@ export function addToRequestQueue(requestList, dataItem, startDate) {
     return requestList;
 }
 
-export function pushToRequestQueue(reduction, dataItem) {
-    const startDate = reduction.getIn(['pages', 'overview', 'data', 'startDate']);
+export function pushToRequestQueue(state, dataItem) {
+    const startDate = state.getIn(['pages', 'overview', 'startDate']);
 
-    const requestList = reduction.getIn(['edit', 'requestList']);
+    const requestList = state.getIn(['edit', 'requestList']);
     const newRequestList = addToRequestQueue(requestList, dataItem, startDate || null);
 
-    return reduction
+    return state
         .setIn(['edit', 'requestList'], newRequestList);
 }
 

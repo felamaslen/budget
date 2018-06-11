@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { fromJS } from 'immutable';
+import { DateTime } from 'luxon';
 import * as R from '../../src/reducers/content.reducer';
 
 describe('Content reducer', () => {
@@ -65,13 +66,21 @@ describe('Content reducer', () => {
 
     describe('rRequestContent', () => {
         it('should set the loading status', () => {
-            expect(R.rRequestContent(fromJS({}), { loading: true }).get('loading'))
-                .to.equal(true);
+            expect(R.rRequestContent(fromJS({ pages: {} }), { page: 'food' }).toJS())
+                .to.have.property('loading', true);
+
+            expect(R.rRequestContent(fromJS({ pages: { food: {} } }), { page: 'food' }).toJS())
+                .to.have.property('loading', false);
         });
 
-        it('should set the current page index', () => {
-            expect(R.rRequestContent(fromJS({}), { page: 'page1' }).get('currentPage'))
-                .to.equal('page1');
+        it('should always reload the analysis page', () => {
+            expect(R.rRequestContent(fromJS({ pages: { analysis: {} } }), { page: 'analysis' }).toJS())
+                .to.have.property('loading', true);
+        });
+
+        it('should set the current page', () => {
+            expect(R.rRequestContent(fromJS({ pages: {} }), { page: 'page1' }).toJS())
+                .to.have.property('currentPage', 'page1');
         });
     });
 
@@ -84,10 +93,11 @@ describe('Content reducer', () => {
         });
 
         it('set expected parameters in the state', () => {
+            const now = DateTime.fromISO('2017-11-10T09:34Z');
+
             const state = fromJS({
+                now,
                 loading: true,
-                pagesLoaded: {},
-                pagesRaw: {},
                 pages: {},
                 edit: {
                     active: null,
@@ -112,58 +122,31 @@ describe('Content reducer', () => {
                 }
             };
 
-            const now = new Date('2017-11-10 09:34');
-
             const result = R.rHandleContentResponse(state, { response, page: 'funds' }, now);
 
             expect(result.toJS())
                 .to.deep.equal({
+                    now,
                     loading: false,
                     pages: {
                         funds: {
-                            cacheTimes: [191239],
-                            data: { numCols: 2, numRows: 0, total: 0 },
-                            rows: {},
-                            rowIds: [],
-                            startTime: 1508533928
-                        }
-                    },
-                    pagesLoaded: { funds: true },
-                    pagesRaw: {
-                        funds: {
-                            cacheTimes: [191239],
-                            data: [],
-                            startTime: 1508533928,
-                            total: 0
+                            cache: {
+                                fooperiod: {
+                                    cacheTimes: [191239],
+                                    startTime: 1508533928,
+                                    prices: {}
+                                }
+                            },
+                            rows: {}
                         }
                     },
                     other: {
                         graphFunds: {
-                            cacheTimes: [191239],
-                            period: 'fooperiod',
-                            data: {
-                                fundItems: [
-                                    {
-                                        color: [0, 0, 0],
-                                        enabled: true,
-                                        item: 'Overall'
-                                    }
-                                ],
-                                fundLines: []
+                            enabledList: {
+                                overall: true
                             },
-                            startTime: 1508533928,
+                            period: 'fooperiod',
                             zoomRange: [0, 1772512]
-                        },
-                        fundHistoryCache: {
-                            fooperiod: {
-                                cacheTimes: [191239],
-                                rows: {},
-                                startTime: 1508533928
-                            }
-                        },
-                        fundsCachedValue: {
-                            ageText: '2 weeks, 4 days ago',
-                            value: 0
                         }
                     },
                     edit: {

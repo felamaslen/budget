@@ -13,22 +13,22 @@ describe('Color', () => {
     });
     describe('getOverviewCategoryColor', () => {
         it('should return the correct colour list', () => {
-            expect(color.getOverviewCategoryColor()).to.deep.equal([
-                [84, 110, 122],
-                [183, 28, 28],
-                [67, 160, 71],
-                [1, 87, 155],
-                [0, 137, 123],
-                [191, 158, 36],
-                [36, 191, 55],
-                [191, 36, 36],
-                [
+            expect(color.getOverviewCategoryColor().toJS()).to.deep.equal({
+                funds: [84, 110, 122],
+                bills: [183, 28, 28],
+                food: [67, 160, 71],
+                general: [1, 87, 155],
+                holiday: [0, 137, 123],
+                social: [191, 158, 36],
+                income: [36, 191, 55],
+                spending: [191, 36, 36],
+                net: [
                     [191, 36, 36],
                     [36, 191, 55]
                 ],
-                [36, 191, 55],
-                [36, 191, 55]
-            ]);
+                predicted: [36, 191, 55],
+                balance: [36, 191, 55]
+            });
         });
     });
     describe('getOverviewScoreColor', () => {
@@ -53,15 +53,13 @@ describe('Color', () => {
         });
     });
     describe('colorKey', () => {
-        it('should return black for the first colour', () => {
-            expect(color.colorKey(0)).to.deep.equal([0, 0, 0]);
-        });
         it('should return different colours for other numbers', () => {
-            expect(color.colorKey(1)).to.be.an('array').lengthOf(3);
-            expect(color.colorKey(1)).to.not.deep.equal([0, 0, 0]);
+            expect(color.colorKey('foo')).to.be.an('array').lengthOf(3);
+            expect(color.colorKey('foo')).to.not.deep.equal([0, 0, 0]);
 
-            expect(color.colorKey(13)).to.be.an('array').lengthOf(3);
-            expect(color.colorKey(13)).to.not.deep.equal([0, 0, 0]);
+            expect(color.colorKey('bar')).to.be.an('array').lengthOf(3);
+            expect(color.colorKey('bar')).to.not.deep.equal([0, 0, 0]);
+            expect(color.colorKey('bar')).to.not.deep.equal(color.colorKey('foo'));
         });
     });
 

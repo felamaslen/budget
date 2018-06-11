@@ -3,15 +3,13 @@ import { eventChannel } from 'redux-saga';
 import { fork, select, take, call, put } from 'redux-saga/effects';
 import { TIMER_UPDATE_SERVER } from '../constants/data';
 import { SERVER_UPDATED } from '../constants/actions';
-import { aSettingsLoaded, aTimeUpdated, aServerUpdated } from '../actions/app.actions';
+import { aSettingsLoaded, aServerUpdated } from '../actions/app.actions';
 
-export const selectRequestList = reduction =>
-    reduction.getIn(['edit', 'requestList']);
+export const selectRequestList = state =>
+    state.getIn(['edit', 'requestList']);
 
 function dataSyncEventChannel() {
     return eventChannel(emitter => {
-        const timer = setInterval(() => emitter(aTimeUpdated(new Date())), 1000);
-
         const dataSync = setInterval(() => emitter(aServerUpdated()), TIMER_UPDATE_SERVER);
 
         return () => {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-
+import { DateTime } from 'luxon';
 import * as date from '../../src/helpers/date';
 
 describe('Date', () => {
@@ -14,7 +14,8 @@ describe('Date', () => {
         });
 
         it('should work for just the day', () => {
-            expect(date.dateInput('5').toISODate()).to.equal('2018-01-05');
+            expect(date.dateInput('5', true, DateTime.fromISO('2018-01-01')).toISODate())
+                .to.equal('2018-01-05');
         });
     });
 

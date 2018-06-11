@@ -35,7 +35,8 @@ export const OVERVIEW_COLUMNS = [
 
 export const PAGES = {
     overview: {
-        path: '/'
+        path: '/',
+        cols: ['balance']
     },
     analysis: {},
     funds: {

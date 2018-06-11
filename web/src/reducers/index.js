@@ -20,11 +20,10 @@ import * as stocksList from './stocks-list.reducer';
 
 import initialState from '../reduction';
 
-const createReducerObject = array => array.reduce((obj, item) => {
-    obj[item[0]] = (state, action) => item[1](state, action, new Date());
-
-    return obj;
-}, {});
+const createReducerObject = array => array.reduce((obj, [type, handler]) => ({
+    ...obj,
+    [type]: handler
+}), {});
 
 const reducers = createReducerObject([
     // login form actions
@@ -80,7 +79,6 @@ const reducers = createReducerObject([
 
     // graph actions
     [AC.GRAPH_SHOWALL_TOGGLED, graph.rToggleShowAll],
-    [AC.GRAPH_FUND_ITEM_TOGGLED, graph.rToggleFundItemGraph],
     [AC.GRAPH_FUNDS_CLICKED, graph.rToggleFundsGraphMode],
     [AC.GRAPH_FUNDS_LINE_TOGGLED, graph.rToggleFundsGraphLine],
     [AC.GRAPH_FUNDS_PERIOD_CHANGED, graph.rChangeFundsGraphPeriod],

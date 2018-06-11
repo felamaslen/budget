@@ -1,5 +1,5 @@
 import { List as list, Map as map } from 'immutable';
-
+import { DateTime } from 'luxon';
 import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_PERIODS } from './constants/graph';
 
 function getDefaultFundPeriod() {
@@ -18,8 +18,6 @@ export function resetAppState(state) {
         .set('user', map({ uid: 0, name: null, apiKey: null }))
         .set('pages', map.of())
         .set('currentPage', null)
-        .set('pagesRaw', map.of())
-        .set('pagesLoaded', map.of())
         .set('edit', map({
             active: map({
                 row: 0,
@@ -77,6 +75,7 @@ export function resetAppState(state) {
                 treeVisible: map({ bills: false })
             }),
             graphFunds: map({
+                enabledList: map.of(),
                 period: getDefaultFundPeriod(),
                 mode: GRAPH_FUNDS_MODE_ROI,
                 showOverall: true,
@@ -95,9 +94,7 @@ export function resetAppState(state) {
                 weightedGain: 0,
                 oldWeightedGain: 0,
                 history: list.of()
-            }),
-            fundsCachedValue: map({ ageText: null, value: null }),
-            fundHistoryCache: map.of()
+            })
         }))
         .set('loginForm', map({
             inputStep: 0,
@@ -107,9 +104,10 @@ export function resetAppState(state) {
         }));
 }
 
-// the state of the app (reduction) is stored as an immutable object,
+// the state of the app (state) is stored as an immutable object,
 // and returned (modified) by reducers
 export default resetAppState(map({
+    now: DateTime.local(),
     errorMsg: list.of(),
     loading: false, // for big (disruptive) things like loading pages
     loadingApi: false // for small things like edit updates

@@ -8,9 +8,9 @@ import Page from '../../../src/containers/Page';
 
 describe('<Page />', () => {
     const state = fromJS({
-        pagesLoaded: {
-            food: false,
-            general: true
+        pages: {
+            food: {},
+            general: {}
         }
     });
 
@@ -30,7 +30,7 @@ describe('<Page />', () => {
 
     it('should render nothing if the page content is not loaded yet', () => {
         const wrapper = shallow((
-            <Page page="food">
+            <Page page="holiday">
                 <span>{'text'}</span>
             </Page>
         ), store).dive();

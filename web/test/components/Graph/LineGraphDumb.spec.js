@@ -60,10 +60,16 @@ describe('<LineGraphDumb />', () => {
                 color: 'black'
             }
         ]),
-        minX: 100,
-        maxX: 103,
-        minY: -2,
-        maxY: 2
+        calc: {
+            minX: 100,
+            maxX: 103,
+            minY: -2,
+            maxY: 2,
+            pixX: () => 0,
+            pixY: () => 0,
+            valX: () => 0,
+            valY: () => 0
+        }
     };
 
     const wrapper = mount(<LineGraphDumb {...props} />);

@@ -3,24 +3,21 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+import { compose } from 'redux';
 import { DateTime } from 'luxon';
-
 import { PAGES } from '../constants/data';
 import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import { getNow } from '../helpers/date';
-import {
-    getNullEditable, getAddDefaultValues, getValueForTransmit, sortRowsByDate, addWeeklyAverages
-} from '../helpers/data';
-
+import { getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
+import { getNow } from '../selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
 import { applyEdits, applyEditsList } from './editable-updates.reducer';
 import { rCalculateOverview } from './overview.reducer';
 
-export function rActivateEditable(reduction, { page, editable, cancel }) {
-    const active = reduction.getIn(['edit', 'active']);
+export function rActivateEditable(state, { page, editable, cancel }) {
+    const active = state.getIn(['edit', 'active']);
 
-    let newReduction = reduction
+    let nextState = state
         .setIn(['edit', 'addBtnFocus'], false)
         .setIn(['editSuggestions', 'list'], list.of())
         .setIn(['editSuggestions', 'active'], -1)
@@ -31,7 +28,7 @@ export function rActivateEditable(reduction, { page, editable, cancel }) {
     if (active && active.get('value') !== active.get('originalValue')) {
         if (cancel) {
             // revert to previous state
-            newReduction = applyEdits(newReduction, {
+            nextState = applyEdits(nextState, {
                 item: active.set('value', active.get('originalValue')),
                 page
             });
@@ -43,8 +40,8 @@ export function rActivateEditable(reduction, { page, editable, cancel }) {
                     : active.get('row');
 
                 // add last update to API queue
-                newReduction = pushToRequestQueue(
-                    newReduction,
+                nextState = pushToRequestQueue(
+                    nextState,
                     active
                         .set('page', page)
                         .set('id', id)
@@ -52,23 +49,23 @@ export function rActivateEditable(reduction, { page, editable, cancel }) {
             }
 
             // append the changes of the last item to the UI
-            newReduction = applyEdits(newReduction, { item: active, page });
+            nextState = applyEdits(nextState, { item: active, page });
         }
     }
 
     if (!editable) {
         // deactivate editing
-        return newReduction.setIn(['edit', 'active'], getNullEditable(page));
+        return nextState.setIn(['edit', 'active'], getNullEditable(page));
     }
 
-    return newReduction.setIn(
+    return nextState.setIn(
         ['edit', 'active'],
         editable.set('originalValue', editable.get('value'))
     );
 }
 
-export function rChangeEditable(reduction, { value }) {
-    return reduction.setIn(['edit', 'active', 'value'], value);
+export function rChangeEditable(state, { value }) {
+    return state.setIn(['edit', 'active', 'value'], value);
 }
 
 export function getInvalidInsertDataKeys(items) {
@@ -103,18 +100,18 @@ export function stringifyFields(fields) {
         }), {});
 }
 
-export function rAddListItem(reduction, { page }) {
-    if (reduction.get('loadingApi')) {
-        return rErrorMessageOpen(reduction, map({
+export function rAddListItem(state, { page }) {
+    if (state.get('loadingApi')) {
+        return rErrorMessageOpen(state, map({
             level: ERROR_LEVEL_WARN,
             text: 'Wait until the previous request has finished'
         }));
     }
 
-    const now = getNow();
+    const now = getNow(state);
 
     // validate items
-    const active = reduction.getIn(['edit', 'active']);
+    const active = state.getIn(['edit', 'active']);
     let activeItem = null;
     let activeValue = null;
     if (active && active.get('row') === -1) {
@@ -122,7 +119,7 @@ export function rAddListItem(reduction, { page }) {
         activeValue = active.get('value');
     }
 
-    const items = reduction
+    const items = state
         .getIn(['edit', 'add', page])
         .map((value, key) => ({
             item: PAGES[page].cols[key],
@@ -140,7 +137,7 @@ export function rAddListItem(reduction, { page }) {
     const valid = invalidKeys.size === 0;
 
     if (!valid) {
-        return rErrorMessageOpen(reduction, map({
+        return rErrorMessageOpen(state, map({
             level: ERROR_LEVEL_WARN,
             text: ERROR_MSG_BAD_DATA
         }))
@@ -151,8 +148,8 @@ export function rAddListItem(reduction, { page }) {
 
     const fieldsString = stringifyFields(fields);
 
-    return rActivateEditable(reduction, { page })
-        .setIn(['edit', 'add', page], getAddDefaultValues(page))
+    return rActivateEditable(state, { page })
+        .setIn(['edit', 'add', page], getAddDefaultValues(page, now))
         .setIn(['edit', 'addFields'], fields)
         .setIn(['edit', 'addFieldsString'], fieldsString)
         .setIn(['edit', 'active'], map({
@@ -168,71 +165,60 @@ export function rAddListItem(reduction, { page }) {
         .set('loadingApi', true);
 }
 
-export function rHandleServerAdd(reduction, { err, response, fields, page }) {
-    // handle the response from adding an item to a list page
-    let newReduction = reduction.set('loadingApi', false);
+export const updateTotal = (page, total) => state => state
+    .setIn(['pages', page, 'data', 'total'], total);
 
+function addRows(page, id, cols) {
+    return state => state.setIn(['pages', page, 'rows', id], map({ id, cols }));
+}
+
+function addOverviewData(page, fields) {
+    const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
+    const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
+
+    if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
+        return state => rErrorMessageOpen(state, map({
+            level: ERROR_LEVEL_WARN,
+            text: ERROR_MSG_BUG_INVALID_ITEM
+        }));
+    }
+
+    return rCalculateOverview({
+        page,
+        newDate: dateItem.get('value'),
+        oldDate: dateItem.get('value'),
+        newItemCost: costItem.get('value'),
+        oldItemCost: 0
+    });
+}
+
+export function rHandleServerAdd(state, { err, response, fields, page }) {
+    // handle the response from adding an item to a list page
+    const nextState = state.set('loadingApi', false);
     if (err) {
-        return newReduction;
+        return nextState;
     }
 
     const id = response.data.id;
-    const newTotal = response.data.total;
 
     const cols = list(fields.map(thisItem => thisItem.get('value')));
 
-    // update total and push new item to the data store list, then sort by date
-    const { sortedRows, rowIds } = sortRowsByDate(
-        reduction.getIn(['pages', page, 'rows'])
-            .set(id, map({ id, cols })),
-        page);
-
-    const weeklyData = addWeeklyAverages(
-        reduction.getIn(['pages', page, 'data']),
-        sortedRows,
-        page
-    );
-
-    newReduction = newReduction
-        .setIn(['pages', page, 'rows'], sortedRows)
-        .setIn(['pages', page, 'rowIds'], rowIds)
-        .setIn(['pages', page, 'data'], weeklyData)
-        .setIn(['pages', page, 'data', 'total'], newTotal)
-        .setIn(
-            ['pages', page, 'data', 'numRows'],
-            newReduction.getIn(['pages', page, 'data', 'numRows']) + 1
-        );
-
-    // recalculate overview data
-    if (reduction.getIn(['pagesLoaded', 'overview'])) {
-        const costItem = fields.find(thisItem => thisItem.get('item') === 'cost');
-        const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
-        if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
-            return rErrorMessageOpen(newReduction, map({
-                level: ERROR_LEVEL_WARN,
-                text: ERROR_MSG_BUG_INVALID_ITEM
-            }));
-        }
-        newReduction = rCalculateOverview(newReduction, {
-            page,
-            newDate: dateItem.get('value'),
-            oldDate: dateItem.get('value'),
-            newItemCost: costItem.get('value'),
-            oldItemCost: 0
-        });
-    }
-
-    return newReduction;
+    return compose(
+        addOverviewData(page, fields),
+        resortListRows(page),
+        updateTotal(page, response.data.total),
+        addRows(page, id, cols)
+    )(nextState);
 }
 
-export function rHandleSuggestions(reduction, { data, reqId }) {
-    const newReduction = reduction
+export function rHandleSuggestions(state, { data, reqId }) {
+    const nextState = state
         .setIn(['editSuggestions', 'loading'], false)
         .setIn(['editSuggestions', 'active'], -1);
 
-    if (!(data && reduction.getIn(['editSuggestions', 'reqId']) === reqId)) {
+    if (!(data && state.getIn(['editSuggestions', 'reqId']) === reqId)) {
         // null object (clear), or changed input while suggestions were loading
-        return newReduction
+        return nextState
             .setIn(['editSuggestions', 'list'], list.of())
             .setIn(['editSuggestions', 'reqId'], null)
             .setIn(['editSuggestions', 'nextCategory'], null);
@@ -240,26 +226,26 @@ export function rHandleSuggestions(reduction, { data, reqId }) {
 
     const { list: items, nextCategory } = data;
 
-    return newReduction
+    return nextState
         .setIn(['editSuggestions', 'list'], list(items))
         .setIn(['editSuggestions', 'nextCategory'], list(nextCategory || []));
 }
 
-export function rRequestSuggestions(reduction, { reqId }) {
-    return reduction
+export function rRequestSuggestions(state, { reqId }) {
+    return state
         .setIn(['editSuggestions', 'loading'], true)
         .setIn(['editSuggestions', 'reqId'], reqId);
 }
 
-function getTransactionsForRow(reduction, row, col) {
+function getTransactionsForRow(state, row, col) {
     if (row > -1) {
-        return reduction.getIn(['pages', 'funds', 'rows', row, 'cols', col]);
+        return state.getIn(['pages', 'funds', 'rows', row, 'cols', col]);
     }
 
-    return reduction.getIn(['edit', 'add', 'funds', col]);
+    return state.getIn(['edit', 'add', 'funds', col]);
 }
 
-function rFundTransactions(reduction, row, col, transactions) {
+function rFundTransactions(state, row, col, transactions) {
     if (row > -1) {
         const item = map({
             item: 'transactions',
@@ -268,38 +254,35 @@ function rFundTransactions(reduction, row, col, transactions) {
             value: transactions
         });
 
-        return applyEditsList(reduction, { item, page: 'funds' })
-            .setIn(
-                ['edit', 'active'],
-                reduction.getIn(['edit', 'active']).set('value', transactions)
+        return applyEditsList(state, { item, page: 'funds' })
+            .setIn(['edit', 'active'], state.getIn(['edit', 'active'])
+                .set('value', transactions)
             );
     }
 
-    return reduction.setIn(
-        ['edit', 'add', 'funds', col], transactions
-    );
+    return state.setIn(['edit', 'add', 'funds', col], transactions);
 }
 
-export function rChangeFundTransactions(reduction, { row, col, key, column, value }) {
-    const transactions = getTransactionsForRow(reduction, row, col)
+export function rChangeFundTransactions(state, { row, col, key, column, value }) {
+    const transactions = getTransactionsForRow(state, row, col)
         .setIn([key, column], value);
 
-    return rFundTransactions(reduction, row, col, transactions);
+    return rFundTransactions(state, row, col, transactions);
 }
 
-export function rAddFundTransactions(reduction, item) {
+export function rAddFundTransactions(state, item) {
     const { row, col } = item;
 
-    const transactions = getTransactionsForRow(reduction, row, col)
+    const transactions = getTransactionsForRow(state, row, col)
         .push(item);
 
-    return rFundTransactions(reduction, row, col, transactions);
+    return rFundTransactions(state, row, col, transactions);
 }
 
-export function rRemoveFundTransactions(reduction, { row, col, key }) {
-    const transactions = getTransactionsForRow(reduction, row, col)
+export function rRemoveFundTransactions(state, { row, col, key }) {
+    const transactions = getTransactionsForRow(state, row, col)
         .remove(key);
 
-    return rFundTransactions(reduction, row, col, transactions);
+    return rFundTransactions(state, row, col, transactions);
 }
 

@@ -1,7 +1,6 @@
 /* eslint-disable prefer-reflect */
 import '../browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
@@ -9,20 +8,12 @@ import * as S from '../../src/sagas/funds.saga';
 import * as A from '../../src/actions/graph.actions';
 import * as B from '../../src/actions/stocks-list.actions';
 import { openTimedMessage } from '../../src/sagas/error.saga';
-import { selectApiKey } from '../../src/sagas';
+import { getApiKey } from '../../src/selectors/app';
+import { getFundsCache } from '../../src/selectors/funds/helpers';
+import { getStocksListInfo } from '../../src/selectors/funds/stocks';
 import { getStockPricesFromYahoo } from '../../src/helpers/finance';
 
 describe('funds.saga', () => {
-    describe('selectFundHistoryCache', () => {
-        it('should get the fundHistoryCache', () => {
-            expect(S.selectFundHistoryCache(fromJS({
-                other: {
-                    fundHistoryCache: 'foo'
-                }
-            }))).to.equal('foo');
-        });
-    });
-
     describe('requestFundPeriodData', () => {
         let envBefore = null;
         before(() => {
@@ -38,7 +29,7 @@ describe('funds.saga', () => {
         it('should do nothing if loading from the cache', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()
-                .select(S.selectFundHistoryCache)
+                .select(getFundsCache)
                 .next(fromJS({ foo: 'bar' }))
                 .isDone();
         });
@@ -46,16 +37,16 @@ describe('funds.saga', () => {
         it('should request new data', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()
-                .select(S.selectFundHistoryCache)
+                .select(getFundsCache)
                 .next(fromJS({}))
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
                 .call(axios.get, 'api/v4/data/funds?period=year&length=1&history=true', {
                     headers: { Authorization: 'some_api_key' }
                 })
                 .next({ data: { data: 'yes' } })
                 .put(A.aFundsGraphPeriodReceived({
-                    shortPeriod: 'foo', data: 'yes', reloadPagePrices: false
+                    shortPeriod: 'foo', res: 'yes'
                 }))
                 .next()
                 .isDone();
@@ -64,9 +55,9 @@ describe('funds.saga', () => {
         it('should handle errors', () => {
             testSaga(S.requestFundPeriodData, { noCache: false, shortPeriod: 'foo', reloadPagePrices: false })
                 .next()
-                .select(S.selectFundHistoryCache)
+                .select(getFundsCache)
                 .next(fromJS({}))
-                .select(selectApiKey)
+                .select(getApiKey)
                 .next('some_api_key')
                 .call(axios.get, 'api/v4/data/funds?period=year&length=1&history=true', {
                     headers: { Authorization: 'some_api_key' }
@@ -78,27 +69,11 @@ describe('funds.saga', () => {
         });
     });
 
-    describe('selectStocksListInfo', () => {
-        it('should return stocks and indices', () => {
-            expect(S.selectStocksListInfo(fromJS({
-                other: {
-                    stocksList: {
-                        stocks: 'foo',
-                        indices: 'bar'
-                    }
-                }
-            }))).to.deep.equal({
-                stocks: 'foo',
-                indices: 'bar'
-            });
-        });
-    });
-
     describe('requestStocksPrices', () => {
         it('should request stock prices', () => {
             testSaga(S.requestStocksPrices)
                 .next()
-                .select(S.selectStocksListInfo)
+                .select(getStocksListInfo)
                 .next({
                     stocks: fromJS({ code1: 'code1', code2: 'code2', code3: 'code3' }),
                     indices: fromJS([{ code: 'indice1' }, { code: 'indice2' }])
@@ -113,7 +88,7 @@ describe('funds.saga', () => {
         it('should handle errors', () => {
             testSaga(S.requestStocksPrices)
                 .next()
-                .select(S.selectStocksListInfo)
+                .select(getStocksListInfo)
                 .next({
                     stocks: fromJS({ code1: 'code1', code2: 'code2', code3: 'code3' }),
                     indices: fromJS([{ code: 'indice1' }, { code: 'indice2' }])

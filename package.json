@@ -1,6 +1,6 @@
 {
   "name": "budget",
-  "version": "4.2.10",
+  "version": "4.3.0",
   "description": "Personal finance app",
   "main": "index.js",
   "engines": {
@@ -82,10 +82,12 @@
     "bcrypt": "^1.0.3",
     "body-parser": "^1.17.2",
     "classnames": "^2.2.5",
+    "color-hash": "^1.0.3",
     "colors": "^1.1.2",
     "command-line-args": "^5.0.2",
     "cssnano": "^3.10.0",
     "dateformat": "^2.0.0",
+    "debounce": "^1.1.0",
     "deepmerge": "^2.0.1",
     "ejs": "^2.5.7",
     "express": "^4.15.4",

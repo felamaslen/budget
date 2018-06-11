@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
-import { genPixelCompute } from './helpers';
 import Graph from '.';
 import HighlightPoint from '../HighlightPoint';
 import RenderedLine from './RenderedLine';
 
-export default function LineGraphDumb({ lines, hlPoint, beforeLines, afterLines, ...props }) {
-    const pixelFunctions = genPixelCompute({ padding: [0, 0, 0, 0], ...props });
-    const subProps = { ...props, ...pixelFunctions };
+export default function LineGraphDumb({ calc, lines, hlPoint, beforeLines, afterLines, ...props }) {
+    const subProps = {
+        ...calc,
+        ...props
+    };
 
     if (!lines.size) {
         return <Graph {...subProps} />;
@@ -38,6 +39,7 @@ export default function LineGraphDumb({ lines, hlPoint, beforeLines, afterLines,
 }
 
 LineGraphDumb.propTypes = {
+    calc: PropTypes.object.isRequired,
     beforeLines: PropTypes.func,
     afterLines: PropTypes.func,
     lines: ImmutablePropTypes.list.isRequired,

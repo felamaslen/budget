@@ -11,21 +11,20 @@ import { getPeriodMatch } from '../helpers/data';
 import { aFundsGraphPeriodReceived } from '../actions/graph.actions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/stocks-list.actions';
 import { getStockPricesFromYahoo } from '../helpers/finance';
-
-import { selectApiKey } from '.';
+import { getApiKey } from '../selectors/app';
+import { getFundsCache } from '../selectors/funds/helpers';
+import { getStocksListInfo } from '../selectors/funds/stocks';
 import { openTimedMessage } from './error.saga';
 
-export const selectFundHistoryCache = state => state.getIn(['other', 'fundHistoryCache']);
+export function *requestFundPeriodData({ shortPeriod, noCache }) {
+    const cache = yield select(getFundsCache);
 
-export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache }) {
-    const fundHistoryCache = yield select(selectFundHistoryCache);
-
-    const loadFromCache = !noCache && fundHistoryCache.has(shortPeriod);
+    const loadFromCache = !noCache && cache && cache.has(shortPeriod);
     if (loadFromCache) {
         return;
     }
 
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     const { period, length } = getPeriodMatch(shortPeriod);
     const query = querystring.stringify({ period, length, history: true });
@@ -37,9 +36,9 @@ export function *requestFundPeriodData({ shortPeriod, reloadPagePrices, noCache 
             { headers: { Authorization: apiKey } }
         );
 
-        const data = response.data.data;
+        const res = response.data.data;
 
-        yield put(aFundsGraphPeriodReceived({ reloadPagePrices, shortPeriod, data }));
+        yield put(aFundsGraphPeriodReceived({ shortPeriod, res }));
     }
     catch (err) {
         yield call(openTimedMessage, 'Error loading fund data');
@@ -51,7 +50,7 @@ export function *requestStocksList() {
         return;
     }
 
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     try {
         const response = yield call(
@@ -67,13 +66,8 @@ export function *requestStocksList() {
     }
 }
 
-export const selectStocksListInfo = state => ({
-    stocks: state.getIn(['other', 'stocksList', 'stocks']),
-    indices: state.getIn(['other', 'stocksList', 'indices'])
-});
-
 export function *requestStocksPrices() {
-    const { stocks, indices } = yield select(selectStocksListInfo);
+    const { stocks, indices } = yield select(getStocksListInfo);
 
     const symbols = stocks
         .reduce((codes, item, code) => codes.push(code), list.of())

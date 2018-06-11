@@ -1,3 +1,4 @@
+import '../../browser';
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';

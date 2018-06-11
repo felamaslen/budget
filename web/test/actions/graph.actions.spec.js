@@ -9,13 +9,6 @@ describe('graph.actions', () => {
             expect(A.aShowAllToggled()).to.deep.equal({ type: C.GRAPH_SHOWALL_TOGGLED })
         )
     );
-    describe('aFundItemGraphToggled', () =>
-        it('should return GRAPH_FUND_ITEM_TOGGLED with key', () =>
-            expect(A.aFundItemGraphToggled(10)).to.deep.equal({
-                type: C.GRAPH_FUND_ITEM_TOGGLED, key: 10
-            })
-        )
-    );
     describe('aFundsGraphClicked', () =>
         it('should return GRAPH_FUNDS_CLICKED', () =>
             expect(A.aFundsGraphClicked()).to.deep.equal({ type: C.GRAPH_FUNDS_CLICKED })

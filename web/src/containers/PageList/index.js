@@ -2,6 +2,7 @@ import './style.scss';
 import { connect } from 'react-redux';
 import { aMobileAddDialogOpened } from '../../actions/form.actions';
 import { aListItemAdded } from '../../actions/edit.actions';
+import { makeGetRowIds, makeGetDailyTotals, makeGetWeeklyAverages } from '../../selectors/list';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -34,18 +35,25 @@ PageList.propTypes = {
     After: PropTypes.func
 };
 
-const mapStateToProps = (state, { page }) => ({
-    rowIds: state.getIn(['pages', page, 'rowIds']),
-    addBtnFocus: state.getIn(['edit', 'addBtnFocus']),
-    weeklyValue: state.getIn(['pages', page, 'data', 'weekly']),
-    getDaily: Boolean(PAGES[page].daily),
-    totalCost: state.getIn(['pages', page, 'data', 'total'])
-});
+const makeMapStateToProps = () => {
+    const getRowIds = makeGetRowIds();
+    const getDailyTotals = makeGetDailyTotals();
+    const getWeeklyAverages = makeGetWeeklyAverages();
+
+    return (state, props) => ({
+        rowIds: getRowIds(state, props),
+        dailyTotals: getDailyTotals(state, props),
+        weeklyValue: getWeeklyAverages(state, props),
+        addBtnFocus: state.getIn(['edit', 'addBtnFocus']),
+        getDaily: Boolean(PAGES[props.page].daily),
+        totalCost: state.getIn(['pages', props.page, 'data', 'total'])
+    });
+};
 
 const mapDispatchToProps = dispatch => ({
     onDesktopAdd: page => dispatch(aListItemAdded({ page })),
     onMobileAdd: page => dispatch(aMobileAddDialogOpened(page))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(PageList);
+export default connect(makeMapStateToProps, mapDispatchToProps)(PageList);
 

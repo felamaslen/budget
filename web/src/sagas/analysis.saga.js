@@ -4,24 +4,18 @@ import axios from 'axios';
 import { ANALYSIS_BLOCK_CLICKED, ANALYSIS_OPTION_CHANGED } from '../constants/actions';
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../constants/analysis';
 
-import { selectApiKey } from '.';
 import { makeContentRequest } from './content.saga';
 import { openTimedMessage } from './error.saga';
 import { aAnalysisDataRefreshed } from '../actions/analysis.actions';
-
-export const selectStateProps = state => ({
-    loading: state.getIn(['other', 'analysis', 'loading']),
-    period: state.getIn(['other', 'analysis', 'period']),
-    grouping: state.getIn(['other', 'analysis', 'grouping']),
-    timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
-});
+import { getApiKey } from '../selectors/app';
+import { requestProps } from '../selectors/analysis';
 
 export function *requestAnalysisData({ wasDeep, ...payload }) {
     if (wasDeep) {
         return;
     }
 
-    const stateProps = yield select(selectStateProps);
+    const stateProps = yield select(requestProps);
 
     const { loading, name, period, grouping, timeIndex } = { ...stateProps, ...payload };
 
@@ -29,7 +23,7 @@ export function *requestAnalysisData({ wasDeep, ...payload }) {
         return;
     }
 
-    const apiKey = yield select(selectApiKey);
+    const apiKey = yield select(getApiKey);
 
     let params = [ANALYSIS_PERIODS[period], ANALYSIS_GROUPINGS[grouping], timeIndex];
 
