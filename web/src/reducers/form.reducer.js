@@ -127,7 +127,7 @@ export function rCloseFormDialogEdit(state, { page, fields }) {
         updateRequestList(page, id, fields),
         doOverview,
         doTotal,
-        resortListRows(page),
+        resortListRows(page, state.get('now')),
         updateRows(page, id, newRow)
     )(nextState);
 }

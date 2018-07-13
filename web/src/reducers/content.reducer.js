@@ -28,7 +28,7 @@ function processPageData(state, { page, raw }) {
 
     if (PAGES[page].list) {
         return compose(
-            resortListRows(page),
+            resortListRows(page, state.get('now')),
             nextState => processPageDataList(nextState, { page, raw })
         )(state);
     }
