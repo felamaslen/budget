@@ -205,7 +205,7 @@ export function rHandleServerAdd(state, { err, response, fields, page }) {
 
     return compose(
         addOverviewData(page, fields),
-        resortListRows(page),
+        resortListRows(page, state.get('now')),
         updateTotal(page, response.data.total),
         addRows(page, id, cols)
     )(nextState);

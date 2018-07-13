@@ -33,7 +33,7 @@ export function processPageDataFunds(state, { raw }) {
     const period = state.getIn(['other', 'graphFunds', 'period']);
     const maxAge = Math.floor((getNow(state).ts / 1000) - startTime);
 
-    const sortedRows = sortRowsByDate(processRawListRows(raw.data, 'funds'), 'funds');
+    const sortedRows = sortRowsByDate(processRawListRows(raw.data, 'funds'), 'funds', state.get('now'));
 
     const prices = processPrices(raw.data);
 
