@@ -58,7 +58,7 @@ export function applyEditsList(state, { item, page }) {
 
         doOverview = rCalculateOverview({ page, newDate: item.get('value'), oldDate: item.get('originalValue'), newItemCost: cost, oldItemCost: cost });
 
-        sortOrTotal = resortListRows(page);
+        sortOrTotal = resortListRows(page, state.get('now'));
     }
 
     return compose(
@@ -99,7 +99,7 @@ export function rDeleteListItem(state, { page, id }) {
 
     return compose(
         pushDeleteRequest(page, id),
-        resortListRows(page),
+        resortListRows(page, state.get('now')),
         updateTotal(page, newTotal),
         deleteItem(page, id),
         rCalculateOverview({ page, newDate: date, oldDate: date, newItemCost: 0, oldItemCost }),

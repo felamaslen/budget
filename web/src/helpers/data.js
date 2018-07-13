@@ -270,14 +270,13 @@ export function sortRowsByDate(rows, page, now) {
             const thisLastFuture = lastFuture;
             lastFuture = thisFuture;
 
-            return row
-                .set('future', thisFuture)
+            return row.set('future', thisFuture)
                 .set('first-present', !thisFuture && thisLastFuture);
         });
 }
 
-export function resortListRows(page) {
+export function resortListRows(page, now) {
     return state => state.setIn(['pages', page, 'rows'],
-        sortRowsByDate(state.getIn(['pages', page, 'rows']), page));
+        sortRowsByDate(state.getIn(['pages', page, 'rows']), page, now));
 }
 
