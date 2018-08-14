@@ -1,5 +1,6 @@
 import { Map as map, List as list } from 'immutable';
 import { compose } from 'redux';
+import { getNow } from '../selectors/app';
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
 import { stringifyFields, getInvalidInsertDataKeys, updateTotal } from './edit.reducer';
@@ -30,7 +31,7 @@ export function rOpenFormDialogEdit(state, { page, id }) {
 }
 
 export function rOpenFormDialogAdd(state, { page }) {
-    const values = getAddDefaultValues(page);
+    const values = getAddDefaultValues(page, getNow(state));
     const fields = list(PAGES[page].cols)
         .map((item, key) => map({ item, value: values.get(key) }));
 
