@@ -51,6 +51,102 @@ describe('helpers/data', () => {
             expect(uuid(0.99123, true)).to.equal(130497);
         });
     });
+
+    describe('TransactionsList', () => {
+        const data = [
+            {
+                date: '2017-05-08T23:00:00.000Z',
+                units: 934,
+                cost: 399924
+            },
+            {
+                date: '2018-03-13T00:00:00.000Z',
+                units: 25,
+                cost: -10512
+            },
+            {
+                date: '2018-06-06T23:00:00.000Z',
+                units: -1239,
+                cost: -539814
+            },
+            {
+                date: '2018-04-25T23:00:00.000Z',
+                units: 280,
+                cost: 119931
+            }
+        ];
+
+        const shortList = new TransactionsList(data, true);
+
+        const longList = new TransactionsList(shortList.list, false);
+
+        it.each([shortList, longList], 'should return a list as valueOf()', transactions => {
+            const value = transactions.valueOf();
+
+            expect(value).to.be.instanceof(list);
+            expect(value.size).to.equal(4);
+        });
+
+        it.each([shortList, longList], 'should return a raw array from format(), ordered by date', transactions => {
+            expect(transactions.format()).to.deep.equal([
+                {
+                    date: '2017-05-09',
+                    units: 934,
+                    cost: 399924
+                },
+                {
+                    date: '2018-03-13',
+                    units: 25,
+                    cost: -10512
+                },
+                {
+                    date: '2018-04-26',
+                    units: 280,
+                    cost: 119931
+                },
+                {
+                    date: '2018-06-07',
+                    units: -1239,
+                    cost: -539814
+                }
+            ]);
+        });
+
+        it.each([shortList, longList], 'should have a method to remove items by their index', transactions => {
+            const removed = transactions.remove(0);
+
+            expect(removed).to.be.instanceof(TransactionsList);
+            expect(removed.size).to.equal(3);
+        });
+
+        it.each([shortList, longList], 'should have a method to push an item', transactions => {
+            const pushed = transactions.push({
+                date: '2018-09-13T03:20Z',
+                units: 20,
+                cost: 3
+            });
+
+            expect(pushed).to.be.instanceof(TransactionsList);
+            expect(pushed.size).to.equal(5);
+        });
+
+        it.each([shortList, longList], 'should have a method to get the total units', transactions => {
+            expect(transactions.getTotalUnits()).to.equal(0);
+
+            expect(transactions.remove(3).getTotalUnits()).to.equal(1239);
+        });
+
+        it.each([shortList, longList], 'should have a method to get the total cost', transactions => {
+            expect(transactions.getTotalCost()).to.equal(-30471);
+        });
+
+        it.each([shortList, longList], 'should have a method to determine if the holding is sold', transactions => {
+            expect(transactions.isSold()).to.equal(true);
+
+            expect(transactions.setIn([3, 'units'], -1238).isSold()).to.equal(false);
+        });
+    });
+
     describe('dataEquals', () => {
         it('should compare YMDs', () => {
             expect(dataEquals(dateInput('1/9/17'), dateInput('1/9/17'))).to.equal(true);
