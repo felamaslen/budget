@@ -14,9 +14,12 @@ import classNames from 'classnames';
 import LineGraph from '../../components/Graph/LineGraph';
 import { getTickSize } from '../../helpers/format';
 import {
-    GRAPH_FUNDS_WIDTH, GRAPH_FUNDS_HEIGHT,
-    GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_PRICE,
-    GRAPH_FUNDS_NUM_TICKS, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_MODES
+    GRAPH_FUNDS_WIDTH,
+    GRAPH_FUNDS_HEIGHT,
+    GRAPH_FUNDS_MODE_ROI,
+    GRAPH_FUNDS_NUM_TICKS,
+    GRAPH_FUNDS_PERIODS,
+    GRAPH_FUNDS_MODES
 } from '../../constants/graph';
 import styles from '../../constants/styles.json';
 import { rgba } from '../../helpers/color';

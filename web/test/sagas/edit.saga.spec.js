@@ -1,13 +1,17 @@
 /* eslint-disable prefer-reflect */
 import '../browser';
-import { fromJS, List as list } from 'immutable';
-import { expect } from 'chai';
+import { List as list } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import { delay } from 'redux-saga';
 import axios from 'axios';
 import { getApiKey } from '../../src/selectors/app';
 import { getModalState, suggestionsInfo } from '../../src/selectors/edit';
-import * as S from '../../src/sagas/edit.saga';
+import {
+    triggerEditSuggestionsRequest,
+    watchTextInput,
+    requestEditSuggestions,
+    handleModal
+} from '../../src/sagas/edit.saga';
 import { addServerDataRequest } from '../../src/sagas/app.saga';
 import * as A from '../../src/actions/edit.actions';
 import * as B from '../../src/actions/form.actions';
@@ -16,7 +20,7 @@ import { EDIT_CHANGED } from '../../src/constants/actions';
 describe('edit.saga', () => {
     describe('triggerEditSuggestionsRequest', () => {
         it('should call the suggetions requester after a delay', () => {
-            testSaga(S.triggerEditSuggestionsRequest, { page: 'income', item: 'foo', value: 'bar' })
+            testSaga(triggerEditSuggestionsRequest, { page: 'income', item: 'foo', value: 'bar' })
                 .next()
                 .call(delay, 100)
                 .next()
@@ -28,20 +32,20 @@ describe('edit.saga', () => {
 
     describe('watchTextInput', () => {
         it('should continuously watch the text input for changes, triggering suggestions request if appropriate', () => {
-            testSaga(S.watchTextInput)
+            testSaga(watchTextInput)
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
                 .select(suggestionsInfo)
                 .next({ page: 'food', item: 'item', value: 'value' })
-                .fork(S.triggerEditSuggestionsRequest, { page: 'food', item: 'item', value: 'value' })
+                .fork(triggerEditSuggestionsRequest, { page: 'food', item: 'item', value: 'value' })
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
                 .select(suggestionsInfo)
                 .next({ page: 'general', item: 'item', value: 'value' });
 
-            testSaga(S.watchTextInput)
+            testSaga(watchTextInput)
                 .next()
                 .take(EDIT_CHANGED)
                 .next()
@@ -53,7 +57,7 @@ describe('edit.saga', () => {
 
     describe('requestEditSuggestions', () => {
         it('should request edit suggestions, if a value was typed', () => {
-            testSaga(S.requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: 'bar' })
+            testSaga(requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: 'bar' })
                 .next()
                 .select(getApiKey)
                 .next('some_api_key')
@@ -65,7 +69,7 @@ describe('edit.saga', () => {
         });
 
         it('should insert null into the suggestions, otherwise', () => {
-            testSaga(S.requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: '' })
+            testSaga(requestEditSuggestions, { reqId: 1, page: 'food', item: 'foo', value: '' })
                 .next()
                 .put(A.aSuggestionsReceived({ items: null }))
                 .next()
@@ -83,7 +87,7 @@ describe('edit.saga', () => {
         };
 
         it('should work as expected', () => {
-            testSaga(S.handleModal, { page: 'page1' })
+            testSaga(handleModal, { page: 'page1' })
                 .next()
                 .select(getModalState)
                 .next(state)
@@ -96,7 +100,7 @@ describe('edit.saga', () => {
 
         describe('should not proceed if', () => {
             it('there is no page', () => {
-                testSaga(S.handleModal, {})
+                testSaga(handleModal, {})
                     .next()
                     .select(getModalState)
                     .next(state)
@@ -104,7 +108,7 @@ describe('edit.saga', () => {
             });
 
             it('the modal dialog isn\'t of tye "add" type', () => {
-                testSaga(S.handleModal, { page: 'page1' })
+                testSaga(handleModal, { page: 'page1' })
                     .next()
                     .select(getModalState)
                     .next({ ...state, modalDialogType: 'not add' })
@@ -112,7 +116,7 @@ describe('edit.saga', () => {
             });
 
             it('there are invalid data', () => {
-                testSaga(S.handleModal, { page: 'page1' })
+                testSaga(handleModal, { page: 'page1' })
                     .next()
                     .select(getModalState)
                     .next({ ...state, invalidKeys: list.of(1) })
@@ -120,7 +124,7 @@ describe('edit.saga', () => {
             });
 
             it('there dialog was not set to loading', () => {
-                testSaga(S.handleModal, { page: 'page1' })
+                testSaga(handleModal, { page: 'page1' })
                     .next()
                     .select(getModalState)
                     .next({ ...state, modalDialogLoading: false })

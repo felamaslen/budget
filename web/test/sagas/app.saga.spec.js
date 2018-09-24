@@ -2,11 +2,16 @@
 import '../browser';
 import { DateTime } from 'luxon';
 import { delay } from 'redux-saga';
-import { takeEvery, takeLatest } from 'redux-saga/effects';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
-import appSaga, * as S from '../../src/sagas/app.saga';
-import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '../../src/constants/actions';
+import {
+    watchEventEmitter,
+    windowResizeEventChannel,
+    updateServerData,
+    addServerDataRequest,
+    addServerData,
+    timeUpdater
+} from '../../src/sagas/app.saga';
 import { getApiKey, getRequestList, getAddData } from '../../src/selectors/app';
 import { openTimedMessage } from '../../src/sagas/error.saga';
 import { aWindowResized, aServerUpdateReceived, aServerAddReceived, aTimeUpdated } from '../../src/actions/app.actions';
@@ -14,11 +19,11 @@ import { aWindowResized, aServerUpdateReceived, aServerAddReceived, aTimeUpdated
 describe('app.saga', () => {
     describe('watchEventEmitter', () => {
         it('should dispatch an action emitted by the channel', () => {
-            const channel = S.windowResizeEventChannel();
+            const channel = windowResizeEventChannel();
 
-            testSaga(S.watchEventEmitter, S.windowResizeEventChannel)
+            testSaga(watchEventEmitter, windowResizeEventChannel)
                 .next()
-                .call(S.windowResizeEventChannel)
+                .call(windowResizeEventChannel)
                 .next(channel)
                 .take(channel)
                 .next(aWindowResized(100))
@@ -32,7 +37,7 @@ describe('app.saga', () => {
 
     describe('updateServerData', () => {
         it('should work as expected', () => {
-            testSaga(S.updateServerData)
+            testSaga(updateServerData)
                 .next()
                 .select(getApiKey)
                 .next('some_api_key')
@@ -50,7 +55,7 @@ describe('app.saga', () => {
         });
 
         it('should handle errors', () => {
-            testSaga(S.updateServerData)
+            testSaga(updateServerData)
                 .next()
                 .select(getApiKey)
                 .next('some_api_key')
@@ -72,7 +77,7 @@ describe('app.saga', () => {
 
     describe('addServerDataRequest', () => {
         it('should work as expected', () => {
-            testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
+            testSaga(addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
                 .next()
                 .select(getApiKey)
                 .next('some_api_key')
@@ -86,7 +91,7 @@ describe('app.saga', () => {
         });
 
         it('should handle errors', () => {
-            testSaga(S.addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
+            testSaga(addServerDataRequest, { item: 'foo', fields: ['bar'], page: 'bills' })
                 .next()
                 .select(getApiKey)
                 .next('some_api_key')
@@ -104,11 +109,11 @@ describe('app.saga', () => {
 
     describe('addServerData', () => {
         it('should work as expected', () => {
-            testSaga(S.addServerData, { page: 'page1' })
+            testSaga(addServerData, { page: 'page1' })
                 .next()
                 .select(getAddData)
                 .next({ fields: 'foo', item: 'bar' })
-                .call(S.addServerDataRequest, { page: 'page1', fields: 'foo', item: 'bar' })
+                .call(addServerDataRequest, { page: 'page1', fields: 'foo', item: 'bar' })
                 .next()
                 .isDone();
 
@@ -119,7 +124,7 @@ describe('app.saga', () => {
         it('should periodically call the time updater action', () => {
             const date = new Date(150000000);
 
-            testSaga(S.timeUpdater)
+            testSaga(timeUpdater)
                 .next()
                 .call(delay, 1000)
                 .next()

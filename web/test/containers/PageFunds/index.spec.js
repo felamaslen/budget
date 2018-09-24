@@ -1,4 +1,4 @@
-import { fromJS, OrderedMap } from 'immutable';
+import { fromJS } from 'immutable';
 import shallow from '../../shallow-with-store';
 import { expect } from 'chai';
 import '../../browser';

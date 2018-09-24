@@ -13,7 +13,6 @@ function dataSyncEventChannel() {
         const dataSync = setInterval(() => emitter(aServerUpdated()), TIMER_UPDATE_SERVER);
 
         return () => {
-            clearInterval(timer);
             clearInterval(dataSync);
         };
     });
