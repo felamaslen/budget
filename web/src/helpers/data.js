@@ -90,7 +90,7 @@ export class TransactionsList {
         return new TransactionsList(this.list.filter(callback), false);
     }
     static getUnits(aList) {
-        return aList.reduce((sum, item) => sum + item.get('units'), 0);
+        return Number(aList.reduce((sum, item) => sum + item.get('units'), 0).toFixed(4));
     }
     static getCost(aList) {
         return aList.reduce((sum, item) => sum + item.get('cost'), 0);

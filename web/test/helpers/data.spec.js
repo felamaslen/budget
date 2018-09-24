@@ -145,6 +145,40 @@ describe('helpers/data', () => {
 
             expect(transactions.setIn([3, 'units'], -1238).isSold()).to.equal(false);
         });
+
+        it('should handle rounding errors', () => {
+            const listWithErrors = new TransactionsList([
+                {
+                    date: '2016-09-19T05:00Z',
+                    units: 1678.42,
+                    cost: 2000
+                },
+                {
+                    date: '2017-02-14T05:00Z',
+                    units: 846.38,
+                    cost: 1000
+                },
+                {
+                    date: '2017-10-25T05:00Z',
+                    units: 817,
+                    cost: 1000
+                },
+                {
+                    date: '2018-03-14T05:00Z',
+                    units: 1217.43,
+                    cost: 1500
+                },
+                {
+                    date: '2018-09-24T05:00Z',
+                    units: -4559.23,
+                    cost: -5595.2
+                }
+            ]);
+
+            expect(listWithErrors.getTotalUnits()).to.equal(0);
+
+            expect(listWithErrors.isSold()).to.equal(true);
+        });
     });
 
     describe('dataEquals', () => {
