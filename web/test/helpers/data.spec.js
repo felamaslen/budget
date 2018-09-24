@@ -7,7 +7,18 @@ import itEach from 'it-each';
 itEach();
 import { fromJS, List as list } from 'immutable';
 import { DateTime } from 'luxon';
-import * as M from '../../src/helpers/data';
+import {
+    getPeriodMatch,
+    uuid,
+    TransactionsList,
+    dataEquals,
+    listAverage,
+    randnBm,
+    getValueForTransmit,
+    getNullEditable,
+    getAddDefaultValues,
+    sortRowsByDate
+} from '../../src/helpers/data';
 import { dateInput } from '../../src/helpers/date';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/constants';
 
@@ -25,55 +36,55 @@ describe('helpers/data', () => {
         });
 
         it('should return env variable by default', () => {
-            expect(M.getPeriodMatch('foo')).to.deep.equal({ period: 'year', length: '11' });
+            expect(getPeriodMatch('foo')).to.deep.equal({ period: 'year', length: '11' });
 
             process.env.DEFAULT_FUND_PERIOD = 'year11';
         });
         it('should split up a short period representation', () => {
-            expect(M.getPeriodMatch('month5')).to.deep.equal({ period: 'month', length: '5' });
-            expect(M.getPeriodMatch('year10')).to.deep.equal({ period: 'year', length: '10' });
+            expect(getPeriodMatch('month5')).to.deep.equal({ period: 'month', length: '5' });
+            expect(getPeriodMatch('year10')).to.deep.equal({ period: 'year', length: '10' });
         });
     });
     describe('uuid', () => {
         it('should map [0, 1] bijectively to a six-digit number', () => {
-            expect(M.uuid(0.6741, true)).to.equal(109713);
-            expect(M.uuid(0.99123, true)).to.equal(130497);
+            expect(uuid(0.6741, true)).to.equal(109713);
+            expect(uuid(0.99123, true)).to.equal(130497);
         });
     });
     describe('dataEquals', () => {
         it('should compare YMDs', () => {
-            expect(M.dataEquals(dateInput('1/9/17'), dateInput('1/9/17'))).to.equal(true);
-            expect(M.dataEquals(dateInput('1/9/17'), dateInput('2/9/17'))).to.equal(false);
+            expect(dataEquals(dateInput('1/9/17'), dateInput('1/9/17'))).to.equal(true);
+            expect(dataEquals(dateInput('1/9/17'), dateInput('2/9/17'))).to.equal(false);
         });
         it('should compare TransactionsLists', () => {
-            const testList1 = new M.TransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
-            const testList2 = new M.TransactionsList([{ date: '2017-09-02', units: 1, cost: 1 }]);
-            const testList3 = new M.TransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
-            const testList4 = new M.TransactionsList([{ date: '2017-09-01', units: 1, cost: 1 }]);
+            const testList1 = new TransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
+            const testList2 = new TransactionsList([{ date: '2017-09-02', units: 1, cost: 1 }]);
+            const testList3 = new TransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
+            const testList4 = new TransactionsList([{ date: '2017-09-01', units: 1, cost: 1 }]);
 
-            expect(M.dataEquals(testList1, testList1)).to.equal(true);
-            expect(M.dataEquals(testList1, testList2)).to.equal(false);
-            expect(M.dataEquals(testList1, testList3)).to.equal(true);
-            expect(M.dataEquals(testList1, testList4)).to.equal(false);
-            expect(M.dataEquals(testList2, testList2)).to.equal(true);
-            expect(M.dataEquals(testList2, testList3)).to.equal(false);
-            expect(M.dataEquals(testList2, testList4)).to.equal(false);
-            expect(M.dataEquals(testList3, testList3)).to.equal(true);
-            expect(M.dataEquals(testList3, testList4)).to.equal(false);
+            expect(dataEquals(testList1, testList1)).to.equal(true);
+            expect(dataEquals(testList1, testList2)).to.equal(false);
+            expect(dataEquals(testList1, testList3)).to.equal(true);
+            expect(dataEquals(testList1, testList4)).to.equal(false);
+            expect(dataEquals(testList2, testList2)).to.equal(true);
+            expect(dataEquals(testList2, testList3)).to.equal(false);
+            expect(dataEquals(testList2, testList4)).to.equal(false);
+            expect(dataEquals(testList3, testList3)).to.equal(true);
+            expect(dataEquals(testList3, testList4)).to.equal(false);
         });
         it('should resort to === by default', () => {
-            expect(M.dataEquals('foo', 'foo')).to.equal(true);
-            expect(M.dataEquals('foo', 'bar')).to.equal(false);
-            expect(M.dataEquals(0, -0)).to.equal(true);
-            expect(M.dataEquals(0.4, 0)).to.equal(false);
+            expect(dataEquals('foo', 'foo')).to.equal(true);
+            expect(dataEquals('foo', 'bar')).to.equal(false);
+            expect(dataEquals(0, -0)).to.equal(true);
+            expect(dataEquals(0.4, 0)).to.equal(false);
         });
     });
     describe('listAverage', () => {
         it('should get the median of a list of data', () => {
-            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN))
+            expect(listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN))
                 .to.equal(9);
 
-            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN))
+            expect(listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN))
                 .to.equal(9.5);
         });
         it('should get an exponential average for a list of data', () => {
@@ -81,51 +92,51 @@ describe('helpers/data', () => {
 
             const averageExp = 13.105675146771038;
 
-            expect(M.listAverage(theList, AVERAGE_EXP)).to.equal(averageExp);
+            expect(listAverage(theList, AVERAGE_EXP)).to.equal(averageExp);
         });
         it('should get the mean by default', () => {
-            expect(M.listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20])))
+            expect(listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20])))
                 .to.equal(71 / 9);
 
-            expect(M.listAverage(list([1, 5, 10, 10, 11, 9, 3, 20])))
+            expect(listAverage(list([1, 5, 10, 10, 11, 9, 3, 20])))
                 .to.equal(8.625);
         });
     });
     describe('randnBm', () => {
         it('should return a Gaussian-incremented value from two random numbers', () => {
-            expect(M.randnBm(0.13, 0.87)).to.equal(1.382792212427032);
-            expect(M.randnBm(0.83, 0.876)).to.equal(0.43436275519719214);
+            expect(randnBm(0.13, 0.87)).to.equal(1.382792212427032);
+            expect(randnBm(0.83, 0.876)).to.equal(0.43436275519719214);
         });
     });
     describe('getValueForTransmit', () => {
         it('should return numbers as-is', () => {
-            expect(M.getValueForTransmit(10)).to.equal(10);
-            expect(M.getValueForTransmit(-35.3)).to.equal(-35.3);
+            expect(getValueForTransmit(10)).to.equal(10);
+            expect(getValueForTransmit(-35.3)).to.equal(-35.3);
         });
 
         it('should return serialised dates', () => {
-            expect(M.getValueForTransmit(dateInput('11/10/17'))).to.equal('2017-10-11');
+            expect(getValueForTransmit(dateInput('11/10/17'))).to.equal('2017-10-11');
         });
 
         it('should return serialised transactions lists', () => {
-            expect(M.getValueForTransmit(new M.TransactionsList([{ date: '2017-10-11', units: 1, cost: 2 }])))
+            expect(getValueForTransmit(new TransactionsList([{ date: '2017-10-11', units: 1, cost: 2 }])))
                 .to.deep.equal([
                     { date: '2017-10-11', cost: 2, units: 1 }
                 ]);
         });
 
         it('should return objects as-is', () => {
-            expect(M.getValueForTransmit({ foo: 'bar' })).to.deep.equal({ foo: 'bar' });
+            expect(getValueForTransmit({ foo: 'bar' })).to.deep.equal({ foo: 'bar' });
         });
 
         it('should stringify the object, otherwise', () => {
-            expect(M.getValueForTransmit('23.51')).to.equal('23.51');
-            expect(M.getValueForTransmit('foobar')).to.equal('foobar');
+            expect(getValueForTransmit('23.51')).to.equal('23.51');
+            expect(getValueForTransmit('foobar')).to.equal('foobar');
         });
     });
     describe('getNullEditable', () => {
         it('should return a list object for list pages', () => {
-            expect(M.getNullEditable('food').toJS()).to.deep.equal({
+            expect(getNullEditable('food').toJS()).to.deep.equal({
                 row: -1,
                 col: -1,
                 page: 'food',
@@ -137,7 +148,7 @@ describe('helpers/data', () => {
         });
 
         it('should return a normal object for non-list pages', () => {
-            expect(M.getNullEditable('overview').toJS()).to.deep.equal({
+            expect(getNullEditable('overview').toJS()).to.deep.equal({
                 row: 0,
                 col: -1,
                 page: 'overview',
@@ -152,7 +163,7 @@ describe('helpers/data', () => {
         it('should get the right values for the food page', () => {
             const now = DateTime.local();
 
-            expect(M.getAddDefaultValues('food', now).toJS())
+            expect(getAddDefaultValues('food', now).toJS())
                 .to.deep.equal([
                     now,
                     '',
@@ -182,7 +193,7 @@ describe('helpers/data', () => {
                 }
             });
 
-            const sortedRows = M.sortRowsByDate(rows, 'food');
+            const sortedRows = sortRowsByDate(rows, 'food');
 
             expect(sortedRows.map(item => item
                 .setIn(['cols', 0], item.getIn(['cols', 0]).toISODate())
