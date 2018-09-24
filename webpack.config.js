@@ -65,7 +65,7 @@ function getEntry() {
     if (__DEV__) {
         return [
             'webpack/hot/only-dev-server',
-            'webpack-hot-middleware/client',
+            'webpack-hot-middleware/client?reload=true',
             'react-hot-loader/patch',
             ...common
         ];
