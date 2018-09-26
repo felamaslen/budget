@@ -64,6 +64,10 @@ function processData(data, popout) {
 }
 
 export default function GraphFundItem({ sold, values, popout, onToggle, ...props }) {
+    if (!values) {
+        return null;
+    }
+
     const { width, height } = getDimensions({ popout, sold });
 
     const beforeLines = subProps => (<Axes popout={popout} {...subProps} />);
@@ -85,7 +89,7 @@ export default function GraphFundItem({ sold, values, popout, onToggle, ...props
 
 GraphFundItem.propTypes = {
     sold: PropTypes.bool.isRequired,
-    values: PropTypes.instanceOf(list).isRequired,
+    values: PropTypes.instanceOf(list),
     popout: PropTypes.bool.isRequired,
     onToggle: PropTypes.func.isRequired
 };

@@ -4,7 +4,7 @@ import '../../browser';
 import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
-import { mount } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import GraphFundItem from '../../../src/components/GraphFundItem';
 
@@ -73,6 +73,17 @@ describe('<GraphFundItem />', () => {
                 }
             }
         ]);
+    });
+
+    it('should not render anything if there are no values', () => {
+        const propsNoValues = {
+            ...props,
+            values: null
+        };
+
+        const wrapperNoValues = shallow(<GraphFundItem {...propsNoValues} />);
+
+        expect(wrapperNoValues.get(0)).to.equal(null);
     });
 });
 
