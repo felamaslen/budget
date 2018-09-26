@@ -6,8 +6,8 @@ import { List as list, Map as map } from 'immutable';
 import { compose } from 'redux';
 import { DateTime } from 'luxon';
 import { PAGES } from '../constants/data';
-import { ERROR_MSG_BUG_INVALID_ITEM, ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import { getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
+import { ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
+import { IDENTITY, getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
 import { getNow } from '../selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
@@ -177,10 +177,7 @@ function addOverviewData(page, fields) {
     const dateItem = fields.find(thisItem => thisItem.get('item') === 'date');
 
     if (typeof costItem === 'undefined' || typeof dateItem === 'undefined') {
-        return state => rErrorMessageOpen(state, map({
-            level: ERROR_LEVEL_WARN,
-            text: ERROR_MSG_BUG_INVALID_ITEM
-        }));
+        return IDENTITY;
     }
 
     return rCalculateOverview({
