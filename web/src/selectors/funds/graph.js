@@ -1,6 +1,10 @@
 import { List as list, Map as map } from 'immutable';
 import { createSelector } from 'reselect';
-import { GRAPH_FUNDS_MODE_PRICE, GRAPH_FUNDS_MODE_ROI } from '../../constants/graph';
+import {
+    GRAPH_FUNDS_MODE_PRICE,
+    GRAPH_FUNDS_MODE_ROI,
+    GRAPH_FUNDS_OVERALL_ID
+} from '../../constants/graph';
 import { COLOR_GRAPH_FUND_LINE } from '../../constants/colors';
 import { rgba, colorKey } from '../../helpers/color';
 import { separateLines } from '../../helpers/funds';
@@ -12,12 +16,12 @@ const getEnabledList = state => state.getIn(['other', 'graphFunds', 'enabledList
 
 function getFundItems(rows, enabledList) {
     const colors = rows.map(row => colorKey(row.getIn(['cols', itemKey])))
-        .set('overall', COLOR_GRAPH_FUND_LINE);
+        .set(GRAPH_FUNDS_OVERALL_ID, COLOR_GRAPH_FUND_LINE);
 
     return enabledList.map((enabled, id) => {
         const color = colors.get(id);
 
-        const item = id === 'overall'
+        const item = id === GRAPH_FUNDS_OVERALL_ID
             ? 'Overall'
             : rows.getIn([id, 'cols', itemKey]);
 
@@ -103,7 +107,7 @@ const getFormattedHistory = createSelector([
     const times = rowLengths.reduce(
         (items, length, id) =>
             items.set(id, cacheTimes.slice(timeOffsets.get(id), timeOffsets.get(id) + length)),
-        map({ overall: cacheTimes.slice(0, maxLength) })
+        map({ [GRAPH_FUNDS_OVERALL_ID]: cacheTimes.slice(0, maxLength) })
     );
 
     const fundItems = getFundItems(rows, enabledList);
@@ -116,12 +120,12 @@ const getFormattedHistory = createSelector([
 function getLines({ isMobile, fundLines, fundItems, mode }) {
     return fundLines.reduce((lines, item) => {
         const id = item.get('id');
-        const mainLine = id === 'overall';
+        const mainLine = id === GRAPH_FUNDS_OVERALL_ID;
         if (isMobile && !mainLine && mode !== GRAPH_FUNDS_MODE_PRICE) {
             return lines;
         }
 
-        const color = rgba(fundItems.getIn([item.get('id'), 'color']));
+        const color = rgba(fundItems.getIn([id, 'color']));
 
         const strokeWidth = 1 + 0.5 * (mainLine >> 0);
 

@@ -25,6 +25,8 @@ export const GRAPH_SPEND_CATEGORIES = [
 export const GRAPH_FUNDS_POINT_RADIUS = 3;
 export const GRAPH_FUNDS_MODES = ['ROI', 'Value', 'Price'];
 
+export const GRAPH_FUNDS_OVERALL_ID = 'overall';
+
 export const GRAPH_FUND_ITEM_WIDTH = 100;
 export const GRAPH_FUND_ITEM_HEIGHT = 48;
 export const GRAPH_FUND_ITEM_WIDTH_LARGE = 300;

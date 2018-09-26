@@ -4,6 +4,7 @@
 
 import { List as list, Map as map, OrderedMap as orderedMap } from 'immutable';
 import { DATA_KEY_ABBR } from '../constants/data';
+import { GRAPH_FUNDS_OVERALL_ID } from '../constants/graph';
 import { sortRowsByDate } from '../helpers/data';
 import { getRowLengths } from '../selectors/funds/helpers';
 import { getNow } from '../selectors/app';
@@ -13,7 +14,7 @@ export function getInitialEnabledList(prices) {
     const { rowLengths, maxLength } = getRowLengths(prices);
 
     return rowLengths.reduce((keys, length, id) =>
-        keys.set(id, length >= maxLength), orderedMap({ overall: true }));
+        keys.set(id, length >= maxLength), orderedMap({ [GRAPH_FUNDS_OVERALL_ID]: true }));
 }
 
 export function processPrices(rowsRaw) {

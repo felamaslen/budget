@@ -1,5 +1,10 @@
 import { List as list, Map as map } from 'immutable';
-import { GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_MODE_ABSOLUTE, GRAPH_FUNDS_MODE_PRICE } from '../../constants/graph';
+import {
+    GRAPH_FUNDS_OVERALL_ID,
+    GRAPH_FUNDS_MODE_ROI,
+    GRAPH_FUNDS_MODE_ABSOLUTE,
+    GRAPH_FUNDS_MODE_PRICE
+} from '../../constants/graph';
 
 export function getOverallAbsolute(prices, units) {
     // get the overall absolute value for each time point
@@ -110,7 +115,7 @@ export function getFundLine(priceUnitsCosts, mode, id) {
 }
 
 export function getFundLineProcessed(times, timeOffsets, priceUnitsCosts, mode, id) {
-    const overall = id === 'overall';
+    const overall = id === GRAPH_FUNDS_OVERALL_ID;
 
     const line = overall
         ? getOverallLine(priceUnitsCosts, mode, timeOffsets)
