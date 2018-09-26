@@ -18,15 +18,16 @@ function getFundItems(rows, enabledList) {
     const colors = rows.map(row => colorKey(row.getIn(['cols', itemKey])))
         .set(GRAPH_FUNDS_OVERALL_ID, COLOR_GRAPH_FUND_LINE);
 
-    return enabledList.map((enabled, id) => {
-        const color = colors.get(id);
+    return enabledList.filter((item, id) => id === GRAPH_FUNDS_OVERALL_ID || rows.has(id))
+        .map((enabled, id) => {
+            const color = colors.get(id);
 
-        const item = id === GRAPH_FUNDS_OVERALL_ID
-            ? 'Overall'
-            : rows.getIn([id, 'cols', itemKey]);
+            const item = id === GRAPH_FUNDS_OVERALL_ID
+                ? 'Overall'
+                : rows.getIn([id, 'cols', itemKey]);
 
-        return map({ item, color, enabled });
-    });
+            return map({ item, color, enabled });
+        });
 }
 
 function getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList) {

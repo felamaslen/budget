@@ -72,6 +72,15 @@ describe('Funds/graph selectors', () => {
             expect(result.lines).to.be.instanceof(list);
             expect(result.lines.toJS()).to.deep.equal(testLines);
         });
+
+        it('should not return fund items for deleted funds', () => {
+            const stateWithDeletedItem = state.setIn(['pages', 'funds', 'rows'],
+                state.getIn(['pages', 'funds', 'rows']).delete(10));
+
+            const resultWithDeletedItem = getGraphProps(stateWithDeletedItem, { isMobile: false });
+
+            expect(resultWithDeletedItem.fundItems.toJS()).not.to.have.property('10');
+        });
     });
 });
 
