@@ -121,6 +121,10 @@ function getFundsWithHoldings(logger, funds, data) {
         try {
             const holdings = getFundHoldings(fund, data[index]);
 
+            if (!holdings) {
+                return results;
+            }
+
             logger.debug(`Processed holdings for ${fund.name}`);
 
             const numErrors = holdings.filter(item => !item).length;

@@ -15,11 +15,17 @@ function getHoldingsFromDataHL(fund, data) {
         : '<table class="factsheet-table" summary="Top 10 holdings">';
 
     try {
-        const [matchRowsRaw] = dataWithoutNewLines.match(new RegExp([
+        const tableMatch = dataWithoutNewLines.match(new RegExp([
             table,
             '(.*?)',
             '<\\/table>'
         ].join('')));
+
+        if (!tableMatch) {
+            return null;
+        }
+
+        const [matchRowsRaw] = tableMatch;
 
         const matchRows = matchRowsRaw.match(/<tr[^>]*><td(.*?)<\/tr>/g);
 
@@ -48,7 +54,7 @@ function getHoldingsFromDataHL(fund, data) {
     }
 }
 
-function getPriceFromDataHL(data) {
+function getPriceFromDataHL(data, currencyPrices) {
     // gets the fund price from raw html (HL)
 
     // build a regex to match the specific part of the html
@@ -56,15 +62,25 @@ function getPriceFromDataHL(data) {
     const regex = new RegExp([
         '<div id="security-price">',
         '.*',
-        '<span class="bid price-divide"[^>]*>([0-9]+(\\.[0-9]*)?)p<\\/span>'
+        '<span class="bid price-divide"[^>]*>(\\$?)([0-9]+(\\.[0-9]*)?)p?<\\/span>'
     ].join(''));
 
     const dataWithoutNewLines = removeWhitespace(data);
 
     try {
-        const [, price] = dataWithoutNewLines.match(regex);
+        const [, dollar, price] = dataWithoutNewLines.match(regex);
 
-        return Number(price);
+        const rawPrice = Number(price);
+
+        if (dollar) {
+            if (!(currencyPrices && 'GBP' in currencyPrices)) {
+                throw new Error('no GBP/USD currency conversion available');
+            }
+
+            return rawPrice * currencyPrices.GBP * 100;
+        }
+
+        return rawPrice;
     }
     catch (err) {
         throw new Error('data formatted incorrectly');

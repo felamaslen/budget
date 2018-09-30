@@ -15,6 +15,7 @@ module.exports = () => ({
         ? process.env.MYSQL_URI_TEST
         : process.env.MYSQL_URI,
     webUrl: process.env.WEB_URL || '',
+    openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
     user: {
         hashSalt: process.env.USER_HASH_SALT || '',
         banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,

@@ -112,4 +112,9 @@ describe('Config', () => {
             });
         });
     });
+
+    it('should define an Open Exchange Rates API key', () => {
+        expect(config).to.have.property('openExchangeRatesApiKey');
+        expect(config.openExchangeRatesApiKey).to.be.a('string');
+    });
 });
