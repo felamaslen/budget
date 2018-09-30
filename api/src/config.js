@@ -15,6 +15,7 @@ module.exports = () => ({
         ? process.env.MYSQL_URI_TEST
         : process.env.MYSQL_URI,
     webUrl: process.env.WEB_URL || '',
+    openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
     user: {
         hashSalt: process.env.USER_HASH_SALT || '',
         banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,
@@ -80,7 +81,6 @@ module.exports = () => ({
             tolerance: Number(process.env.PIE_TOLERANCE) || 0.075,
             detail: Number(process.env.PIE_DETAIL) || 30
         }
-    },
-    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    }
 });
 

@@ -10,10 +10,11 @@ const testFunds = {};
 let testFundsList = [];
 const testFundsListData = [];
 
-const TEST_FUND_NAMES = [
-    'HL Multi-Manager UK Growth (accum.)',
-    'City of London Investment Trust ORD 25p (share)'
-];
+const TEST_FUND_NAMES = {
+    shareHLDollar: 'Apple Inc Com Stk NPV (share)',
+    fundHL: 'HL Multi-Manager UK Growth (accum.)',
+    shareHL: 'City of London Investment Trust ORD 25p (share)'
+};
 
 const holdingsTestData1 = [
     {
@@ -105,15 +106,23 @@ function processTestFiles() {
     testFunds.hl = {
         fund: {
             fund: {
-                name: TEST_FUND_NAMES[0],
+                name: TEST_FUND_NAMES.fundHL,
                 broker: 'hl',
                 uid: 1
             },
             data: testData.testDataFundHL
         },
+        shareDollar: {
+            fund: {
+                name: TEST_FUND_NAMES.shareHLDollar,
+                broker: 'hl',
+                uid: 1
+            },
+            data: testData.testDataShareHLDollar
+        },
         share: {
             fund: {
-                name: TEST_FUND_NAMES[1],
+                name: TEST_FUND_NAMES.shareHL,
                 broker: 'hl',
                 uid: 2
             },
@@ -123,11 +132,13 @@ function processTestFiles() {
 
     testFundsList.push(testFunds.hl.fund.fund);
     testFundsList.push(testFunds.hl.share.fund);
+    testFundsList.push(testFunds.hl.shareDollar.fund);
 
     testFundsList = testFundsList.map(item => ({ ...item, hash: md5(item.name) }));
 
     testFundsListData.push(testFunds.hl.fund.data);
     testFundsListData.push(testFunds.hl.share.data);
+    testFundsListData.push(testFunds.hl.shareDollar.data);
 }
 
 function checkTestFiles(done) {
@@ -145,18 +156,24 @@ function checkTestFiles(done) {
 
     const testDataFundHLFile = path.join(__dirname, '../../data/fund-test-hl.html');
     const testDataShareHLFile = path.join(__dirname, '../../data/share-test-hl.html');
+    const testDataShareHLDollarFile = path.join(__dirname, '../../data/share-test-hl-dollar.html');
 
     Promise.all([
         fs.readFile(testDataFundHLFile, 'utf8'),
-        fs.readFile(testDataShareHLFile, 'utf8')
+        fs.readFile(testDataShareHLFile, 'utf8'),
+        fs.readFile(testDataShareHLDollarFile, 'utf8')
     ])
         .catch(() => {
             testData = false;
 
             this.skip();
         })
-        .then(([testDataFundHL, testDataShareHL]) => {
-            testData = { testDataFundHL, testDataShareHL };
+        .then(([testDataFundHL, testDataShareHL, testDataShareHLDollar]) => {
+            testData = {
+                testDataFundHL,
+                testDataShareHL,
+                testDataShareHLDollar
+            };
 
             processTestFiles();
 
@@ -177,6 +194,7 @@ describe('scrapeFunds HL functions', () => {
         it('should return the correct status', () => {
             expect(hl.isHLFundShare(testFunds.hl.fund.fund)).to.equal(false);
             expect(hl.isHLFundShare(testFunds.hl.share.fund)).to.equal(true);
+            expect(hl.isHLFundShare(testFunds.hl.shareDollar.fund)).to.equal(true);
         });
     });
 
@@ -204,26 +222,50 @@ describe('scrapeFunds HL functions', () => {
 
             expect(result).to.deep.equal(expectedResult);
         });
+
+        it('should return null for shares without holdings', () => {
+            const fund = testFunds.hl.shareDollar.fund;
+            const data = testFunds.hl.shareDollar.data;
+
+            const result = hl.getHoldingsFromDataHL(fund, data);
+
+            expect(result).to.equal(null);
+        });
     });
 
     describe('getPriceFromDataHL', () => {
         describe('data processors', () => {
             before(checkTestFiles);
+
+            const currencyPrices = {
+                GBP: 0.76746
+            };
+
             it('should successfully parse the test fund data', () => {
-                const result = hl.getPriceFromDataHL(testFunds.hl.fund.data);
+                const result = hl.getPriceFromDataHL(testFunds.hl.fund.data, currencyPrices);
 
                 const expectedResult = 130.31;
 
                 expect(result).to.equal(expectedResult);
             });
+
             it('should successfully parse the test share data', () => {
-                const result = hl.getPriceFromDataHL(testFunds.hl.share.data);
+                const result = hl.getPriceFromDataHL(testFunds.hl.share.data, currencyPrices);
 
                 const expectedResult = 424.1;
 
                 expect(result).to.equal(expectedResult);
             });
+
+            it('should parse the dollar share data and convert the price from USD to GBP', () => {
+                const result = hl.getPriceFromDataHL(testFunds.hl.shareDollar.data, currencyPrices);
+
+                const expectedResult = 22582 * 0.76746;
+
+                expect(result).to.equal(expectedResult);
+            });
         });
+
         it('should handle bad data', () => {
             expect(() => hl.getPriceFromDataHL('flkjsdflksjdf'))
                 .to.throw('data formatted incorrectly');
@@ -243,10 +285,20 @@ describe('scrapeFunds HL functions', () => {
 
         it('should handle shares', () => {
             const fund = {
-                name: TEST_FUND_NAMES[1]
+                name: TEST_FUND_NAMES.shareHL
             };
 
             const url = 'http://www.hl.co.uk/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p';
+
+            expect(hl.getFundUrlHL(config, fund)).to.equal(url);
+        });
+
+        it('should handle dollar shares', () => {
+            const fund = {
+                name: TEST_FUND_NAMES.shareHLDollar
+            };
+
+            const url = 'http://www.hl.co.uk/shares/shares-search-results/a/apple-inc-com-stk-npv';
 
             expect(hl.getFundUrlHL(config, fund)).to.equal(url);
         });

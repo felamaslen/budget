@@ -113,9 +113,8 @@ describe('Config', () => {
         });
     });
 
-    it('should define months', () => {
-        expect(config.months).to.deep.equal(
-            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        );
+    it('should define an Open Exchange Rates API key', () => {
+        expect(config).to.have.property('openExchangeRatesApiKey');
+        expect(config.openExchangeRatesApiKey).to.be.a('string');
     });
 });

@@ -1,3 +1,4 @@
+const { getCurrencyPrices } = require('./currencies');
 const { fundHash } = require('../../src/routes/data/funds/common');
 const { getRawData } = require('./scrape');
 const { scrapeFundHoldings } = require('./holdings');
@@ -76,13 +77,15 @@ async function processScrape(config, flags, db, logger) {
             return 0;
         }
 
+        const currencyPrices = await getCurrencyPrices(config, logger);
+
         const rawData = await getRawData(config, logger, funds);
 
         if (holdings) {
             await scrapeFundHoldings(config, db, logger, funds, rawData);
         }
         if (prices) {
-            await scrapeFundPrices(config, db, logger, funds, rawData);
+            await scrapeFundPrices(config, db, logger, currencyPrices, funds, rawData);
         }
 
         logger.info('Finished scraping funds');

@@ -1,22 +1,22 @@
 const { DateTime } = require('luxon');
 const { getPriceFromDataHL } = require('./hl');
 
-function getPriceFromData(fund, data) {
+function getPriceFromData(fund, currencyPrices, data) {
     if (!data) {
         throw new Error('Data empty');
     }
 
     if (fund.broker === 'hl') {
-        return getPriceFromDataHL(data);
+        return getPriceFromDataHL(data, currencyPrices);
     }
 
     throw new Error('Unknown broker');
 }
 
-function getPricesFromData(logger, funds, data) {
+function getPricesFromData(logger, currencyPrices, funds, data) {
     return funds.reduce((results, fund, index) => {
         try {
-            const price = getPriceFromData(fund, data[index]);
+            const price = getPriceFromData(fund, currencyPrices, data[index]);
 
             logger.verbose(`Price update: ${price} for ${fund.name}`);
 
@@ -67,10 +67,10 @@ async function insertNewPriceCache(db, logger, fundsWithPrices, now) {
         .update({ done: true });
 }
 
-async function scrapeFundPrices(config, db, logger, funds, data) {
+async function scrapeFundPrices(config, db, logger, currencyPrices, funds, data) {
     logger.info('Processing fund prices...');
 
-    const fundsWithPrices = getPricesFromData(logger, funds, data);
+    const fundsWithPrices = getPricesFromData(logger, currencyPrices, funds, data);
 
     const currentValue = (fundsWithPrices.reduce(
         (value, { units, price }) => value + units * price, 0
