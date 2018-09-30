@@ -80,7 +80,6 @@ module.exports = () => ({
             tolerance: Number(process.env.PIE_TOLERANCE) || 0.075,
             detail: Number(process.env.PIE_DETAIL) || 30
         }
-    },
-    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    }
 });
 
