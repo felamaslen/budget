@@ -127,11 +127,17 @@ export function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
     }
 
     if (fill) {
-        return line.concat({
-            start: pixels.last(),
-            type: 'L',
-            args: [list.of(width, height)]
-        });
+        return line
+            .push({
+                start: pixels.last(),
+                type: 'L',
+                args: [list.of(width, height)]
+            })
+            .push({
+                start: list.of(width, height),
+                type: 'L',
+                args: [pixels.first().set(1, height)]
+            });
     }
 
     return line;
