@@ -90,7 +90,9 @@ public class ApiCaller {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.e(AppController.TAG, "API error: " + error.getMessage());
-                    Log.e(AppController.TAG, "details: " + data.toString());
+                    if (data != null) {
+                        Log.e(AppController.TAG, "details: " + data.toString());
+                    }
 
                     for (Api listener : listeners) {
                         listener.apiError(tag_int_req, error);
