@@ -57,6 +57,8 @@ public class MainActivity extends Activity implements Api {
     }
     @Override public void apiError(int tag, VolleyError error) {
         AppController.alert(getApplicationContext(), "Error :" + error.getMessage());
+
+        logoutUser();
     }
     @Override public void apiResponseEnd(int tag) {
         switch (tag) {
