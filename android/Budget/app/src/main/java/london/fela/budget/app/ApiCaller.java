@@ -55,18 +55,18 @@ public class ApiCaller {
      * @param tag_int_req    // tag used to identify the request to the implementation
      * @param tag_string_req // tag used to cancel the request
      * @param method         // GET, POST, PUT, DELETE and PATCH are implemented
-     * @param args           // arguments to add to the URL
+     * @param path           // API path to add to the URL
      */
     public void request(
         final int tag_int_req,
         String tag_string_req,
         String method,
-        String args,
+        String path,
         final JSONObject data
     ) {
         final int httpMethod = ApiCaller.getHttpMethod(method.toLowerCase());
 
-        final String url = apiUrl + args;
+        final String url = apiUrl + path;
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(
             httpMethod,

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Handles application-specific databases
@@ -15,7 +16,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     // Database name
-    private static final String DATABASE_NAME = "android_api";
+    private static final String DATABASE_NAME = "budget_android";
 
     // Login table name
     private static final String TABLE_USER = "user";
@@ -29,9 +30,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    // Creating tables
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.v("DB", "Creating new database");
+
         String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
             + KEY_ID + " INTEGER PRIMARY KEY,"
             + KEY_NAME + " TEXT,"
@@ -41,20 +43,19 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_LOGIN_TABLE);
     }
 
-    // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Drop older table if existed
+        Log.v("DB", "Dropping and recreating database on upgrade");
+
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
 
-        // create tables again
         onCreate(db);
     }
 
     /**
      * Storing user details in database
      */
-    public void addUser(String uid, String name, String apiKey) {
+    public void addUser(Integer uid, String name, String apiKey) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -63,7 +64,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         values.put(KEY_NAME, name);
         values.put(KEY_API_KEY, apiKey);
 
-        // inserting row
+        Log.v("DB", "Inserting into DB: " + values.toString());
+
+        db.delete(TABLE_USER, KEY_ID + " = " + uid, null);
         db.insert(TABLE_USER, null, values);
         db.close();
     }
@@ -78,11 +81,15 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
         // move to first row
         cursor.moveToFirst();
+
         if (cursor.getCount() > 0) {
             Data.user.put("uid", cursor.getString(0));
             Data.user.put("name", cursor.getString(1));
             Data.user.put("apiKey", cursor.getString(2));
+        } else {
+            Log.v("DB", "Empty user database");
         }
+
         cursor.close();
         db.close();
     }
@@ -91,8 +98,9 @@ public class SQLiteHandler extends SQLiteOpenHelper {
      * Re-create database: delete all tables and create them again
      */
     public void deleteUsers() {
+        Log.v("DB", "Deleting users");
+
         SQLiteDatabase db = this.getWritableDatabase();
-        // delete all rows
         db.delete(TABLE_USER, null, null);
         db.close();
     }

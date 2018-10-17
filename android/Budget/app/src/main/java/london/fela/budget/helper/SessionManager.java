@@ -3,6 +3,8 @@ package london.fela.budget.helper;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import london.fela.budget.helper.Data;
+
 /**
  * Manages sessions
  */
@@ -21,7 +23,9 @@ public class SessionManager {
     }
 
     public void setLogin(boolean isLoggedIn) {
-        pref.edit().putBoolean(KEY_IS_LOGGED_IN, isLoggedIn).apply();
+        pref.edit()
+                .putBoolean(KEY_IS_LOGGED_IN, isLoggedIn)
+                .apply();
     }
 
     public boolean isLoggedIn() {

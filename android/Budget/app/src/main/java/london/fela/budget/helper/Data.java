@@ -28,7 +28,15 @@ public class Data {
     public static final String[] months = { "Jan", "Feb", "Mar", "Apr", "May",
 		"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-	public static final Map<String, String> user = new HashMap<>();
+    public static Map<String, String> createNullUser() {
+        Map<String, String> user = new HashMap<>();
+
+        user.put("uid", "0");
+
+        return user;
+    }
+
+	public static final Map<String, String> user = createNullUser();
 
 	public static boolean dataPreLoaded = false;
 

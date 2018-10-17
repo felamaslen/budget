@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -181,8 +182,7 @@ public class MainActivity extends Activity implements Api {
             updateVisibleViewsData();
         }
         catch (JSONException e) {
-            // misconfigured api
-            AppController.alert(getApplicationContext(), "Bug: Misconfigured API");
+            AppController.alert(getApplicationContext(), "API bug: " + e.getMessage());
         }
     }
 
@@ -257,7 +257,6 @@ public class MainActivity extends Activity implements Api {
 
         apiSetup();
 
-        // fetch all the data
         if (!Data.dataPreLoaded) {
             loadCache();
         }
@@ -308,7 +307,7 @@ public class MainActivity extends Activity implements Api {
         session.setLogin(false);
 
         db.deleteUsers();
-        
+
         clearCache();
 
         // launch the login activity

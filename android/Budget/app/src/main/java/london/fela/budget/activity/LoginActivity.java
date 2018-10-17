@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,24 +43,17 @@ public class LoginActivity extends AppCompatActivity implements Api {
     }
     @Override
     public void apiJSONSuccess(int tag, JSONObject res) {
-        switch (tag) {
-            case API_TAG_LOGIN:
-                // successfully fetched overview data
-                // user successfully logged in
-                // create login session
-                session.setLogin(true);
+        if (tag == API_TAG_LOGIN) {
+            session.setLogin(true);
 
-                String uid, name, apiKey;
+            Integer uid;
+            String name, apiKey;
 
-                // store the user in sqlite
-                try {
-                    uid = res.getString("uid");
-                    name = res.getString("name");
-                    apiKey = res.getString("apiKey");
-                }
-                catch (JSONException e) {
-                    return;
-                }
+            // store the user in sqlite
+            try {
+                uid = res.getInt("uid");
+                name = res.getString("name");
+                apiKey = res.getString("apiKey");
 
                 // insert row into users table
                 db.addUser(uid, name, apiKey);
@@ -69,7 +63,9 @@ public class LoginActivity extends AppCompatActivity implements Api {
                 startActivity(intent);
                 finish();
 
-                break;
+            } catch (JSONException e) {
+                Log.e("LOGIN", "Error processing login response: " + e.getMessage());
+            }
         }
     }
     @Override
@@ -128,13 +124,10 @@ public class LoginActivity extends AppCompatActivity implements Api {
                 String pin = inputPin.getText().toString().trim();
 
                 // check for empty data
-                if (!pin.isEmpty()) {
-                    // login user
-                    checkLogin(pin);
-                }
-                else {
-                    // prompt user to enter credentials
+                if (pin.isEmpty()) {
                     AppController.alert(getApplicationContext(), "Please enter your PIN!");
+                } else {
+                    tryToLogin(pin);
                 }
             }
         });
@@ -143,26 +136,25 @@ public class LoginActivity extends AppCompatActivity implements Api {
     /**
      * verify login details with the server
      */
-    private void checkLogin(String pin) {
+    private void tryToLogin(String pin) {
         pDialog.setMessage("Logging in...");
         AppController.showDialog(pDialog);
 
         JSONObject data = new JSONObject();
         try {
             data.put("pin", pin);
-        }
-        catch (JSONException e) {
-            AppController.alert(getApplicationContext(), "Bug!11!1");
 
-            return;
-        }
+            api.request(
+                    API_TAG_LOGIN,
+                    "req_login",
+                    "post",
+                    AppConfig.URL_LOGIN,
+                    data
+            );
+        } catch (JSONException e) {
+            AppController.alert(getApplicationContext(), "Unknown error");
 
-        api.request(
-            API_TAG_LOGIN,
-            "req_login",
-            "post",
-            AppConfig.URL_LOGIN,
-            data
-        );
+            Log.e("LOGIN", "Unhandled error logging in: " + e.getMessage());
+        }
     }
 }
