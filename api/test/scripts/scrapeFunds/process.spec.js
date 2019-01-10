@@ -44,6 +44,11 @@ describe('scrapeFunds process', () => {
                 {
                     uid: 1,
                     item: TEST_FUND_NAMES[0],
+                    units: 1678.42 + 846.38 + 817 + 1217.43 - 4559.23
+                },
+                {
+                    uid: 1,
+                    item: TEST_FUND_NAMES[0],
                     units: -10
                 },
                 {

@@ -28,7 +28,7 @@ function getEligibleFunds(config, logger, rows) {
         const hash = fundHash(item, config.data.funds.salt);
 
         if (hash in funds) {
-            funds[hash].units += units;
+            funds[hash].units += Math.round(units * 10000) / 10000;
 
             return funds;
         }
