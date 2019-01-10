@@ -10,7 +10,9 @@ describe('Date', () => {
         });
 
         it('should work for dates with the month', () => {
-            expect(date.dateInput('1/3').toISODate()).to.equal('2018-03-01');
+            const currentYear = new Date().getFullYear();
+
+            expect(date.dateInput('1/3').toISODate()).to.equal(`${currentYear}-03-01`);
         });
 
         it('should work for just the day', () => {
