@@ -66,7 +66,7 @@ module.exports = () => ({
             salt: 'a963anx2',
             historyResolution: Math.round(Number(process.env.FUND_RESOLUTION) || 100),
             scraper: {
-                regex: /^(.*)\s\((accum|inc|share)\.?\)$/i,
+                regex: /^(.*)\s\((accum|inc|share|accum-inc)\.?\)$/i,
                 userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
             },
             stocksApiKey: process.env.STOCKS_API_KEY || ''

@@ -94,6 +94,9 @@ function getSystemType(humanType) {
     if (humanType === 'accum') {
         return 'accumulation';
     }
+    if (humanType === 'accum-inc') {
+        return 'accumulation-inclusive';
+    }
     if (humanType === 'share') {
         return 'share';
     }

@@ -283,6 +283,16 @@ describe('scrapeFunds HL functions', () => {
             expect(hl.getFundUrlHL(config, fund)).to.equal(url);
         });
 
+        it('should handle accumulation-inclusive funds', () => {
+            const fund = {
+                name: 'Threadneedle UK Equity Income Class 1 (accum-inc.)'
+            };
+
+            const url = 'http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/t/threadneedle-uk-equity-income-class-1-accumulation-inclusive';
+
+            expect(hl.getFundUrlHL(config, fund)).to.equal(url);
+        });
+
         it('should handle shares', () => {
             const fund = {
                 name: TEST_FUND_NAMES.shareHL
