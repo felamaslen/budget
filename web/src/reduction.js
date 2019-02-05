@@ -74,6 +74,7 @@ export function resetAppState(state) {
                 treeOpen: map.of(),
                 treeVisible: map({ bills: false })
             }),
+            viewSoldFunds: false,
             graphFunds: map({
                 enabledList: map.of(),
                 period: getDefaultFundPeriod(),
