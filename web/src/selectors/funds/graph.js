@@ -8,17 +8,19 @@ import {
 import { COLOR_GRAPH_FUND_LINE } from '../../constants/colors';
 import { rgba, colorKey } from '../../helpers/color';
 import { separateLines } from '../../helpers/funds';
-import { transactionsKey, itemKey, getRowLengths, getCurrentFundsCache, getFundsRows } from './helpers';
+import { getViewSoldFunds, transactionsKey, itemKey, getRowLengths, getCurrentFundsCache, getFundsRows } from './helpers';
 import { getFundLineProcessed } from './lines';
 
 const getGraphMode = state => state.getIn(['other', 'graphFunds', 'mode']);
 const getEnabledList = state => state.getIn(['other', 'graphFunds', 'enabledList']);
 
-function getFundItems(rows, enabledList) {
+function getFundItems(rows, enabledList, soldList) {
     const colors = rows.map(row => colorKey(row.getIn(['cols', itemKey])))
         .set(GRAPH_FUNDS_OVERALL_ID, COLOR_GRAPH_FUND_LINE);
 
-    return enabledList.filter((item, id) => id === GRAPH_FUNDS_OVERALL_ID || rows.has(id))
+    return enabledList.filter((item, id) => !soldList.get(id) &&
+        (id === GRAPH_FUNDS_OVERALL_ID || rows.has(id))
+    )
         .map((enabled, id) => {
             const color = colors.get(id);
 
@@ -32,7 +34,10 @@ function getFundItems(rows, enabledList) {
 
 function getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList) {
     return enabledList.reduce((last, enabled, id) => {
-        if (!(enabled && times.get(id) && times.get(id).size > 1)) {
+        if (priceUnitsCosts.sold.get(id) ||
+            !(enabled && times.get(id) && times.get(id).size > 1)
+        ) {
+
             return last;
         }
 
@@ -48,7 +53,7 @@ function getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList) {
     }, list.of());
 }
 
-function getPriceUnitsCosts(rows, prices, startTime, cacheTimes) {
+function getPriceUnitsCosts(rows, prices, startTime, cacheTimes, viewSold) {
     return rows.reduce((red, row, id) => {
         if (!prices.get(id)) {
             return red;
@@ -78,11 +83,13 @@ function getPriceUnitsCosts(rows, prices, startTime, cacheTimes) {
         });
 
         return {
+            sold: red.sold.set(id, !viewSold && transactions.isSold()),
             prices: red.prices.set(id, thisPrices),
             units: red.units.set(id, thisUnits),
             costs: red.costs.set(id, thisCosts)
         };
     }, {
+        sold: map.of(),
         prices: map.of(),
         units: map.of(),
         costs: map.of()
@@ -90,18 +97,19 @@ function getPriceUnitsCosts(rows, prices, startTime, cacheTimes) {
 }
 
 const getFormattedHistory = createSelector([
+    getViewSoldFunds,
     getFundsRows,
     getCurrentFundsCache,
     getGraphMode,
     getEnabledList
-], (rows, cache, mode, enabledList) => {
+], (viewSoldFunds, rows, cache, mode, enabledList) => {
     // get a formatted list of lines for display in the fund price / value graph
 
     const prices = cache.get('prices');
     const startTime = cache.get('startTime');
     const cacheTimes = cache.get('cacheTimes');
 
-    const priceUnitsCosts = getPriceUnitsCosts(rows, prices, startTime, cacheTimes);
+    const priceUnitsCosts = getPriceUnitsCosts(rows, prices, startTime, cacheTimes, viewSoldFunds);
 
     const { timeOffsets, rowLengths, maxLength } = getRowLengths(prices);
 
@@ -111,7 +119,7 @@ const getFormattedHistory = createSelector([
         map({ [GRAPH_FUNDS_OVERALL_ID]: cacheTimes.slice(0, maxLength) })
     );
 
-    const fundItems = getFundItems(rows, enabledList);
+    const fundItems = getFundItems(rows, enabledList, priceUnitsCosts.sold);
 
     const fundLines = getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList);
 

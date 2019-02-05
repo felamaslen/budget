@@ -29,6 +29,7 @@ describe('Funds/graph selectors', () => {
                 })
             }),
             other: map({
+                viewSoldFunds: true,
                 graphFunds: map({
                     mode: GRAPH_FUNDS_MODE_ROI,
                     period: 'period1',
