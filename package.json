@@ -78,6 +78,7 @@
     }
   },
   "dependencies": {
+    "@hot-loader/react-dom": "^16.8.4",
     "axios": "^0.16.2",
     "bcrypt": "^2.0.1",
     "body-parser": "^1.17.2",
@@ -112,8 +113,8 @@
     "postcss-import": "^11.0.0",
     "postcss-loader": "^2.0.9",
     "prompt": "^1.0.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
     "react-immutable-proptypes": "^2.1.0",
     "react-media": "^1.6.1",
     "react-pure-render": "^1.0.2",
