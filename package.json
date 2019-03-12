@@ -4,7 +4,7 @@
   "description": "Personal finance app",
   "main": "index.js",
   "engines": {
-    "node": "8.9.x"
+    "node": "10"
   },
   "sasslintConfig": ".sass-lint.yml",
   "scripts": {
@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "axios": "^0.16.2",
-    "bcrypt": "^1.0.3",
+    "bcrypt": "^2.0.1",
     "body-parser": "^1.17.2",
     "classnames": "^2.2.5",
     "color-hash": "^1.0.3",
