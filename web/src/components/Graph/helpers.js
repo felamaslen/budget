@@ -256,3 +256,5 @@ export function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
     return joinChoppedPath(linePath, ends, (end, endIndex) => colors.get(ends[endIndex]));
 }
 
+export const pointVisible = (valX, minX, maxX) => valX >= minX && valX <= maxX;
+
