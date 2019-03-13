@@ -39,6 +39,8 @@ function getClosest(lines, position, mvt) {
     }, null);
 }
 
+const noop = () => null;
+
 export function useHover({ props }) {
     const {
         lines,
@@ -86,6 +88,10 @@ export function useHover({ props }) {
     }, [onHover]);
 
     const onMouseLeave = useCallback(() => () => onHover(null), []);
+
+    if (!props.hoverEffect) {
+        return [null, noop, noop];
+    }
 
     return [hlPoint, onMouseMove, onMouseLeave];
 }
