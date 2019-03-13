@@ -1,5 +1,5 @@
 import { List as list } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { listAverage } from '../../helpers/data';
 import { rgba } from '../../helpers/color';
@@ -11,18 +11,20 @@ export default function AverageLine({ value, data, ...props }) {
         return null;
     }
 
-    const averageData = data.reduce(({ last, points }, point) => {
-        const nextLast = last.slice(1 - value).push(point.get(1));
-        const average = listAverage(nextLast);
+    const averageData = useMemo(() => {
+        return data.reduce(({ last, points }, point) => {
+            const nextLast = last.slice(1 - value).push(point.get(1));
+            const average = listAverage(nextLast);
 
-        return { last: nextLast, points: points.push(point.set(1, average)) };
+            return { last: nextLast, points: points.push(point.set(1, average)) };
 
-    }, { last: list.of(), points: list.of() })
-        .points;
+        }, { last: list.of(), points: list.of() })
+            .points;
+    }, [data]);
 
-    const averageLinePath = getSingleLinePath({
+    const averageLinePath = useMemo(() => getSingleLinePath({
         ...props, data: averageData, smooth: true, fill: false
-    });
+    }), [averageData, ...Object.keys(props).map(key => props[key])]);
 
     return (
         <path d={averageLinePath}
