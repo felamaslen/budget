@@ -3,7 +3,7 @@
  */
 
 import { List as list } from 'immutable';
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { genPixelCompute } from './helpers';
 import LineGraphDumb from './LineGraphDumb';
@@ -29,26 +29,26 @@ export default function LineGraph(props) {
 
     const graph = useRef(null);
 
-    const [calc, setCalc] = useState(genPixelCompute({
-        padding,
-        width,
-        height,
-        lines,
-        minY,
-        maxY,
-        minX,
-        maxX
-    }));
+    const [calc, setCalc] = useState(null);
+
+    useEffect(() => {
+        setCalc(genPixelCompute({
+            padding,
+            width,
+            height,
+            lines,
+            minY,
+            maxY,
+            minX,
+            maxX
+        }));
+    }, [padding, width, height, lines, minY, maxY, minX, maxX]);
 
     const range = useMemo(() => maxX - minX, [minX, maxX]);
 
     const [hlPoint, onMouseMove, onMouseLeave] = useHover({ props });
 
     const [zoom, onWheel] = useZoom({ props, padding, range, graph, hlPoint, setCalc });
-
-    if (!calc) {
-        return null;
-    }
 
     const outerProperties = useMemo(() => ({
         onMouseMove,
@@ -60,6 +60,10 @@ export default function LineGraph(props) {
         onWheel,
         ...(props.svgProperties || {})
     }), [onWheel, props.svgProperties]);
+
+    if (!calc) {
+        return null;
+    }
 
     return (
         <LineGraphDumb
