@@ -11,6 +11,8 @@ const exposedProperties = ['window', 'navigator', 'document'];
 global.window = (new JSDOM('')).window;
 global.document = window.document;
 
+global.window.Date = Date;
+
 global.window.matchMedia = (...args) => matchMediaMock(...args);
 
 Object.keys(window).forEach(property => {
