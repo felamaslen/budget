@@ -1,178 +1,212 @@
-import React from 'react';
-import ImmutableComponent from '../../../ImmutableComponent';
+import { Map as map } from 'immutable';
+import React, { useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { formatValue } from '../format';
 import { dateInput } from '../../../helpers/date';
+import { TransactionsList } from '../../../helpers/data';
 
-export default class InteractiveEditableTransactions extends ImmutableComponent {
-    constructor(props) {
-        super(props);
+const InputDate = React.forwardRef((props, ref) => (
+    <input ref={ref} {...props} />
+));
 
-        this.input = {
-            date: {},
-            units: {},
-            cost: {}
-        };
+const InputUnits = React.forwardRef((props, ref) => (
+    <input ref={ref} {...props} type="number" />
+));
 
-        this.inputAdd = {};
-    }
-    addTransaction(row, col) {
-        const date = dateInput(this.inputAdd.date.value);
-        const units = Number(this.inputAdd.units.value);
-        const cost = Math.round(100 * Number(this.inputAdd.cost.value));
+const InputCost = React.forwardRef((props, ref) => (
+    <input ref={ref} {...props} type="number" step="0.01" />
+));
+
+function InteractiveEditableTransactionsItem({ transaction, onEdit, onRemove }) {
+    const inputDate = useRef(null);
+    const inputUnits = useRef(null);
+    const inputCost = useRef(null);
+
+    const editIfValid = useCallback((column, input, value, isValid, format) => {
+        let toFormat = transaction.get(column);
+
+        if (isValid) {
+            onEdit(transaction, column, value);
+            toFormat = value;
+        }
+
+        if (format) {
+            toFormat = format(toFormat);
+        } else {
+            toFormat = formatValue(column, toFormat);
+        }
+
+        input.current.value = toFormat;
+    });
+
+    const onDateBlur = useCallback(evt => {
+        const rawValue = evt.target.value;
+        const value = dateInput(rawValue);
+
+        editIfValid('date', inputDate, value, Boolean(value));
+    });
+
+    const onUnitsBlur = useCallback(evt => {
+        const units = Number(evt.target.value);
+
+        editIfValid('units', inputUnits, units, !isNaN(units));
+    });
+
+    const onCostBlur = useCallback(evt => {
+        const cost = Math.round(100 * Number(evt.target.value));
+
+        editIfValid('cost', inputCost, cost, !isNaN(cost), value => value / 100);
+    });
+
+    const date = transaction.get('date');
+    const units = transaction.get('units');
+    const cost = transaction.get('cost');
+
+    return (
+        <tr>
+            <td>
+                <InputDate ref={inputDate}
+                    defaultValue={formatValue('date', date)}
+                    onBlur={onDateBlur}
+                />
+            </td>
+            <td>
+                <InputUnits ref={inputUnits}
+                    defaultValue={units}
+                    onBlur={onUnitsBlur}
+                />
+            </td>
+            <td>
+                <InputCost ref={inputCost}
+                    defaultValue={cost / 100}
+                    onBlur={onCostBlur}
+                />
+            </td>
+            <td>
+                <button onClick={onRemove(transaction)}>&minus;</button>
+            </td>
+        </tr>
+    );
+}
+
+InteractiveEditableTransactionsItem.propTypes = {
+    transaction: PropTypes.instanceOf(map).isRequired,
+    onEdit: PropTypes.func.isRequired,
+    onRemove: PropTypes.func.isRequired
+};
+
+export default function InteractiveEditableTransactions({
+    item,
+    value,
+    row,
+    col,
+    addTransaction,
+    editTransaction,
+    removeTransaction
+}) {
+    const inputDateNew = useRef(null);
+    const inputUnitsNew = useRef(null);
+    const inputCostNew = useRef(null);
+
+    const onDateBlur = useCallback(evt => {
+        const rawValue = evt.target.value;
+        const newValue = dateInput(rawValue);
+
+        if (newValue) {
+            inputDateNew.current.value = formatValue('date', newValue);
+        } else {
+            inputDateNew.current.value = '';
+        }
+    }, [inputDateNew]);
+
+    const onAddTransaction = useCallback(() => {
+        const date = dateInput(inputDateNew.current.value);
+        const units = Number(inputUnitsNew.current.value);
+        const cost = Math.round(100 * Number(inputCostNew.current.value));
 
         if (!date || isNaN(units) || isNaN(cost)) {
             return;
         }
 
-        this.props.addTransaction({ row, col, date, units, cost });
+        addTransaction({ row, col, date, units, cost });
 
-        this.inputAdd.date.value = '';
-        this.inputAdd.units.value = '';
-        this.inputAdd.cost.value = '';
-    }
-    onDateBlur(key, id) {
-        this.input.date[id].value = formatValue('date', this.props.value.list
-            .getIn([key, 'date'])
-        );
-    }
-    onDateChange(row, col, key, rawValue) {
-        const value = dateInput(rawValue);
+        inputDateNew.current.value = '';
+        inputUnitsNew.current.value = '';
+        inputCostNew.current.value = '';
 
-        if (value) {
-            this.props.editTransaction({ row, col, key, column: 'date', value });
-        }
-    }
-    onUnitsBlur(key, id) {
-        this.input.units[id].value = this.props.value.list.getIn([key, 'units']);
-    }
-    onUnitsChange(row, col, key, newUnits, units) {
-        const thisUnits = Number(newUnits);
+    }, [row, col, addTransaction]);
 
-        const value = isNaN(thisUnits)
-            ? units
-            : thisUnits;
+    const getKey = useCallback(transaction => value.list.findIndex(otherItem =>
+        otherItem.get('id') === transaction.get('id')
+    ));
 
-        this.props.editTransaction({
-            row, col, key, column: 'units', value
-        });
-    }
-    onCostBlur(key, id) {
-        this.input.cost[id].value = this.props.value.list.getIn([key, 'cost']) / 100;
-    }
-    onCostChange(row, col, key, newCost, cost) {
-        const thisCost = Math.round(100 * Number(newCost));
+    const onEdit = useCallback((transaction, column, newValue) => {
+        const key = getKey(transaction);
+        editTransaction({ row, col, key, column, value: newValue });
 
-        const value = isNaN(thisCost)
-            ? cost
-            : thisCost;
+    });
 
-        this.props.editTransaction({
-            row, col, key, column: 'cost', value
-        });
-    }
-    render() {
-        const { item, value, row, col } = this.props;
+    const onRemove = useCallback(transaction => () => {
+        const key = getKey(transaction);
+        removeTransaction({ row, col, key });
 
-        const addDateRef = input => {
-            this.inputAdd.date = input;
-        };
-        const addUnitsRef = input => {
-            this.inputAdd.units = input;
-        };
-        const addCostRef = input => {
-            this.inputAdd.cost = input;
-        };
+    });
 
-        const addOnClick = () => this.addTransaction(row, col);
+    const editList = value.list.map(transaction => (
+        <InteractiveEditableTransactionsItem key={transaction.get('id')}
+            transaction={transaction}
+            onEdit={onEdit}
+            onRemove={onRemove}
+        />
+    ));
 
-        const editList = value.list.map((transaction, key) => {
-            const date = transaction.get('date');
-            const units = transaction.get('units');
-            const cost = transaction.get('cost');
+    const className = classNames('active', 'editable', 'editable-transactions');
 
-            const id = transaction.get('id');
-
-            const onDateChange = evt => this.onDateChange(row, col, key, evt.target.value);
-
-            const onUnitsChange = evt => this.onUnitsChange(row, col, key, evt.target.value, units);
-
-            const onCostChange = evt => this.onCostChange(row, col, key, evt.target.value, cost);
-
-            const removeOnClick = () => this.props.removeTransaction({ row, col, key });
-
-            const dateRef = input => {
-                this.input.date[id] = input;
-            };
-            const unitsRef = input => {
-                this.input.units[id] = input;
-            };
-            const costRef = input => {
-                this.input.cost[id] = input;
-            };
-
-            return <tr key={id}>
-                <td>
-                    <input defaultValue={formatValue('date', date)} ref={dateRef}
-                        onBlur={onDateChange}
-                    />
-                </td>
-                <td>
-                    <input defaultValue={units} ref={unitsRef}
-                        onBlur={onUnitsChange}
-                    />
-                </td>
-                <td>
-                    <input defaultValue={cost / 100} ref={costRef}
-                        onBlur={onCostChange}
-                    />
-                </td>
-                <td>
-                    <button onClick={removeOnClick}>&minus;</button>
-                </td>
-            </tr>;
-        });
-
-        const className = classNames('active', 'editable', 'editable-transactions');
-
-        return (
-            <span className={className}>
-                <span className="num-transactions">
-                    {formatValue(item, value)}
-                </span>
-                <div className="modal">
-                    <div className="inner">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>{'Date'}</th>
-                                    <th>{'Units'}</th>
-                                    <th colSpan="2">{'Cost'}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><input ref={addDateRef} /></td>
-                                    <td><input ref={addUnitsRef} /></td>
-                                    <td><input ref={addCostRef} /></td>
-                                    <td>
-                                        <button onClick={addOnClick}>{'+'}</button>
-                                    </td>
-                                </tr>
-                                {editList}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    return (
+        <span className={className}>
+            <span className="num-transactions">
+                {formatValue(item, value)}
             </span>
-        );
-    }
+            <div className="modal">
+                <div className="inner">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>{'Date'}</th>
+                                <th>{'Units'}</th>
+                                <th colSpan="2">{'Cost'}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <InputDate ref={inputDateNew}
+                                        onBlur={onDateBlur}
+                                    />
+                                </td>
+                                <td>
+                                    <InputUnits ref={inputUnitsNew} />
+                                </td>
+                                <td>
+                                    <InputCost ref={inputCostNew} />
+                                </td>
+                                <td>
+                                    <button onClick={onAddTransaction}>{'+'}</button>
+                                </td>
+                            </tr>
+                            {editList}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </span>
+    );
 }
 
 InteractiveEditableTransactions.propTypes = {
     item: PropTypes.string.isRequired,
-    value: PropTypes.object.isRequired,
+    value: PropTypes.instanceOf(TransactionsList).isRequired,
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
     addTransaction: PropTypes.func.isRequired,
