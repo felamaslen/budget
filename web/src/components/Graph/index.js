@@ -31,7 +31,11 @@ export default function Graph(props) {
     const svgPropertiesProc = attachProps(svgProperties);
 
     return (
-        <div className={className} {...outerPropertiesProc}>
+        <div
+            ref={props.svgRef || null}
+            className={className}
+            {...outerPropertiesProc}
+        >
             {before || null}
             <svg
                 className={svgClasses || ''}
@@ -47,6 +51,7 @@ export default function Graph(props) {
 }
 
 Graph.propTypes = {
+    svgRef: PropTypes.object,
     name: PropTypes.string,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,

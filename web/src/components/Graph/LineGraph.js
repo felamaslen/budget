@@ -2,10 +2,10 @@
  * React component to display a line graph (e.g. time series)
  */
 
+import { List as list } from 'immutable';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import React from 'react';
 import debounce from 'debounce';
-import ImmutableComponent, { propsChanged } from '../../ImmutableComponent';
 import { rgba } from '../../helpers/color';
 import { genPixelCompute } from './helpers';
 import { COLOR_GRAPH_TITLE } from '../../constants/colors';
@@ -44,58 +44,6 @@ function pointsVisible(lines) {
     return Boolean(lines.find(line => line.get('data').size > threshold));
 }
 
-function zoomLines(lines, { minX, maxX }) {
-    return lines.map(line => {
-        const data = line.get('data');
-
-        return line.set('data', data.filter((point, pointKey) => {
-            if (pointVisible(point.get(0), minX, maxX)) {
-                return true;
-            }
-            if (pointKey < data.size - 1 &&
-                pointVisible(data.getIn([pointKey + 1, 0]), minX, maxX)) {
-                return true;
-            }
-            if (pointKey > 0 &&
-                pointVisible(data.getIn([pointKey - 1, 0]), minX, maxX)) {
-                return true;
-            }
-
-            return false;
-        }));
-    });
-}
-
-function getZoomedRange(props, state, position, zoomLevel) {
-    let { minX, maxX } = state.zoom;
-
-    if (position) {
-        const range = props.maxX - props.minX;
-        const newRange = range * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
-
-        let newMinXTarget = position - newRange / 2;
-        let newMaxXTarget = position + newRange / 2;
-        if (newMinXTarget < props.minX) {
-            newMaxXTarget += props.minX - newMinXTarget;
-            newMinXTarget = props.minX;
-        }
-        else if (newMaxXTarget > props.maxX) {
-            newMinXTarget -= newMaxXTarget - props.maxX;
-            newMaxXTarget = props.maxX;
-        }
-
-        minX = Math.max(props.minX, Math.round(newMinXTarget));
-        maxX = Math.min(props.maxX, Math.round(newMaxXTarget));
-    }
-
-    const zoomedLines = zoomLines(props.lines, { minX, maxX });
-    if (!pointsVisible(zoomedLines)) {
-        return null;
-    }
-
-    return props.zoomEffect(props, zoomedLines, { minX, maxX });
-}
-
 function getHlColor(color, point, index) {
     if (typeof color === 'string') {
         return color;
@@ -107,185 +55,233 @@ function getHlColor(color, point, index) {
     return rgba(COLOR_GRAPH_TITLE);
 }
 
-const noop = () => null;
+const defaultPadding = [0, 0, 0, 0];
 
-export default class LineGraph extends ImmutableComponent {
-    static propTypes = {
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
-        padding: PropTypes.array,
-        minX: PropTypes.number,
-        maxX: PropTypes.number,
-        minY: PropTypes.number,
-        maxY: PropTypes.number,
-        isMobile: PropTypes.bool,
-        hoverEffect: PropTypes.object,
-        outerProperties: PropTypes.object,
-        svgProperties: PropTypes.object,
-        zoomEffect: PropTypes.func
-    };
-    constructor(props) {
-        super(props);
+export default function LineGraph(props) {
+    const {
+        lines,
+        width,
+        height,
+        padding: customPadding,
+        minX,
+        maxX,
+        minY,
+        maxY,
+        zoomEffect,
+        isMobile
+    } = props;
 
-        this.state = {
-            hlPoint: null,
-            outerProperties: {
-                onMouseMove: this.getOnMouseMove(),
-                onMouseLeave: this.getOnMouseLeave()
-            },
-            svgProperties: {
-                onWheel: this.getOnWheel()
-            },
-            padding: this.props.padding || [0, 0, 0, 0],
-            zoom: {},
-            zoomLevel: 0
-        };
-    }
-    onHover(position, mvt) {
-        if (!this.props.lines || this.props.isMobile) {
-            return;
+    const padding = customPadding || defaultPadding;
+
+    const graph = useRef(null);
+
+    const [zoom, setZoom] = useState({ minX, maxX });
+    const [zoomLevel, setZoomLevel] = useState(0);
+
+    const [calc, setCalc] = useState(genPixelCompute({
+        padding,
+        width,
+        height,
+        lines,
+        minY,
+        maxY,
+        minX,
+        maxX,
+        ...zoom
+    }));
+
+    const [hlPoint, setHlPoint] = useState(null);
+
+    const onHover = useCallback((position, mvt) => {
+        if (!lines || isMobile) {
+            return null;
         }
 
-        const closest = getClosest(this.props.lines, position, mvt);
+        const closest = getClosest(lines, position, mvt);
         if (!closest) {
-            this.setState({ hlPoint: null });
-
-            return;
+            return setHlPoint(null);
         }
 
         const { lineIndex, point, index } = closest;
-        const color = getHlColor(this.props.lines.getIn([lineIndex, 'color']), point, index);
+        const color = getHlColor(lines.getIn([lineIndex, 'color']), point, index);
 
-        this.setState({
-            hlPoint: {
-                valX: point.get(0),
-                valY: point.get(1),
-                color
-            }
+        return setHlPoint({
+            valX: point.get(0),
+            valY: point.get(1),
+            color
         });
-    }
-    getOnMouseMove(customHandler = noop) {
-        return subProps => {
-            const handler = debounce((pageX, pageY, currentTarget) => {
-                const { left, top } = currentTarget.getBoundingClientRect();
+    }, [lines, isMobile]);
 
-                this.onHover({
-                    posX: pageX - left,
-                    posY: pageY - top
-                }, subProps);
+    const onMouseMove = useCallback(subProps => {
+        const handler = debounce((pageX, pageY, currentTarget) => {
+            const { left, top } = currentTarget.getBoundingClientRect();
 
-            }, 10, true);
+            onHover({
+                posX: pageX - left,
+                posY: pageY - top
+            }, subProps);
 
-            return evt => {
-                customHandler(evt);
-                const { pageX, pageY, currentTarget } = evt;
+        }, 10, true);
 
-                return handler(pageX, pageY, currentTarget);
-            };
+        return evt => {
+            const { pageX, pageY, currentTarget } = evt;
+
+            return handler(pageX, pageY, currentTarget);
         };
-    }
-    getOnMouseLeave(customHandler = noop) {
-        return () => evt => {
-            customHandler(evt);
-            this.onHover(null);
-        };
-    }
-    getOnWheel(customHandler = noop) {
-        return ({ valX }) => evt => {
-            customHandler(evt);
-            if (this.props.isMobile || !this.props.zoomEffect) {
+    }, [onHover]);
+
+    const onMouseLeave = useCallback(() => () => onHover(null), []);
+
+    const range = useMemo(() => maxX - minX, [minX, maxX]);
+
+    const zoomLines = useCallback((newMinX, newMaxX) => lines.map(line => {
+        const data = line.get('data');
+
+        return line.set('data', data.filter((point, index) => {
+            if (pointVisible(point.get(0), newMinX, newMaxX)) {
+                return true;
+            }
+            if (index < data.size - 1 &&
+                pointVisible(data.getIn([index + 1, 0]), newMinX, newMaxX)) {
+                return true;
+            }
+            if (index > 0 &&
+                pointVisible(data.getIn([index - 1, 0]), newMinX, newMaxX)) {
+                return true;
+            }
+
+            return false;
+        }));
+    }), [lines]);
+
+    const getZoomedRange = useCallback((position, newZoomLevel) => {
+        let newMinX = zoom.minX;
+        let newMaxX = zoom.maxX;
+
+        if (position) {
+            const newRange = range * (1 - GRAPH_ZOOM_SPEED) ** newZoomLevel;
+
+            let newMinXTarget = position - newRange / 2;
+            let newMaxXTarget = position + newRange / 2;
+            if (newMinXTarget < minX) {
+                newMaxXTarget += minX - newMinXTarget;
+                newMinXTarget = minX;
+            } else if (newMaxXTarget > maxX) {
+                newMinXTarget -= newMaxXTarget - maxX;
+                newMaxXTarget = maxX;
+            }
+
+            newMinX = Math.max(minX, Math.round(newMinXTarget));
+            newMaxX = Math.min(maxX, Math.round(newMaxXTarget));
+        }
+
+        const zoomedLines = zoomLines(newMinX, newMaxX);
+        if (!pointsVisible(zoomedLines)) {
+            return null;
+        }
+
+        return zoomEffect(props, zoomedLines, { minX: newMinX, maxX: newMaxX });
+    });
+
+    const onWheel = useCallback(
+        ({ valX }) => debounce(evt => {
+            if (isMobile || !zoomEffect) {
                 return;
             }
 
             evt.preventDefault();
 
-            if (!this.state.hlPoint && !(evt.currentTarget && evt.currentTarget.offsetParent)) {
+            if (!hlPoint && !(graph.current && graph.current.offsetParent)) {
                 return;
             }
 
-            const position = this.state.hlPoint
-                ? this.state.hlPoint.valX
-                : valX(evt.pageX - evt.currentTarget.offsetParent.offsetLeft);
+            const position = hlPoint
+                ? hlPoint.valX
+                : valX(evt.pageX - graph.current.offsetParent.offsetLeft);
 
             // direction: in is -1, out is +1
             const direction = evt.deltaY / Math.abs(evt.deltaY);
-            const zoomLevel = Math.max(0, this.state.zoomLevel - direction);
-            const zoom = getZoomedRange(this.props, this.state, position, zoomLevel);
-            if (!zoom) {
+            const newZoomLevel = Math.max(0, zoomLevel - direction);
+
+            const newZoom = getZoomedRange(position, newZoomLevel);
+
+            if (!newZoom) {
                 return;
             }
 
-            const calc = genPixelCompute({
-                padding: this.state.padding,
-                width: this.props.width,
-                height: this.props.height,
-                lines: this.props.lines,
-                minY: this.props.minY,
-                maxY: this.props.maxY,
-                minX: this.props.minX,
-                maxX: this.props.maxX,
-                ...zoom,
-                zoomLevel
-            });
+            setZoomLevel(newZoomLevel);
+            setZoom(newZoom);
 
-            this.setState({ calc, zoom, zoomLevel });
-        };
-    }
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (propsChanged(nextProps, prevState.range)) {
-            return {
-                ...prevState,
-                outerProperties: {
-                    ...prevState.outerProperties,
-                    ...nextProps.outerProperties
-                },
-                svgProperties: {
-                    ...prevState.svgProperties,
-                    ...nextProps.svgProperties
-                },
-                range: {
-                    minX: nextProps.minX,
-                    maxX: nextProps.maxX,
-                    minY: nextProps.minY,
-                    maxY: nextProps.maxY,
-                    width: nextProps.width,
-                    height: nextProps.height
-                },
-                calc: genPixelCompute({
-                    padding: prevState.padding,
-                    width: nextProps.width,
-                    height: nextProps.height,
-                    lines: nextProps.lines,
-                    minY: nextProps.minY,
-                    maxY: nextProps.maxY,
-                    minX: nextProps.minX,
-                    maxX: nextProps.maxX,
-                    zoom: {},
-                    zoomLevel: 0
-                }),
-                zoom: {},
-                zoomLevel: 0
-            };
-        }
+            setCalc(genPixelCompute({
+                padding,
+                width,
+                height,
+                lines,
+                minY,
+                maxY,
+                minX,
+                maxX,
+                ...newZoom
+            }));
 
-        return prevState;
-    }
-    render() {
-        if (!this.state.calc) {
-            return null;
-        }
+        }, 10, true),
+        [
+            isMobile,
+            zoomEffect,
+            padding,
+            width,
+            height,
+            lines,
+            minY,
+            maxY,
+            minX,
+            maxX,
+            zoom,
+            zoomLevel
+        ]
+    );
 
-        return (
-            <LineGraphDumb
-                {...this.props}
-                {...this.mouseEffects}
-                {...this.state.zoom}
-                calc={this.state.calc}
-                outerProperties={this.state.outerProperties}
-                svgProperties={this.state.svgProperties}
-                hlPoint={this.state.hlPoint}
-            />
-        );
+    if (!calc) {
+        return null;
     }
+
+    const outerProperties = useMemo(() => ({
+        onMouseMove,
+        onMouseLeave,
+        ...(props.outerProperties || {})
+    }), [onMouseMove, onMouseLeave, props.outerProperties]);
+
+    const svgProperties = useMemo(() => ({
+        onWheel,
+        ...(props.svgProperties || {})
+    }), [onWheel, props.svgProperties]);
+
+    return (
+        <LineGraphDumb
+            svgRef={graph}
+            {...props}
+            {...zoom}
+            calc={calc}
+            outerProperties={outerProperties}
+            svgProperties={svgProperties}
+            hlPoint={hlPoint}
+        />
+    );
 }
+
+LineGraph.propTypes = {
+    lines: PropTypes.instanceOf(list).isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    padding: PropTypes.array,
+    minX: PropTypes.number,
+    maxX: PropTypes.number,
+    minY: PropTypes.number,
+    maxY: PropTypes.number,
+    isMobile: PropTypes.bool,
+    hoverEffect: PropTypes.object,
+    outerProperties: PropTypes.object,
+    svgProperties: PropTypes.object,
+    zoomEffect: PropTypes.func
+};
 

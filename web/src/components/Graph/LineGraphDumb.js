@@ -5,7 +5,9 @@ import Graph from '.';
 import HighlightPoint from '../HighlightPoint';
 import RenderedLine from './RenderedLine';
 
-export default function LineGraphDumb({ calc, lines, hlPoint, beforeLines, afterLines, ...props }) {
+export default function LineGraphDumb(allProps) {
+    const { calc, lines, hlPoint, beforeLines, afterLines, ...props } = allProps;
+
     const subProps = {
         ...calc,
         ...props
