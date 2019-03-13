@@ -1,48 +1,44 @@
-import React from 'react';
-import ImmutableComponent from '../../../ImmutableComponent';
+import React, { useRef, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import SuggestionsList from '../suggestions-list';
 import { getEditValue, getDefaultValue } from '../format';
 
-export default class InteractiveEditable extends ImmutableComponent {
-    constructor(props) {
-        super(props);
+export default function InteractiveEditable({ item, value, onChange }) {
+    const input = useRef(null);
 
-        this.input = null;
-    }
-    componentDidMount() {
+    useEffect(() => {
         setImmediate(() => {
-            if (this.input && this.input.focus && this.input.select) {
-                this.input.focus();
-                this.input.select();
+            if (input.current) {
+                if (input.focus) {
+                    input.focus();
+                }
+                if (input.select) {
+                    input.select();
+                }
             }
         });
-    }
-    render() {
-        const { item, value, onChange } = this.props;
+    }, []);
 
-        const inputRef = input => {
-            this.input = input;
-        };
+    const onInputChange = useCallback(evt => onChange(getEditValue(item, value, evt.target.value)),
+        [item, value]);
 
-        const onInputChange = evt => onChange(getEditValue(item, value, evt.target.value));
+    const className = classNames('active', 'editable', `editable-${item}`);
 
-        const className = classNames('active', 'editable', `editable-${item}`);
+    const inputClassName = classNames('editable-input');
 
-        const inputClassName = classNames('editable-input');
-
-        return <span className={className}>
+    return (
+        <span className={className}>
             <input
-                ref={inputRef}
+                ref={input}
                 className={inputClassName}
                 type="text"
                 defaultValue={getDefaultValue(item, value)}
                 onChange={onInputChange}
             />
             <SuggestionsList />
-        </span>;
-    }
+        </span>
+    );
 }
 
 InteractiveEditable.propTypes = {
