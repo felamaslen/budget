@@ -1,42 +1,41 @@
-import React, { Component } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { PAGES } from '../../constants/data';
 import ListAddEditItem from '../../containers/Editable/list-item';
 
-export default class AddForm extends Component {
-    componentDidUpdate(prevProps) {
-        if (this.addBtn && this.addBtn.focus &&
-            !prevProps.addBtnFocus && this.props.addBtnFocus) {
+export default function AddForm({ page, addBtnFocus, onAdd }) {
+    const addBtn = useRef(null);
+    const [wasFocused, setWasFocused] = useState(false);
 
-            setImmediate(() => this.addBtn.focus());
+    useEffect(() => {
+        if (addBtn.current && addBtn.current.focus && !wasFocused && addBtnFocus) {
+            setImmediate(() => addBtn.current.focus());
         }
-    }
-    render() {
-        const { page, onAdd } = this.props;
 
-        const addItems = PAGES[page].cols.map((item, col) => (
-            <ListAddEditItem
-                key={col}
-                page={page}
-                row={-1}
-                col={col}
-                id={null}
-            />
-        ));
+        setWasFocused(addBtnFocus);
 
-        const addBtnRef = input => {
-            this.addBtn = input;
-        };
+    }, [addBtnFocus]);
 
-        return (
-            <li className="li-add">
-                {addItems}
-                <span className="add-button-outer">
-                    <button ref={addBtnRef} onClick={() => onAdd(page)}>{'Add'}</button>
-                </span>
-            </li>
-        );
-    }
+    const addItems = useMemo(() => PAGES[page].cols.map((item, col) => (
+        <ListAddEditItem
+            key={col}
+            page={page}
+            row={-1}
+            col={col}
+            id={null}
+        />
+    )), [page]);
+
+    const onClick = useCallback(() => onAdd(page), [page]);
+
+    return (
+        <li className="li-add">
+            {addItems}
+            <span className="add-button-outer">
+                <button ref={addBtn} onClick={onClick}>{'Add'}</button>
+            </span>
+        </li>
+    );
 }
 
 AddForm.propTypes = {
