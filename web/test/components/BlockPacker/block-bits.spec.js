@@ -1,13 +1,14 @@
 /* eslint-disable no-unused-expressions */
 import { fromJS } from 'immutable';
-import 'babel-polyfill';
 import '../../browser';
+import { configure, shallow } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+configure({ adapter: new Adapter() });
 import chai, { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
 import chaiEnzyme from 'chai-enzyme';
 chai.use(chaiEnzyme());
-import { shallow } from 'enzyme';
 import React from 'react';
 import BlockBits, { BlockGroup, SubBlock } from '../../../src/components/BlockPacker/block-bits';
 

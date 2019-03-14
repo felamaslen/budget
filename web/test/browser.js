@@ -2,14 +2,12 @@ const { JSDOM } = require('jsdom');
 const matchMediaMock = require('match-media-mock').create();
 matchMediaMock.setConfig({ type: 'screen', width: 1200 });
 
-const enzyme = require('enzyme');
-const Adapter = require('enzyme-adapter-react-16');
-enzyme.configure({ adapter: new Adapter() });
-
 const exposedProperties = ['window', 'navigator', 'document'];
 
 global.window = (new JSDOM('')).window;
 global.document = window.document;
+
+global.window.Date = Date;
 
 global.window.matchMedia = (...args) => matchMediaMock(...args);
 
@@ -31,4 +29,5 @@ global.localStorage = {
 };
 
 global.HTMLElement = global.window.HTMLElement;
+
 

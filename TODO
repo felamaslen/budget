@@ -16,4 +16,7 @@
 - Pagination on list data
 - Client response data validation
 - Write unit tests for client [IN PROGRESS]
-- Use logger function instead of console.log
+- Use logger function instead of console.log [DONE]
+- Remove ImmutableJS
+- Relative imports
+- Replace enzyme with react-testing-library

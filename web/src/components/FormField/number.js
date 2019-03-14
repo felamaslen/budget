@@ -1,13 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default function FormFieldNumber({ value, onChange }) {
-    const procValue = Number(value);
-    const procOnChange = evt => onChange(Number(evt.target.value));
+import { useField } from './use-field';
 
-    return <div className="form-field form-field-number">
-        <input type="number" defaultValue={procValue} onChange={procOnChange} />
-    </div>;
+export default function FormFieldNumber({ value, onChange }) {
+    const [currentValue, onType, onBlur] = useField(
+        value,
+        onChange,
+        number => number,
+        Number
+    );
+
+    return (
+        <div className="form-field form-field-number">
+            <input
+                type="number"
+                defaultValue={currentValue}
+                onChange={onType}
+                onBlur={onBlur}
+            />
+        </div>
+    );
 }
 
 FormFieldNumber.propTypes = {

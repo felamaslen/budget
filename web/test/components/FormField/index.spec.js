@@ -1,3 +1,4 @@
+import '../../browser';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -24,8 +25,10 @@ describe('<FormFieldText />', () => {
     it('should render an input', () => {
         const wrapper = shallow(<FormFieldText {...props} />);
 
-        expect(wrapper.childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.deep.include({
+        const input = wrapper.childAt(0);
+
+        expect(input.is('input')).to.equal(true);
+        expect(input.props()).to.deep.include({
             type: 'text',
             defaultValue: 'foo'
         });
@@ -36,9 +39,13 @@ describe('<FormFieldText />', () => {
 
         expect(changed).to.equal(null);
 
-        wrapper.childAt(0).simulate('change', { target: { value: 'bar' } });
+        const input = wrapper.childAt(0);
 
-        expect(changed).to.equal('bar');
+        input.simulate('change', { target: { value: 'bar' } });
+
+        expect(changed).to.equal(null);
+
+        input.simulate('blur');
     });
 });
 

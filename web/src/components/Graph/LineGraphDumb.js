@@ -1,27 +1,29 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import Graph from '.';
 import HighlightPoint from '../HighlightPoint';
 import RenderedLine from './RenderedLine';
 
-export default function LineGraphDumb({ calc, lines, hlPoint, beforeLines, afterLines, ...props }) {
-    const subProps = {
+export default function LineGraphDumb(allProps) {
+    const { calc, lines, hlPoint, beforeLines, afterLines, ...props } = allProps;
+
+    const subProps = useMemo(() => ({
         ...calc,
         ...props
-    };
+    }), [calc, ...Object.keys(props).map(key => props[key])]);
 
     if (!lines.size) {
         return <Graph {...subProps} />;
     }
 
-    const renderedLines = lines.map(line => (
+    const renderedLines = useMemo(() => lines.map(line => (
         <RenderedLine
             key={line.get('key')}
             line={line}
             {...subProps}
         />
-    ));
+    )), [lines, subProps]);
 
     let highlightPoint = null;
     if (props.hoverEffect) {

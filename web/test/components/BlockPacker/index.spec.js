@@ -1,10 +1,9 @@
 /* eslint-disable no-unused-expressions */
+import '../../browser';
 import { List as list } from 'immutable';
 import { expect } from 'chai';
-import 'babel-polyfill';
 import React from 'react';
 import { shallow } from 'enzyme';
-import '../../browser';
 
 import BlockPacker from '../../../src/components/BlockPacker';
 

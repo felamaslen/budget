@@ -4,8 +4,7 @@
 
 import { connect } from 'react-redux';
 import './style.scss';
-import React from 'react';
-import PureComponent from '../../ImmutableComponent';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { List as list } from 'immutable';
 import classNames from 'classnames';
@@ -22,54 +21,64 @@ export function title(id) {
     return 'Add item';
 }
 
-export class ModalDialog extends PureComponent {
-    shouldComponentUpdate(nextProps) {
-        return nextProps.active !== this.props.active ||
-            nextProps.visible !== this.props.visible ||
-            nextProps.loading !== this.props.loading ||
-            nextProps.invalidKeys.size !== this.props.invalidKeys.size;
-    }
-    componentDidUpdate(prevProps) {
-        if (prevProps.visible && !this.props.visible) {
-            this.props.deactivate();
+export function ModalDialog({
+    active,
+    visible,
+    loading,
+    invalidKeys,
+    deactivate,
+    page,
+    id,
+    type,
+    fields,
+    onCancel,
+    onSubmit
+}) {
+    const [wasVisible, setWasVisible] = useState(visible);
+
+    useEffect(() => {
+        if (!visible && wasVisible) {
+            deactivate();
         }
+
+        setWasVisible(visible);
+
+    }, [visible]);
+
+    const className = classNames('modal-dialog-outer', type);
+
+    const dialogClass = classNames('dialog', { hidden: !visible, loading });
+
+    const onSubmitClick = useCallback(() => onSubmit(page), [page, onSubmit]);
+
+    if (!active) {
+        return null;
     }
-    render() {
-        const {
-            page, id, active, type, visible, loading, fields, onCancel, onSubmit
-        } = this.props;
 
-        if (!active) {
-            return null;
-        }
-
-        const className = classNames('modal-dialog-outer', type);
-
-        const dialogClass = classNames('dialog', { hidden: !visible, loading });
-
-        const items = fields.map((field, fieldKey) => <ModalDialogField key={field.get('item')}
-            field={field}
-            fieldKey={fieldKey}
-            invalidKeys={this.props.invalidKeys}
-        />);
-
-        return <div className={className}>
+    return (
+        <div className={className}>
             <div className={dialogClass}>
                 <span className="title">{title(id)}</span>
                 <ul className="form-list">
-                    {items}
+                    {fields.map((field, fieldKey) => (
+                        <ModalDialogField key={field.get('item')}
+                            field={field}
+                            fieldKey={fieldKey}
+                            invalidKeys={invalidKeys}
+                        />
+                    ))}
                 </ul>
                 <div className="buttons">
                     <button type="button" className="button-cancel" disabled={loading} onClick={onCancel}>
                         {'nope.avi'}
                     </button>
-                    <button type="button" className="button-submit" disabled={loading} onClick={() => onSubmit(page)}>
+                    <button type="button" className="button-submit" disabled={loading} onClick={onSubmitClick}>
                         {'Do it.'}
                     </button>
                 </div>
             </div>
-        </div>;
-    }
+        </div>
+    );
 }
 
 ModalDialog.propTypes = {
