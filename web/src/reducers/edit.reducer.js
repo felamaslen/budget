@@ -7,7 +7,7 @@ import { compose } from 'redux';
 import { DateTime } from 'luxon';
 import { PAGES } from '../constants/data';
 import { ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import { IDENTITY, getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
+import { IDENTITY, uuid, getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
 import { getNow } from '../selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
@@ -102,10 +102,13 @@ export function stringifyFields(fields) {
 
 export function rAddListItem(state, { page }) {
     if (state.get('loadingApi')) {
-        return rErrorMessageOpen(state, map({
-            level: ERROR_LEVEL_WARN,
-            text: 'Wait until the previous request has finished'
-        }));
+        return rErrorMessageOpen(state, {
+            msgId: uuid(),
+            message: map({
+                level: ERROR_LEVEL_WARN,
+                text: 'Wait until the previous request has finished'
+            })
+        });
     }
 
     const now = getNow(state);
@@ -137,10 +140,13 @@ export function rAddListItem(state, { page }) {
     const valid = invalidKeys.size === 0;
 
     if (!valid) {
-        return rErrorMessageOpen(state, map({
-            level: ERROR_LEVEL_WARN,
-            text: ERROR_MSG_BAD_DATA
-        }))
+        return rErrorMessageOpen(state, {
+            msgId: uuid(),
+            message: map({
+                level: ERROR_LEVEL_WARN,
+                text: ERROR_MSG_BAD_DATA
+            })
+        })
             .setIn(['edit', 'addFields'], null)
             .setIn(['edit', 'addFieldsString'], null)
             .set('loadingApi', false);
