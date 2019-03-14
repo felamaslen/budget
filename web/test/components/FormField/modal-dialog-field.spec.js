@@ -1,8 +1,10 @@
+import '../../browser';
 import { Map as map, List as list } from 'immutable';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
 import ModalDialogField from '../../../src/components/FormField/modal-dialog-field';
+import FormField from '../../../src/containers/FormField';
 import { TransactionsList } from '../../../src/helpers/data';
 
 describe('<ModalDialogField />', () => {
@@ -33,7 +35,14 @@ describe('<ModalDialogField />', () => {
     it('should render a form field container', () => {
         const wrapper = shallow(<ModalDialogField {...props} />);
 
-        expect(wrapper.childAt(1).name()).to.equal('Connect(FormFieldText)');
+        const formField = wrapper.childAt(1);
+
+        expect(formField.is(FormField)).to.equal(true);
+        expect(formField.props()).to.deep.equal({
+            fieldKey: 3,
+            item: 'foo',
+            value: 'bar'
+        });
     });
 
     it('should render an invalid class', () => {

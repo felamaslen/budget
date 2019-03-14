@@ -1,5 +1,7 @@
+import '../../browser';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import 'react-testing-library/cleanup-after-each';
+import { cleanup, render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldCost from '../../../src/components/FormField/cost';
 
@@ -14,31 +16,49 @@ describe('<FormFieldCost />', () => {
         onChange
     };
 
-    it('should render its basic structure', () => {
-        const wrapper = shallow(<FormFieldCost {...props} />);
+    before(() => {
+        cleanup();
+    });
 
-        expect(wrapper.is('div.form-field.form-field-cost')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
+    it('should render its basic structure', () => {
+        const { container } = render(<FormFieldCost {...props} />);
+
+        const [div] = container.childNodes;
+
+        expect(div.tagName).to.equal('DIV');
+
+        expect(div.className).to.equal('form-field form-field-cost');
+
+        expect(div.childNodes).to.have.length(1);
     });
 
     it('should render an input', () => {
-        const wrapper = shallow(<FormFieldCost {...props} />);
+        const { container } = render(<FormFieldCost {...props} />);
 
-        expect(wrapper.childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            type: 'number',
-            step: '0.01',
-            defaultValue: 103.45
-        });
+        const [div] = container.childNodes;
+        const [input] = div.childNodes;
+
+        expect(input.tagName).to.equal('INPUT');
+        expect(input.type).to.equal('number');
+        expect(input.step).to.equal('0.01');
+        expect(input.value).to.equal('103.45');
     });
 
     it('should fire onChange', () => {
-        const wrapper = shallow(<FormFieldCost {...props} />);
+        const { container } = render(<FormFieldCost {...props} />);
+
+        const [div] = container.childNodes;
+        const [input] = div.childNodes;
 
         expect(changed).to.equal(null);
 
-        wrapper.childAt(0).simulate('change', { target: { value: '10.93' } });
+        fireEvent.change(input, { target: { value: '10.93' } });
+
+        expect(changed).to.equal(null);
+
+        fireEvent.blur(input);
 
         expect(changed).to.equal(1093);
     });
 });
+

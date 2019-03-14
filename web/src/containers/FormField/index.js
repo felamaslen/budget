@@ -3,8 +3,8 @@
  */
 
 import { connect } from 'react-redux';
-
-import { TransactionsList } from '../../helpers/data';
+import React, { useMemo } from 'react';
+import PropTypes from 'prop-types';
 
 import FormFieldText from '../../components/FormField';
 import FormFieldDate from '../../components/FormField/date';
@@ -13,72 +13,65 @@ import FormFieldTransactions from '../../components/FormField/transactions';
 
 import { aFormFieldChanged } from '../../actions/form.actions';
 
-function getFormFieldComponent(item) {
+function FormField({ fieldKey, item, value, makeOnChange }) {
+    const onChange = useMemo(() => makeOnChange(fieldKey, item), [fieldKey, item]);
+
     if (item === 'date') {
-        return FormFieldDate;
+        return (
+            <FormFieldDate
+                value={value}
+                onChange={onChange}
+            />
+        );
     }
 
     if (item === 'cost') {
-        return FormFieldCost;
+        return (
+            <FormFieldCost
+                value={value}
+                onChange={onChange}
+            />
+        );
     }
 
     if (item === 'transactions') {
-        return FormFieldTransactions;
+        return (
+            <FormFieldTransactions
+                value={value}
+                onChange={onChange}
+            />
+        );
     }
 
-    return FormFieldText;
+    return (
+        <FormFieldText
+            value={value}
+            onChange={onChange}
+        />
+    );
 }
 
-function getStateProps(item, defaultValue) {
-    const value = item === 'cost' && !defaultValue
-        ? 0
-        : defaultValue;
-
-    return () => ({ value });
-}
-
-function getDispatchProps(fieldKey, item) {
-    const onChange = (dispatch, fieldValue) => {
-        return dispatch(aFormFieldChanged(fieldKey, fieldValue));
-    };
-
-    if (item === 'transactions') {
-        const modifyTransactionsList = (dispatch, transactionsList, value, key, trKey) => {
-            if (value === null) {
-                return dispatch(aFormFieldChanged(fieldKey, null));
-            }
-
-            const newList = transactionsList.list
-                .setIn([key, trKey], value);
-
-            return onChange(dispatch, new TransactionsList(newList, false));
-        };
-
-        return dispatch => ({
-            onDateChange: (transactionsList, ymd, key) => {
-                return modifyTransactionsList(dispatch, transactionsList, ymd, key, 'date');
-            },
-            onUnitsChange: (transactionsList, units, key) => {
-                return modifyTransactionsList(dispatch, transactionsList, units, key, 'units');
-            },
-            onCostChange: (transactionsList, cost, key) => {
-                return modifyTransactionsList(dispatch, transactionsList, cost, key, 'cost');
-            }
-        });
-    }
-
-    return dispatch => ({
-        onChange: fieldValue => onChange(dispatch, fieldValue)
-    });
-}
-
-export default ({ fieldKey, item, value }) => {
-    const Component = getFormFieldComponent(item);
-
-    const mapStateToProps = getStateProps(item, value);
-
-    const mapDispatchToProps = getDispatchProps(fieldKey, item);
-
-    return connect(mapStateToProps, mapDispatchToProps)(Component);
+FormField.propTypes = {
+    fieldKey: PropTypes.number.isRequired,
+    item: PropTypes.string.isRequired,
+    value: PropTypes.any,
+    makeOnChange: PropTypes.func.isRequired
 };
+
+const mapDispatchToProps = dispatch => ({
+    makeOnChange: (fieldKey, item) => {
+        if (item === 'transactions') {
+            return (transactionsList, key, value, subField) => {
+                return dispatch(aFormFieldChanged(
+                    fieldKey,
+                    transactionsList.setIn([key, subField], value)
+                ));
+            };
+        }
+
+        return value => dispatch(aFormFieldChanged(fieldKey, value));
+    }
+});
+
+export default connect(null, mapDispatchToProps)(FormField);
 

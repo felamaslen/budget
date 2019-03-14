@@ -1,4 +1,5 @@
-import React from 'react';
+import { Map as map } from 'immutable';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import FormFieldDate from './date';
@@ -6,50 +7,70 @@ import FormFieldNumber from './number';
 import FormFieldCost from './cost';
 import { TransactionsList } from '../../helpers/data';
 
-export default function FormFieldTransactions({ value, onDateChange, onUnitsChange, onCostChange }) {
-    const transactionsList = value.list.map((item, key) => {
-        const dateValue = item.get('date');
-        const dateChange = ymd => onDateChange(value, ymd, key);
+function FormFieldTransactionsItem({ item, onChange }) {
+    const onChangeDate = useMemo(() => onChange('date'), [onChange]);
+    const onChangeUnits = useMemo(() => onChange('units'), [onChange]);
+    const onChangeCost = useMemo(() => onChange('cost'), [onChange]);
 
-        const unitsValue = item.get('units');
-        const unitsChange = units => onUnitsChange(value, units, key);
-
-        const costValue = item.get('cost');
-        const costChange = cost => onCostChange(value, cost, key);
-
-        return <li key={key}>
+    return (
+        <li>
             <span className="transaction">
                 <span className="row">
                     <span className="col">{'Date:'}</span>
                     <span className="col">
-                        <FormFieldDate value={dateValue} onChange={dateChange} />
+                        <FormFieldDate
+                            value={item.get('date')}
+                            onChange={onChangeDate}
+                        />
                     </span>
                 </span>
                 <span className="row">
                     <span className="col">{'Units:'}</span>
                     <span className="col">
-                        <FormFieldNumber value={unitsValue} onChange={unitsChange} />
+                        <FormFieldNumber
+                            value={item.get('units')}
+                            onChange={onChangeUnits}
+                        />
                     </span>
                 </span>
                 <span className="row">
                     <span className="col">{'Cost:'}</span>
                     <span className="col">
-                        <FormFieldCost value={costValue} onChange={costChange} />
+                        <FormFieldCost
+                            value={item.get('cost')}
+                            onChange={onChangeCost}
+                        />
                     </span>
                 </span>
             </span>
-        </li>;
-    });
+        </li>
+    );
+}
 
-    return <ul className="transactions-list">
-        {transactionsList}
-    </ul>;
+FormFieldTransactionsItem.propTypes = {
+    item: PropTypes.instanceOf(map).isRequired,
+    onChange: PropTypes.func.isRequired
+};
+
+export default function FormFieldTransactions({ value, onChange }) {
+    const makeOnChangeField = useCallback(key => field => subValue =>
+        onChange(value.list, key, subValue, field), [value.list]
+    );
+
+    return (
+        <ul className="transactions-list">
+            {value.list.map((item, key) => (
+                <FormFieldTransactionsItem key={key}
+                    item={item}
+                    onChange={makeOnChangeField(key)}
+                />
+            ))}
+        </ul>
+    );
 }
 
 FormFieldTransactions.propTypes = {
     value: PropTypes.instanceOf(TransactionsList).isRequired,
-    onDateChange: PropTypes.func.isRequired,
-    onUnitsChange: PropTypes.func.isRequired,
-    onCostChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired
 };
 

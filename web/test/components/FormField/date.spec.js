@@ -1,5 +1,7 @@
+import '../../browser';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import 'react-testing-library/cleanup-after-each';
+import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldDate from '../../../src/components/FormField/date';
 import { dateInput } from '../../../src/helpers/date';
@@ -20,38 +22,55 @@ describe('<FormFieldDate />', () => {
     };
 
     it('should render its basic structure', () => {
-        const wrapper = shallow(<FormFieldDate{...props} />);
+        const { container } = render(<FormFieldDate {...props} />);
 
-        expect(wrapper.is('div.form-field.form-field-date')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
+        const [div] = container.childNodes;
+
+        expect(div.tagName).to.equal('DIV');
+
+        expect(div.className).to.equal('form-field form-field-date');
+
+        expect(div.childNodes).to.have.length(1);
     });
 
     it('should render an input', () => {
-        const wrapper = shallow(<FormFieldDate {...props} />);
+        const { container } = render(<FormFieldDate {...props} />);
 
-        expect(wrapper.childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            type: 'date',
-            defaultValue: '2017-11-10'
-        });
+        const [div] = container.childNodes;
+        const [input] = div.childNodes;
+
+        expect(input.tagName).to.equal('INPUT');
+        expect(input.type).to.equal('date');
+        expect(input.value).to.equal('2017-11-10');
     });
 
     it('should fire onChange', () => {
-        const wrapper = shallow(<FormFieldDate {...props} />);
+        const { container } = render(<FormFieldDate {...props} />);
+
+        const [div] = container.childNodes;
+        const [input] = div.childNodes;
 
         expect(changed).to.equal(null);
 
-        wrapper.childAt(0).simulate('change', { target: { value: '2014-04-09' } });
+        fireEvent.change(input, { target: { value: '2014-04-09' } });
+
+        expect(changed).to.equal(null);
+
+        fireEvent.blur(input);
 
         expect(changed.toString()).to.deep.equal(dateInput('9/4/2014').toString());
     });
 
     it('should handle bad values', () => {
-        const wrapper = shallow(<FormFieldDate {...props} />);
+        const { container } = render(<FormFieldDate {...props} />);
+
+        const [div] = container.childNodes;
+        const [input] = div.childNodes;
 
         expect(changed).to.equal(null);
 
-        wrapper.childAt(0).simulate('change', { target: { value: 'not a date' } });
+        fireEvent.change(input, { target: { value: 'not a date' } });
+        fireEvent.blur(input);
 
         expect(changed.toString()).to.equal('Invalid DateTime');
     });

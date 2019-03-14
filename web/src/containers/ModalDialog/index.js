@@ -4,7 +4,7 @@
 
 import { connect } from 'react-redux';
 import './style.scss';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { List as list } from 'immutable';
 import classNames from 'classnames';
@@ -51,36 +51,34 @@ export function ModalDialog({
 
     const onSubmitClick = useCallback(() => onSubmit(page), [page, onSubmit]);
 
-    return useMemo(() => {
-        if (!active) {
-            return null;
-        }
+    if (!active) {
+        return null;
+    }
 
-        return (
-            <div className={className}>
-                <div className={dialogClass}>
-                    <span className="title">{title(id)}</span>
-                    <ul className="form-list">
-                        {fields.map((field, fieldKey) => (
-                            <ModalDialogField key={field.get('item')}
-                                field={field}
-                                fieldKey={fieldKey}
-                                invalidKeys={invalidKeys}
-                            />
-                        ))}
-                    </ul>
-                    <div className="buttons">
-                        <button type="button" className="button-cancel" disabled={loading} onClick={onCancel}>
-                            {'nope.avi'}
-                        </button>
-                        <button type="button" className="button-submit" disabled={loading} onClick={onSubmitClick}>
-                            {'Do it.'}
-                        </button>
-                    </div>
+    return (
+        <div className={className}>
+            <div className={dialogClass}>
+                <span className="title">{title(id)}</span>
+                <ul className="form-list">
+                    {fields.map((field, fieldKey) => (
+                        <ModalDialogField key={field.get('item')}
+                            field={field}
+                            fieldKey={fieldKey}
+                            invalidKeys={invalidKeys}
+                        />
+                    ))}
+                </ul>
+                <div className="buttons">
+                    <button type="button" className="button-cancel" disabled={loading} onClick={onCancel}>
+                        {'nope.avi'}
+                    </button>
+                    <button type="button" className="button-submit" disabled={loading} onClick={onSubmitClick}>
+                        {'Do it.'}
+                    </button>
                 </div>
             </div>
-        );
-    }, [active, visible, loading, invalidKeys.size]);
+        </div>
+    );
 }
 
 ModalDialog.propTypes = {

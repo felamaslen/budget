@@ -3,32 +3,38 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import getFormField from '../../containers/FormField';
+import FormField from '../../containers/FormField';
 
 export default function ModalDialogField({ field, fieldKey, invalidKeys }) {
-    const FieldContainer = getFormField({
-        fieldKey,
-        item: field.get('item'),
-        value: field.get('value')
-    });
-
     const invalid = invalidKeys.includes(fieldKey);
+
+    const formField = (
+        <FormField
+            fieldKey={fieldKey}
+            item={field.get('item')}
+            value={field.get('value')}
+        />
+    );
 
     const className = classNames('form-row', field.get('item'), { invalid });
 
     if (field.get('item') === 'transactions') {
-        return <li className={className}>
-            <div className="inner">
-                <span className="form-label">{field.get('item')}</span>
-                <FieldContainer />
-            </div>
-        </li>;
+        return (
+            <li className={className}>
+                <div className="inner">
+                    <span className="form-label">{field.get('item')}</span>
+                    {formField}
+                </div>
+            </li>
+        );
     }
 
-    return <li className={className}>
-        <span className="form-label">{field.get('item')}</span>
-        <FieldContainer />
-    </li>;
+    return (
+        <li className={className}>
+            <span className="form-label">{field.get('item')}</span>
+            {formField}
+        </li>
+    );
 }
 
 ModalDialogField.propTypes = {
