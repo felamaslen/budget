@@ -2,34 +2,33 @@ import './style.scss';
 import { connect } from 'react-redux';
 import { getLoadedStatus } from '../../selectors/app';
 import { aContentRequested } from '../../actions/content.actions';
-import React from 'react';
-import ImmutableComponent from '../../ImmutableComponent';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-class Page extends ImmutableComponent {
-    componentDidMount() {
-        this.props.onLoad(this.props.page);
-    }
-    componentDidUpdate(prevProps) {
-        if (!this.props.loaded && this.props.page !== prevProps.page) {
-            this.props.onLoad(this.props.page);
-        }
-    }
-    render() {
-        const { loaded, page, children } = this.props;
-        if (!loaded) {
-            return null;
+function Page({ page, loaded, children, onLoad }) {
+    const [prevPage, setPrevPage] = useState(null);
+
+    useEffect(() => {
+        if (!loaded && page !== prevPage) {
+            onLoad(page);
         }
 
-        const className = classNames('page', `page-${page}`);
+        setPrevPage(page);
 
-        return (
-            <div className={className}>
-                {children}
-            </div>
-        );
+    }, [page, loaded]);
+
+    if (!loaded) {
+        return null;
     }
+
+    const className = classNames('page', `page-${page}`);
+
+    return (
+        <div className={className}>
+            {children}
+        </div>
+    );
 }
 
 Page.propTypes = {

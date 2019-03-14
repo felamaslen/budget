@@ -1,7 +1,7 @@
 import '../../browser';
 import { expect } from 'chai';
 import 'react-testing-library/cleanup-after-each';
-import { cleanup, render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldCost from '../../../src/components/FormField/cost';
 
@@ -15,10 +15,6 @@ describe('<FormFieldCost />', () => {
         value: 10345,
         onChange
     };
-
-    before(() => {
-        cleanup();
-    });
 
     it('should render its basic structure', () => {
         const { container } = render(<FormFieldCost {...props} />);
