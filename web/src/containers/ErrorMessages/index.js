@@ -5,8 +5,7 @@
 import './style.scss';
 import { List } from 'immutable';
 import { connect } from 'react-redux';
-import React from 'react';
-import PureComponent from '../../ImmutableComponent';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import {
@@ -14,40 +13,47 @@ import {
 } from '../../constants/error';
 import { aErrorClosed, aErrorRemoved } from '../../actions/error.actions';
 
-class ErrorMessages extends PureComponent {
-    componentDidUpdate(prevProps) {
-        const messagesAdded = prevProps.list.size < this.props.list.size;
-        if (messagesAdded) {
-            this.props.list
-                .filter(msg => prevProps.list.findIndex(
-                    old => old.get('id') === msg.get('id')
-                ) === -1)
-                .map(msg => msg.get('id'))
-                .forEach(msgId => setTimeout(
-                    () => this.props.closeMessage(msgId), ERROR_MESSAGE_DELAY)
-                );
-        }
-    }
-    render() {
-        const messages = this.props.list.map((msg, key) => {
-            const msgClasses = classNames('message', {
-                debug: msg.get('level') === ERROR_LEVEL_DEBUG,
-                warn: msg.get('level') === ERROR_LEVEL_WARN,
-                error: msg.get('level') === ERROR_LEVEL_ERROR,
-                closed: msg.get('closed')
+function ErrorMessages({ list, closeMessage }) {
+    const [prevList, setPrevList] = useState(list);
+    const hideTimers = useRef([]);
+
+    useEffect(() => () => hideTimers.current.forEach(timer => clearTimeout(timer)), []);
+
+    const onClose = useCallback(messageId => () => closeMessage(messageId));
+
+    useEffect(() => {
+        if (prevList.size < list.size) {
+            const hideIds = list
+                .filter(msg => !prevList.some(old => old.get('id') === msg.get('id')))
+                .map(msg => msg.get('id'));
+
+            hideIds.forEach(messageId => {
+                hideTimers.current.push(setTimeout(onClose(messageId), ERROR_MESSAGE_DELAY));
             });
+        }
 
-            const closeMessage = () => this.props.closeMessage(msg.get('id'));
+        setPrevList(list);
 
-            return <li key={key} className={msgClasses} onClick={closeMessage}>
-                <span>{msg.get('text')}</span>
-            </li>;
-        });
+    }, [list]);
 
-        return <ul className="messages-outer">
-            {messages}
-        </ul>;
-    }
+    return (
+        <ul className="messages-outer">
+            {list.map((msg, key) => {
+                const msgClasses = classNames('message', {
+                    debug: msg.get('level') === ERROR_LEVEL_DEBUG,
+                    warn: msg.get('level') === ERROR_LEVEL_WARN,
+                    error: msg.get('level') === ERROR_LEVEL_ERROR,
+                    closed: msg.get('closed')
+                });
+
+                return (
+                    <li key={key} className={msgClasses} onClick={onClose(msg.get('id'))}>
+                        <span>{msg.get('text')}</span>
+                    </li>
+                );
+            })}
+        </ul>
+    );
 }
 
 ErrorMessages.propTypes = {
