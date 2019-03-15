@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 
-import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '../constants/stocks';
+import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '~client/constants/stocks';
 
 export function rHandleStocksListResponse(state, response) {
     if (!response) {

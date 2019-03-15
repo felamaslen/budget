@@ -4,10 +4,10 @@ import {
     GRAPH_FUNDS_MODE_PRICE,
     GRAPH_FUNDS_MODE_ROI,
     GRAPH_FUNDS_OVERALL_ID
-} from '../../constants/graph';
-import { COLOR_GRAPH_FUND_LINE } from '../../constants/colors';
-import { rgba, colorKey } from '../../helpers/color';
-import { separateLines } from '../../helpers/funds';
+} from '~client/constants/graph';
+import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
+import { rgba, colorKey } from '~client/helpers/color';
+import { separateLines } from '~client/helpers/funds';
 import { getViewSoldFunds, transactionsKey, itemKey, getRowLengths, getCurrentFundsCache, getFundsRows } from './helpers';
 import { getFundLineProcessed } from './lines';
 

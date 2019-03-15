@@ -2,10 +2,10 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Arrow from '../Arrow';
-import { FONT_GRAPH_KEY } from '../../constants/graph';
-import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../constants/colors';
-import { formatCurrency } from '../../helpers/format';
-import { rgba } from '../../helpers/color';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
+import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
+import { formatCurrency } from '~client/helpers/format';
+import { rgba } from '~client/helpers/color';
 
 const formatTarget = target => `${formatCurrency(target.get('value'), {
     raw: true, noPence: true, abbreviate: true, precision: 0

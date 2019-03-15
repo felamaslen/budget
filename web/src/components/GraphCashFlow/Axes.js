@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE } from '../../constants/colors';
-import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '../../constants/graph';
-import { rgba } from '../../helpers/color';
-import { getTickSize, formatCurrency } from '../../helpers/format';
+import { COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE } from '~client/constants/colors';
+import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '~client/constants/graph';
+import { rgba } from '~client/helpers/color';
+import { getTickSize, formatCurrency } from '~client/helpers/format';
 import { getTimeScale } from '../Graph/helpers';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {

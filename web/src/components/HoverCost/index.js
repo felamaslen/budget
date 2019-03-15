@@ -2,7 +2,7 @@ import './style.scss';
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency } from '../../helpers/format';
+import { formatCurrency } from '~client/helpers/format';
 
 export default function HoverCost(allProps) {
     const [hover, setHover] = useState(null);

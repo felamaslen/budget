@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import BaseKey from '../GraphCashFlow/BaseKey';
-import { FONT_GRAPH_KEY } from '../../constants/graph';
-import { COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '../../constants/colors';
-import { rgba } from '../../helpers/color';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
+import { COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
+import { rgba } from '~client/helpers/color';
 
 export default function Key({ pixX, pixY, maxX, minY, maxY, title }) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;

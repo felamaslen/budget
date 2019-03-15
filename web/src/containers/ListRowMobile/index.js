@@ -1,10 +1,10 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { LIST_COLS_MOBILE } from '../../constants/data';
-import { aMobileEditDialogOpened } from '../../actions/form.actions';
+import { LIST_COLS_MOBILE } from '~client/constants/data';
+import { aMobileEditDialogOpened } from '~client/actions/form.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import ListRowCellMobile from '../../components/ListRowCellMobile';
+import ListRowCellMobile from '~client/components/ListRowCellMobile';
 
 export function ListRowMobile({ page, id, row, colKeys, listColsMobile, AfterRowMobile, onEdit }) {
     const cells = (listColsMobile || LIST_COLS_MOBILE).map((column, key) => (

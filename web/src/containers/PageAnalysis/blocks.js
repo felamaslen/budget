@@ -1,10 +1,10 @@
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
-import { aBlockClicked } from '../../actions/analysis.actions';
-import { aContentBlockHovered } from '../../actions/content.actions';
+import { aBlockClicked } from '~client/actions/analysis.actions';
+import { aContentBlockHovered } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import BlockPacker from '../../components/BlockPacker';
+import BlockPacker from '~client/components/BlockPacker';
 
 export function Blocks(props) {
     return <BlockPacker page="analysis" {...props} />;

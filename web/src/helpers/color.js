@@ -4,8 +4,8 @@
 
 import { Map as map } from 'immutable';
 import ColorHash from 'color-hash';
-import { OVERVIEW_COLUMNS } from '../constants/data';
-import { COLOR_CATEGORY } from '../constants/colors';
+import { OVERVIEW_COLUMNS } from '~client/constants/data';
+import { COLOR_CATEGORY } from '~client/constants/colors';
 import { listAverage } from './data';
 
 export function rgba(values) {

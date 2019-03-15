@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import AddForm from './AddForm';
 import ListHeadDesktop from '../ListHeadDesktop';
-import ListRowDesktop from '../../containers/ListRowDesktop';
+import ListRowDesktop from '~client/containers/ListRowDesktop';
 
 export default function ListBodyDesktop(props) {
     const {

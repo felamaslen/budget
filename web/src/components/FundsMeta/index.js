@@ -1,9 +1,9 @@
 import React from 'react';
-import { mediaQueryMobile } from '../../constants';
+import { mediaQueryMobile } from '~client/constants';
 import Media from 'react-media';
-import StocksList from '../../containers/StocksList';
-import GraphFunds from '../../containers/GraphFunds';
-import ListHeadFundsMobile from '../../containers/ListHeadFundsMobile';
+import StocksList from '~client/containers/StocksList';
+import GraphFunds from '~client/containers/GraphFunds';
+import ListHeadFundsMobile from '~client/containers/ListHeadFundsMobile';
 
 export default function FundsMeta() {
     return (

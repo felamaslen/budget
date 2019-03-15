@@ -2,7 +2,7 @@
  * Actions called on the mobile-editing form framework
  */
 
-import * as A from '../constants/actions';
+import * as A from '~client/constants/actions';
 
 export const aMobileEditDialogOpened = (page, id) => ({ type: A.FORM_EDIT_DIALOG_OPENED, page, id });
 export const aMobileAddDialogOpened = page => ({ type: A.FORM_ADD_DIALOG_OPENED, page });

@@ -3,8 +3,8 @@ import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
-import { makeGetRowIds, getAllPageRows } from '../selectors/list';
-import { PAGES } from '../constants/data';
+import { makeGetRowIds, getAllPageRows } from '~client/selectors/list';
+import { PAGES } from '~client/constants/data';
 
 export const rOnWindowResize = (state, { size }) => state
     .setIn(['other', 'windowWidth'], size);

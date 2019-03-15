@@ -1,14 +1,14 @@
 import './style.scss';
 import { connect } from 'react-redux';
-import { aMobileAddDialogOpened } from '../../actions/form.actions';
-import { aListItemAdded } from '../../actions/edit.actions';
-import { makeGetRowIds, makeGetDailyTotals, makeGetWeeklyAverages } from '../../selectors/list';
+import { aMobileAddDialogOpened } from '~client/actions/form.actions';
+import { aListItemAdded } from '~client/actions/edit.actions';
+import { makeGetRowIds, makeGetDailyTotals, makeGetWeeklyAverages } from '~client/selectors/list';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { PAGES } from '../../constants/data';
+import { PAGES } from '~client/constants/data';
 import Page from '../Page';
-import ListBody from '../../components/ListBody';
+import ListBody from '~client/components/ListBody';
 
 function PageList(props) {
     const { page, After } = props;

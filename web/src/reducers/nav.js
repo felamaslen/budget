@@ -2,7 +2,7 @@
  * Helper functions for the app reducer to decide how to navigate in the app
  */
 
-import { PAGES } from '../constants/data';
+import { PAGES } from '~client/constants/data';
 
 function getNavRow({ dx, dy, numRows, numCols, currentRow, currentCol }) {
     const wasInactive = currentCol === -1 && currentRow === 0;

@@ -2,12 +2,12 @@ import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
 import { createSelector } from 'reselect';
 import { compose } from 'redux';
-import { AVERAGE_MEDIAN } from '../constants';
-import { OVERVIEW_COLUMNS } from '../constants/data';
-import { GRAPH_SPEND_CATEGORIES } from '../constants/graph';
-import { FUTURE_INVESTMENT_RATE } from '../constants/stocks';
-import { listAverage, randnBm } from '../helpers/data';
-import { getOverviewScoreColor, getOverviewCategoryColor } from '../helpers/color';
+import { AVERAGE_MEDIAN } from '~client/constants';
+import { OVERVIEW_COLUMNS } from '~client/constants/data';
+import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
+import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
+import { listAverage, randnBm } from '~client/helpers/data';
+import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/helpers/color';
 import { getNow } from './app';
 
 const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');

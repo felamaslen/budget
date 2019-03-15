@@ -3,11 +3,11 @@
  */
 
 import { List as list, Map as map, OrderedMap as orderedMap } from 'immutable';
-import { DATA_KEY_ABBR } from '../constants/data';
-import { GRAPH_FUNDS_OVERALL_ID } from '../constants/graph';
-import { sortRowsByDate } from '../helpers/data';
-import { getRowLengths } from '../selectors/funds/helpers';
-import { getNow } from '../selectors/app';
+import { DATA_KEY_ABBR } from '~client/constants/data';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { sortRowsByDate } from '~client/helpers/data';
+import { getRowLengths } from '~client/selectors/funds/helpers';
+import { getNow } from '~client/selectors/app';
 import { processRawListRows } from './list.reducer';
 
 export function getInitialEnabledList(prices) {

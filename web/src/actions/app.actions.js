@@ -2,7 +2,7 @@
  * Actions called by the header (application-wide functions)
  */
 
-import * as A from '../constants/actions';
+import * as A from '~client/constants/actions';
 
 export const aWindowResized = size => ({ type: A.WINDOW_RESIZED, size });
 export const aSettingsLoaded = () => ({ type: A.SETTINGS_LOADED });

@@ -2,13 +2,13 @@ import { delay } from 'redux-saga';
 import { all, fork, select, takeLatest, take, cancel, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
-import { FORM_DIALOG_CLOSED, EDIT_CHANGED, EDIT_SUGGESTIONS_REQUESTED } from '../constants/actions';
-import { API_PREFIX, MAX_SUGGESTIONS, PAGES } from '../constants/data';
+import { FORM_DIALOG_CLOSED, EDIT_CHANGED, EDIT_SUGGESTIONS_REQUESTED } from '~client/constants/actions';
+import { API_PREFIX, MAX_SUGGESTIONS, PAGES } from '~client/constants/data';
 
 import { aSuggestionsRequested, aSuggestionsReceived } from '../actions/edit.actions';
 import { aMobileDialogClosed } from '../actions/form.actions';
-import { getApiKey } from '../selectors/app';
-import { getModalState, suggestionsInfo } from '../selectors/edit';
+import { getApiKey } from '~client/selectors/app';
+import { getModalState, suggestionsInfo } from '~client/selectors/edit';
 import { addServerDataRequest } from './app.saga';
 
 export function *triggerEditSuggestionsRequest({ page, item, value }) {

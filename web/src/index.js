@@ -10,7 +10,7 @@ import { AppContainer } from 'react-hot-loader';
 import { render } from 'react-dom';
 
 import store from './store';
-import Root from './containers/Root';
+import Root from '~client/containers/Root';
 
 // import styles and favicon
 import './images/favicon.png';

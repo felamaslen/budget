@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { PAGES } from '../../constants/data';
+import { PAGES } from '~client/constants/data';
 
 import React from 'react';
 import PropTypes from 'prop-types';

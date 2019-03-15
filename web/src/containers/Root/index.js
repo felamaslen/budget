@@ -1,15 +1,15 @@
 import './style.scss';
 import { connect, Provider } from 'react-redux';
-import { aUserLoggedOut } from '../../actions/app.actions';
-import { aPageSet, aContentRequested } from '../../actions/content.actions';
+import { aUserLoggedOut } from '~client/actions/app.actions';
+import { aPageSet, aContentRequested } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter } from 'react-router-dom';
 import ErrorMessages from '../ErrorMessages';
 import Spinner from '../Spinner';
 import LoginForm from '../LoginForm';
-import Content from '../../components/Content';
-import Header from '../../components/Header';
+import Content from '~client/components/Content';
+import Header from '~client/components/Header';
 
 function Root({ store, loggedIn, loadContent, ...props }) {
     return (

@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { PAGES } from '../../constants/data';
+import { PAGES } from '~client/constants/data';
 
 export const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 export const itemKey = PAGES.funds.cols.indexOf('item');

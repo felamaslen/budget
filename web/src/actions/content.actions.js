@@ -2,7 +2,7 @@
  * Actions called on content
  */
 
-import * as A from '../constants/actions';
+import * as A from '~client/constants/actions';
 
 export const aContentRequested = req => ({ type: A.CONTENT_REQUESTED, ...req });
 export const aContentLoaded = res => ({ type: A.CONTENT_LOADED, ...res });
