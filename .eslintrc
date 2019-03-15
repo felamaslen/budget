@@ -22,6 +22,7 @@
     },
     "plugins": [
         "react",
+        "react-hooks",
         "babel"
     ],
     "rules": {
@@ -243,6 +244,7 @@
             { "allowTemplateLiterals": true }
         ],
         "radix": "error",
+        "react-hooks/rules-of-hooks": "error",
         "require-await": "error",
         "require-jsdoc": "off",
         "rest-spread-spacing": [
