@@ -45,7 +45,7 @@ function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedVal
             <span className="toggle-view-sold">
                 <input type="checkbox"
                     checked={viewSoldFunds}
-                    onClick={onViewSoldToggle}
+                    onChange={onViewSoldToggle}
                 />
                 <span>{'View sold'}</span>
             </span>
