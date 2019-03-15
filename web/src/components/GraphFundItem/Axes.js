@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FONT_AXIS_LABEL } from '../../constants/graph';
-import { COLOR_DARK } from '../../constants/colors';
-import { rgba } from '../../helpers/color';
+import { FONT_AXIS_LABEL } from '~client/constants/graph';
+import { COLOR_DARK } from '~client/constants/colors';
+import { rgba } from '~client/helpers/color';
 
 export default function Axes({ popout, minX, minY, maxY, height, pixX, pixY }) {
     if (!popout) {

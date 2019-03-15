@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FONT_AXIS_LABEL } from '../../constants/graph';
-import { COLOR_LIGHT_MED, COLOR_DARK, COLOR_GRAPH_TITLE } from '../../constants/colors';
-import { rgba } from '../../helpers/color';
-import { formatValue } from '../../helpers/funds';
-import { getTimeScale } from '../../components/Graph/helpers';
+import { FONT_AXIS_LABEL } from '~client/constants/graph';
+import { COLOR_LIGHT_MED, COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
+import { rgba } from '~client/helpers/color';
+import { formatValue } from '~client/helpers/funds';
+import { getTimeScale } from '~client/components/Graph/helpers';
 
 function calculateTicksY({ tickSizeY, minY, maxY, pixY }) {
     // calculate tick range

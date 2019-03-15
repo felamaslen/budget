@@ -3,11 +3,11 @@ import React from 'react';
 import { withRouter } from 'react-router';
 import { Switch, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import ModalDialog from '../../containers/ModalDialog';
-import PageOverview from '../../containers/PageOverview';
-import PageAnalysis from '../../containers/PageAnalysis';
-import PageFunds from '../../containers/PageFunds';
-import PageList from '../../containers/PageList';
+import ModalDialog from '~client/containers/ModalDialog';
+import PageOverview from '~client/containers/PageOverview';
+import PageAnalysis from '~client/containers/PageAnalysis';
+import PageFunds from '~client/containers/PageFunds';
+import PageList from '~client/containers/PageList';
 
 function Content({ loggedIn }) {
     if (!loggedIn) {

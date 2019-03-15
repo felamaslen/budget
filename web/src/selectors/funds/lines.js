@@ -4,7 +4,7 @@ import {
     GRAPH_FUNDS_MODE_ROI,
     GRAPH_FUNDS_MODE_ABSOLUTE,
     GRAPH_FUNDS_MODE_PRICE
-} from '../../constants/graph';
+} from '~client/constants/graph';
 
 export function getOverallAbsolute(prices, units) {
     // get the overall absolute value for each time point

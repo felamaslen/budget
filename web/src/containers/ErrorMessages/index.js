@@ -10,8 +10,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import {
     ERROR_MESSAGE_DELAY, ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR, ERROR_CLOSE_TIME
-} from '../../constants/error';
-import { aErrorClosed, aErrorRemoved } from '../../actions/error.actions';
+} from '~client/constants/error';
+import { aErrorClosed, aErrorRemoved } from '~client/actions/error.actions';
 
 function ErrorMessages({ list, closeMessage }) {
     const [prevList, setPrevList] = useState(list);

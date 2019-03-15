@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { rgba } from '../../helpers/color';
-import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '../../constants/colors';
-import { FONT_GRAPH_TITLE } from '../../constants/graph';
+import { rgba } from '~client/helpers/color';
+import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '~client/constants/colors';
+import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 
 export default function BaseKey({ title, children }) {
     const [fontSize, fontFamily] = FONT_GRAPH_TITLE;

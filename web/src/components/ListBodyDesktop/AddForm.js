@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { PAGES } from '../../constants/data';
-import ListAddEditItem from '../../containers/Editable/list-item';
+import { PAGES } from '~client/constants/data';
+import ListAddEditItem from '~client/containers/Editable/list-item';
 
 export default function AddForm({ page, addBtnFocus, onAdd }) {
     const addBtn = useRef(null);

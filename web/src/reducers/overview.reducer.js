@@ -5,8 +5,8 @@
 import { List as list, Map as map, fromJS } from 'immutable';
 import { compose } from 'redux';
 import { DateTime } from 'luxon';
-import { getLoadedStatus } from '../selectors/app';
-import { getRowDates } from '../selectors/overview';
+import { getLoadedStatus } from '~client/selectors/app';
+import { getRowDates } from '~client/selectors/overview';
 
 function getUpdatedCostMap(cost, dates, req) {
     const { page, newDate, oldDate, newItemCost, oldItemCost } = req;

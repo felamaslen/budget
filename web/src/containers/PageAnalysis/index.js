@@ -5,7 +5,7 @@
 import './style.scss';
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
-import { aContentRequested } from '../../actions/content.actions';
+import { aContentRequested } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Page from '../Page';

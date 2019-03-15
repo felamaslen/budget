@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
-import { PAGES } from '../../constants/data';
+import { PAGES } from '~client/constants/data';
 
 export default function Navbar({ active, onPageSet, onLogout }) {
     if (!active) {

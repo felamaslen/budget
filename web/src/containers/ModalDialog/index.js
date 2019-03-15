@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import { List as list } from 'immutable';
 import classNames from 'classnames';
 
-import { aMobileDialogClosed } from '../../actions/form.actions';
+import { aMobileDialogClosed } from '~client/actions/form.actions';
 
-import ModalDialogField from '../../components/FormField/modal-dialog-field';
+import ModalDialogField from '~client/components/FormField/modal-dialog-field';
 
 export function title(id) {
     if (id) {

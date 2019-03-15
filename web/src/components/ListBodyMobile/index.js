@@ -1,10 +1,10 @@
 import './style.scss';
 import { List as list } from 'immutable';
-import { PAGES, LIST_COLS_MOBILE } from '../../constants/data';
+import { PAGES, LIST_COLS_MOBILE } from '~client/constants/data';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ListRowMobile from '../../containers/ListRowMobile';
+import ListRowMobile from '~client/containers/ListRowMobile';
 
 export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileAdd, ...props }) {
     const listCols = listColsMobile || LIST_COLS_MOBILE;

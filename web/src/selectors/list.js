@@ -1,6 +1,6 @@
 import { Map as map } from 'immutable';
 import { createSelector } from 'reselect';
-import { PAGES } from '../constants/data';
+import { PAGES } from '~client/constants/data';
 
 export const getPageRow = (state, { page, id, row }) =>
     row || state.getIn(['pages', page, 'rows', id]);

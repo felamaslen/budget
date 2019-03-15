@@ -1,7 +1,7 @@
 import { Map as map, List as list } from 'immutable';
 import { createSelector } from 'reselect';
 import classNames from 'classnames';
-import { formatAge } from '../../helpers/format';
+import { formatAge } from '~client/helpers/format';
 import { getNow } from '../app';
 import { transactionsKey, getFundsRows, getCurrentFundsCache } from './helpers';
 import { getRowGains, getGainsForRow } from './gains';

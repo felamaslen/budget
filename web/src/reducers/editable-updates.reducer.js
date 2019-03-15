@@ -1,7 +1,7 @@
 import { Map as map } from 'immutable';
 import { compose } from 'redux';
-import { PAGES } from '../constants/data';
-import { IDENTITY, dataEquals, resortListRows } from '../helpers/data';
+import { PAGES } from '~client/constants/data';
+import { IDENTITY, dataEquals, resortListRows } from '~client/helpers/data';
 import { pushToRequestQueue } from './request-queue.reducer';
 import { updateTotal } from './edit.reducer';
 import { rCalculateOverview } from './overview.reducer';

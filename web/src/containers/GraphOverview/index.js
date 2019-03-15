@@ -1,16 +1,16 @@
 import './style.scss';
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { aShowAllToggled } from '../../actions/graph.actions';
+import { aShowAllToggled } from '~client/actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
-import { mediaQueryMobile } from '../../constants';
-import { getTargets } from '../../selectors/graph';
-import { getCurrentDate, getStartDate, getFutureMonths, getProcessedCost } from '../../selectors/overview';
-import { GRAPH_WIDTH } from '../../constants/graph';
-import GraphBalance from '../../components/GraphBalance';
-import GraphSpending from '../../components/GraphSpending';
+import { mediaQueryMobile } from '~client/constants';
+import { getTargets } from '~client/selectors/graph';
+import { getCurrentDate, getStartDate, getFutureMonths, getProcessedCost } from '~client/selectors/overview';
+import { GRAPH_WIDTH } from '~client/constants/graph';
+import GraphBalance from '~client/components/GraphBalance';
+import GraphSpending from '~client/components/GraphSpending';
 
 export function GraphOverviewWrapped({ futureMonths, cost, showAll, targets, ...props }) {
     let graphSpending = null;

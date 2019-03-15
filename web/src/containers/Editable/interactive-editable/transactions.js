@@ -3,8 +3,8 @@ import React, { useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { formatValue } from '../format';
-import { dateInput } from '../../../helpers/date';
-import { TransactionsList } from '../../../helpers/data';
+import { dateInput } from '~client/helpers/date';
+import { TransactionsList } from '~client/helpers/data';
 
 const InputDate = React.forwardRef((props, ref) => (
     <input ref={ref} {...props} />

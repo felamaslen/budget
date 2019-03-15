@@ -4,7 +4,7 @@
 
 import { List as list, Map as map } from 'immutable';
 import humanizeDuration from 'humanize-duration';
-import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '../constants';
+import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 
 const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
 

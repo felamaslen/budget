@@ -1,5 +1,5 @@
 import { Map as map } from 'immutable';
-import { PAGES } from '../../constants/data';
+import { PAGES } from '~client/constants/data';
 import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';

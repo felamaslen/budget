@@ -1,9 +1,9 @@
 import { List as list } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { listAverage } from '../../helpers/data';
-import { rgba } from '../../helpers/color';
-import { COLOR_LIGHT_GREY } from '../../constants/colors';
+import { listAverage } from '~client/helpers/data';
+import { rgba } from '~client/helpers/color';
+import { COLOR_LIGHT_GREY } from '~client/constants/colors';
 import { getSingleLinePath } from './helpers';
 
 export default function AverageLine({ value, data, ...props }) {

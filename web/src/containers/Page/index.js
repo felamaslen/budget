@@ -1,7 +1,7 @@
 import './style.scss';
 import { connect } from 'react-redux';
-import { getLoadedStatus } from '../../selectors/app';
-import { aContentRequested } from '../../actions/content.actions';
+import { getLoadedStatus } from '~client/selectors/app';
+import { aContentRequested } from '~client/actions/content.actions';
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
