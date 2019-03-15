@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions, newline-per-chained-call */
-import 'babel-polyfill';
 import { fromJS } from 'immutable';
 import chai, { expect } from 'chai';
 import chaiEnzyme from 'chai-enzyme';
