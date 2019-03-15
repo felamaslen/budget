@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { expect } = require('chai');
 
-const middleware = require('../../src/middleware/multipleUpdateRequest');
+const middleware = require('~api/src/middleware/multipleUpdateRequest');
 
 describe('Multiple update request middleware', () => {
     describe('getOverallStatusCode', () => {

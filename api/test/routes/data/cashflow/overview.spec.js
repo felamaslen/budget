@@ -11,8 +11,8 @@ const { prepareMockDb } = require('../../../test.common');
 const { DateTime } = require('luxon');
 
 const common = require('../../../test.common');
-const config = require('../../../../src/config')();
-const overview = require('../../../../src/routes/data/cashflow/overview');
+const config = require('~api/src/config')();
+const overview = require('~api/src/routes/data/cashflow/overview');
 
 const { db, tracker } = prepareMockDb();
 

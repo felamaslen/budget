@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const { prepareMockDb } = require('../../test.common');
 const { DateTime } = require('luxon');
 
-const listCommon = require('../../../src/routes/data/list.common');
+const listCommon = require('~api/src/routes/data/list.common');
 
 const { db, tracker } = prepareMockDb();
 

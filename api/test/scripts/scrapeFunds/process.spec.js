@@ -1,8 +1,8 @@
 const { expect } = require('chai');
-const scraper = require('../../../scripts/scrapeFunds/process');
-const { fundHash } = require('../../../src/routes/data/funds/common');
-const config = require('../../../src/config')();
-const logger = require('../../../src/modules/logger')(true);
+const scraper = require('~api/scripts/scrapeFunds/process');
+const { fundHash } = require('~api/src/routes/data/funds/common');
+const config = require('~api/src/config')();
+const logger = require('~api/src/modules/logger')(true);
 
 const TEST_FUND_NAMES = [
     'HL Multi-Manager UK Growth (accum.)',

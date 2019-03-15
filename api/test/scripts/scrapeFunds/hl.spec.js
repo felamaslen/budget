@@ -2,8 +2,8 @@ const { expect } = require('chai');
 const path = require('path');
 const fs = require('fs-extra');
 const md5 = require('md5');
-const hl = require('../../../scripts/scrapeFunds/hl');
-const config = require('../../../src/config')();
+const hl = require('~api/scripts/scrapeFunds/hl');
+const config = require('~api/src/config')();
 
 let testData = null;
 const testFunds = {};
