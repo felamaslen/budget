@@ -4,12 +4,12 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import PageAnalysis from '../../../src/containers/PageAnalysis';
-import Page from '../../../src/containers/Page';
-import Upper from '../../../src/containers/PageAnalysis/upper';
-import Timeline from '../../../src/containers/PageAnalysis/timeline';
-import ListTree from '../../../src/containers/PageAnalysis/list-tree';
-import Blocks from '../../../src/containers/PageAnalysis/blocks';
+import PageAnalysis from '~client/containers/PageAnalysis';
+import Page from '~client/containers/Page';
+import Upper from '~client/containers/PageAnalysis/upper';
+import Timeline from '~client/containers/PageAnalysis/timeline';
+import ListTree from '~client/containers/PageAnalysis/list-tree';
+import Blocks from '~client/containers/PageAnalysis/blocks';
 
 describe('<PageAnalysis />', () => {
     const state = fromJS({

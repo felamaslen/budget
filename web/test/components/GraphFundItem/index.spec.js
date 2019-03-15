@@ -1,12 +1,12 @@
 /* eslint-disable newline-per-chained-call, id-length */
 import { fromJS } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
 import { shallow, mount } from 'enzyme';
 import React from 'react';
-import GraphFundItem from '../../../src/components/GraphFundItem';
+import GraphFundItem from '~client/components/GraphFundItem';
 
 describe('<GraphFundItem />', () => {
     const props = {

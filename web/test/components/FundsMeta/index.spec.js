@@ -2,14 +2,14 @@
 import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
-import '../../browser';
+import '~client-test/browser.js';
 import React from 'react';
 import { shallow } from 'enzyme';
-import FundsMeta from '../../../src/components/FundsMeta';
+import FundsMeta from '~client/components/FundsMeta';
 import Media from 'react-media';
-import { mediaQueryMobile } from '../../../src/constants';
-import StocksList from '../../../src/containers/StocksList';
-import GraphFunds from '../../../src/containers/GraphFunds';
+import { mediaQueryMobile } from '~client/constants';
+import StocksList from '~client/containers/StocksList';
+import GraphFunds from '~client/containers/GraphFunds';
 
 describe('<FundsMeta />', () => {
     const wrapper = shallow(<FundsMeta page="funds" />);

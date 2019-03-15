@@ -7,7 +7,7 @@ chai.use(chaiEnzyme());
 import itEach from 'it-each';
 itEach();
 import React from 'react';
-import Timeline from '../../../src/containers/PageAnalysis/timeline';
+import Timeline from '~client/containers/PageAnalysis/timeline';
 
 describe('Analysis page <Timeline />', () => {
     const timeline = [

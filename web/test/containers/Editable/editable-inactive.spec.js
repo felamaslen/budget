@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import EditableInactive from '../../../src/containers/Editable/editable-inactive';
-import { formatValue } from '../../../src/containers/Editable/format';
+import EditableInactive from '~client/containers/Editable/editable-inactive';
+import { formatValue } from '~client/containers/Editable/format';
 
 describe('<EditableInactive />', () => {
     let activated = false;

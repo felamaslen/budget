@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/login-form.reducer';
+import * as R from '~client/reducers/login-form.reducer';
 
 describe('Login form reducer', () => {
     describe('rLoginFormInput', () => {

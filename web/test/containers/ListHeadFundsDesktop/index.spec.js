@@ -1,13 +1,13 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
-import ListHeadFundsDesktop from '../../../src/containers/ListHeadFundsDesktop';
-import { GRAPH_FUNDS_PERIOD_CHANGED } from '../../../src/constants/actions';
+import ListHeadFundsDesktop from '~client/containers/ListHeadFundsDesktop';
+import { GRAPH_FUNDS_PERIOD_CHANGED } from '~client/constants/actions';
 import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
 
 describe('<ListHeadFundsDesktop />', () => {

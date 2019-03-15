@@ -2,8 +2,8 @@ import { List } from 'immutable';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import InteractiveEditable from '../../../../src/containers/Editable/interactive-editable';
-import SuggestionsList from '../../../../src/containers/Editable/suggestions-list';
+import InteractiveEditable from '~client/containers/Editable/interactive-editable';
+import SuggestionsList from '~client/containers/Editable/suggestions-list';
 
 describe('<InteractiveEditable />', () => {
     let changed = null;

@@ -4,9 +4,9 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import ErrorMessages from '../../../src/containers/ErrorMessages';
-import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '../../../src/constants/error';
-import { ERROR_CLOSED } from '../../../src/constants/actions';
+import ErrorMessages from '~client/containers/ErrorMessages';
+import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '~client/constants/error';
+import { ERROR_CLOSED } from '~client/constants/actions';
 
 describe('<ErrorMessages />', () => {
     const store = createMockStore(fromJS({

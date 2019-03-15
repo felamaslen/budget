@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
 import { Map as map } from 'immutable';
-import * as rList from '../../src/reducers/list.reducer';
+import * as rList from '~client/reducers/list.reducer';
 
 describe('List page reducers', () => {
     describe('processRawListRows', () => {

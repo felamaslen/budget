@@ -1,10 +1,10 @@
 /* eslint-disable newline-per-chained-call */
 import { fromJS } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import { mount } from 'enzyme';
 import React from 'react';
-import LineGraphDumb from '../../../src/components/Graph/LineGraphDumb';
+import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
 
 describe('<LineGraphDumb />', () => {
     const props = {

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
 import { fromJS } from 'immutable';
-import * as S from '../../src/selectors/overview';
+import * as S from '~client/selectors/overview';
 
 describe('Overview selectors', () => {
     const state = fromJS({

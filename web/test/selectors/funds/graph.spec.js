@@ -6,8 +6,8 @@ import { Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import {
     makeGetGraphProps
-} from '../../../src/selectors/funds/graph';
-import { GRAPH_FUNDS_MODE_ROI } from '../../../src/constants/graph';
+} from '~client/selectors/funds/graph';
+import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
 import { testRows, testPrices, testStartTime, testCacheTimes, testLines } from '../../test_data/testFunds';
 
 describe('Funds/graph selectors', () => {

@@ -1,9 +1,9 @@
 import { fromJS, Map as map, List as list } from 'immutable';
-import '../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
-import * as R from '../../src/reducers/app.reducer';
-import reduction from '../../src/reduction';
+import * as R from '~client/reducers/app.reducer';
+import reduction from '~client/reduction';
 
 describe('app.reducer', () => {
     describe('rOnWindowResize', () => {

@@ -18,9 +18,9 @@ import {
     getNullEditable,
     getAddDefaultValues,
     sortRowsByDate
-} from '../../src/helpers/data';
-import { dateInput } from '../../src/helpers/date';
-import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../../src/constants';
+} from '~client/helpers/data';
+import { dateInput } from '~client/helpers/date';
+import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
 
 describe('helpers/data', () => {
     describe('getPeriodMatch', () => {

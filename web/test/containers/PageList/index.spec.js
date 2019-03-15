@@ -4,9 +4,9 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import PageList from '../../../src/containers/PageList';
-import Page from '../../../src/containers/Page';
-import ListBody from '../../../src/components/ListBody';
+import PageList from '~client/containers/PageList';
+import Page from '~client/containers/Page';
+import ListBody from '~client/components/ListBody';
 
 describe('<PageList />', () => {
     const store = createMockStore(fromJS({

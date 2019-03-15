@@ -2,11 +2,11 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
-import '../browser';
+import '~client-test/browser.js';
 import axios from 'axios';
-import * as S from '../../src/sagas/login.saga';
-import { openTimedMessage } from '../../src/sagas/error.saga';
-import { aLoginFormResponseReceived } from '../../src/actions/login.actions';
+import * as S from '~client/sagas/login.saga';
+import { openTimedMessage } from '~client/sagas/error.saga';
+import { aLoginFormResponseReceived } from '~client/actions/login.actions';
 
 describe('Login saga', () => {
     describe('getLoginCredentials', () => {

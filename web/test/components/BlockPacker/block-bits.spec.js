@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions */
 import { fromJS } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 configure({ adapter: new Adapter() });
@@ -10,7 +10,7 @@ itEach();
 import chaiEnzyme from 'chai-enzyme';
 chai.use(chaiEnzyme());
 import React from 'react';
-import BlockBits, { BlockGroup, SubBlock } from '../../../src/components/BlockPacker/block-bits';
+import BlockBits, { BlockGroup, SubBlock } from '~client/components/BlockPacker/block-bits';
 
 describe('<SubBlock />', () => {
     const props = {

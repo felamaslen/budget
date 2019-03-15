@@ -1,12 +1,12 @@
 /* eslint-disable prefer-reflect */
-import '../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
-import * as S from '../../src/sagas/content.saga';
-import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '../../src/selectors/app';
-import { aContentLoaded } from '../../src/actions/content.actions';
-import { openTimedMessage } from '../../src/sagas/error.saga';
+import * as S from '~client/sagas/content.saga';
+import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '~client/selectors/app';
+import { aContentLoaded } from '~client/actions/content.actions';
+import { openTimedMessage } from '~client/sagas/error.saga';
 
 describe('content.saga', () => {
     describe('makeContentRequest', () => {

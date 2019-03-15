@@ -3,7 +3,7 @@ import itEach from 'it-each';
 itEach();
 import { shallow } from 'enzyme';
 import React from 'react';
-import PinDisplay from '../../../src/components/LoginForm/pin-display';
+import PinDisplay from '~client/components/LoginForm/pin-display';
 
 describe('<PinDisplay />', () => {
     const props = {

@@ -1,7 +1,7 @@
 import { fromJS, Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/editable-updates.reducer';
+import * as R from '~client/reducers/editable-updates.reducer';
 
 describe('Editable updates reducer', () => {
     const state = map({

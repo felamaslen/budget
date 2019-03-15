@@ -1,7 +1,7 @@
 import { fromJS, Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/request-queue.reducer';
+import * as R from '~client/reducers/request-queue.reducer';
 
 describe('Request queue reducer', () => {
     describe('addToRequestQueue', () => {

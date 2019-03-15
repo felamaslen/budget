@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import * as S from '../../src/selectors/edit';
+import * as S from '~client/selectors/edit';
 
 describe('Edit selectors', () => {
     describe('getModalState', () => {

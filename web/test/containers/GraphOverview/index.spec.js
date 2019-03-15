@@ -1,6 +1,6 @@
 /* eslint-disable newline-per-chained-call */
 import { fromJS, Map as map, List as list } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import React from 'react';
 import shallowWithStore from '../../shallow-with-store';
 import { shallow } from 'enzyme';
@@ -8,11 +8,11 @@ import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
 import { DateTime } from 'luxon';
 import Media from 'react-media';
-import { mediaQueryMobile } from '../../../src/constants';
-import GraphOverview, { GraphOverviewWrapped } from '../../../src/containers/GraphOverview';
-import GraphBalance from '../../../src/components/GraphBalance';
-import GraphSpending from '../../../src/components/GraphSpending';
-import { aShowAllToggled } from '../../../src/actions/graph.actions';
+import { mediaQueryMobile } from '~client/constants';
+import GraphOverview, { GraphOverviewWrapped } from '~client/containers/GraphOverview';
+import GraphBalance from '~client/components/GraphBalance';
+import GraphSpending from '~client/components/GraphSpending';
+import { aShowAllToggled } from '~client/actions/graph.actions';
 
 describe('<GraphOverview />', () => {
     const state = map({
