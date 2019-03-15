@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { List as list, Map as map } from 'immutable';
-import { TransactionsList } from '../../src/helpers/data';
+import { TransactionsList } from '~client/helpers/data';
 
 export const testRows = map([
     [10, map({

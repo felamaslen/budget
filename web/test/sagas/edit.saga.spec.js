@@ -1,21 +1,21 @@
 /* eslint-disable prefer-reflect */
-import '../browser';
+import '~client-test/browser.js';
 import { List as list } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import { delay } from 'redux-saga';
 import axios from 'axios';
-import { getApiKey } from '../../src/selectors/app';
-import { getModalState, suggestionsInfo } from '../../src/selectors/edit';
+import { getApiKey } from '~client/selectors/app';
+import { getModalState, suggestionsInfo } from '~client/selectors/edit';
 import {
     triggerEditSuggestionsRequest,
     watchTextInput,
     requestEditSuggestions,
     handleModal
-} from '../../src/sagas/edit.saga';
-import { addServerDataRequest } from '../../src/sagas/app.saga';
-import * as A from '../../src/actions/edit.actions';
-import * as B from '../../src/actions/form.actions';
-import { EDIT_CHANGED } from '../../src/constants/actions';
+} from '~client/sagas/edit.saga';
+import { addServerDataRequest } from '~client/sagas/app.saga';
+import * as A from '~client/actions/edit.actions';
+import * as B from '~client/actions/form.actions';
+import { EDIT_CHANGED } from '~client/constants/actions';
 
 describe('edit.saga', () => {
     describe('triggerEditSuggestionsRequest', () => {

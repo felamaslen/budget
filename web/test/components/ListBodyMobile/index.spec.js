@@ -6,8 +6,8 @@ import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 import React from 'react';
 import { shallow } from 'enzyme';
-import ListBodyMobile from '../../../src/components/ListBodyMobile';
-import ListRowMobile from '../../../src/containers/ListRowMobile';
+import ListBodyMobile from '~client/components/ListBodyMobile';
+import ListRowMobile from '~client/containers/ListRowMobile';
 
 describe('<ListBodyMobile />', () => {
     const props = {

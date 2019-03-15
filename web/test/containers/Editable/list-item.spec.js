@@ -1,11 +1,11 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import ListAddEditItem from '../../../src/containers/Editable/list-item';
-import Editable from '../../../src/containers/Editable';
+import ListAddEditItem from '~client/containers/Editable/list-item';
+import Editable from '~client/containers/Editable';
 
 describe('<ListAddEditItem />', () => {
     const props = {

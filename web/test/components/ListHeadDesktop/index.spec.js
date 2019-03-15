@@ -1,7 +1,7 @@
 /* eslint-disable newline-per-chained-call */
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import ListHeadDesktop from '../../../src/components/ListHeadDesktop';
+import ListHeadDesktop from '~client/components/ListHeadDesktop';
 import React from 'react';
 
 describe('List page <ListHeadDesktop />', () => {

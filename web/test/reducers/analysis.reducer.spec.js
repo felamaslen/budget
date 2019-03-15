@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/analysis.reducer';
+import * as R from '~client/reducers/analysis.reducer';
 
 describe('Analysis reducers', () => {
     describe('processPageDataAnalysis', () => {

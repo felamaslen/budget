@@ -1,11 +1,11 @@
 /* eslint-disable newline-per-chained-call */
 import { expect } from 'chai';
-import '../../browser';
+import '~client-test/browser.js';
 import React from 'react';
 import { shallow } from 'enzyme';
-import Header from '../../../src/components/Header';
-import AppLogo from '../../../src/components/AppLogo';
-import Navbar from '../../../src/components/Navbar';
+import Header from '~client/components/Header';
+import AppLogo from '~client/components/AppLogo';
+import Navbar from '~client/components/Navbar';
 
 describe('<Header/>', () => {
     const props = {

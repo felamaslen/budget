@@ -1,5 +1,5 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS, List } from 'immutable';
 import { expect } from 'chai';
 import equal from 'deep-equal';
@@ -8,12 +8,12 @@ itEach();
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import ListTree from '../../../src/containers/PageAnalysis/list-tree';
-import ListTreeHead from '../../../src/containers/PageAnalysis/list-tree-head';
-import SubTree from '../../../src/containers/PageAnalysis/sub-tree';
+import ListTree from '~client/containers/PageAnalysis/list-tree';
+import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
+import SubTree from '~client/containers/PageAnalysis/sub-tree';
 import {
     ANALYSIS_TREE_EXPAND_TOGGLED, ANALYSIS_TREE_DISPLAY_TOGGLED, ANALYSIS_TREE_HOVERED
-} from '../../../src/constants/actions';
+} from '~client/constants/actions';
 
 describe('<ListTree />', () => {
     const state = fromJS({

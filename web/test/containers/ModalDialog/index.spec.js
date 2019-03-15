@@ -1,13 +1,13 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import ModalDialog from '../../../src/containers/ModalDialog';
-import ModalDialogField from '../../../src/components/FormField/modal-dialog-field';
-import { FORM_DIALOG_CLOSED } from '../../../src/constants/actions';
+import ModalDialog from '~client/containers/ModalDialog';
+import ModalDialogField from '~client/components/FormField/modal-dialog-field';
+import { FORM_DIALOG_CLOSED } from '~client/constants/actions';
 
 describe('<ModalDialog />', () => {
     const state = fromJS({

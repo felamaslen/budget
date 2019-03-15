@@ -6,10 +6,10 @@ import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 import React from 'react';
 import { shallow } from 'enzyme';
-import ListBodyDesktop from '../../../src/components/ListBodyDesktop';
-import ListHeadDesktop from '../../../src/components/ListHeadDesktop';
-import AddForm from '../../../src/components/ListBodyDesktop/AddForm';
-import ListRowDesktop from '../../../src/containers/ListRowDesktop';
+import ListBodyDesktop from '~client/components/ListBodyDesktop';
+import ListHeadDesktop from '~client/components/ListHeadDesktop';
+import AddForm from '~client/components/ListBodyDesktop/AddForm';
+import ListRowDesktop from '~client/containers/ListRowDesktop';
 
 describe('<ListBodyDesktop />', () => {
     const props = {

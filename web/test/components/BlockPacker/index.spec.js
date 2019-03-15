@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-expressions */
-import '../../browser';
+import '~client-test/browser.js';
 import { List as list } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import BlockPacker from '../../../src/components/BlockPacker';
+import BlockPacker from '~client/components/BlockPacker';
 
 describe('<BlockPacker />', () => {
     const onClick = () => null;

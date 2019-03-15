@@ -8,7 +8,7 @@ chai.use(sinonChai);
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { shallow } from 'enzyme';
-import Navbar from '../../../src/components/Navbar';
+import Navbar from '~client/components/Navbar';
 
 describe('<Navbar />', () => {
     const props = {

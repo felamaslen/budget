@@ -1,10 +1,10 @@
 /* eslint-disable newline-per-chained-call */
 import { Map as map, List as list } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import FundGainInfo from '../../../src/components/FundGainInfo';
+import FundGainInfo from '~client/components/FundGainInfo';
 
 describe('<FundGainInfo />', () => {
     const props = {

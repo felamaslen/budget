@@ -5,9 +5,9 @@ itEach();
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
-import Editable from '../../../src/containers/Editable';
-import EditableActive from '../../../src/containers/Editable/editable-active';
-import EditableInactive from '../../../src/containers/Editable/editable-inactive';
+import Editable from '~client/containers/Editable';
+import EditableActive from '~client/containers/Editable/editable-active';
+import EditableInactive from '~client/containers/Editable/editable-inactive';
 
 describe('<Editable />', () => {
     it('should render an active editable item, if active', () => {

@@ -1,5 +1,5 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -10,8 +10,8 @@ import 'react-testing-library/cleanup-after-each';
 import { render, fireEvent } from 'react-testing-library';
 import { DateTime } from 'luxon';
 import React from 'react';
-import FormFieldTransactions from '../../../src/components/FormField/transactions';
-import { TransactionsList } from '../../../src/helpers/data';
+import FormFieldTransactions from '~client/components/FormField/transactions';
+import { TransactionsList } from '~client/helpers/data';
 
 describe('<FormFieldTransactions />', () => {
     const transactions = [

@@ -1,6 +1,6 @@
 import { fromJS, List as list } from 'immutable';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/nav';
+import * as R from '~client/reducers/nav';
 
 describe('Nav helpers', () => {
     describe('getNavRowCol', () => {

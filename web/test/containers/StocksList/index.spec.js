@@ -1,4 +1,4 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import sinon from 'sinon';
 import { expect } from 'chai';
@@ -7,8 +7,8 @@ import 'react-testing-library/cleanup-after-each';
 import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
-import StocksList from '../../../src/containers/StocksList';
-import { aStocksListRequested } from '../../../src/actions/stocks-list.actions';
+import StocksList from '~client/containers/StocksList';
+import { aStocksListRequested } from '~client/actions/stocks-list.actions';
 
 describe('<StocksList />', () => {
     const getComponent = () => {

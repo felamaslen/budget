@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import Digit from '../../../src/components/LoginForm/digit';
+import Digit from '~client/components/LoginForm/digit';
 
 describe('<Digit />', () => {
     let input = null;

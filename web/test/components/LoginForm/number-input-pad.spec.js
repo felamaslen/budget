@@ -4,8 +4,8 @@ import itEach from 'it-each';
 itEach();
 import { shallow } from 'enzyme';
 import React from 'react';
-import NumberInputPad from '../../../src/components/LoginForm/number-input-pad';
-import Digit from '../../../src/components/LoginForm/digit';
+import NumberInputPad from '~client/components/LoginForm/number-input-pad';
+import Digit from '~client/components/LoginForm/digit';
 
 describe('<NumberInputPad />', () => {
     let input = false;

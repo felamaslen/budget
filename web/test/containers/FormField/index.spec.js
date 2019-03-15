@@ -1,5 +1,5 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import itEach from 'it-each';
@@ -7,16 +7,16 @@ import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 
-import FormField from '../../../src/containers/FormField';
-import FormFieldText from '../../../src/components/FormField';
-import FormFieldDate from '../../../src/components/FormField/date';
-import FormFieldCost from '../../../src/components/FormField/cost';
-import FormFieldTransactions from '../../../src/components/FormField/transactions';
+import FormField from '~client/containers/FormField';
+import FormFieldText from '~client/components/FormField';
+import FormFieldDate from '~client/components/FormField/date';
+import FormFieldCost from '~client/components/FormField/cost';
+import FormFieldTransactions from '~client/components/FormField/transactions';
 
-import { aFormFieldChanged } from '../../../src/actions/form.actions';
+import { aFormFieldChanged } from '~client/actions/form.actions';
 
-import { dateInput } from '../../../src/helpers/date';
-import { TransactionsList } from '../../../src/helpers/data';
+import { dateInput } from '~client/helpers/date';
+import { TransactionsList } from '~client/helpers/data';
 
 describe('<FormField />', () => {
     itEach({ testPerIteration: true });

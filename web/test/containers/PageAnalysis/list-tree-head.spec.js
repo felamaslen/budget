@@ -3,7 +3,7 @@ import { List } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import { shallow } from 'enzyme';
-import ListTreeHead from '../../../src/containers/PageAnalysis/list-tree-head';
+import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 
 describe('Analysis page <ListTreeHead />', () => {
     const props = {

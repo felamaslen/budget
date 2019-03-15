@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
-import * as date from '../../src/helpers/date';
+import * as date from '~client/helpers/date';
 
 describe('Date', () => {
     describe('dateInput', () => {

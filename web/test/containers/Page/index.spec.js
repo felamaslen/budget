@@ -1,13 +1,13 @@
 import { fromJS } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import 'react-testing-library/cleanup-after-each';
 import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
-import Page from '../../../src/containers/Page';
-import { aContentRequested } from '../../../src/actions/content.actions';
+import Page from '~client/containers/Page';
+import { aContentRequested } from '~client/actions/content.actions';
 
 describe('<Page />', () => {
     const getContainer = (props = {}) => {

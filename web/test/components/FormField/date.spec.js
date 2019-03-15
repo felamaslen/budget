@@ -1,10 +1,10 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import 'react-testing-library/cleanup-after-each';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
-import FormFieldDate from '../../../src/components/FormField/date';
-import { dateInput } from '../../../src/helpers/date';
+import FormFieldDate from '~client/components/FormField/date';
+import { dateInput } from '~client/helpers/date';
 
 describe('<FormFieldDate />', () => {
     let changed = null;

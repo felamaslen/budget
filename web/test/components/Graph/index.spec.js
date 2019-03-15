@@ -1,9 +1,9 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import Graph from '../../../src/components/Graph';
+import Graph from '~client/components/Graph';
 
 describe('<Graph />', () => {
     const basicProps = {
