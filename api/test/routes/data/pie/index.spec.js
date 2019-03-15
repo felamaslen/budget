@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const expect = require('chai').expect;
 
-const pie = require('../../../../src/routes/data/pie');
+const pie = require('~api/src/routes/data/pie');
 
 describe('Pie charts', () => {
     describe('getPieCols', () => {

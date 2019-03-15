@@ -5,7 +5,7 @@
 require('dotenv').config();
 const expect = require('chai').expect;
 
-const search = require('../../../src/routes/search');
+const search = require('~api/src/routes/search');
 
 describe('/api/search', () => {
     it('works', () => {

@@ -1,7 +1,7 @@
 const { expect } = require('chai');
-const scrape = require('../../../scripts/scrapeFunds/scrape');
-const config = require('../../../src/config')();
-const logger = require('../../../src/modules/logger')(true);
+const scrape = require('~api/scripts/scrapeFunds/scrape');
+const config = require('~api/src/config')();
+const logger = require('~api/src/modules/logger')(true);
 
 describe('scrapeFunds scrape functions', () => {
     describe('getFundUrl', () => {

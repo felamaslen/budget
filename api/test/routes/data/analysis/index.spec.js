@@ -7,7 +7,7 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 const { DateTime } = require('luxon');
 const { prepareMockDb } = require('../../../test.common');
-const analysis = require('../../../../src/routes/data/analysis');
+const analysis = require('~api/src/routes/data/analysis');
 
 const { db, tracker } = prepareMockDb();
 
