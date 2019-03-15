@@ -4,8 +4,8 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import Upper from '../../../src/containers/PageAnalysis/upper';
-import { ANALYSIS_OPTION_CHANGED } from '../../../src/constants/actions';
+import Upper from '~client/containers/PageAnalysis/upper';
+import { ANALYSIS_OPTION_CHANGED } from '~client/constants/actions';
 
 describe('Analysis page <Upper />', () => {
     const state = fromJS({

@@ -2,8 +2,8 @@ import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import { shallow } from 'enzyme';
-import ListRowCell from '../../../src/components/ListRowCell';
-import Editable from '../../../src/containers/Editable';
+import ListRowCell from '~client/components/ListRowCell';
+import Editable from '~client/containers/Editable';
 
 describe('<ListRowCell />', () => {
     const props = {

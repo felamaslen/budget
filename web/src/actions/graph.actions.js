@@ -2,7 +2,7 @@
  * Actions called to manipulate graphs
  */
 
-import * as A from '../constants/actions';
+import * as A from '~client/constants/actions';
 
 export const aShowAllToggled = () => ({ type: A.GRAPH_SHOWALL_TOGGLED });
 export const aFundsGraphClicked = () => ({ type: A.GRAPH_FUNDS_CLICKED });

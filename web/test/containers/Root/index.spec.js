@@ -6,12 +6,12 @@ import { createMockStore } from 'redux-test-utils';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import Root from '../../../src/containers/Root';
-import ErrorMessages from '../../../src/containers/ErrorMessages';
-import Spinner from '../../../src/containers/Spinner';
-import LoginForm from '../../../src/containers/LoginForm';
-import Content from '../../../src/components/Content';
-import Header from '../../../src/components/Header';
+import Root from '~client/containers/Root';
+import ErrorMessages from '~client/containers/ErrorMessages';
+import Spinner from '~client/containers/Spinner';
+import LoginForm from '~client/containers/LoginForm';
+import Content from '~client/components/Content';
+import Header from '~client/components/Header';
 
 describe('<Root />', () => {
     const state = fromJS({

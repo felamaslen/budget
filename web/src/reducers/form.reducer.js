@@ -1,11 +1,11 @@
 import { Map as map, List as list } from 'immutable';
 import { compose } from 'redux';
-import { getNow } from '../selectors/app';
+import { getNow } from '~client/selectors/app';
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
 import { stringifyFields, getInvalidInsertDataKeys, updateTotal } from './edit.reducer';
-import { IDENTITY, dataEquals, getAddDefaultValues, resortListRows } from '../helpers/data';
-import { PAGES } from '../constants/data';
+import { IDENTITY, dataEquals, getAddDefaultValues, resortListRows } from '~client/helpers/data';
+import { PAGES } from '~client/constants/data';
 
 export function rOpenFormDialogEdit(state, { page, id }) {
     const rowItem = state.getIn(['pages', page, 'rows', id]);

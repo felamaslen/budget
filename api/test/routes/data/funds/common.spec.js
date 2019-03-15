@@ -9,7 +9,7 @@ const { prepareMockDb } = require('../../../test.common');
 const md5 = require('md5');
 const { DateTime } = require('luxon');
 
-const funds = require('../../../../src/routes/data/funds/common');
+const funds = require('~api/src/routes/data/funds/common');
 
 const { db } = prepareMockDb();
 

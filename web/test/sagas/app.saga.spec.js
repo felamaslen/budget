@@ -1,5 +1,5 @@
 /* eslint-disable prefer-reflect */
-import '../browser';
+import '~client-test/browser.js';
 import { DateTime } from 'luxon';
 import { delay } from 'redux-saga';
 import { testSaga } from 'redux-saga-test-plan';
@@ -11,10 +11,10 @@ import {
     addServerDataRequest,
     addServerData,
     timeUpdater
-} from '../../src/sagas/app.saga';
-import { getApiKey, getRequestList, getAddData } from '../../src/selectors/app';
-import { openTimedMessage } from '../../src/sagas/error.saga';
-import { aWindowResized, aServerUpdateReceived, aServerAddReceived, aTimeUpdated } from '../../src/actions/app.actions';
+} from '~client/sagas/app.saga';
+import { getApiKey, getRequestList, getAddData } from '~client/selectors/app';
+import { openTimedMessage } from '~client/sagas/error.saga';
+import { aWindowResized, aServerUpdateReceived, aServerAddReceived, aTimeUpdated } from '~client/actions/app.actions';
 
 describe('app.saga', () => {
     describe('watchEventEmitter', () => {

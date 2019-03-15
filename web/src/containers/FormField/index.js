@@ -6,12 +6,12 @@ import { connect } from 'react-redux';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-import FormFieldText from '../../components/FormField';
-import FormFieldDate from '../../components/FormField/date';
-import FormFieldCost from '../../components/FormField/cost';
-import FormFieldTransactions from '../../components/FormField/transactions';
+import FormFieldText from '~client/components/FormField';
+import FormFieldDate from '~client/components/FormField/date';
+import FormFieldCost from '~client/components/FormField/cost';
+import FormFieldTransactions from '~client/components/FormField/transactions';
 
-import { aFormFieldChanged } from '../../actions/form.actions';
+import { aFormFieldChanged } from '~client/actions/form.actions';
 
 function FormField({ fieldKey, item, value, makeOnChange }) {
     const onChange = useMemo(() => makeOnChange(fieldKey, item), [fieldKey, item]);

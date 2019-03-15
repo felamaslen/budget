@@ -2,7 +2,7 @@
  * Actions called to do stuff on the analysis page
  */
 
-import * as A from '../constants/actions';
+import * as A from '~client/constants/actions';
 
 export const aOptionChanged = req => ({ type: A.ANALYSIS_OPTION_CHANGED, ...req });
 export const aTreeItemDisplayToggled = key => ({ type: A.ANALYSIS_TREE_DISPLAY_TOGGLED, key });

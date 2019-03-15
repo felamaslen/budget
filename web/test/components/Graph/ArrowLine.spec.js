@@ -1,13 +1,13 @@
 /* eslint-disable newline-per-chained-call */
 import { fromJS } from 'immutable';
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
 import { shallow } from 'enzyme';
 import React from 'react';
-import ArrowLine from '../../../src/components/Graph/ArrowLine';
-import Arrow from '../../../src/components/Arrow';
+import ArrowLine from '~client/components/Graph/ArrowLine';
+import Arrow from '~client/components/Arrow';
 
 describe('<ArrowLine />', () => {
     const points = [

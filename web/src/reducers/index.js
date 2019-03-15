@@ -5,7 +5,7 @@
 
 import { createReducer } from 'redux-create-reducer';
 
-import * as AC from '../constants/actions';
+import * as AC from '~client/constants/actions';
 
 import * as error from './error.reducer';
 import * as login from './login-form.reducer';

@@ -4,7 +4,7 @@
 
 const { expect } = require('chai');
 
-const stocks = require('../../../../src/routes/data/stocks');
+const stocks = require('~api/src/routes/data/stocks');
 
 describe('/data/stocks', () => {
     describe('processStocks', () => {

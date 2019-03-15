@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import debounce from 'debounce';
 
-import { rgba } from '../../../helpers/color';
-import { COLOR_GRAPH_TITLE } from '../../../constants/colors';
+import { rgba } from '~client/helpers/color';
+import { COLOR_GRAPH_TITLE } from '~client/constants/colors';
 
 function getHlColor(color, point, index) {
     if (typeof color === 'string') {

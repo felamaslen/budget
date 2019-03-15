@@ -1,11 +1,11 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { Map as map, List as list } from 'immutable';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import ModalDialogField from '../../../src/components/FormField/modal-dialog-field';
-import FormField from '../../../src/containers/FormField';
-import { TransactionsList } from '../../../src/helpers/data';
+import ModalDialogField from '~client/components/FormField/modal-dialog-field';
+import FormField from '~client/containers/FormField';
+import { TransactionsList } from '~client/helpers/data';
 
 describe('<ModalDialogField />', () => {
     const props = {

@@ -4,13 +4,13 @@
 
 import { connect } from 'react-redux';
 import './style.scss';
-import { aLoginFormInputted } from '../../actions/login.actions';
+import { aLoginFormInputted } from '~client/actions/login.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import PinDisplay from '../../components/LoginForm/pin-display';
-import NumberInputPad from '../../components/LoginForm/number-input-pad';
+import PinDisplay from '~client/components/LoginForm/pin-display';
+import NumberInputPad from '~client/components/LoginForm/number-input-pad';
 
 function LoginForm({ visible, active, inputStep, inputDigit }) {
     if (!visible) {

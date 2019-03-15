@@ -3,11 +3,11 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import Blocks from '../../../src/containers/PageAnalysis/blocks';
-import BlockPacker from '../../../src/components/BlockPacker';
+import Blocks from '~client/containers/PageAnalysis/blocks';
+import BlockPacker from '~client/components/BlockPacker';
 import {
     ANALYSIS_BLOCK_CLICKED, CONTENT_BLOCK_HOVERED
-} from '../../../src/constants/actions';
+} from '~client/constants/actions';
 
 describe('Analysis page <Blocks />', () => {
     const state = map({

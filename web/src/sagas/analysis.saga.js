@@ -1,14 +1,14 @@
 import { all, select, takeEvery, put, call } from 'redux-saga/effects';
 import axios from 'axios';
 
-import { ANALYSIS_BLOCK_CLICKED, ANALYSIS_OPTION_CHANGED } from '../constants/actions';
-import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../constants/analysis';
+import { ANALYSIS_BLOCK_CLICKED, ANALYSIS_OPTION_CHANGED } from '~client/constants/actions';
+import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '~client/constants/analysis';
 
 import { makeContentRequest } from './content.saga';
 import { openTimedMessage } from './error.saga';
 import { aAnalysisDataRefreshed } from '../actions/analysis.actions';
-import { getApiKey } from '../selectors/app';
-import { requestProps } from '../selectors/analysis';
+import { getApiKey } from '~client/selectors/app';
+import { requestProps } from '~client/selectors/analysis';
 
 export function *requestAnalysisData({ wasDeep, ...payload }) {
     if (wasDeep) {

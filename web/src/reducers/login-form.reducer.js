@@ -2,7 +2,7 @@
  * Carries out actions for the Form component
  */
 
-import { PAGES, LOGIN_INPUT_LENGTH } from '../constants/data';
+import { PAGES, LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
 export function rLoginFormInput(state, { input }) {
     const inputString = input.toString();

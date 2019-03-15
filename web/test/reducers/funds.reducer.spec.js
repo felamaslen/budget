@@ -2,7 +2,7 @@
 import { Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import { expect } from 'chai';
-import * as rFunds from '../../src/reducers/funds.reducer';
+import * as rFunds from '~client/reducers/funds.reducer';
 
 describe('funds', () => {
     describe('getInitialEnabledList', () => {

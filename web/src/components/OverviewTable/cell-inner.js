@@ -1,8 +1,8 @@
 import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import Editable from '../../containers/Editable';
-import HoverCost from '../../components/HoverCost';
+import Editable from '~client/containers/Editable';
+import HoverCost from '~client/components/HoverCost';
 
 export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable }) {
     if (editable) {

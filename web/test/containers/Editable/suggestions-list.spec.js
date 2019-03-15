@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
-import SuggestionsList from '../../../src/containers/Editable/suggestions-list';
+import SuggestionsList from '~client/containers/Editable/suggestions-list';
 
 describe('<SuggestionsList />', () => {
     const state = fromJS({

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Map as map } from 'immutable';
 import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
-import * as S from '../../../src/selectors/funds/gains';
+import * as S from '~client/selectors/funds/gains';
 
 describe('Funds/gains selectors', () => {
     describe('getRowGains', () => {

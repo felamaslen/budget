@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import Spinner from '../../../src/containers/Spinner';
+import Spinner from '~client/containers/Spinner';
 
 describe('<Spinner />', () => {
     const wrapper = shallow(<Spinner />, createMockStore(fromJS({

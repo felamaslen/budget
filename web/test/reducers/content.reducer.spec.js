@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { fromJS } from 'immutable';
 import { DateTime } from 'luxon';
-import * as R from '../../src/reducers/content.reducer';
+import * as R from '~client/reducers/content.reducer';
 
 describe('Content reducer', () => {
     describe('rContentBlockHover', () => {

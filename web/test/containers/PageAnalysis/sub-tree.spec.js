@@ -1,12 +1,12 @@
 /* eslint-disable newline-per-chained-call */
-import '../../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import itEach from 'it-each';
 itEach();
 import React from 'react';
 import { shallow } from 'enzyme';
-import SubTree from '../../../src/containers/PageAnalysis/sub-tree';
+import SubTree from '~client/containers/PageAnalysis/sub-tree';
 
 describe('Analysis page <SubTree />', () => {
     const props = {

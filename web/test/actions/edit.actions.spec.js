@@ -1,46 +1,68 @@
 import { expect } from 'chai';
-import * as A from '../../src/actions/edit.actions';
-import * as C from '../../src/constants/actions';
+
+import {
+    aEditableActivated,
+    aEditableChanged,
+    aListItemAdded,
+    aListItemDeleted,
+    aFundTransactionsAdded,
+    aFundTransactionsChanged,
+    aFundTransactionsRemoved,
+    aSuggestionsRequested,
+    aSuggestionsReceived
+} from '~client/actions/edit.actions';
+
+import {
+    EDIT_ACTIVATED,
+    EDIT_CHANGED,
+    EDIT_LIST_ITEM_ADDED,
+    EDIT_LIST_ITEM_DELETED,
+    EDIT_FUND_TRANSACTIONS_ADDED,
+    EDIT_FUND_TRANSACTIONS_CHANGED,
+    EDIT_FUND_TRANSACTIONS_REMOVED,
+    EDIT_SUGGESTIONS_REQUESTED,
+    EDIT_SUGGESTIONS_RECEIVED
+} from '~client/constants/actions';
 
 describe('edit.actions', () => {
     describe('aEditableActivated', () => {
-        it('should return EDIT_ACTIVATED with req object', () => expect(A.aEditableActivated({
+        it('should return EDIT_ACTIVATED with req object', () => expect(aEditableActivated({
             foo: 'bar'
         })).to.deep.equal({
-            type: C.EDIT_ACTIVATED,
+            type: EDIT_ACTIVATED,
             foo: 'bar'
         }));
     });
     describe('aEditableChanged', () => {
         it('should return EDIT_ACTIVATED with value', () =>
-            expect(A.aEditableChanged('value')).to.deep.equal({
-                type: C.EDIT_CHANGED,
+            expect(aEditableChanged('value')).to.deep.equal({
+                type: EDIT_CHANGED,
                 value: 'value'
             })
         );
     });
     describe('aListItemAdded', () => {
         it('should return EDIT_LIST_ITEM_ADDED with req object', () => {
-            expect(A.aListItemAdded({ foo: 'bar' })).to.deep.equal({
-                type: C.EDIT_LIST_ITEM_ADDED,
+            expect(aListItemAdded({ foo: 'bar' })).to.deep.equal({
+                type: EDIT_LIST_ITEM_ADDED,
                 foo: 'bar'
             });
         });
     });
     describe('aListItemDeleted', () => {
         it('should return EDIT_LIST_ITEM_DELETED with item', () => {
-            expect(A.aListItemDeleted({ foo: 'bar' })).to.deep.equal({
-                type: C.EDIT_LIST_ITEM_DELETED,
+            expect(aListItemDeleted({ foo: 'bar' })).to.deep.equal({
+                type: EDIT_LIST_ITEM_DELETED,
                 foo: 'bar'
             });
         });
     });
     describe('aSuggestionsRequested', () => {
-        const action = A.aSuggestionsRequested({ foo: 'bar' });
+        const action = aSuggestionsRequested({ foo: 'bar' });
 
         it('should return EDIT_SUGGESTIONS_REQUESTED with a req object and random uuid', () => {
             expect(action).to.deep.include({
-                type: C.EDIT_SUGGESTIONS_REQUESTED,
+                type: EDIT_SUGGESTIONS_REQUESTED,
                 foo: 'bar'
             });
 
@@ -49,32 +71,32 @@ describe('edit.actions', () => {
     });
     describe('aSuggestionsReceived', () => {
         it('should return EDIT_SUGGESTIONS_RECEIVED with a response object', () =>
-            expect(A.aSuggestionsReceived({ foo: 'bar' })).to.deep.equal({
-                type: C.EDIT_SUGGESTIONS_RECEIVED,
+            expect(aSuggestionsReceived({ foo: 'bar' })).to.deep.equal({
+                type: EDIT_SUGGESTIONS_RECEIVED,
                 foo: 'bar'
             })
         );
     });
     describe('aFundTransactionsChanged', () =>
         it('should return EDIT_FUND_TRANSACTIONS_CHANGED with req object', () =>
-            expect(A.aFundTransactionsChanged({ foo: 'bar' })).to.deep.equal({
-                type: C.EDIT_FUND_TRANSACTIONS_CHANGED,
+            expect(aFundTransactionsChanged({ foo: 'bar' })).to.deep.equal({
+                type: EDIT_FUND_TRANSACTIONS_CHANGED,
                 foo: 'bar'
             })
         )
     );
     describe('aFundTransactionsAdded', () =>
         it('should return EDIT_FUND_TRANSACTIONS_ADDED with req object', () =>
-            expect(A.aFundTransactionsAdded({ foo: 'bar' })).to.deep.equal({
-                type: C.EDIT_FUND_TRANSACTIONS_ADDED,
+            expect(aFundTransactionsAdded({ foo: 'bar' })).to.deep.equal({
+                type: EDIT_FUND_TRANSACTIONS_ADDED,
                 foo: 'bar'
             })
         )
     );
     describe('aFundTransactionsRemoved', () =>
         it('should return EDIT_FUND_TRANSACTIONS_REMOVED with req object', () =>
-            expect(A.aFundTransactionsRemoved({ foo: 'bar' })).to.deep.equal({
-                type: C.EDIT_FUND_TRANSACTIONS_REMOVED,
+            expect(aFundTransactionsRemoved({ foo: 'bar' })).to.deep.equal({
+                type: EDIT_FUND_TRANSACTIONS_REMOVED,
                 foo: 'bar'
             })
         )

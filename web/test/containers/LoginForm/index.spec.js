@@ -4,10 +4,10 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import LoginForm from '../../../src/containers/LoginForm';
-import PinDisplay from '../../../src/components/LoginForm/pin-display';
-import NumberInputPad from '../../../src/components/LoginForm/number-input-pad';
-import { LOGIN_FORM_INPUTTED } from '../../../src/constants/actions';
+import LoginForm from '~client/containers/LoginForm';
+import PinDisplay from '~client/components/LoginForm/pin-display';
+import NumberInputPad from '~client/components/LoginForm/number-input-pad';
+import { LOGIN_FORM_INPUTTED } from '~client/constants/actions';
 
 describe('<LoginForm />', () => {
     const state = fromJS({

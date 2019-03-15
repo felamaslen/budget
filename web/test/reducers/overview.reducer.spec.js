@@ -1,7 +1,7 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
-import * as R from '../../src/reducers/overview.reducer';
+import * as R from '~client/reducers/overview.reducer';
 
 describe('Overview reducer', () => {
     describe('rCalculateOverview', () => {

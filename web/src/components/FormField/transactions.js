@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import FormFieldDate from './date';
 import FormFieldNumber from './number';
 import FormFieldCost from './cost';
-import { TransactionsList } from '../../helpers/data';
+import { TransactionsList } from '~client/helpers/data';
 
 function FormFieldTransactionsItem({ item, onChange }) {
     const onChangeDate = useMemo(() => onChange('date'), [onChange]);

@@ -1,13 +1,13 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { aListItemDeleted } from '../../actions/edit.actions';
+import { aListItemDeleted } from '~client/actions/edit.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { PAGES } from '../../constants/data';
-import { getPageRow } from '../../selectors/list';
-import ListRowCell from '../../components/ListRowCell';
-import DailyText from '../../components/DailyText';
+import { PAGES } from '~client/constants/data';
+import { getPageRow } from '~client/selectors/list';
+import ListRowCell from '~client/components/ListRowCell';
+import DailyText from '~client/components/DailyText';
 
 function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete }) {
     const rowClass = row.get('className') || '';

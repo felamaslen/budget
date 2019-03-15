@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import debounce from 'debounce';
 
-import { GRAPH_ZOOM_SPEED } from '../../../constants/graph';
+import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
 import { genPixelCompute, pointVisible } from '../helpers';
 
 function pointsVisible(lines) {

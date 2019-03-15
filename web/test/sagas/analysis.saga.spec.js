@@ -2,12 +2,12 @@
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
-import * as S from '../../src/sagas/analysis.saga';
-import * as A from '../../src/actions/analysis.actions';
-import { makeContentRequest } from '../../src/sagas/content.saga';
-import { openTimedMessage } from '../../src/sagas/error.saga';
-import { getApiKey } from '../../src/selectors/app';
-import { requestProps } from '../../src/selectors/analysis';
+import * as S from '~client/sagas/analysis.saga';
+import * as A from '~client/actions/analysis.actions';
+import { makeContentRequest } from '~client/sagas/content.saga';
+import { openTimedMessage } from '~client/sagas/error.saga';
+import { getApiKey } from '~client/selectors/app';
+import { requestProps } from '~client/selectors/analysis';
 
 describe('analysis.saga', () => {
     describe('requestAnalysisData', () => {

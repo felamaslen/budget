@@ -5,9 +5,9 @@
 import { List as list, Map as map } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import LineGraph from '../../components/Graph/LineGraph';
-import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '../../constants/graph';
-import { COLOR_PROFIT, COLOR_LOSS } from '../../constants/colors';
+import LineGraph from '~client/components/Graph/LineGraph';
+import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '~client/constants/graph';
+import { COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
 
 export default function GraphStocks({ history }) {
     const lines = useMemo(() => list.of(map({

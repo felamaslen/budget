@@ -1,12 +1,12 @@
 import './style.scss';
 import { List as list } from 'immutable';
 import { connect } from 'react-redux';
-import { aContentRequested } from '../../actions/content.actions';
-import { getOverviewTable } from '../../selectors/overview';
+import { aContentRequested } from '~client/actions/content.actions';
+import { getOverviewTable } from '~client/selectors/overview';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Page from '../Page';
-import OverviewTable from '../../components/OverviewTable';
+import OverviewTable from '~client/components/OverviewTable';
 import GraphOverview from '../GraphOverview';
 
 function PageOverview({ rows, editRow, editCol, ...props }) {

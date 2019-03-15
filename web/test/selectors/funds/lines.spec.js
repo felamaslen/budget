@@ -1,7 +1,7 @@
 /* eslint-disable newline-per-chained-call */
 import { List as list } from 'immutable';
 import { expect } from 'chai';
-import * as S from '../../../src/selectors/funds/lines';
+import * as S from '~client/selectors/funds/lines';
 
 describe('Funds/lines selectors', () => {
     describe('getOverallAbsolute', () => {

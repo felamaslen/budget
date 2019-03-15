@@ -2,7 +2,7 @@ import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { formatCurrency } from '../../helpers/format';
+import { formatCurrency } from '~client/helpers/format';
 
 export default function SubTree({ open, subTree, name, itemCost, onHover }) {
     if (!open) {

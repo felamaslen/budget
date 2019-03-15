@@ -1,9 +1,9 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import 'react-testing-library/cleanup-after-each';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
-import HoverCost from '../../../src/components/HoverCost';
+import HoverCost from '~client/components/HoverCost';
 
 describe('<HoverCost />', () => {
     it('should render its value unmodified, if set not to abbreviate', () => {

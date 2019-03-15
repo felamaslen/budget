@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const helpers = require('../../../scripts/scrapeFunds/helpers');
+const helpers = require('~api/scripts/scrapeFunds/helpers');
 
 describe('scrapeFunds helpers', () => {
     describe('removeWhitespace', () => {

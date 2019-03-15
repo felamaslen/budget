@@ -6,7 +6,7 @@ require('dotenv').config();
 const expect = require('chai').expect;
 
 const common = require('../../../test.common');
-const analysis = require('../../../../src/routes/data/analysis/deep');
+const analysis = require('~api/src/routes/data/analysis/deep');
 
 describe('/data/analysis/deep', () => {
     describe('getPeriodCostDeep', () => {

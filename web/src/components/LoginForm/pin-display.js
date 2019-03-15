@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { LOGIN_INPUT_LENGTH } from '../../constants/data';
+import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
 export default function PinDisplay({ inputStep }) {
     const digitBoxes = new Array(LOGIN_INPUT_LENGTH)

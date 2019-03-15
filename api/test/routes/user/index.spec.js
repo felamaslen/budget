@@ -7,7 +7,7 @@ chai.use(require('sinon-chai'));
 const { expect } = chai;
 require('it-each')();
 
-const user = require('../../../src/routes/user');
+const user = require('~api/src/routes/user');
 
 describe('/api/user', () => {
     describe('getNewBadLoginCount', () => {

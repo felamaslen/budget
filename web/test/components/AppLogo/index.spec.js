@@ -1,9 +1,9 @@
 /* eslint-disable newline-per-chained-call */
 import { expect } from 'chai';
-import '../../browser';
+import '~client-test/browser.js';
 import React from 'react';
 import { shallow } from 'enzyme';
-import AppLogo from '../../../src/components/AppLogo';
+import AppLogo from '~client/components/AppLogo';
 
 describe('<AppLogo />', () => {
     it('should render its basic structure', () => {

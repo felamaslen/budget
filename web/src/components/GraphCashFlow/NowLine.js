@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
-import { FONT_GRAPH_KEY } from '../../constants/graph';
-import { COLOR_DARK, COLOR_GRAPH_TITLE } from '../../constants/colors';
-import { rgba } from '../../helpers/color';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
+import { COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
+import { rgba } from '~client/helpers/color';
 
 export default function NowLine({ now, minY, maxY, pixX, pixY }) {
     const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;

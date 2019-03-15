@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FONT_GRAPH_TITLE } from '../../constants/graph';
-import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '../../constants/colors';
-import { rgba } from '../../helpers/color';
+import { FONT_GRAPH_TITLE } from '~client/constants/graph';
+import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '~client/constants/colors';
+import { rgba } from '~client/helpers/color';
 
 function getLabelPosX(posX, width, labelWidthX) {
     let anchorLabelX = 'middle';

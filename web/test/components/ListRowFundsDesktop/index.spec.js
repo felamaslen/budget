@@ -3,9 +3,9 @@ import { List as list, Map as map } from 'immutable';
 import { expect } from 'chai';
 import React from 'react';
 import { shallow } from 'enzyme';
-import GraphFundItem from '../../../src/components/GraphFundItem';
-import ListRowFundsDesktop from '../../../src/components/ListRowFundsDesktop';
-import FundGainInfo from '../../../src/components/FundGainInfo';
+import GraphFundItem from '~client/components/GraphFundItem';
+import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
+import FundGainInfo from '~client/components/FundGainInfo';
 
 describe('<ListRowFundsDesktop />', () => {
     const props = {

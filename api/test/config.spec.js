@@ -8,7 +8,7 @@ require('dotenv').config();
 const expect = require('chai').expect;
 require('it-each')({ testPerIteration: true });
 
-const config = require('../src/config')();
+const config = require('~api/src/config')();
 
 describe('Config', () => {
     it('should define debug', () => {

@@ -1,8 +1,8 @@
 /* eslint-disable newline-per-chained-call */
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/edit.reducer';
-import { dateInput } from '../../src/helpers/date';
+import * as R from '~client/reducers/edit.reducer';
+import { dateInput } from '~client/helpers/date';
 
 describe('Edit reducers', () => {
     describe('rActivateEditable', () => {

@@ -1,14 +1,14 @@
 import './style.scss';
 import { OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
-import { getProcessedFundsRows } from '../../selectors/funds';
+import { getProcessedFundsRows } from '~client/selectors/funds';
 import React from 'react';
 import PropTypes from 'prop-types';
 import PageList from '../PageList';
-import FundsMeta from '../../components/FundsMeta';
+import FundsMeta from '~client/components/FundsMeta';
 import ListHeadFundsDesktop from '../ListHeadFundsDesktop';
-import ListRowFundsDesktop from '../../components/ListRowFundsDesktop';
-import ListRowFundsMobile from '../../components/ListRowFundsMobile';
+import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
+import ListRowFundsMobile from '~client/components/ListRowFundsMobile';
 
 function PageFunds({ rows }) {
     return (

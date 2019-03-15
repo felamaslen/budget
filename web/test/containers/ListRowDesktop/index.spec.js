@@ -4,9 +4,9 @@ import { expect } from 'chai';
 import React from 'react';
 import shallow from '../../shallow-with-store';
 import { createMockStore } from 'redux-test-utils';
-import ListRowDesktop from '../../../src/containers/ListRowDesktop';
-import ListRowCell from '../../../src/components/ListRowCell';
-import { EDIT_LIST_ITEM_DELETED } from '../../../src/constants/actions';
+import ListRowDesktop from '~client/containers/ListRowDesktop';
+import ListRowCell from '~client/components/ListRowCell';
+import { EDIT_LIST_ITEM_DELETED } from '~client/constants/actions';
 
 describe('<ListRowDesktop />', () => {
     const state = map({

@@ -1,6 +1,6 @@
 import { Map as map } from 'immutable';
-import { PAGES } from '../../constants/data';
-import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '../../constants/colors';
+import { PAGES } from '~client/constants/data';
+import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
 
 const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 

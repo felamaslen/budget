@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import * as R from '../../src/reducers/graph.reducer';
+import * as R from '~client/reducers/graph.reducer';
 
 describe('Graph reducer', () => {
     describe('rToggleShowAll', () => {

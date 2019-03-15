@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
-import * as S from '../../src/selectors/list';
+import * as S from '~client/selectors/list';
 
 describe('List selectors', () => {
     const state = map({

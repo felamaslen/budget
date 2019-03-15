@@ -1,9 +1,9 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import 'react-testing-library/cleanup-after-each';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
-import FormFieldNumber from '../../../src/components/FormField/number';
+import FormFieldNumber from '~client/components/FormField/number';
 
 describe('<FormFieldNumber />', () => {
     let changed = null;

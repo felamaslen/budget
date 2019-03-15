@@ -1,14 +1,13 @@
 /* eslint-disable no-unused-expressions, newline-per-chained-call */
-import 'babel-polyfill';
 import { fromJS } from 'immutable';
 import chai, { expect } from 'chai';
 import chaiEnzyme from 'chai-enzyme';
 chai.use(chaiEnzyme());
 import { shallow } from 'enzyme';
-import '../../browser';
+import '~client-test/browser.js';
 import React from 'react';
-import Blocks, { OuterBlockGroup } from '../../../src/components/BlockPacker/blocks';
-import BlockBits from '../../../src/components/BlockPacker/block-bits';
+import Blocks, { OuterBlockGroup } from '~client/components/BlockPacker/blocks';
+import BlockBits from '~client/components/BlockPacker/block-bits';
 
 describe('<OuterBlockGroup />', () => {
     const props = {

@@ -1,7 +1,7 @@
 /* eslint-disable newline-per-chained-call */
 import { expect } from 'chai';
 import { fromJS } from 'immutable';
-import * as R from '../../src/reducers/error.reducer';
+import * as R from '~client/reducers/error.reducer';
 
 describe('Error reducer', () => {
     describe('rErrorMessageOpen', () => {

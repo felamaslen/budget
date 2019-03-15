@@ -1,8 +1,8 @@
-import '../../browser';
+import '~client-test/browser.js';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import React from 'react';
-import FormFieldText from '../../../src/components/FormField';
+import FormFieldText from '~client/components/FormField';
 
 describe('<FormFieldText />', () => {
     let changed = null;

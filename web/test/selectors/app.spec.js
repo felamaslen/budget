@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
-import * as S from '../../src/selectors/app';
+import * as S from '~client/selectors/app';
 
 describe('App selectors', () => {
     describe('getNow', () => {

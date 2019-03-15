@@ -2,7 +2,7 @@
 import { fromJS, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import { expect } from 'chai';
-import * as S from '../../../src/selectors/funds';
+import * as S from '~client/selectors/funds';
 import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
 
 describe('Funds selectors', () => {

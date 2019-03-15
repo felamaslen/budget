@@ -1,17 +1,17 @@
 /* eslint-disable prefer-reflect */
-import '../browser';
+import '~client-test/browser.js';
 import { fromJS } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
-import * as S from '../../src/sagas/funds.saga';
-import * as A from '../../src/actions/graph.actions';
-import * as B from '../../src/actions/stocks-list.actions';
-import { openTimedMessage } from '../../src/sagas/error.saga';
-import { getApiKey } from '../../src/selectors/app';
-import { getFundsCache } from '../../src/selectors/funds/helpers';
-import { getStocksListInfo } from '../../src/selectors/funds/stocks';
-import { getStockPricesFromYahoo } from '../../src/helpers/finance';
+import * as S from '~client/sagas/funds.saga';
+import * as A from '~client/actions/graph.actions';
+import * as B from '~client/actions/stocks-list.actions';
+import { openTimedMessage } from '~client/sagas/error.saga';
+import { getApiKey } from '~client/selectors/app';
+import { getFundsCache } from '~client/selectors/funds/helpers';
+import { getStocksListInfo } from '~client/selectors/funds/stocks';
+import { getStockPricesFromYahoo } from '~client/helpers/finance';
 
 describe('funds.saga', () => {
     describe('requestFundPeriodData', () => {

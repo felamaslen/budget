@@ -1,6 +1,6 @@
 import React from 'react';
 import Media from 'react-media';
-import { mediaQueryMobile } from '../../constants';
+import { mediaQueryMobile } from '~client/constants';
 import ListBodyDesktop from '../ListBodyDesktop';
 import ListBodyMobile from '../ListBodyMobile';
 

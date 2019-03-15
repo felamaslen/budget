@@ -5,7 +5,7 @@
 const { expect } = require('chai');
 const { DateTime } = require('luxon');
 
-const analysis = require('../../../../src/routes/data/analysis/common');
+const analysis = require('~api/src/routes/data/analysis/common');
 
 describe('/data/analysis/deep?', () => {
     describe('getCategoryColumn', () => {

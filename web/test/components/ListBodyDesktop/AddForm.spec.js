@@ -7,8 +7,8 @@ import sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 import React from 'react';
 import { shallow } from 'enzyme';
-import AddForm from '../../../src/components/ListBodyDesktop/AddForm';
-import ListAddEditItem from '../../../src/containers/Editable/list-item';
+import AddForm from '~client/components/ListBodyDesktop/AddForm';
+import ListAddEditItem from '~client/containers/Editable/list-item';
 
 describe('List page <AddForm />', () => {
     const props = {
