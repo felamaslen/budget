@@ -1,16 +1,12 @@
-/**
- * Block packer component
- */
-
 import './style.scss';
 import { List as list } from 'immutable';
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import Blocks from './blocks';
 
 export default function BlockPacker({ status, ...props }) {
-    const onMouseOut = () => props.onHover(null, null);
+    const onMouseOut = useCallback(() => props.onHover(null, null));
 
     const blocks = props.blocks
         ? <Blocks {...props} />

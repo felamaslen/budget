@@ -1,76 +1,110 @@
-/* eslint-disable newline-per-chained-call */
-import chai, { expect } from 'chai';
-import itEach from 'it-each';
-itEach({ testPerIteration: true });
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-chai.use(sinonChai);
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render, fireEvent } from 'react-testing-library';
+import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { shallow } from 'enzyme';
 import Navbar from '~client/components/Navbar';
 
-describe('<Navbar />', () => {
+const getContainer = (customProps = {}) => {
     const props = {
         active: true,
-        onPageSet: sinon.spy(),
-        onLogout: sinon.spy()
+        onPageSet: () => null,
+        onLogout: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<Navbar {...props} />);
+    return render(
+        <MemoryRouter>
+            <Navbar {...props} />
+        </MemoryRouter>
+    );
+};
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('nav.nav-list.noselect')).to.equal(true);
-        expect(wrapper.children()).to.have.length(10);
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [nav] = container.childNodes;
+
+    t.is(nav.tagName, 'NAV');
+    t.is(nav.className, 'nav-list noselect');
+    t.is(nav.childNodes.length, 10);
+});
+
+const pageCases = [
+    { page: 'overview', path: '/' },
+    { page: 'analysis', path: '/analysis' },
+    { page: 'funds', path: '/funds' },
+    { page: 'income', path: '/income' },
+    { page: 'bills', path: '/bills' },
+    { page: 'food', path: '/food' },
+    { page: 'general', path: '/general' },
+    { page: 'holiday', path: '/holiday' },
+    { page: 'social', path: '/social' }
+];
+
+pageCases.forEach(({ page, path }, index) => {
+    test(`rendering a button for the ${page} page`, t => {
+        const { container } = getContainer();
+        const [nav] = container.childNodes;
+
+        const link = nav.childNodes[index];
+
+        t.is(link.tagName, 'A');
+        t.regex(link.className, new RegExp(`nav-link nav-link-${page}`));
+        if (path === '/') {
+            t.regex(link.className, /active/);
+        } else {
+            t.notRegex(link.className, /active/);
+        }
+
+        t.is(link.href, path);
     });
 
-    let key = null;
-    before(() => {
-        key = 0;
-    });
-    after(() => {
-        key = 0;
-    });
+    test(`navigation to ${page} page`, t => {
+        // eslint-disable-next-line no-unused-vars
+        const onPageSet = memoize(linkPage => t.context.stub());
 
-    it.each([
-        { page: 'overview', path: '/' },
-        { page: 'analysis', path: '/analysis' },
-        { page: 'funds', path: '/funds' },
-        { page: 'income', path: '/income' },
-        { page: 'bills', path: '/bills' },
-        { page: 'food', path: '/food' },
-        { page: 'general', path: '/general' },
-        { page: 'holiday', path: '/holiday' },
-        { page: 'social', path: '/social' }
-    ], 'should render a button for the %s page', ['page'], ({ page, path }) => {
-
-        expect(wrapper.childAt(key).is(NavLink)).to.equal(true);
-        expect(wrapper.childAt(key).props()).to.deep.include({
-            exact: true,
-            to: path,
-            activeClassName: 'active',
-            className: `nav-link nav-link-${page}`
+        const { container } = getContainer({
+            onPageSet
         });
 
-        wrapper.childAt(key).simulate('click');
-        expect(props.onPageSet).to.have.been.calledWith(page);
+        const [nav] = container.childNodes;
+        const link = nav.childNodes[index];
 
-        key++;
+        t.is(onPageSet(page).calls.length, 0);
+        fireEvent.click(link);
+        t.is(onPageSet(page).calls.length, 1);
+    });
+});
+
+test('logout button', t => {
+    const onLogout = t.context.stub();
+    const { container } = getContainer({
+        onLogout
     });
 
-    it('should render a logout button', () => {
-        expect(wrapper.childAt(9).is('a.nav-link.nav-link-logout')).to.equal(true);
-        expect(wrapper.childAt(9).text()).to.equal('Log out');
+    const [nav] = container.childNodes;
+    const link = nav.childNodes[9];
 
-        expect(props.onLogout).not.to.have.been.calledWith();
-        wrapper.childAt(9).simulate('click');
-        expect(props.onLogout).to.have.been.calledWith();
+    t.is(link.tagName, 'A');
+    t.is(link.className, 'nav-link nav-link-logout');
+    t.is(link.innerHTML, 'Log out');
+
+    t.is(onLogout.calls.length, 0);
+    fireEvent.click(link);
+    t.is(onLogout.calls.length, 1);
+});
+
+test('rendering nothing when inactive', t => {
+    const { container } = getContainer({
+        active: false
     });
 
-    it('should not render anything if inactive', () => {
-        const wrapperInactive = shallow(<Navbar {...props} active={false} />);
-
-        expect(wrapperInactive.get(0)).to.equal(null);
-    });
+    t.is(container.childNodes.length, 0);
 });
 

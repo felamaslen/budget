@@ -1,33 +1,74 @@
-/* eslint-disable newline-per-chained-call */
-import { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
-import '~client-test/browser.js';
+import test from 'ava';
+import { render } from 'react-testing-library';
+import '~client-test/browser';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { Provider } from 'react-redux';
+import { createMockStore } from 'redux-test-utils';
+import reduction from '~client/reduction';
 import FundsMeta from '~client/components/FundsMeta';
-import Media from 'react-media';
-import { mediaQueryMobile } from '~client/constants';
-import StocksList from '~client/containers/StocksList';
-import GraphFunds from '~client/containers/GraphFunds';
+import { widthPageMobile } from '~client/constants/styles.json';
 
-describe('<FundsMeta />', () => {
-    const wrapper = shallow(<FundsMeta page="funds" />);
+const getFundsMeta = (customProps = {}) => {
+    const state = reduction;
 
-    it('should render a media query to switch between mobile and desktop', () => {
-        expect(wrapper.is('div.funds-info')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is(Media)).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.have.property('query', mediaQueryMobile);
-    });
+    const store = createMockStore(state);
 
-    it('should render an after list section on desktop', () => {
-        const afterList = shallow(wrapper.childAt(0).props().children(false));
+    const props = {
+        page: 'funds',
+        ...customProps
+    };
 
-        expect(afterList.is('div.after-list')).to.equal(true);
-        expect(afterList.children()).to.have.length(2);
-        expect(afterList.childAt(0).is(StocksList)).to.equal(true);
-        expect(afterList.childAt(1).is(GraphFunds)).to.equal(true);
-    });
+    const utils = render((
+        <Provider store={store}>
+            <FundsMeta {...props} />
+        </Provider>
+    ));
+
+    return { store, ...utils };
+};
+
+const testOuter = (t, container) => {
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'funds-info');
+};
+
+test('rendering a mobile info box', t => {
+    window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile - 1 });
+
+    const { container } = getFundsMeta();
+
+    testOuter(t, container);
+
+    const [div] = container.childNodes;
+    t.is(div.childNodes.length, 1);
+
+    const [inner] = div.childNodes;
+    t.is(inner.tagName, 'DIV');
+    t.is(inner.className, 'funds-info-inner');
+});
+
+test('rendering a desktop info box', t => {
+    window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile + 1 });
+
+    const { container } = getFundsMeta();
+
+    testOuter(t, container);
+
+    const [div] = container.childNodes;
+    t.is(div.childNodes.length, 1);
+
+    const [after] = div.childNodes;
+    t.is(after.tagName, 'DIV');
+    t.is(after.className, 'after-list');
+    t.is(after.childNodes.length, 1);
+
+    const [graphFunds] = after.childNodes;
+
+    t.is(graphFunds.tagName, 'DIV');
+    t.is(graphFunds.className, 'graph-container graph-fund-history');
 });
 

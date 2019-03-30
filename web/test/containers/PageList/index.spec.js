@@ -1,34 +1,66 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
+import React from 'react';
 import PageList from '~client/containers/PageList';
-import Page from '~client/containers/Page';
-import ListBody from '~client/components/ListBody';
 
-describe('<PageList />', () => {
-    const store = createMockStore(fromJS({
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
+        edit: {
+            addBtnFocus: false
+        },
+        pages: {
+            food: {
+            }
+        },
         pagesLoaded: {
             food: true
+        },
+        other: {
         }
-    }));
+    });
+
+    if (customState) {
+        state = customState(state);
+    }
+
+    const store = createMockStore(state);
 
     const props = {
         page: 'food',
-        After: () => null
+        After: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<PageList {...props} />, store).dive();
+    const utils = render(
+        <Provider store={store}>
+            <PageList {...props} />
+        </Provider>
+    );
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is(Page)).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
-        expect(wrapper.childAt(0).is('div.list-insert.list-food.list')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).is(ListBody)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).props()).to.deep.include({ page: 'food' });
-    });
+    return { store, ...utils };
+};
+
+test('basic structure', t => {
+    const { container } = getContainer();
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'page page-food');
+    t.is(div.childNodes.length, 1);
+});
+
+test('list', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [pageList] = div.childNodes;
+
+    t.is(pageList.tagName, 'DIV');
+    t.is(pageList.className, 'list-insert list-food list');
+    t.is(pageList.childNodes.length, 0);
 });
 

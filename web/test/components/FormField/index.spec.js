@@ -1,51 +1,58 @@
-import '~client-test/browser.js';
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldText from '~client/components/FormField';
 
-describe('<FormFieldText />', () => {
-    let changed = null;
-    const onChange = value => {
-        changed = value;
-    };
-
+const getFormFieldText = memoize((customProps = {}) => {
     const props = {
         value: 'foo',
-        onChange
+        onChange: () => null,
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const wrapper = shallow(<FormFieldText {...props} />);
+    return render(<FormFieldText {...props} />);
+});
 
-        expect(wrapper.is('div.form-field.form-field-text')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-    });
+test('basic structure', t => {
+    const { container } = getFormFieldText();
 
-    it('should render an input', () => {
-        const wrapper = shallow(<FormFieldText {...props} />);
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 1);
+    t.is(div.className, 'form-field form-field-text');
+});
 
-        const input = wrapper.childAt(0);
+test('input', t => {
+    const { container } = getFormFieldText();
+    const [div] = container.childNodes;
 
-        expect(input.is('input')).to.equal(true);
-        expect(input.props()).to.deep.include({
-            type: 'text',
-            defaultValue: 'foo'
-        });
-    });
+    const [input] = div.childNodes;
 
-    it('should fire onChange', () => {
-        const wrapper = shallow(<FormFieldText {...props} />);
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'text');
+    t.is(input.value, 'foo');
+});
 
-        expect(changed).to.equal(null);
+test('changing value', t => {
+    const onChange = t.context.stub();
+    const { container } = getFormFieldText({ onChange });
 
-        const input = wrapper.childAt(0);
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
 
-        input.simulate('change', { target: { value: 'bar' } });
+    fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(changed).to.equal(null);
+    t.is(onChange.calls.length, 0);
 
-        input.simulate('blur');
-    });
+    fireEvent.blur(input);
+
+    t.is(onChange.calls.length, 1);
+    t.deepEqual(onChange.calls[0].arguments, ['bar']);
 });
 

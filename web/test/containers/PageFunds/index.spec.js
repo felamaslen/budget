@@ -1,32 +1,70 @@
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import shallow from '../../shallow-with-store';
-import { expect } from 'chai';
-import '~client-test/browser.js';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import React from 'react';
 import PageFunds from '~client/containers/PageFunds';
-import PageList from '~client/containers/PageList';
-import FundsMeta from '~client/components/FundsMeta';
-import ListHeadFundsDesktop from '~client/containers/ListHeadFundsDesktop';
-import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
-import ListRowFundsMobile from '~client/components/ListRowFundsMobile';
 
-describe('<PageFunds />', () => {
-    it('should render a list page with extra props', () => {
-        const state = fromJS({});
-
-        const wrapper = shallow(<PageFunds />, createMockStore(state)).dive();
-
-        expect(wrapper.is(PageList)).to.equal(true);
-        expect(wrapper.props()).to.deep.equal({
-            page: 'funds',
-            After: FundsMeta,
-            TotalValue: ListHeadFundsDesktop,
-            AfterRow: ListRowFundsDesktop,
-            AfterRowMobile: ListRowFundsMobile,
-            listColsMobile: ['item'],
-            rows: null
-        });
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
+        edit: {
+            addBtnFocus: false
+        },
+        pages: {
+            funds: {
+            }
+        },
+        pagesLoaded: {
+            funds: true
+        },
+        other: {
+            windowWidth: 1000,
+            graphFunds: {
+                mode: 0,
+                period: 'year1',
+                zoomRange: [null, null]
+            },
+            stocksList: {
+                loadedList: false,
+                loadedInitial: false,
+                stocks: {},
+                indices: {},
+                history: [],
+                lastPriceUpdate: 0,
+                weightedGain: 0,
+                oldWeightedGain: 0
+            }
+        }
     });
+
+    if (customState) {
+        state = customState(state);
+    }
+
+    const store = createMockStore(state);
+
+    const props = {
+        ...customProps
+    };
+
+    const utils = render(
+        <Provider store={store}>
+            <PageFunds {...props} />
+        </Provider>
+    );
+
+    return { store, ...utils };
+};
+
+test('list page with extra props', t => {
+    const { container } = getContainer();
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'page page-funds');
 });
 

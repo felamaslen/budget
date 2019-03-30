@@ -1,63 +1,69 @@
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import '~client-test/browser.js';
-import 'react-testing-library/cleanup-after-each';
 import { render } from 'react-testing-library';
-import { Provider } from 'react-redux';
-import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import React from 'react';
 import Page from '~client/containers/Page';
 import { aContentRequested } from '~client/actions/content.actions';
 
-describe('<Page />', () => {
-    const getContainer = (props = {}) => {
-        const state = fromJS({
-            pages: {
-                food: {},
-                general: {}
-            }
-        });
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
+        pages: {
+            food: {},
+            general: {}
+        }
+    });
 
-        const store = createMockStore(state);
+    if (customState) {
+        state = customState(state);
+    }
 
-        const utils = render(
-            <Provider store={store}>
-                <Page page="general" {...props}>
-                    <span>{'text'}</span>
-                </Page>
-            </Provider>
-        );
+    const store = createMockStore(state);
 
-        return { ...utils, store };
+    const props = {
+        page: 'general',
+        ...customProps
     };
 
-    it('should render a basic page container', () => {
-        const { container } = getContainer();
+    const utils = render(
+        <Provider store={store}>
+            <Page {...props}>
+                <span>{'text'}</span>
+            </Page>
+        </Provider>
+    );
 
-        const [div] = container.childNodes;
+    return { store, ...utils };
+};
 
-        expect(div.tagName).to.equal('DIV');
-        expect(div.className).to.equal('page page-general');
+test('basic page container', t => {
+    const { container } = getContainer();
 
-        expect(div.childNodes).to.have.length(1);
+    const [div] = container.childNodes;
 
-        const [span] = div.childNodes;
-        expect(span.tagName).to.equal('SPAN');
-        expect(span.innerHTML).to.equal('text');
-    });
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'page page-general');
 
-    it('should render nothing if the page content is not loaded yet', () => {
-        const { container } = getContainer({ page: 'holiday' });
+    t.is(div.childNodes.length, 1);
 
-        expect(container.innerHTML).to.equal('');
-    });
+    const [span] = div.childNodes;
+    t.is(span.tagName, 'SPAN');
+    t.is(span.innerHTML, 'text');
+});
 
-    it('should dispatch an action when rendering', () => {
-        const { store } = getContainer({ page: 'bills' });
+test('rendering nothing if the page content is not loaded yet', t => {
+    const { container } = getContainer({ page: 'holiday' });
 
-        const action = aContentRequested({ page: 'bills' });
+    t.is(container.childNodes.length, 0);
+});
 
-        expect(store.isActionDispatched(action)).to.equal(true);
-    });
+test('dispatching an action when rendering', t => {
+    const { store } = getContainer({ page: 'bills' });
+
+    const action = aContentRequested({ page: 'bills' });
+
+    t.true(store.isActionDispatched(action));
 });
 

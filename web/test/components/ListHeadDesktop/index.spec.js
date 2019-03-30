@@ -1,10 +1,11 @@
-/* eslint-disable newline-per-chained-call */
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import test from 'ava';
+import { render } from 'react-testing-library';
+import '~client-test/browser';
+import memoize from 'fast-memoize';
 import ListHeadDesktop from '~client/components/ListHeadDesktop';
 import React from 'react';
 
-describe('List page <ListHeadDesktop />', () => {
+const getContainer = memoize((customProps = {}) => {
     const AfterHead = () => null;
 
     const props = {
@@ -12,56 +13,89 @@ describe('List page <ListHeadDesktop />', () => {
         weeklyValue: 100,
         getDaily: true,
         totalCost: 400,
-        AfterHead
+        AfterHead,
+        ...customProps
     };
 
-    const wrapper = shallow(<ListHeadDesktop {...props} />);
+    return render(<ListHeadDesktop {...props} />);
+});
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.list-head-inner.noselect')).to.equal(true);
-        expect(wrapper.children()).to.have.length(7);
-    });
+test('basic structure', t => {
+    const { container } = getContainer();
 
-    it('should render a list head', () => {
-        expect(wrapper.childAt(0).is('span.date')).to.equal(true);
-        expect(wrapper.childAt(0).text()).to.equal('date');
+    t.is(container.tagName, 'DIV');
+    t.is(container.childNodes.length, 1);
 
-        expect(wrapper.childAt(1).is('span.item')).to.equal(true);
-        expect(wrapper.childAt(1).text()).to.equal('item');
+    const [div] = container.childNodes;
 
-        expect(wrapper.childAt(2).is('span.category')).to.equal(true);
-        expect(wrapper.childAt(2).text()).to.equal('category');
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 7);
+    t.is(div.className, 'list-head-inner noselect');
+});
 
-        expect(wrapper.childAt(3).is('span.cost')).to.equal(true);
-        expect(wrapper.childAt(3).text()).to.equal('cost');
+test('column headings', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
 
-        expect(wrapper.childAt(4).is('span.shop')).to.equal(true);
-        expect(wrapper.childAt(4).text()).to.equal('shop');
-    });
+    [0, 1, 2, 3, 4].forEach(key => t.is(div.childNodes[key].tagName, 'SPAN'));
 
-    it('should render a daily column for daily pages (with weekly totals)', () => {
-        expect(wrapper.childAt(5).is('span')).to.equal(true);
-        expect(wrapper.childAt(5).children()).to.have.length(3);
+    const [date, item, category, cost, shop] = div.childNodes;
 
-        expect(wrapper.childAt(5).childAt(0).is('span.daily')).to.equal(true);
-        expect(wrapper.childAt(5).childAt(0).text()).to.equal('Daily |');
+    t.is(date.className, 'date');
+    t.is(item.className, 'item');
+    t.is(category.className, 'category');
+    t.is(cost.className, 'cost');
+    t.is(shop.className, 'shop');
 
-        expect(wrapper.childAt(5).childAt(1).is('span.weekly')).to.equal(true);
-        expect(wrapper.childAt(5).childAt(1).text()).to.equal('Weekly:');
+    t.is(date.innerHTML, 'date');
+    t.is(item.innerHTML, 'item');
+    t.is(category.innerHTML, 'category');
+    t.is(cost.innerHTML, 'cost');
+    t.is(shop.innerHTML, 'shop');
+});
 
-        expect(wrapper.childAt(5).childAt(2).is('span.weekly-value')).to.equal(true);
-        expect(wrapper.childAt(5).childAt(2).text()).to.equal('£1.00');
-    });
+test('daily column', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
 
-    it('should render a total column', () => {
-        expect(wrapper.childAt(6).is('div.total-outer')).to.equal(true);
+    const [, , , , , daily] = div.childNodes;
 
-        expect(wrapper.childAt(6).children()).to.have.length(2);
+    t.is(daily.tagName, 'SPAN');
+    t.is(daily.childNodes.length, 3);
 
-        expect(wrapper.childAt(6).childAt(0).text()).to.equal('Total:');
+    const [main, weekly, value] = daily.childNodes;
 
-        expect(wrapper.childAt(6).childAt(1).is('span.total-value')).to.equal(true);
-        expect(wrapper.childAt(6).childAt(1).text()).to.equal('£4.00');
-    });
+    t.is(main.tagName, 'SPAN');
+    t.is(main.className, 'daily');
+    t.is(main.innerHTML, 'Daily |');
+
+    t.is(weekly.tagName, 'SPAN');
+    t.is(weekly.className, 'weekly');
+    t.is(weekly.innerHTML, 'Weekly:');
+
+    t.is(value.tagName, 'SPAN');
+    t.is(value.className, 'weekly-value');
+    t.is(value.innerHTML, '£1.00');
+});
+
+test('total column', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [, , , , , , total] = div.childNodes;
+
+    t.is(total.tagName, 'DIV');
+    t.is(total.className, 'total-outer');
+
+    t.is(total.childNodes.length, 2);
+
+    const [text, value] = total.childNodes;
+
+    t.is(text.tagName, 'SPAN');
+    t.is(text.innerHTML, 'Total:');
+
+    t.is(value.tagName, 'SPAN');
+    t.is(value.className, 'total-value');
+    t.is(value.innerHTML, '£4.00');
 });
 

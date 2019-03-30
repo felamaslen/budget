@@ -19,5 +19,5 @@
 - Use logger function instead of console.log [DONE]
 - Remove ImmutableJS
 - Relative imports [DONE]
-- Replace enzyme with react-testing-library
-- Replace mocha with ava
+- Replace enzyme with react-testing-library [DONE]
+- Replace mocha with ava [PARTIAL]

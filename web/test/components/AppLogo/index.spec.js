@@ -1,56 +1,109 @@
-/* eslint-disable newline-per-chained-call */
-import { expect } from 'chai';
-import '~client-test/browser.js';
+import test from 'ava';
+import '~client-test/browser';
+import memoize from 'fast-memoize';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from 'react-testing-library';
 import AppLogo from '~client/components/AppLogo';
 
-describe('<AppLogo />', () => {
-    it('should render its basic structure', () => {
-        const props = {
-            loading: true,
-            unsaved: true
-        };
+const getContainer = memoize((customProps = {}) => {
+    const props = {
+        loading: true,
+        unsaved: true,
+        ...customProps
+    };
 
-        const wrapper = shallow(<AppLogo {...props} />);
+    const utils = render(<AppLogo {...props} />);
 
-        expect(wrapper.is('div.app-logo')).to.equal(true);
+    return utils;
+});
 
-        expect(wrapper.children()).to.have.length(2);
+test('rendering basic structure', t => {
+    const { container } = getContainer();
 
-        expect(wrapper.childAt(0).is('span.queue-not-saved')).to.equal(true);
-        expect(wrapper.childAt(0).text()).to.equal('Unsaved changes!');
+    t.is(container.tagName, 'DIV');
+});
 
-        expect(wrapper.childAt(1).is('a.logo')).to.equal(true);
-        expect(wrapper.childAt(1).children()).to.have.length(2);
-        expect(wrapper.childAt(1).childAt(0).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(0).text()).to.equal('Budget');
-        expect(wrapper.childAt(1).childAt(1).is('span.loading-api')).to.equal(true);
+test('children', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+});
+
+test('class name', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    t.is(div.className, 'app-logo');
+});
+
+test('logo children', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    t.is(div.childNodes.length, 2);
+});
+
+test('queue not saved', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [queue] = div.childNodes;
+
+    t.is(queue.tagName, 'SPAN');
+    t.is(queue.className, 'queue-not-saved');
+    t.is(queue.innerHTML, 'Unsaved changes!');
+});
+
+test('logo', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [, logo] = div.childNodes;
+
+    t.is(logo.tagName, 'A');
+    t.is(logo.childNodes.length, 2);
+
+    const [name, loading] = logo.childNodes;
+
+    t.is(name.tagName, 'SPAN');
+    t.is(name.innerHTML, 'Budget');
+
+    t.is(loading.tagName, 'SPAN');
+    t.is(loading.className, 'loading-api');
+    t.is(loading.childNodes.length, 0);
+});
+
+test('no unsaved changes rendered, if there are no requests in the list', t => {
+    const { container } = getContainer({
+        loading: false,
+        unsaved: false
     });
 
-    it('should not render unsaved changes, if there are no requests in the list', () => {
-        const props = {
-            loading: false,
-            unsaved: false
-        };
+    const [div] = container.childNodes;
 
-        const wrapper = shallow(<AppLogo {...props} />);
+    t.is(div.childNodes.length, 1);
 
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is('a.logo')).to.equal(true);
+    const [logo] = div.childNodes;
+    t.is(logo.tagName, 'A');
+    t.is(logo.className, 'logo');
+});
+
+test('no loading spinner if not loading a request', t => {
+    const { container } = getContainer({
+        loading: false,
+        unsaved: true
     });
 
-    it('should not render a loading spinner if not loading a request', () => {
-        const props = {
-            loading: false,
-            unsaved: true
-        };
+    const [div] = container.childNodes;
 
-        const wrapper = shallow(<AppLogo {...props} />);
+    t.is(div.childNodes.length, 2);
 
-        expect(wrapper.childAt(1).children()).to.have.length(1);
-        expect(wrapper.childAt(1).childAt(0).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(0).text()).to.equal('Budget');
-    });
+    const [queue, logo] = div.childNodes;
+
+    t.is(queue.className, 'queue-not-saved');
+
+    t.is(logo.childNodes.length, 1);
+    const [name] = logo.childNodes;
+    t.is(name.innerHTML, 'Budget');
 });
 

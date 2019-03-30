@@ -1,32 +1,58 @@
-import { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
-import { shallow } from 'enzyme';
+import test from 'ava';
+import '~client-test/browser';
+import memoize from 'fast-memoize';
+import { render } from 'react-testing-library';
 import React from 'react';
 import PinDisplay from '~client/components/LoginForm/pin-display';
 
-describe('<PinDisplay />', () => {
+const getContainer = memoize((customProps = {}) => {
     const props = {
-        inputStep: 2
+        inputStep: 2,
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const wrapper = shallow(<PinDisplay {...props} />);
+    return render(<PinDisplay {...props} />);
+});
 
-        expect(wrapper.is('div.pin-display')).to.equal(true);
-        expect(wrapper.children()).to.have.length(4);
-    });
+test('basic structure', t => {
+    const { container } = getContainer();
 
-    it.each([0, 1, 2, 3], 'should render each digit box', key => {
-        const wrapper = shallow(<PinDisplay {...props} />);
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
 
-        expect(wrapper.childAt(key).is('div.input-pin')).to.equal(true);
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 4);
+    t.is(div.className, 'pin-display');
+});
 
+test('each digit box', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    t.plan(4 * 4);
+
+    [0, 1, 2, 3].forEach(key => {
         const active = key === 2;
         const done = key < 2;
 
-        expect(wrapper.childAt(key).hasClass('active')).to.equal(active);
-        expect(wrapper.childAt(key).hasClass('done')).to.equal(done);
+        const child = div.childNodes[key];
+
+        t.is(child.tagName, 'DIV');
+        t.regex(child.className, /input-pin/);
+
+        const activeClassName = /(^|\s)active($|\s)/;
+        if (active) {
+            t.regex(child.className, activeClassName);
+        } else {
+            t.notRegex(child.className, activeClassName);
+        }
+
+        const doneClassName = /(^|\s)done($|\s)/;
+        if (done) {
+            t.regex(child.className, doneClassName);
+        } else {
+            t.notRegex(child.className, doneClassName);
+        }
     });
 });
 

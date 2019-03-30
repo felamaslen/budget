@@ -1,14 +1,12 @@
-/* eslint-disable newline-per-chained-call, id-length */
+import test from 'ava';
+import memoize from 'fast-memoize';
+import { render } from 'react-testing-library';
 import { fromJS } from 'immutable';
-import '~client-test/browser.js';
-import { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
-import { shallow, mount } from 'enzyme';
+import '~client-test/browser';
 import React from 'react';
 import GraphFundItem from '~client/components/GraphFundItem';
 
-describe('<GraphFundItem />', () => {
+const getGraph = memoize((customProps = {}) => {
     const props = {
         id: 3,
         values: fromJS([
@@ -23,67 +21,31 @@ describe('<GraphFundItem />', () => {
         ]),
         sold: false,
         popout: true,
-        onToggle: () => null
+        onToggle: () => null,
+        ...customProps
     };
 
-    const wrapper = mount(<GraphFundItem {...props} />);
+    return render(<GraphFundItem {...props} />);
+});
 
-    it('should render a graph with the correct paths', () => {
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).name()).to.equal('LineGraph');
+test('rendering a graph with the correct paths', t => {
+    const { container } = getGraph();
+    t.is(container.childNodes.length, 1);
 
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            svgClasses: 'popout',
-            width: 300,
-            height: 120,
-            minX: 100,
-            maxX: 106,
-            minY: 41.2,
-            maxY: 47.1
-        });
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 1);
 
-        expect(wrapper.childAt(0).props().lines.toJS()).to.deep.equal([
-            {
-                key: 0,
-                data: [
-                    [100, 42.3],
-                    [101, 41.2],
-                    [102, 45.9],
-                    [102.5, 46.9]
-                ],
-                strokeWidth: 1.5,
-                smooth: true,
-                color: {
-                    changes: [42.3],
-                    values: ['rgb(204,51,0)', 'rgb(0,204,51)']
-                }
-            },
-            {
-                key: 1,
-                data: [
-                    [104, 47.1],
-                    [105, 46.9],
-                    [106, 42.5]
-                ],
-                strokeWidth: 1.5,
-                smooth: true,
-                color: {
-                    changes: [47.1],
-                    values: ['rgb(204,51,0)', 'rgb(0,204,51)']
-                }
-            }
-        ]);
+    const [svg] = div.childNodes;
+    t.is(svg.tagName, 'svg');
+    t.is(svg.className, 'popout');
+});
+
+test('not rendering anything if there are no values', t => {
+    const { container } = getGraph({
+        values: null
     });
 
-    it('should not render anything if there are no values', () => {
-        const propsNoValues = {
-            ...props,
-            values: null
-        };
-
-        const wrapperNoValues = shallow(<GraphFundItem {...propsNoValues} />);
-
-        expect(wrapperNoValues.get(0)).to.equal(null);
-    });
+    t.is(container.childNodes.length, 0);
 });
 

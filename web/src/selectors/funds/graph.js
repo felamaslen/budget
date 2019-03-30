@@ -1,4 +1,4 @@
-import { List as list, Map as map } from 'immutable';
+import { List as list, Map as map, OrderedMap } from 'immutable';
 import { createSelector } from 'reselect';
 import {
     GRAPH_FUNDS_MODE_PRICE,
@@ -105,6 +105,12 @@ const getFormattedHistory = createSelector([
 ], (viewSoldFunds, rows, cache, mode, enabledList) => {
     // get a formatted list of lines for display in the fund price / value graph
 
+    if (!cache) {
+        return {
+            fundItems: OrderedMap.of()
+        };
+    }
+
     const prices = cache.get('prices');
     const startTime = cache.get('startTime');
     const cacheTimes = cache.get('cacheTimes');
@@ -127,6 +133,10 @@ const getFormattedHistory = createSelector([
 });
 
 function getLines({ isMobile, fundLines, fundItems, mode }) {
+    if (!fundLines) {
+        return list.of();
+    }
+
     return fundLines.reduce((lines, item) => {
         const id = item.get('id');
         const mainLine = id === GRAPH_FUNDS_OVERALL_ID;

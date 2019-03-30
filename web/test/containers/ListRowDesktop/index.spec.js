@@ -1,15 +1,18 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
 import { Map as map } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
+import React from 'react';
 import ListRowDesktop from '~client/containers/ListRowDesktop';
-import ListRowCell from '~client/components/ListRowCell';
-import { EDIT_LIST_ITEM_DELETED } from '~client/constants/actions';
+import { aListItemDeleted } from '~client/actions/edit.actions';
 
-describe('<ListRowDesktop />', () => {
-    const state = map({
+const AfterRow = () => null;
+
+const getContainer = memoize((customProps = {}, customState = null) => {
+    let state = map({
         pages: map({
             food: map({
                 rows: map([
@@ -26,104 +29,85 @@ describe('<ListRowDesktop />', () => {
         })
     });
 
-    const AfterRow = () => null;
+    if (customState) {
+        state = customState(state);
+    }
 
     const store = createMockStore(state);
 
     const props = {
         page: 'food',
         id: 10,
-        AfterRow
+        AfterRow,
+        ...customProps
     };
 
-    const wrapper = shallow(<ListRowDesktop {...props} />, store).dive();
+    const utils = render(
+        <Provider store={store}>
+            <ListRowDesktop {...props} />
+        </Provider>
+    );
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('li.future')).to.equal(true);
-        expect(wrapper.children()).to.have.length(8);
-    });
+    return { store, ...utils };
+});
 
-    it('should render a list of columns', () => {
-        expect(wrapper.childAt(0).is(ListRowCell)).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            page: 'food',
-            row: map({ foo: 'bar', future: true }),
-            colName: 'date',
-            colKey: 0,
-            id: 10,
-            active: false
-        });
+test('basic structure', t => {
+    const { container } = getContainer();
 
-        expect(wrapper.childAt(1).is(ListRowCell)).to.equal(true);
-        expect(wrapper.childAt(1).props()).to.deep.include({
-            page: 'food',
-            row: map({ foo: 'bar', future: true }),
-            colName: 'item',
-            colKey: 1,
-            id: 10,
-            active: false
-        });
+    t.is(container.childNodes.length, 1);
+    const [li] = container.childNodes;
 
-        expect(wrapper.childAt(2).is(ListRowCell)).to.equal(true);
-        expect(wrapper.childAt(2).props()).to.deep.include({
-            page: 'food',
-            row: map({ foo: 'bar', future: true }),
-            colName: 'category',
-            colKey: 2,
-            id: 10,
-            active: true
-        });
+    t.is(li.tagName, 'LI');
+    t.is(li.className, 'future');
+    t.is(li.childNodes.length, 7);
+});
 
-        expect(wrapper.childAt(3).is(ListRowCell)).to.equal(true);
-        expect(wrapper.childAt(3).props()).to.deep.include({
-            page: 'food',
-            row: map({ foo: 'bar', future: true }),
-            colName: 'cost',
-            colKey: 3,
-            id: 10,
-            active: false
-        });
+test('list of columns', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
 
-        expect(wrapper.childAt(4).is(ListRowCell)).to.equal(true);
-        expect(wrapper.childAt(4).props()).to.deep.include({
-            page: 'food',
-            row: map({ foo: 'bar', future: true }),
-            colName: 'shop',
-            colKey: 4,
-            id: 10,
-            active: false
-        });
-    });
+    const [rowCell] = li.childNodes;
 
-    it('should render a daily column', () => {
-        expect(wrapper.childAt(5).is('span.daily'));
-        expect(wrapper.childAt(5).children()).to.have.length(0);
-    });
+    t.is(rowCell.tagName, 'SPAN');
+    t.is(rowCell.className, 'date');
+});
 
-    it('should render a <AfterRow /> component', () => {
-        expect(wrapper.childAt(6).is(AfterRow)).to.equal(true);
-        expect(wrapper.childAt(6).props()).to.deep.include({
-            page: 'food',
-            row: map({ foo: 'bar', future: true }),
-            id: 10
-        });
-    });
+test('daily column', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
 
-    it('should render a delete button', () => {
-        expect(wrapper.childAt(7).is('span.delete')).to.equal(true);
-        expect(wrapper.childAt(7).children()).to.have.length(1);
-        expect(wrapper.childAt(7).childAt(0).is('a')).to.equal(true);
-        expect(wrapper.childAt(7).childAt(0).children()).to.have.length(0);
-    });
+    const [, , , , , span] = li.childNodes;
 
-    it('should dispatch a delete event when the delete button is pressed', () => {
-        const action = { type: EDIT_LIST_ITEM_DELETED, page: 'food', id: 10 };
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'daily');
+    t.is(span.childNodes.length, 0);
+});
 
-        expect(store.isActionDispatched(action)).to.equal(false);
+test('delete button', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
 
-        wrapper.childAt(7).childAt(0).simulate('click');
+    const [, , , , , , span] = li.childNodes;
 
-        expect(store.isActionDispatched(action)).to.equal(true);
-    });
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'delete');
+    t.is(span.childNodes.length, 1);
+
+    const [a] = span.childNodes;
+
+    t.is(a.tagName, 'A');
+    t.is(a.childNodes.length, 0);
+});
+
+test('dispatching an action when the delete button is pressed', t => {
+    const { store, container } = getContainer();
+
+    const action = aListItemDeleted({ page: 'food', id: 10 });
+
+    t.false(store.isActionDispatched(action));
+
+    fireEvent.click(container.childNodes[0].childNodes[6].childNodes[0]);
+
+    t.true(store.isActionDispatched(action));
 });
 

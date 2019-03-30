@@ -1,39 +1,63 @@
+import test from 'ava';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
 import React from 'react';
-import { shallow } from 'enzyme';
-import ListRowCell from '~client/components/ListRowCell';
-import Editable from '~client/containers/Editable';
 
-describe('<ListRowCell />', () => {
+import reduction from '~client/reduction';
+import ListRowCell from '~client/components/ListRowCell';
+
+const getContainer = memoize((customProps = {}) => {
+    const state = reduction;
+
+    const store = createMockStore(state);
+
     const props = {
         page: 'page1',
         id: 3,
         row: fromJS({ cols: [null, 'bar'] }),
         colName: 'foo',
         colKey: 1,
-        active: true
+        active: true,
+        ...customProps
     };
 
-    const wrapper = shallow(<ListRowCell {...props} />);
+    const utils = render(
+        <Provider store={store}>
+            <ListRowCell {...props} />
+        </Provider>
+    );
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('span.foo.active')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is(Editable)).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            page: 'page1',
-            row: 3,
-            col: 1,
-            item: 'foo',
-            value: 'bar'
-        });
+    return { store, ...utils };
+});
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+
+    const [span] = container.childNodes;
+
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'foo active');
+    t.is(span.childNodes.length, 1);
+
+    const [editable] = span.childNodes;
+
+    t.is(editable.tagName, 'SPAN');
+    t.is(editable.className, 'editable editable-foo');
+});
+
+test('no active class while inactive', t => {
+    const { container } = getContainer({
+        active: false
     });
 
-    it('should not render an active class if inactive', () => {
-        const wrapperInactive = shallow(<ListRowCell {...props} active={false} />);
+    const [span] = container.childNodes;
 
-        expect(wrapperInactive.hasClass('active')).to.equal(false);
-    });
+    t.notRegex(span.className, /active/);
 });
 

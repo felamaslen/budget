@@ -1,56 +1,60 @@
-import '~client-test/browser.js';
-import { expect } from 'chai';
-import 'react-testing-library/cleanup-after-each';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldNumber from '~client/components/FormField/number';
 
-describe('<FormFieldNumber />', () => {
-    let changed = null;
-    const onChange = value => {
-        changed = value;
-    };
-
+const getContainer = memoize((customProps = {}) => {
     const props = {
         value: 103,
-        onChange
+        onChange: () => null,
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const { container } = render(<FormFieldNumber {...props} />);
-
-        const [div] = container.childNodes;
-
-        expect(div.tagName).to.equal('DIV');
-        expect(div.className).to.equal('form-field form-field-number');
-        expect(div.childNodes).to.have.length(1);
-    });
-
-    it('should render an input', () => {
-        const { container } = render(<FormFieldNumber {...props} />);
-
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
-
-        expect(input.tagName).to.equal('INPUT');
-        expect(input.type).to.equal('number');
-        expect(input.value).to.equal('103');
-    });
-
-    it('should fire onChange', () => {
-        const { container } = render(<FormFieldNumber {...props} />);
-
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
-
-        expect(changed).to.equal(null);
-
-        fireEvent.change(input, { target: { value: '10.93' } });
-
-        expect(changed).to.equal(null);
-
-        fireEvent.blur(input);
-
-        expect(changed).to.equal(10.93);
-    });
+    return render(<FormFieldNumber {...props} />);
 });
+
+test('render its basic structure', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'form-field form-field-number');
+    t.is(div.childNodes.length, 1);
+});
+
+test('render an input', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'number');
+    t.is(input.value, '103');
+});
+
+test('fire onChange', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({
+        onChange
+    });
+
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.change(input, { target: { value: '10.93' } });
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.blur(input);
+    t.is(onChange.calls.length, 1);
+    t.deepEqual(onChange.calls[0].arguments, [10.93]);
+});
+

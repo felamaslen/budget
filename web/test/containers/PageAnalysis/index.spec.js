@@ -1,66 +1,115 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
+import React from 'react';
 import PageAnalysis from '~client/containers/PageAnalysis';
-import Page from '~client/containers/Page';
-import Upper from '~client/containers/PageAnalysis/upper';
-import Timeline from '~client/containers/PageAnalysis/timeline';
-import ListTree from '~client/containers/PageAnalysis/list-tree';
-import Blocks from '~client/containers/PageAnalysis/blocks';
 
-describe('<PageAnalysis />', () => {
-    const state = fromJS({
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
+        pages: {
+            analysis: {
+                cost: []
+            }
+        },
         pagesLoaded: {
             analysis: true
         },
         other: {
             analysis: {
-                timeline: [1, 2, 3]
+                period: 0,
+                grouping: 0,
+                timeIndex: 0,
+                treeVisible: {},
+                treeOpen: {},
+                timeline: [
+                    [1, 2, 3]
+                ]
             }
         }
     });
 
+    if (customState) {
+        state = customState(state);
+    }
+
     const store = createMockStore(state);
 
-    const wrapper = shallow(<PageAnalysis />, store).dive();
+    const props = {
+        ...customProps
+    };
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is(Page)).to.equal(true);
-        expect(wrapper.props()).to.have.property('page', 'analysis');
+    const utils = render(
+        <Provider store={store}>
+            <PageAnalysis {...props} />
+        </Provider>
+    );
 
-        expect(wrapper.children()).to.have.length(2);
+    return { store, ...utils };
+};
 
-        expect(wrapper.childAt(0).is(Upper)).to.equal(true);
+test('basic structure', t => {
+    const { container } = getContainer();
 
-        expect(wrapper.childAt(1).is('div.analysis-outer')).to.equal(true);
-        expect(wrapper.childAt(1).children()).to.have.length(3);
-    });
+    t.is(container.childNodes.length, 1);
+    const [page] = container.childNodes;
 
-    it('should render a timeline view', () => {
-        expect(wrapper.childAt(1).childAt(0).is(Timeline)).to.equal(true);
-        expect(wrapper.childAt(1).childAt(0).props())
-            .to.have.deep.property('data', fromJS([1, 2, 3]));
-    });
+    t.is(page.tagName, 'DIV');
+    t.is(page.className, 'page page-analysis');
+    t.is(page.childNodes.length, 2);
 
-    it('should render a list tree', () => {
-        expect(wrapper.childAt(1).childAt(1).is(ListTree)).to.equal(true);
-    });
+    const [upper, outer] = page.childNodes;
 
-    it('should render a block view', () => {
-        expect(wrapper.childAt(1).childAt(2).is(Blocks)).to.equal(true);
-    });
+    t.is(upper.tagName, 'DIV');
+    t.is(upper.className, 'upper');
 
-    it('should not render a timeline if there is not one present', () => {
-        const wrapperNoTimeline = shallow(<PageAnalysis />, createMockStore(state
-            .setIn(['other', 'analysis', 'timeline'], null)
-        )).dive();
+    t.is(outer.tagName, 'DIV');
+    t.is(outer.className, 'analysis-outer');
+    t.is(outer.childNodes.length, 3);
+});
 
-        expect(wrapperNoTimeline.childAt(1).children()).to.have.length(2);
-        expect(wrapperNoTimeline.childAt(1).childAt(0).is(ListTree)).to.equal(true);
-        expect(wrapperNoTimeline.childAt(1).childAt(1).is(Blocks)).to.equal(true);
-    });
+test('timeline view', t => {
+    const { container } = getContainer();
+    const [page] = container.childNodes;
+    const [, outer] = page.childNodes;
+
+    const [timeline] = outer.childNodes;
+    t.is(timeline.tagName, 'DIV');
+    t.is(timeline.className, 'timeline-outer');
+});
+
+test('list tree', t => {
+    const { container } = getContainer();
+    const [page] = container.childNodes;
+    const [, outer] = page.childNodes;
+
+    const [, listTree] = outer.childNodes;
+    t.is(listTree.tagName, 'DIV');
+    t.is(listTree.className, 'tree');
+});
+
+test('block view', t => {
+    const { container } = getContainer();
+    const [page] = container.childNodes;
+    const [, outer] = page.childNodes;
+
+    const [, , blockView] = outer.childNodes;
+    t.is(blockView.tagName, 'DIV');
+    t.is(blockView.className, 'block-view');
+});
+
+test('not rendering a timeline if there is not one present', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['other', 'analysis', 'timeline'], null)
+    );
+
+    const [page] = container.childNodes;
+    t.is(page.childNodes.length, 2);
+    const [child0, child1] = page.childNodes;
+
+    t.notRegex(child0.className, /timeline/);
+    t.notRegex(child1.className, /timeline/);
 });
 

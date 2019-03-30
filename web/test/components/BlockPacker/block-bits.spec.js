@@ -1,18 +1,13 @@
 /* eslint-disable no-unused-expressions */
+import test from 'ava';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
+import memoize from 'fast-memoize';
 import { fromJS } from 'immutable';
-import '~client-test/browser.js';
-import { configure, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-configure({ adapter: new Adapter() });
-import chai, { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
-import chaiEnzyme from 'chai-enzyme';
-chai.use(chaiEnzyme());
 import React from 'react';
 import BlockBits, { BlockGroup, SubBlock } from '~client/components/BlockPacker/block-bits';
 
-describe('<SubBlock />', () => {
+const getSubBlock = memoize((customProps = {}) => {
     const props = {
         name: 'foo',
         value: 101.5,
@@ -23,19 +18,26 @@ describe('<SubBlock />', () => {
         }),
         activeSub: false,
         activeBlock: [],
-        onHover: () => null
+        onHover: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<SubBlock {...props} />);
-
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.sub-block')).to.equal(true);
-        expect(wrapper).to.have.style('width', '90px');
-        expect(wrapper).to.have.style('height', '87px');
-    });
+    return render(<SubBlock {...props} />);
 });
 
-describe('<BlockGroup />', () => {
+test('<SubBlock /> - rendering basic structure', t => {
+    const { container } = getSubBlock();
+
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'sub-block');
+    t.is(div.style.width, '90px');
+    t.is(div.style.height, '87px');
+});
+
+const getBlockGroup = memoize((customProps = {}) => {
     const props = {
         name: 'foo',
         value: 987,
@@ -48,30 +50,44 @@ describe('<BlockGroup />', () => {
             ],
             width: 15,
             height: 13
-        })
+        }),
+        ...customProps
     };
 
-    const wrapper = shallow(<BlockGroup {...props} />);
-
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.block-group')).to.equal(true);
-        expect(wrapper).to.have.style('width', '15px');
-        expect(wrapper).to.have.style('height', '13px');
-    });
-
-    it('should render block bits', () => {
-        expect(wrapper.children()).to.have.length(2);
-    });
+    return render(<BlockGroup {...props} />);
 });
 
-describe('<BlockBits />', () => {
+test('<BlockGroup /> - rendering basic structure', t => {
+    const { container } = getBlockGroup();
+
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'block-group');
+    t.is(div.style.width, '15px');
+    t.is(div.style.height, '13px');
+
+    t.is(div.childNodes.length, 2);
+});
+
+const getBlockBits = memoize((customProps = {}) => {
     const props = {
         block: fromJS({
             name: 'foo',
             value: 1001.3,
             color: 'red',
-            blocks: [{ foo: 'bar' }, { bar: 'baz' }],
-            width: 11,
+            blocks: [
+                {
+                    bits: [
+                        { foo: 'bar' },
+                        { bar: 'baz' }
+                    ],
+                    width: 15,
+                    height: 13
+                }
+            ],
+            width: 21,
             height: 13
         }),
         page: 'page1',
@@ -79,34 +95,41 @@ describe('<BlockBits />', () => {
         activeSub: false,
         activeBlock: [],
         onHover: () => null,
-        onClick: () => null
+        onClick: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<BlockBits {...props} />);
+    return render(<BlockBits {...props} />);
+});
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.block.block-red')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
-    });
+test('<BlockBits /> - rendering basic structure', t => {
+    const { container } = getBlockBits();
 
-    let key = null;
-    before(() => {
-        key = 0;
-    });
-    after(() => {
-        key = 0;
-    });
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
 
-    it.each(props.block.get('blocks').toJS(), 'should render a list of blocks', group => {
-        expect(wrapper.childAt(key).is(BlockGroup)).to.equal(true);
-        expect(wrapper.childAt(key).props()).to.deep.include({
-            activeBlock: [],
-            name: 'foo',
-            value: 1001.3,
-            group: fromJS(group)
-        });
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'block block-red block-foo');
+    t.is(div.childNodes.length, 1);
+});
 
-        key++;
-    });
+test('<BlockBits /> - rendering a list of blocks', t => {
+    const { container } = getBlockBits();
+
+    const [div] = container.childNodes;
+    const [group] = div.childNodes;
+
+    t.is(group.tagName, 'DIV');
+    t.is(group.className, 'block-group');
+
+    t.is(group.childNodes.length, 2);
+
+    const [bit0, bit1] = group.childNodes;
+
+    t.is(bit0.tagName, 'DIV');
+    t.is(bit1.tagName, 'DIV');
+
+    t.is(bit0.className, 'sub-block');
+    t.is(bit1.className, 'sub-block');
 });
 

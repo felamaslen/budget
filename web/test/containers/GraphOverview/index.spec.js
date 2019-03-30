@@ -1,20 +1,19 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import memoize from 'fast-memoize';
 import { fromJS, Map as map, List as list } from 'immutable';
-import '~client-test/browser.js';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
+import { Provider } from 'react-redux';
 import React from 'react';
-import shallowWithStore from '../../shallow-with-store';
-import { shallow } from 'enzyme';
-import { expect } from 'chai';
 import { createMockStore } from 'redux-test-utils';
 import { DateTime } from 'luxon';
-import Media from 'react-media';
-import { mediaQueryMobile } from '~client/constants';
-import GraphOverview, { GraphOverviewWrapped } from '~client/containers/GraphOverview';
-import GraphBalance from '~client/components/GraphBalance';
-import GraphSpending from '~client/components/GraphSpending';
-import { aShowAllToggled } from '~client/actions/graph.actions';
+import GraphOverview from '~client/containers/GraphOverview';
 
-describe('<GraphOverview />', () => {
+const getContainer = memoize((customProps = {}) => {
+    const props = {
+        ...customProps
+    };
+
     const state = map({
         now: DateTime.fromISO('2018-03-02T12:36:49Z'),
         pages: map({
@@ -23,6 +22,7 @@ describe('<GraphOverview />', () => {
                 endDate: DateTime.fromObject({ year: 2018, month: 5, day: 31 }),
                 cost: fromJS({
                     funds: [983204, 983204, 983204, 983204, 983204, 983204, 983204, 983204],
+                    fundChanges: [0, 0, 0, 0, 0, 0, 0, 0],
                     income: [163613, 163613, 163613, 163613, 163613, 0, 0],
                     bills: [101992, 101992, 101992, 101992, 98106, 97356, 0, 0],
                     food: [26247, 22075, 23260, 11979, 11933, 1186, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -54,55 +54,40 @@ describe('<GraphOverview />', () => {
 
     const store = createMockStore(state);
 
-    const wrapperContainer = shallowWithStore(<GraphOverview />, store);
+    const utils = render(
+        <Provider store={store}>
+            <GraphOverview {...props} />
+        </Provider>
+    );
 
-    const wrapperProps = wrapperContainer.props();
+    return { store, ...utils };
+});
 
-    it('should render a media query', () => {
-        const wrapper = wrapperContainer.dive();
+test('rendering a graph container', t => {
+    const { container } = getContainer();
 
-        expect(wrapper.is(Media)).to.equal(true);
-        expect(wrapper.props()).to.deep.include({
-            query: mediaQueryMobile
-        });
-    });
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'graph-container-outer');
+    t.is(div.childNodes.length, 2);
+});
 
-    it('should dispatch the show all action', () => {
-        expect(store.isActionDispatched(aShowAllToggled())).to.equal(false);
-        wrapperContainer.props().onShowAll();
-        expect(store.isActionDispatched(aShowAllToggled())).to.equal(true);
-    });
+test('rendering a balance graph', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [graphBalance] = div.childNodes;
 
-    describe('<GraphOverviewWrapped />', () => {
-        const propsWrapped = {
-            ...wrapperProps,
-            isMobile: false
-        };
+    t.is(graphBalance.tagName, 'DIV');
+    t.is(graphBalance.className, 'graph-container graph-balance');
+});
 
-        const wrapper = shallow(<GraphOverviewWrapped {...propsWrapped} />);
+test('rendering a spending graph', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [, graphSpending] = div.childNodes;
 
-        it('should render a container div', () => {
-            expect(wrapper.is('div.graph-container-outer')).to.equal(true);
-            expect(wrapper.children()).to.have.length(2);
-        });
-
-        it('should render a balance graph', () => {
-            expect(wrapper.childAt(0).is(GraphBalance)).to.equal(true);
-        });
-
-        it('should render a spending graph', () => {
-            expect(wrapper.childAt(1).is(GraphSpending)).to.equal(true);
-        });
-
-        it('should pass required props to the graphs', () => {
-            expect(wrapper.childAt(0).props()).to.deep.include({
-                now: DateTime.fromISO('2018-03-02T23:59:59.999Z'),
-                name: 'balance',
-                showAll: false,
-                startDate: DateTime.fromISO('2018-02-28'),
-                graphWidth: 500
-            });
-        });
-    });
+    t.is(graphSpending.tagName, 'DIV');
+    t.is(graphSpending.className, 'graph-container graph-spend');
 });
 

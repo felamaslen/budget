@@ -1,102 +1,106 @@
-/* eslint-disable newline-per-chained-call */
-import '~client-test/browser.js';
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import test from 'ava';
+import memoize from 'fast-memoize';
+import { render } from 'react-testing-library';
+import '~client-test/browser';
 import React from 'react';
 import Graph from '~client/components/Graph';
 
-describe('<Graph />', () => {
-    const basicProps = {
+const getGraph = memoize((customProps = {}) => {
+    const props = {
         name: 'foo',
         width: 200,
         height: 100,
         padding: [10, 10, 10, 10],
-        svgClasses: 'svgClass1 svgClass2'
+        svgClasses: 'svgClass1 svgClass2',
+        ...customProps
     };
 
-    const wrapper = shallow((
-        <Graph {...basicProps}>
+    return render(
+        <Graph {...props}>
             <span>{'foo'}</span>
         </Graph>
-    ));
+    );
+});
 
-    it('should render a basic container', () => {
-        expect(wrapper.is('div.graph-container.graph-foo')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
+test('rendering a basic container', t => {
+    const { container } = getGraph();
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 1);
+    t.is(div.className, 'graph-container graph-foo');
+});
+
+test('rendering an SVG with a custom class', t => {
+    const { container } = getGraph();
+    const [div] = container.childNodes;
+    t.is(div.childNodes.length, 1);
+
+    const [svg] = div.childNodes;
+    t.is(svg.tagName, 'svg');
+    t.is(svg.className, 'svgClass1 svgClass2');
+});
+
+test('rendering its children inside the SVG', t => {
+    const { container } = getGraph();
+    const [div] = container.childNodes;
+    const [svg] = div.childNodes;
+
+    t.is(svg.childNodes.length, 1);
+    const [span] = svg.childNodes;
+
+    t.is(span.tagName, 'span');
+    t.is(span.innerHTML, 'foo');
+});
+
+test('accepting a child before the SVG', t => {
+    const { container } = getGraph({
+        before: <span>{'before1'}</span>
     });
+    const [div] = container.childNodes;
 
-    it('should render an SVG with a custom class', () => {
-        expect(wrapper.childAt(0).is('svg')).to.equal(true);
-        expect(wrapper.childAt(0).hasClass('svgClass1')).to.equal(true);
-        expect(wrapper.childAt(0).hasClass('svgClass2')).to.equal(true);
+    t.is(div.childNodes.length, 2);
 
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            width: 200,
-            height: 100
-        });
+    const [before, svg] = div.childNodes;
+
+    t.is(svg.tagName, 'svg');
+    t.is(before.tagName, 'SPAN');
+    t.is(before.innerHTML, 'before1');
+});
+
+test('accepting a child after the SVG', t => {
+    const { container } = getGraph({
+        after: <span>{'after1'}</span>
     });
+    const [div] = container.childNodes;
 
-    it('should render its children inside the SVG', () => {
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).text()).to.equal('foo');
+    t.is(div.childNodes.length, 2);
+
+    const [svg, after] = div.childNodes;
+
+    t.is(svg.tagName, 'svg');
+    t.is(after.tagName, 'SPAN');
+    t.is(after.innerHTML, 'after1');
+});
+
+test('accepting children before and after the SVG', t => {
+    const { container } = getGraph({
+        before: <span>{'before1'}</span>,
+        after: <span>{'after1'}</span>
     });
+    const [div] = container.childNodes;
 
-    it('should accept a child before the SVG', () => {
-        const beforeProps = {
-            ...basicProps,
-            before: <span>{'before1'}</span>
-        };
+    t.is(div.childNodes.length, 3);
 
-        const wrapperBefore = shallow((
-            <Graph {...beforeProps}>
-                <span>{'foo'}</span>
-            </Graph>
-        ));
+    const [before, svg, after] = div.childNodes;
 
-        expect(wrapperBefore.children()).to.have.length(2);
-        expect(wrapperBefore.childAt(1).is('svg')).to.equal(true);
-        expect(wrapperBefore.childAt(0).is('span')).to.equal(true);
-        expect(wrapperBefore.childAt(0).text()).to.equal('before1');
-    });
+    t.is(svg.tagName, 'svg');
 
-    it('should accept a child after the SVG', () => {
-        const afterProps = {
-            ...basicProps,
-            after: <span>{'after1'}</span>
-        };
+    t.is(before.tagName, 'SPAN');
+    t.is(before.innerHTML, 'before1');
 
-        const wrapperAfter = shallow((
-            <Graph {...afterProps}>
-                <span>{'foo'}</span>
-            </Graph>
-        ));
-
-        expect(wrapperAfter.children()).to.have.length(2);
-        expect(wrapperAfter.childAt(0).is('svg')).to.equal(true);
-        expect(wrapperAfter.childAt(1).is('span')).to.equal(true);
-        expect(wrapperAfter.childAt(1).text()).to.equal('after1');
-    });
-
-    it('should accept children before and after the SVG', () => {
-        const beforeAfterProps = {
-            ...basicProps,
-            before: <span>{'before1'}</span>,
-            after: <span>{'after1'}</span>
-        };
-
-        const wrapperBeforeAfter = shallow((
-            <Graph {...beforeAfterProps}>
-                <span>{'foo'}</span>
-            </Graph>
-        ));
-
-        expect(wrapperBeforeAfter.children()).to.have.length(3);
-        expect(wrapperBeforeAfter.childAt(0).is('span')).to.equal(true);
-        expect(wrapperBeforeAfter.childAt(0).text()).to.equal('before1');
-        expect(wrapperBeforeAfter.childAt(1).is('svg')).to.equal(true);
-        expect(wrapperBeforeAfter.childAt(2).is('span')).to.equal(true);
-        expect(wrapperBeforeAfter.childAt(2).text()).to.equal('after1');
-    });
+    t.is(after.tagName, 'SPAN');
+    t.is(after.innerHTML, 'after1');
 });
 

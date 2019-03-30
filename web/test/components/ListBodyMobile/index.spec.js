@@ -1,72 +1,116 @@
-/* eslint-disable newline-per-chained-call */
-import { List } from 'immutable';
-import chai, { expect } from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-chai.use(sinonChai);
-import React from 'react';
-import { shallow } from 'enzyme';
-import ListBodyMobile from '~client/components/ListBodyMobile';
-import ListRowMobile from '~client/containers/ListRowMobile';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
 
-describe('<ListBodyMobile />', () => {
+import '~client-test/browser';
+import memoize from 'fast-memoize';
+import { List as list } from 'immutable';
+import { render, fireEvent } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import React from 'react';
+import { Provider } from 'react-redux';
+import reduction from '~client/reduction';
+import ListBodyMobile from '~client/components/ListBodyMobile';
+
+const getContainer = memoize((customProps = {}) => {
     const props = {
         page: 'food',
-        rowIds: List.of(1, 2),
-        onMobileAdd: sinon.spy()
+        rowIds: list.of(),
+        onMobileAdd: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<ListBodyMobile {...props} />);
+    const state = reduction;
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div')).to.equal(true);
-        expect(wrapper.children()).to.have.length(3);
+    const store = createMockStore(state);
+
+    const utils = render(
+        <Provider store={store}>
+            <ListBodyMobile {...props} />
+        </Provider>
+
+    );
+
+    return { store, ...utils };
+});
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.tagName, 'DIV');
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 3);
+});
+
+test('list head', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [head] = div.childNodes;
+
+    t.is(head.tagName, 'DIV');
+    t.is(head.className, 'list-head noselect');
+    t.is(head.childNodes.length, 3);
+
+    head.childNodes.forEach(item => t.is(item.tagName, 'SPAN'));
+
+    const [date, item, cost] = head.childNodes;
+
+    t.is(date.className, 'list-head-column date');
+    t.is(date.innerHTML, 'date');
+
+    t.is(item.className, 'list-head-column item');
+    t.is(item.innerHTML, 'item');
+
+    t.is(cost.className, 'list-head-column cost');
+    t.is(cost.innerHTML, 'cost');
+});
+
+test('row list', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [, rows] = div.childNodes;
+
+    t.is(rows.tagName, 'UL');
+    t.is(rows.className, 'list-ul');
+    t.is(rows.childNodes.length, 0);
+});
+
+test('add button', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [, , addButton] = div.childNodes;
+
+    t.is(addButton.tagName, 'DIV');
+    t.is(addButton.className, 'button-add-outer');
+    t.is(addButton.childNodes.length, 1);
+
+    const [button] = addButton.childNodes;
+
+    t.is(button.tagName, 'BUTTON');
+    t.is(button.className, 'button-add');
+    t.is(button.innerHTML, 'Add');
+});
+
+test('calling a function when clicking add', t => {
+    const onMobileAdd = t.context.stub();
+
+    const { container } = getContainer({
+        onMobileAdd
     });
 
-    it('should render a list head', () => {
-        expect(wrapper.childAt(0).is('div.list-head.noselect')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(3);
+    const [div] = container.childNodes;
+    const [, , addButton] = div.childNodes;
+    const [button] = addButton.childNodes;
 
-        expect(wrapper.childAt(0).childAt(0).is('span.list-head-column.date')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).text()).to.equal('date');
-
-        expect(wrapper.childAt(0).childAt(1).is('span.list-head-column.item')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).text()).to.equal('item');
-
-        expect(wrapper.childAt(0).childAt(2).is('span.list-head-column.cost')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).text()).to.equal('cost');
-    });
-
-    it('should render rows', () => {
-        expect(wrapper.childAt(1).is('ul.list-ul')).to.equal(true);
-        expect(wrapper.childAt(1).children()).to.have.length(2);
-
-        expect(wrapper.childAt(1).childAt(0).is(ListRowMobile)).to.equal(true);
-        expect(wrapper.childAt(1).childAt(0).props()).to.deep.include({
-            page: 'food',
-            id: 1,
-            colKeys: [0, 1, 3]
-        });
-
-        expect(wrapper.childAt(1).childAt(1).is(ListRowMobile)).to.equal(true);
-        expect(wrapper.childAt(1).childAt(1).props()).to.deep.include({
-            page: 'food',
-            id: 2,
-            colKeys: [0, 1, 3]
-        });
-    });
-
-    it('should render an add button', () => {
-        expect(wrapper.childAt(2).is('div.button-add-outer')).to.equal(true);
-        expect(wrapper.childAt(2).children()).to.have.length(1);
-        expect(wrapper.childAt(2).childAt(0).is('button.button-add')).to.equal(true);
-        expect(wrapper.childAt(2).childAt(0).text()).to.equal('Add');
-    });
-
-    it('should dispatch an add event when adding items', () => {
-        wrapper.childAt(2).childAt(0).simulate('click');
-
-        expect(props.onMobileAdd).to.have.been.calledWith();
-    });
+    t.is(onMobileAdd.calls.length, 0);
+    fireEvent.click(button);
+    t.is(onMobileAdd.calls.length, 1);
+    t.deepEqual(onMobileAdd.calls[0].arguments, ['food']);
 });
 

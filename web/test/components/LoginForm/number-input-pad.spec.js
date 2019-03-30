@@ -1,114 +1,126 @@
-/* eslint-disable newline-per-chained-call */
-import { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
-import { shallow } from 'enzyme';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render, fireEvent } from 'react-testing-library';
+
 import React from 'react';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
-import Digit from '~client/components/LoginForm/digit';
 
-describe('<NumberInputPad />', () => {
-    let input = false;
-    const onInput = () => {
-        input = true;
-    };
-
+const getContainer = memoize((customProps = {}) => {
     const props = {
-        onInput
+        onInput: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<NumberInputPad {...props} />);
+    return render(<NumberInputPad {...props} />);
+});
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.number-input.noselect')).to.equal(true);
-        expect(wrapper.children()).to.have.length(4);
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'number-input noselect');
+    t.is(div.childNodes.length, 4);
+});
+
+const testNumberInputRow = (t, row) => {
+    t.is(row.tagName, 'DIV');
+    t.is(row.className, 'number-input-row');
+    t.is(row.childNodes.length, 3);
+
+    row.childNodes.forEach(button => {
+        t.is(button.tagName, 'BUTTON');
+        t.regex(button.className, /^btn-digit\sbtn-digit-[0-9]$/);
     });
+};
 
-    beforeEach(() => {
-        input = false;
+const testDigits = (t, rowIndex, digits) => {
+    const onInput = t.context.stub();
+    const { container } = render(<NumberInputPad onInput={onInput} />);
+
+    t.is(onInput.calls.length, 0);
+
+    const [div] = container.childNodes;
+    const row = div.childNodes[rowIndex];
+
+    row.childNodes.forEach((digit, index) => {
+        fireEvent.mouseDown(digit);
+        t.is(onInput.calls.length, index + 1);
+        t.deepEqual(onInput.calls[index].arguments, [digits[index]]);
     });
+};
 
-    describe('digits 1-3', () => {
-        it('should be rendered', () => {
-            expect(wrapper.childAt(0).is('div.number-input-row')).to.equal(true);
-            expect(wrapper.childAt(0).children()).to.have.length(3);
-        });
+test('digits 1-3 (rendering)', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
 
-        let key = 0;
+    const [row] = div.childNodes;
 
-        it.each([1, 2, 3], 'should work', digit => {
-            expect(wrapper.childAt(0).childAt(key).is(Digit)).to.equal(true);
-            expect(wrapper.childAt(0).childAt(key).props()).to.have.property('digit', digit);
+    testNumberInputRow(t, row);
+});
 
-            expect(input).to.equal(false);
-            wrapper.childAt(0).childAt(key).props().onInput();
-            expect(input).to.equal(true);
+test('digits 4-6 (rendering)', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
 
-            key++;
-            input = false;
-        });
-    });
+    const [, row] = div.childNodes;
 
-    describe('digits 4-6', () => {
-        it('should be rendered', () => {
-            expect(wrapper.childAt(1).is('div.number-input-row')).to.equal(true);
-            expect(wrapper.childAt(1).children()).to.have.length(3);
-        });
+    testNumberInputRow(t, row);
+});
 
-        let key = 0;
+test('digits 7-9 (rendering)', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
 
-        it.each([4, 5, 6], 'should work', digit => {
-            expect(wrapper.childAt(1).childAt(key).is(Digit)).to.equal(true);
-            expect(wrapper.childAt(1).childAt(key).props()).to.have.property('digit', digit);
+    const [, row] = div.childNodes;
 
-            expect(input).to.equal(false);
-            wrapper.childAt(1).childAt(key).props().onInput();
-            expect(input).to.equal(true);
+    testNumberInputRow(t, row);
+});
 
-            key++;
-            input = false;
-        });
-    });
+test('digits 1-3 (handling)', t => {
+    testDigits(t, 0, [1, 2, 3]);
+});
 
-    describe('digits 7-9', () => {
-        it('should be rendered', () => {
-            expect(wrapper.childAt(2).is('div.number-input-row')).to.equal(true);
-            expect(wrapper.childAt(2).children()).to.have.length(3);
-        });
+test('digits 4-6 (handling)', t => {
+    testDigits(t, 1, [4, 5, 6]);
+});
 
-        beforeEach(() => {
-            input = false;
-        });
+test('digits 7-9 (handling)', t => {
+    testDigits(t, 2, [7, 8, 9]);
+});
 
-        let key = 0;
+test('digit 0 (rendering)', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
 
-        it.each([7, 8, 9], 'should work', digit => {
-            expect(wrapper.childAt(2).childAt(key).is(Digit)).to.equal(true);
-            expect(wrapper.childAt(2).childAt(key).props()).to.have.property('digit', digit);
+    const [, , , row] = div.childNodes;
+    t.is(row.tagName, 'DIV');
+    t.is(row.className, 'number-input-row');
+    t.is(row.childNodes.length, 1);
 
-            expect(input).to.equal(false);
-            wrapper.childAt(2).childAt(key).props().onInput();
-            expect(input).to.equal(true);
+    const [button] = row.childNodes;
 
-            key++;
-            input = false;
-        });
-    });
+    t.is(button.tagName, 'BUTTON');
+    t.is(button.className, 'btn-digit btn-digit-0');
+});
 
-    describe('digit 0', () => {
-        it('should be rendered', () => {
-            expect(wrapper.childAt(3).is('div.number-input-row')).to.equal(true);
-            expect(wrapper.childAt(3).children()).to.have.length(1);
-        });
+test('digit 0 (handling)', t => {
+    const onInput = t.context.stub();
+    const { container } = render(<NumberInputPad onInput={onInput} />);
 
-        it('should work', () => {
-            expect(wrapper.childAt(3).childAt(0).is(Digit)).to.equal(true);
-            expect(wrapper.childAt(3).childAt(0).props()).to.have.property('digit', 0);
+    const [div] = container.childNodes;
+    const [, , , row] = div.childNodes;
+    const [button] = row.childNodes;
 
-            expect(input).to.equal(false);
-            wrapper.childAt(3).childAt(0).props().onInput();
-            expect(input).to.equal(true);
-        });
-    });
+    t.is(onInput.calls.length, 0);
+    fireEvent.mouseDown(button);
+    t.is(onInput.calls.length, 1);
+    t.deepEqual(onInput.calls[0].arguments, [0]);
 });
 

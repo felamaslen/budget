@@ -1,12 +1,11 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import { render } from 'react-testing-library';
 import { fromJS } from 'immutable';
-import '~client-test/browser.js';
-import { expect } from 'chai';
-import { mount } from 'enzyme';
+import '~client-test/browser';
 import React from 'react';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
 
-describe('<LineGraphDumb />', () => {
+test('rendering a line graph', t => {
     const props = {
         width: 200,
         height: 100,
@@ -72,16 +71,16 @@ describe('<LineGraphDumb />', () => {
         }
     };
 
-    const wrapper = mount(<LineGraphDumb {...props} />);
+    const { container } = render(<LineGraphDumb {...props} />);
 
-    it('should render a line graph', () => {
-        expect(wrapper.is(LineGraphDumb)).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
+    t.is(container.childNodes.length, 1);
+    const [graph] = container.childNodes;
 
-        const graph = wrapper.childAt(0);
+    t.is(graph.tagName, 'DIV');
+    t.is(graph.childNodes.length, 1);
 
-        expect(graph.name()).to.equal('Graph');
-    });
+    const [svg] = graph.childNodes;
+    t.is(svg.tagName, 'svg');
 });
 
 

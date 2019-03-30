@@ -1,6 +1,5 @@
 const { JSDOM } = require('jsdom');
-const matchMediaMock = require('match-media-mock').create();
-matchMediaMock.setConfig({ type: 'screen', width: 1200 });
+const matchMedia = require('match-media-mock').create();
 
 const exposedProperties = ['window', 'navigator', 'document'];
 
@@ -9,7 +8,8 @@ global.document = window.document;
 
 global.window.Date = Date;
 
-global.window.matchMedia = (...args) => matchMediaMock(...args);
+matchMedia.setConfig({ type: 'screen', width: 1200 });
+global.window.matchMedia = matchMedia;
 
 Object.keys(window).forEach(property => {
     if (typeof global[property] === 'undefined') {

@@ -1,32 +1,47 @@
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import Digit from '~client/components/LoginForm/digit';
 
-describe('<Digit />', () => {
-    let input = null;
-    const onInput = digit => {
-        input = digit;
-    };
-
+const getContainer = memoize((customProps = {}) => {
     const props = {
         digit: 3,
-        onInput
+        onInput: () => null,
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const wrapper = shallow(<Digit {...props} />);
+    return render(<Digit {...props} />);
+});
 
-        expect(wrapper.is('button.btn-digit.btn-digit-3')).to.equal(true);
-        expect(wrapper.text()).to.equal('3');
-    });
+test('basic structure', t => {
+    const { container } = getContainer();
 
-    it('should handle input', () => {
-        const wrapper = shallow(<Digit {...props} />);
+    t.is(container.childNodes.length, 1);
 
-        expect(input).to.equal(null);
-        wrapper.simulate('mousedown');
-        expect(input).to.equal(3);
-    });
+    const [button] = container.childNodes;
+
+    t.is(button.tagName, 'BUTTON');
+    t.is(button.className, 'btn-digit btn-digit-3');
+    t.is(button.innerHTML, '3');
+});
+
+test('handling input', t => {
+    const onInput = t.context.stub();
+
+    const { container } = getContainer({ onInput });
+
+    t.is(onInput.calls.length, 0);
+
+    const [button] = container.childNodes;
+
+    fireEvent.mouseDown(button);
+
+    t.is(onInput.calls.length, 1);
+    t.deepEqual(onInput.calls[0].arguments, [3]);
 });
 

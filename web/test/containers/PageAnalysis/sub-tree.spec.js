@@ -1,14 +1,18 @@
-/* eslint-disable newline-per-chained-call */
-import '~client-test/browser.js';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import React from 'react';
-import { shallow } from 'enzyme';
+import reduction from '~client/reduction';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
 
-describe('Analysis page <SubTree />', () => {
+const getContainer = memoize((customProps = {}) => {
     const props = {
         open: true,
         subTree: fromJS([
@@ -17,47 +21,75 @@ describe('Analysis page <SubTree />', () => {
         ]),
         name: 'foo',
         itemCost: 6,
-        onHover: () => null
+        onHover: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<SubTree {...props} />);
+    const state = reduction;
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('ul.sub-tree')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
-    });
+    const store = createMockStore(state);
 
-    let key = null;
-    before(() => {
-        key = 0;
-    });
+    const utils = render(
+        <Provider store={store}>
+            <SubTree {...props} />
+        </Provider>
+    );
 
-    it.each([
+    return { store, ...utils };
+});
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [ul] = container.childNodes;
+    t.is(ul.tagName, 'UL');
+    t.is(ul.className, 'sub-tree');
+    t.is(ul.childNodes.length, 2);
+});
+
+test('rendering each sub tree item', t => {
+    const { container } = getContainer();
+    const [ul] = container.childNodes;
+
+    const items = [
         { name: 'foo1', cost: '0.02', pct: '33.3' },
         { name: 'foo2', cost: '0.04', pct: '66.7' }
-    ], 'should render each sub tree item', ({ name, cost, pct }) => {
+    ];
 
-        expect(wrapper.childAt(key).is('li.tree-list-item')).to.equal(true);
-        expect(wrapper.childAt(key).children()).to.have.length(1);
-        expect(wrapper.childAt(key).childAt(0).is('div.main')).to.equal(true);
-        expect(wrapper.childAt(key).childAt(0).children()).to.have.length(3);
+    items.forEach(({ name, cost, pct }, index) => {
+        const child = ul.childNodes[index];
 
-        expect(wrapper.childAt(key).childAt(0).childAt(0).is('span.title')).to.equal(true);
-        expect(wrapper.childAt(key).childAt(0).childAt(0).text()).to.equal(name);
+        t.is(child.tagName, 'LI');
+        t.is(child.className, 'tree-list-item');
+        t.is(child.childNodes.length, 1);
 
-        expect(wrapper.childAt(key).childAt(0).childAt(1).is('span.cost')).to.equal(true);
-        expect(wrapper.childAt(key).childAt(0).childAt(1).text()).to.equal(`£${cost}`);
+        const [main] = child.childNodes;
+        t.is(main.tagName, 'DIV');
+        t.is(main.className, 'main');
+        t.is(main.childNodes.length, 3);
 
-        expect(wrapper.childAt(key).childAt(0).childAt(2).is('span.pct')).to.equal(true);
-        expect(wrapper.childAt(key).childAt(0).childAt(2).text()).to.equal(` (${pct}%)`);
+        const [titleItem, costItem, pctItem] = main.childNodes;
 
-        key++;
+        t.is(titleItem.tagName, 'SPAN');
+        t.is(titleItem.className, 'title');
+        t.is(titleItem.innerHTML, name);
+
+        t.is(costItem.tagName, 'SPAN');
+        t.is(costItem.className, 'cost');
+        t.is(costItem.innerHTML, `£${cost}`);
+
+        t.is(pctItem.tagName, 'SPAN');
+        t.is(pctItem.className, 'pct');
+        t.is(pctItem.innerHTML, ` (${pct}%)`);
+    });
+});
+
+test('not rendering anything if not open', t => {
+    const { container } = getContainer({
+        open: false
     });
 
-    it('should not render anything if not open', () => {
-        const wrapperNotOpen = shallow(<SubTree {...props} open={false} />);
-
-        expect(wrapperNotOpen.get(0)).to.equal(null);
-    });
+    t.is(container.childNodes.length, 0);
 });
 

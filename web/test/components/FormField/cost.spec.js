@@ -1,60 +1,62 @@
-import '~client-test/browser.js';
-import { expect } from 'chai';
-import 'react-testing-library/cleanup-after-each';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import memoize from 'fast-memoize';
+import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldCost from '~client/components/FormField/cost';
 
-describe('<FormFieldCost />', () => {
-    let changed = null;
-    const onChange = value => {
-        changed = value;
-    };
-
+const getContainer = memoize((customProps = {}) => {
     const props = {
         value: 10345,
-        onChange
+        onChange: () => null,
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const { container } = render(<FormFieldCost {...props} />);
+    return render(<FormFieldCost {...props} />);
+});
 
-        const [div] = container.childNodes;
+test('basic structure', t => {
+    const { container } = getContainer();
+    t.is(container.childNodes.length, 1);
 
-        expect(div.tagName).to.equal('DIV');
+    const [div] = container.childNodes;
 
-        expect(div.className).to.equal('form-field form-field-cost');
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'form-field form-field-cost');
+    t.is(div.childNodes.length, 1);
+});
 
-        expect(div.childNodes).to.have.length(1);
+test('input', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'number');
+    t.is(input.step, '0.01');
+    t.is(input.value, '103.45');
+});
+
+test('handling onchange', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({
+        onChange
     });
 
-    it('should render an input', () => {
-        const { container } = render(<FormFieldCost {...props} />);
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
 
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
+    t.is(onChange.calls.length, 0);
 
-        expect(input.tagName).to.equal('INPUT');
-        expect(input.type).to.equal('number');
-        expect(input.step).to.equal('0.01');
-        expect(input.value).to.equal('103.45');
-    });
+    fireEvent.change(input, { target: { value: '10.93' } });
+    t.is(onChange.calls.length, 0);
 
-    it('should fire onChange', () => {
-        const { container } = render(<FormFieldCost {...props} />);
+    fireEvent.blur(input);
+    t.is(onChange.calls.length, 1);
 
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
-
-        expect(changed).to.equal(null);
-
-        fireEvent.change(input, { target: { value: '10.93' } });
-
-        expect(changed).to.equal(null);
-
-        fireEvent.blur(input);
-
-        expect(changed).to.equal(1093);
-    });
+    t.deepEqual(onChange.calls[0].arguments, [1093]);
 });
 

@@ -20,6 +20,10 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
 }
 
 const getFundCacheAge = createSelector([getCurrentFundsCache, getNow], (cache, now) => {
+    if (!cache) {
+        return null;
+    }
+
     const startTime = cache.get('startTime');
     const cacheTimes = cache.get('cacheTimes');
 
@@ -27,6 +31,10 @@ const getFundCacheAge = createSelector([getCurrentFundsCache, getNow], (cache, n
 });
 
 const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (rows, cache) => {
+    if (!rows) {
+        return 0;
+    }
+
     return rows.reduce((sum, row, id) => {
         const values = cache.getIn(['prices', id, 'values']);
         if (!(values && values.size)) {
@@ -41,6 +49,10 @@ export const getFundsCachedValue = createSelector([getLastFundsValue, getFundCac
     (value, ageText) => map({ ageText, value }));
 
 export const getFundsCost = createSelector([getFundsRows], rows => {
+    if (!rows) {
+        return 0;
+    }
+
     return rows.reduce((sum, row) => {
         const transactions = row.getIn(['cols', transactionsKey]);
 
