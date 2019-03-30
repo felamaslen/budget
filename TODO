@@ -20,3 +20,4 @@
 - Remove ImmutableJS
 - Relative imports [DONE]
 - Replace enzyme with react-testing-library
+- Replace mocha with ava
