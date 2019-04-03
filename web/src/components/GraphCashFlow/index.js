@@ -7,7 +7,7 @@ import LineGraph from '~client/components/Graph/LineGraph';
 import Axes from './Axes';
 import NowLine from './NowLine';
 import { GRAPH_HEIGHT } from '~client/constants/graph';
-import { formatCurrency } from '~client/helpers/format';
+import { formatCurrency } from '~client/modules/format';
 
 function getTime(key, now, offset, breakAtToday, startDate) {
     // converts a key index to a UNIX time stamp

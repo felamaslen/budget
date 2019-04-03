@@ -1,5 +1,5 @@
 /* eslint-disable prefer-reflect */
-import '~client-test/browser.js';
+import '~client-test/browser';
 import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';

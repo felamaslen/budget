@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '~client/components/Graph/LineGraph';
 import Axes from './Axes';
-import { rgba } from '~client/helpers/color';
-import { separateLines } from '~client/helpers/funds';
+import { rgba } from '~client/modules/color';
+import { separateLines } from '~client/modules/funds';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
     GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE

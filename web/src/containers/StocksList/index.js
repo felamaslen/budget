@@ -13,7 +13,7 @@ import classNames from 'classnames';
 
 import GraphStocks from './GraphStocks';
 import { aStocksListRequested, aStocksPricesRequested } from '~client/actions/stocks-list.actions';
-import { sigFigs } from '~client/helpers/format';
+import { sigFigs } from '~client/modules/format';
 
 function StockListItems({ stockMap }) {
     return stockMap

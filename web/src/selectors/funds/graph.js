@@ -6,8 +6,8 @@ import {
     GRAPH_FUNDS_OVERALL_ID
 } from '~client/constants/graph';
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
-import { rgba, colorKey } from '~client/helpers/color';
-import { separateLines } from '~client/helpers/funds';
+import { rgba, colorKey } from '~client/modules/color';
+import { separateLines } from '~client/modules/funds';
 import { getViewSoldFunds, transactionsKey, itemKey, getRowLengths, getCurrentFundsCache, getFundsRows } from './helpers';
 import { getFundLineProcessed } from './lines';
 

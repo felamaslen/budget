@@ -5,8 +5,8 @@
 import { List as list, Map as map } from 'immutable';
 
 import { PAGES, DATA_KEY_ABBR } from '~client/constants/data';
-import { dateInput } from '~client/helpers/date';
-import { TransactionsList } from '~client/helpers/data';
+import { dateInput } from '~client/modules/date';
+import { TransactionsList } from '~client/modules/data';
 
 export function processRawListRows(rows, page) {
     const listCols = list(PAGES[page].cols);

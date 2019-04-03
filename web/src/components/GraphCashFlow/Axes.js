@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '~client/constants/graph';
-import { rgba } from '~client/helpers/color';
-import { getTickSize, formatCurrency } from '~client/helpers/format';
+import { rgba } from '~client/modules/color';
+import { getTickSize, formatCurrency } from '~client/modules/format';
 import { getTimeScale } from '../Graph/helpers';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {

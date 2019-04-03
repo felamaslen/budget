@@ -10,7 +10,7 @@ import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import ModalDialogField from '~client/components/FormField/modal-dialog-field';
-import { TransactionsList } from '~client/helpers/data';
+import { TransactionsList } from '~client/modules/data';
 
 const getModalDialogField = memoize((customProps = {}) => {
     const state = fromJS({

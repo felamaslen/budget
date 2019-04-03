@@ -1,5 +1,5 @@
 import { fromJS, Map as map, List as list } from 'immutable';
-import '~client-test/browser.js';
+import '~client-test/browser';
 import { expect } from 'chai';
 import { DateTime } from 'luxon';
 import * as R from '~client/reducers/app.reducer';

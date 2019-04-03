@@ -6,11 +6,11 @@ import querystring from 'querystring';
 import { GRAPH_FUNDS_PERIOD_CHANGED, STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions';
 import { API_PREFIX } from '~client/constants/data';
 import { DO_STOCKS_LIST } from '~client/constants/stocks';
-import { getPeriodMatch } from '~client/helpers/data';
+import { getPeriodMatch } from '~client/modules/data';
 
 import { aFundsGraphPeriodReceived } from '../actions/graph.actions';
 import { aStocksListReceived, aStocksPricesReceived } from '../actions/stocks-list.actions';
-import { getStockPricesFromYahoo } from '~client/helpers/finance';
+import { getStockPricesFromYahoo } from '~client/modules/finance';
 import { getApiKey } from '~client/selectors/app';
 import { getFundsCache } from '~client/selectors/funds/helpers';
 import { getStocksListInfo } from '~client/selectors/funds/stocks';

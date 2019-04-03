@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import debounce from 'debounce';
 
-import { rgba } from '~client/helpers/color';
+import { rgba } from '~client/modules/color';
 import { COLOR_GRAPH_TITLE } from '~client/constants/colors';
 
 function getHlColor(color, point, index) {

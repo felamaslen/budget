@@ -6,8 +6,8 @@ import { AVERAGE_MEDIAN } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
-import { listAverage, randnBm } from '~client/helpers/data';
-import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/helpers/color';
+import { listAverage, randnBm } from '~client/modules/data';
+import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
 import { getNow } from './app';
 
 const futureCategories = list.of('funds', 'food', 'general', 'holiday', 'social');

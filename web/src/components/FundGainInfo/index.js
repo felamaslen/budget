@@ -2,8 +2,8 @@ import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency, formatPercent } from '~client/helpers/format';
-import { rgba } from '~client/helpers/color';
+import { formatCurrency, formatPercent } from '~client/modules/format';
+import { rgba } from '~client/modules/color';
 
 export default function FundGainInfo({ gain, sold }) {
     if (!gain) {

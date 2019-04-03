@@ -1,7 +1,7 @@
 import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { formatCurrency } from '~client/helpers/format';
+import { formatCurrency } from '~client/modules/format';
 import { PAGES } from '~client/constants/data';
 
 export default function ListRowFundsMobile({ row }) {

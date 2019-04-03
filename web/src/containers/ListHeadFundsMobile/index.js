@@ -5,7 +5,7 @@ import { getFundsCachedValue, getFundsCost } from '~client/selectors/funds';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency, formatPercent } from '~client/helpers/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import GraphFunds from '../GraphFunds';
 
 function ListHeadFundsMobile({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {

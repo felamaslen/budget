@@ -7,7 +7,7 @@ import reduction from '~client/reduction';
 import { Provider } from 'react-redux';
 import React from 'react';
 import EditableActive from '~client/containers/Editable/editable-active';
-import { TransactionsList } from '~client/helpers/data';
+import { TransactionsList } from '~client/modules/data';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {

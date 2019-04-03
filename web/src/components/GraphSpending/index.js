@@ -5,7 +5,7 @@
 import { List as list, Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { rgba } from '~client/helpers/color';
+import { rgba } from '~client/modules/color';
 import { COLOR_SPENDING, COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
 import GraphCashFlow, { getValuesWithTime } from '../GraphCashFlow';
 import Key from './Key';

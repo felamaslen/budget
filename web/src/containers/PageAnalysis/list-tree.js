@@ -8,9 +8,10 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListTreeHead from './list-tree-head';
 import SubTree from './sub-tree';
-import { formatCurrency } from '~client/helpers/format';
+import { formatCurrency } from '~client/modules/format';
 
 function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, onToggle }) {
+
     const costPct = cost.map(item => {
         const itemCost = item.get('total');
         const pct = 100 * itemCost / costTotal;

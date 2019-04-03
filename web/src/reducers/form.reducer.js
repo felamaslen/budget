@@ -4,7 +4,7 @@ import { getNow } from '~client/selectors/app';
 import { rCalculateOverview } from './overview.reducer';
 import { addToRequestQueue } from './request-queue.reducer';
 import { stringifyFields, getInvalidInsertDataKeys, updateTotal } from './edit.reducer';
-import { IDENTITY, dataEquals, getAddDefaultValues, resortListRows } from '~client/helpers/data';
+import { IDENTITY, dataEquals, getAddDefaultValues, resortListRows } from '~client/modules/data';
 import { PAGES } from '~client/constants/data';
 
 export function rOpenFormDialogEdit(state, { page, id }) {

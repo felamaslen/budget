@@ -4,7 +4,7 @@ import { all, select, takeLatest, call, put } from 'redux-saga/effects';
 import { CONTENT_REQUESTED } from '~client/constants/actions';
 import { API_PREFIX } from '~client/constants/data';
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '~client/constants/analysis';
-import { getPeriodMatch } from '~client/helpers/data';
+import { getPeriodMatch } from '~client/modules/data';
 import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '~client/selectors/app';
 import { openTimedMessage } from './error.saga';
 import { aContentLoaded } from '../actions/content.actions';

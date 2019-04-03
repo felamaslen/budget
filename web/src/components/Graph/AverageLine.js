@@ -1,8 +1,8 @@
 import { List as list } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { listAverage } from '~client/helpers/data';
-import { rgba } from '~client/helpers/color';
+import { listAverage } from '~client/modules/data';
+import { rgba } from '~client/modules/color';
 import { COLOR_LIGHT_GREY } from '~client/constants/colors';
 import { getSingleLinePath } from './helpers';
 

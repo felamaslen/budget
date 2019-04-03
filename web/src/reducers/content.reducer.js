@@ -4,8 +4,8 @@
 
 import { compose } from 'redux';
 import { PAGES } from '~client/constants/data';
-import { getNullEditable, getAddDefaultValues, resortListRows } from '~client/helpers/data';
-import { capitalise, formatCurrency } from '~client/helpers/format';
+import { getNullEditable, getAddDefaultValues, resortListRows } from '~client/modules/data';
+import { capitalise, formatCurrency } from '~client/modules/format';
 import { getNow, getLoadedStatus } from '~client/selectors/app';
 import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList } from './list.reducer';

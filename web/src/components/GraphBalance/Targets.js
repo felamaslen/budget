@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import Arrow from '../Arrow';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
-import { formatCurrency } from '~client/helpers/format';
-import { rgba } from '~client/helpers/color';
+import { formatCurrency } from '~client/modules/format';
+import { rgba } from '~client/modules/color';
 
 const formatTarget = target => `${formatCurrency(target.get('value'), {
     raw: true, noPence: true, abbreviate: true, precision: 0

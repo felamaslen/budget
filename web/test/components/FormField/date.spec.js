@@ -6,7 +6,7 @@ import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import FormFieldDate from '~client/components/FormField/date';
-import { dateInput } from '~client/helpers/date';
+import { dateInput } from '~client/modules/date';
 
 const getContainer = (customProps = {}) => {
     const props = {

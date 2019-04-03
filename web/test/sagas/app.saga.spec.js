@@ -1,5 +1,5 @@
 /* eslint-disable prefer-reflect */
-import '~client-test/browser.js';
+import '~client-test/browser';
 import { DateTime } from 'luxon';
 import { delay } from 'redux-saga';
 import { testSaga } from 'redux-saga-test-plan';

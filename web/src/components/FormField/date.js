@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
-import { dateInput } from '~client/helpers/date';
+import { dateInput } from '~client/modules/date';
 
 import { useField } from './use-field';
 

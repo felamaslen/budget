@@ -5,7 +5,7 @@ import { aFundsViewSoldToggled } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency, formatPercent } from '~client/helpers/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getFundsCachedValue, getFundsCost } from '~client/selectors/funds';
 
 function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedValue, onReloadPrices, onViewSoldToggle }) {

@@ -7,7 +7,7 @@ import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import { DateTime } from 'luxon';
 import FormFieldTransactions from '~client/components/FormField/transactions';
-import { TransactionsList } from '~client/helpers/data';
+import { TransactionsList } from '~client/modules/data';
 
 const transactions = [
     { date: '2017-11-10', units: 10.5, cost: 50 },

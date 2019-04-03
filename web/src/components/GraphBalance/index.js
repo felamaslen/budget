@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS } from '~client/constants/colors';
 import styles from '~client/constants/styles.json';
-import { rgba } from '~client/helpers/color';
+import { rgba } from '~client/modules/color';
 import GraphCashFlow, { getValuesWithTime } from '../GraphCashFlow';
 import Key from './Key';
 import Targets from './Targets.js';

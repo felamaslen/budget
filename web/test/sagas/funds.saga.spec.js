@@ -1,5 +1,5 @@
 /* eslint-disable prefer-reflect */
-import '~client-test/browser.js';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
@@ -11,7 +11,7 @@ import { openTimedMessage } from '~client/sagas/error.saga';
 import { getApiKey } from '~client/selectors/app';
 import { getFundsCache } from '~client/selectors/funds/helpers';
 import { getStocksListInfo } from '~client/selectors/funds/stocks';
-import { getStockPricesFromYahoo } from '~client/helpers/finance';
+import { getStockPricesFromYahoo } from '~client/modules/finance';
 
 describe('funds.saga', () => {
     describe('requestFundPeriodData', () => {

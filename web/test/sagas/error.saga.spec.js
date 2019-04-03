@@ -1,4 +1,4 @@
-import '~client-test/browser.js';
+import '~client-test/browser';
 import { Map as map } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import * as S from '~client/sagas/error.saga';

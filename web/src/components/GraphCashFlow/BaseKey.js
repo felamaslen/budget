@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { rgba } from '~client/helpers/color';
+import { rgba } from '~client/modules/color';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 

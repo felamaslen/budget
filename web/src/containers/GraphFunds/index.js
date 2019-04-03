@@ -12,7 +12,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '~client/components/Graph/LineGraph';
-import { getTickSize } from '~client/helpers/format';
+import { getTickSize } from '~client/modules/format';
 import {
     GRAPH_FUNDS_WIDTH,
     GRAPH_FUNDS_HEIGHT,
@@ -22,8 +22,8 @@ import {
     GRAPH_FUNDS_MODES
 } from '~client/constants/graph';
 import styles from '~client/constants/styles.json';
-import { rgba } from '~client/helpers/color';
-import { formatValue } from '~client/helpers/funds';
+import { rgba } from '~client/modules/color';
+import { formatValue } from '~client/modules/funds';
 import Axes from './Axes';
 
 function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {

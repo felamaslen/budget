@@ -4,7 +4,7 @@
 
 import { fromJS, Map as map, List as list } from 'immutable';
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '~client/constants/analysis';
-import { BlockPacker } from '~client/helpers/format';
+import { BlockPacker } from '~client/modules/format';
 
 function sortTotal(prev, next) {
     if (prev.get('total') > next.get('total')) {

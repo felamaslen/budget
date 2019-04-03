@@ -5,7 +5,7 @@
 import { List as list, Map as map, OrderedMap as orderedMap } from 'immutable';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
-import { sortRowsByDate } from '~client/helpers/data';
+import { sortRowsByDate } from '~client/modules/data';
 import { getRowLengths } from '~client/selectors/funds/helpers';
 import { getNow } from '~client/selectors/app';
 import { processRawListRows } from './list.reducer';

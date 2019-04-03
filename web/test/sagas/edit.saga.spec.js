@@ -1,5 +1,5 @@
 /* eslint-disable prefer-reflect */
-import '~client-test/browser.js';
+import '~client-test/browser';
 import { List as list } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
 import { delay } from 'redux-saga';

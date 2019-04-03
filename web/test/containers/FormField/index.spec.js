@@ -11,8 +11,8 @@ import FormField from '~client/containers/FormField';
 
 import { aFormFieldChanged } from '~client/actions/form.actions';
 
-import { dateInput } from '~client/helpers/date';
-import { TransactionsList } from '~client/helpers/data';
+import { dateInput } from '~client/modules/date';
+import { TransactionsList } from '~client/modules/data';
 
 const getContainer = memoize((customProps = {}) => {
     const state = reduction;

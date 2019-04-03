@@ -2,7 +2,7 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import { testSaga } from 'redux-saga-test-plan';
-import '~client-test/browser.js';
+import '~client-test/browser';
 import axios from 'axios';
 import * as S from '~client/sagas/login.saga';
 import { openTimedMessage } from '~client/sagas/error.saga';

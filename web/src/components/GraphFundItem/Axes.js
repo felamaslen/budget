@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { COLOR_DARK } from '~client/constants/colors';
-import { rgba } from '~client/helpers/color';
+import { rgba } from '~client/modules/color';
 
 export default function Axes({ popout, minX, minY, maxY, height, pixX, pixY }) {
     if (!popout) {

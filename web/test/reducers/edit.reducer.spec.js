@@ -2,7 +2,7 @@
 import { fromJS } from 'immutable';
 import { expect } from 'chai';
 import * as R from '~client/reducers/edit.reducer';
-import { dateInput } from '~client/helpers/date';
+import { dateInput } from '~client/modules/date';
 
 describe('Edit reducers', () => {
     describe('rActivateEditable', () => {

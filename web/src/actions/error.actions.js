@@ -2,7 +2,7 @@
  * Actions called to show/hide error messages
  */
 
-import { uuid } from '~client/helpers/data';
+import { uuid } from '~client/modules/data';
 
 import * as A from '~client/constants/actions';
 

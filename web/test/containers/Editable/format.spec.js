@@ -6,7 +6,7 @@ import {
     formatValue,
     getDefaultValue
 } from '~client/containers/Editable/format';
-import { dateInput } from '~client/helpers/date';
+import { dateInput } from '~client/modules/date';
 
 test('getEditValue / dates / trying to make a date from the raw value', t => {
     t.deepEqual(getEditValue('date', 'foo', '10/11/2017'), dateInput('10/11/2017'));
