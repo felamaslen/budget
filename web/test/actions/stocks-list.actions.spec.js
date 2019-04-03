@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'ava';
 
 import {
     aStocksListRequested,
@@ -14,30 +14,23 @@ import {
     STOCKS_PRICES_RECEIVED
 } from '~client/constants/actions';
 
-describe('stocks-list.actions', () => {
-    describe('aStocksListRequested', () =>
-        it('should return STOCKS_LIST_REQUESTED', () =>
-            expect(aStocksListRequested()).to.deep.equal({ type: STOCKS_LIST_REQUESTED })
-        )
-    );
-    describe('aStocksListReceived', () =>
-        it('should return STOCKS_LIST_RECEIVED with response object', () =>
-            expect(aStocksListReceived({ foo: 'bar' })).to.deep.equal({
-                type: STOCKS_LIST_RECEIVED, foo: 'bar'
-            })
-        )
-    );
-    describe('aStocksPricesRequested', () =>
-        it('should return STOCKS_PRICES_REQUESTED', () =>
-            expect(aStocksPricesRequested()).to.deep.equal({ type: STOCKS_PRICES_REQUESTED })
-        )
-    );
-    describe('aStocksPricesReceived', () =>
-        it('should return STOCKS_PRICES_RECEIVED with response object', () =>
-            expect(aStocksPricesReceived({ foo: 'bar' })).to.deep.equal({
-                type: STOCKS_PRICES_RECEIVED, foo: 'bar'
-            })
-        )
-    );
+test('aStocksListRequested returns STOCKS_LIST_REQUESTED', t => {
+    t.deepEqual(aStocksListRequested(), { type: STOCKS_LIST_REQUESTED });
+});
+
+test('aStocksListReceived returns STOCKS_LIST_RECEIVED with response object', t => {
+    t.deepEqual(aStocksListReceived({ foo: 'bar' }), {
+        type: STOCKS_LIST_RECEIVED, foo: 'bar'
+    });
+});
+
+test('aStocksPricesRequested returns STOCKS_PRICES_REQUESTED', t => {
+    t.deepEqual(aStocksPricesRequested(), { type: STOCKS_PRICES_REQUESTED });
+});
+
+test('aStocksPricesReceived returns STOCKS_PRICES_RECEIVED with response object', t => {
+    t.deepEqual(aStocksPricesReceived({ foo: 'bar' }), {
+        type: STOCKS_PRICES_RECEIVED, foo: 'bar'
+    });
 });
 

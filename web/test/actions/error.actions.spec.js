@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'ava';
 
 import {
     aErrorOpened,
@@ -12,34 +12,26 @@ import {
     ERROR_REMOVED
 } from '~client/constants/actions';
 
-describe('error.actions', () => {
-    describe('aErrorOpened', () =>
-        it('should return ERROR_OPENED with message', () => {
-            const result = aErrorOpened({ foo: 'bar' });
+test('aErrorOpened returns ERROR_OPENED with message', t => {
+    const result = aErrorOpened({ foo: 'bar' });
 
-            expect(result).to.deep.include({
-                type: ERROR_OPENED,
-                message: { foo: 'bar' }
-            });
+    t.is(result.type, ERROR_OPENED);
+    t.deepEqual(result.message, { foo: 'bar' });
+    t.is(typeof result.msgId, 'number');
+    t.true(result.msgId > 0);
+});
 
-            expect(result.msgId).to.be.a('number').greaterThan(0);
-        })
-    );
-    describe('aErrorClosed', () =>
-        it('should return ERROR_CLOSED with msgId', () =>
-            expect(aErrorClosed(10)).to.deep.equal({
-                type: ERROR_CLOSED,
-                msgId: 10
-            })
-        )
-    );
-    describe('aErrorRemoved', () =>
-        it('should return ERROR_REMOVED with msgId', () =>
-            expect(aErrorRemoved(10)).to.deep.equal({
-                type: ERROR_REMOVED,
-                msgId: 10
-            })
-        )
-    );
+test('aErrorClosed returns ERROR_CLOSED with msgId', t => {
+    t.deepEqual(aErrorClosed(10), {
+        type: ERROR_CLOSED,
+        msgId: 10
+    });
+});
+
+test('aErrorRemoved returns ERROR_REMOVED with msgId', t => {
+    t.deepEqual(aErrorRemoved(10), {
+        type: ERROR_REMOVED,
+        msgId: 10
+    });
 });
 

@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'ava';
 
 import {
     aWindowResized,
@@ -22,58 +22,63 @@ import {
     SERVER_ADD_RECEIVED
 } from '~client/constants/actions';
 
-describe('app.actions', () => {
-    describe('aWindowResized', () => {
-        it('should return WINDOW_RESIZED', () => expect(aWindowResized(100)).to.deep.equal({
-            type: WINDOW_RESIZED, size: 100
-        }));
+test('aWindowResized returns WINDOW_RESIZED', t => {
+    t.deepEqual(aWindowResized(100), {
+        type: WINDOW_RESIZED, size: 100
     });
-    describe('aSettingsLoaded', () => {
-        it('should return SETTINGS_LOADED', () => expect(aSettingsLoaded()).to.deep.equal({
-            type: SETTINGS_LOADED
-        }));
+});
+
+test('aSettingsLoaded returns SETTINGS_LOADED', t => {
+    t.deepEqual(aSettingsLoaded(), {
+        type: SETTINGS_LOADED
     });
-    describe('aUserLoggedOut', () => {
-        it('should return USER_LOGGED_OUT', () => expect(aUserLoggedOut()).to.deep.equal({
-            type: USER_LOGGED_OUT
-        }));
+});
+
+test('aUserLoggedOut returns USER_LOGGED_OUT', t => {
+    t.deepEqual(aUserLoggedOut(), {
+        type: USER_LOGGED_OUT
     });
-    describe('aKeyPressed', () => {
-        it('should return KEY_PRESSED with req', () => expect(aKeyPressed({
-            key: 10,
-            shift: true
-        })).to.deep.equal({
-            type: KEY_PRESSED,
-            key: 10,
-            shift: true
-        }));
+});
+
+test('aKeyPressed returns KEY_PRESSED with req', t => {
+    t.deepEqual(aKeyPressed({
+        key: 10,
+        shift: true
+    }), {
+        type: KEY_PRESSED,
+        key: 10,
+        shift: true
     });
-    describe('aTimeUpdated', () => {
-        it('should return TIME_UPDATED with the time', () => expect(aTimeUpdated(10)).to.deep.equal({
-            type: TIME_UPDATED,
-            now: 10
-        }));
+});
+
+test('aTimeUpdated returns TIME_UPDATED with the time', t => {
+    t.deepEqual(aTimeUpdated(10), {
+        type: TIME_UPDATED,
+        now: 10
     });
-    describe('aServerUpdated', () => {
-        it('should return SERVER_UPDATED', () => expect(aServerUpdated()).to.deep.equal({
-            type: SERVER_UPDATED
-        }));
+});
+
+test('aServerUpdated returns SERVER_UPDATED', t => {
+    t.deepEqual(aServerUpdated(), {
+        type: SERVER_UPDATED
     });
-    describe('aServerUpdateReceived', () => {
-        it('should return SERVER_UPDATE_RECEIVED with res', () => expect(aServerUpdateReceived({
-            foo: 'bar'
-        })).to.deep.equal({
-            type: SERVER_UPDATE_RECEIVED,
-            foo: 'bar'
-        }));
+});
+
+test('aServerUpdateReceived returns SERVER_UPDATE_RECEIVED with res', t => {
+    t.deepEqual(aServerUpdateReceived({
+        foo: 'bar'
+    }), {
+        type: SERVER_UPDATE_RECEIVED,
+        foo: 'bar'
     });
-    describe('aServerAddReceived', () => {
-        it('should return SERVER_ADD_RECEIVED with res', () => expect(aServerAddReceived({
-            foo: 'bar'
-        })).to.deep.equal({
-            type: SERVER_ADD_RECEIVED,
-            foo: 'bar'
-        }));
+});
+
+test('aServerAddReceived returns SERVER_ADD_RECEIVED with res', t => {
+    t.deepEqual(aServerAddReceived({
+        foo: 'bar'
+    }), {
+        type: SERVER_ADD_RECEIVED,
+        foo: 'bar'
     });
 });
 
