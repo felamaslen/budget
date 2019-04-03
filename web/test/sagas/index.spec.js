@@ -1,3 +1,4 @@
+import test from 'ava';
 import { testSaga } from 'redux-saga-test-plan';
 
 import rootSaga from '~client/sagas';
@@ -9,25 +10,24 @@ import editSaga from '~client/sagas/edit.saga';
 import analysisSaga from '~client/sagas/analysis.saga';
 import fundsSaga from '~client/sagas/funds.saga';
 
-describe('rootSaga', () => {
-    it('should fork all the other sagas', () => {
-        testSaga(rootSaga)
-            .next()
-            .fork(appSaga)
-            .next()
-            .fork(loginSaga)
-            .next()
-            .fork(dataSyncSaga)
-            .next()
-            .fork(contentSaga)
-            .next()
-            .fork(editSaga)
-            .next()
-            .fork(analysisSaga)
-            .next()
-            .fork(fundsSaga)
-            .next()
-            .isDone();
-    });
+test('rootSaga forking all the other sagas', t => {
+    t.is(1, 1);
+    testSaga(rootSaga)
+        .next()
+        .fork(appSaga)
+        .next()
+        .fork(loginSaga)
+        .next()
+        .fork(dataSyncSaga)
+        .next()
+        .fork(contentSaga)
+        .next()
+        .fork(editSaga)
+        .next()
+        .fork(analysisSaga)
+        .next()
+        .fork(fundsSaga)
+        .next()
+        .isDone();
 });
 
