@@ -11,6 +11,8 @@ const getContainer = (customProps = {}, customState = null) => {
         user: {
             uid: 1
         },
+        currentPage: 'general',
+        loading: false,
         loadingApi: false,
         errorMsg: [],
         loginForm: {
@@ -18,6 +20,11 @@ const getContainer = (customProps = {}, customState = null) => {
             visible: false,
             active: false,
             values: []
+        },
+        modalDialog: {
+            active: false,
+            visible: false,
+            loading: false
         },
         edit: {
             requestList: []
