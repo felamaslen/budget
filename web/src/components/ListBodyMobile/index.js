@@ -1,10 +1,10 @@
 import './style.scss';
 import { List as list } from 'immutable';
-import { PAGES, LIST_COLS_MOBILE } from '../../constants/data';
-import React from 'react';
+import { PAGES, LIST_COLS_MOBILE } from '~client/constants/data';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ListRowMobile from '../../containers/ListRowMobile';
+import ListRowMobile from '~client/containers/ListRowMobile';
 
 export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileAdd, ...props }) {
     const listCols = listColsMobile || LIST_COLS_MOBILE;
@@ -27,6 +27,8 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
         return <span key={column} className={className}>{column}</span>;
     });
 
+    const onAdd = useCallback(() => onMobileAdd(page), [page]);
+
     return (
         <div className="list-mobile">
             <div className="list-head noselect">
@@ -34,7 +36,9 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
             </div>
             <ul className="list-ul">{rows}</ul>
             <div className="button-add-outer">
-                <button type="button" className="button-add" onClick={() => onMobileAdd(page)}>{'Add'}</button>
+                <button type="button" className="button-add" onClick={onAdd}>
+                    {'Add'}
+                </button>
             </div>
         </div>
     );

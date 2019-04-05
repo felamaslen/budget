@@ -3,10 +3,10 @@
  */
 
 import { compose } from 'redux';
-import { PAGES } from '../constants/data';
-import { getNullEditable, getAddDefaultValues, resortListRows } from '../helpers/data';
-import { capitalise, formatCurrency } from '../helpers/format';
-import { getNow, getLoadedStatus } from '../selectors/app';
+import { PAGES } from '~client/constants/data';
+import { getNullEditable, getAddDefaultValues, resortListRows } from '~client/modules/data';
+import { capitalise, formatCurrency } from '~client/modules/format';
+import { getNow, getLoadedStatus } from '~client/selectors/app';
 import { processPageDataOverview } from './overview.reducer';
 import { processPageDataList } from './list.reducer';
 import { processPageDataFunds } from './funds.reducer';

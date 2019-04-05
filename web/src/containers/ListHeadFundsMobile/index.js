@@ -1,11 +1,11 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { aFundsGraphPeriodChanged } from '../../actions/graph.actions';
-import { getFundsCachedValue, getFundsCost } from '../../selectors/funds';
+import { aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
+import { getFundsCachedValue, getFundsCost } from '~client/selectors/funds';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency, formatPercent } from '../../helpers/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import GraphFunds from '../GraphFunds';
 
 function ListHeadFundsMobile({ totalCost, shortPeriod, cachedValue, onReloadPrices }) {

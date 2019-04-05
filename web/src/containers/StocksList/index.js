@@ -6,14 +6,14 @@
 import './style.scss';
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '../../constants/stocks';
+import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import GraphStocks from './GraphStocks';
-import { aStocksListRequested, aStocksPricesRequested } from '../../actions/stocks-list.actions';
-import { sigFigs } from '../../helpers/format';
+import { aStocksListRequested, aStocksPricesRequested } from '~client/actions/stocks-list.actions';
+import { sigFigs } from '~client/modules/format';
 
 function StockListItems({ stockMap }) {
     return stockMap

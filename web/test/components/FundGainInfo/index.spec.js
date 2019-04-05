@@ -1,12 +1,13 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import memoize from 'fast-memoize';
+import compose from 'just-compose';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
 import { Map as map, List as list } from 'immutable';
-import '../../browser';
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
 import React from 'react';
-import FundGainInfo from '../../../src/components/FundGainInfo';
+import FundGainInfo from '~client/components/FundGainInfo';
 
-describe('<FundGainInfo />', () => {
+const getGainInfo = memoize((customProps = {}) => {
     const props = {
         gain: map({
             value: 561932,
@@ -15,72 +16,121 @@ describe('<FundGainInfo />', () => {
             dayGain: -0.02,
             dayGainAbs: -341,
             color: list([255, 128, 30])
-        })
+        }),
+        ...customProps
     };
 
-    const wrapper = shallow(<FundGainInfo {...props} />);
+    return render(<FundGainInfo {...props} />);
+});
 
-    it('should render gain info', () => {
-        expect(wrapper.is('span.gain')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is('span.text.profit')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(2);
-    });
+test('gain info', t => {
+    const { container } = getGainInfo();
 
-    it('should render the current value', () => {
-        expect(wrapper.childAt(0).childAt(0).is('span.value')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).text()).to.equal('£5.6k');
-    });
+    t.is(container.childNodes.length, 1);
+    const [outer] = container.childNodes;
+    t.is(outer.tagName, 'SPAN');
+    t.is(outer.childNodes.length, 1);
 
-    const breakdown = wrapper.childAt(0).childAt(1);
+    const [inner] = outer.childNodes;
+    t.is(inner.tagName, 'SPAN');
+    t.is(inner.className, 'text profit');
+    t.is(inner.childNodes.length, 2);
+});
 
-    it('should render a breakdown', () => {
-        expect(breakdown.is('span.breakdown')).to.equal(true);
-        expect(breakdown.children()).to.have.length(2);
-    });
+const getInner = compose(
+    getGainInfo,
+    ({ container }) => container.childNodes[0].childNodes[0]
+);
 
-    describe('the overall gain', () => {
-        const overall = breakdown.childAt(0);
+test('current value', t => {
+    const inner = getInner();
+    const [value] = inner.childNodes;
 
-        it('should be rendered', () => {
-            expect(overall.is('span.overall')).to.equal(true);
-            expect(overall.children())
-                .to.have.length(2);
-        });
+    t.is(value.tagName, 'SPAN');
+    t.is(value.innerHTML, '£5.6k');
+    t.is(value.className, 'value');
+});
 
-        it('should render an absolute value', () => {
-            const absolute = overall.childAt(0);
+test('breakdown', t => {
+    const inner = getInner();
+    const [, breakdown] = inner.childNodes;
 
-            expect(absolute.is('span.gain-abs.profit')).to.equal(true);
-            expect(absolute.text()).to.equal('£40');
-        });
-        it('should render a relative value', () => {
-            const relative = overall.childAt(1);
+    t.is(breakdown.tagName, 'SPAN');
+    t.is(breakdown.className, 'breakdown');
+    t.is(breakdown.childNodes.length, 2);
+});
 
-            expect(relative.is('span.gain.profit')).to.equal(true);
-            expect(relative.text()).to.equal('30.00%');
-        });
-    });
+const getBreakdown = compose(
+    getInner,
+    inner => inner.childNodes[1]
+);
 
-    describe('the daily gain', () => {
-        const daily = breakdown.childAt(1);
+test('overall gain', t => {
+    const breakdown = getBreakdown();
 
-        it('should be rendered', () => {
-            expect(daily.is('span.day-gain-outer')).to.equal(true);
-        });
+    const [overall] = breakdown.childNodes;
 
-        it('should render an absolute value', () => {
-            const absolute = daily.childAt(0);
+    t.is(overall.tagName, 'SPAN');
+    t.is(overall.childNodes.length, 2);
+});
 
-            expect(absolute.is('span.day-gain-abs.loss')).to.equal(true);
-            expect(absolute.text()).to.equal('(£3)');
-        });
-        it('should render a relative value', () => {
-            const relative = daily.childAt(1);
+const getOverall = compose(
+    getBreakdown,
+    breakdown => breakdown.childNodes[0]
+);
 
-            expect(relative.is('span.day-gain.loss')).to.equal(true);
-            expect(relative.text()).to.equal('(2.00%)');
-        });
-    });
+test('(overall) absolute value', t => {
+    const overall = getOverall();
+
+    const [absolute] = overall.childNodes;
+
+    t.is(absolute.tagName, 'SPAN');
+    t.is(absolute.className, 'gain-abs profit');
+    t.is(absolute.innerHTML, '£40');
+});
+
+test('(overall) relative value', t => {
+    const overall = getOverall();
+
+    const [, relative] = overall.childNodes;
+
+    t.is(relative.tagName, 'SPAN');
+    t.is(relative.className, 'gain profit');
+    t.is(relative.innerHTML, '30.00%');
+});
+
+test('daily gain', t => {
+    const breakdown = getBreakdown();
+
+    const [, daily] = breakdown.childNodes;
+
+    t.is(daily.tagName, 'SPAN');
+    t.is(daily.className, 'day-gain-outer');
+    t.is(daily.childNodes.length, 2);
+});
+
+const getDaily = compose(
+    getBreakdown,
+    breakdown => breakdown.childNodes[1]
+);
+
+test('(daily) absolute value', t => {
+    const daily = getDaily();
+
+    const [absolute] = daily.childNodes;
+
+    t.is(absolute.tagName, 'SPAN');
+    t.is(absolute.className, 'day-gain-abs loss');
+    t.is(absolute.innerHTML, '(£3)');
+});
+
+test('(daily) relative value', t => {
+    const daily = getDaily();
+
+    const [, relative] = daily.childNodes;
+
+    t.is(relative.tagName, 'SPAN');
+    t.is(relative.className, 'day-gain loss');
+    t.is(relative.innerHTML, '(2.00%)');
 });
 

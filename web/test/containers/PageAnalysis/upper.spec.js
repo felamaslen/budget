@@ -1,127 +1,254 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import Upper from '../../../src/containers/PageAnalysis/upper';
-import { ANALYSIS_OPTION_CHANGED } from '../../../src/constants/actions';
+import { Provider } from 'react-redux';
+import React from 'react';
+import Upper from '~client/containers/PageAnalysis/upper';
+import { aOptionChanged } from '~client/actions/analysis.actions';
 
-describe('Analysis page <Upper />', () => {
-    const state = fromJS({
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
         pages: {
             analysis: {
-                description: 'foo'
+                description: 'foo',
+                cost: [
+                    { name: 'foo1', total: 1, subTree: [{ name: 'bar1', total: 1 }] },
+                    { name: 'foo2', total: 4, subTree: [{ name: 'bar2', total: 2 }] },
+                    { name: 'foo3', total: 3, subTree: [{ name: 'bar3', total: 2 }] },
+                    { name: 'foo4', total: 6, subTree: [{ name: 'bar4', total: 2 }] },
+                    { name: 'foo5', total: 10, subTree: [{ name: 'bar5', total: 3 }] }
+                ],
+                costTotal: 24
             }
         },
         other: {
             analysis: {
                 period: 0,
                 grouping: 0,
-                timeIndex: 0
+                timeIndex: 0,
+                treeVisible: {
+                    foo1: true,
+                    foo2: false,
+                    foo3: true
+                },
+                treeOpen: {
+                    foo1: true,
+                    foo2: false,
+                    foo3: false,
+                    foo4: true
+                }
             }
         }
     });
 
+    if (customState) {
+        state = customState(state);
+    }
+
     const store = createMockStore(state);
 
-    const wrapper = shallow(<Upper />, store).dive();
+    const props = {
+        ...customProps
+    };
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.upper')).to.equal(true);
-        expect(wrapper.children()).to.have.length(4);
-    });
+    const utils = render(
+        <Provider store={store}>
+            <Upper {...props} />
+        </Provider>
+    );
 
-    it('should render a period switcher', () => {
-        expect(wrapper.childAt(0).is('span.input-period')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(4);
-        expect(wrapper.childAt(0).childAt(0).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).text()).to.equal('Period:');
+    return { store, ...utils };
+};
 
-        expect(wrapper.childAt(0).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).children()).to.have.length(2);
-        expect(wrapper.childAt(0).childAt(1).childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).childAt(0).props())
-            .to.deep.include({ type: 'radio', checked: true });
-        expect(wrapper.childAt(0).childAt(1).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).childAt(1).text()).to.equal('year');
+test('basic structure', t => {
+    const { container } = getContainer();
+    t.is(container.childNodes.length, 1);
 
-        expect(wrapper.childAt(0).childAt(2).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).children()).to.have.length(2);
-        expect(wrapper.childAt(0).childAt(2).childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).childAt(0).props())
-            .to.deep.include({ type: 'radio', checked: false });
-        expect(wrapper.childAt(0).childAt(2).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).childAt(1).text()).to.equal('month');
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'upper');
+    t.is(div.childNodes.length, 4);
+});
 
-        expect(wrapper.childAt(0).childAt(3).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(3).children()).to.have.length(2);
-        expect(wrapper.childAt(0).childAt(3).childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(3).childAt(0).props())
-            .to.deep.include({ type: 'radio', checked: false });
-        expect(wrapper.childAt(0).childAt(3).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(3).childAt(1).text()).to.equal('week');
-    });
+test('period switcher - basic structure', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
 
-    it('should render a grouping switcher', () => {
-        expect(wrapper.childAt(1).is('span.input-grouping')).to.equal(true);
-        expect(wrapper.childAt(1).children()).to.have.length(3);
-        expect(wrapper.childAt(1).childAt(0).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(0).text()).to.equal('Grouping:');
+    t.is(input.tagName, 'SPAN');
+    t.is(input.className, 'input-period');
+    t.is(input.childNodes.length, 4);
 
-        expect(wrapper.childAt(1).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(1).children()).to.have.length(2);
-        expect(wrapper.childAt(1).childAt(1).childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(1).childAt(0).props()).to.deep.include({
-            type: 'radio', checked: true
-        });
-        expect(wrapper.childAt(1).childAt(1).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(1).childAt(1).text()).to.equal('category');
+    const [title] = input.childNodes;
 
-        expect(wrapper.childAt(1).childAt(2).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(2).children()).to.have.length(2);
-        expect(wrapper.childAt(1).childAt(2).childAt(0).is('input')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(2).childAt(0).props()).to.deep.include({
-            type: 'radio', checked: false
-        });
-        expect(wrapper.childAt(1).childAt(2).childAt(1).is('span')).to.equal(true);
-        expect(wrapper.childAt(1).childAt(2).childAt(1).text()).to.equal('shop');
-    });
+    t.is(title.tagName, 'SPAN');
+    t.is(title.innerHTML, 'Period:');
+});
 
-    it('should render buttons', () => {
-        expect(wrapper.childAt(2).is('div.btns')).to.equal(true);
-        expect(wrapper.childAt(2).children()).to.have.length(2);
+test('period switcher - year group', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
 
-        expect(wrapper.childAt(2).childAt(0).is('button.btn-previous')).to.equal(true);
-        expect(wrapper.childAt(2).childAt(1).is('button.btn-next')).to.equal(true);
-        expect(wrapper.childAt(2).childAt(1).props()).to.deep.include({ disabled: true });
-    });
+    const [, yearGroup] = input.childNodes;
 
-    it('should dispatch actions when the buttons are pressed', () => {
-        expect(store.isActionDispatched({
-            type: ANALYSIS_OPTION_CHANGED, period: 0, grouping: 0, timeIndex: 1
-        })).to.equal(false);
+    t.is(yearGroup.tagName, 'SPAN');
+    t.is(yearGroup.childNodes.length, 2);
 
-        wrapper.childAt(2).childAt(0).simulate('click');
+    const [radioYear, titleYear] = yearGroup.childNodes;
 
-        expect(store.isActionDispatched({
-            type: ANALYSIS_OPTION_CHANGED, period: 0, grouping: 0, timeIndex: 1
-        })).to.equal(true);
+    t.is(radioYear.tagName, 'INPUT');
+    t.is(radioYear.type, 'radio');
+    t.is(radioYear.checked, true);
 
-        expect(store.isActionDispatched({
-            type: ANALYSIS_OPTION_CHANGED, period: 0, grouping: 0, timeIndex: -1
-        })).to.equal(false);
+    t.is(titleYear.innerHTML, 'year');
+});
 
-        wrapper.childAt(2).childAt(1).simulate('click');
+test('period switcher - month group', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
 
-        expect(store.isActionDispatched({
-            type: ANALYSIS_OPTION_CHANGED, period: 0, grouping: 0, timeIndex: -1
-        })).to.equal(true);
-    });
+    const [, , monthGroup] = input.childNodes;
 
-    it('should render a description', () => {
-        expect(wrapper.childAt(3).is('h3.period-title')).to.equal(true);
-        expect(wrapper.childAt(3).text()).to.equal('foo');
-    });
+    t.is(monthGroup.tagName, 'SPAN');
+    t.is(monthGroup.childNodes.length, 2);
+
+    const [radioMonth, titleMonth] = monthGroup.childNodes;
+
+    t.is(radioMonth.tagName, 'INPUT');
+    t.is(radioMonth.type, 'radio');
+    t.is(radioMonth.checked, false);
+
+    t.is(titleMonth.tagName, 'SPAN');
+    t.is(titleMonth.innerHTML, 'month');
+});
+
+test('period switcher - week group', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    const [, , , weekGroup] = input.childNodes;
+
+    const [radioWeek, titleWeek] = weekGroup.childNodes;
+
+    t.is(radioWeek.tagName, 'INPUT');
+    t.is(radioWeek.type, 'radio');
+    t.is(radioWeek.checked, false);
+
+    t.is(titleWeek.tagName, 'SPAN');
+    t.is(titleWeek.innerHTML, 'week');
+});
+
+test('grouping switcher - basic structure', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [, grouping] = div.childNodes;
+
+    t.is(grouping.tagName, 'SPAN');
+    t.is(grouping.className, 'input-grouping');
+    t.is(grouping.childNodes.length, 3);
+
+    const [title] = grouping.childNodes;
+
+    t.is(title.tagName, 'SPAN');
+    t.is(title.innerHTML, 'Grouping:');
+});
+
+test('grouping switcher - category group', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [, grouping] = div.childNodes;
+
+    const [, categoryGroup] = grouping.childNodes;
+
+    t.is(categoryGroup.tagName, 'SPAN');
+    t.is(categoryGroup.childNodes.length, 2);
+
+    const [input, title] = categoryGroup.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'radio');
+    t.is(input.checked, true);
+
+    t.is(title.tagName, 'SPAN');
+    t.is(title.innerHTML, 'category');
+});
+
+test('grouping switcher - shop group', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [, grouping] = div.childNodes;
+
+    const [, , shopGroup] = grouping.childNodes;
+
+    t.is(shopGroup.tagName, 'SPAN');
+    t.is(shopGroup.childNodes.length, 2);
+
+    const [input, title] = shopGroup.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'radio');
+    t.is(input.checked, false);
+
+    t.is(title.tagName, 'SPAN');
+    t.is(title.innerHTML, 'shop');
+});
+
+test('buttons', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [, , buttons] = div.childNodes;
+
+    t.is(buttons.tagName, 'DIV');
+    t.is(buttons.className, 'btns');
+    t.is(buttons.childNodes.length, 2);
+
+    const [previous, next] = buttons.childNodes;
+
+    t.is(previous.tagName, 'BUTTON');
+    t.is(previous.className, 'btn-previous');
+    t.is(previous.disabled, false);
+
+    t.is(next.tagName, 'BUTTON');
+    t.is(next.className, 'btn-next');
+    t.is(next.disabled, true);
+});
+
+test('dispatching actions when the buttons are pressed', t => {
+    const { store, container } = getContainer({}, state => state
+        .setIn(['other', 'analysis', 'timeIndex'], 1)
+    );
+
+    const [div] = container.childNodes;
+    const [, , buttons] = div.childNodes;
+    const [previous, next] = buttons.childNodes;
+
+    const actionPrevious = aOptionChanged({ period: 0, grouping: 0, timeIndex: 2 });
+    const actionNext = aOptionChanged({ period: 0, grouping: 0, timeIndex: 0 });
+
+    t.false(store.isActionDispatched(actionPrevious));
+
+    fireEvent.click(previous);
+    t.true(store.isActionDispatched(actionPrevious));
+
+    t.false(store.isActionDispatched(actionNext));
+
+    fireEvent.click(next);
+    t.true(store.isActionDispatched(actionNext));
+});
+
+test('description', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const [, , , title] = div.childNodes;
+
+    t.is(title.tagName, 'H3');
+    t.is(title.className, 'period-title');
+    t.is(title.innerHTML, 'foo');
 });
 

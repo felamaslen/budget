@@ -1,356 +1,314 @@
+import test from 'ava';
 import { fromJS, Map as map, List as list } from 'immutable';
-import '../browser';
-import { expect } from 'chai';
+import '~client-test/browser';
 import { DateTime } from 'luxon';
-import * as R from '../../src/reducers/app.reducer';
-import reduction from '../../src/reduction';
+import {
+    rOnWindowResize,
+    getItemValue,
+    rHandleKeyPress,
+    rHandleServerUpdate,
+    rUpdateTime,
+    rUpdateServer,
+    rLogout
+} from '~client/reducers/app.reducer';
+import reduction from '~client/reduction';
 
-describe('app.reducer', () => {
-    describe('rOnWindowResize', () => {
-        it('should set the window size in state', () => {
-            expect(R.rOnWindowResize(fromJS({ other: { windowWidth: 100 } }), { size: 200 }).toJS())
-                .to.deep.equal({ other: { windowWidth: 200 } });
-        });
-    });
+test('rOnWindowResize setting the window size in state', t => {
+    t.deepEqual(
+        rOnWindowResize(fromJS({ other: { windowWidth: 100 } }), { size: 200 }).toJS(),
+        { other: { windowWidth: 200 } }
+    );
+});
 
-    describe('getItemValue', () => {
-        const state = fromJS({
-            pages: {
-                overview: {
-                    data: {
-                        cost: {
-                            balance: [100, 1001, 392, 9913, 923]
-                        }
-                    }
+const stateOverview = fromJS({
+    pages: {
+        overview: {
+            data: {
+                cost: {
+                    balance: [100, 1001, 392, 9913, 923]
                 }
             }
-        });
+        }
+    }
+});
 
-        describe('on the overview page', () => {
-            it('should get an object with the relevant value', () => {
-                expect(R.getItemValue(state, 'overview', 0))
-                    .to.deep.equal({ id: null, item: null, value: 100 });
+test('getItemValue (on the overview page) geting an object with the relevant value', t => {
+    t.deepEqual(getItemValue(stateOverview, 'overview', 0), { id: null, item: null, value: 100 });
 
-                expect(R.getItemValue(state, 'overview', 3))
-                    .to.deep.equal({ id: null, item: null, value: 9913 });
-            });
-        });
+    t.deepEqual(getItemValue(stateOverview, 'overview', 3), { id: null, item: null, value: 9913 });
+});
 
-        describe('on list pages', () => {
-            describe('on the add row', () => {
-                it('should return the current add-item value', () => {
-                    const stateOnAddRow = state.set('edit', map({
-                        add: map({
-                            food: list.of(DateTime.fromISO('2018-06-10'), 'foo', 'bar', 365, 'baz')
-                        })
-                    }));
+test('getItemValue (on list pages, on the add row) returning the current add-item value', t => {
+    const stateOnAddRow = stateOverview.set('edit', map({
+        add: map({
+            food: list.of(DateTime.fromISO('2018-06-10'), 'foo', 'bar', 365, 'baz')
+        })
+    }));
 
-                    expect(R.getItemValue(stateOnAddRow, 'food', -1, 1))
-                        .to.deep.equal({ id: null, item: 'item', value: 'foo' });
-                    expect(R.getItemValue(stateOnAddRow, 'food', -1, 3))
-                        .to.deep.equal({ id: null, item: 'cost', value: 365 });
-                });
-            });
-            describe('on a list row', () => {
-                it('should return the current list-row value', () => {
-                    const stateOnListRow = state.setIn(['pages', 'food', 'rows'], map([
-                        [76, map({
-                            cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 861, 'baz2')
-                        })],
-                        [2, map({
-                            cols: list.of(DateTime.fromISO('2018-06-11'), 'foo2', 'bar2', 1943, 'baz3')
-                        })]
-                    ]));
+    t.deepEqual(getItemValue(stateOnAddRow, 'food', -1, 1), { id: null, item: 'item', value: 'foo' });
+    t.deepEqual(getItemValue(stateOnAddRow, 'food', -1, 3), { id: null, item: 'cost', value: 365 });
+});
 
-                    expect(R.getItemValue(stateOnListRow, 'food', 76, 4))
-                        .to.deep.equal({ id: 76, item: 'shop', value: 'baz2' });
+test('getItemValue (on list pages, on the list row) returning the current list-row value', t => {
+    const stateOnListRow = stateOverview.setIn(['pages', 'food', 'rows'], map([
+        [76, map({
+            cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 861, 'baz2')
+        })],
+        [2, map({
+            cols: list.of(DateTime.fromISO('2018-06-11'), 'foo2', 'bar2', 1943, 'baz3')
+        })]
+    ]));
 
-                    expect(R.getItemValue(stateOnListRow, 'food', 2, 0))
-                        .to.deep.equal({ id: 2, item: 'date', value: DateTime.fromISO('2018-06-11') });
-                });
-            });
-        });
+    t.deepEqual(getItemValue(stateOnListRow, 'food', 76, 4), { id: 76, item: 'shop', value: 'baz2' });
+
+    t.deepEqual(getItemValue(stateOnListRow, 'food', 2, 0), { id: 2, item: 'date', value: DateTime.fromISO('2018-06-11') });
+});
+
+const stateKeyPress = map({
+    user: map({ uid: 0 })
+});
+
+test('rHandleKeyPress doing nothing if the key is a modifier', t => {
+    t.is(rHandleKeyPress(stateKeyPress, { key: 'Control' }), stateKeyPress);
+    t.is(rHandleKeyPress(stateKeyPress, { key: 'Shift' }), stateKeyPress);
+});
+
+const stateLoggedIn = stateOverview.setIn(['user', 'uid'], 1)
+    .set('currentPage', 'food')
+    .set('edit', map({
+        active: map({
+            row: -1,
+            col: 2,
+            value: null
+        }),
+        add: map({
+            food: list.of(DateTime.fromISO('2018-06-10'), '', '', 0, '')
+        })
+    }))
+    .set('editSuggestions', map({
+        list: list.of(),
+        active: -1,
+        nextCategory: list.of()
+    }))
+    .set('pages', map({
+        food: map({
+            data: map({ numRows: 10, numCols: 5 }),
+            rows: map([
+                [1, map({
+                    id: 1,
+                    cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 30, 'baz1')
+                })],
+                [2, map({
+                    id: 2,
+                    cols: list.of(DateTime.fromISO('2018-06-02'), 'foo2', 'bar2', 30, 'baz2')
+                })],
+                [5, map({
+                    id: 5,
+                    cols: list.of(DateTime.fromISO('2018-05-28'), 'foo3', 'bar3', 30, 'baz3')
+                })],
+                [6, map({
+                    id: 6,
+                    cols: list.of(DateTime.fromISO('2018-05-28'), 'foo4', 'bar4', 30, 'baz4')
+                })],
+                [35, map({
+                    id: 35,
+                    cols: list.of(DateTime.fromISO('2018-05-09'), 'foo5', 'bar5', 30, 'baz5')
+                })],
+                [19, map({
+                    id: 19,
+                    cols: list.of(DateTime.fromISO('2018-04-19'), 'foo6', 'bar6', 30, 'baz6')
+                })],
+                [7, map({
+                    id: 7,
+                    cols: list.of(DateTime.fromISO('2018-04-18'), 'foo7', 'bar7', 30, 'baz7')
+                })],
+                [9, map({
+                    id: 9,
+                    cols: list.of(DateTime.fromISO('2018-04-09'), 'foo8', 'bar8', 30, 'baz8')
+                })],
+                [11, map({
+                    id: 11,
+                    cols: list.of(DateTime.fromISO('2018-04-05'), 'foo9', 'bar9', 30, 'baz9')
+                })],
+                [61, map({
+                    id: 61,
+                    cols: list.of(DateTime.fromISO('2018-04-03'), 'foo10', 'bar10', 30, 'baz10')
+                })]
+            ])
+        })
+    }));
+
+const stateFromSuggestions = stateLoggedIn.set('editSuggestions', map({
+    list: list.of('foo', 'bar'),
+    active: 1,
+    nextCategory: list.of()
+}));
+
+test('rHandleKeyPress (logged in, navigating from suggestions, on escape) clearing the edit suggestions list', t => {
+    const result = rHandleKeyPress(stateFromSuggestions, { key: 'Escape' });
+
+    t.deepEqual(result.get('editSuggestions').toJS(), {
+        list: [],
+        active: -1,
+        nextCategory: []
     });
+});
 
-    describe('rHandleKeyPress', () => {
-        const state = map({
-            user: map({ uid: 0 })
-        });
+test('rHandleKeyPress (logged in, navigating from suggestions, no prefill) setting editable value to the suggestion value', t => {
+    const result = rHandleKeyPress(stateFromSuggestions, { key: 'Enter' });
 
-        it('should do nothing if the key is a modifier', () => {
-            expect(R.rHandleKeyPress(state, { key: 'Control' })).to.equal(state);
-            expect(R.rHandleKeyPress(state, { key: 'Shift' })).to.equal(state);
-        });
+    t.is(result.getIn(['edit', 'add', 'food', 2]), 'bar');
+});
 
-        describe('if logged in', () => {
-            const stateLoggedIn = state.setIn(['user', 'uid'], 1)
-                .set('currentPage', 'food')
-                .set('edit', map({
-                    active: map({
-                        row: -1,
-                        col: 2,
-                        value: null
-                    }),
-                    add: map({
-                        food: list.of(DateTime.fromISO('2018-06-10'), '', '', 0, '')
-                    })
-                }))
-                .set('editSuggestions', map({
-                    list: list.of(),
-                    active: -1,
-                    nextCategory: list.of()
-                }))
-                .set('pages', map({
-                    food: map({
-                        data: map({ numRows: 10, numCols: 5 }),
-                        rows: map([
-                            [1, map({
-                                id: 1,
-                                cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 30, 'baz1')
-                            })],
-                            [2, map({
-                                id: 2,
-                                cols: list.of(DateTime.fromISO('2018-06-02'), 'foo2', 'bar2', 30, 'baz2')
-                            })],
-                            [5, map({
-                                id: 5,
-                                cols: list.of(DateTime.fromISO('2018-05-28'), 'foo3', 'bar3', 30, 'baz3')
-                            })],
-                            [6, map({
-                                id: 6,
-                                cols: list.of(DateTime.fromISO('2018-05-28'), 'foo4', 'bar4', 30, 'baz4')
-                            })],
-                            [35, map({
-                                id: 35,
-                                cols: list.of(DateTime.fromISO('2018-05-09'), 'foo5', 'bar5', 30, 'baz5')
-                            })],
-                            [19, map({
-                                id: 19,
-                                cols: list.of(DateTime.fromISO('2018-04-19'), 'foo6', 'bar6', 30, 'baz6')
-                            })],
-                            [7, map({
-                                id: 7,
-                                cols: list.of(DateTime.fromISO('2018-04-18'), 'foo7', 'bar7', 30, 'baz7')
-                            })],
-                            [9, map({
-                                id: 9,
-                                cols: list.of(DateTime.fromISO('2018-04-09'), 'foo8', 'bar8', 30, 'baz8')
-                            })],
-                            [11, map({
-                                id: 11,
-                                cols: list.of(DateTime.fromISO('2018-04-05'), 'foo9', 'bar9', 30, 'baz9')
-                            })],
-                            [61, map({
-                                id: 61,
-                                cols: list.of(DateTime.fromISO('2018-04-03'), 'foo10', 'bar10', 30, 'baz10')
-                            })]
-                        ])
-                    })
-                }));
+test('rHandleKeyPress (logged in, navigating from suggestions, no prefill) navigating to the next field', t => {
+    const result = rHandleKeyPress(stateFromSuggestions, { key: 'Enter' });
 
-            describe('if navigating from suggestions', () => {
-                const stateFromSuggestions = stateLoggedIn.set('editSuggestions', map({
-                    list: list.of('foo', 'bar'),
-                    active: 1,
-                    nextCategory: list.of()
-                }));
+    t.is(result.getIn(['edit', 'active', 'col']), 3);
+});
 
-                describe('on escape', () => {
-                    it('should clear the edit suggestions list', () => {
-                        const result = R.rHandleKeyPress(stateFromSuggestions, { key: 'Escape' });
+const stateWithPrefill = stateFromSuggestions
+    .setIn(['edit', 'active', 'col'], 1)
+    .setIn(['editSuggestions', 'nextCategory'], list.of('baz', 'bak'));
 
-                        expect(result.get('editSuggestions').toJS()).to.deep.equal({
-                            list: [],
-                            active: -1,
-                            nextCategory: []
-                        });
-                    });
-                });
-                describe('on enter', () => {
-                    describe('if there is no suggestions category prefill', () => {
-                        const result = R.rHandleKeyPress(stateFromSuggestions, { key: 'Enter' });
+test('rHandleKeyPress (logged in, navigating from suggestions, with prefill) prefilling the category column', t => {
+    const result = rHandleKeyPress(stateWithPrefill, { key: 'Enter' });
 
-                        it('should set editable value to the suggestion value', () => {
-                            expect(result.getIn(['edit', 'add', 'food', 2])).to.equal('bar');
-                        });
+    t.is(result.getIn(['edit', 'add', 'food', 2]), 'bak');
+});
 
-                        it('should navigate to the next field', () => {
-                            expect(result.getIn(['edit', 'active', 'col'])).to.equal(3);
-                        });
-                    });
+test('rHandleKeyPress (logged in, navigating within suggestions) looping through the suggestions', t => {
+    const stateWithSuggestions = stateLoggedIn.set('editSuggestions', map({
+        list: list.of('foo', 'bar'),
+        active: -1
+    }));
 
-                    describe('otherwise', () => {
-                        const stateWithPrefill = stateFromSuggestions
-                            .setIn(['edit', 'active', 'col'], 1)
-                            .setIn(['editSuggestions', 'nextCategory'], list.of('baz', 'bak'));
+    let nextState = stateWithSuggestions;
 
-                        const result = R.rHandleKeyPress(stateWithPrefill, { key: 'Enter' });
+    const navState = prevState => rHandleKeyPress(prevState, { key: 'Tab' });
 
-                        it('should prefill the category column', () => {
-                            expect(result.getIn(['edit', 'add', 'food', 2])).to.equal('bak');
-                        });
-                    });
-                });
-            });
+    nextState = navState(nextState);
+    t.is(nextState.getIn(['editSuggestions', 'active']), 0);
 
-            describe('if navigating within suggestions', () => {
-                it('should loop through the suggestions', () => {
-                    const stateWithSuggestions = stateLoggedIn.set('editSuggestions', map({
-                        list: list.of('foo', 'bar'),
-                        active: -1
-                    }));
+    nextState = navState(nextState);
+    t.is(nextState.getIn(['editSuggestions', 'active']), 1);
 
-                    let nextState = stateWithSuggestions;
+    nextState = navState(nextState);
+    t.is(nextState.getIn(['editSuggestions', 'active']), -1);
+});
 
-                    const navState = prevState => R.rHandleKeyPress(prevState, { key: 'Tab' });
+test('rHandleKeyPress (logged in, navigating from the active field) setting the next active field', t => {
+    const result = rHandleKeyPress(stateLoggedIn, { key: 'Tab' });
 
-                    nextState = navState(nextState);
-                    expect(nextState.getIn(['editSuggestions', 'active'])).to.equal(0);
+    t.is(result.getIn(['edit', 'active', 'col']), 3);
+});
 
-                    nextState = navState(nextState);
-                    expect(nextState.getIn(['editSuggestions', 'active'])).to.equal(1);
+test('rHandleKeyPress (logged in, on escape) deactivateing and cancel editing', t => {
+    const stateEditing = stateLoggedIn.setIn(['edit', 'active', 'value'], 'wanttocancelthis');
 
-                    nextState = navState(nextState);
-                    expect(nextState.getIn(['editSuggestions', 'active'])).to.equal(-1);
-                });
-            });
+    const result = rHandleKeyPress(stateEditing, { key: 'Escape' });
 
-            describe('if navigating from the active field', () => {
-                it('should set the next active field', () => {
-                    const result = R.rHandleKeyPress(stateLoggedIn, { key: 'Tab' });
+    t.is(result.getIn(['edit', 'active', 'value']), null);
+});
 
-                    expect(result.getIn(['edit', 'active', 'col'])).to.equal(3);
-                });
-            });
+test('rHandleKeyPress (logged in, on enter) noting do anything if the add button is selected', t => {
+    const stateWithAddButton = stateLoggedIn.setIn(['edit', 'addBtnFocus'], true);
 
-            describe('on escape', () => {
-                it('should deactivate and cancel editing', () => {
-                    const stateEditing = stateLoggedIn.setIn(['edit', 'active', 'value'], 'wanttocancelthis');
+    const result = rHandleKeyPress(stateWithAddButton, { key: 'Enter' });
 
-                    const result = R.rHandleKeyPress(stateEditing, { key: 'Escape' });
+    t.is(result, stateWithAddButton);
+});
 
-                    expect(result.getIn(['edit', 'active', 'value'])).to.equal(null);
-                });
-            });
+test('rHandleKeyPress (logged in, on enter) activateing the current edit item', t => {
+    const result = rHandleKeyPress(stateLoggedIn, { key: 'Enter' });
 
-            describe('on enter', () => {
-                it('should not do anything if the add button is selected', () => {
-                    const stateWithAddButton = stateLoggedIn.setIn(['edit', 'addBtnFocus'], true);
+    t.is(result.getIn(['edit', 'active', 'col']), -1);
+    t.is(result.getIn(['edit', 'active', 'id']), null);
+    t.is(result.getIn(['edit', 'active', 'item']), null);
+    t.is(result.getIn(['edit', 'active', 'originalValue']), null);
+    t.is(result.getIn(['edit', 'active', 'page']), 'food');
 
-                    const result = R.rHandleKeyPress(stateWithAddButton, { key: 'Enter' });
+    t.is(result.getIn(['edit', 'add', 'food', 2]), null);
+    t.is(result.getIn(['edit', 'addBtnFocus']), false);
 
-                    expect(result).to.equal(stateWithAddButton);
-                });
-                it('should activate the current edit item', () => {
-                    const result = R.rHandleKeyPress(stateLoggedIn, { key: 'Enter' });
+    t.is(result.getIn(['editSuggestions', 'loading']), false);
+    t.is(result.getIn(['editSuggestions', 'reqId']), null);
+});
 
-                    expect(result.getIn(['edit', 'active', 'col'])).to.equal(-1);
-                    expect(result.getIn(['edit', 'active', 'id'])).to.equal(null);
-                    expect(result.getIn(['edit', 'active', 'item'])).to.equal(null);
-                    expect(result.getIn(['edit', 'active', 'originalValue'])).to.equal(null);
-                    expect(result.getIn(['edit', 'active', 'page'])).to.equal('food');
+const stateLoggedOut = stateKeyPress.set('loginForm', map({
+    values: list.of('0', '1'),
+    inputStep: 2,
+    visible: true
+}));
 
-                    expect(result.getIn(['edit', 'add', 'food', 2])).to.equal(null);
-                    expect(result.getIn(['edit', 'addBtnFocus'])).to.equal(false);
-
-                    expect(result.getIn(['editSuggestions', 'loading'])).to.equal(false);
-                    expect(result.getIn(['editSuggestions', 'reqId'])).to.equal(null);
-                });
-            });
-        });
-
-        describe('if not logged in', () => {
-            const stateLoggedOut = state.set('loginForm', map({
-                values: list.of('0', '1'),
-                inputStep: 2,
-                visible: true
-            }));
-
-            it('should reset the login form if Escape was pressed', () => {
-                expect(R.rHandleKeyPress(stateLoggedOut, { key: 'Escape' }).toJS())
-                    .to.deep.equal({
-                        user: { uid: 0 },
-                        loginForm: {
-                            values: [],
-                            inputStep: 0,
-                            visible: true
-                        }
-                    });
-            });
-
-            it('should input the key to the login form, otherwise', () => {
-                expect(R.rHandleKeyPress(stateLoggedOut, { key: '4' }).toJS())
-                    .to.deep.equal({
-                        user: { uid: 0 },
-                        loginForm: {
-                            values: ['0', '1', '4'],
-                            inputStep: 3,
-                            visible: true,
-                            active: true
-                        }
-                    });
-            });
-        });
+test('rHandleKeyPress (logged out) resetting the login form if Escape was pressed', t => {
+    t.deepEqual(rHandleKeyPress(stateLoggedOut, { key: 'Escape' }).toJS(), {
+        user: { uid: 0 },
+        loginForm: {
+            values: [],
+            inputStep: 0,
+            visible: true
+        }
     });
+});
 
-    describe('rLogout', () => {
-        let envBefore = null;
-        before(() => {
-            envBefore = process.env.DEFAULT_FUND_PERIOD;
-
-            process.env.DEFAULT_FUND_PERIOD = 'year1';
-        });
-        after(() => {
-            process.env.DEFAULT_FUND_PERIOD = envBefore;
-        });
-
-        it('should not do anything if the state is loading', () => {
-            expect(R.rLogout(fromJS({ loading: true })).toJS())
-                .to.deep.equal({ loading: true });
-        });
-
-        it('should reset the state and set the login form to visible', () => {
-            expect(R.rLogout(fromJS({ loginForm: { visible: false } })).toJS())
-                .to.deep.equal(reduction
-                    .delete('now')
-                    .setIn(['loginForm', 'visible'], true)
-                    .deleteIn(['errorMsg'])
-                    .deleteIn(['loading'])
-                    .deleteIn(['loadingApi'])
-                    .toJS()
-                );
-        });
+test('rHandleKeyPress (logged out) inputing the key to the login form, otherwise', t => {
+    t.deepEqual(rHandleKeyPress(stateLoggedOut, { key: '4' }).toJS(), {
+        user: { uid: 0 },
+        loginForm: {
+            values: ['0', '1', '4'],
+            inputStep: 3,
+            visible: true,
+            active: true
+        }
     });
+});
 
-    describe('rUpdateTime', () => {
-        it('should set the now property in the state', () => {
-            const now = DateTime.local();
+let envBefore = null;
+test.before(() => {
+    envBefore = process.env.DEFAULT_FUND_PERIOD;
 
-            expect(R.rUpdateTime(fromJS({ now: null }), { now }).toJS()).to.deep.equal({ now });
-        });
-    });
+    process.env.DEFAULT_FUND_PERIOD = 'year1';
+});
+test.after(() => {
+    process.env.DEFAULT_FUND_PERIOD = envBefore;
+});
 
-    describe('rUpdateServer', () => {
-        it('should set loadingApi to true', () => {
-            expect(R.rUpdateServer(fromJS({ loadingApi: false })).toJS()).to.deep.equal({ loadingApi: true });
-        });
-    });
+test('rLogout noting do anything if the state is loading', t => {
+    t.deepEqual(rLogout(fromJS({ loading: true })).toJS(), { loading: true });
+});
 
-    describe('rHandleServerUpdate', () => {
-        it('should set loadingApi to false and reset the request queue', () => {
-            expect(R.rHandleServerUpdate(fromJS({
-                loadingApi: true,
-                edit: {
-                    requestList: ['foo', 'bar']
-                }
-            })).toJS())
-                .to.deep.equal({
-                    loadingApi: false,
-                    edit: {
-                        requestList: []
-                    }
-                });
-        });
+test('rLogout resetting the state and set the login form to visible', t => {
+    t.deepEqual(rLogout(fromJS({ loginForm: { visible: false } })).toJS(), reduction
+        .delete('now')
+        .setIn(['loginForm', 'visible'], true)
+        .deleteIn(['errorMsg'])
+        .deleteIn(['loading'])
+        .deleteIn(['loadingApi'])
+        .toJS()
+    );
+});
+
+test('rUpdateTime setting the now property in the state', t => {
+    const now = DateTime.local();
+
+    t.deepEqual(rUpdateTime(fromJS({ now: null }), { now }).toJS(), { now });
+});
+
+test('rUpdateServer setting loadingApi to true', t => {
+    t.deepEqual(rUpdateServer(fromJS({ loadingApi: false })).toJS(), { loadingApi: true });
+});
+
+test('rHandleServerUpdate setting loadingApi to false and resetting the request queue', t => {
+    t.deepEqual(rHandleServerUpdate(fromJS({
+        loadingApi: true,
+        edit: {
+            requestList: ['foo', 'bar']
+        }
+    })).toJS(), {
+        loadingApi: false,
+        edit: {
+            requestList: []
+        }
     });
 });
 

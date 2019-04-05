@@ -1,11 +1,15 @@
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import test from 'ava';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import reduction from '~client/reduction';
+import { Provider } from 'react-redux';
 import React from 'react';
-import EditableActive from '../../../src/containers/Editable/editable-active';
-import InteractiveEditable from '../../../src/containers/Editable/interactive-editable';
-import InteractiveEditableTransactions from '../../../src/containers/Editable/interactive-editable/transactions';
+import EditableActive from '~client/containers/Editable/editable-active';
+import { TransactionsList } from '~client/modules/data';
 
-describe('<EditableActive />', () => {
+const getContainer = memoize((customProps = {}) => {
     const props = {
         row: 1,
         col: 1,
@@ -13,21 +17,43 @@ describe('<EditableActive />', () => {
         onChange: () => null,
         addTransaction: () => null,
         editTransaction: () => null,
-        removeTransaction: () => null
+        removeTransaction: () => null,
+        ...customProps
     };
 
-    it('should render <InteractiveEditableTransactions /> for transactions items', () => {
-        const wrapper = shallow(<EditableActive item="transactions" {...props} />);
+    const state = reduction;
 
-        expect(wrapper.is(InteractiveEditableTransactions)).to.equal(true);
-        expect(wrapper.props()).to.deep.equal({ ...props, item: 'transactions' });
+    const store = createMockStore(state);
+
+    const utils = render(
+        <Provider store={store}>
+            <EditableActive {...props} />
+        </Provider>
+    );
+
+    return { store, ...utils };
+});
+
+test('rendering transactions items', t => {
+    const { container } = getContainer({
+        item: 'transactions',
+        value: new TransactionsList([])
     });
 
-    it('should render <InteractiveEditable /> for other items', () => {
-        const wrapper = shallow(<EditableActive item="foo" {...props} />);
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'SPAN');
+    t.is(div.className, 'active editable editable-transactions');
+});
 
-        expect(wrapper.is(InteractiveEditable)).to.equal(true);
-        expect(wrapper.props()).to.deep.equal({ ...props, item: 'foo' });
+test('rendering other items', t => {
+    const { container } = getContainer({
+        item: 'foo'
     });
+
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'SPAN');
+    t.is(div.className, 'active editable editable-foo');
 });
 

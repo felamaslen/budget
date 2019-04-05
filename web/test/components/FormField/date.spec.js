@@ -1,77 +1,77 @@
-import '../../browser';
-import { expect } from 'chai';
-import 'react-testing-library/cleanup-after-each';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
-import FormFieldDate from '../../../src/components/FormField/date';
-import { dateInput } from '../../../src/helpers/date';
+import FormFieldDate from '~client/components/FormField/date';
+import { dateInput } from '~client/modules/date';
 
-describe('<FormFieldDate />', () => {
-    let changed = null;
-    beforeEach(() => {
-        changed = null;
-    });
-
-    const onChange = value => {
-        changed = value;
-    };
-
+const getContainer = (customProps = {}) => {
     const props = {
         value: dateInput('10/11/2017'),
-        onChange
+        onChange: () => null,
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const { container } = render(<FormFieldDate {...props} />);
+    return render(<FormFieldDate {...props} />);
+};
 
-        const [div] = container.childNodes;
+test('basic structure', t => {
+    const { container } = getContainer();
 
-        expect(div.tagName).to.equal('DIV');
+    const [div] = container.childNodes;
 
-        expect(div.className).to.equal('form-field form-field-date');
+    t.is(div.tagName, 'DIV');
 
-        expect(div.childNodes).to.have.length(1);
-    });
+    t.is(div.className, 'form-field form-field-date');
 
-    it('should render an input', () => {
-        const { container } = render(<FormFieldDate {...props} />);
-
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
-
-        expect(input.tagName).to.equal('INPUT');
-        expect(input.type).to.equal('date');
-        expect(input.value).to.equal('2017-11-10');
-    });
-
-    it('should fire onChange', () => {
-        const { container } = render(<FormFieldDate {...props} />);
-
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
-
-        expect(changed).to.equal(null);
-
-        fireEvent.change(input, { target: { value: '2014-04-09' } });
-
-        expect(changed).to.equal(null);
-
-        fireEvent.blur(input);
-
-        expect(changed.toString()).to.deep.equal(dateInput('9/4/2014').toString());
-    });
-
-    it('should handle bad values', () => {
-        const { container } = render(<FormFieldDate {...props} />);
-
-        const [div] = container.childNodes;
-        const [input] = div.childNodes;
-
-        expect(changed).to.equal(null);
-
-        fireEvent.change(input, { target: { value: 'not a date' } });
-        fireEvent.blur(input);
-
-        expect(changed.toString()).to.equal('Invalid DateTime');
-    });
+    t.is(div.childNodes.length, 1);
 });
+
+test('input', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'date');
+    t.is(input.value, '2017-11-10');
+});
+
+test('handling onchange', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange });
+
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.change(input, { target: { value: '2014-04-09' } });
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.blur(input);
+    t.is(onChange.calls.length, 1);
+    t.deepEqual(onChange.calls[0].arguments, [dateInput('9/4/2014')]);
+});
+
+test('handling bad values', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange });
+
+    const [div] = container.childNodes;
+    const [input] = div.childNodes;
+
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.change(input, { target: { value: 'not a date' } });
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.blur(input);
+    t.is(onChange.calls.length, 1);
+    t.is(onChange.calls[0].arguments[0].toString(), 'Invalid DateTime');
+});
+

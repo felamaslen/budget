@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import Editable from '../../containers/Editable';
+import Editable from '~client/containers/Editable';
 
 export default function ListRowCell({ page, id, row, colName, colKey, active }) {
     const spanClasses = classNames(colName, { active });

@@ -1,31 +1,31 @@
+import test from 'ava';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import * as R from '../../src/reducers/graph.reducer';
+import {
+    rToggleShowAll
+} from '~client/reducers/graph.reducer';
 
-describe('Graph reducer', () => {
-    describe('rToggleShowAll', () => {
-        it('should toggle showAllBalanceGraph', () => {
-            expect(R.rToggleShowAll(fromJS({ other: { showAllBalanceGraph: true } }))
-                .getIn(['other', 'showAllBalanceGraph'])).to.equal(false);
+test('rToggleShowAll toggling showAllBalanceGraph', t => {
+    t.is(
+        rToggleShowAll(fromJS({ other: { showAllBalanceGraph: true } }))
+            .getIn(['other', 'showAllBalanceGraph']),
+        false
+    );
 
-            expect(R.rToggleShowAll(fromJS({ other: { showAllBalanceGraph: false } }))
-                .getIn(['other', 'showAllBalanceGraph'])).to.equal(true);
+    t.is(
+        rToggleShowAll(fromJS({ other: { showAllBalanceGraph: false } }))
+            .getIn(['other', 'showAllBalanceGraph']),
+        true
+    );
 
-            expect(R.rToggleShowAll(fromJS({ other: { showAllBalanceGraph: null } }))
-                .getIn(['other', 'showAllBalanceGraph'])).to.equal(true);
-        });
-    });
-    describe('rToggleFundsGraphMode', () => {
-        it('should be tested');
-    });
-    describe('rToggleFundsGraphLine', () => {
-        it('should be tested');
-    });
-    describe('rHandleFundPeriodResponse', () => {
-        it('should be tested');
-    });
-    describe('rChangeFundsGraphPeriod', () => {
-        it('should be tested');
-    });
+    t.is(
+        rToggleShowAll(fromJS({ other: { showAllBalanceGraph: null } }))
+            .getIn(['other', 'showAllBalanceGraph']),
+        true
+    );
 });
+
+test.todo('rToggleFundsGraphMode');
+test.todo('rToggleFundsGraphLine');
+test.todo('rHandleFundPeriodResponse');
+test.todo('rChangeFundsGraphPeriod');
 

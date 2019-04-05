@@ -5,7 +5,7 @@
 import './style.scss';
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import * as actions from '../../actions/edit.actions';
+import * as actions from '~client/actions/edit.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import EditableActive from './editable-active';

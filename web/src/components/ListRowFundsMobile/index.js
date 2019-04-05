@@ -1,8 +1,8 @@
 import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { formatCurrency } from '../../helpers/format';
-import { PAGES } from '../../constants/data';
+import { formatCurrency } from '~client/modules/format';
+import { PAGES } from '~client/constants/data';
 
 export default function ListRowFundsMobile({ row }) {
     const transactions = row.getIn(['cols', PAGES.funds.cols.indexOf('transactions')]);

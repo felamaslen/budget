@@ -1,8 +1,8 @@
 import { List as list } from 'immutable';
 import { eventChannel } from 'redux-saga';
 import { fork, select, take, call, put } from 'redux-saga/effects';
-import { TIMER_UPDATE_SERVER } from '../constants/data';
-import { SERVER_UPDATED } from '../constants/actions';
+import { TIMER_UPDATE_SERVER } from '~client/constants/data';
+import { SERVER_UPDATED } from '~client/constants/actions';
 import { aSettingsLoaded, aServerUpdated } from '../actions/app.actions';
 
 export const selectRequestList = state =>

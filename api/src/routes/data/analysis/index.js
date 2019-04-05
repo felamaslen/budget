@@ -22,9 +22,14 @@ function getRowsByDate(results) {
         return rows.reduce((itemsByDate, { date, cost }) => {
             const value = Math.max(0, cost);
 
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const index = date.getDate();
+            let dateObject = date;
+            if (typeof date === 'string') {
+                dateObject = new Date(date);
+            }
+
+            const year = dateObject.getFullYear();
+            const month = dateObject.getMonth();
+            const index = dateObject.getDate();
 
             const havePreceding = categoryKey === 0 || (year in itemsByDate &&
                 month in itemsByDate[year] &&

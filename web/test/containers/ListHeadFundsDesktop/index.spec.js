@@ -1,17 +1,20 @@
-/* eslint-disable newline-per-chained-call */
-import '../../browser';
+import test from 'ava';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import { DateTime } from 'luxon';
-import shallow from '../../shallow-with-store';
+import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import React from 'react';
-import ListHeadFundsDesktop from '../../../src/containers/ListHeadFundsDesktop';
-import { GRAPH_FUNDS_PERIOD_CHANGED } from '../../../src/constants/actions';
+import { DateTime } from 'luxon';
+import { aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
+import { aFundsViewSoldToggled } from '~client/actions/content.actions';
+
+import ListHeadFundsDesktop from '~client/containers/ListHeadFundsDesktop';
 import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
 
-describe('<ListHeadFundsDesktop />', () => {
-    const state = fromJS({
+const getContainer = memoize((customProps = {}, customState = null) => {
+    let state = fromJS({
         now: DateTime.fromISO('2017-09-01T20:01Z'),
         pages: {
             funds: {
@@ -32,67 +35,112 @@ describe('<ListHeadFundsDesktop />', () => {
         }
     });
 
-    const props = {
-        page: 'funds'
-    };
+    if (customState) {
+        state = customState(state);
+    }
 
     const store = createMockStore(state);
 
-    const wrapper = shallow(<ListHeadFundsDesktop {...props} />, store).dive();
+    const props = {
+        page: 'funds',
+        ...customProps
+    };
 
-    const gainSpan = wrapper.childAt(0);
+    const utils = render(
+        <Provider store={store}>
+            <ListHeadFundsDesktop {...props} />
+        </Provider>
+    );
 
-    it('should render a gain span', () => {
-        expect(gainSpan.is('span.overall-gain.loss')).to.equal(true);
-        expect(gainSpan.hasClass('gain')).to.equal(false);
+    return { store, ...utils };
+});
 
-        expect(gainSpan.children()).to.have.length(3);
-    });
+test('gain span', t => {
+    const { container } = getContainer();
+    t.is(container.childNodes.length, 2);
 
-    it('should render a gain class', () => {
-        const stateGain = state.setIn(['pages', 'funds', 'cache', 'year1', 'prices', 10, 'values', 30], 430);
+    const [gainSpan] = container.childNodes;
+    t.is(gainSpan.tagName, 'SPAN');
+    t.is(gainSpan.className, 'overall-gain loss');
+    t.is(gainSpan.childNodes.length, 3);
+});
 
-        const wrapperLoss = shallow(<ListHeadFundsDesktop {...props} />, createMockStore(stateGain)).dive();
+test('gain class', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['pages', 'funds', 'cache', 'year1', 'prices', 10, 'values', 30], 430)
+    );
 
-        const wrapperLossGainSpan = wrapperLoss.childAt(0);
+    const [span] = container.childNodes;
 
-        expect(wrapperLossGainSpan.hasClass('profit')).to.equal(true);
-        expect(wrapperLossGainSpan.hasClass('loss')).to.equal(false);
-    });
+    t.is(span.className, 'overall-gain profit');
+});
 
-    it('should render gain info', () => {
-        const gainInfo = gainSpan.childAt(0);
+test('gain info', t => {
+    const { container } = getContainer();
+    const [span] = container.childNodes;
 
-        expect(gainInfo.is('span.value')).to.equal(true);
-        expect(gainInfo.text()).to.equal('£3,990.98');
+    const [gainInfo, gainValues, cacheAge] = span.childNodes;
 
-        const gainValues = gainSpan.childAt(1);
+    t.is(gainInfo.tagName, 'SPAN');
+    t.is(gainInfo.className, 'value');
+    t.is(gainInfo.innerHTML, '£3,990.98');
 
-        expect(gainValues.is('span.gain-values')).to.equal(true);
-        expect(gainValues.children()).to.have.length(2);
-        expect(gainValues.childAt(0).is('span.gain-pct')).to.equal(true);
-        expect(gainValues.childAt(0).text()).to.equal('(0.23%)');
-        expect(gainValues.childAt(1).is('span.gain-abs')).to.equal(true);
-        expect(gainValues.childAt(1).text()).to.equal('(£9.02)');
+    t.is(gainValues.tagName, 'SPAN');
+    t.is(gainValues.className, 'gain-values');
+    t.is(gainValues.childNodes.length, 2);
 
-        const cacheAge = gainSpan.childAt(2);
+    const [gainPct, gainAbs] = gainValues.childNodes;
 
-        expect(cacheAge.is('span.cache-age')).to.equal(true);
-        expect(cacheAge.text()).to.equal('(3 hours ago)');
-    });
+    t.is(gainPct.tagName, 'SPAN');
+    t.is(gainAbs.tagName, 'SPAN');
 
-    it('should reload fund prices on click', () => {
-        const action = {
-            type: GRAPH_FUNDS_PERIOD_CHANGED,
-            shortPeriod: 'year1',
-            noCache: true
-        };
+    t.is(gainPct.className, 'gain-pct');
+    t.is(gainAbs.className, 'gain-abs');
 
-        expect(store.isActionDispatched(action)).to.equal(false);
+    t.is(gainPct.innerHTML, '(0.23%)');
+    t.is(gainAbs.innerHTML, '(£9.02)');
 
-        wrapper.childAt(0).simulate('click');
+    t.is(cacheAge.tagName, 'SPAN');
+    t.is(cacheAge.className, 'cache-age');
+    t.is(cacheAge.innerHTML, '(3 hours ago)');
+});
 
-        expect(store.isActionDispatched(action)).to.equal(true);
-    });
+test('reloading fund prices on click', t => {
+    const { store, container } = getContainer();
+
+    const action = aFundsGraphPeriodChanged({ shortPeriod: 'year1', noCache: true });
+
+    t.false(store.isActionDispatched(action));
+
+    fireEvent.click(container.childNodes[0]);
+
+    t.true(store.isActionDispatched(action));
+});
+
+test('view sold toggle', t => {
+    const { store, container } = getContainer();
+
+    const [, toggleViewSold] = container.childNodes;
+
+    t.is(toggleViewSold.tagName, 'SPAN');
+    t.is(toggleViewSold.className, 'toggle-view-sold');
+    t.is(toggleViewSold.childNodes.length, 2);
+
+    const [input, span] = toggleViewSold.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+    t.is(input.type, 'checkbox');
+    t.is(input.checked, false);
+
+    t.is(span.tagName, 'SPAN');
+    t.is(span.innerHTML, 'View sold');
+
+    const action = aFundsViewSoldToggled();
+
+    t.false(store.isActionDispatched(action));
+
+    fireEvent.click(input);
+
+    t.true(store.isActionDispatched(action));
 });
 

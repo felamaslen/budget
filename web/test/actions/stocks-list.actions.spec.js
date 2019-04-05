@@ -1,32 +1,36 @@
-import { expect } from 'chai';
+import test from 'ava';
 
-import * as A from '../../src/actions/stocks-list.actions';
-import * as C from '../../src/constants/actions';
+import {
+    aStocksListRequested,
+    aStocksListReceived,
+    aStocksPricesRequested,
+    aStocksPricesReceived
+} from '~client/actions/stocks-list.actions';
 
-describe('stocks-list.actions', () => {
-    describe('aStocksListRequested', () =>
-        it('should return STOCKS_LIST_REQUESTED', () =>
-            expect(A.aStocksListRequested()).to.deep.equal({ type: C.STOCKS_LIST_REQUESTED })
-        )
-    );
-    describe('aStocksListReceived', () =>
-        it('should return STOCKS_LIST_RECEIVED with response object', () =>
-            expect(A.aStocksListReceived({ foo: 'bar' })).to.deep.equal({
-                type: C.STOCKS_LIST_RECEIVED, foo: 'bar'
-            })
-        )
-    );
-    describe('aStocksPricesRequested', () =>
-        it('should return STOCKS_PRICES_REQUESTED', () =>
-            expect(A.aStocksPricesRequested()).to.deep.equal({ type: C.STOCKS_PRICES_REQUESTED })
-        )
-    );
-    describe('aStocksPricesReceived', () =>
-        it('should return STOCKS_PRICES_RECEIVED with response object', () =>
-            expect(A.aStocksPricesReceived({ foo: 'bar' })).to.deep.equal({
-                type: C.STOCKS_PRICES_RECEIVED, foo: 'bar'
-            })
-        )
-    );
+import {
+    STOCKS_LIST_REQUESTED,
+    STOCKS_LIST_RECEIVED,
+    STOCKS_PRICES_REQUESTED,
+    STOCKS_PRICES_RECEIVED
+} from '~client/constants/actions';
+
+test('aStocksListRequested returns STOCKS_LIST_REQUESTED', t => {
+    t.deepEqual(aStocksListRequested(), { type: STOCKS_LIST_REQUESTED });
+});
+
+test('aStocksListReceived returns STOCKS_LIST_RECEIVED with response object', t => {
+    t.deepEqual(aStocksListReceived({ foo: 'bar' }), {
+        type: STOCKS_LIST_RECEIVED, foo: 'bar'
+    });
+});
+
+test('aStocksPricesRequested returns STOCKS_PRICES_REQUESTED', t => {
+    t.deepEqual(aStocksPricesRequested(), { type: STOCKS_PRICES_REQUESTED });
+});
+
+test('aStocksPricesReceived returns STOCKS_PRICES_RECEIVED with response object', t => {
+    t.deepEqual(aStocksPricesReceived({ foo: 'bar' }), {
+        type: STOCKS_PRICES_RECEIVED, foo: 'bar'
+    });
 });
 

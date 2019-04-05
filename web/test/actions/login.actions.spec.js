@@ -1,25 +1,28 @@
-import { expect } from 'chai';
+import test from 'ava';
 
-import * as A from '../../src/actions/login.actions';
-import * as C from '../../src/constants/actions';
+import {
+    aLoginFormInputted,
+    aLoginFormReset,
+    aLoginFormResponseReceived
+} from '~client/actions/login.actions';
 
-describe('login.actions', () => {
-    describe('aLoginFormInputted', () =>
-        it('should return LOGIN_FORM_INPUTTED with input', () =>
-            expect(A.aLoginFormInputted(9)).to.deep.equal({ type: C.LOGIN_FORM_INPUTTED, input: 9 })
-        )
-    );
-    describe('aLoginFormReset', () =>
-        it('should return LOGIN_FORM_RESET with index', () =>
-            expect(A.aLoginFormReset(10)).to.deep.equal({ type: C.LOGIN_FORM_RESET, index: 10 })
-        )
-    );
-    describe('aLoginFormResponseReceived', () =>
-        it('should return LOGIN_FORM_RESPONSE_GOT with res object', () =>
-            expect(A.aLoginFormResponseReceived({ foo: 'bar' })).to.deep.equal({
-                type: C.LOGIN_FORM_RESPONSE_GOT, foo: 'bar'
-            })
-        )
-    );
+import {
+    LOGIN_FORM_INPUTTED,
+    LOGIN_FORM_RESET,
+    LOGIN_FORM_RESPONSE_GOT
+} from '~client/constants/actions';
+
+test('aLoginFormInputted returns LOGIN_FORM_INPUTTED with input', t => {
+    t.deepEqual(aLoginFormInputted(9), { type: LOGIN_FORM_INPUTTED, input: 9 });
+});
+
+test('aLoginFormReset returns LOGIN_FORM_RESET with index', t => {
+    t.deepEqual(aLoginFormReset(10), { type: LOGIN_FORM_RESET, index: 10 });
+});
+
+test('aLoginFormResponseReceived returns LOGIN_FORM_RESPONSE_GOT with res object', t => {
+    t.deepEqual(aLoginFormResponseReceived({ foo: 'bar' }), {
+        type: LOGIN_FORM_RESPONSE_GOT, foo: 'bar'
+    });
 });
 

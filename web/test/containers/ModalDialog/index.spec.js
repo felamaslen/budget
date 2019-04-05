@@ -1,139 +1,206 @@
-/* eslint-disable newline-per-chained-call */
-import '../../browser';
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import ModalDialog from '../../../src/containers/ModalDialog';
-import ModalDialogField from '../../../src/components/FormField/modal-dialog-field';
-import { FORM_DIALOG_CLOSED } from '../../../src/constants/actions';
+import { Provider } from 'react-redux';
+import React from 'react';
+import ModalDialog from '~client/containers/ModalDialog';
+import { aMobileDialogClosed } from '~client/actions/form.actions';
 
-describe('<ModalDialog />', () => {
-    const state = fromJS({
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
         currentPage: 'page1',
         modalDialog: {
             active: true,
             visible: true,
             loading: false,
             type: 'foo',
-            row: 3,
-            col: 4,
+            row: 3, col: 4,
             id: 100,
             fields: [
-                { item: 'blah' },
-                { item: 'baz' }
+                { item: 'item', value: 'foo' },
+                { item: 'cost', value: 34 }
             ],
             invalidKeys: ['xyz']
         }
     });
 
+    if (customState) {
+        state = customState(state);
+    }
+
     const store = createMockStore(state);
 
-    const wrapper = shallow(<ModalDialog />, store).dive();
+    const props = {
+        ...customProps
+    };
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.modal-dialog-outer.foo')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is('div.dialog')).to.equal(true);
-        expect(wrapper.childAt(0).hasClass('hidden')).to.equal(false);
-        expect(wrapper.childAt(0).hasClass('loading')).to.equal(false);
-        expect(wrapper.childAt(0).children()).to.have.length(3);
-        expect(wrapper.childAt(0).childAt(0).is('span.title')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).is('ul.form-list')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).is('div.buttons')).to.equal(true);
+    const utils = render(
+        <Provider store={store}>
+            <ModalDialog {...props} />
+        </Provider>
+    );
+
+    return { store, ...utils };
+};
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'modal-dialog-outer foo');
+    t.is(div.childNodes.length, 1);
+
+    const [dialog] = div.childNodes;
+
+    t.is(dialog.tagName, 'DIV');
+    t.is(dialog.className, 'dialog');
+    t.is(dialog.childNodes.length, 3);
+});
+
+test('not rendering anything while inactive', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['modalDialog', 'active'], false)
+    );
+
+    t.is(container.childNodes.length, 0);
+});
+
+test('hidden class', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['modalDialog', 'visible'], false)
+    );
+
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+
+    t.regex(dialog.className, /hidden/);
+});
+
+test('loading class', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['modalDialog', 'loading'], true)
+    );
+
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+
+    t.regex(dialog.className, /loading/);
+});
+
+
+test('title', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [title] = dialog.childNodes;
+
+    t.is(title.tagName, 'SPAN');
+    t.is(title.className, 'title');
+
+
+    t.is(title.innerHTML, 'Editing id#100');
+});
+
+test('adding title', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['modalDialog', 'id'], null)
+    );
+
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [title] = dialog.childNodes;
+
+
+    t.is(title.innerHTML, 'Add item');
+});
+
+test('form list', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [, formList] = dialog.childNodes;
+
+    t.is(formList.tagName, 'UL');
+    t.is(formList.className, 'form-list');
+    t.is(formList.childNodes.length, 2);
+
+    formList.childNodes.forEach(modalDialogField => {
+        t.is(modalDialogField.tagName, 'LI');
+        t.regex(modalDialogField.className, /^form-row\s/);
     });
+});
 
-    it('should not render anything if inactive', () => {
-        const wrapperInactive = shallow(<ModalDialog />, createMockStore(state
-            .setIn(['modalDialog', 'active'], false)
-        )).dive();
+test('buttons', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [, , buttons] = dialog.childNodes;
 
-        expect(wrapperInactive.get(0)).to.equal(null);
-    });
+    t.is(buttons.tagName, 'DIV');
+    t.is(buttons.className, 'buttons');
+    t.is(buttons.childNodes.length, 2);
 
-    it('should render a hidden class', () => {
-        const wrapperHidden = shallow(<ModalDialog />, createMockStore(state
-            .setIn(['modalDialog', 'visible'], false)
-        )).dive();
+    const [cancel, submit] = buttons.childNodes;
 
-        expect(wrapperHidden.childAt(0).hasClass('hidden')).to.equal(true);
-    });
+    t.is(cancel.tagName, 'BUTTON');
+    t.is(cancel.className, 'button-cancel');
+    t.is(cancel.type, 'button');
+    t.is(cancel.disabled, false);
+    t.is(cancel.innerHTML, 'nope.avi');
 
-    it('should render a loading class', () => {
-        const wrapperLoading = shallow(<ModalDialog />, createMockStore(state
-            .setIn(['modalDialog', 'loading'], true)
-        )).dive();
+    t.is(submit.tagName, 'BUTTON');
+    t.is(submit.className, 'button-submit');
+    t.is(submit.type, 'button');
+    t.is(submit.disabled, false);
+    t.is(submit.innerHTML, 'Do it.');
+});
 
-        expect(wrapperLoading.childAt(0).hasClass('loading')).to.equal(true);
-    });
+test('dispatching a cancel action', t => {
+    const { store, container } = getContainer();
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [, , buttons] = dialog.childNodes;
 
-    it('should render a title', () => {
-        expect(wrapper.childAt(0).childAt(0).text()).to.equal('Editing id#100');
-    });
-    it('should render an adding title', () => {
-        const wrapperAdding = shallow(<ModalDialog />, createMockStore(state
-            .setIn(['modalDialog', 'id'], null)
-        )).dive();
+    const [cancel] = buttons.childNodes;
+    const action = aMobileDialogClosed(null);
 
-        expect(wrapperAdding.childAt(0).childAt(0).text()).to.equal('Add item');
-    });
+    t.false(store.isActionDispatched(action));
 
-    it('should render a form list', () => {
-        expect(wrapper.childAt(0).childAt(1).children()).to.have.length(2);
+    fireEvent.click(cancel);
+    t.true(store.isActionDispatched(action));
+});
 
-        expect(wrapper.childAt(0).childAt(1).childAt(0).is(ModalDialogField)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).childAt(0).props()).to.deep.include({
-            field: fromJS({ item: 'blah' }),
-            fieldKey: 0,
-            invalidKeys: fromJS(['xyz'])
-        });
+test('dispatching a submit action', t => {
+    const { store, container } = getContainer();
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [, , buttons] = dialog.childNodes;
 
-        expect(wrapper.childAt(0).childAt(1).childAt(1).is(ModalDialogField)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).childAt(1).props()).to.deep.include({
-            field: fromJS({ item: 'baz' }),
-            fieldKey: 1,
-            invalidKeys: fromJS(['xyz'])
-        });
-    });
+    const [, submit] = buttons.childNodes;
+    const action = aMobileDialogClosed({ page: 'page1' });
 
-    it('should render buttons', () => {
-        expect(wrapper.childAt(0).childAt(2).children()).to.have.length(2);
+    t.false(store.isActionDispatched(action));
 
-        expect(wrapper.childAt(0).childAt(2).childAt(0).is('button.button-cancel')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).childAt(0).props()).to.deep.include({
-            type: 'button',
-            disabled: false
-        });
-        expect(wrapper.childAt(0).childAt(2).childAt(0).text()).to.equal('nope.avi');
+    fireEvent.click(submit);
+    t.true(store.isActionDispatched(action));
+});
 
-        expect(wrapper.childAt(0).childAt(2).childAt(1).is('button.button-submit')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).childAt(1).props()).to.deep.include({
-            type: 'button',
-            disabled: false
-        });
-        expect(wrapper.childAt(0).childAt(2).childAt(1).text()).to.equal('Do it.');
-    });
+test('disabled buttons while loading', t => {
+    const { container } = getContainer({}, state => state
+        .setIn(['modalDialog', 'loading'], true)
+    );
 
-    it('should dispatch cancel action when pressing the cancel button', () => {
-        expect(store.isActionDispatched({ type: FORM_DIALOG_CLOSED })).to.equal(false);
-        wrapper.childAt(0).childAt(2).childAt(0).simulate('click');
-        expect(store.isActionDispatched({ type: FORM_DIALOG_CLOSED })).to.equal(true);
-    });
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [, , buttons] = dialog.childNodes;
 
-    it('should dispatch submit action when pressing the submit button', () => {
-        expect(store.isActionDispatched({ type: FORM_DIALOG_CLOSED, page: 'page1' })).to.equal(false);
-        wrapper.childAt(0).childAt(2).childAt(1).simulate('click');
-        expect(store.isActionDispatched({ type: FORM_DIALOG_CLOSED, page: 'page1' })).to.equal(true);
-    });
+    const [cancel, submit] = buttons.childNodes;
 
-    it('should make the buttons disabled if loading', () => {
-        const wrapperLoading = shallow(<ModalDialog />, createMockStore(state
-            .setIn(['modalDialog', 'loading'], true)
-        )).dive();
-
-        expect(wrapperLoading.childAt(0).childAt(2).childAt(0).props()).to.have.property('disabled', true);
-        expect(wrapperLoading.childAt(0).childAt(2).childAt(1).props()).to.have.property('disabled', true);
-    });
+    t.is(cancel.disabled, true);
+    t.is(submit.disabled, true);
 });
 

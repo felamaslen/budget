@@ -1,47 +1,82 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import ErrorMessages from '../../../src/containers/ErrorMessages';
-import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '../../../src/constants/error';
-import { ERROR_CLOSED } from '../../../src/constants/actions';
+import { Provider } from 'react-redux';
+import React from 'react';
+import ErrorMessages from '~client/containers/ErrorMessages';
+import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '~client/constants/error';
+import { ERROR_CLOSED } from '~client/constants/actions';
 
-describe('<ErrorMessages />', () => {
-    const store = createMockStore(fromJS({
+const getContainer = (customProps = {}) => {
+    const state = fromJS({
         errorMsg: [
             { id: 'f1101', level: ERROR_LEVEL_ERROR, closed: false, text: 'foo' },
             { id: 'g1923', level: ERROR_LEVEL_WARN, closed: true, text: 'bar' }
         ]
-    }));
-
-    const wrapper = shallow(<ErrorMessages />, store).dive();
-
-    it('should render its basic structure', () => {
-        expect(wrapper.is('ul.messages-outer')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
     });
 
-    it('should render each message', () => {
-        expect(wrapper.childAt(0).is('li.message.error')).to.equal(true);
-        expect(wrapper.childAt(0).hasClass('closed')).to.equal(false);
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).is('span')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).text()).to.equal('foo');
+    const store = createMockStore(state);
 
-        expect(wrapper.childAt(1).is('li.message.warn.closed')).to.equal(true);
-        expect(wrapper.childAt(1).text()).to.equal('bar');
-    });
+    const props = {
+        page: 'food',
+        row: 3,
+        col: 2,
+        ...customProps
+    };
 
-    it('should close messages when clicking them', () => {
-        expect(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'f1101' })).to.equal(false);
-        wrapper.childAt(0).simulate('click');
-        expect(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'f1101' })).to.equal(true);
+    const utils = render(
+        <Provider store={store}>
+            <ErrorMessages {...props} />
+        </Provider>
+    );
 
-        expect(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' })).to.equal(false);
-        wrapper.childAt(1).simulate('click');
-        expect(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' })).to.equal(true);
-    });
+    return { store, ...utils };
+};
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [ul] = container.childNodes;
+    t.is(ul.tagName, 'UL');
+    t.is(ul.className, 'messages-outer');
+    t.is(ul.childNodes.length, 2);
+});
+
+test('each message', t => {
+    const { container } = getContainer();
+
+    const [ul] = container.childNodes;
+
+    const [li0, li1] = ul.childNodes;
+
+    t.is(li0.tagName, 'LI');
+    t.is(li0.className, 'message error');
+    t.is(li0.childNodes.length, 1);
+
+    const [span0] = li0.childNodes;
+    t.is(span0.tagName, 'SPAN');
+    t.is(span0.innerHTML, 'foo');
+
+    t.is(li1.tagName, 'LI');
+    t.is(li1.className, 'message warn closed');
+
+    const [span1] = li1.childNodes;
+    t.is(span1.tagName, 'SPAN');
+    t.is(span1.innerHTML, 'bar');
+});
+
+test('closing messages when clicking them', t => {
+    const { container, store } = getContainer();
+
+    t.false(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'f1101' }));
+    fireEvent.click(container.childNodes[0].childNodes[0]);
+    t.true(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'f1101' }));
+
+    t.false(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' }));
+    fireEvent.click(container.childNodes[0].childNodes[1]);
+    t.true(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' }));
 });
 

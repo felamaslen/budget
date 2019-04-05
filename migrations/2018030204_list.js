@@ -1,7 +1,9 @@
 async function up(knex, Promise) {
     await Promise.all([
         knex.schema.createTable('income', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').primary();
             table.integer('uid').unsigned()
@@ -14,7 +16,9 @@ async function up(knex, Promise) {
             table.integer('cost').notNullable();
         }),
         knex.schema.createTable('bills', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').primary();
             table.integer('uid').unsigned()
@@ -27,7 +31,9 @@ async function up(knex, Promise) {
             table.integer('cost').notNullable();
         }),
         knex.schema.createTable('food', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').primary();
             table.integer('uid').unsigned()
@@ -45,7 +51,9 @@ async function up(knex, Promise) {
                 .index();
         }),
         knex.schema.createTable('general', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').primary();
             table.integer('uid').unsigned()
@@ -61,7 +69,9 @@ async function up(knex, Promise) {
                 .index();
         }),
         knex.schema.createTable('social', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').primary();
             table.integer('uid').unsigned()
@@ -77,7 +87,9 @@ async function up(knex, Promise) {
                 .index();
         }),
         knex.schema.createTable('holiday', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').primary();
             table.integer('uid').unsigned()

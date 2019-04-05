@@ -1,12 +1,7 @@
-const { expect } = require('chai');
-const helpers = require('../../../scripts/scrapeFunds/helpers');
+const test = require('ava');
+const helpers = require('~api/scripts/scrapeFunds/helpers');
 
-describe('scrapeFunds helpers', () => {
-    describe('removeWhitespace', () => {
-        it('should remove whitespace', () => {
-            expect(helpers.removeWhitespace(`a\nb\tc\rd e   f   > >>`))
-                .to.equal('abcd e f>>>');
-        });
-    });
+test('removeWhitespace removing whitespace', t => {
+    t.is(helpers.removeWhitespace(`a\nb\tc\rd e   f   > >>`), 'abcd e f>>>');
 });
 

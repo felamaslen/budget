@@ -13,10 +13,6 @@ export default function LineGraphDumb(allProps) {
         ...props
     }), [calc, ...Object.keys(props).map(key => props[key])]);
 
-    if (!lines.size) {
-        return <Graph {...subProps} />;
-    }
-
     const renderedLines = useMemo(() => lines.map(line => (
         <RenderedLine
             key={line.get('key')}
@@ -24,6 +20,10 @@ export default function LineGraphDumb(allProps) {
             {...subProps}
         />
     )), [lines, subProps]);
+
+    if (!lines.size) {
+        return <Graph {...subProps} />;
+    }
 
     let highlightPoint = null;
     if (props.hoverEffect) {

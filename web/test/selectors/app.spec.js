@@ -1,69 +1,62 @@
+import test from 'ava';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import * as S from '../../src/selectors/app';
+import {
+    getNow,
+    getApiKey,
+    getRequestList,
+    getAddData,
+    getContentParamsAnalysis,
+    getLoadedStatus
+} from '~client/selectors/app';
 
-describe('App selectors', () => {
-    describe('getNow', () => {
-        it('should get the current time from the state', () => {
-            expect(S.getNow(fromJS({ now: 'foo' }))).to.equal('foo');
-        });
-    });
+test('getNow gets the current time from the state', t => {
+    t.is(getNow(fromJS({ now: 'foo' })), 'foo');
+});
 
-    describe('apiKey', () => {
-        it('should get the API key from the state', () => {
-            expect(S.getApiKey(fromJS({
-                user: {
-                    apiKey: 'foo'
-                }
-            }))).to.equal('foo');
-        });
-    });
+test('apiKey gets the API key from the state', t => {
+    t.is(getApiKey(fromJS({
+        user: {
+            apiKey: 'foo'
+        }
+    })), 'foo');
+});
 
-    describe('getRequestList', () => {
-        it('should get the requestList and map it to each request', () => {
-            expect(S.getRequestList(fromJS({
-                edit: {
-                    requestList: [{ req: 1, foo: 'bar' }, { req: 2, bar: 'baz' }]
-                }
-            })).toJS()).to.deep.equal([1, 2]);
-        });
-    });
+test('getRequestList gets the requestList and map it to each request', t => {
+    t.deepEqual(getRequestList(fromJS({
+        edit: {
+            requestList: [{ req: 1, foo: 'bar' }, { req: 2, bar: 'baz' }]
+        }
+    })).toJS(), [1, 2]);
+});
 
-    describe('getAddData', () => {
-        it('should get the fields and item', () => {
-            expect(S.getAddData(fromJS({
-                edit: {
-                    addFields: 'foo',
-                    addFieldsString: 'bar'
-                }
-            }))).to.deep.equal({ fields: 'foo', item: 'bar' });
-        });
-    });
+test('getAddData gets the fields and item', t => {
+    t.deepEqual(getAddData(fromJS({
+        edit: {
+            addFields: 'foo',
+            addFieldsString: 'bar'
+        }
+    })), { fields: 'foo', item: 'bar' });
+});
 
-    describe('getContentParamsAnalysis', () => {
-        it('should get the periodKey and groupingKey from state', () => {
-            expect(S.getContentParamsAnalysis(fromJS({
-                other: {
-                    analysis: {
-                        period: 'foo',
-                        grouping: 'bar',
-                        timeIndex: 'baz'
-                    }
-                }
-            }))).to.deep.equal({
-                periodKey: 'foo',
-                groupingKey: 'bar',
+test('getContentParamsAnalysis gets the periodKey and groupingKey from state', t => {
+    t.deepEqual(getContentParamsAnalysis(fromJS({
+        other: {
+            analysis: {
+                period: 'foo',
+                grouping: 'bar',
                 timeIndex: 'baz'
-            });
-        });
+            }
+        }
+    })), {
+        periodKey: 'foo',
+        groupingKey: 'bar',
+        timeIndex: 'baz'
     });
+});
 
-    describe('getLoadedStatus', () => {
-        it('should return the pagesLoaded status from state', () => {
-            expect(S.getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'foo' })).to.equal(true);
-            expect(S.getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'bar' })).to.equal(false);
-            expect(S.getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'baz' })).to.equal(false);
-        });
-    });
+test('getLoadedStatus returns the pagesLoaded status from state', t => {
+    t.is(getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'foo' }), true);
+    t.is(getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'bar' }), false);
+    t.is(getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'baz' }), false);
 });
 

@@ -3,7 +3,8 @@
  */
 
 const { DateTime } = require('luxon');
-const { getNow } = require('../../../modules/time');
+const { sqlConcat } = require('~api/src/common');
+const { getNow } = require('~api/src/modules/time');
 
 const getYearMonth = time => ([time.year, time.month]);
 
@@ -63,7 +64,7 @@ function queryFundPrices(config, db, user) {
         .innerJoin('fund_hash', 'fund_hash.fid', 'fund_cache.fid')
         .innerJoin('fund_cache_time', 'fund_cache_time.cid', 'fund_cache.cid')
         .innerJoin('funds', 'funds.uid', user.uid)
-        .whereRaw('MD5(CONCAT(funds.item, ?)) = fund_hash.hash', config.data.funds.salt)
+        .whereRaw(`MD5(${sqlConcat('funds.item', '?')}) = fund_hash.hash`, config.data.funds.salt)
         .andWhere('fund_cache_time.done', '=', true)
         .groupBy('fund_cache_time.cid')
         .orderBy('fund_cache_time.time', 'desc');

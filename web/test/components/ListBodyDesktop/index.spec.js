@@ -1,55 +1,82 @@
-/* eslint-disable newline-per-chained-call */
-import { List } from 'immutable';
-import chai, { expect } from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-chai.use(sinonChai);
-import React from 'react';
-import { shallow } from 'enzyme';
-import ListBodyDesktop from '../../../src/components/ListBodyDesktop';
-import ListHeadDesktop from '../../../src/components/ListHeadDesktop';
-import AddForm from '../../../src/components/ListBodyDesktop/AddForm';
-import ListRowDesktop from '../../../src/containers/ListRowDesktop';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
 
-describe('<ListBodyDesktop />', () => {
+import '~client-test/browser';
+import memoize from 'fast-memoize';
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import { List as list } from 'immutable';
+import { DateTime } from 'luxon';
+import React from 'react';
+import { Provider } from 'react-redux';
+import reduction from '~client/reduction';
+import ListBodyDesktop from '~client/components/ListBodyDesktop';
+
+const getContainer = memoize((customProps = {}) => {
     const props = {
-        page: 'page1',
-        rowIds: List.of(1, 2),
+        page: 'food',
+        rowIds: list.of(),
         addBtnFocus: false,
-        onDesktopAdd: sinon.spy
+        onDesktopAdd: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<ListBodyDesktop {...props} />);
+    const state = reduction
+        .set('page', 'food')
+        .setIn(['edit', 'add', 'food'], list.of(
+            DateTime.local(),
+            'foo',
+            'bar',
+            302,
+            'baz'
+        ));
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('ul.list-ul')).to.equal(true);
-        expect(wrapper.children()).to.have.length(4);
-    });
+    const store = createMockStore(state);
 
-    it('should render a list head', () => {
-        expect(wrapper.childAt(0).is('li.list-head')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).is(ListHeadDesktop)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).props()).to.have.property('page', 'page1');
-    });
+    const utils = render(
+        <Provider store={store}>
+            <ListBodyDesktop {...props} />
+        </Provider>
+    );
 
-    it('should render an add form', () => {
-        expect(wrapper.childAt(1).is(AddForm)).to.equal(true);
-        expect(wrapper.childAt(1).props()).to.have.property('page', 'page1');
-    });
+    return { store, ...utils };
+});
 
-    it('should render rows', () => {
-        expect(wrapper.childAt(2).is(ListRowDesktop)).to.equal(true);
-        expect(wrapper.childAt(2).props()).to.include({
-            page: 'page1',
-            id: 1
-        });
+test('rendering basic structure', t => {
+    const { container } = getContainer();
 
-        expect(wrapper.childAt(3).is(ListRowDesktop)).to.equal(true);
-        expect(wrapper.childAt(3).props()).to.include({
-            page: 'page1',
-            id: 2
-        });
-    });
+    t.is(container.tagName, 'DIV');
+    t.is(container.childNodes.length, 1);
+
+    const [ul] = container.childNodes;
+    t.is(ul.tagName, 'UL');
+    t.is(ul.childNodes.length, 2);
+    t.is(ul.className, 'list-ul');
+});
+
+test('rendering a list head', t => {
+    const { container } = getContainer();
+    const [ul] = container.childNodes;
+
+    const [listHead] = ul.childNodes;
+
+    t.is(listHead.tagName, 'LI');
+    t.is(listHead.className, 'list-head');
+    t.is(listHead.childNodes.length, 1);
+
+    const [listHeadDesktop] = listHead.childNodes;
+    t.is(listHeadDesktop.tagName, 'DIV');
+    t.is(listHeadDesktop.className, 'list-head-inner noselect');
+});
+
+test('rendering an add form', t => {
+    const { container } = getContainer();
+    const [ul] = container.childNodes;
+
+    const [, addForm] = ul.childNodes;
+
+    t.is(addForm.tagName, 'LI');
+    t.is(addForm.className, 'li-add');
 });
 

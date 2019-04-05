@@ -5,10 +5,10 @@
 import { List as list, Map as map } from 'immutable';
 import { compose } from 'redux';
 import { DateTime } from 'luxon';
-import { PAGES } from '../constants/data';
-import { ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '../constants/error';
-import { IDENTITY, uuid, getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '../helpers/data';
-import { getNow } from '../selectors/app';
+import { PAGES } from '~client/constants/data';
+import { ERROR_MSG_BAD_DATA, ERROR_LEVEL_WARN } from '~client/constants/error';
+import { IDENTITY, uuid, getNullEditable, getAddDefaultValues, getValueForTransmit, resortListRows } from '~client/modules/data';
+import { getNow } from '~client/selectors/app';
 import { rErrorMessageOpen } from './error.reducer';
 import { pushToRequestQueue } from './request-queue.reducer';
 import { applyEdits, applyEditsList } from './editable-updates.reducer';

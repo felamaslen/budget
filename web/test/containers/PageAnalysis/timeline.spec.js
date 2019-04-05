@@ -1,15 +1,18 @@
-/* eslint-disable newline-per-chained-call */
-import { fromJS } from 'immutable';
-import { shallow } from 'enzyme';
-import chai, { expect } from 'chai';
-import chaiEnzyme from 'chai-enzyme';
-chai.use(chaiEnzyme());
-import itEach from 'it-each';
-itEach();
-import React from 'react';
-import Timeline from '../../../src/containers/PageAnalysis/timeline';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
 
-describe('Analysis page <Timeline />', () => {
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { fromJS } from 'immutable';
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
+import React from 'react';
+import reduction from '~client/reduction';
+import Timeline from '~client/containers/PageAnalysis/timeline';
+
+const getContainer = memoize((customProps = {}) => {
     const timeline = [
         [1, 5, 3, 9],
         [93, 10, 24, 40],
@@ -19,32 +22,51 @@ describe('Analysis page <Timeline />', () => {
     ];
 
     const props = {
-        data: fromJS(timeline)
+        data: fromJS(timeline),
+        ...customProps
     };
 
-    const wrapper = shallow(<Timeline {...props} />);
+    const state = reduction;
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.timeline-outer')).to.equal(true);
-        expect(wrapper.children()).to.have.length(5);
-    });
+    const store = createMockStore(state);
 
-    let key = null;
-    before(() => {
-        key = 0;
-    });
+    const utils = render(
+        <Provider store={store}>
+            <Timeline {...props} />
+        </Provider>
+    );
 
-    it.each([
-        { color: 'rgb(211,231,227)' },
-        { color: 'rgb(218,209,209)' },
-        { color: 'rgb(215,213,214)' },
-        { color: 'rgb(204,219,223)' },
-        { color: 'rgb(224,213,211)' }
-    ], 'should render the timeline', ({ color }) => {
-        expect(wrapper.childAt(key).is('span.data-item')).to.equal(true);
-        expect(wrapper.childAt(key)).to.have.style('background-color', color);
+    return { store, ...utils };
+});
 
-        key++;
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'timeline-outer');
+    t.is(div.childNodes.length, 5);
+});
+
+test('timeline items', t => {
+    const { container } = getContainer();
+    const [div] = container.childNodes;
+
+    const items = [
+        { color: 'rgb(211, 231, 227)' },
+        { color: 'rgb(218, 209, 209)' },
+        { color: 'rgb(215, 213, 214)' },
+        { color: 'rgb(204, 219, 223)' },
+        { color: 'rgb(224, 213, 211)' }
+    ];
+
+    items.forEach(({ color }, index) => {
+        const child = div.childNodes[index];
+
+        t.is(child.tagName, 'SPAN');
+        t.is(child.className, 'data-item');
+        t.is(child.style.backgroundColor, color);
     });
 });
 

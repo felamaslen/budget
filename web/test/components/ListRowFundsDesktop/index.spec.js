@@ -1,18 +1,21 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
 import { List as list, Map as map } from 'immutable';
-import { expect } from 'chai';
+import { render } from 'react-testing-library';
 import React from 'react';
-import { shallow } from 'enzyme';
-import GraphFundItem from '../../../src/components/GraphFundItem';
-import ListRowFundsDesktop from '../../../src/components/ListRowFundsDesktop';
-import FundGainInfo from '../../../src/components/FundGainInfo';
+import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
 
-describe('<ListRowFundsDesktop />', () => {
+const getContainer = memoize((customProps = {}) => {
     const props = {
         id: 10,
         row: map({
             cols: list(['foo-fund']),
-            prices: list.of(1, 2, 3),
+            prices: list.of(
+                list.of(1, 10),
+                list.of(2, 11),
+                list.of(3, 10.2)
+            ),
             gain: map({
                 value: 561932,
                 gain: 0.3,
@@ -22,33 +25,52 @@ describe('<ListRowFundsDesktop />', () => {
                 color: list([255, 128, 30])
             }),
             sold: false
-        })
+        }),
+        ...customProps
     };
 
-    const wrapper = shallow(<ListRowFundsDesktop {...props} />);
+    return render(<ListRowFundsDesktop {...props} />);
+});
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('span.fund-extra-info')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
-    });
+test('basic structure', t => {
+    const { container } = getContainer();
 
-    it('should render a fund graph', () => {
-        expect(wrapper.childAt(0).is('span.fund-graph')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).is('div.fund-graph-cont')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).childAt(0).is(GraphFundItem)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).childAt(0).props()).to.deep.include({
-            name: 'foo-fund',
-            sold: false,
-            values: list.of(1, 2, 3),
-            popout: false
-        });
-    });
+    t.is(container.childNodes.length, 1);
+    const [span] = container.childNodes;
 
-    it('should render gain info', () => {
-        expect(wrapper.childAt(1).is(FundGainInfo)).to.equal(true);
-        expect(wrapper.childAt(1).props()).to.have.property('gain', props.row.get('gain'));
-    });
+    t.is(span.tagName, 'SPAN');
+    t.is(span.childNodes.length, 2);
+    t.is(span.className, 'fund-extra-info');
+});
+
+test('fund graph', t => {
+    const { container } = getContainer();
+    const [span] = container.childNodes;
+
+    const [graph] = span.childNodes;
+
+    t.is(graph.tagName, 'SPAN');
+    t.is(graph.className, 'fund-graph');
+    t.is(graph.childNodes.length, 1);
+
+    const [graphCont] = graph.childNodes;
+    t.is(graphCont.tagName, 'DIV');
+    t.is(graphCont.childNodes.length, 1);
+    t.is(graphCont.className, 'fund-graph-cont');
+
+    const [graphItem] = graphCont.childNodes;
+
+    t.is(graphItem.tagName, 'DIV');
+    t.is(graphItem.className, 'graph-container graph-foo-fund');
+});
+
+test('gain info', t => {
+    const { container } = getContainer();
+    const [span] = container.childNodes;
+
+    const [, gainInfo] = span.childNodes;
+
+    t.is(gainInfo.tagName, 'SPAN');
+    t.is(gainInfo.className, 'gain');
 });
 

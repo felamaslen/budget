@@ -4,8 +4,8 @@
 
 import { List as list, Map as map } from 'immutable';
 import { DateTime } from 'luxon';
-import { AVERAGE_MEDIAN, AVERAGE_EXP } from '../constants';
-import { PAGES } from '../constants/data';
+import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
+import { PAGES } from '~client/constants/data';
 
 export const IDENTITY = state => state;
 

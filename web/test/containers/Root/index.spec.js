@@ -1,80 +1,63 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import shallow from '../../shallow-with-store';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
-import Root from '../../../src/containers/Root';
-import ErrorMessages from '../../../src/containers/ErrorMessages';
-import Spinner from '../../../src/containers/Spinner';
-import LoginForm from '../../../src/containers/LoginForm';
-import Content from '../../../src/components/Content';
-import Header from '../../../src/components/Header';
+import Root from '~client/containers/Root';
 
-describe('<Root />', () => {
-    const state = fromJS({
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
         user: {
             uid: 1
         },
+        currentPage: 'general',
+        loading: false,
         loadingApi: false,
+        errorMsg: [],
+        loginForm: {
+            inputStep: 0,
+            visible: false,
+            active: false,
+            values: []
+        },
+        modalDialog: {
+            active: false,
+            visible: false,
+            loading: false
+        },
         edit: {
             requestList: []
         }
     });
 
+    if (customState) {
+        state = customState(state);
+    }
+
     const store = createMockStore(state);
 
     const props = {
         store,
-        foo: 'bar'
+        ...customProps
     };
 
-    const wrapper = shallow(<Root {...props} />, store).dive();
+    const utils = render(
+        <Root {...props} />
+    );
 
-    it('should render a Provider with store', () => {
-        expect(wrapper.is(Provider)).to.equal(true);
-        expect(wrapper.props()).to.have.property('store', store);
-        expect(wrapper.children()).to.have.length(1);
-    });
+    return { store, ...utils };
+};
 
-    it('should render a BrowserRouter', () => {
-        expect(wrapper.childAt(0).is(BrowserRouter)).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-    });
+test('main container', t => {
+    const { container } = getContainer();
 
-    it('should render a main div', () => {
-        expect(wrapper.childAt(0).childAt(0).is('div.main')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).children()).to.have.length(5);
-    });
+    t.is(container.childNodes.length, 1);
 
-    it('should render a Header', () => {
-        expect(wrapper.childAt(0).childAt(0).childAt(0).is(Header)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).childAt(0).props()).to.deep.include({
-            foo: 'bar',
-            loadingApi: false,
-            navActive: true
-        });
-    });
+    const [div] = container.childNodes;
 
-    it('should render an ErrorMessages container', () => {
-        expect(wrapper.childAt(0).childAt(0).childAt(1).is(ErrorMessages)).to.equal(true);
-    });
-
-    it('should render a LoginForm container', () => {
-        expect(wrapper.childAt(0).childAt(0).childAt(2).is(LoginForm)).to.equal(true);
-    });
-
-    it('should render a Content component', () => {
-        expect(wrapper.childAt(0).childAt(0).childAt(3).is(Content)).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).childAt(3).props()).to.deep.include({
-            loggedIn: true
-        });
-    });
-
-    it('should render a Spinner container', () => {
-        expect(wrapper.childAt(0).childAt(0).childAt(4).is(Spinner)).to.equal(true);
-    });
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'main');
+    t.is(div.childNodes.length, 3);
 });
 

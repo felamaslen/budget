@@ -1,4 +1,4 @@
-describe('<InteractiveEditableTransactions />', () => {
-    it('works, but needs improvement', () => null);
-});
+import test from 'ava';
+
+test.todo('works, but needs improvement');
 

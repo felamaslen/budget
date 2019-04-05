@@ -1,6 +1,6 @@
 import { Map as map } from 'immutable';
-import { PAGES } from '../constants/data';
-import { getValueForTransmit } from '../helpers/data';
+import { PAGES } from '~client/constants/data';
+import { getValueForTransmit } from '~client/modules/data';
 
 export function addToRequestQueue(requestList, dataItem, startDate) {
     const page = dataItem.get('page');

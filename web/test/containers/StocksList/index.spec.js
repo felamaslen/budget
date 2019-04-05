@@ -1,287 +1,281 @@
-import '../../browser';
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
 import sinon from 'sinon';
-import { expect } from 'chai';
 import React from 'react';
-import 'react-testing-library/cleanup-after-each';
 import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
-import StocksList from '../../../src/containers/StocksList';
-import { aStocksListRequested } from '../../../src/actions/stocks-list.actions';
+import StocksList from '~client/containers/StocksList';
+import { aStocksListRequested } from '~client/actions/stocks-list.actions';
 
-describe('<StocksList />', () => {
-    const getComponent = () => {
-        const store = createMockStore(fromJS({
-            other: {
-                stocksList: {
-                    loadedList: false,
-                    loadedInitial: false,
-                    stocks: {
-                        'CTY.L': {
-                            code: 'CTY.L',
-                            name: 'City of London Investment Trust',
-                            weight: 0.3,
-                            gain: 0.01,
-                            price: 406.23,
-                            up: false,
-                            down: true
-                        },
-                        'SMT.L': {
-                            code: 'SMT.L',
-                            name: 'Scottish Mortgage Investment Trust',
-                            weight: 0.7,
-                            gain: -0.54,
-                            price: 492.21,
-                            up: false,
-                            down: true
-                        }
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
+        other: {
+            stocksList: {
+                loadedList: false,
+                loadedInitial: false,
+                stocks: {
+                    'CTY.L': {
+                        code: 'CTY.L',
+                        name: 'City of London Investment Trust',
+                        weight: 0.3,
+                        gain: 0.01,
+                        price: 406.23,
+                        up: false,
+                        down: true
                     },
-                    indices: {
-                        'SPX': {
-                            code: 'SPX',
-                            name: 'S&P 500',
-                            gain: 0.65,
-                            up: true,
-                            down: false
-                        },
-                        'FTSE': {
-                            code: 'FTSE',
-                            name: 'FTSE 100',
-                            gain: -0.21,
-                            up: false,
-                            down: true
-                        }
+                    'SMT.L': {
+                        code: 'SMT.L',
+                        name: 'Scottish Mortgage Investment Trust',
+                        weight: 0.7,
+                        gain: -0.54,
+                        price: 492.21,
+                        up: false,
+                        down: true
+                    }
+                },
+                indices: {
+                    'SPX': {
+                        code: 'SPX',
+                        name: 'S&P 500',
+                        gain: 0.65,
+                        up: true,
+                        down: false
                     },
-                    history: [],
-                    lastPriceUpdate: 133,
-                    weightedGain: -0.02,
-                    oldWeightedGain: -0.033
-                }
+                    'FTSE': {
+                        code: 'FTSE',
+                        name: 'FTSE 100',
+                        gain: -0.21,
+                        up: false,
+                        down: true
+                    }
+                },
+                history: [],
+                lastPriceUpdate: 133,
+                weightedGain: -0.02,
+                oldWeightedGain: -0.033
             }
-        }));
+        }
+    });
 
-        const component = (
-            <Provider store={store}>
-                <StocksList enabled />
-            </Provider>
-        );
+    if (customState) {
+        state = customState;
+    }
 
-        return { store, component };
+    const store = createMockStore(state);
+
+    const props = {
+        enabled: true,
+        ...customProps
     };
 
-    const getContainer = () => {
-        const { store, component } = getComponent();
+    const utils = render(
+        <Provider store={store}>
+            <StocksList {...props} />
+        </Provider>
+    );
 
-        const utils = render(component);
+    return { store, ...utils };
+};
 
-        return { ...utils, store };
-    };
+test('basic structure', t => {
+    const { container } = getContainer();
 
-    let clock = null;
+    t.is(container.childNodes.length, 1);
 
-    beforeEach(() => {
-        clock = sinon.useFakeTimers();
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'stocks-list graph-container-outer loading');
+    t.is(div.childNodes.length, 1);
+});
+
+test('requesting a stocks list when it renders', t => {
+    const clock = sinon.useFakeTimers();
+
+    const { store } = getContainer();
+
+    const action = aStocksListRequested();
+
+    t.false(store.isActionDispatched(action));
+
+    clock.tick(1);
+
+    t.true(store.isActionDispatched(action));
+
+    clock.restore();
+});
+
+test('rendering a graph container', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
+
+    t.is(graph.tagName, 'DIV');
+    t.is(graph.className, 'graph-container');
+    t.is(graph.childNodes.length, 2);
+});
+
+test('rendering a stocks list', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
+    const [stocksList] = graph.childNodes;
+
+    t.is(stocksList.tagName, 'UL');
+    t.is(stocksList.className, 'stocks-list-ul');
+    t.is(stocksList.childNodes.length, 2);
+});
+
+test('rendering CTY stock', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
+    const [stocksList] = graph.childNodes;
+
+    const [cty] = stocksList.childNodes;
+
+    t.is(cty.tagName, 'LI');
+    t.is(cty.className, 'up hl-down');
+    t.is(cty.title, 'City of London Investment Trust');
+
+    t.is(cty.childNodes.length, 3);
+    cty.childNodes.forEach(tag => {
+        t.is(tag.tagName, 'SPAN');
     });
 
-    afterEach(() => {
-        clock.restore();
+    const [nameColumn, price, change] = cty.childNodes;
+
+    t.is(nameColumn.className, 'name-column');
+    t.is(price.className, 'price');
+    t.is(change.className, 'change');
+
+    t.is(nameColumn.childNodes.length, 2);
+    nameColumn.childNodes.forEach(tag => {
+        t.is(tag.tagName, 'SPAN');
+    });
+    const [code, title] = nameColumn.childNodes;
+
+    t.is(code.className, 'code');
+    t.is(code.innerHTML, 'CTY.L');
+
+    t.is(title.className, 'title');
+    t.is(title.innerHTML, 'City of London Investment Trust');
+
+    t.is(price.className, 'price');
+    t.is(price.innerHTML, '406.23');
+
+    t.is(change.className, 'change');
+    t.is(change.innerHTML, '0.01%');
+});
+
+test('rendering SMT stock', t => {
+    const { container } = getContainer();
+
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
+    const [stocksList] = graph.childNodes;
+
+    const [, smt] = stocksList.childNodes;
+
+    t.is(smt.tagName, 'LI');
+    t.is(smt.className, 'down hl-down');
+    t.is(smt.title, 'Scottish Mortgage Investment Trust');
+
+    t.is(smt.childNodes.length, 3);
+    smt.childNodes.forEach(tag => {
+        t.is(tag.tagName, 'SPAN');
     });
 
-    it('should render a container', () => {
-        const { container } = getContainer();
+    const [nameColumn, price, change] = smt.childNodes;
 
-        expect(container.childNodes).to.have.length(1);
+    t.is(nameColumn.className, 'name-column');
+    t.is(price.className, 'price');
+    t.is(change.className, 'change');
 
-        const [div] = container.childNodes;
-        expect(div.tagName).to.equal('DIV');
-        expect(div.className).to.equal('stocks-list graph-container-outer loading');
-        expect(div.childNodes).to.have.length(1);
+    t.is(nameColumn.childNodes.length, 2);
+    nameColumn.childNodes.forEach(tag => {
+        t.is(tag.tagName, 'SPAN');
     });
+    const [code, title] = nameColumn.childNodes;
 
-    it('should request a stocks list when it renders', () => {
-        const { store } = getContainer();
+    t.is(code.className, 'code');
+    t.is(code.innerHTML, 'SMT.L');
 
-        const action = aStocksListRequested();
+    t.is(title.className, 'title');
+    t.is(title.innerHTML, 'Scottish Mortgage Investment Trust');
 
-        expect(store.isActionDispatched(action)).to.equal(false);
+    t.is(price.className, 'price');
+    t.is(price.innerHTML, '492.21');
 
-        clock.tick(1);
+    t.is(change.className, 'change');
+    t.is(change.innerHTML, '-0.54%');
+});
 
-        expect(store.isActionDispatched(action)).to.equal(true);
-    });
+test('rendering a stocks sidebar', t => {
+    const { container } = getContainer();
 
-    it('should render a graph container', () => {
-        const { container } = getContainer();
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
 
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
+    const [, sidebar] = graph.childNodes;
 
-        expect(graph.tagName).to.equal('DIV');
-        expect(graph.className).to.equal('graph-container');
-        expect(graph.childNodes).to.have.length(2);
-    });
+    t.is(sidebar.tagName, 'DIV');
+    t.is(sidebar.className, 'stocks-sidebar');
+    t.is(sidebar.childNodes.length, 2);
+});
 
-    it('should render a stocks list', () => {
-        const { container } = getContainer();
+test('rendering a stocks graph', t => {
+    const { container } = getContainer();
 
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-        const [stocksList] = graph.childNodes;
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
 
-        expect(stocksList.tagName).to.equal('UL');
-        expect(stocksList.className).to.equal('stocks-list-ul');
-        expect(stocksList.childNodes).to.have.length(2);
-    });
+    const [, sidebar] = graph.childNodes;
 
-    it('should render CTY stock', () => {
-        const { container } = getContainer();
+    const [stocksGraph] = sidebar.childNodes;
 
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-        const [stocksList] = graph.childNodes;
+    t.is(stocksGraph.tagName, 'DIV');
+    t.is(stocksGraph.className, 'graph-container');
+});
 
-        const [cty] = stocksList.childNodes;
+test('rendering a sidebar list', t => {
+    const { container } = getContainer();
 
-        expect(cty.tagName).to.equal('LI');
-        expect(cty.className).to.equal('up hl-down');
-        expect(cty.title).to.equal('City of London Investment Trust');
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
 
-        expect(cty.childNodes).to.have.length(3);
-        cty.childNodes.forEach(tag => {
-            expect(tag.tagName).to.equal('SPAN');
-        });
+    const [, sidebar] = graph.childNodes;
 
-        const [nameColumn, price, change] = cty.childNodes;
+    const [, sidebarList] = sidebar.childNodes;
 
-        expect(nameColumn.className).to.equal('name-column');
-        expect(price.className).to.equal('price');
-        expect(change.className).to.equal('change');
+    t.is(sidebarList.tagName, 'UL');
+    t.is(sidebarList.childNodes.length, 3);
+});
 
-        expect(nameColumn.childNodes).to.have.length(2);
-        nameColumn.childNodes.forEach(tag => {
-            expect(tag.tagName).to.equal('SPAN');
-        });
-        const [code, title] = nameColumn.childNodes;
+test('rendering an overall gain', t => {
+    const { container } = getContainer();
 
-        expect(code.className).to.equal('code');
-        expect(code.innerHTML).to.equal('CTY.L');
+    const [div] = container.childNodes;
+    const [graph] = div.childNodes;
+    const [, sidebar] = graph.childNodes;
+    const [, sidebarList] = sidebar.childNodes;
+    const [gain] = sidebarList.childNodes;
 
-        expect(title.className).to.equal('title');
-        expect(title.innerHTML).to.equal('City of London Investment Trust');
+    t.is(gain.tagName, 'LI');
+    t.is(gain.className, 'down hl-up');
 
-        expect(price.className).to.equal('price');
-        expect(price.innerHTML).to.equal('406.23');
+    t.is(gain.childNodes.length, 2);
 
-        expect(change.className).to.equal('change');
-        expect(change.innerHTML).to.equal('0.01%');
-    });
+    const [name, change] = gain.childNodes;
 
-    it('should render SMT stock', () => {
-        const { container } = getContainer();
+    t.is(name.className, 'name-column');
+    t.is(name.innerHTML, 'Overall');
 
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-        const [stocksList] = graph.childNodes;
-
-        const [, smt] = stocksList.childNodes;
-
-        expect(smt.tagName).to.equal('LI');
-        expect(smt.className).to.equal('down hl-down');
-        expect(smt.title).to.equal('Scottish Mortgage Investment Trust');
-
-        expect(smt.childNodes).to.have.length(3);
-        smt.childNodes.forEach(tag => {
-            expect(tag.tagName).to.equal('SPAN');
-        });
-
-        const [nameColumn, price, change] = smt.childNodes;
-
-        expect(nameColumn.className).to.equal('name-column');
-        expect(price.className).to.equal('price');
-        expect(change.className).to.equal('change');
-
-        expect(nameColumn.childNodes).to.have.length(2);
-        nameColumn.childNodes.forEach(tag => {
-            expect(tag.tagName).to.equal('SPAN');
-        });
-        const [code, title] = nameColumn.childNodes;
-
-        expect(code.className).to.equal('code');
-        expect(code.innerHTML).to.equal('SMT.L');
-
-        expect(title.className).to.equal('title');
-        expect(title.innerHTML).to.equal('Scottish Mortgage Investment Trust');
-
-        expect(price.className).to.equal('price');
-        expect(price.innerHTML).to.equal('492.21');
-
-        expect(change.className).to.equal('change');
-        expect(change.innerHTML).to.equal('-0.54%');
-    });
-
-    it('should render a stocks sidebar', () => {
-        const { container } = getContainer();
-
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-
-        const [, sidebar] = graph.childNodes;
-
-        expect(sidebar.tagName).to.equal('DIV');
-        expect(sidebar.className).to.equal('stocks-sidebar');
-        expect(sidebar.childNodes).to.have.length(2);
-    });
-
-    it('should render a stocks graph', () => {
-        const { container } = getContainer();
-
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-
-        const [, sidebar] = graph.childNodes;
-
-        const [stocksGraph] = sidebar.childNodes;
-
-        expect(stocksGraph.tagName).to.equal('DIV');
-        expect(stocksGraph.className).to.equal('graph-container');
-    });
-
-    it('should render a sidebar list', () => {
-        const { container } = getContainer();
-
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-
-        const [, sidebar] = graph.childNodes;
-
-        const [, sidebarList] = sidebar.childNodes;
-
-        expect(sidebarList.tagName).to.equal('UL');
-        expect(sidebarList.childNodes).to.have.length(3);
-    });
-
-    it('should render an overall gain', () => {
-        const { container } = getContainer();
-
-        const [div] = container.childNodes;
-        const [graph] = div.childNodes;
-        const [, sidebar] = graph.childNodes;
-        const [, sidebarList] = sidebar.childNodes;
-        const [gain] = sidebarList.childNodes;
-
-        expect(gain.tagName).to.equal('LI');
-        expect(gain.className).to.equal('down hl-up');
-
-        expect(gain.childNodes).to.have.length(2);
-
-        const [name, change] = gain.childNodes;
-
-        expect(name.className).to.equal('name-column');
-        expect(name.innerHTML).to.equal('Overall');
-
-        expect(change.className).to.equal('change');
-        expect(change.innerHTML).to.equal('-0.02%');
-    });
+    t.is(change.className, 'change');
+    t.is(change.innerHTML, '-0.02%');
 });
 

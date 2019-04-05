@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { select, all, takeLatest, put, call } from 'redux-saga/effects';
-import { SETTINGS_LOADED, USER_LOGGED_OUT, LOGIN_FORM_INPUTTED, KEY_PRESSED } from '../constants/actions';
-import { API_PREFIX, LOGIN_INPUT_LENGTH } from '../constants/data';
+import { SETTINGS_LOADED, USER_LOGGED_OUT, LOGIN_FORM_INPUTTED, KEY_PRESSED } from '~client/constants/actions';
+import { API_PREFIX, LOGIN_INPUT_LENGTH } from '~client/constants/data';
 import { aLoginFormResponseReceived } from '../actions/login.actions';
 import { openTimedMessage } from './error.saga';
 

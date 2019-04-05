@@ -1,6 +1,6 @@
 import { List as list } from 'immutable';
-import { GRAPH_CURVINESS } from '../../constants/graph';
-import { timeSeriesTicks } from '../../helpers/date';
+import { GRAPH_CURVINESS } from '~client/constants/graph';
+import { timeSeriesTicks } from '~client/modules/date';
 
 export const genPixelCompute = props => {
     const {

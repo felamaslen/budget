@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
-import Editable from '../../containers/Editable';
+import Editable from '~client/containers/Editable';
 
 export default function ListRowCellMobile({ page, colKey, row, id, column }) {
     const value = row.getIn(['cols', colKey]);

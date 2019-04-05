@@ -1,38 +1,50 @@
-import { expect } from 'chai';
+import test from 'ava';
 
-import * as A from '../../src/actions/content.actions';
-import * as C from '../../src/constants/actions';
+import {
+    aContentRequested,
+    aContentLoaded,
+    aContentBlockHovered,
+    aPageSet
+} from '~client/actions/content.actions';
 
-describe('content.actions', () => {
-    describe('aContentRequested', () => {
-        it('should return CONTENT_REQUESTED with req object', () => expect(A.aContentRequested({
-            foo: 'bar'
-        })).to.deep.equal({
-            type: C.CONTENT_REQUESTED,
-            foo: 'bar'
-        }));
+import {
+    CONTENT_REQUESTED,
+    CONTENT_LOADED,
+    CONTENT_BLOCK_HOVERED,
+    PAGE_SET
+} from '~client/constants/actions';
+
+test('aContentRequested returns CONTENT_REQUESTED with req object', t => {
+    t.deepEqual(aContentRequested({
+        foo: 'bar'
+    }), {
+        type: CONTENT_REQUESTED,
+        foo: 'bar'
     });
-    describe('aContentLoaded', () => {
-        it('should return CONTENT_LOADED with res object', () => expect(A.aContentLoaded({
-            foo: 'bar'
-        })).to.deep.equal({
-            type: C.CONTENT_LOADED,
-            foo: 'bar'
-        }));
+});
+
+test('aContentLoaded returns CONTENT_LOADED with res object', t => {
+    t.deepEqual(aContentLoaded({
+        foo: 'bar'
+    }), {
+        type: CONTENT_LOADED,
+        foo: 'bar'
     });
-    describe('aContentBlockHovered', () => {
-        it('should return CONTENT_BLOCK_HOVERED with req object', () => expect(A.aContentBlockHovered({
-            foo: 'bar'
-        })).to.deep.equal({
-            type: C.CONTENT_BLOCK_HOVERED,
-            foo: 'bar'
-        }));
+});
+
+test('aContentBlockHovered returns CONTENT_BLOCK_HOVERED with req object', t => {
+    t.deepEqual(aContentBlockHovered({
+        foo: 'bar'
+    }), {
+        type: CONTENT_BLOCK_HOVERED,
+        foo: 'bar'
     });
-    describe('aPageSet', () => {
-        it('should return PAGE_SET with page', () => expect(A.aPageSet('general')).to.deep.equal({
-            type: C.PAGE_SET,
-            page: 'general'
-        }));
+});
+
+test('aPageSet returns PAGE_SET with page', t => {
+    t.deepEqual(aPageSet('general'), {
+        type: PAGE_SET,
+        page: 'general'
     });
 });
 

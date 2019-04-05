@@ -1,22 +1,19 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
 import { fromJS } from 'immutable';
-import '../../browser';
-import { expect } from 'chai';
-import itEach from 'it-each';
-itEach();
-import { shallow } from 'enzyme';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
 import React from 'react';
-import ArrowLine from '../../../src/components/Graph/ArrowLine';
-import Arrow from '../../../src/components/Arrow';
+import ArrowLine from '~client/components/Graph/ArrowLine';
 
-describe('<ArrowLine />', () => {
-    const points = [
-        [0, 5],
-        [1, 4.5],
-        [2, 2.3],
-        [3, -1.2]
-    ];
+const points = [
+    [0, 5],
+    [1, 4.5],
+    [2, 2.3],
+    [3, -1.2]
+];
 
+const getContainer = memoize(() => {
     const props = {
         data: fromJS(points),
         color: 'black',
@@ -26,17 +23,35 @@ describe('<ArrowLine />', () => {
         pixY: yv => yv * 10 + 2
     };
 
-    const wrapper = shallow(<ArrowLine {...props} />);
+    return render(<svg>
+        <ArrowLine {...props} />
+    </svg>);
+});
 
-    it('should render a list of arrow SVG paths', () => {
-        expect(wrapper.is('g')).to.equal(true);
-        expect(wrapper.children()).to.have.length(4);
-    });
+test('rendering a list of arrow SVG paths', t => {
+    const { container } = getContainer();
+    t.is(container.childNodes.length, 1);
+    const [svg] = container.childNodes;
+    t.is(svg.childNodes.length, 1);
+    const [g] = svg.childNodes;
 
-    it.each(points, 'should render the paths as Arrow components', ([index]) => {
-        const child = wrapper.childAt(index);
+    t.is(g.tagName, 'g');
+    t.is(g.childNodes.length, points.length);
+});
 
-        expect(child.is(Arrow)).to.equal(true);
+test('rendering paths as Arrow components', t => {
+    t.plan(points.length * 2);
+
+    const { container } = getContainer();
+    const [svg] = container.childNodes;
+    const [g] = svg.childNodes;
+
+    points.forEach((point, index) => {
+        const child = g.childNodes[index];
+        t.is(child.tagName, 'g');
+
+        const [path] = child.childNodes;
+        t.is(path.tagName, 'path');
     });
 });
 

@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import FormField from '../../containers/FormField';
+import FormField from '~client/containers/FormField';
 
 export default function ModalDialogField({ field, fieldKey, invalidKeys }) {
     const invalid = invalidKeys.includes(fieldKey);

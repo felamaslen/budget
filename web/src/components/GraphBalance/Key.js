@@ -1,10 +1,10 @@
 import React from 'react';
 import BaseKey from '../GraphCashFlow/BaseKey';
-import { FONT_GRAPH_KEY } from '../../constants/graph';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import {
     COLOR_DARK, COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS
-} from '../../constants/colors';
-import { rgba } from '../../helpers/color';
+} from '~client/constants/colors';
+import { rgba } from '~client/modules/color';
 
 export default function Key(props) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;

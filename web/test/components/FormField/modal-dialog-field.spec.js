@@ -1,72 +1,99 @@
-import '../../browser';
-import { Map as map, List as list } from 'immutable';
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
-import React from 'react';
-import ModalDialogField from '../../../src/components/FormField/modal-dialog-field';
-import FormField from '../../../src/containers/FormField';
-import { TransactionsList } from '../../../src/helpers/data';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
 
-describe('<ModalDialogField />', () => {
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { fromJS, Map as map, List as list } from 'immutable';
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
+import React from 'react';
+import ModalDialogField from '~client/components/FormField/modal-dialog-field';
+import { TransactionsList } from '~client/modules/data';
+
+const getModalDialogField = memoize((customProps = {}) => {
+    const state = fromJS({
+    });
+
+    const store = createMockStore(state);
+
     const props = {
         fieldKey: 3,
         field: map({
             item: 'foo',
             value: 'bar'
         }),
-        invalidKeys: list.of()
+        invalidKeys: list.of(),
+        ...customProps
     };
 
-    it('should render its basic structure', () => {
-        const wrapper = shallow(<ModalDialogField {...props} />);
+    const utils = render((
+        <Provider store={store}>
+            <ModalDialogField {...props} />
+        </Provider>
+    ));
 
-        expect(wrapper.is('li.form-row.foo')).to.equal(true);
-        expect(wrapper.hasClass('invalid')).to.equal(false);
-        expect(wrapper.children()).to.have.length(2);
-    });
-
-    it('should render a label', () => {
-        const wrapper = shallow(<ModalDialogField {...props} />);
-
-        expect(wrapper.childAt(0).is('span.form-label')).to.equal(true);
-        expect(wrapper.childAt(0).text()).to.equal('foo');
-    });
-
-    it('should render a form field container', () => {
-        const wrapper = shallow(<ModalDialogField {...props} />);
-
-        const formField = wrapper.childAt(1);
-
-        expect(formField.is(FormField)).to.equal(true);
-        expect(formField.props()).to.deep.equal({
-            fieldKey: 3,
-            item: 'foo',
-            value: 'bar'
-        });
-    });
-
-    it('should render an invalid class', () => {
-        const wrapper = shallow(<ModalDialogField {...props} invalidKeys={list([3])} />);
-
-        expect(wrapper.hasClass('invalid')).to.equal(true);
-    });
-
-    describe('for transactions fields', () => {
-        it('should render an inner div', () => {
-            const trProps = {
-                ...props,
-                field: map({
-                    item: 'transactions',
-                    value: new TransactionsList([])
-                })
-            };
-
-            const wrapper = shallow(<ModalDialogField {...trProps} />);
-
-            expect(wrapper.children()).to.have.length(1);
-            expect(wrapper.childAt(0).is('div.inner')).to.equal(true);
-
-            expect(wrapper.childAt(0).children()).to.have.length(2);
-        });
-    });
+    return { ...utils, store };
 });
+
+test('basic structure', t => {
+    const { container } = getModalDialogField();
+
+    t.is(container.childNodes.length, 1);
+    const [li] = container.childNodes;
+    t.is(li.tagName, 'LI');
+    t.is(li.className, 'form-row foo');
+    t.is(li.childNodes.length, 2);
+});
+
+test('label', t => {
+    const { container } = getModalDialogField();
+    const [li] = container.childNodes;
+
+    const [label] = li.childNodes;
+    t.is(label.tagName, 'SPAN');
+    t.is(label.className, 'form-label');
+    t.is(label.innerHTML, 'foo');
+});
+
+test('form field container', t => {
+    const { container } = getModalDialogField();
+    const [li] = container.childNodes;
+
+    const [, formField] = li.childNodes;
+
+    t.is(formField.tagName, 'DIV');
+    const [input] = formField.childNodes;
+    t.is(input.tagName, 'INPUT');
+});
+
+test('invalid class', t => {
+    const { container } = getModalDialogField({
+        invalidKeys: list.of(3)
+    });
+
+    const [li] = container.childNodes;
+
+    t.is(li.className, 'form-row foo invalid');
+});
+
+test('transactions fields', t => {
+    const { container } = getModalDialogField({
+        field: map({
+            item: 'transactions',
+            value: new TransactionsList([])
+        })
+    });
+
+    t.is(container.childNodes.length, 1);
+    const [li] = container.childNodes;
+
+    t.is(li.childNodes.length, 1);
+    const [div] = li.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.childNodes.length, 2);
+    t.is(div.className, 'inner');
+});
+

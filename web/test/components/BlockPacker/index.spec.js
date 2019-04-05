@@ -1,78 +1,125 @@
-/* eslint-disable no-unused-expressions */
-import '../../browser';
-import { List as list } from 'immutable';
-import { expect } from 'chai';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
+
+import '~client-test/browser';
+import { fromJS } from 'immutable';
+import memoize from 'fast-memoize';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
+import BlockPacker from '~client/components/BlockPacker';
 
-import BlockPacker from '../../../src/components/BlockPacker';
-
-describe('<BlockPacker />', () => {
-    const onClick = () => null;
-    let hovered = null;
-    const onHover = (...args) => {
-        hovered = args;
-    };
-
+const getBlockPacker = memoize((customProps = {}) => {
     const props = {
         page: 'page1',
-        blocks: list([1, 2, 3]),
+        blocks: fromJS([
+            {
+                width: 10.4,
+                height: 11.5,
+                value: 5,
+                bits: [
+                    {
+                        name: 'foo',
+                        value: 5.1,
+                        color: 'black',
+                        blocks: [
+                            {
+                                bits: [
+                                    { name: 'foo1', value: 3 }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        name: 'bar',
+                        value: 5.2,
+                        color: 'red',
+                        blocks: [
+                            {
+                                bits: [
+                                    { name: 'bar1', value: 4 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]),
         activeBlock: [0, 1],
         deepBlock: 'foo',
         status: 'bar',
-        onClick,
-        onHover
+        onClick: () => null,
+        onHover: () => null,
+        ...customProps
     };
 
-    const wrapper = shallow(<BlockPacker {...props} />);
+    return render(<BlockPacker {...props} />);
+});
 
-    it('should render its basic structure', () => {
-        expect(wrapper.name()).to.equal('div');
-        expect(wrapper.hasClass('block-view')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
+test('basic structure', t => {
+    const { container } = getBlockPacker();
 
-        const blockTreeOuter = wrapper.childAt(0);
-        expect(blockTreeOuter.name()).to.equal('div');
-        expect(blockTreeOuter.hasClass('block-tree-outer')).to.equal(true);
+    t.is(container.tagName, 'DIV');
+    t.is(container.childNodes.length, 1);
 
-        const statusBarOuter = wrapper.childAt(1);
-        expect(statusBarOuter.name()).to.equal('div');
-        expect(statusBarOuter.hasClass('status-bar')).to.equal(true);
-    });
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'block-view');
+    t.is(div.childNodes.length, 2);
+});
 
-    it('should render blocks', () => {
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0)
-            .name()).to.equal('Blocks');
-    });
+test('outer block tree', t => {
+    const { container } = getBlockPacker();
+    const [div] = container.childNodes;
+    const [blockTreeOuter] = div.childNodes;
 
-    it('should render a status bar', () => {
-        expect(wrapper.childAt(1).children()).to.have.length(1);
+    t.is(blockTreeOuter.tagName, 'DIV');
+    t.is(blockTreeOuter.className, 'block-tree-outer');
+});
 
-        const inner = wrapper.childAt(1).childAt(0);
-        expect(inner.name()).to.equal('span');
-        expect(inner.hasClass('inner')).to.equal(true);
-        expect(inner.text()).to.equal('bar');
-    });
+test('status bar', t => {
+    const { container } = getBlockPacker();
+    const [div] = container.childNodes;
+    const [, statusBarOuter] = div.childNodes;
 
-    it('should run onHover with null values on mouseout / touchend', () => {
-        wrapper.simulate('mouseout');
+    t.is(statusBarOuter.tagName, 'DIV');
+    t.is(statusBarOuter.className, 'status-bar');
 
-        expect(hovered).to.deep.equal([null, null]);
-        hovered = null;
+    t.is(statusBarOuter.childNodes.length, 1);
 
-        wrapper.simulate('touchend');
+    const [inner] = statusBarOuter.childNodes;
 
-        expect(hovered).to.deep.equal([null, null]);
-        hovered = null;
-    });
+    t.is(inner.tagName, 'SPAN');
+    t.is(inner.className, 'inner');
+    t.is(inner.innerHTML, 'bar');
+});
 
-    it('should not render blocks if blocks is null', () => {
-        const nullProps = { ...props, blocks: null };
+test('blocks', t => {
+    const { container } = getBlockPacker();
+    const [div] = container.childNodes;
+    const [blockTreeOuter] = div.childNodes;
 
-        const nullWrapper = shallow(<BlockPacker {...nullProps} />);
+    t.is(blockTreeOuter.childNodes.length, 1);
+});
 
-        expect(nullWrapper.childAt(0).children()).to.have.length(0);
-    });
+test('running onHover, with null values on mouseout / touchend', t => {
+    const onHover = t.context.stub();
+    const { container } = getBlockPacker({ onHover });
+
+    const [div] = container.childNodes;
+
+    t.deepEqual(onHover.calls, []);
+    fireEvent.mouseOut(div);
+
+    t.is(onHover.calls.length, 1);
+    t.deepEqual(onHover.calls[0].arguments, [null, null]);
+});
+
+test('not rendering blocks if blocks is null', t => {
+    const { container } = getBlockPacker({ blocks: null });
+    const [div] = container.childNodes;
+    const [blocks] = div.childNodes;
+
+    t.is(blocks.childNodes.length, 0);
 });
 

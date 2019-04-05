@@ -1,7 +1,9 @@
 function up(knex, Promise) {
     return Promise.all([
         knex.schema.createTable('balance', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').unsigned()
                 .primary();

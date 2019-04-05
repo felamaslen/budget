@@ -1,58 +1,70 @@
-import '../../browser';
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import ListAddEditItem from '../../../src/containers/Editable/list-item';
-import Editable from '../../../src/containers/Editable';
+import { Provider } from 'react-redux';
+import React from 'react';
+import ListAddEditItem from '~client/containers/Editable/list-item';
 
-describe('<ListAddEditItem />', () => {
+const getContainer = (customProps = {}) => {
+    const state = fromJS({
+        edit: {
+            add: {
+                food: ['foo', 'bar', 'baz', 'bak', 'ban']
+            },
+            row: 2,
+            col: 4
+        }
+    });
+
+    const store = createMockStore(state);
+
     const props = {
         page: 'food',
         row: 3,
-        col: 2
+        col: 2,
+        ...customProps
     };
 
-    const wrapper = shallow(<ListAddEditItem {...props} />, createMockStore(fromJS({
-        edit: {
-            add: {
-                food: ['foo', 'bar', 'baz', 'bak']
-            },
-            row: 2,
-            col: 5
-        }
-    }))).dive();
+    const utils = render(
+        <Provider store={store}>
+            <ListAddEditItem {...props} />
+        </Provider>
+    );
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('span.category')).to.equal(true);
-        expect(wrapper.hasClass('active')).to.equal(false);
+    return { store, ...utils };
+};
 
-        expect(wrapper.children()).to.have.length(1);
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [span] = container.childNodes;
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'category');
+    t.is(span.childNodes.length, 1);
+});
+
+test('editable', t => {
+    const { container } = getContainer();
+    const [span] = container.childNodes;
+    const [editable] = span.childNodes;
+
+    t.is(editable.tagName, 'SPAN');
+    t.is(editable.className, 'editable editable-category');
+});
+
+test('rendering as active', t => {
+    const { container } = getContainer({
+        row: 2,
+        col: 4
     });
 
-    it('should render an <Editable /> item', () => {
-        expect(wrapper.childAt(0).is(Editable)).to.equal(true);
-        expect(wrapper.childAt(0).props()).to.deep.include({
-            row: 3,
-            col: 2,
-            value: 'baz',
-            item: 'category'
-        });
-    });
+    const [span] = container.childNodes;
+    t.is(span.className, 'shop active');
 
-    it('should render as active, if active', () => {
-        const wrapperActive = shallow(<ListAddEditItem {...props} />, createMockStore(fromJS({
-            edit: {
-                add: {
-                    food: ['foo', 'bar', 'baz', 'bak']
-                },
-                row: 3,
-                col: 2
-            }
-        }))).dive();
-
-        expect(wrapperActive.hasClass('active')).to.equal(true);
-    });
+    const [editable] = span.childNodes;
+    t.is(editable.className, 'editable editable-shop');
 });
 

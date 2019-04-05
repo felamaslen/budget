@@ -1,43 +1,63 @@
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
-import React from 'react';
-import EditableInactive from '../../../src/containers/Editable/editable-inactive';
-import { formatValue } from '../../../src/containers/Editable/format';
+import ava from 'ava';
+import ninos from 'ninos';
+const test = ninos(ava);
 
-describe('<EditableInactive />', () => {
-    let activated = false;
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { render, fireEvent } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import reduction from '~client/reduction';
+import { Provider } from 'react-redux';
+import React from 'react';
+import EditableInactive from '~client/containers/Editable/editable-inactive';
+import { formatValue } from '~client/containers/Editable/format';
+
+const getContainer = memoize((customProps = {}) => {
     const props = {
         item: 'foo',
         value: 'bar',
-        onActivate: () => {
-            activated = true;
-        }
+        onActivate: () => null,
+        ...customProps
     };
 
-    beforeEach(() => {
-        activated = false;
+    const state = reduction;
+
+    const store = createMockStore(state);
+
+    const utils = render(
+        <Provider store={store}>
+            <EditableInactive {...props} />
+        </Provider>
+    );
+
+    return { store, ...utils };
+});
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+    const [span] = container.childNodes;
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'editable editable-foo');
+});
+
+test('rendering its formatted value', t => {
+    const { container } = getContainer();
+    const [span] = container.childNodes;
+
+    t.is(span.innerHTML, formatValue('foo', 'bar'));
+});
+
+test('activation', t => {
+    const onActivate = t.context.stub();
+    const { container } = getContainer({
+        onActivate
     });
+    const [span] = container.childNodes;
 
-    it('should render its basic structure', () => {
-        const wrapper = shallow(<EditableInactive {...props} />);
-
-        expect(wrapper.is('span.editable.editable-foo')).to.equal(true);
-    });
-
-    it('should render its formatted value', () => {
-        const wrapper = shallow(<EditableInactive {...props} />);
-
-        expect(wrapper.text()).to.equal(formatValue('foo', 'bar'));
-    });
-
-    it('should activate on mousedown', () => {
-        const wrapper = shallow(<EditableInactive {...props} />);
-
-        expect(activated).to.equal(false);
-
-        wrapper.simulate('mousedown');
-
-        expect(activated).to.equal(true);
-    });
+    t.is(onActivate.calls.length, 0);
+    fireEvent.mouseDown(span);
+    t.is(onActivate.calls.length, 1);
 });
 

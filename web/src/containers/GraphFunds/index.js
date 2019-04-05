@@ -6,13 +6,13 @@ import './style.scss';
 import { List as list, OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
 import { DateTime } from 'luxon';
-import { aFundsGraphClicked, aFundsGraphLineToggled, aFundsGraphPeriodChanged } from '../../actions/graph.actions';
-import { makeGetGraphProps } from '../../selectors/funds/graph';
+import { aFundsGraphClicked, aFundsGraphLineToggled, aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
+import { makeGetGraphProps } from '~client/selectors/funds/graph';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import LineGraph from '../../components/Graph/LineGraph';
-import { getTickSize } from '../../helpers/format';
+import LineGraph from '~client/components/Graph/LineGraph';
+import { getTickSize } from '~client/modules/format';
 import {
     GRAPH_FUNDS_WIDTH,
     GRAPH_FUNDS_HEIGHT,
@@ -20,10 +20,10 @@ import {
     GRAPH_FUNDS_NUM_TICKS,
     GRAPH_FUNDS_PERIODS,
     GRAPH_FUNDS_MODES
-} from '../../constants/graph';
-import styles from '../../constants/styles.json';
-import { rgba } from '../../helpers/color';
-import { formatValue } from '../../helpers/funds';
+} from '~client/constants/graph';
+import styles from '~client/constants/styles.json';
+import { rgba } from '~client/modules/color';
+import { formatValue } from '~client/modules/funds';
 import Axes from './Axes';
 
 function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {

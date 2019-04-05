@@ -1,41 +1,30 @@
-/**
- * user API spec
- */
+const test = require('ava');
+const {
+    getNewBadLoginCount
+} = require('~api/src/routes/user');
 
-const chai = require('chai');
-chai.use(require('sinon-chai'));
-const { expect } = chai;
-require('it-each')();
 
-const user = require('../../../src/routes/user');
+test('getNewBadLoginCount increments the counter for recent logs', t => {
+    t.is(getNewBadLoginCount(1, false, false, false), 2);
+    t.is(getNewBadLoginCount(2, false, false, false), 3);
+});
 
-describe('/api/user', () => {
-    describe('getNewBadLoginCount', () => {
-        // note that this function is run if and only if a bad login is made
+test('getNewBadLoginCount returns the current counter for active bans', t => {
+    t.is(getNewBadLoginCount(1, true, false, false), 1);
+    t.is(getNewBadLoginCount(5, true, false, false), 5);
+});
+test('getNewBadLoginCount returns the current counter for active bans despite an expired log', t => {
+    t.is(getNewBadLoginCount(1, true, true, false), 1);
+    t.is(getNewBadLoginCount(5, true, true, false), 5);
+});
 
-        it('should increment the counter for recent logs', () => {
-            expect(user.getNewBadLoginCount(1, false, false, false)).to.equal(2);
-            expect(user.getNewBadLoginCount(2, false, false, false)).to.equal(3);
-        });
+test('getNewBadLoginCount resets the counter for expired logs with no ban', t => {
+    t.is(getNewBadLoginCount(4, false, true, false), 1);
+    t.is(getNewBadLoginCount(1, false, true, false), 1);
+});
 
-        it('should return the current counter for active bans', () => {
-            expect(user.getNewBadLoginCount(1, true, false, false)).to.equal(1);
-            expect(user.getNewBadLoginCount(5, true, false, false)).to.equal(5);
-        });
-        it('should return the current counter for active bans despite an expired log', () => {
-            expect(user.getNewBadLoginCount(1, true, true, false)).to.equal(1);
-            expect(user.getNewBadLoginCount(5, true, true, false)).to.equal(5);
-        });
-
-        it('should reset the counter for expired logs with no ban', () => {
-            expect(user.getNewBadLoginCount(4, false, true, false)).to.equal(1);
-            expect(user.getNewBadLoginCount(1, false, true, false)).to.equal(1);
-        });
-
-        it('should reset the counter for expired bans', () => {
-            expect(user.getNewBadLoginCount(4, true, null, true)).to.equal(1);
-            expect(user.getNewBadLoginCount(1, true, null, true)).to.equal(1);
-        });
-    });
+test('getNewBadLoginCount resets the counter for expired bans', t => {
+    t.is(getNewBadLoginCount(4, true, null, true), 1);
+    t.is(getNewBadLoginCount(1, true, null, true), 1);
 });
 

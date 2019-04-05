@@ -18,5 +18,8 @@
 - Write unit tests for client [IN PROGRESS]
 - Use logger function instead of console.log [DONE]
 - Remove ImmutableJS
-- Relative imports
-- Replace enzyme with react-testing-library
+- Relative imports [DONE]
+- Replace enzyme with react-testing-library [DONE]
+- Replace mocha with ava [DONE]
+- Fix scrolling on list and analysis pages
+- Implement ES6 modules on server side

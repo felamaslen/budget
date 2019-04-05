@@ -1,72 +1,41 @@
-require('dotenv').config();
+const test = require('ava');
+const middleware = require('~api/src/middleware/multipleUpdateRequest');
 
-const { expect } = require('chai');
+test('getOverallStatusCode handling 5xx codes', t => {
+    t.is(middleware.getOverallStatusCode([200, 403, 503, 500].map(
+        statusCode => ({ statusCode })
+    )), 500);
 
-const middleware = require('../../src/middleware/multipleUpdateRequest');
+    t.is(middleware.getOverallStatusCode([200, 403, 503].map(
+        statusCode => ({ statusCode })
+    )), 503);
+});
 
-describe('Multiple update request middleware', () => {
-    describe('getOverallStatusCode', () => {
-        it('should handle 5xx codes', () => {
-            expect(middleware.getOverallStatusCode([200, 403, 503, 500].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(500);
+test('getOverallStatusCode handling 4xx codes', t => {
+    t.is(middleware.getOverallStatusCode([200, 301, 403, 410].map(
+        statusCode => ({ statusCode })
+    )), 400);
 
-            expect(middleware.getOverallStatusCode([200, 403, 503].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(503);
-        });
+    t.is(middleware.getOverallStatusCode([200, 301, 403, 400].map(
+        statusCode => ({ statusCode })
+    )), 400);
 
-        it('should handle 4xx codes', () => {
-            expect(middleware.getOverallStatusCode([200, 301, 403, 410].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(400);
+    t.is(middleware.getOverallStatusCode([200, 301, 403].map(
+        statusCode => ({ statusCode })
+    )), 403);
+});
 
-            expect(middleware.getOverallStatusCode([200, 301, 403, 400].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(400);
+test('getOverallStatusCode handling 2xx codes', t => {
+    t.is(middleware.getOverallStatusCode([200, 201].map(
+        statusCode => ({ statusCode })
+    )), 200);
 
-            expect(middleware.getOverallStatusCode([200, 301, 403].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(403);
-        });
+    t.is(middleware.getOverallStatusCode([200, 200, 200].map(
+        statusCode => ({ statusCode })
+    )), 200);
 
-        it('should handle 2xx codes', () => {
-            expect(middleware.getOverallStatusCode([200, 201].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(200);
-
-            expect(middleware.getOverallStatusCode([200, 200, 200].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(200);
-
-            expect(middleware.getOverallStatusCode([201, 201].map(
-                statusCode => {
-                    return { statusCode };
-                }
-            )))
-                .to.equal(201);
-        });
-    });
+    t.is(middleware.getOverallStatusCode([201, 201].map(
+        statusCode => ({ statusCode })
+    )), 201);
 });
 

@@ -1,7 +1,9 @@
 function up(knex, Promise) {
     return Promise.all([
         knex.schema.createTable('funds', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').unsigned()
                 .primary();
@@ -25,7 +27,9 @@ function up(knex, Promise) {
             table.integer('cost').notNullable();
         }),
         knex.schema.createTable('fund_hash', table => {
-            table.collate('utf8_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('fid').unsigned()
                 .primary();
@@ -34,7 +38,9 @@ function up(knex, Promise) {
             table.unique(['broker', 'hash']);
         }),
         knex.schema.createTable('fund_cache_time', table => {
-            table.collate('utf8_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('cid').unsigned()
                 .notNullable();
@@ -43,7 +49,9 @@ function up(knex, Promise) {
             table.boolean('done');
         }),
         knex.schema.createTable('fund_cache', table => {
-            table.collate('utf8_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').unsigned()
                 .primary();
@@ -59,7 +67,9 @@ function up(knex, Promise) {
             table.unique(['cid', 'fid']);
         }),
         knex.schema.createTable('stocks', table => {
-            table.collate('utf8mb4_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id').unsigned()
                 .primary();
@@ -74,7 +84,9 @@ function up(knex, Promise) {
             table.float('subweight');
         }),
         knex.schema.createTable('stock_codes', table => {
-            table.collate('utf8_unicode_ci');
+            if (process.env.NODE_ENV !== 'test') {
+                table.collate('utf8mb4_unicode_ci');
+            }
 
             table.increments('id')
                 .unsigned()

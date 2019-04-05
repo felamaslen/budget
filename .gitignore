@@ -68,7 +68,6 @@ cli/env
 *.pyc
 
 web/build
-api/test/data
 android/budget.jks
 android/Budget/app/release
 android/Budget/app/src/main/res/values/env.xml

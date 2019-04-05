@@ -1,14 +1,13 @@
-import { List as list, Map as map, OrderedMap } from 'immutable';
-import React from 'react';
+import { List as list, Map as map } from 'immutable';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import AddForm from './AddForm';
 import ListHeadDesktop from '../ListHeadDesktop';
-import ListRowDesktop from '../../containers/ListRowDesktop';
+import ListRowDesktop from '~client/containers/ListRowDesktop';
 
 export default function ListBodyDesktop(props) {
     const {
         page,
-        rows,
         rowIds,
         dailyTotals,
         weeklyValue,
@@ -18,23 +17,18 @@ export default function ListBodyDesktop(props) {
         ...subProps
     } = props;
 
-    if (!rowIds) {
-        return null;
-    }
-
-    const getRow = rows
-        ? id => rows.get(id)
-        : () => null;
-
-    const listRows = rowIds.map(id => (
+    const listRows = useMemo(() => rowIds && rowIds.map(id => (
         <ListRowDesktop key={id}
             page={page}
             id={id}
-            row={getRow(id)}
             daily={dailyTotals && dailyTotals.get(id)}
             {...subProps}
         />
-    ));
+    )), [rowIds]);
+
+    if (!listRows) {
+        return null;
+    }
 
     return (
         <ul className="list-ul">
@@ -56,7 +50,6 @@ export default function ListBodyDesktop(props) {
 
 ListBodyDesktop.propTypes = {
     page: PropTypes.string.isRequired,
-    rows: PropTypes.instanceOf(OrderedMap),
     rowIds: PropTypes.instanceOf(list),
     dailyTotals: PropTypes.instanceOf(map),
     weeklyValue: PropTypes.number,

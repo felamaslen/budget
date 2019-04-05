@@ -1,186 +1,183 @@
 /* eslint-disable prefer-reflect */
-import '../browser';
-import { expect } from 'chai';
+import test from 'ava';
+import '~client-test/browser';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
-import * as S from '../../src/sagas/content.saga';
-import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '../../src/selectors/app';
-import { aContentLoaded } from '../../src/actions/content.actions';
-import { openTimedMessage } from '../../src/sagas/error.saga';
+import * as S from '~client/sagas/content.saga';
+import { getApiKey, getContentParamsAnalysis, getLoadedStatus } from '~client/selectors/app';
+import { aContentLoaded } from '~client/actions/content.actions';
+import { openTimedMessage } from '~client/sagas/error.saga';
 
-describe('content.saga', () => {
-    describe('makeContentRequest', () => {
-        const result = S.makeContentRequest('some_api_key', {
-            page: 'analysis', params: ['foo', 'bar'], query: { bar: 'baz' }
-        });
-
-        it('should call the API with the correct URL', () => {
-            expect(result).to.deep.equal([
-                'api/v4/data/analysis/foo/bar/?bar=baz',
-                {
-                    headers: { Authorization: 'some_api_key' }
-                }
-            ]);
-        });
+test('makeContentRequest calling the API with the correct URL', t => {
+    const result = S.makeContentRequest('some_api_key', {
+        page: 'analysis', params: ['foo', 'bar'], query: { bar: 'baz' }
     });
 
-    describe('requestContent', () => {
-        describe('for the analysis page', () => {
-            it('should work as expected', () => {
-                testSaga(S.requestContent, { page: 'analysis' })
-                    .next()
-                    .select(getLoadedStatus, 'analysis')
-                    .next(false)
-                    .select(getContentParamsAnalysis)
-                    .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'analysis', params: ['year', 'category', 0], query: {}
-                    }))
-                    .next({ foo: 'bar' })
-                    .put(aContentLoaded({ page: 'analysis', response: { foo: 'bar' } }))
-                    .next()
-                    .isDone();
-            });
+    t.deepEqual(result, [
+        'api/v4/data/analysis/foo/bar/?bar=baz',
+        {
+            headers: { Authorization: 'some_api_key' }
+        }
+    ]);
+});
 
-            it('should request new data on every load', () => {
-                testSaga(S.requestContent, { page: 'analysis' })
-                    .next()
-                    .select(getLoadedStatus, 'analysis')
-                    .next(true)
-                    .select(getContentParamsAnalysis)
-                    .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'analysis', params: ['year', 'category', 0], query: {}
-                    }))
-                    .next({ foo: 'bar' })
-                    .put(aContentLoaded({ page: 'analysis', response: { foo: 'bar' } }))
-                    .next()
-                    .isDone();
-            });
+test('requestContent (for the analysis page) working as expected', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'analysis' })
+        .next()
+        .select(getLoadedStatus, 'analysis')
+        .next(false)
+        .select(getContentParamsAnalysis)
+        .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'analysis', params: ['year', 'category', 0], query: {}
+        }))
+        .next({ foo: 'bar' })
+        .put(aContentLoaded({ page: 'analysis', response: { foo: 'bar' } }))
+        .next()
+        .isDone();
+});
 
-            it('should handle errors', () => {
-                testSaga(S.requestContent, { page: 'analysis' })
-                    .next()
-                    .select(getLoadedStatus, 'analysis')
-                    .next(false)
-                    .select(getContentParamsAnalysis)
-                    .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'analysis', params: ['year', 'category', 0], query: {}
-                    }))
-                    .throw({ response: 'foo' })
-                    .call(openTimedMessage, 'An error occurred loading content')
-                    .next()
-                    .put(aContentLoaded({ page: 'analysis', response: null }))
-                    .next()
-                    .isDone();
-            });
-        });
+test('requestContent (for the analysis page) requesting new data on every load', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'analysis' })
+        .next()
+        .select(getLoadedStatus, 'analysis')
+        .next(true)
+        .select(getContentParamsAnalysis)
+        .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'analysis', params: ['year', 'category', 0], query: {}
+        }))
+        .next({ foo: 'bar' })
+        .put(aContentLoaded({ page: 'analysis', response: { foo: 'bar' } }))
+        .next()
+        .isDone();
+});
 
-        describe('for the funds page', () => {
-            let envBefore = null;
-            before(() => {
-                envBefore = process.env.DEFAULT_FUND_PERIOD;
+test('requestContent (for the analysis page) handleing errors', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'analysis' })
+        .next()
+        .select(getLoadedStatus, 'analysis')
+        .next(false)
+        .select(getContentParamsAnalysis)
+        .next({ periodKey: 0, groupingKey: 0, timeIndex: 0 })
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'analysis', params: ['year', 'category', 0], query: {}
+        }))
+        .throw({ response: 'foo' })
+        .call(openTimedMessage, 'An error occurred loading content')
+        .next()
+        .put(aContentLoaded({ page: 'analysis', response: null }))
+        .next()
+        .isDone();
+});
 
-                process.env.DEFAULT_FUND_PERIOD = 'year1';
-            });
+let envBefore = null;
+test.before(() => {
+    envBefore = process.env.DEFAULT_FUND_PERIOD;
 
-            after(() => {
-                process.env.DEFAULT_FUND_PERIOD = envBefore;
-            });
+    process.env.DEFAULT_FUND_PERIOD = 'year1';
+});
 
-            it('should work as expected', () => {
-                testSaga(S.requestContent, { page: 'funds' })
-                    .next()
-                    .select(getLoadedStatus, 'funds')
-                    .next(false)
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'funds', params: [], query: { history: 'true', period: 'year', length: 1 }
-                    }))
-                    .next({ foo: 'bar' })
-                    .put(aContentLoaded({ page: 'funds', response: { foo: 'bar' } }))
-                    .next()
-                    .isDone();
-            });
+test.after(() => {
+    process.env.DEFAULT_FUND_PERIOD = envBefore;
+});
 
-            it('should not load data if it is already loaded', () => {
-                testSaga(S.requestContent, { page: 'funds' })
-                    .next()
-                    .select(getLoadedStatus, 'funds')
-                    .next(true)
-                    .isDone();
-            });
+test('requestContent (for the funds page) working as expected', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'funds' })
+        .next()
+        .select(getLoadedStatus, 'funds')
+        .next(false)
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'funds', params: [], query: { history: 'true', period: 'year', length: 1 }
+        }))
+        .next({ foo: 'bar' })
+        .put(aContentLoaded({ page: 'funds', response: { foo: 'bar' } }))
+        .next()
+        .isDone();
+});
 
-            it('should handle errors', () => {
-                testSaga(S.requestContent, { page: 'funds' })
-                    .next()
-                    .select(getLoadedStatus, 'funds')
-                    .next(false)
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'funds', params: [], query: { history: 'true', period: 'year', length: 1 }
-                    }))
-                    .throw({ response: 'foo' })
-                    .call(openTimedMessage, 'An error occurred loading content')
-                    .next()
-                    .put(aContentLoaded({ page: 'funds', response: null }))
-                    .next()
-                    .isDone();
-            });
-        });
+test('requestContent (for the funds page) noting load data if it is already loaded', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'funds' })
+        .next()
+        .select(getLoadedStatus, 'funds')
+        .next(true)
+        .isDone();
+});
 
-        describe('for all other pages', () => {
-            it('should work as expected', () => {
-                testSaga(S.requestContent, { page: 'page1' })
-                    .next()
-                    .select(getLoadedStatus, 'page1')
-                    .next(false)
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'page1', params: [], query: {}
-                    }))
-                    .next({ foo: 'bar' })
-                    .put(aContentLoaded({ page: 'page1', response: { foo: 'bar' } }))
-                    .next()
-                    .isDone();
-            });
+test('requestContent (for the funds page) handleing errors', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'funds' })
+        .next()
+        .select(getLoadedStatus, 'funds')
+        .next(false)
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'funds', params: [], query: { history: 'true', period: 'year', length: 1 }
+        }))
+        .throw({ response: 'foo' })
+        .call(openTimedMessage, 'An error occurred loading content')
+        .next()
+        .put(aContentLoaded({ page: 'funds', response: null }))
+        .next()
+        .isDone();
+});
 
-            it('should not load data if it is already loaded', () => {
-                testSaga(S.requestContent, { page: 'page1' })
-                    .next()
-                    .select(getLoadedStatus, 'page1')
-                    .next(true)
-                    .isDone();
-            });
+test('requestContent (for all other pages) working as expected', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'page1' })
+        .next()
+        .select(getLoadedStatus, 'page1')
+        .next(false)
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'page1', params: [], query: {}
+        }))
+        .next({ foo: 'bar' })
+        .put(aContentLoaded({ page: 'page1', response: { foo: 'bar' } }))
+        .next()
+        .isDone();
+});
 
-            it('should handle errors', () => {
-                testSaga(S.requestContent, { page: 'page1' })
-                    .next()
-                    .select(getLoadedStatus, 'page1')
-                    .next(false)
-                    .select(getApiKey)
-                    .next('some_api_key')
-                    .call(axios.get, ...S.makeContentRequest('some_api_key', {
-                        page: 'page1', params: [], query: {}
-                    }))
-                    .throw({ response: 'foo' })
-                    .call(openTimedMessage, 'An error occurred loading content')
-                    .next()
-                    .put(aContentLoaded({ page: 'page1', response: null }))
-                    .next()
-                    .isDone();
-            });
-        });
-    });
+test('requestContent (for all other pages) noting load data if it is already loaded', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'page1' })
+        .next()
+        .select(getLoadedStatus, 'page1')
+        .next(true)
+        .isDone();
+});
+
+test('requestContent (for all other pages) handleing errors', t => {
+    t.is(1, 1);
+    testSaga(S.requestContent, { page: 'page1' })
+        .next()
+        .select(getLoadedStatus, 'page1')
+        .next(false)
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, ...S.makeContentRequest('some_api_key', {
+            page: 'page1', params: [], query: {}
+        }))
+        .throw({ response: 'foo' })
+        .call(openTimedMessage, 'An error occurred loading content')
+        .next()
+        .put(aContentLoaded({ page: 'page1', response: null }))
+        .next()
+        .isDone();
 });
 

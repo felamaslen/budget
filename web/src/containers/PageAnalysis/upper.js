@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
-import { aOptionChanged } from '../../actions/analysis.actions';
+import { aOptionChanged } from '~client/actions/analysis.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '../../constants/analysis';
+import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '~client/constants/analysis';
 
 export function Upper({ periodKey, groupingKey, timeIndex, description, changeOption }) {
     const changePeriod = key => changeOption(key, groupingKey, 0);

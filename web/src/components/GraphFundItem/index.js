@@ -7,15 +7,15 @@ import { List as list, Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import LineGraph from '../../components/Graph/LineGraph';
+import LineGraph from '~client/components/Graph/LineGraph';
 import Axes from './Axes';
-import { rgba } from '../../helpers/color';
-import { separateLines } from '../../helpers/funds';
+import { rgba } from '~client/modules/color';
+import { separateLines } from '~client/modules/funds';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
     GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE
-} from '../../constants/graph';
-import { COLOR_LOSS, COLOR_PROFIT } from '../../constants/colors';
+} from '~client/constants/graph';
+import { COLOR_LOSS, COLOR_PROFIT } from '~client/constants/colors';
 
 function getDimensions({ popout, sold }) {
     if (popout) {

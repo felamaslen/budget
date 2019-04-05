@@ -88,7 +88,10 @@ module.exports = {
     },
     resolve: {
         alias: {
-            'react-dom': '@hot-loader/react-dom'
+            'react-dom': '@hot-loader/react-dom',
+            '~client': path.resolve(__dirname, './web/src'),
+            '~client-test': path.resolve(__dirname, './web/test'),
+            '~api': path.resolve(__dirname, './api')
         }
     },
     module: {

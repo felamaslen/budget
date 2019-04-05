@@ -1,59 +1,117 @@
-/* eslint-disable newline-per-chained-call */
-import { List } from 'immutable';
-import { expect } from 'chai';
+import test from 'ava';
+import memoize from 'fast-memoize';
+import '~client-test/browser';
+import { List as list } from 'immutable';
+import { render } from 'react-testing-library';
+import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import React from 'react';
-import { shallow } from 'enzyme';
-import ListTreeHead from '../../../src/containers/PageAnalysis/list-tree-head';
+import reduction from '~client/reduction';
+import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 
-describe('Analysis page <ListTreeHead />', () => {
+const getContainer = memoize((customProps = {}) => {
     const props = {
-        items: List.of(
+        items: list.of(
             { itemCost: 3, pct: 5, visible: true },
             { itemCost: 5, pct: 8, visible: true },
             { itemCost: 1, pct: 2, visible: false }
-        )
+        ),
+        ...customProps
     };
 
-    const wrapper = shallow(<ListTreeHead {...props} />);
+    const state = reduction;
 
-    it('should render its basic structure', () => {
-        expect(wrapper.is('li.tree-list-item.head')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is('div.inner')).to.equal(true);
+    const store = createMockStore(state);
 
-        expect(wrapper.childAt(0).children()).to.have.length(4);
-    });
+    const utils = render(
+        <Provider store={store}>
+            <ListTreeHead {...props} />
+        </Provider>
+    );
 
-    it('should render an indicator', () => {
-        expect(wrapper.childAt(0).childAt(0).is('span.indicator')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).children()).to.have.length(0);
-    });
+    return { store, ...utils };
+});
 
-    it('should render a title (Total:)', () => {
-        expect(wrapper.childAt(0).childAt(1).is('span.title')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(1).text()).to.equal('Total:');
-    });
+test('basic structure', t => {
+    const { container } = getContainer();
 
-    it('should render a total cost section', () => {
-        expect(wrapper.childAt(0).childAt(2).is('span.cost')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).children()).to.have.length(2);
+    t.is(container.childNodes.length, 1);
+    const [li] = container.childNodes;
+    t.is(li.tagName, 'LI');
+    t.is(li.className, 'tree-list-item head');
+    t.is(li.childNodes.length, 1);
 
-        expect(wrapper.childAt(0).childAt(2).childAt(0).is('div.total')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).childAt(0).text()).to.equal('£0.09');
+    const [inner] = li.childNodes;
+    t.is(inner.tagName, 'DIV');
+    t.is(inner.className, 'inner');
+    t.is(inner.childNodes.length, 4);
+});
 
-        expect(wrapper.childAt(0).childAt(2).childAt(1).is('div.selected')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(2).childAt(1).text()).to.equal('£0.08');
-    });
+test('indicator', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
+    const [inner] = li.childNodes;
 
-    it('should render a total percent section', () => {
-        expect(wrapper.childAt(0).childAt(3).is('span.pct')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(3).children()).to.have.length(2);
+    const [indicator] = inner.childNodes;
 
-        expect(wrapper.childAt(0).childAt(3).childAt(0).is('div.total')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(3).childAt(0).text()).to.equal('15.0%');
+    t.is(indicator.tagName, 'SPAN');
+    t.is(indicator.className, 'indicator');
+    t.is(indicator.childNodes.length, 0);
+});
 
-        expect(wrapper.childAt(0).childAt(3).childAt(1).is('div.selected')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(3).childAt(1).text()).to.equal('13.0%');
-    });
+test('title', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
+    const [inner] = li.childNodes;
+
+    const [, title] = inner.childNodes;
+
+    t.is(title.tagName, 'SPAN');
+    t.is(title.className, 'title');
+    t.is(title.innerHTML, 'Total:');
+});
+
+test('total cost', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
+    const [inner] = li.childNodes;
+
+    const [, , span] = inner.childNodes;
+
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'cost');
+    t.is(span.childNodes.length, 2);
+
+    const [total, selected] = span.childNodes;
+
+    t.is(total.tagName, 'DIV');
+    t.is(total.className, 'total');
+    t.is(total.innerHTML, '£0.09');
+
+    t.is(selected.tagName, 'DIV');
+    t.is(selected.className, 'selected');
+    t.is(selected.innerHTML, '£0.08');
+});
+
+test('total percent', t => {
+    const { container } = getContainer();
+    const [li] = container.childNodes;
+    const [inner] = li.childNodes;
+
+    const [, , , span] = inner.childNodes;
+
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'pct');
+    t.is(span.childNodes.length, 2);
+
+    const [total, selected] = span.childNodes;
+
+    t.is(total.tagName, 'DIV');
+    t.is(total.className, 'total');
+    t.is(total.innerHTML, '15.0%');
+
+    t.is(selected.tagName, 'DIV');
+    t.is(selected.className, 'selected');
+    t.is(selected.innerHTML, '13.0%');
 });
 

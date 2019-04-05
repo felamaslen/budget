@@ -1,11 +1,13 @@
+import test from 'ava';
+import '~client-test/browser';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import shallow from '../../shallow-with-store';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
 import React from 'react';
-import SuggestionsList from '../../../src/containers/Editable/suggestions-list';
+import SuggestionsList from '~client/containers/Editable/suggestions-list';
 
-describe('<SuggestionsList />', () => {
+const getContainer = (customProps = {}) => {
     const state = fromJS({
         editSuggestions: {
             list: ['foo', 'bar'],
@@ -15,32 +17,51 @@ describe('<SuggestionsList />', () => {
 
     const store = createMockStore(state);
 
-    it('should render a list of suggestions', () => {
-        const wrapper = shallow(<SuggestionsList />, store).dive();
+    const props = {
+        page: 'food',
+        row: 3,
+        col: 2,
+        ...customProps
+    };
 
-        expect(wrapper.is('ul.suggestions')).to.equal(true);
-        expect(wrapper.children()).to.have.length(2);
+    const utils = render(
+        <Provider store={store}>
+            <SuggestionsList {...props} />
+        </Provider>
+    );
 
-        expect(wrapper.childAt(0).is('li.suggestion')).to.equal(true);
-        expect(wrapper.childAt(0).text()).to.equal('foo');
+    return { store, ...utils };
+};
 
-        expect(wrapper.childAt(1).is('li.suggestion')).to.equal(true);
-        expect(wrapper.childAt(1).text()).to.equal('bar');
-    });
+test('list of suggestions', t => {
+    const { container } = getContainer();
 
-    it('should render an active class on the active suggestion, if there is one', () => {
-        const wrapper0 = shallow(<SuggestionsList />, store).dive();
+    t.is(container.childNodes.length, 1);
 
-        expect(wrapper0.childAt(0).hasClass('active')).to.equal(false);
-        expect(wrapper0.childAt(1).hasClass('active')).to.equal(true);
+    const [ul] = container.childNodes;
+    t.is(ul.tagName, 'UL');
+    t.is(ul.className, 'suggestions');
+    t.is(ul.childNodes.length, 2);
 
-        const wrapper1 = shallow(<SuggestionsList />, createMockStore(
-            state.setIn(['editSuggestions', 'active'], -1))
-        )
-            .dive();
+    const [li0, li1] = ul.childNodes;
 
-        expect(wrapper1.childAt(0).hasClass('active')).to.equal(false);
-        expect(wrapper1.childAt(1).hasClass('active')).to.equal(false);
-    });
+    t.is(li0.tagName, 'LI');
+    t.is(li1.tagName, 'LI');
+
+    t.regex(li0.className, /suggestion/);
+    t.regex(li1.className, /suggestion/);
+
+    t.is(li0.innerHTML, 'foo');
+    t.is(li1.innerHTML, 'bar');
+});
+
+test('rendering an active class on the active suggestion, if there is one', t => {
+    const { container } = getContainer();
+
+    const [ul] = container.childNodes;
+    const [li0, li1] = ul.childNodes;
+
+    t.notRegex(li0.className, /active/);
+    t.regex(li1.className, /active/);
 });
 

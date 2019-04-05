@@ -1,28 +1,65 @@
-/* eslint-disable newline-per-chained-call */
-import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import React from 'react';
-import shallow from '../../shallow-with-store';
+import test from 'ava';
+import '~client-test/browser';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import Spinner from '../../../src/containers/Spinner';
+import { fromJS } from 'immutable';
+import { Provider } from 'react-redux';
+import React from 'react';
+import Spinner from '~client/containers/Spinner';
 
-describe('<Spinner />', () => {
-    const wrapper = shallow(<Spinner />, createMockStore(fromJS({
+const getContainer = (customProps = {}, customState = null) => {
+    let state = fromJS({
         loading: true
-    }))).dive();
-
-    it('should render its basic structure', () => {
-        expect(wrapper.is('div.progress-outer')).to.equal(true);
-        expect(wrapper.children()).to.have.length(1);
-        expect(wrapper.childAt(0).is('div.progress-inner')).to.equal(true);
-        expect(wrapper.childAt(0).children()).to.have.length(1);
-        expect(wrapper.childAt(0).childAt(0).is('div.progress')).to.equal(true);
-        expect(wrapper.childAt(0).childAt(0).children()).to.have.length(0);
     });
 
-    it('should not render anything if inactive', () => {
-        expect(shallow(<Spinner />, createMockStore(fromJS({ loading: false }))).dive().get(0))
-            .to.equal(null);
-    });
+    if (customState) {
+        state = customState(state);
+    }
+
+    const store = createMockStore(state);
+
+    const props = {
+        ...customProps
+    };
+
+    const utils = render(
+        <Provider store={store}>
+            <Spinner {...props} />
+        </Provider>
+    );
+
+    return { store, ...utils };
+};
+
+test('basic structure', t => {
+    const { container } = getContainer();
+
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'progress-outer');
+    t.is(div.childNodes.length, 1);
+
+    const [inner] = div.childNodes;
+
+    t.is(inner.tagName, 'DIV');
+    t.is(inner.className, 'progress-inner');
+    t.is(inner.childNodes.length, 1);
+
+    const [progress] = inner.childNodes;
+
+    t.is(progress.tagName, 'DIV');
+    t.is(progress.className, 'progress');
+    t.is(progress.childNodes.length, 0);
+});
+
+test('not rendering if inactive', t => {
+    const { container } = getContainer({}, state => state
+        .set('loading', false)
+    );
+
+    t.is(container.childNodes.length, 0);
 });
 

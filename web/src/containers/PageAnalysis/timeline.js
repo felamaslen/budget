@@ -1,8 +1,8 @@
 import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { COLOR_CATEGORY } from '../../constants/colors';
-import { rgba, averageColor } from '../../helpers/color';
+import { COLOR_CATEGORY } from '~client/constants/colors';
+import { rgba, averageColor } from '~client/modules/color';
 
 const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 

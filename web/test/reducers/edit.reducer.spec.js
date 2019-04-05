@@ -1,139 +1,122 @@
-/* eslint-disable newline-per-chained-call */
+import test from 'ava';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import * as R from '../../src/reducers/edit.reducer';
-import { dateInput } from '../../src/helpers/date';
+import {
+    getInvalidInsertDataKeys,
+    stringifyFields,
+    rHandleServerAdd,
+    rHandleSuggestions
+} from '~client/reducers/edit.reducer';
+import { dateInput } from '~client/modules/date';
 
-describe('Edit reducers', () => {
-    describe('rActivateEditable', () => {
-        it('should be tested');
-    });
-    describe('rChangeEditable', () => {
-        it('should be tested');
-    });
-    describe('getInvalidInsertDataKeys', () => {
-        it('should get a list of invalid data keys', () => {
-            const items = fromJS([
-                { item: 'item', value: '' },
-                { item: 'foo', value: '' },
-                { item: 'category', value: '' },
-                { item: 'category', value: 'foobar' },
-                { item: 'society', value: '' },
-                { item: 'holiday', value: '' },
-                { item: 'bar', value: '' },
-                dateInput('13/10/17'),
-                dateInput('foo')
-            ]);
+test.todo('rActivateEditable');
 
-            expect(R.getInvalidInsertDataKeys(items).toJS())
-                .to.deep.equal([0, 2, 4, 5, 8]);
-        });
-    });
-    describe('stringifyFields', () => {
-        it('should serialise fields into an object of strings', () => {
-            const fields = fromJS([
-                { item: 'foo1', value: 'bar' },
-                { item: 'foo2', value: dateInput('13/10/17') },
-                { item: 'foo3', value: 10.43 }
-            ]);
+test.todo('rChangeEditable');
 
-            expect(R.stringifyFields(fields)).to.deep.equal({
-                foo1: 'bar',
-                foo2: '2017-10-13',
-                foo3: 10.43
-            });
-        });
-    });
-    describe('rHandleServerAdd', () => {
-        it('should be tested');
+test('getInvalidInsertDataKeys geting a list of invalid data keys', t => {
+    const items = fromJS([
+        { item: 'item', value: '' },
+        { item: 'foo', value: '' },
+        { item: 'category', value: '' },
+        { item: 'category', value: 'foobar' },
+        { item: 'society', value: '' },
+        { item: 'holiday', value: '' },
+        { item: 'bar', value: '' },
+        dateInput('13/10/17'),
+        dateInput('foo')
+    ]);
 
-        it('shouldn\'t do anything if an error occurred', () => {
-            expect(R.rHandleServerAdd(fromJS({ loadingApi: true, foo: 'bar' }), { err: true }).toJS())
-                .to.deep.equal({ loadingApi: false, foo: 'bar' });
-        });
-    });
-    describe('rHandleSuggestions', () => {
-        it('should be tested');
-    });
+    t.deepEqual(getInvalidInsertDataKeys(items).toJS(), [0, 2, 4, 5, 8]);
+});
 
-    describe('rHandleSuggestions', () => {
-        it('should set editSuggestions/loading to false', () => {
-            expect(R.rHandleSuggestions(fromJS({
-                editSuggestions: {
-                    loading: true
-                }
-            }), {}).getIn(['editSuggestions', 'loading']))
-                .to.equal(false);
-        });
+test('stringifyFields serialiseing fields into an object of strings', t => {
+    const fields = fromJS([
+        { item: 'foo1', value: 'bar' },
+        { item: 'foo2', value: dateInput('13/10/17') },
+        { item: 'foo3', value: 10.43 }
+    ]);
 
-        it('should set the active suggestion to -1', () => {
-            expect(R.rHandleSuggestions(fromJS({
-                editSuggestions: {
-                    active: 5
-                }
-            }), {}).getIn(['editSuggestions', 'active']))
-                .to.equal(-1);
-        });
-
-        it('should reset the list if there are no results, or if the request is stale', () => {
-            const resultNoItems = R.rHandleSuggestions(fromJS({
-                editSuggestions: {
-                    active: 5
-                }
-            }), {});
-
-            expect(resultNoItems.getIn(['editSuggestions', 'list']).size).to.equal(0);
-            expect(resultNoItems.getIn(['editSuggestions', 'reqId'])).to.equal(null);
-
-            const resultWrongId = R.rHandleSuggestions(fromJS({
-                editSuggestions: {
-                    active: 5,
-                    reqId: 100
-                }
-            }), { items: ['foo'], reqId: 101 });
-
-            expect(resultWrongId.getIn(['editSuggestions', 'list']).size).to.equal(0);
-            expect(resultWrongId.getIn(['editSuggestions', 'reqId'])).to.equal(null);
-        });
-
-        it('should insert the list into the state', () => {
-            expect(R.rHandleSuggestions(fromJS({
-                editSuggestions: {
-                    loading: true,
-                    active: 3,
-                    reqId: 100,
-                    list: []
-                },
-                edit: {
-                    active: {
-                        value: 'foo'
-                    }
-                }
-            }), {
-                data: { list: ['bar', 'baz'] },
-                reqId: 100
-            }).get('editSuggestions').toJS())
-                .to.deep.equal({
-                    loading: false,
-                    active: -1,
-                    reqId: 100,
-                    list: ['bar', 'baz'],
-                    nextCategory: []
-                });
-        });
-    });
-
-    describe('rRequestSuggestions', () => {
-        it('should be tested');
-    });
-    describe('rChangeFundTransactions', () => {
-        it('should be tested');
-    });
-    describe('rAddFundTransactions', () => {
-        it('should be tested');
-    });
-    describe('rRemoveFundTransactions', () => {
-        it('should be tested');
+    t.deepEqual(stringifyFields(fields), {
+        foo1: 'bar',
+        foo2: '2017-10-13',
+        foo3: 10.43
     });
 });
+
+test.todo('rHandleServerAdd');
+
+test('rHandleServerAdd shouldn\'t do anything if an error occurred', t => {
+    t.deepEqual(rHandleServerAdd(fromJS({ loadingApi: true, foo: 'bar' }), { err: true }).toJS(), { loadingApi: false, foo: 'bar' });
+});
+
+test('rHandleSuggestions setting editSuggestions/loading to false', t => {
+    t.is(rHandleSuggestions(fromJS({
+        editSuggestions: {
+            loading: true
+        }
+    }), {}).getIn(['editSuggestions', 'loading']), false);
+});
+
+test('rHandleSuggestions setting the active suggestion to -1', t => {
+    t.is(rHandleSuggestions(fromJS({
+        editSuggestions: {
+            active: 5
+        }
+    }), {}).getIn(['editSuggestions', 'active']), -1);
+});
+
+test('rHandleSuggestions resetting the list if there are no results, or if the request is stale', t => {
+    const resultNoItems = rHandleSuggestions(fromJS({
+        editSuggestions: {
+            active: 5
+        }
+    }), {});
+
+    t.is(resultNoItems.getIn(['editSuggestions', 'list']).size, 0);
+    t.is(resultNoItems.getIn(['editSuggestions', 'reqId']), null);
+
+    const resultWrongId = rHandleSuggestions(fromJS({
+        editSuggestions: {
+            active: 5,
+            reqId: 100
+        }
+    }), { items: ['foo'], reqId: 101 });
+
+    t.is(resultWrongId.getIn(['editSuggestions', 'list']).size, 0);
+    t.is(resultWrongId.getIn(['editSuggestions', 'reqId']), null);
+});
+
+test('rHandleSuggestions inserting the list into the state', t => {
+    t.deepEqual(
+        rHandleSuggestions(fromJS({
+            editSuggestions: {
+                loading: true,
+                active: 3,
+                reqId: 100,
+                list: []
+            },
+            edit: {
+                active: {
+                    value: 'foo'
+                }
+            }
+        }), {
+            data: { list: ['bar', 'baz'] },
+            reqId: 100
+        })
+            .get('editSuggestions')
+            .toJS(),
+        {
+            loading: false,
+            active: -1,
+            reqId: 100,
+            list: ['bar', 'baz'],
+            nextCategory: []
+        }
+    );
+});
+
+test.todo('rRequestSuggestions');
+test.todo('rChangeFundTransactions');
+test.todo('rAddFundTransactions');
+test.todo('rRemoveFundTransactions');
 

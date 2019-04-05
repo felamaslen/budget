@@ -1,52 +1,55 @@
-/* eslint-disable newline-per-chained-call */
-import { expect } from 'chai';
+import test from 'ava';
 import { fromJS } from 'immutable';
-import * as R from '../../src/reducers/error.reducer';
+import {
+    rErrorMessageOpen,
+    rErrorMessageClose,
+    rErrorMessageRemove
+} from '~client/reducers/error.reducer';
 
-describe('Error reducer', () => {
-    describe('rErrorMessageOpen', () => {
-        it('should push the message to the list', () => {
-            const message = fromJS({
-                foo: 'bar'
-            });
-
-            const msgId = '119238';
-
-            const result = R.rErrorMessageOpen(fromJS({
-                errorMsg: []
-            }), { message, msgId });
-
-            expect(result.get('errorMsg').toJS()).to.deep.equal([{ foo: 'bar', id: '119238' }]);
-        });
+test('rErrorMessageOpen pushing the message to the list', t => {
+    const message = fromJS({
+        foo: 'bar'
     });
 
-    describe('rErrorMessageClose', () => {
-        it('should set the selected message to closed', () => {
-            expect(R.rErrorMessageClose(fromJS({
-                errorMsg: [
-                    { id: 'foo' },
-                    { id: 'bar' }
-                ]
-            }), { msgId: 'foo' }).get('errorMsg').toJS())
-                .to.deep.equal([
-                    { id: 'foo', closed: true },
-                    { id: 'bar' }
-                ]);
-        });
-    });
+    const msgId = '119238';
 
-    describe('rErrorMessageRemove', () => {
-        it('should remove the selected message from the list', () => {
-            expect(R.rErrorMessageRemove(fromJS({
-                errorMsg: [
-                    { id: 'foo' },
-                    { id: 'bar' }
-                ]
-            }), { msgId: 'foo' }).get('errorMsg').toJS())
-                .to.deep.equal([
-                    { id: 'bar' }
-                ]);
-        });
-    });
+    const result = rErrorMessageOpen(fromJS({
+        errorMsg: []
+    }), { message, msgId });
+
+    t.deepEqual(result.get('errorMsg').toJS(), [{ foo: 'bar', id: '119238' }]);
+});
+
+test('rErrorMessageClose seting the selected message to closed', t => {
+    t.deepEqual(
+        rErrorMessageClose(fromJS({
+            errorMsg: [
+                { id: 'foo' },
+                { id: 'bar' }
+            ]
+        }), { msgId: 'foo' })
+            .get('errorMsg')
+            .toJS(),
+        [
+            { id: 'foo', closed: true },
+            { id: 'bar' }
+        ]
+    );
+});
+
+test('rErrorMessageRemove removeing the selected message from the list', t => {
+    t.deepEqual(
+        rErrorMessageRemove(fromJS({
+            errorMsg: [
+                { id: 'foo' },
+                { id: 'bar' }
+            ]
+        }), { msgId: 'foo' })
+            .get('errorMsg')
+            .toJS(),
+        [
+            { id: 'bar' }
+        ]
+    );
 });
 

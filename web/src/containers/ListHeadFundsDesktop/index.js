@@ -1,12 +1,12 @@
 import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { aFundsGraphPeriodChanged } from '../../actions/graph.actions';
-import { aFundsViewSoldToggled } from '../../actions/content.actions';
+import { aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
+import { aFundsViewSoldToggled } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { formatCurrency, formatPercent } from '../../helpers/format';
-import { getFundsCachedValue, getFundsCost } from '../../selectors/funds';
+import { formatCurrency, formatPercent } from '~client/modules/format';
+import { getFundsCachedValue, getFundsCost } from '~client/selectors/funds';
 
 function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedValue, onReloadPrices, onViewSoldToggle }) {
 
@@ -45,7 +45,7 @@ function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedVal
             <span className="toggle-view-sold">
                 <input type="checkbox"
                     checked={viewSoldFunds}
-                    onClick={onViewSoldToggle}
+                    onChange={onViewSoldToggle}
                 />
                 <span>{'View sold'}</span>
             </span>
