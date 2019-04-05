@@ -21,5 +21,6 @@
 - Relative imports [DONE]
 - Replace enzyme with react-testing-library [DONE]
 - Replace mocha with ava [DONE]
+- Remove variable length memoisations and spread props inheritance in graph components
 - Fix scrolling on list and analysis pages
 - Implement ES6 modules on server side
