@@ -20,4 +20,6 @@
 - Remove ImmutableJS
 - Relative imports [DONE]
 - Replace enzyme with react-testing-library [DONE]
-- Replace mocha with ava [PARTIAL]
+- Replace mocha with ava [DONE]
+- Fix scrolling on list and analysis pages
+- Implement ES6 modules on server side
