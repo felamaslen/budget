@@ -1,45 +1,41 @@
+import test from 'ava';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import * as S from '~client/selectors/edit';
+import {
+    getModalState,
+    suggestionsInfo
+} from '~client/selectors/edit';
 
-describe('Edit selectors', () => {
-    describe('getModalState', () => {
-        it('should select the required info from the state', () => {
-            expect(S.getModalState(fromJS({
-                modalDialog: {
-                    type: 'foo',
-                    invalidKeys: 'bar',
-                    loading: 'baz',
-                    fieldsString: 'item',
-                    fieldsValidated: 'fields'
-                }
-            }))).to.deep.equal({
-                modalDialogType: 'foo',
-                invalidKeys: 'bar',
-                modalDialogLoading: 'baz',
-                item: 'item',
-                fields: 'fields'
-            });
-        });
+test('getModalState selects the required info from the state', t => {
+    t.deepEqual(getModalState(fromJS({
+        modalDialog: {
+            type: 'foo',
+            invalidKeys: 'bar',
+            loading: 'baz',
+            fieldsString: 'item',
+            fieldsValidated: 'fields'
+        }
+    })), {
+        modalDialogType: 'foo',
+        invalidKeys: 'bar',
+        modalDialogLoading: 'baz',
+        item: 'item',
+        fields: 'fields'
     });
+});
 
-    describe('suggestionsInfo', () => {
-        it('should get required items from state', () => {
-            expect(S.suggestionsInfo(fromJS({
-                currentPage: 'page1',
-                edit: {
-                    active: {
-                        item: 'foo',
-                        value: 'bar'
-                    }
-                }
-            })))
-                .to.deep.equal({
-                    page: 'page1',
-                    item: 'foo',
-                    value: 'bar'
-                });
-        });
+test('suggestionsInfo gets required items from state', t => {
+    t.deepEqual(suggestionsInfo(fromJS({
+        currentPage: 'page1',
+        edit: {
+            active: {
+                item: 'foo',
+                value: 'bar'
+            }
+        }
+    })), {
+        page: 'page1',
+        item: 'foo',
+        value: 'bar'
     });
 });
 

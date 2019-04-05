@@ -1,20 +1,20 @@
+import test from 'ava';
 import { fromJS } from 'immutable';
-import { expect } from 'chai';
-import * as S from '~client/selectors/funds/stocks';
+import {
+    getStocksListInfo
+} from '~client/selectors/funds/stocks';
 
-describe('getStocksListInfo', () => {
-    it('should return stocks and indices', () => {
-        expect(S.getStocksListInfo(fromJS({
-            other: {
-                stocksList: {
-                    stocks: 'foo',
-                    indices: 'bar'
-                }
+test('getStocksListInfo returns stocks and indices', t => {
+    t.deepEqual(getStocksListInfo(fromJS({
+        other: {
+            stocksList: {
+                stocks: 'foo',
+                indices: 'bar'
             }
-        }))).to.deep.equal({
-            stocks: 'foo',
-            indices: 'bar'
-        });
+        }
+    })), {
+        stocks: 'foo',
+        indices: 'bar'
     });
 });
 
