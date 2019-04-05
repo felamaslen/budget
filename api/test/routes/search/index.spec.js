@@ -1,15 +1,9 @@
-/**
- * search API spec
- */
+const test = require('ava');
+const {
+    routeGet
+} = require('~api/src/routes/search');
 
-require('dotenv').config();
-const expect = require('chai').expect;
-
-const search = require('~api/src/routes/search');
-
-describe('/api/search', () => {
-    it('works', () => {
-        expect(search.routeGet).to.be.a('function');
-    });
+test('routeGet is defined', t => {
+    t.is(typeof routeGet, 'function');
 });
 

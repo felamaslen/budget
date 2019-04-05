@@ -1,116 +1,84 @@
-const { expect } = require('chai');
-const { prepareMockDb } = require('../../test.common');
+const test = require('ava');
+const { prepareMockDb } = require('~api/test/test.common');
 const { DateTime } = require('luxon');
 
-const listCommon = require('~api/src/routes/data/list.common');
+const {
+    getLimitCondition,
+    getOlderExists,
+    formatResults,
+    getTotalCost
+} = require('~api/src/routes/data/list.common');
 
-const { db, tracker } = prepareMockDb();
+test('getLimitCondition returns a valid limit condition', t => {
+    const now = DateTime.fromISO('2017-09-04');
+    const numMonths = 3;
 
-describe('Common list data functions', () => {
-    describe('getLimitCondition', () => {
-        it('should return a valid limit condition', () => {
-            const now = DateTime.fromISO('2017-09-04');
-            const numMonths = 3;
+    const result = getLimitCondition(now, { numMonths });
 
-            const result = listCommon.getLimitCondition(now, { numMonths });
-
-            expect(Object.keys(result).reduce((items, key) => ({
-                ...items,
-                [key]: result[key]
-                    ? result[key].toISODate()
-                    : null
-            }), {}))
-                .to.deep.equal({
-                    startDate: '2017-09-01',
-                    endDate: null
-                });
-        });
-        it('should handle pagination', () => {
-            const now = DateTime.fromISO('2017-09-03');
-            const numMonths = 5;
-            const offset = 1;
-
-            const result = listCommon.getLimitCondition(now, { numMonths, offset });
-
-            expect(Object.keys(result).reduce((items, key) => ({
-                ...items,
-                [key]: result[key]
-                    ? result[key].toISODate()
-                    : null
-            }), {}))
-                .to.deep.equal({
-                    startDate: '2016-12-01',
-                    endDate: '2017-04-30'
-                });
-        });
+    t.deepEqual(Object.keys(result).reduce((items, key) => ({
+        ...items,
+        [key]: result[key]
+            ? result[key].toISODate()
+            : null
+    }), {}), {
+        startDate: '2017-09-01',
+        endDate: null
     });
+});
 
-    describe('getOlderExists', () => {
-        before(() => {
-            tracker.install();
+test('getLimitCondition handles pagination', t => {
+    const now = DateTime.fromISO('2017-09-03');
+    const numMonths = 5;
+    const offset = 1;
 
-            tracker.on('query', query => {
-                expect(query.sql).to.equal(
-                    'select COUNT(*) AS count from `food` where `date` < ? and `uid` = ?');
+    const result = getLimitCondition(now, { numMonths, offset });
 
-                query.response([{ count: 156 }]);
-            });
-        });
-
-        after(() => {
-            tracker.uninstall();
-        });
-
-        it('should return the correct query', () => {
-            const user = { uid: 1 };
-            const table = 'food';
-            const startDate = DateTime.fromISO('2017-07-01');
-
-            listCommon.getOlderExists(db, user, table, { startDate });
-        });
+    t.deepEqual(Object.keys(result).reduce((items, key) => ({
+        ...items,
+        [key]: result[key]
+            ? result[key].toISODate()
+            : null
+    }), {}), {
+        startDate: '2016-12-01',
+        endDate: '2017-04-30'
     });
+});
 
-    describe('formatResults', () => {
-        it('should work as expected', () => {
-            const queryResult = [
-                { date: new Date('2017-09-12'), item: 'foo', category: 'bar' },
-                { date: new Date('2017-08-29'), item: 'baz', category: 'bak' }
-            ];
+test('getOlderExists returns the correct result', async t => {
+    const db = await prepareMockDb(false);
 
-            const columnMap = {
-                item: 'i',
-                category: 'k'
-            };
+    const user = { uid: 1 };
+    const table = 'food';
 
-            expect(queryResult.map(listCommon.formatResults(columnMap))).to.deep.equal([
-                {
-                    'd': '2017-09-12', 'i': 'foo', 'k': 'bar'
-                },
-                {
-                    'd': '2017-08-29', 'i': 'baz', 'k': 'bak'
-                }
-            ]);
-        });
-    });
+    t.true(await getOlderExists(db, user, table, { startDate: DateTime.fromISO('2018-10-03') }));
+    t.false(await getOlderExists(db, user, table, { startDate: DateTime.fromISO('2017-04-23') }));
+});
 
-    describe('getTotalCost', () => {
-        before(() => {
-            tracker.install();
+test('formatResults works as expected', t => {
+    const queryResult = [
+        { date: new Date('2017-09-12'), item: 'foo', category: 'bar' },
+        { date: new Date('2017-08-29'), item: 'baz', category: 'bak' }
+    ];
 
-            tracker.on('query', query => {
-                query.response([{ total: 8147 }]);
-            });
-        });
+    const columnMap = {
+        item: 'i',
+        category: 'k'
+    };
 
-        after(() => {
-            tracker.uninstall();
-        });
+    t.deepEqual(queryResult.map(formatResults(columnMap)), [
+        {
+            'd': '2017-09-12', 'i': 'foo', 'k': 'bar'
+        },
+        {
+            'd': '2017-08-29', 'i': 'baz', 'k': 'bak'
+        }
+    ]);
+});
 
-        it('should return the correct query', async () => {
-            const user = { uid: 1 };
+test('getTotalCost returns the correct query', async t => {
+    const db = await prepareMockDb();
+    const user = { uid: 1 };
 
-            expect(await listCommon.getTotalCost(db, user, 'food')).to.equal(8147);
-        });
-    });
+    t.is(await getTotalCost(db, user, 'food'), 19239 + 91923 + 2239);
 });
 
