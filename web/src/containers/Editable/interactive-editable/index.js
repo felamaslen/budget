@@ -10,11 +10,11 @@ export default function InteractiveEditable({ item, value, onChange }) {
     useEffect(() => {
         setImmediate(() => {
             if (input.current) {
-                if (input.focus) {
-                    input.focus();
+                if (input.current.focus) {
+                    input.current.focus();
                 }
-                if (input.select) {
-                    input.select();
+                if (input.current.select) {
+                    input.current.select();
                 }
             }
         });
