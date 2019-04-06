@@ -127,7 +127,7 @@ export default function GraphBalance({
         graphProps.graphHeight = styles.graphOverviewHeightMobile;
     }
 
-    return <GraphCashFlow {...graphProps} />;
+    return <GraphCashFlow isMobile={isMobile} {...graphProps} />;
 }
 
 GraphBalance.propTypes = {
