@@ -7,8 +7,18 @@ import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
 
 test('rendering a line graph', t => {
     const props = {
-        width: 200,
-        height: 100,
+        name: 'some-dumb-graph',
+        dimensions: {
+            width: 200,
+            height: 100,
+            padding: [10, 0, 3, 5],
+            minX: 0,
+            maxX: 10,
+            minY: -3,
+            maxY: 7
+        },
+        outerProperties: {},
+        svgProperties: {},
         lines: fromJS([
             {
                 key: 'line1',
