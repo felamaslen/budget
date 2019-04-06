@@ -2,7 +2,6 @@ const test = require('ava');
 const memoize = require('fast-memoize');
 const path = require('path');
 const fs = require('fs-extra');
-const md5 = require('md5');
 const hl = require('~api/scripts/scrapeFunds/hl');
 const config = require('~api/src/config')();
 
@@ -151,26 +150,6 @@ const getTestFunds = async () => {
             }
         }
     };
-};
-
-const getTestFundsList = async () => {
-    const data = await getTestData();
-    const testFunds = await getTestFunds();
-
-    const testFundsList = [
-        testFunds.hl.fund.fund,
-        testFunds.hl.share.fund,
-        testFunds.hl.shareDollar.fund
-    ]
-        .map(item => ({ ...item, hash: md5(item.name) }));
-
-    const testFundsListData = [
-        testFunds.hl.fund.data,
-        testFunds.hl.share.data,
-        testFunds.hl.shareDollar.data
-    ];
-
-    return { testFundsList, testFundsListData };
 };
 
 test('isHLFundShare returning the correct status', async t => {
