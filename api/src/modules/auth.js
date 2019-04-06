@@ -127,11 +127,11 @@ function authMiddleware() {
     };
 }
 
-function generateUserPin() {
+function generateUserPin(defaultPin = null) {
     const charNotUniqueEnough = (chars, char) =>
         chars.filter(item => item === char).length > 1;
 
-    const pinRaw = new Array(4).fill(0)
+    const pinRaw = defaultPin || new Array(4).fill(0)
         .reduce(chars => {
             let nextChar = null;
             do {

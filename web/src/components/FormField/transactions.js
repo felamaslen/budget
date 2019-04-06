@@ -54,7 +54,7 @@ FormFieldTransactionsItem.propTypes = {
 
 export default function FormFieldTransactions({ value, onChange }) {
     const makeOnChangeField = useCallback(key => field => subValue =>
-        onChange(value.list, key, subValue, field), [value.list]
+        onChange(value.list, key, subValue, field), [onChange, value.list]
     );
 
     return (

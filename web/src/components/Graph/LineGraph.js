@@ -5,92 +5,146 @@
 import { List as list } from 'immutable';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { genPixelCompute } from './helpers';
-import LineGraphDumb from './LineGraphDumb';
+import { genPixelCompute } from '~client/components/Graph/helpers';
+import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
+import { lineGraphPropTypes, rangePropTypes } from '~client/components/Graph/propTypes';
 
 import { useZoom } from './hooks/zoom';
 import { useHover } from './hooks/hover';
 
 const defaultPadding = [0, 0, 0, 0];
 
-export default function LineGraph(props) {
-    const {
-        lines,
-        width,
-        height,
-        padding: customPadding,
-        minX,
-        maxX,
-        minY,
-        maxY
-    } = props;
-
-    const padding = customPadding || defaultPadding;
-
+export default function LineGraph({
+    name,
+    before,
+    beforeLines,
+    afterLines,
+    after,
+    lines,
+    width,
+    height,
+    padding,
+    minX,
+    maxX,
+    minY,
+    maxY,
+    outerProperties,
+    svgProperties,
+    svgClasses,
+    isMobile,
+    hoverEffect,
+    zoomEffect
+}) {
     const graph = useRef(null);
 
     const [calc, setCalc] = useState(null);
 
+    const dimensions = useMemo(() => ({
+        width,
+        height,
+        padding,
+        minY,
+        maxY,
+        minX,
+        maxX
+    }), [width, height, padding, minY, maxY, minX, maxX]);
+
     useEffect(() => {
-        setCalc(genPixelCompute({
-            padding,
-            width,
-            height,
-            lines,
-            minY,
-            maxY,
-            minX,
-            maxX
-        }));
-    }, [padding, width, height, lines, minY, maxY, minX, maxX]);
+        setCalc(genPixelCompute(dimensions));
+    }, [dimensions]);
 
-    const range = useMemo(() => maxX - minX, [minX, maxX]);
+    const [hlPoint, onMouseMove, onMouseLeave] = useHover({
+        lines,
+        isMobile,
+        calc,
+        hoverEffect
+    });
 
-    const [hlPoint, onMouseMove, onMouseLeave] = useHover({ props });
+    const [zoom, onWheel] = useZoom({
+        dimensions,
+        lines,
+        isMobile,
+        graph,
+        hlPoint,
+        calc,
+        setCalc,
+        zoomEffect
+    });
 
-    const [zoom, onWheel] = useZoom({ props, padding, range, graph, hlPoint, setCalc });
+    const zoomedDimensions = useMemo(() => {
+        if (zoom) {
+            return {
+                ...dimensions,
+                ...zoom
+            };
+        }
 
-    const outerProperties = useMemo(() => ({
+        return dimensions;
+    }, [zoom, dimensions]);
+
+    const outerPropertiesProc = useMemo(() => ({
         onMouseMove,
+        onMouseOver: onMouseMove,
         onMouseLeave,
-        ...(props.outerProperties || {})
-    }), [onMouseMove, onMouseLeave, props.outerProperties]);
+        ...outerProperties
+    }), [onMouseMove, onMouseLeave, outerProperties]);
 
-    const svgProperties = useMemo(() => ({
+    const svgPropertiesProc = useMemo(() => ({
         onWheel,
-        ...(props.svgProperties || {})
-    }), [onWheel, props.svgProperties]);
+        ...svgProperties
+    }), [onWheel, svgProperties]);
 
     if (!calc) {
         return null;
     }
 
-    return (
-        <LineGraphDumb
-            svgRef={graph}
-            {...props}
-            {...zoom}
-            calc={calc}
-            outerProperties={outerProperties}
-            svgProperties={svgProperties}
-            hlPoint={hlPoint}
-        />
-    );
+    const graphProps = {
+        name,
+        svgRef: graph,
+        before,
+        beforeLines,
+        afterLines,
+        after,
+        dimensions: zoomedDimensions,
+        lines,
+        calc,
+        hlPoint,
+        hoverEffect,
+        outerProperties: outerPropertiesProc,
+        svgProperties: svgPropertiesProc,
+        svgClasses
+    };
+
+    return <LineGraphDumb {...graphProps} />;
 }
 
 LineGraph.propTypes = {
+    name: PropTypes.string.isRequired,
+    before: PropTypes.func,
+    beforeLines: PropTypes.func,
+    afterLines: PropTypes.func,
+    after: PropTypes.func,
+    ...lineGraphPropTypes,
+    ...rangePropTypes,
     lines: PropTypes.instanceOf(list).isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    padding: PropTypes.array,
-    minX: PropTypes.number,
-    maxX: PropTypes.number,
-    minY: PropTypes.number,
-    maxY: PropTypes.number,
     isMobile: PropTypes.bool,
-    hoverEffect: PropTypes.object,
-    outerProperties: PropTypes.object,
-    svgProperties: PropTypes.object,
+    hoverEffect: PropTypes.shape({
+        labelX: PropTypes.func.isRequired,
+        labelY: PropTypes.func.isRequired,
+        labelWidthY: PropTypes.number
+    }),
+    outerProperties: PropTypes.object.isRequired,
+    svgProperties: PropTypes.object.isRequired,
+    svgClasses: PropTypes.string,
     zoomEffect: PropTypes.func
+};
+
+LineGraph.defaultProps = {
+    isMobile: false,
+    before: null,
+    after: null,
+    padding: defaultPadding,
+    outerProperties: {},
+    svgProperties: {}
 };
 

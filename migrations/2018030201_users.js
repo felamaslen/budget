@@ -25,7 +25,7 @@ async function up(knex, Promise) {
         })
     ]);
 
-    const { pinRaw, pinHash } = await generateUserPin();
+    const { pinRaw, pinHash } = await generateUserPin(process.env.DEFAULT_PIN);
 
     console.log('Creating user with PIN:', pinRaw);
 

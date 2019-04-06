@@ -61,6 +61,7 @@ Note that the development variables are optional on a production environment.
 - `PORT`: the port to listen on
 - `MYSQL_URI`: URI for connecting to the production database
 - `MYSQL_URI_TEST`: URI for connecting to a testing database
+- `DEFAULT_PIN`: the PIN for the first generated user
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts
 - `IP_BAN_LIMIT`: the period of time to consider when banning users
 - `IP_BAN_TRIES`: the maximum number of failed logins before banning users

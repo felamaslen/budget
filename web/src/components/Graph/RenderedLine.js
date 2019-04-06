@@ -24,6 +24,30 @@ export default function RenderedLine(allProps) {
     const movingAverage = line.get('movingAverage');
     const arrows = line.get('arrows');
 
+    const pathProps = useMemo(() => !arrows && getPathProps(line), [arrows, line]);
+
+    const averageLine = useMemo(() => !arrows && data.size && (
+        <AverageLine {...props} data={data} value={movingAverage} />
+    ), [arrows, data, movingAverage, props]);
+
+    const constantColor = typeof color === 'string';
+
+    const linePath = useMemo(
+        () => constantColor &&
+            !arrows &&
+            data.size &&
+            getSingleLinePath({ data, smooth, fill, ...props }),
+        [constantColor, arrows, data, smooth, fill, props]
+    );
+
+    const styleProps = useMemo(
+        () => constantColor &&
+            !arrows &&
+            data.size &&
+            getStyleProps(fill, color),
+        [constantColor, arrows, data, fill, color]
+    );
+
     if (!data.size) {
         return null;
     }
@@ -32,21 +56,13 @@ export default function RenderedLine(allProps) {
         return <ArrowLine data={data} color={color} {...props} />;
     }
 
-    const pathProps = useMemo(() => getPathProps(line), [line]);
-
-    const averageLine = <AverageLine {...props} data={data} value={movingAverage} />;
-
-    if (typeof color === 'string') {
-        const linePath = useMemo(
-            () => getSingleLinePath({ data, smooth, fill, ...props }),
-            [data, smooth, fill, ...Object.keys(props).map(key => props[key])]
+    if (constantColor) {
+        return (
+            <g className="line">
+                <path d={linePath} {...styleProps} {...pathProps} />
+                {averageLine}
+            </g>
         );
-        const styleProps = useMemo(() => getStyleProps(fill, color), [fill, color]);
-
-        return <g className="line">
-            <path d={linePath} {...styleProps} {...pathProps} />
-            {averageLine}
-        </g>;
     }
 
     const lineProps = { data, color, fill, smooth, movingAverage, pathProps };

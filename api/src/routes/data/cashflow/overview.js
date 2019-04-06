@@ -3,8 +3,8 @@
  */
 
 const { DateTime } = require('luxon');
-const { sqlConcat } = require('~api/src/common');
-const { getNow } = require('~api/src/modules/time');
+const { sqlConcat } = require('../../../common');
+const { getNow } = require('../../../modules/time');
 
 const getYearMonth = time => ([time.year, time.month]);
 

@@ -5,11 +5,11 @@ export function useField(value, onChange, getValue, setValue) {
 
     const onType = useCallback(evt => {
         setCurrentValue(setValue(evt.target.value));
-    });
+    }, [setCurrentValue, setValue]);
 
     const onBlur = useCallback(() => {
         onChange(currentValue);
-    });
+    }, [onChange, currentValue]);
 
     return [currentValue, onType, onBlur];
 }

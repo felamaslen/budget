@@ -5,11 +5,11 @@ import PropTypes from 'prop-types';
 
 import Blocks from './blocks';
 
-export default function BlockPacker({ status, ...props }) {
-    const onMouseOut = useCallback(() => props.onHover(null, null));
+export default function BlockPacker({ status, onHover, ...props }) {
+    const onMouseOut = useCallback(() => onHover(null, null), [onHover]);
 
     const blocks = props.blocks
-        ? <Blocks {...props} />
+        ? <Blocks onHover={onHover} {...props} />
         : null;
 
     return <div className="block-view" onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>

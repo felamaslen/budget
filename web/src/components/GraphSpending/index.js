@@ -3,16 +3,24 @@
  */
 
 import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { DateTime } from 'luxon';
+
 import { rgba } from '~client/modules/color';
 import { COLOR_SPENDING, COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
-import GraphCashFlow, { getValuesWithTime } from '../GraphCashFlow';
+import { rangePropTypes, pixelPropTypes } from '~client/components/Graph/propTypes';
+import GraphCashFlow, { getValuesWithTime, graphCashFlowPropTypes } from '~client/components/GraphCashFlow';
 import Key from './Key';
 
-function processData({ valuesNet, valuesSpending, ...props }) {
-    const dataNet = getValuesWithTime(valuesNet, { oldOffset: 0, ...props });
-    const dataSpending = getValuesWithTime(valuesSpending, { oldOffset: 0, ...props });
+function processData({ valuesNet, valuesSpending, startDate }) {
+    const props = {
+        oldOffset: 0,
+        startDate
+    };
+
+    const dataNet = getValuesWithTime(valuesNet, props);
+    const dataSpending = getValuesWithTime(valuesSpending, props);
 
     const colorProfitLoss = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
 
@@ -34,23 +42,49 @@ function processData({ valuesNet, valuesSpending, ...props }) {
     );
 }
 
-export default function GraphSpending(props) {
-    const lines = processData(props);
+function makeAfterLines() {
+    const AfterLines = ({ pixX, pixY, maxX, minY, maxY }) => (
+        <g>
+            <Key
+                title="Cash flow"
+                pixX={pixX}
+                pixY={pixY}
+                maxX={maxX}
+                minY={minY}
+                maxY={maxY}
+            />
+        </g>
+    );
 
-    const afterLines = subProps => <g>
-        <Key {...subProps} title="Cash flow" />
-    </g>;
+    AfterLines.propTypes = {
+        ...rangePropTypes,
+        ...pixelPropTypes
+    };
+}
+
+export default function GraphSpending({ graphWidth, now, valuesNet, valuesSpending, startDate }) {
+    const lines = useMemo(() => processData({
+        valuesNet,
+        valuesSpending,
+        startDate
+    }), [valuesNet, valuesSpending, startDate]);
+
+    const afterLines = useMemo(makeAfterLines, []);
 
     const graphProps = {
+        name: 'spend',
+        graphWidth,
+        now,
         lines,
-        afterLines,
-        ...props
+        afterLines
     };
 
     return <GraphCashFlow {...graphProps} />;
 }
 
 GraphSpending.propTypes = {
+    ...graphCashFlowPropTypes,
+    startDate: PropTypes.instanceOf(DateTime).isRequired,
     valuesNet: PropTypes.instanceOf(list).isRequired,
     valuesSpending: PropTypes.instanceOf(list).isRequired
 };

@@ -15,20 +15,20 @@ const {
 } = require('~api/src/routes/data/cashflow/overview');
 
 const testPricesProcessedResponse = {
-        '1': [
-            { date: new Date('2017-09-30 23:59:59.999'), value: 95.49 },
-            { date: new Date('2017-08-31 23:59:59.999'), value: 121 }
-        ],
-        '3': [
-            { date: new Date('2017-09-30 23:59:59.999'), value: 49.52 },
-            { date: new Date('2017-08-31 23:59:59.999'), value: 56.01 }
-        ],
-        '11': [
-            { date: new Date('2017-09-30 23:59:59.999'), value: 124.04 },
-            { date: new Date('2017-08-31 23:59:59.999'), value: 99.13 },
-            { date: new Date('2016-11-30 23:59:59.999'), value: 95.3 }
-        ]
-    };
+    '1': [
+        { date: new Date('2017-09-30 23:59:59.999'), value: 95.49 },
+        { date: new Date('2017-08-31 23:59:59.999'), value: 121 }
+    ],
+    '3': [
+        { date: new Date('2017-09-30 23:59:59.999'), value: 49.52 },
+        { date: new Date('2017-08-31 23:59:59.999'), value: 56.01 }
+    ],
+    '11': [
+        { date: new Date('2017-09-30 23:59:59.999'), value: 124.04 },
+        { date: new Date('2017-08-31 23:59:59.999'), value: 99.13 },
+        { date: new Date('2016-11-30 23:59:59.999'), value: 95.3 }
+    ]
+};
 
 const testTransactionsProcessedResponse = {
     '3': [

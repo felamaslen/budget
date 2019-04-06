@@ -1,7 +1,6 @@
 import test from 'ava';
 
 import {
-    aShowAllToggled,
     aFundsGraphClicked,
     aFundsGraphLineToggled,
     aFundsGraphPeriodChanged,
@@ -9,16 +8,11 @@ import {
 } from '~client/actions/graph.actions';
 
 import {
-    GRAPH_SHOWALL_TOGGLED,
     GRAPH_FUNDS_LINE_TOGGLED,
     GRAPH_FUNDS_CLICKED,
     GRAPH_FUNDS_PERIOD_LOADED,
     GRAPH_FUNDS_PERIOD_CHANGED
 } from '~client/constants/actions';
-
-test('aShowAllToggled returns GRAPH_SHOWALL_TOGGLED', t => {
-    t.deepEqual(aShowAllToggled(), { type: GRAPH_SHOWALL_TOGGLED });
-});
 
 test('aFundsGraphClicked returns GRAPH_FUNDS_CLICKED', t => {
     t.deepEqual(aFundsGraphClicked(), { type: GRAPH_FUNDS_CLICKED });

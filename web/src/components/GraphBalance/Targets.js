@@ -6,12 +6,16 @@ import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
 import { formatCurrency } from '~client/modules/format';
 import { rgba } from '~client/modules/color';
+import {
+    pixelPropTypes as allPixelPropTypes,
+    rangePropTypes as allRangePropTypes
+} from '~client/components/Graph/propTypes';
 
 const formatTarget = target => `${formatCurrency(target.get('value'), {
     raw: true, noPence: true, abbreviate: true, precision: 0
 })} (${target.get('tag')})`;
 
-export default function Targets({ showAll, targets, ...props }) {
+export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     const tags = targets.map((target, key) => (
@@ -26,10 +30,10 @@ export default function Targets({ showAll, targets, ...props }) {
         </text>
     ));
 
-    const monthWidth = props.pixX(2628000) - props.pixX(0);
+    const monthWidth = pixX(2628000) - pixX(0);
 
     const arrowAngle = target =>
-        Math.atan2(props.pixY(target.get('from')) - props.pixY(target.get('value')),
+        Math.atan2(pixY(target.get('from')) - pixY(target.get('value')),
             monthWidth * (target.get('months') + target.get('last')));
 
     const arrows = targets.map((target, key) => (
@@ -41,7 +45,10 @@ export default function Targets({ showAll, targets, ...props }) {
             color={rgba(COLOR_DARK)}
             strokeWidth={1}
             arrowSize={target.get('months') / 24}
-            {...props}
+            minY={minY}
+            maxY={maxY}
+            pixX={pixX}
+            pixY={pixY}
         />
     ));
 
@@ -55,10 +62,12 @@ export default function Targets({ showAll, targets, ...props }) {
     );
 }
 
+const { valX, valY, ...pixelPropTypes } = allPixelPropTypes;
+const { minX, maxX, ...rangePropTypes } = allRangePropTypes;
+
 Targets.propTypes = {
+    ...pixelPropTypes,
+    ...rangePropTypes,
     showAll: PropTypes.bool,
-    width: PropTypes.number.isRequired,
-    pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired,
     targets: PropTypes.instanceOf(list).isRequired
 };

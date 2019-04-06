@@ -16,7 +16,7 @@ function Page({ page, loaded, children, onLoad }) {
 
         setPrevPage(page);
 
-    }, [page, loaded]);
+    }, [page, loaded, onLoad, prevPage]);
 
     if (!loaded) {
         return null;

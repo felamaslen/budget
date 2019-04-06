@@ -13,7 +13,7 @@ export default function ListRowFundsDesktop({ row }) {
 
     const onToggleGraph = useCallback(() => {
         setPopout(!popout);
-    });
+    }, [popout, setPopout]);
 
     const name = useMemo(
         () => row.getIn(['cols', itemKey])

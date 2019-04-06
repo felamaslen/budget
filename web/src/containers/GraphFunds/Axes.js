@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { COLOR_LIGHT_MED, COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
@@ -12,7 +12,7 @@ function calculateTicksY({ tickSizeY, minY, maxY, pixY }) {
         ? 0
         : Math.floor((maxY - minY) / tickSizeY);
 
-    if (!numTicks) {
+    if (!numTicks || numTicks > 1000) {
         return [];
     }
 
@@ -26,11 +26,19 @@ function calculateTicksY({ tickSizeY, minY, maxY, pixY }) {
         });
 }
 
-export default function Axes(props) {
+export default function Axes({
+    startTime,
+    tickSizeY,
+    mode,
+    minY,
+    maxY,
+    minX,
+    maxX,
+    pixX,
+    pixY
+}) {
     const textColor = rgba(COLOR_DARK);
     const [fontSize, fontFamily] = FONT_AXIS_LABEL;
-
-    const { startTime, mode, minX, maxX, minY, maxY, pixX, pixY } = props;
 
     const x0 = pixX(minX);
     const xMax = pixX(maxX);
@@ -49,17 +57,31 @@ export default function Axes(props) {
         return rgba(COLOR_LIGHT_MED);
     };
 
-    const ticksY = calculateTicksY(props).map(({ pos, value }) => (
-        <g key={value}>
-            <line x1={x0} y1={pos} x2={xMax} y2={pos}
-                stroke={axisColor(value)} strokeWidth={1} />
-            <text x={xMax} y={pos - 2} color={textColor}
-                fontSize={fontSize} fontFamily={fontFamily}
-                alignmentBaseline="baseline" textAnchor="end">{formatValue(value, mode)}</text>
-        </g>
-    ));
+    const ticksY = calculateTicksY({ tickSizeY, minY, maxY, pixY })
+        .map(({ pos, value }) => (
+            <g key={value}>
+                <line
+                    x1={x0}
+                    y1={pos}
+                    x2={xMax}
+                    y2={pos}
+                    stroke={axisColor(value)}
+                    strokeWidth={1}
+                />
+                <text
+                    x={xMax}
+                    y={pos - 2}
+                    color={textColor}
+                    fontSize={fontSize}
+                    fontFamily={fontFamily}
+                    alignmentBaseline="baseline"
+                    textAnchor="end"
+                >{formatValue(value, mode)}</text>
+            </g>
+        ));
 
-    const timeTicks = getTimeScale(props)(startTime);
+    const timeTicks = useMemo(() => getTimeScale({ minX, maxX, pixX })(startTime),
+        [minX, maxX, pixX, startTime]);
 
     const tickColors = [rgba(COLOR_DARK), rgba(COLOR_GRAPH_TITLE)];
     const getColor = major => tickColors[(major > 0) >> 0];

@@ -4,7 +4,7 @@
 
 import './style.scss';
 import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '~client/components/Graph/LineGraph';
@@ -35,16 +35,23 @@ function processData(data, popout) {
     const dataX = validData.map(item => item.get(0));
     const dataY = validData.map(item => item.get(1));
 
-    const minX = dataX.min();
-    const maxX = dataX.max();
-    let minY = dataY.min();
-    let maxY = dataY.max();
+    let minX = 0;
+    let maxX = 0;
+    let minY = 0;
+    let maxY = 0;
 
-    if (minY === maxY) {
-        const range = minY / 100;
+    if (dataX.size && dataY.size) {
+        minX = dataX.min();
+        maxX = dataX.max();
+        minY = dataY.min();
+        maxY = dataY.max();
 
-        minY -= range;
-        maxY += range;
+        if (minY === maxY) {
+            const range = minY / 100;
+
+            minY -= range;
+            maxY += range;
+        }
     }
 
     // split up the line into multiple sections, if there are gaps in the data
@@ -63,24 +70,51 @@ function processData(data, popout) {
     return { lines, minX, maxX, minY, maxY };
 }
 
-export default function GraphFundItem({ sold, values, popout, onToggle, ...props }) {
+function makeBeforeLines({ popout }) {
+    const BeforeLines = ({ minX, minY, maxY, height, pixX, pixY }) => (
+        <Axes
+            popout={popout}
+            minX={minX}
+            minY={minY}
+            maxY={maxY}
+            height={height}
+            pixX={pixX}
+            pixY={pixY}
+        />
+    );
+
+    BeforeLines.propTypes = {
+        minX: PropTypes.number.isRequired,
+        minY: PropTypes.number.isRequired,
+        maxY: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired,
+        pixX: PropTypes.func.isRequired,
+        pixY: PropTypes.func.isRequired
+    };
+
+    return BeforeLines;
+}
+
+export default function GraphFundItem({ name, sold, values, popout, onToggle }) {
+    const { width, height } = getDimensions({ popout, sold });
+
+    const beforeLines = useMemo(() => values && makeBeforeLines({ popout }), [values, popout]);
+
+    const svgProperties = useMemo(() => ({
+        onClick: onToggle
+    }), [onToggle]);
+
     if (!values) {
         return null;
     }
 
-    const { width, height } = getDimensions({ popout, sold });
-
-    const beforeLines = subProps => (<Axes popout={popout} {...subProps} />);
-
     const graphProps = {
-        svgProperties: {
-            onClick: () => onToggle
-        },
+        name,
+        svgProperties,
         svgClasses: classNames({ popout }),
         beforeLines,
         width,
         height,
-        ...props,
         ...processData(values, popout)
     };
 
@@ -88,6 +122,7 @@ export default function GraphFundItem({ sold, values, popout, onToggle, ...props
 }
 
 GraphFundItem.propTypes = {
+    name: PropTypes.string.isRequired,
     sold: PropTypes.bool.isRequired,
     values: PropTypes.instanceOf(list),
     popout: PropTypes.bool.isRequired,

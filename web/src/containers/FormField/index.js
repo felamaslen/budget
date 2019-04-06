@@ -14,7 +14,7 @@ import FormFieldTransactions from '~client/components/FormField/transactions';
 import { aFormFieldChanged } from '~client/actions/form.actions';
 
 function FormField({ fieldKey, item, value, makeOnChange }) {
-    const onChange = useMemo(() => makeOnChange(fieldKey, item), [fieldKey, item]);
+    const onChange = useMemo(() => makeOnChange(fieldKey, item), [fieldKey, item, makeOnChange]);
 
     if (item === 'date') {
         return (

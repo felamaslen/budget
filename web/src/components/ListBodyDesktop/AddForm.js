@@ -14,7 +14,7 @@ export default function AddForm({ page, addBtnFocus, onAdd }) {
 
         setWasFocused(addBtnFocus);
 
-    }, [addBtnFocus]);
+    }, [addBtnFocus, wasFocused]);
 
     const addItems = useMemo(() => PAGES[page].cols.map((item, col) => (
         <ListAddEditItem
@@ -26,7 +26,7 @@ export default function AddForm({ page, addBtnFocus, onAdd }) {
         />
     )), [page]);
 
-    const onClick = useCallback(() => onAdd(page), [page]);
+    const onClick = useCallback(() => onAdd(page), [onAdd, page]);
 
     return (
         <li className="li-add">
