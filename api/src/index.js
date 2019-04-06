@@ -101,6 +101,10 @@ function setupApi(app, config, db, logger) {
 
     app.use(passport.initialize());
 
+    app.get('/health', (req, res) => {
+        res.send('ok');
+    });
+
     app.use(API_PREFIX, routes(config, db, logger));
 
     setupApiDocs(app, config);
