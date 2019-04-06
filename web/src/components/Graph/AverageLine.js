@@ -7,11 +7,11 @@ import { COLOR_LIGHT_GREY } from '~client/constants/colors';
 import { getSingleLinePath } from './helpers';
 
 export default function AverageLine({ value, data, ...props }) {
-    if (!value) {
-        return null;
-    }
-
     const averageData = useMemo(() => {
+        if (!value) {
+            return null;
+        }
+
         return data.reduce(({ last, points }, point) => {
             const nextLast = last.slice(1 - value).push(point.get(1));
             const average = listAverage(nextLast);
@@ -20,11 +20,21 @@ export default function AverageLine({ value, data, ...props }) {
 
         }, { last: list.of(), points: list.of() })
             .points;
-    }, [data]);
+    }, [value, data]);
 
-    const averageLinePath = useMemo(() => getSingleLinePath({
-        ...props, data: averageData, smooth: true, fill: false
-    }), [averageData, ...Object.keys(props).map(key => props[key])]);
+    const averageLinePath = useMemo(() => {
+        if (!averageData) {
+            return null;
+        }
+
+        return getSingleLinePath({
+            ...props, data: averageData, smooth: true, fill: false
+        });
+    }, [averageData, ...Object.keys(props).map(key => props[key])]);
+
+    if (!averageLinePath) {
+        return null;
+    }
 
     return (
         <path d={averageLinePath}

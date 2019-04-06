@@ -9,28 +9,35 @@ export default function HoverCost(allProps) {
 
     const { abbreviate, value, ...props } = allProps;
 
-    if (abbreviate === false) {
-        return <span className="hover-cost">{value}</span>;
-    }
-
     const formattedValue = formatCurrency(value, {
         brackets: true,
         ...props,
         abbreviate: false
     });
-    const abbreviated = formatCurrency(value, {
+
+    const abbreviated = abbreviate && formatCurrency(value, {
         abbreviate: true,
         precision: 1,
         brackets: true,
         ...props
     });
 
-    if (formattedValue === abbreviated) {
-        return <span className="hover-cost">{formattedValue}</span>;
+    const doHover = formattedValue !== abbreviated;
+
+    const onMouseEnter = useCallback(() => doHover && setHover(true), [doHover, setHover]);
+    const onMouseLeave = useCallback(() => doHover && setHover(null), [doHover, setHover]);
+
+    if (!abbreviate) {
+        return (
+            <span className="hover-cost">{value}</span>
+        );
     }
 
-    const onMouseEnter = useCallback(() => setHover(true));
-    const onMouseLeave = useCallback(() => setHover(null));
+    if (!doHover) {
+        return (
+            <span className="hover-cost">{formattedValue}</span>
+        );
+    }
 
     const className = classNames('hover-cost', { hover });
 
@@ -53,3 +60,8 @@ HoverCost.propTypes = {
     abbreviate: PropTypes.bool,
     precision: PropTypes.number
 };
+
+HoverCost.defaultProps = {
+    abbreviate: true
+};
+
