@@ -43,7 +43,7 @@ export function ModalDialog({
 
         setWasVisible(visible);
 
-    }, [visible]);
+    }, [visible, wasVisible, deactivate]);
 
     const className = classNames('modal-dialog-outer', type);
 

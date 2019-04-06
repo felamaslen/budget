@@ -19,7 +19,7 @@ function ErrorMessages({ list, closeMessage }) {
 
     useEffect(() => () => hideTimers.current.forEach(timer => clearTimeout(timer)), []);
 
-    const onClose = useCallback(messageId => () => closeMessage(messageId));
+    const onClose = useCallback(messageId => () => closeMessage(messageId), [closeMessage]);
 
     useEffect(() => {
         if (prevList.size < list.size) {
@@ -34,7 +34,7 @@ function ErrorMessages({ list, closeMessage }) {
 
         setPrevList(list);
 
-    }, [list]);
+    }, [list, prevList, onClose]);
 
     return (
         <ul className="messages-outer">

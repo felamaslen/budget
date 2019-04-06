@@ -1,12 +1,13 @@
 import { List as list } from 'immutable';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { DateTime } from 'luxon';
 import LineGraph from '~client/components/Graph/LineGraph';
-import Axes from './Axes';
-import NowLine from './NowLine';
-import { GRAPH_HEIGHT } from '~client/constants/graph';
+import { rangePropTypes } from '~client/components/Graph/propTypes';
+import Axes from '~client/components/GraphCashFlow/Axes';
+import NowLine from '~client/components/GraphCashFlow/NowLine';
+import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
 
 function getTime(key, now, offset, breakAtToday, startDate) {
@@ -54,40 +55,84 @@ export function getRanges(lines) {
     }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
 }
 
-export default function GraphCashFlow(props) {
-    const ranges = getRanges(props.lines);
+function makeBeforeLines({ now }) {
+    const BeforeLines = ({ minX, maxX, minY, maxY, pixX, pixY }) => (
+        <g>
+            <Axes
+                minX={minX}
+                maxX={maxX}
+                minY={minY}
+                maxY={maxY}
+                pixX={pixX}
+                pixY={pixY}
+            />
+            <NowLine
+                now={now}
+                minY={minY}
+                maxY={maxY}
+                pixX={pixX}
+                pixY={pixY}
+            />
+        </g>
+    );
 
-    const coreProps = {
-        width: props.graphWidth,
-        height: props.graphHeight || GRAPH_HEIGHT,
-        padding: [40, 0, 0, 0],
-        ...ranges
+    BeforeLines.propTypes = {
+        ...rangePropTypes
     };
 
-    const beforeLines = subProps => <g>
-        <Axes {...subProps} />
-        <NowLine {...subProps} now={props.now} />
-    </g>;
+    return BeforeLines;
+}
+
+export default function GraphCashFlow({ name, now, graphWidth, graphHeight, lines, afterLines, after }) {
+    const ranges = useMemo(() => getRanges(lines), [lines]);
+
+    const beforeLines = useMemo(() => makeBeforeLines({ now }), [now]);
+
+    const labelX = useCallback(value => DateTime.fromJSDate(new Date(1000 * value))
+        .toFormat('LLL y'), []
+    );
+
+    const labelY = useCallback(value => formatCurrency(value, { precision: 2 }), []);
+
+    const hoverEffect = useMemo(() => ({
+        labelX,
+        labelY,
+        labelWidthY: 88
+    }), [labelX, labelY]);
 
     const graphProps = {
+        name,
         beforeLines,
-        hoverEffect: {
-            labelX: value => DateTime.fromJSDate(new Date(1000 * value))
-                .toFormat('LLL y'),
-            labelY: value => formatCurrency(value, { precision: 2 }),
-            labelWidthY: 88
-        },
-        ...coreProps,
-        ...props
+        afterLines,
+        after,
+        lines,
+        hoverEffect,
+        width: graphWidth,
+        height: graphHeight,
+        padding: GRAPH_CASHFLOW_PADDING,
+        ...ranges
     };
 
     return <LineGraph {...graphProps} />;
 }
 
-GraphCashFlow.propTypes = {
+export const graphCashFlowPropTypes = {
+    name: PropTypes.string.isRequired,
     now: PropTypes.instanceOf(DateTime).isRequired,
-    graphWidth: PropTypes.number.isRequired,
-    graphHeight: PropTypes.number,
-    lines: ImmutablePropTypes.list.isRequired
+    graphWidth: PropTypes.number.isRequired
+};
+
+GraphCashFlow.propTypes = {
+    graphHeight: PropTypes.number.isRequired,
+    lines: ImmutablePropTypes.list.isRequired,
+    afterLines: PropTypes.func,
+    after: PropTypes.func,
+    ...graphCashFlowPropTypes
+};
+
+GraphCashFlow.defaultProps = {
+    graphHeight: GRAPH_HEIGHT,
+    afterLines: null,
+    after: null
 };
 

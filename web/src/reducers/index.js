@@ -79,7 +79,6 @@ const reducers = createReducerObject([
     [AC.FORM_INPUT_CHANGED, form.rHandleFormInputChange],
 
     // graph actions
-    [AC.GRAPH_SHOWALL_TOGGLED, graph.rToggleShowAll],
     [AC.GRAPH_FUNDS_CLICKED, graph.rToggleFundsGraphMode],
     [AC.GRAPH_FUNDS_LINE_TOGGLED, graph.rToggleFundsGraphLine],
     [AC.GRAPH_FUNDS_PERIOD_CHANGED, graph.rChangeFundsGraphPeriod],

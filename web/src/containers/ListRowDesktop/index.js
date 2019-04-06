@@ -10,7 +10,7 @@ import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
 
 function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete }) {
-    const rowClass = row.get('className') || '';
+    const rowClass = row.get('className') || {};
 
     const items = PAGES[page].cols.map((colName, colKey) => (
         <ListRowCell key={colKey}

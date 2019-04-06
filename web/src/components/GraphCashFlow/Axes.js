@@ -1,10 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTickSize, formatCurrency } from '~client/modules/format';
-import { getTimeScale } from '../Graph/helpers';
+import { getTimeScale } from '~client/components/Graph/helpers';
+import { pixelPropTypes } from '~client/components/Graph/propTypes';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     return (minY, maxY, pixY) => {
@@ -127,15 +127,9 @@ export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
     );
 }
 
+const { valX, valY, ...propTypes } = pixelPropTypes;
+
 Axes.propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    padding: PropTypes.array.isRequired,
-    minX: PropTypes.number.isRequired,
-    maxX: PropTypes.number.isRequired,
-    minY: PropTypes.number.isRequired,
-    maxY: PropTypes.number.isRequired,
-    pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    ...propTypes
 };
 

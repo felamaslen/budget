@@ -14,6 +14,7 @@ export const GRAPH_KEY_OFFSET_X = 45;
 export const GRAPH_KEY_OFFSET_Y = 34;
 
 export const GRAPH_CASHFLOW_NUM_TICKS = 5;
+export const GRAPH_CASHFLOW_PADDING = [40, 0, 0, 0];
 export const GRAPH_SPEND_CATEGORIES = [
     { name: 'bills', key: 15 },
     { name: 'food', key: 67 },

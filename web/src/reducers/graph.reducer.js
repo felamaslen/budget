@@ -6,12 +6,6 @@ import { List as list, Map as map } from 'immutable';
 
 import { getInitialEnabledList, processPrices } from './funds.reducer';
 
-export const rToggleShowAll = state => {
-    return state.setIn(
-        ['other', 'showAllBalanceGraph'],
-        !state.getIn(['other', 'showAllBalanceGraph']));
-};
-
 export function rToggleFundsGraphMode(state) {
     return state.setIn(['other', 'graphFunds', 'mode'],
         (state.getIn(['other', 'graphFunds', 'mode']) + 1) % 3);

@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export default function AfterCanvas({ showAll, onShowAll }) {
+export default function AfterCanvas({ showAll, setShowAll }) {
     const className = classNames('show-all', 'noselect', {
         noselect: true,
         enabled: showAll
     });
 
-    const onClick = () => onShowAll();
+    const onClick = useCallback(() => setShowAll(!showAll), [showAll, setShowAll]);
 
     return <span className={className} onClick={onClick}>
         <span>{'Show all'}</span>
@@ -18,6 +18,6 @@ export default function AfterCanvas({ showAll, onShowAll }) {
 
 AfterCanvas.propTypes = {
     showAll: PropTypes.bool.isRequired,
-    onShowAll: PropTypes.func.isRequired
+    setShowAll: PropTypes.func.isRequired
 };
 

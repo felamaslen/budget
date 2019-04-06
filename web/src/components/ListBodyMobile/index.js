@@ -27,7 +27,7 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
         return <span key={column} className={className}>{column}</span>;
     });
 
-    const onAdd = useCallback(() => onMobileAdd(page), [page]);
+    const onAdd = useCallback(() => onMobileAdd(page), [page, onMobileAdd]);
 
     return (
         <div className="list-mobile">

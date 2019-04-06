@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import debounce from 'debounce';
 
 import { rgba } from '~client/modules/color';
@@ -15,7 +15,7 @@ function getHlColor(color, point, index) {
     return rgba(COLOR_GRAPH_TITLE);
 }
 
-function getClosest(lines, position, mvt) {
+function getClosest(lines, position, calc) {
     if (!position) {
         return null;
     }
@@ -24,16 +24,14 @@ function getClosest(lines, position, mvt) {
 
     return lines.reduce((red, line, lineIndex) => {
         return line.get('data').reduce((last, point, index) => {
-            const distX = mvt.pixX(point.get(0)) - posX;
-            const distY = mvt.pixY(point.get(1)) - posY;
+            const distX = Math.abs(calc.pixX(point.get(0)) - posX);
+            const distY = Math.abs(calc.pixY(point.get(1)) - posY);
 
-            const dist = (distX ** 2) + (distY ** 2);
-
-            if (last && dist > last.dist) {
+            if (last && !(distX < last.distX || (distX === last.distX && distY < last.distY))) {
                 return last;
             }
 
-            return { dist, lineIndex, point, index };
+            return { distX, distY, lineIndex, point, index };
 
         }, red);
     }, null);
@@ -41,20 +39,15 @@ function getClosest(lines, position, mvt) {
 
 const noop = () => null;
 
-export function useHover({ props }) {
-    const {
-        lines,
-        isMobile
-    } = props;
-
+export function useHover({ lines, isMobile, calc, hoverEffect }) {
     const [hlPoint, setHlPoint] = useState(null);
 
-    const onHover = useCallback((position, mvt) => {
-        if (!lines || isMobile) {
+    const onHover = useCallback(position => {
+        if (!calc || !lines || isMobile) {
             return null;
         }
 
-        const closest = getClosest(lines, position, mvt);
+        const closest = getClosest(lines, position, calc);
         if (!closest) {
             return setHlPoint(null);
         }
@@ -67,16 +60,16 @@ export function useHover({ props }) {
             valY: point.get(1),
             color
         });
-    }, [lines, isMobile]);
+    }, [lines, isMobile, calc]);
 
-    const onMouseMove = useCallback(subProps => {
+    const onMouseMove = useMemo(() => {
         const handler = debounce((pageX, pageY, currentTarget) => {
             const { left, top } = currentTarget.getBoundingClientRect();
 
             onHover({
                 posX: pageX - left,
                 posY: pageY - top
-            }, subProps);
+            });
 
         }, 10, true);
 
@@ -87,9 +80,9 @@ export function useHover({ props }) {
         };
     }, [onHover]);
 
-    const onMouseLeave = useCallback(() => () => onHover(null), []);
+    const onMouseLeave = useCallback(() => setHlPoint(null), [setHlPoint]);
 
-    if (!props.hoverEffect) {
+    if (!hoverEffect) {
         return [null, noop, noop];
     }
 

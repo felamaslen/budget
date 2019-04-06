@@ -1,9 +1,9 @@
 import './style.scss';
 import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
-import { aShowAllToggled } from '~client/actions/graph.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { DateTime } from 'luxon';
 import Media from 'react-media';
 import { mediaQueryMobile } from '~client/constants';
 import { getTargets } from '~client/selectors/graph';
@@ -12,49 +12,44 @@ import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
-export function GraphOverviewWrapped({ futureMonths, cost, showAll, targets, ...props }) {
-    let graphSpending = null;
-    if (!props.isMobile) {
-        graphSpending = (
-            <GraphSpending name="spend"
-                {...props}
-                valuesNet={cost.get('net')}
-                valuesSpending={cost.get('spending')}
-            />
-        );
-    }
+export function GraphOverviewWrapped({ isMobile, startDate, now, futureMonths, cost, targets, graphWidth }) {
+    const commonProps = { startDate, now, graphWidth };
 
     return (
         <div className="graph-container-outer">
             <GraphBalance name="balance"
-                {...props}
+                {...commonProps}
                 futureMonths={futureMonths}
                 cost={cost}
-                showAll={showAll}
                 targets={targets}
             />
-            {graphSpending}
+            {!isMobile && (
+                <GraphSpending name="spend"
+                    {...commonProps}
+                    valuesNet={cost.get('net')}
+                    valuesSpending={cost.get('spending')}
+                />
+            )}
         </div>
     );
 }
 
 GraphOverviewWrapped.propTypes = {
     isMobile: PropTypes.bool,
+    startDate: PropTypes.instanceOf(DateTime).isRequired,
+    now: PropTypes.instanceOf(DateTime).isRequired,
     futureMonths: PropTypes.number.isRequired,
     cost: PropTypes.instanceOf(map).isRequired,
-    showAll: PropTypes.bool.isRequired,
     targets: PropTypes.instanceOf(list).isRequired,
     graphWidth: PropTypes.number.isRequired
 };
 
-function mediaQueryWrapper(isMobile, props) {
-    return <GraphOverviewWrapped isMobile={isMobile} {...props} />;
-}
-
 function GraphOverview(props) {
     return (
         <Media query={mediaQueryMobile}>
-            {isMobile => mediaQueryWrapper(isMobile, props)}
+            {isMobile => (
+                <GraphOverviewWrapped isMobile={isMobile} {...props} />
+            )}
         </Media>
     );
 }
@@ -65,13 +60,8 @@ const mapStateToProps = state => ({
     graphWidth: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_WIDTH),
     cost: getProcessedCost(state),
     futureMonths: getFutureMonths(state),
-    showAll: state.getIn(['other', 'showAllBalanceGraph']),
     targets: getTargets(state)
 });
 
-const mapDispatchToProps = dispatch => ({
-    onShowAll: () => dispatch(aShowAllToggled())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(GraphOverview);
+export default connect(mapStateToProps)(GraphOverview);
 

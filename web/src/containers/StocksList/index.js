@@ -69,7 +69,7 @@ function StocksList({
         requestStocksList();
 
         return requestStocksList;
-    }, []);
+    }, [requestStocksList]);
 
     const [listLoaded, setListLoaded] = useState(loadedList);
     const [prevLastPriceUpdate, setLastPriceUpdate] = useState(lastPriceUpdate);
@@ -83,7 +83,7 @@ function StocksList({
             requestPrices(0);
             setListLoaded(true);
         }
-    }, [lastPriceUpdate, listLoaded]);
+    }, [lastPriceUpdate, listLoaded, loadedList, prevLastPriceUpdate, requestPrices]);
 
     if (!enabled) {
         return null;

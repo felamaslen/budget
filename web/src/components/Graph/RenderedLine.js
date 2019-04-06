@@ -28,7 +28,7 @@ export default function RenderedLine(allProps) {
 
     const averageLine = useMemo(() => !arrows && data.size && (
         <AverageLine {...props} data={data} value={movingAverage} />
-    ), [arrows, data]);
+    ), [arrows, data, movingAverage, props]);
 
     const constantColor = typeof color === 'string';
 
@@ -37,7 +37,7 @@ export default function RenderedLine(allProps) {
             !arrows &&
             data.size &&
             getSingleLinePath({ data, smooth, fill, ...props }),
-        [constantColor, arrows, data, smooth, fill, ...Object.keys(props).map(key => props[key])]
+        [constantColor, arrows, data, smooth, fill, props]
     );
 
     const styleProps = useMemo(

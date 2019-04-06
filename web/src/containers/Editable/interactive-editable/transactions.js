@@ -38,26 +38,26 @@ function InteractiveEditableTransactionsItem({ transaction, onEdit, onRemove }) 
         }
 
         input.current.value = toFormat;
-    });
+    }, [onEdit, transaction]);
 
     const onDateBlur = useCallback(evt => {
         const rawValue = evt.target.value;
         const value = dateInput(rawValue);
 
         editIfValid('date', inputDate, value, Boolean(value));
-    });
+    }, [editIfValid]);
 
     const onUnitsBlur = useCallback(evt => {
         const units = Number(evt.target.value);
 
         editIfValid('units', inputUnits, units, !isNaN(units));
-    });
+    }, [editIfValid]);
 
     const onCostBlur = useCallback(evt => {
         const cost = Math.round(100 * Number(evt.target.value));
 
         editIfValid('cost', inputCost, cost, !isNaN(cost), value => value / 100);
-    });
+    }, [editIfValid]);
 
     const date = transaction.get('date');
     const units = transaction.get('units');
@@ -139,19 +139,18 @@ export default function InteractiveEditableTransactions({
 
     const getKey = useCallback(transaction => value.list.findIndex(otherItem =>
         otherItem.get('id') === transaction.get('id')
-    ));
+    ), [value.list]);
 
     const onEdit = useCallback((transaction, column, newValue) => {
         const key = getKey(transaction);
         editTransaction({ row, col, key, column, value: newValue });
 
-    });
+    }, [editTransaction, row, col, getKey]);
 
     const onRemove = useCallback(transaction => () => {
         const key = getKey(transaction);
         removeTransaction({ row, col, key });
-
-    });
+    }, [removeTransaction, row, col, getKey]);
 
     const editList = value.list.map(transaction => (
         <InteractiveEditableTransactionsItem key={transaction.get('id')}

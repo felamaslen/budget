@@ -39,7 +39,7 @@ function getLabelPosY(posY, height, labelHeight) {
     return { labelPosY, rectPosY };
 }
 
-export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect, hlPoint, ...props }) {
+export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect, hlPoint }) {
     if (!hlPoint) {
         return null;
     }
@@ -58,8 +58,8 @@ export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect,
     const { anchorLabelX, labelPosX, rectPosX } = getLabelPosX(posX, width, labelWidthX);
     const { labelPosY, rectPosY } = getLabelPosY(posY, height, labelHeight);
 
-    const labelTextX = hoverEffect.labelX(valX, props);
-    const labelTextY = hoverEffect.labelY(valY, props);
+    const labelTextX = hoverEffect.labelX(valX);
+    const labelTextY = hoverEffect.labelY(valY);
 
     const pathVertical = `M${posX},0 L${posX},${height}`;
     const pathHorizontal = `M0,${posY} L${width},${posY}`;

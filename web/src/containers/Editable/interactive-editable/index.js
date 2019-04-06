@@ -21,7 +21,7 @@ export default function InteractiveEditable({ item, value, onChange }) {
     }, []);
 
     const onInputChange = useCallback(evt => onChange(getEditValue(item, value, evt.target.value)),
-        [item, value]);
+        [item, value, onChange]);
 
     const className = classNames('active', 'editable', `editable-${item}`);
 

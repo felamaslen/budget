@@ -30,7 +30,7 @@ export default function AverageLine({ value, data, ...props }) {
         return getSingleLinePath({
             ...props, data: averageData, smooth: true, fill: false
         });
-    }, [averageData, ...Object.keys(props).map(key => props[key])]);
+    }, [averageData, props]);
 
     if (!averageLinePath) {
         return null;

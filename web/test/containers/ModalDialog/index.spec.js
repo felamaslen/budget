@@ -17,7 +17,7 @@ const getContainer = (customProps = {}, customState = null) => {
             loading: false,
             type: 'foo',
             row: 3,
-            col: 4,
+            ol: 4,
             id: 100,
             fields: [
                 { item: 'item', value: 'foo' },

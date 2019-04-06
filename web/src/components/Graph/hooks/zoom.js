@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import debounce from 'debounce';
 
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
@@ -10,21 +10,23 @@ function pointsVisible(lines) {
     return Boolean(lines.find(line => line.get('data').size > threshold));
 }
 
-export function useZoom({ props, padding, range, graph, hlPoint, setCalc }) {
-    const {
-        lines,
-        width,
-        height,
-        minX,
-        maxX,
-        minY,
-        maxY,
-        zoomEffect,
-        isMobile
-    } = props;
-
-    const [zoom, setZoom] = useState({ minX, maxX });
+export function useZoom({
+    dimensions,
+    lines,
+    isMobile,
+    graph,
+    hlPoint,
+    calc,
+    setCalc,
+    zoomEffect
+}) {
+    const [zoom, setZoom] = useState(dimensions);
     const [zoomLevel, setZoomLevel] = useState(0);
+
+    useEffect(() => {
+        setZoom(dimensions);
+        setZoomLevel(0);
+    }, [dimensions]);
 
     const zoomLines = useCallback((newMinX, newMaxX) => lines.map(line => {
         const data = line.get('data');
@@ -47,6 +49,8 @@ export function useZoom({ props, padding, range, graph, hlPoint, setCalc }) {
     }), [lines]);
 
     const getZoomedRange = useCallback((position, newZoomLevel) => {
+        const range = dimensions.maxX - dimensions.minX;
+
         let newMinX = zoom.minX;
         let newMaxX = zoom.maxX;
 
@@ -55,16 +59,16 @@ export function useZoom({ props, padding, range, graph, hlPoint, setCalc }) {
 
             let newMinXTarget = position - newRange / 2;
             let newMaxXTarget = position + newRange / 2;
-            if (newMinXTarget < minX) {
-                newMaxXTarget += minX - newMinXTarget;
-                newMinXTarget = minX;
-            } else if (newMaxXTarget > maxX) {
-                newMinXTarget -= newMaxXTarget - maxX;
-                newMaxXTarget = maxX;
+            if (newMinXTarget < dimensions.minX) {
+                newMaxXTarget += dimensions.minX - newMinXTarget;
+                newMinXTarget = dimensions.minX;
+            } else if (newMaxXTarget > dimensions.maxX) {
+                newMinXTarget -= newMaxXTarget - dimensions.maxX;
+                newMaxXTarget = dimensions.maxX;
             }
 
-            newMinX = Math.max(minX, Math.round(newMinXTarget));
-            newMaxX = Math.min(maxX, Math.round(newMaxXTarget));
+            newMinX = Math.max(dimensions.minX, Math.round(newMinXTarget));
+            newMaxX = Math.min(dimensions.maxX, Math.round(newMaxXTarget));
         }
 
         const zoomedLines = zoomLines(newMinX, newMaxX);
@@ -72,16 +76,14 @@ export function useZoom({ props, padding, range, graph, hlPoint, setCalc }) {
             return null;
         }
 
-        return zoomEffect(props, zoomedLines, { minX: newMinX, maxX: newMaxX });
-    });
+        return zoomEffect(zoomedLines, newMinX, newMaxX);
+    }, [dimensions.maxX, dimensions.minX, zoom.minX, zoom.maxX, zoomLines, zoomEffect]);
 
     const onWheel = useCallback(
-        ({ valX }) => debounce(evt => {
+        debounce(evt => {
             if (isMobile || !zoomEffect) {
                 return;
             }
-
-            evt.preventDefault();
 
             if (!hlPoint && !(graph.current && graph.current.offsetParent)) {
                 return;
@@ -89,14 +91,13 @@ export function useZoom({ props, padding, range, graph, hlPoint, setCalc }) {
 
             const position = hlPoint
                 ? hlPoint.valX
-                : valX(evt.pageX - graph.current.offsetParent.offsetLeft);
+                : calc.valX(evt.pageX - graph.current.offsetParent.offsetLeft);
 
             // direction: in is -1, out is +1
             const direction = evt.deltaY / Math.abs(evt.deltaY);
             const newZoomLevel = Math.max(0, zoomLevel - direction);
 
             const newZoom = getZoomedRange(position, newZoomLevel);
-
             if (!newZoom) {
                 return;
             }
@@ -105,32 +106,13 @@ export function useZoom({ props, padding, range, graph, hlPoint, setCalc }) {
             setZoom(newZoom);
 
             setCalc(genPixelCompute({
-                padding,
-                width,
-                height,
                 lines,
-                minY,
-                maxY,
-                minX,
-                maxX,
+                ...dimensions,
                 ...newZoom
             }));
 
         }, 10, true),
-        [
-            isMobile,
-            zoomEffect,
-            padding,
-            width,
-            height,
-            lines,
-            minY,
-            maxY,
-            minX,
-            maxX,
-            zoom,
-            zoomLevel
-        ]
+        [isMobile, zoomEffect, hlPoint, graph, zoomLevel, getZoomedRange, calc, setCalc, lines, dimensions]
     );
 
     return [zoom, onWheel];

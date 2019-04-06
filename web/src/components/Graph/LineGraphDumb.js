@@ -1,55 +1,102 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
-import Graph from '.';
-import HighlightPoint from '../HighlightPoint';
-import RenderedLine from './RenderedLine';
+import Graph from '~client/components/Graph';
+import { lineGraphPropTypes, rangePropTypes, pixelPropTypes } from '~client/components/Graph/propTypes';
+import RenderedLine from '~client/components/Graph/RenderedLine';
+import HighlightPoint from '~client/components/HighlightPoint';
 
-export default function LineGraphDumb(allProps) {
-    const { calc, lines, hlPoint, beforeLines, afterLines, ...props } = allProps;
+function useBeforeAfter(component, basicProps) {
+    return useMemo(
+        () => component && component(basicProps),
+        [component, basicProps]
+    );
+}
 
-    const subProps = useMemo(() => ({
-        ...calc,
-        ...props
-    }), [calc, ...Object.keys(props).map(key => props[key])]);
+export default function LineGraphDumb({
+    name,
+    before,
+    after,
+    dimensions,
+    calc,
+    lines,
+    hlPoint,
+    beforeLines,
+    afterLines,
+    outerProperties,
+    svgProperties,
+    svgClasses,
+    hoverEffect
+}) {
+    const basicProps = useMemo(() => ({
+        ...dimensions,
+        ...calc
+    }), [dimensions, calc]);
+
+    const graphProps = {
+        name,
+        before,
+        after,
+        outerProperties,
+        svgProperties,
+        svgClasses,
+        ...basicProps
+    };
 
     const renderedLines = useMemo(() => lines.map(line => (
         <RenderedLine
             key={line.get('key')}
             line={line}
-            {...subProps}
+            {...dimensions}
+            {...calc}
         />
-    )), [lines, subProps]);
+    )), [dimensions, lines, calc]);
+
+    const beforeLinesProc = useBeforeAfter(beforeLines, basicProps);
+    const afterLinesProc = useBeforeAfter(afterLines, basicProps);
 
     if (!lines.size) {
-        return <Graph {...subProps} />;
-    }
-
-    let highlightPoint = null;
-    if (props.hoverEffect) {
-        highlightPoint = <HighlightPoint hlPoint={hlPoint} {...subProps} />;
+        return <Graph {...graphProps} />;
     }
 
     return (
-        <Graph {...subProps}>
-            {beforeLines && beforeLines(subProps)}
+        <Graph {...graphProps}>
+            {beforeLinesProc}
             {renderedLines}
-            {afterLines && afterLines(subProps)}
-            {highlightPoint}
+            {afterLinesProc}
+            {hoverEffect && <HighlightPoint
+                pixX={calc.pixX}
+                pixY={calc.pixY}
+                width={dimensions.width}
+                height={dimensions.height}
+                hlPoint={hlPoint}
+                hoverEffect={hoverEffect}
+            />}
         </Graph>
     );
 }
 
 LineGraphDumb.propTypes = {
-    calc: PropTypes.object.isRequired,
+    name: PropTypes.string.isRequired,
+    before: PropTypes.func,
     beforeLines: PropTypes.func,
     afterLines: PropTypes.func,
+    after: PropTypes.func,
+    dimensions: PropTypes.shape({
+        ...lineGraphPropTypes,
+        ...rangePropTypes
+    }).isRequired,
+    calc: PropTypes.shape(pixelPropTypes).isRequired,
     lines: ImmutablePropTypes.list.isRequired,
     hoverEffect: PropTypes.object,
-    hlPoint: PropTypes.object,
-    minX: PropTypes.number,
-    maxX: PropTypes.number,
-    minY: PropTypes.number,
-    maxY: PropTypes.number
+    outerProperties: PropTypes.object.isRequired,
+    svgProperties: PropTypes.object.isRequired,
+    svgClasses: PropTypes.string,
+    hlPoint: PropTypes.object
+};
+
+LineGraphDumb.defaultProps = {
+    before: null,
+    after: null
 };
 

@@ -57,7 +57,6 @@ export function resetAppState(state) {
         }))
         .set('other', map({
             windowWidth: window.innerWidth,
-            showAllBalanceGraph: false,
             blockView: map({
                 status: '',
                 loadKey: null,
