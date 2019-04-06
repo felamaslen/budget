@@ -228,6 +228,7 @@
 
         .table-flex {
             width: 100%;
+            overflow-y: auto;
 
             .header {
                 flex: 0 0 auto;

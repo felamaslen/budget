@@ -13,7 +13,7 @@ import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
 export function GraphOverviewWrapped({ isMobile, startDate, now, futureMonths, cost, targets, graphWidth }) {
-    const commonProps = { startDate, now, graphWidth };
+    const commonProps = { isMobile, startDate, now, graphWidth };
 
     return (
         <div className="graph-container-outer">

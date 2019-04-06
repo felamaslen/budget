@@ -199,6 +199,7 @@ export function GraphFunds({
 
     const graphProps = {
         name: 'fund-history',
+        isMobile,
         width,
         height,
         padding: isMobile

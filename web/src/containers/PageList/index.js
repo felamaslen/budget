@@ -41,6 +41,7 @@ const makeMapStateToProps = () => {
     const getWeeklyAverages = makeGetWeeklyAverages();
 
     return (state, props) => ({
+        rows: props.rows || state.getIn(['pages', props.page, 'rows']),
         rowIds: getRowIds(state, props),
         dailyTotals: getDailyTotals(state, props),
         weeklyValue: getWeeklyAverages(state, props),

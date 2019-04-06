@@ -83,7 +83,7 @@ function makeBeforeLines({ now }) {
     return BeforeLines;
 }
 
-export default function GraphCashFlow({ name, now, graphWidth, graphHeight, lines, afterLines, after }) {
+export default function GraphCashFlow({ name, isMobile, now, graphWidth, graphHeight, lines, afterLines, after }) {
     const ranges = useMemo(() => getRanges(lines), [lines]);
 
     const beforeLines = useMemo(() => makeBeforeLines({ now }), [now]);
@@ -102,6 +102,7 @@ export default function GraphCashFlow({ name, now, graphWidth, graphHeight, line
 
     const graphProps = {
         name,
+        isMobile,
         beforeLines,
         afterLines,
         after,
@@ -123,6 +124,7 @@ export const graphCashFlowPropTypes = {
 };
 
 GraphCashFlow.propTypes = {
+    isMobile: PropTypes.bool.isRequired,
     graphHeight: PropTypes.number.isRequired,
     lines: ImmutablePropTypes.list.isRequired,
     afterLines: PropTypes.func,
@@ -131,6 +133,7 @@ GraphCashFlow.propTypes = {
 };
 
 GraphCashFlow.defaultProps = {
+    isMobile: false,
     graphHeight: GRAPH_HEIGHT,
     afterLines: null,
     after: null
