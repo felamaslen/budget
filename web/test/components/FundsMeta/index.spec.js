@@ -1,15 +1,55 @@
 import test from 'ava';
 import { render } from 'react-testing-library';
 import '~client-test/browser';
+import { fromJS } from 'immutable';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
-import reduction from '~client/reduction';
+import { DateTime } from 'luxon';
+
 import FundsMeta from '~client/components/FundsMeta';
 import { widthPageMobile } from '~client/constants/styles.json';
 
 const getFundsMeta = (customProps = {}) => {
-    const state = reduction;
+    const state = fromJS({
+        now: DateTime.fromISO('2019-04-06T23:02Z'),
+        edit: {
+            addBtnFocus: false
+        },
+        pages: {
+            funds: {
+                cache: {
+                    year1: {
+                        cacheTimes: [],
+                        prices: []
+                    }
+                },
+                rows: []
+            }
+        },
+        pagesLoaded: {
+            funds: true
+        },
+        other: {
+            windowWidth: 1000,
+            graphFunds: {
+                mode: 0,
+                period: 'year1',
+                zoomRange: [null, null],
+                enabledList: []
+            },
+            stocksList: {
+                loadedList: false,
+                loadedInitial: false,
+                stocks: {},
+                indices: {},
+                history: [],
+                lastPriceUpdate: 0,
+                weightedGain: 0,
+                oldWeightedGain: 0
+            }
+        }
+    });
 
     const store = createMockStore(state);
 

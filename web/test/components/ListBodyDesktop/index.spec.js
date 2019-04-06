@@ -3,19 +3,19 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import memoize from 'fast-memoize';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import { List as list } from 'immutable';
+import { List as list, OrderedMap } from 'immutable';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { Provider } from 'react-redux';
 import reduction from '~client/reduction';
 import ListBodyDesktop from '~client/components/ListBodyDesktop';
 
-const getContainer = memoize((customProps = {}) => {
+const getContainer = (customProps = {}) => {
     const props = {
         page: 'food',
+        rows: OrderedMap.of(),
         rowIds: list.of(),
         addBtnFocus: false,
         onDesktopAdd: () => null,
@@ -41,7 +41,7 @@ const getContainer = memoize((customProps = {}) => {
     );
 
     return { store, ...utils };
-});
+};
 
 test('rendering basic structure', t => {
     const { container } = getContainer();

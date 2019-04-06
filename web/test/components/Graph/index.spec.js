@@ -1,11 +1,10 @@
 import test from 'ava';
-import memoize from 'fast-memoize';
 import { render } from 'react-testing-library';
 import '~client-test/browser';
 import React from 'react';
 import Graph from '~client/components/Graph';
 
-const getGraph = memoize((customProps = {}) => {
+const getGraph = (customProps = {}) => {
     const props = {
         name: 'foo',
         width: 200,
@@ -20,7 +19,7 @@ const getGraph = memoize((customProps = {}) => {
             <span>{'foo'}</span>
         </Graph>
     );
-});
+};
 
 test('rendering a basic container', t => {
     const { container } = getGraph();
@@ -55,8 +54,10 @@ test('rendering its children inside the SVG', t => {
 });
 
 test('accepting a child before the SVG', t => {
+    const Before = () => <span>{'before1'}</span>;
+
     const { container } = getGraph({
-        before: <span>{'before1'}</span>
+        before: Before
     });
     const [div] = container.childNodes;
 
@@ -70,8 +71,10 @@ test('accepting a child before the SVG', t => {
 });
 
 test('accepting a child after the SVG', t => {
+    const After = () => <span>{'after1'}</span>;
+
     const { container } = getGraph({
-        after: <span>{'after1'}</span>
+        after: After
     });
     const [div] = container.childNodes;
 
@@ -85,9 +88,12 @@ test('accepting a child after the SVG', t => {
 });
 
 test('accepting children before and after the SVG', t => {
+    const Before = () => <span>{'before1'}</span>;
+    const After = () => <span>{'after1'}</span>;
+
     const { container } = getGraph({
-        before: <span>{'before1'}</span>,
-        after: <span>{'after1'}</span>
+        before: Before,
+        after: After
     });
     const [div] = container.childNodes;
 

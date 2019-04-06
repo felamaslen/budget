@@ -5,15 +5,24 @@ import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
+import { DateTime } from 'luxon';
 import PageFunds from '~client/containers/PageFunds';
 
 const getContainer = (customProps = {}, customState = null) => {
     let state = fromJS({
+        now: DateTime.fromISO('2019-04-06T23:02Z'),
         edit: {
             addBtnFocus: false
         },
         pages: {
             funds: {
+                cache: {
+                    year1: {
+                        cacheTimes: [],
+                        prices: []
+                    }
+                },
+                rows: []
             }
         },
         pagesLoaded: {
@@ -24,7 +33,8 @@ const getContainer = (customProps = {}, customState = null) => {
             graphFunds: {
                 mode: 0,
                 period: 'year1',
-                zoomRange: [null, null]
+                zoomRange: [null, null],
+                enabledList: []
             },
             stocksList: {
                 loadedList: false,
