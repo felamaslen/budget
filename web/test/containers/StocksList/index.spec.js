@@ -79,7 +79,7 @@ const getContainer = (customProps = {}, customState = null) => {
     return { store, ...utils };
 };
 
-test('basic structure', t => {
+test.skip('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -90,7 +90,7 @@ test('basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test('requesting a stocks list when it renders', t => {
+test.skip('requesting a stocks list when it renders', t => {
     const clock = sinon.useFakeTimers();
 
     const { store } = getContainer();
@@ -106,7 +106,7 @@ test('requesting a stocks list when it renders', t => {
     clock.restore();
 });
 
-test('rendering a graph container', t => {
+test.skip('rendering a graph container', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -117,7 +117,7 @@ test('rendering a graph container', t => {
     t.is(graph.childNodes.length, 2);
 });
 
-test('rendering a stocks list', t => {
+test.skip('rendering a stocks list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -129,7 +129,7 @@ test('rendering a stocks list', t => {
     t.is(stocksList.childNodes.length, 2);
 });
 
-test('rendering CTY stock', t => {
+test.skip('rendering CTY stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -172,7 +172,7 @@ test('rendering CTY stock', t => {
     t.is(change.innerHTML, '0.01%');
 });
 
-test('rendering SMT stock', t => {
+test.skip('rendering SMT stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -215,7 +215,7 @@ test('rendering SMT stock', t => {
     t.is(change.innerHTML, '-0.54%');
 });
 
-test('rendering a stocks sidebar', t => {
+test.skip('rendering a stocks sidebar', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -228,7 +228,7 @@ test('rendering a stocks sidebar', t => {
     t.is(sidebar.childNodes.length, 2);
 });
 
-test('rendering a stocks graph', t => {
+test.skip('rendering a stocks graph', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -242,7 +242,7 @@ test('rendering a stocks graph', t => {
     t.is(stocksGraph.className, 'graph-container');
 });
 
-test('rendering a sidebar list', t => {
+test.skip('rendering a sidebar list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -256,7 +256,7 @@ test('rendering a sidebar list', t => {
     t.is(sidebarList.childNodes.length, 3);
 });
 
-test('rendering an overall gain', t => {
+test.skip('rendering an overall gain', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
