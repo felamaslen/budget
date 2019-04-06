@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { PAGES } from '~client/constants/data';
 
+import './style.scss';
+
 export default function Navbar({ active, onPageSet, onLogout }) {
     if (!active) {
         return null;
