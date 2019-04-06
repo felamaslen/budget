@@ -22,6 +22,6 @@
 - Replace enzyme with react-testing-library [DONE]
 - Replace mocha with ava [DONE]
 - Remove variable length memoisations and spread props inheritance in graph components [DONE]
-- Fix scrolling on list and analysis pages
+- Fix scrolling on list and analysis pages [DONE]
 - Implement ES6 modules on server side
 - Update native android web URI
