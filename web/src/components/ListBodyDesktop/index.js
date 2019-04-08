@@ -5,28 +5,28 @@ import AddForm from './AddForm';
 import ListHeadDesktop from '../ListHeadDesktop';
 import ListRowDesktop from '~client/containers/ListRowDesktop';
 
-export default function ListBodyDesktop(props) {
-    const {
-        page,
-        rows,
-        rowIds,
-        dailyTotals,
-        weeklyValue,
-        totalCost,
-        addBtnFocus,
-        onDesktopAdd,
-        ...subProps
-    } = props;
-
+export default function ListBodyDesktop({
+    page,
+    rows,
+    rowIds,
+    getDaily,
+    dailyTotals,
+    weeklyValue,
+    totalCost,
+    addBtnFocus,
+    onDesktopAdd,
+    AfterRow,
+    TotalValue
+}) {
     const listRows = useMemo(() => rows && rowIds.map(id => (
         <ListRowDesktop key={id}
             page={page}
             id={id}
             row={rows.get(id)}
             daily={dailyTotals && dailyTotals.get(id)}
-            {...subProps}
+            AfterRow={AfterRow}
         />
-    )), [rowIds, dailyTotals, page, rows, subProps]);
+    )), [rowIds, dailyTotals, page, rows, AfterRow]);
 
     if (!listRows) {
         return null;
@@ -38,8 +38,9 @@ export default function ListBodyDesktop(props) {
                 <ListHeadDesktop
                     page={page}
                     weeklyValue={weeklyValue}
+                    getDaily={getDaily}
                     totalCost={totalCost}
-                    {...subProps}
+                    TotalValue={TotalValue}
                 />
             </li>
             <AddForm page={page}
@@ -54,10 +55,13 @@ ListBodyDesktop.propTypes = {
     page: PropTypes.string.isRequired,
     rows: PropTypes.instanceOf(OrderedMap),
     rowIds: PropTypes.instanceOf(list),
+    getDaily: PropTypes.bool,
     dailyTotals: PropTypes.instanceOf(map),
     weeklyValue: PropTypes.number,
     totalCost: PropTypes.number,
     addBtnFocus: PropTypes.bool.isRequired,
-    onDesktopAdd: PropTypes.func.isRequired
+    onDesktopAdd: PropTypes.func.isRequired,
+    AfterRow: PropTypes.func,
+    TotalValue: PropTypes.func,
 };
 

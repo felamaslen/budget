@@ -7,7 +7,14 @@ import ModalDialog from '~client/containers/ModalDialog';
 import PageOverview from '~client/containers/PageOverview';
 import PageAnalysis from '~client/containers/PageAnalysis';
 import PageFunds from '~client/containers/PageFunds';
-import PageList from '~client/containers/PageList';
+import {
+    PageIncome,
+    PageBills,
+    PageFood,
+    PageGeneral,
+    PageHoliday,
+    PageSocial
+} from '~client/containers/PageList';
 
 function Content({ loggedIn }) {
     if (!loggedIn) {
@@ -21,12 +28,12 @@ function Content({ loggedIn }) {
                     <Route exact path="/" component={PageOverview} />
                     <Route path="/analysis" component={PageAnalysis} />
                     <Route path="/funds" component={PageFunds} />
-                    <Route path="/income" render={() => <PageList page="income" />} />
-                    <Route path="/bills" render={() => <PageList page="bills" />} />
-                    <Route path="/food" render={() => <PageList page="food" />} />
-                    <Route path="/general" render={() => <PageList page="general" />} />
-                    <Route path="/holiday" render={() => <PageList page="holiday" />} />
-                    <Route path="/social" render={() => <PageList page="social" />} />
+                    <Route path="/income" component={PageIncome} />
+                    <Route path="/bills" component={PageBills} />
+                    <Route path="/food" component={PageFood} />
+                    <Route path="/general" component={PageGeneral} />
+                    <Route path="/holiday" component={PageHoliday} />
+                    <Route path="/social" component={PageSocial} />
                 </Switch>
             </div>
             <ModalDialog />

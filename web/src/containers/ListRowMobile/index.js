@@ -2,12 +2,13 @@ import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 import { aMobileEditDialogOpened } from '~client/actions/form.actions';
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ListRowCellMobile from '~client/components/ListRowCellMobile';
 
 export function ListRowMobile({ page, id, row, colKeys, listColsMobile, AfterRowMobile, onEdit }) {
-    const cells = (listColsMobile || LIST_COLS_MOBILE).map((column, key) => (
+
+    const cells = listColsMobile.map((column, key) => (
         <ListRowCellMobile key={column}
             page={page} colKey={colKeys[key]} row={row} id={id} column={column} />
     ));
@@ -17,8 +18,10 @@ export function ListRowMobile({ page, id, row, colKeys, listColsMobile, AfterRow
         afterRowMobile = <AfterRowMobile row={row} colKeys={colKeys} />;
     }
 
+    const onClick = useCallback(() => onEdit(page, id), [page, id, onEdit]);
+
     return (
-        <li onClick={onEdit(page, id)}>
+        <li onClick={onClick}>
             {cells}
             {afterRowMobile}
         </li>
@@ -30,18 +33,22 @@ ListRowMobile.propTypes = {
     colKeys: PropTypes.array.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     id: PropTypes.number.isRequired,
-    listColsMobile: PropTypes.array,
+    listColsMobile: PropTypes.array.isRequired,
     AfterRowMobile: PropTypes.func,
     onEdit: PropTypes.func.isRequired
+};
+
+ListRowMobile.defaultProps = {
+    listColsMobile: LIST_COLS_MOBILE
 };
 
 const mapStateToProps = (state, { page, id }) => ({
     row: state.getIn(['pages', page, 'rows', id])
 });
 
-const mapDispatchToProps = dispatch => ({
-    onEdit: (page, id) => () => dispatch(aMobileEditDialogOpened(page, id))
-});
+const mapDispatchToProps = {
+    onEdit: aMobileEditDialogOpened
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListRowMobile);
 
