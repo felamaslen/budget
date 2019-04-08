@@ -1,5 +1,4 @@
-import { delay } from 'redux-saga';
-import { all, fork, select, takeLatest, take, cancel, call, put } from 'redux-saga/effects';
+import { delay, all, fork, select, takeLatest, take, cancel, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { FORM_DIALOG_CLOSED, EDIT_CHANGED, EDIT_SUGGESTIONS_REQUESTED } from '~client/constants/actions';
@@ -12,7 +11,7 @@ import { getModalState, suggestionsInfo } from '~client/selectors/edit';
 import { addServerDataRequest } from './app.saga';
 
 export function *triggerEditSuggestionsRequest({ page, item, value }) {
-    yield call(delay, 100);
+    yield delay(100);
 
     yield put(aSuggestionsRequested({ page, item, value }));
 }

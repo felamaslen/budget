@@ -3,7 +3,6 @@ import test from 'ava';
 import '~client-test/browser';
 import { List as list } from 'immutable';
 import { testSaga } from 'redux-saga-test-plan';
-import { delay } from 'redux-saga';
 import axios from 'axios';
 import { getApiKey } from '~client/selectors/app';
 import { getModalState, suggestionsInfo } from '~client/selectors/edit';
@@ -22,7 +21,7 @@ test('triggerEditSuggestionsRequest calling the suggetions requester after a del
     t.is(1, 1);
     testSaga(triggerEditSuggestionsRequest, { page: 'income', item: 'foo', value: 'bar' })
         .next()
-        .call(delay, 100)
+        .delay(100)
         .next()
         .put(A.aSuggestionsRequested({ page: 'income', item: 'foo', value: 'bar' }))
         .next()
