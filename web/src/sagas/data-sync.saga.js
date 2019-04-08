@@ -1,42 +1,21 @@
 import { List as list } from 'immutable';
-import { eventChannel } from 'redux-saga';
-import { fork, select, take, call, put } from 'redux-saga/effects';
+import { delay, fork, select, put } from 'redux-saga/effects';
 import { TIMER_UPDATE_SERVER } from '~client/constants/data';
-import { SERVER_UPDATED } from '~client/constants/actions';
-import { aSettingsLoaded, aServerUpdated } from '../actions/app.actions';
-
-export const selectRequestList = state =>
-    state.getIn(['edit', 'requestList']);
-
-function dataSyncEventChannel() {
-    return eventChannel(emitter => {
-        const dataSync = setInterval(() => emitter(aServerUpdated()), TIMER_UPDATE_SERVER);
-
-        return () => {
-            clearInterval(dataSync);
-        };
-    });
-}
+import { aSettingsLoaded, aServerUpdated } from '~client/actions/app.actions';
+import { getRawRequestList } from '~client/selectors/app';
 
 export function *loopDataSync() {
-    const channel = yield call(dataSyncEventChannel);
-
     let lastRequestList = list.of();
 
     while (true) {
-        const action = yield take(channel);
+        yield delay(TIMER_UPDATE_SERVER);
 
-        if (action.type === SERVER_UPDATED) {
-            const requestList = yield select(selectRequestList);
+        const requestList = yield select(getRawRequestList);
 
-            if (!requestList.equals(lastRequestList) && requestList.size) {
-                lastRequestList = requestList;
+        if (!requestList.equals(lastRequestList) && requestList.size) {
+            lastRequestList = requestList;
 
-                yield put(action);
-            }
-        }
-        else {
-            yield put(action);
+            yield put(aServerUpdated());
         }
     }
 }

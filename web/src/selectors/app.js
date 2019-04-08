@@ -4,7 +4,7 @@ export const getNow = state => state.get('now');
 
 export const getApiKey = state => state.getIn(['user', 'apiKey']);
 
-const getRawRequestList = state => state.getIn(['edit', 'requestList']);
+export const getRawRequestList = state => state.getIn(['edit', 'requestList']);
 
 export const getRequestList = createSelector([getRawRequestList], requestList =>
     requestList.map(item => item.get('req')));
