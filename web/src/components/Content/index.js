@@ -28,6 +28,14 @@ const routes = [
     { key: 'social', component: PageSocial }
 ];
 
+function NotFound() {
+    return (
+        <div className="page page-not-found">
+            <h1>{'Page not found'}</h1>
+        </div>
+    );
+}
+
 function Content({ loggedIn }) {
     if (!loggedIn) {
         return null;
@@ -39,6 +47,7 @@ function Content({ loggedIn }) {
                 {routes.map(({ key, path = `/${key}`, ...rest }) => (
                     <Route key={key} className="inner" path={path} {...rest} />
                 ))}
+                <Route path="/" component={NotFound} />
             </Switch>
             <ModalDialog />
         </div>
