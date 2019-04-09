@@ -1,5 +1,6 @@
-@import '../../sass/responsive.scss';
-@import '../../sass/variables.scss';
+@import '~client/sass/responsive.scss';
+@import '~client/sass/variables.scss';
+@import '~client/sass/animations.scss';
 
 $nav-img: "../../images/nav.png";
 
@@ -212,6 +213,16 @@ $nav-img: "../../images/nav.png";
             height: $height-header-mobile;
             padding: 0 0.5em;
             background: $color-mob-primary-dark;
+
+            .logo {
+                display: flex;
+                align-items: center;
+                line-height: 55px;
+
+                .loading-api {
+                    top: 10px;
+                }
+            }
         }
         .queue-not-saved {
             float: right;
@@ -278,5 +289,4 @@ $nav-img: "../../images/nav.png";
         }
     }
 }
-
 

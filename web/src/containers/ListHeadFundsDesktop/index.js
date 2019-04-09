@@ -54,7 +54,6 @@ function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedVal
 }
 
 ListHeadFundsDesktop.propTypes = {
-    page: PropTypes.string.isRequired,
     totalCost: PropTypes.number.isRequired,
     viewSoldFunds: PropTypes.bool,
     shortPeriod: PropTypes.string.isRequired,

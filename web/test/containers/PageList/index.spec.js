@@ -5,7 +5,7 @@ import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
-import PageList from '~client/containers/PageList';
+import { PageList } from '~client/containers/PageList';
 
 const getContainer = (customProps = {}, customState = null) => {
     let state = fromJS({

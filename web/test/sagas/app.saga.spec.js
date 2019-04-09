@@ -2,17 +2,18 @@
 import test from 'ava';
 import '~client-test/browser';
 import { DateTime } from 'luxon';
-import { delay } from 'redux-saga';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
-import {
+import appSaga, {
     watchEventEmitter,
+    keyPressEventChannel,
     windowResizeEventChannel,
     updateServerData,
     addServerDataRequest,
     addServerData,
     timeUpdater
 } from '~client/sagas/app.saga';
+import { EDIT_LIST_ITEM_ADDED, SERVER_UPDATED } from '~client/constants/actions';
 import { getApiKey, getRequestList, getAddData } from '~client/selectors/app';
 import { openTimedMessage } from '~client/sagas/error.saga';
 import { aWindowResized, aServerUpdateReceived, aServerAddReceived, aTimeUpdated } from '~client/actions/app.actions';
@@ -124,16 +125,34 @@ test('timeUpdater periodicallying call the time updater action', t => {
 
     testSaga(timeUpdater)
         .next()
-        .call(delay, 1000)
+        .delay(1000)
         .next()
         .call(DateTime.local)
         .next(date)
         .put(aTimeUpdated(date))
         .next()
-        .call(delay, 1000)
+        .delay(1000)
         .next()
         .call(DateTime.local);
 
     // etc.
+});
+
+test('appSaga forks other sagas', t => {
+    t.is(1, 1);
+
+    testSaga(appSaga)
+        .next()
+        .fork(timeUpdater)
+        .next()
+        .fork(watchEventEmitter, keyPressEventChannel)
+        .next()
+        .fork(watchEventEmitter, windowResizeEventChannel)
+        .next()
+        .takeEvery(EDIT_LIST_ITEM_ADDED, addServerData)
+        .next()
+        .takeLatest(SERVER_UPDATED, updateServerData)
+        .next()
+        .isDone();
 });
 

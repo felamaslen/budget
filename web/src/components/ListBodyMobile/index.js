@@ -1,31 +1,39 @@
 import './style.scss';
-import { List as list } from 'immutable';
+import { List as list, OrderedMap } from 'immutable';
 import { PAGES, LIST_COLS_MOBILE } from '~client/constants/data';
-import React, { useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListRowMobile from '~client/containers/ListRowMobile';
 
-export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileAdd, ...props }) {
-    const listCols = listColsMobile || LIST_COLS_MOBILE;
-    const colKeys = listCols.map(column =>
-        PAGES[page].cols.indexOf(column));
+export default function ListBodyMobile({
+    page,
+    rows,
+    rowIds,
+    listColsMobile,
+    onMobileAdd,
+    AfterRowMobile
+}) {
+    const colKeys = useMemo(
+        () => listColsMobile.map(column => PAGES[page].cols.indexOf(column)),
+        [page, listColsMobile]
+    );
 
-    const rows = rowIds.map(id => (
+    const listRows = useMemo(() => rows && rowIds.map(id => (
         <ListRowMobile key={id}
             page={page}
-            id={id}
             colKeys={colKeys}
+            id={id}
             listColsMobile={listColsMobile}
-            {...props}
+            AfterRowMobile={AfterRowMobile}
         />
+    )), [page, rowIds, rows, colKeys, AfterRowMobile, listColsMobile]);
+
+    const listHeadInner = listColsMobile.map(column => (
+        <span key={column}
+            className={classNames('list-head-column', column)}
+        >{column}</span>
     ));
-
-    const listHeadInner = listCols.map(column => {
-        const className = classNames('list-head-column', column);
-
-        return <span key={column} className={className}>{column}</span>;
-    });
 
     const onAdd = useCallback(() => onMobileAdd(page), [page, onMobileAdd]);
 
@@ -34,7 +42,7 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
             <div className="list-head noselect">
                 {listHeadInner}
             </div>
-            <ul className="list-ul">{rows}</ul>
+            <ul className="list-ul">{listRows}</ul>
             <div className="button-add-outer">
                 <button type="button" className="button-add" onClick={onAdd}>
                     {'Add'}
@@ -46,8 +54,14 @@ export default function ListBodyMobile({ page, rowIds, listColsMobile, onMobileA
 
 ListBodyMobile.propTypes = {
     page: PropTypes.string.isRequired,
+    rows: PropTypes.instanceOf(OrderedMap),
     rowIds: PropTypes.instanceOf(list).isRequired,
-    listColsMobile: PropTypes.array,
-    onMobileAdd: PropTypes.func.isRequired
+    listColsMobile: PropTypes.array.isRequired,
+    onMobileAdd: PropTypes.func.isRequired,
+    AfterRowMobile: PropTypes.func
+};
+
+ListBodyMobile.defaultProps = {
+    listColsMobile: LIST_COLS_MOBILE
 };
 

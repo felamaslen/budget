@@ -1,5 +1,5 @@
-import { delay, eventChannel } from 'redux-saga';
-import { fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
+import { eventChannel } from 'redux-saga';
+import { delay, fork, select, take, takeEvery, takeLatest, call, put } from 'redux-saga/effects';
 import { DateTime } from 'luxon';
 import debounce from 'debounce';
 import axios from 'axios';
@@ -104,7 +104,7 @@ export function *addServerData({ page }) {
 
 export function *timeUpdater() {
     while (true) {
-        yield call(delay, 1000);
+        yield delay(1000);
 
         const now = yield call(DateTime.local);
 
@@ -116,7 +116,7 @@ export default function *appSaga() {
     yield fork(timeUpdater);
     yield fork(watchEventEmitter, keyPressEventChannel);
     yield fork(watchEventEmitter, windowResizeEventChannel);
-    yield fork(takeEvery, EDIT_LIST_ITEM_ADDED, addServerData);
-    yield fork(takeLatest, SERVER_UPDATED, updateServerData);
+    yield takeEvery(EDIT_LIST_ITEM_ADDED, addServerData);
+    yield takeLatest(SERVER_UPDATED, updateServerData);
 }
 
