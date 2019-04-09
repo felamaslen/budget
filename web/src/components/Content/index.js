@@ -1,7 +1,7 @@
 import './style.scss';
 import React from 'react';
 import { withRouter } from 'react-router';
-import { Switch, Route } from 'react-router-dom';
+import Route, { CacheSwitch as Switch } from 'react-router-cache-route';
 import PropTypes from 'prop-types';
 import ModalDialog from '~client/containers/ModalDialog';
 import PageOverview from '~client/containers/PageOverview';
