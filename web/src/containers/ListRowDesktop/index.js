@@ -5,7 +5,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { PAGES } from '~client/constants/data';
-import { getPageRow } from '~client/selectors/list';
 import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
 
@@ -13,7 +12,7 @@ function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete })
     const rowClass = row.get('className') || {};
 
     const items = PAGES[page].cols.map((colName, colKey) => (
-        <ListRowCell key={colKey}
+        <ListRowCell key={colName}
             page={page}
             row={row}
             colName={colName}
@@ -56,7 +55,6 @@ ListRowDesktop.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-    row: getPageRow(state, props),
     activeCol: state.getIn(['edit', 'active', 'row']) === props.id
         ? state.getIn(['edit', 'active', 'col'])
         : null

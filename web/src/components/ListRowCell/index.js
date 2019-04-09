@@ -1,11 +1,11 @@
 import { Map as map } from 'immutable';
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import Editable from '~client/containers/Editable';
 
-export default function ListRowCell({ page, id, row, colName, colKey, active }) {
+const ListRowCell = memo(({ page, id, row, colName, colKey, active }) => {
     const spanClasses = classNames(colName, { active });
 
     const props = {
@@ -19,8 +19,7 @@ export default function ListRowCell({ page, id, row, colName, colKey, active }) 
     return <span key={colKey} className={spanClasses}>
         <Editable {...props} />
     </span>;
-
-}
+});
 
 ListRowCell.propTypes = {
     page: PropTypes.string.isRequired,
@@ -30,4 +29,6 @@ ListRowCell.propTypes = {
     colKey: PropTypes.number.isRequired,
     active: PropTypes.bool.isRequired
 };
+
+export default ListRowCell;
 

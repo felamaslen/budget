@@ -38,6 +38,7 @@ const getContainer = memoize((customProps = {}, customState = null) => {
     const props = {
         page: 'food',
         id: 10,
+        row: state.getIn(['pages', 'food', 'rows', customProps.id || 10]),
         AfterRow,
         ...customProps
     };
