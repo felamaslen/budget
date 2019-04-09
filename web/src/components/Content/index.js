@@ -16,6 +16,18 @@ import {
     PageSocial
 } from '~client/containers/PageList';
 
+const routes = [
+    { key: 'overview', path: '/', exact: true, component: PageOverview },
+    { key: 'analysis', component: PageAnalysis },
+    { key: 'funds', component: PageFunds },
+    { key: 'income', component: PageIncome },
+    { key: 'bills', component: PageBills },
+    { key: 'food', component: PageFood },
+    { key: 'general', component: PageGeneral },
+    { key: 'holiday', component: PageHoliday },
+    { key: 'social', component: PageSocial }
+];
+
 function Content({ loggedIn }) {
     if (!loggedIn) {
         return null;
@@ -23,19 +35,11 @@ function Content({ loggedIn }) {
 
     return (
         <div className="page-wrapper">
-            <div className="inner">
-                <Switch>
-                    <Route exact path="/" component={PageOverview} />
-                    <Route path="/analysis" component={PageAnalysis} />
-                    <Route path="/funds" component={PageFunds} />
-                    <Route path="/income" component={PageIncome} />
-                    <Route path="/bills" component={PageBills} />
-                    <Route path="/food" component={PageFood} />
-                    <Route path="/general" component={PageGeneral} />
-                    <Route path="/holiday" component={PageHoliday} />
-                    <Route path="/social" component={PageSocial} />
-                </Switch>
-            </div>
+            <Switch>
+                {routes.map(({ key, path = `/${key}`, ...rest }) => (
+                    <Route key={key} className="inner" path={path} {...rest} />
+                ))}
+            </Switch>
             <ModalDialog />
         </div>
     );
