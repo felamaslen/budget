@@ -62,6 +62,6 @@ ListBodyDesktop.propTypes = {
     addBtnFocus: PropTypes.bool.isRequired,
     onDesktopAdd: PropTypes.func.isRequired,
     AfterRow: PropTypes.func,
-    TotalValue: PropTypes.func,
+    TotalValue: PropTypes.func
 };
 
