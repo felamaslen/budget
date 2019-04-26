@@ -1,0 +1,97 @@
+const { Router } = require('express');
+
+const { clientError, catchAsyncErrors } = require('./error-handling');
+const { validate } = require('./validate');
+
+const makeGetItem = (table, item, dbToJson) => async (db, id) => {
+    const [data] = await db.select()
+        .from(table)
+        .where({ id });
+
+    if (!data) {
+        throw clientError(`${item} not found`, 404);
+    }
+
+    return dbToJson(data);
+};
+
+const onCreate = (db, table, jsonToDb) => catchAsyncErrors(async (req, res) => {
+    const data = jsonToDb(req.validBody);
+
+    const [id] = await db.insert(data)
+        .returning('id')
+        .into(table);
+
+    res.json({
+        id,
+        ...data
+    });
+});
+
+const onRead = (db, table, getItem, dbToJson) => catchAsyncErrors(async (req, res) => {
+    if (req.params.id) {
+        const data = await getItem(db, req.params.id);
+
+        return res.json(data);
+    }
+
+    const data = await db.select()
+        .from(table);
+
+    const items = data.map(dbToJson);
+
+    return res.json(items);
+});
+
+const onUpdate = (db, table, getItem, jsonToDb) => catchAsyncErrors(async (req, res) => {
+    await getItem(db, req.params.id);
+
+    const data = jsonToDb(req.validBody);
+
+    await db(table)
+        .update(data)
+        .where({ id: req.params.id });
+
+    const updated = await getItem(db, req.params.id);
+
+    res.json(updated);
+});
+
+const onDelete = (db, table, getItem) => catchAsyncErrors(async (req, res) => {
+    await getItem(db, req.params.id);
+    await db(table)
+        .where({ id: req.params.id })
+        .delete();
+
+    res.status(204).end();
+});
+
+const noop = value => value;
+
+function makeCrudRoute({
+    table,
+    item,
+    schema,
+    jsonToDb = noop,
+    dbToJson = noop
+}) {
+    const getItem = makeGetItem(table, item, dbToJson);
+
+    return db => {
+        const router = new Router();
+
+        router.post('/', validate(schema), onCreate(db, table, jsonToDb));
+
+        router.get('/:id?', onRead(db, table, getItem, dbToJson));
+
+        router.put('/:id', validate(schema), onUpdate(db, table, getItem, jsonToDb));
+
+        router.delete('/:id', onDelete(db, table, getItem));
+
+        return router;
+    };
+}
+
+module.exports = {
+    makeCrudRoute
+};

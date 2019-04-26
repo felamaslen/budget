@@ -2,10 +2,10 @@ const { Router } = require('express');
 
 const { routeCategories } = require('./categories');
 
-function netWorthRoute(config, db, logger) {
+function netWorthRoute(config, db) {
     const router = new Router();
 
-    router.use('/categories', routeCategories(config, db, logger));
+    router.use('/categories', routeCategories(db));
 
     return router;
 }
