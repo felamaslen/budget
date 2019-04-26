@@ -60,6 +60,7 @@
     "ejs": "^2.5.7",
     "express": "^4.15.4",
     "express-cache-control": "^1.0.2",
+    "flat": "^4.1.0",
     "history": "^4.7.2",
     "humanize-duration": "^3.14.0",
     "immutable": "^3.8.1",
