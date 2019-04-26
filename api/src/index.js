@@ -18,6 +18,7 @@ const getConfig = require('./config');
 const getLogger = require('./modules/logger');
 const initDb = require('./modules/db');
 const { getStrategy } = require('./modules/auth');
+const { errorHandler } = require('./modules/error-handling');
 const routes = require('./routes');
 
 const API_PREFIX = '/api/v4';
@@ -155,8 +156,9 @@ function setupWebApp(app) {
     app.use('/', cache('days', 100), express.static(path.join(__dirname, '../../web/build')));
 }
 
-function setupErorHandling(app) {
-    // error handling
+function setupErrorHandling(app, logger) {
+    app.use(errorHandler(logger));
+
     app.use((req, res) => {
         res.status(404).send('File not found');
     });
@@ -176,7 +178,7 @@ async function run() {
         setupDataInput(app);
         setupApi(app, config, db, logger);
         setupWebApp(app);
-        setupErorHandling(app);
+        setupErrorHandling(app, logger);
 
         app.listen(port, () => {
             logger.info('Server listening on port', port);
