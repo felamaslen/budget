@@ -1,3 +1,11 @@
+function clientError(message, status = 400) {
+    const err = new Error(message);
+
+    err.status = status;
+
+    return err;
+}
+
 function catchAsyncErrors(handler) {
     return async (req, res, next) => {
         try {
@@ -26,6 +34,7 @@ function errorHandler(logger) {
 }
 
 module.exports = {
+    clientError,
     catchAsyncErrors,
     errorHandler
 };

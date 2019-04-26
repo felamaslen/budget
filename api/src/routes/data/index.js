@@ -5,6 +5,8 @@ const { routePatch: routeMultipleUpdate } = require('../../middleware/multipleUp
 
 const search = require('../search');
 
+const { netWorthRoute } = require('../net-worth');
+
 const cashflow = require('./cashflow');
 const analysis = require('./analysis');
 const analysisDeep = require('./analysis/deep');
@@ -32,6 +34,8 @@ function handler(config, db, logger) {
     router.patch('/multiple', routeMultipleUpdate(config, db, listDataProcessor));
 
     router.use('/search', search.handler(config, db));
+
+    router.use('/net-worth', netWorthRoute(config, db, logger));
 
     // cash flow routes
     router.get('/overview', cashflow.routeGet(config, db));
