@@ -2,6 +2,16 @@ const joi = require('joi');
 
 const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 
+const schemaSubcategory = joi.object()
+    .keys({
+        subcategory: joi.string().required(),
+        hasCreditLimit: joi.boolean(),
+        opacity: joi.number()
+            .min(0)
+            .max(1)
+    })
+    .unknown(false);
+
 const schemaCategory = joi.object()
     .keys({
         type: joi.string().valid(['asset', 'liability'])
@@ -12,5 +22,6 @@ const schemaCategory = joi.object()
     .unknown(false);
 
 module.exports = {
+    schemaSubcategory,
     schemaCategory
 };

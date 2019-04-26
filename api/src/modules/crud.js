@@ -3,6 +3,8 @@ const { Router } = require('express');
 const { clientError, catchAsyncErrors } = require('./error-handling');
 const { validate } = require('./validate');
 
+const noop = value => value;
+
 const makeGetItem = (table, item, dbToJson) => async (db, id) => {
     const [data] = await db.select()
         .from(table)
@@ -15,8 +17,18 @@ const makeGetItem = (table, item, dbToJson) => async (db, id) => {
     return dbToJson(data);
 };
 
+const checkItem = (db, table, item) => {
+    const getItem = makeGetItem(table, item, noop);
+
+    return catchAsyncErrors(async (req, res, next) => {
+        await getItem(db, req.params.id);
+
+        next();
+    });
+};
+
 const onCreate = (db, table, jsonToDb) => catchAsyncErrors(async (req, res) => {
-    const data = jsonToDb(req.validBody);
+    const data = jsonToDb(req.validBody, req.params);
 
     const [id] = await db.insert(data)
         .returning('id')
@@ -46,7 +58,7 @@ const onRead = (db, table, getItem, dbToJson) => catchAsyncErrors(async (req, re
 const onUpdate = (db, table, getItem, jsonToDb) => catchAsyncErrors(async (req, res) => {
     await getItem(db, req.params.id);
 
-    const data = jsonToDb(req.validBody);
+    const data = jsonToDb(req.validBody, req.params);
 
     await db(table)
         .update(data)
@@ -66,8 +78,6 @@ const onDelete = (db, table, getItem) => catchAsyncErrors(async (req, res) => {
     res.status(204).end();
 });
 
-const noop = value => value;
-
 function makeCrudRoute({
     table,
     item,
@@ -77,21 +87,20 @@ function makeCrudRoute({
 }) {
     const getItem = makeGetItem(table, item, dbToJson);
 
-    return db => {
-        const router = new Router();
+    return (db, router = new Router(), prefix = '') => {
+        router.post(`${prefix}/`, validate(schema), onCreate(db, table, jsonToDb));
 
-        router.post('/', validate(schema), onCreate(db, table, jsonToDb));
+        router.get(`${prefix}/:id?`, onRead(db, table, getItem, dbToJson));
 
-        router.get('/:id?', onRead(db, table, getItem, dbToJson));
+        router.put(`${prefix}/:id`, validate(schema), onUpdate(db, table, getItem, jsonToDb));
 
-        router.put('/:id', validate(schema), onUpdate(db, table, getItem, jsonToDb));
-
-        router.delete('/:id', onDelete(db, table, getItem));
+        router.delete(`${prefix}/:id`, onDelete(db, table, getItem));
 
         return router;
     };
 }
 
 module.exports = {
+    checkItem,
     makeCrudRoute
 };
