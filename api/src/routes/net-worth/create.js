@@ -1,7 +1,5 @@
-const { DateTime } = require('luxon');
-
 const { catchAsyncErrors } = require('../../modules/error-handling');
-const { fetchById } = require('./read');
+const { formatDate, fetchById } = require('./read');
 
 function getValueRow(netWorthId) {
     return ({ subcategory, value }) => {
@@ -97,8 +95,7 @@ const onCreate = db => catchAsyncErrors(async (req, res) => {
 
     const [netWorthId] = await db.insert({
         uid,
-        date: DateTime.fromJSDate(date)
-            .toISODate()
+        date: formatDate(date)
     })
         .returning('id')
         .into('net_worth');
