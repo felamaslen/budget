@@ -112,5 +112,8 @@ const onCreate = db => catchAsyncErrors(async (req, res) => {
 module.exports = {
     getValueRow,
     getFxValueRow,
+    insertValues,
+    insertCreditLimits,
+    insertCurrencies,
     onCreate
 };
