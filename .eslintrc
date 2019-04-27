@@ -25,6 +25,11 @@
         "react-hooks",
         "babel"
     ],
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
     "rules": {
         "accessor-pairs": "error",
         "array-bracket-spacing": [
@@ -244,6 +249,7 @@
             { "allowTemplateLiterals": true }
         ],
         "radix": "error",
+        "react/jsx-fragments": "error",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
         "require-await": "error",
