@@ -7,6 +7,7 @@ const { routeSubCategories } = require('./subcategories');
 
 const { onCreate } = require('./create');
 const { onRead } = require('./read');
+const { onDelete } = require('./delete');
 
 function netWorthRoute(config, db) {
     const router = new Router();
@@ -17,6 +18,8 @@ function netWorthRoute(config, db) {
     router.post('/', validate(schemaNetWorth), onCreate(db));
 
     router.get('/:id?', onRead(db));
+
+    router.delete('/:id', onDelete(db));
 
     return router;
 }
