@@ -4,6 +4,7 @@ const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 
 const schemaSubcategory = joi.object()
     .keys({
+        categoryId: joi.number().required(),
         subcategory: joi.string().required(),
         hasCreditLimit: joi.boolean(),
         opacity: joi.number()

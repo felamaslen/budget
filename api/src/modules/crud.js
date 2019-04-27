@@ -17,11 +17,11 @@ const makeGetItem = (table, item, dbToJson) => async (db, id) => {
     return dbToJson(data);
 };
 
-const checkItem = (db, table, item) => {
+const checkItem = (db, table, item, getId = req => req.params.id) => {
     const getItem = makeGetItem(table, item, noop);
 
     return catchAsyncErrors(async (req, res, next) => {
-        await getItem(db, req.params.id);
+        await getItem(db, getId(req));
 
         next();
     });

@@ -1,7 +1,5 @@
-const { makeCrudRoute, checkItem } = require('../../modules/crud');
+const { makeCrudRoute } = require('../../modules/crud');
 const { schemaCategory } = require('../../schema/net-worth');
-
-const { routeSubCategories } = require('./subcategories');
 
 function routeCategories(db) {
     const table = 'net_worth_categories';
@@ -12,10 +10,6 @@ function routeCategories(db) {
         item,
         schema: schemaCategory
     })(db);
-
-    route.use('/:id/*', checkItem(db, table, item));
-
-    routeSubCategories(db, route, '/:categoryId/subcategories');
 
     return route;
 }
