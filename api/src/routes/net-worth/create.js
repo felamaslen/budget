@@ -106,7 +106,7 @@ const onCreate = db => catchAsyncErrors(async (req, res) => {
 
     const netWorth = await fetchById(db, netWorthId, uid);
 
-    res.json(netWorth);
+    res.status(201).json(netWorth);
 });
 
 module.exports = {

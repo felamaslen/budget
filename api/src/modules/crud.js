@@ -36,7 +36,7 @@ const onCreate = (db, table, jsonToDb, getItem) => catchAsyncErrors(async (req, 
 
     const newItem = await getItem(db, id);
 
-    res.json(newItem);
+    res.status(201).json(newItem);
 });
 
 const onRead = (db, table, getItem, dbToJson) => catchAsyncErrors(async (req, res) => {
