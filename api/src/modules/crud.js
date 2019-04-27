@@ -27,17 +27,16 @@ const checkItem = (db, table, item, getId = req => req.params.id) => {
     });
 };
 
-const onCreate = (db, table, jsonToDb) => catchAsyncErrors(async (req, res) => {
+const onCreate = (db, table, jsonToDb, getItem) => catchAsyncErrors(async (req, res) => {
     const data = jsonToDb(req.validBody, req.params);
 
     const [id] = await db.insert(data)
         .returning('id')
         .into(table);
 
-    res.json({
-        id,
-        ...data
-    });
+    const newItem = await getItem(db, id);
+
+    res.json(newItem);
 });
 
 const onRead = (db, table, getItem, dbToJson) => catchAsyncErrors(async (req, res) => {
@@ -88,7 +87,7 @@ function makeCrudRoute({
     const getItem = makeGetItem(table, item, dbToJson);
 
     return (db, router = new Router(), prefix = '') => {
-        router.post(`${prefix}/`, validate(schema), onCreate(db, table, jsonToDb));
+        router.post(`${prefix}/`, validate(schema), onCreate(db, table, jsonToDb, getItem));
 
         router.get(`${prefix}/:id?`, onRead(db, table, getItem, dbToJson));
 
