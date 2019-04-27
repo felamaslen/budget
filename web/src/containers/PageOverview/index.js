@@ -12,13 +12,13 @@ import GraphOverview from '~client/containers/GraphOverview';
 import NetWorth from '~client/containers/NetWorth';
 
 function PageOverview({ rows, editRow, editCol, ...props }) {
-    return (
+    return <>
         <Page page="overview" {...props}>
             <OverviewTable rows={rows} editRow={editRow} editCol={editCol} />
             <GraphOverview />
-            <Route path="/net-worth" component={NetWorth} />
         </Page>
-    );
+        <Route path="/net-worth" component={NetWorth} />
+    </>;
 }
 
 PageOverview.propTypes = {
