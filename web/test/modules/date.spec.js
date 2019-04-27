@@ -20,7 +20,7 @@ test('dateInput working for just the day', t => {
     t.is(dateInput('5', true, DateTime.fromISO('2018-01-01')).toISODate(), '2018-01-05');
 });
 
-test('getTimeSeriesTicker handleing small ranges (less than 10 minutes)', t => {
+test('getTimeSeriesTicker handles small ranges (less than 10 minutes)', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 167);
     const expectedResult = [
         { label: '12:21', major: 1, time: 1497871260 },
@@ -35,7 +35,7 @@ test('getTimeSeriesTicker handleing small ranges (less than 10 minutes)', t => {
     t.deepEqual(result, expectedResult);
 });
 
-test('getTimeSeriesTicker handleing ranges of between 10 minutes and one hour', t => {
+test('getTimeSeriesTicker handles ranges of between 10 minutes and one hour', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 795);
 
     const expectedResult = [
@@ -59,7 +59,7 @@ test('getTimeSeriesTicker handleing ranges of between 10 minutes and one hour', 
     t.deepEqual(result, expectedResult);
 });
 
-test('getTimeSeriesTicker handleing ranges of between one hour and 0.6 days', t => {
+test('getTimeSeriesTicker handles ranges of between one hour and 0.6 days', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 51320);
 
     const expectedResult = [
@@ -98,7 +98,7 @@ test('getTimeSeriesTicker handleing ranges of between one hour and 0.6 days', t 
     t.deepEqual(result, expectedResult);
 });
 
-test('getTimeSeriesTicker handleing ranges of between 0.6 days and eight days', t => {
+test('getTimeSeriesTicker handles ranges of between 0.6 days and eight days', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 86400 * 3.32);
 
     const expectedResult = [
@@ -135,7 +135,7 @@ test('getTimeSeriesTicker handleing ranges of between 0.6 days and eight days', 
     t.deepEqual(result, expectedResult);
 });
 
-test('getTimeSeriesTicker handleing ranges of between eight and 35 days', t => {
+test('getTimeSeriesTicker handles ranges of between eight and 35 days', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 86400 * 11.4);
 
     const expectedResult = [
@@ -157,7 +157,7 @@ test('getTimeSeriesTicker handleing ranges of between eight and 35 days', t => {
     t.deepEqual(result, expectedResult);
 });
 
-test('getTimeSeriesTicker handleing ranges of between 35 days and a year', t => {
+test('getTimeSeriesTicker handles ranges of between 35 days and a year', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 86400 * 35 * 1.5);
 
     const expectedResult = [
@@ -177,7 +177,7 @@ test('getTimeSeriesTicker handleing ranges of between 35 days and a year', t => 
     t.deepEqual(result, expectedResult);
 });
 
-test('getTimeSeriesTicker handleing ranges of years', t => {
+test('getTimeSeriesTicker handles ranges of years', t => {
     const result = timeSeriesTicks(1456790400, 1494073200);
 
     const expectedResult = [
