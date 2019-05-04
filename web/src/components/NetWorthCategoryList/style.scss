@@ -75,7 +75,7 @@
     }
     .net-worth-subcategory-list {
         grid-row: 2;
-        grid-column: 1;
+        grid-column: 1 / span 2;
     }
     > .button-delete {
         grid-row: 1;

@@ -178,7 +178,6 @@ export default function NetWorthCategoryList({
         onClick: () => setActiveCategoryId(id)
     }), []);
 
-
     return (
         <div className="net-worth-category-list">
             <h4 className="title">{'Categories'}</h4>

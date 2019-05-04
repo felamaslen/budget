@@ -14,6 +14,8 @@ export const subcategoryShape = {
     opacity: PropTypes.number.isRequired
 };
 
+const getCreditLimitDisabled = parent => parent.type !== 'liability';
+
 function NetWorthSubcategoryItemForm({
     categoryId,
     subcategory,
@@ -31,7 +33,7 @@ function NetWorthSubcategoryItemForm({
         className: 'input-subcategory'
     });
 
-    const creditLimitDisabled = parent.type !== 'liability';
+    const creditLimitDisabled = getCreditLimitDisabled(parent);
 
     const initialHasCreditLimit = creditLimitDisabled
         ? null
@@ -53,6 +55,7 @@ function NetWorthSubcategoryItemForm({
         InputOpacity,
         touchedOpacity
     ] = useInputRange(opacity, {
+        className: 'input-opacity',
         min: 0,
         max: 1,
         step: 0.1
@@ -171,9 +174,21 @@ export default function NetWorthSubcategoryList({
         parent
     };
 
+    const creditLimitDisabled = getCreditLimitDisabled(parent);
+
+    const itemProps = useCallback((id, { opacity }) => ({
+        style: {
+            backgroundColor: `rgba(255, 255, 255, ${opacity}`
+        }
+    }), []);
+
     return (
         <div className="net-worth-subcategory-list">
-            <h5 className="subtitle">{'Subcategories'}</h5>
+            <div className="net-worth-subcategory-list-head">
+                <span className="subcategory">{'Name'}</span>
+                {!creditLimitDisabled && <span className="credit-limit">{'Credit limit'}</span>}
+                <span className="opacity">{'Opacity'}</span>
+            </div>
             <CrudList
                 items={subcategories}
                 Item={NetWorthSubcategoryItem}
@@ -184,6 +199,7 @@ export default function NetWorthSubcategoryList({
                 onDelete={onDelete}
                 className="net-worth-subcategory"
                 extraProps={extraProps}
+                itemProps={itemProps}
             />
         </div>
     );
