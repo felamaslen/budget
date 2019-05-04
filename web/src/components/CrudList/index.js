@@ -29,7 +29,7 @@ export default function CrudList({
             </div>
             <ul className="crud-list-list">
                 {items.map(({ id, ...rest }) => (
-                    <li key={id} className="crud-list-list-item" {...itemProps(rest)}>
+                    <li key={id} className="crud-list-list-item" {...itemProps(id, rest)}>
                         <Item
                             id={id}
                             {...rest}

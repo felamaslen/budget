@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -80,6 +80,7 @@ function NetWorthCategoryItem({
     categories,
     subcategories,
     categoryIdMap,
+    activeCategoryId,
     onCreateSubcategory,
     onReadSubcategory,
     onUpdateSubcategory,
@@ -106,7 +107,7 @@ function NetWorthCategoryItem({
             onChange={onChange}
             buttonText="Update"
         />
-        <NetWorthSubcategoryList
+        {id === activeCategoryId && <NetWorthSubcategoryList
             key="subcategory-list"
             parent={parent}
             categoryIdMap={categoryIdMap}
@@ -115,7 +116,7 @@ function NetWorthCategoryItem({
             onRead={onReadSubcategory}
             onUpdate={onUpdateSubcategory}
             onDelete={onDeleteSubcategory}
-        />
+        />}
     </>;
 }
 
@@ -124,6 +125,7 @@ NetWorthCategoryItem.propTypes = {
     onUpdate: PropTypes.func.isRequired,
     subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)),
     categoryIdMap: PropTypes.array.isRequired,
+    activeCategoryId: PropTypes.number,
     onCreateSubcategory: PropTypes.func.isRequired,
     onReadSubcategory: PropTypes.func.isRequired,
     onUpdateSubcategory: PropTypes.func.isRequired,
@@ -148,12 +150,6 @@ NetWorthCategoryCreateItem.propTypes = {
     onCreate: PropTypes.func.isRequired
 };
 
-const itemProps = ({ color }) => ({
-    style: {
-        backgroundColor: color
-    }
-});
-
 export default function NetWorthCategoryList({
     categories,
     subcategories,
@@ -166,21 +162,32 @@ export default function NetWorthCategoryList({
     onUpdateSubcategory,
     onDeleteSubcategory
 }) {
-    const categoryIdMap = categories.map(({ id, type, category }) => ({
+    const categoryIdMap = useMemo(() => categories.map(({ id, type, category }) => ({
         categoryId: id,
         type,
         category
-    }));
+    })), [categories]);
+
+    const [activeCategoryId, setActiveCategoryId] = useState(null);
 
     const extraProps = {
         categories,
         subcategories,
         categoryIdMap,
+        activeCategoryId,
         onCreateSubcategory,
         onReadSubcategory,
         onUpdateSubcategory,
         onDeleteSubcategory
     };
+
+    const itemProps = useCallback((id, { color }) => ({
+        style: {
+            backgroundColor: color
+        },
+        onClick: () => setActiveCategoryId(id)
+    }), []);
+
 
     return (
         <div className="net-worth-category-list">
