@@ -1,39 +1,43 @@
 import { connect } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { getApiKey } from '~client/selectors/app';
-import { useApi } from '~client/hooks/api';
+import { useCrud } from '~client/hooks/api';
 
 import './style.scss';
 
 function NetWorth({ apiKey }) {
-    const [categories, setCategories] = useState(null);
-    const [subcategories, setSubcategories] = useState(null);
-
-    const [getCategories, loadingCategories, errCategories] = useApi({
+    const [categories, loadingCategories, errCategories, createCategory, readCategories, updateCategory, deleteCategory] = useCrud({
         url: 'data/net-worth/categories',
-        apiKey,
-        onSuccess: setCategories
+        apiKey
     });
 
-    const [getSubcategories, loadingSubcategories, errSubcategories] = useApi({
+    const [subcategories, loadingSubcategories, errSubcategories, createSubcategory, readSubcategories, updateSubcategory, deleteSubcategory] = useCrud({
         url: 'data/net-worth/subcategories',
-        apiKey,
-        onSuccess: setSubcategories
+        apiKey
+    });
+
+    const [netWorth, loadingNetWorth, errNetWorth, createNetWorth, readNetWorth, updateNetWorth, deleteNetWorth] = useCrud({
+        url: 'data/net-worth',
+        apiKey
     });
 
     useEffect(() => {
-        getCategories();
-    }, [getCategories]);
+        readCategories();
+    }, [readCategories]);
 
     useEffect(() => {
-        getSubcategories();
-    }, [getSubcategories]);
+        readSubcategories();
+    }, [readSubcategories]);
 
-    const loading = loadingCategories || loadingSubcategories;
-    const error = errCategories || errSubcategories;
+    useEffect(() => {
+        readNetWorth();
+    }, [readNetWorth]);
+
+    const loading = loadingCategories || loadingSubcategories || loadingNetWorth;
+    const error = errCategories || errSubcategories || errNetWorth;
 
     return (
         <div className={classNames('net-worth', { loading, error })}>
@@ -43,6 +47,9 @@ function NetWorth({ apiKey }) {
             )}
             {subcategories && (
                 <div className="subcategories">{JSON.stringify(subcategories)}</div>
+            )}
+            {netWorth && (
+                <div className="net-worth-data">{JSON.stringify(netWorth)}</div>
             )}
         </div>
     );
