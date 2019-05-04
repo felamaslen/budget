@@ -43,7 +43,6 @@ export function useApi({
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [response, setResponse] = useState(null);
 
     const onError = useCallback(err => {
         setError(err);
@@ -52,11 +51,6 @@ export function useApi({
     const onComplete = useCallback(() => {
         setLoading(false);
     }, []);
-
-    const onSuccessHandler = useCallback((data, id) => {
-        setResponse(data);
-        onSuccess(data, id);
-    }, [onSuccess]);
 
     useEffect(() => () => {
         if (source.current) {
@@ -68,10 +62,10 @@ export function useApi({
         method,
         url,
         apiKey,
-        onSuccess: onSuccessHandler,
+        onSuccess,
         onError,
         onComplete
-    }), [method, url, apiKey, onSuccessHandler, onError, onComplete]);
+    }), [method, url, apiKey, onSuccess, onError, onComplete]);
 
     const initiateRequest = useCallback((...args) => {
         if (source.current) {
@@ -84,93 +78,77 @@ export function useApi({
         makeRequest(source.current, ...args);
     }, [makeRequest]);
 
-    return [initiateRequest, loading, error, response];
+    return [initiateRequest, loading, error];
 }
 
-export function useCrud({
-    url,
-    apiKey
-}) {
-    const [data, setData] = useState([]);
-
-    const onSetSingleItem = useCallback(item => {
-        const index = data.findIndex(({ id }) => id === item.id);
-        if (index === -1) {
-            setData([...data, item]);
-        } else {
-            setData(data.slice(0, index)
-                .concat([item])
-                .concat(data.slice(index + 1))
-            );
-        }
-    }, [data]);
-
-    const [onCreate, loadingCreate, errorCreate, responseCreate] = useApi({
-        method: 'post',
-        url,
-        apiKey
-    });
-
-    useEffect(() => {
-        if (responseCreate) {
-            setData([...data, responseCreate]);
-        }
-    }, [responseCreate, data]);
-
-    const handleRead = useCallback((res, id) => {
-        if (!id) {
-            setData(res);
-        }
+function useResponseOp(url, apiKey, setResponse, method) {
+    const [response, setTempResponse] = useState(null);
+    const handleResponse = useCallback(res => {
+        setTempResponse(res);
     }, []);
 
-    const [onRead, loadingRead, errorRead, responseRead] = useApi({
-        method: 'get',
+    const [onTrigger, loading, error] = useApi({
+        method,
         url,
         apiKey,
-        onSuccess: handleRead
+        onSuccess: handleResponse
     });
 
     useEffect(() => {
-        if (!responseRead) {
-            return;
+        if (response) {
+            setResponse(response);
+            setTempResponse(null);
         }
-        if (Array.isArray(responseRead)) {
-            setData(responseRead);
-        } else {
-            onSetSingleItem(responseRead);
-        }
-    }, [responseRead, onSetSingleItem]);
+    }, [response, setResponse]);
 
-    const [onUpdate, loadingUpdate, errorUpdate, responseUpdate] = useApi({
-        method: 'put',
-        url,
-        apiKey
-    });
+    return [onTrigger, loading, error];
+}
 
-    useEffect(() => {
-        if (responseUpdate) {
-            onSetSingleItem(responseUpdate);
-        }
-    }, [responseUpdate, onSetSingleItem]);
-
+function useDelete(url, apiKey, data, setData) {
     const [deletedId, setDeletedId] = useState(null);
-
-    useEffect(() => {
-        if (deletedId) {
-            setData(data.filter(({ id }) => id !== deletedId));
-        }
-    }, [data, deletedId]);
-
     const handleDelete = useCallback((res, id) => {
         setDeletedId(id);
     }, []);
 
-    const [onDelete, loadingDelete, errorDelete] = useApi({
+    const [onDelete, loading, error] = useApi({
         method: 'delete',
         url,
         apiKey,
         onSuccess: handleDelete
     });
+
+    useEffect(() => {
+        if (deletedId) {
+            setData(data.filter(({ id }) => id !== deletedId));
+            setDeletedId(null);
+        }
+    }, [data, setData, deletedId]);
+
+    return [onDelete, loading, error];
+}
+
+export function useCrud({ url, apiKey }) {
+    const [data, setData] = useState([]);
+    const setResponse = useCallback(item => {
+        if (Array.isArray(item)) {
+            return setData(item);
+        }
+
+        const index = data.findIndex(({ id }) => id === item.id);
+        if (index === -1) {
+            return setData([...data, item]);
+        }
+
+        return setData(data.slice(0, index)
+            .concat([item])
+            .concat(data.slice(index + 1))
+        );
+    }, [data]);
+
+    const [onCreate, loadingCreate, errorCreate] = useResponseOp(url, apiKey, setResponse, 'post');
+    const [onRead, loadingRead, errorRead] = useResponseOp(url, apiKey, setResponse, 'get');
+    const [onUpdate, loadingUpdate, errorUpdate] = useResponseOp(url, apiKey, setResponse, 'put');
+    const [onDelete, loadingDelete, errorDelete] = useDelete(url, apiKey, data, setData);
 
     const loading = loadingCreate || loadingRead || loadingUpdate || loadingDelete;
     const error = errorCreate || errorRead || errorUpdate || errorDelete;
