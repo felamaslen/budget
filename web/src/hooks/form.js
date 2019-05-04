@@ -115,7 +115,7 @@ export function useInputColor(initialValue, props = {}) {
 }
 
 const InputTickbox = ({ props, tempValue, onChange }) => (
-    <input {...props} type="checkbox" value={Boolean(tempValue)} onChange={onChange} />
+    <input {...props} type="checkbox" checked={Boolean(tempValue)} onChange={onChange} />
 );
 
 InputTickbox.propTypes = {

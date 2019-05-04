@@ -110,6 +110,7 @@ function NetWorthSubcategoryItem({
     id,
     categoryId,
     subcategory,
+    hasCreditLimit,
     opacity,
     parent,
     onUpdate
@@ -123,6 +124,7 @@ function NetWorthSubcategoryItem({
             parent={parent}
             categoryId={categoryId}
             subcategory={subcategory}
+            hasCreditLimit={hasCreditLimit}
             opacity={opacity}
             onChange={onChange}
             buttonText="Update"
