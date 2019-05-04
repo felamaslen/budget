@@ -78,7 +78,7 @@ function NetWorthSubcategoryItemForm({
     return (
         <span className={className}>
             {InputSubcategory}
-            {InputHasCreditLimit}
+            {!creditLimitDisabled && InputHasCreditLimit}
             {InputOpacity}
             <button
                 disabled={!touched}
