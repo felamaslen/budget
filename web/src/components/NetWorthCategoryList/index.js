@@ -32,10 +32,6 @@ function NetWorthCategoryItemForm({ type, category, color, onChange, buttonText 
 
     const touched = touchedType || touchedCategory || touchedColor;
 
-    const style = {
-        backgroundColor: tempColor
-    };
-
     const className = classNames('net-worth-category-item-form', {
         touched,
         asset: type === 'asset',
@@ -51,7 +47,7 @@ function NetWorthCategoryItemForm({ type, category, color, onChange, buttonText 
     }, [onChange, tempType, tempCategory, tempColor]);
 
     return (
-        <span className={className} style={style}>
+        <span className={className}>
             {InputType}
             {InputCategory}
             {InputColor}
@@ -152,6 +148,12 @@ NetWorthCategoryCreateItem.propTypes = {
     onCreate: PropTypes.func.isRequired
 };
 
+const itemProps = ({ color }) => ({
+    style: {
+        backgroundColor: color
+    }
+});
+
 export default function NetWorthCategoryList({
     categories,
     subcategories,
@@ -191,6 +193,8 @@ export default function NetWorthCategoryList({
                 onRead={onReadCategory}
                 onUpdate={onUpdateCategory}
                 onDelete={onDeleteCategory}
+                className="net-worth-category"
+                itemProps={itemProps}
                 extraProps={extraProps}
             />
         </div>

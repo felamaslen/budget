@@ -1,15 +1,27 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import './style.scss';
 
-export default function CrudList({ items, Item, CreateItem, onCreate, onRead, onUpdate, onDelete, extraProps }) {
+export default function CrudList({
+    items,
+    Item,
+    CreateItem,
+    onCreate,
+    onRead,
+    onUpdate,
+    onDelete,
+    className,
+    itemProps,
+    extraProps
+}) {
     const onRefresh = useCallback(() => {
         onRead();
     }, [onRead]);
 
     return (
-        <div className="crud-list">
+        <div className={classNames('crud-list', className)}>
             <div className="crud-list-meta">
                 <button className="button-refresh" onClick={onRefresh}>
                     {'Refresh'}
@@ -17,17 +29,19 @@ export default function CrudList({ items, Item, CreateItem, onCreate, onRead, on
             </div>
             <ul className="crud-list-list">
                 {items.map(({ id, ...rest }) => (
-                    <li key={id} className="crud-list-list-item">
+                    <li key={id} className="crud-list-list-item" {...itemProps(rest)}>
                         <Item
                             id={id}
                             {...rest}
                             onUpdate={onUpdate}
                             {...extraProps}
                         />
-                        <button
-                            className="button-delete"
-                            onClick={() => onDelete(id)}
-                        >&minus;</button>
+                        <div className="button-delete">
+                            <button
+                                className="button-delete-button"
+                                onClick={() => onDelete(id)}
+                            >&minus;</button>
+                        </div>
                     </li>
                 ))}
                 <li key={0} className="crud-list-list-item crud-list-list-item-create">
@@ -54,10 +68,16 @@ CrudList.propTypes = {
     })),
     Item: PropTypes.func.isRequired,
     CreateItem: PropTypes.func.isRequired,
+    className: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
+    ]).isRequired,
     extraProps: PropTypes.object.isRequired,
     ...crudListPropTypes
 };
 
 CrudList.defaultProps = {
+    className: {},
+    itemProps: () => ({}),
     extraProps: {}
 };

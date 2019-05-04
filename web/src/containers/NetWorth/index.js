@@ -43,24 +43,26 @@ function NetWorth({ apiKey }) {
 
     return (
         <div className={classNames('net-worth', { loading, error })}>
-            <h1>{'Net worth'}</h1>
-            {categories && subcategories && (
-                <NetWorthCategoryList
-                    categories={categories}
-                    subcategories={subcategories}
-                    onCreateCategory={createCategory}
-                    onReadCategory={readCategories}
-                    onUpdateCategory={updateCategory}
-                    onDeleteCategory={deleteCategory}
-                    onCreateSubcategory={createSubcategory}
-                    onReadSubcategory={readSubcategories}
-                    onUpdateSubcategory={updateSubcategory}
-                    onDeleteSubcategory={deleteSubcategory}
-                />
-            )}
-            {netWorth && (
-                <div className="net-worth-data">{JSON.stringify(netWorth)}</div>
-            )}
+            <div className="net-worth-inner">
+                <h1 className="title">{'Net worth'}</h1>
+                {categories && subcategories && (
+                    <NetWorthCategoryList
+                        categories={categories}
+                        subcategories={subcategories}
+                        onCreateCategory={createCategory}
+                        onReadCategory={readCategories}
+                        onUpdateCategory={updateCategory}
+                        onDeleteCategory={deleteCategory}
+                        onCreateSubcategory={createSubcategory}
+                        onReadSubcategory={readSubcategories}
+                        onUpdateSubcategory={updateSubcategory}
+                        onDeleteSubcategory={deleteSubcategory}
+                    />
+                )}
+                {netWorth && (
+                    <div className="net-worth-data">{JSON.stringify(netWorth)}</div>
+                )}
+            </div>
         </div>
     );
 }

@@ -210,6 +210,7 @@ export default function NetWorthSubcategoryList({
                 onRead={onRead}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                className="net-worth-subcategory"
                 extraProps={extraProps}
             />
         </div>
