@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { useInputText, useInputSelect, useInputTickbox, useInputRange } from '~client/hooks/form';
+import { useInputText, useInputTickbox, useInputRange } from '~client/hooks/form';
 import CrudList, { crudListPropTypes } from '~client/components/CrudList';
 
 import './style.scss';
@@ -19,24 +19,10 @@ function NetWorthSubcategoryItemForm({
     subcategory,
     hasCreditLimit,
     opacity,
-    categoryIdMap,
+    parent,
     onChange,
     buttonText
 }) {
-    const categoryIdOptions = useMemo(() => categoryIdMap.map(
-        ({ categoryId: internal, category: external }) => ({ internal, external })
-    ), [categoryIdMap]);
-
-    const [
-        tempCategoryIdString,
-        InputCategoryId,
-        touchedCategoryId
-    ] = useInputSelect(String(categoryId), categoryIdOptions, {
-        className: 'input-category-id'
-    });
-
-    const tempCategoryId = Number(tempCategoryIdString);
-
     const [
         tempSubcategory,
         InputSubcategory,
@@ -45,9 +31,7 @@ function NetWorthSubcategoryItemForm({
         className: 'input-subcategory'
     });
 
-    const tempParent = categoryIdMap.find(({ categoryId: id }) => id === tempCategoryId);
-
-    const creditLimitDisabled = tempParent.type !== 'liability';
+    const creditLimitDisabled = parent.type !== 'liability';
 
     const initialHasCreditLimit = creditLimitDisabled
         ? null
@@ -74,8 +58,7 @@ function NetWorthSubcategoryItemForm({
         step: 0.1
     });
 
-    const touched = touchedCategoryId ||
-        touchedSubcategory ||
+    const touched = touchedSubcategory ||
         touchedHasCreditLimit ||
         touchedOpacity;
 
@@ -85,16 +68,15 @@ function NetWorthSubcategoryItemForm({
 
     const onChangeItem = useCallback(() => {
         onChange({
-            categoryId: tempCategoryId,
+            categoryId,
             subcategory: tempSubcategory,
             hasCreditLimit: tempHasCreditLimit,
             opacity: tempOpacity
         });
-    }, [onChange, tempCategoryId, tempSubcategory, tempHasCreditLimit, tempOpacity]);
+    }, [onChange, categoryId, tempSubcategory, tempHasCreditLimit, tempOpacity]);
 
     return (
         <span className={className}>
-            {InputCategoryId}
             {InputSubcategory}
             {InputHasCreditLimit}
             {InputOpacity}
@@ -116,12 +98,7 @@ NetWorthSubcategoryItemForm.propTypes = {
     onChange: PropTypes.func.isRequired,
     parent: PropTypes.shape({
         type: PropTypes.oneOf(['asset', 'liability']).isRequired
-    }).isRequired,
-    categoryIdMap: PropTypes.arrayOf(PropTypes.shape({
-        categoryId: PropTypes.number.isRequired,
-        type: PropTypes.oneOf(['asset', 'liability']).isRequired,
-        category: PropTypes.string.isRequired
-    })).isRequired
+    }).isRequired
 };
 
 NetWorthSubcategoryItemForm.defaultProps = {
@@ -135,7 +112,6 @@ function NetWorthSubcategoryItem({
     subcategory,
     opacity,
     parent,
-    categoryIdMap,
     onUpdate
 }) {
     const onChange = useCallback(values => {
@@ -145,7 +121,6 @@ function NetWorthSubcategoryItem({
     return (
         <NetWorthSubcategoryItemForm
             parent={parent}
-            categoryIdMap={categoryIdMap}
             categoryId={categoryId}
             subcategory={subcategory}
             opacity={opacity}
@@ -158,12 +133,11 @@ function NetWorthSubcategoryItem({
 NetWorthSubcategoryItem.propTypes = {
     id: PropTypes.number.isRequired,
     parent: PropTypes.object.isRequired,
-    categoryIdMap: PropTypes.array.isRequired,
     onUpdate: PropTypes.func.isRequired,
     ...subcategoryShape
 };
 
-function NetWorthSubcategoryCreateItem({ parent, categoryIdMap, onCreate }) {
+function NetWorthSubcategoryCreateItem({ parent, onCreate }) {
     const onChange = useCallback(values => {
         onCreate(null, {}, values);
     }, [onCreate]);
@@ -171,7 +145,6 @@ function NetWorthSubcategoryCreateItem({ parent, categoryIdMap, onCreate }) {
     return (
         <NetWorthSubcategoryItemForm
             parent={parent}
-            categoryIdMap={categoryIdMap}
             categoryId={parent.id}
             onChange={onChange}
             buttonText="Create"
@@ -181,13 +154,11 @@ function NetWorthSubcategoryCreateItem({ parent, categoryIdMap, onCreate }) {
 
 NetWorthSubcategoryCreateItem.propTypes = {
     parent: PropTypes.object.isRequired,
-    categoryIdMap: PropTypes.array.isRequired,
     onCreate: PropTypes.func.isRequired
 };
 
 export default function NetWorthSubcategoryList({
     parent,
-    categoryIdMap,
     subcategories,
     onCreate,
     onRead,
@@ -195,8 +166,7 @@ export default function NetWorthSubcategoryList({
     onDelete
 }) {
     const extraProps = {
-        parent,
-        categoryIdMap
+        parent
     };
 
     return (
@@ -219,7 +189,6 @@ export default function NetWorthSubcategoryList({
 
 NetWorthSubcategoryList.propTypes = {
     subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)).isRequired,
-    categoryIdMap: PropTypes.array.isRequired,
     parent: PropTypes.object.isRequired,
     ...crudListPropTypes
 };

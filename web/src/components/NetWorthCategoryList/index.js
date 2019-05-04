@@ -79,7 +79,6 @@ function NetWorthCategoryItem({
     onUpdate,
     categories,
     subcategories,
-    categoryIdMap,
     activeCategoryId,
     onCreateSubcategory,
     onReadSubcategory,
@@ -110,7 +109,6 @@ function NetWorthCategoryItem({
         {id === activeCategoryId && <NetWorthSubcategoryList
             key="subcategory-list"
             parent={parent}
-            categoryIdMap={categoryIdMap}
             subcategories={categorySubcategories}
             onCreate={onCreateSubcategory}
             onRead={onReadSubcategory}
@@ -124,7 +122,6 @@ NetWorthCategoryItem.propTypes = {
     id: PropTypes.number.isRequired,
     onUpdate: PropTypes.func.isRequired,
     subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)),
-    categoryIdMap: PropTypes.array.isRequired,
     activeCategoryId: PropTypes.number,
     onCreateSubcategory: PropTypes.func.isRequired,
     onReadSubcategory: PropTypes.func.isRequired,
@@ -162,18 +159,11 @@ export default function NetWorthCategoryList({
     onUpdateSubcategory,
     onDeleteSubcategory
 }) {
-    const categoryIdMap = useMemo(() => categories.map(({ id, type, category }) => ({
-        categoryId: id,
-        type,
-        category
-    })), [categories]);
-
     const [activeCategoryId, setActiveCategoryId] = useState(null);
 
     const extraProps = {
         categories,
         subcategories,
-        categoryIdMap,
         activeCategoryId,
         onCreateSubcategory,
         onReadSubcategory,
