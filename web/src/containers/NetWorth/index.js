@@ -6,6 +6,8 @@ import classNames from 'classnames';
 import { getApiKey } from '~client/selectors/app';
 import { useCrud } from '~client/hooks/api';
 
+import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
+
 import './style.scss';
 
 function NetWorth({ apiKey }) {
@@ -43,7 +45,13 @@ function NetWorth({ apiKey }) {
         <div className={classNames('net-worth', { loading, error })}>
             <h1>{'Net worth'}</h1>
             {categories && (
-                <div className="categories">{JSON.stringify(categories)}</div>
+                <NetWorthCategoryList
+                    categories={categories}
+                    onCreate={createCategory}
+                    onRead={readCategories}
+                    onUpdate={updateCategory}
+                    onDelete={deleteCategory}
+                />
             )}
             {subcategories && (
                 <div className="subcategories">{JSON.stringify(subcategories)}</div>
