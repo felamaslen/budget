@@ -60,10 +60,7 @@ const makeInputComponentSelect = options => {
         </select>
     );
 
-    InputComponentSelect.propTypes = {
-        ...inputTextPropTypes,
-        tempValue: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
-    };
+    InputComponentSelect.propTypes = inputTextPropTypes;
 
     return InputComponentSelect;
 };
