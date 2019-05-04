@@ -73,30 +73,29 @@ export function useInputSelect(initialValue, options, props = {}) {
 
 const makeInputComponentColor = (active, setActive) => {
     const InputComponentColor = ({ props, tempValue, setTempValue }) => {
+        const { className, ...otherProps } = props;
+
         const Input = (
-            <span key="inactive"
-                {...props}
-                onClick={() => setActive(true)}
-            >{'Edit colour'}</span>
+            <button className="color-value"
+                onClick={() => setActive(!active)}
+            >{'Edit colour'}</button>
         );
 
         const onChangeComplete = useCallback(color => {
             setTempValue(color.hex);
-            setActive(false);
         }, [setTempValue]);
 
-        if (!active) {
-            return Input;
-        }
-
-        return [
-            Input,
-            <SketchPicker key="active"
-                {...props}
-                color={tempValue}
-                onChangeComplete={onChangeComplete}
-            />
-        ];
+        return (
+            <div className={className}>
+                {Input}
+                {active && <SketchPicker
+                    className="color-picker"
+                    {...otherProps}
+                    color={tempValue}
+                    onChangeComplete={onChangeComplete}
+                />}
+            </div>
+        );
     };
 
     InputComponentColor.propTypes = {
