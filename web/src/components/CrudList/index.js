@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import './style.scss';
 
-export default function CrudList({ items, Item, CreateItem, onCreate, onRead, onUpdate, onDelete }) {
+export default function CrudList({ items, Item, CreateItem, onCreate, onRead, onUpdate, onDelete, extraProps }) {
     const onRefresh = useCallback(() => {
         onRead();
     }, [onRead]);
@@ -22,6 +22,7 @@ export default function CrudList({ items, Item, CreateItem, onCreate, onRead, on
                             id={id}
                             {...rest}
                             onUpdate={onUpdate}
+                            {...extraProps}
                         />
                         <button
                             className="button-delete"
@@ -30,7 +31,10 @@ export default function CrudList({ items, Item, CreateItem, onCreate, onRead, on
                     </li>
                 ))}
                 <li key={0} className="crud-list-list-item crud-list-list-item-create">
-                    <CreateItem onCreate={onCreate} />
+                    <CreateItem
+                        onCreate={onCreate}
+                        {...extraProps}
+                    />
                 </li>
             </ul>
         </div>
@@ -50,5 +54,10 @@ CrudList.propTypes = {
     })),
     Item: PropTypes.func.isRequired,
     CreateItem: PropTypes.func.isRequired,
+    extraProps: PropTypes.object.isRequired,
     ...crudListPropTypes
+};
+
+CrudList.defaultProps = {
+    extraProps: {}
 };

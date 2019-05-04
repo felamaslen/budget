@@ -1,9 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { useInputText, useInputSelect, useInputColor } from '~client/hooks/form';
-import CrudList, { crudListPropTypes } from '~client/components/CrudList';
+import CrudList from '~client/components/CrudList';
+import NetWorthSubcategoryList, { subcategoryShape } from '~client/components/NetWorthSubcategoryList';
 
 import './style.scss';
 
@@ -74,25 +75,63 @@ NetWorthCategoryItemForm.defaultProps = {
     color: '#ccffcc'
 };
 
-function NetWorthCategoryItem({ id, type, category, color, onUpdate }) {
+function NetWorthCategoryItem({
+    id,
+    type,
+    category,
+    color,
+    onUpdate,
+    categories,
+    subcategories,
+    categoryIdMap,
+    onCreateSubcategory,
+    onReadSubcategory,
+    onUpdateSubcategory,
+    onDeleteSubcategory
+}) {
     const onChange = useCallback(values => {
         onUpdate(id, {}, values);
     }, [onUpdate, id]);
 
-    return (
+    const categorySubcategories = useMemo(() => subcategories.filter(
+        ({ categoryId }) => categoryId === id
+    ), [id, subcategories]);
+
+    const parent = useMemo(() => categories.find(
+        ({ id: categoryId }) => categoryId === id
+    ), [id, categories]);
+
+    return <>
         <NetWorthCategoryItemForm
+            key="category-form"
             type={type}
             category={category}
             color={color}
             onChange={onChange}
             buttonText="Update"
         />
-    );
+        <NetWorthSubcategoryList
+            key="subcategory-list"
+            parent={parent}
+            categoryIdMap={categoryIdMap}
+            subcategories={categorySubcategories}
+            onCreate={onCreateSubcategory}
+            onRead={onReadSubcategory}
+            onUpdate={onUpdateSubcategory}
+            onDelete={onDeleteSubcategory}
+        />
+    </>;
 }
 
 NetWorthCategoryItem.propTypes = {
     id: PropTypes.number.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)),
+    categoryIdMap: PropTypes.array.isRequired,
+    onCreateSubcategory: PropTypes.func.isRequired,
+    onReadSubcategory: PropTypes.func.isRequired,
+    onUpdateSubcategory: PropTypes.func.isRequired,
+    onDeleteSubcategory: PropTypes.func.isRequired,
     ...categoryShape
 };
 
@@ -115,11 +154,32 @@ NetWorthCategoryCreateItem.propTypes = {
 
 export default function NetWorthCategoryList({
     categories,
-    onCreate,
-    onRead,
-    onUpdate,
-    onDelete
+    subcategories,
+    onCreateCategory,
+    onReadCategory,
+    onUpdateCategory,
+    onDeleteCategory,
+    onCreateSubcategory,
+    onReadSubcategory,
+    onUpdateSubcategory,
+    onDeleteSubcategory
 }) {
+    const categoryIdMap = categories.map(({ id, type, category }) => ({
+        categoryId: id,
+        type,
+        category
+    }));
+
+    const extraProps = {
+        categories,
+        subcategories,
+        categoryIdMap,
+        onCreateSubcategory,
+        onReadSubcategory,
+        onUpdateSubcategory,
+        onDeleteSubcategory
+    };
+
     return (
         <div className="net-worth-category-list">
             <h4 className="title">{'Categories'}</h4>
@@ -127,10 +187,11 @@ export default function NetWorthCategoryList({
                 items={categories}
                 Item={NetWorthCategoryItem}
                 CreateItem={NetWorthCategoryCreateItem}
-                onCreate={onCreate}
-                onRead={onRead}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
+                onCreate={onCreateCategory}
+                onRead={onReadCategory}
+                onUpdate={onUpdateCategory}
+                onDelete={onDeleteCategory}
+                extraProps={extraProps}
             />
         </div>
     );
@@ -138,5 +199,13 @@ export default function NetWorthCategoryList({
 
 NetWorthCategoryList.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.shape(categoryShape)),
-    ...crudListPropTypes
+    subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)),
+    onCreateCategory: PropTypes.func.isRequired,
+    onReadCategory: PropTypes.func.isRequired,
+    onUpdateCategory: PropTypes.func.isRequired,
+    onDeleteCategory: PropTypes.func.isRequired,
+    onCreateSubcategory: PropTypes.func.isRequired,
+    onReadSubcategory: PropTypes.func.isRequired,
+    onUpdateSubcategory: PropTypes.func.isRequired,
+    onDeleteSubcategory: PropTypes.func.isRequired
 };

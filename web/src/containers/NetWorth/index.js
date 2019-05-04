@@ -32,7 +32,7 @@ function NetWorth({ apiKey }) {
 
     useEffect(() => {
         readSubcategories();
-    }, [readSubcategories]);
+    }, [readSubcategories, categories]);
 
     useEffect(() => {
         readNetWorth();
@@ -44,17 +44,19 @@ function NetWorth({ apiKey }) {
     return (
         <div className={classNames('net-worth', { loading, error })}>
             <h1>{'Net worth'}</h1>
-            {categories && (
+            {categories && subcategories && (
                 <NetWorthCategoryList
                     categories={categories}
-                    onCreate={createCategory}
-                    onRead={readCategories}
-                    onUpdate={updateCategory}
-                    onDelete={deleteCategory}
+                    subcategories={subcategories}
+                    onCreateCategory={createCategory}
+                    onReadCategory={readCategories}
+                    onUpdateCategory={updateCategory}
+                    onDeleteCategory={deleteCategory}
+                    onCreateSubcategory={createSubcategory}
+                    onReadSubcategory={readSubcategories}
+                    onUpdateSubcategory={updateSubcategory}
+                    onDeleteSubcategory={deleteSubcategory}
                 />
-            )}
-            {subcategories && (
-                <div className="subcategories">{JSON.stringify(subcategories)}</div>
             )}
             {netWorth && (
                 <div className="net-worth-data">{JSON.stringify(netWorth)}</div>

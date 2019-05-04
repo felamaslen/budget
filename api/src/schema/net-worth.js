@@ -59,7 +59,7 @@ const schemaSubcategory = joi.object()
     .keys({
         categoryId: joi.number().required(),
         subcategory: joi.string().required(),
-        hasCreditLimit: joi.boolean(),
+        hasCreditLimit: joi.boolean().allow(null),
         opacity: joi.number()
             .min(0)
             .max(1)
