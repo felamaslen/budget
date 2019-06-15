@@ -3,23 +3,25 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { useInputText, useInputSelect, useInputColor } from '~client/hooks/form';
-import CrudList from '~client/components/CrudList';
-import NetWorthSubcategoryList, { subcategoryShape } from '~client/components/NetWorthSubcategoryList';
+import CrudList, { CREATE_ID } from '~client/components/CrudList';
+import NetWorthSubcategoryList from '~client/components/NetWorthSubcategoryList';
+import {
+    category as categoryShape,
+    subcategory as subcategoryShape
+} from '~client/components/NetWorthCategoryList/prop-types';
 
 import './style.scss';
-
-const categoryShape = {
-    type: PropTypes.oneOf(['asset', 'liability']).isRequired,
-    category: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired
-};
 
 const typeOptions = [
     { internal: 'asset', external: 'Asset' },
     { internal: 'liability', external: 'Liability' }
 ];
 
-function NetWorthCategoryItemForm({ type, category, color, onChange, buttonText }) {
+function NetWorthCategoryItemForm({
+    item: { type, category, color },
+    onChange,
+    buttonText
+}) {
     const [tempType, InputType, touchedType] = useInputSelect(type, typeOptions, {
         className: 'input-type'
     });
@@ -61,22 +63,23 @@ function NetWorthCategoryItemForm({ type, category, color, onChange, buttonText 
 }
 
 NetWorthCategoryItemForm.propTypes = {
+    item: categoryShape,
     buttonText: PropTypes.string.isRequired,
-    ...categoryShape
+    onChange: PropTypes.func.isRequired
 };
 
 NetWorthCategoryItemForm.defaultProps = {
-    type: 'asset',
-    category: 'Cash',
-    color: '#ccffcc'
+    item: {
+        id: CREATE_ID,
+        type: 'asset',
+        category: 'Cash',
+        color: '#ccffcc'
+    }
 };
 
 function NetWorthCategoryItem({
-    id,
+    item,
     active,
-    type,
-    category,
-    color,
     onUpdate,
     categories,
     subcategories,
@@ -86,23 +89,21 @@ function NetWorthCategoryItem({
     onDeleteSubcategory
 }) {
     const onChange = useCallback(values => {
-        onUpdate(id, {}, values);
-    }, [onUpdate, id]);
+        onUpdate(item.id, {}, values);
+    }, [onUpdate, item.id]);
 
     const categorySubcategories = useMemo(() => subcategories.filter(
-        ({ categoryId }) => categoryId === id
-    ), [id, subcategories]);
+        ({ categoryId }) => categoryId === item.id
+    ), [item.id, subcategories]);
 
     const parent = useMemo(() => categories.find(
-        ({ id: categoryId }) => categoryId === id
-    ), [id, categories]);
+        ({ id: categoryId }) => categoryId === item.id
+    ), [item.id, categories]);
 
     return <>
         <NetWorthCategoryItemForm
             key="category-form"
-            type={type}
-            category={category}
-            color={color}
+            item={item}
             onChange={onChange}
             buttonText="Update"
         />
@@ -119,15 +120,15 @@ function NetWorthCategoryItem({
 }
 
 NetWorthCategoryItem.propTypes = {
-    id: PropTypes.number.isRequired,
+    item: categoryShape.isRequired,
     active: PropTypes.bool.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)),
+    categories: PropTypes.arrayOf(categoryShape),
+    subcategories: PropTypes.arrayOf(subcategoryShape),
     onCreateSubcategory: PropTypes.func.isRequired,
     onReadSubcategory: PropTypes.func.isRequired,
     onUpdateSubcategory: PropTypes.func.isRequired,
-    onDeleteSubcategory: PropTypes.func.isRequired,
-    ...categoryShape
+    onDeleteSubcategory: PropTypes.func.isRequired
 };
 
 function NetWorthCategoryCreateItem({ onCreate }) {
@@ -168,7 +169,7 @@ export default function NetWorthCategoryList({
         onDeleteSubcategory
     };
 
-    const itemProps = useCallback((id, { color }) => ({
+    const itemProps = useCallback(({ color }) => ({
         style: {
             backgroundColor: color
         }
@@ -198,8 +199,8 @@ export default function NetWorthCategoryList({
 }
 
 NetWorthCategoryList.propTypes = {
-    categories: PropTypes.arrayOf(PropTypes.shape(categoryShape)),
-    subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)),
+    categories: PropTypes.arrayOf(categoryShape),
+    subcategories: PropTypes.arrayOf(subcategoryShape),
     onCreateCategory: PropTypes.func.isRequired,
     onReadCategory: PropTypes.func.isRequired,
     onUpdateCategory: PropTypes.func.isRequired,

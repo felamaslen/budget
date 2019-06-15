@@ -2,17 +2,11 @@ import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { subcategory as subcategoryShape } from '~client/components/NetWorthCategoryList/prop-types';
 import { useInputText, useInputTickbox, useInputRange } from '~client/hooks/form';
-import CrudList, { crudListPropTypes } from '~client/components/CrudList';
+import CrudList from '~client/components/CrudList';
 
 import './style.scss';
-
-export const subcategoryShape = {
-    categoryId: PropTypes.number.isRequired,
-    subcategory: PropTypes.string.isRequired,
-    hasCreditLimit: PropTypes.bool,
-    opacity: PropTypes.number.isRequired
-};
 
 const getCreditLimitDisabled = parent => parent.type !== 'liability';
 
@@ -110,11 +104,13 @@ NetWorthSubcategoryItemForm.defaultProps = {
 };
 
 function NetWorthSubcategoryItem({
-    id,
-    categoryId,
-    subcategory,
-    hasCreditLimit,
-    opacity,
+    item: {
+        id,
+        categoryId,
+        subcategory,
+        hasCreditLimit,
+        opacity
+    },
     parent,
     onUpdate
 }) {
@@ -136,10 +132,9 @@ function NetWorthSubcategoryItem({
 }
 
 NetWorthSubcategoryItem.propTypes = {
-    id: PropTypes.number.isRequired,
     parent: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    ...subcategoryShape
+    item: subcategoryShape.isRequired
 };
 
 function NetWorthSubcategoryCreateItem({ parent, onCreate }) {
@@ -176,7 +171,7 @@ export default function NetWorthSubcategoryList({
 
     const creditLimitDisabled = getCreditLimitDisabled(parent);
 
-    const itemProps = useCallback((id, { opacity }) => ({
+    const itemProps = useCallback(({ opacity }) => ({
         style: {
             backgroundColor: `rgba(255, 255, 255, ${opacity}`
         }
@@ -206,7 +201,10 @@ export default function NetWorthSubcategoryList({
 }
 
 NetWorthSubcategoryList.propTypes = {
-    subcategories: PropTypes.arrayOf(PropTypes.shape(subcategoryShape)).isRequired,
+    subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
     parent: PropTypes.object.isRequired,
-    ...crudListPropTypes
+    onCreate: PropTypes.func.isRequired,
+    onRead: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired
 };
