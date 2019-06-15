@@ -4,7 +4,7 @@ import axios from 'axios';
 import { API_PREFIX } from '~client/constants/data';
 
 function buildMakeRequest({ method, url, apiKey, onSuccess, onError, onComplete }) {
-    return async (source, id = null, params = {}, data = null) => {
+    return async (source, id = null, params = {}, data = null, done = null) => {
         try {
             let requestUrl = `${API_PREFIX}/${url}`;
             if (id) {
@@ -27,6 +27,10 @@ function buildMakeRequest({ method, url, apiKey, onSuccess, onError, onComplete 
             onError(err);
         } finally {
             onComplete();
+
+            if (done) {
+                done();
+            }
         }
     };
 }
