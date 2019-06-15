@@ -28,7 +28,29 @@
         margin: 0;
     }
 
-    .net-worth-data {
-        flex: 0 0 auto;
+    &-tab-bar {
+        padding: 0 5px;
+        flex: 0 0 22px;
+        border-top: 1px solid #ccc;
+        background: #eee;
+
+        .tab {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 5px;
+            padding: 0 10px;
+            line-height: 22px;
+            color: white;
+            background: #999;
+            text-decoration: none;
+
+            &:hover, &:active {
+                background: #bbb;
+            }
+
+            &.selected {
+                background: #888;
+            }
+        }
     }
 }

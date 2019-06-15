@@ -174,6 +174,10 @@ export default function NetWorthCategoryList({
         }
     }), []);
 
+    if (!(categories && subcategories)) {
+        return null;
+    }
+
     return (
         <div className="net-worth-category-list">
             <h4 className="title">{'Categories'}</h4>
