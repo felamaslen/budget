@@ -33,12 +33,12 @@ function CrudListItem({
                 onUpdate={onUpdate}
                 {...extraProps}
             />
-            <div className="button-delete">
+            {!active && <div className="button-delete">
                 <button
                     className="button-delete-button"
                     onClick={() => onDelete(item.id)}
                 >&minus;</button>
-            </div>
+            </div>}
         </li>
     );
 }
