@@ -84,6 +84,7 @@ module.exports = {
         : 'production',
     output: {
         path: path.join(__dirname, './web/build'),
+        publicPath: '/',
         filename: 'assets/bundle.js'
     },
     resolve: {
