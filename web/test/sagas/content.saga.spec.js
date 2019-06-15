@@ -14,7 +14,7 @@ test('makeContentRequest calling the API with the correct URL', t => {
     });
 
     t.deepEqual(result, [
-        'api/v4/data/analysis/foo/bar/?bar=baz',
+        '/api/v4/data/analysis/foo/bar/?bar=baz',
         {
             headers: { Authorization: 'some_api_key' }
         }
@@ -180,4 +180,3 @@ test('requestContent (for all other pages) handleing errors', t => {
         .next()
         .isDone();
 });
-

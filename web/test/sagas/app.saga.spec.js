@@ -43,7 +43,7 @@ test('updateServerData working as expected', t => {
         .next('some_api_key')
         .select(getRequestList)
         .next([{ req1: 'foo' }])
-        .call(axios.patch, 'api/v4/data/multiple', {
+        .call(axios.patch, '/api/v4/data/multiple', {
             list: [{ req1: 'foo' }]
         }, {
             headers: { Authorization: 'some_api_key' }
@@ -62,7 +62,7 @@ test('updateServerData handleing errors', t => {
         .next('some_api_key')
         .select(getRequestList)
         .next([{ req1: 'foo' }])
-        .call(axios.patch, 'api/v4/data/multiple', {
+        .call(axios.patch, '/api/v4/data/multiple', {
             list: [{ req1: 'foo' }]
         }, {
             headers: { Authorization: 'some_api_key' }
@@ -81,7 +81,7 @@ test('addServerDataRequest working as expected', t => {
         .next()
         .select(getApiKey)
         .next('some_api_key')
-        .call(axios.post, 'api/v4/data/bills', 'foo', {
+        .call(axios.post, '/api/v4/data/bills', 'foo', {
             headers: { Authorization: 'some_api_key' }
         })
         .next({ data: 'something' })
@@ -96,7 +96,7 @@ test('addServerDataRequest handleing errors', t => {
         .next()
         .select(getApiKey)
         .next('some_api_key')
-        .call(axios.post, 'api/v4/data/bills', 'foo', {
+        .call(axios.post, '/api/v4/data/bills', 'foo', {
             headers: { Authorization: 'some_api_key' }
         })
         .throw(new Error('some error'))
@@ -155,4 +155,3 @@ test('appSaga forks other sagas', t => {
         .next()
         .isDone();
 });
-

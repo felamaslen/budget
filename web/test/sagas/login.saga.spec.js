@@ -67,7 +67,7 @@ test('getLoginPin loging in, saving credentials if successful', t => {
         .next()
         .select(S.getLoginPin)
         .next(1024)
-        .call(axios.post, 'api/v4/user/login', { pin: 1024 })
+        .call(axios.post, '/api/v4/user/login', { pin: 1024 })
         .next({ some: 'response' })
         .call(S.saveLoginCredentials, 1024)
         .next()
@@ -82,7 +82,7 @@ test('getLoginPin handleing errors', t => {
         .next()
         .select(S.getLoginPin)
         .next(9999)
-        .call(axios.post, 'api/v4/user/login', { pin: 9999 })
+        .call(axios.post, '/api/v4/user/login', { pin: 9999 })
         .throw({
             response: {
                 data: {
@@ -101,7 +101,7 @@ test('getLoginPin accepting a custom pin parameter', t => {
     t.is(1, 1);
     testSaga(S.submitLoginForm, { customPin: 9999 })
         .next()
-        .call(axios.post, 'api/v4/user/login', { pin: 9999 });
+        .call(axios.post, '/api/v4/user/login', { pin: 9999 });
 });
 
 test('autoLogin loging in automatically', t => {
@@ -131,4 +131,3 @@ test('logoutUser reseting saved credentials', t => {
         .next()
         .isDone();
 });
-

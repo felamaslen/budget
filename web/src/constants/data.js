@@ -2,7 +2,7 @@
 export const TIMER_UPDATE_SERVER = 1000;
 
 export const API_VERSION = 4;
-export const API_PREFIX = `api/v${API_VERSION}`;
+export const API_PREFIX = `/api/v${API_VERSION}`;
 
 export const LOGIN_INPUT_LENGTH = 4;
 
