@@ -10,12 +10,13 @@ function CrudListItem({
     Item,
     onUpdate,
     onDelete,
-    active,
+    activeId,
     setActiveId,
     item,
     itemProps,
     extraProps
 }) {
+    const active = activeId === item.id;
     const onSetActive = useCallback(() => setActiveId(item.id), [item.id, setActiveId]);
 
     return (
@@ -27,6 +28,8 @@ function CrudListItem({
             <Item
                 item={item}
                 active={active}
+                activeId={activeId}
+                setActiveId={setActiveId}
                 onUpdate={onUpdate}
                 {...extraProps}
             />
@@ -43,7 +46,7 @@ function CrudListItem({
 CrudListItem.propTypes = {
     Item: PropTypes.func.isRequired,
     item: PropTypes.object.isRequired,
-    active: PropTypes.bool.isRequired,
+    activeId: PropTypes.number,
     setActiveId: PropTypes.func.isRequired,
     itemProps: PropTypes.func.isRequired,
     extraProps: PropTypes.object.isRequired,
@@ -84,7 +87,7 @@ export default function CrudList({
                         Item={Item}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
-                        active={activeId === item.id}
+                        activeId={activeId}
                         setActiveId={setActiveId}
                         item={item}
                         itemProps={itemProps}
