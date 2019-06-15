@@ -74,6 +74,8 @@ function NetWorth({ apiKey }) {
                     path="/net-worth/edit/list"
                     render={routeProps => <NetWorthList {...routeProps}
                         data={netWorth}
+                        categories={categories}
+                        subcategories={subcategories}
                         onCreate={createNetWorth}
                         onRead={readNetWorth}
                         onUpdate={updateNetWorth}

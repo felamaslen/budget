@@ -15,4 +15,3 @@ NetWorthListCreateItem.propTypes = {
     active: PropTypes.bool.isRequired,
     onCreate: PropTypes.func.isRequired
 };
-

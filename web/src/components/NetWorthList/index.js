@@ -2,13 +2,31 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { netWorthList } from '~client/components/NetWorthList/prop-types';
+import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
 import CrudList from '~client/components/CrudList';
 import NetWorthListItem from '~client/components/NetWorthList/net-worth-list-item';
 import NetWorthListCreateItem from '~client/components/NetWorthList/net-worth-list-create-item';
 
 import './style.scss';
 
-export default function NetWorthList({ data, onCreate, onRead, onUpdate, onDelete }) {
+export default function NetWorthList({
+    data,
+    categories,
+    subcategories,
+    onCreate,
+    onRead,
+    onUpdate,
+    onDelete
+}) {
+    if (!(data && categories && subcategories)) {
+        return null;
+    }
+
+    const extraProps = {
+        categories,
+        subcategories
+    };
+
     return (
         <div className="net-worth-list">
             <h4 className="title">{'List'}</h4>
@@ -21,6 +39,7 @@ export default function NetWorthList({ data, onCreate, onRead, onUpdate, onDelet
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 className="net-worth-item"
+                extraProps={extraProps}
             />
         </div>
     );
@@ -28,6 +47,8 @@ export default function NetWorthList({ data, onCreate, onRead, onUpdate, onDelet
 
 NetWorthList.propTypes = {
     data: netWorthList,
+    categories: PropTypes.arrayOf(category.isRequired),
+    subcategories: PropTypes.arrayOf(subcategory.isRequired),
     onCreate: PropTypes.func.isRequired,
     onRead: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
