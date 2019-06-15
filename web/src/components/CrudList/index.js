@@ -1,8 +1,63 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import './style.scss';
+
+const CREATE_ID = 0;
+
+export const crudListPropTypes = {
+    onCreate: PropTypes.func.isRequired,
+    onRead: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired
+};
+
+function CrudListItem({
+    Item,
+    onUpdate,
+    onDelete,
+    id,
+    active,
+    setActiveId,
+    item,
+    itemProps,
+    extraProps
+}) {
+    const onSetActive = useCallback(() => setActiveId(id), [id, setActiveId]);
+
+    return (
+        <li
+            className="crud-list-list-item"
+            onClick={onSetActive}
+            {...itemProps(id, item)}
+        >
+            <Item
+                id={id}
+                active={active}
+                {...item}
+                onUpdate={onUpdate}
+                {...extraProps}
+            />
+            <div className="button-delete">
+                <button
+                    className="button-delete-button"
+                    onClick={() => onDelete(id)}
+                >&minus;</button>
+            </div>
+        </li>
+    );
+}
+
+CrudListItem.propTypes = {
+    Item: PropTypes.func.isRequired,
+    id: PropTypes.number.isRequired,
+    item: PropTypes.object.isRequired,
+    active: PropTypes.bool.isRequired,
+    setActiveId: PropTypes.func.isRequired,
+    itemProps: PropTypes.func.isRequired,
+    ...crudListPropTypes
+};
 
 export default function CrudList({
     items,
@@ -20,6 +75,10 @@ export default function CrudList({
         onRead();
     }, [onRead]);
 
+    const [activeId, setActiveId] = useState(null);
+
+    const onSetCreateActive = useCallback(() => setActiveId(CREATE_ID), []);
+
     return (
         <div className={classNames('crud-list', className)}>
             <div className="crud-list-meta">
@@ -28,24 +87,27 @@ export default function CrudList({
                 </button>
             </div>
             <ul className="crud-list-list">
-                {items.map(({ id, ...rest }) => (
-                    <li key={id} className="crud-list-list-item" {...itemProps(id, rest)}>
-                        <Item
-                            id={id}
-                            {...rest}
-                            onUpdate={onUpdate}
-                            {...extraProps}
-                        />
-                        <div className="button-delete">
-                            <button
-                                className="button-delete-button"
-                                onClick={() => onDelete(id)}
-                            >&minus;</button>
-                        </div>
-                    </li>
+                {items.map(({ id, ...item }) => (
+                    <CrudListItem key={id}
+                        Item={Item}
+                        onRead={onRead}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                        active={activeId === id}
+                        setActiveId={setActiveId}
+                        id={id}
+                        item={item}
+                        itemProps={itemProps}
+                        extraProps={extraProps}
+                    />
                 ))}
-                <li key={0} className="crud-list-list-item crud-list-list-item-create">
+                <li key={CREATE_ID}
+                    className="crud-list-list-item crud-list-list-item-create"
+                    onClick={onSetCreateActive}
+                >
                     <CreateItem
+                        active={activeId === CREATE_ID}
                         onCreate={onCreate}
                         {...extraProps}
                     />
@@ -55,23 +117,16 @@ export default function CrudList({
     );
 }
 
-export const crudListPropTypes = {
-    onCreate: PropTypes.func.isRequired,
-    onRead: PropTypes.func.isRequired,
-    onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
-};
-
 CrudList.propTypes = {
     items: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.number.isRequired
     })),
-    Item: PropTypes.func.isRequired,
     CreateItem: PropTypes.func.isRequired,
     className: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.object
     ]).isRequired,
+    itemProps: PropTypes.func.isRequired,
     extraProps: PropTypes.object.isRequired,
     ...crudListPropTypes
 };
