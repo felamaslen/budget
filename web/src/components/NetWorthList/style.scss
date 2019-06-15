@@ -1,0 +1,34 @@
+.net-worth-list {
+    flex: 1;
+    overflow: auto;
+
+    .crud-list {
+        &:not(.active) {
+            .crud-list-list-item {
+                height: 26px;
+                position: relative;
+
+                .net-worth-list-item-summary {
+                    padding-left: 24px;
+                    line-height: 26px;
+                    cursor: pointer;
+                    transition: background 0.2s ease;
+
+                    &:nth-child(2n+1) {
+                        background: rgba(10, 10, 10, 0.1);
+                    }
+
+                    &:hover {
+                        background: rgba(10, 60, 240, 0.3);
+                    }
+                }
+
+                .button-delete {
+                    position: absolute;
+                    top: 2px;
+                    right: 24px;
+                }
+            }
+        }
+    }
+}

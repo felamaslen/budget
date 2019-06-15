@@ -9,6 +9,7 @@ import { useCrud } from '~client/hooks/api';
 
 import NetWorthView from '~client/components/NetWorthView';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
+import NetWorthList from '~client/components/NetWorthList';
 
 import './style.scss';
 
@@ -69,6 +70,16 @@ function NetWorth({ apiKey }) {
                         onDeleteSubcategory={deleteSubcategory}
                     />}
                 />
+                <Route
+                    path="/net-worth/edit/list"
+                    render={routeProps => <NetWorthList {...routeProps}
+                        data={netWorth}
+                        onCreate={createNetWorth}
+                        onRead={readNetWorth}
+                        onUpdate={updateNetWorth}
+                        onDelete={deleteNetWorth}
+                    />}
+                />
                 <div className="net-worth-tab-bar">
                     <NavLink
                         exact
@@ -81,6 +92,11 @@ function NetWorth({ apiKey }) {
                         className="tab tab-edit-categories"
                         activeClassName="selected"
                     >{'Categories'}</NavLink>
+                    <NavLink
+                        to="/net-worth/edit/list"
+                        className="tab tab-edit-list"
+                        activeClassName="selected"
+                    >{'List'}</NavLink>
                 </div>
             </div>
         </div>

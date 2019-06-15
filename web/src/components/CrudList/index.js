@@ -75,7 +75,9 @@ export default function CrudList({
     const onSetCreateActive = useCallback(() => setActiveId(CREATE_ID), []);
 
     return (
-        <div className={classNames('crud-list', className)}>
+        <div className={classNames('crud-list', className, {
+            active: activeId !== null
+        })}>
             <div className="crud-list-meta">
                 <button className="button-refresh" onClick={onRefresh}>
                     {'Refresh'}
