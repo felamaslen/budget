@@ -5,12 +5,13 @@
     .crud-list {
         &:not(.active) {
             .crud-list-list-item {
-                height: 26px;
+                $height: 32px;
+                height: $height;
                 position: relative;
 
                 .net-worth-list-item-summary {
                     padding-left: 24px;
-                    line-height: 26px;
+                    line-height: $height;
                     cursor: pointer;
                     transition: background 0.2s ease;
 
@@ -25,7 +26,7 @@
 
                 .button-delete {
                     position: absolute;
-                    top: 2px;
+                    top: ($height - 22px) / 2;
                     right: 24px;
                 }
             }
