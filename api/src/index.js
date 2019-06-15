@@ -149,12 +149,12 @@ function setupWebApp(app) {
         });
     };
 
-    app.get('/:pageName?', singlePageApp);
-    app.get('/:pageName/*', singlePageApp);
-
     // web app static files
     const cache = new CacheControl().middleware;
     app.use('/', cache('days', 100), express.static(path.join(__dirname, '../../web/build')));
+
+    app.get('/:pageName?', singlePageApp);
+    app.get('/:pageName/*', singlePageApp);
 }
 
 function setupErrorHandling(app, logger) {
