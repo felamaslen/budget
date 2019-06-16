@@ -35,7 +35,11 @@ function EditByType({
 
     const { category } = categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId);
 
-    const onChangeCallback = useCallback(newValue => onChange(id, newValue), [onChange, id]);
+    const onChangeCallback = useCallback(newValue => onChange(id, {
+        ...newValue,
+        category: Number(newValue.category),
+        subcategory: Number(newValue.subcategory)
+    }), [onChange, id]);
     const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
     return (
@@ -71,25 +75,28 @@ function AddByType({
     onAdd
 }) {
     const categoryOptions = useMemo(() => categories.map(({ id, category }) => ({
-        internal: id,
+        internal: String(id),
         external: category
     })), [categories]);
 
-    const [category, InputCategory] = useInputSelect(categories[0].id, categoryOptions);
+    const [category, InputCategory] = useInputSelect(categoryOptions[0].internal, categoryOptions);
 
-    const subcategoryOptions = useMemo(() => subcategories
-        .filter(({ categoryId }) => categoryId === category)
-        .map(({ id, subcategory }) => ({
-            internal: id,
-            external: subcategory
-        })), [subcategories, category]);
+    const subcategoryOptions = useMemo(
+        () => subcategories
+            .filter(({ categoryId }) => categoryId === Number(category))
+            .map(({ id, subcategory }) => ({
+                internal: String(id),
+                external: subcategory
+            })),
+        [category, subcategories]
+    );
 
     const [subcategory, InputSubcategory] = useInputSelect(subcategoryOptions[0].internal, subcategoryOptions);
 
     const [value, setValue] = useState(0);
 
     const onAddCallback = useCallback(() => {
-        onAdd(value, subcategory);
+        onAdd(value, Number(subcategory));
     }, [onAdd, subcategory, value]);
 
     return (
@@ -119,7 +126,9 @@ AddByType.propTypes = {
     onAdd: PropTypes.func.isRequired
 };
 
-export function StepAssets({
+function StepValues({
+    typeFilter,
+    name,
     containerProps,
     item,
     categories,
@@ -128,7 +137,7 @@ export function StepAssets({
     onNextStep,
     onLastStep
 }) {
-    const categoriesByType = useMemo(() => categories.filter(({ type }) => type === 'asset'), [categories]);
+    const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [categories, typeFilter]);
 
     const valuesByType = useMemo(() => item.values.filter(({ subcategory }) => {
         const { categoryId } = subcategories.find(({ id }) => id === subcategory);
@@ -173,7 +182,10 @@ export function StepAssets({
 
     return (
         <FormContainer {...containerProps}>
-            <h4>{'Assets - '}{item.date}</h4>
+            <h4 className="step-values-title">
+                <span className="type">{name}</span>
+                <span className="date">{' - '}{item.date}</span>
+            </h4>
             <div className="edit-by-category">
                 {valuesByType.map(value => (
                     <EditByType key={value.id}
@@ -197,7 +209,9 @@ export function StepAssets({
     );
 }
 
-StepAssets.propTypes = {
+StepValues.propTypes = {
+    typeFilter: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
     containerProps: PropTypes.object.isRequired,
     item: netWorthItem.isRequired,
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
@@ -206,3 +220,11 @@ StepAssets.propTypes = {
     onNextStep: PropTypes.func.isRequired,
     onLastStep: PropTypes.bool.isRequired
 };
+
+export const StepAssets = props => (
+    <StepValues {...props} typeFilter="asset" name="Assets" />
+);
+
+export const StepLiabilities = props => (
+    <StepValues {...props} typeFilter="liability" name="Liabilities" />
+);

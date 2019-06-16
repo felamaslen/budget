@@ -5,18 +5,20 @@ import { netWorthItem } from '~client/components/NetWorthList/prop-types';
 import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
 import StepCurrencies from '~client/components/NetWorthEditForm/step-currencies';
-import { StepAssets } from '~client/components/NetWorthEditForm/step-values';
+import { StepAssets, StepLiabilities } from '~client/components/NetWorthEditForm/step-values';
 
 import './style.scss';
 
 const STEP_DATE = 'STEP_DATE';
 const STEP_CURRENCIES = 'STEP_CURRENCIES';
 const STEP_ASSETS = 'STEP_ASSETS';
+const STEP_LIABILITIES = 'STEP_LIABILITIES';
 
 const steps = [
     STEP_DATE,
     STEP_CURRENCIES,
-    STEP_ASSETS
+    STEP_ASSETS,
+    STEP_LIABILITIES
 ];
 
 export default function NetWorthEditForm({
@@ -88,6 +90,14 @@ export default function NetWorthEditForm({
     if (step === STEP_ASSETS) {
         return (
             <StepAssets
+                containerProps={containerProps}
+                {...stepProps}
+            />
+        );
+    }
+    if (step === STEP_LIABILITIES) {
+        return (
+            <StepLiabilities
                 containerProps={containerProps}
                 {...stepProps}
             />
