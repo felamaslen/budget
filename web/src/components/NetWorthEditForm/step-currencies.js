@@ -1,5 +1,8 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import axios from 'axios';
+import debounce from 'debounce';
 
 import { replaceAtIndex } from '~client/modules/data';
 import FormFieldText from '~client/components/FormField';
@@ -18,7 +21,7 @@ function validateRate(rate) {
     return rate;
 }
 
-function validateCurrency(symbol, currencies) {
+function validateCurrency(symbol, currencies = []) {
     if (currencies.some(({ currency }) => currency === symbol)) {
         throw new Error(`Duplicate currency ${symbol}`);
     }
@@ -35,9 +38,112 @@ function validateCurrency(symbol, currencies) {
     return symbolUpper;
 }
 
-function EditCurrency({ entry, onChange, onRemove }) {
+async function getCurrencies(symbols, source, onSuccess, onError, onComplete) {
+    try {
+        const res = await axios.get('https://api.exchangeratesapi.io/latest', {
+            params: {
+                base: BASE,
+                symbols: symbols.join(',')
+            },
+            cancelToken: source.current.token
+        });
+
+        onSuccess(res.data);
+    } catch (err) {
+        if (!axios.isCancel(err)) {
+            onError(err);
+        }
+    } finally {
+        onComplete();
+    }
+}
+
+const getCurrenciesDebounced = debounce((...args) => {
+    getCurrencies(...args);
+}, 100);
+
+function useCurrencyApi(symbols) {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const source = useRef(null);
+    const [rates, setRates] = useState({});
+    const [cacheTime, setCacheTime] = useState(null);
+
+    const onSuccess = useCallback(({ rates: newRates }) => {
+        setRates(Object.keys(newRates).reduce((last, symbol) => ({
+            ...last,
+            [symbol]: 1 / newRates[symbol]
+        }), rates));
+
+        setCacheTime(Date.now());
+    }, [rates]);
+
+    const onComplete = useCallback(() => {
+        setLoading(false);
+    }, []);
+
+    const getRates = useCallback((extraSymbol = null) => {
+        const allSymbols = Array.from(new Set(symbols.concat([extraSymbol])))
+            .filter(value => value);
+
+        const allCached = allSymbols.every(symbol => rates[symbol]);
+        if (allCached && cacheTime && cacheTime > Date.now() - 3600 * 1000) {
+            return;
+        }
+
+        if (source.current) {
+            source.current.cancel('New request made');
+        }
+        source.current = axios.CancelToken.source();
+        setLoading(true);
+
+        getCurrenciesDebounced(allSymbols, source, onSuccess, setError, onComplete);
+    }, [rates, cacheTime, symbols, onSuccess, onComplete]);
+
+    useEffect(() => () => {
+        if (source.current) {
+            source.current.cancel('Component unmounted');
+        }
+    }, []);
+
+    return [rates, getRates, loading, error];
+}
+
+function useRateRefresh(rates, getRates, loading, symbol, setRate) {
+    const [readyToInsert, setReadyToInsert] = useState(false);
+    const initRefresh = useCallback(() => {
+        try {
+            validateCurrency(symbol);
+            setReadyToInsert(true);
+            getRates(symbol);
+        } catch (err) {
+            // do nothing - invalid symbol
+        }
+    }, [getRates, symbol]);
+
+    useEffect(() => {
+        if (readyToInsert && rates[symbol]) {
+            setRate(rates[symbol]);
+            setReadyToInsert(false);
+        }
+    }, [symbol, setRate, readyToInsert, rates]);
+
+    const button = useMemo(() => (
+        <button
+            className="button-refresh"
+            disabled={loading}
+            onClick={initRefresh}
+        >&#8635;</button>
+    ), [loading, initRefresh]);
+
+    return [button, readyToInsert];
+}
+
+function EditCurrency({ entry, onChange, onRemove, rates, getRates, loadingRates }) {
     const [tempRate, setTempRate] = useState(entry.rate);
     const [error, setError] = useState(null);
+
+    const [refreshButton, refreshing] = useRateRefresh(rates, getRates, loadingRates, entry.currency, setTempRate);
 
     useEffect(() => {
         if (tempRate !== entry.rate) {
@@ -60,10 +166,11 @@ function EditCurrency({ entry, onChange, onRemove }) {
         <div className="edit-currency">
             <h5 className="currency-title">{entry.currency}</h5>
             <div className="input-group">
-                <FormFieldNumber value={tempRate} onChange={setTempRate} />
+                <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
                 {error && <span className="error">{error}</span>}
             </div>
             <button className="button-delete" onClick={onRemoveCallback}>&minus;</button>
+            {refreshButton}
         </div>
     );
 }
@@ -71,12 +178,17 @@ function EditCurrency({ entry, onChange, onRemove }) {
 EditCurrency.propTypes = {
     entry: currencyShape.isRequired,
     onChange: PropTypes.func.isRequired,
-    onRemove: PropTypes.func.isRequired
+    onRemove: PropTypes.func.isRequired,
+    rates: PropTypes.object.isRequired,
+    getRates: PropTypes.func.isRequired,
+    loadingRates: PropTypes.bool.isRequired
 };
 
-function AddCurrency({ currencies, onAdd }) {
+function AddCurrency({ currencies, onAdd, rates, getRates, loadingRates }) {
     const [tempCurrency, setTempCurrency] = useState('USD');
     const [tempRate, setTempRate] = useState(0);
+
+    const [refreshButton, refreshing] = useRateRefresh(rates, getRates, loadingRates, tempCurrency, setTempRate);
 
     const [error, setError] = useState(null);
 
@@ -97,17 +209,21 @@ function AddCurrency({ currencies, onAdd }) {
             <h5 className="currency-title">{'Add a currency'}</h5>
             <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
             <div className="input-group">
-                <FormFieldNumber value={tempRate} onChange={setTempRate} />
+                <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
                 {error && <span className="error">{error}</span>}
             </div>
             <button className="button-add" onClick={onAddCallback}>+</button>
+            {refreshButton}
         </div>
     );
 }
 
 AddCurrency.propTypes = {
     currencies: PropTypes.arrayOf(currencyShape.isRequired).isRequired,
-    onAdd: PropTypes.func.isRequired
+    onAdd: PropTypes.func.isRequired,
+    rates: PropTypes.object.isRequired,
+    getRates: PropTypes.func.isRequired,
+    loadingRates: PropTypes.bool.isRequired
 };
 
 export default function StepCurrencies({
@@ -139,20 +255,32 @@ export default function StepCurrencies({
         onEdit({ ...item, currencies: newCurrencies });
     }, [onEdit, item]);
 
+    const symbols = item.currencies.map(({ currency }) => currency);
+    const [rates, getRates, loadingRates, errorRates] = useCurrencyApi(symbols);
+
     return (
         <FormContainer {...containerProps}>
             <h4>{'Currencies - '}{item.date}</h4>
-            <div className="edit-currencies">
+            {errorRates && <div className="error">
+                {'Error loading rates: '}{errorRates.message}
+            </div>}
+            <div className={classNames('edit-currencies', { loading: loadingRates })}>
                 {item.currencies.map(currency => (
                     <EditCurrency key={currency.id}
                         entry={currency}
                         onChange={onChangeValue}
                         onRemove={onRemoveValue}
+                        rates={rates}
+                        getRates={getRates}
+                        loadingRates={loadingRates}
                     />
                 ))}
                 <AddCurrency key={0}
                     currencies={item.currencies}
                     onAdd={onAddValue}
+                    rates={rates}
+                    getRates={getRates}
+                    loadingRates={loadingRates}
                 />
             </div>
             <NextButton onNextStep={onNextStep} onLastStep={onLastStep} />
@@ -167,4 +295,3 @@ StepCurrencies.propTypes = {
     onNextStep: PropTypes.func.isRequired,
     onLastStep: PropTypes.bool.isRequired
 };
-
