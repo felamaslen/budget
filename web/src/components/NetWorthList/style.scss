@@ -9,15 +9,17 @@
                 height: $height;
                 position: relative;
 
+                &:nth-child(2n+1) {
+                    .net-worth-list-item-summary {
+                        background: rgba(10, 10, 10, 0.1);
+                    }
+                }
+
                 .net-worth-list-item-summary {
                     padding-left: 24px;
                     line-height: $height;
                     cursor: pointer;
                     transition: background 0.2s ease;
-
-                    &:nth-child(2n+1) {
-                        background: rgba(10, 10, 10, 0.1);
-                    }
 
                     &:hover {
                         background: rgba(10, 60, 240, 0.3);

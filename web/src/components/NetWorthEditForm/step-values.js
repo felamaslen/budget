@@ -169,14 +169,14 @@ function appendCreditLimit(item, subcategory, value) {
     return replaceAtIndex(item.creditLimit, index, creditLimit);
 }
 
-function useAddValue(item, onEdit) {
-    const [numNew, setNumNew] = useState(0);
+function useAddValue(item, minId, onEdit) {
+    const [numNew, setNumNew] = useState(-Math.min(0, minId));
 
     return useCallback((newValue, creditLimit, subcategory) => {
         const itemWithValue = {
             ...item,
             values: item.values.concat([{
-                id: -numNew,
+                id: -(numNew + 1),
                 subcategory,
                 value: newValue
             }])
@@ -250,6 +250,8 @@ function StepValues({
         return categoriesByType.some(({ id }) => id === categoryId);
     }), [categoriesByType, subcategories, item.values]);
 
+    const minId = useMemo(() => Math.min(...valuesByType.map(({ id }) => id)), [valuesByType]);
+
     const availableSubcategories = useMemo(() => subcategories.filter(({ id: subcategoryId, categoryId }) =>
         categoriesByType.some(({ id }) => id === categoryId) &&
         !valuesByType.some(({ subcategory }) => subcategory === subcategoryId)
@@ -259,7 +261,7 @@ function StepValues({
         availableSubcategories.some(({ categoryId }) => categoryId === id)
     ), [categoriesByType, availableSubcategories]);
 
-    const onAddValue = useAddValue(item, onEdit);
+    const onAddValue = useAddValue(item, minId, onEdit);
     const onChangeValue = useChangeValue(item, onEdit);
     const onRemoveValue = useRemoveValue(item, onEdit);
 

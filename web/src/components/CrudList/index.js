@@ -102,6 +102,8 @@ export default function CrudList({
                 >
                     <CreateItem
                         active={activeId === CREATE_ID}
+                        activeId={activeId}
+                        setActiveId={setActiveId}
                         onCreate={onCreate}
                         {...extraProps}
                     />

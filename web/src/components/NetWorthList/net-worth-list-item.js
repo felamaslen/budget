@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
 import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
-import NetWorthEditForm from '~client/components/NetWorthEditForm';
+import { NetWorthEditForm } from '~client/components/NetWorthEditForm';
 
 export default function NetWorthListItem({
     item,

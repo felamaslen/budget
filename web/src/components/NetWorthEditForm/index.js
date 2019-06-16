@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { DateTime } from 'luxon';
 
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
 import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
@@ -21,12 +22,12 @@ const steps = [
     STEP_LIABILITIES
 ];
 
-export default function NetWorthEditForm({
+function NetWorthItemForm({
     item,
     categories,
     subcategories,
     setActiveId,
-    onUpdate
+    onEdit
 }) {
     const onComplete = useCallback(event => {
         if (event) {
@@ -43,21 +44,9 @@ export default function NetWorthEditForm({
         if (stepIndex < steps.length - 1) {
             setStep(steps[stepIndex + 1]);
         } else {
-            const { id, ...doc } = tempItem;
-
-            const docWithoutIds = [
-                'creditLimit',
-                'currencies',
-                'values'
-            ]
-                .reduce((last, key) => ({
-                    ...last,
-                    [key]: doc[key].map(({ id: valueId, ...rest }) => rest)
-                }), doc);
-
-            onUpdate(item.id, {}, docWithoutIds, onComplete);
+            onEdit(tempItem, onComplete);
         }
-    }, [item.id, onComplete, step, tempItem, onUpdate]);
+    }, [onComplete, step, tempItem, onEdit]);
 
     const onLastStep = steps.indexOf(step) === steps.length - 1;
 
@@ -107,10 +96,78 @@ export default function NetWorthEditForm({
     throw new Error('Invalid step set for <NetWorthEditForm />');
 }
 
-NetWorthEditForm.propTypes = {
+NetWorthItemForm.propTypes = {
     item: netWorthItem.isRequired,
     categories: PropTypes.arrayOf(category.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     setActiveId: PropTypes.func.isRequired,
+    onEdit: PropTypes.func.isRequired
+};
+
+const idLists = [
+    'creditLimit',
+    'currencies',
+    'values'
+];
+
+const withoutIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
+    ...last,
+    [key]: doc[key].map(({ id: valueId, ...rest }) => rest)
+}), doc);
+
+const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
+    ...last,
+    [key]: doc[key].map((item, index) => ({ ...item, id: -(index + 1) }))
+}), doc);
+
+export function NetWorthEditForm({ onUpdate, ...props }) {
+    const onEdit = useCallback((tempItem, onComplete) => {
+        onUpdate(tempItem.id, {}, withoutIds(tempItem), onComplete);
+    }, [onUpdate]);
+
+    return (
+        <NetWorthItemForm {...props} onEdit={onEdit} />
+    );
+}
+
+NetWorthEditForm.propTypes = {
     onUpdate: PropTypes.func.isRequired
+};
+
+export function NetWorthAddForm({ data, onCreate, ...props }) {
+    const item = useMemo(() => {
+        if (data.length) {
+            const itemsSorted = data.sort(({ date: dateA }, { date: dateB }) =>
+                DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
+
+            const lastItem = itemsSorted[itemsSorted.length - 1];
+
+            return {
+                ...withContrivedIds(lastItem),
+                date: DateTime.fromISO(lastItem.date)
+                    .plus({ months: 1 })
+                    .endOf('month')
+                    .toISODate()
+            };
+        }
+
+        return {
+            creditLimit: [],
+            currencies: [],
+            values: []
+        };
+    }, [data]);
+
+    const onEdit = useCallback((tempItem, onComplete) => {
+        onCreate(null, {}, withoutIds(tempItem), onComplete);
+    }, [onCreate]);
+
+    return (
+        <NetWorthItemForm {...props} item={item} onEdit={onEdit} />
+    );
+}
+
+NetWorthAddForm.propTypes = {
+    data: PropTypes.arrayOf(netWorthItem.isRequired).isRequired,
+    onCreate: PropTypes.func.isRequired
 };

@@ -23,6 +23,7 @@ export default function NetWorthList({
     }
 
     const extraProps = {
+        data,
         categories,
         subcategories
     };

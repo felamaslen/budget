@@ -233,7 +233,8 @@ export default function StepCurrencies({
     onNextStep,
     onLastStep
 }) {
-    const [numNew, setNumNew] = useState(0);
+    const minId = useMemo(() => Math.min(...item.currencies.map(({ id }) => id)), [item.currencies]);
+    const [numNew, setNumNew] = useState(-Math.min(0, minId));
 
     const onAddValue = useCallback(currency => {
         const newCurrencies = item.currencies.concat([{
