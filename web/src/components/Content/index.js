@@ -17,7 +17,6 @@ import {
 } from '~client/containers/PageList';
 
 const routes = [
-    { key: 'overview', path: '/', exact: true, component: PageOverview },
     { key: 'analysis', component: PageAnalysis },
     { key: 'funds', component: PageFunds },
     { key: 'income', component: PageIncome },
@@ -25,7 +24,8 @@ const routes = [
     { key: 'food', component: PageFood },
     { key: 'general', component: PageGeneral },
     { key: 'holiday', component: PageHoliday },
-    { key: 'social', component: PageSocial }
+    { key: 'social', component: PageSocial },
+    { key: 'overview', path: '/', component: PageOverview }
 ];
 
 function NotFound() {

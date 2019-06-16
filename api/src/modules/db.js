@@ -25,7 +25,21 @@ function parseConnectionURI(uri = '') {
 async function initDb(config, logger, migrate = true) {
     const db = knex({
         client: 'mysql2',
-        connection: parseConnectionURI(config.mysqlUri)
+        connection: {
+            ...parseConnectionURI(config.mysqlUri),
+            typeCast: (field, next) => {
+                if (field.type === 'TINY' && field.length === 1) {
+                    const value = field.string();
+                    if (value) {
+                        return value === '1';
+                    }
+
+                    return null;
+                }
+
+                return next();
+            }
+        }
     });
 
     if (migrate) {

@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import {
     getPeriodMatch,
     uuid,
+    replaceAtIndex,
     TransactionsList,
     dataEquals,
     listAverage,
@@ -42,6 +43,10 @@ test('getPeriodMatch spliting up a short period representation', t => {
 test('uuid maping [0, 1] bijectively to a six-digit number', t => {
     t.is(uuid(0.6741, true), 109713);
     t.is(uuid(0.99123, true), 130497);
+});
+
+test('replaceAtIndex replaces an array item at a specified index', t => {
+    t.deepEqual(replaceAtIndex([1, 5, 7, 3, 2], 1, 3.2), [1, 3.2, 7, 3, 2]);
 });
 
 const transactionsData = [
@@ -383,4 +388,3 @@ test('sortRowsByDate sorting rows by date', t => {
         }
     );
 });
-
