@@ -96,7 +96,7 @@
     "redux-saga": "^1.0.2",
     "reselect": "^3.0.1",
     "sha1": "^1.1.1",
-    "swagger-jsdoc": "^1.9.7",
+    "swagger-jsdoc": "^3.2.9",
     "swagger-ui-dist": "^3.1.7",
     "winston": "^2.4.0"
   },
