@@ -21,7 +21,7 @@ function CrudListItem({
 
     return (
         <li
-            className="crud-list-list-item"
+            className={classNames('crud-list-list-item', { active })}
             onClick={onSetActive}
             {...itemProps(item)}
         >
@@ -73,6 +73,7 @@ export default function CrudList({
     const [activeId, setActiveId] = useState(null);
 
     const onSetCreateActive = useCallback(() => setActiveId(CREATE_ID), []);
+    const createActive = activeId === CREATE_ID;
 
     return (
         <div className={classNames('crud-list', className, {
@@ -97,11 +98,13 @@ export default function CrudList({
                     />
                 ))}
                 <li key={CREATE_ID}
-                    className="crud-list-list-item crud-list-list-item-create"
+                    className={classNames('crud-list-list-item', 'crud-list-list-item-create', {
+                        active: createActive
+                    })}
                     onClick={onSetCreateActive}
                 >
                     <CreateItem
-                        active={activeId === CREATE_ID}
+                        active={createActive}
                         activeId={activeId}
                         setActiveId={setActiveId}
                         onCreate={onCreate}

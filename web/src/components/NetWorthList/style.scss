@@ -33,5 +33,13 @@
                 }
             }
         }
+
+        &.active {
+            .crud-list-list-item {
+                &:not(.active) {
+                    display: none;
+                }
+            }
+        }
     }
 }
