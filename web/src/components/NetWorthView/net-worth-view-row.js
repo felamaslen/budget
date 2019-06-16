@@ -38,6 +38,8 @@ export default function NetWorthViewRow({ row, categories, subcategories }) {
         brackets: true
     }), [netWorthValue]);
 
+    const fti = useMemo(() => row.fti(netWorthValue).toFixed(2), [row, netWorthValue]);
+
     return (
         <tr className="net-worth-view-row">
             <td className="date-short">{dateShort}</td>
@@ -46,6 +48,7 @@ export default function NetWorthViewRow({ row, categories, subcategories }) {
             <td className="liabilities">{liabilities}</td>
             <td className="net-worth-value">{netWorthFormatted}</td>
             <td className="expenses">{formatCurrency(row.spend)}</td>
+            <td className="fti">{fti}</td>
         </tr>
     );
 }

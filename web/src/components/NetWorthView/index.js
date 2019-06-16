@@ -18,6 +18,19 @@ const withIsoDates = data => data.map(({ date, ...rest }) => ({
 
 const sortByIsoDate = rows => rows.sort(({ date: dateA }, { date: dateB }) => dateA - dateB);
 
+const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE);
+
+const withFTI = rows => rows.map((row, index) => {
+    const { years } = row.dateIso.diff(FTI_START, 'years').toObject();
+
+    const pastYear = rows.slice(index - 11, index + 1);
+    const pastYearAverageSpend = pastYear.reduce((sum, { spend }) => sum + spend, 0) * 12 / pastYear.length;
+
+    const fti = netWorthValue => netWorthValue * years / pastYearAverageSpend;
+
+    return { ...row, fti };
+});
+
 export default function NetWorthView({ rowDates, spending, data, categories, subcategories }) {
     const netWorthDateToRowIndex = useCallback(date => rowDates.findIndex(value =>
         value.year === date.year && value.month === date.month
@@ -35,6 +48,7 @@ export default function NetWorthView({ rowDates, spending, data, categories, sub
 
 
     const rows = useMemo(() => compose(
+        withFTI,
         withSpend,
         sortByIsoDate,
         withIsoDates
