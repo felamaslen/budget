@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { useInputSelect } from '~client/hooks/form';
 import {
     currency,
+    creditLimit as creditLimitShape,
     netWorthItem,
     netWorthValue
 } from '~client/components/NetWorthList/prop-types';
@@ -13,12 +14,28 @@ import {
     subcategory as subcategoryShape
 } from '~client/components/NetWorthCategoryList/prop-types';
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
+import FormFieldCost from '~client/components/FormField/cost';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
 import NextButton from '~client/components/NetWorthEditForm/next-button';
+
+function CreditLimitEditor({ creditLimit, setCreditLimit }) {
+    return (
+        <div className="credit-limit-editor">
+            <span className="label">{'Credit limit:'}</span>
+            <FormFieldCost value={creditLimit} onChange={setCreditLimit} />
+        </div>
+    );
+}
+
+CreditLimitEditor.propTypes = {
+    creditLimit: PropTypes.number.isRequired,
+    setCreditLimit: PropTypes.func.isRequired
+};
 
 function EditByType({
     categories,
     subcategories,
+    creditLimit: creditLimitList,
     currencies,
     value: {
         id,
@@ -30,16 +47,23 @@ function EditByType({
 }) {
     const {
         subcategory: subcategoryName,
+        hasCreditLimit,
         categoryId
     } = subcategories.find(({ id: subcategoryId }) => subcategoryId === subcategory);
 
     const { category } = categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId);
 
-    const onChangeCallback = useCallback(newValue => onChange(id, {
-        ...newValue,
-        category: Number(newValue.category),
-        subcategory: Number(newValue.subcategory)
-    }), [onChange, id]);
+    const { value: initialCreditLimit } = creditLimitList.find(({ subcategory: subcategoryId }) => subcategoryId === subcategory) || { value: null };
+
+    const [newValue, setNewValue] = useState(value);
+    const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
+
+    useEffect(() => {
+        if (!(value === newValue && initialCreditLimit === creditLimit)) {
+            onChange(id, newValue, creditLimit);
+        }
+    }, [value, newValue, initialCreditLimit, creditLimit, onChange, id]);
+
     const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
     return (
@@ -48,9 +72,10 @@ function EditByType({
             <h6 className="subcategory">{subcategoryName}</h6>
             <FormFieldNetWorthValue
                 value={value}
-                onChange={onChangeCallback}
+                onChange={setNewValue}
                 currencies={currencies}
             />
+            {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
             <button
                 onClick={onRemoveCallback}
                 className="button-delete"
@@ -62,6 +87,7 @@ function EditByType({
 EditByType.propTypes = {
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
+    creditLimit: PropTypes.arrayOf(creditLimitShape.isRequired).isRequired,
     currencies: PropTypes.arrayOf(currency.isRequired).isRequired,
     value: netWorthValue.isRequired,
     onChange: PropTypes.func.isRequired,
@@ -95,9 +121,15 @@ function AddByType({
 
     const [value, setValue] = useState(0);
 
+    const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === Number(subcategory)), [subcategories, subcategory]);
+    const initialCreditLimit = hasCreditLimit
+        ? 0
+        : null;
+    const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
+
     const onAddCallback = useCallback(() => {
-        onAdd(value, Number(subcategory));
-    }, [onAdd, subcategory, value]);
+        onAdd(value, creditLimit, Number(subcategory));
+    }, [onAdd, subcategory, value, creditLimit]);
 
     return (
         <div className="add-by-category-value">
@@ -114,6 +146,7 @@ function AddByType({
                 onChange={setValue}
                 currencies={currencies}
             />
+            {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
             <button onClick={onAddCallback} className="button-add">{'Add'}</button>
         </div>
     );
@@ -125,6 +158,78 @@ AddByType.propTypes = {
     currencies: PropTypes.arrayOf(currency.isRequired).isRequired,
     onAdd: PropTypes.func.isRequired
 };
+
+function appendCreditLimit(item, subcategory, value) {
+    const index = item.creditLimit.findIndex(({ subcategory: subcategoryId }) => subcategoryId === subcategory);
+    const creditLimit = { subcategory, value };
+    if (index === -1) {
+        return item.creditLimit.concat([creditLimit]);
+    }
+
+    return replaceAtIndex(item.creditLimit, index, creditLimit);
+}
+
+function useAddValue(item, onEdit) {
+    const [numNew, setNumNew] = useState(0);
+
+    return useCallback((newValue, creditLimit, subcategory) => {
+        const itemWithValue = {
+            ...item,
+            values: item.values.concat([{
+                id: -numNew,
+                subcategory,
+                value: newValue
+            }])
+        };
+
+        setNumNew(numNew + 1);
+
+        if (creditLimit === null) {
+            onEdit(itemWithValue);
+        } else {
+            onEdit({
+                ...itemWithValue,
+                creditLimit: appendCreditLimit(item, subcategory, creditLimit)
+            });
+        }
+    }, [item, onEdit, numNew]);
+}
+
+function useChangeValue(item, onEdit) {
+    return useCallback((id, newValue, creditLimit) => {
+        const index = item.values.findIndex(({ id: valueId }) => valueId === id);
+        const itemWithValue = {
+            ...item,
+            values: replaceAtIndex(item.values, index, {
+                ...item.values[index],
+                value: newValue
+            })
+        };
+
+        if (creditLimit === null) {
+            onEdit(itemWithValue);
+        } else {
+            const creditLimitIndex = item.creditLimit.findIndex(({ subcategory }) => subcategory === item.values[index].subcategory);
+
+            onEdit({
+                ...itemWithValue,
+                creditLimit: replaceAtIndex(item.creditLimit, creditLimitIndex, {
+                    ...item.creditLimit[creditLimitIndex],
+                    value: creditLimit
+                })
+            });
+        }
+    }, [item, onEdit]);
+}
+
+function useRemoveValue(item, onEdit) {
+    return useCallback(id => {
+        const index = item.values.findIndex(({ id: valueId }) => valueId === id);
+        const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
+        const creditLimit = item.creditLimit.filter(({ subcategory }) => subcategory !== item.values[index].subcategory);
+        onEdit({ ...item, values: newItemValues, creditLimit });
+    }, [item, onEdit]);
+}
 
 function StepValues({
     typeFilter,
@@ -154,31 +259,9 @@ function StepValues({
         availableSubcategories.some(({ categoryId }) => categoryId === id)
     ), [categoriesByType, availableSubcategories]);
 
-    const [numNew, setNumNew] = useState(0);
-
-    const onAddValue = useCallback((newValue, subcategory) => {
-        const newItemValues = item.values.concat([{
-            id: -numNew,
-            subcategory,
-            value: newValue
-        }]);
-        setNumNew(numNew + 1);
-        onEdit({ ...item, values: newItemValues });
-    }, [onEdit, numNew, item]);
-
-    const onChangeValue = useCallback((id, newValue) => {
-        const index = item.values.findIndex(({ id: valueId }) => valueId === id);
-        const newItemValues = replaceAtIndex(item.values, index, {
-            ...item.values[index],
-            value: newValue
-        });
-        onEdit({ ...item, values: newItemValues });
-    }, [onEdit, item]);
-
-    const onRemoveValue = useCallback(id => {
-        const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
-        onEdit({ ...item, values: newItemValues });
-    }, [onEdit, item]);
+    const onAddValue = useAddValue(item, onEdit);
+    const onChangeValue = useChangeValue(item, onEdit);
+    const onRemoveValue = useRemoveValue(item, onEdit);
 
     return (
         <FormContainer {...containerProps}>
@@ -191,6 +274,7 @@ function StepValues({
                     <EditByType key={value.id}
                         categories={categoriesByType}
                         subcategories={subcategories}
+                        creditLimit={item.creditLimit}
                         currencies={item.currencies}
                         value={value}
                         onChange={onChangeValue}
