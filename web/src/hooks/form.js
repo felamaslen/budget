@@ -42,7 +42,7 @@ function useInput(initialValue, props, InputComponent, handleChange = handleChan
 
     const touched = initialValue !== tempValue;
 
-    return [tempValue, Input, touched];
+    return [tempValue, Input, touched, setTempValue];
 }
 
 export function useInputText(initialValue, props = {}) {
@@ -60,15 +60,43 @@ const makeInputComponentSelect = options => {
         </select>
     );
 
-    InputComponentSelect.propTypes = inputTextPropTypes;
+    InputComponentSelect.propTypes = {
+        ...inputTextPropTypes,
+        tempValue: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.number
+        ])
+    };
 
     return InputComponentSelect;
 };
 
-export function useInputSelect(initialValue, options, props = {}) {
+export function useInputSelect(initialValue, optionsRaw, props = {}) {
+    const options = useMemo(() => optionsRaw.map(option => {
+        if (typeof option === 'object') {
+            return option;
+        }
+
+        return { internal: option, external: option };
+    }), [optionsRaw]);
+
     const InputComponentSelect = useMemo(() => makeInputComponentSelect(options), [options]);
 
-    return useInput(initialValue, props, InputComponentSelect);
+    const input = useInput(initialValue, props, InputComponentSelect);
+
+    const [tempValue, , , setTempValue] = input;
+
+    useEffect(() => {
+        if (!options.some(({ internal }) => internal === tempValue)) {
+            if (options.length) {
+                setTempValue(options[0].internal);
+            } else {
+                setTempValue(null);
+            }
+        }
+    }, [options, tempValue, setTempValue]);
+
+    return input;
 }
 
 const makeInputComponentColor = (active, setActive) => {
