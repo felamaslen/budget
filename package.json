@@ -123,7 +123,6 @@
     "eslint-plugin-react-hooks": "^1.5.1",
     "fast-memoize": "^2.5.1",
     "file-loader": "^1.1.11",
-    "fixture-factory": "^1.5.1",
     "fs-extra": "^4.0.1",
     "full-icu": "^1.2.1",
     "ignore-styles": "^5.0.1",
