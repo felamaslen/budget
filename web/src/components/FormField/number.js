@@ -16,7 +16,7 @@ export default function FormFieldNumber({ value, onChange, ...props }) {
             <input
                 {...props}
                 type="number"
-                defaultValue={currentValue}
+                value={currentValue}
                 onChange={onType}
                 onBlur={onBlur}
             />
