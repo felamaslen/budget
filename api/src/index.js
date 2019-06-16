@@ -138,22 +138,23 @@ function setupWebApp(app) {
         setupDevServer(app);
     }
 
-    // set up views engine
     setupStaticViews(app);
 
-    // index template
-    app.get('/:pageName?', (req, res) => {
+    const singlePageApp = (req, res) => {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
         res.render('index', {
             version,
             hot,
             pieTolerance
         });
-    });
+    };
 
     // web app static files
     const cache = new CacheControl().middleware;
     app.use('/', cache('days', 100), express.static(path.join(__dirname, '../../web/build')));
+
+    app.get('/:pageName?', singlePageApp);
+    app.get('/:pageName/*', singlePageApp);
 }
 
 function setupErrorHandling(app, logger) {

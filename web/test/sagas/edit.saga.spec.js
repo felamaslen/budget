@@ -58,7 +58,7 @@ test('requestEditSuggestions requesting edit suggestions, if a value was typed',
         .next()
         .select(getApiKey)
         .next('some_api_key')
-        .call(axios.get, 'api/v4/data/search/food/foo/bar/5', { headers: { Authorization: 'some_api_key' } })
+        .call(axios.get, '/api/v4/data/search/food/foo/bar/5', { headers: { Authorization: 'some_api_key' } })
         .next({ data: { data: { list: ['foo'] } } })
         .put(A.aSuggestionsReceived({ data: { list: ['foo'] }, reqId: 1 }))
         .next()

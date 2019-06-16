@@ -42,7 +42,7 @@ test('requestFundPeriodData requesting new data', t => {
         .next(fromJS({}))
         .select(getApiKey)
         .next('some_api_key')
-        .call(axios.get, 'api/v4/data/funds?period=year&length=1&history=true', {
+        .call(axios.get, '/api/v4/data/funds?period=year&length=1&history=true', {
             headers: { Authorization: 'some_api_key' }
         })
         .next({ data: { data: 'yes' } })
@@ -61,7 +61,7 @@ test('requestFundPeriodData handleing errors', t => {
         .next(fromJS({}))
         .select(getApiKey)
         .next('some_api_key')
-        .call(axios.get, 'api/v4/data/funds?period=year&length=1&history=true', {
+        .call(axios.get, '/api/v4/data/funds?period=year&length=1&history=true', {
             headers: { Authorization: 'some_api_key' }
         })
         .throw(new Error('some error'))
@@ -101,4 +101,3 @@ test('requestStocksPrices handleing errors', t => {
         .next()
         .isDone();
 });
-
