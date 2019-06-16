@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { DateTime } from 'luxon';
 
 import { formatCurrency } from '~client/modules/format';
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
@@ -19,9 +18,8 @@ function getShortDate(dateIso) {
 }
 
 export default function NetWorthViewRow({ row, categories, subcategories }) {
-    const dateIso = useMemo(() => DateTime.fromISO(row.date), [row.date]);
-    const dateShort = useMemo(() => getShortDate(dateIso), [dateIso]);
-    const dateLong = useMemo(() => dateIso.toLocaleString(), [dateIso]);
+    const dateShort = useMemo(() => getShortDate(row.dateIso), [row.dateIso]);
+    const dateLong = useMemo(() => row.dateIso.toLocaleString(), [row.dateIso]);
 
     const dataProps = useMemo(() => ({ row, categories, subcategories }), [row, categories, subcategories]);
 
@@ -47,6 +45,7 @@ export default function NetWorthViewRow({ row, categories, subcategories }) {
             <td className="assets">{assets}</td>
             <td className="liabilities">{liabilities}</td>
             <td className="net-worth-value">{netWorthFormatted}</td>
+            <td className="expenses">{formatCurrency(row.spend)}</td>
         </tr>
     );
 }

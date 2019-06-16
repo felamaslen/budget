@@ -1,16 +1,46 @@
-import React, { useMemo } from 'react';
+import { List as list } from 'immutable';
+import React, { useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
+import { DateTime } from 'luxon';
+import { compose } from 'redux';
 
-import { sortByDate } from '~client/modules/data';
 import { dataPropTypes } from '~client/components/NetWorthView/prop-types';
 import { SumCashEasyAccess, SumCashOther, SumStocks, SumPension } from '~client/components/NetWorthView/sum-by-category';
 import NetWorthViewRow from '~client/components/NetWorthView/net-worth-view-row';
 
 import './style.scss';
 
-export default function NetWorthView({ data, categories, subcategories }) {
-    const rows = useMemo(() => sortByDate(data), [data]);
+const withIsoDates = data => data.map(({ date, ...rest }) => ({
+    date,
+    dateIso: DateTime.fromISO(date),
+    ...rest
+}));
 
-    if (!(data && categories && subcategories)) {
+const sortByIsoDate = rows => rows.sort(({ date: dateA }, { date: dateB }) => dateA - dateB);
+
+export default function NetWorthView({ rowDates, spending, data, categories, subcategories }) {
+    const netWorthDateToRowIndex = useCallback(date => rowDates.findIndex(value =>
+        value.year === date.year && value.month === date.month
+    ), [rowDates]);
+
+    const withSpend = useCallback(rows => rows.map(row => {
+        let spend = 0;
+        const rowIndex = netWorthDateToRowIndex(row.dateIso);
+        if (rowIndex !== -1) {
+            spend = spending.get(rowIndex);
+        }
+
+        return { ...row, spend };
+    }), [spending, netWorthDateToRowIndex]);
+
+
+    const rows = useMemo(() => compose(
+        withSpend,
+        sortByIsoDate,
+        withIsoDates
+    )(data || []), [data, withSpend]);
+
+    if (!(categories && subcategories)) {
         return null;
     }
 
@@ -54,5 +84,7 @@ export default function NetWorthView({ data, categories, subcategories }) {
 }
 
 NetWorthView.propTypes = {
+    rowDates: PropTypes.instanceOf(list).isRequired,
+    spending: PropTypes.instanceOf(list).isRequired,
     ...dataPropTypes
 };

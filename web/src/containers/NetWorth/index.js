@@ -1,3 +1,4 @@
+import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
 import React, { useEffect } from 'react';
 import { Route, NavLink } from 'react-router-dom';
@@ -5,6 +6,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { getApiKey } from '~client/selectors/app';
+import { getRowDates, getProcessedCost } from '~client/selectors/overview';
 import { useCrud } from '~client/hooks/api';
 
 import NetWorthView from '~client/components/NetWorthView';
@@ -13,7 +15,7 @@ import NetWorthList from '~client/components/NetWorthList';
 
 import './style.scss';
 
-function NetWorth({ apiKey }) {
+function NetWorth({ rowDates, cost, apiKey }) {
     const [categories, loadingCategories, errCategories, createCategory, readCategories, updateCategory, deleteCategory] = useCrud({
         url: 'data/net-worth/categories',
         apiKey
@@ -44,6 +46,10 @@ function NetWorth({ apiKey }) {
     const loading = loadingCategories || loadingSubcategories || loadingNetWorth;
     const error = errCategories || errSubcategories || errNetWorth;
 
+    if (!cost) {
+        return null;
+    }
+
     return (
         <div className={classNames('net-worth', { loading, error })}>
             <div className="net-worth-inner">
@@ -53,6 +59,8 @@ function NetWorth({ apiKey }) {
                     path="/net-worth"
                     render={routeProps => <NetWorthView {...routeProps}
                         data={netWorth}
+                        spending={cost.get('spending')}
+                        rowDates={rowDates}
                         categories={categories}
                         subcategories={subcategories}
                     />}
@@ -108,10 +116,14 @@ function NetWorth({ apiKey }) {
 }
 
 NetWorth.propTypes = {
+    rowDates: PropTypes.instanceOf(list),
+    cost: PropTypes.instanceOf(map),
     apiKey: PropTypes.string.isRequired
 };
 
 const mapStateToProps = state => ({
+    rowDates: getRowDates(state),
+    cost: getProcessedCost(state),
     apiKey: getApiKey(state)
 });
 

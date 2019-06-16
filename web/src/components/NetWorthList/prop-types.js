@@ -28,6 +28,7 @@ export const currency = PropTypes.shape({
 export const netWorthItem = PropTypes.shape({
     id: PropTypes.number,
     date: PropTypes.string.isRequired,
+    spend: PropTypes.number,
     values: PropTypes.arrayOf(netWorthValue.isRequired).isRequired,
     creditLimit: PropTypes.arrayOf(creditLimit.isRequired).isRequired,
     currencies: PropTypes.arrayOf(currency.isRequired).isRequired
