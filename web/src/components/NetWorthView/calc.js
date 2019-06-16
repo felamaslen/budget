@@ -13,15 +13,12 @@ function getComplexValue(value, currencies) {
     }, 0);
 }
 
-const valueByCategory = (subcategories, categoryId) => {
-    return ({ subcategory: subcategoryId }) => {
-        const subcategory = subcategories.find(({ id }) => {
-            return id === subcategoryId;
-        });
+const valueByCategory = (subcategories, categoryId) =>
+    ({ subcategory: subcategoryId }) => {
+        const subcategory = subcategories.find(({ id }) => id === subcategoryId);
 
         return subcategory && subcategory.categoryId === categoryId;
     };
-};
 
 export function sumByCategory(categoryName, { rows, categories, subcategories }) {
     if (!(rows.length && categories.length && subcategories.length)) {
@@ -37,5 +34,24 @@ export function sumByCategory(categoryName, { rows, categories, subcategories })
 
     return values
         .filter(valueByCategory(subcategories, category.id))
+        .reduce((last, { value }) => last + getComplexValue(value, currencies), 0);
+}
+
+const valueByType = (categoryType, categories, subcategories) =>
+    ({ subcategory }) => {
+        const { categoryId } = subcategories.find(({ id }) => id === subcategory);
+
+        return categories.some(({ id, type }) => id === categoryId && type === categoryType);
+    };
+
+export function sumByType(categoryType, { row, categories, subcategories }) {
+    if (!(row && categories.length && subcategories.length)) {
+        return 0;
+    }
+
+    const { currencies, values } = row;
+
+    return values
+        .filter(valueByType(categoryType, categories, subcategories))
         .reduce((last, { value }) => last + getComplexValue(value, currencies), 0);
 }

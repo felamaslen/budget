@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { sortByDate } from '~client/modules/data';
 import { dataPropTypes } from '~client/components/NetWorthView/prop-types';
 import { SumCashEasyAccess, SumCashOther, SumStocks, SumPension } from '~client/components/NetWorthView/sum-by-category';
+import NetWorthViewRow from '~client/components/NetWorthView/net-worth-view-row';
 
 import './style.scss';
 
@@ -43,6 +44,9 @@ export default function NetWorthView({ data, categories, subcategories }) {
                     </tr>
                 </thead>
                 <tbody>
+                    {rows.map(row => (
+                        <NetWorthViewRow key={row.id} row={row} {...dataProps} />
+                    ))}
                 </tbody>
             </table>
         </div>
