@@ -152,6 +152,7 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
         }
 
         return {
+            date: DateTime.local().toISODate(),
             creditLimit: [],
             currencies: [],
             values: []

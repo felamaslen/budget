@@ -9,7 +9,8 @@ function getComplexValue(value, currencies) {
             return last;
         }
 
-        return last + currencyMatch.rate * numberValue;
+        // converting from currency to GBX, but rate is against GBP
+        return last + currencyMatch.rate * numberValue * 100;
     }, 0);
 }
 

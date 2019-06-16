@@ -105,7 +105,7 @@ function AddByType({
         external: category
     })), [categories]);
 
-    const [category, InputCategory] = useInputSelect(categoryOptions[0].internal, categoryOptions);
+    const [category, InputCategory] = useInputSelect((categoryOptions[0] || {}).internal, categoryOptions);
 
     const subcategoryOptions = useMemo(
         () => subcategories
@@ -117,11 +117,11 @@ function AddByType({
         [category, subcategories]
     );
 
-    const [subcategory, InputSubcategory] = useInputSelect(subcategoryOptions[0].internal, subcategoryOptions);
+    const [subcategory, InputSubcategory] = useInputSelect((subcategoryOptions[0] || {}).internal, subcategoryOptions);
 
     const [value, setValue] = useState(0);
 
-    const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === Number(subcategory)), [subcategories, subcategory]);
+    const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === Number(subcategory)) || {}, [subcategories, subcategory]);
     const initialCreditLimit = hasCreditLimit
         ? 0
         : null;
