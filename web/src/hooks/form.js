@@ -51,7 +51,7 @@ export function useInputText(initialValue, props = {}) {
 
 const makeInputComponentSelect = options => {
     const InputComponentSelect = ({ props, tempValue, onChange }) => (
-        <select {...props} value={tempValue} onChange={onChange}>
+        <select {...props} value={tempValue || ''} onChange={onChange}>
             {options.map(({ internal, external }) => (
                 <option key={internal} value={internal}>
                     {external}
