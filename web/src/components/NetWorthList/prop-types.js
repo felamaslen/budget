@@ -1,15 +1,17 @@
 import PropTypes from 'prop-types';
 
+export const netWorthValueSize = PropTypes.oneOfType([
+    PropTypes.number.isRequired,
+    PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.number.isRequired,
+        currency: PropTypes.string
+    }))
+]);
+
 export const netWorthValue = PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.number,
     subcategory: PropTypes.number.isRequired,
-    value: PropTypes.oneOfType([
-        PropTypes.number.isRequired,
-        PropTypes.arrayOf(PropTypes.shape({
-            value: PropTypes.number.isRequired,
-            currency: PropTypes.string
-        }))
-    ]).isRequired
+    value: netWorthValueSize.isRequired
 });
 
 export const creditLimit = PropTypes.shape({
@@ -18,13 +20,13 @@ export const creditLimit = PropTypes.shape({
 });
 
 export const currency = PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.number,
     currency: PropTypes.string.isRequired,
     rate: PropTypes.number.isRequired
 });
 
 export const netWorthItem = PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.number,
     date: PropTypes.string.isRequired,
     values: PropTypes.arrayOf(netWorthValue.isRequired).isRequired,
     creditLimit: PropTypes.arrayOf(creditLimit.isRequired).isRequired,

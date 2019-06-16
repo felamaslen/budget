@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 
+import { replaceAtIndex } from '~client/modules/data';
 import { API_PREFIX } from '~client/constants/data';
 
 function buildMakeRequest({ method, url, apiKey, onSuccess, onError, onComplete }) {
@@ -143,10 +144,7 @@ export function useCrud({ url, apiKey }) {
             return setData([...data, item]);
         }
 
-        return setData(data.slice(0, index)
-            .concat([item])
-            .concat(data.slice(index + 1))
-        );
+        return setData(replaceAtIndex(data, index, item));
     }, [data]);
 
     const [onCreate, loadingCreate, errorCreate] = useResponseOp(url, apiKey, setResponse, 'post');

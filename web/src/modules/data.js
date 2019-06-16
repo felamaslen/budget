@@ -32,6 +32,11 @@ export function uuid(rand = Math.random(), random = false) {
     return Math.floor((1 + rand) * 0x10000);
 }
 
+export const replaceAtIndex = (array, index, value) => array
+    .slice(0, index)
+    .concat([value])
+    .concat(array.slice(index + 1));
+
 export class TransactionsList {
     constructor(data, isShort = true) {
         this.list = data;
@@ -279,4 +284,3 @@ export function resortListRows(page, now) {
     return state => state.setIn(['pages', page, 'rows'],
         sortRowsByDate(state.getIn(['pages', page, 'rows']), page, now));
 }
-

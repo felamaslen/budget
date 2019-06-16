@@ -4,13 +4,16 @@ import PropTypes from 'prop-types';
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
 import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
+import { StepAssets } from '~client/components/NetWorthEditForm/step-values';
 
 import './style.scss';
 
 const STEP_DATE = 'STEP_DATE';
+const STEP_ASSETS = 'STEP_ASSETS';
 
 const steps = [
-    STEP_DATE
+    STEP_DATE,
+    STEP_ASSETS
 ];
 
 export default function NetWorthEditForm({
@@ -56,6 +59,8 @@ export default function NetWorthEditForm({
     const containerProps = { onComplete, item };
     const stepProps = {
         item: tempItem,
+        categories,
+        subcategories,
         onEdit: setTempItem,
         onNextStep,
         onLastStep
@@ -64,6 +69,14 @@ export default function NetWorthEditForm({
     if (step === STEP_DATE) {
         return (
             <StepDate
+                containerProps={containerProps}
+                {...stepProps}
+            />
+        );
+    }
+    if (step === STEP_ASSETS) {
+        return (
+            <StepAssets
                 containerProps={containerProps}
                 {...stepProps}
             />
