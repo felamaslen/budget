@@ -280,6 +280,9 @@ export function sortRowsByDate(rows, page, now) {
         });
 }
 
+export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>
+    DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
+
 export function resortListRows(page, now) {
     return state => state.setIn(['pages', page, 'rows'],
         sortRowsByDate(state.getIn(['pages', page, 'rows']), page, now));

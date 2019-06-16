@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
+import { sortByDate } from '~client/modules/data';
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
 import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
@@ -137,8 +138,7 @@ NetWorthEditForm.propTypes = {
 export function NetWorthAddForm({ data, onCreate, ...props }) {
     const item = useMemo(() => {
         if (data.length) {
-            const itemsSorted = data.sort(({ date: dateA }, { date: dateB }) =>
-                DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
+            const itemsSorted = sortByDate(data);
 
             const lastItem = itemsSorted[itemsSorted.length - 1];
 

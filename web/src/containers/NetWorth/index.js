@@ -53,6 +53,8 @@ function NetWorth({ apiKey }) {
                     path="/net-worth"
                     render={routeProps => <NetWorthView {...routeProps}
                         data={netWorth}
+                        categories={categories}
+                        subcategories={subcategories}
                     />}
                 />
                 <Route
