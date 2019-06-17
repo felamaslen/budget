@@ -22,13 +22,13 @@ function CreditLimitEditor({ creditLimit, setCreditLimit }) {
     return (
         <div className="credit-limit-editor">
             <span className="label">{'Credit limit:'}</span>
-            <FormFieldCost value={creditLimit} onChange={setCreditLimit} />
+            <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} />
         </div>
     );
 }
 
 CreditLimitEditor.propTypes = {
-    creditLimit: PropTypes.number.isRequired,
+    creditLimit: PropTypes.number,
     setCreditLimit: PropTypes.func.isRequired
 };
 
