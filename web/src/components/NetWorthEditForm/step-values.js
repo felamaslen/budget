@@ -32,7 +32,20 @@ CreditLimitEditor.propTypes = {
     setCreditLimit: PropTypes.func.isRequired
 };
 
+const SkipToggle = ({ skip, setSkip }) => (
+    <div className="skip-toggle">
+        <input type="checkbox" checked={Boolean(skip)} onChange={() => setSkip(!skip)} />
+        <span className="label">{'Skip in calculations'}</span>
+    </div>
+);
+
+SkipToggle.propTypes = {
+    skip: PropTypes.bool,
+    setSkip: PropTypes.func.isRequired
+};
+
 function EditByType({
+    isLiability,
     categories,
     subcategories,
     creditLimit: creditLimitList,
@@ -40,6 +53,7 @@ function EditByType({
     value: {
         id,
         subcategory,
+        skip,
         value
     },
     onChange,
@@ -57,12 +71,13 @@ function EditByType({
 
     const [newValue, setNewValue] = useState(value);
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
+    const [newSkip, setSkip] = useState(skip);
 
     useEffect(() => {
-        if (!(value === newValue && initialCreditLimit === creditLimit)) {
-            onChange(id, newValue, creditLimit);
+        if (!(value === newValue && initialCreditLimit === creditLimit && skip === newSkip)) {
+            onChange(id, newValue, creditLimit, newSkip);
         }
-    }, [value, newValue, initialCreditLimit, creditLimit, onChange, id]);
+    }, [value, newValue, initialCreditLimit, creditLimit, skip, newSkip, onChange, id]);
 
     const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
@@ -76,6 +91,7 @@ function EditByType({
                 currencies={currencies}
             />
             {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
+            {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
             <button
                 onClick={onRemoveCallback}
                 className="button-delete"
@@ -85,6 +101,7 @@ function EditByType({
 }
 
 EditByType.propTypes = {
+    isLiability: PropTypes.bool.isRequired,
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
     creditLimit: PropTypes.arrayOf(creditLimitShape.isRequired).isRequired,
@@ -95,6 +112,7 @@ EditByType.propTypes = {
 };
 
 function AddByType({
+    isLiability,
     categories,
     subcategories,
     currencies,
@@ -120,6 +138,7 @@ function AddByType({
     const [subcategory, InputSubcategory] = useInputSelect((subcategoryOptions[0] || {}).internal, subcategoryOptions);
 
     const [value, setValue] = useState(0);
+    const [skip, setSkip] = useState(null);
 
     const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === Number(subcategory)) || {}, [subcategories, subcategory]);
     const initialCreditLimit = hasCreditLimit
@@ -128,8 +147,8 @@ function AddByType({
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
 
     const onAddCallback = useCallback(() => {
-        onAdd(value, creditLimit, Number(subcategory));
-    }, [onAdd, subcategory, value, creditLimit]);
+        onAdd(value, creditLimit, Number(subcategory), skip);
+    }, [onAdd, subcategory, value, creditLimit, skip]);
 
     return (
         <div className="add-by-category-value">
@@ -147,12 +166,14 @@ function AddByType({
                 currencies={currencies}
             />
             {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
+            {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
             <button onClick={onAddCallback} className="button-add">{'Add'}</button>
         </div>
     );
 }
 
 AddByType.propTypes = {
+    isLiability: PropTypes.bool.isRequired,
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
     currencies: PropTypes.arrayOf(currency.isRequired).isRequired,
@@ -172,12 +193,13 @@ function appendCreditLimit(item, subcategory, value) {
 function useAddValue(item, minId, onEdit) {
     const [numNew, setNumNew] = useState(-Math.min(0, minId));
 
-    return useCallback((newValue, creditLimit, subcategory) => {
+    return useCallback((newValue, creditLimit, subcategory, skip = null) => {
         const itemWithValue = {
             ...item,
             values: item.values.concat([{
                 id: -(numNew + 1),
                 subcategory,
+                skip,
                 value: newValue
             }])
         };
@@ -196,12 +218,13 @@ function useAddValue(item, minId, onEdit) {
 }
 
 function useChangeValue(item, onEdit) {
-    return useCallback((id, newValue, creditLimit) => {
+    return useCallback((id, newValue, creditLimit, skip = null) => {
         const index = item.values.findIndex(({ id: valueId }) => valueId === id);
         const itemWithValue = {
             ...item,
             values: replaceAtIndex(item.values, index, {
                 ...item.values[index],
+                skip,
                 value: newValue
             })
         };
@@ -242,6 +265,7 @@ function StepValues({
     onNextStep,
     onLastStep
 }) {
+    const isLiability = typeFilter === 'liability';
     const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [categories, typeFilter]);
 
     const valuesByType = useMemo(() => item.values.filter(({ subcategory }) => {
@@ -274,6 +298,7 @@ function StepValues({
             <div className="edit-by-category">
                 {valuesByType.map(value => (
                     <EditByType key={value.id}
+                        isLiability={isLiability}
                         categories={categoriesByType}
                         subcategories={subcategories}
                         creditLimit={item.creditLimit}
@@ -284,6 +309,7 @@ function StepValues({
                     />
                 ))}
                 {availableCategories.length && <AddByType key="add"
+                    isLiability={isLiability}
                     categories={availableCategories}
                     subcategories={availableSubcategories}
                     currencies={item.currencies}
