@@ -14,6 +14,8 @@ const schemaNetWorth = joi.object()
                         .integer()
                         .min(1)
                         .required(),
+                    skip: joi.boolean()
+                        .allow(null),
                     value: joi.alternatives()
                         .try(
                             joi.number().integer(),

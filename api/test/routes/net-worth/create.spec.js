@@ -17,7 +17,7 @@ test('getValueRow converts simple numeric values', t => {
     const result = values.map(getValueRow(netWorthId));
 
     t.deepEqual(result, [
-        { 'net_worth_id': 3, subcategory: 13, value: 364987 }
+        { 'net_worth_id': 3, skip: null, subcategory: 13, value: 364987 }
     ]);
 });
 
@@ -40,8 +40,8 @@ test('getValueRow converts currency-based values', t => {
     const result = values.map(getValueRow(netWorthId));
 
     t.deepEqual(result, [
-        { 'net_worth_id': 4, subcategory: 7, value: 364987 },
-        { 'net_worth_id': 4, subcategory: 13, value: null }
+        { 'net_worth_id': 4, skip: null, subcategory: 7, value: 364987 },
+        { 'net_worth_id': 4, skip: null, subcategory: 13, value: null }
     ]);
 });
 
@@ -65,8 +65,8 @@ test('getValueRow converts mixed simple and currency-based values', t => {
     const result = values.map(getValueRow(netWorthId));
 
     t.deepEqual(result, [
-        { 'net_worth_id': 5, subcategory: 17, value: 364987 },
-        { 'net_worth_id': 5, subcategory: 21, value: 267 }
+        { 'net_worth_id': 5, skip: null, subcategory: 17, value: 364987 },
+        { 'net_worth_id': 5, skip: null, subcategory: 21, value: 267 }
     ]);
 });
 
