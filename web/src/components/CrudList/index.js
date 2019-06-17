@@ -19,6 +19,14 @@ function CrudListItem({
     const active = activeId === item.id;
     const onSetActive = useCallback(() => setActiveId(item.id), [item.id, setActiveId]);
 
+    const onDeleteCallback = useCallback(event => {
+        if (event) {
+            event.stopPropagation();
+        }
+        onDelete(item.id);
+        setActiveId(null);
+    }, [item.id, setActiveId, onDelete]);
+
     return (
         <li
             className={classNames('crud-list-list-item', { active })}
@@ -36,7 +44,7 @@ function CrudListItem({
             {!active && <div className="button-delete">
                 <button
                     className="button-delete-button"
-                    onClick={() => onDelete(item.id)}
+                    onClick={onDeleteCallback}
                 >&minus;</button>
             </div>}
         </li>
