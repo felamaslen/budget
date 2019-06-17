@@ -40,7 +40,10 @@ export function sumByCategory(categoryName, { rows, categories, subcategories })
 
 const valueByType = (categoryType, categories, subcategories) =>
     ({ subcategory }) => {
-        const { categoryId } = subcategories.find(({ id }) => id === subcategory);
+        const { categoryId } = subcategories.find(({ id }) => id === subcategory) || {};
+        if (!categoryId) {
+            return false;
+        }
 
         return categories.some(({ id, type }) => id === categoryId && type === categoryType);
     };

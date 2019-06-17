@@ -2,9 +2,10 @@ const { catchAsyncErrors } = require('../../modules/error-handling');
 const { formatDate, fetchById } = require('./read');
 
 function getValueRow(netWorthId) {
-    return ({ subcategory, value }) => {
+    return ({ subcategory, skip = null, value }) => {
         const base = {
             'net_worth_id': netWorthId,
+            skip,
             subcategory
         };
 

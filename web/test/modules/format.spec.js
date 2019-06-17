@@ -47,11 +47,19 @@ test('leadingZeroes adding the expected number of zeroes to a number', t => {
     t.is(leadingZeroes(1313, 3), '1313');
 });
 
-test('formatCurrency formating a GBX value into £x.yz format by default, with commas', t => {
+test('formatCurrency formatting a GBX value into £x.yz format by default, with commas', t => {
     t.is(formatCurrency(1), '£0.01');
     t.is(formatCurrency(-1), '\u2212£0.01');
     t.is(formatCurrency(145), '£1.45');
     t.is(formatCurrency(1823123919), '£18,231,239.19');
+});
+
+test('formatCurrency sets the precision to 2 by default', t => {
+    t.is(formatCurrency(486121.293), '£4,861.21');
+});
+
+test('formatCurrency sets the precision to 0 by default, if abbreviating', t => {
+    t.is(formatCurrency(486121.293, { abbreviate: true }), '£5k');
 });
 
 test('formatCurrency accepting an abbreviate parameter', t => {

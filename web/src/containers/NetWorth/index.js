@@ -108,7 +108,7 @@ function NetWorth({ rowDates, cost, apiKey }) {
                         to="/net-worth/edit/list"
                         className="tab tab-edit-list"
                         activeClassName="selected"
-                    >{'List'}</NavLink>
+                    >{'Entries'}</NavLink>
                 </div>
             </div>
         </div>

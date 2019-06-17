@@ -6,8 +6,8 @@ const LIMIT_ALL = 48;
 
 const formatDate = date => DateTime.fromJSDate(date).toISODate();
 
-function processValuesRows({ id, subcategory, value, fxValues, fxCurrencies, ...rest }) {
-    const base = { id, subcategory, value, ...rest };
+function processValuesRows({ id, subcategory, skip, value, fxValues, fxCurrencies, ...rest }) {
+    const base = { id, subcategory, skip, value, ...rest };
     if (fxValues === null) {
         return base;
     }
@@ -35,6 +35,7 @@ async function getValuesRows(db, ids) {
         'nwv.net_worth_id as netWorthId',
         'nwv.id',
         'nwv.subcategory',
+        'nwv.skip',
         'nwv.value',
         db.raw('group_concat(nwfxv.value) as fxValues'),
         db.raw('group_concat(nwfxv.currency) as fxCurrencies')
