@@ -17,7 +17,7 @@ For info on building the Android app, see `android/README.md`.
 ### Installation:
 
 - Install external dependencies
-    - MySQL server
+    - PostgreSQL server
 
 - Set environment variables
     - These are in `.env.example`, which you should copy to `.env` and edit with the appropriate values (see below).
@@ -59,8 +59,7 @@ These environment variables must be set on your deployment environment, or in `.
 Note that the development variables are optional on a production environment.
 
 - `PORT`: the port to listen on
-- `MYSQL_URI`: URI for connecting to the production database
-- `MYSQL_URI_TEST`: URI for connecting to a testing database
+- `POSTGRES_URI`: URI for connecting to the database
 - `DEFAULT_PIN`: the PIN for the first generated user
 - `BIRTH_DATE`: the (ISO) date of birth (for use in FTI calculation)
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts

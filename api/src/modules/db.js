@@ -1,11 +1,11 @@
 /**
- * Class and methods to access MySQL database
+ * Class and methods to access PostgreSQL database
  */
 
 const knex = require('knex');
 
 function parseConnectionURI(uri = '') {
-    const matches = uri.match(/^mysql:\/\/(\w+):(\w+)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/);
+    const matches = uri.match(/^postgres:\/\/(\w+):(\w+)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/);
 
     if (!matches) {
         throw new Error('invalid database string');
@@ -24,9 +24,9 @@ function parseConnectionURI(uri = '') {
 
 async function initDb(config, logger, migrate = true) {
     const db = knex({
-        client: 'mysql2',
+        client: 'pg',
         connection: {
-            ...parseConnectionURI(config.mysqlUri),
+            ...parseConnectionURI(config.postgresUri),
             typeCast: (field, next) => {
                 if (field.type === 'TINY' && field.length === 1) {
                     const value = field.string();
