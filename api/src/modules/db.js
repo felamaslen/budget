@@ -22,8 +22,8 @@ function parseConnectionURI(uri = '') {
     };
 }
 
-async function initDb(config, logger, migrate = true) {
-    const db = knex({
+function initDb(config) {
+    return knex({
         client: 'pg',
         connection: {
             ...parseConnectionURI(config.postgresUri),
@@ -41,15 +41,6 @@ async function initDb(config, logger, migrate = true) {
             }
         }
     });
-
-    if (migrate) {
-        await db.migrate.latest();
-
-        logger.verbose('Database migrations complete');
-    }
-
-    return db;
 }
 
 module.exports = initDb;
-

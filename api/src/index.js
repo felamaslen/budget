@@ -165,12 +165,12 @@ function setupErrorHandling(app, logger) {
     });
 }
 
-async function run() {
+function run() {
     const config = getConfig();
     const logger = getLogger();
 
     try {
-        const db = await initDb(config, logger);
+        const db = initDb(config);
 
         const app = express();
         const port = process.env.PORT || 3000;
