@@ -1,11 +1,12 @@
 const up = knex => knex.schema.createTable('net_worth_fx_values', table => {
-    table.increments('id')
-        .primary();
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
 
-    table.integer('values_id')
-        .unsigned()
+    table.uuid('values_id')
         .notNullable()
         .references('net_worth_values.id')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
     table.float('value');

@@ -1,6 +1,7 @@
 const up = knex => knex.schema.createTable('net_worth_categories', table => {
-    table.increments('id')
-        .primary();
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
 
     table.enu('type', ['asset', 'liability'])
         .notNullable();

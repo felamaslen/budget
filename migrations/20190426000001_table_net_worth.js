@@ -1,10 +1,12 @@
 const up = knex => knex.schema.createTable('net_worth', table => {
-    table.increments('id')
-        .primary();
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
 
-    table.integer('uid').unsigned()
+    table.uuid('uid')
         .notNullable()
         .references('users.uid')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
     table.date('date').notNullable();

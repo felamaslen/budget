@@ -1,6 +1,8 @@
 const up = knex => knex.schema.createTable('fund_cache_time', table => {
-    table.increments('cid').unsigned()
-        .notNullable();
+    table.uuid('cid')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
+
     table.dateTime('time').index()
         .notNullable();
     table.boolean('done');

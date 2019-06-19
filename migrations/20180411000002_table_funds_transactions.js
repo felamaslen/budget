@@ -1,9 +1,12 @@
 const up = knex => knex.schema.createTable('funds_transactions', table => {
-    table.increments('id').unsigned()
-        .primary();
-    table.integer('fund_id')
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
+
+    table.uuid('fund_id')
         .unsigned()
         .references('funds.id')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
     table.date('date').notNullable();

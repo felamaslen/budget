@@ -1,14 +1,14 @@
 const up = knex => knex.schema.createTable('net_worth_credit_limit', table => {
-    table.integer('net_worth_id')
-        .unsigned()
+    table.uuid('net_worth_id')
         .notNullable()
         .references('net_worth.id')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
-    table.integer('subcategory')
-        .unsigned()
+    table.uuid('subcategory')
         .notNullable()
         .references('net_worth_subcategories.id')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
     table.primary(['net_worth_id', 'subcategory']);

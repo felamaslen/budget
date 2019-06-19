@@ -1,9 +1,12 @@
 const up = knex => knex.schema.createTable('stocks', table => {
-    table.increments('id').unsigned()
-        .primary();
-    table.integer('uid').unsigned()
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
+
+    table.uuid('uid')
         .notNullable()
         .references('users.uid')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
     table.string('name').notNullable();

@@ -1,6 +1,8 @@
 const up = knex => knex.schema.createTable('users', table => {
-    table.increments('uid').unsigned()
-        .primary();
+    table.uuid('uid')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
+
     table.string('name').notNullable();
     table.string('pin_hash').unique()
         .notNullable();

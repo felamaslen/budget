@@ -1,7 +1,8 @@
 const up = knex => knex.schema.createTable('stock_codes', table => {
-    table.increments('id')
-        .unsigned()
-        .primary();
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
+
     table.string('name').notNullable();
     table.string('code');
     table.unique(['name', 'code']);

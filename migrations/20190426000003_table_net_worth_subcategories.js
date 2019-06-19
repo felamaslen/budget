@@ -1,11 +1,12 @@
 const up = knex => knex.schema.createTable('net_worth_subcategories', table => {
-    table.increments('id')
-        .primary();
+    table.uuid('id')
+        .primary()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
 
-    table.integer('category_id')
-        .unsigned()
+    table.uuid('category_id')
         .notNullable()
         .references('net_worth_categories.id')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE');
 
     table.string('subcategory');
