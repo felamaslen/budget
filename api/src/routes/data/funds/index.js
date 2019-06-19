@@ -32,7 +32,7 @@ async function getQuery(db, user) {
         'transactions.cost'
     )
         .from('funds')
-        .leftJoin('funds_transactions as transactions', 'transactions.fundId', 'funds.id')
+        .leftJoin('funds_transactions as transactions', 'transactions.fund_id', 'funds.id')
         .where('funds.uid', '=', user.uid);
 
     const { items: funds } = rows.reduce(({ items, fundIds }, { id, item, date, units, cost }) => {
@@ -212,7 +212,7 @@ function routeGet(config, db) {
 function insertTransactions(db, user, id, transactions) {
     return db.transaction(trx => transactions.reduce(
         (last, { date, units, cost }) => last.then(() => trx
-            .insert({ fundId: id, date, units, cost })
+            .insert({ 'fund_id': id, date, units, cost })
             .into('funds_transactions')
         ),
         Promise.resolve()
@@ -235,7 +235,7 @@ async function updateFund(db, user, table, data) {
     await listCommon.updateItem(db, user, 'funds', { id, item });
 
     if (transactions) {
-        await db('funds_transactions').where('fundId', '=', id)
+        await db('funds_transactions').where('fund_id', '=', id)
             .del();
 
         await insertTransactions(db, user, id, transactions);

@@ -69,7 +69,7 @@ function formatResults(columnMap) {
 async function getTotalFundCost(db, user) {
     const [{ total }] = await db.select(db.raw('SUM(cost) AS total'))
         .from('funds')
-        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
+        .innerJoin('funds_transactions', 'funds_transactions.fund_id', 'funds.id')
         .where('uid', '=', user.uid);
 
     return Number(total);
@@ -232,4 +232,3 @@ module.exports = {
     routePut,
     routeDelete
 };
-

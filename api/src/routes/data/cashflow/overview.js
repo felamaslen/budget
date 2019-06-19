@@ -111,7 +111,7 @@ function processFundPrices(rows) {
 function queryFundTransactions(db, user) {
     return db.select('funds.id', 'date', 'units', 'cost')
         .from('funds')
-        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
+        .innerJoin('funds_transactions', 'funds_transactions.fund_id', 'funds.id')
         .where('uid', '=', user.uid);
 }
 

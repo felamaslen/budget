@@ -51,11 +51,11 @@ const generateFunds = async (db, nativeDates) => {
         .into('funds');
 
     await db.insert([
-        { fundId: 3, date: getDate('2016-09-19', nativeDates), units: 1678.42, cost: 200000 },
-        { fundId: 3, date: getDate('2017-02-14', nativeDates), units: 846.38, cost: 100000 },
-        { fundId: 11, date: getDate('2016-08-24', nativeDates), units: 89.095, cost: 100000 },
-        { fundId: 11, date: getDate('2016-09-19', nativeDates), units: 894.134, cost: 100000 },
-        { fundId: 11, date: getDate('2017-04-27', nativeDates), units: -883.229, cost: -90000 }
+        { 'fund_id': 3, date: getDate('2016-09-19', nativeDates), units: 1678.42, cost: 200000 },
+        { 'fund_id': 3, date: getDate('2017-02-14', nativeDates), units: 846.38, cost: 100000 },
+        { 'fund_id': 11, date: getDate('2016-08-24', nativeDates), units: 89.095, cost: 100000 },
+        { 'fund_id': 11, date: getDate('2016-09-19', nativeDates), units: 894.134, cost: 100000 },
+        { 'fund_id': 11, date: getDate('2017-04-27', nativeDates), units: -883.229, cost: -90000 }
     ])
         .into('funds_transactions');
 

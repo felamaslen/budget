@@ -48,7 +48,7 @@ function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay, minT
                 )
                     .from(qb4 => qb4.distinct('funds.id', 'funds.item', db.raw('MIN(date) AS date'))
                         .from('funds')
-                        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
+                        .innerJoin('funds_transactions', 'funds_transactions.fund_id', 'funds.id')
                         .where('uid', '=', user.uid)
                         .groupBy('funds.id')
                         .as('f')
