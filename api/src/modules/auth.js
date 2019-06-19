@@ -47,14 +47,14 @@ function genToken(user) {
 
 async function getUsersToCheck(db, uid) {
     if (uid) {
-        const { pinHash } = await db.select('name', 'pinHash')
+        const { pinHash } = await db.select('name', 'pin_hash as pinHash')
             .from('users')
             .where('uid', '=', uid);
 
         return [{ uid, name, pinHash }];
     }
 
-    const rows = await db.select('uid as userId', 'name', 'pinHash')
+    const rows = await db.select('uid as userId', 'name', 'pin_hash as pinHash')
         .from('users');
 
     return rows.map(({ userId, name, pinHash }) => ({ uid: userId, name, pinHash }));
