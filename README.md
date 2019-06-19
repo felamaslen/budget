@@ -59,7 +59,7 @@ These environment variables must be set on your deployment environment, or in `.
 Note that the development variables are optional on a production environment.
 
 - `PORT`: the port to listen on
-- `POSTGRES_URI`: URI for connecting to the database
+- `DATABASE_URL`: URI for connecting to the database
 - `DEFAULT_PIN`: the PIN for the first generated user
 - `BIRTH_DATE`: the (ISO) date of birth (for use in FTI calculation)
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts

@@ -11,7 +11,7 @@ module.exports = () => ({
     testIntegration: process.env.NODE_ENV === 'testintegration',
     debug: process.env.NODE_ENV !== 'production',
     debugSql: process.env.SQLDEBUGGER === 'true',
-    postgresUri: process.env.POSTGRES_URI,
+    postgresUri: process.env.DATABASE_URL,
     webUrl: process.env.WEB_URL || '',
     openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
     user: {

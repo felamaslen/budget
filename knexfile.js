@@ -18,5 +18,5 @@ function parseConnectionURI(uri = '') {
 
 module.exports = {
     client: 'pg',
-    connection: parseConnectionURI(process.env.POSTGRES_URI)
+    connection: parseConnectionURI(process.env.DATABASE_URL)
 };
