@@ -349,4 +349,3 @@ module.exports = {
     routePut,
     routeDelete
 };
-
