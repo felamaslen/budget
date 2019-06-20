@@ -1,0 +1,31 @@
+version: "2"
+services:
+  budget:
+    container_name: budget
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    volumes:
+      - .:/opt/app
+    links:
+      - db:db
+    networks:
+      - net_budget_dev
+    ports:
+      - 3000:3000
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://docker:docker@db:5432/budget
+      WEB_URL: http://localhost:3000
+      DEFAULT_PIN: 1234
+  db:
+    restart: always
+    image: postgres:latest
+    networks:
+      - net_budget_dev
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+networks:
+  net_budget_dev:
+    driver: bridge

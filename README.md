@@ -6,7 +6,7 @@ Personal finance app for web, cli and android
 
 There is a web-based API written in Node.js, which also runs a web app. The Android app connects to this API.
 
-- Node version: 8
+- Node version: 10
 
 The CLI app is written in Python 3. See `cli/README.md` for setup info.
 
@@ -23,15 +23,14 @@ For info on building the Android app, see `android/README.md`.
     - These are in `.env.example`, which you should copy to `.env` and edit with the appropriate values (see below).
 
 - Run `npm install` to install Node dependencies
-	- This will also build the web app into `web/build`
+
+- Run `npm run build` to build the web app
 
 ### Production:
 
 - Run `npm start` and access the app at `http://localhost:3000` by default.
 
 ### Maintenance:
-
-- Run `npm run install_db` to drop all data and create clean tables in the database
 
 - Run `npm run scrape_funds` to scrape and cache current fund prices
 
@@ -40,8 +39,20 @@ For info on building the Android app, see `android/README.md`.
 ### Development:
 
 - Run `npm run dev` to run a development server with hot module replacement
+    - This runs inside a Docker containerised environment
+    - All external services are created by docker-compose
 
 - This is accessible at `http://localhost:3000` by default
+
+#### Migrations / seeds:
+
+To run database migrations and seeds on the development environment:
+
+- `docker-compose exec budget sh -c "./node_modules/.bin/knex migrate:latest"`
+
+- `docker-compose exec budget sh -c "./node_modules/.bin/knex seed:run"`
+
+- The admin user PIN is 1234
 
 #### Notes: 
 
@@ -50,7 +61,6 @@ When making changes, please update the version number in `package.json` before s
 ## Documentation:
 
 Upon running the server, API documentation is available at `/docs/api`.
-
 
 ## Environment variables:
 
