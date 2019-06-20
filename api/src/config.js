@@ -15,7 +15,6 @@ module.exports = () => ({
     webUrl: process.env.WEB_URL || '',
     openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
     user: {
-        hashSalt: process.env.USER_HASH_SALT || '',
         banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,
         banLimit: (Number(process.env.IP_BAN_LIMIT) || 60) * 1000,
         banTries: Math.round(Number(process.env.IP_BAN_TRIES) || 5)
