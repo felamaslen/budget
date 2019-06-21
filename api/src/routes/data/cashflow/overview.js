@@ -180,7 +180,8 @@ function getMonthlyValuesQuery(db, user, union, category) {
             .on('date', '>=', 'dates.start_date')
             .on('date', '<=', 'dates.end_date')
         )
-        .groupBy('dates.start_date');
+        .groupBy('dates.start_date')
+        .orderBy('dates.start_date');
 }
 
 async function getMonthlyValues(config, db, user, yearMonths, union, category, old) {
