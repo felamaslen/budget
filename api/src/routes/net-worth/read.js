@@ -93,7 +93,7 @@ async function fetchById(db, netWorthId, uid) {
     const withoutId = rows => rows.map(({ netWorthId: discard, ...rest }) => rest);
 
     return {
-        id: Number(netWorthId),
+        id: netWorthId,
         date,
         values: withoutId(values),
         creditLimit: withoutId(creditLimit),

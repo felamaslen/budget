@@ -10,9 +10,8 @@ const schemaNetWorth = joi.object()
         values: joi.array()
             .items(joi.object()
                 .keys({
-                    subcategory: joi.number()
-                        .integer()
-                        .min(1)
+                    subcategory: joi.string()
+                        .uuid()
                         .required(),
                     skip: joi.boolean()
                         .allow(null),
@@ -36,9 +35,8 @@ const schemaNetWorth = joi.object()
         creditLimit: joi.array()
             .items(joi.object()
                 .keys({
-                    subcategory: joi.number()
-                        .integer()
-                        .min(1)
+                    subcategory: joi.string()
+                        .uuid()
                         .required(),
                     value: joi.number()
                         .integer()
