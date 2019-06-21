@@ -1,5 +1,5 @@
 const test = require('ava');
-const { prepareMockDb } = require('~api/test/test.common');
+const db = require('~api/src/modules/db')();
 const { DateTime } = require('luxon');
 
 const {
@@ -45,9 +45,11 @@ test('getLimitCondition handles pagination', t => {
 });
 
 test('getOlderExists returns the correct result', async t => {
-    const db = await prepareMockDb(false);
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
 
-    const user = { uid: 1 };
+    const user = { uid };
     const table = 'food';
 
     t.true(await getOlderExists(db, user, table, { startDate: DateTime.fromISO('2018-10-03') }));
@@ -76,8 +78,11 @@ test('formatResults works as expected', t => {
 });
 
 test('getTotalCost returns the correct query', async t => {
-    const db = await prepareMockDb();
-    const user = { uid: 1 };
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
+
+    const user = { uid };
 
     t.is(await getTotalCost(db, user, 'food'), 19239 + 91923 + 2239);
 });

@@ -1,5 +1,5 @@
 const test = require('ava');
-const { prepareMockDb } = require('~api/test/test.common');
+const db = require('~api/src/modules/db')();
 const { DateTime } = require('luxon');
 
 const {
@@ -168,26 +168,42 @@ test('processFundPrices returns a map of fund IDs to dated lists of prices', t =
 });
 
 test('queryFundTransactions runs the correct query', async t => {
-    const db = await prepareMockDb();
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
 
-    const result = await queryFundTransactions(db, { uid: 1 });
+    const result = await queryFundTransactions(db, { uid });
+
+    const [{ id: fundId3 }] = await db.select('id')
+        .from('funds')
+        .where('item', '=', 'fund3');
+    const [{ id: fundId1 }] = await db.select('id')
+        .from('funds')
+        .where('item', '=', 'fund1');
 
     t.deepEqual(result, [
-        { id: 3, date: new Date('2016-09-19').getTime(), units: 1678.42, cost: 200000 },
-        { id: 3, date: new Date('2017-02-14').getTime(), units: 846.38, cost: 100000 },
-        { id: 11, date: new Date('2016-08-24').getTime(), units: 89.095, cost: 100000 },
-        { id: 11, date: new Date('2016-09-19').getTime(), units: 894.134, cost: 100000 },
-        { id: 11, date: new Date('2017-04-27').getTime(), units: -883.229, cost: -90000 }
+        { id: fundId3, date: new Date('2016-09-19'), units: 1678.42, cost: 200000 },
+        { id: fundId3, date: new Date('2017-02-14'), units: 846.38, cost: 100000 },
+        { id: fundId1, date: new Date('2016-08-24'), units: 89.095, cost: 100000 },
+        { id: fundId1, date: new Date('2016-09-19'), units: 894.134, cost: 100000 },
+        { id: fundId1, date: new Date('2017-04-27'), units: -883.229, cost: -90000 }
     ]);
 });
 
-test('processFundTransactions returns a valid map of IDs to lists of transactions', t => {
+test('processFundTransactions returns a valid map of IDs to lists of transactions', async t => {
+    const [{ id: fundId3 }] = await db.select('id')
+        .from('funds')
+        .where('item', '=', 'fund3');
+    const [{ id: fundId1 }] = await db.select('id')
+        .from('funds')
+        .where('item', '=', 'fund1');
+
     const result = processFundTransactions([
-        { id: 3, date: new Date('2016-09-19'), units: 1678.42, cost: 200000 },
-        { id: 3, date: new Date('2017-02-14'), units: 846.38, cost: 100000 },
-        { id: 11, date: new Date('2016-08-24'), units: 89.095, cost: 10000 },
-        { id: 11, date: new Date('2016-09-19'), units: 894.134, cost: 100000 },
-        { id: 11, date: new Date('2017-04-27'), units: -883.229, cost: -90000 }
+        { id: fundId3, date: new Date('2016-09-19'), units: 1678.42, cost: 200000 },
+        { id: fundId3, date: new Date('2017-02-14'), units: 846.38, cost: 100000 },
+        { id: fundId1, date: new Date('2016-08-24'), units: 89.095, cost: 10000 },
+        { id: fundId1, date: new Date('2016-09-19'), units: 894.134, cost: 100000 },
+        { id: fundId1, date: new Date('2017-04-27'), units: -883.229, cost: -90000 }
     ]);
 
     t.deepEqual(Object.keys(result).reduce((items, key) => ({
@@ -197,11 +213,11 @@ test('processFundTransactions returns a valid map of IDs to lists of transaction
             date: date.toISODate()
         }))
     }), {}), {
-        '3': [
+        [fundId3]: [
             { date: '2016-09-30', units: 1678.42, cost: 200000 },
             { date: '2017-02-28', units: 846.38, cost: 100000 }
         ],
-        '11': [
+        [fundId1]: [
             { date: '2016-08-31', units: 89.095, cost: 10000 },
             { date: '2016-09-30', units: 894.134, cost: 100000 },
             { date: '2017-04-30', units: -883.229, cost: -90000 }
@@ -268,4 +284,3 @@ test('getMonthlyBalance returns valid data', t => {
 
     t.deepEqual(result, expectedResult);
 });
-
