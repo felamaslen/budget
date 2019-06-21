@@ -3,7 +3,7 @@ import { List as list, Map as map } from 'immutable';
 import { TransactionsList } from '~client/modules/data';
 
 export const testRows = map([
-    [10, map({
+    ['10', map({
         'cols': list([
             'some fund 1',
             new TransactionsList([
@@ -15,7 +15,7 @@ export const testRows = map([
             ])
         ])
     })],
-    [3, map({
+    ['3', map({
         cols: list([
             'some fund 2',
             new TransactionsList([
@@ -32,7 +32,7 @@ export const testRows = map([
             ])
         ])
     })],
-    [1, map({
+    ['1', map({
         cols: list([
             'some fund 3',
             new TransactionsList([
@@ -49,7 +49,7 @@ export const testRows = map([
             ])
         ])
     })],
-    [5, map({
+    ['5', map({
         cols: list([
             'test fund 4',
             new TransactionsList([
@@ -69,7 +69,7 @@ export const testRows = map([
 ]);
 
 export const testPrices = map([
-    [10, map({
+    ['10', map({
         values: list([
             429.5,
             429.5,
@@ -105,7 +105,7 @@ export const testPrices = map([
         ]),
         startIndex: 69
     })],
-    [3, map({
+    ['3', map({
         values: list([
             99.86,
             99.77,
@@ -127,7 +127,7 @@ export const testPrices = map([
         ]),
         startIndex: 48
     })],
-    [1, map({
+    ['1', map({
         values: list([
             80.9,
             80.06,
@@ -165,7 +165,7 @@ export const testPrices = map([
         ]),
         startIndex: 32
     })],
-    [5, map({
+    ['5', map({
         values: list([
             137.77,
             136.3,

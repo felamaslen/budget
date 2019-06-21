@@ -48,14 +48,12 @@ export default function RenderedLine(allProps) {
         [constantColor, arrows, data, fill, color]
     );
 
-    if (!data.size) {
+    if (!(data.size && allProps.minY !== allProps.maxY)) {
         return null;
     }
-
     if (arrows) {
         return <ArrowLine data={data} color={color} {...props} />;
     }
-
     if (constantColor) {
         return (
             <g className="line">
@@ -92,9 +90,10 @@ RenderedLine.propTypes = {
         movingAverage: PropTypes.number,
         arrows: PropTypes.bool
     }),
+    minY: PropTypes.number,
+    maxY: PropTypes.number,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     valX: PropTypes.func.isRequired,
     valY: PropTypes.func.isRequired
 };
-

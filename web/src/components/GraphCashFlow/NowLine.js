@@ -6,6 +6,10 @@ import { COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
 
 export default function NowLine({ now, minY, maxY, pixX, pixY }) {
+    if (minY === maxY) {
+        return null;
+    }
+
     const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;
 
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;

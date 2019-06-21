@@ -5,8 +5,8 @@ const {
 
 test('processStocks returns valid results', t => {
     const queryResult = [
-        { code: 'ABC:DEF', name: 'ABC company', sumWeight: 2 },
-        { code: 'XYZ:UVW', name: 'XYZ company', sumWeight: 4 }
+        { code: 'ABC:DEF', name: 'ABC company', 'sum_weight': 2 },
+        { code: 'XYZ:UVW', name: 'XYZ company', 'sum_weight': 4 }
     ];
 
     t.deepEqual(processStocks(queryResult, 'fookey'), {

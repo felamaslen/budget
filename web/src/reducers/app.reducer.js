@@ -3,6 +3,7 @@ import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
+import { getLoggedIn } from '~client/selectors/app';
 import { makeGetRowIds, getAllPageRows } from '~client/selectors/list';
 import { PAGES } from '~client/constants/data';
 
@@ -18,7 +19,7 @@ export function getItemValue(state, page, row, col) {
         return { id, item, value: state.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]) };
     }
     if (PAGES[page].list) {
-        if (row > -1) {
+        if (row !== -1) {
             const rows = getAllPageRows(state, { page });
 
             id = row;
@@ -211,8 +212,7 @@ export function rHandleKeyPress(state, req) {
         page: state.get('currentPage')
     };
 
-    const loggedIn = state.getIn(['user', 'uid']) > 0;
-
+    const loggedIn = getLoggedIn(state);
     if (loggedIn) {
         return handleKeyPressLoggedIn(state, params);
     }

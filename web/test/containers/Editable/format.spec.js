@@ -1,6 +1,7 @@
 import test from 'ava';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
+import { DateTime } from 'luxon';
 import {
     getEditValue,
     formatValue,
@@ -37,7 +38,7 @@ test('getEditValue / returning the raw value as a string by default', t => {
 });
 
 test('formatValue / dates / returning the formatted date', t => {
-    t.is(formatValue('date', dateInput('10/11/2017')), '10/11/2017');
+    t.is(formatValue('date', dateInput('10/11/2017')), DateTime.fromISO('2017-11-10').toLocaleString(DateTime.DATE_SHORT));
 });
 
 test('formatValue / dates / returning an empty string for invalid values', t => {
@@ -74,7 +75,7 @@ test('formatValue / returning the value as a string by default', t => {
 });
 
 test('getDefaultValue / dates / returning the formatted date', t => {
-    t.is(getDefaultValue('date', dateInput('10/11/2017')), '10/11/2017');
+    t.is(getDefaultValue('date', dateInput('10/11/2017')), DateTime.fromISO('2017-11-10').toLocaleString(DateTime.DATE_SHORT));
 });
 
 test('getDefaultValue / costs / returning the GBP value if it is non-zero', t => {

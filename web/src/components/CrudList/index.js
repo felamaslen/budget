@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import './style.scss';
 
-export const CREATE_ID = 0;
+export const CREATE_ID = 'CREATE_ID';
 
 function CrudListItem({
     Item,
@@ -54,7 +54,7 @@ function CrudListItem({
 CrudListItem.propTypes = {
     Item: PropTypes.func.isRequired,
     item: PropTypes.object.isRequired,
-    activeId: PropTypes.number,
+    activeId: PropTypes.string,
     setActiveId: PropTypes.func.isRequired,
     itemProps: PropTypes.func.isRequired,
     extraProps: PropTypes.object.isRequired,
@@ -126,7 +126,7 @@ export default function CrudList({
 
 CrudList.propTypes = {
     items: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })),
     Item: PropTypes.func.isRequired,
     CreateItem: PropTypes.func.isRequired,

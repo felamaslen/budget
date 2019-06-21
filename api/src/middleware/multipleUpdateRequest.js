@@ -176,4 +176,3 @@ module.exports = {
     routePatch,
     getOverallStatusCode
 };
-

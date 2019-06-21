@@ -23,7 +23,7 @@ const ListRowCell = memo(({ page, id, row, colName, colKey, active }) => {
 
 ListRowCell.propTypes = {
     page: PropTypes.string.isRequired,
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     colName: PropTypes.string.isRequired,
     colKey: PropTypes.number.isRequired,

@@ -6,9 +6,17 @@ const LIMIT_ALL = 48;
 
 const formatDate = date => DateTime.fromJSDate(date).toISODate();
 
-function processValuesRows({ id, subcategory, skip, value, fxValues, fxCurrencies, ...rest }) {
+function processValuesRows({
+    id,
+    subcategory,
+    skip,
+    value,
+    'fx_values': fxValues,
+    'fx_currencies': fxCurrencies,
+    ...rest
+}) {
     const base = { id, subcategory, skip, value, ...rest };
-    if (fxValues === null) {
+    if (fxValues.every(item => item === null)) {
         return base;
     }
 
@@ -16,14 +24,11 @@ function processValuesRows({ id, subcategory, skip, value, fxValues, fxCurrencie
         ? []
         : [value];
 
-    const fxValuesItems = fxValues.split(',').map(Number);
-    const fxCurrenciesItems = fxCurrencies.split(',');
-
-    const valueWithFx = fxValuesItems.reduce((last, fxValue, index) => ([
+    const valueWithFx = fxValues.reduce((last, fxValue, index) => ([
         ...last,
         {
             value: fxValue,
-            currency: fxCurrenciesItems[index]
+            currency: fxCurrencies[index]
         }
     ]), initialValue);
 
@@ -37,8 +42,8 @@ async function getValuesRows(db, ids) {
         'nwv.subcategory',
         'nwv.skip',
         'nwv.value',
-        db.raw('group_concat(nwfxv.value) as fxValues'),
-        db.raw('group_concat(nwfxv.currency) as fxCurrencies')
+        db.raw('ARRAY_AGG(nwfxv.value) as fx_values'),
+        db.raw('ARRAY_AGG(nwfxv.currency) as fx_currencies')
     )
         .from('net_worth_values as nwv')
         .leftJoin('net_worth_fx_values as nwfxv', 'nwfxv.values_id', 'nwv.id')
@@ -88,7 +93,7 @@ async function fetchById(db, netWorthId, uid) {
     const withoutId = rows => rows.map(({ netWorthId: discard, ...rest }) => rest);
 
     return {
-        id: Number(netWorthId),
+        id: netWorthId,
         date,
         values: withoutId(values),
         creditLimit: withoutId(creditLimit),

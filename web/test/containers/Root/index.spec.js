@@ -9,7 +9,7 @@ import Root from '~client/containers/Root';
 const getContainer = (customProps = {}, customState = null) => {
     let state = fromJS({
         user: {
-            uid: 1
+            uid: '1'
         },
         currentPage: 'general',
         loading: false,
@@ -58,6 +58,5 @@ test('main container', t => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.className, 'main');
-    t.is(div.childNodes.length, 3);
+    t.is(div.childNodes.length, 2);
 });
-

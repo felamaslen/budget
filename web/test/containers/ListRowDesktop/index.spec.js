@@ -37,7 +37,7 @@ const getContainer = memoize((customProps = {}, customState = null) => {
 
     const props = {
         page: 'food',
-        id: 10,
+        id: '10',
         row: state.getIn(['pages', 'food', 'rows', customProps.id || 10]),
         AfterRow,
         ...customProps
@@ -103,7 +103,7 @@ test('delete button', t => {
 test('dispatching an action when the delete button is pressed', t => {
     const { store, container } = getContainer();
 
-    const action = aListItemDeleted({ page: 'food', id: 10 });
+    const action = aListItemDeleted({ page: 'food', id: '10' });
 
     t.false(store.isActionDispatched(action));
 

@@ -11,7 +11,7 @@ import { TransactionsList } from '~client/modules/data';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
-        row: 1,
+        row: 'ab1',
         col: 1,
         value: { foo: 'bar' },
         onChange: () => null,
@@ -56,4 +56,3 @@ test('rendering other items', t => {
     t.is(div.tagName, 'SPAN');
     t.is(div.className, 'active editable editable-foo');
 });
-

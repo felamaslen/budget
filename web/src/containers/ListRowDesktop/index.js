@@ -46,7 +46,7 @@ function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete })
 
 ListRowDesktop.propTypes = {
     page: PropTypes.string.isRequired,
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
     activeCol: PropTypes.number,
     daily: PropTypes.number,

@@ -4,6 +4,10 @@ import PropTypes from 'prop-types';
 import Arrow from '../Arrow';
 
 export default function ArrowLine({ data, color, ...props }) {
+    if (props.minY === 0 || props.maxY === 0) {
+        return null;
+    }
+
     const getColor = typeof color === 'function'
         ? point => color(point)
         : () => color;

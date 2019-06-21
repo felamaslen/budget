@@ -8,7 +8,7 @@ import GraphFundItem from '~client/components/GraphFundItem';
 
 const getGraph = memoize((customProps = {}) => {
     const props = {
-        id: 3,
+        id: '3',
         name: 'some-fund-graph',
         values: fromJS([
             [100, 42.3],

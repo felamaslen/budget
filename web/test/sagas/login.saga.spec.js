@@ -86,7 +86,7 @@ test('getLoginPin handleing errors', t => {
         .throw({
             response: {
                 data: {
-                    errorMessage: 'foo'
+                    err: 'foo'
                 }
             }
         })

@@ -4,6 +4,8 @@ const { DateTime } = require('luxon');
 const { Strategy, ExtractJwt } = require('passport-jwt');
 const bcrypt = require('bcrypt');
 
+const { clientError } = require('./error-handling');
+
 function getStrategy(config, db) {
     const params = {
         secretOrKey: process.env.USER_TOKEN_SECRET,
@@ -45,61 +47,41 @@ function genToken(user) {
     };
 }
 
-async function getUsersToCheck(db, uid) {
-    if (uid) {
-        const { pinHash } = await db.select('name', 'pinHash')
-            .from('users')
-            .where('uid', '=', uid);
+function checkValidUser(pin) {
+    const stringPin = String(pin);
 
-        return [{ uid, name, pinHash }];
-    }
+    return (last, { pinHash, ...user }) => last.then(async previous => {
+        if (previous) {
+            return previous;
+        }
 
-    const rows = await db.select('uid as userId', 'name', 'pinHash')
-        .from('users');
-
-    return rows.map(({ userId, name, pinHash }) => ({ uid: userId, name, pinHash }));
-}
-
-function checkValidUser(specificUid, pin) {
-    return ({ uid, pinHash, ...user }) => {
-        const userId = specificUid || uid;
-
-        return new Promise((resolve, reject) => {
-            bcrypt.compare(pin, pinHash, (err, res) => {
+        const validUser = await new Promise((resolve, reject) => {
+            bcrypt.compare(stringPin, pinHash, (err, res) => {
                 if (err) {
                     return reject(err);
                 }
-
                 if (!res) {
                     return resolve(null);
                 }
 
-                return resolve({ uid: userId, ...user });
+                return resolve(user);
             });
         });
-    };
+
+        return validUser;
+    });
 }
 
-async function checkLoggedIn(db, uid, pin) {
-    const usersToCheck = await getUsersToCheck(db, uid, pin);
+async function checkLoggedIn(config, db, pin) {
+    const users = await db.select('uid', 'name', 'pin_hash as pinHash')
+        .from('users');
 
-    if (!usersToCheck.length) {
-        if (uid) {
-            throw new Error('User does not exist');
-        }
-
-        throw new Error('There are no users in the database');
+    const validUser = await users.reduce(checkValidUser(pin), Promise.resolve(null));
+    if (!validUser) {
+        throw clientError(config.msg.errorLoginBad, 401);
     }
 
-    const status = await Promise.all(usersToCheck.map(checkValidUser(uid, String(pin))));
-
-    const validStatus = status.filter(valid => valid);
-
-    if (!validStatus.length) {
-        throw new Error('Invalid PIN');
-    }
-
-    return validStatus[0];
+    return validUser;
 }
 
 function authMiddleware() {

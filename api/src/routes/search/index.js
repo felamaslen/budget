@@ -9,23 +9,29 @@ const { searchSchema } = require('../../schema');
 function getQuery(db, request, uid) {
     const { table, column, searchTerm, numResults } = request;
 
-    const searchTermEscaped = searchTerm.replace(/[^\w]+/g, '');
+    const tsQuery = searchTerm
+        .trim()
+        .replace(/[^\w\s+]/g, '')
+        .split(/\s+/)
+        .map(word => `${word}:*`)
+        .join(' | ');
 
-    const query = qb => qb.select(column, db.raw(`SUM(IF(??.?? LIKE '${searchTermEscaped}%', 1, 0)) AS matches`, [table, column]))
+    const query = qb => qb.distinct(column)
         .from(table)
-        .where(`${table}.${column}`, 'like', `%${searchTerm}%`)
-        .andWhere(`${table}.${column}`, 'not like', searchTerm)
+        .whereRaw(`to_tsvector("${table}"."${column}") @@ to_tsquery('${tsQuery}') = true`)
         .andWhere(`${table}.uid`, '=', uid)
-        .groupBy(`${table}.${column}`)
-        .orderBy('matches', 'desc')
+        .groupBy(column)
         .orderBy(column)
         .limit(numResults)
         .as('items');
 
     if (['food', 'general'].includes(table) && column === 'item') {
-        return db.select('items.item', db.raw('COALESCE(nextValues.category, \'\') as nextCategory'))
+        return db.select(
+            'items.item',
+            db.raw('COALESCE(next_values.category, \'\') as next_category')
+        )
             .from(query)
-            .leftJoin(`${table} as nextValues`, 'nextValues.id', qb => qb.select('id')
+            .leftJoin(`${table} as next_values`, 'next_values.id', qb => qb.select('id')
                 .from(table)
                 .where('item', '=', db.raw('items.item'))
                 .andWhere('uid', '=', uid)

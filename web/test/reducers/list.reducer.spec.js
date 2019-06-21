@@ -26,7 +26,7 @@ test('processPageDataList seting the page data', t => {
     const page = 'food';
     const raw = {
         data: [
-            { I: 300, 'd': '2018-05-03', 'i': 'foo', 'k': 'bar', 'c': 1939, 's': 'baz' }
+            { I: '300', 'd': '2018-05-03', 'i': 'foo', 'k': 'bar', 'c': 1939, 's': 'baz' }
         ],
         total: 1003
     };
@@ -39,7 +39,7 @@ test('processPageDataList seting the page data', t => {
                 },
                 rows: {
                     '300': {
-                        id: 300,
+                        id: '300',
                         cols: [
                             DateTime.fromISO('2018-05-03'),
                             'foo',

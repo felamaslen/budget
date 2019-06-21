@@ -34,8 +34,8 @@ export function rActivateEditable(state, { page, editable, cancel }) {
             });
         }
         else {
-            if (active.get('row') > -1) {
-                const id = active.has('id')
+            if (active.get('row') !== -1) {
+                const id = active.get('id')
                     ? active.get('id')
                     : active.get('row');
 
@@ -241,7 +241,7 @@ export function rRequestSuggestions(state, { reqId }) {
 }
 
 function getTransactionsForRow(state, row, col) {
-    if (row > -1) {
+    if (row !== -1) {
         return state.getIn(['pages', 'funds', 'rows', row, 'cols', col]);
     }
 
@@ -249,7 +249,7 @@ function getTransactionsForRow(state, row, col) {
 }
 
 function rFundTransactions(state, row, col, transactions) {
-    if (row > -1) {
+    if (row !== -1) {
         const item = map({
             item: 'transactions',
             row,
@@ -288,4 +288,3 @@ export function rRemoveFundTransactions(state, { row, col, key }) {
 
     return rFundTransactions(state, row, col, transactions);
 }
-

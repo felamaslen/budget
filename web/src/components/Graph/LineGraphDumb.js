@@ -67,6 +67,8 @@ export default function LineGraphDumb({
             {hoverEffect && <HighlightPoint
                 pixX={calc.pixX}
                 pixY={calc.pixY}
+                minY={dimensions.minY}
+                maxY={dimensions.maxY}
                 width={dimensions.width}
                 height={dimensions.height}
                 hlPoint={hlPoint}

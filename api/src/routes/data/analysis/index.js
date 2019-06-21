@@ -9,7 +9,7 @@ const CATEGORIES = ['bills', 'food', 'general', 'holiday', 'social'];
 function getPeriodCostForCategory(db, user, startTime, endTime, category, groupBy) {
     const categoryColumn = getCategoryColumn(category, groupBy);
 
-    return db.select(`${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
+    return db.select(`${categoryColumn} AS itemCol`, db.raw('SUM(cost)::integer AS cost'))
         .from(category)
         .where('date', '>=', startTime.toISODate())
         .andWhere('date', '<=', endTime.toISODate())

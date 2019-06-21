@@ -88,7 +88,7 @@ ModalDialog.propTypes = {
     type: PropTypes.string,
     row: PropTypes.number,
     col: PropTypes.number,
-    id: PropTypes.number,
+    id: PropTypes.string,
     fields: PropTypes.instanceOf(list),
     invalidKeys: PropTypes.instanceOf(list),
     page: PropTypes.string.isRequired,

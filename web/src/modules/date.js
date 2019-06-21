@@ -133,7 +133,7 @@ function timeTickMinuteHour(t0, t1) {
                 return time.toFormat('ccc');
             }
 
-            return time.toLocaleString(DateTime.TIME_SIMPLE);
+            return time.toFormat('HH:mm');
         }
     });
 }
@@ -178,4 +178,3 @@ export function timeSeriesTicks(t0, t1) {
 
     return timeTickMonthYear(t0, t1);
 }
-

@@ -18,7 +18,7 @@ ListAddEditItem.propTypes = {
     page: PropTypes.string.isRequired,
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
-    id: PropTypes.number,
+    id: PropTypes.string,
     item: PropTypes.string.isRequired,
     value: PropTypes.any.isRequired,
     active: PropTypes.bool.isRequired

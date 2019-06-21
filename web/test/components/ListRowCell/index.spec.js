@@ -17,7 +17,7 @@ const getContainer = memoize((customProps = {}) => {
 
     const props = {
         page: 'page1',
-        id: 3,
+        id: '3',
         row: fromJS({ cols: [null, 'bar'] }),
         colName: 'foo',
         colKey: 1,

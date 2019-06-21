@@ -65,7 +65,7 @@ export function *submitLoginForm({ customPin }) {
     }
     catch (err) {
         if (err.response) {
-            const message = `Login error: ${err.response.data.errorMessage}`;
+            const message = `Login error: ${err.response.data.err}`;
 
             yield call(openTimedMessage, message);
         }

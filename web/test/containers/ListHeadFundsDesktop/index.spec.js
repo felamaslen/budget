@@ -67,7 +67,7 @@ test('gain span', t => {
 
 test('gain class', t => {
     const { container } = getContainer({}, state => state
-        .setIn(['pages', 'funds', 'cache', 'year1', 'prices', 10, 'values', 30], 430)
+        .setIn(['pages', 'funds', 'cache', 'year1', 'prices', '10', 'values', 30], 430)
     );
 
     const [span] = container.childNodes;
