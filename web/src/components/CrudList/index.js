@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import './style.scss';
 
-export const CREATE_ID = 0;
+export const CREATE_ID = 'CREATE_ID';
 
 function CrudListItem({
     Item,
