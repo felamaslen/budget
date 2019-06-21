@@ -3,16 +3,16 @@
  */
 
 function getStocks(db, user) {
-    return db.select('code', 'name', 'SUM(weight * subweight) AS sumWeight')
+    return db.select('code', 'name', db.raw('SUM(weight * subweight)::float AS sum_weight'))
         .from('stocks')
         .where('uid', '=', user.uid)
         .groupBy('code', 'name')
-        .orderBy('sumWeight', 'desc');
+        .orderBy('sum_weight', 'desc');
 }
 
 function processStocks(queryResult, apiKey) {
-    const stocks = queryResult.map(({ code, name, sumWeight }) => ([
-        code, name, Number(sumWeight)
+    const stocks = queryResult.map(({ code, name, sum_weight: sumWeight }) => ([
+        code, name, sumWeight
     ]));
 
     const total = stocks.reduce((sum, [, , weight]) => sum + weight, 0);
