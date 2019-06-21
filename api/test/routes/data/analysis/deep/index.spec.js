@@ -11,11 +11,12 @@ test('getPeriodCostDeep getting items data with cost', async t => {
         .from('users')
         .where('name', '=', 'test-user');
 
-    await db.insert([
+    const ids = await db.insert([
         { uid, date: '2017-09-01', item: 'Flour', category: 'Bread', cost: 80, shop: '' },
         { uid, date: '2017-09-03', item: 'Eggs', category: 'Dairy', cost: 10, shop: '' },
         { uid, date: '2017-09-02', item: 'Eggs', category: 'Dairy', cost: 120, shop: '' }
     ])
+        .returning('id')
         .into('food');
 
     const user = { uid };
@@ -35,6 +36,10 @@ test('getPeriodCostDeep getting items data with cost', async t => {
     ];
 
     t.deepEqual(result, expectedResult);
+
+    await db('food')
+        .whereIn('id', ids)
+        .del();
 });
 
 test('processDataResponse processing query response properly', t => {
