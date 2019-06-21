@@ -8,7 +8,7 @@ import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
-        id: 10,
+        id: '10',
         row: map({
             cols: list(['foo-fund']),
             prices: list.of(

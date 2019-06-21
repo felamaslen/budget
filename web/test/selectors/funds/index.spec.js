@@ -68,7 +68,7 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
 
     t.deepEqual(
         result
-            .get(10)
+            .get('10')
             .remove('cols')
             .remove('prices')
             .toJS(),
@@ -88,7 +88,7 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
 
     t.deepEqual(
         result
-            .get(1)
+            .get('1')
             .remove('cols')
             .remove('prices')
             .toJS(),

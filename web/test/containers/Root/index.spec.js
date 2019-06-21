@@ -9,7 +9,7 @@ import Root from '~client/containers/Root';
 const getContainer = (customProps = {}, customState = null) => {
     let state = fromJS({
         user: {
-            uid: 1
+            uid: '1'
         },
         currentPage: 'general',
         loading: false,

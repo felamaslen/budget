@@ -29,10 +29,10 @@ const state = map({
             period: 'period1',
             enabledList: map([
                 ['overall', true],
-                [10, false],
-                [1, true],
-                [3, false],
-                [5, false]
+                ['10', false],
+                ['1', true],
+                ['3', false],
+                ['5', false]
             ])
         })
     })
@@ -55,10 +55,10 @@ test('makeGetGraphProps (fund items) returns a map', t => {
 
 const testCases = [
     { id: 'overall', value: { color: [0, 0, 0], enabled: true, item: 'Overall' } },
-    { id: 10, value: { color: [0, 74, 153], enabled: false, item: 'some fund 1' } },
-    { id: 1, value: { color: [0, 74, 153], enabled: true, item: 'some fund 3' } },
-    { id: 3, value: { color: [0, 74, 153], enabled: false, item: 'some fund 2' } },
-    { id: 5, value: { color: [0, 153, 99], enabled: false, item: 'test fund 4' } }
+    { id: '10', value: { color: [0, 74, 153], enabled: false, item: 'some fund 1' } },
+    { id: '1', value: { color: [0, 74, 153], enabled: true, item: 'some fund 3' } },
+    { id: '3', value: { color: [0, 74, 153], enabled: false, item: 'some fund 2' } },
+    { id: '5', value: { color: [0, 153, 99], enabled: false, item: 'test fund 4' } }
 ];
 
 testCases.forEach(({ id, value }) => {
@@ -79,10 +79,9 @@ test('makeGetGraphProps (fund items) returns fund lines', t => {
 
 test('makeGetGraphProps (fund items) returns fund items for deleted funds', t => {
     const stateWithDeletedItem = state.setIn(['pages', 'funds', 'rows'],
-        state.getIn(['pages', 'funds', 'rows']).delete(10));
+        state.getIn(['pages', 'funds', 'rows']).delete('10'));
 
     const resultWithDeletedItem = getFundItemsResult(stateWithDeletedItem, { isMobile: false });
 
     t.false('10' in resultWithDeletedItem.fundItems.toJS());
 });
-
