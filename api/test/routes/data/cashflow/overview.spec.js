@@ -1,5 +1,6 @@
 const test = require('ava');
 const db = require('~api/src/modules/db')();
+const config = require('~api/src/config')();
 const { DateTime } = require('luxon');
 
 const {
@@ -11,7 +12,8 @@ const {
     getMonthlyBalance,
     getMonthlyTotalFundValues,
     getFundValue,
-    mapOldToYearMonths
+    mapOldToYearMonths,
+    getData
 } = require('~api/src/routes/data/cashflow/overview');
 
 const testPricesProcessedResponse = {
@@ -140,10 +142,10 @@ test('getFundValue gets the correct fund price at a specified date', t => {
 
 test('processFundPrices returns a map of fund IDs to dated lists of prices', t => {
     const queryResult = [
-        { time: new Date('2017-09-30 17:01:01'), id: '11,1,3', price: '124.04,95.49,49.52' },
-        { time: new Date('2017-09-01 17:01:01'), id: '11,1,3', price: '100,123,50.97' },
-        { time: new Date('2017-08-31 17:01:02'), id: '1,11,3', price: '121,99.13,56.01' },
-        { time: new Date('2016-11-07 06:26:40'), id: '11', price: '95.3' }
+        { time: new Date('2017-09-30 17:01:01'), ids: ['11', '1', '3'], prices: [124.04, 95.49, 49.52] },
+        { time: new Date('2017-09-01 17:01:01'), ids: ['11', '1', '3'], prices: [100, 123, 50.97] },
+        { time: new Date('2017-08-31 17:01:02'), ids: ['1', '11', '3'], prices: [121, 99.13, 56.01] },
+        { time: new Date('2016-11-07 06:26:40'), ids: ['11'], prices: [95.3] }
     ];
 
     const result = processFundPrices(queryResult);
@@ -283,4 +285,68 @@ test('getMonthlyBalance returns valid data', t => {
     };
 
     t.deepEqual(result, expectedResult);
+});
+
+// eslint-disable-next-line max-statements
+test('getData gets overview data', async t => {
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
+
+    const user = { uid };
+
+    const result = await getData(config, db, user);
+
+    const now = DateTime.local().setZone(config.timeZone);
+    const { year, month } = now;
+
+    const { numLast, numFuture } = config.data.overview;
+
+    t.is(Object.keys(result).length, 6);
+
+    t.deepEqual(result.startYearMonth, [
+        year + Math.floor((month - numLast) / 12),
+        (((month - numLast + 12) % 12) + 12) % 12
+    ]);
+
+    t.deepEqual(result.endYearMonth, [
+        year + Math.floor((month + numFuture) / 12),
+        (((month + numFuture + 12) % 12) + 12) % 12
+    ]);
+
+    t.is(result.currentYear, year);
+    t.is(result.currentMonth, month);
+
+    t.is(result.futureMonths, numFuture);
+
+    t.is(Object.keys(result.cost).length, 10);
+
+    t.is(result.cost.balance.length, numLast + numFuture + 1);
+    t.true(result.cost.balance.every(value => typeof value === 'number'));
+
+    t.true(result.cost.old.every(value => typeof value === 'number'));
+
+    t.is(result.cost.income.length, numLast + numFuture + 1);
+    t.true(result.cost.income.every(value => typeof value === 'number'));
+
+    t.is(result.cost.fundChanges.length, numLast + numFuture + 1);
+    t.true(result.cost.fundChanges.every(value => [0, 1].includes(value)));
+
+    t.is(result.cost.funds.length, numLast + numFuture + 1 + result.cost.old.length);
+    t.true(result.cost.funds.every(value => typeof value === 'number'));
+
+    t.is(result.cost.bills.length, numLast + numFuture + 1);
+    t.true(result.cost.bills.every(value => typeof value === 'number'));
+
+    t.is(result.cost.food.length, numLast + numFuture + 1);
+    t.true(result.cost.food.every(value => typeof value === 'number'));
+
+    t.is(result.cost.general.length, numLast + numFuture + 1);
+    t.true(result.cost.general.every(value => typeof value === 'number'));
+
+    t.is(result.cost.holiday.length, numLast + numFuture + 1);
+    t.true(result.cost.holiday.every(value => typeof value === 'number'));
+
+    t.is(result.cost.social.length, numLast + numFuture + 1);
+    t.true(result.cost.social.every(value => typeof value === 'number'));
 });

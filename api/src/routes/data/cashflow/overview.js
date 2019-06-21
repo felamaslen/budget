@@ -3,7 +3,6 @@
  */
 
 const { DateTime } = require('luxon');
-const { sqlConcat } = require('../../../common');
 const { getNow } = require('../../../modules/time');
 
 const getYearMonth = time => ([time.year, time.month]);
@@ -57,14 +56,18 @@ function getFundValue(monthDate, transactions, prices) {
 function queryFundPrices(config, db, user) {
     return db.select(
         'fund_cache_time.time',
-        db.raw('ARRAY_AGG(funds.id) AS id'),
-        db.raw('ARRAY_AGG(fund_cache.price) AS price')
+        db.raw('ARRAY_AGG(funds.id) AS ids'),
+        db.raw('ARRAY_AGG(fund_cache.price) AS prices')
     )
-        .from('fund_cache')
-        .innerJoin('fund_hash', 'fund_hash.fid', 'fund_cache.fid')
+        .from('funds')
+        .innerJoin(
+            'fund_hash',
+            'fund_hash.hash',
+            db.raw(`MD5(funds.item || ?)`, config.data.funds.salt)
+        )
+        .innerJoin('fund_cache', 'fund_cache.fid', 'fund_hash.fid')
         .innerJoin('fund_cache_time', 'fund_cache_time.cid', 'fund_cache.cid')
-        .innerJoin('funds', 'funds.uid', user.uid)
-        .whereRaw(`MD5(${sqlConcat('funds.item', '?')}) = fund_hash.hash`, config.data.funds.salt)
+        .where('funds.uid', '=', user.uid)
         .andWhere('fund_cache_time.done', '=', true)
         .groupBy('fund_cache_time.cid')
         .orderBy('fund_cache_time.time', 'desc');
@@ -72,13 +75,11 @@ function queryFundPrices(config, db, user) {
 
 function processFundPrices(rows) {
     return rows
-        .map(({ id, time, price }) => {
-            // normalise dates to the end of the month and split values
-            const ids = id.split(',').map(item => Number(item));
-            const prices = price.split(',').map(item => Number(item));
-
-            return { ids, prices, date: DateTime.fromJSDate(time).endOf('month') };
-        })
+        .map(({ ids, time, prices }) => ({
+            ids,
+            prices,
+            date: DateTime.fromJSDate(time).endOf('month')
+        }))
         .reduce((lastReduction, { date, ids, prices }) => {
             // filter out duplicate year/months
             // note that integrity is guaranteed by ordering by time in the query
@@ -167,15 +168,15 @@ function getMonthlyValuesQueryDateUnion(months) {
         }))
         .reduce(
             (last, { start, end }) => `${last} UNION SELECT ${start}, ${end}`,
-            `SELECT to_date('${firstStart}', 'YYYY-MM-DD') AS start_date, to_date('${firstEnd}', 'YYYY-MM-DD') AS end_date`
+            `SELECT DATE('${firstStart}') AS start_date, DATE('${firstEnd}') AS end_date`
         );
 }
 
 function getMonthlyValuesQuery(db, user, union, category) {
-    return db.select(db.raw('SUM(cost) AS month_cost'))
+    return db.select(db.raw('SUM(cost)::integer AS month_cost'))
         .from(db.raw(`(${union}) dates`))
-        .leftJoin(category, qb1 => qb1
-            .on('uid', '=', user.uid)
+        .leftJoin(`${category} as list_data`, qb1 => qb1
+            .on('list_data.uid', '=', db.raw(`'${user.uid}'`))
             .on('date', '>=', 'dates.start_date')
             .on('date', '<=', 'dates.end_date')
         )

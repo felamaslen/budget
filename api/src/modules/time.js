@@ -7,4 +7,3 @@ function getNow(config) {
 module.exports = {
     getNow
 };
-
