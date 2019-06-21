@@ -1,3 +1,4 @@
+const joi = require('joi');
 const { Router } = require('express');
 
 const { clientError } = require('../../modules/error-handling');
@@ -20,8 +21,14 @@ function routeSubCategories(db) {
         'net_worth_categories',
         'Category',
         req => {
-            if (!req.body.categoryId) {
-                throw clientError('Missing category', 400);
+            const { error } = joi.validate(req.body, joi.object({
+                categoryId: joi.string()
+                    .uuid()
+                    .required()
+            }).unknown(true));
+
+            if (error) {
+                throw clientError(error, 400);
             }
 
             return req.body.categoryId;

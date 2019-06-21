@@ -59,7 +59,9 @@ const schemaNetWorth = joi.object()
 
 const schemaSubcategory = joi.object()
     .keys({
-        categoryId: joi.number().required(),
+        categoryId: joi.string()
+            .uuid()
+            .required(),
         subcategory: joi.string().required(),
         hasCreditLimit: joi.boolean().allow(null),
         opacity: joi.number()
