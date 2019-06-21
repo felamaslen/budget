@@ -80,11 +80,13 @@ async function getTotalCost(db, user, table) {
         return getTotalFundCost(db, user);
     }
 
-    const [{ total }] = await db.select(db.raw('SUM(cost) AS total'))
+    const rows = await db.select('item', 'category', 'cost').from(table).where('uid', '=', user.uid);
+
+    const [{ total }] = await db.select(db.raw('SUM(cost)::integer AS total'))
         .from(table)
         .where('uid', '=', user.uid);
 
-    return Number(total);
+    return total;
 }
 
 async function getResults(config, db, user, now, table, limit = null) {

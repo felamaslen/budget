@@ -57,8 +57,8 @@ function getFundValue(monthDate, transactions, prices) {
 function queryFundPrices(config, db, user) {
     return db.select(
         'fund_cache_time.time',
-        db.raw('GROUP_CONCAT(funds.id) AS id'),
-        db.raw('GROUP_CONCAT(fund_cache.price) AS price')
+        db.raw('ARRAY_AGG(funds.id) AS id'),
+        db.raw('ARRAY_AGG(fund_cache.price) AS price')
     )
         .from('fund_cache')
         .innerJoin('fund_hash', 'fund_hash.fid', 'fund_cache.fid')
@@ -167,17 +167,19 @@ function getMonthlyValuesQueryDateUnion(months) {
         }))
         .reduce(
             (last, { start, end }) => `${last} UNION SELECT ${start}, ${end}`,
-            `SELECT DATE('${firstStart}') AS startDate, DATE('${firstEnd}') AS endDate`
+            `SELECT to_date('${firstStart}', 'YYYY-MM-DD') AS start_date, to_date('${firstEnd}', 'YYYY-MM-DD') AS end_date`
         );
 }
 
 function getMonthlyValuesQuery(db, user, union, category) {
-    return db.select(db.raw('SUM(cost) AS monthCost'))
+    return db.select(db.raw('SUM(cost) AS month_cost'))
         .from(db.raw(`(${union}) dates`))
-        .joinRaw(`LEFT JOIN ${category} ON uid = ?
-            AND date >= dates.startDate
-            AND date <= dates.endDate`, user.uid)
-        .groupBy('dates.startDate');
+        .leftJoin(category, qb1 => qb1
+            .on('uid', '=', user.uid)
+            .on('date', '>=', 'dates.start_date')
+            .on('date', '<=', 'dates.end_date')
+        )
+        .groupBy('dates.start_date');
 }
 
 async function getMonthlyValues(config, db, user, yearMonths, union, category, old) {
@@ -193,7 +195,7 @@ async function getMonthlyValues(config, db, user, yearMonths, union, category, o
 
     const result = await getMonthlyValuesQuery(db, user, union, category);
 
-    return { [category]: result.map(({ monthCost }) => Number(monthCost) || 0) };
+    return { [category]: result.map(({ 'month_cost': monthCost }) => Number(monthCost) || 0) };
 }
 
 function getMonthlyBalanceRows(db, user) {

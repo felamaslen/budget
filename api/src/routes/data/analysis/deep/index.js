@@ -10,7 +10,7 @@ function getPeriodCostDeep(db, user, now, params) {
 
     const { startTime, endTime } = common.periodCondition(now, period, pageIndex);
 
-    return db.select('item', `${categoryColumn} AS itemCol`, db.raw('SUM(cost) AS cost'))
+    return db.select('item', `${categoryColumn} AS itemCol`, db.raw('SUM(cost)::integer AS cost'))
         .from(category)
         .where('date', '>=', startTime.toISODate())
         .andWhere('date', '<=', endTime.toISODate())
@@ -100,4 +100,3 @@ module.exports = {
     processDataResponse,
     routeGet
 };
-
