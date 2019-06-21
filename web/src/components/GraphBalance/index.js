@@ -138,4 +138,3 @@ GraphBalance.propTypes = {
     startDate: PropTypes.instanceOf(DateTime).isRequired,
     futureMonths: PropTypes.number.isRequired
 };
-

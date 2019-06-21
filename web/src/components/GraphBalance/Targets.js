@@ -36,7 +36,7 @@ export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
         Math.atan2(pixY(target.get('from')) - pixY(target.get('value')),
             monthWidth * (target.get('months') + target.get('last')));
 
-    const arrows = targets.map((target, key) => (
+    const arrows = minY !== maxY && targets.map((target, key) => (
         <Arrow key={key}
             startX={target.get('date')}
             startY={target.get('from')}

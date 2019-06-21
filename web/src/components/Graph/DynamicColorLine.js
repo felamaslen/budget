@@ -4,6 +4,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import { getDynamicLinePaths } from './helpers';
 
 export default function DynamicColorLine({ fill, data, smooth, color, children, pathProps, ...props }) {
+    if (props.minY === props.maxY) {
+        return null;
+    }
     if (fill) {
         throw new Error('Dynamically coloured, filled graph not implemented');
     }
@@ -31,7 +34,8 @@ DynamicColorLine.propTypes = {
             values: PropTypes.array.isRequired
         })
     ]).isRequired,
+    minY: PropTypes.number,
+    maxY: PropTypes.number,
     children: PropTypes.object,
     pathProps: PropTypes.object.isRequired
 };
-

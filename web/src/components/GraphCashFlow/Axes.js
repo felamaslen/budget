@@ -29,6 +29,10 @@ function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
 }
 
 export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
+    if (maxY === minY || maxX === minX) {
+        return null;
+    }
+
     const x0 = pixX(minX);
     const xMax = pixX(maxX);
     const y0 = pixY(minY);
