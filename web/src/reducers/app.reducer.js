@@ -19,7 +19,7 @@ export function getItemValue(state, page, row, col) {
         return { id, item, value: state.getIn(['pages', 'overview', 'data', 'cost', 'balance', row]) };
     }
     if (PAGES[page].list) {
-        if (row > -1) {
+        if (row !== -1) {
             const rows = getAllPageRows(state, { page });
 
             id = row;

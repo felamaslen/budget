@@ -51,17 +51,17 @@ test('getItemValue (on list pages, on the add row) returning the current add-ite
 
 test('getItemValue (on list pages, on the list row) returning the current list-row value', t => {
     const stateOnListRow = stateOverview.setIn(['pages', 'food', 'rows'], map([
-        ['76', map({
+        ['ab1', map({
             cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 861, 'baz2')
         })],
-        ['2', map({
+        ['cd2', map({
             cols: list.of(DateTime.fromISO('2018-06-11'), 'foo2', 'bar2', 1943, 'baz3')
         })]
     ]));
 
-    t.deepEqual(getItemValue(stateOnListRow, 'food', '76', 4), { id: '76', item: 'shop', value: 'baz2' });
+    t.deepEqual(getItemValue(stateOnListRow, 'food', 'ab1', 4), { id: 'ab1', item: 'shop', value: 'baz2' });
 
-    t.deepEqual(getItemValue(stateOnListRow, 'food', '2', 0), { id: '2', item: 'date', value: DateTime.fromISO('2018-06-11') });
+    t.deepEqual(getItemValue(stateOnListRow, 'food', 'cd2', 0), { id: 'cd2', item: 'date', value: DateTime.fromISO('2018-06-11') });
 });
 
 const stateKeyPress = map({
