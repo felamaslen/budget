@@ -35,7 +35,7 @@ export function rActivateEditable(state, { page, editable, cancel }) {
         }
         else {
             if (active.get('row') !== -1) {
-                const id = active.has('id')
+                const id = active.get('id')
                     ? active.get('id')
                     : active.get('row');
 
