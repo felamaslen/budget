@@ -38,4 +38,3 @@ Navbar.propTypes = {
     onPageSet: PropTypes.func.isRequired,
     onLogout: PropTypes.func.isRequired
 };
-

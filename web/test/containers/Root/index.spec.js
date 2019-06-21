@@ -58,6 +58,5 @@ test('main container', t => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.className, 'main');
-    t.is(div.childNodes.length, 3);
+    t.is(div.childNodes.length, 2);
 });
-
