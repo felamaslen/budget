@@ -4,6 +4,10 @@ export const getNow = state => state.get('now');
 
 export const getApiKey = state => state.getIn(['user', 'apiKey']);
 
+const getUid = state => state.getIn(['user', 'uid']);
+
+export const getLoggedIn = createSelector(getApiKey, getUid, (apiKey, uid) => Boolean(apiKey && uid));
+
 export const getRawRequestList = state => state.getIn(['edit', 'requestList']);
 
 export const getRequestList = createSelector([getRawRequestList], requestList =>

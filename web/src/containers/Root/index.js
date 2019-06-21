@@ -2,6 +2,7 @@ import './style.scss';
 import { connect, Provider } from 'react-redux';
 import { aUserLoggedOut } from '~client/actions/app.actions';
 import { aPageSet, aContentRequested } from '~client/actions/content.actions';
+import { getLoggedIn } from '~client/selectors/app';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter } from 'react-router-dom';
@@ -37,7 +38,7 @@ const mapStateToProps = state => ({
     navActive: state.getIn(['user', 'uid']) > 0,
     loadingApi: state.get('loadingApi'),
     unsavedApi: state.getIn(['edit', 'requestList']).size > 0,
-    loggedIn: state.getIn(['user', 'uid']) > 0
+    loggedIn: getLoggedIn(state)
 });
 
 const mapDispatchToProps = dispatch => ({

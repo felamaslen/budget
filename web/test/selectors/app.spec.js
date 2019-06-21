@@ -3,6 +3,7 @@ import { fromJS } from 'immutable';
 import {
     getNow,
     getApiKey,
+    getLoggedIn,
     getRequestList,
     getAddData,
     getContentParamsAnalysis,
@@ -13,12 +14,35 @@ test('getNow gets the current time from the state', t => {
     t.is(getNow(fromJS({ now: 'foo' })), 'foo');
 });
 
-test('apiKey gets the API key from the state', t => {
+test('getApiKey gets the API key from the state', t => {
     t.is(getApiKey(fromJS({
         user: {
             apiKey: 'foo'
         }
     })), 'foo');
+});
+
+test('getLoggedIn returns true iff there is an API key and a user ID in state', t => {
+    t.is(getLoggedIn(fromJS({
+        user: {
+            apiKey: 'foo',
+            uid: 'bar'
+        }
+    })), true);
+
+    t.is(getLoggedIn(fromJS({
+        user: {
+            apiKey: 'foo',
+            uid: null
+        }
+    })), false);
+
+    t.is(getLoggedIn(fromJS({
+        user: {
+            apiKey: null,
+            uid: 'bar'
+        }
+    })), false);
 });
 
 test('getRequestList gets the requestList and map it to each request', t => {
@@ -59,4 +83,3 @@ test('getLoadedStatus returns the pagesLoaded status from state', t => {
     t.is(getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'bar' }), false);
     t.is(getLoadedStatus(fromJS({ pages: { foo: { is: 'loaded' } } }), { page: 'baz' }), false);
 });
-
