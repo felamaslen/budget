@@ -34,7 +34,7 @@ export function rActivateEditable(state, { page, editable, cancel }) {
             });
         }
         else {
-            if (active.get('row') > -1) {
+            if (active.get('row') !== -1) {
                 const id = active.has('id')
                     ? active.get('id')
                     : active.get('row');
@@ -288,4 +288,3 @@ export function rRemoveFundTransactions(state, { row, col, key }) {
 
     return rFundTransactions(state, row, col, transactions);
 }
-
