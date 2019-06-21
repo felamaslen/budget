@@ -1,5 +1,10 @@
 Release:
 
+- 4.7.0
+    - API:
+        - Using PostgreSQL instead of MySQL database
+        - Docker environments for test, development and production, using docker-compose for the first two
+
 - 4.6.0
     - Web client:
         - Net worth editor (MVP)
