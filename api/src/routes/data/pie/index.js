@@ -37,12 +37,12 @@ function getPieQuery(config, db, user, pieCol, category) {
     const limit = config.data.pie.detail;
 
     if (type === 'cost') {
-        return db.select(`${column} AS col`, 'SUM(cost) AS cost')
+        return db.select(`${column} AS col`, db.raw('SUM(cost)::integer AS cost'))
             .from(category)
             .where('cost', '>', 0)
             .andWhere('uid', '=', user.uid)
             .groupBy('col')
-            .orderby('cost', 'desc')
+            .orderBy('cost', 'desc')
             .limit(limit);
     }
 

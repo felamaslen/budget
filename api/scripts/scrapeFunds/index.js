@@ -18,7 +18,7 @@ async function run() {
     const config = getConfig();
 
     const logger = getLogger();
-    const db = await initDb(config, logger, false);
+    const db = initDb(config);
 
     const status = await processScrape(config, flags, db, logger);
 
@@ -28,4 +28,3 @@ async function run() {
 }
 
 run();
-

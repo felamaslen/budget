@@ -11,23 +11,21 @@ const { onRead } = require('./read');
 const { onUpdate } = require('./update');
 const { onDelete } = require('./delete');
 
-const unionSelectIds = async (db, categories, after) => {
+const unionSelectIds = (db, categories, after) => {
     if (!categories.length) {
         return [];
     }
 
-    const [items] = await db.raw(`
+    return db.raw(`
     SELECT ids.id
     FROM (
-        SELECT ${categories[0]} AS id
+        SELECT '${categories[0]}'::uuid AS id
         ${categories.slice(1)
-        .map(id => `UNION SELECT ${id}`)
+        .map(id => `UNION SELECT '${id}'::uuid`)
         .join('\n')}
     ) AS ids
     ${after}
     `);
-
-    return items;
 };
 
 function validateCategories(db) {
@@ -52,7 +50,7 @@ function validateCategories(db) {
         LEFT JOIN net_worth_subcategories AS nws ON nws.id = ids.id
         LEFT JOIN net_worth_categories AS nwc ON nwc.id = nws.category_id
         WHERE nwc.id IS NULL
-            OR nws.has_credit_limit != 1
+            OR nws.has_credit_limit != TRUE
             OR nwc.id IS NULL
             OR nwc.type != 'liability'
         `);

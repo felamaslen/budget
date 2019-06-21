@@ -88,7 +88,7 @@ function NetWorthSubcategoryItemForm({
 
 NetWorthSubcategoryItemForm.propTypes = {
     buttonText: PropTypes.string.isRequired,
-    categoryId: PropTypes.number.isRequired,
+    categoryId: PropTypes.string.isRequired,
     subcategory: PropTypes.string,
     hasCreditLimit: PropTypes.bool,
     opacity: PropTypes.number.isRequired,

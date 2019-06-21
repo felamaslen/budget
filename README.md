@@ -6,7 +6,7 @@ Personal finance app for web, cli and android
 
 There is a web-based API written in Node.js, which also runs a web app. The Android app connects to this API.
 
-- Node version: 8
+- Node version: 10
 
 The CLI app is written in Python 3. See `cli/README.md` for setup info.
 
@@ -17,21 +17,20 @@ For info on building the Android app, see `android/README.md`.
 ### Installation:
 
 - Install external dependencies
-    - MySQL server
+    - PostgreSQL server with uuid-ossp extension created
 
 - Set environment variables
     - These are in `.env.example`, which you should copy to `.env` and edit with the appropriate values (see below).
 
 - Run `npm install` to install Node dependencies
-	- This will also build the web app into `web/build`
+
+- Run `npm run build` to build the web app
 
 ### Production:
 
 - Run `npm start` and access the app at `http://localhost:3000` by default.
 
 ### Maintenance:
-
-- Run `npm run install_db` to drop all data and create clean tables in the database
 
 - Run `npm run scrape_funds` to scrape and cache current fund prices
 
@@ -40,8 +39,20 @@ For info on building the Android app, see `android/README.md`.
 ### Development:
 
 - Run `npm run dev` to run a development server with hot module replacement
+    - This runs inside a Docker containerised environment
+    - All external services are created by docker-compose
 
 - This is accessible at `http://localhost:3000` by default
+
+#### Migrations / seeds:
+
+To run database migrations and seeds on the development environment:
+
+- `docker-compose exec budget sh -c "./node_modules/.bin/knex migrate:latest"`
+
+- `docker-compose exec budget sh -c "./node_modules/.bin/knex seed:run"`
+
+- The admin user PIN is 1234
 
 #### Notes: 
 
@@ -51,7 +62,6 @@ When making changes, please update the version number in `package.json` before s
 
 Upon running the server, API documentation is available at `/docs/api`.
 
-
 ## Environment variables:
 
 These environment variables must be set on your deployment environment, or in `.env`:
@@ -59,14 +69,12 @@ These environment variables must be set on your deployment environment, or in `.
 Note that the development variables are optional on a production environment.
 
 - `PORT`: the port to listen on
-- `MYSQL_URI`: URI for connecting to the production database
-- `MYSQL_URI_TEST`: URI for connecting to a testing database
+- `DATABASE_URL`: URI for connecting to the database
 - `DEFAULT_PIN`: the PIN for the first generated user
 - `BIRTH_DATE`: the (ISO) date of birth (for use in FTI calculation)
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts
 - `IP_BAN_LIMIT`: the period of time to consider when banning users
 - `IP_BAN_TRIES`: the maximum number of failed logins before banning users
-- `USER_HASH_SALT`: the salt to hash users' PINs with (TODO: better authentication mechanism)
 - `WEB_URL`: the URL to access the web app at, without trailing slash
 - `PIE_TOLERANCE`: minimum slice of pie charts to include on list data
 - `PIE_DETAIL`:  maximum number of pie slices to return on list data

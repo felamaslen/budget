@@ -51,21 +51,21 @@ test('getItemValue (on list pages, on the add row) returning the current add-ite
 
 test('getItemValue (on list pages, on the list row) returning the current list-row value', t => {
     const stateOnListRow = stateOverview.setIn(['pages', 'food', 'rows'], map([
-        [76, map({
+        ['ab1', map({
             cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 861, 'baz2')
         })],
-        [2, map({
+        ['cd2', map({
             cols: list.of(DateTime.fromISO('2018-06-11'), 'foo2', 'bar2', 1943, 'baz3')
         })]
     ]));
 
-    t.deepEqual(getItemValue(stateOnListRow, 'food', 76, 4), { id: 76, item: 'shop', value: 'baz2' });
+    t.deepEqual(getItemValue(stateOnListRow, 'food', 'ab1', 4), { id: 'ab1', item: 'shop', value: 'baz2' });
 
-    t.deepEqual(getItemValue(stateOnListRow, 'food', 2, 0), { id: 2, item: 'date', value: DateTime.fromISO('2018-06-11') });
+    t.deepEqual(getItemValue(stateOnListRow, 'food', 'cd2', 0), { id: 'cd2', item: 'date', value: DateTime.fromISO('2018-06-11') });
 });
 
 const stateKeyPress = map({
-    user: map({ uid: 0 })
+    user: map({ uid: '0' })
 });
 
 test('rHandleKeyPress doing nothing if the key is a modifier', t => {
@@ -73,7 +73,9 @@ test('rHandleKeyPress doing nothing if the key is a modifier', t => {
     t.is(rHandleKeyPress(stateKeyPress, { key: 'Shift' }), stateKeyPress);
 });
 
-const stateLoggedIn = stateOverview.setIn(['user', 'uid'], 1)
+const stateLoggedIn = stateOverview
+    .setIn(['user', 'uid'], 'f0aab1')
+    .setIn(['user', 'apiKey'], 'some_api_key')
     .set('currentPage', 'food')
     .set('edit', map({
         active: map({
@@ -94,44 +96,44 @@ const stateLoggedIn = stateOverview.setIn(['user', 'uid'], 1)
         food: map({
             data: map({ numRows: 10, numCols: 5 }),
             rows: map([
-                [1, map({
-                    id: 1,
+                ['1', map({
+                    id: '1',
                     cols: list.of(DateTime.fromISO('2018-06-03'), 'foo1', 'bar1', 30, 'baz1')
                 })],
-                [2, map({
-                    id: 2,
+                ['2', map({
+                    id: '2',
                     cols: list.of(DateTime.fromISO('2018-06-02'), 'foo2', 'bar2', 30, 'baz2')
                 })],
-                [5, map({
-                    id: 5,
+                ['5', map({
+                    id: '5',
                     cols: list.of(DateTime.fromISO('2018-05-28'), 'foo3', 'bar3', 30, 'baz3')
                 })],
-                [6, map({
-                    id: 6,
+                ['6', map({
+                    id: '6',
                     cols: list.of(DateTime.fromISO('2018-05-28'), 'foo4', 'bar4', 30, 'baz4')
                 })],
-                [35, map({
-                    id: 35,
+                ['35', map({
+                    id: '35',
                     cols: list.of(DateTime.fromISO('2018-05-09'), 'foo5', 'bar5', 30, 'baz5')
                 })],
-                [19, map({
-                    id: 19,
+                ['19', map({
+                    id: '19',
                     cols: list.of(DateTime.fromISO('2018-04-19'), 'foo6', 'bar6', 30, 'baz6')
                 })],
-                [7, map({
-                    id: 7,
+                ['7', map({
+                    id: '7',
                     cols: list.of(DateTime.fromISO('2018-04-18'), 'foo7', 'bar7', 30, 'baz7')
                 })],
-                [9, map({
-                    id: 9,
+                ['9', map({
+                    id: '9',
                     cols: list.of(DateTime.fromISO('2018-04-09'), 'foo8', 'bar8', 30, 'baz8')
                 })],
-                [11, map({
-                    id: 11,
+                ['11', map({
+                    id: '11',
                     cols: list.of(DateTime.fromISO('2018-04-05'), 'foo9', 'bar9', 30, 'baz9')
                 })],
-                [61, map({
-                    id: 61,
+                ['61', map({
+                    id: '61',
                     cols: list.of(DateTime.fromISO('2018-04-03'), 'foo10', 'bar10', 30, 'baz10')
                 })]
             ])
@@ -202,7 +204,7 @@ test('rHandleKeyPress (logged in, navigating from the active field) setting the 
     t.is(result.getIn(['edit', 'active', 'col']), 3);
 });
 
-test('rHandleKeyPress (logged in, on escape) deactivateing and cancel editing', t => {
+test('rHandleKeyPress (logged in, on escape) deactivates and cancels editing', t => {
     const stateEditing = stateLoggedIn.setIn(['edit', 'active', 'value'], 'wanttocancelthis');
 
     const result = rHandleKeyPress(stateEditing, { key: 'Escape' });
@@ -242,7 +244,7 @@ const stateLoggedOut = stateKeyPress.set('loginForm', map({
 
 test('rHandleKeyPress (logged out) resetting the login form if Escape was pressed', t => {
     t.deepEqual(rHandleKeyPress(stateLoggedOut, { key: 'Escape' }).toJS(), {
-        user: { uid: 0 },
+        user: { uid: '0' },
         loginForm: {
             values: [],
             inputStep: 0,
@@ -253,7 +255,7 @@ test('rHandleKeyPress (logged out) resetting the login form if Escape was presse
 
 test('rHandleKeyPress (logged out) inputing the key to the login form, otherwise', t => {
     t.deepEqual(rHandleKeyPress(stateLoggedOut, { key: '4' }).toJS(), {
-        user: { uid: 0 },
+        user: { uid: '0' },
         loginForm: {
             values: ['0', '1', '4'],
             inputStep: 3,

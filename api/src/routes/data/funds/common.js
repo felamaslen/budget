@@ -11,11 +11,13 @@ function getMaxAge(now, period, length) {
     return now.plus({ [period]: -length });
 }
 
+const withFundHash = (db, salt) => db.raw('md5(f.item || ?)', salt);
+
 function getNumResultsQuery(db, user, salt, minTime) {
-    return db.select(db.raw('COUNT(1) AS numResults'))
+    return db.select(db.raw('COUNT(1)::integer AS count'))
         .from(qb1 => qb1.select('c.cid')
             .from('funds as f')
-            .innerJoin('fund_hash as fh', 'fh.hash', db.raw('MD5(CONCAT(f.item, ?))', salt))
+            .innerJoin('fund_hash as fh', 'fh.hash', withFundHash(db, salt))
             .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
             .innerJoin('fund_cache_time as c', 'c.cid', 'fc.cid')
             .where('f.uid', '=', user.uid)
@@ -26,64 +28,55 @@ function getNumResultsQuery(db, user, salt, minTime) {
         );
 }
 
-function getAllHistoryForFundsQuery(db, user, salt, numResults, numDisplay, minTime) {
-    return db.select()
-        .from(qb1 => qb1.select(
-            'id', 'time', 'price', 'cNum', db.raw('FLOOR(cNum % (? / ?)) AS period', [numResults, numDisplay])
+const getAllHistoryForFundsQuery = (db, user, salt, numResults, numDisplay, minTime) => db.select()
+    .from(qb1 => qb1.select(
+        'id',
+        'time',
+        'price',
+        'row_num',
+        db.raw('floor(row_num % ?) as period', Math.ceil(numResults / numDisplay))
+    )
+        .from(qb2 => qb2.select(
+            'c.cid',
+            'c.time',
+            db.raw('array_agg(f.id order by f.date desc) as id'),
+            db.raw('array_agg(fc.price order by f.date desc) as price'),
+            db.raw('row_number() over (order by time) as row_num')
         )
-            .from(qb2 => qb2.select(
-                'id',
-                'time',
-                'price',
-                db.raw(
-                    '(CASE prices.cid WHEN @lastCid THEN @cNum ELSE @cNum := @cNum + 1 END) AS cNum'
-                ),
-                db.raw('@lastCid := prices.cid AS lastCid')
+            .from(qb3 => qb3.distinct(
+                'f.id',
+                'f.item',
+                db.raw('min(ft.date) as date')
             )
-                .from(qb3 => qb3.select(
-                    'c.cid',
-                    'c.time',
-                    db.raw('GROUP_CONCAT(f.id ORDER BY f.date DESC) AS id'),
-                    db.raw('GROUP_CONCAT(fc.price ORDER BY f.date DESC) AS price')
-                )
-                    .from(qb4 => qb4.distinct('funds.id', 'funds.item', db.raw('MIN(date) AS date'))
-                        .from('funds')
-                        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
-                        .where('uid', '=', user.uid)
-                        .groupBy('funds.id')
-                        .as('f')
-                    )
-                    .innerJoin('fund_hash AS fh', 'fh.hash', db.raw('MD5(CONCAT(f.item, ?))', salt))
-                    .innerJoin('fund_cache AS fc', 'fh.fid', 'fc.fid')
-                    .innerJoin('fund_cache_time AS c', 'c.cid', 'fc.cid')
-                    .where('c.done', '=', true)
-                    .where('c.time', '>', minTime)
-                    .groupBy('c.cid')
-                    .orderBy('time')
-                    .as('prices')
-                )
-                .join(qb3 => qb3.select(db.raw('@cNum := -1'), db.raw('@lastCid := 0'))
-                    .as('counter')
-                )
-                .as('ranked')
+                .from('funds as f')
+                .innerJoin('funds_transactions as ft', 'ft.fund_id', 'f.id')
+                .where('uid', '=', user.uid)
+                .groupBy('f.id')
+                .as('f')
             )
-            .as('results')
+            .innerJoin('fund_hash as fh', 'fh.hash', withFundHash(db, salt))
+            .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
+            .innerJoin('fund_cache_time as c', 'c.cid', 'fc.cid')
+            .where('c.done', '=', true)
+            .where('c.time', '>', minTime)
+            .groupBy('c.cid')
+            .orderBy('time')
+            .as('prices')
         )
-        .where('period', '=', 0)
-        .orWhere('cNum', '=', numResults - 1)
-        .orWhere('cNum', '=', numResults - 2);
-}
+        .as('results')
+    )
+    .where('period', '=', 0)
+    .orWhere('row_num', '=', numResults - 1)
+    .orWhere('row_num', '=', numResults);
 
 function processFundHistory(queryResult) {
     // return a map of fund holding IDs to historical prices
     const keyMap = queryResult
         .reduce(({ rowIds, data }, { id, price }, rowKey) => {
-            const [thisRowIds, rowPrices] = [id, price].map(item => item.split(',').map(Number));
-
-            const newData = thisRowIds.reduce(({ idMap, startIndex }, fundId, idKey) => {
+            const newData = id.reduce(({ idMap, startIndex }, fundId, idKey) => {
                 if (!(fundId in idMap)) {
                     return {
-                        idMap: { ...idMap, [fundId]: [rowPrices[idKey]] },
+                        idMap: { ...idMap, [fundId]: [price[idKey]] },
                         startIndex: { ...startIndex, [fundId]: rowKey }
                     };
                 }
@@ -106,14 +99,14 @@ function processFundHistory(queryResult) {
                 return {
                     idMap: {
                         ...idMap,
-                        [fundId]: [...idMap[fundId], ...zeroes, rowPrices[idKey]]
+                        [fundId]: [...idMap[fundId], ...zeroes, price[idKey]]
                     },
                     startIndex
                 };
 
             }, data);
 
-            return { rowIds: [thisRowIds, ...rowIds], data: newData };
+            return { rowIds: [id, ...rowIds], data: newData };
 
         }, { rowIds: [], data: { idMap: {}, startIndex: {} } })
         .data;
@@ -137,11 +130,8 @@ async function getFundHistoryMappedToFundIds(db, user, now, params) {
     const minTime = getMaxAge(now, period, length);
     const minTimeSQL = minTime.toSQL({ includeOffset: false });
 
-    const rows = await getNumResultsQuery(db, user, salt, minTimeSQL);
-    let [{ numResults }] = rows;
-    numResults = Number(numResults);
-
-    if (!isNaN(numResults) && numResults > 2) {
+    const [{ count: numResults }] = await getNumResultsQuery(db, user, salt, minTimeSQL);
+    if (numResults > 2) {
         const fundHistory = await getAllHistoryForFundsQuery(
             db, user, salt, numResults, numDisplay, minTimeSQL);
 
@@ -159,4 +149,3 @@ module.exports = {
     fundHash,
     getFundHistoryMappedToFundIds
 };
-

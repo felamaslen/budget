@@ -11,13 +11,10 @@ module.exports = () => ({
     testIntegration: process.env.NODE_ENV === 'testintegration',
     debug: process.env.NODE_ENV !== 'production',
     debugSql: process.env.SQLDEBUGGER === 'true',
-    mysqlUri: process.env.NODE_ENV === 'test'
-        ? process.env.MYSQL_URI_TEST
-        : process.env.MYSQL_URI,
+    postgresUri: process.env.DATABASE_URL,
     webUrl: process.env.WEB_URL || '',
     openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
     user: {
-        hashSalt: process.env.USER_HASH_SALT || '',
         banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,
         banLimit: (Number(process.env.IP_BAN_LIMIT) || 60) * 1000,
         banTries: Math.round(Number(process.env.IP_BAN_TRIES) || 5)

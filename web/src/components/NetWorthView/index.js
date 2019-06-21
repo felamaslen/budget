@@ -18,6 +18,11 @@ const withIsoDates = data => data.map(({ date, ...rest }) => ({
 
 const sortByIsoDate = rows => rows.sort(({ date: dateA }, { date: dateB }) => dateA - dateB);
 
+const withoutSkipValues = rows => rows.map(({ values, ...rest }) => ({
+    values: values.filter(({ skip }) => !skip),
+    ...rest
+}));
+
 const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE);
 
 const withFTI = rows => rows.map((row, index) => {
@@ -50,6 +55,7 @@ export default function NetWorthView({ rowDates, spending, data, categories, sub
     const rows = useMemo(() => compose(
         withFTI,
         withSpend,
+        withoutSkipValues,
         sortByIsoDate,
         withIsoDates
     )(data || []), [data, withSpend]);

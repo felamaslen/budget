@@ -1,6 +1,6 @@
 const test = require('ava');
 const { DateTime } = require('luxon');
-const { prepareMockDb } = require('../../../test.common');
+const db = require('~api/src/modules/db')();
 const {
     getPeriodCostForCategory,
     getRowsByDate,
@@ -9,9 +9,11 @@ const {
 } = require('~api/src/routes/data/analysis');
 
 test('getPeriodCostForCategory getting valid data', async t => {
-    const db = await prepareMockDb(false);
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
 
-    const user = { uid: 1 };
+    const user = { uid };
 
     const result = await getPeriodCostForCategory(
         db, user, DateTime.fromObject({ year: 2018, month: 1, date: 3 }), DateTime.fromObject({ year: 2018, month: 10, date: 4 }), 'food', 'category');
@@ -150,9 +152,11 @@ test('processTimelineData (without a valid period) return null', t => {
 });
 
 test('getPeriodCost getting cost data and a period description', async t => {
-    const db = await prepareMockDb(false);
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
 
-    const user = { uid: 1 };
+    const user = { uid };
     const now = DateTime.fromISO('2018-03-04');
     const params = { period: 'month', groupBy: 'category', pageIndex: 0 };
 
@@ -175,4 +179,3 @@ test('getPeriodCost getting cost data and a period description', async t => {
 
     t.deepEqual(result, expectedResult);
 });
-

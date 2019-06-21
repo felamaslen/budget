@@ -287,7 +287,7 @@ function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
         return Math.round(absValue).toString();
     }
 
-    return absValue.toFixed(2);
+    return absValue.toFixed(precision);
 }
 
 /**
@@ -299,7 +299,6 @@ function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
 export function formatCurrency(value, customOptions = {}) {
     const options = {
         abbreviate: false,
-        precision: 0,
         brackets: false,
         noSymbol: false,
         noPence: false,
@@ -328,6 +327,16 @@ export function formatCurrency(value, customOptions = {}) {
         ? Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length)
         : 0;
 
+    let {
+        precision = options.abbreviate
+            ? 0
+            : 2
+    } = options;
+
+    if (options.abbreviate && log === 0) {
+        precision = 2;
+    }
+
     const abbreviation = log > 0
         ? abbr[log - 1]
         : '';
@@ -335,7 +344,7 @@ export function formatCurrency(value, customOptions = {}) {
     const suffix = options.suffix || '';
 
     const valueRaw = getCurrencyValueRaw(
-        absValue, log, options.abbreviate, options.precision, options.noPence
+        absValue, log, options.abbreviate, precision, options.noPence
     );
 
     const formatted = numberFormat(valueRaw);

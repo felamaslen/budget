@@ -1,5 +1,5 @@
 const test = require('ava');
-const { prepareMockDb } = require('~api/test/test.common');
+const db = require('~api/src/modules/db')();
 const md5 = require('md5');
 const { DateTime } = require('luxon');
 
@@ -40,17 +40,21 @@ test('getMaxAge handles invalid parameters', t => {
 });
 
 test('getNumResultsQuery returns the correct query', async t => {
-    const user = { uid: 1 };
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
 
-    const db = await prepareMockDb();
+    const user = { uid };
 
     t.is(typeof getNumResultsQuery(db, user, 'somesalt', 10), 'object');
 });
 
 test('getAllHistoryForFundsQuery returns the correct query', async t => {
-    const user = { uid: 1 };
+    const [{ uid }] = await db.select('uid')
+        .from('users')
+        .where('name', '=', 'test-user');
 
-    const db = await prepareMockDb();
+    const user = { uid };
 
     t.is(typeof getAllHistoryForFundsQuery(db, user, 'somesalt', 100, 50, 10), 'object');
 });
@@ -58,16 +62,16 @@ test('getAllHistoryForFundsQuery returns the correct query', async t => {
 test('processFundHistory returns the expected data', t => {
     const queryResult = [
         {
-            id: '3,22,23,24', time: new Date('2017-04-03 14:23:49'), price: '96.5,100.2,16.29,1.23'
+            id: ['3', '22', '23', '24'], time: new Date('2017-04-03 14:23:49'), price: [96.5, 100.2, 16.29, 1.23]
         },
         {
-            id: '3,22,23,25', time: new Date('2017-04-21 09:00:01'), price: '97.3,100.03,16.35,67.08'
+            id: ['3', '22', '23', '25'], time: new Date('2017-04-21 09:00:01'), price: [97.3, 100.03, 16.35, 67.08]
         },
         {
-            id: '7,3,22,23,25', time: new Date('2017-05-01 10:32:43'), price: '10.21,97.4,100.1,16.33,67.22'
+            id: ['7', '3', '22', '23', '25'], time: new Date('2017-05-01 10:32:43'), price: [10.21, 97.4, 100.1, 16.33, 67.22]
         },
         {
-            id: '22,25', time: new Date('2017-05-03 10:31:06'), price: '100.15,66.98'
+            id: ['22', '25'], time: new Date('2017-05-03 10:31:06'), price: [100.15, 66.98]
         }
     ];
 

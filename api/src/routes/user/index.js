@@ -6,17 +6,10 @@ const { Router } = require('express');
 const joi = require('joi');
 const { DateTime } = require('luxon');
 const { checkLoggedIn, genToken } = require('../../modules/auth');
+const { clientError, catchAsyncErrors } = require('../../modules/error-handling');
 
-const errorStatus = (err, code) => {
-    const res = new Error(err.message);
-    res.statusCode = code;
-
-    return res;
-};
-
-async function attemptLogin(db, req) {
-    const { error, value: { uid, pin } } = joi.validate(req.body, joi.object().keys({
-        uid: joi.number().integer(),
+async function attemptLogin(config, db, req) {
+    const { error, value } = joi.validate(req.body, joi.object().keys({
         pin: joi.number().integer()
             .min(1000)
             .max(9999)
@@ -24,17 +17,14 @@ async function attemptLogin(db, req) {
     }));
 
     if (error) {
-        throw errorStatus(error, 400);
+        throw clientError(error.message);
     }
 
-    try {
-        const { name, uid: userId } = await checkLoggedIn(db, uid, pin);
+    const { pin } = value;
 
-        return { name, ...genToken({ uid: userId, pin }) };
-    }
-    catch (err) {
-        return { name: null, uid: null, apiKey: null };
-    }
+    const { name, uid } = await checkLoggedIn(config, db, pin);
+
+    return { name, uid, ...genToken({ uid, pin }) };
 }
 
 async function getIpLog(db, ip) {
@@ -58,8 +48,10 @@ function updateIpLog(db, ip, time, count) {
     return db.raw(`
     INSERT INTO ip_login_req (ip, time, count)
     VALUES(?, ?, ?)
-    ON DUPLICATE KEY UPDATE time = ?, count = ?
-    `, [ip, time, count, time, count]);
+    ON CONFLICT (ip) DO UPDATE
+        SET time = excluded.time
+        ,count = excluded.count
+    `, [ip, time, count]);
 }
 
 function getNewBadLoginCount(oldCount, banned, logExpired, banExpired) {
@@ -105,35 +97,37 @@ async function loginBanCheck(config, db, logger, loggedIn, ip) {
     }
 
     if (banned) {
-        throw errorStatus(new Error(config.msg.errorIpBanned), 401);
+        throw clientError(config.msg.errorIpBanned, 401);
     }
 }
 
 function login(config, db, logger) {
-    return async (req, res) => {
+    return catchAsyncErrors(async (req, res) => {
+        const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+        let loginErr = null;
+        let response = null;
+
         try {
-            const response = await attemptLogin(db, req);
-
-            const loggedIn = Boolean(response.uid);
-
-            const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-            await loginBanCheck(config, db, logger, loggedIn, ip);
-
-            if (loggedIn) {
-                return res.json(response);
+            response = await attemptLogin(config, db, req);
+        } catch (err) {
+            if (err.status === 401) {
+                loginErr = err;
+            } else {
+                throw err;
             }
-
-            return res.status(401)
-                .json({ errorMessage: config.msg.errorLoginBad });
         }
-        catch (err) {
-            const statusCode = err.statusCode || 500;
 
-            return res.status(statusCode)
-                .json({ errorMessage: err.message });
+        const loggedIn = !loginErr;
+        await loginBanCheck(config, db, logger, loggedIn, ip);
+
+        if (loginErr) {
+            throw loginErr;
         }
-    };
+
+        res.json(response);
+
+    });
 }
 
 function handler(config, db, logger) {

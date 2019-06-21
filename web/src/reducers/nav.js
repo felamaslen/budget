@@ -132,4 +132,3 @@ export function getCurrentRowCol(editing) {
 
     return { currentRow, currentCol };
 }
-

@@ -17,7 +17,9 @@ const listItemKeysConsumable = (category = 'category') => ({
 });
 
 const schemaDeleteListItem = joi.object().keys({
-    id: joi.number().integer().required()
+    id: joi.string()
+        .uuid()
+        .required()
 });
 
 const schemaInsert = keys => joi.object().keys(Object.keys(keys)
@@ -25,7 +27,9 @@ const schemaInsert = keys => joi.object().keys(Object.keys(keys)
 );
 
 const schemaUpdate = keys => joi.object().keys({
-    id: joi.number().integer().required(),
+    id: joi.string()
+        .uuid()
+        .required(),
     ...keys
 });
 

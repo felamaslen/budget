@@ -26,7 +26,7 @@ ListRowCellMobile.propTypes = {
     page: PropTypes.string.isRequired,
     colKey: PropTypes.number.isRequired,
     row: ImmutablePropTypes.map.isRequired,
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     column: PropTypes.string.isRequired
 };
 

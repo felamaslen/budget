@@ -8,7 +8,7 @@ import Header from '~client/components/Header';
 
 const getHeader = memoize((customProps = {}) => {
     const props = {
-        navActive: true,
+        loggedIn: true,
         loadingApi: false,
         unsavedApi: false,
         onPageSet: () => null,
@@ -59,4 +59,3 @@ test('renders <Navbar />', t => {
     t.is(navBar.tagName, 'NAV');
     t.is(navBar.className, 'nav-list noselect');
 });
-

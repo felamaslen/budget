@@ -14,8 +14,8 @@ function updateQuery(db, user, value) {
 
     return db.transaction(async trx => {
         await trx('balance')
-            .whereRaw('YEAR(balance.date) = ?', year)
-            .whereRaw('MONTH(balance.date) = ?', month)
+            .whereRaw('extract(year from balance.date) = ?', year)
+            .whereRaw('extract(month from balance.date) = ?', month)
             .where({ uid: user.uid })
             .del();
 
@@ -29,7 +29,8 @@ function updateData(config, db, post = true) {
         const { error, value } = joi.validate(req.body, balanceSchema);
 
         if (error) {
-            return res.status(400)
+            return res
+                .status(400)
                 .json({ errorMessage: error.message });
         }
 
@@ -39,7 +40,8 @@ function updateData(config, db, post = true) {
             ? 201
             : 200;
 
-        return res.status(statusCode)
+        return res
+            .status(statusCode)
             .json({ success: true });
     };
 }
@@ -48,4 +50,3 @@ module.exports = {
     updateQuery,
     updateData
 };
-

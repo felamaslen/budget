@@ -39,8 +39,8 @@ function getLabelPosY(posY, height, labelHeight) {
     return { labelPosY, rectPosY };
 }
 
-export default function HighlightPoint({ pixX, pixY, width, height, hoverEffect, hlPoint }) {
-    if (!hlPoint) {
+export default function HighlightPoint({ pixX, pixY, minY, maxY, width, height, hoverEffect, hlPoint }) {
+    if (!(hlPoint && maxY !== minY)) {
         return null;
     }
 
@@ -102,10 +102,10 @@ HighlightPoint.propTypes = {
         valY: PropTypes.number.isRequired,
         color: PropTypes.string.isRequired
     }),
+    minY: PropTypes.number,
+    maxY: PropTypes.number,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired
 };
-
-

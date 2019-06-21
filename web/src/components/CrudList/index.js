@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import './style.scss';
 
-export const CREATE_ID = 0;
+export const CREATE_ID = 'CREATE_ID';
 
 function CrudListItem({
     Item,
@@ -18,6 +18,14 @@ function CrudListItem({
 }) {
     const active = activeId === item.id;
     const onSetActive = useCallback(() => setActiveId(item.id), [item.id, setActiveId]);
+
+    const onDeleteCallback = useCallback(event => {
+        if (event) {
+            event.stopPropagation();
+        }
+        onDelete(item.id);
+        setActiveId(null);
+    }, [item.id, setActiveId, onDelete]);
 
     return (
         <li
@@ -36,7 +44,7 @@ function CrudListItem({
             {!active && <div className="button-delete">
                 <button
                     className="button-delete-button"
-                    onClick={() => onDelete(item.id)}
+                    onClick={onDeleteCallback}
                 >&minus;</button>
             </div>}
         </li>
@@ -46,7 +54,7 @@ function CrudListItem({
 CrudListItem.propTypes = {
     Item: PropTypes.func.isRequired,
     item: PropTypes.object.isRequired,
-    activeId: PropTypes.number,
+    activeId: PropTypes.string,
     setActiveId: PropTypes.func.isRequired,
     itemProps: PropTypes.func.isRequired,
     extraProps: PropTypes.object.isRequired,
@@ -118,7 +126,7 @@ export default function CrudList({
 
 CrudList.propTypes = {
     items: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number.isRequired
+        id: PropTypes.string.isRequired
     })),
     Item: PropTypes.func.isRequired,
     CreateItem: PropTypes.func.isRequired,

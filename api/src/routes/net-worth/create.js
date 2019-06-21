@@ -2,9 +2,10 @@ const { catchAsyncErrors } = require('../../modules/error-handling');
 const { formatDate, fetchById } = require('./read');
 
 function getValueRow(netWorthId) {
-    return ({ subcategory, value }) => {
+    return ({ subcategory, skip = null, value }) => {
         const base = {
             'net_worth_id': netWorthId,
+            skip,
             subcategory
         };
 
@@ -51,17 +52,9 @@ async function insertValues(db, netWorthId, values = []) {
 
     const valuesRows = values.map(getValueRow(netWorthId));
 
-    const [firstId] = await db.insert(valuesRows)
+    const valueIds = await db.insert(valuesRows)
         .returning('id')
         .into('net_worth_values');
-
-    // This is possible provided:
-    // - we're using mySQL
-    // - the table is InnoDB
-    // - the auto increment lock mode is set to 0 or 1 (default)
-    // See here for more info: https://dev.mysql.com/doc/refman/5.7/en/innodb-auto-increment-handling.html
-    // Also this SO: https://github.com/tgriesser/knex/issues/1828#issuecomment-272635117
-    const valueIds = valuesRows.map((item, index) => firstId + index);
 
     const fxValuesRows = values.reduce(getFxValueRow(netWorthId, valueIds), []);
 

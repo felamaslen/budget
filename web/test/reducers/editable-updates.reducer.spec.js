@@ -43,13 +43,13 @@ const state = map({
                 total: 8755601
             }),
             rows: map([
-                [19, map({
+                ['19', map({
                     cols: list.of(DateTime.fromISO('2018-04-17'), 'foo3', 'bar3', 29, 'bak3')
                 })],
-                [300, map({
+                ['300', map({
                     cols: list.of(DateTime.fromISO('2018-02-03'), 'foo1', 'bar1', 1139, 'bak1')
                 })],
-                [81, map({
+                ['81', map({
                     cols: list.of(DateTime.fromISO('2018-02-03'), 'foo2', 'bar2', 876, 'bak2')
                 })]
             ])
@@ -77,11 +77,11 @@ test('applyEditsList waiting for the response reducer to handle adding items', t
 
 const resultEditingInPlaceCost = applyEditsList(state, {
     page: 'food',
-    item: map({ row: 19, col: 3, item: 'cost', value: 33, originalValue: 29 })
+    item: map({ row: '19', col: 3, item: 'cost', value: 33, originalValue: 29 })
 });
 
 test('applyEditsList (in-place, editing cost) updateing the row in state', t => {
-    t.is(resultEditingInPlaceCost.getIn(['pages', 'food', 'rows', 19, 'cols', 3]), 33);
+    t.is(resultEditingInPlaceCost.getIn(['pages', 'food', 'rows', '19', 'cols', 3]), 33);
 });
 
 test('applyEditsList (in-place, editing cost) recalculateing the overview data properly', t => {
@@ -94,7 +94,7 @@ test('applyEditsList (in-place, editing cost) recalculateing the total for the p
 const resultEditingInPlaceDate = applyEditsList(state, {
     page: 'food',
     item: map({
-        row: 300,
+        row: '300',
         col: 0,
         item: 'date',
         value: DateTime.fromISO('2018-04-21'),
@@ -103,7 +103,7 @@ const resultEditingInPlaceDate = applyEditsList(state, {
 });
 
 test('applyEditsList (in-place, editing date) updateing the row in state', t => {
-    t.deepEqual(resultEditingInPlaceDate.getIn(['pages', 'food', 'rows', 300, 'cols', 0]), DateTime.fromISO('2018-04-21'));
+    t.deepEqual(resultEditingInPlaceDate.getIn(['pages', 'food', 'rows', '300', 'cols', 0]), DateTime.fromISO('2018-04-21'));
 });
 test('applyEditsList (in-place, editing date) recalculateing the overview data properly', t => {
     t.is(resultEditingInPlaceDate.getIn(['pages', 'overview', 'cost', 'food', 1]), 1392 - 1139);
@@ -114,23 +114,23 @@ test('applyEditsList (in-place, editing date) sorting the list rows', t => {
         resultEditingInPlaceDate.getIn(['pages', 'food', 'rows']).keySeq()
             .toList()
             .toJS(),
-        [300, 19, 81]
+        ['300', '19', '81']
     );
 });
 
-const resultDelete = rDeleteListItem(state, { page: 'food', id: 300 });
+const resultDelete = rDeleteListItem(state, { page: 'food', id: '300' });
 
 test('rDeleteListItem deleteing the row in state', t => {
     t.deepEqual(
         resultDelete.getIn(['pages', 'food', 'rows']).keySeq()
             .toList()
             .toJS(),
-        [19, 81]
+        ['19', '81']
     );
 });
 
 test('rDeleteListItem recalculateing the overview data properly', t => {
-    t.is(resultDelete.getIn(['pages', 'overview', 'cost', 'food', 1]), 1392 - 1139);
+    t.is(resultDelete.getIn(['pages', 'overview', 'cost', 'food', '1']), 1392 - 1139);
 });
 
 test('rDeleteListItem updateing the page total', t => {
@@ -142,7 +142,7 @@ test('rDeleteListItem pushing a request to the request queue', t => {
         {
             req: {
                 body: {
-                    id: 300
+                    id: '300'
                 },
                 method: 'delete',
                 query: {},
@@ -151,4 +151,3 @@ test('rDeleteListItem pushing a request to the request queue', t => {
         }
     ]);
 });
-

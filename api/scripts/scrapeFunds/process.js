@@ -52,7 +52,7 @@ function getEligibleFunds(config, logger, rows) {
 async function getFunds(config, db, logger) {
     const rows = await db.select('uid', 'item', 'units')
         .from('funds')
-        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id');
+        .innerJoin('funds_transactions', 'funds_transactions.fund_id', 'funds.id');
 
     return getEligibleFunds(config, logger, rows);
 }

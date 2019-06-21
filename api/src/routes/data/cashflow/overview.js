@@ -3,7 +3,6 @@
  */
 
 const { DateTime } = require('luxon');
-const { sqlConcat } = require('../../../common');
 const { getNow } = require('../../../modules/time');
 
 const getYearMonth = time => ([time.year, time.month]);
@@ -57,14 +56,18 @@ function getFundValue(monthDate, transactions, prices) {
 function queryFundPrices(config, db, user) {
     return db.select(
         'fund_cache_time.time',
-        db.raw('GROUP_CONCAT(funds.id) AS id'),
-        db.raw('GROUP_CONCAT(fund_cache.price) AS price')
+        db.raw('ARRAY_AGG(funds.id) AS ids'),
+        db.raw('ARRAY_AGG(fund_cache.price) AS prices')
     )
-        .from('fund_cache')
-        .innerJoin('fund_hash', 'fund_hash.fid', 'fund_cache.fid')
+        .from('funds')
+        .innerJoin(
+            'fund_hash',
+            'fund_hash.hash',
+            db.raw(`MD5(funds.item || ?)`, config.data.funds.salt)
+        )
+        .innerJoin('fund_cache', 'fund_cache.fid', 'fund_hash.fid')
         .innerJoin('fund_cache_time', 'fund_cache_time.cid', 'fund_cache.cid')
-        .innerJoin('funds', 'funds.uid', user.uid)
-        .whereRaw(`MD5(${sqlConcat('funds.item', '?')}) = fund_hash.hash`, config.data.funds.salt)
+        .where('funds.uid', '=', user.uid)
         .andWhere('fund_cache_time.done', '=', true)
         .groupBy('fund_cache_time.cid')
         .orderBy('fund_cache_time.time', 'desc');
@@ -72,13 +75,11 @@ function queryFundPrices(config, db, user) {
 
 function processFundPrices(rows) {
     return rows
-        .map(({ id, time, price }) => {
-            // normalise dates to the end of the month and split values
-            const ids = id.split(',').map(item => Number(item));
-            const prices = price.split(',').map(item => Number(item));
-
-            return { ids, prices, date: DateTime.fromJSDate(time).endOf('month') };
-        })
+        .map(({ ids, time, prices }) => ({
+            ids,
+            prices,
+            date: DateTime.fromJSDate(time).endOf('month')
+        }))
         .reduce((lastReduction, { date, ids, prices }) => {
             // filter out duplicate year/months
             // note that integrity is guaranteed by ordering by time in the query
@@ -111,7 +112,7 @@ function processFundPrices(rows) {
 function queryFundTransactions(db, user) {
     return db.select('funds.id', 'date', 'units', 'cost')
         .from('funds')
-        .innerJoin('funds_transactions', 'funds_transactions.fundId', 'funds.id')
+        .innerJoin('funds_transactions', 'funds_transactions.fund_id', 'funds.id')
         .where('uid', '=', user.uid);
 }
 
@@ -167,17 +168,20 @@ function getMonthlyValuesQueryDateUnion(months) {
         }))
         .reduce(
             (last, { start, end }) => `${last} UNION SELECT ${start}, ${end}`,
-            `SELECT DATE('${firstStart}') AS startDate, DATE('${firstEnd}') AS endDate`
+            `SELECT DATE('${firstStart}') AS start_date, DATE('${firstEnd}') AS end_date`
         );
 }
 
 function getMonthlyValuesQuery(db, user, union, category) {
-    return db.select(db.raw('SUM(cost) AS monthCost'))
+    return db.select(db.raw('SUM(cost)::integer AS month_cost'))
         .from(db.raw(`(${union}) dates`))
-        .joinRaw(`LEFT JOIN ${category} ON uid = ?
-            AND date >= dates.startDate
-            AND date <= dates.endDate`, user.uid)
-        .groupBy('dates.startDate');
+        .leftJoin(`${category} as list_data`, qb1 => qb1
+            .on('list_data.uid', '=', db.raw(`'${user.uid}'`))
+            .on('date', '>=', 'dates.start_date')
+            .on('date', '<=', 'dates.end_date')
+        )
+        .groupBy('dates.start_date')
+        .orderBy('dates.start_date');
 }
 
 async function getMonthlyValues(config, db, user, yearMonths, union, category, old) {
@@ -193,7 +197,7 @@ async function getMonthlyValues(config, db, user, yearMonths, union, category, o
 
     const result = await getMonthlyValuesQuery(db, user, union, category);
 
-    return { [category]: result.map(({ monthCost }) => Number(monthCost) || 0) };
+    return { [category]: result.map(({ 'month_cost': monthCost }) => Number(monthCost) || 0) };
 }
 
 function getMonthlyBalanceRows(db, user) {

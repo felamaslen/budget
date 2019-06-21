@@ -13,7 +13,9 @@ const CATEGORY_PENSION = 'Pension';
 
 const SumByCategory = ({ categoryName, className, ...props }) => (
     <th className={classNames('sum-value', className)}>
-        {formatCurrency(sumByCategory(categoryName, props))}
+        {formatCurrency(sumByCategory(categoryName, props), {
+            precision: 0
+        })}
     </th>
 );
 

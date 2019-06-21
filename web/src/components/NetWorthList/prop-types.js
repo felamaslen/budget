@@ -9,24 +9,24 @@ export const netWorthValueSize = PropTypes.oneOfType([
 ]);
 
 export const netWorthValue = PropTypes.shape({
-    id: PropTypes.number,
-    subcategory: PropTypes.number.isRequired,
+    id: PropTypes.string,
+    subcategory: PropTypes.string.isRequired,
     value: netWorthValueSize.isRequired
 });
 
 export const creditLimit = PropTypes.shape({
-    subcategory: PropTypes.number.isRequired,
+    subcategory: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired
 });
 
 export const currency = PropTypes.shape({
-    id: PropTypes.number,
+    id: PropTypes.string,
     currency: PropTypes.string.isRequired,
     rate: PropTypes.number.isRequired
 });
 
 export const netWorthItem = PropTypes.shape({
-    id: PropTypes.number,
+    id: PropTypes.string,
     date: PropTypes.string.isRequired,
     spend: PropTypes.number,
     fti: PropTypes.func,

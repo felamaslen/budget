@@ -40,7 +40,7 @@ function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedVal
     );
 
     return (
-        <React.Fragment>
+        <>
             {gainSpan}
             <span className="toggle-view-sold">
                 <input type="checkbox"
@@ -49,7 +49,7 @@ function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedVal
                 />
                 <span>{'View sold'}</span>
             </span>
-        </React.Fragment>
+        </>
     );
 }
 
@@ -75,4 +75,3 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ListHeadFundsDesktop);
-

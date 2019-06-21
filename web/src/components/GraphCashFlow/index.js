@@ -138,4 +138,3 @@ GraphCashFlow.defaultProps = {
     afterLines: null,
     after: null
 };
-
