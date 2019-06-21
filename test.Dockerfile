@@ -9,4 +9,6 @@ COPY package-lock.json ./
 
 RUN npm ci
 
+ENV TZ=UTC
+
 COPY . .
