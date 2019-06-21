@@ -24,7 +24,7 @@ async function attemptLogin(config, db, req) {
 
     const { name, uid } = await checkLoggedIn(config, db, pin);
 
-    return { name, ...genToken({ uid, pin }) };
+    return { name, uid, ...genToken({ uid, pin }) };
 }
 
 async function getIpLog(db, ip) {

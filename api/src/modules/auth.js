@@ -73,7 +73,7 @@ function checkValidUser(pin) {
 }
 
 async function checkLoggedIn(config, db, pin) {
-    const users = await db.select('name', 'pin_hash as pinHash')
+    const users = await db.select('uid', 'name', 'pin_hash as pinHash')
         .from('users');
 
     const validUser = await users.reduce(checkValidUser(pin), Promise.resolve(null));
