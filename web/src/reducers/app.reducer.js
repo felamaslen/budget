@@ -3,6 +3,7 @@ import { resetAppState } from '../reduction';
 import { rLoginFormReset, rLoginFormInput } from './login-form.reducer';
 import { rActivateEditable } from './edit.reducer';
 import { getNumRowsCols, getNavRowCol, getCurrentRowCol } from './nav';
+import { getLoggedIn } from '~client/selectors/app';
 import { makeGetRowIds, getAllPageRows } from '~client/selectors/list';
 import { PAGES } from '~client/constants/data';
 
@@ -211,8 +212,7 @@ export function rHandleKeyPress(state, req) {
         page: state.get('currentPage')
     };
 
-    const loggedIn = state.getIn(['user', 'uid']) > 0;
-
+    const loggedIn = getLoggedIn(state);
     if (loggedIn) {
         return handleKeyPressLoggedIn(state, params);
     }

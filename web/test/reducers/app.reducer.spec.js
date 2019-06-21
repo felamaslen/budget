@@ -73,7 +73,9 @@ test('rHandleKeyPress doing nothing if the key is a modifier', t => {
     t.is(rHandleKeyPress(stateKeyPress, { key: 'Shift' }), stateKeyPress);
 });
 
-const stateLoggedIn = stateOverview.setIn(['user', 'uid'], '1')
+const stateLoggedIn = stateOverview
+    .setIn(['user', 'uid'], 'f0aab1')
+    .setIn(['user', 'apiKey'], 'some_api_key')
     .set('currentPage', 'food')
     .set('edit', map({
         active: map({
@@ -202,7 +204,7 @@ test('rHandleKeyPress (logged in, navigating from the active field) setting the 
     t.is(result.getIn(['edit', 'active', 'col']), 3);
 });
 
-test('rHandleKeyPress (logged in, on escape) deactivateing and cancel editing', t => {
+test('rHandleKeyPress (logged in, on escape) deactivates and cancels editing', t => {
     const stateEditing = stateLoggedIn.setIn(['edit', 'active', 'value'], 'wanttocancelthis');
 
     const result = rHandleKeyPress(stateEditing, { key: 'Escape' });
