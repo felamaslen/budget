@@ -28,4 +28,3 @@ export const getTargets = createSelector([
         return map({ date, from, months, last, tag, value });
     });
 });
-

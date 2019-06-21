@@ -32,7 +32,7 @@ ListRowMobile.propTypes = {
     page: PropTypes.string.isRequired,
     colKeys: PropTypes.array.isRequired,
     row: PropTypes.instanceOf(map).isRequired,
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     listColsMobile: PropTypes.array.isRequired,
     AfterRowMobile: PropTypes.func,
     onEdit: PropTypes.func.isRequired

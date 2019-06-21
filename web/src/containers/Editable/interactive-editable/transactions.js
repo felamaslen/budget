@@ -206,10 +206,9 @@ export default function InteractiveEditableTransactions({
 InteractiveEditableTransactions.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.instanceOf(TransactionsList).isRequired,
-    row: PropTypes.number.isRequired,
+    row: PropTypes.string.isRequired,
     col: PropTypes.number.isRequired,
     addTransaction: PropTypes.func.isRequired,
     editTransaction: PropTypes.func.isRequired,
     removeTransaction: PropTypes.func.isRequired
 };
-

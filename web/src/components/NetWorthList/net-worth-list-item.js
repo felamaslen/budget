@@ -42,7 +42,7 @@ NetWorthListItem.propTypes = {
     categories: PropTypes.arrayOf(category.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     active: PropTypes.bool.isRequired,
-    activeId: PropTypes.number,
+    activeId: PropTypes.string,
     setActiveId: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired
 };
