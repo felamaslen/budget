@@ -141,11 +141,57 @@
               &-value {
                 display: flex;
                 padding: 5px 0;
-                align-items: center;
+                align-items: flex-start;
                 background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.8));
+
+                .form-field-net-worth-value {
+                  display: flex;
+                  align-items: flex-start;
+
+                  .complex-toggle {
+                    display: inline-flex;
+                    align-items: center;
+                    margin-right: 6px;
+                    font-size: 12px;
+                  }
+                  
+                  &-complex {
+                    display: flex;
+
+                    .form-field {
+                      flex: 0 0 100px;
+                      input {
+                        width: 100px;
+                      }
+                    }
+                    select {
+                      flex: 0 0 60px;
+                    }
+                    .delete-button,
+                    .add-button {
+                      top: 0;
+                      margin: 0 3px;
+                      flex: 0 0 auto;
+                      width: 32px;
+                    }
+
+                    &.field-add {
+                      margin-top: 3px;
+                      padding: 3px 0;
+                      background: rgba(200, 200, 200, 0.3);
+                    }
+                  }
+
+                  ul {
+                    flex: 1;
+                    padding: 0;
+                  }
+                }
 
                 .subcategory {
                   flex: 1;
+                  margin: 0 5px;
+                  padding-top: 5px;
                 }
                 .form-field-net-worth-value {
                   flex: 3;
