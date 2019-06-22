@@ -16,7 +16,6 @@ import {
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
-import NextButton from '~client/components/NetWorthEditForm/next-button';
 
 function CreditLimitEditor({ creditLimit, setCreditLimit }) {
     return (
@@ -261,9 +260,7 @@ function StepValues({
     item,
     categories,
     subcategories,
-    onEdit,
-    onNextStep,
-    onLastStep
+    onEdit
 }) {
     const isLiability = typeFilter === 'liability';
     const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [categories, typeFilter]);
@@ -316,7 +313,6 @@ function StepValues({
                     onAdd={onAddValue}
                 /> || null}
             </div>
-            <NextButton onNextStep={onNextStep} onLastStep={onLastStep} />
         </FormContainer>
     );
 }
@@ -328,9 +324,7 @@ StepValues.propTypes = {
     item: netWorthItem.isRequired,
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
-    onEdit: PropTypes.func.isRequired,
-    onNextStep: PropTypes.func.isRequired,
-    onLastStep: PropTypes.bool.isRequired
+    onEdit: PropTypes.func.isRequired
 };
 
 export const StepAssets = props => (

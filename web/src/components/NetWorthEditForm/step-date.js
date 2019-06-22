@@ -4,9 +4,8 @@ import { DateTime } from 'luxon';
 
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
 import FormFieldDate from '~client/components/FormField/date';
-import NextButton from '~client/components/NetWorthEditForm/next-button';
 
-export default function StepDate({ containerProps, item, onEdit, onNextStep, onLastStep }) {
+export default function StepDate({ containerProps, item, onEdit }) {
     const onChange = useCallback(date => {
         onEdit({
             ...item,
@@ -18,7 +17,6 @@ export default function StepDate({ containerProps, item, onEdit, onNextStep, onL
         <FormContainer {...containerProps}>
             <h5>{'On what date were the data collected?'}</h5>
             <FormFieldDate value={DateTime.fromISO(item.date)} onChange={onChange} />
-            <NextButton onNextStep={onNextStep} onLastStep={onLastStep} />
         </FormContainer>
     );
 }
@@ -28,7 +26,5 @@ StepDate.propTypes = {
     item: PropTypes.shape({
         date: PropTypes.string.isRequired
     }),
-    onEdit: PropTypes.func.isRequired,
-    onNextStep: PropTypes.func.isRequired,
-    onLastStep: PropTypes.bool.isRequired
+    onEdit: PropTypes.func.isRequired
 };

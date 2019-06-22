@@ -9,7 +9,6 @@ import FormFieldText from '~client/components/FormField';
 import FormFieldNumber from '~client/components/FormField/number';
 import { netWorthItem, currency as currencyShape } from '~client/components/NetWorthList/prop-types';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
-import NextButton from '~client/components/NetWorthEditForm/next-button';
 
 const BASE = 'GBP';
 
@@ -229,9 +228,7 @@ AddCurrency.propTypes = {
 export default function StepCurrencies({
     containerProps,
     item,
-    onEdit,
-    onNextStep,
-    onLastStep
+    onEdit
 }) {
     const minId = useMemo(() => Math.min(...item.currencies.map(({ id }) => id)), [item.currencies]);
     const [numNew, setNumNew] = useState(-Math.min(0, minId));
@@ -284,7 +281,6 @@ export default function StepCurrencies({
                     loadingRates={loadingRates}
                 />
             </div>
-            <NextButton onNextStep={onNextStep} onLastStep={onLastStep} />
         </FormContainer>
     );
 }
@@ -292,7 +288,5 @@ export default function StepCurrencies({
 StepCurrencies.propTypes = {
     containerProps: PropTypes.object.isRequired,
     item: netWorthItem.isRequired,
-    onEdit: PropTypes.func.isRequired,
-    onNextStep: PropTypes.func.isRequired,
-    onLastStep: PropTypes.bool.isRequired
+    onEdit: PropTypes.func.isRequired
 };
