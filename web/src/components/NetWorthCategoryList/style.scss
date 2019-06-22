@@ -88,6 +88,7 @@
     flex-flow: column;
     flex: 1;
     user-select: none;
+    min-height: 0;
 
     .title {
         flex: 0 0 auto;
@@ -97,8 +98,10 @@
         display: flex;
         flex-flow: column;
         flex: 1;
+        min-height: 0;
 
         &-list {
+            flex: 1;
             overflow-y: auto;
         }
 
