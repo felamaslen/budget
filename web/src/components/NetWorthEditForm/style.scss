@@ -1,0 +1,58 @@
+.net-worth-item.active {
+  display: flex;
+  flex-flow: column;
+  flex: 1;
+
+  .crud-list-list {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+
+    &-item.active {
+      display: flex;
+      margin: 0;
+      flex-flow: column;
+      flex: 1;
+
+      .net-worth-list-item {
+        display: flex;
+        flex-flow: column;
+        flex: 1;
+        position: relative;
+        padding-top: 22px;
+      }
+
+      .button-cancel {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      .net-worth-edit-form-section {
+        display: flex;
+        flex-flow: column;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+
+        h5 {
+          margin: 1em 0;
+          text-align: center;
+          font-size: 16px;
+        }
+      }
+
+      .net-worth-edit-form-navigation {
+        display: flex;
+        flex: 0 0 24px;
+        align-items: center;
+        justify-content: space-between;
+        background: #efefef;
+
+        button {
+          height: 23px;
+        }
+      }
+    }
+  }
+}
