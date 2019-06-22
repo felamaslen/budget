@@ -95,7 +95,7 @@ function EditByType({
             <button
                 onClick={onRemoveCallback}
                 className="button-delete"
-            >{'Remove this value'}</button>
+            >&minus;</button>
         </div>
     );
 }
@@ -284,11 +284,11 @@ function StepValues({
     const onRemoveValue = useRemoveValue(item, onEdit);
 
     return (
-        <FormContainer {...containerProps}>
-            <h4 className="step-values-title">
+        <FormContainer {...containerProps} className="step-values">
+            <h5 className="net-worth-edit-form-section-title">
                 <span className="type">{name}</span>
                 <span className="date">{' - '}{item.date}</span>
-            </h4>
+            </h5>
             <div className="edit-by-category">
                 {valuesByType.map(value => (
                     <EditByType key={value.id}

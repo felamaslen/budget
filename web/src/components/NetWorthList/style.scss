@@ -2,7 +2,6 @@
     display: flex;
     flex-flow: column;
     flex: 1;
-    overflow: auto;
 
     .title {
         display: flex;
@@ -21,6 +20,10 @@
             position: absolute;
             top: 20px;
             right: 5px;
+        }
+
+        &-list {
+            overflow-y: auto;
         }
 
         &:not(.active) {
