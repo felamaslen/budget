@@ -1,5 +1,9 @@
 Release:
 
+- 4.8.0:
+    - Web client:
+        - Net worth pagination
+
 - 4.7.3:
     - Web client:
         - Net worth scrolling fixes
