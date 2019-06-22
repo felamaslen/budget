@@ -163,7 +163,7 @@ function AddByType({
             />
             {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <button onClick={onAddCallback} className="button-add">{'Add'}</button>
+            <button onClick={onAddCallback} className="button-add">{'+'}</button>
         </div>
     );
 }
