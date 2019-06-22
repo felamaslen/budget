@@ -1,5 +1,9 @@
 Release:
 
+- 4.7.1
+    - Web client:
+        - Made net worth editor forms easier to use and prettier
+
 - 4.7.0
     - API:
         - Using PostgreSQL instead of MySQL database
