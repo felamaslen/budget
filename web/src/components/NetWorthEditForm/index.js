@@ -40,6 +40,13 @@ function NetWorthItemForm({
     const [tempItem, setTempItem] = useState(item);
     const [step, setStep] = useState(steps[0]);
 
+    const onPrevStep = useCallback(() => {
+        const stepIndex = steps.indexOf(step);
+        if (stepIndex > 0) {
+            setStep(steps[stepIndex - 1]);
+        }
+    }, [step]);
+
     const onNextStep = useCallback(() => {
         const stepIndex = steps.indexOf(step);
         if (stepIndex < steps.length - 1) {
@@ -49,16 +56,23 @@ function NetWorthItemForm({
         }
     }, [onComplete, step, tempItem, onEdit]);
 
+    const onFirstStep = steps.indexOf(step) === 0;
     const onLastStep = steps.indexOf(step) === steps.length - 1;
 
-    const containerProps = { onComplete, item };
+    const containerProps = {
+        onComplete,
+        item,
+        onPrevStep,
+        onNextStep,
+        onFirstStep,
+        onLastStep
+    };
+
     const stepProps = {
         item: tempItem,
         categories,
         subcategories,
-        onEdit: setTempItem,
-        onNextStep,
-        onLastStep
+        onEdit: setTempItem
     };
 
     if (step === STEP_DATE) {

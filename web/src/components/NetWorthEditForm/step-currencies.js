@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import axios from 'axios';
 import debounce from 'debounce';
+import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
 import FormFieldText from '~client/components/FormField';
 import FormFieldNumber from '~client/components/FormField/number';
 import { netWorthItem, currency as currencyShape } from '~client/components/NetWorthList/prop-types';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
-import NextButton from '~client/components/NetWorthEditForm/next-button';
 
 const BASE = 'GBP';
 
@@ -169,8 +169,8 @@ function EditCurrency({ entry, onChange, onRemove, rates, getRates, loadingRates
                 <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
                 {error && <span className="error">{error}</span>}
             </div>
-            <button className="button-delete" onClick={onRemoveCallback}>&minus;</button>
             {refreshButton}
+            <button className="button-delete" onClick={onRemoveCallback}>&minus;</button>
         </div>
     );
 }
@@ -205,15 +205,17 @@ function AddCurrency({ currencies, onAdd, rates, getRates, loadingRates }) {
     }, [currencies, onAdd, tempCurrency, tempRate]);
 
     return (
-        <div className="edit-currency">
+        <div className="edit-currency edit-currency-add">
             <h5 className="currency-title">{'Add a currency'}</h5>
-            <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
-            <div className="input-group">
-                <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
-                {error && <span className="error">{error}</span>}
+            <div className="form-section">
+                <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
+                <div className="input-group">
+                    <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
+                    {error && <span className="error">{error}</span>}
+                </div>
+                {refreshButton}
+                <button className="button-add" onClick={onAddCallback}>+</button>
             </div>
-            <button className="button-add" onClick={onAddCallback}>+</button>
-            {refreshButton}
         </div>
     );
 }
@@ -229,21 +231,15 @@ AddCurrency.propTypes = {
 export default function StepCurrencies({
     containerProps,
     item,
-    onEdit,
-    onNextStep,
-    onLastStep
+    onEdit
 }) {
-    const minId = useMemo(() => Math.min(...item.currencies.map(({ id }) => id)), [item.currencies]);
-    const [numNew, setNumNew] = useState(-Math.min(0, minId));
-
     const onAddValue = useCallback(currency => {
         const newCurrencies = item.currencies.concat([{
-            id: -(numNew + 1),
+            id: shortid.generate(),
             ...currency
         }]);
-        setNumNew(numNew + 1);
         onEdit({ ...item, currencies: newCurrencies });
-    }, [onEdit, numNew, item]);
+    }, [onEdit, item]);
 
     const onChangeValue = useCallback(currency => {
         const index = item.currencies.findIndex(({ id }) => id === currency.id);
@@ -260,8 +256,10 @@ export default function StepCurrencies({
     const [rates, getRates, loadingRates, errorRates] = useCurrencyApi(symbols);
 
     return (
-        <FormContainer {...containerProps}>
-            <h4>{'Currencies - '}{item.date}</h4>
+        <FormContainer {...containerProps} className="step-currencies">
+            <h5 className="net-worth-edit-form-section-title">
+                {'Currencies - '}{item.date}
+            </h5>
             {errorRates && <div className="error">
                 {'Error loading rates: '}{errorRates.message}
             </div>}
@@ -284,7 +282,6 @@ export default function StepCurrencies({
                     loadingRates={loadingRates}
                 />
             </div>
-            <NextButton onNextStep={onNextStep} onLastStep={onLastStep} />
         </FormContainer>
     );
 }
@@ -292,7 +289,5 @@ export default function StepCurrencies({
 StepCurrencies.propTypes = {
     containerProps: PropTypes.object.isRequired,
     item: netWorthItem.isRequired,
-    onEdit: PropTypes.func.isRequired,
-    onNextStep: PropTypes.func.isRequired,
-    onLastStep: PropTypes.bool.isRequired
+    onEdit: PropTypes.func.isRequired
 };

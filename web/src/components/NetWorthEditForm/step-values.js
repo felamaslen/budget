@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { useInputSelect } from '~client/hooks/form';
@@ -16,7 +18,6 @@ import {
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
-import NextButton from '~client/components/NetWorthEditForm/next-button';
 
 function CreditLimitEditor({ creditLimit, setCreditLimit }) {
     return (
@@ -46,7 +47,6 @@ SkipToggle.propTypes = {
 
 function EditByType({
     isLiability,
-    categories,
     subcategories,
     creditLimit: creditLimitList,
     currencies,
@@ -61,11 +61,8 @@ function EditByType({
 }) {
     const {
         subcategory: subcategoryName,
-        hasCreditLimit,
-        categoryId
+        hasCreditLimit
     } = subcategories.find(({ id: subcategoryId }) => subcategoryId === subcategory);
-
-    const { category } = categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId);
 
     const { value: initialCreditLimit } = creditLimitList.find(({ subcategory: subcategoryId }) => subcategoryId === subcategory) || { value: null };
 
@@ -83,7 +80,6 @@ function EditByType({
 
     return (
         <div className="edit-by-category-value">
-            <h5 className="category">{category}</h5>
             <h6 className="subcategory">{subcategoryName}</h6>
             <FormFieldNetWorthValue
                 value={value}
@@ -95,7 +91,7 @@ function EditByType({
             <button
                 onClick={onRemoveCallback}
                 className="button-delete"
-            >{'Remove this value'}</button>
+            >&minus;</button>
         </div>
     );
 }
@@ -127,9 +123,9 @@ function AddByType({
 
     const subcategoryOptions = useMemo(
         () => subcategories
-            .filter(({ categoryId }) => categoryId === Number(category))
+            .filter(({ categoryId }) => categoryId === category)
             .map(({ id, subcategory }) => ({
-                internal: String(id),
+                internal: id,
                 external: subcategory
             })),
         [category, subcategories]
@@ -147,7 +143,7 @@ function AddByType({
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
 
     const onAddCallback = useCallback(() => {
-        onAdd(value, creditLimit, Number(subcategory), skip);
+        onAdd(value, creditLimit, subcategory, skip);
     }, [onAdd, subcategory, value, creditLimit, skip]);
 
     return (
@@ -167,7 +163,7 @@ function AddByType({
             />
             {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <button onClick={onAddCallback} className="button-add">{'Add'}</button>
+            <button onClick={onAddCallback} className="button-add">{'+'}</button>
         </div>
     );
 }
@@ -190,21 +186,17 @@ function appendCreditLimit(item, subcategory, value) {
     return replaceAtIndex(item.creditLimit, index, creditLimit);
 }
 
-function useAddValue(item, minId, onEdit) {
-    const [numNew, setNumNew] = useState(-Math.min(0, minId));
-
+function useAddValue(item, onEdit) {
     return useCallback((newValue, creditLimit, subcategory, skip = null) => {
         const itemWithValue = {
             ...item,
             values: item.values.concat([{
-                id: -(numNew + 1),
+                id: shortid.generate(),
                 subcategory,
                 skip,
                 value: newValue
             }])
         };
-
-        setNumNew(numNew + 1);
 
         if (creditLimit === null) {
             onEdit(itemWithValue);
@@ -214,7 +206,7 @@ function useAddValue(item, minId, onEdit) {
                 creditLimit: appendCreditLimit(item, subcategory, creditLimit)
             });
         }
-    }, [item, onEdit, numNew]);
+    }, [item, onEdit]);
 }
 
 function useChangeValue(item, onEdit) {
@@ -254,6 +246,34 @@ function useRemoveValue(item, onEdit) {
     }, [item, onEdit]);
 }
 
+function CategoryGroup({ category: { category, color }, children }) {
+    const [hidden, setHidden] = useState(false);
+    const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
+
+    const style = {
+        backgroundColor: color
+    };
+
+    return (
+        <div style={style} className={classNames('edit-by-category-group', { hidden })}>
+            <h6 className="net-worth-edit-form-section-subtitle"
+                onClick={onToggleHidden}
+            >{category}</h6>
+            {!hidden && children}
+        </div>
+    );
+}
+
+CategoryGroup.propTypes = {
+    category: categoryShape.isRequired,
+    children: PropTypes.arrayOf(PropTypes.node).isRequired
+};
+
+const toIdMap = items => items.reduce((last, item) => ({
+    ...last,
+    [item.id]: item
+}), {});
+
 function StepValues({
     typeFilter,
     name,
@@ -261,52 +281,81 @@ function StepValues({
     item,
     categories,
     subcategories,
-    onEdit,
-    onNextStep,
-    onLastStep
+    onEdit
 }) {
     const isLiability = typeFilter === 'liability';
     const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [categories, typeFilter]);
 
-    const valuesByType = useMemo(() => item.values.filter(({ subcategory }) => {
-        const { categoryId } = subcategories.find(({ id }) => id === subcategory);
+    const categoriesById = useMemo(() => toIdMap(categoriesByType), [categoriesByType]);
+    const subcategoriesById = useMemo(() => toIdMap(subcategories), [subcategories]);
 
-        return categoriesByType.some(({ id }) => id === categoryId);
-    }), [categoriesByType, subcategories, item.values]);
+    const valuesByType = useMemo(
+        () => item.values
+            .map(({ subcategory, ...rest }) => {
+                const { categoryId } = subcategoriesById[subcategory];
+                const category = categoriesById[categoryId];
 
-    const minId = useMemo(() => Math.min(...valuesByType.map(({ id }) => id)), [valuesByType]);
+                return { subcategory, category, ...rest };
+            })
+            .filter(({ category }) => category)
+            .reduce((last, value) => ({
+                ...last,
+                [value.category.id]: (last[value.category.id] || []).concat([value])
+            }), {}),
+        [categoriesById, subcategoriesById, item.values]
+    );
+
+    const valueKeys = useMemo(
+        () => Object.keys(valuesByType).sort((idA, idB) => {
+            if (categoriesById[idA].category < categoriesById[idB].category) {
+                return -1;
+            }
+            if (categoriesById[idA].category < categoriesById[idB].category) {
+                return 1;
+            }
+
+            return 0;
+        }),
+        [valuesByType, categoriesById]
+    );
 
     const availableSubcategories = useMemo(() => subcategories.filter(({ id: subcategoryId, categoryId }) =>
         categoriesByType.some(({ id }) => id === categoryId) &&
-        !valuesByType.some(({ subcategory }) => subcategory === subcategoryId)
+        !Object.keys(valuesByType).some(key => valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId))
     ), [subcategories, categoriesByType, valuesByType]);
 
     const availableCategories = useMemo(() => categoriesByType.filter(({ id }) =>
         availableSubcategories.some(({ categoryId }) => categoryId === id)
     ), [categoriesByType, availableSubcategories]);
 
-    const onAddValue = useAddValue(item, minId, onEdit);
+    const onAddValue = useAddValue(item, onEdit);
     const onChangeValue = useChangeValue(item, onEdit);
     const onRemoveValue = useRemoveValue(item, onEdit);
 
     return (
-        <FormContainer {...containerProps}>
-            <h4 className="step-values-title">
+        <FormContainer {...containerProps} className="step-values">
+            <h5 className="net-worth-edit-form-section-title">
                 <span className="type">{name}</span>
                 <span className="date">{' - '}{item.date}</span>
-            </h4>
+            </h5>
             <div className="edit-by-category">
-                {valuesByType.map(value => (
-                    <EditByType key={value.id}
-                        isLiability={isLiability}
-                        categories={categoriesByType}
-                        subcategories={subcategories}
-                        creditLimit={item.creditLimit}
-                        currencies={item.currencies}
-                        value={value}
-                        onChange={onChangeValue}
-                        onRemove={onRemoveValue}
-                    />
+                {valueKeys.map(categoryId => (
+                    <CategoryGroup key={categoryId}
+                        category={categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId)}
+                    >
+                        {valuesByType[categoryId].map(value => (
+                            <EditByType key={value.id}
+                                isLiability={isLiability}
+                                categories={categoriesByType}
+                                subcategories={subcategories}
+                                creditLimit={item.creditLimit}
+                                currencies={item.currencies}
+                                value={value}
+                                onChange={onChangeValue}
+                                onRemove={onRemoveValue}
+                            />
+                        ))}
+                    </CategoryGroup>
                 ))}
                 {availableCategories.length && <AddByType key="add"
                     isLiability={isLiability}
@@ -316,7 +365,6 @@ function StepValues({
                     onAdd={onAddValue}
                 /> || null}
             </div>
-            <NextButton onNextStep={onNextStep} onLastStep={onLastStep} />
         </FormContainer>
     );
 }
@@ -328,9 +376,7 @@ StepValues.propTypes = {
     item: netWorthItem.isRequired,
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
-    onEdit: PropTypes.func.isRequired,
-    onNextStep: PropTypes.func.isRequired,
-    onLastStep: PropTypes.bool.isRequired
+    onEdit: PropTypes.func.isRequired
 };
 
 export const StepAssets = props => (

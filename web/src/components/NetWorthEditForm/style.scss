@@ -1,0 +1,280 @@
+.net-worth-item.active {
+  display: flex;
+  flex-flow: column;
+  flex: 1;
+  min-height: 0;
+
+  .crud-list-list {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+    overflow-y: initial;
+
+    &-item.active {
+      display: flex;
+      margin: 0;
+      flex-flow: column;
+      flex: 1;
+      min-height: 0;
+
+      .net-worth-list-item {
+        display: flex;
+        flex-flow: column;
+        flex: 1;
+        min-height: 0;
+
+        &.step-date {
+          .net-worth-edit-form-section {
+            justify-content: center;
+          }
+        }
+
+        &.step-currencies {
+          display: flex;
+          flex-flow: column;
+
+          .edit-currency {
+            display: flex;
+            align-items: center;
+
+            $title-width: 100px;
+
+            .currency-title {
+              flex: 0 0 $title-width;
+              margin: 0 5px;
+            }
+
+            .button-refresh,
+            .button-delete,
+            .button-add {
+              margin: 2px 4px;
+              width: 32px;
+              height: 22px;
+              line-height: 16px;
+            }
+
+            &-add {
+              flex-flow: column;
+              align-items: flex-start;
+
+              .currency-title {
+                flex: 0 0 auto;
+              }
+
+              .form-section {
+                display: flex;
+
+                .form-field-text {
+                  margin: 0 5px;
+                  flex: 0 0 $title-width;
+
+                  input {
+                    margin: 0;
+                    padding-left: 0;
+                    padding-right: 0;
+                    width: $title-width - 4px;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        &.step-values {
+          .net-worth-edit-form-section {
+            min-height: 0;
+            overflow-y: initial;
+
+            .form-field-net-worth-value {
+              display: flex;
+              align-items: flex-start;
+
+              .complex-toggle {
+                display: inline-flex;
+                align-items: center;
+                margin-right: 6px;
+                font-size: 12px;
+              }
+              
+              &-complex {
+                display: flex;
+
+                .form-field {
+                  flex: 0 0 100px;
+                  input {
+                    width: 100px;
+                  }
+                }
+                select {
+                  flex: 0 0 60px;
+                }
+                .delete-button,
+                .add-button {
+                  top: 0;
+                  margin: 0 3px;
+                  flex: 0 0 auto;
+                  width: 32px;
+                }
+
+                &.field-add {
+                  margin-top: 3px;
+                  padding: 3px 0;
+                  background: rgba(200, 200, 200, 0.3);
+                }
+              }
+
+              ul {
+                flex: 1;
+                padding: 0;
+                list-style: none;
+              }
+            }
+
+            .button-add,
+            .button-delete {
+              margin: 0 5px;
+              flex: 0 0 auto;
+            }
+
+            .edit-by-category {
+              width: 100%;
+              overflow-y: auto;
+
+              &-group {
+                .net-worth-edit-form-section-subtitle {
+                  display: flex;
+                  align-items: flex-end;
+                  position: relative;
+                  height: 26px;
+                  padding: 0 5px;
+                  cursor: pointer;
+
+                  &:hover {
+                    &::after {
+                      content: '';
+                      display: block;
+                      position: absolute;
+                      left: 0;
+                      top: 0;
+                      width: 100%;
+                      height: 100%;
+                      background: rgba(0, 0, 0, 0.25);
+                    }
+                  }
+
+                  &::before {
+                    content: '';
+                    display: inline-block;
+                    position: absolute;
+                    width: 0;
+                    height: 0;
+                    right: 15px;
+                    top: 5px;
+                    padding: 2px;
+                    border-width: 0 3px 3px 0;
+                    border: solid black;
+                    border-left-color: transparent;
+                    border-top-color: transparent;
+                    transform: rotate(45deg);
+                  }
+                }
+
+                &.hidden {
+                  .net-worth-edit-form-section-subtitle {
+                    &::before {
+                      transform: rotate(225deg);
+                      top: 10px;
+                    }
+                  }
+                }
+              }
+
+              &-value {
+                display: flex;
+                padding: 5px 0;
+                align-items: flex-start;
+                background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.8));
+
+                .subcategory {
+                  flex: 1;
+                  margin: 0 5px;
+                  padding-top: 5px;
+                }
+                .form-field-net-worth-value {
+                  flex: 3;
+                }
+              }
+            }
+          
+            .add-by-category-value {
+              display: flex;
+              align-items: flex-start;
+              padding: 2px 0;
+
+              .category,
+              .subcategory {
+                display: flex;
+                flex-flow: column;
+                flex: 1;
+                margin: 0 10px;
+
+                .label {
+                  margin-bottom: 3px;
+                  font-size: 12px;
+                }
+              }
+
+              .form-field-net-worth-value {
+                margin: 0 10px;
+                flex: 2;
+              }
+            }
+          }
+        }
+      }
+
+      .button-cancel {
+        position: absolute;
+        left: 0;
+        top:  20px;
+      }
+
+      .net-worth-edit-form-section {
+        display: flex;
+        flex-flow: column;
+        flex: 1;
+        align-items: center;
+        overflow-y: auto;
+
+        &-title {
+          margin: 1em 0;
+          text-align: center;
+          font-size: 16px;
+        }
+
+        &-subtitle {
+          margin: 0;
+          font-size: 14px;
+          line-height: 24px;
+        }
+
+        .error {
+          color: #900;
+          font-size: 12px;
+        }
+      }
+
+      .net-worth-edit-form-navigation {
+        display: flex;
+        flex: 0 0 24px;
+        align-items: center;
+        justify-content: space-between;
+        background: #efefef;
+
+        button {
+          height: 23px;
+        }
+      }
+    }
+  }
+}
