@@ -1,5 +1,9 @@
 Release:
 
+- 4.7.2
+    - Web client:
+        - Fixed bug where net worth form would hang while changing credit limit for additional liabilities
+
 - 4.7.1
     - Web client:
         - Made net worth editor forms easier to use and prettier
