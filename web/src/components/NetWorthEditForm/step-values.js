@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
@@ -46,7 +47,6 @@ SkipToggle.propTypes = {
 
 function EditByType({
     isLiability,
-    categories,
     subcategories,
     creditLimit: creditLimitList,
     currencies,
@@ -61,11 +61,8 @@ function EditByType({
 }) {
     const {
         subcategory: subcategoryName,
-        hasCreditLimit,
-        categoryId
+        hasCreditLimit
     } = subcategories.find(({ id: subcategoryId }) => subcategoryId === subcategory);
-
-    const { category } = categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId);
 
     const { value: initialCreditLimit } = creditLimitList.find(({ subcategory: subcategoryId }) => subcategoryId === subcategory) || { value: null };
 
@@ -83,7 +80,6 @@ function EditByType({
 
     return (
         <div className="edit-by-category-value">
-            <h5 className="category">{category}</h5>
             <h6 className="subcategory">{subcategoryName}</h6>
             <FormFieldNetWorthValue
                 value={value}
@@ -190,7 +186,7 @@ function appendCreditLimit(item, subcategory, value) {
     return replaceAtIndex(item.creditLimit, index, creditLimit);
 }
 
-function useAddValue(item, minId, onEdit) {
+function useAddValue(item, onEdit) {
     return useCallback((newValue, creditLimit, subcategory, skip = null) => {
         const itemWithValue = {
             ...item,
@@ -250,6 +246,34 @@ function useRemoveValue(item, onEdit) {
     }, [item, onEdit]);
 }
 
+function CategoryGroup({ category: { category, color }, children }) {
+    const [hidden, setHidden] = useState(false);
+    const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
+
+    const style = {
+        backgroundColor: color
+    };
+
+    return (
+        <div style={style} className={classNames('edit-by-category-group', { hidden })}>
+            <h6 className="net-worth-edit-form-section-subtitle"
+                onClick={onToggleHidden}
+            >{category}</h6>
+            {!hidden && children}
+        </div>
+    );
+}
+
+CategoryGroup.propTypes = {
+    category: categoryShape.isRequired,
+    children: PropTypes.arrayOf(PropTypes.node).isRequired
+};
+
+const toIdMap = items => items.reduce((last, item) => ({
+    ...last,
+    [item.id]: item
+}), {});
+
 function StepValues({
     typeFilter,
     name,
@@ -262,24 +286,49 @@ function StepValues({
     const isLiability = typeFilter === 'liability';
     const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [categories, typeFilter]);
 
-    const valuesByType = useMemo(() => item.values.filter(({ subcategory }) => {
-        const { categoryId } = subcategories.find(({ id }) => id === subcategory);
+    const categoriesById = useMemo(() => toIdMap(categoriesByType), [categoriesByType]);
+    const subcategoriesById = useMemo(() => toIdMap(subcategories), [subcategories]);
 
-        return categoriesByType.some(({ id }) => id === categoryId);
-    }), [categoriesByType, subcategories, item.values]);
+    const valuesByType = useMemo(
+        () => item.values
+            .map(({ subcategory, ...rest }) => {
+                const { categoryId } = subcategoriesById[subcategory];
+                const category = categoriesById[categoryId];
 
-    const minId = useMemo(() => Math.min(...valuesByType.map(({ id }) => id)), [valuesByType]);
+                return { subcategory, category, ...rest };
+            })
+            .filter(({ category }) => category)
+            .reduce((last, value) => ({
+                ...last,
+                [value.category.id]: (last[value.category.id] || []).concat([value])
+            }), {}),
+        [categoriesById, subcategoriesById, item.values]
+    );
+
+    const valueKeys = useMemo(
+        () => Object.keys(valuesByType).sort((idA, idB) => {
+            if (categoriesById[idA].category < categoriesById[idB].category) {
+                return -1;
+            }
+            if (categoriesById[idA].category < categoriesById[idB].category) {
+                return 1;
+            }
+
+            return 0;
+        }),
+        [valuesByType, categoriesById]
+    );
 
     const availableSubcategories = useMemo(() => subcategories.filter(({ id: subcategoryId, categoryId }) =>
         categoriesByType.some(({ id }) => id === categoryId) &&
-        !valuesByType.some(({ subcategory }) => subcategory === subcategoryId)
+        !Object.keys(valuesByType).some(key => valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId))
     ), [subcategories, categoriesByType, valuesByType]);
 
     const availableCategories = useMemo(() => categoriesByType.filter(({ id }) =>
         availableSubcategories.some(({ categoryId }) => categoryId === id)
     ), [categoriesByType, availableSubcategories]);
 
-    const onAddValue = useAddValue(item, minId, onEdit);
+    const onAddValue = useAddValue(item, onEdit);
     const onChangeValue = useChangeValue(item, onEdit);
     const onRemoveValue = useRemoveValue(item, onEdit);
 
@@ -290,17 +339,23 @@ function StepValues({
                 <span className="date">{' - '}{item.date}</span>
             </h5>
             <div className="edit-by-category">
-                {valuesByType.map(value => (
-                    <EditByType key={value.id}
-                        isLiability={isLiability}
-                        categories={categoriesByType}
-                        subcategories={subcategories}
-                        creditLimit={item.creditLimit}
-                        currencies={item.currencies}
-                        value={value}
-                        onChange={onChangeValue}
-                        onRemove={onRemoveValue}
-                    />
+                {valueKeys.map(categoryId => (
+                    <CategoryGroup key={categoryId}
+                        category={categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId)}
+                    >
+                        {valuesByType[categoryId].map(value => (
+                            <EditByType key={value.id}
+                                isLiability={isLiability}
+                                categories={categoriesByType}
+                                subcategories={subcategories}
+                                creditLimit={item.creditLimit}
+                                currencies={item.currencies}
+                                value={value}
+                                onChange={onChangeValue}
+                                onRemove={onRemoveValue}
+                            />
+                        ))}
+                    </CategoryGroup>
                 ))}
                 {availableCategories.length && <AddByType key="add"
                     isLiability={isLiability}
