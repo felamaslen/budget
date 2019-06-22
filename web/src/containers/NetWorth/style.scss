@@ -22,10 +22,30 @@
         height: 100%;
         position: relative;
         overflow: hidden;
-    }
 
-    .title {
-        margin: 0;
+        > .title {
+            display: flex;
+            align-items: center;
+            position: relative;
+            justify-content: center;
+            flex: 0 0 22px;
+            background: #efefef;
+
+            h1 {
+                margin: 0;
+                font-size: 15px;
+            }
+
+            .button-back {
+                position: absolute;
+                right: 5px;
+                top: 0;
+                font-size: 25px;
+                line-height: 20px;
+                text-decoration: none;
+                color: black;
+            }
+        }
     }
 
     &-tab-bar {

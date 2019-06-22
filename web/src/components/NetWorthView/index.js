@@ -16,7 +16,7 @@ const withIsoDates = data => data.map(({ date, ...rest }) => ({
     ...rest
 }));
 
-const sortByIsoDate = rows => rows.sort(({ date: dateA }, { date: dateB }) => dateA - dateB);
+const sortByIsoDate = rows => rows.sort(({ dateIso: dateA }, { dateIso: dateB }) => dateA - dateB);
 
 const withoutSkipValues = rows => rows.map(({ values, ...rest }) => ({
     values: values.filter(({ skip }) => !skip),

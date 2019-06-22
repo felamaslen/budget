@@ -107,6 +107,9 @@
                         border: none;
                     }
                 }
+                .text {
+                    color: black;
+                }
             }
             @mixin row-height($height) {
                 height: $height;

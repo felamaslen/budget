@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import { replaceAtIndex } from '~client/modules/data';
 import {
@@ -10,7 +11,7 @@ import { useInputTickbox, useInputSelect } from '~client/hooks/form';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldNumber from '~client/components/FormField/number';
 
-function FormFieldWithCurrency({ index, value, currency, currencyOptions, onChange, onRemove, onAdd }) {
+function FormFieldWithCurrency({ className, index, value, currency, currencyOptions, onChange, onRemove, onAdd }) {
     const options = useMemo(() => Array.from(new Set(currencyOptions.concat([currency]))), [currencyOptions, currency]);
 
     const [newValue, setNewValue] = useState(value);
@@ -31,7 +32,7 @@ function FormFieldWithCurrency({ index, value, currency, currencyOptions, onChan
     }, [onAdd, newValue, newCurrency]);
 
     return (
-        <li className="form-field-net-worth-value-complex">
+        <li className={classNames('form-field-net-worth-value-complex', className)}>
             <FormFieldNumber value={newValue} onChange={setNewValue} />
             {InputCurrency}
             {onRemove && (
@@ -45,6 +46,10 @@ function FormFieldWithCurrency({ index, value, currency, currencyOptions, onChan
 }
 
 FormFieldWithCurrency.propTypes = {
+    className: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
+    ]),
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
     currency: PropTypes.string.isRequired,
@@ -55,6 +60,7 @@ FormFieldWithCurrency.propTypes = {
 };
 
 FormFieldWithCurrency.defaultProps = {
+    className: {},
     onChange: () => null
 };
 
@@ -137,6 +143,7 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
                     value={0}
                     currency={otherCurrencyOptions[0]}
                     currencyOptions={otherCurrencyOptions}
+                    className="field-add"
                     onAdd={onAddComplexValue}
                 /> || null}
             </ul>}
