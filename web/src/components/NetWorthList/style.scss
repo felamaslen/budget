@@ -2,34 +2,53 @@
     flex: 1;
     overflow: auto;
 
+    .title {
+        display: flex;
+        margin: 0;
+        align-items: center;
+        font-size: 14px;
+        line-height: 22px;
+        background: #efefef;
+    }
+
     .crud-list {
+        &-meta {
+            display: flex;
+            justify-content: flex-end;
+            position: absolute;
+            top: 20px;
+            right: 5px;
+        }
+
         &:not(.active) {
             .crud-list-list-item {
                 $height: 32px;
+
+                display: flex;
+                align-items: center;
+                margin: 0;
+                padding: 5px 0;
                 height: $height;
                 position: relative;
+                transition: background 0.2s ease;
 
-                &:nth-child(2n+1) {
-                    .net-worth-list-item-summary {
-                        background: rgba(10, 10, 10, 0.1);
-                    }
+                &:nth-child(2n) {
+                    background: #f3f3f3;
+                }
+
+                &:hover {
+                    background: rgba(10, 60, 240, 0.3);
                 }
 
                 .net-worth-list-item-summary {
+                    flex: 1;
                     padding-left: 24px;
                     line-height: $height;
                     cursor: pointer;
-                    transition: background 0.2s ease;
-
-                    &:hover {
-                        background: rgba(10, 60, 240, 0.3);
-                    }
                 }
 
                 .button-delete {
-                    position: absolute;
-                    top: ($height - 22px) / 2;
-                    right: 24px;
+                    flex: 0 0 64px;
                 }
             }
         }
