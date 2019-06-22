@@ -14,8 +14,10 @@ export default function StepDate({ containerProps, item, onEdit }) {
     }, [item, onEdit]);
 
     return (
-        <FormContainer {...containerProps}>
-            <h5>{'On what date were the data collected?'}</h5>
+        <FormContainer {...containerProps} className="step-date">
+            <h5 className="net-worth-edit-form-section-title">
+                {'On what date were the data collected?'}
+            </h5>
             <FormFieldDate value={DateTime.fromISO(item.date)} onChange={onChange} />
         </FormContainer>
     );
