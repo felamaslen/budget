@@ -75,6 +75,8 @@ function getEntry() {
     return common;
 }
 
+const publicPath = '/';
+
 module.exports = {
     entry: getEntry(),
     devtool: __DEV__
@@ -85,7 +87,7 @@ module.exports = {
         : 'production',
     output: {
         path: path.join(__dirname, './web/build'),
-        publicPath: '/',
+        publicPath,
         filename: 'assets/bundle.js'
     },
     resolve: {
@@ -123,8 +125,7 @@ module.exports = {
                 use: {
                     loader: 'file-loader',
                     options: {
-                        name: 'assets/[hash].[ext]',
-                        publicPath: '../'
+                        name: 'assets/[hash].[ext]'
                     }
                 }
             },
@@ -133,8 +134,7 @@ module.exports = {
                 use: {
                     loader: 'file-loader',
                     options: {
-                        name: 'assets/favicon.ico',
-                        publicPath: '../'
+                        name: 'assets/favicon.ico'
                     }
                 }
             }
