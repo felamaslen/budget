@@ -136,7 +136,7 @@ function AddByType({
     const [value, setValue] = useState(0);
     const [skip, setSkip] = useState(null);
 
-    const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === Number(subcategory)) || {}, [subcategories, subcategory]);
+    const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === subcategory) || {}, [subcategories, subcategory]);
     const initialCreditLimit = hasCreditLimit
         ? 0
         : null;
