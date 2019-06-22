@@ -106,7 +106,7 @@ const splitById = rows => rows.reduce((items, { netWorthId, ...rest }) => ({
     [netWorthId]: (items[netWorthId] || []).concat([rest])
 }), {});
 
-async function fetchAll(db, uid) {
+async function fetchAll(db, uid, page, limit) {
     const netWorth = await db.select()
         .from(qb1 => qb1.select(
             'nw.id',
@@ -115,7 +115,8 @@ async function fetchAll(db, uid) {
             .from('net_worth as nw')
             .where('nw.uid', '=', uid)
             .orderBy('date', 'desc')
-            .limit(LIMIT_ALL)
+            .limit(limit)
+            .offset(limit * (page || 0))
             .as('results')
         )
         .orderBy('date', 'asc');
@@ -132,20 +133,39 @@ async function fetchAll(db, uid) {
     const creditLimitById = splitById(creditLimit);
     const currenciesById = splitById(currencies);
 
-    return netWorth.map(({ id, date }) => ({
+    const data = netWorth.map(({ id, date }) => ({
         id,
         date: formatDate(date),
         values: valuesById[id],
         creditLimit: creditLimitById[id],
         currencies: currenciesById[id]
     }));
+
+    if (page === null) {
+        return data;
+    }
+
+    const [{ count }] = await db.select(db.raw('COUNT(*) AS count'))
+        .from('net_worth as nw')
+        .where('nw.uid', '=', uid);
+
+    return { data, count };
 }
 
 const onRead = db => catchAsyncErrors(async (req, res) => {
     const uid = req.user.uid;
 
     if (!req.params.id) {
-        const items = await fetchAll(db, uid);
+        const { page = null, limit = LIMIT_ALL } = req.query;
+
+        if (page !== null && isNaN(Number(page))) {
+            throw clientError('Page must be a number');
+        }
+        if (limit !== LIMIT_ALL && isNaN(Number(limit))) {
+            throw clientError('Limit must be a number');
+        }
+
+        const items = await fetchAll(db, uid, page, limit);
 
         return res.json(items);
     }
