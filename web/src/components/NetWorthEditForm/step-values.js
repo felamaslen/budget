@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { useInputSelect } from '~client/hooks/form';
@@ -190,20 +191,16 @@ function appendCreditLimit(item, subcategory, value) {
 }
 
 function useAddValue(item, minId, onEdit) {
-    const [numNew, setNumNew] = useState(-Math.min(0, minId));
-
     return useCallback((newValue, creditLimit, subcategory, skip = null) => {
         const itemWithValue = {
             ...item,
             values: item.values.concat([{
-                id: -(numNew + 1),
+                id: shortid.generate(),
                 subcategory,
                 skip,
                 value: newValue
             }])
         };
-
-        setNumNew(numNew + 1);
 
         if (creditLimit === null) {
             onEdit(itemWithValue);
@@ -213,7 +210,7 @@ function useAddValue(item, minId, onEdit) {
                 creditLimit: appendCreditLimit(item, subcategory, creditLimit)
             });
         }
-    }, [item, onEdit, numNew]);
+    }, [item, onEdit]);
 }
 
 function useChangeValue(item, onEdit) {

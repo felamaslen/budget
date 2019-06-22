@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import axios from 'axios';
 import debounce from 'debounce';
+import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
 import FormFieldText from '~client/components/FormField';
@@ -232,17 +233,13 @@ export default function StepCurrencies({
     item,
     onEdit
 }) {
-    const minId = useMemo(() => Math.min(...item.currencies.map(({ id }) => id)), [item.currencies]);
-    const [numNew, setNumNew] = useState(-Math.min(0, minId));
-
     const onAddValue = useCallback(currency => {
         const newCurrencies = item.currencies.concat([{
-            id: -(numNew + 1),
+            id: shortid.generate(),
             ...currency
         }]);
-        setNumNew(numNew + 1);
         onEdit({ ...item, currencies: newCurrencies });
-    }, [onEdit, numNew, item]);
+    }, [onEdit, item]);
 
     const onChangeValue = useCallback(currency => {
         const index = item.currencies.findIndex(({ id }) => id === currency.id);
