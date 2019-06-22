@@ -1,6 +1,7 @@
 import { List as list } from 'immutable';
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { DateTime } from 'luxon';
 import { compose } from 'redux';
 
@@ -36,7 +37,7 @@ const withFTI = rows => rows.map((row, index) => {
     return { ...row, fti };
 });
 
-export default function NetWorthView({ rowDates, spending, data, categories, subcategories }) {
+export default function NetWorthView({ rowDates, spending, data, categories, subcategories, page, setPage, numPages }) {
     const netWorthDateToRowIndex = useCallback(date => rowDates.findIndex(value =>
         value.year === date.year && value.month === date.month
     ), [rowDates]);
@@ -99,11 +100,25 @@ export default function NetWorthView({ rowDates, spending, data, categories, sub
                     ))}
                 </tbody>
             </table>
+            <div className="pagination">
+                <span>{'Page: '}</span>
+                <ul>{new Array(numPages).fill(0)
+                    .map((item, index) => (
+                        <li key={index}
+                            onClick={() => setPage(index)}
+                            className={classNames({ active: page === index })}
+                        >{index + 1}</li>
+                    ))
+                }</ul>
+            </div>
         </div>
     );
 }
 
 NetWorthView.propTypes = {
+    page: PropTypes.number,
+    setPage: PropTypes.func.isRequired,
+    numPages: PropTypes.number,
     rowDates: PropTypes.instanceOf(list).isRequired,
     spending: PropTypes.instanceOf(list).isRequired,
     ...dataPropTypes
