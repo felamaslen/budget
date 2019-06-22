@@ -2,6 +2,7 @@
     display: flex;
     flex-flow: column;
     flex: 1;
+    min-height: 0;
 
     .title {
         display: flex;
@@ -14,6 +15,10 @@
     }
 
     .crud-list {
+        display: flex;
+        flex-flow: column;
+        min-height: 0;
+
         &-meta {
             display: flex;
             justify-content: flex-end;
@@ -23,6 +28,7 @@
         }
 
         &-list {
+            flex: 1;
             overflow-y: auto;
         }
 
