@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
+import shortid from 'shortid';
 
 import { sortByDate } from '~client/modules/data';
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
@@ -132,7 +133,7 @@ const withoutIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
 
 const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
     ...last,
-    [key]: doc[key].map((item, index) => ({ ...item, id: -(index + 1) }))
+    [key]: doc[key].map(item => ({ ...item, id: shortid.generate() }))
 }), doc);
 
 export function NetWorthEditForm({ onUpdate, ...props }) {
