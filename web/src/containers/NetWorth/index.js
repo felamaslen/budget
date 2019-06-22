@@ -53,7 +53,10 @@ function NetWorth({ rowDates, cost, apiKey }) {
     return (
         <div className={classNames('net-worth', { loading, error })}>
             <div className="net-worth-inner">
-                <h1 className="title">{'Net worth'}</h1>
+                <div className="title">
+                    <h1>{'Net worth'}</h1>
+                    <NavLink className="button-back" to="/">&times;</NavLink>
+                </div>
                 <Route
                     exact
                     path="/net-worth"
