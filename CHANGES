@@ -1,5 +1,10 @@
 Release:
 
+- 4.7.3:
+    - Web client:
+        - Net worth scrolling fixes
+        - Net worth NaN FTI display fix
+
 - 4.7.2
     - Web client:
         - Fixed bug where net worth form would hang while changing credit limit for additional liabilities
