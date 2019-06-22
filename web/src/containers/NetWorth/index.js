@@ -26,8 +26,20 @@ function NetWorth({ rowDates, cost, apiKey }) {
         apiKey
     });
 
-    const [netWorth, loadingNetWorth, errNetWorth, createNetWorth, readNetWorth, updateNetWorth, deleteNetWorth] = useCrud({
+    const [
+        netWorth,
+        loadingNetWorth,
+        errNetWorth,
+        createNetWorth,
+        readNetWorth,
+        updateNetWorth,
+        deleteNetWorth,
+        page,
+        setPage,
+        numPages
+    ] = useCrud({
         url: 'data/net-worth',
+        numPerPage: 20,
         apiKey
     });
 
@@ -62,6 +74,9 @@ function NetWorth({ rowDates, cost, apiKey }) {
                     path="/net-worth"
                     render={routeProps => <NetWorthView {...routeProps}
                         data={netWorth}
+                        page={page}
+                        setPage={setPage}
+                        numPages={numPages}
                         spending={cost.get('spending')}
                         rowDates={rowDates}
                         categories={categories}

@@ -86,7 +86,7 @@ export function useApi({
     return [initiateRequest, loading, error];
 }
 
-function useResponseOp(url, apiKey, setResponse, method) {
+function useResponseOp(url, apiKey, setResponse, method, query = null) {
     const [response, setTempResponse] = useState(null);
     const handleResponse = useCallback(res => {
         setTempResponse(res);
@@ -99,6 +99,14 @@ function useResponseOp(url, apiKey, setResponse, method) {
         onSuccess: handleResponse
     });
 
+    const triggerWithQuery = useMemo(() => {
+        if (query) {
+            return (id, params, data, done) => onTrigger(id, params || query, data, done);
+        }
+
+        return onTrigger;
+    }, [query, onTrigger]);
+
     useEffect(() => {
         if (response) {
             setResponse(response);
@@ -106,7 +114,7 @@ function useResponseOp(url, apiKey, setResponse, method) {
         }
     }, [response, setResponse]);
 
-    return [onTrigger, loading, error];
+    return [triggerWithQuery, loading, error];
 }
 
 function useDelete(url, apiKey, data, setData) {
@@ -132,9 +140,24 @@ function useDelete(url, apiKey, data, setData) {
     return [onDelete, loading, error];
 }
 
-export function useCrud({ url, apiKey }) {
+export function useCrud({
+    url,
+    numPerPage = null,
+    apiKey
+}) {
+    const [page, setPage] = useState(0);
+    const [prevPage, setPrevPage] = useState(0);
+    const [numPages, setNumPages] = useState(null);
+    const [prevPages, setPrevPages] = useState(null);
+
     const [data, setData] = useState([]);
-    const setResponse = useCallback(item => {
+    const setResponse = useCallback(response => {
+        let item = response;
+        if (numPerPage && Array.isArray(response.data)) {
+            item = response.data;
+
+            setNumPages(Math.ceil(response.count / numPerPage));
+        }
         if (Array.isArray(item)) {
             return setData(item);
         }
@@ -145,15 +168,38 @@ export function useCrud({ url, apiKey }) {
         }
 
         return setData(replaceAtIndex(data, index, item));
-    }, [data]);
+    }, [data, numPerPage]);
+
+    useEffect(() => {
+        if (numPages !== prevPages) {
+            setPage(0);
+            setPrevPages(numPages);
+        }
+    }, [numPages, prevPages]);
 
     const [onCreate, loadingCreate, errorCreate] = useResponseOp(url, apiKey, setResponse, 'post');
-    const [onRead, loadingRead, errorRead] = useResponseOp(url, apiKey, setResponse, 'get');
+
+    const readQuery = useMemo(() => {
+        if (numPerPage) {
+            return { page, limit: numPerPage };
+        }
+
+        return null;
+    }, [numPerPage, page]);
+
+    const [onRead, loadingRead, errorRead] = useResponseOp(url, apiKey, setResponse, 'get', readQuery);
     const [onUpdate, loadingUpdate, errorUpdate] = useResponseOp(url, apiKey, setResponse, 'put');
     const [onDelete, loadingDelete, errorDelete] = useDelete(url, apiKey, data, setData);
+
+    useEffect(() => {
+        if (numPerPage && page !== prevPage) {
+            onRead();
+            setPrevPage(page);
+        }
+    }, [numPerPage, page, prevPage, onRead]);
 
     const loading = loadingCreate || loadingRead || loadingUpdate || loadingDelete;
     const error = errorCreate || errorRead || errorUpdate || errorDelete;
 
-    return [data, loading, error, onCreate, onRead, onUpdate, onDelete];
+    return [data, loading, error, onCreate, onRead, onUpdate, onDelete, page, setPage, numPages];
 }
