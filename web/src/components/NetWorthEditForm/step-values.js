@@ -123,9 +123,9 @@ function AddByType({
 
     const subcategoryOptions = useMemo(
         () => subcategories
-            .filter(({ categoryId }) => categoryId === Number(category))
+            .filter(({ categoryId }) => categoryId === category)
             .map(({ id, subcategory }) => ({
-                internal: String(id),
+                internal: id,
                 external: subcategory
             })),
         [category, subcategories]
@@ -143,7 +143,7 @@ function AddByType({
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
 
     const onAddCallback = useCallback(() => {
-        onAdd(value, creditLimit, Number(subcategory), skip);
+        onAdd(value, creditLimit, subcategory, skip);
     }, [onAdd, subcategory, value, creditLimit, skip]);
 
     return (
