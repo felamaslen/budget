@@ -28,7 +28,7 @@ const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE);
 const withFTI = rows => rows.map((row, index) => {
     const { years } = row.dateIso.diff(FTI_START, 'years').toObject();
 
-    const pastYear = rows.slice(index - 11, index + 1);
+    const pastYear = rows.slice(Math.max(0, index - 11), index + 1);
     const pastYearAverageSpend = pastYear.reduce((sum, { spend }) => sum + spend, 0) * 12 / pastYear.length;
 
     const fti = netWorthValue => netWorthValue * years / pastYearAverageSpend;
