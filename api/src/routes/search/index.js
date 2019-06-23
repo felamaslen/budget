@@ -6,8 +6,10 @@ const { Router } = require('express');
 const joi = require('joi');
 const { searchSchema } = require('../../schema');
 
-function getQuery(db, request, uid) {
-    const { table, column, searchTerm, numResults } = request;
+function matchQuery(table, column, searchTerm) {
+    if (searchTerm.length < 3) {
+        return query => query.whereRaw(`"${table}"."${column}" ILIKE ?`, `${searchTerm}%`);
+    }
 
     const tsQuery = searchTerm
         .trim()
@@ -16,14 +18,20 @@ function getQuery(db, request, uid) {
         .map(word => `${word}:*`)
         .join(' | ');
 
-    const query = qb => qb.distinct(column)
+    return query => query.whereRaw(`to_tsvector("${table}"."${column}") @@ to_tsquery(?) = true`, tsQuery);
+}
+
+function getQuery(db, request, uid) {
+    const { table, column, searchTerm, numResults } = request;
+
+    const query = qb => matchQuery(table, column, searchTerm)(qb.distinct(column)
         .from(table)
-        .whereRaw(`to_tsvector("${table}"."${column}") @@ to_tsquery('${tsQuery}') = true`)
         .andWhere(`${table}.uid`, '=', uid)
         .groupBy(column)
         .orderBy(column)
         .limit(numResults)
-        .as('items');
+        .as('items')
+    );
 
     if (['food', 'general'].includes(table) && column === 'item') {
         return db.select(
