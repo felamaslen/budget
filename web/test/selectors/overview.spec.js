@@ -126,7 +126,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 1260, rgb: [209, 99, 99] },
                 { column: ['net', 'Net'], editable: false, value: 740, rgb: [206, 241, 211] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 13502, rgb: [161, 228, 169] },
-                { column: ['balance', 'Balance'], editable: true, value: 13502, rgb: [146, 223, 155] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 13502, rgb: [146, 223, 155] }
             ]
         },
         {
@@ -145,7 +145,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 2068, rgb: [191, 36, 36] },
                 { column: ['net', 'Net'], editable: false, value: -168, rgb: [191, 36, 36] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 13334, rgb: [162, 228, 170] },
-                { column: ['balance', 'Balance'], editable: true, value: 19220, rgb: [36, 191, 55] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 19220, rgb: [36, 191, 55] }
             ]
         },
         {
@@ -164,7 +164,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 659, rgb: [223, 146, 146] },
                 { column: ['net', 'Net'], editable: false, value: 841, rgb: [200, 239, 205] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 20062, rgb: [36, 191, 55] },
-                { column: ['balance', 'Balance'], editable: true, value: 11876, rgb: [159, 227, 167] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 11876, rgb: [159, 227, 167] }
             ]
         },
         {
@@ -183,7 +183,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 754, rgb: [221, 138, 138] },
                 { column: ['net', 'Net'], editable: false, value: 1746, rgb: [134, 220, 144] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 13622, rgb: [160, 227, 168] },
-                { column: ['balance', 'Balance'], editable: true, value: 14981, rgb: [117, 215, 129] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 14981, rgb: [117, 215, 129] }
             ]
         },
         {
@@ -202,7 +202,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 207, rgb: [245, 221, 221] },
                 { column: ['net', 'Net'], editable: false, value: 2093, rgb: [81, 204, 96] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 15715, rgb: [146, 223, 155] },
-                { column: ['balance', 'Balance'], editable: true, value: 14230, rgb: [132, 219, 142] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 14230, rgb: [132, 219, 142] }
             ]
         },
         {
@@ -221,7 +221,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 207, rgb: [245, 221, 221] },
                 { column: ['net', 'Net'], editable: false, value: 1593, rgb: [151, 224, 160] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 17308, rgb: [105, 211, 118] },
-                { column: ['balance', 'Balance'], editable: true, value: 12678, rgb: [152, 225, 161] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 12678, rgb: [152, 225, 161] }
             ]
         },
         {
@@ -240,7 +240,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], editable: false, value: 207, rgb: [245, 221, 221] },
                 { column: ['net', 'Net'], editable: false, value: 2393, rgb: [36, 191, 55] },
                 { column: ['predicted', 'Predicted'], editable: false, value: 19701, rgb: [45, 194, 63] },
-                { column: ['balance', 'Balance'], editable: true, value: 0, rgb: [255, 255, 255] }
+                { column: ['balance', 'Net Worth'], editable: true, value: 0, rgb: [255, 255, 255] }
             ]
         }
     ]);
