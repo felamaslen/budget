@@ -1,5 +1,10 @@
 Release:
 
+- 4.8.1 (hotfix):
+    - Web client:
+        - Fixed issue where search next category autofills weren't being returned by the API
+        - Made search results more relevant
+
 - 4.8.0:
     - Web client:
         - Net worth pagination
