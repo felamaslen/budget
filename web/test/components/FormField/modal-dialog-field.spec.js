@@ -4,7 +4,6 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS, Map as map, List as list } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -13,18 +12,18 @@ import ModalDialogField from '~client/components/FormField/modal-dialog-field';
 import { TransactionsList } from '~client/modules/data';
 
 const getModalDialogField = memoize((customProps = {}) => {
-    const state = fromJS({
-    });
+    const state = {
+    };
 
     const store = createMockStore(state);
 
     const props = {
         fieldKey: 3,
-        field: map({
+        field: {
             item: 'foo',
             value: 'bar'
-        }),
-        invalidKeys: list.of(),
+        },
+        invalidKeys: [],
         ...customProps
     };
 
@@ -70,7 +69,7 @@ test('form field container', t => {
 
 test('invalid class', t => {
     const { container } = getModalDialogField({
-        invalidKeys: list.of(3)
+        invalidKeys: [3]
     });
 
     const [li] = container.childNodes;
@@ -80,10 +79,10 @@ test('invalid class', t => {
 
 test('transactions fields', t => {
     const { container } = getModalDialogField({
-        field: map({
+        field: {
             item: 'transactions',
             value: new TransactionsList([])
-        })
+        }
     });
 
     t.is(container.childNodes.length, 1);
