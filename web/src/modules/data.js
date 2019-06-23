@@ -128,48 +128,38 @@ export function dataEquals(item, compare) {
     return item === compare;
 }
 
-export function listAverage(values, mode = null) {
-    if (!values.size) {
+export function arrayAverage(values, mode = null) {
+    if (!values.length) {
         return NaN;
     }
-
     if (mode === AVERAGE_MEDIAN) {
-        const sorted = values.sort((prev, next) => {
-            if (prev < next) {
-                return -1;
-            }
+        const sorted = values.sort((prev, next) => prev - next);
 
-            return 1;
-        });
-
-        const oddLength = sorted.size & 1;
+        const oddLength = sorted.length & 1;
         if (oddLength) {
             // odd: get the middle value
-            return sorted.get(Math.floor((sorted.size - 1) / 2));
+            return sorted[Math.floor((sorted.length - 1) / 2)];
         }
 
         // even: get the middle two values and find the average of them
-        const low = sorted.get(Math.floor(sorted.size / 2) - 1);
-        const high = sorted.get(Math.floor(sorted.size / 2));
+        const low = sorted[Math.floor(sorted.length / 2) - 1];
+        const high = sorted[Math.floor(sorted.length / 2)];
 
         return (low + high) / 2;
     }
-
     if (mode === AVERAGE_EXP) {
-        const weights = new Array(values.size)
+        const weights = new Array(values.length)
             .fill(0)
-            .map((item, key) => Math.pow(2, -(key + 1)))
+            .map((item, key) => 2 ** (-(key + 1)))
             .reverse();
 
         const weightSum = weights.reduce((sum, value) => sum + value, 0);
 
-        return values.reduce(
-            (average, value, key) => average + value * weights[key], 0
-        ) / weightSum;
+        return values.reduce((average, value, index) => average + value * weights[index], 0) / weightSum;
     }
 
     // mean
-    return values.reduce((sum, value) => sum + value, 0) / values.size;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 const testableRandom = (key = 0) => {
@@ -244,24 +234,24 @@ export function getAddDefaultValues(page, now) {
 
 export function sortRowsByDate(rows, page, now) {
     const dateKey = PAGES[page].cols.indexOf('date');
-    let lastFuture = false;
 
     return rows
-        .sort((prev, next) => {
-            const prevDate = prev.getIn(['cols', dateKey]);
-            const nextDate = next.getIn(['cols', dateKey]);
+        .sort(({ id: idA, cols: colsA }, { id: idB, cols: colsB }) =>
+            (colsB[dateKey] - colsA[dateKey]) || (idB - idA)
+        )
+        .reduce(({ lastFuture, accum }, row) => {
+            const thisFuture = row.cols[dateKey] > now;
 
-            return (nextDate - prevDate) ||
-                (next.get('id') - prev.get('id'));
-        })
-        .map(row => {
-            const thisFuture = row.getIn(['cols', dateKey]) > now;
-            const thisLastFuture = lastFuture;
-            lastFuture = thisFuture;
-
-            return row.set('future', thisFuture)
-                .set('first-present', !thisFuture && thisLastFuture);
-        });
+            return {
+                lastFuture: thisFuture,
+                accum: accum.concat([{
+                    ...row,
+                    future: thisFuture,
+                    firstPresent: !thisFuture && lastFuture
+                }])
+            };
+        }, { lastFuture: false, accum: [] })
+        .accum;
 }
 
 export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>

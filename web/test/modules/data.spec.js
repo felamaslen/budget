@@ -1,5 +1,4 @@
 import test from 'ava';
-import { fromJS, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import {
     getPeriodMatch,
@@ -15,7 +14,7 @@ import {
     getTotalCost,
     isSold,
     dataEquals,
-    listAverage,
+    arrayAverage,
     randnBm,
     getValueForTransmit,
     getNullEditable,
@@ -266,22 +265,22 @@ test('dataEquals resorts to === by default', t => {
     t.is(dataEquals(0.4, 0), false);
 });
 
-test('listAverage getting the median of a list of data', t => {
-    t.is(listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN), 9);
+test('arrayAverage gets the median of a list of data', t => {
+    t.is(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20], AVERAGE_MEDIAN), 9);
 
-    t.is(listAverage(list([1, 5, 10, 10, 11, 9, 3, 20]), AVERAGE_MEDIAN), 9.5);
+    t.is(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20], AVERAGE_MEDIAN), 9.5);
 });
-test('listAverage getting an exponential average for a list of data', t => {
-    const theList = list([1, 2, 5, 10, 10, 11, 9, 3, 20]);
+test('arrayAverage gets an exponential average for a list of data', t => {
+    const theList = [1, 2, 5, 10, 10, 11, 9, 3, 20];
 
     const averageExp = 13.105675146771038;
 
-    t.is(listAverage(theList, AVERAGE_EXP), averageExp);
+    t.is(arrayAverage(theList, AVERAGE_EXP), averageExp);
 });
-test('listAverage getting the mean by default', t => {
-    t.is(listAverage(list([1, 2, 5, 10, 10, 11, 9, 3, 20])), 71 / 9);
+test('arrayAverage gets the mean by default', t => {
+    t.is(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20]), 71 / 9);
 
-    t.is(listAverage(list([1, 5, 10, 10, 11, 9, 3, 20])), 8.625);
+    t.is(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20]), 8.625);
 });
 
 
@@ -351,83 +350,93 @@ test('getAddDefaultValues getting the right values for the food page', t => {
     ]);
 });
 
-test('sortRowsByDate sorting rows by date', t => {
-    const rows = fromJS({
-        1: {
+test('sortRowsByDate sorts rows by date', t => {
+    const rows = [
+        {
+            id: '1',
             cols: [dateInput('11/10/17'), 'foo1', 'bar1', 3]
         },
-        4: {
+        {
+            id: '4',
             cols: [dateInput('10/10/17'), 'foo4', 'bar4', 1]
         },
-        2: {
+        {
+            id: '2',
             cols: [dateInput('11/10/17'), 'foo2', 'bar2', 5]
         },
-        3: {
+        {
+            id: '3',
             cols: [DateTime.fromObject({ year: 2017, month: 10, day: 12, hour: 13 }), 'foo3', 'bar3', 11]
         },
-        5: {
+        {
+            id: '5',
             cols: [DateTime.fromObject({ year: 2017, month: 10, day: 12, hour: 11 }), 'foo5', 'bar5', 13]
         }
-    });
+    ];
 
     const sortedRows = sortRowsByDate(rows, 'food');
 
     t.deepEqual(
-        sortedRows.map(item => item
-            .setIn(['cols', 0], item.getIn(['cols', 0]).toISODate())
-        )
-            .toJS(),
-        {
-            3: {
+        sortedRows.map(item => ({
+            ...item,
+            cols: replaceAtIndex(item.cols, 0, item.cols[0].toISODate())
+        })),
+        [
+            {
+                id: '3',
                 cols: [
                     '2017-10-12',
                     'foo3',
                     'bar3',
                     11
                 ],
-                'first-present': false,
+                firstPresent: false,
                 future: false
             },
-            5: {
+            {
+                id: '5',
                 cols: [
                     '2017-10-12',
                     'foo5',
                     'bar5',
                     13
                 ],
-                'first-present': false,
+                firstPresent: false,
                 future: false
             },
-            2: {
+            {
+                id: '2',
                 cols: [
                     '2017-10-11',
                     'foo2',
                     'bar2',
                     5
                 ],
-                'first-present': false,
+                firstPresent: false,
                 future: false
             },
-            1: {
+            {
+                id: '1',
                 cols: [
                     '2017-10-11',
                     'foo1',
                     'bar1',
                     3
                 ],
-                'first-present': false,
+                firstPresent: false,
                 future: false
             },
-            4: {
+            {
+                id: '4',
                 cols: [
                     '2017-10-10',
                     'foo4',
                     'bar4',
                     1
                 ],
-                'first-present': false,
+                firstPresent: false,
                 future: false
             }
-        }
+        ]
     );
 });
