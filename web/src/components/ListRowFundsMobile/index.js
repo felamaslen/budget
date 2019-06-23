@@ -1,4 +1,3 @@
-import { Map as map } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
@@ -10,9 +9,8 @@ const formatOptions = {
     precision: 1
 };
 
-export default function ListRowFundsMobile({ row }) {
-    const transactions = row.getIn(['cols', PAGES.funds.cols.indexOf('transactions')]);
-    const gain = row.get('gain');
+export default function ListRowFundsMobile({ row: { cols, gain } }) {
+    const transactions = cols[PAGES.funds.cols.indexOf('transactions')];
     const costValueFormatted = useMemo(() => formatCurrency(getTotalCost(transactions), formatOptions), [transactions]);
 
     const actualValueFormatted = useMemo(() => {
@@ -23,7 +21,7 @@ export default function ListRowFundsMobile({ row }) {
             return '\u2013';
         }
 
-        return formatCurrency(gain.get('value'), formatOptions);
+        return formatCurrency(gain.value, formatOptions);
     }, [transactions, gain]);
 
     if (!gain) {
@@ -39,5 +37,10 @@ export default function ListRowFundsMobile({ row }) {
 }
 
 ListRowFundsMobile.propTypes = {
-    row: PropTypes.instanceOf(map).isRequired
+    row: PropTypes.shape({
+        cols: PropTypes.array.isRequired,
+        gain: PropTypes.shape({
+            value: PropTypes.number.isRequired
+        })
+    })
 };
