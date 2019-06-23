@@ -1,11 +1,10 @@
-import { Map as map } from 'immutable';
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import FormFieldDate from './date';
 import FormFieldNumber from './number';
 import FormFieldCost from './cost';
-import { TransactionsList } from '~client/modules/data';
+import { transactionShape, transactionsListShape, modifyTransactionById } from '~client/modules/data';
 
 function FormFieldTransactionsItem({ item, onChange }) {
     const onChangeDate = useMemo(() => onChange('date'), [onChange]);
@@ -19,7 +18,7 @@ function FormFieldTransactionsItem({ item, onChange }) {
                     <span className="col">{'Date:'}</span>
                     <span className="col">
                         <FormFieldDate
-                            value={item.get('date')}
+                            value={item.date}
                             onChange={onChangeDate}
                         />
                     </span>
@@ -28,7 +27,7 @@ function FormFieldTransactionsItem({ item, onChange }) {
                     <span className="col">{'Units:'}</span>
                     <span className="col">
                         <FormFieldNumber
-                            value={item.get('units')}
+                            value={item.units}
                             onChange={onChangeUnits}
                         />
                     </span>
@@ -37,7 +36,7 @@ function FormFieldTransactionsItem({ item, onChange }) {
                     <span className="col">{'Cost:'}</span>
                     <span className="col">
                         <FormFieldCost
-                            value={item.get('cost')}
+                            value={item.cost}
                             onChange={onChangeCost}
                         />
                     </span>
@@ -48,21 +47,21 @@ function FormFieldTransactionsItem({ item, onChange }) {
 }
 
 FormFieldTransactionsItem.propTypes = {
-    item: PropTypes.instanceOf(map).isRequired,
+    item: transactionShape,
     onChange: PropTypes.func.isRequired
 };
 
 export default function FormFieldTransactions({ value, onChange }) {
-    const makeOnChangeField = useCallback(key => field => subValue =>
-        onChange(value.list, key, subValue, field), [onChange, value.list]
+    const makeOnChangeField = useCallback(id => field => subValue =>
+        onChange(value, id, subValue, field), [onChange, value]
     );
 
     return (
-        <ul className="transactions-list">
-            {value.list.map((item, key) => (
-                <FormFieldTransactionsItem key={key}
+        <ul className="form-field form-field-transactions">
+            {value.map(item => (
+                <FormFieldTransactionsItem key={item.id}
                     item={item}
-                    onChange={makeOnChangeField(key)}
+                    onChange={makeOnChangeField(item.id)}
                 />
             ))}
         </ul>
@@ -70,6 +69,6 @@ export default function FormFieldTransactions({ value, onChange }) {
 }
 
 FormFieldTransactions.propTypes = {
-    value: PropTypes.instanceOf(TransactionsList).isRequired,
+    value: transactionsListShape.isRequired,
     onChange: PropTypes.func.isRequired
 };

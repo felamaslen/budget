@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import shortid from 'shortid';
 
-import { sortByDate } from '~client/modules/data';
+import { withoutIds, sortByDate } from '~client/modules/data';
 import { netWorthItem } from '~client/components/NetWorthList/prop-types';
 import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
@@ -126,9 +126,9 @@ const idLists = [
     'values'
 ];
 
-const withoutIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
+const withoutGroupIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
     ...last,
-    [key]: doc[key].map(({ id: valueId, ...rest }) => rest)
+    [key]: withoutIds(doc[key])
 }), doc);
 
 const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
@@ -138,7 +138,7 @@ const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
 
 export function NetWorthEditForm({ onUpdate, ...props }) {
     const onEdit = useCallback((tempItem, onComplete) => {
-        onUpdate(tempItem.id, {}, withoutIds(tempItem), onComplete);
+        onUpdate(tempItem.id, {}, withoutGroupIds(tempItem), onComplete);
     }, [onUpdate]);
 
     return (
@@ -175,7 +175,7 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
     }, [data]);
 
     const onEdit = useCallback((tempItem, onComplete) => {
-        onCreate(null, {}, withoutIds(tempItem), onComplete);
+        onCreate(null, {}, withoutGroupIds(tempItem), onComplete);
     }, [onCreate]);
 
     return (

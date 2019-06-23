@@ -1,12 +1,12 @@
 /* eslint-disable max-lines */
 import { List as list, Map as map } from 'immutable';
-import { TransactionsList } from '~client/modules/data';
+import { getTransactionsList } from '~client/modules/data';
 
 export const testRows = map([
     ['10', map({
         'cols': list([
             'some fund 1',
-            new TransactionsList([
+            getTransactionsList([
                 {
                     cost: 400000,
                     units: 934,
@@ -18,7 +18,7 @@ export const testRows = map([
     ['3', map({
         cols: list([
             'some fund 2',
-            new TransactionsList([
+            getTransactionsList([
                 {
                     cost: 45000,
                     units: 450,
@@ -35,7 +35,7 @@ export const testRows = map([
     ['1', map({
         cols: list([
             'some fund 3',
-            new TransactionsList([
+            getTransactionsList([
                 {
                     cost: 90000,
                     units: 1117.87,
@@ -52,7 +52,7 @@ export const testRows = map([
     ['5', map({
         cols: list([
             'test fund 4',
-            new TransactionsList([
+            getTransactionsList([
                 {
                     cost: 200000,
                     units: 1499.7,

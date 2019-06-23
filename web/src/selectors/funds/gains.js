@@ -1,4 +1,6 @@
 import { Map as map } from 'immutable';
+
+import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { PAGES } from '~client/constants/data';
 import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
 
@@ -25,20 +27,15 @@ const roundGain = value => Math.round(10000 * value) / 10000;
 const roundAbs = value => Math.round(value);
 
 function getCostValue(transactions, price, yesterdayPrice) {
-    if (transactions.isSold()) {
-        return transactions.list.reduce(({ cost, value }, item) => {
-            const itemCost = item.get('cost');
-
-            return {
-                cost: cost + itemCost * ((itemCost > 0) >> 0),
-                value: value - itemCost * ((itemCost < 0) >> 0)
-            };
-
-        }, { cost: 0, value: 0 });
+    if (isSold(transactions)) {
+        return transactions.reduce(({ cost, value }, item) => ({
+            cost: cost + Math.max(0, item.cost),
+            value: value - Math.min(0, item.cost)
+        }), { cost: 0, value: 0 });
     }
 
-    const units = transactions.getTotalUnits();
-    const cost = transactions.getTotalCost();
+    const units = getTotalUnits(transactions);
+    const cost = getTotalCost(transactions);
     const value = price * units;
 
     let dayGainAbs = 0;

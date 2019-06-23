@@ -8,6 +8,7 @@ import {
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
 import { rgba, colorKey } from '~client/modules/color';
 import { separateLines } from '~client/modules/funds';
+import { getTotalUnits, getTotalCost } from '~client/modules/data';
 import { getViewSoldFunds, transactionsKey, itemKey, getRowLengths, getCurrentFundsCache, getFundsRows } from './helpers';
 import { getFundLineProcessed } from './lines';
 
@@ -67,11 +68,10 @@ function getPriceUnitsCosts(rows, prices, startTime, cacheTimes, viewSold) {
         const { thisUnits, thisCosts } = thisPrices.reduce((rowRed, price, index) => {
             const time = cacheTimes.get(index + timeOffset);
 
-            const transactionsToNow = transactions.filter(item =>
-                item.get('date') < 1000 * (startTime + time));
+            const transactionsToNow = transactions.filter(item => item.date < 1000 * (startTime + time));
 
-            const thisPriceUnits = transactionsToNow.getTotalUnits();
-            const thisPriceCost = transactionsToNow.getTotalCost();
+            const thisPriceUnits = getTotalUnits(transactionsToNow);
+            const thisPriceCost = getTotalCost(transactionsToNow);
 
             return {
                 thisUnits: rowRed.thisUnits.push(thisPriceUnits),

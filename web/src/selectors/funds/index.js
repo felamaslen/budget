@@ -2,6 +2,7 @@ import { Map as map, List as list } from 'immutable';
 import { createSelector } from 'reselect';
 import classNames from 'classnames';
 import { formatAge } from '~client/modules/format';
+import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { getNow } from '~client/selectors/app';
 import { transactionsKey, getFundsRows, getCurrentFundsCache } from './helpers';
 import { getRowGains, getGainsForRow } from './gains';
@@ -41,7 +42,7 @@ const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (
             return sum;
         }
 
-        return sum + values.last() * row.getIn(['cols', transactionsKey]).getTotalUnits();
+        return sum + values.last() * getTotalUnits(row.getIn(['cols', transactionsKey]));
     }, 0);
 });
 
@@ -56,11 +57,11 @@ export const getFundsCost = createSelector([getFundsRows], rows => {
     return rows.reduce((sum, row) => {
         const transactions = row.getIn(['cols', transactionsKey]);
 
-        if (transactions.isSold()) {
+        if (isSold(transactions)) {
             return sum;
         }
 
-        return sum + transactions.getTotalCost();
+        return sum + getTotalCost(transactions);
     }, 0);
 });
 
@@ -91,7 +92,7 @@ export const getProcessedFundsRows = createSelector([getFundsRows, getCurrentFun
     const max = gains.max();
 
     return rows.map((row, id) => {
-        const sold = row.getIn(['cols', transactionsKey]).isSold();
+        const sold = isSold(row.getIn(['cols', transactionsKey]));
 
         return row.set('gain', getGainsForRow(rowGains, id, min, max))
             .set('prices', getPricesForRow(prices, id, startTime, cacheTimes))

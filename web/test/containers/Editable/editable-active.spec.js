@@ -7,7 +7,7 @@ import reduction from '~client/reduction';
 import { Provider } from 'react-redux';
 import React from 'react';
 import EditableActive from '~client/containers/Editable/editable-active';
-import { TransactionsList } from '~client/modules/data';
+import { getTransactionsList } from '~client/modules/data';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
@@ -37,7 +37,7 @@ const getContainer = memoize((customProps = {}) => {
 test('rendering transactions items', t => {
     const { container } = getContainer({
         item: 'transactions',
-        value: new TransactionsList([])
+        value: getTransactionsList([])
     });
 
     t.is(container.childNodes.length, 1);

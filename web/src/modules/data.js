@@ -3,7 +3,10 @@
  */
 
 import { List as list, Map as map } from 'immutable';
+import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
+import shortid from 'shortid';
+
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
 import { PAGES } from '~client/constants/data';
 
@@ -37,105 +40,89 @@ export const replaceAtIndex = (array, index, value) => array
     .concat([value])
     .concat(array.slice(index + 1));
 
-export class TransactionsList {
-    constructor(data, isShort = true) {
-        this.list = data;
-        this.idCount = 0;
+export const removeAtIndex = (array, index) => array
+    .slice(0, index)
+    .concat(array.slice(index + 1));
 
-        if (isShort) {
-            // turn a short list into a descriptive list
-            this.list = list(data)
-                .map(item => {
-                    return map({
-                        id: ++this.idCount,
-                        date: DateTime.fromISO(item.date),
-                        units: item.units,
-                        cost: item.cost
-                    });
-                })
-                .sort((prev, next) => prev.get('date') - next.get('date'));
+export const getTransactionsList = data => data.map(({ date, units, cost }) => ({
+    id: shortid.generate(),
+    date: DateTime.fromISO(date),
+    units: Number(units) || 0,
+    cost: Number(cost) || 0
+}));
 
-            this.size = this.list.size;
-        }
-        else {
-            this.idCount = this.list.size;
-            this.size = this.list.size;
-        }
-    }
-    format() {
-        return this.list.map(item => item.delete('id')
-            .set('date', item.get('date').toISODate()))
-            .toJS();
-    }
-    valueOf() {
-        return this.list;
-    }
-    maxId() {
-        if (this.size > 0) {
-            return this.list.map(item => item.get('id')).max();
-        }
+export const transactionShape = PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    date: PropTypes.instanceOf(DateTime).isRequired,
+    units: PropTypes.number.isRequired,
+    cost: PropTypes.number.isRequired
+}).isRequired;
 
-        return 0;
+export const transactionsListShape = PropTypes.arrayOf(transactionShape);
+
+const isTransactionsList = item => Array.isArray(item) && item.every(value =>
+    typeof value === 'object' &&
+    Object.keys(value).length === 4 &&
+    typeof value.id === 'string' &&
+    value.id.length >= 7 &&
+    value.date instanceof DateTime &&
+    typeof value.units === 'number' &&
+    typeof value.cost === 'number'
+);
+
+const getRoundedTotal = key => array => Number(array.reduce((sum, { [key]: value }) => sum + value, 0).toFixed(4));
+
+export const getTotalUnits = getRoundedTotal('units');
+export const getTotalCost = getRoundedTotal('cost');
+
+export const isSold = transactionsList => getTotalUnits(transactionsList) === 0;
+
+export const addToTransactionsList = (transactionsList, item) => transactionsList.concat(getTransactionsList([item]));
+
+export function modifyTransaction(transactionsList, index, item) {
+    const oldItem = transactionsList[index];
+    const { date: rawDate = oldItem.date } = item;
+
+    let date = rawDate;
+    if (rawDate !== oldItem.date) {
+        date = DateTime.fromISO(rawDate);
     }
-    remove(key) {
-        return new TransactionsList(this.list.splice(key, 1), false);
-    }
-    setIn(key, value) {
-        return new TransactionsList(this.list.setIn(key, value), false);
-    }
-    push(item) {
-        return new TransactionsList(this.list.push(map({
-            id: this.maxId() + 1,
-            date: item.date,
-            units: item.units,
-            cost: item.cost
-        })), false);
-    }
-    filter(callback) {
-        return new TransactionsList(this.list.filter(callback), false);
-    }
-    static getUnits(aList) {
-        return Number(aList.reduce((sum, item) => sum + item.get('units'), 0).toFixed(4));
-    }
-    static getCost(aList) {
-        return aList.reduce((sum, item) => sum + item.get('cost'), 0);
-    }
-    getTotalUnits() {
-        return TransactionsList.getUnits(this.list);
-    }
-    getTotalCost() {
-        return TransactionsList.getCost(this.list);
-    }
-    isSold() {
-        return this.getTotalUnits() === 0;
-    }
+
+    return replaceAtIndex(transactionsList, index, { ...oldItem, ...item, date });
 }
 
+export const modifyTransactionById = (transactionsList, id, item) => modifyTransaction(
+    transactionsList,
+    transactionsList.findIndex(({ id: itemId }) => itemId === id),
+    item
+);
+
+export const formatTransactionsList = transactionsList => transactionsList
+    .sort(({ date: dateA }, { date: dateB }) => dateA - dateB)
+    .map(({ date, units, cost }) => ({
+        date: date.toISODate(),
+        units,
+        cost
+    }));
+
+export const withoutIds = array => array.map(({ id, ...doc }) => doc);
+
 export function dataEquals(item, compare) {
-    if (item instanceof DateTime) {
-        if (compare instanceof DateTime) {
-            return item.hasSame(compare, 'day');
-        }
-
-        return false;
+    if (item instanceof DateTime && compare instanceof DateTime) {
+        return item.hasSame(compare, 'day');
     }
-
-    if (item instanceof TransactionsList) {
-        if (compare instanceof TransactionsList) {
-            if (item.size !== compare.size) {
-                return false;
-            }
-
-            return item.list.reduce((equal, listItem, key) => {
-                return equal &&
-                    listItem.get('date').hasSame(compare.list.getIn([key, 'date']), 'day') &&
-                    listItem.get('units') === compare.list.getIn([key, 'units']) &&
-                    listItem.get('cost') === compare.list.getIn([key, 'cost']);
-
-            }, true);
+    if (isTransactionsList(item) && isTransactionsList(compare)) {
+        if (item.length !== compare.length) {
+            return false;
         }
 
-        return false;
+        const compareWithoutIds = withoutIds(compare);
+
+        return withoutIds(item).every(
+            (itemValue, index) => Object.keys(itemValue).every(
+                key => dataEquals(itemValue[key], compareWithoutIds[index][key])
+            )
+        );
     }
 
     return item === compare;
@@ -201,15 +188,12 @@ export function getValueForTransmit(value) {
     if (typeof value === 'number') {
         return value;
     }
-
     if (value instanceof DateTime) {
         return value.toISODate();
     }
-
-    if (value instanceof TransactionsList) {
-        return value.format();
+    if (isTransactionsList(value)) {
+        return formatTransactionsList(value);
     }
-
     if (typeof value === 'object') {
         return value;
     }
@@ -247,7 +231,7 @@ export function getAddDefaultValues(page, now) {
             return 0;
         }
         if (column === 'transactions') {
-            return new TransactionsList(list.of(), true);
+            return getTransactionsList([]);
         }
 
         if (['item', 'category', 'shop', 'holiday', 'society'].indexOf(column) > -1) {

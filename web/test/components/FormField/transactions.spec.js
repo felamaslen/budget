@@ -7,14 +7,14 @@ import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import { DateTime } from 'luxon';
 import FormFieldTransactions from '~client/components/FormField/transactions';
-import { TransactionsList } from '~client/modules/data';
+import { getTransactionsList } from '~client/modules/data';
 
 const transactions = [
     { date: '2017-11-10', units: 10.5, cost: 50 },
     { date: '2018-09-05', units: -3, cost: -40 }
 ];
 
-const value = new TransactionsList(transactions);
+const value = getTransactionsList(transactions);
 
 const getContainer = (customProps = {}) => {
     const props = {
@@ -34,7 +34,7 @@ test('basic structure', t => {
     const [ul] = container.childNodes;
 
     t.is(ul.tagName, 'UL');
-    t.is(ul.className, 'transactions-list');
+    t.is(ul.className, 'form-field form-field-transactions');
 
     t.is(ul.childNodes.length, 2);
 });
@@ -97,8 +97,8 @@ test('handling date input', t => {
 
         t.is(onChange.calls.length, 1);
         t.deepEqual(onChange.calls[0].arguments, [
-            value.list,
-            index,
+            value,
+            value[index].id,
             DateTime.fromISO('2017-04-03'),
             'date'
         ]);
@@ -140,8 +140,8 @@ test('handling units input', t => {
         t.is(onChange.calls.length, 1);
 
         t.deepEqual(onChange.calls[0].arguments, [
-            value.list,
-            index,
+            value,
+            value[index].id,
             34.2219,
             'units'
         ]);
@@ -183,8 +183,8 @@ test('handling cost input', t => {
         t.is(onChange.calls.length, 1);
 
         t.deepEqual(onChange.calls[0].arguments, [
-            value.list,
-            index,
+            value,
+            value[index].id,
             12677,
             'cost'
         ]);
