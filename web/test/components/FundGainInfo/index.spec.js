@@ -3,20 +3,19 @@ import memoize from 'fast-memoize';
 import compose from 'just-compose';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
-import { Map as map, List as list } from 'immutable';
 import React from 'react';
 import FundGainInfo from '~client/components/FundGainInfo';
 
 const getGainInfo = memoize((customProps = {}) => {
     const props = {
-        gain: map({
+        gain: {
             value: 561932,
             gain: 0.3,
             gainAbs: 4030,
             dayGain: -0.02,
             dayGainAbs: -341,
-            color: list([255, 128, 30])
-        }),
+            color: [255, 128, 30]
+        },
         ...customProps
     };
 
