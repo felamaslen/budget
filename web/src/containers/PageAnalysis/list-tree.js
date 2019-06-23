@@ -1,4 +1,3 @@
-import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 import {
     aTreeItemExpandToggled, aTreeItemDisplayToggled, aTreeItemHovered
@@ -9,22 +8,18 @@ import classNames from 'classnames';
 import ListTreeHead from './list-tree-head';
 import SubTree from './sub-tree';
 import { formatCurrency } from '~client/modules/format';
+import { costShape } from '~client/containers/PageAnalysis/prop-types';
 
 function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, onToggle }) {
-
-    const costPct = cost.map(item => {
-        const itemCost = item.get('total');
-        const pct = 100 * itemCost / costTotal;
-        const name = item.get('name');
-        const visible = treeVisible.has(name)
-            ? treeVisible.get(name)
+    const costPct = cost.map(({ name, total, subTree }) => {
+        const pct = 100 * total / costTotal;
+        const visible = name in treeVisible
+            ? treeVisible[name]
             : true;
 
-        const open = Boolean(treeOpen.get(name));
+        const open = Boolean(treeOpen[name]);
 
-        const subTree = item.get('subTree');
-
-        return { name, itemCost, pct, visible, open, subTree };
+        return { name, itemCost: total, pct, visible, open, subTree };
     });
 
     const listTreeBody = costPct.map(({ visible, pct, ...item }) => {
@@ -63,20 +58,20 @@ function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, o
 }
 
 ListTree.propTypes = {
-    cost: PropTypes.instanceOf(list),
+    cost: costShape,
     costTotal: PropTypes.number,
-    treeVisible: PropTypes.object.isRequired,
-    treeOpen: PropTypes.object.isRequired,
+    treeVisible: PropTypes.objectOf(PropTypes.bool).isRequired,
+    treeOpen: PropTypes.objectOf(PropTypes.bool).isRequired,
     onHover: PropTypes.func.isRequired,
     onExpand: PropTypes.func.isRequired,
     onToggle: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    cost: state.getIn(['pages', 'analysis', 'cost']),
-    costTotal: state.getIn(['pages', 'analysis', 'costTotal']),
-    treeVisible: state.getIn(['other', 'analysis', 'treeVisible']),
-    treeOpen: state.getIn(['other', 'analysis', 'treeOpen'])
+    cost: state.pages.analysis.cost,
+    costTotal: state.pages.analysis.costTotal,
+    treeVisible: state.other.analysis.treeVisible,
+    treeOpen: state.other.analysis.treeOpen
 });
 
 const mapDispatchToProps = dispatch => ({

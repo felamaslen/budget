@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -9,7 +8,7 @@ import Upper from '~client/containers/PageAnalysis/upper';
 import { aOptionChanged } from '~client/actions/analysis.actions';
 
 const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+    let state = {
         pages: {
             analysis: {
                 description: 'foo',
@@ -41,7 +40,7 @@ const getContainer = (customProps = {}, customState = null) => {
                 }
             }
         }
-    });
+    };
 
     if (customState) {
         state = customState(state);
@@ -219,9 +218,16 @@ test('buttons', t => {
 });
 
 test('dispatching actions when the buttons are pressed', t => {
-    const { store, container } = getContainer({}, state => state
-        .setIn(['other', 'analysis', 'timeIndex'], 1)
-    );
+    const { store, container } = getContainer({}, state => ({
+        ...state,
+        other: {
+            ...state.other,
+            analysis: {
+                ...state.other.analysis,
+                timeIndex: 1
+            }
+        }
+    }));
 
     const [div] = container.childNodes;
     const [, , buttons] = div.childNodes;

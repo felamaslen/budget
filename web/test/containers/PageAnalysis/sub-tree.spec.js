@@ -4,7 +4,6 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -15,10 +14,10 @@ import SubTree from '~client/containers/PageAnalysis/sub-tree';
 const getContainer = memoize((customProps = {}) => {
     const props = {
         open: true,
-        subTree: fromJS([
+        subTree: [
             { name: 'foo1', total: 2 },
             { name: 'foo2', total: 4 }
-        ]),
+        ],
         name: 'foo',
         itemCost: 6,
         onHover: () => null,

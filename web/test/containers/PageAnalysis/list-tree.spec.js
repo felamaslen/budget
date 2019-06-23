@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -13,7 +12,7 @@ import {
 } from '~client/actions/analysis.actions';
 
 const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+    let state = {
         pages: {
             analysis: {
                 cost: [
@@ -41,7 +40,7 @@ const getContainer = (customProps = {}, customState = null) => {
                 }
             }
         }
-    });
+    };
 
     if (customState) {
         state = customState(state);

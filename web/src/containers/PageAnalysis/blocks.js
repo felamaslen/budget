@@ -1,9 +1,9 @@
-import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { aBlockClicked } from '~client/actions/analysis.actions';
 import { aContentBlockHovered } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { blocksShape, activeBlockShape } from '~client/components/BlockPacker/prop-types';
 import BlockPacker from '~client/components/BlockPacker';
 
 export function Blocks(props) {
@@ -11,19 +11,19 @@ export function Blocks(props) {
 }
 
 Blocks.propTypes = {
-    blocks: PropTypes.instanceOf(list),
+    blocks: blocksShape,
     status: PropTypes.string,
-    activeBlock: PropTypes.array,
+    activeBlock: activeBlockShape,
     deep: PropTypes.string,
     onClick: PropTypes.func.isRequired,
     onHover: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    activeBlock: state.getIn(['other', 'blockView', 'active']),
-    blocks: state.getIn(['other', 'blockView', 'blocks']),
-    deep: state.getIn(['other', 'blockView', 'deep']),
-    status: state.getIn(['other', 'blockView', 'status'])
+    activeBlock: state.other.blockView.active,
+    blocks: state.other.blockView.blocks,
+    deep: state.other.blockView.deep,
+    status: state.other.blockView.status
 });
 
 const mapDispatchToProps = dispatch => ({

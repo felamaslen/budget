@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { Map as map, List as list } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -9,57 +8,54 @@ import Blocks from '~client/containers/PageAnalysis/blocks';
 import { aBlockClicked } from '~client/actions/analysis.actions';
 import { aContentBlockHovered } from '~client/actions/content.actions';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = map({
-        other: map({
-            blockView: map({
-                active: [0, 1],
-                blocks: list.of(
-                    map({
-                        name: 'foo',
-                        value: 10,
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
+        other: {
+            blockView: {
+                active: ['foo', 'foz'],
+                blocks: [
+                    {
                         width: 90,
                         height: 87,
-                        bits: list.of(
-                            map({
+                        bits: [
+                            {
                                 name: 'bar',
                                 value: 3,
                                 color: 'red',
                                 width: 27,
                                 height: 87,
-                                blocks: list.of(
-                                    map({
-                                        bits: list.of(
-                                            map({
+                                blocks: [
+                                    {
+                                        width: 20,
+                                        height: 39,
+                                        bits: [
+                                            {
                                                 name: 'bak',
                                                 value: 3,
+                                                color: 'pink',
                                                 width: 27,
                                                 height: 87
-                                            })
-                                        )
-                                    })
-                                )
-                            }),
-                            map({
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
                                 name: 'baz',
                                 value: 7,
                                 color: 'blue',
                                 width: 63,
                                 height: 87,
-                                blocks: list.of()
-                            })
-                        )
-                    })
-                ),
+                                blocks: []
+                            }
+                        ]
+                    }
+                ],
                 deep: 'baz deepblock',
                 status: 'foo status'
-            })
-        })
+            }
+        }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
@@ -111,8 +107,8 @@ test('dispatching block clicked actions', t => {
 test('dispatching block hover actions', t => {
     const { store, container } = getContainer();
     const action = aContentBlockHovered({
-        block: map({ name: 'bar', value: 3 }),
-        subBlock: map({ name: 'bak', value: 3, width: 27, height: 87 })
+        block: { name: 'bar', value: 3 },
+        subBlock: { name: 'bak', color: 'pink', value: 3, width: 27, height: 87 }
     });
 
     t.false(store.isActionDispatched(action));

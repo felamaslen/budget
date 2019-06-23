@@ -1,8 +1,7 @@
-import { List as list } from 'immutable';
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { formatCurrency } from '~client/modules/format';
+import { listTreeHeadItemsShape } from '~client/containers/PageAnalysis/prop-types';
 
 export default function ListTreeHead({ items }) {
     const getCost = itemList => formatCurrency(itemList
@@ -38,5 +37,5 @@ export default function ListTreeHead({ items }) {
 }
 
 ListTreeHead.propTypes = {
-    items: PropTypes.instanceOf(list)
+    items: listTreeHeadItemsShape
 };

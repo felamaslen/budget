@@ -3,12 +3,12 @@
  */
 
 import './style.scss';
-import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { aContentRequested } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import Page from '../Page';
+import { timelineShape } from '~client/containers/PageAnalysis/prop-types';
+import Page from '~client/containers/Page';
 import Timeline from './timeline';
 import Upper from './upper';
 import ListTree from './list-tree';
@@ -33,12 +33,12 @@ function PageAnalysis({ timeline }) {
 }
 
 PageAnalysis.propTypes = {
-    timeline: PropTypes.instanceOf(list),
+    timeline: timelineShape,
     onLoad: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    timeline: state.getIn(['other', 'analysis', 'timeline'])
+    timeline: state.other.analysis.timeline
 });
 
 const mapDispatchToProps = dispatch => ({

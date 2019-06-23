@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -8,7 +7,7 @@ import React from 'react';
 import PageAnalysis from '~client/containers/PageAnalysis';
 
 const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+    let state = {
         pages: {
             analysis: {
                 cost: []
@@ -18,6 +17,9 @@ const getContainer = (customProps = {}, customState = null) => {
             analysis: true
         },
         other: {
+            blockView: {
+                active: null
+            },
             analysis: {
                 period: 0,
                 grouping: 0,
@@ -29,7 +31,7 @@ const getContainer = (customProps = {}, customState = null) => {
                 ]
             }
         }
-    });
+    };
 
     if (customState) {
         state = customState(state);
@@ -101,9 +103,16 @@ test('block view', t => {
 });
 
 test('not rendering a timeline if there is not one present', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['other', 'analysis', 'timeline'], null)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        other: {
+            ...state.other,
+            analysis: {
+                ...state.other.analysis,
+                timeline: null
+            }
+        }
+    }));
 
     const [page] = container.childNodes;
     t.is(page.childNodes.length, 2);

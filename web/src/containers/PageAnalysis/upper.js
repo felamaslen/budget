@@ -49,10 +49,10 @@ Upper.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    periodKey: state.getIn(['other', 'analysis', 'period']),
-    groupingKey: state.getIn(['other', 'analysis', 'grouping']),
-    timeIndex: state.getIn(['other', 'analysis', 'timeIndex']),
-    description: state.getIn(['pages', 'analysis', 'description'])
+    periodKey: state.other.analysis.period,
+    groupingKey: state.other.analysis.grouping,
+    timeIndex: state.other.analysis.timeIndex,
+    description: state.pages.analysis.description
 });
 
 const mapDispatchToProps = dispatch => ({
