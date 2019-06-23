@@ -1,44 +1,43 @@
 import { Map as map } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
+import { getTotalCost, isSold } from '~client/modules/data';
 import { PAGES } from '~client/constants/data';
+
+const formatOptions = {
+    abbreviate: true,
+    precision: 1
+};
 
 export default function ListRowFundsMobile({ row }) {
     const transactions = row.getIn(['cols', PAGES.funds.cols.indexOf('transactions')]);
     const gain = row.get('gain');
+    const costValueFormatted = useMemo(() => formatCurrency(getTotalCost(transactions), formatOptions), [transactions]);
+
+    const actualValueFormatted = useMemo(() => {
+        if (!gain) {
+            return null;
+        }
+        if (isSold(transactions)) {
+            return '\u2013';
+        }
+
+        return formatCurrency(gain.get('value'), formatOptions);
+    }, [transactions, gain]);
+
     if (!gain) {
         return null;
     }
 
-    const cost = transactions.getTotalCost();
-
-    const formatOptions = {
-        abbreviate: true,
-        precision: 1
-    };
-
-    const costValue = (
-        <span className="cost-value">
-            {formatCurrency(cost, formatOptions)}
-        </span>
-    );
-
-    const value = cost
-        ? formatCurrency(gain.get('value'), formatOptions)
-        : '\u2013';
-
-    const actualValue = <span className="actual-value">{value}</span>;
-
     return (
         <span className="cost">
-            {costValue}
-            {actualValue}
+            <span className="cost-value">{costValueFormatted}</span>
+            <span className="actual-value">{actualValueFormatted}</span>
         </span>
     );
 }
 
 ListRowFundsMobile.propTypes = {
-    row: PropTypes.instanceOf(map).isRequired,
-    colKeys: PropTypes.array.isRequired
+    row: PropTypes.instanceOf(map).isRequired
 };
