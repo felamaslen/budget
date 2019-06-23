@@ -123,4 +123,3 @@ test('digit 0 (handling)', t => {
     t.is(onInput.calls.length, 1);
     t.deepEqual(onInput.calls[0].arguments, [0]);
 });
-

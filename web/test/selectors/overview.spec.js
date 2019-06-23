@@ -245,4 +245,3 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
         }
     ]);
 });
-

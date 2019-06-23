@@ -9,4 +9,3 @@ export const aContentLoaded = res => ({ type: A.CONTENT_LOADED, ...res });
 export const aContentBlockHovered = req => ({ type: A.CONTENT_BLOCK_HOVERED, ...req });
 export const aPageSet = page => ({ type: A.PAGE_SET, page });
 export const aFundsViewSoldToggled = () => ({ type: A.FUNDS_VIEW_SOLD_TOGGLED });
-

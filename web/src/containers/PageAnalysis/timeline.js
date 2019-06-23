@@ -41,4 +41,3 @@ export default function Timeline({ data }) {
 Timeline.propTypes = {
     data: PropTypes.instanceOf(list)
 };
-

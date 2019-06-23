@@ -251,4 +251,3 @@ test('description', t => {
     t.is(title.className, 'period-title');
     t.is(title.innerHTML, 'foo');
 });
-

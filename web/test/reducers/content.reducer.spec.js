@@ -140,4 +140,3 @@ test('rHandleContentRespons setting expected parameters in the state', t => {
 test('rSetPage seting the current page', t => {
     t.deepEqual(rSetPage(fromJS({ currentPage: null }), { page: 'food' }).toJS(), { currentPage: 'food' });
 });
-

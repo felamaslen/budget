@@ -13,4 +13,3 @@ Digit.propTypes = {
     digit: PropTypes.number.isRequired,
     onInput: PropTypes.func.isRequired
 };
-

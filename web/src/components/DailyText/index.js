@@ -22,4 +22,3 @@ DailyText.propTypes = {
     value: PropTypes.number,
     row: PropTypes.instanceOf(map).isRequired
 };
-

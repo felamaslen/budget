@@ -35,4 +35,3 @@ export default function Key(props) {
         >{'Stocks'}</text>
     </BaseKey>;
 }
-

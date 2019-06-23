@@ -67,4 +67,3 @@ test('rendering as active', t => {
     const [editable] = span.childNodes;
     t.is(editable.className, 'editable editable-shop');
 });
-

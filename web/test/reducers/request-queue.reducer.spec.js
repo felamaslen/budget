@@ -47,4 +47,3 @@ test('pushToRequestQueue pushing to the request list', t => {
         }
     );
 });
-

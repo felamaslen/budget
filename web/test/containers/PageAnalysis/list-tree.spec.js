@@ -238,4 +238,3 @@ test('toggling items by the tick box', t => {
         t.true(store.isActionDispatched(action));
     });
 });
-

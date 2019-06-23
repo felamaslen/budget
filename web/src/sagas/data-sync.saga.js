@@ -25,4 +25,3 @@ export default function *dataSyncSaga() {
 
     yield fork(loopDataSync);
 }
-

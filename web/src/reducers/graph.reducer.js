@@ -59,4 +59,3 @@ export function rChangeFundsGraphPeriod(state, { shortPeriod, noCache }) {
 
     return changePeriod(state, shortPeriod || state.getIn(['other', 'graphFunds', 'period']));
 }
-

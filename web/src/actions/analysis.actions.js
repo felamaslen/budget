@@ -10,4 +10,3 @@ export const aTreeItemExpandToggled = key => ({ type: A.ANALYSIS_TREE_EXPAND_TOG
 export const aTreeItemHovered = key => ({ type: A.ANALYSIS_TREE_HOVERED, key });
 export const aBlockClicked = req => ({ type: A.ANALYSIS_BLOCK_CLICKED, ...req });
 export const aAnalysisDataRefreshed = res => ({ type: A.ANALYSIS_DATA_REFRESHED, ...res });
-

@@ -116,4 +116,3 @@ export const PageFood = () => <PageList page="food" />;
 export const PageGeneral = () => <PageList page="general" />;
 export const PageHoliday = () => <PageList page="holiday" />;
 export const PageSocial = () => <PageList page="social" />;
-

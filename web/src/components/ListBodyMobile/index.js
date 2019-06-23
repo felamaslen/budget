@@ -64,4 +64,3 @@ ListBodyMobile.propTypes = {
 ListBodyMobile.defaultProps = {
     listColsMobile: LIST_COLS_MOBILE
 };
-

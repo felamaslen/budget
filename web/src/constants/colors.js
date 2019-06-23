@@ -36,4 +36,3 @@ export const COLOR_SPENDING = [0, 51, 153];
 
 export const COLOR_GRAPH_FUND_ITEM = [66, 134, 244];
 export const COLOR_GRAPH_FUND_LINE = COLOR_GRAPH_TITLE;
-

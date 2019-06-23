@@ -51,4 +51,3 @@ export function rLoginFormHandleResponse(state, { data }) {
         .setIn(['user', 'name'], data.name)
         .setIn(['user', 'apiKey'], data.apiKey);
 }
-

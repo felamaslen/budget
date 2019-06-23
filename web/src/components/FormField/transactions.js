@@ -73,4 +73,3 @@ FormFieldTransactions.propTypes = {
     value: PropTypes.instanceOf(TransactionsList).isRequired,
     onChange: PropTypes.func.isRequired
 };
-

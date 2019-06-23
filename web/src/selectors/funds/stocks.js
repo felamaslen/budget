@@ -6,5 +6,3 @@ const getIndices = state => state.getIn(['other', 'stocksList', 'indices']);
 export const getStocksListInfo = createSelector([getStocks, getIndices], (stocks, indices) => ({
     stocks, indices
 }));
-
-

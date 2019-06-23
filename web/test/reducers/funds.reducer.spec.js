@@ -115,4 +115,3 @@ test('processPageDataFunds returning formatted funds page data', t => {
         [0, 86400 * 4]
     );
 });
-

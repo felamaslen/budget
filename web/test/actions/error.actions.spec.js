@@ -34,4 +34,3 @@ test('aErrorRemoved returns ERROR_REMOVED with msgId', t => {
         msgId: 10
     });
 });
-

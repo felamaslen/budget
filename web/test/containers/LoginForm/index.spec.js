@@ -91,4 +91,3 @@ test('dispatching a number on input', t => {
     fireEvent.mouseDown(button);
     t.true(store.isActionDispatched(action));
 });
-

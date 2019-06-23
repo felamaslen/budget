@@ -60,4 +60,3 @@ test('no active class while inactive', t => {
 
     t.notRegex(span.className, /active/);
 });
-

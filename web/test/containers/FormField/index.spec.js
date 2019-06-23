@@ -94,4 +94,3 @@ testCases.forEach(({ name, fieldKey, props }) => {
         t.is(container.childNodes.length, 1);
     });
 });
-

@@ -98,4 +98,3 @@ test('total column', t => {
     t.is(value.className, 'total-value');
     t.is(value.innerHTML, '£4.00');
 });
-

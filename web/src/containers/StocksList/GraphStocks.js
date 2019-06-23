@@ -34,4 +34,3 @@ export default function GraphStocks({ history }) {
 GraphStocks.propTypes = {
     history: PropTypes.instanceOf(list).isRequired
 };
-

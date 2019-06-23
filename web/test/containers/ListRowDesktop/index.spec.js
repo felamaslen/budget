@@ -111,4 +111,3 @@ test('dispatching an action when the delete button is pressed', t => {
 
     t.true(store.isActionDispatched(action));
 });
-

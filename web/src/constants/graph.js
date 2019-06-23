@@ -48,4 +48,3 @@ export const GRAPH_FUNDS_NUM_TICKS = 10;
 
 export const GRAPH_STOCKS_WIDTH = 150;
 export const GRAPH_STOCKS_HEIGHT = 72;
-

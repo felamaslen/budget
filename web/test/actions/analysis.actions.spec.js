@@ -59,4 +59,3 @@ test('aAnalysisDataRefreshed returns ANALYSIS_DATA_REFRESHED with res object', t
         foo: 'bar'
     });
 });
-

@@ -139,4 +139,3 @@ export function rHandleStocksPricesResponse(state, res) {
             history.push(list([time / 1000, weightedGain]))
         );
 }
-

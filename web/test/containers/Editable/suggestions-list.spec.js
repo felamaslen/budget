@@ -64,4 +64,3 @@ test('rendering an active class on the active suggestion, if there is one', t =>
     t.notRegex(li0.className, /active/);
     t.regex(li1.className, /active/);
 });
-

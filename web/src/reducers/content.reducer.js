@@ -79,4 +79,3 @@ export function rHandleContentResponse(state, { response, page }) {
 export const rSetPage = (state, { page }) => state.set('currentPage', page);
 
 export const rToggleViewSold = state => state.setIn(['other', 'viewSoldFunds'], !state.getIn(['other', 'viewSoldFunds']));
-

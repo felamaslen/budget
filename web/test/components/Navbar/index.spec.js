@@ -107,4 +107,3 @@ test('rendering nothing when inactive', t => {
 
     t.is(container.childNodes.length, 0);
 });
-

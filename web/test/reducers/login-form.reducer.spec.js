@@ -93,4 +93,3 @@ test('rLoginFormSubmit seting the login form to inactive', t => {
 });
 
 test.todo('rLoginFormHandleResponse');
-

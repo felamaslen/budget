@@ -84,4 +84,3 @@ export function getGainsForRow(rowGains, id, min, max) {
 
     return rowGains.get(id).set('color', color);
 }
-

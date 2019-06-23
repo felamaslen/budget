@@ -29,4 +29,3 @@ export function formatValue(value, mode = null) {
 
     return formatCurrency(value, { raw: true, abbreviate: true, precision: 1 });
 }
-

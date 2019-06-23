@@ -16,4 +16,3 @@ export default function EditableActive(props) {
 EditableActive.propTypes = {
     item: PropTypes.string.isRequired
 };
-

@@ -306,4 +306,3 @@ module.exports = {
     getMonthlyCategoryValues,
     getData
 };
-

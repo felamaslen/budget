@@ -17,4 +17,3 @@ test('getStocksListInfo returns stocks and indices', t => {
         indices: 'bar'
     });
 });
-

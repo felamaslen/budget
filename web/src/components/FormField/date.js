@@ -29,4 +29,3 @@ FormFieldDate.propTypes = {
     value: PropTypes.instanceOf(DateTime).isRequired,
     onChange: PropTypes.func.isRequired
 };
-

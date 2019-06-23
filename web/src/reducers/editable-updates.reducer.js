@@ -105,4 +105,3 @@ export function rDeleteListItem(state, { page, id }) {
         rCalculateOverview({ page, newDate: date, oldDate: date, newItemCost: 0, oldItemCost }),
     )(state);
 }
-

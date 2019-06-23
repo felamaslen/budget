@@ -88,4 +88,3 @@ GraphSpending.propTypes = {
     valuesNet: PropTypes.instanceOf(list).isRequired,
     valuesSpending: PropTypes.instanceOf(list).isRequired
 };
-

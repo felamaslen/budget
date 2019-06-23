@@ -52,4 +52,3 @@ test('rErrorMessageRemove removeing the selected message from the list', t => {
         ]
     );
 });
-

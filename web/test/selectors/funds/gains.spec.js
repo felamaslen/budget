@@ -41,4 +41,3 @@ test('getRowGains returns the correct values', t => {
 
     t.deepEqual(gains.toJS(), expectedResult.toJS());
 });
-

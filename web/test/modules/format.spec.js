@@ -161,4 +161,3 @@ test('formatAge formating the age properly', t => {
     t.is(formatAge(812391239), '25 years, 9 months ago');
     t.is(formatAge(812391239, true), '25Y, 9M');
 });
-

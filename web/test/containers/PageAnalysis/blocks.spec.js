@@ -129,4 +129,3 @@ test('dispatching block hover actions', t => {
     fireEvent.mouseOver(subBlock);
     t.true(store.isActionDispatched(action));
 });
-

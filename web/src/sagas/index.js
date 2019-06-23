@@ -17,4 +17,3 @@ export default function *rootSaga() {
     yield fork(analysisSaga);
     yield fork(fundsSaga);
 }
-

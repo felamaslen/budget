@@ -200,4 +200,3 @@ test('getTimeSeriesTicker handles ranges of years', t => {
 
     t.deepEqual(result, expectedResult);
 });
-

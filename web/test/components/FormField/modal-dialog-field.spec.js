@@ -96,4 +96,3 @@ test('transactions fields', t => {
     t.is(div.childNodes.length, 2);
     t.is(div.className, 'inner');
 });
-

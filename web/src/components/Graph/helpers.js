@@ -253,4 +253,3 @@ export function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
 }
 
 export const pointVisible = (valX, minX, maxX) => valX >= minX && valX <= maxX;
-

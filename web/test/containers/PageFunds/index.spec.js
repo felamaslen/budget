@@ -83,4 +83,3 @@ test('list page with extra props', t => {
     t.is(div.tagName, 'DIV');
     t.is(div.className, 'page page-funds');
 });
-

@@ -117,4 +117,3 @@ export function useZoom({
 
     return [zoom, onWheel];
 }
-

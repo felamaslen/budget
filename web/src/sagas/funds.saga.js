@@ -90,4 +90,3 @@ export default function *fundsSaga() {
         takeEvery(STOCKS_PRICES_REQUESTED, requestStocksPrices)
     ]);
 }
-

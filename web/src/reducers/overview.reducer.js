@@ -62,4 +62,3 @@ export function processPageDataOverview(state, { raw }) {
         rows: list(balance).map(value => list.of(value))
     }));
 }
-

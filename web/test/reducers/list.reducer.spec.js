@@ -55,4 +55,3 @@ test('processPageDataList seting the page data', t => {
 
     t.deepEqual(processPageDataList(stateBefore, { page, raw }).toJS(), stateAfter);
 });
-

@@ -32,4 +32,3 @@ const mapStateToProps = (state, { page, row, col }) => ({
 });
 
 export default connect(mapStateToProps)(ListAddEditItem);
-

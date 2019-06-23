@@ -101,4 +101,3 @@ LineGraphDumb.defaultProps = {
     before: null,
     after: null
 };
-

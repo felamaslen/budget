@@ -70,4 +70,3 @@ FundGainInfo.propTypes = {
     gain: PropTypes.instanceOf(map),
     sold: PropTypes.bool
 };
-

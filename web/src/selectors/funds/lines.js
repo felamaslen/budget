@@ -135,4 +135,3 @@ export function getFundLineProcessed(times, timeOffsets, priceUnitsCosts, mode, 
         id
     });
 }
-

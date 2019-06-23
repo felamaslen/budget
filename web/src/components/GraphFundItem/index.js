@@ -128,4 +128,3 @@ GraphFundItem.propTypes = {
     popout: PropTypes.bool.isRequired,
     onToggle: PropTypes.func.isRequired
 };
-

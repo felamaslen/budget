@@ -171,4 +171,3 @@ export function rHandleFormInputChange(state, req) {
     return state
         .setIn(['modalDialog', 'fields', req.fieldKey, 'value'], req.value);
 }
-

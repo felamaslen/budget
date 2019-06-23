@@ -199,4 +199,3 @@ module.exports = {
     login,
     handler
 };
-

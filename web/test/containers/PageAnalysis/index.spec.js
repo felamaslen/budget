@@ -112,4 +112,3 @@ test('not rendering a timeline if there is not one present', t => {
     t.notRegex(child0.className, /timeline/);
     t.notRegex(child1.className, /timeline/);
 });
-

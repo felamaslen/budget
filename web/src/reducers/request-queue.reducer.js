@@ -69,4 +69,3 @@ export function pushToRequestQueue(state, dataItem) {
     return state
         .setIn(['edit', 'requestList'], newRequestList);
 }
-

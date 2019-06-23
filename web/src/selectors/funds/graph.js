@@ -172,4 +172,3 @@ const getMobileProp = (state, { isMobile }) => isMobile;
 export const makeGetGraphProps = () => createSelector([
     getGraphMode, getFormattedHistory, getMobileProp
 ], getGraphProps);
-

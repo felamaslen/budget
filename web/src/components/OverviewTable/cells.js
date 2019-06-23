@@ -42,4 +42,3 @@ OverviewTableCells.propTypes = {
     editRow: PropTypes.number,
     editCol: PropTypes.number
 };
-

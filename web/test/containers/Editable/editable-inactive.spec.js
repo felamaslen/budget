@@ -60,4 +60,3 @@ test('activation', t => {
     fireEvent.mouseDown(span);
     t.is(onActivate.calls.length, 1);
 });
-

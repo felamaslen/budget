@@ -234,4 +234,3 @@ export const rUpdateServer = state => state.set('loadingApi', true);
 
 export const rHandleServerUpdate = state => state.set('loadingApi', false)
     .setIn(['edit', 'requestList'], list.of());
-

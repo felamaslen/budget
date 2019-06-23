@@ -76,4 +76,3 @@ test('averageColor returning an average colour', t => {
 test('averageColor returning transparent by default', t => {
     t.deepEqual(averageColor(list.of()), [255, 255, 255, 0]);
 });
-

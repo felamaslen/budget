@@ -42,4 +42,3 @@ ModalDialogField.propTypes = {
     field: PropTypes.instanceOf(map).isRequired,
     invalidKeys: PropTypes.instanceOf(list)
 };
-

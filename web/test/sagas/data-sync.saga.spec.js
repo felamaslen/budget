@@ -50,4 +50,3 @@ test('dataSyncSaga gets settings and forks data loop saga', t => {
         .next()
         .isDone();
 });
-

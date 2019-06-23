@@ -73,4 +73,3 @@ test('gain info', t => {
     t.is(gainInfo.tagName, 'SPAN');
     t.is(gainInfo.className, 'gain');
 });
-

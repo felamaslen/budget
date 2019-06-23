@@ -15,4 +15,3 @@ export const aSuggestionsReceived = res => ({ type: A.EDIT_SUGGESTIONS_RECEIVED,
 export const aFundTransactionsChanged = req => ({ type: A.EDIT_FUND_TRANSACTIONS_CHANGED, ...req });
 export const aFundTransactionsAdded = req => ({ type: A.EDIT_FUND_TRANSACTIONS_ADDED, ...req });
 export const aFundTransactionsRemoved = req => ({ type: A.EDIT_FUND_TRANSACTIONS_REMOVED, ...req });
-

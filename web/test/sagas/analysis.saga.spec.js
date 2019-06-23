@@ -59,4 +59,3 @@ test('requestAnalysisData handling errors', t => {
         .next()
         .isDone();
 });
-

@@ -102,4 +102,3 @@ export function averageColor(colors) {
         listAverage(blue)
     ];
 }
-

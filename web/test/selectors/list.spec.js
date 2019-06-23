@@ -51,4 +51,3 @@ test('makeGetWeeklyAverages returns the data with a processed weekly value', t =
     t.is(makeGetWeeklyAverages()(state, { page: 'food' }),
         Math.round((29 + 1139 + 876 + 498) / 10.5477178));
 });
-

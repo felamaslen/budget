@@ -59,4 +59,3 @@ test('handling onchange', t => {
 
     t.deepEqual(onChange.calls[0].arguments, [1093]);
 });
-

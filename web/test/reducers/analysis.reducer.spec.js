@@ -406,4 +406,3 @@ test('rAnalysisBlockClick reseting the view, if going back to shallow view', t =
         }
     });
 });
-

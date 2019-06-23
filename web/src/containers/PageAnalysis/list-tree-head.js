@@ -40,4 +40,3 @@ export default function ListTreeHead({ items }) {
 ListTreeHead.propTypes = {
     items: PropTypes.instanceOf(list)
 };
-

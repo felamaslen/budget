@@ -119,4 +119,3 @@ export default function *appSaga() {
     yield takeEvery(EDIT_LIST_ITEM_ADDED, addServerData);
     yield takeLatest(SERVER_UPDATED, updateServerData);
 }
-

@@ -83,4 +83,3 @@ export const makeGetWeeklyAverages = () => {
         return Math.round(visibleTotal / numWeeks);
     });
 };
-

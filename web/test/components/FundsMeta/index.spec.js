@@ -111,4 +111,3 @@ test('rendering a desktop info box', t => {
     t.is(graphFunds.tagName, 'DIV');
     t.is(graphFunds.className, 'graph-container graph-fund-history');
 });
-

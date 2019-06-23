@@ -30,4 +30,3 @@ test('rootSaga forking all the other sagas', t => {
         .next()
         .isDone();
 });
-

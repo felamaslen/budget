@@ -413,4 +413,3 @@ export function formatAge(seconds, shortAbbr = false) {
 
     return `${humanizeDuration(seconds * 1000, { round: true, largest: 2 })} ago`;
 }
-

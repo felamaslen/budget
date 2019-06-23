@@ -35,4 +35,3 @@ test('aFundsGraphPeriodChanged returns GRAPH_FUNDS_PERIOD_CHANGED with req objec
         type: GRAPH_FUNDS_PERIOD_CHANGED, foo: 'bar'
     });
 });
-

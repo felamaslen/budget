@@ -23,4 +23,3 @@ OverviewTableRows.propTypes = {
     rows: PropTypes.instanceOf(list).isRequired,
     numToSkip: PropTypes.number.isRequired
 };
-

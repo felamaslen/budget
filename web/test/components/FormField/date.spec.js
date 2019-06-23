@@ -74,4 +74,3 @@ test('handling bad values', t => {
     t.is(onChange.calls.length, 1);
     t.is(onChange.calls[0].arguments[0].toString(), 'Invalid DateTime');
 });
-

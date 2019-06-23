@@ -33,4 +33,3 @@ test('aStocksPricesReceived returns STOCKS_PRICES_RECEIVED with response object'
         type: STOCKS_PRICES_RECEIVED, foo: 'bar'
     });
 });
-

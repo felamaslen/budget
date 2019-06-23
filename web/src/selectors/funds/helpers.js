@@ -22,4 +22,3 @@ const getFundsPeriod = state => state.getIn(['other', 'graphFunds', 'period']);
 
 export const getCurrentFundsCache = createSelector([getFundsPeriod, getFundsCache],
     (period, cache) => cache && cache.get(period));
-

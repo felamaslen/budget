@@ -68,4 +68,3 @@ export function getDefaultValue(item, value) {
 
     return String(value);
 }
-

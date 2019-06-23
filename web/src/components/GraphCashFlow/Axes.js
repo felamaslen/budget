@@ -136,4 +136,3 @@ const { valX, valY, ...propTypes } = pixelPropTypes;
 Axes.propTypes = {
     ...propTypes
 };
-

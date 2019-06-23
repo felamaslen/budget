@@ -54,4 +54,3 @@ Graph.propTypes = {
         PropTypes.array
     ])
 };
-

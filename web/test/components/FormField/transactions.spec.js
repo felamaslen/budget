@@ -190,4 +190,3 @@ test('handling cost input', t => {
         ]);
     });
 });
-

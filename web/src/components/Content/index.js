@@ -61,4 +61,3 @@ Content.propTypes = {
 };
 
 export default withRouter(Content);
-

@@ -21,4 +21,3 @@ test('requestProps gets the loading status, period, grouping and timeIndex', t =
         timeIndex: 300
     });
 });
-

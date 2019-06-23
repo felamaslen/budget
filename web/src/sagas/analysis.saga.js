@@ -47,4 +47,3 @@ export default function *analysisSaga() {
         takeEvery(ANALYSIS_OPTION_CHANGED, requestAnalysisData)
     ]);
 }
-

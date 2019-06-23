@@ -313,4 +313,3 @@ test('rHandleServerUpdate setting loadingApi to false and resetting the request 
         }
     });
 });
-

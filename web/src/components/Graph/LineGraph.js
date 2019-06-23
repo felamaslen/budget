@@ -147,4 +147,3 @@ LineGraph.defaultProps = {
     outerProperties: {},
     svgProperties: {}
 };
-

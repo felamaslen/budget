@@ -14,4 +14,3 @@ else {
 const store = configStore(initialState);
 
 export default store;
-

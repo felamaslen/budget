@@ -30,4 +30,3 @@ export default function NumberInputPad({ onInput }) {
 NumberInputPad.propTypes = {
     onInput: PropTypes.func.isRequired
 };
-

@@ -28,4 +28,3 @@ FormFieldNumber.propTypes = {
     value: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired
 };
-

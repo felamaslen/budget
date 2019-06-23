@@ -114,4 +114,3 @@ test('total percent', t => {
     t.is(selected.className, 'selected');
     t.is(selected.innerHTML, '13.0%');
 });
-

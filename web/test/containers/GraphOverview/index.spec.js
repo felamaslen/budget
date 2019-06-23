@@ -90,4 +90,3 @@ test('rendering a spending graph', t => {
     t.is(graphSpending.tagName, 'DIV');
     t.is(graphSpending.className, 'graph-container graph-spend');
 });
-

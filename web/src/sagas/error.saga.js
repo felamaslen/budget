@@ -11,4 +11,3 @@ export function *openTimedMessage(message, level = ERROR_LEVEL_ERROR) {
 
     yield put(aErrorOpened(errorMsg));
 }
-

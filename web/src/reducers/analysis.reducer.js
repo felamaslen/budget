@@ -156,4 +156,3 @@ export function rAnalysisBlockClick(state, { name }) {
     return state
         .setIn(['other', 'analysis', 'loading'], true);
 }
-

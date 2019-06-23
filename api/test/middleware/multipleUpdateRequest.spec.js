@@ -38,4 +38,3 @@ test('getOverallStatusCode handling 2xx codes', t => {
         statusCode => ({ statusCode })
     )), 201);
 });
-

@@ -66,4 +66,3 @@ test('dispatching an action when rendering', t => {
 
     t.true(store.isActionDispatched(action));
 });
-

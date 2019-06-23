@@ -361,4 +361,3 @@ test('getCurrentRowCol getting the current row and column from the editing objec
         }
     );
 });
-

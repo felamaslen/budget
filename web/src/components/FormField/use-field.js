@@ -21,4 +21,3 @@ export function useField(value, onChange, getValue, setValue) {
 
     return [currentValue, onType, onBlur];
 }
-

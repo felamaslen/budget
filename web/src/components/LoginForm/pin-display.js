@@ -22,4 +22,3 @@ export default function PinDisplay({ inputStep }) {
 PinDisplay.propTypes = {
     inputStep: PropTypes.number.isRequired
 };
-

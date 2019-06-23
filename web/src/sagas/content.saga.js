@@ -70,4 +70,3 @@ export default function *contentSaga() {
         takeLatest(CONTENT_REQUESTED, requestContent)
     ]);
 }
-

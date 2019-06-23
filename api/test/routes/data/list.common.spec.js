@@ -86,4 +86,3 @@ test('getTotalCost returns the correct query', async t => {
 
     t.is(await getTotalCost(db, user, 'food'), 19239 + 91923 + 2239);
 });
-

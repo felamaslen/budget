@@ -46,4 +46,3 @@ export default function ListRowFundsDesktop({ row }) {
 ListRowFundsDesktop.propTypes = {
     row: PropTypes.instanceOf(map).isRequired
 };
-

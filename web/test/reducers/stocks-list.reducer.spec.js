@@ -40,4 +40,3 @@ test('limitTimeSeriesLength filtering time series according to a least-distance 
 });
 
 test.todo('rHandleStocksPricesResponse');
-

@@ -12,4 +12,3 @@ export const aTimeUpdated = now => ({ type: A.TIME_UPDATED, now });
 export const aServerUpdated = () => ({ type: A.SERVER_UPDATED });
 export const aServerUpdateReceived = res => ({ type: A.SERVER_UPDATE_RECEIVED, ...res });
 export const aServerAddReceived = res => ({ type: A.SERVER_ADD_RECEIVED, ...res });
-

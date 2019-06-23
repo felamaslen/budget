@@ -133,4 +133,3 @@ test('(daily) relative value', t => {
     t.is(relative.className, 'day-gain loss');
     t.is(relative.innerHTML, '(2.00%)');
 });
-

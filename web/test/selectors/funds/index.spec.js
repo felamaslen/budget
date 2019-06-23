@@ -104,4 +104,3 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
         }
     );
 });
-

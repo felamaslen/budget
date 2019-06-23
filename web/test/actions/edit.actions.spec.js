@@ -90,4 +90,3 @@ test('aFundTransactionsRemoved returns EDIT_FUND_TRANSACTIONS_REMOVED with req o
         foo: 'bar'
     });
 });
-

@@ -161,4 +161,3 @@ module.exports = {
     routePut,
     routeDelete
 };
-

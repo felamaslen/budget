@@ -130,4 +130,3 @@ test('handleModal not proceeding if there dialog was not set to loading', t => {
         .next({ ...stateModal, modalDialogLoading: false })
         .isDone();
 });
-

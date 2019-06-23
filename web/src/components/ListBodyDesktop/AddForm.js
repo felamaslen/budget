@@ -43,4 +43,3 @@ AddForm.propTypes = {
     addBtnFocus: PropTypes.bool.isRequired,
     onAdd: PropTypes.func.isRequired
 };
-

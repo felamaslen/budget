@@ -29,4 +29,3 @@ ListRowCellMobile.propTypes = {
     id: PropTypes.string.isRequired,
     column: PropTypes.string.isRequired
 };
-

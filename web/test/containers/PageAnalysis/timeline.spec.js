@@ -69,4 +69,3 @@ test('timeline items', t => {
         t.is(child.style.backgroundColor, color);
     });
 });
-

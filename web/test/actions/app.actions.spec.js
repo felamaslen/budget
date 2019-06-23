@@ -81,4 +81,3 @@ test('aServerAddReceived returns SERVER_ADD_RECEIVED with res', t => {
         foo: 'bar'
     });
 });
-

@@ -112,4 +112,3 @@ export default resetAppState(map({
     loading: false, // for big (disruptive) things like loading pages
     loadingApi: false // for small things like edit updates
 }));
-

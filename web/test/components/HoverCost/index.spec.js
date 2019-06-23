@@ -80,4 +80,3 @@ test('removing the label on mouseout', t => {
     t.is(child.childNodes[0].className, 'abbreviated');
     t.is(child.childNodes[0].innerHTML, '£1.2k');
 });
-

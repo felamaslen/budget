@@ -50,4 +50,3 @@ AverageLine.propTypes = {
     value: PropTypes.number,
     data: PropTypes.instanceOf(list).isRequired
 };
-

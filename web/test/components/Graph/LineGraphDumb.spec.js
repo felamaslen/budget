@@ -92,5 +92,3 @@ test('rendering a line graph', t => {
     const [svg] = graph.childNodes;
     t.is(svg.tagName, 'svg');
 });
-
-

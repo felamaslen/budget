@@ -19,4 +19,3 @@ export const pixelPropTypes = {
     valX: PropTypes.func.isRequired,
     valY: PropTypes.func.isRequired
 };
-

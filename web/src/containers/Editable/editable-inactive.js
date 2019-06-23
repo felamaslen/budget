@@ -17,4 +17,3 @@ EditableInactive.propTypes = {
     value: PropTypes.any,
     onActivate: PropTypes.func.isRequired
 };
-

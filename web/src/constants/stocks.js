@@ -15,4 +15,3 @@ export const STOCK_PRICES_DELAY = 10000;
 
 // investment rate of return (assumed, per annum)
 export const FUTURE_INVESTMENT_RATE = 0.1;
-

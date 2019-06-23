@@ -278,4 +278,3 @@ test.skip('rendering an overall gain', t => {
     t.is(change.className, 'change');
     t.is(change.innerHTML, '-0.02%');
 });
-

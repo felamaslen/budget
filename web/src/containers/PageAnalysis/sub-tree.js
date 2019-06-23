@@ -41,4 +41,3 @@ SubTree.propTypes = {
     itemCost: PropTypes.number,
     onHover: PropTypes.func.isRequired
 };
-

@@ -113,4 +113,3 @@ test('calling a function when clicking add', t => {
     t.is(onMobileAdd.calls.length, 1);
     t.deepEqual(onMobileAdd.calls[0].arguments, ['food']);
 });
-

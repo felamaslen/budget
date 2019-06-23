@@ -82,4 +82,3 @@ export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
-

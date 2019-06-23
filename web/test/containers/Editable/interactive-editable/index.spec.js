@@ -81,4 +81,3 @@ test('suggestions list', t => {
     t.is(suggestionsList.tagName, 'UL');
     t.is(suggestionsList.className, 'suggestions');
 });
-

@@ -79,4 +79,3 @@ test('rendering an add form', t => {
     t.is(addForm.tagName, 'LI');
     t.is(addForm.className, 'li-add');
 });
-

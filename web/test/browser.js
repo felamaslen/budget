@@ -29,5 +29,3 @@ global.localStorage = {
 };
 
 global.HTMLElement = global.window.HTMLElement;
-
-

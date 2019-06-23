@@ -92,4 +92,3 @@ test('not rendering anything if not open', t => {
 
     t.is(container.childNodes.length, 0);
 });
-

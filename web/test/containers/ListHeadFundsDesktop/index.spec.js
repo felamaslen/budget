@@ -143,4 +143,3 @@ test('view sold toggle', t => {
 
     t.true(store.isActionDispatched(action));
 });
-

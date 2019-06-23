@@ -25,4 +25,3 @@ export const getContentParamsAnalysis = state => ({
 });
 
 export const getLoadedStatus = (state, { page }) => state.get('pages').has(page);
-

@@ -97,4 +97,3 @@ module.exports = {
     downloadUrl,
     getRawData
 };
-

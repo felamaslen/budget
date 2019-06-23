@@ -25,4 +25,3 @@ test('aLoginFormResponseReceived returns LOGIN_FORM_RESPONSE_GOT with res object
         type: LOGIN_FORM_RESPONSE_GOT, foo: 'bar'
     });
 });
-

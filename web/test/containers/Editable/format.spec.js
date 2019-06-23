@@ -90,4 +90,3 @@ test('getDefaultValue / returning the value as a string by default', t => {
     t.is(getDefaultValue('text', 'foo'), 'foo');
     t.is(getDefaultValue('text', 100), '100');
 });
-

@@ -40,4 +40,3 @@ test('aFormFieldChanged returns FORM_INPUT_CHANGED with fieldKey, value', t => {
         value: 11
     });
 });
-

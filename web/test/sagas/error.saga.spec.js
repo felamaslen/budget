@@ -23,4 +23,3 @@ test('openTimedMessage accepting a level argument', t => {
         .next()
         .isDone();
 });
-

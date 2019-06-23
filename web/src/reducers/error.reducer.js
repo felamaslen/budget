@@ -26,4 +26,3 @@ export function rErrorMessageRemove(state, { msgId }) {
         .filter(msg => msg.get('id') !== msgId)
     );
 }
-

@@ -8,4 +8,3 @@ export const SYMBOL_CURRENCY_RAW = '£';
 
 export const AVERAGE_MEDIAN = 0xa1;
 export const AVERAGE_EXP = 0xa2;
-

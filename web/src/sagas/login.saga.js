@@ -100,4 +100,3 @@ export default function *loginSaga() {
         takeLatest(USER_LOGGED_OUT, logoutUser)
     ]);
 }
-

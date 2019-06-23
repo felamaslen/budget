@@ -106,4 +106,3 @@ test('dispatching an action when the add button is pressed', t => {
     t.is(onAdd.calls.length, 1);
     t.deepEqual(onAdd.calls[0].arguments, ['food']);
 });
-

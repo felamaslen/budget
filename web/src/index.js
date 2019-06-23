@@ -34,4 +34,3 @@ if (module.hot) {
         () => renderApp(require('./containers/Root').default)
     );
 }
-

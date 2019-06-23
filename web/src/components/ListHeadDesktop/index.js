@@ -47,4 +47,3 @@ ListHeadDesktop.propTypes = {
     totalCost: PropTypes.number,
     TotalValue: PropTypes.func
 };
-

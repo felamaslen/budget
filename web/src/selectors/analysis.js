@@ -4,4 +4,3 @@ export const requestProps = state => ({
     grouping: state.getIn(['other', 'analysis', 'grouping']),
     timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
 });
-

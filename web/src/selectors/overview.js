@@ -233,4 +233,3 @@ export const getOverviewTable = createSelector([
         return map({ cells, past, active, future });
     });
 });
-

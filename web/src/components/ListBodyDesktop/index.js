@@ -64,4 +64,3 @@ ListBodyDesktop.propTypes = {
     AfterRow: PropTypes.func,
     TotalValue: PropTypes.func
 };
-

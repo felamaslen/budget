@@ -83,4 +83,3 @@ export default function *editSaga() {
         takeLatest(FORM_DIALOG_CLOSED, handleModal)
     ]);
 }
-

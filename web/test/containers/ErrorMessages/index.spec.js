@@ -79,4 +79,3 @@ test('closing messages when clicking them', t => {
     fireEvent.click(container.childNodes[0].childNodes[1]);
     t.true(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' }));
 });
-

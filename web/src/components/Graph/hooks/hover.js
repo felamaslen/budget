@@ -88,4 +88,3 @@ export function useHover({ lines, isMobile, calc, hoverEffect }) {
 
     return [hlPoint, onMouseMove, onMouseLeave];
 }
-

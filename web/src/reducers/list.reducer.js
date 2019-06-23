@@ -39,4 +39,3 @@ export function processPageDataList(state, { page, raw }) {
 
     return state.setIn(['pages', page], map({ data, rows }));
 }
-

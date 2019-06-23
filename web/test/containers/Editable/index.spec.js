@@ -59,4 +59,3 @@ test('rendering inactive editable item', t => {
         t.notRegex(span.className, /active/);
     });
 });
-

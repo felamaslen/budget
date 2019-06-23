@@ -42,4 +42,3 @@ ListRowFundsMobile.propTypes = {
     row: PropTypes.instanceOf(map).isRequired,
     colKeys: PropTypes.array.isRequired
 };
-

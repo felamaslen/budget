@@ -32,4 +32,3 @@ OverviewTableCellInner.propTypes = {
     rowKey: PropTypes.number.isRequired,
     editable: PropTypes.bool.isRequired
 };
-

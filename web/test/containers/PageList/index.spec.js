@@ -63,4 +63,3 @@ test('list', t => {
     t.is(pageList.className, 'list-insert list-food list');
     t.is(pageList.childNodes.length, 0);
 });
-

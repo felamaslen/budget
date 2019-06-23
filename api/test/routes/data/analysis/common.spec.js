@@ -62,4 +62,3 @@ test('periodCondition getting yearly periods', t => {
     t.is(result10.endTime.toISODate(), '2012-12-31');
     t.is(result10.description, '2012');
 });
-

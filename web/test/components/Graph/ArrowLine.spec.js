@@ -54,4 +54,3 @@ test('rendering paths as Arrow components', t => {
         t.is(path.tagName, 'path');
     });
 });
-

@@ -99,4 +99,3 @@ export const getProcessedFundsRows = createSelector([getFundsRows, getCurrentFun
             .set('className', classNames({ sold }));
     });
 });
-

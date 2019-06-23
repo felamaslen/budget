@@ -106,4 +106,3 @@ test('no loading spinner if not loading a request', t => {
     const [name] = logo.childNodes;
     t.is(name.innerHTML, 'Budget');
 });
-

@@ -109,4 +109,3 @@ test('accepting children before and after the SVG', t => {
     t.is(after.tagName, 'SPAN');
     t.is(after.innerHTML, 'after1');
 });
-

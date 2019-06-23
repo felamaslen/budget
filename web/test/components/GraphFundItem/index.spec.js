@@ -49,4 +49,3 @@ test('not rendering anything if there are no values', t => {
 
     t.is(container.childNodes.length, 0);
 });
-

@@ -31,4 +31,3 @@ ListRowCell.propTypes = {
 };
 
 export default ListRowCell;
-

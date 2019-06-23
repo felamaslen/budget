@@ -47,4 +47,3 @@ ArrowLine.propTypes = {
         PropTypes.func
     ]).isRequired
 };
-

@@ -47,4 +47,3 @@ test('aPageSet returns PAGE_SET with page', t => {
         page: 'general'
     });
 });
-

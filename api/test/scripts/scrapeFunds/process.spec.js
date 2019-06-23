@@ -131,4 +131,3 @@ test('getEligibleFunds filtering  funds by uniqueness', t => {
         }
     ]);
 });
-

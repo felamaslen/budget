@@ -55,4 +55,3 @@ test('each digit box', t => {
         }
     });
 });
-

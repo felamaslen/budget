@@ -11,4 +11,3 @@ export const suggestionsInfo = state => ({
     item: state.getIn(['edit', 'active', 'item']),
     value: state.getIn(['edit', 'active', 'value'])
 });
-

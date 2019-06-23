@@ -45,4 +45,3 @@ export function processPageDataFunds(state, { raw }) {
         .setIn(['other', 'graphFunds', 'zoomRange'], list([0, maxAge]))
         .setIn(['other', 'graphFunds', 'enabledList'], getInitialEnabledList(prices));
 }
-

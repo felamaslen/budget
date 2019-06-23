@@ -38,4 +38,3 @@ test('suggestionsInfo gets required items from state', t => {
         value: 'bar'
     });
 });
-

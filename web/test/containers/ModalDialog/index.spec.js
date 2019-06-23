@@ -204,4 +204,3 @@ test('disabled buttons while loading', t => {
     t.is(cancel.disabled, true);
     t.is(submit.disabled, true);
 });
-
