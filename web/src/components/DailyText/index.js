@@ -1,4 +1,3 @@
-import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
@@ -19,6 +18,5 @@ export default function DailyText({ value }) {
 }
 
 DailyText.propTypes = {
-    value: PropTypes.number,
-    row: PropTypes.instanceOf(map).isRequired
+    value: PropTypes.number
 };
