@@ -1,18 +1,19 @@
-import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import BlockBits from './block-bits';
 
-export function OuterBlockGroup({ group, activeMain, activeSub, activeBlock, ...props }) {
-    const style = {
-        width: group.get('width'),
-        height: group.get('height')
-    };
+import { blocksShape, blockShape, activeBlockShape } from '~client/components/BlockPacker/prop-types';
+import BlockBits from '~client/components/BlockPacker/block-bits';
 
-    const groupBits = group.get('bits').map((block, key) => <BlockBits
-        key={key}
-        block={block}
+export function OuterBlockGroup({ block, activeMain, activeSub, activeBlock, ...props }) {
+    const style = useMemo(() => ({
+        width: block.width,
+        height: block.height
+    }), [block]);
+
+    const blockBits = block.bits.map(blockBit => <BlockBits
+        key={blockBit.name}
+        blockBit={blockBit}
         activeMain={activeMain}
         activeSub={activeSub}
         activeBlock={activeBlock}
@@ -20,12 +21,12 @@ export function OuterBlockGroup({ group, activeMain, activeSub, activeBlock, ...
     />);
 
     return <div className="block-group" style={style}>
-        {groupBits}
+        {blockBits}
     </div>;
 }
 
 OuterBlockGroup.propTypes = {
-    group: PropTypes.instanceOf(map).isRequired,
+    block: blockShape,
     activeMain: PropTypes.bool.isRequired,
     activeSub: PropTypes.bool.isRequired,
     activeBlock: PropTypes.array
@@ -41,9 +42,9 @@ export default function Blocks({ blocks, activeBlock, deep, ...props }) {
         [`block-tree-${deep}`]: activeDeep
     });
 
-    const blocksList = blocks.map((group, key) => <OuterBlockGroup
+    const blocksList = blocks.map((block, key) => <OuterBlockGroup
         key={key}
-        group={group}
+        block={block}
         activeMain={activeMain}
         activeSub={activeSub}
         activeBlock={activeBlock}
@@ -55,8 +56,7 @@ export default function Blocks({ blocks, activeBlock, deep, ...props }) {
 }
 
 Blocks.propTypes = {
-    blocks: PropTypes.instanceOf(list).isRequired,
-    activeBlock: PropTypes.array,
+    blocks: blocksShape,
+    activeBlock: activeBlockShape,
     deep: PropTypes.string
 };
-

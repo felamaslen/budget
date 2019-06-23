@@ -3,7 +3,6 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import memoize from 'fast-memoize';
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
@@ -12,20 +11,29 @@ import BlockPacker from '~client/components/BlockPacker';
 const getBlockPacker = memoize((customProps = {}) => {
     const props = {
         page: 'page1',
-        blocks: fromJS([
+        blocks: [
             {
                 width: 10.4,
                 height: 11.5,
-                value: 5,
                 bits: [
                     {
                         name: 'foo',
                         value: 5.1,
                         color: 'black',
+                        width: 8,
+                        height: 9.3,
                         blocks: [
                             {
+                                width: 4.9,
+                                height: 9.21,
                                 bits: [
-                                    { name: 'foo1', value: 3 }
+                                    {
+                                        name: 'foo1',
+                                        value: 3,
+                                        color: 'teal',
+                                        width: 3,
+                                        height: 3.1
+                                    }
                                 ]
                             }
                         ]
@@ -37,15 +45,21 @@ const getBlockPacker = memoize((customProps = {}) => {
                         blocks: [
                             {
                                 bits: [
-                                    { name: 'bar1', value: 4 }
+                                    {
+                                        name: 'bar1',
+                                        value: 4,
+                                        color: 'teal',
+                                        width: 3,
+                                        height: 3.1
+                                    }
                                 ]
                             }
                         ]
                     }
                 ]
             }
-        ]),
-        activeBlock: [0, 1],
+        ],
+        activeBlock: ['not_foo', 'not_bar'],
         deepBlock: 'foo',
         status: 'bar',
         onClick: () => null,
@@ -122,4 +136,3 @@ test('not rendering blocks if blocks is null', t => {
 
     t.is(blocks.childNodes.length, 0);
 });
-

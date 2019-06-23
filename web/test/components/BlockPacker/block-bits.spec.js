@@ -3,7 +3,6 @@ import test from 'ava';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
 import memoize from 'fast-memoize';
-import { fromJS } from 'immutable';
 import React from 'react';
 import BlockBits, { BlockGroup, SubBlock } from '~client/components/BlockPacker/block-bits';
 
@@ -11,11 +10,13 @@ const getSubBlock = memoize((customProps = {}) => {
     const props = {
         name: 'foo',
         value: 101.5,
-        subBlock: fromJS({
+        subBlockBit: {
             name: 'bar',
+            color: 'red',
+            value: 53.24,
             width: 90,
             height: 87
-        }),
+        },
         activeSub: false,
         activeBlock: [],
         onHover: () => null,
@@ -43,14 +44,14 @@ const getBlockGroup = memoize((customProps = {}) => {
         value: 987,
         activeSub: false,
         onHover: () => null,
-        group: fromJS({
+        subBlock: {
             bits: [
-                { foo: 'bar' },
-                { bar: 'baz' }
+                { name: 'foo', color: 'red', value: 3, width: 1, height: 1 },
+                { name: 'bar', color: 'green', value: 5, width: 1, height: 1 }
             ],
             width: 15,
             height: 13
-        }),
+        },
         ...customProps
     };
 
@@ -73,15 +74,15 @@ test('<BlockGroup /> - rendering basic structure', t => {
 
 const getBlockBits = memoize((customProps = {}) => {
     const props = {
-        block: fromJS({
+        blockBit: {
             name: 'foo',
             value: 1001.3,
             color: 'red',
             blocks: [
                 {
                     bits: [
-                        { foo: 'bar' },
-                        { bar: 'baz' }
+                        { name: 'foo', color: 'pink', value: 3, width: 1, height: 1 },
+                        { name: 'bar', color: 'turquoise', value: 5, width: 1, height: 1 }
                     ],
                     width: 15,
                     height: 13
@@ -89,7 +90,7 @@ const getBlockBits = memoize((customProps = {}) => {
             ],
             width: 21,
             height: 13
-        }),
+        },
         page: 'page1',
         activeMain: false,
         activeSub: false,
@@ -132,4 +133,3 @@ test('<BlockBits /> - rendering a list of blocks', t => {
     t.is(bit0.className, 'sub-block');
     t.is(bit1.className, 'sub-block');
 });
-
