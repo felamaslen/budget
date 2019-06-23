@@ -24,11 +24,14 @@ function matchQuery(table, column, searchTerm) {
 function getQuery(db, request, uid) {
     const { table, column, searchTerm, numResults } = request;
 
-    const query = qb => matchQuery(table, column, searchTerm)(qb.distinct(column)
+    const query = qb => matchQuery(table, column, searchTerm)(qb.select(
+        db.raw(`DISTINCT(${column}) AS ${column}`),
+        db.raw(`COUNT(${column}) AS count`)
+    )
         .from(table)
         .andWhere(`${table}.uid`, '=', uid)
         .groupBy(column)
-        .orderBy(column)
+        .orderBy('count', 'desc')
         .limit(numResults)
         .as('items')
     );
