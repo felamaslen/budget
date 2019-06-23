@@ -108,8 +108,8 @@ function routeGet(config, db) {
                 list: result.map(({ [value.column]: item }) => String(item))
             };
 
-            if (result.length && result[0].nextCategory) {
-                const nextCategory = result.map(({ nextCategory: item }) => String(item));
+            if (result.length && result[0].next_category) {
+                const nextCategory = result.map(({ next_category: item }) => item);
 
                 return res.json({ data: { ...data, nextCategory } });
             }
