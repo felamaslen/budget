@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -9,7 +8,7 @@ import ModalDialog from '~client/containers/ModalDialog';
 import { aMobileDialogClosed } from '~client/actions/form.actions';
 
 const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+    let state = {
         currentPage: 'page1',
         modalDialog: {
             active: true,
@@ -23,9 +22,9 @@ const getContainer = (customProps = {}, customState = null) => {
                 { item: 'item', value: 'foo' },
                 { item: 'cost', value: 34 }
             ],
-            invalidKeys: ['xyz']
+            invalidKeys: [1]
         }
-    });
+    };
 
     if (customState) {
         state = customState(state);
@@ -63,17 +62,25 @@ test('basic structure', t => {
 });
 
 test('not rendering anything while inactive', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['modalDialog', 'active'], false)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        modalDialog: {
+            ...state.modalDialog,
+            active: false
+        }
+    }));
 
     t.is(container.childNodes.length, 0);
 });
 
 test('hidden class', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['modalDialog', 'visible'], false)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        modalDialog: {
+            ...state.modalDialog,
+            visible: false
+        }
+    }));
 
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -82,9 +89,13 @@ test('hidden class', t => {
 });
 
 test('loading class', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['modalDialog', 'loading'], true)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        modalDialog: {
+            ...state.modalDialog,
+            loading: true
+        }
+    }));
 
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -107,9 +118,13 @@ test('title', t => {
 });
 
 test('adding title', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['modalDialog', 'id'], null)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        modalDialog: {
+            ...state.modalDialog,
+            id: null
+        }
+    }));
 
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -191,9 +206,13 @@ test('dispatching a submit action', t => {
 });
 
 test('disabled buttons while loading', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['modalDialog', 'loading'], true)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        modalDialog: {
+            ...state.modalDialog,
+            loading: true
+        }
+    }));
 
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;

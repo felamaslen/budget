@@ -6,11 +6,10 @@ import { connect } from 'react-redux';
 import './style.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { List as list } from 'immutable';
 import classNames from 'classnames';
 
 import { aMobileDialogClosed } from '~client/actions/form.actions';
-
+import { getCurrentPage } from '~client/selectors/app';
 import ModalDialogField from '~client/components/FormField/modal-dialog-field';
 
 export function title(id) {
@@ -61,7 +60,7 @@ export function ModalDialog({
                 <span className="title">{title(id)}</span>
                 <ul className="form-list">
                     {fields.map((field, fieldKey) => (
-                        <ModalDialogField key={field.get('item')}
+                        <ModalDialogField key={field.item}
                             field={field}
                             fieldKey={fieldKey}
                             invalidKeys={invalidKeys}
@@ -89,8 +88,11 @@ ModalDialog.propTypes = {
     row: PropTypes.number,
     col: PropTypes.number,
     id: PropTypes.string,
-    fields: PropTypes.instanceOf(list),
-    invalidKeys: PropTypes.instanceOf(list),
+    fields: PropTypes.arrayOf(PropTypes.shape({
+        item: PropTypes.string.isRequired,
+        value: PropTypes.any
+    })),
+    invalidKeys: PropTypes.arrayOf(PropTypes.number.isRequired),
     page: PropTypes.string.isRequired,
     onCancel: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
@@ -98,16 +100,8 @@ ModalDialog.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    page: state.get('currentPage'),
-    active: state.getIn(['modalDialog', 'active']),
-    visible: state.getIn(['modalDialog', 'visible']),
-    loading: state.getIn(['modalDialog', 'loading']),
-    type: state.getIn(['modalDialog', 'type']),
-    row: state.getIn(['modalDialog', 'row']),
-    col: state.getIn(['modalDialog', 'col']),
-    id: state.getIn(['modalDialog', 'id']),
-    fields: state.getIn(['modalDialog', 'fields']),
-    invalidKeys: state.getIn(['modalDialog', 'invalidKeys'])
+    page: getCurrentPage(state),
+    ...state.modalDialog
 });
 
 const mapDispatchToProps = dispatch => ({
