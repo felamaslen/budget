@@ -2,11 +2,10 @@
  * Colour functions
  */
 
-import { Map as map } from 'immutable';
 import ColorHash from 'color-hash';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { COLOR_CATEGORY } from '~client/constants/colors';
-import { listAverage } from './data';
+import { arrayAverage } from '~client/modules/data';
 
 export function rgba(values) {
     const roundedValues = values
@@ -22,23 +21,25 @@ export function rgba(values) {
     return `rgb(${roundedValues})`;
 }
 
-export function getOverviewCategoryColor() {
-    return map(OVERVIEW_COLUMNS.slice(1)
-        .map(([key]) => {
-            if (COLOR_CATEGORY[key]) {
-                return [key, COLOR_CATEGORY[key]];
-            }
-            if (key === 'net') {
-                return [key, [COLOR_CATEGORY.spending, COLOR_CATEGORY.income]];
-            }
-            if (key === 'predicted') {
-                return [key, COLOR_CATEGORY.balance];
-            }
+function getOverviewCategoryKeyColor(key) {
+    if (COLOR_CATEGORY[key]) {
+        return COLOR_CATEGORY[key];
+    }
+    if (key === 'net') {
+        return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
+    }
+    if (key === 'predicted') {
+        return COLOR_CATEGORY.balance;
+    }
 
-            throw new Error(`Unknown overview column: ${key}`);
-        })
-    );
+    throw new Error(`Unknown overview column: ${key}`);
 }
+
+export const getOverviewCategoryColor = () => OVERVIEW_COLUMNS.slice(1)
+    .reduce((last, [key]) => ({
+        ...last,
+        [key]: getOverviewCategoryKeyColor(key)
+    }), {});
 
 export function getOverviewScoreColor(value, range, median, color) {
     const blank = [255, 255, 255]; // white
@@ -88,17 +89,13 @@ export function colorKey(string) {
 }
 
 export function averageColor(colors) {
-    if (!colors.size) {
+    if (!colors.length) {
         return [255, 255, 255, 0];
     }
 
-    const red = colors.map(color => color[0]);
-    const green = colors.map(color => color[1]);
-    const blue = colors.map(color => color[2]);
-
     return [
-        listAverage(red),
-        listAverage(green),
-        listAverage(blue)
+        arrayAverage(colors.map(([red]) => red)),
+        arrayAverage(colors.map(([, green]) => green)),
+        arrayAverage(colors.map(([, , blue]) => blue))
     ];
 }

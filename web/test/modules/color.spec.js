@@ -1,5 +1,4 @@
 import test from 'ava';
-import { List as list } from 'immutable';
 import {
     rgba,
     getOverviewCategoryColor,
@@ -17,7 +16,7 @@ test('rgba returning rgb for three values', t => {
 });
 
 test('getOverviewCategoryColor returning the correct colour list', t => {
-    t.deepEqual(getOverviewCategoryColor().toJS(), {
+    t.deepEqual(getOverviewCategoryColor(), {
         funds: [84, 110, 122],
         bills: [183, 28, 28],
         food: [67, 160, 71],
@@ -65,14 +64,14 @@ test('colorKey returning different colours for other numbers', t => {
     t.notDeepEqual(colorKey('bar'), colorKey('foo'));
 });
 
-test('averageColor returning an average colour', t => {
-    t.deepEqual(averageColor(list([
+test('averageColor returns an average colour', t => {
+    t.deepEqual(averageColor([
         [123, 245, 3],
         [255, 2, 30],
         [39, 128, 255]
-    ])), [139, 125, 96]);
+    ]), [139, 125, 96]);
 });
 
-test('averageColor returning transparent by default', t => {
-    t.deepEqual(averageColor(list.of()), [255, 255, 255, 0]);
+test('averageColor returns transparent by default', t => {
+    t.deepEqual(averageColor([]), [255, 255, 255, 0]);
 });
