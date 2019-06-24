@@ -1,7 +1,5 @@
-import { List as list } from 'immutable';
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
 import { DateTime } from 'luxon';
 import LineGraph from '~client/components/Graph/LineGraph';
 import { rangePropTypes } from '~client/components/Graph/propTypes';
@@ -28,31 +26,22 @@ export function getValuesWithTime(data, props) {
     return data.map((value, index) => {
         const date = getTime(index, props.now, oldOffset, breakAtToday, startDate);
 
-        return list([date.ts / 1000, value, date]);
+        return [date.ts / 1000, value, date];
     });
 }
 
 export function getRanges(lines) {
-    return lines.reduce(({ minX, maxX, minY, maxY }, line) => {
-        const data = line.get('data');
-
-        const dataX = data.map(item => item.get(0));
-        const dataY = data.map(item => item.get(1));
-
-        const thisMinX = dataX.min();
-        const thisMaxX = dataX.max();
-
-        const thisMinY = Math.min(0, dataY.min());
-        const thisMaxY = dataY.max();
+    return lines.reduce(({ minX, maxX, minY, maxY }, { data }) => {
+        const dataX = data.map(([xValue]) => xValue);
+        const dataY = data.map(([, yValue]) => yValue);
 
         return {
-            minX: Math.min(minX, thisMinX),
-            maxX: Math.max(maxX, thisMaxX),
-            minY: Math.min(minY, thisMinY),
-            maxY: Math.max(maxY, thisMaxY)
+            minX: dataX.reduce((min, value) => Math.min(min, value), minX),
+            maxX: dataX.reduce((max, value) => Math.max(max, value), maxX),
+            minY: dataY.reduce((min, value) => Math.min(min, value), minY),
+            maxY: dataY.reduce((max, value) => Math.max(max, value), maxY)
         };
-
-    }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+    }, { minX: Infinity, maxX: -Infinity, minY: 0, maxY: -Infinity });
 }
 
 function makeBeforeLines({ now }) {
@@ -126,7 +115,12 @@ export const graphCashFlowPropTypes = {
 GraphCashFlow.propTypes = {
     isMobile: PropTypes.bool.isRequired,
     graphHeight: PropTypes.number.isRequired,
-    lines: ImmutablePropTypes.list.isRequired,
+    lines: PropTypes.arrayOf(PropTypes.shape({
+        minX: PropTypes.number.isRequired,
+        maxX: PropTypes.number.isRequired,
+        minY: PropTypes.number.isRequired,
+        maxY: PropTypes.number.isRequired
+    }).isRequired).isRequired,
     afterLines: PropTypes.func,
     after: PropTypes.func,
     ...graphCashFlowPropTypes
