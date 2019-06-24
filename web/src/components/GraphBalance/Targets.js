@@ -9,6 +9,7 @@ import {
     pixelPropTypes as allPixelPropTypes,
     rangePropTypes as allRangePropTypes
 } from '~client/components/Graph/prop-types';
+import { targetsShape } from '~client/components/GraphBalance/prop-types';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
@@ -63,12 +64,5 @@ Targets.propTypes = {
     ...pixelPropTypes,
     ...rangePropTypes,
     showAll: PropTypes.bool,
-    targets: PropTypes.arrayOf(PropTypes.shape({
-        date: PropTypes.number.isRequired,
-        from: PropTypes.number.isRequired,
-        value: PropTypes.number.isRequired,
-        months: PropTypes.number.isRequired,
-        last: PropTypes.number.isRequired,
-        tag: PropTypes.string.isRequired
-    }))
+    targets: targetsShape
 };
