@@ -4,7 +4,6 @@ const test = ninos(ava);
 
 import '~client-test/browser';
 import memoize from 'fast-memoize';
-import { List as list } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
@@ -15,7 +14,6 @@ import ListBodyMobile from '~client/components/ListBodyMobile';
 const getContainer = memoize((customProps = {}) => {
     const props = {
         page: 'food',
-        rowIds: list.of(),
         onMobileAdd: () => null,
         ...customProps
     };
