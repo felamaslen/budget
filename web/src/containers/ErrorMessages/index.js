@@ -3,7 +3,6 @@
  */
 
 import './style.scss';
-import { List } from 'immutable';
 import { connect } from 'react-redux';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
@@ -23,9 +22,8 @@ function ErrorMessages({ list, closeMessage }) {
 
     useEffect(() => {
         if (prevList.size < list.size) {
-            const hideIds = list
-                .filter(msg => !prevList.some(old => old.get('id') === msg.get('id')))
-                .map(msg => msg.get('id'));
+            const hideIds = list.map(({ id }) => id)
+                .filter(msgId => !prevList.some(({ id }) => id === msgId));
 
             hideIds.forEach(messageId => {
                 hideTimers.current.push(setTimeout(onClose(messageId), ERROR_MESSAGE_DELAY));
@@ -38,31 +36,35 @@ function ErrorMessages({ list, closeMessage }) {
 
     return (
         <ul className="messages-outer">
-            {list.map((msg, key) => {
-                const msgClasses = classNames('message', {
-                    debug: msg.get('level') === ERROR_LEVEL_DEBUG,
-                    warn: msg.get('level') === ERROR_LEVEL_WARN,
-                    error: msg.get('level') === ERROR_LEVEL_ERROR,
-                    closed: msg.get('closed')
-                });
-
-                return (
-                    <li key={key} className={msgClasses} onClick={onClose(msg.get('id'))}>
-                        <span>{msg.get('text')}</span>
-                    </li>
-                );
-            })}
+            {list.map(({ id, level, closed, text }) => (
+                <li key={id}
+                    className={classNames('message', {
+                        debug: level === ERROR_LEVEL_DEBUG,
+                        warn: level === ERROR_LEVEL_WARN,
+                        error: level === ERROR_LEVEL_ERROR,
+                        closed
+                    })}
+                    onClick={onClose(id)}
+                >
+                    <span>{text}</span>
+                </li>
+            ))}
         </ul>
     );
 }
 
 ErrorMessages.propTypes = {
-    list: PropTypes.instanceOf(List),
+    list: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        level: PropTypes.number.isRequired,
+        closed: PropTypes.bool.isRequired,
+        text: PropTypes.string.isRequired
+    }).isRequired),
     closeMessage: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    list: state.getIn(['errorMsg'])
+    list: state.errorMsg
 });
 
 const mapDispatchToProps = dispatch => ({

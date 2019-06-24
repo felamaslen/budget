@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -10,12 +9,12 @@ import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '~client/constants/error';
 import { ERROR_CLOSED } from '~client/constants/actions';
 
 const getContainer = (customProps = {}) => {
-    const state = fromJS({
+    const state = {
         errorMsg: [
             { id: 'f1101', level: ERROR_LEVEL_ERROR, closed: false, text: 'foo' },
             { id: 'g1923', level: ERROR_LEVEL_WARN, closed: true, text: 'bar' }
         ]
-    });
+    };
 
     const store = createMockStore(state);
 
