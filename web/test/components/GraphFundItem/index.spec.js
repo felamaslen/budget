@@ -1,7 +1,6 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import { render } from 'react-testing-library';
-import { fromJS } from 'immutable';
 import '~client-test/browser';
 import React from 'react';
 import GraphFundItem from '~client/components/GraphFundItem';
@@ -10,7 +9,7 @@ const getGraph = memoize((customProps = {}) => {
     const props = {
         id: '3',
         name: 'some-fund-graph',
-        values: fromJS([
+        values: [
             [100, 42.3],
             [101, 41.2],
             [102, 45.9],
@@ -19,7 +18,7 @@ const getGraph = memoize((customProps = {}) => {
             [104, 47.1],
             [105, 46.9],
             [106, 42.5]
-        ]),
+        ],
         sold: false,
         popout: true,
         onToggle: () => null,
