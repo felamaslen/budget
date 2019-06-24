@@ -1,43 +1,43 @@
-import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import CellInner from './cell-inner';
 
-export default function OverviewTableCells({ row, rowKey, editRow, editCol }) {
-    const cells = row.get('cells')
-        .map((cell, cellKey) => {
-            const style = {};
-            if (cell.get('rgb')) {
-                style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
-            }
+export default function OverviewTableCells({ row: { cells, past, active, future }, rowKey, editRow, editCol }) {
+    return (
+        <div className={classNames('row', { past, active, future })}>
+            {cells.map((cell, cellKey) => {
+                const { column, rgb, editable } = cell;
+                const style = {};
+                if (rgb) {
+                    style.backgroundColor = `rgb(${rgb.join(',')})`;
+                }
 
-            const editable = cell.get('editable');
-
-            const active = editRow === rowKey && editCol === 0;
-
-            const cellClassName = classNames('col', cell.getIn(['column', 0]), {
-                'editable-outer': editable,
-                editing: editable && active
-            });
-
-            return <div key={cellKey} className={cellClassName} style={style}>
-                <CellInner cell={cell} cellKey={cellKey} rowKey={rowKey} editable={editable} />
-            </div>;
-        });
-
-    const rowClassName = classNames('row', {
-        past: Boolean(row.get('past')),
-        active: Boolean(row.get('active')),
-        future: Boolean(row.get('future'))
-    });
-
-    return <div className={rowClassName}>{cells}</div>;
+                return (
+                    <div key={cellKey}
+                        className={classNames('col', column[0], {
+                            'editable-outer': editable,
+                            editing: editable && editRow === rowKey && editCol === 0
+                        })}
+                        style={style}>
+                        <CellInner cell={cell} cellKey={cellKey} rowKey={rowKey} editable={editable} />
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
 OverviewTableCells.propTypes = {
-    row: PropTypes.instanceOf(map).isRequired,
+    row: PropTypes.shape({
+        column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+        rgb: PropTypes.array,
+        editable: PropTypes.bool,
+        past: PropTypes.bool,
+        active: PropTypes.bool,
+        future: PropTypes.bool
+    }).isRequired,
     rowKey: PropTypes.number.isRequired,
     editRow: PropTypes.number,
     editCol: PropTypes.number

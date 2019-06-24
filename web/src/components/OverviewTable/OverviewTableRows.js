@@ -1,4 +1,3 @@
-import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Cells from './cells';
@@ -20,6 +19,6 @@ export default function OverviewTableRows({ rows, numToSkip, ...props }) {
 }
 
 OverviewTableRows.propTypes = {
-    rows: PropTypes.instanceOf(list).isRequired,
+    rows: PropTypes.array.isRequired,
     numToSkip: PropTypes.number.isRequired
 };

@@ -1,4 +1,3 @@
-import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Editable from '~client/containers/Editable';
@@ -13,7 +12,7 @@ export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable
             col: 0,
             id: null,
             item: 'cost',
-            value: cell.get('value')
+            value: cell.value
         };
 
         return <Editable {...props} />;
@@ -27,7 +26,9 @@ export default function OverviewTableCellInner({ cell, cellKey, rowKey, editable
 }
 
 OverviewTableCellInner.propTypes = {
-    cell: PropTypes.instanceOf(map).isRequired,
+    cell: PropTypes.shape({
+        value: PropTypes.number.isRequired
+    }),
     cellKey: PropTypes.number.isRequired,
     rowKey: PropTypes.number.isRequired,
     editable: PropTypes.bool.isRequired
