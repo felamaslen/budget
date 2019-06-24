@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { COLOR_CATEGORY } from '~client/constants/colors';
 import { rgba, averageColor } from '~client/modules/color';
-import { timelineShape } from '~client/containers/PageAnalysis/prop-types';
+import { timelineShape } from '~client/prop-types/page/analysis';
 
 const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 

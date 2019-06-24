@@ -3,7 +3,7 @@ import { aBlockClicked } from '~client/actions/analysis.actions';
 import { aContentBlockHovered } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { blocksShape, activeBlockShape } from '~client/components/BlockPacker/prop-types';
+import { blocksShape, activeBlockShape } from '~client/prop-types/block-packer';
 import BlockPacker from '~client/components/BlockPacker';
 
 export function Blocks(props) {

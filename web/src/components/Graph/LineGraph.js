@@ -10,7 +10,7 @@ import {
     lineShape,
     lineGraphPropTypes,
     rangePropTypes
-} from '~client/components/Graph/prop-types';
+} from '~client/prop-types/graph';
 
 import { useZoom } from './hooks/zoom';
 import { useHover } from './hooks/hover';

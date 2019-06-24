@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import ListTreeHead from './list-tree-head';
 import SubTree from './sub-tree';
 import { formatCurrency } from '~client/modules/format';
-import { costShape } from '~client/containers/PageAnalysis/prop-types';
+import { costShape } from '~client/prop-types/page/analysis';
 
 function ListTree({ cost, costTotal, treeVisible, treeOpen, onExpand, onHover, onToggle }) {
     const costPct = cost.map(({ name, total, subTree }) => {

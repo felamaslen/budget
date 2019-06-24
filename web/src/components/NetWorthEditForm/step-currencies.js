@@ -8,7 +8,7 @@ import shortid from 'shortid';
 import { replaceAtIndex } from '~client/modules/data';
 import FormFieldText from '~client/components/FormField';
 import FormFieldNumber from '~client/components/FormField/number';
-import { netWorthItem, currency as currencyShape } from '~client/components/NetWorthList/prop-types';
+import { netWorthItem, currency as currencyShape } from '~client/prop-types/net-worth/list';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
 
 const BASE = 'GBP';

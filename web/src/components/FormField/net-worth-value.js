@@ -6,7 +6,7 @@ import { replaceAtIndex } from '~client/modules/data';
 import {
     netWorthValueSize,
     currency as currencyShape
-} from '~client/components/NetWorthList/prop-types';
+} from '~client/prop-types/net-worth/list';
 import { useInputTickbox, useInputSelect } from '~client/hooks/form';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldNumber from '~client/components/FormField/number';

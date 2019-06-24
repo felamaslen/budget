@@ -2,7 +2,7 @@ import './style.scss';
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-import { blocksShape, activeBlockShape } from '~client/components/BlockPacker/prop-types';
+import { blocksShape, activeBlockShape } from '~client/prop-types/block-packer';
 import Blocks from '~client/components/BlockPacker/blocks';
 
 export default function BlockPacker({ status, onHover, ...props }) {

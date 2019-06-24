@@ -6,7 +6,7 @@ import {
     rangePropTypes,
     pixelPropTypes,
     lineShape
-} from '~client/components/Graph/prop-types';
+} from '~client/prop-types/graph';
 import RenderedLine from '~client/components/Graph/RenderedLine';
 import HighlightPoint from '~client/components/HighlightPoint';
 

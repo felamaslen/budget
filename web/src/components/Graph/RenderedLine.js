@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-import { lineShape } from '~client/components/Graph/prop-types';
+import { lineShape } from '~client/prop-types/graph';
 import { getPathProps, getSingleLinePath } from '~client/components/Graph/helpers';
 import ArrowLine from '~client/components/Graph/ArrowLine';
 import DynamicColorLine from '~client/components/Graph/DynamicColorLine';

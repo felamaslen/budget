@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { subcategory as subcategoryShape } from '~client/components/NetWorthCategoryList/prop-types';
+import { subcategory as subcategoryShape } from '~client/prop-types/net-worth/category';
 import { useInputText, useInputTickbox, useInputRange } from '~client/hooks/form';
 import CrudList from '~client/components/CrudList';
 

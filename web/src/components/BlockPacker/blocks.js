@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { blocksShape, blockShape, activeBlockShape } from '~client/components/BlockPacker/prop-types';
+import { blocksShape, blockShape, activeBlockShape } from '~client/prop-types/block-packer';
 import BlockBits from '~client/components/BlockPacker/block-bits';
 
 export function OuterBlockGroup({ block, activeMain, activeSub, activeBlock, ...props }) {

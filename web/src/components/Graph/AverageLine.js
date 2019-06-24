@@ -4,7 +4,7 @@ import { arrayAverage } from '~client/modules/data';
 import { rgba } from '~client/modules/color';
 import { COLOR_LIGHT_GREY } from '~client/constants/colors';
 import { getSingleLinePath } from '~client/components/Graph/helpers';
-import { lineShape } from '~client/components/Graph/prop-types';
+import { lineShape } from '~client/prop-types/graph';
 
 export default function AverageLine({ value, data, ...props }) {
     const averageLinePath = useMemo(() => {

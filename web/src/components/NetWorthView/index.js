@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { DateTime } from 'luxon';
 import { compose } from 'redux';
 
-import { dataPropTypes } from '~client/components/NetWorthView/prop-types';
+import { dataPropTypes } from '~client/prop-types/net-worth/view';
 import { SumCashEasyAccess, SumCashOther, SumStocks, SumPension } from '~client/components/NetWorthView/sum-by-category';
 import NetWorthViewRow from '~client/components/NetWorthView/net-worth-view-row';
 

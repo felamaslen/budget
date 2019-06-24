@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { netWorthList } from '~client/components/NetWorthList/prop-types';
-import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
+import { netWorthList } from '~client/prop-types/net-worth/list';
+import { category, subcategory } from '~client/prop-types/net-worth/category';
 import CrudList from '~client/components/CrudList';
 import NetWorthListItem from '~client/components/NetWorthList/net-worth-list-item';
 import NetWorthListCreateItem from '~client/components/NetWorthList/net-worth-list-create-item';

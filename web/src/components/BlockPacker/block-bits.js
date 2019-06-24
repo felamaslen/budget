@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { blockBitShape, subBlockShape, subBlockBitShape, activeBlockShape } from '~client/components/BlockPacker/prop-types';
+import { blockBitShape, subBlockShape, subBlockBitShape, activeBlockShape } from '~client/prop-types/block-packer';
 
 export function SubBlock({ name, value, subBlockBit, activeSub, activeBlock, onHover }) {
     const [activeName, activeSubName] = activeBlock || [];

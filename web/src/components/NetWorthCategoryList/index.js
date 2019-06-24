@@ -8,7 +8,7 @@ import NetWorthSubcategoryList from '~client/components/NetWorthSubcategoryList'
 import {
     category as categoryShape,
     subcategory as subcategoryShape
-} from '~client/components/NetWorthCategoryList/prop-types';
+} from '~client/prop-types/net-worth/category';
 
 import './style.scss';
 

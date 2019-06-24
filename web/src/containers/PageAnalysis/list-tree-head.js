@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { formatCurrency } from '~client/modules/format';
-import { listTreeHeadItemsShape } from '~client/containers/PageAnalysis/prop-types';
+import { listTreeHeadItemsShape } from '~client/prop-types/page/analysis';
 
 export default function ListTreeHead({ items }) {
     const getCost = itemList => formatCurrency(itemList

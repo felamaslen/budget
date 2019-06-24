@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import { formatCurrency } from '~client/modules/format';
 import { sumByCategory } from '~client/components/NetWorthView/calc';
-import { dataPropTypes } from '~client/components/NetWorthView/prop-types';
+import { dataPropTypes } from '~client/prop-types/net-worth/view';
 
 const CATEGORY_CASH_EASY_ACCESS = 'Cash (easy access)';
 const CATEGORY_CASH_OTHER = 'Cash (other)';

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { formatCurrency } from '~client/modules/format';
-import { subTreeShape } from '~client/containers/PageAnalysis/prop-types';
+import { subTreeShape } from '~client/prop-types/page/analysis';
 
 export default function SubTree({ open, subTree, name, itemCost, onHover }) {
     const makeOnMouseOver = useCallback(

@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { aContentRequested } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { timelineShape } from '~client/containers/PageAnalysis/prop-types';
+import { timelineShape } from '~client/prop-types/page/analysis';
 import Page from '~client/containers/Page';
 import Timeline from './timeline';
 import Upper from './upper';

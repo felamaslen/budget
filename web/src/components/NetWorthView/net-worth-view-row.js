@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 
 import { formatCurrency } from '~client/modules/format';
-import { netWorthItem } from '~client/components/NetWorthList/prop-types';
-import { dataPropTypes } from '~client/components/NetWorthView/prop-types';
+import { netWorthItem } from '~client/prop-types/net-worth/list';
+import { dataPropTypes } from '~client/prop-types/net-worth/view';
 import { sumByType } from '~client/components/NetWorthView/calc';
 
 function getShortDate(dateIso) {

@@ -10,11 +10,11 @@ import {
     creditLimit as creditLimitShape,
     netWorthItem,
     netWorthValue
-} from '~client/components/NetWorthList/prop-types';
+} from '~client/prop-types/net-worth/list';
 import {
     category as categoryShape,
     subcategory as subcategoryShape
-} from '~client/components/NetWorthCategoryList/prop-types';
+} from '~client/prop-types/net-worth/category';
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';

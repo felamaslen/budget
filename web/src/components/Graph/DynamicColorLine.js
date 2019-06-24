@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getDynamicLinePaths } from '~client/components/Graph/helpers';
-import { dataShape } from '~client/components/Graph/prop-types';
+import { dataShape } from '~client/prop-types/graph';
 
 export default function DynamicColorLine({ fill, data, smooth, color, children, pathProps, ...props }) {
     if (props.minY === props.maxY) {

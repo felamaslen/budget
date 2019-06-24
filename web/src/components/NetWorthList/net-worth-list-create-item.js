@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { netWorthItem } from '~client/components/NetWorthList/prop-types';
-import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
+import { netWorthItem } from '~client/prop-types/net-worth/list';
+import { category, subcategory } from '~client/prop-types/net-worth/category';
 import { NetWorthAddForm } from '~client/components/NetWorthEditForm';
 
 export default function NetWorthListCreateItem({

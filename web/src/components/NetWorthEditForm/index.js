@@ -4,8 +4,8 @@ import { DateTime } from 'luxon';
 import shortid from 'shortid';
 
 import { withoutIds, sortByDate } from '~client/modules/data';
-import { netWorthItem } from '~client/components/NetWorthList/prop-types';
-import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
+import { netWorthItem } from '~client/prop-types/net-worth/list';
+import { category, subcategory } from '~client/prop-types/net-worth/category';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
 import StepCurrencies from '~client/components/NetWorthEditForm/step-currencies';
 import { StepAssets, StepLiabilities } from '~client/components/NetWorthEditForm/step-values';

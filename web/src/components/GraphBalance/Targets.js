@@ -8,8 +8,8 @@ import { rgba } from '~client/modules/color';
 import {
     pixelPropTypes as allPixelPropTypes,
     rangePropTypes as allRangePropTypes
-} from '~client/components/Graph/prop-types';
-import { targetsShape } from '~client/components/GraphBalance/prop-types';
+} from '~client/prop-types/graph';
+import { targetsShape } from '~client/prop-types/graph/balance';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
