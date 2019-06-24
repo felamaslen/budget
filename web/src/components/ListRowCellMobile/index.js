@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
 import Editable from '~client/containers/Editable';
 
-export default function ListRowCellMobile({ page, colKey, row, id, column }) {
+import { rowShape } from '~client/prop-types/page/row';
+
+export default function ListRowCellMobile({ page, colKey, row, column }) {
     const value = row.getIn(['cols', colKey]);
 
     const editableProps = {
         page,
-        row: id,
+        row: row.id,
         col: colKey,
         item: column,
         value,
@@ -25,7 +26,6 @@ export default function ListRowCellMobile({ page, colKey, row, id, column }) {
 ListRowCellMobile.propTypes = {
     page: PropTypes.string.isRequired,
     colKey: PropTypes.number.isRequired,
-    row: ImmutablePropTypes.map.isRequired,
-    id: PropTypes.string.isRequired,
+    row: rowShape.isRequired,
     column: PropTypes.string.isRequired
 };
