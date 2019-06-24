@@ -1,5 +1,4 @@
 import test from 'ava';
-import { fromJS } from 'immutable';
 
 import {
     separateLines,
@@ -8,7 +7,7 @@ import {
 import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
 
 test('separateLines separates a list of data into separate lines', t => {
-    const line = fromJS([
+    const line = [
         [0, 10],
         [1, 11],
         [2, 10.5],
@@ -20,11 +19,11 @@ test('separateLines separates a list of data into separate lines', t => {
         [8, 0],
         [9, 15.1],
         [10, 14.9]
-    ]);
+    ];
 
     const result = separateLines(line);
 
-    t.deepEqual(result.toJS(), [
+    t.deepEqual(result, [
         [[0, 10], [1, 11], [2, 10.5]],
         [[5, 9.4], [6, 9.8], [7, 10.3]],
         [[9, 15.1], [10, 14.9]]
