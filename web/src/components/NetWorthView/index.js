@@ -1,4 +1,3 @@
-import { List as list } from 'immutable';
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -119,7 +118,7 @@ NetWorthView.propTypes = {
     page: PropTypes.number,
     setPage: PropTypes.func.isRequired,
     numPages: PropTypes.number,
-    rowDates: PropTypes.instanceOf(list).isRequired,
-    spending: PropTypes.instanceOf(list).isRequired,
+    rowDates: PropTypes.arrayOf(PropTypes.instanceOf(DateTime).isRequired).isRequired,
+    spending: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     ...dataPropTypes
 };
