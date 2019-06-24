@@ -25,7 +25,7 @@ export const dataShape = PropTypes.arrayOf(
 );
 
 export const lineShape = PropTypes.shape({
-    key: PropTypes.string,
+    key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     data: dataShape.isRequired,
     color: PropTypes.oneOfType([
         PropTypes.string,

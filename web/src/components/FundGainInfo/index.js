@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+
+import { gainShape } from '~client/prop-types/page/funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { rgba } from '~client/modules/color';
 
@@ -54,13 +56,6 @@ export default function FundGainInfo({
 }
 
 FundGainInfo.propTypes = {
-    gain: PropTypes.shape({
-        value: PropTypes.number,
-        gain: PropTypes.number,
-        gainAbs: PropTypes.number,
-        dayGain: PropTypes.number,
-        dayGainAbs: PropTypes.number,
-        color: PropTypes.arrayOf(PropTypes.number.isRequired)
-    }),
+    gain: gainShape,
     sold: PropTypes.bool
 };
