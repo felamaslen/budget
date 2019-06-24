@@ -4,21 +4,22 @@ import '~client-test/browser';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
-import { fromJS } from 'immutable';
 import React from 'react';
 
-import reduction from '~client/reduction';
 import ListRowCell from '~client/components/ListRowCell';
 
 const getContainer = memoize((customProps = {}) => {
-    const state = reduction;
+    const state = {
+        edit: {
+            active: {}
+        }
+    };
 
     const store = createMockStore(state);
 
     const props = {
         page: 'page1',
-        id: '3',
-        row: fromJS({ cols: [null, 'bar'] }),
+        row: { id: '3', cols: [null, 'bar'] },
         colName: 'foo',
         colKey: 1,
         active: true,

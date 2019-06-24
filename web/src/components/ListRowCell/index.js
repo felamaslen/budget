@@ -1,19 +1,19 @@
-import { Map as map } from 'immutable';
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { rowShape } from '~client/prop-types/page/rows';
 import Editable from '~client/containers/Editable';
 
-const ListRowCell = memo(({ page, id, row, colName, colKey, active }) => {
+const ListRowCell = memo(({ page, row, colName, colKey, active }) => {
     const spanClasses = classNames(colName, { active });
 
     const props = {
         page,
-        row: id,
+        row: row.id,
         col: colKey,
         item: colName,
-        value: row.getIn(['cols', colKey])
+        value: row.cols[colKey]
     };
 
     return <span key={colKey} className={spanClasses}>
@@ -23,8 +23,7 @@ const ListRowCell = memo(({ page, id, row, colName, colKey, active }) => {
 
 ListRowCell.propTypes = {
     page: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    row: PropTypes.instanceOf(map).isRequired,
+    row: rowShape.isRequired,
     colName: PropTypes.string.isRequired,
     colKey: PropTypes.number.isRequired,
     active: PropTypes.bool.isRequired
