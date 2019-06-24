@@ -1,36 +1,32 @@
 import { connect } from 'react-redux';
-import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 function SuggestionsList({ suggestionsList, suggestionsActive }) {
-    if (suggestionsList && suggestionsList.size) {
-        const itemList = suggestionsList
-            .map((suggestion, key) => {
-                const className = classNames('suggestion', {
-                    active: suggestionsActive === key
-                });
-
-                return <li key={key} className={className}>{suggestion}</li>;
-            });
-
-        return <ul className="suggestions">
-            {itemList}
-        </ul>;
+    if (!(suggestionsList && suggestionsList.length)) {
+        return null;
     }
 
-    return null;
+    return (
+        <ul className="suggestions">
+            {suggestionsList.map((suggestion, index) => (
+                <li key={suggestion}
+                    className={classNames('suggestion', { active: index === suggestionsActive })}
+                >{suggestion}</li>
+            ))}
+        </ul>
+    );
 }
 
 SuggestionsList.propTypes = {
-    suggestionsList: PropTypes.instanceOf(list),
+    suggestionsList: PropTypes.arrayOf(PropTypes.string.isRequired),
     suggestionsActive: PropTypes.number
 };
 
 const mapStateToProps = state => ({
-    suggestionsList: state.getIn(['editSuggestions', 'list']),
-    suggestionsActive: state.getIn(['editSuggestions', 'active'])
+    suggestionsList: state.editSuggestions.list,
+    suggestionsActive: state.editSuggestions.active
 });
 
 export default connect(mapStateToProps)(SuggestionsList);

@@ -6,7 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import Editable from '.';
+import Editable from '~client/containers/Editable';
 
 function ListAddEditItem({ active, ...props }) {
     return <span className={classNames(props.item, { active })}>
@@ -25,9 +25,8 @@ ListAddEditItem.propTypes = {
 };
 
 const mapStateToProps = (state, { page, row, col }) => ({
-    value: state.getIn(['edit', 'add', page, col]),
-    active: state.getIn(['edit', 'row']) === row &&
-        state.getIn(['edit', 'col']) === col,
+    value: state.edit.add[page][col],
+    active: state.edit.row === row && state.edit.col === col,
     item: PAGES[page].cols[col]
 });
 

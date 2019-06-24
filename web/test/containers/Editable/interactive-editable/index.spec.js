@@ -4,10 +4,8 @@ const test = ninos(ava);
 
 import '~client-test/browser';
 import memoize from 'fast-memoize';
-import { List as list } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import reduction from '~client/reduction';
 import { Provider } from 'react-redux';
 import React from 'react';
 import InteractiveEditable from '~client/containers/Editable/interactive-editable';
@@ -16,15 +14,18 @@ const getContainer = memoize((customProps = {}) => {
     const props = {
         item: 'foo',
         value: 'bar',
-        suggestionsList: list.of(),
+        suggestionsList: [],
         suggestionsActive: -1,
         onChange: () => null,
         ...customProps
     };
 
-    const state = reduction
-        .setIn(['editSuggestions', 'list'], list.of('foobar', 'foobar2000'))
-        .setIn(['editSuggestions', 'active'], 0);
+    const state = {
+        editSuggestions: {
+            list: ['foobar', 'foobar2000'],
+            active: 0
+        }
+    };
 
     const store = createMockStore(state);
 

@@ -3,7 +3,6 @@
  */
 
 import './style.scss';
-import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import * as actions from '~client/actions/edit.actions';
 import React from 'react';
@@ -28,8 +27,7 @@ const mapStateToProps = (state, { row, col, item, value }) => ({
     col,
     item,
     value,
-    active: state.getIn(['edit', 'active', 'row']) === row &&
-        state.getIn(['edit', 'active', 'col']) === col
+    active: state.edit.active.row === row && state.edit.active.col === col
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -40,13 +38,10 @@ const mapDispatchToProps = dispatch => ({
 
         dispatch(actions.aEditableActivated({
             page,
-            editable: map({ row, col, item, value })
+            editable: { row, col, item, value }
         }));
     },
-    onChange: processedValue => dispatch(actions.aEditableChanged(processedValue)),
-    addTransaction: transaction => dispatch(actions.aFundTransactionsAdded(transaction)),
-    editTransaction: transaction => dispatch(actions.aFundTransactionsChanged(transaction)),
-    removeTransaction: transaction => dispatch(actions.aFundTransactionsRemoved(transaction))
+    onChange: processedValue => dispatch(actions.aEditableChanged(processedValue))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Editable);

@@ -3,7 +3,6 @@ import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import reduction from '~client/reduction';
 import { Provider } from 'react-redux';
 import React from 'react';
 import EditableActive from '~client/containers/Editable/editable-active';
@@ -21,7 +20,12 @@ const getContainer = memoize((customProps = {}) => {
         ...customProps
     };
 
-    const state = reduction;
+    const state = {
+        editSuggestions: {
+            list: [],
+            active: null
+        }
+    };
 
     const store = createMockStore(state);
 

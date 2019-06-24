@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -8,12 +7,12 @@ import React from 'react';
 import SuggestionsList from '~client/containers/Editable/suggestions-list';
 
 const getContainer = (customProps = {}) => {
-    const state = fromJS({
+    const state = {
         editSuggestions: {
             list: ['foo', 'bar'],
             active: 1
         }
-    });
+    };
 
     const store = createMockStore(state);
 
