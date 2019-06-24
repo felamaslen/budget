@@ -1,36 +1,29 @@
-import { List as list } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { listAverage } from '~client/modules/data';
+import { arrayAverage } from '~client/modules/data';
 import { rgba } from '~client/modules/color';
 import { COLOR_LIGHT_GREY } from '~client/constants/colors';
-import { getSingleLinePath } from './helpers';
+import { getSingleLinePath } from '~client/components/Graph/helpers';
+import { lineShape } from '~client/components/Graph/prop-types';
 
 export default function AverageLine({ value, data, ...props }) {
-    const averageData = useMemo(() => {
+    const averageLinePath = useMemo(() => {
         if (!value) {
             return null;
         }
 
-        return data.reduce(({ last, points }, point) => {
-            const nextLast = last.slice(1 - value).push(point.get(1));
-            const average = listAverage(nextLast);
+        const averageData = data.reduce(({ last, points }, [xValue, yValue]) => {
+            const nextLast = last.slice(1 - value).concat([yValue]);
+            const average = arrayAverage(nextLast);
 
-            return { last: nextLast, points: points.push(point.set(1, average)) };
-
-        }, { last: list.of(), points: list.of() })
+            return { last: nextLast, points: points.concat([[xValue, average]]) };
+        }, { last: [], points: [] })
             .points;
-    }, [value, data]);
-
-    const averageLinePath = useMemo(() => {
-        if (!averageData) {
-            return null;
-        }
 
         return getSingleLinePath({
             ...props, data: averageData, smooth: true, fill: false
         });
-    }, [averageData, props]);
+    }, [props, value, data]);
 
     if (!averageLinePath) {
         return null;
@@ -48,5 +41,5 @@ export default function AverageLine({ value, data, ...props }) {
 
 AverageLine.propTypes = {
     value: PropTypes.number,
-    data: PropTypes.instanceOf(list).isRequired
+    data: PropTypes.arrayOf(lineShape)
 };

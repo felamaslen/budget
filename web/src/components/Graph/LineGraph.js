@@ -2,12 +2,15 @@
  * React component to display a line graph (e.g. time series)
  */
 
-import { List as list } from 'immutable';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { genPixelCompute } from '~client/components/Graph/helpers';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
-import { lineGraphPropTypes, rangePropTypes } from '~client/components/Graph/propTypes';
+import {
+    lineShape,
+    lineGraphPropTypes,
+    rangePropTypes
+} from '~client/components/Graph/prop-types';
 
 import { useZoom } from './hooks/zoom';
 import { useHover } from './hooks/hover';
@@ -126,7 +129,7 @@ LineGraph.propTypes = {
     after: PropTypes.func,
     ...lineGraphPropTypes,
     ...rangePropTypes,
-    lines: PropTypes.instanceOf(list).isRequired,
+    lines: PropTypes.arrayOf(lineShape.isRequired).isRequired,
     isMobile: PropTypes.bool,
     hoverEffect: PropTypes.shape({
         labelX: PropTypes.func.isRequired,

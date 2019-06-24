@@ -1,8 +1,12 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
 import Graph from '~client/components/Graph';
-import { lineGraphPropTypes, rangePropTypes, pixelPropTypes } from '~client/components/Graph/propTypes';
+import {
+    lineGraphPropTypes,
+    rangePropTypes,
+    pixelPropTypes,
+    lineShape
+} from '~client/components/Graph/prop-types';
 import RenderedLine from '~client/components/Graph/RenderedLine';
 import HighlightPoint from '~client/components/HighlightPoint';
 
@@ -43,9 +47,9 @@ export default function LineGraphDumb({
         ...basicProps
     };
 
-    const renderedLines = useMemo(() => lines.map(line => (
+    const renderedLines = useMemo(() => lines.map(({ key, ...line }) => (
         <RenderedLine
-            key={line.get('key')}
+            key={key}
             line={line}
             {...dimensions}
             {...calc}
@@ -89,7 +93,7 @@ LineGraphDumb.propTypes = {
         ...rangePropTypes
     }).isRequired,
     calc: PropTypes.shape(pixelPropTypes).isRequired,
-    lines: ImmutablePropTypes.list.isRequired,
+    lines: PropTypes.arrayOf(lineShape.isRequired).isRequired,
     hoverEffect: PropTypes.object,
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
