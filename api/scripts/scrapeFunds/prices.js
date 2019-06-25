@@ -57,7 +57,7 @@ async function insertNewSinglePriceCache(db, logger, cid, fund) {
 }
 
 async function insertNewPriceCache(db, logger, fundsWithPrices, now) {
-    const [cid] = await db.insert({ time: now.toSQL({ includeOffset: false }), done: false })
+    const [cid] = await db.insert({ time: now, done: false })
         .returning('cid')
         .into('fund_cache_time');
 
