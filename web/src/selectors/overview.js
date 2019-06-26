@@ -53,7 +53,7 @@ function separateOldFunds(numRows) {
 }
 
 const predictCompoundInterest = (annualRate, jitter = 0) => last =>
-    last.concat([Math.round(last[last.length - 1] * (1 + annualRate / 144 + randnBm() * jitter))]); // TODO
+    last.concat([Math.round(last[last.length - 1] * (1 + annualRate / 12 + randnBm() * jitter))]);
 
 function predictByPastAverages(cost, futureMonths, currentMonthRatio, currentIndex) {
     const currentItems = replaceAtIndex(

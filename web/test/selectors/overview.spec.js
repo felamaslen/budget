@@ -91,12 +91,12 @@ test('getRowDates gets a list of dates at the end of each month', t => {
 test('getProcessedCost processs the cost data, including making predictions, adding spending / net columns etc.', t => {
     t.deepEqual(getProcessedCost(state), {
         spending: [1260, 2068, 659, 754, 207, 207, 207],
-        predicted: [13502, 13334, 20062, 13622, 15715, 17308, 19701],
-        balanceWithPredicted: [13502, 19220, 11876, 14981, 15715, 17308, 19701],
+        predicted: [13502, 13334, 20062, 13622, 15715, 17309, 19703],
+        balanceWithPredicted: [13502, 19220, 11876, 14981, 15715, 17309, 19703],
         old: [10000, 11500, 11200],
         net: [740, -168, 841, 1746, 2093, 1593, 2393],
         fundsOld: [94, 105, 110],
-        funds: [100, 101, 102, 103, 103, 103, 103],
+        funds: [100, 101, 102, 103, 104, 105, 106],
         fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
         income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
         bills: [1000, 900, 400, 650, 0, 0, 0],
@@ -191,7 +191,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             future: true,
             cells: [
                 { column: ['month', 'Month'], editable: false, value: 'May-18', rgb: null },
-                { column: ['funds', 'Stocks'], editable: false, value: 103, rgb: [170, 183, 189] },
+                { column: ['funds', 'Stocks'], editable: false, value: 104, rgb: [141, 158, 166] },
                 { column: ['bills', 'Bills'], editable: false, value: 0, rgb: [255, 255, 255] },
                 { column: ['food', 'Food'], editable: false, value: 23, rgb: [161, 208, 163] },
                 { column: ['general', 'General'], editable: false, value: 69, rgb: [128, 171, 205] },
@@ -210,7 +210,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             future: true,
             cells: [
                 { column: ['month', 'Month'], editable: false, value: 'Jun-18', rgb: null },
-                { column: ['funds', 'Stocks'], editable: false, value: 103, rgb: [170, 183, 189] },
+                { column: ['funds', 'Stocks'], editable: false, value: 105, rgb: [113, 134, 144] },
                 { column: ['bills', 'Bills'], editable: false, value: 0, rgb: [255, 255, 255] },
                 { column: ['food', 'Food'], editable: false, value: 23, rgb: [161, 208, 163] },
                 { column: ['general', 'General'], editable: false, value: 69, rgb: [128, 171, 205] },
@@ -219,7 +219,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['income', 'Income'], editable: false, value: 1800, rgb: [156, 226, 165] },
                 { column: ['spending', 'Out'], editable: false, value: 207, rgb: [245, 221, 221] },
                 { column: ['net', 'Net'], editable: false, value: 1593, rgb: [151, 224, 160] },
-                { column: ['predicted', 'Predicted'], editable: false, value: 17308, rgb: [105, 211, 118] },
+                { column: ['predicted', 'Predicted'], editable: false, value: 17309, rgb: [105, 211, 118] },
                 { column: ['balance', 'Net Worth'], editable: true, value: 12678, rgb: [152, 225, 161] }
             ]
         },
@@ -229,7 +229,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             future: true,
             cells: [
                 { column: ['month', 'Month'], editable: false, value: 'Jul-18', rgb: null },
-                { column: ['funds', 'Stocks'], editable: false, value: 103, rgb: [170, 183, 189] },
+                { column: ['funds', 'Stocks'], editable: false, value: 106, rgb: [84, 110, 122] },
                 { column: ['bills', 'Bills'], editable: false, value: 0, rgb: [255, 255, 255] },
                 { column: ['food', 'Food'], editable: false, value: 23, rgb: [161, 208, 163] },
                 { column: ['general', 'General'], editable: false, value: 69, rgb: [128, 171, 205] },
@@ -238,7 +238,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['income', 'Income'], editable: false, value: 2600, rgb: [36, 191, 55] },
                 { column: ['spending', 'Out'], editable: false, value: 207, rgb: [245, 221, 221] },
                 { column: ['net', 'Net'], editable: false, value: 2393, rgb: [36, 191, 55] },
-                { column: ['predicted', 'Predicted'], editable: false, value: 19701, rgb: [45, 194, 63] },
+                { column: ['predicted', 'Predicted'], editable: false, value: 19703, rgb: [45, 194, 63] },
                 { column: ['balance', 'Net Worth'], editable: true, value: 0, rgb: [255, 255, 255] }
             ]
         }
