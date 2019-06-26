@@ -1,27 +1,28 @@
 import { createSelector } from 'reselect';
 
-export const getNow = state => state.get('now');
+export const getNow = state => state.now;
 
-export const getApiKey = state => state.getIn(['user', 'apiKey']);
+export const getApiKey = state => state.user.apiKey;
 
-const getUid = state => state.getIn(['user', 'uid']);
+const getUid = state => state.user.uid;
 
 export const getLoggedIn = createSelector(getApiKey, getUid, (apiKey, uid) => Boolean(apiKey && uid));
 
-export const getRawRequestList = state => state.getIn(['edit', 'requestList']);
+export const getCurrentPage = state => state.currentPage;
 
-export const getRequestList = createSelector([getRawRequestList], requestList =>
-    requestList.map(item => item.get('req')));
+export const getRawRequestList = state => state.edit.requestList;
+
+export const getRequestList = createSelector([getRawRequestList], requestList => requestList.map(({ req }) => req));
 
 export const getAddData = state => ({
-    fields: state.getIn(['edit', 'addFields']),
-    item: state.getIn(['edit', 'addFieldsString'])
+    fields: state.edit.addFields,
+    item: state.edit.addFieldsString
 });
 
 export const getContentParamsAnalysis = state => ({
-    periodKey: state.getIn(['other', 'analysis', 'period']),
-    groupingKey: state.getIn(['other', 'analysis', 'grouping']),
-    timeIndex: state.getIn(['other', 'analysis', 'timeIndex'])
+    periodKey: state.other.analysis.period,
+    groupingKey: state.other.analysis.grouping,
+    timeIndex: state.other.analysis.timeIndex
 });
 
-export const getLoadedStatus = (state, { page }) => state.get('pages').has(page);
+export const getLoadedStatus = (state, { page }) => page in state.pages;
