@@ -1,4 +1,3 @@
-import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
 import { aFundsViewSoldToggled } from '~client/actions/content.actions';
@@ -8,18 +7,18 @@ import classNames from 'classnames';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getFundsCachedValue, getFundsCost } from '~client/selectors/funds';
 
+const formatOptions = { brackets: true, precision: 2 };
+
 function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedValue, onReloadPrices, onViewSoldToggle }) {
 
     let gainValues = null;
-    const currentValue = cachedValue.get('value');
+    const { ageText, value: currentValue } = cachedValue;
     const gainAbsValue = currentValue - totalCost;
 
     const profitClass = { profit: gainAbsValue > 0, loss: gainAbsValue < 0 };
 
     if (totalCost) {
         const gainPctValue = gainAbsValue / totalCost;
-
-        const formatOptions = { brackets: true, precision: 2 };
 
         gainValues = (
             <span className="gain-values">
@@ -35,7 +34,7 @@ function ListHeadFundsDesktop({ totalCost, viewSoldFunds, shortPeriod, cachedVal
         <span className={className} onClick={onReloadPrices(shortPeriod)}>
             <span className="value">{formatCurrency(currentValue)}</span>
             {gainValues}
-            <span className="cache-age">({cachedValue.get('ageText')})</span>
+            <span className="cache-age">({ageText})</span>
         </span>
     );
 
@@ -57,15 +56,18 @@ ListHeadFundsDesktop.propTypes = {
     totalCost: PropTypes.number.isRequired,
     viewSoldFunds: PropTypes.bool,
     shortPeriod: PropTypes.string.isRequired,
-    cachedValue: PropTypes.instanceOf(map).isRequired,
+    cachedValue: PropTypes.shape({
+        value: PropTypes.number.isRequired,
+        ageText: PropTypes.string.isRequired
+    }).isRequired,
     onViewSoldToggle: PropTypes.func.isRequired,
     onReloadPrices: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state, props) => ({
     totalCost: getFundsCost(state),
-    viewSoldFunds: state.getIn(['other', 'viewSoldFunds']),
-    shortPeriod: state.getIn(['other', 'graphFunds', 'period']),
+    viewSoldFunds: state.other.viewSoldFunds,
+    shortPeriod: state.other.graphFunds.period,
     cachedValue: getFundsCachedValue(state, props)
 });
 

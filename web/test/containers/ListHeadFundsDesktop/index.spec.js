@@ -1,7 +1,6 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -9,12 +8,13 @@ import React from 'react';
 import { DateTime } from 'luxon';
 import { aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
 import { aFundsViewSoldToggled } from '~client/actions/content.actions';
+import { replaceAtIndex } from '~client/modules/data';
 
 import ListHeadFundsDesktop from '~client/containers/ListHeadFundsDesktop';
 import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
 
-const getContainer = memoize((customProps = {}, customState = null) => {
-    let state = fromJS({
+const getContainer = memoize((customProps = {}, customState = state => state) => {
+    const state = customState({
         now: DateTime.fromISO('2017-09-01T20:01Z'),
         pages: {
             funds: {
@@ -34,10 +34,6 @@ const getContainer = memoize((customProps = {}, customState = null) => {
             }
         }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
@@ -66,9 +62,28 @@ test('gain span', t => {
 });
 
 test('gain class', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['pages', 'funds', 'cache', 'year1', 'prices', '10', 'values', 30], 430)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        pages: {
+            ...state.pages,
+            funds: {
+                ...state.pages.funds,
+                cache: {
+                    ...state.pages.funds.cache,
+                    year1: {
+                        ...state.pages.funds.cache.year1,
+                        prices: {
+                            ...state.pages.funds.cache.year1.prices,
+                            '10': {
+                                ...state.pages.funds.cache.year1.prices['10'],
+                                values: replaceAtIndex(state.pages.funds.cache.year1.prices['10'].values, 30, 430)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }));
 
     const [span] = container.childNodes;
 
