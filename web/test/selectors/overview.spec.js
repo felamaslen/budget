@@ -1,6 +1,5 @@
 import test from 'ava';
 import { DateTime } from 'luxon';
-import { fromJS } from 'immutable';
 import {
     getStartDate,
     getEndDate,
@@ -13,7 +12,7 @@ import {
     getOverviewTable
 } from '~client/selectors/overview';
 
-const state = fromJS({
+const state = {
     now: DateTime.fromISO('2018-03-23T11:45:20Z'),
     pages: {
         overview: {
@@ -37,14 +36,14 @@ const state = fromJS({
             rows: [[13502], [19220], [11876], [14981], [14230], [12678], [0]]
         }
     }
-});
+};
 
 test('getStartDate gets the start date', t => {
     t.deepEqual(getStartDate(state), DateTime.fromISO('2018-01-31T23:59:59.999Z'));
 });
 
 test('getEndDate gets the end date', t => {
-    t.deepEqual(getEndDate(state), DateTime.fromISO('2018-06-30T22:59:59.999Z'));
+    t.deepEqual(getEndDate(state), DateTime.fromISO('2018-06-30T23:59:59.999Z'));
 });
 
 test('getNumRows gets the numRows', t => {
@@ -52,7 +51,7 @@ test('getNumRows gets the numRows', t => {
 });
 
 test('getBalance gets the balance items', t => {
-    t.deepEqual(getBalance(state).toJS(), [13502, 19220, 11876, 14981, 14230, 12678, 0]);
+    t.deepEqual(getBalance(state), [13502, 19220, 11876, 14981, 14230, 12678, 0]);
 });
 
 test('getCurrentDate gets the end of the current day', t => {
@@ -60,9 +59,9 @@ test('getCurrentDate gets the end of the current day', t => {
 
     t.deepEqual(result, DateTime.fromISO('2018-03-23T23:59:59.999Z'));
 });
-test('getCurrentDate nots reload the result if the day doesn\'t change', t => {
+test('getCurrentDate does not reload the result if the day doesn\'t change', t => {
     const result = getCurrentDate(state);
-    const nextResult = getCurrentDate(state.set('now', DateTime.fromISO('2018-03-23T15:20Z')));
+    const nextResult = getCurrentDate({ ...state, now: DateTime.fromISO('2018-03-23T15:20Z') });
 
     // notice this equality check is shallow, i.e. by reference, so if the date had
     // been recalculated, this test would fail :)
@@ -71,26 +70,26 @@ test('getCurrentDate nots reload the result if the day doesn\'t change', t => {
 
 test('getFutureMonths calculates the number of months in the future there are, based on the current date', t => {
     t.is(getFutureMonths(state), 3);
-    t.is(getFutureMonths(state.set('now', DateTime.fromISO('2018-03-31T15:20Z'))), 3);
-    t.is(getFutureMonths(state.set('now', DateTime.fromISO('2018-03-31T22:59Z'))), 3);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T15:20Z') }), 3);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T22:59Z') }), 3);
 
-    t.is(getFutureMonths(state.set('now', DateTime.fromISO('2018-03-31T23:00Z'))), 2);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-04-01T00:00Z') }), 2);
 });
 
 test('getRowDates gets a list of dates at the end of each month', t => {
-    t.deepEqual(getRowDates(state).toJS(), [
+    t.deepEqual(getRowDates(state), [
         DateTime.fromISO('2018-01-31T23:59:59.999Z'),
         DateTime.fromISO('2018-02-28T23:59:59.999Z'),
-        DateTime.fromISO('2018-03-31T22:59:59.999Z'),
-        DateTime.fromISO('2018-04-30T22:59:59.999Z'),
-        DateTime.fromISO('2018-05-31T22:59:59.999Z'),
-        DateTime.fromISO('2018-06-30T22:59:59.999Z'),
-        DateTime.fromISO('2018-07-31T22:59:59.999Z')
+        DateTime.fromISO('2018-03-31T23:59:59.999Z'),
+        DateTime.fromISO('2018-04-30T23:59:59.999Z'),
+        DateTime.fromISO('2018-05-31T23:59:59.999Z'),
+        DateTime.fromISO('2018-06-30T23:59:59.999Z'),
+        DateTime.fromISO('2018-07-31T23:59:59.999Z')
     ]);
 });
 
 test('getProcessedCost processs the cost data, including making predictions, adding spending / net columns etc.', t => {
-    t.deepEqual(getProcessedCost(state).toJS(), {
+    t.deepEqual(getProcessedCost(state), {
         spending: [1260, 2068, 659, 754, 207, 207, 207],
         predicted: [13502, 13334, 20062, 13622, 15715, 17308, 19701],
         balanceWithPredicted: [13502, 19220, 11876, 14981, 15715, 17308, 19701],
@@ -109,7 +108,7 @@ test('getProcessedCost processs the cost data, including making predictions, add
 });
 
 test('getOverviewTable gets a list of rows for the overview table', t => {
-    t.deepEqual(getOverviewTable(state).toJS(), [
+    t.deepEqual(getOverviewTable(state), [
         {
             past: true,
             active: false,
