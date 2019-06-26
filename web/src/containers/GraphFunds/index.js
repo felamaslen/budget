@@ -1,5 +1,4 @@
 import './style.scss';
-import { List as list, OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
 import { DateTime } from 'luxon';
 import { aFundsGraphClicked, aFundsGraphLineToggled, aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
@@ -8,7 +7,12 @@ import React, { useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import LineGraph from '~client/components/Graph/LineGraph';
-import { rangePropTypes, pixelPropTypes } from '~client/components/Graph/propTypes';
+import {
+    rangePropTypes,
+    pixelPropTypes,
+    lineShape
+} from '~client/prop-types/graph';
+import { fundItemShape } from '~client/prop-types/page/funds';
 import { getTickSize } from '~client/modules/format';
 import {
     GRAPH_FUNDS_WIDTH,
@@ -70,27 +74,29 @@ function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {
 AfterCanvas.propTypes = {
     period: PropTypes.string.isRequired,
     mode: PropTypes.number.isRequired,
-    fundItems: PropTypes.instanceOf(OrderedMap).isRequired,
+    fundItems: PropTypes.arrayOf(fundItemShape.isRequired).isRequired,
     toggleLine: PropTypes.func.isRequired,
     changePeriod: PropTypes.func.isRequired
 };
 
 const makeGetRanges = ({
     mode,
-    zoomRange,
+    zoomRange: [zoomMin, zoomMax],
     lines,
     cacheTimes
-}) => (zoomedLines = lines, minX = zoomRange.get(0), maxX = zoomRange.get(1)) => {
+}) => (zoomedLines = lines, minX = zoomMin, maxX = zoomMax) => {
     if (!(zoomedLines && cacheTimes.size >= 2)) {
         return { minX, maxX, minY: -1, maxY: 1 };
     }
 
     const valuesY = zoomedLines
-        .map(line => line.get('data').map(item => item.get(1)))
-        .filter(item => item.size);
+        .map(({ data }) => data.map(([, yValue]) => yValue))
+        .filter(values => values.length);
 
-    let minY = valuesY.reduce((min, line) => Math.min(min, line.min()), Infinity);
-    let maxY = valuesY.reduce((max, line) => Math.max(max, line.max()), -Infinity);
+    let minY = valuesY.reduce((min, line) =>
+        Math.min(min, line.reduce((last, value) => Math.min(last, value), min)), Infinity);
+    let maxY = valuesY.reduce((max, line) =>
+        Math.max(max, line.reduce((last, value) => Math.max(last, value), max)), -Infinity);
 
     if (minY === maxY) {
         minY -= 0.5;
@@ -224,13 +230,11 @@ GraphFunds.propTypes = {
     isMobile: PropTypes.bool,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    fundItems: PropTypes.instanceOf(OrderedMap),
-    fundLines: PropTypes.instanceOf(list),
+    fundItems: PropTypes.arrayOf(fundItemShape.isRequired).isRequired,
     startTime: PropTypes.number.isRequired,
-    cacheTimes: PropTypes.instanceOf(list),
-    zoomRange: PropTypes.instanceOf(list),
-    funds: PropTypes.instanceOf(list),
-    lines: PropTypes.instanceOf(list),
+    cacheTimes: PropTypes.array.isRequired,
+    zoomRange: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+    lines: PropTypes.arrayOf(lineShape.isRequired),
     mode: PropTypes.number.isRequired,
     period: PropTypes.string,
     changePeriod: PropTypes.func.isRequired,
@@ -248,15 +252,15 @@ const makeMapStateToProps = () => {
 
     return (state, props) => ({
         name: 'fund-history',
-        width: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_FUNDS_WIDTH),
+        width: Math.min(state.other.windowWidth, GRAPH_FUNDS_WIDTH),
         height: props.isMobile
             ? styles.graphFundsHeightMobile
             : GRAPH_FUNDS_HEIGHT,
         ...getGraphProps(state, props),
-        zoomRange: state.getIn(['other', 'graphFunds', 'zoomRange']),
-        mode: state.getIn(['other', 'graphFunds', 'mode']),
-        period: state.getIn(['other', 'graphFunds', 'period']),
-        showOverall: state.getIn(['other', 'graphFunds', 'showOverall'])
+        zoomRange: state.other.graphFunds.zoomRange,
+        mode: state.other.graphFunds.mode,
+        period: state.other.graphFunds.period,
+        showOverall: state.other.graphFunds.showOverall
     });
 };
 

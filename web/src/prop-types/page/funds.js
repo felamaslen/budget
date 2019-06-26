@@ -8,3 +8,15 @@ export const gainShape = PropTypes.shape({
     dayGainAbs: PropTypes.number,
     color: PropTypes.arrayOf(PropTypes.number.isRequired)
 });
+
+export const fundItemShape = PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    color: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+    item: PropTypes.string.isRequired,
+    enabled: PropTypes.bool.isRequired
+});
+
+export const cachedValueShape = PropTypes.shape({
+    value: PropTypes.number.isRequired,
+    ageText: PropTypes.string.isRequired
+});

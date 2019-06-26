@@ -4,6 +4,7 @@ import { aFundsViewSoldToggled } from '~client/actions/content.actions';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { cachedValueShape } from '~client/prop-types/page/funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getFundsCachedValue, getFundsCost } from '~client/selectors/funds';
 
@@ -56,10 +57,7 @@ ListHeadFundsDesktop.propTypes = {
     totalCost: PropTypes.number.isRequired,
     viewSoldFunds: PropTypes.bool,
     shortPeriod: PropTypes.string.isRequired,
-    cachedValue: PropTypes.shape({
-        value: PropTypes.number.isRequired,
-        ageText: PropTypes.string.isRequired
-    }).isRequired,
+    cachedValue: cachedValueShape.isRequired,
     onViewSoldToggle: PropTypes.func.isRequired,
     onReloadPrices: PropTypes.func.isRequired
 };
