@@ -282,7 +282,13 @@ test('arrayAverage gets the mean by default', t => {
 
     t.is(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20]), 8.625);
 });
+test('arrayAverage does not mutate the array', t => {
+    const values = [1, 7, 3, 9];
 
+    arrayAverage(values, AVERAGE_MEDIAN);
+
+    t.deepEqual(values, [1, 7, 3, 9]);
+});
 
 test('randnBm returning a Gaussian-incremented value from two random numbers', t => {
     t.is(randnBm(0.13, 0.87), 1.382792212427032);

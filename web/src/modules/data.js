@@ -133,7 +133,7 @@ export function arrayAverage(values, mode = null) {
         return NaN;
     }
     if (mode === AVERAGE_MEDIAN) {
-        const sorted = values.sort((prev, next) => prev - next);
+        const sorted = values.slice().sort((prev, next) => prev - next);
 
         const oddLength = sorted.length & 1;
         if (oddLength) {
