@@ -116,10 +116,10 @@ GraphCashFlow.propTypes = {
     isMobile: PropTypes.bool.isRequired,
     graphHeight: PropTypes.number.isRequired,
     lines: PropTypes.arrayOf(PropTypes.shape({
-        minX: PropTypes.number.isRequired,
-        maxX: PropTypes.number.isRequired,
-        minY: PropTypes.number.isRequired,
-        maxY: PropTypes.number.isRequired
+        minX: PropTypes.number,
+        maxX: PropTypes.number,
+        minY: PropTypes.number,
+        maxY: PropTypes.number
     }).isRequired).isRequired,
     afterLines: PropTypes.func,
     after: PropTypes.func,

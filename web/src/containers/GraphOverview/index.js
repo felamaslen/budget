@@ -1,5 +1,4 @@
 import './style.scss';
-import { List as list, Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -7,6 +6,7 @@ import { DateTime } from 'luxon';
 import Media from 'react-media';
 import { mediaQueryMobile } from '~client/constants';
 import { getTargets } from '~client/selectors/graph';
+import { targetsShape } from '~client/prop-types/graph/balance';
 import { getCurrentDate, getStartDate, getFutureMonths, getProcessedCost } from '~client/selectors/overview';
 import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
@@ -26,8 +26,8 @@ export function GraphOverviewWrapped({ isMobile, startDate, now, futureMonths, c
             {!isMobile && (
                 <GraphSpending name="spend"
                     {...commonProps}
-                    valuesNet={cost.get('net')}
-                    valuesSpending={cost.get('spending')}
+                    valuesNet={cost.net}
+                    valuesSpending={cost.spending}
                 />
             )}
         </div>
@@ -39,8 +39,11 @@ GraphOverviewWrapped.propTypes = {
     startDate: PropTypes.instanceOf(DateTime).isRequired,
     now: PropTypes.instanceOf(DateTime).isRequired,
     futureMonths: PropTypes.number.isRequired,
-    cost: PropTypes.instanceOf(map).isRequired,
-    targets: PropTypes.instanceOf(list).isRequired,
+    cost: PropTypes.shape({
+        net: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+        spending: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
+    }).isRequired,
+    targets: targetsShape.isRequired,
     graphWidth: PropTypes.number.isRequired
 };
 
@@ -57,7 +60,7 @@ function GraphOverview(props) {
 const mapStateToProps = state => ({
     now: getCurrentDate(state),
     startDate: getStartDate(state),
-    graphWidth: Math.min(state.getIn(['other', 'windowWidth']), GRAPH_WIDTH),
+    graphWidth: Math.min(state.other.windowWidth, GRAPH_WIDTH),
     cost: getProcessedCost(state),
     futureMonths: getFutureMonths(state),
     targets: getTargets(state)
