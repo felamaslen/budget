@@ -1,4 +1,3 @@
-import { Map as map } from 'immutable';
 import { connect } from 'react-redux';
 import { aListItemDeleted } from '~client/actions/edit.actions';
 import React from 'react';
@@ -9,7 +8,7 @@ import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
 
 function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete }) {
-    const rowClass = row.get('className') || {};
+    const rowClass = row.className || {};
 
     const items = PAGES[page].cols.map((colName, colKey) => (
         <ListRowCell key={colName}
@@ -23,8 +22,8 @@ function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete })
     ));
 
     const itemClassName = classNames(rowClass, {
-        future: row.get('future'),
-        'first-present': row.get('first-present')
+        future: row.future,
+        'first-present': row.firstPresent
     });
 
     let afterRow = null;
@@ -47,7 +46,11 @@ function ListRowDesktop({ page, id, row, activeCol, daily, AfterRow, onDelete })
 ListRowDesktop.propTypes = {
     page: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
-    row: PropTypes.instanceOf(map).isRequired,
+    row: PropTypes.shape({
+        future: PropTypes.bool,
+        firstPresent: PropTypes.bool,
+        className: PropTypes.object
+    }).isRequired,
     activeCol: PropTypes.number,
     daily: PropTypes.number,
     AfterRow: PropTypes.func,
@@ -55,8 +58,8 @@ ListRowDesktop.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-    activeCol: state.getIn(['edit', 'active', 'row']) === props.id
-        ? state.getIn(['edit', 'active', 'col'])
+    activeCol: state.edit.active.row === props.id
+        ? state.edit.active.col
         : null
 });
 

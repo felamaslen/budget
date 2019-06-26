@@ -35,7 +35,23 @@ export const testState = {
                     prices: testPrices
                 }
             }
+        },
+        food: {
+            rows: [
+                { id: '10', foo: 'bar', cols: [], future: true },
+                { id: '11', bar: 'baz', cols: [], future: false }
+            ]
         }
+    },
+    edit: {
+        active: {
+            row: '10',
+            col: 2
+        }
+    },
+    editSuggestions: {
+        list: [],
+        active: -1
     },
     other: {
         windowWidth: 1000,

@@ -1,44 +1,28 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { Map as map } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
+import { testState } from '~client-test/test_data/state';
 import ListRowDesktop from '~client/containers/ListRowDesktop';
 import { aListItemDeleted } from '~client/actions/edit.actions';
 
 const AfterRow = () => null;
 
-const getContainer = memoize((customProps = {}, customState = null) => {
-    let state = map({
-        pages: map({
-            food: map({
-                rows: map([
-                    [10, map({ foo: 'bar', future: true })],
-                    [11, map({ bar: 'baz', future: false })]
-                ])
-            })
-        }),
-        edit: map({
-            active: map({
-                row: 10,
-                col: 2
-            })
-        })
-    });
-
-    if (customState) {
-        state = customState(state);
-    }
+const getContainer = memoize((customProps = {}, customState = state => state) => {
+    const state = customState(testState);
 
     const store = createMockStore(state);
 
     const props = {
         page: 'food',
         id: '10',
-        row: state.getIn(['pages', 'food', 'rows', customProps.id || 10]),
+        row: {
+            ...state.pages.food.rows.find(({ id }) => id === customProps.id || '10'),
+            future: true
+        },
         AfterRow,
         ...customProps
     };
