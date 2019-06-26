@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */
-import { List as list, Map as map } from 'immutable';
 import { getTransactionsList } from '~client/modules/data';
 
-export const testRows = map([
-    ['10', map({
-        'cols': list([
+export const testRows = [
+    {
+        id: '10',
+        cols: [
             'some fund 1',
             getTransactionsList([
                 {
@@ -13,10 +13,11 @@ export const testRows = map([
                     date: '2017-05-09'
                 }
             ])
-        ])
-    })],
-    ['3', map({
-        cols: list([
+        ]
+    },
+    {
+        id: '3',
+        cols: [
             'some fund 2',
             getTransactionsList([
                 {
@@ -30,10 +31,11 @@ export const testRows = map([
                     date: '2017-04-27'
                 }
             ])
-        ])
-    })],
-    ['1', map({
-        cols: list([
+        ]
+    },
+    {
+        id: '1',
+        cols: [
             'some fund 3',
             getTransactionsList([
                 {
@@ -47,10 +49,11 @@ export const testRows = map([
                     date: '2017-04-27'
                 }
             ])
-        ])
-    })],
-    ['5', map({
-        cols: list([
+        ]
+    },
+    {
+        id: '5',
+        cols: [
             'test fund 4',
             getTransactionsList([
                 {
@@ -64,13 +67,13 @@ export const testRows = map([
                     date: '2017-04-27'
                 }
             ])
-        ])
-    })]
-]);
+        ]
+    }
+];
 
-export const testPrices = map([
-    ['10', map({
-        values: list([
+export const testPrices = {
+    '10': {
+        values: [
             429.5,
             429.5,
             432.3,
@@ -102,11 +105,11 @@ export const testPrices = map([
             426.1,
             424.1,
             427.3
-        ]),
+        ],
         startIndex: 69
-    })],
-    ['3', map({
-        values: list([
+    },
+    '3': {
+        values: [
             99.86,
             99.77,
             99.15,
@@ -124,11 +127,11 @@ export const testPrices = map([
             100.19,
             101.05,
             101.37
-        ]),
+        ],
         startIndex: 48
-    })],
-    ['1', map({
-        values: list([
+    },
+    '1': {
+        values: [
             80.9,
             80.06,
             79.36,
@@ -162,11 +165,11 @@ export const testPrices = map([
             76.61,
             77.35,
             78.54
-        ]),
+        ],
         startIndex: 32
-    })],
-    ['5', map({
-        values: list([
+    },
+    '5': {
+        values: [
             137.77,
             136.3,
             136.08,
@@ -232,10 +235,10 @@ export const testPrices = map([
             142.2,
             144.21,
             144.94
-        ]),
+        ],
         startIndex: 0
-    })]
-]);
+    }
+};
 
 export const testLines = [
     {
@@ -781,7 +784,7 @@ export const testLines = [
 ];
 
 export const testStartTime = 1475661661;
-export const testCacheTimes = list([
+export const testCacheTimes = [
     0,
     259200,
     518400,
@@ -882,4 +885,4 @@ export const testCacheTimes = list([
     27932400,
     28364400,
     28623600
-]);
+];
