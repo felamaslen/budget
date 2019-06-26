@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import LineGraph from '~client/components/Graph/LineGraph';
-import { rangePropTypes } from '~client/components/Graph/propTypes';
+import { rangePropTypes } from '~client/prop-types/graph';
 import Axes from '~client/components/GraphCashFlow/Axes';
 import NowLine from '~client/components/GraphCashFlow/NowLine';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
@@ -26,7 +26,7 @@ export function getValuesWithTime(data, props) {
     return data.map((value, index) => {
         const date = getTime(index, props.now, oldOffset, breakAtToday, startDate);
 
-        return [date.ts / 1000, value, date];
+        return [date.ts / 1000, value];
     });
 }
 
