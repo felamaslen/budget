@@ -1,4 +1,3 @@
-import { List as list, Map as map, OrderedMap } from 'immutable';
 import { createSelector } from 'reselect';
 import {
     GRAPH_FUNDS_MODE_PRICE,
@@ -8,92 +7,92 @@ import {
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
 import { rgba, colorKey } from '~client/modules/color';
 import { separateLines } from '~client/modules/funds';
-import { getTotalUnits, getTotalCost } from '~client/modules/data';
-import { getViewSoldFunds, transactionsKey, itemKey, getRowLengths, getCurrentFundsCache, getFundsRows } from './helpers';
+import { getTotalUnits, getTotalCost, isSold } from '~client/modules/data';
+import {
+    getViewSoldFunds,
+    transactionsKey,
+    itemKey,
+    getRowLengths,
+    getCurrentFundsCache,
+    getFundsRows
+} from '~client/selectors/funds/helpers';
 import { getFundLineProcessed } from './lines';
 
-const getGraphMode = state => state.getIn(['other', 'graphFunds', 'mode']);
-const getEnabledList = state => state.getIn(['other', 'graphFunds', 'enabledList']);
+const getGraphMode = state => state.other.graphFunds.mode;
+const getEnabledList = state => state.other.graphFunds.enabledList;
 
 function getFundItems(rows, enabledList, soldList) {
-    const colors = rows.map(row => colorKey(row.getIn(['cols', itemKey])))
-        .set(GRAPH_FUNDS_OVERALL_ID, COLOR_GRAPH_FUND_LINE);
+    const colors = rows.reduce((last, { id, cols }) => ({
+        ...last,
+        [id]: colorKey(cols[itemKey])
+    }), { [GRAPH_FUNDS_OVERALL_ID]: COLOR_GRAPH_FUND_LINE });
 
-    return enabledList.filter((item, id) => !soldList.get(id) &&
-        (id === GRAPH_FUNDS_OVERALL_ID || rows.has(id))
+    return enabledList.filter(({ id }) =>
+        !soldList[id] &&
+        (id === GRAPH_FUNDS_OVERALL_ID || rows.some(({ id: rowId }) => rowId === id))
     )
-        .map((enabled, id) => {
-            const color = colors.get(id);
-
-            const item = id === GRAPH_FUNDS_OVERALL_ID
+        .map(({ id, enabled }) => ({
+            id,
+            color: colors[id],
+            item: id === GRAPH_FUNDS_OVERALL_ID
                 ? 'Overall'
-                : rows.getIn([id, 'cols', itemKey]);
-
-            return map({ item, color, enabled });
-        });
+                : rows.find(({ id: rowId }) => rowId === id).cols[itemKey],
+            enabled
+        }));
 }
 
 function getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList) {
-    return enabledList.reduce((last, enabled, id) => {
-        if (priceUnitsCosts.sold.get(id) ||
-            !(enabled && times.get(id) && times.get(id).size > 1)
-        ) {
-
+    return enabledList.reduce((last, { id, enabled }) => {
+        if (priceUnitsCosts.sold[id] || !(enabled && times[id] && times[id].length > 1)) {
             return last;
         }
 
-        const item = getFundLineProcessed(times.get(id), timeOffsets, priceUnitsCosts, mode, id);
+        const item = getFundLineProcessed(times[id], timeOffsets, priceUnitsCosts, mode, id);
         if (!item) {
             return last;
         }
 
-        const line = item.set('line', separateLines(item.get('line')));
-
-        return last.push(line);
-
-    }, list.of());
+        return last.concat([{
+            ...item,
+            line: separateLines(item.line)
+        }]);
+    }, []);
 }
 
-function getPriceUnitsCosts(rows, prices, startTime, cacheTimes, viewSold) {
-    return rows.reduce((red, row, id) => {
-        if (!prices.get(id)) {
-            return red;
-        }
+function getPriceUnitsCosts(rows, rawPrices, startTime, cacheTimes, viewSold) {
+    const rowsWithInfo = rows
+        .filter(({ id }) => rawPrices[id])
+        .map(({ id, cols }) => ({
+            id,
+            transactions: cols[transactionsKey],
+            transactionsToDate: rawPrices[id].values.map((price, index) =>
+                cols[transactionsKey].filter(({ date }) =>
+                    date < 1000 * (startTime + cacheTimes[index + rawPrices[id].startIndex])
+                )
+            )
+        }));
 
-        const transactions = row.getIn(['cols', transactionsKey]);
+    const sold = rowsWithInfo.reduce((last, { id, transactions }) => ({
+        ...last,
+        [id]: !viewSold && isSold(transactions)
+    }), {});
 
-        const thisPrices = prices.getIn([id, 'values']);
-        const timeOffset = prices.getIn([id, 'startIndex']);
+    const prices = rowsWithInfo.reduce((last, { id }) => ({
+        ...last,
+        [id]: rawPrices[id].values
+    }), {});
 
-        const { thisUnits, thisCosts } = thisPrices.reduce((rowRed, price, index) => {
-            const time = cacheTimes.get(index + timeOffset);
+    const units = rowsWithInfo.reduce((last, { id, transactionsToDate }) => ({
+        ...last,
+        [id]: prices[id].map((price, index) => getTotalUnits(transactionsToDate[index]))
+    }), {});
 
-            const transactionsToNow = transactions.filter(item => item.date < 1000 * (startTime + time));
+    const costs = rowsWithInfo.reduce((last, { id, transactionsToDate }) => ({
+        ...last,
+        [id]: prices[id].map((price, index) => getTotalCost(transactionsToDate[index]))
+    }), {});
 
-            const thisPriceUnits = getTotalUnits(transactionsToNow);
-            const thisPriceCost = getTotalCost(transactionsToNow);
-
-            return {
-                thisUnits: rowRed.thisUnits.push(thisPriceUnits),
-                thisCosts: rowRed.thisCosts.push(thisPriceCost)
-            };
-        }, {
-            thisUnits: list.of(),
-            thisCosts: list.of()
-        });
-
-        return {
-            sold: red.sold.set(id, !viewSold && transactions.isSold()),
-            prices: red.prices.set(id, thisPrices),
-            units: red.units.set(id, thisUnits),
-            costs: red.costs.set(id, thisCosts)
-        };
-    }, {
-        sold: map.of(),
-        prices: map.of(),
-        units: map.of(),
-        costs: map.of()
-    });
+    return { sold, prices, units, costs };
 }
 
 const getFormattedHistory = createSelector([
@@ -106,24 +105,19 @@ const getFormattedHistory = createSelector([
     // get a formatted list of lines for display in the fund price / value graph
 
     if (!cache) {
-        return {
-            fundItems: OrderedMap.of()
-        };
+        return { fundItems: [] };
     }
 
-    const prices = cache.get('prices');
-    const startTime = cache.get('startTime');
-    const cacheTimes = cache.get('cacheTimes');
+    const { prices, startTime, cacheTimes } = cache;
 
     const priceUnitsCosts = getPriceUnitsCosts(rows, prices, startTime, cacheTimes, viewSoldFunds);
 
     const { timeOffsets, rowLengths, maxLength } = getRowLengths(prices);
 
-    const times = rowLengths.reduce(
-        (items, length, id) =>
-            items.set(id, cacheTimes.slice(timeOffsets.get(id), timeOffsets.get(id) + length)),
-        map({ [GRAPH_FUNDS_OVERALL_ID]: cacheTimes.slice(0, maxLength) })
-    );
+    const times = Object.keys(prices).reduce((items, id) => ({
+        ...items,
+        [id]: cacheTimes.slice(timeOffsets[id], timeOffsets[id] + rowLengths[id])
+    }), { [GRAPH_FUNDS_OVERALL_ID]: cacheTimes.slice(0, maxLength) });
 
     const fundItems = getFundItems(rows, enabledList, priceUnitsCosts.sold);
 
@@ -133,22 +127,17 @@ const getFormattedHistory = createSelector([
 });
 
 function getLines({ isMobile, fundLines, fundItems, mode }) {
-    if (!fundLines) {
-        return list.of();
-    }
-
-    return fundLines.reduce((lines, item) => {
-        const id = item.get('id');
+    return (fundLines || []).reduce((lines, { id, line }) => {
         const mainLine = id === GRAPH_FUNDS_OVERALL_ID;
         if (isMobile && !mainLine && mode !== GRAPH_FUNDS_MODE_PRICE) {
             return lines;
         }
 
-        const color = rgba(fundItems.getIn([id, 'color']));
+        const color = rgba(fundItems.find(({ id: itemId }) => itemId === id).color);
 
         const strokeWidth = 1 + 0.5 * (mainLine >> 0);
 
-        const itemLines = item.get('line').map((data, key) => map({
+        const itemLines = line.map((data, key) => ({
             key: `${id}-${key}`,
             data,
             smooth: mode === GRAPH_FUNDS_MODE_ROI,
@@ -157,8 +146,7 @@ function getLines({ isMobile, fundLines, fundItems, mode }) {
         }));
 
         return lines.concat(itemLines);
-
-    }, list.of());
+    }, []);
 }
 
 function getGraphProps(mode, { startTime, cacheTimes, fundItems, fundLines }, isMobile) {

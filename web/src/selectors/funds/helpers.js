@@ -4,21 +4,29 @@ import { PAGES } from '~client/constants/data';
 export const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 export const itemKey = PAGES.funds.cols.indexOf('item');
 
-export const getViewSoldFunds = state => Boolean(state.getIn(['other', 'viewSoldFunds']));
+export const getViewSoldFunds = state => Boolean(state.other.viewSoldFunds);
 
 export function getRowLengths(prices) {
-    const timeOffsets = prices.map(row => row.get('startIndex'));
-    const rowLengths = prices.map((row, id) => row.get('values').size + timeOffsets.get(id));
+    const timeOffsets = Object.keys(prices).reduce((last, id) => ({
+        ...last,
+        [id]: prices[id].startIndex
+    }), {});
+    const rowLengths = Object.keys(prices).reduce((last, id) => ({
+        ...last,
+        [id]: prices[id].values.length + timeOffsets[id]
+    }), {});
 
-    const maxLength = rowLengths.max();
+    const maxLength = Object.keys(prices).reduce((last, id) => Math.max(last, rowLengths[id]), 0);
 
     return { timeOffsets, rowLengths, maxLength };
 }
 
-export const getFundsRows = state => state.getIn(['pages', 'funds', 'rows']);
+export const getFundsRows = state => state.pages.funds.rows;
 
-export const getFundsCache = state => state.getIn(['pages', 'funds', 'cache']);
-const getFundsPeriod = state => state.getIn(['other', 'graphFunds', 'period']);
+export const getFundsCache = state => state.pages.funds.cache;
+const getFundsPeriod = state => state.other.graphFunds.period;
 
-export const getCurrentFundsCache = createSelector([getFundsPeriod, getFundsCache],
-    (period, cache) => cache && cache.get(period));
+export const getCurrentFundsCache = createSelector([
+    getFundsPeriod,
+    getFundsCache
+], (period, cache) => cache && cache[period]);

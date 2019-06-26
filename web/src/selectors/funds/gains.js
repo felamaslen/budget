@@ -1,5 +1,4 @@
-import { Map as map } from 'immutable';
-
+import memoize from 'fast-memoize';
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { PAGES } from '~client/constants/data';
 import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
@@ -50,16 +49,16 @@ function getCostValue(transactions, price, yesterdayPrice) {
 }
 
 export function getRowGains(rows, cache) {
-    return rows.reduce((items, row, id) => {
-        const rowCache = cache.getIn(['prices', id]);
-        if (!(rowCache && rowCache.get('values').size)) {
+    return rows.reduce((items, { id, cols }) => {
+        const rowCache = cache.prices[id];
+        if (!(rowCache && rowCache.values.length)) {
             return items;
         }
 
-        const transactions = row.getIn(['cols', transactionsKey]);
-        const price = rowCache.get('values').last();
-        const yesterdayPrice = rowCache.get('values').size > 1
-            ? rowCache.getIn(['values', -2])
+        const transactions = cols[transactionsKey];
+        const price = rowCache.values[rowCache.values.length - 1];
+        const yesterdayPrice = rowCache.values.length > 1
+            ? rowCache.values[rowCache.values.length - 2]
             : null;
 
         const { cost, ...props } = getCostValue(transactions, price, yesterdayPrice);
@@ -67,17 +66,16 @@ export function getRowGains(rows, cache) {
         const gainAbs = roundAbs(props.value - cost);
         const gain = roundGain((props.value - cost) / cost);
 
-        return items.set(id, map({ ...props, gain, gainAbs }));
-
-    }, map.of());
+        return { ...items, [id]: { ...props, gain, gainAbs } };
+    }, {});
 }
 
-export function getGainsForRow(rowGains, id, min, max) {
-    if (!rowGains.get(id)) {
-        return null;
-    }
+const getMinMax = memoize(rowGains => Object.keys(rowGains).reduce(([min, max], id) => ([
+    Math.min(min, rowGains[id].gain),
+    Math.max(max, rowGains[id].gain)
+]), [Infinity, -Infinity]));
 
-    const color = getFundColor(rowGains.getIn([id, 'gain']), min, max);
-
-    return rowGains.get(id).set('color', color);
-}
+export const getGainsForRow = (rowGains, id) => rowGains[id] && ({
+    ...rowGains[id],
+    color: getFundColor(rowGains[id].gain, ...getMinMax(rowGains))
+});
