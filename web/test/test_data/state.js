@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon';
 
+import { testRows, testPrices, testStartTime, testCacheTimes } from '~client-test/test_data/testFunds';
+
 export const testState = {
     now: DateTime.fromISO('2018-03-23T11:45:20Z'),
     pages: {
@@ -22,6 +24,21 @@ export const testState = {
                 numCols: 1
             },
             rows: [[13502], [19220], [11876], [14981], [14230], [12678], [0]]
+        },
+        funds: {
+            rows: testRows,
+            cache: {
+                period1: {
+                    startTime: testStartTime,
+                    cacheTimes: testCacheTimes,
+                    prices: testPrices
+                }
+            }
+        }
+    },
+    other: {
+        graphFunds: {
+            period: 'period1'
         }
     }
 };

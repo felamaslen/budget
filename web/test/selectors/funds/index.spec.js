@@ -1,11 +1,13 @@
 import test from 'ava';
 import { DateTime } from 'luxon';
+
+import { testState as state } from '~client-test/test_data/state';
 import {
     getFundsCachedValueAgeText,
     getFundsCachedValue,
+    getFundsCost,
     getProcessedFundsRows
 } from '~client/selectors/funds';
-import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
 
 test('getFundsCachedValueAgeText returns the expected string', t => {
     const now = DateTime.fromISO('2018-06-03');
@@ -14,55 +16,17 @@ test('getFundsCachedValueAgeText returns the expected string', t => {
 });
 
 test('getFundsCachedValue gets an age text and value', t => {
-    const state = {
-        now: DateTime.fromISO('2017-09-01T19:01Z'),
-        pages: {
-            funds: {
-                rows: testRows,
-                cache: {
-                    period1: {
-                        startTime: testStartTime,
-                        cacheTimes: testCacheTimes,
-                        prices: testPrices
-                    }
-                }
-            }
-        },
-        other: {
-            graphFunds: {
-                period: 'period1'
-            }
-        }
-    };
-
     const expectedValue = 399098.2;
-    const expectedAgeText = '2 hours ago';
+    const expectedAgeText = '6 months, 3 weeks ago';
 
     t.deepEqual(getFundsCachedValue(state), { value: expectedValue, ageText: expectedAgeText });
 });
 
-test('getProcessedFundsRows sets gain, prices, sold and class information on each fund row', t => {
-    const state = {
-        now: DateTime.fromISO('2017-09-01T19:01Z'),
-        pages: {
-            funds: {
-                rows: testRows,
-                cache: {
-                    period1: {
-                        startTime: testStartTime,
-                        cacheTimes: testCacheTimes,
-                        prices: testPrices
-                    }
-                }
-            }
-        },
-        other: {
-            graphFunds: {
-                period: 'period1'
-            }
-        }
-    };
+test('getFundsCost gets the total fund cost, excluding sold funds', t => {
+    t.is(getFundsCost(state), 400000);
+});
 
+test('getProcessedFundsRows sets gain, prices, sold and class information on each fund row', t => {
     const result = getProcessedFundsRows(state);
 
     t.true(Array.isArray(result));

@@ -49,14 +49,13 @@ export const getFundsCachedValue = createSelector([
     getFundCacheAge
 ], (value, ageText) => ({ value, ageText }));
 
-export const getFundsCost = createSelector([getFundsRows], rows => {
+export const getFundsCost = createSelector(getFundsRows, rows => {
     if (!rows) {
         return 0;
     }
 
-    return rows.reduce((sum, row) => {
-        const transactions = row.getIn(['cols', transactionsKey]);
-
+    return rows.reduce((sum, { cols }) => {
+        const transactions = cols[transactionsKey];
         if (isSold(transactions)) {
             return sum;
         }
