@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 import { PAGES } from '~client/constants/data';
+import { getFundsCost } from '~client/selectors/funds';
 
 export const getAllPageRows = (state, { page }) => state.pages[page].rows;
 
@@ -52,4 +53,18 @@ export const getWeeklyAverages = createSelector([getPageProp, getAllPageRows], (
     }
 
     return Math.round(visibleTotal / numWeeks);
+});
+
+const getListPageData = (state, { page }) => state.pages[page].data && state.pages[page].data.total;
+
+export const getTotalCost = createSelector([
+    getPageProp,
+    getListPageData,
+    getFundsCost
+], (page, total, fundsTotal) => {
+    if (page === 'funds') {
+        return fundsTotal;
+    }
+
+    return total;
 });

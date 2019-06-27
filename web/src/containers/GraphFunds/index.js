@@ -31,38 +31,27 @@ const PADDING_DESKTOP = [36, 0, 0, 0];
 const PADDING_MOBILE = [0, 0, 0, 0];
 
 function AfterCanvas({ period, mode, fundItems, toggleLine, changePeriod }) {
-    let fundLineToggles = null;
-    if (fundItems) {
-        fundLineToggles = fundItems.map((item, id) => {
-            const className = classNames({ enabled: item.get('enabled') });
-            const onClick = () => toggleLine(id);
-            const style = {
-                borderColor: rgba(item.get('color'))
-            };
-
-            return <li key={id} className={className} onClick={onClick}>
-                <span className="checkbox" style={style}></span>
-                <span className="fund">{item.get('item')}</span>
-            </li>;
-        })
-            .toList();
-    }
-
-    const onChange = evt => changePeriod({ shortPeriod: evt.target.value });
-
-    const periodOptions = GRAPH_FUNDS_PERIODS.map(([value, display], key) => (
-        <option key={key} value={value}>{display}</option>
-    ));
+    const onChange = useCallback(evt => changePeriod({ shortPeriod: evt.target.value }));
 
     return (
         <div className="after-canvas">
             <ul className="fund-sidebar noselect">
                 <li>
                     <select defaultValue={period} onChange={onChange}>
-                        {periodOptions}
+                        {GRAPH_FUNDS_PERIODS.map(([value, display], key) => (
+                            <option key={key} value={value}>{display}</option>
+                        ))}
                     </select>
                 </li>
-                {fundLineToggles}
+                {fundItems && fundItems.map(({ id, color, item, enabled }) => (
+                    <li key={id}
+                        className={classNames({ enabled })}
+                        onClick={() => toggleLine(id)}
+                    >
+                        <span className="checkbox" style={{ borderColor: rgba(color) }}></span>
+                        <span className="fund">{item}</span>
+                    </li>
+                ))}
             </ul>
             <span className="mode">
                 {'Mode: '}{GRAPH_FUNDS_MODES[mode]}

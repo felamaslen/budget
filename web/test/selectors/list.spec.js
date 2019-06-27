@@ -2,8 +2,10 @@ import test from 'ava';
 import { DateTime } from 'luxon';
 import {
     getDailyTotals,
-    getWeeklyAverages
+    getWeeklyAverages,
+    getTotalCost
 } from '~client/selectors/list';
+import { testRows } from '~client-test/test_data/testFunds';
 
 const state = {
     now: DateTime.fromISO('2018-03-23T11:45:20Z'),
@@ -33,6 +35,9 @@ const state = {
                     cols: [DateTime.fromISO('2018-02-02'), 'foo3', 'bar3', 498, 'bak3']
                 }
             ]
+        },
+        funds: {
+            rows: testRows
         }
     }
 };
@@ -53,4 +58,12 @@ test('getWeeklyAverages returns null for non-daily pages', t => {
 
 test('getWeeklyAverages returns the data with a processed weekly value', t => {
     t.is(getWeeklyAverages(state, { page: 'food' }), Math.round((29 + 1139 + 876 + 498) / 10.571428571428571));
+});
+
+test('getTotalCost returns the total cost of a list page', t => {
+    t.is(getTotalCost(state, { page: 'food' }), 8755601);
+});
+
+test('getTotalCost returns the fund cost value for the funds page', t => {
+    t.is(getTotalCost(state, { page: 'funds' }), 400000);
 });

@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { Map as map, List as list, OrderedMap } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -8,56 +7,53 @@ import React from 'react';
 import { DateTime } from 'luxon';
 import PageFunds from '~client/containers/PageFunds';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = map({
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
         now: DateTime.fromISO('2019-04-06T23:02Z'),
-        edit: map({
-            add: map({
-                funds: list.of(
-                    '',
-                    ''
-                )
-            }),
+        edit: {
+            active: {
+                row: null,
+                col: null
+            },
+            add: {
+                funds: ['', '']
+            },
             addBtnFocus: false
-        }),
-        pages: map({
-            funds: map({
-                cache: map({
-                    year1: map({
-                        cacheTimes: list.of(),
-                        prices: list.of()
-                    })
-                }),
-                rows: OrderedMap.of()
-            })
-        }),
-        pagesLoaded: map({
+        },
+        pages: {
+            funds: {
+                cache: {
+                    year1: {
+                        cacheTimes: [],
+                        prices: []
+                    }
+                },
+                rows: []
+            }
+        },
+        pagesLoaded: {
             funds: true
-        }),
-        other: map({
+        },
+        other: {
             windowWidth: 1000,
-            graphFunds: map({
+            graphFunds: {
                 mode: 0,
                 period: 'year1',
-                zoomRange: list.of(0, 0),
-                enabledList: OrderedMap.of()
-            }),
-            stocksList: map({
+                zoomRange: [0, 0],
+                enabledList: []
+            },
+            stocksList: {
                 loadedList: false,
                 loadedInitial: false,
-                stocks: map.of(),
-                indices: map.of(),
-                history: list.of(),
+                stocks: {},
+                indices: {},
+                history: [],
                 lastPriceUpdate: 0,
                 weightedGain: 0,
                 oldWeightedGain: 0
-            })
-        })
+            }
+        }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 

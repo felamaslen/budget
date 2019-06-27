@@ -1,9 +1,8 @@
 import './style.scss';
-import { OrderedMap } from 'immutable';
 import { connect } from 'react-redux';
 import { getProcessedFundsRows } from '~client/selectors/funds';
 import React from 'react';
-import PropTypes from 'prop-types';
+import { rowsShape } from '~client/prop-types/page/rows';
 import { PageList } from '~client/containers/PageList';
 import FundsMeta from '~client/components/FundsMeta';
 import ListHeadFundsDesktop from '~client/containers/ListHeadFundsDesktop';
@@ -26,7 +25,7 @@ function PageFunds({ rows }) {
 }
 
 PageFunds.propTypes = {
-    rows: PropTypes.instanceOf(OrderedMap)
+    rows: rowsShape
 };
 
 const mapStateToProps = state => ({
