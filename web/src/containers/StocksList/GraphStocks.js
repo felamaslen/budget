@@ -2,7 +2,6 @@
  * Graph general cash flow (balance over time)
  */
 
-import { List as list, Map as map } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import LineGraph from '~client/components/Graph/LineGraph';
@@ -10,7 +9,7 @@ import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '~client/constants/graph
 import { COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
 
 export default function GraphStocks({ history }) {
-    const lines = useMemo(() => list.of(map({
+    const lines = useMemo(() => ([{
         key: 'graph-stock-prices',
         data: history,
         color: value => {
@@ -20,10 +19,11 @@ export default function GraphStocks({ history }) {
 
             return COLOR_LOSS;
         }
-    })), [history]);
+    }]), [history]);
 
     return (
         <LineGraph
+            name="graph-stocks"
             lines={lines}
             width={GRAPH_STOCKS_WIDTH}
             height={GRAPH_STOCKS_HEIGHT}
@@ -32,5 +32,5 @@ export default function GraphStocks({ history }) {
 }
 
 GraphStocks.propTypes = {
-    history: PropTypes.instanceOf(list).isRequired
+    history: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
 };

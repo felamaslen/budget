@@ -7,10 +7,10 @@ export const lineGraphPropTypes = {
 };
 
 export const rangePropTypes = {
-    minX: PropTypes.number.isRequired,
-    maxX: PropTypes.number.isRequired,
-    minY: PropTypes.number.isRequired,
-    maxY: PropTypes.number.isRequired
+    minX: PropTypes.number,
+    maxX: PropTypes.number,
+    minY: PropTypes.number,
+    maxY: PropTypes.number
 };
 
 export const pixelPropTypes = {

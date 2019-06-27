@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import sinon from 'sinon';
 import React from 'react';
 import { render } from 'react-testing-library';
@@ -9,8 +8,8 @@ import { createMockStore } from 'redux-test-utils';
 import StocksList from '~client/containers/StocksList';
 import { aStocksListRequested } from '~client/actions/stocks-list.actions';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
         other: {
             stocksList: {
                 loadedList: false,
@@ -59,10 +58,6 @@ const getContainer = (customProps = {}, customState = null) => {
         }
     });
 
-    if (customState) {
-        state = customState;
-    }
-
     const store = createMockStore(state);
 
     const props = {
@@ -79,7 +74,7 @@ const getContainer = (customProps = {}, customState = null) => {
     return { store, ...utils };
 };
 
-test.skip('basic structure', t => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -90,7 +85,7 @@ test.skip('basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test.skip('requesting a stocks list when it renders', t => {
+test('requesting a stocks list when it renders', t => {
     const clock = sinon.useFakeTimers();
 
     const { store } = getContainer();
@@ -106,7 +101,7 @@ test.skip('requesting a stocks list when it renders', t => {
     clock.restore();
 });
 
-test.skip('rendering a graph container', t => {
+test('rendering a graph container', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -117,7 +112,7 @@ test.skip('rendering a graph container', t => {
     t.is(graph.childNodes.length, 2);
 });
 
-test.skip('rendering a stocks list', t => {
+test('rendering a stocks list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -129,7 +124,7 @@ test.skip('rendering a stocks list', t => {
     t.is(stocksList.childNodes.length, 2);
 });
 
-test.skip('rendering CTY stock', t => {
+test('rendering CTY stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -172,7 +167,7 @@ test.skip('rendering CTY stock', t => {
     t.is(change.innerHTML, '0.01%');
 });
 
-test.skip('rendering SMT stock', t => {
+test('rendering SMT stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -215,7 +210,7 @@ test.skip('rendering SMT stock', t => {
     t.is(change.innerHTML, '-0.54%');
 });
 
-test.skip('rendering a stocks sidebar', t => {
+test('rendering a stocks sidebar', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -228,7 +223,7 @@ test.skip('rendering a stocks sidebar', t => {
     t.is(sidebar.childNodes.length, 2);
 });
 
-test.skip('rendering a stocks graph', t => {
+test('rendering a stocks graph', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -239,10 +234,10 @@ test.skip('rendering a stocks graph', t => {
     const [stocksGraph] = sidebar.childNodes;
 
     t.is(stocksGraph.tagName, 'DIV');
-    t.is(stocksGraph.className, 'graph-container');
+    t.is(stocksGraph.className, 'graph-container graph-graph-stocks');
 });
 
-test.skip('rendering a sidebar list', t => {
+test('rendering a sidebar list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -256,7 +251,7 @@ test.skip('rendering a sidebar list', t => {
     t.is(sidebarList.childNodes.length, 3);
 });
 
-test.skip('rendering an overall gain', t => {
+test('rendering an overall gain', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
