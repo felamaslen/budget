@@ -1,11 +1,11 @@
 import './style.scss';
-import { List as list } from 'immutable';
 import { connect } from 'react-redux';
 import { aContentRequested } from '~client/actions/content.actions';
 import { getOverviewTable } from '~client/selectors/overview';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Route } from 'react-router-dom';
+import { rowsShape } from '~client/prop-types/page/rows';
 import Page from '~client/containers/Page';
 import OverviewTable from '~client/components/OverviewTable';
 import GraphOverview from '~client/containers/GraphOverview';
@@ -22,15 +22,15 @@ function PageOverview({ rows, editRow, editCol, ...props }) {
 }
 
 PageOverview.propTypes = {
-    rows: PropTypes.instanceOf(list),
+    rows: rowsShape,
     editRow: PropTypes.number,
     editCol: PropTypes.number
 };
 
 const mapStateToProps = state => ({
     rows: getOverviewTable(state),
-    editRow: state.getIn(['edit', 'row']),
-    editCol: state.getIn(['edit', 'col'])
+    editRow: state.edit.row,
+    editCol: state.edit.col
 });
 
 const mapDispatchToProps = dispatch => ({
