@@ -1,85 +1,55 @@
-import { Map as map } from 'immutable';
 import { createSelector } from 'reselect';
 import { PAGES } from '~client/constants/data';
 
-export const getAllPageRows = (state, { page }) => state.getIn(['pages', page, 'rows']);
-
-export const makeGetRowIds = () => createSelector([getAllPageRows], rows =>
-    rows && rows.keySeq().toList());
+export const getAllPageRows = (state, { page }) => state.pages[page].rows;
 
 const getPageProp = (state, { page }) => page;
 
-export const makeGetDailyTotals = () => {
-    let lastResult = null;
+export const getDailyTotals = createSelector([getPageProp, getAllPageRows], (page, rows) => {
+    if (!(rows && PAGES[page].daily)) {
+        return null;
+    }
 
-    return createSelector([getPageProp, getAllPageRows], (page, rows) => {
-        if (!(rows && PAGES[page].daily)) {
-            return null;
+    const dateKey = PAGES[page].cols.indexOf('date');
+    const costKey = PAGES[page].cols.indexOf('cost');
+
+    const [totals] = rows.reduce(([results, dailySum], row, index) => {
+        const lastInDay = !(index < rows.length - 1 && row.cols[dateKey].hasSame(rows[index + 1].cols[dateKey], 'day'));
+        const cost = row.cols[costKey];
+
+        if (lastInDay) {
+            return [{ ...results, [row.id]: dailySum + cost }, 0];
         }
 
-        const dateKey = PAGES[page].cols.indexOf('date');
-        const costKey = PAGES[page].cols.indexOf('cost');
+        return [results, dailySum + cost];
+    }, [{}, 0]);
 
-        const keys = rows.keys();
-        keys.next();
+    return totals;
+});
 
-        const result = rows.reduce(({ dailySum, results }, row, id) => {
-            const nextKey = keys.next().value;
+export const getWeeklyAverages = createSelector([getPageProp, getAllPageRows], (page, rows) => {
+    if (!(rows && PAGES[page].daily)) {
+        return null;
+    }
 
-            const lastInDay = !(nextKey && row.getIn(['cols', dateKey]).hasSame(
-                rows.getIn([nextKey, 'cols', dateKey]), 'day'));
+    const costKey = PAGES[page].cols.indexOf('cost');
+    const dateKey = PAGES[page].cols.indexOf('date');
 
-            const cost = row.getIn(['cols', costKey]);
+    // note that this is calculated only based on the visible data,
+    // not past data
 
-            if (lastInDay) {
-                return {
-                    results: results.set(id, dailySum + cost),
-                    dailySum: 0
-                };
-            }
+    const visibleTotal = rows.reduce((sum, item) => sum + item.cols[costKey], 0);
+    if (!rows.length) {
+        return 0;
+    }
 
-            return { results, dailySum: dailySum + cost };
+    const firstDate = rows[0].cols[dateKey];
+    const lastDate = rows[rows.length - 1].cols[dateKey];
 
-        }, { results: map.of(), dailySum: 0 })
-            .results;
+    const numWeeks = firstDate.diff(lastDate).as('days') / 7;
+    if (!numWeeks) {
+        return 0;
+    }
 
-        if (result && result.equals(lastResult)) {
-            return lastResult;
-        }
-
-        lastResult = result;
-
-        return result;
-    });
-};
-
-export const makeGetWeeklyAverages = () => {
-    return createSelector([getPageProp, getAllPageRows], (page, rows) => {
-        if (!(rows && PAGES[page].daily)) {
-            return null;
-        }
-
-        const costKey = PAGES[page].cols.indexOf('cost');
-        const dateKey = PAGES[page].cols.indexOf('date');
-
-        // note that this is calculated only based on the visible data,
-        // not past data
-
-        const visibleTotal = rows.reduce((sum, item) =>
-            sum + item.getIn(['cols', costKey]), 0);
-
-        if (!rows.size) {
-            return 0;
-        }
-
-        const firstDate = rows.first().getIn(['cols', dateKey]);
-        const lastDate = rows.last().getIn(['cols', dateKey]);
-
-        const numWeeks = firstDate.diff(lastDate).as('days') / 7;
-        if (!numWeeks) {
-            return 0;
-        }
-
-        return Math.round(visibleTotal / numWeeks);
-    });
-};
+    return Math.round(visibleTotal / numWeeks);
+});

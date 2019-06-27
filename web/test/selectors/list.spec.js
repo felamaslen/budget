@@ -1,53 +1,56 @@
 import test from 'ava';
-import { Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import {
-    makeGetDailyTotals,
-    makeGetWeeklyAverages
+    getDailyTotals,
+    getWeeklyAverages
 } from '~client/selectors/list';
 
-const state = map({
+const state = {
     now: DateTime.fromISO('2018-03-23T11:45:20Z'),
-    pages: map({
-        food: map({
-            data: map({
+    pages: {
+        analysis: {},
+        food: {
+            data: {
                 numRows: 3,
                 numCols: 5,
                 total: 8755601
-            }),
-            rows: map([
-                [19, map({
-                    cols: list.of(DateTime.fromISO('2018-04-17'), 'foo3', 'bar3', 29, 'bak3')
-                })],
-                [300, map({
-                    cols: list.of(DateTime.fromISO('2018-02-03'), 'foo1', 'bar1', 1139, 'bak1')
-                })],
-                [81, map({
-                    cols: list.of(DateTime.fromISO('2018-02-03'), 'foo2', 'bar2', 876, 'bak2')
-                })],
-                [29, map({
-                    cols: list.of(DateTime.fromISO('2018-02-02'), 'foo3', 'bar3', 498, 'bak3')
-                })]
-            ])
-        })
-    })
-});
+            },
+            rows: [
+                {
+                    id: '19',
+                    cols: [DateTime.fromISO('2018-04-17'), 'foo3', 'bar3', 29, 'bak3']
+                },
+                {
+                    id: '300',
+                    cols: [DateTime.fromISO('2018-02-03'), 'foo1', 'bar1', 1139, 'bak1']
+                },
+                {
+                    id: '81',
+                    cols: [DateTime.fromISO('2018-02-03'), 'foo2', 'bar2', 876, 'bak2']
+                },
+                {
+                    id: '29',
+                    cols: [DateTime.fromISO('2018-02-02'), 'foo3', 'bar3', 498, 'bak3']
+                }
+            ]
+        }
+    }
+};
 
-test('makeGetDailyTotals calculates daily totals for list pages', t => {
-    const result = makeGetDailyTotals()(state, { page: 'food' });
+test('getDailyTotals calculates daily totals for list pages', t => {
+    const result = getDailyTotals(state, { page: 'food' });
 
-    t.deepEqual(result.toJS(), {
+    t.deepEqual(result, {
         19: 29,
         81: 2015,
         29: 498
     });
 });
 
-test('makeGetWeeklyAverages returns null for non-daily pages', t => {
-    t.is(makeGetWeeklyAverages()(state, { page: 'analysis' }), null);
+test('getWeeklyAverages returns null for non-daily pages', t => {
+    t.is(getWeeklyAverages(state, { page: 'analysis' }), null);
 });
 
-test('makeGetWeeklyAverages returns the data with a processed weekly value', t => {
-    t.is(makeGetWeeklyAverages()(state, { page: 'food' }),
-        Math.round((29 + 1139 + 876 + 498) / 10.5477178));
+test('getWeeklyAverages returns the data with a processed weekly value', t => {
+    t.is(getWeeklyAverages(state, { page: 'food' }), Math.round((29 + 1139 + 876 + 498) / 10.571428571428571));
 });
