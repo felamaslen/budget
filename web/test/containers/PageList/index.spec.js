@@ -1,19 +1,24 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import { PageList } from '~client/containers/PageList';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
         edit: {
             addBtnFocus: false
         },
         pages: {
+            funds: {
+                rows: []
+            },
             food: {
+                data: {
+                    total: 34
+                }
             }
         },
         pagesLoaded: {
@@ -22,10 +27,6 @@ const getContainer = (customProps = {}, customState = null) => {
         other: {
         }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
