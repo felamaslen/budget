@@ -38,8 +38,22 @@ export const testState = {
         },
         food: {
             rows: [
-                { id: '10', foo: 'bar', cols: [], future: true },
-                { id: '11', bar: 'baz', cols: [], future: false }
+                {
+                    id: 'my-id',
+                    cols: [
+                        DateTime.fromISO('2019-06-27T21:19:03.000Z'),
+                        'something',
+                        343
+                    ]
+                },
+                {
+                    id: 'other-id',
+                    cols: [
+                        DateTime.fromISO('2019-06-20T21:15:10.000Z'),
+                        'something else',
+                        9123
+                    ]
+                }
             ]
         }
     },
