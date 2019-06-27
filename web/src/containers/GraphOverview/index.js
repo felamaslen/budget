@@ -7,6 +7,7 @@ import Media from 'react-media';
 import { mediaQueryMobile } from '~client/constants';
 import { getTargets } from '~client/selectors/graph';
 import { targetsShape } from '~client/prop-types/graph/balance';
+import { costShape } from '~client/prop-types/page/overview';
 import { getCurrentDate, getStartDate, getFutureMonths, getProcessedCost } from '~client/selectors/overview';
 import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
@@ -39,10 +40,7 @@ GraphOverviewWrapped.propTypes = {
     startDate: PropTypes.instanceOf(DateTime).isRequired,
     now: PropTypes.instanceOf(DateTime).isRequired,
     futureMonths: PropTypes.number.isRequired,
-    cost: PropTypes.shape({
-        net: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-        spending: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
-    }).isRequired,
+    cost: costShape.isRequired,
     targets: targetsShape.isRequired,
     graphWidth: PropTypes.number.isRequired
 };

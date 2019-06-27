@@ -1,4 +1,3 @@
-import { Map as map, List as list } from 'immutable';
 import { connect } from 'react-redux';
 import React, { useEffect } from 'react';
 import { Route, NavLink } from 'react-router-dom';
@@ -8,6 +7,8 @@ import classNames from 'classnames';
 import { getApiKey } from '~client/selectors/app';
 import { getRowDates, getProcessedCost } from '~client/selectors/overview';
 import { useCrud } from '~client/hooks/api';
+
+import { costShape, rowDatesShape } from '~client/prop-types/page/overview';
 
 import NetWorthView from '~client/components/NetWorthView';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
@@ -134,8 +135,8 @@ function NetWorth({ rowDates, cost, apiKey }) {
 }
 
 NetWorth.propTypes = {
-    rowDates: PropTypes.instanceOf(list),
-    cost: PropTypes.instanceOf(map),
+    rowDates: rowDatesShape.isRequired,
+    cost: costShape,
     apiKey: PropTypes.string.isRequired
 };
 
