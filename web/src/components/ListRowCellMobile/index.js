@@ -2,26 +2,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Editable from '~client/containers/Editable';
 
-import { rowShape } from '~client/prop-types/page/row';
+import { rowShape } from '~client/prop-types/page/rows';
 
-export default function ListRowCellMobile({ page, colKey, row, column }) {
-    const value = row.getIn(['cols', colKey]);
-
-    const editableProps = {
-        page,
-        row: row.id,
-        col: colKey,
-        item: column,
-        value,
-        staticEdit: true
-    };
-
-    return (
-        <span key={colKey} className={column}>
-            <Editable {...editableProps} />
-        </span>
-    );
-}
+const ListRowCellMobile = ({ page, colKey, row, column }) => (
+    <span className={column}>
+        <Editable
+            page={page}
+            row={row.id}
+            col={colKey}
+            item={column}
+            value={row.cols[colKey]}
+            staticEdit
+        />
+    </span>
+);
 
 ListRowCellMobile.propTypes = {
     page: PropTypes.string.isRequired,
@@ -29,3 +23,5 @@ ListRowCellMobile.propTypes = {
     row: rowShape.isRequired,
     column: PropTypes.string.isRequired
 };
+
+export default ListRowCellMobile;
