@@ -1,13 +1,13 @@
 export const getModalState = state => ({
-    modalDialogType: state.getIn(['modalDialog', 'type']),
-    invalidKeys: state.getIn(['modalDialog', 'invalidKeys']),
-    modalDialogLoading: state.getIn(['modalDialog', 'loading']),
-    item: state.getIn(['modalDialog', 'fieldsString']),
-    fields: state.getIn(['modalDialog', 'fieldsValidated'])
+    modalDialogType: state.modalDialog.type,
+    invalidKeys: state.modalDialog.invalidKeys,
+    modalDialogLoading: state.modalDialog.loading,
+    item: state.modalDialog.fieldsString,
+    fields: state.modalDialog.fieldsValidated
 });
 
 export const suggestionsInfo = state => ({
-    page: state.get('currentPage'),
-    item: state.getIn(['edit', 'active', 'item']),
-    value: state.getIn(['edit', 'active', 'value'])
+    page: state.currentPage,
+    item: state.edit.active.item,
+    value: state.edit.active.value
 });

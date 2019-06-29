@@ -1,12 +1,11 @@
 import test from 'ava';
-import { fromJS } from 'immutable';
 import {
     getModalState,
     suggestionsInfo
 } from '~client/selectors/edit';
 
 test('getModalState selects the required info from the state', t => {
-    t.deepEqual(getModalState(fromJS({
+    t.deepEqual(getModalState({
         modalDialog: {
             type: 'foo',
             invalidKeys: 'bar',
@@ -14,7 +13,7 @@ test('getModalState selects the required info from the state', t => {
             fieldsString: 'item',
             fieldsValidated: 'fields'
         }
-    })), {
+    }), {
         modalDialogType: 'foo',
         invalidKeys: 'bar',
         modalDialogLoading: 'baz',
@@ -24,7 +23,7 @@ test('getModalState selects the required info from the state', t => {
 });
 
 test('suggestionsInfo gets required items from state', t => {
-    t.deepEqual(suggestionsInfo(fromJS({
+    t.deepEqual(suggestionsInfo({
         currentPage: 'page1',
         edit: {
             active: {
@@ -32,7 +31,7 @@ test('suggestionsInfo gets required items from state', t => {
                 value: 'bar'
             }
         }
-    })), {
+    }), {
         page: 'page1',
         item: 'foo',
         value: 'bar'
