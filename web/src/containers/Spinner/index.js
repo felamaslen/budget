@@ -24,7 +24,7 @@ Spinner.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    active: state.get('loading')
+    active: state.loading
 });
 
 export default connect(mapStateToProps)(Spinner);
