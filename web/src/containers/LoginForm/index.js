@@ -37,10 +37,10 @@ LoginForm.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    inputStep: state.getIn(['loginForm', 'inputStep']),
-    pin: state.getIn(['loginForm', 'values']).join(''),
-    visible: state.getIn(['loginForm', 'visible']),
-    active: state.getIn(['loginForm', 'active'])
+    inputStep: state.loginForm.inputStep,
+    pin: state.loginForm.values.join(''),
+    visible: state.loginForm.visible,
+    active: state.loginForm.active
 });
 
 const mapDispatchToProps = dispatch => ({

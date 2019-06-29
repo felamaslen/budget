@@ -1,7 +1,6 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render, fireEvent } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -10,14 +9,14 @@ import LoginForm from '~client/containers/LoginForm';
 import { aLoginFormInputted } from '~client/actions/login.actions';
 
 const getContainer = memoize((customProps = {}) => {
-    const state = fromJS({
+    const state = {
         loginForm: {
             inputStep: 3,
             values: [5, 1, 2],
             visible: true,
             active: true
         }
-    });
+    };
 
     const store = createMockStore(state);
 
