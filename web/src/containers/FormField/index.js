@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-import { modifyTransactionById } from '~client/modules/data';
 import FormFieldText from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
 import FormFieldCost from '~client/components/FormField/cost';
@@ -15,7 +14,7 @@ import FormFieldTransactions from '~client/components/FormField/transactions';
 import { aFormFieldChanged } from '~client/actions/form.actions';
 
 function FormField({ fieldKey, item, value, makeOnChange }) {
-    const onChange = useMemo(() => makeOnChange(fieldKey, item), [fieldKey, item, makeOnChange]);
+    const onChange = useMemo(() => makeOnChange(fieldKey), [fieldKey, makeOnChange]);
 
     if (item === 'date') {
         return (
@@ -60,20 +59,7 @@ FormField.propTypes = {
 };
 
 const mapDispatchToProps = dispatch => ({
-    makeOnChange: (fieldKey, item) => {
-        if (item === 'transactions') {
-            return (transactionsList, id, value, subField) => {
-                return dispatch(aFormFieldChanged(
-                    fieldKey,
-                    modifyTransactionById(transactionsList, id, {
-                        [subField]: value
-                    })
-                ));
-            };
-        }
-
-        return value => dispatch(aFormFieldChanged(fieldKey, value));
-    }
+    makeOnChange: fieldKey => value => dispatch(aFormFieldChanged(fieldKey, value))
 });
 
 export default connect(null, mapDispatchToProps)(FormField);
