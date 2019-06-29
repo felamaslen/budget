@@ -1,6 +1,5 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
@@ -9,12 +8,12 @@ import Page from '~client/containers/Page';
 import { aContentRequested } from '~client/actions/content.actions';
 
 const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+    let state = {
         pages: {
             food: {},
             general: {}
         }
-    });
+    };
 
     if (customState) {
         state = customState(state);

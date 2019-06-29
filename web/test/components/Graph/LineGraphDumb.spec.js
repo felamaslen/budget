@@ -1,6 +1,5 @@
 import test from 'ava';
 import { render } from 'react-testing-library';
-import { fromJS } from 'immutable';
 import '~client-test/browser';
 import React from 'react';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
@@ -19,7 +18,7 @@ test('rendering a line graph', t => {
         },
         outerProperties: {},
         svgProperties: {},
-        lines: fromJS([
+        lines: [
             {
                 key: 'line1',
                 data: [
@@ -68,7 +67,7 @@ test('rendering a line graph', t => {
                 smooth: true,
                 color: 'black'
             }
-        ]),
+        ],
         calc: {
             minX: 100,
             maxX: 103,

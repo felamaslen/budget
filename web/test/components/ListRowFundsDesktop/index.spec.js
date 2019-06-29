@@ -1,31 +1,30 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { List as list, Map as map } from 'immutable';
 import { render } from 'react-testing-library';
 import React from 'react';
 import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
-        id: '10',
-        row: map({
-            cols: list(['foo-fund']),
-            prices: list.of(
-                list.of(1, 10),
-                list.of(2, 11),
-                list.of(3, 10.2)
-            ),
-            gain: map({
+        row: {
+            id: '10',
+            cols: ['foo-fund'],
+            prices: [
+                [1, 10],
+                [2, 11],
+                [3, 10.2]
+            ],
+            gain: {
                 value: 561932,
                 gain: 0.3,
                 gainAbs: 4030,
                 dayGain: -0.02,
                 dayGainAbs: -341,
-                color: list([255, 128, 30])
-            }),
+                color: [255, 128, 30]
+            },
             sold: false
-        }),
+        },
         ...customProps
     };
 

@@ -1,5 +1,4 @@
 import test from 'ava';
-import { fromJS } from 'immutable';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
@@ -15,7 +14,7 @@ const points = [
 
 const getContainer = memoize(() => {
     const props = {
-        data: fromJS(points),
+        data: points,
         color: 'black',
         minY: -5,
         maxY: 10,

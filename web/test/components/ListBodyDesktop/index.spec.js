@@ -5,32 +5,35 @@ const test = ninos(ava);
 import '~client-test/browser';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
-import { List as list, OrderedMap } from 'immutable';
 import { DateTime } from 'luxon';
 import React from 'react';
 import { Provider } from 'react-redux';
-import reduction from '~client/reduction';
 import ListBodyDesktop from '~client/components/ListBodyDesktop';
 
 const getContainer = (customProps = {}) => {
     const props = {
         page: 'food',
-        rows: OrderedMap.of(),
-        rowIds: list.of(),
+        rows: [],
         addBtnFocus: false,
         onDesktopAdd: () => null,
         ...customProps
     };
 
-    const state = reduction
-        .set('page', 'food')
-        .setIn(['edit', 'add', 'food'], list.of(
-            DateTime.local(),
-            'foo',
-            'bar',
-            302,
-            'baz'
-        ));
+    const state = {
+        page: 'food',
+        edit: {
+            active: {},
+            add: {
+                food: [
+                    DateTime.local(),
+                    'foo',
+                    'bar',
+                    302,
+                    'baz'
+                ]
+            }
+        }
+    };
 
     const store = createMockStore(state);
 
