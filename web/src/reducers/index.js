@@ -68,10 +68,6 @@ const reducers = createReducerObject([
     [AC.EDIT_SUGGESTIONS_REQUESTED, edit.rRequestSuggestions],
     [AC.EDIT_SUGGESTIONS_RECEIVED, edit.rHandleSuggestions],
 
-    [AC.EDIT_FUND_TRANSACTIONS_CHANGED, edit.rChangeFundTransactions],
-    [AC.EDIT_FUND_TRANSACTIONS_ADDED, edit.rAddFundTransactions],
-    [AC.EDIT_FUND_TRANSACTIONS_REMOVED, edit.rRemoveFundTransactions],
-
     // mobile form actions
     [AC.FORM_EDIT_DIALOG_OPENED, form.rOpenFormDialogEdit],
     [AC.FORM_ADD_DIALOG_OPENED, form.rOpenFormDialogAdd],
