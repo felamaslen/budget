@@ -1,14 +1,14 @@
-import { List as list, Map as map, OrderedMap } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import AddForm from './AddForm';
-import ListHeadDesktop from '../ListHeadDesktop';
+
+import { rowsShape, dailyTotalsShape } from '~client/prop-types/page/rows';
+import AddForm from '~client/components/ListBodyDesktop/AddForm';
+import ListHeadDesktop from '~client/components/ListHeadDesktop';
 import ListRowDesktop from '~client/containers/ListRowDesktop';
 
 export default function ListBodyDesktop({
     page,
     rows,
-    rowIds,
     getDaily,
     dailyTotals,
     weeklyValue,
@@ -18,15 +18,14 @@ export default function ListBodyDesktop({
     AfterRow,
     TotalValue
 }) {
-    const listRows = useMemo(() => rows && rowIds.map(id => (
-        <ListRowDesktop key={id}
+    const listRows = useMemo(() => rows && rows.map(row => (
+        <ListRowDesktop key={row.id}
             page={page}
-            id={id}
-            row={rows.get(id)}
-            daily={dailyTotals && dailyTotals.get(id)}
+            row={row}
+            daily={dailyTotals[row.id]}
             AfterRow={AfterRow}
         />
-    )), [rowIds, dailyTotals, page, rows, AfterRow]);
+    )), [dailyTotals, page, rows, AfterRow]);
 
     if (!listRows) {
         return null;
@@ -45,7 +44,8 @@ export default function ListBodyDesktop({
             </li>
             <AddForm page={page}
                 addBtnFocus={addBtnFocus}
-                onAdd={onDesktopAdd} />
+                onAdd={onDesktopAdd}
+            />
             {listRows}
         </ul>
     );
@@ -53,14 +53,17 @@ export default function ListBodyDesktop({
 
 ListBodyDesktop.propTypes = {
     page: PropTypes.string.isRequired,
-    rows: PropTypes.instanceOf(OrderedMap),
-    rowIds: PropTypes.instanceOf(list),
+    rows: rowsShape,
     getDaily: PropTypes.bool,
-    dailyTotals: PropTypes.instanceOf(map),
+    dailyTotals: dailyTotalsShape,
     weeklyValue: PropTypes.number,
     totalCost: PropTypes.number,
     addBtnFocus: PropTypes.bool.isRequired,
     onDesktopAdd: PropTypes.func.isRequired,
     AfterRow: PropTypes.func,
     TotalValue: PropTypes.func
+};
+
+ListBodyDesktop.defaultProps = {
+    dailyTotals: {}
 };

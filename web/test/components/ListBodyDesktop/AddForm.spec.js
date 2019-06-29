@@ -3,14 +3,13 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import memoize from 'fast-memoize';
-import { List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
-import reduction from '~client/reduction';
 import React from 'react';
+import { testState } from '~client-test/test_data/state';
 import AddForm from '~client/components/ListBodyDesktop/AddForm';
 
 const getAddForm = memoize((customProps = {}) => {
@@ -21,15 +20,22 @@ const getAddForm = memoize((customProps = {}) => {
         ...customProps
     };
 
-    const state = reduction
-        .set('page', 'food')
-        .setIn(['edit', 'add', 'food'], list.of(
-            DateTime.local(),
-            'foo',
-            'bar',
-            302,
-            'baz'
-        ));
+    const state = {
+        ...testState,
+        currentPage: 'food',
+        edit: {
+            ...testState.edit,
+            add: {
+                food: [
+                    DateTime.local(),
+                    'foo',
+                    'bar',
+                    302,
+                    'baz'
+                ]
+            }
+        }
+    };
 
     const store = createMockStore(state);
 
