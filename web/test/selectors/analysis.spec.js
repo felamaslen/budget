@@ -1,11 +1,10 @@
 import test from 'ava';
-import { fromJS } from 'immutable';
 import {
     requestProps
 } from '~client/selectors/analysis';
 
 test('requestProps gets the loading status, period, grouping and timeIndex', t => {
-    t.deepEqual(requestProps(fromJS({
+    t.deepEqual(requestProps({
         other: {
             analysis: {
                 loading: true,
@@ -14,7 +13,7 @@ test('requestProps gets the loading status, period, grouping and timeIndex', t =
                 timeIndex: 300
             }
         }
-    })), {
+    }), {
         loading: true,
         period: 100,
         grouping: 200,
