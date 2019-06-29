@@ -1,8 +1,3 @@
-/**
- * Data methods (using immutable objects)
- */
-
-import { List as list, Map as map } from 'immutable';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import shortid from 'shortid';
@@ -197,7 +192,7 @@ export function getNullEditable(page) {
         row = -1;
     }
 
-    return map({
+    return {
         row,
         col: -1,
         page,
@@ -205,15 +200,15 @@ export function getNullEditable(page) {
         item: null,
         value: null,
         originalValue: null
-    });
+    };
 }
 
 export function getAddDefaultValues(page, now) {
     if (!PAGES[page].list) {
-        return list.of();
+        return [];
     }
 
-    return list(PAGES[page].cols).map(column => {
+    return PAGES[page].cols.map(column => {
         if (column === 'date') {
             return now;
         }

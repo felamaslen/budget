@@ -321,7 +321,7 @@ test('getValueForTransmit stringifying the object, otherwise', t => {
 });
 
 test('getNullEditable returning a list object for list pages', t => {
-    t.deepEqual(getNullEditable('food').toJS(), {
+    t.deepEqual(getNullEditable('food'), {
         row: -1,
         col: -1,
         page: 'food',
@@ -333,7 +333,7 @@ test('getNullEditable returning a list object for list pages', t => {
 });
 
 test('getNullEditable returning a normal object for non-list pages', t => {
-    t.deepEqual(getNullEditable('overview').toJS(), {
+    t.deepEqual(getNullEditable('overview'), {
         row: 0,
         col: -1,
         page: 'overview',
@@ -347,7 +347,7 @@ test('getNullEditable returning a normal object for non-list pages', t => {
 test('getAddDefaultValues getting the right values for the food page', t => {
     const now = DateTime.local();
 
-    t.deepEqual(getAddDefaultValues('food', now).toJS(), [
+    t.deepEqual(getAddDefaultValues('food', now), [
         now,
         '',
         '',
