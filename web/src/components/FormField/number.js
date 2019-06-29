@@ -3,18 +3,20 @@ import PropTypes from 'prop-types';
 
 import { useField } from './use-field';
 
-export default function FormFieldNumber({ value, onChange, ...props }) {
-    const [currentValue, onType, onBlur] = useField(
+export default function FormFieldNumber({ value, onChange, active, ...props }) {
+    const [currentValue, onType, onBlur, ref] = useField(
         value,
         onChange,
         number => number,
-        Number
+        Number,
+        active
     );
 
     return (
         <div className="form-field form-field-number">
             <input
                 {...props}
+                ref={ref}
                 type="number"
                 value={currentValue}
                 onChange={onType}
@@ -26,5 +28,6 @@ export default function FormFieldNumber({ value, onChange, ...props }) {
 
 FormFieldNumber.propTypes = {
     value: PropTypes.number.isRequired,
+    active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 };

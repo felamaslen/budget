@@ -2,9 +2,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
-import FormFieldDate from './date';
-import FormFieldNumber from './number';
-import FormFieldCost from './cost';
+import FormFieldDate from '~client/components/FormField/date';
+import FormFieldNumber from '~client/components/FormField/number';
+import FormFieldCost from '~client/components/FormField/cost';
 import {
     addToTransactionsList,
     modifyTransactionById,
@@ -13,7 +13,7 @@ import {
 } from '~client/modules/data';
 import { CREATE_ID } from '~client/components/CrudList';
 
-function FormFieldTransactionsItem({ item, children, onChange }) {
+function FormFieldTransactionsItem({ item, children, onChange, active }) {
     const onChangeDate = useMemo(() => onChange('date'), [onChange]);
     const onChangeUnits = useMemo(() => onChange('units'), [onChange]);
     const onChangeCost = useMemo(() => onChange('cost'), [onChange]);
@@ -27,6 +27,7 @@ function FormFieldTransactionsItem({ item, children, onChange }) {
                         <FormFieldDate
                             value={item.date}
                             onChange={onChangeDate}
+                            active={active}
                         />
                     </span>
                 </span>
@@ -36,6 +37,7 @@ function FormFieldTransactionsItem({ item, children, onChange }) {
                         <FormFieldNumber
                             value={item.units}
                             onChange={onChangeUnits}
+                            active={active}
                         />
                     </span>
                 </span>
@@ -45,6 +47,7 @@ function FormFieldTransactionsItem({ item, children, onChange }) {
                         <FormFieldCost
                             value={item.cost}
                             onChange={onChangeCost}
+                            active={active}
                         />
                     </span>
                 </span>
@@ -57,6 +60,7 @@ function FormFieldTransactionsItem({ item, children, onChange }) {
 FormFieldTransactionsItem.propTypes = {
     item: transactionShape,
     children: PropTypes.node,
+    active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 };
 
@@ -99,7 +103,7 @@ AddNewTransaction.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-export default function FormFieldTransactions({ create, value, onChange }) {
+export default function FormFieldTransactions({ create, value, onChange, active }) {
     const makeOnChangeField = useCallback(id => field => fieldValue => onChange(modifyTransactionById(value, id, {
         [field]: fieldValue
     })), [value, onChange]);
@@ -115,6 +119,7 @@ export default function FormFieldTransactions({ create, value, onChange }) {
             {value.map(item => (
                 <FormFieldTransactionsItem key={item.id}
                     item={item}
+                    active={active}
                     onChange={makeOnChangeField(item.id)}
                 >
                     {create && <span className="row">
@@ -129,6 +134,7 @@ export default function FormFieldTransactions({ create, value, onChange }) {
 FormFieldTransactions.propTypes = {
     create: PropTypes.bool,
     value: transactionsListShape.isRequired,
+    active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 };
 
