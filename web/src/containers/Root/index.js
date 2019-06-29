@@ -35,8 +35,8 @@ Root.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    loadingApi: state.get('loadingApi'),
-    unsavedApi: state.getIn(['edit', 'requestList']).size > 0,
+    loadingApi: state.loadingApi,
+    unsavedApi: state.edit.requestList.length > 0,
     loggedIn: getLoggedIn(state)
 });
 

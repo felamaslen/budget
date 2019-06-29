@@ -1,13 +1,12 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
 import Root from '~client/containers/Root';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
         user: {
             uid: '1'
         },
@@ -30,10 +29,6 @@ const getContainer = (customProps = {}, customState = null) => {
             requestList: []
         }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 

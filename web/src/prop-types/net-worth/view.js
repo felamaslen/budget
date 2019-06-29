@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
-import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
-import { netWorthList } from '~client/components/NetWorthList/prop-types';
+import { category, subcategory } from '~client/prop-types/net-worth/category';
+import { netWorthList } from '~client/prop-types/net-worth/list';
 
 export const dataPropTypes = {
     data: netWorthList,
