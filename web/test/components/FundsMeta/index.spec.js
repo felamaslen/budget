@@ -1,7 +1,6 @@
 import test from 'ava';
 import { render } from 'react-testing-library';
 import '~client-test/browser';
-import { Map as map, List as list, OrderedMap } from 'immutable';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
@@ -11,45 +10,45 @@ import FundsMeta from '~client/components/FundsMeta';
 import { widthPageMobile } from '~client/constants/styles.json';
 
 const getFundsMeta = (customProps = {}) => {
-    const state = map({
+    const state = {
         now: DateTime.fromISO('2019-04-06T23:02Z'),
-        edit: map({
+        edit: {
             addBtnFocus: false
-        }),
-        pages: map({
-            funds: map({
-                cache: map({
-                    year1: map({
-                        cacheTimes: list.of(),
-                        prices: list.of()
-                    })
-                }),
-                rows: OrderedMap.of()
-            })
-        }),
-        pagesLoaded: map({
+        },
+        pages: {
+            funds: {
+                cache: {
+                    year1: {
+                        cacheTimes: [],
+                        prices: []
+                    }
+                },
+                rows: []
+            }
+        },
+        pagesLoaded: {
             funds: true
-        }),
-        other: map({
+        },
+        other: {
             windowWidth: 1000,
-            graphFunds: map({
+            graphFunds: {
                 mode: 0,
                 period: 'year1',
-                zoomRange: list.of(0, 0),
-                enabledList: OrderedMap.of()
-            }),
-            stocksList: map({
+                zoomRange: [0, 0],
+                enabledList: []
+            },
+            stocksList: {
                 loadedList: false,
                 loadedInitial: false,
-                stocks: map.of(),
-                indices: map.of(),
-                history: list.of(),
+                stocks: {},
+                indices: {},
+                history: [],
                 lastPriceUpdate: 0,
                 weightedGain: 0,
                 oldWeightedGain: 0
-            })
-        })
-    });
+            }
+        }
+    };
 
     const store = createMockStore(state);
 
