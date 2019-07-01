@@ -30,10 +30,16 @@ export function uuid(rand = Math.random(), random = false) {
     return Math.floor((1 + rand) * 0x10000);
 }
 
-export const replaceAtIndex = (array, index, value) => array
-    .slice(0, index)
-    .concat([value])
-    .concat(array.slice(index + 1));
+export function replaceAtIndex(array, index, value) {
+    if (index === -1) {
+        return array;
+    }
+
+    return array
+        .slice(0, index)
+        .concat([value])
+        .concat(array.slice(index + 1));
+}
 
 export const removeAtIndex = (array, index) => array
     .slice(0, index)

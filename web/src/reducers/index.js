@@ -1,9 +1,23 @@
-/**
- * This is run whenever an action is called by a view, and decides which
- * reducer to run based on the action given.
- */
+import { combineReducers } from 'redux';
 
-import { createReducer } from 'redux-create-reducer';
+import app from '~client/reducers/app';
+import api from '~client/reducers/api';
+import login from '~client/reducers/login';
+import error from '~client/reducers/error';
+import list from '~client/reducers/list';
+import analysis from '~client/reducers/analysis';
+import funds from '~client/reducers/funds';
+
+export default combineReducers({
+    app,
+    api,
+    login,
+    error,
+    list,
+    analysis,
+    funds
+});
+
 
 import * as AC from '~client/constants/actions';
 
