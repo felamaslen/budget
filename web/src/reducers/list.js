@@ -10,10 +10,26 @@ import {
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 
-import { CREATE, UPDATE, DELETE } from '~client/constants/data';
+import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
 import { replaceAtIndex } from '~client/modules/data';
 
-const onRead = page => (state, { res: { [page]: { data: items } } }) => ({ items });
+const onRead = page => (state, { res }) => {
+    if (!res[page]) {
+        return {};
+    }
+    if (!res[page].data.length) {
+        return { items: [] };
+    }
+
+    const dataKeys = Object.keys(DATA_KEY_ABBR)
+        .filter(longKey => typeof res[page].data[0][DATA_KEY_ABBR[longKey]] !== 'undefined');
+
+    const items = res[page].data.map(item =>
+        dataKeys.reduce((last, longKey) => ({ ...last, [longKey]: item[DATA_KEY_ABBR[longKey]] }), {})
+    );
+
+    return { items };
+};
 
 function withOptimisticUpdate(requestType, getNewProps = () => ({})) {
     return thisPage => (state, { page, ...action }) => {

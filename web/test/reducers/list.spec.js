@@ -8,7 +8,7 @@ import {
 } from '~client/actions/list';
 import { dataRead, syncReceived } from '~client/actions/api';
 import { loggedOut } from '~client/actions/login';
-import { CREATE, UPDATE, DELETE } from '~client/constants/data';
+import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
 
 const page = 'my-page';
 
@@ -40,8 +40,8 @@ test('DATA_READ inserts rows into the state', t => {
     const action = dataRead({
         [page]: {
             data: [
-                { id: 'some-id', prop: 'yes' },
-                { id: 'other-id', prop: 'no' }
+                { [DATA_KEY_ABBR.id]: 'some-id', [DATA_KEY_ABBR.item]: 'yes' },
+                { [DATA_KEY_ABBR.id]: 'other-id', [DATA_KEY_ABBR.item]: 'no' }
             ]
         }
     });
@@ -49,8 +49,8 @@ test('DATA_READ inserts rows into the state', t => {
     const result = myListReducer(state, action);
 
     t.deepEqual(result.items, [
-        { id: 'some-id', prop: 'yes' },
-        { id: 'other-id', prop: 'no' }
+        { id: 'some-id', item: 'yes' },
+        { id: 'other-id', item: 'no' }
     ]);
 });
 
