@@ -73,7 +73,7 @@ test('removeAtIndex removes an array item at a specified index', t => {
 
 const transactionsData = [
     {
-        date: '2017-05-08T23:00:00.000Z',
+        date: '2017-05-09T00:00:00.000Z',
         units: 934,
         cost: 399924
     },
@@ -83,12 +83,12 @@ const transactionsData = [
         cost: -10512
     },
     {
-        date: '2018-06-06T23:00:00.000Z',
+        date: '2018-06-07T00:00:00.000Z',
         units: -1239,
         cost: -539814
     },
     {
-        date: '2018-04-25T23:00:00.000Z',
+        date: '2018-04-26T00:00:00.000Z',
         units: 280,
         cost: 119931
     }
