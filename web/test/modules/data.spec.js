@@ -2,7 +2,6 @@ import test from 'ava';
 import { DateTime } from 'luxon';
 import {
     getPeriodMatch,
-    uuid,
     replaceAtIndex,
     removeAtIndex,
     getTransactionsList,
@@ -15,6 +14,7 @@ import {
     isSold,
     dataEquals,
     arrayAverage,
+    limitTimeSeriesLength,
     randnBm,
     getValueForTransmit,
     getNullEditable,
@@ -45,11 +45,6 @@ test('getPeriodMatch returning env variable by default', t => {
 test('getPeriodMatch spliting up a short period representation', t => {
     t.deepEqual(getPeriodMatch('month5'), { period: 'month', length: '5' });
     t.deepEqual(getPeriodMatch('year10'), { period: 'year', length: '10' });
-});
-
-test('uuid maping [0, 1] bijectively to a six-digit number', t => {
-    t.is(uuid(0.6741, true), 109713);
-    t.is(uuid(0.99123, true), 130497);
 });
 
 test('replaceAtIndex replaces an array item at a specified index', t => {
@@ -301,11 +296,44 @@ test('arrayAverage does not mutate the array', t => {
     t.deepEqual(values, [1, 7, 3, 9]);
 });
 
+test('limitTimeSeriesLength filters time series according to a least-distance algorithm', t => {
+    const series = [
+        [1, 10110],
+        [1.9, 19092],
+        [3, 99123],
+        [4.2, 82782],
+        [5.8, 11823],
+        [6.9, 88123],
+        [8.1, 12939],
+        [9, 99123],
+        [10.1, 91723],
+        [11.5, 91231]
+    ];
+
+    const result = limitTimeSeriesLength(series, 3);
+
+    t.deepEqual(result, [
+        [4.2, 82782],
+        [6.9, 88123],
+        [11.5, 91231]
+    ]);
+
+    const resultLong = limitTimeSeriesLength(series, 6);
+
+    t.deepEqual(resultLong, [
+        [3, 99123],
+        [4.2, 82782],
+        [5.8, 11823],
+        [6.9, 88123],
+        [10.1, 91723],
+        [11.5, 91231]
+    ]);
+});
+
 test('randnBm returning a Gaussian-incremented value from two random numbers', t => {
     t.is(randnBm(0.13, 0.87), 1.382792212427032);
     t.is(randnBm(0.83, 0.876), 0.43436275519719214);
 });
-
 
 test('getValueForTransmit returning numbers as-is', t => {
     t.is(getValueForTransmit(10), 10);

@@ -159,6 +159,26 @@ export function arrayAverage(values, mode = null) {
     return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+export const limitTimeSeriesLength = (timeSeries, limit) => new Array(timeSeries.length)
+    .fill(0)
+    .reduce(last => {
+        if (last.length <= limit) {
+            return last;
+        }
+
+        const [closestIndex] = last.slice(1).reduce(([closest, interval], [time], index) => {
+            const thisInterval = time - last[index][0];
+            if (thisInterval < interval) {
+                return [index, thisInterval];
+            }
+
+            return [closest, interval];
+        }, [1, Infinity]);
+
+        return last.slice(0, closestIndex)
+            .concat(last.slice(closestIndex + 1));
+    }, timeSeries);
+
 const testableRandom = (key = 0) => {
     if (process.env.NODE_ENV === 'test') {
         return (0.36123 * (key + 1)) % 1;
