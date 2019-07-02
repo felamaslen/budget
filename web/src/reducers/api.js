@@ -2,7 +2,8 @@ import { createReducerObject } from 'create-reducer-object';
 
 import {
     SYNC_REQUESTED,
-    SYNC_RECEIVED
+    SYNC_RECEIVED,
+    SYNC_ERROR_OCCURRED
 } from '~client/constants/actions/api';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 
@@ -13,10 +14,8 @@ export const initialState = {
 
 const handlers = {
     [SYNC_REQUESTED]: () => ({ loading: true }),
-    [SYNC_RECEIVED]: (state, { err }) => ({
-        loading: false,
-        error: err
-    }),
+    [SYNC_RECEIVED]: () => ({ loading: false, error: null }),
+    [SYNC_ERROR_OCCURRED]: (state, { err }) => ({ loading: false, error: err }),
     [LOGGED_OUT]: () => initialState
 };
 

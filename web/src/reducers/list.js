@@ -110,7 +110,7 @@ const onSyncReceived = page => (state, { requests, res }) => {
     return { items };
 };
 
-export default function makeListReducer(page, extraHandlers, extraState) {
+export default function makeListReducer(page, extraHandlers = {}, extraState = {}) {
     const initialState = {
         ...extraState,
         items: []
