@@ -1,13 +1,13 @@
+const stockIndexRegex = /^([^/]+)\/([^/]+)$/;
+
 export const STOCK_INDICES = (process.env.STOCK_INDICES || '')
     .split(',')
-    .reduce((obj, item) => {
-        const match = item.match(/^([^/]+)\/([^/]+)$/);
-        if (match) {
-            obj[match[1]] = match[2];
-        }
-
-        return obj;
-    }, {});
+    .map(code => code.match(stockIndexRegex))
+    .filter(code => code)
+    .reduce((last, [, code, name]) => ({
+        ...last,
+        [code]: name
+    }), {});
 
 export const DO_STOCKS_LIST = process.env.DO_STOCKS_LIST === 'true';
 export const STOCKS_GRAPH_RESOLUTION = 50;

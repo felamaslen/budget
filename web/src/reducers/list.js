@@ -13,7 +13,7 @@ import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
 import { replaceAtIndex } from '~client/modules/data';
 
-const onRead = page => (state, { res }) => {
+export const onRead = page => (state, { res }) => {
     if (!res[page]) {
         return {};
     }
@@ -117,13 +117,13 @@ export default function makeListReducer(page, extraHandlers, extraState) {
     };
 
     const handlers = {
-        ...extraHandlers,
         [LOGGED_OUT]: () => initialState,
         [DATA_READ]: onRead(page),
         [LIST_ITEM_CREATED]: onCreateOptimistic(page),
         [LIST_ITEM_UPDATED]: onUpdateOptimistic(page),
         [LIST_ITEM_DELETED]: onDeleteOptimistic(page),
-        [SYNC_RECEIVED]: onSyncReceived(page)
+        [SYNC_RECEIVED]: onSyncReceived(page),
+        ...extraHandlers
     };
 
     return createReducerObject(handlers, initialState);
