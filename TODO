@@ -28,3 +28,4 @@
 - Refactor state using combineReducers
 - Restrict containers to the following: <ErrorMessages />, <GraphFunds />, <GraphOverview />, <LoginForm />, <ModalDialog /> (?), <NetWorth />, <Page /> (and derivatives), <Root />, <Spinner />, <StocksList />
 - Combine net worth with balance column (put net worth data in redux)
+- Fix stock prices feature
