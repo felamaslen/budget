@@ -1,10 +1,11 @@
-import * as actions from '~client/actions/error';
-import { uuid } from '~client/modules/data';
+import shortid from 'shortid';
+
+import * as actions from '~client/constants/actions/error';
 
 export const errorOpened = message => ({
     type: actions.ERROR_OPENED,
     message,
-    id: uuid()
+    id: shortid.generate()
 });
 
 export const errorClosed = id => ({
