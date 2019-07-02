@@ -4,7 +4,6 @@ import { testRows, testPrices, testStartTime, testCacheTimes } from '~client-tes
 import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
 
 export const testState = {
-    now: DateTime.fromISO('2018-03-23T11:45:20Z'),
     pages: {
         overview: {
             startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),

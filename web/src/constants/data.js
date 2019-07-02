@@ -6,6 +6,11 @@ export const API_PREFIX = `/api/v${API_VERSION}`;
 
 export const LOGIN_INPUT_LENGTH = 4;
 
+export const CREATE = 'CREATE';
+export const READ = 'READ';
+export const UPDATE = 'UPDATE';
+export const DELETE = 'DELETE';
+
 export const DATA_KEY_ABBR = {
     id: 'I',
     date: 'd',

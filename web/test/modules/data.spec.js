@@ -62,6 +62,11 @@ test('replaceAtIndex doesn\'t modify the array if the index is -1', t => {
     t.is(replaceAtIndex(array, -1, 'foo'), array);
 });
 
+test('replaceAtIndex accepts a parameter to replace with a function of the previous value', t => {
+    t.deepEqual(replaceAtIndex([1, 5, 7, 3, 2], 1, value => value ** 2, true),
+        [1, 25, 7, 3, 2]);
+});
+
 test('removeAtIndex removes an array item at a specified index', t => {
     t.deepEqual(removeAtIndex([1, 5, 7, 3, 2], 3), [1, 5, 7, 2]);
 });

@@ -22,22 +22,18 @@ export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_
     return { period: match[1], length: match[2] };
 }
 
-export function uuid(rand = Math.random(), random = false) {
-    if (process.env.NODE_ENV === 'test' && !random) {
-        return 0x4812;
-    }
-
-    return Math.floor((1 + rand) * 0x10000);
-}
-
-export function replaceAtIndex(array, index, value) {
+export function replaceAtIndex(array, index, value, isFunction = false) {
     if (index === -1) {
         return array;
     }
 
+    const nextValue = isFunction
+        ? value(array[index])
+        : value;
+
     return array
         .slice(0, index)
-        .concat([value])
+        .concat([nextValue])
         .concat(array.slice(index + 1));
 }
 
