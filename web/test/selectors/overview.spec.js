@@ -31,13 +31,13 @@ test('getBalance gets the balance items', t => {
 });
 
 test('getCurrentDate gets the end of the current day', t => {
-    const result = getCurrentDate(state);
-
-    t.deepEqual(result, DateTime.fromISO('2018-03-23T23:59:59.999Z'));
+    t.deepEqual(getCurrentDate(state), DateTime.fromISO('2018-03-23T23:59:59.999Z'));
 });
+
 test('getCurrentDate does not reload the result if the day doesn\'t change', t => {
     const result = getCurrentDate(state);
-    const nextResult = getCurrentDate({ ...state, now: DateTime.fromISO('2018-03-23T15:20Z') });
+
+    const nextResult = getCurrentDate({ ...state, now: DateTime.fromISO('2018-03-23T12:32:02Z') });
 
     // notice this equality check is shallow, i.e. by reference, so if the date had
     // been recalculated, this test would fail :)
@@ -45,8 +45,10 @@ test('getCurrentDate does not reload the result if the day doesn\'t change', t =
 });
 
 test('getFutureMonths calculates the number of months in the future there are, based on the current date', t => {
-    t.is(getFutureMonths(state), 3);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-23T11:45:20Z') }), 3);
+
     t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T15:20Z') }), 3);
+
     t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T22:59Z') }), 3);
 
     t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-04-01T00:00Z') }), 2);

@@ -1,40 +1,45 @@
 import { DateTime } from 'luxon';
 import { createSelector } from 'reselect';
 import { compose } from 'redux';
+
 import { AVERAGE_MEDIAN } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { arrayAverage, randnBm, replaceAtIndex } from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
-import { getNow } from './app';
+import { getNow } from '~client/selectors/app';
 
 const futureCategories = ['funds', 'food', 'general', 'holiday', 'social'];
 const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
 
-export const getStartDate = state => state.pages.overview.startDate;
-export const getEndDate = state => state.pages.overview.endDate;
+export const getStartDate = state => state.overview.startDate;
+export const getEndDate = state => state.overview.endDate;
 
-const getRows = state => state.pages.overview.rows;
-const getCost = state => state.pages.overview.cost;
+const getRows = state => state.overview.rows;
+const getCost = state => state.overview.cost;
 
 export const getNumRows = createSelector(getRows, rows => rows && rows.length);
 
 export const getBalance = createSelector(getRows, rows => rows && rows.map(([first]) => first));
 
-const getCurrentDateTimestamp = createSelector(getNow, now => now.endOf('day').ts);
+const getEndOfDayTimestamp = createSelector(getNow, now => now.endOf('day').ts);
 
-export const getCurrentDate = createSelector(getCurrentDateTimestamp, ts => DateTime.fromMillis(ts));
+export const getCurrentDate = createSelector(getEndOfDayTimestamp, ts => DateTime.fromMillis(ts));
 
-export const getFutureMonths = createSelector([getCurrentDate, getEndDate], (currentDate, endDate) =>
-    currentDate && endDate && Math.floor(endDate.diff(currentDate, 'months').toObject().months || 0));
+export const getFutureMonths = createSelector(getCurrentDate, getEndDate, (currentDate, endDate) => {
+    if (!(currentDate && endDate)) {
+        return 0;
+    }
+
+    return Math.floor(endDate.diff(currentDate, 'months').toObject().months);
+});
 
 export const getRowDates = createSelector([
-    getFutureMonths,
     getStartDate,
     getEndDate,
     getNumRows
-], (futureMonths, startDate, endDate, numRows) => startDate && new Array(numRows).fill(0)
+], (startDate, endDate, numRows) => startDate && new Array(numRows).fill(0)
     .map((item, index) => startDate.plus({ months: index }).endOf('month'))
 );
 
