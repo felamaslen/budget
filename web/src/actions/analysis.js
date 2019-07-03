@@ -2,7 +2,7 @@ import * as actions from '~client/constants/actions/analysis';
 
 export const optionChanged = req => ({
     type: actions.ANALYSIS_OPTION_CHANGED,
-    req
+    ...req
 });
 
 export const analysisDataRefreshed = (res, err = null) => ({
@@ -11,16 +11,11 @@ export const analysisDataRefreshed = (res, err = null) => ({
     err
 });
 
-export const treeItemDisplayToggled = key => ({
+export const treeItemDisplayToggled = group => ({
     type: actions.ANALYSIS_TREE_DISPLAY_TOGGLED,
-    key
+    group
 });
 
-export const treeItemExpandToggled = key => ({
-    type: actions.ANALYSIS_TREE_EXPAND_TOGGLED,
-    key
-});
+export const treeItemHovered = (group, name) => ({ type: actions.ANALYSIS_TREE_HOVERED, group, name });
 
-export const treeItemHovered = key => ({ type: actions.ANALYSIS_TREE_HOVERED, key });
-
-export const blockClicked = req => ({ type: actions.ANALYSIS_BLOCK_CLICKED, req });
+export const blockClicked = name => ({ type: actions.ANALYSIS_BLOCK_CLICKED, name });
