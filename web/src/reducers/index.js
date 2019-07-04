@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 
+import now from '~client/reducers/now';
 import app from '~client/reducers/app';
 import api from '~client/reducers/api';
 import login from '~client/reducers/login';
@@ -16,6 +17,7 @@ import holiday from '~client/reducers/holiday';
 import social from '~client/reducers/social';
 
 export default combineReducers({
+    now,
     app,
     api,
     login,
