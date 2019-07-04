@@ -1,54 +1,21 @@
 import test from 'ava';
-import { DateTime } from 'luxon';
 import {
     getDailyTotals,
     getWeeklyAverages,
-    getTotalCost
+    getTotalCost,
+    getCrudRequests
 } from '~client/selectors/list';
-import { testRows } from '~client-test/test_data/testFunds';
-
-const state = {
-    now: DateTime.fromISO('2018-03-23T11:45:20Z'),
-    pages: {
-        analysis: {},
-        food: {
-            data: {
-                numRows: 3,
-                numCols: 5,
-                total: 8755601
-            },
-            rows: [
-                {
-                    id: '19',
-                    cols: [DateTime.fromISO('2018-04-17'), 'foo3', 'bar3', 29, 'bak3']
-                },
-                {
-                    id: '300',
-                    cols: [DateTime.fromISO('2018-02-03'), 'foo1', 'bar1', 1139, 'bak1']
-                },
-                {
-                    id: '81',
-                    cols: [DateTime.fromISO('2018-02-03'), 'foo2', 'bar2', 876, 'bak2']
-                },
-                {
-                    id: '29',
-                    cols: [DateTime.fromISO('2018-02-02'), 'foo3', 'bar3', 498, 'bak3']
-                }
-            ]
-        },
-        funds: {
-            rows: testRows
-        }
-    }
-};
+import { testState as state } from '~client-test/test_data/state';
+import { getTransactionsList } from '~client/modules/data';
+import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
 test('getDailyTotals calculates daily totals for list pages', t => {
     const result = getDailyTotals(state, { page: 'food' });
 
     t.deepEqual(result, {
-        19: 29,
-        81: 2015,
-        29: 498
+        id19: 29,
+        id81: 2015,
+        id29: 498
     });
 });
 
@@ -66,4 +33,83 @@ test('getTotalCost returns the total cost of a list page', t => {
 
 test('getTotalCost returns the fund cost value for the funds page', t => {
     t.is(getTotalCost(state, { page: 'funds' }), 400000);
+});
+
+test('getCrudRequests maps optimistically updated items to a HTTP request list', t => {
+    const stateWithUpdates = {
+        income: { items: [] },
+        funds: {
+            items: [
+                {
+                    id: 'some-fund-id',
+                    name: 'some-fund-name',
+                    transactions: getTransactionsList([
+                        { date: '2019-05-03', units: 103, cost: 99231 }
+                    ]),
+                    __optimistic: UPDATE
+                }
+            ]
+        },
+        bills: { items: [] },
+        food: {
+            items: [
+                { id: 'real-id-z', other: 'this-prop', is: null, __optimistic: UPDATE }
+            ]
+        },
+        general: {
+            items: [
+                { id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE }
+            ]
+        },
+        holiday: {
+            items: [
+                { id: 'real-id-x', thisProp: 'foo', is: false, __optimistic: DELETE }
+            ]
+        },
+        social: { items: [] }
+    };
+
+    const requests = [
+        {
+            method: 'put',
+            route: 'funds',
+            query: {},
+            body: {
+                id: 'some-fund-id',
+                name: 'some-fund-name',
+                transactions: [
+                    { date: '2019-05-03', units: 103, cost: 99231 }
+                ]
+            }
+        },
+        {
+            method: 'put',
+            route: 'food',
+            query: {},
+            body: {
+                id: 'real-id-z',
+                other: 'this-prop',
+                is: 'null'
+            }
+        },
+        {
+            method: 'post',
+            route: 'general',
+            query: {},
+            body: {
+                some: 'prop',
+                is: 'true'
+            }
+        },
+        {
+            method: 'delete',
+            route: 'holiday',
+            query: {},
+            body: {
+                id: 'real-id-x'
+            }
+        }
+    ];
+
+    t.deepEqual(getCrudRequests(stateWithUpdates), requests);
 });

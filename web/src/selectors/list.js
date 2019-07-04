@@ -1,8 +1,16 @@
 import { createSelector } from 'reselect';
-import { PAGES } from '~client/constants/data';
-import { getFundsCost } from '~client/selectors/funds';
+import compose from 'just-compose';
 
-export const getAllPageRows = (state, { page }) => state.pages[page].rows;
+import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/data';
+import { getFundsCost } from '~client/selectors/funds';
+import { getValueForTransmit } from '~client/modules/data';
+
+export const getAllPageRows = (state, { page }) => state[page].items;
+
+const getAllListRows = state => PAGES_LIST.map(page => ({
+    page,
+    rows: getAllPageRows(state, { page })
+}));
 
 const getPageProp = (state, { page }) => page;
 
@@ -11,15 +19,10 @@ export const getDailyTotals = createSelector([getPageProp, getAllPageRows], (pag
         return null;
     }
 
-    const dateKey = PAGES[page].cols.indexOf('date');
-    const costKey = PAGES[page].cols.indexOf('cost');
-
-    const [totals] = rows.reduce(([results, dailySum], row, index) => {
-        const lastInDay = !(index < rows.length - 1 && row.cols[dateKey].hasSame(rows[index + 1].cols[dateKey], 'day'));
-        const cost = row.cols[costKey];
-
+    const [totals] = rows.reduce(([results, dailySum], { id, date, cost }, index) => {
+        const lastInDay = !(index < rows.length - 1 && date.hasSame(rows[index + 1].date, 'day'));
         if (lastInDay) {
-            return [{ ...results, [row.id]: dailySum + cost }, 0];
+            return [{ ...results, [id]: dailySum + cost }, 0];
         }
 
         return [results, dailySum + cost];
@@ -33,19 +36,16 @@ export const getWeeklyAverages = createSelector([getPageProp, getAllPageRows], (
         return null;
     }
 
-    const costKey = PAGES[page].cols.indexOf('cost');
-    const dateKey = PAGES[page].cols.indexOf('date');
-
     // note that this is calculated only based on the visible data,
     // not past data
 
-    const visibleTotal = rows.reduce((sum, item) => sum + item.cols[costKey], 0);
+    const visibleTotal = rows.reduce((sum, { cost }) => sum + cost, 0);
     if (!rows.length) {
         return 0;
     }
 
-    const firstDate = rows[0].cols[dateKey];
-    const lastDate = rows[rows.length - 1].cols[dateKey];
+    const firstDate = rows[0].date;
+    const lastDate = rows[rows.length - 1].date;
 
     const numWeeks = firstDate.diff(lastDate).as('days') / 7;
     if (!numWeeks) {
@@ -55,7 +55,7 @@ export const getWeeklyAverages = createSelector([getPageProp, getAllPageRows], (
     return Math.round(visibleTotal / numWeeks);
 });
 
-const getListPageData = (state, { page }) => state.pages[page].data && state.pages[page].data.total;
+const getListPageData = (state, { page }) => state[page].data && state[page].data.total;
 
 export const getTotalCost = createSelector([
     getPageProp,
@@ -68,3 +68,51 @@ export const getTotalCost = createSelector([
 
     return total;
 });
+
+const withTransmitValues = requests => requests.map(({ body, ...rest }) => ({
+    ...rest,
+    body: Object.keys(body).reduce((last, column) => ({
+        ...last,
+        [column]: getValueForTransmit(column, body[column])
+    }), {})
+}));
+
+const withCreateRequests = (page, rows) => last => last.concat(rows
+    .filter(({ __optimistic }) => __optimistic === CREATE)
+    .map(({ id, __optimistic, ...body }) => ({
+        method: 'post',
+        route: page,
+        query: {},
+        body
+    }))
+);
+
+const withUpdateRequests = (page, rows) => last => last.concat(rows
+    .filter(({ __optimistic }) => __optimistic === UPDATE)
+    .map(({ __optimistic, ...body }) => ({
+        method: 'put',
+        route: page,
+        query: {},
+        body
+    }))
+);
+
+const withDeleteRequests = (page, rows) => last => last.concat(rows
+    .filter(({ __optimistic }) => __optimistic === DELETE)
+    .map(({ id }) => ({
+        method: 'delete',
+        route: page,
+        query: {},
+        body: { id }
+    }))
+);
+
+const getCrudRequestsByPage = (page, rows) => compose(
+    withCreateRequests(page, rows),
+    withUpdateRequests(page, rows),
+    withDeleteRequests(page, rows),
+    withTransmitValues
+)([]);
+
+export const getCrudRequests = createSelector(getAllListRows, rowsByPage =>
+    rowsByPage.reduce((last, { page, rows }) => last.concat(getCrudRequestsByPage(page, rows)), []));
