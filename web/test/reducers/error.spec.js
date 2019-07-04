@@ -13,12 +13,11 @@ test('Null action returns the initial state', t => {
 
 test('ERROR_OPENED adds a message to the list', t => {
     const state = [];
-    const message = { text: 'some message', level: 'foo_level' };
-    const action = errorOpened(message);
+    const action = errorOpened('some message', 'foo_level');
     const result = reducer(state, action);
 
     t.deepEqual(result, [
-        { id: action.id, message }
+        { id: action.id, message: { text: 'some message', level: 'foo_level' } }
     ]);
 });
 

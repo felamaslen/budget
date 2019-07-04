@@ -6,13 +6,13 @@ import { Provider } from 'react-redux';
 import React from 'react';
 import ErrorMessages from '~client/containers/ErrorMessages';
 import { ERROR_LEVEL_ERROR, ERROR_LEVEL_WARN } from '~client/constants/error';
-import { ERROR_CLOSED } from '~client/constants/actions';
+import { errorClosed } from '~client/actions/error';
 
 const getContainer = (customProps = {}) => {
     const state = {
-        errorMsg: [
-            { id: 'f1101', level: ERROR_LEVEL_ERROR, closed: false, text: 'foo' },
-            { id: 'g1923', level: ERROR_LEVEL_WARN, closed: true, text: 'bar' }
+        error: [
+            { id: 'f1101', message: { level: ERROR_LEVEL_ERROR, text: 'foo' }, closed: false },
+            { id: 'g1923', message: { level: ERROR_LEVEL_WARN, text: 'bar' }, closed: true }
         ]
     };
 
@@ -70,11 +70,11 @@ test('each message', t => {
 test('closing messages when clicking them', t => {
     const { container, store } = getContainer();
 
-    t.false(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'f1101' }));
+    t.false(store.isActionDispatched(errorClosed('f1101')));
     fireEvent.click(container.childNodes[0].childNodes[0]);
-    t.true(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'f1101' }));
+    t.true(store.isActionDispatched(errorClosed('f1101')));
 
-    t.false(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' }));
+    t.false(store.isActionDispatched(errorClosed('g1923')));
     fireEvent.click(container.childNodes[0].childNodes[1]);
-    t.true(store.isActionDispatched({ type: ERROR_CLOSED, msgId: 'g1923' }));
+    t.true(store.isActionDispatched(errorClosed('g1923')));
 });

@@ -10,14 +10,12 @@ import { replaceAtIndex } from '~client/modules/data';
 
 export const initialState = [];
 
-function onClose(state, { id }) {
-    const index = state.findIndex(({ id: messageId }) => messageId === id);
-    if (index === -1) {
-        return state;
-    }
-
-    return replaceAtIndex(state, index, { ...state[index], closed: true });
-}
+const onClose = (state, { id }) => replaceAtIndex(
+    state,
+    state.findIndex(({ id: messageId }) => messageId === id),
+    value => ({ ...value, closed: true }),
+    true
+);
 
 const handlers = {
     [ERROR_OPENED]: (state, { id, message }) => state.concat([{ id, message }]),
