@@ -36,6 +36,8 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
 
     t.deepEqual(rest10, {
         id: '10',
+        item: 'some fund 1',
+        transactions: state.funds.items[0].transactions,
         className: '',
         sold: false,
         gain: {
@@ -52,6 +54,8 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
 
     t.deepEqual(rest1, {
         id: '1',
+        item: 'some fund 3',
+        transactions: state.funds.items[2].transactions,
         className: 'sold',
         sold: true,
         gain: {

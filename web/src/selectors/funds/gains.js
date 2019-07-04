@@ -1,9 +1,6 @@
 import memoize from 'fast-memoize';
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
-import { PAGES } from '~client/constants/data';
 import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
-
-const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 
 function getFundColor(value, min, max) {
     const color = value > 0
@@ -49,13 +46,12 @@ function getCostValue(transactions, price, yesterdayPrice) {
 }
 
 export function getRowGains(rows, cache) {
-    return rows.reduce((items, { id, cols }) => {
+    return rows.reduce((items, { id, transactions }) => {
         const rowCache = cache.prices[id];
         if (!(rowCache && rowCache.values.length)) {
             return items;
         }
 
-        const transactions = cols[transactionsKey];
         const price = rowCache.values[rowCache.values.length - 1];
         const yesterdayPrice = rowCache.values.length > 1
             ? rowCache.values[rowCache.values.length - 2]

@@ -10,8 +10,6 @@ import { separateLines } from '~client/modules/funds';
 import { getTotalUnits, getTotalCost, isSold } from '~client/modules/data';
 import {
     getViewSoldFunds,
-    transactionsKey,
-    itemKey,
     getRowLengths,
     getCurrentFundsCache,
     getFundsRows
@@ -19,31 +17,23 @@ import {
 import { getFundLineProcessed } from './lines';
 
 const getGraphMode = state => state.other.graphFunds.mode;
-const getEnabledList = state => state.other.graphFunds.enabledList;
 
-function getFundItems(rows, enabledList, soldList) {
-    const colors = rows.reduce((last, { id, cols }) => ({
-        ...last,
-        [id]: colorKey(cols[itemKey])
-    }), { [GRAPH_FUNDS_OVERALL_ID]: COLOR_GRAPH_FUND_LINE });
+const getFundItems = (rows, soldList) => ([{
+    id: GRAPH_FUNDS_OVERALL_ID,
+    item: 'Overall',
+    color: COLOR_GRAPH_FUND_LINE
+}].concat(rows
+    .filter(({ id }) => !soldList[id])
+    .map(({ id, item }) => ({
+        id,
+        item,
+        color: colorKey(item)
+    }))
+));
 
-    return enabledList.filter(({ id }) =>
-        !soldList[id] &&
-        (id === GRAPH_FUNDS_OVERALL_ID || rows.some(({ id: rowId }) => rowId === id))
-    )
-        .map(({ id, enabled }) => ({
-            id,
-            color: colors[id],
-            item: id === GRAPH_FUNDS_OVERALL_ID
-                ? 'Overall'
-                : rows.find(({ id: rowId }) => rowId === id).cols[itemKey],
-            enabled
-        }));
-}
-
-function getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList) {
-    return enabledList.reduce((last, { id, enabled }) => {
-        if (priceUnitsCosts.sold[id] || !(enabled && times[id] && times[id].length > 1)) {
+function getFundLines(fundItems, times, timeOffsets, priceUnitsCosts, mode) {
+    return fundItems.reduce((last, { id }) => {
+        if (priceUnitsCosts.sold[id] || !(times[id] && times[id].length > 1)) {
             return last;
         }
 
@@ -62,14 +52,11 @@ function getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList) {
 function getPriceUnitsCosts(rows, rawPrices, startTime, cacheTimes, viewSold) {
     const rowsWithInfo = rows
         .filter(({ id }) => rawPrices[id])
-        .map(({ id, cols }) => ({
+        .map(({ id, transactions }) => ({
             id,
-            transactions: cols[transactionsKey],
-            transactionsToDate: rawPrices[id].values.map((price, index) =>
-                cols[transactionsKey].filter(({ date }) =>
-                    date < 1000 * (startTime + cacheTimes[index + rawPrices[id].startIndex])
-                )
-            )
+            transactions,
+            transactionsToDate: rawPrices[id].values.map((price, index) => transactions.filter(({ date }) =>
+                date < 1000 * (startTime + cacheTimes[index + rawPrices[id].startIndex])))
         }));
 
     const sold = rowsWithInfo.reduce((last, { id, transactions }) => ({
@@ -99,9 +86,8 @@ const getFormattedHistory = createSelector([
     getViewSoldFunds,
     getFundsRows,
     getCurrentFundsCache,
-    getGraphMode,
-    getEnabledList
-], (viewSoldFunds, rows, cache, mode, enabledList) => {
+    getGraphMode
+], (viewSoldFunds, rows, cache, mode) => {
     // get a formatted list of lines for display in the fund price / value graph
 
     if (!cache) {
@@ -119,9 +105,9 @@ const getFormattedHistory = createSelector([
         [id]: cacheTimes.slice(timeOffsets[id], timeOffsets[id] + rowLengths[id])
     }), { [GRAPH_FUNDS_OVERALL_ID]: cacheTimes.slice(0, maxLength) });
 
-    const fundItems = getFundItems(rows, enabledList, priceUnitsCosts.sold);
+    const fundItems = getFundItems(rows, priceUnitsCosts.sold);
 
-    const fundLines = getFundLines(times, timeOffsets, priceUnitsCosts, mode, enabledList);
+    const fundLines = getFundLines(fundItems, times, timeOffsets, priceUnitsCosts, mode);
 
     return { startTime, cacheTimes, fundItems, fundLines };
 });

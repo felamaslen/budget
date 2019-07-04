@@ -25,37 +25,56 @@ export const testState = {
         },
         rows: [[13502], [19220], [11876], [14981], [14230], [12678], [0]]
     },
-    pages: {
-        funds: {
-            rows: testRows,
-            cache: {
-                period1: {
-                    startTime: testStartTime,
-                    cacheTimes: testCacheTimes,
-                    prices: testPrices
-                }
+    funds: {
+        items: testRows,
+        viewSoldFunds: false,
+        period: 'period1',
+        cache: {
+            period1: {
+                startTime: testStartTime,
+                cacheTimes: testCacheTimes,
+                prices: testPrices
             }
-        },
-        food: {
-            rows: [
-                {
-                    id: 'my-id',
-                    cols: [
-                        DateTime.fromISO('2019-06-27T21:19:03.000Z'),
-                        'something',
-                        343
-                    ]
-                },
-                {
-                    id: 'other-id',
-                    cols: [
-                        DateTime.fromISO('2019-06-20T21:15:10.000Z'),
-                        'something else',
-                        9123
-                    ]
-                }
-            ]
         }
+    },
+    food: {
+        data: {
+            total: 8755601
+        },
+        items: [
+            {
+                id: 'id19',
+                date: DateTime.fromISO('2018-04-17'),
+                item: 'foo3',
+                category: 'bar3',
+                cost: 29,
+                shop: 'bak3'
+            },
+            {
+                id: 'id300',
+                date: DateTime.fromISO('2018-02-03'),
+                item: 'foo1',
+                category: 'bar1',
+                cost: 1139,
+                shop: 'bak2'
+            },
+            {
+                id: 'id81',
+                date: DateTime.fromISO('2018-02-03'),
+                item: 'foo2',
+                category: 'bar2',
+                cost: 876,
+                shop: 'bak2'
+            },
+            {
+                id: 'id29',
+                date: DateTime.fromISO('2018-02-02'),
+                item: 'foo3',
+                category: 'bar3',
+                cost: 498,
+                shop: 'bak3'
+            }
+        ]
     },
     edit: {
         active: {

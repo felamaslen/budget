@@ -3,8 +3,8 @@ import classNames from 'classnames';
 import { formatAge } from '~client/modules/format';
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { getNow } from '~client/selectors/app';
-import { transactionsKey, getFundsRows, getCurrentFundsCache } from './helpers';
-import { getRowGains, getGainsForRow } from './gains';
+import { getFundsRows, getCurrentFundsCache } from '~client/selectors/funds/helpers';
+import { getRowGains, getGainsForRow } from '~client/selectors/funds/gains';
 
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = (now.ts / 1000) - cacheTimes[cacheTimes.length - 1] - startTime;
@@ -19,7 +19,7 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     return formatAge(age);
 }
 
-const getFundCacheAge = createSelector([getCurrentFundsCache, getNow], (cache, now) => {
+const getFundCacheAge = createSelector(getNow, getCurrentFundsCache, (now, cache) => {
     if (!cache) {
         return null;
     }
@@ -34,13 +34,13 @@ const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (
         return 0;
     }
 
-    return rows.reduce((sum, { id, cols }) => {
+    return rows.reduce((sum, { id, transactions }) => {
         const { values: prices } = cache.prices[id];
         if (!(prices && prices.length)) {
             return sum;
         }
 
-        return sum + prices[prices.length - 1] * getTotalUnits(cols[transactionsKey]);
+        return sum + prices[prices.length - 1] * getTotalUnits(transactions);
     }, 0);
 });
 
@@ -54,8 +54,7 @@ export const getFundsCost = createSelector(getFundsRows, rows => {
         return 0;
     }
 
-    return rows.reduce((sum, { cols }) => {
-        const transactions = cols[transactionsKey];
+    return rows.reduce((sum, { transactions }) => {
         if (isSold(transactions)) {
             return sum;
         }
@@ -85,7 +84,7 @@ export const getProcessedFundsRows = createSelector([getFundsRows, getCurrentFun
     const rowGains = getRowGains(rows, cache);
 
     return rows.map(row => {
-        const sold = isSold(row.cols[transactionsKey]);
+        const sold = isSold(row.transactions);
 
         return {
             ...row,

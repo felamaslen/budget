@@ -1,10 +1,6 @@
 import { createSelector } from 'reselect';
-import { PAGES } from '~client/constants/data';
 
-export const transactionsKey = PAGES.funds.cols.indexOf('transactions');
-export const itemKey = PAGES.funds.cols.indexOf('item');
-
-export const getViewSoldFunds = state => Boolean(state.other.viewSoldFunds);
+export const getViewSoldFunds = state => Boolean(state.funds.viewSoldFunds);
 
 export function getRowLengths(prices) {
     const timeOffsets = Object.keys(prices).reduce((last, id) => ({
@@ -21,10 +17,10 @@ export function getRowLengths(prices) {
     return { timeOffsets, rowLengths, maxLength };
 }
 
-export const getFundsRows = state => state.pages.funds.rows;
+export const getFundsRows = state => state.funds.items;
 
-export const getFundsCache = state => state.pages.funds.cache;
-const getFundsPeriod = state => state.other.graphFunds.period;
+export const getFundsCache = state => state.funds.cache;
+const getFundsPeriod = state => state.funds.period;
 
 export const getCurrentFundsCache = createSelector([
     getFundsPeriod,

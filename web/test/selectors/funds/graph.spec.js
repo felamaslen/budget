@@ -4,36 +4,16 @@ import { DateTime } from 'luxon';
 import {
     makeGetGraphProps
 } from '~client/selectors/funds/graph';
-import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
-import { testRows, testPrices, testStartTime, testCacheTimes, testLines } from '~client-test/test_data/testFunds';
+import { testState } from '~client-test/test_data/state';
+import { testLines } from '~client-test/test_data/testFunds';
 
 const state = {
+    ...testState,
     now: DateTime.fromISO('2017-09-01T19:01Z'),
-    pages: {
-        funds: {
-            rows: testRows,
-            cache: {
-                period1: {
-                    startTime: testStartTime,
-                    cacheTimes: testCacheTimes,
-                    prices: testPrices
-                }
-            }
-        }
-    },
-    other: {
-        viewSoldFunds: true,
-        graphFunds: {
-            mode: GRAPH_FUNDS_MODE_ROI,
-            period: 'period1',
-            enabledList: [
-                { id: 'overall', enabled: true },
-                { id: '10', enabled: false },
-                { id: '1', enabled: true },
-                { id: '3', enabled: false },
-                { id: '5', enabled: false }
-            ]
-        }
+    funds: {
+        ...testState.funds,
+        viewSoldFunds: false,
+        period: 'period1'
     }
 };
 
@@ -52,11 +32,8 @@ test('makeGetGraphProps (fund items) returns an array', t => {
 });
 
 const testCases = [
-    { id: 'overall', color: [0, 0, 0], enabled: true, item: 'Overall' },
-    { id: '10', color: [0, 74, 153], enabled: false, item: 'some fund 1' },
-    { id: '1', color: [0, 74, 153], enabled: true, item: 'some fund 3' },
-    { id: '3', color: [0, 74, 153], enabled: false, item: 'some fund 2' },
-    { id: '5', color: [0, 153, 99], enabled: false, item: 'test fund 4' }
+    { id: 'overall', color: [0, 0, 0], item: 'Overall' },
+    { id: '10', color: [0, 74, 153], item: 'some fund 1' }
 ];
 
 testCases.forEach(value => {
@@ -65,6 +42,14 @@ testCases.forEach(value => {
 
         t.deepEqual(fundItems.find(({ id }) => id === value.id), value);
     });
+});
+
+const soldIds = ['1', '3', '5'];
+
+test('makeGetGraphProps doesn\'t calculate sold funds graph values', t => {
+    const { fundItems } = getFundItemsResult();
+
+    soldIds.forEach(id => t.false(fundItems.some(({ id: fundId }) => fundId === id)));
 });
 
 test('makeGetGraphProps (fund items) returns fund lines', t => {
@@ -76,12 +61,10 @@ test('makeGetGraphProps (fund items) returns fund lines', t => {
 test('makeGetGraphProps (fund items) returns fund items for deleted funds', t => {
     const stateWithDeletedItem = {
         ...state,
-        pages: {
-            ...state.pages,
-            funds: {
-                ...state.pages.funds,
-                rows: state.pages.funds.rows.filter(({ id }) => id !== '10')
-            }
+        funds: {
+            ...state.funds,
+            viewSoldFunds: true,
+            items: state.funds.items.filter(({ id }) => id !== '10')
         }
     };
 
