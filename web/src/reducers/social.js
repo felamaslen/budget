@@ -1,3 +1,3 @@
-import makeListReducer from '~client/reducers/list';
+import { makeDailyListReducer } from '~client/reducers/list';
 
-export default makeListReducer('social');
+export default makeDailyListReducer('social');

@@ -1,6 +1,7 @@
 import test from 'ava';
+import { DateTime } from 'luxon';
 
-import makeListReducer from '~client/reducers/list';
+import makeListReducer, { makeDailyListReducer } from '~client/reducers/list';
 import {
     listItemCreated,
     listItemUpdated,
@@ -52,6 +53,44 @@ test('DATA_READ inserts rows into the state', t => {
         { id: 'some-id', item: 'yes' },
         { id: 'other-id', item: 'no' }
     ]);
+});
+
+test('makeDailyListReducer makes a reducer which inserts the all-time total value from response', t => {
+    const dailyReducer = makeDailyListReducer(page);
+
+    const initialStateDaily = {
+        total: 0,
+        olderExists: null,
+        items: []
+    };
+
+    t.deepEqual(dailyReducer(undefined, null), initialStateDaily);
+
+    const actionRead = dataRead({
+        [page]: {
+            total: 335,
+            olderExists: true,
+            data: [{
+                [DATA_KEY_ABBR.id]: 'some-id',
+                [DATA_KEY_ABBR.date]: '2019-05-03',
+                [DATA_KEY_ABBR.item]: 'some-item',
+                [DATA_KEY_ABBR.cost]: 102
+            }]
+        }
+    });
+
+    const result = dailyReducer(initialStateDaily, actionRead);
+
+    t.deepEqual(result, {
+        total: 335,
+        olderExists: true,
+        items: [{
+            id: 'some-id',
+            date: '2019-05-03',
+            item: 'some-item',
+            cost: 102
+        }]
+    });
 });
 
 test('LIST_ITEM_CREATED optimistically creates a list item', t => {

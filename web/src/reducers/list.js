@@ -128,3 +128,31 @@ export default function makeListReducer(page, extraHandlers = {}, extraState = {
 
     return createReducerObject(handlers, initialState);
 }
+
+export function makeDailyListReducer(page, extraHandlers = {}) {
+    const dataOnRead = onRead(page);
+
+    const listOnRead = (state, action) => {
+
+        const {
+            res: {
+                [page]: pageRes = { total: 0, olderExists: null }
+            }
+        } = action;
+
+        const {
+            total,
+            olderExists
+        } = pageRes;
+
+        return { ...dataOnRead(state, action), total, olderExists };
+    };
+
+    return makeListReducer(page, {
+        ...extraHandlers,
+        [DATA_READ]: listOnRead
+    }, {
+        total: 0,
+        olderExists: null
+    });
+}
