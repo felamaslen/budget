@@ -1,5 +1,9 @@
+/* eslint-disable max-lines */
 import test from 'ava';
+import sinon from 'sinon';
 import { DateTime } from 'luxon';
+import shortid from 'shortid';
+
 import {
     getPeriodMatch,
     replaceAtIndex,
@@ -16,6 +20,7 @@ import {
     arrayAverage,
     limitTimeSeriesLength,
     randnBm,
+    getValueFromTransmit,
     getValueForTransmit,
     getNullEditable,
     getAddDefaultValues,
@@ -333,6 +338,47 @@ test('limitTimeSeriesLength filters time series according to a least-distance al
 test('randnBm returning a Gaussian-incremented value from two random numbers', t => {
     t.is(randnBm(0.13, 0.87), 1.382792212427032);
     t.is(randnBm(0.83, 0.876), 0.43436275519719214);
+});
+
+test('getValueFromTransmit returns "date" as DateTime', t => {
+    t.deepEqual(getValueFromTransmit('date', '2019-06-05'), DateTime.fromISO('2019-06-05'));
+});
+
+test('getValueFromTransmit returns "item" as-is', t => {
+    t.deepEqual(getValueFromTransmit('item', 'some-item'), 'some-item');
+});
+
+test('getValueFromTransmit returns "category" as-is', t => {
+    t.deepEqual(getValueFromTransmit('category', 'some-category'), 'some-category');
+});
+
+test('getValueFromTransmit returns "holiday" as-is', t => {
+    t.deepEqual(getValueFromTransmit('holiday', 'some-holiday'), 'some-holiday');
+});
+
+test('getValueFromTransmit returns "social" as-is', t => {
+    t.deepEqual(getValueFromTransmit('social', 'some-social'), 'some-social');
+});
+
+test('getValueFromTransmit returns "shop" as-is', t => {
+    t.deepEqual(getValueFromTransmit('shop', 'some-shop'), 'some-shop');
+});
+
+test('getValueFromTransmit returns "cost" as an integer', t => {
+    t.deepEqual(getValueFromTransmit('cost', 123), 123);
+    t.deepEqual(getValueFromTransmit('cost', 123.45), 123);
+    t.deepEqual(getValueFromTransmit('cost', '123.45'), 123);
+    t.deepEqual(getValueFromTransmit('cost', 'not a number'), 0);
+});
+
+test('getValueFromTransmit returns "transactions" as a transactions list', t => {
+    const stub = sinon.stub(shortid, 'generate').returns('something');
+
+    const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
+
+    t.deepEqual(getValueFromTransmit('transactions', transactions), getTransactionsList(transactions));
+
+    stub.restore();
 });
 
 test('getValueForTransmit returning numbers as-is', t => {

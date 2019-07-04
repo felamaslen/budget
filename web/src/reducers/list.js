@@ -11,7 +11,7 @@ import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 
 import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
-import { replaceAtIndex } from '~client/modules/data';
+import { replaceAtIndex, getValueFromTransmit } from '~client/modules/data';
 
 export const onRead = page => (state, { res }) => {
     if (!res[page]) {
@@ -25,7 +25,10 @@ export const onRead = page => (state, { res }) => {
         .filter(longKey => typeof res[page].data[0][DATA_KEY_ABBR[longKey]] !== 'undefined');
 
     const items = res[page].data.map(item =>
-        dataKeys.reduce((last, longKey) => ({ ...last, [longKey]: item[DATA_KEY_ABBR[longKey]] }), {})
+        dataKeys.reduce((last, longKey) => ({
+            ...last,
+            [longKey]: getValueFromTransmit(longKey, item[DATA_KEY_ABBR[longKey]])
+        }), {})
     );
 
     return { items };

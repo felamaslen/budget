@@ -86,7 +86,7 @@ test('makeDailyListReducer makes a reducer which inserts the all-time total valu
         olderExists: true,
         items: [{
             id: 'some-id',
-            date: '2019-05-03',
+            date: DateTime.fromISO('2019-05-03'),
             item: 'some-item',
             cost: 102
         }]

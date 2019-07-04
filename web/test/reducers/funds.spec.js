@@ -1,10 +1,15 @@
 import test from 'ava';
+import sinon from 'sinon';
+import shortid from 'shortid';
 
 import reducer, { initialState } from '~client/reducers/funds';
 import { dataRead } from '~client/actions/api';
+import { getTransactionsList } from '~client/modules/data';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 
 test('DATA_READ sets funds-related properties', t => {
+    const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
+
     const state = initialState;
 
     t.truthy(state.period);
@@ -17,7 +22,9 @@ test('DATA_READ sets funds-related properties', t => {
                 {
                     [DATA_KEY_ABBR.id]: 'id-1',
                     [DATA_KEY_ABBR.item]: 'My fund 1',
-                    [DATA_KEY_ABBR.transactions]: [],
+                    [DATA_KEY_ABBR.transactions]: [
+                        { date: '2019-06-30', units: 100, cost: 9923 }
+                    ],
                     pr: [45, 45.6, 44.9],
                     prStartIndex: 1
                 },
@@ -39,7 +46,11 @@ test('DATA_READ sets funds-related properties', t => {
     t.deepEqual(result, {
         ...state,
         items: [
-            { id: 'id-1', item: 'My fund 1', transactions: [] },
+            {
+                id: 'id-1',
+                item: 'My fund 1',
+                transactions: getTransactionsList([{ date: '2019-06-30', units: 100, cost: 9923 }])
+            },
             { id: 'id-2', item: 'My fund 2', transactions: [] }
         ],
         priceCache: {
@@ -53,4 +64,6 @@ test('DATA_READ sets funds-related properties', t => {
             }
         }
     });
+
+    stub.restore();
 });

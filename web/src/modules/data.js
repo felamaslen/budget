@@ -191,6 +191,20 @@ export function randnBm(rand1 = testableRandom(0), rand2 = testableRandom(1)) {
     return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
 }
 
+export function getValueFromTransmit(dataType, value) {
+    if (dataType === 'date') {
+        return DateTime.fromISO(value);
+    }
+    if (dataType === 'cost') {
+        return parseInt(value, 10) || 0;
+    }
+    if (dataType === 'transactions') {
+        return getTransactionsList(value);
+    }
+
+    return String(value);
+}
+
 export function getValueForTransmit(value) {
     if (typeof value === 'number') {
         return value;
