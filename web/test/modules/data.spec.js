@@ -381,28 +381,41 @@ test('getValueFromTransmit returns "transactions" as a transactions list', t => 
     stub.restore();
 });
 
-test('getValueForTransmit returning numbers as-is', t => {
-    t.is(getValueForTransmit(10), 10);
-    t.is(getValueForTransmit(-35.3), -35.3);
+test('getValueForTransmit returns date as ISO date', t => {
+    t.deepEqual(getValueForTransmit('date', DateTime.fromISO('2019-06-05')), '2019-06-05');
 });
 
-test('getValueForTransmit returning serialised dates', t => {
-    t.is(getValueForTransmit(dateInput('11/10/17')), '2017-10-11');
+test('getValueForTransmit returns "item" as-is', t => {
+    t.deepEqual(getValueForTransmit('item', 'some-item'), 'some-item');
 });
 
-test('getValueForTransmit returns serialised transactions lists', t => {
-    t.deepEqual(getValueForTransmit(getTransactionsList([{ date: '2017-10-11', units: 1, cost: 2 }])), [
-        { date: '2017-10-11', cost: 2, units: 1 }
-    ]);
+test('getValueForTransmit returns "category" as-is', t => {
+    t.deepEqual(getValueForTransmit('category', 'some-category'), 'some-category');
 });
 
-test('getValueForTransmit returning objects as-is', t => {
-    t.deepEqual(getValueForTransmit({ foo: 'bar' }), { foo: 'bar' });
+test('getValueForTransmit returns "holiday" as-is', t => {
+    t.deepEqual(getValueForTransmit('holiday', 'some-holiday'), 'some-holiday');
 });
 
-test('getValueForTransmit stringifying the object, otherwise', t => {
-    t.is(getValueForTransmit('23.51'), '23.51');
-    t.is(getValueForTransmit('foobar'), 'foobar');
+test('getValueForTransmit returns "social" as-is', t => {
+    t.deepEqual(getValueForTransmit('social', 'some-social'), 'some-social');
+});
+
+test('getValueForTransmit returns "shop" as-is', t => {
+    t.deepEqual(getValueForTransmit('shop', 'some-shop'), 'some-shop');
+});
+
+test('getValueForTransmit returns cost as an integer', t => {
+    t.deepEqual(getValueForTransmit('cost', 123), 123);
+    t.deepEqual(getValueForTransmit('cost', 123.45), 123);
+    t.deepEqual(getValueForTransmit('cost', '123.45'), 123);
+    t.deepEqual(getValueForTransmit('cost', 'not a number'), 0);
+});
+
+test('getValueForTransmit returns transactions as a simple array', t => {
+    const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
+
+    t.deepEqual(getValueForTransmit('transactions', getTransactionsList(transactions)), transactions);
 });
 
 test('getNullEditable returning a list object for list pages', t => {

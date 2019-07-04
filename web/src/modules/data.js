@@ -205,21 +205,15 @@ export function getValueFromTransmit(dataType, value) {
     return String(value);
 }
 
-export function getValueForTransmit(value) {
-    if (typeof value === 'number') {
-        return value;
-    }
-    if (value instanceof DateTime) {
+export function getValueForTransmit(dataType, value) {
+    if (dataType === 'date') {
         return value.toISODate();
     }
-    if (isTransactionsList(value)) {
+    if (dataType === 'transactions') {
         return formatTransactionsList(value);
     }
-    if (typeof value === 'object') {
-        return value;
-    }
 
-    return value.toString();
+    return getValueFromTransmit(dataType, value);
 }
 
 export function getNullEditable(page) {
