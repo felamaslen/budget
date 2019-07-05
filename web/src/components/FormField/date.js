@@ -3,16 +3,19 @@ import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import { dateInput } from '~client/modules/date';
 
-import { useField } from './use-field';
+import { useField } from '~client/hooks/field';
+
+const getValue = date => dateInput(date, false);
+const setValue = date => dateInput(date, false);
 
 export default function FormFieldDate({ value, onChange, active }) {
-    const [currentValue, onType, onBlur, ref] = useField(
+    const [currentValue, onType, onBlur, ref] = useField({
         value,
         onChange,
-        date => dateInput(date, false),
-        date => dateInput(date, false),
+        getValue,
+        setValue,
         active
-    );
+    });
 
     return (
         <div className="form-field form-field-date">

@@ -1,16 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { useField } from './use-field';
+import { useField } from '~client/hooks/field';
+
+const getValue = cost => cost || 0;
+const setValue = cost => Math.round(100 * Number(cost));
 
 export default function FormFieldCost({ value, onChange, active }) {
-    const [currentValue, onType, onBlur, ref] = useField(
+    const [currentValue, onType, onBlur, ref] = useField({
         value,
         onChange,
-        cost => cost || 0,
-        cost => Math.round(100 * Number(cost)),
+        getValue,
+        setValue,
         active
-    );
+    });
 
     return (
         <div className="form-field form-field-cost">

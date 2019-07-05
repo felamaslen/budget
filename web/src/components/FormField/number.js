@@ -1,16 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { useField } from './use-field';
+import { useField } from '~client/hooks/field';
+
+const getValue = number => number;
+const setValue = Number;
 
 export default function FormFieldNumber({ value, onChange, active, ...props }) {
-    const [currentValue, onType, onBlur, ref] = useField(
+    const [currentValue, onType, onBlur, ref] = useField({
         value,
         onChange,
-        number => number,
-        Number,
+        getValue,
+        setValue,
         active
-    );
+    });
 
     return (
         <div className="form-field form-field-number">
