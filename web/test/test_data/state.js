@@ -25,6 +25,7 @@ export const testState = {
         },
         rows: [[13502], [19220], [11876], [14981], [14230], [12678], [0]]
     },
+    analysis: {},
     funds: {
         items: testRows,
         viewSoldFunds: false,
@@ -36,6 +37,15 @@ export const testState = {
                 prices: testPrices
             }
         }
+    },
+    stocks: {
+        loading: false,
+        indices: [
+            { code: 'SPX', name: 'S&P 500', gain: 0, up: false, down: false }
+        ],
+        shares: [],
+        history: [],
+        lastPriceUpdate: null
     },
     food: {
         data: {

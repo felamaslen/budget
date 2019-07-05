@@ -4,6 +4,7 @@ import shortid from 'shortid';
 
 import reducer, { initialState } from '~client/reducers/funds';
 import { dataRead } from '~client/actions/api';
+import { fundsPeriodLoaded } from '~client/actions/funds';
 import { getTransactionsList } from '~client/modules/data';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 
@@ -64,6 +65,78 @@ test('DATA_READ sets funds-related properties', t => {
             }
         }
     });
+
+    stub.restore();
+});
+
+test('FUNDS_PERIOD_LOADED sets funds-related properties in new period', t => {
+    const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
+
+    const state = initialState;
+
+    const res = {
+        data: {
+            startTime: 1430,
+            cacheTimes: [2, 100, 183],
+            data: [
+                {
+                    [DATA_KEY_ABBR.id]: 'id-1',
+                    [DATA_KEY_ABBR.item]: 'My fund 1',
+                    [DATA_KEY_ABBR.transactions]: [
+                        { date: '2019-06-30', units: 100, cost: 9923 }
+                    ],
+                    pr: [45.6, 44.9],
+                    prStartIndex: 1
+                },
+                {
+                    [DATA_KEY_ABBR.id]: 'id-2',
+                    [DATA_KEY_ABBR.item]: 'My fund 2',
+                    [DATA_KEY_ABBR.transactions]: [],
+                    pr: [100.94, 101.4, 102.03],
+                    prStartIndex: 0
+                }
+            ]
+        }
+    };
+
+    t.not(state.period, 'month3');
+
+    const action = fundsPeriodLoaded('month3', res);
+
+    const result = reducer(state, action);
+
+    t.is(result.items, state.items);
+    t.is(result.priceCache[state.period], state.priceCache[state.period]);
+
+    t.deepEqual(result.priceCache.month3, {
+        startTime: 1430,
+        cacheTimes: [2, 100, 183],
+        prices: [
+            { id: 'id-1', startIndex: 1, values: [45.6, 44.9] },
+            { id: 'id-2', startIndex: 0, values: [100.94, 101.4, 102.03] }
+        ]
+    });
+
+    t.is(result.period, 'month3');
+
+    stub.restore();
+});
+
+test('FUNDS_PERIOD_LOADED just sets the period, if the data already exist', t => {
+    const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
+
+    const state = initialState;
+
+    t.not(state.period, 'month3');
+
+    const action = fundsPeriodLoaded('month3');
+
+    const result = reducer(state, action);
+
+    t.is(result.items, state.items);
+    t.is(result.priceCache, state.priceCache);
+
+    t.is(result.period, 'month3');
 
     stub.restore();
 });

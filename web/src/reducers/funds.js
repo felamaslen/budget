@@ -1,5 +1,6 @@
 import makeListReducer, { onRead } from '~client/reducers/list';
 import { DATA_READ } from '~client/constants/actions/api';
+import { FUNDS_PERIOD_LOADED } from '~client/constants/actions/funds';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 import { GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 
@@ -31,12 +32,8 @@ export const initialState = {
 
 const onReadRows = onRead('funds');
 
-function onReadFunds(state, action) {
-    if (!action.res.funds) {
-        return {};
-    }
-
-    const { res: { funds: { data, startTime, cacheTimes } } } = action;
+function getPriceCache(funds) {
+    const { data, startTime, cacheTimes } = funds;
 
     const prices = data.map(({ [DATA_KEY_ABBR.id]: id, pr, prStartIndex }) => ({
         id,
@@ -45,20 +42,43 @@ function onReadFunds(state, action) {
     }));
 
     return {
+        startTime,
+        cacheTimes,
+        prices
+    };
+}
+
+function onReadFunds(state, action) {
+    if (!action.res.funds) {
+        return {};
+    }
+
+    return {
         priceCache: {
             ...state.priceCache,
-            [state.period]: {
-                startTime,
-                cacheTimes,
-                prices
-            }
+            [state.period]: getPriceCache(action.res.funds)
         },
         ...onReadRows(state, action)
     };
 }
 
+function onPeriodLoad(state, { res, period }) {
+    if (!res) {
+        return { period };
+    }
+
+    return {
+        period,
+        priceCache: {
+            ...state.priceCache,
+            [period]: getPriceCache(res.data)
+        }
+    };
+}
+
 const handlers = {
-    [DATA_READ]: onReadFunds
+    [DATA_READ]: onReadFunds,
+    [FUNDS_PERIOD_LOADED]: onPeriodLoad
 };
 
 export default makeListReducer('funds', handlers, initialState);
