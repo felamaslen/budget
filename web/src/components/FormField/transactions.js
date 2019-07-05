@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { DateTime } from 'luxon';
 
 import FormFieldDate from '~client/components/FormField/date';
@@ -103,7 +104,7 @@ AddNewTransaction.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-export default function FormFieldTransactions({ create, value, onChange, active }) {
+function FormFieldTransactionsList({ create, value, onChange, active }) {
     const makeOnChangeField = useCallback(id => field => fieldValue => onChange(modifyTransactionById(value, id, {
         [field]: fieldValue
     })), [value, onChange]);
@@ -114,7 +115,7 @@ export default function FormFieldTransactions({ create, value, onChange, active 
     );
 
     return (
-        <ul className="form-field form-field-transactions">
+        <ul className="transactions-list">
             {create && <AddNewTransaction value={value} onChange={onChange} />}
             {value.map(item => (
                 <FormFieldTransactionsItem key={item.id}
@@ -131,13 +132,35 @@ export default function FormFieldTransactions({ create, value, onChange, active 
     );
 }
 
-FormFieldTransactions.propTypes = {
+FormFieldTransactionsList.propTypes = {
     create: PropTypes.bool,
     value: transactionsListShape.isRequired,
     active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 };
 
-FormFieldTransactions.defaultProps = {
+FormFieldTransactionsList.defaultProps = {
     create: false
+};
+
+export default function FormFieldTransactions(props) {
+    const { value, active } = props;
+
+    return (
+        <span className={classNames('form-field', 'form-field-transactions', { active })}>
+            <span className="num-transactions">{value.length}</span>
+            {active && (
+                <div className="modal">
+                    <div className="inner">
+                        <FormFieldTransactionsList {...props} />
+                    </div>
+                </div>
+            )}
+        </span>
+    );
+}
+
+FormFieldTransactions.propTypes = {
+    value: transactionsListShape.isRequired,
+    active: PropTypes.bool
 };

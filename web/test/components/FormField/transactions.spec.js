@@ -25,24 +25,56 @@ const getContainer = (customProps = {}) => {
     return render(<FormFieldTransactions {...props} />);
 };
 
-test('basic structure', t => {
-    const onChange = t.context.stub();
-    const { container } = getContainer({ onChange });
+test('basic structure (inactive)', t => {
+    const { container } = getContainer({ active: false });
 
     t.is(container.childNodes.length, 1);
-    const [ul] = container.childNodes;
+    const [span] = container.childNodes;
 
+    t.is(span.tagName, 'SPAN');
+    t.is(span.className, 'form-field form-field-transactions');
+    t.is(span.childNodes.length, 1);
+
+    const [overview] = span.childNodes;
+    t.is(overview.tagName, 'SPAN');
+    t.is(overview.className, 'num-transactions');
+    t.is(overview.innerHTML, '2'); // two transactions
+});
+
+test('basic structure (active)', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange, active: true, create: true });
+
+    t.is(container.childNodes.length, 1);
+    const [span] = container.childNodes;
+
+    t.is(span.childNodes.length, 2);
+
+    const [overview, modal] = span.childNodes;
+
+    t.is(overview.innerHTML, '2');
+
+    t.is(modal.tagName, 'DIV');
+    t.is(modal.className, 'modal');
+    t.is(modal.childNodes.length, 1);
+
+    const [inner] = modal.childNodes;
+    t.is(inner.tagName, 'DIV');
+    t.is(inner.className, 'inner');
+    t.is(inner.childNodes.length, 1);
+
+    const [ul] = inner.childNodes;
     t.is(ul.tagName, 'UL');
-    t.is(ul.className, 'form-field form-field-transactions');
+    t.is(ul.className, 'transactions-list');
 
-    t.is(ul.childNodes.length, 2);
+    t.is(ul.childNodes.length, 3); // two rows + create
 });
 
 test('rendering a list of transactions', t => {
     const onChange = t.context.stub();
-    const { container } = getContainer({ onChange });
-
-    const [ul] = container.childNodes;
+    const { container } = getContainer({ onChange, active: true, create: true });
+    const { childNodes: [, modal] } = container.childNodes[0];
+    const { childNodes: [ul] } = modal.childNodes[0];
 
     transactions.forEach((transaction, index) => {
         const li = ul.childNodes[index];
@@ -53,7 +85,7 @@ test('rendering a list of transactions', t => {
         const [item] = li.childNodes;
 
         t.is(item.tagName, 'SPAN');
-        t.is(item.childNodes.length, 3);
+        t.is(item.childNodes.length, 4);
 
         item.childNodes.forEach(row => {
             t.is(row.tagName, 'SPAN');
@@ -65,11 +97,11 @@ test('rendering a list of transactions', t => {
 test('handling date input', t => {
     transactions.forEach((transaction, index) => {
         const onChange = t.context.stub();
-        const { container } = getContainer({ onChange });
+        const { container } = getContainer({ onChange, active: true, create: true });
+        const { childNodes: [, modal] } = container.childNodes[0];
+        const { childNodes: [ul] } = modal.childNodes[0];
 
-        const [ul] = container.childNodes;
-
-        const li = ul.childNodes[index];
+        const li = ul.childNodes[index + 1];
         const [item] = li.childNodes;
 
         const [dateRow] = item.childNodes;
@@ -104,11 +136,11 @@ test('handling date input', t => {
 test('handling units input', t => {
     transactions.forEach((transaction, index) => {
         const onChange = t.context.stub();
-        const { container } = getContainer({ onChange });
+        const { container } = getContainer({ onChange, active: true, create: true });
+        const { childNodes: [, modal] } = container.childNodes[0];
+        const { childNodes: [ul] } = modal.childNodes[0];
 
-        const [ul] = container.childNodes;
-
-        const li = ul.childNodes[index];
+        const li = ul.childNodes[index + 1];
         const [item] = li.childNodes;
 
         const [, unitsRow] = item.childNodes;
@@ -144,11 +176,11 @@ test('handling units input', t => {
 test('handling cost input', t => {
     transactions.forEach((transaction, index) => {
         const onChange = t.context.stub();
-        const { container } = getContainer({ onChange });
+        const { container } = getContainer({ onChange, active: true, create: true });
+        const { childNodes: [, modal] } = container.childNodes[0];
+        const { childNodes: [ul] } = modal.childNodes[0];
 
-        const [ul] = container.childNodes;
-
-        const li = ul.childNodes[index];
+        const li = ul.childNodes[index + 1];
         const [item] = li.childNodes;
 
         const [, , costRow] = item.childNodes;
@@ -184,9 +216,9 @@ test('handling cost input', t => {
 // eslint-disable-next-line max-statements
 test('adding a transaction', t => {
     const onChange = t.context.stub();
-    const { container } = getContainer({ onChange, create: true });
-
-    const [ul] = container.childNodes;
+    const { container } = getContainer({ onChange, active: true, create: true });
+    const { childNodes: [, modal] } = container.childNodes[0];
+    const { childNodes: [ul] } = modal.childNodes[0];
 
     t.is(ul.childNodes.length, 3);
     const [liAdd] = ul.childNodes;
@@ -244,9 +276,9 @@ test('adding a transaction', t => {
 
 test('removing a transaction', t => {
     const onChange = t.context.stub();
-    const { container } = getContainer({ onChange, create: true });
-
-    const [ul] = container.childNodes;
+    const { container } = getContainer({ onChange, active: true, create: true });
+    const { childNodes: [, modal] } = container.childNodes[0];
+    const { childNodes: [ul] } = modal.childNodes[0];
 
     t.is(ul.childNodes.length, 3);
     const [, row1, row2] = ul.childNodes;
