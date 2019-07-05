@@ -1,12 +1,15 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 
-export function useField(
+const noop = () => null;
+
+export function useField({
     value,
     onChange,
+    onType = noop,
     getValue,
     setValue,
     active
-) {
+}) {
     const inputRef = useRef(null);
     const [wasActive, setWasActive] = useState(active);
     useEffect(() => {
@@ -29,13 +32,15 @@ export function useField(
         }
     }, [value, prevValue, getValue]);
 
-    const onType = useCallback(evt => {
-        setCurrentValue(setValue(evt.target.value));
-    }, [setCurrentValue, setValue]);
+    const onChangeRaw = useCallback(evt => {
+        const newValue = setValue(evt.target.value);
+        setCurrentValue(newValue);
+        onType(newValue);
+    }, [setCurrentValue, setValue, onType]);
 
     const onBlur = useCallback(() => {
         onChange(currentValue);
     }, [onChange, currentValue]);
 
-    return [currentValue, onType, onBlur, inputRef];
+    return [currentValue, onChangeRaw, onBlur, inputRef];
 }

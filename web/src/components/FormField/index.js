@@ -1,16 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { useField } from '~client/hooks/use-field';
+import { useField } from '~client/hooks/field';
 
-export default function FormFieldText({ value, onChange, active }) {
-    const [currentValue, onType, onBlur, ref] = useField(
+const getValue = text => text;
+const setValue = text => text;
+
+export default function FormFieldText({ value, onType, onChange, active }) {
+    const [currentValue, onChangeRaw, onBlur, ref] = useField({
         value,
+        onType,
         onChange,
-        text => text,
-        text => text,
+        getValue,
+        setValue,
         active
-    );
+    });
 
     return (
         <div className="form-field form-field-text">
@@ -18,7 +22,7 @@ export default function FormFieldText({ value, onChange, active }) {
                 ref={ref}
                 type="text"
                 defaultValue={currentValue}
-                onChange={onType}
+                onChange={onChangeRaw}
                 onBlur={onBlur}
             />
         </div>
@@ -28,5 +32,10 @@ export default function FormFieldText({ value, onChange, active }) {
 FormFieldText.propTypes = {
     value: PropTypes.string.isRequired,
     active: PropTypes.bool,
+    onType: PropTypes.func,
     onChange: PropTypes.func.isRequired
+};
+
+FormFieldText.defaultProps = {
+    onType: () => null
 };
