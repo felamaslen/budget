@@ -1,7 +1,15 @@
 import { eventChannel } from 'redux-saga';
-import { fork, take, call, put } from 'redux-saga/effects';
+import { select, fork, take, takeLatest, call, put } from 'redux-saga/effects';
 import debounce from 'debounce';
+import axios from 'axios';
+
 import { windowResized } from '~client/actions/app';
+import { dataRead } from '~client/actions/api';
+
+import { getApiKey } from '~client/selectors/api';
+
+import { LOGGED_IN } from '~client/constants/actions/login';
+import { API_PREFIX } from '~client/constants/data';
 
 export function windowResizeEventChannel() {
     return eventChannel(emit => {
@@ -23,6 +31,24 @@ export function *watchEventEmitter(channelCreator) {
     }
 }
 
+export function *fetchData() {
+    const apiKey = yield select(getApiKey);
+
+    try {
+        const res = yield call(axios.get, `${API_PREFIX}/data/all`, {
+            headers: {
+                Authorization: apiKey
+            }
+        });
+
+        yield put(dataRead(res));
+    } catch (err) {
+        yield put(dataRead(null, err));
+    }
+}
+
 export default function *appSaga() {
     yield fork(watchEventEmitter, windowResizeEventChannel);
+
+    yield takeLatest(LOGGED_IN, fetchData);
 }
