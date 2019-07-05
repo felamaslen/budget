@@ -4,19 +4,12 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
+import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
 import ModalDialogField from '~client/components/FormField/modal-dialog-field';
 import { getTransactionsList } from '~client/modules/data';
 
 const getModalDialogField = memoize((customProps = {}) => {
-    const state = {
-    };
-
-    const store = createMockStore(state);
-
     const props = {
         fieldKey: 3,
         field: {
@@ -24,16 +17,13 @@ const getModalDialogField = memoize((customProps = {}) => {
             value: 'bar'
         },
         invalidKeys: [],
+        onChange: () => null,
         ...customProps
     };
 
-    const utils = render((
-        <Provider store={store}>
-            <ModalDialogField {...props} />
-        </Provider>
-    ));
-
-    return { ...utils, store };
+    return render(
+        <ModalDialogField {...props} />
+    );
 });
 
 test('basic structure', t => {
@@ -94,4 +84,21 @@ test('transactions fields', t => {
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 2);
     t.is(div.className, 'inner');
+});
+
+test('firing onChange', t => {
+    const onChange = t.context.stub();
+    const { container } = getModalDialogField({ onChange });
+    const [li] = container.childNodes;
+    const [, formField] = li.childNodes;
+    const [input] = formField.childNodes;
+
+    t.is(onChange.calls.length, 0);
+
+    fireEvent.change(input, { target: { value: 'hello' } });
+    t.is(onChange.calls.length, 0);
+    fireEvent.blur(input);
+    t.is(onChange.calls.length, 1);
+
+    t.deepEqual(onChange.calls[0].arguments, ['hello']);
 });
