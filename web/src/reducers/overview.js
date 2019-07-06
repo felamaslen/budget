@@ -13,7 +13,7 @@ import { getRowDates } from '~client/selectors/overview';
 import { replaceAtIndex } from '~client/modules/data';
 
 import { DATA_READ } from '~client/constants/actions/api';
-import { LOGGED_OUT } from '~client/constants/actions/app';
+import { LOGGED_OUT } from '~client/constants/actions/login';
 
 export const initialState = {
     startDate: null,
