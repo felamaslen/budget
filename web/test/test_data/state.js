@@ -1,10 +1,12 @@
 import { DateTime } from 'luxon';
 
 import { testRows, testPrices, testStartTime, testCacheTimes } from '~client-test/test_data/testFunds';
-import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
 
 export const testState = {
     now: DateTime.fromISO('2018-03-23T11:45:20Z'),
+    app: {
+        windowWidth: 1000
+    },
     login: {
         loading: false,
         error: null,
@@ -125,30 +127,5 @@ export const testState = {
     },
     social: {
         items: []
-    },
-    edit: {
-        active: {
-            row: '10',
-            col: 2
-        }
-    },
-    editSuggestions: {
-        list: [],
-        active: -1
-    },
-    other: {
-        windowWidth: 1000,
-        graphFunds: {
-            mode: GRAPH_FUNDS_MODE_ROI,
-            period: 'period1',
-            zoomRange: [-Infinity, Infinity],
-            enabledList: [
-                { id: 'overall', enabled: true },
-                { id: '10', enabled: true },
-                { id: '1', enabled: true },
-                { id: '3', enabled: true },
-                { id: '11', enabled: false }
-            ]
-        }
     }
 };
