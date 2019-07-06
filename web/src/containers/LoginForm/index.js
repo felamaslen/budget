@@ -10,7 +10,7 @@ import PinDisplay from '~client/components/LoginForm/pin-display';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
-function LoginForm({ loading, loggedIn, onLogin }) {
+function LoginForm({ loading, initialised, loggedIn, onLogin }) {
     const [pin, setPin] = useState('');
     const onInput = useCallback(digit => setPin(last => `${last}${digit}`), []);
 
@@ -39,7 +39,7 @@ function LoginForm({ loading, loggedIn, onLogin }) {
         }
     }, [loggedIn, loading, onLogin, pin]);
 
-    if (loggedIn) {
+    if (loggedIn || !initialised) {
         return null;
     }
 
@@ -53,12 +53,14 @@ function LoginForm({ loading, loggedIn, onLogin }) {
 }
 
 LoginForm.propTypes = {
+    initialised: PropTypes.bool.isRequired,
     loading: PropTypes.bool.isRequired,
     loggedIn: PropTypes.bool.isRequired,
     onLogin: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+    initialised: state.login.initialised,
     loading: state.login.loading,
     loggedIn: getLoggedIn(state)
 });

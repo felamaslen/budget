@@ -8,6 +8,7 @@ import {
 } from '~client/constants/actions/login';
 
 export const initialState = {
+    initialised: false,
     loading: false,
     error: null,
     uid: null,
@@ -16,14 +17,22 @@ export const initialState = {
 
 const handlers = {
     [LOGIN_REQUESTED]: () => ({ loading: true }),
-    [LOGIN_ERROR_OCCURRED]: (state, { err }) => ({ loading: false, error: err }),
+    [LOGIN_ERROR_OCCURRED]: (state, { err }) => ({
+        initialised: true,
+        loading: false,
+        error: err
+    }),
     [LOGGED_IN]: (state, { res: { uid, name } }) => ({
+        initialised: true,
         loading: false,
         error: null,
         uid,
         name
     }),
-    [LOGGED_OUT]: () => initialState
+    [LOGGED_OUT]: () => ({
+        ...initialState,
+        initialised: true
+    })
 };
 
 export default createReducerObject(handlers, initialState);

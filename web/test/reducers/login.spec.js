@@ -12,8 +12,8 @@ test('Null action returns the initial state', t => {
     t.is(reducer(undefined, null), initialState);
 });
 
-test('LOGGED_OUT resets the state', t => {
-    t.deepEqual(reducer(undefined, loggedOut()), initialState);
+test('LOGGED_OUT sets initialised to true', t => {
+    t.deepEqual(reducer(undefined, loggedOut()), { ...initialState, initialised: true });
 });
 
 test('LOGIN_REQUESTED sets loading to true', t => {
@@ -33,6 +33,7 @@ test('LOGIN_ERROR_OCCURRED sets error to true and loading to false', t => {
 
     t.is(result.loading, false);
     t.is(result.error, err);
+    t.is(result.initialised, true);
 });
 
 test('LOGGED_IN sets user details', t => {
@@ -50,4 +51,5 @@ test('LOGGED_IN sets user details', t => {
 
     t.is(result.uid, 'some-long-id');
     t.is(result.name, 'someone');
+    t.is(result.initialised, true);
 });

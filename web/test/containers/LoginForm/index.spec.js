@@ -9,15 +9,16 @@ import LoginForm from '~client/containers/LoginForm';
 import { loginRequested } from '~client/actions/login';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = memoize((customProps = {}) => {
-    const state = {
+const getContainer = memoize((customProps = {}, customState = state => state) => {
+    const state = customState({
         ...testState,
         login: {
             uid: null,
             name: null,
+            initialised: true,
             loading: false
         }
-    };
+    });
 
     const store = createMockStore(state);
 
@@ -95,4 +96,13 @@ test('listening to input events', t => {
     fireEvent.keyDown(document.body, { key: '4' });
 
     t.true(store.isActionDispatched(action));
+});
+
+test('doesn\'t render when the state isn\'t initialised', t => {
+    const { container } = getContainer({}, state => ({
+        ...state,
+        login: { ...state.login, initialised: false }
+    }));
+
+    t.is(container.childNodes.length, 0);
 });
