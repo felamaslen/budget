@@ -2,6 +2,7 @@ import test from 'ava';
 
 import reducer, { initialState } from '~client/reducers/api';
 import {
+    dataRead,
     syncRequested,
     syncReceived,
     syncErrorOccurred
@@ -12,7 +13,7 @@ test('Null action returns the initial state', t => {
     t.is(reducer(undefined, null), initialState);
 });
 
-test('LOGGED_IN sets user details', t => {
+test('LOGGED_IN sets user details and initial loading', t => {
     const state = {};
     const action = loggedIn({
         name: 'someone',
@@ -23,10 +24,15 @@ test('LOGGED_IN sets user details', t => {
     const result = reducer(state, action);
 
     t.is(result.key, 'some-api-key');
+    t.true(result.initialLoading);
 });
 
 test('LOGGED_OUT resets the state', t => {
     t.deepEqual(reducer(undefined, loggedOut()), initialState);
+});
+
+test('DATA_READ sets initial loading to false', t => {
+    t.false(reducer({ initialLoading: true }, dataRead()).initialLoading);
 });
 
 test('SYNC_REQUESTED sets loading to true', t => {

@@ -8,7 +8,9 @@ import Spinner from '~client/containers/Spinner';
 
 const getContainer = (customProps = {}, customState = state => state) => {
     const state = customState({
-        loading: true
+        api: {
+            initialLoading: true
+        }
     });
 
     const store = createMockStore(state);
@@ -53,7 +55,10 @@ test('basic structure', t => {
 test('not rendering if inactive', t => {
     const { container } = getContainer({}, state => ({
         ...state,
-        loading: false
+        api: {
+            ...state.api,
+            initialLoading: false
+        }
     }));
 
     t.is(container.childNodes.length, 0);
