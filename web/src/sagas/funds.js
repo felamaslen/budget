@@ -3,29 +3,34 @@ import axios from 'axios';
 import querystring from 'querystring';
 
 import { errorOpened } from '~client/actions/error';
-import { fundsPeriodLoaded } from '~client/actions/funds';
+import { fundsReceived } from '~client/actions/funds';
 import { stocksListReceived, stockPricesReceived } from '~client/actions/stocks';
 import { getApiKey } from '~client/selectors/api';
 import { getFundsCache } from '~client/selectors/funds/helpers';
+import { getPeriod } from '~client/selectors/funds';
 import { getStocks, getIndices } from '~client/selectors/funds/stocks';
 import { getPeriodMatch } from '~client/modules/data';
 import { getStockPricesFromYahoo } from '~client/modules/finance';
 import { API_PREFIX } from '~client/constants/data';
-import { FUNDS_PERIOD_CHANGED } from '~client/constants/actions/funds';
+import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
 import { DO_STOCKS_LIST } from '~client/constants/stocks';
 
 export function *requestFundPeriodData({ period, fromCache }) {
-    const cache = yield select(getFundsCache);
-    if (fromCache && cache[period]) {
-        yield put(fundsPeriodLoaded(period));
+    const nextPeriod = period || (yield select(getPeriod));
+    if (fromCache) {
+        const cache = yield select(getFundsCache);
 
-        return;
+        if (cache[nextPeriod]) {
+            yield put(fundsReceived(nextPeriod));
+
+            return;
+        }
     }
 
     const apiKey = yield select(getApiKey);
 
-    const periodMatch = getPeriodMatch(period);
+    const periodMatch = getPeriodMatch(nextPeriod);
     const query = querystring.stringify({ ...periodMatch, history: true });
 
     try {
@@ -35,7 +40,7 @@ export function *requestFundPeriodData({ period, fromCache }) {
             }
         });
 
-        yield put(fundsPeriodLoaded(period, res));
+        yield put(fundsReceived(nextPeriod, res));
     } catch (err) {
         yield put(errorOpened('Error loading fund data'));
     }
@@ -77,7 +82,7 @@ export function *requestStocksPrices() {
 }
 
 export default function *fundsSaga() {
-    yield takeLatest(FUNDS_PERIOD_CHANGED, requestFundPeriodData);
+    yield takeLatest(FUNDS_REQUESTED, requestFundPeriodData);
     yield takeLatest(STOCKS_LIST_REQUESTED, requestStocksList);
     yield takeLatest(STOCKS_PRICES_REQUESTED, requestStocksPrices);
 }

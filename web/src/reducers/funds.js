@@ -1,6 +1,6 @@
 import makeListReducer, { onRead } from '~client/reducers/list';
 import { DATA_READ } from '~client/constants/actions/api';
-import { FUNDS_PERIOD_LOADED } from '~client/constants/actions/funds';
+import { FUNDS_RECEIVED } from '~client/constants/actions/funds';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 import { GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 
@@ -78,7 +78,7 @@ function onPeriodLoad(state, { res, period }) {
 
 const handlers = {
     [DATA_READ]: onReadFunds,
-    [FUNDS_PERIOD_LOADED]: onPeriodLoad
+    [FUNDS_RECEIVED]: onPeriodLoad
 };
 
 export default makeListReducer('funds', handlers, initialState);

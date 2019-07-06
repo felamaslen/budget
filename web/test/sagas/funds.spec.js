@@ -13,24 +13,25 @@ import fundsSaga, {
     requestStocksPrices
 } from '~client/sagas/funds';
 import { errorOpened } from '~client/actions/error';
-import { fundsPeriodChanged, fundsPeriodLoaded } from '~client/actions/funds';
+import { fundsRequested, fundsReceived } from '~client/actions/funds';
 import { stocksListReceived, stockPricesReceived } from '~client/actions/stocks';
 import { getApiKey } from '~client/selectors/api';
 import { getFundsCache } from '~client/selectors/funds/helpers';
+import { getPeriod } from '~client/selectors/funds';
 import { getStocks, getIndices } from '~client/selectors/funds/stocks';
 import { getStockPricesFromYahoo } from '~client/modules/finance';
 import { API_PREFIX } from '~client/constants/data';
-import { FUNDS_PERIOD_CHANGED } from '~client/constants/actions/funds';
+import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
 
 test('requestFundPeriodData returns cached data', t => {
     t.is(1, 1);
 
-    testSaga(requestFundPeriodData, fundsPeriodChanged('month5'))
+    testSaga(requestFundPeriodData, fundsRequested(true, 'month5'))
         .next()
         .select(getFundsCache)
         .next({ month5: 'some data' })
-        .put(fundsPeriodLoaded('month5'))
+        .put(fundsReceived('month5'))
         .next()
         .isDone();
 });
@@ -42,7 +43,7 @@ test('requestFundPeriodData requests new data', t => {
         data: { is: 'funds data' }
     };
 
-    testSaga(requestFundPeriodData, fundsPeriodChanged('month5'))
+    testSaga(requestFundPeriodData, fundsRequested(true, 'month5'))
         .next()
         .select(getFundsCache)
         .next({})
@@ -52,23 +53,51 @@ test('requestFundPeriodData requests new data', t => {
             headers: { Authorization: 'some_api_key' }
         })
         .next(res)
-        .put(fundsPeriodLoaded('month5', res))
+        .put(fundsReceived('month5', res))
         .next()
         .isDone();
 
-    testSaga(requestFundPeriodData, fundsPeriodChanged('month5', false))
+    testSaga(requestFundPeriodData, fundsRequested(false, 'month5'))
         .next()
-        .select(getFundsCache)
-        .next({
-            month5: 'stale data'
-        })
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=month&length=5&history=true', {
             headers: { Authorization: 'some_api_key' }
         })
         .next(res)
-        .put(fundsPeriodLoaded('month5', res))
+        .put(fundsReceived('month5', res))
+        .next()
+        .isDone();
+});
+
+test('requestFundPeriodData uses the current period by default', t => {
+    t.is(1, 1);
+
+    const res = {
+        data: { is: 'funds data' }
+    };
+
+    testSaga(requestFundPeriodData, fundsRequested(false))
+        .next()
+        .select(getPeriod)
+        .next('year5')
+        .select(getApiKey)
+        .next('some_api_key')
+        .call(axios.get, '/api/v4/data/funds?period=year&length=5&history=true', {
+            headers: { Authorization: 'some_api_key' }
+        })
+        .next(res)
+        .put(fundsReceived('year5', res))
+        .next()
+        .isDone();
+
+    testSaga(requestFundPeriodData, fundsRequested(true))
+        .next()
+        .select(getPeriod)
+        .next('year5')
+        .select(getFundsCache)
+        .next({ year5: 'some data' })
+        .put(fundsReceived('year5'))
         .next()
         .isDone();
 });
@@ -80,7 +109,7 @@ test('requestFundPeriodData handles errors', t => {
 
     const err = new Error('something bad happened');
 
-    testSaga(requestFundPeriodData, fundsPeriodChanged('year3'))
+    testSaga(requestFundPeriodData, fundsRequested(true, 'year3'))
         .next()
         .select(getFundsCache)
         .next({})
@@ -183,7 +212,7 @@ test('fundsSaga forks other sagas', t => {
     t.is(1, 1);
     testSaga(fundsSaga)
         .next()
-        .takeLatest(FUNDS_PERIOD_CHANGED, requestFundPeriodData)
+        .takeLatest(FUNDS_REQUESTED, requestFundPeriodData)
         .next()
         .takeLatest(STOCKS_LIST_REQUESTED, requestStocksList)
         .next()

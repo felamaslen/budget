@@ -4,7 +4,7 @@ import shortid from 'shortid';
 
 import reducer, { initialState } from '~client/reducers/funds';
 import { dataRead } from '~client/actions/api';
-import { fundsPeriodLoaded } from '~client/actions/funds';
+import { fundsReceived } from '~client/actions/funds';
 import { getTransactionsList } from '~client/modules/data';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 
@@ -69,7 +69,7 @@ test('DATA_READ sets funds-related properties', t => {
     stub.restore();
 });
 
-test('FUNDS_PERIOD_LOADED sets funds-related properties in new period', t => {
+test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
     const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
 
     const state = initialState;
@@ -101,7 +101,7 @@ test('FUNDS_PERIOD_LOADED sets funds-related properties in new period', t => {
 
     t.not(state.period, 'month3');
 
-    const action = fundsPeriodLoaded('month3', res);
+    const action = fundsReceived('month3', res);
 
     const result = reducer(state, action);
 
@@ -122,14 +122,14 @@ test('FUNDS_PERIOD_LOADED sets funds-related properties in new period', t => {
     stub.restore();
 });
 
-test('FUNDS_PERIOD_LOADED just sets the period, if the data already exist', t => {
+test('FUNDS_RECEIVED just sets the period, if the data already exist', t => {
     const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
 
     const state = initialState;
 
     t.not(state.period, 'month3');
 
-    const action = fundsPeriodLoaded('month3');
+    const action = fundsReceived('month3');
 
     const result = reducer(state, action);
 
