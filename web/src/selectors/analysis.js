@@ -1,6 +1,5 @@
-export const requestProps = state => ({
-    loading: state.other.analysis.loading,
-    period: state.other.analysis.period,
-    grouping: state.other.analysis.grouping,
-    timeIndex: state.other.analysis.timeIndex
-});
+export const getLoading = state => state.analysis.loading;
+export const getLoadingDeep = state => state.analysis.loadingDeep;
+export const getPeriod = state => state.analysis.period;
+export const getGrouping = state => state.analysis.grouping;
+export const getPage = state => state.analysis.page;

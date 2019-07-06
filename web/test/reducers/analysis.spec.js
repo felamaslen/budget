@@ -3,11 +3,12 @@ import test from 'ava';
 import reducer, { initialState } from '~client/reducers/analysis';
 
 import {
-    optionChanged,
-    analysisDataRefreshed,
+    requested,
+    received,
     treeItemDisplayToggled,
     treeItemHovered,
-    blockClicked
+    blockRequested,
+    blockReceived
 } from '~client/actions/analysis';
 import { loggedOut } from '~client/actions/login';
 
@@ -19,7 +20,7 @@ test('LOGGED_OUT resets the state', t => {
     t.deepEqual(reducer(undefined, loggedOut()), initialState);
 });
 
-test('ANALYSIS_OPTION_CHANGED sets up the state for loading new data', t => {
+test('ANALYSIS_REQUESTED sets up the state for loading new data', t => {
     const state = {
         loading: false,
         period: 'year',
@@ -27,26 +28,36 @@ test('ANALYSIS_OPTION_CHANGED sets up the state for loading new data', t => {
         page: 3
     };
 
-    const withPeriod = reducer(state, optionChanged({ period: 'month' }));
+    const withPeriod = reducer(state, requested({ period: 'month' }));
     t.is(withPeriod.loading, true);
+    t.is(withPeriod.loadingDeep, false);
     t.is(withPeriod.period, 'month');
     t.is(withPeriod.grouping, 'category');
     t.is(withPeriod.page, 0);
 
-    const withGrouping = reducer(state, optionChanged({ grouping: 'shop' }));
+    const withGrouping = reducer(state, requested({ grouping: 'shop' }));
     t.is(withGrouping.loading, true);
+    t.is(withGrouping.loadingDeep, false);
     t.is(withGrouping.period, 'year');
     t.is(withGrouping.grouping, 'shop');
     t.is(withGrouping.page, 0);
 
-    const withPage = reducer(state, optionChanged({ page: 1 }));
+    const withPage = reducer(state, requested({ page: 1 }));
     t.is(withPage.loading, true);
+    t.is(withPage.loadingDeep, false);
     t.is(withPage.period, 'year');
     t.is(withPage.grouping, 'category');
     t.is(withPage.page, 1);
+
+    const withNothing = reducer(state, requested());
+    t.is(withNothing.loading, true);
+    t.is(withNothing.loadingDeep, false);
+    t.is(withNothing.period, 'year');
+    t.is(withNothing.grouping, 'category');
+    t.is(withNothing.page, 0);
 });
 
-test('ANALYSIS_DATA_REFRESHED updates data in state', t => {
+test('ANALYSIS_RECEIVED updates data in state', t => {
     const state = {
         loading: true,
         period: 'year',
@@ -56,7 +67,7 @@ test('ANALYSIS_DATA_REFRESHED updates data in state', t => {
         treeVisible: { bills: false, general: true }
     };
 
-    const action = analysisDataRefreshed({
+    const action = received({
         data: {
             timeline: [
                 [72500, 1035, 2779, 1745],
@@ -75,6 +86,7 @@ test('ANALYSIS_DATA_REFRESHED updates data in state', t => {
     const result = reducer(state, action);
 
     t.is(result.loading, false);
+    t.is(result.loadingDeep, false);
 
     t.deepEqual(result.timeline, [
         [72500, 1035, 2779, 1745],
@@ -94,9 +106,42 @@ test('ANALYSIS_DATA_REFRESHED updates data in state', t => {
     t.is(result.description, '2019');
 });
 
-test('ANALYSIS_DATA_REFRESHED updates deep-block data in state', t => {
+test('ANALYSIS_BLOCK_REQUESTED (while on main view) sets state up for loading deep view', t => {
+    const state = {};
+
+    const action = blockRequested('food');
+
+    const result = reducer(state, action);
+
+    t.is(result.loading, true);
+    t.is(result.loadingDeep, true);
+});
+
+test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bills or saved block', t => {
+    const state = {};
+
+    t.deepEqual(reducer(state, blockRequested('bills')), { loading: false, loadingDeep: false });
+    t.deepEqual(reducer(state, blockRequested('saved')), { loading: false, loadingDeep: false });
+});
+
+test('ANALYSIS_BLOCK_REQUESTED (while on deep view) resets the deep data', t => {
     const state = {
-        loading: true,
+        deep: [1, 2, 3]
+    };
+
+    const action = blockRequested('Fish');
+
+    const result = reducer(state, action);
+
+    t.is(result.deep, null);
+    t.is(result.loading, false);
+    t.is(result.loadingDeep, false);
+});
+
+test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', t => {
+    const state = {
+        loading: false,
+        loadingDeep: true,
         cost: { something: true },
         saved: 230,
         description: 'some description',
@@ -107,7 +152,7 @@ test('ANALYSIS_DATA_REFRESHED updates deep-block data in state', t => {
         treeVisible: { bills: false, general: true }
     };
 
-    const action = analysisDataRefreshed({
+    const action = blockReceived({
         data: {
             items: [
                 ['Bread', [['Bread', 317]]],
@@ -119,6 +164,7 @@ test('ANALYSIS_DATA_REFRESHED updates deep-block data in state', t => {
     const result = reducer(state, action);
 
     t.is(result.loading, false);
+    t.is(result.loadingDeep, false);
 
     t.is(result.timeline, state.timeline);
 
@@ -158,33 +204,4 @@ test('ANALYSIS_TREE_HOVERED sets the active block', t => {
 
     t.is(result.activeGroup, 'food');
     t.is(result.activeBlock, 'Fish');
-});
-
-test('ANALYSIS_BLOCK_CLICKED (while on main view) sets state up for loading deep view', t => {
-    const state = {};
-
-    const action = blockClicked('food');
-
-    const result = reducer(state, action);
-
-    t.is(result.loading, true);
-});
-
-test('ANALYSIS_BLOCK_CLICKED (while on main view) doesn\'t do anything on bills or saved block', t => {
-    const state = { loading: false };
-
-    t.deepEqual(reducer(state, blockClicked('bills')), state);
-    t.deepEqual(reducer(state, blockClicked('saved')), state);
-});
-
-test('ANALYSIS_BLOCK_CLICKED (while on deep view) resets the deep data', t => {
-    const state = {
-        deep: [1, 2, 3]
-    };
-
-    const action = blockClicked('Fish');
-
-    const result = reducer(state, action);
-
-    t.is(result.deep, null);
 });

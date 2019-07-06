@@ -1,5 +1,6 @@
-export const ANALYSIS_OPTION_CHANGED = '@@analysis/OPTION_CHANGED';
-export const ANALYSIS_DATA_REFRESHED = '@@analysis/DATA_REFRESHED';
+export const ANALYSIS_REQUESTED = '@@analysis/REQUESTED';
+export const ANALYSIS_RECEIVED = '@@analysis/RECEIVED';
+export const ANALYSIS_BLOCK_REQUESTED = '@@analysis/BLOCK_REQUESTED';
+export const ANALYSIS_BLOCK_RECEIVED = '@@analysis/BLOCK_RECEIVED';
 export const ANALYSIS_TREE_DISPLAY_TOGGLED = '@@analysis/TREE_DISPLAY_TOGGLED';
 export const ANALYSIS_TREE_HOVERED = '@@analysis/TREE_HOVERED';
-export const ANALYSIS_BLOCK_CLICKED = '@@analysis/BLOCK_CLICKED';
