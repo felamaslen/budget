@@ -10,18 +10,16 @@ import {
 export const initialState = {
     loading: false,
     error: null,
-    user: null,
-    apiKey: null
+    user: null
 };
 
 const handlers = {
     [LOGIN_REQUESTED]: () => ({ loading: true }),
     [LOGIN_ERROR_OCCURRED]: (state, { err }) => ({ loading: false, error: err }),
-    [LOGGED_IN]: (state, { res: { uid, name, apiKey } }) => ({
+    [LOGGED_IN]: (state, { res: { uid, name } }) => ({
         loading: false,
         error: null,
-        user: { uid, name },
-        apiKey
+        user: { uid, name }
     }),
     [LOGGED_OUT]: () => initialState
 };

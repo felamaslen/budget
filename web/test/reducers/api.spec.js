@@ -6,10 +6,23 @@ import {
     syncReceived,
     syncErrorOccurred
 } from '~client/actions/api';
-import { loggedOut } from '~client/actions/login';
+import { loggedIn, loggedOut } from '~client/actions/login';
 
 test('Null action returns the initial state', t => {
     t.is(reducer(undefined, null), initialState);
+});
+
+test('LOGGED_IN sets user details', t => {
+    const state = {};
+    const action = loggedIn({
+        name: 'someone',
+        uid: 'some-long-id',
+        apiKey: 'some-api-key',
+        expires: '2019-07-31T23:08:26.442+01:00'
+    });
+    const result = reducer(state, action);
+
+    t.is(result.key, 'some-api-key');
 });
 
 test('LOGGED_OUT resets the state', t => {

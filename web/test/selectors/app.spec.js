@@ -1,10 +1,8 @@
 import test from 'ava';
 import {
     getNow,
-    getApiKey,
     getLoggedIn,
     getCurrentPage,
-    getRequestList,
     getAddData,
     getContentParamsAnalysis,
     getLoadedStatus
@@ -14,47 +12,37 @@ test('getNow gets the current time from the state', t => {
     t.is(getNow({ now: 'foo' }), 'foo');
 });
 
-test('getApiKey gets the API key from the state', t => {
-    t.is(getApiKey({
-        user: {
-            apiKey: 'foo'
-        }
-    }), 'foo');
-});
-
 test('getLoggedIn returns true iff there is an API key and a user ID in state', t => {
     t.is(getLoggedIn({
-        user: {
-            apiKey: 'foo',
-            uid: 'bar'
+        api: {
+            key: 'foo'
+        },
+        login: {
+            user: { uid: 'bar' }
         }
     }), true);
 
     t.is(getLoggedIn({
-        user: {
-            apiKey: 'foo',
-            uid: null
+        api: {
+            key: 'foo'
+        },
+        login: {
+            user: { uid: null }
         }
     }), false);
 
     t.is(getLoggedIn({
-        user: {
-            apiKey: null,
-            uid: 'bar'
+        api: {
+            key: null
+        },
+        login: {
+            user: { uid: 'bar' }
         }
     }), false);
 });
 
 test('getCurrentPage gets current page', t => {
     t.is(getCurrentPage({ currentPage: 'foo' }), 'foo');
-});
-
-test('getRequestList gets the requestList and maps it to each request', t => {
-    t.deepEqual(getRequestList({
-        edit: {
-            requestList: [{ req: 1, foo: 'bar' }, { req: 2, bar: 'baz' }]
-        }
-    }), [1, 2]);
 });
 
 test('getAddData gets the fields and item', t => {

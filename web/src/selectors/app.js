@@ -1,18 +1,14 @@
 import { createSelector } from 'reselect';
 
+import { getApiKey } from '~client/selectors/api';
+
 export const getNow = state => state.now;
 
-export const getApiKey = state => state.user.apiKey;
-
-const getUid = state => state.user.uid;
+const getUid = state => state.login.user.uid;
 
 export const getLoggedIn = createSelector(getApiKey, getUid, (apiKey, uid) => Boolean(apiKey && uid));
 
 export const getCurrentPage = state => state.currentPage;
-
-export const getRawRequestList = state => state.edit.requestList;
-
-export const getRequestList = createSelector([getRawRequestList], requestList => requestList.map(({ req }) => req));
 
 export const getAddData = state => ({
     fields: state.edit.addFields,

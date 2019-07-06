@@ -35,7 +35,7 @@ test('LOGIN_ERROR_OCCURRED sets error to true and loading to false', t => {
     t.is(result.error, err);
 });
 
-test('LOGGED_IN sets user details and API key', t => {
+test('LOGGED_IN sets user details', t => {
     const state = {};
     const action = loggedIn({
         name: 'someone',
@@ -52,6 +52,4 @@ test('LOGGED_IN sets user details and API key', t => {
         name: 'someone',
         uid: 'some-long-id'
     });
-
-    t.is(result.apiKey, 'some-api-key');
 });
