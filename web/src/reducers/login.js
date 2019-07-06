@@ -10,7 +10,8 @@ import {
 export const initialState = {
     loading: false,
     error: null,
-    user: null
+    uid: null,
+    name: null
 };
 
 const handlers = {
@@ -19,7 +20,8 @@ const handlers = {
     [LOGGED_IN]: (state, { res: { uid, name } }) => ({
         loading: false,
         error: null,
-        user: { uid, name }
+        uid,
+        name
     }),
     [LOGGED_OUT]: () => initialState
 };

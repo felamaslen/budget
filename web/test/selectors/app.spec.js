@@ -9,7 +9,7 @@ test('getLoggedIn returns true iff there is an API key and a user ID in state', 
             key: 'foo'
         },
         login: {
-            user: { uid: 'bar' }
+            uid: 'bar'
         }
     }), true);
 
@@ -18,7 +18,7 @@ test('getLoggedIn returns true iff there is an API key and a user ID in state', 
             key: 'foo'
         },
         login: {
-            user: { uid: null }
+            uid: null
         }
     }), false);
 
@@ -27,7 +27,7 @@ test('getLoggedIn returns true iff there is an API key and a user ID in state', 
             key: null
         },
         login: {
-            user: { uid: 'bar' }
+            uid: 'bar'
         }
     }), false);
 });

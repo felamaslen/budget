@@ -1,5 +1,10 @@
+import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
+
+import { loggedOut } from '~client/actions/login';
+import { getLoggedIn } from '~client/selectors/app';
+import { getUnsaved } from '~client/selectors/api';
 import AppLogo from '~client/components/AppLogo';
 import Navbar from '~client/components/Navbar';
 
@@ -19,4 +24,14 @@ Header.propTypes = {
     onLogout: PropTypes.func.isRequired
 };
 
-export default Header;
+const mapStateToProps = state => ({
+    loggedIn: getLoggedIn(state),
+    loadingApi: state.api.loading,
+    unsavedApi: getUnsaved(state)
+});
+
+const mapDispatchToProps = {
+    onLogout: loggedOut
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

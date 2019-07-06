@@ -5,6 +5,17 @@ import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
 
 export const testState = {
     now: DateTime.fromISO('2018-03-23T11:45:20Z'),
+    login: {
+        loading: false,
+        error: null,
+        uid: 'some-user-id',
+        name: 'Some user'
+    },
+    api: {
+        loading: false,
+        error: null,
+        key: 'some api key'
+    },
     overview: {
         startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),
         endDate: DateTime.fromISO('2018-06-30T23:59:59.999Z'),
@@ -47,6 +58,12 @@ export const testState = {
         history: [],
         lastPriceUpdate: null
     },
+    income: {
+        items: []
+    },
+    bills: {
+        items: []
+    },
     food: {
         data: {
             total: 8755601
@@ -85,6 +102,15 @@ export const testState = {
                 shop: 'bak3'
             }
         ]
+    },
+    general: {
+        items: []
+    },
+    holiday: {
+        items: []
+    },
+    social: {
+        items: []
     },
     edit: {
         active: {

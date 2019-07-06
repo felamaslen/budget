@@ -48,8 +48,6 @@ test('LOGGED_IN sets user details', t => {
     t.is(result.loading, false);
     t.is(result.error, null);
 
-    t.deepEqual(result.user, {
-        name: 'someone',
-        uid: 'some-long-id'
-    });
+    t.is(result.uid, 'some-long-id');
+    t.is(result.name, 'someone');
 });
