@@ -185,25 +185,17 @@ test('getFundLine returns a price line if the mode is price', t => {
 });
 
 test('getFundLineProcessed processes a normal fund line', t => {
-    t.deepEqual(getFundLineProcessed(times, timeOffsets, priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, id1), {
-        prices: priceUnitsCosts.prices[id1],
-        line: [
-            [10000, 100 * ((100 * 34) - 3100) / 3100],
-            [10030, 100 * ((102 * 34) - 3100) / 3100],
-            [10632, 100 * ((103 * 18) - 1560) / 1560]
-        ],
-        id: id1
-    });
+    t.deepEqual(getFundLineProcessed(times, timeOffsets, priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, id1), [[
+        [10000, 100 * ((100 * 34) - 3100) / 3100],
+        [10030, 100 * ((102 * 34) - 3100) / 3100],
+        [10632, 100 * ((103 * 18) - 1560) / 1560]
+    ]]);
 });
 
 test('getFundLineProcessed processes an overall line', t => {
-    t.deepEqual(getFundLineProcessed(times, timeOffsets, priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_OVERALL_ID), {
-        prices: null,
-        line: [
-            [10000, 100 * ((100 * 34 + 0) - (3100 + 0)) / (3100 + 0)],
-            [10030, 100 * ((102 * 34 + 954 * 105) - (3100 + 975400)) / (3100 + 975400)],
-            [10632, 100 * ((103 * 18 + 961 * 105) - (1560 + 975400)) / (1560 + 975400)]
-        ],
-        id: GRAPH_FUNDS_OVERALL_ID
-    });
+    t.deepEqual(getFundLineProcessed(times, timeOffsets, priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, GRAPH_FUNDS_OVERALL_ID), [[
+        [10000, 100 * ((100 * 34 + 0) - (3100 + 0)) / (3100 + 0)],
+        [10030, 100 * ((102 * 34 + 954 * 105) - (3100 + 975400)) / (3100 + 975400)],
+        [10632, 100 * ((103 * 18 + 961 * 105) - (1560 + 975400)) / (1560 + 975400)]
+    ]]);
 });

@@ -12,8 +12,7 @@ export const gainShape = PropTypes.shape({
 export const fundItemShape = PropTypes.shape({
     id: PropTypes.string.isRequired,
     color: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-    item: PropTypes.string.isRequired,
-    enabled: PropTypes.bool.isRequired
+    item: PropTypes.string.isRequired
 });
 
 export const cachedValueShape = PropTypes.shape({

@@ -6,6 +6,8 @@ import { getNow } from '~client/selectors/app';
 import { getFundsRows, getCurrentFundsCache } from '~client/selectors/funds/helpers';
 import { getRowGains, getGainsForRow } from '~client/selectors/funds/gains';
 
+export const getPeriod = state => state.funds.period;
+
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = (now.ts / 1000) - cacheTimes[cacheTimes.length - 1] - startTime;
 

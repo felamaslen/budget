@@ -1,3 +1,4 @@
+import { separateLines } from '~client/modules/funds';
 import {
     GRAPH_FUNDS_OVERALL_ID,
     GRAPH_FUNDS_MODE_ROI,
@@ -118,11 +119,5 @@ export function getFundLineProcessed(times, timeOffsets, priceUnitsCosts, mode, 
 
     const lineWithTimes = line.map((value, index) => ([times[index], value]));
 
-    return {
-        prices: overall
-            ? null
-            : priceUnitsCosts.prices[id],
-        line: lineWithTimes,
-        id
-    };
+    return separateLines(lineWithTimes);
 }

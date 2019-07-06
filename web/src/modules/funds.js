@@ -1,5 +1,6 @@
 import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
-import { formatCurrency } from './format';
+import { formatCurrency } from '~client/modules/format';
+import { replaceAtIndex } from '~client/modules/data';
 
 export function separateLines(line) {
     return line.reduce(([lines, newLine], [xValue, yValue]) => {
@@ -10,12 +11,7 @@ export function separateLines(line) {
             return [lines.concat([[[xValue, yValue]]]), false];
         }
 
-        return [
-            lines
-                .slice(0, lines.length - 1)
-                .concat([lines[lines.length - 1].concat([[xValue, yValue]])]),
-            false
-        ];
+        return [replaceAtIndex(lines, lines.length - 1, part => part.concat([[xValue, yValue]]), true), false];
     }, [[], true])[0];
 }
 
