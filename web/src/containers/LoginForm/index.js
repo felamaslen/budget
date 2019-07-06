@@ -22,9 +22,9 @@ function LoginForm({ loading, loggedIn, onLogin }) {
 
     useEffect(() => {
         if (loggedIn) {
-            window.addEventListener('keydown', onKeydown);
-        } else {
             window.removeEventListener('keydown', onKeydown);
+        } else {
+            window.addEventListener('keydown', onKeydown);
         }
 
         return () => window.removeEventListener('keydown', onKeydown);
