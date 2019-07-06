@@ -28,9 +28,10 @@ export default function OverviewTableCells({ row: { cells, past, active, future 
 
 OverviewTableCells.propTypes = {
     row: PropTypes.shape({
-        column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-        rgb: PropTypes.array,
-        editable: PropTypes.bool,
+        cells: PropTypes.arrayOf(PropTypes.shape({
+            column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+            rgb: PropTypes.arrayOf(PropTypes.number)
+        }).isRequired).isRequired,
         past: PropTypes.bool,
         active: PropTypes.bool,
         future: PropTypes.bool
