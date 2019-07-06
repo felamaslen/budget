@@ -6,17 +6,14 @@ import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
-import ModalDialogField from '~client/components/FormField/modal-dialog-field';
+import ModalDialogField from '~client/components/ModalDialog/field';
 import { getTransactionsList } from '~client/modules/data';
 
 const getModalDialogField = memoize((customProps = {}) => {
     const props = {
-        fieldKey: 3,
-        field: {
-            item: 'foo',
-            value: 'bar'
-        },
-        invalidKeys: [],
+        item: 'foo',
+        value: 'bar',
+        invalid: false,
         onChange: () => null,
         ...customProps
     };
@@ -59,7 +56,7 @@ test('form field container', t => {
 
 test('invalid class', t => {
     const { container } = getModalDialogField({
-        invalidKeys: [3]
+        invalid: true
     });
 
     const [li] = container.childNodes;
@@ -69,10 +66,8 @@ test('invalid class', t => {
 
 test('transactions fields', t => {
     const { container } = getModalDialogField({
-        field: {
-            item: 'transactions',
-            value: getTransactionsList([])
-        }
+        item: 'transactions',
+        value: getTransactionsList([])
     });
 
     t.is(container.childNodes.length, 1);
@@ -100,5 +95,5 @@ test('firing onChange', t => {
     fireEvent.blur(input);
     t.is(onChange.calls.length, 1);
 
-    t.deepEqual(onChange.calls[0].arguments, ['hello']);
+    t.deepEqual(onChange.calls[0].arguments, ['foo', 'hello']);
 });

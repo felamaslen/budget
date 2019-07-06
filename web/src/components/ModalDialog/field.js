@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -20,17 +20,16 @@ FormFieldContainer.propTypes = {
     children: PropTypes.node.isRequired
 };
 
-export default function ModalDialogField({ field: { item, value }, fieldKey, invalidKeys, onChange }) {
-    const invalid = invalidKeys.includes(fieldKey);
-
+export default function ModalDialogField({ item, value, invalid, onChange }) {
     const className = classNames('form-row', item, { invalid });
+    const onChangeCallback = useCallback(newValue => onChange(item, newValue), [onChange, item]);
 
     if (item === 'date') {
         return (
             <FormFieldContainer item={item} className={className}>
                 <FormFieldDate
                     value={value}
-                    onChange={onChange}
+                    onChange={onChangeCallback}
                 />
             </FormFieldContainer>
         );
@@ -40,7 +39,7 @@ export default function ModalDialogField({ field: { item, value }, fieldKey, inv
             <FormFieldContainer item={item} className={className}>
                 <FormFieldCost
                     value={value}
-                    onChange={onChange}
+                    onChange={onChangeCallback}
                 />
             </FormFieldContainer>
         );
@@ -52,7 +51,7 @@ export default function ModalDialogField({ field: { item, value }, fieldKey, inv
                     <span className="form-label">{item}</span>
                     <FormFieldTransactions
                         value={value}
-                        onChange={onChange}
+                        onChange={onChangeCallback}
                         active
                     />
                 </div>
@@ -64,18 +63,15 @@ export default function ModalDialogField({ field: { item, value }, fieldKey, inv
         <FormFieldContainer item={item} className={className}>
             <FormFieldText
                 value={value}
-                onChange={onChange}
+                onChange={onChangeCallback}
             />
         </FormFieldContainer>
     );
 }
 
 ModalDialogField.propTypes = {
-    fieldKey: PropTypes.number.isRequired,
-    field: PropTypes.shape({
-        item: PropTypes.string.isRequired,
-        value: PropTypes.any
-    }).isRequired,
-    invalidKeys: PropTypes.arrayOf(PropTypes.number.isRequired),
+    item: PropTypes.string.isRequired,
+    value: PropTypes.any,
+    invalid: PropTypes.bool.isRequired,
     onChange: PropTypes.func.isRequired
 };

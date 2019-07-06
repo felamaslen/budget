@@ -83,6 +83,8 @@ export const PAGES = {
     }
 };
 
+export const PAGES_LIST = ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'];
+
 export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
 // maximum number of search suggestions to request
