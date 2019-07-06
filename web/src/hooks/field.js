@@ -13,8 +13,13 @@ export function useField({
     const inputRef = useRef(null);
     const [wasActive, setWasActive] = useState(active);
     useEffect(() => {
-        if (active && !wasActive && inputRef.current && inputRef.current.focus) {
-            inputRef.current.focus();
+        if (active && !wasActive && inputRef.current) {
+            if (inputRef.current.focus) {
+                inputRef.current.focus();
+            }
+            if (inputRef.current.select) {
+                inputRef.current.select();
+            }
         } else if (!active && wasActive && inputRef.current && inputRef.current.blur) {
             inputRef.current.blur();
         }
