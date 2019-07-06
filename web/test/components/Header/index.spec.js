@@ -11,7 +11,6 @@ const getHeader = memoize((customProps = {}) => {
         loggedIn: true,
         loadingApi: false,
         unsavedApi: false,
-        onPageSet: () => null,
         onLogout: () => null,
         ...customProps
     };
