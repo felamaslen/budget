@@ -1,64 +1,21 @@
 import test from 'ava';
+import sinon from 'sinon';
 import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
 import React from 'react';
 import Upper from '~client/containers/PageAnalysis/upper';
-import { aOptionChanged } from '~client/actions/analysis.actions';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = {
-        pages: {
-            analysis: {
-                description: 'foo',
-                cost: [
-                    { name: 'foo1', total: 1, subTree: [{ name: 'bar1', total: 1 }] },
-                    { name: 'foo2', total: 4, subTree: [{ name: 'bar2', total: 2 }] },
-                    { name: 'foo3', total: 3, subTree: [{ name: 'bar3', total: 2 }] },
-                    { name: 'foo4', total: 6, subTree: [{ name: 'bar4', total: 2 }] },
-                    { name: 'foo5', total: 10, subTree: [{ name: 'bar5', total: 3 }] }
-                ],
-                costTotal: 24
-            }
-        },
-        other: {
-            analysis: {
-                period: 0,
-                grouping: 0,
-                timeIndex: 0,
-                treeVisible: {
-                    foo1: true,
-                    foo2: false,
-                    foo3: true
-                },
-                treeOpen: {
-                    foo1: true,
-                    foo2: false,
-                    foo3: false,
-                    foo4: true
-                }
-            }
-        }
-    };
-
-    if (customState) {
-        state = customState(state);
-    }
-
-    const store = createMockStore(state);
-
+const getContainer = (customProps = {}) => {
     const props = {
+        period: 'year',
+        grouping: 'category',
+        page: 0,
+        description: 'foo',
+        onRequest: () => null,
         ...customProps
     };
 
-    const utils = render(
-        <Provider store={store}>
-            <Upper {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<Upper {...props} />);
 };
 
 test('basic structure', t => {
@@ -217,34 +174,22 @@ test('buttons', t => {
     t.is(next.disabled, true);
 });
 
-test('dispatching actions when the buttons are pressed', t => {
-    const { store, container } = getContainer({}, state => ({
-        ...state,
-        other: {
-            ...state.other,
-            analysis: {
-                ...state.other.analysis,
-                timeIndex: 1
-            }
-        }
-    }));
+test('calling functions when the buttons are pressed', t => {
+    const onRequest = sinon.spy();
+    const { container } = getContainer({
+        page: 1,
+        onRequest
+    });
 
     const [div] = container.childNodes;
     const [, , buttons] = div.childNodes;
     const [previous, next] = buttons.childNodes;
 
-    const actionPrevious = aOptionChanged({ period: 0, grouping: 0, timeIndex: 2 });
-    const actionNext = aOptionChanged({ period: 0, grouping: 0, timeIndex: 0 });
-
-    t.false(store.isActionDispatched(actionPrevious));
-
     fireEvent.click(previous);
-    t.true(store.isActionDispatched(actionPrevious));
-
-    t.false(store.isActionDispatched(actionNext));
+    t.deepEqual(onRequest.getCalls()[0].args, [{ page: 2 }]);
 
     fireEvent.click(next);
-    t.true(store.isActionDispatched(actionNext));
+    t.deepEqual(onRequest.getCalls()[1].args, [{ page: 0 }]);
 });
 
 test('description', t => {

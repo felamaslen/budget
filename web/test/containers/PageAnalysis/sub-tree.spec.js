@@ -5,10 +5,7 @@ const test = ninos(ava);
 import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
 import React from 'react';
-import reduction from '~client/reduction';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
 
 const getContainer = memoize((customProps = {}) => {
@@ -24,17 +21,7 @@ const getContainer = memoize((customProps = {}) => {
         ...customProps
     };
 
-    const state = reduction;
-
-    const store = createMockStore(state);
-
-    const utils = render(
-        <Provider store={store}>
-            <SubTree {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<SubTree {...props} />);
 });
 
 test('basic structure', t => {
@@ -87,6 +74,14 @@ test('rendering each sub tree item', t => {
 test('not rendering anything if not open', t => {
     const { container } = getContainer({
         open: false
+    });
+
+    t.is(container.childNodes.length, 0);
+});
+
+test('not rendering anything if there is no subtree', t => {
+    const { container } = getContainer({
+        subTree: null
     });
 
     t.is(container.childNodes.length, 0);

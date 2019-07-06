@@ -10,7 +10,6 @@ import BlockPacker from '~client/components/BlockPacker';
 
 const getBlockPacker = memoize((customProps = {}) => {
     const props = {
-        page: 'page1',
         blocks: [
             {
                 width: 10.4,

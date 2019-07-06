@@ -133,3 +133,19 @@ test('<BlockBits /> - rendering a list of blocks', t => {
     t.is(bit0.className, 'sub-block');
     t.is(bit1.className, 'sub-block');
 });
+
+test('<BlockBits /> - skipping subBlock render if there are none', t => {
+    const { container } = getBlockBits({
+        blockBit: {
+            name: 'foo',
+            value: 1001.3,
+            color: 'red',
+            width: 21,
+            height: 13
+        }
+    });
+
+    const [div] = container.childNodes;
+
+    t.is(div.childNodes.length, 0);
+});

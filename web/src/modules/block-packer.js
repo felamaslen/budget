@@ -189,11 +189,14 @@ function squarify(params, blocks, rowCount, children, row, node) {
 }
 
 function rowTotal(row) {
+    if (row.total) {
+        return row.total;
+    }
     if (row.subTree) {
         return row.subTree.reduce((sum, subRow) => sum + rowTotal(subRow), 0);
     }
 
-    return row.total || 0;
+    return 0;
 }
 
 const withTotals = rows => rows.map(row => ({ ...row, total: rowTotal(row) }));

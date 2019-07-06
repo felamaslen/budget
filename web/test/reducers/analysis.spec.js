@@ -115,6 +115,7 @@ test('ANALYSIS_BLOCK_REQUESTED (while on main view) sets state up for loading de
 
     t.is(result.loading, true);
     t.is(result.loadingDeep, true);
+    t.is(result.deepBlock, 'food');
 });
 
 test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bills or saved block', t => {
@@ -126,7 +127,8 @@ test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bill
 
 test('ANALYSIS_BLOCK_REQUESTED (while on deep view) resets the deep data', t => {
     const state = {
-        deep: [1, 2, 3]
+        deep: [1, 2, 3],
+        deepBlock: 'food'
     };
 
     const action = blockRequested('Fish');
@@ -134,6 +136,7 @@ test('ANALYSIS_BLOCK_REQUESTED (while on deep view) resets the deep data', t => 
     const result = reducer(state, action);
 
     t.is(result.deep, null);
+    t.is(result.deepBlock, null);
     t.is(result.loading, false);
     t.is(result.loadingDeep, false);
 });

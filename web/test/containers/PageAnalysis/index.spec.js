@@ -5,37 +5,12 @@ import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import PageAnalysis from '~client/containers/PageAnalysis';
+import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = {
-        pages: {
-            analysis: {
-                cost: []
-            }
-        },
-        pagesLoaded: {
-            analysis: true
-        },
-        other: {
-            blockView: {
-                active: null
-            },
-            analysis: {
-                period: 0,
-                grouping: 0,
-                timeIndex: 0,
-                treeVisible: {},
-                treeOpen: {},
-                timeline: [
-                    [1, 2, 3]
-                ]
-            }
-        }
-    };
-
-    if (customState) {
-        state = customState(state);
-    }
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
+        ...testState
+    });
 
     const store = createMockStore(state);
 

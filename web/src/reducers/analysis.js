@@ -50,13 +50,13 @@ const onReceive = (state, { res }) => ({
 
 function onBlockRequest(state, { name }) {
     if (state.deep) {
-        return { loading: false, loadingDeep: false, deep: null };
+        return { loading: false, loadingDeep: false, deep: null, deepBlock: null };
     }
     if (['bills', 'saved'].includes(name)) {
         return { loading: false, loadingDeep: false };
     }
 
-    return { loading: true, loadingDeep: true };
+    return { loading: true, loadingDeep: true, deepBlock: name };
 }
 
 const onBlockReceive = (state, { res }) => ({

@@ -16,6 +16,7 @@ export const testState = {
         error: null,
         key: 'some api key'
     },
+    error: [],
     overview: {
         startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),
         endDate: DateTime.fromISO('2018-06-30T23:59:59.999Z'),
@@ -36,7 +37,20 @@ export const testState = {
         },
         rows: [[13502], [19220], [11876], [14981], [14230], [12678], [0]]
     },
-    analysis: {},
+    analysis: {
+        period: 'year',
+        grouping: 'category',
+        page: 0,
+        timeline: [
+            [1, 2, 3]
+        ],
+        treeVisible: {},
+        cost: [
+            ['foo1', [['foo1_bar1', 1642283]]],
+            ['foo2', [['foo2_bar1', 156842], ['foo2_bar2', 137650]]]
+        ],
+        saved: 67123
+    },
     funds: {
         items: testRows,
         viewSoldFunds: false,

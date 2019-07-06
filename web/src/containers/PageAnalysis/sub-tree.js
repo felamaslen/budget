@@ -12,7 +12,7 @@ export default function SubTree({ open, subTree, name, itemCost, onHover }) {
 
     const onMouseOut = useCallback(() => onHover(null), [onHover]);
 
-    if (!open) {
+    if (!(open && subTree)) {
         return null;
     }
 
@@ -43,4 +43,8 @@ SubTree.propTypes = {
     name: PropTypes.string,
     itemCost: PropTypes.number,
     onHover: PropTypes.func.isRequired
+};
+
+SubTree.defaultProps = {
+    subTree: null
 };

@@ -2,10 +2,7 @@ import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
 import React from 'react';
-import reduction from '~client/reduction';
 import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 
 const getContainer = memoize((customProps = {}) => {
@@ -18,17 +15,7 @@ const getContainer = memoize((customProps = {}) => {
         ...customProps
     };
 
-    const state = reduction;
-
-    const store = createMockStore(state);
-
-    const utils = render(
-        <Provider store={store}>
-            <ListTreeHead {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<ListTreeHead {...props} />);
 });
 
 test('basic structure', t => {

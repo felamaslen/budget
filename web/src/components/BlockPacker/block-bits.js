@@ -56,41 +56,35 @@ BlockGroup.propTypes = {
     subBlock: subBlockShape
 };
 
-export default function BlockBits({ page, blockBit, activeMain, activeBlock, deep, onClick, ...props }) {
-    const className = classNames('block', `block-${blockBit.color}`, {
-        active: activeMain && activeBlock[0] === blockBit.name,
-        [`block-${blockBit.name}`]: !deep
-    });
-
-    const subBlocks = blockBit.blocks.map((subBlock, key) => <BlockGroup
-        key={key}
-        activeBlock={activeBlock}
-        name={blockBit.name}
-        value={blockBit.value}
-        subBlock={subBlock}
-        {...props}
-    />);
-
+export default function BlockBits({ blockBit, activeMain, activeBlock, deep, onClick, ...props }) {
     const style = useMemo(() => ({
         width: blockBit.width,
         height: blockBit.height
     }), [blockBit]);
 
-    const onBlockClick = useCallback(() => onClick({
-        wasDeep: Boolean(deep),
-        page,
-        name: blockBit.name
-    }), [onClick, deep, page, blockBit]);
-
-    return <div className={className} style={style}
-        onClick={onBlockClick}>
-        {subBlocks}
-    </div>;
+    return (
+        <div
+            className={classNames('block', `block-${blockBit.color}`, {
+                active: activeMain && activeBlock[0] === blockBit.name,
+                [`block-${blockBit.name}`]: !deep
+            })}
+            style={style}
+            onClick={() => onClick(activeBlock[0], blockBit.name)}
+        >
+            {(blockBit.blocks || []).map((subBlock, key) => <BlockGroup
+                key={key}
+                activeBlock={activeBlock}
+                name={blockBit.name}
+                value={blockBit.value}
+                subBlock={subBlock}
+                {...props}
+            />)}
+        </div>
+    );
 }
 
 BlockBits.propTypes = {
     blockBit: blockBitShape,
-    page: PropTypes.string.isRequired,
     activeMain: PropTypes.bool.isRequired,
     activeSub: PropTypes.bool.isRequired,
     activeBlock: activeBlockShape,

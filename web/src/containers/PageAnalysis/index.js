@@ -1,32 +1,78 @@
-/**
- * Analysis page component
- */
+import { connect } from 'react-redux';
+import React, { useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
+
+import {
+    requested,
+    blockRequested,
+    treeItemDisplayToggled,
+    treeItemHovered
+} from '~client/actions/analysis';
+
+import {
+    getPeriod,
+    getGrouping,
+    getPage,
+    getCost,
+    getBlocks
+} from '~client/selectors/analysis';
+
+import { timelineShape, costShape } from '~client/prop-types/page/analysis';
+import { blocksShape } from '~client/prop-types/block-packer';
+
+import Page from '~client/components/Page';
+import Timeline from '~client/containers/PageAnalysis/timeline';
+import Upper from '~client/containers/PageAnalysis/upper';
+import ListTree from '~client/containers/PageAnalysis/list-tree';
+import BlockPacker from '~client/components/BlockPacker';
 
 import './style.scss';
-import { connect } from 'react-redux';
-import { aContentRequested } from '~client/actions/content.actions';
-import React from 'react';
-import PropTypes from 'prop-types';
-import { timelineShape } from '~client/prop-types/page/analysis';
-import Page from '~client/containers/Page';
-import Timeline from './timeline';
-import Upper from './upper';
-import ListTree from './list-tree';
-import Blocks from './blocks';
 
-function PageAnalysis({ timeline }) {
-    let TimelineView = null;
-    if (timeline) {
-        TimelineView = <Timeline data={timeline} />;
-    }
+function PageAnalysis({
+    timeline,
+    cost,
+    blocks,
+    period,
+    grouping,
+    page,
+    description,
+    treeVisible,
+    deepBlock,
+    onRequest,
+    toggleTreeItem,
+    onBlockClick
+}) {
+    const [activeBlock, setActiveBlock] = useState([null, null]);
+    const onBlockHover = useCallback((main, deep = null) => setActiveBlock([main, deep]), []);
+
+    const [treeOpen, setTreeOpen] = useState({});
 
     return (
         <Page page="analysis">
-            <Upper />
+            <Upper
+                period={period}
+                grouping={grouping}
+                page={page}
+                description={description}
+                onRequest={onRequest}
+            />
             <div className="analysis-outer">
-                {TimelineView}
-                <ListTree />
-                <Blocks />
+                {timeline && <Timeline data={timeline} />}
+                <ListTree
+                    cost={cost}
+                    treeVisible={treeVisible}
+                    toggleTreeItem={toggleTreeItem}
+                    treeOpen={treeOpen}
+                    setTreeOpen={setTreeOpen}
+                    onHover={onBlockHover}
+                />
+                <BlockPacker
+                    blocks={blocks}
+                    activeBlock={activeBlock}
+                    deep={deepBlock}
+                    onHover={onBlockHover}
+                    onClick={onBlockClick}
+                />
             </div>
         </Page>
     );
@@ -34,15 +80,37 @@ function PageAnalysis({ timeline }) {
 
 PageAnalysis.propTypes = {
     timeline: timelineShape,
-    onLoad: PropTypes.func.isRequired
+    cost: costShape,
+    blocks: blocksShape,
+    period: PropTypes.string.isRequired,
+    grouping: PropTypes.string.isRequired,
+    page: PropTypes.number.isRequired,
+    description: PropTypes.string,
+    treeVisible: PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
+    deepBlock: PropTypes.string,
+    onBlockClick: PropTypes.func.isRequired,
+    onRequest: PropTypes.func.isRequired,
+    toggleTreeItem: PropTypes.func.isRequired,
+    hoverTreeItem: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    timeline: state.other.analysis.timeline
+    cost: getCost(state),
+    blocks: getBlocks(state),
+    period: getPeriod(state),
+    grouping: getGrouping(state),
+    page: getPage(state),
+    description: state.analysis.description,
+    deepBlock: state.analysis.deepBlock,
+    treeVisible: state.analysis.treeVisible,
+    timeline: state.analysis.timeline
 });
 
-const mapDispatchToProps = dispatch => ({
-    onLoad: () => dispatch(aContentRequested({ page: 'analysis' }))
-});
+const mapDispatchToProps = {
+    onBlockClick: blockRequested,
+    onRequest: requested,
+    toggleTreeItem: treeItemDisplayToggled,
+    hoverTreeItem: treeItemHovered
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);

@@ -5,10 +5,7 @@ const test = ninos(ava);
 import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
 import React from 'react';
-import reduction from '~client/reduction';
 import Timeline from '~client/containers/PageAnalysis/timeline';
 
 const getContainer = memoize((customProps = {}) => {
@@ -25,17 +22,7 @@ const getContainer = memoize((customProps = {}) => {
         ...customProps
     };
 
-    const state = reduction;
-
-    const store = createMockStore(state);
-
-    const utils = render(
-        <Provider store={store}>
-            <Timeline {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<Timeline {...props} />);
 });
 
 test('basic structure', t => {
