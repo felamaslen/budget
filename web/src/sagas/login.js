@@ -7,7 +7,7 @@ import { errorOpened } from '~client/actions/error';
 
 export function *onLoginAttempt({ pin }) {
     try {
-        const response = yield call(axios.post, `${API_PREFIX}/user/login`, { pin });
+        const res = yield call(axios.post, `${API_PREFIX}/user/login`, { pin });
 
         try {
             yield call([localStorage, 'setItem'], 'pin', pin);
@@ -15,7 +15,7 @@ export function *onLoginAttempt({ pin }) {
             // do nothing
         }
 
-        yield put(loggedIn(response));
+        yield put(loggedIn(res.data));
     } catch (err) {
         if (err.response) {
             const message = `Login error: ${err.response.data.err}`;

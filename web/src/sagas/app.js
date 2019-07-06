@@ -42,7 +42,7 @@ export function *fetchData() {
             }
         });
 
-        yield put(dataRead(res));
+        yield put(dataRead(res.data.data));
     } catch (err) {
         yield put(errorOpened(`Error loading data: ${err.message}`));
     }

@@ -18,7 +18,7 @@ import { errorOpened } from '~client/actions/error';
 test('onLoginAttempt tries to log in', t => {
     t.is(1, 1);
 
-    const res = { isRes: true };
+    const res = { data: { isRes: true } };
 
     testSaga(onLoginAttempt, loginRequested(1024))
         .next()
@@ -26,7 +26,7 @@ test('onLoginAttempt tries to log in', t => {
         .next(res)
         .call([localStorage, 'setItem'], 'pin', 1024)
         .next()
-        .put(loggedIn(res))
+        .put(loggedIn(res.data))
         .next()
         .isDone();
 });

@@ -40,7 +40,12 @@ test('fetchData gets all data from the API', t => {
 
     const stub = sinon.stub(shortid, 'generate').returns('some-id');
 
-    const res = { isRes: true };
+    const res = {
+        data: {
+            data: { isRes: true }
+        },
+        headers: {}
+    };
     const err = new Error('something bad happened');
 
     testSaga(fetchData)
@@ -53,7 +58,7 @@ test('fetchData gets all data from the API', t => {
             }
         })
         .next(res)
-        .put(dataRead(res))
+        .put(dataRead(res.data.data))
         .next()
         .isDone();
 
