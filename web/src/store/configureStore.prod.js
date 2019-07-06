@@ -6,10 +6,10 @@ import rootReducer from '~client/reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default initialState => {
+export default () => {
     const createStoreWithMiddleware = applyMiddleware(sagaMiddleware)(createStore);
 
-    const store = createStoreWithMiddleware(rootReducer, initialState);
+    const store = createStoreWithMiddleware(rootReducer);
 
     sagaMiddleware.run(rootSaga);
 

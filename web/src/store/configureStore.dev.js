@@ -16,14 +16,13 @@ const logger = createLogger({
     predicate: (getState, action) => SKIP_LOG_ACTIONS.indexOf(action.type) === -1
 });
 
-const newStore = initialState => {
+const newStore = () => {
     const createStoreWithMiddleware = compose(
         applyMiddleware(sagaMiddleware, logger)
     )(createStore);
 
     const store = createStoreWithMiddleware(
         rootReducer,
-        initialState,
         window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__({
             actionsBlacklist: SKIP_LOG_ACTIONS
         })
