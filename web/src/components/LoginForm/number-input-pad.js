@@ -17,7 +17,7 @@ const NumberInputPad = ({ onInput }) => (
             }
 
             return (
-                <div key={row}>{new Array(3).fill(0)
+                <div key={row} className="number-input-row">{new Array(3).fill(0)
                     .map((colItem, col) => (
                         <Digit key={getDigit(row, col)} digit={getDigit(row, col)} onInput={onInput} />
                     ))

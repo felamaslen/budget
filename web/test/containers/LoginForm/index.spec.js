@@ -1,20 +1,20 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render } from 'react-testing-library';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import LoginForm from '~client/containers/LoginForm';
-import { aLoginFormInputted } from '~client/actions/login.actions';
+import { testState } from '~client-test/test_data/state';
 
 const getContainer = memoize((customProps = {}) => {
     const state = {
-        loginForm: {
-            inputStep: 3,
-            values: [5, 1, 2],
-            visible: true,
-            active: true
+        ...testState,
+        login: {
+            uid: null,
+            name: null,
+            loading: false
         }
     };
 
@@ -40,7 +40,7 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'login-form active');
+    t.is(div.className, 'login-form');
     t.is(div.childNodes.length, 3);
 });
 
@@ -72,21 +72,4 @@ test('number input pad', t => {
 
     t.is(pad.tagName, 'DIV');
     t.is(pad.className, 'number-input noselect');
-});
-
-test('dispatching a number on input', t => {
-    const { store, container } = getContainer();
-    const [div] = container.childNodes;
-    const [, , pad] = div.childNodes;
-    const [row] = pad.childNodes;
-    const [button] = row.childNodes;
-
-    t.is(button.tagName, 'BUTTON');
-
-    const action = aLoginFormInputted(1);
-
-    t.false(store.isActionDispatched(action));
-
-    fireEvent.mouseDown(button);
-    t.true(store.isActionDispatched(action));
 });
