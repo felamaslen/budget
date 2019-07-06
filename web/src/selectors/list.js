@@ -7,9 +7,9 @@ import { getValueForTransmit } from '~client/modules/data';
 
 export const getAllPageRows = (state, { page }) => state[page].items;
 
-const getAllListRows = state => PAGES_LIST.map(page => ({
+const getAllListItems = state => PAGES_LIST.map(page => ({
     page,
-    rows: getAllPageRows(state, { page })
+    items: getAllPageRows(state, { page })
 }));
 
 const getPageProp = (state, { page }) => page;
@@ -107,12 +107,12 @@ const withDeleteRequests = (page, rows) => last => last.concat(rows
     }))
 );
 
-const getCrudRequestsByPage = (page, rows) => compose(
-    withCreateRequests(page, rows),
-    withUpdateRequests(page, rows),
-    withDeleteRequests(page, rows),
+const getCrudRequestsByPage = (page, items) => compose(
+    withCreateRequests(page, items),
+    withUpdateRequests(page, items),
+    withDeleteRequests(page, items),
     withTransmitValues
 )([]);
 
-export const getCrudRequests = createSelector(getAllListRows, rowsByPage =>
-    rowsByPage.reduce((last, { page, rows }) => last.concat(getCrudRequestsByPage(page, rows)), []));
+export const getCrudRequests = createSelector(getAllListItems, itemsByPage =>
+    itemsByPage.reduce((last, { page, items }) => last.concat(getCrudRequestsByPage(page, items)), []));

@@ -8,7 +8,7 @@ import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { arrayAverage, randnBm, replaceAtIndex } from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
-import { getNow } from '~client/selectors/app';
+import { getNow } from '~client/selectors/now';
 
 const futureCategories = ['funds', 'food', 'general', 'holiday', 'social'];
 const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);

@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import classNames from 'classnames';
 import { formatAge } from '~client/modules/format';
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
-import { getNow } from '~client/selectors/app';
+import { getNow } from '~client/selectors/now';
 import { getFundsRows, getCurrentFundsCache } from '~client/selectors/funds/helpers';
 import { getRowGains, getGainsForRow } from '~client/selectors/funds/gains';
 

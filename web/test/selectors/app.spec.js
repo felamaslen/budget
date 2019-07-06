@@ -1,12 +1,7 @@
 import test from 'ava';
 import {
-    getNow,
     getLoggedIn
 } from '~client/selectors/app';
-
-test('getNow gets the current time from the state', t => {
-    t.is(getNow({ now: 'foo' }), 'foo');
-});
 
 test('getLoggedIn returns true iff there is an API key and a user ID in state', t => {
     t.is(getLoggedIn({
