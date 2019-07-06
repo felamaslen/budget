@@ -201,8 +201,7 @@ export const getOverviewTable = createSelector([
             return {
                 column,
                 value: monthText,
-                rgb: null,
-                editable: false
+                rgb: null
             };
         }
         if (key === 'balance') {
@@ -211,8 +210,7 @@ export const getOverviewTable = createSelector([
             return {
                 column,
                 value,
-                rgb: getColor(value, key),
-                editable: true
+                rgb: getColor(value, key)
             };
         }
 
@@ -221,8 +219,7 @@ export const getOverviewTable = createSelector([
         return {
             column,
             value,
-            rgb: getColor(value, key),
-            editable: false
+            rgb: getColor(value, key)
         };
     });
 
@@ -236,6 +233,6 @@ export const getOverviewTable = createSelector([
 
         const cells = getCells(monthText, index);
 
-        return { cells, past, active, future };
+        return { key: monthText, cells, past, active, future };
     });
 });

@@ -4,11 +4,11 @@ import classNames from 'classnames';
 
 import CellInner from './cell-inner';
 
-export default function OverviewTableCells({ row: { cells, past, active, future }, rowKey, editRow, editCol }) {
+export default function OverviewTableCells({ row: { cells, past, active, future } }) {
     return (
         <div className={classNames('row', { past, active, future })}>
             {cells.map((cell, cellKey) => {
-                const { column, rgb, editable } = cell;
+                const { column, rgb } = cell;
                 const style = {};
                 if (rgb) {
                     style.backgroundColor = `rgb(${rgb.join(',')})`;
@@ -16,12 +16,9 @@ export default function OverviewTableCells({ row: { cells, past, active, future 
 
                 return (
                     <div key={cellKey}
-                        className={classNames('col', column[0], {
-                            'editable-outer': editable,
-                            editing: editable && editRow === rowKey && editCol === 0
-                        })}
+                        className={classNames('col', column[0])}
                         style={style}>
-                        <CellInner cell={cell} cellKey={cellKey} rowKey={rowKey} editable={editable} />
+                        <CellInner cell={cell} cellKey={cellKey} />
                     </div>
                 );
             })}
@@ -37,8 +34,5 @@ OverviewTableCells.propTypes = {
         past: PropTypes.bool,
         active: PropTypes.bool,
         future: PropTypes.bool
-    }).isRequired,
-    rowKey: PropTypes.number.isRequired,
-    editRow: PropTypes.number,
-    editCol: PropTypes.number
+    }).isRequired
 };

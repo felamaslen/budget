@@ -88,6 +88,7 @@ test('getProcessedCost processs the cost data, including making predictions, add
 test('getOverviewTable gets a list of rows for the overview table', t => {
     t.deepEqual(getOverviewTable(state), [
         {
+            key: 'Jan-18',
             past: true,
             active: false,
             future: false,
@@ -107,6 +108,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         },
         {
+            key: 'Feb-18',
             past: true,
             active: false,
             future: false,
@@ -126,6 +128,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         },
         {
+            key: 'Mar-18',
             past: false,
             active: true,
             future: false,
@@ -145,6 +148,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         },
         {
+            key: 'Apr-18',
             past: false,
             active: false,
             future: true,
@@ -164,6 +168,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         },
         {
+            key: 'May-18',
             past: false,
             active: false,
             future: true,
@@ -183,6 +188,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         },
         {
+            key: 'Jun-18',
             past: false,
             active: false,
             future: true,
@@ -202,6 +208,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         },
         {
+            key: 'Jul-18',
             past: false,
             active: false,
             future: true,
