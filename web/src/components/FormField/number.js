@@ -3,15 +3,11 @@ import PropTypes from 'prop-types';
 
 import { useField } from '~client/hooks/field';
 
-const getValue = number => number;
-const setValue = Number;
-
 export default function FormFieldNumber({ value, onChange, active, ...props }) {
     const [currentValue, onType, onBlur, ref] = useField({
         value,
         onChange,
-        getValue,
-        setValue,
+        setValue: Number,
         active
     });
 

@@ -3,16 +3,11 @@ import PropTypes from 'prop-types';
 
 import { useField } from '~client/hooks/field';
 
-const getValue = text => text;
-const setValue = text => text;
-
 export default function FormFieldText({ value, onType, onChange, active }) {
     const [currentValue, onChangeRaw, onBlur, ref] = useField({
         value,
         onType,
         onChange,
-        getValue,
-        setValue,
         active
     });
 

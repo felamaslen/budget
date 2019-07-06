@@ -1,13 +1,13 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 
-const noop = () => null;
+const noop = value => value;
 
 export function useField({
     value,
     onChange,
     onType = noop,
-    getValue,
-    setValue,
+    getValue = noop,
+    setValue = noop,
     active
 }) {
     const inputRef = useRef(null);
@@ -33,9 +33,13 @@ export function useField({
     }, [value, prevValue, getValue]);
 
     const onChangeRaw = useCallback(evt => {
-        const newValue = setValue(evt.target.value);
-        setCurrentValue(newValue);
-        onType(newValue);
+        try {
+            const newValue = setValue(evt.target.value);
+            setCurrentValue(newValue);
+            onType(newValue);
+        } catch {
+            // do nothing
+        }
     }, [setCurrentValue, setValue, onType]);
 
     const onBlur = useCallback(() => {

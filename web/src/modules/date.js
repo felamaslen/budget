@@ -4,38 +4,6 @@
 
 import { DateTime } from 'luxon';
 
-export function dateInput(input = null, validate = true, now = DateTime.local()) {
-    // get a DateTime object from something like "10/11" or just "3", for quick insertion of data
-
-    if (!validate) {
-        return DateTime.fromISO(input);
-    }
-
-    if (input && input.match(/^[0-9]{1,2}(\/[0-9]{1,2}(\/[0-9]{2,4})?)?$/)) {
-        const [day, monthInput, yearShort] = input.split('/');
-
-        let year = now.year;
-        if (yearShort) {
-            if (yearShort.length === 2) {
-                year = Number(`20${yearShort}`);
-            }
-            else {
-                year = Number(yearShort);
-            }
-        }
-
-        const month = Number(monthInput) || now.month;
-
-        return DateTime.fromObject({ year, month, day: Number(day) });
-    }
-
-    if (validate) {
-        return null;
-    }
-
-    return now;
-}
-
 function timeTick(t0, t1, { start, measure, tickSize, numTicks, getMajor, label, extra }) {
     const theStart = start || DateTime.fromJSDate(new Date(t0 * 1000)).startOf(measure);
 

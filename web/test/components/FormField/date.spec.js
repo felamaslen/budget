@@ -1,16 +1,18 @@
 import ava from 'ava';
+import sinon from 'sinon';
 import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent } from 'react-testing-library';
 import React from 'react';
+import { DateTime } from 'luxon';
+
 import FormFieldDate from '~client/components/FormField/date';
-import { dateInput } from '~client/modules/date';
 
 const getContainer = (customProps = {}) => {
     const props = {
-        value: dateInput('10/11/2017'),
+        value: DateTime.fromISO('2017-11-10'),
         onChange: () => null,
         ...customProps
     };
@@ -43,7 +45,8 @@ test('input', t => {
 
 test('handling onchange', t => {
     const onChange = t.context.stub();
-    const { container } = getContainer({ onChange });
+    const onType = t.context.stub();
+    const { container } = getContainer({ onChange, onType });
 
     const [div] = container.childNodes;
     const [input] = div.childNodes;
@@ -55,7 +58,7 @@ test('handling onchange', t => {
 
     fireEvent.blur(input);
     t.is(onChange.calls.length, 1);
-    t.deepEqual(onChange.calls[0].arguments, [dateInput('9/4/2014')]);
+    t.deepEqual(onChange.calls[0].arguments, [DateTime.fromISO('2014-04-09')]);
 });
 
 test('handling bad values', t => {
@@ -73,4 +76,46 @@ test('handling bad values', t => {
     fireEvent.blur(input);
     t.is(onChange.calls.length, 1);
     t.is(onChange.calls[0].arguments[0].toString(), 'Invalid DateTime');
+});
+
+test('rendering as a string input - entering abbreviations', t => {
+    const clock = sinon.useFakeTimers(new Date('2019-07-06T16:47:20Z').getTime());
+
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange, string: true });
+
+    const { childNodes: [input] } = container.childNodes[0];
+
+    t.is(input.type, 'text');
+
+    fireEvent.change(input, { target: { value: '1' } });
+    fireEvent.blur(input);
+
+    t.deepEqual(onChange.calls[0].arguments, [DateTime.fromISO('2019-07-01')]);
+
+    fireEvent.change(input, { target: { value: '4/3' } });
+    fireEvent.blur(input);
+
+    t.deepEqual(onChange.calls[1].arguments, [DateTime.fromISO('2019-03-04')]);
+
+    fireEvent.change(input, { target: { value: '2/9/16' } });
+    fireEvent.blur(input);
+
+    t.deepEqual(onChange.calls[2].arguments, [DateTime.fromISO('2016-09-02')]);
+
+    clock.restore();
+});
+
+test('rendering as a string input - handling invalid input', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange, string: true });
+
+    const { childNodes: [input] } = container.childNodes[0];
+
+    t.is(input.type, 'text');
+
+    fireEvent.change(input, { target: { value: 'not-a-date' } });
+    fireEvent.blur(input);
+
+    t.deepEqual(onChange.calls[0].arguments, [DateTime.fromISO('2017-11-10')]);
 });

@@ -1,24 +1,7 @@
 import test from 'ava';
-import { DateTime } from 'luxon';
 import {
-    dateInput,
     timeSeriesTicks
 } from '~client/modules/date';
-
-test('dateInput working for full dates', t => {
-    t.is(dateInput('22/01/2018').toISODate(), '2018-01-22');
-    t.is(dateInput('3/5/17').toISODate(), '2017-05-03');
-});
-
-test('dateInput working for dates with the month', t => {
-    const currentYear = new Date().getFullYear();
-
-    t.is(dateInput('1/3').toISODate(), `${currentYear}-03-01`);
-});
-
-test('dateInput working for just the day', t => {
-    t.is(dateInput('5', true, DateTime.fromISO('2018-01-01')).toISODate(), '2018-01-05');
-});
 
 test('getTimeSeriesTicker handles small ranges (less than 10 minutes)', t => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 167);
