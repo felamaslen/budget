@@ -5,6 +5,7 @@ import axios from 'axios';
 
 import { windowResized } from '~client/actions/app';
 import { dataRead } from '~client/actions/api';
+import { errorOpened } from '~client/actions/error';
 
 import { getApiKey } from '~client/selectors/api';
 
@@ -43,7 +44,7 @@ export function *fetchData() {
 
         yield put(dataRead(res));
     } catch (err) {
-        yield put(dataRead(null, err));
+        yield put(errorOpened(`Error loading data: ${err.message}`));
     }
 }
 

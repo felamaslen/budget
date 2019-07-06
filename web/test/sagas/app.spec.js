@@ -1,6 +1,8 @@
 /* eslint-disable prefer-reflect */
 import test from 'ava';
+import sinon from 'sinon';
 import axios from 'axios';
+import shortid from 'shortid';
 
 import '~client-test/browser';
 import { testSaga } from 'redux-saga-test-plan';
@@ -11,6 +13,7 @@ import appSaga, {
 } from '~client/sagas/app';
 import { windowResized } from '~client/actions/app';
 import { dataRead } from '~client/actions/api';
+import { errorOpened } from '~client/actions/error';
 import { getApiKey } from '~client/selectors/api';
 import { LOGGED_IN } from '~client/constants/actions/login';
 import { API_PREFIX } from '~client/constants/data';
@@ -34,6 +37,8 @@ test('watchEventEmitter dispatching an action emitted by the channel', t => {
 
 test('fetchData gets all data from the API', t => {
     t.is(1, 1);
+
+    const stub = sinon.stub(shortid, 'generate').returns('some-id');
 
     const res = { isRes: true };
     const err = new Error('something bad happened');
@@ -62,9 +67,11 @@ test('fetchData gets all data from the API', t => {
             }
         })
         .throw(err)
-        .put(dataRead(null, err))
+        .put(errorOpened('Error loading data: something bad happened'))
         .next()
         .isDone();
+
+    stub.restore();
 });
 
 test('appSaga forks other sagas', t => {
