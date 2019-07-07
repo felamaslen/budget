@@ -4,7 +4,7 @@ const test = ninos(ava);
 
 import '~client-test/browser';
 import memoize from 'fast-memoize';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
 import { Provider } from 'react-redux';

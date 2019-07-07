@@ -4,7 +4,7 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
 

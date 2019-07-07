@@ -3,7 +3,7 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 import Navbar from '~client/components/Navbar';

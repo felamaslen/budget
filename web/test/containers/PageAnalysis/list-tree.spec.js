@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ListTree from '~client/containers/PageAnalysis/list-tree';
 

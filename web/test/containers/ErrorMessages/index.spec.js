@@ -1,6 +1,6 @@
 import test from 'ava';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';

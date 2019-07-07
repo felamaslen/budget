@@ -1,7 +1,7 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 

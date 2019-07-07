@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import test from 'ava';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import memoize from 'fast-memoize';
 import React from 'react';
 import BlockBits, { BlockGroup, SubBlock } from '~client/components/BlockPacker/block-bits';

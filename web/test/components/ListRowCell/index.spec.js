@@ -1,7 +1,7 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';

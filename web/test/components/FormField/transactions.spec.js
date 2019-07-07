@@ -3,7 +3,7 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import FormFieldTransactions from '~client/components/FormField/transactions';
 import { getTransactionsList, modifyTransaction, removeAtIndex } from '~client/modules/data';

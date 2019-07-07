@@ -5,7 +5,7 @@ const test = ninos(ava);
 import memoize from 'fast-memoize';
 import { DateTime } from 'luxon';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';

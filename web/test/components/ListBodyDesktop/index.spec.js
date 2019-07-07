@@ -3,7 +3,7 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { DateTime } from 'luxon';
 import React from 'react';
@@ -14,7 +14,6 @@ const getContainer = (customProps = {}) => {
     const props = {
         page: 'food',
         rows: [],
-        addBtnFocus: false,
         onDesktopAdd: () => null,
         ...customProps
     };

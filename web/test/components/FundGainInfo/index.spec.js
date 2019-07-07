@@ -2,7 +2,7 @@ import test from 'ava';
 import memoize from 'fast-memoize';
 import compose from 'just-compose';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import FundGainInfo from '~client/components/FundGainInfo';
 

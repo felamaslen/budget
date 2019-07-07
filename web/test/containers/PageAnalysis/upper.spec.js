@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import Upper from '~client/containers/PageAnalysis/upper';
 

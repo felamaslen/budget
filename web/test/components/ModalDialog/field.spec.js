@@ -4,7 +4,7 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ModalDialogField from '~client/components/ModalDialog/field';
 import { getTransactionsList } from '~client/modules/data';

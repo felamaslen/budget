@@ -1,5 +1,5 @@
 import test from 'ava';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import memoize from 'fast-memoize';
 import { createMockStore } from 'redux-test-utils';

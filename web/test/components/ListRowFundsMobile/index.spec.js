@@ -1,6 +1,6 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import '~client-test/browser';
 import React from 'react';
 import ListRowFundsMobile from '~client/components/ListRowFundsMobile';

@@ -1,5 +1,5 @@
 import test from 'ava';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import '~client-test/browser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -13,7 +13,6 @@ const getFundsMeta = (customProps = {}) => {
     const state = {
         now: DateTime.fromISO('2019-04-06T23:02Z'),
         edit: {
-            addBtnFocus: false
         },
         pages: {
             funds: {

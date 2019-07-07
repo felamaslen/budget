@@ -5,7 +5,7 @@ const test = ninos(ava);
 import '~client-test/browser';
 import memoize from 'fast-memoize';
 import React from 'react';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import BlockPacker from '~client/components/BlockPacker';
 
 const getBlockPacker = memoize((customProps = {}) => {

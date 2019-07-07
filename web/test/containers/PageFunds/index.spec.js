@@ -1,6 +1,6 @@
 import test from 'ava';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
@@ -17,8 +17,7 @@ const getContainer = (customProps = {}, customState = state => state) => {
             },
             add: {
                 funds: ['', '']
-            },
-            addBtnFocus: false
+            }
         },
         pages: {
             funds: {

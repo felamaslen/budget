@@ -1,6 +1,6 @@
 import test from 'ava';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import Page from '~client/components/Page';
 
