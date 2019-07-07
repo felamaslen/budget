@@ -17,7 +17,7 @@
 - Client response data validation
 - Write unit tests for client [IN PROGRESS]
 - Use logger function instead of console.log [DONE]
-- Remove ImmutableJS
+- Remove ImmutableJS [DONE]
 - Relative imports [DONE]
 - Replace enzyme with react-testing-library [DONE]
 - Replace mocha with ava [DONE]
