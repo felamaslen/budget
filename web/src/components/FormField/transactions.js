@@ -161,6 +161,10 @@ export default function FormFieldTransactions(props) {
 }
 
 FormFieldTransactions.propTypes = {
-    value: transactionsListShape.isRequired,
+    value: transactionsListShape,
     active: PropTypes.bool
+};
+
+FormFieldTransactions.defaultProps = {
+    value: []
 };

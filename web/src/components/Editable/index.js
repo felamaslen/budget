@@ -36,7 +36,7 @@ EditableActive.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-export function formatValue(item, value) {
+function formatValue(item, value) {
     if (item === 'date') {
         return value.toLocaleString(DateTime.DATE_SHORT);
     }
@@ -44,7 +44,10 @@ export function formatValue(item, value) {
         return formatCurrency(value);
     }
     if (item === 'transactions') {
-        return <span className="num-transactions">{value.length}</span>;
+        return <span className="num-transactions">{value
+            ? value.length
+            : 0
+        }</span>;
     }
 
     return String(value);
