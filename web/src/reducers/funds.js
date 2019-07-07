@@ -21,7 +21,7 @@ export const initialState = {
     viewSoldFunds: false,
     items: [],
     period: initialPeriod,
-    priceCache: {
+    cache: {
         [initialPeriod]: {
             startTime: 0,
             cacheTimes: [],
@@ -54,8 +54,8 @@ function onReadFunds(state, action) {
     }
 
     return {
-        priceCache: {
-            ...state.priceCache,
+        cache: {
+            ...state.cache,
             [state.period]: getPriceCache(action.res.funds)
         },
         ...onReadRows(state, action)
@@ -69,8 +69,8 @@ function onPeriodLoad(state, { res, period }) {
 
     return {
         period,
-        priceCache: {
-            ...state.priceCache,
+        cache: {
+            ...state.cache,
             [period]: getPriceCache(res.data)
         }
     };

@@ -54,7 +54,7 @@ test('DATA_READ sets funds-related properties', t => {
             },
             { id: 'id-2', item: 'My fund 2', transactions: [] }
         ],
-        priceCache: {
+        cache: {
             [state.period]: {
                 startTime: 1000,
                 cacheTimes: [1, 2, 100, 183],
@@ -106,9 +106,9 @@ test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
     const result = reducer(state, action);
 
     t.is(result.items, state.items);
-    t.is(result.priceCache[state.period], state.priceCache[state.period]);
+    t.is(result.cache[state.period], state.cache[state.period]);
 
-    t.deepEqual(result.priceCache.month3, {
+    t.deepEqual(result.cache.month3, {
         startTime: 1430,
         cacheTimes: [2, 100, 183],
         prices: [
@@ -134,7 +134,7 @@ test('FUNDS_RECEIVED just sets the period, if the data already exist', t => {
     const result = reducer(state, action);
 
     t.is(result.items, state.items);
-    t.is(result.priceCache, state.priceCache);
+    t.is(result.cache, state.cache);
 
     t.is(result.period, 'month3');
 
