@@ -153,7 +153,7 @@ test('requestFundPeriodData handles errors', t => {
 test('requestStocksList requests stocks list', t => {
     t.is(1, 1);
 
-    const res = { isRes: true };
+    const res = { data: { isRes: true } };
 
     testSaga(requestStocksList)
         .next()
@@ -161,7 +161,7 @@ test('requestStocksList requests stocks list', t => {
         .next('some api key')
         .call(axios.get, `${API_PREFIX}/data/stocks`, { headers: { Authorization: 'some api key' } })
         .next(res)
-        .put(stocksListReceived(res))
+        .put(stocksListReceived(res.data))
         .next()
         .isDone();
 });

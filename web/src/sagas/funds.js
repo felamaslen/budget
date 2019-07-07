@@ -66,7 +66,7 @@ export function *requestStocksList() {
             }
         });
 
-        yield put(stocksListReceived(res));
+        yield put(stocksListReceived(res.data));
     } catch (err) {
         yield put(stocksListReceived(null));
     }
