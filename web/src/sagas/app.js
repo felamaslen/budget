@@ -2,6 +2,9 @@ import { eventChannel } from 'redux-saga';
 import { select, fork, take, takeLatest, call, put } from 'redux-saga/effects';
 import { debounce } from 'throttle-debounce';
 import axios from 'axios';
+import querystring from 'querystring';
+
+import { getFundHistoryQuery } from '~client/sagas/funds';
 
 import { windowResized } from '~client/actions/app';
 import { dataRead } from '~client/actions/api';
@@ -33,10 +36,11 @@ export function *watchEventEmitter(channelCreator) {
 }
 
 export function *fetchData() {
+    const query = yield call(getFundHistoryQuery);
     const apiKey = yield select(getApiKey);
 
     try {
-        const res = yield call(axios.get, `${API_PREFIX}/data/all`, {
+        const res = yield call(axios.get, `${API_PREFIX}/data/all?${querystring.stringify(query)}`, {
             headers: {
                 Authorization: apiKey
             }

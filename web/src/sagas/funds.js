@@ -16,6 +16,14 @@ import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
 import { DO_STOCKS_LIST } from '~client/constants/stocks';
 
+export function *getFundHistoryQuery(period = null) {
+    const nextPeriod = period || (yield select(getPeriod));
+
+    const periodMatch = getPeriodMatch(nextPeriod);
+
+    return { ...periodMatch, history: true };
+}
+
 export function *requestFundPeriodData({ period, fromCache }) {
     const nextPeriod = period || (yield select(getPeriod));
     if (fromCache) {
@@ -28,13 +36,11 @@ export function *requestFundPeriodData({ period, fromCache }) {
         }
     }
 
+    const query = yield call(getFundHistoryQuery, nextPeriod);
     const apiKey = yield select(getApiKey);
 
-    const periodMatch = getPeriodMatch(nextPeriod);
-    const query = querystring.stringify({ ...periodMatch, history: true });
-
     try {
-        const res = yield call(axios.get, `${API_PREFIX}/data/funds?${query}`, {
+        const res = yield call(axios.get, `${API_PREFIX}/data/funds?${querystring.stringify(query)}`, {
             headers: {
                 Authorization: apiKey
             }

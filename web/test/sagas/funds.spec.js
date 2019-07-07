@@ -8,6 +8,7 @@ import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
 import fundsSaga, {
+    getFundHistoryQuery,
     requestFundPeriodData,
     requestStocksList,
     requestStocksPrices
@@ -23,6 +24,20 @@ import { getStockPricesFromYahoo } from '~client/modules/finance';
 import { API_PREFIX } from '~client/constants/data';
 import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
+
+test('getFundHistoryQuery gets a URL query object to specify fund price history detail', t => {
+    t.is(1, 1);
+
+    testSaga(getFundHistoryQuery)
+        .next()
+        .select(getPeriod)
+        .next('year5')
+        .returns({
+            period: 'year',
+            length: '5',
+            history: true
+        });
+});
 
 test('requestFundPeriodData returns cached data', t => {
     t.is(1, 1);
@@ -47,6 +62,8 @@ test('requestFundPeriodData requests new data', t => {
         .next()
         .select(getFundsCache)
         .next({})
+        .call(getFundHistoryQuery, 'month5')
+        .next({ period: 'month', length: 5, history: true })
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=month&length=5&history=true', {
@@ -59,6 +76,8 @@ test('requestFundPeriodData requests new data', t => {
 
     testSaga(requestFundPeriodData, fundsRequested(false, 'month5'))
         .next()
+        .call(getFundHistoryQuery, 'month5')
+        .next({ period: 'month', length: 5, history: true })
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=month&length=5&history=true', {
@@ -81,6 +100,8 @@ test('requestFundPeriodData uses the current period by default', t => {
         .next()
         .select(getPeriod)
         .next('year5')
+        .call(getFundHistoryQuery, 'year5')
+        .next({ period: 'year', length: 5, history: true })
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=year&length=5&history=true', {
@@ -113,6 +134,8 @@ test('requestFundPeriodData handles errors', t => {
         .next()
         .select(getFundsCache)
         .next({})
+        .call(getFundHistoryQuery, 'year3')
+        .next({ period: 'year', length: 3, history: true })
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=year&length=3&history=true', {
