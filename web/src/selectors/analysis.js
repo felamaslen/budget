@@ -36,10 +36,7 @@ export const getBlocks = createSelector(getCost, getTreeVisible, (cost, treeVisi
 
 const getDeepArray = state => state.analysis.deep;
 
-export const getDeepBlocks = createSelector(getDeepArray, cost => cost &&
-    blockPacker(
-        cost.map(getSortedTree),
-        ANALYSIS_VIEW_WIDTH,
-        ANALYSIS_VIEW_HEIGHT
-    )
-);
+export const getDeepCost = createSelector(getDeepArray, cost => cost && cost.map(getSortedTree));
+
+export const getDeepBlocks = createSelector(getDeepCost, cost => cost &&
+    blockPacker(cost, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));
