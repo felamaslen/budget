@@ -65,7 +65,7 @@ export default function BlockBits({ blockBit, activeMain, activeSub, deep, onCli
                 [`block-${blockBit.name}`]: !deep
             })}
             style={style}
-            onClick={() => onClick(activeMain, blockBit.name)}
+            onClick={() => onClick(blockBit.name)}
         >
             {(blockBit.blocks || []).map((subBlock, key) => <BlockGroup
                 key={key}
