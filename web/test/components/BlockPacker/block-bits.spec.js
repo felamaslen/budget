@@ -18,8 +18,8 @@ const getSubBlock = memoize((customProps = {}) => {
             width: 90,
             height: 87
         },
-        activeSub: false,
-        activeBlock: [],
+        activeMain: null,
+        activeSub: null,
         onHover: () => null,
         ...customProps
     };
@@ -56,7 +56,7 @@ const getBlockGroup = memoize((customProps = {}) => {
     const props = {
         name: 'foo',
         value: 987,
-        activeSub: false,
+        activeSub: null,
         onHover: () => null,
         subBlock: {
             bits: [
@@ -106,9 +106,8 @@ const getBlockBits = memoize((customProps = {}) => {
             height: 13
         },
         page: 'page1',
-        activeMain: false,
-        activeSub: false,
-        activeBlock: [],
+        activeMain: null,
+        activeSub: null,
         onHover: () => null,
         onClick: () => null,
         ...customProps

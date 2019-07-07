@@ -46,9 +46,8 @@ const getOuterBlockGroup = memoize((customProps = {}) => {
                 }
             ]
         },
-        activeMain: true,
-        activeSub: false,
-        activeBlock: ['not_foo', 'not_bar'],
+        activeMain: 'not_foo',
+        activeSub: 'not_bar',
         onHover: () => null,
         onClick: () => null,
         ...customProps
@@ -152,7 +151,7 @@ const getBlocks = (customProps = {}) => {
                 ]
             }
         ],
-        activeBlock: null,
+        activeBlock: [null, null],
         page: 'page1',
         onClick: () => null,
         onHover: () => null,
@@ -228,7 +227,7 @@ test('<Blocks /> - active sub block', t => {
 
 test('<Blocks /> - deep prop', t => {
     const { container } = getBlocks({
-        deep: 'foo'
+        deepBlock: 'foo'
     });
 
     const [div] = container.childNodes;

@@ -51,6 +51,8 @@ export const testState = {
             ['foo2', [['foo2_bar2', 137650], ['foo2_bar1', 156842]]],
             ['foo1', [['foo1_bar1', 1642283]]]
         ],
+        deep: null,
+        deepBlock: null,
         saved: 67123
     },
     funds: {

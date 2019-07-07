@@ -15,7 +15,8 @@ import {
     getPage,
     getTreeVisible,
     getCost,
-    getBlocks
+    getBlocks,
+    getDeepBlocks
 } from '~client/selectors/analysis';
 
 import { timelineShape, costShape } from '~client/prop-types/page/analysis';
@@ -38,7 +39,8 @@ function PageAnalysis({
     page,
     description,
     treeVisible,
-    deepBlock,
+    deepBlockName,
+    deepBlocks,
     onRequest,
     toggleTreeItem,
     onBlockClick
@@ -78,9 +80,9 @@ function PageAnalysis({
                     onHover={onBlockHover}
                 />
                 <BlockPacker
-                    blocks={blocks}
+                    blocks={deepBlocks || blocks}
                     activeBlock={activeBlock}
-                    deep={deepBlock}
+                    deepBlock={deepBlockName}
                     onHover={onBlockHover}
                     onClick={onBlockClick}
                 />
@@ -98,7 +100,8 @@ PageAnalysis.propTypes = {
     page: PropTypes.number.isRequired,
     description: PropTypes.string,
     treeVisible: PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
-    deepBlock: PropTypes.string,
+    deepBlockName: PropTypes.string,
+    deepBlocks: blocksShape,
     onBlockClick: PropTypes.func.isRequired,
     onRequest: PropTypes.func.isRequired,
     toggleTreeItem: PropTypes.func.isRequired,
@@ -112,7 +115,8 @@ const mapStateToProps = state => ({
     grouping: getGrouping(state),
     page: getPage(state),
     description: state.analysis.description,
-    deepBlock: state.analysis.deepBlock,
+    deepBlockName: state.analysis.deepBlock,
+    deepBlocks: getDeepBlocks(state),
     treeVisible: getTreeVisible(state),
     timeline: state.analysis.timeline
 });

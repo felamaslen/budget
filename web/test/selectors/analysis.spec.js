@@ -6,7 +6,8 @@ import {
     getGrouping,
     getPage,
     getCost,
-    getBlocks
+    getBlocks,
+    getDeepBlocks
 } from '~client/selectors/analysis';
 import { blockPacker } from '~client/modules/block-packer';
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '~client/constants/analysis';
@@ -105,4 +106,46 @@ test('getBlocks excludes blocks which are not in the visible tree', t => {
             cost: testState.analysis.cost.filter(([name]) => name !== 'foo1')
         }
     }), ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));
+});
+
+test('getDeepBlocks gets a block-packed map of the state', t => {
+    const result = getDeepBlocks({
+        ...testState,
+        analysis: {
+            ...testState.analysis,
+            deepBlock: 'foo2_bar2',
+            deep: [
+                ['foo2_bar2_baz1', [
+                    ['foo2_bar2_baz1_bak1', 100],
+                    ['foo2_bar2_baz1_bak2', 130],
+                    ['foo2_bar2_baz1_bak3', 93]
+                ]],
+                ['foo2_bar2_baz2', [
+                    ['foo2_bar2_baz2_bak1', 30],
+                    ['foo2_bar2_baz2_bak2', 992]
+                ]]
+            ]
+        }
+    });
+
+    t.true(result.length > 0);
+    t.deepEqual(result, blockPacker([
+        {
+            name: 'foo2_bar2_baz1',
+            total: 100 + 130 + 93,
+            subTree: [
+                { name: 'foo2_bar2_baz1_bak1', total: 100 },
+                { name: 'foo2_bar2_baz1_bak2', total: 130 },
+                { name: 'foo2_bar2_baz1_bak3', total: 93 }
+            ]
+        },
+        {
+            name: 'foo2_bar2_baz2',
+            total: 30 + 992,
+            subTree: [
+                { name: 'foo2_bar2_baz2_bak1', total: 30 },
+                { name: 'foo2_bar2_baz2_bak2', total: 992 }
+            ]
+        }
+    ], ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));
 });

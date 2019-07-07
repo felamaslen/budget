@@ -2,15 +2,9 @@ import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { blockBitShape, subBlockShape, subBlockBitShape, activeBlockShape } from '~client/prop-types/block-packer';
+import { blockBitShape, subBlockShape, subBlockBitShape } from '~client/prop-types/block-packer';
 
-export function SubBlock({ name, subBlockBit, activeSub, activeBlock, onHover }) {
-    const [activeName, activeSubName] = activeBlock || [];
-
-    const active = activeSub && activeName === name && activeSubName === subBlockBit.name;
-
-    const className = classNames('sub-block', { active });
-
+export function SubBlock({ name, subBlockBit, activeMain, activeSub, onHover }) {
     const style = useMemo(() => ({
         width: subBlockBit.width,
         height: subBlockBit.height
@@ -19,7 +13,9 @@ export function SubBlock({ name, subBlockBit, activeSub, activeBlock, onHover })
     const onBlockHover = useCallback(() => onHover(name, subBlockBit.name), [onHover, name, subBlockBit.name]);
 
     return <div
-        className={className}
+        className={classNames('sub-block', {
+            active: activeMain === name && activeSub === subBlockBit.name
+        })}
         style={style}
         onTouchStart={onBlockHover}
         onMouseOver={onBlockHover}
@@ -30,8 +26,8 @@ SubBlock.propTypes = {
     name: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired,
     subBlockBit: subBlockBitShape,
-    activeSub: PropTypes.bool.isRequired,
-    activeBlock: activeBlockShape,
+    activeMain: PropTypes.string,
+    activeSub: PropTypes.string,
     onHover: PropTypes.func.isRequired
 };
 
@@ -56,7 +52,7 @@ BlockGroup.propTypes = {
     subBlock: subBlockShape
 };
 
-export default function BlockBits({ blockBit, activeMain, activeBlock, deep, onClick, ...props }) {
+export default function BlockBits({ blockBit, activeMain, activeSub, deep, onClick, ...props }) {
     const style = useMemo(() => ({
         width: blockBit.width,
         height: blockBit.height
@@ -65,15 +61,16 @@ export default function BlockBits({ blockBit, activeMain, activeBlock, deep, onC
     return (
         <div
             className={classNames('block', `block-${blockBit.color}`, {
-                active: activeMain && activeBlock[0] === blockBit.name,
+                active: activeMain === blockBit.name && !activeSub,
                 [`block-${blockBit.name}`]: !deep
             })}
             style={style}
-            onClick={() => onClick(activeBlock[0], blockBit.name)}
+            onClick={() => onClick(activeMain, blockBit.name)}
         >
             {(blockBit.blocks || []).map((subBlock, key) => <BlockGroup
                 key={key}
-                activeBlock={activeBlock}
+                activeMain={activeMain}
+                activeSub={activeSub}
                 name={blockBit.name}
                 value={blockBit.value}
                 subBlock={subBlock}
@@ -85,9 +82,8 @@ export default function BlockBits({ blockBit, activeMain, activeBlock, deep, onC
 
 BlockBits.propTypes = {
     blockBit: blockBitShape,
-    activeMain: PropTypes.bool.isRequired,
-    activeSub: PropTypes.bool.isRequired,
-    activeBlock: activeBlockShape,
+    activeMain: PropTypes.string,
+    activeSub: PropTypes.string,
     deep: PropTypes.string,
     onHover: PropTypes.func.isRequired,
     onClick: PropTypes.func.isRequired
