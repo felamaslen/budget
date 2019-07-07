@@ -66,7 +66,7 @@ const onBlockReceive = (state, { res }) => ({
 });
 
 const onTreeDisplayToggle = (state, { group }) => ({
-    treeVisible: { ...state.treeVisible, [group]: !state.treeVisible[group] }
+    treeVisible: { ...state.treeVisible, [group]: state.treeVisible[group] === false }
 });
 
 const onTreeHover = (state, { group, name }) => ({ activeGroup: group, activeBlock: name });

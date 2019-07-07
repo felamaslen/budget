@@ -192,7 +192,7 @@ test('ANALYSIS_TREE_DISPLAY_TOGGLED toggles treeVisible', t => {
     t.deepEqual(withBills.treeVisible, { bills: true, general: true });
 
     const withFood = reducer(state, treeItemDisplayToggled('food'));
-    t.deepEqual(withFood.treeVisible, { bills: false, general: true, food: true });
+    t.deepEqual(withFood.treeVisible, { bills: false, general: true, food: false });
 
     const withGeneral = reducer(state, treeItemDisplayToggled('general'));
     t.deepEqual(withGeneral.treeVisible, { bills: false, general: false });
