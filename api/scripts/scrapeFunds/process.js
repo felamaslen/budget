@@ -77,14 +77,14 @@ async function processScrape(config, flags, db, logger) {
             return 0;
         }
 
-        const currencyPrices = await getCurrencyPrices(config, logger);
-
         const rawData = await getRawData(config, logger, funds);
 
         if (holdings) {
             await scrapeFundHoldings(config, db, logger, funds, rawData);
         }
         if (prices) {
+            const currencyPrices = await getCurrencyPrices(config, logger);
+
             await scrapeFundPrices(config, db, logger, currencyPrices, funds, rawData);
         }
 
