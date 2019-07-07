@@ -4,7 +4,7 @@ import { arrayAverage } from '~client/modules/data';
 import { rgba } from '~client/modules/color';
 import { COLOR_LIGHT_GREY } from '~client/constants/colors';
 import { getSingleLinePath } from '~client/components/Graph/helpers';
-import { lineShape } from '~client/prop-types/graph';
+import { dataShape } from '~client/prop-types/graph';
 
 export default function AverageLine({ value, data, ...props }) {
     const averageLinePath = useMemo(() => {
@@ -12,16 +12,24 @@ export default function AverageLine({ value, data, ...props }) {
             return null;
         }
 
-        const averageData = data.reduce(({ last, points }, [xValue, yValue]) => {
-            const nextLast = last.slice(1 - value).concat([yValue]);
-            const average = arrayAverage(nextLast);
+        const [points] = data.reduce(([lastPoints, compareData], [xValue, yValue]) => {
+            const nextCompareData = compareData.slice(1 - value).concat([yValue]);
 
-            return { last: nextLast, points: points.concat([[xValue, average]]) };
-        }, { last: [], points: [] })
-            .points;
+            return [
+                lastPoints.concat([[xValue, arrayAverage(nextCompareData)]]),
+                nextCompareData
+            ];
+        }, [[], []]);
+
+        if (!points.length) {
+            return null;
+        }
 
         return getSingleLinePath({
-            ...props, data: averageData, smooth: true, fill: false
+            ...props,
+            data: points,
+            smooth: true,
+            fill: false
         });
     }, [props, value, data]);
 
@@ -41,5 +49,5 @@ export default function AverageLine({ value, data, ...props }) {
 
 AverageLine.propTypes = {
     value: PropTypes.number,
-    data: PropTypes.arrayOf(lineShape)
+    data: dataShape.isRequired
 };

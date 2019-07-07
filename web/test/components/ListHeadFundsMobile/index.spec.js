@@ -1,26 +1,26 @@
 import test from 'ava';
-import memoize from 'fast-memoize';
+import sinon from 'sinon';
 import { render, fireEvent } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
 import React from 'react';
 import '~client-test/browser';
 
-import { testState as state } from '~client-test/test_data/state';
-import ListHeadFundsMobile from '~client/containers/ListHeadFundsMobile';
-import { aFundsGraphPeriodChanged } from '~client/actions/graph.actions';
+import ListHeadFundsMobile from '~client/components/ListHeadFundsMobile';
 
-const getContainer = memoize(() => {
-    const store = createMockStore(state);
+const getContainer = (customProps = {}) => {
+    const props = {
+        totalCost: 400000,
+        cachedValue: {
+            value: 399978,
+            ageText: '6 months, three weeks ago'
+        },
+        onReloadPrices: () => null,
+        ...customProps
+    };
 
-    const { container } = render(
-        <Provider store={store}>
-            <ListHeadFundsMobile />
-        </Provider>
+    return render(
+        <ListHeadFundsMobile {...props} />
     );
-
-    return { store, container };
-});
+};
 
 test('rendering basic structure', t => {
     const { container } = getContainer();
@@ -44,15 +44,15 @@ test('meta', t => {
 });
 
 test('reloading prices on meta click', t => {
-    const { store, container } = getContainer();
+    const onReloadPrices = sinon.spy();
+    const { container } = getContainer({
+        onReloadPrices
+    });
 
-    const action = aFundsGraphPeriodChanged({ shortPeriod: 'period1', noCache: true });
-
-    t.false(store.isActionDispatched(action));
-
+    t.is(onReloadPrices.getCalls().length, 0);
     const { childNodes: [meta] } = container.childNodes[0];
     fireEvent.click(meta);
-    t.true(store.isActionDispatched(action));
+    t.is(onReloadPrices.getCalls().length, 1);
 });
 
 test('gain info', t => {

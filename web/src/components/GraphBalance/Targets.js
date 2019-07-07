@@ -49,7 +49,7 @@ export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
 
     return (
         <g className="savings-targets">
-            <rect x={48} y={70} width={100} height={targets.size * 22 + 4}
+            <rect x={48} y={70} width={100} height={targets.length * 22 + 4}
                 fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
             {tags}
             {arrows}

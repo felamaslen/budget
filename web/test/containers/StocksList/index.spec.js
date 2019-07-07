@@ -2,11 +2,11 @@ import test from 'ava';
 import '~client-test/browser';
 import sinon from 'sinon';
 import React from 'react';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
 import StocksList from '~client/containers/StocksList';
-import { aStocksListRequested } from '~client/actions/stocks-list.actions';
+import { stocksListRequested } from '~client/actions/stocks';
 
 const getContainer = (customProps = {}, customState = state => state) => {
     const state = customState({
@@ -90,7 +90,7 @@ test('requesting a stocks list when it renders', t => {
 
     const { store } = getContainer();
 
-    const action = aStocksListRequested();
+    const action = stocksListRequested();
 
     t.false(store.isActionDispatched(action));
 

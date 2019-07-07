@@ -59,7 +59,7 @@ export default function LineGraphDumb({
     const beforeLinesProc = useBeforeAfter(beforeLines, basicProps);
     const afterLinesProc = useBeforeAfter(afterLines, basicProps);
 
-    if (!lines.size) {
+    if (!lines.length) {
         return <Graph {...graphProps} />;
     }
 

@@ -1,32 +1,22 @@
 import test from 'ava';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
 import Root from '~client/containers/Root';
+import { testState } from '~client-test/test_data/state';
 
 const getContainer = (customProps = {}, customState = state => state) => {
     const state = customState({
-        user: {
+        ...testState,
+        login: {
+            ...testState.login,
             uid: '1'
         },
-        currentPage: 'general',
-        loading: false,
-        loadingApi: false,
-        errorMsg: [],
-        loginForm: {
-            inputStep: 0,
-            visible: false,
-            active: false,
-            values: []
-        },
-        modalDialog: {
-            active: false,
-            visible: false,
+        api: {
+            ...testState.api,
+            initialLoading: false,
             loading: false
-        },
-        edit: {
-            requestList: []
         }
     });
 

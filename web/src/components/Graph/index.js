@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import './style.scss';
 
-export default function Graph({
+const Graph = ({
     name,
     svgRef,
     width,
@@ -15,28 +15,24 @@ export default function Graph({
     before,
     after,
     children
-}) {
-    const className = classNames('graph-container', { [`graph-${name}`]: name });
-
-    return (
-        <div
-            ref={svgRef || null}
-            className={className}
-            {...outerProperties}
+}) => (
+    <div
+        ref={svgRef}
+        className={classNames('graph-container', { [`graph-${name}`]: name })}
+        {...outerProperties}
+    >
+        {before && before()}
+        <svg
+            className={svgClasses}
+            width={width}
+            height={height}
+            {...svgProperties}
         >
-            {before && before()}
-            <svg
-                className={svgClasses || ''}
-                width={width}
-                height={height}
-                {...svgProperties}>
-
-                {children || null}
-            </svg>
-            {after && after()}
-        </div>
-    );
-}
+            {children}
+        </svg>
+        {after && after()}
+    </div>
+);
 
 Graph.propTypes = {
     svgRef: PropTypes.object,
@@ -54,3 +50,15 @@ Graph.propTypes = {
         PropTypes.array
     ])
 };
+
+Graph.defaultProps = {
+    before: null,
+    after: null,
+    svgRef: null,
+    svgClasses: '',
+    outerProperties: {},
+    svgProperties: {},
+    children: null
+};
+
+export default Graph;
