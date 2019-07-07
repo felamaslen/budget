@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import { blockBitShape, subBlockShape, subBlockBitShape } from '~client/prop-types/block-packer';
 
-export function SubBlock({ name, subBlockBit, active, onHover }) {
+function SubBlockComponent({ name, subBlockBit, active, onHover }) {
     const style = useMemo(() => ({
         width: subBlockBit.width,
         height: subBlockBit.height
@@ -20,7 +20,7 @@ export function SubBlock({ name, subBlockBit, active, onHover }) {
     />;
 }
 
-SubBlock.propTypes = {
+SubBlockComponent.propTypes = {
     name: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired,
     subBlockBit: subBlockBitShape,
@@ -28,11 +28,13 @@ SubBlock.propTypes = {
     onHover: PropTypes.func.isRequired
 };
 
-export function BlockGroup({ subBlock, active, activeSub, ...props }) {
+export const SubBlock = React.memo(SubBlockComponent);
+
+function BlockGroupComponent({ subBlock, activeSub, ...props }) {
     const subBlockBits = subBlock.bits.map(subBlockBit => <SubBlock
         key={subBlockBit.name}
         subBlockBit={subBlockBit}
-        active={active && activeSub === subBlockBit.name}
+        active={activeSub === subBlockBit.name}
         {...props}
     />);
 
@@ -46,11 +48,12 @@ export function BlockGroup({ subBlock, active, activeSub, ...props }) {
     </div>;
 }
 
-BlockGroup.propTypes = {
+BlockGroupComponent.propTypes = {
     subBlock: subBlockShape,
-    active: PropTypes.bool,
     activeSub: PropTypes.string
 };
+
+export const BlockGroup = React.memo(BlockGroupComponent);
 
 function BlockBits({ blockBit, active, activeSub, deep, onHover, onClick }) {
     const style = useMemo(() => ({
@@ -69,7 +72,6 @@ function BlockBits({ blockBit, active, activeSub, deep, onHover, onClick }) {
         >
             {(blockBit.blocks || []).map(subBlock => <BlockGroup
                 key={subBlock.bits[0].name}
-                active={active}
                 activeSub={activeSub}
                 name={blockBit.name}
                 value={blockBit.value}

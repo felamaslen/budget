@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { blocksShape, blockShape } from '~client/prop-types/block-packer';
 import BlockBits from '~client/components/BlockPacker/block-bits';
 
-export function OuterBlockGroup({ block, activeMain, activeSub, ...props }) {
+function OuterBlockGroupComponent({ block, activeMain, activeSub, ...props }) {
     const style = useMemo(() => ({
         width: block.width,
         height: block.height
@@ -29,15 +29,19 @@ export function OuterBlockGroup({ block, activeMain, activeSub, ...props }) {
     );
 }
 
-OuterBlockGroup.propTypes = {
+OuterBlockGroupComponent.propTypes = {
     activeMain: PropTypes.string,
     activeSub: PropTypes.string,
     block: blockShape
 };
 
+export const OuterBlockGroup = React.memo(OuterBlockGroupComponent);
+
 const Blocks = ({
     blocks,
     deepBlock,
+    activeMain,
+    activeSub,
     ...props
 }) => (
     <div className={classNames('block-tree', {
@@ -49,6 +53,19 @@ const Blocks = ({
                 key={block.bits[0].name}
                 block={block}
                 deep={deepBlock}
+                activeMain={block.bits && block.bits.some(({ name }) => name === activeMain)
+                    ? activeMain
+                    : null
+                }
+                activeSub={block.bits && block.bits.some(({ name, blocks: subBlocks }) => name === activeMain &&
+                    subBlocks &&
+                    subBlocks.some(({ bits: subBits }) =>
+                        subBits && subBits.some(({ name: subName }) => subName === activeSub)
+                    )
+                )
+                    ? activeSub
+                    : null
+                }
                 {...props}
             />
         ))}
@@ -57,7 +74,9 @@ const Blocks = ({
 
 Blocks.propTypes = {
     blocks: blocksShape,
-    deepBlock: PropTypes.string
+    deepBlock: PropTypes.string,
+    activeMain: PropTypes.string,
+    activeSub: PropTypes.string
 };
 
 export default Blocks;
