@@ -2,7 +2,7 @@ import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import axios from 'axios';
-import debounce from 'debounce';
+import { debounce } from 'throttle-debounce';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
@@ -58,9 +58,9 @@ async function getCurrencies(symbols, source, onSuccess, onError, onComplete) {
     }
 }
 
-const getCurrenciesDebounced = debounce((...args) => {
+const getCurrenciesDebounced = debounce(100, (...args) => {
     getCurrencies(...args);
-}, 100);
+});
 
 function useCurrencyApi(symbols) {
     const [loading, setLoading] = useState(false);

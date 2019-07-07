@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import debounce from 'debounce';
+import { throttle } from 'throttle-debounce';
 
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
 import { genPixelCompute, pointVisible } from '../helpers';
@@ -69,7 +69,7 @@ export function useZoom({
     }, [dimensions.maxX, dimensions.minX, zoom.minX, zoom.maxX, zoomLines, zoomEffect]);
 
     const onWheel = useCallback(
-        debounce(evt => {
+        throttle(10, evt => {
             if (isMobile || !zoomEffect) {
                 return;
             }
@@ -100,7 +100,7 @@ export function useZoom({
                 ...newZoom
             }));
 
-        }, 10, true),
+        }),
         [isMobile, zoomEffect, hlPoint, graph, zoomLevel, getZoomedRange, calc, setCalc, lines, dimensions]
     );
 

@@ -1,6 +1,6 @@
 import { eventChannel } from 'redux-saga';
 import { select, fork, take, takeLatest, call, put } from 'redux-saga/effects';
-import debounce from 'debounce';
+import { debounce } from 'throttle-debounce';
 import axios from 'axios';
 
 import { windowResized } from '~client/actions/app';
@@ -14,7 +14,7 @@ import { API_PREFIX } from '~client/constants/data';
 
 export function windowResizeEventChannel() {
     return eventChannel(emit => {
-        const resizeHandler = debounce(() => emit(windowResized(window.innerWidth)), 50, true);
+        const resizeHandler = debounce(50, true, () => emit(windowResized(window.innerWidth)));
 
         window.addEventListener('resize', resizeHandler);
 

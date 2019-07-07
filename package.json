@@ -60,7 +60,6 @@
     "create-reducer-object": "^1.1.0",
     "cssnano": "^4.1.10",
     "dateformat": "^2.0.0",
-    "debounce": "^1.1.0",
     "deepmerge": "^2.0.1",
     "ejs": "^2.5.7",
     "express": "^4.15.4",
@@ -101,6 +100,7 @@
     "shortid": "^2.2.14",
     "swagger-jsdoc": "^3.2.9",
     "swagger-ui-dist": "^3.1.7",
+    "throttle-debounce": "^2.1.0",
     "winston": "^2.4.0"
   },
   "devDependencies": {

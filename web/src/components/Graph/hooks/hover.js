@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import debounce from 'debounce';
+import { throttle } from 'throttle-debounce';
 
 import { rgba } from '~client/modules/color';
 import { COLOR_GRAPH_TITLE } from '~client/constants/colors';
@@ -60,14 +60,14 @@ export function useHover({ lines, isMobile, calc, hoverEffect }) {
     }, [lines, isMobile, calc]);
 
     const onMouseMove = useMemo(() => {
-        const handler = debounce((pageX, pageY, currentTarget) => {
+        const handler = throttle(10, (pageX, pageY, currentTarget) => {
             const { left, top } = currentTarget.getBoundingClientRect();
 
             onHover({
                 posX: pageX - left,
                 posY: pageY - top
             });
-        }, 10, true);
+        });
 
         return ({ pageX, pageY, currentTarget }) => handler(pageX, pageY, currentTarget);
     }, [onHover]);

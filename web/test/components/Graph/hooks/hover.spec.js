@@ -1,4 +1,5 @@
 import test from 'ava';
+import sinon from 'sinon';
 import React from 'react';
 import '~client-test/browser';
 import { render, act } from '@testing-library/react';
@@ -81,6 +82,8 @@ test('hlPoint is initially null', t => {
 });
 
 test('onMouseMove on the top left corner highlights the first point on the second line', t => {
+    const clock = sinon.useFakeTimers();
+
     const [hlPointBefore, onMouseMove] = hookResult;
     t.is(hlPointBefore, null);
 
@@ -90,15 +93,20 @@ test('onMouseMove on the top left corner highlights the first point on the secon
         currentTarget
     });
 
+    clock.tick(1000);
     const [hlPointAfter] = hookResult;
     t.deepEqual(hlPointAfter, {
         valX: 0,
         valY: 19,
         color: 'blue'
     });
+
+    clock.restore();
 });
 
 test('onMouseMove on the bottom left corner highlights the first point on the first line', t => {
+    const clock = sinon.useFakeTimers();
+
     const [, onMouseMove] = hookResult;
 
     act(() => {
@@ -109,15 +117,20 @@ test('onMouseMove on the bottom left corner highlights the first point on the fi
         });
     });
 
+    clock.tick(1000);
     const [hlPointAfter] = hookResult;
     t.deepEqual(hlPointAfter, {
         valX: 0,
         valY: 0,
         color: 'red'
     });
+
+    clock.restore();
 });
 
 test('onMouseMove in the middle of the graph highlights the closest line point', t => {
+    const clock = sinon.useFakeTimers();
+
     const [, onMouseMove] = hookResult;
 
     onMouseMove({
@@ -126,12 +139,15 @@ test('onMouseMove in the middle of the graph highlights the closest line point',
         currentTarget
     });
 
+    clock.tick(1000);
     const [hlPointAfter] = hookResult;
     t.deepEqual(hlPointAfter, {
         valX: 2,
         valY: 4,
         color: 'red'
     });
+
+    clock.restore();
 });
 
 test('onMouseLeave resets hlPoint', t => {
