@@ -42,7 +42,7 @@ test('getPage gets the page', t => t.is(getPage({
     }
 }), 3));
 
-test('getCost returns the cost data mapped into subtrees', t => {
+test('getCost returns the cost data, ordered and mapped into subtrees', t => {
     const expectedResult = [
         {
             name: 'foo1',

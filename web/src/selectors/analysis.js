@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 
+import { sortByTotal } from '~client/modules/data';
 import { blockPacker } from '~client/modules/block-packer';
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '~client/constants/analysis';
 
@@ -14,13 +15,14 @@ export const getTreeVisible = state => state.analysis.treeVisible;
 const getCostArray = state => state.analysis.cost;
 const getSaved = state => state.analysis.saved;
 
-export const getCost = createSelector(getCostArray, getSaved, (cost, saved) => cost && cost
+export const getCost = createSelector(getCostArray, getSaved, (cost, saved) => cost && sortByTotal(cost
     .map(([name, subTree]) => ({
         name,
-        subTree: subTree.map(([item, total]) => ({ name: item, total })),
+        subTree: sortByTotal(subTree.map(([item, total]) => ({ name: item, total }))),
         total: subTree.reduce((sum, [, total]) => sum + total, 0)
     }))
-    .concat([{ name: 'saved', total: saved }]));
+    .concat([{ name: 'saved', total: saved }])
+));
 
 export const getBlocks = createSelector(getCost, getTreeVisible, (cost, treeVisible) => cost &&
     blockPacker(

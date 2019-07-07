@@ -159,6 +159,9 @@ export function arrayAverage(values, mode = null) {
     return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+export const sortByTotal = rows => rows.slice()
+    .sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
+
 export const limitTimeSeriesLength = (timeSeries, limit) => new Array(timeSeries.length)
     .fill(0)
     .reduce(last => {

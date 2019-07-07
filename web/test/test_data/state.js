@@ -48,8 +48,8 @@ export const testState = {
         ],
         treeVisible: {},
         cost: [
-            ['foo1', [['foo1_bar1', 1642283]]],
-            ['foo2', [['foo2_bar1', 156842], ['foo2_bar2', 137650]]]
+            ['foo2', [['foo2_bar2', 137650], ['foo2_bar1', 156842]]],
+            ['foo1', [['foo1_bar1', 1642283]]]
         ],
         saved: 67123
     },
