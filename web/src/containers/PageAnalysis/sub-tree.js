@@ -6,7 +6,7 @@ import { subTreeShape } from '~client/prop-types/page/analysis';
 
 export default function SubTree({ open, subTree, name, itemCost, onHover }) {
     const makeOnMouseOver = useCallback(
-        subItemName => () => onHover([name, subItemName]),
+        subItemName => () => onHover(name, subItemName),
         [onHover, name]
     );
 

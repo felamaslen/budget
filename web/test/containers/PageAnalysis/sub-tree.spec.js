@@ -1,10 +1,11 @@
 import ava from 'ava';
+import sinon from 'sinon';
 import ninos from 'ninos';
 const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
 
@@ -69,6 +70,24 @@ test('rendering each sub tree item', t => {
         t.is(pctItem.className, 'pct');
         t.is(pctItem.innerHTML, ` (${pct}%)`);
     });
+});
+
+test('onHover', t => {
+    const onHover = sinon.spy();
+
+    const { container } = getContainer({
+        onHover
+    });
+
+    t.is(onHover.getCalls().length, 0);
+
+    fireEvent.mouseOver(container.childNodes[0].childNodes[0]);
+    t.is(onHover.getCalls().length, 1);
+    t.deepEqual(onHover.getCalls()[0].args, ['foo', 'foo1']);
+
+    fireEvent.mouseOver(container.childNodes[0].childNodes[1]);
+    t.is(onHover.getCalls().length, 2);
+    t.deepEqual(onHover.getCalls()[1].args, ['foo', 'foo2']);
 });
 
 test('not rendering anything if not open', t => {

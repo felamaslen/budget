@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import { blockBitShape, subBlockShape, subBlockBitShape, activeBlockShape } from '~client/prop-types/block-packer';
 
-export function SubBlock({ name, value, subBlockBit, activeSub, activeBlock, onHover }) {
+export function SubBlock({ name, subBlockBit, activeSub, activeBlock, onHover }) {
     const [activeName, activeSubName] = activeBlock || [];
 
     const active = activeSub && activeName === name && activeSubName === subBlockBit.name;
@@ -16,7 +16,7 @@ export function SubBlock({ name, value, subBlockBit, activeSub, activeBlock, onH
         height: subBlockBit.height
     }), [subBlockBit]);
 
-    const onBlockHover = useCallback(() => onHover({ name, value }, subBlockBit), [onHover, name, value, subBlockBit]);
+    const onBlockHover = useCallback(() => onHover(name, subBlockBit.name), [onHover, name, subBlockBit.name]);
 
     return <div
         className={className}

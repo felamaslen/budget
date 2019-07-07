@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-expressions */
 import test from 'ava';
+import sinon from 'sinon';
 import '~client-test/browser';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import memoize from 'fast-memoize';
 import React from 'react';
 import BlockBits, { BlockGroup, SubBlock } from '~client/components/BlockPacker/block-bits';
@@ -36,6 +37,19 @@ test('<SubBlock /> - rendering basic structure', t => {
     t.is(div.className, 'sub-block');
     t.is(div.style.width, '90px');
     t.is(div.style.height, '87px');
+});
+
+test('<SubBlock /> - onHover', t => {
+    const onHover = sinon.spy();
+
+    const { container } = getSubBlock({
+        onHover
+    });
+
+    t.is(onHover.getCalls().length, 0);
+    fireEvent.mouseOver(container.childNodes[0]);
+    t.is(onHover.getCalls().length, 1);
+    t.deepEqual(onHover.getCalls()[0].args, ['foo', 'bar']);
 });
 
 const getBlockGroup = memoize((customProps = {}) => {
