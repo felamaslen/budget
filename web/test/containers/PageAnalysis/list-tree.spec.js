@@ -249,8 +249,6 @@ test('toggling items by the tick box', t => {
 
         fireEvent.click(input);
         t.is(toggleTreeItem.getCalls().length, 1);
-
-        const [set] = toggleTreeItem.getCalls()[0].args;
-        testToggler(t, set, name);
+        t.deepEqual(toggleTreeItem.getCalls()[0].args, [name]);
     });
 });

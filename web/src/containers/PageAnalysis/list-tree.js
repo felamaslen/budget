@@ -75,7 +75,6 @@ export default function ListTree({ cost, treeVisible, treeOpen, onHover, toggleT
         open: Boolean(treeOpen[name])
     }));
 
-    const onToggle = useToggle(toggleTreeItem);
     const onToggleExpand = useToggle(setTreeOpen);
 
     return (
@@ -86,7 +85,7 @@ export default function ListTree({ cost, treeVisible, treeOpen, onHover, toggleT
                     <ListTreeItem key={item.name}
                         item={item}
                         onHover={onHover}
-                        onToggle={onToggle}
+                        onToggle={toggleTreeItem}
                         onToggleExpand={onToggleExpand}
                     />
                 ))}
