@@ -86,3 +86,23 @@ test('getBlocks gets a block-packed map of the state', t => {
     t.true(result.length > 0);
     t.deepEqual(result, blockPacker(getCost(testState), ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));
 });
+
+test('getBlocks excludes blocks which are not in the visible tree', t => {
+    const result = getBlocks({
+        ...testState,
+        analysis: {
+            ...testState.analysis,
+            treeVisible: {
+                foo1: false
+            }
+        }
+    });
+
+    t.deepEqual(result, blockPacker(getCost({
+        ...testState,
+        analysis: {
+            ...testState.analysis,
+            cost: testState.analysis.cost.filter(([name]) => name !== 'foo1')
+        }
+    }), ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));
+});

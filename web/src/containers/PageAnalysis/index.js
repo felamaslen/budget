@@ -13,6 +13,7 @@ import {
     getPeriod,
     getGrouping,
     getPage,
+    getTreeVisible,
     getCost,
     getBlocks
 } from '~client/selectors/analysis';
@@ -112,7 +113,7 @@ const mapStateToProps = state => ({
     page: getPage(state),
     description: state.analysis.description,
     deepBlock: state.analysis.deepBlock,
-    treeVisible: state.analysis.treeVisible,
+    treeVisible: getTreeVisible(state),
     timeline: state.analysis.timeline
 });
 
