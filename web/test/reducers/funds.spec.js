@@ -58,10 +58,10 @@ test('DATA_READ sets funds-related properties', t => {
             [state.period]: {
                 startTime: 1000,
                 cacheTimes: [1, 2, 100, 183],
-                prices: [
-                    { id: 'id-1', startIndex: 1, values: [45, 45.6, 44.9] },
-                    { id: 'id-2', startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] }
-                ]
+                prices: {
+                    'id-1': { startIndex: 1, values: [45, 45.6, 44.9] },
+                    'id-2': { startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] }
+                }
             }
         }
     });
@@ -111,10 +111,10 @@ test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
     t.deepEqual(result.cache.month3, {
         startTime: 1430,
         cacheTimes: [2, 100, 183],
-        prices: [
-            { id: 'id-1', startIndex: 1, values: [45.6, 44.9] },
-            { id: 'id-2', startIndex: 0, values: [100.94, 101.4, 102.03] }
-        ]
+        prices: {
+            'id-1': { startIndex: 1, values: [45.6, 44.9] },
+            'id-2': { startIndex: 0, values: [100.94, 101.4, 102.03] }
+        }
     });
 
     t.is(result.period, 'month3');

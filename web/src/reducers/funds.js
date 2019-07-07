@@ -25,7 +25,7 @@ export const initialState = {
         [initialPeriod]: {
             startTime: 0,
             cacheTimes: [],
-            prices: []
+            prices: {}
         }
     }
 };
@@ -35,11 +35,10 @@ const onReadRows = onRead('funds');
 function getPriceCache(funds) {
     const { data, startTime, cacheTimes } = funds;
 
-    const prices = data.map(({ [DATA_KEY_ABBR.id]: id, pr, prStartIndex }) => ({
-        id,
-        startIndex: prStartIndex,
-        values: pr
-    }));
+    const prices = data.reduce((last, { [DATA_KEY_ABBR.id]: id, pr, prStartIndex }) => ({
+        ...last,
+        [id]: { startIndex: prStartIndex, values: pr }
+    }), {});
 
     return {
         startTime,
