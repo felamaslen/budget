@@ -175,7 +175,7 @@ const testToggler = (t, toggler, name) => {
     t.deepEqual(toggler({
         somethingElse: true
     }), {
-        [name]: false,
+        [name]: true,
         somethingElse: true
     });
 };

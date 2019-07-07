@@ -60,7 +60,7 @@ ListTreeItem.propTypes = {
 
 const useToggle = onToggle => useCallback(name => onToggle(last => ({
     ...last,
-    [name]: last[name] === false
+    [name]: !last[name]
 })), [onToggle]);
 
 export default function ListTree({ cost, treeVisible, treeOpen, onHover, toggleTreeItem, setTreeOpen }) {
