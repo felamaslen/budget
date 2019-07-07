@@ -157,6 +157,7 @@
 // desktop
 @media screen and (min-width: $width-page-mobile) {
     .page-analysis {
+        min-height: 0;
         flex-flow: column;
 
         .upper {
