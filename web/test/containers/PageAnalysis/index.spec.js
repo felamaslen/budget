@@ -80,12 +80,9 @@ test('block view', t => {
 test('not rendering a timeline if there is not one present', t => {
     const { container } = getContainer({}, state => ({
         ...state,
-        other: {
-            ...state.other,
-            analysis: {
-                ...state.other.analysis,
-                timeline: null
-            }
+        analysis: {
+            ...state.analysis,
+            timeline: null
         }
     }));
 
