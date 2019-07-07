@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { blocksShape, blockShape, activeBlockShape } from '~client/prop-types/block-packer';
+import { blocksShape, blockShape } from '~client/prop-types/block-packer';
 import BlockBits from '~client/components/BlockPacker/block-bits';
 
 export function OuterBlockGroup({ block, activeMain, activeSub, ...props }) {
@@ -17,8 +17,11 @@ export function OuterBlockGroup({ block, activeMain, activeSub, ...props }) {
                 <BlockBits
                     key={blockBit.name}
                     blockBit={blockBit}
-                    activeMain={activeMain}
-                    activeSub={activeSub}
+                    active={activeMain === blockBit.name}
+                    activeSub={activeMain === blockBit.name
+                        ? activeSub
+                        : null
+                    }
                     {...props}
                 />
             ))}
@@ -27,12 +30,16 @@ export function OuterBlockGroup({ block, activeMain, activeSub, ...props }) {
 }
 
 OuterBlockGroup.propTypes = {
-    block: blockShape,
     activeMain: PropTypes.string,
-    activeSub: PropTypes.string
+    activeSub: PropTypes.string,
+    block: blockShape
 };
 
-const Blocks = ({ blocks, activeBlock: [activeMain, activeSub], deepBlock, ...props }) => (
+const Blocks = ({
+    blocks,
+    deepBlock,
+    ...props
+}) => (
     <div className={classNames('block-tree', {
         'block-tree-deep': deepBlock,
         [`block-tree-${deepBlock}`]: deepBlock
@@ -41,8 +48,6 @@ const Blocks = ({ blocks, activeBlock: [activeMain, activeSub], deepBlock, ...pr
             <OuterBlockGroup
                 key={block.bits[0].name}
                 block={block}
-                activeMain={activeMain}
-                activeSub={activeSub}
                 deep={deepBlock}
                 {...props}
             />
@@ -52,7 +57,6 @@ const Blocks = ({ blocks, activeBlock: [activeMain, activeSub], deepBlock, ...pr
 
 Blocks.propTypes = {
     blocks: blocksShape,
-    activeBlock: activeBlockShape,
     deepBlock: PropTypes.string
 };
 

@@ -58,7 +58,8 @@ const getBlockPacker = memoize((customProps = {}) => {
                 ]
             }
         ],
-        activeBlock: ['not_foo', 'not_bar'],
+        activeMain: 'not_foo',
+        activeSub: 'not_bar',
         deepBlock: 'foo',
         status: 'bar',
         onClick: () => null,

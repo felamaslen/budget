@@ -63,7 +63,7 @@ const useToggle = onToggle => useCallback(name => onToggle(last => ({
     [name]: !last[name]
 })), [onToggle]);
 
-export default function ListTree({ cost, treeVisible, treeOpen, onHover, toggleTreeItem, setTreeOpen }) {
+function ListTree({ cost, treeVisible, treeOpen, onHover, toggleTreeItem, setTreeOpen }) {
     const costTotal = cost.reduce((sum, { total }) => sum + total, 0);
 
     const costPct = cost.map(({ name, total, subTree }) => ({
@@ -102,3 +102,5 @@ ListTree.propTypes = {
     setTreeOpen: PropTypes.func.isRequired,
     onHover: PropTypes.func.isRequired
 };
+
+export default React.memo(ListTree);

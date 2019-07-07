@@ -151,7 +151,8 @@ const getBlocks = (customProps = {}) => {
                 ]
             }
         ],
-        activeBlock: [null, null],
+        activeMain: null,
+        activeSub: null,
         page: 'page1',
         onClick: () => null,
         onHover: () => null,
@@ -190,7 +191,7 @@ test('<Blocks /> - list of blocks', t => {
 
 test('<Blocks /> - active main block', t => {
     const { container } = getBlocks({
-        activeBlock: ['foo']
+        activeMain: 'foo'
     });
 
     const [div] = container.childNodes;
@@ -207,7 +208,8 @@ test('<Blocks /> - active main block', t => {
 
 test('<Blocks /> - active sub block', t => {
     const { container } = getBlocks({
-        activeBlock: ['bar', 'bar1']
+        activeMain: 'bar',
+        activeSub: 'bar1'
     });
 
     const [div] = container.childNodes;

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-import { blocksShape, activeBlockShape } from '~client/prop-types/block-packer';
+import { blocksShape } from '~client/prop-types/block-packer';
 import Blocks from '~client/components/BlockPacker/blocks';
 
 import './style.scss';
@@ -23,9 +23,6 @@ export default function BlockPacker({ status, onHover, ...props }) {
 
 BlockPacker.propTypes = {
     blocks: blocksShape,
-    activeBlock: activeBlockShape,
-    deep: PropTypes.string,
     status: PropTypes.string,
-    onClick: PropTypes.func.isRequired,
     onHover: PropTypes.func.isRequired
 };

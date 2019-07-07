@@ -50,4 +50,4 @@ Upper.propTypes = {
     onRequest: PropTypes.func.isRequired
 };
 
-export default Upper;
+export default React.memo(Upper);

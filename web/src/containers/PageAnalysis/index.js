@@ -100,7 +100,8 @@ function PageAnalysis({
                 />
                 <BlockPacker
                     blocks={deepBlocks || blocks}
-                    activeBlock={activeBlock}
+                    activeMain={activeBlock[0]}
+                    activeSub={activeBlock[1]}
                     deepBlock={deepBlockName}
                     onHover={onBlockHover}
                     onClick={onBlockClick}
