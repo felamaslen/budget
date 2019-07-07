@@ -7,7 +7,7 @@ const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 
 const rB = 0.1;
 
-export default function Timeline({ data }) {
+function Timeline({ data }) {
     const sums = useMemo(() => data.map(row => row.reduce((sum, value) => sum + value, 0)), [data]);
     const getSumScore = useMemo(() => {
         const range = sums.reduce((max, sum) => Math.max(max, sum), -Infinity);
@@ -40,3 +40,5 @@ export default function Timeline({ data }) {
 Timeline.propTypes = {
     data: timelineShape
 };
+
+export default React.memo(Timeline);
