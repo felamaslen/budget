@@ -335,9 +335,14 @@ test('limitTimeSeriesLength filters time series according to a least-distance al
     ]);
 });
 
-test('randnBm returning a Gaussian-incremented value from two random numbers', t => {
-    t.is(randnBm(0.13, 0.87), 1.382792212427032);
-    t.is(randnBm(0.83, 0.876), 0.43436275519719214);
+test('randnBm returns a Gaussian-incremented value from two random numbers', t => {
+    let randomIndex = 0;
+    const testRandoms = [0.36123, 0.96951];
+    const stub = sinon.stub(Math, 'random').callsFake(() => testRandoms[(randomIndex++) % 2]);
+
+    t.is(randnBm(), Math.sqrt(-2 * Math.log(0.36123)) * Math.cos(2 * Math.PI * 0.96951));
+
+    stub.restore();
 });
 
 test('getValueFromTransmit returns "date" as DateTime', t => {

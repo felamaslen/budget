@@ -182,17 +182,7 @@ export const limitTimeSeriesLength = (timeSeries, limit) => new Array(timeSeries
             .concat(last.slice(closestIndex + 1));
     }, timeSeries);
 
-const testableRandom = (key = 0) => {
-    if (process.env.NODE_ENV === 'test') {
-        return (0.36123 * (key + 1)) % 1;
-    }
-
-    return Math.random();
-};
-
-export function randnBm(rand1 = testableRandom(0), rand2 = testableRandom(1)) {
-    return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
-}
+export const randnBm = () => Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
 
 export function getValueFromTransmit(dataType, value) {
     if (dataType === 'date') {
