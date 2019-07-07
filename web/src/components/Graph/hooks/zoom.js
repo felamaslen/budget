@@ -28,25 +28,14 @@ export function useZoom({
         setZoomLevel(0);
     }, [dimensions]);
 
-    const zoomLines = useCallback((newMinX, newMaxX) => lines.map(line => {
-        const data = line.get('data');
-
-        return line.set('data', data.filter((point, index) => {
-            if (pointVisible(point.get(0), newMinX, newMaxX)) {
-                return true;
-            }
-            if (index < data.size - 1 &&
-                pointVisible(data.getIn([index + 1, 0]), newMinX, newMaxX)) {
-                return true;
-            }
-            if (index > 0 &&
-                pointVisible(data.getIn([index - 1, 0]), newMinX, newMaxX)) {
-                return true;
-            }
-
-            return false;
-        }));
-    }), [lines]);
+    const zoomLines = useCallback((newMinX, newMaxX) => lines.map(({ data, ...line }) => ({
+        data: data.filter(([xValue], index) =>
+            pointVisible(xValue, newMinX, newMaxX) ||
+            (index < data.length - 1 && pointVisible(data[index + 1][0], newMinX, newMaxX)) ||
+            (index > 0 && pointVisible(data[index - 1][0], newMinX, newMaxX))
+        ),
+        ...line
+    })), [lines]);
 
     const getZoomedRange = useCallback((position, newZoomLevel) => {
         const range = dimensions.maxX - dimensions.minX;
