@@ -1,35 +1,19 @@
 import test from 'ava';
 import '~client-test/browser';
 import { render } from '@testing-library/react';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
 import React from 'react';
-import SuggestionsList from '~client/containers/Editable/suggestions-list';
+import SuggestionsList from '~client/components/Editable/suggestions-list';
 
 const getContainer = (customProps = {}) => {
-    const state = {
-        editSuggestions: {
-            list: ['foo', 'bar'],
-            active: 1
-        }
-    };
-
-    const store = createMockStore(state);
-
     const props = {
-        page: 'food',
-        row: 3,
-        col: 2,
+        suggestions: {
+            list: ['foo', 'bar'],
+            active: 'bar'
+        },
         ...customProps
     };
 
-    const utils = render(
-        <Provider store={store}>
-            <SuggestionsList {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<SuggestionsList {...props} />);
 };
 
 test('list of suggestions', t => {
