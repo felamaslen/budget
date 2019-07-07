@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -18,6 +18,8 @@ import {
     getBlocks,
     getDeepBlocks
 } from '~client/selectors/analysis';
+
+import { formatCurrency, capitalise } from '~client/modules/format';
 
 import { timelineShape, costShape } from '~client/prop-types/page/analysis';
 import { blocksShape } from '~client/prop-types/block-packer';
@@ -56,6 +58,23 @@ function PageAnalysis({
         }
     }, [cost, onRequest]);
 
+    const status = useMemo(() => {
+        const [activeMain, activeSub] = activeBlock;
+
+        if (!(cost && activeMain)) {
+            return '';
+        }
+
+        const main = cost.find(({ name }) => name === activeMain);
+        if (activeSub) {
+            const { total } = main.subTree.find(({ name }) => name === activeSub);
+
+            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
+        }
+
+        return `${capitalise(activeMain)} (${formatCurrency(main.total, { raw: true })})`;
+    }, [cost, activeBlock]);
+
     if (!cost) {
         return null;
     }
@@ -85,6 +104,7 @@ function PageAnalysis({
                     deepBlock={deepBlockName}
                     onHover={onBlockHover}
                     onClick={onBlockClick}
+                    status={status}
                 />
             </div>
         </Page>
