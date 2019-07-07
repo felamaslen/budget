@@ -54,13 +54,13 @@ function makeGetFakeStockPrices() {
             const existsIndex = last.findIndex(({ code: haveCode }) => haveCode === code);
             if (existsIndex === -1) {
                 const open = Number((1000 * Math.random()).toFixed(2));
-                const close = open + randnBm() * 0.02;
+                const close = open * (1 + randnBm() * 0.002);
 
                 return last.concat([{ code, open, close }]);
             }
 
-            const open = last[existsIndex].close + randnBm() * 0.01;
-            const close = open + randnBm() * 0.02;
+            const open = last[existsIndex].close * (1 + randnBm() * 0.001);
+            const close = open * (1 + randnBm() * 0.002);
 
             return replaceAtIndex(last, existsIndex, { code, open, close });
         }, prices);
