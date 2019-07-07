@@ -5,6 +5,7 @@ import shortid from 'shortid';
 
 import '~client-test/browser';
 import { testSaga } from 'redux-saga-test-plan';
+import { debounce } from 'redux-saga/effects';
 import axios from 'axios';
 
 import fundsSaga, {
@@ -239,7 +240,7 @@ test('fundsSaga forks other sagas', t => {
         .next()
         .takeLatest(STOCKS_LIST_REQUESTED, requestStocksList)
         .next()
-        .takeLatest(STOCKS_PRICES_REQUESTED, requestStocksPrices)
+        .is(debounce(100, STOCKS_PRICES_REQUESTED, requestStocksPrices))
         .next()
         .isDone();
 });

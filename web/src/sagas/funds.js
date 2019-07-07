@@ -1,4 +1,4 @@
-import { select, takeLatest, call, put } from 'redux-saga/effects';
+import { debounce, select, takeLatest, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 import querystring from 'querystring';
 
@@ -90,5 +90,5 @@ export function *requestStocksPrices() {
 export default function *fundsSaga() {
     yield takeLatest(FUNDS_REQUESTED, requestFundPeriodData);
     yield takeLatest(STOCKS_LIST_REQUESTED, requestStocksList);
-    yield takeLatest(STOCKS_PRICES_REQUESTED, requestStocksPrices);
+    yield debounce(100, STOCKS_PRICES_REQUESTED, requestStocksPrices);
 }
