@@ -70,6 +70,16 @@ test('getCost returns the cost data mapped into subtrees', t => {
     t.deepEqual(result, expectedResult);
 });
 
+test('getCost doesn\'t throw an error if cost is null', t => {
+    t.notThrows(() => getCost({
+        ...testState,
+        analysis: {
+            ...testState.analysis,
+            cost: null
+        }
+    }));
+});
+
 test('getBlocks gets a block-packed map of the state', t => {
     const result = getBlocks(testState);
 

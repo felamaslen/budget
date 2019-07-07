@@ -12,7 +12,7 @@ export const getPage = state => state.analysis.page;
 const getCostArray = state => state.analysis.cost;
 const getSaved = state => state.analysis.saved;
 
-export const getCost = createSelector(getCostArray, getSaved, (cost, saved) => cost
+export const getCost = createSelector(getCostArray, getSaved, (cost, saved) => cost && cost
     .map(([name, subTree]) => ({
         name,
         subTree: subTree.map(([item, total]) => ({ name: item, total })),
@@ -20,4 +20,4 @@ export const getCost = createSelector(getCostArray, getSaved, (cost, saved) => c
     }))
     .concat([{ name: 'Saved', total: saved }]));
 
-export const getBlocks = createSelector(getCost, cost => blockPacker(cost, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));
+export const getBlocks = createSelector(getCost, cost => cost && blockPacker(cost, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT));

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -46,6 +46,16 @@ function PageAnalysis({
     const onBlockHover = useCallback((main, deep = null) => setActiveBlock([main, deep]), []);
 
     const [treeOpen, setTreeOpen] = useState({});
+
+    useEffect(() => {
+        if (!cost) {
+            onRequest();
+        }
+    }, [cost, onRequest]);
+
+    if (!cost) {
+        return null;
+    }
 
     return (
         <Page page="analysis">

@@ -93,3 +93,16 @@ test('not rendering a timeline if there is not one present', t => {
     t.notRegex(child0.className, /timeline/);
     t.notRegex(child1.className, /timeline/);
 });
+
+test('nothing is rendered if the page hasn\'t loaded', t => {
+    const { container } = getContainer({}, state => ({
+        ...state,
+        analysis: {
+            ...state.analysis,
+            cost: null,
+            saved: null
+        }
+    }));
+
+    t.is(container.childNodes.length, 0);
+});
