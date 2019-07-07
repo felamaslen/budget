@@ -26,7 +26,6 @@ import {
     getAddDefaultValues,
     sortRowsByDate
 } from '~client/modules/data';
-import { dateInput } from '~client/modules/date';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
 
 let envBefore = null;
@@ -249,10 +248,18 @@ test('getSold determines if a transactions list represents a holding which is fu
     t.false(isSold(modifyTransaction(transactionsList, 3, { units: -1238 })));
 });
 
-test('dataEquals compares YMDs', t => {
-    t.is(dataEquals(dateInput('1/9/17'), dateInput('1/9/17')), true);
-    t.is(dataEquals(dateInput('1/9/17'), dateInput('2/9/17')), false);
+test('dataEquals compares DateTime objects', t => {
+    t.true(dataEquals(
+        DateTime.fromObject({ year: 2017, month: 9, day: 1 }),
+        DateTime.fromObject({ year: 2017, month: 9, day: 1 })
+    ));
+
+    t.false(dataEquals(
+        DateTime.fromObject({ year: 2017, month: 9, day: 1 }),
+        DateTime.fromObject({ year: 2017, month: 9, day: 2 })
+    ));
 });
+
 test('dataEquals compares transactions lists', t => {
     const testList1 = getTransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
     const testList2 = getTransactionsList([{ date: '2017-09-02', units: 1, cost: 1 }]);
@@ -463,15 +470,15 @@ test('sortRowsByDate sorts rows by date', t => {
     const rows = [
         {
             id: '1',
-            cols: [dateInput('11/10/17'), 'foo1', 'bar1', 3]
+            cols: [DateTime.fromObject({ year: 2017, month: 10, day: 11 }), 'foo1', 'bar1', 3]
         },
         {
             id: '4',
-            cols: [dateInput('10/10/17'), 'foo4', 'bar4', 1]
+            cols: [DateTime.fromObject({ year: 2017, month: 10, day: 10 }), 'foo4', 'bar4', 1]
         },
         {
             id: '2',
-            cols: [dateInput('11/10/17'), 'foo2', 'bar2', 5]
+            cols: [DateTime.fromObject({ year: 2017, month: 10, day: 11 }), 'foo2', 'bar2', 5]
         },
         {
             id: '3',
