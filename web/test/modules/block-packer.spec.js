@@ -1,4 +1,5 @@
 import test from 'ava';
+import permutation from 'array-permutation';
 
 import { blockData } from '~client-test/test_data/blocks';
 import { blockPacker } from '~client/modules/block-packer';
@@ -152,7 +153,7 @@ test('creating a block list from block data', t => {
                 {
                     width: '100%',
                     height: '100%',
-                    name: 'foo3',
+                    name: 'foo4',
                     color: 5,
                     value: 79231,
                     blocks: [
@@ -213,7 +214,7 @@ test('creating a block list from block data', t => {
                 {
                     width: '100%',
                     height: '100%',
-                    name: 'foo4',
+                    name: 'foo3',
                     color: 6,
                     value: 49760,
                     blocks: [
@@ -261,4 +262,22 @@ test('creating a block list from block data', t => {
             ]
         }
     ]);
+});
+
+test('blocks are sorted by size, largest first', t => {
+    const [foo1, foo2, foo3, foo4] = blockData;
+
+    // foo1 > foo2 > foo4 > foo3
+    const ordered = [foo1, foo2, foo4, foo3];
+
+    const width = 640;
+    const height = 480;
+
+    const args = [width, height];
+
+    const permutations = permutation(blockData);
+
+    for (const perm of permutations) {
+        t.deepEqual(blockPacker(perm, ...args), blockPacker(ordered, ...args));
+    }
 });

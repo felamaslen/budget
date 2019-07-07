@@ -203,10 +203,13 @@ const withTotals = rows => rows.map(row => ({ ...row, total: rowTotal(row) }));
 
 const withPositiveTotals = rows => rows.filter(({ total }) => total > 0);
 
+const sorted = rows => rows.sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
+
 export function blockPacker(rows, width, height) {
     const data = compose(
         withTotals,
-        withPositiveTotals
+        withPositiveTotals,
+        sorted
     )(rows);
 
     const colorOffset = data.reduce((sum, { total }) => sum + (total & 1), 0);

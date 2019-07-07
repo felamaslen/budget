@@ -53,6 +53,23 @@ export const blockData = [
         name: 'foo3',
         subTree: [
             {
+                name: 'foo4_bar1',
+                total: 40100
+            },
+            {
+                name: 'foo4_bar2',
+                total: 5080
+            },
+            {
+                name: 'foo4_bar3',
+                total: 4580
+            }
+        ]
+    },
+    {
+        name: 'foo4',
+        subTree: [
+            {
                 name: 'foo3_bar1',
                 total: 27941
             },
@@ -67,23 +84,6 @@ export const blockData = [
             {
                 name: 'foo3_bar4',
                 total: 14495
-            }
-        ]
-    },
-    {
-        name: 'foo4',
-        subTree: [
-            {
-                name: 'foo4_bar1',
-                total: 40100
-            },
-            {
-                name: 'foo4_bar2',
-                total: 5080
-            },
-            {
-                name: 'foo4_bar3',
-                total: 4580
             }
         ]
     }

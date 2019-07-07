@@ -114,6 +114,7 @@
     "@babel/register": "^7.0.0",
     "@epegzz/sass-vars-loader": "^3.3.1",
     "@testing-library/react": "^8.0.4",
+    "array-permutation": "^0.2.0",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
