@@ -72,7 +72,7 @@ export default function ListTree({ cost, treeVisible, treeOpen, onHover, toggleT
         subTree,
         pct: 100 * total / costTotal,
         visible: !(treeVisible[name] === false),
-        open: !(treeOpen[name] === false)
+        open: Boolean(treeOpen[name])
     }));
 
     const onToggle = useToggle(toggleTreeItem);

@@ -69,7 +69,7 @@ const bodyTestCases = [
     { name: 'foo2', visible: false, open: false, cost: '0.04', pct: '16.7' },
     { name: 'foo3', visible: true, open: false, cost: '0.03', pct: '12.5' },
     { name: 'foo4', visible: true, open: true, cost: '0.06', pct: '25.0' },
-    { name: 'foo5', visible: true, open: true, cost: '0.10', pct: '41.7' }
+    { name: 'foo5', visible: true, open: false, cost: '0.10', pct: '41.7' }
 ];
 
 test('list tree body - basic structure', t => {
