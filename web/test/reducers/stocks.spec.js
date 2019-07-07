@@ -73,6 +73,40 @@ test('STOCKS_LIST_RECEIVED sets stocks list', t => {
     t.is(result.lastPriceUpdate, null);
 });
 
+test('STOCKS_LIST_RECEIVED adds duplicate stocks together', t => {
+    const state = {
+        shares: [],
+        loading: true
+    };
+
+    const action = stocksListReceived({
+        data: {
+            stocks: [
+                ['HKG:0700', 'TENCENT HLDGS', 3],
+                ['HKG:0700', 'Tencent Holdings', 5]
+            ],
+            total: 11
+        }
+    });
+
+    const result = reducer(state, action);
+
+    t.deepEqual(result.shares, [
+        {
+            code: 'HKG:0700',
+            name: 'TENCENT HLDGS',
+            weight: 8 / 11,
+            gain: 0,
+            price: null,
+            up: false,
+            down: false
+        }
+    ]);
+
+    t.is(result.loading, false);
+    t.is(result.lastPriceUpdate, null);
+});
+
 test('STOCKS_PRICES_RECEIVED sets stock prices', t => {
     const now = new Date('2019-07-02T19:13:32+01:00');
 

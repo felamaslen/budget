@@ -1,6 +1,6 @@
 import { createReducerObject } from 'create-reducer-object';
 
-import { limitTimeSeriesLength } from '~client/modules/data';
+import { replaceAtIndex, limitTimeSeriesLength } from '~client/modules/data';
 
 import {
     STOCKS_LIST_REQUESTED,
@@ -14,7 +14,7 @@ export const initialState = {
     loading: false,
     indices: Object.keys(STOCK_INDICES).map(code => ({
         code,
-        name: STOCK_INDICES[code].name,
+        name: STOCK_INDICES[code],
         gain: 0,
         up: false,
         down: false
@@ -27,15 +27,25 @@ export const initialState = {
 const onStocksList = (state, { res: { data: { stocks, total } } }) => ({
     loading: false,
     lastPriceUpdate: null,
-    shares: stocks.map(([code, name, weight]) => ({
-        code,
-        name,
-        weight: weight / total,
-        gain: 0,
-        price: null,
-        up: false,
-        down: false
-    }))
+    shares: stocks.reduce((last, [code, name, weight]) => {
+        const codeIndex = last.findIndex(({ code: lastCode }) => lastCode === code);
+        if (codeIndex === -1) {
+            return last.concat([{
+                code,
+                name,
+                weight: weight / total,
+                gain: 0,
+                price: null,
+                up: false,
+                down: false
+            }]);
+        }
+
+        return replaceAtIndex(last, codeIndex, value => ({
+            ...value,
+            weight: value.weight + weight / total
+        }), true);
+    }, [])
 });
 
 const updateStock = prices => ({ code, gain, ...rest }) => {
