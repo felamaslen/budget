@@ -4,7 +4,7 @@ import { Route, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { getApiKey } from '~client/selectors/app';
+import { getApiKey } from '~client/selectors/api';
 import { getRowDates, getProcessedCost } from '~client/selectors/overview';
 import { useCrud } from '~client/hooks/api';
 
@@ -78,7 +78,7 @@ function NetWorth({ rowDates, cost, apiKey }) {
                         page={page}
                         setPage={setPage}
                         numPages={numPages}
-                        spending={cost.get('spending')}
+                        spending={cost.spending}
                         rowDates={rowDates}
                         categories={categories}
                         subcategories={subcategories}

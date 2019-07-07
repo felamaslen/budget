@@ -45,7 +45,7 @@ export default function NetWorthView({ rowDates, spending, data, categories, sub
         let spend = 0;
         const rowIndex = netWorthDateToRowIndex(row.dateIso);
         if (rowIndex !== -1) {
-            spend = spending.get(rowIndex);
+            spend = spending[rowIndex];
         }
 
         return { ...row, spend };
