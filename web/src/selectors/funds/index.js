@@ -23,7 +23,7 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
 
 const getFundCacheAge = createSelector(getNow, getCurrentFundsCache, (now, cache) => {
     if (!cache) {
-        return null;
+        return '';
     }
 
     const { startTime, cacheTimes } = cache;
@@ -32,7 +32,7 @@ const getFundCacheAge = createSelector(getNow, getCurrentFundsCache, (now, cache
 });
 
 const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (rows, cache) => {
-    if (!rows) {
+    if (!(rows && cache)) {
         return 0;
     }
 

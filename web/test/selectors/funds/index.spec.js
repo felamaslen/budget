@@ -22,6 +22,19 @@ test('getFundsCachedValue gets an age text and value', t => {
     t.deepEqual(getFundsCachedValue(state), { value: expectedValue, ageText: expectedAgeText });
 });
 
+test('getFundsCachedValue returns a default value if there are no data', t => {
+    t.deepEqual(getFundsCachedValue({
+        ...state,
+        funds: {
+            ...state.funds,
+            cache: null
+        }
+    }), {
+        value: 0,
+        ageText: ''
+    });
+});
+
 test('getFundsCost gets the total fund cost, excluding sold funds', t => {
     t.is(getFundsCost(state), 400000);
 });
