@@ -1,5 +1,6 @@
 import compose from 'just-compose';
 
+import { sortByTotal } from '~client/modules/data';
 import { percent } from '~client/modules/format';
 
 const numBlockColors = 16;
@@ -203,13 +204,11 @@ const withTotals = rows => rows.map(row => ({ ...row, total: rowTotal(row) }));
 
 const withPositiveTotals = rows => rows.filter(({ total }) => total > 0);
 
-const sorted = rows => rows.sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
-
 export function blockPacker(rows, width, height) {
     const data = compose(
         withTotals,
         withPositiveTotals,
-        sorted
+        sortByTotal
     )(rows);
 
     const colorOffset = data.reduce((sum, { total }) => sum + (total & 1), 0);
