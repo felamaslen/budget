@@ -20,7 +20,7 @@ export const getCost = createSelector(getCostArray, getSaved, (cost, saved) => c
         subTree: subTree.map(([item, total]) => ({ name: item, total })),
         total: subTree.reduce((sum, [, total]) => sum + total, 0)
     }))
-    .concat([{ name: 'Saved', total: saved }]));
+    .concat([{ name: 'saved', total: saved }]));
 
 export const getBlocks = createSelector(getCost, getTreeVisible, (cost, treeVisible) => cost &&
     blockPacker(

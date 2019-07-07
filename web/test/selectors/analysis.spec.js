@@ -60,7 +60,7 @@ test('getCost returns the cost data mapped into subtrees', t => {
             total: 156842 + 137650
         },
         {
-            name: 'Saved',
+            name: 'saved',
             total: testState.analysis.saved
         }
     ];
