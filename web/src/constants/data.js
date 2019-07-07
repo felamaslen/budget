@@ -84,6 +84,7 @@ export const PAGES = {
 };
 
 export const PAGES_LIST = ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'];
+export const PAGES_SUGGESTIONS = ['income', 'bills', 'food', 'general', 'holiday', 'social'];
 
 export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
