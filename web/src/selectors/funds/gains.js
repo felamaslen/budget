@@ -49,7 +49,7 @@ export function getRowGains(rows, cache) {
     return rows.reduce((items, { id, transactions }) => {
         const rowCache = cache.prices[id];
         if (!(rowCache && rowCache.values.length)) {
-            return items;
+            return { ...items, [id]: {} };
         }
 
         const price = rowCache.values[rowCache.values.length - 1];

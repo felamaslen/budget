@@ -5,13 +5,13 @@ import {
     getGainsForRow
 } from '~client/selectors/funds/gains';
 
-test('getRowGains returns the correct values', t => {
-    const testCache = {
-        startTime: testStartTime,
-        cacheTimes: testCacheTimes,
-        prices: testPrices
-    };
+const testCache = {
+    startTime: testStartTime,
+    cacheTimes: testCacheTimes,
+    prices: testPrices
+};
 
+test('getRowGains returns the correct values', t => {
     const result = getRowGains(testRows, testCache);
 
     const expectedResult = {
@@ -40,6 +40,16 @@ test('getRowGains returns the correct values', t => {
     };
 
     t.deepEqual(result, expectedResult);
+});
+
+test('getRowGains sets empty objects for funds with no data', t => {
+    const result = getRowGains([
+        { id: 'non-existent-id', item: 'some fund' }
+    ], testCache);
+
+    t.deepEqual(result, {
+        'non-existent-id': {}
+    });
 });
 
 test('getGainsForRow sets a colour', t => {
