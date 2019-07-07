@@ -10,7 +10,7 @@ import { getFundsCache } from '~client/selectors/funds/helpers';
 import { getPeriod } from '~client/selectors/funds';
 import { getStocks, getIndices } from '~client/selectors/funds/stocks';
 import { getPeriodMatch } from '~client/modules/data';
-import { getStockPricesFromYahoo } from '~client/modules/finance';
+import { getStockPrices } from '~client/modules/finance';
 import { API_PREFIX } from '~client/constants/data';
 import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
@@ -79,7 +79,7 @@ export function *requestStocksPrices() {
     const symbols = Array.from(new Set(stocks.concat(indices).map(({ code }) => code)));
 
     try {
-        const data = yield call(getStockPricesFromYahoo, symbols);
+        const data = yield call(getStockPrices, symbols);
 
         yield put(stockPricesReceived(data));
     } catch (err) {

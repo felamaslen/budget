@@ -20,7 +20,7 @@ import { getApiKey } from '~client/selectors/api';
 import { getFundsCache } from '~client/selectors/funds/helpers';
 import { getPeriod } from '~client/selectors/funds';
 import { getStocks, getIndices } from '~client/selectors/funds/stocks';
-import { getStockPricesFromYahoo } from '~client/modules/finance';
+import { getStockPrices } from '~client/modules/finance';
 import { API_PREFIX } from '~client/constants/data';
 import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
@@ -199,7 +199,7 @@ test('requestStocksPrices requests stock prices', t => {
             { code: 'indice1' },
             { code: 'indice2' }
         ])
-        .call(getStockPricesFromYahoo, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
+        .call(getStockPrices, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
         .next(res)
         .put(stockPricesReceived(res))
         .next()
@@ -224,7 +224,7 @@ test('requestStocksPrices handles errors', t => {
             { code: 'indice1' },
             { code: 'indice2' }
         ])
-        .call(getStockPricesFromYahoo, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
+        .call(getStockPrices, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
         .throw(err)
         .put(stockPricesReceived(null, err))
         .next()
