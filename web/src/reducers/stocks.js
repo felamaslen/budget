@@ -68,6 +68,10 @@ const updateStock = prices => ({ code, gain, ...rest }) => {
 };
 
 function onStocksPrices(state, { res }) {
+    if (!res) {
+        return {};
+    }
+
     const lastPriceUpdate = Date.now();
     const stockMapper = updateStock(res);
     const shares = state.shares.map(stockMapper);
@@ -79,7 +83,7 @@ function onStocksPrices(state, { res }) {
         indices: state.indices.map(stockMapper),
         shares,
         history: limitTimeSeriesLength(state.history, STOCKS_GRAPH_RESOLUTION)
-            .concat([weightedGain])
+            .concat([[Date.now(), weightedGain]])
     };
 }
 

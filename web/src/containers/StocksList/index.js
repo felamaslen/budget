@@ -4,7 +4,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import GraphStocks from './GraphStocks';
+import { dataShape } from '~client/prop-types/graph';
+import GraphStocks from '~client/containers/StocksList/GraphStocks';
 import { stocksListRequested, stockPricesRequested } from '~client/actions/stocks';
 import { sigFigs } from '~client/modules/format';
 
@@ -67,7 +68,7 @@ function StocksList({
     useEffect(() => {
         if (history.length) {
             setOldWeightedGain(weightedGain);
-            setWeightedGain(history[history.length - 1]);
+            setWeightedGain(history[history.length - 1][1]);
         }
     }, [history, weightedGain]);
 
@@ -121,7 +122,7 @@ StocksList.propTypes = {
     loading: PropTypes.bool.isRequired,
     shares: PropTypes.arrayOf(stockShape.isRequired).isRequired,
     indices: PropTypes.arrayOf(stockShape.isRequired).isRequired,
-    history: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+    history: dataShape.isRequired,
     lastPriceUpdate: PropTypes.number,
     requestList: PropTypes.func.isRequired,
     requestPrices: PropTypes.func.isRequired

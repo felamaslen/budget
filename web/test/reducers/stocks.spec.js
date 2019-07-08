@@ -152,7 +152,9 @@ test('STOCKS_PRICES_RECEIVED sets stock prices', t => {
 
     t.is(result.lastPriceUpdate, now.getTime());
 
-    t.deepEqual(result.history, [(3 / 11 * (101.3 - 100) / 100 * 100) + (5 / 11 * (308.9 - 321.2) / 321.2 * 100)]);
+    t.deepEqual(result.history, [
+        [now.getTime(), (3 / 11 * (101.3 - 100) / 100 * 100) + (5 / 11 * (308.9 - 321.2) / 321.2 * 100)]
+    ]);
 
     clock.restore();
 });
