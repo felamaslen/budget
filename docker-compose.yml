@@ -14,6 +14,8 @@ services:
       - net_budget_dev
     ports:
       - 3000:3000
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
       FAKE_STOCK_PRICES: "true"
