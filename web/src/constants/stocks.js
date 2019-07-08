@@ -9,7 +9,7 @@ export const STOCK_INDICES = (process.env.STOCK_INDICES || '')
         [code]: name
     }), {});
 
-export const DO_STOCKS_LIST = process.env.SKIP_STOCKS_LIST !== 'true';
+export const DO_STOCKS_LIST = process.env.DO_STOCKS_LIST !== 'false';
 export const FAKE_STOCK_PRICES = process.env.FAKE_STOCK_PRICES === 'true';
 export const STOCKS_GRAPH_RESOLUTION = 50;
 export const STOCK_PRICES_DELAY = FAKE_STOCK_PRICES
