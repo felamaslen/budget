@@ -60,7 +60,7 @@ export function useHover({ lines, isMobile, calc, hoverEffect }) {
     }, [lines, isMobile, calc]);
 
     const onMouseMove = useMemo(() => {
-        const handler = throttle(10, (pageX, pageY, currentTarget) => {
+        const handler = throttle(10, true, (pageX, pageY, currentTarget) => {
             const { left, top } = currentTarget.getBoundingClientRect();
 
             onHover({

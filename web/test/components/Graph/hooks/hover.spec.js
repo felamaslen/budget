@@ -87,13 +87,22 @@ test('onMouseMove on the top left corner highlights the first point on the secon
     const [hlPointBefore, onMouseMove] = hookResult;
     t.is(hlPointBefore, null);
 
-    onMouseMove({
-        pageX: 13 + 3,
-        pageY: 25 + 1,
-        currentTarget
+    act(() => {
+        onMouseMove({
+            pageX: 0,
+            pageY: 0,
+            currentTarget
+        });
+
+        clock.tick(11);
+
+        onMouseMove({
+            pageX: 13 + 3,
+            pageY: 25 + 1,
+            currentTarget
+        });
     });
 
-    clock.tick(1000);
     const [hlPointAfter] = hookResult;
     t.deepEqual(hlPointAfter, {
         valX: 0,
@@ -111,13 +120,20 @@ test('onMouseMove on the bottom left corner highlights the first point on the fi
 
     act(() => {
         onMouseMove({
+            pageX: 0,
+            pageY: 0,
+            currentTarget
+        });
+
+        clock.tick(11);
+
+        onMouseMove({
             pageX: 13 + 3,
             pageY: 25 + 90 - 2,
             currentTarget
         });
     });
 
-    clock.tick(1000);
     const [hlPointAfter] = hookResult;
     t.deepEqual(hlPointAfter, {
         valX: 0,
@@ -133,13 +149,22 @@ test('onMouseMove in the middle of the graph highlights the closest line point',
 
     const [, onMouseMove] = hookResult;
 
-    onMouseMove({
-        pageX: 13 + 43,
-        pageY: 25 + 37,
-        currentTarget
+    act(() => {
+        onMouseMove({
+            pageX: 0,
+            pageY: 0,
+            currentTarget
+        });
+
+        clock.tick(11);
+
+        onMouseMove({
+            pageX: 13 + 43,
+            pageY: 25 + 37,
+            currentTarget
+        });
     });
 
-    clock.tick(1000);
     const [hlPointAfter] = hookResult;
     t.deepEqual(hlPointAfter, {
         valX: 2,
@@ -151,17 +176,27 @@ test('onMouseMove in the middle of the graph highlights the closest line point',
 });
 
 test('onMouseLeave resets hlPoint', t => {
-    const [, onMouseMove] = hookResult;
-    onMouseMove({
-        pageX: 13 + 3,
-        pageY: 25 + 1,
-        currentTarget
-    });
+    const clock = sinon.useFakeTimers();
 
-    const [hlPointBefore, , onMouseLeave] = hookResult;
+    const [, onMouseMove, onMouseLeave] = hookResult;
+
+    const [hlPointBefore] = hookResult;
     t.not(hlPointBefore, null);
 
-    onMouseLeave();
+    act(() => {
+        onMouseMove({
+            pageX: 13 + 3,
+            pageY: 25 + 1,
+            currentTarget
+        });
+
+        clock.tick(3);
+
+        onMouseLeave();
+
+        clock.tick(8);
+    });
+
     const [hlPointAfter] = hookResult;
 
     t.is(hlPointAfter, null);
