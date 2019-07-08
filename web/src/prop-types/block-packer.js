@@ -33,5 +33,3 @@ export const blockShape = PropTypes.shape({
 }).isRequired;
 
 export const blocksShape = PropTypes.arrayOf(blockShape);
-
-export const activeBlockShape = PropTypes.arrayOf(PropTypes.string);
