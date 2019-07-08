@@ -4,11 +4,9 @@ import { throttle } from 'throttle-debounce';
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
 import { genPixelCompute, pointVisible } from '../helpers';
 
-function pointsVisible(lines) {
-    const threshold = 4;
+const threshold = 4;
 
-    return Boolean(lines.find(line => line.get('data').size > threshold));
-}
+const pointsVisible = lines => lines.some(({ data }) => data.length > threshold);
 
 export function useZoom({
     dimensions,
