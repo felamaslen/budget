@@ -4,42 +4,44 @@ import classNames from 'classnames';
 
 import './style.scss';
 
-const Graph = ({
+export default function Graph({
     name,
-    svgRef,
     width,
     height,
+    graphRef,
     svgClasses,
     svgProperties,
     outerProperties,
     before,
     after,
     children
-}) => (
-    <div
-        ref={svgRef}
-        className={classNames('graph-container', { [`graph-${name}`]: name })}
-        {...outerProperties}
-    >
-        {before && before()}
-        <svg
-            className={svgClasses}
-            width={width}
-            height={height}
-            {...svgProperties}
+}) {
+    return (
+        <div
+            ref={graphRef}
+            className={classNames('graph-container', { [`graph-${name}`]: name })}
+            {...outerProperties}
         >
-            {children}
-        </svg>
-        {after && after()}
-    </div>
-);
+            {before && before()}
+            <svg
+                className={svgClasses}
+                width={width}
+                height={height}
+                {...svgProperties}
+            >
+                {children}
+            </svg>
+            {after && after()}
+        </div>
+    );
+}
 
 Graph.propTypes = {
-    svgRef: PropTypes.object,
     name: PropTypes.string,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     padding: PropTypes.array,
+    graphRef: PropTypes.object,
     svgClasses: PropTypes.string,
     svgProperties: PropTypes.object,
     outerProperties: PropTypes.object,
@@ -54,11 +56,8 @@ Graph.propTypes = {
 Graph.defaultProps = {
     before: null,
     after: null,
-    svgRef: null,
     svgClasses: '',
     outerProperties: {},
     svgProperties: {},
     children: null
 };
-
-export default Graph;

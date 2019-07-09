@@ -2,7 +2,7 @@
  * React component to display a line graph (e.g. time series)
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { genPixelCompute } from '~client/components/Graph/helpers';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
@@ -38,8 +38,7 @@ export default function LineGraph({
     hoverEffect,
     zoomEffect
 }) {
-    const graph = useRef(null);
-
+    const graphRef = useRef();
     const [calc, setCalc] = useState(null);
 
     const dimensions = useMemo(() => ({
@@ -63,27 +62,15 @@ export default function LineGraph({
         hoverEffect
     });
 
-    const [zoom, onWheel] = useZoom({
+    const [, zoomedDimensions] = useZoom({
         dimensions,
         lines,
         isMobile,
-        graph,
-        hlPoint,
+        graphRef,
         calc,
         setCalc,
         zoomEffect
     });
-
-    const zoomedDimensions = useMemo(() => {
-        if (zoom) {
-            return {
-                ...dimensions,
-                ...zoom
-            };
-        }
-
-        return dimensions;
-    }, [zoom, dimensions]);
 
     const outerPropertiesProc = useMemo(() => ({
         onMouseMove,
@@ -92,18 +79,12 @@ export default function LineGraph({
         ...outerProperties
     }), [onMouseMove, onMouseLeave, outerProperties]);
 
-    const svgPropertiesProc = useMemo(() => ({
-        onWheel,
-        ...svgProperties
-    }), [onWheel, svgProperties]);
-
     if (!calc) {
         return null;
     }
 
     const graphProps = {
         name,
-        svgRef: graph,
         before,
         beforeLines,
         afterLines,
@@ -113,8 +94,9 @@ export default function LineGraph({
         calc,
         hlPoint,
         hoverEffect,
+        graphRef,
         outerProperties: outerPropertiesProc,
-        svgProperties: svgPropertiesProc,
+        svgProperties,
         svgClasses
     };
 

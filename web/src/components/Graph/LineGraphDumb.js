@@ -27,6 +27,7 @@ export default function LineGraphDumb({
     hlPoint,
     beforeLines,
     afterLines,
+    graphRef,
     outerProperties,
     svgProperties,
     svgClasses,
@@ -41,6 +42,7 @@ export default function LineGraphDumb({
         name,
         before,
         after,
+        graphRef,
         outerProperties,
         svgProperties,
         svgClasses,
@@ -95,6 +97,7 @@ LineGraphDumb.propTypes = {
     calc: PropTypes.shape(pixelPropTypes).isRequired,
     lines: PropTypes.arrayOf(lineShape.isRequired).isRequired,
     hoverEffect: PropTypes.object,
+    graphRef: PropTypes.object,
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
     svgClasses: PropTypes.string,
@@ -102,6 +105,7 @@ LineGraphDumb.propTypes = {
 };
 
 LineGraphDumb.defaultProps = {
+    graphRef: null,
     before: null,
     after: null
 };
