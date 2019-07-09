@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useReducer, useMemo, useEffect } from 'react';
 import { throttle } from 'throttle-debounce';
 
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
@@ -8,16 +8,101 @@ const threshold = 4;
 
 const noop = () => null;
 
-const getZoomedLines = (lines, [minX, maxX]) => lines.map(({ data, ...rest }) => ({
-    data: data.filter(([xValue], index) =>
-        pointVisible(xValue, minX, maxX) ||
-        (index < data.length - 1 && pointVisible(data[index + 1][0], minX, maxX)) ||
-        (index > 0 && pointVisible(data[index - 1][0], minX, maxX))
-    ),
-    ...rest
-}));
-
 const pointsVisible = lines => lines.some(({ data }) => data.length > threshold);
+
+function getZoomedLines(lines, minX, maxX) {
+    const zoomedLines = lines.map(({ data, ...rest }) => ({
+        data: data.filter(([xValue], index) =>
+            pointVisible(xValue, minX, maxX) ||
+            (index < data.length - 1 && pointVisible(data[index + 1][0], minX, maxX)) ||
+            (index > 0 && pointVisible(data[index - 1][0], minX, maxX))
+        ),
+        ...rest
+    }));
+
+    if (!pointsVisible(zoomedLines)) {
+        return lines;
+    }
+
+    return zoomedLines;
+}
+
+function getZoomedRange(position, zoomedWidth, { minX, maxX }) {
+    let zoomedMinX = position - zoomedWidth / 2;
+    let zoomedMaxX = position + zoomedWidth / 2;
+    if (zoomedMinX < minX) {
+        zoomedMaxX += minX - zoomedMinX;
+        zoomedMinX = minX;
+    } else if (zoomedMaxX > maxX) {
+        zoomedMinX -= zoomedMaxX - maxX;
+        zoomedMaxX = maxX;
+    }
+
+    return [
+        Math.max(minX, Math.round(zoomedMinX)),
+        Math.min(maxX, Math.round(zoomedMaxX))
+    ];
+}
+
+const init = ({ disabled, dimensions, lines, calc, zoomEffect, graphRef }) => ({
+    disabled,
+    valX: calc && calc.valX,
+    zoomEffect,
+    graphRef,
+    fullWidth: dimensions.maxX - dimensions.minX,
+    lastLines: lines,
+    lastDimensions: dimensions,
+    zoomLevel: 0,
+    zoomedLines: lines,
+    zoomedDimensions: dimensions
+});
+
+function onWheel(state, { evt }) {
+    if (state.disabled || !state.graphRef.current) {
+        return state;
+    }
+
+    const zoomLevel = Math.max(0, state.zoomLevel - evt.deltaY / Math.abs(evt.deltaY));
+    const position = state.valX(evt.pageX - state.graphRef.current.offsetParent.offsetLeft);
+
+    if (!position) {
+        return state;
+    }
+
+    const zoomedWidth = state.fullWidth * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
+
+    const [zoomedMinX, zoomedMaxX] = getZoomedRange(position, zoomedWidth, state.lastDimensions);
+
+    const zoomedLines = getZoomedLines(state.lastLines, zoomedMinX, zoomedMaxX);
+
+    const nextZoomedDimensions = state.zoomEffect(zoomedLines, zoomedMinX, zoomedMaxX);
+
+    if (nextZoomedDimensions.minX === state.zoomedDimensions.minX &&
+        nextZoomedDimensions.maxX === state.zoomedDimensions.maxX) {
+
+        return state;
+    }
+
+    const zoomedDimensions = { ...state.zoomedDimensions, ...nextZoomedDimensions };
+
+    return {
+        ...state,
+        zoomLevel,
+        zoomedLines,
+        zoomedDimensions
+    };
+}
+
+function reducer(state, action) {
+    if (action.type === 'reset') {
+        return init(action);
+    }
+    if (action.type === 'wheel') {
+        return onWheel(state, action);
+    }
+
+    throw new Error(`Unhandled zoom hook action: ${action.type}`);
+}
 
 export function useZoom({
     dimensions,
@@ -30,119 +115,52 @@ export function useZoom({
 }) {
     const disabled = isMobile || !zoomEffect;
 
-    const [range, setRange] = useState([dimensions.minX, dimensions.maxX]);
-    const [zoomedLines, setZoomedLines] = useState(lines);
-    const [zoomedDimensions, setZoomedDimensions] = useState(dimensions);
+    const [state, dispatch] = useReducer(reducer, {
+        dimensions,
+        lines,
+        calc,
+        zoomEffect,
+        graphRef
+    }, init);
 
-    const [wheelEvent, setWheelEvent] = useState({ time: 0, pageX: 0, level: 0 });
-    const [position, setPosition] = useState(0);
-    const [lastZoomTime, setLastZoomTime] = useState(0);
     useEffect(() => {
-        if (graphRef.current && wheelEvent.time !== lastZoomTime) {
-            setLastZoomTime(wheelEvent.time);
-            setPosition(calc.valX(wheelEvent.pageX - graphRef.current.offsetParent.offsetLeft));
-        }
-    }, [calc, graphRef, lastZoomTime, wheelEvent]);
-
-    const [lastLines, setLastLines] = useState(lines);
-    useEffect(() => {
-        if (lines !== lastLines) {
-            setLastLines(lines);
-            setRange([dimensions.minX, dimensions.maxX]);
-            setZoomedLines(lines);
-            setZoomedDimensions(dimensions);
-            setWheelEvent({ time: 0, pageX: 0, level: 0 });
-            setPosition(0);
+        if ((disabled && !state.disabled) || lines !== state.lastLines) {
+            dispatch({
+                type: 'reset',
+                disabled,
+                dimensions,
+                lines,
+                calc,
+                zoomEffect,
+                graphRef
+            });
             setCalc(genPixelCompute(dimensions));
         }
-    }, [setCalc, lines, lastLines, dimensions]);
-
-    const fullWidth = dimensions.maxX - dimensions.minX;
-    const zoomedWidth = fullWidth * (1 - GRAPH_ZOOM_SPEED) ** wheelEvent.level;
-
-    // SET ZOOMED MINX/MAXX RANGE (<- position (<- wheelEvent.time), (zoomedWidth <- level))
-    useEffect(() => {
-        if (disabled || !position) {
-            return;
-        }
-
-        let newMinX = position - zoomedWidth / 2;
-        let newMaxX = position + zoomedWidth / 2;
-        if (newMinX < dimensions.minX) {
-            newMaxX += dimensions.minX - newMinX;
-            newMinX = dimensions.minX;
-        } else if (newMaxX > dimensions.maxX) {
-            newMinX -= newMaxX - dimensions.maxX;
-            newMaxX = dimensions.maxX;
-        }
-
-        newMinX = Math.max(dimensions.minX, Math.round(newMinX));
-        newMaxX = Math.min(dimensions.maxX, Math.round(newMaxX));
-
-        setRange(lastRange => {
-            if (newMinX === lastRange[0] && newMaxX === lastRange[1]) {
-                return lastRange;
-            }
-
-            return [newMinX, newMaxX];
-        });
-    }, [disabled, dimensions.minX, dimensions.maxX, zoomedWidth, position]);
-
-    // SET ZOOMED LINES (<- range)
-    useEffect(() => {
-        setZoomedLines(lastZoomedLines => {
-            if (disabled) {
-                return lastZoomedLines;
-            }
-
-            const nextZoomedLines = getZoomedLines(lines, range);
-
-            if (!pointsVisible(nextZoomedLines)) {
-                return lastZoomedLines;
-            }
-
-            return nextZoomedLines;
-        });
-    }, [disabled, lines, range]);
-
-    // SET ZOOMED DIMENSIONS (<- range, (zoomedLines <- range))
-    useEffect(() => {
-        setZoomedDimensions(lastZoomedDimensions => {
-            if (disabled) {
-                return lastZoomedDimensions;
-            }
-
-            const { minX, maxX } = lastZoomedDimensions;
-            const [zoomMinX, zoomMaxX] = range;
-
-            const nextZoomedDimensions = zoomEffect(zoomedLines, zoomMinX, zoomMaxX);
-            if (nextZoomedDimensions.minX === minX && nextZoomedDimensions.maxX === maxX) {
-                return lastZoomedDimensions;
-            }
-
-            return { ...dimensions, ...nextZoomedDimensions };
-        });
-    }, [disabled, zoomEffect, dimensions, zoomedLines, range]);
+    }, [
+        disabled,
+        state.disabled,
+        state.lastLines,
+        setCalc,
+        dimensions,
+        lines,
+        calc,
+        zoomEffect,
+        graphRef
+    ]);
 
     useEffect(() => {
         setCalc(genPixelCompute({
-            lines: zoomedLines,
-            ...zoomedDimensions
+            lines: state.zoomedLines,
+            ...state.zoomedDimensions
         }));
-    }, [setCalc, zoomedLines, zoomedDimensions]);
+    }, [setCalc, state.zoomedLines, state.zoomedDimensions]);
 
-    const onWheel = useMemo(() => {
+    const onWheelThrottled = useMemo(() => {
         if (disabled) {
             return noop;
         }
 
-        const handler = throttle(10, evt => {
-            setWheelEvent(({ level }) => ({
-                time: performance.now(),
-                pageX: evt.pageX,
-                level: Math.max(0, level - evt.deltaY / Math.abs(evt.deltaY))
-            }));
-        });
+        const handler = throttle(10, evt => dispatch({ type: 'wheel', evt }));
 
         return evt => {
             evt.preventDefault();
@@ -150,22 +168,21 @@ export function useZoom({
         };
     }, [disabled]);
 
-    // EVENT LISTENERS
     useEffect(() => {
         let lastRef = null;
         setImmediate(() => {
             if (graphRef.current) {
-                graphRef.current.addEventListener('wheel', onWheel);
+                graphRef.current.addEventListener('wheel', onWheelThrottled);
             }
             lastRef = graphRef.current;
         });
 
         return () => {
             if (lastRef) {
-                lastRef.removeEventListener('wheel', onWheel);
+                lastRef.removeEventListener('wheel', onWheelThrottled);
             }
         };
-    }, [graphRef, onWheel]);
+    }, [graphRef, onWheelThrottled]);
 
-    return [zoomedLines, zoomedDimensions];
+    return [state.zoomedLines, state.zoomedDimensions];
 }
