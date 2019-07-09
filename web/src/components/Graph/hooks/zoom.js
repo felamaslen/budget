@@ -52,7 +52,9 @@ const init = ({ disabled, dimensions, lines, calc, zoomEffect, graphRef }) => ({
     fullWidth: dimensions.maxX - dimensions.minX,
     lastLines: lines,
     lastDimensions: dimensions,
-    zoomLevel: 0,
+    level: 0,
+    pageX: null,
+    position: 0,
     zoomedLines: lines,
     zoomedDimensions: dimensions
 });
@@ -62,14 +64,16 @@ function onWheel(state, { evt }) {
         return state;
     }
 
-    const zoomLevel = Math.max(0, state.zoomLevel - evt.deltaY / Math.abs(evt.deltaY));
-    const position = state.valX(evt.pageX - state.graphRef.current.offsetParent.offsetLeft);
+    const level = Math.max(0, state.level - evt.deltaY / Math.abs(evt.deltaY));
+    const position = evt.pageX === state.pageX
+        ? state.position
+        : state.valX(evt.pageX - state.graphRef.current.offsetLeft);
 
     if (!position) {
         return state;
     }
 
-    const zoomedWidth = state.fullWidth * (1 - GRAPH_ZOOM_SPEED) ** zoomLevel;
+    const zoomedWidth = state.fullWidth * (1 - GRAPH_ZOOM_SPEED) ** level;
 
     const [zoomedMinX, zoomedMaxX] = getZoomedRange(position, zoomedWidth, state.lastDimensions);
 
@@ -87,7 +91,9 @@ function onWheel(state, { evt }) {
 
     return {
         ...state,
-        zoomLevel,
+        level,
+        pageX: evt.pageX,
+        position,
         zoomedLines,
         zoomedDimensions
     };
