@@ -131,16 +131,17 @@ export function useZoom({
 
     useEffect(() => {
         if ((disabled && !state.disabled) || lines !== state.lastLines) {
+            const nextCalc = genPixelCompute(dimensions);
             dispatch({
                 type: 'reset',
                 disabled,
                 dimensions,
                 lines,
-                calc,
+                calc: nextCalc,
                 zoomEffect,
                 graphRef
             });
-            setCalc(genPixelCompute(dimensions));
+            setCalc(nextCalc);
         }
     }, [
         disabled,
