@@ -59,7 +59,7 @@ function timeTickWeekMonth(t0, t1) {
         getMajor: () => 0,
         label: () => false,
         extra: time => {
-            if (time.plus({ weeks: 1 }).hasSame(time, 'month')) {
+            if (time.plus({ seconds: 86400 * 7 }).hasSame(time, 'month')) {
                 return null;
             }
 
