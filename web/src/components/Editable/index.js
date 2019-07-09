@@ -85,6 +85,7 @@ Editable.propTypes = {
 
 Editable.defaultProps = {
     active: false,
+    value: '',
     suggestions: {
         list: [],
         active: null,

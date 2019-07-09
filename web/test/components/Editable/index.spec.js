@@ -44,6 +44,18 @@ test('rendering inactive editable item', t => {
     t.notRegex(span.className, /active/);
 });
 
+test('Undefined value is renderd as a blank string', t => {
+    const { container } = getContainer({
+        active: false,
+        item: 'shop'
+    });
+
+    t.is(container.childNodes.length, 1);
+    const [span] = container.childNodes;
+    const [editable] = span.childNodes;
+    t.is(editable.innerHTML, '');
+});
+
 test('Falsy transactions are rendered as 0 items', t => {
     const { container } = getContainer({
         active: false,
