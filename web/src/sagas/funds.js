@@ -46,7 +46,7 @@ export function *requestFundPeriodData({ period, fromCache }) {
             }
         });
 
-        yield put(fundsReceived(nextPeriod, res));
+        yield put(fundsReceived(nextPeriod, res.data));
     } catch (err) {
         yield put(errorOpened('Error loading fund data'));
     }

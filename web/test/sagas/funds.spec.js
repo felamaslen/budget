@@ -71,7 +71,7 @@ test('requestFundPeriodData requests new data', t => {
             headers: { Authorization: 'some_api_key' }
         })
         .next(res)
-        .put(fundsReceived('month5', res))
+        .put(fundsReceived('month5', res.data))
         .next()
         .isDone();
 
@@ -85,7 +85,7 @@ test('requestFundPeriodData requests new data', t => {
             headers: { Authorization: 'some_api_key' }
         })
         .next(res)
-        .put(fundsReceived('month5', res))
+        .put(fundsReceived('month5', res.data))
         .next()
         .isDone();
 });
@@ -109,7 +109,7 @@ test('requestFundPeriodData uses the current period by default', t => {
             headers: { Authorization: 'some_api_key' }
         })
         .next(res)
-        .put(fundsReceived('year5', res))
+        .put(fundsReceived('year5', res.data))
         .next()
         .isDone();
 
