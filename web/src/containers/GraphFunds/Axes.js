@@ -117,7 +117,7 @@ export default function Axes({
 Axes.propTypes = {
     startTime: PropTypes.number.isRequired,
     tickSizeY: PropTypes.number,
-    mode: PropTypes.number.isRequired,
+    mode: PropTypes.string.isRequired,
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     minX: PropTypes.number.isRequired,
