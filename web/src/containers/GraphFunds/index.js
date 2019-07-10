@@ -14,6 +14,7 @@ import {
     GRAPH_FUNDS_OVERALL_ID,
     GRAPH_FUNDS_MODE_ROI,
     GRAPH_FUNDS_MODE_ABSOLUTE,
+    GRAPH_FUNDS_MODE_PRICE,
     GRAPH_FUNDS_NUM_TICKS,
     GRAPH_FUNDS_MODES
 } from '~client/constants/graph';
@@ -102,7 +103,7 @@ function makeBeforeLines({ mode, startTime, tickSizeY }) {
     return BeforeLines;
 }
 
-const modeList = Object.keys(GRAPH_FUNDS_MODES);
+const modeListAll = Object.keys(GRAPH_FUNDS_MODES);
 
 export function GraphFunds({
     isMobile,
@@ -115,6 +116,14 @@ export function GraphFunds({
     period,
     changePeriod
 }) {
+    const modeList = useMemo(() => {
+        if (isMobile) {
+            return modeListAll.filter(value => value !== GRAPH_FUNDS_MODE_PRICE);
+        }
+
+        return modeListAll;
+    }, [isMobile]);
+
     const [mode, setMode] = useState(modeList[0]);
     const [toggleList, setToggleList] = useState({});
     const [numFundItems, setNumFundItems] = useState(0);
@@ -130,9 +139,17 @@ export function GraphFunds({
         }
     }, [fundItems, numFundItems]);
 
+    const filterFunds = useMemo(() => {
+        if (isMobile) {
+            return ({ id }) => id === GRAPH_FUNDS_OVERALL_ID;
+        }
+
+        return ({ id }) => toggleList[id] !== false;
+    }, [isMobile, toggleList]);
+
     const [lines] = useMemo(() => {
         return fundLines[mode]
-            .filter(({ id }) => toggleList[id] !== false)
+            .filter(filterFunds)
             .reduce(([last, idCount], { id, color, data }) => ([last.concat([{
                 key: `${id}-${idCount[id] || 0}`,
                 data,
@@ -142,7 +159,7 @@ export function GraphFunds({
                     : 1,
                 smooth: mode !== GRAPH_FUNDS_MODE_ABSOLUTE
             }]), { ...idCount, [id]: (idCount[id] || 0) + 1 }]), [[], {}]);
-    }, [fundLines, mode, toggleList]);
+    }, [fundLines, mode, filterFunds]);
 
     const getRanges = useMemo(() => makeGetRanges({
         mode,
