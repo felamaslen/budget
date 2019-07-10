@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router';
 
 import { loggedOut } from '~client/actions/login';
 import { getLoggedIn } from '~client/selectors/app';
@@ -34,4 +35,4 @@ const mapDispatchToProps = {
     onLogout: loggedOut
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));
