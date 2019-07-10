@@ -15,9 +15,47 @@ import {
     LIST_ITEM_UPDATED,
     LIST_ITEM_DELETED
 } from '~client/constants/actions/list';
-import { API_PREFIX, TIMER_UPDATE_SERVER } from '~client/constants/data';
+import { CREATE, UPDATE, DELETE, API_PREFIX, TIMER_UPDATE_SERVER } from '~client/constants/data';
 
 const requests = [
+    {
+        type: CREATE,
+        fakeId: 'some-fake-id',
+        method: 'post',
+        route: 'general',
+        query: {},
+        body: {
+            date: '2019-07-04',
+            item: 'some item',
+            category: 'some category',
+            cost: 2563,
+            shop: 'some shop'
+        }
+    },
+    {
+        type: UPDATE,
+        id: 'some-real-id',
+        method: 'put',
+        route: 'food',
+        query: {},
+        body: {
+            id: 'some-real-id',
+            date: '2019-07-01'
+        }
+    },
+    {
+        type: DELETE,
+        id: 'other-real-id',
+        method: 'delete',
+        route: 'holiday',
+        query: {},
+        body: {
+            id: 'other-real-id'
+        }
+    }
+];
+
+const httpRequests = [
     {
         method: 'post',
         route: 'general',
@@ -52,7 +90,7 @@ const requests = [
 test('updateCrud calls the API with a request list', t => {
     t.is(1, 1);
 
-    const res = { isRes: true };
+    const res = { data: { data: { isRes: true } } };
 
     testSaga(updateCrud)
         .next()
@@ -63,12 +101,12 @@ test('updateCrud calls the API with a request list', t => {
         .put(syncRequested())
         .next()
         .call(axios.patch, `${API_PREFIX}/data/multiple`, {
-            list: requests
+            list: httpRequests
         }, {
             headers: { Authorization: 'my-api-key' }
         })
         .next(res)
-        .put(syncReceived(requests, res))
+        .put(syncReceived(requests, res.data.data))
         .next()
         .isDone();
 });
@@ -87,7 +125,7 @@ test('updateCrud handles API errors', t => {
         .put(syncRequested())
         .next()
         .call(axios.patch, `${API_PREFIX}/data/multiple`, {
-            list: requests
+            list: httpRequests
         }, {
             headers: { Authorization: 'my-api-key' }
         })

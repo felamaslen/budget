@@ -19,14 +19,14 @@ export function *updateCrud() {
         yield put(syncRequested());
 
         const res = yield call(axios.patch, `${API_PREFIX}/data/multiple`, {
-            list: requests
+            list: requests.map(({ type, id, fakeId, ...request }) => request)
         }, {
             headers: {
                 Authorization: apiKey
             }
         });
 
-        yield put(syncReceived(requests, res));
+        yield put(syncReceived(requests, res.data.data));
     } catch (err) {
         yield put(syncErrorOccurred(requests, err));
     }

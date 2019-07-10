@@ -71,6 +71,8 @@ test('getCrudRequests maps optimistically updated items to a HTTP request list',
 
     const requests = [
         {
+            type: UPDATE,
+            id: 'some-fund-id',
             method: 'put',
             route: 'funds',
             query: {},
@@ -83,6 +85,8 @@ test('getCrudRequests maps optimistically updated items to a HTTP request list',
             }
         },
         {
+            type: UPDATE,
+            id: 'real-id-z',
             method: 'put',
             route: 'food',
             query: {},
@@ -93,6 +97,8 @@ test('getCrudRequests maps optimistically updated items to a HTTP request list',
             }
         },
         {
+            type: CREATE,
+            fakeId: 'some-fake-id',
             method: 'post',
             route: 'general',
             query: {},
@@ -102,6 +108,8 @@ test('getCrudRequests maps optimistically updated items to a HTTP request list',
             }
         },
         {
+            type: DELETE,
+            id: 'real-id-x',
             method: 'delete',
             route: 'holiday',
             query: {},

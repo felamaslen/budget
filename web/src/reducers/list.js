@@ -85,7 +85,7 @@ function filterRequestItems(requestType, postProcess, idKey = 'id') {
 const withCreatedIds = (items, requestItems) => requestItems
     .reduce((last, { res, listIndex }) => replaceAtIndex(last, listIndex, value => ({
         ...value,
-        id: res.id,
+        id: res.id || value.id,
         __optimistic: null
     }), true), items);
 
@@ -102,7 +102,7 @@ const confirmDeletes = filterRequestItems(DELETE, (items, requestItems) => {
 const onSyncReceived = page => (state, { requests, res }) => {
     const requestItems = requests
         .map((request, index) => ({ request, index, res: res[index] }))
-        .filter(({ request }) => request.page === page);
+        .filter(({ request }) => request.route === page);
 
     const items = compose(
         confirmCreates(requestItems),

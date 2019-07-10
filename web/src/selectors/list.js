@@ -79,7 +79,9 @@ const withTransmitValues = requests => requests.map(({ body, ...rest }) => ({
 
 const withCreateRequests = (page, rows) => last => last.concat(rows
     .filter(({ __optimistic }) => __optimistic === CREATE)
-    .map(({ id, __optimistic, ...body }) => ({
+    .map(({ id, __optimistic: type, ...body }) => ({
+        type,
+        fakeId: id,
         method: 'post',
         route: page,
         query: {},
@@ -89,7 +91,9 @@ const withCreateRequests = (page, rows) => last => last.concat(rows
 
 const withUpdateRequests = (page, rows) => last => last.concat(rows
     .filter(({ __optimistic }) => __optimistic === UPDATE)
-    .map(({ __optimistic, ...body }) => ({
+    .map(({ __optimistic: type, ...body }) => ({
+        type,
+        id: body.id,
         method: 'put',
         route: page,
         query: {},
@@ -100,6 +104,8 @@ const withUpdateRequests = (page, rows) => last => last.concat(rows
 const withDeleteRequests = (page, rows) => last => last.concat(rows
     .filter(({ __optimistic }) => __optimistic === DELETE)
     .map(({ id }) => ({
+        type: DELETE,
+        id,
         method: 'delete',
         route: page,
         query: {},

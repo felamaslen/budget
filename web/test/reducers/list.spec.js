@@ -172,25 +172,25 @@ const syncRequests = [
     {
         type: CREATE,
         fakeId: 'other-fake-id',
-        page: 'some-other-page',
-        data: { some: 'data' }
+        route: 'some-other-page',
+        body: { some: 'data' }
     },
     {
         type: UPDATE,
-        page,
+        route: page,
         id: 'real-id-z',
-        data: { other: 'something' }
+        body: { other: 'something' }
     },
     {
         type: DELETE,
-        page,
+        route: page,
         id: 'real-id-x'
     },
     {
         type: CREATE,
         fakeId: 'some-fake-id',
-        page,
-        data: { thisItem: true }
+        route: page,
+        body: { thisItem: true }
     }
 ];
 
@@ -199,7 +199,7 @@ const syncResponse = [
         id: 'real-id-a'
     },
     {
-        id: 'real-id-z'
+        total: 2354
     },
     null,
     {
