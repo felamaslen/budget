@@ -67,13 +67,19 @@ export default function ModalDialog({
         }
     }, [onSubmit, tempFields, id]);
 
+    useEffect(() => {
+        if (!active && Object.keys(invalid).length) {
+            setInvalid({});
+        }
+    }, [active, invalid]);
+
     if (!visible) {
         return null;
     }
 
     return (
-        <div className={classNames('modal-dialog-outer', type)}>
-            <div className={classNames('dialog', { hidden: !active, loading })}>
+        <div className={classNames('modal-dialog', type)}>
+            <div className={classNames('modal-dialog-inner', { hidden: !active, loading })}>
                 <span className="title">{title(id)}</span>
                 <ul className="form-list">
                     {fields.map(({ item, value }) => (
