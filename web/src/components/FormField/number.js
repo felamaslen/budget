@@ -26,7 +26,11 @@ export default function FormFieldNumber({ value, onChange, active, ...props }) {
 }
 
 FormFieldNumber.propTypes = {
-    value: PropTypes.number.isRequired,
+    value: PropTypes.number,
     active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
+};
+
+FormFieldNumber.defaultProps = {
+    value: 0
 };

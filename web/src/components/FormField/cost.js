@@ -21,7 +21,9 @@ export default function FormFieldCost({ value, onChange, active }) {
                 ref={ref}
                 type="number"
                 step="0.01"
-                defaultValue={currentValue / 100}
+                defaultValue={value === null
+                    ? ''
+                    : currentValue / 100}
                 onChange={onType}
                 onBlur={onBlur}
             />
@@ -30,7 +32,11 @@ export default function FormFieldCost({ value, onChange, active }) {
 }
 
 FormFieldCost.propTypes = {
-    value: PropTypes.number.isRequired,
+    value: PropTypes.number,
     active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
+};
+
+FormFieldCost.defaultProps = {
+    value: null
 };

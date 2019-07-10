@@ -57,11 +57,12 @@ export default function FormFieldDate({ string, value, onChange, active }) {
 
 FormFieldDate.propTypes = {
     string: PropTypes.bool,
-    value: PropTypes.instanceOf(DateTime).isRequired,
+    value: PropTypes.instanceOf(DateTime),
     active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 };
 
 FormFieldDate.defaultProps = {
-    string: false
+    string: false,
+    value: DateTime.local()
 };

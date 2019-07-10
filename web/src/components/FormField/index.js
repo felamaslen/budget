@@ -25,12 +25,13 @@ export default function FormFieldText({ value, onType, onChange, active }) {
 }
 
 FormFieldText.propTypes = {
-    value: PropTypes.string.isRequired,
+    value: PropTypes.string,
     active: PropTypes.bool,
     onType: PropTypes.func,
     onChange: PropTypes.func.isRequired
 };
 
 FormFieldText.defaultProps = {
+    value: '',
     onType: () => null
 };
