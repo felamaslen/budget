@@ -9,7 +9,7 @@ import { rgba } from '~client/modules/color';
 function FundItem({ toggleList, setToggleList, id, color, item }) {
     const onToggle = useCallback(() => setToggleList(last => ({
         ...last,
-        [id]: last[id] !== false
+        [id]: last[id] === false
     })), [id, setToggleList]);
 
     const style = { borderColor: rgba(color) };
