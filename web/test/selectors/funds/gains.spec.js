@@ -87,3 +87,11 @@ test('getGainsForRow sets a colour', t => {
 
     t.falsy(getGainsForRow(rowGains, 'non-existent-id'));
 });
+
+test('getGainsForRow returns null if there are no gain data for the fund', t => {
+    const rowGains = {
+        'some-id': {}
+    };
+
+    t.is(getGainsForRow(rowGains, 'some-id'), null);
+});

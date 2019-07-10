@@ -71,7 +71,10 @@ const getMinMax = memoize(rowGains => Object.keys(rowGains).reduce(([min, max], 
     Math.max(max, rowGains[id].gain)
 ]), [Infinity, -Infinity]));
 
-export const getGainsForRow = (rowGains, id) => rowGains[id] && ({
-    ...rowGains[id],
-    color: getFundColor(rowGains[id].gain, ...getMinMax(rowGains))
-});
+export function getGainsForRow(rowGains, id) {
+    if (!(rowGains[id] && Object.keys(rowGains[id]).length)) {
+        return null;
+    }
+
+    return { ...rowGains[id], color: getFundColor(rowGains[id].gain, ...getMinMax(rowGains)) };
+}
