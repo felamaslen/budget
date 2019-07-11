@@ -30,3 +30,4 @@
 - Combine net worth with balance column (put net worth data in redux)
 - Fix stock prices feature
 - Fix time series major ticks not appearing sometimes
+- Server side rendering
