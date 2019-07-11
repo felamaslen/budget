@@ -5,7 +5,11 @@ import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/dat
 import { getFundsCost } from '~client/selectors/funds';
 import { getValueForTransmit } from '~client/modules/data';
 
-export const getAllPageRows = (state, { page }) => state[page].items;
+const getAllPageRows = (state, { page }) => state[page].items;
+
+export const getSortedPageRows = createSelector(getAllPageRows, items => items
+    .slice()
+    .sort(({ date: dateA }, { date: dateB }) => dateB - dateA));
 
 const getAllListItems = state => PAGES_LIST.map(page => ({
     page,
@@ -14,7 +18,7 @@ const getAllListItems = state => PAGES_LIST.map(page => ({
 
 const getPageProp = (state, { page }) => page;
 
-export const getDailyTotals = createSelector([getPageProp, getAllPageRows], (page, rows) => {
+export const getDailyTotals = createSelector(getPageProp, getSortedPageRows, (page, rows) => {
     if (!(rows && PAGES[page].daily)) {
         return null;
     }

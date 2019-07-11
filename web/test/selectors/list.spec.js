@@ -1,5 +1,8 @@
 import test from 'ava';
+import { DateTime } from 'luxon';
+
 import {
+    getSortedPageRows,
     getDailyTotals,
     getWeeklyAverages,
     getTotalCost,
@@ -9,12 +12,92 @@ import { testState as state } from '~client-test/test_data/state';
 import { getTransactionsList } from '~client/modules/data';
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
+const stateWithUnorderedRows = {
+    ...state,
+    general: {
+        ...state.general,
+        items: [
+            {
+                id: 'id300',
+                date: DateTime.fromISO('2018-02-03'),
+                item: 'foo1',
+                category: 'bar1',
+                cost: 1139,
+                shop: 'bak2'
+            },
+            {
+                id: 'id29',
+                date: DateTime.fromISO('2018-02-02'),
+                item: 'foo3',
+                category: 'bar3',
+                cost: 498,
+                shop: 'bak3'
+            },
+            {
+                id: 'id81',
+                date: DateTime.fromISO('2018-02-03'),
+                item: 'foo2',
+                category: 'bar2',
+                cost: 876,
+                shop: 'bak2'
+            },
+            {
+                id: 'id19',
+                date: DateTime.fromISO('2018-04-17'),
+                item: 'foo3',
+                category: 'bar3',
+                cost: 29,
+                shop: 'bak3'
+            }
+        ]
+    }
+};
+
+test('getSortedPageRows sorts list rows by date, newest first', t => {
+    const result = getSortedPageRows(stateWithUnorderedRows, { page: 'general' });
+
+    t.deepEqual(result, [
+        {
+            id: 'id19',
+            date: DateTime.fromISO('2018-04-17'),
+            item: 'foo3',
+            category: 'bar3',
+            cost: 29,
+            shop: 'bak3'
+        },
+        {
+            id: 'id300',
+            date: DateTime.fromISO('2018-02-03'),
+            item: 'foo1',
+            category: 'bar1',
+            cost: 1139,
+            shop: 'bak2'
+        },
+        {
+            id: 'id81',
+            date: DateTime.fromISO('2018-02-03'),
+            item: 'foo2',
+            category: 'bar2',
+            cost: 876,
+            shop: 'bak2'
+        },
+        {
+            id: 'id29',
+            date: DateTime.fromISO('2018-02-02'),
+            item: 'foo3',
+            category: 'bar3',
+            cost: 498,
+            shop: 'bak3'
+        }
+    ]);
+});
+
 test('getDailyTotals calculates daily totals for list pages', t => {
-    const result = getDailyTotals(state, { page: 'food' });
+    const result = getDailyTotals(stateWithUnorderedRows, { page: 'general' });
 
     t.deepEqual(result, {
         id19: 29,
-        id81: 2015,
+        id81: 1139 + 876,
         id29: 498
     });
 });
