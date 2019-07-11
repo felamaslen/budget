@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import compose from 'just-compose';
+import { DateTime } from 'luxon';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { validateField } from '~client/modules/validate';
@@ -17,6 +19,12 @@ export function title(id) {
 }
 
 export const animationTime = 350;
+
+const withDefaultDate = fields => replaceAtIndex(
+    fields,
+    fields.findIndex(({ item, value }) => item === 'date' && !value),
+    { item: 'date', value: DateTime.local() }
+);
 
 export default function ModalDialog({
     active,
@@ -40,7 +48,13 @@ export default function ModalDialog({
         }
     }, [active, visible]);
 
-    const [tempFields, setTempFields] = useState(fields.slice());
+    const [tempFields, setTempFields] = useState();
+    useEffect(() => {
+        setTempFields(compose(
+            withDefaultDate
+        )(fields.slice()));
+    }, [fields]);
+
     const [invalid, setInvalid] = useState({});
 
     const onChangeField = useCallback((item, value) => setTempFields(last => replaceAtIndex(
