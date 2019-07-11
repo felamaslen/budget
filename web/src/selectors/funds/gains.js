@@ -23,7 +23,7 @@ const roundGain = value => Math.round(10000 * value) / 10000;
 const roundAbs = value => Math.round(value);
 
 function getCostValue(transactions, price, yesterdayPrice) {
-    if (isSold(transactions)) {
+    if (isSold(transactions) || !price) {
         return transactions.reduce(({ cost, value }, item) => ({
             cost: cost + Math.max(0, item.cost),
             value: value - Math.min(0, item.cost)
@@ -47,15 +47,19 @@ function getCostValue(transactions, price, yesterdayPrice) {
 
 export function getRowGains(rows, cache) {
     return rows.reduce((items, { id, transactions }) => {
-        const rowCache = cache.prices[id];
-        if (!(rowCache && rowCache.values.length)) {
-            return { ...items, [id]: {} };
+        if (!transactions) {
+            return { ...items, [id]: { value: 0, gain: 0, gainAbs: 0 } };
         }
 
-        const price = rowCache.values[rowCache.values.length - 1];
+        const rowCache = cache.prices[id] || { values: [] };
+
+        const price = rowCache.values.length
+            ? rowCache.values[rowCache.values.length - 1]
+            : 0;
+
         const yesterdayPrice = rowCache.values.length > 1
             ? rowCache.values[rowCache.values.length - 2]
-            : null;
+            : 0;
 
         const { cost, ...props } = getCostValue(transactions, price, yesterdayPrice);
 

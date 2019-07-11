@@ -4,6 +4,7 @@ import {
     getRowGains,
     getGainsForRow
 } from '~client/selectors/funds/gains';
+import { getTransactionsList } from '~client/modules/data';
 
 const testCache = {
     startTime: testStartTime,
@@ -42,13 +43,38 @@ test('getRowGains returns the correct values', t => {
     t.deepEqual(result, expectedResult);
 });
 
-test('getRowGains sets empty objects for funds with no data', t => {
+test('getRowGains sets the value to 0 for funds with no data', t => {
     const result = getRowGains([
         { id: 'non-existent-id', item: 'some fund' }
     ], testCache);
 
     t.deepEqual(result, {
-        'non-existent-id': {}
+        'non-existent-id': {
+            value: 0,
+            gain: 0,
+            gainAbs: 0
+        }
+    });
+});
+
+test('getRowGains sets the cost and estimated value, if there are transactions available', t => {
+    const result = getRowGains([
+        {
+            id: 'non-existent-id',
+            item: 'some fund',
+            transactions: getTransactionsList([
+                { date: '2019-04-03', units: 345, cost: 1199 },
+                { date: '2019-07-01', units: -345, cost: -1302 }
+            ])
+        }
+    ], testCache);
+
+    t.deepEqual(result, {
+        'non-existent-id': {
+            value: 1302,
+            gainAbs: 1302 - 1199,
+            gain: Number(((1302 - 1199) / 1199).toFixed(5))
+        }
     });
 });
 
