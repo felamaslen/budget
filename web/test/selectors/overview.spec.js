@@ -1,4 +1,5 @@
 import test from 'ava';
+import sinon from 'sinon';
 import { DateTime } from 'luxon';
 
 import { testState as state } from '~client-test/test_data/state';
@@ -13,6 +14,14 @@ import {
     getRowDates,
     getOverviewTable
 } from '~client/selectors/overview';
+
+const testRandoms = [0.36123, 0.72246];
+
+const getRandomStub = () => {
+    let randomIndex = 0;
+
+    return sinon.stub(Math, 'random').callsFake(() => testRandoms[(randomIndex++) % 2]);
+};
 
 test('getStartDate gets the start date', t => {
     t.deepEqual(getStartDate(state), DateTime.fromISO('2018-01-31T23:59:59.999Z'));
@@ -67,6 +76,8 @@ test('getRowDates gets a list of dates at the end of each month', t => {
 });
 
 test('getProcessedCost processs the cost data, including making predictions, adding spending / net columns etc.', t => {
+    const stub = getRandomStub();
+
     t.deepEqual(getProcessedCost(state), {
         spending: [1260, 2068, 659, 754, 207, 207, 207],
         predicted: [13502, 13334, 20062, 13622, 15715, 17309, 19703],
@@ -83,9 +94,13 @@ test('getProcessedCost processs the cost data, including making predictions, add
         social: [50, 65, 134, 13, 58, 58, 58],
         holiday: [10, 1000, 95, 18, 57, 57, 57]
     });
+
+    stub.restore();
 });
 
 test('getOverviewTable gets a list of rows for the overview table', t => {
+    const stub = getRandomStub();
+
     t.deepEqual(getOverviewTable(state), [
         {
             key: 'Jan-18',
@@ -228,4 +243,6 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             ]
         }
     ]);
+
+    stub.restore();
 });
