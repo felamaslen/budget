@@ -4,6 +4,7 @@ import '~client-test/browser';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ModalDialog, { animationTime } from '~client/components/ModalDialog';
+import { CREATE_ID } from '~client/components/CrudList';
 
 const getContainer = (customProps = {}, ...args) => {
     const props = {
@@ -30,13 +31,13 @@ test('basic structure', t => {
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'modal-dialog-outer edit');
+    t.is(div.className, 'modal-dialog edit');
     t.is(div.childNodes.length, 1);
 
     const [dialog] = div.childNodes;
 
     t.is(dialog.tagName, 'DIV');
-    t.is(dialog.className, 'dialog');
+    t.is(dialog.className, 'modal-dialog-inner');
     t.is(dialog.childNodes.length, 3);
 });
 
@@ -46,14 +47,14 @@ test('hiding after a delay', t => {
     const { container } = getContainer();
     const { childNodes: [dialog] } = container.childNodes[0];
 
-    t.is(dialog.className, 'dialog');
+    t.is(dialog.className, 'modal-dialog-inner');
 
     getContainer({ active: false }, { container });
 
-    t.is(dialog.className, 'dialog hidden');
+    t.is(dialog.className, 'modal-dialog-inner hidden');
 
     clock.tick(animationTime - 1);
-    t.is(dialog.className, 'dialog hidden');
+    t.is(dialog.className, 'modal-dialog-inner hidden');
 
     clock.tick(1);
     t.is(container.childNodes.length, 0);
@@ -71,7 +72,7 @@ test('showing from inactive', t => {
     t.is(container.childNodes.length, 1);
     const { childNodes: [dialog] } = container.childNodes[0];
 
-    t.is(dialog.className, 'dialog');
+    t.is(dialog.className, 'modal-dialog-inner');
 });
 
 test('title', t => {
@@ -88,7 +89,7 @@ test('title', t => {
 
 test('adding title', t => {
     const { container } = getContainer({
-        id: null,
+        id: CREATE_ID,
         type: 'add'
     });
 

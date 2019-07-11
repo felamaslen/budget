@@ -10,8 +10,8 @@ import ModalDialogField from '~client/components/ModalDialog/field';
 
 import './style.scss';
 
-export function title(id) {
-    if (id) {
+export function title(type, id) {
+    if (type === 'edit') {
         return `Editing id#${id}`;
     }
 
@@ -94,7 +94,7 @@ export default function ModalDialog({
     return (
         <div className={classNames('modal-dialog', type)}>
             <div className={classNames('modal-dialog-inner', { hidden: !active, loading })}>
-                <span className="title">{title(id)}</span>
+                <span className="title">{title(type, id)}</span>
                 <ul className="form-list">
                     {fields.map(({ item, value }) => (
                         <ModalDialogField key={item}
