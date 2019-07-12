@@ -2,14 +2,14 @@ import test from 'ava';
 import '~client-test/browser';
 import sinon from 'sinon';
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
 import StocksList from '~client/containers/StocksList';
 import { stocksListRequested } from '~client/actions/stocks';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = state => state, customStore = null, ...args) => {
+const getContainer = (customProps = {}, customState = state => state, ...args) => {
     const state = customState({
         ...testState,
         stocks: {
@@ -56,7 +56,7 @@ const getContainer = (customProps = {}, customState = state => state, customStor
         }
     });
 
-    const store = customStore || createMockStore(state);
+    const store = createMockStore(state);
 
     const props = {
         enabled: true,
@@ -248,49 +248,4 @@ test('rendering a sidebar list', t => {
 
     t.is(sidebarList.tagName, 'UL');
     t.is(sidebarList.childNodes.length, 3);
-});
-
-test.skip('rendering an overall gain', t => {
-    const { container, store } = getContainer();
-
-    act(() => {
-        const noop = value => value;
-        const state = store.getState();
-        store.setState({
-            ...state,
-            stocks: {
-                ...state.stocks,
-                history: [-0.02861]
-            }
-        });
-        getContainer({}, noop, { container });
-
-        store.setState({
-            ...state,
-            stocks: {
-                ...state.stocks,
-                history: [-0.02861, -0.02003]
-            }
-        });
-        getContainer({}, noop, { container });
-    });
-
-    const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-    const [, sidebar] = graph.childNodes;
-    const [, sidebarList] = sidebar.childNodes;
-    const [gain] = sidebarList.childNodes;
-
-    t.is(gain.tagName, 'LI');
-    t.is(gain.className, 'down hl-up');
-
-    t.is(gain.childNodes.length, 2);
-
-    const [name, change] = gain.childNodes;
-
-    t.is(name.className, 'name-column');
-    t.is(name.innerHTML, 'Overall');
-
-    t.is(change.className, 'change');
-    t.is(change.innerHTML, '-0.02%');
 });
