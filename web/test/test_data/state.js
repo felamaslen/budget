@@ -9,6 +9,7 @@ export const testState = {
     },
     login: {
         loading: false,
+        initialised: true,
         error: null,
         uid: 'some-user-id',
         name: 'Some user'
