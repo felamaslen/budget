@@ -10,12 +10,12 @@ import AppLogo from '~client/components/AppLogo';
 import Navbar from '~client/components/Navbar';
 
 const Header = ({ loggedIn, loadingApi, unsavedApi, onLogout }) => (
-    <div className="navbar">
+    <header className="navbar">
         <div className="inner">
             <AppLogo loading={loadingApi} unsaved={unsavedApi} />
             {loggedIn && <Navbar onLogout={onLogout} />}
         </div>
-    </div>
+    </header>
 );
 
 Header.propTypes = {

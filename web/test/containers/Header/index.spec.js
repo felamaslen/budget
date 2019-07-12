@@ -27,12 +27,12 @@ test('rendering its basic structure', t => {
     const { container } = getHeader();
     t.is(container.childNodes.length, 1);
 
-    const [div] = container.childNodes;
-    t.is(div.tagName, 'DIV');
-    t.is(div.className, 'navbar');
-    t.is(div.childNodes.length, 1);
+    const [header] = container.childNodes;
+    t.is(header.tagName, 'HEADER');
+    t.is(header.className, 'navbar');
+    t.is(header.childNodes.length, 1);
 
-    const [inner] = div.childNodes;
+    const [inner] = header.childNodes;
     t.is(inner.tagName, 'DIV');
     t.is(inner.className, 'inner');
     t.is(inner.childNodes.length, 2);
