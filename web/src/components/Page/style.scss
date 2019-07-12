@@ -1,21 +1,13 @@
-@import '../../sass/responsive.scss';
+@import '~client/sass/responsive.scss';
 
-// desktop
-@media screen and (min-width: $width-page-mobile) {
-    .page {
-        display: flex;
+.page {
+    display: flex;
+    flex-flow: column;
+    min-height: 0;
+    width: 100%;
+
+    @media screen and (min-width: $width-page-mobile) {
         flex-flow: row;
         flex-wrap: wrap;
     }
 }
-
-
-// mobile
-@media screen and (max-width: $width-page-mobile) {
-    .page {
-        display: flex;
-        flex-flow: column;
-        min-height: 0;
-    }
-}
-

@@ -45,7 +45,6 @@ const Content = () => (
 );
 
 Content.propTypes = {
-    loggedIn: PropTypes.bool.isRequired,
     location: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired
 };
