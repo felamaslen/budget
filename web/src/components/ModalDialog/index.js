@@ -30,7 +30,11 @@ const HIDDEN = 'HIDDEN';
 const SHOWN = 'SHOWN';
 const CHANGED_ID = 'CHANGED_ID';
 
-const updateTitle = (state, { payload }) => ({ ...state, title: getTitle(payload) });
+const updatePersistentState = (state, { payload }) => ({
+    ...state,
+    title: getTitle(payload),
+    canRemove: Boolean(payload.onRemove)
+});
 
 function reducer(state, action) {
     if (action.type === HIDDEN) {
@@ -41,12 +45,12 @@ function reducer(state, action) {
     }
     if (action.type === SHOWN) {
         return {
-            ...updateTitle(state, action),
+            ...updatePersistentState(state, action),
             visible: true
         };
     }
     if (action.type === CHANGED_ID) {
-        return updateTitle(state, action);
+        return updatePersistentState(state, action);
     }
 
     return state;
@@ -64,22 +68,23 @@ export default function ModalDialog({
 }) {
     const [state, dispatch] = useReducer(reducer, {
         title: getTitle({ type, id }),
+        canRemove: Boolean(onRemove),
         visible: active
     });
 
     const timer = useRef(null);
-    const { title, visible } = state;
+    const { title, canRemove, visible } = state;
 
     useEffect(() => {
         if (active && !visible) {
-            dispatch({ type: SHOWN, payload: { type, id } });
+            dispatch({ type: SHOWN, payload: { type, id, onRemove } });
         } else if (!active && visible) {
             clearTimeout(timer.current);
             timer.current = setTimeout(() => dispatch({ type: HIDDEN }), animationTime);
         } else {
-            dispatch({ type: CHANGED_ID, payload: { type, id } });
+            dispatch({ type: CHANGED_ID, payload: { type, id, onRemove } });
         }
-    }, [type, id, active, visible]);
+    }, [type, id, onRemove, active, visible]);
 
     useEffect(() => {
         return () => clearTimeout(timer.current);
@@ -155,7 +160,7 @@ export default function ModalDialog({
                         disabled={loading}
                         onClick={onSubmitCallback}
                     >{'Do it.'}</button>
-                    {onRemove && <button
+                    {canRemove && <button
                         type="button"
                         className="button-remove"
                         disabled={loading}
