@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import compose from 'just-compose';
@@ -10,7 +10,7 @@ import ModalDialogField from '~client/components/ModalDialog/field';
 
 import './style.scss';
 
-export function title(type, id) {
+export function getTitle({ type, id }) {
     if (type === 'edit') {
         return `Editing id#${id}`;
     }
@@ -26,6 +26,32 @@ const withDefaultDate = fields => replaceAtIndex(
     { item: 'date', value: DateTime.local() }
 );
 
+const HIDDEN = 'HIDDEN';
+const SHOWN = 'SHOWN';
+const CHANGED_ID = 'CHANGED_ID';
+
+const updateTitle = (state, { payload }) => ({ ...state, title: getTitle(payload) });
+
+function reducer(state, action) {
+    if (action.type === HIDDEN) {
+        return {
+            ...state,
+            visible: false
+        };
+    }
+    if (action.type === SHOWN) {
+        return {
+            ...updateTitle(state, action),
+            visible: true
+        };
+    }
+    if (action.type === CHANGED_ID) {
+        return updateTitle(state, action);
+    }
+
+    return state;
+}
+
 export default function ModalDialog({
     active,
     loading,
@@ -36,17 +62,28 @@ export default function ModalDialog({
     onSubmit,
     onRemove
 }) {
-    const [visible, setVisible] = useState(active);
+    const [state, dispatch] = useReducer(reducer, {
+        title: getTitle({ type, id }),
+        visible: active
+    });
+
     const timer = useRef(null);
+    const { title, visible } = state;
 
     useEffect(() => {
         if (active && !visible) {
-            setVisible(true);
+            dispatch({ type: SHOWN, payload: { type, id } });
         } else if (!active && visible) {
             clearTimeout(timer.current);
-            timer.current = setTimeout(() => setVisible(false), animationTime);
+            timer.current = setTimeout(() => dispatch({ type: HIDDEN }), animationTime);
+        } else {
+            dispatch({ type: CHANGED_ID, payload: { type, id } });
         }
-    }, [active, visible]);
+    }, [type, id, active, visible]);
+
+    useEffect(() => {
+        return () => clearTimeout(timer.current);
+    }, []);
 
     const [tempFields, setTempFields] = useState();
     useEffect(() => {
@@ -94,7 +131,7 @@ export default function ModalDialog({
     return (
         <div className={classNames('modal-dialog', type)}>
             <div className={classNames('modal-dialog-inner', { hidden: !active, loading })}>
-                <span className="title">{title(type, id)}</span>
+                <span className="title">{title}</span>
                 <ul className="form-list">
                     {fields.map(({ item, value }) => (
                         <ModalDialogField key={item}
