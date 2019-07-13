@@ -1,9 +1,15 @@
-import { debounce, delay, select, call, put } from 'redux-saga/effects';
+import { debounce, delay, fork, select, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
-import { getApiKey } from '~client/selectors/api';
+import { getLocked, getApiKey } from '~client/selectors/api';
 import { getCrudRequests } from '~client/selectors/list';
-import { syncRequested, syncReceived, syncErrorOccurred } from '~client/actions/api';
+import {
+    syncRequested,
+    syncLocked,
+    syncUnlocked,
+    syncReceived,
+    syncErrorOccurred
+} from '~client/actions/api';
 import {
     LIST_ITEM_CREATED,
     LIST_ITEM_UPDATED,
@@ -11,12 +17,15 @@ import {
 } from '~client/constants/actions/list';
 import { API_PREFIX, API_BACKOFF_TIME, TIMER_UPDATE_SERVER } from '~client/constants/data';
 
-export function *updateCrud(action, backoffIndex = 0) {
+export function *updateCrud(backoffIndex = 0) {
     const requests = yield select(getCrudRequests);
     if (!requests.length) {
+        yield put(syncUnlocked());
+
         return;
     }
 
+    yield put(syncLocked());
     const apiKey = yield select(getApiKey);
 
     try {
@@ -30,13 +39,23 @@ export function *updateCrud(action, backoffIndex = 0) {
             }
         });
 
+        yield put(syncUnlocked());
         yield put(syncReceived(requests, res.data.data));
     } catch (err) {
         yield put(syncErrorOccurred(requests, err));
 
         yield delay(API_BACKOFF_TIME * (1.5 ** backoffIndex));
-        yield call(updateCrud, action, backoffIndex + 1);
+        yield call(updateCrud, backoffIndex + 1);
     }
+}
+
+export function *updateCrudFromAction() {
+    const locked = yield select(getLocked);
+    if (locked) {
+        return;
+    }
+
+    yield fork(updateCrud);
 }
 
 export default function *crudSaga() {
@@ -44,5 +63,5 @@ export default function *crudSaga() {
         LIST_ITEM_CREATED,
         LIST_ITEM_UPDATED,
         LIST_ITEM_DELETED
-    ], updateCrud);
+    ], updateCrudFromAction);
 }

@@ -1,6 +1,7 @@
 import test from 'ava';
 import {
     getApiKey,
+    getLocked,
     getUnsaved
 } from '~client/selectors/api';
 import { getTransactionsList } from '~client/modules/data';
@@ -12,6 +13,12 @@ test('getApiKey gets the API key from the state', t => {
             key: 'foo'
         }
     }), 'foo');
+});
+
+test('getLocked returns true iff the state is locked for synchronisation', t => {
+    t.true(getLocked({ api: { locked: true } }));
+    t.false(getLocked({ api: { locked: false } }));
+    t.false(getLocked({ api: {} }));
 });
 
 test('getUnsaved returns true iff the state contains unsaved optimistic updates', t => {

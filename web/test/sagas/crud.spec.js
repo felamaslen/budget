@@ -5,11 +5,18 @@ import { debounce } from 'redux-saga/effects';
 import axios from 'axios';
 
 import crudSaga, {
-    updateCrud
+    updateCrud,
+    updateCrudFromAction
 } from '~client/sagas/crud';
-import { getApiKey } from '~client/selectors/api';
+import { getLocked, getApiKey } from '~client/selectors/api';
 import { getCrudRequests } from '~client/selectors/list';
-import { syncRequested, syncReceived, syncErrorOccurred } from '~client/actions/api';
+import {
+    syncRequested,
+    syncLocked,
+    syncUnlocked,
+    syncReceived,
+    syncErrorOccurred
+} from '~client/actions/api';
 import {
     LIST_ITEM_CREATED,
     LIST_ITEM_UPDATED,
@@ -101,6 +108,8 @@ test('updateCrud calls the API with a request list', t => {
         .next()
         .select(getCrudRequests)
         .next(requests)
+        .put(syncLocked())
+        .next()
         .select(getApiKey)
         .next('my-api-key')
         .put(syncRequested())
@@ -111,6 +120,8 @@ test('updateCrud calls the API with a request list', t => {
             headers: { Authorization: 'my-api-key' }
         })
         .next(res)
+        .put(syncUnlocked())
+        .next()
         .put(syncReceived(requests, res.data.data))
         .next()
         .isDone();
@@ -118,11 +129,13 @@ test('updateCrud calls the API with a request list', t => {
     t.pass();
 });
 
-test('updateCrud doesn\'t do anything if there are no requests', t => {
+test('updateCrud just unlocks the sync if there are no requests', t => {
     testSaga(updateCrud)
         .next()
         .select(getCrudRequests)
         .next([])
+        .put(syncUnlocked())
+        .next()
         .isDone();
 
     t.pass();
@@ -137,6 +150,8 @@ test('updateCrud handles API errors using exponential backoff', t => {
         .next()
         .select(getCrudRequests)
         .next(requests)
+        .put(syncLocked())
+        .next()
         .select(getApiKey)
         .next('my-api-key')
         .put(syncRequested())
@@ -146,44 +161,58 @@ test('updateCrud handles API errors using exponential backoff', t => {
         }, {
             headers: { Authorization: 'my-api-key' }
         })
-        .throw(err);
-
-    const action = { some: 'action' };
-
-    toError(testSaga(updateCrud, action))
+        .throw(err)
         .put(syncErrorOccurred(requests, err))
-        .next()
+        .next();
+
+    toError(testSaga(updateCrud))
         .delay(API_BACKOFF_TIME)
         .next()
-        .call(updateCrud, action, 1)
+        .call(updateCrud, 1)
         .next()
         .isDone();
 
-    toError(testSaga(updateCrud, action, 1))
-        .put(syncErrorOccurred(requests, err))
-        .next()
+    toError(testSaga(updateCrud, 1))
         .delay(API_BACKOFF_TIME * 3 / 2)
         .next()
-        .call(updateCrud, action, 2)
+        .call(updateCrud, 2)
         .next()
         .isDone();
 
-    toError(testSaga(updateCrud, action, 2))
-        .put(syncErrorOccurred(requests, err))
-        .next()
+    toError(testSaga(updateCrud, 2))
         .delay(API_BACKOFF_TIME * 9 / 4)
         .next()
-        .call(updateCrud, action, 3)
+        .call(updateCrud, 3)
         .next()
         .isDone();
 
-    toError(testSaga(updateCrud, action, 3))
-        .put(syncErrorOccurred(requests, err))
-        .next()
+    toError(testSaga(updateCrud, 3))
         .delay(API_BACKOFF_TIME * 27 / 8)
         .next()
-        .call(updateCrud, action, 4)
+        .call(updateCrud, 4)
         .next()
+        .isDone();
+
+    t.pass();
+});
+
+test('updateCrudFromAction calls updateCrud', t => {
+    testSaga(updateCrudFromAction)
+        .next()
+        .select(getLocked)
+        .next(false)
+        .fork(updateCrud)
+        .next()
+        .isDone();
+
+    t.pass();
+});
+
+test('updateCrudFromAction doesn\'t do anything if the sync is locked', t => {
+    testSaga(updateCrudFromAction)
+        .next()
+        .select(getLocked)
+        .next(true)
         .isDone();
 
     t.pass();
@@ -196,7 +225,7 @@ test('crudSaga runs a debounced sync in response to CRUD actions', t => {
             LIST_ITEM_CREATED,
             LIST_ITEM_UPDATED,
             LIST_ITEM_DELETED
-        ], updateCrud))
+        ], updateCrudFromAction))
         .next()
         .isDone();
 

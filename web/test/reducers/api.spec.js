@@ -4,6 +4,8 @@ import reducer, { initialState } from '~client/reducers/api';
 import {
     dataRead,
     syncRequested,
+    syncLocked,
+    syncUnlocked,
     syncReceived,
     syncErrorOccurred
 } from '~client/actions/api';
@@ -42,6 +44,20 @@ test('SYNC_REQUESTED sets loading to true', t => {
     const result = reducer(state, action);
 
     t.is(result.loading, true);
+});
+
+test('SYNC_LOCKED locks the state', t => {
+    const action = syncLocked();
+
+    t.deepEqual(reducer({ locked: false }, action), { locked: true });
+    t.deepEqual(reducer({ locked: true }, action), { locked: true });
+});
+
+test('SYNC_UNLOCKED unlocks the state', t => {
+    const action = syncUnlocked();
+
+    t.deepEqual(reducer({ locked: false }, action), { locked: false });
+    t.deepEqual(reducer({ locked: true }, action), { locked: false });
 });
 
 test('SYNC_RECEIVED sets loading to false', t => {
