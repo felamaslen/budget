@@ -63,11 +63,11 @@ export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows]
     return Math.round(visibleTotal / numWeeks);
 });
 
-const getListPageData = (state, { page }) => state[page].data && state[page].data.total;
+const getAllTimeTotal = (state, { page }) => state[page].total || 0;
 
 export const getTotalCost = createSelector([
     getPageProp,
-    getListPageData,
+    getAllTimeTotal,
     getFundsCost
 ], (page, total, fundsTotal) => {
     if (page === 'funds') {

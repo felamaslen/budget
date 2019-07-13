@@ -84,9 +84,7 @@ export const testState = {
         items: []
     },
     food: {
-        data: {
-            total: 8755601
-        },
+        total: 8755601,
         items: [
             {
                 id: 'id19',
