@@ -8,7 +8,6 @@ import {
     getEndDate,
     getNumRows,
     getBalance,
-    getCurrentDate,
     getFutureMonths,
     getProcessedCost,
     getRowDates,
@@ -37,10 +36,6 @@ test('getNumRows gets the numRows', t => {
 
 test('getBalance gets the balance items', t => {
     t.deepEqual(getBalance(state), [13502, 19220, 11876, 14981, 14230, 12678, 0]);
-});
-
-test('getCurrentDate gets the end of the current day', t => {
-    t.deepEqual(getCurrentDate(state), DateTime.fromISO('2018-03-23T23:59:59.999Z'));
 });
 
 test('getCurrentDate does not reload the result if the day doesn\'t change', t => {

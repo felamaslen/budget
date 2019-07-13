@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { createSelector } from 'reselect';
 import { compose } from 'redux';
 
@@ -8,7 +7,7 @@ import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { arrayAverage, randnBm, replaceAtIndex } from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
-import { getNow } from '~client/selectors/now';
+import { getCurrentDate } from '~client/selectors/now';
 
 const futureCategories = ['funds', 'food', 'general', 'holiday', 'social'];
 const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
@@ -22,10 +21,6 @@ const getCost = state => state.overview.cost;
 export const getNumRows = createSelector(getRows, rows => rows && rows.length);
 
 export const getBalance = createSelector(getRows, rows => rows && rows.map(([first]) => first));
-
-const getEndOfDayTimestamp = createSelector(getNow, now => now.endOf('day').ts);
-
-export const getCurrentDate = createSelector(getEndOfDayTimestamp, ts => DateTime.fromMillis(ts));
 
 export const getFutureMonths = createSelector(getCurrentDate, getEndDate, (currentDate, endDate) => {
     if (!(currentDate && endDate)) {

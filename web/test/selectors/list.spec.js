@@ -124,6 +124,25 @@ test('getSortedPageRows sorts list rows by date, newest first, adding future / f
     ]);
 });
 
+test('getSortedPageRows doesn\'t recalculate until the next day', t => {
+    const getState = now => ({ ...stateWithUnorderedRows, now: DateTime.fromISO(now) });
+
+    const resultA = getSortedPageRows(getState('2019-07-13T16:45:23Z'), { page: 'general' });
+    const resultB = getSortedPageRows(getState('2019-07-13T18:23:19Z'), { page: 'general' });
+    const resultC = getSortedPageRows(getState('2019-07-13T23:59:46Z'), { page: 'general' });
+    const resultD = getSortedPageRows(getState('2019-07-13T23:59:59.999Z'), { page: 'general' });
+    const resultE = getSortedPageRows(getState('2019-07-14T00:00:00.000'), { page: 'general' });
+    const resultF = getSortedPageRows(getState('2019-07-14T00:00:00.001'), { page: 'general' });
+    const resultG = getSortedPageRows(getState('2019-07-14T11:32:27Z'), { page: 'general' });
+
+    t.is(resultA, resultB);
+    t.is(resultB, resultC);
+    t.is(resultC, resultD);
+    t.not(resultD, resultE);
+    t.is(resultE, resultF);
+    t.is(resultF, resultG);
+});
+
 test('getDailyTotals calculates daily totals for list pages', t => {
     const result = getDailyTotals(stateWithUnorderedRows, { page: 'general' });
 

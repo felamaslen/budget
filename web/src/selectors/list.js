@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import compose from 'just-compose';
 
 import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/data';
-import { getNow } from '~client/selectors/now';
+import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
 import { getValueForTransmit } from '~client/modules/data';
 
@@ -12,7 +12,7 @@ export const getAllPageRows = createSelector(getNonFilteredItems, items => items
     .filter(({ __optimistic }) => __optimistic !== DELETE)
 );
 
-export const getSortedPageRows = createSelector(getNow, getAllPageRows, (now, items) => {
+export const getSortedPageRows = createSelector(getCurrentDate, getAllPageRows, (now, items) => {
     if (!items) {
         return [];
     }
