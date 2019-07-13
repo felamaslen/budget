@@ -1,5 +1,13 @@
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
-import { replaceAtIndex } from '~client/modules/data';
+import { removeAtIndex, replaceAtIndex } from '~client/modules/data';
+
+function getNextOptimisticStatus(lastStatus, requestType) {
+    if (requestType === DELETE) {
+        return DELETE;
+    }
+
+    return lastStatus || requestType;
+}
 
 const withOptimisticUpdate = (key = 'items', requestType, getNewProps = () => ({})) =>
     (state, action) => {
@@ -7,12 +15,15 @@ const withOptimisticUpdate = (key = 'items', requestType, getNewProps = () => ({
         if (index === -1) {
             return {};
         }
+        if (requestType === DELETE && state[key][index].__optimistic === CREATE) {
+            return { [key]: removeAtIndex(state[key], index) };
+        }
 
         return {
             [key]: replaceAtIndex(state[key], index, {
                 ...state[key][index],
                 ...getNewProps(action),
-                __optimistic: state[key][index].__optimistic || requestType
+                __optimistic: getNextOptimisticStatus(state[key][index].__optimistic, requestType)
             })
         };
     };

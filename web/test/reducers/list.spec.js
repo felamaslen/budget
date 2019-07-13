@@ -158,6 +158,36 @@ test('LIST_ITEM_DELETED optimistically deletes a list item', t => {
     ]);
 });
 
+test('LIST_ITEM_DELETED simply removes the item from state, if it was already in an optimistic creation state', t => {
+    const state = {
+        items: [
+            { id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE }
+        ]
+    };
+
+    const action = listItemDeleted(page, 'some-fake-id');
+
+    const result = myListReducer(state, action);
+
+    t.deepEqual(result.items, []);
+});
+
+test('LIST_ITEM_DELETED updates the optimistic state to DELETE, if it was in an optimistic update state', t => {
+    const state = {
+        items: [
+            { id: 'some-real-id', some: 'prop', is: true, __optimistic: UPDATE }
+        ]
+    };
+
+    const action = listItemDeleted(page, 'some-real-id');
+
+    const result = myListReducer(state, action);
+
+    t.deepEqual(result.items, [
+        { id: 'some-real-id', some: 'prop', is: true, __optimistic: DELETE }
+    ]);
+});
+
 test('Actions intended for other pages are ignored', t => {
     const initialStateCreate = {
         items: []
