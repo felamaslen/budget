@@ -103,6 +103,11 @@ test('rendering as a string input - entering abbreviations', t => {
 
     t.deepEqual(onChange.calls[2].arguments, [DateTime.fromISO('2016-09-02')]);
 
+    fireEvent.change(input, { target: { value: '2/9/2016' } });
+    fireEvent.blur(input);
+
+    t.deepEqual(onChange.calls[3].arguments, [DateTime.fromISO('2016-09-02')]);
+
     clock.restore();
 });
 

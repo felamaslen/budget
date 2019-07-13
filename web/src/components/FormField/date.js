@@ -5,6 +5,14 @@ import { useField } from '~client/hooks/field';
 
 const setValueDate = isoDate => DateTime.fromISO(isoDate);
 
+function parseYear(year) {
+    if (year && year.length <= 2) {
+        return 2000 + Number(year);
+    }
+
+    return Number(year);
+}
+
 function setValueString(date) {
     const shortMatch = date.match(/^(\d{1,2})(\/(\d{1,2})(\/(\d{2,4}))?)?$/);
     if (!shortMatch) {
@@ -16,7 +24,7 @@ function setValueString(date) {
     const now = DateTime.local();
 
     return DateTime.fromObject({
-        year: (Number(year) + 2000) || now.year,
+        year: parseYear(year) || now.year,
         month: Number(month) || now.month,
         day: Number(day) || now.day
     });
