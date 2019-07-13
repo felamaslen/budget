@@ -71,7 +71,7 @@ export default function ListFootMobile({ page, active, setActive, activeItem, on
                     {'Add'}
                 </button>
             </div>
-            <ModalDialog
+            {(!active || typeof active === 'string') && <ModalDialog
                 type={modalDialogType}
                 active={Boolean(active)}
                 id={active}
@@ -79,14 +79,14 @@ export default function ListFootMobile({ page, active, setActive, activeItem, on
                 onCancel={onCloseModal}
                 onSubmit={onSubmit}
                 onRemove={onRemove}
-            />
+            />}
         </>
     );
 }
 
 ListFootMobile.propTypes = {
     page: PropTypes.string.isRequired,
-    active: PropTypes.string,
+    active: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     setActive: PropTypes.func.isRequired,
     activeItem: PropTypes.shape({
         id: PropTypes.string.isRequired

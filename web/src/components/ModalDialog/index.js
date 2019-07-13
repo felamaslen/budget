@@ -173,7 +173,7 @@ export default function ModalDialog({
 }
 
 ModalDialog.propTypes = {
-    active: PropTypes.bool,
+    active: PropTypes.bool.isRequired,
     loading: PropTypes.bool,
     type: PropTypes.string,
     id: PropTypes.string,

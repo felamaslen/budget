@@ -100,7 +100,7 @@ export default function CrudList({
     }, [nav, active, setActive, items]);
 
     const onSetCreateActive = useCallback(() => setActive(CREATE_ID), [setActive]);
-    const createActive = nav
+    const createActive = active && typeof active === 'object'
         ? active.index === -1
         : active === CREATE_ID;
 
@@ -122,7 +122,7 @@ export default function CrudList({
 
     const activeItem = useMemo(() => {
         if (nav) {
-            if (active.index === null || active.index === -1) {
+            if (!active || active.index === null || active.index === -1) {
                 return null;
             }
 
@@ -166,7 +166,7 @@ export default function CrudList({
                         onDelete={onDelete}
                         nav={nav}
                         active={active}
-                        isActive={nav
+                        isActive={active && typeof active === 'object'
                             ? index === active.index
                             : item.id === active
                         }
