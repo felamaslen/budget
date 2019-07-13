@@ -15,7 +15,14 @@ import {
     LIST_ITEM_UPDATED,
     LIST_ITEM_DELETED
 } from '~client/constants/actions/list';
-import { CREATE, UPDATE, DELETE, API_PREFIX, TIMER_UPDATE_SERVER } from '~client/constants/data';
+import {
+    CREATE,
+    UPDATE,
+    DELETE,
+    API_PREFIX,
+    API_BACKOFF_TIME,
+    TIMER_UPDATE_SERVER
+} from '~client/constants/data';
 
 const requests = [
     {
@@ -88,8 +95,6 @@ const httpRequests = [
 ];
 
 test('updateCrud calls the API with a request list', t => {
-    t.is(1, 1);
-
     const res = { data: { data: { isRes: true } } };
 
     testSaga(updateCrud)
@@ -109,14 +114,26 @@ test('updateCrud calls the API with a request list', t => {
         .put(syncReceived(requests, res.data.data))
         .next()
         .isDone();
+
+    t.pass();
 });
 
-test('updateCrud handles API errors', t => {
-    t.is(1, 1);
+test('updateCrud doesn\'t do anything if there are no requests', t => {
+    testSaga(updateCrud)
+        .next()
+        .select(getCrudRequests)
+        .next([])
+        .isDone();
 
+    t.pass();
+});
+
+test('updateCrud handles API errors using exponential backoff', t => {
     const err = new Error('some api error');
 
-    testSaga(updateCrud)
+    t.true(API_BACKOFF_TIME > 100);
+
+    const toError = saga => saga
         .next()
         .select(getCrudRequests)
         .next(requests)
@@ -129,14 +146,50 @@ test('updateCrud handles API errors', t => {
         }, {
             headers: { Authorization: 'my-api-key' }
         })
-        .throw(err)
+        .throw(err);
+
+    const action = { some: 'action' };
+
+    toError(testSaga(updateCrud, action))
         .put(syncErrorOccurred(requests, err))
         .next()
+        .delay(API_BACKOFF_TIME)
+        .next()
+        .call(updateCrud, action, 1)
+        .next()
         .isDone();
+
+    toError(testSaga(updateCrud, action, 1))
+        .put(syncErrorOccurred(requests, err))
+        .next()
+        .delay(API_BACKOFF_TIME * 3 / 2)
+        .next()
+        .call(updateCrud, action, 2)
+        .next()
+        .isDone();
+
+    toError(testSaga(updateCrud, action, 2))
+        .put(syncErrorOccurred(requests, err))
+        .next()
+        .delay(API_BACKOFF_TIME * 9 / 4)
+        .next()
+        .call(updateCrud, action, 3)
+        .next()
+        .isDone();
+
+    toError(testSaga(updateCrud, action, 3))
+        .put(syncErrorOccurred(requests, err))
+        .next()
+        .delay(API_BACKOFF_TIME * 27 / 8)
+        .next()
+        .call(updateCrud, action, 4)
+        .next()
+        .isDone();
+
+    t.pass();
 });
 
 test('crudSaga runs a debounced sync in response to CRUD actions', t => {
-    t.is(1, 1);
     testSaga(crudSaga)
         .next()
         .is(debounce(TIMER_UPDATE_SERVER, [
@@ -146,4 +199,6 @@ test('crudSaga runs a debounced sync in response to CRUD actions', t => {
         ], updateCrud))
         .next()
         .isDone();
+
+    t.pass();
 });
