@@ -33,38 +33,31 @@ const getContainer = memoize(() => {
     return render(<ListRowMobile {...props} />);
 });
 
-test('rendering an <li />', t => {
+test('rendering the children of a list item', t => {
     const { container } = getContainer();
-
-    t.is(container.childNodes.length, 1);
-    const [li] = container.childNodes;
-
-    t.is(li.tagName, 'LI');
-    t.is(li.childNodes.length, 4);
+    t.is(container.childNodes.length, 4);
 });
 
 test('cells', t => {
     const { container } = getContainer();
-    const [li] = container.childNodes;
-
-    const [date, item, cost] = li.childNodes;
+    const [date, item, cost] = container.childNodes;
 
     t.is(date.tagName, 'SPAN');
     t.is(item.tagName, 'SPAN');
     t.is(cost.tagName, 'SPAN');
 
-    t.is(date.innerHTML, `<span class="date"><span class="editable editable-date editable-inactive">${
-        DateTime.fromISO('2019-07-06T18:39:32Z').toLocaleString(DateTime.DATE_SHORT)
-    }</span></span>`);
-    t.is(item.innerHTML, '<span class="item"><span class="editable editable-item editable-inactive">something</span></span>');
-    t.is(cost.innerHTML, '<span class="cost"><span class="editable editable-cost editable-inactive">£3.43</span></span>');
+    t.is(date.className, 'column date');
+    t.is(item.className, 'column item');
+    t.is(cost.className, 'column cost');
+
+    t.is(date.innerHTML, DateTime.fromISO('2019-07-06T18:39:32Z').toLocaleString(DateTime.DATE_SHORT));
+    t.is(item.innerHTML, 'something');
+    t.is(cost.innerHTML, '£3.43');
 });
 
 test('custom after row component', t => {
     const { container } = getContainer();
-    const [li] = container.childNodes;
-
-    const [, , , after] = li.childNodes;
+    const [, , , after] = container.childNodes;
 
     t.is(after.tagName, 'SPAN');
     t.is(after.className, 'my-after-row');

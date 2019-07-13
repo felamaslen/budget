@@ -41,7 +41,7 @@ test('rendering inactive editable item', t => {
 
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
-    t.notRegex(span.className, /active/);
+    t.notRegex(span.className, /editable-active/);
 });
 
 test('Undefined value is renderd as a blank string', t => {
@@ -66,12 +66,12 @@ test('Falsy transactions are rendered as 0 items', t => {
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'transactions');
+    t.is(span.className, 'editable editable-transactions editable-inactive');
     t.is(span.childNodes.length, 1);
 
     const [editable] = span.childNodes;
     t.is(editable.tagName, 'SPAN');
-    t.is(editable.className, 'editable editable-transactions editable-inactive');
+    t.is(editable.className, 'editable-inner');
     t.is(editable.childNodes.length, 1);
 
     const [value] = editable.childNodes;

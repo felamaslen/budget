@@ -36,7 +36,7 @@ EditableActive.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-function formatValue(item, value) {
+export function formatValue(item, value) {
     if (item === 'date') {
         return value.toLocaleString(DateTime.DATE_SHORT);
     }
@@ -66,8 +66,8 @@ export default function Editable(props) {
     }
 
     return (
-        <span className={item}>
-            <span className={classNames('editable', `editable-${item}`, 'editable-inactive')}>
+        <span className={classNames('editable', `editable-${item}`, 'editable-inactive')}>
+            <span className="editable-inner">
                 {formatValue(item, value)}
             </span>
         </span>
