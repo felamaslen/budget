@@ -15,6 +15,7 @@ import {
     getPage,
     getTreeVisible,
     getCost,
+    getDeepCost,
     getBlocks,
     getDeepBlocks
 } from '~client/selectors/analysis';
@@ -42,6 +43,7 @@ function PageAnalysis({
     description,
     treeVisible,
     deepBlockName,
+    deepCost,
     deepBlocks,
     onRequest,
     toggleTreeItem,
@@ -60,12 +62,16 @@ function PageAnalysis({
 
     const status = useMemo(() => {
         const [activeMain, activeSub] = activeBlock;
+        const activeCost = deepCost || cost;
 
-        if (!(cost && activeMain)) {
+        if (!(activeCost && activeMain)) {
             return '';
         }
 
-        const main = cost.find(({ name }) => name === activeMain);
+        const main = activeCost.find(({ name }) => name === activeMain);
+        if (!main) {
+            return '';
+        }
         if (activeSub) {
             const { total } = main.subTree.find(({ name }) => name === activeSub);
 
@@ -73,7 +79,7 @@ function PageAnalysis({
         }
 
         return `${capitalise(activeMain)} (${formatCurrency(main.total, { raw: true })})`;
-    }, [cost, activeBlock]);
+    }, [cost, deepCost, activeBlock]);
 
     if (!cost) {
         return null;
@@ -122,6 +128,7 @@ PageAnalysis.propTypes = {
     description: PropTypes.string,
     treeVisible: PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
     deepBlockName: PropTypes.string,
+    deepCost: costShape,
     deepBlocks: blocksShape,
     onBlockClick: PropTypes.func.isRequired,
     onRequest: PropTypes.func.isRequired,
@@ -137,6 +144,7 @@ const mapStateToProps = state => ({
     page: getPage(state),
     description: state.analysis.description,
     deepBlockName: state.analysis.deepBlock,
+    deepCost: getDeepCost(state),
     deepBlocks: getDeepBlocks(state),
     treeVisible: getTreeVisible(state),
     timeline: state.analysis.timeline
