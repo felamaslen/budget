@@ -118,12 +118,12 @@ export default function ModalDialog({
                         disabled={loading}
                         onClick={onSubmitCallback}
                     >{'Do it.'}</button>
-                    <button
+                    {onRemove && <button
                         type="button"
                         className="button-remove"
                         disabled={loading}
                         onClick={onRemove}
-                    >&minus;</button>
+                    >&minus;</button>}
                 </div>
             </div>
         </div>
@@ -150,5 +150,5 @@ ModalDialog.defaultProps = {
     type: 'edit',
     id: null,
     fields: [],
-    onRemove: () => null
+    onRemove: null
 };

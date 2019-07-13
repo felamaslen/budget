@@ -117,7 +117,54 @@ test('form list', t => {
 });
 
 test('buttons', t => {
-    const { container } = getContainer();
+    const onCancel = sinon.spy();
+    const onSubmit = sinon.spy();
+
+    const { container } = getContainer({
+        onCancel,
+        onSubmit
+    });
+    const [div] = container.childNodes;
+    const [dialog] = div.childNodes;
+    const [, , buttons] = dialog.childNodes;
+
+    t.is(buttons.tagName, 'DIV');
+    t.is(buttons.className, 'buttons');
+    t.is(buttons.childNodes.length, 2);
+
+    const [cancel, submit] = buttons.childNodes;
+
+    t.is(cancel.tagName, 'BUTTON');
+    t.is(cancel.className, 'button-cancel');
+    t.is(cancel.type, 'button');
+    t.is(cancel.disabled, false);
+    t.is(cancel.innerHTML, 'nope.avi');
+
+    t.false(onCancel.calledOnce);
+    fireEvent.click(cancel);
+    t.true(onCancel.calledOnce);
+
+    t.is(submit.tagName, 'BUTTON');
+    t.is(submit.className, 'button-submit');
+    t.is(submit.type, 'button');
+    t.is(submit.disabled, false);
+    t.is(submit.innerHTML, 'Do it.');
+
+    t.false(onSubmit.calledOnce);
+    fireEvent.click(submit);
+    t.true(onSubmit.calledOnce);
+    t.true(onSubmit.calledWith({
+        id: 'some-id',
+        item: 'some item',
+        cost: 342
+    }));
+});
+
+test('Optional remove button', t => {
+    const onRemove = sinon.spy();
+    const { container } = getContainer({
+        onRemove
+    });
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
     const [, , buttons] = dialog.childNodes;
@@ -128,23 +175,18 @@ test('buttons', t => {
 
     const [cancel, submit, remove] = buttons.childNodes;
 
-    t.is(cancel.tagName, 'BUTTON');
     t.is(cancel.className, 'button-cancel');
-    t.is(cancel.type, 'button');
-    t.is(cancel.disabled, false);
-    t.is(cancel.innerHTML, 'nope.avi');
-
-    t.is(submit.tagName, 'BUTTON');
     t.is(submit.className, 'button-submit');
-    t.is(submit.type, 'button');
-    t.is(submit.disabled, false);
-    t.is(submit.innerHTML, 'Do it.');
 
     t.is(remove.tagName, 'BUTTON');
     t.is(remove.className, 'button-remove');
     t.is(remove.type, 'button');
     t.is(remove.disabled, false);
     t.is(remove.innerHTML, '−');
+
+    t.false(onRemove.calledOnce);
+    fireEvent.click(remove);
+    t.true(onRemove.calledOnce);
 });
 
 test('onCancel event', t => {
@@ -216,6 +258,7 @@ test('onSubmit does not run if values are invalid', t => {
 
 test('buttons are disabled while loading', t => {
     const { container } = getContainer({
+        onRemove: () => null,
         loading: true
     });
 
