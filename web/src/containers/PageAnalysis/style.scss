@@ -208,6 +208,24 @@
                 width: 400px;
                 align-self: center;
             }
+
+            .tree {
+                &-list {
+                    & > .tree-list-item > .main, .sub-tree .tree-list-item {
+                        &:hover {
+                            background: $color-blue;
+                        }
+                    }
+                }
+            }
+
+            .block-view {
+                .block, .sub-block {
+                    &.active {
+                        background: $color-highlight;
+                    }
+                }
+            }
         }
     }
 
@@ -266,28 +284,14 @@
                     min-height: 0;
                     flex: 1 1 auto;
                     margin: 1em;
-
-                    & > .tree-list-item > .main, .sub-tree .tree-list-item {
-                        &:hover {
-                            background: $color-blue;
-                        }
-                    }
                 }
             }
-           .block-view {
-               grid-row: 2;
-               grid-column: 2;
-               width: 500px;
-               height: 500px;
-
-               .block-tree-outer {
-               }
-               .block, .sub-block {
-                   &.active {
-                       background: $color-highlight;
-                   }
-               }
-           }
+            .block-view {
+                grid-row: 2;
+                grid-column: 2;
+                width: 500px;
+                height: 500px;
+            }
         }
     }
 }
