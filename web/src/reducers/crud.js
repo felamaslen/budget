@@ -9,30 +9,76 @@ function getNextOptimisticStatus(lastStatus, requestType) {
     return lastStatus || requestType;
 }
 
-const withOptimisticUpdate = (key = 'items', requestType, getNewProps = () => ({})) =>
-    (state, action) => {
+const getOptimisticUpdateItems = (key, requestType, getNewProps) =>
+    (state, action, index) => {
+        if (requestType === DELETE && state[key][index].__optimistic === CREATE) {
+            return removeAtIndex(state[key], index);
+        }
+
+        return replaceAtIndex(state[key], index, {
+            ...state[key][index],
+            ...getNewProps(action),
+            __optimistic: getNextOptimisticStatus(state[key][index].__optimistic, requestType)
+        });
+    };
+
+const getNewTotals = (key, requestType) => (state, nextItems, index) => {
+    const withoutOld = state.total - state[key][index].cost;
+    if (requestType === DELETE) {
+        return withoutOld;
+    }
+
+    return withoutOld + nextItems[index].cost;
+};
+
+const withOptimisticUpdate = (
+    key = 'items',
+    requestType,
+    withTotals,
+    getNewProps = () => ({})
+) => {
+    const getItems = getOptimisticUpdateItems(key, requestType, getNewProps);
+    const getTotals = getNewTotals(key, requestType);
+
+    return (state, action) => {
         const index = state[key].findIndex(({ id }) => id === action.id);
         if (index === -1) {
             return {};
         }
-        if (requestType === DELETE && state[key][index].__optimistic === CREATE) {
-            return { [key]: removeAtIndex(state[key], index) };
+
+        const items = getItems(state, action, index);
+
+        if (withTotals) {
+            return {
+                [key]: items,
+                total: getTotals(state, items, index)
+            };
         }
 
-        return {
-            [key]: replaceAtIndex(state[key], index, {
-                ...state[key][index],
-                ...getNewProps(action),
-                __optimistic: getNextOptimisticStatus(state[key][index].__optimistic, requestType)
-            })
-        };
+        return { [key]: items };
+    };
+};
+
+export const onCreateOptimistic = (key = 'items', withTotals = false) =>
+    (state, { item, fakeId }) => {
+        const items = state[key].concat([{ ...item, id: fakeId, __optimistic: CREATE }]);
+
+        if (withTotals) {
+            return { [key]: items, total: state.total + item.cost };
+        }
+
+        return { [key]: items };
     };
 
-export const onCreateOptimistic = (key = 'items') =>
-    (state, { item, fakeId }) => ({
-        [key]: state[key].concat([{ ...item, id: fakeId, __optimistic: CREATE }])
-    });
+export const onUpdateOptimistic = (key, withTotals) => withOptimisticUpdate(
+    key,
+    UPDATE,
+    withTotals,
+    ({ item }) => item
+);
 
-export const onUpdateOptimistic = key => withOptimisticUpdate(key, UPDATE, ({ item }) => item);
-
-export const onDeleteOptimistic = key => withOptimisticUpdate(key, DELETE);
+export const onDeleteOptimistic = (key, withTotals) => withOptimisticUpdate(
+    key,
+    DELETE,
+    withTotals
+);

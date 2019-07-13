@@ -87,10 +87,12 @@ const onSyncReceived = page => (state, { requests, res }) => {
         confirmDeletes(requestItems)
     )(state.items);
 
-    return { items };
+    const total = requestItems.reduce((last, { res: { total: next = last } = {} }) => next, 0);
+
+    return { items, total };
 };
 
-export default function makeListReducer(page, extraHandlers = {}, extraState = {}) {
+export default function makeListReducer(page, extraHandlers = {}, extraState = {}, withTotals = false) {
     const initialState = {
         ...extraState,
         items: []
@@ -99,9 +101,9 @@ export default function makeListReducer(page, extraHandlers = {}, extraState = {
     const handlers = {
         [LOGGED_OUT]: () => initialState,
         [DATA_READ]: onRead(page),
-        [LIST_ITEM_CREATED]: filterByPage(page, onCreateOptimistic()),
-        [LIST_ITEM_UPDATED]: filterByPage(page, onUpdateOptimistic()),
-        [LIST_ITEM_DELETED]: filterByPage(page, onDeleteOptimistic()),
+        [LIST_ITEM_CREATED]: filterByPage(page, onCreateOptimistic('items', withTotals)),
+        [LIST_ITEM_UPDATED]: filterByPage(page, onUpdateOptimistic('items', withTotals)),
+        [LIST_ITEM_DELETED]: filterByPage(page, onDeleteOptimistic('items', withTotals)),
         [SYNC_RECEIVED]: onSyncReceived(page),
         ...extraHandlers
     };
@@ -134,5 +136,5 @@ export function makeDailyListReducer(page, extraHandlers = {}) {
     }, {
         total: 0,
         olderExists: null
-    });
+    }, true);
 }

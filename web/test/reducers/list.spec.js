@@ -25,6 +25,8 @@ const initialState = {
 
 const myListReducer = makeListReducer(page, customHandlers, initialState);
 
+const dailyReducer = makeDailyListReducer(page);
+
 test('Null action returns the initial state', t => {
     t.deepEqual(myListReducer(undefined, null), { items: [], baz: 'initial baz' });
 });
@@ -55,9 +57,7 @@ test('DATA_READ inserts rows into the state', t => {
     ]);
 });
 
-test('makeDailyListReducer makes a reducer which inserts the all-time total value from response', t => {
-    const dailyReducer = makeDailyListReducer(page);
-
+test('[daily] DATA_READ inserts the all-time total value from response', t => {
     const initialStateDaily = {
         total: 0,
         olderExists: null,
@@ -110,6 +110,23 @@ test('LIST_ITEM_CREATED optimistically creates a list item', t => {
     ]);
 });
 
+test('[daily] LIST_ITEM_CREATED updates the total', t => {
+    const state = {
+        total: 3,
+        items: []
+    };
+
+    const action = listItemCreated(page, {
+        some: 'prop',
+        cost: 34,
+        is: true
+    });
+
+    const result = dailyReducer(state, action);
+
+    t.is(result.total, 3 + 34);
+});
+
 test('LIST_ITEM_UPDATED optimistically updates a list item', t => {
     const state = {
         items: [
@@ -124,6 +141,24 @@ test('LIST_ITEM_UPDATED optimistically updates a list item', t => {
     t.deepEqual(result.items, [
         { id: 'some-real-id', some: 'different prop', is: true, __optimistic: UPDATE }
     ]);
+});
+
+test('[daily] LIST_ITEM_UPDATED updates the total', t => {
+    const state = {
+        total: 5,
+        items: [
+            { id: 'some-real-id', some: 'prop', cost: 3, is: true }
+        ]
+    };
+
+    const action = listItemUpdated(page, 'some-real-id', {
+        cost: 41,
+        some: 'different prop'
+    });
+
+    const result = dailyReducer(state, action);
+
+    t.is(result.total, 5 + 41 - 3);
 });
 
 test('LIST_ITEM_UPDATED does not alter the status of optimistically created items', t => {
@@ -156,6 +191,21 @@ test('LIST_ITEM_DELETED optimistically deletes a list item', t => {
     t.deepEqual(result.items, [
         { id: 'some-real-id', some: 'prop', is: true, __optimistic: DELETE }
     ]);
+});
+
+test('[daily] LIST_ITEM_DELETED updates the total', t => {
+    const state = {
+        total: 51,
+        items: [
+            { id: 'some-real-id', some: 'prop', cost: 29, is: true }
+        ]
+    };
+
+    const action = listItemDeleted(page, 'some-real-id');
+
+    const result = dailyReducer(state, action);
+
+    t.is(result.total, 51 - 29);
 });
 
 test('LIST_ITEM_DELETED simply removes the item from state, if it was already in an optimistic creation state', t => {
@@ -237,19 +287,33 @@ const syncRequests = [
         fakeId: 'some-fake-id',
         route: page,
         body: { thisItem: true }
+    },
+    {
+        type: CREATE,
+        fakeId: 'different-fake-id',
+        route: 'different-route',
+        body: { some: 'data' }
     }
 ];
 
 const syncResponse = [
     {
-        id: 'real-id-a'
+        id: 'real-id-a',
+        total: 516
     },
     {
         total: 2354
     },
-    null,
     {
-        id: 'real-id-b'
+        total: 1976
+    },
+    {
+        id: 'real-id-b',
+        total: 117
+    },
+    {
+        id: 'real-id-different',
+        total: 1856
     }
 ];
 
@@ -268,6 +332,21 @@ test('SYNC_RECEIVED updates optimistically-created items with their real IDs', t
     t.deepEqual(result.items[0], { id: 'real-id-b', some: 'prop', is: true, __optimistic: null });
 });
 
+test('[daily] SYNC_RECEIVED updates the list total from the last response', t => {
+    const state = {
+        total: 100,
+        items: [
+            { id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE }
+        ]
+    };
+
+    const action = syncReceived(syncRequests, syncResponse);
+
+    const result = dailyReducer(state, action);
+
+    t.is(result.total, 117);
+});
+
 test('SYNC_RECEIVED marks optimistically-updated items as confirmed', t => {
     const state = {
         items: [
@@ -281,6 +360,8 @@ test('SYNC_RECEIVED marks optimistically-updated items as confirmed', t => {
 
     t.is(result.items.length, 1);
     t.deepEqual(result.items[0], { id: 'real-id-z', some: 'prop', is: true, __optimistic: null });
+
+    t.is(result.total, 117);
 });
 
 test('SYNC_RECEIVED removes optimistically-deleted items from state', t => {
@@ -295,6 +376,7 @@ test('SYNC_RECEIVED removes optimistically-deleted items from state', t => {
     const result = myListReducer(state, action);
 
     t.is(result.items.length, 0);
+    t.is(result.total, 117);
 });
 
 test('Custom handlers produce custom results', t => {
