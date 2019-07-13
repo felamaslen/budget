@@ -105,20 +105,20 @@ export const testState = {
                 shop: 'bak2'
             },
             {
-                id: 'id81',
-                date: DateTime.fromISO('2018-02-03'),
-                item: 'foo2',
-                category: 'bar2',
-                cost: 876,
-                shop: 'bak2'
-            },
-            {
                 id: 'id29',
                 date: DateTime.fromISO('2018-02-02'),
                 item: 'foo3',
                 category: 'bar3',
                 cost: 498,
                 shop: 'bak3'
+            },
+            {
+                id: 'id81',
+                date: DateTime.fromISO('2018-02-03'),
+                item: 'foo2',
+                category: 'bar2',
+                cost: 876,
+                shop: 'bak2'
             }
         ]
     },

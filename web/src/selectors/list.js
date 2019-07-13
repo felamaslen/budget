@@ -11,7 +11,7 @@ export const getAllPageRows = createSelector(getNonFilteredItems, items => items
     .filter(({ __optimistic }) => __optimistic !== DELETE)
 );
 
-export const getSortedPageRows = createSelector(getAllPageRows, items => items
+export const getSortedPageRows = createSelector(getAllPageRows, items => items && items
     .slice()
     .sort(({ date: dateA }, { date: dateB }) => dateB - dateA));
 
@@ -39,7 +39,7 @@ export const getDailyTotals = createSelector(getPageProp, getSortedPageRows, (pa
     return totals;
 });
 
-export const getWeeklyAverages = createSelector([getPageProp, getAllPageRows], (page, rows) => {
+export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows], (page, rows) => {
     if (!(rows && PAGES[page].daily)) {
         return null;
     }
