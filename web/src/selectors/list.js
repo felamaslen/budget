@@ -17,18 +17,35 @@ export const getSortedPageRows = createSelector(getNow, getAllPageRows, (now, it
         return [];
     }
 
+    const getDaily = (last, item, index) => {
+        const sum = last + item.cost;
+        if ((index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day')) ||
+            index === items.length - 1
+        ) {
+            return { daily: sum, dailySum: 0 };
+        }
+
+        return { daily: null, dailySum: sum };
+    };
+
     const [sorted] = items.slice()
         .sort(({ date: dateA }, { date: dateB }) => dateB - dateA)
-        .reduce(([last, wasFuture], item) => {
+        .reduce(([last, wasFuture, lastDailySum], item, index) => {
             const future = wasFuture && item.date > now;
             const firstPresent = wasFuture && !future;
+            const { daily, dailySum } = getDaily(lastDailySum, item, index);
 
-            return [last.concat([{
-                ...item,
+            return [
+                last.concat([{
+                    ...item,
+                    future,
+                    firstPresent,
+                    daily
+                }]),
                 future,
-                firstPresent
-            }]), future];
-        }, [[], true]);
+                dailySum
+            ];
+        }, [[], true, 0]);
 
     return sorted;
 });

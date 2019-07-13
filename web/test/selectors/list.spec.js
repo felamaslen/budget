@@ -73,7 +73,7 @@ test('getAllPageRows excludes optimistically deleted items', t => {
     t.deepEqual(ids, ['id300', 'id29', 'id81', 'id19']);
 });
 
-test('getSortedPageRows sorts list rows by date, newest first, adding future / first present props', t => {
+test('getSortedPageRows sorts list rows by date, newest first, adding future / first present / daily props', t => {
     const result = getSortedPageRows(stateWithUnorderedRows, { page: 'general' });
 
     t.deepEqual(result, [
@@ -85,7 +85,8 @@ test('getSortedPageRows sorts list rows by date, newest first, adding future / f
             cost: 29,
             shop: 'bak3',
             future: true,
-            firstPresent: false
+            firstPresent: false,
+            daily: 29
         },
         {
             id: 'id300',
@@ -95,7 +96,8 @@ test('getSortedPageRows sorts list rows by date, newest first, adding future / f
             cost: 1139,
             shop: 'bak2',
             future: false,
-            firstPresent: true
+            firstPresent: true,
+            daily: null
         },
         {
             id: 'id81',
@@ -105,7 +107,8 @@ test('getSortedPageRows sorts list rows by date, newest first, adding future / f
             cost: 876,
             shop: 'bak2',
             future: false,
-            firstPresent: false
+            firstPresent: false,
+            daily: 1139 + 876
         },
         {
             id: 'id29',
@@ -115,7 +118,8 @@ test('getSortedPageRows sorts list rows by date, newest first, adding future / f
             cost: 498,
             shop: 'bak3',
             future: false,
-            firstPresent: false
+            firstPresent: false,
+            daily: 498
         }
     ]);
 });
