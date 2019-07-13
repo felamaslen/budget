@@ -2,6 +2,7 @@ import { createSelector } from 'reselect';
 import compose from 'just-compose';
 
 import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/data';
+import { getNow } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
 import { getValueForTransmit } from '~client/modules/data';
 
@@ -11,9 +12,26 @@ export const getAllPageRows = createSelector(getNonFilteredItems, items => items
     .filter(({ __optimistic }) => __optimistic !== DELETE)
 );
 
-export const getSortedPageRows = createSelector(getAllPageRows, items => items && items
-    .slice()
-    .sort(({ date: dateA }, { date: dateB }) => dateB - dateA));
+export const getSortedPageRows = createSelector(getNow, getAllPageRows, (now, items) => {
+    if (!items) {
+        return [];
+    }
+
+    const [sorted] = items.slice()
+        .sort(({ date: dateA }, { date: dateB }) => dateB - dateA)
+        .reduce(([last, wasFuture], item) => {
+            const future = wasFuture && item.date > now;
+            const firstPresent = wasFuture && !future;
+
+            return [last.concat([{
+                ...item,
+                future,
+                firstPresent
+            }]), future];
+        }, [[], true]);
+
+    return sorted;
+});
 
 const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
     page,
@@ -23,7 +41,7 @@ const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
 const getPageProp = (state, { page }) => page;
 
 export const getDailyTotals = createSelector(getPageProp, getSortedPageRows, (page, rows) => {
-    if (!(rows && PAGES[page].daily)) {
+    if (!PAGES[page].daily) {
         return null;
     }
 

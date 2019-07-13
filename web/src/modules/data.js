@@ -6,6 +6,7 @@ import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
 import { PAGES } from '~client/constants/data';
 
 export const IDENTITY = state => state;
+export const NULL = () => null;
 
 export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD || '') {
     const periodRegex = /^([a-z]+)([0-9]+)$/;
@@ -248,28 +249,6 @@ export function getAddDefaultValues(page, now) {
 
         return null;
     });
-}
-
-export function sortRowsByDate(rows, page, now) {
-    const dateKey = PAGES[page].cols.indexOf('date');
-
-    return rows
-        .sort(({ id: idA, cols: colsA }, { id: idB, cols: colsB }) =>
-            (colsB[dateKey] - colsA[dateKey]) || (idB - idA)
-        )
-        .reduce(({ lastFuture, accum }, row) => {
-            const thisFuture = row.cols[dateKey] > now;
-
-            return {
-                lastFuture: thisFuture,
-                accum: accum.concat([{
-                    ...row,
-                    future: thisFuture,
-                    firstPresent: !thisFuture && lastFuture
-                }])
-            };
-        }, { lastFuture: false, accum: [] })
-        .accum;
 }
 
 export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>

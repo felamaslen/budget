@@ -15,6 +15,7 @@ import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
 const stateWithUnorderedRows = {
     ...state,
+    now: DateTime.fromISO('2018-04-13T12:45:23Z'),
     general: {
         ...state.general,
         items: [
@@ -72,7 +73,7 @@ test('getAllPageRows excludes optimistically deleted items', t => {
     t.deepEqual(ids, ['id300', 'id29', 'id81', 'id19']);
 });
 
-test('getSortedPageRows sorts list rows by date, newest first', t => {
+test('getSortedPageRows sorts list rows by date, newest first, adding future / first present props', t => {
     const result = getSortedPageRows(stateWithUnorderedRows, { page: 'general' });
 
     t.deepEqual(result, [
@@ -82,7 +83,9 @@ test('getSortedPageRows sorts list rows by date, newest first', t => {
             item: 'foo3',
             category: 'bar3',
             cost: 29,
-            shop: 'bak3'
+            shop: 'bak3',
+            future: true,
+            firstPresent: false
         },
         {
             id: 'id300',
@@ -90,7 +93,9 @@ test('getSortedPageRows sorts list rows by date, newest first', t => {
             item: 'foo1',
             category: 'bar1',
             cost: 1139,
-            shop: 'bak2'
+            shop: 'bak2',
+            future: false,
+            firstPresent: true
         },
         {
             id: 'id81',
@@ -98,7 +103,9 @@ test('getSortedPageRows sorts list rows by date, newest first', t => {
             item: 'foo2',
             category: 'bar2',
             cost: 876,
-            shop: 'bak2'
+            shop: 'bak2',
+            future: false,
+            firstPresent: false
         },
         {
             id: 'id29',
@@ -106,7 +113,9 @@ test('getSortedPageRows sorts list rows by date, newest first', t => {
             item: 'foo3',
             category: 'bar3',
             cost: 498,
-            shop: 'bak3'
+            shop: 'bak3',
+            future: false,
+            firstPresent: false
         }
     ]);
 });
