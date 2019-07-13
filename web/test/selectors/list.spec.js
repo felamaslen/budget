@@ -2,6 +2,7 @@ import test from 'ava';
 import { DateTime } from 'luxon';
 
 import {
+    getAllPageRows,
     getSortedPageRows,
     getDailyTotals,
     getWeeklyAverages,
@@ -42,6 +43,15 @@ const stateWithUnorderedRows = {
                 shop: 'bak2'
             },
             {
+                id: 'id956__SHOULD_NOT_SEE_THIS!',
+                date: DateTime.fromISO('2018-03-09'),
+                item: 'foo4',
+                category: 'bar4',
+                cost: 198,
+                shop: 'bak4',
+                __optimistic: DELETE
+            },
+            {
                 id: 'id19',
                 date: DateTime.fromISO('2018-04-17'),
                 item: 'foo3',
@@ -52,6 +62,15 @@ const stateWithUnorderedRows = {
         ]
     }
 };
+
+test('getAllPageRows excludes optimistically deleted items', t => {
+    const result = getAllPageRows(stateWithUnorderedRows, { page: 'general' });
+
+    t.true(Array.isArray(result));
+    const ids = result.map(({ id }) => id);
+
+    t.deepEqual(ids, ['id300', 'id29', 'id81', 'id19']);
+});
 
 test('getSortedPageRows sorts list rows by date, newest first', t => {
     const result = getSortedPageRows(stateWithUnorderedRows, { page: 'general' });

@@ -5,15 +5,19 @@ import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/dat
 import { getFundsCost } from '~client/selectors/funds';
 import { getValueForTransmit } from '~client/modules/data';
 
-const getAllPageRows = (state, { page }) => state[page].items;
+const getNonFilteredItems = (state, { page }) => state[page].items;
+
+export const getAllPageRows = createSelector(getNonFilteredItems, items => items && items
+    .filter(({ __optimistic }) => __optimistic !== DELETE)
+);
 
 export const getSortedPageRows = createSelector(getAllPageRows, items => items
     .slice()
     .sort(({ date: dateA }, { date: dateB }) => dateB - dateA));
 
-const getAllListItems = state => PAGES_LIST.map(page => ({
+const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
     page,
-    items: getAllPageRows(state, { page })
+    items: getNonFilteredItems(state, { page })
 }));
 
 const getPageProp = (state, { page }) => page;
@@ -124,5 +128,5 @@ const getCrudRequestsByPage = (page, items) => compose(
     withTransmitValues
 )([]);
 
-export const getCrudRequests = createSelector(getAllListItems, itemsByPage =>
+export const getCrudRequests = createSelector(getAllNonFilteredItems, itemsByPage =>
     itemsByPage.reduce((last, { page, items }) => last.concat(getCrudRequestsByPage(page, items)), []));
