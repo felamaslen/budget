@@ -13,6 +13,16 @@ import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
 import { replaceAtIndex, getValueFromTransmit } from '~client/modules/data';
 
+import { onCreateOptimistic, onUpdateOptimistic, onDeleteOptimistic } from '~client/reducers/crud';
+
+const filterByPage = (thisPage, handler) => (state, { page, ...action }) => {
+    if (page !== thisPage) {
+        return {};
+    }
+
+    return handler(state, action);
+};
+
 export const onRead = page => (state, { res }) => {
     if (!res[page]) {
         return {};
@@ -33,39 +43,6 @@ export const onRead = page => (state, { res }) => {
 
     return { items };
 };
-
-function withOptimisticUpdate(requestType, getNewProps = () => ({})) {
-    return thisPage => (state, { page, ...action }) => {
-        if (page !== thisPage) {
-            return {};
-        }
-
-        const index = state.items.findIndex(({ id }) => id === action.id);
-        if (index === -1) {
-            return {};
-        }
-
-        return {
-            items: replaceAtIndex(state.items, index, {
-                ...state.items[index],
-                ...getNewProps(action),
-                __optimistic: requestType
-            })
-        };
-    };
-}
-
-const onCreateOptimistic = thisPage => (state, { page, item, fakeId }) => {
-    if (page !== thisPage) {
-        return {};
-    }
-
-    return { items: state.items.concat([{ ...item, id: fakeId, __optimistic: CREATE }]) };
-};
-
-const onUpdateOptimistic = withOptimisticUpdate(UPDATE, ({ item }) => item);
-
-const onDeleteOptimistic = withOptimisticUpdate(DELETE);
 
 function filterRequestItems(requestType, postProcess, idKey = 'id') {
     return requestItems => items => postProcess(items, requestItems
@@ -122,9 +99,9 @@ export default function makeListReducer(page, extraHandlers = {}, extraState = {
     const handlers = {
         [LOGGED_OUT]: () => initialState,
         [DATA_READ]: onRead(page),
-        [LIST_ITEM_CREATED]: onCreateOptimistic(page),
-        [LIST_ITEM_UPDATED]: onUpdateOptimistic(page),
-        [LIST_ITEM_DELETED]: onDeleteOptimistic(page),
+        [LIST_ITEM_CREATED]: filterByPage(page, onCreateOptimistic()),
+        [LIST_ITEM_UPDATED]: filterByPage(page, onUpdateOptimistic()),
+        [LIST_ITEM_DELETED]: filterByPage(page, onDeleteOptimistic()),
         [SYNC_RECEIVED]: onSyncReceived(page),
         ...extraHandlers
     };

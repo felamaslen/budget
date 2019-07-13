@@ -126,6 +126,22 @@ test('LIST_ITEM_UPDATED optimistically updates a list item', t => {
     ]);
 });
 
+test('LIST_ITEM_UPDATED does not alter the status of optimistically created items', t => {
+    const state = {
+        items: [
+            { id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE }
+        ]
+    };
+
+    const action = listItemUpdated(page, 'some-fake-id', { some: 'different prop' });
+
+    const result = myListReducer(state, action);
+
+    t.deepEqual(result.items, [
+        { id: 'some-fake-id', some: 'different prop', is: true, __optimistic: CREATE }
+    ]);
+});
+
 test('LIST_ITEM_DELETED optimistically deletes a list item', t => {
     const state = {
         items: [
