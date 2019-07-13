@@ -12,24 +12,28 @@ export const getAllPageRows = createSelector(getNonFilteredItems, items => items
     .filter(({ __optimistic }) => __optimistic !== DELETE)
 );
 
+const makeGetDaily = items => (last, item, index) => {
+    const sum = last + item.cost;
+    if ((index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day')) ||
+        index === items.length - 1
+    ) {
+        return { daily: sum, dailySum: 0 };
+    }
+
+    return { daily: null, dailySum: sum };
+};
+
 export const getSortedPageRows = createSelector(getCurrentDate, getAllPageRows, (now, items) => {
     if (!items) {
         return [];
     }
 
-    const getDaily = (last, item, index) => {
-        const sum = last + item.cost;
-        if ((index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day')) ||
-            index === items.length - 1
-        ) {
-            return { daily: sum, dailySum: 0 };
-        }
+    const sortedByDate = items.slice()
+        .sort(({ date: dateA }, { date: dateB }) => dateB - dateA);
 
-        return { daily: null, dailySum: sum };
-    };
+    const getDaily = makeGetDaily(sortedByDate);
 
-    const [sorted] = items.slice()
-        .sort(({ date: dateA }, { date: dateB }) => dateB - dateA)
+    const [sorted] = sortedByDate
         .reduce(([last, wasFuture, lastDailySum], item, index) => {
             const future = wasFuture && item.date > now;
             const firstPresent = wasFuture && !future;

@@ -74,53 +74,41 @@ test('getAllPageRows excludes optimistically deleted items', t => {
 });
 
 test('getSortedPageRows sorts list rows by date, newest first, adding future / first present / daily props', t => {
-    const result = getSortedPageRows(stateWithUnorderedRows, { page: 'general' });
+    const craftedState = {
+        now: DateTime.fromISO('2019-07-13T15:23:39Z'),
+        general: {
+            items: [
+                { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2 },
+                { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3 },
+                { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5 },
+                { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7 },
+                { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11 },
+                { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13 },
+                { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17 },
+                { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19 },
+                { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29 },
+                { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23 },
+                { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31 },
+                { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37 }
+            ]
+        }
+    };
+
+    const result = getSortedPageRows(craftedState, { page: 'general' });
 
     t.deepEqual(result, [
-        {
-            id: 'id19',
-            date: DateTime.fromISO('2018-04-17'),
-            item: 'foo3',
-            category: 'bar3',
-            cost: 29,
-            shop: 'bak3',
-            future: true,
-            firstPresent: false,
-            daily: 29
-        },
-        {
-            id: 'id300',
-            date: DateTime.fromISO('2018-02-03'),
-            item: 'foo1',
-            category: 'bar1',
-            cost: 1139,
-            shop: 'bak2',
-            future: false,
-            firstPresent: true,
-            daily: null
-        },
-        {
-            id: 'id81',
-            date: DateTime.fromISO('2018-02-03'),
-            item: 'foo2',
-            category: 'bar2',
-            cost: 876,
-            shop: 'bak2',
-            future: false,
-            firstPresent: false,
-            daily: 1139 + 876
-        },
-        {
-            id: 'id29',
-            date: DateTime.fromISO('2018-02-02'),
-            item: 'foo3',
-            category: 'bar3',
-            cost: 498,
-            shop: 'bak3',
-            future: false,
-            firstPresent: false,
-            daily: 498
-        }
+        { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37, future: true, firstPresent: false, daily: 37 },
+        { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31, future: true, firstPresent: false, daily: 31 },
+        { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5, future: false, firstPresent: true, daily: null },
+        { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2, future: false, firstPresent: false, daily: null },
+        { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11, future: false, firstPresent: false, daily: null },
+        { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13, future: false, firstPresent: false, daily: null },
+        { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3, future: false, firstPresent: false, daily: 34 },
+        { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7, future: false, firstPresent: false, daily: null },
+        { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17, future: false, firstPresent: false, daily: 24 },
+        { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19, future: false, firstPresent: false, daily: null },
+        { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23, future: false, firstPresent: false, daily: 42 },
+        { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29, future: false, firstPresent: false, daily: 29 }
     ]);
 });
 
