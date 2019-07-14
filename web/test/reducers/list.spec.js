@@ -389,6 +389,29 @@ test('[daily] SYNC_RECEIVED updates the list total from the last response', t =>
     t.is(result.total, 117);
 });
 
+test('[daily] SYNC_RECEIVED doesn\'t update the list total if there wasn\'t a relevant response', t => {
+    const state = {
+        total: 932,
+        items: [
+            { id: 'some-real-id', some: 'prop', is: true, __optimistic: UPDATE }
+        ]
+    };
+
+    const req = [
+        { type: UPDATE, id: 'some-real-id', method: 'put', route: `not-${page}`, query: {}, body: { some: 'body' } }
+    ];
+
+    const res = [
+        { total: 8743 }
+    ];
+
+    const action = syncReceived(req, res);
+
+    const result = dailyReducer(state, action);
+
+    t.is(result.total, 932);
+});
+
 test('SYNC_RECEIVED marks optimistically-updated items as confirmed', t => {
     const state = {
         items: [

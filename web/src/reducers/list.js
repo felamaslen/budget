@@ -87,7 +87,7 @@ const onSyncReceived = page => (state, { requests, res }) => {
         confirmDeletes(requestItems)
     )(state.items);
 
-    const total = requestItems.reduce((last, { res: { total: next = last } = {} }) => next, 0);
+    const total = requestItems.reduce((last, { res: { total: next = last } = {} }) => next, state.total);
 
     return { items, total };
 };
