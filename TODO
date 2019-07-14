@@ -31,3 +31,4 @@
 - Fix stock prices feature
 - Fix time series major ticks not appearing sometimes
 - Server side rendering
+- Replace hooks/form implementation in net worth form with hooks/field
