@@ -9,6 +9,7 @@ import login from '~client/sagas/login';
 import crud from '~client/sagas/crud';
 import analysis from '~client/sagas/analysis';
 import funds from '~client/sagas/funds';
+import suggestions from '~client/sagas/suggestions';
 
 test('rootSaga forking all the other sagas', t => {
     t.is(1, 1);
@@ -27,6 +28,8 @@ test('rootSaga forking all the other sagas', t => {
         .fork(analysis)
         .next()
         .fork(funds)
+        .next()
+        .fork(suggestions)
         .next()
         .isDone();
 });

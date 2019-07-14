@@ -15,6 +15,7 @@ import food from '~client/reducers/food';
 import general from '~client/reducers/general';
 import holiday from '~client/reducers/holiday';
 import social from '~client/reducers/social';
+import suggestions from '~client/reducers/suggestions';
 
 export default combineReducers({
     now,
@@ -31,5 +32,6 @@ export default combineReducers({
     food,
     general,
     holiday,
-    social
+    social,
+    suggestions
 });

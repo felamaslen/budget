@@ -7,6 +7,7 @@ import login from '~client/sagas/login';
 import crud from '~client/sagas/crud';
 import analysis from '~client/sagas/analysis';
 import funds from '~client/sagas/funds';
+import suggestions from '~client/sagas/suggestions';
 
 export default function *rootSaga() {
     yield fork(now);
@@ -16,4 +17,5 @@ export default function *rootSaga() {
     yield fork(crud);
     yield fork(analysis);
     yield fork(funds);
+    yield fork(suggestions);
 }
