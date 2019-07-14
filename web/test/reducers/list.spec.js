@@ -11,7 +11,7 @@ import { dataRead, syncReceived } from '~client/actions/api';
 import { loggedOut } from '~client/actions/login';
 import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
 
-const page = 'my-page';
+const page = 'food';
 
 const customHandlers = {
     'CUSTOM_HANDLER_101': (state, { foo }) => ({
@@ -99,14 +99,32 @@ test('LIST_ITEM_CREATED optimistically creates a list item', t => {
     };
 
     const action = listItemCreated(page, {
-        some: 'prop',
-        is: true
+        shop: 'prop',
+        cost: 3
     });
 
     const result = myListReducer(state, action);
 
     t.deepEqual(result.items, [
-        { id: action.fakeId, some: 'prop', is: true, __optimistic: CREATE }
+        { id: action.fakeId, shop: 'prop', cost: 3, __optimistic: CREATE }
+    ]);
+});
+
+test('LIST_ITEM_CREATED omits properties not in the page\'s columns definition', t => {
+    const state = {
+        items: []
+    };
+
+    const action = listItemCreated(page, {
+        date: DateTime.fromISO('2019-07-14'),
+        item: 'some item',
+        foo: 'bar'
+    });
+
+    const result = myListReducer(state, action);
+
+    t.deepEqual(result.items, [
+        { id: action.fakeId, date: DateTime.fromISO('2019-07-14'), item: 'some item', __optimistic: CREATE }
     ]);
 });
 
@@ -140,6 +158,30 @@ test('LIST_ITEM_UPDATED optimistically updates a list item', t => {
 
     t.deepEqual(result.items, [
         { id: 'some-real-id', some: 'different prop', is: true, __optimistic: UPDATE }
+    ]);
+});
+
+test('LIST_ITEM_UPDATED omits props which are not present on the item', t => {
+    const state = {
+        items: [
+            { id: 'some-real-id', some: 'prop', is: true }
+        ]
+    };
+
+    const actionNull = listItemUpdated(page, 'some-real-id', { other: 'should not exist' });
+
+    const resultNull = myListReducer(state, actionNull);
+
+    t.deepEqual(resultNull.items, [
+        { id: 'some-real-id', some: 'prop', is: true }
+    ]);
+
+    const actionSome = listItemUpdated(page, 'some-real-id', { other: 'should not exist', some: 'thing' });
+
+    const resultSome = myListReducer(state, actionSome);
+
+    t.deepEqual(resultSome.items, [
+        { id: 'some-real-id', some: 'thing', is: true, __optimistic: UPDATE }
     ]);
 });
 

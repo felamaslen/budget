@@ -15,9 +15,16 @@ const getOptimisticUpdateItems = (key, requestType, getNewProps) =>
             return removeAtIndex(state[key], index);
         }
 
+        const newItem = { ...state[key][index], ...getNewProps(action, state[key][index]) };
+
+        if (requestType === UPDATE && Object.keys(newItem).every(
+            column => newItem[column] === state[key][index][column])
+        ) {
+            return state[key];
+        }
+
         return replaceAtIndex(state[key], index, {
-            ...state[key][index],
-            ...getNewProps(action),
+            ...newItem,
             __optimistic: getNextOptimisticStatus(state[key][index].__optimistic, requestType)
         });
     };
@@ -59,9 +66,12 @@ const withOptimisticUpdate = (
     };
 };
 
-export const onCreateOptimistic = (key = 'items', withTotals = false) =>
+export const onCreateOptimistic = (key = 'items', columns, withTotals = false) =>
     (state, { item, fakeId }) => {
-        const items = state[key].concat([{ ...item, id: fakeId, __optimistic: CREATE }]);
+        const itemFiltered = Object.keys(item).filter(column => columns.includes(column))
+            .reduce((last, column) => ({ ...last, [column]: item[column] }), {});
+
+        const items = state[key].concat([{ ...itemFiltered, id: fakeId, __optimistic: CREATE }]);
 
         if (withTotals) {
             return { [key]: items, total: state.total + item.cost };
@@ -70,11 +80,16 @@ export const onCreateOptimistic = (key = 'items', withTotals = false) =>
         return { [key]: items };
     };
 
-export const onUpdateOptimistic = (key, withTotals) => withOptimisticUpdate(
+export const onUpdateOptimistic = (key, columns, withTotals) => withOptimisticUpdate(
     key,
     UPDATE,
     withTotals,
-    ({ item }) => item
+    ({ item }, oldItem) => {
+        const oldColumns = Object.keys(oldItem);
+        const newColumns = Object.keys(item).filter(column => oldColumns.includes(column));
+
+        return newColumns.reduce((last, column) => ({ ...last, [column]: item[column] }), {});
+    }
 );
 
 export const onDeleteOptimistic = (key, withTotals) => withOptimisticUpdate(

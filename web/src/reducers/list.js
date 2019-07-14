@@ -10,7 +10,7 @@ import {
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 
-import { DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
+import { PAGES, DATA_KEY_ABBR, CREATE, UPDATE, DELETE } from '~client/constants/data';
 import { replaceAtIndex, getValueFromTransmit } from '~client/modules/data';
 
 import { onCreateOptimistic, onUpdateOptimistic, onDeleteOptimistic } from '~client/reducers/crud';
@@ -98,11 +98,13 @@ export default function makeListReducer(page, extraHandlers = {}, extraState = {
         items: []
     };
 
+    const columns = PAGES[page].cols;
+
     const handlers = {
         [LOGGED_OUT]: () => initialState,
         [DATA_READ]: onRead(page),
-        [LIST_ITEM_CREATED]: filterByPage(page, onCreateOptimistic('items', withTotals)),
-        [LIST_ITEM_UPDATED]: filterByPage(page, onUpdateOptimistic('items', withTotals)),
+        [LIST_ITEM_CREATED]: filterByPage(page, onCreateOptimistic('items', columns, withTotals)),
+        [LIST_ITEM_UPDATED]: filterByPage(page, onUpdateOptimistic('items', columns, withTotals)),
         [LIST_ITEM_DELETED]: filterByPage(page, onDeleteOptimistic('items', withTotals)),
         [SYNC_RECEIVED]: onSyncReceived(page),
         ...extraHandlers
