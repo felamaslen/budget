@@ -23,6 +23,36 @@ const makeGetDaily = items => (last, item, index) => {
     return { daily: null, dailySum: sum };
 };
 
+function makeMemoisedRowProcessor() {
+    const resultsCache = {};
+
+    return (items, now) => {
+        const getDaily = makeGetDaily(items);
+
+        const [result] = items.reduce(([last, wasFuture, lastDailySum], item, index) => {
+            const future = wasFuture && item.date > now;
+            const firstPresent = wasFuture && !future;
+            const { daily, dailySum } = getDaily(lastDailySum, item, index);
+
+            const extraProps = { future, firstPresent, daily };
+
+            const cachedItem = resultsCache[item.id];
+            if (cachedItem && Object.keys(extraProps).every(key => extraProps[key] === cachedItem[key])) {
+                return [last.concat([cachedItem]), future, dailySum];
+            }
+
+            const processedItem = { ...item, ...extraProps };
+            resultsCache[item.id] = processedItem;
+
+            return [last.concat([processedItem]), future, dailySum];
+        }, [[], true, 0]);
+
+        return result;
+    };
+}
+
+const memoisedRowProcessor = makeMemoisedRowProcessor();
+
 export const getSortedPageRows = createSelector(getCurrentDate, getAllPageRows, (now, items) => {
     if (!items) {
         return [];
@@ -31,27 +61,7 @@ export const getSortedPageRows = createSelector(getCurrentDate, getAllPageRows, 
     const sortedByDate = items.slice()
         .sort(({ date: dateA }, { date: dateB }) => dateB - dateA);
 
-    const getDaily = makeGetDaily(sortedByDate);
-
-    const [sorted] = sortedByDate
-        .reduce(([last, wasFuture, lastDailySum], item, index) => {
-            const future = wasFuture && item.date > now;
-            const firstPresent = wasFuture && !future;
-            const { daily, dailySum } = getDaily(lastDailySum, item, index);
-
-            return [
-                last.concat([{
-                    ...item,
-                    future,
-                    firstPresent,
-                    daily
-                }]),
-                future,
-                dailySum
-            ];
-        }, [[], true, 0]);
-
-    return sorted;
+    return memoisedRowProcessor(sortedByDate, now);
 });
 
 const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
@@ -60,23 +70,6 @@ const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
 }));
 
 const getPageProp = (state, { page }) => page;
-
-export const getDailyTotals = createSelector(getPageProp, getSortedPageRows, (page, rows) => {
-    if (!PAGES[page].daily) {
-        return null;
-    }
-
-    const [totals] = rows.reduce(([results, dailySum], { id, date, cost }, index) => {
-        const lastInDay = !(index < rows.length - 1 && date.hasSame(rows[index + 1].date, 'day'));
-        if (lastInDay) {
-            return [{ ...results, [id]: dailySum + cost }, 0];
-        }
-
-        return [results, dailySum + cost];
-    }, [{}, 0]);
-
-    return totals;
-});
 
 export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows], (page, rows) => {
     if (!(rows && PAGES[page].daily)) {

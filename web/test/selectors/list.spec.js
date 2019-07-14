@@ -4,7 +4,6 @@ import { DateTime } from 'luxon';
 import {
     getAllPageRows,
     getSortedPageRows,
-    getDailyTotals,
     getWeeklyAverages,
     getTotalCost,
     getCrudRequests
@@ -112,6 +111,30 @@ test('getSortedPageRows sorts list rows by date, newest first, adding future / f
     ]);
 });
 
+test('getSortedPageRows returns shallowly equal rows where possible', t => {
+    const result0 = getSortedPageRows(state, { page: 'food' });
+
+    t.deepEqual(result0, [
+        { id: 'id19', date: DateTime.fromISO('2018-04-17'), item: 'foo3', category: 'bar3', cost: 29, shop: 'bak3', daily: 29, future: true, firstPresent: false },
+        { id: 'id300', date: DateTime.fromISO('2018-02-03'), item: 'foo1', category: 'bar1', cost: 1139, shop: 'bak2', daily: null, future: false, firstPresent: true },
+        { id: 'id81', date: DateTime.fromISO('2018-02-03'), item: 'foo2', category: 'bar2', cost: 876, shop: 'bak2', daily: 2015, future: false, firstPresent: false },
+        { id: 'id29', date: DateTime.fromISO('2018-02-02'), item: 'foo3', category: 'bar3', cost: 498, shop: 'bak3', daily: 498, future: false, firstPresent: false }
+    ]);
+
+    const modifiedState = {
+        ...state,
+        now: DateTime.fromISO('2018-04-23')
+    };
+
+    const result1 = getSortedPageRows(modifiedState, { page: 'food' });
+
+    t.is(result1[0].future, false);
+    t.is(result1[0].firstPresent, true);
+    t.is(result1[1].firstPresent, false);
+    t.is(result1[2], result0[2]);
+    t.is(result1[3], result0[3]);
+});
+
 test('getSortedPageRows doesn\'t recalculate until the next day', t => {
     const getState = now => ({ ...stateWithUnorderedRows, now: DateTime.fromISO(now) });
 
@@ -129,16 +152,6 @@ test('getSortedPageRows doesn\'t recalculate until the next day', t => {
     t.not(resultD, resultE);
     t.is(resultE, resultF);
     t.is(resultF, resultG);
-});
-
-test('getDailyTotals calculates daily totals for list pages', t => {
-    const result = getDailyTotals(stateWithUnorderedRows, { page: 'general' });
-
-    t.deepEqual(result, {
-        id19: 29,
-        id81: 1139 + 876,
-        id29: 498
-    });
 });
 
 test('getWeeklyAverages returns null for non-daily pages', t => {
