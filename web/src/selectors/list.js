@@ -6,6 +6,8 @@ import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
 import { getValueForTransmit } from '~client/modules/data';
 
+const getPageProp = (state, { page }) => page;
+
 const getNonFilteredItems = (state, { page }) => state[page].items;
 
 export const getAllPageRows = createSelector(getNonFilteredItems, items => items && items
@@ -25,11 +27,26 @@ const makeGetDaily = items => (last, item, index) => {
 
 function makeMemoisedRowProcessor() {
     const resultsCache = {};
+    const perPageCache = {};
 
-    return (items, now) => {
-        const getDaily = makeGetDaily(items);
+    return (page, now, items) => {
+        if (!items) {
+            return [];
+        }
+        if (perPageCache[page] &&
+            now === perPageCache[page].now &&
+            items.length === perPageCache[page].items.length &&
+            items.every((item, index) => item === perPageCache[page].items[index])
+        ) {
+            return perPageCache[page].result;
+        }
 
-        const [result] = items.reduce(([last, wasFuture, lastDailySum], item, index) => {
+        const sortedByDate = items.slice()
+            .sort(({ date: dateA }, { date: dateB }) => dateB - dateA);
+
+        const getDaily = makeGetDaily(sortedByDate);
+
+        const [result] = sortedByDate.reduce(([last, wasFuture, lastDailySum], item, index) => {
             const future = wasFuture && item.date > now;
             const firstPresent = wasFuture && !future;
             const { daily, dailySum } = getDaily(lastDailySum, item, index);
@@ -47,29 +64,25 @@ function makeMemoisedRowProcessor() {
             return [last.concat([processedItem]), future, dailySum];
         }, [[], true, 0]);
 
+        perPageCache[page] = { result, now, items };
+
         return result;
     };
 }
 
 const memoisedRowProcessor = makeMemoisedRowProcessor();
 
-export const getSortedPageRows = createSelector(getCurrentDate, getAllPageRows, (now, items) => {
-    if (!items) {
-        return [];
-    }
-
-    const sortedByDate = items.slice()
-        .sort(({ date: dateA }, { date: dateB }) => dateB - dateA);
-
-    return memoisedRowProcessor(sortedByDate, now);
-});
+export const getSortedPageRows = createSelector(
+    getPageProp,
+    getCurrentDate,
+    getAllPageRows,
+    (page, now, items) => memoisedRowProcessor(page, now, items)
+);
 
 const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
     page,
     items: getNonFilteredItems(state, { page })
 }));
-
-const getPageProp = (state, { page }) => page;
 
 export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows], (page, rows) => {
     if (!(rows && PAGES[page].daily)) {

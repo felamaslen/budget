@@ -135,6 +135,16 @@ test('getSortedPageRows returns shallowly equal rows where possible', t => {
     t.is(result1[3], result0[3]);
 });
 
+test('getSortedPageRows memoises the result set across different pages', t => {
+    const resultFood0 = getSortedPageRows(state, { page: 'food' });
+    const resultGeneral0 = getSortedPageRows(state, { page: 'general' });
+    const resultFood1 = getSortedPageRows(state, { page: 'food' });
+    const resultGeneral1 = getSortedPageRows(state, { page: 'general' });
+
+    t.is(resultFood0, resultFood1);
+    t.is(resultGeneral0, resultGeneral1);
+});
+
 test('getSortedPageRows doesn\'t recalculate until the next day', t => {
     const getState = now => ({ ...stateWithUnorderedRows, now: DateTime.fromISO(now) });
 
