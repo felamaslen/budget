@@ -1,5 +1,5 @@
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
-import { removeAtIndex, replaceAtIndex } from '~client/modules/data';
+import { removeAtIndex, replaceAtIndex, fieldExists } from '~client/modules/data';
 
 function getNextOptimisticStatus(lastStatus, requestType) {
     if (requestType === DELETE) {
@@ -68,6 +68,10 @@ const withOptimisticUpdate = (
 
 export const onCreateOptimistic = (key = 'items', columns, withTotals = false) =>
     (state, { item, fakeId }) => {
+        if (columns.some(column => !fieldExists(item[column]))) {
+            return {};
+        }
+
         const itemFiltered = Object.keys(item).filter(column => columns.includes(column))
             .reduce((last, column) => ({ ...last, [column]: item[column] }), {});
 

@@ -94,6 +94,37 @@ test('LIST_ITEM_CREATED adds to the relevant month and category', t => {
     t.is(withGeneral.cost.general[2], 28335 + 34);
 });
 
+test('LIST_ITEM_CREATED is ignored if the item has insufficient data', t => {
+    const state = {
+        startDate: DateTime.fromISO('2019-04-30T23:59:59.999Z'),
+        endDate: DateTime.fromISO('2019-07-31T23:59:59.999Z'),
+        cost: {
+            funds: [0, 0, 510000, 2160465],
+            fundChanges: [1, 1, 0, 1],
+            income: [0, 30040, 229838, 196429],
+            bills: [99778, 101073, 118057, 212450],
+            food: [11907, 24108, 28123, 38352],
+            general: [12192, 9515, 28335, 160600],
+            holiday: [46352, 0, 47398, 55597],
+            social: [13275, 12593, 12400, 8115],
+            old: [488973, 434353, 1234689]
+        },
+        rows: [[1672664], [7532442], [8120445], [0]]
+    };
+
+    const withMissingDate = reducer(state, listItemCreated('general', {
+        cost: 34
+    }));
+
+    t.deepEqual(withMissingDate, state);
+
+    const withMissingCost = reducer(state, listItemCreated('general', {
+        date: DateTime.fromISO('2019-06-02T00:00:00.000Z')
+    }));
+
+    t.deepEqual(withMissingCost, state);
+});
+
 test('LIST_ITEM_UPDATED updates the relevant month and category', t => {
     const state = {
         startDate: DateTime.fromISO('2019-04-30T23:59:59.999Z'),

@@ -45,7 +45,7 @@ const getStateRowDates = memoize(state => getRowDates({ overview: state }));
 const getDateIndex = (state, date) => getStateRowDates(state).findIndex(item => date.hasSame(item, 'month'));
 
 function getUpdatedCost(state, page, newItem, oldItem = { date: newItem.date, cost: 0 }) {
-    if (!(newItem.date && oldItem.date)) {
+    if (!(newItem.date && oldItem.date && typeof newItem.cost !== 'undefined')) {
         return state;
     }
 

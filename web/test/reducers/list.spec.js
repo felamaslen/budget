@@ -99,15 +99,41 @@ test('LIST_ITEM_CREATED optimistically creates a list item', t => {
     };
 
     const action = listItemCreated(page, {
+        date: DateTime.fromISO('2019-07-10'),
+        item: 'some item',
+        category: 'some category',
+        cost: 3,
+        shop: 'some shop'
+    });
+
+    const result = myListReducer(state, action);
+
+    t.deepEqual(result.items, [
+        {
+            id: action.fakeId,
+            date: DateTime.fromISO('2019-07-10'),
+            item: 'some item',
+            category: 'some category',
+            cost: 3,
+            shop: 'some shop',
+            __optimistic: CREATE
+        }
+    ]);
+});
+
+test('LIST_ITEM_CREATED doesn\'t do anything if not all the data exist', t => {
+    const state = {
+        items: []
+    };
+
+    const action = listItemCreated(page, {
         shop: 'prop',
         cost: 3
     });
 
     const result = myListReducer(state, action);
 
-    t.deepEqual(result.items, [
-        { id: action.fakeId, shop: 'prop', cost: 3, __optimistic: CREATE }
-    ]);
+    t.deepEqual(result.items, []);
 });
 
 test('LIST_ITEM_CREATED omits properties not in the page\'s columns definition', t => {
@@ -118,13 +144,24 @@ test('LIST_ITEM_CREATED omits properties not in the page\'s columns definition',
     const action = listItemCreated(page, {
         date: DateTime.fromISO('2019-07-14'),
         item: 'some item',
+        category: 'some category',
+        cost: 21,
+        shop: 'some shop',
         foo: 'bar'
     });
 
     const result = myListReducer(state, action);
 
     t.deepEqual(result.items, [
-        { id: action.fakeId, date: DateTime.fromISO('2019-07-14'), item: 'some item', __optimistic: CREATE }
+        {
+            id: action.fakeId,
+            date: DateTime.fromISO('2019-07-14'),
+            item: 'some item',
+            category: 'some category',
+            cost: 21,
+            shop: 'some shop',
+            __optimistic: CREATE
+        }
     ]);
 });
 
@@ -135,9 +172,11 @@ test('[daily] LIST_ITEM_CREATED updates the total', t => {
     };
 
     const action = listItemCreated(page, {
-        some: 'prop',
+        date: DateTime.fromISO('2019-07-12'),
+        item: 'some item',
+        category: 'some category',
         cost: 34,
-        is: true
+        shop: 'some shop'
     });
 
     const result = dailyReducer(state, action);

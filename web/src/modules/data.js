@@ -210,51 +210,8 @@ export function getValueForTransmit(dataType, value) {
     return getValueFromTransmit(dataType, value);
 }
 
-export function getNullEditable(page) {
-    let row = 0;
-    if (PAGES[page].list) {
-        row = -1;
-    }
-
-    return {
-        row,
-        col: -1,
-        page,
-        id: null,
-        item: null,
-        value: null,
-        originalValue: null
-    };
-}
-
-export function getAddDefaultValues(page, now) {
-    if (!PAGES[page].list) {
-        return [];
-    }
-
-    return PAGES[page].cols.map(column => {
-        if (column === 'date') {
-            return now;
-        }
-        if (column === 'cost') {
-            return 0;
-        }
-        if (column === 'transactions') {
-            return getTransactionsList([]);
-        }
-
-        if (['item', 'category', 'shop', 'holiday', 'society'].indexOf(column) > -1) {
-            return '';
-        }
-
-        return null;
-    });
-}
-
 export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>
     DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
 
-export function resortListRows(page, now) {
-    return state => state.setIn(['pages', page, 'rows'],
-        sortRowsByDate(state.getIn(['pages', page, 'rows']), page, now));
-}
+export const fieldExists = value => typeof value !== 'undefined' &&
+    !(typeof value === 'string' && !value.length);
