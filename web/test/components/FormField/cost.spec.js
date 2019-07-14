@@ -2,13 +2,12 @@ import ava from 'ava';
 import ninos from 'ninos';
 const test = ninos(ava);
 
-import memoize from 'fast-memoize';
 import '~client-test/browser';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import FormFieldCost from '~client/components/FormField/cost';
 
-const getContainer = memoize((customProps = {}) => {
+const getContainer = (customProps = {}) => {
     const props = {
         value: 10345,
         onChange: () => null,
@@ -16,7 +15,7 @@ const getContainer = memoize((customProps = {}) => {
     };
 
     return render(<FormFieldCost {...props} />);
-});
+};
 
 test('basic structure', t => {
     const { container } = getContainer();
@@ -58,4 +57,35 @@ test('handling onchange', t => {
     t.is(onChange.calls.length, 1);
 
     t.deepEqual(onChange.calls[0].arguments, [1093]);
+});
+
+test('rendering as a string input', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange, string: true });
+
+    const { childNodes: [input] } = container.childNodes[0];
+
+    t.is(input.type, 'text');
+
+    fireEvent.change(input, { target: { value: '10.93' } });
+    fireEvent.blur(input);
+    t.deepEqual(onChange.calls[0].arguments, [1093]);
+
+    fireEvent.change(input, { target: { value: '229.119330' } });
+    fireEvent.blur(input);
+    t.deepEqual(onChange.calls[1].arguments, [22912]);
+});
+
+test('rendering as a string input - handling invalid input', t => {
+    const onChange = t.context.stub();
+    const { container } = getContainer({ onChange, string: true });
+
+    const { childNodes: [input] } = container.childNodes[0];
+
+    t.is(input.type, 'text');
+
+    fireEvent.change(input, { target: { value: 'not-a-number' } });
+    fireEvent.blur(input);
+
+    t.deepEqual(onChange.calls[0].arguments, [0]);
 });

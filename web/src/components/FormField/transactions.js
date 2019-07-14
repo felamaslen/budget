@@ -12,7 +12,7 @@ import {
     transactionShape,
     transactionsListShape
 } from '~client/modules/data';
-import { CREATE_ID } from '~client/components/CrudList';
+import { CREATE_ID } from '~client/constants/data';
 
 function FormFieldTransactionsItem({ item, children, onChange, active }) {
     const onChangeDate = useMemo(() => onChange('date'), [onChange]);
