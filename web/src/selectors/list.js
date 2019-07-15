@@ -46,7 +46,7 @@ function makeMemoisedRowProcessor() {
 
         const getDaily = makeGetDaily(sortedByDate);
 
-        const [result] = sortedByDate.reduce(([last, wasFuture, lastDailySum], item, index) => {
+        const [result] = sortedByDate.reduce(([last, wasFuture, lastDailySum], { __optimistic, ...item }, index) => {
             const future = wasFuture && item.date > now;
             const firstPresent = wasFuture && !future;
             const { daily, dailySum } = getDaily(lastDailySum, item, index);

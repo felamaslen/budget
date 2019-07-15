@@ -1,5 +1,6 @@
 import test from 'ava';
 import { DateTime } from 'luxon';
+import compose from 'just-compose';
 
 import {
     getAllPageRows,
@@ -126,7 +127,10 @@ test('getSortedPageRows returns shallowly equal rows where possible', t => {
         now: DateTime.fromISO('2018-04-23'),
         food: {
             ...state.food,
-            items: replaceAtIndex(state.food.items, 2, value => ({ ...value, item: 'foo3_updated' }), true)
+            items: compose(
+                array => replaceAtIndex(array, 3, value => ({ ...value, __optimistic: 'SOME_OPTIMISTIC_VALUE' }), true),
+                array => replaceAtIndex(array, 2, value => ({ ...value, item: 'foo3_updated' }), true)
+            )(state.food.items)
         }
     };
 
