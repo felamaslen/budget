@@ -53,12 +53,13 @@ function makeMemoisedRowProcessor() {
 
             const extraProps = { future, firstPresent, daily };
 
+            const processedItem = { ...item, ...extraProps };
             const cachedItem = resultsCache[item.id];
-            if (cachedItem && Object.keys(extraProps).every(key => extraProps[key] === cachedItem[key])) {
+
+            if (cachedItem && Object.keys(processedItem).every(key => processedItem[key] === cachedItem[key])) {
                 return [last.concat([cachedItem]), future, dailySum];
             }
 
-            const processedItem = { ...item, ...extraProps };
             resultsCache[item.id] = processedItem;
 
             return [last.concat([processedItem]), future, dailySum];

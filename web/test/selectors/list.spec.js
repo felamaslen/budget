@@ -9,7 +9,7 @@ import {
     getCrudRequests
 } from '~client/selectors/list';
 import { testState as state } from '~client-test/test_data/state';
-import { getTransactionsList } from '~client/modules/data';
+import { replaceAtIndex, getTransactionsList } from '~client/modules/data';
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
 const stateWithUnorderedRows = {
@@ -123,7 +123,11 @@ test('getSortedPageRows returns shallowly equal rows where possible', t => {
 
     const modifiedState = {
         ...state,
-        now: DateTime.fromISO('2018-04-23')
+        now: DateTime.fromISO('2018-04-23'),
+        food: {
+            ...state.food,
+            items: replaceAtIndex(state.food.items, 2, value => ({ ...value, item: 'foo3_updated' }), true)
+        }
     };
 
     const result1 = getSortedPageRows(modifiedState, { page: 'food' });
@@ -132,7 +136,8 @@ test('getSortedPageRows returns shallowly equal rows where possible', t => {
     t.is(result1[0].firstPresent, true);
     t.is(result1[1].firstPresent, false);
     t.is(result1[2], result0[2]);
-    t.is(result1[3], result0[3]);
+    t.not(result1[3], result0[3]);
+    t.is(result1[3].item, 'foo3_updated');
 });
 
 test('getSortedPageRows memoises the result set across different pages', t => {
