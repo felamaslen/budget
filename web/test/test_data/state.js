@@ -128,5 +128,10 @@ export const testState = {
     },
     social: {
         items: []
+    },
+    suggestions: {
+        loading: false,
+        list: [],
+        next: []
     }
 };

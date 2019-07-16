@@ -21,10 +21,7 @@ import {
     limitTimeSeriesLength,
     randnBm,
     getValueFromTransmit,
-    getValueForTransmit,
-    getNullEditable,
-    getAddDefaultValues,
-    sortRowsByDate
+    getValueForTransmit
 } from '~client/modules/data';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
 
@@ -428,40 +425,4 @@ test('getValueForTransmit returns transactions as a simple array', t => {
     const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
 
     t.deepEqual(getValueForTransmit('transactions', getTransactionsList(transactions)), transactions);
-});
-
-test('getNullEditable returning a list object for list pages', t => {
-    t.deepEqual(getNullEditable('food'), {
-        row: -1,
-        col: -1,
-        page: 'food',
-        id: null,
-        item: null,
-        value: null,
-        originalValue: null
-    });
-});
-
-test('getNullEditable returning a normal object for non-list pages', t => {
-    t.deepEqual(getNullEditable('overview'), {
-        row: 0,
-        col: -1,
-        page: 'overview',
-        id: null,
-        item: null,
-        value: null,
-        originalValue: null
-    });
-});
-
-test('getAddDefaultValues getting the right values for the food page', t => {
-    const now = DateTime.local();
-
-    t.deepEqual(getAddDefaultValues('food', now), [
-        now,
-        '',
-        '',
-        0,
-        ''
-    ]);
 });

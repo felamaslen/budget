@@ -24,18 +24,41 @@ test('SUGGESTIONS_REQUESTED sets loading to true', t => {
     t.true(result.loading);
 });
 
-test('SUGGESTIONS_RECEIVED sets the list, column and next-column list', t => {
+test('SUGGESTIONS_RECEIVED sets the list and next-column list', t => {
     const state = {};
     const action = suggestionsReceived('item', {
         list: ['salmon', 'sausages'],
-        next: ['fish', 'pork']
+        nextCategory: ['fish', 'pork']
     });
     const result = reducer(state, action);
 
     t.false(result.loading);
     t.deepEqual(result.list, ['salmon', 'sausages']);
-    t.is(result.column, 'item');
     t.deepEqual(result.next, ['fish', 'pork']);
+});
+
+test('SUGGESTIONS_RECEIVED sets empty arrays if the results are not present', t => {
+    t.deepEqual(reducer({}, suggestionsReceived('item', {})), {
+        loading: false,
+        list: [],
+        next: []
+    });
+
+    t.deepEqual(reducer({}, suggestionsReceived('item', {
+        list: []
+    })), {
+        loading: false,
+        list: [],
+        next: []
+    });
+
+    t.deepEqual(reducer({}, suggestionsReceived('item', {
+        next: []
+    })), {
+        loading: false,
+        list: [],
+        next: []
+    });
 });
 
 test('SUGGESTIONS_CLEARED clears the list and next-column list', t => {
@@ -47,6 +70,5 @@ test('SUGGESTIONS_CLEARED clears the list and next-column list', t => {
     const result = reducer(state, action);
 
     t.deepEqual(result.list, []);
-    t.is(result.column, null);
     t.deepEqual(result.next, []);
 });

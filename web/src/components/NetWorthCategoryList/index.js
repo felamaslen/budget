@@ -3,12 +3,13 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { useInputText, useInputSelect, useInputColor } from '~client/hooks/form';
-import CrudList, { CREATE_ID } from '~client/components/CrudList';
+import CrudList from '~client/components/CrudList';
 import NetWorthSubcategoryList from '~client/components/NetWorthSubcategoryList';
 import {
     category as categoryShape,
     subcategory as subcategoryShape
 } from '~client/prop-types/net-worth/category';
+import { CREATE_ID } from '~client/constants/data';
 
 import './style.scss';
 

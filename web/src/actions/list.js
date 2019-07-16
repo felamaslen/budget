@@ -17,7 +17,7 @@ export const listItemUpdated = (page, id, item, oldItem) => ({
     oldItem
 });
 
-export const listItemDeleted = (page, id, oldItem) => ({
+export const listItemDeleted = (id, { page }, oldItem) => ({
     page,
     type: actions.LIST_ITEM_DELETED,
     id,

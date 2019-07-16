@@ -1,24 +1,35 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { useNav } from '~client/hooks/nav';
+import { NULL_COMMAND, useNav } from '~client/hooks/nav';
+import { CREATE_ID } from '~client/constants/data';
 
 import './style.scss';
 
-export const CREATE_ID = 'CREATE_ID';
+function withNav(nav, active, value) {
+    if (nav && !active) {
+        return null;
+    }
+
+    return value;
+}
 
 function CrudListItem({
     Item,
     onUpdate,
     onDelete,
-    active,
-    isActive,
+    activeId,
+    activeColumn,
     setActive,
+    command,
+    setCommand,
+    nav,
     navNext,
     navPrev,
     item,
     itemProps,
+    itemClassName,
     extraProps
 }) {
     const onSetActive = useCallback(() => setActive(item.id), [item.id, setActive]);
@@ -27,27 +38,41 @@ function CrudListItem({
         if (event) {
             event.stopPropagation();
         }
-        onDelete(item.id);
+        onDelete(item.id, extraProps, item);
         setActive(null);
-    }, [item.id, setActive, onDelete]);
+    }, [item, setActive, onDelete, extraProps]);
+
+    const liProps = {};
+    if (!nav) {
+        liProps.onClick = onSetActive;
+    }
 
     return (
         <li
-            className={classNames('crud-list-list-item', { active: isActive })}
-            onClick={onSetActive}
+            className={classNames('crud-list-list-item', {
+                active: item.id === activeId,
+                ...itemClassName(item)
+            })}
+            {...liProps}
             {...itemProps(item)}
         >
             <Item
                 item={item}
-                active={isActive}
-                activeId={active}
+                active={item.id === activeId}
+                activeId={activeId}
+                activeColumn={activeColumn}
+                command={item.id === activeId
+                    ? command
+                    : NULL_COMMAND
+                }
+                setCommand={setCommand}
                 navNext={navNext}
                 navPrev={navPrev}
                 setActive={setActive}
                 onUpdate={onUpdate}
                 {...extraProps}
             />
-            {!active && <div className="button-delete">
+            {activeId !== item.id && <div className="button-delete">
                 <button
                     className="button-delete-button"
                     onClick={onDeleteCallback}
@@ -58,18 +83,24 @@ function CrudListItem({
 }
 
 CrudListItem.propTypes = {
-    Item: PropTypes.func.isRequired,
+    Item: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
     item: PropTypes.object.isRequired,
-    active: PropTypes.oneOfType([PropTypes.string, PropTypes.shape({ index: PropTypes.number, maxIndex: PropTypes.number })]),
-    isActive: PropTypes.bool.isRequired,
+    activeId: PropTypes.string,
+    activeColumn: PropTypes.string,
     setActive: PropTypes.func.isRequired,
+    command: PropTypes.object.isRequired,
+    setCommand: PropTypes.func.isRequired,
+    nav: PropTypes.bool.isRequired,
     navNext: PropTypes.func.isRequired,
     navPrev: PropTypes.func.isRequired,
     itemProps: PropTypes.func.isRequired,
+    itemClassName: PropTypes.func.isRequired,
     extraProps: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired
 };
+
+const CrudListItemMemo = React.memo(CrudListItem);
 
 export default function CrudList({
     items,
@@ -87,59 +118,55 @@ export default function CrudList({
     onDelete,
     className,
     itemProps,
+    itemClassName,
     extraProps
 }) {
     const onRefresh = useCallback(() => onRead && onRead(), [onRead]);
 
-    const [active, setActive, navNext, navPrev] = useNav(nav, items);
-
-    useEffect(() => {
-        if (!nav && active !== CREATE_ID && !items.some(({ id }) => id === active)) {
-            setActive(null);
-        }
-    }, [nav, active, setActive, items]);
+    const [navState, setActive, setCommand, navNext, navPrev] = useNav(nav, items, extraProps.page);
+    const { activeId, activeItem, activeColumn, command } = navState;
 
     const onSetCreateActive = useCallback(() => setActive(CREATE_ID), [setActive]);
-    const createActive = active && typeof active === 'object'
-        ? active.index === -1
-        : active === CREATE_ID;
+    const createActive = activeId === CREATE_ID;
+
+    const createLiProps = {};
+    if (!nav) {
+        createLiProps.onClick = onSetCreateActive;
+    }
 
     const createItem = CreateItem && (
         <li key={CREATE_ID}
             className={classNames('crud-list-list-item', 'crud-list-list-item-create', {
                 active: createActive
             })}
-            onClick={onSetCreateActive}
+            {...createLiProps}
         >
             <CreateItem
                 active={createActive}
-                activeId={active}
+                activeId={activeId}
+                activeColumn={createActive
+                    ? activeColumn
+                    : null
+                }
                 setActive={setActive}
+                command={command.id === CREATE_ID
+                    ? command
+                    : NULL_COMMAND}
+                setCommand={setCommand}
+                navNext={navNext}
+                navPrev={navPrev}
                 onCreate={onCreate} {...extraProps}
             />
         </li>
     );
 
-    const activeItem = useMemo(() => {
-        if (nav) {
-            if (!active || active.index === null || active.index === -1) {
-                return null;
-            }
-
-            return items[active.index];
-        }
-
-        if (active === null || active === CREATE_ID) {
-            return null;
-        }
-
-        return items.find(({ id }) => id === active);
-    }, [nav, items, active]);
-
     const metaProps = {
-        active,
+        active: activeId,
         setActive,
         activeItem,
+        activeColumn,
+        navNext,
+        navPrev,
         onCreate,
         onUpdate,
         onDelete,
@@ -148,7 +175,7 @@ export default function CrudList({
 
     return (
         <div className={classNames('crud-list', className, {
-            active: active !== null
+            active: activeId !== null
         })}>
             <div className="crud-list-meta">
                 {onRead && <button className="button-refresh" onClick={onRefresh}>
@@ -159,25 +186,30 @@ export default function CrudList({
             {BeforeList && <BeforeList {...metaProps} />}
             <ul className="crud-list-list">
                 {reverse && createItem}
-                {items.map((item, index) => (
-                    <CrudListItem key={item.id}
+                {items.map(item => {
+                    const active = activeId === item.id;
+
+                    return <CrudListItemMemo key={item.id}
                         Item={Item}
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                         nav={nav}
-                        active={active}
-                        isActive={active && typeof active === 'object'
-                            ? index === active.index
-                            : item.id === active
-                        }
+                        activeId={withNav(nav, active, activeId)}
+                        activeColumn={withNav(nav, active, activeColumn)}
                         setActive={setActive}
+                        command={command.id === item.id
+                            ? command
+                            : NULL_COMMAND
+                        }
+                        setCommand={setCommand}
                         navNext={navNext}
                         navPrev={navPrev}
                         item={item}
                         itemProps={itemProps}
+                        itemClassName={itemClassName}
                         extraProps={extraProps}
-                    />
-                ))}
+                    />;
+                })}
                 {!reverse && createItem}
             </ul>
             {afterList}
@@ -192,8 +224,8 @@ CrudList.propTypes = {
     })),
     reverse: PropTypes.bool,
     nav: PropTypes.bool,
-    Item: PropTypes.func.isRequired,
-    CreateItem: PropTypes.func,
+    Item: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
+    CreateItem: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     beforeList: PropTypes.node,
     BeforeList: PropTypes.func,
     afterList: PropTypes.node,
@@ -203,6 +235,7 @@ CrudList.propTypes = {
         PropTypes.object
     ]),
     itemProps: PropTypes.func,
+    itemClassName: PropTypes.func,
     extraProps: PropTypes.object,
     onCreate: PropTypes.func.isRequired,
     onRead: PropTypes.func,
@@ -221,5 +254,8 @@ CrudList.defaultProps = {
     AfterList: null,
     CreateItem: null,
     itemProps: () => ({}),
-    extraProps: {}
+    itemClassName: () => ({}),
+    extraProps: {
+        page: null
+    }
 };

@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
+
+import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
 const setValueDate = isoDate => DateTime.fromISO(isoDate);
@@ -23,51 +25,54 @@ function setValueString(date) {
 
     const now = DateTime.local();
 
-    return DateTime.fromObject({
+    const result = DateTime.fromObject({
         year: parseYear(year) || now.year,
         month: Number(month) || now.month,
         day: Number(day) || now.day
     });
+
+    if (result.invalid) {
+        return now;
+    }
+
+    return result;
 }
 
-export default function FormFieldDate({ string, value, onChange, active }) {
+export default function FormFieldDate(props) {
     let setValue = setValueDate;
     let type = 'date';
 
-    if (string) {
+    if (props.string) {
         setValue = setValueString;
         type = 'text';
     }
 
-    const [, onChangeRaw, onBlur, ref] = useField({
-        value,
-        onChange,
-        setValue,
-        active
+    const [, onChange, ref, onBlur] = useField({
+        ...props,
+        setValue
     });
 
-    const defaultValue = string
-        ? value.toLocaleString(DateTime.DATE_SHORT)
-        : value.toISODate();
+    const defaultValue = props.string
+        ? props.value.toLocaleString(DateTime.DATE_SHORT)
+        : props.value.toISODate();
 
     return (
-        <div className="form-field form-field-date">
+        <Wrapper item="date" value={props.value} active={props.active}>
             <input
                 ref={ref}
                 type={type}
                 defaultValue={defaultValue}
-                onChange={onChangeRaw}
+                onChange={onChange}
                 onBlur={onBlur}
             />
-        </div>
+        </Wrapper>
     );
 }
 
 FormFieldDate.propTypes = {
     string: PropTypes.bool,
     value: PropTypes.instanceOf(DateTime),
-    active: PropTypes.bool,
-    onChange: PropTypes.func.isRequired
+    active: PropTypes.bool
 };
 
 FormFieldDate.defaultProps = {

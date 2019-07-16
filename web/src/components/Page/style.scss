@@ -5,9 +5,4 @@
     flex-flow: column;
     min-height: 0;
     width: 100%;
-
-    @media screen and (min-width: $width-page-mobile) {
-        flex-flow: row;
-        flex-wrap: wrap;
-    }
 }

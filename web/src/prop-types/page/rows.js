@@ -5,5 +5,3 @@ export const rowShape = PropTypes.shape({
 });
 
 export const rowsShape = PropTypes.arrayOf(rowShape.isRequired);
-
-export const dailyTotalsShape = PropTypes.objectOf(PropTypes.number.isRequired);

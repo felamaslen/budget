@@ -2,8 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import ModalDialog from '~client/components/ModalDialog';
-import { CREATE_ID } from '~client/components/CrudList';
-import { PAGES } from '~client/constants/data';
+import { CREATE_ID, PAGES } from '~client/constants/data';
 
 export default function ListFootMobile({ page, active, setActive, activeItem, onCreate, onUpdate, onDelete }) {
     const onAdd = useCallback(() => setActive(CREATE_ID), [setActive]);

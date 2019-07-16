@@ -30,7 +30,7 @@ test('basic structure', t => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 7);
-    t.is(div.className, 'list-head-inner noselect');
+    t.is(div.className, 'list-head noselect');
 });
 
 test('column headings', t => {
@@ -66,7 +66,7 @@ test('daily column', t => {
     const [main, weekly, value] = daily.childNodes;
 
     t.is(main.tagName, 'SPAN');
-    t.is(main.className, 'daily');
+    t.is(main.className, 'daily-value');
     t.is(main.innerHTML, 'Daily |');
 
     t.is(weekly.tagName, 'SPAN');

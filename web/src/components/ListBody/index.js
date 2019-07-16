@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-import { rowsShape, dailyTotalsShape } from '~client/prop-types/page/rows';
+import { rowsShape } from '~client/prop-types/page/rows';
 
-import { useSuggestions } from '~client/hooks/suggestions';
 import CrudList from '~client/components/CrudList';
 import ListHeadDesktop from '~client/components/ListHeadDesktop';
 import ListHeadMobile from '~client/components/ListHeadMobile';
@@ -12,13 +11,17 @@ import ListRowDesktop from '~client/components/ListRowDesktop';
 import ListRowMobile from '~client/components/ListRowMobile';
 import ListCreateDesktop from '~client/components/ListCreateDesktop';
 
+const getItemClassName = ({ future, firstPresent, className = '' }) => ({
+    future,
+    'first-present': firstPresent,
+    [className]: className
+});
+
 export default function ListBody({
-    apiKey,
     page,
     isMobile,
     rows,
     getDaily,
-    dailyTotals,
     weeklyValue,
     totalCost,
     extraProps: pageExtraProps,
@@ -26,29 +29,15 @@ export default function ListBody({
     onUpdate,
     onDelete
 }) {
-    const [
-        suggestions,
-        clearSuggestions,
-        refreshSuggestions
-    ] = useSuggestions({ apiKey, page });
-
     const extraProps = useMemo(() => ({
         page,
-        suggestions,
-        clearSuggestions,
-        refreshSuggestions,
         getDaily,
-        dailyTotals,
         weeklyValue,
         totalCost,
         ...pageExtraProps
     }), [
         page,
-        suggestions,
-        clearSuggestions,
-        refreshSuggestions,
         getDaily,
-        dailyTotals,
         weeklyValue,
         totalCost,
         pageExtraProps
@@ -84,6 +73,7 @@ export default function ListBody({
             BeforeList={BeforeList}
             AfterList={AfterList}
             className={className}
+            itemClassName={getItemClassName}
             extraProps={extraProps}
             onCreate={onCreate}
             onUpdate={onUpdate}
@@ -93,12 +83,10 @@ export default function ListBody({
 }
 
 ListBody.propTypes = {
-    apiKey: PropTypes.string,
     page: PropTypes.string.isRequired,
     isMobile: PropTypes.bool.isRequired,
     rows: rowsShape,
     getDaily: PropTypes.bool,
-    dailyTotals: dailyTotalsShape,
     weeklyValue: PropTypes.number,
     totalCost: PropTypes.number,
     extraProps: PropTypes.object,
@@ -108,6 +96,5 @@ ListBody.propTypes = {
 };
 
 ListBody.defaultProps = {
-    extraProps: {},
-    dailyTotals: {}
+    extraProps: {}
 };

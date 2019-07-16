@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { DateTime } from 'luxon';
 
+import { Wrapper } from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
 import FormFieldNumber from '~client/components/FormField/number';
 import FormFieldCost from '~client/components/FormField/cost';
@@ -143,28 +144,29 @@ FormFieldTransactionsList.defaultProps = {
     create: false
 };
 
-export default function FormFieldTransactions(props) {
-    const { value, active } = props;
-
-    return (
-        <span className={classNames('form-field', 'form-field-transactions', { active })}>
-            <span className="num-transactions">{value.length}</span>
-            {active && (
-                <div className="modal">
-                    <div className="inner">
-                        <FormFieldTransactionsList {...props} />
-                    </div>
-                </div>
-            )}
-        </span>
-    );
-}
+const FormFieldTransactions = ({ create, value, active, onChange }) => (
+    <Wrapper item="transactions" value={value} active={active}>
+        <span className="num-transactions">{(value || []).length}</span>
+        {value && active && <div className="modal">
+            <div className="inner">
+                <FormFieldTransactionsList
+                    create={create}
+                    value={value}
+                    active={active}
+                    onChange={onChange}
+                />
+            </div>
+        </div>}
+    </Wrapper>
+);
 
 FormFieldTransactions.propTypes = {
-    value: transactionsListShape,
-    active: PropTypes.bool
+    ...FormFieldTransactionsList.propTypes,
+    value: transactionsListShape
 };
 
 FormFieldTransactions.defaultProps = {
     value: []
 };
+
+export default FormFieldTransactions;

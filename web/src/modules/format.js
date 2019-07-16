@@ -1,34 +1,20 @@
 import humanizeDuration from 'humanize-duration';
+import { DateTime } from 'luxon';
+
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 
 export const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
 
-/**
- * @function capitalise
- * @param {string} string: value to capitalise
- * @returns {string} capitalised string
- */
 export function capitalise(string) {
     return `${string.substring(0, 1).toUpperCase()}${string.substring(1).toLowerCase()}`;
 }
 
-/**
- * @function round
- * @param {float} value: value to round
- * @param {integer} precision: precision to round to
- * @returns {float} rounded value
- */
 function round(value, precision) {
     const exp = Math.pow(10, precision);
 
     return Math.round(exp * value) / exp;
 }
 
-/**
- * @function numberFormat
- * @param {float} value: value to format
- * @returns {string} formatted number
- */
 export function numberFormat(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
@@ -41,12 +27,6 @@ function getSign(number) {
     return '';
 }
 
-/**
- * round a number to a certain sig. figs
- * @param {float} value: number to display
- * @param {integer} figs: sig figs to restrict to
- * @returns {string} formatted number
- */
 export function sigFigs(value, figs) {
     if (value === 0) {
         return value.toFixed(figs - 1);
@@ -76,12 +56,6 @@ export function sigFigs(value, figs) {
     return `${sign}${absResult}`;
 }
 
-/**
- * @function leadingZeroes
- * @param {integer} value: number to add zeroes to
- * @param {integer} numZeroes: number of zeroes to fill
- * @returns {string} formatted number
- */
 export function leadingZeroes(value, numZeroes) {
     const numAdd = value
         ? numZeroes - Math.floor(Math.log10(value)) - 1
@@ -116,12 +90,6 @@ function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
     return absValue.toFixed(precision);
 }
 
-/**
- * Format currency values for display
- * @param {integer} value: value in GBX
- * @param {object} options: options to pass to formatter
- * @returns {string} formatted value
- */
 export function formatCurrency(value, customOptions = {}) {
     const options = {
         abbreviate: false,
@@ -188,13 +156,6 @@ export function formatPercent(frac, options = {}) {
     });
 }
 
-/**
- * Get tick sizes for graphs
- * @param {float} min: minimum value
- * @param {float} max: maximum value
- * @param {integer} numTicks: number of ticks to produce
- * @returns {float} tick length
- */
 export function getTickSize(min, max, numTicks) {
     const minimum = (max - min) / numTicks;
     const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
@@ -238,4 +199,23 @@ export function formatAge(seconds, shortAbbr = false) {
     }
 
     return `${humanizeDuration(seconds * 1000, { round: true, largest: 2 })} ago`;
+}
+
+export const formatDate = date => date.toLocaleString(DateTime.DATE_SHORT);
+
+export function formatItem(item, value) {
+    if (item === 'date') {
+        return formatDate(value);
+    }
+    if (item === 'cost') {
+        return formatCurrency(value);
+    }
+    if (item === 'transactions') {
+        return String(value
+            ? value.length
+            : 0
+        );
+    }
+
+    return String(value);
 }

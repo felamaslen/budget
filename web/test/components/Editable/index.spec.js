@@ -1,22 +1,19 @@
 import test from 'ava';
+import sinon from 'sinon';
 import '~client-test/browser';
-import { render } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import Editable from '~client/components/Editable';
 
-const getContainer = (customProps = {}) => {
+const getContainer = (customProps = {}, ...args) => {
     const props = {
+        page: 'some-page',
         onType: () => null,
         onChange: () => null,
-        suggestions: {
-            list: [],
-            active: null,
-            next: []
-        },
         ...customProps
     };
 
-    return render(<Editable {...props} />);
+    return render(<Editable {...props} />, ...args);
 };
 
 test('rendering active editable item', t => {
@@ -30,6 +27,9 @@ test('rendering active editable item', t => {
     const [span] = container.childNodes;
     t.is(span.tagName, 'SPAN');
     t.is(span.className, 'editable editable-shop editable-active');
+
+    t.is(span.childNodes.length, 1);
+    t.regex(span.childNodes[0].className, /form-field/);
 });
 
 test('rendering inactive editable item', t => {
@@ -56,7 +56,7 @@ test('Undefined value is renderd as a blank string', t => {
     t.is(editable.innerHTML, '');
 });
 
-test('Falsy transactions are rendered as 0 items', t => {
+test('Falsey transactions are rendered as 0 items', t => {
     const { container } = getContainer({
         active: false,
         item: 'transactions',
@@ -69,13 +69,40 @@ test('Falsy transactions are rendered as 0 items', t => {
     t.is(span.className, 'editable editable-transactions editable-inactive');
     t.is(span.childNodes.length, 1);
 
-    const [editable] = span.childNodes;
-    t.is(editable.tagName, 'SPAN');
-    t.is(editable.className, 'editable-inner');
-    t.is(editable.childNodes.length, 1);
+    const [field] = span.childNodes;
+    t.is(field.tagName, 'DIV');
+    t.is(field.className, 'form-field form-field-transactions');
+    t.is(field.innerHTML, '0');
+});
 
-    const [value] = editable.childNodes;
-    t.is(value.tagName, 'SPAN');
-    t.is(value.className, 'num-transactions');
-    t.is(value.innerHTML, '0');
+test('onChange is called with the column and new value', t => {
+    const onChange = sinon.spy();
+
+    const props = {
+        active: true,
+        item: 'shop',
+        value: 'Tesco',
+        onChange
+    };
+
+    const { container } = getContainer(props);
+
+    const [span] = container.childNodes;
+    const [field] = span.childNodes;
+    const [input] = field.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+
+    t.false(onChange.calledOnce);
+    fireEvent.change(input, { target: { value: 'Wilko' } });
+
+    act(() => {
+        getContainer({
+            ...props,
+            active: false
+        }, { container });
+    });
+
+    t.true(onChange.calledOnce);
+    t.true(onChange.calledWith('shop', 'Wilko'));
 });

@@ -4,20 +4,21 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { DateTime } from 'luxon';
 
 import FormFieldDate from '~client/components/FormField/date';
 
-const getContainer = (customProps = {}) => {
+const getContainer = (customProps = {}, ...args) => {
     const props = {
+        active: true,
         value: DateTime.fromISO('2017-11-10'),
         onChange: () => null,
         ...customProps
     };
 
-    return render(<FormFieldDate {...props} />);
+    return render(<FormFieldDate {...props} />, ...args);
 };
 
 test('basic structure', t => {
@@ -82,29 +83,48 @@ test('rendering as a string input - entering abbreviations', t => {
     const clock = sinon.useFakeTimers(new Date('2019-07-06T16:47:20Z').getTime());
 
     const onChange = t.context.stub();
-    const { container } = getContainer({ onChange, string: true });
+    const props = { onChange, string: true };
+
+    const { container } = getContainer(props);
 
     const { childNodes: [input] } = container.childNodes[0];
 
     t.is(input.type, 'text');
 
     fireEvent.change(input, { target: { value: '1' } });
-    fireEvent.blur(input);
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
 
     t.deepEqual(onChange.calls[0].arguments, [DateTime.fromISO('2019-07-01')]);
 
-    fireEvent.change(input, { target: { value: '4/3' } });
-    fireEvent.blur(input);
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '4/3' } });
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
 
     t.deepEqual(onChange.calls[1].arguments, [DateTime.fromISO('2019-03-04')]);
 
-    fireEvent.change(input, { target: { value: '2/9/16' } });
-    fireEvent.blur(input);
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '2/9/16' } });
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
 
     t.deepEqual(onChange.calls[2].arguments, [DateTime.fromISO('2016-09-02')]);
 
-    fireEvent.change(input, { target: { value: '2/9/2016' } });
-    fireEvent.blur(input);
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '2/9/2016' } });
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
 
     t.deepEqual(onChange.calls[3].arguments, [DateTime.fromISO('2016-09-02')]);
 
@@ -113,14 +133,18 @@ test('rendering as a string input - entering abbreviations', t => {
 
 test('rendering as a string input - handling invalid input', t => {
     const onChange = t.context.stub();
-    const { container } = getContainer({ onChange, string: true });
+    const props = { onChange, active: true, string: true };
+    const { container } = getContainer(props);
 
     const { childNodes: [input] } = container.childNodes[0];
 
     t.is(input.type, 'text');
 
     fireEvent.change(input, { target: { value: 'not-a-date' } });
-    fireEvent.blur(input);
 
-    t.deepEqual(onChange.calls[0].arguments, [DateTime.fromISO('2017-11-10')]);
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+
+    t.is(onChange.calls.length, 0);
 });

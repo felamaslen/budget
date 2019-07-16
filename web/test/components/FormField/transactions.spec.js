@@ -31,14 +31,9 @@ test('basic structure (inactive)', t => {
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
 
-    t.is(span.tagName, 'SPAN');
+    t.is(span.tagName, 'DIV');
     t.is(span.className, 'form-field form-field-transactions');
-    t.is(span.childNodes.length, 1);
-
-    const [overview] = span.childNodes;
-    t.is(overview.tagName, 'SPAN');
-    t.is(overview.className, 'num-transactions');
-    t.is(overview.innerHTML, '2'); // two transactions
+    t.is(span.innerHTML, '2'); // two transactions
 });
 
 test('basic structure (active)', t => {

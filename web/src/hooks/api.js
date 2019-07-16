@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 
-import { replaceAtIndex } from '~client/modules/data';
+import { NULL, replaceAtIndex } from '~client/modules/data';
 import { API_PREFIX } from '~client/constants/data';
 
 function buildMakeRequest({ method, url, apiKey, onSuccess, onError, onComplete }) {
@@ -36,13 +36,11 @@ function buildMakeRequest({ method, url, apiKey, onSuccess, onError, onComplete 
     };
 }
 
-const noop = () => null;
-
 export function useApi({
     method = 'get',
     url,
     apiKey,
-    onSuccess = noop
+    onSuccess = NULL
 }) {
     const source = useRef(null);
 

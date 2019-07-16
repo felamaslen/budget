@@ -1,4 +1,4 @@
-import { debounce, select, call, put } from 'redux-saga/effects';
+import { takeLatest, select, call, put } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { getApiKey } from '~client/selectors/api';
@@ -23,7 +23,7 @@ export function *onRequest({ page, column, search }) {
             }
         });
 
-        yield put(suggestionsReceived(column, res.data));
+        yield put(suggestionsReceived(column, res.data.data));
     } catch (err) {
         yield put(errorOpened(`Error loading suggestions: ${err.message}`));
         yield put(suggestionsCleared());
@@ -31,5 +31,5 @@ export function *onRequest({ page, column, search }) {
 }
 
 export default function *suggestionsSaga() {
-    yield debounce(100, SUGGESTIONS_REQUESTED, onRequest);
+    yield takeLatest(SUGGESTIONS_REQUESTED, onRequest);
 }

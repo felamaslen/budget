@@ -1,55 +1,114 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+/**
+ * Hook for an interactive, generic form field
+ * `setValue` is used to set the *state value* from the *input value*
+ * Components which use this hook are responsible for rendering the input,
+ */
 
-const noop = value => value;
+import { useRef, useReducer, useCallback, useEffect } from 'react';
+
+import { NULL, IDENTITY } from '~client/modules/data';
+import { VALUE_SET, CANCELLED } from '~client/modules/nav';
+import { NULL_COMMAND } from '~client/hooks/nav';
+
+const ACTIVE_TOGGLED = 'ACTIVE_TOGGLED';
+const TYPED = 'TYPED';
+
+function fieldReducer(state, action) {
+    if (action.type === VALUE_SET) {
+        return { ...state, currentValue: action.payload };
+    }
+    if (action.type === CANCELLED) {
+        return { ...state, currentValue: state.initialValue, cancelled: true };
+    }
+    if (action.type === ACTIVE_TOGGLED) {
+        if (action.active && !state.active) {
+            return {
+                ...state,
+                active: true,
+                cancelled: false,
+                initialValue: action.value,
+                currentValue: action.value
+            };
+        }
+
+        return { ...state, active: action.active };
+    }
+    if (action.type === TYPED) {
+        return { ...state, currentValue: action.value };
+    }
+
+    return state;
+}
 
 export function useField({
     value,
+    string = false,
     onChange,
-    onType = noop,
-    getValue = noop,
-    setValue = noop,
-    active
+    onType = NULL,
+    setValue = IDENTITY,
+    command = NULL_COMMAND,
+    active = false
 }) {
     const inputRef = useRef(null);
-    const [wasActive, setWasActive] = useState(active);
+
+    const [state, dispatch] = useReducer(fieldReducer, {
+        active: false,
+        cancelled: false,
+        initialValue: value,
+        currentValue: value
+    });
+
     useEffect(() => {
-        if (active && !wasActive && inputRef.current) {
-            if (inputRef.current.focus) {
+        if (string) {
+            dispatch({ type: VALUE_SET, payload: value });
+        }
+    }, [string, value]);
+
+    useEffect(() => {
+        if (!string) {
+            return;
+        }
+        if (!active && state.active && state.currentValue !== state.initialValue) {
+            onChange(state.currentValue);
+        }
+        if (active !== state.active) {
+            dispatch({ type: ACTIVE_TOGGLED, active, value });
+        }
+        if (active && !state.active) {
+            setImmediate(() => {
+                if (!inputRef.current) {
+                    return;
+                }
+
                 inputRef.current.focus();
-            }
-            if (inputRef.current.select) {
                 inputRef.current.select();
-            }
-        } else if (!active && wasActive && inputRef.current && inputRef.current.blur) {
+            });
+        } else if (!active && state.active && inputRef.current) {
             inputRef.current.blur();
         }
-
-        setWasActive(active);
-    }, [active, wasActive]);
-
-    const [prevValue, setPrevValue] = useState(value);
-    const [currentValue, setCurrentValue] = useState(getValue(value));
+    }, [string, onChange, active, value, state.active, state.currentValue, state.initialValue]);
 
     useEffect(() => {
-        if (value !== prevValue) {
-            setPrevValue(value);
-            setCurrentValue(getValue(value));
+        if (string && command !== NULL_COMMAND) {
+            dispatch(command);
         }
-    }, [value, prevValue, getValue]);
+    }, [string, command]);
 
-    const onChangeRaw = useCallback(evt => {
+    const onChangeInput = useCallback(event => {
         try {
-            const newValue = setValue(evt.target.value);
-            setCurrentValue(newValue);
+            const newValue = setValue(event.target.value);
+            dispatch({ type: TYPED, value: newValue });
             onType(newValue);
         } catch {
             // do nothing
         }
-    }, [setCurrentValue, setValue, onType]);
+    }, [setValue, onType]);
 
-    const onBlur = useCallback(() => {
-        onChange(currentValue);
-    }, [onChange, currentValue]);
+    const onBlurInput = useCallback(() => {
+        if (!string) {
+            onChange(state.currentValue);
+        }
+    }, [string, onChange, state.currentValue]);
 
-    return [currentValue, onChangeRaw, onBlur, inputRef];
+    return [state.currentValue, onChangeInput, inputRef, onBlurInput];
 }

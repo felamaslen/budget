@@ -2,7 +2,6 @@
 import test from 'ava';
 import sinon from 'sinon';
 import shortid from 'shortid';
-import { debounce } from 'redux-saga/effects';
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
@@ -18,7 +17,7 @@ import { suggestionsRequested, suggestionsReceived, suggestionsCleared } from '~
 import { errorOpened } from '~client/actions/error';
 
 test('onRequest calls the API with a request for CRUD list suggestions', t => {
-    const res = { data: { isRes: true } };
+    const res = { data: { data: { isRes: true } } };
 
     testSaga(onRequest, suggestionsRequested('food', 'item', 'ab'))
         .next()
@@ -30,7 +29,7 @@ test('onRequest calls the API with a request for CRUD list suggestions', t => {
             }
         })
         .next(res)
-        .put(suggestionsReceived('item', res.data))
+        .put(suggestionsReceived('item', res.data.data))
         .next()
         .isDone();
 
@@ -71,10 +70,10 @@ test('onRequest doesn\'t do anything if the page isn\'t a suggestions page', t =
     t.pass();
 });
 
-test('suggestionsSaga debounces the request saga in response to request action', t => {
+test('suggestionsSaga calls the request saga in response to request action', t => {
     testSaga(suggestionsSaga)
         .next()
-        .is(debounce(100, SUGGESTIONS_REQUESTED, onRequest))
+        .takeLatest(SUGGESTIONS_REQUESTED, onRequest)
         .next()
         .isDone();
 

@@ -1,32 +1,55 @@
-import React, { memo } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { rowShape } from '~client/prop-types/page/rows';
-import Editable from '~client/containers/Editable';
+import Editable from '~client/components/Editable';
 
-const ListRowCell = memo(({ page, row, colName, colKey, active }) => {
-    const spanClasses = classNames(colName, { active });
+function ListRowCell({
+    page,
+    id,
+    column,
+    value,
+    active,
+    setActive,
+    command,
+    onSuggestionConfirmed,
+    onUpdate
+}) {
+    const onSuggestion = useCallback((suggestion, next) => {
+        onUpdate(column, suggestion);
+        setImmediate(() => onSuggestionConfirmed(column, next));
+    }, [onUpdate, onSuggestionConfirmed, column]);
 
-    const props = {
-        page,
-        row: row.id,
-        col: colKey,
-        item: colName,
-        value: row.cols[colKey]
-    };
+    const onSetActive = useCallback(() => setActive(id, column), [setActive, id, column]);
 
-    return <span key={colKey} className={spanClasses}>
-        <Editable {...props} />
-    </span>;
-});
+    return (
+        <span
+            className={classNames('cell', column, { active })}
+            onMouseDown={onSetActive}
+        >
+            <Editable
+                page={page}
+                onChange={onUpdate}
+                active={active}
+                item={column}
+                value={value}
+                onSuggestion={onSuggestion}
+                command={command}
+            />
+        </span>
+    );
+}
 
 ListRowCell.propTypes = {
     page: PropTypes.string.isRequired,
-    row: rowShape.isRequired,
-    colName: PropTypes.string.isRequired,
-    colKey: PropTypes.number.isRequired,
-    active: PropTypes.bool.isRequired
+    id: PropTypes.string.isRequired,
+    column: PropTypes.string.isRequired,
+    onSuggestionConfirmed: PropTypes.func.isRequired,
+    value: PropTypes.any,
+    active: PropTypes.bool.isRequired,
+    setActive: PropTypes.func.isRequired,
+    command: PropTypes.object,
+    onUpdate: PropTypes.func.isRequired
 };
 
-export default ListRowCell;
+export default React.memo(ListRowCell);

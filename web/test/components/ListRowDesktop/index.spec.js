@@ -1,97 +1,58 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
+import { DateTime } from 'luxon';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
+import { render } from '@testing-library/react';
 import React from 'react';
-import { testState } from '~client-test/test_data/state';
-import ListRowDesktop from '~client/containers/ListRowDesktop';
-import { aListItemDeleted } from '~client/actions/edit.actions';
+import ListRowDesktop from '~client/components/ListRowDesktop';
 
 const AfterRow = () => null;
 
-const getContainer = memoize((customProps = {}, customState = state => state) => {
-    const state = customState(testState);
-
-    const store = createMockStore(state);
-
+const getContainer = memoize((customProps = {}) => {
     const props = {
         page: 'food',
-        id: '10',
-        row: {
-            ...state.pages.food.rows.find(({ id }) => id === customProps.id || '10'),
-            future: true
+        item: {
+            id: '10',
+            date: DateTime.fromISO('2019-07-16'),
+            future: true,
+            firstPresent: false,
+            className: 'my-classname'
         },
+        command: {},
+        setCommand: () => null,
+        setActive: () => null,
+        onUpdate: () => null,
+        daily: null,
         AfterRow,
+        navNext: () => null,
+        navPrev: () => null,
         ...customProps
     };
 
-    const utils = render(
-        <Provider store={store}>
-            <ListRowDesktop {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<ListRowDesktop {...props} />);
 });
 
 test('basic structure', t => {
     const { container } = getContainer();
 
-    t.is(container.childNodes.length, 1);
-    const [li] = container.childNodes;
-
-    t.is(li.tagName, 'LI');
-    t.is(li.className, 'future');
-    t.is(li.childNodes.length, 7);
+    t.is(container.childNodes.length, 6);
 });
 
 test('list of columns', t => {
     const { container } = getContainer();
-    const [li] = container.childNodes;
 
-    const [rowCell] = li.childNodes;
+    const [rowCell] = container.childNodes;
 
     t.is(rowCell.tagName, 'SPAN');
-    t.is(rowCell.className, 'date');
+    t.is(rowCell.className, 'cell date');
 });
 
 test('daily column', t => {
     const { container } = getContainer();
-    const [li] = container.childNodes;
 
-    const [, , , , , span] = li.childNodes;
+    const [, , , , , span] = container.childNodes;
 
     t.is(span.tagName, 'SPAN');
     t.is(span.className, 'daily');
     t.is(span.childNodes.length, 0);
-});
-
-test('delete button', t => {
-    const { container } = getContainer();
-    const [li] = container.childNodes;
-
-    const [, , , , , , span] = li.childNodes;
-
-    t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'delete');
-    t.is(span.childNodes.length, 1);
-
-    const [a] = span.childNodes;
-
-    t.is(a.tagName, 'A');
-    t.is(a.childNodes.length, 0);
-});
-
-test('dispatching an action when the delete button is pressed', t => {
-    const { store, container } = getContainer();
-
-    const action = aListItemDeleted({ page: 'food', id: '10' });
-
-    t.false(store.isActionDispatched(action));
-
-    fireEvent.click(container.childNodes[0].childNodes[6].childNodes[0]);
-
-    t.true(store.isActionDispatched(action));
 });

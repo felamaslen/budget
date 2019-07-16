@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { rowShape } from '~client/prop-types/page/rows';
-import { formatValue } from '~client/components/Editable';
+import { formatItem } from '~client/modules/format';
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
 export default function ListRowMobile({ item, listColsMobile, AfterRowMobile }) {
@@ -11,7 +11,7 @@ export default function ListRowMobile({ item, listColsMobile, AfterRowMobile }) 
         <>
             {listColsMobile.map(column => (
                 <span key={column} className={classNames('column', column)}>
-                    {formatValue(column, item[column])}
+                    {formatItem(column, item[column])}
                 </span>
             ))}
             {AfterRowMobile && <AfterRowMobile item={item} />}

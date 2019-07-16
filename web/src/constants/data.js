@@ -7,6 +7,8 @@ export const API_BACKOFF_TIME = 5000;
 
 export const LOGIN_INPUT_LENGTH = 4;
 
+export const CREATE_ID = 'CREATE_ID';
+
 export const CREATE = 'CREATE';
 export const READ = 'READ';
 export const UPDATE = 'UPDATE';

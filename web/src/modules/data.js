@@ -3,7 +3,6 @@ import { DateTime } from 'luxon';
 import shortid from 'shortid';
 
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
-import { PAGES } from '~client/constants/data';
 
 export const IDENTITY = state => state;
 export const NULL = () => null;

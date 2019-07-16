@@ -4,7 +4,7 @@ import '~client-test/browser';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ModalDialog, { animationTime } from '~client/components/ModalDialog';
-import { CREATE_ID } from '~client/components/CrudList';
+import { CREATE_ID } from '~client/constants/data';
 
 const getContainer = (customProps = {}, ...args) => {
     const props = {

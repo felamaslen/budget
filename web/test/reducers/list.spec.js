@@ -265,7 +265,7 @@ test('LIST_ITEM_DELETED optimistically deletes a list item', t => {
         ]
     };
 
-    const action = listItemDeleted(page, 'some-real-id');
+    const action = listItemDeleted('some-real-id', { page });
 
     const result = myListReducer(state, action);
 
@@ -282,7 +282,7 @@ test('[daily] LIST_ITEM_DELETED updates the total', t => {
         ]
     };
 
-    const action = listItemDeleted(page, 'some-real-id');
+    const action = listItemDeleted('some-real-id', { page });
 
     const result = dailyReducer(state, action);
 
@@ -296,7 +296,7 @@ test('LIST_ITEM_DELETED simply removes the item from state, if it was already in
         ]
     };
 
-    const action = listItemDeleted(page, 'some-fake-id');
+    const action = listItemDeleted('some-fake-id', { page });
 
     const result = myListReducer(state, action);
 
@@ -310,7 +310,7 @@ test('LIST_ITEM_DELETED updates the optimistic state to DELETE, if it was in an 
         ]
     };
 
-    const action = listItemDeleted(page, 'some-real-id');
+    const action = listItemDeleted('some-real-id', { page });
 
     const result = myListReducer(state, action);
 
@@ -342,7 +342,7 @@ test('Actions intended for other pages are ignored', t => {
         items: [{ id: 'some-id', other: 'prop', is: false }]
     };
 
-    t.deepEqual(myListReducer(initialStateDelete, listItemDeleted('other-page', 'some-id')), initialStateDelete);
+    t.deepEqual(myListReducer(initialStateDelete, listItemDeleted('some-id', { page: 'other-page' })), initialStateDelete);
 });
 
 const syncRequests = [
