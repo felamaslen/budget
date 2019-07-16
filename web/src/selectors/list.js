@@ -77,7 +77,13 @@ export const getSortedPageRows = createSelector(
     getPageProp,
     getCurrentDate,
     getAllPageRows,
-    (page, now, items) => memoisedRowProcessor(page, now, items)
+    (page, now, items) => {
+        if (!PAGES[page].daily) {
+            return items;
+        }
+
+        return memoisedRowProcessor(page, now, items);
+    }
 );
 
 const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({

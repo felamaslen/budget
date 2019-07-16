@@ -173,6 +173,12 @@ test('getSortedPageRows doesn\'t recalculate until the next day', t => {
     t.is(resultF, resultG);
 });
 
+test('getSortedPageRows returns the items as-is, if the page is not a daily list page', t => {
+    const result = getSortedPageRows(state, { page: 'funds' });
+
+    t.deepEqual(result, state.funds.items);
+});
+
 test('getWeeklyAverages returns null for non-daily pages', t => {
     t.is(getWeeklyAverages(state, { page: 'analysis' }), null);
 });
