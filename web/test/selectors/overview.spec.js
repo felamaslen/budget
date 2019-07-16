@@ -14,6 +14,8 @@ import {
     getOverviewTable
 } from '~client/selectors/overview';
 
+import { getCurrentDate } from '~client/selectors/now';
+
 const testRandoms = [0.36123, 0.72246];
 
 const getRandomStub = () => {
