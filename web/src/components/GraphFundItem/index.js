@@ -20,7 +20,6 @@ function getDimensions({ popout, sold }) {
     if (popout) {
         return { width: GRAPH_FUND_ITEM_WIDTH_LARGE, height: GRAPH_FUND_ITEM_HEIGHT_LARGE };
     }
-
     if (sold) {
         return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT / 2 };
     }
@@ -121,7 +120,11 @@ export default function GraphFundItem({ name, sold, values, popout, onToggle }) 
         ...processData(values, popout)
     };
 
-    return (<LineGraph {...graphProps} />);
+    return (
+        <div className="fund-graph">
+            <LineGraph {...graphProps} />
+        </div>
+    );
 }
 
 GraphFundItem.propTypes = {

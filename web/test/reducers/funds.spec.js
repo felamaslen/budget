@@ -4,9 +4,19 @@ import shortid from 'shortid';
 
 import reducer, { initialState } from '~client/reducers/funds';
 import { dataRead } from '~client/actions/api';
-import { fundsReceived } from '~client/actions/funds';
+import {
+    fundsViewSoldToggled,
+    fundsReceived
+} from '~client/actions/funds';
 import { getTransactionsList } from '~client/modules/data';
 import { DATA_KEY_ABBR } from '~client/constants/data';
+
+test('FUNDS_VIEW_SOLD_TOGGLED toggles the view sold status', t => {
+    const action = fundsViewSoldToggled();
+
+    t.true(reducer({ viewSoldFunds: false }, action).viewSoldFunds);
+    t.false(reducer({ viewSoldFunds: true }, action).viewSoldFunds);
+});
 
 test('DATA_READ sets funds-related properties', t => {
     const stub = sinon.stub(shortid, 'generate').returns('my-short-id');

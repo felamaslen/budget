@@ -21,7 +21,7 @@ export default function FormFieldCost(props) {
             <input
                 ref={ref}
                 {...inputProps}
-                defaultValue={props.value === null || typeof props.value === 'string'
+                value={currentValue === null || typeof currentValue === 'string'
                     ? ''
                     : currentValue / 100
                 }

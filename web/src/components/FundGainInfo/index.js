@@ -25,7 +25,7 @@ export default function FundGainInfo({
     const gainStyle = { backgroundColor: rgba(color) };
 
     return (
-        <span className="gain">
+        <span className="fund-extra-info-gain">
             <span className={classNames('text', profitLossClass(gain))} style={gainStyle}>
                 <span className="value">
                     {formatCurrency(value, formatOptions)}

@@ -3,7 +3,7 @@ import ninos from 'ninos';
 const test = ninos(ava);
 
 import '~client-test/browser';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import FormFieldTransactions from '~client/components/FormField/transactions';
 import { getTransactionsList, modifyTransaction, removeAtIndex } from '~client/modules/data';
@@ -15,14 +15,14 @@ const transactions = [
 
 const value = getTransactionsList(transactions);
 
-const getContainer = (customProps = {}) => {
+const getContainer = (customProps = {}, ...args) => {
     const props = {
         value,
         onChange: () => null,
         ...customProps
     };
 
-    return render(<FormFieldTransactions {...props} />);
+    return render(<FormFieldTransactions {...props} />, ...args);
 };
 
 test('basic structure (inactive)', t => {
@@ -55,37 +55,50 @@ test('basic structure (active)', t => {
 
     const [inner] = modal.childNodes;
     t.is(inner.tagName, 'DIV');
-    t.is(inner.className, 'inner');
-    t.is(inner.childNodes.length, 1);
+    t.is(inner.className, 'modal-inner');
+    t.is(inner.childNodes.length, 2);
 
-    const [ul] = inner.childNodes;
+    const [head, ul] = inner.childNodes;
+
+    t.is(head.tagName, 'DIV');
+    t.is(head.className, 'modal-head');
+    t.is(head.childNodes.length, 3);
+
+    const [date, units, cost] = head.childNodes;
+
+    t.is(date.innerHTML, 'Date');
+    t.is(units.innerHTML, 'Units');
+    t.is(cost.innerHTML, 'Cost');
+
     t.is(ul.tagName, 'UL');
     t.is(ul.className, 'transactions-list');
-
-    t.is(ul.childNodes.length, 3); // two rows + create
 });
 
 test('rendering a list of transactions', t => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
     const { childNodes: [, modal] } = container.childNodes[0];
-    const { childNodes: [ul] } = modal.childNodes[0];
+    const { childNodes: [, ul] } = modal.childNodes[0];
+
+    t.is(ul.childNodes.length, transactions.length + 1); // transactions + create item
 
     transactions.forEach((transaction, index) => {
-        const li = ul.childNodes[index];
+        const li = ul.childNodes[index + 1];
 
         t.is(li.tagName, 'LI');
-        t.is(li.childNodes.length, 1);
+        t.is(li.childNodes.length, 4);
 
-        const [item] = li.childNodes;
+        const [date, units, cost, button] = li.childNodes;
 
-        t.is(item.tagName, 'SPAN');
-        t.is(item.childNodes.length, 4);
+        t.is(date.tagName, 'SPAN');
+        t.is(units.tagName, 'SPAN');
+        t.is(cost.tagName, 'SPAN');
+        t.is(button.tagName, 'SPAN');
 
-        item.childNodes.forEach(row => {
-            t.is(row.tagName, 'SPAN');
-            t.is(row.className, 'row');
-        });
+        t.is(date.className, 'row date');
+        t.is(units.className, 'row units');
+        t.is(cost.className, 'row cost');
+        t.is(button.className, 'row button');
     });
 });
 
@@ -94,15 +107,13 @@ test('handling date input', t => {
         const onChange = t.context.stub();
         const { container } = getContainer({ onChange, active: true, create: true });
         const { childNodes: [, modal] } = container.childNodes[0];
-        const { childNodes: [ul] } = modal.childNodes[0];
+        const { childNodes: [, ul] } = modal.childNodes[0];
 
         const li = ul.childNodes[index + 1];
         const [item] = li.childNodes;
 
-        const [dateRow] = item.childNodes;
-
-        t.is(dateRow.childNodes.length, 2);
-        const [dateLabelCol, dateInputCol] = dateRow.childNodes;
+        t.is(item.childNodes.length, 2);
+        const [dateLabelCol, dateInputCol] = item.childNodes;
 
         t.is(dateLabelCol.tagName, 'SPAN');
         t.is(dateLabelCol.className, 'col label');
@@ -113,6 +124,7 @@ test('handling date input', t => {
         t.is(dateInputCol.childNodes.length, 1);
 
         const { childNodes: [inputDate] } = dateInputCol.childNodes[0];
+        t.is(inputDate.tagName, 'INPUT');
 
         t.is(onChange.calls.length, 0);
 
@@ -120,6 +132,11 @@ test('handling date input', t => {
         t.is(onChange.calls.length, 0);
 
         fireEvent.blur(inputDate);
+        t.is(onChange.calls.length, 0);
+
+        act(() => {
+            getContainer({ onChange, active: false, create: true }, { container });
+        });
 
         t.is(onChange.calls.length, 1);
         t.deepEqual(onChange.calls[0].arguments, [modifyTransaction(value, index, {
@@ -133,15 +150,13 @@ test('handling units input', t => {
         const onChange = t.context.stub();
         const { container } = getContainer({ onChange, active: true, create: true });
         const { childNodes: [, modal] } = container.childNodes[0];
-        const { childNodes: [ul] } = modal.childNodes[0];
+        const { childNodes: [, ul] } = modal.childNodes[0];
 
         const li = ul.childNodes[index + 1];
-        const [item] = li.childNodes;
+        const [, item] = li.childNodes;
 
-        const [, unitsRow] = item.childNodes;
-
-        t.is(unitsRow.childNodes.length, 2);
-        const [unitsLabelCol, unitsInputCol] = unitsRow.childNodes;
+        t.is(item.childNodes.length, 2);
+        const [unitsLabelCol, unitsInputCol] = item.childNodes;
 
         t.is(unitsLabelCol.tagName, 'SPAN');
         t.is(unitsLabelCol.className, 'col label');
@@ -152,6 +167,7 @@ test('handling units input', t => {
         t.is(unitsInputCol.childNodes.length, 1);
 
         const { childNodes: [inputUnits] } = unitsInputCol.childNodes[0];
+        t.is(inputUnits.tagName, 'INPUT');
 
         t.is(onChange.calls.length, 0);
 
@@ -159,9 +175,13 @@ test('handling units input', t => {
         t.is(onChange.calls.length, 0);
 
         fireEvent.blur(inputUnits);
+        t.is(onChange.calls.length, 0);
+
+        act(() => {
+            getContainer({ onChange, active: false, create: true }, { container });
+        });
 
         t.is(onChange.calls.length, 1);
-
         t.deepEqual(onChange.calls[0].arguments, [modifyTransaction(value, index, {
             units: 34.2219
         })]);
@@ -173,15 +193,13 @@ test('handling cost input', t => {
         const onChange = t.context.stub();
         const { container } = getContainer({ onChange, active: true, create: true });
         const { childNodes: [, modal] } = container.childNodes[0];
-        const { childNodes: [ul] } = modal.childNodes[0];
+        const { childNodes: [, ul] } = modal.childNodes[0];
 
         const li = ul.childNodes[index + 1];
-        const [item] = li.childNodes;
+        const [, , item] = li.childNodes;
 
-        const [, , costRow] = item.childNodes;
-
-        t.is(costRow.childNodes.length, 2);
-        const [costLabelCol, costInputCol] = costRow.childNodes;
+        t.is(item.childNodes.length, 2);
+        const [costLabelCol, costInputCol] = item.childNodes;
 
         t.is(costLabelCol.tagName, 'SPAN');
         t.is(costLabelCol.className, 'col label');
@@ -192,6 +210,7 @@ test('handling cost input', t => {
         t.is(costInputCol.childNodes.length, 1);
 
         const { childNodes: [inputCost] } = costInputCol.childNodes[0];
+        t.is(inputCost.tagName, 'INPUT');
 
         t.is(onChange.calls.length, 0);
 
@@ -199,9 +218,13 @@ test('handling cost input', t => {
         t.is(onChange.calls.length, 0);
 
         fireEvent.blur(inputCost);
+        t.is(onChange.calls.length, 0);
+
+        act(() => {
+            getContainer({ onChange, active: false, create: true }, { container });
+        });
 
         t.is(onChange.calls.length, 1);
-
         t.deepEqual(onChange.calls[0].arguments, [modifyTransaction(value, index, {
             cost: 12677
         })]);
@@ -213,17 +236,16 @@ test('adding a transaction', t => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
     const { childNodes: [, modal] } = container.childNodes[0];
-    const { childNodes: [ul] } = modal.childNodes[0];
+    const { childNodes: [, ul] } = modal.childNodes[0];
 
     t.is(ul.childNodes.length, 3);
     const [liAdd] = ul.childNodes;
 
-    const [span] = liAdd.childNodes;
-    const [rowDate, rowUnits, rowCost, rowAdd] = span.childNodes;
+    const [rowDate, rowUnits, rowCost, rowAdd] = liAdd.childNodes;
 
-    t.is(rowDate.className, 'row');
-    t.is(rowUnits.className, 'row');
-    t.is(rowCost.className, 'row');
+    t.is(rowDate.className, 'row date');
+    t.is(rowUnits.className, 'row units');
+    t.is(rowCost.className, 'row cost');
 
     const { childNodes: [fieldDate] } = rowDate.childNodes[1];
     const { childNodes: [fieldUnits] } = rowUnits.childNodes[1];
@@ -250,6 +272,11 @@ test('adding a transaction', t => {
     t.is(onChange.calls.length, 0);
 
     fireEvent.click(buttonAdd);
+    t.is(onChange.calls.length, 0);
+
+    act(() => {
+        getContainer({ onChange, active: false, create: true }, { container });
+    });
 
     t.is(onChange.calls[0].arguments.length, 1);
     const [newValue] = onChange.calls[0].arguments;
@@ -273,16 +300,19 @@ test('removing a transaction', t => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
     const { childNodes: [, modal] } = container.childNodes[0];
-    const { childNodes: [ul] } = modal.childNodes[0];
+    const { childNodes: [, ul] } = modal.childNodes[0];
 
     t.is(ul.childNodes.length, 3);
     const [, row1, row2] = ul.childNodes;
 
-    const { childNodes: [, , , rowRemove1] } = row1.childNodes[0];
-    const { childNodes: [, , , rowRemove2] } = row2.childNodes[0];
+    const [, , , rowRemove1] = row1.childNodes;
+    const [, , , rowRemove2] = row2.childNodes;
 
     const [buttonRemove1] = rowRemove1.childNodes;
     const [buttonRemove2] = rowRemove2.childNodes;
+
+    t.is(buttonRemove1.tagName, 'BUTTON');
+    t.is(buttonRemove2.tagName, 'BUTTON');
 
     t.is(buttonRemove1.innerHTML, '−');
     t.is(buttonRemove2.innerHTML, '−');
@@ -290,10 +320,12 @@ test('removing a transaction', t => {
     t.is(onChange.calls.length, 0);
 
     fireEvent.click(buttonRemove1);
+    t.is(onChange.calls.length, 0);
+
+    act(() => {
+        getContainer({ onChange, active: false, create: true }, { container });
+    });
+
     t.is(onChange.calls.length, 1);
     t.deepEqual(onChange.calls[0].arguments, [removeAtIndex(value, 0)]);
-
-    fireEvent.click(buttonRemove2);
-    t.is(onChange.calls.length, 2);
-    t.deepEqual(onChange.calls[1].arguments, [removeAtIndex(value, 1)]);
 });

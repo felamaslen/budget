@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { throttle } from 'throttle-debounce';
 
 import { rgba } from '~client/modules/color';
+import { NULL } from '~client/modules/data';
 import { COLOR_GRAPH_TITLE } from '~client/constants/colors';
 
 function getHlColor(color, point, index) {
@@ -36,8 +37,6 @@ function getClosest(lines, position, calc) {
         }, red);
     }, null);
 }
-
-const noop = () => null;
 
 export function useHover({ lines, isMobile, calc, hoverEffect }) {
     const [hlPoint, setHlPoint] = useState(null);
@@ -75,7 +74,7 @@ export function useHover({ lines, isMobile, calc, hoverEffect }) {
     const onMouseLeave = useCallback(() => setHlPoint(null), []);
 
     if (!hoverEffect) {
-        return [null, noop, noop];
+        return [null, NULL, NULL];
     }
 
     return [hlPoint, onMouseMove, onMouseLeave];

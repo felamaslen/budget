@@ -30,12 +30,12 @@ FundItem.propTypes = {
     item: PropTypes.string.isRequired
 };
 
-function AfterCanvas({ period, mode, fundItems, toggleList, setToggleList, changePeriod }) {
+function AfterCanvas({ isMobile, period, mode, fundItems, toggleList, setToggleList, changePeriod }) {
     const onChange = useCallback(evt => changePeriod(evt.target.value), [changePeriod]);
 
     return (
         <div className="after-canvas">
-            <ul className="fund-sidebar noselect">
+            {!isMobile && <ul className="fund-sidebar noselect">
                 <li>
                     <select defaultValue={period} onChange={onChange}>
                         {GRAPH_FUNDS_PERIODS.map(([value, display]) => (
@@ -50,7 +50,7 @@ function AfterCanvas({ period, mode, fundItems, toggleList, setToggleList, chang
                         setToggleList={setToggleList}
                     />
                 ))}
-            </ul>
+            </ul>}
             <span className="mode">
                 {'Mode: '}{GRAPH_FUNDS_MODES[mode]}
             </span>
@@ -59,6 +59,7 @@ function AfterCanvas({ period, mode, fundItems, toggleList, setToggleList, chang
 }
 
 AfterCanvas.propTypes = {
+    isMobile: PropTypes.bool.isRequired,
     period: PropTypes.string.isRequired,
     mode: PropTypes.string.isRequired,
     fundItems: PropTypes.arrayOf(fundItemShape.isRequired).isRequired,

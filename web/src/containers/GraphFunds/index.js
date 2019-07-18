@@ -182,8 +182,9 @@ export function GraphFunds({
         tickSizeY
     }), [mode, startTime, tickSizeY]);
 
-    const after = useMemo(() => () => !isMobile && (
+    const after = useCallback(() => (
         <AfterCanvas
+            isMobile={isMobile}
             period={period}
             mode={mode}
             fundItems={fundItems}

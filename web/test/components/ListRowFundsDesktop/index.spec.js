@@ -9,7 +9,7 @@ const getContainer = memoize((customProps = {}) => {
     const props = {
         row: {
             id: '10',
-            cols: ['foo-fund'],
+            item: 'foo-fund',
             prices: [
                 [1, 10],
                 [2, 11],
@@ -48,16 +48,11 @@ test('fund graph', t => {
 
     const [graph] = span.childNodes;
 
-    t.is(graph.tagName, 'SPAN');
+    t.is(graph.tagName, 'DIV');
     t.is(graph.className, 'fund-graph');
     t.is(graph.childNodes.length, 1);
 
-    const [graphCont] = graph.childNodes;
-    t.is(graphCont.tagName, 'DIV');
-    t.is(graphCont.childNodes.length, 1);
-    t.is(graphCont.className, 'fund-graph-cont');
-
-    const [graphItem] = graphCont.childNodes;
+    const [graphItem] = graph.childNodes;
 
     t.is(graphItem.tagName, 'DIV');
     t.is(graphItem.className, 'graph-container graph-foo-fund');
@@ -70,5 +65,5 @@ test('gain info', t => {
     const [, gainInfo] = span.childNodes;
 
     t.is(gainInfo.tagName, 'SPAN');
-    t.is(gainInfo.className, 'gain');
+    t.is(gainInfo.className, 'fund-extra-info-gain');
 });

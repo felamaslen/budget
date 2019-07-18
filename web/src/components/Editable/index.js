@@ -23,7 +23,7 @@ function EditableField({ item, onChange, ...rest }) {
         return <FormFieldCost string {...props} />;
     }
     if (item === 'transactions') {
-        return <FormFieldTransactions {...props} />;
+        return <FormFieldTransactions create {...props} />;
     }
 
     return <FormFieldText string {...props} />;

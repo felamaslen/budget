@@ -1,6 +1,6 @@
 import makeListReducer, { onRead } from '~client/reducers/list';
 import { DATA_READ } from '~client/constants/actions/api';
-import { FUNDS_RECEIVED } from '~client/constants/actions/funds';
+import { FUNDS_VIEW_SOLD_TOGGLED, FUNDS_RECEIVED } from '~client/constants/actions/funds';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 import { GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 
@@ -76,6 +76,7 @@ function onPeriodLoad(state, { res, period }) {
 }
 
 const handlers = {
+    [FUNDS_VIEW_SOLD_TOGGLED]: ({ viewSoldFunds }) => ({ viewSoldFunds: !viewSoldFunds }),
     [DATA_READ]: onReadFunds,
     [FUNDS_RECEIVED]: onPeriodLoad
 };

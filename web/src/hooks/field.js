@@ -59,10 +59,8 @@ export function useField({
     });
 
     useEffect(() => {
-        if (string) {
-            dispatch({ type: VALUE_SET, payload: value });
-        }
-    }, [string, value]);
+        dispatch({ type: VALUE_SET, payload: value });
+    }, [value]);
 
     useEffect(() => {
         if (!string) {

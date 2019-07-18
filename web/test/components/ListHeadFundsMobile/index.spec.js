@@ -1,8 +1,11 @@
 import test from 'ava';
 import sinon from 'sinon';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import '~client-test/browser';
+import { createMockStore } from 'redux-test-utils';
+import { Provider } from 'react-redux';
+import { testState } from '~client-test/test_data/state';
 
 import ListHeadFundsMobile from '~client/components/ListHeadFundsMobile';
 
@@ -10,16 +13,20 @@ const getContainer = (customProps = {}) => {
     const props = {
         totalCost: 400000,
         cachedValue: {
-            value: 399978,
-            ageText: '6 months, three weeks ago'
+            value: 399098,
+            ageText: '6 months, 3 weeks ago'
         },
         onReloadPrices: () => null,
         ...customProps
     };
 
-    return render(
+    const store = createMockStore(testState);
+
+    const utils = render(<Provider store={store}>
         <ListHeadFundsMobile {...props} />
-    );
+    </Provider>);
+
+    return { ...utils, store };
 };
 
 test('rendering basic structure', t => {

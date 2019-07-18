@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { DateTime } from 'luxon';
 
+import { useField } from '~client/hooks/field';
 import { Wrapper } from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
 import FormFieldNumber from '~client/components/FormField/number';
@@ -15,157 +15,149 @@ import {
 } from '~client/modules/data';
 import { CREATE_ID } from '~client/constants/data';
 
-function FormFieldTransactionsItem({ item, children, onChange, active }) {
-    const onChangeDate = useMemo(() => onChange('date'), [onChange]);
-    const onChangeUnits = useMemo(() => onChange('units'), [onChange]);
-    const onChangeCost = useMemo(() => onChange('cost'), [onChange]);
+function FormFieldTransaction({ item, children, onChange, active }) {
+    const onChangeDate = useCallback(value => onChange(item.id, 'date', value), [onChange, item.id]);
+    const onChangeUnits = useCallback(value => onChange(item.id, 'units', value), [onChange, item.id]);
+    const onChangeCost = useCallback(value => onChange(item.id, 'cost', value), [onChange, item.id]);
 
     return (
-        <li>
-            <span className="transaction">
-                <span className="row">
-                    <span className="col label">{'Date:'}</span>
-                    <span className="col">
-                        <FormFieldDate
-                            value={item.date}
-                            onChange={onChangeDate}
-                            active={active}
-                        />
-                    </span>
+        <li className="transactions-list-item">
+            <span className="row date">
+                <span className="col label">{'Date:'}</span>
+                <span className="col">
+                    <FormFieldDate
+                        value={item.date}
+                        onChange={onChangeDate}
+                        active={active}
+                    />
                 </span>
-                <span className="row">
-                    <span className="col label">{'Units:'}</span>
-                    <span className="col">
-                        <FormFieldNumber
-                            value={item.units}
-                            onChange={onChangeUnits}
-                            active={active}
-                        />
-                    </span>
-                </span>
-                <span className="row">
-                    <span className="col label">{'Cost:'}</span>
-                    <span className="col">
-                        <FormFieldCost
-                            value={item.cost}
-                            onChange={onChangeCost}
-                            active={active}
-                        />
-                    </span>
-                </span>
-                {children}
             </span>
+            <span className="row units">
+                <span className="col label">{'Units:'}</span>
+                <span className="col">
+                    <FormFieldNumber
+                        value={item.units}
+                        onChange={onChangeUnits}
+                        active={active}
+                    />
+                </span>
+            </span>
+            <span className="row cost">
+                <span className="col label">{'Cost:'}</span>
+                <span className="col">
+                    <FormFieldCost
+                        value={item.cost}
+                        onChange={onChangeCost}
+                        active={active}
+                    />
+                </span>
+            </span>
+            {children}
         </li>
     );
 }
 
-FormFieldTransactionsItem.propTypes = {
+FormFieldTransaction.propTypes = {
     item: transactionShape,
     children: PropTypes.node,
-    active: PropTypes.bool,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
+    active: PropTypes.bool
 };
 
-function AddNewTransaction({ value, onChange }) {
-    const onAdd = useCallback(newItem => onChange(addToTransactionsList(value, newItem)), [value, onChange]);
-    const [newItem, setNewItem] = useState({
-        id: CREATE_ID,
-        date: DateTime.local(),
-        units: 0,
-        cost: 0
-    });
+const newItemInit = {
+    id: CREATE_ID,
+    date: DateTime.local(),
+    units: 0,
+    cost: 0
+};
 
-    const onAddCallback = useCallback(() => {
+function FormFieldTransactions({ create, ...props }) {
+    const [currentValue, onChangeInput] = useField({ ...props, string: true });
+
+    const onChange = useCallback(value => onChangeInput({
+        target: { value }
+    }), [onChangeInput]);
+
+    const { value, active } = props;
+
+    const onChangeTransaction = useCallback((id, field, fieldValue) =>
+        onChange(modifyTransactionById(value, id, {
+            [field]: fieldValue
+        })), [value, onChange]);
+
+    const onRemoveTransaction = useCallback(id => onChange(
+        currentValue.filter(({ id: valueId }) => valueId !== id)
+    ), [currentValue, onChange]);
+
+    const [newItem, setNewItem] = useState(newItemInit);
+
+    const onChangeAddField = useCallback((id, field, fieldValue) => setNewItem(last => ({
+        ...last,
+        [field]: fieldValue
+    })), []);
+
+    const onAdd = useCallback(() => {
         if (!newItem) {
             return;
         }
 
-        onAdd(newItem);
-    }, [newItem, onAdd]);
-
-    const onChangeField = useCallback(field => fieldValue => setNewItem({
-        ...newItem,
-        [field]: fieldValue
-    }), [newItem]);
+        setNewItem(newItemInit);
+        onChange(addToTransactionsList(currentValue, newItem));
+    }, [newItem, currentValue, onChange]);
 
     return (
-        <FormFieldTransactionsItem
-            item={newItem}
-            onChange={onChangeField}
-        >
-            <span className="row">
-                <button onClick={onAddCallback}>{'+'}</button>
-            </span>
-        </FormFieldTransactionsItem>
+        <Wrapper item="transactions" value={value} active={active}>
+            <span className="num-transactions">{(value || []).length}</span>
+            {currentValue && active && <div className="modal">
+                <div className="modal-inner">
+                    {create && (
+                        <div className="modal-head">
+                            <span className="col label date">{'Date'}</span>
+                            <span className="col label units">{'Units'}</span>
+                            <span className="col label cost">{'Cost'}</span>
+                        </div>
+                    )}
+                    <ul className="transactions-list">
+                        {create && (
+                            <FormFieldTransaction
+                                item={newItem}
+                                onChange={onChangeAddField}
+                            >
+                                <span className="row button">
+                                    <button onClick={onAdd}>{'+'}</button>
+                                </span>
+                            </FormFieldTransaction>
+                        )}
+                        {currentValue.map(item => (
+                            <FormFieldTransaction key={item.id}
+                                item={item}
+                                active={active}
+                                onChange={onChangeTransaction}
+                                onRemove={onRemoveTransaction}
+                            >
+                                {create && <span className="row button">
+                                    <button onClick={() => onRemoveTransaction(item.id)}>
+                                        &minus;
+                                    </button>
+                                </span>}
+                            </FormFieldTransaction>
+                        ))}
+                    </ul>
+                </div>
+            </div>}
+        </Wrapper>
     );
 }
 
-AddNewTransaction.propTypes = {
-    value: transactionsListShape.isRequired,
-    onChange: PropTypes.func.isRequired
-};
-
-function FormFieldTransactionsList({ create, value, onChange, active }) {
-    const makeOnChangeField = useCallback(id => field => fieldValue => onChange(modifyTransactionById(value, id, {
-        [field]: fieldValue
-    })), [value, onChange]);
-
-    const makeOnRemove = useCallback(
-        id => () => onChange(value.filter(({ id: valueId }) => valueId !== id)),
-        [value, onChange]
-    );
-
-    return (
-        <ul className="transactions-list">
-            {create && <AddNewTransaction value={value} onChange={onChange} />}
-            {value.map(item => (
-                <FormFieldTransactionsItem key={item.id}
-                    item={item}
-                    active={active}
-                    onChange={makeOnChangeField(item.id)}
-                >
-                    {create && <span className="row">
-                        <button onClick={makeOnRemove(item.id)}>&minus;</button>
-                    </span>}
-                </FormFieldTransactionsItem>
-            ))}
-        </ul>
-    );
-}
-
-FormFieldTransactionsList.propTypes = {
+FormFieldTransactions.propTypes = {
     create: PropTypes.bool,
-    value: transactionsListShape.isRequired,
+    value: transactionsListShape,
     active: PropTypes.bool,
     onChange: PropTypes.func.isRequired
 };
 
-FormFieldTransactionsList.defaultProps = {
-    create: false
-};
-
-const FormFieldTransactions = ({ create, value, active, onChange }) => (
-    <Wrapper item="transactions" value={value} active={active}>
-        <span className="num-transactions">{(value || []).length}</span>
-        {value && active && <div className="modal">
-            <div className="inner">
-                <FormFieldTransactionsList
-                    create={create}
-                    value={value}
-                    active={active}
-                    onChange={onChange}
-                />
-            </div>
-        </div>}
-    </Wrapper>
-);
-
-FormFieldTransactions.propTypes = {
-    ...FormFieldTransactionsList.propTypes,
-    value: transactionsListShape
-};
-
 FormFieldTransactions.defaultProps = {
+    create: false,
     value: []
 };
 

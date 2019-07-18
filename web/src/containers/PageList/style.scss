@@ -136,7 +136,7 @@ $item-height-desktop: 24px;
         }
     }
 
-    @media screen and (min-width: $width-page-mobile) {
+    @media only screen and (min-width: $width-page-mobile) {
         flex-flow: column;
 
         &-main {
@@ -261,11 +261,14 @@ $item-height-desktop: 24px;
                     background: $color-translucent-l95;
                 }
 
-                li {
-                    &:not(.li-add) > span:not(.active) {
-                        overflow: hidden;
+                &-item {
+                    &:not(.crud-list-list-item-create) {
+                        .cell:not(.active) {
+                            overflow: hidden;
+                        }
                     }
-                    & > span {
+
+                    .cell {
                         display: inline-flex;
                         text-overflow: ellipsis;
                         vertical-align: top;
@@ -279,8 +282,10 @@ $item-height-desktop: 24px;
                         }
                     }
                 }
-                .editable, .editable-input {
-                    height: inherit;
+                .editable {
+                    &, &-input {
+                        height: inherit;
+                    }
                 }
                 .text {
                     margin-right: 2px;
@@ -339,5 +344,9 @@ $item-height-desktop: 24px;
                 }
             }
         }
+    }
+
+    @media only screen and (min-width: $width-page-tablet) {
+        flex-flow: row;
     }
 }

@@ -1,12 +1,11 @@
 import { useReducer, useMemo, useEffect } from 'react';
 import { throttle } from 'throttle-debounce';
 
+import { NULL } from '~client/modules/data';
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
 import { genPixelCompute, pointVisible } from '~client/components/Graph/helpers';
 
 const threshold = 4;
-
-const noop = () => null;
 
 const pointsVisible = lines => lines.some(({ data }) => data.length > threshold);
 
@@ -60,7 +59,7 @@ const init = ({ disabled, dimensions, lines, calc, zoomEffect, graphRef }) => ({
 });
 
 function onWheel(state, { evt }) {
-    if (state.disabled || !state.graphRef.current) {
+    if (state.disabled || !state.graphRef.current || !evt.deltaY) {
         return state;
     }
 
@@ -130,7 +129,10 @@ export function useZoom({
     }, init);
 
     useEffect(() => {
-        if ((disabled && !state.disabled) || lines !== state.lastLines) {
+        if ((disabled && !state.disabled) ||
+            lines !== state.lastLines ||
+            dimensions !== state.lastDimensions
+        ) {
             const nextCalc = genPixelCompute(dimensions);
             dispatch({
                 type: 'reset',
@@ -147,6 +149,7 @@ export function useZoom({
         disabled,
         state.disabled,
         state.lastLines,
+        state.lastDimensions,
         setCalc,
         dimensions,
         lines,
@@ -164,7 +167,7 @@ export function useZoom({
 
     const onWheelThrottled = useMemo(() => {
         if (disabled) {
-            return noop;
+            return NULL;
         }
 
         const handler = throttle(10, evt => dispatch({ type: 'wheel', evt }));
