@@ -145,7 +145,7 @@ async function fetchAll(db, uid, page, limit) {
         return data;
     }
 
-    const [{ count }] = await db.select(db.raw('COUNT(*) AS count'))
+    const [{ count }] = await db.select(db.raw('COUNT(*)::integer AS count'))
         .from('net_worth as nw')
         .where('nw.uid', '=', uid);
 
