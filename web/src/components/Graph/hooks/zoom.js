@@ -178,7 +178,7 @@ export function useZoom({
     useEffect(() => {
         let lastRef = null;
         setImmediate(() => {
-            if (graphRef.current) {
+            if (graphRef.current && onWheelThrottled !== NULL) {
                 graphRef.current.addEventListener('wheel', onWheelThrottled);
             }
             lastRef = graphRef.current;
