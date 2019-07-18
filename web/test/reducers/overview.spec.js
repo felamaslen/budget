@@ -194,7 +194,7 @@ test('LIST_ITEM_DELETED removes from the relevant month and category', t => {
         rows: [[1672664], [7532442], [8120445], [0]]
     };
 
-    const withHoliday = reducer(state, listItemDeleted('holiday', 'some-id', {
+    const withHoliday = reducer(state, listItemDeleted('some-id', { page: 'holiday' }, {
         date: DateTime.fromISO('2019-07-12T00:00Z'),
         cost: 1235
     }));
