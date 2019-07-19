@@ -84,7 +84,7 @@ export const onCreateOptimistic = (key = 'items', columns, withTotals = false) =
         return { [key]: items };
     };
 
-export const onUpdateOptimistic = (key, columns, withTotals) => withOptimisticUpdate(
+export const onUpdateOptimistic = (key, columns, withTotals = false) => withOptimisticUpdate(
     key,
     UPDATE,
     withTotals,

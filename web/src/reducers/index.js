@@ -6,6 +6,7 @@ import api from '~client/reducers/api';
 import login from '~client/reducers/login';
 import error from '~client/reducers/error';
 import overview from '~client/reducers/overview';
+import netWorth from '~client/reducers/net-worth';
 import analysis from '~client/reducers/analysis';
 import stocks from '~client/reducers/stocks';
 import funds from '~client/reducers/funds';
@@ -24,6 +25,7 @@ export default combineReducers({
     login,
     error,
     overview,
+    netWorth,
     analysis,
     stocks,
     funds,
