@@ -130,7 +130,10 @@ const withDeletes = requests => state => compose(
 const onRead = (state, { res: { netWorth: { categories, subcategories, entries } } }) => ({
     categories: categories.data,
     subcategories: subcategories.data,
-    entries: entries.data.data
+    entries: entries.data.data.map(({ date, ...rest }) => ({
+        date: DateTime.fromISO(date),
+        ...rest
+    }))
 });
 
 const onSyncReceived = (state, { netWorth: requests }) => compose(

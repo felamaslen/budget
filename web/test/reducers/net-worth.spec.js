@@ -434,7 +434,7 @@ test('DATA_READ inserts data into the state', t => {
                     count: 17,
                     data: [{
                         id: 'some-entry-id',
-                        date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+                        date: '2019-07-12',
                         values: [
                             {
                                 subcategory: 'some-subcategory-id',
@@ -480,7 +480,7 @@ test('DATA_READ inserts data into the state', t => {
         }],
         entries: [{
             id: 'some-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: DateTime.fromISO('2019-07-12'),
             values: [
                 {
                     subcategory: 'some-subcategory-id',
