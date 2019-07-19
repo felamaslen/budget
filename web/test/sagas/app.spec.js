@@ -6,9 +6,12 @@ import shortid from 'shortid';
 
 import '~client-test/browser';
 import { testSaga } from 'redux-saga-test-plan';
+import { call } from 'redux-saga/effects';
 import appSaga, {
     watchEventEmitter,
     windowResizeEventChannel,
+    fetchLegacy,
+    fetchNetWorth,
     fetchData
 } from '~client/sagas/app';
 import { getFundHistoryQuery } from '~client/sagas/funds';
@@ -20,7 +23,6 @@ import { LOGGED_IN } from '~client/constants/actions/login';
 import { API_PREFIX } from '~client/constants/data';
 
 test('watchEventEmitter dispatching an action emitted by the channel', t => {
-    t.is(1, 1);
     const channel = windowResizeEventChannel();
 
     testSaga(watchEventEmitter, windowResizeEventChannel)
@@ -34,47 +36,92 @@ test('watchEventEmitter dispatching an action emitted by the channel', t => {
         .take(channel)
         .next(windowResized(105))
         .put(windowResized(105));
+
+    t.pass();
 });
 
-test('fetchData gets all data from the API', t => {
-    t.is(1, 1);
-
-    const stub = sinon.stub(shortid, 'generate').returns('some-id');
-
+test('fetchLegacy calls GET /data/all with fund query options', t => {
     const res = {
         data: {
             data: { isRes: true }
         },
         headers: {}
     };
-    const err = new Error('something bad happened');
 
-    testSaga(fetchData)
+    testSaga(fetchLegacy, 'some-api-key')
         .next()
         .call(getFundHistoryQuery)
         .next({ period: 'month', length: 6, history: true })
-        .select(getApiKey)
-        .next('some-api-key')
         .call(axios.get, `${API_PREFIX}/data/all?period=month&length=6&history=true`, {
             headers: {
                 Authorization: 'some-api-key'
             }
         })
         .next(res)
-        .put(dataRead(res.data.data))
+        .returns(res.data.data);
+
+    t.pass();
+});
+
+test('fetchNetWorth gets categories, subcategories and entries', t => {
+    const resCategories = { isCategoryRes: true };
+    const resSubcategories = { isSubcategoryRes: true };
+    const resEntries = { count: 17, data: ['some-data'] };
+
+    const options = { headers: { Authorization: 'some-api-key' } };
+
+    testSaga(fetchNetWorth, 'some-api-key')
+        .next()
+        .all({
+            categories: call(axios.get, `${API_PREFIX}/data/net-worth/categories`, options),
+            subcategories: call(axios.get, `${API_PREFIX}/data/net-worth/subcategories`, options),
+            entries: call(axios.get, `${API_PREFIX}/data/net-worth?page=0&limit=20`, options)
+        })
+        .next({
+            categories: resCategories,
+            subcategories: resSubcategories,
+            entries: resEntries
+        })
+        .returns({
+            categories: resCategories,
+            subcategories: resSubcategories,
+            entries: resEntries
+        });
+
+    t.pass();
+});
+
+test('fetchData gets all data from the API', t => {
+    const stub = sinon.stub(shortid, 'generate').returns('some-id');
+
+    const resLegacy = { foo: 'bar' };
+    const resNetWorth = { bar: 'baz' };
+
+    const err = new Error('something bad happened');
+
+    testSaga(fetchData)
+        .next()
+        .select(getApiKey)
+        .next('some-api-key')
+        .all({
+            legacy: call(fetchLegacy, 'some-api-key'),
+            netWorth: call(fetchNetWorth, 'some-api-key')
+        })
+        .next({
+            legacy: resLegacy,
+            netWorth: resNetWorth
+        })
+        .put(dataRead({ ...resLegacy, netWorth: resNetWorth }))
         .next()
         .isDone();
 
     testSaga(fetchData)
         .next()
-        .call(getFundHistoryQuery)
-        .next({ period: 'month', length: 6, history: true })
         .select(getApiKey)
         .next('some-api-key')
-        .call(axios.get, `${API_PREFIX}/data/all?period=month&length=6&history=true`, {
-            headers: {
-                Authorization: 'some-api-key'
-            }
+        .all({
+            legacy: call(fetchLegacy, 'some-api-key'),
+            netWorth: call(fetchNetWorth, 'some-api-key')
         })
         .throw(err)
         .put(errorOpened('Error loading data: something bad happened'))
@@ -82,11 +129,11 @@ test('fetchData gets all data from the API', t => {
         .isDone();
 
     stub.restore();
+
+    t.pass();
 });
 
 test('appSaga forks other sagas', t => {
-    t.is(1, 1);
-
     testSaga(appSaga)
         .next()
         .fork(watchEventEmitter, windowResizeEventChannel)
@@ -94,4 +141,6 @@ test('appSaga forks other sagas', t => {
         .takeLatest(LOGGED_IN, fetchData)
         .next()
         .isDone();
+
+    t.pass();
 });
