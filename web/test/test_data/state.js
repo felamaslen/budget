@@ -22,10 +22,9 @@ export const testState = {
     error: [],
     overview: {
         startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),
-        endDate: DateTime.fromISO('2018-06-30T23:59:59.999Z'),
+        endDate: DateTime.fromISO('2018-07-31T23:59:59.999Z'),
         cost: {
-            old: [10000, 11500, 11200],
-            funds: [94, 105, 110, 100, 101, 102, 103, 0, 0, 0],
+            funds: [94004, 105390, 110183, 100779, 101459, 102981, 103293, 0, 0, 0],
             fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
             income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
             bills: [1000, 900, 400, 650, 0, 0, 0],
@@ -33,12 +32,131 @@ export const testState = {
             general: [150, 90, 10, 35, 0, 0, 0],
             holiday: [10, 1000, 95, 13, 0, 0, 0],
             social: [50, 65, 134, 10, 0, 0, 0]
-        },
-        data: {
-            numRows: 7,
-            numCols: 1
-        },
-        rows: [[13502], [19220], [11876], [14981], [14230], [12678], [0]]
+        }
+    },
+    netWorth: {
+        categories: [
+            {
+                id: 'real-cash-category-id',
+                type: 'asset',
+                category: 'Cash (easy access)',
+                color: '#00ff00'
+            },
+            {
+                id: 'real-mortgage-category-id',
+                type: 'liability',
+                category: 'Mortgage',
+                color: '#fa0000'
+            },
+            {
+                id: 'real-credit-card-category-id',
+                type: 'liability',
+                category: 'Credit cards',
+                color: '#fc0000'
+            }
+        ],
+        subcategories: [
+            {
+                id: 'real-wallet-subcategory-id',
+                categoryId: 'real-cash-category-id',
+                subcategory: 'My wallet',
+                hasCreditLimit: null,
+                opacity: 0.2
+            },
+            {
+                id: 'real-bank-subcategory-id',
+                categoryId: 'real-cash-category-id',
+                subcategory: 'My bank',
+                hasCreditLimit: null,
+                opacity: 0.25
+            },
+            {
+                id: 'real-house-subcategory-id',
+                categoryId: 'real-mortage-category-id',
+                subcategory: 'My house',
+                hasCreditLimit: false,
+                opacity: 0.1
+            },
+            {
+                id: 'real-credit-card-subcategory-id',
+                categoryId: 'real-credit-card-category-id',
+                subcategory: 'My credit card',
+                hasCreditLimit: true,
+                opacity: 0.3
+            }
+        ],
+        entries: [
+            {
+                id: 'real-entry-id-a',
+                date: DateTime.fromISO('2018-02-28'),
+                values: [
+                    {
+                        subcategory: 'real-wallet-subcategory-id',
+                        value: [
+                            10324,
+                            { currency: 'CZK', value: 37.5 }
+                        ]
+                    },
+                    {
+                        subcategory: 'real-house-subcategory-id',
+                        value: -18744200,
+                        skip: true
+                    },
+                    {
+                        subcategory: 'real-bank-subcategory-id',
+                        value: 1296523
+                    },
+                    {
+                        subcategory: 'real-credit-card-subcategory-id',
+                        value: -8751
+                    }
+                ],
+                creditLimit: [
+                    {
+                        subcategory: 'real-credit-card-subcategory-id',
+                        value: 120000
+                    }
+                ],
+                currencies: [
+                    { currency: 'CZK', rate: 0.035 }
+                ]
+            },
+            {
+                id: 'real-entry-id-b',
+                date: DateTime.fromISO('2018-03-31'),
+                values: [
+                    {
+                        subcategory: 'real-wallet-subcategory-id',
+                        value: [
+                            9752
+                        ]
+                    },
+                    {
+                        subcategory: 'real-house-subcategory-id',
+                        value: -18420900,
+                        skip: true
+                    },
+                    {
+                        subcategory: 'real-bank-subcategory-id',
+                        value: 1051343
+                    },
+                    {
+                        subcategory: 'real-credit-card-subcategory-id',
+                        value: -21939
+                    }
+                ],
+                creditLimit: [
+                    {
+                        subcategory: 'real-credit-card-subcategory-id',
+                        value: 150000
+                    }
+                ],
+                currencies: [
+                    { currency: 'USD', rate: 0.865 },
+                    { currency: 'CZK', rate: 0.0314 }
+                ]
+            }
+        ]
     },
     analysis: {
         period: 'year',

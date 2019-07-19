@@ -28,8 +28,8 @@ function getOverviewCategoryKeyColor(key) {
     if (key === 'net') {
         return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
     }
-    if (key === 'predicted') {
-        return COLOR_CATEGORY.balance;
+    if (key.startsWith('netWorth')) {
+        return [COLOR_CATEGORY.spending, COLOR_CATEGORY.balance];
     }
 
     throw new Error(`Unknown overview column: ${key}`);
@@ -44,7 +44,7 @@ export const getOverviewCategoryColor = () => OVERVIEW_COLUMNS.slice(1)
 export function getOverviewScoreColor(value, range, median, color) {
     const blank = [255, 255, 255]; // white
 
-    if (range.min === range.max) {
+    if (!value || range.min === range.max) {
         return blank;
     }
 

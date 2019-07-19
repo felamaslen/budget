@@ -1,6 +1,9 @@
 import test from 'ava';
+import { DateTime } from 'luxon';
+
 import {
-    timeSeriesTicks
+    timeSeriesTicks,
+    getMonthDatesList
 } from '~client/modules/date';
 
 test('timeSeriesTicks handles small ranges (less than 10 minutes)', t => {
@@ -192,4 +195,26 @@ test('timeSeriesTicks handles ranges of years', t => {
     ];
 
     t.deepEqual(result, expectedResult);
+});
+
+test('getMonthDatesList gets a list of dates at the end of each month', t => {
+    const startDate = DateTime.fromISO('2018-01-01');
+    const endDate = DateTime.fromISO('2018-07-01');
+
+    t.deepEqual(getMonthDatesList(startDate, endDate), [
+        DateTime.fromISO('2018-01-31T23:59:59.999Z'),
+        DateTime.fromISO('2018-02-28T23:59:59.999Z'),
+        DateTime.fromISO('2018-03-31T23:59:59.999Z'),
+        DateTime.fromISO('2018-04-30T23:59:59.999Z'),
+        DateTime.fromISO('2018-05-31T23:59:59.999Z'),
+        DateTime.fromISO('2018-06-30T23:59:59.999Z'),
+        DateTime.fromISO('2018-07-31T23:59:59.999Z')
+    ]);
+});
+
+test('getMonthDatesList returns an empty array if both dates are in the same month', t => {
+    t.deepEqual(getMonthDatesList(
+        DateTime.fromISO('2018-01-03'),
+        DateTime.fromISO('2018-01-29')
+    ), []);
 });

@@ -9,7 +9,7 @@ import {
     LIST_ITEM_DELETED
 } from '~client/constants/actions/list';
 
-import { getRowDates } from '~client/selectors/overview';
+import { getMonthDates } from '~client/selectors/common';
 import { replaceAtIndex } from '~client/modules/data';
 
 import { DATA_READ } from '~client/constants/actions/api';
@@ -18,8 +18,7 @@ import { LOGGED_OUT } from '~client/constants/actions/login';
 export const initialState = {
     startDate: null,
     endDate: null,
-    cost: {},
-    rows: []
+    cost: {}
 };
 
 const onRead = (state, {
@@ -36,11 +35,10 @@ const onRead = (state, {
 }) => ({
     startDate: DateTime.fromObject({ year: startYear, month: startMonth }).endOf('month'),
     endDate: DateTime.fromObject({ year: endYear, month: endMonth }).endOf('month'),
-    cost,
-    rows: balance.map(value => ([value]))
+    cost
 });
 
-const getStateRowDates = memoize(state => getRowDates({ overview: state }));
+const getStateRowDates = memoize(state => getMonthDates({ overview: state }));
 
 const getDateIndex = (state, date) => getStateRowDates(state).findIndex(item => date.hasSame(item, 'month'));
 

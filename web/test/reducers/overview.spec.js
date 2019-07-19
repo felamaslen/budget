@@ -60,12 +60,7 @@ test('DATA_READ sets overview data', t => {
         social: [13275, 12593, 12400, 8115],
         old: [488973, 434353, 1234689]
     });
-    t.deepEqual(result.rows, [
-        [1672664],
-        [7532442],
-        [8120445],
-        [0]
-    ]);
+    t.falsy(result.rows);
 });
 
 test('LIST_ITEM_CREATED adds to the relevant month and category', t => {
@@ -82,8 +77,7 @@ test('LIST_ITEM_CREATED adds to the relevant month and category', t => {
             holiday: [46352, 0, 47398, 55597],
             social: [13275, 12593, 12400, 8115],
             old: [488973, 434353, 1234689]
-        },
-        rows: [[1672664], [7532442], [8120445], [0]]
+        }
     };
 
     const withGeneral = reducer(state, listItemCreated('general', {
@@ -108,8 +102,7 @@ test('LIST_ITEM_CREATED is ignored if the item has insufficient data', t => {
             holiday: [46352, 0, 47398, 55597],
             social: [13275, 12593, 12400, 8115],
             old: [488973, 434353, 1234689]
-        },
-        rows: [[1672664], [7532442], [8120445], [0]]
+        }
     };
 
     const withMissingDate = reducer(state, listItemCreated('general', {
@@ -139,8 +132,7 @@ test('LIST_ITEM_UPDATED updates the relevant month and category', t => {
             holiday: [46352, 0, 47398, 55597],
             social: [13275, 12593, 12400, 8115],
             old: [488973, 434353, 1234689]
-        },
-        rows: [[1672664], [7532442], [8120445], [0]]
+        }
     };
 
     const withDate = reducer(state, listItemUpdated('food', 'some-id', {
@@ -190,8 +182,7 @@ test('LIST_ITEM_DELETED removes from the relevant month and category', t => {
             holiday: [46352, 0, 47398, 55597],
             social: [13275, 12593, 12400, 8115],
             old: [488973, 434353, 1234689]
-        },
-        rows: [[1672664], [7532442], [8120445], [0]]
+        }
     };
 
     const withHoliday = reducer(state, listItemDeleted('some-id', { page: 'holiday' }, {

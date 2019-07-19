@@ -1,40 +1,49 @@
-import './style.scss';
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import Media from 'react-media';
-import { mediaQueryMobile } from '~client/constants';
-import { getTargets } from '~client/selectors/graph';
+
 import { targetsShape } from '~client/prop-types/graph/balance';
 import { costShape } from '~client/prop-types/page/overview';
+
+import { getTargets } from '~client/selectors/graph';
+import { getProcessedCost } from '~client/selectors/overview';
+import { getNetWorthSummaryOld } from '~client/selectors/net-worth';
+import { getStartDate, getFutureMonths } from '~client/selectors/common';
 import { getCurrentDate } from '~client/selectors/now';
-import { getStartDate, getFutureMonths, getProcessedCost } from '~client/selectors/overview';
+
+import { mediaQueryMobile } from '~client/constants';
 import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
-export function GraphOverviewWrapped({ isMobile, startDate, now, futureMonths, cost, targets, graphWidth }) {
-    const commonProps = { isMobile, startDate, now, graphWidth };
+import './style.scss';
 
-    return (
-        <div className="graph-container-outer">
-            <GraphBalance name="balance"
+const GraphOverviewWrapped = ({
+    futureMonths,
+    cost,
+    netWorthOld,
+    targets,
+    ...commonProps
+}) => (
+    <div className="graph-container-outer">
+        <GraphBalance name="balance"
+            {...commonProps}
+            futureMonths={futureMonths}
+            cost={cost}
+            netWorthOld={netWorthOld}
+            targets={targets}
+        />
+        {!commonProps.isMobile && (
+            <GraphSpending name="spend"
                 {...commonProps}
-                futureMonths={futureMonths}
-                cost={cost}
-                targets={targets}
+                valuesNet={cost.net}
+                valuesSpending={cost.spending}
             />
-            {!isMobile && (
-                <GraphSpending name="spend"
-                    {...commonProps}
-                    valuesNet={cost.net}
-                    valuesSpending={cost.spending}
-                />
-            )}
-        </div>
-    );
-}
+        )}
+    </div>
+);
 
 GraphOverviewWrapped.propTypes = {
     isMobile: PropTypes.bool,
@@ -42,6 +51,7 @@ GraphOverviewWrapped.propTypes = {
     now: PropTypes.instanceOf(DateTime).isRequired,
     futureMonths: PropTypes.number.isRequired,
     cost: costShape.isRequired,
+    netWorthOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     targets: targetsShape.isRequired,
     graphWidth: PropTypes.number.isRequired
 };
@@ -61,6 +71,7 @@ const mapStateToProps = state => ({
     startDate: getStartDate(state),
     graphWidth: Math.min(state.app.windowWidth, GRAPH_WIDTH),
     cost: getProcessedCost(state),
+    netWorthOld: getNetWorthSummaryOld(state),
     futureMonths: getFutureMonths(state),
     targets: getTargets(state)
 });

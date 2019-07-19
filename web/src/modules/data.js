@@ -214,3 +214,10 @@ export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =
 
 export const fieldExists = value => typeof value !== 'undefined' &&
     !(typeof value === 'string' && !value.length);
+
+export const leftPad = (array, length) => new Array(Math.max(0, length - array.length))
+    .fill(0)
+    .concat(array);
+
+export const rightPad = (array, length) => array
+    .concat(new Array(Math.max(0, length - array.length)).fill(0));

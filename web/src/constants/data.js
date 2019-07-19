@@ -37,8 +37,8 @@ export const OVERVIEW_COLUMNS = [
     ['income', 'Income'],
     ['spending', 'Out'],
     ['net', 'Net'],
-    ['predicted', 'Predicted'],
-    ['balance', 'Net Worth', '/net-worth']
+    ['netWorthPredicted', 'Predicted'],
+    ['netWorth', 'Net Worth', '/net-worth']
 ];
 
 export const PAGES = {

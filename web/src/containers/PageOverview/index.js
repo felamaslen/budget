@@ -11,10 +11,10 @@ import GraphOverview from '~client/containers/GraphOverview';
 import NetWorth from '~client/containers/NetWorth';
 import './style.scss';
 
-const PageOverview = ({ rows, editRow, editCol, ...props }) => (
+const PageOverview = ({ table, ...props }) => (
     <>
         <Page page="overview" {...props}>
-            <OverviewTable rows={rows} />
+            <OverviewTable rows={table} />
             <GraphOverview />
         </Page>
         <Route path="/net-worth" component={NetWorth} />
@@ -22,7 +22,7 @@ const PageOverview = ({ rows, editRow, editCol, ...props }) => (
 );
 
 PageOverview.propTypes = {
-    rows: PropTypes.arrayOf(PropTypes.shape({
+    table: PropTypes.arrayOf(PropTypes.shape({
         key: PropTypes.string.isRequired,
         cells: PropTypes.arrayOf(PropTypes.shape({
             column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
@@ -36,13 +36,11 @@ PageOverview.propTypes = {
         past: PropTypes.bool.isRequired,
         active: PropTypes.bool.isRequired,
         future: PropTypes.bool.isRequired
-    }).isRequired).isRequired,
-    editRow: PropTypes.number,
-    editCol: PropTypes.number
+    }).isRequired).isRequired
 };
 
 const mapStateToProps = state => ({
-    rows: getOverviewTable(state)
+    table: getOverviewTable(state)
 });
 
 export default connect(mapStateToProps)(PageOverview);

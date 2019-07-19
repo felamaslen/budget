@@ -2,13 +2,36 @@ import test from 'ava';
 import { DateTime } from 'luxon';
 
 import { testState as state } from '~client-test/test_data/state';
-import {
-    getTargets
-} from '~client/selectors/graph';
 
-test('getTargets gets a list of savings targets', t => {
-    const result = getTargets({
+import {
+    getNetWorthSummary,
+    getNetWorthSummaryOld
+} from '~client/selectors/net-worth';
+
+import { getNumMonths } from '~client/selectors/common';
+
+test('getNetWorthSummary gets a list of net worth values by month', t => {
+    const result = getNetWorthSummary(state);
+
+    t.true(Array.isArray(result));
+    t.is(result.length, getNumMonths(state));
+
+    t.is(result[0], 0); // January 2018 doesn't have any entries
+    t.is(result[1], 10324 + 0.035 * 3750 + 1296523 - 8751);
+    t.is(result[2], 9752 + 1051343 - 21939);
+    t.is(result[3], 0); // April 2018 doesn't have any entries
+    t.is(result[4], 0); // May 2018 "
+    t.is(result[5], 0); // June 2018 "
+    t.is(result[6], 0); // July 2018 "
+});
+
+test('getNetWorthSummaryOld gets old entry values, if there are any', t => {
+    const result = getNetWorthSummaryOld({
         ...state,
+        overview: {
+            startDate: DateTime.fromISO('2018-03-31'),
+            endDate: DateTime.fromISO('2018-05-31')
+        },
         netWorth: {
             ...state.netWorth,
             entries: [
@@ -72,30 +95,5 @@ test('getTargets gets a list of savings targets', t => {
         }
     });
 
-    t.deepEqual(result, [
-        {
-            date: 1517443199.999,
-            from: 13502,
-            months: 12,
-            last: 3,
-            tag: '1y',
-            value: 20897
-        },
-        {
-            date: 1527811199.999,
-            from: 14230,
-            months: 36,
-            last: 6,
-            tag: '3y',
-            value: 19487
-        },
-        {
-            date: 1530403199.999,
-            from: 12678,
-            months: 60,
-            last: 12,
-            tag: '5y',
-            value: 26496
-        }
-    ]);
+    t.deepEqual(result, [13502, 19220]);
 });

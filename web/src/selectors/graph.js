@@ -1,5 +1,7 @@
 import { createSelector } from 'reselect';
-import { getBalance, getFutureMonths, getRowDates } from './overview';
+
+import { getNetWorthSummary } from '~client/selectors/net-worth';
+import { getFutureMonths, getMonthDates } from '~client/selectors/common';
 
 const targetPeriods = [
     { last: 3, months: 12, tag: '1y' },
@@ -8,16 +10,16 @@ const targetPeriods = [
 ];
 
 export const getTargets = createSelector([
-    getBalance,
+    getNetWorthSummary,
     getFutureMonths,
-    getRowDates
-], (balance, futureMonths, dates) => {
-    const values = balance.slice(0, -futureMonths).reverse();
+    getMonthDates
+], (netWorth, futureMonths, dates) => {
+    const values = netWorth.slice(0, -futureMonths).reverse();
 
     return targetPeriods.map(({ last, months, tag }) => {
-        const index = ((-(futureMonths + 1 + last) % balance.length) + balance.length) % balance.length;
+        const index = ((-(futureMonths + 1 + last) % netWorth.length) + netWorth.length) % netWorth.length;
 
-        const from = balance[index];
+        const from = netWorth[index];
 
         const date = dates[index].ts / 1000;
 

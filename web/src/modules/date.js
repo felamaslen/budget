@@ -146,3 +146,19 @@ export function timeSeriesTicks(t0, t1) {
 
     return timeTickMonthYear(t0, t1);
 }
+
+export const getMonthDiff = (dateA, dateB) => Math.floor(dateB.diff(dateA, 'months')
+    .toObject()
+    .months
+);
+
+export const getMonthDatesList = (startDate, endDate) => {
+    const numMonths = getMonthDiff(startDate, endDate) + 1;
+
+    if (numMonths <= 1) {
+        return [];
+    }
+
+    return new Array(numMonths).fill(0)
+        .map((item, index) => startDate.plus({ months: index }).endOf('month'));
+};
