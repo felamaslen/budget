@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
+import PropTypes from 'prop-types';
+import { DateTime } from 'luxon';
 
 import { formatCurrency } from '~client/modules/format';
-import { netWorthItem } from '~client/prop-types/net-worth/list';
-import { dataPropTypes } from '~client/prop-types/net-worth/view';
-import { sumByType } from '~client/components/NetWorthView/calc';
 
 function getShortDate(dateIso) {
     if (dateIso.month % 3 === 0) {
@@ -17,43 +16,31 @@ function getShortDate(dateIso) {
     return dateIso.toFormat('MMM');
 }
 
-export default function NetWorthViewRow({ row, categories, subcategories }) {
-    const dateShort = useMemo(() => getShortDate(row.dateIso), [row.dateIso]);
-    const dateLong = useMemo(() => row.dateIso.toLocaleString(), [row.dateIso]);
-
-    const dataProps = useMemo(() => ({ row, categories, subcategories }), [row, categories, subcategories]);
-
-    const totalAssets = useMemo(() => sumByType('asset', dataProps), [dataProps]);
-    const totalLiabilities = useMemo(() => sumByType('liability', dataProps), [dataProps]);
-
-    const netWorthValue = totalAssets + totalLiabilities;
-
-    const assets = useMemo(() => formatCurrency(totalAssets), [totalAssets]);
-
-    const liabilities = useMemo(() => formatCurrency(totalLiabilities, {
-        brackets: true
-    }), [totalLiabilities]);
-
-    const netWorthFormatted = useMemo(() => formatCurrency(netWorthValue, {
-        brackets: true
-    }), [netWorthValue]);
-
-    const fti = useMemo(() => row.fti(netWorthValue).toFixed(2), [row, netWorthValue]);
+export default function NetWorthViewRow({ date, assets, liabilities, fti, expenses }) {
+    const dateShort = useMemo(() => getShortDate(date), [date]);
+    const dateLong = useMemo(() => date.toLocaleString(), [date]);
 
     return (
         <tr className="net-worth-view-row">
             <td className="date-short">{dateShort}</td>
             <td className="date-long">{dateLong}</td>
-            <td className="assets">{assets}</td>
-            <td className="liabilities">{liabilities}</td>
-            <td className="net-worth-value">{netWorthFormatted}</td>
-            <td className="expenses">{formatCurrency(row.spend)}</td>
-            <td className="fti">{fti}</td>
+            <td className="assets">{formatCurrency(assets)}</td>
+            <td className="liabilities">{formatCurrency(liabilities, {
+                brackets: true
+            })}</td>
+            <td className="net-worth-value">{formatCurrency(assets - liabilities, {
+                brackets: true
+            })}</td>
+            <td className="expenses">{formatCurrency(expenses)}</td>
+            <td className="fti">{fti.toFixed(2)}</td>
         </tr>
     );
 }
 
 NetWorthViewRow.propTypes = {
-    row: netWorthItem.isRequired,
-    ...dataPropTypes
+    date: PropTypes.instanceOf(DateTime).isRequired,
+    assets: PropTypes.number.isRequired,
+    liabilities: PropTypes.number.isRequired,
+    expenses: PropTypes.number.isRequired,
+    fti: PropTypes.number.isRequired
 };

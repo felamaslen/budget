@@ -23,11 +23,11 @@ Wrapper.defaultProps = {
     active: true
 };
 
-export default function FormFieldText(props) {
+export default function FormFieldText({ item, ...props }) {
     const [currentValue, onChange, ref, onBlur] = useField(props);
 
     return (
-        <Wrapper item="text" value={props.value} active={props.active}>
+        <Wrapper item={item} value={props.value} active={props.active}>
             <input
                 ref={ref}
                 type="text"
@@ -40,10 +40,12 @@ export default function FormFieldText(props) {
 }
 
 FormFieldText.propTypes = {
+    item: PropTypes.string,
     value: PropTypes.string,
     active: PropTypes.bool
 };
 
 FormFieldText.defaultProps = {
+    item: 'text',
     value: ''
 };

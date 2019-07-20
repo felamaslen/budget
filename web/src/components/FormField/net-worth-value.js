@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useReducer, useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -7,15 +7,19 @@ import {
     netWorthValueSize,
     currency as currencyShape
 } from '~client/prop-types/net-worth/list';
-import { useInputTickbox, useInputSelect } from '~client/hooks/form';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldNumber from '~client/components/FormField/number';
+import FormFieldTickbox from '~client/components/FormField/tickbox';
+import FormFieldSelect from '~client/components/FormField/select';
 
 function FormFieldWithCurrency({ className, index, value, currency, currencyOptions, onChange, onRemove, onAdd }) {
-    const options = useMemo(() => Array.from(new Set(currencyOptions.concat([currency]))), [currencyOptions, currency]);
+    const options = useMemo(() => {
+        return Array.from(new Set(currencyOptions.concat([currency])))
+            .map(item => ({ internal: item, external: item }));
+    }, [currencyOptions, currency]);
 
     const [newValue, setNewValue] = useState(value);
-    const [newCurrency, InputCurrency] = useInputSelect(currency, options);
+    const [newCurrency, setNewCurrency] = useState(currency);
 
     useEffect(() => {
         if (!(newValue === value && newCurrency === currency)) {
@@ -34,7 +38,12 @@ function FormFieldWithCurrency({ className, index, value, currency, currencyOpti
     return (
         <li className={classNames('form-field-net-worth-value-complex', className)}>
             <FormFieldNumber value={newValue} onChange={setNewValue} />
-            {InputCurrency}
+            <FormFieldSelect
+                item="currency"
+                options={options}
+                value={newCurrency}
+                onChange={setNewCurrency}
+            />
             {onRemove && (
                 <button className="delete-button" onClick={onRemoveCallback}>&minus;</button>
             )}
@@ -64,27 +73,49 @@ FormFieldWithCurrency.defaultProps = {
     onChange: () => null
 };
 
+const COMPLEX_TOGGLED = 'COMPLEX_TOGGLED';
+const VALUE_SET = 'VALUE_SET';
+
+function complexValueReducer(state, action) {
+    if (action.type === COMPLEX_TOGGLED) {
+        return {
+            ...state,
+            complex: !state.complex,
+            otherValue: state.value,
+            value: state.otherValue
+        };
+    }
+    if (action.type === VALUE_SET) {
+        return { ...state, value: action.value };
+    }
+
+    return state;
+}
+
 export default function FormFieldNetWorthValue({ value, onChange, currencies }) {
     const isComplex = Array.isArray(value);
-    const initialOtherValue = useMemo(() => {
-        if (isComplex) {
-            return 0;
-        }
 
-        return [];
-    }, [isComplex]);
-    const [otherValue, setOtherValue] = useState(initialOtherValue);
-    const [complexToggle, InputToggleComplex] = useInputTickbox(isComplex);
-    const [wasComplex, setWasComplex] = useState(complexToggle);
+    const [state, dispatch] = useReducer(complexValueReducer, {
+        complex: isComplex,
+        otherValue: isComplex
+            ? 0
+            : [],
+        value
+    });
+
+    const toggleComplex = useCallback(() => {
+        dispatch({ type: COMPLEX_TOGGLED, value });
+    }, [value]);
 
     useEffect(() => {
-        if (complexToggle !== wasComplex) {
-            setOtherValue(value);
-            onChange(otherValue);
+        if (state.complex !== isComplex && value !== state.value) {
+            onChange(state.value);
         }
+    }, [onChange, state.complex, isComplex, value, state.value]);
 
-        setWasComplex(complexToggle);
-    }, [complexToggle, wasComplex, onChange, otherValue, value]);
+    useEffect(() => {
+        dispatch({ type: VALUE_SET, value });
+    }, [value]);
 
     const currencyOptions = useMemo(() => currencies.map(({ currency }) => currency), [currencies]);
 
@@ -121,7 +152,7 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
     return (
         <div className="form-field form-field-net-worth-value">
             <span className="complex-toggle">
-                {InputToggleComplex}
+                <FormFieldTickbox item="fx-toggle" value={isComplex} onChange={toggleComplex} />
                 {'FX'}
             </span>
             {!isComplex && <FormFieldCost value={value} onChange={onChange} />}

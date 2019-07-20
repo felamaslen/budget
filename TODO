@@ -27,8 +27,8 @@
 - Throw errors on routes instead of handling errors individually
 - Refactor state using combineReducers
 - Restrict containers to the following: <ErrorMessages />, <GraphFunds />, <GraphOverview />, <LoginForm />, <ModalDialog /> (?), <NetWorth />, <Page /> (and derivatives), <Root />, <Spinner />, <StocksList />
-- Combine net worth with balance column (put net worth data in redux)
+- [DONE] Combine net worth with balance column (put net worth data in redux)
 - Fix stock prices feature
 - Fix time series major ticks not appearing sometimes
 - Server side rendering
-- Replace hooks/form implementation in net worth form with hooks/field
+- [DONE] Replace hooks/form implementation in net worth form with hooks/field

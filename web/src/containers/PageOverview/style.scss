@@ -5,9 +5,6 @@
 @mixin row-height($height) {
     height: $height;
     line-height: $height;
-    .editable-input {
-        height: $height - 1px;
-    }
 }
 
 @mixin hide-overview-columns($width) {
@@ -61,7 +58,7 @@
         }
 
         .col {
-            .text, .editable {
+            .text {
                 padding: 4px 2px;
                 display: inline-block;
                 width: 100%;

@@ -72,7 +72,7 @@ export const testState = {
             },
             {
                 id: 'real-house-subcategory-id',
-                categoryId: 'real-mortage-category-id',
+                categoryId: 'real-mortgage-category-id',
                 subcategory: 'My house',
                 hasCreditLimit: false,
                 opacity: 0.1

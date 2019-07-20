@@ -1,14 +1,33 @@
 import { connect } from 'react-redux';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Route, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
-import { getApiKey } from '~client/selectors/api';
-import { getRowDates, getProcessedCost } from '~client/selectors/overview';
-import { useCrud } from '~client/hooks/api';
+import { NET_WORTH_AGGREGATE } from '~client/constants/data';
 
-import { costShape, rowDatesShape } from '~client/prop-types/page/overview';
+import { getProcessedCost } from '~client/selectors/overview';
+import {
+    getCategories,
+    getSubcategories,
+    getEntries,
+    getAggregates,
+    getNetWorthTable
+} from '~client/selectors/overview/net-worth';
+
+import {
+    netWorthCategoryCreated,
+    netWorthCategoryUpdated,
+    netWorthCategoryDeleted,
+    netWorthSubcategoryCreated,
+    netWorthSubcategoryUpdated,
+    netWorthSubcategoryDeleted,
+    netWorthCreated,
+    netWorthUpdated,
+    netWorthDeleted
+} from '~client/actions/net-worth';
+
+import { costShape } from '~client/prop-types/page/overview';
+import { dataPropTypes, netWorthTableShape } from '~client/prop-types/net-worth/view';
 
 import NetWorthView from '~client/components/NetWorthView';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
@@ -16,55 +35,24 @@ import NetWorthList from '~client/components/NetWorthList';
 
 import './style.scss';
 
-function NetWorth({ rowDates, cost, apiKey }) {
-    const [categories, loadingCategories, errCategories, createCategory, readCategories, updateCategory, deleteCategory] = useCrud({
-        url: 'data/net-worth/categories',
-        apiKey
-    });
-
-    const [subcategories, loadingSubcategories, errSubcategories, createSubcategory, readSubcategories, updateSubcategory, deleteSubcategory] = useCrud({
-        url: 'data/net-worth/subcategories',
-        apiKey
-    });
-
-    const [
-        netWorth,
-        loadingNetWorth,
-        errNetWorth,
-        createNetWorth,
-        readNetWorth,
-        updateNetWorth,
-        deleteNetWorth,
-        page,
-        setPage,
-        numPages
-    ] = useCrud({
-        url: 'data/net-worth',
-        numPerPage: 20,
-        apiKey
-    });
-
-    useEffect(() => {
-        readCategories();
-    }, [readCategories]);
-
-    useEffect(() => {
-        readSubcategories();
-    }, [readSubcategories, categories]);
-
-    useEffect(() => {
-        readNetWorth();
-    }, [readNetWorth]);
-
-    const loading = loadingCategories || loadingSubcategories || loadingNetWorth;
-    const error = errCategories || errSubcategories || errNetWorth;
-
-    if (!cost) {
-        return null;
-    }
-
+function NetWorth({
+    categories,
+    subcategories,
+    entries,
+    aggregate,
+    table,
+    onCreateCategory,
+    onUpdateCategory,
+    onDeleteCategory,
+    onCreateSubcategory,
+    onUpdateSubcategory,
+    onDeleteSubcategory,
+    onCreateEntry,
+    onUpdateEntry,
+    onDeleteEntry
+}) {
     return (
-        <div className={classNames('net-worth', { loading, error })}>
+        <div className="net-worth">
             <div className="net-worth-inner">
                 <div className="title">
                     <h1>{'Net worth'}</h1>
@@ -74,14 +62,8 @@ function NetWorth({ rowDates, cost, apiKey }) {
                     exact
                     path="/net-worth"
                     render={routeProps => <NetWorthView {...routeProps}
-                        data={netWorth}
-                        page={page}
-                        setPage={setPage}
-                        numPages={numPages}
-                        spending={cost.spending}
-                        rowDates={rowDates}
-                        categories={categories}
-                        subcategories={subcategories}
+                        table={table}
+                        aggregate={aggregate}
                     />}
                 />
                 <Route
@@ -89,26 +71,23 @@ function NetWorth({ rowDates, cost, apiKey }) {
                     render={routeProps => <NetWorthCategoryList {...routeProps}
                         categories={categories}
                         subcategories={subcategories}
-                        onCreateCategory={createCategory}
-                        onReadCategory={readCategories}
-                        onUpdateCategory={updateCategory}
-                        onDeleteCategory={deleteCategory}
-                        onCreateSubcategory={createSubcategory}
-                        onReadSubcategory={readSubcategories}
-                        onUpdateSubcategory={updateSubcategory}
-                        onDeleteSubcategory={deleteSubcategory}
+                        onCreateCategory={onCreateCategory}
+                        onUpdateCategory={onUpdateCategory}
+                        onDeleteCategory={onDeleteCategory}
+                        onCreateSubcategory={onCreateSubcategory}
+                        onUpdateSubcategory={onUpdateSubcategory}
+                        onDeleteSubcategory={onDeleteSubcategory}
                     />}
                 />
                 <Route
                     path="/net-worth/edit/list"
                     render={routeProps => <NetWorthList {...routeProps}
-                        data={netWorth}
+                        data={entries}
                         categories={categories}
                         subcategories={subcategories}
-                        onCreate={createNetWorth}
-                        onRead={readNetWorth}
-                        onUpdate={updateNetWorth}
-                        onDelete={deleteNetWorth}
+                        onCreate={onCreateEntry}
+                        onUpdate={onUpdateEntry}
+                        onDelete={onDeleteEntry}
                     />}
                 />
                 <div className="net-worth-tab-bar">
@@ -135,15 +114,42 @@ function NetWorth({ rowDates, cost, apiKey }) {
 }
 
 NetWorth.propTypes = {
-    rowDates: rowDatesShape.isRequired,
     cost: costShape,
-    apiKey: PropTypes.string.isRequired
+    categories: dataPropTypes.categories,
+    subcategories: dataPropTypes.subcategories,
+    entries: dataPropTypes.data,
+    aggregate: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
+    table: netWorthTableShape.isRequired,
+    onCreateCategory: PropTypes.func.isRequired,
+    onUpdateCategory: PropTypes.func.isRequired,
+    onDeleteCategory: PropTypes.func.isRequired,
+    onCreateSubcategory: PropTypes.func.isRequired,
+    onUpdateSubcategory: PropTypes.func.isRequired,
+    onDeleteSubcategory: PropTypes.func.isRequired,
+    onCreateEntry: PropTypes.func.isRequired,
+    onUpdateEntry: PropTypes.func.isRequired,
+    onDeleteEntry: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    rowDates: getRowDates(state),
     cost: getProcessedCost(state),
-    apiKey: getApiKey(state)
+    categories: getCategories(state),
+    subcategories: getSubcategories(state),
+    entries: getEntries(state),
+    aggregate: getAggregates(state, NET_WORTH_AGGREGATE),
+    table: getNetWorthTable(state)
 });
 
-export default connect(mapStateToProps)(NetWorth);
+const mapDispatchToProps = {
+    onCreateCategory: netWorthCategoryCreated,
+    onUpdateCategory: netWorthCategoryUpdated,
+    onDeleteCategory: netWorthCategoryDeleted,
+    onCreateSubcategory: netWorthSubcategoryCreated,
+    onUpdateSubcategory: netWorthSubcategoryUpdated,
+    onDeleteSubcategory: netWorthSubcategoryDeleted,
+    onCreateEntry: netWorthCreated,
+    onUpdateEntry: netWorthUpdated,
+    onDeleteEntry: netWorthDeleted
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(NetWorth);

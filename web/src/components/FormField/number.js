@@ -35,5 +35,6 @@ FormFieldNumber.propTypes = {
 };
 
 FormFieldNumber.defaultProps = {
+    type: 'number',
     value: 0
 };

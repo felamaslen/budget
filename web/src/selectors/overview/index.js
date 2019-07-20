@@ -3,24 +3,22 @@ import compose from 'just-compose';
 
 import { AVERAGE_MEDIAN } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
-import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { IDENTITY, arrayAverage, randnBm, replaceAtIndex } from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
 import { getCurrentDate } from '~client/selectors/now';
 import {
+    getCost,
+    getSpendingColumn,
     getStartDate,
     getEndDate,
     getNumMonths,
     getFutureMonths,
     getMonthDates
-} from '~client/selectors/common';
-import { getNetWorthSummary } from '~client/selectors/net-worth';
+} from '~client/selectors/overview/common';
+import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
 
 const futureCategories = ['funds', 'food', 'general', 'holiday', 'social'];
-const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
-
-const getCost = state => state.overview.cost;
 
 function separateOldFunds(numRows) {
     return data => {
@@ -81,13 +79,6 @@ function calculateFutures(numRows, currentDate, futureMonths) {
         )
     }), {});
 }
-
-const getSpendingColumn = dates => data => ({
-    ...data,
-    spending: dates.map((date, index) =>
-        spendingCategories.reduce((sum, category) => sum + data[category][index], 0)
-    )
-});
 
 const getNetCashFlow = dates => data => ({
     ...data,

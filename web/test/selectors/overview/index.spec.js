@@ -6,7 +6,7 @@ import {
     getProcessedCost,
     getOverviewTable
 } from '~client/selectors/overview';
-import { getNetWorthSummary } from '~client/selectors/net-worth';
+import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
 
 const testRandoms = [0.15, 0.99];
 

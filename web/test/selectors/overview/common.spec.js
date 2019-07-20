@@ -9,7 +9,7 @@ import {
     getNumMonths,
     getFutureMonths,
     getMonthDates
-} from '~client/selectors/common';
+} from '~client/selectors/overview/common';
 
 test('getStartDate gets the start date', t => {
     t.deepEqual(getStartDate(state), DateTime.fromISO('2018-01-31T23:59:59.999Z'));

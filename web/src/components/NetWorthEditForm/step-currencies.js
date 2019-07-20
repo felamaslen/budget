@@ -38,7 +38,7 @@ function validateCurrency(symbol, currencies = []) {
     return symbolUpper;
 }
 
-async function getCurrencies(symbols, source, onSuccess, onError, onComplete) {
+const getCurrencies = debounce(100, async (symbols, source, onSuccess, onError, onComplete) => {
     try {
         const res = await axios.get('https://api.exchangeratesapi.io/latest', {
             params: {
@@ -56,10 +56,6 @@ async function getCurrencies(symbols, source, onSuccess, onError, onComplete) {
     } finally {
         onComplete();
     }
-}
-
-const getCurrenciesDebounced = debounce(100, (...args) => {
-    getCurrencies(...args);
 });
 
 function useCurrencyApi(symbols) {
@@ -97,7 +93,7 @@ function useCurrencyApi(symbols) {
         source.current = axios.CancelToken.source();
         setLoading(true);
 
-        getCurrenciesDebounced(allSymbols, source, onSuccess, setError, onComplete);
+        getCurrencies(allSymbols, source, onSuccess, setError, onComplete);
     }, [rates, cacheTime, symbols, onSuccess, onComplete]);
 
     useEffect(() => () => {
@@ -258,7 +254,7 @@ export default function StepCurrencies({
     return (
         <FormContainer {...containerProps} className="step-currencies">
             <h5 className="net-worth-edit-form-section-title">
-                {'Currencies - '}{item.date}
+                {'Currencies - '}{item.date.toISODate()}
             </h5>
             {errorRates && <div className="error">
                 {'Error loading rates: '}{errorRates.message}

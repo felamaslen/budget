@@ -21,9 +21,9 @@
         grid-template-rows: 28px;
         grid-template-columns: 104px auto 150px 64px;
 
-        .input-type,
-        .input-category,
-        .input-color,
+        .form-field-type,
+        .form-field-category,
+        .form-field-color,
         .button-change {
             display: flex;
             margin: 0 0.2em;
@@ -33,10 +33,10 @@
             grid-row: 1;
         }
 
-        .input-type {
+        .form-field-type {
             grid-column: 1;
         }
-        .input-category {
+        .form-field-category {
             padding: 0 0.2em;
             border: none;
             outline: none;
@@ -44,7 +44,7 @@
 
             grid-column: 2;
         }
-        .input-color {
+        .form-field-color {
             grid-column: 3;
             position: relative;
 

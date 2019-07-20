@@ -4,7 +4,6 @@ import classNames from 'classnames';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
-import { useInputSelect } from '~client/hooks/form';
 import {
     currency,
     creditLimit as creditLimitShape,
@@ -17,6 +16,7 @@ import {
 } from '~client/prop-types/net-worth/category';
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
+import FormFieldSelect from '~client/components/FormField/select';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
 
 function CreditLimitEditor({ creditLimit, setCreditLimit }) {
@@ -107,6 +107,8 @@ EditByType.propTypes = {
     onRemove: PropTypes.func.isRequired
 };
 
+const getFirstOption = options => (options[0] || {}).internal;
+
 function AddByType({
     isLiability,
     categories,
@@ -119,7 +121,7 @@ function AddByType({
         external: category
     })), [categories]);
 
-    const [category, InputCategory] = useInputSelect((categoryOptions[0] || {}).internal, categoryOptions);
+    const [category, setCategory] = useState(getFirstOption(categoryOptions));
 
     const subcategoryOptions = useMemo(
         () => subcategories
@@ -131,7 +133,7 @@ function AddByType({
         [category, subcategories]
     );
 
-    const [subcategory, InputSubcategory] = useInputSelect((subcategoryOptions[0] || {}).internal, subcategoryOptions);
+    const [subcategory, setSubcategory] = useState(getFirstOption(subcategoryOptions));
 
     const [value, setValue] = useState(0);
     const [skip, setSkip] = useState(null);
@@ -150,11 +152,21 @@ function AddByType({
         <div className="add-by-category-value">
             <span className="category">
                 <span className="label">{'Category:'}</span>
-                {InputCategory}
+                <FormFieldSelect
+                    item="category"
+                    options={categoryOptions}
+                    value={category}
+                    onChange={setCategory}
+                />
             </span>
             <span className="subcategory">
                 <span className="label">{'Subcategory:'}</span>
-                {InputSubcategory}
+                <FormFieldSelect
+                    item="subcategory"
+                    options={subcategoryOptions}
+                    value={subcategory}
+                    onChange={setSubcategory}
+                />
             </span>
             <FormFieldNetWorthValue
                 value={value}
@@ -336,7 +348,7 @@ function StepValues({
         <FormContainer {...containerProps} className="step-values">
             <h5 className="net-worth-edit-form-section-title">
                 <span className="type">{name}</span>
-                <span className="date">{' - '}{item.date}</span>
+                <span className="date">{' - '}{item.date.toISODate()}</span>
             </h5>
             <div className="edit-by-category">
                 {valueKeys.map(categoryId => (

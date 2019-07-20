@@ -14,14 +14,9 @@ export default function NetWorthList({
     categories,
     subcategories,
     onCreate,
-    onRead,
     onUpdate,
     onDelete
 }) {
-    if (!(data && categories && subcategories)) {
-        return null;
-    }
-
     const extraProps = {
         data,
         categories,
@@ -36,7 +31,6 @@ export default function NetWorthList({
                 Item={NetWorthListItem}
                 CreateItem={NetWorthListCreateItem}
                 onCreate={onCreate}
-                onRead={onRead}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 className="net-worth-item"
@@ -51,7 +45,6 @@ NetWorthList.propTypes = {
     categories: PropTypes.arrayOf(category.isRequired),
     subcategories: PropTypes.arrayOf(subcategory.isRequired),
     onCreate: PropTypes.func.isRequired,
-    onRead: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired
 };

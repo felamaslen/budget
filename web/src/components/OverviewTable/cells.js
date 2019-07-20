@@ -1,27 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import HoverCost from '~client/components/HoverCost';
 
-import CellInner from './cell-inner';
+function getStyle(rgb) {
+    if (!rgb) {
+        return {};
+    }
+
+    return { backgroundColor: `rgb(${rgb.join(',')})` };
+}
 
 export default function OverviewTableCells({ row: { cells, past, active, future } }) {
     return (
         <div className={classNames('row', { past, active, future })}>
-            {cells.map((cell, cellKey) => {
-                const { column, rgb } = cell;
-                const style = {};
-                if (rgb) {
-                    style.backgroundColor = `rgb(${rgb.join(',')})`;
-                }
-
-                return (
-                    <div key={cellKey}
-                        className={classNames('col', column[0])}
-                        style={style}>
-                        <CellInner cell={cell} cellKey={cellKey} />
-                    </div>
-                );
-            })}
+            {cells.map(({ column: [key], value, rgb }, index) => (
+                <div
+                    key={key}
+                    className={classNames('col', key)}
+                    style={getStyle(rgb)}
+                >
+                    <HoverCost value={value} abbreviate={index > 0} />
+                </div>
+            ))}
         </div>
     );
 }

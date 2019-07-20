@@ -22,4 +22,4 @@ const OverviewTable = props => (
     </div>
 );
 
-export default OverviewTable;
+export default React.memo(OverviewTable);

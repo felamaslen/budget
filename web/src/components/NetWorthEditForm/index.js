@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import shortid from 'shortid';
 
-import { withoutIds, sortByDate } from '~client/modules/data';
+import { sortByDate } from '~client/modules/data';
 import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
@@ -126,11 +126,6 @@ const idLists = [
     'values'
 ];
 
-const withoutGroupIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
-    ...last,
-    [key]: withoutIds(doc[key])
-}), doc);
-
 const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
     ...last,
     [key]: doc[key].map(item => ({ ...item, id: shortid.generate() }))
@@ -138,7 +133,8 @@ const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
 
 export function NetWorthEditForm({ onUpdate, ...props }) {
     const onEdit = useCallback((tempItem, onComplete) => {
-        onUpdate(tempItem.id, {}, withoutGroupIds(tempItem), onComplete);
+        onUpdate(tempItem.id, tempItem);
+        onComplete();
     }, [onUpdate]);
 
     return (
@@ -162,12 +158,11 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
                 date: DateTime.fromISO(lastItem.date)
                     .plus({ months: 1 })
                     .endOf('month')
-                    .toISODate()
             };
         }
 
         return {
-            date: DateTime.local().toISODate(),
+            date: DateTime.local(),
             creditLimit: [],
             currencies: [],
             values: []
@@ -175,7 +170,8 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
     }, [data]);
 
     const onEdit = useCallback((tempItem, onComplete) => {
-        onCreate(null, {}, withoutGroupIds(tempItem), onComplete);
+        onCreate(tempItem);
+        onComplete();
     }, [onCreate]);
 
     return (

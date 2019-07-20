@@ -9,8 +9,8 @@ import { costShape } from '~client/prop-types/page/overview';
 
 import { getTargets } from '~client/selectors/graph';
 import { getProcessedCost } from '~client/selectors/overview';
-import { getNetWorthSummaryOld } from '~client/selectors/net-worth';
-import { getStartDate, getFutureMonths } from '~client/selectors/common';
+import { getNetWorthSummaryOld } from '~client/selectors/overview/net-worth';
+import { getStartDate, getFutureMonths } from '~client/selectors/overview/common';
 import { getCurrentDate } from '~client/selectors/now';
 
 import { mediaQueryMobile } from '~client/constants';

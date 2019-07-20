@@ -30,7 +30,7 @@ const getContainer = (customProps = {}, customState = state => state) => {
     return { store, ...utils };
 };
 
-test.only('list page with extra props', t => {
+test('list page with extra props', t => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
 

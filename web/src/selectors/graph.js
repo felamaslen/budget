@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
-import { getNetWorthSummary } from '~client/selectors/net-worth';
-import { getFutureMonths, getMonthDates } from '~client/selectors/common';
+import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
+import { getFutureMonths, getMonthDates } from '~client/selectors/overview/common';
 
 const targetPeriods = [
     { last: 3, months: 12, tag: '1y' },

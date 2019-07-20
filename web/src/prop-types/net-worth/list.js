@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { DateTime } from 'luxon';
 
 export const netWorthValueSize = PropTypes.oneOfType([
     PropTypes.number.isRequired,
@@ -27,7 +28,7 @@ export const currency = PropTypes.shape({
 
 export const netWorthItem = PropTypes.shape({
     id: PropTypes.string,
-    date: PropTypes.string.isRequired,
+    date: PropTypes.instanceOf(DateTime).isRequired,
     spend: PropTypes.number,
     fti: PropTypes.func,
     values: PropTypes.arrayOf(netWorthValue.isRequired).isRequired,

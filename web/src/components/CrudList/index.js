@@ -7,20 +7,23 @@ import { CREATE_ID } from '~client/constants/data';
 
 import './style.scss';
 
-function withNav(nav, active, value) {
-    if (nav && !active) {
+function ifActive(active, value) {
+    if (!active) {
         return null;
     }
 
     return value;
 }
 
+const withNav = (nav, active, value) => ifActive(!nav || active, value);
+
 function CrudListItem({
     Item,
     onUpdate,
     onDelete,
-    activeId,
+    active,
     activeColumn,
+    noneActive,
     setActive,
     command,
     setCommand,
@@ -43,14 +46,14 @@ function CrudListItem({
     }, [item, setActive, onDelete, extraProps]);
 
     const liProps = {};
-    if (!nav) {
+    if (!nav && !active) {
         liProps.onClick = onSetActive;
     }
 
     return (
         <li
             className={classNames('crud-list-list-item', {
-                active: item.id === activeId,
+                active,
                 ...itemClassName(item)
             })}
             {...liProps}
@@ -58,10 +61,10 @@ function CrudListItem({
         >
             <Item
                 item={item}
-                active={item.id === activeId}
-                activeId={activeId}
+                active={active}
                 activeColumn={activeColumn}
-                command={item.id === activeId
+                noneActive={noneActive}
+                command={active
                     ? command
                     : NULL_COMMAND
                 }
@@ -72,7 +75,7 @@ function CrudListItem({
                 onUpdate={onUpdate}
                 {...extraProps}
             />
-            {activeId !== item.id && <div className="button-delete">
+            {!active && <div className="button-delete">
                 <button
                     className="button-delete-button"
                     onClick={onDeleteCallback}
@@ -85,8 +88,9 @@ function CrudListItem({
 CrudListItem.propTypes = {
     Item: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
     item: PropTypes.object.isRequired,
-    activeId: PropTypes.string,
+    active: PropTypes.bool.isRequired,
     activeColumn: PropTypes.string,
+    noneActive: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     command: PropTypes.object.isRequired,
     setCommand: PropTypes.func.isRequired,
@@ -128,9 +132,10 @@ export default function CrudList({
 
     const onSetCreateActive = useCallback(() => setActive(CREATE_ID), [setActive]);
     const createActive = activeId === CREATE_ID;
+    const noneActive = activeId === null;
 
     const createLiProps = {};
-    if (!nav) {
+    if (!nav && !createActive) {
         createLiProps.onClick = onSetCreateActive;
     }
 
@@ -143,11 +148,11 @@ export default function CrudList({
         >
             <CreateItem
                 active={createActive}
-                activeId={activeId}
                 activeColumn={createActive
                     ? activeColumn
                     : null
                 }
+                noneActive={noneActive}
                 setActive={setActive}
                 command={command.id === CREATE_ID
                     ? command
@@ -194,8 +199,9 @@ export default function CrudList({
                         onUpdate={onUpdate}
                         onDelete={onDelete}
                         nav={nav}
-                        activeId={withNav(nav, active, activeId)}
+                        active={active}
                         activeColumn={withNav(nav, active, activeColumn)}
+                        noneActive={noneActive}
                         setActive={setActive}
                         command={command.id === item.id
                             ? command
