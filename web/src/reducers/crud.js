@@ -96,7 +96,7 @@ export const onUpdateOptimistic = (key, columns, withTotals = false) => withOpti
     }
 );
 
-export const onDeleteOptimistic = (key, withTotals) => withOptimisticUpdate(
+export const onDeleteOptimistic = (key, withTotals = false) => withOptimisticUpdate(
     key,
     DELETE,
     withTotals

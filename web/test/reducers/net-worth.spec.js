@@ -127,20 +127,65 @@ test('NET_WORTH_CATEGORY_DELETED optimistically deletes a category', t => {
             type: 'asset',
             category: 'Cash (easy access)',
             color: '#00ff00'
-        }]
+        }],
+        subcategories: [],
+        entries: []
     };
 
     const action = netWorthCategoryDeleted('some-real-id');
 
     const result = reducer(state, action);
 
-    t.deepEqual(result.categories, [{
-        id: 'some-real-id',
-        type: 'asset',
-        category: 'Cash (easy access)',
-        color: '#00ff00',
-        __optimistic: DELETE
-    }]);
+    t.deepEqual(result, {
+        categories: [{
+            id: 'some-real-id',
+            type: 'asset',
+            category: 'Cash (easy access)',
+            color: '#00ff00',
+            __optimistic: DELETE
+        }],
+        subcategories: [],
+        entries: []
+    });
+});
+
+test('NET_WORTH_CATEGORY_DELETED deletes a pending category and its dependencies', t => {
+    const state = {
+        categories: [
+            {
+                id: 'some-real-id',
+                type: 'asset',
+                category: 'Cash (easy access)',
+                color: '#00ff00',
+                __optimistic: CREATE
+            },
+            { id: 'other-cat-id' }
+        ],
+        subcategories: [
+            { categoryId: 'some-real-id', id: 'subcat-A', __optimistic: CREATE },
+            { categoryId: 'other-cat-id', id: 'subcat-B' }
+        ],
+        entries: [
+            {
+                id: 'entry-A0',
+                values: [
+                    { subcategory: 'subcat-B' },
+                    { subcategory: 'subcat-A' }
+                ],
+                __optimistic: CREATE
+            }
+        ]
+    };
+
+    const action = netWorthCategoryDeleted('some-real-id');
+
+    const result = reducer(state, action);
+
+    t.deepEqual(result, {
+        categories: [{ id: 'other-cat-id' }],
+        subcategories: [{ categoryId: 'other-cat-id', id: 'subcat-B' }],
+        entries: [{ id: 'entry-A0', values: [{ subcategory: 'subcat-B' }], __optimistic: CREATE }]
+    });
 });
 
 test('NET_WORTH_SUBCATEGORY_CREATED optimistically creates a subcategory', t => {
@@ -199,13 +244,15 @@ test('NET_WORTH_SUBCATEGORY_UPDATED optimistically updates a subcategory', t => 
 
 test('NET_WORTH_SUBCATEGORY_DELETED optimistically deletes a subcategory', t => {
     const state = {
+        categories: [{ id: 'some-category-id' }],
         subcategories: [{
             id: 'some-subcategory-id',
             categoryId: 'some-category-id',
             subcategory: 'My bank account',
             hasCreditLimit: null,
             opacity: 0.2
-        }]
+        }],
+        entries: []
     };
 
     const action = netWorthSubcategoryDeleted('some-subcategory-id');
@@ -220,6 +267,47 @@ test('NET_WORTH_SUBCATEGORY_DELETED optimistically deletes a subcategory', t => 
         opacity: 0.2,
         __optimistic: DELETE
     }]);
+});
+
+test('NET_WORTH_SUBCATEGORY_DELETED deletes a pending subcategory and its dependencies', t => {
+    const state = {
+        categories: [{ id: 'some-category-id' }],
+        subcategories: [
+            {
+                id: 'some-subcategory-id',
+                categoryId: 'some-category-id',
+                subcategory: 'My bank account',
+                hasCreditLimit: null,
+                opacity: 0.2,
+                __optimistic: CREATE
+            },
+            { id: 'subcat-A', categoryId: 'some-category-id' }
+        ],
+        entries: [
+            {
+                id: 'entry-A0',
+                values: [
+                    { subcategory: 'some-subcategory-id' },
+                    { subcategory: 'subcat-A' }
+                ],
+                __optimistic: CREATE
+            }
+        ]
+    };
+
+    const action = netWorthSubcategoryDeleted('some-subcategory-id');
+
+    const result = reducer(state, action);
+
+    t.deepEqual(result, {
+        categories: [{ id: 'some-category-id' }],
+        subcategories: [{ id: 'subcat-A', categoryId: 'some-category-id' }],
+        entries: [{
+            id: 'entry-A0',
+            values: [{ subcategory: 'subcat-A' }],
+            __optimistic: CREATE
+        }]
+    });
 });
 
 test('NET_WORTH_CREATED optimistically creates an entry', t => {

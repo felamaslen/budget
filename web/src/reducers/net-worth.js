@@ -146,17 +146,37 @@ const COLUMNS_CATEGORIES = ['category', 'color', 'type'];
 const COLUMNS_SUBCATEGORIES = ['subcategory', 'categoryId', 'hasCreditLimit', 'opacity'];
 const COLUMNS_ENTRIES = ['date', 'values', 'currencies', 'creditLimit'];
 
+const removeDeletedSubcategories = ({ subcategories, ...state }) => ({
+    ...state,
+    subcategories: subcategories.filter(({ categoryId }) =>
+        state.categories.some(({ id }) => id === categoryId))
+});
+
+const removeDeletedEntries = ({ entries, ...state }) => ({
+    ...state,
+    entries: entries.map(({ values, ...rest }) => ({
+        ...rest,
+        values: values.filter(({ subcategory }) =>
+            state.subcategories.some(({ id }) => id === subcategory))
+    }))
+});
+
+const removeDependencies = handler => (state, action) => compose(
+    removeDeletedSubcategories,
+    removeDeletedEntries
+)({ ...state, ...handler(state, action) });
+
 const handlers = {
     [LOGGED_OUT]: () => initialState,
     [NET_WORTH_CATEGORY_CREATED]: onCreateOptimistic('categories', COLUMNS_CATEGORIES),
     [NET_WORTH_CATEGORY_UPDATED]: onUpdateOptimistic('categories', COLUMNS_CATEGORIES),
-    [NET_WORTH_CATEGORY_DELETED]: onDeleteOptimistic('categories', COLUMNS_CATEGORIES),
+    [NET_WORTH_CATEGORY_DELETED]: removeDependencies(onDeleteOptimistic('categories')),
     [NET_WORTH_SUBCATEGORY_CREATED]: onCreateOptimistic('subcategories', COLUMNS_SUBCATEGORIES),
     [NET_WORTH_SUBCATEGORY_UPDATED]: onUpdateOptimistic('subcategories', COLUMNS_SUBCATEGORIES),
-    [NET_WORTH_SUBCATEGORY_DELETED]: onDeleteOptimistic('subcategories', COLUMNS_SUBCATEGORIES),
+    [NET_WORTH_SUBCATEGORY_DELETED]: removeDependencies(onDeleteOptimistic('subcategories')),
     [NET_WORTH_CREATED]: onCreateOptimistic('entries', COLUMNS_ENTRIES),
     [NET_WORTH_UPDATED]: onUpdateOptimistic('entries', COLUMNS_ENTRIES),
-    [NET_WORTH_DELETED]: onDeleteOptimistic('entries', COLUMNS_ENTRIES),
+    [NET_WORTH_DELETED]: onDeleteOptimistic('entries'),
     [DATA_READ]: onRead,
     [SYNC_RECEIVED]: onSyncReceived
 };

@@ -9,7 +9,7 @@ import {
     LIST_ITEM_DELETED
 } from '~client/constants/actions/list';
 
-import { getMonthDates } from '~client/selectors/common';
+import { getMonthDates } from '~client/selectors/overview/common';
 import { replaceAtIndex } from '~client/modules/data';
 
 import { DATA_READ } from '~client/constants/actions/api';
