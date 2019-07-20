@@ -9,12 +9,13 @@ import {
     getNetWorthSummary,
     getNetWorthSummaryOld,
     getAggregates,
-    getNetWorthTable
+    getNetWorthTable,
+    getNetWorthRequests
 } from '~client/selectors/overview/net-worth';
 
 import { getNumMonths } from '~client/selectors/overview/common';
 import { replaceAtIndex } from '~client/modules/data';
-import { DELETE } from '~client/constants/data';
+import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
 test('getCategories excludes optimistically deleted items', t => {
     t.deepEqual(getCategories({
@@ -185,4 +186,110 @@ test('getAggregates returns the latest summed value of a group of categories', t
         cc: -21939,
         no: 0
     });
+});
+
+test('getNetWorthRequests gets requests for all items which don\'t reference fake IDs', t => {
+    const stateOptimistic = {
+        netWorth: {
+            categories: [
+                {
+                    id: 'real-category-id',
+                    __optimistic: DELETE
+                },
+                {
+                    id: 'fake-category-id',
+                    foo: 'bar',
+                    __optimistic: CREATE
+                }
+            ],
+            subcategories: [
+                {
+                    id: 'real-subcategory-id',
+                    categoryId: 'real-category-id',
+                    bar: 'baz',
+                    __optimistic: UPDATE
+                },
+                {
+                    id: 'fake-subcategory-id-a',
+                    categoryId: 'real-category-id',
+                    __optimistic: CREATE
+                },
+                {
+                    id: 'fake-subcategory-id-b',
+                    categoryId: 'fake-category-id',
+                    __optimistic: CREATE
+                }
+            ],
+            entries: [
+                {
+                    id: 'real-entry-id',
+                    values: [
+                        { subcategory: 'real-subcategory-id' }
+                    ],
+                    creditLimit: [],
+                    __optimistic: UPDATE
+                },
+                {
+                    id: 'fake-entry-id',
+                    values: [
+                        { subcategory: 'real-subcategory-id' },
+                        { subcategory: 'fake-subcategory-id-a' }
+                    ],
+                    creditLimit: [],
+                    __optimistic: CREATE
+                }
+            ]
+        }
+    };
+
+    const result = getNetWorthRequests(stateOptimistic);
+
+    t.deepEqual(result, [
+        {
+            type: CREATE,
+            fakeId: 'fake-category-id',
+            method: 'post',
+            route: 'data/net-worth/categories',
+            body: {
+                foo: 'bar'
+            }
+        },
+        {
+            type: DELETE,
+            id: 'real-category-id',
+            method: 'delete',
+            route: 'data/net-worth/categories'
+        },
+        {
+            type: CREATE,
+            fakeId: 'fake-subcategory-id-a',
+            method: 'post',
+            route: 'data/net-worth/subcategories',
+            body: {
+                categoryId: 'real-category-id'
+            }
+        },
+        {
+            type: UPDATE,
+            id: 'real-subcategory-id',
+            method: 'put',
+            route: 'data/net-worth/subcategories',
+            body: {
+                categoryId: 'real-category-id',
+                bar: 'baz'
+            }
+        },
+        {
+            type: UPDATE,
+            id: 'real-entry-id',
+            method: 'put',
+            route: 'data/net-worth',
+            body: {
+                values: [
+                    { subcategory: 'real-subcategory-id' }
+                ],
+                creditLimit: []
+            }
+        }
+    ]);
 });

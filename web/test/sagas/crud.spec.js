@@ -5,11 +5,14 @@ import { debounce } from 'redux-saga/effects';
 import axios from 'axios';
 
 import crudSaga, {
+    updateLists,
+    updateNetWorth,
     updateCrud,
     updateCrudFromAction
 } from '~client/sagas/crud';
 import { getLocked, getApiKey } from '~client/selectors/api';
 import { getCrudRequests } from '~client/selectors/list';
+import { getNetWorthRequests } from '~client/selectors/overview/net-worth';
 import {
     syncRequested,
     syncLocked,
@@ -31,7 +34,7 @@ import {
     TIMER_UPDATE_SERVER
 } from '~client/constants/data';
 
-const requests = [
+const listRequests = [
     {
         type: CREATE,
         fakeId: 'some-fake-id',
@@ -69,7 +72,7 @@ const requests = [
     }
 ];
 
-const httpRequests = [
+const listHttpRequests = [
     {
         method: 'post',
         route: 'general',
@@ -101,25 +104,138 @@ const httpRequests = [
     }
 ];
 
-test('updateCrud calls the API with a request list', t => {
+const netWorthRequests = [
+    {
+        type: CREATE,
+        fakeId: 'fake-category-id',
+        method: 'post',
+        route: 'data/net-worth/categories',
+        body: {
+            foo: 'bar'
+        }
+    },
+    {
+        type: DELETE,
+        id: 'real-category-id',
+        method: 'delete',
+        route: 'data/net-worth/categories'
+    },
+    {
+        type: CREATE,
+        fakeId: 'fake-subcategory-id-a',
+        method: 'post',
+        route: 'data/net-worth/subcategories',
+        body: {
+            categoryId: 'real-category-id'
+        }
+    },
+    {
+        type: UPDATE,
+        id: 'real-subcategory-id',
+        method: 'put',
+        route: 'data/net-worth/subcategories',
+        body: {
+            categoryId: 'real-category-id',
+            bar: 'baz'
+        }
+    },
+    {
+        type: UPDATE,
+        id: 'real-entry-id',
+        method: 'put',
+        route: 'data/net-worth',
+        body: {
+            values: [
+                { subcategory: 'real-subcategory-id' }
+            ],
+            creditLimit: []
+        }
+    }
+];
+
+const netWorthHttpRequests = [
+    {
+        method: 'post',
+        url: `${API_PREFIX}/data/net-worth/categories`,
+        body: {
+            foo: 'bar'
+        }
+    },
+    {
+        method: 'delete',
+        url: `${API_PREFIX}/data/net-worth/categories/real-category-id`,
+    },
+    {
+        method: 'post',
+        url: `${API_PREFIX}/data/net-worth/subcategories`,
+        body: {
+            categoryId: 'real-category-id'
+        }
+    },
+    {
+        method: 'put',
+        url: `${API_PREFIX}/data/net-worth/subcategories/real-subcategory-id`,
+        body: {
+            categoryId: 'real-category-id',
+            bar: 'baz'
+        }
+    },
+    {
+        type: UPDATE,
+        method: 'put',
+        url: `${API_PREFIX}/data/net-worth/real-entry-id`,
+        body: {
+            values: [
+                { subcategory: 'real-subcategory-id' }
+            ],
+            creditLimit: []
+        }
+    }
+];
+
+test('updateLists calls the API with a request list', t => {
     const res = { data: { data: { isRes: true } } };
 
-    testSaga(updateCrud)
+    testSaga(updateLists, 'some-api-key')
         .next()
         .select(getCrudRequests)
-        .next(requests)
-        .put(syncLocked())
+        .next(listRequests)
+        .call(axios.patch, `${API_PREFIX}/data/multiple`, {
+            list: listHttpRequests
+        }, {
+            headers: { Authorization: 'my-api-key' }
+        })
+        .next(res)
+        .returns(res.data.data);
+});
+
+test('updateNetWorth calls the API with a request list', t => {
+    const res = { data: { data: { isRes: true } } };
+
+    testSaga(updateLists, 'some-api-key')
         .next()
-        .select(getApiKey)
-        .next('my-api-key')
-        .put(syncRequested())
-        .next()
+        .select(getNetWorthRequests)
+        .next(netWorthRequests)
         .call(axios.patch, `${API_PREFIX}/data/multiple`, {
             list: httpRequests
         }, {
             headers: { Authorization: 'my-api-key' }
         })
         .next(res)
+        .returns(res.data.data);
+});
+
+test('updateCrud calls the API with a request list', t => {
+    const res = { data: { data: { isRes: true } } };
+
+    testSaga(updateCrud)
+        .next()
+        .put(syncLocked())
+        .next()
+        .select(getApiKey)
+        .next('my-api-key')
+        .put(syncRequested())
+        .next()
         .put(syncUnlocked())
         .next()
         .put(syncReceived(requests, res.data.data))

@@ -11,6 +11,8 @@ import {
 
 import { getMonthDatesList } from '~client/modules/date';
 import { withoutDeleted } from '~client/modules/data';
+import { getRequests } from '~client/selectors/crud';
+import { CREATE } from '~client/constants/data';
 
 const nullEntry = date => ({
     date,
@@ -191,3 +193,36 @@ export const getNetWorthTable = createSelector([
     withFTI,
     withTableProps
 )(entries));
+
+const withCategoryRequests = categories => requests => requests.concat(
+    getRequests('data/net-worth/categories')(categories)
+);
+
+const subcategoryPending = categories => categoryId => categories.some(({ id, __optimistic }) =>
+    id === categoryId && __optimistic === CREATE);
+
+const withSubcategoryRequests = (categories, subcategories) => requests => requests.concat(
+    getRequests('data/net-worth/subcategories')(subcategories.filter(({ categoryId }) =>
+        !subcategoryPending(categories)(categoryId)
+    )));
+
+const groupPending = (categories, subcategories) => ({ subcategory }) =>
+    subcategories.some(({ id, categoryId, __optimistic }) => id === subcategory && (
+        __optimistic === CREATE || subcategoryPending(categories)(categoryId)
+    ));
+
+const withEntryRequests = (categories, subcategories, entries) => requests => requests.concat(
+    getRequests('data/net-worth')(entries.filter(({ values, creditLimit }) => ([values, creditLimit])
+        .every(group => !group.some(groupPending(categories, subcategories)))
+    ))
+);
+
+export const getNetWorthRequests = createSelector([
+    getNonFilteredCategories,
+    getNonFilteredSubcategories,
+    getNonFilteredEntries
+], (categories, subcategories, entries) => compose(
+    withCategoryRequests(categories),
+    withSubcategoryRequests(categories, subcategories),
+    withEntryRequests(categories, subcategories, entries)
+)([]));
