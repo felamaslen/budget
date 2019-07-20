@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import shortid from 'shortid';
 
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
+import { DELETE } from '~client/constants/data';
 
 export const IDENTITY = state => state;
 export const NULL = () => null;
@@ -221,3 +222,5 @@ export const leftPad = (array, length) => new Array(Math.max(0, length - array.l
 
 export const rightPad = (array, length) => array
     .concat(new Array(Math.max(0, length - array.length)).fill(0));
+
+export const withoutDeleted = items => (items || []).filter(({ __optimistic }) => __optimistic !== DELETE);

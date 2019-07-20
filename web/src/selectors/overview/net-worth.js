@@ -10,7 +10,7 @@ import {
 } from '~client/selectors/overview/common';
 
 import { getMonthDatesList } from '~client/modules/date';
-import { DELETE } from '~client/constants/data';
+import { withoutDeleted } from '~client/modules/data';
 
 const nullEntry = date => ({
     date,
@@ -21,10 +21,13 @@ const nullEntry = date => ({
 
 const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE || '1990-01-01');
 
+const getNonFilteredCategories = state => state.netWorth.categories;
+const getNonFilteredSubcategories = state => state.netWorth.subcategories;
 const getNonFilteredEntries = state => state.netWorth.entries;
 
-export const getEntries = createSelector(getNonFilteredEntries,
-    items => items.filter(({ __optimistic }) => __optimistic !== DELETE));
+export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
+export const getCategories = createSelector(getNonFilteredCategories, withoutDeleted);
+export const getSubcategories = createSelector(getNonFilteredSubcategories, withoutDeleted);
 
 const withoutSkipValues = entries => entries.map(({ values, ...rest }) => ({
     ...rest,
@@ -32,9 +35,6 @@ const withoutSkipValues = entries => entries.map(({ values, ...rest }) => ({
 }));
 
 const getSummaryEntries = createSelector(getEntries, withoutSkipValues);
-
-export const getCategories = state => state.netWorth.categories;
-export const getSubcategories = state => state.netWorth.subcategories;
 
 function getComplexValue(value, currencies) {
     if (typeof value === 'number') {

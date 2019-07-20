@@ -4,6 +4,8 @@ import { DateTime } from 'luxon';
 import { testState as state } from '~client-test/test_data/state';
 
 import {
+    getCategories,
+    getSubcategories,
     getNetWorthSummary,
     getNetWorthSummaryOld,
     getAggregates,
@@ -13,6 +15,28 @@ import {
 import { getNumMonths } from '~client/selectors/overview/common';
 import { replaceAtIndex } from '~client/modules/data';
 import { DELETE } from '~client/constants/data';
+
+test('getCategories excludes optimistically deleted items', t => {
+    t.deepEqual(getCategories({
+        netWorth: {
+            categories: [
+                { id: 'id-a', __optimistic: DELETE },
+                { id: 'id-b' }
+            ]
+        }
+    }), [{ id: 'id-b' }]);
+});
+
+test('getSubcategories excludes optimistically deleted items', t => {
+    t.deepEqual(getSubcategories({
+        netWorth: {
+            subcategories: [
+                { id: 'id-a', __optimistic: DELETE },
+                { id: 'id-b' }
+            ]
+        }
+    }), [{ id: 'id-b' }]);
+});
 
 test('getNetWorthSummary gets a list of net worth values by month', t => {
     const result = getNetWorthSummary(state);

@@ -4,15 +4,13 @@ import compose from 'just-compose';
 import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/data';
 import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
-import { getValueForTransmit } from '~client/modules/data';
+import { withoutDeleted, getValueForTransmit } from '~client/modules/data';
 
 const getPageProp = (state, { page }) => page;
 
 const getNonFilteredItems = (state, { page }) => state[page].items;
 
-export const getAllPageRows = createSelector(getNonFilteredItems, items => items && items
-    .filter(({ __optimistic }) => __optimistic !== DELETE)
-);
+export const getAllPageRows = createSelector(getNonFilteredItems, withoutDeleted);
 
 const makeGetDaily = items => (last, item, index) => {
     const sum = last + item.cost;
