@@ -62,7 +62,7 @@ function NetWorthSubcategoryItemForm({
             />
             {!creditLimitDisabled && <FormFieldTickbox
                 item="credit-limit"
-                value={tempHasCreditLimit}
+                value={Boolean(tempHasCreditLimit)}
                 onChange={setTempHasCreditLimit}
             />}
             <FormFieldRange

@@ -635,8 +635,8 @@ test('SYNC_RECEIVED confirms category creates, updating any dependencies', t => 
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: CREATE,
             fakeId: 'some-fake-category-id',
             method: 'post',
@@ -647,8 +647,8 @@ test('SYNC_RECEIVED confirms category creates, updating any dependencies', t => 
                 color: '#fa0000'
             },
             res: CATEGORY_CC
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -706,8 +706,8 @@ test('SYNC_RECEIVED confirms category updates', t => {
         entries: []
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: UPDATE,
             id: CATEGORY_CC.id,
             method: 'put',
@@ -723,8 +723,8 @@ test('SYNC_RECEIVED confirms category updates', t => {
                 category: 'This is now an asset group',
                 color: '#00aa00'
             }
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -778,15 +778,15 @@ test('SYNC_RECEIVED confirms category deletes, removing any dependencies', t => 
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: DELETE,
             id: CATEGORY_CC.id,
             method: 'delete',
             route: 'net-worth/categories',
             res: null
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -853,8 +853,8 @@ test('SYNC_RECEIVED confirms subcategory creates, updating any dependencies', t 
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: CREATE,
             fakeId: 'some-fake-subcategory-id',
             method: 'post',
@@ -866,8 +866,8 @@ test('SYNC_RECEIVED confirms subcategory creates, updating any dependencies', t 
                 opacity: 0.2
             },
             res: SUBCATEGORY_CC
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -916,8 +916,8 @@ test('SYNC_RECEIVED confirms subcategory updates', t => {
         entries: []
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: UPDATE,
             id: SUBCATEGORY_HOUSE.id,
             method: 'put',
@@ -929,8 +929,8 @@ test('SYNC_RECEIVED confirms subcategory updates', t => {
                 opacity: 0.2
             },
             res: SUBCATEGORY_HOUSE
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -978,15 +978,15 @@ test('SYNC_RECEIVED confirms subcategory deletes, removing any dependencies', t 
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: DELETE,
             id: SUBCATEGORY_CC.id,
             method: 'delete',
             route: 'net-worth/subcategories',
             res: null
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -1057,8 +1057,8 @@ test('SYNC_RECEIVED confirms entry creates', t => {
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: CREATE,
             fakeId: 'some-fake-entry-id',
             method: 'post',
@@ -1112,8 +1112,8 @@ test('SYNC_RECEIVED confirms entry creates', t => {
                     { currency: 'CZK', rate: 0.035 }
                 ]
             }
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -1197,8 +1197,8 @@ test('SYNC_RECEIVED confirms entry updates', t => {
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: UPDATE,
             id: 'some-real-entry-id',
             method: 'put',
@@ -1252,8 +1252,8 @@ test('SYNC_RECEIVED confirms entry updates', t => {
                     { currency: 'CZK', rate: 0.035 }
                 ]
             }
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 
@@ -1335,15 +1335,15 @@ test('SYNC_RECEIVED confirms entry deletes', t => {
         }]
     };
 
-    const action = syncReceived([], [], [
-        {
+    const action = syncReceived({
+        netWorth: [{
             type: DELETE,
             id: 'some-real-entry-id',
             method: 'delete',
             route: 'net-worth',
             res: null
-        }
-    ]);
+        }]
+    });
 
     const result = reducer(state, action);
 

@@ -398,6 +398,13 @@ const syncResponse = [
     }
 ];
 
+const syncReceivedAction = syncReceived({
+    list: syncRequests.map((request, index) => ({
+        ...request,
+        res: syncResponse[index]
+    }))
+});
+
 test('SYNC_RECEIVED updates optimistically-created items with their real IDs', t => {
     const state = {
         items: [
@@ -405,7 +412,7 @@ test('SYNC_RECEIVED updates optimistically-created items with their real IDs', t
         ]
     };
 
-    const action = syncReceived(syncRequests, syncResponse);
+    const action = syncReceivedAction;
 
     const result = myListReducer(state, action);
 
@@ -421,7 +428,7 @@ test('[daily] SYNC_RECEIVED updates the list total from the last response', t =>
         ]
     };
 
-    const action = syncReceived(syncRequests, syncResponse);
+    const action = syncReceivedAction;
 
     const result = dailyReducer(state, action);
 
@@ -444,7 +451,7 @@ test('[daily] SYNC_RECEIVED doesn\'t update the list total if there wasn\'t a re
         { total: 8743 }
     ];
 
-    const action = syncReceived(req, res);
+    const action = syncReceived({ list: [{ ...req, res: res[0] }] });
 
     const result = dailyReducer(state, action);
 
@@ -458,7 +465,7 @@ test('SYNC_RECEIVED marks optimistically-updated items as confirmed', t => {
         ]
     };
 
-    const action = syncReceived(syncRequests, syncResponse);
+    const action = syncReceivedAction;
 
     const result = myListReducer(state, action);
 
@@ -475,7 +482,7 @@ test('SYNC_RECEIVED removes optimistically-deleted items from state', t => {
         ]
     };
 
-    const action = syncReceived(syncRequests, syncResponse);
+    const action = syncReceivedAction;
 
     const result = myListReducer(state, action);
 

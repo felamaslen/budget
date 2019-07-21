@@ -76,9 +76,9 @@ const confirmDeletes = filterRequestItems(DELETE, (items, requestItems) => {
     return items.filter(({ id }) => !idsToDelete.includes(id));
 });
 
-const onSyncReceived = page => (state, { requests, res }) => {
-    const requestItems = requests
-        .map((request, index) => ({ request, index, res: res[index] }))
+const onSyncReceived = page => (state, { res: { list } }) => {
+    const requestItems = list
+        .map(({ res, ...request }, index) => ({ request, index, res }))
         .filter(({ request }) => request.route === page);
 
     const items = compose(

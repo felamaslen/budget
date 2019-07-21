@@ -136,7 +136,7 @@ const onRead = (state, { res: { netWorth: { categories, subcategories, entries }
     }))
 });
 
-const onSyncReceived = (state, { netWorth: requests = [] }) => compose(
+const onSyncReceived = (state, { res: { netWorth: requests = [] } }) => compose(
     withCreates(requests),
     withUpdates(requests),
     withDeletes(requests)

@@ -43,6 +43,11 @@
             font-size: 18px;
 
             grid-column: 2;
+
+            input {
+                width: 100%;
+                font-size: 16px;
+            }
         }
         .form-field-color {
             grid-column: 3;
