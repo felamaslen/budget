@@ -4,7 +4,7 @@ const { listItemSchema } = require('../../schema/list');
 const common = require('../../common');
 
 function getLimitCondition(now, limit) {
-    const { numMonths, offset } = limit;
+    const { numMonths, offset = 0 } = limit;
 
     const monthDiffStart = 1 - (offset + 1) * numMonths;
 

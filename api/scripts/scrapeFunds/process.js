@@ -16,7 +16,7 @@ function getBroker(config, name) {
 
 function getEligibleFunds(config, logger, rows) {
     const fundsByHash = rows.reduce((funds, { uid, item, units, cost }) => {
-        if (!units || isNaN(units)) {
+        if (!(units && !isNaN(units) && cost && !isNaN(cost))) {
             return funds;
         }
 
@@ -27,10 +27,17 @@ function getEligibleFunds(config, logger, rows) {
 
         const hash = fundHash(item, config.data.funds.salt);
 
-        if (hash in funds) {
-            funds[hash].units += Math.round(units * 10000) / 10000;
+        const unitsRounded = Number(units.toFixed(5));
 
-            return funds;
+        if (funds[hash]) {
+            return {
+                ...funds,
+                [hash]: {
+                    ...funds[hash],
+                    units: funds[hash].units + unitsRounded,
+                    cost: funds[hash].cost + cost
+                }
+            };
         }
 
         return {
@@ -40,7 +47,7 @@ function getEligibleFunds(config, logger, rows) {
                 name: item,
                 hash,
                 broker,
-                units,
+                units: unitsRounded,
                 cost
             }
         };
