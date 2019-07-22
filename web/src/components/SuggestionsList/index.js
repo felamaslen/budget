@@ -64,6 +64,8 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
         }
     }, [requestDebounced, clear, page, column, search]);
 
+    useEffect(() => clear, [clear]);
+
     const { size, active } = state;
     const haveList = size > 0;
 

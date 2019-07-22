@@ -42,6 +42,11 @@ export default function Editable({ page, active, item, onSuggestion, ...props })
         }
     }, [active]);
 
+    const showSuggestions = Boolean(active &&
+        typed.length &&
+        PAGES_SUGGESTIONS.includes(page) &&
+        PAGES[page].suggestions.includes(item));
+
     return (
         <span className={classNames('editable', `editable-${item}`, {
             'editable-active': active,
@@ -53,7 +58,7 @@ export default function Editable({ page, active, item, onSuggestion, ...props })
                 onType={onType}
                 {...props}
             />
-            {active && PAGES_SUGGESTIONS.includes(page) && PAGES[page].suggestions.includes(item) && (
+            {showSuggestions && (
                 <SuggestionsList
                     page={page}
                     column={item}
