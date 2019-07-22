@@ -85,7 +85,7 @@ export function *updateCrud(backoffIndex = 0, unlock = false) {
     } catch (err) {
         yield put(syncErrorOccurred([...listRequests, ...netWorthRequests], err));
 
-        yield delay(API_BACKOFF_TIME * (1.5 ** backoffIndex));
+        yield delay(Math.min(300000, API_BACKOFF_TIME * (1.5 ** backoffIndex)));
         yield call(updateCrud, backoffIndex + 1, true);
     }
 }

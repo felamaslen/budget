@@ -411,6 +411,37 @@ test('updateCrud handles API errors using exponential backoff', t => {
     t.pass();
 });
 
+test('updateCrud sets a maximum of five minutes on the backoff delay', t => {
+    const err = new Error('some api error');
+
+    testSaga(updateCrud, 1000000, true)
+        .next()
+        .select(getCrudRequests)
+        .next(listRequests)
+        .select(getNetWorthRequests)
+        .next(netWorthRequests)
+        .put(syncLocked())
+        .next()
+        .select(getApiKey)
+        .next('my-api-key')
+        .put(syncRequested())
+        .next()
+        .all({
+            list: call(updateLists, 'my-api-key', listRequests),
+            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests)
+        })
+        .throw(err)
+        .put(syncErrorOccurred([...listRequests, ...netWorthRequests], err))
+        .next()
+        .delay(300000)
+        .next()
+        .call(updateCrud, 1000001, true)
+        .next()
+        .isDone();
+
+    t.pass();
+});
+
 test('updateCrudFromAction calls updateCrud', t => {
     testSaga(updateCrudFromAction)
         .next()
