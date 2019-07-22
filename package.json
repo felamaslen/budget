@@ -14,7 +14,7 @@
     "dev": "docker-compose up --build",
     "dev:run": "NODE_ENV=development nodemon -w ./api/src index.js",
     "dev:api": "NODE_ENV=development SKIP_APP=true nodemon --inspect -w ./api/src index.js",
-    "test:web": "NODE_ENV=test ava \"./web/test/**/*.spec.js\"",
+    "test:web": "TZ=UTC NODE_ENV=test ava \"./web/test/**/*.spec.js\"",
     "test:api": "./api/test/docker.sh",
     "test:api:run": "NODE_ENV=test ava \"./api/test/**/*.spec.js\"",
     "test:dev": "NODE_ENV=test ava -w --fail-fast \"./web/test/**/*.spec.js\"",
