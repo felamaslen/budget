@@ -226,6 +226,7 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
                     values: [
                         { subcategory: 'real-subcategory-id' }
                     ],
+                    currencies: [],
                     creditLimit: [],
                     __optimistic: UPDATE
                 },
@@ -235,6 +236,7 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
                         { subcategory: 'real-subcategory-id' },
                         { subcategory: 'fake-subcategory-id-a' }
                     ],
+                    currencies: [],
                     creditLimit: [],
                     __optimistic: CREATE
                 }
@@ -288,8 +290,56 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
                 values: [
                     { subcategory: 'real-subcategory-id' }
                 ],
+                currencies: [],
                 creditLimit: []
             }
         }
     ]);
+});
+
+test('getNetWorthRequests removes IDs from net worth entry dependents', t => {
+    const stateWithEntryCreate = {
+        netWorth: {
+            categories: [{
+                id: 'real-category-id'
+            }],
+            subcategories: [{
+                id: 'real-subcategory-id',
+                categoryId: 'real-category-id'
+            }],
+            entries: [{
+                id: 'fake-entry-id',
+                values: [
+                    { id: 'fake-value-id', subcategory: 'real-subcategory-id' }
+                ],
+                creditLimit: [
+                    { id: 'fake-credit-limit-id', subcategory: 'real-subcategory-id' }
+                ],
+                currencies: [
+                    { id: 'fake-currency-id', currency: 'CZK', rate: 0.031 }
+                ],
+                __optimistic: CREATE
+            }]
+        }
+    };
+
+    const result = getNetWorthRequests(stateWithEntryCreate);
+
+    t.deepEqual(result, [{
+        type: CREATE,
+        fakeId: 'fake-entry-id',
+        method: 'post',
+        route: 'data/net-worth',
+        body: {
+            values: [
+                { subcategory: 'real-subcategory-id' }
+            ],
+            creditLimit: [
+                { subcategory: 'real-subcategory-id' }
+            ],
+            currencies: [
+                { currency: 'CZK', rate: 0.031 }
+            ]
+        }
+    }]);
 });

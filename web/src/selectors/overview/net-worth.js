@@ -211,10 +211,20 @@ const groupPending = (categories, subcategories) => ({ subcategory }) =>
         __optimistic === CREATE || subcategoryPending(categories)(categoryId)
     ));
 
+const withoutIds = items => items.map(({ id, ...rest }) => rest);
+
 const withEntryRequests = (categories, subcategories, entries) => requests => requests.concat(
-    getRequests('data/net-worth')(entries.filter(({ values, creditLimit }) => ([values, creditLimit])
-        .every(group => !group.some(groupPending(categories, subcategories)))
-    ))
+    getRequests('data/net-worth')(entries
+        .filter(({ values, creditLimit }) => ([values, creditLimit])
+            .every(group => !group.some(groupPending(categories, subcategories)))
+        )
+        .map(({ values, creditLimit, currencies, ...rest }) => ({
+            values: withoutIds(values),
+            creditLimit: withoutIds(creditLimit),
+            currencies: withoutIds(currencies),
+            ...rest
+        }))
+    )
 );
 
 export const getNetWorthRequests = createSelector([
