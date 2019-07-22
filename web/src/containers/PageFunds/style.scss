@@ -242,6 +242,10 @@ $transactions-width-cost: 60px;
                 &-list-item {
                     padding: 0;
 
+                    &-create {
+                        z-index: 5;
+                    }
+
                     &:not(.crud-list-list-item-create):not(.sold) {
                         flex: 0 0 $item-height-desktop;
                         line-height: $item-height-desktop;
