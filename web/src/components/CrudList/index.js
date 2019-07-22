@@ -201,7 +201,7 @@ export default function CrudList({
                         nav={nav}
                         active={active}
                         activeColumn={withNav(nav, active, activeColumn)}
-                        noneActive={noneActive}
+                        noneActive={!nav && noneActive}
                         setActive={setActive}
                         command={command.id === item.id
                             ? command
