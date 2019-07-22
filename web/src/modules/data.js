@@ -58,16 +58,6 @@ export const transactionShape = PropTypes.shape({
 
 export const transactionsListShape = PropTypes.arrayOf(transactionShape);
 
-const isTransactionsList = item => Array.isArray(item) && item.every(value =>
-    typeof value === 'object' &&
-    Object.keys(value).length === 4 &&
-    typeof value.id === 'string' &&
-    value.id.length >= 7 &&
-    value.date instanceof DateTime &&
-    typeof value.units === 'number' &&
-    typeof value.cost === 'number'
-);
-
 const getRoundedTotal = key => array => Number(array.reduce((sum, { [key]: value }) => sum + value, 0).toFixed(4));
 
 export const getTotalUnits = getRoundedTotal('units');

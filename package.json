@@ -19,7 +19,7 @@
     "test:api:run": "NODE_ENV=test ava \"./api/test/**/*.spec.js\"",
     "test:dev": "NODE_ENV=test ava -w --fail-fast \"./web/test/**/*.spec.js\"",
     "test": "npm run test:web && npm run test:api",
-    "lint": "eslint webpack.config.js webpack api/src api/test web/src web/test",
+    "lint": "eslint webpack.config.js api/src api/test web/src web/test",
     "sass-lint": "sass-lint -qv \"./web/src/sass/**/*.scss\"",
     "scrape_funds": "node ./api/scripts/scrapeFunds/index.js --prices",
     "dev:scrape_funds": "NODE_ENV=development node ./api/scripts/scrapeFunds/index.js --prices",

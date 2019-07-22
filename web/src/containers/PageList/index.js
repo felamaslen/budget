@@ -8,7 +8,6 @@ import classNames from 'classnames';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
 import {
     getSortedPageRows,
-    getDailyTotals,
     getWeeklyAverages,
     getTotalCost
 } from '~client/selectors/list';

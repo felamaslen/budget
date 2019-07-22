@@ -6,8 +6,7 @@ import {
     ANALYSIS_BLOCK_REQUESTED,
     ANALYSIS_BLOCK_RECEIVED,
     ANALYSIS_TREE_DISPLAY_TOGGLED,
-    ANALYSIS_TREE_HOVERED,
-    ANALYSIS_BLOCK_CLICKED
+    ANALYSIS_TREE_HOVERED
 } from '~client/constants/actions/analysis';
 
 export const initialState = {

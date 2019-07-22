@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import test from 'ava';
 import { DateTime } from 'luxon';
 

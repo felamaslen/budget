@@ -16,7 +16,6 @@ import {
     getTotalUnits,
     getTotalCost,
     isSold,
-    dataEquals,
     arrayAverage,
     limitTimeSeriesLength,
     randnBm,

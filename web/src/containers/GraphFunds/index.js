@@ -207,7 +207,7 @@ function GraphFunds({
         labelY
     }), [labelX, labelY]);
 
-    const onClick = useCallback(() => setMode(last => modeList[(modeList.indexOf(last) + 1) % modeList.length]), []);
+    const onClick = useCallback(() => setMode(last => modeList[(modeList.indexOf(last) + 1) % modeList.length]), [modeList]);
 
     const svgProperties = useMemo(() => ({ onClick }), [onClick]);
 
