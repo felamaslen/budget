@@ -1,8 +1,7 @@
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
 
-export const API_VERSION = 4;
-export const API_PREFIX = `/api/v${API_VERSION}`;
+export const API_PREFIX = '/api/v4';
 export const API_BACKOFF_TIME = 5000;
 
 export const LOGIN_INPUT_LENGTH = 4;
@@ -10,7 +9,6 @@ export const LOGIN_INPUT_LENGTH = 4;
 export const CREATE_ID = 'CREATE_ID';
 
 export const CREATE = 'CREATE';
-export const READ = 'READ';
 export const UPDATE = 'UPDATE';
 export const DELETE = 'DELETE';
 

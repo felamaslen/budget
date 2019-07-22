@@ -103,29 +103,6 @@ export const formatTransactionsList = transactionsList => transactionsList
         cost
     }));
 
-export const withoutIds = array => array.map(({ id, ...doc }) => doc);
-
-export function dataEquals(item, compare) {
-    if (item instanceof DateTime && compare instanceof DateTime) {
-        return item.hasSame(compare, 'day');
-    }
-    if (isTransactionsList(item) && isTransactionsList(compare)) {
-        if (item.length !== compare.length) {
-            return false;
-        }
-
-        const compareWithoutIds = withoutIds(compare);
-
-        return withoutIds(item).every(
-            (itemValue, index) => Object.keys(itemValue).every(
-                key => dataEquals(itemValue[key], compareWithoutIds[index][key])
-            )
-        );
-    }
-
-    return item === compare;
-}
-
 export function arrayAverage(values, mode = null) {
     if (!values.length) {
         return NaN;
@@ -219,8 +196,5 @@ export const fieldExists = value => typeof value !== 'undefined' &&
 export const leftPad = (array, length) => new Array(Math.max(0, length - array.length))
     .fill(0)
     .concat(array);
-
-export const rightPad = (array, length) => array
-    .concat(new Array(Math.max(0, length - array.length)).fill(0));
 
 export const withoutDeleted = items => (items || []).filter(({ __optimistic }) => __optimistic !== DELETE);

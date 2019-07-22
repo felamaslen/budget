@@ -201,11 +201,9 @@ export function formatAge(seconds, shortAbbr = false) {
     return `${humanizeDuration(seconds * 1000, { round: true, largest: 2 })} ago`;
 }
 
-export const formatDate = date => date.toLocaleString(DateTime.DATE_SHORT);
-
 export function formatItem(item, value) {
     if (item === 'date') {
-        return formatDate(value);
+        return value.toLocaleString(DateTime.DATE_SHORT);
     }
     if (item === 'cost') {
         return formatCurrency(value);

@@ -10,7 +10,7 @@ import ModalDialogField from '~client/components/ModalDialog/field';
 
 import './style.scss';
 
-export function getTitle({ type, id }) {
+function getTitle({ type, id }) {
     if (type === 'edit') {
         return `Editing id#${id}`;
     }

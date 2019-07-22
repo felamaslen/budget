@@ -105,7 +105,7 @@ function makeBeforeLines({ mode, startTime, tickSizeY }) {
 
 const modeListAll = Object.keys(GRAPH_FUNDS_MODES);
 
-export function GraphFunds({
+function GraphFunds({
     isMobile,
     width,
     height,

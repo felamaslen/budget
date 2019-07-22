@@ -245,41 +245,6 @@ test('getSold determines if a transactions list represents a holding which is fu
     t.false(isSold(modifyTransaction(transactionsList, 3, { units: -1238 })));
 });
 
-test('dataEquals compares DateTime objects', t => {
-    t.true(dataEquals(
-        DateTime.fromObject({ year: 2017, month: 9, day: 1 }),
-        DateTime.fromObject({ year: 2017, month: 9, day: 1 })
-    ));
-
-    t.false(dataEquals(
-        DateTime.fromObject({ year: 2017, month: 9, day: 1 }),
-        DateTime.fromObject({ year: 2017, month: 9, day: 2 })
-    ));
-});
-
-test('dataEquals compares transactions lists', t => {
-    const testList1 = getTransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
-    const testList2 = getTransactionsList([{ date: '2017-09-02', units: 1, cost: 1 }]);
-    const testList3 = getTransactionsList([{ date: '2017-09-01', units: 2.5, cost: 1 }]);
-    const testList4 = getTransactionsList([{ date: '2017-09-01', units: 1, cost: 1 }]);
-
-    t.is(dataEquals(testList1, testList1), true);
-    t.is(dataEquals(testList1, testList2), false);
-    t.is(dataEquals(testList1, testList3), true);
-    t.is(dataEquals(testList1, testList4), false);
-    t.is(dataEquals(testList2, testList2), true);
-    t.is(dataEquals(testList2, testList3), false);
-    t.is(dataEquals(testList2, testList4), false);
-    t.is(dataEquals(testList3, testList3), true);
-    t.is(dataEquals(testList3, testList4), false);
-});
-test('dataEquals resorts to === by default', t => {
-    t.is(dataEquals('foo', 'foo'), true);
-    t.is(dataEquals('foo', 'bar'), false);
-    t.is(dataEquals(0, -0), true);
-    t.is(dataEquals(0.4, 0), false);
-});
-
 test('arrayAverage gets the median of a list of data', t => {
     t.is(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20], AVERAGE_MEDIAN), 9);
 

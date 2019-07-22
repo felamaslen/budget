@@ -10,7 +10,6 @@ import {
     formatPercent,
     getTickSize,
     formatAge,
-    formatDate,
     formatItem
 } from '~client/modules/format';
 
@@ -167,24 +166,24 @@ test('formatAge formats the age properly', t => {
     t.is(formatAge(812391239, true), '25Y, 9M');
 });
 
-test('formatDate returns the short date according to the current locale', t => {
+test('formatItem formats dates', t => {
     const date = DateTime.fromISO('2019-07-14T23:19:20Z');
-
-    t.is(formatDate(date), date.toLocaleString(DateTime.DATE_SHORT));
+    t.is(formatItem('date', date), date.toLocaleString(DateTime.DATE_SHORT));
 });
 
-test('formatItem formats an item according to its data type', t => {
-    const date = DateTime.fromISO('2019-07-14T23:19:20Z');
-    t.is(formatItem('date', date), formatDate(date));
-
+test('formatItem formats strings', t => {
     t.is(formatItem('item', 'foo'), 'foo');
     t.is(formatItem('category', 'bar'), 'bar');
     t.is(formatItem('shop', 'baz'), 'baz');
     t.is(formatItem('holiday', 'bak'), 'bak');
     t.is(formatItem('social', 'kab'), 'kab');
+});
 
+test('formatItem formats costs', t => {
     t.is(formatItem('cost', 3462), formatCurrency(3462));
+});
 
+test('formatItem formats transactions lists', t => {
     t.is(formatItem('transactions', getTransactionsList([
         { date: '2019-05-03', units: 3, cost: 2 },
         { date: '2019-05-017', units: 31, cost: 25 }

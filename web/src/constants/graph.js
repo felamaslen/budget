@@ -9,10 +9,6 @@ export const GRAPH_HEIGHT = 300;
 
 export const GRAPH_ZOOM_SPEED = 0.15;
 
-export const GRAPH_KEY_SIZE = 12;
-export const GRAPH_KEY_OFFSET_X = 45;
-export const GRAPH_KEY_OFFSET_Y = 34;
-
 export const GRAPH_CASHFLOW_NUM_TICKS = 5;
 export const GRAPH_CASHFLOW_PADDING = [40, 0, 0, 0];
 export const GRAPH_SPEND_CATEGORIES = [
@@ -22,8 +18,6 @@ export const GRAPH_SPEND_CATEGORIES = [
     { name: 'holiday', key: 195 },
     { name: 'social', key: 260 }
 ];
-
-export const GRAPH_FUNDS_POINT_RADIUS = 3;
 
 export const GRAPH_FUNDS_OVERALL_ID = 'overall';
 
