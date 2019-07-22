@@ -31,3 +31,4 @@
 - [DONE] Fix time series major ticks not appearing sometimes
 - Server side rendering
 - [DONE] Replace hooks/form implementation in net worth form with hooks/field
+- Index suggestions search and order by rank
