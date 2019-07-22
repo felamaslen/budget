@@ -1,12 +1,17 @@
 const path = require('path');
 const webpack = require('webpack');
+const autoprefixer = require('autoprefixer');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const DeadCodePlugin = require('webpack-deadcode-plugin');
 
 const __DEV__ = process.env.NODE_ENV === 'development';
 
 function sassLoader() {
     const common = [
         'css-loader',
+        {
+            loader: 'postcss-loader'
+        },
         'sass-loader',
         {
             loader: '@epegzz/sass-vars-loader',
@@ -28,12 +33,28 @@ function sassLoader() {
 
 function getPlugins() {
     const common = [
+        new DeadCodePlugin({
+            patterns: [
+                'web/src/**/*.js'
+            ],
+            exclude: [
+                'web/test/**/*.js'
+            ]
+        }),
+        new webpack.LoaderOptionsPlugin({
+            options: {
+                postcss: [
+                    autoprefixer()
+                ]
+            }
+        }),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV),
                 BIRTH_DATE: JSON.stringify(process.env.BIRTH_DATE || '1990-01-01'),
                 STOCK_INDICES: JSON.stringify(process.env.STOCK_INDICES || ''),
                 DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false'),
+                FAKE_STOCK_PRICES: JSON.stringify(process.env.FAKE_STOCK_PRICES || 'false'),
                 DEFAULT_FUND_PERIOD: JSON.stringify(process.env.DEFAULT_FUND_PERIOD || 'year1')
             }
         })
@@ -58,6 +79,12 @@ function getPlugins() {
             filename: 'assets/style.css'
         })
     ];
+}
+
+function getOptimization() {
+    return {
+        usedExports: true
+    };
 }
 
 function getEntry() {
@@ -98,6 +125,7 @@ module.exports = {
             '~api': path.resolve(__dirname, './api')
         }
     },
+    optimization: getOptimization(),
     module: {
         rules: [
             {

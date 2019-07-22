@@ -23,4 +23,3 @@ AppLogo.propTypes = {
     loading: PropTypes.bool.isRequired,
     unsaved: PropTypes.bool.isRequired
 };
-

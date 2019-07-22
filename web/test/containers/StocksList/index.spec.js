@@ -1,67 +1,60 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import sinon from 'sinon';
 import React from 'react';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createMockStore } from 'redux-test-utils';
 import StocksList from '~client/containers/StocksList';
-import { aStocksListRequested } from '~client/actions/stocks-list.actions';
+import { stocksListRequested } from '~client/actions/stocks';
+import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
-        other: {
-            stocksList: {
-                loadedList: false,
-                loadedInitial: false,
-                stocks: {
-                    'CTY.L': {
-                        code: 'CTY.L',
-                        name: 'City of London Investment Trust',
-                        weight: 0.3,
-                        gain: 0.01,
-                        price: 406.23,
-                        up: false,
-                        down: true
-                    },
-                    'SMT.L': {
-                        code: 'SMT.L',
-                        name: 'Scottish Mortgage Investment Trust',
-                        weight: 0.7,
-                        gain: -0.54,
-                        price: 492.21,
-                        up: false,
-                        down: true
-                    }
+const getContainer = (customProps = {}, customState = state => state, ...args) => {
+    const state = customState({
+        ...testState,
+        stocks: {
+            ...testState.stocks,
+            loading: false,
+            indices: [
+                {
+                    code: 'SPX',
+                    name: 'S&P 500',
+                    gain: 0.65,
+                    up: true,
+                    down: false
                 },
-                indices: {
-                    'SPX': {
-                        code: 'SPX',
-                        name: 'S&P 500',
-                        gain: 0.65,
-                        up: true,
-                        down: false
-                    },
-                    'FTSE': {
-                        code: 'FTSE',
-                        name: 'FTSE 100',
-                        gain: -0.21,
-                        up: false,
-                        down: true
-                    }
+                {
+                    code: 'FTSE',
+                    name: 'FTSE 100',
+                    gain: -0.21,
+                    up: false,
+                    down: true
+                }
+            ],
+            shares: [
+                {
+                    code: 'CTY.L',
+                    name: 'City of London Investment Trust',
+                    weight: 0.3,
+                    gain: 0.01,
+                    price: 406.23,
+                    up: false,
+                    down: true
                 },
-                history: [],
-                lastPriceUpdate: 133,
-                weightedGain: -0.02,
-                oldWeightedGain: -0.033
-            }
+                {
+                    code: 'SMT.L',
+                    name: 'Scottish Mortgage Investment Trust',
+                    weight: 0.7,
+                    gain: -0.54,
+                    price: 492.21,
+                    up: false,
+                    down: true
+                }
+            ],
+            history: [],
+            lastPriceUpdate: 133
         }
     });
-
-    if (customState) {
-        state = customState;
-    }
 
     const store = createMockStore(state);
 
@@ -73,29 +66,30 @@ const getContainer = (customProps = {}, customState = null) => {
     const utils = render(
         <Provider store={store}>
             <StocksList {...props} />
-        </Provider>
+        </Provider>,
+        ...args
     );
 
     return { store, ...utils };
 };
 
-test.skip('basic structure', t => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'stocks-list graph-container-outer loading');
+    t.is(div.className, 'stocks-list graph-container-outer');
     t.is(div.childNodes.length, 1);
 });
 
-test.skip('requesting a stocks list when it renders', t => {
+test('requesting a stocks list when it renders', t => {
     const clock = sinon.useFakeTimers();
 
     const { store } = getContainer();
 
-    const action = aStocksListRequested();
+    const action = stocksListRequested();
 
     t.false(store.isActionDispatched(action));
 
@@ -106,7 +100,7 @@ test.skip('requesting a stocks list when it renders', t => {
     clock.restore();
 });
 
-test.skip('rendering a graph container', t => {
+test('rendering a graph container', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -117,7 +111,7 @@ test.skip('rendering a graph container', t => {
     t.is(graph.childNodes.length, 2);
 });
 
-test.skip('rendering a stocks list', t => {
+test('rendering a stocks list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -129,7 +123,7 @@ test.skip('rendering a stocks list', t => {
     t.is(stocksList.childNodes.length, 2);
 });
 
-test.skip('rendering CTY stock', t => {
+test('rendering CTY stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -172,7 +166,7 @@ test.skip('rendering CTY stock', t => {
     t.is(change.innerHTML, '0.01%');
 });
 
-test.skip('rendering SMT stock', t => {
+test('rendering SMT stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -215,7 +209,7 @@ test.skip('rendering SMT stock', t => {
     t.is(change.innerHTML, '-0.54%');
 });
 
-test.skip('rendering a stocks sidebar', t => {
+test('rendering a stocks sidebar', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -228,7 +222,7 @@ test.skip('rendering a stocks sidebar', t => {
     t.is(sidebar.childNodes.length, 2);
 });
 
-test.skip('rendering a stocks graph', t => {
+test('rendering a stocks graph', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -239,10 +233,10 @@ test.skip('rendering a stocks graph', t => {
     const [stocksGraph] = sidebar.childNodes;
 
     t.is(stocksGraph.tagName, 'DIV');
-    t.is(stocksGraph.className, 'graph-container');
+    t.is(stocksGraph.className, 'graph-container graph-graph-stocks');
 });
 
-test.skip('rendering a sidebar list', t => {
+test('rendering a sidebar list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -255,27 +249,3 @@ test.skip('rendering a sidebar list', t => {
     t.is(sidebarList.tagName, 'UL');
     t.is(sidebarList.childNodes.length, 3);
 });
-
-test.skip('rendering an overall gain', t => {
-    const { container } = getContainer();
-
-    const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-    const [, sidebar] = graph.childNodes;
-    const [, sidebarList] = sidebar.childNodes;
-    const [gain] = sidebarList.childNodes;
-
-    t.is(gain.tagName, 'LI');
-    t.is(gain.className, 'down hl-up');
-
-    t.is(gain.childNodes.length, 2);
-
-    const [name, change] = gain.childNodes;
-
-    t.is(name.className, 'name-column');
-    t.is(name.innerHTML, 'Overall');
-
-    t.is(change.className, 'change');
-    t.is(change.innerHTML, '-0.02%');
-});
-

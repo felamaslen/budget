@@ -1,62 +1,82 @@
-import { List as list, Map as map } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import BlockBits from './block-bits';
 
-export function OuterBlockGroup({ group, activeMain, activeSub, activeBlock, ...props }) {
-    const style = {
-        width: group.get('width'),
-        height: group.get('height')
-    };
+import { blocksShape, blockShape } from '~client/prop-types/block-packer';
+import BlockBits from '~client/components/BlockPacker/block-bits';
 
-    const groupBits = group.get('bits').map((block, key) => <BlockBits
-        key={key}
-        block={block}
-        activeMain={activeMain}
-        activeSub={activeSub}
-        activeBlock={activeBlock}
-        {...props}
-    />);
+function OuterBlockGroupComponent({ block, activeMain, activeSub, ...props }) {
+    const style = useMemo(() => ({
+        width: block.width,
+        height: block.height
+    }), [block]);
 
-    return <div className="block-group" style={style}>
-        {groupBits}
-    </div>;
+    return (
+        <div className="block-group" style={style}>
+            {block.bits.map(blockBit => (
+                <BlockBits
+                    key={blockBit.name}
+                    blockBit={blockBit}
+                    active={activeMain === blockBit.name}
+                    activeSub={activeMain === blockBit.name
+                        ? activeSub
+                        : null
+                    }
+                    {...props}
+                />
+            ))}
+        </div>
+    );
 }
 
-OuterBlockGroup.propTypes = {
-    group: PropTypes.instanceOf(map).isRequired,
-    activeMain: PropTypes.bool.isRequired,
-    activeSub: PropTypes.bool.isRequired,
-    activeBlock: PropTypes.array
+OuterBlockGroupComponent.propTypes = {
+    activeMain: PropTypes.string,
+    activeSub: PropTypes.string,
+    block: blockShape
 };
 
-export default function Blocks({ blocks, activeBlock, deep, ...props }) {
-    const activeMain = Boolean(activeBlock && activeBlock.length === 1);
-    const activeSub = Boolean(activeBlock && activeBlock.length === 2);
-    const activeDeep = Boolean(deep);
+export const OuterBlockGroup = React.memo(OuterBlockGroupComponent);
 
-    const className = classNames('block-tree', {
-        'block-tree-deep': activeDeep,
-        [`block-tree-${deep}`]: activeDeep
-    });
-
-    const blocksList = blocks.map((group, key) => <OuterBlockGroup
-        key={key}
-        group={group}
-        activeMain={activeMain}
-        activeSub={activeSub}
-        activeBlock={activeBlock}
-        deep={deep}
-        {...props}
-    />);
-
-    return <div className={className}>{blocksList}</div>;
-}
+const Blocks = ({
+    blocks,
+    deepBlock,
+    activeMain,
+    activeSub,
+    ...props
+}) => (
+    <div className={classNames('block-tree', {
+        'block-tree-deep': deepBlock,
+        [`block-tree-${deepBlock}`]: deepBlock
+    })}>
+        {blocks.map(block => (
+            <OuterBlockGroup
+                key={block.bits[0].name}
+                block={block}
+                deep={deepBlock}
+                activeMain={block.bits && block.bits.some(({ name }) => name === activeMain)
+                    ? activeMain
+                    : null
+                }
+                activeSub={block.bits && block.bits.some(({ name, blocks: subBlocks }) => name === activeMain &&
+                    subBlocks &&
+                    subBlocks.some(({ bits: subBits }) =>
+                        subBits && subBits.some(({ name: subName }) => subName === activeSub)
+                    )
+                )
+                    ? activeSub
+                    : null
+                }
+                {...props}
+            />
+        ))}
+    </div>
+);
 
 Blocks.propTypes = {
-    blocks: PropTypes.instanceOf(list).isRequired,
-    activeBlock: PropTypes.array,
-    deep: PropTypes.string
+    blocks: blocksShape,
+    deepBlock: PropTypes.string,
+    activeMain: PropTypes.string,
+    activeSub: PropTypes.string
 };
 
+export default Blocks;

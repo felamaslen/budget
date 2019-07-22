@@ -1,32 +1,81 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
-import { dateInput } from '~client/modules/date';
 
-import { useField } from './use-field';
+import { Wrapper } from '~client/components/FormField';
+import { useField } from '~client/hooks/field';
 
-export default function FormFieldDate({ value, onChange }) {
-    const [currentValue, onType, onBlur] = useField(
-        value,
-        onChange,
-        date => dateInput(date, false),
-        date => dateInput(date, false)
-    );
+const setValueDate = isoDate => DateTime.fromISO(isoDate);
+
+function parseYear(year) {
+    if (year && year.length <= 2) {
+        return 2000 + Number(year);
+    }
+
+    return Number(year);
+}
+
+function setValueString(date) {
+    const shortMatch = date.match(/^(\d{1,2})(\/(\d{1,2})(\/(\d{2,4}))?)?$/);
+    if (!shortMatch) {
+        throw new Error('Not a valid date');
+    }
+
+    const [, day, , month, , year] = shortMatch;
+
+    const now = DateTime.local();
+
+    const result = DateTime.fromObject({
+        year: parseYear(year) || now.year,
+        month: Number(month) || now.month,
+        day: Number(day) || now.day
+    });
+
+    if (result.invalid) {
+        return now;
+    }
+
+    return result;
+}
+
+export default function FormFieldDate(props) {
+    let setValue = setValueDate;
+    let type = 'date';
+
+    if (props.string) {
+        setValue = setValueString;
+        type = 'text';
+    }
+
+    const [, onChange, ref, onBlur] = useField({
+        ...props,
+        setValue
+    });
+
+    const defaultValue = props.string
+        ? props.value.toLocaleString(DateTime.DATE_SHORT)
+        : props.value.toISODate();
 
     return (
-        <div className="form-field form-field-date">
+        <Wrapper item="date" value={props.value} active={props.active}>
             <input
-                type="date"
-                defaultValue={currentValue.toISODate()}
-                onChange={onType}
+                ref={ref}
+                type={type}
+                defaultValue={defaultValue}
+                onChange={onChange}
                 onBlur={onBlur}
             />
-        </div>
+        </Wrapper>
     );
 }
 
 FormFieldDate.propTypes = {
-    value: PropTypes.instanceOf(DateTime).isRequired,
-    onChange: PropTypes.func.isRequired
+    string: PropTypes.bool,
+    value: PropTypes.instanceOf(DateTime),
+    active: PropTypes.bool
 };
 
+FormFieldDate.defaultProps = {
+    string: false,
+    value: DateTime.local()
+};

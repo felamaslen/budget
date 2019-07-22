@@ -1,38 +1,35 @@
 import test from 'ava';
-import memoize from 'fast-memoize';
+import sinon from 'sinon';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render, fireEvent, act } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
-import { fromJS } from 'immutable';
 import React from 'react';
+import { Provider } from 'react-redux';
+import { testState } from '~client-test/test_data/state';
 
-import reduction from '~client/reduction';
 import ListRowCell from '~client/components/ListRowCell';
 
-const getContainer = memoize((customProps = {}) => {
-    const state = reduction;
+const store = createMockStore(testState);
 
-    const store = createMockStore(state);
-
+const getContainer = (customProps = {}, ...args) => {
     const props = {
-        page: 'page1',
-        id: '3',
-        row: fromJS({ cols: [null, 'bar'] }),
-        colName: 'foo',
-        colKey: 1,
-        active: true,
+        page: 'food',
+        id: 'some-real-id',
+        column: 'item',
+        value: 'som',
+        onSuggestionConfirmed: () => null,
+        active: false,
+        setActive: () => null,
+        onUpdate: () => null,
         ...customProps
     };
 
-    const utils = render(
+    return render((
         <Provider store={store}>
             <ListRowCell {...props} />
         </Provider>
-    );
-
-    return { store, ...utils };
-});
+    ), ...args);
+};
 
 test('basic structure', t => {
     const { container } = getContainer();
@@ -42,13 +39,13 @@ test('basic structure', t => {
     const [span] = container.childNodes;
 
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'foo active');
+    t.is(span.className, 'cell item');
     t.is(span.childNodes.length, 1);
 
     const [editable] = span.childNodes;
 
     t.is(editable.tagName, 'SPAN');
-    t.is(editable.className, 'editable editable-foo');
+    t.is(editable.className, 'editable editable-item editable-inactive');
 });
 
 test('no active class while inactive', t => {
@@ -61,3 +58,31 @@ test('no active class while inactive', t => {
     t.notRegex(span.className, /active/);
 });
 
+test('onUpdate is called when the input changes, with the column and new value', t => {
+    const onUpdate = sinon.spy();
+    const props = {
+        page: 'food',
+        column: 'shop',
+        value: 'Tesco',
+        active: true,
+        onUpdate
+    };
+    const { container } = getContainer(props);
+
+    const [span] = container.childNodes;
+    const [editable] = span.childNodes;
+    const [field] = editable.childNodes;
+    const [input] = field.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+
+    t.false(onUpdate.calledOnce);
+    fireEvent.change(input, { target: { value: 'Wilko' } });
+
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+
+    t.true(onUpdate.calledOnce);
+    t.true(onUpdate.calledWith('shop', 'Wilko'));
+});

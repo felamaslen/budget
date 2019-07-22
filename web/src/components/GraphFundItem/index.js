@@ -3,7 +3,6 @@
  */
 
 import './style.scss';
-import { List as list, Map as map } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -21,7 +20,6 @@ function getDimensions({ popout, sold }) {
     if (popout) {
         return { width: GRAPH_FUND_ITEM_WIDTH_LARGE, height: GRAPH_FUND_ITEM_HEIGHT_LARGE };
     }
-
     if (sold) {
         return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT / 2 };
     }
@@ -29,22 +27,26 @@ function getDimensions({ popout, sold }) {
     return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT };
 }
 
-function processData(data, popout) {
-    const validData = data.filterNot(item => item.get(1) === 0);
+const getRange = data => data.reduce(({ min, max }, value) => ({
+    min: Math.min(min, value),
+    max: Math.max(max, value)
+}), { min: Infinity, max: -Infinity });
 
-    const dataX = validData.map(item => item.get(0));
-    const dataY = validData.map(item => item.get(1));
+const valuesColor = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
+
+function processData(data, popout) {
+    const validData = data.filter(([, yValue]) => yValue !== 0);
+    const dataX = validData.map(([xValue]) => xValue);
+    const dataY = validData.map(([, yValue]) => yValue);
 
     let minX = 0;
     let maxX = 0;
     let minY = 0;
     let maxY = 0;
 
-    if (dataX.size && dataY.size) {
-        minX = dataX.min();
-        maxX = dataX.max();
-        minY = dataY.min();
-        maxY = dataY.max();
+    if (validData.length) {
+        ({ min: minX, max: maxX } = getRange(dataX));
+        ({ min: minY, max: maxY } = getRange(dataY));
 
         if (minY === maxY) {
             const range = minY / 100;
@@ -56,14 +58,14 @@ function processData(data, popout) {
 
     // split up the line into multiple sections, if there are gaps in the data
     // (this can happen if the fund is sold and then re-bought at a later date)
-    const lines = separateLines(data).map((line, key) => map({
+    const lines = separateLines(data).map((line, key) => ({
         key,
         data: line,
         strokeWidth: 1 + 0.5 * (popout >> 0),
         smooth: true,
         color: {
-            changes: [line.getIn([0, 1])],
-            values: [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)]
+            changes: [line[0][1]],
+            values: valuesColor
         }
     }));
 
@@ -118,14 +120,17 @@ export default function GraphFundItem({ name, sold, values, popout, onToggle }) 
         ...processData(values, popout)
     };
 
-    return (<LineGraph {...graphProps} />);
+    return (
+        <div className="fund-graph">
+            <LineGraph {...graphProps} />
+        </div>
+    );
 }
 
 GraphFundItem.propTypes = {
     name: PropTypes.string.isRequired,
     sold: PropTypes.bool.isRequired,
-    values: PropTypes.instanceOf(list),
+    values: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number.isRequired).isRequired),
     popout: PropTypes.bool.isRequired,
     onToggle: PropTypes.func.isRequired
 };
-

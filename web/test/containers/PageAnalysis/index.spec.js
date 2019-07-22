@@ -1,39 +1,16 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import PageAnalysis from '~client/containers/PageAnalysis';
+import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
-        pages: {
-            analysis: {
-                cost: []
-            }
-        },
-        pagesLoaded: {
-            analysis: true
-        },
-        other: {
-            analysis: {
-                period: 0,
-                grouping: 0,
-                timeIndex: 0,
-                treeVisible: {},
-                treeOpen: {},
-                timeline: [
-                    [1, 2, 3]
-                ]
-            }
-        }
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
+        ...testState
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
@@ -101,9 +78,13 @@ test('block view', t => {
 });
 
 test('not rendering a timeline if there is not one present', t => {
-    const { container } = getContainer({}, state => state
-        .setIn(['other', 'analysis', 'timeline'], null)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        analysis: {
+            ...state.analysis,
+            timeline: null
+        }
+    }));
 
     const [page] = container.childNodes;
     t.is(page.childNodes.length, 2);
@@ -113,3 +94,15 @@ test('not rendering a timeline if there is not one present', t => {
     t.notRegex(child1.className, /timeline/);
 });
 
+test('nothing is rendered if the page hasn\'t loaded', t => {
+    const { container } = getContainer({}, state => ({
+        ...state,
+        analysis: {
+            ...state.analysis,
+            cost: null,
+            saved: null
+        }
+    }));
+
+    t.is(container.childNodes.length, 0);
+});

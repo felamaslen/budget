@@ -1,7 +1,6 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
-import { render } from 'react-testing-library';
-import { fromJS } from 'immutable';
+import { render } from '@testing-library/react';
 import '~client-test/browser';
 import React from 'react';
 import GraphFundItem from '~client/components/GraphFundItem';
@@ -10,7 +9,7 @@ const getGraph = memoize((customProps = {}) => {
     const props = {
         id: '3',
         name: 'some-fund-graph',
-        values: fromJS([
+        values: [
             [100, 42.3],
             [101, 41.2],
             [102, 45.9],
@@ -19,7 +18,7 @@ const getGraph = memoize((customProps = {}) => {
             [104, 47.1],
             [105, 46.9],
             [106, 42.5]
-        ]),
+        ],
         sold: false,
         popout: true,
         onToggle: () => null,
@@ -35,9 +34,16 @@ test('rendering a graph with the correct paths', t => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
+    t.is(div.className, 'fund-graph');
     t.is(div.childNodes.length, 1);
 
-    const [svg] = div.childNodes;
+    const [graph] = div.childNodes;
+
+    t.is(graph.tagName, 'DIV');
+    t.is(graph.className, 'graph-container graph-some-fund-graph');
+    t.is(graph.childNodes.length, 1);
+
+    const [svg] = graph.childNodes;
     t.is(svg.tagName, 'svg');
     t.is(svg.className, 'popout');
 });
@@ -49,4 +55,3 @@ test('not rendering anything if there are no values', t => {
 
     t.is(container.childNodes.length, 0);
 });
-

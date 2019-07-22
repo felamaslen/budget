@@ -64,4 +64,3 @@ HoverCost.propTypes = {
 HoverCost.defaultProps = {
     abbreviate: true
 };
-

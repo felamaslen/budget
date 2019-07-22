@@ -2,17 +2,14 @@ import ava from 'ava';
 import ninos from 'ninos';
 const test = ninos(ava);
 
-import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 import Navbar from '~client/components/Navbar';
 
 const getContainer = (customProps = {}) => {
     const props = {
-        active: true,
-        onPageSet: () => null,
         onLogout: () => null,
         ...customProps
     };
@@ -64,22 +61,6 @@ pageCases.forEach(({ page, path }, index) => {
 
         t.is(link.href, path);
     });
-
-    test(`navigation to ${page} page`, t => {
-        // eslint-disable-next-line no-unused-vars
-        const onPageSet = memoize(linkPage => t.context.stub());
-
-        const { container } = getContainer({
-            onPageSet
-        });
-
-        const [nav] = container.childNodes;
-        const link = nav.childNodes[index];
-
-        t.is(onPageSet(page).calls.length, 0);
-        fireEvent.click(link);
-        t.is(onPageSet(page).calls.length, 1);
-    });
 });
 
 test('logout button', t => {
@@ -99,12 +80,3 @@ test('logout button', t => {
     fireEvent.click(link);
     t.is(onLogout.calls.length, 1);
 });
-
-test('rendering nothing when inactive', t => {
-    const { container } = getContainer({
-        active: false
-    });
-
-    t.is(container.childNodes.length, 0);
-});
-

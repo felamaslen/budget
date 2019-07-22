@@ -1,49 +1,36 @@
-import { Map as map } from 'immutable';
-import { PAGES } from '~client/constants/data';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import GraphFundItem from '../GraphFundItem';
-import FundGainInfo from '../FundGainInfo';
 
-const itemKey = PAGES.funds.cols.indexOf('item');
+import { gainShape } from '~client/prop-types/page/funds';
+import GraphFundItem from '~client/components/GraphFundItem';
+import FundGainInfo from '~client/components/FundGainInfo';
 
-export default function ListRowFundsDesktop({ row }) {
+export default function ListRowFundsDesktop({ row: { item, sold, prices, gain } }) {
     const [popout, setPopout] = useState(false);
-
     const onToggleGraph = useCallback(() => {
         setPopout(!popout);
     }, [popout, setPopout]);
 
-    const name = useMemo(
-        () => row.getIn(['cols', itemKey])
-            .toLowerCase()
-            .replace(/\W+/g, '-'),
-        [row]
-    );
-
-    const sold = row.get('sold');
-
-    const className = classNames('fund-extra-info', { popout });
-
     return (
-        <span className={className}>
-            <span className="fund-graph">
-                <div className="fund-graph-cont">
-                    <GraphFundItem name={name}
-                        sold={sold}
-                        values={row.get('prices')}
-                        popout={popout}
-                        onToggle={onToggleGraph}
-                    />
-                </div>
-            </span>
-            <FundGainInfo gain={row.get('gain')} sold={sold} />
+        <span className={classNames('fund-extra-info', { popout })}>
+            <GraphFundItem name={item.toLowerCase().replace(/\W+/g, '-')}
+                sold={sold}
+                values={prices}
+                popout={popout}
+                onToggle={onToggleGraph}
+            />
+            <FundGainInfo gain={gain} sold={sold} />
         </span>
     );
 }
 
 ListRowFundsDesktop.propTypes = {
-    row: PropTypes.instanceOf(map).isRequired
+    row: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        item: PropTypes.string.isRequired,
+        sold: PropTypes.bool.isRequired,
+        prices: PropTypes.array.isRequired,
+        gain: gainShape.isRequired
+    })
 };
-

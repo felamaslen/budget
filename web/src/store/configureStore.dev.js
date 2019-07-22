@@ -4,8 +4,8 @@ import createSagaMiddleware from 'redux-saga';
 
 import { createLogger } from 'redux-logger';
 
-import rootSaga from '../sagas';
-import rootReducer from '../reducers';
+import rootSaga from '~client/sagas';
+import rootReducer from '~client/reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -16,14 +16,13 @@ const logger = createLogger({
     predicate: (getState, action) => SKIP_LOG_ACTIONS.indexOf(action.type) === -1
 });
 
-const newStore = initialState => {
+const newStore = () => {
     const createStoreWithMiddleware = compose(
         applyMiddleware(sagaMiddleware, logger)
     )(createStore);
 
     const store = createStoreWithMiddleware(
         rootReducer,
-        initialState,
         window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__({
             actionsBlacklist: SKIP_LOG_ACTIONS
         })

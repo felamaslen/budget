@@ -39,4 +39,3 @@ async function getCurrencyPrices(config, logger) {
 module.exports = {
     getCurrencyPrices
 };
-

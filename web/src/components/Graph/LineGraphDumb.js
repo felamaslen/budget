@@ -1,8 +1,12 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
 import Graph from '~client/components/Graph';
-import { lineGraphPropTypes, rangePropTypes, pixelPropTypes } from '~client/components/Graph/propTypes';
+import {
+    lineGraphPropTypes,
+    rangePropTypes,
+    pixelPropTypes,
+    lineShape
+} from '~client/prop-types/graph';
 import RenderedLine from '~client/components/Graph/RenderedLine';
 import HighlightPoint from '~client/components/HighlightPoint';
 
@@ -23,6 +27,7 @@ export default function LineGraphDumb({
     hlPoint,
     beforeLines,
     afterLines,
+    graphRef,
     outerProperties,
     svgProperties,
     svgClasses,
@@ -37,15 +42,16 @@ export default function LineGraphDumb({
         name,
         before,
         after,
+        graphRef,
         outerProperties,
         svgProperties,
         svgClasses,
         ...basicProps
     };
 
-    const renderedLines = useMemo(() => lines.map(line => (
+    const renderedLines = useMemo(() => lines.map(({ key, ...line }) => (
         <RenderedLine
-            key={line.get('key')}
+            key={key}
             line={line}
             {...dimensions}
             {...calc}
@@ -55,7 +61,7 @@ export default function LineGraphDumb({
     const beforeLinesProc = useBeforeAfter(beforeLines, basicProps);
     const afterLinesProc = useBeforeAfter(afterLines, basicProps);
 
-    if (!lines.size) {
+    if (!lines.length) {
         return <Graph {...graphProps} />;
     }
 
@@ -89,8 +95,9 @@ LineGraphDumb.propTypes = {
         ...rangePropTypes
     }).isRequired,
     calc: PropTypes.shape(pixelPropTypes).isRequired,
-    lines: ImmutablePropTypes.list.isRequired,
+    lines: PropTypes.arrayOf(lineShape.isRequired).isRequired,
     hoverEffect: PropTypes.object,
+    graphRef: PropTypes.object,
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
     svgClasses: PropTypes.string,
@@ -98,7 +105,7 @@ LineGraphDumb.propTypes = {
 };
 
 LineGraphDumb.defaultProps = {
+    graphRef: null,
     before: null,
     after: null
 };
-

@@ -1,34 +1,28 @@
-import './style.scss';
-import { List as list } from 'immutable';
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-import Blocks from './blocks';
+import { blocksShape } from '~client/prop-types/block-packer';
+import Blocks from '~client/components/BlockPacker/blocks';
+
+import './style.scss';
 
 export default function BlockPacker({ status, onHover, ...props }) {
     const onMouseOut = useCallback(() => onHover(null, null), [onHover]);
 
-    const blocks = props.blocks
-        ? <Blocks onHover={onHover} {...props} />
-        : null;
-
-    return <div className="block-view" onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>
-        <div className="block-tree-outer">
-            {blocks}
+    return (
+        <div className="block-view" onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>
+            <div className="block-tree-outer">
+                {props.blocks && <Blocks onHover={onHover} {...props} />}
+            </div>
+            <div className="status-bar">
+                <span className="inner">{status}</span>
+            </div>
         </div>
-        <div className="status-bar">
-            <span className="inner">{status}</span>
-        </div>
-    </div>;
+    );
 }
 
 BlockPacker.propTypes = {
-    page: PropTypes.string.isRequired,
-    blocks: PropTypes.instanceOf(list),
-    activeBlock: PropTypes.array,
-    deep: PropTypes.string,
+    blocks: blocksShape,
     status: PropTypes.string,
-    onClick: PropTypes.func.isRequired,
     onHover: PropTypes.func.isRequired
 };
-

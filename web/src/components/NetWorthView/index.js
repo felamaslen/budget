@@ -1,80 +1,21 @@
-import { List as list } from 'immutable';
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { DateTime } from 'luxon';
-import { compose } from 'redux';
 
-import { dataPropTypes } from '~client/components/NetWorthView/prop-types';
-import { SumCashEasyAccess, SumCashOther, SumStocks, SumPension } from '~client/components/NetWorthView/sum-by-category';
+import { netWorthTableShape } from '~client/prop-types/net-worth/view';
+import SumByCategory from '~client/components/NetWorthView/sum-by-category';
 import NetWorthViewRow from '~client/components/NetWorthView/net-worth-view-row';
 
 import './style.scss';
 
-const withIsoDates = data => data.map(({ date, ...rest }) => ({
-    date,
-    dateIso: DateTime.fromISO(date),
-    ...rest
-}));
-
-const sortByIsoDate = rows => rows.sort(({ dateIso: dateA }, { dateIso: dateB }) => dateA - dateB);
-
-const withoutSkipValues = rows => rows.map(({ values, ...rest }) => ({
-    values: values.filter(({ skip }) => !skip),
-    ...rest
-}));
-
-const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE);
-
-const withFTI = rows => rows.map((row, index) => {
-    const { years } = row.dateIso.diff(FTI_START, 'years').toObject();
-
-    const pastYear = rows.slice(Math.max(0, index - 11), index + 1);
-    const pastYearAverageSpend = pastYear.reduce((sum, { spend }) => sum + spend, 0) * 12 / pastYear.length;
-
-    const fti = netWorthValue => netWorthValue * years / pastYearAverageSpend;
-
-    return { ...row, fti };
-});
-
-export default function NetWorthView({ rowDates, spending, data, categories, subcategories, page, setPage, numPages }) {
-    const netWorthDateToRowIndex = useCallback(date => rowDates.findIndex(value =>
-        value.year === date.year && value.month === date.month
-    ), [rowDates]);
-
-    const withSpend = useCallback(rows => rows.map(row => {
-        let spend = 0;
-        const rowIndex = netWorthDateToRowIndex(row.dateIso);
-        if (rowIndex !== -1) {
-            spend = spending.get(rowIndex);
-        }
-
-        return { ...row, spend };
-    }), [spending, netWorthDateToRowIndex]);
-
-
-    const rows = useMemo(() => compose(
-        withFTI,
-        withSpend,
-        withoutSkipValues,
-        sortByIsoDate,
-        withIsoDates
-    )(data || []), [data, withSpend]);
-
-    if (!(categories && subcategories)) {
-        return null;
-    }
-
-    const dataProps = { rows, categories, subcategories };
-
+export default function NetWorthView({ table, aggregate }) {
     return (
         <div className="net-worth-view">
             <h4 className="title">{'View'}</h4>
             <table className="net-worth-view-table">
                 <thead>
                     <tr className="row-categories">
-                        <SumCashEasyAccess {...dataProps} />
-                        <SumStocks {...dataProps} />
+                        <SumByCategory className="cash-easy-access" aggregate={aggregate} />
+                        <SumByCategory className="stocks" aggregate={aggregate} />
                         <th className="assets">{'Assets'}</th>
                         <th className="liabilities">{'Liabilities'}</th>
                         <th rowSpan={3} className="net-worth-header">{'Net Worth'}</th>
@@ -82,8 +23,8 @@ export default function NetWorthView({ rowDates, spending, data, categories, sub
                         <th className="fti">{'FTI'}</th>
                     </tr>
                     <tr className="row-subtitle">
-                        <SumCashOther {...dataProps} />
-                        <SumPension {...dataProps} />
+                        <SumByCategory className="cash-other" aggregate={aggregate} />
+                        <SumByCategory className="pension" aggregate={aggregate} />
                         <th rowSpan={2} className="assets">{'Total (£)'}</th>
                         <th rowSpan={2} className="liabilities">{'Total (£)'}</th>
                         <th rowSpan={2} colSpan={2} className="retirement">
@@ -95,31 +36,14 @@ export default function NetWorthView({ rowDates, spending, data, categories, sub
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map(row => (
-                        <NetWorthViewRow key={row.id} row={row} {...dataProps} />
-                    ))}
+                    {table.map(row => <NetWorthViewRow key={row.id} {...row} />)}
                 </tbody>
             </table>
-            <div className="pagination">
-                <span>{'Page: '}</span>
-                <ul>{new Array(numPages).fill(0)
-                    .map((item, index) => (
-                        <li key={index}
-                            onClick={() => setPage(index)}
-                            className={classNames({ active: page === index })}
-                        >{index + 1}</li>
-                    ))
-                }</ul>
-            </div>
         </div>
     );
 }
 
 NetWorthView.propTypes = {
-    page: PropTypes.number,
-    setPage: PropTypes.func.isRequired,
-    numPages: PropTypes.number,
-    rowDates: PropTypes.instanceOf(list).isRequired,
-    spending: PropTypes.instanceOf(list).isRequired,
-    ...dataPropTypes
+    table: netWorthTableShape.isRequired,
+    aggregate: PropTypes.objectOf(PropTypes.number.isRequired).isRequired
 };

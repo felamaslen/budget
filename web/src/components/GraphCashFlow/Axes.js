@@ -4,7 +4,7 @@ import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '~client/constants/gra
 import { rgba } from '~client/modules/color';
 import { getTickSize, formatCurrency } from '~client/modules/format';
 import { getTimeScale } from '~client/components/Graph/helpers';
-import { pixelPropTypes } from '~client/components/Graph/propTypes';
+import { pixelPropTypes } from '~client/prop-types/graph';
 
 function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     return (minY, maxY, pixY) => {
@@ -136,4 +136,3 @@ const { valX, valY, ...propTypes } = pixelPropTypes;
 Axes.propTypes = {
     ...propTypes
 };
-

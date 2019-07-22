@@ -1,9 +1,7 @@
-import './style.scss';
 import React from 'react';
 import { withRouter } from 'react-router';
 import Route, { CacheSwitch as Switch } from 'react-router-cache-route';
 import PropTypes from 'prop-types';
-import ModalDialog from '~client/containers/ModalDialog';
 import PageOverview from '~client/containers/PageOverview';
 import PageAnalysis from '~client/containers/PageAnalysis';
 import PageFunds from '~client/containers/PageFunds';
@@ -15,6 +13,7 @@ import {
     PageHoliday,
     PageSocial
 } from '~client/containers/PageList';
+import './style.scss';
 
 const routes = [
     { key: 'analysis', component: PageAnalysis },
@@ -28,37 +27,26 @@ const routes = [
     { key: 'overview', path: '/', component: PageOverview }
 ];
 
-function NotFound() {
-    return (
-        <div className="page page-not-found">
-            <h1>{'Page not found'}</h1>
-        </div>
-    );
-}
+const NotFound = () => (
+    <div className="page page-not-found">
+        <h1>{'Page not found'}</h1>
+    </div>
+);
 
-function Content({ loggedIn }) {
-    if (!loggedIn) {
-        return null;
-    }
-
-    return (
-        <div className="page-wrapper">
-            <Switch>
-                {routes.map(({ key, path = `/${key}`, ...rest }) => (
-                    <Route key={key} className="inner" path={path} {...rest} />
-                ))}
-                <Route path="/" component={NotFound} />
-            </Switch>
-            <ModalDialog />
-        </div>
-    );
-}
+const Content = () => (
+    <div className="page-wrapper">
+        <Switch>
+            {routes.map(({ key, path = `/${key}`, ...rest }) => (
+                <Route key={key} className="inner" path={path} {...rest} />
+            ))}
+            <Route path="/" component={NotFound} />
+        </Switch>
+    </div>
+);
 
 Content.propTypes = {
-    loggedIn: PropTypes.bool.isRequired,
     location: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired
 };
 
 export default withRouter(Content);
-

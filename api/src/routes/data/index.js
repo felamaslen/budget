@@ -72,4 +72,3 @@ function handler(config, db, logger) {
 module.exports = {
     handler
 };
-

@@ -32,4 +32,3 @@ class ResponseMultiple {
 }
 
 module.exports = ResponseMultiple;
-

@@ -8,7 +8,8 @@ export default function ListHeadDesktop({
     weeklyValue,
     getDaily,
     totalCost,
-    TotalValue
+    TotalValue,
+    ...extraProps
 }) {
     const weeklyValueFormatted = formatCurrency(weeklyValue, {
         abbreviate: true,
@@ -16,18 +17,18 @@ export default function ListHeadDesktop({
     });
 
     return (
-        <div className="list-head-inner noselect">
+        <div className="list-head noselect">
             {PAGES[page].cols.map((column, key) => (
                 <span key={key} className={column}>{column}</span>
             ))}
             {getDaily && (
-                <span>
-                    <span className="daily">{'Daily |'}</span>
+                <span className="daily">
+                    <span className="daily-value">{'Daily |'}</span>
                     <span className="weekly">{'Weekly:'}</span>
                     <span className="weekly-value">{weeklyValueFormatted}</span>
                 </span>
             )}
-            {TotalValue && <TotalValue /> || (
+            {TotalValue && <TotalValue totalCost={totalCost} {...extraProps} /> || (
                 <div className="total-outer">
                     <span className="total">{'Total:'}</span>
                     <span className="total-value">{formatCurrency(totalCost, {
@@ -47,4 +48,3 @@ ListHeadDesktop.propTypes = {
     totalCost: PropTypes.number,
     TotalValue: PropTypes.func
 };
-

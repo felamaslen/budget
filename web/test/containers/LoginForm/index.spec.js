@@ -1,21 +1,22 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import LoginForm from '~client/containers/LoginForm';
-import { aLoginFormInputted } from '~client/actions/login.actions';
+import { loginRequested } from '~client/actions/login';
+import { testState } from '~client-test/test_data/state';
 
-const getContainer = memoize((customProps = {}) => {
-    const state = fromJS({
-        loginForm: {
-            inputStep: 3,
-            values: [5, 1, 2],
-            visible: true,
-            active: true
+const getContainer = memoize((customProps = {}, customState = state => state) => {
+    const state = customState({
+        ...testState,
+        login: {
+            uid: null,
+            name: null,
+            initialised: true,
+            loading: false
         }
     });
 
@@ -41,7 +42,7 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'login-form active');
+    t.is(div.className, 'login-form');
     t.is(div.childNodes.length, 3);
 });
 
@@ -75,20 +76,33 @@ test('number input pad', t => {
     t.is(pad.className, 'number-input noselect');
 });
 
-test('dispatching a number on input', t => {
-    const { store, container } = getContainer();
-    const [div] = container.childNodes;
-    const [, , pad] = div.childNodes;
-    const [row] = pad.childNodes;
-    const [button] = row.childNodes;
+test('listening to input events', t => {
+    const { store } = getContainer();
 
-    t.is(button.tagName, 'BUTTON');
-
-    const action = aLoginFormInputted(1);
+    const action = loginRequested(1234);
 
     t.false(store.isActionDispatched(action));
+    t.is(store.getActions().length, 0);
 
-    fireEvent.mouseDown(button);
+    fireEvent.keyDown(document.body, { key: '1' });
+    t.is(store.getActions().length, 0);
+
+    fireEvent.keyDown(document.body, { key: '2' });
+    t.is(store.getActions().length, 0);
+
+    fireEvent.keyDown(document.body, { key: '3' });
+    t.is(store.getActions().length, 0);
+
+    fireEvent.keyDown(document.body, { key: '4' });
+
     t.true(store.isActionDispatched(action));
 });
 
+test('doesn\'t render when the state isn\'t initialised', t => {
+    const { container } = getContainer({}, state => ({
+        ...state,
+        login: { ...state.login, initialised: false }
+    }));
+
+    t.is(container.childNodes.length, 0);
+});

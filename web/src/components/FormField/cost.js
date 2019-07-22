@@ -1,31 +1,44 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { useField } from './use-field';
+import { Wrapper } from '~client/components/FormField';
+import { useField } from '~client/hooks/field';
 
-export default function FormFieldCost({ value, onChange }) {
-    const [currentValue, onType, onBlur] = useField(
-        value,
-        onChange,
-        cost => cost || 0,
-        cost => Math.round(100 * Number(cost))
-    );
+const setValue = cost => Math.round(100 * (Number(cost) || 0));
+
+export default function FormFieldCost(props) {
+    const [currentValue, onChange, ref, onBlur] = useField({
+        ...props,
+        setValue
+    });
+
+    const inputProps = props.string
+        ? { type: 'text' }
+        : { type: 'number', step: 0.01 };
 
     return (
-        <div className="form-field form-field-cost">
+        <Wrapper item="cost" value={props.value} active={props.active}>
             <input
-                type="number"
-                step="0.01"
-                defaultValue={currentValue / 100}
-                onChange={onType}
+                ref={ref}
+                {...inputProps}
+                value={currentValue === null || typeof currentValue === 'string'
+                    ? ''
+                    : currentValue / 100
+                }
+                onChange={onChange}
                 onBlur={onBlur}
             />
-        </div>
+        </Wrapper>
     );
 }
 
 FormFieldCost.propTypes = {
-    value: PropTypes.number.isRequired,
-    onChange: PropTypes.func.isRequired
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    active: PropTypes.bool,
+    string: PropTypes.bool
 };
 
+FormFieldCost.defaultProps = {
+    string: false,
+    value: null
+};

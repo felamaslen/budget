@@ -1,41 +1,28 @@
 import ava from 'ava';
+import sinon from 'sinon';
 import ninos from 'ninos';
 const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
-import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import reduction from '~client/reduction';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
         open: true,
-        subTree: fromJS([
+        subTree: [
             { name: 'foo1', total: 2 },
             { name: 'foo2', total: 4 }
-        ]),
+        ],
         name: 'foo',
         itemCost: 6,
         onHover: () => null,
         ...customProps
     };
 
-    const state = reduction;
-
-    const store = createMockStore(state);
-
-    const utils = render(
-        <Provider store={store}>
-            <SubTree {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<SubTree {...props} />);
 });
 
 test('basic structure', t => {
@@ -85,6 +72,24 @@ test('rendering each sub tree item', t => {
     });
 });
 
+test('onHover', t => {
+    const onHover = sinon.spy();
+
+    const { container } = getContainer({
+        onHover
+    });
+
+    t.is(onHover.getCalls().length, 0);
+
+    fireEvent.mouseOver(container.childNodes[0].childNodes[0]);
+    t.is(onHover.getCalls().length, 1);
+    t.deepEqual(onHover.getCalls()[0].args, ['foo', 'foo1']);
+
+    fireEvent.mouseOver(container.childNodes[0].childNodes[1]);
+    t.is(onHover.getCalls().length, 2);
+    t.deepEqual(onHover.getCalls()[1].args, ['foo', 'foo2']);
+});
+
 test('not rendering anything if not open', t => {
     const { container } = getContainer({
         open: false
@@ -93,3 +98,10 @@ test('not rendering anything if not open', t => {
     t.is(container.childNodes.length, 0);
 });
 
+test('not rendering anything if there is no subtree', t => {
+    const { container } = getContainer({
+        subTree: null
+    });
+
+    t.is(container.childNodes.length, 0);
+});

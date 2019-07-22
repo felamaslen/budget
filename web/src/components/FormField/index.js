@@ -1,30 +1,51 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
-import { useField } from './use-field';
+import { formatItem } from '~client/modules/format';
+import { useField } from '~client/hooks/field';
 
-export default function FormFieldText({ value, onChange }) {
-    const [currentValue, onType, onBlur] = useField(
-        value,
-        onChange,
-        text => text,
-        text => text
-    );
+export const Wrapper = ({ item, value, active, children }) => (
+    <div className={classNames('form-field', `form-field-${item}`, active)}>
+        {active && children}
+        {!active && formatItem(item, value)}
+    </div>
+);
+
+Wrapper.propTypes = {
+    item: PropTypes.string.isRequired,
+    value: PropTypes.any,
+    active: PropTypes.bool,
+    children: PropTypes.node.isRequired
+};
+
+Wrapper.defaultProps = {
+    active: true
+};
+
+export default function FormFieldText({ item, ...props }) {
+    const [currentValue, onChange, ref, onBlur] = useField(props);
 
     return (
-        <div className="form-field form-field-text">
+        <Wrapper item={item} value={props.value} active={props.active}>
             <input
+                ref={ref}
                 type="text"
-                defaultValue={currentValue}
-                onChange={onType}
+                value={currentValue}
+                onChange={onChange}
                 onBlur={onBlur}
             />
-        </div>
+        </Wrapper>
     );
 }
 
 FormFieldText.propTypes = {
-    value: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired
+    item: PropTypes.string,
+    value: PropTypes.string,
+    active: PropTypes.bool
 };
 
+FormFieldText.defaultProps = {
+    item: 'text',
+    value: ''
+};

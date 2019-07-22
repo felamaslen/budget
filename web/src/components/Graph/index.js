@@ -6,9 +6,9 @@ import './style.scss';
 
 export default function Graph({
     name,
-    svgRef,
     width,
     height,
+    graphRef,
     svgClasses,
     svgProperties,
     outerProperties,
@@ -16,22 +16,20 @@ export default function Graph({
     after,
     children
 }) {
-    const className = classNames('graph-container', { [`graph-${name}`]: name });
-
     return (
         <div
-            ref={svgRef || null}
-            className={className}
+            ref={graphRef}
+            className={classNames('graph-container', { [`graph-${name}`]: name })}
             {...outerProperties}
         >
             {before && before()}
             <svg
-                className={svgClasses || ''}
+                className={svgClasses}
                 width={width}
                 height={height}
-                {...svgProperties}>
-
-                {children || null}
+                {...svgProperties}
+            >
+                {children}
             </svg>
             {after && after()}
         </div>
@@ -39,11 +37,11 @@ export default function Graph({
 }
 
 Graph.propTypes = {
-    svgRef: PropTypes.object,
     name: PropTypes.string,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     padding: PropTypes.array,
+    graphRef: PropTypes.object,
     svgClasses: PropTypes.string,
     svgProperties: PropTypes.object,
     outerProperties: PropTypes.object,
@@ -55,3 +53,11 @@ Graph.propTypes = {
     ])
 };
 
+Graph.defaultProps = {
+    before: null,
+    after: null,
+    svgClasses: '',
+    outerProperties: {},
+    svgProperties: {},
+    children: null
+};

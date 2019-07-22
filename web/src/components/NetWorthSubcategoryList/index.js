@@ -1,9 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { subcategory as subcategoryShape } from '~client/components/NetWorthCategoryList/prop-types';
-import { useInputText, useInputTickbox, useInputRange } from '~client/hooks/form';
+import { subcategory as subcategoryShape } from '~client/prop-types/net-worth/category';
+import FormFieldText from '~client/components/FormField';
+import FormFieldRange from '~client/components/FormField/range';
+import FormFieldTickbox from '~client/components/FormField/tickbox';
 import CrudList from '~client/components/CrudList';
 
 import './style.scss';
@@ -19,64 +21,58 @@ function NetWorthSubcategoryItemForm({
     onChange,
     buttonText
 }) {
-    const [
-        tempSubcategory,
-        InputSubcategory,
-        touchedSubcategory
-    ] = useInputText(subcategory, {
-        className: 'input-subcategory'
-    });
+    const [tempSubcategory, setTempSubcategory] = useState(subcategory);
 
     const creditLimitDisabled = getCreditLimitDisabled(parent);
-
     const initialHasCreditLimit = creditLimitDisabled
         ? null
-        : hasCreditLimit;
+        : Boolean(hasCreditLimit);
 
-    const hasCreditLimitProps = {
-        className: 'input-has-credit-limit',
-        disabled: creditLimitDisabled
-    };
+    const [tempHasCreditLimit, setTempHasCreditLimit] = useState(initialHasCreditLimit);
 
-    const [
+    const [tempOpacity, setTempOpacity] = useState(opacity);
+
+    const touched = !(tempSubcategory === subcategory &&
+        tempHasCreditLimit === initialHasCreditLimit &&
+        tempOpacity === opacity
+    );
+
+    const onChangeItem = useCallback(() => onChange({
+        categoryId,
+        subcategory: tempSubcategory,
+        hasCreditLimit: tempHasCreditLimit,
+        opacity: tempOpacity
+    }), [
+        onChange,
+        categoryId,
+        tempSubcategory,
         tempHasCreditLimit,
-        InputHasCreditLimit,
-        touchedHasCreditLimit
-    ] = useInputTickbox(initialHasCreditLimit, hasCreditLimitProps);
-
-    const [
-        tempOpacity,
-        InputOpacity,
-        touchedOpacity
-    ] = useInputRange(opacity, {
-        className: 'input-opacity',
-        min: 0,
-        max: 1,
-        step: 0.1
-    });
-
-    const touched = touchedSubcategory ||
-        touchedHasCreditLimit ||
-        touchedOpacity;
-
-    const className = classNames('net-worth-subcategory-item-form', {
-        touched
-    });
-
-    const onChangeItem = useCallback(() => {
-        onChange({
-            categoryId,
-            subcategory: tempSubcategory,
-            hasCreditLimit: tempHasCreditLimit,
-            opacity: tempOpacity
-        });
-    }, [onChange, categoryId, tempSubcategory, tempHasCreditLimit, tempOpacity]);
+        tempOpacity
+    ]);
 
     return (
-        <span className={className}>
-            {InputSubcategory}
-            {!creditLimitDisabled && InputHasCreditLimit}
-            {InputOpacity}
+        <span className={classNames('net-worth-subcategory-item-form', {
+            touched
+        })}>
+            <FormFieldText
+                item="subcategory"
+                value={tempSubcategory}
+                onChange={setTempSubcategory}
+                active
+            />
+            {!creditLimitDisabled && <FormFieldTickbox
+                item="credit-limit"
+                value={Boolean(tempHasCreditLimit)}
+                onChange={setTempHasCreditLimit}
+            />}
+            <FormFieldRange
+                item="opacity"
+                min={0}
+                max={1}
+                step={0.1}
+                value={tempOpacity}
+                onChange={setTempOpacity}
+            />
             <button
                 disabled={!touched}
                 className="button-change"
@@ -115,7 +111,7 @@ function NetWorthSubcategoryItem({
     onUpdate
 }) {
     const onChange = useCallback(values => {
-        onUpdate(id, {}, values);
+        onUpdate(id, values);
     }, [onUpdate, id]);
 
     return (
@@ -137,20 +133,14 @@ NetWorthSubcategoryItem.propTypes = {
     item: subcategoryShape.isRequired
 };
 
-function NetWorthSubcategoryCreateItem({ parent, onCreate }) {
-    const onChange = useCallback(values => {
-        onCreate(null, {}, values);
-    }, [onCreate]);
-
-    return (
-        <NetWorthSubcategoryItemForm
-            parent={parent}
-            categoryId={parent.id}
-            onChange={onChange}
-            buttonText="Create"
-        />
-    );
-}
+const NetWorthSubcategoryCreateItem = ({ parent, onCreate }) => (
+    <NetWorthSubcategoryItemForm
+        parent={parent}
+        categoryId={parent.id}
+        onChange={onCreate}
+        buttonText="Create"
+    />
+);
 
 NetWorthSubcategoryCreateItem.propTypes = {
     parent: PropTypes.object.isRequired,
@@ -161,7 +151,6 @@ export default function NetWorthSubcategoryList({
     parent,
     subcategories,
     onCreate,
-    onRead,
     onUpdate,
     onDelete
 }) {
@@ -189,7 +178,6 @@ export default function NetWorthSubcategoryList({
                 Item={NetWorthSubcategoryItem}
                 CreateItem={NetWorthSubcategoryCreateItem}
                 onCreate={onCreate}
-                onRead={onRead}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 className="net-worth-subcategory"
@@ -204,7 +192,6 @@ NetWorthSubcategoryList.propTypes = {
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
     parent: PropTypes.object.isRequired,
     onCreate: PropTypes.func.isRequired,
-    onRead: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired
 };

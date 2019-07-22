@@ -1,8 +1,6 @@
-import { Map as map } from 'immutable';
-import { PAGES } from '~client/constants/data';
+import memoize from 'fast-memoize';
+import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
-
-const transactionsKey = PAGES.funds.cols.indexOf('transactions');
 
 function getFundColor(value, min, max) {
     const color = value > 0
@@ -25,20 +23,15 @@ const roundGain = value => Math.round(10000 * value) / 10000;
 const roundAbs = value => Math.round(value);
 
 function getCostValue(transactions, price, yesterdayPrice) {
-    if (transactions.isSold()) {
-        return transactions.list.reduce(({ cost, value }, item) => {
-            const itemCost = item.get('cost');
-
-            return {
-                cost: cost + itemCost * ((itemCost > 0) >> 0),
-                value: value - itemCost * ((itemCost < 0) >> 0)
-            };
-
-        }, { cost: 0, value: 0 });
+    if (isSold(transactions) || !price) {
+        return transactions.reduce(({ cost, value }, item) => ({
+            cost: cost + Math.max(0, item.cost),
+            value: value - Math.min(0, item.cost)
+        }), { cost: 0, value: 0 });
     }
 
-    const units = transactions.getTotalUnits();
-    const cost = transactions.getTotalCost();
+    const units = getTotalUnits(transactions);
+    const cost = getTotalCost(transactions);
     const value = price * units;
 
     let dayGainAbs = 0;
@@ -53,35 +46,39 @@ function getCostValue(transactions, price, yesterdayPrice) {
 }
 
 export function getRowGains(rows, cache) {
-    return rows.reduce((items, row, id) => {
-        const rowCache = cache.getIn(['prices', id]);
-        if (!(rowCache && rowCache.get('values').size)) {
-            return items;
+    return rows.reduce((items, { id, transactions }) => {
+        if (!transactions) {
+            return { ...items, [id]: { value: 0, gain: 0, gainAbs: 0 } };
         }
 
-        const transactions = row.getIn(['cols', transactionsKey]);
-        const price = rowCache.get('values').last();
-        const yesterdayPrice = rowCache.get('values').size > 1
-            ? rowCache.getIn(['values', -2])
-            : null;
+        const rowCache = cache.prices[id] || { values: [] };
+
+        const price = rowCache.values.length
+            ? rowCache.values[rowCache.values.length - 1]
+            : 0;
+
+        const yesterdayPrice = rowCache.values.length > 1
+            ? rowCache.values[rowCache.values.length - 2]
+            : 0;
 
         const { cost, ...props } = getCostValue(transactions, price, yesterdayPrice);
 
         const gainAbs = roundAbs(props.value - cost);
         const gain = roundGain((props.value - cost) / cost);
 
-        return items.set(id, map({ ...props, gain, gainAbs }));
-
-    }, map.of());
+        return { ...items, [id]: { ...props, gain, gainAbs } };
+    }, {});
 }
 
-export function getGainsForRow(rowGains, id, min, max) {
-    if (!rowGains.get(id)) {
+const getMinMax = memoize(rowGains => Object.keys(rowGains).reduce(([min, max], id) => ([
+    Math.min(min, rowGains[id].gain),
+    Math.max(max, rowGains[id].gain)
+]), [Infinity, -Infinity]));
+
+export function getGainsForRow(rowGains, id) {
+    if (!(rowGains[id] && Object.keys(rowGains[id]).length)) {
         return null;
     }
 
-    const color = getFundColor(rowGains.getIn([id, 'gain']), min, max);
-
-    return rowGains.get(id).set('color', color);
+    return { ...rowGains[id], color: getFundColor(rowGains[id].gain, ...getMinMax(rowGains)) };
 }
-

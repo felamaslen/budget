@@ -1,65 +1,41 @@
 import test from 'ava';
+import sinon from 'sinon';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
-import { render, fireEvent } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ListTree from '~client/containers/PageAnalysis/list-tree';
-import {
-    aTreeItemExpandToggled,
-    aTreeItemDisplayToggled,
-    aTreeItemHovered
-} from '~client/actions/analysis.actions';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
-        pages: {
-            analysis: {
-                cost: [
-                    { name: 'foo1', total: 1, subTree: [{ name: 'bar1', total: 1 }] },
-                    { name: 'foo2', total: 4, subTree: [{ name: 'bar2', total: 2 }] },
-                    { name: 'foo3', total: 3, subTree: [{ name: 'bar3', total: 2 }] },
-                    { name: 'foo4', total: 6, subTree: [{ name: 'bar4', total: 2 }] },
-                    { name: 'foo5', total: 10, subTree: [{ name: 'bar5', total: 3 }] }
-                ],
-                costTotal: 24
-            }
-        },
-        other: {
-            analysis: {
-                treeVisible: {
-                    foo1: true,
-                    foo2: false,
-                    foo3: true
-                },
-                treeOpen: {
-                    foo1: true,
-                    foo2: false,
-                    foo3: false,
-                    foo4: true
-                }
-            }
-        }
-    });
+const treeVisible = {
+    foo1: true,
+    foo2: false,
+    foo3: true
+};
 
-    if (customState) {
-        state = customState(state);
-    }
+const treeOpen = {
+    foo1: true,
+    foo2: false,
+    foo3: false,
+    foo4: true
+};
 
-    const store = createMockStore(state);
-
+const getContainer = (customProps = {}) => {
     const props = {
+        cost: [
+            { name: 'foo1', total: 1, subTree: [{ name: 'bar1', total: 1 }] },
+            { name: 'foo2', total: 4, subTree: [{ name: 'bar2', total: 2 }] },
+            { name: 'foo3', total: 3, subTree: [{ name: 'bar3', total: 2 }] },
+            { name: 'foo4', total: 6, subTree: [{ name: 'bar4', total: 2 }] },
+            { name: 'foo5', total: 10, subTree: [{ name: 'bar5', total: 3 }] }
+        ],
+        treeVisible,
+        treeOpen,
+        toggleTreeItem: () => null,
+        setTreeOpen: () => null,
+        onHover: () => null,
         ...customProps
     };
 
-    const utils = render(
-        <Provider store={store}>
-            <ListTree {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<ListTree {...props} />);
 };
 
 test('basic structure', t => {
@@ -176,8 +152,40 @@ test('list tree body - sub tree', t => {
     });
 });
 
+const testToggler = (t, toggler, name) => {
+    t.not(name, 'somethingElse');
+
+    t.is(typeof toggler, 'function');
+    t.deepEqual(toggler({
+        [name]: false,
+        somethingElse: true
+    }), {
+        [name]: true,
+        somethingElse: true
+    });
+
+    t.deepEqual(toggler({
+        [name]: true,
+        somethingElse: true
+    }), {
+        [name]: false,
+        somethingElse: true
+    });
+
+    t.deepEqual(toggler({
+        somethingElse: true
+    }), {
+        [name]: true,
+        somethingElse: true
+    });
+};
+
 test('expanding items on click', t => {
-    const { store, container } = getContainer();
+    const setTreeOpen = sinon.spy();
+
+    const { container } = getContainer({
+        setTreeOpen
+    });
 
     const [div] = container.childNodes;
     const [ul] = div.childNodes;
@@ -186,19 +194,25 @@ test('expanding items on click', t => {
         const child = ul.childNodes[index + 1];
         const [main] = child.childNodes;
 
-        const action = aTreeItemExpandToggled(name);
-
-        t.false(store.isActionDispatched(action));
-
+        setTreeOpen.resetHistory();
         fireEvent.click(main);
 
-        t.true(store.isActionDispatched(action));
+        t.is(setTreeOpen.getCalls().length, 1);
+
+        const [set] = setTreeOpen.getCalls()[0].args;
+        testToggler(t, set, name);
     });
 });
 
 test('hovering over items', t => {
+    const onHover = sinon.spy();
+
     bodyTestCases.forEach(({ name }, index) => {
-        const { store, container } = getContainer();
+        onHover.resetHistory();
+
+        const { container } = getContainer({
+            onHover
+        });
 
         const [div] = container.childNodes;
         const [ul] = div.childNodes;
@@ -206,36 +220,35 @@ test('hovering over items', t => {
         const child = ul.childNodes[index + 1];
         const [main] = child.childNodes;
 
-        const actionIn = aTreeItemHovered([name]);
-
-        t.false(store.isActionDispatched(actionIn));
         fireEvent.mouseOver(main);
-        t.true(store.isActionDispatched(actionIn));
+        t.is(onHover.getCalls().length, 1);
+        t.deepEqual(onHover.getCalls()[0].args, [name]);
 
-        const actionOut = aTreeItemHovered(null);
-
-        t.false(store.isActionDispatched(actionOut));
         fireEvent.mouseOut(main);
-        t.true(store.isActionDispatched(actionOut));
+        t.is(onHover.getCalls().length, 2);
+        t.deepEqual(onHover.getCalls()[1].args, [null]);
     });
 });
 
 test('toggling items by the tick box', t => {
-    const { store, container } = getContainer();
+    const toggleTreeItem = sinon.spy();
+
+    const { container } = getContainer({
+        toggleTreeItem
+    });
 
     const [div] = container.childNodes;
     const [ul] = div.childNodes;
 
     bodyTestCases.forEach(({ name }, index) => {
+        toggleTreeItem.resetHistory();
+
         const child = ul.childNodes[index + 1];
         const [main] = child.childNodes;
         const [, input] = main.childNodes;
 
-        const action = aTreeItemDisplayToggled(name);
-
-        t.false(store.isActionDispatched(action));
         fireEvent.click(input);
-        t.true(store.isActionDispatched(action));
+        t.is(toggleTreeItem.getCalls().length, 1);
+        t.deepEqual(toggleTreeItem.getCalls()[0].args, [name]);
     });
 });
-

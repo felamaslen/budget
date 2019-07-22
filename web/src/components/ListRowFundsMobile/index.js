@@ -1,45 +1,42 @@
-import { Map as map } from 'immutable';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
-import { PAGES } from '~client/constants/data';
+import { transactionsListShape, getTotalCost, isSold } from '~client/modules/data';
 
-export default function ListRowFundsMobile({ row }) {
-    const transactions = row.getIn(['cols', PAGES.funds.cols.indexOf('transactions')]);
-    const gain = row.get('gain');
+const formatOptions = {
+    abbreviate: true,
+    precision: 1
+};
+
+export default function ListRowFundsMobile({ item: { transactions, gain } }) {
+    const actualValueFormatted = useMemo(() => {
+        if (!gain) {
+            return null;
+        }
+        if (isSold(transactions)) {
+            return '\u2013';
+        }
+
+        return formatCurrency(gain.value, formatOptions);
+    }, [transactions, gain]);
+
     if (!gain) {
         return null;
     }
 
-    const cost = transactions.getTotalCost();
-
-    const formatOptions = {
-        abbreviate: true,
-        precision: 1
-    };
-
-    const costValue = (
-        <span className="cost-value">
-            {formatCurrency(cost, formatOptions)}
-        </span>
-    );
-
-    const value = cost
-        ? formatCurrency(gain.get('value'), formatOptions)
-        : '\u2013';
-
-    const actualValue = <span className="actual-value">{value}</span>;
-
     return (
         <span className="cost">
-            {costValue}
-            {actualValue}
+            <span className="cost-value">{formatCurrency(getTotalCost(transactions), formatOptions)}</span>
+            <span className="actual-value">{actualValueFormatted}</span>
         </span>
     );
 }
 
 ListRowFundsMobile.propTypes = {
-    row: PropTypes.instanceOf(map).isRequired,
-    colKeys: PropTypes.array.isRequired
+    item: PropTypes.shape({
+        transactions: transactionsListShape,
+        gain: PropTypes.shape({
+            value: PropTypes.number.isRequired
+        })
+    }).isRequired
 };
-

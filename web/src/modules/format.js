@@ -1,208 +1,20 @@
-/**
- * Text formatters
- */
-
-import { List as list, Map as map } from 'immutable';
 import humanizeDuration from 'humanize-duration';
+import { DateTime } from 'luxon';
+
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 
-const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
+export const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
 
-/**
- * class to visualise data as a bunch of squares
- */
-export class BlockPacker {
-    constructor(data, width, height) {
-        this.data = data.filter(item => item.get('total') > 0);
-
-        this.width = width;
-        this.height = height;
-
-        this.numBlockColors = 16;
-        this.colorOffset = this.data.reduce((sum, item) => sum + (item.get('total') & 1), 0);
-
-        this.total = this.data.reduce((sum, item) => sum + item.get('total'), 0);
-        const totalArea = width * height;
-
-        this.tree = this.data.map(item => item.get('total') * totalArea / this.total);
-        this.blocks = list.of();
-        this.root = {
-            xPos: 0,
-            yPos: 0,
-            width,
-            height
-        };
-
-        const row = list.of();
-        this.rowCount = 0;
-
-        this.squarify(this.tree, row, this.root);
-    }
-    squarify(children, row, node) {
-        if (!children.size) {
-            return;
-        }
-        const row2 = row.push(children.first());
-        if (children.size === 1 && row.size === 0) {
-            // use all the remaining space for the last child
-            this.addNode(children, node);
-        }
-        else if (this.worst(row, node) >= this.worst(row2, node)) {
-            this.squarify(children.shift(), row2, node);
-        }
-        else {
-            const newNode = this.addNode(row, node);
-            this.squarify(children, list.of(), newNode);
-        }
-    }
-    addNode(row, node) {
-        // returns a new node (the rest of the available space)
-        const wide = node.width > node.height;
-
-        let freeX = node.xPos;
-        let freeY = node.yPos; // measured from bottom
-
-        let freeWidth = node.width;
-        let freeHeight = node.height;
-
-        let blockWidth = node.width;
-        let blockHeight = node.height;
-
-        const totalArea = row.reduce((sum, area) => sum + area, 0);
-
-        if (wide) {
-            blockWidth = totalArea / node.height;
-            freeWidth -= blockWidth;
-            freeX += blockWidth;
-        }
-        else {
-            blockHeight = totalArea / node.width;
-            freeHeight -= blockHeight;
-            freeY += blockHeight;
-        }
-
-        // add row's blocks
-        const newNode = {
-            xPos: freeX,
-            yPos: freeY,
-            width: freeWidth,
-            height: freeHeight
-        };
-
-        const newBlockBits = row.map(item => {
-            const thisBlockWidth = wide
-                ? 1
-                : item / totalArea;
-
-            const thisBlockHeight = wide
-                ? item / totalArea
-                : 1;
-
-            const key = this.rowCount++;
-
-            const name = this.data.getIn([key, 'name']);
-            const color = (key + this.colorOffset) % this.numBlockColors;
-            const value = this.data.getIn([key, 'total']);
-            const newBlockBit = map({
-                width: percent(thisBlockWidth),
-                height: percent(thisBlockHeight),
-                name,
-                color,
-                value
-            });
-
-            if (this.data.getIn([key, 'subTree'])) {
-                const thisBlocks = new BlockPacker(
-                    this.data.getIn([key, 'subTree']),
-                    thisBlockWidth * blockWidth,
-                    thisBlockHeight * blockHeight
-                );
-
-                return newBlockBit.set('blocks', thisBlocks.blocks);
-            }
-
-            return newBlockBit;
-        });
-
-        const newBlock = map({
-            width: percent(blockWidth / this.width),
-            height: percent(blockHeight / this.height),
-            bits: newBlockBits
-        });
-
-        this.blocks = this.blocks.push(newBlock);
-
-        return newNode;
-    }
-    worst(row, node) {
-        // row is a list of areas
-        if (row.size === 0) {
-            return Infinity;
-        }
-
-        const nodeAspect = node.width / node.height;
-
-        const totalArea = row.reduce((sum, area) => sum + area, 0);
-
-        if (nodeAspect > 1) {
-            // wide, so fill the node from the left
-            const rowWidth = totalArea / node.height;
-
-            return row.reduce((worstAspect, area) => {
-                const thisAspect = rowWidth * rowWidth / area;
-                const thisWorst = Math.max(thisAspect, 1 / thisAspect);
-
-                if (thisWorst > worstAspect) {
-                    return thisWorst;
-                }
-
-                return worstAspect;
-            }, 0);
-        }
-
-        // tall, so fill the node from the bottom
-        const rowHeight = totalArea / node.width;
-
-        // calculate the worst aspect ratio possible in the row
-        return row.reduce((worstAspect, area) => {
-            const thisAspect = area / (rowHeight * rowHeight);
-            const thisWorst = Math.max(thisAspect, 1 / thisAspect);
-
-            if (thisWorst > worstAspect) {
-                return thisWorst;
-            }
-
-            return worstAspect;
-        }, 0);
-    }
-}
-
-/**
- * @function capitalise
- * @param {string} string: value to capitalise
- * @returns {string} capitalised string
- */
 export function capitalise(string) {
     return `${string.substring(0, 1).toUpperCase()}${string.substring(1).toLowerCase()}`;
 }
 
-/**
- * @function round
- * @param {float} value: value to round
- * @param {integer} precision: precision to round to
- * @returns {float} rounded value
- */
 function round(value, precision) {
     const exp = Math.pow(10, precision);
 
     return Math.round(exp * value) / exp;
 }
 
-/**
- * @function numberFormat
- * @param {float} value: value to format
- * @returns {string} formatted number
- */
 export function numberFormat(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
@@ -215,12 +27,6 @@ function getSign(number) {
     return '';
 }
 
-/**
- * round a number to a certain sig. figs
- * @param {float} value: number to display
- * @param {integer} figs: sig figs to restrict to
- * @returns {string} formatted number
- */
 export function sigFigs(value, figs) {
     if (value === 0) {
         return value.toFixed(figs - 1);
@@ -250,12 +56,6 @@ export function sigFigs(value, figs) {
     return `${sign}${absResult}`;
 }
 
-/**
- * @function leadingZeroes
- * @param {integer} value: number to add zeroes to
- * @param {integer} numZeroes: number of zeroes to fill
- * @returns {string} formatted number
- */
 export function leadingZeroes(value, numZeroes) {
     const numAdd = value
         ? numZeroes - Math.floor(Math.log10(value)) - 1
@@ -290,12 +90,6 @@ function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
     return absValue.toFixed(precision);
 }
 
-/**
- * Format currency values for display
- * @param {integer} value: value in GBX
- * @param {object} options: options to pass to formatter
- * @returns {string} formatted value
- */
 export function formatCurrency(value, customOptions = {}) {
     const options = {
         abbreviate: false,
@@ -362,13 +156,6 @@ export function formatPercent(frac, options = {}) {
     });
 }
 
-/**
- * Get tick sizes for graphs
- * @param {float} min: minimum value
- * @param {float} max: maximum value
- * @param {integer} numTicks: number of ticks to produce
- * @returns {float} tick length
- */
 export function getTickSize(min, max, numTicks) {
     const minimum = (max - min) / numTicks;
     const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
@@ -414,3 +201,19 @@ export function formatAge(seconds, shortAbbr = false) {
     return `${humanizeDuration(seconds * 1000, { round: true, largest: 2 })} ago`;
 }
 
+export function formatItem(item, value) {
+    if (item === 'date') {
+        return value.toLocaleString(DateTime.DATE_SHORT);
+    }
+    if (item === 'cost') {
+        return formatCurrency(value);
+    }
+    if (item === 'transactions') {
+        return String(value
+            ? value.length
+            : 0
+        );
+    }
+
+    return String(value);
+}

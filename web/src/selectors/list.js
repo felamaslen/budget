@@ -1,86 +1,182 @@
-import { Map as map } from 'immutable';
 import { createSelector } from 'reselect';
-import { PAGES } from '~client/constants/data';
+import compose from 'just-compose';
 
-export const getAllPageRows = (state, { page }) => state.getIn(['pages', page, 'rows']);
-
-export const makeGetRowIds = () => createSelector([getAllPageRows], rows =>
-    rows && rows.keySeq().toList());
+import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/data';
+import { getCurrentDate } from '~client/selectors/now';
+import { getFundsCost } from '~client/selectors/funds';
+import { withoutDeleted, getValueForTransmit } from '~client/modules/data';
 
 const getPageProp = (state, { page }) => page;
 
-export const makeGetDailyTotals = () => {
-    let lastResult = null;
+const getNonFilteredItems = (state, { page }) => state[page].items;
 
-    return createSelector([getPageProp, getAllPageRows], (page, rows) => {
-        if (!(rows && PAGES[page].daily)) {
-            return null;
+export const getAllPageRows = createSelector(getNonFilteredItems, withoutDeleted);
+
+const makeGetDaily = items => (last, item, index) => {
+    const sum = last + item.cost;
+    if ((index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day')) ||
+        index === items.length - 1
+    ) {
+        return { daily: sum, dailySum: 0 };
+    }
+
+    return { daily: null, dailySum: sum };
+};
+
+function makeMemoisedRowProcessor() {
+    const resultsCache = {};
+    const perPageCache = {};
+
+    return (page, now, items) => {
+        if (!items) {
+            return [];
+        }
+        if (perPageCache[page] &&
+            now === perPageCache[page].now &&
+            items.length === perPageCache[page].items.length &&
+            items.every((item, index) => item === perPageCache[page].items[index])
+        ) {
+            return perPageCache[page].result;
         }
 
-        const dateKey = PAGES[page].cols.indexOf('date');
-        const costKey = PAGES[page].cols.indexOf('cost');
+        const sortedByDate = items.slice()
+            .sort(({ date: dateA }, { date: dateB }) => dateB - dateA);
 
-        const keys = rows.keys();
-        keys.next();
+        const getDaily = makeGetDaily(sortedByDate);
 
-        const result = rows.reduce(({ dailySum, results }, row, id) => {
-            const nextKey = keys.next().value;
+        const [result] = sortedByDate.reduce(([last, wasFuture, lastDailySum], { __optimistic, ...item }, index) => {
+            const future = wasFuture && item.date > now;
+            const firstPresent = wasFuture && !future;
+            const { daily, dailySum } = getDaily(lastDailySum, item, index);
 
-            const lastInDay = !(nextKey && row.getIn(['cols', dateKey]).hasSame(
-                rows.getIn([nextKey, 'cols', dateKey]), 'day'));
+            const extraProps = { future, firstPresent, daily };
 
-            const cost = row.getIn(['cols', costKey]);
+            const processedItem = { ...item, ...extraProps };
+            const cachedItem = resultsCache[item.id];
 
-            if (lastInDay) {
-                return {
-                    results: results.set(id, dailySum + cost),
-                    dailySum: 0
-                };
+            if (cachedItem && Object.keys(processedItem).every(key => processedItem[key] === cachedItem[key])) {
+                return [last.concat([cachedItem]), future, dailySum];
             }
 
-            return { results, dailySum: dailySum + cost };
+            resultsCache[item.id] = processedItem;
 
-        }, { results: map.of(), dailySum: 0 })
-            .results;
+            return [last.concat([processedItem]), future, dailySum];
+        }, [[], true, 0]);
 
-        if (result && result.equals(lastResult)) {
-            return lastResult;
-        }
-
-        lastResult = result;
+        perPageCache[page] = { result, now, items };
 
         return result;
-    });
-};
+    };
+}
 
-export const makeGetWeeklyAverages = () => {
-    return createSelector([getPageProp, getAllPageRows], (page, rows) => {
-        if (!(rows && PAGES[page].daily)) {
-            return null;
+const memoisedRowProcessor = makeMemoisedRowProcessor();
+
+export const getSortedPageRows = createSelector(
+    getPageProp,
+    getCurrentDate,
+    getAllPageRows,
+    (page, now, items) => {
+        if (!PAGES[page].daily) {
+            return items;
         }
 
-        const costKey = PAGES[page].cols.indexOf('cost');
-        const dateKey = PAGES[page].cols.indexOf('date');
+        return memoisedRowProcessor(page, now, items);
+    }
+);
 
-        // note that this is calculated only based on the visible data,
-        // not past data
+const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
+    page,
+    items: getNonFilteredItems(state, { page })
+}));
 
-        const visibleTotal = rows.reduce((sum, item) =>
-            sum + item.getIn(['cols', costKey]), 0);
+export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows], (page, rows) => {
+    if (!(rows && PAGES[page].daily)) {
+        return null;
+    }
 
-        if (!rows.size) {
-            return 0;
-        }
+    // note that this is calculated only based on the visible data,
+    // not past data
 
-        const firstDate = rows.first().getIn(['cols', dateKey]);
-        const lastDate = rows.last().getIn(['cols', dateKey]);
+    const visibleTotal = rows.reduce((sum, { cost }) => sum + cost, 0);
+    if (!rows.length) {
+        return 0;
+    }
 
-        const numWeeks = firstDate.diff(lastDate).as('days') / 7;
-        if (!numWeeks) {
-            return 0;
-        }
+    const firstDate = rows[0].date;
+    const lastDate = rows[rows.length - 1].date;
 
-        return Math.round(visibleTotal / numWeeks);
-    });
-};
+    const numWeeks = firstDate.diff(lastDate).as('days') / 7;
+    if (!numWeeks) {
+        return 0;
+    }
 
+    return Math.round(visibleTotal / numWeeks);
+});
+
+const getAllTimeTotal = (state, { page }) => state[page].total || 0;
+
+export const getTotalCost = createSelector([
+    getPageProp,
+    getAllTimeTotal,
+    getFundsCost
+], (page, total, fundsTotal) => {
+    if (page === 'funds') {
+        return fundsTotal;
+    }
+
+    return total;
+});
+
+const withTransmitValues = requests => requests.map(({ body, ...rest }) => ({
+    ...rest,
+    body: Object.keys(body).reduce((last, column) => ({
+        ...last,
+        [column]: getValueForTransmit(column, body[column])
+    }), {})
+}));
+
+const withCreateRequests = (page, rows) => last => last.concat(rows
+    .filter(({ __optimistic }) => __optimistic === CREATE)
+    .map(({ id, __optimistic: type, ...body }) => ({
+        type,
+        fakeId: id,
+        method: 'post',
+        route: page,
+        query: {},
+        body
+    }))
+);
+
+const withUpdateRequests = (page, rows) => last => last.concat(rows
+    .filter(({ __optimistic }) => __optimistic === UPDATE)
+    .map(({ __optimistic: type, ...body }) => ({
+        type,
+        id: body.id,
+        method: 'put',
+        route: page,
+        query: {},
+        body
+    }))
+);
+
+const withDeleteRequests = (page, rows) => last => last.concat(rows
+    .filter(({ __optimistic }) => __optimistic === DELETE)
+    .map(({ id }) => ({
+        type: DELETE,
+        id,
+        method: 'delete',
+        route: page,
+        query: {},
+        body: { id }
+    }))
+);
+
+const getCrudRequestsByPage = (page, items) => compose(
+    withCreateRequests(page, items),
+    withUpdateRequests(page, items),
+    withDeleteRequests(page, items),
+    withTransmitValues
+)([]);
+
+export const getCrudRequests = createSelector(getAllNonFilteredItems, itemsByPage =>
+    itemsByPage.reduce((last, { page, items }) => last.concat(getCrudRequestsByPage(page, items)), []));

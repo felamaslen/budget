@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
-import { getPathProps, getSingleLinePath } from './helpers';
-import ArrowLine from './ArrowLine';
-import DynamicColorLine from './DynamicColorLine';
-import AverageLine from './AverageLine';
+
+import { lineShape } from '~client/prop-types/graph';
+import { getPathProps, getSingleLinePath } from '~client/components/Graph/helpers';
+import ArrowLine from '~client/components/Graph/ArrowLine';
+import DynamicColorLine from '~client/components/Graph/DynamicColorLine';
+import AverageLine from '~client/components/Graph/AverageLine';
 
 function getStyleProps(fill, color) {
     if (fill) {
@@ -14,19 +15,11 @@ function getStyleProps(fill, color) {
     return { fill: 'none', stroke: color };
 }
 
-export default function RenderedLine(allProps) {
-    const { line, ...props } = allProps;
+export default function RenderedLine({ line, ...props }) {
+    const { data, color, fill, smooth, movingAverage, arrows, strokeWidth, dashed } = line;
+    const pathProps = useMemo(() => !arrows && getPathProps({ strokeWidth, dashed }), [arrows, strokeWidth, dashed]);
 
-    const data = line.get('data');
-    const color = line.get('color');
-    const fill = line.get('fill');
-    const smooth = line.get('smooth');
-    const movingAverage = line.get('movingAverage');
-    const arrows = line.get('arrows');
-
-    const pathProps = useMemo(() => !arrows && getPathProps(line), [arrows, line]);
-
-    const averageLine = useMemo(() => !arrows && data.size && (
+    const averageLine = useMemo(() => !arrows && data.length && (
         <AverageLine {...props} data={data} value={movingAverage} />
     ), [arrows, data, movingAverage, props]);
 
@@ -35,7 +28,7 @@ export default function RenderedLine(allProps) {
     const linePath = useMemo(
         () => constantColor &&
             !arrows &&
-            data.size &&
+            data.length &&
             getSingleLinePath({ data, smooth, fill, ...props }),
         [constantColor, arrows, data, smooth, fill, props]
     );
@@ -43,12 +36,12 @@ export default function RenderedLine(allProps) {
     const styleProps = useMemo(
         () => constantColor &&
             !arrows &&
-            data.size &&
+            data.length &&
             getStyleProps(fill, color),
         [constantColor, arrows, data, fill, color]
     );
 
-    if (!(data.size && allProps.minY !== allProps.maxY)) {
+    if (!(data.length && props.minY !== props.maxY)) {
         return null;
     }
     if (arrows) {
@@ -73,23 +66,7 @@ export default function RenderedLine(allProps) {
 }
 
 RenderedLine.propTypes = {
-    line: ImmutablePropTypes.contains({
-        data: ImmutablePropTypes.list.isRequired,
-        color: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.func,
-            PropTypes.shape({
-                changes: PropTypes.array.isRequired,
-                values: PropTypes.array.isRequired
-            })
-        ]).isRequired,
-        strokeWidth: PropTypes.number,
-        dashed: PropTypes.bool,
-        fill: PropTypes.bool,
-        smooth: PropTypes.bool,
-        movingAverage: PropTypes.number,
-        arrows: PropTypes.bool
-    }),
+    line: lineShape,
     minY: PropTypes.number,
     maxY: PropTypes.number,
     pixX: PropTypes.func.isRequired,

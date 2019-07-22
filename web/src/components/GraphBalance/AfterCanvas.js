@@ -20,4 +20,3 @@ AfterCanvas.propTypes = {
     showAll: PropTypes.bool.isRequired,
     setShowAll: PropTypes.func.isRequired
 };
-

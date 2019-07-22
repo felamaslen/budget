@@ -4,8 +4,8 @@ import { DateTime } from 'luxon';
 import shortid from 'shortid';
 
 import { sortByDate } from '~client/modules/data';
-import { netWorthItem } from '~client/components/NetWorthList/prop-types';
-import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
+import { netWorthItem } from '~client/prop-types/net-worth/list';
+import { category, subcategory } from '~client/prop-types/net-worth/category';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
 import StepCurrencies from '~client/components/NetWorthEditForm/step-currencies';
 import { StepAssets, StepLiabilities } from '~client/components/NetWorthEditForm/step-values';
@@ -126,11 +126,6 @@ const idLists = [
     'values'
 ];
 
-const withoutIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
-    ...last,
-    [key]: doc[key].map(({ id: valueId, ...rest }) => rest)
-}), doc);
-
 const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
     ...last,
     [key]: doc[key].map(item => ({ ...item, id: shortid.generate() }))
@@ -138,7 +133,8 @@ const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
 
 export function NetWorthEditForm({ onUpdate, ...props }) {
     const onEdit = useCallback((tempItem, onComplete) => {
-        onUpdate(tempItem.id, {}, withoutIds(tempItem), onComplete);
+        onUpdate(tempItem.id, tempItem);
+        onComplete();
     }, [onUpdate]);
 
     return (
@@ -162,12 +158,11 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
                 date: DateTime.fromISO(lastItem.date)
                     .plus({ months: 1 })
                     .endOf('month')
-                    .toISODate()
             };
         }
 
         return {
-            date: DateTime.local().toISODate(),
+            date: DateTime.local(),
             creditLimit: [],
             currencies: [],
             values: []
@@ -175,7 +170,8 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
     }, [data]);
 
     const onEdit = useCallback((tempItem, onComplete) => {
-        onCreate(null, {}, withoutIds(tempItem), onComplete);
+        onCreate(tempItem);
+        onComplete();
     }, [onCreate]);
 
     return (

@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-expressions */
 import test from 'ava';
+import sinon from 'sinon';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import memoize from 'fast-memoize';
-import { fromJS } from 'immutable';
 import React from 'react';
 import BlockBits, { BlockGroup, SubBlock } from '~client/components/BlockPacker/block-bits';
 
@@ -11,13 +11,15 @@ const getSubBlock = memoize((customProps = {}) => {
     const props = {
         name: 'foo',
         value: 101.5,
-        subBlock: fromJS({
+        subBlockBit: {
             name: 'bar',
+            color: 'red',
+            value: 53.24,
             width: 90,
             height: 87
-        }),
-        activeSub: false,
-        activeBlock: [],
+        },
+        activeMain: null,
+        activeSub: null,
         onHover: () => null,
         ...customProps
     };
@@ -37,20 +39,33 @@ test('<SubBlock /> - rendering basic structure', t => {
     t.is(div.style.height, '87px');
 });
 
+test('<SubBlock /> - onHover', t => {
+    const onHover = sinon.spy();
+
+    const { container } = getSubBlock({
+        onHover
+    });
+
+    t.is(onHover.getCalls().length, 0);
+    fireEvent.mouseOver(container.childNodes[0]);
+    t.is(onHover.getCalls().length, 1);
+    t.deepEqual(onHover.getCalls()[0].args, ['foo', 'bar']);
+});
+
 const getBlockGroup = memoize((customProps = {}) => {
     const props = {
         name: 'foo',
         value: 987,
-        activeSub: false,
+        activeSub: null,
         onHover: () => null,
-        group: fromJS({
+        subBlock: {
             bits: [
-                { foo: 'bar' },
-                { bar: 'baz' }
+                { name: 'foo', color: 'red', value: 3, width: 1, height: 1 },
+                { name: 'bar', color: 'green', value: 5, width: 1, height: 1 }
             ],
             width: 15,
             height: 13
-        }),
+        },
         ...customProps
     };
 
@@ -73,15 +88,15 @@ test('<BlockGroup /> - rendering basic structure', t => {
 
 const getBlockBits = memoize((customProps = {}) => {
     const props = {
-        block: fromJS({
+        blockBit: {
             name: 'foo',
             value: 1001.3,
             color: 'red',
             blocks: [
                 {
                     bits: [
-                        { foo: 'bar' },
-                        { bar: 'baz' }
+                        { name: 'foo', color: 'pink', value: 3, width: 1, height: 1 },
+                        { name: 'bar', color: 'turquoise', value: 5, width: 1, height: 1 }
                     ],
                     width: 15,
                     height: 13
@@ -89,11 +104,10 @@ const getBlockBits = memoize((customProps = {}) => {
             ],
             width: 21,
             height: 13
-        }),
+        },
         page: 'page1',
-        activeMain: false,
-        activeSub: false,
-        activeBlock: [],
+        activeMain: null,
+        activeSub: null,
         onHover: () => null,
         onClick: () => null,
         ...customProps
@@ -133,3 +147,18 @@ test('<BlockBits /> - rendering a list of blocks', t => {
     t.is(bit1.className, 'sub-block');
 });
 
+test('<BlockBits /> - skipping subBlock render if there are none', t => {
+    const { container } = getBlockBits({
+        blockBit: {
+            name: 'foo',
+            value: 1001.3,
+            color: 'red',
+            width: 21,
+            height: 13
+        }
+    });
+
+    const [div] = container.childNodes;
+
+    t.is(div.childNodes.length, 0);
+});

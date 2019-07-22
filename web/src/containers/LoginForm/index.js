@@ -1,51 +1,72 @@
-/*
- * React component to display a form
- */
-
 import { connect } from 'react-redux';
 import './style.scss';
-import { aLoginFormInputted } from '~client/actions/login.actions';
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { loginRequested } from '~client/actions/login';
+import { getLoggedIn } from '~client/selectors/app';
 import PinDisplay from '~client/components/LoginForm/pin-display';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
+import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
-function LoginForm({ visible, active, inputStep, inputDigit }) {
-    if (!visible) {
+function LoginForm({ loading, initialised, loggedIn, onLogin }) {
+    const [pin, setPin] = useState('');
+    const onInput = useCallback(digit => setPin(last => `${last}${digit}`), []);
+
+    const onKeydown = useCallback(event => {
+        if (!isNaN(Number(event.key))) {
+            onInput(event.key);
+        }
+    }, [onInput]);
+
+    useEffect(() => {
+        if (loggedIn) {
+            window.removeEventListener('keydown', onKeydown);
+        } else {
+            window.addEventListener('keydown', onKeydown);
+        }
+
+        return () => window.removeEventListener('keydown', onKeydown);
+    }, [loggedIn, onKeydown]);
+
+    const inputStep = pin.length;
+
+    useEffect(() => {
+        if (!loggedIn && !loading && pin.length >= LOGIN_INPUT_LENGTH) {
+            onLogin(Number(pin));
+            setPin('');
+        }
+    }, [loggedIn, loading, onLogin, pin]);
+
+    if (loggedIn || !initialised) {
         return null;
     }
 
-    const onInput = digit => active && inputDigit(digit);
-
-    const outerClasses = classNames('login-form', { active });
-
-    return <div className={outerClasses}>
-        <h3>{'Enter your PIN:'}</h3>
-        <PinDisplay inputStep={inputStep} />
-        <NumberInputPad onInput={onInput} />
-    </div>;
+    return (
+        <div className={classNames('login-form', { loading })}>
+            <h3>{'Enter your PIN:'}</h3>
+            <PinDisplay inputStep={inputStep} />
+            <NumberInputPad onInput={onInput} />
+        </div>
+    );
 }
 
 LoginForm.propTypes = {
-    inputStep: PropTypes.number.isRequired,
-    pin: PropTypes.string.isRequired,
-    visible: PropTypes.bool.isRequired,
-    active: PropTypes.bool.isRequired,
-    inputDigit: PropTypes.func.isRequired
+    initialised: PropTypes.bool.isRequired,
+    loading: PropTypes.bool.isRequired,
+    loggedIn: PropTypes.bool.isRequired,
+    onLogin: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-    inputStep: state.getIn(['loginForm', 'inputStep']),
-    pin: state.getIn(['loginForm', 'values']).join(''),
-    visible: state.getIn(['loginForm', 'visible']),
-    active: state.getIn(['loginForm', 'active'])
+    initialised: state.login.initialised,
+    loading: state.login.loading,
+    loggedIn: getLoggedIn(state)
 });
 
-const mapDispatchToProps = dispatch => ({
-    inputDigit: digit => dispatch(aLoginFormInputted(digit))
-});
+const mapDispatchToProps = {
+    onLogin: loginRequested
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
-

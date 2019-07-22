@@ -1,56 +1,27 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
-import { fromJS, Map as map, List as list } from 'immutable';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import React from 'react';
 import { createMockStore } from 'redux-test-utils';
 import { DateTime } from 'luxon';
 import GraphOverview from '~client/containers/GraphOverview';
+import { testState } from '~client-test/test_data/state';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
         ...customProps
     };
 
-    const state = map({
+    const state = {
+        ...testState,
         now: DateTime.fromISO('2018-03-02T12:36:49Z'),
-        pages: map({
-            overview: map({
-                startDate: DateTime.fromObject({ year: 2018, month: 2, day: 28 }),
-                endDate: DateTime.fromObject({ year: 2018, month: 5, day: 31 }),
-                cost: fromJS({
-                    funds: [983204, 983204, 983204, 983204, 983204, 983204, 983204, 983204],
-                    fundChanges: [0, 0, 0, 0, 0, 0, 0, 0],
-                    income: [163613, 163613, 163613, 163613, 163613, 0, 0],
-                    bills: [101992, 101992, 101992, 101992, 98106, 97356, 0, 0],
-                    food: [26247, 22075, 23260, 11979, 11933, 1186, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    general: [59288, 12542, 9737, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    holiday: [17820, 33019, 52100, 112722, 0, 46352, 9880, 0, 0, 0, 0, 0, 0],
-                    social: [5440, 4560, 900, 4370, 2545, 700, 2491, 0, 0, 0, 0, 0, 0, 0],
-                    balance: [1242000, 1830000, 1860000, 1890000, 1980000, 2000000, 0, 0, 0],
-                    old: [488973, 332654, 247359, 208390, 156520, 839480, 641599, 543787, 556649, 649386],
-                    net: [100, -10, 125, 160, 14, 145, 96, 76, 1],
-                    spending: [143, 1032, 56891, 1923, 99130, 10, 1104, 9914, 8247]
-                }),
-                rows: list.of(
-                    list.of(1654),
-                    list.of(1872),
-                    list.of(932),
-                    list.of(9931)
-                ),
-                data: map({
-                    numRows: 4,
-                    numCols: 1
-                })
-            })
-        }),
-        other: map({
-            windowWidth: 1045,
-            showAllBalanceGraph: false
-        })
-    });
+        app: {
+            ...testState.app,
+            windowWidth: 1045
+        }
+    };
 
     const store = createMockStore(state);
 
@@ -90,4 +61,3 @@ test('rendering a spending graph', t => {
     t.is(graphSpending.tagName, 'DIV');
     t.is(graphSpending.className, 'graph-container graph-spend');
 });
-

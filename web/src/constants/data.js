@@ -1,10 +1,16 @@
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
 
-export const API_VERSION = 4;
-export const API_PREFIX = `/api/v${API_VERSION}`;
+export const API_PREFIX = '/api/v4';
+export const API_BACKOFF_TIME = 5000;
 
 export const LOGIN_INPUT_LENGTH = 4;
+
+export const CREATE_ID = 'CREATE_ID';
+
+export const CREATE = 'CREATE';
+export const UPDATE = 'UPDATE';
+export const DELETE = 'DELETE';
 
 export const DATA_KEY_ABBR = {
     id: 'I',
@@ -29,8 +35,8 @@ export const OVERVIEW_COLUMNS = [
     ['income', 'Income'],
     ['spending', 'Out'],
     ['net', 'Net'],
-    ['predicted', 'Predicted'],
-    ['balance', 'Net Worth', '/net-worth']
+    ['netWorthPredicted', 'Predicted'],
+    ['netWorth', 'Net Worth', '/net-worth']
 ];
 
 export const PAGES = {
@@ -78,8 +84,17 @@ export const PAGES = {
     }
 };
 
+export const PAGES_LIST = ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'];
+export const PAGES_SUGGESTIONS = ['income', 'bills', 'food', 'general', 'holiday', 'social'];
+
 export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
 
+export const NET_WORTH_AGGREGATE = {
+    'cash-easy-access': 'Cash (easy access)',
+    'cash-other': 'Cash (other)',
+    stocks: 'Stocks',
+    pension: 'Pension'
+};

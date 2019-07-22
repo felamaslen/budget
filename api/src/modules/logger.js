@@ -28,4 +28,3 @@ const getLogger = (suppress = false) => {
 };
 
 module.exports = getLogger;
-

@@ -27,4 +27,3 @@ test('getNewBadLoginCount resets the counter for expired bans', t => {
     t.is(getNewBadLoginCount(4, true, null, true), 1);
     t.is(getNewBadLoginCount(1, true, null, true), 1);
 });
-

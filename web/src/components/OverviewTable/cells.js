@@ -1,45 +1,40 @@
-import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import HoverCost from '~client/components/HoverCost';
 
-import CellInner from './cell-inner';
+function getStyle(rgb) {
+    if (!rgb) {
+        return {};
+    }
 
-export default function OverviewTableCells({ row, rowKey, editRow, editCol }) {
-    const cells = row.get('cells')
-        .map((cell, cellKey) => {
-            const style = {};
-            if (cell.get('rgb')) {
-                style.backgroundColor = `rgb(${cell.get('rgb').join(',')})`;
-            }
+    return { backgroundColor: `rgb(${rgb.join(',')})` };
+}
 
-            const editable = cell.get('editable');
-
-            const active = editRow === rowKey && editCol === 0;
-
-            const cellClassName = classNames('col', cell.getIn(['column', 0]), {
-                'editable-outer': editable,
-                editing: editable && active
-            });
-
-            return <div key={cellKey} className={cellClassName} style={style}>
-                <CellInner cell={cell} cellKey={cellKey} rowKey={rowKey} editable={editable} />
-            </div>;
-        });
-
-    const rowClassName = classNames('row', {
-        past: Boolean(row.get('past')),
-        active: Boolean(row.get('active')),
-        future: Boolean(row.get('future'))
-    });
-
-    return <div className={rowClassName}>{cells}</div>;
+export default function OverviewTableCells({ row: { cells, past, active, future } }) {
+    return (
+        <div className={classNames('row', { past, active, future })}>
+            {cells.map(({ column: [key], value, rgb }, index) => (
+                <div
+                    key={key}
+                    className={classNames('col', key)}
+                    style={getStyle(rgb)}
+                >
+                    <HoverCost value={value} abbreviate={index > 0} />
+                </div>
+            ))}
+        </div>
+    );
 }
 
 OverviewTableCells.propTypes = {
-    row: PropTypes.instanceOf(map).isRequired,
-    rowKey: PropTypes.number.isRequired,
-    editRow: PropTypes.number,
-    editCol: PropTypes.number
+    row: PropTypes.shape({
+        cells: PropTypes.arrayOf(PropTypes.shape({
+            column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+            rgb: PropTypes.arrayOf(PropTypes.number)
+        }).isRequired).isRequired,
+        past: PropTypes.bool,
+        active: PropTypes.bool,
+        future: PropTypes.bool
+    }).isRequired
 };
-

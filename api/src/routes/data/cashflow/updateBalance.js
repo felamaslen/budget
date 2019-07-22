@@ -29,9 +29,10 @@ function updateData(config, db, post = true) {
         const { error, value } = joi.validate(req.body, balanceSchema);
 
         if (error) {
-            return res
-                .status(400)
-                .json({ errorMessage: error.message });
+            res.status(400);
+            res.json({ errorMessage: error.message });
+
+            return;
         }
 
         await updateQuery(db, req.user, value);
@@ -40,9 +41,8 @@ function updateData(config, db, post = true) {
             ? 201
             : 200;
 
-        return res
-            .status(statusCode)
-            .json({ success: true });
+        res.status(statusCode);
+        res.json({ success: true });
     };
 }
 

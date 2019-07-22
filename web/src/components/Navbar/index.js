@@ -1,40 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { NavLink } from 'react-router-dom';
+
 import { PAGES } from '~client/constants/data';
 
 import './style.scss';
 
-export default function Navbar({ active, onPageSet, onLogout }) {
-    if (!active) {
-        return null;
-    }
-
-    const pageLinksList = Object.keys(PAGES).map(page => {
-        const path = PAGES[page].path || `/${page}`;
-
-        const className = `nav-link nav-link-${page}`;
-
-        return (
-            <NavLink key={page} exact to={path}
-                onClick={onPageSet(page)}
+const Navbar = ({ onLogout }) => (
+    <nav className="nav-list noselect">
+        {Object.keys(PAGES).map(page => (
+            <NavLink key={page}
+                exact
+                to={PAGES[page].path || `/${page}`}
                 activeClassName="active"
-                className={className}>
+                className={classNames('nav-link', `nav-link-${page}`)}>
                 {page}
             </NavLink>
-        );
-    });
-
-    return (
-        <nav className="nav-list noselect">
-            {pageLinksList}
-            <a className="nav-link nav-link-logout" onClick={onLogout}>{'Log out'}</a>
-        </nav>
-    );
-}
+        ))}
+        <a className="nav-link nav-link-logout" onClick={onLogout}>{'Log out'}</a>
+    </nav>
+);
 
 Navbar.propTypes = {
-    active: PropTypes.bool.isRequired,
-    onPageSet: PropTypes.func.isRequired,
     onLogout: PropTypes.func.isRequired
 };
+
+export default Navbar;

@@ -1,87 +1,95 @@
 import test from 'ava';
-import memoize from 'fast-memoize';
-import { Map as map, List as list } from 'immutable';
 import { DateTime } from 'luxon';
 import {
-    makeGetGraphProps
+    getStartTime,
+    getCacheTimes,
+    getFundItems,
+    getFundLines
 } from '~client/selectors/funds/graph';
-import { GRAPH_FUNDS_MODE_ROI } from '~client/constants/graph';
-import { testRows, testPrices, testStartTime, testCacheTimes, testLines } from '../../test_data/testFunds';
+import { testState } from '~client-test/test_data/state';
+import {
+    testStartTime,
+    testCacheTimes,
+    testLinesRoi,
+    testLinesAbsolute,
+    testLinesPrice
+} from '~client-test/test_data/testFunds';
+import {
+    GRAPH_FUNDS_MODE_ROI,
+    GRAPH_FUNDS_MODE_ABSOLUTE,
+    GRAPH_FUNDS_MODE_PRICE,
+    GRAPH_FUNDS_OVERALL_ID
+} from '~client/constants/graph';
+import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
+import { colorKey } from '~client/modules/color';
 
-const state = map({
+const state = {
+    ...testState,
     now: DateTime.fromISO('2017-09-01T19:01Z'),
-    pages: map({
-        funds: map({
-            rows: testRows,
-            cache: map({
-                period1: map({
-                    startTime: testStartTime,
-                    cacheTimes: testCacheTimes,
-                    prices: testPrices
-                })
-            })
-        })
-    }),
-    other: map({
+    funds: {
+        ...testState.funds,
         viewSoldFunds: true,
-        graphFunds: map({
-            mode: GRAPH_FUNDS_MODE_ROI,
-            period: 'period1',
-            enabledList: map([
-                ['overall', true],
-                ['10', false],
-                ['1', true],
-                ['3', false],
-                ['5', false]
-            ])
-        })
-    })
+        period: 'period1'
+    }
+};
+
+test('getStartTime gets the current funds cache start time', t => {
+    t.is(getStartTime(state), testStartTime);
 });
 
-const getFundItemsResult = memoize((customState = state, customProps = { isMobile: false }) => {
-    const getGraphProps = makeGetGraphProps();
-
-    const result = getGraphProps(customState, customProps);
-
-    return result;
+test('getCacheTimes gets the current funds cache times list', t => {
+    t.is(getCacheTimes(state), testCacheTimes);
 });
 
-test('makeGetGraphProps (fund items) returns a map', t => {
-    const result = getFundItemsResult();
-
-    t.true('fundItems' in result);
-    t.true(result.fundItems instanceof map);
+test('getFundItems gets the list of available funds with an overall item in addition', t => {
+    t.deepEqual(getFundItems(state), [
+        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: COLOR_GRAPH_FUND_LINE },
+        { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
+        { id: '3', item: 'some fund 2', color: colorKey('some fund 2') },
+        { id: '1', item: 'some fund 3', color: colorKey('some fund 3') },
+        { id: '5', item: 'test fund 4', color: colorKey('test fund 4') }
+    ]);
 });
 
-const testCases = [
-    { id: 'overall', value: { color: [0, 0, 0], enabled: true, item: 'Overall' } },
-    { id: '10', value: { color: [0, 74, 153], enabled: false, item: 'some fund 1' } },
-    { id: '1', value: { color: [0, 74, 153], enabled: true, item: 'some fund 3' } },
-    { id: '3', value: { color: [0, 74, 153], enabled: false, item: 'some fund 2' } },
-    { id: '5', value: { color: [0, 153, 99], enabled: false, item: 'test fund 4' } }
-];
+test('getFundItems filters out sold funds, if the option is set', t => {
+    const stateNoSold = {
+        ...state,
+        funds: {
+            ...state.funds,
+            viewSoldFunds: false
+        }
+    };
 
-testCases.forEach(({ id, value }) => {
-    test(`makeGetGraphProps (fund items) sets the fund item with id ${id}`, t => {
-        const { fundItems } = getFundItemsResult();
+    t.deepEqual(getFundItems(stateNoSold), [
+        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: COLOR_GRAPH_FUND_LINE },
+        { id: '10', item: 'some fund 1', color: colorKey('some fund 1') }
+    ]);
+});
 
-        t.deepEqual(fundItems.get(id).toJS(), value);
+test('getFundLines gets a list (by mode) of graphed, split fund lines', t => {
+    t.deepEqual(getFundLines(state), {
+        [GRAPH_FUNDS_MODE_ROI]: testLinesRoi,
+        [GRAPH_FUNDS_MODE_ABSOLUTE]: testLinesAbsolute,
+        [GRAPH_FUNDS_MODE_PRICE]: testLinesPrice
     });
 });
 
-test('makeGetGraphProps (fund items) returns fund lines', t => {
-    const result = getFundItemsResult();
+test('getFundLines filters out sold funds, if the option is set', t => {
+    const stateNoSold = {
+        ...state,
+        funds: {
+            ...state.funds,
+            viewSoldFunds: false
+        }
+    };
 
-    t.true('lines' in result);
-    t.true(result.lines instanceof list);
-    t.deepEqual(result.lines.toJS(), testLines);
-});
+    const soldIds = ['3', '1', '5'];
 
-test('makeGetGraphProps (fund items) returns fund items for deleted funds', t => {
-    const stateWithDeletedItem = state.setIn(['pages', 'funds', 'rows'],
-        state.getIn(['pages', 'funds', 'rows']).delete('10'));
+    const filter = values => values.filter(({ id }) => !soldIds.includes(id));
 
-    const resultWithDeletedItem = getFundItemsResult(stateWithDeletedItem, { isMobile: false });
-
-    t.false('10' in resultWithDeletedItem.fundItems.toJS());
+    t.deepEqual(getFundLines(stateNoSold), {
+        [GRAPH_FUNDS_MODE_ROI]: filter(testLinesRoi),
+        [GRAPH_FUNDS_MODE_ABSOLUTE]: filter(testLinesAbsolute),
+        [GRAPH_FUNDS_MODE_PRICE]: filter(testLinesPrice)
+    });
 });

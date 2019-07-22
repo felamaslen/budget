@@ -18,7 +18,7 @@ test('getBroker throwing an error for invalid fund names', t => {
     t.throws(() => scraper.getBroker('foo'));
 });
 
-test('getEligibleFunds maping  and filter funds by validity', t => {
+test('getEligibleFunds maps and filters funds by validity', t => {
     const queryResultAllInvalid = [
         { uid: 1, item: TEST_FUND_NAMES[0], units: null, cost: null },
         { uid: 1, item: TEST_FUND_NAMES[1], units: 5, cost: 3 },
@@ -35,7 +35,8 @@ test('getEligibleFunds maping  and filter funds by validity', t => {
         {
             uid: 1,
             item: TEST_FUND_NAMES[0],
-            units: 10
+            units: 10,
+            cost: 12
         },
         {
             uid: 1,
@@ -50,7 +51,8 @@ test('getEligibleFunds maping  and filter funds by validity', t => {
         {
             uid: 2,
             item: TEST_FUND_NAMES[1],
-            units: 100
+            units: 100,
+            cost: 99
         },
         {
             uid: 2,
@@ -67,8 +69,7 @@ test('getEligibleFunds maping  and filter funds by validity', t => {
         {
             uid: 2,
             item: TEST_FUND_NAMES[0],
-            units: 10,
-            cost: 10
+            units: 10
         }
     ];
 
@@ -78,6 +79,7 @@ test('getEligibleFunds maping  and filter funds by validity', t => {
             hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
             broker: 'hl',
             name: TEST_FUND_NAMES[0],
+            cost: 12,
             units: 10
         },
         {
@@ -85,31 +87,36 @@ test('getEligibleFunds maping  and filter funds by validity', t => {
             hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
             broker: 'hl',
             name: TEST_FUND_NAMES[1],
+            cost: 10,
             units: 54
         }
     ]);
 });
 
-test('getEligibleFunds filtering  funds by uniqueness', t => {
+test('getEligibleFunds filters funds by uniqueness', t => {
     const queryResultSomeDuplicate = [
         {
             uid: 1,
             item: TEST_FUND_NAMES[1],
+            cost: 150,
             units: 100
         },
         {
             uid: 1,
             item: TEST_FUND_NAMES[1],
+            cost: -64,
             units: -46
         },
         {
             uid: 2,
             item: TEST_FUND_NAMES[0],
+            cost: 29,
             units: 20
         },
         {
             uid: 2,
             item: TEST_FUND_NAMES[0],
+            cost: 25,
             units: 10
         }
     ];
@@ -120,6 +127,7 @@ test('getEligibleFunds filtering  funds by uniqueness', t => {
             hash: fundHash(TEST_FUND_NAMES[1], config.data.funds.salt),
             broker: 'hl',
             name: TEST_FUND_NAMES[1],
+            cost: 86,
             units: 54
         },
         {
@@ -127,8 +135,8 @@ test('getEligibleFunds filtering  funds by uniqueness', t => {
             hash: fundHash(TEST_FUND_NAMES[0], config.data.funds.salt),
             broker: 'hl',
             name: TEST_FUND_NAMES[0],
+            cost: 54,
             units: 30
         }
     ]);
 });
-

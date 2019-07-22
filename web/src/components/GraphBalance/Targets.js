@@ -1,7 +1,6 @@
-import { List as list } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
-import Arrow from '../Arrow';
+import Arrow from '~client/components/Arrow';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
 import { formatCurrency } from '~client/modules/format';
@@ -9,42 +8,38 @@ import { rgba } from '~client/modules/color';
 import {
     pixelPropTypes as allPixelPropTypes,
     rangePropTypes as allRangePropTypes
-} from '~client/components/Graph/propTypes';
+} from '~client/prop-types/graph';
+import { targetsShape } from '~client/prop-types/graph/balance';
 
-const formatTarget = target => `${formatCurrency(target.get('value'), {
-    raw: true, noPence: true, abbreviate: true, precision: 0
-})} (${target.get('tag')})`;
+const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
 export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
-    const [fontSize, fontFamily] = FONT_GRAPH_KEY;
-
-    const tags = targets.map((target, key) => (
-        <text key={key}
+    const tags = targets.map(({ tag, value }, index) => (
+        <text key={tag}
             x={50}
-            y={72 + 22 * key}
+            y={72 + 22 * index}
             fill={rgba(COLOR_DARK)}
             alignmentBaseline="hanging"
             fontFamily={fontFamily}
-            fontSize={fontSize}>
-            {formatTarget(target)}
+            fontSize={fontSize}
+        >
+            {`${formatCurrency(value, {
+                raw: true, noPence: true, abbreviate: true, precision: 0
+            })} (${tag})`}
         </text>
     ));
 
     const monthWidth = pixX(2628000) - pixX(0);
 
-    const arrowAngle = target =>
-        Math.atan2(pixY(target.get('from')) - pixY(target.get('value')),
-            monthWidth * (target.get('months') + target.get('last')));
-
-    const arrows = minY !== maxY && targets.map((target, key) => (
-        <Arrow key={key}
-            startX={target.get('date')}
-            startY={target.get('from')}
-            length={100 * (1 + key) * 0.8 ** (showAll >> 0)}
-            angle={arrowAngle(target)}
+    const arrows = minY !== maxY && targets.map(({ tag, date, value, from, months, last }, index) => (
+        <Arrow key={tag}
+            startX={date}
+            startY={from}
+            length={100 * (1 + index) * 0.8 ** (showAll >> 0)}
+            angle={Math.atan2(pixY(from) - pixY(value), monthWidth * (months + last))}
             color={rgba(COLOR_DARK)}
             strokeWidth={1}
-            arrowSize={target.get('months') / 24}
+            arrowSize={months / 24}
             minY={minY}
             maxY={maxY}
             pixX={pixX}
@@ -54,7 +49,7 @@ export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
 
     return (
         <g className="savings-targets">
-            <rect x={48} y={70} width={100} height={targets.size * 22 + 4}
+            <rect x={48} y={70} width={100} height={targets.length * 22 + 4}
                 fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
             {tags}
             {arrows}
@@ -69,5 +64,5 @@ Targets.propTypes = {
     ...pixelPropTypes,
     ...rangePropTypes,
     showAll: PropTypes.bool,
-    targets: PropTypes.instanceOf(list).isRequired
+    targets: targetsShape
 };

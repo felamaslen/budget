@@ -1,7 +1,5 @@
 /* eslint-disable global-require */
 
-import initialState from '../reduction';
-
 let configStore = null;
 
 if (process.env.NODE_ENV === 'development') {
@@ -11,7 +9,6 @@ else {
     configStore = require('./configureStore.prod').default;
 }
 
-const store = configStore(initialState);
+const store = configStore();
 
 export default store;
-

@@ -1,35 +1,21 @@
 import test from 'ava';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { List as list } from 'immutable';
-import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
+import { render } from '@testing-library/react';
 import React from 'react';
-import reduction from '~client/reduction';
 import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
-        items: list.of(
-            { itemCost: 3, pct: 5, visible: true },
-            { itemCost: 5, pct: 8, visible: true },
-            { itemCost: 1, pct: 2, visible: false }
-        ),
+        items: [
+            { name: 'foo', itemCost: 3, pct: 5, open: false, visible: true },
+            { name: 'bar', itemCost: 5, pct: 8, open: false, visible: true },
+            { name: 'baz', itemCost: 1, pct: 2, open: false, visible: false }
+        ],
         ...customProps
     };
 
-    const state = reduction;
-
-    const store = createMockStore(state);
-
-    const utils = render(
-        <Provider store={store}>
-            <ListTreeHead {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<ListTreeHead {...props} />);
 });
 
 test('basic structure', t => {
@@ -114,4 +100,3 @@ test('total percent', t => {
     t.is(selected.className, 'selected');
     t.is(selected.innerHTML, '13.0%');
 });
-

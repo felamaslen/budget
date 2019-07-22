@@ -1,11 +1,10 @@
 import test from 'ava';
-import { render } from 'react-testing-library';
-import { fromJS } from 'immutable';
+import { render } from '@testing-library/react';
 import '~client-test/browser';
 import React from 'react';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
 
-test('rendering a line graph', t => {
+const getContainer = (customProps = {}) => {
     const props = {
         name: 'some-dumb-graph',
         dimensions: {
@@ -19,7 +18,7 @@ test('rendering a line graph', t => {
         },
         outerProperties: {},
         svgProperties: {},
-        lines: fromJS([
+        lines: [
             {
                 key: 'line1',
                 data: [
@@ -68,7 +67,7 @@ test('rendering a line graph', t => {
                 smooth: true,
                 color: 'black'
             }
-        ]),
+        ],
         calc: {
             minX: 100,
             maxX: 103,
@@ -78,10 +77,15 @@ test('rendering a line graph', t => {
             pixY: () => 0,
             valX: () => 0,
             valY: () => 0
-        }
+        },
+        ...customProps
     };
 
-    const { container } = render(<LineGraphDumb {...props} />);
+    return render(<LineGraphDumb {...props} />);
+};
+
+test('rendering a line graph', t => {
+    const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [graph] = container.childNodes;
@@ -93,4 +97,28 @@ test('rendering a line graph', t => {
     t.is(svg.tagName, 'svg');
 });
 
+test('not rendering any SVG data if there are no lines', t => {
+    const { container } = getContainer({ lines: [] });
 
+    const { childNodes: [svg] } = container.childNodes[0];
+
+    t.is(svg.childNodes.length, 0);
+});
+
+test('rendering lines', t => {
+    const { container } = getContainer();
+
+    const { childNodes: [svg] } = container.childNodes[0];
+
+    t.is(svg.childNodes.length, 5);
+
+    svg.childNodes.forEach(line => {
+        t.is(line.tagName, 'g');
+        t.is(line.className, 'line');
+        t.is(line.childNodes.length, 1);
+
+        const [path] = line.childNodes;
+
+        t.is(path.tagName, 'path');
+    });
+});

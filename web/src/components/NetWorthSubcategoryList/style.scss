@@ -34,8 +34,7 @@
     .crud-list.net-worth-subcategory {
         display: grid;
         grid-template-columns: inherit;
-        grid-template-columns: 2;
-        grid-row: 1 / span 2;
+        grid-row: 2;
         grid-column: 1 / span 5;
 
         .crud-list-meta {
@@ -59,18 +58,22 @@
                 display: grid;
                 grid-template-columns: auto 100px 100px 64px;
 
-                .input-subcategory {
+                .form-field-subcategory {
                     margin: 0 2em;
                     padding: 0 0.5em;
                     grid-column: 1;
                 }
-                .input-has-credit-limit {
+                .form-field-credit-limit {
                     margin: auto;
                     grid-column: 2;
                 }
-                .input-opacity {
+                .form-field-opacity {
                     margin: 0 1em;
                     grid-column: 3;
+
+                    input {
+                        width: 100%;
+                    }
                 }
                 .button-change {
                     grid-column: 4;

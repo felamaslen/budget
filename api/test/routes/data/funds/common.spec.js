@@ -102,4 +102,3 @@ test('processFundHistory returns the expected data', t => {
 test('fundHash returns a valid hashed value', t => {
     t.is(fundHash('foobar', 'somesalt'), md5('foobarsomesalt'));
 });
-

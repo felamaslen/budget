@@ -21,4 +21,3 @@ module.exports = {
     insert: schemaInsertFunds,
     update: schemaUpdateFunds
 };
-

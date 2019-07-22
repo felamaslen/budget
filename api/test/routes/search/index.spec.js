@@ -6,4 +6,3 @@ const {
 test('routeGet is defined', t => {
     t.is(typeof routeGet, 'function');
 });
-

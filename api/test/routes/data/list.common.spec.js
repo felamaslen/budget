@@ -21,7 +21,7 @@ test('getLimitCondition returns a valid limit condition', t => {
             ? result[key].toISODate()
             : null
     }), {}), {
-        startDate: '2017-09-01',
+        startDate: '2017-07-01',
         endDate: null
     });
 });
@@ -86,4 +86,3 @@ test('getTotalCost returns the correct query', async t => {
 
     t.is(await getTotalCost(db, user, 'food'), 19239 + 91923 + 2239);
 });
-

@@ -15,8 +15,8 @@ function getBroker(config, name) {
 }
 
 function getEligibleFunds(config, logger, rows) {
-    const fundsByHash = rows.reduce((funds, { uid, item, units }) => {
-        if (!units || isNaN(units)) {
+    const fundsByHash = rows.reduce((funds, { uid, item, units, cost }) => {
+        if (!(units && !isNaN(units) && cost && !isNaN(cost))) {
             return funds;
         }
 
@@ -27,10 +27,17 @@ function getEligibleFunds(config, logger, rows) {
 
         const hash = fundHash(item, config.data.funds.salt);
 
-        if (hash in funds) {
-            funds[hash].units += Math.round(units * 10000) / 10000;
+        const unitsRounded = Number(units.toFixed(5));
 
-            return funds;
+        if (funds[hash]) {
+            return {
+                ...funds,
+                [hash]: {
+                    ...funds[hash],
+                    units: funds[hash].units + unitsRounded,
+                    cost: funds[hash].cost + cost
+                }
+            };
         }
 
         return {
@@ -40,7 +47,8 @@ function getEligibleFunds(config, logger, rows) {
                 name: item,
                 hash,
                 broker,
-                units
+                units: unitsRounded,
+                cost
             }
         };
     }, {});
@@ -50,9 +58,15 @@ function getEligibleFunds(config, logger, rows) {
 }
 
 async function getFunds(config, db, logger) {
-    const rows = await db.select('uid', 'item', 'units')
-        .from('funds')
-        .innerJoin('funds_transactions', 'funds_transactions.fund_id', 'funds.id');
+    const rows = await db.select(
+        'f.uid',
+        'f.item',
+        db.raw('SUM(ft.units)::float AS units'),
+        db.raw('SUM(ft.cost)::float AS cost')
+    )
+        .from('funds as f')
+        .innerJoin('funds_transactions as ft', 'ft.fund_id', 'f.id')
+        .groupBy('f.uid', 'f.item');
 
     return getEligibleFunds(config, logger, rows);
 }
@@ -77,14 +91,14 @@ async function processScrape(config, flags, db, logger) {
             return 0;
         }
 
-        const currencyPrices = await getCurrencyPrices(config, logger);
-
         const rawData = await getRawData(config, logger, funds);
 
         if (holdings) {
             await scrapeFundHoldings(config, db, logger, funds, rawData);
         }
         if (prices) {
+            const currencyPrices = await getCurrencyPrices(config, logger);
+
             await scrapeFundPrices(config, db, logger, currencyPrices, funds, rawData);
         }
 
@@ -105,4 +119,3 @@ module.exports = {
     getEligibleFunds,
     processScrape
 };
-

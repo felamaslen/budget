@@ -36,4 +36,3 @@ Key.propTypes = {
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired
 };
-

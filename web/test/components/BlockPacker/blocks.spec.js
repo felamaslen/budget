@@ -1,27 +1,29 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
 import memoize from 'fast-memoize';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import Blocks, { OuterBlockGroup } from '~client/components/BlockPacker/blocks';
 
 const getOuterBlockGroup = memoize((customProps = {}) => {
     const props = {
         page: 'page1',
-        group: fromJS({
+        block: {
             width: 10.4,
             height: 11.5,
-            value: 5,
             bits: [
                 {
                     name: 'foo',
                     value: 5.1,
                     color: 'black',
+                    width: 3,
+                    height: 3,
                     blocks: [
                         {
+                            width: 2.9,
+                            height: 2.15,
                             bits: [
-                                { name: 'foo1', value: 3 }
+                                { name: 'foo1', value: 3, color: 'ebony', width: 3, height: 2.9 }
                             ]
                         }
                     ]
@@ -30,19 +32,22 @@ const getOuterBlockGroup = memoize((customProps = {}) => {
                     name: 'bar',
                     value: 5.2,
                     color: 'red',
+                    width: 4,
+                    height: 2.4,
                     blocks: [
                         {
+                            width: 2.8,
+                            height: 4.35,
                             bits: [
-                                { name: 'bar1', value: 4 }
+                                { name: 'bar1', value: 4, color: 'pink', width: 2, height: 1.3 }
                             ]
                         }
                     ]
                 }
             ]
-        }),
-        activeMain: true,
-        activeSub: false,
-        activeBlock: [1, 0],
+        },
+        activeMain: 'not_foo',
+        activeSub: 'not_bar',
         onHover: () => null,
         onClick: () => null,
         ...customProps
@@ -86,10 +91,8 @@ test('<OuterBlockGroup /> - rendering the block\'s bits', t => {
 
 const getBlocks = (customProps = {}) => {
     const props = {
-        blocks: fromJS([
+        blocks: [
             {
-                name: 'foz',
-                color: 'blue',
                 width: 10,
                 height: 10,
                 bits: [
@@ -99,8 +102,16 @@ const getBlocks = (customProps = {}) => {
                         value: 8,
                         blocks: [
                             {
+                                width: 8,
+                                height: 7.3,
                                 bits: [
-                                    { name: 'foo1', value: 8 }
+                                    {
+                                        name: 'foo1',
+                                        value: 8,
+                                        color: 'ebony',
+                                        width: 3,
+                                        height: 2.9
+                                    }
                                 ]
                             }
                         ]
@@ -111,8 +122,16 @@ const getBlocks = (customProps = {}) => {
                         value: 2,
                         blocks: [
                             {
+                                width: 1,
+                                height: 9.3,
                                 bits: [
-                                    { name: 'bar1', value: 2 }
+                                    {
+                                        name: 'bar1',
+                                        value: 2,
+                                        color: 'ebony',
+                                        width: 3,
+                                        height: 2.9
+                                    }
                                 ]
                             }
                         ]
@@ -120,11 +139,8 @@ const getBlocks = (customProps = {}) => {
                 ]
             },
             {
-                name: 'boz',
-                color: 'yellow',
                 width: 3,
                 height: 7,
-                value: 5,
                 bits: [
                     {
                         name: 'baz',
@@ -134,8 +150,9 @@ const getBlocks = (customProps = {}) => {
                     }
                 ]
             }
-        ]),
-        activeBlock: null,
+        ],
+        activeMain: null,
+        activeSub: null,
         page: 'page1',
         onClick: () => null,
         onHover: () => null,
@@ -174,7 +191,7 @@ test('<Blocks /> - list of blocks', t => {
 
 test('<Blocks /> - active main block', t => {
     const { container } = getBlocks({
-        activeBlock: ['foo']
+        activeMain: 'foo'
     });
 
     const [div] = container.childNodes;
@@ -191,7 +208,8 @@ test('<Blocks /> - active main block', t => {
 
 test('<Blocks /> - active sub block', t => {
     const { container } = getBlocks({
-        activeBlock: ['bar', 'bar1']
+        activeMain: 'bar',
+        activeSub: 'bar1'
     });
 
     const [div] = container.childNodes;
@@ -211,11 +229,10 @@ test('<Blocks /> - active sub block', t => {
 
 test('<Blocks /> - deep prop', t => {
     const { container } = getBlocks({
-        deep: 'foo'
+        deepBlock: 'foo'
     });
 
     const [div] = container.childNodes;
 
     t.is(div.className, 'block-tree block-tree-deep block-tree-foo');
 });
-
