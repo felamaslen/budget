@@ -594,6 +594,61 @@ test('DATA_READ inserts data into the state', t => {
     });
 });
 
+test('DATA_READ sets default empty arrays for missing items', t => {
+    const state = {
+        categories: [],
+        subcategories: [],
+        entries: []
+    };
+
+    const action = dataRead({
+        netWorth: {
+            categories: {
+                data: []
+            },
+            subcategories: {
+                data: []
+            },
+            entries: {
+                data: {
+                    count: 17,
+                    data: [{
+                        id: 'some-entry-id',
+                        date: '2019-07-12',
+                        values: [
+                            {
+                                subcategory: 'some-subcategory-id',
+                                skip: true,
+                                value: -239
+                            }
+                        ]
+                    }]
+                }
+            }
+        }
+    });
+
+    const result = reducer(state, action);
+
+    t.deepEqual(result, {
+        categories: [],
+        subcategories: [],
+        entries: [{
+            id: 'some-entry-id',
+            date: DateTime.fromISO('2019-07-12'),
+            values: [
+                {
+                    subcategory: 'some-subcategory-id',
+                    skip: true,
+                    value: -239
+                }
+            ],
+            creditLimit: [],
+            currencies: []
+        }]
+    });
+});
+
 test('SYNC_RECEIVED confirms category creates, updating any dependencies', t => {
     const state = {
         categories: [CATEGORY_CASH, {
