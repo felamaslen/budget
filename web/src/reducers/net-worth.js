@@ -130,8 +130,17 @@ const withDeletes = requests => state => compose(
 const onRead = (state, { res: { netWorth: { categories, subcategories, entries } } }) => ({
     categories: categories.data,
     subcategories: subcategories.data,
-    entries: entries.data.data.map(({ date, ...rest }) => ({
+    entries: entries.data.data.map(({
+        date,
+        values = [],
+        creditLimit = [],
+        currencies = [],
+        ...rest
+    }) => ({
         date: DateTime.fromISO(date),
+        values,
+        creditLimit,
+        currencies,
         ...rest
     }))
 });
