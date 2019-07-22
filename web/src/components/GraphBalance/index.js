@@ -25,10 +25,11 @@ const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
 function getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll) {
     if (showAll) {
         const oldOffset = Math.max(fundsOld.length, netWorthOld.length);
+        const totalLength = oldOffset + netWorthCombined.length;
 
         return {
-            balance: leftPad(netWorthOld.concat(netWorthCombined), oldOffset),
-            funds: leftPad(fundsOld.concat(fundsCurrent), oldOffset),
+            balance: leftPad(netWorthOld.concat(netWorthCombined), totalLength),
+            funds: leftPad(fundsOld.concat(fundsCurrent), totalLength),
             oldOffset
         };
     }
