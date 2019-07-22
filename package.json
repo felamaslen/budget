@@ -1,7 +1,9 @@
 {
   "name": "budget",
-  "sideEffects": false,
-  "version": "4.9.1",
+  "sideEffects": [
+    "*.scss"
+  ],
+  "version": "4.9.2",
   "description": "Personal finance app",
   "main": "index.js",
   "engines": {
