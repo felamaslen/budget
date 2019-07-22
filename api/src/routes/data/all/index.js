@@ -96,4 +96,3 @@ function routeGet(config, db) {
 module.exports = {
     routeGet
 };
-

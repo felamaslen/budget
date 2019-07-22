@@ -1,33 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Digit from './digit';
+import Digit from '~client/components/LoginForm/digit';
 
-export default function NumberInputPad({ onInput }) {
-    const digits = new Array(4)
-        .fill(0)
-        .map((item, rowKey) => {
-            if (rowKey < 3) {
-                const row = new Array(3)
-                    .fill(0)
-                    .map((column, colKey) => {
-                        const digit = (rowKey * 3 + colKey + 1) % 10;
+const getDigit = (row, col) => (row * 3 + col + 1) % 10;
 
-                        return <Digit key={digit} digit={digit} onInput={onInput} />;
-                    });
-
-                return <div key={rowKey} className="number-input-row">{row}</div>;
+const NumberInputPad = ({ onInput }) => (
+    <div className="number-input noselect">{new Array(4).fill(0)
+        .map((item, row) => {
+            if (row === 3) {
+                return (
+                    <div key={row} className="number-input-row">
+                        <Digit digit={0} onInput={onInput} />
+                    </div>
+                );
             }
 
-            return <div key={rowKey} className="number-input-row">
-                <Digit digit={0} onInput={onInput} />
-            </div>;
-        });
-
-    return <div className="number-input noselect">{digits}</div>;
-}
+            return (
+                <div key={row} className="number-input-row">{new Array(3).fill(0)
+                    .map((colItem, col) => (
+                        <Digit key={getDigit(row, col)} digit={getDigit(row, col)} onInput={onInput} />
+                    ))
+                }</div>
+            );
+        })
+    }</div>
+);
 
 NumberInputPad.propTypes = {
     onInput: PropTypes.func.isRequired
 };
 
+export default NumberInputPad;

@@ -62,4 +62,3 @@ test('processQueryResult returns results', t => {
 
     t.deepEqual(result, expectedResult);
 });
-

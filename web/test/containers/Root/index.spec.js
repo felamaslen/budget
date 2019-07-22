@@ -1,39 +1,24 @@
 import test from 'ava';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import React from 'react';
 import Root from '~client/containers/Root';
+import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
-        user: {
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
+        ...testState,
+        login: {
+            ...testState.login,
             uid: '1'
         },
-        currentPage: 'general',
-        loading: false,
-        loadingApi: false,
-        errorMsg: [],
-        loginForm: {
-            inputStep: 0,
-            visible: false,
-            active: false,
-            values: []
-        },
-        modalDialog: {
-            active: false,
-            visible: false,
+        api: {
+            ...testState.api,
+            initialLoading: false,
             loading: false
-        },
-        edit: {
-            requestList: []
         }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
@@ -58,5 +43,11 @@ test('main container', t => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.className, 'main');
-    t.is(div.childNodes.length, 2);
+    t.is(div.childNodes.length, 3);
+
+    const [header, errorMessages, page] = div.childNodes;
+
+    t.is(header.tagName, 'HEADER');
+    t.is(errorMessages.className, 'messages-outer');
+    t.is(page.className, 'page-wrapper');
 });

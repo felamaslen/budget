@@ -1,27 +1,95 @@
-@import '../../sass/responsive.scss';
-@import '../../sass/variables.scss';
-@import '../../sass/mixins.scss';
+@import '~client/sass/responsive.scss';
+@import '~client/sass/variables.scss';
+@import '~client/sass/mixins.scss';
+
+@mixin row-height($height) {
+    height: $height;
+    line-height: $height;
+}
 
 @mixin hide-overview-columns($width) {
     @media screen and (max-width: $width) {
-        .page.page-overview {
-            .table-flex {
-                .col {
-                    &.funds, &.bills, &.food, &.general, &.holiday, &.social {
-                        display: none;
-                    }
-                    &.month {
-                        border-right: none;
-                    }
+        .table-flex {
+            .col {
+                &.funds, &.bills, &.food, &.general, &.holiday, &.social {
+                    display: none;
+                }
+                &.month {
+                    border-right: none;
                 }
             }
         }
     }
 }
 
-.page.page-overview {
+.page-overview {
+    .month {
+        text-align: right;
+    }
+
     .table-flex {
+        width: 100%;
+        overflow-y: auto;
+
+        .header {
+            flex: 0 0 auto;
+
+            .col .text {
+                text-align: center;
+                height: 20px;
+                line-height: 20px;
+            }
+            .month {
+                background: $color-mob-overview-tbl-month;
+            }
+            .income {
+                background: $color-mob-overview-tbl-income;
+            }
+            .spending {
+                background: $color-mob-overview-tbl-spending;
+            }
+            .predicted {
+                background: $color-mob-overview-tbl-balance;
+            }
+        }
+        .table-overview-rows {
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+
+        .col {
+            .text {
+                padding: 4px 2px;
+                display: inline-block;
+                width: 100%;
+                vertical-align: middle;
+                text-align: left;
+                height: 32px;
+                line-height: 32px;
+            }
+
+            &.funds,
+            &.bills,
+            &.food,
+            &.general,
+            &.holiday,
+            &.social,
+            &.net,
+            &.balance {
+                display: none;
+            }
+        }
+        .past {
+            font-style: italic;
+            color: $color-medium-slightly-dark;
+
+            .month {
+                background: $color-light;
+            }
+        }
         .active {
+            font-weight: bold;
+
             .month {
                 background: $color-green;
                 color: $color-white;
@@ -33,9 +101,11 @@
             }
         }
     }
-    .month {
-        text-align: right;
+
+    .graph-container {
+        z-index: 2;
     }
+
     .graph-balance {
         .show-all {
             position: absolute;
@@ -80,19 +150,38 @@
             }
         }
     }
-}
 
-.graph-container {
-    z-index: 2;
-}
-
-// desktop
-@media screen and (min-width: $width-page-mobile) {
-    .page.page-overview {
-        display: flex;
-        
+    @media only screen and (min-width: $width-page-mobile-small) {
         .table-flex {
-            flex: 0 0 auto;
+            .col {
+                .text, .editable {
+                    padding: 4px 10px;
+                }
+            }
+        }
+    }
+
+    @media only screen and (min-width: $width-page-mobile) {
+        @include hide-overview-columns(880px);
+
+        display: flex;
+        flex: 1 1 0;
+        padding-bottom: 1em;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        .table-flex {
+            flex: 1 1 0;
+            width: 100%;
+
+            &,
+            .table-overview-rows {
+                overflow-y: unset;
+            }
+
+            .table-ovreview-rows {
+                overflow: hidden;
+            }
 
             cursor: default;
             .editable-outer {
@@ -111,15 +200,9 @@
                     color: black;
                 }
             }
-            @mixin row-height($height) {
-                height: $height;
-                line-height: $height;
-                .editable-input {
-                    height: $height - 1px;
-                }
-            }
             .row {
                 @include row-height(24px);
+                // width: 95%;
                 font-size: 16px;
             }
             .past {
@@ -128,26 +211,39 @@
                 font-size: 13px;
             }
             .col {
+                flex-grow: 10;
+
+                &.funds,
+                &.bills,
+                &.food,
+                &.general,
+                &.holiday,
+                &.social,
+                &.net,
+                &.balance {
+                    display: block;
+                }
+        
                 &.month {
                     border-right: 3px solid $color-dark;
                     text-align: left;
                 }
                 &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
-                    flex-grow: 0.7;
+                    flex-grow: 7;
                 }
                 &.income {
                     border-left: 3px solid $color-dark;
                 }
                 &.net {
-                    flex-grow: 1;
+                    flex-grow: 10;
                     border-right: 3px solid $color-light;
                 }
                 &.predicted {
-                    flex-grow: 0.9;
+                    flex-grow: 9;
                     font-style: italic;
                 }
                 &.balance {
-                    flex-grow: 1.2;
+                    flex-grow: 12;
                 }
                 .text {
                     display: flex;
@@ -156,6 +252,11 @@
                 }
                 &.balancePred {
                     display: none;
+                }
+
+                .text, .editable {
+                    height: auto;
+                    line-height: 22px;
                 }
             }
             .editable-input {
@@ -166,29 +267,47 @@
             .active {
                 font-weight: bold;
             }
+
+            .active,
             .future {
+                font-size: 14px;
+
+                .text, .editable {
+                    line-height: 26px;
+                }
             }
         }
 
         .graph-container-outer {
             display: flex;
+            flex: 0 0 300px;
+            height: 300px;
         }
     }
-}
 
-// desktop (large)
-@media screen and (min-width: $width-page-tablet) {
-    .page.page-overview {
+    @media only screen and (min-width: $width-page-tablet) {
+        @include hide-overview-columns(1380px);
+        
         flex-flow: row;
         position: relative;
 
         .table-flex {
             flex: 1 0 700px;
             max-width: 1024px;
+            overflow-y: unset;
             
             .table-overview-rows {
                 flex: 1 1 auto;
-                overflow: auto;
+                overflow: unset;
+            }
+
+            .col {
+                flex-grow: 10;
+            }
+            
+            .active,
+            .future {
+                font-size: 16px;
             }
         }
 
@@ -197,105 +316,8 @@
             justify-content: center;
             align-items: center;
             overflow-y: auto;
+            height: auto;
             max-height: 640px;
         }
     }
-
-    @include hide-overview-columns(1380px);
 }
-
-// tablet
-@media screen and (min-width: $width-page-mobile) and (max-width: $width-page-tablet) {
-    .page.page-overview {
-        flex-flow: column;
-        flex-wrap: nowrap;
-        overflow-y: auto;
-        padding-bottom: 1em;
-
-        .graph-container-outer {
-            flex: 0 0 300px;
-            height: 300px;
-        }
-    }
-
-    @include hide-overview-columns(880px);
-}
-
-// mobile
-@media screen and (max-width: $width-page-mobile) {
-    .page.page-overview {
-        .funds, .bills, .food, .general, .holiday, .social,
-        .net, .balance {
-            display: none;
-        }
-
-        .table-flex {
-            width: 100%;
-            overflow-y: auto;
-
-            .header {
-                flex: 0 0 auto;
-
-                .col .text {
-                    text-align: center;
-                    height: 20px;
-                    line-height: 20px;
-                }
-                .month {
-                    background: $color-mob-overview-tbl-month;
-                }
-                .income {
-                    background: $color-mob-overview-tbl-income;
-                }
-                .spending {
-                    background: $color-mob-overview-tbl-spending;
-                }
-                .predicted {
-                    background: $color-mob-overview-tbl-balance;
-                }
-            }
-            .table-overview-rows {
-                flex: 1 1 auto;
-                overflow-y: auto;
-            }
-
-            .col {
-                .text, .editable {
-                    padding: 4px 10px;
-                    display: inline-block;
-                    width: 100%;
-                    vertical-align: middle;
-                    text-align: left;
-                    height: 32px;
-                    line-height: 32px;
-                }
-            }
-            .past {
-                font-style: italic;
-                color: $color-medium-slightly-dark;
-
-                .month {
-                    background: $color-light;
-                }
-            }
-            .active {
-                font-weight: bold;
-            }
-            .future {
-            }
-        }
-    }
-
-    @media screen and (max-width: $width-page-mobile-small) {
-        .page-overview {
-            .table-flex {
-                .col {
-                    .text, .editable {
-                        padding: 4px 1px;
-                    }
-                }
-            }
-        }
-    }
-}
-

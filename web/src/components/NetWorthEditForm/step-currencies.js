@@ -2,13 +2,13 @@ import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import axios from 'axios';
-import debounce from 'debounce';
+import { debounce } from 'throttle-debounce';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
 import FormFieldText from '~client/components/FormField';
 import FormFieldNumber from '~client/components/FormField/number';
-import { netWorthItem, currency as currencyShape } from '~client/components/NetWorthList/prop-types';
+import { netWorthItem, currency as currencyShape } from '~client/prop-types/net-worth/list';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
 
 const BASE = 'GBP';
@@ -38,7 +38,7 @@ function validateCurrency(symbol, currencies = []) {
     return symbolUpper;
 }
 
-async function getCurrencies(symbols, source, onSuccess, onError, onComplete) {
+const getCurrencies = debounce(100, async (symbols, source, onSuccess, onError, onComplete) => {
     try {
         const res = await axios.get('https://api.exchangeratesapi.io/latest', {
             params: {
@@ -56,11 +56,7 @@ async function getCurrencies(symbols, source, onSuccess, onError, onComplete) {
     } finally {
         onComplete();
     }
-}
-
-const getCurrenciesDebounced = debounce((...args) => {
-    getCurrencies(...args);
-}, 100);
+});
 
 function useCurrencyApi(symbols) {
     const [loading, setLoading] = useState(false);
@@ -97,7 +93,7 @@ function useCurrencyApi(symbols) {
         source.current = axios.CancelToken.source();
         setLoading(true);
 
-        getCurrenciesDebounced(allSymbols, source, onSuccess, setError, onComplete);
+        getCurrencies(allSymbols, source, onSuccess, setError, onComplete);
     }, [rates, cacheTime, symbols, onSuccess, onComplete]);
 
     useEffect(() => () => {
@@ -258,7 +254,7 @@ export default function StepCurrencies({
     return (
         <FormContainer {...containerProps} className="step-currencies">
             <h5 className="net-worth-edit-form-section-title">
-                {'Currencies - '}{item.date}
+                {'Currencies - '}{item.date.toISODate()}
             </h5>
             {errorRates && <div className="error">
                 {'Error loading rates: '}{errorRates.message}

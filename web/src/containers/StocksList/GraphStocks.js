@@ -1,30 +1,28 @@
-/*
- * Graph general cash flow (balance over time)
- */
-
-import { List as list, Map as map } from 'immutable';
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
+
+import { dataShape } from '~client/prop-types/graph';
 import LineGraph from '~client/components/Graph/LineGraph';
 import { GRAPH_STOCKS_WIDTH, GRAPH_STOCKS_HEIGHT } from '~client/constants/graph';
 import { COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
+import { rgba } from '~client/modules/color';
+
+const colors = [rgba(COLOR_PROFIT), rgba(COLOR_LOSS)];
 
 export default function GraphStocks({ history }) {
-    const lines = useMemo(() => list.of(map({
+    const lines = useMemo(() => ([{
         key: 'graph-stock-prices',
         data: history,
-        color: value => {
-            if (value >= 0) {
-                return COLOR_PROFIT;
-            }
-
-            return COLOR_LOSS;
-        }
-    })), [history]);
+        color: ([, value]) => colors[(value < 0) >> 0]
+    }]), [history]);
 
     return (
         <LineGraph
+            name="graph-stocks"
             lines={lines}
+            minY={history.reduce((last, [, yValue]) => Math.min(last, yValue), Infinity)}
+            maxY={history.reduce((last, [, yValue]) => Math.max(last, yValue), -Infinity)}
+            minX={history.reduce((last, [xValue]) => Math.min(last, xValue), Infinity)}
+            maxX={history.reduce((last, [xValue]) => Math.max(last, xValue), -Infinity)}
             width={GRAPH_STOCKS_WIDTH}
             height={GRAPH_STOCKS_HEIGHT}
         />
@@ -32,6 +30,5 @@ export default function GraphStocks({ history }) {
 }
 
 GraphStocks.propTypes = {
-    history: PropTypes.instanceOf(list).isRequired
+    history: dataShape.isRequired
 };
-

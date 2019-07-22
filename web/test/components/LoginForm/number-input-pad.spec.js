@@ -4,7 +4,7 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 
 import React from 'react';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
@@ -123,4 +123,3 @@ test('digit 0 (handling)', t => {
     t.is(onInput.calls.length, 1);
     t.deepEqual(onInput.calls[0].arguments, [0]);
 });
-

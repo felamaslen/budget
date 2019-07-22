@@ -1,44 +1,50 @@
-import { List as list } from 'immutable';
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { formatCurrency } from '~client/modules/format';
+import { subTreeShape } from '~client/prop-types/page/analysis';
 
 export default function SubTree({ open, subTree, name, itemCost, onHover }) {
-    if (!open) {
+    const makeOnMouseOver = useCallback(
+        subItemName => () => onHover(name, subItemName),
+        [onHover, name]
+    );
+
+    const onMouseOut = useCallback(() => onHover(null), [onHover]);
+
+    if (!(open && subTree)) {
         return null;
     }
 
-    const subTreeItems = subTree.map((subItem, subKey) => {
-        const subItemTotal = subItem.get('total');
-        const subItemPct = (100 * subItemTotal / itemCost).toFixed(1);
-        const subItemName = subItem.get('name');
-
-        const onMouseOver = () => onHover([name, subItemName]);
-        const onMouseOut = () => onHover(null);
-
-        return <li key={subKey} className="tree-list-item"
-            onMouseOver={onMouseOver} onMouseOut={onMouseOut}
-            onTouchStart={onMouseOver} onTouchEnd={onMouseOut}>
-
-            <div className="main">
-                <span className="title">{subItemName}</span>
-                <span className="cost">{formatCurrency(subItemTotal)}</span>
-                <span className="pct">{' ('}{subItemPct}{'%)'}</span>
-            </div>
-        </li>;
-    });
-
-    return <ul className="sub-tree">
-        {subTreeItems}
-    </ul>;
+    return (
+        <ul className="sub-tree">
+            {subTree.map(({ name: subItemName, total }) => (
+                <li key={subItemName}
+                    className="tree-list-item"
+                    onMouseOver={makeOnMouseOver(subItemName)}
+                    onMouseOut={onMouseOut}
+                    onTouchStart={makeOnMouseOver(subItemName)}
+                    onTouchEnd={onMouseOut}
+                >
+                    <div className="main">
+                        <span className="title">{subItemName}</span>
+                        <span className="cost">{formatCurrency(total)}</span>
+                        <span className="pct">{' ('}{(100 * total / itemCost).toFixed(1)}{'%)'}</span>
+                    </div>
+                </li>
+            ))}
+        </ul>
+    );
 }
 
 SubTree.propTypes = {
     open: PropTypes.bool.isRequired,
-    subTree: PropTypes.instanceOf(list),
+    subTree: subTreeShape,
     name: PropTypes.string,
     itemCost: PropTypes.number,
     onHover: PropTypes.func.isRequired
 };
 
+SubTree.defaultProps = {
+    subTree: null
+};

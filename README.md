@@ -81,6 +81,7 @@ Note that the development variables are optional on a production environment.
 - `FUND_RESOLUTION`: detail to include on fund price graph
 - `FUND_TEST_URL`: URL to an example fund for the scraper to test with
 - `FUND_TEST_URL_SHARE`: URL to an example share-type fund for the scraper to test with
-- `DO_STOCKS_LIST`: boolean to toggle rendering of the fund holdings list
+- `SKIP_STOCKS_LIST`: boolean to toggle rendering of the fund holdings list
+- `FAKE_STOCK_PRICES`: boolean to toggle mock stock prices API
 - `STOCKS_API_KEY`: API key to access realtime stock price data (TODO)
 - `STOCK_INDICES`: extra indices to track on the stocks list

@@ -2,21 +2,21 @@ import ava from 'ava';
 import ninos from 'ninos';
 const test = ninos(ava);
 
-import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import FormFieldCost from '~client/components/FormField/cost';
 
-const getContainer = memoize((customProps = {}) => {
+const getContainer = (customProps = {}, ...args) => {
     const props = {
+        active: true,
         value: 10345,
         onChange: () => null,
         ...customProps
     };
 
-    return render(<FormFieldCost {...props} />);
-});
+    return render(<FormFieldCost {...props} />, ...args);
+};
 
 test('basic structure', t => {
     const { container } = getContainer();
@@ -60,3 +60,44 @@ test('handling onchange', t => {
     t.deepEqual(onChange.calls[0].arguments, [1093]);
 });
 
+test('rendering as a string input', t => {
+    const onChange = t.context.stub();
+    const props = { onChange, string: true };
+    const { container } = getContainer(props);
+
+    const { childNodes: [input] } = container.childNodes[0];
+
+    t.is(input.type, 'text');
+
+    fireEvent.change(input, { target: { value: '10.93' } });
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+    t.deepEqual(onChange.calls[0].arguments, [1093]);
+
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '229.119330' } });
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+    t.deepEqual(onChange.calls[1].arguments, [22912]);
+});
+
+test('rendering as a string input - handling invalid input', t => {
+    const onChange = t.context.stub();
+    const props = { onChange, string: true };
+    const { container } = getContainer(props);
+
+    const { childNodes: [input] } = container.childNodes[0];
+
+    t.is(input.type, 'text');
+
+    fireEvent.change(input, { target: { value: 'not-a-number' } });
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+
+    t.deepEqual(onChange.calls[0].arguments, [0]);
+});

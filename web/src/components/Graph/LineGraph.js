@@ -2,12 +2,15 @@
  * React component to display a line graph (e.g. time series)
  */
 
-import { List as list } from 'immutable';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { genPixelCompute } from '~client/components/Graph/helpers';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
-import { lineGraphPropTypes, rangePropTypes } from '~client/components/Graph/propTypes';
+import {
+    lineShape,
+    lineGraphPropTypes,
+    rangePropTypes
+} from '~client/prop-types/graph';
 
 import { useZoom } from './hooks/zoom';
 import { useHover } from './hooks/hover';
@@ -35,8 +38,7 @@ export default function LineGraph({
     hoverEffect,
     zoomEffect
 }) {
-    const graph = useRef(null);
-
+    const graphRef = useRef();
     const [calc, setCalc] = useState(null);
 
     const dimensions = useMemo(() => ({
@@ -60,27 +62,15 @@ export default function LineGraph({
         hoverEffect
     });
 
-    const [zoom, onWheel] = useZoom({
+    const [, zoomedDimensions] = useZoom({
         dimensions,
         lines,
         isMobile,
-        graph,
-        hlPoint,
+        graphRef,
         calc,
         setCalc,
         zoomEffect
     });
-
-    const zoomedDimensions = useMemo(() => {
-        if (zoom) {
-            return {
-                ...dimensions,
-                ...zoom
-            };
-        }
-
-        return dimensions;
-    }, [zoom, dimensions]);
 
     const outerPropertiesProc = useMemo(() => ({
         onMouseMove,
@@ -89,18 +79,12 @@ export default function LineGraph({
         ...outerProperties
     }), [onMouseMove, onMouseLeave, outerProperties]);
 
-    const svgPropertiesProc = useMemo(() => ({
-        onWheel,
-        ...svgProperties
-    }), [onWheel, svgProperties]);
-
     if (!calc) {
         return null;
     }
 
     const graphProps = {
         name,
-        svgRef: graph,
         before,
         beforeLines,
         afterLines,
@@ -110,8 +94,9 @@ export default function LineGraph({
         calc,
         hlPoint,
         hoverEffect,
+        graphRef,
         outerProperties: outerPropertiesProc,
-        svgProperties: svgPropertiesProc,
+        svgProperties,
         svgClasses
     };
 
@@ -126,7 +111,7 @@ LineGraph.propTypes = {
     after: PropTypes.func,
     ...lineGraphPropTypes,
     ...rangePropTypes,
-    lines: PropTypes.instanceOf(list).isRequired,
+    lines: PropTypes.arrayOf(lineShape.isRequired).isRequired,
     isMobile: PropTypes.bool,
     hoverEffect: PropTypes.shape({
         labelX: PropTypes.func.isRequired,
@@ -147,4 +132,3 @@ LineGraph.defaultProps = {
     outerProperties: {},
     svgProperties: {}
 };
-

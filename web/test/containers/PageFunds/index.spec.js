@@ -1,63 +1,19 @@
 import test from 'ava';
 import '~client-test/browser';
-import { Map as map, List as list, OrderedMap } from 'immutable';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
 import { DateTime } from 'luxon';
 import PageFunds from '~client/containers/PageFunds';
+import { widthPageMobile } from '~client/constants/styles.json';
+import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = map({
-        now: DateTime.fromISO('2019-04-06T23:02Z'),
-        edit: map({
-            add: map({
-                funds: list.of(
-                    '',
-                    ''
-                )
-            }),
-            addBtnFocus: false
-        }),
-        pages: map({
-            funds: map({
-                cache: map({
-                    year1: map({
-                        cacheTimes: list.of(),
-                        prices: list.of()
-                    })
-                }),
-                rows: OrderedMap.of()
-            })
-        }),
-        pagesLoaded: map({
-            funds: true
-        }),
-        other: map({
-            windowWidth: 1000,
-            graphFunds: map({
-                mode: 0,
-                period: 'year1',
-                zoomRange: list.of(0, 0),
-                enabledList: OrderedMap.of()
-            }),
-            stocksList: map({
-                loadedList: false,
-                loadedInitial: false,
-                stocks: map.of(),
-                indices: map.of(),
-                history: list.of(),
-                lastPriceUpdate: 0,
-                weightedGain: 0,
-                oldWeightedGain: 0
-            })
-        })
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
+        ...testState,
+        now: DateTime.fromISO('2019-04-06T23:02Z')
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
@@ -81,6 +37,53 @@ test('list page with extra props', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'page page-funds');
+    t.is(div.className, 'page page-list page-funds');
 });
 
+test('funds meta - mobile info box', t => {
+    window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile - 1 });
+
+    const { container } = getContainer();
+
+    const { childNodes: [, meta] } = container.childNodes[0];
+
+    t.is(meta.tagName, 'DIV');
+    t.is(meta.className, 'funds-info');
+    t.is(meta.childNodes.length, 1);
+
+    const [div] = meta.childNodes;
+    t.is(div.childNodes.length, 2);
+
+    const [gain, graph] = div.childNodes;
+
+    t.is(gain.tagName, 'DIV');
+    t.is(gain.className, 'gain loss');
+
+    t.is(graph.tagName, 'DIV');
+    t.is(graph.className, 'graph-container graph-fund-history');
+});
+
+test('funds meta - desktop info box', t => {
+    window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile + 1 });
+
+    const { container } = getContainer();
+    const { childNodes: [, meta] } = container.childNodes[0];
+
+    t.is(meta.tagName, 'DIV');
+    t.is(meta.className, 'funds-info');
+    t.is(meta.childNodes.length, 1);
+
+    const [after] = meta.childNodes;
+
+    t.is(after.tagName, 'DIV');
+    t.is(after.className, 'after-list');
+    t.is(after.childNodes.length, 2);
+
+    const [stocksList, graphFunds] = after.childNodes;
+
+    t.is(stocksList.tagName, 'DIV');
+    t.is(stocksList.className, 'stocks-list graph-container-outer');
+
+    t.is(graphFunds.tagName, 'DIV');
+    t.is(graphFunds.className, 'graph-container graph-fund-history');
+});

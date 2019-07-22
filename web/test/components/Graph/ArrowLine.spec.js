@@ -1,8 +1,7 @@
 import test from 'ava';
-import { fromJS } from 'immutable';
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import React from 'react';
 import ArrowLine from '~client/components/Graph/ArrowLine';
 
@@ -15,7 +14,7 @@ const points = [
 
 const getContainer = memoize(() => {
     const props = {
-        data: fromJS(points),
+        data: points,
         color: 'black',
         minY: -5,
         maxY: 10,
@@ -54,4 +53,3 @@ test('rendering paths as Arrow components', t => {
         t.is(path.tagName, 'path');
     });
 });
-

@@ -1,20 +1,16 @@
 import test from 'ava';
-import { fromJS } from 'immutable';
 import {
-    getStocksListInfo
+    getStocks,
+    getIndices
 } from '~client/selectors/funds/stocks';
+import { testState as state } from '~client-test/test_data/state';
 
-test('getStocksListInfo returns stocks and indices', t => {
-    t.deepEqual(getStocksListInfo(fromJS({
-        other: {
-            stocksList: {
-                stocks: 'foo',
-                indices: 'bar'
-            }
-        }
-    })), {
-        stocks: 'foo',
-        indices: 'bar'
-    });
+test('getStocks gets stocks list', t => {
+    t.deepEqual(getStocks(state), []);
 });
 
+test('getIndices gets indices list', t => {
+    t.deepEqual(getIndices(state), [
+        { code: 'SPX', name: 'S&P 500', gain: 0, up: false, down: false }
+    ]);
+});

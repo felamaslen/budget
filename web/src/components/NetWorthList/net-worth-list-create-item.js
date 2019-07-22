@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { netWorthItem } from '~client/components/NetWorthList/prop-types';
-import { category, subcategory } from '~client/components/NetWorthCategoryList/prop-types';
+import { netWorthItem } from '~client/prop-types/net-worth/list';
+import { category, subcategory } from '~client/prop-types/net-worth/category';
 import { NetWorthAddForm } from '~client/components/NetWorthEditForm';
 
 export default function NetWorthListCreateItem({
@@ -10,18 +10,17 @@ export default function NetWorthListCreateItem({
     categories,
     subcategories,
     active,
-    activeId,
-    setActiveId,
+    setActive,
+    noneActive,
     onCreate
 }) {
-    if (activeId === null) {
+    if (noneActive) {
         return (
             <div className="net-worth-list-item-summary">
                 {'Add a new entry'}
             </div>
         );
     }
-
     if (!active) {
         return null;
     }
@@ -31,7 +30,7 @@ export default function NetWorthListCreateItem({
             data={data}
             categories={categories}
             subcategories={subcategories}
-            setActiveId={setActiveId}
+            setActiveId={setActive}
             onCreate={onCreate}
         />
     );
@@ -42,7 +41,7 @@ NetWorthListCreateItem.propTypes = {
     categories: PropTypes.arrayOf(category.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     active: PropTypes.bool.isRequired,
-    activeId: PropTypes.string,
-    setActiveId: PropTypes.func.isRequired,
+    setActive: PropTypes.func.isRequired,
+    noneActive: PropTypes.bool.isRequired,
     onCreate: PropTypes.func.isRequired
 };

@@ -1,20 +1,17 @@
 import test from 'ava';
 import '~client-test/browser';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
-import { fromJS } from 'immutable';
 import { Provider } from 'react-redux';
 import React from 'react';
 import Spinner from '~client/containers/Spinner';
 
-const getContainer = (customProps = {}, customState = null) => {
-    let state = fromJS({
-        loading: true
+const getContainer = (customProps = {}, customState = state => state) => {
+    const state = customState({
+        api: {
+            initialLoading: true
+        }
     });
-
-    if (customState) {
-        state = customState(state);
-    }
 
     const store = createMockStore(state);
 
@@ -56,10 +53,13 @@ test('basic structure', t => {
 });
 
 test('not rendering if inactive', t => {
-    const { container } = getContainer({}, state => state
-        .set('loading', false)
-    );
+    const { container } = getContainer({}, state => ({
+        ...state,
+        api: {
+            ...state.api,
+            initialLoading: false
+        }
+    }));
 
     t.is(container.childNodes.length, 0);
 });
-

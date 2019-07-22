@@ -1,5 +1,11 @@
 Release:
 
+- 4.9.0:
+    - Web client:
+        - Removed Immutable.JS
+        - Unified optimistically updating CRUD list, including creates / deletes
+        - Unified Net Worth and Overall (balance) features
+
 - 4.8.1 (hotfix):
     - Web client:
         - Fixed issue where search next category autofills weren't being returned by the API

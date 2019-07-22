@@ -4,7 +4,7 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import HoverCost from '~client/components/HoverCost';
 
@@ -80,4 +80,3 @@ test('removing the label on mouseout', t => {
     t.is(child.childNodes[0].className, 'abbreviated');
     t.is(child.childNodes[0].innerHTML, '£1.2k');
 });
-

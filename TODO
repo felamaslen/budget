@@ -1,27 +1,35 @@
-- Make client work [DONE]
-- Update client for new API [DONE]
-- Fix bugs with different database states (e.g. empty) [DONE?]
-- Route for "all data" [DONE]
-- Client coding standards [DONE]
-- refreshing fund price cache doesn't reload gain text etc. [FIXED]
-- Optimise client for mobile devices [DONE (mostly)]
-- Use react router [DONE]
-- Update Android app for new API [DONE]
-- Don't use .toString() for JSON data passing (use .valueOf())
+- [DONE] Make client work
+- [DONE] Update client for new API
+- [DONE] Fix bugs with different database states (e.g. empty)
+- [DONE] Route for "all data"
+- [DONE] Client coding standards
+- [DONE] refreshing fund price cache doesn't reload gain text etc.
+- [DONE] Optimise client for mobile devices
+- [DONE] Use react router
+- [DONE] Update Android app for new API
+- [DONE] Don't use .toString() for JSON data passing (use .valueOf())
 - Allow deep blocks on bills
-- Include pie data with add / edit responses
+- [WONTFIX] Include pie data with add / edit responses
 - Handle API response codes
 - Fix realtime stock prices
 - More sophisticated authentication
 - Pagination on list data
 - Client response data validation
-- Write unit tests for client [IN PROGRESS]
-- Use logger function instead of console.log [DONE]
-- Remove ImmutableJS
-- Relative imports [DONE]
-- Replace enzyme with react-testing-library [DONE]
-- Replace mocha with ava [DONE]
-- Remove variable length memoisations and spread props inheritance in graph components [DONE]
-- Fix scrolling on list and analysis pages [DONE]
+- [DONE] Write unit tests for client
+- [DONE] Use logger function instead of console.log
+- [DONE] Remove ImmutableJS
+- [DONE] Relative imports
+- [DONE] Replace enzyme with react-testing-library
+- [DONE] Replace mocha with ava
+- [DONE] Remove variable length memoisations and spread props inheritance in graph components
+- [DONE] Fix scrolling on list and analysis pages
 - Implement ES6 modules on server side
 - Throw errors on routes instead of handling errors individually
+- [DONE] Refactor state using combineReducers
+- [DONE] Restrict containers to the following: <ErrorMessages />, <GraphFunds />, <GraphOverview />, <LoginForm />, <ModalDialog /> (?), <NetWorth />, <Page /> (and derivatives), <Root />, <Spinner />, <StocksList />
+- [DONE] Combine net worth with balance column (put net worth data in redux)
+- [DONE] Fix time series major ticks not appearing sometimes
+- Server side rendering
+- [DONE] Replace hooks/form implementation in net worth form with hooks/field
+- Index suggestions search and order by rank
+- Order funds and net worth categories by name

@@ -16,7 +16,7 @@ test('getPeriodCostForCategory getting valid data', async t => {
     const user = { uid };
 
     const result = await getPeriodCostForCategory(
-        db, user, DateTime.fromObject({ year: 2018, month: 1, date: 3 }), DateTime.fromObject({ year: 2018, month: 10, date: 4 }), 'food', 'category');
+        db, user, DateTime.fromObject({ year: 2018, month: 1, day: 3 }), DateTime.fromObject({ year: 2018, month: 10, day: 4 }), 'food', 'category');
 
     t.deepEqual(result, [
         { itemCol: 'Food', cost: 111162 },

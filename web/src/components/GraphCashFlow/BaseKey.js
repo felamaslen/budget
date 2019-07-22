@@ -24,5 +24,3 @@ BaseKey.propTypes = {
         PropTypes.array
     ])
 };
-
-

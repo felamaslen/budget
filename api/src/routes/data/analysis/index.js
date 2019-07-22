@@ -202,4 +202,3 @@ module.exports = {
     getPeriodCost,
     routeGet
 };
-

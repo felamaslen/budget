@@ -14,4 +14,3 @@ export default function OverviewTableHeader() {
 
     return <div className="row header">{header}</div>;
 }
-

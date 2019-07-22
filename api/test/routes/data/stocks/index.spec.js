@@ -18,4 +18,3 @@ test('processStocks returns valid results', t => {
         apiKey: 'fookey'
     });
 });
-

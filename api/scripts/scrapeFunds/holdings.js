@@ -161,4 +161,3 @@ async function scrapeFundHoldings(config, db, logger, funds, data) {
 module.exports = {
     scrapeFundHoldings
 };
-

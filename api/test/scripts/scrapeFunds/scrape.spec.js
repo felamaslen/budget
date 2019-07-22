@@ -32,4 +32,3 @@ test('getCacheUrlMap mapping funds to urls to download', t => {
 
     t.deepEqual(result, expectedResult);
 });
-

@@ -105,8 +105,14 @@
             background-color: $color-saved;
             background-image: none;
 
-            .sub-block {
+            &::after {
                 @include diagonal-bg(16px);
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
             }
         }
         .block-bills {
@@ -126,4 +132,3 @@
         }
     }
 }
-

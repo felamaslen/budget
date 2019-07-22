@@ -276,4 +276,3 @@ test('getFundUrlHL handling  dollar shares', t => {
 
     t.is(hl.getFundUrlHL(config, fund), url);
 });
-

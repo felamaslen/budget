@@ -171,4 +171,3 @@ module.exports = {
     processQueryResult,
     routeGet
 };
-

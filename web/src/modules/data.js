@@ -1,13 +1,12 @@
-/**
- * Data methods (using immutable objects)
- */
-
-import { List as list, Map as map } from 'immutable';
+import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
+import shortid from 'shortid';
+
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
-import { PAGES } from '~client/constants/data';
+import { DELETE } from '~client/constants/data';
 
 export const IDENTITY = state => state;
+export const NULL = () => null;
 
 export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD || '') {
     const periodRegex = /^([a-z]+)([0-9]+)$/;
@@ -24,266 +23,168 @@ export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_
     return { period: match[1], length: match[2] };
 }
 
-export function uuid(rand = Math.random(), random = false) {
-    if (process.env.NODE_ENV === 'test' && !random) {
-        return 0x4812;
+export function replaceAtIndex(array, index, value, isFunction = false) {
+    if (index === -1) {
+        return array;
     }
 
-    return Math.floor((1 + rand) * 0x10000);
+    const nextValue = isFunction
+        ? value(array[index])
+        : value;
+
+    return array
+        .slice(0, index)
+        .concat([nextValue])
+        .concat(array.slice(index + 1));
 }
 
-export const replaceAtIndex = (array, index, value) => array
+export const removeAtIndex = (array, index) => array
     .slice(0, index)
-    .concat([value])
     .concat(array.slice(index + 1));
 
-export class TransactionsList {
-    constructor(data, isShort = true) {
-        this.list = data;
-        this.idCount = 0;
+export const getTransactionsList = data => data.map(({ date, units, cost }) => ({
+    id: shortid.generate(),
+    date: DateTime.fromISO(date),
+    units: Number(units) || 0,
+    cost: Number(cost) || 0
+}));
 
-        if (isShort) {
-            // turn a short list into a descriptive list
-            this.list = list(data)
-                .map(item => {
-                    return map({
-                        id: ++this.idCount,
-                        date: DateTime.fromISO(item.date),
-                        units: item.units,
-                        cost: item.cost
-                    });
-                })
-                .sort((prev, next) => prev.get('date') - next.get('date'));
+export const transactionShape = PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    date: PropTypes.instanceOf(DateTime).isRequired,
+    units: PropTypes.number.isRequired,
+    cost: PropTypes.number.isRequired
+}).isRequired;
 
-            this.size = this.list.size;
-        }
-        else {
-            this.idCount = this.list.size;
-            this.size = this.list.size;
-        }
-    }
-    format() {
-        return this.list.map(item => item.delete('id')
-            .set('date', item.get('date').toISODate()))
-            .toJS();
-    }
-    valueOf() {
-        return this.list;
-    }
-    maxId() {
-        if (this.size > 0) {
-            return this.list.map(item => item.get('id')).max();
-        }
+export const transactionsListShape = PropTypes.arrayOf(transactionShape);
 
-        return 0;
+const getRoundedTotal = key => array => Number(array.reduce((sum, { [key]: value }) => sum + value, 0).toFixed(4));
+
+export const getTotalUnits = getRoundedTotal('units');
+export const getTotalCost = getRoundedTotal('cost');
+
+export const isSold = transactionsList => getTotalUnits(transactionsList) === 0;
+
+export const addToTransactionsList = (transactionsList, item) => transactionsList.concat(getTransactionsList([item]));
+
+export function modifyTransaction(transactionsList, index, item) {
+    const oldItem = transactionsList[index];
+    const { date: rawDate = oldItem.date } = item;
+
+    let date = rawDate;
+    if (rawDate !== oldItem.date) {
+        date = DateTime.fromISO(rawDate);
     }
-    remove(key) {
-        return new TransactionsList(this.list.splice(key, 1), false);
-    }
-    setIn(key, value) {
-        return new TransactionsList(this.list.setIn(key, value), false);
-    }
-    push(item) {
-        return new TransactionsList(this.list.push(map({
-            id: this.maxId() + 1,
-            date: item.date,
-            units: item.units,
-            cost: item.cost
-        })), false);
-    }
-    filter(callback) {
-        return new TransactionsList(this.list.filter(callback), false);
-    }
-    static getUnits(aList) {
-        return Number(aList.reduce((sum, item) => sum + item.get('units'), 0).toFixed(4));
-    }
-    static getCost(aList) {
-        return aList.reduce((sum, item) => sum + item.get('cost'), 0);
-    }
-    getTotalUnits() {
-        return TransactionsList.getUnits(this.list);
-    }
-    getTotalCost() {
-        return TransactionsList.getCost(this.list);
-    }
-    isSold() {
-        return this.getTotalUnits() === 0;
-    }
+
+    return replaceAtIndex(transactionsList, index, { ...oldItem, ...item, date });
 }
 
-export function dataEquals(item, compare) {
-    if (item instanceof DateTime) {
-        if (compare instanceof DateTime) {
-            return item.hasSame(compare, 'day');
-        }
+export const modifyTransactionById = (transactionsList, id, item) => modifyTransaction(
+    transactionsList,
+    transactionsList.findIndex(({ id: itemId }) => itemId === id),
+    item
+);
 
-        return false;
-    }
+export const formatTransactionsList = transactionsList => transactionsList
+    .sort(({ date: dateA }, { date: dateB }) => dateA - dateB)
+    .map(({ date, units, cost }) => ({
+        date: date.toISODate(),
+        units,
+        cost
+    }));
 
-    if (item instanceof TransactionsList) {
-        if (compare instanceof TransactionsList) {
-            if (item.size !== compare.size) {
-                return false;
-            }
-
-            return item.list.reduce((equal, listItem, key) => {
-                return equal &&
-                    listItem.get('date').hasSame(compare.list.getIn([key, 'date']), 'day') &&
-                    listItem.get('units') === compare.list.getIn([key, 'units']) &&
-                    listItem.get('cost') === compare.list.getIn([key, 'cost']);
-
-            }, true);
-        }
-
-        return false;
-    }
-
-    return item === compare;
-}
-
-export function listAverage(values, mode = null) {
-    if (!values.size) {
+export function arrayAverage(values, mode = null) {
+    if (!values.length) {
         return NaN;
     }
-
     if (mode === AVERAGE_MEDIAN) {
-        const sorted = values.sort((prev, next) => {
-            if (prev < next) {
-                return -1;
-            }
+        const sorted = values.slice().sort((prev, next) => prev - next);
 
-            return 1;
-        });
-
-        const oddLength = sorted.size & 1;
+        const oddLength = sorted.length & 1;
         if (oddLength) {
             // odd: get the middle value
-            return sorted.get(Math.floor((sorted.size - 1) / 2));
+            return sorted[Math.floor((sorted.length - 1) / 2)];
         }
 
         // even: get the middle two values and find the average of them
-        const low = sorted.get(Math.floor(sorted.size / 2) - 1);
-        const high = sorted.get(Math.floor(sorted.size / 2));
+        const low = sorted[Math.floor(sorted.length / 2) - 1];
+        const high = sorted[Math.floor(sorted.length / 2)];
 
         return (low + high) / 2;
     }
-
     if (mode === AVERAGE_EXP) {
-        const weights = new Array(values.size)
+        const weights = new Array(values.length)
             .fill(0)
-            .map((item, key) => Math.pow(2, -(key + 1)))
+            .map((item, key) => 2 ** (-(key + 1)))
             .reverse();
 
         const weightSum = weights.reduce((sum, value) => sum + value, 0);
 
-        return values.reduce(
-            (average, value, key) => average + value * weights[key], 0
-        ) / weightSum;
+        return values.reduce((average, value, index) => average + value * weights[index], 0) / weightSum;
     }
 
     // mean
-    return values.reduce((sum, value) => sum + value, 0) / values.size;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-const testableRandom = (key = 0) => {
-    if (process.env.NODE_ENV === 'test') {
-        return (0.36123 * (key + 1)) % 1;
+export const sortByTotal = rows => rows.slice()
+    .sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
+
+export const limitTimeSeriesLength = (timeSeries, limit) => new Array(timeSeries.length)
+    .fill(0)
+    .reduce(last => {
+        if (last.length <= limit) {
+            return last;
+        }
+
+        const [closestIndex] = last.slice(1).reduce(([closest, interval], [time], index) => {
+            const thisInterval = time - last[index][0];
+            if (thisInterval < interval) {
+                return [index, thisInterval];
+            }
+
+            return [closest, interval];
+        }, [1, Infinity]);
+
+        return last.slice(0, closestIndex)
+            .concat(last.slice(closestIndex + 1));
+    }, timeSeries);
+
+export const randnBm = () => Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+
+export function getValueFromTransmit(dataType, value) {
+    if (dataType === 'date') {
+        return DateTime.fromISO(value);
+    }
+    if (dataType === 'cost') {
+        return parseInt(value, 10) || 0;
+    }
+    if (dataType === 'transactions') {
+        return getTransactionsList(value);
     }
 
-    return Math.random();
-};
-
-export function randnBm(rand1 = testableRandom(0), rand2 = testableRandom(1)) {
-    return Math.sqrt(-2 * Math.log(rand1)) * Math.cos(2 * Math.PI * rand2);
+    return String(value);
 }
 
-export function getValueForTransmit(value) {
-    if (typeof value === 'number') {
-        return value;
-    }
-
-    if (value instanceof DateTime) {
+export function getValueForTransmit(dataType, value) {
+    if (dataType === 'date') {
         return value.toISODate();
     }
-
-    if (value instanceof TransactionsList) {
-        return value.format();
+    if (dataType === 'transactions') {
+        return formatTransactionsList(value);
     }
 
-    if (typeof value === 'object') {
-        return value;
-    }
-
-    return value.toString();
-}
-
-export function getNullEditable(page) {
-    let row = 0;
-    if (PAGES[page].list) {
-        row = -1;
-    }
-
-    return map({
-        row,
-        col: -1,
-        page,
-        id: null,
-        item: null,
-        value: null,
-        originalValue: null
-    });
-}
-
-export function getAddDefaultValues(page, now) {
-    if (!PAGES[page].list) {
-        return list.of();
-    }
-
-    return list(PAGES[page].cols).map(column => {
-        if (column === 'date') {
-            return now;
-        }
-        if (column === 'cost') {
-            return 0;
-        }
-        if (column === 'transactions') {
-            return new TransactionsList(list.of(), true);
-        }
-
-        if (['item', 'category', 'shop', 'holiday', 'society'].indexOf(column) > -1) {
-            return '';
-        }
-
-        return null;
-    });
-}
-
-export function sortRowsByDate(rows, page, now) {
-    const dateKey = PAGES[page].cols.indexOf('date');
-    let lastFuture = false;
-
-    return rows
-        .sort((prev, next) => {
-            const prevDate = prev.getIn(['cols', dateKey]);
-            const nextDate = next.getIn(['cols', dateKey]);
-
-            return (nextDate - prevDate) ||
-                (next.get('id') - prev.get('id'));
-        })
-        .map(row => {
-            const thisFuture = row.getIn(['cols', dateKey]) > now;
-            const thisLastFuture = lastFuture;
-            lastFuture = thisFuture;
-
-            return row.set('future', thisFuture)
-                .set('first-present', !thisFuture && thisLastFuture);
-        });
+    return getValueFromTransmit(dataType, value);
 }
 
 export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>
     DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
 
-export function resortListRows(page, now) {
-    return state => state.setIn(['pages', page, 'rows'],
-        sortRowsByDate(state.getIn(['pages', page, 'rows']), page, now));
-}
+export const fieldExists = value => typeof value !== 'undefined' &&
+    !(typeof value === 'string' && !value.length);
+
+export const leftPad = (array, length) => new Array(Math.max(0, length - array.length))
+    .fill(0)
+    .concat(array);
+
+export const withoutDeleted = items => (items || []).filter(({ __optimistic }) => __optimistic !== DELETE);

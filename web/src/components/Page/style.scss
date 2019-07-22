@@ -1,0 +1,8 @@
+@import '~client/sass/responsive.scss';
+
+.page {
+    display: flex;
+    flex-flow: column;
+    min-height: 0;
+    width: 100%;
+}

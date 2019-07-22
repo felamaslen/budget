@@ -1,36 +1,37 @@
-import { List as list } from 'immutable';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { listAverage } from '~client/modules/data';
+import { arrayAverage } from '~client/modules/data';
 import { rgba } from '~client/modules/color';
 import { COLOR_LIGHT_GREY } from '~client/constants/colors';
-import { getSingleLinePath } from './helpers';
+import { getSingleLinePath } from '~client/components/Graph/helpers';
+import { dataShape } from '~client/prop-types/graph';
 
 export default function AverageLine({ value, data, ...props }) {
-    const averageData = useMemo(() => {
+    const averageLinePath = useMemo(() => {
         if (!value) {
             return null;
         }
 
-        return data.reduce(({ last, points }, point) => {
-            const nextLast = last.slice(1 - value).push(point.get(1));
-            const average = listAverage(nextLast);
+        const [points] = data.reduce(([lastPoints, compareData], [xValue, yValue]) => {
+            const nextCompareData = compareData.slice(1 - value).concat([yValue]);
 
-            return { last: nextLast, points: points.push(point.set(1, average)) };
+            return [
+                lastPoints.concat([[xValue, arrayAverage(nextCompareData)]]),
+                nextCompareData
+            ];
+        }, [[], []]);
 
-        }, { last: list.of(), points: list.of() })
-            .points;
-    }, [value, data]);
-
-    const averageLinePath = useMemo(() => {
-        if (!averageData) {
+        if (!points.length) {
             return null;
         }
 
         return getSingleLinePath({
-            ...props, data: averageData, smooth: true, fill: false
+            ...props,
+            data: points,
+            smooth: true,
+            fill: false
         });
-    }, [averageData, props]);
+    }, [props, value, data]);
 
     if (!averageLinePath) {
         return null;
@@ -48,6 +49,5 @@ export default function AverageLine({ value, data, ...props }) {
 
 AverageLine.propTypes = {
     value: PropTypes.number,
-    data: PropTypes.instanceOf(list).isRequired
+    data: dataShape.isRequired
 };
-

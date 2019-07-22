@@ -1,65 +1,54 @@
-import { Map as map } from 'immutable';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+
+import { gainShape } from '~client/prop-types/page/funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { rgba } from '~client/modules/color';
 
-export default function FundGainInfo({ gain, sold }) {
+const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
+const formatOptionsPct = { brackets: true, precision: 2 };
+
+const profitLossClass = value => ({
+    profit: value >= 0,
+    loss: value < 0
+});
+
+export default function FundGainInfo({
+    gain: { color, value, gainAbs, gain, dayGainAbs, dayGain },
+    sold
+}) {
     if (!gain) {
         return null;
     }
 
-    const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
-    const formatOptionsPct = { brackets: true, precision: 2 };
-
-    const gainStyle = { backgroundColor: rgba(gain.get('color')) };
-
-    const gainSpanClasses = (spanName, key = spanName) => classNames(spanName, {
-        profit: gain.get(key) >= 0,
-        loss: gain.get(key) < 0
-    });
-
-    const gainOuterClasses = gainSpanClasses('text', 'gain');
-    const gainClasses = gainSpanClasses('gain');
-    const gainAbsClasses = gainSpanClasses('gain-abs', 'gainAbs');
-
-    let dayGain = null;
-
-    if (!sold) {
-        const dayGainClasses = gainSpanClasses('day-gain', 'dayGain');
-        const dayGainAbsClasses = gainSpanClasses('day-gain-abs', 'dayGainAbs');
-
-        dayGain = (
-            <span className="day-gain-outer">
-                <span className={dayGainAbsClasses}>
-                    {formatCurrency(gain.get('dayGainAbs'), formatOptions)}
-                </span>
-                <span className={dayGainClasses}>
-                    {formatPercent(gain.get('dayGain'), formatOptionsPct)}
-                </span>
-            </span>
-        );
-    }
-
-    const breakdownClass = classNames('breakdown', { sold });
+    const gainStyle = { backgroundColor: rgba(color) };
 
     return (
-        <span className="gain">
-            <span className={gainOuterClasses} style={gainStyle}>
+        <span className="fund-extra-info-gain">
+            <span className={classNames('text', profitLossClass(gain))} style={gainStyle}>
                 <span className="value">
-                    {formatCurrency(gain.get('value'), formatOptions)}
+                    {formatCurrency(value, formatOptions)}
                 </span>
-                <span className={breakdownClass}>
+                <span className={classNames('breakdown', { sold })}>
                     <span className="overall">
-                        <span className={gainAbsClasses}>
-                            {formatCurrency(gain.get('gainAbs'), formatOptions)}
+                        <span className={classNames('gain-abs', profitLossClass(gainAbs))}>
+                            {formatCurrency(gainAbs, formatOptions)}
                         </span>
-                        <span className={gainClasses}>
-                            {formatPercent(gain.get('gain'), formatOptionsPct)}
+                        <span className={classNames('gain', profitLossClass(gain))}>
+                            {formatPercent(gain, formatOptionsPct)}
                         </span>
                     </span>
-                    {dayGain}
+                    {!sold && (
+                        <span className="day-gain-outer">
+                            <span className={classNames('day-gain-abs', profitLossClass(dayGainAbs))}>
+                                {formatCurrency(dayGainAbs, formatOptions)}
+                            </span>
+                            <span className={classNames('day-gain', profitLossClass(dayGain))}>
+                                {formatPercent(dayGain, formatOptionsPct)}
+                            </span>
+                        </span>
+                    )}
                 </span>
             </span>
         </span>
@@ -67,7 +56,6 @@ export default function FundGainInfo({ gain, sold }) {
 }
 
 FundGainInfo.propTypes = {
-    gain: PropTypes.instanceOf(map),
+    gain: gainShape,
     sold: PropTypes.bool
 };
-

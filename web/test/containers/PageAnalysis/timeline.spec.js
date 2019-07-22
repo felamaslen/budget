@@ -4,12 +4,8 @@ const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
-import { fromJS } from 'immutable';
-import { render } from 'react-testing-library';
-import { createMockStore } from 'redux-test-utils';
-import { Provider } from 'react-redux';
+import { render } from '@testing-library/react';
 import React from 'react';
-import reduction from '~client/reduction';
 import Timeline from '~client/containers/PageAnalysis/timeline';
 
 const getContainer = memoize((customProps = {}) => {
@@ -22,21 +18,11 @@ const getContainer = memoize((customProps = {}) => {
     ];
 
     const props = {
-        data: fromJS(timeline),
+        data: timeline,
         ...customProps
     };
 
-    const state = reduction;
-
-    const store = createMockStore(state);
-
-    const utils = render(
-        <Provider store={store}>
-            <Timeline {...props} />
-        </Provider>
-    );
-
-    return { store, ...utils };
+    return render(<Timeline {...props} />);
 });
 
 test('basic structure', t => {
@@ -69,4 +55,3 @@ test('timeline items', t => {
         t.is(child.style.backgroundColor, color);
     });
 });
-

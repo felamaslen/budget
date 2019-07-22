@@ -1,5 +1,5 @@
 import test from 'ava';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import '~client-test/browser';
 import React from 'react';
 import Graph from '~client/components/Graph';
@@ -109,4 +109,3 @@ test('accepting children before and after the SVG', t => {
     t.is(after.tagName, 'SPAN');
     t.is(after.innerHTML, 'after1');
 });
-

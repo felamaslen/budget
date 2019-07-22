@@ -26,14 +26,10 @@ export const COLOR_TRANSLUCENT_DARK = [255, 255, 255, 0.8];
 
 export const COLOR_PROFIT = [0, 204, 51];
 export const COLOR_LOSS = [204, 51, 0];
-export const COLOR_PROFIT_LIGHT = [244, 255, 244];
-export const COLOR_LOSS_LIGHT = [255, 244, 244];
 
 export const COLOR_BALANCE_ACTUAL = [0, 51, 153];
 export const COLOR_BALANCE_PREDICTED = [255, 0, 0];
 export const COLOR_BALANCE_STOCKS = [200, 200, 200, 0.5];
 export const COLOR_SPENDING = [0, 51, 153];
 
-export const COLOR_GRAPH_FUND_ITEM = [66, 134, 244];
 export const COLOR_GRAPH_FUND_LINE = COLOR_GRAPH_TITLE;
-

@@ -2,7 +2,7 @@ import test from 'ava';
 import '~client-test/browser';
 import memoize from 'fast-memoize';
 import React from 'react';
-import { render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import AppLogo from '~client/components/AppLogo';
 
 const getContainer = memoize((customProps = {}) => {
@@ -106,4 +106,3 @@ test('no loading spinner if not loading a request', t => {
     const [name] = logo.childNodes;
     t.is(name.innerHTML, 'Budget');
 });
-

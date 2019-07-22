@@ -1,5 +1,4 @@
 import test from 'ava';
-import { List as list } from 'immutable';
 import {
     rgba,
     getOverviewCategoryColor,
@@ -8,16 +7,16 @@ import {
     averageColor
 } from '~client/modules/color';
 
-test('rgba returning rgba for four values', t => {
+test('rgba returns rgba for four values', t => {
     t.is(rgba([254, 19, 99, 0.4]), 'rgba(254,19,99,0.4)');
 });
 
-test('rgba returning rgb for three values', t => {
+test('rgba returns rgb for three values', t => {
     t.is(rgba([0, 92, 29]), 'rgb(0,92,29)');
 });
 
-test('getOverviewCategoryColor returning the correct colour list', t => {
-    t.deepEqual(getOverviewCategoryColor().toJS(), {
+test('getOverviewCategoryColor returns the correct colour list', t => {
+    t.deepEqual(getOverviewCategoryColor(), {
         funds: [84, 110, 122],
         bills: [183, 28, 28],
         food: [67, 160, 71],
@@ -30,16 +29,28 @@ test('getOverviewCategoryColor returning the correct colour list', t => {
             [191, 36, 36],
             [36, 191, 55]
         ],
-        predicted: [36, 191, 55],
-        balance: [36, 191, 55]
+        netWorthPredicted: [
+            [191, 36, 36],
+            [36, 191, 55]
+        ],
+        netWorth: [
+            [191, 36, 36],
+            [36, 191, 55]
+        ]
     });
 });
 
-test('getOverviewScoreColor returning white if the range is zero', t => {
+test('getOverviewScoreColor returns white if the range is zero', t => {
     t.deepEqual(getOverviewScoreColor(10, { min: 1, max: 1 }), [255, 255, 255]);
 });
 
-test('getOverviewScoreColor geting the correct color', t => {
+test('getOverviewScoreColor returns white if the value is zero', t => {
+    t.deepEqual(getOverviewScoreColor(0, { min: 1, max: 1 }), [255, 255, 255]);
+    t.deepEqual(getOverviewScoreColor(0, { min: 0, max: 1 }), [255, 255, 255]);
+    t.deepEqual(getOverviewScoreColor(0, { min: -1, max: 1 }), [255, 255, 255]);
+});
+
+test('getOverviewScoreColor gets the correct color', t => {
     t.deepEqual(getOverviewScoreColor(
         10,
         { min: -10, max: 20 },
@@ -55,7 +66,7 @@ test('getOverviewScoreColor geting the correct color', t => {
     ), [165, 55, 100]);
 });
 
-test('colorKey returning different colours for other numbers', t => {
+test('colorKey returns different colours for other numbers', t => {
     t.true(Array.isArray(colorKey('foo')));
     t.is(colorKey('foo').length, 3);
     t.notDeepEqual(colorKey('foo'), [0, 0, 0]);
@@ -65,15 +76,14 @@ test('colorKey returning different colours for other numbers', t => {
     t.notDeepEqual(colorKey('bar'), colorKey('foo'));
 });
 
-test('averageColor returning an average colour', t => {
-    t.deepEqual(averageColor(list([
+test('averageColor returns an average colour', t => {
+    t.deepEqual(averageColor([
         [123, 245, 3],
         [255, 2, 30],
         [39, 128, 255]
-    ])), [139, 125, 96]);
+    ]), [139, 125, 96]);
 });
 
-test('averageColor returning transparent by default', t => {
-    t.deepEqual(averageColor(list.of()), [255, 255, 255, 0]);
+test('averageColor returns transparent by default', t => {
+    t.deepEqual(averageColor([]), [255, 255, 255, 0]);
 });
-
