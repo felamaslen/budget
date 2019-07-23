@@ -33,3 +33,4 @@
 - [DONE] Replace hooks/form implementation in net worth form with hooks/field
 - Index suggestions search and order by rank
 - Order funds and net worth categories by name
+- Fetch all net worth summary values on startup
