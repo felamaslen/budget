@@ -18,6 +18,7 @@ services:
       - .env
     environment:
       NODE_ENV: development
+      SKIP_APP: ${SKIP_APP}
       FAKE_STOCK_PRICES: "true"
       PORT: 3000
       DATABASE_URL: postgres://docker:docker@db:5432/budget
