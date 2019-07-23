@@ -28,6 +28,24 @@ test('getCategories excludes optimistically deleted items', t => {
     }), [{ id: 'id-b' }]);
 });
 
+test('getCategories sorts by type, then category', t => {
+    t.deepEqual(getCategories({
+        netWorth: {
+            categories: [
+                { id: 'id-a', type: 'asset', category: 'foo' },
+                { id: 'id-b', type: 'liability', category: 'bar' },
+                { id: 'id-c', type: 'asset', category: 'baz' },
+                { id: 'id-d', type: 'asset', category: 'bak' }
+            ]
+        }
+    }), [
+        { id: 'id-d', type: 'asset', category: 'bak' },
+        { id: 'id-c', type: 'asset', category: 'baz' },
+        { id: 'id-a', type: 'asset', category: 'foo' },
+        { id: 'id-b', type: 'liability', category: 'bar' }
+    ]);
+});
+
 test('getSubcategories excludes optimistically deleted items', t => {
     t.deepEqual(getSubcategories({
         netWorth: {
@@ -37,6 +55,22 @@ test('getSubcategories excludes optimistically deleted items', t => {
             ]
         }
     }), [{ id: 'id-b' }]);
+});
+
+test('getSubcategories sorts by category ID and subcategory', t => {
+    t.deepEqual(getSubcategories({
+        netWorth: {
+            subcategories: [
+                { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
+                { id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
+                { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' }
+            ]
+        }
+    }), [
+        { id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
+        { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
+        { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' }
+    ]);
 });
 
 test('getNetWorthSummary gets a list of net worth values by month', t => {

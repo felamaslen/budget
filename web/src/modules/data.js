@@ -180,6 +180,20 @@ export function getValueForTransmit(dataType, value) {
 export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>
     DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
 
+function sortKey(key, itemA, itemB) {
+    if (itemA[key] < itemB[key]) {
+        return -1;
+    }
+    if (itemA[key] > itemB[key]) {
+        return 1;
+    }
+
+    return 0;
+}
+
+export const sortByKey = (...keys) => items => items.sort((itemA, itemB) =>
+    keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0));
+
 export const fieldExists = value => typeof value !== 'undefined' &&
     !(typeof value === 'string' && !value.length);
 

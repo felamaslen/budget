@@ -10,7 +10,7 @@ import {
 } from '~client/selectors/overview/common';
 
 import { getMonthDatesList } from '~client/modules/date';
-import { withoutDeleted } from '~client/modules/data';
+import { sortByKey, withoutDeleted } from '~client/modules/data';
 import { getRequests } from '~client/selectors/crud';
 import { CREATE } from '~client/constants/data';
 
@@ -28,8 +28,10 @@ const getNonFilteredSubcategories = state => state.netWorth.subcategories;
 const getNonFilteredEntries = state => state.netWorth.entries;
 
 export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
-export const getCategories = createSelector(getNonFilteredCategories, withoutDeleted);
-export const getSubcategories = createSelector(getNonFilteredSubcategories, withoutDeleted);
+export const getCategories = createSelector(getNonFilteredCategories,
+    compose(withoutDeleted, sortByKey('type', 'category')));
+export const getSubcategories = createSelector(getNonFilteredSubcategories,
+    compose(withoutDeleted, sortByKey('subcategory'), sortByKey('categoryId')));
 
 const withoutSkipValues = entries => entries.map(({ values, ...rest }) => ({
     ...rest,

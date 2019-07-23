@@ -16,3 +16,17 @@ test('getFundsRows excludes optimistically deleted items', t => {
         }
     }), [{ item: 'bar fund' }]);
 });
+
+test('getFundsRows orders by item', t => {
+    t.deepEqual(getFundsRows({
+        funds: {
+            items: [
+                { item: 'foo fund' },
+                { item: 'bar fund' }
+            ]
+        }
+    }), [
+        { item: 'bar fund' },
+        { item: 'foo fund' }
+    ]);
+});
