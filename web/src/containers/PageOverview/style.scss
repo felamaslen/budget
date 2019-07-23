@@ -48,8 +48,11 @@
             .spending {
                 background: $color-mob-overview-tbl-spending;
             }
-            .predicted {
+            .netWorthPredicted {
                 background: $color-mob-overview-tbl-balance;
+            }
+            .netWorth {
+                display: none;
             }
         }
         .table-overview-rows {
@@ -58,15 +61,13 @@
         }
 
         .col {
-            .text {
-                padding: 4px 2px;
-                display: inline-block;
-                width: 100%;
-                vertical-align: middle;
-                text-align: left;
-                height: 32px;
-                line-height: 32px;
-            }
+            display: inline-block;
+            padding: 4px 2px;
+            width: 100%;
+            vertical-align: middle;
+            text-align: left;
+            height: 32px;
+            line-height: 32px;
 
             &.funds,
             &.bills,
@@ -75,7 +76,7 @@
             &.holiday,
             &.social,
             &.net,
-            &.balance {
+            &.netWorth {
                 display: none;
             }
         }
@@ -154,8 +155,17 @@
     @media only screen and (min-width: $width-page-mobile-small) {
         .table-flex {
             .col {
+                padding: 0;
+                height: initial;
+                line-height: initial;
+                white-space: nowrap;
+
                 .text, .editable {
                     padding: 4px 10px;
+                }
+
+                &.netWorth {
+                    display: inline-block;
                 }
             }
         }
