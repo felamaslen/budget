@@ -2,8 +2,6 @@ const { DateTime } = require('luxon');
 
 const { catchAsyncErrors, clientError } = require('../../modules/error-handling');
 
-const LIMIT_ALL = 48;
-
 const formatDate = date => DateTime.fromJSDate(date).toISODate();
 
 function processValuesRows({
@@ -106,23 +104,7 @@ const splitById = rows => rows.reduce((items, { netWorthId, ...rest }) => ({
     [netWorthId]: (items[netWorthId] || []).concat([rest])
 }), {});
 
-async function fetchOld(db, uid, page, limit) {
-    const [{ min_date: minDate }] = await db.select(db.raw('min(date) as min_date'))
-        .from(qb1 => qb1.select('date')
-            .from('net_worth as nw')
-            .where('nw.uid', '=', uid)
-            .orderBy('nw.date', 'desc')
-            .limit(limit)
-            .offset(limit * (page || 0))
-            .as('dates')
-        );
-
-    const oldDateEnd = (
-        minDate
-            ? DateTime.fromJSDate(minDate).startOf('month')
-            : DateTime.local()
-    ).toISODate();
-
+async function fetchOld(db, uid, startDate, oldDateEnd) {
     const rows = await db.select(db.raw(`sum(coalesce(nwv.value, (nwfx.value * nwc.rate * 100), 0))::integer as value`))
         .from('net_worth as nw')
         .leftJoin('net_worth_values as nwv', 'nwv.net_worth_id', 'nw.id')
@@ -132,6 +114,7 @@ async function fetchOld(db, uid, page, limit) {
             .on('nwc.currency', 'nwfx.currency')
         )
         .where('nw.date', '<', oldDateEnd)
+        .where('nw.date', '>=', startDate)
         .where(qb1 => qb1
             .where('nwv.skip', '=', false)
             .orWhere('nwv.skip', null)
@@ -142,20 +125,12 @@ async function fetchOld(db, uid, page, limit) {
     return rows.map(({ value }) => value);
 }
 
-async function fetchAll(db, uid, page, limit) {
-    const netWorth = await db.select()
-        .from(qb1 => qb1.select(
-            'nw.id',
-            'nw.date'
-        )
-            .from('net_worth as nw')
-            .where('nw.uid', '=', uid)
-            .orderBy('date', 'desc')
-            .limit(limit)
-            .offset(limit * (page || 0))
-            .as('results')
-        )
-        .orderBy('date', 'asc');
+async function fetchAll(db, uid, oldDateEnd) {
+    const netWorth = await db.select('id', 'date')
+        .from('net_worth as nw')
+        .where('uid', '=', uid)
+        .where('date', '>=', oldDateEnd)
+        .orderBy('date');
 
     const netWorthIds = netWorth.map(({ id }) => id);
 
@@ -169,48 +144,36 @@ async function fetchAll(db, uid, page, limit) {
     const creditLimitById = splitById(creditLimit);
     const currenciesById = splitById(currencies);
 
-    const data = netWorth.map(({ id, date }) => ({
+    return netWorth.map(({ id, date }) => ({
         id,
         date: formatDate(date),
         values: valuesById[id],
         creditLimit: creditLimitById[id],
         currencies: currenciesById[id]
     }));
-
-    if (page === null) {
-        return data;
-    }
-
-    const [{ count }] = await db.select(db.raw('COUNT(*)::integer AS count'))
-        .from('net_worth as nw')
-        .where('nw.uid', '=', uid);
-
-    return { data, count };
 }
 
-const onRead = db => catchAsyncErrors(async (req, res) => {
+const onRead = (config, db) => catchAsyncErrors(async (req, res) => {
     const uid = req.user.uid;
 
     if (!req.params.id) {
-        const { page = null, limit = LIMIT_ALL } = req.query;
+        const { numLast, startYear, startMonth } = config.data.overview;
 
-        if (page !== null && isNaN(Number(page))) {
-            throw clientError('Page must be a number');
-        }
-        if (limit !== LIMIT_ALL && isNaN(Number(limit))) {
-            throw clientError('Limit must be a number');
-        }
+        const oldDateEnd = DateTime.local()
+            .plus({ months: -numLast })
+            .startOf('month')
+            .toISODate();
+
+        const startDate = DateTime.fromObject({ year: startYear, month: startMonth })
+            .startOf('month')
+            .toISODate();
 
         const [items, old] = await Promise.all([
-            fetchAll(db, uid, page, limit),
-            fetchOld(db, uid, page, limit)
+            fetchAll(db, uid, oldDateEnd),
+            fetchOld(db, uid, startDate, oldDateEnd)
         ]);
 
-        if (Array.isArray(items)) {
-            return res.json(items);
-        }
-
-        return res.json({ ...items, old });
+        return res.json({ items, old });
     }
 
     const item = await fetchById(db, req.params.id, uid);
