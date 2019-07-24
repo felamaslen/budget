@@ -495,7 +495,8 @@ test('DATA_READ inserts data into the state', t => {
     const state = {
         categories: [],
         subcategories: [],
-        entries: []
+        entries: [],
+        old: []
     };
 
     const action = dataRead({
@@ -519,8 +520,7 @@ test('DATA_READ inserts data into the state', t => {
             },
             entries: {
                 data: {
-                    count: 17,
-                    data: [{
+                    items: [{
                         id: 'some-entry-id',
                         date: '2019-07-12',
                         values: [
@@ -544,7 +544,8 @@ test('DATA_READ inserts data into the state', t => {
                         currencies: [
                             { currency: 'CZK', rate: 0.035 }
                         ]
-                    }]
+                    }],
+                    old: [145, 210]
                 }
             }
         }
@@ -590,7 +591,8 @@ test('DATA_READ inserts data into the state', t => {
             currencies: [
                 { currency: 'CZK', rate: 0.035 }
             ]
-        }]
+        }],
+        old: [145, 210]
     });
 });
 
@@ -611,8 +613,7 @@ test('DATA_READ sets default empty arrays for missing items', t => {
             },
             entries: {
                 data: {
-                    count: 17,
-                    data: [{
+                    items: [{
                         id: 'some-entry-id',
                         date: '2019-07-12',
                         values: [
@@ -645,7 +646,8 @@ test('DATA_READ sets default empty arrays for missing items', t => {
             ],
             creditLimit: [],
             currencies: []
-        }]
+        }],
+        old: []
     });
 });
 

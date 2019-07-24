@@ -110,7 +110,7 @@ test('getNetWorthSummary excludes optimistically deleted entries', t => {
     t.is(result[6], 0); // July 2018 "
 });
 
-test('getNetWorthSummaryOld gets old entry values, if there are any', t => {
+test('getNetWorthSummaryOld gets the old net worth entry values, as provided by the API', t => {
     const result = getNetWorthSummaryOld({
         ...state,
         overview: {
@@ -119,68 +119,12 @@ test('getNetWorthSummaryOld gets old entry values, if there are any', t => {
         },
         netWorth: {
             ...state.netWorth,
-            entries: [
-                {
-                    date: DateTime.fromISO('2018-01-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 13502 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-02-28'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 19220 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-03-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 11876 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-04-30'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 14981 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-05-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 14230 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-06-30'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 12678 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-07-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 0 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                }
-            ]
+            entries: [],
+            old: [1000, 1302]
         }
     });
 
-    t.deepEqual(result, [13502, 19220]);
+    t.deepEqual(result, [1000, 1302]);
 });
 
 test('getNetWorthTable returns a list of rows for the view', t => {
