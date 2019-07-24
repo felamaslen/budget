@@ -106,6 +106,42 @@ const splitById = rows => rows.reduce((items, { netWorthId, ...rest }) => ({
     [netWorthId]: (items[netWorthId] || []).concat([rest])
 }), {});
 
+async function fetchOld(db, uid, page, limit) {
+    const [{ min_date: minDate }] = await db.select(db.raw('min(date) as min_date'))
+        .from(qb1 => qb1.select('date')
+            .from('net_worth as nw')
+            .where('nw.uid', '=', uid)
+            .orderBy('nw.date', 'desc')
+            .limit(limit)
+            .offset(limit * (page || 0))
+            .as('dates')
+        );
+
+    const oldDateEnd = (
+        minDate
+            ? DateTime.fromJSDate(minDate).startOf('month')
+            : DateTime.local()
+    ).toISODate();
+
+    const rows = await db.select(db.raw(`sum(coalesce(nwv.value, (nwfx.value * nwc.rate * 100), 0))::integer as value`))
+        .from('net_worth as nw')
+        .leftJoin('net_worth_values as nwv', 'nwv.net_worth_id', 'nw.id')
+        .leftJoin('net_worth_fx_values as nwfx', 'nwfx.values_id', 'nwv.id')
+        .leftJoin('net_worth_currencies as nwc', qb1 => qb1
+            .on('nwc.net_worth_id', 'nw.id')
+            .on('nwc.currency', 'nwfx.currency')
+        )
+        .where('nw.date', '<', oldDateEnd)
+        .where(qb1 => qb1
+            .where('nwv.skip', '=', false)
+            .orWhere('nwv.skip', null)
+        )
+        .groupBy('nw.date')
+        .orderBy('nw.date');
+
+    return rows.map(({ value }) => value);
+}
+
 async function fetchAll(db, uid, page, limit) {
     const netWorth = await db.select()
         .from(qb1 => qb1.select(
@@ -165,9 +201,16 @@ const onRead = db => catchAsyncErrors(async (req, res) => {
             throw clientError('Limit must be a number');
         }
 
-        const items = await fetchAll(db, uid, page, limit);
+        const [items, old] = await Promise.all([
+            fetchAll(db, uid, page, limit),
+            fetchOld(db, uid, page, limit)
+        ]);
 
-        return res.json(items);
+        if (Array.isArray(items)) {
+            return res.json(items);
+        }
+
+        return res.json({ ...items, old });
     }
 
     const item = await fetchById(db, req.params.id, uid);
