@@ -6,10 +6,40 @@ import { useField } from '~client/hooks/field';
 
 const setValue = cost => Math.round(100 * (Number(cost) || 0));
 
+function setValueString(inputValue) {
+    if (isNaN(Number(inputValue))) {
+        throw new Error('Invalid value');
+    }
+
+    const fieldValue = setValue(inputValue);
+    if (inputValue === `${fieldValue / 100}.`) {
+        return { __split: true, fieldValue, inputValue };
+    }
+
+    return { __split: true, fieldValue, inputValue: String(fieldValue / 100) };
+}
+
+function setValueNumber(inputValue) {
+    const fieldValue = setValue(inputValue);
+
+    return { __split: true, fieldValue, inputValue: String(fieldValue / 100) };
+}
+
+function getInitialInputValue(value) {
+    if (value === null || typeof value === 'string') {
+        return '';
+    }
+
+    return String(value / 100);
+}
+
 export default function FormFieldCost(props) {
-    const [currentValue, onChange, ref, onBlur] = useField({
+    const [, inputValue, onChange, ref, onBlur] = useField({
         ...props,
-        setValue
+        getInitialInputValue,
+        setValue: props.string
+            ? setValueString
+            : setValueNumber
     });
 
     const inputProps = props.string
@@ -21,10 +51,7 @@ export default function FormFieldCost(props) {
             <input
                 ref={ref}
                 {...inputProps}
-                value={currentValue === null || typeof currentValue === 'string'
-                    ? ''
-                    : currentValue / 100
-                }
+                value={inputValue}
                 onChange={onChange}
                 onBlur={onBlur}
             />

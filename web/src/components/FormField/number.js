@@ -5,7 +5,7 @@ import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
 export default function FormFieldNumber({ min, max, step, ...props }) {
-    const [currentValue, onChange, ref, onBlur] = useField({
+    const [currentValue, , onChange, ref, onBlur] = useField({
         ...props,
         setValue: Number
     });

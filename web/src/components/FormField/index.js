@@ -24,7 +24,7 @@ Wrapper.defaultProps = {
 };
 
 export default function FormFieldText({ item, ...props }) {
-    const [currentValue, onChange, ref, onBlur] = useField(props);
+    const [currentValue, , onChange, ref, onBlur] = useField(props);
 
     return (
         <Wrapper item={item} value={props.value} active={props.active}>

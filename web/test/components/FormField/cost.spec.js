@@ -46,15 +46,15 @@ test('handling onchange', t => {
         onChange
     });
 
-    const [div] = container.childNodes;
-    const [input] = div.childNodes;
-
     t.is(onChange.calls.length, 0);
 
-    fireEvent.change(input, { target: { value: '10.93' } });
-    t.is(onChange.calls.length, 0);
+    const input = () => container.childNodes[0].childNodes[0];
 
-    fireEvent.blur(input);
+    fireEvent.change(input(), { target: { value: '10.93' } });
+    t.is(onChange.calls.length, 0);
+    t.is(input().value, '10.93');
+
+    fireEvent.blur(input());
     t.is(onChange.calls.length, 1);
 
     t.deepEqual(onChange.calls[0].arguments, [1093]);
@@ -85,6 +85,49 @@ test('rendering as a string input', t => {
     t.deepEqual(onChange.calls[1].arguments, [22912]);
 });
 
+test('rendering as a string input - decimal point', t => {
+    const onChange = t.context.stub();
+    const props = { onChange, value: '', string: true };
+    const { container } = getContainer(props);
+
+    const input = () => container.childNodes[0].childNodes[0];
+
+    t.is(input().value, '');
+
+    fireEvent.change(input(), { target: { value: '1' } });
+    t.is(input().value, '1');
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+    t.is(onChange.calls.length, 1);
+    t.deepEqual(onChange.calls[0].arguments, [100]);
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+
+    fireEvent.change(input(), { target: { value: '1.' } });
+    t.is(input().value, '1.');
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+    t.is(onChange.calls.length, 2);
+    t.deepEqual(onChange.calls[1].arguments, [100]);
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+
+    fireEvent.change(input(), { target: { value: '1.5' } });
+    t.is(input().value, '1.5');
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+    t.is(onChange.calls.length, 3);
+    t.deepEqual(onChange.calls[2].arguments, [150]);
+    act(() => {
+        getContainer({ ...props, active: true }, { container });
+    });
+});
+
 test('rendering as a string input - handling invalid input', t => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
@@ -99,5 +142,22 @@ test('rendering as a string input - handling invalid input', t => {
         getContainer({ ...props, active: false }, { container });
     });
 
-    t.deepEqual(onChange.calls[0].arguments, [0]);
+    t.is(onChange.calls.length, 0);
+});
+
+test('rendering as a string input - not overwriting on invalid input', t => {
+    const onChange = t.context.stub();
+    const props = { onChange, string: true };
+    const { container } = getContainer(props);
+
+    const input = () => container.childNodes[0].childNodes[0];
+
+    fireEvent.change(input(), { target: { value: '1.5' } });
+    fireEvent.change(input(), { target: { value: '1.5f' } });
+    t.is(input().value, '1.5');
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+
+    t.deepEqual(onChange.calls[0].arguments, [150]);
 });

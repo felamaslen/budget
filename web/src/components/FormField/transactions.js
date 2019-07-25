@@ -72,7 +72,7 @@ const newItemInit = {
 };
 
 function FormFieldTransactions({ create, ...props }) {
-    const [currentValue, onChangeInput] = useField({ ...props, string: true });
+    const [currentValue, , onChangeInput] = useField({ ...props, string: true });
 
     const onChange = useCallback(value => onChangeInput({
         target: { value }

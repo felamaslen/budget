@@ -47,7 +47,7 @@ export default function FormFieldDate(props) {
         type = 'text';
     }
 
-    const [, onChange, ref, onBlur] = useField({
+    const [, , onChange, ref, onBlur] = useField({
         ...props,
         setValue
     });

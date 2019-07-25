@@ -18,23 +18,28 @@ function fieldReducer(state, action) {
         return { ...state, currentValue: action.payload };
     }
     if (action.type === CANCELLED) {
-        return { ...state, currentValue: state.initialValue, cancelled: true };
+        return { ...state, currentValue: state.initialValue };
     }
     if (action.type === ACTIVE_TOGGLED) {
         if (action.active && !state.active) {
             return {
                 ...state,
                 active: true,
-                cancelled: false,
                 initialValue: action.value,
                 currentValue: action.value
             };
         }
 
-        return { ...state, active: action.active };
+        return {
+            ...state,
+            active: action.active,
+            inputValue: action.inputValue
+        };
     }
     if (action.type === TYPED) {
-        return { ...state, currentValue: action.value };
+        const { value: currentValue, inputValue = currentValue } = action;
+
+        return { ...state, currentValue, inputValue };
     }
 
     return state;
@@ -46,6 +51,7 @@ export function useField({
     onChange,
     onType = NULL,
     setValue = IDENTITY,
+    getInitialInputValue = IDENTITY,
     command = NULL_COMMAND,
     active = false
 }) {
@@ -53,9 +59,9 @@ export function useField({
 
     const [state, dispatch] = useReducer(fieldReducer, {
         active: false,
-        cancelled: false,
         initialValue: value,
-        currentValue: value
+        currentValue: value,
+        inputValue: getInitialInputValue(value)
     });
 
     useEffect(() => {
@@ -70,7 +76,12 @@ export function useField({
             onChange(state.currentValue);
         }
         if (active !== state.active) {
-            dispatch({ type: ACTIVE_TOGGLED, active, value });
+            dispatch({
+                type: ACTIVE_TOGGLED,
+                active,
+                value,
+                inputValue: getInitialInputValue(state.currentValue)
+            });
         }
         if (active && !state.active) {
             setImmediate(() => {
@@ -95,7 +106,17 @@ export function useField({
     const onChangeInput = useCallback(event => {
         try {
             const newValue = setValue(event.target.value);
-            dispatch({ type: TYPED, value: newValue });
+            if (typeof newValue === 'object' && newValue.__split) {
+                const { fieldValue, inputValue } = newValue;
+                dispatch({
+                    type: TYPED,
+                    value: fieldValue,
+                    inputValue
+                });
+            } else {
+                dispatch({ type: TYPED, value: newValue });
+            }
+
             onType(newValue);
         } catch {
             // do nothing
@@ -108,5 +129,11 @@ export function useField({
         }
     }, [string, onChange, state.currentValue]);
 
-    return [state.currentValue, onChangeInput, inputRef, onBlurInput];
+    return [
+        state.currentValue,
+        state.inputValue,
+        onChangeInput,
+        inputRef,
+        onBlurInput
+    ];
 }
