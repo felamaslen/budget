@@ -6,9 +6,19 @@ const { Router } = require('express');
 const joi = require('joi');
 const { searchSchema } = require('../../schema');
 
-function matchQuery(table, column, searchTerm) {
+function matchQuery(db, table, column, searchTerm, conditions) {
     if (searchTerm.length < 3) {
-        return query => query.whereRaw(`"${table}"."${column}" ILIKE ?`, `${searchTerm}%`);
+        return qb1 => conditions(qb1
+            .select(
+                db.raw(`distinct("${column}") as "${column}"`),
+                db.raw(`count("${column}") AS count`)
+            )
+            .from(table)
+            .whereRaw(`"${table}"."${column}" ILIKE ?`, `${searchTerm}%`)
+            .groupBy(column)
+            .orderBy('count', 'desc')
+        )
+            .as('items_ranked');
     }
 
     const tsQuery = searchTerm
@@ -18,23 +28,28 @@ function matchQuery(table, column, searchTerm) {
         .map(word => `${word}:*`)
         .join(' | ');
 
-    return query => query.whereRaw(`to_tsvector("${table}"."${column}") @@ to_tsquery(?) = true`, tsQuery);
+    return qb1 => qb1
+        .distinct(column, 'rank')
+        .from(qb2 => conditions(qb2.select(
+            column,
+            db.raw(`ts_rank_cd("${table}"."${column}_search", to_tsquery(?)) as rank`, tsQuery)
+        )
+            .from(table)
+            .whereRaw(`"${table}"."${column}_search" @@ to_tsquery(?)`, tsQuery)
+            .as('items_all')
+        ))
+        .orderBy('rank', 'desc')
+        .as('items_ranked');
 }
 
 function getQuery(db, request, uid) {
     const { table, column, searchTerm, numResults } = request;
 
-    const query = qb => matchQuery(table, column, searchTerm)(qb.select(
-        db.raw(`DISTINCT(${column}) AS ${column}`),
-        db.raw(`COUNT(${column}) AS count`)
-    )
-        .from(table)
-        .andWhere(`${table}.uid`, '=', uid)
-        .groupBy(column)
-        .orderBy('count', 'desc')
+    const conditions = qb => qb.where(`${table}.uid`, '=', uid);
+
+    const query = qb0 => matchQuery(db, table, column, searchTerm, conditions)(qb0)
         .limit(numResults)
-        .as('items')
-    );
+        .as('items');
 
     if (['food', 'general'].includes(table) && column === 'item') {
         return db.select(
