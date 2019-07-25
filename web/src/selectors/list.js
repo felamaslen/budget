@@ -76,8 +76,11 @@ export const getSortedPageRows = createSelector(
     getCurrentDate,
     getAllPageRows,
     (page, now, items) => {
-        if (!PAGES[page].daily) {
+        if (page === 'funds') {
             return items;
+        }
+        if (!PAGES[page].daily) {
+            return items.sort(({ date: dateA }, { date: dateB }) => dateB - dateA);
         }
 
         return memoisedRowProcessor(page, now, items);

@@ -11,7 +11,7 @@ import {
 } from '~client/selectors/list';
 import { testState as state } from '~client-test/test_data/state';
 import { replaceAtIndex, getTransactionsList } from '~client/modules/data';
-import { CREATE, UPDATE, DELETE } from '~client/constants/data';
+import { CREATE, UPDATE, DELETE, PAGES } from '~client/constants/data';
 
 const stateWithUnorderedRows = {
     ...state,
@@ -73,26 +73,33 @@ test('getAllPageRows excludes optimistically deleted items', t => {
     t.deepEqual(ids, ['id300', 'id29', 'id81', 'id19']);
 });
 
+const craftedItems = [
+    { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2 },
+    { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3 },
+    { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5 },
+    { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7 },
+    { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11 },
+    { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13 },
+    { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17 },
+    { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19 },
+    { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29 },
+    { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23 },
+    { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31 },
+    { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37 }
+];
+
+const craftedState = {
+    now: DateTime.fromISO('2019-07-13T15:23:39Z'),
+    general: {
+        items: craftedItems.slice()
+    },
+    income: {
+        items: craftedItems.slice()
+    }
+};
+
 test('getSortedPageRows sorts list rows by date, newest first, adding future / first present / daily props', t => {
-    const craftedState = {
-        now: DateTime.fromISO('2019-07-13T15:23:39Z'),
-        general: {
-            items: [
-                { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2 },
-                { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3 },
-                { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5 },
-                { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7 },
-                { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11 },
-                { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13 },
-                { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17 },
-                { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19 },
-                { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29 },
-                { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23 },
-                { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31 },
-                { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37 }
-            ]
-        }
-    };
+    t.true(PAGES.general.daily);
 
     const result = getSortedPageRows(craftedState, { page: 'general' });
 
@@ -173,10 +180,38 @@ test('getSortedPageRows doesn\'t recalculate until the next day', t => {
     t.is(resultF, resultG);
 });
 
-test('getSortedPageRows returns the items as-is, if the page is not a daily list page', t => {
+test('getSortedPageRows returns the items as-is, for the funds page', t => {
     const result = getSortedPageRows(state, { page: 'funds' });
 
     t.deepEqual(result, state.funds.items);
+});
+
+test('getSortedPageRows sorts rows by date for other non-daily pages', t => {
+    t.falsy(PAGES.income.daily);
+
+    const result = getSortedPageRows(craftedState, { page: 'income' });
+
+    t.deepEqual(result, [
+        { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37 },
+        { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31 },
+        { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5 },
+        { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2 },
+        { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11 },
+        { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13 },
+        { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3 },
+        { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7 },
+        { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17 },
+        { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19 },
+        { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23 },
+        { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29 }
+    ]);
+});
+
+test('getSortedPageRows memoises the result for non-daily pages', t => {
+    const result0 = getSortedPageRows(craftedState, { page: 'income' });
+    const result1 = getSortedPageRows(craftedState, { page: 'income' });
+
+    t.is(result0, result1);
 });
 
 test('getWeeklyAverages returns null for non-daily pages', t => {
