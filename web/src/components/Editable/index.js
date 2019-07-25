@@ -45,6 +45,7 @@ export default function Editable({ page, active, item, onSuggestion, ...props })
     const showSuggestions = Boolean(active &&
         typed.length &&
         PAGES_SUGGESTIONS.includes(page) &&
+        PAGES[page].suggestions &&
         PAGES[page].suggestions.includes(item));
 
     return (
