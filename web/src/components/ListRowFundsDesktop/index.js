@@ -12,6 +12,10 @@ export default function ListRowFundsDesktop({ row: { item, sold, prices, gain } 
         setPopout(!popout);
     }, [popout, setPopout]);
 
+    if (!(prices && prices.length)) {
+        return null;
+    }
+
     return (
         <span className={classNames('fund-extra-info', { popout })}>
             <GraphFundItem name={item.toLowerCase().replace(/\W+/g, '-')}
@@ -30,7 +34,7 @@ ListRowFundsDesktop.propTypes = {
         id: PropTypes.string.isRequired,
         item: PropTypes.string.isRequired,
         sold: PropTypes.bool.isRequired,
-        prices: PropTypes.array.isRequired,
+        prices: PropTypes.array,
         gain: gainShape.isRequired
     })
 };

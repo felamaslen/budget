@@ -28,6 +28,24 @@ test('getCategories excludes optimistically deleted items', t => {
     }), [{ id: 'id-b' }]);
 });
 
+test('getCategories sorts by type, then category', t => {
+    t.deepEqual(getCategories({
+        netWorth: {
+            categories: [
+                { id: 'id-a', type: 'asset', category: 'foo' },
+                { id: 'id-b', type: 'liability', category: 'bar' },
+                { id: 'id-c', type: 'asset', category: 'baz' },
+                { id: 'id-d', type: 'asset', category: 'bak' }
+            ]
+        }
+    }), [
+        { id: 'id-d', type: 'asset', category: 'bak' },
+        { id: 'id-c', type: 'asset', category: 'baz' },
+        { id: 'id-a', type: 'asset', category: 'foo' },
+        { id: 'id-b', type: 'liability', category: 'bar' }
+    ]);
+});
+
 test('getSubcategories excludes optimistically deleted items', t => {
     t.deepEqual(getSubcategories({
         netWorth: {
@@ -37,6 +55,22 @@ test('getSubcategories excludes optimistically deleted items', t => {
             ]
         }
     }), [{ id: 'id-b' }]);
+});
+
+test('getSubcategories sorts by category ID and subcategory', t => {
+    t.deepEqual(getSubcategories({
+        netWorth: {
+            subcategories: [
+                { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
+                { id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
+                { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' }
+            ]
+        }
+    }), [
+        { id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
+        { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
+        { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' }
+    ]);
 });
 
 test('getNetWorthSummary gets a list of net worth values by month', t => {
@@ -76,7 +110,7 @@ test('getNetWorthSummary excludes optimistically deleted entries', t => {
     t.is(result[6], 0); // July 2018 "
 });
 
-test('getNetWorthSummaryOld gets old entry values, if there are any', t => {
+test('getNetWorthSummaryOld gets the old net worth entry values, as provided by the API', t => {
     const result = getNetWorthSummaryOld({
         ...state,
         overview: {
@@ -85,68 +119,12 @@ test('getNetWorthSummaryOld gets old entry values, if there are any', t => {
         },
         netWorth: {
             ...state.netWorth,
-            entries: [
-                {
-                    date: DateTime.fromISO('2018-01-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 13502 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-02-28'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 19220 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-03-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 11876 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-04-30'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 14981 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-05-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 14230 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-06-30'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 12678 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                },
-                {
-                    date: DateTime.fromISO('2018-07-31'),
-                    values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 0 }
-                    ],
-                    creditLimit: [],
-                    currencies: []
-                }
-            ]
+            entries: [],
+            old: [1000, 1302]
         }
     });
 
-    t.deepEqual(result, [13502, 19220]);
+    t.deepEqual(result, [1000, 1302]);
 });
 
 test('getNetWorthTable returns a list of rows for the view', t => {

@@ -10,7 +10,7 @@ import {
 } from '~client/selectors/overview/common';
 
 import { getMonthDatesList } from '~client/modules/date';
-import { withoutDeleted } from '~client/modules/data';
+import { sortByKey, withoutDeleted } from '~client/modules/data';
 import { getRequests } from '~client/selectors/crud';
 import { CREATE } from '~client/constants/data';
 
@@ -28,8 +28,10 @@ const getNonFilteredSubcategories = state => state.netWorth.subcategories;
 const getNonFilteredEntries = state => state.netWorth.entries;
 
 export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
-export const getCategories = createSelector(getNonFilteredCategories, withoutDeleted);
-export const getSubcategories = createSelector(getNonFilteredSubcategories, withoutDeleted);
+export const getCategories = createSelector(getNonFilteredCategories,
+    compose(withoutDeleted, sortByKey('type', 'category')));
+export const getSubcategories = createSelector(getNonFilteredSubcategories,
+    compose(withoutDeleted, sortByKey('subcategory'), sortByKey('categoryId')));
 
 const withoutSkipValues = entries => entries.map(({ values, ...rest }) => ({
     ...rest,
@@ -115,24 +117,7 @@ const getValues = ({ currencies, values }) => sumValues(currencies, values);
 
 export const getNetWorthSummary = createSelector(getNetWorthRows, rows => rows.map(getValues));
 
-export const getNetWorthSummaryOld = createSelector(getStartDate, getSummaryEntries, (startDate, entries) => {
-    const startOfMonth = startDate.startOf('month');
-    const oldEntries = entries.filter(({ date }) => date < startOfMonth);
-
-    const maxDate = startOfMonth.plus({ days: -1 });
-
-    const minDate = oldEntries.reduce((last, { date }) => {
-        if (date < last) {
-            return date;
-        }
-
-        return last;
-    }, maxDate);
-
-    return getMonthDatesList(minDate, maxDate)
-        .map(getEntryForMonth(oldEntries))
-        .map(getValues);
-});
+export const getNetWorthSummaryOld = state => state.netWorth.old;
 
 const sumByType = (categoryType, categories, subcategories, { currencies, values }) =>
     sumValues(currencies, values.filter(({ subcategory }) => subcategories.some(({ id, categoryId }) =>

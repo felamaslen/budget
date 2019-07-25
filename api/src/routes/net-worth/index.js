@@ -77,7 +77,7 @@ function netWorthRoute(config, db) {
 
     router.post('/', validate(schemaNetWorth), validateCategories(db), onCreate(db));
 
-    router.get('/:id?', onRead(db));
+    router.get('/:id?', onRead(config, db));
 
     router.put('/:id', validate(schemaNetWorth), validateCategories(db), onUpdate(db));
 

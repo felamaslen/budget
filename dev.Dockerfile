@@ -10,4 +10,7 @@ COPY package-lock.json ./
 RUN npm install --only=production
 RUN npm install --only=development
 
-CMD ["npm", "run", "dev:run"]
+ENV SKIP_APP=false
+ENV DEBUG=
+
+CMD ["node_modules/.bin/nodemon", "-w", "./api/src", "index.js"]

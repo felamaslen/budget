@@ -31,5 +31,7 @@
 - [DONE] Fix time series major ticks not appearing sometimes
 - Server side rendering
 - [DONE] Replace hooks/form implementation in net worth form with hooks/field
-- Index suggestions search and order by rank
-- Order funds and net worth categories by name
+- [DONE] Index suggestions search and order by rank
+- [DONE] Order funds and net worth categories by name
+- [DONE] Fetch all net worth summary values on startup
+- Use react-window or similar virtualisation to render list data

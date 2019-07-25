@@ -37,7 +37,7 @@ const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (
     }
 
     return rows.reduce((sum, { id, transactions }) => {
-        const { values: prices } = cache.prices[id];
+        const { values: prices } = cache.prices[id] || {};
         if (!(prices && prices.length)) {
             return sum;
         }

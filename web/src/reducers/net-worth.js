@@ -130,7 +130,7 @@ const withDeletes = requests => state => compose(
 const onRead = (state, { res: { netWorth: { categories, subcategories, entries } } }) => ({
     categories: categories.data,
     subcategories: subcategories.data,
-    entries: entries.data.data.map(({
+    entries: entries.data.items.map(({
         date,
         values = [],
         creditLimit = [],
@@ -142,7 +142,8 @@ const onRead = (state, { res: { netWorth: { categories, subcategories, entries }
         creditLimit,
         currencies,
         ...rest
-    }))
+    })),
+    old: entries.data.old || []
 });
 
 const onSyncReceived = (state, { res: { netWorth: requests = [] } }) => compose(

@@ -56,7 +56,7 @@ export function *fetchNetWorth(apiKey) {
     const res = yield all({
         categories: call(axios.get, `${API_PREFIX}/data/net-worth/categories`, options),
         subcategories: call(axios.get, `${API_PREFIX}/data/net-worth/subcategories`, options),
-        entries: call(axios.get, `${API_PREFIX}/data/net-worth?page=0&limit=20`, options)
+        entries: call(axios.get, `${API_PREFIX}/data/net-worth`, options)
     });
 
     return res;

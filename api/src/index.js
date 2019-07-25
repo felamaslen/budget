@@ -6,7 +6,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const CacheControl = require('express-cache-control');
+const serveStatic = require('serve-static');
 const path = require('path');
 const webLogger = require('morgan');
 const passport = require('passport');
@@ -142,6 +142,9 @@ function setupWebApp(app) {
 
     const singlePageApp = (req, res) => {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
+
+        res.setHeader('Cache-Control', 'no-cache');
+
         res.render('index', {
             version,
             hot,
@@ -150,8 +153,9 @@ function setupWebApp(app) {
     };
 
     // web app static files
-    const cache = new CacheControl().middleware;
-    app.use('/', cache('days', 100), express.static(path.join(__dirname, '../../web/build')));
+    app.use('/', serveStatic(path.resolve(__dirname, '../../web/build'), {
+        maxAge: 3600 * 24 * 100 * 1000
+    }));
 
     app.get('/:pageName?', singlePageApp);
     app.get('/:pageName/*', singlePageApp);

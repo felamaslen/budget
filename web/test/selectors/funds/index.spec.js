@@ -8,6 +8,7 @@ import {
     getFundsCost,
     getProcessedFundsRows
 } from '~client/selectors/funds';
+import { getTransactionsList } from '~client/modules/data';
 
 test('getFundsCachedValueAgeText returns the expected string', t => {
     const now = DateTime.fromISO('2018-06-03');
@@ -32,6 +33,27 @@ test('getFundsCachedValue returns a default value if there are no data', t => {
     }), {
         value: 0,
         ageText: ''
+    });
+});
+
+test('getFundsCachedValue skips funds without price data', t => {
+    t.deepEqual(getFundsCachedValue({
+        ...state,
+        funds: {
+            ...state.funds,
+            items: [
+                ...state.funds.items,
+                {
+                    item: 'new fund',
+                    transactions: getTransactionsList([
+                        { date: '2019-07-23', units: 13, cost: 12 }
+                    ])
+                }
+            ]
+        }
+    }), {
+        value: 399098.2,
+        ageText: '6 months, 3 weeks ago'
     });
 });
 
