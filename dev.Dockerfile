@@ -11,5 +11,6 @@ RUN npm install --only=production
 RUN npm install --only=development
 
 ENV SKIP_APP=false
+ENV DEBUG=
 
 CMD ["node_modules/.bin/nodemon", "-w", "./api/src", "index.js"]

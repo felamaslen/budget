@@ -18,6 +18,7 @@ services:
       - .env
     environment:
       NODE_ENV: development
+      DEBUG: ${DEBUG}
       SKIP_APP: ${SKIP_APP}
       FAKE_STOCK_PRICES: "true"
       PORT: 3000
