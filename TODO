@@ -35,3 +35,6 @@
 - [DONE] Order funds and net worth categories by name
 - [DONE] Fetch all net worth summary values on startup
 - Use react-window or similar virtualisation to render list data
+- Fix funds list head formatting
+- Fix predicted net worth (predicted for current month)
+- Lazy / infinite loading of list pages (see https://github.com/bvaughn/react-window-infinite-loader)
