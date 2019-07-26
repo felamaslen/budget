@@ -116,6 +116,8 @@ function GraphFunds({
     period,
     changePeriod
 }) {
+    const haveData = cacheTimes.length > 0;
+
     const modeList = useMemo(() => {
         if (isMobile) {
             return modeListAll.filter(value => value !== GRAPH_FUNDS_MODE_PRICE);
@@ -161,12 +163,24 @@ function GraphFunds({
             }]), { ...idCount, [id]: (idCount[id] || 0) + 1 }]), [[], {}]);
     }, [fundLines, mode, filterFunds]);
 
-    const getRanges = useMemo(() => makeGetRanges({
-        mode,
-        zoomRange: [0, cacheTimes[cacheTimes.length - 1]],
-        lines,
-        cacheTimes
-    }), [mode, cacheTimes, lines]);
+    const getRanges = useMemo(() => {
+        if (!haveData) {
+            return () => ({
+                minX: 0,
+                maxX: 0,
+                minY: 0,
+                maxY: 0,
+                tickSizeY: 0
+            });
+        }
+
+        return makeGetRanges({
+            mode,
+            zoomRange: [0, cacheTimes[cacheTimes.length - 1]],
+            lines,
+            cacheTimes
+        });
+    }, [haveData, mode, cacheTimes, lines]);
 
     const {
         minX,
@@ -176,11 +190,17 @@ function GraphFunds({
         tickSizeY
     } = useMemo(getRanges, [getRanges]);
 
-    const beforeLines = useMemo(() => makeBeforeLines({
-        mode,
-        startTime,
-        tickSizeY
-    }), [mode, startTime, tickSizeY]);
+    const beforeLines = useMemo(() => {
+        if (!haveData) {
+            return () => null;
+        }
+
+        return makeBeforeLines({
+            mode,
+            startTime,
+            tickSizeY
+        });
+    }, [haveData, mode, startTime, tickSizeY]);
 
     const after = useCallback(() => (
         <AfterCanvas
