@@ -56,8 +56,11 @@ const makeGetRanges = ({
         .map(({ data }) => data.map(([, yValue]) => yValue))
         .filter(values => values.length);
 
-    let minY = valuesY.reduce((min, line) =>
-        Math.min(min, line.reduce((last, value) => Math.min(last, value), min)), Infinity);
+    let minY = 0;
+    if (mode !== GRAPH_FUNDS_MODE_ABSOLUTE) {
+        minY = valuesY.reduce((min, line) =>
+            Math.min(min, line.reduce((last, value) => Math.min(last, value), min)), Infinity);
+    }
     let maxY = valuesY.reduce((max, line) =>
         Math.max(max, line.reduce((last, value) => Math.max(last, value), max)), -Infinity);
 
