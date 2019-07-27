@@ -1,6 +1,12 @@
-@import '../../sass/responsive.scss';
-@import '../../sass/variables.scss';
-@import '../../sass/mixins.scss';
+@import '~client/sass/responsive.scss';
+@import '~client/sass/variables.scss';
+@import '~client/sass/mixins.scss';
+
+html, body {
+    @media only screen and (min-width: $width-page-tablet) {
+        height: 100%;
+    }
+}
 
 body {
     margin: 0;
@@ -8,20 +14,79 @@ body {
     &.wait * {
         cursor: wait !important;
     }
+
+    @media only screen and (min-width: $width-page-mobile) {
+        overflow: auto;
+    }
+
+    @media only screen and (min-width: $width-page-tablet) {
+        overflow: initial;
+    }
 }
 
 .noselect {
     @include noselect;
 }
 
-// desktop (large)
-@media screen and (min-width: $width-page-tablet) {
-    html, body {
-        height: 100%;
+button {
+    display: flex;
+    margin: 0 6px;
+    flex-grow: 1;
+    justify-content: center;
+    padding: 1em 0;
+    width: 100%;
+    background: $color-button-bg-mobile;
+    font-size: 0.6em;
+    border: none;
+    border-radius: 3px;
+    outline: none;
+    text-transform: uppercase;
+    font-weight: bold;
+   
+    &:disabled {
+        background: none;
+    }
+
+    @media only screen and (min-width: $width-page-mobile) {
+        display: inline-block;
+        margin: 0;
+        padding: 5px 12px 6px;
+        flex-grow: 0;
+        width: auto;
+        box-shadow: inset 0px 1px 0px 0px $color-button-shadow;
+        background: linear-gradient(to bottom, $color-button-bg2 5%, $color-button-bg1 100%);
+        background-color: $color-button-bg2;
+        border: 1px solid $color-button-border;
+        border-radius: 0;
+        cursor: pointer;
+        color: $color-white;
+        font-family: Arial;
+        font-size: 13px;
+        height: 24px;
+        position: relative;
+        text-decoration: none;
+        text-transform: none;
+        z-index: 4;
+
+        &:hover {
+            background-color: $color-button-bg1;
+            background-image: linear-gradient(to bottom, $color-button-bg1 5%, $color-button-bg2 100%);
+        }
+        &:active {
+            top: 1px;
+            background: $color-button-active;
+        }
+        &:focus {
+            box-shadow: 0 2px 3px $color-shadow-l3;
+        }
+        &:disabled {
+            background: $color-button-bg-disabled;
+            cursor: default;
+            border: 1px solid $color-medium-slightly-dark;
+        }
     }
 }
 
-// desktop
 @media screen and (min-width: $width-page-mobile) {
     * {
         &::-webkit-scrollbar {
@@ -42,63 +107,4 @@ body {
         }
     }
 
-    button {
-        display: inline-block;
-        box-shadow: inset 0px 1px 0px 0px $color-button-shadow;
-        background: linear-gradient(to bottom, $color-button-bg2 5%, $color-button-bg1 100%);
-        background-color: $color-button-bg2;
-        border: 1px solid $color-button-border;
-        cursor: pointer;
-        color: $color-white;
-        font-family: Arial;
-        font-size: 13px;
-        font-weight: bold;
-        padding: 3px 12px;
-        position: relative;
-        top: -1px;
-        text-decoration: none;
-        outline: none;
-        z-index: 4;
-
-        &:hover {
-            background-color: $color-button-bg1;
-            background-image: linear-gradient(to bottom, $color-button-bg1 5%, $color-button-bg2 100%);
-        }
-        &:active {
-            top: 0;
-        }
-        &:focus {
-            background: $color-button-focus;
-        }
-    }
 }
-
-// tablet
-@media screen and (min-width: $width-page-mobile) and (max-width: $width-page-tablet) {
-    body {
-        overflow: auto;
-    }
-}
-
-// mobile
-@media screen and (max-width: $width-page-mobile) {
-    button {
-        margin: 0 6px;
-        display: flex;
-        flex-grow: 1;
-        justify-content: center;
-        padding: 1em 0;
-        width: 100%;
-        font-size: 0.6em;
-        border: none;
-        border-radius: 3px;
-        outline: none;
-        text-transform: uppercase;
-        font-weight: bold;
-        
-        &:not(:disabled) {
-            background: $color-button-bg-mobile;
-        }
-    }
-}
-
