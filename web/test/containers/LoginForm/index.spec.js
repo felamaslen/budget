@@ -43,14 +43,20 @@ test('basic structure', t => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.className, 'login-form');
-    t.is(div.childNodes.length, 3);
+    t.is(div.childNodes.length, 1);
+
+    const [inner] = div.childNodes;
+    t.is(inner.tagName, 'DIV');
+    t.is(inner.className, 'login-form-inner');
+    t.is(inner.childNodes.length, 3);
 });
 
 test('title', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
+    const [inner] = div.childNodes;
 
-    const [title] = div.childNodes;
+    const [title] = inner.childNodes;
 
     t.is(title.tagName, 'H3');
     t.is(title.innerHTML, 'Enter your PIN:');
@@ -59,8 +65,9 @@ test('title', t => {
 test('pin display', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
+    const [inner] = div.childNodes;
 
-    const [, pinDisplay] = div.childNodes;
+    const [, pinDisplay] = inner.childNodes;
 
     t.is(pinDisplay.tagName, 'DIV');
     t.is(pinDisplay.className, 'pin-display');
@@ -69,8 +76,9 @@ test('pin display', t => {
 test('number input pad', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
+    const [inner] = div.childNodes;
 
-    const [, , pad] = div.childNodes;
+    const [, , pad] = inner.childNodes;
 
     t.is(pad.tagName, 'DIV');
     t.is(pad.className, 'number-input noselect');

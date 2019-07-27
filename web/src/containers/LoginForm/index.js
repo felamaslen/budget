@@ -45,9 +45,11 @@ function LoginForm({ loading, initialised, loggedIn, onLogin }) {
 
     return (
         <div className={classNames('login-form', { loading })}>
-            <h3>{'Enter your PIN:'}</h3>
-            <PinDisplay inputStep={inputStep} />
-            <NumberInputPad onInput={onInput} />
+            <div className="login-form-inner">
+                <h3>{'Enter your PIN:'}</h3>
+                <PinDisplay inputStep={inputStep} />
+                <NumberInputPad onInput={onInput} />
+            </div>
         </div>
     );
 }
