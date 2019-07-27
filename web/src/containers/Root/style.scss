@@ -2,6 +2,14 @@
 @import '~client/sass/variables.scss';
 @import '~client/sass/mixins.scss';
 
+html {
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
 html, body {
     @media only screen and (min-width: $width-page-tablet) {
         height: 100%;
