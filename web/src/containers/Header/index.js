@@ -11,10 +11,8 @@ import Navbar from '~client/components/Navbar';
 
 const Header = ({ loggedIn, loadingApi, unsavedApi, onLogout }) => (
     <header className="navbar">
-        <div className="inner">
-            <AppLogo loading={loadingApi} unsaved={unsavedApi} />
-            {loggedIn && <Navbar onLogout={onLogout} />}
-        </div>
+        <AppLogo loading={loadingApi} unsaved={unsavedApi} />
+        {loggedIn && <Navbar onLogout={onLogout} />}
     </header>
 );
 
