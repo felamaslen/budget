@@ -156,7 +156,8 @@ export const testState = {
                     { currency: 'CZK', rate: 0.0314 }
                 ]
             }
-        ]
+        ],
+        old: []
     },
     analysis: {
         period: 'year',

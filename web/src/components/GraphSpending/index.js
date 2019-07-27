@@ -10,7 +10,7 @@ import { rgba } from '~client/modules/color';
 import { COLOR_SPENDING, COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
 import { rangePropTypes, pixelPropTypes } from '~client/prop-types/graph';
 import GraphCashFlow, { getValuesWithTime, graphCashFlowPropTypes } from '~client/components/GraphCashFlow';
-import Key from './Key';
+import Key from '~client/components/GraphSpending/Key';
 
 const colorProfitLoss = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
 
@@ -59,6 +59,8 @@ function makeAfterLines() {
         ...rangePropTypes,
         ...pixelPropTypes
     };
+
+    return AfterLines;
 }
 
 export default function GraphSpending({ graphWidth, now, valuesNet, valuesSpending, startDate }) {
