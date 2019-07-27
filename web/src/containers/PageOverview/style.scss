@@ -2,9 +2,11 @@
 @import '~client/sass/variables.scss';
 @import '~client/sass/mixins.scss';
 
-@mixin row-height($height) {
-    height: $height;
-    line-height: $height;
+@mixin row-height($height, $line-height: $height) {
+    .col {
+        height: $height;
+        line-height: $line-height;
+    }
 }
 
 @mixin hide-overview-columns($width) {
@@ -12,10 +14,10 @@
         .table-flex {
             .col {
                 &.funds, &.bills, &.food, &.general, &.holiday, &.social {
-                    display: none;
+                    display: none !important;
                 }
-                &.month {
-                    border-right: none;
+                &.income {
+                    border-left: none !important;
                 }
             }
         }
@@ -34,10 +36,10 @@
         .header {
             flex: 0 0 auto;
 
-            .col .text {
+            .col {
+                padding: 2px 0;
+                height: 24px;
                 text-align: center;
-                height: 20px;
-                line-height: 20px;
             }
             .month {
                 background: $color-mob-overview-tbl-month;
@@ -67,7 +69,7 @@
             vertical-align: middle;
             text-align: left;
             height: 32px;
-            line-height: 32px;
+            line-height: 24px;
 
             &.funds,
             &.bills,
@@ -155,18 +157,8 @@
     @media only screen and (min-width: $width-page-mobile-small) {
         .table-flex {
             .col {
-                padding: 0;
-                height: initial;
-                line-height: initial;
+                padding: 4px 10px;
                 white-space: nowrap;
-
-                .text, .editable {
-                    padding: 4px 10px;
-                }
-
-                &.netWorth {
-                    display: inline-block;
-                }
             }
         }
     }
@@ -189,7 +181,7 @@
                 overflow-y: unset;
             }
 
-            .table-ovreview-rows {
+            .table-overview-rows {
                 overflow: hidden;
             }
 
@@ -202,9 +194,7 @@
             }
             .header {
                 .col {
-                    &.month, &.income {
-                        border: none;
-                    }
+                    padding: 2px;
                 }
                 .text {
                     color: black;
@@ -212,15 +202,15 @@
             }
             .row {
                 @include row-height(24px);
-                // width: 95%;
                 font-size: 16px;
             }
             .past {
                 @include unimportant;
-                @include row-height(16px);
+                @include row-height(16px, 18px);
                 font-size: 13px;
             }
             .col {
+                padding: 0 2px;
                 flex-grow: 10;
 
                 &.funds,
@@ -230,13 +220,14 @@
                 &.holiday,
                 &.social,
                 &.net,
-                &.balance {
+                &.netWorthPredicted,
+                &.netWorth {
                     display: block;
                 }
         
                 &.month {
-                    border-right: 3px solid $color-dark;
                     text-align: left;
+                    border-right: 3px solid $color-dark;
                 }
                 &.funds, &.bills, &.food, &.general, &.holiday, &.social, &.income, &.spending {
                     flex-grow: 7;
@@ -248,11 +239,11 @@
                     flex-grow: 10;
                     border-right: 3px solid $color-light;
                 }
-                &.predicted {
+                &.netWorthPredicted {
                     flex-grow: 9;
                     font-style: italic;
                 }
-                &.balance {
+                &.netWorth {
                     flex-grow: 12;
                 }
                 .text {
@@ -260,19 +251,6 @@
                     width: 100%;
                     padding: 0 2px;
                 }
-                &.balancePred {
-                    display: none;
-                }
-
-                .text, .editable {
-                    height: auto;
-                    line-height: 22px;
-                }
-            }
-            .editable-input {
-                right: 0;
-                top: 0;
-                padding: 0;
             }
             .active {
                 font-weight: bold;
@@ -282,7 +260,7 @@
             .future {
                 font-size: 14px;
 
-                .text, .editable {
+                .text {
                     line-height: 26px;
                 }
             }
