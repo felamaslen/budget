@@ -166,7 +166,9 @@
                     }
 
                     .tree-list-item {
-                        &:hover {
+                        .title {
+                            margin-right: 4px;
+                            overflow: hidden;
                         }
                     }
                 }
@@ -181,11 +183,8 @@
     @media only screen and (min-width: $width-page-mobile-small) {
         .analysis-outer {
             .block-view {
-                display: block;
-
-                .block-tree-outer {
-                    height: 300px;
-                }
+                display: flex;
+                height: 300px;
             }
         }
     }
