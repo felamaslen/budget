@@ -25,15 +25,15 @@ export default function NetWorthList({
 
     return (
         <div className="net-worth-list">
-            <h4 className="title">{'List'}</h4>
             <CrudList
                 items={data}
+                real
                 Item={NetWorthListItem}
                 CreateItem={NetWorthListCreateItem}
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
-                className="net-worth-item"
+                className="net-worth-list-crud"
                 extraProps={extraProps}
             />
         </div>

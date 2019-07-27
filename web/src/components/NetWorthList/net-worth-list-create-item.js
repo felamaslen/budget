@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
+import { CREATE_ID } from '~client/constants/data';
 import { NetWorthAddForm } from '~client/components/NetWorthEditForm';
 
 export default function NetWorthListCreateItem({
@@ -14,9 +15,14 @@ export default function NetWorthListCreateItem({
     noneActive,
     onCreate
 }) {
+    const onActivate = useCallback(() => setActive(CREATE_ID), [setActive]);
+
     if (noneActive) {
         return (
-            <div className="net-worth-list-item-summary">
+            <div
+                className="net-worth-list-item-summary"
+                onClick={onActivate}
+            >
                 {'Add a new entry'}
             </div>
         );

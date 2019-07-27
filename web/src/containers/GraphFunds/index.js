@@ -84,7 +84,7 @@ const makeGetRanges = ({
 };
 
 function makeBeforeLines({ mode, startTime, tickSizeY }) {
-    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) => (
+    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) => maxY !== 0 && (
         <Axes
             mode={mode}
             startTime={startTime}

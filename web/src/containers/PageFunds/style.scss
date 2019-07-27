@@ -1,7 +1,7 @@
 @import '~client/sass/responsive.scss';
 @import '~client/sass/variables.scss';
 
-$item-height-desktop: 48px;
+$item-height-desktop: $itemHeightDesktopFunds + 0px;
 
 $transactions-width-date: 110px;
 $transactions-width-units: 60px;
@@ -101,55 +101,53 @@ $transactions-width-cost: 60px;
     flex: 1 0 0;
 
     .page-list-main {
-        .crud-list {
-            &-list {
-                &-item {
-                    margin: 0;
-                    padding: 4px 0 1px;
+        .list-mobile {
+            .list-row-mobile {
+                margin: 0;
+                padding: 4px 0 1px;
 
-                    .column {
-                        &.item {
-                            display: block;
-                            flex: 1 1 auto;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            white-space: nowrap;
-                        }
+                .column {
+                    &.item {
+                        display: block;
+                        flex: 1 1 auto;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
                     }
+                }
+
+                .cost {
+                    display: flex;
+                    margin-left: 10px;
+                    flex: 0 0 auto;
+                    font-size: 90%;
+
+                    &-value {
+                        flex: 0 0 auto;
+                        text-align: right;
+                    }
+
+                    .actual-value {
+                        width: 50px;
+                        flex: 0 0 auto;
+                        font-weight: bold;
+                        text-align: center;
+                    }
+
+                    &-value,
+                    .actual-value {
+                        margin-right: 4px;
+                    }
+                }
+
+                &.sold {
+                    padding: 0;
+                    font-size: 90%;
+                    color: $color-medium-light;
+                    background: $color-shadow-l05;
 
                     .cost {
-                        display: flex;
-                        margin-left: 10px;
-                        flex: 0 0 auto;
-                        font-size: 90%;
-
-                        &-value {
-                            flex: 0 0 auto;
-                            text-align: right;
-                        }
-
                         .actual-value {
-                            width: 50px;
-                            flex: 0 0 auto;
-                            font-weight: bold;
-                            text-align: center;
-                        }
-
-                        &-value,
-                        .actual-value {
-                            margin-right: 4px;
-                        }
-                    }
-
-                    &.sold {
-                        padding: 0;
-                        font-size: 90%;
-                        color: $color-medium-light;
-                        background: $color-shadow-l05;
-
-                        .cost {
-                            .actual-value {
-                            }
                         }
                     }
                 }
@@ -221,15 +219,15 @@ $transactions-width-cost: 60px;
         }
     }
 
-    @media screen and (min-width: $width-page-mobile) {
+    @media only screen and (min-width: $width-page-mobile) {
+        flex-direction: column;
         overflow-y: auto;
-        padding-bottom: 1em;
 
         .page-list-main {
             flex: 0 1 800px;
 
-            .crud-list {
-                &-list-item,
+            .list-desktop {
+                .list-row-desktop,
                 .list-head {
                     .fund-extra-info {
                         flex: 0 0 100px;
@@ -237,19 +235,36 @@ $transactions-width-cost: 60px;
                     .add-button-outer {
                         flex: 0 0 121px;
                     }
+
+                    &.odd {
+                        background: white;
+                    }
+                    &.sold {
+                        .editable-inactive {
+                            .form-field {
+                                opacity: 0.3;
+                            }
+                        }
+                    }
                 }
 
-                &-list-item {
-                    padding: 0;
-
-                    &-create {
-                        z-index: 5;
+                &-window {
+                    .list-row-desktop {
+                        &:not(.sold) {
+                            flex: 0 0 $item-height-desktop;
+                            line-height: $item-height-desktop;
+                            height: $item-height-desktop;
+                        }
                     }
+                }
 
-                    &:not(.crud-list-list-item-create):not(.sold) {
-                        flex: 0 0 $item-height-desktop;
-                        line-height: $item-height-desktop;
-                        height: $item-height-desktop;
+                .list-row-desktop {
+                    padding: 0;
+                    border-right: 1px solid $color-light;
+
+                    .item,
+                    .transactions {
+                        border-bottom: 1px solid $color-light;
                     }
 
                     .cell {
@@ -283,6 +298,9 @@ $transactions-width-cost: 60px;
                             flex: 0 0 320px;
                             border-right: none;
                         }
+                    }
+                    .button-delete {
+                        flex: 1;
                     }
                     .fund-extra-info {
                         display: flex;
@@ -395,12 +413,20 @@ $transactions-width-cost: 60px;
                             }
                         }
                     }
+                    &-create {
+                        z-index: 5;
+
+                        .form-field-transactions {
+                            .modal {
+                                top: 0 !important;
+                                bottom: initial !important;
+                            }
+                        }
+                    }
                     &.sold {
                         height: 24px;
                         line-height: 24px;
                         font-size: inherit;
-                        color: $color-slightly-light;
-                        background: initial;
 
                         .fund-graph {
                             filter: grayscale(100%);
@@ -509,5 +535,12 @@ $transactions-width-cost: 60px;
         .funds-info {
             flex: 1 0 auto;
         }
+    }
+
+    @media only screen and (min-width: $width-page-tablet) {
+    }
+
+    @media only screen and (min-width: 1325px) {
+        flex-direction: row;
     }
 }

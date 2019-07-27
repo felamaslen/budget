@@ -9,7 +9,6 @@ import {
     formatCurrency,
     formatPercent,
     getTickSize,
-    formatAge,
     formatItem
 } from '~client/modules/format';
 
@@ -143,27 +142,6 @@ test('getTickSize gets the correct tick size', t => {
     t.is(getTickSize(-1, 11, 10), 2);
     t.is(getTickSize(0, 996, 5), 200);
     t.is(getTickSize(0, 1001, 5), 500);
-});
-
-test('formatAge formats the age properly', t => {
-    t.is(formatAge(0), '0 seconds ago');
-    t.is(formatAge(1), '1 second ago');
-    t.is(formatAge(2), '2 seconds ago');
-    t.is(formatAge(59), '59 seconds ago');
-    t.is(formatAge(59.4), '59 seconds ago');
-    t.is(formatAge(59.5), '1 minute ago');
-    t.is(formatAge(60), '1 minute ago');
-    t.is(formatAge(61), '1 minute, 1 second ago');
-    t.is(formatAge(93), '1 minute, 33 seconds ago');
-    t.is(formatAge(7175), '2 hours ago');
-    t.is(formatAge(7619), '2 hours, 7 minutes ago');
-    t.is(formatAge(86395), '1 day ago');
-    t.is(formatAge(86400), '1 day ago');
-    t.is(formatAge(86450), '1 day ago');
-    t.is(formatAge(96450), '1 day, 3 hours ago');
-    t.is(formatAge(180450), '2 days, 2 hours ago');
-    t.is(formatAge(812391239), '25 years, 9 months ago');
-    t.is(formatAge(812391239, true), '25Y, 9M');
 });
 
 test('formatItem formats dates', t => {

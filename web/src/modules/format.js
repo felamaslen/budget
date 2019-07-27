@@ -1,4 +1,3 @@
-import humanizeDuration from 'humanize-duration';
 import { DateTime } from 'luxon';
 
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
@@ -174,31 +173,6 @@ export function getTickSize(min, max, numTicks) {
     }
 
     return magnitude;
-}
-
-export function formatAge(seconds, shortAbbr = false) {
-    if (shortAbbr) {
-        return humanizeDuration(seconds * 1000, {
-            round: true,
-            largest: 2,
-            spacer: '',
-            language: 'shortEn',
-            languages: {
-                shortEn: {
-                    'y': () => 'Y',
-                    mo: () => 'M',
-                    'w': () => 'w',
-                    'd': () => 'd',
-                    'h': () => 'h',
-                    'm': () => 'm',
-                    's': () => 's',
-                    ms: () => 'ms'
-                }
-            }
-        });
-    }
-
-    return `${humanizeDuration(seconds * 1000, { round: true, largest: 2 })} ago`;
 }
 
 export function formatItem(item, value) {

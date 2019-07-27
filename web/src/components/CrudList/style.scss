@@ -1,20 +1,10 @@
 .crud-list {
-    &-meta {
-    }
-
-    &-list {
+    &-window {
         display: flex;
         margin: 0;
         padding: 0;
         flex-flow: column;
         list-style: none;
-
-        &-item {
-            margin: 0.5em 0 0.2em;
-
-            &-create {
-            }
-        }
     }
 
     .button-delete {

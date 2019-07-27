@@ -65,7 +65,8 @@
     }
 
     @media screen and (min-width: $width-page-mobile) {
-        margin: 36px 0 0 10px;
+        // margin: 36px 0 0 10px;
+        margin: 10px;
         height: 300px;
 
         .mode {

@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { NULL_COMMAND, ADD_BTN } from '~client/hooks/nav';
@@ -7,17 +8,15 @@ import { VALUE_SET } from '~client/modules/nav';
 import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
 
-export function ListRowDesktopBase(props) {
-    const {
-        item,
-        activeColumn,
-        setActive,
-        onUpdate,
-        command,
-        setCommand,
-        page
-    } = props;
-
+export function ListRowDesktopBase({
+    item,
+    activeColumn,
+    setActive,
+    onUpdate,
+    command,
+    setCommand,
+    page
+}) {
     const columns = PAGES[page].cols;
 
     const onSuggestionConfirmed = useCallback((column, nextValue) => {
@@ -81,9 +80,12 @@ ListRowDesktopBase.propTypes = {
 function ListRowDesktop({
     page,
     item,
+    style,
+    odd,
     command,
     setCommand,
     onUpdate,
+    onDelete,
     AfterRow,
     activeColumn,
     setActive
@@ -94,7 +96,14 @@ function ListRowDesktop({
     }, item), [onUpdate, page, item]);
 
     return (
-        <>
+        <div
+            className={classNames('list-row-desktop', item.className || {}, {
+                odd,
+                future: item.future,
+                'first-present': item.firstPresent
+            })}
+            style={style}
+        >
             <ListRowDesktopBase
                 item={item}
                 page={page}
@@ -105,14 +114,22 @@ function ListRowDesktop({
                 onUpdate={onColumnUpdate}
             />
             {PAGES[page].daily && <DailyText value={item.daily} />}
+            <div className="button-delete">
+                <button
+                    className="button-delete-button"
+                    onClick={onDelete}
+                >&minus;</button>
+            </div>
             {AfterRow && <AfterRow page={page} row={item} />}
-        </>
+        </div>
     );
 }
 
 ListRowDesktop.propTypes = {
     ...ListRowDesktopBase.propTypes,
     page: PropTypes.string.isRequired,
+    style: PropTypes.object,
+    odd: PropTypes.bool.isRequired,
     item: PropTypes.shape({
         id: PropTypes.string.isRequired,
         future: PropTypes.bool,
@@ -127,12 +144,14 @@ ListRowDesktop.propTypes = {
     command: PropTypes.object.isRequired,
     setCommand: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
     daily: PropTypes.number,
     AfterRow: PropTypes.func
 };
 
 ListRowDesktop.defaultProps = {
+    style: {},
     active: false
 };
 
-export default React.memo(ListRowDesktop);
+export default memo(ListRowDesktop);

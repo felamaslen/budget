@@ -103,6 +103,9 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
         if (!dy) {
             return null;
         }
+
+        event.stopPropagation();
+
         if (dy > 0) {
             return dispatch({ type: NAV_NEXT });
         }

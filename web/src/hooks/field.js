@@ -95,7 +95,7 @@ export function useField({
         } else if (!active && state.active && inputRef.current) {
             inputRef.current.blur();
         }
-    }, [string, onChange, active, value, state.active, state.currentValue, state.initialValue]);
+    }, [string, onChange, active, value, state.active, state.currentValue, state.initialValue, getInitialInputValue]);
 
     useEffect(() => {
         if (string && command !== NULL_COMMAND) {

@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 import classNames from 'classnames';
-import { formatAge } from '~client/modules/format';
+import humanizeDuration from 'humanize-duration';
+
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { getNow } from '~client/selectors/now';
 import { getFundsRows, getCurrentFundsCache } from '~client/selectors/funds/helpers';
@@ -9,7 +10,7 @@ import { getRowGains, getGainsForRow } from '~client/selectors/funds/gains';
 export const getPeriod = state => state.funds.period;
 
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
-    const age = (now.ts / 1000) - cacheTimes[cacheTimes.length - 1] - startTime;
+    const age = now.ts - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
 
     if (isNaN(age)) {
         return 'no values';
@@ -18,7 +19,7 @@ export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
         return 'in the future!';
     }
 
-    return formatAge(age);
+    return `${humanizeDuration(age, { round: true, largest: 1 })} ago`;
 }
 
 const getFundCacheAge = createSelector(getNow, getCurrentFundsCache, (now, cache) => {

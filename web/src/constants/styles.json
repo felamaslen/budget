@@ -3,6 +3,9 @@
     "widthPageMobile": 690,
     "widthPageTablet": 1200,
     "widthPageTabletSmall": 1000,
+    "itemHeightDesktop": 24,
+    "itemHeightDesktopFunds": 48,
+    "itemHeightMobile": 30,
     "graphOverviewHeightMobile": 240,
     "graphFundsHeightMobile": 125
 }

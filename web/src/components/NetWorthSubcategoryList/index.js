@@ -19,6 +19,7 @@ function NetWorthSubcategoryItemForm({
     opacity,
     parent,
     onChange,
+    onDelete,
     buttonText
 }) {
     const [tempSubcategory, setTempSubcategory] = useState(subcategory);
@@ -32,7 +33,8 @@ function NetWorthSubcategoryItemForm({
 
     const [tempOpacity, setTempOpacity] = useState(opacity);
 
-    const touched = !(tempSubcategory === subcategory &&
+    const touched = !(onDelete &&
+        tempSubcategory === subcategory &&
         tempHasCreditLimit === initialHasCreditLimit &&
         tempOpacity === opacity
     );
@@ -50,10 +52,17 @@ function NetWorthSubcategoryItemForm({
         tempOpacity
     ]);
 
+    const style = {
+        backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`
+    };
+
     return (
-        <span className={classNames('net-worth-subcategory-item-form', {
-            touched
-        })}>
+        <span
+            className={classNames('net-worth-subcategory-item-form', {
+                touched
+            })}
+            style={style}
+        >
             <FormFieldText
                 item="subcategory"
                 value={tempSubcategory}
@@ -73,11 +82,21 @@ function NetWorthSubcategoryItemForm({
                 value={tempOpacity}
                 onChange={setTempOpacity}
             />
-            <button
-                disabled={!touched}
-                className="button-change"
-                onClick={onChangeItem}
-            >{buttonText}</button>
+            <div className="button-change">
+                <button
+                    disabled={!touched}
+                    className="button-change-button"
+                    onClick={onChangeItem}
+                >{buttonText}</button>
+            </div>
+            {onDelete && (
+                <div className="button-delete">
+                    <button
+                        className="button-delete-button"
+                        onClick={onDelete}
+                    >&minus;</button>
+                </div>
+            )}
         </span>
     );
 }
@@ -89,6 +108,7 @@ NetWorthSubcategoryItemForm.propTypes = {
     hasCreditLimit: PropTypes.bool,
     opacity: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired,
+    onDelete: PropTypes.func,
     parent: PropTypes.shape({
         type: PropTypes.oneOf(['asset', 'liability']).isRequired
     }).isRequired
@@ -108,7 +128,8 @@ function NetWorthSubcategoryItem({
         opacity
     },
     parent,
-    onUpdate
+    onUpdate,
+    onDelete
 }) {
     const onChange = useCallback(values => {
         onUpdate(id, values);
@@ -122,6 +143,7 @@ function NetWorthSubcategoryItem({
             hasCreditLimit={hasCreditLimit}
             opacity={opacity}
             onChange={onChange}
+            onDelete={onDelete}
             buttonText="Update"
         />
     );
@@ -130,6 +152,7 @@ function NetWorthSubcategoryItem({
 NetWorthSubcategoryItem.propTypes = {
     parent: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
     item: subcategoryShape.isRequired
 };
 
@@ -160,12 +183,6 @@ export default function NetWorthSubcategoryList({
 
     const creditLimitDisabled = getCreditLimitDisabled(parent);
 
-    const itemProps = useCallback(({ opacity }) => ({
-        style: {
-            backgroundColor: `rgba(255, 255, 255, ${opacity}`
-        }
-    }), []);
-
     return (
         <div className="net-worth-subcategory-list">
             <div className="net-worth-subcategory-list-head">
@@ -175,14 +192,14 @@ export default function NetWorthSubcategoryList({
             </div>
             <CrudList
                 items={subcategories}
+                real
                 Item={NetWorthSubcategoryItem}
                 CreateItem={NetWorthSubcategoryCreateItem}
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
-                className="net-worth-subcategory"
+                className="net-worth-subcategory-list-crud"
                 extraProps={extraProps}
-                itemProps={itemProps}
             />
         </div>
     );

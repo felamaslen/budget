@@ -1,23 +1,35 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
 import { NetWorthEditForm } from '~client/components/NetWorthEditForm';
 
-export default function NetWorthListItem({
+function NetWorthListItem({
     item,
     categories,
     subcategories,
     active,
     noneActive,
     setActive,
-    onUpdate
+    onUpdate,
+    onDelete
 }) {
+    const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
+
     if (noneActive) {
         return (
-            <div className="net-worth-list-item-summary">
-                {'Entry from date '}{item.date.toISODate()}
+            <div
+                className="net-worth-list-item-summary"
+                onClick={onActivate}
+            >
+                <span className="entry-title">{item.date.toISODate()}</span>
+                <span className="button-delete">
+                    <button
+                        className="button-delete-button"
+                        onClick={onDelete}
+                    >&minus;</button>
+                </span>
             </div>
         );
     }
@@ -43,5 +55,8 @@ NetWorthListItem.propTypes = {
     active: PropTypes.bool.isRequired,
     noneActive: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
-    onUpdate: PropTypes.func.isRequired
+    onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired
 };
+
+export default memo(NetWorthListItem);

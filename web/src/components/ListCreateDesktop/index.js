@@ -66,7 +66,7 @@ export default function ListCreateDesktop({
     }, [onCreate, setActive, page, values]);
 
     return (
-        <>
+        <div className="list-row-desktop list-row-desktop-create">
             <ListRowDesktopBase
                 item={values}
                 page={page}
@@ -79,7 +79,7 @@ export default function ListCreateDesktop({
             <span className="add-button-outer">
                 <button ref={addBtn} onClick={onAdd}>{'Add'}</button>
             </span>
-        </>
+        </div>
     );
 }
 

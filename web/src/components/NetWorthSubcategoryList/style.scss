@@ -31,53 +31,43 @@
         }
     }
 
-    .crud-list.net-worth-subcategory {
+    &-crud {
         display: grid;
         grid-template-columns: inherit;
         grid-row: 2;
         grid-column: 1 / span 5;
 
-        .crud-list-meta {
-            display: inline;
-            grid-row: 1;
-            grid-column: 4 / span 1;
-            position: relative;
+        &-inner {
+            display: flex;
+            flex-flow: column-reverse;
+            grid-column: 1 / span 5;
         }
 
-        .crud-list-list {
-            grid-column: 1 / span 5;
+        .net-worth-subcategory-item-form {
+            display: grid;
+            margin: 0;
+            padding: 0.4em 0;
+            grid-template-columns: auto 100px 100px 64px 64px;
 
-            .crud-list-list-item {
-                display: grid;
-                margin: 0;
-                padding: 0.4em 0;
-                grid-template-columns: auto 64px;
+            .form-field-subcategory {
+                margin: 0 2em;
+                padding: 0 0.5em;
+                grid-column: 1;
             }
+            .form-field-credit-limit {
+                margin: auto;
+                grid-column: 2;
+            }
+            .form-field-opacity {
+                margin: 0 1em;
+                grid-column: 3;
 
-            .net-worth-subcategory-item-form {
-                display: grid;
-                grid-template-columns: auto 100px 100px 64px;
-
-                .form-field-subcategory {
-                    margin: 0 2em;
-                    padding: 0 0.5em;
-                    grid-column: 1;
+                input {
+                    width: 100%;
                 }
-                .form-field-credit-limit {
-                    margin: auto;
-                    grid-column: 2;
-                }
-                .form-field-opacity {
-                    margin: 0 1em;
-                    grid-column: 3;
-
-                    input {
-                        width: 100%;
-                    }
-                }
-                .button-change {
-                    grid-column: 4;
-                }
+            }
+            .button-change {
+                grid-column: 4;
             }
         }
     }

@@ -58,5 +58,5 @@ test('list', t => {
     const [crudList] = pageList.childNodes;
 
     t.is(crudList.tagName, 'DIV');
-    t.is(crudList.className, 'crud-list list-body');
+    t.is(crudList.className, 'crud-list list-desktop');
 });

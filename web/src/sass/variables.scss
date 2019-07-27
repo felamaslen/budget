@@ -130,7 +130,8 @@ $top-nav: $height-nav + 10;
 
 // mobile variables
 $height-header-mobile: 55px;
-$height-nav-mobile: 45px;
+$height-nav-mobile: 36px;
+$navbar-height-mobile: $height-header-mobile + $height-nav-mobile;
 $color-mob-primary: rgb(255, 254, 247);
 $color-mob-primary-dark: rgb(159, 48, 48);
 $color-mob-accent: rgb(255, 160, 64);

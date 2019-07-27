@@ -87,10 +87,13 @@ NetWorthCategoryItemForm.defaultProps = {
 
 function NetWorthCategoryItem({
     item,
-    active,
+    style,
     onUpdate,
+    onDelete,
     categories,
     subcategories,
+    expanded,
+    onExpandToggle,
     onCreateSubcategory,
     onUpdateSubcategory,
     onDeleteSubcategory
@@ -107,28 +110,51 @@ function NetWorthCategoryItem({
         ({ id: categoryId }) => categoryId === item.id
     ), [item.id, categories]);
 
-    return <>
-        <NetWorthCategoryItemForm
-            key="category-form"
-            item={item}
-            onChange={onChange}
-            buttonText="Update"
-        />
-        {active && <NetWorthSubcategoryList
-            key="subcategory-list"
-            parent={parent}
-            subcategories={categorySubcategories}
-            onCreate={onCreateSubcategory}
-            onUpdate={onUpdateSubcategory}
-            onDelete={onDeleteSubcategory}
-        />}
-    </>;
+    const itemStyle = useMemo(() => ({ ...style, backgroundColor: item.color }),
+        [style, item.color]);
+
+    const onExpand = useCallback(() => onExpandToggle(item.id), [onExpandToggle, item.id]);
+
+    return (
+        <div className={classNames('net-worth-category-item', {
+            expanded: expanded === item.id
+        })} style={itemStyle}>
+            <div className="net-worth-category-item-main">
+                <div className="button-toggle-visibility">
+                    <button className="button-toggle-visibility-button" onClick={onExpand} />
+                </div>
+                <NetWorthCategoryItemForm
+                    key="category-form"
+                    item={item}
+                    onChange={onChange}
+                    buttonText="Update"
+                />
+                <div className="button-delete">
+                    <button
+                        className="button-delete-button"
+                        onClick={onDelete}
+                    >&minus;</button>
+                </div>
+            </div>
+            {expanded === item.id && <NetWorthSubcategoryList
+                key="subcategory-list"
+                parent={parent}
+                subcategories={categorySubcategories}
+                onCreate={onCreateSubcategory}
+                onUpdate={onUpdateSubcategory}
+                onDelete={onDeleteSubcategory}
+            />}
+        </div>
+    );
 }
 
 NetWorthCategoryItem.propTypes = {
     item: categoryShape.isRequired,
-    active: PropTypes.bool.isRequired,
+    style: PropTypes.object,
+    expanded: PropTypes.string,
+    onExpandToggle: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
     categories: PropTypes.arrayOf(categoryShape),
     subcategories: PropTypes.arrayOf(subcategoryShape),
     onCreateSubcategory: PropTypes.func.isRequired,
@@ -136,11 +162,17 @@ NetWorthCategoryItem.propTypes = {
     onDeleteSubcategory: PropTypes.func.isRequired
 };
 
+NetWorthCategoryItem.defaultProps = {
+    style: {}
+};
+
 const NetWorthCategoryCreateItem = ({ onCreate }) => (
-    <NetWorthCategoryItemForm
-        onChange={onCreate}
-        buttonText="Create"
-    />
+    <div className="net-worth-category-item">
+        <NetWorthCategoryItemForm
+            onChange={onCreate}
+            buttonText="Create"
+        />
+    </div>
 );
 
 NetWorthCategoryCreateItem.propTypes = {
@@ -157,19 +189,24 @@ export default function NetWorthCategoryList({
     onUpdateSubcategory,
     onDeleteSubcategory
 }) {
+    const [expanded, setExpanded] = useState(null);
+    const onExpandToggle = useCallback(id => setExpanded(last => {
+        if (last === id) {
+            return null;
+        }
+
+        return id;
+    }), []);
+
     const extraProps = {
         categories,
         subcategories,
+        expanded,
+        onExpandToggle,
         onCreateSubcategory,
         onUpdateSubcategory,
         onDeleteSubcategory
     };
-
-    const itemProps = useCallback(({ color }) => ({
-        style: {
-            backgroundColor: color
-        }
-    }), []);
 
     if (!(categories && subcategories)) {
         return null;
@@ -177,16 +214,15 @@ export default function NetWorthCategoryList({
 
     return (
         <div className="net-worth-category-list">
-            <h4 className="title">{'Categories'}</h4>
             <CrudList
                 items={categories}
+                real
                 Item={NetWorthCategoryItem}
                 CreateItem={NetWorthCategoryCreateItem}
                 onCreate={onCreateCategory}
                 onUpdate={onUpdateCategory}
                 onDelete={onDeleteCategory}
-                className="net-worth-category"
-                itemProps={itemProps}
+                className="net-worth-category-list-crud"
                 extraProps={extraProps}
             />
         </div>

@@ -35,12 +35,20 @@ const getContainer = memoize(() => {
 
 test('rendering the children of a list item', t => {
     const { container } = getContainer();
-    t.is(container.childNodes.length, 4);
+
+    t.is(container.childNodes.length, 1);
+
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
+    t.is(div.className, 'list-row-mobile');
+
+    t.is(div.childNodes.length, 4);
 });
 
 test('cells', t => {
     const { container } = getContainer();
-    const [date, item, cost] = container.childNodes;
+    const [div] = container.childNodes;
+    const [date, item, cost] = div.childNodes;
 
     t.is(date.tagName, 'SPAN');
     t.is(item.tagName, 'SPAN');
@@ -57,7 +65,8 @@ test('cells', t => {
 
 test('custom after row component', t => {
     const { container } = getContainer();
-    const [, , , after] = container.childNodes;
+    const [div] = container.childNodes;
+    const [, , , after] = div.childNodes;
 
     t.is(after.tagName, 'SPAN');
     t.is(after.className, 'my-after-row');

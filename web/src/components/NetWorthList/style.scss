@@ -1,3 +1,6 @@
+@import '~client/sass/variables.scss';
+@import '~client/sass/mixins.scss';
+
 .net-worth-list {
     display: flex;
     flex-flow: column;
@@ -14,61 +17,56 @@
         background: #efefef;
     }
 
-    .crud-list {
-        display: flex;
-        flex-flow: column;
-        min-height: 0;
-
-        &-meta {
+    &-crud {
+        &, &-inner {
             display: flex;
-            justify-content: flex-end;
-            position: absolute;
-            top: 20px;
-            right: 5px;
+            flex: 1 1 0;
+            flex-flow: column;
+            min-height: 0;
         }
 
-        &-list {
+        &-inner {
+            flex-flow: column-reverse;
+        }
+
+        &-window {
             flex: 1;
-            overflow-y: auto;
+            flex-flow: row wrap;
         }
 
-        &:not(.active) {
-            .crud-list-list-item {
-                $height: 32px;
+        .net-worth-list-item-summary {
+            @include noselect;
 
-                display: flex;
-                align-items: center;
-                margin: 0;
-                padding: 5px 0;
-                flex: 0 0 $height;
-                position: relative;
+            display: flex;
+            position: relative;
+            flex-flow: column;
+            margin: 10px;
+            align-items: center;
+            justify-content: center;
+            width: 128px;
+            height: 92px;
+            border: 1px solid $color-light;
+            cursor: pointer;
 
-                &:nth-child(2n) {
-                    background: #f3f3f3;
-                }
+            &:hover {
+                background: rgba(10, 60, 240, 0.3);
+            }
 
-                &:hover {
-                    background: rgba(10, 60, 240, 0.3);
-                }
-
-                .net-worth-list-item-summary {
-                    flex: 1;
-                    padding-left: 24px;
-                    line-height: $height;
-                    cursor: pointer;
-                }
-
-                .button-delete {
-                    flex: 0 0 64px;
-                }
+            .button-delete {
+                position: absolute;
+                right: 5px;
+                top: 5px;
             }
         }
 
         &.active {
-            .crud-list-list-item {
-                &:not(.active) {
-                    display: none;
-                }
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        &.create-active {
+            .net-worth-list-crud-window {
+                display: none;
             }
         }
     }

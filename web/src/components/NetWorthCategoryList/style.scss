@@ -1,14 +1,62 @@
+@import '~client/sass/variables.scss';
+
+$category-item-height: 52px;
+
 @mixin category-item {
     display: grid;
     margin: 0;
-    padding: 1em 0;
 
-    grid-template-rows: 28px auto;
-    grid-template-columns: auto 28px;
+    grid-template-rows: $category-item-height auto;
+    grid-template-columns: 24px auto 28px;
     grid-gap: 5px;
 
     &:not(:last-child) {
         border-bottom: 1px solid #000;
+    }
+
+    &-main {
+        display: grid;
+        grid-template-columns: inherit;
+        grid-gap: inherit;
+        grid-row: 1;
+        grid-column: 1 / span 3;
+    }
+
+    .button-toggle-visibility {
+        grid-row: 1;
+        grid-column: 1;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &-button {
+            background: none;
+            border: none;
+            box-shadow: none;
+
+            &::after {
+                display: block;
+                margin-left: 16px;
+                content: '';
+                width: 0;
+                height: 0;
+                border: solid transparent;
+                border-left-color: $color-very-dark;
+                border-width: 6px 8px;
+                transform-origin: left center;
+            }
+        }
+    }
+
+    &.expanded {
+        .button-toggle-visibility {
+            &-button {
+                &::after {
+                    transform: rotate(90deg);
+                }
+            }
+        }
     }
 
     .net-worth-category-item-form {
@@ -16,9 +64,9 @@
         align-items: center;
 
         grid-row: 1;
-        grid-column: 1;
+        grid-column: 2;
 
-        grid-template-rows: 28px;
+        grid-template-rows: $category-item-height;
         grid-template-columns: 104px auto 150px 64px;
 
         .form-field-type,
@@ -80,18 +128,18 @@
     }
     .net-worth-subcategory-list {
         grid-row: 2;
-        grid-column: 1 / span 2;
+        grid-column: 1 / span 3;
     }
     > .button-delete {
         grid-row: 1;
-        grid-column: 2;
+        grid-column: 3;
     }
 }
 
 .net-worth-category-list {
     display: flex;
     flex-flow: column;
-    flex: 1;
+    flex: 1 1 0;
     user-select: none;
     min-height: 0;
 
@@ -99,23 +147,20 @@
         flex: 0 0 auto;
     }
 
-    .crud-list {
-        display: flex;
-        flex-flow: column;
-        flex: 1;
-        min-height: 0;
+    &-crud {
+        &, &-inner {
+            display: flex;
+            flex-flow: column;
+            min-height: 0;
+        }
 
-        &-list {
-            flex: 1;
+        &-inner {
+            flex-flow: column-reverse;
             overflow-y: auto;
         }
 
-        &.net-worth-category {
-            > .crud-list-list {
-                > .crud-list-list-item {
-                    @include category-item;
-                }
-            }
+        .net-worth-category-item {
+            @include category-item;
         }
     }
 }

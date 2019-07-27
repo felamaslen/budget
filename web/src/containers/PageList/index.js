@@ -22,6 +22,7 @@ const PageListComponent = ({
     page,
     After,
     rows,
+    itemSize,
     getDaily,
     weeklyValue,
     totalCost,
@@ -37,6 +38,10 @@ const PageListComponent = ({
                     page={page}
                     isMobile={isMobile}
                     rows={rows}
+                    itemSize={isMobile
+                        ? null
+                        : itemSize
+                    }
                     getDaily={getDaily}
                     weeklyValue={weeklyValue}
                     totalCost={totalCost}
@@ -54,6 +59,7 @@ const PageListComponent = ({
 PageListComponent.propTypes = {
     page: PropTypes.string.isRequired,
     rows: rowsShape,
+    itemSize: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
     After: PropTypes.func,
     getDaily: PropTypes.bool,
     weeklyValue: PropTypes.number,
@@ -66,6 +72,7 @@ PageListComponent.propTypes = {
 
 PageListComponent.defaultProps = {
     After: null,
+    itemSize: null,
     extraProps: {}
 };
 

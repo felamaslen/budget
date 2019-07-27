@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import { rowsShape } from '~client/prop-types/page/rows';
+import { itemHeightDesktop, itemHeightMobile } from '~client/constants/styles';
 
 import CrudList from '~client/components/CrudList';
 import ListHeadDesktop from '~client/components/ListHeadDesktop';
@@ -11,16 +12,11 @@ import ListRowDesktop from '~client/components/ListRowDesktop';
 import ListRowMobile from '~client/components/ListRowMobile';
 import ListCreateDesktop from '~client/components/ListCreateDesktop';
 
-const getItemClassName = ({ future, firstPresent, className = '' }) => ({
-    future,
-    'first-present': firstPresent,
-    [className]: className
-});
-
 export default function ListBody({
     page,
     isMobile,
     rows,
+    itemSize,
     getDaily,
     weeklyValue,
     totalCost,
@@ -57,23 +53,26 @@ export default function ListBody({
         return [
             ListRowDesktop,
             ListCreateDesktop,
-            'list-body',
+            'list-desktop',
             ListHeadDesktop,
             null
         ];
     }, [isMobile]);
 
+    const defaultItemSize = isMobile
+        ? itemHeightMobile
+        : itemHeightDesktop;
+
     return (
         <CrudList
             items={rows}
-            reverse
+            itemSize={itemSize || defaultItemSize}
             nav={!isMobile}
             Item={Item}
             CreateItem={CreateItem}
             BeforeList={BeforeList}
             AfterList={AfterList}
             className={className}
-            itemClassName={getItemClassName}
             extraProps={extraProps}
             onCreate={onCreate}
             onUpdate={onUpdate}
@@ -86,6 +85,7 @@ ListBody.propTypes = {
     page: PropTypes.string.isRequired,
     isMobile: PropTypes.bool.isRequired,
     rows: rowsShape,
+    itemSize: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
     getDaily: PropTypes.bool,
     weeklyValue: PropTypes.number,
     totalCost: PropTypes.number,

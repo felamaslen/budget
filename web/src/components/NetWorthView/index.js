@@ -10,7 +10,6 @@ import './style.scss';
 export default function NetWorthView({ table, aggregate }) {
     return (
         <div className="net-worth-view">
-            <h4 className="title">{'View'}</h4>
             <table className="net-worth-view-table">
                 <thead>
                     <tr className="row-categories">

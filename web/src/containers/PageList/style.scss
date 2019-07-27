@@ -2,8 +2,8 @@
 @import '~client/sass/variables.scss';
 @import '~client/sass/mixins.scss';
 
-$item-height-mobile: 30px;
-$item-height-desktop: 24px;
+$item-height-mobile: $itemHeightMobile + 0px;
+$item-height-desktop: $itemHeightDesktop + 0px;
 
 .page-list {
     flex: 1 1 0;
@@ -32,7 +32,7 @@ $item-height-desktop: 24px;
         }
 
         .crud-list {
-            &-list {
+            &-inner {
                 display: flex;
                 flex: 1 0 0;
                 z-index: 5;
@@ -41,30 +41,32 @@ $item-height-desktop: 24px;
                 flex-flow: column nowrap;
                 overflow-y: auto;
 
-                &-item {
+                .list-row-mobile {
                     display: flex;
                     flex-flow: row nowrap;
                     flex: 0 0 $item-height-mobile;
                     line-height: $item-height-mobile;
-                    height: $item-height-mobile;
 
                     .column {
-                        display: flex;
                         flex-basis: 0;
                         min-width: 0;
                         white-space: nowrap;
-                        padding: 0 2px;
-
-                        .editable {
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
+                        margin: 0 2px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
 
                     .button-delete {
                         display: none;
                     }
                 }
+            }
+
+            &-window {
+                display: flex;
+                flex-flow: column;
+                flex: 1 1 0;
+                min-height: 0;
             }
 
             .button-add {
@@ -85,7 +87,7 @@ $item-height-desktop: 24px;
         }
 
         .list-head,
-        .crud-list-list {
+        .list-row-mobile {
             .column {
                 &.date {
                     flex-grow: 4;
@@ -144,37 +146,14 @@ $item-height-desktop: 24px;
                 background: none !important;
             }
 
-            &, .list-body {
+            &, .list-desktop {
                 display: flex;
                 flex-flow: column;
                 flex: 1 1 0;
                 min-height: 0;
             }
-
-            .list-head {
-                flex: 0 0 10px;
-                font-weight: bold;
-                line-height: 24px;
-                text-transform: capitalize;
-                white-space: nowrap;
-                text-align: left;
-                line-height: 24px;
-                border-bottom: 1px solid $color-medium-very-light;
-
-                .weekly,
-                .weekly-value,
-                .total,
-                .total-value {
-                    margin-left: 0.2em;
-                    padding-left: 0.2em;
-                }
-
-                span {
-                    padding-left: 1px;
-                }
-            }
-
-            .crud-list-list-item,
+            
+            .list-row-desktop,
             .list-head {
                 .date {
                     flex: 0 0 96px;
@@ -201,22 +180,59 @@ $item-height-desktop: 24px;
             .future {
                 @include unimportant;
             }
-            .first-present {
+            .first-present:not(:first-child) {
                 border-top: 1px solid $color-medium-slightly-dark;
             }
 
-            .crud-list-list {
-                display: flex;
-                margin: 0;
-                flex: 1 1 0;
-                min-height: 0;
-                flex-flow: column;
-                position: relative;
-                overflow-y: auto;
-                list-style: none;
-                width: 100%;
+            .crud-list {
+                &-inner {
+                    display: flex;
+                    margin: 0;
+                    flex: 1 1 0;
+                    min-height: 0;
+                    flex-flow: column;
+                    position: relative;
+                    overflow-y: initial;
+                    list-style: none;
+                    width: 100%;
+                }
 
-                &-item {
+                .list-head {
+                    flex: 0 0 24px;
+                    font-weight: bold;
+                    line-height: 24px;
+                    text-transform: capitalize;
+                    white-space: nowrap;
+                    text-align: left;
+                    line-height: 24px;
+                    border-bottom: 1px solid $color-medium-very-light;
+
+                    .weekly,
+                    .weekly-value,
+                    .total,
+                    .total-value {
+                        margin-left: 0.2em;
+                        padding-left: 0.2em;
+                    }
+
+                    span {
+                        padding-left: 1px;
+                    }
+                }
+
+                &-window {
+                    .list-row-desktop {
+                        &.odd {
+                            background: $color-translucent-dark;
+                        }
+
+                        .cell:not(.active) {
+                            overflow: hidden;
+                        }
+                    }
+                }
+
+                .list-row-desktop {
                     display: flex;
                     margin: 0;
                     padding: 0;
@@ -225,13 +241,16 @@ $item-height-desktop: 24px;
                     height: $item-height-desktop;
                     width: 100%;
 
-                    &:not(.crud-list-list-item-create) {
-                        &:nth-child(2n) {
-                            background: $color-translucent-dark;
-                        }
+                    &-create {
+                        flex: 0 0 auto;
+                        border-bottom: 1px solid $color-medium-very-light;
                     }
 
                     .cell {
+                        display: inline-flex;
+                        text-overflow: ellipsis;
+                        vertical-align: top;
+                        height: inherit;
                         overflow: hidden;
 
                         &.active {
@@ -239,7 +258,46 @@ $item-height-desktop: 24px;
                         }
 
                         .editable {
+                            &, &-input {
+                                height: inherit;
+                            }
+
                             &-active {
+                            }
+
+                            .text {
+                                margin-right: 2px;
+                                padding: 0 2px;
+                            }
+                        }
+
+                        & > span {
+                            border-right: 1px solid $color-slightly-light;
+                            &.active {
+                                overflow: visible;
+                            }
+                        }
+                    }
+                
+                    .suggestions {
+                        margin: 0;
+                        padding: 0;
+                        position: absolute;
+                        width: 100%;
+                        z-index: 10;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        box-shadow: 0 3px 6px $color-shadow-l3;
+                        background: $color-translucent-l95;
+                
+                        .suggestion {
+                            margin: 1px 0;
+                            padding: 2px;
+                            cursor: default;
+
+                            &.active {
+                                background: $color-blue;
+                                color: $color-white;
                             }
                         }
                     }
@@ -253,94 +311,6 @@ $item-height-desktop: 24px;
                             line-height: 18px;
                         }
                     }
-                }
-
-                &-item-create {
-                    position: sticky;
-                    top: 0;
-                    background: $color-translucent-l95;
-                }
-
-                &-item {
-                    &:not(.crud-list-list-item-create) {
-                        .cell:not(.active) {
-                            overflow: hidden;
-                        }
-                    }
-
-                    .cell {
-                        display: inline-flex;
-                        text-overflow: ellipsis;
-                        vertical-align: top;
-                        height: inherit;
-
-                        & > span {
-                            border-right: 1px solid $color-slightly-light;
-                            &.active {
-                                overflow: visible;
-                            }
-                        }
-                    }
-                }
-                .editable {
-                    &, &-input {
-                        height: inherit;
-                    }
-                }
-                .text {
-                    margin-right: 2px;
-                    padding: 0 2px;
-                }
-                .delete {
-                    display: flex;
-                    flex: 0 0 20px;
-                    align-items: center;
-                    justify-content: center;
-                    border-right: none;
-
-                    a {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        cursor: pointer;
-                        background: $color-delete;
-                        font-size: 20px;
-                        width: 16px;
-                        height: 16px;
-                        border-radius: 100%;
-
-                        &::after {
-                            display: block;
-                            width: 80%;
-                            height: 3px;
-                            background: $color-white;
-                            content: '';
-                        }
-
-                        &:active {
-                            background: $color-delete-active;
-                        }
-                    }
-                }
-                .suggestions {
-                    margin: 0;
-                    padding: 0;
-                    position: absolute;
-                    width: 100%;
-                    z-index: 10;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    box-shadow: 0 3px 6px $color-shadow-l3;
-                    background: $color-translucent-l95;
-                }
-                .suggestion {
-                    margin: 1px 0;
-                    padding: 2px;
-                    cursor: default;
-                }
-                .suggestion.active {
-                    background: $color-blue;
-                    color: $color-white;
                 }
             }
         }

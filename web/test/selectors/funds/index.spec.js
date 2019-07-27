@@ -16,9 +16,15 @@ test('getFundsCachedValueAgeText returns the expected string', t => {
     t.is(getFundsCachedValueAgeText(now.ts / 1000 - 4000, [0, 100, 400], now), '1 hour ago');
 });
 
+test('getFundsCachedValueAgeText uses only one unit', t => {
+    const now = DateTime.fromISO('2018-06-03');
+
+    t.is(getFundsCachedValueAgeText(now.ts / 1000 - 86400 - 3600 * 5.4, [0, 100, 400], now), '1 day ago');
+});
+
 test('getFundsCachedValue gets an age text and value', t => {
     const expectedValue = 399098.2;
-    const expectedAgeText = '6 months, 3 weeks ago';
+    const expectedAgeText = '7 months ago';
 
     t.deepEqual(getFundsCachedValue(state), { value: expectedValue, ageText: expectedAgeText });
 });
@@ -53,7 +59,7 @@ test('getFundsCachedValue skips funds without price data', t => {
         }
     }), {
         value: 399098.2,
-        ageText: '6 months, 3 weeks ago'
+        ageText: '7 months ago'
     });
 });
 

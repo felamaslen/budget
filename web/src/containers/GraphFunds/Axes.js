@@ -37,10 +37,6 @@ export default function Axes({
     pixX,
     pixY
 }) {
-    if (!maxX) {
-        return null;
-    }
-
     const textColor = rgba(COLOR_DARK);
     const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 

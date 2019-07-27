@@ -1,6 +1,5 @@
-import './style.scss';
 import { connect } from 'react-redux';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
 
@@ -13,6 +12,7 @@ import {
 } from '~client/selectors/funds';
 import { rowsShape } from '~client/prop-types/page/rows';
 import { cachedValueShape } from '~client/prop-types/page/funds';
+import { itemHeightDesktop, itemHeightDesktopFunds } from '~client/constants/styles';
 import { PageList } from '~client/containers/PageList';
 import StocksList from '~client/containers/StocksList';
 import GraphFunds from '~client/containers/GraphFunds';
@@ -20,6 +20,8 @@ import ListHeadFundsDesktop from '~client/components/ListHeadFundsDesktop';
 import ListHeadFundsMobile from '~client/components/ListHeadFundsMobile';
 import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
 import ListRowFundsMobile from '~client/components/ListRowFundsMobile';
+
+import './style.scss';
 
 const LIST_COLS_MOBILE_FUNDS = ['item'];
 
@@ -48,8 +50,17 @@ function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices
         onReloadPrices
     }), [period, cachedValue, onViewSoldToggle, onReloadPrices]);
 
+    const itemSize = useCallback(index => {
+        if (rows[index].sold) {
+            return itemHeightDesktop;
+        }
+
+        return itemHeightDesktopFunds;
+    }, [rows]);
+
     return (
         <PageList page="funds"
+            itemSize={itemSize}
             After={FundsInfo}
             TotalValue={ListHeadFundsDesktop}
             AfterRow={ListRowFundsDesktop}

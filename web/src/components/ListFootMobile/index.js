@@ -50,7 +50,7 @@ export default function ListFootMobile({ page, active, setActive, activeItem, on
 
         return () => {
             setActive(null);
-            onDelete(page, active, activeItem);
+            onDelete(activeItem.id, { page }, activeItem);
         };
     }, [setActive, onDelete, page, active, adding, activeItem]);
 

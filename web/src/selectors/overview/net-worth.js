@@ -5,7 +5,6 @@ import compose from 'just-compose';
 import {
     getCost,
     getSpendingColumn,
-    getStartDate,
     getMonthDates
 } from '~client/selectors/overview/common';
 
