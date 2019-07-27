@@ -201,6 +201,7 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
             entries: [
                 {
                     id: 'real-entry-id',
+                    date: DateTime.fromISO('2019-07-27'),
                     values: [
                         { subcategory: 'real-subcategory-id' }
                     ],
@@ -210,6 +211,7 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
                 },
                 {
                     id: 'fake-entry-id',
+                    date: DateTime.fromISO('2019-07-04'),
                     values: [
                         { subcategory: 'real-subcategory-id' },
                         { subcategory: 'fake-subcategory-id-a' }
@@ -265,6 +267,7 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
             method: 'put',
             route: 'data/net-worth',
             body: {
+                date: '2019-07-27',
                 values: [
                     { subcategory: 'real-subcategory-id' }
                 ],
@@ -287,6 +290,7 @@ test('getNetWorthRequests removes IDs from net worth entry dependents', t => {
             }],
             entries: [{
                 id: 'fake-entry-id',
+                date: DateTime.fromISO('2019-07-31'),
                 values: [
                     { id: 'fake-value-id', subcategory: 'real-subcategory-id' }
                 ],
@@ -309,6 +313,7 @@ test('getNetWorthRequests removes IDs from net worth entry dependents', t => {
         method: 'post',
         route: 'data/net-worth',
         body: {
+            date: '2019-07-31',
             values: [
                 { subcategory: 'real-subcategory-id' }
             ],

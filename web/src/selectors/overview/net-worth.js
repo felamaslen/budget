@@ -9,7 +9,6 @@ import {
     getMonthDates
 } from '~client/selectors/overview/common';
 
-import { getMonthDatesList } from '~client/modules/date';
 import { sortByKey, withoutDeleted } from '~client/modules/data';
 import { getRequests } from '~client/selectors/crud';
 import { CREATE } from '~client/constants/data';
@@ -203,7 +202,8 @@ const withEntryRequests = (categories, subcategories, entries) => requests => re
         .filter(({ values, creditLimit }) => ([values, creditLimit])
             .every(group => !group.some(groupPending(categories, subcategories)))
         )
-        .map(({ values, creditLimit, currencies, ...rest }) => ({
+        .map(({ date, values, creditLimit, currencies, ...rest }) => ({
+            date: date.toISODate(),
             values: withoutIds(values),
             creditLimit: withoutIds(creditLimit),
             currencies: withoutIds(currencies),
