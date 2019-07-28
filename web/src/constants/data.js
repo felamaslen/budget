@@ -36,7 +36,7 @@ export const OVERVIEW_COLUMNS = [
     ['spending', 'Out'],
     ['net', 'Net'],
     ['netWorthPredicted', 'Predicted'],
-    ['netWorth', 'Net Worth', '/net-worth']
+    ['netWorth', 'Net Worth', { to: '/net-worth', replace: true }]
 ];
 
 export const PAGES = {

@@ -1,3 +1,5 @@
+@import '~client/sass/variables.scss';
+
 $color-border: #ccc;
 
 $color-cash-easy-access: #b4d6a9;
@@ -13,12 +15,13 @@ $color-net-worth: #b2a6d3;
 $color-expenses: #d5a4bb;
 
 .net-worth-view {
-    flex: 1;
+    margin: 0 3px;
+    min-height: 0;
+    max-height: 720px;
     overflow: auto;
+    background: $color-translucent-l95;
 
     &-table {
-        margin: 10px;
-
         border-collapse: collapse;
         border-spacing: 0;
 
@@ -26,15 +29,11 @@ $color-expenses: #d5a4bb;
         line-height: 20px;
 
         thead {
-            border-top: 1px solid $color-border;
             border-right: 1px solid $color-border;
             border-left: 1px solid $color-border;
         }
 
         tbody {
-            border-top: 1px solid $color-border;
-            border-left: 1px solid $color-border;
-
             tr {
                 border-bottom: 1px solid $color-border;
             }

@@ -17,21 +17,18 @@ export default function NetWorthView({ table, aggregate }) {
                         <SumByCategory className="stocks" aggregate={aggregate} />
                         <th className="assets">{'Assets'}</th>
                         <th className="liabilities">{'Liabilities'}</th>
-                        <th rowSpan={3} className="net-worth-header">{'Net Worth'}</th>
+                        <th rowSpan={2} className="net-worth-header">{'Net Worth'}</th>
                         <th className="expenses">{'Expenses'}</th>
                         <th className="fti">{'FTI'}</th>
                     </tr>
                     <tr className="row-subtitle">
                         <SumByCategory className="cash-other" aggregate={aggregate} />
                         <SumByCategory className="pension" aggregate={aggregate} />
-                        <th rowSpan={2} className="assets">{'Total (£)'}</th>
-                        <th rowSpan={2} className="liabilities">{'Total (£)'}</th>
-                        <th rowSpan={2} colSpan={2} className="retirement">
-                            {'Can retire when FTI > 1000 consistently'}
+                        <th className="assets">{'Total (£)'}</th>
+                        <th className="liabilities">{'Total (£)'}</th>
+                        <th colSpan={2} className="retirement">
+                            {'Retire when FTI > 1000'}
                         </th>
-                    </tr>
-                    <tr className="row-date">
-                        <th colSpan={2} className="date">{'Date'}</th>
                     </tr>
                 </thead>
                 <tbody>

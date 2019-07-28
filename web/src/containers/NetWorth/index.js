@@ -1,7 +1,9 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { withRouter } from 'react-router';
 import { Route, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import { NET_WORTH_AGGREGATE } from '~client/constants/data';
 
@@ -36,6 +38,7 @@ import NetWorthList from '~client/components/NetWorthList';
 import './style.scss';
 
 function NetWorth({
+    history,
     categories,
     subcategories,
     entries,
@@ -51,69 +54,86 @@ function NetWorth({
     onUpdateEntry,
     onDeleteEntry
 }) {
+    const timer = useRef();
+    const [visible, setVisible] = useState(false);
+    const onClose = useCallback(() => {
+        setVisible(false);
+        clearTimeout(timer.current);
+        timer.current = setTimeout(() => {
+            history.replace('/');
+        }, 300);
+    }, [history]);
+
+    useEffect(() => {
+        setVisible(true);
+
+        return () => clearTimeout(timer.current);
+    }, []);
+
     return (
-        <div className="net-worth">
-            <div className="net-worth-inner">
-                <div className="title">
-                    <h1>{'Net worth'}</h1>
-                    <NavLink className="button-back" to="/">&times;</NavLink>
-                </div>
-                <Route
+        <div className={classNames('net-worth', { visible })}>
+            <div className="meta">
+                <h2 className="title">{'Net worth'}</h2>
+                <a className="button-back" onClick={onClose}>&times;</a>
+            </div>
+            <Route
+                exact
+                path="/net-worth"
+                render={routeProps => <NetWorthView {...routeProps}
+                    table={table}
+                    aggregate={aggregate}
+                />}
+            />
+            <Route
+                path="/net-worth/edit/categories"
+                render={routeProps => <NetWorthCategoryList {...routeProps}
+                    categories={categories}
+                    subcategories={subcategories}
+                    onCreateCategory={onCreateCategory}
+                    onUpdateCategory={onUpdateCategory}
+                    onDeleteCategory={onDeleteCategory}
+                    onCreateSubcategory={onCreateSubcategory}
+                    onUpdateSubcategory={onUpdateSubcategory}
+                    onDeleteSubcategory={onDeleteSubcategory}
+                />}
+            />
+            <Route
+                path="/net-worth/edit/list"
+                render={routeProps => <NetWorthList {...routeProps}
+                    data={entries}
+                    categories={categories}
+                    subcategories={subcategories}
+                    onCreate={onCreateEntry}
+                    onUpdate={onUpdateEntry}
+                    onDelete={onDeleteEntry}
+                />}
+            />
+            <div className="net-worth-tab-bar">
+                <NavLink
                     exact
-                    path="/net-worth"
-                    render={routeProps => <NetWorthView {...routeProps}
-                        table={table}
-                        aggregate={aggregate}
-                    />}
-                />
-                <Route
-                    path="/net-worth/edit/categories"
-                    render={routeProps => <NetWorthCategoryList {...routeProps}
-                        categories={categories}
-                        subcategories={subcategories}
-                        onCreateCategory={onCreateCategory}
-                        onUpdateCategory={onUpdateCategory}
-                        onDeleteCategory={onDeleteCategory}
-                        onCreateSubcategory={onCreateSubcategory}
-                        onUpdateSubcategory={onUpdateSubcategory}
-                        onDeleteSubcategory={onDeleteSubcategory}
-                    />}
-                />
-                <Route
-                    path="/net-worth/edit/list"
-                    render={routeProps => <NetWorthList {...routeProps}
-                        data={entries}
-                        categories={categories}
-                        subcategories={subcategories}
-                        onCreate={onCreateEntry}
-                        onUpdate={onUpdateEntry}
-                        onDelete={onDeleteEntry}
-                    />}
-                />
-                <div className="net-worth-tab-bar">
-                    <NavLink
-                        exact
-                        to="/net-worth"
-                        className="tab tab-view"
-                        activeClassName="selected"
-                    >{'View'}</NavLink>
-                    <NavLink
-                        to="/net-worth/edit/categories"
-                        className="tab tab-edit-categories"
-                        activeClassName="selected"
-                    >{'Categories'}</NavLink>
-                    <NavLink
-                        to="/net-worth/edit/list"
-                        className="tab tab-edit-list"
-                        activeClassName="selected"
-                    >{'Entries'}</NavLink>
-                </div>
+                    to="/net-worth"
+                    className="tab tab-button tab-view"
+                    activeClassName="selected"
+                >{'View'}</NavLink>
+                <NavLink
+                    to="/net-worth/edit/categories"
+                    className="tab tab-button tab-edit-categories"
+                    activeClassName="selected"
+                >{'Categories'}</NavLink>
+                <NavLink
+                    to="/net-worth/edit/list"
+                    className="tab tab-button tab-edit-list"
+                    activeClassName="selected"
+                >{'Entries'}</NavLink>
             </div>
         </div>
     );
 }
 
 NetWorth.propTypes = {
+    history: PropTypes.shape({
+        replace: PropTypes.func.isRequired
+    }).isRequired,
     cost: costShape,
     categories: dataPropTypes.categories,
     subcategories: dataPropTypes.subcategories,
@@ -152,4 +172,4 @@ const mapDispatchToProps = {
     onDeleteEntry: netWorthDeleted
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(NetWorth);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(NetWorth));

@@ -4,8 +4,7 @@
 .net-worth-list {
     display: flex;
     flex-flow: column;
-    flex: 1;
-    min-height: 0;
+    flex: 0 0 480px;
 
     .title {
         display: flex;
@@ -18,50 +17,101 @@
     }
 
     &-crud {
-        &, &-inner {
+        & {
             display: flex;
-            flex: 1 1 0;
+            width: 500px;
+            flex: 0 0 480px;
             flex-flow: column;
-            min-height: 0;
         }
 
         &-inner {
-            flex-flow: column-reverse;
+            display: flex;
+            flex: 1 1 0;
+            width: 100%;
         }
 
-        &-window {
-            flex: 1;
-            flex-flow: row wrap;
+        &:not(.active) {
+            .net-worth-list-crud-inner {
+                display: grid;
+                grid-template-rows: 448px 32px;
+
+                > .net-worth-list-item-summary {
+                    margin: 0 auto 4px;
+                    width: 160px;
+                    grid-row: 2;
+                    flex: 0 0 32px;
+                    line-height: 32px;
+                }
+            }
+
+            .net-worth-list-crud-window {
+                display: grid;
+                padding: 6px;
+                grid-row: 1;
+                grid-column: 1;
+                grid-gap: 6px;
+                grid-template-rows: repeat(5, 1fr);
+                grid-template-columns: repeat(5, 1fr);
+
+                .net-worth-list-item-summary {
+                    flex-flow: column;
+                }
+            }
+        }
+
+        &.active {
+            width: 700px;
+            &, .net-worth-list-crud-inner {
+                flex: 1 1 0;
+                flex-flow: column;
+                min-height: 0;
+            }
+
+            .net-worth-list-crud-window {
+                flex: 1 1 0;
+                min-height: 0;
+
+                width: 100%;
+                position: relative;
+                background: white;
+            }
         }
 
         .net-worth-list-item-summary {
             @include noselect;
 
             display: flex;
-            position: relative;
-            flex-flow: column;
-            margin: 10px;
+            padding: 0 6px;
             align-items: center;
             justify-content: center;
-            width: 128px;
-            height: 92px;
-            border: 1px solid $color-light;
+            position: relative;
+            background: $color-light;
             cursor: pointer;
+            border-radius: 2px;
 
             &:hover {
-                background: rgba(10, 60, 240, 0.3);
+                background: $color-slightly-light;
+            }
+            &:active {
+                box-shadow: 0 1px 3px $color-shadow-l8;
             }
 
             .button-delete {
                 position: absolute;
                 right: 5px;
                 top: 5px;
+
+                &-button {
+                    width: 16px;
+                    height: 16px;
+                    font-size: 16px;
+                    line-height: 16px;
+                }
             }
         }
 
         &.active {
             flex: 1;
-            overflow-y: auto;
         }
 
         &.create-active {

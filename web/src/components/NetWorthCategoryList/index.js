@@ -21,7 +21,7 @@ const typeOptions = [
 ];
 
 function NetWorthCategoryItemForm({
-    item: { type, category, color },
+    item: { id, type, category, color },
     onChange,
     buttonText
 }) {
@@ -29,7 +29,8 @@ function NetWorthCategoryItemForm({
     const [tempCategory, setTempCategory] = useState(category);
     const [tempColor, setTempColor] = useState(color);
 
-    const touched = !(tempType === type && tempCategory === category && tempColor === color);
+    const touched = id === CREATE_ID ||
+        !(tempType === type && tempCategory === category && tempColor === color);
 
     const onChangeItem = useCallback(() => onChange({
         type: tempType,
