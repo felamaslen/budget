@@ -68,6 +68,7 @@
 
             .form-field-net-worth-value {
                 display: flex;
+                flex-flow: column;
                 align-items: flex-start;
 
                 .complex-toggle {
@@ -84,6 +85,14 @@
                         flex: 0 0 100px;
                         input {
                             width: 100px;
+                        }
+
+                        &-number,
+                        &-currency {
+                            flex: 0 0 64px;
+                            input {
+                                width: 64px;
+                            }
                         }
                     }
                     select {
@@ -105,9 +114,16 @@
                 }
 
                 ul {
-                    flex: 1;
+                    margin: 0 6px 0 0;
                     padding: 0;
+                    flex: 1;
                     list-style: none;
+                }
+            }
+
+            .form-field-cost {
+                &, input {
+                    width: 100px;
                 }
             }
 
@@ -216,7 +232,7 @@
     .button-cancel {
         position: absolute;
         left: 0;
-        top:  20px;
+        top:  0;
     }
 
     .net-worth-edit-form-section {

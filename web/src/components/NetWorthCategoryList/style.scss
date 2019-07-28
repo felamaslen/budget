@@ -11,7 +11,7 @@ $category-item-height: 52px;
     grid-gap: 5px;
 
     &:not(:last-child) {
-        border-bottom: 1px solid #000;
+        border-bottom: 1px solid $color-medium;
     }
 
     &-main {
@@ -99,7 +99,6 @@ $category-item-height: 52px;
         }
         .form-field-color {
             grid-column: 3;
-            position: relative;
 
             .color-value {
                 display: flex;
@@ -117,8 +116,9 @@ $category-item-height: 52px;
 
             .color-picker {
                 position: absolute;
-                left: 0;
-                top: 28px;
+                left: 50%;
+                top: 50%;
+                transform: translateX(-50%) translateY(-50%);
                 z-index: 5;
             }
         }
@@ -139,9 +139,9 @@ $category-item-height: 52px;
 .net-worth-category-list {
     display: flex;
     flex-flow: column;
-    flex: 1 1 0;
     user-select: none;
     min-height: 0;
+    max-height: 720px;
 
     .title {
         flex: 0 0 auto;

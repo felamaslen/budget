@@ -3,7 +3,7 @@
   "sideEffects": [
     "*.scss"
   ],
-  "version": "4.9.5",
+  "version": "4.9.6",
   "description": "Personal finance app",
   "main": "index.js",
   "engines": {
