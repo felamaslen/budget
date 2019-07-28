@@ -22,7 +22,7 @@ export const getEndDate = state => state.overview.endDate;
 export const getNumMonths = createSelector(getStartDate, getEndDate,
     (startDate, endDate) => getMonthDiff(startDate, endDate) + 1);
 
-export const getFutureMonths = createSelector(getCurrentDate, getEndDate,
-    (startDate, endDate) => getMonthDiff(startDate, endDate) - 1);
+export const getFutureMonths = createSelector(getCurrentDate, getEndDate, (currentDate, endDate) =>
+    getMonthDiff(currentDate, endDate));
 
 export const getMonthDates = createSelector(getStartDate, getEndDate, getMonthDatesList);

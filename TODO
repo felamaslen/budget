@@ -36,5 +36,7 @@
 - [DONE] Fetch all net worth summary values on startup
 - [DONE] Use react-window or similar virtualisation to render list data
 - [DONE] Fix funds list head formatting
-- Fix predicted net worth (predicted for current month)
+- [DONE] Fix predicted net worth (predicted for current month)
+- Move overview fund value calculation to frontend
+- Remove obsolete balance response in overview route
 - Lazy / infinite loading of list pages (see https://github.com/bvaughn/react-window-infinite-loader)

@@ -25,11 +25,8 @@ function getOverviewCategoryKeyColor(key) {
     if (COLOR_CATEGORY[key]) {
         return COLOR_CATEGORY[key];
     }
-    if (key === 'net') {
+    if (key.startsWith('net')) {
         return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
-    }
-    if (key.startsWith('netWorth')) {
-        return [COLOR_CATEGORY.spending, COLOR_CATEGORY.balance];
     }
 
     throw new Error(`Unknown overview column: ${key}`);
@@ -41,42 +38,48 @@ export const getOverviewCategoryColor = () => OVERVIEW_COLUMNS.slice(1)
         [key]: getOverviewCategoryKeyColor(key)
     }), {});
 
-export function getOverviewScoreColor(value, range, median, color) {
-    const blank = [255, 255, 255]; // white
+const blank = [255, 255, 255]; // white
 
-    if (!value || range.min === range.max) {
+const scoreColor = (color, score) => color.map(value => Math.round(255 - (255 - value) * score));
+
+function getScore(value, median, min, max) {
+    if (min / max > 0 && value / min < 1) {
+        return 0;
+    }
+    if (value / max > 1) {
+        return 1;
+    }
+    if ((value - min) / (median - min) < 1) {
+        return 0.5 * (value - min) / (median - min);
+    }
+
+    return 0.5 * (1 + (value - median) / (max - median));
+}
+
+export function getOverviewScoreColor(
+    value,
+    {
+        min,
+        maxNegative = 0,
+        minPositive = 0,
+        max
+    },
+    { negative, positive } = {},
+    color
+) {
+    if (!value || min === max) {
         return blank;
     }
 
-    const medianValue = value < 0
-        ? median.negative
-        : median.positive;
+    if (color.length === 2) {
+        if (value < 0) {
+            return scoreColor(color[0], getScore(-value, -negative, -maxNegative, -min));
+        }
 
-    const cost = Math.abs(value);
-
-    const max = value > 0
-        ? range.max
-        : -range.min;
-
-    const score = cost > medianValue
-        ? 0.5 * (1 + (cost - medianValue) / (max - medianValue))
-        : 0.5 * cost / medianValue;
-
-    const split = color.length === 2 && (range.min < 0 || range.max > 0);
-
-    let theColor = color;
-    if (split) {
-        // score separately for positive vs. negative
-        const end = value < 0
-            ? 0
-            : 1;
-        theColor = color[end];
-    }
-    else if (value < 0) {
-        return blank;
+        return scoreColor(color[1], getScore(value, positive, minPositive, max));
     }
 
-    return theColor.map(item => Math.round(255 - (255 - item) * score));
+    return scoreColor(color, getScore(value, positive, min, max));
 }
 
 const colorHash = new ColorHash({

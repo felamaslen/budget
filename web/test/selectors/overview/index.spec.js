@@ -1,5 +1,6 @@
 import test from 'ava';
 import sinon from 'sinon';
+import { DateTime } from 'luxon';
 
 import { testState as state } from '~client-test/test_data/state';
 import {
@@ -7,6 +8,7 @@ import {
     getOverviewTable
 } from '~client/selectors/overview';
 import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
+import { getTransactionsList } from '~client/modules/data';
 
 const testRandoms = [0.15, 0.99];
 
@@ -18,35 +20,137 @@ const getRandomStub = () => {
 
 test('getProcessedCost processes the cost data, including making predictions, adding spending / net columns etc.', t => {
     const stub = getRandomStub();
-    const netWorthSummary = getNetWorthSummary(state);
 
-    const netWorthPredicted = [
-        netWorthSummary[0],
-        netWorthSummary[0] - 168,
-        netWorthSummary[1] + 841 + 102981 - 101459,
-        netWorthSummary[2] + 1746,
-        (netWorthSummary[2] + 1746) + 2093, // first future row
-        (netWorthSummary[2] + 1746) + 2093 + 1593,
-        (netWorthSummary[2] + 1746) + 2093 + 1593 + 2393
-    ];
+    const testState = {
+        ...state,
+        now: DateTime.fromISO('2018-03-23T11:54:23.000Z'),
+        funds: {
+            ...state.funds,
+            items: [
+                {
+                    id: 'fund-A',
+                    item: 'some fund 1',
+                    transactions: getTransactionsList([
+                        { date: DateTime.fromISO('2018-02-05'), units: 10, cost: 56123 },
+                        { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 }
+                    ])
+                },
+                {
+                    id: 'fund-B',
+                    item: 'some fund 2',
+                    transactions: getTransactionsList([
+                        { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 }
+                    ])
+                }
+            ]
+        }
+    };
 
-    t.deepEqual(getProcessedCost(state), {
-        spending: [1260, 2068, 659, 754, 207, 207, 207],
-        net: [740, -168, 841, 1746, 2093, 1593, 2393],
+    const netWorthSummary = getNetWorthSummary(testState);
+
+    const net = [740, -168, 751, 1540, 1990, 1490, 2290];
+    const funds = [100779, 101459, 102981, 105841, 108781, 111802, 114907];
+
+    const jan = netWorthSummary[0];
+    const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - 56123;
+    const mar = netWorthSummary[1] + net[2] + funds[2] - funds[1] + 2382 - 10662;
+
+    // We're currently in March, but not at the end of the month, so we predict the next
+    // month's value based on the prediction for March
+    const apr = mar + net[3] + funds[3] - funds[2];
+    const may = apr + net[4] + funds[4] - funds[3];
+    const jun = may + net[5] + funds[5] - funds[4];
+    const jul = jun + net[6] + funds[6] - funds[5];
+
+    const netWorthPredicted = [jan, feb, mar, apr, may, jun, jul];
+
+    // We include the current month's prediction in the combined list,
+    // because we're not yet at the end of the month
+    const netWorthCombined = [netWorthSummary[0], netWorthSummary[1], mar, apr, may, jun, jul];
+
+    t.deepEqual(getProcessedCost(testState), {
+        spending: [1260, 2068, 749, 960, 310, 310, 310],
+        funds,
         fundsOld: [94004, 105390, 110183],
-        funds: [100779, 101459, 102981, 103293, 106162, 109111, 112141],
-        fundChanges: [0, 0, 1, 0, 0, 1, 1, 0, 0, 0],
         income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
         bills: [1000, 900, 400, 650, 0, 0, 0],
-        food: [50, 13, 20, 26, 23, 23, 23],
-        general: [150, 90, 10, 47, 69, 69, 69],
-        social: [50, 65, 134, 13, 58, 58, 58],
-        holiday: [10, 1000, 95, 18, 57, 57, 57],
+        food: [50, 13, 27, 27, 27, 27, 27],
+        general: [150, 90, 13, 90, 90, 90, 90],
+        social: [50, 65, 181, 65, 65, 65, 65],
+        holiday: [10, 1000, 128, 128, 128, 128, 128],
+        net,
         netWorthPredicted,
-        netWorthCombined: getNetWorthSummary(state)
-            .slice(0, -4)
-            .concat(netWorthPredicted.slice(-4)),
-        netWorth: getNetWorthSummary(state)
+        netWorthCombined,
+        netWorth: netWorthSummary
+    });
+
+    stub.restore();
+});
+
+test('getProcessedCost uses the actual (non-predicted) net worth value for the current month, if at the last day', t => {
+    const stub = getRandomStub();
+
+    const testState = {
+        ...state,
+        now: DateTime.fromISO('2018-03-31'),
+        funds: {
+            ...state.funds,
+            items: [
+                {
+                    id: 'fund-A',
+                    item: 'some fund 1',
+                    transactions: getTransactionsList([
+                        { date: DateTime.fromISO('2018-02-05'), units: 10, cost: 56123 },
+                        { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 }
+                    ])
+                },
+                {
+                    id: 'fund-B',
+                    item: 'some fund 2',
+                    transactions: getTransactionsList([
+                        { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 }
+                    ])
+                }
+            ]
+        }
+    };
+
+    const netWorthSummary = getNetWorthSummary(testState);
+
+    const net = [740, -168, 841, 1580, 2030, 1530, 2330];
+    const funds = [100779, 101459, 102981, 105841, 108781, 111802, 114907];
+
+    const jan = netWorthSummary[0];
+    const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - 56123;
+    const mar = netWorthSummary[1] + net[2] + funds[2] - funds[1] + 2382 - 10662;
+
+    // We're currently in March, at the end of the month, so we predict the next
+    // month's value based on the actual value for March
+    const apr = netWorthSummary[2] + net[3] + funds[3] - funds[2];
+    const may = apr + net[4] + funds[4] - funds[3];
+    const jun = may + net[5] + funds[5] - funds[4];
+    const jul = jun + net[6] + funds[6] - funds[5];
+
+    const netWorthPredicted = [jan, feb, mar, apr, may, jun, jul];
+
+    // We don't include the current month's prediction in the combined list,
+    // because we're at the end of the month
+    const netWorthCombined = [netWorthSummary[0], netWorthSummary[1], netWorthSummary[2], apr, may, jun, jul];
+
+    t.deepEqual(getProcessedCost(testState), {
+        spending: [1260, 2068, 659, 920, 270, 270, 270],
+        funds,
+        fundsOld: [94004, 105390, 110183],
+        income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
+        bills: [1000, 900, 400, 650, 0, 0, 0],
+        food: [50, 13, 20, 20, 20, 20, 20],
+        general: [150, 90, 10, 90, 90, 90, 90],
+        social: [50, 65, 134, 65, 65, 65, 65],
+        holiday: [10, 1000, 95, 95, 95, 95, 95],
+        net,
+        netWorthPredicted,
+        netWorthCombined,
+        netWorth: netWorthSummary
     });
 
     stub.restore();
@@ -55,25 +159,34 @@ test('getProcessedCost processes the cost data, including making predictions, ad
 test('getOverviewTable gets a list of rows for the overview table', t => {
     const stub = getRandomStub();
 
-    t.deepEqual(getOverviewTable(state), [
+    const table = getOverviewTable(state);
+
+    // The colour generation is unit-tested in modules/color,
+    // and the table colours are manually tested
+    const tableWithoutColor = table.map(({ cells, ...rest }) => ({
+        ...rest,
+        cells: cells.map(({ rgb, ...cell }) => cell)
+    }));
+
+    t.deepEqual(tableWithoutColor, [
         {
             key: 'Jan-18',
             past: true,
             active: false,
             future: false,
             cells: [
-                { column: ['month', 'Month'], value: 'Jan-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 100779, rgb: [172, 184, 190] },
-                { column: ['bills', 'Bills'], value: 1000, rgb: [183, 28, 28] },
-                { column: ['food', 'Food'], value: 50, rgb: [67, 160, 71] },
-                { column: ['general', 'General'], value: 150, rgb: [1, 87, 155] },
-                { column: ['holiday', 'Holiday'], value: 10, rgb: [233, 245, 243] },
-                { column: ['social', 'Social'], value: 50, rgb: [227, 213, 161] },
-                { column: ['income', 'Income'], value: 2000, rgb: [146, 223, 155] },
-                { column: ['spending', 'Out'], value: 1260, rgb: [209, 99, 99] },
-                { column: ['net', 'Net'], value: 740, rgb: [206, 241, 211] },
-                { column: ['netWorthPredicted', 'Predicted'], value: 0, rgb: [255, 255, 255] },
-                { column: ['netWorth', 'Net Worth'], value: 0, rgb: [255, 255, 255] }
+                { column: ['month', 'Month'], value: 'Jan-18' },
+                { column: ['funds', 'Stocks'], value: 100779 },
+                { column: ['bills', 'Bills'], value: 1000 },
+                { column: ['food', 'Food'], value: 50 },
+                { column: ['general', 'General'], value: 150 },
+                { column: ['holiday', 'Holiday'], value: 10 },
+                { column: ['social', 'Social'], value: 50 },
+                { column: ['income', 'Income'], value: 2000 },
+                { column: ['spending', 'Out'], value: 1260 },
+                { column: ['net', 'Net'], value: 740 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 0 },
+                { column: ['netWorth', 'Net Worth'], value: 0 }
             ]
         },
         {
@@ -82,18 +195,18 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             active: false,
             future: false,
             cells: [
-                { column: ['month', 'Month'], value: 'Feb-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 101459, rgb: [171, 184, 190] },
-                { column: ['bills', 'Bills'], value: 900, rgb: [189, 47, 47] },
-                { column: ['food', 'Food'], value: 13, rgb: [202, 228, 203] },
-                { column: ['general', 'General'], value: 90, rgb: [95, 149, 192] },
-                { column: ['holiday', 'Holiday'], value: 1000, rgb: [0, 137, 123] },
-                { column: ['social', 'Social'], value: 65, rgb: [220, 202, 135] },
-                { column: ['income', 'Income'], value: 1900, rgb: [151, 225, 160] },
-                { column: ['spending', 'Out'], value: 2068, rgb: [191, 36, 36] },
-                { column: ['net', 'Net'], value: -168, rgb: [191, 36, 36] },
-                { column: ['netWorthPredicted', 'Predicted'], value: -168, rgb: [191, 36, 36] },
-                { column: ['netWorth', 'Net Worth'], value: 1298227.25, rgb: [36, 191, 55] }
+                { column: ['month', 'Month'], value: 'Feb-18' },
+                { column: ['funds', 'Stocks'], value: 101459 },
+                { column: ['bills', 'Bills'], value: 900 },
+                { column: ['food', 'Food'], value: 13 },
+                { column: ['general', 'General'], value: 90 },
+                { column: ['holiday', 'Holiday'], value: 1000 },
+                { column: ['social', 'Social'], value: 65 },
+                { column: ['income', 'Income'], value: 1900 },
+                { column: ['spending', 'Out'], value: 2068 },
+                { column: ['net', 'Net'], value: -168 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 512 },
+                { column: ['netWorth', 'Net Worth'], value: 1298227.25 }
             ]
         },
         {
@@ -102,18 +215,18 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             active: true,
             future: false,
             cells: [
-                { column: ['month', 'Month'], value: 'Mar-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 102981, rgb: [170, 183, 189] },
-                { column: ['bills', 'Bills'], value: 400, rgb: [219, 142, 142] },
-                { column: ['food', 'Food'], value: 20, rgb: [173, 214, 175] },
-                { column: ['general', 'General'], value: 10, rgb: [237, 243, 248] },
-                { column: ['holiday', 'Holiday'], value: 95, rgb: [122, 194, 186] },
-                { column: ['social', 'Social'], value: 134, rgb: [191, 158, 36] },
-                { column: ['income', 'Income'], value: 1500, rgb: [173, 231, 180] },
-                { column: ['spending', 'Out'], value: 659, rgb: [223, 146, 146] },
-                { column: ['net', 'Net'], value: 841, rgb: [200, 239, 205] },
-                { column: ['netWorthPredicted', 'Predicted'], value: 1300590.25, rgb: [36, 191, 55] },
-                { column: ['netWorth', 'Net Worth'], value: 1039156, rgb: [58, 197, 75] }
+                { column: ['month', 'Month'], value: 'Mar-18' },
+                { column: ['funds', 'Stocks'], value: 102981 },
+                { column: ['bills', 'Bills'], value: 400 },
+                { column: ['food', 'Food'], value: 27 },
+                { column: ['general', 'General'], value: 13 },
+                { column: ['holiday', 'Holiday'], value: 128 },
+                { column: ['social', 'Social'], value: 181 },
+                { column: ['income', 'Income'], value: 1500 },
+                { column: ['spending', 'Out'], value: 749 },
+                { column: ['net', 'Net'], value: 751 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 1300500.25 },
+                { column: ['netWorth', 'Net Worth'], value: 1039156 }
             ]
         },
         {
@@ -122,18 +235,18 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             active: false,
             future: true,
             cells: [
-                { column: ['month', 'Month'], value: 'Apr-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 103293, rgb: [170, 183, 189] },
-                { column: ['bills', 'Bills'], value: 650, rgb: [204, 94, 94] },
-                { column: ['food', 'Food'], value: 26, rgb: [151, 202, 153] },
-                { column: ['general', 'General'], value: 47, rgb: [168, 198, 221] },
-                { column: ['holiday', 'Holiday'], value: 18, rgb: [215, 236, 234] },
-                { column: ['social', 'Social'], value: 13, rgb: [248, 244, 230] },
-                { column: ['income', 'Income'], value: 2500, rgb: [54, 196, 72] },
-                { column: ['spending', 'Out'], value: 754, rgb: [221, 138, 138] },
-                { column: ['net', 'Net'], value: 1746, rgb: [134, 220, 144] },
-                { column: ['netWorthPredicted', 'Predicted'], value: 1040902, rgb: [146, 223, 155] },
-                { column: ['netWorth', 'Net Worth'], value: 0, rgb: [255, 255, 255] }
+                { column: ['month', 'Month'], value: 'Apr-18' },
+                { column: ['funds', 'Stocks'], value: 105841 },
+                { column: ['bills', 'Bills'], value: 650 },
+                { column: ['food', 'Food'], value: 27 },
+                { column: ['general', 'General'], value: 90 },
+                { column: ['holiday', 'Holiday'], value: 128 },
+                { column: ['social', 'Social'], value: 65 },
+                { column: ['income', 'Income'], value: 2500 },
+                { column: ['spending', 'Out'], value: 960 },
+                { column: ['net', 'Net'], value: 1540 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 1304900.25 },
+                { column: ['netWorth', 'Net Worth'], value: 0 }
             ]
         },
         {
@@ -142,18 +255,18 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             active: false,
             future: true,
             cells: [
-                { column: ['month', 'Month'], value: 'May-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 106162, rgb: [142, 159, 167] },
-                { column: ['bills', 'Bills'], value: 0, rgb: [255, 255, 255] },
-                { column: ['food', 'Food'], value: 23, rgb: [161, 208, 163] },
-                { column: ['general', 'General'], value: 69, rgb: [128, 171, 205] },
-                { column: ['holiday', 'Holiday'], value: 57, rgb: [128, 196, 189] },
-                { column: ['social', 'Social'], value: 58, rgb: [223, 207, 146] },
-                { column: ['income', 'Income'], value: 2300, rgb: [91, 207, 105] },
-                { column: ['spending', 'Out'], value: 207, rgb: [245, 221, 221] },
-                { column: ['net', 'Net'], value: 2093, rgb: [81, 204, 96] },
-                { column: ['netWorthPredicted', 'Predicted'], value: 1042995, rgb: [146, 223, 155] },
-                { column: ['netWorth', 'Net Worth'], value: 0, rgb: [255, 255, 255] }
+                { column: ['month', 'Month'], value: 'May-18' },
+                { column: ['funds', 'Stocks'], value: 108781 },
+                { column: ['bills', 'Bills'], value: 0 },
+                { column: ['food', 'Food'], value: 27 },
+                { column: ['general', 'General'], value: 90 },
+                { column: ['holiday', 'Holiday'], value: 128 },
+                { column: ['social', 'Social'], value: 65 },
+                { column: ['income', 'Income'], value: 2300 },
+                { column: ['spending', 'Out'], value: 310 },
+                { column: ['net', 'Net'], value: 1990 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 1309830.25 },
+                { column: ['netWorth', 'Net Worth'], value: 0 }
             ]
         },
         {
@@ -162,18 +275,18 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             active: false,
             future: true,
             cells: [
-                { column: ['month', 'Month'], value: 'Jun-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 109111, rgb: [113, 135, 145] },
-                { column: ['bills', 'Bills'], value: 0, rgb: [255, 255, 255] },
-                { column: ['food', 'Food'], value: 23, rgb: [161, 208, 163] },
-                { column: ['general', 'General'], value: 69, rgb: [128, 171, 205] },
-                { column: ['holiday', 'Holiday'], value: 57, rgb: [128, 196, 189] },
-                { column: ['social', 'Social'], value: 58, rgb: [223, 207, 146] },
-                { column: ['income', 'Income'], value: 1800, rgb: [156, 226, 165] },
-                { column: ['spending', 'Out'], value: 207, rgb: [245, 221, 221] },
-                { column: ['net', 'Net'], value: 1593, rgb: [151, 224, 160] },
-                { column: ['netWorthPredicted', 'Predicted'], value: 1044588, rgb: [145, 223, 155] },
-                { column: ['netWorth', 'Net Worth'], value: 0, rgb: [255, 255, 255] }
+                { column: ['month', 'Month'], value: 'Jun-18' },
+                { column: ['funds', 'Stocks'], value: 111802 },
+                { column: ['bills', 'Bills'], value: 0 },
+                { column: ['food', 'Food'], value: 27 },
+                { column: ['general', 'General'], value: 90 },
+                { column: ['holiday', 'Holiday'], value: 128 },
+                { column: ['social', 'Social'], value: 65 },
+                { column: ['income', 'Income'], value: 1800 },
+                { column: ['spending', 'Out'], value: 310 },
+                { column: ['net', 'Net'], value: 1490 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 1314341.25 },
+                { column: ['netWorth', 'Net Worth'], value: 0 }
             ]
         },
         {
@@ -182,18 +295,18 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
             active: false,
             future: true,
             cells: [
-                { column: ['month', 'Month'], value: 'Jul-18', rgb: null },
-                { column: ['funds', 'Stocks'], value: 112141, rgb: [84, 110, 122] },
-                { column: ['bills', 'Bills'], value: 0, rgb: [255, 255, 255] },
-                { column: ['food', 'Food'], value: 23, rgb: [161, 208, 163] },
-                { column: ['general', 'General'], value: 69, rgb: [128, 171, 205] },
-                { column: ['holiday', 'Holiday'], value: 57, rgb: [128, 196, 189] },
-                { column: ['social', 'Social'], value: 58, rgb: [223, 207, 146] },
-                { column: ['income', 'Income'], value: 2600, rgb: [36, 191, 55] },
-                { column: ['spending', 'Out'], value: 207, rgb: [245, 221, 221] },
-                { column: ['net', 'Net'], value: 2393, rgb: [36, 191, 55] },
-                { column: ['netWorthPredicted', 'Predicted'], value: 1046981, rgb: [144, 223, 154] },
-                { column: ['netWorth', 'Net Worth'], value: 0, rgb: [255, 255, 255] }
+                { column: ['month', 'Month'], value: 'Jul-18' },
+                { column: ['funds', 'Stocks'], value: 114907 },
+                { column: ['bills', 'Bills'], value: 0 },
+                { column: ['food', 'Food'], value: 27 },
+                { column: ['general', 'General'], value: 90 },
+                { column: ['holiday', 'Holiday'], value: 128 },
+                { column: ['social', 'Social'], value: 65 },
+                { column: ['income', 'Income'], value: 2600 },
+                { column: ['spending', 'Out'], value: 310 },
+                { column: ['net', 'Net'], value: 2290 },
+                { column: ['netWorthPredicted', 'Predicted'], value: 1319736.25 },
+                { column: ['netWorth', 'Net Worth'], value: 0 }
             ]
         }
     ]);

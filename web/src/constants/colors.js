@@ -6,9 +6,7 @@ export const COLOR_CATEGORY = {
     holiday: [0, 137, 123],
     social: [191, 158, 36],
     income: [36, 191, 55],
-    spending: [191, 36, 36],
-    balance: [36, 191, 55],
-    balancePred: [36, 191, 55]
+    spending: [191, 36, 36]
 };
 
 // fund colour scale
