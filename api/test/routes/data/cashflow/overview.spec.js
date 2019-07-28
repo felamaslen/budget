@@ -249,8 +249,7 @@ test('getMonthlyTotalFundValue gets the correct fund values', t => {
     );
 
     const expectedResult = {
-        funds: [0, 0, 0, 0, 10000, 310000, 293702, 151327, 137432, 137432],
-        fundChanges: [1, 0, 0, 1, 1, 1, 1]
+        funds: [0, 0, 0, 0, 10000, 310000, 293702, 151327, 137432, 137432]
     };
 
     t.deepEqual(result, expectedResult);
@@ -319,7 +318,7 @@ test('getData gets overview data', async t => {
 
     t.is(result.futureMonths, numFuture);
 
-    t.is(Object.keys(result.cost).length, 10);
+    t.is(Object.keys(result.cost).length, 9);
 
     t.is(result.cost.balance.length, numLast + numFuture + 1);
     t.true(result.cost.balance.every(value => typeof value === 'number'));
@@ -328,9 +327,6 @@ test('getData gets overview data', async t => {
 
     t.is(result.cost.income.length, numLast + numFuture + 1);
     t.true(result.cost.income.every(value => typeof value === 'number'));
-
-    t.is(result.cost.fundChanges.length, numLast + numFuture + 1);
-    t.true(result.cost.fundChanges.every(value => [0, 1].includes(value)));
 
     t.is(result.cost.funds.length, numLast + numFuture + 1 + result.cost.old.length);
     t.true(result.cost.funds.every(value => typeof value === 'number'));

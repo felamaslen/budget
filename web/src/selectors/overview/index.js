@@ -17,6 +17,7 @@ import {
     getMonthDates
 } from '~client/selectors/overview/common';
 import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
+import { getFundsRows } from '~client/selectors/funds/helpers';
 
 const futureCategories = ['funds', 'food', 'general', 'holiday', 'social'];
 
@@ -85,37 +86,53 @@ const getNetCashFlow = dates => data => ({
     net: dates.map((date, index) => data.income[index] - data.spending[index])
 });
 
-const getPredictedNetWorth = (dates, currentDate, netWorth) => data => ({
-    ...data,
-    netWorthPredicted: dates.reduce((values, date, index) => {
-        if (index === 0) {
-            return values.concat([netWorth[index]]);
-        }
+const getPredictedNetWorth = (dates, currentDate, netWorth, fundsRows) => data => {
+    const fundCosts = dates.map(monthDate => fundsRows.reduce((sum, { transactions }) => transactions
+        .filter(({ date }) => date.hasSame(monthDate, 'month'))
+        .reduce((last, { cost }) => last + cost, sum), 0));
 
-        const pastOrPresent = dates[index - 1] < currentDate ||
-            dates[index - 1].hasSame(currentDate, 'month');
+    const endOfCurrentMonth = currentDate.endOf('month');
+    const futureStart = endOfCurrentMonth.hasSame(currentDate, 'day')
+        ? endOfCurrentMonth.plus({ months: 1 })
+        : endOfCurrentMonth;
 
-        const fundsBoughtOrSold = data.fundChanges[index] === 1;
+    return {
+        ...data,
+        netWorthPredicted: dates.reduce((values, date, index) => {
+            if (index === 0) {
+                return values.concat([netWorth[index]]);
+            }
 
-        const fundChange = fundsBoughtOrSold && pastOrPresent
-            ? (data.funds[index] - data.funds[index - 1])
-            : 0;
+            const future = dates[index] > futureStart;
 
-        const netChange = data.net[index] + fundChange;
+            const netChange = data.net[index] +
+                data.funds[index] - data.funds[index - 1] -
+                fundCosts[index];
 
-        if (pastOrPresent) {
+            if (future) {
+                return values.concat([values[values.length - 1] + netChange]);
+            }
+
             return values.concat([netWorth[index - 1] + netChange]);
-        }
+        }, [])
+    };
+};
 
-        return values.concat([values[values.length - 1] + netChange]);
-    }, [])
-});
+const getCombinedNetWorth = (currentDate, futureMonths, netWorth) => table => {
+    const includeThisMonth = currentDate.endOf('month').hasSame(currentDate, 'day')
+        ? 0
+        : 1;
 
-const getCombinedNetWorth = (futureMonths, netWorth) => table => ({
-    ...table,
-    netWorthCombined: netWorth.slice(0, -(futureMonths + 1))
-        .concat(table.netWorthPredicted.slice(-(futureMonths + 1)))
-});
+    const slice = -(futureMonths + includeThisMonth);
+
+    return {
+        ...table,
+        netWorthCombined: [
+            ...netWorth.slice(0, slice),
+            ...table.netWorthPredicted.slice(slice)
+        ]
+    };
+};
 
 export const getProcessedCost = createSelector([
     getCurrentDate,
@@ -125,6 +142,7 @@ export const getProcessedCost = createSelector([
     getFutureMonths,
     getMonthDates,
     getNetWorthSummary,
+    getFundsRows,
     getCost
 ], (
     currentDate,
@@ -134,6 +152,7 @@ export const getProcessedCost = createSelector([
     futureMonths,
     dates,
     netWorth,
+    fundsRows,
     costMap
 ) => compose(
     separateOldFunds(numRows),
@@ -141,16 +160,20 @@ export const getProcessedCost = createSelector([
     getSpendingColumn(dates),
     getNetCashFlow(dates),
     data => ({ ...data, netWorth }),
-    getPredictedNetWorth(dates, currentDate, netWorth),
-    getCombinedNetWorth(futureMonths, netWorth)
+    getPredictedNetWorth(dates, currentDate, netWorth, fundsRows),
+    getCombinedNetWorth(currentDate, futureMonths, netWorth)
 )(costMap));
+
+const isPositive = value => value >= 0;
+const isNegative = value => value < 0;
 
 export const getOverviewTable = createSelector([
     getCurrentDate,
     getMonthDates,
+    getFutureMonths,
     getProcessedCost,
     getNetWorthSummary
-], (currentDate, dates, cost, netWorth) => {
+], (currentDate, dates, futureMonths, cost, netWorth) => {
     if (!dates) {
         return null;
     }
@@ -160,16 +183,29 @@ export const getOverviewTable = createSelector([
     const values = OVERVIEW_COLUMNS.slice(1)
         .reduce((last, [key]) => ({ [key]: cost[key], ...last }), { netWorth });
 
+    const scoreValues = {
+        ...values,
+        netWorth: values.netWorth.slice(0, -(futureMonths + 1))
+    };
+
     const ranges = Object.keys(values).reduce((last, key) => ({
-        ...last,
-        [key]: { min: Math.min(...values[key]), max: Math.max(...values[key]) }
+        [key]: {
+            min: Math.min(...scoreValues[key]),
+            maxNegative: key === 'net'
+                ? 0
+                : Math.max(...scoreValues[key].filter(isNegative)),
+            minPositive: key === 'net'
+                ? 0
+                : Math.min(...scoreValues[key].filter(isPositive)),
+            max: Math.max(...scoreValues[key]) },
+        ...last
     }), {});
 
     const median = Object.keys(values).reduce((last, key) => ({
         ...last,
         [key]: {
-            positive: arrayAverage(values[key].filter(item => item >= 0), AVERAGE_MEDIAN),
-            negative: arrayAverage(values[key].filter(item => item < 0), AVERAGE_MEDIAN)
+            positive: arrayAverage(scoreValues[key].filter(isPositive), AVERAGE_MEDIAN),
+            negative: arrayAverage(scoreValues[key].filter(isNegative), AVERAGE_MEDIAN)
         }
     }), {});
 
@@ -185,15 +221,6 @@ export const getOverviewTable = createSelector([
                 column,
                 value: monthText,
                 rgb: null
-            };
-        }
-        if (key === 'netWorth') {
-            const value = netWorth[index];
-
-            return {
-                column,
-                value,
-                rgb: getColor(value, key)
             };
         }
 

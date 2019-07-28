@@ -24,13 +24,20 @@ test('getNumMonths gets the number of months in overview views, given the start 
 });
 
 test('getFutureMonths calculates the number of months in the future there are, based on the current date', t => {
-    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-23T11:45:20Z') }), 3);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-23T11:45:20Z') }), 4);
 
-    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T15:20Z') }), 3);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T15:20Z') }), 4);
 
-    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T22:59Z') }), 3);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-03-31T22:59Z') }), 4);
 
-    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-04-01T00:00Z') }), 2);
+    t.is(getFutureMonths({ ...state, now: DateTime.fromISO('2018-04-01T00:00Z') }), 3);
+
+    t.is(getFutureMonths({
+        now: DateTime.fromISO('2019-07-28T12:01:32Z'),
+        overview: {
+            endDate: DateTime.fromISO('2020-07-31T23:59:59.999Z')
+        }
+    }), 12);
 });
 
 test('getMonthDates gets a list of dates at the end of each month', t => {
