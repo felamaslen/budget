@@ -23,7 +23,9 @@ function NetWorthListItem({
                 className="net-worth-list-item-summary"
                 onClick={onActivate}
             >
-                <span className="entry-title">{item.date.toISODate()}</span>
+                <span className="entry-title">
+                    {item.date.toFormat('dd MMM yy')}
+                </span>
                 <span className="button-delete">
                     <button
                         className="button-delete-button"

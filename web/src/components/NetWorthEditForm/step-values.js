@@ -259,7 +259,7 @@ function useRemoveValue(item, onEdit) {
 }
 
 function CategoryGroup({ category: { category, color }, children }) {
-    const [hidden, setHidden] = useState(false);
+    const [hidden, setHidden] = useState(true);
     const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
 
     const style = {
