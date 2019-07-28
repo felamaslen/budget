@@ -18,17 +18,17 @@ const {
 
 const testPricesProcessedResponse = {
     '1': [
-        { date: new Date('2017-09-30 23:59:59.999'), value: 95.49 },
-        { date: new Date('2017-08-31 23:59:59.999'), value: 121 }
+        { date: new Date('2017-09-01 00:00:00.000'), value: 95.49 },
+        { date: new Date('2017-08-01 00:00:00.000'), value: 121 }
     ],
     '3': [
-        { date: new Date('2017-09-30 23:59:59.999'), value: 49.52 },
-        { date: new Date('2017-08-31 23:59:59.999'), value: 56.01 }
+        { date: new Date('2017-09-01 00:00:00.000'), value: 49.52 },
+        { date: new Date('2017-08-01 00:00:00.000'), value: 56.01 }
     ],
     '11': [
-        { date: new Date('2017-09-30 23:59:59.999'), value: 124.04 },
-        { date: new Date('2017-08-31 23:59:59.999'), value: 99.13 },
-        { date: new Date('2016-11-30 23:59:59.999'), value: 95.3 }
+        { date: new Date('2017-09-01 00:00:00.000'), value: 124.04 },
+        { date: new Date('2017-08-01 00:00:00.000'), value: 99.13 },
+        { date: new Date('2016-11-01 00:00:00.000'), value: 95.3 }
     ]
 };
 
@@ -127,17 +127,17 @@ test('getFundValue gets the correct fund price at a specified date', t => {
 
     t.is(getFundValue(new Date('2016-08-31'), transactions, prices), 10000);
 
-    t.is(getFundValue(new Date('2016-10-01'), transactions, prices), 110000);
+    t.is(getFundValue(new Date('2016-10-31'), transactions, prices), 110000);
 
-    t.is(getFundValue(new Date('2016-12-01'), transactions, prices), 95.3 * (89.095 + 894.134));
+    t.is(getFundValue(new Date('2016-12-31'), transactions, prices), 95.3 * (89.095 + 894.134));
 
     t.is(getFundValue(new Date('2017-01-31'), transactions, prices), 95.3 * (89.095 + 894.134));
 
     t.is(getFundValue(new Date('2017-04-30'), transactions, prices), 95.3 * (89.095 + 894.134 - 883.229));
 
-    t.is(getFundValue(new Date('2017-09-01'), transactions, prices), 99.13 * (89.095 + 894.134 - 883.229));
+    t.is(getFundValue(new Date('2017-09-30'), transactions, prices), 124.04 * (89.095 + 894.134 - 883.229));
 
-    t.is(getFundValue(new Date('2017-10-01'), transactions, prices), 12404);
+    t.is(getFundValue(new Date('2017-10-31'), transactions, prices), 12404);
 });
 
 test('processFundPrices returns a map of fund IDs to dated lists of prices', t => {
@@ -216,13 +216,13 @@ test('processFundTransactions returns a valid map of IDs to lists of transaction
         }))
     }), {}), {
         [fundId3]: [
-            { date: '2016-09-30', units: 1678.42, cost: 200000 },
-            { date: '2017-02-28', units: 846.38, cost: 100000 }
+            { date: '2016-09-01', units: 1678.42, cost: 200000 },
+            { date: '2017-02-01', units: 846.38, cost: 100000 }
         ],
         [fundId1]: [
-            { date: '2016-08-31', units: 89.095, cost: 10000 },
-            { date: '2016-09-30', units: 894.134, cost: 100000 },
-            { date: '2017-04-30', units: -883.229, cost: -90000 }
+            { date: '2016-08-01', units: 89.095, cost: 10000 },
+            { date: '2016-09-01', units: 894.134, cost: 100000 },
+            { date: '2017-04-01', units: -883.229, cost: -90000 }
         ]
     });
 });
@@ -249,7 +249,7 @@ test('getMonthlyTotalFundValue gets the correct fund values', t => {
     );
 
     const expectedResult = {
-        funds: [0, 0, 0, 0, 10000, 310000, 310000, 309530, 151327, 137432],
+        funds: [0, 0, 0, 0, 10000, 310000, 293702, 151327, 137432, 137432],
         fundChanges: [1, 0, 0, 1, 1, 1, 1]
     };
 

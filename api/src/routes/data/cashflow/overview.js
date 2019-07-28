@@ -78,7 +78,7 @@ function processFundPrices(rows) {
         .map(({ ids, time, prices }) => ({
             ids,
             prices,
-            date: DateTime.fromJSDate(time).endOf('month')
+            date: DateTime.fromJSDate(time).startOf('month')
         }))
         .reduce((lastReduction, { date, ids, prices }) => {
             // filter out duplicate year/months
@@ -118,7 +118,7 @@ function queryFundTransactions(db, user) {
 
 function processFundTransactions(rows) {
     return rows.reduce((items, { id, date: dateRaw, units, cost }) => {
-        const date = DateTime.fromJSDate(dateRaw).endOf('month');
+        const date = DateTime.fromJSDate(dateRaw).startOf('month');
 
         if (id in items) {
             items[id].push({ date, units, cost });
