@@ -7,12 +7,15 @@ import { useField } from '~client/hooks/field';
 const setValue = cost => Math.round((100 * (Number(cost) || 0)).toPrecision(10));
 
 function setValueString(inputValue) {
+    if (inputValue === '.') {
+        return { __split: true, fieldValue: 0, inputValue: '.' };
+    }
     if (isNaN(Number(inputValue))) {
         throw new Error('Invalid value');
     }
 
     const fieldValue = setValue(inputValue);
-    if (inputValue.startsWith(`${fieldValue / 100}.`)) {
+    if (inputValue.match('.')) {
         return { __split: true, fieldValue, inputValue };
     }
 

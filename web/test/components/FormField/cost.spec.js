@@ -128,7 +128,14 @@ test('rendering as a string input - decimal point', t => {
     testInputCharacter('10', 1000);
     testInputCharacter('100', 10000);
     testInputCharacter('1005', 100500);
-    testInputCharacter('1.005', 101, '1.01');
+    testInputCharacter('1.005', 101, '1.005');
+
+    testInputCharacter('.', 0);
+    testInputCharacter('.3', 30, '.3');
+
+    testInputCharacter('.', 0);
+    testInputCharacter('.0', 0, '.0');
+    testInputCharacter('.05', 5, '.05');
 });
 
 test('rendering as a string input - handling invalid input', t => {
