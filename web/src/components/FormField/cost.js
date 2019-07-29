@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
-const setValue = cost => Math.round(100 * (Number(cost) || 0));
+const setValue = cost => Math.round((100 * (Number(cost) || 0)).toPrecision(10));
 
 function setValueString(inputValue) {
     if (isNaN(Number(inputValue))) {
@@ -12,7 +12,7 @@ function setValueString(inputValue) {
     }
 
     const fieldValue = setValue(inputValue);
-    if (inputValue === `${fieldValue / 100}.`) {
+    if (inputValue.startsWith(`${fieldValue / 100}.`)) {
         return { __split: true, fieldValue, inputValue };
     }
 

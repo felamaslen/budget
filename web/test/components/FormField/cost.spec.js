@@ -94,38 +94,41 @@ test('rendering as a string input - decimal point', t => {
 
     t.is(input().value, '');
 
-    fireEvent.change(input(), { target: { value: '1' } });
-    t.is(input().value, '1');
-    act(() => {
-        getContainer({ ...props, active: false }, { container });
-    });
-    t.is(onChange.calls.length, 1);
-    t.deepEqual(onChange.calls[0].arguments, [100]);
-    act(() => {
-        getContainer({ ...props, active: true }, { container });
-    });
+    const testInputCharacter = (value, changeTo, nextValue = value) => {
+        const numCalls = onChange.calls.length;
 
-    fireEvent.change(input(), { target: { value: '1.' } });
-    t.is(input().value, '1.');
-    act(() => {
-        getContainer({ ...props, active: false }, { container });
-    });
-    t.is(onChange.calls.length, 2);
-    t.deepEqual(onChange.calls[1].arguments, [100]);
-    act(() => {
-        getContainer({ ...props, active: true }, { container });
-    });
+        fireEvent.change(input(), { target: { value } });
 
-    fireEvent.change(input(), { target: { value: '1.5' } });
-    t.is(input().value, '1.5');
-    act(() => {
-        getContainer({ ...props, active: false }, { container });
-    });
-    t.is(onChange.calls.length, 3);
-    t.deepEqual(onChange.calls[2].arguments, [150]);
-    act(() => {
-        getContainer({ ...props, active: true }, { container });
-    });
+        t.is(input().value, nextValue);
+
+        act(() => {
+            getContainer({ ...props, active: false }, { container });
+        });
+
+        t.is(onChange.calls.length, numCalls + 1);
+        t.deepEqual(onChange.calls[onChange.calls.length - 1].arguments, [changeTo]);
+
+        act(() => {
+            getContainer({ ...props, active: true }, { container });
+        });
+    };
+
+    const testInput = (string, changeTo) => {
+        const chars = string.split('');
+
+        chars.forEach((value, index) =>
+            testInputCharacter(string.substring(0, index + 1), changeTo[index]));
+    };
+
+    testInput('1.5', [100, 100, 150]);
+
+    testInput('1.05', [100, 100, 100, 105]);
+
+    testInputCharacter('1', 100);
+    testInputCharacter('10', 1000);
+    testInputCharacter('100', 10000);
+    testInputCharacter('1005', 100500);
+    testInputCharacter('1.005', 101, '1.01');
 });
 
 test('rendering as a string input - handling invalid input', t => {
