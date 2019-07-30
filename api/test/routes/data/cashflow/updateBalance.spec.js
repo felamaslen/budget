@@ -1,11 +1,12 @@
-const test = require('ava');
-const sinon = require('sinon');
-const db = require('~api/src/modules/db')();
-const config = require('~api/src/config')();
+import test from 'ava';
+import sinon from 'sinon';
 
-const {
+import db from '~api/modules/db';
+import config from '~api/config';
+
+import {
     updateData
-} = require('~api/src/routes/data/cashflow/updateBalance');
+} from '~api/routes/data/cashflow/updateBalance';
 
 test('updateData updates a balance item in the database', async t => {
     const [{ uid }] = await db.select('uid')

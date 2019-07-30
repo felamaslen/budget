@@ -10,7 +10,10 @@ COPY package-lock.json ./
 RUN npm install --only=production
 RUN npm install --only=development
 
+ENV NODE_ENV=development
+ENV BABEL_ENV=node
+
 ENV SKIP_APP=false
 ENV DEBUG=
 
-CMD ["node_modules/.bin/nodemon", "-w", "./api/src", "index.js"]
+CMD node_modules/.bin/babel-watch -I -w ./api/src ./api/src

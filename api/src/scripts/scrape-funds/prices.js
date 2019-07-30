@@ -1,5 +1,5 @@
-const { DateTime } = require('luxon');
-const { getPriceFromDataHL } = require('./hl');
+import { DateTime } from 'luxon';
+import { getPriceFromDataHL } from '~api/scripts/scrape-funds/hl';
 
 function getPriceFromData(fund, currencyPrices, data) {
     if (!data) {
@@ -67,7 +67,7 @@ async function insertNewPriceCache(db, logger, fundsWithPrices, now) {
         .update({ done: true });
 }
 
-async function scrapeFundPrices(config, db, logger, currencyPrices, funds, data) {
+export async function scrapeFundPrices(config, db, logger, currencyPrices, funds, data) {
     logger.info('Processing fund prices...');
 
     const fundsWithPrices = getPricesFromData(logger, currencyPrices, funds, data);
@@ -82,7 +82,3 @@ async function scrapeFundPrices(config, db, logger, currencyPrices, funds, data)
 
     await insertNewPriceCache(db, logger, fundsWithPrices, DateTime.local());
 }
-
-module.exports = {
-    scrapeFundPrices
-};

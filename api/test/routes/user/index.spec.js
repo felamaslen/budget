@@ -1,7 +1,7 @@
 const test = require('ava');
 const {
     getNewBadLoginCount
-} = require('~api/src/routes/user');
+} = require('~api/routes/user');
 
 
 test('getNewBadLoginCount increments the counter for recent logs', t => {

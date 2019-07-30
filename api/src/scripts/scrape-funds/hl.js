@@ -1,10 +1,10 @@
-const { removeWhitespace, localFile } = require('./helpers');
+import { removeWhitespace, localFile } from '~api/scripts/scrape-funds/helpers';
 
-function isHLFundShare(fund) {
+export function isHLFundShare(fund) {
     return Boolean(fund.name.match(/^.*\(share\.?\)$/));
 }
 
-function getHoldingsFromDataHL(fund, data) {
+export function getHoldingsFromDataHL(fund, data) {
     // gets the top holdings from raw HTML data (HL)
     const isShare = isHLFundShare(fund);
 
@@ -41,20 +41,18 @@ function getHoldingsFromDataHL(fund, data) {
                     const value = Number(valueRaw.replace(/[^\d.]/g, ''));
 
                     return { name, value };
-                }
-                catch (err) {
+                } catch {
                     return null;
                 }
             });
 
         return holdings;
-    }
-    catch (err) {
+    } catch {
         throw new Error('Invalid data');
     }
 }
 
-function getPriceFromDataHL(data, currencyPrices) {
+export function getPriceFromDataHL(data, currencyPrices) {
     // gets the fund price from raw html (HL)
 
     // build a regex to match the specific part of the html
@@ -81,8 +79,7 @@ function getPriceFromDataHL(data, currencyPrices) {
         }
 
         return rawPrice;
-    }
-    catch (err) {
+    } catch {
         throw new Error('data formatted incorrectly');
     }
 }
@@ -104,7 +101,7 @@ function getSystemType(humanType) {
     return null;
 }
 
-function getFundUrlHL(config, fund) {
+export function getFundUrlHL(config, fund) {
     // returns a URL like:
     // http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
     const [, humanName, humanTypeRaw] = fund.name.match(config.data.funds.scraper.regex);
@@ -132,8 +129,7 @@ function getFundUrlHL(config, fund) {
 
     if (systemType === 'share') {
         urlParts = [...urlParts, 'shares/shares-search-results', firstLetter, systemName];
-    }
-    else {
+    } else {
         urlParts = [
             ...urlParts,
             'funds/fund-discounts,-prices--and--factsheets/search-results',
@@ -144,10 +140,3 @@ function getFundUrlHL(config, fund) {
 
     return urlParts.join('/');
 }
-
-module.exports = {
-    isHLFundShare,
-    getHoldingsFromDataHL,
-    getPriceFromDataHL,
-    getFundUrlHL
-};

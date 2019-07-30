@@ -122,7 +122,8 @@ module.exports = {
             'react-dom': '@hot-loader/react-dom',
             '~client': path.resolve(__dirname, './web/src'),
             '~client-test': path.resolve(__dirname, './web/test'),
-            '~api': path.resolve(__dirname, './api')
+            '~api': path.resolve(__dirname, './api/src'),
+            '~api-test': path.resolve(__dirname, './api/test')
         }
     },
     optimization: getOptimization(),

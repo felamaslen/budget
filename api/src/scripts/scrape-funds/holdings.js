@@ -1,5 +1,5 @@
-const { promptUser } = require('./helpers');
-const { getHoldingsFromDataHL } = require('./hl');
+import { promptUser } from '~api/scripts/scrape-funds/helpers';
+import { getHoldingsFromDataHL } from '~api/scripts/scrape-funds/hl';
 
 async function getStockCodes(db, logger) {
     // get a saved map of saved stock codes so that the user doesn't need to enter
@@ -87,8 +87,7 @@ async function updateHoldings(db, logger, fundsWithHoldings) {
             else {
                 logger.warn(`Skipped null code for stock: ${name}`);
             }
-        }
-        catch (err) {
+        } catch (err) {
             if (err.message === 'canceled') {
                 // this happens iff the user cancels a prompt for a stock code
                 // in this case, we exit the entire process (for good UX)
@@ -140,8 +139,7 @@ function getFundsWithHoldings(logger, funds, data) {
                     holdings: holdings.filter(item => item)
                 }
             ];
-        }
-        catch (err) {
+        } catch (err) {
             logger.warn(`Couldn't get holdings for fund with name: ${fund.name}`);
             logger.debug(err.stack);
 
@@ -150,14 +148,10 @@ function getFundsWithHoldings(logger, funds, data) {
     }, []);
 }
 
-async function scrapeFundHoldings(config, db, logger, funds, data) {
+export async function scrapeFundHoldings(config, db, logger, funds, data) {
     logger.info('Processing fund holdings...');
 
     const fundsWithHoldings = getFundsWithHoldings(logger, funds, data);
 
     await updateHoldings(db, logger, fundsWithHoldings);
 }
-
-module.exports = {
-    scrapeFundHoldings
-};

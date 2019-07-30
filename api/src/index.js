@@ -4,22 +4,22 @@
 
 /* eslint-disable global-require */
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const serveStatic = require('serve-static');
-const path = require('path');
-const webLogger = require('morgan');
-const passport = require('passport');
-const swaggerUiDist = require('swagger-ui-dist');
-const swaggerJSDoc = require('swagger-jsdoc');
+import express from 'express';
+import bodyParser from 'body-parser';
+import serveStatic from 'serve-static';
+import path from 'path';
+import webLogger from 'morgan';
+import passport from 'passport';
+import swaggerUiDist from 'swagger-ui-dist';
+import swaggerJSDoc from 'swagger-jsdoc';
 
-const { version } = require('../../package.json');
-const getConfig = require('./config');
-const getLogger = require('./modules/logger');
-const initDb = require('./modules/db');
-const { getStrategy } = require('./modules/auth');
-const { errorHandler } = require('./modules/error-handling');
-const routes = require('./routes');
+import { version } from '../../package.json';
+import config from '~api/config';
+import db from '~api/modules/db';
+import getLogger from '~api/modules/logger';
+import { getStrategy } from '~api/modules/auth';
+import { errorHandler } from '~api/modules/error-handling';
+import routes from '~api/routes';
 
 const API_PREFIX = '/api/v4';
 
@@ -27,7 +27,7 @@ function getVersion() {
     return version.substring(0, version.indexOf('-'));
 }
 
-function setupLogging(app, config) {
+function setupLogging(app) {
     if (config.debug) {
         app.use(webLogger('dev'));
     }
@@ -62,7 +62,7 @@ function setupDataInput(app) {
     app.use(bodyParser.urlencoded({ extended: true }));
 }
 
-function setupApiDocs(app, config) {
+function setupApiDocs(app) {
     // API docs
     const swaggerDefinition = {
         info: {
@@ -97,7 +97,7 @@ function setupApiDocs(app, config) {
     app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
-function setupApi(app, config, db, logger) {
+function setupApi(app, logger) {
     passport.use('jwt', getStrategy(config, db, logger));
 
     app.use(passport.initialize());
@@ -108,7 +108,7 @@ function setupApi(app, config, db, logger) {
 
     app.use(API_PREFIX, routes(config, db, logger));
 
-    setupApiDocs(app, config);
+    setupApiDocs(app);
 }
 
 function setupDevServer(app) {
@@ -170,28 +170,24 @@ function setupErrorHandling(app, logger) {
 }
 
 function run() {
-    const config = getConfig();
     const logger = getLogger();
 
     try {
-        const db = initDb(config);
-
         const app = express();
         const port = process.env.PORT || 3000;
 
-        setupLogging(app, config);
+        setupLogging(app);
         setupDataInput(app);
-        setupApi(app, config, db, logger);
+        setupApi(app, logger);
         setupWebApp(app);
         setupErrorHandling(app, logger);
 
         app.listen(port, () => {
             logger.info('Server listening on port', port);
         });
-    }
-    catch (err) {
+    } catch (err) {
         logger.error('Server did not start:', err.stack);
     }
 }
 
-module.exports = { run };
+run();

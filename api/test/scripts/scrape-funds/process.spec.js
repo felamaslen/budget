@@ -1,8 +1,10 @@
-const test = require('ava');
-const scraper = require('~api/scripts/scrapeFunds/process');
-const { fundHash } = require('~api/src/routes/data/funds/common');
-const config = require('~api/src/config')();
-const logger = require('~api/src/modules/logger')(true);
+import test from 'ava';
+import scraper from '~api/scripts/scrape-funds/process';
+import { fundHash } from '~api/routes/data/funds/common';
+import config from '~api/config';
+import { MockLogger } from '~api-test/test.common';
+
+const logger = new MockLogger();
 
 const TEST_FUND_NAMES = [
     'HL Multi-Manager UK Growth (accum.)',

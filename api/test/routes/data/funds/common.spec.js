@@ -1,15 +1,16 @@
-const test = require('ava');
-const db = require('~api/src/modules/db')();
-const md5 = require('md5');
-const { DateTime } = require('luxon');
+import test from 'ava';
+import md5 from 'md5';
+import { DateTime } from 'luxon';
 
-const {
+import db from '~api/modules/db';
+
+import {
     getMaxAge,
     getNumResultsQuery,
     getAllHistoryForFundsQuery,
     processFundHistory,
     fundHash
-} = require('~api/src/routes/data/funds/common');
+} from '~api/routes/data/funds/common';
 
 test('getMaxAge returns the correct timestamp', t => {
     const now = DateTime.fromISO('2017-09-05');
