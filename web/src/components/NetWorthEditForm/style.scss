@@ -1,3 +1,5 @@
+@import '~client/sass/variables.scss';
+
 .net-worth-list-item {
     display: flex;
     flex-flow: column;
@@ -21,8 +23,8 @@
             $title-width: 100px;
 
             .currency-title {
-                flex: 0 0 $title-width;
                 margin: 0 5px;
+                flex: 0 0 $title-width;
             }
 
             .button-refresh,
@@ -100,8 +102,8 @@
                     }
                     .delete-button,
                     .add-button {
-                        top: 0;
                         margin: 0 3px;
+                        top: 0;
                         flex: 0 0 auto;
                         width: 32px;
                     }
@@ -148,20 +150,20 @@
 
                         &:hover {
                             &::after {
-                                    content: '';
-                                    display: block;
-                                    position: absolute;
-                                    left: 0;
-                                    top: 0;
-                                    width: 100%;
-                                    height: 100%;
-                                    background: rgba(0, 0, 0, 0.25);
+                                display: block;
+                                content: $none;
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(0, 0, 0, 0.25);
                             }
                         }
 
                         &::before {
-                            content: '';
                             display: inline-block;
+                            content: $none;
                             position: absolute;
                             width: 0;
                             height: 0;
@@ -193,8 +195,8 @@
                     background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.8));
 
                     .subcategory {
-                        flex: 1;
                         margin: 0 5px;
+                        flex: 1;
                         padding-top: 5px;
                     }
                     .form-field-net-worth-value {
@@ -211,9 +213,9 @@
                 .category,
                 .subcategory {
                     display: flex;
+                    margin: 0 10px;
                     flex-flow: column;
                     flex: 1;
-                    margin: 0 10px;
 
                     .label {
                         margin-bottom: 3px;
