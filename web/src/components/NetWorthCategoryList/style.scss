@@ -23,10 +23,9 @@ $category-item-height: 52px;
     }
 
     .button-toggle-visibility {
+        display: flex;
         grid-row: 1;
         grid-column: 1;
-
-        display: flex;
         align-items: center;
         justify-content: center;
 
@@ -38,7 +37,7 @@ $category-item-height: 52px;
             &::after {
                 display: block;
                 margin-left: 16px;
-                content: '';
+                content: $none;
                 width: 0;
                 height: 0;
                 border: solid transparent;

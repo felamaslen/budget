@@ -64,7 +64,7 @@
             flex-grow: 1;
             text-transform: capitalize;
             &:after {
-                content: ":";
+                content: $colon;
             }
         }
         .form-field {
@@ -132,8 +132,8 @@
         background: $color-slightly-light;
         color: black;
         &:after {
-            content: $none;
             display: block;
+            content: $none;
             height: 100%;
             width: 0;
             border-right: 1px solid $color-medium-very-light;
