@@ -1,13 +1,9 @@
-/**
- * Script to scrape fund prices from broker
- */
+import commandLineArgs from 'command-line-args';
 
-const commandLineArgs = require('command-line-args');
-
-const getConfig = require('../../src/config');
-const getLogger = require('../../src/modules/logger');
-const initDb = require('../../src/modules/db');
-const { processScrape } = require('./process');
+import getConfig from '~api/config';
+import getLogger from '~api/modules/logger';
+import getDb from '~api/modules/db';
+import { processScrape } from '~api/scripts/scrape-funds/process';
 
 async function run() {
     const flags = commandLineArgs([
@@ -18,7 +14,7 @@ async function run() {
     const config = getConfig();
 
     const logger = getLogger();
-    const db = initDb(config);
+    const db = getDb();
 
     const status = await processScrape(config, flags, db, logger);
 

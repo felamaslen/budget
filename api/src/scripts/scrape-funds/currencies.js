@@ -1,6 +1,6 @@
-const axios = require('axios');
+import axios from 'axios';
 
-async function getCurrencyPrices(config, logger) {
+export async function getCurrencyPrices(config, logger) {
     logger.verbose('Fetching currency prices for conversion...');
 
     if (process.env.NODE_ENV === 'test') {
@@ -35,7 +35,3 @@ async function getCurrencyPrices(config, logger) {
         return {};
     }
 }
-
-module.exports = {
-    getCurrencyPrices
-};

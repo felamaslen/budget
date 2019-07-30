@@ -1,13 +1,13 @@
-const test = require('ava');
-const db = require('~api/src/modules/db')();
-const { DateTime } = require('luxon');
+import test from 'ava';
+import db from '~api/modules/db';
+import { DateTime } from 'luxon';
 
-const {
+import {
     getLimitCondition,
     getOlderExists,
     formatResults,
     getTotalCost
-} = require('~api/src/routes/data/list.common');
+} from '~api/routes/data/list.common';
 
 test('getLimitCondition returns a valid limit condition', t => {
     const now = DateTime.fromISO('2017-09-04');

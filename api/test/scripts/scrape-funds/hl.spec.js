@@ -1,9 +1,14 @@
-const test = require('ava');
-const memoize = require('fast-memoize');
-const path = require('path');
-const fs = require('fs-extra');
-const hl = require('~api/scripts/scrapeFunds/hl');
-const config = require('~api/src/config')();
+import test from 'ava';
+import memoize from 'fast-memoize';
+import path from 'path';
+import fs from 'fs-extra';
+import {
+    isHLFundShare,
+    getHoldingsFromDataHL,
+    getPriceFromDataHL,
+    getFundUrlHL
+} from '~api/scripts/scrape-funds/hl';
+import config from '~api/config';
 
 const TEST_FUND_NAMES = {
     shareHLDollar: 'Apple Inc Com Stk NPV (share)',
@@ -155,9 +160,9 @@ const getTestFunds = async () => {
 test('isHLFundShare returning the correct status', async t => {
     const testFunds = await getTestFunds();
 
-    t.false(hl.isHLFundShare(testFunds.hl.fund.fund));
-    t.true(hl.isHLFundShare(testFunds.hl.share.fund));
-    t.true(hl.isHLFundShare(testFunds.hl.shareDollar.fund));
+    t.false(isHLFundShare(testFunds.hl.fund.fund));
+    t.true(isHLFundShare(testFunds.hl.share.fund));
+    t.true(isHLFundShare(testFunds.hl.shareDollar.fund));
 });
 
 test('getHoldingsFromDataHL returning holdings for funds', async t => {
@@ -166,7 +171,7 @@ test('getHoldingsFromDataHL returning holdings for funds', async t => {
     const fund = testFunds.hl.fund.fund;
     const data = testFunds.hl.fund.data;
 
-    const result = hl.getHoldingsFromDataHL(fund, data);
+    const result = getHoldingsFromDataHL(fund, data);
 
     const expectedResult = holdingsTestData1;
 
@@ -179,7 +184,7 @@ test('getHoldingsFromDataHL returning  holdings for shares', async t => {
     const fund = testFunds.hl.share.fund;
     const data = testFunds.hl.share.data;
 
-    const result = hl.getHoldingsFromDataHL(fund, data);
+    const result = getHoldingsFromDataHL(fund, data);
 
     const expectedResult = holdingsTestData2;
 
@@ -192,7 +197,7 @@ test('getHoldingsFromDataHL returning  null for shares without holdings', async 
     const fund = testFunds.hl.shareDollar.fund;
     const data = testFunds.hl.shareDollar.data;
 
-    const result = hl.getHoldingsFromDataHL(fund, data);
+    const result = getHoldingsFromDataHL(fund, data);
 
     t.is(result, null);
 });
@@ -204,7 +209,7 @@ const currencyPrices = {
 test('getPriceFromDataHL (data processors) parsing the test fund data', async t => {
     const testFunds = await getTestFunds();
 
-    const result = hl.getPriceFromDataHL(testFunds.hl.fund.data, currencyPrices);
+    const result = getPriceFromDataHL(testFunds.hl.fund.data, currencyPrices);
 
     const expectedResult = 130.31;
 
@@ -214,7 +219,7 @@ test('getPriceFromDataHL (data processors) parsing the test fund data', async t 
 test('getPriceFromDataHL (data processors) parsing the test share data', async t => {
     const testFunds = await getTestFunds();
 
-    const result = hl.getPriceFromDataHL(testFunds.hl.share.data, currencyPrices);
+    const result = getPriceFromDataHL(testFunds.hl.share.data, currencyPrices);
 
     const expectedResult = 424.1;
 
@@ -224,7 +229,7 @@ test('getPriceFromDataHL (data processors) parsing the test share data', async t
 test('getPriceFromDataHL (data processors) parsing  the dollar share data and convert the price from USD to GBP', async t => {
     const testFunds = await getTestFunds();
 
-    const result = hl.getPriceFromDataHL(testFunds.hl.shareDollar.data, currencyPrices);
+    const result = getPriceFromDataHL(testFunds.hl.shareDollar.data, currencyPrices);
 
     const expectedResult = 22582 * 0.76746;
 
@@ -232,7 +237,7 @@ test('getPriceFromDataHL (data processors) parsing  the dollar share data and co
 });
 
 test('getPriceFromDataHL handling  bad data', t => {
-    const err = t.throws(() => hl.getPriceFromDataHL('flkjsdflksjdf'));
+    const err = t.throws(() => getPriceFromDataHL('flkjsdflksjdf'));
 
     t.is(err.message, 'data formatted incorrectly');
 });
@@ -244,7 +249,7 @@ test('getFundUrlHL handling  funds', t => {
 
     const url = 'http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/c/cf-lindsell-train-uk-equity-class-d-accumulation';
 
-    t.is(hl.getFundUrlHL(config, fund), url);
+    t.is(getFundUrlHL(config, fund), url);
 });
 
 test('getFundUrlHL handling  accumulation-inclusive funds', t => {
@@ -254,7 +259,7 @@ test('getFundUrlHL handling  accumulation-inclusive funds', t => {
 
     const url = 'http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/t/threadneedle-uk-equity-income-class-1-accumulation-inclusive';
 
-    t.is(hl.getFundUrlHL(config, fund), url);
+    t.is(getFundUrlHL(config, fund), url);
 });
 
 test('getFundUrlHL handling  shares', t => {
@@ -264,7 +269,7 @@ test('getFundUrlHL handling  shares', t => {
 
     const url = 'http://www.hl.co.uk/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p';
 
-    t.is(hl.getFundUrlHL(config, fund), url);
+    t.is(getFundUrlHL(config, fund), url);
 });
 
 test('getFundUrlHL handling  dollar shares', t => {
@@ -274,5 +279,5 @@ test('getFundUrlHL handling  dollar shares', t => {
 
     const url = 'http://www.hl.co.uk/shares/shares-search-results/a/apple-inc-com-stk-npv';
 
-    t.is(hl.getFundUrlHL(config, fund), url);
+    t.is(getFundUrlHL(config, fund), url);
 });

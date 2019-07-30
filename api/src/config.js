@@ -6,12 +6,11 @@ if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'tru
     require('dotenv').config(); // eslint-disable-line global-require
 }
 
-module.exports = () => ({
+export default {
     test: process.env.NODE_ENV === 'test',
     testIntegration: process.env.NODE_ENV === 'testintegration',
     debug: process.env.NODE_ENV !== 'production',
     debugSql: process.env.SQLDEBUGGER === 'true',
-    postgresUri: process.env.DATABASE_URL,
     webUrl: process.env.WEB_URL || '',
     openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
     user: {
@@ -79,4 +78,4 @@ module.exports = () => ({
             detail: Number(process.env.PIE_DETAIL) || 30
         }
     }
-});
+};

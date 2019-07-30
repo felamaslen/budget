@@ -1,8 +1,8 @@
-const { getCurrencyPrices } = require('./currencies');
-const { fundHash } = require('../../src/routes/data/funds/common');
-const { getRawData } = require('./scrape');
-const { scrapeFundHoldings } = require('./holdings');
-const { scrapeFundPrices } = require('./prices');
+import { getCurrencyPrices } from '~api/scripts/scrape-funds/currencies';
+import { fundHash } from '~api/routes/data/funds/common';
+import { getRawData } from '~api/scripts/scrape-funds/scrape';
+import { scrapeFundHoldings } from '~api/scripts/scrape-funds/holdings';
+import { scrapeFundPrices } from '~api/scripts/scrape-funds/prices';
 
 function getBroker(config, name) {
     if (name.match(config.data.funds.scraper.regex)) {
@@ -75,7 +75,7 @@ async function processScrape(config, flags, db, logger) {
     const { holdings, prices } = flags;
 
     if (!holdings && !prices) {
-        logger.info('Usage: node api/scripts/scrapeFunds/process.js [--holdings|--prices]');
+        logger.info('Usage: node api/src/scripts/scrape-funds/process.js [--holdings|--prices]');
 
         return 0;
     }

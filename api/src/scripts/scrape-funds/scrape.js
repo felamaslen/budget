@@ -1,8 +1,8 @@
-const fs = require('fs');
-const request = require('request');
-const { getFundUrlHL } = require('./hl');
+import fs from 'fs';
+import request from 'request';
+import { getFundUrlHL } from '~api/scripts/scrape-funds/hl';
 
-function getFundUrl(config, fund) {
+export function getFundUrl(config, fund) {
     if (fund.broker === 'hl') {
         return getFundUrlHL(config, fund);
     }
@@ -10,7 +10,7 @@ function getFundUrl(config, fund) {
     throw new Error('Unknown fund broker');
 }
 
-function getCacheUrlMap(config, logger, funds) {
+export function getCacheUrlMap(config, logger, funds) {
     // never download the same data twice
     return funds.reduce(({ urls, urlIndices }, fund) => {
         try {
@@ -25,8 +25,7 @@ function getCacheUrlMap(config, logger, funds) {
             }
 
             return { urls: [...urls, url], urlIndices: [...urlIndices, urls.length] };
-        }
-        catch (err) {
+        } catch (err) {
             logger.error(`Error getting URL for fund: ${fund.name}:`, err.message);
             logger.debug(err.stack);
 
@@ -36,7 +35,7 @@ function getCacheUrlMap(config, logger, funds) {
     }, { urls: [], urlIndices: [] });
 }
 
-function downloadUrl(config, logger, url) {
+export function downloadUrl(config, logger, url) {
     if (url.match(/^file:\/\//)) {
         const filePath = url.substring(7);
 
@@ -79,7 +78,7 @@ function downloadUrl(config, logger, url) {
     });
 }
 
-async function getRawData(config, logger, funds) {
+export async function getRawData(config, logger, funds) {
     const { urls, urlIndices } = getCacheUrlMap(config, logger, funds);
 
     const data = await Promise.all(urls.map(url => downloadUrl(config, logger, url)));
@@ -90,10 +89,3 @@ async function getRawData(config, logger, funds) {
 
     return dataMapped;
 }
-
-module.exports = {
-    getFundUrl,
-    getCacheUrlMap,
-    downloadUrl,
-    getRawData
-};

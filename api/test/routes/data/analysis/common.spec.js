@@ -1,7 +1,7 @@
 const test = require('ava');
 const { DateTime } = require('luxon');
 
-const analysis = require('~api/src/routes/data/analysis/common');
+const analysis = require('~api/routes/data/analysis/common');
 
 test('getCategoryColumn returning a group as expected', t => {
     t.is(analysis.getCategoryColumn('bills'), 'item');

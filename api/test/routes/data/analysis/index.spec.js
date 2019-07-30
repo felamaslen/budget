@@ -1,12 +1,12 @@
-const test = require('ava');
-const { DateTime } = require('luxon');
-const db = require('~api/src/modules/db')();
-const {
+import test from 'ava';
+import { DateTime } from 'luxon';
+import db from '~api/modules/db';
+import {
     getPeriodCostForCategory,
     getRowsByDate,
     processTimelineData,
     getPeriodCost
-} = require('~api/src/routes/data/analysis');
+} from '~api/routes/data/analysis';
 
 test('getPeriodCostForCategory getting valid data', async t => {
     const [{ uid }] = await db.select('uid')

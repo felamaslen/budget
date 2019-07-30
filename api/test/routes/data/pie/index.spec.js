@@ -3,7 +3,7 @@ const test = require('ava');
 const {
     getPieCols,
     processQueryResult
-} = require('~api/src/routes/data/pie');
+} = require('~api/routes/data/pie');
 
 test('getPieCols returns the expected category list', t => {
     t.deepEqual(getPieCols('funds'), [

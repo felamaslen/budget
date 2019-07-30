@@ -1,10 +1,10 @@
-const test = require('ava');
-const { DateTime } = require('luxon');
-const db = require('~api/src/modules/db')();
-const {
+import test from 'ava';
+import { DateTime } from 'luxon';
+import db from '~api/modules/db';
+import {
     getPeriodCostDeep,
     processDataResponse
-} = require('~api/src/routes/data/analysis/deep');
+} from '~api/routes/data/analysis/deep';
 
 test('getPeriodCostDeep getting items data with cost', async t => {
     const [{ uid }] = await db.select('uid')

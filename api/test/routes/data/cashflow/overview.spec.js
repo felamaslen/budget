@@ -1,7 +1,8 @@
-const test = require('ava');
-const db = require('~api/src/modules/db')();
-const config = require('~api/src/config')();
-const { DateTime } = require('luxon');
+import test from 'ava';
+import { DateTime } from 'luxon';
+
+import db from '~api/modules/db';
+import config from '~api/config';
 
 const {
     getStartTime,
@@ -14,7 +15,7 @@ const {
     getFundValue,
     mapOldToYearMonths,
     getData
-} = require('~api/src/routes/data/cashflow/overview');
+} = require('~api/routes/data/cashflow/overview');
 
 const testPricesProcessedResponse = {
     '1': [

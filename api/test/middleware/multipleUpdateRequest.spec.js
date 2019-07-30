@@ -1,5 +1,5 @@
 const test = require('ava');
-const middleware = require('~api/src/middleware/multipleUpdateRequest');
+const middleware = require('~api/middleware/multipleUpdateRequest');
 
 test('getOverallStatusCode handling 5xx codes', t => {
     t.is(middleware.getOverallStatusCode([200, 403, 503, 500].map(
