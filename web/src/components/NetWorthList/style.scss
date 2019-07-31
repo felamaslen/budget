@@ -50,11 +50,32 @@
                 grid-row: 1;
                 grid-column: 1;
                 grid-gap: 6px;
-                grid-template-rows: repeat(5, 1fr);
+                grid-template-rows: repeat(6, 1fr);
                 grid-template-columns: repeat(5, 1fr);
 
                 .net-worth-list-item-summary {
                     flex-flow: column;
+
+                    &:last-child {
+                        grid-row: 6;
+                        grid-column: 3;
+                        z-index: 3;
+                    }
+                }
+
+                &::after {
+                    display: flex;
+                    content: $text-latest;
+                    align-items: center;
+                    justify-content: center;
+                    grid-row: 6;
+                    grid-column: 3;
+                    z-index: 2;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    border: 2px dashed $color-light;
+                    color: $color-light;
+                    border-radius: 5px;
                 }
             }
         }
