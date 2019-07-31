@@ -24,7 +24,8 @@
         display: flex;
         flex: 0 0 24px;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
+        position: relative;
         background: $color-shadow-l4;
         color: white;
 
@@ -35,7 +36,8 @@
         }
         .button-back {
             display: block;
-            margin: 0 4px;
+            position: absolute;
+            right: 4px;
             width: 20px;
             height: 20px;
             text-align: center;
