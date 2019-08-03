@@ -71,15 +71,9 @@ test('funds meta - desktop info box', t => {
 
     t.is(meta.tagName, 'DIV');
     t.is(meta.className, 'funds-info');
-    t.is(meta.childNodes.length, 1);
+    t.is(meta.childNodes.length, 2);
 
-    const [after] = meta.childNodes;
-
-    t.is(after.tagName, 'DIV');
-    t.is(after.className, 'after-list');
-    t.is(after.childNodes.length, 2);
-
-    const [stocksList, graphFunds] = after.childNodes;
+    const [stocksList, graphFunds] = meta.childNodes;
 
     t.is(stocksList.tagName, 'DIV');
     t.is(stocksList.className, 'stocks-list graph-container-outer');

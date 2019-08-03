@@ -11,49 +11,7 @@ import { testState } from '~client-test/test_data/state';
 
 const getContainer = (customProps = {}, customState = state => state, ...args) => {
     const state = customState({
-        ...testState,
-        stocks: {
-            ...testState.stocks,
-            loading: false,
-            indices: [
-                {
-                    code: 'SPX',
-                    name: 'S&P 500',
-                    gain: 0.65,
-                    up: true,
-                    down: false
-                },
-                {
-                    code: 'FTSE',
-                    name: 'FTSE 100',
-                    gain: -0.21,
-                    up: false,
-                    down: true
-                }
-            ],
-            shares: [
-                {
-                    code: 'CTY.L',
-                    name: 'City of London Investment Trust',
-                    weight: 0.3,
-                    gain: 0.01,
-                    price: 406.23,
-                    up: false,
-                    down: true
-                },
-                {
-                    code: 'SMT.L',
-                    name: 'Scottish Mortgage Investment Trust',
-                    weight: 0.7,
-                    gain: -0.54,
-                    price: 492.21,
-                    up: false,
-                    down: true
-                }
-            ],
-            history: [],
-            lastPriceUpdate: 133
-        }
+        ...testState
     });
 
     const store = createMockStore(state);
@@ -80,7 +38,7 @@ test('basic structure', t => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'stocks-list graph-container-outer');
+    t.is(div.className, 'stocks-list');
     t.is(div.childNodes.length, 1);
 });
 
@@ -100,152 +58,72 @@ test('requesting a stocks list when it renders', t => {
     clock.restore();
 });
 
-test('rendering a graph container', t => {
-    const { container } = getContainer();
-
-    const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-
-    t.is(graph.tagName, 'DIV');
-    t.is(graph.className, 'graph-container');
-    t.is(graph.childNodes.length, 2);
-});
-
 test('rendering a stocks list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-    const [stocksList] = graph.childNodes;
+    const [stocksList] = div.childNodes;
 
     t.is(stocksList.tagName, 'UL');
     t.is(stocksList.className, 'stocks-list-ul');
-    t.is(stocksList.childNodes.length, 2);
+    t.is(stocksList.childNodes.length, 4);
 });
 
 test('rendering CTY stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-    const [stocksList] = graph.childNodes;
+    const [stocksList] = div.childNodes;
 
     const [cty] = stocksList.childNodes;
 
     t.is(cty.tagName, 'LI');
-    t.is(cty.className, 'up hl-down');
+    t.is(cty.className, 'stocks-list-item stocks-list-share');
     t.is(cty.title, 'City of London Investment Trust');
-
-    t.is(cty.childNodes.length, 3);
-    cty.childNodes.forEach(tag => {
-        t.is(tag.tagName, 'SPAN');
-    });
-
-    const [nameColumn, price, change] = cty.childNodes;
-
-    t.is(nameColumn.className, 'name-column');
-    t.is(price.className, 'price');
-    t.is(change.className, 'change');
-
-    t.is(nameColumn.childNodes.length, 2);
-    nameColumn.childNodes.forEach(tag => {
-        t.is(tag.tagName, 'SPAN');
-    });
-    const [code, title] = nameColumn.childNodes;
-
-    t.is(code.className, 'code');
-    t.is(code.innerHTML, 'CTY.L');
-
-    t.is(title.className, 'title');
-    t.is(title.innerHTML, 'City of London Investment Trust');
-
-    t.is(price.className, 'price');
-    t.is(price.innerHTML, '406.23');
-
-    t.is(change.className, 'change');
-    t.is(change.innerHTML, '0.01%');
+    t.is(cty.childNodes[0].innerHTML, 'CTY.L');
 });
 
 test('rendering SMT stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-    const [stocksList] = graph.childNodes;
+    const [stocksList] = div.childNodes;
 
     const [, smt] = stocksList.childNodes;
 
     t.is(smt.tagName, 'LI');
-    t.is(smt.className, 'down hl-down');
+    t.is(smt.className, 'down hl-up');
     t.is(smt.title, 'Scottish Mortgage Investment Trust');
 
-    t.is(smt.childNodes.length, 3);
-    smt.childNodes.forEach(tag => {
-        t.is(tag.tagName, 'SPAN');
-    });
-
-    const [nameColumn, price, change] = smt.childNodes;
-
-    t.is(nameColumn.className, 'name-column');
-    t.is(price.className, 'price');
-    t.is(change.className, 'change');
-
-    t.is(nameColumn.childNodes.length, 2);
-    nameColumn.childNodes.forEach(tag => {
-        t.is(tag.tagName, 'SPAN');
-    });
-    const [code, title] = nameColumn.childNodes;
-
-    t.is(code.className, 'code');
-    t.is(code.innerHTML, 'SMT.L');
-
-    t.is(title.className, 'title');
-    t.is(title.innerHTML, 'Scottish Mortgage Investment Trust');
-
-    t.is(price.className, 'price');
-    t.is(price.innerHTML, '492.21');
-
-    t.is(change.className, 'change');
-    t.is(change.innerHTML, '-0.54%');
+    t.is(smt.childNodes.[0].innerHTML, 'SMT.L');
 });
 
-test('rendering a stocks sidebar', t => {
+test('rendering SPX index', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
-    const [graph] = div.childNodes;
+    const [stocksList] = div.childNodes;
 
-    const [, sidebar] = graph.childNodes;
+    const [, , spx] = stocksList.childNodes;
 
-    t.is(sidebar.tagName, 'DIV');
-    t.is(sidebar.className, 'stocks-sidebar');
-    t.is(sidebar.childNodes.length, 2);
+    t.is(spx.tagName, 'LI');
+    t.is(spx.className, '');
+    t.not(spx.title, 'S&P 500');
+
+    t.is(spx.childNodes.[0].innerHTML, 'S&P 500');
 });
 
-test('rendering a stocks graph', t => {
+test('rendering FTSE index', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
-    const [graph] = div.childNodes;
+    const [stocksList] = div.childNodes;
 
-    const [, sidebar] = graph.childNodes;
+    const [, , , ftse] = stocksList.childNodes;
 
-    const [stocksGraph] = sidebar.childNodes;
+    t.is(ftse.tagName, 'LI');
+    t.is(ftse.className, '');
+    t.not(ftse.title, 'FTSE 100');
 
-    t.is(stocksGraph.tagName, 'DIV');
-    t.is(stocksGraph.className, 'graph-container graph-graph-stocks');
-});
-
-test('rendering a sidebar list', t => {
-    const { container } = getContainer();
-
-    const [div] = container.childNodes;
-    const [graph] = div.childNodes;
-
-    const [, sidebar] = graph.childNodes;
-
-    const [, sidebarList] = sidebar.childNodes;
-
-    t.is(sidebarList.tagName, 'UL');
-    t.is(sidebarList.childNodes.length, 3);
+    t.is(ftse.childNodes.[0].innerHTML, 'FTSE 100');
 });

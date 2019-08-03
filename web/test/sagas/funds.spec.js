@@ -4,27 +4,29 @@ import sinon from 'sinon';
 import shortid from 'shortid';
 
 import '~client-test/browser';
+import { delay, take } from 'redux-saga/effects';
 import { testSaga } from 'redux-saga-test-plan';
-import { debounce } from 'redux-saga/effects';
 import axios from 'axios';
 
 import fundsSaga, {
     getFundHistoryQuery,
     requestFundPeriodData,
     requestStocksList,
-    requestStocksPrices
+    watchQuotesReceived,
+    requestQuotes,
+    requestQuotesLoop
 } from '~client/sagas/funds';
 import { errorOpened } from '~client/actions/error';
 import { fundsRequested, fundsReceived } from '~client/actions/funds';
-import { stocksListReceived, stockPricesReceived } from '~client/actions/stocks';
+import { stocksListReceived } from '~client/actions/stocks';
 import { getApiKey } from '~client/selectors/api';
 import { getFundsCache } from '~client/selectors/funds/helpers';
 import { getPeriod } from '~client/selectors/funds';
-import { getStocks, getIndices } from '~client/selectors/funds/stocks';
-import { getStockPrices } from '~client/modules/finance';
+import { getStocks, getIndices } from '~client/selectors/stocks';
 import { API_PREFIX } from '~client/constants/data';
 import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
-import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
+import { STOCKS_LIST_REQUESTED, STOCKS_LIST_RECEIVED } from '~client/constants/actions/stocks';
+import { STOCK_PRICES_DELAY } from '~client/constants/stocks';
 
 test('getFundHistoryQuery gets a URL query object to specify fund price history detail', t => {
     t.is(1, 1);
@@ -182,12 +184,12 @@ test('requestStocksList handles errors', t => {
         .isDone();
 });
 
-test('requestStocksPrices requests stock prices', t => {
-    t.is(1, 1);
+test('requestQuotes sends an action to the socket', t => {
+    const io = {
+        emit: () => null
+    };
 
-    const res = { isRes: true };
-
-    testSaga(requestStocksPrices)
+    testSaga(requestQuotes, io)
         .next()
         .select(getStocks)
         .next([
@@ -200,47 +202,63 @@ test('requestStocksPrices requests stock prices', t => {
             { code: 'indice1' },
             { code: 'indice2' }
         ])
-        .call(getStockPrices, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
-        .next(res)
-        .put(stockPricesReceived(res))
+        .call([io, 'emit'], 'request-quotes', ['code1', 'code2', 'code3', 'indice1', 'indice2'])
         .next()
         .isDone();
+
+    t.pass();
 });
 
-test('requestStocksPrices handles errors', t => {
-    t.is(1, 1);
+test('requestQuotes doesn\'t do anything if there are no quotes to request', t => {
+    const io = {
+        emit: () => null
+    };
 
-    const err = new Error('some error');
-
-    testSaga(requestStocksPrices)
+    testSaga(requestQuotes, io)
         .next()
         .select(getStocks)
-        .next([
-            { code: 'code1' },
-            { code: 'code2' },
-            { code: 'code3' }
-        ])
+        .next([])
         .select(getIndices)
-        .next([
-            { code: 'indice1' },
-            { code: 'indice2' }
-        ])
-        .call(getStockPrices, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
-        .throw(err)
-        .put(stockPricesReceived(null, err))
-        .next()
+        .next([])
         .isDone();
+
+    t.pass();
+});
+
+test('requestQuotesLoop requests quotes on a loop', t => {
+    const io = {
+        emit: () => null
+    };
+
+    testSaga(requestQuotesLoop, io)
+        .next()
+        .call(requestQuotes, io)
+        .next()
+        .race([
+            delay(STOCK_PRICES_DELAY),
+            take(STOCKS_LIST_RECEIVED)
+        ])
+        .next()
+        .call(requestQuotes, io)
+        .next(); // etc.
+
+    t.pass();
 });
 
 test('fundsSaga forks other sagas', t => {
-    t.is(1, 1);
-    testSaga(fundsSaga)
+    const io = { isIoServer: true };
+
+    testSaga(fundsSaga, io)
         .next()
         .takeLatest(FUNDS_REQUESTED, requestFundPeriodData)
         .next()
         .takeLatest(STOCKS_LIST_REQUESTED, requestStocksList)
         .next()
-        .is(debounce(100, STOCKS_PRICES_REQUESTED, requestStocksPrices))
+        .fork(watchQuotesReceived, io)
+        .next()
+        .fork(requestQuotesLoop, io)
         .next()
         .isDone();
+
+    t.pass();
 });

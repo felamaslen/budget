@@ -18,43 +18,6 @@ export function numberFormat(value) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function getSign(number) {
-    if (number < 0) {
-        return '-';
-    }
-
-    return '';
-}
-
-export function sigFigs(value, figs) {
-    if (value === 0) {
-        return value.toFixed(figs - 1);
-    }
-
-    const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
-    const exp = Math.pow(10, Math.min(figs - 1, Math.max(0, figs - numDigits)));
-    const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
-
-    // add extra zeroes if necessary
-    const hasDot = absResult.indexOf('.') > -1;
-    const numDigitsVisible = absResult.length - (hasDot >> 0);
-    const numTrailingZeroes = Math.max(0, figs - numDigitsVisible);
-
-    const sign = getSign(value);
-
-    if (numTrailingZeroes > 0) {
-        const dot = hasDot
-            ? ''
-            : '.';
-
-        const zeroes = new Array(numTrailingZeroes).fill('0');
-
-        return `${sign}${absResult}${dot}${zeroes.join('')}`;
-    }
-
-    return `${sign}${absResult}`;
-}
-
 export function leadingZeroes(value, numZeroes) {
     const numAdd = value
         ? numZeroes - Math.floor(Math.log10(value)) - 1

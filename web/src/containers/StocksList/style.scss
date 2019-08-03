@@ -2,144 +2,36 @@
 @import '~client/sass/variables.scss';
 @import '~client/sass/mixins.scss';
 
-// desktop
-@media screen and (min-width: $width-page-mobile) {
-    .stocks-list {
-        font-size: 0.8em;
-        .graph-container {
-            background: $color-very-dark;
-            color: $color-white;
-        }
-        
-        span {
-            display: inline-block;
-        }
-        
-        li {
-            @include stocks-list-price-change;
-            border-bottom: 1px solid $color-dark;
-            padding-top: 1px;
+.stocks-list {
+    display: none;
+    width: 500px;
+    height: 300px;
+    background: $color-very-dark;
 
-            &.up.hl-up {
-                background-color: $color-bg-up-hl;
-            }
-            &.up.hl-down {
-                background-color: $color-bg-up-rev;
-            }
-            &.down.hl-up {
-                background-color: $color-bg-down-rev;
-            }
-            &.down.hl-down {
-                background-color: $color-bg-down-hl;
-            }
+    &-ul {
+        display: flex;
+        margin: 0;
+        padding: 0;
+        flex-flow: column;
+        min-height: 100%;
+    }
 
-            &:nth-child(2n+1) {
-                background: $color-very-dark-1;
-            }
-        }
-            
-        .change {
-            &:after {
-                display: inline-block;
-                width: 10px;
-                height: 2px;
-                content: $none;
-                vertical-align: middle;
-                background: turquoise;
-            }
-        }
-        
-        .stocks-list-ul {
-            margin: 0;
-            width: 350px;
-            height: 100%;
-            overflow-y: scroll;
-            float: left;
-            padding: 0;
-            list-style: none;
-            font-size: 13pt;
+    &-item {
+        display: flex;
+        align-items: center;
+        color: $color-light;
+        flex: 0 0 auto;
 
-            span {
-                white-space: nowrap;
-                line-height: 20px;
-                vertical-align: top;
-            }
-            .name-column {
-                width: 68%;
-                text-overflow: ellipsis;
-                overflow: hidden;
-
-                .code, .title {
-                }
-                .code {
-                    margin: 1px;
-                    padding-right: 4px;
-                    line-height: 18px;
-                    color: $color-white;
-                    font-size: 11pt;
-                    background: $color-shadow-l3;
-                }
-                .title {
-                    color: $color-medium-very-light;
-                    font-size: 8pt;
-                    width: 100%;
-                }
-            }
-            .price, .change {
-                width: 16%;
-                font-size: 10pt;
-                color: $color-white;
-                text-align: right;
-            }
-            .up .change {
-                color: $color-bg-up;
-            }
-            .down .change {
-                color: $color-bg-down;
-            }
-            
-            .hl-up, .hl-down {
-                font-weight: bold;
-            }
+        .title {
+            flex: 3;
         }
-        .stocks-sidebar {
-            width: 150px;
-            height: 100%;
-            float: right;
-            text-align: right;
-            ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-            }
-            .graph-container {
-                width: auto;
-                height: auto;
-                box-shadow: none;
-                position: static;
-                background: none;
-            }
-            .name-column {
-                width: 60%;
-                color: $color-light;
-                font-style: italic;
-                .title:after {
-                    content: $colon-space;
-                }
-            }
-            .code, .price {
-                display: none;
-            }
-            .price, .change {
-                width: 40%;
-            }
+        .price-gain {
+            flex: 0 0 100px;
         }
     }
 
-    .graph-stocks {
-        position: static;
-        box-shadow: none;
-        width: 260px;
-        height: 50px;
+    @media only screen and (min-width: $width-page-mobile) {
+        display: block;
+        overflow-y: auto;
     }
 }

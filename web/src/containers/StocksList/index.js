@@ -1,118 +1,107 @@
 import { connect } from 'react-redux';
-import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
-import React, { useRef, useState, useEffect } from 'react';
+import { DO_STOCKS_LIST } from '~client/constants/stocks';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { stocksListCleared, stocksListRequested } from '~client/actions/stocks';
+import { getStocksList } from '~client/selectors/stocks';
 import { dataShape } from '~client/prop-types/graph';
-import GraphStocks from '~client/containers/StocksList/GraphStocks';
-import { stocksListRequested, stockPricesRequested } from '~client/actions/stocks';
-import { sigFigs } from '~client/modules/format';
 
 import './style.scss';
 
-const stockShape = PropTypes.shape({
-    code: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    weight: PropTypes.number,
-    gain: PropTypes.number.isRequired,
-    price: PropTypes.number,
-    up: PropTypes.bool.isRequired,
-    down: PropTypes.bool.isRequired
-});
+function PriceDisplay({ price, gain, priceFirst, onClick }) {
+    if (!price) {
+        return null;
+    }
+    if (gain === null) {
+        return (
+            <span className="price">{price}</span>
+        );
+    }
 
-const StockListItems = ({ stockMap }) => stockMap.map(({ code, name, price, gain, up, down }) => (
-    <li key={code}
-        className={classNames({ up: gain > 0, down: gain < 0, 'hl-up': up, 'hl-down': down })}
-        title={name}
-    >
-        <span className="name-column">
-            <span className="code">{code}</span>
-            <span className="title">{name}</span>
+    return (
+        <span
+            className={classNames('price-gain', { 'price-first': priceFirst })}
+            onClick={onClick}
+        >
+            <span className="price">{price}</span>
+            <span className="gain">{gain.toPrecision(3)}</span>
         </span>
-        <span className="price">{(price || 0).toFixed(2)}</span>
-        <span className="change">{sigFigs(gain, 3)}%</span>
-    </li>
-));
+    );
+}
 
-StockListItems.propTypes = {
-    stockMap: PropTypes.arrayOf(stockShape.isRequired).isRequired
+PriceDisplay.propTypes = {
+    price: PropTypes.number,
+    gain: PropTypes.number,
+    priceFirst: PropTypes.bool.isRequired,
+    onClick: PropTypes.func.isRequired
+};
+
+PriceDisplay.defaultProps = {
+    gain: null
+};
+
+const StockItem = ({ name, title, price, gainPercent, lastGainPercent, graph, priceFirst, togglePriceFirst }) => (
+    <li className={classNames('stocks-list-item', {
+        up: gainPercent > 0,
+        down: gainPercent < 0,
+        'hl-up': lastGainPercent > 0,
+        'hl-down': lastGainPercent < 0
+    })}>
+        <a className="title" title={title}>{name}</a>
+        <PriceDisplay price={price} gain={gainPercent} priceFirst={priceFirst} onClick={togglePriceFirst} />
+        {graph && <span className="graph">{graph}</span>}
+    </li>
+);
+
+StockItem.propTypes = {
+    name: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    price: PropTypes.number,
+    gainPercent: PropTypes.number,
+    lastGainPercent: PropTypes.number,
+    graph: dataShape,
+    priceFirst: PropTypes.bool.isRequired,
+    togglePriceFirst: PropTypes.func.isRequired
 };
 
 function StocksList({
     enabled,
     loading,
-    shares,
-    indices,
-    history,
-    lastPriceUpdate,
-    requestList,
-    requestPrices
+    stocksList,
+    clearList,
+    requestList
 }) {
     useEffect(() => {
         if (enabled) {
-            setImmediate(requestList);
-
-            return requestList;
+            // setImmediate(requestList);
+        } else {
+            setImmediate(clearList);
         }
 
-        return () => null;
-    }, [enabled, requestList]);
+        return clearList;
+    }, [enabled, clearList, requestList]);
 
-    const [prevLastPriceUpdate, setLastPriceUpdate] = useState(lastPriceUpdate);
-    const timer = useRef(null);
-
-    const [oldWeightedGain, setOldWeightedGain] = useState(0);
-    const [weightedGain, setWeightedGain] = useState(0);
-
-    useEffect(() => {
-        if (history.length) {
-            setOldWeightedGain(weightedGain);
-            setWeightedGain(history[history.length - 1][1]);
-        }
-    }, [history, weightedGain]);
-
-    useEffect(() => {
-        if (lastPriceUpdate !== prevLastPriceUpdate) {
-            clearTimeout(timer.current);
-            timer.current = setTimeout(requestPrices, STOCK_PRICES_DELAY);
-            setLastPriceUpdate(lastPriceUpdate);
-        }
-    }, [lastPriceUpdate, prevLastPriceUpdate, requestPrices]);
-
-    useEffect(() => {
-        if (enabled && (shares.length || indices.length)) {
-            clearTimeout(timer.current);
-            requestPrices();
-        }
-    }, [enabled, shares.length, indices.length, requestPrices]);
+    const [priceFirst, setPriceFirst] = useState(false);
+    const togglePriceFirst = useCallback(() => setPriceFirst(last => !last), []);
 
     if (!enabled) {
         return null;
     }
 
     return (
-        <div className={classNames('stocks-list', 'graph-container-outer', { loading })}>
-            <div className="graph-container">
-                <ul className="stocks-list-ul">
-                    <StockListItems stockMap={shares} />
-                </ul>
-                <div className="stocks-sidebar">
-                    <GraphStocks history={history} />
-                    <ul>
-                        <li className={classNames({
-                            up: weightedGain > 0,
-                            down: weightedGain < 0,
-                            'hl-up': weightedGain > oldWeightedGain,
-                            'hl-down': weightedGain < oldWeightedGain
-                        })}>
-                            <span className="name-column">Overall</span>
-                            <span className="change">{sigFigs(weightedGain, 3)}%</span>
-                        </li>
-                        <StockListItems stockMap={indices} />
-                    </ul>
-                </div>
-            </div>
+        <div className={classNames('stocks-list', { loading })}>
+            <ul className="stocks-list-ul">
+                {stocksList.map(item => (
+                    <StockItem
+                        key={item.name}
+                        {...item}
+                        priceFirst={priceFirst}
+                        togglePriceFirst={togglePriceFirst}
+                    />
+                ))}
+            </ul>
         </div>
     );
 }
@@ -120,30 +109,28 @@ function StocksList({
 StocksList.propTypes = {
     enabled: PropTypes.bool.isRequired,
     loading: PropTypes.bool.isRequired,
-    shares: PropTypes.arrayOf(stockShape.isRequired).isRequired,
-    indices: PropTypes.arrayOf(stockShape.isRequired).isRequired,
-    history: dataShape.isRequired,
-    lastPriceUpdate: PropTypes.number,
-    requestList: PropTypes.func.isRequired,
-    requestPrices: PropTypes.func.isRequired
+    stocksList: PropTypes.arrayOf(PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        title: PropTypes.string,
+        gainPercent: PropTypes.number,
+        lastGainPercent: PropTypes.number
+    }).isRequired).isRequired,
+    clearList: PropTypes.func.isRequired,
+    requestList: PropTypes.func.isRequired
 };
 
 StocksList.defaultProps = {
-    lastPriceUpdate: 0,
     enabled: DO_STOCKS_LIST
 };
 
 const mapStateToProps = state => ({
     loading: state.stocks.loading,
-    shares: state.stocks.shares,
-    indices: state.stocks.indices,
-    history: state.stocks.history,
-    lastPriceUpdate: state.stocks.lastPriceUpdate
+    stocksList: getStocksList(state)
 });
 
 const mapDispatchToProps = {
-    requestList: stocksListRequested,
-    requestPrices: stockPricesRequested
+    clearList: stocksListCleared,
+    requestList: stocksListRequested
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(StocksList);

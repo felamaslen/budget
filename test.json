@@ -1,0 +1,25 @@
+[
+    {
+        "id": "5f61537a-3942-4815-89d1-d97cb9e76d12",
+        "date": "2019-06-15T00:00:00.000+01:00",
+        "item": "White Cabbage",
+        "cost": 53,
+        "shop": "Lidl",
+        "category": "Vegetables",
+        "future": false,
+        "firstPresent": false,
+        "daily": null,
+        "__optimistic": "UPDATE"
+    },
+    {
+        "id": "d67baaad-7ce0-413b-8171-d6a265434b0b",
+        "date": "2019-06-15T00:00:00.000+01:00",
+        "item": "Leeksf",
+        "cost": 95,
+        "shop": "Lidl",
+        "category": "Vegetables",
+        "future": false,
+        "firstPresent": false,
+        "daily": 2019
+    }
+]

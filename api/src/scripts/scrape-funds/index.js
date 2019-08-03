@@ -1,8 +1,8 @@
 import commandLineArgs from 'command-line-args';
 
-import getConfig from '~api/config';
-import getLogger from '~api/modules/logger';
-import getDb from '~api/modules/db';
+import config from '~api/config';
+import logger from '~api/modules/logger';
+import db from '~api/modules/db';
 import { processScrape } from '~api/scripts/scrape-funds/process';
 
 async function run() {
@@ -10,11 +10,6 @@ async function run() {
         { name: 'holdings', alias: 'h', type: Boolean },
         { name: 'prices', alias: 'p', type: Boolean }
     ]);
-
-    const config = getConfig();
-
-    const logger = getLogger();
-    const db = getDb();
 
     const status = await processScrape(config, flags, db, logger);
 

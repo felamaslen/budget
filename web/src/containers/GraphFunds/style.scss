@@ -64,9 +64,7 @@
         left: 0.2em;
     }
 
-    @media screen and (min-width: $width-page-mobile) {
-        // margin: 36px 0 0 10px;
-        margin: 10px;
+    @media only screen and (min-width: $width-page-mobile) {
         height: 300px;
 
         .mode {

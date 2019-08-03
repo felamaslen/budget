@@ -4,6 +4,7 @@
 
 /* eslint-disable global-require */
 
+import http from 'http';
 import express from 'express';
 import bodyParser from 'body-parser';
 import serveStatic from 'serve-static';
@@ -16,7 +17,8 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import { version } from '../../package.json';
 import config from '~api/config';
 import db from '~api/modules/db';
-import getLogger from '~api/modules/logger';
+import logger from '~api/modules/logger';
+import { setupSockets } from '~api/modules/sockets';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
 import routes from '~api/routes';
@@ -97,7 +99,7 @@ function setupApiDocs(app) {
     app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
-function setupApi(app, logger) {
+function setupApi(app, server) {
     passport.use('jwt', getStrategy(config, db, logger));
 
     app.use(passport.initialize());
@@ -105,6 +107,8 @@ function setupApi(app, logger) {
     app.get('/health', (req, res) => {
         res.send('ok');
     });
+
+    setupSockets(server);
 
     app.use(API_PREFIX, routes(config, db, logger));
 
@@ -161,7 +165,7 @@ function setupWebApp(app) {
     app.get('/:pageName/*', singlePageApp);
 }
 
-function setupErrorHandling(app, logger) {
+function setupErrorHandling(app) {
     app.use(errorHandler(logger));
 
     app.use((req, res) => {
@@ -170,19 +174,18 @@ function setupErrorHandling(app, logger) {
 }
 
 function run() {
-    const logger = getLogger();
-
     try {
         const app = express();
+        const server = new http.Server(app);
         const port = process.env.PORT || 3000;
 
         setupLogging(app);
         setupDataInput(app);
-        setupApi(app, logger);
+        setupApi(app, server);
         setupWebApp(app);
-        setupErrorHandling(app, logger);
+        setupErrorHandling(app);
 
-        app.listen(port, () => {
+        server.listen(port, () => {
             logger.info('Server listening on port', port);
         });
     } catch (err) {

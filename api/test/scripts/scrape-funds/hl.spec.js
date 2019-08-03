@@ -61,44 +61,8 @@ const holdingsTestData1 = [
 
 const holdingsTestData2 = [
     {
-        name: 'British American Tobacco plc Ordinary 25p',
-        value: 4.94
-    },
-    {
-        name: 'HSBC Holdings plc Ordinary USD0.50',
-        value: 4.34
-    },
-    {
-        name: 'Diageo plc Ordinary 28 101/108p',
-        value: 2.95
-    },
-    {
-        name: 'Royal Dutch Shell Plc B Shares EUR0.07',
-        value: 2.87
-    },
-    {
-        name: 'Unilever plc Ordinary 3.11p',
-        value: 2.73
-    },
-    {
-        name: 'Vodafone Group plc USD0.20 20/21',
-        value: 2.71
-    },
-    {
-        name: 'Prudential plc Ordinary 5p',
-        value: 2.68
-    },
-    {
-        name: 'GlaxoSmithKline plc Ordinary 25p',
-        value: 2.54
-    },
-    {
-        name: 'Lloyds Banking Group plc Ordinary 10p',
-        value: 2.53
-    },
-    {
-        name: 'BP Plc Ordinary US$0.25',
-        value: 2.5
+        name: 'City of London Investment Trust ORD 25p',
+        value: 100
     }
 ];
 
@@ -178,7 +142,7 @@ test('getHoldingsFromDataHL returning holdings for funds', async t => {
     t.deepEqual(result, expectedResult);
 });
 
-test('getHoldingsFromDataHL returning  holdings for shares', async t => {
+test('getHoldingsFromDataHL returns the share name for shares', async t => {
     const testFunds = await getTestFunds();
 
     const fund = testFunds.hl.share.fund;
@@ -189,17 +153,6 @@ test('getHoldingsFromDataHL returning  holdings for shares', async t => {
     const expectedResult = holdingsTestData2;
 
     t.deepEqual(result, expectedResult);
-});
-
-test('getHoldingsFromDataHL returning  null for shares without holdings', async t => {
-    const testFunds = await getTestFunds();
-
-    const fund = testFunds.hl.shareDollar.fund;
-    const data = testFunds.hl.shareDollar.data;
-
-    const result = getHoldingsFromDataHL(fund, data);
-
-    t.is(result, null);
 });
 
 const currencyPrices = {

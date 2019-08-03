@@ -533,11 +533,22 @@ $transactions-width-cost: 60px;
         }
 
         .funds-info {
+            display: flex;
+            flex-flow: row;
             flex: 1 0 auto;
+            justify-content: space-around;
+            overflow-y: hidden;
         }
     }
 
     @media only screen and (min-width: $width-page-tablet) {
+        .funds-info {
+            display: grid;
+            padding: 10px;
+            grid-template-rows: repeat(2, 300px);
+            grid-template-columns: 500px;
+            grid-gap: 10px;
+        }
     }
 
     @media only screen and (min-width: 1325px) {

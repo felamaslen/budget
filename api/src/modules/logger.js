@@ -11,7 +11,7 @@ const getLevel = () => {
     return 'verbose';
 };
 
-export default () => new winston.Logger({
+export default new winston.Logger({
     transports: [
         new winston.transports.Console({
             level: getLevel(),

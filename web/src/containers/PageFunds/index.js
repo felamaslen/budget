@@ -29,12 +29,10 @@ const FundsInfo = props => (
     <div className="funds-info">
         <Media query={mediaQueryMobile}>{isMobile => isMobile && (
             <ListHeadFundsMobile {...props} />
-        ) || (
-            <div className="after-list">
-                <StocksList />
-                <GraphFunds isMobile={isMobile} />
-            </div>
-        )}</Media>
+        ) || <>
+            <StocksList />
+            <GraphFunds isMobile={isMobile} />
+        </>}</Media>
     </div>
 );
 

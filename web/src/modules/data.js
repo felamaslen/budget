@@ -130,26 +130,6 @@ export function arrayAverage(values, mode = null) {
 export const sortByTotal = rows => rows.slice()
     .sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
 
-export const limitTimeSeriesLength = (timeSeries, limit) => new Array(timeSeries.length)
-    .fill(0)
-    .reduce(last => {
-        if (last.length <= limit) {
-            return last;
-        }
-
-        const [closestIndex] = last.slice(1).reduce(([closest, interval], [time], index) => {
-            const thisInterval = time - last[index][0];
-            if (thisInterval < interval) {
-                return [index, thisInterval];
-            }
-
-            return [closest, interval];
-        }, [1, Infinity]);
-
-        return last.slice(0, closestIndex)
-            .concat(last.slice(closestIndex + 1));
-    }, timeSeries);
-
 export const randnBm = () => Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
 
 export function getValueFromTransmit(dataType, value) {

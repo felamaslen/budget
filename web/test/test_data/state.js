@@ -189,11 +189,38 @@ export const testState = {
     stocks: {
         loading: false,
         indices: [
-            { code: 'SPX', name: 'S&P 500', gain: 0, up: false, down: false }
+            {
+                code: 'SPX',
+                name: 'S&P 500'
+            },
+            {
+                code: 'FTSE',
+                name: 'FTSE 100'
+            }
         ],
-        shares: [],
-        history: [],
-        lastPriceUpdate: null
+        shares: [
+            {
+                code: 'CTY.L',
+                name: 'City of London Investment Trust',
+                weight: 0.3
+            },
+            {
+                code: 'SMT.L',
+                name: 'Scottish Mortgage Investment Trust',
+                weight: 0.7
+            }
+        ],
+        quotes: {
+            'SMT.L': {
+                timeSeries: [
+                    { date: '2019-08-02T20:40:00Z', close: 546 },
+                    { date: '2019-08-02T20:39:00Z', close: 544.3 },
+                    { date: '2019-08-02T20:38:00Z', close: 539 },
+                    { date: '2019-08-02T20:37:00Z', close: 542 }
+                ],
+                prevClose: 568.5
+            }
+        }
     },
     income: {
         items: []

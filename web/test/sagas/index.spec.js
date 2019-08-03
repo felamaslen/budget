@@ -2,6 +2,8 @@ import test from 'ava';
 import { testSaga } from 'redux-saga-test-plan';
 
 import rootSaga from '~client/sagas';
+
+import io from '~client/sagas/io';
 import now from '~client/sagas/now';
 import app from '~client/sagas/app';
 import error from '~client/sagas/error';
@@ -12,9 +14,12 @@ import funds from '~client/sagas/funds';
 import suggestions from '~client/sagas/suggestions';
 
 test('rootSaga forking all the other sagas', t => {
-    t.is(1, 1);
+    const ioServer = { isIoServer: true };
+
     testSaga(rootSaga)
         .next()
+        .call(io)
+        .next(ioServer)
         .fork(now)
         .next()
         .fork(app)
@@ -27,9 +32,11 @@ test('rootSaga forking all the other sagas', t => {
         .next()
         .fork(analysis)
         .next()
-        .fork(funds)
+        .fork(funds, ioServer)
         .next()
         .fork(suggestions)
         .next()
         .isDone();
+
+    t.pass();
 });

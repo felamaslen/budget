@@ -1,4 +1,4 @@
+export const STOCKS_LIST_CLEARED = '@@stocks/LIST_CLEARED';
 export const STOCKS_LIST_REQUESTED = '@@stocks/LIST_REQUESTED';
 export const STOCKS_LIST_RECEIVED = '@@stocks/LIST_RECEIVED';
-export const STOCKS_PRICES_REQUESTED = '@@stocks/PRICES_REQUESTED';
-export const STOCKS_PRICES_RECEIVED = '@@stocks/PRICES_RECEIVED';
+export const STOCK_QUOTES_RECEIVED = '@@stocks/QUOTES_RECEIVED';

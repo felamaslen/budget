@@ -4,7 +4,6 @@ import { DateTime } from 'luxon';
 import {
     capitalise,
     numberFormat,
-    sigFigs,
     leadingZeroes,
     formatCurrency,
     formatPercent,
@@ -23,21 +22,6 @@ test('numberFormat adds comma separators', t => {
     t.is(numberFormat(1000), '1,000');
     t.is(numberFormat(91239.192), '91,239.192');
     t.is(numberFormat(192), '192');
-});
-
-test('sigFigs returns strings of the expected width', t => {
-    t.is(sigFigs(1, 3), '1.00');
-    t.is(sigFigs(1.55293, 3), '1.55');
-    t.is(sigFigs(34.9239912, 5), '34.924');
-});
-
-test('sigFigs handles numbers larger than the width given', t => {
-    t.is(sigFigs(100000, 3), '100000');
-});
-
-test('sigFigs works for 0', t => {
-    t.is(sigFigs(0, 2), '0.0');
-    t.is(sigFigs(0, 3), '0.00');
 });
 
 test('leadingZeroes adds the expected number of zeroes to a number', t => {

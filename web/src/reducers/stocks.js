@@ -1,16 +1,65 @@
 import { createReducerObject } from 'create-reducer-object';
 
-import { replaceAtIndex, limitTimeSeriesLength } from '~client/modules/data';
+import { replaceAtIndex } from '~client/modules/data';
 
 import {
+    STOCKS_LIST_CLEARED,
     STOCKS_LIST_REQUESTED,
     STOCKS_LIST_RECEIVED,
-    STOCKS_PRICES_RECEIVED
+    STOCK_QUOTES_RECEIVED
 } from '~client/constants/actions/stocks';
 
-import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '~client/constants/stocks';
+import { STOCK_INDICES } from '~client/constants/stocks';
+
+/*
+export const initialState = {
+    loading: false,
+    indices: [],
+    shares: [],
+    quotes: {}
+};
+*/
 
 export const initialState = {
+    loading: false,
+    indices: [
+        {
+            code: 'SPX',
+            name: 'S&P 500'
+        },
+        {
+            code: 'FTSE',
+            name: 'FTSE 100'
+        }
+    ],
+    shares: [
+        {
+            code: 'CTY.L',
+            name: 'City of London Investment Trust',
+            weight: 0.3
+        },
+        {
+            code: 'SMT.L',
+            name: 'Scottish Mortgage Investment Trust',
+            weight: 0.7
+        }
+    ],
+    quotes: {
+        'SMT.L': {
+            timeSeries: [
+                { date: '2019-08-02T20:40:00Z', close: 546 },
+                { date: '2019-08-02T20:39:00Z', close: 544.3 },
+                { date: '2019-08-02T20:38:00Z', close: 539 },
+                { date: '2019-08-02T20:37:00Z', close: 542 }
+            ],
+            prevClose: 568.5
+        }
+    }
+};
+
+const onClear = () => initialState;
+
+const onStocksList = (state, { res: { data: { stocks, total } } }) => ({
     loading: false,
     indices: Object.keys(STOCK_INDICES).map(code => ({
         code,
@@ -19,14 +68,6 @@ export const initialState = {
         up: false,
         down: false
     })),
-    shares: [],
-    history: [],
-    lastPriceUpdate: null
-};
-
-const onStocksList = (state, { res: { data: { stocks, total } } }) => ({
-    loading: false,
-    lastPriceUpdate: null,
     shares: stocks.reduce((last, [code, name, weight]) => {
         const codeIndex = last.findIndex(({ code: lastCode }) => lastCode === code);
         if (codeIndex === -1) {
@@ -48,49 +89,18 @@ const onStocksList = (state, { res: { data: { stocks, total } } }) => ({
     }, [])
 });
 
-const updateStock = prices => ({ code, gain, ...rest }) => {
-    const match = prices.find(({ code: priceCode }) => priceCode === code);
-    if (!match) {
-        return { code, gain, ...rest };
-    }
-
-    const { open, close } = match;
-    const newGain = 100 * (close - open) / open;
-
-    return {
-        ...rest,
-        code,
-        gain: newGain,
-        up: gain !== null && newGain > gain,
-        down: gain !== null && newGain < gain,
-        price: close
-    };
-};
-
-function onStocksPrices(state, { res }) {
-    if (!res) {
-        return {};
-    }
-
-    const lastPriceUpdate = Date.now();
-    const stockMapper = updateStock(res);
-    const shares = state.shares.map(stockMapper);
-
-    const weightedGain = shares.reduce((last, { gain, weight }) => last + gain * weight, 0);
-
-    return {
-        lastPriceUpdate,
-        indices: state.indices.map(stockMapper),
-        shares,
-        history: limitTimeSeriesLength(state.history, STOCKS_GRAPH_RESOLUTION)
-            .concat([[Date.now(), weightedGain]])
-    };
-}
+const onQuoteUpdate = (state, { items }) => ({
+    quotes: items.reduce((last, { code, data }) => ({
+        ...last,
+        [code]: data
+    }), state.quotes)
+});
 
 const handlers = {
+    [STOCKS_LIST_CLEARED]: onClear,
     [STOCKS_LIST_REQUESTED]: () => ({ loading: true }),
     [STOCKS_LIST_RECEIVED]: onStocksList,
-    [STOCKS_PRICES_RECEIVED]: onStocksPrices
+    [STOCK_QUOTES_RECEIVED]: onQuoteUpdate
 };
 
 export default createReducerObject(handlers, initialState);

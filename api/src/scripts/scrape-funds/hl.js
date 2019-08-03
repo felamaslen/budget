@@ -5,14 +5,15 @@ export function isHLFundShare(fund) {
 }
 
 export function getHoldingsFromDataHL(fund, data) {
-    // gets the top holdings from raw HTML data (HL)
-    const isShare = isHLFundShare(fund);
+    if (isHLFundShare(fund)) {
+        const [, name] = fund.name.match(/^(.*?)(\s+\(share\))?$/);
+
+        return [{ name, value: 100 }];
+    }
 
     const dataWithoutNewLines = removeWhitespace(data);
 
-    const table = isShare
-        ? '<table class="factsheet-table" summary="Top 10 exposures">'
-        : '<table class="factsheet-table" summary="Top 10 holdings">';
+    const table = '<table class="factsheet-table" summary="Top 10 holdings">';
 
     try {
         const tableMatch = dataWithoutNewLines.match(new RegExp([

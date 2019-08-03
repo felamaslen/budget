@@ -21,7 +21,6 @@ services:
       NODE_ENV: development
       DEBUG: ${DEBUG}
       SKIP_APP: ${SKIP_APP}
-      FAKE_STOCK_PRICES: "true"
       PORT: 3000
       DATABASE_URL: postgres://docker:docker@db:5432/budget
       WEB_URL: http://localhost:3000
