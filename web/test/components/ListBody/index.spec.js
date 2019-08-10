@@ -34,7 +34,17 @@ const getContainer = (customProps = {}) => {
     );
 };
 
-test('(desktop) basic structure', t => {
+test.beforeEach(t => {
+    t.context.clock = sinon.useFakeTimers(new Date('2019-08-04T11:54:23Z').getTime());
+});
+
+test.afterEach(t => {
+    t.context.clock.restore();
+
+    cleanup();
+});
+
+test.serial('(desktop) basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -43,11 +53,9 @@ test('(desktop) basic structure', t => {
     t.is(div.tagName, 'DIV');
     t.is(div.className, 'crud-list list-desktop');
     t.is(div.childNodes.length, 2);
-
-    cleanup();
 });
 
-test('(desktop) head - basic structure', t => {
+test.serial('(desktop) head - basic structure', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -55,11 +63,9 @@ test('(desktop) head - basic structure', t => {
 
     t.is(head.tagName, 'DIV');
     t.is(head.className, 'list-head noselect');
-
-    cleanup();
 });
 
-test('(desktop) list - basic structure', t => {
+test.serial('(desktop) list - basic structure', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -68,11 +74,9 @@ test('(desktop) list - basic structure', t => {
     t.is(list.tagName, 'DIV');
     t.is(list.className, 'crud-list-inner list-desktop-inner');
     t.is(list.childNodes.length, 2);
-
-    cleanup();
 });
 
-test('(desktop) create - basic structure', t => {
+test.serial('(desktop) create - basic structure', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, list] = div.childNodes;
@@ -81,11 +85,9 @@ test('(desktop) create - basic structure', t => {
     t.is(create.tagName, 'DIV');
     t.is(create.className, 'list-row-desktop list-row-desktop-create');
     t.is(create.childNodes.length, 6);
-
-    cleanup();
 });
 
-test('(desktop) create - columns', t => {
+test.serial('(desktop) create - columns', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, list] = div.childNodes;
@@ -107,12 +109,9 @@ test('(desktop) create - columns', t => {
 
     t.is(shop.tagName, 'SPAN');
     t.is(shop.className, 'cell shop');
-
-    cleanup();
 });
 
-test('(desktop) adding a new item', t => {
-    const clock = sinon.useFakeTimers(new Date('2019-08-04T11:54:23Z').getTime());
+test.serial('(desktop) adding a new item', t => {
     const onCreate = sinon.spy();
 
     const { container, getByLabelText } = getContainer({
@@ -163,13 +162,9 @@ test('(desktop) adding a new item', t => {
             shop: 'baz'
         }
     ]);
-
-    clock.restore();
-    cleanup();
 });
 
-test('(desktop) onCreate is not called if there are missing data', t => {
-    const clock = sinon.useFakeTimers(new Date('2019-08-04T11:54:23Z').getTime());
+test.serial('(desktop) onCreate is not called if there are missing data', t => {
     const onCreate = sinon.spy();
 
     const { container, getByLabelText } = getContainer({
@@ -241,7 +236,70 @@ test('(desktop) onCreate is not called if there are missing data', t => {
             shop: 'baz'
         }
     ]);
+});
 
-    clock.restore();
-    cleanup();
+test.serial('(desktop) input fields are cleared when navigating', t => {
+    const onCreate = sinon.spy();
+    const { getByLabelText } = getContainer({ onCreate });
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> date
+
+    t.is(getByLabelText('date-input-CREATE_ID').value, DateTime.fromISO('2019-08-04').toLocaleString(DateTime.DATE_SHORT));
+    fireEvent.change(getByLabelText('date-input-CREATE_ID'), { target: { value: '1/3/19' } });
+    t.is(getByLabelText('date-input-CREATE_ID').value, '1/3/19');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> item
+
+    t.is(getByLabelText('item-input-CREATE_ID').value, '');
+    fireEvent.change(getByLabelText('item-input-CREATE_ID'), { target: { value: 'foo' } });
+    t.is(getByLabelText('item-input-CREATE_ID').value, 'foo');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> category
+
+    t.is(getByLabelText('category-input-CREATE_ID').value, '');
+    fireEvent.change(getByLabelText('category-input-CREATE_ID'), { target: { value: 'bar' } });
+    t.is(getByLabelText('category-input-CREATE_ID').value, 'bar');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> cost
+
+    t.is(getByLabelText('cost-input-CREATE_ID').value, '');
+    fireEvent.change(getByLabelText('cost-input-CREATE_ID'), { target: { value: '10.54' } });
+    t.is(getByLabelText('cost-input-CREATE_ID').value, '10.54');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> shop
+
+    t.is(getByLabelText('shop-input-CREATE_ID').value, '');
+    fireEvent.change(getByLabelText('shop-input-CREATE_ID'), { target: { value: 'baz' } });
+    t.is(getByLabelText('shop-input-CREATE_ID').value, 'baz');
+
+    const addButton = getByLabelText('add-button');
+
+    fireEvent.mouseDown(addButton);
+
+    t.is(onCreate.getCalls().length, 0);
+    fireEvent.click(addButton);
+    t.is(onCreate.getCalls().length, 1);
+
+    t.deepEqual(onCreate.getCalls()[0].args, ['food', {
+        id: CREATE_ID,
+        date: DateTime.fromISO('2019-03-01'),
+        item: 'foo',
+        category: 'bar',
+        cost: 1054,
+        shop: 'baz'
+    }]);
+
+    t.is(getByLabelText('date-input-CREATE_ID').value, DateTime.fromISO('2019-08-04').toLocaleString(DateTime.DATE_SHORT));
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> item
+    t.is(getByLabelText('item-input-CREATE_ID').value, '');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> category
+    t.is(getByLabelText('category-input-CREATE_ID').value, '');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> cost
+    t.is(getByLabelText('cost-input-CREATE_ID').value, '');
+
+    fireEvent.keyDown(window, { key: 'Tab' }); // -> shop
+    t.is(getByLabelText('shop-input-CREATE_ID').value, '');
 });
