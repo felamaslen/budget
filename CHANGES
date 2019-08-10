@@ -1,5 +1,14 @@
 Release:
 
+- 4.9.12:
+    - Web client:
+        - Fixed bug where adding blank values to list page edits would result in breakage
+        - Made aria labels unique
+        - Reset cost input value when adding new items
+        - Fixed bug where navigating down from a suggestion-autocompleted (next) value, would overwrite the subsequent row
+    - API:
+        - Order suggestion results by length, ascending
+
 - 4.9.11 (hotfix):
     - Web client:
         - Require all values to be input when creating list items
