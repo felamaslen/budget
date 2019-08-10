@@ -22,6 +22,14 @@ function ListRowCell({
 
     const onSetActive = useCallback(() => setActive(id, column), [setActive, id, column]);
 
+    const onChange = useCallback((editColumn, newValue) => {
+        if (typeof newValue === 'string' && !newValue.length) {
+            return;
+        }
+
+        onUpdate(editColumn, newValue);
+    }, [onUpdate]);
+
     return (
         <span
             className={classNames('cell', column, { active })}
@@ -29,7 +37,7 @@ function ListRowCell({
         >
             <Editable
                 page={page}
-                onChange={onUpdate}
+                onChange={onChange}
                 active={active}
                 item={column}
                 value={value}
