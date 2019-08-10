@@ -1,5 +1,9 @@
 Release:
 
+- 4.9.11 (hotfix):
+    - Web client:
+        - Require all values to be input when creating list items
+
 - 4.9.0:
     - Web client:
         - Removed Immutable.JS
