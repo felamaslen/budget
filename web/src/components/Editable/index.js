@@ -17,16 +17,16 @@ function EditableField({ item, onChange, ...rest }) {
     const props = { ...rest, onChange: onChangeCallback };
 
     if (item === 'date') {
-        return <FormFieldDate string {...props} />;
+        return <FormFieldDate string label="date-input" {...props} />;
     }
     if (item === 'cost') {
-        return <FormFieldCost string {...props} />;
+        return <FormFieldCost string label="cost-input" {...props} />;
     }
     if (item === 'transactions') {
         return <FormFieldTransactions create {...props} />;
     }
 
-    return <FormFieldText string {...props} />;
+    return <FormFieldText string label={`${item}-input`} {...props} />;
 }
 
 EditableField.propTypes = {

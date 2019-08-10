@@ -38,7 +38,7 @@ function setValueString(date) {
     return result;
 }
 
-export default function FormFieldDate(props) {
+export default function FormFieldDate({ label, ...props }) {
     let setValue = setValueDate;
     let type = 'date';
 
@@ -60,6 +60,7 @@ export default function FormFieldDate(props) {
         <Wrapper item="date" value={props.value} active={props.active}>
             <input
                 ref={ref}
+                aria-label={label}
                 type={type}
                 defaultValue={defaultValue}
                 onChange={onChange}
@@ -71,11 +72,13 @@ export default function FormFieldDate(props) {
 
 FormFieldDate.propTypes = {
     string: PropTypes.bool,
+    label: PropTypes.string,
     value: PropTypes.instanceOf(DateTime),
     active: PropTypes.bool
 };
 
 FormFieldDate.defaultProps = {
     string: false,
+    label: null,
     value: DateTime.local()
 };
