@@ -23,13 +23,14 @@ Wrapper.defaultProps = {
     active: true
 };
 
-export default function FormFieldText({ item, ...props }) {
+export default function FormFieldText({ label, item, ...props }) {
     const [currentValue, , onChange, ref, onBlur] = useField(props);
 
     return (
         <Wrapper item={item} value={props.value} active={props.active}>
             <input
                 ref={ref}
+                aria-label={label}
                 type="text"
                 value={currentValue}
                 onChange={onChange}
@@ -40,12 +41,14 @@ export default function FormFieldText({ item, ...props }) {
 }
 
 FormFieldText.propTypes = {
+    label: PropTypes.string,
     item: PropTypes.string,
     value: PropTypes.string,
     active: PropTypes.bool
 };
 
 FormFieldText.defaultProps = {
+    label: null,
     item: 'text',
     value: ''
 };

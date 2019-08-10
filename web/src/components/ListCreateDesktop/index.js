@@ -55,6 +55,10 @@ export default function ListCreateDesktop({
 
     const onUpdate = useCallback((column, value) => setValues(last => ({ ...last, [column]: value })), []);
 
+    const onAddPre = useCallback(() => {
+        setActive(CREATE_ID, null);
+    }, [setActive]);
+
     const onAdd = useCallback(() => {
         if (!Object.keys(values).every(key => fieldExists(values[key]))) {
             return;
@@ -77,7 +81,12 @@ export default function ListCreateDesktop({
                 onUpdate={onUpdate}
             />
             <span className="add-button-outer">
-                <button ref={addBtn} onClick={onAdd}>{'Add'}</button>
+                <button
+                    ref={addBtn}
+                    aria-label="add-button"
+                    onMouseDown={onAddPre}
+                    onClick={onAdd}
+                >{'Add'}</button>
             </span>
         </div>
     );
@@ -85,7 +94,6 @@ export default function ListCreateDesktop({
 
 ListCreateDesktop.propTypes = {
     page: PropTypes.string.isRequired,
-    active: PropTypes.bool.isRequired,
     activeColumn: PropTypes.string,
     command: PropTypes.object,
     setCommand: PropTypes.func.isRequired,
