@@ -1,6 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import { createMockStore } from 'redux-test-utils';
+import compose from 'just-compose';
 
 import '~client-test/browser';
 import { cleanup, render, fireEvent } from '@testing-library/react';
@@ -12,7 +13,7 @@ import { testState } from '~client-test/test_data/state';
 import ListBody from '~client/components/ListBody';
 import { CREATE_ID } from '~client/constants/data';
 
-const getContainer = (customProps = {}) => {
+const getContainer = (customProps = {}, customState = {}) => {
     const props = {
         page: 'food',
         isMobile: false,
@@ -24,7 +25,8 @@ const getContainer = (customProps = {}) => {
     };
 
     const store = createMockStore({
-        suggestions: testState.suggestions
+        suggestions: testState.suggestions,
+        ...customState
     });
 
     return render(
@@ -39,9 +41,24 @@ test.beforeEach(t => {
 });
 
 test.afterEach(t => {
-    t.context.clock.restore();
+    if (t.context.clock && t.context.clock.restore) {
+        t.context.clock.restore();
+    }
 
     cleanup();
+});
+
+const originalOffsetHeight = Reflect.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight');
+const originalOffsetWidth = Reflect.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+
+test.before(() => {
+    Reflect.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, value: 480 });
+    Reflect.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 640 });
+});
+
+test.after(() => {
+    Reflect.defineProperty(HTMLElement.prototype, 'offsetHeight', originalOffsetHeight);
+    Reflect.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
 });
 
 test.serial('(desktop) basic structure', t => {
@@ -302,4 +319,101 @@ test.serial('(desktop) input fields are cleared when navigating', t => {
 
     fireEvent.keyDown(window, { key: 'Tab' }); // -> shop
     t.is(getByLabelText('shop-input-CREATE_ID').value, '');
+});
+
+test('(desktop) prefilled category from suggestion doesn\'t affect subsequent rows', async t => {
+    t.context.clock.restore();
+    t.plan(4);
+
+    const onUpdate = sinon.spy();
+    const rows = [
+        {
+            id: 'id1',
+            date: DateTime.fromISO('2019-08-03'),
+            item: 'Bread',
+            category: 'Breakfast',
+            cost: 3,
+            shop: 'Food shop'
+        },
+        {
+            id: 'id2',
+            date: DateTime.fromISO('2019-08-01'),
+            item: 'Wine',
+            category: 'Drinks',
+            cost: 41,
+            shop: 'Wine shop'
+        }
+    ];
+
+    const { container, getByLabelText } = getContainer({
+        onUpdate,
+        rows
+    }, {
+        suggestions: {
+            ...testState.suggestions,
+            list: ['Apple', 'Chocolate'],
+            next: ['Fruit', 'Confectionary']
+        }
+    });
+
+    const [div] = container.childNodes;
+    const [, list] = div.childNodes;
+    const [, crudWindow] = list.childNodes;
+    const [windowInner] = crudWindow.childNodes;
+    const [boxOuter] = windowInner.childNodes;
+    const [boxInner] = boxOuter.childNodes;
+    const [row1] = boxInner.childNodes;
+
+    const [, item1] = row1.childNodes;
+
+    // activate "item" on row 1
+    fireEvent.mouseDown(item1);
+
+    // activate first suggestion item
+    fireEvent.change(getByLabelText('item-input-id1'), { target: { value: 'a' } });
+
+    console.log('navigating to suggestions');
+    fireEvent.keyDown(window, { key: 'ArrowDown' });
+    fireEvent.keyDown(window, { key: 'Enter' });
+
+    t.is(onUpdate.getCalls().length, 1);
+    t.deepEqual(onUpdate.getCalls()[0].args, [
+        'food',
+        'id1',
+        {
+            id: 'id1',
+            date: DateTime.fromISO('2019-08-03'),
+            item: 'Apple',
+            category: 'Breakfast',
+            cost: 3,
+            shop: 'Food shop'
+        },
+        {
+            id: 'id1',
+            date: DateTime.fromISO('2019-08-03'),
+            item: 'Bread',
+            category: 'Breakfast',
+            cost: 3,
+            shop: 'Food shop'
+        }
+    ]);
+
+    const nextLoop = fn => () => setImmediate(fn);
+
+    await new Promise(resolve => compose(
+        nextLoop,
+        nextLoop
+    )(() => {
+        // assert that the suggestion next value was autocompleted
+        t.is(getByLabelText('category-input-id1').value, 'Fruit');
+
+        // navigate to the "category" field on row 2
+        fireEvent.keyDown(window, { key: 'ArrowDown', ctrlKey: true });
+
+        // assert that row2's "category" value has not been overwritten
+        // this was the bug caused by the command being sent to both rows
+        t.is(getByLabelText('category-input-id2').value, 'Drinks');
+
+        resolve();
+    })());
 });
