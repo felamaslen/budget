@@ -167,3 +167,81 @@ test('(desktop) adding a new item', t => {
     clock.restore();
     cleanup();
 });
+
+test('(desktop) onCreate is not called if there are missing data', t => {
+    const clock = sinon.useFakeTimers(new Date('2019-08-04T11:54:23Z').getTime());
+    const onCreate = sinon.spy();
+
+    const { container, getByLabelText } = getContainer({
+        onCreate
+    });
+
+    const addButton = getByLabelText('add-button');
+
+    fireEvent.mouseDown(addButton);
+    fireEvent.click(addButton);
+    t.is(onCreate.getCalls().length, 0);
+
+    const [div] = container.childNodes;
+    const [, list] = div.childNodes;
+    const [create] = list.childNodes;
+
+    const [date, item, category, cost, shop] = create.childNodes;
+
+    fireEvent.mouseDown(date);
+    const dateInput = getByLabelText('date-input');
+    fireEvent.change(dateInput, { target: { value: '10' } });
+
+    fireEvent.mouseDown(addButton);
+    fireEvent.click(addButton);
+    t.is(onCreate.getCalls().length, 0);
+
+    fireEvent.mouseDown(item);
+    const itemInput = getByLabelText('item-input');
+    fireEvent.change(itemInput, { target: { value: 'foo' } });
+
+    fireEvent.mouseDown(addButton);
+    fireEvent.click(addButton);
+    t.is(onCreate.getCalls().length, 0);
+
+    fireEvent.mouseDown(category);
+    const categoryInput = getByLabelText('category-input');
+    fireEvent.change(categoryInput, { target: { value: 'bar' } });
+
+    fireEvent.mouseDown(addButton);
+    fireEvent.click(addButton);
+    t.is(onCreate.getCalls().length, 0);
+
+    fireEvent.mouseDown(cost);
+    const costInput = getByLabelText('cost-input');
+    fireEvent.change(costInput, { target: { value: '10.65' } });
+
+    fireEvent.mouseDown(addButton);
+    fireEvent.click(addButton);
+    t.is(onCreate.getCalls().length, 0);
+
+    fireEvent.mouseDown(shop);
+    const shopInput = getByLabelText('shop-input');
+    fireEvent.change(shopInput, { target: { value: 'baz' } });
+
+    t.is(onCreate.getCalls().length, 0);
+
+    fireEvent.mouseDown(addButton);
+    fireEvent.click(addButton);
+
+    t.is(onCreate.getCalls().length, 1);
+    t.deepEqual(onCreate.getCalls()[0].args, [
+        'food',
+        {
+            id: CREATE_ID,
+            date: DateTime.fromObject({ year: 2019, month: 8, day: 10 }),
+            item: 'foo',
+            category: 'bar',
+            cost: 1065,
+            shop: 'baz'
+        }
+    ]);
+
+    clock.restore();
+    cleanup();
+});

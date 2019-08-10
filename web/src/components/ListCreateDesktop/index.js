@@ -23,7 +23,10 @@ const withTransactions = withInitialValue('transactions', () => ([]));
 const initialValues = memoize(page => compose(
     withDate(page),
     withTransactions(page)
-)({ id: CREATE_ID }));
+)(PAGES[page].cols.reduce((last, col) => ({
+    ...last,
+    [col]: undefined
+}), { id: CREATE_ID })));
 
 export default function ListCreateDesktop({
     page,
