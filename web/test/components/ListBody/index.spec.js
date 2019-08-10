@@ -126,23 +126,23 @@ test('(desktop) adding a new item', t => {
     const [date, item, category, cost, shop] = create.childNodes;
 
     fireEvent.mouseDown(date);
-    const dateInput = getByLabelText('date-input');
+    const dateInput = getByLabelText('date-input-CREATE_ID');
     fireEvent.change(dateInput, { target: { value: '10' } });
 
     fireEvent.mouseDown(item);
-    const itemInput = getByLabelText('item-input');
+    const itemInput = getByLabelText('item-input-CREATE_ID');
     fireEvent.change(itemInput, { target: { value: 'foo' } });
 
     fireEvent.mouseDown(category);
-    const categoryInput = getByLabelText('category-input');
+    const categoryInput = getByLabelText('category-input-CREATE_ID');
     fireEvent.change(categoryInput, { target: { value: 'bar' } });
 
     fireEvent.mouseDown(cost);
-    const costInput = getByLabelText('cost-input');
+    const costInput = getByLabelText('cost-input-CREATE_ID');
     fireEvent.change(costInput, { target: { value: '10.65' } });
 
     fireEvent.mouseDown(shop);
-    const shopInput = getByLabelText('shop-input');
+    const shopInput = getByLabelText('shop-input-CREATE_ID');
     fireEvent.change(shopInput, { target: { value: 'baz' } });
 
     t.is(onCreate.getCalls().length, 0);
@@ -189,7 +189,7 @@ test('(desktop) onCreate is not called if there are missing data', t => {
     const [date, item, category, cost, shop] = create.childNodes;
 
     fireEvent.mouseDown(date);
-    const dateInput = getByLabelText('date-input');
+    const dateInput = getByLabelText('date-input-CREATE_ID');
     fireEvent.change(dateInput, { target: { value: '10' } });
 
     fireEvent.mouseDown(addButton);
@@ -197,7 +197,7 @@ test('(desktop) onCreate is not called if there are missing data', t => {
     t.is(onCreate.getCalls().length, 0);
 
     fireEvent.mouseDown(item);
-    const itemInput = getByLabelText('item-input');
+    const itemInput = getByLabelText('item-input-CREATE_ID');
     fireEvent.change(itemInput, { target: { value: 'foo' } });
 
     fireEvent.mouseDown(addButton);
@@ -205,7 +205,7 @@ test('(desktop) onCreate is not called if there are missing data', t => {
     t.is(onCreate.getCalls().length, 0);
 
     fireEvent.mouseDown(category);
-    const categoryInput = getByLabelText('category-input');
+    const categoryInput = getByLabelText('category-input-CREATE_ID');
     fireEvent.change(categoryInput, { target: { value: 'bar' } });
 
     fireEvent.mouseDown(addButton);
@@ -213,7 +213,7 @@ test('(desktop) onCreate is not called if there are missing data', t => {
     t.is(onCreate.getCalls().length, 0);
 
     fireEvent.mouseDown(cost);
-    const costInput = getByLabelText('cost-input');
+    const costInput = getByLabelText('cost-input-CREATE_ID');
     fireEvent.change(costInput, { target: { value: '10.65' } });
 
     fireEvent.mouseDown(addButton);
@@ -221,7 +221,7 @@ test('(desktop) onCreate is not called if there are missing data', t => {
     t.is(onCreate.getCalls().length, 0);
 
     fireEvent.mouseDown(shop);
-    const shopInput = getByLabelText('shop-input');
+    const shopInput = getByLabelText('shop-input-CREATE_ID');
     fireEvent.change(shopInput, { target: { value: 'baz' } });
 
     t.is(onCreate.getCalls().length, 0);

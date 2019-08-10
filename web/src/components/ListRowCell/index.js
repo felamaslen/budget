@@ -37,6 +37,7 @@ function ListRowCell({
         >
             <Editable
                 page={page}
+                id={id}
                 onChange={onChange}
                 active={active}
                 item={column}
