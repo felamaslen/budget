@@ -109,7 +109,10 @@ function ListRowDesktop({
                 page={page}
                 activeColumn={activeColumn}
                 setActive={setActive}
-                command={command}
+                command={command.id && command.id === item.id
+                    ? command
+                    : NULL_COMMAND
+                }
                 setCommand={setCommand}
                 onUpdate={onColumnUpdate}
             />

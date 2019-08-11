@@ -11,30 +11,31 @@ import FormFieldTransactions from '~client/components/FormField/transactions';
 
 import './style.scss';
 
-function EditableField({ item, onChange, ...rest }) {
+function EditableField({ id, item, onChange, ...rest }) {
     const onChangeCallback = useCallback(value => onChange(item, value), [onChange, item]);
 
     const props = { ...rest, onChange: onChangeCallback };
 
     if (item === 'date') {
-        return <FormFieldDate string label="date-input" {...props} />;
+        return <FormFieldDate string label={`date-input-${id}`} {...props} />;
     }
     if (item === 'cost') {
-        return <FormFieldCost string label="cost-input" {...props} />;
+        return <FormFieldCost string label={`cost-input-${id}`} {...props} />;
     }
     if (item === 'transactions') {
         return <FormFieldTransactions create {...props} />;
     }
 
-    return <FormFieldText string label={`${item}-input`} {...props} />;
+    return <FormFieldText string label={`${item}-input-${id}`} {...props} />;
 }
 
 EditableField.propTypes = {
+    id: PropTypes.string.isRequired,
     item: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired
 };
 
-export default function Editable({ page, active, item, onSuggestion, ...props }) {
+export default function Editable({ page, id, active, item, onSuggestion, ...props }) {
     const [typed, onType] = useState('');
     useEffect(() => {
         if (!active) {
@@ -54,6 +55,7 @@ export default function Editable({ page, active, item, onSuggestion, ...props })
             'editable-inactive': !active
         })}>
             <EditableField
+                id={id}
                 active={active}
                 item={item}
                 onType={onType}
@@ -73,6 +75,7 @@ export default function Editable({ page, active, item, onSuggestion, ...props })
 
 Editable.propTypes = {
     page: PropTypes.string.isRequired,
+    id: PropTypes.string,
     active: PropTypes.bool,
     item: PropTypes.string.isRequired,
     onSuggestion: PropTypes.func,
@@ -81,6 +84,7 @@ Editable.propTypes = {
 
 Editable.defaultProps = {
     active: false,
+    id: '',
     value: '',
     onSuggestion: () => null,
     onChange: () => null

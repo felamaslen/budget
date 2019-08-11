@@ -40,3 +40,4 @@
 - Move overview fund value calculation to frontend
 - Remove obsolete balance response in overview route
 - Lazy / infinite loading of list pages (see https://github.com/bvaughn/react-window-infinite-loader)
+- Use slonik instead of knex
