@@ -86,3 +86,31 @@ test('onUpdate is called when the input changes, with the column and new value',
     t.true(onUpdate.calledOnce);
     t.true(onUpdate.calledWith('shop', 'Wilko'));
 });
+
+test('onUpdate is not called when the input is blank', t => {
+    const onUpdate = sinon.spy();
+    const props = {
+        page: 'food',
+        column: 'shop',
+        value: 'Tesco',
+        active: true,
+        onUpdate
+    };
+    const { container } = getContainer(props);
+
+    const [span] = container.childNodes;
+    const [editable] = span.childNodes;
+    const [field] = editable.childNodes;
+    const [input] = field.childNodes;
+
+    t.is(input.tagName, 'INPUT');
+
+    t.false(onUpdate.calledOnce);
+    fireEvent.change(input, { target: { value: '' } });
+
+    act(() => {
+        getContainer({ ...props, active: false }, { container });
+    });
+
+    t.false(onUpdate.calledOnce);
+});

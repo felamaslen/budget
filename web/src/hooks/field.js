@@ -80,7 +80,7 @@ export function useField({
                 type: ACTIVE_TOGGLED,
                 active,
                 value,
-                inputValue: getInitialInputValue(state.currentValue)
+                inputValue: getInitialInputValue(state.initialValue)
             });
         }
         if (active && !state.active) {

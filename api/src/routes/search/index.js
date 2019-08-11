@@ -4,6 +4,7 @@
 
 const { Router } = require('express');
 const joi = require('joi');
+const { catchAsyncErrors } = require('../../modules/error-handling');
 const { searchSchema } = require('../../schema');
 
 function matchQuery(db, table, column, searchTerm, conditions) {
@@ -29,16 +30,17 @@ function matchQuery(db, table, column, searchTerm, conditions) {
         .join(' | ');
 
     return qb1 => qb1
-        .distinct(column, 'rank')
-        .from(qb2 => conditions(qb2.select(
+        .distinct(
             column,
-            db.raw(`ts_rank_cd("${table}"."${column}_search", to_tsquery(?)) as rank`, tsQuery)
+            db.raw(`ts_rank_cd("${table}"."${column}_search", to_tsquery(?)) as rank`, tsQuery),
+            db.raw(`char_length("${table}"."${column}") as length`)
         )
-            .from(table)
-            .whereRaw(`"${table}"."${column}_search" @@ to_tsquery(?)`, tsQuery)
-            .as('items_all')
-        ))
-        .orderBy('rank', 'desc')
+        .from(table)
+        .whereRaw(`"${table}"."${column}_search" @@ to_tsquery(?)`, tsQuery)
+        .orderBy([
+            { column: 'rank', order: 'desc' },
+            { column: 'length' }
+        ])
         .as('items_ranked');
 }
 
@@ -119,7 +121,7 @@ function getQuery(db, request, uid) {
  *                                         type: string
  */
 function routeGet(config, db) {
-    return async (req, res) => {
+    return catchAsyncErrors(async (req, res) => {
         const { error, value } = joi.validate(req.params, searchSchema);
 
         if (error) {
@@ -127,26 +129,20 @@ function routeGet(config, db) {
                 .json({ errorMessage: error.message });
         }
 
-        try {
-            const result = await getQuery(db, value, req.user.uid);
+        const result = await getQuery(db, value, req.user.uid);
 
-            const data = {
-                list: result.map(({ [value.column]: item }) => String(item))
-            };
+        const data = {
+            list: result.map(({ [value.column]: item }) => String(item))
+        };
 
-            if (result.length && result[0].next_category) {
-                const nextCategory = result.map(({ next_category: item }) => item);
+        if (result.length && result[0].next_category) {
+            const nextCategory = result.map(({ next_category: item }) => item);
 
-                return res.json({ data: { ...data, nextCategory } });
-            }
-
-            return res.json({ data });
+            return res.json({ data: { ...data, nextCategory } });
         }
-        catch (err) {
-            return res.status(500)
-                .json({ errorMessage: err.message });
-        }
-    };
+
+        return res.json({ data });
+    });
 }
 
 function handler(config, db) {
