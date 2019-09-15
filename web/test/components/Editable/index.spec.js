@@ -10,17 +10,17 @@ const getContainer = (customProps = {}, ...args) => {
         page: 'some-page',
         onType: () => null,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<Editable {...props} />, ...args);
 };
 
-test('rendering active editable item', t => {
+test('rendering active editable item', (t) => {
     const { container } = getContainer({
         active: true,
         item: 'shop',
-        value: 'Tesco'
+        value: 'Tesco',
     });
 
     t.is(container.childNodes.length, 1);
@@ -32,11 +32,11 @@ test('rendering active editable item', t => {
     t.regex(span.childNodes[0].className, /form-field/);
 });
 
-test('rendering inactive editable item', t => {
+test('rendering inactive editable item', (t) => {
     const { container } = getContainer({
         active: false,
         item: 'shop',
-        value: 'Tesco'
+        value: 'Tesco',
     });
 
     t.is(container.childNodes.length, 1);
@@ -44,10 +44,10 @@ test('rendering inactive editable item', t => {
     t.notRegex(span.className, /editable-active/);
 });
 
-test('Undefined value is renderd as a blank string', t => {
+test('Undefined value is renderd as a blank string', (t) => {
     const { container } = getContainer({
         active: false,
-        item: 'shop'
+        item: 'shop',
     });
 
     t.is(container.childNodes.length, 1);
@@ -56,11 +56,11 @@ test('Undefined value is renderd as a blank string', t => {
     t.is(editable.innerHTML, '');
 });
 
-test('Falsey transactions are rendered as 0 items', t => {
+test('Falsey transactions are rendered as 0 items', (t) => {
     const { container } = getContainer({
         active: false,
         item: 'transactions',
-        value: null
+        value: null,
     });
 
     t.is(container.childNodes.length, 1);
@@ -75,14 +75,14 @@ test('Falsey transactions are rendered as 0 items', t => {
     t.is(field.innerHTML, '0');
 });
 
-test('onChange is called with the column and new value', t => {
+test('onChange is called with the column and new value', (t) => {
     const onChange = sinon.spy();
 
     const props = {
         active: true,
         item: 'shop',
         value: 'Tesco',
-        onChange
+        onChange,
     };
 
     const { container } = getContainer(props);
@@ -99,7 +99,7 @@ test('onChange is called with the column and new value', t => {
     act(() => {
         getContainer({
             ...props,
-            active: false
+            active: false,
         }, { container });
     });
 

@@ -7,7 +7,7 @@ import { ERROR_OPENED, ERROR_CLOSED } from '~client/constants/actions/error';
 import { errorOpened, errorClosed, errorRemoved } from '~client/actions/error';
 import { ERROR_MESSAGE_DELAY, ERROR_CLOSE_TIME } from '~client/constants/error';
 
-test('watchManualClose waits for a particular error to be manually closed', t => {
+test('watchManualClose waits for a particular error to be manually closed', (t) => {
     t.is(1, 1);
 
     const id = 'my-error-id';
@@ -21,7 +21,7 @@ test('watchManualClose waits for a particular error to be manually closed', t =>
         .isDone();
 });
 
-test('watchError hides and removes messages after a timer, or manual close', t => {
+test('watchError hides and removes messages after a timer, or manual close', (t) => {
     t.is(1, 1);
 
     const errorAction = errorOpened('foo message');
@@ -30,7 +30,7 @@ test('watchError hides and removes messages after a timer, or manual close', t =
         .next()
         .race({
             timeout: delay(ERROR_MESSAGE_DELAY),
-            manual: call(watchManualClose, errorAction.id)
+            manual: call(watchManualClose, errorAction.id),
         })
         .next()
         .put(errorClosed(errorAction.id))
@@ -42,7 +42,7 @@ test('watchError hides and removes messages after a timer, or manual close', t =
         .isDone();
 });
 
-test('error forks watchError', t => {
+test('error forks watchError', (t) => {
     t.is(1, 1);
     testSaga(error)
         .next()

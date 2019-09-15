@@ -11,17 +11,17 @@ const getGraph = (customProps = {}) => {
         height: 100,
         padding: [10, 10, 10, 10],
         svgClasses: 'svgClass1 svgClass2',
-        ...customProps
+        ...customProps,
     };
 
     return render(
         <Graph {...props}>
             <span>{'foo'}</span>
-        </Graph>
+        </Graph>,
     );
 };
 
-test('rendering a basic container', t => {
+test('rendering a basic container', (t) => {
     const { container } = getGraph();
     t.is(container.childNodes.length, 1);
 
@@ -31,7 +31,7 @@ test('rendering a basic container', t => {
     t.is(div.className, 'graph-container graph-foo');
 });
 
-test('rendering an SVG with a custom class', t => {
+test('rendering an SVG with a custom class', (t) => {
     const { container } = getGraph();
     const [div] = container.childNodes;
     t.is(div.childNodes.length, 1);
@@ -41,7 +41,7 @@ test('rendering an SVG with a custom class', t => {
     t.is(svg.className, 'svgClass1 svgClass2');
 });
 
-test('rendering its children inside the SVG', t => {
+test('rendering its children inside the SVG', (t) => {
     const { container } = getGraph();
     const [div] = container.childNodes;
     const [svg] = div.childNodes;
@@ -53,11 +53,11 @@ test('rendering its children inside the SVG', t => {
     t.is(span.innerHTML, 'foo');
 });
 
-test('accepting a child before the SVG', t => {
+test('accepting a child before the SVG', (t) => {
     const Before = () => <span>{'before1'}</span>;
 
     const { container } = getGraph({
-        before: Before
+        before: Before,
     });
     const [div] = container.childNodes;
 
@@ -70,11 +70,11 @@ test('accepting a child before the SVG', t => {
     t.is(before.innerHTML, 'before1');
 });
 
-test('accepting a child after the SVG', t => {
+test('accepting a child after the SVG', (t) => {
     const After = () => <span>{'after1'}</span>;
 
     const { container } = getGraph({
-        after: After
+        after: After,
     });
     const [div] = container.childNodes;
 
@@ -87,13 +87,13 @@ test('accepting a child after the SVG', t => {
     t.is(after.innerHTML, 'after1');
 });
 
-test('accepting children before and after the SVG', t => {
+test('accepting children before and after the SVG', (t) => {
     const Before = () => <span>{'before1'}</span>;
     const After = () => <span>{'after1'}</span>;
 
     const { container } = getGraph({
         before: Before,
-        after: After
+        after: After,
     });
     const [div] = container.childNodes;
 

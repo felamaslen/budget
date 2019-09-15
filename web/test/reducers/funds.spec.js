@@ -6,19 +6,19 @@ import reducer, { initialState } from '~client/reducers/funds';
 import { dataRead } from '~client/actions/api';
 import {
     fundsViewSoldToggled,
-    fundsReceived
+    fundsReceived,
 } from '~client/actions/funds';
 import { getTransactionsList } from '~client/modules/data';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 
-test('FUNDS_VIEW_SOLD_TOGGLED toggles the view sold status', t => {
+test('FUNDS_VIEW_SOLD_TOGGLED toggles the view sold status', (t) => {
     const action = fundsViewSoldToggled();
 
     t.true(reducer({ viewSoldFunds: false }, action).viewSoldFunds);
     t.false(reducer({ viewSoldFunds: true }, action).viewSoldFunds);
 });
 
-test('DATA_READ sets funds-related properties', t => {
+test('DATA_READ sets funds-related properties', (t) => {
     const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
 
     const state = initialState;
@@ -34,20 +34,20 @@ test('DATA_READ sets funds-related properties', t => {
                     [DATA_KEY_ABBR.id]: 'id-1',
                     [DATA_KEY_ABBR.item]: 'My fund 1',
                     [DATA_KEY_ABBR.transactions]: [
-                        { date: '2019-06-30', units: 100, cost: 9923 }
+                        { date: '2019-06-30', units: 100, cost: 9923 },
                     ],
                     pr: [45, 45.6, 44.9],
-                    prStartIndex: 1
+                    prStartIndex: 1,
                 },
                 {
                     [DATA_KEY_ABBR.id]: 'id-2',
                     [DATA_KEY_ABBR.item]: 'My fund 2',
                     [DATA_KEY_ABBR.transactions]: [],
                     pr: [101.2, 100.94, 101.4, 102.03],
-                    prStartIndex: 0
-                }
-            ]
-        }
+                    prStartIndex: 0,
+                },
+            ],
+        },
     };
 
     const action = dataRead(res, null);
@@ -60,9 +60,9 @@ test('DATA_READ sets funds-related properties', t => {
             {
                 id: 'id-1',
                 item: 'My fund 1',
-                transactions: getTransactionsList([{ date: '2019-06-30', units: 100, cost: 9923 }])
+                transactions: getTransactionsList([{ date: '2019-06-30', units: 100, cost: 9923 }]),
             },
-            { id: 'id-2', item: 'My fund 2', transactions: [] }
+            { id: 'id-2', item: 'My fund 2', transactions: [] },
         ],
         cache: {
             [state.period]: {
@@ -70,16 +70,16 @@ test('DATA_READ sets funds-related properties', t => {
                 cacheTimes: [1, 2, 100, 183],
                 prices: {
                     'id-1': { startIndex: 1, values: [45, 45.6, 44.9] },
-                    'id-2': { startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] }
-                }
-            }
-        }
+                    'id-2': { startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] },
+                },
+            },
+        },
     });
 
     stub.restore();
 });
 
-test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
+test('FUNDS_RECEIVED sets funds-related properties in new period', (t) => {
     const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
 
     const state = initialState;
@@ -93,20 +93,20 @@ test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
                     [DATA_KEY_ABBR.id]: 'id-1',
                     [DATA_KEY_ABBR.item]: 'My fund 1',
                     [DATA_KEY_ABBR.transactions]: [
-                        { date: '2019-06-30', units: 100, cost: 9923 }
+                        { date: '2019-06-30', units: 100, cost: 9923 },
                     ],
                     pr: [45.6, 44.9],
-                    prStartIndex: 1
+                    prStartIndex: 1,
                 },
                 {
                     [DATA_KEY_ABBR.id]: 'id-2',
                     [DATA_KEY_ABBR.item]: 'My fund 2',
                     [DATA_KEY_ABBR.transactions]: [],
                     pr: [100.94, 101.4, 102.03],
-                    prStartIndex: 0
-                }
-            ]
-        }
+                    prStartIndex: 0,
+                },
+            ],
+        },
     };
 
     t.not(state.period, 'month3');
@@ -123,8 +123,8 @@ test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
         cacheTimes: [2, 100, 183],
         prices: {
             'id-1': { startIndex: 1, values: [45.6, 44.9] },
-            'id-2': { startIndex: 0, values: [100.94, 101.4, 102.03] }
-        }
+            'id-2': { startIndex: 0, values: [100.94, 101.4, 102.03] },
+        },
     });
 
     t.is(result.period, 'month3');
@@ -132,7 +132,7 @@ test('FUNDS_RECEIVED sets funds-related properties in new period', t => {
     stub.restore();
 });
 
-test('FUNDS_RECEIVED just sets the period, if the data already exist', t => {
+test('FUNDS_RECEIVED just sets the period, if the data already exist', (t) => {
     const stub = sinon.stub(shortid, 'generate').returns('my-short-id');
 
     const state = initialState;

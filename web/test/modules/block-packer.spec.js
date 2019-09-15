@@ -4,7 +4,7 @@ import permutation from 'array-permutation';
 import { blockData } from '~client-test/test_data/blocks';
 import { blockPacker } from '~client/modules/block-packer';
 
-test('creating a block list from block data', t => {
+test('creating a block list from block data', (t) => {
     const data = blockData;
 
     const result = blockPacker(data, 500, 400);
@@ -30,13 +30,13 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo1_bar1',
                                     color: 1,
-                                    value: 1642283
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+                                    value: 1642283,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
             width: '33.722%',
@@ -58,16 +58,16 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo2_bar1',
                                     color: 3,
-                                    value: 156842
+                                    value: 156842,
                                 },
                                 {
                                     width: '46.742%',
                                     height: '100%',
                                     name: 'foo2_bar2',
                                     color: 4,
-                                    value: 137650
-                                }
-                            ]
+                                    value: 137650,
+                                },
+                            ],
                         },
                         {
                             width: '100%',
@@ -78,16 +78,16 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo2_bar3',
                                     color: 5,
-                                    value: 122108
+                                    value: 122108,
                                 },
                                 {
                                     width: '35.819%',
                                     height: '100%',
                                     name: 'foo2_bar4',
                                     color: 6,
-                                    value: 68148
-                                }
-                            ]
+                                    value: 68148,
+                                },
+                            ],
                         },
                         {
                             width: '47.35%',
@@ -98,16 +98,16 @@ test('creating a block list from block data', t => {
                                     height: '54.595%',
                                     name: 'foo2_bar5',
                                     color: 7,
-                                    value: 57351
+                                    value: 57351,
                                 },
                                 {
                                     width: '100%',
                                     height: '45.405%',
                                     name: 'foo2_bar6',
                                     color: 8,
-                                    value: 47698
-                                }
-                            ]
+                                    value: 47698,
+                                },
+                            ],
                         },
                         {
                             width: '52.65%',
@@ -118,16 +118,16 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo2_bar7',
                                     color: 9,
-                                    value: 43399
+                                    value: 43399,
                                 },
                                 {
                                     width: '46.684%',
                                     height: '100%',
                                     name: 'foo2_bar8',
                                     color: 10,
-                                    value: 38000
-                                }
-                            ]
+                                    value: 38000,
+                                },
+                            ],
                         },
                         {
                             width: '52.65%',
@@ -138,13 +138,13 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo3_bar9',
                                     color: 11,
-                                    value: 35409
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+                                    value: 35409,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
             width: '20.713%',
@@ -166,9 +166,9 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo3_bar1',
                                     color: 3,
-                                    value: 27941
-                                }
-                            ]
+                                    value: 27941,
+                                },
+                            ],
                         },
                         {
                             width: '46.44%',
@@ -179,16 +179,16 @@ test('creating a block list from block data', t => {
                                     height: '54.983%',
                                     name: 'foo3_bar2',
                                     color: 4,
-                                    value: 20231
+                                    value: 20231,
                                 },
                                 {
                                     width: '100%',
                                     height: '45.017%',
                                     name: 'foo3_bar3',
                                     color: 5,
-                                    value: 16564
-                                }
-                            ]
+                                    value: 16564,
+                                },
+                            ],
                         },
                         {
                             width: '18.295%',
@@ -199,13 +199,13 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo3_bar4',
                                     color: 6,
-                                    value: 14495
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+                                    value: 14495,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         {
             width: '13.009%',
@@ -227,9 +227,9 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo4_bar1',
                                     color: 0,
-                                    value: 40100
-                                }
-                            ]
+                                    value: 40100,
+                                },
+                            ],
                         },
                         {
                             width: '19.413%',
@@ -240,9 +240,9 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo4_bar2',
                                     color: 1,
-                                    value: 5080
-                                }
-                            ]
+                                    value: 5080,
+                                },
+                            ],
                         },
                         {
                             width: '19.413%',
@@ -253,18 +253,18 @@ test('creating a block list from block data', t => {
                                     height: '100%',
                                     name: 'foo4_bar3',
                                     color: 2,
-                                    value: 4580
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
+                                    value: 4580,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
     ]);
 });
 
-test('blocks are sorted by size, largest first', t => {
+test('blocks are sorted by size, largest first', (t) => {
     const [foo1, foo2, foo3, foo4] = blockData;
 
     // foo1 > foo2 > foo4 > foo3
@@ -277,6 +277,7 @@ test('blocks are sorted by size, largest first', t => {
 
     const permutations = permutation(blockData);
 
+    // eslint-disable-next-line no-restricted-syntax
     for (const perm of permutations) {
         t.deepEqual(blockPacker(perm, ...args), blockPacker(ordered, ...args));
     }

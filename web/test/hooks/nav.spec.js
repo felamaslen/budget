@@ -9,7 +9,7 @@ import {
     NAV_XY,
     ACTIVE_SET,
     ADD_BTN,
-    navReducer
+    navReducer,
 } from '~client/hooks/nav';
 import { CREATE_ID } from '~client/constants/data';
 
@@ -19,56 +19,56 @@ const initialState = {
     activeId: null,
     activeItem: null,
     activeColumn: null,
-    columns: []
+    columns: [],
 };
 
-test('ITEMS_SET sets items', t => {
+test('ITEMS_SET sets items', (t) => {
     t.deepEqual(navReducer(initialState, {
         type: ITEMS_SET,
-        items: [1, 2, 3]
+        items: [1, 2, 3],
     }), { ...initialState, items: [1, 2, 3] });
 });
 
-test('COLUMNS_SET sets columns', t => {
+test('COLUMNS_SET sets columns', (t) => {
     t.deepEqual(navReducer(initialState, {
         type: COLUMNS_SET,
-        columns: ['foo', 'bar']
+        columns: ['foo', 'bar'],
     }), { ...initialState, columns: ['foo', 'bar'] });
 });
 
-test('NAV_TOGGLED (to nav) enables navigation', t => {
+test('NAV_TOGGLED (to nav) enables navigation', (t) => {
     t.deepEqual(navReducer({
         nav: false,
         items: [1, 2, 3],
         activeId: 'some-id',
         activeItem: { some: 'item' },
         activeColumn: null,
-        columns: null
+        columns: null,
     }, { type: NAV_TOGGLED }), {
         nav: true,
         items: [1, 2, 3],
         activeId: null,
         activeItem: null,
         activeColumn: null,
-        columns: null
+        columns: null,
     });
 });
 
-test('NAV_TOGGLED (from nav) disables navigation', t => {
+test('NAV_TOGGLED (from nav) disables navigation', (t) => {
     t.deepEqual(navReducer({
         nav: true,
         items: [1, 2, 3],
         activeId: 'some-id',
         activeItem: { some: 'item' },
         activeColumn: 'some',
-        columns: ['some']
+        columns: ['some'],
     }, { type: NAV_TOGGLED }), {
         nav: false,
         items: [1, 2, 3],
         activeId: null,
         activeItem: null,
         activeColumn: 'some',
-        columns: ['some']
+        columns: ['some'],
     });
 });
 
@@ -76,20 +76,20 @@ const stateColumns = {
     ...initialState,
     items: [
         { id: 'id1', foo: 'foo1', bar: 'bar1' },
-        { id: 'id2', foo: 'foo2', bar: 'bar2' }
+        { id: 'id2', foo: 'foo2', bar: 'bar2' },
     ],
-    columns: ['foo', 'bar']
+    columns: ['foo', 'bar'],
 };
 
 const stateNoColumns = {
     ...initialState,
     items: [
         { id: 'id1', foo: 'foo1' },
-        { id: 'id2', foo: 'foo2' }
-    ]
+        { id: 'id2', foo: 'foo2' },
+    ],
 };
 
-test('NAV_NEXT (columns disabled) goes to the next row', t => {
+test('NAV_NEXT (columns disabled) goes to the next row', (t) => {
     const action = { type: NAV_NEXT };
 
     const result0 = navReducer(stateNoColumns, action);
@@ -109,7 +109,7 @@ test('NAV_NEXT (columns disabled) goes to the next row', t => {
     t.is(result3.activeItem, null);
 });
 
-test('NAV_PREV (columns disabled) goes to the previous row', t => {
+test('NAV_PREV (columns disabled) goes to the previous row', (t) => {
     const action = { type: NAV_PREV };
 
     const result0 = navReducer(stateNoColumns, action);
@@ -129,7 +129,7 @@ test('NAV_PREV (columns disabled) goes to the previous row', t => {
     t.is(result3.activeItem, stateNoColumns.items[1]);
 });
 
-test('NAV_XY (x=1, y=0) loops through the rows and columns', t => {
+test('NAV_XY (x=1, y=0) loops through the rows and columns', (t) => {
     const action = { type: NAV_XY, dx: 1, dy: 0 };
 
     const fromNull = navReducer(stateColumns, action);
@@ -165,7 +165,7 @@ test('NAV_XY (x=1, y=0) loops through the rows and columns', t => {
     t.is(fromRow2Bar.activeColumn, 'foo');
 });
 
-test('NAV_XY (x=-1, y=0) loops through the rows and columns in reverse', t => {
+test('NAV_XY (x=-1, y=0) loops through the rows and columns in reverse', (t) => {
     const action = { type: NAV_XY, dx: -1, dy: 0 };
 
     const fromNull = navReducer(stateColumns, action);
@@ -201,7 +201,7 @@ test('NAV_XY (x=-1, y=0) loops through the rows and columns in reverse', t => {
     t.is(fromCreateFoo.activeColumn, 'bar');
 });
 
-test('NAV_XY (x=0, y=1) loops through a single column', t => {
+test('NAV_XY (x=0, y=1) loops through a single column', (t) => {
     const action = { type: NAV_XY, dx: 0, dy: 1 };
 
     const fromNull = navReducer(stateColumns, action);
@@ -221,7 +221,7 @@ test('NAV_XY (x=0, y=1) loops through a single column', t => {
     t.is(fromRow2.activeColumn, 'foo');
 });
 
-test('NAV_XY (x=0, y=-1) loops through a single column in reverse', t => {
+test('NAV_XY (x=0, y=-1) loops through a single column in reverse', (t) => {
     const action = { type: NAV_XY, dx: 0, dy: -1 };
 
     const fromNull = navReducer(stateColumns, action);
@@ -241,7 +241,7 @@ test('NAV_XY (x=0, y=-1) loops through a single column in reverse', t => {
     t.is(fromCreate.activeColumn, 'foo');
 });
 
-test('NAV_XY (x=0, y=1) from the add button chooses the last column', t => {
+test('NAV_XY (x=0, y=1) from the add button chooses the last column', (t) => {
     const action = { type: NAV_XY, dx: 0, dy: 1 };
     const state = { ...stateColumns, activeId: CREATE_ID, activeColumn: ADD_BTN };
 
@@ -251,7 +251,7 @@ test('NAV_XY (x=0, y=1) from the add button chooses the last column', t => {
     t.is(result.activeColumn, 'bar');
 });
 
-test('ACTIVE_SET (columns disabled) sets the active ID and item', t => {
+test('ACTIVE_SET (columns disabled) sets the active ID and item', (t) => {
     const result = navReducer(stateNoColumns, { type: ACTIVE_SET, id: 'id2' });
     t.is(result.activeId, 'id2');
     t.is(result.activeItem, stateNoColumns.items[1]);
@@ -261,7 +261,7 @@ test('ACTIVE_SET (columns disabled) sets the active ID and item', t => {
     t.is(resultCreate.activeItem, null);
 });
 
-test('ACTIVE_SET (columns enabled) sets the active ID, item and active column', t => {
+test('ACTIVE_SET (columns enabled) sets the active ID, item and active column', (t) => {
     const result = navReducer(stateColumns, { type: ACTIVE_SET, id: 'id2', column: 'foo' });
     t.is(result.activeId, 'id2');
     t.is(result.activeItem, stateColumns.items[1]);

@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -8,19 +7,21 @@ import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import HoverCost from '~client/components/HoverCost';
 
+const test = ninos(ava);
+
 const getContainer = memoize((customProps = {}) => {
     const props = {
         value: 123456.78,
-        ...customProps
+        ...customProps,
     };
 
     return render(<HoverCost {...props} />);
 });
 
-test('rendering its value unmodified, if set not to abbreviate', t => {
+test('rendering its value unmodified, if set not to abbreviate', (t) => {
     const { container } = getContainer({
         value: 'foo',
-        abbreviate: false
+        abbreviate: false,
     });
 
     t.is(container.children.length, 1);
@@ -31,7 +32,7 @@ test('rendering its value unmodified, if set not to abbreviate', t => {
     t.is(child.innerHTML, 'foo');
 });
 
-test('rendering an abbreviated currency value', t => {
+test('rendering an abbreviated currency value', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -47,7 +48,7 @@ test('rendering an abbreviated currency value', t => {
     t.is(abbreviated.innerHTML, '£1.2k');
 });
 
-test('rendering a hover label on hover', t => {
+test('rendering a hover label on hover', (t) => {
     const { container } = getContainer();
 
     const [child] = container.childNodes;
@@ -66,7 +67,7 @@ test('rendering a hover label on hover', t => {
     t.is(full.innerHTML, '£1,234.57');
 });
 
-test('removing the label on mouseout', t => {
+test('removing the label on mouseout', (t) => {
     const { container } = getContainer();
 
     const [child] = container.childNodes;

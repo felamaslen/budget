@@ -8,18 +8,18 @@ import { createMemoryHistory } from 'history';
 import Root from '~client/containers/Root';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = state => state) => {
+const getContainer = (customProps = {}, customState = (state) => state) => {
     const state = customState({
         ...testState,
         login: {
             ...testState.login,
-            uid: '1'
+            uid: '1',
         },
         api: {
             ...testState.api,
             initialLoading: false,
-            loading: false
-        }
+            loading: false,
+        },
     });
 
     const store = createMockStore(state);
@@ -27,7 +27,7 @@ const getContainer = (customProps = {}, customState = state => state) => {
     const props = {
         store,
         history: {},
-        ...customProps
+        ...customProps,
     };
 
     const history = createMemoryHistory({
@@ -43,7 +43,7 @@ const getContainer = (customProps = {}, customState = state => state) => {
     return { store, ...utils };
 };
 
-test('main container', t => {
+test('main container', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);

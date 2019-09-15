@@ -21,7 +21,7 @@ const getContainer = (customProps = {}, ...args) => {
         active: false,
         setActive: () => null,
         onUpdate: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render((
@@ -31,7 +31,7 @@ const getContainer = (customProps = {}, ...args) => {
     ), ...args);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -48,9 +48,9 @@ test('basic structure', t => {
     t.is(editable.className, 'editable editable-item editable-inactive');
 });
 
-test('no active class while inactive', t => {
+test('no active class while inactive', (t) => {
     const { container } = getContainer({
-        active: false
+        active: false,
     });
 
     const [span] = container.childNodes;
@@ -58,14 +58,14 @@ test('no active class while inactive', t => {
     t.notRegex(span.className, /active/);
 });
 
-test('onUpdate is called when the input changes, with the column and new value', t => {
+test('onUpdate is called when the input changes, with the column and new value', (t) => {
     const onUpdate = sinon.spy();
     const props = {
         page: 'food',
         column: 'shop',
         value: 'Tesco',
         active: true,
-        onUpdate
+        onUpdate,
     };
     const { container } = getContainer(props);
 
@@ -87,14 +87,14 @@ test('onUpdate is called when the input changes, with the column and new value',
     t.true(onUpdate.calledWith('shop', 'Wilko'));
 });
 
-test('onUpdate is not called when the input is blank', t => {
+test('onUpdate is not called when the input is blank', (t) => {
     const onUpdate = sinon.spy();
     const props = {
         page: 'food',
         column: 'shop',
         value: 'Tesco',
         active: true,
-        onUpdate
+        onUpdate,
     };
     const { container } = getContainer(props);
 

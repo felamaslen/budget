@@ -14,10 +14,10 @@ const getContainer = (customProps = {}) => {
         totalCost: 400000,
         cachedValue: {
             value: 399098,
-            ageText: '6 months, 3 weeks ago'
+            ageText: '6 months, 3 weeks ago',
         },
         onReloadPrices: () => null,
-        ...customProps
+        ...customProps,
     };
 
     const store = createMockStore(testState);
@@ -29,7 +29,7 @@ const getContainer = (customProps = {}) => {
     return { ...utils, store };
 };
 
-test('rendering basic structure', t => {
+test('rendering basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -40,7 +40,7 @@ test('rendering basic structure', t => {
     t.is(div.childNodes.length, 2);
 });
 
-test('meta', t => {
+test('meta', (t) => {
     const { container } = getContainer();
 
     const { childNodes: [meta] } = container.childNodes[0];
@@ -50,10 +50,10 @@ test('meta', t => {
     t.is(meta.childNodes.length, 4);
 });
 
-test('reloading prices on meta click', t => {
+test('reloading prices on meta click', (t) => {
     const onReloadPrices = sinon.spy();
     const { container } = getContainer({
-        onReloadPrices
+        onReloadPrices,
     });
 
     t.is(onReloadPrices.getCalls().length, 0);
@@ -62,7 +62,7 @@ test('reloading prices on meta click', t => {
     t.is(onReloadPrices.getCalls().length, 1);
 });
 
-test('gain info', t => {
+test('gain info', (t) => {
     const { container } = getContainer();
 
     const { childNodes: [meta] } = container.childNodes[0];
@@ -72,7 +72,7 @@ test('gain info', t => {
     t.is(gainInfo.innerHTML, 'Current value:');
 });
 
-test('value', t => {
+test('value', (t) => {
     const { container } = getContainer();
 
     const { childNodes: [meta] } = container.childNodes[0];
@@ -83,7 +83,7 @@ test('value', t => {
     t.is(value.innerHTML, '£3,990.98');
 });
 
-test('gain percent', t => {
+test('gain percent', (t) => {
     const { container } = getContainer();
 
     const { childNodes: [meta] } = container.childNodes[0];
@@ -94,7 +94,7 @@ test('gain percent', t => {
     t.is(gainPct.innerHTML, '(0.23%)');
 });
 
-test('cache age', t => {
+test('cache age', (t) => {
     const { container } = getContainer();
 
     const { childNodes: [meta] } = container.childNodes[0];

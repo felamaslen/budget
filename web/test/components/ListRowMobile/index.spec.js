@@ -13,7 +13,7 @@ const getContainer = memoize(() => {
     );
 
     AfterRowMobile.propTypes = {
-        item: PropTypes.any
+        item: PropTypes.any,
     };
 
     const props = {
@@ -22,18 +22,18 @@ const getContainer = memoize(() => {
             id: 'my-id',
             date: DateTime.fromISO('2019-07-06T18:39:32Z'),
             item: 'something',
-            cost: 343
+            cost: 343,
         },
         active: false,
         setActive: () => null,
         onUpdate: () => null,
-        AfterRowMobile
+        AfterRowMobile,
     };
 
     return render(<ListRowMobile {...props} />);
 });
 
-test('rendering the children of a list item', t => {
+test('rendering the children of a list item', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -45,7 +45,7 @@ test('rendering the children of a list item', t => {
     t.is(div.childNodes.length, 4);
 });
 
-test('cells', t => {
+test('cells', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [date, item, cost] = div.childNodes;
@@ -63,12 +63,13 @@ test('cells', t => {
     t.is(cost.innerHTML, '£3.43');
 });
 
-test('custom after row component', t => {
+test('custom after row component', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, , , after] = div.childNodes;
 
     t.is(after.tagName, 'SPAN');
     t.is(after.className, 'my-after-row');
-    t.is(after.innerHTML, '{"item":{"id":"my-id","date":"2019-07-06T18:39:32.000+00:00","item":"something","cost":343}}');
+    t.is(after.innerHTML,
+        '{"item":{"id":"my-id","date":"2019-07-06T18:39:32.000+00:00","item":"something","cost":343}}');
 });

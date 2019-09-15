@@ -3,10 +3,10 @@ import { DateTime } from 'luxon';
 
 import { testState as state } from '~client-test/test_data/state';
 import {
-    getTargets
+    getTargets,
 } from '~client/selectors/graph';
 
-test('getTargets gets a list of savings targets', t => {
+test('getTargets gets a list of savings targets', (t) => {
     const result = getTargets({
         ...state,
         netWorth: {
@@ -15,61 +15,61 @@ test('getTargets gets a list of savings targets', t => {
                 {
                     date: DateTime.fromISO('2018-01-31'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 13502 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 13502 },
                     ],
                     creditLimit: [],
-                    currencies: []
+                    currencies: [],
                 },
                 {
                     date: DateTime.fromISO('2018-02-28'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 19220 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 19220 },
                     ],
                     creditLimit: [],
-                    currencies: []
+                    currencies: [],
                 },
                 {
                     date: DateTime.fromISO('2018-03-31'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 11876 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 11876 },
                     ],
                     creditLimit: [],
-                    currencies: []
+                    currencies: [],
                 },
                 {
                     date: DateTime.fromISO('2018-04-30'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 14981 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 14981 },
                     ],
                     creditLimit: [],
-                    currencies: []
+                    currencies: [],
                 },
                 {
                     date: DateTime.fromISO('2018-05-31'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 14230 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 14230 },
                     ],
                     creditLimit: [],
-                    currencies: []
+                    currencies: [],
                 },
                 {
                     date: DateTime.fromISO('2018-06-30'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 12678 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 12678 },
                     ],
                     creditLimit: [],
-                    currencies: []
+                    currencies: [],
                 },
                 {
                     date: DateTime.fromISO('2018-07-31'),
                     values: [
-                        { subcategory: 'real-wallet-subcategory-id', value: 0 }
+                        { subcategory: 'real-wallet-subcategory-id', value: 0 },
                     ],
                     creditLimit: [],
-                    currencies: []
-                }
-            ]
-        }
+                    currencies: [],
+                },
+            ],
+        },
     });
 
     t.deepEqual(result, [
@@ -79,7 +79,7 @@ test('getTargets gets a list of savings targets', t => {
             months: 12,
             last: 3,
             tag: '1y',
-            value: 73434.5
+            value: 73434.5,
         },
         {
             date: DateTime.fromISO('2018-05-31').endOf('day').ts / 1000,
@@ -95,7 +95,7 @@ test('getTargets gets a list of savings targets', t => {
             months: 60,
             last: 12,
             tag: '5y',
-            value: 70376 + 2 / 11
-        }
+            value: 70376 + 2 / 11,
+        },
     ]);
 });

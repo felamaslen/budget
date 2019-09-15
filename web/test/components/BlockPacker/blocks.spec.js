@@ -23,10 +23,12 @@ const getOuterBlockGroup = memoize((customProps = {}) => {
                             width: 2.9,
                             height: 2.15,
                             bits: [
-                                { name: 'foo1', value: 3, color: 'ebony', width: 3, height: 2.9 }
-                            ]
-                        }
-                    ]
+                                {
+                                    name: 'foo1', value: 3, color: 'ebony', width: 3, height: 2.9,
+                                },
+                            ],
+                        },
+                    ],
                 },
                 {
                     name: 'bar',
@@ -39,24 +41,26 @@ const getOuterBlockGroup = memoize((customProps = {}) => {
                             width: 2.8,
                             height: 4.35,
                             bits: [
-                                { name: 'bar1', value: 4, color: 'pink', width: 2, height: 1.3 }
-                            ]
-                        }
-                    ]
-                }
-            ]
+                                {
+                                    name: 'bar1', value: 4, color: 'pink', width: 2, height: 1.3,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
         },
         activeMain: 'not_foo',
         activeSub: 'not_bar',
         onHover: () => null,
         onClick: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<OuterBlockGroup {...props} />);
 });
 
-test('<OuterBlockGroup /> - rendering basic structure', t => {
+test('<OuterBlockGroup /> - rendering basic structure', (t) => {
     const { container } = getOuterBlockGroup();
 
     t.is(container.childNodes.length, 1);
@@ -66,7 +70,7 @@ test('<OuterBlockGroup /> - rendering basic structure', t => {
     t.is(div.className, 'block-group');
 });
 
-test('<OuterBlockGroup /> - rendering width an height', t => {
+test('<OuterBlockGroup /> - rendering width an height', (t) => {
     const { container } = getOuterBlockGroup();
     const [div] = container.childNodes;
 
@@ -74,7 +78,7 @@ test('<OuterBlockGroup /> - rendering width an height', t => {
     t.is(div.style.height, '11.5px');
 });
 
-test('<OuterBlockGroup /> - rendering the block\'s bits', t => {
+test('<OuterBlockGroup /> - rendering the block\'s bits', (t) => {
     const { container } = getOuterBlockGroup();
     const [div] = container.childNodes;
 
@@ -110,11 +114,11 @@ const getBlocks = (customProps = {}) => {
                                         value: 8,
                                         color: 'ebony',
                                         width: 3,
-                                        height: 2.9
-                                    }
-                                ]
-                            }
-                        ]
+                                        height: 2.9,
+                                    },
+                                ],
+                            },
+                        ],
                     },
                     {
                         name: 'bar',
@@ -130,13 +134,13 @@ const getBlocks = (customProps = {}) => {
                                         value: 2,
                                         color: 'ebony',
                                         width: 3,
-                                        height: 2.9
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+                                        height: 2.9,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
             },
             {
                 width: 3,
@@ -146,23 +150,23 @@ const getBlocks = (customProps = {}) => {
                         name: 'baz',
                         color: 'orange',
                         value: 5,
-                        blocks: []
-                    }
-                ]
-            }
+                        blocks: [],
+                    },
+                ],
+            },
         ],
         activeMain: null,
         activeSub: null,
         page: 'page1',
         onClick: () => null,
         onHover: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<Blocks {...props} />);
 };
 
-test('<Blocks /> - basic structure', t => {
+test('<Blocks /> - basic structure', (t) => {
     const { container } = getBlocks();
 
     t.is(container.tagName, 'DIV');
@@ -174,7 +178,7 @@ test('<Blocks /> - basic structure', t => {
     t.is(div.childNodes.length, 2);
 });
 
-test('<Blocks /> - list of blocks', t => {
+test('<Blocks /> - list of blocks', (t) => {
     const { container } = getBlocks();
 
     const [div] = container.childNodes;
@@ -189,9 +193,9 @@ test('<Blocks /> - list of blocks', t => {
     t.is(group1.childNodes.length, 1);
 });
 
-test('<Blocks /> - active main block', t => {
+test('<Blocks /> - active main block', (t) => {
     const { container } = getBlocks({
-        activeMain: 'foo'
+        activeMain: 'foo',
     });
 
     const [div] = container.childNodes;
@@ -206,10 +210,10 @@ test('<Blocks /> - active main block', t => {
     t.is(bitBaz.className, 'block block-orange block-baz');
 });
 
-test('<Blocks /> - active sub block', t => {
+test('<Blocks /> - active sub block', (t) => {
     const { container } = getBlocks({
         activeMain: 'bar',
-        activeSub: 'bar1'
+        activeSub: 'bar1',
     });
 
     const [div] = container.childNodes;
@@ -227,9 +231,9 @@ test('<Blocks /> - active sub block', t => {
     t.is(bitBar1.className, 'sub-block active');
 });
 
-test('<Blocks /> - deep prop', t => {
+test('<Blocks /> - deep prop', (t) => {
     const { container } = getBlocks({
-        deepBlock: 'foo'
+        deepBlock: 'foo',
     });
 
     const [div] = container.childNodes;

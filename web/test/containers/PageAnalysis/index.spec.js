@@ -7,27 +7,27 @@ import React from 'react';
 import PageAnalysis from '~client/containers/PageAnalysis';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = state => state) => {
+const getContainer = (customProps = {}, customState = (state) => state) => {
     const state = customState({
-        ...testState
+        ...testState,
     });
 
     const store = createMockStore(state);
 
     const props = {
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
             <PageAnalysis {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -47,7 +47,7 @@ test('basic structure', t => {
     t.is(outer.childNodes.length, 3);
 });
 
-test('timeline view', t => {
+test('timeline view', (t) => {
     const { container } = getContainer();
     const [page] = container.childNodes;
     const [, outer] = page.childNodes;
@@ -57,7 +57,7 @@ test('timeline view', t => {
     t.is(timeline.className, 'timeline-outer');
 });
 
-test('list tree', t => {
+test('list tree', (t) => {
     const { container } = getContainer();
     const [page] = container.childNodes;
     const [, outer] = page.childNodes;
@@ -67,7 +67,7 @@ test('list tree', t => {
     t.is(listTree.className, 'tree');
 });
 
-test('block view', t => {
+test('block view', (t) => {
     const { container } = getContainer();
     const [page] = container.childNodes;
     const [, outer] = page.childNodes;
@@ -77,13 +77,13 @@ test('block view', t => {
     t.is(blockView.className, 'block-view');
 });
 
-test('not rendering a timeline if there is not one present', t => {
-    const { container } = getContainer({}, state => ({
+test('not rendering a timeline if there is not one present', (t) => {
+    const { container } = getContainer({}, (state) => ({
         ...state,
         analysis: {
             ...state.analysis,
-            timeline: null
-        }
+            timeline: null,
+        },
     }));
 
     const [page] = container.childNodes;
@@ -94,14 +94,14 @@ test('not rendering a timeline if there is not one present', t => {
     t.notRegex(child1.className, /timeline/);
 });
 
-test('nothing is rendered if the page hasn\'t loaded', t => {
-    const { container } = getContainer({}, state => ({
+test('nothing is rendered if the page hasn\'t loaded', (t) => {
+    const { container } = getContainer({}, (state) => ({
         ...state,
         analysis: {
             ...state.analysis,
             cost: null,
-            saved: null
-        }
+            saved: null,
+        },
     }));
 
     t.is(container.childNodes.length, 0);

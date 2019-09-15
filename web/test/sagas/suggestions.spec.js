@@ -6,7 +6,7 @@ import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
 
 import suggestionsSaga, {
-    onRequest
+    onRequest,
 } from '~client/sagas/suggestions';
 
 import { getApiKey } from '~client/selectors/api';
@@ -16,7 +16,7 @@ import { SUGGESTIONS_REQUESTED } from '~client/constants/actions/suggestions';
 import { suggestionsRequested, suggestionsReceived, suggestionsCleared } from '~client/actions/suggestions';
 import { errorOpened } from '~client/actions/error';
 
-test('onRequest calls the API with a request for CRUD list suggestions', t => {
+test('onRequest calls the API with a request for CRUD list suggestions', (t) => {
     const res = { data: { data: { isRes: true } } };
 
     testSaga(onRequest, suggestionsRequested('food', 'item', 'ab'))
@@ -25,8 +25,8 @@ test('onRequest calls the API with a request for CRUD list suggestions', t => {
         .next('some api key')
         .call(axios.get, `${API_PREFIX}/data/search/food/item/ab/${MAX_SUGGESTIONS}`, {
             headers: {
-                Authorization: 'some api key'
-            }
+                Authorization: 'some api key',
+            },
         })
         .next(res)
         .put(suggestionsReceived('item', res.data.data))
@@ -36,7 +36,7 @@ test('onRequest calls the API with a request for CRUD list suggestions', t => {
     t.pass();
 });
 
-test('onRequest handles errors', t => {
+test('onRequest handles errors', (t) => {
     const err = new Error('some error');
 
     const stub = sinon.stub(shortid, 'generate').returns('some-id');
@@ -47,8 +47,8 @@ test('onRequest handles errors', t => {
         .next('some api key')
         .call(axios.get, `${API_PREFIX}/data/search/food/item/ab/${MAX_SUGGESTIONS}`, {
             headers: {
-                Authorization: 'some api key'
-            }
+                Authorization: 'some api key',
+            },
         })
         .throw(err)
         .put(errorOpened('Error loading suggestions: some error'))
@@ -62,7 +62,7 @@ test('onRequest handles errors', t => {
     t.pass();
 });
 
-test('onRequest doesn\'t do anything if the page isn\'t a suggestions page', t => {
+test('onRequest doesn\'t do anything if the page isn\'t a suggestions page', (t) => {
     testSaga(onRequest, suggestionsRequested('overview', 'item', 'ab'))
         .next()
         .isDone();
@@ -70,7 +70,7 @@ test('onRequest doesn\'t do anything if the page isn\'t a suggestions page', t =
     t.pass();
 });
 
-test('suggestionsSaga calls the request saga in response to request action', t => {
+test('suggestionsSaga calls the request saga in response to request action', (t) => {
     testSaga(suggestionsSaga)
         .next()
         .takeLatest(SUGGESTIONS_REQUESTED, onRequest)

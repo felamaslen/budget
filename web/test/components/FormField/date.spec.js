@@ -1,7 +1,6 @@
 import ava from 'ava';
 import sinon from 'sinon';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
@@ -10,18 +9,20 @@ import { DateTime } from 'luxon';
 
 import FormFieldDate from '~client/components/FormField/date';
 
+const test = ninos(ava);
+
 const getContainer = (customProps = {}, ...args) => {
     const props = {
         active: true,
         value: DateTime.fromISO('2017-11-10'),
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldDate {...props} />, ...args);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -33,7 +34,7 @@ test('basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test('input', t => {
+test('input', (t) => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -44,7 +45,7 @@ test('input', t => {
     t.is(input.value, '2017-11-10');
 });
 
-test('handling onchange', t => {
+test('handling onchange', (t) => {
     const onChange = t.context.stub();
     const onType = t.context.stub();
     const { container } = getContainer({ onChange, onType });
@@ -62,7 +63,7 @@ test('handling onchange', t => {
     t.deepEqual(onChange.calls[0].arguments, [DateTime.fromISO('2014-04-09')]);
 });
 
-test('handling bad values', t => {
+test('handling bad values', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange });
 
@@ -79,7 +80,7 @@ test('handling bad values', t => {
     t.is(onChange.calls[0].arguments[0].toString(), 'Invalid DateTime');
 });
 
-test('rendering as a string input - entering abbreviations', t => {
+test('rendering as a string input - entering abbreviations', (t) => {
     const clock = sinon.useFakeTimers(new Date('2019-07-06T16:47:20Z').getTime());
 
     const onChange = t.context.stub();
@@ -131,7 +132,7 @@ test('rendering as a string input - entering abbreviations', t => {
     clock.restore();
 });
 
-test('rendering as a string input - handling invalid input', t => {
+test('rendering as a string input - handling invalid input', (t) => {
     const onChange = t.context.stub();
     const props = { onChange, active: true, string: true };
     const { container } = getContainer(props);

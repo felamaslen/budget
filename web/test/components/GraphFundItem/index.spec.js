@@ -17,18 +17,18 @@ const getGraph = memoize((customProps = {}) => {
             [103, 0],
             [104, 47.1],
             [105, 46.9],
-            [106, 42.5]
+            [106, 42.5],
         ],
         sold: false,
         popout: true,
         onToggle: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<GraphFundItem {...props} />);
 });
 
-test('rendering a graph with the correct paths', t => {
+test('rendering a graph with the correct paths', (t) => {
     const { container } = getGraph();
     t.is(container.childNodes.length, 1);
 
@@ -48,9 +48,9 @@ test('rendering a graph with the correct paths', t => {
     t.is(svg.className, 'popout');
 });
 
-test('not rendering anything if there are no values', t => {
+test('not rendering anything if there are no values', (t) => {
     const { container } = getGraph({
-        values: null
+        values: null,
     });
 
     t.is(container.childNodes.length, 0);

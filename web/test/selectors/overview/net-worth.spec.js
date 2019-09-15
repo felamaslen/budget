@@ -10,70 +10,70 @@ import {
     getNetWorthSummaryOld,
     getAggregates,
     getNetWorthTable,
-    getNetWorthRequests
+    getNetWorthRequests,
 } from '~client/selectors/overview/net-worth';
 
 import { getNumMonths } from '~client/selectors/overview/common';
 import { replaceAtIndex } from '~client/modules/data';
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
-test('getCategories excludes optimistically deleted items', t => {
+test('getCategories excludes optimistically deleted items', (t) => {
     t.deepEqual(getCategories({
         netWorth: {
             categories: [
                 { id: 'id-a', __optimistic: DELETE },
-                { id: 'id-b' }
-            ]
-        }
+                { id: 'id-b' },
+            ],
+        },
     }), [{ id: 'id-b' }]);
 });
 
-test('getCategories sorts by type, then category', t => {
+test('getCategories sorts by type, then category', (t) => {
     t.deepEqual(getCategories({
         netWorth: {
             categories: [
                 { id: 'id-a', type: 'asset', category: 'foo' },
                 { id: 'id-b', type: 'liability', category: 'bar' },
                 { id: 'id-c', type: 'asset', category: 'baz' },
-                { id: 'id-d', type: 'asset', category: 'bak' }
-            ]
-        }
+                { id: 'id-d', type: 'asset', category: 'bak' },
+            ],
+        },
     }), [
         { id: 'id-d', type: 'asset', category: 'bak' },
         { id: 'id-c', type: 'asset', category: 'baz' },
         { id: 'id-a', type: 'asset', category: 'foo' },
-        { id: 'id-b', type: 'liability', category: 'bar' }
+        { id: 'id-b', type: 'liability', category: 'bar' },
     ]);
 });
 
-test('getSubcategories excludes optimistically deleted items', t => {
+test('getSubcategories excludes optimistically deleted items', (t) => {
     t.deepEqual(getSubcategories({
         netWorth: {
             subcategories: [
                 { id: 'id-a', __optimistic: DELETE },
-                { id: 'id-b' }
-            ]
-        }
+                { id: 'id-b' },
+            ],
+        },
     }), [{ id: 'id-b' }]);
 });
 
-test('getSubcategories sorts by category ID and subcategory', t => {
+test('getSubcategories sorts by category ID and subcategory', (t) => {
     t.deepEqual(getSubcategories({
         netWorth: {
             subcategories: [
                 { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
                 { id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
-                { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' }
-            ]
-        }
+                { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
+            ],
+        },
     }), [
         { id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
         { id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
-        { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' }
+        { id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
     ]);
 });
 
-test('getNetWorthSummary gets a list of net worth values by month', t => {
+test('getNetWorthSummary gets a list of net worth values by month', (t) => {
     const result = getNetWorthSummary(state);
 
     t.true(Array.isArray(result));
@@ -88,14 +88,14 @@ test('getNetWorthSummary gets a list of net worth values by month', t => {
     t.is(result[6], 0); // July 2018 "
 });
 
-test('getNetWorthSummary excludes optimistically deleted entries', t => {
+test('getNetWorthSummary excludes optimistically deleted entries', (t) => {
     const result = getNetWorthSummary({
         ...state,
         netWorth: {
             ...state.netWorth,
             entries: replaceAtIndex(state.netWorth.entries, 1,
-                entry => ({ ...entry, __optimistic: DELETE }), true)
-        }
+                (entry) => ({ ...entry, __optimistic: DELETE }), true),
+        },
     });
 
     t.true(Array.isArray(result));
@@ -110,38 +110,32 @@ test('getNetWorthSummary excludes optimistically deleted entries', t => {
     t.is(result[6], 0); // July 2018 "
 });
 
-test('getNetWorthSummaryOld gets the old net worth entry values, as provided by the API', t => {
+test('getNetWorthSummaryOld gets the old net worth entry values, as provided by the API', (t) => {
     const result = getNetWorthSummaryOld({
         ...state,
         overview: {
             startDate: DateTime.fromISO('2018-03-31'),
-            endDate: DateTime.fromISO('2018-05-31')
+            endDate: DateTime.fromISO('2018-05-31'),
         },
         netWorth: {
             ...state.netWorth,
             entries: [],
-            old: [1000, 1302]
-        }
+            old: [1000, 1302],
+        },
     });
 
     t.deepEqual(result, [1000, 1302]);
 });
 
-test('getNetWorthTable returns a list of rows for the view', t => {
-    const rounded = (items) => items.map(({ fti, ...rest }) => ({
-        ...rest,
-        fti: Number(fti.toPrecision(8)),
-    }));
-
-    t.deepEqual(rounded(getNetWorthTable(state)), rounded([
+test('getNetWorthTable returns a list of rows for the view', (t) => {
+    t.deepEqual(getNetWorthTable(state), [
         {
             id: 'real-entry-id-a',
             date: DateTime.fromISO('2018-02-28'),
             assets: 10324 + 3750 * 0.035 + 1296523,
             liabilities: 8751,
             expenses: 900 + 13 + 90 + 1000 + 65,
-            fti: ((10324 + 3750 * 0.035 + 1296523) - (8751)) *
-            (28 + 58 / 365) / ((900 + 13 + 90 + 1000 + 65) * 12)
+            fti: ((10324 + 3750 * 0.035 + 1296523) - (8751)) * ((28 + 58 / 365) / ((900 + 13 + 90 + 1000 + 65) * 12)),
         },
         {
             id: 'real-entry-id-b',
@@ -149,84 +143,83 @@ test('getNetWorthTable returns a list of rows for the view', t => {
             assets: 9752 + 1051343,
             liabilities: 21939,
             expenses: 400 + 20 + 10 + 95 + 134,
-            fti: ((9752 + 1051343) - (21939)) * (28 + (58 + 31) / 365) / (
-                ((900 + 13 + 90 + 1000 + 65) + (400 + 20 + 10 + 95 + 134)) *
-                    12 / 2
-            )
-        }
-    ]));
+            fti: ((9752 + 1051343) - (21939)) * ((28 + (58 + 31) / 365) / (
+                ((900 + 13 + 90 + 1000 + 65) + (400 + 20 + 10 + 95 + 134)) * (12 / 2))
+            ),
+        },
+    ]);
 });
 
-test('getAggregates returns the latest summed value of a group of categories', t => {
+test('getAggregates returns the latest summed value of a group of categories', (t) => {
     t.deepEqual(getAggregates(state, {
         cash: 'Cash (easy access)',
         mortgage: 'Mortgage',
         cc: 'Credit cards',
-        no: 'nonexistent category'
+        no: 'nonexistent category',
     }), {
         cash: 9752 + 1051343,
         mortgage: -18420900,
         cc: -21939,
-        no: 0
+        no: 0,
     });
 });
 
-test('getNetWorthRequests gets requests for all items which don\'t reference fake IDs', t => {
+test('getNetWorthRequests gets requests for all items which don\'t reference fake IDs', (t) => {
     const stateOptimistic = {
         netWorth: {
             categories: [
                 {
                     id: 'real-category-id',
-                    __optimistic: DELETE
+                    __optimistic: DELETE,
                 },
                 {
                     id: 'fake-category-id',
                     foo: 'bar',
-                    __optimistic: CREATE
-                }
+                    __optimistic: CREATE,
+                },
             ],
             subcategories: [
                 {
                     id: 'real-subcategory-id',
                     categoryId: 'real-category-id',
                     bar: 'baz',
-                    __optimistic: UPDATE
+                    __optimistic: UPDATE,
                 },
                 {
                     id: 'fake-subcategory-id-a',
                     categoryId: 'real-category-id',
-                    __optimistic: CREATE
+                    __optimistic: CREATE,
                 },
                 {
                     id: 'fake-subcategory-id-b',
                     categoryId: 'fake-category-id',
-                    __optimistic: CREATE
-                }
+                    __optimistic: CREATE,
+                },
             ],
             entries: [
                 {
                     id: 'real-entry-id',
                     date: DateTime.fromISO('2019-07-27'),
                     values: [
-                        { subcategory: 'real-subcategory-id' }
+                        { subcategory: 'real-subcategory-id' },
                     ],
                     currencies: [],
                     creditLimit: [],
-                    __optimistic: UPDATE
+                    __optimistic: UPDATE,
                 },
                 {
                     id: 'fake-entry-id',
                     date: DateTime.fromISO('2019-07-04'),
                     values: [
                         { subcategory: 'real-subcategory-id' },
-                        { subcategory: 'fake-subcategory-id-a' }
+                        { subcategory: 'fake-subcategory-id-a' },
                     ],
                     currencies: [],
                     creditLimit: [],
-                    __optimistic: CREATE
-                }
-            ]
-        }
+                    __optimistic: CREATE,
+                },
+            ],
+        },
     };
 
     const result = getNetWorthRequests(stateOptimistic);
@@ -238,14 +231,14 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
             method: 'post',
             route: 'data/net-worth/categories',
             body: {
-                foo: 'bar'
-            }
+                foo: 'bar',
+            },
         },
         {
             type: DELETE,
             id: 'real-category-id',
             method: 'delete',
-            route: 'data/net-worth/categories'
+            route: 'data/net-worth/categories',
         },
         {
             type: CREATE,
@@ -253,8 +246,8 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
             method: 'post',
             route: 'data/net-worth/subcategories',
             body: {
-                categoryId: 'real-category-id'
-            }
+                categoryId: 'real-category-id',
+            },
         },
         {
             type: UPDATE,
@@ -263,8 +256,8 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
             route: 'data/net-worth/subcategories',
             body: {
                 categoryId: 'real-category-id',
-                bar: 'baz'
-            }
+                bar: 'baz',
+            },
         },
         {
             type: UPDATE,
@@ -274,40 +267,40 @@ test('getNetWorthRequests gets requests for all items which don\'t reference fak
             body: {
                 date: '2019-07-27',
                 values: [
-                    { subcategory: 'real-subcategory-id' }
+                    { subcategory: 'real-subcategory-id' },
                 ],
                 currencies: [],
-                creditLimit: []
-            }
-        }
+                creditLimit: [],
+            },
+        },
     ]);
 });
 
-test('getNetWorthRequests removes IDs from net worth entry dependents', t => {
+test('getNetWorthRequests removes IDs from net worth entry dependents', (t) => {
     const stateWithEntryCreate = {
         netWorth: {
             categories: [{
-                id: 'real-category-id'
+                id: 'real-category-id',
             }],
             subcategories: [{
                 id: 'real-subcategory-id',
-                categoryId: 'real-category-id'
+                categoryId: 'real-category-id',
             }],
             entries: [{
                 id: 'fake-entry-id',
                 date: DateTime.fromISO('2019-07-31'),
                 values: [
-                    { id: 'fake-value-id', subcategory: 'real-subcategory-id' }
+                    { id: 'fake-value-id', subcategory: 'real-subcategory-id' },
                 ],
                 creditLimit: [
-                    { id: 'fake-credit-limit-id', subcategory: 'real-subcategory-id' }
+                    { id: 'fake-credit-limit-id', subcategory: 'real-subcategory-id' },
                 ],
                 currencies: [
-                    { id: 'fake-currency-id', currency: 'CZK', rate: 0.031 }
+                    { id: 'fake-currency-id', currency: 'CZK', rate: 0.031 },
                 ],
-                __optimistic: CREATE
-            }]
-        }
+                __optimistic: CREATE,
+            }],
+        },
     };
 
     const result = getNetWorthRequests(stateWithEntryCreate);
@@ -320,14 +313,14 @@ test('getNetWorthRequests removes IDs from net worth entry dependents', t => {
         body: {
             date: '2019-07-31',
             values: [
-                { subcategory: 'real-subcategory-id' }
+                { subcategory: 'real-subcategory-id' },
             ],
             creditLimit: [
-                { subcategory: 'real-subcategory-id' }
+                { subcategory: 'real-subcategory-id' },
             ],
             currencies: [
-                { currency: 'CZK', rate: 0.031 }
-            ]
-        }
+                { currency: 'CZK', rate: 0.031 },
+            ],
+        },
     }]);
 });

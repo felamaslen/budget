@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -9,21 +8,23 @@ import React from 'react';
 import ModalDialogField from '~client/components/ModalDialog/field';
 import { getTransactionsList } from '~client/modules/data';
 
+const test = ninos(ava);
+
 const getModalDialogField = memoize((customProps = {}) => {
     const props = {
         item: 'foo',
         value: 'bar',
         invalid: false,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(
-        <ModalDialogField {...props} />
+        <ModalDialogField {...props} />,
     );
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getModalDialogField();
 
     t.is(container.childNodes.length, 1);
@@ -33,7 +34,7 @@ test('basic structure', t => {
     t.is(li.childNodes.length, 2);
 });
 
-test('label', t => {
+test('label', (t) => {
     const { container } = getModalDialogField();
     const [li] = container.childNodes;
 
@@ -43,7 +44,7 @@ test('label', t => {
     t.is(label.innerHTML, 'foo');
 });
 
-test('form field container', t => {
+test('form field container', (t) => {
     const { container } = getModalDialogField();
     const [li] = container.childNodes;
 
@@ -54,9 +55,9 @@ test('form field container', t => {
     t.is(input.tagName, 'INPUT');
 });
 
-test('invalid class', t => {
+test('invalid class', (t) => {
     const { container } = getModalDialogField({
-        invalid: true
+        invalid: true,
     });
 
     const [li] = container.childNodes;
@@ -64,10 +65,10 @@ test('invalid class', t => {
     t.is(li.className, 'form-row foo invalid');
 });
 
-test('transactions fields', t => {
+test('transactions fields', (t) => {
     const { container } = getModalDialogField({
         item: 'transactions',
-        value: getTransactionsList([])
+        value: getTransactionsList([]),
     });
 
     t.is(container.childNodes.length, 1);
@@ -81,7 +82,7 @@ test('transactions fields', t => {
     t.is(div.className, 'inner');
 });
 
-test('firing onChange', t => {
+test('firing onChange', (t) => {
     const onChange = t.context.stub();
     const { container } = getModalDialogField({ onChange });
     const [li] = container.childNodes;

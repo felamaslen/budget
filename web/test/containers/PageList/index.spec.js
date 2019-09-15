@@ -7,16 +7,16 @@ import React from 'react';
 import { PageList } from '~client/containers/PageList';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = state => state) => {
+const getContainer = (customProps = {}, customState = (state) => state) => {
     const state = customState({
         ...testState,
         food: {
             ...testState.food,
             data: {
                 ...testState.food.data,
-                total: 34
-            }
-        }
+                total: 34,
+            },
+        },
     });
 
     const store = createMockStore(state);
@@ -24,19 +24,19 @@ const getContainer = (customProps = {}, customState = state => state) => {
     const props = {
         page: 'food',
         After: () => null,
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
             <PageList {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
 
@@ -46,7 +46,7 @@ test('basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test('list', t => {
+test('list', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [pageList] = div.childNodes;

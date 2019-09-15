@@ -9,7 +9,7 @@ const points = [
     [0, 5],
     [1, 4.5],
     [2, 2.3],
-    [3, -1.2]
+    [3, -1.2],
 ];
 
 const getContainer = memoize(() => {
@@ -18,8 +18,8 @@ const getContainer = memoize(() => {
         color: 'black',
         minY: -5,
         maxY: 10,
-        pixX: xv => xv * 5 + 1,
-        pixY: yv => yv * 10 + 2
+        pixX: (xv) => xv * 5 + 1,
+        pixY: (yv) => yv * 10 + 2,
     };
 
     return render(<svg>
@@ -27,7 +27,7 @@ const getContainer = memoize(() => {
     </svg>);
 });
 
-test('rendering a list of arrow SVG paths', t => {
+test('rendering a list of arrow SVG paths', (t) => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
     const [svg] = container.childNodes;
@@ -38,7 +38,7 @@ test('rendering a list of arrow SVG paths', t => {
     t.is(g.childNodes.length, points.length);
 });
 
-test('rendering paths as Arrow components', t => {
+test('rendering paths as Arrow components', (t) => {
     t.plan(points.length * 2);
 
     const { container } = getContainer();

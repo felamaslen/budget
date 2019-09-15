@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent } from '@testing-library/react';
@@ -8,20 +7,22 @@ import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 import Navbar from '~client/components/Navbar';
 
+const test = ninos(ava);
+
 const getContainer = (customProps = {}) => {
     const props = {
         onLogout: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(
         <MemoryRouter>
             <Navbar {...props} />
-        </MemoryRouter>
+        </MemoryRouter>,
     );
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -41,11 +42,11 @@ const pageCases = [
     { page: 'food', path: '/food' },
     { page: 'general', path: '/general' },
     { page: 'holiday', path: '/holiday' },
-    { page: 'social', path: '/social' }
+    { page: 'social', path: '/social' },
 ];
 
 pageCases.forEach(({ page, path }, index) => {
-    test(`rendering a button for the ${page} page`, t => {
+    test(`rendering a button for the ${page} page`, (t) => {
         const { container } = getContainer();
         const [nav] = container.childNodes;
 
@@ -63,10 +64,10 @@ pageCases.forEach(({ page, path }, index) => {
     });
 });
 
-test('logout button', t => {
+test('logout button', (t) => {
     const onLogout = t.context.stub();
     const { container } = getContainer({
-        onLogout
+        onLogout,
     });
 
     const [nav] = container.childNodes;
