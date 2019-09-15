@@ -4,7 +4,9 @@ import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { COLOR_DARK } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
 
-export default function Axes({ popout, minX, minY, maxY, height, pixX, pixY }) {
+export default function Axes({
+    popout, minX, minY, maxY, height, pixX, pixY,
+}) {
     if (!popout) {
         return null;
     }
@@ -43,5 +45,5 @@ Axes.propTypes = {
     maxY: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    pixY: PropTypes.func.isRequired,
 };

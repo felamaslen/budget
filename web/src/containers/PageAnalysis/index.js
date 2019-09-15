@@ -1,12 +1,14 @@
 import { connect } from 'react-redux';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+    useState, useCallback, useMemo, useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 
 import {
     requested,
     blockRequested,
     treeItemDisplayToggled,
-    treeItemHovered
+    treeItemHovered,
 } from '~client/actions/analysis';
 
 import {
@@ -17,7 +19,7 @@ import {
     getCost,
     getDeepCost,
     getBlocks,
-    getDeepBlocks
+    getDeepBlocks,
 } from '~client/selectors/analysis';
 
 import { formatCurrency, capitalise } from '~client/modules/format';
@@ -47,7 +49,7 @@ function PageAnalysis({
     deepBlocks,
     onRequest,
     toggleTreeItem,
-    onBlockClick
+    onBlockClick,
 }) {
     const [activeBlock, setActiveBlock] = useState([null, null]);
     const onBlockHover = useCallback((main, deep = null) => setActiveBlock([main, deep]), []);
@@ -133,10 +135,10 @@ PageAnalysis.propTypes = {
     onBlockClick: PropTypes.func.isRequired,
     onRequest: PropTypes.func.isRequired,
     toggleTreeItem: PropTypes.func.isRequired,
-    hoverTreeItem: PropTypes.func.isRequired
+    hoverTreeItem: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     cost: getCost(state),
     blocks: getBlocks(state),
     period: getPeriod(state),
@@ -147,14 +149,14 @@ const mapStateToProps = state => ({
     deepCost: getDeepCost(state),
     deepBlocks: getDeepBlocks(state),
     treeVisible: getTreeVisible(state),
-    timeline: state.analysis.timeline
+    timeline: state.analysis.timeline,
 });
 
 const mapDispatchToProps = {
     onBlockClick: blockRequested,
     onRequest: requested,
     toggleTreeItem: treeItemDisplayToggled,
-    hoverTreeItem: treeItemHovered
+    hoverTreeItem: treeItemHovered,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);

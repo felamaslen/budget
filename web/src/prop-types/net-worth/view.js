@@ -7,7 +7,7 @@ import { netWorthList } from '~client/prop-types/net-worth/list';
 export const dataPropTypes = {
     data: netWorthList,
     categories: PropTypes.arrayOf(category.isRequired).isRequired,
-    subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired
+    subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
 };
 
 export const netWorthTableShape = PropTypes.arrayOf(PropTypes.shape({
@@ -16,5 +16,5 @@ export const netWorthTableShape = PropTypes.arrayOf(PropTypes.shape({
     assets: PropTypes.number.isRequired,
     liabilities: PropTypes.number.isRequired,
     expenses: PropTypes.number.isRequired,
-    fti: PropTypes.number.isRequired
+    fti: PropTypes.number.isRequired,
 }).isRequired);

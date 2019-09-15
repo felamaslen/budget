@@ -1,7 +1,9 @@
 import { createSelector } from 'reselect';
 import compose from 'just-compose';
 
-import { CREATE, UPDATE, DELETE, PAGES, PAGES_LIST } from '~client/constants/data';
+import {
+    CREATE, UPDATE, DELETE, PAGES, PAGES_LIST,
+} from '~client/constants/data';
 import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
 import { withoutDeleted, getValueForTransmit } from '~client/modules/data';
@@ -12,10 +14,10 @@ const getNonFilteredItems = (state, { page }) => state[page].items;
 
 export const getAllPageRows = createSelector(getNonFilteredItems, withoutDeleted);
 
-const makeGetDaily = items => (last, item, index) => {
+const makeGetDaily = (items) => (last, item, index) => {
     const sum = last + item.cost;
-    if ((index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day')) ||
-        index === items.length - 1
+    if ((index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day'))
+        || index === items.length - 1
     ) {
         return { daily: sum, dailySum: 0 };
     }
@@ -31,10 +33,10 @@ function makeMemoisedRowProcessor() {
         if (!items) {
             return [];
         }
-        if (perPageCache[page] &&
-            now === perPageCache[page].now &&
-            items.length === perPageCache[page].items.length &&
-            items.every((item, index) => item === perPageCache[page].items[index])
+        if (perPageCache[page]
+            && now === perPageCache[page].now
+            && items.length === perPageCache[page].items.length
+            && items.every((item, index) => item === perPageCache[page].items[index])
         ) {
             return perPageCache[page].result;
         }
@@ -54,7 +56,7 @@ function makeMemoisedRowProcessor() {
             const processedItem = { ...item, ...extraProps };
             const cachedItem = resultsCache[item.id];
 
-            if (cachedItem && Object.keys(processedItem).every(key => processedItem[key] === cachedItem[key])) {
+            if (cachedItem && Object.keys(processedItem).every((key) => processedItem[key] === cachedItem[key])) {
                 return [last.concat([cachedItem]), future, dailySum];
             }
 
@@ -84,12 +86,12 @@ export const getSortedPageRows = createSelector(
         }
 
         return memoisedRowProcessor(page, now, items);
-    }
+    },
 );
 
-const getAllNonFilteredItems = state => PAGES_LIST.map(page => ({
+const getAllNonFilteredItems = (state) => PAGES_LIST.map((page) => ({
     page,
-    items: getNonFilteredItems(state, { page })
+    items: getNonFilteredItems(state, { page }),
 }));
 
 export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows], (page, rows) => {
@@ -121,7 +123,7 @@ const getAllTimeTotal = (state, { page }) => state[page].total || 0;
 export const getTotalCost = createSelector([
     getPageProp,
     getAllTimeTotal,
-    getFundsCost
+    getFundsCost,
 ], (page, total, fundsTotal) => {
     if (page === 'funds') {
         return fundsTotal;
@@ -130,15 +132,15 @@ export const getTotalCost = createSelector([
     return total;
 });
 
-const withTransmitValues = requests => requests.map(({ body, ...rest }) => ({
+const withTransmitValues = (requests) => requests.map(({ body, ...rest }) => ({
     ...rest,
     body: Object.keys(body).reduce((last, column) => ({
         ...last,
-        [column]: getValueForTransmit(column, body[column])
-    }), {})
+        [column]: getValueForTransmit(column, body[column]),
+    }), {}),
 }));
 
-const withCreateRequests = (page, rows) => last => last.concat(rows
+const withCreateRequests = (page, rows) => (last) => last.concat(rows
     .filter(({ __optimistic }) => __optimistic === CREATE)
     .map(({ id, __optimistic: type, ...body }) => ({
         type,
@@ -146,11 +148,10 @@ const withCreateRequests = (page, rows) => last => last.concat(rows
         method: 'post',
         route: page,
         query: {},
-        body
-    }))
-);
+        body,
+    })));
 
-const withUpdateRequests = (page, rows) => last => last.concat(rows
+const withUpdateRequests = (page, rows) => (last) => last.concat(rows
     .filter(({ __optimistic }) => __optimistic === UPDATE)
     .map(({ __optimistic: type, ...body }) => ({
         type,
@@ -158,11 +159,10 @@ const withUpdateRequests = (page, rows) => last => last.concat(rows
         method: 'put',
         route: page,
         query: {},
-        body
-    }))
-);
+        body,
+    })));
 
-const withDeleteRequests = (page, rows) => last => last.concat(rows
+const withDeleteRequests = (page, rows) => (last) => last.concat(rows
     .filter(({ __optimistic }) => __optimistic === DELETE)
     .map(({ id }) => ({
         type: DELETE,
@@ -170,16 +170,16 @@ const withDeleteRequests = (page, rows) => last => last.concat(rows
         method: 'delete',
         route: page,
         query: {},
-        body: { id }
-    }))
-);
+        body: { id },
+    })));
 
 const getCrudRequestsByPage = (page, items) => compose(
     withCreateRequests(page, items),
     withUpdateRequests(page, items),
     withDeleteRequests(page, items),
-    withTransmitValues
+    withTransmitValues,
 )([]);
 
-export const getCrudRequests = createSelector(getAllNonFilteredItems, itemsByPage =>
-    itemsByPage.reduce((last, { page, items }) => last.concat(getCrudRequestsByPage(page, items)), []));
+export const getCrudRequests = createSelector(getAllNonFilteredItems, (itemsByPage) => (
+    itemsByPage.reduce((last, { page, items }) => last.concat(getCrudRequestsByPage(page, items)), [])
+));

@@ -5,23 +5,23 @@ import { replaceAtIndex, limitTimeSeriesLength } from '~client/modules/data';
 import {
     STOCKS_LIST_REQUESTED,
     STOCKS_LIST_RECEIVED,
-    STOCKS_PRICES_RECEIVED
+    STOCKS_PRICES_RECEIVED,
 } from '~client/constants/actions/stocks';
 
 import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '~client/constants/stocks';
 
 export const initialState = {
     loading: false,
-    indices: Object.keys(STOCK_INDICES).map(code => ({
+    indices: Object.keys(STOCK_INDICES).map((code) => ({
         code,
         name: STOCK_INDICES[code],
         gain: 0,
         up: false,
-        down: false
+        down: false,
     })),
     shares: [],
     history: [],
-    lastPriceUpdate: null
+    lastPriceUpdate: null,
 };
 
 const onStocksList = (state, { res: { data: { stocks, total } } }) => ({
@@ -37,25 +37,25 @@ const onStocksList = (state, { res: { data: { stocks, total } } }) => ({
                 gain: 0,
                 price: null,
                 up: false,
-                down: false
+                down: false,
             }]);
         }
 
-        return replaceAtIndex(last, codeIndex, value => ({
+        return replaceAtIndex(last, codeIndex, (value) => ({
             ...value,
-            weight: value.weight + weight / total
+            weight: value.weight + weight / total,
         }), true);
-    }, [])
+    }, []),
 });
 
-const updateStock = prices => ({ code, gain, ...rest }) => {
+const updateStock = (prices) => ({ code, gain, ...rest }) => {
     const match = prices.find(({ code: priceCode }) => priceCode === code);
     if (!match) {
         return { code, gain, ...rest };
     }
 
     const { open, close } = match;
-    const newGain = 100 * (close - open) / open;
+    const newGain = 100 * ((close - open) / open);
 
     return {
         ...rest,
@@ -63,7 +63,7 @@ const updateStock = prices => ({ code, gain, ...rest }) => {
         gain: newGain,
         up: gain !== null && newGain > gain,
         down: gain !== null && newGain < gain,
-        price: close
+        price: close,
     };
 };
 
@@ -83,14 +83,14 @@ function onStocksPrices(state, { res }) {
         indices: state.indices.map(stockMapper),
         shares,
         history: limitTimeSeriesLength(state.history, STOCKS_GRAPH_RESOLUTION)
-            .concat([[Date.now(), weightedGain]])
+            .concat([[Date.now(), weightedGain]]),
     };
 }
 
 const handlers = {
     [STOCKS_LIST_REQUESTED]: () => ({ loading: true }),
     [STOCKS_LIST_RECEIVED]: onStocksList,
-    [STOCKS_PRICES_RECEIVED]: onStocksPrices
+    [STOCKS_PRICES_RECEIVED]: onStocksPrices,
 };
 
 export default createReducerObject(handlers, initialState);

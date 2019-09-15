@@ -139,7 +139,7 @@ test('STOCKS_PRICES_RECEIVED sets stock prices', t => {
 
     const action = stockPricesReceived([
         { code: 'LLOY.L', open: 100, close: 101.3 },
-        { code: 'SMT.L', open: 321.2, close: 308.9 }
+        { code: 'SMT.L', open: 321, close: 308 }
     ]);
 
     const result = reducer(state, action);
@@ -147,13 +147,13 @@ test('STOCKS_PRICES_RECEIVED sets stock prices', t => {
     t.is(result.shares[0].gain, 100 * (101.3 - 100) / 100);
     t.is(result.shares[0].price, 101.3);
 
-    t.is(result.shares[1].gain, 100 * (308.9 - 321.2) / 321.2);
-    t.is(result.shares[1].price, 308.9);
+    t.is(result.shares[1].gain, 100 * (308 - 321) / 321);
+    t.is(result.shares[1].price, 308);
 
     t.is(result.lastPriceUpdate, now.getTime());
 
     t.deepEqual(result.history, [
-        [now.getTime(), (3 / 11 * (101.3 - 100) / 100 * 100) + (5 / 11 * (308.9 - 321.2) / 321.2 * 100)]
+        [now.getTime(), (3 / 11 * (101.3 - 100) / 100 * 100) + (5 / 11 * (308 - 321) / 321 * 100)]
     ]);
 
     clock.restore();

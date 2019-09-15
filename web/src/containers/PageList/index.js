@@ -9,7 +9,7 @@ import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actio
 import {
     getSortedPageRows,
     getWeeklyAverages,
-    getTotalCost
+    getTotalCost,
 } from '~client/selectors/list';
 
 import { rowsShape } from '~client/prop-types/page/rows';
@@ -29,11 +29,11 @@ const PageListComponent = ({
     extraProps,
     onCreate,
     onUpdate,
-    onDelete
+    onDelete,
 }) => (
     <Page page={page} className="page-list">
         <div className={classNames('page-list-main', page)}>
-            <Media query={mediaQueryMobile}>{isMobile => (
+            <Media query={mediaQueryMobile}>{(isMobile) => (
                 <ListBody
                     page={page}
                     isMobile={isMobile}
@@ -67,26 +67,26 @@ PageListComponent.propTypes = {
     extraProps: PropTypes.object,
     onCreate: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 PageListComponent.defaultProps = {
     After: null,
     itemSize: null,
-    extraProps: {}
+    extraProps: {},
 };
 
 const mapStateToProps = (state, props) => ({
     rows: props.rows || getSortedPageRows(state, props),
     weeklyValue: getWeeklyAverages(state, props),
     getDaily: Boolean(PAGES[props.page].daily),
-    totalCost: getTotalCost(state, props)
+    totalCost: getTotalCost(state, props),
 });
 
 const mapDispatchToProps = {
     onCreate: listItemCreated,
     onUpdate: listItemUpdated,
-    onDelete: listItemDeleted
+    onDelete: listItemDeleted,
 };
 
 export const PageList = connect(mapStateToProps, mapDispatchToProps)(PageListComponent);

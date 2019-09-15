@@ -1,7 +1,7 @@
 import { connect, Provider } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BrowserRouter } from 'react-router-dom';
 
 import { getLoggedIn } from '~client/selectors/app';
 
@@ -15,27 +15,25 @@ import './style.scss';
 
 const Root = ({ store, loggedIn, initialLoading }) => (
     <Provider store={store}>
-        <BrowserRouter>
-            <div className="main">
-                <Header />
-                <ErrorMessages />
-                <LoginForm />
-                {loggedIn && !initialLoading && <Content />}
-                <Spinner />
-            </div>
-        </BrowserRouter>
+        <div className="main">
+            <Header />
+            <ErrorMessages />
+            <LoginForm />
+            {loggedIn && !initialLoading && <Content />}
+            <Spinner />
+        </div>
     </Provider>
 );
 
 Root.propTypes = {
     store: PropTypes.object.isRequired,
     loggedIn: PropTypes.bool.isRequired,
-    initialLoading: PropTypes.bool.isRequired
+    initialLoading: PropTypes.bool.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     loggedIn: getLoggedIn(state),
-    initialLoading: state.api.initialLoading
+    initialLoading: state.api.initialLoading,
 });
 
-export default connect(mapStateToProps)(Root);
+export default withRouter(connect(mapStateToProps)(Root));

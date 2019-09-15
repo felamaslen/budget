@@ -1,6 +1,8 @@
 import { useReducer, useCallback, useEffect } from 'react';
 
-import { CANCELLED, isEscape, isEnter, isCtrl, getNavDirection } from '~client/modules/nav';
+import {
+    CANCELLED, isEscape, isEnter, isCtrl, getNavDirection,
+} from '~client/modules/nav';
 import { CREATE_ID, PAGES, PAGES_LIST } from '~client/constants/data';
 
 export const ADD_BTN = 'ADD_BTN';
@@ -146,10 +148,10 @@ function navReducerHelper(state, action) {
                 type: action.command,
                 id: action.id || state.activeId,
                 column: action.column || state.activeColumn,
-                payload: action.payload
+                payload: action.payload,
             },
             activeId: action.activeId || state.activeId,
-            activeColumn: action.activeColumn || state.activeColumn
+            activeColumn: action.activeColumn || state.activeColumn,
         };
     }
     if (action.type === ITEMS_SET) {
@@ -188,7 +190,7 @@ export function navReducer(state, action) {
             ...nextState,
             activeItem: nextState.activeId && nextState.activeId !== CREATE_ID
                 ? nextState.items.find(({ id }) => id === nextState.activeId)
-                : null
+                : null,
         };
     }
 
@@ -212,7 +214,7 @@ export function useNav(nav, items, page = null) {
         columns: getColumns(page),
         activeId: null,
         activeItem: null,
-        activeColumn: null
+        activeColumn: null,
     });
 
     useEffect(() => {
@@ -234,7 +236,7 @@ export function useNav(nav, items, page = null) {
     const onNext = useCallback(() => dispatch({ type: NAV_NEXT }), []);
     const onPrev = useCallback(() => dispatch({ type: NAV_PREV }), []);
 
-    const setCommand = useCallback(action => {
+    const setCommand = useCallback((action) => {
         if (typeof action === 'string') {
             dispatch({ type: COMMAND_SET, command: action });
         } else {
@@ -242,7 +244,7 @@ export function useNav(nav, items, page = null) {
         }
     }, []);
 
-    const onKey = useCallback(event => {
+    const onKey = useCallback((event) => {
         if (isEscape(event)) {
             event.preventDefault();
             dispatch({ type: COMMAND_SET, command: CANCELLED });

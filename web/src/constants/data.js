@@ -21,7 +21,7 @@ export const DATA_KEY_ABBR = {
     category: 'k',
     holiday: 'h',
     society: 'y',
-    transactions: 'tr'
+    transactions: 'tr',
 };
 
 export const OVERVIEW_COLUMNS = [
@@ -36,52 +36,52 @@ export const OVERVIEW_COLUMNS = [
     ['spending', 'Out'],
     ['net', 'Net'],
     ['netWorthPredicted', 'Predicted'],
-    ['netWorth', 'Net Worth', { to: '/net-worth', replace: true }]
+    ['netWorth', 'Net Worth', { to: '/net-worth', replace: true }],
 ];
 
 export const PAGES = {
     overview: {
         path: '/',
-        cols: ['balance']
+        cols: ['balance'],
     },
     analysis: {},
     funds: {
         list: true,
-        cols: ['item', 'transactions']
+        cols: ['item', 'transactions'],
     },
     income: {
         list: true,
-        cols: ['date', 'item', 'cost']
+        cols: ['date', 'item', 'cost'],
     },
     bills: {
         list: true,
         cols: ['date', 'item', 'cost'],
-        suggestions: ['item']
+        suggestions: ['item'],
     },
     food: {
         list: true,
         cols: ['date', 'item', 'category', 'cost', 'shop'],
         daily: true,
-        suggestions: ['item', 'category', 'shop']
+        suggestions: ['item', 'category', 'shop'],
     },
     general: {
         list: true,
         cols: ['date', 'item', 'category', 'cost', 'shop'],
         daily: true,
-        suggestions: ['item', 'category', 'shop']
+        suggestions: ['item', 'category', 'shop'],
     },
     holiday: {
         list: true,
         cols: ['date', 'item', 'holiday', 'cost', 'shop'],
         daily: true,
-        suggestions: ['item', 'holiday', 'shop']
+        suggestions: ['item', 'holiday', 'shop'],
     },
     social: {
         list: true,
         cols: ['date', 'item', 'society', 'cost', 'shop'],
         daily: true,
-        suggestions: ['item', 'society', 'shop']
-    }
+        suggestions: ['item', 'society', 'shop'],
+    },
 };
 
 export const PAGES_LIST = ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'];
@@ -96,5 +96,5 @@ export const NET_WORTH_AGGREGATE = {
     'cash-easy-access': 'Cash (easy access)',
     'cash-other': 'Cash (other)',
     stocks: 'Stocks',
-    pension: 'Pension'
+    pension: 'Pension',
 };

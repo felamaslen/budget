@@ -7,12 +7,12 @@ import { getNow } from '~client/selectors/now';
 import { getFundsRows, getCurrentFundsCache } from '~client/selectors/funds/helpers';
 import { getRowGains, getGainsForRow } from '~client/selectors/funds/gains';
 
-export const getPeriod = state => state.funds.period;
+export const getPeriod = (state) => state.funds.period;
 
 export function getFundsCachedValueAgeText(startTime, cacheTimes, now) {
     const age = now.ts - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
 
-    if (isNaN(age)) {
+    if (Number.isNaN(age)) {
         return 'no values';
     }
     if (age < 0) {
@@ -49,10 +49,10 @@ const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (
 
 export const getFundsCachedValue = createSelector([
     getLastFundsValue,
-    getFundCacheAge
+    getFundCacheAge,
 ], (value, ageText) => ({ value, ageText }));
 
-export const getFundsCost = createSelector(getFundsRows, rows => {
+export const getFundsCost = createSelector(getFundsRows, (rows) => {
     if (!rows) {
         return 0;
     }
@@ -73,7 +73,7 @@ function getPricesForRow(prices, id, startTime, cacheTimes) {
 
     return prices[id].values.map((price, index) => ([
         startTime + cacheTimes[index + prices[id].startIndex],
-        price
+        price,
     ]));
 }
 
@@ -86,7 +86,7 @@ export const getProcessedFundsRows = createSelector([getFundsRows, getCurrentFun
 
     const rowGains = getRowGains(rows, cache);
 
-    return rows.map(row => {
+    return rows.map((row) => {
         const sold = isSold(row.transactions);
 
         return {
@@ -94,7 +94,7 @@ export const getProcessedFundsRows = createSelector([getFundsRows, getCurrentFun
             gain: getGainsForRow(rowGains, row.id),
             prices: getPricesForRow(prices, row.id, startTime, cacheTimes),
             sold,
-            className: classNames({ sold })
+            className: classNames({ sold }),
         };
     });
 });

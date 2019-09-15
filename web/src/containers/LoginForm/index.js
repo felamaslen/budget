@@ -10,12 +10,14 @@ import PinDisplay from '~client/components/LoginForm/pin-display';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
-function LoginForm({ loading, initialised, loggedIn, onLogin }) {
+function LoginForm({
+    loading, initialised, loggedIn, onLogin,
+}) {
     const [pin, setPin] = useState('');
-    const onInput = useCallback(digit => setPin(last => `${last}${digit}`), []);
+    const onInput = useCallback((digit) => setPin((last) => `${last}${digit}`), []);
 
-    const onKeydown = useCallback(event => {
-        if (!isNaN(Number(event.key))) {
+    const onKeydown = useCallback((event) => {
+        if (!Number.isNaN(Number(event.key))) {
             onInput(event.key);
         }
     }, [onInput]);
@@ -58,17 +60,17 @@ LoginForm.propTypes = {
     initialised: PropTypes.bool.isRequired,
     loading: PropTypes.bool.isRequired,
     loggedIn: PropTypes.bool.isRequired,
-    onLogin: PropTypes.func.isRequired
+    onLogin: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     initialised: state.login.initialised,
     loading: state.login.loading,
-    loggedIn: getLoggedIn(state)
+    loggedIn: getLoggedIn(state),
 });
 
 const mapDispatchToProps = {
-    onLogin: loginRequested
+    onLogin: loginRequested,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

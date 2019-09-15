@@ -70,6 +70,8 @@ test('getOverallROI gets the correct values and returns a line', t => {
         [300, 300, 300, 300, 300]
     ];
 
+    const rounded = (value) => Number(value.toPrecision(8));
+
     const result = getOverallROI(prices, units, costs);
 
     const expectedResult = [
@@ -80,7 +82,7 @@ test('getOverallROI gets the correct values and returns a line', t => {
         100 * ((386 * 28 + 31 * 10) - (10800 + 300)) / (10800 + 300)
     ];
 
-    t.deepEqual(result, expectedResult);
+    t.deepEqual(result.map(rounded), expectedResult.map(rounded));
 });
 
 test('getFundLineROI gets the correct values and returns a line', t => {

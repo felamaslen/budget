@@ -87,7 +87,7 @@ test('getTargets gets a list of savings targets', t => {
             months: 36,
             last: 6,
             tag: '3y',
-            value: 75239.2
+            value: 75239.20000000001,
         },
         {
             date: DateTime.fromISO('2018-06-30').endOf('day').ts / 1000,

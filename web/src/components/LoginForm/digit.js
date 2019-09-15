@@ -10,7 +10,7 @@ const Digit = ({ digit, onInput }) => (
 
 Digit.propTypes = {
     digit: PropTypes.number.isRequired,
-    onInput: PropTypes.func.isRequired
+    onInput: PropTypes.func.isRequired,
 };
 
 export default Digit;

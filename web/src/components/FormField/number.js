@@ -4,10 +4,12 @@ import PropTypes from 'prop-types';
 import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
-export default function FormFieldNumber({ min, max, step, ...props }) {
+export default function FormFieldNumber({
+    min, max, step, ...props
+}) {
     const [currentValue, , onChange, ref, onBlur] = useField({
         ...props,
-        setValue: Number
+        setValue: Number,
     });
 
     return (
@@ -31,10 +33,10 @@ FormFieldNumber.propTypes = {
     active: PropTypes.bool,
     min: PropTypes.number,
     max: PropTypes.number,
-    step: PropTypes.number
+    step: PropTypes.number,
 };
 
 FormFieldNumber.defaultProps = {
     type: 'number',
-    value: 0
+    value: 0,
 };

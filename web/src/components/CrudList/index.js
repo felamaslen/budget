@@ -21,12 +21,12 @@ const itemProps = [
     'setActive',
     'setCommand',
     'navNext',
-    'navPrev'
+    'navPrev',
 ];
 
 const getItemData = memoize((...args) => args.reduce((last, value, index) => ({
     ...last,
-    [itemProps[index]]: value
+    [itemProps[index]]: value,
 }), {}));
 
 export default function CrudList({
@@ -42,15 +42,17 @@ export default function CrudList({
     onUpdate,
     onDelete,
     className,
-    extraProps
+    extraProps,
 }) {
     const [navState, setActive, setCommand, navNext, navPrev] = useNav(nav, items, extraProps.page);
-    const { activeId, activeItem, activeColumn, command } = navState;
+    const {
+        activeId, activeItem, activeColumn, command,
+    } = navState;
 
     const createActive = activeId === CREATE_ID;
     const noneActive = activeId === null;
 
-    const getItemKey = useCallback(index => items[index].id, [items]);
+    const getItemKey = useCallback((index) => items[index].id, [items]);
 
     const metaProps = {
         active: activeId,
@@ -62,7 +64,7 @@ export default function CrudList({
         onCreate,
         onUpdate,
         onDelete,
-        ...extraProps
+        ...extraProps,
     };
 
     const itemData = getItemData(
@@ -75,7 +77,7 @@ export default function CrudList({
         setActive,
         setCommand,
         navNext,
-        navPrev
+        navPrev,
     );
 
     const variableSize = typeof itemSize === 'function';
@@ -94,7 +96,7 @@ export default function CrudList({
     return (
         <div className={classNames('crud-list', className, {
             active: activeId !== null,
-            'create-active': createActive
+            'create-active': createActive,
         })}>
             {BeforeList && <BeforeList {...metaProps} />}
             <div className={`crud-list-inner ${className}-inner`}>
@@ -149,7 +151,7 @@ export default function CrudList({
 
 CrudList.propTypes = {
     items: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string.isRequired
+        id: PropTypes.string.isRequired,
     })),
     nav: PropTypes.bool,
     itemSize: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
@@ -163,7 +165,7 @@ CrudList.propTypes = {
     onCreate: PropTypes.func.isRequired,
     onRead: PropTypes.func,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 CrudList.defaultProps = {
@@ -175,6 +177,6 @@ CrudList.defaultProps = {
     AfterList: null,
     CreateItem: null,
     extraProps: {
-        page: null
-    }
+        page: null,
+    },
 };

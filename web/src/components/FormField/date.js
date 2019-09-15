@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
-const setValueDate = isoDate => DateTime.fromISO(isoDate);
+const setValueDate = (isoDate) => DateTime.fromISO(isoDate);
 
 function parseYear(year) {
     if (year && year.length <= 2) {
@@ -28,7 +28,7 @@ function setValueString(date) {
     const result = DateTime.fromObject({
         year: parseYear(year) || now.year,
         month: Number(month) || now.month,
-        day: Number(day) || now.day
+        day: Number(day) || now.day,
     });
 
     if (result.invalid) {
@@ -49,7 +49,7 @@ export default function FormFieldDate({ label, ...props }) {
 
     const [, , onChange, ref, onBlur] = useField({
         ...props,
-        setValue
+        setValue,
     });
 
     const defaultValue = props.string
@@ -74,11 +74,11 @@ FormFieldDate.propTypes = {
     string: PropTypes.bool,
     label: PropTypes.string,
     value: PropTypes.instanceOf(DateTime),
-    active: PropTypes.bool
+    active: PropTypes.bool,
 };
 
 FormFieldDate.defaultProps = {
     string: false,
     label: null,
-    value: DateTime.local()
+    value: DateTime.local(),
 };

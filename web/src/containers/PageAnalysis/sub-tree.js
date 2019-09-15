@@ -4,10 +4,12 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
 import { subTreeShape } from '~client/prop-types/page/analysis';
 
-export default function SubTree({ open, subTree, name, itemCost, onHover }) {
+export default function SubTree({
+    open, subTree, name, itemCost, onHover,
+}) {
     const makeOnMouseOver = useCallback(
-        subItemName => () => onHover(name, subItemName),
-        [onHover, name]
+        (subItemName) => () => onHover(name, subItemName),
+        [onHover, name],
     );
 
     const onMouseOut = useCallback(() => onHover(null), [onHover]);
@@ -29,7 +31,7 @@ export default function SubTree({ open, subTree, name, itemCost, onHover }) {
                     <div className="main">
                         <span className="title">{subItemName}</span>
                         <span className="cost">{formatCurrency(total)}</span>
-                        <span className="pct">{' ('}{(100 * total / itemCost).toFixed(1)}{'%)'}</span>
+                        <span className="pct">{' ('}{(100 * (total / itemCost)).toFixed(1)}{'%)'}</span>
                     </div>
                 </li>
             ))}
@@ -42,9 +44,9 @@ SubTree.propTypes = {
     subTree: subTreeShape,
     name: PropTypes.string,
     itemCost: PropTypes.number,
-    onHover: PropTypes.func.isRequired
+    onHover: PropTypes.func.isRequired,
 };
 
 SubTree.defaultProps = {
-    subTree: null
+    subTree: null,
 };

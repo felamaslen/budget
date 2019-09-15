@@ -1,5 +1,5 @@
 import React from 'react';
-import { withRouter } from 'react-router';
+import { withRouter } from 'react-router-dom';
 import Route, { CacheSwitch as Switch } from 'react-router-cache-route';
 import PropTypes from 'prop-types';
 import PageOverview from '~client/containers/PageOverview';
@@ -11,7 +11,7 @@ import {
     PageFood,
     PageGeneral,
     PageHoliday,
-    PageSocial
+    PageSocial,
 } from '~client/containers/PageList';
 import './style.scss';
 
@@ -24,7 +24,7 @@ const routes = [
     { key: 'general', component: PageGeneral },
     { key: 'holiday', component: PageHoliday },
     { key: 'social', component: PageSocial },
-    { key: 'overview', path: '/', component: PageOverview }
+    { key: 'overview', path: '/', component: PageOverview },
 ];
 
 const NotFound = () => (
@@ -46,7 +46,7 @@ const Content = () => (
 
 Content.propTypes = {
     location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired
+    history: PropTypes.object.isRequired,
 };
 
 export default withRouter(Content);

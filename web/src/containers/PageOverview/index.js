@@ -29,18 +29,18 @@ PageOverview.propTypes = {
             value: PropTypes.oneOfType([
                 PropTypes.string.isRequired,
                 PropTypes.number.isRequired,
-                PropTypes.instanceOf(DateTime).isRequired
+                PropTypes.instanceOf(DateTime).isRequired,
             ]).isRequired,
-            rgb: PropTypes.arrayOf(PropTypes.number)
+            rgb: PropTypes.arrayOf(PropTypes.number),
         }).isRequired),
         past: PropTypes.bool.isRequired,
         active: PropTypes.bool.isRequired,
-        future: PropTypes.bool.isRequired
-    }).isRequired).isRequired
+        future: PropTypes.bool.isRequired,
+    }).isRequired).isRequired,
 };
 
-const mapStateToProps = state => ({
-    table: getOverviewTable(state)
+const mapStateToProps = (state) => ({
+    table: getOverviewTable(state),
 });
 
 export default connect(mapStateToProps)(PageOverview);

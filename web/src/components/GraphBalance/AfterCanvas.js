@@ -5,7 +5,7 @@ import classNames from 'classnames';
 export default function AfterCanvas({ showAll, setShowAll }) {
     const className = classNames('show-all', 'noselect', {
         noselect: true,
-        enabled: showAll
+        enabled: showAll,
     });
 
     const onClick = useCallback(() => setShowAll(!showAll), [showAll, setShowAll]);
@@ -18,5 +18,5 @@ export default function AfterCanvas({ showAll, setShowAll }) {
 
 AfterCanvas.propTypes = {
     showAll: PropTypes.bool.isRequired,
-    setShowAll: PropTypes.func.isRequired
+    setShowAll: PropTypes.func.isRequired,
 };

@@ -15,9 +15,9 @@ const OverviewTableRows = ({ rows, numToSkip, ...props }) => (
 
 OverviewTableRows.propTypes = {
     rows: PropTypes.arrayOf(PropTypes.shape({
-        key: PropTypes.string.isRequired
+        key: PropTypes.string.isRequired,
     }).isRequired).isRequired,
-    numToSkip: PropTypes.number.isRequired
+    numToSkip: PropTypes.number.isRequired,
 };
 
 export default OverviewTableRows;

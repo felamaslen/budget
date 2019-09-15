@@ -8,7 +8,7 @@ export default function ArrowLine({ data, color, ...props }) {
     }
 
     const getColor = typeof color === 'function'
-        ? point => color(point)
+        ? (point) => color(point)
         : () => color;
 
     const y0 = props.pixY(0);
@@ -42,6 +42,6 @@ ArrowLine.propTypes = {
     maxY: PropTypes.number.isRequired,
     color: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.func
-    ]).isRequired
+        PropTypes.func,
+    ]).isRequired,
 };

@@ -4,11 +4,10 @@ import { formatCurrency } from '~client/modules/format';
 import { listTreeHeadItemsShape } from '~client/prop-types/page/analysis';
 
 export default function ListTreeHead({ items }) {
-    const getCost = itemList => formatCurrency(itemList
-        .reduce((last, { itemCost }) => last + itemCost, 0)
-    );
+    const getCost = (itemList) => formatCurrency(itemList
+        .reduce((last, { itemCost }) => last + itemCost, 0));
 
-    const getPct = itemList => itemList
+    const getPct = (itemList) => itemList
         .reduce((last, { pct }) => last + pct, 0)
         .toFixed(1);
 
@@ -37,5 +36,5 @@ export default function ListTreeHead({ items }) {
 }
 
 ListTreeHead.propTypes = {
-    items: listTreeHeadItemsShape
+    items: listTreeHeadItemsShape,
 };

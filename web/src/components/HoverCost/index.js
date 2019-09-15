@@ -12,14 +12,14 @@ export default function HoverCost(allProps) {
     const formattedValue = formatCurrency(value, {
         brackets: true,
         ...props,
-        abbreviate: false
+        abbreviate: false,
     });
 
     const abbreviated = abbreviate && formatCurrency(value, {
         abbreviate: true,
         precision: 1,
         brackets: true,
-        ...props
+        ...props,
     });
 
     const doHover = formattedValue !== abbreviated;
@@ -55,12 +55,12 @@ export default function HoverCost(allProps) {
 HoverCost.propTypes = {
     value: PropTypes.oneOfType([
         PropTypes.number.isRequired,
-        PropTypes.string.isRequired
+        PropTypes.string.isRequired,
     ]),
     abbreviate: PropTypes.bool,
-    precision: PropTypes.number
+    precision: PropTypes.number,
 };
 
 HoverCost.defaultProps = {
-    abbreviate: true
+    abbreviate: true,
 };

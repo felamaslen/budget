@@ -4,7 +4,9 @@
  * Components which use this hook are responsible for rendering the input,
  */
 
-import { useRef, useReducer, useCallback, useEffect } from 'react';
+import {
+    useRef, useReducer, useCallback, useEffect,
+} from 'react';
 
 import { NULL, IDENTITY } from '~client/modules/data';
 import { VALUE_SET, CANCELLED } from '~client/modules/nav';
@@ -26,14 +28,14 @@ function fieldReducer(state, action) {
                 ...state,
                 active: true,
                 initialValue: action.value,
-                currentValue: action.value
+                currentValue: action.value,
             };
         }
 
         return {
             ...state,
             active: action.active,
-            inputValue: action.inputValue
+            inputValue: action.inputValue,
         };
     }
     if (action.type === TYPED) {
@@ -53,7 +55,7 @@ export function useField({
     setValue = IDENTITY,
     getInitialInputValue = IDENTITY,
     command = NULL_COMMAND,
-    active = false
+    active = false,
 }) {
     const inputRef = useRef(null);
 
@@ -61,7 +63,7 @@ export function useField({
         active: false,
         initialValue: value,
         currentValue: value,
-        inputValue: getInitialInputValue(value)
+        inputValue: getInitialInputValue(value),
     });
 
     useEffect(() => {
@@ -80,7 +82,7 @@ export function useField({
                 type: ACTIVE_TOGGLED,
                 active,
                 value,
-                inputValue: getInitialInputValue(state.initialValue)
+                inputValue: getInitialInputValue(state.initialValue),
             });
         }
         if (active && !state.active) {
@@ -103,7 +105,7 @@ export function useField({
         }
     }, [string, command]);
 
-    const onChangeInput = useCallback(event => {
+    const onChangeInput = useCallback((event) => {
         try {
             const newValue = setValue(event.target.value);
             if (typeof newValue === 'object' && newValue.__split) {
@@ -111,7 +113,7 @@ export function useField({
                 dispatch({
                     type: TYPED,
                     value: fieldValue,
-                    inputValue
+                    inputValue,
                 });
             } else {
                 dispatch({ type: TYPED, value: newValue });
@@ -134,6 +136,6 @@ export function useField({
         state.inputValue,
         onChangeInput,
         inputRef,
-        onBlurInput
+        onBlurInput,
     ];
 }

@@ -1,4 +1,4 @@
-import memoize from 'fast-memoize';
+import memoize from 'memoize-one';
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
 
@@ -15,18 +15,17 @@ function getFundColor(value, min, max) {
         return [255, 255, 255];
     }
 
-    return color.map(channel =>
-        Math.round(255 + (value / range) * (channel - 255)));
+    return color.map((channel) => Math.round(255 + (value / range) * (channel - 255)));
 }
 
-const roundGain = value => Math.round(10000 * value) / 10000;
-const roundAbs = value => Math.round(value);
+const roundGain = (value) => Math.round(10000 * value) / 10000;
+const roundAbs = (value) => Math.round(value);
 
 function getCostValue(transactions, price, yesterdayPrice) {
     if (isSold(transactions) || !price) {
         return transactions.reduce(({ cost, value }, item) => ({
             cost: cost + Math.max(0, item.cost),
-            value: value - Math.min(0, item.cost)
+            value: value - Math.min(0, item.cost),
         }), { cost: 0, value: 0 });
     }
 
@@ -42,7 +41,9 @@ function getCostValue(transactions, price, yesterdayPrice) {
         dayGain = roundGain((price - yesterdayPrice) / yesterdayPrice);
     }
 
-    return { cost, value, dayGain, dayGainAbs };
+    return {
+        cost, value, dayGain, dayGainAbs,
+    };
 }
 
 export function getRowGains(rows, cache) {
@@ -70,9 +71,9 @@ export function getRowGains(rows, cache) {
     }, {});
 }
 
-const getMinMax = memoize(rowGains => Object.keys(rowGains).reduce(([min, max], id) => ([
+const getMinMax = memoize((rowGains) => Object.keys(rowGains).reduce(([min, max], id) => ([
     Math.min(min, rowGains[id].gain),
-    Math.max(max, rowGains[id].gain)
+    Math.max(max, rowGains[id].gain),
 ]), [Infinity, -Infinity]));
 
 export function getGainsForRow(rowGains, id) {

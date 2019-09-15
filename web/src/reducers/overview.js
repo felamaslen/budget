@@ -6,7 +6,7 @@ import memoize from 'fast-memoize';
 import {
     LIST_ITEM_CREATED,
     LIST_ITEM_UPDATED,
-    LIST_ITEM_DELETED
+    LIST_ITEM_DELETED,
 } from '~client/constants/actions/list';
 
 import { getMonthDates } from '~client/selectors/overview/common';
@@ -18,7 +18,7 @@ import { LOGGED_OUT } from '~client/constants/actions/login';
 export const initialState = {
     startDate: null,
     endDate: null,
-    cost: {}
+    cost: {},
 };
 
 const onRead = (state, {
@@ -29,35 +29,36 @@ const onRead = (state, {
             cost: {
                 balance,
                 ...cost
-            }
-        }
-    }
+            },
+        },
+    },
 }) => ({
     startDate: DateTime.fromObject({ year: startYear, month: startMonth }).endOf('month'),
     endDate: DateTime.fromObject({ year: endYear, month: endMonth }).endOf('month'),
-    cost
+    cost,
 });
 
-const getStateRowDates = memoize(state => getMonthDates({ overview: state }));
+const getStateRowDates = memoize((state) => getMonthDates({ overview: state }));
 
-const getDateIndex = (state, date) => getStateRowDates(state).findIndex(item => date.hasSame(item, 'month'));
+const getDateIndex = (state, date) => getStateRowDates(state).findIndex((item) => date.hasSame(item, 'month'));
 
 function getUpdatedCost(state, page, newItem, oldItem = { date: newItem.date, cost: 0 }) {
     if (!(newItem.date && oldItem.date && typeof newItem.cost !== 'undefined')) {
         return state;
     }
 
-    const setCost = (date, diff) => last => replaceAtIndex(
-        last, getDateIndex(state, date), value => value + diff, true);
+    const setCost = (date, diff) => (last) => replaceAtIndex(
+        last, getDateIndex(state, date), (value) => value + diff, true,
+    );
 
     return {
         cost: {
             ...state.cost,
             [page]: compose(
                 setCost(oldItem.date, -oldItem.cost),
-                setCost(newItem.date, +newItem.cost)
-            )(state.cost[page])
-        }
+                setCost(newItem.date, +newItem.cost),
+            )(state.cost[page]),
+        },
     };
 }
 
@@ -72,7 +73,7 @@ const handlers = {
     [LIST_ITEM_CREATED]: onCreate,
     [LIST_ITEM_UPDATED]: onUpdate,
     [LIST_ITEM_DELETED]: onDelete,
-    [LOGGED_OUT]: () => initialState
+    [LOGGED_OUT]: () => initialState,
 };
 
 export default createReducerObject(handlers, initialState);

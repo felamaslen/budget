@@ -4,7 +4,9 @@ import compose from 'just-compose';
 import { AVERAGE_MEDIAN } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
-import { IDENTITY, arrayAverage, randnBm, replaceAtIndex } from '~client/modules/data';
+import {
+    IDENTITY, arrayAverage, randnBm, replaceAtIndex,
+} from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
 import { getCurrentDate } from '~client/selectors/now';
 import {
@@ -14,7 +16,7 @@ import {
     getEndDate,
     getNumMonths,
     getFutureMonths,
-    getMonthDates
+    getMonthDates,
 } from '~client/selectors/overview/common';
 import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
 import { getFundsRows } from '~client/selectors/funds/helpers';
@@ -22,12 +24,12 @@ import { getFundsRows } from '~client/selectors/funds/helpers';
 const futureCategories = ['funds', 'food', 'general', 'holiday', 'social'];
 
 function separateOldFunds(numRows) {
-    return data => {
+    return (data) => {
         if (data.funds.length > numRows) {
             return {
                 ...data,
                 funds: data.funds.slice(-numRows),
-                fundsOld: data.funds.slice(0, -numRows)
+                fundsOld: data.funds.slice(0, -numRows),
             };
         }
 
@@ -35,14 +37,15 @@ function separateOldFunds(numRows) {
     };
 }
 
-const predictCompoundInterest = (annualRate, jitter = 0) => last =>
-    last.concat([Math.round(last[last.length - 1] * (1 + annualRate / 12 + randnBm() * jitter))]);
+const predictCompoundInterest = (annualRate, jitter = 0) => (last) => (
+    last.concat([Math.round(last[last.length - 1] * (1 + annualRate / 12 + randnBm() * jitter))])
+);
 
 function predictByPastAverages(cost, futureMonths, currentMonthRatio, currentIndex) {
     const currentItems = replaceAtIndex(
         cost.slice(0, -futureMonths),
         currentIndex,
-        Math.round(cost[currentIndex] * currentMonthRatio)
+        Math.round(cost[currentIndex] * currentMonthRatio),
     );
 
     const average = Math.round(arrayAverage(currentItems, AVERAGE_MEDIAN));
@@ -69,25 +72,25 @@ function calculateFutures(numRows, currentDate, futureMonths) {
 
     const currentMonthRatio = currentDate.daysInMonth / currentDate.day;
 
-    return cost => Object.keys(cost).reduce((last, category) => ({
+    return (cost) => Object.keys(cost).reduce((last, category) => ({
         ...last,
         [category]: predictCategory(
             cost[category],
             category,
             futureMonths,
             currentMonthRatio,
-            numRows - 1 - futureMonths
-        )
+            numRows - 1 - futureMonths,
+        ),
     }), {});
 }
 
-const getNetCashFlow = dates => data => ({
+const getNetCashFlow = (dates) => (data) => ({
     ...data,
-    net: dates.map((date, index) => data.income[index] - data.spending[index])
+    net: dates.map((date, index) => data.income[index] - data.spending[index]),
 });
 
-const getPredictedNetWorth = (dates, currentDate, netWorth, fundsRows) => data => {
-    const fundCosts = dates.map(monthDate => fundsRows.reduce((sum, { transactions }) => transactions
+const getPredictedNetWorth = (dates, currentDate, netWorth, fundsRows) => (data) => {
+    const fundCosts = dates.map((monthDate) => fundsRows.reduce((sum, { transactions }) => transactions
         .filter(({ date }) => date.hasSame(monthDate, 'month'))
         .reduce((last, { cost }) => last + cost, sum), 0));
 
@@ -105,20 +108,20 @@ const getPredictedNetWorth = (dates, currentDate, netWorth, fundsRows) => data =
 
             const future = dates[index] > futureStart;
 
-            const netChange = data.net[index] +
-                data.funds[index] - data.funds[index - 1] -
-                fundCosts[index];
+            const netChange = data.net[index]
+                + data.funds[index] - data.funds[index - 1]
+                - fundCosts[index];
 
             if (future) {
                 return values.concat([values[values.length - 1] + netChange]);
             }
 
             return values.concat([netWorth[index - 1] + netChange]);
-        }, [])
+        }, []),
     };
 };
 
-const getCombinedNetWorth = (currentDate, futureMonths, netWorth) => table => {
+const getCombinedNetWorth = (currentDate, futureMonths, netWorth) => (table) => {
     const includeThisMonth = currentDate.endOf('month').hasSame(currentDate, 'day')
         ? 0
         : 1;
@@ -129,8 +132,8 @@ const getCombinedNetWorth = (currentDate, futureMonths, netWorth) => table => {
         ...table,
         netWorthCombined: [
             ...netWorth.slice(0, slice),
-            ...table.netWorthPredicted.slice(slice)
-        ]
+            ...table.netWorthPredicted.slice(slice),
+        ],
     };
 };
 
@@ -143,7 +146,7 @@ export const getProcessedCost = createSelector([
     getMonthDates,
     getNetWorthSummary,
     getFundsRows,
-    getCost
+    getCost,
 ], (
     currentDate,
     startDate,
@@ -153,39 +156,39 @@ export const getProcessedCost = createSelector([
     dates,
     netWorth,
     fundsRows,
-    costMap
+    costMap,
 ) => compose(
     separateOldFunds(numRows),
     calculateFutures(numRows, currentDate, futureMonths),
     getSpendingColumn(dates),
     getNetCashFlow(dates),
-    data => ({ ...data, netWorth }),
+    (data) => ({ ...data, netWorth }),
     getPredictedNetWorth(dates, currentDate, netWorth, fundsRows),
-    getCombinedNetWorth(currentDate, futureMonths, netWorth)
+    getCombinedNetWorth(currentDate, futureMonths, netWorth),
 )(costMap));
 
-const isPositive = value => value >= 0;
-const isNegative = value => value < 0;
+const isPositive = (value) => value >= 0;
+const isNegative = (value) => value < 0;
 
 export const getOverviewTable = createSelector([
     getCurrentDate,
     getMonthDates,
     getFutureMonths,
     getProcessedCost,
-    getNetWorthSummary
+    getNetWorthSummary,
 ], (currentDate, dates, futureMonths, cost, netWorth) => {
     if (!dates) {
         return null;
     }
 
-    const months = dates.map(date => date.toFormat('LLL-yy'));
+    const months = dates.map((date) => date.toFormat('LLL-yy'));
 
     const values = OVERVIEW_COLUMNS.slice(1)
         .reduce((last, [key]) => ({ [key]: cost[key], ...last }), { netWorth });
 
     const scoreValues = {
         ...values,
-        netWorth: values.netWorth.slice(0, -(futureMonths + 1))
+        netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
     };
 
     const ranges = Object.keys(values).reduce((last, key) => ({
@@ -197,16 +200,17 @@ export const getOverviewTable = createSelector([
             minPositive: key === 'net'
                 ? 0
                 : Math.min(...scoreValues[key].filter(isPositive)),
-            max: Math.max(...scoreValues[key]) },
-        ...last
+            max: Math.max(...scoreValues[key]),
+        },
+        ...last,
     }), {});
 
     const median = Object.keys(values).reduce((last, key) => ({
         ...last,
         [key]: {
             positive: arrayAverage(scoreValues[key].filter(isPositive), AVERAGE_MEDIAN),
-            negative: arrayAverage(scoreValues[key].filter(isNegative), AVERAGE_MEDIAN)
-        }
+            negative: arrayAverage(scoreValues[key].filter(isNegative), AVERAGE_MEDIAN),
+        },
     }), {});
 
     const categoryColor = getOverviewCategoryColor();
@@ -220,7 +224,7 @@ export const getOverviewTable = createSelector([
             return {
                 column,
                 value: monthText,
-                rgb: null
+                rgb: null,
             };
         }
 
@@ -229,7 +233,7 @@ export const getOverviewTable = createSelector([
         return {
             column,
             value,
-            rgb: getColor(value, key)
+            rgb: getColor(value, key),
         };
     });
 
@@ -243,6 +247,8 @@ export const getOverviewTable = createSelector([
 
         const cells = getCells(monthText, index);
 
-        return { key: monthText, cells, past, active, future };
+        return {
+            key: monthText, cells, past, active, future,
+        };
     });
 });

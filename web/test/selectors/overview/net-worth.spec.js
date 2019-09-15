@@ -128,7 +128,12 @@ test('getNetWorthSummaryOld gets the old net worth entry values, as provided by 
 });
 
 test('getNetWorthTable returns a list of rows for the view', t => {
-    t.deepEqual(getNetWorthTable(state), [
+    const rounded = (items) => items.map(({ fti, ...rest }) => ({
+        ...rest,
+        fti: Number(fti.toPrecision(8)),
+    }));
+
+    t.deepEqual(rounded(getNetWorthTable(state)), rounded([
         {
             id: 'real-entry-id-a',
             date: DateTime.fromISO('2018-02-28'),
@@ -149,7 +154,7 @@ test('getNetWorthTable returns a list of rows for the view', t => {
                     12 / 2
             )
         }
-    ]);
+    ]));
 });
 
 test('getAggregates returns the latest summed value of a group of categories', t => {

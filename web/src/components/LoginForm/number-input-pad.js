@@ -28,7 +28,7 @@ const NumberInputPad = ({ onInput }) => (
 );
 
 NumberInputPad.propTypes = {
-    onInput: PropTypes.func.isRequired
+    onInput: PropTypes.func.isRequired,
 };
 
 export default NumberInputPad;

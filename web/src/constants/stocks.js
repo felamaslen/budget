@@ -2,11 +2,11 @@ const stockIndexRegex = /^([^/]+)\/([^/]+)$/;
 
 export const STOCK_INDICES = (process.env.STOCK_INDICES || '')
     .split(',')
-    .map(code => code.match(stockIndexRegex))
-    .filter(code => code)
+    .map((code) => code.match(stockIndexRegex))
+    .filter((code) => code)
     .reduce((last, [, code, name]) => ({
         ...last,
-        [code]: name
+        [code]: name,
     }), {});
 
 export const DO_STOCKS_LIST = process.env.DO_STOCKS_LIST !== 'false';

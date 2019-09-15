@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
-import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 
 import { dataShape } from '~client/prop-types/graph';
 import GraphStocks from '~client/containers/StocksList/GraphStocks';
@@ -18,12 +18,16 @@ const stockShape = PropTypes.shape({
     gain: PropTypes.number.isRequired,
     price: PropTypes.number,
     up: PropTypes.bool.isRequired,
-    down: PropTypes.bool.isRequired
+    down: PropTypes.bool.isRequired,
 });
 
-const StockListItems = ({ stockMap }) => stockMap.map(({ code, name, price, gain, up, down }) => (
+const StockListItems = ({ stockMap }) => stockMap.map(({
+    code, name, price, gain, up, down,
+}) => (
     <li key={code}
-        className={classNames({ up: gain > 0, down: gain < 0, 'hl-up': up, 'hl-down': down })}
+        className={classNames({
+            up: gain > 0, down: gain < 0, 'hl-up': up, 'hl-down': down,
+        })}
         title={name}
     >
         <span className="name-column">
@@ -36,7 +40,7 @@ const StockListItems = ({ stockMap }) => stockMap.map(({ code, name, price, gain
 ));
 
 StockListItems.propTypes = {
-    stockMap: PropTypes.arrayOf(stockShape.isRequired).isRequired
+    stockMap: PropTypes.arrayOf(stockShape.isRequired).isRequired,
 };
 
 function StocksList({
@@ -47,7 +51,7 @@ function StocksList({
     history,
     lastPriceUpdate,
     requestList,
-    requestPrices
+    requestPrices,
 }) {
     useEffect(() => {
         if (enabled) {
@@ -104,7 +108,7 @@ function StocksList({
                             up: weightedGain > 0,
                             down: weightedGain < 0,
                             'hl-up': weightedGain > oldWeightedGain,
-                            'hl-down': weightedGain < oldWeightedGain
+                            'hl-down': weightedGain < oldWeightedGain,
                         })}>
                             <span className="name-column">Overall</span>
                             <span className="change">{sigFigs(weightedGain, 3)}%</span>
@@ -125,25 +129,25 @@ StocksList.propTypes = {
     history: dataShape.isRequired,
     lastPriceUpdate: PropTypes.number,
     requestList: PropTypes.func.isRequired,
-    requestPrices: PropTypes.func.isRequired
+    requestPrices: PropTypes.func.isRequired,
 };
 
 StocksList.defaultProps = {
     lastPriceUpdate: 0,
-    enabled: DO_STOCKS_LIST
+    enabled: DO_STOCKS_LIST,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     loading: state.stocks.loading,
     shares: state.stocks.shares,
     indices: state.stocks.indices,
     history: state.stocks.history,
-    lastPriceUpdate: state.stocks.lastPriceUpdate
+    lastPriceUpdate: state.stocks.lastPriceUpdate,
 });
 
 const mapDispatchToProps = {
     requestList: stocksListRequested,
-    requestPrices: stockPricesRequested
+    requestPrices: stockPricesRequested,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(StocksList);

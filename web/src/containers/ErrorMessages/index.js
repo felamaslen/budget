@@ -12,10 +12,12 @@ import { errorClosed } from '~client/actions/error';
 
 const messageShape = PropTypes.shape({
     text: PropTypes.string.isRequired,
-    level: PropTypes.number.isRequired
+    level: PropTypes.number.isRequired,
 }).isRequired;
 
-function Message({ id, closed, message: { text, level }, onClose }) {
+function Message({
+    id, closed, message: { text, level }, onClose,
+}) {
     const onCloseCallback = useCallback(() => onClose(id), [onClose, id]);
 
     return (
@@ -24,7 +26,7 @@ function Message({ id, closed, message: { text, level }, onClose }) {
                 debug: level === ERROR_LEVEL_DEBUG,
                 warn: level === ERROR_LEVEL_WARN,
                 error: level === ERROR_LEVEL_ERROR,
-                closed
+                closed,
             })}
             onClick={onCloseCallback}
         >
@@ -37,12 +39,12 @@ Message.propTypes = {
     id: PropTypes.string.isRequired,
     closed: PropTypes.bool,
     message: messageShape,
-    onClose: PropTypes.func.isRequired
+    onClose: PropTypes.func.isRequired,
 };
 
 const ErrorMessages = ({ list, onClose }) => (
     <ul className="messages-outer">
-        {list.map(error => <Message key={error.id} {...error} onClose={onClose} />)}
+        {list.map((error) => <Message key={error.id} {...error} onClose={onClose} />)}
     </ul>
 );
 
@@ -50,17 +52,17 @@ ErrorMessages.propTypes = {
     list: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.string.isRequired,
         closed: PropTypes.bool,
-        message: messageShape
+        message: messageShape,
     }).isRequired).isRequired,
-    onClose: PropTypes.func.isRequired
+    onClose: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
-    list: state.error
+const mapStateToProps = (state) => ({
+    list: state.error,
 });
 
 const mapDispatchToProps = {
-    onClose: errorClosed
+    onClose: errorClosed,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ErrorMessages);

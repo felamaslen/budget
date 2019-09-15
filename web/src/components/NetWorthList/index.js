@@ -15,12 +15,12 @@ export default function NetWorthList({
     subcategories,
     onCreate,
     onUpdate,
-    onDelete
+    onDelete,
 }) {
     const extraProps = {
         data,
         categories,
-        subcategories
+        subcategories,
     };
 
     return (
@@ -46,5 +46,5 @@ NetWorthList.propTypes = {
     subcategories: PropTypes.arrayOf(subcategory.isRequired),
     onCreate: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };

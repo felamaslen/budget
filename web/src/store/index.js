@@ -4,8 +4,7 @@ let configStore = null;
 
 if (process.env.NODE_ENV === 'development') {
     configStore = require('./configureStore.dev').default;
-}
-else {
+} else {
     configStore = require('./configureStore.prod').default;
 }
 

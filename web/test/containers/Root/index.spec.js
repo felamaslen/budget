@@ -2,7 +2,9 @@ import test from 'ava';
 import '~client-test/browser';
 import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
+import { Router } from 'react-router-dom';
 import React from 'react';
+import { createMemoryHistory } from 'history';
 import Root from '~client/containers/Root';
 import { testState } from '~client-test/test_data/state';
 
@@ -24,12 +26,19 @@ const getContainer = (customProps = {}, customState = state => state) => {
 
     const props = {
         store,
+        history: {},
         ...customProps
     };
 
-    const utils = render(
-        <Root {...props} />
-    );
+    const history = createMemoryHistory({
+        initialEntries: ['/'],
+    });
+
+    const utils = render((
+        <Router history={history}>
+            <Root {...props} />
+        </Router>
+    ));
 
     return { store, ...utils };
 };

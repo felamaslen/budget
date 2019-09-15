@@ -7,16 +7,14 @@ import { genPixelCompute, pointVisible } from '~client/components/Graph/helpers'
 
 const threshold = 4;
 
-const pointsVisible = lines => lines.some(({ data }) => data.length > threshold);
+const pointsVisible = (lines) => lines.some(({ data }) => data.length > threshold);
 
 function getZoomedLines(lines, minX, maxX) {
     const zoomedLines = lines.map(({ data, ...rest }) => ({
-        data: data.filter(([xValue], index) =>
-            pointVisible(xValue, minX, maxX) ||
-            (index < data.length - 1 && pointVisible(data[index + 1][0], minX, maxX)) ||
-            (index > 0 && pointVisible(data[index - 1][0], minX, maxX))
-        ),
-        ...rest
+        data: data.filter(([xValue], index) => pointVisible(xValue, minX, maxX)
+            || (index < data.length - 1 && pointVisible(data[index + 1][0], minX, maxX))
+            || (index > 0 && pointVisible(data[index - 1][0], minX, maxX))),
+        ...rest,
     }));
 
     if (!pointsVisible(zoomedLines)) {
@@ -39,11 +37,13 @@ function getZoomedRange(position, zoomedWidth, { minX, maxX }) {
 
     return [
         Math.max(minX, Math.round(zoomedMinX)),
-        Math.min(maxX, Math.round(zoomedMaxX))
+        Math.min(maxX, Math.round(zoomedMaxX)),
     ];
 }
 
-const init = ({ disabled, dimensions, lines, calc, zoomEffect, graphRef }) => ({
+const init = ({
+    disabled, dimensions, lines, calc, zoomEffect, graphRef,
+}) => ({
     disabled,
     valX: calc && calc.valX,
     zoomEffect,
@@ -55,7 +55,7 @@ const init = ({ disabled, dimensions, lines, calc, zoomEffect, graphRef }) => ({
     pageX: null,
     position: 0,
     zoomedLines: lines,
-    zoomedDimensions: dimensions
+    zoomedDimensions: dimensions,
 });
 
 function onWheel(state, { evt }) {
@@ -80,9 +80,8 @@ function onWheel(state, { evt }) {
 
     const nextZoomedDimensions = state.zoomEffect(zoomedLines, zoomedMinX, zoomedMaxX);
 
-    if (nextZoomedDimensions.minX === state.zoomedDimensions.minX &&
-        nextZoomedDimensions.maxX === state.zoomedDimensions.maxX) {
-
+    if (nextZoomedDimensions.minX === state.zoomedDimensions.minX
+        && nextZoomedDimensions.maxX === state.zoomedDimensions.maxX) {
         return state;
     }
 
@@ -94,7 +93,7 @@ function onWheel(state, { evt }) {
         pageX: evt.pageX,
         position,
         zoomedLines,
-        zoomedDimensions
+        zoomedDimensions,
     };
 }
 
@@ -116,7 +115,7 @@ export function useZoom({
     graphRef,
     calc,
     setCalc,
-    zoomEffect
+    zoomEffect,
 }) {
     const disabled = isMobile || !zoomEffect;
 
@@ -125,13 +124,13 @@ export function useZoom({
         lines,
         calc,
         zoomEffect,
-        graphRef
+        graphRef,
     }, init);
 
     useEffect(() => {
-        if ((disabled && !state.disabled) ||
-            lines !== state.lastLines ||
-            dimensions !== state.lastDimensions
+        if ((disabled && !state.disabled)
+            || lines !== state.lastLines
+            || dimensions !== state.lastDimensions
         ) {
             const nextCalc = genPixelCompute(dimensions);
             dispatch({
@@ -141,7 +140,7 @@ export function useZoom({
                 lines,
                 calc: nextCalc,
                 zoomEffect,
-                graphRef
+                graphRef,
             });
             setCalc(nextCalc);
         }
@@ -155,13 +154,13 @@ export function useZoom({
         lines,
         calc,
         zoomEffect,
-        graphRef
+        graphRef,
     ]);
 
     useEffect(() => {
         setCalc(genPixelCompute({
             lines: state.zoomedLines,
-            ...state.zoomedDimensions
+            ...state.zoomedDimensions,
         }));
     }, [setCalc, state.zoomedLines, state.zoomedDimensions]);
 
@@ -170,9 +169,9 @@ export function useZoom({
             return NULL;
         }
 
-        const handler = throttle(10, evt => dispatch({ type: 'wheel', evt }));
+        const handler = throttle(10, (evt) => dispatch({ type: 'wheel', evt }));
 
-        return evt => {
+        return (evt) => {
             evt.preventDefault();
             handler(evt);
         };

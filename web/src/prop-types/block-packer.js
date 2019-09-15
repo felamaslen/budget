@@ -8,13 +8,13 @@ export const subBlockBitShape = PropTypes.shape({
     color,
     width: dimension,
     height: dimension,
-    value: PropTypes.number
+    value: PropTypes.number,
 }).isRequired;
 
 export const subBlockShape = PropTypes.shape({
     width: dimension,
     height: dimension,
-    bits: PropTypes.arrayOf(subBlockBitShape)
+    bits: PropTypes.arrayOf(subBlockBitShape),
 }).isRequired;
 
 export const blockBitShape = PropTypes.shape({
@@ -23,13 +23,13 @@ export const blockBitShape = PropTypes.shape({
     value: PropTypes.number.isRequired,
     width: dimension,
     height: dimension,
-    blocks: PropTypes.arrayOf(subBlockShape)
+    blocks: PropTypes.arrayOf(subBlockShape),
 }).isRequired;
 
 export const blockShape = PropTypes.shape({
     width: dimension,
     height: dimension,
-    bits: PropTypes.arrayOf(blockBitShape)
+    bits: PropTypes.arrayOf(blockBitShape),
 }).isRequired;
 
 export const blocksShape = PropTypes.arrayOf(blockShape);

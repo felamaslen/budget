@@ -1,5 +1,7 @@
 import React from 'react';
-import { COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE } from '~client/constants/colors';
+import {
+    COLOR_LIGHT, COLOR_DARK, COLOR_LIGHT_GREY, COLOR_GRAPH_TITLE,
+} from '~client/constants/colors';
 import { GRAPH_CASHFLOW_NUM_TICKS, FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTickSize, formatCurrency } from '~client/modules/format';
@@ -28,7 +30,9 @@ function getTicksY(numMajorTicks = GRAPH_CASHFLOW_NUM_TICKS) {
     };
 }
 
-export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
+export default function Axes({
+    minX, maxX, minY, maxY, pixX, pixY,
+}) {
     if (maxY === minY || maxX === minX) {
         return null;
     }
@@ -65,10 +69,10 @@ export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
     const timeTickColors = [rgba(COLOR_GRAPH_TITLE), rgba(COLOR_DARK)];
     const timeLineColors = [lightColor, rgba(COLOR_LIGHT_GREY)];
 
-    const timeTickColor = major => timeTickColors[(major > 0) >> 0];
-    const timeLineColor = major => timeLineColors[(major > 1) >> 0];
+    const timeTickColor = (major) => timeTickColors[(major > 0) >> 0];
+    const timeLineColor = (major) => timeLineColors[(major > 1) >> 0];
 
-    const tickSize = major => tickLength * 0.5 * (major + 1);
+    const tickSize = (major) => tickLength * 0.5 * (major + 1);
 
     const timeTicksBackground = timeScale.map(({ pix, major }) => (
         <line key={pix}
@@ -103,7 +107,9 @@ export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
             <text key={pos} x={x0} y={pos - 2}
                 fontFamily={fontFamily} fontSize={fontSize} alignmentBaseline="baseline"
             >
-                {formatCurrency(value, { raw: true, noPence: true, abbreviate: true, precision: 1 })}
+                {formatCurrency(value, {
+                    raw: true, noPence: true, abbreviate: true, precision: 1,
+                })}
             </text>
         ));
 
@@ -134,5 +140,5 @@ export default function Axes({ minX, maxX, minY, maxY, pixX, pixY }) {
 const { valX, valY, ...propTypes } = pixelPropTypes;
 
 Axes.propTypes = {
-    ...propTypes
+    ...propTypes,
 };

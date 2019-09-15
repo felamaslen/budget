@@ -6,9 +6,11 @@ import { rgba } from '~client/modules/color';
 import { formatValue } from '~client/modules/funds';
 import { getTimeScale } from '~client/components/Graph/helpers';
 
-function calculateTicksY({ tickSizeY, minY, maxY, pixY }) {
+function calculateTicksY({
+    tickSizeY, minY, maxY, pixY,
+}) {
     // calculate tick range
-    const numTicks = typeof tickSizeY === 'undefined' || isNaN(tickSizeY)
+    const numTicks = typeof tickSizeY === 'undefined' || Number.isNaN(tickSizeY)
         ? 0
         : Math.floor((maxY - minY) / tickSizeY);
 
@@ -35,7 +37,7 @@ export default function Axes({
     minX,
     maxX,
     pixX,
-    pixY
+    pixY,
 }) {
     const textColor = rgba(COLOR_DARK);
     const [fontSize, fontFamily] = FONT_AXIS_LABEL;
@@ -49,7 +51,7 @@ export default function Axes({
     const tickAngle = -30;
     const transformText = (xPix, yPix) => `rotate(${tickAngle} ${xPix} ${yPix})`;
 
-    const axisColor = value => {
+    const axisColor = (value) => {
         if (value === 0) {
             return rgba(COLOR_DARK);
         }
@@ -57,7 +59,9 @@ export default function Axes({
         return rgba(COLOR_LIGHT_MED);
     };
 
-    const ticksY = calculateTicksY({ tickSizeY, minY, maxY, pixY })
+    const ticksY = calculateTicksY({
+        tickSizeY, minY, maxY, pixY,
+    })
         .map(({ pos, value }) => (
             <g key={value}>
                 <line
@@ -84,8 +88,8 @@ export default function Axes({
         [minX, maxX, pixX, startTime]);
 
     const tickColors = [rgba(COLOR_DARK), rgba(COLOR_GRAPH_TITLE)];
-    const getColor = major => tickColors[(major > 0) >> 0];
-    const getTickSize = major => tickSize * 0.5 * (major + 1);
+    const getColor = (major) => tickColors[(major > 0) >> 0];
+    const getTickSize = (major) => tickSize * 0.5 * (major + 1);
 
     const timeTicksSmall = timeTicks.map(({ pix, major }, key) => (
         <line key={key} x1={pix} y1={y0} x2={pix} y2={y0 - getTickSize(major)}
@@ -123,5 +127,5 @@ Axes.propTypes = {
     minX: PropTypes.number.isRequired,
     maxX: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    pixY: PropTypes.func.isRequired,
 };

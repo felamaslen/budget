@@ -6,17 +6,21 @@ import { gainShape } from '~client/prop-types/page/funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { rgba } from '~client/modules/color';
 
-const formatOptions = { brackets: true, abbreviate: true, precision: 1, noPence: true };
+const formatOptions = {
+    brackets: true, abbreviate: true, precision: 1, noPence: true,
+};
 const formatOptionsPct = { brackets: true, precision: 2 };
 
-const profitLossClass = value => ({
+const profitLossClass = (value) => ({
     profit: value >= 0,
-    loss: value < 0
+    loss: value < 0,
 });
 
 export default function FundGainInfo({
-    gain: { color, value, gainAbs, gain, dayGainAbs, dayGain },
-    sold
+    gain: {
+        color, value, gainAbs, gain, dayGainAbs, dayGain,
+    },
+    sold,
 }) {
     if (!gain) {
         return null;
@@ -57,5 +61,5 @@ export default function FundGainInfo({
 
 FundGainInfo.propTypes = {
     gain: gainShape,
-    sold: PropTypes.bool
+    sold: PropTypes.bool,
 };

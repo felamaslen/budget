@@ -53,27 +53,27 @@ GraphOverviewWrapped.propTypes = {
     cost: costShape.isRequired,
     netWorthOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     targets: targetsShape.isRequired,
-    graphWidth: PropTypes.number.isRequired
+    graphWidth: PropTypes.number.isRequired,
 };
 
 function GraphOverview(props) {
     return (
         <Media query={mediaQueryMobile}>
-            {isMobile => (
+            {(isMobile) => (
                 <GraphOverviewWrapped isMobile={isMobile} {...props} />
             )}
         </Media>
     );
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     now: getCurrentDate(state),
     startDate: getStartDate(state),
     graphWidth: Math.min(state.app.windowWidth, GRAPH_WIDTH),
     cost: getProcessedCost(state),
     netWorthOld: getNetWorthSummaryOld(state),
     futureMonths: getFutureMonths(state),
-    targets: getTargets(state)
+    targets: getTargets(state),
 });
 
 export default connect(mapStateToProps)(GraphOverview);

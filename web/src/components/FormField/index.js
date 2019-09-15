@@ -5,7 +5,9 @@ import classNames from 'classnames';
 import { formatItem } from '~client/modules/format';
 import { useField } from '~client/hooks/field';
 
-export const Wrapper = ({ item, value, active, children }) => (
+export const Wrapper = ({
+    item, value, active, children,
+}) => (
     <div className={classNames('form-field', `form-field-${item}`, active)}>
         {active && children}
         {!active && formatItem(item, value)}
@@ -16,11 +18,11 @@ Wrapper.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.any,
     active: PropTypes.bool,
-    children: PropTypes.node.isRequired
+    children: PropTypes.node.isRequired,
 };
 
 Wrapper.defaultProps = {
-    active: true
+    active: true,
 };
 
 export default function FormFieldText({ label, item, ...props }) {
@@ -44,11 +46,11 @@ FormFieldText.propTypes = {
     label: PropTypes.string,
     item: PropTypes.string,
     value: PropTypes.string,
-    active: PropTypes.bool
+    active: PropTypes.bool,
 };
 
 FormFieldText.defaultProps = {
     label: null,
     item: 'text',
-    value: ''
+    value: '',
 };

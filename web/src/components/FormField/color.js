@@ -5,9 +5,9 @@ import { SketchPicker } from 'react-color';
 
 export default function FormFieldColor({ value, onChange }) {
     const [active, setActive] = useState(false);
-    const toggle = useCallback(() => setActive(last => !last), []);
+    const toggle = useCallback(() => setActive((last) => !last), []);
 
-    const onChangeComplete = useCallback(color => {
+    const onChangeComplete = useCallback((color) => {
         onChange(color.hex);
     }, [onChange]);
 
@@ -27,5 +27,5 @@ export default function FormFieldColor({ value, onChange }) {
 
 FormFieldColor.propTypes = {
     value: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };

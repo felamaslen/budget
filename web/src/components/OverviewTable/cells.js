@@ -11,7 +11,11 @@ function getStyle(rgb) {
     return { backgroundColor: `rgb(${rgb.join(',')})` };
 }
 
-export default function OverviewTableCells({ row: { cells, past, active, future } }) {
+export default function OverviewTableCells({
+    row: {
+        cells, past, active, future,
+    },
+}) {
     return (
         <div className={classNames('row', { past, active, future })}>
             {cells.map(({ column: [key], value, rgb }, index) => (
@@ -31,10 +35,10 @@ OverviewTableCells.propTypes = {
     row: PropTypes.shape({
         cells: PropTypes.arrayOf(PropTypes.shape({
             column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-            rgb: PropTypes.arrayOf(PropTypes.number)
+            rgb: PropTypes.arrayOf(PropTypes.number),
         }).isRequired).isRequired,
         past: PropTypes.bool,
         active: PropTypes.bool,
-        future: PropTypes.bool
-    }).isRequired
+        future: PropTypes.bool,
+    }).isRequired,
 };

@@ -16,7 +16,7 @@ export const GRAPH_SPEND_CATEGORIES = [
     { name: 'food', key: 67 },
     { name: 'general', key: 125 },
     { name: 'holiday', key: 195 },
-    { name: 'social', key: 260 }
+    { name: 'social', key: 260 },
 ];
 
 export const GRAPH_FUNDS_OVERALL_ID = 'overall';
@@ -36,14 +36,14 @@ export const GRAPH_FUNDS_MODE_PRICE = 'MODE_PRICE';
 export const GRAPH_FUNDS_MODES = {
     [GRAPH_FUNDS_MODE_ROI]: 'ROI',
     [GRAPH_FUNDS_MODE_ABSOLUTE]: 'Value',
-    [GRAPH_FUNDS_MODE_PRICE]: 'Price'
+    [GRAPH_FUNDS_MODE_PRICE]: 'Price',
 };
 
 export const GRAPH_FUNDS_PERIODS = [
     ['year1', '1 year'],
     ['year5', '5 years'],
     ['month1', '1 month'],
-    ['month3', '3 months']
+    ['month3', '3 months'],
 ];
 export const GRAPH_FUNDS_NUM_TICKS = 10;
 

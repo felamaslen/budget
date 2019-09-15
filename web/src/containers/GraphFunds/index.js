@@ -1,6 +1,8 @@
 import { connect } from 'react-redux';
 import { DateTime } from 'luxon';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, {
+    useState, useMemo, useCallback, useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 
 import { getTickSize } from '~client/modules/format';
@@ -16,7 +18,7 @@ import {
     GRAPH_FUNDS_MODE_ABSOLUTE,
     GRAPH_FUNDS_MODE_PRICE,
     GRAPH_FUNDS_NUM_TICKS,
-    GRAPH_FUNDS_MODES
+    GRAPH_FUNDS_MODES,
 } from '~client/constants/graph';
 
 import { fundsRequested } from '~client/actions/funds';
@@ -25,12 +27,12 @@ import {
     getStartTime,
     getCacheTimes,
     getFundItems,
-    getFundLines
+    getFundLines,
 } from '~client/selectors/funds/graph';
 
 import {
     rangePropTypes,
-    pixelPropTypes
+    pixelPropTypes,
 } from '~client/prop-types/graph';
 import { fundItemShape } from '~client/prop-types/page/funds';
 import LineGraph from '~client/components/Graph/LineGraph';
@@ -46,23 +48,27 @@ const makeGetRanges = ({
     mode,
     zoomRange: [zoomMin, zoomMax],
     lines,
-    cacheTimes
+    cacheTimes,
 }) => (zoomedLines = lines, minX = zoomMin, maxX = zoomMax) => {
     if (!(zoomedLines && cacheTimes.length >= 2)) {
-        return { minX, maxX, minY: -1, maxY: 1 };
+        return {
+            minX, maxX, minY: -1, maxY: 1,
+        };
     }
 
     const valuesY = zoomedLines
         .map(({ data }) => data.map(([, yValue]) => yValue))
-        .filter(values => values.length);
+        .filter((values) => values.length);
 
     let minY = 0;
     if (mode !== GRAPH_FUNDS_MODE_ABSOLUTE) {
-        minY = valuesY.reduce((min, line) =>
-            Math.min(min, line.reduce((last, value) => Math.min(last, value), min)), Infinity);
+        minY = valuesY.reduce((min, line) => Math.min(min, line.reduce((last, value) => (
+            Math.min(last, value)
+        ), min)), Infinity);
     }
-    let maxY = valuesY.reduce((max, line) =>
-        Math.max(max, line.reduce((last, value) => Math.max(last, value), max)), -Infinity);
+    let maxY = valuesY.reduce((max, line) => Math.max(max, line.reduce((last, value) => (
+        Math.max(last, value)
+    ), max)), -Infinity);
 
     if (minY === maxY) {
         minY -= 0.5;
@@ -75,16 +81,20 @@ const makeGetRanges = ({
     // get the tick size for the new range
     const tickSizeY = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
 
-    if (!isNaN(tickSizeY)) {
+    if (!Number.isNaN(tickSizeY)) {
         minY = tickSizeY * Math.floor(minY / tickSizeY);
         maxY = tickSizeY * Math.ceil(maxY / tickSizeY);
     }
 
-    return { minX, maxX, minY, maxY, tickSizeY };
+    return {
+        minX, maxX, minY, maxY, tickSizeY,
+    };
 };
 
 function makeBeforeLines({ mode, startTime, tickSizeY }) {
-    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) => maxY !== 0 && (
+    const BeforeLines = ({
+        minY, maxY, minX, maxX, pixX, pixY,
+    }) => maxY !== 0 && (
         <Axes
             mode={mode}
             startTime={startTime}
@@ -100,7 +110,7 @@ function makeBeforeLines({ mode, startTime, tickSizeY }) {
 
     BeforeLines.propTypes = {
         ...rangePropTypes,
-        ...pixelPropTypes
+        ...pixelPropTypes,
     };
 
     return BeforeLines;
@@ -117,13 +127,13 @@ function GraphFunds({
     fundLines,
     cacheTimes,
     period,
-    changePeriod
+    changePeriod,
 }) {
     const haveData = cacheTimes.length > 0;
 
     const modeList = useMemo(() => {
         if (isMobile) {
-            return modeListAll.filter(value => value !== GRAPH_FUNDS_MODE_PRICE);
+            return modeListAll.filter((value) => value !== GRAPH_FUNDS_MODE_PRICE);
         }
 
         return modeListAll;
@@ -137,9 +147,9 @@ function GraphFunds({
         if (fundItems.length !== numFundItems) {
             setNumFundItems(fundItems.length);
 
-            setToggleList(lastList => fundItems.reduce((last, { id }) => ({
+            setToggleList((lastList) => fundItems.reduce((last, { id }) => ({
                 [id]: true,
-                ...last
+                ...last,
             }), lastList));
         }
     }, [fundItems, numFundItems]);
@@ -152,19 +162,17 @@ function GraphFunds({
         return ({ id }) => toggleList[id] !== false;
     }, [isMobile, toggleList]);
 
-    const [lines] = useMemo(() => {
-        return fundLines[mode]
-            .filter(filterFunds)
-            .reduce(([last, idCount], { id, color, data }) => ([last.concat([{
-                key: `${id}-${idCount[id] || 0}`,
-                data,
-                color: rgba(color),
-                strokeWidth: id === GRAPH_FUNDS_OVERALL_ID
-                    ? 2
-                    : 1,
-                smooth: mode !== GRAPH_FUNDS_MODE_ABSOLUTE
-            }]), { ...idCount, [id]: (idCount[id] || 0) + 1 }]), [[], {}]);
-    }, [fundLines, mode, filterFunds]);
+    const [lines] = useMemo(() => fundLines[mode]
+        .filter(filterFunds)
+        .reduce(([last, idCount], { id, color, data }) => ([last.concat([{
+            key: `${id}-${idCount[id] || 0}`,
+            data,
+            color: rgba(color),
+            strokeWidth: id === GRAPH_FUNDS_OVERALL_ID
+                ? 2
+                : 1,
+            smooth: mode !== GRAPH_FUNDS_MODE_ABSOLUTE,
+        }]), { ...idCount, [id]: (idCount[id] || 0) + 1 }]), [[], {}]), [fundLines, mode, filterFunds]);
 
     const getRanges = useMemo(() => {
         if (!haveData) {
@@ -173,7 +181,7 @@ function GraphFunds({
                 maxX: 0,
                 minY: 0,
                 maxY: 0,
-                tickSizeY: 0
+                tickSizeY: 0,
             });
         }
 
@@ -181,7 +189,7 @@ function GraphFunds({
             mode,
             zoomRange: [0, cacheTimes[cacheTimes.length - 1]],
             lines,
-            cacheTimes
+            cacheTimes,
         });
     }, [haveData, mode, cacheTimes, lines]);
 
@@ -190,7 +198,7 @@ function GraphFunds({
         maxX,
         minY,
         maxY,
-        tickSizeY
+        tickSizeY,
     } = useMemo(getRanges, [getRanges]);
 
     const beforeLines = useMemo(() => {
@@ -201,7 +209,7 @@ function GraphFunds({
         return makeBeforeLines({
             mode,
             startTime,
-            tickSizeY
+            tickSizeY,
         });
     }, [haveData, mode, startTime, tickSizeY]);
 
@@ -218,19 +226,21 @@ function GraphFunds({
     ), [isMobile, period, mode, fundItems, toggleList, setToggleList, changePeriod]);
 
     const labelX = useCallback(
-        value => DateTime.fromJSDate(new Date(1000 * (value + startTime)))
+        (value) => DateTime.fromJSDate(new Date(1000 * (value + startTime)))
             .toLocaleString(DateTime.DATE_SHORT),
-        [startTime]
+        [startTime],
     );
 
-    const labelY = useCallback(value => formatValue(value, mode), [mode]);
+    const labelY = useCallback((value) => formatValue(value, mode), [mode]);
 
     const hoverEffect = useMemo(() => ({
         labelX,
-        labelY
+        labelY,
     }), [labelX, labelY]);
 
-    const onClick = useCallback(() => setMode(last => modeList[(modeList.indexOf(last) + 1) % modeList.length]), [modeList]);
+    const onClick = useCallback(() => (
+        setMode((last) => modeList[(modeList.indexOf(last) + 1) % modeList.length])
+    ), [modeList]);
 
     const svgProperties = useMemo(() => ({ onClick }), [onClick]);
 
@@ -251,7 +261,7 @@ function GraphFunds({
         after,
         svgProperties,
         hoverEffect,
-        zoomEffect: getRanges
+        zoomEffect: getRanges,
     };
 
     return <LineGraph {...graphProps} />;
@@ -265,16 +275,16 @@ GraphFunds.propTypes = {
     fundLines: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.string.isRequired,
         color: PropTypes.arrayOf(PropTypes.number).isRequired,
-        data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number.isRequired).isRequired).isRequired
+        data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number.isRequired).isRequired).isRequired,
     }).isRequired).isRequired).isRequired,
     startTime: PropTypes.number.isRequired,
     cacheTimes: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     period: PropTypes.string.isRequired,
-    changePeriod: PropTypes.func.isRequired
+    changePeriod: PropTypes.func.isRequired,
 };
 
 GraphFunds.defaultProps = {
-    startTime: 0
+    startTime: 0,
 };
 
 const mapStateToProps = (state, { isMobile }) => ({
@@ -286,11 +296,11 @@ const mapStateToProps = (state, { isMobile }) => ({
     fundLines: getFundLines(state),
     startTime: getStartTime(state),
     cacheTimes: getCacheTimes(state),
-    period: getPeriod(state)
+    period: getPeriod(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-    changePeriod: period => dispatch(fundsRequested(true, period))
+const mapDispatchToProps = (dispatch) => ({
+    changePeriod: (period) => dispatch(fundsRequested(true, period)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);

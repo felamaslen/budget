@@ -1,4 +1,6 @@
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+    useRef, useState, useCallback, useMemo, useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import axios from 'axios';
@@ -43,9 +45,9 @@ const getCurrencies = debounce(100, async (symbols, source, onSuccess, onError, 
         const res = await axios.get('https://api.exchangeratesapi.io/latest', {
             params: {
                 base: BASE,
-                symbols: symbols.join(',')
+                symbols: symbols.join(','),
             },
-            cancelToken: source.current.token
+            cancelToken: source.current.token,
         });
 
         onSuccess(res.data);
@@ -68,7 +70,7 @@ function useCurrencyApi(symbols) {
     const onSuccess = useCallback(({ rates: newRates }) => {
         setRates(Object.keys(newRates).reduce((last, symbol) => ({
             ...last,
-            [symbol]: 1 / newRates[symbol]
+            [symbol]: 1 / newRates[symbol],
         }), rates));
 
         setCacheTime(Date.now());
@@ -80,9 +82,9 @@ function useCurrencyApi(symbols) {
 
     const getRates = useCallback((extraSymbol = null) => {
         const allSymbols = Array.from(new Set(symbols.concat([extraSymbol])))
-            .filter(value => value);
+            .filter((value) => value);
 
-        const allCached = allSymbols.every(symbol => rates[symbol]);
+        const allCached = allSymbols.every((symbol) => rates[symbol]);
         if (allCached && cacheTime && cacheTime > Date.now() - 3600 * 1000) {
             return;
         }
@@ -135,7 +137,9 @@ function useRateRefresh(rates, getRates, loading, symbol, setRate) {
     return [button, readyToInsert];
 }
 
-function EditCurrency({ entry, onChange, onRemove, rates, getRates, loadingRates }) {
+function EditCurrency({
+    entry, onChange, onRemove, rates, getRates, loadingRates,
+}) {
     const [tempRate, setTempRate] = useState(entry.rate);
     const [error, setError] = useState(null);
 
@@ -177,10 +181,12 @@ EditCurrency.propTypes = {
     onRemove: PropTypes.func.isRequired,
     rates: PropTypes.object.isRequired,
     getRates: PropTypes.func.isRequired,
-    loadingRates: PropTypes.bool.isRequired
+    loadingRates: PropTypes.bool.isRequired,
 };
 
-function AddCurrency({ currencies, onAdd, rates, getRates, loadingRates }) {
+function AddCurrency({
+    currencies, onAdd, rates, getRates, loadingRates,
+}) {
     const [tempCurrency, setTempCurrency] = useState('USD');
     const [tempRate, setTempRate] = useState(0);
 
@@ -221,29 +227,29 @@ AddCurrency.propTypes = {
     onAdd: PropTypes.func.isRequired,
     rates: PropTypes.object.isRequired,
     getRates: PropTypes.func.isRequired,
-    loadingRates: PropTypes.bool.isRequired
+    loadingRates: PropTypes.bool.isRequired,
 };
 
 export default function StepCurrencies({
     containerProps,
     item,
-    onEdit
+    onEdit,
 }) {
-    const onAddValue = useCallback(currency => {
+    const onAddValue = useCallback((currency) => {
         const newCurrencies = item.currencies.concat([{
             id: shortid.generate(),
-            ...currency
+            ...currency,
         }]);
         onEdit({ ...item, currencies: newCurrencies });
     }, [onEdit, item]);
 
-    const onChangeValue = useCallback(currency => {
+    const onChangeValue = useCallback((currency) => {
         const index = item.currencies.findIndex(({ id }) => id === currency.id);
         const newCurrencies = replaceAtIndex(item.currencies, index, currency);
         onEdit({ ...item, currencies: newCurrencies });
     }, [onEdit, item]);
 
-    const onRemoveValue = useCallback(id => {
+    const onRemoveValue = useCallback((id) => {
         const newCurrencies = item.currencies.filter(({ id: currencyId }) => currencyId !== id);
         onEdit({ ...item, currencies: newCurrencies });
     }, [onEdit, item]);
@@ -260,7 +266,7 @@ export default function StepCurrencies({
                 {'Error loading rates: '}{errorRates.message}
             </div>}
             <div className={classNames('edit-currencies', { loading: loadingRates })}>
-                {item.currencies.map(currency => (
+                {item.currencies.map((currency) => (
                     <EditCurrency key={currency.id}
                         entry={currency}
                         onChange={onChangeValue}
@@ -285,5 +291,5 @@ export default function StepCurrencies({
 StepCurrencies.propTypes = {
     containerProps: PropTypes.object.isRequired,
     item: netWorthItem.isRequired,
-    onEdit: PropTypes.func.isRequired
+    onEdit: PropTypes.func.isRequired,
 };

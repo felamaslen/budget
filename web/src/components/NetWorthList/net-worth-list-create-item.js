@@ -13,7 +13,7 @@ export default function NetWorthListCreateItem({
     active,
     setActive,
     noneActive,
-    onCreate
+    onCreate,
 }) {
     const onActivate = useCallback(() => setActive(CREATE_ID), [setActive]);
 
@@ -49,5 +49,5 @@ NetWorthListCreateItem.propTypes = {
     active: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     noneActive: PropTypes.bool.isRequired,
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };

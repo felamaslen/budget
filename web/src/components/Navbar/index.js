@@ -9,7 +9,7 @@ import './style.scss';
 
 const Navbar = ({ onLogout }) => (
     <nav className="nav-list noselect">
-        {Object.keys(PAGES).map(page => (
+        {Object.keys(PAGES).map((page) => (
             <NavLink key={page}
                 exact
                 to={PAGES[page].path || `/${page}`}
@@ -23,7 +23,7 @@ const Navbar = ({ onLogout }) => (
 );
 
 Navbar.propTypes = {
-    onLogout: PropTypes.func.isRequired
+    onLogout: PropTypes.func.isRequired,
 };
 
 export default Navbar;

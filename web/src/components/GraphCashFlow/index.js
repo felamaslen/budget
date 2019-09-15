@@ -31,7 +31,9 @@ export function getValuesWithTime(data, props) {
 }
 
 export function getRanges(lines) {
-    return lines.reduce(({ minX, maxX, minY, maxY }, { data }) => {
+    return lines.reduce(({
+        minX, maxX, minY, maxY,
+    }, { data }) => {
         const dataX = data.map(([xValue]) => xValue);
         const dataY = data.map(([, yValue]) => yValue);
 
@@ -39,13 +41,17 @@ export function getRanges(lines) {
             minX: dataX.reduce((min, value) => Math.min(min, value), minX),
             maxX: dataX.reduce((max, value) => Math.max(max, value), maxX),
             minY: dataY.reduce((min, value) => Math.min(min, value), minY),
-            maxY: dataY.reduce((max, value) => Math.max(max, value), maxY)
+            maxY: dataY.reduce((max, value) => Math.max(max, value), maxY),
         };
-    }, { minX: Infinity, maxX: -Infinity, minY: 0, maxY: -Infinity });
+    }, {
+        minX: Infinity, maxX: -Infinity, minY: 0, maxY: -Infinity,
+    });
 }
 
 function makeBeforeLines({ now }) {
-    const BeforeLines = ({ minX, maxX, minY, maxY, pixX, pixY }) => (
+    const BeforeLines = ({
+        minX, maxX, minY, maxY, pixX, pixY,
+    }) => (
         <g>
             <Axes
                 minX={minX}
@@ -66,27 +72,28 @@ function makeBeforeLines({ now }) {
     );
 
     BeforeLines.propTypes = {
-        ...rangePropTypes
+        ...rangePropTypes,
     };
 
     return BeforeLines;
 }
 
-export default function GraphCashFlow({ name, isMobile, now, graphWidth, graphHeight, lines, afterLines, after }) {
+export default function GraphCashFlow({
+    name, isMobile, now, graphWidth, graphHeight, lines, afterLines, after,
+}) {
     const ranges = useMemo(() => getRanges(lines), [lines]);
 
     const beforeLines = useMemo(() => makeBeforeLines({ now }), [now]);
 
-    const labelX = useCallback(value => DateTime.fromJSDate(new Date(1000 * value))
-        .toFormat('LLL y'), []
-    );
+    const labelX = useCallback((value) => DateTime.fromJSDate(new Date(1000 * value))
+        .toFormat('LLL y'), []);
 
-    const labelY = useCallback(value => formatCurrency(value, { precision: 2 }), []);
+    const labelY = useCallback((value) => formatCurrency(value, { precision: 2 }), []);
 
     const hoverEffect = useMemo(() => ({
         labelX,
         labelY,
-        labelWidthY: 88
+        labelWidthY: 88,
     }), [labelX, labelY]);
 
     const graphProps = {
@@ -100,7 +107,7 @@ export default function GraphCashFlow({ name, isMobile, now, graphWidth, graphHe
         width: graphWidth,
         height: graphHeight,
         padding: GRAPH_CASHFLOW_PADDING,
-        ...ranges
+        ...ranges,
     };
 
     return <LineGraph {...graphProps} />;
@@ -109,7 +116,7 @@ export default function GraphCashFlow({ name, isMobile, now, graphWidth, graphHe
 export const graphCashFlowPropTypes = {
     name: PropTypes.string.isRequired,
     now: PropTypes.instanceOf(DateTime).isRequired,
-    graphWidth: PropTypes.number.isRequired
+    graphWidth: PropTypes.number.isRequired,
 };
 
 GraphCashFlow.propTypes = {
@@ -119,16 +126,16 @@ GraphCashFlow.propTypes = {
         minX: PropTypes.number,
         maxX: PropTypes.number,
         minY: PropTypes.number,
-        maxY: PropTypes.number
+        maxY: PropTypes.number,
     }).isRequired).isRequired,
     afterLines: PropTypes.func,
     after: PropTypes.func,
-    ...graphCashFlowPropTypes
+    ...graphCashFlowPropTypes,
 };
 
 GraphCashFlow.defaultProps = {
     isMobile: false,
     graphHeight: GRAPH_HEIGHT,
     afterLines: null,
-    after: null
+    after: null,
 };

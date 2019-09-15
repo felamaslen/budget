@@ -21,6 +21,6 @@ BaseKey.propTypes = {
     title: PropTypes.string.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.object,
-        PropTypes.array
-    ])
+        PropTypes.array,
+    ]),
 };

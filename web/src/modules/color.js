@@ -10,7 +10,7 @@ import { arrayAverage } from '~client/modules/data';
 export function rgba(values) {
     const roundedValues = values
         .slice(0, 3)
-        .map(item => Math.max(0, Math.min(255, Math.round(item))))
+        .map((item) => Math.max(0, Math.min(255, Math.round(item))))
         .concat(values.slice(3))
         .join(',');
 
@@ -35,12 +35,12 @@ function getOverviewCategoryKeyColor(key) {
 export const getOverviewCategoryColor = () => OVERVIEW_COLUMNS.slice(1)
     .reduce((last, [key]) => ({
         ...last,
-        [key]: getOverviewCategoryKeyColor(key)
+        [key]: getOverviewCategoryKeyColor(key),
     }), {});
 
 const blank = [255, 255, 255]; // white
 
-const scoreColor = (color, score) => color.map(value => Math.round(255 - (255 - value) * score));
+const scoreColor = (color, score) => color.map((value) => Math.round(255 - (255 - value) * score));
 
 function getScore(value, median, min, max) {
     if (min / max > 0 && value / min < 1) {
@@ -50,7 +50,7 @@ function getScore(value, median, min, max) {
         return 1;
     }
     if ((value - min) / (median - min) < 1) {
-        return 0.5 * (value - min) / (median - min);
+        return 0.5 * ((value - min) / (median - min));
     }
 
     return 0.5 * (1 + (value - median) / (max - median));
@@ -62,10 +62,10 @@ export function getOverviewScoreColor(
         min,
         maxNegative = 0,
         minPositive = 0,
-        max
+        max,
     },
     { negative, positive } = {},
-    color
+    color,
 ) {
     if (!value || min === max) {
         return blank;
@@ -84,7 +84,7 @@ export function getOverviewScoreColor(
 
 const colorHash = new ColorHash({
     lightness: 0.3,
-    saturation: 1
+    saturation: 1,
 });
 
 export function colorKey(string) {
@@ -99,6 +99,6 @@ export function averageColor(colors) {
     return [
         arrayAverage(colors.map(([red]) => red)),
         arrayAverage(colors.map(([, green]) => green)),
-        arrayAverage(colors.map(([, , blue]) => blue))
+        arrayAverage(colors.map(([, , blue]) => blue)),
     ];
 }

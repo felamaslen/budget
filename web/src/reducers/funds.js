@@ -25,9 +25,9 @@ export const initialState = {
         [initialPeriod]: {
             startTime: 0,
             cacheTimes: [],
-            prices: {}
-        }
-    }
+            prices: {},
+        },
+    },
 };
 
 const onReadRows = onRead('funds');
@@ -37,13 +37,13 @@ function getPriceCache(funds) {
 
     const prices = data.reduce((last, { [DATA_KEY_ABBR.id]: id, pr, prStartIndex }) => ({
         ...last,
-        [id]: { startIndex: prStartIndex, values: pr }
+        [id]: { startIndex: prStartIndex, values: pr },
     }), {});
 
     return {
         startTime,
         cacheTimes,
-        prices
+        prices,
     };
 }
 
@@ -55,9 +55,9 @@ function onReadFunds(state, action) {
     return {
         cache: {
             ...state.cache,
-            [state.period]: getPriceCache(action.res.funds)
+            [state.period]: getPriceCache(action.res.funds),
         },
-        ...onReadRows(state, action)
+        ...onReadRows(state, action),
     };
 }
 
@@ -70,15 +70,15 @@ function onPeriodLoad(state, { res, period }) {
         period,
         cache: {
             ...state.cache,
-            [period]: getPriceCache(res.data)
-        }
+            [period]: getPriceCache(res.data),
+        },
     };
 }
 
 const handlers = {
     [FUNDS_VIEW_SOLD_TOGGLED]: ({ viewSoldFunds }) => ({ viewSoldFunds: !viewSoldFunds }),
     [DATA_READ]: onReadFunds,
-    [FUNDS_RECEIVED]: onPeriodLoad
+    [FUNDS_RECEIVED]: onPeriodLoad,
 };
 
 export default makeListReducer('funds', handlers, initialState);

@@ -2,14 +2,14 @@ import { DateTime } from 'luxon';
 
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 
-export const percent = frac => `${Math.round(100000 * frac) / 1000}%`;
+export const percent = (frac) => `${Math.round(100000 * frac) / 1000}%`;
 
 export function capitalise(string) {
     return `${string.substring(0, 1).toUpperCase()}${string.substring(1).toLowerCase()}`;
 }
 
 function round(value, precision) {
-    const exp = Math.pow(10, precision);
+    const exp = 10 ** precision;
 
     return Math.round(exp * value) / exp;
 }
@@ -32,7 +32,7 @@ export function sigFigs(value, figs) {
     }
 
     const numDigits = Math.floor(Math.log10(Math.abs(value))) + 1;
-    const exp = Math.pow(10, Math.min(figs - 1, Math.max(0, figs - numDigits)));
+    const exp = 10 ** (Math.min(figs - 1, Math.max(0, figs - numDigits)));
     const absResult = (Math.round(Math.abs(value) * exp) / exp).toString();
 
     // add extra zeroes if necessary
@@ -61,11 +61,7 @@ export function leadingZeroes(value, numZeroes) {
         : numZeroes - 1;
 
     if (numAdd > 0) {
-        const zeroes = new Array(numAdd)
-            .fill('0')
-            .join('');
-
-        return `${zeroes}${value}`;
+        return `${new Array(numAdd).fill('0').join('')}${value}`;
     }
 
     return value.toString();
@@ -73,17 +69,16 @@ export function leadingZeroes(value, numZeroes) {
 
 function getCurrencyValueRaw(absValue, log, abbreviate, precision, noPence) {
     if (log > 0) {
-        const measure = absValue / Math.pow(10, log * 3);
+        const measure = absValue / (10 ** (log * 3));
 
         if (abbreviate || noPence) {
             return round(measure, precision).toString();
         }
 
-        return measure.toString();
+        return String(measure);
     }
-
     if (noPence) {
-        return Math.round(absValue).toString();
+        return absValue.toFixed();
     }
 
     return absValue.toFixed(precision);
@@ -97,7 +92,7 @@ export function formatCurrency(value, customOptions = {}) {
         noPence: false,
         suffix: null,
         raw: false,
-        ...customOptions
+        ...customOptions,
     };
 
     const sign = options.brackets || value >= 0
@@ -123,7 +118,7 @@ export function formatCurrency(value, customOptions = {}) {
     let {
         precision = options.abbreviate
             ? 0
-            : 2
+            : 2,
     } = options;
 
     if (options.abbreviate && log === 0) {
@@ -137,7 +132,7 @@ export function formatCurrency(value, customOptions = {}) {
     const suffix = options.suffix || '';
 
     const valueRaw = getCurrencyValueRaw(
-        absValue, log, options.abbreviate, precision, options.noPence
+        absValue, log, options.abbreviate, precision, options.noPence,
     );
 
     const formatted = numberFormat(valueRaw);
@@ -151,13 +146,13 @@ export function formatCurrency(value, customOptions = {}) {
 
 export function formatPercent(frac, options = {}) {
     return formatCurrency(100 * 100 * frac, {
-        ...options, suffix: '%', noSymbol: true
+        ...options, suffix: '%', noSymbol: true,
     });
 }
 
 export function getTickSize(min, max, numTicks) {
     const minimum = (max - min) / numTicks;
-    const magnitude = Math.pow(10, Math.floor(Math.log10(minimum)));
+    const magnitude = 10 ** Math.floor(Math.log10(minimum));
     const res = minimum / magnitude;
 
     if (res > 5) {
@@ -185,8 +180,7 @@ export function formatItem(item, value) {
     if (item === 'transactions') {
         return String(value
             ? value.length
-            : 0
-        );
+            : 0);
     }
 
     return String(value);

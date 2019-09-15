@@ -19,7 +19,7 @@ function worst(row, node) {
         const rowWidth = totalArea / node.height;
 
         return row.reduce((worstAspect, area) => {
-            const thisAspect = rowWidth * rowWidth / area;
+            const thisAspect = (rowWidth ** 2) / area;
             const thisWorst = Math.max(thisAspect, 1 / thisAspect);
 
             if (thisWorst > worstAspect) {
@@ -46,7 +46,7 @@ function worst(row, node) {
     }, 0);
 }
 
-const landscape = node => node.width > node.height;
+const landscape = (node) => node.width > node.height;
 
 function getBlockWidth(node, blockArea) {
     if (landscape(node)) {
@@ -106,16 +106,16 @@ function getNewNode(row, node) {
         xPos: getNodeX(node, blockWidth),
         yPos: getNodeY(node, blockHeight),
         width: getNodeWidth(node, blockWidth),
-        height: getNodeHeight(node, blockHeight)
+        height: getNodeHeight(node, blockHeight),
     };
 }
 
 function makeGetBlockDimensions(node, blockArea) {
     if (landscape(node)) {
-        return value => ([1, value / blockArea]);
+        return (value) => ([1, value / blockArea]);
     }
 
-    return value => ([value / blockArea, 1]);
+    return (value) => ([value / blockArea, 1]);
 }
 
 function getBlockBits(params, dimensions, node, rowCount) {
@@ -134,7 +134,7 @@ function getBlockBits(params, dimensions, node, rowCount) {
             height: percent(thisBlockHeight),
             name,
             color: (rowCount + index + colorOffset) % numBlockColors,
-            value: total
+            value: total,
         };
 
         if (subTree) {
@@ -162,7 +162,7 @@ function getNewBlock(params, row, node, rowCount) {
     return {
         width: percent(blockWidth / width),
         height: percent(blockHeight / height),
-        bits: newBlockBits
+        bits: newBlockBits,
     };
 }
 
@@ -200,15 +200,15 @@ function rowTotal(row) {
     return 0;
 }
 
-const withTotals = rows => rows.map(row => ({ ...row, total: rowTotal(row) }));
+const withTotals = (rows) => rows.map((row) => ({ ...row, total: rowTotal(row) }));
 
-const withPositiveTotals = rows => rows.filter(({ total }) => total > 0);
+const withPositiveTotals = (rows) => rows.filter(({ total }) => total > 0);
 
 export function blockPacker(rows, width, height) {
     const data = compose(
         withTotals,
         withPositiveTotals,
-        sortByTotal
+        sortByTotal,
     )(rows);
 
     const colorOffset = data.reduce((sum, { total }) => sum + (total & 1), 0);
@@ -217,7 +217,7 @@ export function blockPacker(rows, width, height) {
 
     const totalArea = width * height;
 
-    const children = data.map(({ total }) => total * totalArea / totalAll);
+    const children = data.map(({ total }) => total * (totalArea / totalAll));
 
     const blocks = [];
 
@@ -225,13 +225,15 @@ export function blockPacker(rows, width, height) {
         xPos: 0,
         yPos: 0,
         width,
-        height
+        height,
     };
 
     const row = [];
     const rowCount = 0;
 
-    const params = { data, width, height, colorOffset };
+    const params = {
+        data, width, height, colorOffset,
+    };
 
     return squarify(params, blocks, rowCount, children, row, root);
 }

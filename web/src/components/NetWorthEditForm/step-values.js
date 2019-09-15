@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+    useState, useCallback, useMemo, useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import shortid from 'shortid';
@@ -8,11 +10,11 @@ import {
     currency,
     creditLimit as creditLimitShape,
     netWorthItem,
-    netWorthValue
+    netWorthValue,
 } from '~client/prop-types/net-worth/list';
 import {
     category as categoryShape,
-    subcategory as subcategoryShape
+    subcategory as subcategoryShape,
 } from '~client/prop-types/net-worth/category';
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
@@ -30,7 +32,7 @@ function CreditLimitEditor({ creditLimit, setCreditLimit }) {
 
 CreditLimitEditor.propTypes = {
     creditLimit: PropTypes.number,
-    setCreditLimit: PropTypes.func.isRequired
+    setCreditLimit: PropTypes.func.isRequired,
 };
 
 const SkipToggle = ({ skip, setSkip }) => (
@@ -42,7 +44,7 @@ const SkipToggle = ({ skip, setSkip }) => (
 
 SkipToggle.propTypes = {
     skip: PropTypes.bool,
-    setSkip: PropTypes.func.isRequired
+    setSkip: PropTypes.func.isRequired,
 };
 
 function EditByType({
@@ -54,17 +56,19 @@ function EditByType({
         id,
         subcategory,
         skip,
-        value
+        value,
     },
     onChange,
-    onRemove
+    onRemove,
 }) {
     const {
         subcategory: subcategoryName,
-        hasCreditLimit
+        hasCreditLimit,
     } = subcategories.find(({ id: subcategoryId }) => subcategoryId === subcategory);
 
-    const { value: initialCreditLimit } = creditLimitList.find(({ subcategory: subcategoryId }) => subcategoryId === subcategory) || { value: null };
+    const { value: initialCreditLimit } = creditLimitList.find(({ subcategory: subcategoryId }) => (
+        subcategoryId === subcategory
+    )) || { value: null };
 
     const [newValue, setNewValue] = useState(value);
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
@@ -104,21 +108,21 @@ EditByType.propTypes = {
     currencies: PropTypes.arrayOf(currency.isRequired).isRequired,
     value: netWorthValue.isRequired,
     onChange: PropTypes.func.isRequired,
-    onRemove: PropTypes.func.isRequired
+    onRemove: PropTypes.func.isRequired,
 };
 
-const getFirstOption = options => (options[0] || {}).internal;
+const getFirstOption = (options) => (options[0] || {}).internal;
 
 function AddByType({
     isLiability,
     categories,
     subcategories,
     currencies,
-    onAdd
+    onAdd,
 }) {
     const categoryOptions = useMemo(() => categories.map(({ id, category }) => ({
         internal: String(id),
-        external: category
+        external: category,
     })), [categories]);
 
     const [category, setCategory] = useState(getFirstOption(categoryOptions));
@@ -128,9 +132,9 @@ function AddByType({
             .filter(({ categoryId }) => categoryId === category)
             .map(({ id, subcategory }) => ({
                 internal: id,
-                external: subcategory
+                external: subcategory,
             })),
-        [category, subcategories]
+        [category, subcategories],
     );
 
     const [subcategory, setSubcategory] = useState(getFirstOption(subcategoryOptions));
@@ -138,7 +142,9 @@ function AddByType({
     const [value, setValue] = useState(0);
     const [skip, setSkip] = useState(null);
 
-    const { hasCreditLimit } = useMemo(() => subcategories.find(({ id }) => id === subcategory) || {}, [subcategories, subcategory]);
+    const { hasCreditLimit } = useMemo(() => (
+        subcategories.find(({ id }) => id === subcategory) || {}
+    ), [subcategories, subcategory]);
     const initialCreditLimit = hasCreditLimit
         ? 0
         : null;
@@ -185,7 +191,7 @@ AddByType.propTypes = {
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
     currencies: PropTypes.arrayOf(currency.isRequired).isRequired,
-    onAdd: PropTypes.func.isRequired
+    onAdd: PropTypes.func.isRequired,
 };
 
 function appendCreditLimit(item, subcategory, value) {
@@ -206,8 +212,8 @@ function useAddValue(item, onEdit) {
                 id: shortid.generate(),
                 subcategory,
                 skip,
-                value: newValue
-            }])
+                value: newValue,
+            }]),
         };
 
         if (creditLimit === null) {
@@ -215,7 +221,7 @@ function useAddValue(item, onEdit) {
         } else {
             onEdit({
                 ...itemWithValue,
-                creditLimit: appendCreditLimit(item, subcategory, creditLimit)
+                creditLimit: appendCreditLimit(item, subcategory, creditLimit),
             });
         }
     }, [item, onEdit]);
@@ -229,31 +235,35 @@ function useChangeValue(item, onEdit) {
             values: replaceAtIndex(item.values, index, {
                 ...item.values[index],
                 skip,
-                value: newValue
-            })
+                value: newValue,
+            }),
         };
 
         if (creditLimit === null) {
             onEdit(itemWithValue);
         } else {
-            const creditLimitIndex = item.creditLimit.findIndex(({ subcategory }) => subcategory === item.values[index].subcategory);
+            const creditLimitIndex = item.creditLimit.findIndex(({ subcategory }) => (
+                subcategory === item.values[index].subcategory
+            ));
 
             onEdit({
                 ...itemWithValue,
                 creditLimit: replaceAtIndex(item.creditLimit, creditLimitIndex, {
                     ...item.creditLimit[creditLimitIndex],
-                    value: creditLimit
-                })
+                    value: creditLimit,
+                }),
             });
         }
     }, [item, onEdit]);
 }
 
 function useRemoveValue(item, onEdit) {
-    return useCallback(id => {
+    return useCallback((id) => {
         const index = item.values.findIndex(({ id: valueId }) => valueId === id);
         const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
-        const creditLimit = item.creditLimit.filter(({ subcategory }) => subcategory !== item.values[index].subcategory);
+        const creditLimit = item.creditLimit.filter(({ subcategory }) => (
+            subcategory !== item.values[index].subcategory
+        ));
         onEdit({ ...item, values: newItemValues, creditLimit });
     }, [item, onEdit]);
 }
@@ -263,7 +273,7 @@ function CategoryGroup({ category: { category, color }, children }) {
     const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
 
     const style = {
-        backgroundColor: color
+        backgroundColor: color,
     };
 
     return (
@@ -278,12 +288,12 @@ function CategoryGroup({ category: { category, color }, children }) {
 
 CategoryGroup.propTypes = {
     category: categoryShape.isRequired,
-    children: PropTypes.arrayOf(PropTypes.node).isRequired
+    children: PropTypes.arrayOf(PropTypes.node).isRequired,
 };
 
-const toIdMap = items => items.reduce((last, item) => ({
+const toIdMap = (items) => items.reduce((last, item) => ({
     ...last,
-    [item.id]: item
+    [item.id]: item,
 }), {});
 
 function StepValues({
@@ -293,10 +303,12 @@ function StepValues({
     item,
     categories,
     subcategories,
-    onEdit
+    onEdit,
 }) {
     const isLiability = typeFilter === 'liability';
-    const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [categories, typeFilter]);
+    const categoriesByType = useMemo(() => (
+        categories.filter(({ type }) => type === typeFilter)
+    ), [categories, typeFilter]);
 
     const categoriesById = useMemo(() => toIdMap(categoriesByType), [categoriesByType]);
     const subcategoriesById = useMemo(() => toIdMap(subcategories), [subcategories]);
@@ -312,9 +324,9 @@ function StepValues({
             .filter(({ category }) => category)
             .reduce((last, value) => ({
                 ...last,
-                [value.category.id]: (last[value.category.id] || []).concat([value])
+                [value.category.id]: (last[value.category.id] || []).concat([value]),
             }), {}),
-        [categoriesById, subcategoriesById, item.values]
+        [categoriesById, subcategoriesById, item.values],
     );
 
     const valueKeys = useMemo(
@@ -328,17 +340,19 @@ function StepValues({
 
             return 0;
         }),
-        [valuesByType, categoriesById]
+        [valuesByType, categoriesById],
     );
 
-    const availableSubcategories = useMemo(() => subcategories.filter(({ id: subcategoryId, categoryId }) =>
-        categoriesByType.some(({ id }) => id === categoryId) &&
-        !Object.keys(valuesByType).some(key => valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId))
-    ), [subcategories, categoriesByType, valuesByType]);
+    const availableSubcategories = useMemo(() => subcategories.filter(({ id: subcategoryId, categoryId }) => (
+        categoriesByType.some(({ id }) => id === categoryId)
+        && !Object.keys(valuesByType).some((key) => (
+            valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId)
+        ))
+    )), [subcategories, categoriesByType, valuesByType]);
 
-    const availableCategories = useMemo(() => categoriesByType.filter(({ id }) =>
+    const availableCategories = useMemo(() => categoriesByType.filter(({ id }) => (
         availableSubcategories.some(({ categoryId }) => categoryId === id)
-    ), [categoriesByType, availableSubcategories]);
+    )), [categoriesByType, availableSubcategories]);
 
     const onAddValue = useAddValue(item, onEdit);
     const onChangeValue = useChangeValue(item, onEdit);
@@ -351,11 +365,11 @@ function StepValues({
                 <span className="date">{' - '}{item.date.toISODate()}</span>
             </h5>
             <div className="edit-by-category">
-                {valueKeys.map(categoryId => (
+                {valueKeys.map((categoryId) => (
                     <CategoryGroup key={categoryId}
                         category={categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId)}
                     >
-                        {valuesByType[categoryId].map(value => (
+                        {valuesByType[categoryId].map((value) => (
                             <EditByType key={value.id}
                                 isLiability={isLiability}
                                 categories={categoriesByType}
@@ -369,13 +383,13 @@ function StepValues({
                         ))}
                     </CategoryGroup>
                 ))}
-                {availableCategories.length && <AddByType key="add"
+                {availableCategories.length > 0 && <AddByType key="add"
                     isLiability={isLiability}
                     categories={availableCategories}
                     subcategories={availableSubcategories}
                     currencies={item.currencies}
                     onAdd={onAddValue}
-                /> || null}
+                />}
             </div>
         </FormContainer>
     );
@@ -388,13 +402,13 @@ StepValues.propTypes = {
     item: netWorthItem.isRequired,
     categories: PropTypes.arrayOf(categoryShape.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategoryShape.isRequired).isRequired,
-    onEdit: PropTypes.func.isRequired
+    onEdit: PropTypes.func.isRequired,
 };
 
-export const StepAssets = props => (
+export const StepAssets = (props) => (
     <StepValues {...props} typeFilter="asset" name="Assets" />
 );
 
-export const StepLiabilities = props => (
+export const StepLiabilities = (props) => (
     <StepValues {...props} typeFilter="liability" name="Liabilities" />
 );

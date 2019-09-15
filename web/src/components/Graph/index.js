@@ -14,7 +14,7 @@ export default function Graph({
     outerProperties,
     before,
     after,
-    children
+    children,
 }) {
     return (
         <div
@@ -49,8 +49,8 @@ Graph.propTypes = {
     after: PropTypes.func,
     children: PropTypes.oneOfType([
         PropTypes.object,
-        PropTypes.array
-    ])
+        PropTypes.array,
+    ]),
 };
 
 Graph.defaultProps = {
@@ -59,5 +59,5 @@ Graph.defaultProps = {
     svgClasses: '',
     outerProperties: {},
     svgProperties: {},
-    children: null
+    children: null,
 };

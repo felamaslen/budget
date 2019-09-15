@@ -16,7 +16,9 @@ function getShortDate(dateIso) {
     return dateIso.toFormat('MMM');
 }
 
-export default function NetWorthViewRow({ date, assets, liabilities, fti, expenses }) {
+export default function NetWorthViewRow({
+    date, assets, liabilities, fti, expenses,
+}) {
     const dateShort = useMemo(() => getShortDate(date), [date]);
     const dateLong = useMemo(() => date.toLocaleString(), [date]);
 
@@ -26,10 +28,10 @@ export default function NetWorthViewRow({ date, assets, liabilities, fti, expens
             <td className="date-long">{dateLong}</td>
             <td className="assets">{formatCurrency(assets)}</td>
             <td className="liabilities">{formatCurrency(liabilities, {
-                brackets: true
+                brackets: true,
             })}</td>
             <td className="net-worth-value">{formatCurrency(assets - liabilities, {
-                brackets: true
+                brackets: true,
             })}</td>
             <td className="expenses">{formatCurrency(expenses)}</td>
             <td className="fti">{fti.toFixed(2)}</td>
@@ -42,5 +44,5 @@ NetWorthViewRow.propTypes = {
     assets: PropTypes.number.isRequired,
     liabilities: PropTypes.number.isRequired,
     expenses: PropTypes.number.isRequired,
-    fti: PropTypes.number.isRequired
+    fti: PropTypes.number.isRequired,
 };

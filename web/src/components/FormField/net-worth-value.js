@@ -1,22 +1,24 @@
-import React, { useReducer, useState, useCallback, useMemo, useEffect } from 'react';
+import React, {
+    useReducer, useState, useCallback, useMemo, useEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { replaceAtIndex } from '~client/modules/data';
 import {
     netWorthValueSize,
-    currency as currencyShape
+    currency as currencyShape,
 } from '~client/prop-types/net-worth/list';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldNumber from '~client/components/FormField/number';
 import FormFieldTickbox from '~client/components/FormField/tickbox';
 import FormFieldSelect from '~client/components/FormField/select';
 
-function FormFieldWithCurrency({ className, index, value, currency, currencyOptions, onChange, onRemove, onAdd }) {
-    const options = useMemo(() => {
-        return Array.from(new Set(currencyOptions.concat([currency])))
-            .map(item => ({ internal: item, external: item }));
-    }, [currencyOptions, currency]);
+function FormFieldWithCurrency({
+    className, index, value, currency, currencyOptions, onChange, onRemove, onAdd,
+}) {
+    const options = useMemo(() => Array.from(new Set(currencyOptions.concat([currency])))
+        .map((item) => ({ internal: item, external: item })), [currencyOptions, currency]);
 
     const [newValue, setNewValue] = useState(value);
     const [newCurrency, setNewCurrency] = useState(currency);
@@ -57,7 +59,7 @@ function FormFieldWithCurrency({ className, index, value, currency, currencyOpti
 FormFieldWithCurrency.propTypes = {
     className: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.object
+        PropTypes.object,
     ]),
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
@@ -65,12 +67,12 @@ FormFieldWithCurrency.propTypes = {
     currencyOptions: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     onChange: PropTypes.func.isRequired,
     onRemove: PropTypes.func,
-    onAdd: PropTypes.func
+    onAdd: PropTypes.func,
 };
 
 FormFieldWithCurrency.defaultProps = {
     className: {},
-    onChange: () => null
+    onChange: () => null,
 };
 
 const COMPLEX_TOGGLED = 'COMPLEX_TOGGLED';
@@ -82,7 +84,7 @@ function complexValueReducer(state, action) {
             ...state,
             complex: !state.complex,
             otherValue: state.value,
-            value: state.otherValue
+            value: state.otherValue,
         };
     }
     if (action.type === VALUE_SET) {
@@ -100,7 +102,7 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
         otherValue: isComplex
             ? 0
             : [],
-        value
+        value,
     });
 
     const toggleComplex = useCallback(() => {
@@ -124,7 +126,7 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
             return null;
         }
 
-        return currencyOptions.filter(option => !value.some(({ currency }) => currency === option));
+        return currencyOptions.filter((option) => !value.some(({ currency }) => currency === option));
     }, [isComplex, currencyOptions, value]);
 
     const onChangeComplexValue = useCallback(({ index, value: numberValue, currency }) => {
@@ -168,7 +170,7 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
                         onRemove={onRemoveComplexValue}
                     />
                 ))}
-                {otherCurrencyOptions.length && <FormFieldWithCurrency
+                {otherCurrencyOptions.length > 0 && <FormFieldWithCurrency
                     key={otherCurrencyOptions[0]}
                     index={-1}
                     value={0}
@@ -176,7 +178,7 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
                     currencyOptions={otherCurrencyOptions}
                     className="field-add"
                     onAdd={onAddComplexValue}
-                /> || null}
+                />}
             </ul>}
         </div>
     );
@@ -185,5 +187,5 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
 FormFieldNetWorthValue.propTypes = {
     value: netWorthValueSize.isRequired,
     onChange: PropTypes.func.isRequired,
-    currencies: PropTypes.arrayOf(currencyShape.isRequired).isRequired
+    currencies: PropTypes.arrayOf(currencyShape.isRequired).isRequired,
 };

@@ -20,7 +20,7 @@ function FormFieldTickbox({ value, onChange, ...props }) {
 
 FormFieldTickbox.propTypes = {
     value: PropTypes.bool.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };
 
 export default FormFieldTickbox;

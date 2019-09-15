@@ -1,17 +1,15 @@
-/**
- * Date functions and classes
- */
-
 import { DateTime } from 'luxon';
 
-function timeTick(t0, t1, { start, measure, tickSize, numTicks, getMajor, label, extra }) {
+function timeTick(t0, t1, {
+    start, measure, tickSize, numTicks, getMajor, label, extra,
+}) {
     const theStart = start || DateTime.fromJSDate(new Date(t0 * 1000)).startOf(measure);
 
     const theNumTicks = numTicks || Math.ceil((t1 - t0) / tickSize) + 1;
 
     const getTickTime = typeof tickSize === 'function'
-        ? index => tickSize(theStart, index)
-        : index => theStart.plus({ seconds: index * tickSize });
+        ? (index) => tickSize(theStart, index)
+        : (index) => theStart.plus({ seconds: index * tickSize });
 
     return new Array(theNumTicks).fill(0)
         .reduce((ticks, tick, index) => {
@@ -28,7 +26,6 @@ function timeTick(t0, t1, { start, measure, tickSize, numTicks, getMajor, label,
             }
 
             return [...ticks, mainTick];
-
         }, []);
 }
 
@@ -41,15 +38,15 @@ function timeTickMonthYear(t0, t1) {
         measure: 'month',
         start: t0Date.startOf('month'),
         tickSize: (start, index) => start.plus({ months: index }),
-        getMajor: time => (((time.month - 1) % 6 === 0) >> 0) + (((time.month - 1) % 12 === 0) >> 0),
+        getMajor: (time) => (((time.month - 1) % 6 === 0) >> 0) + (((time.month - 1) % 12 === 0) >> 0),
         numTicks,
-        label: time => {
+        label: (time) => {
             if (time.month === 7) {
                 return 'H2';
             }
 
             return time.toFormat('y');
-        }
+        },
     });
 }
 function timeTickWeekMonth(t0, t1) {
@@ -58,7 +55,7 @@ function timeTickWeekMonth(t0, t1) {
         tickSize: 86400 * 7,
         getMajor: () => 0,
         label: () => false,
-        extra: time => {
+        extra: (time) => {
             if (time.plus({ seconds: 86400 * 7 }).hasSame(time, 'month')) {
                 return null;
             }
@@ -66,7 +63,7 @@ function timeTickWeekMonth(t0, t1) {
             const endOfMonth = time.endOf('month').plus({ seconds: 1 });
 
             return { time: Math.round(endOfMonth.ts / 1000), major: 2, label: endOfMonth.toFormat('LLL') };
-        }
+        },
     });
 }
 
@@ -74,8 +71,8 @@ function timeTickDayWeek(t0, t1) {
     return timeTick(t0, t1, {
         measure: 'day',
         tickSize: 86400,
-        getMajor: time => (time.weekday === 7) >> 0,
-        label: time => time.toFormat('d LLL')
+        getMajor: (time) => (time.weekday === 7) >> 0,
+        label: (time) => time.toFormat('d LLL'),
     });
 }
 function timeTickHourDay(t0, t1) {
@@ -87,38 +84,38 @@ function timeTickHourDay(t0, t1) {
     return timeTick(t0, t1, {
         start,
         tickSize: 3600 * 3,
-        getMajor: time => (time.hour === 0) >> 0,
-        label: time => time.toFormat('ccc')
+        getMajor: (time) => (time.hour === 0) >> 0,
+        label: (time) => time.toFormat('ccc'),
     });
 }
 function timeTickMinuteHour(t0, t1) {
     return timeTick(t0, t1, {
         measure: 'hour',
         tickSize: 1800,
-        getMajor: time => ((time.minute === 0) >> 0) + ((time.hour === 0 && time.minute === 0) >> 0),
-        label: time => {
+        getMajor: (time) => ((time.minute === 0) >> 0) + ((time.hour === 0 && time.minute === 0) >> 0),
+        label: (time) => {
             if (time.hour === 0) {
                 return time.toFormat('ccc');
             }
 
             return time.toFormat('HH:mm');
-        }
+        },
     });
 }
 function timeTickSecondMinute2(t0, t1) {
     return timeTick(t0, t1, {
         measure: 'minute',
         tickSize: 60,
-        getMajor: time => (time.minute % 10 === 0) >> 0,
-        label: time => time.toLocaleString(DateTime.TIME_24_SIMPLE)
+        getMajor: (time) => (time.minute % 10 === 0) >> 0,
+        label: (time) => time.toLocaleString(DateTime.TIME_24_SIMPLE),
     });
 }
 function timeTickSecondMinute(t0, t1) {
     return timeTick(t0, t1, {
         measure: 'minute',
         tickSize: 30,
-        getMajor: time => (time.second === 0) >> 0,
-        label: time => time.toLocaleString(DateTime.TIME_24_SIMPLE)
+        getMajor: (time) => (time.second === 0) >> 0,
+        label: (time) => time.toLocaleString(DateTime.TIME_24_SIMPLE),
     });
 }
 
@@ -149,8 +146,7 @@ export function timeSeriesTicks(t0, t1) {
 
 export const getMonthDiff = (dateA, dateB) => Math.floor(dateB.diff(dateA, 'months')
     .toObject()
-    .months
-);
+    .months);
 
 export const getMonthDatesList = (startDate, endDate) => {
     const numMonths = getMonthDiff(startDate, endDate) + 1;

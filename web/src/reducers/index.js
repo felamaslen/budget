@@ -35,5 +35,5 @@ export default combineReducers({
     general,
     holiday,
     social,
-    suggestions
+    suggestions,
 });

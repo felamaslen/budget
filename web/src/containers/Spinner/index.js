@@ -12,11 +12,11 @@ const Spinner = ({ active }) => active && (
 );
 
 Spinner.propTypes = {
-    active: PropTypes.bool.isRequired
+    active: PropTypes.bool.isRequired,
 };
 
-const mapStateToProps = state => ({
-    active: state.api.initialLoading
+const mapStateToProps = (state) => ({
+    active: state.api.initialLoading,
 });
 
 export default connect(mapStateToProps)(Spinner);

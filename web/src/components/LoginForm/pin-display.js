@@ -9,14 +9,14 @@ const PinDisplay = ({ inputStep }) => (
         .map((item, index) => (
             <div key={index} className={classNames('input-pin', {
                 active: index === inputStep,
-                done: index < inputStep
+                done: index < inputStep,
             })} />
         ))
     }</div>
 );
 
 PinDisplay.propTypes = {
-    inputStep: PropTypes.number.isRequired
+    inputStep: PropTypes.number.isRequired,
 };
 
 export default PinDisplay;

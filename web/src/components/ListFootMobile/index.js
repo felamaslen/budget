@@ -4,7 +4,9 @@ import PropTypes from 'prop-types';
 import ModalDialog from '~client/components/ModalDialog';
 import { CREATE_ID, PAGES } from '~client/constants/data';
 
-export default function ListFootMobile({ page, active, setActive, activeItem, onCreate, onUpdate, onDelete }) {
+export default function ListFootMobile({
+    page, active, setActive, activeItem, onCreate, onUpdate, onDelete,
+}) {
     const onAdd = useCallback(() => setActive(CREATE_ID), [setActive]);
 
     const adding = active === CREATE_ID;
@@ -15,25 +17,25 @@ export default function ListFootMobile({ page, active, setActive, activeItem, on
 
     const fields = useMemo(() => {
         if (!activeItem) {
-            return PAGES[page].cols.map(item => ({ item }));
+            return PAGES[page].cols.map((item) => ({ item }));
         }
 
-        return PAGES[page].cols.map(item => ({ item, value: activeItem[item] }));
+        return PAGES[page].cols.map((item) => ({ item, value: activeItem[item] }));
     }, [page, activeItem]);
 
-    const onSubmitEdit = useCallback(newItem => {
+    const onSubmitEdit = useCallback((newItem) => {
         if (!activeItem) {
             return;
         }
         onUpdate(page, activeItem.id, newItem, activeItem);
     }, [onUpdate, page, activeItem]);
 
-    const onSubmitAdd = useCallback(newItem => {
+    const onSubmitAdd = useCallback((newItem) => {
         onCreate(page, newItem);
         setActive(null);
     }, [page, onCreate, setActive]);
 
-    const onSubmit = useCallback(newItem => {
+    const onSubmit = useCallback((newItem) => {
         if (adding) {
             onSubmitAdd(newItem);
         } else {
@@ -54,7 +56,7 @@ export default function ListFootMobile({ page, active, setActive, activeItem, on
         };
     }, [setActive, onDelete, page, active, adding, activeItem]);
 
-    const onCloseModal = useCallback(event => {
+    const onCloseModal = useCallback((event) => {
         event.stopPropagation();
         setActive(null);
     }, [setActive]);
@@ -88,13 +90,13 @@ ListFootMobile.propTypes = {
     active: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     setActive: PropTypes.func.isRequired,
     activeItem: PropTypes.shape({
-        id: PropTypes.string.isRequired
+        id: PropTypes.string.isRequired,
     }),
     onCreate: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 ListFootMobile.defaultProps = {
-    activeItem: null
+    activeItem: null,
 };

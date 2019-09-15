@@ -9,7 +9,7 @@ import analysis from '~client/sagas/analysis';
 import funds from '~client/sagas/funds';
 import suggestions from '~client/sagas/suggestions';
 
-export default function *rootSaga() {
+export default function* rootSaga() {
     yield fork(now);
     yield fork(app);
     yield fork(error);
