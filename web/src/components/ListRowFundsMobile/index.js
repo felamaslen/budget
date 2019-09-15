@@ -5,7 +5,7 @@ import { transactionsListShape, getTotalCost, isSold } from '~client/modules/dat
 
 const formatOptions = {
     abbreviate: true,
-    precision: 1
+    precision: 1,
 };
 
 export default function ListRowFundsMobile({ item: { transactions, gain } }) {
@@ -36,7 +36,7 @@ ListRowFundsMobile.propTypes = {
     item: PropTypes.shape({
         transactions: transactionsListShape,
         gain: PropTypes.shape({
-            value: PropTypes.number.isRequired
-        })
-    }).isRequired
+            value: PropTypes.number.isRequired,
+        }),
+    }).isRequired,
 };

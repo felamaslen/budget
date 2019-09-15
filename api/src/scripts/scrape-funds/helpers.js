@@ -23,10 +23,10 @@ function removeWhitespace(data) {
         .replace(/\s+>/g, '>');
 }
 
-const localFile = file => `file://${file}`;
+const localFile = (file) => `file://${file}`;
 
 module.exports = {
     promptUser,
     removeWhitespace,
-    localFile
+    localFile,
 };

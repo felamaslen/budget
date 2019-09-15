@@ -1,4 +1,6 @@
-import { debounce, select, takeLatest, call, put } from 'redux-saga/effects';
+import {
+    debounce, select, takeLatest, call, put,
+} from 'redux-saga/effects';
 import axios from 'axios';
 import querystring from 'querystring';
 
@@ -16,7 +18,7 @@ import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
 import { DO_STOCKS_LIST } from '~client/constants/stocks';
 
-export function *getFundHistoryQuery(period = null) {
+export function* getFundHistoryQuery(period = null) {
     const nextPeriod = period || (yield select(getPeriod));
 
     const periodMatch = getPeriodMatch(nextPeriod);
@@ -24,7 +26,7 @@ export function *getFundHistoryQuery(period = null) {
     return { ...periodMatch, history: true };
 }
 
-export function *requestFundPeriodData({ period, fromCache }) {
+export function* requestFundPeriodData({ period, fromCache }) {
     const nextPeriod = period || (yield select(getPeriod));
     if (fromCache) {
         const cache = yield select(getFundsCache);
@@ -42,8 +44,8 @@ export function *requestFundPeriodData({ period, fromCache }) {
     try {
         const res = yield call(axios.get, `${API_PREFIX}/data/funds?${querystring.stringify(query)}`, {
             headers: {
-                Authorization: apiKey
-            }
+                Authorization: apiKey,
+            },
         });
 
         yield put(fundsReceived(nextPeriod, res.data));
@@ -52,7 +54,7 @@ export function *requestFundPeriodData({ period, fromCache }) {
     }
 }
 
-export function *requestStocksList() {
+export function* requestStocksList() {
     if (!DO_STOCKS_LIST) {
         return;
     }
@@ -62,8 +64,8 @@ export function *requestStocksList() {
     try {
         const res = yield call(axios.get, `${API_PREFIX}/data/stocks`, {
             headers: {
-                Authorization: apiKey
-            }
+                Authorization: apiKey,
+            },
         });
 
         yield put(stocksListReceived(res.data));
@@ -72,7 +74,7 @@ export function *requestStocksList() {
     }
 }
 
-export function *requestStocksPrices() {
+export function* requestStocksPrices() {
     const stocks = yield select(getStocks);
     const indices = yield select(getIndices);
 
@@ -87,7 +89,7 @@ export function *requestStocksPrices() {
     }
 }
 
-export default function *fundsSaga() {
+export default function* fundsSaga() {
     yield takeLatest(FUNDS_REQUESTED, requestFundPeriodData);
     yield takeLatest(STOCKS_LIST_REQUESTED, requestStocksList);
     yield debounce(100, STOCKS_PRICES_REQUESTED, requestStocksPrices);

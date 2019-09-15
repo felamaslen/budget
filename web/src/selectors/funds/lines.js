@@ -3,7 +3,7 @@ import {
     GRAPH_FUNDS_OVERALL_ID,
     GRAPH_FUNDS_MODE_ROI,
     GRAPH_FUNDS_MODE_ABSOLUTE,
-    GRAPH_FUNDS_MODE_PRICE
+    GRAPH_FUNDS_MODE_PRICE,
 } from '~client/constants/graph';
 
 export function getOverallAbsolute(prices, units) {
@@ -35,7 +35,7 @@ function getROI(values, costs) {
             return 0;
         }
 
-        return 100 * (value - cost) / cost;
+        return 100 * ((value - cost) / cost);
     });
 }
 
@@ -43,15 +43,13 @@ export function getOverallROI(prices, units, costs) {
     // get the overall return on investment for each time point
     const values = getOverallAbsolute(prices, units);
 
-    const overallCosts = values.map((value, timeIndex) =>
-        Object.keys(costs).reduce((sum, id) => {
-            if (costs[id].length < timeIndex + 1 || prices[id][timeIndex] === 0) {
-                return sum;
-            }
+    const overallCosts = values.map((value, timeIndex) => Object.keys(costs).reduce((sum, id) => {
+        if (costs[id].length < timeIndex + 1 || prices[id][timeIndex] === 0) {
+            return sum;
+        }
 
-            return sum + costs[id][timeIndex];
-        }, 0)
-    );
+        return sum + costs[id][timeIndex];
+    }, 0));
 
     return getROI(values, overallCosts);
 }
@@ -65,10 +63,10 @@ export function getFundLineROI({ prices, units, costs }, id) {
 }
 
 export function getOverallLine(priceUnitsCosts, mode, timeOffsets) {
-    const withOffsets = item => Object.keys(item).reduce((last, id) => ({
+    const withOffsets = (item) => Object.keys(item).reduce((last, id) => ({
         ...last,
         [id]: new Array(timeOffsets[id]).fill(0)
-            .concat(item[id])
+            .concat(item[id]),
     }), {});
 
     const { prices, units, costs } = priceUnitsCosts;

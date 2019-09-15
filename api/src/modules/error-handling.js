@@ -28,7 +28,7 @@ function errorHandler(logger) {
         }
 
         res.json({
-            err: err.message
+            err: err.message,
         });
     };
 }
@@ -36,5 +36,5 @@ function errorHandler(logger) {
 module.exports = {
     clientError,
     catchAsyncErrors,
-    errorHandler
+    errorHandler,
 };

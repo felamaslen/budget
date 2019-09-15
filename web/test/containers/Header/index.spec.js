@@ -17,13 +17,13 @@ const getHeader = memoize((customState = testState) => {
             <Router>
                 <Header />
             </Router>
-        </Provider>
+        </Provider>,
     );
 
     return { ...utils, store };
 });
 
-test('rendering its basic structure', t => {
+test('rendering its basic structure', (t) => {
     const { container } = getHeader();
     t.is(container.childNodes.length, 1);
 
@@ -33,7 +33,7 @@ test('rendering its basic structure', t => {
     t.is(header.childNodes.length, 2);
 });
 
-test('renders <AppLogo />', t => {
+test('renders <AppLogo />', (t) => {
     const { container } = getHeader();
 
     const [div] = container.childNodes;
@@ -43,7 +43,7 @@ test('renders <AppLogo />', t => {
     t.is(appLogo.className, 'app-logo');
 });
 
-test('renders <Navbar />', t => {
+test('renders <Navbar />', (t) => {
     const { container } = getHeader();
 
     const [div] = container.childNodes;
@@ -53,13 +53,13 @@ test('renders <Navbar />', t => {
     t.is(navBar.className, 'nav-list noselect');
 });
 
-test('navbar isn\'t rendered when logged out', t => {
+test('navbar isn\'t rendered when logged out', (t) => {
     const { container } = getHeader({
         ...testState,
         login: {
             ...testState.login,
-            uid: null
-        }
+            uid: null,
+        },
     });
 
     const [div] = container.childNodes;

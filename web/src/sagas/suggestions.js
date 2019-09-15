@@ -1,4 +1,6 @@
-import { takeLatest, select, call, put } from 'redux-saga/effects';
+import {
+    takeLatest, select, call, put,
+} from 'redux-saga/effects';
 import axios from 'axios';
 
 import { getApiKey } from '~client/selectors/api';
@@ -9,7 +11,7 @@ import { SUGGESTIONS_REQUESTED } from '~client/constants/actions/suggestions';
 import { suggestionsReceived, suggestionsCleared } from '~client/actions/suggestions';
 import { errorOpened } from '~client/actions/error';
 
-export function *onRequest({ page, column, search }) {
+export function* onRequest({ page, column, search }) {
     if (!PAGES_SUGGESTIONS.includes(page)) {
         return;
     }
@@ -19,8 +21,8 @@ export function *onRequest({ page, column, search }) {
     try {
         const res = yield call(axios.get, `${API_PREFIX}/data/search/${page}/${column}/${search}/${MAX_SUGGESTIONS}`, {
             headers: {
-                Authorization: apiKey
-            }
+                Authorization: apiKey,
+            },
         });
 
         yield put(suggestionsReceived(column, res.data.data));
@@ -30,6 +32,6 @@ export function *onRequest({ page, column, search }) {
     }
 }
 
-export default function *suggestionsSaga() {
+export default function* suggestionsSaga() {
     yield takeLatest(SUGGESTIONS_REQUESTED, onRequest);
 }

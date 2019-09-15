@@ -13,17 +13,17 @@ const getContainer = (customProps = {}) => {
         period: 'year1',
         cachedValue: {
             ageText: '3 hours ago',
-            value: 399098
+            value: 399098,
         },
         onViewSoldToggle: () => null,
         onReloadPrices: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<ListHeadFundsDesktop {...props} />);
 };
 
-test('gain span', t => {
+test('gain span', (t) => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 2);
 
@@ -33,12 +33,12 @@ test('gain span', t => {
     t.is(gainSpan.childNodes.length, 3);
 });
 
-test('gain class', t => {
+test('gain class', (t) => {
     const { container } = getContainer({
         cachedValue: {
             ageText: '1 hour',
-            value: 400130
-        }
+            value: 400130,
+        },
     });
 
     const [span] = container.childNodes;
@@ -46,7 +46,7 @@ test('gain class', t => {
     t.is(span.className, 'overall-gain profit');
 });
 
-test('gain info', t => {
+test('gain info', (t) => {
     const { container } = getContainer();
     const [span] = container.childNodes;
 
@@ -76,10 +76,10 @@ test('gain info', t => {
     t.is(cacheAge.innerHTML, '(3 hours ago)');
 });
 
-test('reloading fund prices on click', t => {
+test('reloading fund prices on click', (t) => {
     const onReloadPrices = sinon.spy();
     const { container } = getContainer({
-        onReloadPrices
+        onReloadPrices,
     });
 
     t.is(onReloadPrices.getCalls().length, 0);
@@ -87,7 +87,7 @@ test('reloading fund prices on click', t => {
     t.is(onReloadPrices.getCalls().length, 1);
 });
 
-test('view sold toggle', t => {
+test('view sold toggle', (t) => {
     const onViewSoldToggle = sinon.spy();
     const { container } = getContainer({ onViewSoldToggle });
 

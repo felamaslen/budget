@@ -9,13 +9,15 @@ import shortid from 'shortid';
 import loginSaga, {
     onLoginAttempt,
     onLogout,
-    autoLogin
+    autoLogin,
 } from '~client/sagas/login';
-import { loginErrorOccurred, loginRequested, loggedIn, loggedOut } from '~client/actions/login';
+import {
+    loginErrorOccurred, loginRequested, loggedIn, loggedOut,
+} from '~client/actions/login';
 import { LOGIN_REQUESTED, LOGGED_OUT } from '~client/constants/actions/login';
 import { errorOpened } from '~client/actions/error';
 
-test('onLoginAttempt tries to log in', t => {
+test('onLoginAttempt tries to log in', (t) => {
     t.is(1, 1);
 
     const res = { data: { isRes: true } };
@@ -31,14 +33,14 @@ test('onLoginAttempt tries to log in', t => {
         .isDone();
 });
 
-test('onLoginAttempt displays errors', t => {
+test('onLoginAttempt displays errors', (t) => {
     t.is(1, 1);
 
     const err = new Error('Something bad happened');
     err.response = {
         data: {
-            err: 'foo'
-        }
+            err: 'foo',
+        },
     };
 
     const stub = sinon.stub(shortid, 'generate').returns('some-id');
@@ -58,7 +60,7 @@ test('onLoginAttempt displays errors', t => {
     stub.restore();
 });
 
-test('onLogout resets saved credentials', t => {
+test('onLogout resets saved credentials', (t) => {
     t.is(1, 1);
     testSaga(onLogout)
         .next()
@@ -67,7 +69,7 @@ test('onLogout resets saved credentials', t => {
         .isDone();
 });
 
-test('autoLogin tries to log in automatically', t => {
+test('autoLogin tries to log in automatically', (t) => {
     t.is(1, 1);
     testSaga(autoLogin)
         .next()
@@ -92,7 +94,7 @@ test('autoLogin tries to log in automatically', t => {
         .isDone();
 });
 
-test('loginSaga yields all other sagas', t => {
+test('loginSaga yields all other sagas', (t) => {
     t.is(1, 1);
     testSaga(loginSaga)
         .next()

@@ -30,14 +30,14 @@ function getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll)
         return {
             balance: leftPad(netWorthOld.concat(netWorthCombined), totalLength),
             funds: leftPad(fundsOld.concat(fundsCurrent), totalLength),
-            oldOffset
+            oldOffset,
         };
     }
 
     return {
         balance: netWorthCombined,
         funds: fundsCurrent,
-        oldOffset: 0
+        oldOffset: 0,
     };
 }
 
@@ -46,22 +46,21 @@ function processData({
     cost: { netWorthCombined, funds: fundsCurrent, fundsOld },
     netWorthOld,
     showAll,
-    futureMonths
+    futureMonths,
 }) {
-    const { balance, funds, oldOffset } =
-        getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll);
+    const { balance, funds, oldOffset } = getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll);
 
     const futureKey = oldOffset + netWorthCombined.length - futureMonths;
 
     const dataBalance = getValuesWithTime(balance, {
         oldOffset,
         breakAtToday: false,
-        startDate
+        startDate,
     });
 
     const dataFunds = funds.map((value, index) => ([
         dataBalance[index][0],
-        value
+        value,
     ]));
 
     return [
@@ -71,20 +70,22 @@ function processData({
             fill: false,
             smooth: true,
             movingAverage: 12,
-            color: (point, index) => colorBalance[(index < futureKey - 1) >> 0]
+            color: (point, index) => colorBalance[(index < futureKey - 1) >> 0],
         },
         {
             key: 'funds',
             data: dataFunds,
             fill: true,
             smooth: true,
-            color: colorBalanceStocks
-        }
+            color: colorBalanceStocks,
+        },
     ];
 }
 
 function makeAfterLines({ showAll, targets }) {
-    const AfterLines = ({ minY, maxY, pixX, pixY }) => (
+    const AfterLines = ({
+        minY, maxY, pixX, pixY,
+    }) => (
         <g>
             <Targets
                 minY={minY}
@@ -100,7 +101,7 @@ function makeAfterLines({ showAll, targets }) {
 
     AfterLines.propTypes = {
         ...pixelPropTypes,
-        ...rangePropTypes
+        ...rangePropTypes,
     };
 
     return AfterLines;
@@ -114,7 +115,7 @@ export default function GraphBalance({
     cost,
     netWorthOld,
     targets,
-    isMobile
+    isMobile,
 }) {
     const [showAll, setShowAll] = useState(false);
     const lines = useMemo(() => processData({
@@ -122,12 +123,12 @@ export default function GraphBalance({
         cost,
         netWorthOld,
         showAll,
-        futureMonths
+        futureMonths,
     }), [startDate, cost, netWorthOld, showAll, futureMonths]);
 
     const afterLines = useMemo(() => makeAfterLines({
         showAll,
-        targets
+        targets,
     }), [showAll, targets]);
 
     const after = useCallback(() => (
@@ -140,7 +141,7 @@ export default function GraphBalance({
         lines,
         graphWidth,
         afterLines,
-        after
+        after,
     };
 
     if (isMobile) {
@@ -156,10 +157,10 @@ GraphBalance.propTypes = {
     cost: PropTypes.shape({
         netWorthCombined: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
         funds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-        fundsOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
+        fundsOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     }).isRequired,
     netWorthOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     targets: targetsShape.isRequired,
     startDate: PropTypes.instanceOf(DateTime).isRequired,
-    futureMonths: PropTypes.number.isRequired
+    futureMonths: PropTypes.number.isRequired,
 };

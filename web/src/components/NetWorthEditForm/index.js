@@ -21,7 +21,7 @@ const steps = [
     STEP_DATE,
     STEP_CURRENCIES,
     STEP_ASSETS,
-    STEP_LIABILITIES
+    STEP_LIABILITIES,
 ];
 
 function NetWorthItemForm({
@@ -29,9 +29,9 @@ function NetWorthItemForm({
     categories,
     subcategories,
     setActiveId,
-    onEdit
+    onEdit,
 }) {
-    const onComplete = useCallback(event => {
+    const onComplete = useCallback((event) => {
         if (event) {
             event.stopPropagation();
         }
@@ -66,14 +66,14 @@ function NetWorthItemForm({
         onPrevStep,
         onNextStep,
         onFirstStep,
-        onLastStep
+        onLastStep,
     };
 
     const stepProps = {
         item: tempItem,
         categories,
         subcategories,
-        onEdit: setTempItem
+        onEdit: setTempItem,
     };
 
     if (step === STEP_DATE) {
@@ -117,18 +117,18 @@ NetWorthItemForm.propTypes = {
     categories: PropTypes.arrayOf(category.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     setActiveId: PropTypes.func.isRequired,
-    onEdit: PropTypes.func.isRequired
+    onEdit: PropTypes.func.isRequired,
 };
 
 const idLists = [
     'creditLimit',
     'currencies',
-    'values'
+    'values',
 ];
 
 const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
     ...last,
-    [key]: doc[key].map(item => ({ ...item, id: shortid.generate() }))
+    [key]: doc[key].map((item) => ({ ...item, id: shortid.generate() })),
 }), doc);
 
 export function NetWorthEditForm({ onUpdate, ...props }) {
@@ -143,7 +143,7 @@ export function NetWorthEditForm({ onUpdate, ...props }) {
 }
 
 NetWorthEditForm.propTypes = {
-    onUpdate: PropTypes.func.isRequired
+    onUpdate: PropTypes.func.isRequired,
 };
 
 export function NetWorthAddForm({ data, onCreate, ...props }) {
@@ -157,7 +157,7 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
                 ...withContrivedIds(lastItem),
                 date: DateTime.fromISO(lastItem.date)
                     .plus({ months: 1 })
-                    .endOf('month')
+                    .endOf('month'),
             };
         }
 
@@ -165,7 +165,7 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
             date: DateTime.local(),
             creditLimit: [],
             currencies: [],
-            values: []
+            values: [],
         };
     }, [data]);
 
@@ -181,5 +181,5 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
 
 NetWorthAddForm.propTypes = {
     data: PropTypes.arrayOf(netWorthItem.isRequired).isRequired,
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };

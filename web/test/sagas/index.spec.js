@@ -11,7 +11,7 @@ import analysis from '~client/sagas/analysis';
 import funds from '~client/sagas/funds';
 import suggestions from '~client/sagas/suggestions';
 
-test('rootSaga forking all the other sagas', t => {
+test('rootSaga forking all the other sagas', (t) => {
     t.is(1, 1);
     testSaga(rootSaga)
         .next()

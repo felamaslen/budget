@@ -8,13 +8,13 @@ import PinDisplay from '~client/components/LoginForm/pin-display';
 const getContainer = memoize((customProps = {}) => {
     const props = {
         inputStep: 2,
-        ...customProps
+        ...customProps,
     };
 
     return render(<PinDisplay {...props} />);
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -25,13 +25,13 @@ test('basic structure', t => {
     t.is(div.className, 'pin-display');
 });
 
-test('each digit box', t => {
+test('each digit box', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
     t.plan(4 * 4);
 
-    [0, 1, 2, 3].forEach(key => {
+    [0, 1, 2, 3].forEach((key) => {
         const active = key === 2;
         const done = key < 2;
 

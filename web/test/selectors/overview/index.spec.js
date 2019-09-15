@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import { testState as state } from '~client-test/test_data/state';
 import {
     getProcessedCost,
-    getOverviewTable
+    getOverviewTable,
 } from '~client/selectors/overview';
 import { getNetWorthSummary } from '~client/selectors/overview/net-worth';
 import { getTransactionsList } from '~client/modules/data';
@@ -15,10 +15,11 @@ const testRandoms = [0.15, 0.99];
 const getRandomStub = () => {
     let randomIndex = 0;
 
+    // eslint-disable-next-line no-plusplus
     return sinon.stub(Math, 'random').callsFake(() => testRandoms[(randomIndex++) % 2]);
 };
 
-test('getProcessedCost processes the cost data, including making predictions, adding spending / net columns etc.', t => {
+test('getProcessedCost processes the cost data, including making predictions and derived columns', (t) => {
     const stub = getRandomStub();
 
     const testState = {
@@ -32,18 +33,18 @@ test('getProcessedCost processes the cost data, including making predictions, ad
                     item: 'some fund 1',
                     transactions: getTransactionsList([
                         { date: DateTime.fromISO('2018-02-05'), units: 10, cost: 56123 },
-                        { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 }
-                    ])
+                        { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 },
+                    ]),
                 },
                 {
                     id: 'fund-B',
                     item: 'some fund 2',
                     transactions: getTransactionsList([
-                        { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 }
-                    ])
-                }
-            ]
-        }
+                        { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 },
+                    ]),
+                },
+            ],
+        },
     };
 
     const netWorthSummary = getNetWorthSummary(testState);
@@ -81,13 +82,14 @@ test('getProcessedCost processes the cost data, including making predictions, ad
         net,
         netWorthPredicted,
         netWorthCombined,
-        netWorth: netWorthSummary
+        netWorth: netWorthSummary,
     });
 
     stub.restore();
 });
 
-test('getProcessedCost uses the actual (non-predicted) net worth value for the current month, if at the last day', t => {
+// eslint-disable-next-line max-len
+test('getProcessedCost uses the actual (non-predicted) net worth value for the current month, if at the last day', (t) => {
     const stub = getRandomStub();
 
     const testState = {
@@ -101,18 +103,18 @@ test('getProcessedCost uses the actual (non-predicted) net worth value for the c
                     item: 'some fund 1',
                     transactions: getTransactionsList([
                         { date: DateTime.fromISO('2018-02-05'), units: 10, cost: 56123 },
-                        { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 }
-                    ])
+                        { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 },
+                    ]),
                 },
                 {
                     id: 'fund-B',
                     item: 'some fund 2',
                     transactions: getTransactionsList([
-                        { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 }
-                    ])
-                }
-            ]
-        }
+                        { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 },
+                    ]),
+                },
+            ],
+        },
     };
 
     const netWorthSummary = getNetWorthSummary(testState);
@@ -150,13 +152,13 @@ test('getProcessedCost uses the actual (non-predicted) net worth value for the c
         net,
         netWorthPredicted,
         netWorthCombined,
-        netWorth: netWorthSummary
+        netWorth: netWorthSummary,
     });
 
     stub.restore();
 });
 
-test('getOverviewTable gets a list of rows for the overview table', t => {
+test('getOverviewTable gets a list of rows for the overview table', (t) => {
     const stub = getRandomStub();
 
     const table = getOverviewTable(state);
@@ -165,7 +167,7 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
     // and the table colours are manually tested
     const tableWithoutColor = table.map(({ cells, ...rest }) => ({
         ...rest,
-        cells: cells.map(({ rgb, ...cell }) => cell)
+        cells: cells.map(({ rgb, ...cell }) => cell),
     }));
 
     t.deepEqual(tableWithoutColor, [
@@ -186,8 +188,8 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 1260 },
                 { column: ['net', 'Net'], value: 740 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 0 },
-                { column: ['netWorth', 'Net Worth'], value: 0 }
-            ]
+                { column: ['netWorth', 'Net Worth'], value: 0 },
+            ],
         },
         {
             key: 'Feb-18',
@@ -206,8 +208,8 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 2068 },
                 { column: ['net', 'Net'], value: -168 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 512 },
-                { column: ['netWorth', 'Net Worth'], value: 1298227.25 }
-            ]
+                { column: ['netWorth', 'Net Worth'], value: 1298227.25 },
+            ],
         },
         {
             key: 'Mar-18',
@@ -226,8 +228,8 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 749 },
                 { column: ['net', 'Net'], value: 751 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 1300500.25 },
-                { column: ['netWorth', 'Net Worth'], value: 1039156 }
-            ]
+                { column: ['netWorth', 'Net Worth'], value: 1039156 },
+            ],
         },
         {
             key: 'Apr-18',
@@ -246,8 +248,8 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 960 },
                 { column: ['net', 'Net'], value: 1540 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 1304900.25 },
-                { column: ['netWorth', 'Net Worth'], value: 0 }
-            ]
+                { column: ['netWorth', 'Net Worth'], value: 0 },
+            ],
         },
         {
             key: 'May-18',
@@ -266,8 +268,8 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 310 },
                 { column: ['net', 'Net'], value: 1990 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 1309830.25 },
-                { column: ['netWorth', 'Net Worth'], value: 0 }
-            ]
+                { column: ['netWorth', 'Net Worth'], value: 0 },
+            ],
         },
         {
             key: 'Jun-18',
@@ -286,8 +288,8 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 310 },
                 { column: ['net', 'Net'], value: 1490 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 1314341.25 },
-                { column: ['netWorth', 'Net Worth'], value: 0 }
-            ]
+                { column: ['netWorth', 'Net Worth'], value: 0 },
+            ],
         },
         {
             key: 'Jul-18',
@@ -306,9 +308,9 @@ test('getOverviewTable gets a list of rows for the overview table', t => {
                 { column: ['spending', 'Out'], value: 310 },
                 { column: ['net', 'Net'], value: 2290 },
                 { column: ['netWorthPredicted', 'Predicted'], value: 1319736.25 },
-                { column: ['netWorth', 'Net Worth'], value: 0 }
-            ]
-        }
+                { column: ['netWorth', 'Net Worth'], value: 0 },
+            ],
+        },
     ]);
 
     stub.restore();

@@ -2,8 +2,8 @@ import test from 'ava';
 import { render } from '@testing-library/react';
 import '~client-test/browser';
 import memoize from 'fast-memoize';
-import ListHeadDesktop from '~client/components/ListHeadDesktop';
 import React from 'react';
+import ListHeadDesktop from '~client/components/ListHeadDesktop';
 
 const getContainer = memoize((customProps = {}) => {
     const AfterHead = () => null;
@@ -14,13 +14,13 @@ const getContainer = memoize((customProps = {}) => {
         getDaily: true,
         totalCost: 400,
         AfterHead,
-        ...customProps
+        ...customProps,
     };
 
     return render(<ListHeadDesktop {...props} />);
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.tagName, 'DIV');
@@ -33,11 +33,11 @@ test('basic structure', t => {
     t.is(div.className, 'list-head noselect');
 });
 
-test('column headings', t => {
+test('column headings', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
-    [0, 1, 2, 3, 4].forEach(key => t.is(div.childNodes[key].tagName, 'SPAN'));
+    [0, 1, 2, 3, 4].forEach((key) => t.is(div.childNodes[key].tagName, 'SPAN'));
 
     const [date, item, category, cost, shop] = div.childNodes;
 
@@ -54,7 +54,7 @@ test('column headings', t => {
     t.is(shop.innerHTML, 'shop');
 });
 
-test('daily column', t => {
+test('daily column', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -78,7 +78,7 @@ test('daily column', t => {
     t.is(value.innerHTML, '£1.00');
 });
 
-test('total column', t => {
+test('total column', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 

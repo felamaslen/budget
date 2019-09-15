@@ -17,12 +17,14 @@ const FormFieldContainer = ({ children, item, className }) => (
 FormFieldContainer.propTypes = {
     item: PropTypes.string.isRequired,
     className: PropTypes.string.isRequired,
-    children: PropTypes.node.isRequired
+    children: PropTypes.node.isRequired,
 };
 
-export default function ModalDialogField({ item, value, invalid, onChange }) {
+export default function ModalDialogField({
+    item, value, invalid, onChange,
+}) {
     const className = classNames('form-row', item, { invalid });
-    const onChangeCallback = useCallback(newValue => onChange(item, newValue), [onChange, item]);
+    const onChangeCallback = useCallback((newValue) => onChange(item, newValue), [onChange, item]);
 
     if (item === 'date') {
         return (
@@ -73,5 +75,5 @@ ModalDialogField.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.any,
     invalid: PropTypes.bool.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };

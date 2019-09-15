@@ -5,11 +5,11 @@ export const fundsViewSoldToggled = () => ({ type: actions.FUNDS_VIEW_SOLD_TOGGL
 export const fundsRequested = (fromCache = true, period = null) => ({
     type: actions.FUNDS_REQUESTED,
     fromCache,
-    period
+    period,
 });
 
 export const fundsReceived = (period, res = null) => ({
     type: actions.FUNDS_RECEIVED,
     res,
-    period
+    period,
 });

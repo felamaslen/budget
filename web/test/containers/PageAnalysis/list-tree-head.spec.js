@@ -8,17 +8,23 @@ import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 const getContainer = memoize((customProps = {}) => {
     const props = {
         items: [
-            { name: 'foo', itemCost: 3, pct: 5, open: false, visible: true },
-            { name: 'bar', itemCost: 5, pct: 8, open: false, visible: true },
-            { name: 'baz', itemCost: 1, pct: 2, open: false, visible: false }
+            {
+                name: 'foo', itemCost: 3, pct: 5, open: false, visible: true,
+            },
+            {
+                name: 'bar', itemCost: 5, pct: 8, open: false, visible: true,
+            },
+            {
+                name: 'baz', itemCost: 1, pct: 2, open: false, visible: false,
+            },
         ],
-        ...customProps
+        ...customProps,
     };
 
     return render(<ListTreeHead {...props} />);
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -33,7 +39,7 @@ test('basic structure', t => {
     t.is(inner.childNodes.length, 4);
 });
 
-test('indicator', t => {
+test('indicator', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -45,7 +51,7 @@ test('indicator', t => {
     t.is(indicator.childNodes.length, 0);
 });
 
-test('title', t => {
+test('title', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -57,7 +63,7 @@ test('title', t => {
     t.is(title.innerHTML, 'Total:');
 });
 
-test('total cost', t => {
+test('total cost', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -79,7 +85,7 @@ test('total cost', t => {
     t.is(selected.innerHTML, '£0.08');
 });
 
-test('total percent', t => {
+test('total percent', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;

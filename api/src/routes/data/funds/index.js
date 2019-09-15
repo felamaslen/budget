@@ -1,7 +1,4 @@
-/**
- * Funds routes
- */
-
+/* eslint-disable max-len */
 const { DateTime } = require('luxon');
 const common = require('./common');
 const listCommon = require('../list.common');
@@ -11,16 +8,16 @@ function formatResults(columnMap, getPriceHistory, priceHistory = null) {
     const commonProps = listCommon.formatResults(columnMap);
 
     if (getPriceHistory) {
-        const addPrices = row => ({
+        const addPrices = (row) => ({
             ...row,
             pr: priceHistory.idMap[row.I] || [],
-            prStartIndex: priceHistory.startIndex[row.I] || 0
+            prStartIndex: priceHistory.startIndex[row.I] || 0,
         });
 
-        return row => addPrices(commonProps(row));
+        return (row) => addPrices(commonProps(row));
     }
 
-    return row => commonProps(row);
+    return (row) => commonProps(row);
 }
 
 async function getQuery(db, user) {
@@ -29,13 +26,15 @@ async function getQuery(db, user) {
         'funds.item',
         'transactions.date',
         'transactions.units',
-        'transactions.cost'
+        'transactions.cost',
     )
         .from('funds')
         .leftJoin('funds_transactions as transactions', 'transactions.fund_id', 'funds.id')
         .where('funds.uid', '=', user.uid);
 
-    const { items: funds } = rows.reduce(({ items, fundIds }, { id, item, date, units, cost }) => {
+    const { items: funds } = rows.reduce(({ items, fundIds }, {
+        id, item, date, units, cost,
+    }) => {
         const transaction = date
             ? { date, units, cost }
             : null;
@@ -54,11 +53,10 @@ async function getQuery(db, user) {
         return {
             items: [
                 ...items,
-                { id, item, transactions }
+                { id, item, transactions },
             ],
-            fundIds: [...fundIds, id]
+            fundIds: [...fundIds, id],
         };
-
     }, { items: [], fundIds: [] });
 
     return funds;
@@ -164,7 +162,7 @@ function routeGet(config, db) {
             id: 'I',
             date: 'd',
             item: 'i',
-            transactions: 'tr'
+            transactions: 'tr',
         };
 
         const queryResult = await getQuery(db, req.user);
@@ -175,8 +173,8 @@ function routeGet(config, db) {
             let period = null;
             let length = null;
 
-            const hasPeriod = ['year', 'month'].includes(req.query.period) &&
-                !isNaN(Number(req.query.length));
+            const hasPeriod = ['year', 'month'].includes(req.query.period)
+                && !Number.isNaN(Number(req.query.length));
 
             if (hasPeriod) {
                 period = req.query.period;
@@ -187,7 +185,7 @@ function routeGet(config, db) {
                 period,
                 length,
                 numDisplay: config.data.funds.historyResolution,
-                salt: config.data.funds.salt
+                salt: config.data.funds.salt,
             };
 
             priceHistory = await common.getFundHistoryMappedToFundIds(db, req.user, now, params);
@@ -210,12 +208,13 @@ function routeGet(config, db) {
 }
 
 function insertTransactions(db, user, id, transactions) {
-    return db.transaction(trx => transactions.reduce(
+    return db.transaction((trx) => transactions.reduce(
         (last, { date, units, cost }) => last.then(() => trx
-            .insert({ 'fund_id': id, date, units, cost })
-            .into('funds_transactions')
-        ),
-        Promise.resolve()
+            .insert({
+                fund_id: id, date, units, cost,
+            })
+            .into('funds_transactions')),
+        Promise.resolve(),
     ));
 }
 
@@ -347,5 +346,5 @@ module.exports = {
     routeGet,
     routePost,
     routePut,
-    routeDelete
+    routeDelete,
 };

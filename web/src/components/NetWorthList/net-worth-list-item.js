@@ -13,7 +13,7 @@ function NetWorthListItem({
     noneActive,
     setActive,
     onUpdate,
-    onDelete
+    onDelete,
 }) {
     const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
 
@@ -58,7 +58,7 @@ NetWorthListItem.propTypes = {
     noneActive: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 export default memo(NetWorthListItem);

@@ -4,13 +4,13 @@ import PropTypes from 'prop-types';
 import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
-const setValue = cost => Math.round((100 * (Number(cost) || 0)).toPrecision(10));
+const setValue = (cost) => Math.round((100 * (Number(cost) || 0)).toPrecision(10));
 
 function setValueString(inputValue) {
     if (inputValue === '.') {
         return { __split: true, fieldValue: 0, inputValue: '.' };
     }
-    if (isNaN(Number(inputValue))) {
+    if (Number.isNaN(Number(inputValue))) {
         throw new Error('Invalid value');
     }
 
@@ -42,7 +42,7 @@ export default function FormFieldCost({ label, ...props }) {
         getInitialInputValue,
         setValue: props.string
             ? setValueString
-            : setValueNumber
+            : setValueNumber,
     });
 
     const inputProps = props.string
@@ -67,11 +67,11 @@ FormFieldCost.propTypes = {
     label: PropTypes.string,
     value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     active: PropTypes.bool,
-    string: PropTypes.bool
+    string: PropTypes.bool,
 };
 
 FormFieldCost.defaultProps = {
     label: null,
     string: false,
-    value: null
+    value: null,
 };

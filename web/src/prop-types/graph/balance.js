@@ -6,5 +6,5 @@ export const targetsShape = PropTypes.arrayOf(PropTypes.shape({
     value: PropTypes.number.isRequired,
     months: PropTypes.number.isRequired,
     last: PropTypes.number.isRequired,
-    tag: PropTypes.string.isRequired
+    tag: PropTypes.string.isRequired,
 }));

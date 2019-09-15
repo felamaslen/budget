@@ -1,7 +1,3 @@
-/**
- * Get all list data
- */
-
 const routeGetOverview = require('../cashflow').routeGet;
 const routeGetFunds = require('../funds').routeGet;
 const routeGetIncome = require('../income').routeGet;
@@ -19,7 +15,7 @@ const routeGetCategory = {
     food: routeGetFood,
     general: routeGetGeneral,
     social: routeGetSocial,
-    holiday: routeGetHoliday
+    holiday: routeGetHoliday,
 };
 
 const ResponseMultiple = require('../../../responseMultiple');
@@ -80,13 +76,13 @@ function routeGet(config, db) {
 
         const responses = categories.map(() => new ResponseMultiple());
 
-        await Promise.all(categories.map((category, key) =>
+        await Promise.all(categories.map((category, key) => (
             routeGetCategory[category](config, db)(req, responses[key])
-        ));
+        )));
 
         const data = responses.reduce((items, result, key) => ({
             ...items,
-            [categories[key]]: result.result.data
+            [categories[key]]: result.result.data,
         }), {});
 
         return res.json({ data });
@@ -94,5 +90,5 @@ function routeGet(config, db) {
 }
 
 module.exports = {
-    routeGet
+    routeGet,
 };

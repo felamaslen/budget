@@ -11,8 +11,10 @@ import FormFieldTransactions from '~client/components/FormField/transactions';
 
 import './style.scss';
 
-function EditableField({ id, item, onChange, ...rest }) {
-    const onChangeCallback = useCallback(value => onChange(item, value), [onChange, item]);
+function EditableField({
+    id, item, onChange, ...rest
+}) {
+    const onChangeCallback = useCallback((value) => onChange(item, value), [onChange, item]);
 
     const props = { ...rest, onChange: onChangeCallback };
 
@@ -32,10 +34,12 @@ function EditableField({ id, item, onChange, ...rest }) {
 EditableField.propTypes = {
     id: PropTypes.string.isRequired,
     item: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };
 
-export default function Editable({ page, id, active, item, onSuggestion, ...props }) {
+export default function Editable({
+    page, id, active, item, onSuggestion, ...props
+}) {
     const [typed, onType] = useState('');
     useEffect(() => {
         if (!active) {
@@ -43,16 +47,16 @@ export default function Editable({ page, id, active, item, onSuggestion, ...prop
         }
     }, [active]);
 
-    const showSuggestions = Boolean(active &&
-        typed.length &&
-        PAGES_SUGGESTIONS.includes(page) &&
-        PAGES[page].suggestions &&
-        PAGES[page].suggestions.includes(item));
+    const showSuggestions = Boolean(active
+        && typed.length
+        && PAGES_SUGGESTIONS.includes(page)
+        && PAGES[page].suggestions
+        && PAGES[page].suggestions.includes(item));
 
     return (
         <span className={classNames('editable', `editable-${item}`, {
             'editable-active': active,
-            'editable-inactive': !active
+            'editable-inactive': !active,
         })}>
             <EditableField
                 id={id}
@@ -79,7 +83,7 @@ Editable.propTypes = {
     active: PropTypes.bool,
     item: PropTypes.string.isRequired,
     onSuggestion: PropTypes.func,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
 };
 
 Editable.defaultProps = {
@@ -87,5 +91,5 @@ Editable.defaultProps = {
     id: '',
     value: '',
     onSuggestion: () => null,
-    onChange: () => null
+    onChange: () => null,
 };

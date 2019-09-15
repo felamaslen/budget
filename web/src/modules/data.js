@@ -5,7 +5,7 @@ import shortid from 'shortid';
 import { AVERAGE_MEDIAN, AVERAGE_EXP } from '~client/constants';
 import { DELETE } from '~client/constants/data';
 
-export const IDENTITY = state => state;
+export const IDENTITY = (state) => state;
 export const NULL = () => null;
 
 export function getPeriodMatch(shortPeriod, defaultPeriod = process.env.DEFAULT_FUND_PERIOD || '') {
@@ -42,28 +42,28 @@ export const removeAtIndex = (array, index) => array
     .slice(0, index)
     .concat(array.slice(index + 1));
 
-export const getTransactionsList = data => data.map(({ date, units, cost }) => ({
+export const getTransactionsList = (data) => data.map(({ date, units, cost }) => ({
     id: shortid.generate(),
     date: DateTime.fromISO(date),
     units: Number(units) || 0,
-    cost: Number(cost) || 0
+    cost: Number(cost) || 0,
 }));
 
 export const transactionShape = PropTypes.shape({
     id: PropTypes.string.isRequired,
     date: PropTypes.instanceOf(DateTime).isRequired,
     units: PropTypes.number.isRequired,
-    cost: PropTypes.number.isRequired
+    cost: PropTypes.number.isRequired,
 }).isRequired;
 
 export const transactionsListShape = PropTypes.arrayOf(transactionShape);
 
-const getRoundedTotal = key => array => Number(array.reduce((sum, { [key]: value }) => sum + value, 0).toFixed(4));
+const getRoundedTotal = (key) => (array) => Number(array.reduce((sum, { [key]: value }) => sum + value, 0).toFixed(4));
 
 export const getTotalUnits = getRoundedTotal('units');
 export const getTotalCost = getRoundedTotal('cost');
 
-export const isSold = transactionsList => getTotalUnits(transactionsList) === 0;
+export const isSold = (transactionsList) => getTotalUnits(transactionsList) === 0;
 
 export const addToTransactionsList = (transactionsList, item) => transactionsList.concat(getTransactionsList([item]));
 
@@ -82,15 +82,15 @@ export function modifyTransaction(transactionsList, index, item) {
 export const modifyTransactionById = (transactionsList, id, item) => modifyTransaction(
     transactionsList,
     transactionsList.findIndex(({ id: itemId }) => itemId === id),
-    item
+    item,
 );
 
-export const formatTransactionsList = transactionsList => transactionsList
+export const formatTransactionsList = (transactionsList) => transactionsList
     .sort(({ date: dateA }, { date: dateB }) => dateA - dateB)
     .map(({ date, units, cost }) => ({
         date: date.toISODate(),
         units,
-        cost
+        cost,
     }));
 
 export function arrayAverage(values, mode = null) {
@@ -127,12 +127,12 @@ export function arrayAverage(values, mode = null) {
     return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-export const sortByTotal = rows => rows.slice()
+export const sortByTotal = (rows) => rows.slice()
     .sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
 
 export const limitTimeSeriesLength = (timeSeries, limit) => new Array(timeSeries.length)
     .fill(0)
-    .reduce(last => {
+    .reduce((last) => {
         if (last.length <= limit) {
             return last;
         }
@@ -177,8 +177,9 @@ export function getValueForTransmit(dataType, value) {
     return getValueFromTransmit(dataType, value);
 }
 
-export const sortByDate = data => data.sort(({ date: dateA }, { date: dateB }) =>
-    DateTime.fromISO(dateA) - DateTime.fromISO(dateB));
+export const sortByDate = (data) => data.sort(({ date: dateA }, { date: dateB }) => (
+    DateTime.fromISO(dateA) - DateTime.fromISO(dateB)
+));
 
 function sortKey(key, itemA, itemB) {
     if (itemA[key] < itemB[key]) {
@@ -191,14 +192,15 @@ function sortKey(key, itemA, itemB) {
     return 0;
 }
 
-export const sortByKey = (...keys) => items => items.sort((itemA, itemB) =>
-    keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0));
+export const sortByKey = (...keys) => (items) => items.sort((itemA, itemB) => (
+    keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0)
+));
 
-export const fieldExists = value => typeof value !== 'undefined' &&
-    !(typeof value === 'string' && !value.length);
+export const fieldExists = (value) => typeof value !== 'undefined'
+    && !(typeof value === 'string' && !value.length);
 
 export const leftPad = (array, length) => new Array(Math.max(0, length - array.length))
     .fill(0)
     .concat(array);
 
-export const withoutDeleted = items => (items || []).filter(({ __optimistic }) => __optimistic !== DELETE);
+export const withoutDeleted = (items) => (items || []).filter(({ __optimistic }) => __optimistic !== DELETE);

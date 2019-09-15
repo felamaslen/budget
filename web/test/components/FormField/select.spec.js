@@ -10,17 +10,17 @@ const getContainer = (customProps = {}, ...args) => {
         item: 'my-select-input',
         options: [
             { internal: 'something', external: 'Something' },
-            { internal: 'else', external: 'My option' }
+            { internal: 'else', external: 'My option' },
         ],
         value: 'something',
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldSelect {...props} />, ...args);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -47,7 +47,7 @@ test('basic structure', t => {
     t.is(optionB.value, 'else');
 });
 
-test('handling onchange', t => {
+test('handling onchange', (t) => {
     const onChange = sinon.stub();
     const { container } = getContainer({ onChange });
 
@@ -63,7 +63,7 @@ test('handling onchange', t => {
     t.deepEqual(onChange.getCalls()[0].args, ['else']);
 });
 
-test('if the available options updates, the value updates', t => {
+test('if the available options updates, the value updates', (t) => {
     const onChange = sinon.stub();
 
     const optionsA = [{ internal: 'A' }, { internal: 'B' }, { internal: 'C' }];

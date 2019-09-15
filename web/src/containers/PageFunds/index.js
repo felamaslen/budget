@@ -8,11 +8,11 @@ import { mediaQueryMobile } from '~client/constants';
 import { fundsViewSoldToggled, fundsRequested } from '~client/actions/funds';
 import {
     getProcessedFundsRows,
-    getFundsCachedValue
+    getFundsCachedValue,
 } from '~client/selectors/funds';
 import { rowsShape } from '~client/prop-types/page/rows';
 import { cachedValueShape } from '~client/prop-types/page/funds';
-import { itemHeightDesktop, itemHeightDesktopFunds } from '~client/constants/styles';
+import { itemHeightDesktop, itemHeightDesktopFunds } from '~client/constants/styles.json';
 import { PageList } from '~client/containers/PageList';
 import StocksList from '~client/containers/StocksList';
 import GraphFunds from '~client/containers/GraphFunds';
@@ -25,12 +25,11 @@ import './style.scss';
 
 const LIST_COLS_MOBILE_FUNDS = ['item'];
 
-const FundsInfo = props => (
+const FundsInfo = (props) => (
     <div className="funds-info">
-        <Media query={mediaQueryMobile}>{isMobile => isMobile && (
-            <ListHeadFundsMobile {...props} />
-        ) || (
-            <div className="after-list">
+        <Media query={mediaQueryMobile}>{(isMobile) => (isMobile
+            ? <ListHeadFundsMobile {...props} />
+            : <div className="after-list">
                 <StocksList />
                 <GraphFunds isMobile={isMobile} />
             </div>
@@ -38,7 +37,9 @@ const FundsInfo = props => (
     </div>
 );
 
-function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices }) {
+function PageFunds({
+    rows, cachedValue, period, onViewSoldToggle, onReloadPrices,
+}) {
     const extraProps = useMemo(() => ({
         period,
         cachedValue,
@@ -47,10 +48,10 @@ function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices
         AfterRowMobile: ListRowFundsMobile,
         listColsMobile: LIST_COLS_MOBILE_FUNDS,
         onViewSoldToggle,
-        onReloadPrices
+        onReloadPrices,
     }), [period, cachedValue, onViewSoldToggle, onReloadPrices]);
 
-    const itemSize = useCallback(index => {
+    const itemSize = useCallback((index) => {
         if (rows[index].sold) {
             return itemHeightDesktop;
         }
@@ -78,19 +79,19 @@ PageFunds.propTypes = {
     cachedValue: cachedValueShape.isRequired,
     rows: rowsShape,
     onViewSoldToggle: PropTypes.func.isRequired,
-    onReloadPrices: PropTypes.func.isRequired
+    onReloadPrices: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     viewSoldFunds: state.funds.viewSoldFunds,
     period: state.funds.period,
     cachedValue: getFundsCachedValue(state),
-    rows: getProcessedFundsRows(state)
+    rows: getProcessedFundsRows(state),
 });
 
 const mapDispatchToProps = {
     onViewSoldToggle: fundsViewSoldToggled,
-    onReloadPrices: () => fundsRequested(false)
+    onReloadPrices: () => fundsRequested(false),
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PageFunds);

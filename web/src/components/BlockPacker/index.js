@@ -24,5 +24,5 @@ export default function BlockPacker({ status, onHover, ...props }) {
 BlockPacker.propTypes = {
     blocks: blocksShape,
     status: PropTypes.string,
-    onHover: PropTypes.func.isRequired
+    onHover: PropTypes.func.isRequired,
 };

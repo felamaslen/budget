@@ -13,16 +13,16 @@ Page.propTypes = {
     page: PropTypes.string.isRequired,
     className: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.objectOf(PropTypes.bool)
+        PropTypes.objectOf(PropTypes.bool),
     ]),
     children: PropTypes.oneOfType([
         PropTypes.node,
-        PropTypes.arrayOf(PropTypes.node)
-    ]).isRequired
+        PropTypes.arrayOf(PropTypes.node),
+    ]).isRequired,
 };
 
 Page.defaultProps = {
-    clasName: {}
+    clasName: {},
 };
 
 export default Page;

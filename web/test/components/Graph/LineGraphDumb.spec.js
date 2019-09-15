@@ -14,7 +14,7 @@ const getContainer = (customProps = {}) => {
             minX: 0,
             maxX: 10,
             minY: -3,
-            maxY: 7
+            maxY: 7,
         },
         outerProperties: {},
         svgProperties: {},
@@ -25,10 +25,10 @@ const getContainer = (customProps = {}) => {
                     [100, 1],
                     [101, 2],
                     [102, -1],
-                    [103, 0]
+                    [103, 0],
                 ],
                 smooth: false,
-                color: 'black'
+                color: 'black',
             },
             {
                 key: 'line2',
@@ -36,37 +36,37 @@ const getContainer = (customProps = {}) => {
                     [100, 1],
                     [101, 2],
                     [102, -1],
-                    [103, 0]
+                    [103, 0],
                 ],
                 smooth: true,
                 color: 'black',
-                strokeWidth: 1.5
+                strokeWidth: 1.5,
             },
             {
                 key: 'line3',
                 data: [
-                    [100, 1]
+                    [100, 1],
                 ],
                 smooth: false,
-                color: 'black'
+                color: 'black',
             },
             {
                 key: 'line4',
                 data: [
-                    [100, 1]
+                    [100, 1],
                 ],
                 smooth: false,
-                color: 'black'
+                color: 'black',
             },
             {
                 key: 'line5',
                 data: [
                     [100, 1],
-                    [102, 2]
+                    [102, 2],
                 ],
                 smooth: true,
-                color: 'black'
-            }
+                color: 'black',
+            },
         ],
         calc: {
             minX: 100,
@@ -76,15 +76,15 @@ const getContainer = (customProps = {}) => {
             pixX: () => 0,
             pixY: () => 0,
             valX: () => 0,
-            valY: () => 0
+            valY: () => 0,
         },
-        ...customProps
+        ...customProps,
     };
 
     return render(<LineGraphDumb {...props} />);
 };
 
-test('rendering a line graph', t => {
+test('rendering a line graph', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -97,7 +97,7 @@ test('rendering a line graph', t => {
     t.is(svg.tagName, 'svg');
 });
 
-test('not rendering any SVG data if there are no lines', t => {
+test('not rendering any SVG data if there are no lines', (t) => {
     const { container } = getContainer({ lines: [] });
 
     const { childNodes: [svg] } = container.childNodes[0];
@@ -105,14 +105,14 @@ test('not rendering any SVG data if there are no lines', t => {
     t.is(svg.childNodes.length, 0);
 });
 
-test('rendering lines', t => {
+test('rendering lines', (t) => {
     const { container } = getContainer();
 
     const { childNodes: [svg] } = container.childNodes[0];
 
     t.is(svg.childNodes.length, 5);
 
-    svg.childNodes.forEach(line => {
+    svg.childNodes.forEach((line) => {
         t.is(line.tagName, 'g');
         t.is(line.className, 'line');
         t.is(line.childNodes.length, 1);

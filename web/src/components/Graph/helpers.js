@@ -1,7 +1,7 @@
 import { GRAPH_CURVINESS } from '~client/constants/graph';
 import { timeSeriesTicks } from '~client/modules/date';
 
-export const genPixelCompute = props => {
+export const genPixelCompute = (props) => {
     const {
         minX,
         maxX,
@@ -9,30 +9,26 @@ export const genPixelCompute = props => {
         maxY,
         width,
         height,
-        padding: [padTop, padRight, padBottom, padLeft]
+        padding: [padTop, padRight, padBottom, padLeft],
     } = props;
 
     return {
-        pixX: value =>
-            padLeft + (value - minX) / (maxX - minX) * (width - padLeft - padRight),
-        pixY: value =>
-            height - padBottom - (value - minY) / (maxY - minY) * (height - padTop - padBottom),
-        valX: pix =>
-            (pix - padLeft) * (maxX - minX) / (width - padLeft - padRight) + minX,
-        valY: pix =>
-            (height - padBottom - pix) * (maxY - minY) / (height - padTop - padBottom) + minY
+        pixX: (value) => padLeft + ((value - minX) / (maxX - minX)) * (width - padLeft - padRight),
+        pixY: (value) => height - padBottom - ((value - minY) / (maxY - minY)) * (height - padTop - padBottom),
+        valX: (pix) => (pix - padLeft) * ((maxX - minX) / (width - padLeft - padRight)) + minX,
+        valY: (pix) => (height - padBottom - pix) * ((maxY - minY) / (height - padTop - padBottom)) + minY,
     };
 };
 
-export const getTimeScale = ({ minX, maxX, pixX }) => offset => {
+export const getTimeScale = ({ minX, maxX, pixX }) => (offset) => {
     // divides the time axis (horizontal) into appropriate chunks
     const ticks = timeSeriesTicks(offset + minX, offset + maxX);
 
     if (ticks) {
-        return ticks.map(tick => ({
+        return ticks.map((tick) => ({
             major: tick.major,
             pix: Math.floor(pixX(tick.time - offset)) + 0.5,
-            text: tick.label || null
+            text: tick.label || null,
         }));
     }
 
@@ -43,7 +39,7 @@ function getControlPointsAtPoint([x0, y0], [x1, y1], [x2, y2]) {
     const distLeft = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5;
     const distRight = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5;
 
-    const controlFactor0 = GRAPH_CURVINESS * distLeft / (distLeft + distRight);
+    const controlFactor0 = GRAPH_CURVINESS * (distLeft / (distLeft + distRight));
     const controlFactor1 = GRAPH_CURVINESS - controlFactor0;
 
     const controlX0 = Math.round(x1 - controlFactor0 * (x2 - x0));
@@ -64,15 +60,17 @@ export function getControlPoints(data) {
         return getControlPointsAtPoint(
             data[index - 1],
             point,
-            data[index + 1]
+            data[index + 1],
         );
     });
 }
 
-export function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
+export function getLinePath({
+    width, height, data, smooth, fill, pixX, pixY,
+}) {
     const getPixPoint = ([xValue, yValue]) => ([pixX(xValue), pixY(yValue)]);
     const pixelsNumeric = data.map(getPixPoint);
-    const pixels = pixelsNumeric.map(point => point.map(value => value.toFixed(1)));
+    const pixels = pixelsNumeric.map((point) => point.map((value) => value.toFixed(1)));
 
     let line = null;
 
@@ -85,7 +83,7 @@ export function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
                     return {
                         start: point,
                         type: 'Q',
-                        args: [controlPoints[index + 1][0], pixels[index + 1]]
+                        args: [controlPoints[index + 1][0], pixels[index + 1]],
                     };
                 }
                 if (index === pixels.length - 2) {
@@ -94,8 +92,8 @@ export function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
                         type: 'Q',
                         args: [
                             controlPoints[index][1],
-                            pixels[index + 1]
-                        ]
+                            pixels[index + 1],
+                        ],
                     };
                 }
 
@@ -105,17 +103,16 @@ export function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
                     args: [
                         controlPoints[index][1],
                         controlPoints[index + 1][0],
-                        pixels[index + 1]
-                    ]
+                        pixels[index + 1],
+                    ],
                 };
-
             });
     } else {
         line = pixels.slice(1)
             .map((point, index) => ({
                 start: pixels[index],
                 type: 'L',
-                args: [point]
+                args: [point],
             }));
     }
     if (fill) {
@@ -123,13 +120,13 @@ export function getLinePath({ width, height, data, smooth, fill, pixX, pixY }) {
             {
                 start: pixels[pixels.length - 1],
                 type: 'L',
-                args: [[width, height]]
+                args: [[width, height]],
             },
             {
                 start: [width, height],
                 type: 'L',
-                args: [[pixels[0][0], height]]
-            }
+                args: [[pixels[0][0], height]],
+            },
         ]);
     }
 
@@ -141,15 +138,14 @@ export function getLinePathPart(linePath) {
         return '';
     }
 
-    const parts = linePath.map(({ type, args }) =>
-        `${type}${args.map(point => point.join(',')).join(' ')}`);
+    const parts = linePath.map(({ type, args }) => `${type}${args.map((point) => point.join(',')).join(' ')}`);
 
     const [{ start }] = linePath;
 
     return `M${start.join(',')} ${parts.join(' ')}`;
 }
 
-export const getSingleLinePath = props => getLinePathPart(getLinePath(props));
+export const getSingleLinePath = (props) => getLinePathPart(getLinePath(props));
 
 export function getPathProps({ strokeWidth = 2, dashed = false }) {
     if (dashed) {
@@ -163,14 +159,16 @@ export const joinChoppedPath = (linePath, ends, color) => ends.slice(1)
     .concat([linePath.length])
     .map((end, endIndex) => ({
         path: getLinePathPart(linePath.slice(ends[endIndex], end)),
-        stroke: color(end, endIndex)
+        stroke: color(end, endIndex),
     }))
     .filter(({ path }) => path.length);
 
-export function getDynamicLinePathsStop({ data, color, smooth, pixX, pixY }) {
+export function getDynamicLinePathsStop({
+    data, color, smooth, pixX, pixY,
+}) {
     const { changes, values } = color;
 
-    const getColorIndex = value => changes.reduce((last, change, index) => {
+    const getColorIndex = (value) => changes.reduce((last, change, index) => {
         if (value >= change) {
             return index + 1;
         }
@@ -186,54 +184,61 @@ export function getDynamicLinePathsStop({ data, color, smooth, pixX, pixY }) {
                 // linearly interpolate to the cut off value between the two points
                 const pointBetween = [
                     (point[0] + data[index][0]) / 2,
-                    changes[Math.min(colorIndex, lastColorIndex)]
+                    changes[Math.min(colorIndex, lastColorIndex)],
                 ];
 
                 return [
                     lastItems.concat([pointBetween, point]),
                     lastEnds.concat([lastItems.length]),
-                    colorIndex
+                    colorIndex,
                 ];
             }
 
             return [
                 lastItems.concat([point]),
                 lastEnds,
-                colorIndex
+                colorIndex,
             ];
         }, [
             data.slice(0, 1),
             [0],
-            getColorIndex(data[0][1])
+            getColorIndex(data[0][1]),
         ]);
 
-    const linePath = getLinePath({ data: items, smooth, pixX, pixY });
+    const linePath = getLinePath({
+        data: items, smooth, pixX, pixY,
+    });
 
-    return joinChoppedPath(linePath, ends, end => values[getColorIndex(items[end - 1][1])]);
+    return joinChoppedPath(linePath, ends, (end) => values[getColorIndex(items[end - 1][1])]);
 }
 
-export function getDynamicLinePaths({ data, color, smooth, pixX, pixY }) {
+export function getDynamicLinePaths({
+    data, color, smooth, pixX, pixY,
+}) {
     if (data.length < 2) {
         return null;
     }
 
     if (typeof color === 'object') {
-        return getDynamicLinePathsStop({ data, color, smooth, pixX, pixY });
+        return getDynamicLinePathsStop({
+            data, color, smooth, pixX, pixY,
+        });
     }
 
-    const linePath = getLinePath({ data, smooth, pixX, pixY });
+    const linePath = getLinePath({
+        data, smooth, pixX, pixY,
+    });
 
     const colors = data.map((point, index) => color(point, index));
     const ends = colors.reduce((indexes, value, index) => {
-        const next = index === colors.length - 1 ||
-            (index > 0 && colors[index - 1] !== value);
+        const next = index === colors.length - 1
+            || (index > 0 && colors[index - 1] !== value);
 
         if (next) {
             return [...indexes, index];
         }
 
         return indexes;
-
     }, [0]);
 
     return joinChoppedPath(linePath, ends, (end, endIndex) => colors[ends[endIndex]]);

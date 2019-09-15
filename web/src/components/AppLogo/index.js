@@ -21,5 +21,5 @@ export default function AppLogo({ loading, unsaved }) {
 
 AppLogo.propTypes = {
     loading: PropTypes.bool.isRequired,
-    unsaved: PropTypes.bool.isRequired
+    unsaved: PropTypes.bool.isRequired,
 };

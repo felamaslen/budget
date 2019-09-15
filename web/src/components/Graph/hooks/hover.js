@@ -23,25 +23,26 @@ function getClosest(lines, position, calc) {
 
     const { posX, posY } = position;
 
-    return lines.reduce((red, line, lineIndex) => {
-        return line.data.reduce((last, point, index) => {
-            const distX = Math.abs(calc.pixX(point[0]) - posX);
-            const distY = Math.abs(calc.pixY(point[1]) - posY);
+    return lines.reduce((red, line, lineIndex) => line.data.reduce((last, point, index) => {
+        const distX = Math.abs(calc.pixX(point[0]) - posX);
+        const distY = Math.abs(calc.pixY(point[1]) - posY);
 
-            if (last && !(distX < last.distX || (distX === last.distX && distY < last.distY))) {
-                return last;
-            }
+        if (last && !(distX < last.distX || (distX === last.distX && distY < last.distY))) {
+            return last;
+        }
 
-            return { distX, distY, lineIndex, point, index };
-
-        }, red);
-    }, null);
+        return {
+            distX, distY, lineIndex, point, index,
+        };
+    }, red), null);
 }
 
-export function useHover({ lines, isMobile, calc, hoverEffect }) {
+export function useHover({
+    lines, isMobile, calc, hoverEffect,
+}) {
     const [hlPoint, setHlPoint] = useState(null);
 
-    const onHover = useCallback(position => {
+    const onHover = useCallback((position) => {
         if (!(calc && lines && !isMobile)) {
             return null;
         }
@@ -64,7 +65,7 @@ export function useHover({ lines, isMobile, calc, hoverEffect }) {
 
             onHover({
                 posX: pageX - left,
-                posY: pageY - top
+                posY: pageY - top,
             });
         });
 

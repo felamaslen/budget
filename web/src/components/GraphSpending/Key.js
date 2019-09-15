@@ -5,7 +5,9 @@ import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
 
-export default function Key({ pixX, pixY, maxX, minY, maxY, title }) {
+export default function Key({
+    pixX, pixY, maxX, minY, maxY, title,
+}) {
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
     const future0 = pixX(Date.now() / 1000);
@@ -34,5 +36,5 @@ Key.propTypes = {
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    pixY: PropTypes.func.isRequired,
 };

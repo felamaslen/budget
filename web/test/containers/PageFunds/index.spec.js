@@ -9,28 +9,28 @@ import PageFunds from '~client/containers/PageFunds';
 import { widthPageMobile } from '~client/constants/styles.json';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = state => state) => {
+const getContainer = (customProps = {}, customState = (state) => state) => {
     const state = customState({
         ...testState,
-        now: DateTime.fromISO('2019-04-06T23:02Z')
+        now: DateTime.fromISO('2019-04-06T23:02Z'),
     });
 
     const store = createMockStore(state);
 
     const props = {
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
             <PageFunds {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
 };
 
-test('list page with extra props', t => {
+test('list page with extra props', (t) => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
 
@@ -40,7 +40,7 @@ test('list page with extra props', t => {
     t.is(div.className, 'page page-list page-funds');
 });
 
-test('funds meta - mobile info box', t => {
+test('funds meta - mobile info box', (t) => {
     window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile - 1 });
 
     const { container } = getContainer();
@@ -63,7 +63,7 @@ test('funds meta - mobile info box', t => {
     t.is(graph.className, 'graph-container graph-fund-history');
 });
 
-test('funds meta - desktop info box', t => {
+test('funds meta - desktop info box', (t) => {
     window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile + 1 });
 
     const { container } = getContainer();

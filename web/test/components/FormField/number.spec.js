@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -8,17 +7,19 @@ import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import FormFieldNumber from '~client/components/FormField/number';
 
+const test = ninos(ava);
+
 const getContainer = memoize((customProps = {}) => {
     const props = {
         value: 103,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldNumber {...props} />);
 });
 
-test('render its basic structure', t => {
+test('render its basic structure', (t) => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -28,7 +29,7 @@ test('render its basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test('render an input', t => {
+test('render an input', (t) => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -39,10 +40,10 @@ test('render an input', t => {
     t.is(input.value, '103');
 });
 
-test('fire onChange', t => {
+test('fire onChange', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({
-        onChange
+        onChange,
     });
 
     const [div] = container.childNodes;

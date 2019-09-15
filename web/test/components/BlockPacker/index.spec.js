@@ -1,12 +1,13 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import memoize from 'fast-memoize';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import BlockPacker from '~client/components/BlockPacker';
+
+const test = ninos(ava);
 
 const getBlockPacker = memoize((customProps = {}) => {
     const props = {
@@ -31,11 +32,11 @@ const getBlockPacker = memoize((customProps = {}) => {
                                         value: 3,
                                         color: 'teal',
                                         width: 3,
-                                        height: 3.1
-                                    }
-                                ]
-                            }
-                        ]
+                                        height: 3.1,
+                                    },
+                                ],
+                            },
+                        ],
                     },
                     {
                         name: 'bar',
@@ -49,14 +50,14 @@ const getBlockPacker = memoize((customProps = {}) => {
                                         value: 4,
                                         color: 'teal',
                                         width: 3,
-                                        height: 3.1
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
+                                        height: 3.1,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
         ],
         activeMain: 'not_foo',
         activeSub: 'not_bar',
@@ -64,13 +65,13 @@ const getBlockPacker = memoize((customProps = {}) => {
         status: 'bar',
         onClick: () => null,
         onHover: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<BlockPacker {...props} />);
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getBlockPacker();
 
     t.is(container.tagName, 'DIV');
@@ -82,7 +83,7 @@ test('basic structure', t => {
     t.is(div.childNodes.length, 2);
 });
 
-test('outer block tree', t => {
+test('outer block tree', (t) => {
     const { container } = getBlockPacker();
     const [div] = container.childNodes;
     const [blockTreeOuter] = div.childNodes;
@@ -91,7 +92,7 @@ test('outer block tree', t => {
     t.is(blockTreeOuter.className, 'block-tree-outer');
 });
 
-test('status bar', t => {
+test('status bar', (t) => {
     const { container } = getBlockPacker();
     const [div] = container.childNodes;
     const [, statusBarOuter] = div.childNodes;
@@ -108,7 +109,7 @@ test('status bar', t => {
     t.is(inner.innerHTML, 'bar');
 });
 
-test('blocks', t => {
+test('blocks', (t) => {
     const { container } = getBlockPacker();
     const [div] = container.childNodes;
     const [blockTreeOuter] = div.childNodes;
@@ -116,7 +117,7 @@ test('blocks', t => {
     t.is(blockTreeOuter.childNodes.length, 1);
 });
 
-test('running onHover, with null values on mouseout / touchend', t => {
+test('running onHover, with null values on mouseout / touchend', (t) => {
     const onHover = t.context.stub();
     const { container } = getBlockPacker({ onHover });
 
@@ -129,7 +130,7 @@ test('running onHover, with null values on mouseout / touchend', t => {
     t.deepEqual(onHover.calls[0].arguments, [null, null]);
 });
 
-test('not rendering blocks if blocks is null', t => {
+test('not rendering blocks if blocks is null', (t) => {
     const { container } = getBlockPacker({ blocks: null });
     const [div] = container.childNodes;
     const [blocks] = div.childNodes;

@@ -3,10 +3,10 @@ import { DateTime } from 'luxon';
 
 import {
     timeSeriesTicks,
-    getMonthDatesList
+    getMonthDatesList,
 } from '~client/modules/date';
 
-test('timeSeriesTicks handles small ranges (less than 10 minutes)', t => {
+test('timeSeriesTicks handles small ranges (less than 10 minutes)', (t) => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 167);
     const expectedResult = [
         { label: '11:21', major: 1, time: 1497871260 },
@@ -15,13 +15,13 @@ test('timeSeriesTicks handles small ranges (less than 10 minutes)', t => {
         { label: false, major: 0, time: 1497871350 },
         { label: '11:23', major: 1, time: 1497871380 },
         { label: false, major: 0, time: 1497871410 },
-        { label: '11:24', major: 1, time: 1497871440 }
+        { label: '11:24', major: 1, time: 1497871440 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('timeSeriesTicks handles ranges of between 10 minutes and one hour', t => {
+test('timeSeriesTicks handles ranges of between 10 minutes and one hour', (t) => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 795);
 
     const expectedResult = [
@@ -39,13 +39,13 @@ test('timeSeriesTicks handles ranges of between 10 minutes and one hour', t => {
         { label: false, major: 0, time: 1497871920 },
         { label: false, major: 0, time: 1497871980 },
         { label: false, major: 0, time: 1497872040 },
-        { label: false, major: 0, time: 1497872100 }
+        { label: false, major: 0, time: 1497872100 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('timeSeriesTicks handles ranges of between one hour and 0.6 days', t => {
+test('timeSeriesTicks handles ranges of between one hour and 0.6 days', (t) => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 51320);
 
     const expectedResult = [
@@ -78,13 +78,13 @@ test('timeSeriesTicks handles ranges of between one hour and 0.6 days', t => {
         { label: 'Tue', major: 2, time: 1497916800 },
         { label: false, major: 0, time: 1497918600 },
         { label: '01:00', major: 1, time: 1497920400 },
-        { label: false, major: 0, time: 1497922200 }
+        { label: false, major: 0, time: 1497922200 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('timeSeriesTicks handles ranges of between 0.6 days and eight days', t => {
+test('timeSeriesTicks handles ranges of between 0.6 days and eight days', (t) => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 86400 * 3.32);
 
     const expectedResult = [
@@ -115,13 +115,13 @@ test('timeSeriesTicks handles ranges of between 0.6 days and eight days', t => {
         { label: false, major: 0, time: 1498122000 },
         { label: false, major: 0, time: 1498132800 },
         { label: false, major: 0, time: 1498143600 },
-        { label: false, major: 0, time: 1498154400 }
+        { label: false, major: 0, time: 1498154400 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('timeSeriesTicks handles ranges of between eight and 35 days', t => {
+test('timeSeriesTicks handles ranges of between eight and 35 days', (t) => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 86400 * 11.4);
 
     const expectedResult = [
@@ -137,13 +137,13 @@ test('timeSeriesTicks handles ranges of between eight and 35 days', t => {
         { label: false, major: 0, time: 1498608000 },
         { label: false, major: 0, time: 1498694400 },
         { label: false, major: 0, time: 1498780800 },
-        { label: false, major: 0, time: 1498867200 }
+        { label: false, major: 0, time: 1498867200 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('timeSeriesTicks handles ranges of between 35 days and a year', t => {
+test('timeSeriesTicks handles ranges of between 35 days and a year', (t) => {
     const result = timeSeriesTicks(1497871283, 1497871283 + 86400 * 35 * 1.5);
 
     const expectedResult = [
@@ -157,13 +157,13 @@ test('timeSeriesTicks handles ranges of between 35 days and a year', t => {
         { label: false, major: 0, time: 1501459200 },
         { label: 'Aug', major: 2, time: 1501545601 },
         { label: false, major: 0, time: 1502064000 },
-        { label: false, major: 0, time: 1502668800 }
+        { label: false, major: 0, time: 1502668800 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('timeSeriesTicks returns ticks for every month of the year', t => {
+test('timeSeriesTicks returns ticks for every month of the year', (t) => {
     const result = timeSeriesTicks(1531414873, 1561140074);
 
     const expectedLabels = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
@@ -173,7 +173,7 @@ test('timeSeriesTicks returns ticks for every month of the year', t => {
     t.deepEqual(labels, expectedLabels);
 });
 
-test('timeSeriesTicks handles ranges of years', t => {
+test('timeSeriesTicks handles ranges of years', (t) => {
     const result = timeSeriesTicks(1456790400, 1494073200);
 
     const expectedResult = [
@@ -191,13 +191,13 @@ test('timeSeriesTicks handles ranges of years', t => {
         { label: false, major: 0, time: 1485907200 },
         { label: false, major: 0, time: 1488326400 },
         { label: false, major: 0, time: 1491004800 },
-        { label: false, major: 0, time: 1493596800 }
+        { label: false, major: 0, time: 1493596800 },
     ];
 
     t.deepEqual(result, expectedResult);
 });
 
-test('getMonthDatesList gets a list of dates at the end of each month', t => {
+test('getMonthDatesList gets a list of dates at the end of each month', (t) => {
     const startDate = DateTime.fromISO('2018-01-01');
     const endDate = DateTime.fromISO('2018-07-01');
 
@@ -208,13 +208,13 @@ test('getMonthDatesList gets a list of dates at the end of each month', t => {
         DateTime.fromISO('2018-04-30T23:59:59.999Z'),
         DateTime.fromISO('2018-05-31T23:59:59.999Z'),
         DateTime.fromISO('2018-06-30T23:59:59.999Z'),
-        DateTime.fromISO('2018-07-31T23:59:59.999Z')
+        DateTime.fromISO('2018-07-31T23:59:59.999Z'),
     ]);
 });
 
-test('getMonthDatesList returns an empty array if both dates are in the same month', t => {
+test('getMonthDatesList returns an empty array if both dates are in the same month', (t) => {
     t.deepEqual(getMonthDatesList(
         DateTime.fromISO('2018-01-03'),
-        DateTime.fromISO('2018-01-29')
+        DateTime.fromISO('2018-01-29'),
     ), []);
 });

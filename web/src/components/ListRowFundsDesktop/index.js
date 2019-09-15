@@ -6,7 +6,11 @@ import { gainShape } from '~client/prop-types/page/funds';
 import GraphFundItem from '~client/components/GraphFundItem';
 import FundGainInfo from '~client/components/FundGainInfo';
 
-export default function ListRowFundsDesktop({ row: { item, sold, prices, gain } }) {
+export default function ListRowFundsDesktop({
+    row: {
+        item, sold, prices, gain,
+    },
+}) {
     const [popout, setPopout] = useState(false);
     const onToggleGraph = useCallback(() => {
         setPopout(!popout);
@@ -35,6 +39,6 @@ ListRowFundsDesktop.propTypes = {
         item: PropTypes.string.isRequired,
         sold: PropTypes.bool.isRequired,
         prices: PropTypes.array,
-        gain: gainShape.isRequired
-    })
+        gain: gainShape.isRequired,
+    }),
 };

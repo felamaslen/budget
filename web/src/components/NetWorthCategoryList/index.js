@@ -9,7 +9,7 @@ import FormFieldColor from '~client/components/FormField/color';
 import NetWorthSubcategoryList from '~client/components/NetWorthSubcategoryList';
 import {
     category as categoryShape,
-    subcategory as subcategoryShape
+    subcategory as subcategoryShape,
 } from '~client/prop-types/net-worth/category';
 import { CREATE_ID } from '~client/constants/data';
 
@@ -17,25 +17,27 @@ import './style.scss';
 
 const typeOptions = [
     { internal: 'asset', external: 'Asset' },
-    { internal: 'liability', external: 'Liability' }
+    { internal: 'liability', external: 'Liability' },
 ];
 
 function NetWorthCategoryItemForm({
-    item: { id, type, category, color },
+    item: {
+        id, type, category, color,
+    },
     onChange,
-    buttonText
+    buttonText,
 }) {
     const [tempType, setTempType] = useState(type);
     const [tempCategory, setTempCategory] = useState(category);
     const [tempColor, setTempColor] = useState(color);
 
-    const touched = id === CREATE_ID ||
-        !(tempType === type && tempCategory === category && tempColor === color);
+    const touched = id === CREATE_ID
+        || !(tempType === type && tempCategory === category && tempColor === color);
 
     const onChangeItem = useCallback(() => onChange({
         type: tempType,
         category: tempCategory,
-        color: tempColor
+        color: tempColor,
     }), [onChange, tempType, tempCategory, tempColor]);
 
     return (
@@ -43,7 +45,7 @@ function NetWorthCategoryItemForm({
             className={classNames('net-worth-category-item-form', {
                 touched,
                 asset: type === 'asset',
-                liability: type === 'liability'
+                liability: type === 'liability',
             })}
             style={{ backgroundColor: tempColor }}
         >
@@ -74,7 +76,7 @@ function NetWorthCategoryItemForm({
 NetWorthCategoryItemForm.propTypes = {
     item: categoryShape,
     buttonText: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };
 
 NetWorthCategoryItemForm.defaultProps = {
@@ -82,8 +84,8 @@ NetWorthCategoryItemForm.defaultProps = {
         id: CREATE_ID,
         type: 'asset',
         category: 'Cash',
-        color: '#ccffcc'
-    }
+        color: '#ccffcc',
+    },
 };
 
 function NetWorthCategoryItem({
@@ -97,18 +99,18 @@ function NetWorthCategoryItem({
     onExpandToggle,
     onCreateSubcategory,
     onUpdateSubcategory,
-    onDeleteSubcategory
+    onDeleteSubcategory,
 }) {
-    const onChange = useCallback(values => {
+    const onChange = useCallback((values) => {
         onUpdate(item.id, values);
     }, [onUpdate, item.id]);
 
     const categorySubcategories = useMemo(() => subcategories.filter(
-        ({ categoryId }) => categoryId === item.id
+        ({ categoryId }) => categoryId === item.id,
     ), [item.id, subcategories]);
 
     const parent = useMemo(() => categories.find(
-        ({ id: categoryId }) => categoryId === item.id
+        ({ id: categoryId }) => categoryId === item.id,
     ), [item.id, categories]);
 
     const itemStyle = useMemo(() => ({ ...style, backgroundColor: item.color }),
@@ -118,7 +120,7 @@ function NetWorthCategoryItem({
 
     return (
         <div className={classNames('net-worth-category-item', {
-            expanded: expanded === item.id
+            expanded: expanded === item.id,
         })} style={itemStyle}>
             <div className="net-worth-category-item-main">
                 <div className="button-toggle-visibility">
@@ -160,11 +162,11 @@ NetWorthCategoryItem.propTypes = {
     subcategories: PropTypes.arrayOf(subcategoryShape),
     onCreateSubcategory: PropTypes.func.isRequired,
     onUpdateSubcategory: PropTypes.func.isRequired,
-    onDeleteSubcategory: PropTypes.func.isRequired
+    onDeleteSubcategory: PropTypes.func.isRequired,
 };
 
 NetWorthCategoryItem.defaultProps = {
-    style: {}
+    style: {},
 };
 
 const NetWorthCategoryCreateItem = ({ onCreate }) => (
@@ -177,7 +179,7 @@ const NetWorthCategoryCreateItem = ({ onCreate }) => (
 );
 
 NetWorthCategoryCreateItem.propTypes = {
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };
 
 export default function NetWorthCategoryList({
@@ -188,10 +190,10 @@ export default function NetWorthCategoryList({
     onDeleteCategory,
     onCreateSubcategory,
     onUpdateSubcategory,
-    onDeleteSubcategory
+    onDeleteSubcategory,
 }) {
     const [expanded, setExpanded] = useState(null);
-    const onExpandToggle = useCallback(id => setExpanded(last => {
+    const onExpandToggle = useCallback((id) => setExpanded((last) => {
         if (last === id) {
             return null;
         }
@@ -206,7 +208,7 @@ export default function NetWorthCategoryList({
         onExpandToggle,
         onCreateSubcategory,
         onUpdateSubcategory,
-        onDeleteSubcategory
+        onDeleteSubcategory,
     };
 
     if (!(categories && subcategories)) {
@@ -238,5 +240,5 @@ NetWorthCategoryList.propTypes = {
     onDeleteCategory: PropTypes.func.isRequired,
     onCreateSubcategory: PropTypes.func.isRequired,
     onUpdateSubcategory: PropTypes.func.isRequired,
-    onDeleteSubcategory: PropTypes.func.isRequired
+    onDeleteSubcategory: PropTypes.func.isRequired,
 };

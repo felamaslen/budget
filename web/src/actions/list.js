@@ -6,7 +6,7 @@ export const listItemCreated = (page, item) => ({
     type: actions.LIST_ITEM_CREATED,
     page,
     item,
-    fakeId: shortid.generate()
+    fakeId: shortid.generate(),
 });
 
 export const listItemUpdated = (page, id, item, oldItem) => ({
@@ -14,12 +14,12 @@ export const listItemUpdated = (page, id, item, oldItem) => ({
     type: actions.LIST_ITEM_UPDATED,
     id,
     item,
-    oldItem
+    oldItem,
 });
 
 export const listItemDeleted = (id, { page }, oldItem) => ({
     page,
     type: actions.LIST_ITEM_DELETED,
     id,
-    oldItem
+    oldItem,
 });

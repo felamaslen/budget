@@ -52,17 +52,16 @@ function getQuery(db, user, table, columns, limitCondition = null) {
 }
 
 function formatResults(columnMap) {
-    return row => Object.keys(row).reduce((item, key) => {
+    return (row) => Object.keys(row).reduce((item, key) => {
         const value = row[key];
 
         const column = columnMap[key];
 
         if (key === 'date') {
-            return { ...item, 'd': DateTime.fromJSDate(value).toISODate() };
+            return { ...item, d: DateTime.fromJSDate(value).toISODate() };
         }
 
         return { ...item, [column]: value };
-
     }, {});
 }
 
@@ -95,7 +94,7 @@ async function getResults(config, db, user, now, table, limit = null) {
         id: 'I',
         date: 'd',
         item: 'i',
-        cost: 'c'
+        cost: 'c',
     };
     const columns = Object.keys(columnMap);
 
@@ -172,7 +171,7 @@ async function deleteItem(db, user, table, data) {
 
 function routeModify(config, db, table, schema, operation, successCode = 200) {
     return async (req, res) => {
-        const user = req.user;
+        const { user } = req;
 
         const { error, value } = joi.validate(req.body, schema);
 
@@ -189,10 +188,9 @@ function routeModify(config, db, table, schema, operation, successCode = 200) {
             return res.status(successCode)
                 .json({
                     ...result,
-                    total: totalCost
+                    total: totalCost,
                 });
-        }
-        catch (err) {
+        } catch (err) {
             if (err instanceof common.ErrorBadRequest) {
                 return res.status(err.statusCode)
                     .json({ errorMessage: err.message });
@@ -230,5 +228,5 @@ module.exports = {
     routeGet,
     routePost,
     routePut,
-    routeDelete
+    routeDelete,
 };

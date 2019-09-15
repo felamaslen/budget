@@ -11,14 +11,16 @@ import {
     addToTransactionsList,
     modifyTransactionById,
     transactionShape,
-    transactionsListShape
+    transactionsListShape,
 } from '~client/modules/data';
 import { CREATE_ID } from '~client/constants/data';
 
-function FormFieldTransaction({ item, children, onChange, active }) {
-    const onChangeDate = useCallback(value => onChange(item.id, 'date', value), [onChange, item.id]);
-    const onChangeUnits = useCallback(value => onChange(item.id, 'units', value), [onChange, item.id]);
-    const onChangeCost = useCallback(value => onChange(item.id, 'cost', value), [onChange, item.id]);
+function FormFieldTransaction({
+    item, children, onChange, active,
+}) {
+    const onChangeDate = useCallback((value) => onChange(item.id, 'date', value), [onChange, item.id]);
+    const onChangeUnits = useCallback((value) => onChange(item.id, 'units', value), [onChange, item.id]);
+    const onChangeCost = useCallback((value) => onChange(item.id, 'cost', value), [onChange, item.id]);
 
     return (
         <li className="transactions-list-item">
@@ -61,39 +63,38 @@ FormFieldTransaction.propTypes = {
     item: transactionShape,
     children: PropTypes.node,
     onChange: PropTypes.func.isRequired,
-    active: PropTypes.bool
+    active: PropTypes.bool,
 };
 
 const newItemInit = {
     id: CREATE_ID,
     date: DateTime.local(),
     units: 0,
-    cost: 0
+    cost: 0,
 };
 
 function FormFieldTransactions({ create, ...props }) {
     const [currentValue, , onChangeInput] = useField({ ...props, string: true });
 
-    const onChange = useCallback(value => onChangeInput({
-        target: { value }
+    const onChange = useCallback((value) => onChangeInput({
+        target: { value },
     }), [onChangeInput]);
 
     const { value, active } = props;
 
-    const onChangeTransaction = useCallback((id, field, fieldValue) =>
-        onChange(modifyTransactionById(value, id, {
-            [field]: fieldValue
-        })), [value, onChange]);
+    const onChangeTransaction = useCallback((id, field, fieldValue) => onChange(modifyTransactionById(value, id, {
+        [field]: fieldValue,
+    })), [value, onChange]);
 
-    const onRemoveTransaction = useCallback(id => onChange(
-        currentValue.filter(({ id: valueId }) => valueId !== id)
+    const onRemoveTransaction = useCallback((id) => onChange(
+        currentValue.filter(({ id: valueId }) => valueId !== id),
     ), [currentValue, onChange]);
 
     const [newItem, setNewItem] = useState(newItemInit);
 
-    const onChangeAddField = useCallback((id, field, fieldValue) => setNewItem(last => ({
+    const onChangeAddField = useCallback((id, field, fieldValue) => setNewItem((last) => ({
         ...last,
-        [field]: fieldValue
+        [field]: fieldValue,
     })), []);
 
     const onAdd = useCallback(() => {
@@ -128,7 +129,7 @@ function FormFieldTransactions({ create, ...props }) {
                                 </span>
                             </FormFieldTransaction>
                         )}
-                        {currentValue.map(item => (
+                        {currentValue.map((item) => (
                             <FormFieldTransaction key={item.id}
                                 item={item}
                                 active={active}
@@ -153,12 +154,12 @@ FormFieldTransactions.propTypes = {
     create: PropTypes.bool,
     value: transactionsListShape,
     active: PropTypes.bool,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };
 
 FormFieldTransactions.defaultProps = {
     create: false,
-    value: []
+    value: [],
 };
 
 export default FormFieldTransactions;

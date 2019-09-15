@@ -15,7 +15,7 @@ export function ListRowDesktopBase({
     onUpdate,
     command,
     setCommand,
-    page
+    page,
 }) {
     const columns = PAGES[page].cols;
 
@@ -38,16 +38,14 @@ export function ListRowDesktopBase({
                 column: nextColumn,
                 payload: nextValue,
                 activeId: toId,
-                activeColumn: toColumn
+                activeColumn: toColumn,
             });
         } else {
             setActive(toId, toColumn);
         }
-
-
     }, [item.id, columns, setCommand, setActive]);
 
-    return columns.map(column => (
+    return columns.map((column) => (
         <ListRowCell key={column}
             page={page}
             id={item.id}
@@ -67,14 +65,14 @@ export function ListRowDesktopBase({
 
 ListRowDesktopBase.propTypes = {
     item: PropTypes.shape({
-        id: PropTypes.string.isRequired
+        id: PropTypes.string.isRequired,
     }).isRequired,
     page: PropTypes.string.isRequired,
     activeColumn: PropTypes.string,
     setActive: PropTypes.func.isRequired,
     command: PropTypes.object.isRequired,
     setCommand: PropTypes.func.isRequired,
-    onUpdate: PropTypes.func.isRequired
+    onUpdate: PropTypes.func.isRequired,
 };
 
 function ListRowDesktop({
@@ -88,11 +86,11 @@ function ListRowDesktop({
     onDelete,
     AfterRow,
     activeColumn,
-    setActive
+    setActive,
 }) {
     const onColumnUpdate = useCallback((column, value) => onUpdate(page, item.id, {
         ...item,
-        [column]: value
+        [column]: value,
     }, item), [onUpdate, page, item]);
 
     return (
@@ -100,7 +98,7 @@ function ListRowDesktop({
             className={classNames('list-row-desktop', item.className || {}, {
                 odd,
                 future: item.future,
-                'first-present': item.firstPresent
+                'first-present': item.firstPresent,
             })}
             style={style}
         >
@@ -140,8 +138,8 @@ ListRowDesktop.propTypes = {
         daily: PropTypes.number,
         className: PropTypes.oneOfType([
             PropTypes.object,
-            PropTypes.string
-        ])
+            PropTypes.string,
+        ]),
     }).isRequired,
     active: PropTypes.bool,
     command: PropTypes.object.isRequired,
@@ -149,12 +147,12 @@ ListRowDesktop.propTypes = {
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     daily: PropTypes.number,
-    AfterRow: PropTypes.func
+    AfterRow: PropTypes.func,
 };
 
 ListRowDesktop.defaultProps = {
     style: {},
-    active: false
+    active: false,
 };
 
 export default memo(ListRowDesktop);

@@ -8,12 +8,12 @@ function routeCategories(db) {
     const route = makeCrudRoute({
         table,
         item,
-        schema: schemaCategory
+        schema: schemaCategory,
     })(db);
 
     return route;
 }
 
 module.exports = {
-    routeCategories
+    routeCategories,
 };

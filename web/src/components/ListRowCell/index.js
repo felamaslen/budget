@@ -13,7 +13,7 @@ function ListRowCell({
     setActive,
     command,
     onSuggestionConfirmed,
-    onUpdate
+    onUpdate,
 }) {
     const onSuggestion = useCallback((suggestion, next) => {
         onUpdate(column, suggestion);
@@ -58,7 +58,7 @@ ListRowCell.propTypes = {
     active: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     command: PropTypes.object,
-    onUpdate: PropTypes.func.isRequired
+    onUpdate: PropTypes.func.isRequired,
 };
 
 export default React.memo(ListRowCell);

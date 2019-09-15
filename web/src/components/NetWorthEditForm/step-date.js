@@ -6,7 +6,7 @@ import FormContainer from '~client/components/NetWorthEditForm/form-container';
 import FormFieldDate from '~client/components/FormField/date';
 
 export default function StepDate({ containerProps, item, onEdit }) {
-    const onChange = useCallback(date => onEdit({ ...item, date }), [item, onEdit]);
+    const onChange = useCallback((date) => onEdit({ ...item, date }), [item, onEdit]);
 
     return (
         <FormContainer {...containerProps} className="step-date">
@@ -21,7 +21,7 @@ export default function StepDate({ containerProps, item, onEdit }) {
 StepDate.propTypes = {
     containerProps: PropTypes.object.isRequired,
     item: PropTypes.shape({
-        date: PropTypes.instanceOf(DateTime).isRequired
+        date: PropTypes.instanceOf(DateTime).isRequired,
     }),
-    onEdit: PropTypes.func.isRequired
+    onEdit: PropTypes.func.isRequired,
 };

@@ -9,7 +9,7 @@ import crudSaga, {
     updateNetWorth,
     updateCrud,
     updateCrudFromAction,
-    matchCrudAction
+    matchCrudAction,
 } from '~client/sagas/crud';
 import { getLocked, getApiKey } from '~client/selectors/api';
 import { getCrudRequests } from '~client/selectors/list';
@@ -19,7 +19,7 @@ import {
     syncLocked,
     syncUnlocked,
     syncReceived,
-    syncErrorOccurred
+    syncErrorOccurred,
 } from '~client/actions/api';
 import {
     CREATE,
@@ -27,12 +27,12 @@ import {
     DELETE,
     API_PREFIX,
     API_BACKOFF_TIME,
-    TIMER_UPDATE_SERVER
+    TIMER_UPDATE_SERVER,
 } from '~client/constants/data';
 import {
     LIST_ITEM_CREATED,
     LIST_ITEM_UPDATED,
-    LIST_ITEM_DELETED
+    LIST_ITEM_DELETED,
 } from '~client/constants/actions/list';
 import {
     NET_WORTH_CATEGORY_CREATED,
@@ -43,7 +43,7 @@ import {
     NET_WORTH_SUBCATEGORY_DELETED,
     NET_WORTH_CREATED,
     NET_WORTH_UPDATED,
-    NET_WORTH_DELETED
+    NET_WORTH_DELETED,
 } from '~client/constants/actions/net-worth';
 
 const listRequests = [
@@ -58,8 +58,8 @@ const listRequests = [
             item: 'some item',
             category: 'some category',
             cost: 2563,
-            shop: 'some shop'
-        }
+            shop: 'some shop',
+        },
     },
     {
         type: UPDATE,
@@ -69,8 +69,8 @@ const listRequests = [
         query: {},
         body: {
             id: 'some-real-id',
-            date: '2019-07-01'
-        }
+            date: '2019-07-01',
+        },
     },
     {
         type: DELETE,
@@ -79,9 +79,9 @@ const listRequests = [
         route: 'holiday',
         query: {},
         body: {
-            id: 'other-real-id'
-        }
-    }
+            id: 'other-real-id',
+        },
+    },
 ];
 
 const listHttpRequests = [
@@ -94,8 +94,8 @@ const listHttpRequests = [
             item: 'some item',
             category: 'some category',
             cost: 2563,
-            shop: 'some shop'
-        }
+            shop: 'some shop',
+        },
     },
     {
         method: 'put',
@@ -103,17 +103,17 @@ const listHttpRequests = [
         query: {},
         body: {
             id: 'some-real-id',
-            date: '2019-07-01'
-        }
+            date: '2019-07-01',
+        },
     },
     {
         method: 'delete',
         route: 'holiday',
         query: {},
         body: {
-            id: 'other-real-id'
-        }
-    }
+            id: 'other-real-id',
+        },
+    },
 ];
 
 const netWorthRequests = [
@@ -123,14 +123,14 @@ const netWorthRequests = [
         method: 'post',
         route: 'data/net-worth/categories',
         body: {
-            foo: 'bar'
-        }
+            foo: 'bar',
+        },
     },
     {
         type: DELETE,
         id: 'real-category-id',
         method: 'delete',
-        route: 'data/net-worth/categories'
+        route: 'data/net-worth/categories',
     },
     {
         type: CREATE,
@@ -138,8 +138,8 @@ const netWorthRequests = [
         method: 'post',
         route: 'data/net-worth/subcategories',
         body: {
-            categoryId: 'real-category-id'
-        }
+            categoryId: 'real-category-id',
+        },
     },
     {
         type: UPDATE,
@@ -148,8 +148,8 @@ const netWorthRequests = [
         route: 'data/net-worth/subcategories',
         body: {
             categoryId: 'real-category-id',
-            bar: 'baz'
-        }
+            bar: 'baz',
+        },
     },
     {
         type: UPDATE,
@@ -158,43 +158,43 @@ const netWorthRequests = [
         route: 'data/net-worth',
         body: {
             values: [
-                { subcategory: 'real-subcategory-id' }
+                { subcategory: 'real-subcategory-id' },
             ],
             creditLimit: [],
-            currencies: []
-        }
-    }
+            currencies: [],
+        },
+    },
 ];
 
-test('updateLists calls the API with a request list', t => {
+test('updateLists calls the API with a request list', (t) => {
     const res = {
         data: {
             data: [
                 { isRes0: true },
                 { isRes1: true },
-                { isRes2: true }
-            ]
-        }
+                { isRes2: true },
+            ],
+        },
     };
 
     testSaga(updateLists, 'some-api-key', listRequests)
         .next()
         .call(axios.patch, `${API_PREFIX}/data/multiple`, {
-            list: listHttpRequests
+            list: listHttpRequests,
         }, {
-            headers: { Authorization: 'some-api-key' }
+            headers: { Authorization: 'some-api-key' },
         })
         .next(res)
         .returns([
             { ...listRequests[0], res: res.data.data[0] },
             { ...listRequests[1], res: res.data.data[1] },
-            { ...listRequests[2], res: res.data.data[2] }
+            { ...listRequests[2], res: res.data.data[2] },
         ]);
 
     t.pass();
 });
 
-test('updateLists does nothing if the request list is empty', t => {
+test('updateLists does nothing if the request list is empty', (t) => {
     testSaga(updateLists, 'some-api-key', [])
         .next()
         .returns([]);
@@ -202,13 +202,13 @@ test('updateLists does nothing if the request list is empty', t => {
     t.pass();
 });
 
-test('updateNetWorth calls data/net-worth API endpoints', t => {
+test('updateNetWorth calls data/net-worth API endpoints', (t) => {
     const resList = [
         { data: { isCategory: true } },
         { data: null },
         { data: { isNewSubctegory: true } },
         { data: { isSubcategory: true } },
-        { data: { isEntry: true } }
+        { data: { isEntry: true } },
     ];
 
     testSaga(updateNetWorth, 'some-api-key', netWorthRequests)
@@ -219,22 +219,22 @@ test('updateNetWorth calls data/net-worth API endpoints', t => {
                 method: 'post',
                 url: `${API_PREFIX}/data/net-worth/categories`,
                 data: {
-                    foo: 'bar'
-                }
+                    foo: 'bar',
+                },
             }),
             call(axios, {
                 headers: { Authorization: 'some-api-key' },
                 method: 'delete',
                 url: `${API_PREFIX}/data/net-worth/categories/real-category-id`,
-                data: undefined
+                data: undefined,
             }),
             call(axios, {
                 headers: { Authorization: 'some-api-key' },
                 method: 'post',
                 url: `${API_PREFIX}/data/net-worth/subcategories`,
                 data: {
-                    categoryId: 'real-category-id'
-                }
+                    categoryId: 'real-category-id',
+                },
             }),
             call(axios, {
                 headers: { Authorization: 'some-api-key' },
@@ -242,8 +242,8 @@ test('updateNetWorth calls data/net-worth API endpoints', t => {
                 url: `${API_PREFIX}/data/net-worth/subcategories/real-subcategory-id`,
                 data: {
                     categoryId: 'real-category-id',
-                    bar: 'baz'
-                }
+                    bar: 'baz',
+                },
             }),
             call(axios, {
                 headers: { Authorization: 'some-api-key' },
@@ -251,23 +251,23 @@ test('updateNetWorth calls data/net-worth API endpoints', t => {
                 url: `${API_PREFIX}/data/net-worth/real-entry-id`,
                 data: {
                     values: [
-                        { subcategory: 'real-subcategory-id' }
+                        { subcategory: 'real-subcategory-id' },
                     ],
                     creditLimit: [],
-                    currencies: []
-                }
-            })
+                    currencies: [],
+                },
+            }),
         ])
         .next(resList)
         .returns(netWorthRequests.map((request, index) => ({
             ...request,
-            res: resList[index].data
+            res: resList[index].data,
         })));
 
     t.pass();
 });
 
-test('updateNetWorth does nothing if the request list is empty', t => {
+test('updateNetWorth does nothing if the request list is empty', (t) => {
     testSaga(updateNetWorth, 'some-api-key', [])
         .next()
         .returns([]);
@@ -275,7 +275,7 @@ test('updateNetWorth does nothing if the request list is empty', t => {
     t.pass();
 });
 
-test('updateCrud calls other update sagas', t => {
+test('updateCrud calls other update sagas', (t) => {
     const resList = [{ isResList: true }];
     const resNetWorth = [{ isResNetWorth: true }];
 
@@ -293,15 +293,15 @@ test('updateCrud calls other update sagas', t => {
         .next()
         .all({
             list: call(updateLists, 'my-api-key', listRequests),
-            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests)
+            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests),
         })
         .next({
             list: resList,
-            netWorth: resNetWorth
+            netWorth: resNetWorth,
         })
         .put(syncReceived({
             list: resList,
-            netWorth: resNetWorth
+            netWorth: resNetWorth,
         }))
         .next()
         .call(updateCrud, 0, true)
@@ -311,7 +311,7 @@ test('updateCrud calls other update sagas', t => {
     t.pass();
 });
 
-test('updateCrud doesn\'t do anything if there are no requests', t => {
+test('updateCrud doesn\'t do anything if there are no requests', (t) => {
     testSaga(updateCrud)
         .next()
         .select(getCrudRequests)
@@ -323,7 +323,7 @@ test('updateCrud doesn\'t do anything if there are no requests', t => {
     t.pass();
 });
 
-test('updateCrud unlocks the sync if there are no requests and the option was set', t => {
+test('updateCrud unlocks the sync if there are no requests and the option was set', (t) => {
     testSaga(updateCrud, 0, true)
         .next()
         .select(getCrudRequests)
@@ -355,12 +355,12 @@ test('updateCrud unlocks the sync if there are no requests and the option was se
     t.pass();
 });
 
-test('updateCrud handles API errors using exponential backoff', t => {
+test('updateCrud handles API errors using exponential backoff', (t) => {
     const err = new Error('some api error');
 
     t.true(API_BACKOFF_TIME > 100);
 
-    const toError = saga => saga
+    const toError = (saga) => saga
         .next()
         .select(getCrudRequests)
         .next(listRequests)
@@ -374,7 +374,7 @@ test('updateCrud handles API errors using exponential backoff', t => {
         .next()
         .all({
             list: call(updateLists, 'my-api-key', listRequests),
-            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests)
+            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests),
         })
         .throw(err)
         .put(syncErrorOccurred([...listRequests, ...netWorthRequests], err))
@@ -388,21 +388,21 @@ test('updateCrud handles API errors using exponential backoff', t => {
         .isDone();
 
     toError(testSaga(updateCrud, 1, true))
-        .delay(API_BACKOFF_TIME * 3 / 2)
+        .delay(API_BACKOFF_TIME * (3 / 2))
         .next()
         .call(updateCrud, 2, true)
         .next()
         .isDone();
 
     toError(testSaga(updateCrud, 2, true))
-        .delay(API_BACKOFF_TIME * 9 / 4)
+        .delay(API_BACKOFF_TIME * (9 / 4))
         .next()
         .call(updateCrud, 3, true)
         .next()
         .isDone();
 
     toError(testSaga(updateCrud, 3))
-        .delay(API_BACKOFF_TIME * 27 / 8)
+        .delay(API_BACKOFF_TIME * (27 / 8))
         .next()
         .call(updateCrud, 4, true)
         .next()
@@ -411,7 +411,7 @@ test('updateCrud handles API errors using exponential backoff', t => {
     t.pass();
 });
 
-test('updateCrud sets a maximum of five minutes on the backoff delay', t => {
+test('updateCrud sets a maximum of five minutes on the backoff delay', (t) => {
     const err = new Error('some api error');
 
     testSaga(updateCrud, 1000000, true)
@@ -428,7 +428,7 @@ test('updateCrud sets a maximum of five minutes on the backoff delay', t => {
         .next()
         .all({
             list: call(updateLists, 'my-api-key', listRequests),
-            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests)
+            netWorth: call(updateNetWorth, 'my-api-key', netWorthRequests),
         })
         .throw(err)
         .put(syncErrorOccurred([...listRequests, ...netWorthRequests], err))
@@ -442,7 +442,7 @@ test('updateCrud sets a maximum of five minutes on the backoff delay', t => {
     t.pass();
 });
 
-test('updateCrudFromAction calls updateCrud', t => {
+test('updateCrudFromAction calls updateCrud', (t) => {
     testSaga(updateCrudFromAction)
         .next()
         .select(getLocked)
@@ -454,7 +454,7 @@ test('updateCrudFromAction calls updateCrud', t => {
     t.pass();
 });
 
-test('updateCrudFromAction doesn\'t do anything if the sync is locked', t => {
+test('updateCrudFromAction doesn\'t do anything if the sync is locked', (t) => {
     testSaga(updateCrudFromAction)
         .next()
         .select(getLocked)
@@ -464,13 +464,13 @@ test('updateCrudFromAction doesn\'t do anything if the sync is locked', t => {
     t.pass();
 });
 
-test('matchCrudAction matches all list actions', t => {
+test('matchCrudAction matches all list actions', (t) => {
     t.true(matchCrudAction({ type: LIST_ITEM_CREATED }));
     t.true(matchCrudAction({ type: LIST_ITEM_UPDATED }));
     t.true(matchCrudAction({ type: LIST_ITEM_DELETED }));
 });
 
-test('matchCrudAction matches all net worth actions', t => {
+test('matchCrudAction matches all net worth actions', (t) => {
     t.true(matchCrudAction({ type: NET_WORTH_CATEGORY_CREATED }));
     t.true(matchCrudAction({ type: NET_WORTH_CATEGORY_UPDATED }));
     t.true(matchCrudAction({ type: NET_WORTH_CATEGORY_DELETED }));
@@ -482,7 +482,7 @@ test('matchCrudAction matches all net worth actions', t => {
     t.true(matchCrudAction({ type: NET_WORTH_DELETED }));
 });
 
-test('crudSaga runs a debounced sync', t => {
+test('crudSaga runs a debounced sync', (t) => {
     testSaga(crudSaga)
         .next()
         .is(debounce(TIMER_UPDATE_SERVER, matchCrudAction, updateCrudFromAction))

@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+    useState, useRef, useEffect, useCallback,
+} from 'react';
 import memoize from 'fast-memoize';
 import compose from 'just-compose';
 import PropTypes from 'prop-types';
@@ -9,23 +11,23 @@ import { IDENTITY, fieldExists } from '~client/modules/data';
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { ADD_BTN } from '~client/hooks/nav';
 
-const withInitialValue = (column, initialValue) => page => {
+const withInitialValue = (column, initialValue) => (page) => {
     if (!PAGES[page].cols.includes(column)) {
         return IDENTITY;
     }
 
-    return values => ({ ...values, [column]: initialValue() });
+    return (values) => ({ ...values, [column]: initialValue() });
 };
 
 const withDate = withInitialValue('date', DateTime.local);
 const withTransactions = withInitialValue('transactions', () => ([]));
 
-const initialValues = memoize(page => compose(
+const initialValues = memoize((page) => compose(
     withDate(page),
-    withTransactions(page)
+    withTransactions(page),
 )(PAGES[page].cols.reduce((last, col) => ({
     ...last,
-    [col]: undefined
+    [col]: undefined,
 }), { id: CREATE_ID })));
 
 export default function ListCreateDesktop({
@@ -34,7 +36,7 @@ export default function ListCreateDesktop({
     command,
     setCommand,
     setActive,
-    onCreate
+    onCreate,
 }) {
     const addBtn = useRef(null);
     const addBtnFocus = activeColumn === ADD_BTN;
@@ -56,14 +58,14 @@ export default function ListCreateDesktop({
 
     const [values, setValues] = useState(initialValues(page));
 
-    const onUpdate = useCallback((column, value) => setValues(last => ({ ...last, [column]: value })), []);
+    const onUpdate = useCallback((column, value) => setValues((last) => ({ ...last, [column]: value })), []);
 
     const onAddPre = useCallback(() => {
         setActive(CREATE_ID, null);
     }, [setActive]);
 
     const onAdd = useCallback(() => {
-        if (!Object.keys(values).every(key => fieldExists(values[key]))) {
+        if (!Object.keys(values).every((key) => fieldExists(values[key]))) {
             return;
         }
 
@@ -101,5 +103,5 @@ ListCreateDesktop.propTypes = {
     command: PropTypes.object,
     setCommand: PropTypes.func.isRequired,
     setActive: PropTypes.func.isRequired,
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };

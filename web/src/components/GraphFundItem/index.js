@@ -12,7 +12,7 @@ import { rgba } from '~client/modules/color';
 import { separateLines } from '~client/modules/funds';
 import {
     GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
-    GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE
+    GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE,
 } from '~client/constants/graph';
 import { COLOR_LOSS, COLOR_PROFIT } from '~client/constants/colors';
 
@@ -27,9 +27,9 @@ function getDimensions({ popout, sold }) {
     return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT };
 }
 
-const getRange = data => data.reduce(({ min, max }, value) => ({
+const getRange = (data) => data.reduce(({ min, max }, value) => ({
     min: Math.min(min, value),
-    max: Math.max(max, value)
+    max: Math.max(max, value),
 }), { min: Infinity, max: -Infinity });
 
 const valuesColor = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
@@ -65,15 +65,19 @@ function processData(data, popout) {
         smooth: true,
         color: {
             changes: [line[0][1]],
-            values: valuesColor
-        }
+            values: valuesColor,
+        },
     }));
 
-    return { lines, minX, maxX, minY, maxY };
+    return {
+        lines, minX, maxX, minY, maxY,
+    };
 }
 
 function makeBeforeLines({ popout }) {
-    const BeforeLines = ({ minX, minY, maxY, height, pixX, pixY }) => (
+    const BeforeLines = ({
+        minX, minY, maxY, height, pixX, pixY,
+    }) => (
         <Axes
             popout={popout}
             minX={minX}
@@ -91,19 +95,21 @@ function makeBeforeLines({ popout }) {
         maxY: PropTypes.number.isRequired,
         height: PropTypes.number.isRequired,
         pixX: PropTypes.func.isRequired,
-        pixY: PropTypes.func.isRequired
+        pixY: PropTypes.func.isRequired,
     };
 
     return BeforeLines;
 }
 
-export default function GraphFundItem({ name, sold, values, popout, onToggle }) {
+export default function GraphFundItem({
+    name, sold, values, popout, onToggle,
+}) {
     const { width, height } = getDimensions({ popout, sold });
 
     const beforeLines = useMemo(() => values && makeBeforeLines({ popout }), [values, popout]);
 
     const svgProperties = useMemo(() => ({
-        onClick: onToggle
+        onClick: onToggle,
     }), [onToggle]);
 
     if (!values) {
@@ -117,7 +123,7 @@ export default function GraphFundItem({ name, sold, values, popout, onToggle }) 
         beforeLines,
         width,
         height,
-        ...processData(values, popout)
+        ...processData(values, popout),
     };
 
     return (
@@ -132,5 +138,5 @@ GraphFundItem.propTypes = {
     sold: PropTypes.bool.isRequired,
     values: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number.isRequired).isRequired),
     popout: PropTypes.bool.isRequired,
-    onToggle: PropTypes.func.isRequired
+    onToggle: PropTypes.func.isRequired,
 };

@@ -15,10 +15,10 @@ function validateTaskList(list) {
             return false;
         }
 
-        return 'route' in task && typeof task.route === 'string' &&
-            'method' in task && typeof task.method === 'string' &&
-            'query' in task && typeof task.query === 'object' &&
-            'body' in task && typeof task.body === 'object';
+        return 'route' in task && typeof task.route === 'string'
+            && 'method' in task && typeof task.method === 'string'
+            && 'query' in task && typeof task.query === 'object'
+            && 'body' in task && typeof task.body === 'object';
     }, true);
 }
 
@@ -117,14 +117,16 @@ function routePatch(config, db, listDataProcessor) {
         if (!('list' in req.body) && validateTaskList(req.body.list)) {
             return res.status(400)
                 .json({
-                    errorMessage: 'Must provide a list of tasks'
+                    errorMessage: 'Must provide a list of tasks',
                 });
         }
 
         const tasks = req.body.list;
 
         const promises = tasks
-            .map(({ route, method, query, body }) => {
+            .map(({
+                route, method, query, body,
+            }) => {
                 const taskReq = { ...req, query, body };
                 const taskRes = new ResponseMultiple();
 
@@ -150,7 +152,7 @@ function routePatch(config, db, listDataProcessor) {
 
                 return null;
             })
-            .filter(item => item !== null);
+            .filter((item) => item !== null);
 
         try {
             const allResults = await Promise.all(promises);
@@ -164,8 +166,7 @@ function routePatch(config, db, listDataProcessor) {
             return res
                 .status(statusCode)
                 .json({ error, data });
-        }
-        catch (err) {
+        } catch (err) {
             return res.status(400)
                 .json({ errorMessage: err.message });
         }
@@ -174,5 +175,5 @@ function routePatch(config, db, listDataProcessor) {
 
 module.exports = {
     routePatch,
-    getOverallStatusCode
+    getOverallStatusCode,
 };

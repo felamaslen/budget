@@ -1,23 +1,24 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import FormFieldText from '~client/components/FormField';
 
+const test = ninos(ava);
+
 const getFormFieldText = (customProps = {}) => {
     const props = {
         value: 'foo',
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldText {...props} />);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getFormFieldText();
 
     t.is(container.childNodes.length, 1);
@@ -27,7 +28,7 @@ test('basic structure', t => {
     t.is(div.className, 'form-field form-field-text');
 });
 
-test('input', t => {
+test('input', (t) => {
     const { container } = getFormFieldText();
     const [div] = container.childNodes;
 
@@ -38,7 +39,7 @@ test('input', t => {
     t.is(input.value, 'foo');
 });
 
-test('changing value', t => {
+test('changing value', (t) => {
     const onChange = t.context.stub();
     const { container } = getFormFieldText({ onChange });
 
@@ -55,7 +56,7 @@ test('changing value', t => {
     t.deepEqual(onChange.calls[0].arguments, ['bar']);
 });
 
-test('handling onType', t => {
+test('handling onType', (t) => {
     const onType = t.context.stub();
 
     const { container } = getFormFieldText({ onType });

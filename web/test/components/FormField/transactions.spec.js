@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
@@ -8,9 +7,11 @@ import React from 'react';
 import FormFieldTransactions from '~client/components/FormField/transactions';
 import { getTransactionsList, modifyTransaction, removeAtIndex } from '~client/modules/data';
 
+const test = ninos(ava);
+
 const transactions = [
     { date: '2017-11-10', units: 10.5, cost: 50 },
-    { date: '2018-09-05', units: -3, cost: -40 }
+    { date: '2018-09-05', units: -3, cost: -40 },
 ];
 
 const value = getTransactionsList(transactions);
@@ -19,13 +20,13 @@ const getContainer = (customProps = {}, ...args) => {
     const props = {
         value,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldTransactions {...props} />, ...args);
 };
 
-test('basic structure (inactive)', t => {
+test('basic structure (inactive)', (t) => {
     const { container } = getContainer({ active: false });
 
     t.is(container.childNodes.length, 1);
@@ -36,7 +37,7 @@ test('basic structure (inactive)', t => {
     t.is(span.innerHTML, '2'); // two transactions
 });
 
-test('basic structure (active)', t => {
+test('basic structure (active)', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
 
@@ -74,7 +75,7 @@ test('basic structure (active)', t => {
     t.is(ul.className, 'transactions-list');
 });
 
-test('rendering a list of transactions', t => {
+test('rendering a list of transactions', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
     const { childNodes: [, modal] } = container.childNodes[0];
@@ -102,7 +103,7 @@ test('rendering a list of transactions', t => {
     });
 });
 
-test('handling date input', t => {
+test('handling date input', (t) => {
     transactions.forEach((transaction, index) => {
         const onChange = t.context.stub();
         const { container } = getContainer({ onChange, active: true, create: true });
@@ -140,12 +141,12 @@ test('handling date input', t => {
 
         t.is(onChange.calls.length, 1);
         t.deepEqual(onChange.calls[0].arguments, [modifyTransaction(value, index, {
-            date: '2017-04-03'
+            date: '2017-04-03',
         })]);
     });
 });
 
-test('handling units input', t => {
+test('handling units input', (t) => {
     transactions.forEach((transaction, index) => {
         const onChange = t.context.stub();
         const { container } = getContainer({ onChange, active: true, create: true });
@@ -183,12 +184,12 @@ test('handling units input', t => {
 
         t.is(onChange.calls.length, 1);
         t.deepEqual(onChange.calls[0].arguments, [modifyTransaction(value, index, {
-            units: 34.2219
+            units: 34.2219,
         })]);
     });
 });
 
-test('handling cost input', t => {
+test('handling cost input', (t) => {
     transactions.forEach((transaction, index) => {
         const onChange = t.context.stub();
         const { container } = getContainer({ onChange, active: true, create: true });
@@ -226,13 +227,13 @@ test('handling cost input', t => {
 
         t.is(onChange.calls.length, 1);
         t.deepEqual(onChange.calls[0].arguments, [modifyTransaction(value, index, {
-            cost: 12677
+            cost: 12677,
         })]);
     });
 });
 
 // eslint-disable-next-line max-statements
-test('adding a transaction', t => {
+test('adding a transaction', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
     const { childNodes: [, modal] } = container.childNodes[0];
@@ -290,13 +291,13 @@ test('adding a transaction', t => {
     const [{ id: discard, ...contrived }] = getTransactionsList([{
         date: '2019-02-11',
         units: 562.23,
-        cost: 109591
+        cost: 109591,
     }]);
 
     t.deepEqual(rest, contrived);
 });
 
-test('removing a transaction', t => {
+test('removing a transaction', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({ onChange, active: true, create: true });
     const { childNodes: [, modal] } = container.childNodes[0];

@@ -3,11 +3,13 @@ import PropTypes from 'prop-types';
 
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '~client/constants/analysis';
 
-const Upper = ({ period, grouping, page, description, onRequest }) => (
+const Upper = ({
+    period, grouping, page, description, onRequest,
+}) => (
     <div className="upper">
         <span className="input-period">
             <span>{'Period:'}</span>
-            {ANALYSIS_PERIODS.map(value => (
+            {ANALYSIS_PERIODS.map((value) => (
                 <span key={value}>
                     <input type="radio"
                         checked={value === period}
@@ -19,7 +21,7 @@ const Upper = ({ period, grouping, page, description, onRequest }) => (
         </span>
         <span className="input-grouping">
             <span>{'Grouping:'}</span>
-            {ANALYSIS_GROUPINGS.map(value => (
+            {ANALYSIS_GROUPINGS.map((value) => (
                 <span key={value}>
                     <input type="radio"
                         checked={value === grouping}
@@ -47,7 +49,7 @@ Upper.propTypes = {
     grouping: PropTypes.string.isRequired,
     page: PropTypes.number.isRequired,
     description: PropTypes.string,
-    onRequest: PropTypes.func.isRequired
+    onRequest: PropTypes.func.isRequired,
 };
 
 export default React.memo(Upper);

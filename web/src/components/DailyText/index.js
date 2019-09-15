@@ -9,7 +9,7 @@ const DailyText = ({ value }) => (
 );
 
 DailyText.propTypes = {
-    value: PropTypes.number
+    value: PropTypes.number,
 };
 
 export default DailyText;

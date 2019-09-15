@@ -1,5 +1,7 @@
 import { connect } from 'react-redux';
-import React, { useReducer, useCallback, useMemo, useEffect } from 'react';
+import React, {
+    useReducer, useCallback, useMemo, useEffect,
+} from 'react';
 import { debounce } from 'throttle-debounce';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -48,7 +50,9 @@ function suggestionsReducer(state, action) {
     return state;
 }
 
-function SuggestionsList({ page, column, search, onConfirm, list, next, request, clear }) {
+function SuggestionsList({
+    page, column, search, onConfirm, list, next, request, clear,
+}) {
     const [state, dispatch] = useReducer(suggestionsReducer, { size: list.length, active: null });
     useEffect(() => {
         dispatch({ type: LIST_SIZE_SET, size: list.length });
@@ -70,10 +74,10 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
     const haveList = size > 0;
 
     useEffect(() => {
-        if (state.confirm &&
-            state.confirm !== state.prevConfirm &&
-            haveList &&
-            state.active !== null
+        if (state.confirm
+            && state.confirm !== state.prevConfirm
+            && haveList
+            && state.active !== null
         ) {
             const nextValue = state.active < next.length
                 ? next[state.active]
@@ -88,10 +92,10 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
         state.active,
         next,
         list,
-        onConfirm
+        onConfirm,
     ]);
 
-    const onKey = useCallback(event => {
+    const onKey = useCallback((event) => {
         if (isCtrl(event)) {
             return null;
         }
@@ -131,7 +135,7 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
         <ul className="suggestions">
             {list.map((value, index) => (
                 <li key={value} className={classNames('suggestion', {
-                    active: index === active
+                    active: index === active,
                 })}>{value}</li>
             ))}
         </ul>
@@ -146,17 +150,17 @@ SuggestionsList.propTypes = {
     list: PropTypes.arrayOf(PropTypes.string.isRequired),
     next: PropTypes.arrayOf(PropTypes.string.isRequired),
     request: PropTypes.func.isRequired,
-    clear: PropTypes.func.isRequired
+    clear: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     list: state.suggestions.list,
-    next: state.suggestions.next
+    next: state.suggestions.next,
 });
 
 const mapDispatchToProps = {
     request: suggestionsRequested,
-    clear: suggestionsCleared
+    clear: suggestionsCleared,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SuggestionsList);

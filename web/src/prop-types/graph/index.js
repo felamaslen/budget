@@ -3,25 +3,25 @@ import PropTypes from 'prop-types';
 export const lineGraphPropTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    padding: PropTypes.array.isRequired
+    padding: PropTypes.array.isRequired,
 };
 
 export const rangePropTypes = {
     minX: PropTypes.number,
     maxX: PropTypes.number,
     minY: PropTypes.number,
-    maxY: PropTypes.number
+    maxY: PropTypes.number,
 };
 
 export const pixelPropTypes = {
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     valX: PropTypes.func.isRequired,
-    valY: PropTypes.func.isRequired
+    valY: PropTypes.func.isRequired,
 };
 
 export const dataShape = PropTypes.arrayOf(
-    PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
+    PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
 );
 
 export const lineShape = PropTypes.shape({
@@ -32,13 +32,13 @@ export const lineShape = PropTypes.shape({
         PropTypes.func,
         PropTypes.shape({
             changes: PropTypes.array.isRequired,
-            values: PropTypes.array.isRequired
-        })
+            values: PropTypes.array.isRequired,
+        }),
     ]).isRequired,
     strokeWidth: PropTypes.number,
     dashed: PropTypes.bool,
     fill: PropTypes.bool,
     smooth: PropTypes.bool,
     movingAverage: PropTypes.number,
-    arrows: PropTypes.bool
+    arrows: PropTypes.bool,
 });

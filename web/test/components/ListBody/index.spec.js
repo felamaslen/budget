@@ -21,26 +21,27 @@ const getContainer = (customProps = {}, customState = {}) => {
         onCreate: () => null,
         onUpdate: () => null,
         onDelete: () => null,
-        ...customProps
+        ...customProps,
     };
 
     const store = createMockStore({
         suggestions: testState.suggestions,
-        ...customState
+        ...customState,
     });
 
     return render(
         <Provider store={store}>
             <ListBody{...props} />
-        </Provider>
+        </Provider>,
     );
 };
 
-test.beforeEach(t => {
+test.beforeEach((t) => {
+    // eslint-disable-next-line no-param-reassign
     t.context.clock = sinon.useFakeTimers(new Date('2019-08-04T11:54:23Z').getTime());
 });
 
-test.afterEach(t => {
+test.afterEach((t) => {
     if (t.context.clock && t.context.clock.restore) {
         t.context.clock.restore();
     }
@@ -61,7 +62,7 @@ test.after(() => {
     Reflect.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
 });
 
-test.serial('(desktop) basic structure', t => {
+test.serial('(desktop) basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -72,7 +73,7 @@ test.serial('(desktop) basic structure', t => {
     t.is(div.childNodes.length, 2);
 });
 
-test.serial('(desktop) head - basic structure', t => {
+test.serial('(desktop) head - basic structure', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -82,7 +83,7 @@ test.serial('(desktop) head - basic structure', t => {
     t.is(head.className, 'list-head noselect');
 });
 
-test.serial('(desktop) list - basic structure', t => {
+test.serial('(desktop) list - basic structure', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -93,7 +94,7 @@ test.serial('(desktop) list - basic structure', t => {
     t.is(list.childNodes.length, 2);
 });
 
-test.serial('(desktop) create - basic structure', t => {
+test.serial('(desktop) create - basic structure', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, list] = div.childNodes;
@@ -104,7 +105,7 @@ test.serial('(desktop) create - basic structure', t => {
     t.is(create.childNodes.length, 6);
 });
 
-test.serial('(desktop) create - columns', t => {
+test.serial('(desktop) create - columns', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, list] = div.childNodes;
@@ -128,11 +129,11 @@ test.serial('(desktop) create - columns', t => {
     t.is(shop.className, 'cell shop');
 });
 
-test.serial('(desktop) adding a new item', t => {
+test.serial('(desktop) adding a new item', (t) => {
     const onCreate = sinon.spy();
 
     const { container, getByLabelText } = getContainer({
-        onCreate
+        onCreate,
     });
 
     const [div] = container.childNodes;
@@ -176,16 +177,16 @@ test.serial('(desktop) adding a new item', t => {
             item: 'foo',
             category: 'bar',
             cost: 1065,
-            shop: 'baz'
-        }
+            shop: 'baz',
+        },
     ]);
 });
 
-test.serial('(desktop) onCreate is not called if there are missing data', t => {
+test.serial('(desktop) onCreate is not called if there are missing data', (t) => {
     const onCreate = sinon.spy();
 
     const { container, getByLabelText } = getContainer({
-        onCreate
+        onCreate,
     });
 
     const addButton = getByLabelText('add-button');
@@ -250,18 +251,19 @@ test.serial('(desktop) onCreate is not called if there are missing data', t => {
             item: 'foo',
             category: 'bar',
             cost: 1065,
-            shop: 'baz'
-        }
+            shop: 'baz',
+        },
     ]);
 });
 
-test.serial('(desktop) input fields are cleared when navigating', t => {
+test.serial('(desktop) input fields are cleared when navigating', (t) => {
     const onCreate = sinon.spy();
     const { getByLabelText } = getContainer({ onCreate });
 
     fireEvent.keyDown(window, { key: 'Tab' }); // -> date
 
-    t.is(getByLabelText('date-input-CREATE_ID').value, DateTime.fromISO('2019-08-04').toLocaleString(DateTime.DATE_SHORT));
+    t.is(getByLabelText('date-input-CREATE_ID').value,
+        DateTime.fromISO('2019-08-04').toLocaleString(DateTime.DATE_SHORT));
     fireEvent.change(getByLabelText('date-input-CREATE_ID'), { target: { value: '1/3/19' } });
     t.is(getByLabelText('date-input-CREATE_ID').value, '1/3/19');
 
@@ -303,10 +305,11 @@ test.serial('(desktop) input fields are cleared when navigating', t => {
         item: 'foo',
         category: 'bar',
         cost: 1054,
-        shop: 'baz'
+        shop: 'baz',
     }]);
 
-    t.is(getByLabelText('date-input-CREATE_ID').value, DateTime.fromISO('2019-08-04').toLocaleString(DateTime.DATE_SHORT));
+    t.is(getByLabelText('date-input-CREATE_ID').value,
+        DateTime.fromISO('2019-08-04').toLocaleString(DateTime.DATE_SHORT));
 
     fireEvent.keyDown(window, { key: 'Tab' }); // -> item
     t.is(getByLabelText('item-input-CREATE_ID').value, '');
@@ -321,7 +324,7 @@ test.serial('(desktop) input fields are cleared when navigating', t => {
     t.is(getByLabelText('shop-input-CREATE_ID').value, '');
 });
 
-test('(desktop) prefilled category from suggestion doesn\'t affect subsequent rows', async t => {
+test('(desktop) prefilled category from suggestion doesn\'t affect subsequent rows', async (t) => {
     t.context.clock.restore();
     t.plan(4);
 
@@ -333,7 +336,7 @@ test('(desktop) prefilled category from suggestion doesn\'t affect subsequent ro
             item: 'Bread',
             category: 'Breakfast',
             cost: 3,
-            shop: 'Food shop'
+            shop: 'Food shop',
         },
         {
             id: 'id2',
@@ -341,19 +344,19 @@ test('(desktop) prefilled category from suggestion doesn\'t affect subsequent ro
             item: 'Wine',
             category: 'Drinks',
             cost: 41,
-            shop: 'Wine shop'
-        }
+            shop: 'Wine shop',
+        },
     ];
 
     const { container, getByLabelText } = getContainer({
         onUpdate,
-        rows
+        rows,
     }, {
         suggestions: {
             ...testState.suggestions,
             list: ['Apple', 'Chocolate'],
-            next: ['Fruit', 'Confectionary']
-        }
+            next: ['Fruit', 'Confectionary'],
+        },
     });
 
     const [div] = container.childNodes;
@@ -372,7 +375,6 @@ test('(desktop) prefilled category from suggestion doesn\'t affect subsequent ro
     // activate first suggestion item
     fireEvent.change(getByLabelText('item-input-id1'), { target: { value: 'a' } });
 
-    console.log('navigating to suggestions');
     fireEvent.keyDown(window, { key: 'ArrowDown' });
     fireEvent.keyDown(window, { key: 'Enter' });
 
@@ -386,7 +388,7 @@ test('(desktop) prefilled category from suggestion doesn\'t affect subsequent ro
             item: 'Apple',
             category: 'Breakfast',
             cost: 3,
-            shop: 'Food shop'
+            shop: 'Food shop',
         },
         {
             id: 'id1',
@@ -394,15 +396,15 @@ test('(desktop) prefilled category from suggestion doesn\'t affect subsequent ro
             item: 'Bread',
             category: 'Breakfast',
             cost: 3,
-            shop: 'Food shop'
-        }
+            shop: 'Food shop',
+        },
     ]);
 
-    const nextLoop = fn => () => setImmediate(fn);
+    const nextLoop = (fn) => () => setImmediate(fn);
 
-    await new Promise(resolve => compose(
+    await new Promise((resolve) => compose(
         nextLoop,
-        nextLoop
+        nextLoop,
     )(() => {
         // assert that the suggestion next value was autocompleted
         t.is(getByLabelText('category-input-id1').value, 'Fruit');

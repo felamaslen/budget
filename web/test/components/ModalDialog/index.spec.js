@@ -14,18 +14,18 @@ const getContainer = (customProps = {}, ...args) => {
         id: 'some-id',
         fields: [
             { item: 'item', value: 'some item' },
-            { item: 'cost', value: 342 }
+            { item: 'cost', value: 342 },
         ],
         type: 'edit',
         onCancel: () => null,
         onSubmit: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<ModalDialog {...props} />, ...args);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -41,7 +41,7 @@ test('basic structure', t => {
     t.is(dialog.childNodes.length, 3);
 });
 
-test('hiding after a delay', t => {
+test('hiding after a delay', (t) => {
     const clock = sinon.useFakeTimers();
 
     const { container } = getContainer();
@@ -62,7 +62,7 @@ test('hiding after a delay', t => {
     clock.restore();
 });
 
-test('showing from inactive', t => {
+test('showing from inactive', (t) => {
     const { container } = getContainer({ active: false });
 
     t.is(container.childNodes.length, 0);
@@ -75,7 +75,7 @@ test('showing from inactive', t => {
     t.is(dialog.className, 'modal-dialog-inner');
 });
 
-test('title', t => {
+test('title', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -87,10 +87,10 @@ test('title', t => {
     t.is(title.innerHTML, 'Editing id#some-id');
 });
 
-test('adding title', t => {
+test('adding title', (t) => {
     const { container } = getContainer({
         id: CREATE_ID,
-        type: 'add'
+        type: 'add',
     });
 
     const [div] = container.childNodes;
@@ -100,7 +100,7 @@ test('adding title', t => {
     t.is(title.innerHTML, 'Add item');
 });
 
-test('form list', t => {
+test('form list', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -110,19 +110,19 @@ test('form list', t => {
     t.is(formList.className, 'form-list');
     t.is(formList.childNodes.length, 2);
 
-    formList.childNodes.forEach(modalDialogField => {
+    formList.childNodes.forEach((modalDialogField) => {
         t.is(modalDialogField.tagName, 'LI');
         t.regex(modalDialogField.className, /^form-row\s/);
     });
 });
 
-test('buttons', t => {
+test('buttons', (t) => {
     const onCancel = sinon.spy();
     const onSubmit = sinon.spy();
 
     const { container } = getContainer({
         onCancel,
-        onSubmit
+        onSubmit,
     });
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -156,14 +156,14 @@ test('buttons', t => {
     t.true(onSubmit.calledWith({
         id: 'some-id',
         item: 'some item',
-        cost: 342
+        cost: 342,
     }));
 });
 
-test('Optional remove button', t => {
+test('Optional remove button', (t) => {
     const onRemove = sinon.spy();
     const { container } = getContainer({
-        onRemove
+        onRemove,
     });
     const [div] = container.childNodes;
     const [dialog] = div.childNodes;
@@ -189,7 +189,7 @@ test('Optional remove button', t => {
     t.true(onRemove.calledOnce);
 });
 
-test('onCancel event', t => {
+test('onCancel event', (t) => {
     const onCancel = sinon.spy();
     const { container } = getContainer({ onCancel });
     const [div] = container.childNodes;
@@ -203,7 +203,7 @@ test('onCancel event', t => {
     t.is(onCancel.getCalls().length, 1);
 });
 
-test('onSubmit event', t => {
+test('onSubmit event', (t) => {
     const onSubmit = sinon.spy();
     const { container } = getContainer({ onSubmit });
     const [div] = container.childNodes;
@@ -229,11 +229,11 @@ test('onSubmit event', t => {
     t.deepEqual(onSubmit.getCalls()[0].args, [{
         id: 'some-id',
         item: 'other item',
-        cost: 108
+        cost: 108,
     }]);
 });
 
-test('onSubmit does not run if values are invalid', t => {
+test('onSubmit does not run if values are invalid', (t) => {
     const onSubmit = sinon.spy();
     const { container } = getContainer({ onSubmit });
     const [div] = container.childNodes;
@@ -256,10 +256,10 @@ test('onSubmit does not run if values are invalid', t => {
     t.regex(liItem.className, /invalid/);
 });
 
-test('buttons are disabled while loading', t => {
+test('buttons are disabled while loading', (t) => {
     const { container } = getContainer({
         onRemove: () => null,
-        loading: true
+        loading: true,
     });
 
     const [div] = container.childNodes;

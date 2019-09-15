@@ -1,4 +1,6 @@
-import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
+import React, {
+    useRef, useState, useReducer, useEffect, useCallback,
+} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import compose from 'just-compose';
@@ -20,10 +22,10 @@ function getTitle({ type, id }) {
 
 export const animationTime = 350;
 
-const withDefaultDate = fields => replaceAtIndex(
+const withDefaultDate = (fields) => replaceAtIndex(
     fields,
     fields.findIndex(({ item, value }) => item === 'date' && !value),
-    { item: 'date', value: DateTime.local() }
+    { item: 'date', value: DateTime.local() },
 );
 
 const HIDDEN = 'HIDDEN';
@@ -33,20 +35,20 @@ const CHANGED_ID = 'CHANGED_ID';
 const updatePersistentState = (state, { payload }) => ({
     ...state,
     title: getTitle(payload),
-    canRemove: Boolean(payload.onRemove)
+    canRemove: Boolean(payload.onRemove),
 });
 
 function reducer(state, action) {
     if (action.type === HIDDEN) {
         return {
             ...state,
-            visible: false
+            visible: false,
         };
     }
     if (action.type === SHOWN) {
         return {
             ...updatePersistentState(state, action),
-            visible: true
+            visible: true,
         };
     }
     if (action.type === CHANGED_ID) {
@@ -64,12 +66,12 @@ export default function ModalDialog({
     type,
     onCancel,
     onSubmit,
-    onRemove
+    onRemove,
 }) {
     const [state, dispatch] = useReducer(reducer, {
         title: getTitle({ type, id }),
         canRemove: Boolean(onRemove),
-        visible: active
+        visible: active,
     });
 
     const timer = useRef(null);
@@ -86,23 +88,21 @@ export default function ModalDialog({
         }
     }, [type, id, onRemove, active, visible]);
 
-    useEffect(() => {
-        return () => clearTimeout(timer.current);
-    }, []);
+    useEffect(() => () => clearTimeout(timer.current), []);
 
     const [tempFields, setTempFields] = useState();
     useEffect(() => {
         setTempFields(compose(
-            withDefaultDate
+            withDefaultDate,
         )(fields.slice()));
     }, [fields]);
 
     const [invalid, setInvalid] = useState({});
 
-    const onChangeField = useCallback((item, value) => setTempFields(last => replaceAtIndex(
+    const onChangeField = useCallback((item, value) => setTempFields((last) => replaceAtIndex(
         last,
         last.findIndex(({ item: thisItem }) => thisItem === item),
-        { item, value }
+        { item, value },
     )), []);
 
     const onSubmitCallback = useCallback(() => {
@@ -179,11 +179,11 @@ ModalDialog.propTypes = {
     id: PropTypes.string,
     fields: PropTypes.arrayOf(PropTypes.shape({
         item: PropTypes.string.isRequired,
-        value: PropTypes.any
+        value: PropTypes.any,
     })),
     onCancel: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
-    onRemove: PropTypes.func
+    onRemove: PropTypes.func,
 };
 
 ModalDialog.defaultProps = {
@@ -192,5 +192,5 @@ ModalDialog.defaultProps = {
     type: 'edit',
     id: null,
     fields: [],
-    onRemove: null
+    onRemove: null,
 };

@@ -1,5 +1,7 @@
 import { connect } from 'react-redux';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, {
+    useState, useRef, useCallback, useEffect,
+} from 'react';
 import { withRouter } from 'react-router';
 import { Route, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -13,7 +15,7 @@ import {
     getSubcategories,
     getEntries,
     getAggregates,
-    getNetWorthTable
+    getNetWorthTable,
 } from '~client/selectors/overview/net-worth';
 
 import {
@@ -25,7 +27,7 @@ import {
     netWorthSubcategoryDeleted,
     netWorthCreated,
     netWorthUpdated,
-    netWorthDeleted
+    netWorthDeleted,
 } from '~client/actions/net-worth';
 
 import { costShape } from '~client/prop-types/page/overview';
@@ -52,7 +54,7 @@ function NetWorth({
     onDeleteSubcategory,
     onCreateEntry,
     onUpdateEntry,
-    onDeleteEntry
+    onDeleteEntry,
 }) {
     const timer = useRef();
     const [visible, setVisible] = useState(false);
@@ -79,14 +81,14 @@ function NetWorth({
             <Route
                 exact
                 path="/net-worth"
-                render={routeProps => <NetWorthView {...routeProps}
+                render={(routeProps) => <NetWorthView {...routeProps}
                     table={table}
                     aggregate={aggregate}
                 />}
             />
             <Route
                 path="/net-worth/edit/categories"
-                render={routeProps => <NetWorthCategoryList {...routeProps}
+                render={(routeProps) => <NetWorthCategoryList {...routeProps}
                     categories={categories}
                     subcategories={subcategories}
                     onCreateCategory={onCreateCategory}
@@ -99,7 +101,7 @@ function NetWorth({
             />
             <Route
                 path="/net-worth/edit/list"
-                render={routeProps => <NetWorthList {...routeProps}
+                render={(routeProps) => <NetWorthList {...routeProps}
                     data={entries}
                     categories={categories}
                     subcategories={subcategories}
@@ -132,7 +134,7 @@ function NetWorth({
 
 NetWorth.propTypes = {
     history: PropTypes.shape({
-        replace: PropTypes.func.isRequired
+        replace: PropTypes.func.isRequired,
     }).isRequired,
     cost: costShape,
     categories: dataPropTypes.categories,
@@ -148,16 +150,16 @@ NetWorth.propTypes = {
     onDeleteSubcategory: PropTypes.func.isRequired,
     onCreateEntry: PropTypes.func.isRequired,
     onUpdateEntry: PropTypes.func.isRequired,
-    onDeleteEntry: PropTypes.func.isRequired
+    onDeleteEntry: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     cost: getProcessedCost(state),
     categories: getCategories(state),
     subcategories: getSubcategories(state),
     entries: getEntries(state),
     aggregate: getAggregates(state, NET_WORTH_AGGREGATE),
-    table: getNetWorthTable(state)
+    table: getNetWorthTable(state),
 });
 
 const mapDispatchToProps = {
@@ -169,7 +171,7 @@ const mapDispatchToProps = {
     onDeleteSubcategory: netWorthSubcategoryDeleted,
     onCreateEntry: netWorthCreated,
     onUpdateEntry: netWorthUpdated,
-    onDeleteEntry: netWorthDeleted
+    onDeleteEntry: netWorthDeleted,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(NetWorth));

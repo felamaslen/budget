@@ -1,35 +1,35 @@
 import test from 'ava';
 
 import {
-    getNavDirection
+    getNavDirection,
 } from '~client/modules/nav';
 
-test('getNavDirection handles tabs', t => {
+test('getNavDirection handles tabs', (t) => {
     const event = {
         key: 'Tab',
-        shiftKey: false
+        shiftKey: false,
     };
 
     t.deepEqual(getNavDirection(event), { dx: 1, dy: 0 });
 });
 
-test('getNavDirection handles reverse tabs', t => {
+test('getNavDirection handles reverse tabs', (t) => {
     const event = {
         key: 'Tab',
-        shiftKey: true
+        shiftKey: true,
     };
 
     t.deepEqual(getNavDirection(event), { dx: -1, dy: 0 });
 });
 
-test('getNavDirection handles arrows', t => {
+test('getNavDirection handles arrows', (t) => {
     t.deepEqual(getNavDirection({ key: 'ArrowUp' }), { dx: 0, dy: -1 });
     t.deepEqual(getNavDirection({ key: 'ArrowRight' }), { dx: 1, dy: 0 });
     t.deepEqual(getNavDirection({ key: 'ArrowDown' }), { dx: 0, dy: 1 });
     t.deepEqual(getNavDirection({ key: 'ArrowLeft' }), { dx: -1, dy: -0 });
 });
 
-test('getNavDirection optionally requires ctrl modifier with arrows', t => {
+test('getNavDirection optionally requires ctrl modifier with arrows', (t) => {
     t.deepEqual(getNavDirection({ key: 'ArrowUp' }, false), { dx: 0, dy: -1 });
     t.deepEqual(getNavDirection({ key: 'ArrowRight' }, false), { dx: 1, dy: 0 });
     t.deepEqual(getNavDirection({ key: 'ArrowDown' }, false), { dx: 0, dy: 1 });
@@ -46,6 +46,6 @@ test('getNavDirection optionally requires ctrl modifier with arrows', t => {
     t.deepEqual(getNavDirection({ ctrlKey: true, key: 'ArrowLeft' }, true), { dx: -1, dy: -0 });
 });
 
-test('getNavDirection ignores other events', t => {
+test('getNavDirection ignores other events', (t) => {
     t.deepEqual(getNavDirection({ key: 'A' }), { dx: 0, dy: 0 });
 });

@@ -12,7 +12,7 @@ import fundsSaga, {
     getFundHistoryQuery,
     requestFundPeriodData,
     requestStocksList,
-    requestStocksPrices
+    requestStocksPrices,
 } from '~client/sagas/funds';
 import { errorOpened } from '~client/actions/error';
 import { fundsRequested, fundsReceived } from '~client/actions/funds';
@@ -26,7 +26,7 @@ import { API_PREFIX } from '~client/constants/data';
 import { FUNDS_REQUESTED } from '~client/constants/actions/funds';
 import { STOCKS_LIST_REQUESTED, STOCKS_PRICES_REQUESTED } from '~client/constants/actions/stocks';
 
-test('getFundHistoryQuery gets a URL query object to specify fund price history detail', t => {
+test('getFundHistoryQuery gets a URL query object to specify fund price history detail', (t) => {
     t.is(1, 1);
 
     testSaga(getFundHistoryQuery)
@@ -36,11 +36,11 @@ test('getFundHistoryQuery gets a URL query object to specify fund price history 
         .returns({
             period: 'year',
             length: '5',
-            history: true
+            history: true,
         });
 });
 
-test('requestFundPeriodData returns cached data', t => {
+test('requestFundPeriodData returns cached data', (t) => {
     t.is(1, 1);
 
     testSaga(requestFundPeriodData, fundsRequested(true, 'month5'))
@@ -52,11 +52,11 @@ test('requestFundPeriodData returns cached data', t => {
         .isDone();
 });
 
-test('requestFundPeriodData requests new data', t => {
+test('requestFundPeriodData requests new data', (t) => {
     t.is(1, 1);
 
     const res = {
-        data: { is: 'funds data' }
+        data: { is: 'funds data' },
     };
 
     testSaga(requestFundPeriodData, fundsRequested(true, 'month5'))
@@ -68,7 +68,7 @@ test('requestFundPeriodData requests new data', t => {
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=month&length=5&history=true', {
-            headers: { Authorization: 'some_api_key' }
+            headers: { Authorization: 'some_api_key' },
         })
         .next(res)
         .put(fundsReceived('month5', res.data))
@@ -82,7 +82,7 @@ test('requestFundPeriodData requests new data', t => {
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=month&length=5&history=true', {
-            headers: { Authorization: 'some_api_key' }
+            headers: { Authorization: 'some_api_key' },
         })
         .next(res)
         .put(fundsReceived('month5', res.data))
@@ -90,11 +90,11 @@ test('requestFundPeriodData requests new data', t => {
         .isDone();
 });
 
-test('requestFundPeriodData uses the current period by default', t => {
+test('requestFundPeriodData uses the current period by default', (t) => {
     t.is(1, 1);
 
     const res = {
-        data: { is: 'funds data' }
+        data: { is: 'funds data' },
     };
 
     testSaga(requestFundPeriodData, fundsRequested(false))
@@ -106,7 +106,7 @@ test('requestFundPeriodData uses the current period by default', t => {
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=year&length=5&history=true', {
-            headers: { Authorization: 'some_api_key' }
+            headers: { Authorization: 'some_api_key' },
         })
         .next(res)
         .put(fundsReceived('year5', res.data))
@@ -124,7 +124,7 @@ test('requestFundPeriodData uses the current period by default', t => {
         .isDone();
 });
 
-test('requestFundPeriodData handles errors', t => {
+test('requestFundPeriodData handles errors', (t) => {
     t.is(1, 1);
 
     const stub = sinon.stub(shortid, 'generate').returns('some-id');
@@ -140,7 +140,7 @@ test('requestFundPeriodData handles errors', t => {
         .select(getApiKey)
         .next('some_api_key')
         .call(axios.get, '/api/v4/data/funds?period=year&length=3&history=true', {
-            headers: { Authorization: 'some_api_key' }
+            headers: { Authorization: 'some_api_key' },
         })
         .throw(err)
         .put(errorOpened('Error loading fund data'))
@@ -150,7 +150,7 @@ test('requestFundPeriodData handles errors', t => {
     stub.restore();
 });
 
-test('requestStocksList requests stocks list', t => {
+test('requestStocksList requests stocks list', (t) => {
     t.is(1, 1);
 
     const res = { data: { isRes: true } };
@@ -166,7 +166,7 @@ test('requestStocksList requests stocks list', t => {
         .isDone();
 });
 
-test('requestStocksList handles errors', t => {
+test('requestStocksList handles errors', (t) => {
     t.is(1, 1);
 
     const err = new Error('something bad happened');
@@ -182,7 +182,7 @@ test('requestStocksList handles errors', t => {
         .isDone();
 });
 
-test('requestStocksPrices requests stock prices', t => {
+test('requestStocksPrices requests stock prices', (t) => {
     t.is(1, 1);
 
     const res = { isRes: true };
@@ -193,12 +193,12 @@ test('requestStocksPrices requests stock prices', t => {
         .next([
             { code: 'code1' },
             { code: 'code2' },
-            { code: 'code3' }
+            { code: 'code3' },
         ])
         .select(getIndices)
         .next([
             { code: 'indice1' },
-            { code: 'indice2' }
+            { code: 'indice2' },
         ])
         .call(getStockPrices, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
         .next(res)
@@ -207,7 +207,7 @@ test('requestStocksPrices requests stock prices', t => {
         .isDone();
 });
 
-test('requestStocksPrices handles errors', t => {
+test('requestStocksPrices handles errors', (t) => {
     t.is(1, 1);
 
     const err = new Error('some error');
@@ -218,12 +218,12 @@ test('requestStocksPrices handles errors', t => {
         .next([
             { code: 'code1' },
             { code: 'code2' },
-            { code: 'code3' }
+            { code: 'code3' },
         ])
         .select(getIndices)
         .next([
             { code: 'indice1' },
-            { code: 'indice2' }
+            { code: 'indice2' },
         ])
         .call(getStockPrices, ['code1', 'code2', 'code3', 'indice1', 'indice2'])
         .throw(err)
@@ -232,7 +232,7 @@ test('requestStocksPrices handles errors', t => {
         .isDone();
 });
 
-test('fundsSaga forks other sagas', t => {
+test('fundsSaga forks other sagas', (t) => {
     t.is(1, 1);
     testSaga(fundsSaga)
         .next()

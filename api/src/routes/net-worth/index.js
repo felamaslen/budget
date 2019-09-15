@@ -21,7 +21,7 @@ const unionSelectIds = (db, categories, after) => {
     FROM (
         SELECT '${categories[0]}'::uuid AS id
         ${categories.slice(1)
-        .map(id => `UNION SELECT '${id}'::uuid`)
+        .map((id) => `UNION SELECT '${id}'::uuid`)
         .join('\n')}
     ) AS ids
     ${after}
@@ -87,5 +87,5 @@ function netWorthRoute(config, db) {
 }
 
 module.exports = {
-    netWorthRoute
+    netWorthRoute,
 };

@@ -10,7 +10,7 @@ function sassLoader() {
     const common = [
         'css-loader',
         {
-            loader: 'postcss-loader'
+            loader: 'postcss-loader',
         },
         'sass-loader',
         {
@@ -18,10 +18,10 @@ function sassLoader() {
             options: {
                 syntax: 'scss',
                 files: [
-                    path.join(__dirname, './web/src/constants/styles.json')
-                ]
-            }
-        }
+                    path.join(__dirname, './web/src/constants/styles.json'),
+                ],
+            },
+        },
     ];
 
     if (__DEV__) {
@@ -35,18 +35,18 @@ function getPlugins() {
     const common = [
         new DeadCodePlugin({
             patterns: [
-                'web/src/**/*.js'
+                'web/src/**/*.js',
             ],
             exclude: [
-                'web/test/**/*.js'
-            ]
+                'web/test/**/*.js',
+            ],
         }),
         new webpack.LoaderOptionsPlugin({
             options: {
                 postcss: [
-                    autoprefixer()
-                ]
-            }
+                    autoprefixer(),
+                ],
+            },
         }),
         new webpack.DefinePlugin({
             'process.env': {
@@ -55,9 +55,9 @@ function getPlugins() {
                 STOCK_INDICES: JSON.stringify(process.env.STOCK_INDICES || ''),
                 DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false'),
                 FAKE_STOCK_PRICES: JSON.stringify(process.env.FAKE_STOCK_PRICES || 'false'),
-                DEFAULT_FUND_PERIOD: JSON.stringify(process.env.DEFAULT_FUND_PERIOD || 'year1')
-            }
-        })
+                DEFAULT_FUND_PERIOD: JSON.stringify(process.env.DEFAULT_FUND_PERIOD || 'year1'),
+            },
+        }),
     ];
 
     if (__DEV__) {
@@ -65,25 +65,25 @@ function getPlugins() {
             ...common,
             new webpack.DefinePlugin({
                 'process.env': {
-                    SKIP_LOG_ACTIONS: JSON.stringify(process.env.SKIP_LOG_ACTIONS || '')
-                }
+                    SKIP_LOG_ACTIONS: JSON.stringify(process.env.SKIP_LOG_ACTIONS || ''),
+                },
             }),
             new webpack.HotModuleReplacementPlugin(),
-            new webpack.NamedModulesPlugin()
+            new webpack.NamedModulesPlugin(),
         ];
     }
 
     return [
         ...common,
         new MiniCssExtractPlugin({
-            filename: 'assets/style.css'
-        })
+            filename: 'assets/style.css',
+        }),
     ];
 }
 
 function getOptimization() {
     return {
-        usedExports: true
+        usedExports: true,
     };
 }
 
@@ -95,7 +95,7 @@ function getEntry() {
             'webpack/hot/only-dev-server',
             'webpack-hot-middleware/client?reload=true',
             'react-hot-loader/patch',
-            ...common
+            ...common,
         ];
     }
 
@@ -115,15 +115,16 @@ module.exports = {
     output: {
         path: path.join(__dirname, './web/build'),
         publicPath,
-        filename: 'assets/bundle.js'
+        filename: 'assets/bundle.js',
     },
     resolve: {
         alias: {
             'react-dom': '@hot-loader/react-dom',
             '~client': path.resolve(__dirname, './web/src'),
             '~client-test': path.resolve(__dirname, './web/test'),
-            '~api': path.resolve(__dirname, './api')
-        }
+            '~api': path.resolve(__dirname, './api/src'),
+            '~api-test': path.resolve(__dirname, './api/test'),
+        },
     },
     optimization: getOptimization(),
     module: {
@@ -131,19 +132,19 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                use: 'babel-loader'
+                use: 'babel-loader',
             },
             {
                 test: /\.scss$/,
                 exclude: /node_modules/,
-                use: sassLoader()
+                use: sassLoader(),
             },
             {
                 test: /\.css$/,
-                use: 'css-loader'
+                use: 'css-loader',
             },
             {
-                test: filename => {
+                test: (filename) => {
                     if (filename.match(/favicon\.png/)) {
                         return false;
                     }
@@ -153,20 +154,20 @@ module.exports = {
                 use: {
                     loader: 'file-loader',
                     options: {
-                        name: 'assets/[hash].[ext]'
-                    }
-                }
+                        name: 'assets/[hash].[ext]',
+                    },
+                },
             },
             {
                 test: /favicon\.png/,
                 use: {
                     loader: 'file-loader',
                     options: {
-                        name: 'assets/favicon.ico'
-                    }
-                }
-            }
-        ]
+                        name: 'assets/favicon.ico',
+                    },
+                },
+            },
+        ],
     },
-    plugins: getPlugins()
+    plugins: getPlugins(),
 };

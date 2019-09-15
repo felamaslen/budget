@@ -10,7 +10,7 @@ import CrudList from '~client/components/CrudList';
 
 import './style.scss';
 
-const getCreditLimitDisabled = parent => parent.type !== 'liability';
+const getCreditLimitDisabled = (parent) => parent.type !== 'liability';
 
 function NetWorthSubcategoryItemForm({
     categoryId,
@@ -20,7 +20,7 @@ function NetWorthSubcategoryItemForm({
     parent,
     onChange,
     onDelete,
-    buttonText
+    buttonText,
 }) {
     const [tempSubcategory, setTempSubcategory] = useState(subcategory);
 
@@ -33,33 +33,33 @@ function NetWorthSubcategoryItemForm({
 
     const [tempOpacity, setTempOpacity] = useState(opacity);
 
-    const touched = !(onDelete &&
-        tempSubcategory === subcategory &&
-        tempHasCreditLimit === initialHasCreditLimit &&
-        tempOpacity === opacity
+    const touched = !(onDelete
+        && tempSubcategory === subcategory
+        && tempHasCreditLimit === initialHasCreditLimit
+        && tempOpacity === opacity
     );
 
     const onChangeItem = useCallback(() => onChange({
         categoryId,
         subcategory: tempSubcategory,
         hasCreditLimit: tempHasCreditLimit,
-        opacity: tempOpacity
+        opacity: tempOpacity,
     }), [
         onChange,
         categoryId,
         tempSubcategory,
         tempHasCreditLimit,
-        tempOpacity
+        tempOpacity,
     ]);
 
     const style = {
-        backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`
+        backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`,
     };
 
     return (
         <span
             className={classNames('net-worth-subcategory-item-form', {
-                touched
+                touched,
             })}
             style={style}
         >
@@ -110,13 +110,13 @@ NetWorthSubcategoryItemForm.propTypes = {
     onChange: PropTypes.func.isRequired,
     onDelete: PropTypes.func,
     parent: PropTypes.shape({
-        type: PropTypes.oneOf(['asset', 'liability']).isRequired
-    }).isRequired
+        type: PropTypes.oneOf(['asset', 'liability']).isRequired,
+    }).isRequired,
 };
 
 NetWorthSubcategoryItemForm.defaultProps = {
     subcategory: 'Some bank account',
-    opacity: 0.8
+    opacity: 0.8,
 };
 
 function NetWorthSubcategoryItem({
@@ -125,13 +125,13 @@ function NetWorthSubcategoryItem({
         categoryId,
         subcategory,
         hasCreditLimit,
-        opacity
+        opacity,
     },
     parent,
     onUpdate,
-    onDelete
+    onDelete,
 }) {
-    const onChange = useCallback(values => {
+    const onChange = useCallback((values) => {
         onUpdate(id, values);
     }, [onUpdate, id]);
 
@@ -153,7 +153,7 @@ NetWorthSubcategoryItem.propTypes = {
     parent: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
-    item: subcategoryShape.isRequired
+    item: subcategoryShape.isRequired,
 };
 
 const NetWorthSubcategoryCreateItem = ({ parent, onCreate }) => (
@@ -167,7 +167,7 @@ const NetWorthSubcategoryCreateItem = ({ parent, onCreate }) => (
 
 NetWorthSubcategoryCreateItem.propTypes = {
     parent: PropTypes.object.isRequired,
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };
 
 export default function NetWorthSubcategoryList({
@@ -175,10 +175,10 @@ export default function NetWorthSubcategoryList({
     subcategories,
     onCreate,
     onUpdate,
-    onDelete
+    onDelete,
 }) {
     const extraProps = {
-        parent
+        parent,
     };
 
     const creditLimitDisabled = getCreditLimitDisabled(parent);
@@ -210,5 +210,5 @@ NetWorthSubcategoryList.propTypes = {
     parent: PropTypes.object.isRequired,
     onCreate: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };

@@ -17,7 +17,7 @@ export default function AverageLine({ value, data, ...props }) {
 
             return [
                 lastPoints.concat([[xValue, arrayAverage(nextCompareData)]]),
-                nextCompareData
+                nextCompareData,
             ];
         }, [[], []]);
 
@@ -29,7 +29,7 @@ export default function AverageLine({ value, data, ...props }) {
             ...props,
             data: points,
             smooth: true,
-            fill: false
+            fill: false,
         });
     }, [props, value, data]);
 
@@ -49,5 +49,5 @@ export default function AverageLine({ value, data, ...props }) {
 
 AverageLine.propTypes = {
     value: PropTypes.number,
-    data: dataShape.isRequired
+    data: dataShape.isRequired,
 };

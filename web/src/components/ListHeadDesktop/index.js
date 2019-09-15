@@ -13,7 +13,7 @@ export default function ListHeadDesktop({
 }) {
     const weeklyValueFormatted = formatCurrency(weeklyValue, {
         abbreviate: true,
-        precision: 1
+        precision: 1,
     });
 
     return (
@@ -28,15 +28,16 @@ export default function ListHeadDesktop({
                     <span className="weekly-value">{weeklyValueFormatted}</span>
                 </span>
             )}
-            {TotalValue && <TotalValue totalCost={totalCost} {...extraProps} /> || (
-                <div className="total-outer">
+            {TotalValue
+                ? <TotalValue totalCost={totalCost} {...extraProps} />
+                : <div className="total-outer">
                     <span className="total">{'Total:'}</span>
                     <span className="total-value">{formatCurrency(totalCost, {
                         abbreviate: true,
-                        precision: 1
+                        precision: 1,
                     })}</span>
                 </div>
-            )}
+            }
         </div>
     );
 }
@@ -46,5 +47,5 @@ ListHeadDesktop.propTypes = {
     weeklyValue: PropTypes.number,
     getDaily: PropTypes.bool,
     totalCost: PropTypes.number,
-    TotalValue: PropTypes.func
+    TotalValue: PropTypes.func,
 };

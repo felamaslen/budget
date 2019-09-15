@@ -12,7 +12,7 @@ export default function GraphStocks({ history }) {
     const lines = useMemo(() => ([{
         key: 'graph-stock-prices',
         data: history,
-        color: ([, value]) => colors[(value < 0) >> 0]
+        color: ([, value]) => colors[(value < 0) >> 0],
     }]), [history]);
 
     return (
@@ -30,5 +30,5 @@ export default function GraphStocks({ history }) {
 }
 
 GraphStocks.propTypes = {
-    history: dataShape.isRequired
+    history: dataShape.isRequired,
 };

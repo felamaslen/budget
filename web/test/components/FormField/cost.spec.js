@@ -1,24 +1,25 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import FormFieldCost from '~client/components/FormField/cost';
 
+const test = ninos(ava);
+
 const getContainer = (customProps = {}, ...args) => {
     const props = {
         active: true,
         value: 10345,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldCost {...props} />, ...args);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
 
@@ -29,7 +30,7 @@ test('basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test('input', t => {
+test('input', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [input] = div.childNodes;
@@ -40,10 +41,10 @@ test('input', t => {
     t.is(input.value, '103.45');
 });
 
-test('handling onchange', t => {
+test('handling onchange', (t) => {
     const onChange = t.context.stub();
     const { container } = getContainer({
-        onChange
+        onChange,
     });
 
     t.is(onChange.calls.length, 0);
@@ -60,7 +61,7 @@ test('handling onchange', t => {
     t.deepEqual(onChange.calls[0].arguments, [1093]);
 });
 
-test('rendering as a string input', t => {
+test('rendering as a string input', (t) => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
     const { container } = getContainer(props);
@@ -85,7 +86,7 @@ test('rendering as a string input', t => {
     t.deepEqual(onChange.calls[1].arguments, [22912]);
 });
 
-test('rendering as a string input - decimal point', t => {
+test('rendering as a string input - decimal point', (t) => {
     const onChange = t.context.stub();
     const props = { onChange, value: '', string: true };
     const { container } = getContainer(props);
@@ -116,8 +117,7 @@ test('rendering as a string input - decimal point', t => {
     const testInput = (string, changeTo) => {
         const chars = string.split('');
 
-        chars.forEach((value, index) =>
-            testInputCharacter(string.substring(0, index + 1), changeTo[index]));
+        chars.forEach((value, index) => testInputCharacter(string.substring(0, index + 1), changeTo[index]));
     };
 
     testInput('1.5', [100, 100, 150]);
@@ -138,7 +138,7 @@ test('rendering as a string input - decimal point', t => {
     testInputCharacter('.05', 5, '.05');
 });
 
-test('rendering as a string input - handling invalid input', t => {
+test('rendering as a string input - handling invalid input', (t) => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
     const { container } = getContainer(props);
@@ -155,7 +155,7 @@ test('rendering as a string input - handling invalid input', t => {
     t.is(onChange.calls.length, 0);
 });
 
-test('rendering as a string input - not overwriting on invalid input', t => {
+test('rendering as a string input - not overwriting on invalid input', (t) => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
     const { container } = getContainer(props);

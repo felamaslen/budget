@@ -2,14 +2,16 @@
  * React component to display a line graph (e.g. time series)
  */
 
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, {
+    useRef, useState, useEffect, useMemo,
+} from 'react';
 import PropTypes from 'prop-types';
 import { genPixelCompute } from '~client/components/Graph/helpers';
 import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
 import {
     lineShape,
     lineGraphPropTypes,
-    rangePropTypes
+    rangePropTypes,
 } from '~client/prop-types/graph';
 
 import { useZoom } from './hooks/zoom';
@@ -36,7 +38,7 @@ export default function LineGraph({
     svgClasses,
     isMobile,
     hoverEffect,
-    zoomEffect
+    zoomEffect,
 }) {
     const graphRef = useRef();
     const [calc, setCalc] = useState(null);
@@ -48,7 +50,7 @@ export default function LineGraph({
         minY,
         maxY,
         minX,
-        maxX
+        maxX,
     }), [width, height, padding, minY, maxY, minX, maxX]);
 
     useEffect(() => {
@@ -59,7 +61,7 @@ export default function LineGraph({
         lines,
         isMobile,
         calc,
-        hoverEffect
+        hoverEffect,
     });
 
     const [, zoomedDimensions] = useZoom({
@@ -69,14 +71,14 @@ export default function LineGraph({
         graphRef,
         calc,
         setCalc,
-        zoomEffect
+        zoomEffect,
     });
 
     const outerPropertiesProc = useMemo(() => ({
         onMouseMove,
         onMouseOver: onMouseMove,
         onMouseLeave,
-        ...outerProperties
+        ...outerProperties,
     }), [onMouseMove, onMouseLeave, outerProperties]);
 
     if (!calc) {
@@ -97,7 +99,7 @@ export default function LineGraph({
         graphRef,
         outerProperties: outerPropertiesProc,
         svgProperties,
-        svgClasses
+        svgClasses,
     };
 
     return <LineGraphDumb {...graphProps} />;
@@ -116,12 +118,12 @@ LineGraph.propTypes = {
     hoverEffect: PropTypes.shape({
         labelX: PropTypes.func.isRequired,
         labelY: PropTypes.func.isRequired,
-        labelWidthY: PropTypes.number
+        labelWidthY: PropTypes.number,
     }),
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
     svgClasses: PropTypes.string,
-    zoomEffect: PropTypes.func
+    zoomEffect: PropTypes.func,
 };
 
 LineGraph.defaultProps = {
@@ -130,5 +132,5 @@ LineGraph.defaultProps = {
     after: null,
     padding: defaultPadding,
     outerProperties: {},
-    svgProperties: {}
+    svgProperties: {},
 };

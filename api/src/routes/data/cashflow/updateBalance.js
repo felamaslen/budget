@@ -12,7 +12,7 @@ function updateQuery(db, user, value) {
         .endOf('month')
         .toISODate();
 
-    return db.transaction(async trx => {
+    return db.transaction(async (trx) => {
         await trx('balance')
             .whereRaw('extract(year from balance.date) = ?', year)
             .whereRaw('extract(month from balance.date) = ?', month)
@@ -48,5 +48,5 @@ function updateData(config, db, post = true) {
 
 module.exports = {
     updateQuery,
-    updateData
+    updateData,
 };

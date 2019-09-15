@@ -1,15 +1,15 @@
-const test = require('ava');
-const db = require('~api/src/modules/db')();
-const { DateTime } = require('luxon');
+import test from 'ava';
+import { DateTime } from 'luxon';
+import db from '~api/modules/db';
 
-const {
+import {
     getLimitCondition,
     getOlderExists,
     formatResults,
-    getTotalCost
-} = require('~api/src/routes/data/list.common');
+    getTotalCost,
+} from '~api/routes/data/list.common';
 
-test('getLimitCondition returns a valid limit condition', t => {
+test('getLimitCondition returns a valid limit condition', (t) => {
     const now = DateTime.fromISO('2017-09-04');
     const numMonths = 3;
 
@@ -19,14 +19,14 @@ test('getLimitCondition returns a valid limit condition', t => {
         ...items,
         [key]: result[key]
             ? result[key].toISODate()
-            : null
+            : null,
     }), {}), {
         startDate: '2017-07-01',
-        endDate: null
+        endDate: null,
     });
 });
 
-test('getLimitCondition handles pagination', t => {
+test('getLimitCondition handles pagination', (t) => {
     const now = DateTime.fromISO('2017-09-03');
     const numMonths = 5;
     const offset = 1;
@@ -37,14 +37,14 @@ test('getLimitCondition handles pagination', t => {
         ...items,
         [key]: result[key]
             ? result[key].toISODate()
-            : null
+            : null,
     }), {}), {
         startDate: '2016-12-01',
-        endDate: '2017-04-30'
+        endDate: '2017-04-30',
     });
 });
 
-test('getOlderExists returns the correct result', async t => {
+test('getOlderExists returns the correct result', async (t) => {
     const [{ uid }] = await db.select('uid')
         .from('users')
         .where('name', '=', 'test-user');
@@ -56,28 +56,28 @@ test('getOlderExists returns the correct result', async t => {
     t.false(await getOlderExists(db, user, table, { startDate: DateTime.fromISO('2017-04-23') }));
 });
 
-test('formatResults works as expected', t => {
+test('formatResults works as expected', (t) => {
     const queryResult = [
         { date: new Date('2017-09-12'), item: 'foo', category: 'bar' },
-        { date: new Date('2017-08-29'), item: 'baz', category: 'bak' }
+        { date: new Date('2017-08-29'), item: 'baz', category: 'bak' },
     ];
 
     const columnMap = {
         item: 'i',
-        category: 'k'
+        category: 'k',
     };
 
     t.deepEqual(queryResult.map(formatResults(columnMap)), [
         {
-            'd': '2017-09-12', 'i': 'foo', 'k': 'bar'
+            d: '2017-09-12', i: 'foo', k: 'bar',
         },
         {
-            'd': '2017-08-29', 'i': 'baz', 'k': 'bak'
-        }
+            d: '2017-08-29', i: 'baz', k: 'bak',
+        },
     ]);
 });
 
-test('getTotalCost returns the correct query', async t => {
+test('getTotalCost returns the correct query', async (t) => {
     const [{ uid }] = await db.select('uid')
         .from('users')
         .where('name', '=', 'test-user');

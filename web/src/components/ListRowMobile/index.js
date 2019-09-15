@@ -6,7 +6,9 @@ import { rowShape } from '~client/prop-types/page/rows';
 import { formatItem } from '~client/modules/format';
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
-function ListRowMobile({ style, item, listColsMobile, AfterRowMobile, setActive }) {
+function ListRowMobile({
+    style, item, listColsMobile, AfterRowMobile, setActive,
+}) {
     const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
 
     return (
@@ -15,7 +17,7 @@ function ListRowMobile({ style, item, listColsMobile, AfterRowMobile, setActive 
             style={style}
             onClick={onActivate}
         >
-            {listColsMobile.map(column => (
+            {listColsMobile.map((column) => (
                 <span key={column} className={classNames('column', column)}>
                     {formatItem(column, item[column])}
                 </span>
@@ -33,12 +35,12 @@ ListRowMobile.propTypes = {
     setActive: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
     listColsMobile: PropTypes.array,
-    AfterRowMobile: PropTypes.func
+    AfterRowMobile: PropTypes.func,
 };
 
 ListRowMobile.defaultProps = {
     style: {},
-    listColsMobile: LIST_COLS_MOBILE
+    listColsMobile: LIST_COLS_MOBILE,
 };
 
 export default memo(ListRowMobile);

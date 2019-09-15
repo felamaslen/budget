@@ -5,10 +5,12 @@
 const { DateTime } = require('luxon');
 const { getNow } = require('../../../modules/time');
 
-const getYearMonth = time => ([time.year, time.month]);
+const getYearMonth = (time) => ([time.year, time.month]);
 
 function getStartTime(options) {
-    const { now, startYear, startMonth, pastMonths } = options;
+    const {
+        now, startYear, startMonth, pastMonths,
+    } = options;
 
     const startTime = now.plus({ months: -pastMonths });
     const minStartTime = DateTime.fromObject({ year: startYear, month: startMonth + 1 });
@@ -29,8 +31,7 @@ function getMonths(options) {
 
     return new Array(numMonths).fill(0)
         .map((item, key) => startTime.plus({ months: key })
-            .endOf('month')
-        );
+            .endOf('month'));
 }
 
 function mapOldToYearMonths(months, old) {
@@ -38,8 +39,7 @@ function mapOldToYearMonths(months, old) {
 }
 
 function getFundValue(monthDate, transactions, prices) {
-    const unitsToDate = transactions.reduce((sum, { date, units }) =>
-        sum + ((date <= monthDate) >> 0) * units, 0);
+    const unitsToDate = transactions.reduce((sum, { date, units }) => sum + ((date <= monthDate) >> 0) * units, 0);
 
     const latestPrice = prices.find(({ date }) => date <= monthDate);
 
@@ -49,21 +49,20 @@ function getFundValue(monthDate, transactions, prices) {
 
     // there is no accurate price cached, so revert to the cost of the fund
     // (neglecting growth)
-    return transactions.reduce((sum, { date, cost }) =>
-        sum + ((date <= monthDate) >> 0) * cost, 0);
+    return transactions.reduce((sum, { date, cost }) => sum + ((date <= monthDate) >> 0) * cost, 0);
 }
 
 function queryFundPrices(config, db, user) {
     return db.select(
         'fund_cache_time.time',
         db.raw('ARRAY_AGG(funds.id) AS ids'),
-        db.raw('ARRAY_AGG(fund_cache.price) AS prices')
+        db.raw('ARRAY_AGG(fund_cache.price) AS prices'),
     )
         .from('funds')
         .innerJoin(
             'fund_hash',
             'fund_hash.hash',
-            db.raw(`MD5(funds.item || ?)`, config.data.funds.salt)
+            db.raw('MD5(funds.item || ?)', config.data.funds.salt),
         )
         .innerJoin('fund_cache', 'fund_cache.fid', 'fund_hash.fid')
         .innerJoin('fund_cache_time', 'fund_cache_time.cid', 'fund_cache.cid')
@@ -78,7 +77,7 @@ function processFundPrices(rows) {
         .map(({ ids, time, prices }) => ({
             ids,
             prices,
-            date: DateTime.fromJSDate(time).startOf('month')
+            date: DateTime.fromJSDate(time).startOf('month'),
         }))
         .reduce((lastReduction, { date, ids, prices }) => {
             // filter out duplicate year/months
@@ -91,22 +90,17 @@ function processFundPrices(rows) {
             }
 
             return lastReduction;
-
         }, { lastDate: Infinity, items: [] })
         .items
-        .reduce((result, { date, ids, prices }) => {
-            return ids.reduce((last, id, key) => {
-                const fundPrice = { date, value: prices[key] };
+        .reduce((result, { date, ids, prices }) => ids.reduce((last, id, key) => {
+            const fundPrice = { date, value: prices[key] };
 
-                if (id in last) {
-                    return { ...last, [id]: [...last[id], fundPrice] };
-                }
+            if (id in last) {
+                return { ...last, [id]: [...last[id], fundPrice] };
+            }
 
-                return { ...last, [id]: [fundPrice] };
-
-            }, result);
-
-        }, {});
+            return { ...last, [id]: [fundPrice] };
+        }, result), {});
 }
 
 function queryFundTransactions(db, user) {
@@ -117,7 +111,9 @@ function queryFundTransactions(db, user) {
 }
 
 function processFundTransactions(rows) {
-    return rows.reduce((items, { id, date: dateRaw, units, cost }) => {
+    return rows.reduce((items, {
+        id, date: dateRaw, units, cost,
+    }) => {
         const date = DateTime.fromJSDate(dateRaw).startOf('month');
 
         if (id in items) {
@@ -127,7 +123,6 @@ function processFundTransactions(rows) {
         }
 
         return { ...items, [id]: [{ date, units, cost }] };
-
     }, {});
 }
 
@@ -135,17 +130,16 @@ function getMonthlyTotalFundValues(months, old, fundTransactions, fundPrices) {
     const transactionsIds = Object.keys(fundTransactions);
     const pricesIds = Object.keys(fundPrices);
 
-    const idsWithPricesAndTransactions = pricesIds.filter(id => transactionsIds.includes(id));
+    const idsWithPricesAndTransactions = pricesIds.filter((id) => transactionsIds.includes(id));
 
     // get as many old fund values as there are old balance items
     const oldMonths = mapOldToYearMonths(months, old);
 
     const allMonths = [...oldMonths, ...months];
 
-    const funds = allMonths.map(date => Math.round(idsWithPricesAndTransactions
-        .map(id => getFundValue(date, fundTransactions[id], fundPrices[id]))
-        .reduce((sum, value) => sum + value, 0)
-    ));
+    const funds = allMonths.map((date) => Math.round(idsWithPricesAndTransactions
+        .map((id) => getFundValue(date, fundTransactions[id], fundPrices[id]))
+        .reduce((sum, value) => sum + value, 0)));
 
     return { funds };
 }
@@ -157,25 +151,24 @@ function getMonthlyValuesQueryDateUnion(months) {
 
     return months
         .slice(1)
-        .map(date => ({
+        .map((date) => ({
             start: `DATE('${date.startOf('month')
                 .toISODate()}')`,
-            end: `DATE('${date.toISODate()}')`
+            end: `DATE('${date.toISODate()}')`,
         }))
         .reduce(
             (last, { start, end }) => `${last} UNION SELECT ${start}, ${end}`,
-            `SELECT DATE('${firstStart}') AS start_date, DATE('${firstEnd}') AS end_date`
+            `SELECT DATE('${firstStart}') AS start_date, DATE('${firstEnd}') AS end_date`,
         );
 }
 
 function getMonthlyValuesQuery(db, user, union, category) {
     return db.select(db.raw('SUM(cost)::integer AS month_cost'))
         .from(db.raw(`(${union}) dates`))
-        .leftJoin(`${category} as list_data`, qb1 => qb1
+        .leftJoin(`${category} as list_data`, (qb1) => qb1
             .on('list_data.uid', '=', db.raw(`'${user.uid}'`))
             .on('date', '>=', 'dates.start_date')
-            .on('date', '<=', 'dates.end_date')
-        )
+            .on('date', '<=', 'dates.end_date'))
         .groupBy('dates.start_date')
         .orderBy('dates.start_date');
 }
@@ -193,7 +186,7 @@ async function getMonthlyValues(config, db, user, yearMonths, union, category, o
 
     const result = await getMonthlyValuesQuery(db, user, union, category);
 
-    return { [category]: result.map(({ 'month_cost': monthCost }) => Number(monthCost) || 0) };
+    return { [category]: result.map(({ month_cost: monthCost }) => Number(monthCost) || 0) };
 }
 
 function getMonthlyBalanceRows(db, user) {
@@ -204,10 +197,9 @@ function getMonthlyBalanceRows(db, user) {
 }
 
 function getMonthlyBalance(rows, months) {
-    const balance = months.map(month => {
+    const balance = months.map((month) => {
         const row = rows.find(({ date }) => DateTime.fromJSDate(date)
-            .hasSame(month, 'month')
-        );
+            .hasSame(month, 'month'));
 
         if (row) {
             return row.value;
@@ -232,12 +224,11 @@ function getMonthlyBalance(rows, months) {
             if (gapSinceLast > 0) {
                 return {
                     ...rest,
-                    values: [...values, ...new Array(gapSinceLast).fill(0), value]
+                    values: [...values, ...new Array(gapSinceLast).fill(0), value],
                 };
             }
 
             return { ...rest, values: [...values, value] };
-
         }, { numZeroesAfter: 0, values: [] });
 
     const old = zeroesSinceLastOld
@@ -252,8 +243,7 @@ async function getMonthlyCategoryValues(config, db, user, months, old) {
 
     const union = getMonthlyValuesQueryDateUnion(months);
 
-    const promises = categories.map(category =>
-        getMonthlyValues(config, db, user, months, union, category, old));
+    const promises = categories.map((category) => getMonthlyValues(config, db, user, months, union, category, old));
 
     const results = await Promise.all(promises);
 
@@ -264,10 +254,12 @@ async function getData(config, db, user) {
     const now = getNow(config);
 
     const {
-        startYear, startMonth, numLast: pastMonths, numFuture: futureMonths
+        startYear, startMonth, numLast: pastMonths, numFuture: futureMonths,
     } = config.data.overview;
 
-    const months = getMonths({ now, startYear, startMonth, pastMonths, futureMonths });
+    const months = getMonths({
+        now, startYear, startMonth, pastMonths, futureMonths,
+    });
 
     const balanceRows = await getMonthlyBalanceRows(db, user);
     const balance = getMonthlyBalance(balanceRows, months);
@@ -282,7 +274,7 @@ async function getData(config, db, user) {
         currentYear,
         currentMonth,
         futureMonths,
-        cost: { ...monthCost, ...balance }
+        cost: { ...monthCost, ...balance },
     };
 }
 
@@ -300,5 +292,5 @@ module.exports = {
     getMonthlyValues,
     getMonthlyBalance,
     getMonthlyCategoryValues,
-    getData
+    getData,
 };

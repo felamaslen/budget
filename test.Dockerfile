@@ -10,5 +10,6 @@ COPY package-lock.json ./
 RUN npm ci
 
 ENV TZ=UTC
+ENV BABEL_ENV=node
 
 COPY . .

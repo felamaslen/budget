@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import { rowsShape } from '~client/prop-types/page/rows';
-import { itemHeightDesktop, itemHeightMobile } from '~client/constants/styles';
+import { itemHeightDesktop, itemHeightMobile } from '~client/constants/styles.json';
 
 import CrudList from '~client/components/CrudList';
 import ListHeadDesktop from '~client/components/ListHeadDesktop';
@@ -23,20 +23,20 @@ export default function ListBody({
     extraProps: pageExtraProps,
     onCreate,
     onUpdate,
-    onDelete
+    onDelete,
 }) {
     const extraProps = useMemo(() => ({
         page,
         getDaily,
         weeklyValue,
         totalCost,
-        ...pageExtraProps
+        ...pageExtraProps,
     }), [
         page,
         getDaily,
         weeklyValue,
         totalCost,
-        pageExtraProps
+        pageExtraProps,
     ]);
 
     const [Item, CreateItem, className, BeforeList, AfterList] = useMemo(() => {
@@ -46,7 +46,7 @@ export default function ListBody({
                 null,
                 'list-mobile',
                 ListHeadMobile,
-                ListFootMobile
+                ListFootMobile,
             ];
         }
 
@@ -55,7 +55,7 @@ export default function ListBody({
             ListCreateDesktop,
             'list-desktop',
             ListHeadDesktop,
-            null
+            null,
         ];
     }, [isMobile]);
 
@@ -92,9 +92,9 @@ ListBody.propTypes = {
     extraProps: PropTypes.object,
     onCreate: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 ListBody.defaultProps = {
-    extraProps: {}
+    extraProps: {},
 };

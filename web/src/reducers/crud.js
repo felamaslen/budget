@@ -9,25 +9,25 @@ function getNextOptimisticStatus(lastStatus, requestType) {
     return lastStatus || requestType;
 }
 
-const getOptimisticUpdateItems = (key, requestType, getNewProps) =>
-    (state, action, index) => {
-        if (requestType === DELETE && state[key][index].__optimistic === CREATE) {
-            return removeAtIndex(state[key], index);
-        }
+const getOptimisticUpdateItems = (key, requestType, getNewProps) => (state, action, index) => {
+    if (requestType === DELETE && state[key][index].__optimistic === CREATE) {
+        return removeAtIndex(state[key], index);
+    }
 
-        const newItem = { ...state[key][index], ...getNewProps(action, state[key][index]) };
+    const newItem = { ...state[key][index], ...getNewProps(action, state[key][index]) };
 
-        if (requestType === UPDATE && Object.keys(newItem).every(
-            column => newItem[column] === state[key][index][column])
-        ) {
-            return state[key];
-        }
+    if (requestType === UPDATE && Object.keys(newItem).every(
+        (column) => newItem[column] === state[key][index][column],
+    )
+    ) {
+        return state[key];
+    }
 
-        return replaceAtIndex(state[key], index, {
-            ...newItem,
-            __optimistic: getNextOptimisticStatus(state[key][index].__optimistic, requestType)
-        });
-    };
+    return replaceAtIndex(state[key], index, {
+        ...newItem,
+        __optimistic: getNextOptimisticStatus(state[key][index].__optimistic, requestType),
+    });
+};
 
 const getNewTotals = (key, requestType) => (state, nextItems, index) => {
     const withoutOld = state.total - state[key][index].cost;
@@ -42,7 +42,7 @@ const withOptimisticUpdate = (
     key = 'items',
     requestType,
     withTotals,
-    getNewProps = () => ({})
+    getNewProps = () => ({}),
 ) => {
     const getItems = getOptimisticUpdateItems(key, requestType, getNewProps);
     const getTotals = getNewTotals(key, requestType);
@@ -58,7 +58,7 @@ const withOptimisticUpdate = (
         if (withTotals) {
             return {
                 [key]: items,
-                total: getTotals(state, items, index)
+                total: getTotals(state, items, index),
             };
         }
 
@@ -66,23 +66,22 @@ const withOptimisticUpdate = (
     };
 };
 
-export const onCreateOptimistic = (key = 'items', columns, withTotals = false) =>
-    (state, { item, fakeId }) => {
-        if (columns.some(column => !fieldExists(item[column]))) {
-            return {};
-        }
+export const onCreateOptimistic = (key = 'items', columns, withTotals = false) => (state, { item, fakeId }) => {
+    if (columns.some((column) => !fieldExists(item[column]))) {
+        return {};
+    }
 
-        const itemFiltered = Object.keys(item).filter(column => columns.includes(column))
-            .reduce((last, column) => ({ ...last, [column]: item[column] }), {});
+    const itemFiltered = Object.keys(item).filter((column) => columns.includes(column))
+        .reduce((last, column) => ({ ...last, [column]: item[column] }), {});
 
-        const items = state[key].concat([{ ...itemFiltered, id: fakeId, __optimistic: CREATE }]);
+    const items = state[key].concat([{ ...itemFiltered, id: fakeId, __optimistic: CREATE }]);
 
-        if (withTotals) {
-            return { [key]: items, total: state.total + item.cost };
-        }
+    if (withTotals) {
+        return { [key]: items, total: state.total + item.cost };
+    }
 
-        return { [key]: items };
-    };
+    return { [key]: items };
+};
 
 export const onUpdateOptimistic = (key, columns, withTotals = false) => withOptimisticUpdate(
     key,
@@ -90,14 +89,14 @@ export const onUpdateOptimistic = (key, columns, withTotals = false) => withOpti
     withTotals,
     ({ item }, oldItem) => {
         const oldColumns = Object.keys(oldItem);
-        const newColumns = Object.keys(item).filter(column => oldColumns.includes(column));
+        const newColumns = Object.keys(item).filter((column) => oldColumns.includes(column));
 
         return newColumns.reduce((last, column) => ({ ...last, [column]: item[column] }), {});
-    }
+    },
 );
 
 export const onDeleteOptimistic = (key, withTotals = false) => withOptimisticUpdate(
     key,
     DELETE,
-    withTotals
+    withTotals,
 );

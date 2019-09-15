@@ -1,6 +1,6 @@
-@import '../../sass/responsive.scss';
-@import '../../sass/variables.scss';
-@import '../../sass/mixins.scss';
+@import '~client/sass/responsive.scss';
+@import '~client/sass/variables.scss';
+@import '~client/sass/mixins.scss';
 
 // desktop
 @media screen and (min-width: $width-page-mobile) {
@@ -92,10 +92,10 @@
                 text-align: right;
             }
             .up .change {
-               color: $color-bg-up;
+                color: $color-bg-up;
             }
             .down .change {
-               color: $color-bg-down;
+                color: $color-bg-down;
             }
             
             .hl-up, .hl-down {
@@ -124,7 +124,7 @@
                 color: $color-light;
                 font-style: italic;
                 .title:after {
-                    content: ": ";
+                    content: $colon-space;
                 }
             }
             .code, .price {
@@ -143,4 +143,3 @@
         height: 50px;
     }
 }
-

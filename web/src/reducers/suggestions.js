@@ -3,14 +3,14 @@ import { createReducerObject } from 'create-reducer-object';
 import {
     SUGGESTIONS_REQUESTED,
     SUGGESTIONS_RECEIVED,
-    SUGGESTIONS_CLEARED
+    SUGGESTIONS_CLEARED,
 } from '~client/constants/actions/suggestions';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 
 export const initialState = {
     loading: false,
     list: [],
-    next: []
+    next: [],
 };
 
 const handlers = {
@@ -19,9 +19,9 @@ const handlers = {
     [SUGGESTIONS_RECEIVED]: (state, { res: { list = [], nextCategory: next = [] } }) => ({
         loading: false,
         list,
-        next
+        next,
     }),
-    [SUGGESTIONS_CLEARED]: () => initialState
+    [SUGGESTIONS_CLEARED]: () => initialState,
 };
 
 export default createReducerObject(handlers, initialState);

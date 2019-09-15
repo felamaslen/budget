@@ -7,17 +7,17 @@ import Page from '~client/components/Page';
 const getContainer = (customProps = {}) => {
     const props = {
         page: 'general',
-        ...customProps
+        ...customProps,
     };
 
     return render(
         <Page {...props}>
             <span>{'text'}</span>
-        </Page>
+        </Page>,
     );
 };
 
-test('basic page container', t => {
+test('basic page container', (t) => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;

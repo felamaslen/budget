@@ -13,11 +13,11 @@ function getNumToSkip(isMobile) {
     return 0;
 }
 
-const OverviewTable = props => (
+const OverviewTable = (props) => (
     <div className="table-flex table-insert table-overview noselect">
         <OverviewTableHeader />
         <Media query={mediaQueryMobile}>
-            {isMobile => <OverviewTableRows {...props} numToSkip={getNumToSkip(isMobile)} />}
+            {(isMobile) => <OverviewTableRows {...props} numToSkip={getNumToSkip(isMobile)} />}
         </Media>
     </div>
 );

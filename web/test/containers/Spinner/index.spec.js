@@ -6,29 +6,29 @@ import { Provider } from 'react-redux';
 import React from 'react';
 import Spinner from '~client/containers/Spinner';
 
-const getContainer = (customProps = {}, customState = state => state) => {
+const getContainer = (customProps = {}, customState = (state) => state) => {
     const state = customState({
         api: {
-            initialLoading: true
-        }
+            initialLoading: true,
+        },
     });
 
     const store = createMockStore(state);
 
     const props = {
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
             <Spinner {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -52,13 +52,13 @@ test('basic structure', t => {
     t.is(progress.childNodes.length, 0);
 });
 
-test('not rendering if inactive', t => {
-    const { container } = getContainer({}, state => ({
+test('not rendering if inactive', (t) => {
+    const { container } = getContainer({}, (state) => ({
         ...state,
         api: {
             ...state.api,
-            initialLoading: false
-        }
+            initialLoading: false,
+        },
     }));
 
     t.is(container.childNodes.length, 0);

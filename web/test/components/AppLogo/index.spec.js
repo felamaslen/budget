@@ -9,7 +9,7 @@ const getContainer = memoize((customProps = {}) => {
     const props = {
         loading: true,
         unsaved: true,
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(<AppLogo {...props} />);
@@ -17,33 +17,33 @@ const getContainer = memoize((customProps = {}) => {
     return utils;
 });
 
-test('rendering basic structure', t => {
+test('rendering basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.tagName, 'DIV');
 });
 
-test('children', t => {
+test('children', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
 });
 
-test('class name', t => {
+test('class name', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
     t.is(div.className, 'app-logo');
 });
 
-test('logo children', t => {
+test('logo children', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
     t.is(div.childNodes.length, 2);
 });
 
-test('queue not saved', t => {
+test('queue not saved', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -54,7 +54,7 @@ test('queue not saved', t => {
     t.is(queue.innerHTML, 'Unsaved changes!');
 });
 
-test('logo', t => {
+test('logo', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -73,10 +73,10 @@ test('logo', t => {
     t.is(loading.childNodes.length, 0);
 });
 
-test('no unsaved changes rendered, if there are no requests in the list', t => {
+test('no unsaved changes rendered, if there are no requests in the list', (t) => {
     const { container } = getContainer({
         loading: false,
-        unsaved: false
+        unsaved: false,
     });
 
     const [div] = container.childNodes;
@@ -88,10 +88,10 @@ test('no unsaved changes rendered, if there are no requests in the list', t => {
     t.is(logo.className, 'logo');
 });
 
-test('no loading spinner if not loading a request', t => {
+test('no loading spinner if not loading a request', (t) => {
     const { container } = getContainer({
         loading: false,
-        unsaved: true
+        unsaved: true,
     });
 
     const [div] = container.childNodes;

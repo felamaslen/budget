@@ -14,7 +14,7 @@ export default function ListHeadFundsMobile({ totalCost, cachedValue: { value, a
         <div className="funds-info-inner">
             <div className={classNames('gain', {
                 profit: gain > 0,
-                loss: gain < 0
+                loss: gain < 0,
             })} onClick={onReloadPrices}>
                 <span className="gain-info">{'Current value:'}</span>
                 <span className="value">{formatCurrency(value)}</span>
@@ -29,5 +29,5 @@ export default function ListHeadFundsMobile({ totalCost, cachedValue: { value, a
 ListHeadFundsMobile.propTypes = {
     totalCost: PropTypes.number.isRequired,
     cachedValue: cachedValueShape.isRequired,
-    onReloadPrices: PropTypes.func.isRequired
+    onReloadPrices: PropTypes.func.isRequired,
 };

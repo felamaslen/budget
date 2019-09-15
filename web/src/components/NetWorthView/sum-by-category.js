@@ -12,7 +12,7 @@ const SumByCategory = ({ className, aggregate }) => (
 
 SumByCategory.propTypes = {
     className: PropTypes.string.isRequired,
-    aggregate: PropTypes.objectOf(PropTypes.number.isRequired).isRequired
+    aggregate: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
 };
 
 export default SumByCategory;

@@ -11,7 +11,7 @@ export default function FormContainer({
     onPrevStep,
     onNextStep,
     onFirstStep,
-    onLastStep
+    onLastStep,
 }) {
     return (
         <div className={classNames('net-worth-list-item', className)}>
@@ -30,13 +30,13 @@ export default function FormContainer({
 }
 
 FormContainer.defaultProps = {
-    className: {}
+    className: {},
 };
 
 FormContainer.propTypes = {
     className: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.object
+        PropTypes.object,
     ]),
     item: PropTypes.object.isRequired,
     children: PropTypes.node.isRequired,
@@ -44,5 +44,5 @@ FormContainer.propTypes = {
     onPrevStep: PropTypes.func.isRequired,
     onNextStep: PropTypes.func.isRequired,
     onFirstStep: PropTypes.bool.isRequired,
-    onLastStep: PropTypes.bool.isRequired
+    onLastStep: PropTypes.bool.isRequired,
 };

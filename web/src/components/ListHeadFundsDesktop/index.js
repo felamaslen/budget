@@ -12,7 +12,7 @@ export default function ListHeadFundsDesktop({
     viewSoldFunds,
     cachedValue: { value, ageText },
     onReloadPrices,
-    onViewSoldToggle
+    onViewSoldToggle,
 }) {
     const gainAbsValue = value - totalCost;
 
@@ -20,7 +20,7 @@ export default function ListHeadFundsDesktop({
         <>
             <span className={classNames('overall-gain', {
                 profit: gainAbsValue > 0,
-                loss: gainAbsValue < 0
+                loss: gainAbsValue < 0,
             })} onClick={onReloadPrices}>
                 <span className="value">{formatCurrency(value)}</span>
                 {totalCost && (
@@ -48,5 +48,5 @@ ListHeadFundsDesktop.propTypes = {
     period: PropTypes.string.isRequired,
     cachedValue: cachedValueShape.isRequired,
     onViewSoldToggle: PropTypes.func.isRequired,
-    onReloadPrices: PropTypes.func.isRequired
+    onReloadPrices: PropTypes.func.isRequired,
 };

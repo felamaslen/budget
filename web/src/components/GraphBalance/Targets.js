@@ -7,13 +7,15 @@ import { formatCurrency } from '~client/modules/format';
 import { rgba } from '~client/modules/color';
 import {
     pixelPropTypes as allPixelPropTypes,
-    rangePropTypes as allRangePropTypes
+    rangePropTypes as allRangePropTypes,
 } from '~client/prop-types/graph';
 import { targetsShape } from '~client/prop-types/graph/balance';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
-export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
+export default function Targets({
+    showAll, targets, minY, maxY, pixX, pixY,
+}) {
     const tags = targets.map(({ tag, value }, index) => (
         <text key={tag}
             x={50}
@@ -24,14 +26,16 @@ export default function Targets({ showAll, targets, minY, maxY, pixX, pixY }) {
             fontSize={fontSize}
         >
             {`${formatCurrency(value, {
-                raw: true, noPence: true, abbreviate: true, precision: 0
+                raw: true, noPence: true, abbreviate: true, precision: 0,
             })} (${tag})`}
         </text>
     ));
 
     const monthWidth = pixX(2628000) - pixX(0);
 
-    const arrows = minY !== maxY && targets.map(({ tag, date, value, from, months, last }, index) => (
+    const arrows = minY !== maxY && targets.map(({
+        tag, date, value, from, months, last,
+    }, index) => (
         <Arrow key={tag}
             startX={date}
             startY={from}
@@ -64,5 +68,5 @@ Targets.propTypes = {
     ...pixelPropTypes,
     ...rangePropTypes,
     showAll: PropTypes.bool,
-    targets: targetsShape
+    targets: targetsShape,
 };

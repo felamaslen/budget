@@ -2,6 +2,7 @@
 import { applyMiddleware, createStore, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { createLogger } from 'redux-logger';
 
 import rootSaga from '~client/sagas';
@@ -13,19 +14,19 @@ const SKIP_LOG_ACTIONS = (process.env.SKIP_LOG_ACTIONS || '').split(',');
 
 const logger = createLogger({
     collapsed: true,
-    predicate: (getState, action) => SKIP_LOG_ACTIONS.indexOf(action.type) === -1
+    predicate: (getState, action) => SKIP_LOG_ACTIONS.indexOf(action.type) === -1,
 });
 
 const newStore = () => {
     const createStoreWithMiddleware = compose(
-        applyMiddleware(sagaMiddleware, logger)
+        applyMiddleware(sagaMiddleware, logger),
     )(createStore);
 
     const store = createStoreWithMiddleware(
         rootReducer,
         window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__({
-            actionsBlacklist: SKIP_LOG_ACTIONS
-        })
+            actionsBlacklist: SKIP_LOG_ACTIONS,
+        }),
     );
 
     sagaMiddleware.run(rootSaga);

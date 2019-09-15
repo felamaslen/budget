@@ -16,18 +16,18 @@ const getSubBlock = memoize((customProps = {}) => {
             color: 'red',
             value: 53.24,
             width: 90,
-            height: 87
+            height: 87,
         },
         activeMain: null,
         activeSub: null,
         onHover: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<SubBlock {...props} />);
 });
 
-test('<SubBlock /> - rendering basic structure', t => {
+test('<SubBlock /> - rendering basic structure', (t) => {
     const { container } = getSubBlock();
 
     t.is(container.childNodes.length, 1);
@@ -39,11 +39,11 @@ test('<SubBlock /> - rendering basic structure', t => {
     t.is(div.style.height, '87px');
 });
 
-test('<SubBlock /> - onHover', t => {
+test('<SubBlock /> - onHover', (t) => {
     const onHover = sinon.spy();
 
     const { container } = getSubBlock({
-        onHover
+        onHover,
     });
 
     t.is(onHover.getCalls().length, 0);
@@ -60,19 +60,23 @@ const getBlockGroup = memoize((customProps = {}) => {
         onHover: () => null,
         subBlock: {
             bits: [
-                { name: 'foo', color: 'red', value: 3, width: 1, height: 1 },
-                { name: 'bar', color: 'green', value: 5, width: 1, height: 1 }
+                {
+                    name: 'foo', color: 'red', value: 3, width: 1, height: 1,
+                },
+                {
+                    name: 'bar', color: 'green', value: 5, width: 1, height: 1,
+                },
             ],
             width: 15,
-            height: 13
+            height: 13,
         },
-        ...customProps
+        ...customProps,
     };
 
     return render(<BlockGroup {...props} />);
 });
 
-test('<BlockGroup /> - rendering basic structure', t => {
+test('<BlockGroup /> - rendering basic structure', (t) => {
     const { container } = getBlockGroup();
 
     t.is(container.childNodes.length, 1);
@@ -95,28 +99,32 @@ const getBlockBits = memoize((customProps = {}) => {
             blocks: [
                 {
                     bits: [
-                        { name: 'foo', color: 'pink', value: 3, width: 1, height: 1 },
-                        { name: 'bar', color: 'turquoise', value: 5, width: 1, height: 1 }
+                        {
+                            name: 'foo', color: 'pink', value: 3, width: 1, height: 1,
+                        },
+                        {
+                            name: 'bar', color: 'turquoise', value: 5, width: 1, height: 1,
+                        },
                     ],
                     width: 15,
-                    height: 13
-                }
+                    height: 13,
+                },
             ],
             width: 21,
-            height: 13
+            height: 13,
         },
         page: 'page1',
         activeMain: null,
         activeSub: null,
         onHover: () => null,
         onClick: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<BlockBits {...props} />);
 });
 
-test('<BlockBits /> - rendering basic structure', t => {
+test('<BlockBits /> - rendering basic structure', (t) => {
     const { container } = getBlockBits();
 
     t.is(container.childNodes.length, 1);
@@ -127,7 +135,7 @@ test('<BlockBits /> - rendering basic structure', t => {
     t.is(div.childNodes.length, 1);
 });
 
-test('<BlockBits /> - rendering a list of blocks', t => {
+test('<BlockBits /> - rendering a list of blocks', (t) => {
     const { container } = getBlockBits();
 
     const [div] = container.childNodes;
@@ -147,15 +155,15 @@ test('<BlockBits /> - rendering a list of blocks', t => {
     t.is(bit1.className, 'sub-block');
 });
 
-test('<BlockBits /> - skipping subBlock render if there are none', t => {
+test('<BlockBits /> - skipping subBlock render if there are none', (t) => {
     const { container } = getBlockBits({
         blockBit: {
             name: 'foo',
             value: 1001.3,
             color: 'red',
             width: 21,
-            height: 13
-        }
+            height: 13,
+        },
     });
 
     const [div] = container.childNodes;

@@ -5,25 +5,25 @@ export const netWorthValueSize = PropTypes.oneOfType([
     PropTypes.number.isRequired,
     PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.number.isRequired,
-        currency: PropTypes.string
-    }))
+        currency: PropTypes.string,
+    })),
 ]);
 
 export const netWorthValue = PropTypes.shape({
     id: PropTypes.string,
     subcategory: PropTypes.string.isRequired,
-    value: netWorthValueSize.isRequired
+    value: netWorthValueSize.isRequired,
 });
 
 export const creditLimit = PropTypes.shape({
     subcategory: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired
+    value: PropTypes.number.isRequired,
 });
 
 export const currency = PropTypes.shape({
     id: PropTypes.string,
     currency: PropTypes.string.isRequired,
-    rate: PropTypes.number.isRequired
+    rate: PropTypes.number.isRequired,
 });
 
 export const netWorthItem = PropTypes.shape({
@@ -33,7 +33,7 @@ export const netWorthItem = PropTypes.shape({
     fti: PropTypes.func,
     values: PropTypes.arrayOf(netWorthValue.isRequired).isRequired,
     creditLimit: PropTypes.arrayOf(creditLimit.isRequired).isRequired,
-    currencies: PropTypes.arrayOf(currency.isRequired).isRequired
+    currencies: PropTypes.arrayOf(currency.isRequired).isRequired,
 });
 
 export const netWorthList = PropTypes.arrayOf(netWorthItem.isRequired);

@@ -5,7 +5,9 @@ import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
 
-export default function NowLine({ now, minY, maxY, pixX, pixY }) {
+export default function NowLine({
+    now, minY, maxY, pixX, pixY,
+}) {
     if (minY === maxY) {
         return null;
     }
@@ -28,5 +30,5 @@ NowLine.propTypes = {
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    pixY: PropTypes.func.isRequired,
 };

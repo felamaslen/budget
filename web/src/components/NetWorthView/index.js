@@ -32,7 +32,7 @@ export default function NetWorthView({ table, aggregate }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {table.map(row => <NetWorthViewRow key={row.id} {...row} />)}
+                    {table.map((row) => <NetWorthViewRow key={row.id} {...row} />)}
                 </tbody>
             </table>
         </div>
@@ -41,5 +41,5 @@ export default function NetWorthView({ table, aggregate }) {
 
 NetWorthView.propTypes = {
     table: netWorthTableShape.isRequired,
-    aggregate: PropTypes.objectOf(PropTypes.number.isRequired).isRequired
+    aggregate: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
 };

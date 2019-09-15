@@ -8,15 +8,17 @@ import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
 
 function ListTreeItem({
-    item: { name, itemCost, subTree, pct, visible, open },
+    item: {
+        name, itemCost, subTree, pct, visible, open,
+    },
     onHover,
     onToggle,
-    onToggleExpand
+    onToggleExpand,
 }) {
     const onMouseOver = useCallback(() => onHover(name), [name, onHover]);
     const onMouseOut = useCallback(() => onHover(null), [onHover]);
 
-    const onToggleCallback = useCallback(event => {
+    const onToggleCallback = useCallback((event) => {
         event.stopPropagation();
         onToggle(name);
     }, [name, onToggle]);
@@ -55,24 +57,26 @@ ListTreeItem.propTypes = {
     }).isRequired,
     onHover: PropTypes.func.isRequired,
     onToggle: PropTypes.func.isRequired,
-    onToggleExpand: PropTypes.func.isRequired
+    onToggleExpand: PropTypes.func.isRequired,
 };
 
-const useToggle = onToggle => useCallback(name => onToggle(last => ({
+const useToggle = (onToggle) => useCallback((name) => onToggle((last) => ({
     ...last,
-    [name]: !last[name]
+    [name]: !last[name],
 })), [onToggle]);
 
-function ListTree({ cost, treeVisible, treeOpen, onHover, toggleTreeItem, setTreeOpen }) {
+function ListTree({
+    cost, treeVisible, treeOpen, onHover, toggleTreeItem, setTreeOpen,
+}) {
     const costTotal = cost.reduce((sum, { total }) => sum + total, 0);
 
     const costPct = cost.map(({ name, total, subTree }) => ({
         name,
         itemCost: total,
         subTree,
-        pct: 100 * total / costTotal,
+        pct: 100 * (total / costTotal),
         visible: !(treeVisible[name] === false),
-        open: Boolean(treeOpen[name])
+        open: Boolean(treeOpen[name]),
     }));
 
     const onToggleExpand = useToggle(setTreeOpen);
@@ -81,7 +85,7 @@ function ListTree({ cost, treeVisible, treeOpen, onHover, toggleTreeItem, setTre
         <div className="tree">
             <ul className="tree-list">
                 <ListTreeHead items={costPct} />
-                {costPct.map(item => (
+                {costPct.map((item) => (
                     <ListTreeItem key={item.name}
                         item={item}
                         onHover={onHover}
@@ -100,7 +104,7 @@ ListTree.propTypes = {
     treeOpen: PropTypes.objectOf(PropTypes.bool).isRequired,
     toggleTreeItem: PropTypes.func.isRequired,
     setTreeOpen: PropTypes.func.isRequired,
-    onHover: PropTypes.func.isRequired
+    onHover: PropTypes.func.isRequired,
 };
 
 export default React.memo(ListTree);

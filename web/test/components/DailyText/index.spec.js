@@ -13,7 +13,7 @@ const testEmpty = (t, container) => {
     t.is(span.innerHTML, '');
 };
 
-test('DailyText renders an empty span if the value is null or undefined', t => {
+test('DailyText renders an empty span if the value is null or undefined', (t) => {
     const { container: noValue } = render(<DailyText />);
     testEmpty(t, noValue);
 
@@ -21,7 +21,7 @@ test('DailyText renders an empty span if the value is null or undefined', t => {
     testEmpty(t, nullValue);
 });
 
-test('DailyText renders a formatted currency', t => {
+test('DailyText renders a formatted currency', (t) => {
     const { container } = render(<DailyText value={3462964} />);
 
     t.is(container.childNodes.length, 1);

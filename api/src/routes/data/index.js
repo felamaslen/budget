@@ -19,7 +19,9 @@ const general = require('./general');
 const social = require('./social');
 const holiday = require('./holiday');
 
-const listDataProcessor = { income, bills, funds, food, general, social, holiday };
+const listDataProcessor = {
+    income, bills, funds, food, general, social, holiday,
+};
 
 const dataAll = require('./all');
 
@@ -47,7 +49,7 @@ function handler(config, db, logger) {
     router.get('/analysis/deep/:category/:period/:groupBy/:pageIndex?', analysisDeep.routeGet(config, db));
 
     // list data routes
-    config.data.listCategories.forEach(category => {
+    config.data.listCategories.forEach((category) => {
         const pageParam = category === 'funds'
             ? ''
             : '/:page?';
@@ -70,5 +72,5 @@ function handler(config, db, logger) {
 }
 
 module.exports = {
-    handler
+    handler,
 };

@@ -1,10 +1,10 @@
-const { getCurrencyPrices } = require('./currencies');
-const { fundHash } = require('../../src/routes/data/funds/common');
-const { getRawData } = require('./scrape');
-const { scrapeFundHoldings } = require('./holdings');
-const { scrapeFundPrices } = require('./prices');
+import { getCurrencyPrices } from '~api/scripts/scrape-funds/currencies';
+import { fundHash } from '~api/routes/data/funds/common';
+import { getRawData } from '~api/scripts/scrape-funds/scrape';
+import { scrapeFundHoldings } from '~api/scripts/scrape-funds/holdings';
+import { scrapeFundPrices } from '~api/scripts/scrape-funds/prices';
 
-function getBroker(config, name) {
+export function getBroker(config, name) {
     if (name.match(config.data.funds.scraper.regex)) {
         // At the moment, only Hargreaves Lansdown is supported
 
@@ -14,9 +14,11 @@ function getBroker(config, name) {
     throw new Error('invalid fund name');
 }
 
-function getEligibleFunds(config, logger, rows) {
-    const fundsByHash = rows.reduce((funds, { uid, item, units, cost }) => {
-        if (!(units && !isNaN(units) && cost && !isNaN(cost))) {
+export function getEligibleFunds(config, logger, rows) {
+    const fundsByHash = rows.reduce((funds, {
+        uid, item, units, cost,
+    }) => {
+        if (!(units && !Number.isNaN(units) && cost && !Number.isNaN(cost))) {
             return funds;
         }
 
@@ -35,8 +37,8 @@ function getEligibleFunds(config, logger, rows) {
                 [hash]: {
                     ...funds[hash],
                     units: funds[hash].units + unitsRounded,
-                    cost: funds[hash].cost + cost
-                }
+                    cost: funds[hash].cost + cost,
+                },
             };
         }
 
@@ -48,13 +50,13 @@ function getEligibleFunds(config, logger, rows) {
                 hash,
                 broker,
                 units: unitsRounded,
-                cost
-            }
+                cost,
+            },
         };
     }, {});
 
-    return Object.keys(fundsByHash).filter(hash => fundsByHash[hash].units > 0)
-        .map(hash => fundsByHash[hash]);
+    return Object.keys(fundsByHash).filter((hash) => fundsByHash[hash].units > 0)
+        .map((hash) => fundsByHash[hash]);
 }
 
 async function getFunds(config, db, logger) {
@@ -62,7 +64,7 @@ async function getFunds(config, db, logger) {
         'f.uid',
         'f.item',
         db.raw('SUM(ft.units)::float AS units'),
-        db.raw('SUM(ft.cost)::float AS cost')
+        db.raw('SUM(ft.cost)::float AS cost'),
     )
         .from('funds as f')
         .innerJoin('funds_transactions as ft', 'ft.fund_id', 'f.id')
@@ -71,11 +73,11 @@ async function getFunds(config, db, logger) {
     return getEligibleFunds(config, logger, rows);
 }
 
-async function processScrape(config, flags, db, logger) {
+export async function processScrape(config, flags, db, logger) {
     const { holdings, prices } = flags;
 
     if (!holdings && !prices) {
-        logger.info('Usage: node api/scripts/scrapeFunds/process.js [--holdings|--prices]');
+        logger.info('Usage: node api/src/scripts/scrape-funds/process.js [--holdings|--prices]');
 
         return 0;
     }
@@ -105,17 +107,10 @@ async function processScrape(config, flags, db, logger) {
         logger.info('Finished scraping funds');
 
         return 0;
-    }
-    catch (err) {
+    } catch (err) {
         logger.error('Error scraping funds:', err.message);
         logger.debug(err.stack);
 
         return 1;
     }
 }
-
-module.exports = {
-    getBroker,
-    getEligibleFunds,
-    processScrape
-};

@@ -12,8 +12,8 @@ const getContainer = (customProps = {}) => {
     const state = {
         error: [
             { id: 'f1101', message: { level: ERROR_LEVEL_ERROR, text: 'foo' }, closed: false },
-            { id: 'g1923', message: { level: ERROR_LEVEL_WARN, text: 'bar' }, closed: true }
-        ]
+            { id: 'g1923', message: { level: ERROR_LEVEL_WARN, text: 'bar' }, closed: true },
+        ],
     };
 
     const store = createMockStore(state);
@@ -22,19 +22,19 @@ const getContainer = (customProps = {}) => {
         page: 'food',
         row: 3,
         col: 2,
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
             <ErrorMessages {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -44,7 +44,7 @@ test('basic structure', t => {
     t.is(ul.childNodes.length, 2);
 });
 
-test('each message', t => {
+test('each message', (t) => {
     const { container } = getContainer();
 
     const [ul] = container.childNodes;
@@ -67,7 +67,7 @@ test('each message', t => {
     t.is(span1.innerHTML, 'bar');
 });
 
-test('closing messages when clicking them', t => {
+test('closing messages when clicking them', (t) => {
     const { container, store } = getContainer();
 
     t.false(store.isActionDispatched(errorClosed('f1101')));

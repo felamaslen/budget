@@ -1,25 +1,19 @@
-/**
- * Express API and web server
- */
+import express from 'express';
+import bodyParser from 'body-parser';
+import serveStatic from 'serve-static';
+import path from 'path';
+import webLogger from 'morgan';
+import passport from 'passport';
+import swaggerUiDist from 'swagger-ui-dist';
+import swaggerJSDoc from 'swagger-jsdoc';
 
-/* eslint-disable global-require */
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const serveStatic = require('serve-static');
-const path = require('path');
-const webLogger = require('morgan');
-const passport = require('passport');
-const swaggerUiDist = require('swagger-ui-dist');
-const swaggerJSDoc = require('swagger-jsdoc');
-
-const { version } = require('../../package.json');
-const getConfig = require('./config');
-const getLogger = require('./modules/logger');
-const initDb = require('./modules/db');
-const { getStrategy } = require('./modules/auth');
-const { errorHandler } = require('./modules/error-handling');
-const routes = require('./routes');
+import { version } from '../../package.json';
+import config from '~api/config';
+import db from '~api/modules/db';
+import getLogger from '~api/modules/logger';
+import { getStrategy } from '~api/modules/auth';
+import { errorHandler } from '~api/modules/error-handling';
+import routes from '~api/routes';
 
 const API_PREFIX = '/api/v4';
 
@@ -27,25 +21,22 @@ function getVersion() {
     return version.substring(0, version.indexOf('-'));
 }
 
-function setupLogging(app, config) {
+function setupLogging(app) {
     if (config.debug) {
         app.use(webLogger('dev'));
-    }
-    else {
-        webLogger.token('remote-addr', req =>
-            req.headers['x-real-ip'] ||
-            req.headers['x-forwarded-for'] ||
-            req.connection.remoteAddress
-        );
+    } else {
+        webLogger.token('remote-addr', (req) => req.headers['x-real-ip']
+            || req.headers['x-forwarded-for']
+            || req.connection.remoteAddress);
 
         app.use(webLogger('common', {
             skip: (req, res) => res.statusCode < 400,
-            stream: process.stderr
+            stream: process.stderr,
         }));
 
         app.use(webLogger('common', {
             skip: (req, res) => res.statusCode >= 400,
-            stream: process.stdout
+            stream: process.stdout,
         }));
     }
 }
@@ -62,24 +53,24 @@ function setupDataInput(app) {
     app.use(bodyParser.urlencoded({ extended: true }));
 }
 
-function setupApiDocs(app, config) {
+function setupApiDocs(app) {
     // API docs
     const swaggerDefinition = {
         info: {
             title: 'Budget API',
             version: getVersion(),
-            description: 'Personal finance manager API'
+            description: 'Personal finance manager API',
         },
         host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
         schemes: [config.webUrl.substring(0, config.webUrl.indexOf(':'))],
-        basePath: API_PREFIX
+        basePath: API_PREFIX,
     };
 
     const swaggerOptions = {
         swaggerDefinition,
         apis: [
-            path.join(__dirname, './routes/**/index.js')
-        ]
+            path.join(__dirname, './routes/**/index.js'),
+        ],
     };
 
     const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -91,13 +82,11 @@ function setupApiDocs(app, config) {
 
     const swaggerUiAssetPath = swaggerUiDist.getAbsoluteFSPath();
 
-    app.get('/docs/api', (req, res) => {
-        return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
-    });
+    app.get('/docs/api', (req, res) => res.sendFile(path.join(__dirname, '../../docs/api/index.html')));
     app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
-function setupApi(app, config, db, logger) {
+function setupApi(app, logger) {
     passport.use('jwt', getStrategy(config, db, logger));
 
     app.use(passport.initialize());
@@ -108,27 +97,31 @@ function setupApi(app, config, db, logger) {
 
     app.use(API_PREFIX, routes(config, db, logger));
 
-    setupApiDocs(app, config);
+    setupApiDocs(app);
 }
 
 function setupDevServer(app) {
+    // eslint-disable-next-line global-require
     const conf = require('../../webpack.config');
+    // eslint-disable-next-line global-require, import/no-extraneous-dependencies
     const compiler = require('webpack')(conf);
 
+    // eslint-disable-next-line import/no-extraneous-dependencies, global-require
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath: '/',
         stats: {
             colors: true,
             modules: false,
             chunks: false,
-            reasons: false
+            reasons: false,
         },
         hot: true,
-        quiet: false
+        quiet: false,
     }));
 
+    // eslint-disable-next-line import/no-extraneous-dependencies, global-require
     app.use(require('webpack-hot-middleware')(compiler, {
-        log: console.log
+        log: console.log, // eslint-disable-line no-console
     }));
 }
 
@@ -148,13 +141,13 @@ function setupWebApp(app) {
         res.render('index', {
             version,
             hot,
-            pieTolerance
+            pieTolerance,
         });
     };
 
     // web app static files
     app.use('/', serveStatic(path.resolve(__dirname, '../../web/build'), {
-        maxAge: 3600 * 24 * 100 * 1000
+        maxAge: 3600 * 24 * 100 * 1000,
     }));
 
     app.get('/:pageName?', singlePageApp);
@@ -170,28 +163,24 @@ function setupErrorHandling(app, logger) {
 }
 
 function run() {
-    const config = getConfig();
     const logger = getLogger();
 
     try {
-        const db = initDb(config);
-
         const app = express();
         const port = process.env.PORT || 3000;
 
-        setupLogging(app, config);
+        setupLogging(app);
         setupDataInput(app);
-        setupApi(app, config, db, logger);
+        setupApi(app, logger);
         setupWebApp(app);
         setupErrorHandling(app, logger);
 
         app.listen(port, () => {
             logger.info('Server listening on port', port);
         });
-    }
-    catch (err) {
+    } catch (err) {
         logger.error('Server did not start:', err.stack);
     }
 }
 
-module.exports = { run };
+run();
