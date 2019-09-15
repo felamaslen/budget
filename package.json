@@ -11,7 +11,7 @@
   },
   "sasslintConfig": ".sass-lint.yml",
   "scripts": {
-    "build:api": "babel -d api/build api/src",
+    "build:api": "BABEL_ENV=node babel -d api/build api/src",
     "build:web": "NODE_ENV=production webpack --mode production",
     "build": "npm run build:api && npm run build:web",
     "start": "node api/build",
@@ -24,8 +24,8 @@
     "lint": "eslint webpack.config.js api/src api/test web/src web/test",
     "sass-lint": "sass-lint -qv \"./web/src/**/*.scss\"",
     "scrape_funds": "node ./api/build/scripts/scrape-funds --prices",
-    "dev:scrape_funds": "NODE_ENV=development babel-node ./api/src/scripts/scrape-funds --prices",
-    "test:scrape_funds": "NODE_ENV=testintegration babel-node ./api/src/scripts/scrape-funds --prices",
+    "dev:scrape_funds": "NODE_ENV=development BABEL_ENV=node babel-node ./api/src/scripts/scrape-funds --prices",
+    "test:scrape_funds": "NODE_ENV=testintegration BABEL_ENV=node babel-node ./api/src/scripts/scrape-funds --prices",
     "scrape_holdings": "node ./api/build/scripts/scrape-funds --holdings",
     "dev:scrape_holdings": "NODE_ENV=development babel-node ./api/src/scripts/scrape-funds --holdings",
     "test:scrape_holdings": "NODE_ENV=testintegration babel-node ./api/scripts/scrape-funds --holdings"
