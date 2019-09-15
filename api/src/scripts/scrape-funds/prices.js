@@ -21,8 +21,7 @@ function getPricesFromData(logger, currencyPrices, funds, data) {
             logger.verbose(`Price update: ${price} for ${fund.name}`);
 
             return [...results, { ...fund, price }];
-        }
-        catch (err) {
+        } catch (err) {
             logger.warn(`Couldn't get price for fund with name: ${fund.name}`);
             logger.debug(err.stack);
 
@@ -42,8 +41,7 @@ async function insertNewSinglePriceCache(db, logger, cid, fund) {
 
     if (cachedHash && cachedHash.length) {
         fid = cachedHash[0].fid;
-    }
-    else {
+    } else {
         [fid] = await db.insert({ hash, broker })
             .returning('fid')
             .into('fund_hash');
@@ -61,7 +59,7 @@ async function insertNewPriceCache(db, logger, fundsWithPrices, now) {
         .returning('cid')
         .into('fund_cache_time');
 
-    await Promise.all(fundsWithPrices.map(fund => insertNewSinglePriceCache(db, logger, cid, fund)));
+    await Promise.all(fundsWithPrices.map((fund) => insertNewSinglePriceCache(db, logger, cid, fund)));
 
     await db('fund_cache_time').where({ cid })
         .update({ done: true });
@@ -73,7 +71,7 @@ export async function scrapeFundPrices(config, db, logger, currencyPrices, funds
     const fundsWithPrices = getPricesFromData(logger, currencyPrices, funds, data);
 
     const currentValue = (fundsWithPrices.reduce(
-        (value, { units, price }) => value + units * price, 0
+        (value, { units, price }) => value + units * price, 0,
     ) / 100).toFixed(2);
 
     logger.verbose(`Total value: ${config.data.currencyUnit}${currentValue}`);

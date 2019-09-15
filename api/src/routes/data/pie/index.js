@@ -10,21 +10,21 @@ function getPieCols(category) {
     if (category === 'food' || category === 'general') {
         return [
             ['shop', 'cost', 'Shop cost'],
-            ['category', 'cost', 'Category cost']
+            ['category', 'cost', 'Category cost'],
         ];
     }
 
     if (category === 'social') {
         return [
             ['shop', 'cost', 'Shop cost'],
-            ['society', 'cost', 'Society cost']
+            ['society', 'cost', 'Society cost'],
         ];
     }
 
     if (category === 'holiday') {
         return [
             ['shop', 'cost', 'Shop cost'],
-            ['holiday', 'cost', 'Holiday cost']
+            ['holiday', 'cost', 'Holiday cost'],
         ];
     }
 
@@ -52,7 +52,7 @@ function getPieQuery(config, db, user, pieCol, category) {
 function processQueryResult(result, pieCol, threshold) {
     const [, type, title] = pieCol;
 
-    let data = result.map(row => ([row.col, row.cost]));
+    let data = result.map((row) => ([row.col, row.cost]));
 
     const total = data.reduce((sum, [, cost]) => sum + cost, 0);
 
@@ -80,21 +80,22 @@ function processQueryResult(result, pieCol, threshold) {
         });
     }
 
-    return { title, type, data, total };
+    return {
+        title, type, data, total,
+    };
 }
 
 async function getPieData(config, db, user, pieCols, category) {
     const threshold = config.data.pie.tolerance / (2 * Math.PI);
 
-    const results = await Promise.all(pieCols.map(pieCol =>
-        getPieQuery(config, db, user, pieCol, category)));
+    const results = await Promise.all(pieCols.map((pieCol) => getPieQuery(config, db, user, pieCol, category)));
 
     if (!results) {
         return null;
     }
 
     return results
-        .filter(result => result)
+        .filter((result) => result)
         .map((result, key) => processQueryResult(result, pieCols[key], threshold));
 }
 
@@ -147,14 +148,14 @@ async function getPieData(config, db, user, pieCols, category) {
  */
 function routeGet(config, db) {
     return async (req, res) => {
-        const category = req.params.category;
+        const { category } = req.params;
 
         const pieCols = getPieCols(category);
 
         if (!pieCols) {
             return res.status(400)
                 .json({
-                    errorMessage: 'unknown category'
+                    errorMessage: 'unknown category',
                 });
         }
 
@@ -169,5 +170,5 @@ function routeGet(config, db) {
 module.exports = {
     getPieCols,
     processQueryResult,
-    routeGet
+    routeGet,
 };

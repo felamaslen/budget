@@ -74,5 +74,5 @@ function periodCondition(now, period, pageIndex = 0) {
 
 module.exports = {
     getCategoryColumn,
-    periodCondition
+    periodCondition,
 };

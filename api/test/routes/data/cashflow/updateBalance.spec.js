@@ -5,22 +5,22 @@ import db from '~api/modules/db';
 import config from '~api/config';
 
 import {
-    updateData
+    updateData,
 } from '~api/routes/data/cashflow/updateBalance';
 
-test('updateData updates a balance item in the database', async t => {
+test('updateData updates a balance item in the database', async (t) => {
     const [{ uid }] = await db.select('uid')
         .from('users')
         .where('name', '=', 'test-user');
 
     const req = {
         body: { year: 2018, month: 5, balance: 34712 },
-        user: { uid }
+        user: { uid },
     };
 
     const res = {
         status: sinon.spy(),
-        json: sinon.spy()
+        json: sinon.spy(),
     };
 
     await updateData(config, db)(req, res);

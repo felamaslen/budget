@@ -16,7 +16,7 @@ export default () => new winston.Logger({
         new winston.transports.Console({
             level: getLevel(),
             json: false,
-            colorize: true
-        })
-    ]
+            colorize: true,
+        }),
+    ],
 });

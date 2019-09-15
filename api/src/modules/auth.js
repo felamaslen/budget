@@ -10,7 +10,7 @@ function getStrategy(config, db) {
     const params = {
         secretOrKey: process.env.USER_TOKEN_SECRET,
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        passReqToCallback: true
+        passReqToCallback: true,
     };
 
     return new Strategy(params, async (req, payload, done) => {
@@ -22,7 +22,7 @@ function getStrategy(config, db) {
 
         if (!user.length) {
             return done(null, false, {
-                message: 'User was deleted since last login'
+                message: 'User was deleted since last login',
             });
         }
 
@@ -37,20 +37,20 @@ function genToken(user) {
 
     const token = jwt.encode({
         exp: expires.ts / 1000,
-        uid
+        uid,
     }, process.env.USER_TOKEN_SECRET);
 
     return {
         apiKey: `Bearer ${token}`,
         expires: expires.toISO(),
-        uid
+        uid,
     };
 }
 
 function checkValidUser(pin) {
     const stringPin = String(pin);
 
-    return (last, { pinHash, ...user }) => last.then(async previous => {
+    return (last, { pinHash, ...user }) => last.then(async (previous) => {
         if (previous) {
             return previous;
         }
@@ -87,7 +87,7 @@ async function checkLoggedIn(config, db, pin) {
 function authMiddleware() {
     return (req, res, next) => {
         passport.authenticate('jwt', {
-            session: false, failWithError: true
+            session: false, failWithError: true,
         }, (err, user, info) => {
             if (err) {
                 return next(err);
@@ -110,11 +110,10 @@ function authMiddleware() {
 }
 
 function generateUserPin(defaultPin = null) {
-    const charNotUniqueEnough = (chars, char) =>
-        chars.filter(item => item === char).length > 1;
+    const charNotUniqueEnough = (chars, char) => chars.filter((item) => item === char).length > 1;
 
     const pinRaw = defaultPin || new Array(4).fill(0)
-        .reduce(chars => {
+        .reduce((chars) => {
             let nextChar = null;
             do {
                 nextChar = 1 + Math.floor(Math.random() * 9);
@@ -140,5 +139,5 @@ module.exports = {
     genToken,
     checkLoggedIn,
     authMiddleware,
-    generateUserPin
+    generateUserPin,
 };

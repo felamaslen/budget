@@ -3,6 +3,7 @@
  */
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
+    // eslint-disable-next-line import/no-extraneous-dependencies
     require('dotenv').config(); // eslint-disable-line global-require
 }
 
@@ -16,7 +17,7 @@ export default {
     user: {
         banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,
         banLimit: (Number(process.env.IP_BAN_LIMIT) || 60) * 1000,
-        banTries: Math.round(Number(process.env.IP_BAN_TRIES) || 5)
+        banTries: Math.round(Number(process.env.IP_BAN_TRIES) || 5),
     },
     msg: {
         unknownApiEndpoint: 'Unknown API endpoint',
@@ -24,7 +25,7 @@ export default {
         errorLoginBad: 'Bad PIN',
         errorIpBanned: 'Banned',
         errorNotAuthorized: 'You need to authenticate to do that',
-        errorBadAuthorization: 'Bad authentication token'
+        errorBadAuthorization: 'Bad authentication token',
     },
     timeZone: 'Europe/London',
     data: {
@@ -35,20 +36,20 @@ export default {
             bills: {},
             food: {
                 category: 'k',
-                shop: 's'
+                shop: 's',
             },
             general: {
                 category: 'k',
-                shop: 's'
+                shop: 's',
             },
             social: {
                 society: 'y',
-                shop: 's'
+                shop: 's',
             },
             holiday: {
                 holiday: 'h',
-                shop: 's'
-            }
+                shop: 's',
+            },
         },
         listPageLimits: {
             income: 12,
@@ -56,26 +57,27 @@ export default {
             food: 2,
             general: 4,
             social: 6,
-            holiday: 12
+            holiday: 12,
         },
         funds: {
             salt: 'a963anx2',
             historyResolution: Math.round(Number(process.env.FUND_RESOLUTION) || 100),
             scraper: {
                 regex: /^(.*)\s\((accum|inc|share|accum-inc)\.?\)$/i,
-                userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+                // eslint-disable-next-line max-len
+                userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
             },
-            stocksApiKey: process.env.STOCKS_API_KEY || ''
+            stocksApiKey: process.env.STOCKS_API_KEY || '',
         },
         overview: {
             numLast: 25,
             numFuture: 12,
             startYear: 2014,
-            startMonth: 9
+            startMonth: 9,
         },
         pie: {
             tolerance: Number(process.env.PIE_TOLERANCE) || 0.075,
-            detail: Number(process.env.PIE_DETAIL) || 30
-        }
-    }
+            detail: Number(process.env.PIE_DETAIL) || 30,
+        },
+    },
 };

@@ -2,19 +2,21 @@ const { DateTime } = require('luxon');
 
 const { catchAsyncErrors, clientError } = require('../../modules/error-handling');
 
-const formatDate = date => DateTime.fromJSDate(date).toISODate();
+const formatDate = (date) => DateTime.fromJSDate(date).toISODate();
 
 function processValuesRows({
     id,
     subcategory,
     skip,
     value,
-    'fx_values': fxValues,
-    'fx_currencies': fxCurrencies,
+    fx_values: fxValues,
+    fx_currencies: fxCurrencies,
     ...rest
 }) {
-    const base = { id, subcategory, skip, value, ...rest };
-    if (fxValues.every(item => item === null)) {
+    const base = {
+        id, subcategory, skip, value, ...rest,
+    };
+    if (fxValues.every((item) => item === null)) {
         return base;
     }
 
@@ -26,8 +28,8 @@ function processValuesRows({
         ...last,
         {
             value: fxValue,
-            currency: fxCurrencies[index]
-        }
+            currency: fxCurrencies[index],
+        },
     ]), initialValue);
 
     return { ...base, value: valueWithFx };
@@ -41,7 +43,7 @@ async function getValuesRows(db, ids) {
         'nwv.skip',
         'nwv.value',
         db.raw('ARRAY_AGG(nwfxv.value) as fx_values'),
-        db.raw('ARRAY_AGG(nwfxv.currency) as fx_currencies')
+        db.raw('ARRAY_AGG(nwfxv.currency) as fx_currencies'),
     )
         .from('net_worth_values as nwv')
         .leftJoin('net_worth_fx_values as nwfxv', 'nwfxv.values_id', 'nwv.id')
@@ -54,7 +56,7 @@ async function getValuesRows(db, ids) {
 const getCreditLimit = (db, ids) => db.select(
     'nwcl.net_worth_id as netWorthId',
     'nwcl.subcategory',
-    'nwcl.value'
+    'nwcl.value',
 )
     .from('net_worth_credit_limit as nwcl')
     .whereIn('nwcl.net_worth_id', ids);
@@ -63,14 +65,14 @@ const getCurrencies = (db, ids) => db.select(
     'nwc.net_worth_id as netWorthId',
     'nwc.id',
     'nwc.currency',
-    'nwc.rate'
+    'nwc.rate',
 )
     .from('net_worth_currencies as nwc')
     .whereIn('nwc.net_worth_id', ids);
 
 async function fetchById(db, netWorthId, uid) {
     const [netWorth] = await db.select(
-        'nw.date'
+        'nw.date',
     )
         .from('net_worth as nw')
         .where('nw.id', '=', netWorthId)
@@ -85,40 +87,38 @@ async function fetchById(db, netWorthId, uid) {
     const [values, creditLimit, currencies] = await Promise.all([
         getValuesRows(db, [netWorthId]),
         getCreditLimit(db, [netWorthId]),
-        getCurrencies(db, [netWorthId])
+        getCurrencies(db, [netWorthId]),
     ]);
 
-    const withoutId = rows => rows.map(({ netWorthId: discard, ...rest }) => rest);
+    const withoutId = (rows) => rows.map(({ netWorthId: discard, ...rest }) => rest);
 
     return {
         id: netWorthId,
         date,
         values: withoutId(values),
         creditLimit: withoutId(creditLimit),
-        currencies: withoutId(currencies)
+        currencies: withoutId(currencies),
     };
 }
 
-const splitById = rows => rows.reduce((items, { netWorthId, ...rest }) => ({
+const splitById = (rows) => rows.reduce((items, { netWorthId, ...rest }) => ({
     ...items,
-    [netWorthId]: (items[netWorthId] || []).concat([rest])
+    [netWorthId]: (items[netWorthId] || []).concat([rest]),
 }), {});
 
 async function fetchOld(db, uid, startDate, oldDateEnd) {
-    const rows = await db.select(db.raw(`sum(coalesce(nwv.value, (nwfx.value * nwc.rate * 100), 0))::integer as value`))
+    const rows = await db.select(db.raw('sum(coalesce(nwv.value, (nwfx.value * nwc.rate * 100), 0))::integer as value'))
         .from('net_worth as nw')
         .leftJoin('net_worth_values as nwv', 'nwv.net_worth_id', 'nw.id')
         .leftJoin('net_worth_fx_values as nwfx', 'nwfx.values_id', 'nwv.id')
-        .leftJoin('net_worth_currencies as nwc', qb1 => qb1
+        .leftJoin('net_worth_currencies as nwc', (qb1) => qb1
             .on('nwc.net_worth_id', 'nw.id')
-            .on('nwc.currency', 'nwfx.currency')
-        )
+            .on('nwc.currency', 'nwfx.currency'))
         .where('nw.date', '<', oldDateEnd)
         .where('nw.date', '>=', startDate)
-        .where(qb1 => qb1
+        .where((qb1) => qb1
             .where('nwv.skip', '=', false)
-            .orWhere('nwv.skip', null)
-        )
+            .orWhere('nwv.skip', null))
         .groupBy('nw.date')
         .orderBy('nw.date');
 
@@ -137,7 +137,7 @@ async function fetchAll(db, uid, oldDateEnd) {
     const [valuesRows, creditLimit, currencies] = await Promise.all([
         getValuesRows(db, netWorthIds),
         getCreditLimit(db, netWorthIds),
-        getCurrencies(db, netWorthIds)
+        getCurrencies(db, netWorthIds),
     ]);
 
     const valuesById = splitById(valuesRows);
@@ -149,12 +149,12 @@ async function fetchAll(db, uid, oldDateEnd) {
         date: formatDate(date),
         values: valuesById[id],
         creditLimit: creditLimitById[id],
-        currencies: currenciesById[id]
+        currencies: currenciesById[id],
     }));
 }
 
 const onRead = (config, db) => catchAsyncErrors(async (req, res) => {
-    const uid = req.user.uid;
+    const { uid } = req.user;
 
     if (!req.params.id) {
         const { numLast, startYear, startMonth } = config.data.overview;
@@ -170,7 +170,7 @@ const onRead = (config, db) => catchAsyncErrors(async (req, res) => {
 
         const [items, old] = await Promise.all([
             fetchAll(db, uid, oldDateEnd),
-            fetchOld(db, uid, startDate, oldDateEnd)
+            fetchOld(db, uid, startDate, oldDateEnd),
         ]);
 
         return res.json({ items, old });
@@ -188,5 +188,5 @@ const onRead = (config, db) => catchAsyncErrors(async (req, res) => {
 module.exports = {
     formatDate,
     fetchById,
-    onRead
+    onRead,
 };

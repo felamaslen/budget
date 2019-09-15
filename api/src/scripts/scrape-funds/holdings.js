@@ -20,7 +20,7 @@ function saveStockCodes(db, logger, stockCodes) {
         return null;
     }
 
-    const rows = names.map(name => ({ name, code: stockCodes[name] }));
+    const rows = names.map((name) => ({ name, code: stockCodes[name] }));
 
     return db.batchInsert('stock_codes', rows, 30);
 }
@@ -48,9 +48,9 @@ async function getCodeForStock(name, stockCodes, newStockCodes) {
     const { code } = await promptUser({
         properties: {
             code: {
-                description: `Enter code for ${name}`
-            }
-        }
+                description: `Enter code for ${name}`,
+            },
+        },
     });
 
     return code;
@@ -61,7 +61,9 @@ async function updateHoldings(db, logger, fundsWithHoldings) {
 
     const fundsHoldings = fundsWithHoldings.reduce((rows, { holdings, uid, cost: weight }) => ([
         ...rows,
-        ...holdings.map(({ name, value: subweight }) => ({ uid, name, weight, subweight }))
+        ...holdings.map(({ name, value: subweight }) => ({
+            uid, name, weight, subweight,
+        })),
     ]), []);
 
     const newStocks = [];
@@ -69,7 +71,9 @@ async function updateHoldings(db, logger, fundsWithHoldings) {
 
     logger.debug('Getting any missing stock codes from user input');
 
-    for (const { name, ...row } of fundsHoldings) {
+    await fundsHoldings.reduce((last, { name, ...row }) => last.then(async () => {
+        await last;
+
         try {
             // eslint-disable-next-line no-await-in-loop
             let code = await getCodeForStock(name, stockCodes, newStockCodes);
@@ -83,8 +87,7 @@ async function updateHoldings(db, logger, fundsWithHoldings) {
 
             if (code) {
                 newStocks.push({ ...row, name, code });
-            }
-            else {
+            } else {
                 logger.warn(`Skipped null code for stock: ${name}`);
             }
         } catch (err) {
@@ -94,7 +97,7 @@ async function updateHoldings(db, logger, fundsWithHoldings) {
                 logger.info('Fund holdings update process cancelled by user');
             }
         }
-    }
+    }), Promise.resolve());
 
     await saveStockCodes(db, logger, newStockCodes);
 
@@ -126,7 +129,7 @@ function getFundsWithHoldings(logger, funds, data) {
 
             logger.debug(`Processed holdings for ${fund.name}`);
 
-            const numErrors = holdings.filter(item => !item).length;
+            const numErrors = holdings.filter((item) => !item).length;
 
             if (numErrors > 0) {
                 logger.warn(`Couldn't process ${numErrors} item(s)`);
@@ -136,8 +139,8 @@ function getFundsWithHoldings(logger, funds, data) {
                 ...results,
                 {
                     ...fund,
-                    holdings: holdings.filter(item => item)
-                }
+                    holdings: holdings.filter((item) => item),
+                },
             ];
         } catch (err) {
             logger.warn(`Couldn't get holdings for fund with name: ${fund.name}`);

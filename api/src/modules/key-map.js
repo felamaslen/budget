@@ -1,7 +1,7 @@
 const { unflatten } = require('flat');
 
 function mapInternalToExternal(map) {
-    return dbResult => unflatten(map.reduce((items, { internal, external }) => {
+    return (dbResult) => unflatten(map.reduce((items, { internal, external }) => {
         if (internal in items) {
             const { [internal]: value, ...rest } = items;
 
@@ -13,7 +13,7 @@ function mapInternalToExternal(map) {
 }
 
 function mapExternalToInternal(map) {
-    return jsObject => map.reduce((items, { internal, external }) => {
+    return (jsObject) => map.reduce((items, { internal, external }) => {
         const keys = external.split('.');
         const deepValue = keys.reduce((obj, key) => obj && obj[key], jsObject);
 
@@ -29,5 +29,5 @@ function mapExternalToInternal(map) {
 
 module.exports = {
     mapInternalToExternal,
-    mapExternalToInternal
+    mapExternalToInternal,
 };

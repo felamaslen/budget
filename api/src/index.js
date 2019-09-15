@@ -1,9 +1,3 @@
-/**
- * Express API and web server
- */
-
-/* eslint-disable global-require */
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import serveStatic from 'serve-static';
@@ -30,22 +24,19 @@ function getVersion() {
 function setupLogging(app) {
     if (config.debug) {
         app.use(webLogger('dev'));
-    }
-    else {
-        webLogger.token('remote-addr', req =>
-            req.headers['x-real-ip'] ||
-            req.headers['x-forwarded-for'] ||
-            req.connection.remoteAddress
-        );
+    } else {
+        webLogger.token('remote-addr', (req) => req.headers['x-real-ip']
+            || req.headers['x-forwarded-for']
+            || req.connection.remoteAddress);
 
         app.use(webLogger('common', {
             skip: (req, res) => res.statusCode < 400,
-            stream: process.stderr
+            stream: process.stderr,
         }));
 
         app.use(webLogger('common', {
             skip: (req, res) => res.statusCode >= 400,
-            stream: process.stdout
+            stream: process.stdout,
         }));
     }
 }
@@ -68,18 +59,18 @@ function setupApiDocs(app) {
         info: {
             title: 'Budget API',
             version: getVersion(),
-            description: 'Personal finance manager API'
+            description: 'Personal finance manager API',
         },
         host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
         schemes: [config.webUrl.substring(0, config.webUrl.indexOf(':'))],
-        basePath: API_PREFIX
+        basePath: API_PREFIX,
     };
 
     const swaggerOptions = {
         swaggerDefinition,
         apis: [
-            path.join(__dirname, './routes/**/index.js')
-        ]
+            path.join(__dirname, './routes/**/index.js'),
+        ],
     };
 
     const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -91,9 +82,7 @@ function setupApiDocs(app) {
 
     const swaggerUiAssetPath = swaggerUiDist.getAbsoluteFSPath();
 
-    app.get('/docs/api', (req, res) => {
-        return res.sendFile(path.join(__dirname, '../../docs/api/index.html'));
-    });
+    app.get('/docs/api', (req, res) => res.sendFile(path.join(__dirname, '../../docs/api/index.html')));
     app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
@@ -112,23 +101,27 @@ function setupApi(app, logger) {
 }
 
 function setupDevServer(app) {
+    // eslint-disable-next-line global-require
     const conf = require('../../webpack.config');
+    // eslint-disable-next-line global-require, import/no-extraneous-dependencies
     const compiler = require('webpack')(conf);
 
+    // eslint-disable-next-line import/no-extraneous-dependencies, global-require
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath: '/',
         stats: {
             colors: true,
             modules: false,
             chunks: false,
-            reasons: false
+            reasons: false,
         },
         hot: true,
-        quiet: false
+        quiet: false,
     }));
 
+    // eslint-disable-next-line import/no-extraneous-dependencies, global-require
     app.use(require('webpack-hot-middleware')(compiler, {
-        log: console.log
+        log: console.log, // eslint-disable-line no-console
     }));
 }
 
@@ -148,13 +141,13 @@ function setupWebApp(app) {
         res.render('index', {
             version,
             hot,
-            pieTolerance
+            pieTolerance,
         });
     };
 
     // web app static files
     app.use('/', serveStatic(path.resolve(__dirname, '../../web/build'), {
-        maxAge: 3600 * 24 * 100 * 1000
+        maxAge: 3600 * 24 * 100 * 1000,
     }));
 
     app.get('/:pageName?', singlePageApp);

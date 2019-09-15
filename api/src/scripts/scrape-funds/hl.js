@@ -18,7 +18,7 @@ export function getHoldingsFromDataHL(fund, data) {
         const tableMatch = dataWithoutNewLines.match(new RegExp([
             table,
             '(.*?)',
-            '<\\/table>'
+            '<\\/table>',
         ].join('')));
 
         if (!tableMatch) {
@@ -32,7 +32,7 @@ export function getHoldingsFromDataHL(fund, data) {
         const regexCells = /<td[^>]*>(.*?)<\/td>/g;
 
         const holdings = matchRows
-            .map(row => {
+            .map((row) => {
                 try {
                     const [nameRaw, valueRaw] = row.match(regexCells);
 
@@ -60,7 +60,7 @@ export function getPriceFromDataHL(data, currencyPrices) {
     const regex = new RegExp([
         '<div id="security-price">',
         '.*',
-        '<span class="bid price-divide"[^>]*>(\\$?)([0-9]+(\\.[0-9]*)?)p?<\\/span>'
+        '<span class="bid price-divide"[^>]*>(\\$?)([0-9]+(\\.[0-9]*)?)p?<\\/span>',
     ].join(''));
 
     const dataWithoutNewLines = removeWhitespace(data);
@@ -103,6 +103,7 @@ function getSystemType(humanType) {
 
 export function getFundUrlHL(config, fund) {
     // returns a URL like:
+    // eslint-disable-next-line max-len
     // http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
     const [, humanName, humanTypeRaw] = fund.name.match(config.data.funds.scraper.regex);
 
@@ -134,7 +135,7 @@ export function getFundUrlHL(config, fund) {
             ...urlParts,
             'funds/fund-discounts,-prices--and--factsheets/search-results',
             firstLetter,
-            `${systemName}-${systemType}`
+            `${systemName}-${systemType}`,
         ];
     }
 

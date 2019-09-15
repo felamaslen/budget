@@ -1,9 +1,9 @@
 import test from 'ava';
 
 import {
-    removeWhitespace
+    removeWhitespace,
 } from '~api/scripts/scrape-funds/helpers';
 
-test('removeWhitespace removing whitespace', t => {
-    t.is(removeWhitespace(`a\nb\tc\rd e   f   > >>`), 'abcd e f>>>');
+test('removeWhitespace removing whitespace', (t) => {
+    t.is(removeWhitespace('a\nb\tc\rd e   f   > >>'), 'abcd e f>>>');
 });

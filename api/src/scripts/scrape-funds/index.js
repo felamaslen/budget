@@ -8,7 +8,7 @@ import { processScrape } from '~api/scripts/scrape-funds/process';
 async function run() {
     const flags = commandLineArgs([
         { name: 'holdings', alias: 'h', type: Boolean },
-        { name: 'prices', alias: 'p', type: Boolean }
+        { name: 'prices', alias: 'p', type: Boolean },
     ]);
 
     const logger = getLogger();

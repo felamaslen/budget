@@ -12,7 +12,7 @@ function getStocks(db, user) {
 
 function processStocks(queryResult, apiKey) {
     const stocks = queryResult.map(({ code, name, sum_weight: sumWeight }) => ([
-        code, name, sumWeight
+        code, name, sumWeight,
     ]));
 
     const total = stocks.reduce((sum, [, , weight]) => sum + weight, 0);
@@ -66,5 +66,5 @@ function routeGet(config, db) {
 module.exports = {
     getStocks,
     processStocks,
-    routeGet
+    routeGet,
 };

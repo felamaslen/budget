@@ -19,7 +19,7 @@ export function getCacheUrlMap(config, logger, funds) {
             logger.debug(`Got URL for fund: ${fund.name} -> ${url}`);
 
             if (urls.includes(url)) {
-                const urlIndex = urls.findIndex(otherUrl => otherUrl === url);
+                const urlIndex = urls.findIndex((otherUrl) => otherUrl === url);
 
                 return { urls, urlIndices: [...urlIndices, urlIndex] };
             }
@@ -31,7 +31,6 @@ export function getCacheUrlMap(config, logger, funds) {
 
             return { urls, urlIndices };
         }
-
     }, { urls: [], urlIndices: [] });
 }
 
@@ -55,7 +54,7 @@ export function downloadUrl(config, logger, url) {
     const req = request.defaults({
         jar: true,
         rejectUnauthorized: false,
-        followAllRedirects: true
+        followAllRedirects: true,
     });
 
     return new Promise((resolve, reject) => {
@@ -64,8 +63,8 @@ export function downloadUrl(config, logger, url) {
         return req.get({
             url,
             headers: {
-                'User-Agent': config.data.funds.scraper.userAgent
-            }
+                'User-Agent': config.data.funds.scraper.userAgent,
+            },
         }, (err, res) => {
             if (err) {
                 return reject(err);
@@ -81,9 +80,9 @@ export function downloadUrl(config, logger, url) {
 export async function getRawData(config, logger, funds) {
     const { urls, urlIndices } = getCacheUrlMap(config, logger, funds);
 
-    const data = await Promise.all(urls.map(url => downloadUrl(config, logger, url)));
+    const data = await Promise.all(urls.map((url) => downloadUrl(config, logger, url)));
 
-    const dataMapped = urlIndices.map(index => data[index]);
+    const dataMapped = urlIndices.map((index) => data[index]);
 
     logger.verbose('Raw data fetched successfully');
 

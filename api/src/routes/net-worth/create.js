@@ -4,16 +4,16 @@ const { formatDate, fetchById } = require('./read');
 function getValueRow(netWorthId) {
     return ({ subcategory, skip = null, value }) => {
         const base = {
-            'net_worth_id': netWorthId,
+            net_worth_id: netWorthId,
             skip,
-            subcategory
+            subcategory,
         };
 
         if (!(value && Array.isArray(value))) {
             return { ...base, value };
         }
 
-        const simpleValues = value.filter(item => typeof item === 'number');
+        const simpleValues = value.filter((item) => typeof item === 'number');
 
         if (!simpleValues.length) {
             return { ...base, value: null };
@@ -21,7 +21,7 @@ function getValueRow(netWorthId) {
 
         return {
             ...base,
-            value: simpleValues.reduce((sum, item) => sum + item, 0)
+            value: simpleValues.reduce((sum, item) => sum + item, 0),
         };
     };
 }
@@ -34,11 +34,11 @@ function getFxValueRow(netWorthId, valueIds) {
 
         const valueId = valueIds[index];
 
-        const fxRows = valueArray.filter(item => typeof item !== 'number')
+        const fxRows = valueArray.filter((item) => typeof item !== 'number')
             .map(({ value, currency }) => ({
-                'values_id': valueId,
+                values_id: valueId,
                 value,
-                currency
+                currency,
             }));
 
         return last.concat(fxRows);
@@ -62,12 +62,12 @@ async function insertValues(db, netWorthId, values = []) {
         .into('net_worth_fx_values');
 }
 
-const insertWithNetWorthId = table => async (db, netWorthId, rows = []) => {
+const insertWithNetWorthId = (table) => async (db, netWorthId, rows = []) => {
     if (!rows.length) {
         return;
     }
 
-    const rowsWithId = rows.map(row => ({ 'net_worth_id': netWorthId, ...row }));
+    const rowsWithId = rows.map((row) => ({ net_worth_id: netWorthId, ...row }));
 
     await db.insert(rowsWithId).into(table);
 };
@@ -76,19 +76,19 @@ const insertCreditLimits = insertWithNetWorthId('net_worth_credit_limit');
 
 const insertCurrencies = insertWithNetWorthId('net_worth_currencies');
 
-const onCreate = db => catchAsyncErrors(async (req, res) => {
+const onCreate = (db) => catchAsyncErrors(async (req, res) => {
     const {
         date,
         values,
         creditLimit,
-        currencies
+        currencies,
     } = req.validBody;
 
-    const uid = req.user.uid;
+    const { uid } = req.user;
 
     const [netWorthId] = await db.insert({
         uid,
-        date: formatDate(date)
+        date: formatDate(date),
     })
         .returning('id')
         .into('net_worth');
@@ -108,5 +108,5 @@ module.exports = {
     insertValues,
     insertCreditLimits,
     insertCurrencies,
-    onCreate
+    onCreate,
 };

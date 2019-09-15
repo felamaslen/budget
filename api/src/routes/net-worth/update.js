@@ -2,15 +2,15 @@ const { clientError, catchAsyncErrors } = require('../../modules/error-handling'
 const { insertValues, insertCreditLimits, insertCurrencies } = require('./create');
 const { formatDate, fetchById } = require('./read');
 
-const onUpdate = db => catchAsyncErrors(async (req, res) => {
+const onUpdate = (db) => catchAsyncErrors(async (req, res) => {
     const {
         date,
         values,
         creditLimit,
-        currencies
+        currencies,
     } = req.validBody;
 
-    const uid = req.user.uid;
+    const { uid } = req.user;
     const netWorthId = req.params.id;
 
     const item = await fetchById(db, netWorthId, uid);
@@ -20,20 +20,18 @@ const onUpdate = db => catchAsyncErrors(async (req, res) => {
 
     await db('net_worth')
         .update({
-            date: formatDate(date)
+            date: formatDate(date),
         })
         .where({ id: netWorthId });
 
     await Promise.all([
         'net_worth_values',
         'net_worth_credit_limit',
-        'net_worth_currencies'
+        'net_worth_currencies',
     ]
-        .map(table => db(table)
-            .where({ 'net_worth_id': netWorthId })
-            .delete()
-        )
-    );
+        .map((table) => db(table)
+            .where({ net_worth_id: netWorthId })
+            .delete()));
 
     await insertValues(db, netWorthId, values);
     await insertCreditLimits(db, netWorthId, creditLimit);
@@ -45,5 +43,5 @@ const onUpdate = db => catchAsyncErrors(async (req, res) => {
 });
 
 module.exports = {
-    onUpdate
+    onUpdate,
 };

@@ -5,5 +5,5 @@ function getNow(config) {
 }
 
 module.exports = {
-    getNow
+    getNow,
 };

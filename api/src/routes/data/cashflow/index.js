@@ -166,5 +166,5 @@ function routePut(config, db) {
 module.exports = {
     routeGet,
     routePost,
-    routePut
+    routePut,
 };

@@ -23,15 +23,14 @@ const schemaNetWorth = joi.object()
                                 joi.object()
                                     .keys({
                                         value: joi.number().required(),
-                                        currency: joi.string().required()
+                                        currency: joi.string().required(),
                                     })
-                                    .unknown(false)
-                            ])
+                                    .unknown(false),
+                            ]),
                         )
-                        .required()
+                        .required(),
                 })
-                .unknown(false)
-            ),
+                .unknown(false)),
         creditLimit: joi.array()
             .items(joi.object()
                 .keys({
@@ -40,18 +39,16 @@ const schemaNetWorth = joi.object()
                         .required(),
                     value: joi.number()
                         .integer()
-                        .required()
+                        .required(),
                 })
-                .unknown(false)
-            ),
+                .unknown(false)),
         currencies: joi.array()
             .items(joi.object()
                 .keys({
                     currency: joi.string().required(),
-                    rate: joi.number().required()
+                    rate: joi.number().required(),
                 })
-                .unknown(false)
-            )
+                .unknown(false)),
     })
     .unknown(false);
 
@@ -64,7 +61,7 @@ const schemaSubcategory = joi.object()
         hasCreditLimit: joi.boolean().allow(null),
         opacity: joi.number()
             .min(0)
-            .max(1)
+            .max(1),
     })
     .unknown(false);
 
@@ -73,12 +70,12 @@ const schemaCategory = joi.object()
         type: joi.string().valid(['asset', 'liability'])
             .required(),
         category: joi.string().required(),
-        color: joi.string().regex(COLOR_REGEX)
+        color: joi.string().regex(COLOR_REGEX),
     })
     .unknown(false);
 
 module.exports = {
     schemaNetWorth,
     schemaSubcategory,
-    schemaCategory
+    schemaCategory,
 };
