@@ -81,9 +81,9 @@ function FormFieldTransactions({ create, ...props }) {
     const { value, active } = props;
 
     const onChangeTransaction = useCallback((id, field, fieldValue) =>
-        onChange(modifyTransactionById(value, id, {
+        onChange(modifyTransactionById(currentValue, id, {
             [field]: fieldValue
-        })), [value, onChange]);
+        })), [currentValue, onChange]);
 
     const onRemoveTransaction = useCallback(id => onChange(
         currentValue.filter(({ id: valueId }) => valueId !== id)

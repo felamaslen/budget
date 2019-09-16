@@ -6,7 +6,12 @@ import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import FormFieldTransactions from '~client/components/FormField/transactions';
-import { getTransactionsList, modifyTransaction, removeAtIndex } from '~client/modules/data';
+import {
+    getTransactionsList,
+    modifyTransaction,
+    modifyTransactionById,
+    removeAtIndex
+} from '~client/modules/data';
 
 const transactions = [
     { date: '2017-11-10', units: 10.5, cost: 50 },
@@ -328,4 +333,46 @@ test('removing a transaction', t => {
 
     t.is(onChange.calls.length, 1);
     t.deepEqual(onChange.calls[0].arguments, [removeAtIndex(value, 0)]);
+});
+
+test('updating a transaction', t => {
+    const onChange = t.context.stub();
+
+    const { container } = getContainer({ onChange, active: true, create: true });
+
+    const { childNodes: [, modal] } = container.childNodes[0];
+    const { childNodes: [, ul] } = modal.childNodes[0];
+
+    const [, , row2] = ul.childNodes;
+
+    const [rowDate, rowUnits, rowCost] = row2.childNodes;
+
+    const [, colDate] = rowDate.childNodes;
+    const { childNodes: [inputDate] } = colDate.childNodes[0];
+
+    const [, colUnits] = rowUnits.childNodes;
+    const { childNodes: [inputUnits] } = colUnits.childNodes[0];
+
+    const [, colCost] = rowCost.childNodes;
+    const { childNodes: [inputCost] } = colCost.childNodes[0];
+
+    fireEvent.change(inputDate, { target: { value: '2014-06-01' } });
+    fireEvent.blur(inputDate);
+
+    fireEvent.change(inputUnits, { target: { value: '56.723' } });
+    fireEvent.blur(inputUnits);
+
+    fireEvent.change(inputCost, { target: { value: '81.32' } });
+    fireEvent.blur(inputCost);
+
+    act(() => {
+        getContainer({ onChange, active: false, create: true }, { container });
+    });
+
+    t.is(onChange.calls.length, 1);
+    t.deepEqual(onChange.calls[0].arguments, [modifyTransactionById(value, value[1].id, {
+        date: '2014-06-01',
+        units: 56.723,
+        cost: 8132
+    })]);
 });
