@@ -19,7 +19,7 @@
     "dev:api": "SKIP_APP=true npm run dev",
     "test:web": "TZ=UTC NODE_ENV=test BABEL_ENV=node ava \"./web/test/**/*.spec.js\"",
     "test:api": "./api/test/docker.sh",
-    "test:dev": "NODE_ENV=test ava -w --fail-fast \"./web/test/**/*.spec.js\"",
+    "test:dev": "TZ=UTC NODE_ENV=test BABEL_ENV=node ava -w --fail-fast \"./web/test/**/*.spec.js\"",
     "test": "npm run test:web && npm run test:api && npm run lint && npm run sass-lint",
     "lint": "eslint webpack.config.js api/src api/test web/src web/test",
     "sass-lint": "sass-lint -qv \"./web/src/**/*.scss\"",
