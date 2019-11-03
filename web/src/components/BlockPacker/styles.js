@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import compose from 'just-compose';
 import { breakpoint, diagonalBg } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
@@ -19,12 +20,31 @@ function getBlockColor({ active, color, name }) {
     return 'white';
 }
 
-const Sized = styled.div.attrs(({ width, height }) => ({
+const withStyle = (getStyle) => (props) => (last = {}) => ({
+    ...last,
     style: {
-        width,
-        height,
+        ...(last.style || {}),
+        ...getStyle(props),
     },
-}))`;
+});
+
+const sized = withStyle(({ width, height }) => ({ width, height }));
+const blockColor = withStyle((props) => ({ backgroundColor: getBlockColor(props) }));
+const position = withStyle(({ left, top }) => ({ left, top }));
+
+export const fadeTime = 100;
+
+const ifProps = (condition) => (styleGenerator) => {
+    if (condition) {
+        return styleGenerator;
+    }
+
+    return (last = {}) => last;
+};
+
+const Sized = styled.div.attrs((props) => compose(
+    sized(props),
+)())`
     float: left;
 `;
 
@@ -38,13 +58,10 @@ const BlockBase = styled(Sized)`
     ${({ active }) => active && `background: ${colors.highlight}`};
 `;
 
-export const Block = styled(BlockBase).attrs(({ width, height, ...props }) => ({
-    style: {
-        width,
-        height,
-        backgroundColor: getBlockColor(props),
-    },
-}))`
+export const Block = styled(BlockBase).attrs((props) => compose(
+    sized(props),
+    blockColor(props),
+)())`
     box-shadow: inset 0 0 13px ${colors['shadow-l6']};
     z-index: 1;
 
@@ -68,17 +85,34 @@ export const Block = styled(BlockBase).attrs(({ width, height, ...props }) => ({
     `}
 `;
 
+export const Preview = styled(Block).attrs((props) => compose(
+    blockColor(props),
+    ifProps(!props.expanded)(sized(props)),
+    ifProps(!props.expanded)(position(props)),
+)())`
+    display: block;
+    position: absolute;
+    z-index: 5;
+    transition: all ${fadeTime}ms ease-in-out;
+
+    ${({ expanded }) => expanded && `
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+    `}
+
+    opacity: ${({ expanded, hidden }) => (hidden || !expanded ? 0 : 1)};
+`;
+
+
 export const SubBlock = styled(BlockBase)`
-    transition: opacity 0.1s linear;
-    opacity: 1;
     box-shadow: inset -1px -1px 13px ${colors['shadow-l4']};
     background-image: linear-gradient(
         to bottom right,
         ${colors['translucent-l6']},
         ${colors['shadow-l3']}
     );
-
-    ${({ hidden }) => hidden && 'opacity: 0'};
 `;
 
 export const StatusBar = styled.div`
@@ -107,6 +141,7 @@ export const BlockTreeOuter = styled.div`
 `;
 
 export const BlockTree = styled.div`
+    z-index: ${({ deep }) => 1 + deep};
     position: absolute;
     left: 0;
     top: 0;
@@ -115,34 +150,6 @@ export const BlockTree = styled.div`
     width: 100%;
     height: 100%;
     box-shadow: 0 3px 13px ${colors['shadow-l6']};
-
-/*
-    ${({ deep }) => (
-        deep
-            ? `
-                width: 100%;
-                height: 100%;
-            `
-            : `
-                ${Block} {
-                    transition: opacity 0.1s linear;
-                    opacity: 1;
-                    box-shadow: inset -1px -1px 13px ${colors['shadow-l4']};
-                }
-            `
-    )}
-
-    ${({ expanded }) => expanded && `
-        ${BlockGroup} {
-            opacity: 0; // for the expansion animation
-        }
-`}
-
-    .preview {
-        position: absolute;
-        z-index: 5;
-    }
-    */
 `;
 
 export const BlockView = styled.div`

@@ -118,7 +118,7 @@ test('running onHover, with null values on mouseout / touchend', (t) => {
     fireEvent.mouseOut(div);
 
     t.is(onHover.calls.length, 1);
-    t.deepEqual(onHover.calls[0].arguments, [null, null]);
+    t.deepEqual(onHover.calls[0].arguments, [null]);
 });
 
 test('not rendering blocks if blocks is null', (t) => {

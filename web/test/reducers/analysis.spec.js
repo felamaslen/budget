@@ -6,7 +6,6 @@ import {
     requested,
     received,
     treeItemDisplayToggled,
-    treeItemHovered,
     blockRequested,
     blockReceived,
 } from '~client/actions/analysis';
@@ -93,7 +92,7 @@ test('ANALYSIS_RECEIVED updates data in state', (t) => {
         [3724, 3340, 3299],
     ]);
 
-    t.is(result.deep, null);
+    t.is(result.costDeep, null);
 
     t.deepEqual(result.cost, [
         ['bills', [['EDF Energy', -6110], ['Water', 44272]]],
@@ -115,7 +114,6 @@ test('ANALYSIS_BLOCK_REQUESTED (while on main view) sets state up for loading de
 
     t.is(result.loading, true);
     t.is(result.loadingDeep, true);
-    t.is(result.deepBlock, 'food');
 });
 
 test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bills or saved block', (t) => {
@@ -127,16 +125,14 @@ test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bill
 
 test('ANALYSIS_BLOCK_REQUESTED (while on deep view) resets the deep data', (t) => {
     const state = {
-        deep: [1, 2, 3],
-        deepBlock: 'food',
+        costDeep: [1, 2, 3],
     };
 
     const action = blockRequested('Fish');
 
     const result = reducer(state, action);
 
-    t.is(result.deep, null);
-    t.is(result.deepBlock, null);
+    t.is(result.costDeep, null);
     t.is(result.loading, false);
     t.is(result.loadingDeep, false);
 });
@@ -171,7 +167,7 @@ test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', (t) => {
 
     t.is(result.timeline, state.timeline);
 
-    t.deepEqual(result.deep, [
+    t.deepEqual(result.costDeep, [
         ['Bread', [['Bread', 317]]],
         ['Fish', [['Cod Fillets', 299], ['Salmon', 585]]],
     ]);
@@ -196,15 +192,4 @@ test('ANALYSIS_TREE_DISPLAY_TOGGLED toggles treeVisible', (t) => {
 
     const withGeneral = reducer(state, treeItemDisplayToggled('general'));
     t.deepEqual(withGeneral.treeVisible, { bills: false, general: false });
-});
-
-test('ANALYSIS_TREE_HOVERED sets the active block', (t) => {
-    const state = {};
-
-    const action = treeItemHovered('food', 'Fish');
-
-    const result = reducer(state, action);
-
-    t.is(result.activeGroup, 'food');
-    t.is(result.activeBlock, 'Fish');
 });

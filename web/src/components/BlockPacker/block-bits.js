@@ -54,29 +54,27 @@ BlockGroupComponent.propTypes = {
 
 export const BlockGroup = memo(BlockGroupComponent);
 
-function BlockBits({
+const BlockBits = ({
     blockBit, active, activeSub, deep, onHover, onClick,
-}) {
-    return (
-        <Styled.Block
-            width={blockBit.width}
-            height={blockBit.height}
-            color={blockBit.color}
-            active={!activeSub && active}
-            name={deep ? undefined : blockBit.name}
-            onClick={() => onClick(blockBit.name)}
-        >
-            {(blockBit.blocks || []).map((subBlock) => <BlockGroup
-                key={subBlock.bits[0].name}
-                activeSub={activeSub}
-                name={blockBit.name}
-                value={blockBit.value}
-                subBlock={subBlock}
-                onHover={onHover}
-            />)}
-        </Styled.Block>
-    );
-}
+}) => (
+    <Styled.Block
+        width={blockBit.width}
+        height={blockBit.height}
+        color={blockBit.color}
+        active={!activeSub && active}
+        name={deep ? undefined : blockBit.name}
+        onClick={() => onClick(blockBit.name, blockBit.color)}
+    >
+        {(blockBit.blocks || []).map((subBlock) => <BlockGroup
+            key={subBlock.bits[0].name}
+            activeSub={activeSub}
+            name={blockBit.name}
+            value={blockBit.value}
+            subBlock={subBlock}
+            onHover={onHover}
+        />)}
+    </Styled.Block>
+);
 
 BlockBits.propTypes = {
     blockBit: blockBitShape,
