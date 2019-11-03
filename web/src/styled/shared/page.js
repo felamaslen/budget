@@ -1,5 +1,12 @@
 import styled from 'styled-components';
 
+export const Page = styled.div`
+    display: flex;
+    flex-flow: column;
+    min-height: 0;
+    width: 100%;
+`;
+
 export const Main = styled.div`
     display: flex;
     flex-flow: column;

@@ -24,7 +24,6 @@ test('basic structure', (t) => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'upper');
     t.is(div.childNodes.length, 4);
 });
 
@@ -34,7 +33,6 @@ test('period switcher - basic structure', (t) => {
     const [input] = div.childNodes;
 
     t.is(input.tagName, 'SPAN');
-    t.is(input.className, 'input-period');
     t.is(input.childNodes.length, 4);
 
     const [title] = input.childNodes;
@@ -105,7 +103,6 @@ test('grouping switcher - basic structure', (t) => {
     const [, grouping] = div.childNodes;
 
     t.is(grouping.tagName, 'SPAN');
-    t.is(grouping.className, 'input-grouping');
     t.is(grouping.childNodes.length, 3);
 
     const [title] = grouping.childNodes;
@@ -160,17 +157,14 @@ test('buttons', (t) => {
     const [, , buttons] = div.childNodes;
 
     t.is(buttons.tagName, 'DIV');
-    t.is(buttons.className, 'btns');
     t.is(buttons.childNodes.length, 2);
 
     const [previous, next] = buttons.childNodes;
 
     t.is(previous.tagName, 'BUTTON');
-    t.is(previous.className, 'btn-previous');
     t.is(previous.disabled, false);
 
     t.is(next.tagName, 'BUTTON');
-    t.is(next.className, 'btn-next');
     t.is(next.disabled, true);
 });
 
@@ -199,6 +193,5 @@ test('description', (t) => {
     const [, , , title] = div.childNodes;
 
     t.is(title.tagName, 'H3');
-    t.is(title.className, 'period-title');
     t.is(title.innerHTML, 'foo');
 });

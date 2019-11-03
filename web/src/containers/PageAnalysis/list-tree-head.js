@@ -3,6 +3,8 @@ import React from 'react';
 import { formatCurrency } from '~client/modules/format';
 import { listTreeHeadItemsShape } from '~client/prop-types/page/analysis';
 
+import * as Styled from './styles';
+
 export default function ListTreeHead({ items }) {
     const getCost = (itemList) => formatCurrency(itemList
         .reduce((last, { itemCost }) => last + itemCost, 0));
@@ -19,20 +21,22 @@ export default function ListTreeHead({ items }) {
     const costSelected = getCost(itemsSelected);
     const pctSelected = getPct(itemsSelected);
 
-    return <li className="tree-list-item head">
-        <div className="inner">
-            <span className="indicator" />
-            <span className="title">{'Total:'}</span>
-            <span className="cost">
-                <div className="total">{costTotal}</div>
-                <div className="selected">{costSelected}</div>
-            </span>
-            <span className="pct">
-                <div className="total">{pctTotal}%</div>
-                <div className="selected">{pctSelected}%</div>
-            </span>
-        </div>
-    </li>;
+    return (
+        <Styled.TreeListHeadItem>
+            <Styled.TreeListItemInner>
+                <Styled.TreeIndicator />
+                <Styled.TreeTitle>{'Total:'}</Styled.TreeTitle>
+                <Styled.TreeValue>
+                    <div>{costTotal}</div>
+                    <Styled.TreeListSelected>{costSelected}</Styled.TreeListSelected>
+                </Styled.TreeValue>
+                <Styled.TreeValue>
+                    <div>{pctTotal}%</div>
+                    <Styled.TreeListSelected>{pctSelected}%</Styled.TreeListSelected>
+                </Styled.TreeValue>
+            </Styled.TreeListItemInner>
+        </Styled.TreeListHeadItem>
+    );
 }
 
 ListTreeHead.propTypes = {

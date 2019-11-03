@@ -8,7 +8,6 @@ import {
     requested,
     blockRequested,
     treeItemDisplayToggled,
-    treeItemHovered,
 } from '~client/actions/analysis';
 
 import {
@@ -27,13 +26,12 @@ import { formatCurrency, capitalise } from '~client/modules/format';
 import { timelineShape, costShape } from '~client/prop-types/page/analysis';
 import { blocksShape } from '~client/prop-types/block-packer';
 
-import Page from '~client/components/Page';
 import Timeline from '~client/containers/PageAnalysis/timeline';
 import Upper from '~client/containers/PageAnalysis/upper';
 import ListTree from '~client/containers/PageAnalysis/list-tree';
 import BlockPacker from '~client/components/BlockPacker';
 
-import './style.scss';
+import * as Styled from './styles';
 
 function PageAnalysis({
     timeline,
@@ -86,7 +84,7 @@ function PageAnalysis({
     }
 
     return (
-        <Page page="analysis">
+        <Styled.Page page="analysis">
             <Upper
                 period={period}
                 grouping={grouping}
@@ -94,7 +92,7 @@ function PageAnalysis({
                 description={description}
                 onRequest={onRequest}
             />
-            <div className="analysis-outer">
+            <Styled.Outer>
                 {timeline && <Timeline data={timeline} />}
                 <ListTree
                     cost={cost}
@@ -113,8 +111,8 @@ function PageAnalysis({
                     onClick={onBlockClick}
                     status={status}
                 />
-            </div>
-        </Page>
+            </Styled.Outer>
+        </Styled.Page>
     );
 }
 

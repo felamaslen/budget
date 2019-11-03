@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
 import { subTreeShape } from '~client/prop-types/page/analysis';
 
+import * as Styled from './styles';
+
 export default function SubTree({
     open, subTree, name, itemCost, onHover,
 }) {
@@ -19,23 +21,23 @@ export default function SubTree({
     }
 
     return (
-        <ul className="sub-tree">
+        <Styled.SubTree>
             {subTree.map(({ name: subItemName, total }) => (
-                <li key={subItemName}
-                    className="tree-list-item"
+                <Styled.TreeListItem
+                    key={subItemName}
                     onMouseOver={makeOnMouseOver(subItemName)}
                     onMouseOut={onMouseOut}
                     onTouchStart={makeOnMouseOver(subItemName)}
                     onTouchEnd={onMouseOut}
                 >
-                    <div className="main">
-                        <span className="title">{subItemName}</span>
-                        <span className="cost">{formatCurrency(total)}</span>
-                        <span className="pct">{' ('}{(100 * (total / itemCost)).toFixed(1)}{'%)'}</span>
-                    </div>
-                </li>
+                    <Styled.TreeMain>
+                        <Styled.TreeTitle>{subItemName}</Styled.TreeTitle>
+                        <Styled.TreeValue>{formatCurrency(total)}</Styled.TreeValue>
+                        <Styled.TreeValue>{' ('}{(100 * (total / itemCost)).toFixed(1)}{'%)'}</Styled.TreeValue>
+                    </Styled.TreeMain>
+                </Styled.TreeListItem>
             ))}
-        </ul>
+        </Styled.SubTree>
     );
 }
 
