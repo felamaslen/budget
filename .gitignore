@@ -73,3 +73,5 @@ android/Budget/app/release
 android/Budget/app/src/main/res/values/env.xml
 
 api/build
+
+.idea
