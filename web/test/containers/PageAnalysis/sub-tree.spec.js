@@ -32,7 +32,6 @@ test('basic structure', (t) => {
     t.is(container.childNodes.length, 1);
     const [ul] = container.childNodes;
     t.is(ul.tagName, 'UL');
-    t.is(ul.className, 'sub-tree');
     t.is(ul.childNodes.length, 2);
 });
 
@@ -49,26 +48,21 @@ test('rendering each sub tree item', (t) => {
         const child = ul.childNodes[index];
 
         t.is(child.tagName, 'LI');
-        t.is(child.className, 'tree-list-item');
         t.is(child.childNodes.length, 1);
 
         const [main] = child.childNodes;
         t.is(main.tagName, 'DIV');
-        t.is(main.className, 'main');
         t.is(main.childNodes.length, 3);
 
         const [titleItem, costItem, pctItem] = main.childNodes;
 
         t.is(titleItem.tagName, 'SPAN');
-        t.is(titleItem.className, 'title');
         t.is(titleItem.innerHTML, name);
 
         t.is(costItem.tagName, 'SPAN');
-        t.is(costItem.className, 'cost');
         t.is(costItem.innerHTML, `£${cost}`);
 
         t.is(pctItem.tagName, 'SPAN');
-        t.is(pctItem.className, 'pct');
         t.is(pctItem.innerHTML, ` (${pct}%)`);
     });
 });

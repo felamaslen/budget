@@ -34,13 +34,11 @@ test('basic structure', (t) => {
     const [page] = container.childNodes;
 
     t.is(page.tagName, 'DIV');
-    t.is(page.className, 'page page-analysis');
     t.is(page.childNodes.length, 2);
 
     const [upper, outer] = page.childNodes;
 
     t.is(upper.tagName, 'DIV');
-    t.is(upper.className, 'upper');
 
     t.is(outer.tagName, 'DIV');
     t.is(outer.childNodes.length, 3);
@@ -53,7 +51,6 @@ test('timeline view', (t) => {
 
     const [timeline] = outer.childNodes;
     t.is(timeline.tagName, 'DIV');
-    t.is(timeline.className, 'timeline-outer');
 });
 
 test('list tree', (t) => {
@@ -63,7 +60,6 @@ test('list tree', (t) => {
 
     const [, listTree] = outer.childNodes;
     t.is(listTree.tagName, 'DIV');
-    t.is(listTree.className, 'tree');
 });
 
 test('block view', (t) => {
@@ -86,10 +82,6 @@ test('not rendering a timeline if there is not one present', (t) => {
 
     const [page] = container.childNodes;
     t.is(page.childNodes.length, 2);
-    const [child0, child1] = page.childNodes;
-
-    t.notRegex(child0.className, /timeline/);
-    t.notRegex(child1.className, /timeline/);
 });
 
 test('nothing is rendered if the page hasn\'t loaded', (t) => {

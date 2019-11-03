@@ -45,12 +45,10 @@ test('basic structure', (t) => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'tree');
     t.is(div.childNodes.length, 1);
 
     const [ul] = div.childNodes;
     t.is(ul.tagName, 'UL');
-    t.is(ul.className, 'tree-list');
     t.is(ul.childNodes.length, 6);
 });
 
@@ -61,7 +59,6 @@ test('list tree head', (t) => {
     const [head] = ul.childNodes;
 
     t.is(head.tagName, 'LI');
-    t.is(head.className, 'tree-list-item head');
 });
 
 const bodyTestCases = [
@@ -92,13 +89,10 @@ test('list tree body - basic structure', (t) => {
         const child = ul.childNodes[index + 1];
 
         t.is(child.tagName, 'LI');
-        t.regex(child.className, new RegExp(`tree-list-item ${name}`));
 
         if (open) {
-            t.regex(child.className, /open/);
             t.is(child.childNodes.length, 2);
         } else {
-            t.notRegex(child.className, /open/);
             t.is(child.childNodes.length, 1);
         }
     });
@@ -118,28 +112,23 @@ test('list tree body - main', (t) => {
         const [main] = child.childNodes;
 
         t.is(main.tagName, 'DIV');
-        t.is(main.className, 'main');
         t.is(main.childNodes.length, 5);
 
         const [indicator, input, title, costItem, pctItem] = main.childNodes;
 
         t.is(indicator.tagName, 'SPAN');
-        t.is(indicator.className, 'indicator');
 
         t.is(input.tagName, 'INPUT');
         t.is(input.type, 'checkbox');
         t.is(input.checked, visible);
 
         t.is(title.tagName, 'SPAN');
-        t.is(title.className, 'title');
         t.is(title.innerHTML, name);
 
         t.is(costItem.tagName, 'SPAN');
-        t.is(costItem.className, 'cost');
         t.is(costItem.innerHTML, `£${cost}`);
 
         t.is(pctItem.tagName, 'SPAN');
-        t.is(pctItem.className, 'pct');
         t.is(pctItem.innerHTML, ` (${pct}%)`);
     });
 });
@@ -160,7 +149,6 @@ test('list tree body - sub tree', (t) => {
         const [, subTree] = child.childNodes;
 
         t.is(subTree.tagName, 'UL');
-        t.is(subTree.className, 'sub-tree');
     });
 });
 

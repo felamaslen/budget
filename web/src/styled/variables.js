@@ -26,6 +26,8 @@ export const colors = {
     'translucent-l2': rgba(255, 255, 255, 0.2),
     'translucent-l6': rgba(255, 255, 255, 0.6),
     highlight: rgba(255, 255, 0, 0.85),
+    'highlight-light': rgb(255, 252, 218),
+    blue: rgb(0, 153, 238),
     overview: {
         main: rgb(66, 66, 66),
     },
