@@ -109,6 +109,7 @@
     "serve-static": "^1.14.1",
     "sha1": "^1.1.1",
     "shortid": "^2.2.14",
+    "styled-components": "^4.4.1",
     "swagger-jsdoc": "^3.2.9",
     "swagger-ui-dist": "^3.1.7",
     "throttle-debounce": "^2.1.0",
