@@ -7,6 +7,7 @@ import { getLoggedIn } from '~client/selectors/app';
 
 import { Main } from '~client/styled/shared/page';
 
+import StyleReset from '~client/styled/reset';
 import Header from '~client/containers/Header';
 import ErrorMessages from '~client/containers/ErrorMessages';
 import Spinner from '~client/containers/Spinner';
@@ -18,6 +19,7 @@ import './style.scss';
 const Root = ({ store, loggedIn, initialLoading }) => (
     <Provider store={store}>
         <Main>
+            <StyleReset />
             <Header />
             <ErrorMessages />
             <LoginForm />
