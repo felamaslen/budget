@@ -1,25 +1,24 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, memo } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { blockBitShape, subBlockShape, subBlockBitShape } from '~client/prop-types/block-packer';
+
+import * as Styled from './styles';
 
 function SubBlockComponent({
     name, subBlockBit, active, onHover,
 }) {
-    const style = useMemo(() => ({
-        width: subBlockBit.width,
-        height: subBlockBit.height,
-    }), [subBlockBit]);
-
     const onBlockHover = useCallback(() => onHover(name, subBlockBit.name), [onHover, name, subBlockBit.name]);
 
-    return <div
-        className={classNames('sub-block', { active })}
-        style={style}
-        onTouchStart={onBlockHover}
-        onMouseOver={onBlockHover}
-    />;
+    return (
+        <Styled.SubBlock
+            width={subBlockBit.width}
+            height={subBlockBit.height}
+            active={active}
+            onTouchStart={onBlockHover}
+            onMouseOver={onBlockHover}
+        />
+    );
 }
 
 SubBlockComponent.propTypes = {
@@ -30,48 +29,41 @@ SubBlockComponent.propTypes = {
     onHover: PropTypes.func.isRequired,
 };
 
-export const SubBlock = React.memo(SubBlockComponent);
+export const SubBlock = memo(SubBlockComponent);
 
-function BlockGroupComponent({ subBlock, activeSub, ...props }) {
-    const subBlockBits = subBlock.bits.map((subBlockBit) => <SubBlock
-        key={subBlockBit.name}
-        subBlockBit={subBlockBit}
-        active={activeSub === subBlockBit.name}
-        {...props}
-    />);
-
-    const style = useMemo(() => ({
-        width: subBlock.width,
-        height: subBlock.height,
-    }), [subBlock]);
-
-    return <div className="block-group" style={style}>
-        {subBlockBits}
-    </div>;
-}
+const BlockGroupComponent = ({ subBlock, activeSub, ...props }) => (
+    <Styled.BlockGroup
+        width={subBlock.width}
+        height={subBlock.height}
+    >
+        {subBlock.bits.map((subBlockBit) => (
+            <SubBlock
+                key={subBlockBit.name}
+                subBlockBit={subBlockBit}
+                active={activeSub === subBlockBit.name}
+                {...props}
+            />
+        ))}
+    </Styled.BlockGroup>
+);
 
 BlockGroupComponent.propTypes = {
     subBlock: subBlockShape,
     activeSub: PropTypes.string,
 };
 
-export const BlockGroup = React.memo(BlockGroupComponent);
+export const BlockGroup = memo(BlockGroupComponent);
 
 function BlockBits({
     blockBit, active, activeSub, deep, onHover, onClick,
 }) {
-    const style = useMemo(() => ({
-        width: blockBit.width,
-        height: blockBit.height,
-    }), [blockBit]);
-
     return (
-        <div
-            className={classNames('block', `block-${blockBit.color}`, {
-                active: active && !activeSub,
-                [`block-${blockBit.name}`]: !deep,
-            })}
-            style={style}
+        <Styled.Block
+            width={blockBit.width}
+            height={blockBit.height}
+            color={blockBit.color}
+            active={!activeSub && active}
+            name={deep ? undefined : blockBit.name}
             onClick={() => onClick(blockBit.name)}
         >
             {(blockBit.blocks || []).map((subBlock) => <BlockGroup
@@ -82,7 +74,7 @@ function BlockBits({
                 subBlock={subBlock}
                 onHover={onHover}
             />)}
-        </div>
+        </Styled.Block>
     );
 }
 
@@ -95,4 +87,4 @@ BlockBits.propTypes = {
     onClick: PropTypes.func.isRequired,
 };
 
-export default React.memo(BlockBits);
+export default memo(BlockBits);

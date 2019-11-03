@@ -34,7 +34,6 @@ test('<SubBlock /> - rendering basic structure', (t) => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'sub-block');
     t.is(div.style.width, '90px');
     t.is(div.style.height, '87px');
 });
@@ -83,7 +82,6 @@ test('<BlockGroup /> - rendering basic structure', (t) => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'block-group');
     t.is(div.style.width, '15px');
     t.is(div.style.height, '13px');
 
@@ -131,7 +129,6 @@ test('<BlockBits /> - rendering basic structure', (t) => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'block block-red block-foo');
     t.is(div.childNodes.length, 1);
 });
 
@@ -142,7 +139,6 @@ test('<BlockBits /> - rendering a list of blocks', (t) => {
     const [group] = div.childNodes;
 
     t.is(group.tagName, 'DIV');
-    t.is(group.className, 'block-group');
 
     t.is(group.childNodes.length, 2);
 
@@ -150,9 +146,6 @@ test('<BlockBits /> - rendering a list of blocks', (t) => {
 
     t.is(bit0.tagName, 'DIV');
     t.is(bit1.tagName, 'DIV');
-
-    t.is(bit0.className, 'sub-block');
-    t.is(bit1.className, 'sub-block');
 });
 
 test('<BlockBits /> - skipping subBlock render if there are none', (t) => {

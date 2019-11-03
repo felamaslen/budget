@@ -1,35 +1,32 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { blocksShape, blockShape } from '~client/prop-types/block-packer';
 import BlockBits from '~client/components/BlockPacker/block-bits';
 
-function OuterBlockGroupComponent({
-    block, activeMain, activeSub, ...props
-}) {
-    const style = useMemo(() => ({
-        width: block.width,
-        height: block.height,
-    }), [block]);
+import * as Styled from './styles';
 
-    return (
-        <div className="block-group" style={style}>
-            {block.bits.map((blockBit) => (
-                <BlockBits
-                    key={blockBit.name}
-                    blockBit={blockBit}
-                    active={activeMain === blockBit.name}
-                    activeSub={activeMain === blockBit.name
-                        ? activeSub
-                        : null
-                    }
-                    {...props}
-                />
-            ))}
-        </div>
-    );
-}
+const OuterBlockGroupComponent = ({
+    block, activeMain, activeSub, ...props
+}) => (
+    <Styled.BlockGroup
+        width={block.width}
+        height={block.height}
+    >
+        {block.bits.map((blockBit) => (
+            <BlockBits
+                key={blockBit.name}
+                blockBit={blockBit}
+                active={activeMain === blockBit.name}
+                activeSub={activeMain === blockBit.name
+                    ? activeSub
+                    : null
+                }
+                {...props}
+            />
+        ))}
+    </Styled.BlockGroup>
+);
 
 OuterBlockGroupComponent.propTypes = {
     activeMain: PropTypes.string,
@@ -46,10 +43,7 @@ const Blocks = ({
     activeSub,
     ...props
 }) => (
-    <div className={classNames('block-tree', {
-        'block-tree-deep': deepBlock,
-        [`block-tree-${deepBlock}`]: deepBlock,
-    })}>
+    <Styled.BlockTree>
         {blocks.map((block) => (
             <OuterBlockGroup
                 key={block.bits[0].name}
@@ -70,7 +64,7 @@ const Blocks = ({
                 {...props}
             />
         ))}
-    </div>
+    </Styled.BlockTree>
 );
 
 Blocks.propTypes = {

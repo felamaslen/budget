@@ -174,19 +174,6 @@
                 }
             }
         }
-
-        .block-view {
-            display: none;
-        }
-    }
-    
-    @media only screen and (min-width: $width-page-mobile-small) {
-        .analysis-outer {
-            .block-view {
-                display: flex;
-                height: 300px;
-            }
-        }
     }
 
     @media only screen and (min-width: $width-page-mobile) {
@@ -213,25 +200,12 @@
         }
 
         .analysis-outer {
-            .block-view {
-                width: 400px;
-                align-self: center;
-            }
-
             .tree {
                 &-list {
                     & > .tree-list-item > .main, .sub-tree .tree-list-item {
                         &:hover {
                             background: $color-blue;
                         }
-                    }
-                }
-            }
-
-            .block-view {
-                .block, .sub-block {
-                    &.active {
-                        background: $color-highlight;
                     }
                 }
             }
@@ -294,12 +268,6 @@
                     flex: 1 1 auto;
                     margin: 1em;
                 }
-            }
-            .block-view {
-                grid-row: 2;
-                grid-column: 2;
-                width: 500px;
-                height: 500px;
             }
         }
     }
