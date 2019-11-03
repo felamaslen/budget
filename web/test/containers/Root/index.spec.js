@@ -51,7 +51,6 @@ test('main container', (t) => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'main');
     t.is(div.childNodes.length, 3);
 
     const [header, errorMessages, page] = div.childNodes;
