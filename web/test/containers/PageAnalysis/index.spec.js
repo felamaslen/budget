@@ -43,7 +43,6 @@ test('basic structure', (t) => {
     t.is(upper.className, 'upper');
 
     t.is(outer.tagName, 'DIV');
-    t.is(outer.className, 'analysis-outer');
     t.is(outer.childNodes.length, 3);
 });
 
@@ -74,7 +73,6 @@ test('block view', (t) => {
 
     const [, , blockView] = outer.childNodes;
     t.is(blockView.tagName, 'DIV');
-    t.is(blockView.className, 'block-view');
 });
 
 test('not rendering a timeline if there is not one present', (t) => {

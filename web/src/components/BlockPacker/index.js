@@ -4,20 +4,24 @@ import PropTypes from 'prop-types';
 import { blocksShape } from '~client/prop-types/block-packer';
 import Blocks from '~client/components/BlockPacker/blocks';
 
-import './style.scss';
+import * as Styled from './styles';
 
-export default function BlockPacker({ status, onHover, ...props }) {
+export default function BlockPacker({ status, onHover, blocks, ...props }) {
     const onMouseOut = useCallback(() => onHover(null, null), [onHover]);
 
     return (
-        <div className="block-view" onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>
-            <div className="block-tree-outer">
-                {props.blocks && <Blocks onHover={onHover} {...props} />}
-            </div>
-            <div className="status-bar">
-                <span className="inner">{status}</span>
-            </div>
-        </div>
+        <Styled.BlockView onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>
+            <Styled.BlockTreeOuter>
+                {blocks && (
+                    <Blocks
+                        blocks={blocks}
+                        onHover={onHover}
+                        {...props}
+                    />
+                )}
+            </Styled.BlockTreeOuter>
+            <Styled.StatusBar>{status}</Styled.StatusBar>
+        </Styled.BlockView>
     );
 }
 
