@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 
 import { getLoggedIn } from '~client/selectors/app';
 
+import { Main } from '~client/styled/shared/page';
+
 import Header from '~client/containers/Header';
 import ErrorMessages from '~client/containers/ErrorMessages';
 import Spinner from '~client/containers/Spinner';
@@ -15,13 +17,13 @@ import './style.scss';
 
 const Root = ({ store, loggedIn, initialLoading }) => (
     <Provider store={store}>
-        <div className="main">
+        <Main>
             <Header />
             <ErrorMessages />
             <LoginForm />
             {loggedIn && !initialLoading && <Content />}
             <Spinner />
-        </div>
+        </Main>
     </Provider>
 );
 
