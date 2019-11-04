@@ -34,30 +34,27 @@ const getContainer = memoize((customProps = {}) => {
     return { store, ...utils };
 });
 
-test('rendering a graph container', (t) => {
+test('rendering a graph container', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'graph-container-outer');
     t.is(div.childNodes.length, 2);
 });
 
-test('rendering a balance graph', (t) => {
+test('rendering a balance graph', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [graphBalance] = div.childNodes;
 
     t.is(graphBalance.tagName, 'DIV');
-    t.is(graphBalance.className, 'graph-container graph-balance');
 });
 
-test('rendering a spending graph', (t) => {
+test('rendering a spending graph', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, graphSpending] = div.childNodes;
 
     t.is(graphSpending.tagName, 'DIV');
-    t.is(graphSpending.className, 'graph-container graph-spend');
 });

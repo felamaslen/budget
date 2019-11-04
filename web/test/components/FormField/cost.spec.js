@@ -19,18 +19,17 @@ const getContainer = (customProps = {}, ...args) => {
     return render(<FormFieldCost {...props} />, ...args);
 };
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
 
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'form-field form-field-cost');
     t.is(div.childNodes.length, 1);
 });
 
-test('input', (t) => {
+test('input', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [input] = div.childNodes;
@@ -41,7 +40,7 @@ test('input', (t) => {
     t.is(input.value, '103.45');
 });
 
-test('handling onchange', (t) => {
+test('handling onchange', t => {
     const onChange = t.context.stub();
     const { container } = getContainer({
         onChange,
@@ -61,12 +60,14 @@ test('handling onchange', (t) => {
     t.deepEqual(onChange.calls[0].arguments, [1093]);
 });
 
-test('rendering as a string input', (t) => {
+test('rendering as a string input', t => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
     const { container } = getContainer(props);
 
-    const { childNodes: [input] } = container.childNodes[0];
+    const {
+        childNodes: [input],
+    } = container.childNodes[0];
 
     t.is(input.type, 'text');
 
@@ -79,14 +80,16 @@ test('rendering as a string input', (t) => {
     act(() => {
         getContainer({ ...props, active: true }, { container });
     });
-    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '229.119330' } });
+    fireEvent.change(container.childNodes[0].childNodes[0], {
+        target: { value: '229.119330' },
+    });
     act(() => {
         getContainer({ ...props, active: false }, { container });
     });
     t.deepEqual(onChange.calls[1].arguments, [22912]);
 });
 
-test('rendering as a string input - decimal point', (t) => {
+test('rendering as a string input - decimal point', t => {
     const onChange = t.context.stub();
     const props = { onChange, value: '', string: true };
     const { container } = getContainer(props);
@@ -107,7 +110,9 @@ test('rendering as a string input - decimal point', (t) => {
         });
 
         t.is(onChange.calls.length, numCalls + 1);
-        t.deepEqual(onChange.calls[onChange.calls.length - 1].arguments, [changeTo]);
+        t.deepEqual(onChange.calls[onChange.calls.length - 1].arguments, [
+            changeTo,
+        ]);
 
         act(() => {
             getContainer({ ...props, active: true }, { container });
@@ -117,7 +122,9 @@ test('rendering as a string input - decimal point', (t) => {
     const testInput = (string, changeTo) => {
         const chars = string.split('');
 
-        chars.forEach((value, index) => testInputCharacter(string.substring(0, index + 1), changeTo[index]));
+        chars.forEach((value, index) =>
+            testInputCharacter(string.substring(0, index + 1), changeTo[index]),
+        );
     };
 
     testInput('1.5', [100, 100, 150]);
@@ -138,12 +145,14 @@ test('rendering as a string input - decimal point', (t) => {
     testInputCharacter('.05', 5, '.05');
 });
 
-test('rendering as a string input - handling invalid input', (t) => {
+test('rendering as a string input - handling invalid input', t => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
     const { container } = getContainer(props);
 
-    const { childNodes: [input] } = container.childNodes[0];
+    const {
+        childNodes: [input],
+    } = container.childNodes[0];
 
     t.is(input.type, 'text');
 
@@ -155,7 +164,7 @@ test('rendering as a string input - handling invalid input', (t) => {
     t.is(onChange.calls.length, 0);
 });
 
-test('rendering as a string input - not overwriting on invalid input', (t) => {
+test('rendering as a string input - not overwriting on invalid input', t => {
     const onChange = t.context.stub();
     const props = { onChange, string: true };
     const { container } = getContainer(props);

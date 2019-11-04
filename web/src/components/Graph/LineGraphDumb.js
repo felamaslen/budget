@@ -30,7 +30,6 @@ export default function LineGraphDumb({
     graphRef,
     outerProperties,
     svgProperties,
-    svgClasses,
     hoverEffect,
 }) {
     const basicProps = useMemo(() => ({
@@ -45,7 +44,6 @@ export default function LineGraphDumb({
         graphRef,
         outerProperties,
         svgProperties,
-        svgClasses,
         ...basicProps,
     };
 
@@ -100,7 +98,6 @@ LineGraphDumb.propTypes = {
     graphRef: PropTypes.object,
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
-    svgClasses: PropTypes.string,
     hlPoint: PropTypes.object,
 };
 

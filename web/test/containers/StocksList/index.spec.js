@@ -9,7 +9,11 @@ import StocksList from '~client/containers/StocksList';
 import { stocksListRequested } from '~client/actions/stocks';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = (state) => state, ...args) => {
+const getContainer = (
+    customProps = {},
+    customState = state => state,
+    ...args
+) => {
     const state = customState({
         ...testState,
         stocks: {
@@ -73,18 +77,17 @@ const getContainer = (customProps = {}, customState = (state) => state, ...args)
     return { store, ...utils };
 };
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'stocks-list graph-container-outer');
     t.is(div.childNodes.length, 1);
 });
 
-test('requesting a stocks list when it renders', (t) => {
+test('requesting a stocks list when it renders', t => {
     const clock = sinon.useFakeTimers();
 
     const { store } = getContainer();
@@ -100,18 +103,17 @@ test('requesting a stocks list when it renders', (t) => {
     clock.restore();
 });
 
-test('rendering a graph container', (t) => {
+test('rendering a graph container', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
     const [graph] = div.childNodes;
 
     t.is(graph.tagName, 'DIV');
-    t.is(graph.className, 'graph-container');
     t.is(graph.childNodes.length, 2);
 });
 
-test('rendering a stocks list', (t) => {
+test('rendering a stocks list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -119,11 +121,10 @@ test('rendering a stocks list', (t) => {
     const [stocksList] = graph.childNodes;
 
     t.is(stocksList.tagName, 'UL');
-    t.is(stocksList.className, 'stocks-list-ul');
     t.is(stocksList.childNodes.length, 2);
 });
 
-test('rendering CTY stock', (t) => {
+test('rendering CTY stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -133,40 +134,31 @@ test('rendering CTY stock', (t) => {
     const [cty] = stocksList.childNodes;
 
     t.is(cty.tagName, 'LI');
-    t.is(cty.className, 'up hl-down');
     t.is(cty.title, 'City of London Investment Trust');
 
     t.is(cty.childNodes.length, 3);
-    cty.childNodes.forEach((tag) => {
+    cty.childNodes.forEach(tag => {
         t.is(tag.tagName, 'SPAN');
     });
 
     const [nameColumn, price, change] = cty.childNodes;
 
-    t.is(nameColumn.className, 'name-column');
-    t.is(price.className, 'price');
-    t.is(change.className, 'change');
-
     t.is(nameColumn.childNodes.length, 2);
-    nameColumn.childNodes.forEach((tag) => {
+    nameColumn.childNodes.forEach(tag => {
         t.is(tag.tagName, 'SPAN');
     });
     const [code, title] = nameColumn.childNodes;
 
-    t.is(code.className, 'code');
     t.is(code.innerHTML, 'CTY.L');
 
-    t.is(title.className, 'title');
     t.is(title.innerHTML, 'City of London Investment Trust');
 
-    t.is(price.className, 'price');
     t.is(price.innerHTML, '406.23');
 
-    t.is(change.className, 'change');
     t.is(change.innerHTML, '0.01%');
 });
 
-test('rendering SMT stock', (t) => {
+test('rendering SMT stock', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -176,40 +168,31 @@ test('rendering SMT stock', (t) => {
     const [, smt] = stocksList.childNodes;
 
     t.is(smt.tagName, 'LI');
-    t.is(smt.className, 'down hl-down');
     t.is(smt.title, 'Scottish Mortgage Investment Trust');
 
     t.is(smt.childNodes.length, 3);
-    smt.childNodes.forEach((tag) => {
+    smt.childNodes.forEach(tag => {
         t.is(tag.tagName, 'SPAN');
     });
 
     const [nameColumn, price, change] = smt.childNodes;
 
-    t.is(nameColumn.className, 'name-column');
-    t.is(price.className, 'price');
-    t.is(change.className, 'change');
-
     t.is(nameColumn.childNodes.length, 2);
-    nameColumn.childNodes.forEach((tag) => {
+    nameColumn.childNodes.forEach(tag => {
         t.is(tag.tagName, 'SPAN');
     });
     const [code, title] = nameColumn.childNodes;
 
-    t.is(code.className, 'code');
     t.is(code.innerHTML, 'SMT.L');
 
-    t.is(title.className, 'title');
     t.is(title.innerHTML, 'Scottish Mortgage Investment Trust');
 
-    t.is(price.className, 'price');
     t.is(price.innerHTML, '492.21');
 
-    t.is(change.className, 'change');
     t.is(change.innerHTML, '-0.54%');
 });
 
-test('rendering a stocks sidebar', (t) => {
+test('rendering a stocks sidebar', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -218,11 +201,10 @@ test('rendering a stocks sidebar', (t) => {
     const [, sidebar] = graph.childNodes;
 
     t.is(sidebar.tagName, 'DIV');
-    t.is(sidebar.className, 'stocks-sidebar');
     t.is(sidebar.childNodes.length, 2);
 });
 
-test('rendering a stocks graph', (t) => {
+test('rendering a stocks graph', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -233,10 +215,9 @@ test('rendering a stocks graph', (t) => {
     const [stocksGraph] = sidebar.childNodes;
 
     t.is(stocksGraph.tagName, 'DIV');
-    t.is(stocksGraph.className, 'graph-container graph-graph-stocks');
 });
 
-test('rendering a sidebar list', (t) => {
+test('rendering a sidebar list', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;

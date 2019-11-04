@@ -5,31 +5,42 @@ import classNames from 'classnames';
 import { formatItem } from '~client/modules/format';
 import { useField } from '~client/hooks/field';
 
-export const Wrapper = ({
-    item, value, active, children,
-}) => (
-    <div className={classNames('form-field', `form-field-${item}`, active)}>
+import * as Styled from './styles';
+
+export const Wrapper = ({ item, value, active, small, children }) => (
+    <Styled.FormField
+        className={classNames('form-field', `form-field-${item}`, active)}
+        active={active}
+        small={small}
+    >
         {active && children}
         {!active && formatItem(item, value)}
-    </div>
+    </Styled.FormField>
 );
 
 Wrapper.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.any,
     active: PropTypes.bool,
+    small: PropTypes.bool,
     children: PropTypes.node.isRequired,
 };
 
 Wrapper.defaultProps = {
     active: true,
+    small: false,
 };
 
 export default function FormFieldText({ label, item, ...props }) {
     const [currentValue, , onChange, ref, onBlur] = useField(props);
 
     return (
-        <Wrapper item={item} value={props.value} active={props.active}>
+        <Wrapper
+            item={item}
+            value={props.value}
+            active={props.active}
+            small={props.small}
+        >
             <input
                 ref={ref}
                 aria-label={label}
@@ -47,6 +58,7 @@ FormFieldText.propTypes = {
     item: PropTypes.string,
     value: PropTypes.string,
     active: PropTypes.bool,
+    small: PropTypes.bool,
 };
 
 FormFieldText.defaultProps = {

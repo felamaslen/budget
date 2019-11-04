@@ -6,10 +6,10 @@ import { gainShape } from '~client/prop-types/page/funds';
 import GraphFundItem from '~client/components/GraphFundItem';
 import FundGainInfo from '~client/components/FundGainInfo';
 
+import * as Styled from './styles';
+
 export default function ListRowFundsDesktop({
-    row: {
-        item, sold, prices, gain,
-    },
+    row: { item, sold, prices, gain },
 }) {
     const [popout, setPopout] = useState(false);
     const onToggleGraph = useCallback(() => {
@@ -21,15 +21,20 @@ export default function ListRowFundsDesktop({
     }
 
     return (
-        <span className={classNames('fund-extra-info', { popout })}>
-            <GraphFundItem name={item.toLowerCase().replace(/\W+/g, '-')}
+        <Styled.FundExtraInfo
+            className={classNames({ popout })}
+            popout={popout}
+            sold={sold}
+        >
+            <GraphFundItem
+                name={item.toLowerCase().replace(/\W+/g, '-')}
                 sold={sold}
                 values={prices}
                 popout={popout}
                 onToggle={onToggleGraph}
             />
             <FundGainInfo gain={gain} sold={sold} />
-        </span>
+        </Styled.FundExtraInfo>
     );
 }
 

@@ -19,17 +19,16 @@ const getContainer = memoize((customProps = {}) => {
     return render(<FormFieldNumber {...props} />);
 });
 
-test('render its basic structure', (t) => {
+test('render its basic structure', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'form-field form-field-number');
     t.is(div.childNodes.length, 1);
 });
 
-test('render an input', (t) => {
+test('render an input', t => {
     const { container } = getContainer();
 
     const [div] = container.childNodes;
@@ -40,7 +39,7 @@ test('render an input', (t) => {
     t.is(input.value, '103');
 });
 
-test('fire onChange', (t) => {
+test('fire onChange', t => {
     const onChange = t.context.stub();
     const { container } = getContainer({
         onChange,

@@ -8,6 +8,8 @@ import { VALUE_SET } from '~client/modules/nav';
 import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
 
+import * as Styled from './styles';
+
 export function ListRowDesktopBase({
     item,
     activeColumn,
@@ -19,45 +21,47 @@ export function ListRowDesktopBase({
 }) {
     const columns = PAGES[page].cols;
 
-    const onSuggestionConfirmed = useCallback((column, nextValue) => {
-        const nextColumn = columns[columns.indexOf(column) + 1];
+    const onSuggestionConfirmed = useCallback(
+        (column, nextValue) => {
+            const nextColumn = columns[columns.indexOf(column) + 1];
 
-        let toId = null;
-        let toColumn = null;
-        if (nextColumn) {
-            toId = item.id;
-            toColumn = nextColumn;
-        } else if (item.id === CREATE_ID) {
-            toId = item.id;
-            toColumn = ADD_BTN;
-        }
+            let toId = null;
+            let toColumn = null;
+            if (nextColumn) {
+                toId = item.id;
+                toColumn = nextColumn;
+            } else if (item.id === CREATE_ID) {
+                toId = item.id;
+                toColumn = ADD_BTN;
+            }
 
-        if (nextColumn && nextValue) {
-            setCommand({
-                command: VALUE_SET,
-                column: nextColumn,
-                payload: nextValue,
-                activeId: toId,
-                activeColumn: toColumn,
-            });
-        } else {
-            setActive(toId, toColumn);
-        }
-    }, [item.id, columns, setCommand, setActive]);
+            if (nextColumn && nextValue) {
+                setCommand({
+                    command: VALUE_SET,
+                    column: nextColumn,
+                    payload: nextValue,
+                    activeId: toId,
+                    activeColumn: toColumn,
+                });
+            } else {
+                setActive(toId, toColumn);
+            }
+        },
+        [item.id, columns, setCommand, setActive],
+    );
 
-    return columns.map((column) => (
-        <ListRowCell key={column}
+    return columns.map(column => (
+        <ListRowCell
+            key={column}
             page={page}
             id={item.id}
+            small={item.small}
             column={column}
             onSuggestionConfirmed={onSuggestionConfirmed}
             value={item[column]}
             active={activeColumn === column}
             setActive={setActive}
-            command={column === command.column
-                ? command
-                : NULL_COMMAND
-            }
+            command={column === command.column ? command : NULL_COMMAND}
             onUpdate={onUpdate}
         />
     ));
@@ -88,13 +92,24 @@ function ListRowDesktop({
     activeColumn,
     setActive,
 }) {
-    const onColumnUpdate = useCallback((column, value) => onUpdate(page, item.id, {
-        ...item,
-        [column]: value,
-    }, item), [onUpdate, page, item]);
+    const onColumnUpdate = useCallback(
+        (column, value) =>
+            onUpdate(
+                page,
+                item.id,
+                {
+                    ...item,
+                    [column]: value,
+                },
+                item,
+            ),
+        [onUpdate, page, item],
+    );
 
     return (
-        <div
+        <Styled.RowBody
+            odd={odd}
+            small={item.small}
             className={classNames('list-row-desktop', item.className || {}, {
                 odd,
                 future: item.future,
@@ -107,22 +122,22 @@ function ListRowDesktop({
                 page={page}
                 activeColumn={activeColumn}
                 setActive={setActive}
-                command={command.id && command.id === item.id
-                    ? command
-                    : NULL_COMMAND
+                command={
+                    command.id && command.id === item.id
+                        ? command
+                        : NULL_COMMAND
                 }
                 setCommand={setCommand}
                 onUpdate={onColumnUpdate}
             />
             {PAGES[page].daily && <DailyText value={item.daily} />}
-            <div className="button-delete">
-                <button
-                    className="button-delete-button"
-                    onClick={onDelete}
-                >&minus;</button>
-            </div>
+            <Styled.ButtonDelete className="button-delete">
+                <button className="button-delete-button" onClick={onDelete}>
+                    &minus;
+                </button>
+            </Styled.ButtonDelete>
             {AfterRow && <AfterRow page={page} row={item} />}
-        </div>
+        </Styled.RowBody>
     );
 }
 
@@ -136,10 +151,8 @@ ListRowDesktop.propTypes = {
         future: PropTypes.bool,
         firstPresent: PropTypes.bool,
         daily: PropTypes.number,
-        className: PropTypes.oneOfType([
-            PropTypes.object,
-            PropTypes.string,
-        ]),
+        small: PropTypes.bool,
+        className: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
     }).isRequired,
     active: PropTypes.bool,
     command: PropTypes.object.isRequired,

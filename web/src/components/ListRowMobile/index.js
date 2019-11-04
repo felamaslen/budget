@@ -6,24 +6,38 @@ import { rowShape } from '~client/prop-types/page/rows';
 import { formatItem } from '~client/modules/format';
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
+import * as Styled from './styles';
+
 function ListRowMobile({
-    style, item, listColsMobile, AfterRowMobile, setActive,
+    style,
+    item,
+    listColsMobile,
+    AfterRowMobile,
+    setActive,
 }) {
-    const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
+    const onActivate = useCallback(() => setActive(item.id), [
+        item.id,
+        setActive,
+    ]);
 
     return (
-        <div
+        <Styled.Row
             className={classNames('list-row-mobile', item.className || {})}
             style={style}
+            small={item.small}
             onClick={onActivate}
         >
-            {listColsMobile.map((column) => (
-                <span key={column} className={classNames('column', column)}>
+            {listColsMobile.map(column => (
+                <Styled.Column
+                    key={column}
+                    column={column}
+                    className={classNames('column', column)}
+                >
                     {formatItem(column, item[column])}
-                </span>
+                </Styled.Column>
             ))}
             {AfterRowMobile && <AfterRowMobile item={item} />}
-        </div>
+        </Styled.Row>
     );
 }
 

@@ -28,27 +28,24 @@ const getGraph = memoize((customProps = {}) => {
     return render(<GraphFundItem {...props} />);
 });
 
-test('rendering a graph with the correct paths', (t) => {
+test('rendering a graph with the correct paths', t => {
     const { container } = getGraph();
     t.is(container.childNodes.length, 1);
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'fund-graph');
     t.is(div.childNodes.length, 1);
 
     const [graph] = div.childNodes;
 
     t.is(graph.tagName, 'DIV');
-    t.is(graph.className, 'graph-container graph-some-fund-graph');
     t.is(graph.childNodes.length, 1);
 
     const [svg] = graph.childNodes;
     t.is(svg.tagName, 'svg');
-    t.is(svg.className, 'popout');
 });
 
-test('not rendering anything if there are no values', (t) => {
+test('not rendering anything if there are no values', t => {
     const { container } = getGraph({
         values: null,
     });
