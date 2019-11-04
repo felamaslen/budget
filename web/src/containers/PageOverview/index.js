@@ -5,18 +5,18 @@ import PropTypes from 'prop-types';
 import { Route } from 'react-router-dom';
 
 import { getOverviewTable } from '~client/selectors/overview';
-import Page from '~client/components/Page';
 import OverviewTable from '~client/components/OverviewTable';
 import GraphOverview from '~client/containers/GraphOverview';
 import NetWorth from '~client/containers/NetWorth';
 import './style.scss';
+import * as Styled from '~client/styled/shared/page';
 
-const PageOverview = ({ table, ...props }) => (
+const PageOverview = ({ table }) => (
     <>
-        <Page page="overview" {...props}>
+        <Styled.Page className="page page-overview">
             <OverviewTable rows={table} />
             <GraphOverview />
-        </Page>
+        </Styled.Page>
         <Route path="/net-worth" component={NetWorth} />
     </>
 );

@@ -1,7 +1,13 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
-import { transactionsListShape, getTotalCost, isSold } from '~client/modules/data';
+import {
+    transactionsListShape,
+    getTotalCost,
+    isSold,
+} from '~client/modules/data';
+
+import * as Styled from './styles';
 
 const formatOptions = {
     abbreviate: true,
@@ -25,10 +31,14 @@ export default function ListRowFundsMobile({ item: { transactions, gain } }) {
     }
 
     return (
-        <span className="cost">
-            <span className="cost-value">{formatCurrency(getTotalCost(transactions), formatOptions)}</span>
-            <span className="actual-value">{actualValueFormatted}</span>
-        </span>
+        <Styled.FundValue>
+            <Styled.Cost className="cost-value">
+                {formatCurrency(getTotalCost(transactions), formatOptions)}
+            </Styled.Cost>
+            <Styled.Value className="actual-value">
+                {actualValueFormatted}
+            </Styled.Value>
+        </Styled.FundValue>
     );
 }
 

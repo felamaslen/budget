@@ -20,7 +20,7 @@ const getContainer = memoize((customProps = {}) => {
     return render(<ListHeadDesktop {...props} />);
 });
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.tagName, 'DIV');
@@ -30,22 +30,15 @@ test('basic structure', (t) => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 7);
-    t.is(div.className, 'list-head noselect');
 });
 
-test('column headings', (t) => {
+test('column headings', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
-    [0, 1, 2, 3, 4].forEach((key) => t.is(div.childNodes[key].tagName, 'SPAN'));
+    [0, 1, 2, 3, 4].forEach(key => t.is(div.childNodes[key].tagName, 'SPAN'));
 
     const [date, item, category, cost, shop] = div.childNodes;
-
-    t.is(date.className, 'date');
-    t.is(item.className, 'item');
-    t.is(category.className, 'category');
-    t.is(cost.className, 'cost');
-    t.is(shop.className, 'shop');
 
     t.is(date.innerHTML, 'date');
     t.is(item.innerHTML, 'item');
@@ -54,7 +47,7 @@ test('column headings', (t) => {
     t.is(shop.innerHTML, 'shop');
 });
 
-test('daily column', (t) => {
+test('daily column', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -66,26 +59,22 @@ test('daily column', (t) => {
     const [main, weekly, value] = daily.childNodes;
 
     t.is(main.tagName, 'SPAN');
-    t.is(main.className, 'daily-value');
     t.is(main.innerHTML, 'Daily |');
 
     t.is(weekly.tagName, 'SPAN');
-    t.is(weekly.className, 'weekly');
     t.is(weekly.innerHTML, 'Weekly:');
 
     t.is(value.tagName, 'SPAN');
-    t.is(value.className, 'weekly-value');
     t.is(value.innerHTML, '£1.00');
 });
 
-test('total column', (t) => {
+test('total column', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
     const [, , , , , , total] = div.childNodes;
 
     t.is(total.tagName, 'DIV');
-    t.is(total.className, 'total-outer');
 
     t.is(total.childNodes.length, 2);
 
@@ -95,6 +84,5 @@ test('total column', (t) => {
     t.is(text.innerHTML, 'Total:');
 
     t.is(value.tagName, 'SPAN');
-    t.is(value.className, 'total-value');
     t.is(value.innerHTML, '£4.00');
 });

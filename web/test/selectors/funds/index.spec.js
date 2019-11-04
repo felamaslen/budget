@@ -10,76 +10,97 @@ import {
 } from '~client/selectors/funds';
 import { getTransactionsList } from '~client/modules/data';
 
-test('getFundsCachedValueAgeText returns the expected string', (t) => {
+test('getFundsCachedValueAgeText returns the expected string', t => {
     const now = DateTime.fromISO('2018-06-03');
 
-    t.is(getFundsCachedValueAgeText(now.ts / 1000 - 4000, [0, 100, 400], now), '1 hour ago');
+    t.is(
+        getFundsCachedValueAgeText(now.ts / 1000 - 4000, [0, 100, 400], now),
+        '1 hour ago',
+    );
 });
 
-test('getFundsCachedValueAgeText uses only one unit', (t) => {
+test('getFundsCachedValueAgeText uses only one unit', t => {
     const now = DateTime.fromISO('2018-06-03');
 
-    t.is(getFundsCachedValueAgeText(now.ts / 1000 - 86400 - 3600 * 5.4, [0, 100, 400], now), '1 day ago');
+    t.is(
+        getFundsCachedValueAgeText(
+            now.ts / 1000 - 86400 - 3600 * 5.4,
+            [0, 100, 400],
+            now,
+        ),
+        '1 day ago',
+    );
 });
 
-test('getFundsCachedValue gets an age text and value', (t) => {
+test('getFundsCachedValue gets an age text and value', t => {
     const expectedValue = 399098.2;
     const expectedAgeText = '7 months ago';
 
-    t.deepEqual(getFundsCachedValue(state), { value: expectedValue, ageText: expectedAgeText });
-});
-
-test('getFundsCachedValue returns a default value if there are no data', (t) => {
-    t.deepEqual(getFundsCachedValue({
-        ...state,
-        funds: {
-            ...state.funds,
-            cache: null,
-        },
-    }), {
-        value: 0,
-        ageText: '',
+    t.deepEqual(getFundsCachedValue(state), {
+        value: expectedValue,
+        ageText: expectedAgeText,
     });
 });
 
-test('getFundsCachedValue skips funds without price data', (t) => {
-    t.deepEqual(getFundsCachedValue({
-        ...state,
-        funds: {
-            ...state.funds,
-            items: [
-                ...state.funds.items,
-                {
-                    item: 'new fund',
-                    transactions: getTransactionsList([
-                        { date: '2019-07-23', units: 13, cost: 12 },
-                    ]),
-                },
-            ],
+test('getFundsCachedValue returns a default value if there are no data', t => {
+    t.deepEqual(
+        getFundsCachedValue({
+            ...state,
+            funds: {
+                ...state.funds,
+                cache: null,
+            },
+        }),
+        {
+            value: 0,
+            ageText: '',
         },
-    }), {
-        value: 399098.2,
-        ageText: '7 months ago',
-    });
+    );
 });
 
-test('getFundsCost gets the total fund cost, excluding sold funds', (t) => {
+test('getFundsCachedValue skips funds without price data', t => {
+    t.deepEqual(
+        getFundsCachedValue({
+            ...state,
+            funds: {
+                ...state.funds,
+                items: [
+                    ...state.funds.items,
+                    {
+                        item: 'new fund',
+                        transactions: getTransactionsList([
+                            { date: '2019-07-23', units: 13, cost: 12 },
+                        ]),
+                    },
+                ],
+            },
+        }),
+        {
+            value: 399098.2,
+            ageText: '7 months ago',
+        },
+    );
+});
+
+test('getFundsCost gets the total fund cost, excluding sold funds', t => {
     t.is(getFundsCost(state), 400000);
 });
 
-test('getProcessedFundsRows sets gain, prices, sold and class information on each fund row', (t) => {
+test('getProcessedFundsRows sets gain, prices, sold and class information on each fund row', t => {
     const result = getProcessedFundsRows(state);
 
     t.true(Array.isArray(result));
     t.is(result.length, 4);
 
-    const { cols: cols10, prices: prices10, ...rest10 } = result.find(({ id }) => id === '10');
+    const { cols: cols10, prices: prices10, ...rest10 } = result.find(
+        ({ id }) => id === '10',
+    );
 
     t.deepEqual(rest10, {
         id: '10',
         item: 'some fund 1',
         transactions: state.funds.items[0].transactions,
-        className: '',
+        small: false,
         sold: false,
         gain: {
             color: [255, 250, 250],
@@ -91,13 +112,15 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
         },
     });
 
-    const { cols: cols1, prices: prices1, ...rest1 } = result.find(({ id }) => id === '1');
+    const { cols: cols1, prices: prices1, ...rest1 } = result.find(
+        ({ id }) => id === '1',
+    );
 
     t.deepEqual(rest1, {
         id: '1',
         item: 'some fund 3',
         transactions: state.funds.items[2].transactions,
-        className: 'sold',
+        small: true,
         sold: true,
         gain: {
             color: [255, 44, 44],

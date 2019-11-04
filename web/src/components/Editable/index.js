@@ -9,12 +9,14 @@ import FormFieldDate from '~client/components/FormField/date';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldTransactions from '~client/components/FormField/transactions';
 
+import * as Styled from './styles';
 import './style.scss';
 
-function EditableField({
-    id, item, onChange, ...rest
-}) {
-    const onChangeCallback = useCallback((value) => onChange(item, value), [onChange, item]);
+function EditableField({ id, item, onChange, ...rest }) {
+    const onChangeCallback = useCallback(value => onChange(item, value), [
+        onChange,
+        item,
+    ]);
 
     const props = { ...rest, onChange: onChangeCallback };
 
@@ -38,7 +40,12 @@ EditableField.propTypes = {
 };
 
 export default function Editable({
-    page, id, active, item, onSuggestion, ...props
+    page,
+    id,
+    active,
+    item,
+    onSuggestion,
+    ...props
 }) {
     const [typed, onType] = useState('');
     useEffect(() => {
@@ -47,17 +54,22 @@ export default function Editable({
         }
     }, [active]);
 
-    const showSuggestions = Boolean(active
-        && typed.length
-        && PAGES_SUGGESTIONS.includes(page)
-        && PAGES[page].suggestions
-        && PAGES[page].suggestions.includes(item));
+    const showSuggestions = Boolean(
+        active &&
+            typed.length &&
+            PAGES_SUGGESTIONS.includes(page) &&
+            PAGES[page].suggestions &&
+            PAGES[page].suggestions.includes(item),
+    );
 
     return (
-        <span className={classNames('editable', `editable-${item}`, {
-            'editable-active': active,
-            'editable-inactive': !active,
-        })}>
+        <Styled.Editable
+            active={active}
+            className={classNames('editable', `editable-${item}`, {
+                'editable-active': active,
+                'editable-inactive': !active,
+            })}
+        >
             <EditableField
                 id={id}
                 active={active}
@@ -73,7 +85,7 @@ export default function Editable({
                     onConfirm={onSuggestion}
                 />
             )}
-        </span>
+        </Styled.Editable>
     );
 }
 

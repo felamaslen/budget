@@ -35,7 +35,6 @@ export default function LineGraph({
     maxY,
     outerProperties,
     svgProperties,
-    svgClasses,
     isMobile,
     hoverEffect,
     zoomEffect,
@@ -99,7 +98,6 @@ export default function LineGraph({
         graphRef,
         outerProperties: outerPropertiesProc,
         svgProperties,
-        svgClasses,
     };
 
     return <LineGraphDumb {...graphProps} />;
@@ -122,7 +120,6 @@ LineGraph.propTypes = {
     }),
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
-    svgClasses: PropTypes.string,
     zoomEffect: PropTypes.func,
 };
 

@@ -6,8 +6,6 @@ $item-height-mobile: $itemHeightMobile + 0px;
 $item-height-desktop: $itemHeightDesktop + 0px;
 
 .page-list {
-    flex: 1 1 0;
-
     &-main {
         &,
         .crud-list {

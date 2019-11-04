@@ -13,21 +13,46 @@ export const itemHeightMobile = 30;
 export const graphOverviewHeightMobile = 240;
 export const graphFundsHeightMobile = 125;
 
+export const downArrow = "'\\25be'";
+export const upArrow = "'\\25b4'";
+
 const colorDark = rgb(34, 34, 34);
 const colorLight = rgb(234, 234, 234);
 
 export const colors = {
     dark: colorDark,
+    'very-dark': rgb(17, 17, 17),
+    'very-dark-1': rgb(24, 24, 24),
+    'medium-very-light': rgb(153, 153, 153),
+    'medium-light': rgb(134, 134, 134),
+    'medium-slightly-dark': rgb(102, 102, 102),
+    'slightly-dark': rgb(51, 51, 51),
     light: colorLight,
+    'shadow-l05': rgba(0, 0, 0, 0.05),
     'shadow-l2': rgba(0, 0, 0, 0.2),
     'shadow-l3': rgba(0, 0, 0, 0.3),
     'shadow-l4': rgba(0, 0, 0, 0.4),
     'shadow-l6': rgba(0, 0, 0, 0.6),
     'translucent-l2': rgba(255, 255, 255, 0.2),
     'translucent-l6': rgba(255, 255, 255, 0.6),
+    'translucent-l7': rgba(255, 255, 255, 0.7),
+    'translucent-l8': rgba(255, 255, 255, 0.8),
     highlight: rgba(255, 255, 0, 0.85),
     'highlight-light': rgb(255, 252, 218),
+    white: rgb(255, 255, 255),
     blue: rgb(0, 153, 238),
+    profit: rgb(72, 59, 228),
+    'profit-light': rgb(204, 255, 213),
+    'profit-translucent': rgba(100, 255, 100, 0.7),
+    loss: rgb(255, 44, 44),
+    'loss-light': rgb(255, 167, 167),
+    'loss-translucent': rgba(255, 100, 100, 0.7),
+    'bg-up': rgb(85, 232, 54),
+    'bg-up-hl': rgb(18, 45, 12),
+    'bg-up-rev': rgb(51, 44, 44),
+    'bg-down': rgb(255, 23, 23),
+    'bg-down-hl': rgb(47, 15, 15),
+    'bg-down-rev': rgb(44, 51, 45),
     overview: {
         main: rgb(66, 66, 66),
     },

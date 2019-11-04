@@ -16,14 +16,13 @@ const getContainer = (customProps = {}, ...args) => {
     return render(<FormFieldTickbox {...props} />, ...args);
 };
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'form-field form-field-my-tickbox');
     t.is(div.childNodes.length, 1);
 
     const [input] = div.childNodes;
@@ -33,7 +32,7 @@ test('basic structure', (t) => {
     t.true(input.checked);
 });
 
-test('handling onchange', (t) => {
+test('handling onchange', t => {
     const onChange = sinon.stub();
     const { container } = getContainer({ onChange });
 

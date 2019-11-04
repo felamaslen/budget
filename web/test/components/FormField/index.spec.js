@@ -18,17 +18,16 @@ const getFormFieldText = (customProps = {}) => {
     return render(<FormFieldText {...props} />);
 };
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getFormFieldText();
 
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 1);
-    t.is(div.className, 'form-field form-field-text');
 });
 
-test('input', (t) => {
+test('input', t => {
     const { container } = getFormFieldText();
     const [div] = container.childNodes;
 
@@ -39,7 +38,7 @@ test('input', (t) => {
     t.is(input.value, 'foo');
 });
 
-test('changing value', (t) => {
+test('changing value', t => {
     const onChange = t.context.stub();
     const { container } = getFormFieldText({ onChange });
 
@@ -56,7 +55,7 @@ test('changing value', (t) => {
     t.deepEqual(onChange.calls[0].arguments, ['bar']);
 });
 
-test('handling onType', (t) => {
+test('handling onType', t => {
     const onType = t.context.stub();
 
     const { container } = getFormFieldText({ onType });

@@ -1,6 +1,4 @@
-import React, {
-    useState, useRef, useEffect, useCallback,
-} from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import memoize from 'fast-memoize';
 import compose from 'just-compose';
 import PropTypes from 'prop-types';
@@ -11,24 +9,33 @@ import { IDENTITY, fieldExists } from '~client/modules/data';
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { ADD_BTN } from '~client/hooks/nav';
 
-const withInitialValue = (column, initialValue) => (page) => {
+import * as Styled from './styles';
+
+const withInitialValue = (column, initialValue) => page => {
     if (!PAGES[page].cols.includes(column)) {
         return IDENTITY;
     }
 
-    return (values) => ({ ...values, [column]: initialValue() });
+    return values => ({ ...values, [column]: initialValue() });
 };
 
 const withDate = withInitialValue('date', DateTime.local);
-const withTransactions = withInitialValue('transactions', () => ([]));
+const withTransactions = withInitialValue('transactions', () => []);
 
-const initialValues = memoize((page) => compose(
-    withDate(page),
-    withTransactions(page),
-)(PAGES[page].cols.reduce((last, col) => ({
-    ...last,
-    [col]: undefined,
-}), { id: CREATE_ID })));
+const initialValues = memoize(page =>
+    compose(
+        withDate(page),
+        withTransactions(page),
+    )(
+        PAGES[page].cols.reduce(
+            (last, col) => ({
+                ...last,
+                [col]: undefined,
+            }),
+            { id: CREATE_ID },
+        ),
+    ),
+);
 
 export default function ListCreateDesktop({
     page,
@@ -58,14 +65,17 @@ export default function ListCreateDesktop({
 
     const [values, setValues] = useState(initialValues(page));
 
-    const onUpdate = useCallback((column, value) => setValues((last) => ({ ...last, [column]: value })), []);
+    const onUpdate = useCallback(
+        (column, value) => setValues(last => ({ ...last, [column]: value })),
+        [],
+    );
 
     const onAddPre = useCallback(() => {
         setActive(CREATE_ID, null);
     }, [setActive]);
 
     const onAdd = useCallback(() => {
-        if (!Object.keys(values).every((key) => fieldExists(values[key]))) {
+        if (!Object.keys(values).every(key => fieldExists(values[key]))) {
             return;
         }
 
@@ -75,7 +85,7 @@ export default function ListCreateDesktop({
     }, [onCreate, setActive, page, values]);
 
     return (
-        <div className="list-row-desktop list-row-desktop-create">
+        <Styled.RowCreate className="list-row-desktop list-row-desktop-create">
             <ListRowDesktopBase
                 item={values}
                 page={page}
@@ -85,15 +95,17 @@ export default function ListCreateDesktop({
                 setCommand={setCommand}
                 onUpdate={onUpdate}
             />
-            <span className="add-button-outer">
+            <Styled.AddButtonOuter className="add-button-outer">
                 <button
                     ref={addBtn}
                     aria-label="add-button"
                     onMouseDown={onAddPre}
                     onClick={onAdd}
-                >{'Add'}</button>
-            </span>
-        </div>
+                >
+                    {'Add'}
+                </button>
+            </Styled.AddButtonOuter>
+        </Styled.RowCreate>
     );
 }
 

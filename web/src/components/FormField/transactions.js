@@ -15,47 +15,62 @@ import {
 } from '~client/modules/data';
 import { CREATE_ID } from '~client/constants/data';
 
-function FormFieldTransaction({
-    item, children, onChange, active,
-}) {
-    const onChangeDate = useCallback((value) => onChange(item.id, 'date', value), [onChange, item.id]);
-    const onChangeUnits = useCallback((value) => onChange(item.id, 'units', value), [onChange, item.id]);
-    const onChangeCost = useCallback((value) => onChange(item.id, 'cost', value), [onChange, item.id]);
+import * as Styled from './styles';
+
+function FormFieldTransaction({ item, children, onChange, active }) {
+    const onChangeDate = useCallback(
+        value => onChange(item.id, 'date', value),
+        [onChange, item.id],
+    );
+    const onChangeUnits = useCallback(
+        value => onChange(item.id, 'units', value),
+        [onChange, item.id],
+    );
+    const onChangeCost = useCallback(
+        value => onChange(item.id, 'cost', value),
+        [onChange, item.id],
+    );
 
     return (
-        <li className="transactions-list-item">
-            <span className="row date">
-                <span className="col label">{'Date:'}</span>
-                <span className="col">
+        <Styled.TransactionsListItem className="transactions-list-item">
+            <Styled.TransactionRowDate className="row date">
+                <Styled.TransactionLabel className="col label">
+                    {'Date:'}
+                </Styled.TransactionLabel>
+                <Styled.TransactionCol className="col">
                     <FormFieldDate
                         value={item.date}
                         onChange={onChangeDate}
                         active={active}
                     />
-                </span>
-            </span>
-            <span className="row units">
-                <span className="col label">{'Units:'}</span>
-                <span className="col">
+                </Styled.TransactionCol>
+            </Styled.TransactionRowDate>
+            <Styled.TransactionRowUnits className="row units">
+                <Styled.TransactionLabel className="col label">
+                    {'Units:'}
+                </Styled.TransactionLabel>
+                <Styled.TransactionCol className="col">
                     <FormFieldNumber
                         value={item.units}
                         onChange={onChangeUnits}
                         active={active}
                     />
-                </span>
-            </span>
-            <span className="row cost">
-                <span className="col label">{'Cost:'}</span>
-                <span className="col">
+                </Styled.TransactionCol>
+            </Styled.TransactionRowUnits>
+            <Styled.TransactionRowCost className="row cost">
+                <Styled.TransactionLabel className="col label">
+                    {'Cost:'}
+                </Styled.TransactionLabel>
+                <Styled.TransactionCol className="col">
                     <FormFieldCost
                         value={item.cost}
                         onChange={onChangeCost}
                         active={active}
                     />
-                </span>
-            </span>
+                </Styled.TransactionCol>
+            </Styled.TransactionRowCost>
             {children}
-        </li>
+        </Styled.TransactionsListItem>
     );
 }
 
@@ -74,28 +89,47 @@ const newItemInit = {
 };
 
 function FormFieldTransactions({ create, ...props }) {
-    const [currentValue, , onChangeInput] = useField({ ...props, string: true });
+    const [currentValue, , onChangeInput] = useField({
+        ...props,
+        string: true,
+    });
 
-    const onChange = useCallback((value) => onChangeInput({
-        target: { value },
-    }), [onChangeInput]);
+    const onChange = useCallback(
+        value =>
+            onChangeInput({
+                target: { value },
+            }),
+        [onChangeInput],
+    );
 
     const { value, active } = props;
 
-    const onChangeTransaction = useCallback((id, field, fieldValue) => onChange(modifyTransactionById(value, id, {
-        [field]: fieldValue,
-    })), [value, onChange]);
+    const onChangeTransaction = useCallback(
+        (id, field, fieldValue) =>
+            onChange(
+                modifyTransactionById(value, id, {
+                    [field]: fieldValue,
+                }),
+            ),
+        [value, onChange],
+    );
 
-    const onRemoveTransaction = useCallback((id) => onChange(
-        currentValue.filter(({ id: valueId }) => valueId !== id),
-    ), [currentValue, onChange]);
+    const onRemoveTransaction = useCallback(
+        id =>
+            onChange(currentValue.filter(({ id: valueId }) => valueId !== id)),
+        [currentValue, onChange],
+    );
 
     const [newItem, setNewItem] = useState(newItemInit);
 
-    const onChangeAddField = useCallback((id, field, fieldValue) => setNewItem((last) => ({
-        ...last,
-        [field]: fieldValue,
-    })), []);
+    const onChangeAddField = useCallback(
+        (id, field, fieldValue) =>
+            setNewItem(last => ({
+                ...last,
+                [field]: fieldValue,
+            })),
+        [],
+    );
 
     const onAdd = useCallback(() => {
         if (!newItem) {
@@ -108,44 +142,64 @@ function FormFieldTransactions({ create, ...props }) {
 
     return (
         <Wrapper item="transactions" value={value} active={active}>
-            <span className="num-transactions">{(value || []).length}</span>
-            {currentValue && active && <div className="modal">
-                <div className="modal-inner">
-                    {create && (
-                        <div className="modal-head">
-                            <span className="col label date">{'Date'}</span>
-                            <span className="col label units">{'Units'}</span>
-                            <span className="col label cost">{'Cost'}</span>
-                        </div>
-                    )}
-                    <ul className="transactions-list">
+            <Styled.NumTransactions
+                active={active}
+                className="num-transactions"
+            >
+                {(value || []).length}
+            </Styled.NumTransactions>
+            {currentValue && active && (
+                <Styled.TransactionsModal className="modal">
+                    <Styled.ModalInner className="modal-inner">
                         {create && (
-                            <FormFieldTransaction
-                                item={newItem}
-                                onChange={onChangeAddField}
-                            >
-                                <span className="row button">
-                                    <button onClick={onAdd}>{'+'}</button>
-                                </span>
-                            </FormFieldTransaction>
+                            <Styled.ModalHead>
+                                <Styled.ModalHeadDate className="label">
+                                    {'Date'}
+                                </Styled.ModalHeadDate>
+                                <Styled.ModalHeadUnits className="label">
+                                    {'Units'}
+                                </Styled.ModalHeadUnits>
+                                <Styled.ModalHeadCost className="label">
+                                    {'Cost'}
+                                </Styled.ModalHeadCost>
+                            </Styled.ModalHead>
                         )}
-                        {currentValue.map((item) => (
-                            <FormFieldTransaction key={item.id}
-                                item={item}
-                                active={active}
-                                onChange={onChangeTransaction}
-                                onRemove={onRemoveTransaction}
-                            >
-                                {create && <span className="row button">
-                                    <button onClick={() => onRemoveTransaction(item.id)}>
-                                        &minus;
-                                    </button>
-                                </span>}
-                            </FormFieldTransaction>
-                        ))}
-                    </ul>
-                </div>
-            </div>}
+                        <Styled.TransactionsList className="transactions-list">
+                            {create && (
+                                <FormFieldTransaction
+                                    item={newItem}
+                                    onChange={onChangeAddField}
+                                >
+                                    <Styled.TransactionRowButton className="row button">
+                                        <button onClick={onAdd}>{'+'}</button>
+                                    </Styled.TransactionRowButton>
+                                </FormFieldTransaction>
+                            )}
+                            {currentValue.map(item => (
+                                <FormFieldTransaction
+                                    key={item.id}
+                                    item={item}
+                                    active={active}
+                                    onChange={onChangeTransaction}
+                                    onRemove={onRemoveTransaction}
+                                >
+                                    {create && (
+                                        <span className="row button">
+                                            <button
+                                                onClick={() =>
+                                                    onRemoveTransaction(item.id)
+                                                }
+                                            >
+                                                &minus;
+                                            </button>
+                                        </span>
+                                    )}
+                                </FormFieldTransaction>
+                            ))}
+                        </Styled.TransactionsList>
+                    </Styled.ModalInner>
+                </Styled.TransactionsModal>
+            )}
         </Wrapper>
     );
 }

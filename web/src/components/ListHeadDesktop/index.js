@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
 import { PAGES } from '~client/constants/data';
 
+import * as Styled from './styles';
+
 export default function ListHeadDesktop({
     page,
     weeklyValue,
@@ -17,9 +19,11 @@ export default function ListHeadDesktop({
     });
 
     return (
-        <div className="list-head noselect">
+        <Styled.ListHead className="list-head">
             {PAGES[page].cols.map((column, key) => (
-                <span key={key} className={column}>{column}</span>
+                <span key={key} className={column}>
+                    {column}
+                </span>
             ))}
             {getDaily && (
                 <span className="daily">
@@ -28,17 +32,20 @@ export default function ListHeadDesktop({
                     <span className="weekly-value">{weeklyValueFormatted}</span>
                 </span>
             )}
-            {TotalValue
-                ? <TotalValue totalCost={totalCost} {...extraProps} />
-                : <div className="total-outer">
+            {TotalValue ? (
+                <TotalValue totalCost={totalCost} {...extraProps} />
+            ) : (
+                <div className="total-outer">
                     <span className="total">{'Total:'}</span>
-                    <span className="total-value">{formatCurrency(totalCost, {
-                        abbreviate: true,
-                        precision: 1,
-                    })}</span>
+                    <span className="total-value">
+                        {formatCurrency(totalCost, {
+                            abbreviate: true,
+                            precision: 1,
+                        })}
+                    </span>
                 </div>
-            }
-        </div>
+            )}
+        </Styled.ListHead>
     );
 }
 
