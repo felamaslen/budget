@@ -9,49 +9,49 @@ import LoginForm from '~client/containers/LoginForm';
 import { loginRequested } from '~client/actions/login';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = memoize((customProps = {}, customState = (state) => state) => {
-    const state = customState({
-        ...testState,
-        login: {
-            uid: null,
-            name: null,
-            initialised: true,
-            loading: false,
-        },
-    });
+const getContainer = memoize(
+    (customProps = {}, customState = state => state) => {
+        const state = customState({
+            ...testState,
+            login: {
+                uid: null,
+                name: null,
+                initialised: true,
+                loading: false,
+            },
+        });
 
-    const store = createMockStore(state);
+        const store = createMockStore(state);
 
-    const props = {
-        ...customProps,
-    };
+        const props = {
+            ...customProps,
+        };
 
-    const utils = render(
-        <Provider store={store}>
-            <LoginForm {...props} />
-        </Provider>,
-    );
+        const utils = render(
+            <Provider store={store}>
+                <LoginForm {...props} />
+            </Provider>,
+        );
 
-    return { store, ...utils };
-});
+        return { store, ...utils };
+    },
+);
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'login-form');
     t.is(div.childNodes.length, 1);
 
     const [inner] = div.childNodes;
     t.is(inner.tagName, 'DIV');
-    t.is(inner.className, 'login-form-inner');
     t.is(inner.childNodes.length, 3);
 });
 
-test('title', (t) => {
+test('title', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [inner] = div.childNodes;
@@ -62,7 +62,7 @@ test('title', (t) => {
     t.is(title.innerHTML, 'Enter your PIN:');
 });
 
-test('pin display', (t) => {
+test('pin display', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [inner] = div.childNodes;
@@ -70,10 +70,9 @@ test('pin display', (t) => {
     const [, pinDisplay] = inner.childNodes;
 
     t.is(pinDisplay.tagName, 'DIV');
-    t.is(pinDisplay.className, 'pin-display');
 });
 
-test('number input pad', (t) => {
+test('number input pad', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [inner] = div.childNodes;
@@ -81,10 +80,9 @@ test('number input pad', (t) => {
     const [, , pad] = inner.childNodes;
 
     t.is(pad.tagName, 'DIV');
-    t.is(pad.className, 'number-input noselect');
 });
 
-test('listening to input events', (t) => {
+test('listening to input events', t => {
     const { store } = getContainer();
 
     const action = loginRequested(1234);
@@ -106,8 +104,8 @@ test('listening to input events', (t) => {
     t.true(store.isActionDispatched(action));
 });
 
-test('doesn\'t render when the state isn\'t initialised', (t) => {
-    const { container } = getContainer({}, (state) => ({
+test("doesn't render when the state isn't initialised", t => {
+    const { container } = getContainer({}, state => ({
         ...state,
         login: { ...state.login, initialised: false },
     }));
