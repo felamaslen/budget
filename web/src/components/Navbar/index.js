@@ -1,29 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { NavLink } from 'react-router-dom';
 
 import { PAGES } from '~client/constants/data';
 
 import * as Styled from './styles';
-import './style.scss';
 
 const Navbar = ({ onLogout }) => (
     <Styled.NavList className="nav-list">
         {Object.keys(PAGES).map(page => (
-            <NavLink
+            <Styled.Link
                 key={page}
                 exact
                 to={PAGES[page].path || `/${page}`}
                 activeClassName="active"
+                page={page}
                 className={classNames('nav-link', `nav-link-${page}`)}
             >
                 {page}
-            </NavLink>
+            </Styled.Link>
         ))}
-        <a className="nav-link nav-link-logout" onClick={onLogout}>
+        <Styled.Link as="a" page="logout" onClick={onLogout}>
             {'Log out'}
-        </a>
+        </Styled.Link>
     </Styled.NavList>
 );
 

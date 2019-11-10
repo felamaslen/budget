@@ -20,6 +20,12 @@ const colorDark = rgb(34, 34, 34);
 const colorLight = rgb(234, 234, 234);
 
 export const colors = {
+    primary: rgb(216, 77, 77),
+    primaryDark: rgb(159, 48, 48),
+    primaryMobile: rgb(255, 254, 247),
+    primaryDarkMobile: rgb(159, 48, 48),
+    amber: rgb(251, 224, 127),
+    accent: rgb(255, 160, 64),
     dark: colorDark,
     'very-dark': rgb(17, 17, 17),
     'very-dark-1': rgb(24, 24, 24),
@@ -40,6 +46,7 @@ export const colors = {
     highlight: rgba(255, 255, 0, 0.85),
     'highlight-light': rgb(255, 252, 218),
     white: rgb(255, 255, 255),
+    black: rgb(0, 0, 0),
     blue: rgb(0, 153, 238),
     profit: rgb(72, 59, 228),
     'profit-light': rgb(204, 255, 213),
@@ -111,4 +118,15 @@ export const colors = {
     blockColor: {
         saved: rgb(17, 56, 34),
     },
+};
+
+const heightHeaderMobile = 55;
+const heightNavMobile = 36;
+
+export const sizes = {
+    heightHeaderMobile,
+    heightNavMobile,
+    navbarHeight: 49,
+    navbarHeightMobile: heightHeaderMobile + heightNavMobile,
+    logo: 30,
 };
