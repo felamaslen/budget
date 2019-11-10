@@ -1,63 +1,40 @@
-/*
- * React component to display error messages
- */
-
-import './style.scss';
 import { connect } from 'react-redux';
-import React, { useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR } from '~client/constants/error';
 import { errorClosed } from '~client/actions/error';
 
-const messageShape = PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    level: PropTypes.number.isRequired,
-}).isRequired;
-
-function Message({
-    id, closed, message: { text, level }, onClose,
-}) {
-    const onCloseCallback = useCallback(() => onClose(id), [onClose, id]);
-
-    return (
-        <li
-            className={classNames('message', {
-                debug: level === ERROR_LEVEL_DEBUG,
-                warn: level === ERROR_LEVEL_WARN,
-                error: level === ERROR_LEVEL_ERROR,
-                closed,
-            })}
-            onClick={onCloseCallback}
-        >
-            <span>{text}</span>
-        </li>
-    );
-}
-
-Message.propTypes = {
-    id: PropTypes.string.isRequired,
-    closed: PropTypes.bool,
-    message: messageShape,
-    onClose: PropTypes.func.isRequired,
-};
+import * as Styled from './styles';
 
 const ErrorMessages = ({ list, onClose }) => (
-    <ul className="messages-outer">
-        {list.map((error) => <Message key={error.id} {...error} onClose={onClose} />)}
-    </ul>
+    <Styled.MessageList>
+        {list.map(({ id, closed, message: { text, level } }) => (
+            <Styled.Message
+                key={id}
+                level={level}
+                closed={closed}
+                onClick={() => onClose(id)}
+            >
+                <span>{text}</span>
+            </Styled.Message>
+        ))}
+    </Styled.MessageList>
 );
 
 ErrorMessages.propTypes = {
-    list: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        closed: PropTypes.bool,
-        message: messageShape,
-    }).isRequired).isRequired,
+    list: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            closed: PropTypes.bool,
+            message: PropTypes.shape({
+                text: PropTypes.string.isRequired,
+                level: PropTypes.number.isRequired,
+            }).isRequired,
+        }).isRequired,
+    ).isRequired,
     onClose: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     list: state.error,
 });
 
@@ -65,4 +42,7 @@ const mapDispatchToProps = {
     onClose: errorClosed,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ErrorMessages);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(ErrorMessages);

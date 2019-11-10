@@ -11,8 +11,16 @@ import { errorClosed } from '~client/actions/error';
 const getContainer = (customProps = {}) => {
     const state = {
         error: [
-            { id: 'f1101', message: { level: ERROR_LEVEL_ERROR, text: 'foo' }, closed: false },
-            { id: 'g1923', message: { level: ERROR_LEVEL_WARN, text: 'bar' }, closed: true },
+            {
+                id: 'f1101',
+                message: { level: ERROR_LEVEL_ERROR, text: 'foo' },
+                closed: false,
+            },
+            {
+                id: 'g1923',
+                message: { level: ERROR_LEVEL_WARN, text: 'bar' },
+                closed: true,
+            },
         ],
     };
 
@@ -34,17 +42,16 @@ const getContainer = (customProps = {}) => {
     return { store, ...utils };
 };
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [ul] = container.childNodes;
     t.is(ul.tagName, 'UL');
-    t.is(ul.className, 'messages-outer');
     t.is(ul.childNodes.length, 2);
 });
 
-test('each message', (t) => {
+test('each message', t => {
     const { container } = getContainer();
 
     const [ul] = container.childNodes;
@@ -52,7 +59,6 @@ test('each message', (t) => {
     const [li0, li1] = ul.childNodes;
 
     t.is(li0.tagName, 'LI');
-    t.is(li0.className, 'message error');
     t.is(li0.childNodes.length, 1);
 
     const [span0] = li0.childNodes;
@@ -60,14 +66,13 @@ test('each message', (t) => {
     t.is(span0.innerHTML, 'foo');
 
     t.is(li1.tagName, 'LI');
-    t.is(li1.className, 'message warn closed');
 
     const [span1] = li1.childNodes;
     t.is(span1.tagName, 'SPAN');
     t.is(span1.innerHTML, 'bar');
 });
 
-test('closing messages when clicking them', (t) => {
+test('closing messages when clicking them', t => {
     const { container, store } = getContainer();
 
     t.false(store.isActionDispatched(errorClosed('f1101')));
