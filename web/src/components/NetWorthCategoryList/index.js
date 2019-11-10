@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { Button } from '~client/styled/shared/button';
 import CrudList from '~client/components/CrudList';
 import FormFieldText from '~client/components/FormField';
 import FormFieldSelect from '~client/components/FormField/select';
@@ -13,6 +14,7 @@ import {
 } from '~client/prop-types/net-worth/category';
 import { CREATE_ID } from '~client/constants/data';
 
+import * as Styled from './styles';
 import './style.scss';
 
 const typeOptions = [
@@ -21,9 +23,7 @@ const typeOptions = [
 ];
 
 function NetWorthCategoryItemForm({
-    item: {
-        id, type, category, color,
-    },
+    item: { id, type, category, color },
     onChange,
     buttonText,
 }) {
@@ -31,17 +31,26 @@ function NetWorthCategoryItemForm({
     const [tempCategory, setTempCategory] = useState(category);
     const [tempColor, setTempColor] = useState(color);
 
-    const touched = id === CREATE_ID
-        || !(tempType === type && tempCategory === category && tempColor === color);
+    const touched =
+        id === CREATE_ID ||
+        !(
+            tempType === type &&
+            tempCategory === category &&
+            tempColor === color
+        );
 
-    const onChangeItem = useCallback(() => onChange({
-        type: tempType,
-        category: tempCategory,
-        color: tempColor,
-    }), [onChange, tempType, tempCategory, tempColor]);
+    const onChangeItem = useCallback(
+        () =>
+            onChange({
+                type: tempType,
+                category: tempCategory,
+                color: tempColor,
+            }),
+        [onChange, tempType, tempCategory, tempColor],
+    );
 
     return (
-        <span
+        <Styled.CategoryItemForm
             className={classNames('net-worth-category-item-form', {
                 touched,
                 asset: type === 'asset',
@@ -60,16 +69,15 @@ function NetWorthCategoryItemForm({
                 value={tempCategory}
                 onChange={setTempCategory}
             />
-            <FormFieldColor
-                value={tempColor}
-                onChange={setTempColor}
-            />
-            <button
+            <FormFieldColor value={tempColor} onChange={setTempColor} />
+            <Button
                 disabled={!touched}
                 className="button-change"
                 onClick={onChangeItem}
-            >{buttonText}</button>
-        </span>
+            >
+                {buttonText}
+            </Button>
+        </Styled.CategoryItemForm>
     );
 }
 
@@ -101,30 +109,46 @@ function NetWorthCategoryItem({
     onUpdateSubcategory,
     onDeleteSubcategory,
 }) {
-    const onChange = useCallback((values) => {
-        onUpdate(item.id, values);
-    }, [onUpdate, item.id]);
+    const onChange = useCallback(
+        values => {
+            onUpdate(item.id, values);
+        },
+        [onUpdate, item.id],
+    );
 
-    const categorySubcategories = useMemo(() => subcategories.filter(
-        ({ categoryId }) => categoryId === item.id,
-    ), [item.id, subcategories]);
+    const categorySubcategories = useMemo(
+        () => subcategories.filter(({ categoryId }) => categoryId === item.id),
+        [item.id, subcategories],
+    );
 
-    const parent = useMemo(() => categories.find(
-        ({ id: categoryId }) => categoryId === item.id,
-    ), [item.id, categories]);
+    const parent = useMemo(
+        () => categories.find(({ id: categoryId }) => categoryId === item.id),
+        [item.id, categories],
+    );
 
-    const itemStyle = useMemo(() => ({ ...style, backgroundColor: item.color }),
-        [style, item.color]);
+    const itemStyle = useMemo(
+        () => ({ ...style, backgroundColor: item.color }),
+        [style, item.color],
+    );
 
-    const onExpand = useCallback(() => onExpandToggle(item.id), [onExpandToggle, item.id]);
+    const onExpand = useCallback(() => onExpandToggle(item.id), [
+        onExpandToggle,
+        item.id,
+    ]);
 
     return (
-        <div className={classNames('net-worth-category-item', {
-            expanded: expanded === item.id,
-        })} style={itemStyle}>
+        <div
+            className={classNames('net-worth-category-item', {
+                expanded: expanded === item.id,
+            })}
+            style={itemStyle}
+        >
             <div className="net-worth-category-item-main">
                 <div className="button-toggle-visibility">
-                    <button className="button-toggle-visibility-button" onClick={onExpand} />
+                    <Button
+                        className="button-toggle-visibility-button"
+                        onClick={onExpand}
+                    />
                 </div>
                 <NetWorthCategoryItemForm
                     key="category-form"
@@ -133,20 +157,21 @@ function NetWorthCategoryItem({
                     buttonText="Update"
                 />
                 <div className="button-delete">
-                    <button
-                        className="button-delete-button"
-                        onClick={onDelete}
-                    >&minus;</button>
+                    <Button className="button-delete-button" onClick={onDelete}>
+                        &minus;
+                    </Button>
                 </div>
             </div>
-            {expanded === item.id && <NetWorthSubcategoryList
-                key="subcategory-list"
-                parent={parent}
-                subcategories={categorySubcategories}
-                onCreate={onCreateSubcategory}
-                onUpdate={onUpdateSubcategory}
-                onDelete={onDeleteSubcategory}
-            />}
+            {expanded === item.id && (
+                <NetWorthSubcategoryList
+                    key="subcategory-list"
+                    parent={parent}
+                    subcategories={categorySubcategories}
+                    onCreate={onCreateSubcategory}
+                    onUpdate={onUpdateSubcategory}
+                    onDelete={onDeleteSubcategory}
+                />
+            )}
         </div>
     );
 }
@@ -171,10 +196,7 @@ NetWorthCategoryItem.defaultProps = {
 
 const NetWorthCategoryCreateItem = ({ onCreate }) => (
     <div className="net-worth-category-item">
-        <NetWorthCategoryItemForm
-            onChange={onCreate}
-            buttonText="Create"
-        />
+        <NetWorthCategoryItemForm onChange={onCreate} buttonText="Create" />
     </div>
 );
 
@@ -193,13 +215,17 @@ export default function NetWorthCategoryList({
     onDeleteSubcategory,
 }) {
     const [expanded, setExpanded] = useState(null);
-    const onExpandToggle = useCallback((id) => setExpanded((last) => {
-        if (last === id) {
-            return null;
-        }
+    const onExpandToggle = useCallback(
+        id =>
+            setExpanded(last => {
+                if (last === id) {
+                    return null;
+                }
 
-        return id;
-    }), []);
+                return id;
+            }),
+        [],
+    );
 
     const extraProps = {
         categories,

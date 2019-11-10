@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { Button } from '~client/styled/shared/button';
 import Navigation from '~client/components/NetWorthEditForm/navigation';
 
 export default function FormContainer({
@@ -15,10 +16,10 @@ export default function FormContainer({
 }) {
     return (
         <div className={classNames('net-worth-list-item', className)}>
-            <button className="button-cancel" onClick={onComplete}>{'Cancel'}</button>
-            <div className="net-worth-edit-form-section">
-                {children}
-            </div>
+            <Button className="button-cancel" onClick={onComplete}>
+                {'Cancel'}
+            </Button>
+            <div className="net-worth-edit-form-section">{children}</div>
             <Navigation
                 onPrevStep={onPrevStep}
                 onNextStep={onNextStep}
@@ -34,10 +35,7 @@ FormContainer.defaultProps = {
 };
 
 FormContainer.propTypes = {
-    className: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.object,
-    ]),
+    className: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     item: PropTypes.object.isRequired,
     children: PropTypes.node.isRequired,
     onComplete: PropTypes.func.isRequired,

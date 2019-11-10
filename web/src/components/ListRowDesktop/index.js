@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { NULL_COMMAND, ADD_BTN } from '~client/hooks/nav';
 import { VALUE_SET } from '~client/modules/nav';
+import { Button } from '~client/styled/shared/button';
 import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
 
@@ -132,9 +133,9 @@ function ListRowDesktop({
             />
             {PAGES[page].daily && <DailyText value={item.daily} />}
             <Styled.ButtonDelete className="button-delete">
-                <button className="button-delete-button" onClick={onDelete}>
+                <Button className="button-delete-button" onClick={onDelete}>
                     &minus;
-                </button>
+                </Button>
             </Styled.ButtonDelete>
             {AfterRow && <AfterRow page={page} row={item} />}
         </Styled.RowBody>

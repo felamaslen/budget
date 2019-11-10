@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
+import { Button } from '~client/styled/shared/button';
 import { NetWorthEditForm } from '~client/components/NetWorthEditForm';
 
 import * as Styled from './styles';
@@ -32,9 +33,9 @@ function NetWorthListItem({
                     {item.date.toFormat('dd MMM yy')}
                 </span>
                 <span className="button-delete">
-                    <button className="button-delete-button" onClick={onDelete}>
+                    <Button className="button-delete-button" onClick={onDelete}>
                         &minus;
-                    </button>
+                    </Button>
                 </span>
             </Styled.ItemSummary>
         );

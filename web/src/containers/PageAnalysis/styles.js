@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import { Page as PageBase } from '~client/styled/shared/page';
+import { Button as ButtonBase } from '~client/styled/shared/button';
 import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
-export const Input = styled.span`;
+export const Input = styled.span`
     display: block;
     margin: 0.3em 0;
     text-align: center;
@@ -23,7 +24,7 @@ export const Input = styled.span`;
     }
 `;
 
-export const Button = styled.button`
+export const Button = styled(ButtonBase)`
     margin: 0 0.3em;
     flex-basis: 0;
     flex-grow: 1;
@@ -95,7 +96,9 @@ export const TreeMain = styled.div`
         border-color: transparent;
         border-left-color: black;
 
-        ${({ open }) => open && `
+        ${({ open }) =>
+            open &&
+            `
             border-left-color: transparent;
             border-top-color: black;
             border-width: 8.7px 5px 0 5px;
@@ -109,7 +112,7 @@ export const TreeIndicator = styled.span`
     width: 16px;
     height: 16px;
     margin-left: 14px;
-    background: ${({ name }) => (indicatorColors[name] || 'transparent')};
+    background: ${({ name }) => indicatorColors[name] || 'transparent'};
 `;
 
 export const TreeTitle = styled.span`
@@ -122,8 +125,7 @@ export const TreeValue = styled.span`
     justify-content: flex-end;
 `;
 
-export const TreeListItemInner = styled.div`
-`;
+export const TreeListItemInner = styled.div``;
 
 export const TreeListItem = styled.li`
     display: flex;
@@ -137,7 +139,9 @@ export const TreeListItem = styled.li`
         flex-basis: 0;
     }
 
-    ${({ open }) => open && `
+    ${({ open }) =>
+        open &&
+        `
         & > ${TreeMain}::before {
         }
     `}
@@ -145,10 +149,10 @@ export const TreeListItem = styled.li`
 
 export const TreeListSelected = styled.div`
     &:before {
-        content: "(";
+        content: '(';
     }
     &:after {
-        content: ")";
+        content: ')';
     }
 `;
 
@@ -198,7 +202,7 @@ export const TreeList = styled.ul`
     list-style: none;
     & > ${TreeListItem} {
         position: relative;
-        &:nth-child(2n+1) > ${TreeMain} {
+        &:nth-child(2n + 1) > ${TreeMain} {
             background: ${colors.light};
         }
         & > ${TreeMain} {
@@ -206,20 +210,18 @@ export const TreeList = styled.ul`
             flex-flow: row;
             align-items: center;
             &:before {
-                content: "";
+                content: '';
             }
         }
     }
 
     ${breakpoint(breakpoints.mobile)} {
-        & > ${TreeListItem} > ${TreeMain},
-        ${SubTree} ${TreeListItem} {
+        & > ${TreeListItem} > ${TreeMain}, ${SubTree} ${TreeListItem} {
             &:hover {
                 background: ${colors.blue};
             }
         }
     }
-
 `;
 
 export const Outer = styled.div`
@@ -254,7 +256,6 @@ export const DataItem = styled.span.attrs(({ color }) => ({
     display: block;
     flex-grow: 1;
     height: 100%;
-    background-color: ${({ color }) => color};
 `;
 
 export const Page = styled(PageBase)`
@@ -262,7 +263,6 @@ export const Page = styled(PageBase)`
 
     ${breakpoint(breakpoints.mobile)} {
         flex-flow: column;
-
     }
 
     ${breakpoint(breakpoints.tablet)} {

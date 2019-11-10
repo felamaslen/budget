@@ -14,8 +14,6 @@ import Spinner from '~client/containers/Spinner';
 import LoginForm from '~client/containers/LoginForm';
 import Content from '~client/components/Content';
 
-import './style.scss';
-
 const Root = ({ store, loggedIn, initialLoading }) => (
     <Provider store={store}>
         <Main>
@@ -35,7 +33,7 @@ Root.propTypes = {
     initialLoading: PropTypes.bool.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     loggedIn: getLoggedIn(state),
     initialLoading: state.api.initialLoading,
 });

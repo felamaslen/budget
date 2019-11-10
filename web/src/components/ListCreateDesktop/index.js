@@ -4,6 +4,7 @@ import compose from 'just-compose';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
+import { Button } from '~client/styled/shared/button';
 import { ListRowDesktopBase } from '~client/components/ListRowDesktop';
 import { IDENTITY, fieldExists } from '~client/modules/data';
 import { PAGES, CREATE_ID } from '~client/constants/data';
@@ -96,14 +97,14 @@ export default function ListCreateDesktop({
                 onUpdate={onUpdate}
             />
             <Styled.AddButtonOuter className="add-button-outer">
-                <button
+                <Button
                     ref={addBtn}
                     aria-label="add-button"
                     onMouseDown={onAddPre}
                     onClick={onAdd}
                 >
                     {'Add'}
-                </button>
+                </Button>
             </Styled.AddButtonOuter>
         </Styled.RowCreate>
     );
