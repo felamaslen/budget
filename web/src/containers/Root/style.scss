@@ -2,10 +2,6 @@
 @import '~client/sass/variables.scss';
 @import '~client/sass/mixins.scss';
 
-.noselect {
-    @include noselect;
-}
-
 button {
     display: flex;
     margin: 0 6px;
@@ -20,7 +16,7 @@ button {
     outline: none;
     text-transform: uppercase;
     font-weight: bold;
-   
+
     &:disabled {
         background: none;
     }
@@ -32,7 +28,11 @@ button {
         flex-grow: 0;
         width: auto;
         box-shadow: inset 0px 1px 0px 0px $color-button-shadow;
-        background: linear-gradient(to bottom, $color-button-bg2 5%, $color-button-bg1 100%);
+        background: linear-gradient(
+            to bottom,
+            $color-button-bg2 5%,
+            $color-button-bg1 100%
+        );
         background-color: $color-button-bg2;
         border: 1px solid $color-button-border;
         border-radius: 0;
@@ -48,7 +48,11 @@ button {
 
         &:hover {
             background-color: $color-button-bg1;
-            background-image: linear-gradient(to bottom, $color-button-bg1 5%, $color-button-bg2 100%);
+            background-image: linear-gradient(
+                to bottom,
+                $color-button-bg1 5%,
+                $color-button-bg2 100%
+            );
         }
         &:active {
             top: 1px;

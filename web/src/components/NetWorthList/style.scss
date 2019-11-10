@@ -82,7 +82,8 @@
 
         &.active {
             width: 700px;
-            &, .net-worth-list-crud-inner {
+            &,
+            .net-worth-list-crud-inner {
                 flex: 1 1 0;
                 flex-flow: column;
                 min-height: 0;
@@ -100,8 +101,6 @@
         }
 
         .net-worth-list-item-summary {
-            @include noselect;
-
             display: flex;
             padding: 0 6px;
             align-items: center;
