@@ -1,18 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
+import * as Styled from './styles';
+
 const PinDisplay = ({ inputStep }) => (
-    <div className="pin-display">{new Array(LOGIN_INPUT_LENGTH).fill(0)
-        .map((item, index) => (
-            <div key={index} className={classNames('input-pin', {
-                active: index === inputStep,
-                done: index < inputStep,
-            })} />
-        ))
-    }</div>
+    <Styled.PinDisplay>
+        {new Array(LOGIN_INPUT_LENGTH).fill(0).map((item, index) => (
+            <Styled.InputPin
+                key={index}
+                active={index === inputStep}
+                done={index < inputStep}
+            />
+        ))}
+    </Styled.PinDisplay>
 );
 
 PinDisplay.propTypes = {
