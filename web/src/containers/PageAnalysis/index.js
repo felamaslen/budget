@@ -1,7 +1,5 @@
 import { connect } from 'react-redux';
-import React, {
-    useState, useCallback, useMemo, useEffect,
-} from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -49,7 +47,10 @@ function PageAnalysis({
     onBlockClick,
 }) {
     const [activeBlock, setActiveBlock] = useState([null, null]);
-    const onHover = useCallback((main, sub = null) => setActiveBlock([main, sub]), []);
+    const onHover = useCallback(
+        (main, sub = null) => setActiveBlock([main, sub]),
+        [],
+    );
     const [activeMain, activeSub] = activeBlock;
 
     const [treeOpen, setTreeOpen] = useState({});
@@ -71,12 +72,19 @@ function PageAnalysis({
             return '';
         }
         if (activeSub) {
-            const { total } = main.subTree.find(({ name }) => name === activeSub);
+            const { total } = main.subTree.find(
+                ({ name }) => name === activeSub,
+            );
 
-            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
+            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(
+                total,
+                { raw: true },
+            )})`;
         }
 
-        return `${capitalise(activeMain)} (${formatCurrency(main.total, { raw: true })})`;
+        return `${capitalise(activeMain)} (${formatCurrency(main.total, {
+            raw: true,
+        })})`;
     }, [cost, costDeep, activeMain, activeSub]);
 
     if (!cost) {
@@ -132,7 +140,7 @@ PageAnalysis.propTypes = {
     toggleTreeItem: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     cost: getCost(state),
     costDeep: getDeepCost(state),
     blocks: getBlocks(state),
@@ -151,4 +159,7 @@ const mapDispatchToProps = {
     toggleTreeItem: treeItemDisplayToggled,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(PageAnalysis);

@@ -53,6 +53,14 @@ export const colors = {
     'bg-down': rgb(255, 23, 23),
     'bg-down-hl': rgb(47, 15, 15),
     'bg-down-rev': rgb(44, 51, 45),
+    button: {
+        bg1: rgb(116, 173, 90),
+        bg2: rgb(104, 165, 75),
+        border: rgb(59, 110, 34),
+        active: rgb(105, 154, 83),
+        mobile: rgb(255, 163, 92),
+        disabled: rgb(156, 156, 156),
+    },
     overview: {
         main: rgb(66, 66, 66),
     },

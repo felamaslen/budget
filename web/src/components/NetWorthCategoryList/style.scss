@@ -76,7 +76,7 @@ $category-item-height: 52px;
             margin: 0 0.2em;
             align-items: center;
             justify-content: center;
-            
+
             grid-row: 1;
         }
 
@@ -98,20 +98,6 @@ $category-item-height: 52px;
         }
         .form-field-color {
             grid-column: 3;
-
-            .color-value {
-                display: flex;
-                padding: 0.1em 1em;
-                align-items: center;
-                top: 0;
-                height: 20px;
-                line-height: 20px;
-                font-size: 14px;
-                cursor: pointer;
-                background: rgba(0, 0, 0, 0.3);
-                border: none;
-                box-shadow: none;
-            }
 
             .color-picker {
                 position: absolute;
@@ -147,7 +133,8 @@ $category-item-height: 52px;
     }
 
     &-crud {
-        &, &-inner {
+        &,
+        &-inner {
             display: flex;
             flex-flow: column;
             min-height: 0;

@@ -12,6 +12,7 @@ import { DateTime } from 'luxon';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { validateField } from '~client/modules/validate';
+import { Button } from '~client/styled/shared/button';
 import ModalDialogField from '~client/components/ModalDialog/field';
 
 import * as Styled from './styles';
@@ -172,31 +173,31 @@ export default function ModalDialog({
                     ))}
                 </ul>
                 <div className="buttons">
-                    <button
+                    <Button
                         type="button"
                         className="button-cancel"
                         disabled={loading}
                         onClick={onCancel}
                     >
                         {'nope.avi'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="button"
                         className="button-submit"
                         disabled={loading}
                         onClick={onSubmitCallback}
                     >
                         {'Do it.'}
-                    </button>
+                    </Button>
                     {canRemove && (
-                        <button
+                        <Button
                             type="button"
                             className="button-remove"
                             disabled={loading}
                             onClick={onRemove}
                         >
                             &minus;
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

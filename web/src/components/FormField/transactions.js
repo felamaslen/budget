@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
 import { useField } from '~client/hooks/field';
+import { Button } from '~client/styled/shared/button';
 import { Wrapper } from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
 import FormFieldNumber from '~client/components/FormField/number';
@@ -171,7 +172,7 @@ function FormFieldTransactions({ create, ...props }) {
                                     onChange={onChangeAddField}
                                 >
                                     <Styled.TransactionRowButton className="row button">
-                                        <button onClick={onAdd}>{'+'}</button>
+                                        <Button onClick={onAdd}>{'+'}</Button>
                                     </Styled.TransactionRowButton>
                                 </FormFieldTransaction>
                             )}
@@ -185,13 +186,13 @@ function FormFieldTransactions({ create, ...props }) {
                                 >
                                     {create && (
                                         <span className="row button">
-                                            <button
+                                            <Button
                                                 onClick={() =>
                                                     onRemoveTransaction(item.id)
                                                 }
                                             >
                                                 &minus;
-                                            </button>
+                                            </Button>
                                         </span>
                                     )}
                                 </FormFieldTransaction>
