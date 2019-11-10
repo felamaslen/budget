@@ -4,14 +4,16 @@ import classNames from 'classnames';
 
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
+import * as Styled from './styles';
+
 const ListHeadMobile = ({ listColsMobile }) => (
-    <div className="list-head noselect">
-        {listColsMobile.map((column) => (
-            <span key={column}
-                className={classNames('column', column)}
-            >{column}</span>
+    <Styled.ListHead className="list-head">
+        {listColsMobile.map(column => (
+            <span key={column} className={classNames('column', column)}>
+                {column}
+            </span>
         ))}
-    </div>
+    </Styled.ListHead>
 );
 
 ListHeadMobile.propTypes = {
