@@ -8,7 +8,7 @@ import { createMemoryHistory } from 'history';
 import Root from '~client/containers/Root';
 import { testState } from '~client-test/test_data/state';
 
-const getContainer = (customProps = {}, customState = (state) => state) => {
+const getContainer = (customProps = {}, customState = state => state) => {
     const state = customState({
         ...testState,
         login: {
@@ -34,16 +34,16 @@ const getContainer = (customProps = {}, customState = (state) => state) => {
         initialEntries: ['/'],
     });
 
-    const utils = render((
+    const utils = render(
         <Router history={history}>
             <Root {...props} />
-        </Router>
-    ));
+        </Router>,
+    );
 
     return { store, ...utils };
 };
 
-test('main container', (t) => {
+test('main container', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -53,9 +53,7 @@ test('main container', (t) => {
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 3);
 
-    const [header, errorMessages, page] = div.childNodes;
+    const [header] = div.childNodes;
 
     t.is(header.tagName, 'HEADER');
-    t.is(errorMessages.className, 'messages-outer');
-    t.is(page.className, 'page-wrapper');
 });

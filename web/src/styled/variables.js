@@ -1,4 +1,9 @@
 import { rgb, rgba } from 'polished';
+import {
+    ERROR_LEVEL_DEBUG,
+    ERROR_LEVEL_WARN,
+    ERROR_LEVEL_ERROR,
+} from '~client/constants/error';
 
 export const breakpoints = {
     mobileSmall: 350,
@@ -60,6 +65,12 @@ export const colors = {
     'bg-down': rgb(255, 23, 23),
     'bg-down-hl': rgb(47, 15, 15),
     'bg-down-rev': rgb(44, 51, 45),
+    messages: {
+        [ERROR_LEVEL_DEBUG]: rgba(0, 156, 255, 0.5),
+        [ERROR_LEVEL_WARN]: rgba(255, 147, 0, 0.5),
+        [ERROR_LEVEL_ERROR]: rgba(255, 0, 0, 0.5),
+        fatal: rgba(128, 0, 0, 0.7),
+    },
     button: {
         bg1: rgb(116, 173, 90),
         bg2: rgb(104, 165, 75),
