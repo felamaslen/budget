@@ -7,7 +7,9 @@ export const reset = css`
         box-sizing: border-box;
     }
 
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
         box-sizing: inherit;
     }
 
@@ -20,7 +22,7 @@ export const reset = css`
 
     body {
         margin: 0;
-        font: 1em Arial, Helvetica, sans-serif;
+        font: 1em 'Noto sans', Ubuntu, Arial, Helvetica, sans-serif;
         &.wait * {
             cursor: wait !important;
         }

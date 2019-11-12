@@ -10,7 +10,10 @@ import { costShape } from '~client/prop-types/page/overview';
 import { getTargets } from '~client/selectors/graph';
 import { getProcessedCost } from '~client/selectors/overview';
 import { getNetWorthSummaryOld } from '~client/selectors/overview/net-worth';
-import { getStartDate, getFutureMonths } from '~client/selectors/overview/common';
+import {
+    getStartDate,
+    getFutureMonths,
+} from '~client/selectors/overview/common';
 import { getCurrentDate } from '~client/selectors/now';
 
 import { mediaQueryMobile } from '~client/constants';
@@ -19,6 +22,7 @@ import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
 import './style.scss';
+import * as Styled from './styles';
 
 const GraphOverviewWrapped = ({
     futureMonths,
@@ -27,8 +31,9 @@ const GraphOverviewWrapped = ({
     targets,
     ...commonProps
 }) => (
-    <div className="graph-container-outer">
-        <GraphBalance name="balance"
+    <Styled.GraphOverview className="graph-container-outer">
+        <GraphBalance
+            name="balance"
             {...commonProps}
             futureMonths={futureMonths}
             cost={cost}
@@ -36,13 +41,14 @@ const GraphOverviewWrapped = ({
             targets={targets}
         />
         {!commonProps.isMobile && (
-            <GraphSpending name="spend"
+            <GraphSpending
+                name="spend"
                 {...commonProps}
                 valuesNet={cost.net}
                 valuesSpending={cost.spending}
             />
         )}
-    </div>
+    </Styled.GraphOverview>
 );
 
 GraphOverviewWrapped.propTypes = {
@@ -59,14 +65,14 @@ GraphOverviewWrapped.propTypes = {
 function GraphOverview(props) {
     return (
         <Media query={mediaQueryMobile}>
-            {(isMobile) => (
+            {isMobile => (
                 <GraphOverviewWrapped isMobile={isMobile} {...props} />
             )}
         </Media>
     );
 }
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     now: getCurrentDate(state),
     startDate: getStartDate(state),
     graphWidth: Math.min(state.app.windowWidth, GRAPH_WIDTH),

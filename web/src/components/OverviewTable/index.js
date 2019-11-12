@@ -7,23 +7,12 @@ import OverviewTableRows from './OverviewTableRows';
 
 import * as Styled from './styles';
 
-function getNumToSkip(isMobile) {
-    if (isMobile) {
-        return 19;
-    }
-
-    return 0;
-}
-
 const OverviewTable = props => (
-    <Styled.OverviewTable className="table-flex table-insert table-overview">
+    <Styled.OverviewTable>
         <OverviewTableHeader />
         <Media query={mediaQueryMobile}>
             {isMobile => (
-                <OverviewTableRows
-                    {...props}
-                    numToSkip={getNumToSkip(isMobile)}
-                />
+                <OverviewTableRows {...props} numToSkip={isMobile ? 19 : 0} />
             )}
         </Media>
     </Styled.OverviewTable>

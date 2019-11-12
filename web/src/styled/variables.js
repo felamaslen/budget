@@ -29,6 +29,7 @@ export const colors = {
     primaryDark: rgb(159, 48, 48),
     primaryMobile: rgb(255, 254, 247),
     primaryDarkMobile: rgb(159, 48, 48),
+    green: rgb(0, 153, 51),
     amber: rgb(251, 224, 127),
     accent: rgb(255, 160, 64),
     dark: colorDark,
@@ -86,6 +87,10 @@ export const colors = {
     },
     overview: {
         main: rgb(66, 66, 66),
+        monthMobile: rgb(255, 252, 163),
+        incomeMobile: rgb(183, 255, 163),
+        spendingMobile: rgb(255, 163, 163),
+        netWorthMobile: rgb(163, 186, 255),
     },
     funds: {
         main: rgb(84, 110, 122),

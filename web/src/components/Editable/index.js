@@ -13,10 +13,7 @@ import * as Styled from './styles';
 import './style.scss';
 
 function EditableField({ id, item, onChange, ...rest }) {
-    const onChangeCallback = useCallback(value => onChange(item, value), [
-        onChange,
-        item,
-    ]);
+    const onChangeCallback = useCallback(value => onChange(item, value), [onChange, item]);
 
     const props = { ...rest, onChange: onChangeCallback };
 
@@ -39,14 +36,7 @@ EditableField.propTypes = {
     onChange: PropTypes.func.isRequired,
 };
 
-export default function Editable({
-    page,
-    id,
-    active,
-    item,
-    onSuggestion,
-    ...props
-}) {
+export default function Editable({ page, id, active, item, onSuggestion, ...props }) {
     const [typed, onType] = useState('');
     useEffect(() => {
         if (!active) {
@@ -70,13 +60,7 @@ export default function Editable({
                 'editable-inactive': !active,
             })}
         >
-            <EditableField
-                id={id}
-                active={active}
-                item={item}
-                onType={onType}
-                {...props}
-            />
+            <EditableField id={id} active={active} item={item} onType={onType} {...props} />
             {showSuggestions && (
                 <SuggestionsList
                     page={page}
