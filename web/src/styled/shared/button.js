@@ -3,6 +3,8 @@ import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { CategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
 import { FormColor } from '~client/components/FormField/styles';
+import { ButtonDelete } from '~client/components/ListRowDesktop/styles';
+import { ButtonAdd } from '~client/components/ListFootMobile/styles';
 
 export const Button = styled.button`
     display: flex;
@@ -19,6 +21,19 @@ export const Button = styled.button`
     text-transform: uppercase;
     font-weight: bold;
 
+    ${ButtonDelete} & {
+        width: 18px !important;
+        height: 18px !important;
+        line-height: 18px !important;
+    }
+
+    ${ButtonAdd} & {
+        width: 120px;
+        flex-grow: 0;
+        background: ${colors.primaryDarkMobile};
+        color: ${colors.white};
+    }
+
     &:disabled {
         background: none;
     }
@@ -30,11 +45,7 @@ export const Button = styled.button`
         flex-grow: 0;
         width: auto;
         box-shadow: inset 0px 1px 0px 0px ${colors.button.shadow};
-        background: linear-gradient(
-            to bottom,
-            ${colors.button.bg2} 5%,
-            ${colors.button.bg1} 100%
-        );
+        background: linear-gradient(to bottom, ${colors.button.bg2} 5%, ${colors.button.bg1} 100%);
         background-color: ${colors.button.bg2};
         border: 1px solid ${colors.button.border};
         border-radius: 0;
