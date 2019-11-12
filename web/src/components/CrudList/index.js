@@ -50,11 +50,7 @@ export default function CrudList({
     className,
     extraProps,
 }) {
-    const [navState, setActive, setCommand, navNext, navPrev] = useNav(
-        nav,
-        items,
-        extraProps.page,
-    );
+    const [navState, setActive, setCommand, navNext, navPrev] = useNav(nav, items, extraProps.page);
     const { activeId, activeItem, activeColumn, command } = navState;
 
     const createActive = activeId === CREATE_ID;
@@ -107,16 +103,14 @@ export default function CrudList({
             })}
         >
             {BeforeList && <BeforeList {...metaProps} />}
-            <div className={`crud-list-inner ${className}-inner`}>
+            <Styled.CrudListInner className={`crud-list-inner ${className}-inner`}>
                 {CreateItem && (
                     <CreateItem
                         active={createActive}
                         activeColumn={createActive ? activeColumn : null}
                         noneActive={noneActive}
                         setActive={setActive}
-                        command={
-                            command.id === CREATE_ID ? command : NULL_COMMAND
-                        }
+                        command={command.id === CREATE_ID ? command : NULL_COMMAND}
                         setCommand={setCommand}
                         navNext={navNext}
                         navPrev={navPrev}
@@ -124,14 +118,10 @@ export default function CrudList({
                         {...extraProps}
                     />
                 )}
-                <div className={`crud-list-window ${className}-window`}>
+                <Styled.CrudWindow className={`crud-list-window ${className}-window`}>
                     {real &&
                         items.map((item, index) => (
-                            <CrudListItem
-                                key={item.id}
-                                data={itemData}
-                                index={index}
-                            />
+                            <CrudListItem key={item.id} data={itemData} index={index} />
                         ))}
                     {!real && (
                         <AutoSizer>
@@ -151,8 +141,8 @@ export default function CrudList({
                             )}
                         </AutoSizer>
                     )}
-                </div>
-            </div>
+                </Styled.CrudWindow>
+            </Styled.CrudListInner>
             {AfterList && <AfterList {...metaProps} />}
         </Styled.CrudList>
     );

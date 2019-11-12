@@ -4,6 +4,7 @@ import { formatCurrency } from '~client/modules/format';
 import { PAGES } from '~client/constants/data';
 
 import * as Styled from './styles';
+import { Column } from '~client/components/ListRowDesktop/styles';
 
 export default function ListHeadDesktop({
     page,
@@ -21,29 +22,31 @@ export default function ListHeadDesktop({
     return (
         <Styled.ListHead className="list-head">
             {PAGES[page].cols.map((column, key) => (
-                <span key={key} className={column}>
+                <Column key={key} column={column} className={column}>
                     {column}
-                </span>
+                </Column>
             ))}
             {getDaily && (
-                <span className="daily">
-                    <span className="daily-value">{'Daily |'}</span>
-                    <span className="weekly">{'Weekly:'}</span>
-                    <span className="weekly-value">{weeklyValueFormatted}</span>
-                </span>
+                <Styled.Daily className="daily">
+                    <Styled.DailyValue className="daily-value">{'Daily |'}</Styled.DailyValue>
+                    <Styled.Weekly className="weekly">{'Weekly:'}</Styled.Weekly>
+                    <Styled.WeeklyValue className="weekly-value">
+                        {weeklyValueFormatted}
+                    </Styled.WeeklyValue>
+                </Styled.Daily>
             )}
             {TotalValue ? (
                 <TotalValue totalCost={totalCost} {...extraProps} />
             ) : (
-                <div className="total-outer">
-                    <span className="total">{'Total:'}</span>
-                    <span className="total-value">
+                <Styled.TotalOuter className="total-outer">
+                    <Styled.Total className="total">{'Total:'}</Styled.Total>
+                    <Styled.TotalValue className="total-value">
                         {formatCurrency(totalCost, {
                             abbreviate: true,
                             precision: 1,
                         })}
-                    </span>
-                </div>
+                    </Styled.TotalValue>
+                </Styled.TotalOuter>
             )}
         </Styled.ListHead>
     );

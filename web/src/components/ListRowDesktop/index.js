@@ -111,6 +111,8 @@ function ListRowDesktop({
         <Styled.RowBody
             odd={odd}
             small={item.small}
+            future={item.future}
+            firstPresent={item.firstPresent}
             className={classNames('list-row-desktop', item.className || {}, {
                 odd,
                 future: item.future,
@@ -123,11 +125,7 @@ function ListRowDesktop({
                 page={page}
                 activeColumn={activeColumn}
                 setActive={setActive}
-                command={
-                    command.id && command.id === item.id
-                        ? command
-                        : NULL_COMMAND
-                }
+                command={command.id && command.id === item.id ? command : NULL_COMMAND}
                 setCommand={setCommand}
                 onUpdate={onColumnUpdate}
             />

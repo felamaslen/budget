@@ -5,6 +5,8 @@ import { Button } from '~client/styled/shared/button';
 import ModalDialog from '~client/components/ModalDialog';
 import { CREATE_ID, PAGES } from '~client/constants/data';
 
+import * as Styled from './styles';
+
 export default function ListFootMobile({
     page,
     active,
@@ -83,7 +85,7 @@ export default function ListFootMobile({
 
     return (
         <>
-            <div className="button-add">
+            <Styled.ButtonAdd className="button-add">
                 <Button
                     type="button"
                     className="button-add-button"
@@ -92,7 +94,7 @@ export default function ListFootMobile({
                 >
                     {'Add'}
                 </Button>
-            </div>
+            </Styled.ButtonAdd>
             {(!active || typeof active === 'string') && (
                 <ModalDialog
                     type={modalDialogType}

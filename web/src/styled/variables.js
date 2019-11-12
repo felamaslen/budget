@@ -1,9 +1,5 @@
 import { rgb, rgba } from 'polished';
-import {
-    ERROR_LEVEL_DEBUG,
-    ERROR_LEVEL_WARN,
-    ERROR_LEVEL_ERROR,
-} from '~client/constants/error';
+import { ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR } from '~client/constants/error';
 
 export const breakpoints = {
     mobileSmall: 350,
@@ -41,6 +37,7 @@ export const colors = {
     'medium-slightly-dark': rgb(102, 102, 102),
     'slightly-dark': rgb(51, 51, 51),
     light: colorLight,
+    'slightly-light': rgb(204, 204, 204),
     'very-light': rgb(254, 254, 254),
     'shadow-l05': rgba(0, 0, 0, 0.05),
     'shadow-l2': rgba(0, 0, 0, 0.2),
@@ -48,12 +45,14 @@ export const colors = {
     'shadow-l4': rgba(0, 0, 0, 0.4),
     'shadow-l5': rgba(0, 0, 0, 0.5),
     'shadow-l6': rgba(0, 0, 0, 0.6),
+    'translucent-dark': rgba(220, 220, 220, 0.4),
     'translucent-l15': rgba(255, 255, 255, 0.15),
     'translucent-l1': rgba(255, 255, 255, 0.1),
     'translucent-l2': rgba(255, 255, 255, 0.2),
     'translucent-l6': rgba(255, 255, 255, 0.6),
     'translucent-l7': rgba(255, 255, 255, 0.7),
     'translucent-l8': rgba(255, 255, 255, 0.8),
+    'translucent-l95': rgba(255, 255, 255, 0.95),
     highlight: rgba(255, 255, 0, 0.85),
     'highlight-light': rgb(255, 252, 218),
     white: rgb(255, 255, 255),
@@ -94,6 +93,7 @@ export const colors = {
     },
     funds: {
         main: rgb(84, 110, 122),
+        light: rgb(194, 221, 234),
     },
     income: {
         main: rgb(216, 67, 21),
@@ -106,6 +106,7 @@ export const colors = {
     },
     general: {
         main: rgb(1, 87, 155),
+        light: rgb(170, 200, 224),
     },
     holiday: {
         main: rgb(0, 137, 123),
