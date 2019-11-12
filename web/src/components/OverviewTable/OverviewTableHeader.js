@@ -1,16 +1,23 @@
 import React from 'react';
-import classNames from 'classnames';
 import { NavLink } from 'react-router-dom';
 
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 
-export default function OverviewTableHeader() {
-    const header = OVERVIEW_COLUMNS.map(([columnClass, columnName, link = null]) => (
-        <div className={classNames('col', columnClass)} key={columnName}>
-            {link && <NavLink className="text" {...link}>{columnName}</NavLink>}
-            {!link && <span className="text">{columnName}</span>}
-        </div>
-    ));
+import * as Styled from './styles';
 
-    return <div className="row header">{header}</div>;
-}
+const OverviewTableHeader = () => (
+    <Styled.Header>
+        {OVERVIEW_COLUMNS.map(([column, name, link = null]) => (
+            <Styled.HeaderLink column={column} key={name}>
+                {link && (
+                    <Styled.HeaderText as={NavLink} {...link}>
+                        {name}
+                    </Styled.HeaderText>
+                )}
+                {!link && <Styled.HeaderText>{name}</Styled.HeaderText>}
+            </Styled.HeaderLink>
+        ))}
+    </Styled.Header>
+);
+
+export default OverviewTableHeader;

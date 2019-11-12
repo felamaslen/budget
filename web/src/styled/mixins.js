@@ -1,6 +1,8 @@
+import { css } from 'styled-components';
 import { colors } from '~client/styled/variables';
 
-export const breakpoint = (size) => `@media only screen and (min-width: ${size}px)`;
+export const breakpoint = size =>
+    `@media only screen and (min-width: ${size}px)`;
 
 export const diagonalBg = (size = 16) => `
     background-image: linear-gradient(45deg,
@@ -13,4 +15,9 @@ export const diagonalBg = (size = 16) => `
         transparent 0
     );
     background-size: ${size}px ${size}px;
+`;
+
+export const unimportant = css`
+    color: ${colors['slightly-dark']};
+    font-style: italic;
 `;

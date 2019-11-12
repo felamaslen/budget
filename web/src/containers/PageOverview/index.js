@@ -8,8 +8,8 @@ import { getOverviewTable } from '~client/selectors/overview';
 import OverviewTable from '~client/components/OverviewTable';
 import GraphOverview from '~client/containers/GraphOverview';
 import NetWorth from '~client/containers/NetWorth';
-import './style.scss';
-import * as Styled from '~client/styled/shared/page';
+
+import * as Styled from './styles';
 
 const PageOverview = ({ table }) => (
     <>
@@ -22,24 +22,29 @@ const PageOverview = ({ table }) => (
 );
 
 PageOverview.propTypes = {
-    table: PropTypes.arrayOf(PropTypes.shape({
-        key: PropTypes.string.isRequired,
-        cells: PropTypes.arrayOf(PropTypes.shape({
-            column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-            value: PropTypes.oneOfType([
-                PropTypes.string.isRequired,
-                PropTypes.number.isRequired,
-                PropTypes.instanceOf(DateTime).isRequired,
-            ]).isRequired,
-            rgb: PropTypes.arrayOf(PropTypes.number),
-        }).isRequired),
-        past: PropTypes.bool.isRequired,
-        active: PropTypes.bool.isRequired,
-        future: PropTypes.bool.isRequired,
-    }).isRequired).isRequired,
+    table: PropTypes.arrayOf(
+        PropTypes.shape({
+            key: PropTypes.string.isRequired,
+            cells: PropTypes.arrayOf(
+                PropTypes.shape({
+                    column: PropTypes.arrayOf(PropTypes.string.isRequired)
+                        .isRequired,
+                    value: PropTypes.oneOfType([
+                        PropTypes.string.isRequired,
+                        PropTypes.number.isRequired,
+                        PropTypes.instanceOf(DateTime).isRequired,
+                    ]).isRequired,
+                    rgb: PropTypes.arrayOf(PropTypes.number),
+                }).isRequired,
+            ),
+            past: PropTypes.bool.isRequired,
+            active: PropTypes.bool.isRequired,
+            future: PropTypes.bool.isRequired,
+        }).isRequired,
+    ).isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     table: getOverviewTable(state),
 });
 
