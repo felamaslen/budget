@@ -7,11 +7,10 @@ WORKDIR /opt/app
 COPY package.json ./
 COPY package-lock.json ./
 
-RUN npm install --only=production
-RUN npm install --only=development
-
 ENV NODE_ENV=development
 ENV BABEL_ENV=node
+
+RUN npm install
 
 ENV SKIP_APP=false
 ENV DEBUG=
