@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import Media from 'react-media';
 import { mediaQueryMobile } from '~client/constants';
 
@@ -11,11 +11,9 @@ const OverviewTable = props => (
     <Styled.OverviewTable>
         <OverviewTableHeader />
         <Media query={mediaQueryMobile}>
-            {isMobile => (
-                <OverviewTableRows {...props} numToSkip={isMobile ? 19 : 0} />
-            )}
+            {isMobile => <OverviewTableRows {...props} numToSkip={isMobile ? 19 : 0} />}
         </Media>
     </Styled.OverviewTable>
 );
 
-export default React.memo(OverviewTable);
+export default memo(OverviewTable);

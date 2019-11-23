@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import Cells from './cells';
 
@@ -21,4 +21,4 @@ OverviewTableRows.propTypes = {
     numToSkip: PropTypes.number.isRequired,
 };
 
-export default OverviewTableRows;
+export default memo(OverviewTableRows);
