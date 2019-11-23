@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Column } from '~client/components/ListRowMobile/styles';
 
 export const ListHead = styled.div`
     display: flex;
@@ -8,4 +9,8 @@ export const ListHead = styled.div`
     width: 100%;
     font-weight: bold;
     user-select: none;
+`;
+
+export const Header = styled(Column)`
+    text-align: center;
 `;

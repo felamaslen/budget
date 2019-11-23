@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { ModalDialog } from '~client/components/ModalDialog/styles';
+import { Editable } from '~client/components/Editable/styles';
 import { Row as ListRowDesktop } from '~client/components/ListRowDesktop/styles';
 import { RowCreate } from '~client/components/ListCreateDesktop/styles';
 import {
@@ -74,7 +75,7 @@ ${NetWorthSubcategoryList} & {
 
 export const FormColor = styled.div``;
 
-const transactionsWidthDate = 110;
+const transactionsWidthDate = 128;
 const transactionsWidthUnits = 60;
 const transactionsWidthCost = 60;
 
@@ -85,7 +86,21 @@ export const TransactionsModal = styled.div`
         top: 0;
         z-index: 2;
         background: ${colors['translucent-l8']};
-        box-shadow: 0 2px 6px ${colors['shadow-l2']};
+        box-shadow: 0 3px 6px ${colors['shadow-l2']};
+
+        ${Editable} & {
+            left: 0;
+            width: 300px;
+            min-height: 100px;
+            z-index: 5;
+            line-height: 26px;
+            input {
+                width: 95%;
+            }
+            thead {
+                font-size: 0.9em;
+            }
+        }
 
         ${ListRowDesktop}:nth-last-child(-n + 3) & {
             top: initial;
@@ -93,13 +108,19 @@ export const TransactionsModal = styled.div`
         }
 
         ${RowCreate} & {
-            top: 0 !important;
-            bottom: initial !important;
+            top: 0;
+            bottom: initial;
         }
     }
 `;
 
-export const ModalInner = styled.div``;
+export const ModalInner = styled.div`
+    ${breakpoint(breakpoints.mobile)} {
+        ${Editable} & {
+            padding: 0.2em;
+        }
+    }
+`;
 
 export const ModalHead = styled.div`
     ${breakpoint(breakpoints.mobile)} {
@@ -124,7 +145,7 @@ export const TransactionsList = styled.ul`
 
 export const TransactionsListItem = styled.li`
     ${ModalDialog} & {
-        flex-flow: column !important;
+        flex-flow: column;
     }
 
     ${breakpoint(breakpoints.mobile)} {
@@ -134,12 +155,12 @@ export const TransactionsListItem = styled.li`
         flex: 0 0 24px;
 
         input {
-            padding: 0 0 0 1px !important;
-            font-size: 12px !important;
-            height: 22px !important;
-            line-height: 22px !important;
-            border: 1px solid #ccc !important;
-            box-shadow: none !important;
+            padding: 0 0 0 1px;
+            font-size: 12px;
+            height: 22px;
+            line-height: 22px;
+            border: 1px solid #ccc;
+            box-shadow: none;
         }
     }
 `;
@@ -164,11 +185,11 @@ export const ModalHeadColumn = styled.span`
 
 const transactionItem = width => css`
     ${breakpoint(breakpoints.mobile)} {
-        flex: 0 0 ${width}px !important;
+        flex: 0 0 ${width}px;
 
         &,
         ${TransactionCol}, input {
-            width: ${width}px !important;
+            width: ${width}px;
         }
     }
 `;
@@ -208,6 +229,9 @@ export const ModalHeadCost = styled(ModalHeadColumn)`
 `;
 
 export const NumTransactions = styled.span`
+    display: block;
+    text-align: center;
+
     ${ModalDialog} & {
         display: none;
     }

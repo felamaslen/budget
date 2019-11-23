@@ -8,9 +8,7 @@ import FormFieldText from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldTransactions from '~client/components/FormField/transactions';
-
 import * as Styled from './styles';
-import './style.scss';
 
 function EditableField({ id, item, onChange, ...rest }) {
     const onChangeCallback = useCallback(value => onChange(item, value), [onChange, item]);
@@ -55,6 +53,7 @@ export default function Editable({ page, id, active, item, onSuggestion, ...prop
     return (
         <Styled.Editable
             active={active}
+            item={item}
             className={classNames('editable', `editable-${item}`, {
                 'editable-active': active,
                 'editable-inactive': !active,

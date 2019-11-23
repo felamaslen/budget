@@ -40,7 +40,7 @@ export const Column = styled.span`
     margin: 0 2px;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
+    text-align: left;
     text-transform: capitalize;
 
     ${PageFunds} & {

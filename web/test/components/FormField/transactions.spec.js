@@ -5,11 +5,7 @@ import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import FormFieldTransactions from '~client/components/FormField/transactions';
-import {
-    getTransactionsList,
-    modifyTransaction,
-    removeAtIndex,
-} from '~client/modules/data';
+import { getTransactionsList, modifyTransaction, removeAtIndex } from '~client/modules/data';
 
 const test = ninos(ava);
 
@@ -34,9 +30,12 @@ test('basic structure (inactive)', t => {
     const { container } = getContainer({ active: false });
 
     t.is(container.childNodes.length, 1);
-    const [span] = container.childNodes;
+    const [div] = container.childNodes;
+    t.is(div.tagName, 'DIV');
 
-    t.is(span.tagName, 'DIV');
+    t.is(div.childNodes.length, 1);
+    const [span] = div.childNodes;
+    t.is(span.tagName, 'SPAN');
     t.is(span.innerHTML, '2'); // two transactions
 });
 
@@ -150,10 +149,7 @@ test('handling date input', t => {
         t.is(onChange.calls.length, 0);
 
         act(() => {
-            getContainer(
-                { onChange, active: false, create: true },
-                { container },
-            );
+            getContainer({ onChange, active: false, create: true }, { container });
         });
 
         t.is(onChange.calls.length, 1);
@@ -206,10 +202,7 @@ test('handling units input', t => {
         t.is(onChange.calls.length, 0);
 
         act(() => {
-            getContainer(
-                { onChange, active: false, create: true },
-                { container },
-            );
+            getContainer({ onChange, active: false, create: true }, { container });
         });
 
         t.is(onChange.calls.length, 1);
@@ -262,10 +255,7 @@ test('handling cost input', t => {
         t.is(onChange.calls.length, 0);
 
         act(() => {
-            getContainer(
-                { onChange, active: false, create: true },
-                { container },
-            );
+            getContainer({ onChange, active: false, create: true }, { container });
         });
 
         t.is(onChange.calls.length, 1);

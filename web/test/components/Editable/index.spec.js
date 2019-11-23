@@ -39,6 +39,9 @@ test('rendering inactive editable item', t => {
 
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
+    t.is(span.childNodes.length, 1);
+
+    t.is(span.childNodes[0].innerHTML, 'Tesco');
 });
 
 test('Undefined value is renderd as a blank string', t => {
@@ -67,7 +70,8 @@ test('Falsey transactions are rendered as 0 items', t => {
 
     const [field] = span.childNodes;
     t.is(field.tagName, 'DIV');
-    t.is(field.innerHTML, '0');
+    t.is(field.childNodes.length, 1);
+    t.is(field.childNodes[0].innerHTML, '0');
 });
 
 test('onChange is called with the column and new value', t => {
