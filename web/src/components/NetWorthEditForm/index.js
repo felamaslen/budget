@@ -12,7 +12,7 @@ import { StepAssets, StepLiabilities } from '~client/components/NetWorthEditForm
 
 import { STEP_DATE, STEP_CURRENCIES, STEP_ASSETS, STEP_LIABILITIES, steps } from './constants';
 
-function NetWorthItemForm({ item, categories, subcategories, setActiveId, onEdit }) {
+function NetWorthItemForm({ add, item, categories, subcategories, setActiveId, onEdit }) {
     const onComplete = useCallback(
         event => {
             if (event) {
@@ -46,6 +46,7 @@ function NetWorthItemForm({ item, categories, subcategories, setActiveId, onEdit
     const onLastStep = steps.indexOf(step) === steps.length - 1;
 
     const containerProps = {
+        add,
         onComplete,
         item,
         onPrevStep,
@@ -78,11 +79,16 @@ function NetWorthItemForm({ item, categories, subcategories, setActiveId, onEdit
 }
 
 NetWorthItemForm.propTypes = {
+    add: PropTypes.bool,
     item: netWorthItem.isRequired,
     categories: PropTypes.arrayOf(category.isRequired).isRequired,
     subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     setActiveId: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
+};
+
+NetWorthItemForm.defaultProps = {
+    add: false,
 };
 
 const idLists = ['creditLimit', 'currencies', 'values'];
@@ -143,7 +149,7 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
         [onCreate],
     );
 
-    return <NetWorthItemForm {...props} item={item} onEdit={onEdit} />;
+    return <NetWorthItemForm {...props} add item={item} onEdit={onEdit} />;
 }
 
 NetWorthAddForm.propTypes = {

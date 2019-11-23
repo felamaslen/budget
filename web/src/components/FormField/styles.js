@@ -25,16 +25,20 @@ export const FormField = styled.div`
             }
         `}
 
-    ${AddCurrency} & {
-        margin: 0 5px;
-        flex: 0 0 ${currencyTitleWidth}px;
-        input {
-            margin: 0;
-            padding-left: 0;
-            padding-right: 0;
-            width: ${currencyTitleWidth - 4}px;
-        }
-    }
+    ${({ item }) =>
+        item === 'text' &&
+        css`
+            ${AddCurrency} & {
+                margin: 0 5px;
+                flex: 0 0 ${currencyTitleWidth}px;
+                input {
+                    margin: 0;
+                    padding-left: 0;
+                    padding-right: 0;
+                    width: ${currencyTitleWidth - 4}px;
+                }
+            }
+        `}
 `;
 
 export const FormColor = styled.div``;

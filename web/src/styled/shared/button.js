@@ -5,6 +5,7 @@ import { CategoryItemForm } from '~client/components/NetWorthCategoryList/styles
 import { FormColor, NetWorthValueComplex } from '~client/components/FormField/styles';
 import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
 import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
+import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
 import {
     EditCurrency,
     EditByCategory,
@@ -122,7 +123,14 @@ ${AddByCategoryValue} &,
     }
 `;
 
-export const ButtonDelete = styled(ButtonCrud)``;
+export const ButtonDelete = styled(ButtonCrud)`
+    ${NetWorthEntryDelete} & {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 16px !important;
+        line-height: 16px !important;
+    }
+`;
 
 export const ButtonAdd = styled(ButtonCrud)``;
 

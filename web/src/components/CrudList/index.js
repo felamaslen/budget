@@ -95,15 +95,18 @@ export default function CrudList({
         }
     }, [variableSize, itemSize]);
 
+    const active = activeId !== null;
+
     return (
         <Styled.CrudList
+            active={active}
             className={classNames('crud-list', className, {
                 active: activeId !== null,
                 'create-active': createActive,
             })}
         >
             {BeforeList && <BeforeList {...metaProps} />}
-            <Styled.CrudListInner className={`crud-list-inner ${className}-inner`}>
+            <Styled.CrudListInner active={active} className={`crud-list-inner ${className}-inner`}>
                 {CreateItem && (
                     <CreateItem
                         active={createActive}
@@ -118,7 +121,11 @@ export default function CrudList({
                         {...extraProps}
                     />
                 )}
-                <Styled.CrudWindow className={`crud-list-window ${className}-window`}>
+                <Styled.CrudWindow
+                    active={active}
+                    createActive={createActive}
+                    className={`crud-list-window ${className}-window`}
+                >
                     {real &&
                         items.map((item, index) => (
                             <CrudListItem key={item.id} data={itemData} index={index} />
