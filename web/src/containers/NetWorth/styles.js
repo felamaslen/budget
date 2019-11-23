@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
 import { colors } from '~client/styled/variables';
 
@@ -36,19 +36,15 @@ export const Tab = styled(NavLink)`
     text-decoration: none;
     border-radius: 0 0 6px 6px;
 
-    ${({ isButton }) =>
-        isButton &&
-        css`
-            &:hover,
-            &:active {
-                background: ${colors.black};
-            }
-            &.selected {
-                background: ${colors['shadow-l2']};
-                color: ${colors['slightly-light']};
-                cursor: default;
-            }
-        `}
+    &:hover,
+    &:active {
+        background: ${colors.black};
+    }
+    &.selected {
+        background: ${colors['shadow-l2']};
+        color: ${colors['slightly-light']};
+        cursor: default;
+    }
 `;
 
 export const Meta = styled.div`

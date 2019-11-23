@@ -10,33 +10,18 @@ import StepDate from '~client/components/NetWorthEditForm/step-date';
 import StepCurrencies from '~client/components/NetWorthEditForm/step-currencies';
 import { StepAssets, StepLiabilities } from '~client/components/NetWorthEditForm/step-values';
 
-import './style.scss';
+import { STEP_DATE, STEP_CURRENCIES, STEP_ASSETS, STEP_LIABILITIES, steps } from './constants';
 
-const STEP_DATE = 'STEP_DATE';
-const STEP_CURRENCIES = 'STEP_CURRENCIES';
-const STEP_ASSETS = 'STEP_ASSETS';
-const STEP_LIABILITIES = 'STEP_LIABILITIES';
-
-const steps = [
-    STEP_DATE,
-    STEP_CURRENCIES,
-    STEP_ASSETS,
-    STEP_LIABILITIES,
-];
-
-function NetWorthItemForm({
-    item,
-    categories,
-    subcategories,
-    setActiveId,
-    onEdit,
-}) {
-    const onComplete = useCallback((event) => {
-        if (event) {
-            event.stopPropagation();
-        }
-        setActiveId(null);
-    }, [setActiveId]);
+function NetWorthItemForm({ item, categories, subcategories, setActiveId, onEdit }) {
+    const onComplete = useCallback(
+        event => {
+            if (event) {
+                event.stopPropagation();
+            }
+            setActiveId(null);
+        },
+        [setActiveId],
+    );
 
     const [tempItem, setTempItem] = useState(item);
     const [step, setStep] = useState(steps[0]);
@@ -77,36 +62,16 @@ function NetWorthItemForm({
     };
 
     if (step === STEP_DATE) {
-        return (
-            <StepDate
-                containerProps={containerProps}
-                {...stepProps}
-            />
-        );
+        return <StepDate containerProps={containerProps} {...stepProps} />;
     }
     if (step === STEP_CURRENCIES) {
-        return (
-            <StepCurrencies
-                containerProps={containerProps}
-                {...stepProps}
-            />
-        );
+        return <StepCurrencies containerProps={containerProps} {...stepProps} />;
     }
     if (step === STEP_ASSETS) {
-        return (
-            <StepAssets
-                containerProps={containerProps}
-                {...stepProps}
-            />
-        );
+        return <StepAssets containerProps={containerProps} {...stepProps} />;
     }
     if (step === STEP_LIABILITIES) {
-        return (
-            <StepLiabilities
-                containerProps={containerProps}
-                {...stepProps}
-            />
-        );
+        return <StepLiabilities containerProps={containerProps} {...stepProps} />;
     }
 
     throw new Error('Invalid step set for <NetWorthEditForm />');
@@ -120,26 +85,27 @@ NetWorthItemForm.propTypes = {
     onEdit: PropTypes.func.isRequired,
 };
 
-const idLists = [
-    'creditLimit',
-    'currencies',
-    'values',
-];
+const idLists = ['creditLimit', 'currencies', 'values'];
 
-const withContrivedIds = ({ id, ...doc }) => idLists.reduce((last, key) => ({
-    ...last,
-    [key]: doc[key].map((item) => ({ ...item, id: shortid.generate() })),
-}), doc);
+const withContrivedIds = ({ id, ...doc }) =>
+    idLists.reduce(
+        (last, key) => ({
+            ...last,
+            [key]: doc[key].map(item => ({ ...item, id: shortid.generate() })),
+        }),
+        doc,
+    );
 
 export function NetWorthEditForm({ onUpdate, ...props }) {
-    const onEdit = useCallback((tempItem, onComplete) => {
-        onUpdate(tempItem.id, tempItem);
-        onComplete();
-    }, [onUpdate]);
-
-    return (
-        <NetWorthItemForm {...props} onEdit={onEdit} />
+    const onEdit = useCallback(
+        (tempItem, onComplete) => {
+            onUpdate(tempItem.id, tempItem);
+            onComplete();
+        },
+        [onUpdate],
     );
+
+    return <NetWorthItemForm {...props} onEdit={onEdit} />;
 }
 
 NetWorthEditForm.propTypes = {
@@ -169,14 +135,15 @@ export function NetWorthAddForm({ data, onCreate, ...props }) {
         };
     }, [data]);
 
-    const onEdit = useCallback((tempItem, onComplete) => {
-        onCreate(tempItem);
-        onComplete();
-    }, [onCreate]);
-
-    return (
-        <NetWorthItemForm {...props} item={item} onEdit={onEdit} />
+    const onEdit = useCallback(
+        (tempItem, onComplete) => {
+            onCreate(tempItem);
+            onComplete();
+        },
+        [onCreate],
     );
+
+    return <NetWorthItemForm {...props} item={item} onEdit={onEdit} />;
 }
 
 NetWorthAddForm.propTypes = {

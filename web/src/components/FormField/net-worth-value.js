@@ -1,26 +1,20 @@
-import React, {
-    useReducer,
-    useState,
-    useCallback,
-    useMemo,
-    useEffect,
-} from 'react';
+import React, { useReducer, useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { replaceAtIndex } from '~client/modules/data';
-import {
-    netWorthValueSize,
-    currency as currencyShape,
-} from '~client/prop-types/net-worth/list';
-import { Button } from '~client/styled/shared/button';
+import { netWorthValueSize, currency as currencyShape } from '~client/prop-types/net-worth/list';
+import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldNumber from '~client/components/FormField/number';
 import FormFieldTickbox from '~client/components/FormField/tickbox';
 import FormFieldSelect from '~client/components/FormField/select';
 
+import * as Styled from './styles';
+
 function FormFieldWithCurrency({
     className,
+    add,
     index,
     value,
     currency,
@@ -31,9 +25,10 @@ function FormFieldWithCurrency({
 }) {
     const options = useMemo(
         () =>
-            Array.from(new Set(currencyOptions.concat([currency]))).map(
-                item => ({ internal: item, external: item }),
-            ),
+            Array.from(new Set(currencyOptions.concat([currency]))).map(item => ({
+                internal: item,
+                external: item,
+            })),
         [currencyOptions, currency],
     );
 
@@ -55,11 +50,9 @@ function FormFieldWithCurrency({
     }, [onAdd, newValue, newCurrency]);
 
     return (
-        <li
-            className={classNames(
-                'form-field-net-worth-value-complex',
-                className,
-            )}
+        <Styled.NetWorthValueComplex
+            add={add}
+            className={classNames('form-field-net-worth-value-complex', className)}
         >
             <FormFieldNumber value={newValue} onChange={setNewValue} />
             <FormFieldSelect
@@ -69,20 +62,21 @@ function FormFieldWithCurrency({
                 onChange={setNewCurrency}
             />
             {onRemove && (
-                <Button className="delete-button" onClick={onRemoveCallback}>
+                <ButtonDelete className="delete-button" onClick={onRemoveCallback}>
                     &minus;
-                </Button>
+                </ButtonDelete>
             )}
             {onAdd && (
-                <Button className="add-button" onClick={onAddCallback}>
+                <ButtonAdd className="add-button" onClick={onAddCallback}>
                     +
-                </Button>
+                </ButtonAdd>
             )}
-        </li>
+        </Styled.NetWorthValueComplex>
     );
 }
 
 FormFieldWithCurrency.propTypes = {
+    add: PropTypes.bool,
     className: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
@@ -94,6 +88,7 @@ FormFieldWithCurrency.propTypes = {
 };
 
 FormFieldWithCurrency.defaultProps = {
+    add: false,
     className: {},
     onChange: () => null,
 };
@@ -117,11 +112,7 @@ function complexValueReducer(state, action) {
     return state;
 }
 
-export default function FormFieldNetWorthValue({
-    value,
-    onChange,
-    currencies,
-}) {
+export default function FormFieldNetWorthValue({ value, onChange, currencies }) {
     const isComplex = Array.isArray(value);
 
     const [state, dispatch] = useReducer(complexValueReducer, {
@@ -144,29 +135,19 @@ export default function FormFieldNetWorthValue({
         dispatch({ type: VALUE_SET, value });
     }, [value]);
 
-    const currencyOptions = useMemo(
-        () => currencies.map(({ currency }) => currency),
-        [currencies],
-    );
+    const currencyOptions = useMemo(() => currencies.map(({ currency }) => currency), [currencies]);
 
     const otherCurrencyOptions = useMemo(() => {
         if (!isComplex) {
             return null;
         }
 
-        return currencyOptions.filter(
-            option => !value.some(({ currency }) => currency === option),
-        );
+        return currencyOptions.filter(option => !value.some(({ currency }) => currency === option));
     }, [isComplex, currencyOptions, value]);
 
     const onChangeComplexValue = useCallback(
         ({ index, value: numberValue, currency }) => {
-            if (
-                !(
-                    numberValue === value[index].value &&
-                    currency === value[index].currency
-                )
-            ) {
+            if (!(numberValue === value[index].value && currency === value[index].currency)) {
                 onChange(
                     replaceAtIndex(value, index, {
                         value: numberValue,
@@ -201,18 +182,14 @@ export default function FormFieldNetWorthValue({
     );
 
     return (
-        <div className="form-field form-field-net-worth-value">
-            <span className="complex-toggle">
-                <FormFieldTickbox
-                    item="fx-toggle"
-                    value={isComplex}
-                    onChange={toggleComplex}
-                />
+        <Styled.NetWorthValue className="form-field form-field-net-worth-value">
+            <Styled.NetWorthValueComplexToggle className="complex-toggle">
+                <FormFieldTickbox item="fx-toggle" value={isComplex} onChange={toggleComplex} />
                 {'FX'}
-            </span>
+            </Styled.NetWorthValueComplexToggle>
             {!isComplex && <FormFieldCost value={value} onChange={onChange} />}
             {isComplex && (
-                <ul>
+                <Styled.NetWorthValueList>
                     {value.map(({ value: numberValue, currency }, index) => (
                         <FormFieldWithCurrency
                             key={currency}
@@ -231,13 +208,13 @@ export default function FormFieldNetWorthValue({
                             value={0}
                             currency={otherCurrencyOptions[0]}
                             currencyOptions={otherCurrencyOptions}
-                            className="field-add"
+                            add
                             onAdd={onAddComplexValue}
                         />
                     )}
-                </ul>
+                </Styled.NetWorthValueList>
             )}
-        </div>
+        </Styled.NetWorthValue>
     );
 }
 

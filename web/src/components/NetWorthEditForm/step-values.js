@@ -14,17 +14,20 @@ import {
     category as categoryShape,
     subcategory as subcategoryShape,
 } from '~client/prop-types/net-worth/category';
-import { Button } from '~client/styled/shared/button';
+import { ButtonAdd, ButtonDelete } from '~client/styled/shared/button';
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldSelect from '~client/components/FormField/select';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
+import { STEP_VALUES } from './constants';
+
+import * as Styled from './styles';
 
 function CreditLimitEditor({ creditLimit, setCreditLimit }) {
     return (
         <div className="credit-limit-editor">
             <span className="label">{'Credit limit:'}</span>
-            <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} />
+            <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} small />
         </div>
     );
 }
@@ -36,11 +39,7 @@ CreditLimitEditor.propTypes = {
 
 const SkipToggle = ({ skip, setSkip }) => (
     <div className="skip-toggle">
-        <input
-            type="checkbox"
-            checked={Boolean(skip)}
-            onChange={() => setSkip(!skip)}
-        />
+        <input type="checkbox" checked={Boolean(skip)} onChange={() => setSkip(!skip)} />
         <span className="label">{'Skip in calculations'}</span>
     </div>
 );
@@ -72,47 +71,25 @@ function EditByType({
     const [newSkip, setSkip] = useState(skip);
 
     useEffect(() => {
-        if (
-            !(
-                value === newValue &&
-                initialCreditLimit === creditLimit &&
-                skip === newSkip
-            )
-        ) {
+        if (!(value === newValue && initialCreditLimit === creditLimit && skip === newSkip)) {
             onChange(id, newValue, creditLimit, newSkip);
         }
-    }, [
-        value,
-        newValue,
-        initialCreditLimit,
-        creditLimit,
-        skip,
-        newSkip,
-        onChange,
-        id,
-    ]);
+    }, [value, newValue, initialCreditLimit, creditLimit, skip, newSkip, onChange, id]);
 
     const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
     return (
-        <div className="edit-by-category-value">
-            <h6 className="subcategory">{subcategoryName}</h6>
-            <FormFieldNetWorthValue
-                value={value}
-                onChange={setNewValue}
-                currencies={currencies}
-            />
+        <Styled.EditByCategoryValue className="edit-by-category-value">
+            <Styled.Subcategory className="subcategory">{subcategoryName}</Styled.Subcategory>
+            <FormFieldNetWorthValue value={value} onChange={setNewValue} currencies={currencies} />
             {hasCreditLimit && (
-                <CreditLimitEditor
-                    creditLimit={creditLimit}
-                    setCreditLimit={setCreditLimit}
-                />
+                <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />
             )}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <Button onClick={onRemoveCallback} className="button-delete">
+            <ButtonDelete onClick={onRemoveCallback} className="button-delete">
                 &minus;
-            </Button>
-        </div>
+            </ButtonDelete>
+        </Styled.EditByCategoryValue>
     );
 }
 
@@ -129,13 +106,7 @@ EditByType.propTypes = {
 
 const getFirstOption = options => (options[0] || {}).internal;
 
-function AddByType({
-    isLiability,
-    categories,
-    subcategories,
-    currencies,
-    onAdd,
-}) {
+function AddByType({ isLiability, categories, subcategories, currencies, onAdd }) {
     const categoryOptions = useMemo(
         () =>
             categories.map(({ id, category }) => ({
@@ -158,9 +129,7 @@ function AddByType({
         [category, subcategories],
     );
 
-    const [subcategory, setSubcategory] = useState(
-        getFirstOption(subcategoryOptions),
-    );
+    const [subcategory, setSubcategory] = useState(getFirstOption(subcategoryOptions));
 
     const [value, setValue] = useState(0);
     const [skip, setSkip] = useState(null);
@@ -177,41 +146,34 @@ function AddByType({
     }, [onAdd, subcategory, value, creditLimit, skip]);
 
     return (
-        <div className="add-by-category-value">
-            <span className="category">
-                <span className="label">{'Category:'}</span>
+        <Styled.AddByCategoryValue className="add-by-category-value">
+            <Styled.AddCategory className="category">
+                <Styled.AddLabel className="label">{'Category:'}</Styled.AddLabel>
                 <FormFieldSelect
                     item="category"
                     options={categoryOptions}
                     value={category}
                     onChange={setCategory}
                 />
-            </span>
-            <span className="subcategory">
-                <span className="label">{'Subcategory:'}</span>
+            </Styled.AddCategory>
+            <Styled.AddSubcategory className="subcategory">
+                <Styled.AddLabel className="label">{'Subcategory:'}</Styled.AddLabel>
                 <FormFieldSelect
                     item="subcategory"
                     options={subcategoryOptions}
                     value={subcategory}
                     onChange={setSubcategory}
                 />
-            </span>
-            <FormFieldNetWorthValue
-                value={value}
-                onChange={setValue}
-                currencies={currencies}
-            />
+            </Styled.AddSubcategory>
+            <FormFieldNetWorthValue value={value} onChange={setValue} currencies={currencies} />
             {hasCreditLimit && (
-                <CreditLimitEditor
-                    creditLimit={creditLimit}
-                    setCreditLimit={setCreditLimit}
-                />
+                <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />
             )}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <Button onClick={onAddCallback} className="button-add">
+            <ButtonAdd onClick={onAddCallback} className="button-add">
                 {'+'}
-            </Button>
-        </div>
+            </ButtonAdd>
+        </Styled.AddByCategoryValue>
     );
 }
 
@@ -255,11 +217,7 @@ function useAddValue(item, onEdit) {
             } else {
                 onEdit({
                     ...itemWithValue,
-                    creditLimit: appendCreditLimit(
-                        item,
-                        subcategory,
-                        creditLimit,
-                    ),
+                    creditLimit: appendCreditLimit(item, subcategory, creditLimit),
                 });
             }
         },
@@ -270,9 +228,7 @@ function useAddValue(item, onEdit) {
 function useChangeValue(item, onEdit) {
     return useCallback(
         (id, newValue, creditLimit, skip = null) => {
-            const index = item.values.findIndex(
-                ({ id: valueId }) => valueId === id,
-            );
+            const index = item.values.findIndex(({ id: valueId }) => valueId === id);
             const itemWithValue = {
                 ...item,
                 values: replaceAtIndex(item.values, index, {
@@ -286,20 +242,15 @@ function useChangeValue(item, onEdit) {
                 onEdit(itemWithValue);
             } else {
                 const creditLimitIndex = item.creditLimit.findIndex(
-                    ({ subcategory }) =>
-                        subcategory === item.values[index].subcategory,
+                    ({ subcategory }) => subcategory === item.values[index].subcategory,
                 );
 
                 onEdit({
                     ...itemWithValue,
-                    creditLimit: replaceAtIndex(
-                        item.creditLimit,
-                        creditLimitIndex,
-                        {
-                            ...item.creditLimit[creditLimitIndex],
-                            value: creditLimit,
-                        },
-                    ),
+                    creditLimit: replaceAtIndex(item.creditLimit, creditLimitIndex, {
+                        ...item.creditLimit[creditLimitIndex],
+                        value: creditLimit,
+                    }),
                 });
             }
         },
@@ -310,15 +261,10 @@ function useChangeValue(item, onEdit) {
 function useRemoveValue(item, onEdit) {
     return useCallback(
         id => {
-            const index = item.values.findIndex(
-                ({ id: valueId }) => valueId === id,
-            );
-            const newItemValues = item.values.filter(
-                ({ id: valueId }) => valueId !== id,
-            );
+            const index = item.values.findIndex(({ id: valueId }) => valueId === id);
+            const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
             const creditLimit = item.creditLimit.filter(
-                ({ subcategory }) =>
-                    subcategory !== item.values[index].subcategory,
+                ({ subcategory }) => subcategory !== item.values[index].subcategory,
             );
             onEdit({ ...item, values: newItemValues, creditLimit });
         },
@@ -330,23 +276,20 @@ function CategoryGroup({ category: { category, color }, children }) {
     const [hidden, setHidden] = useState(true);
     const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
 
-    const style = {
-        backgroundColor: color,
-    };
-
     return (
-        <div
-            style={style}
+        <Styled.EditByCategoryGroup
+            style={{ backgroundColor: color }}
             className={classNames('edit-by-category-group', { hidden })}
         >
-            <h6
+            <Styled.SectionSubtitle
+                hidden={hidden}
                 className="net-worth-edit-form-section-subtitle"
                 onClick={onToggleHidden}
             >
                 {category}
-            </h6>
+            </Styled.SectionSubtitle>
             {!hidden && children}
-        </div>
+        </Styled.EditByCategoryGroup>
     );
 }
 
@@ -364,27 +307,15 @@ const toIdMap = items =>
         {},
     );
 
-function StepValues({
-    typeFilter,
-    name,
-    containerProps,
-    item,
-    categories,
-    subcategories,
-    onEdit,
-}) {
+function StepValues({ typeFilter, name, containerProps, item, categories, subcategories, onEdit }) {
     const isLiability = typeFilter === 'liability';
-    const categoriesByType = useMemo(
-        () => categories.filter(({ type }) => type === typeFilter),
-        [categories, typeFilter],
-    );
+    const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [
+        categories,
+        typeFilter,
+    ]);
 
-    const categoriesById = useMemo(() => toIdMap(categoriesByType), [
-        categoriesByType,
-    ]);
-    const subcategoriesById = useMemo(() => toIdMap(subcategories), [
-        subcategories,
-    ]);
+    const categoriesById = useMemo(() => toIdMap(categoriesByType), [categoriesByType]);
+    const subcategoriesById = useMemo(() => toIdMap(subcategories), [subcategories]);
 
     const valuesByType = useMemo(
         () =>
@@ -399,9 +330,7 @@ function StepValues({
                 .reduce(
                     (last, value) => ({
                         ...last,
-                        [value.category.id]: (
-                            last[value.category.id] || []
-                        ).concat([value]),
+                        [value.category.id]: (last[value.category.id] || []).concat([value]),
                     }),
                     {},
                 ),
@@ -411,14 +340,10 @@ function StepValues({
     const valueKeys = useMemo(
         () =>
             Object.keys(valuesByType).sort((idA, idB) => {
-                if (
-                    categoriesById[idA].category < categoriesById[idB].category
-                ) {
+                if (categoriesById[idA].category < categoriesById[idB].category) {
                     return -1;
                 }
-                if (
-                    categoriesById[idA].category < categoriesById[idB].category
-                ) {
+                if (categoriesById[idA].category < categoriesById[idB].category) {
                     return 1;
                 }
 
@@ -433,9 +358,7 @@ function StepValues({
                 ({ id: subcategoryId, categoryId }) =>
                     categoriesByType.some(({ id }) => id === categoryId) &&
                     !Object.keys(valuesByType).some(key =>
-                        valuesByType[key].some(
-                            ({ subcategory }) => subcategory === subcategoryId,
-                        ),
+                        valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId),
                     ),
             ),
         [subcategories, categoriesByType, valuesByType],
@@ -444,9 +367,7 @@ function StepValues({
     const availableCategories = useMemo(
         () =>
             categoriesByType.filter(({ id }) =>
-                availableSubcategories.some(
-                    ({ categoryId }) => categoryId === id,
-                ),
+                availableSubcategories.some(({ categoryId }) => categoryId === id),
             ),
         [categoriesByType, availableSubcategories],
     );
@@ -456,21 +377,20 @@ function StepValues({
     const onRemoveValue = useRemoveValue(item, onEdit);
 
     return (
-        <FormContainer {...containerProps} className="step-values">
-            <h5 className="net-worth-edit-form-section-title">
+        <FormContainer {...containerProps} step={STEP_VALUES} className="step-values">
+            <Styled.SectionTitle className="net-worth-edit-form-section-title">
                 <span className="type">{name}</span>
                 <span className="date">
                     {' - '}
                     {item.date.toISODate()}
                 </span>
-            </h5>
-            <div className="edit-by-category">
+            </Styled.SectionTitle>
+            <Styled.EditByCategory className="edit-by-category">
                 {valueKeys.map(categoryId => (
                     <CategoryGroup
                         key={categoryId}
                         category={categories.find(
-                            ({ id: otherCategoryId }) =>
-                                otherCategoryId === categoryId,
+                            ({ id: otherCategoryId }) => otherCategoryId === categoryId,
                         )}
                     >
                         {valuesByType[categoryId].map(value => (
@@ -498,7 +418,7 @@ function StepValues({
                         onAdd={onAddValue}
                     />
                 )}
-            </div>
+            </Styled.EditByCategory>
         </FormContainer>
     );
 }
@@ -513,9 +433,7 @@ StepValues.propTypes = {
     onEdit: PropTypes.func.isRequired,
 };
 
-export const StepAssets = props => (
-    <StepValues {...props} typeFilter="asset" name="Assets" />
-);
+export const StepAssets = props => <StepValues {...props} typeFilter="asset" name="Assets" />;
 
 export const StepLiabilities = props => (
     <StepValues {...props} typeFilter="liability" name="Liabilities" />

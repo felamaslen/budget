@@ -2,26 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { Button } from '~client/styled/shared/button';
+import * as Styled from './styles';
 
-export default function NextButton({
-    onPrevStep,
-    onNextStep,
-    onFirstStep,
-    onLastStep,
-}) {
+export default function NextButton({ onPrevStep, onNextStep, onFirstStep, onLastStep }) {
     return (
-        <div className="net-worth-edit-form-navigation">
-            <Button
-                className="button-prev-step"
-                onClick={onPrevStep}
-                disabled={onFirstStep}
-            >
+        <Styled.FormNavigation className="net-worth-edit-form-navigation">
+            <Button className="button-prev-step" onClick={onPrevStep} disabled={onFirstStep}>
                 {'Previous'}
             </Button>
             <Button className="button-next-step" onClick={onNextStep}>
                 {onLastStep ? 'Finish' : 'Next'}
             </Button>
-        </div>
+        </Styled.FormNavigation>
     );
 }
 

@@ -28,10 +28,7 @@ import {
 } from '~client/actions/net-worth';
 
 import { costShape } from '~client/prop-types/page/overview';
-import {
-    dataPropTypes,
-    netWorthTableShape,
-} from '~client/prop-types/net-worth/view';
+import { dataPropTypes, netWorthTableShape } from '~client/prop-types/net-worth/view';
 
 import NetWorthView from '~client/components/NetWorthView';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
@@ -82,11 +79,7 @@ function NetWorth({
                 exact
                 path="/net-worth"
                 render={routeProps => (
-                    <NetWorthView
-                        {...routeProps}
-                        table={table}
-                        aggregate={aggregate}
-                    />
+                    <NetWorthView {...routeProps} table={table} aggregate={aggregate} />
                 )}
             />
             <Route
@@ -120,26 +113,13 @@ function NetWorth({
                 )}
             />
             <Styled.TabBar>
-                <Styled.Tab
-                    exact
-                    to="/net-worth"
-                    isButton
-                    activeClassName="selected"
-                >
+                <Styled.Tab exact to="/net-worth" activeClassName="selected">
                     {'View'}
                 </Styled.Tab>
-                <Styled.Tab
-                    to="/net-worth/edit/categories"
-                    isButton
-                    activeClassName="selected"
-                >
+                <Styled.Tab to="/net-worth/edit/categories" activeClassName="selected">
                     {'Categories'}
                 </Styled.Tab>
-                <Styled.Tab
-                    to="/net-worth/edit/list"
-                    isButton
-                    activeClassName="selected"
-                >
+                <Styled.Tab to="/net-worth/edit/list" activeClassName="selected">
                     {'Entries'}
                 </Styled.Tab>
             </Styled.TabBar>
