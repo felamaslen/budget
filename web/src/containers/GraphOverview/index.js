@@ -10,10 +10,7 @@ import { costShape } from '~client/prop-types/page/overview';
 import { getTargets } from '~client/selectors/graph';
 import { getProcessedCost } from '~client/selectors/overview';
 import { getNetWorthSummaryOld } from '~client/selectors/overview/net-worth';
-import {
-    getStartDate,
-    getFutureMonths,
-} from '~client/selectors/overview/common';
+import { getStartDate, getFutureMonths } from '~client/selectors/overview/common';
 import { getCurrentDate } from '~client/selectors/now';
 
 import { mediaQueryMobile } from '~client/constants';
@@ -21,16 +18,9 @@ import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
-import './style.scss';
 import * as Styled from './styles';
 
-const GraphOverviewWrapped = ({
-    futureMonths,
-    cost,
-    netWorthOld,
-    targets,
-    ...commonProps
-}) => (
+const GraphOverviewWrapped = ({ futureMonths, cost, netWorthOld, targets, ...commonProps }) => (
     <Styled.GraphOverview className="graph-container-outer">
         <GraphBalance
             name="balance"
@@ -65,9 +55,7 @@ GraphOverviewWrapped.propTypes = {
 function GraphOverview(props) {
     return (
         <Media query={mediaQueryMobile}>
-            {isMobile => (
-                <GraphOverviewWrapped isMobile={isMobile} {...props} />
-            )}
+            {isMobile => <GraphOverviewWrapped isMobile={isMobile} {...props} />}
         </Media>
     );
 }
