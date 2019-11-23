@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { CategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
+import { CrudList } from '~client/components/CrudList/styles';
 import { FormColor, NetWorthValueComplex } from '~client/components/FormField/styles';
 import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
 import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
@@ -124,6 +125,21 @@ ${AddByCategoryValue} &,
 `;
 
 export const ButtonDelete = styled(ButtonCrud)`
+    ${CrudList} & {
+        display: inline-flex;
+        margin: 0;
+        padding: 0;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        font-size: 18px;
+        line-height: 22px;
+        background: #c00;
+        border-radius: 100%;
+        border: none;
+        box-shadow: none;
+    }
     ${NetWorthEntryDelete} & {
         width: 16px !important;
         height: 16px !important;

@@ -84,6 +84,12 @@ export const CrudListInner = styled.div`
 `;
 
 export const CrudWindow = styled.div`
+    display: flex;
+    margin: 0;
+    padding: 0;
+    flex-flow: column;
+    list-style: none;
+
     ${PageList} & {
         display: flex;
         flex-flow: column;
