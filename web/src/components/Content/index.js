@@ -13,7 +13,7 @@ import {
     PageHoliday,
     PageSocial,
 } from '~client/containers/PageList';
-import './style.scss';
+import { PageWrapper } from '~client/styled/shared/page';
 
 const routes = [
     { key: 'analysis', component: PageAnalysis },
@@ -34,14 +34,14 @@ const NotFound = () => (
 );
 
 const Content = () => (
-    <div className="page-wrapper">
+    <PageWrapper className="page-wrapper">
         <Switch>
             {routes.map(({ key, path = `/${key}`, ...rest }) => (
-                <Route key={key} className="inner" path={path} {...rest} />
+                <Route key={key} path={path} {...rest} />
             ))}
             <Route path="/" component={NotFound} />
         </Switch>
-    </div>
+    </PageWrapper>
 );
 
 Content.propTypes = {
