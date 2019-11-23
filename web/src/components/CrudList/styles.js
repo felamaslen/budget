@@ -3,6 +3,7 @@ import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { PageList, FlexShrink } from '~client/containers/PageList/styles';
 import { NetWorthList } from '~client/components/NetWorthList/styles';
+import { SubcategoryList as NetWorthSubcategoryList } from '~client/components/NetWorthSubcategoryList/styles';
 
 export const CrudList = styled(FlexShrink)`
     ${PageList} & {
@@ -25,6 +26,13 @@ export const CrudList = styled(FlexShrink)`
                 flex-flow: column;
                 min-height: 0;
             `}
+    }
+
+    ${NetWorthSubcategoryList} & {
+        display: grid;
+        grid-template-columns: inherit;
+        grid-row: 2;
+        grid-column: 1 / span 5;
     }
 `;
 
@@ -54,6 +62,11 @@ export const CrudListInner = styled.div`
                       display: grid;
                       grid-template-rows: 448px 32px;
                   `}
+    }
+    ${NetWorthSubcategoryList} & {
+        display: flex;
+        flex-flow: column-reverse;
+        grid-column: 1 / span 5;
     }
     ${breakpoint(breakpoints.mobile)} {
         ${PageList} & {

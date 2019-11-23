@@ -10,6 +10,7 @@ import {
     AddCurrency,
     currencyTitleWidth,
 } from '~client/components/NetWorthEditForm/styles';
+import { SubcategoryList as NetWorthSubcategoryList } from '~client/components/NetWorthSubcategoryList/styles';
 
 export const FormField = styled.div`
     ${breakpoint(breakpoints.mobile)} {
@@ -39,6 +40,36 @@ export const FormField = styled.div`
                 }
             }
         `}
+
+${NetWorthSubcategoryList} & {
+    ${({ item }) => {
+        if (item === 'subcategory') {
+            return css`
+                margin: 0 2em;
+                padding: 0 0.5em;
+                grid-column: 1;
+            `;
+        }
+        if (item === 'credit-limit') {
+            return css`
+                margin: auto;
+                grid-column: 2;
+            `;
+        }
+        if (item === 'opacity') {
+            return css`
+                margin: 0 1em;
+                grid-column: 3;
+
+                input {
+                    width: 100%;
+                }
+            `;
+        }
+
+        return null;
+    }};
+}
 `;
 
 export const FormColor = styled.div``;
