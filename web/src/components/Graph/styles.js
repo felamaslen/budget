@@ -25,7 +25,6 @@ export const Graph = styled.div`
         position: static;
         width: 500px;
         height: 300px;
-        z-index: 2;
         background: ${colors['translucent-heavy']};
         box-shadow: 0 3px 10px ${colors['shadow-l3']};
 
@@ -44,6 +43,10 @@ export const Graph = styled.div`
 `;
 
 export const GraphOuter = styled.div`
+    ${Graph} {
+        overflow: hidden;
+    }
+
     ${breakpoint(breakpoints.mobile)} {
         display: flex;
         width: 100%;
