@@ -18,10 +18,10 @@ export const PageList = styled(Page)`
 export const FlexShrink = styled.div`
     ${breakpoint(breakpoints.mobile)} {
         ${PageList} & {
-            display: flex !important;
-            flex-flow: column !important;
-            flex: 1 1 0 !important;
-            min-height: 0 !important;
+            display: flex;
+            flex-flow: column;
+            flex: 1 1 0;
+            min-height: 0;
         }
     }
 `;
