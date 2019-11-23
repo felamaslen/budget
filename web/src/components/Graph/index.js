@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import * as Styled from './styles';
-import './style.scss';
 
 export default function Graph({
     name,
@@ -25,11 +24,7 @@ export default function Graph({
             {...outerProperties}
         >
             {before && before()}
-            <svg
-                width={width}
-                height={height}
-                {...svgProperties}
-            >
+            <svg width={width} height={height} {...svgProperties}>
                 {children}
             </svg>
             {after && after()}
