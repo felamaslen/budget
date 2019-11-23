@@ -35,6 +35,7 @@ export const colors = {
     'medium-light': rgb(134, 134, 134),
     medium: rgb(115, 115, 115),
     'medium-slightly-dark': rgb(102, 102, 102),
+    'medium-dark-1': rgb(85, 85, 85),
     'slightly-dark': rgb(51, 51, 51),
     light: colorLight,
     'slightly-light': rgb(204, 204, 204),
