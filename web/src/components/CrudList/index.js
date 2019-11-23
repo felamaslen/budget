@@ -10,7 +10,6 @@ import { CREATE_ID } from '~client/constants/data';
 import CrudListItem from '~client/components/CrudList/item';
 
 import * as Styled from './styles';
-import './style.scss';
 
 const itemProps = [
     'items',

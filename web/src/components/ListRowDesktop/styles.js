@@ -6,6 +6,7 @@ import {
     itemHeightDesktopFunds,
 } from '~client/styled/variables';
 import { breakpoint, unimportant } from '~client/styled/mixins';
+import { CrudList } from '~client/components/CrudList/styles';
 import { PageList } from '~client/containers/PageList/styles';
 import { PageFunds } from '~client/containers/PageFunds/styles';
 
@@ -89,7 +90,12 @@ export const RowBody = styled(Row)`
 `;
 
 export const ButtonDelete = styled.div`
-    display: block !important;
+    display: block;
+    ${CrudList} & {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 
     ${breakpoint(breakpoints.mobile)} {
         ${PageFunds} & {
