@@ -8,6 +8,7 @@ import { ButtonCancel } from '~client/styled/shared/button';
 import * as Styled from './styles';
 
 export default function FormContainer({
+    add,
     step,
     className,
     children,
@@ -18,7 +19,7 @@ export default function FormContainer({
     onLastStep,
 }) {
     return (
-        <Styled.FormContainer className={classNames('net-worth-list-item', className)}>
+        <Styled.FormContainer add={add} className={classNames('net-worth-list-item', className)}>
             <ButtonCancel className="button-cancel" onClick={onComplete}>
                 {'Cancel'}
             </ButtonCancel>
@@ -36,11 +37,13 @@ export default function FormContainer({
 }
 
 FormContainer.defaultProps = {
+    add: false,
     step: null,
     className: {},
 };
 
 FormContainer.propTypes = {
+    add: PropTypes.bool,
     step: PropTypes.string,
     className: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     item: PropTypes.object.isRequired,

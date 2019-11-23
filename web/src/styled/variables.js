@@ -46,6 +46,7 @@ export const colors = {
     'shadow-l4': rgba(0, 0, 0, 0.4),
     'shadow-l5': rgba(0, 0, 0, 0.5),
     'shadow-l6': rgba(0, 0, 0, 0.6),
+    'shadow-l8': rgba(0, 0, 0, 0.8),
     'translucent-dark': rgba(220, 220, 220, 0.4),
     'translucent-l15': rgba(255, 255, 255, 0.15),
     'translucent-l1': rgba(255, 255, 255, 0.1),

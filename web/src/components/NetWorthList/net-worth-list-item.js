@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
-import { Button } from '~client/styled/shared/button';
+import { ButtonDelete } from '~client/styled/shared/button';
 import { NetWorthEditForm } from '~client/components/NetWorthEditForm';
 
 import * as Styled from './styles';
@@ -18,25 +18,17 @@ function NetWorthListItem({
     onUpdate,
     onDelete,
 }) {
-    const onActivate = useCallback(() => setActive(item.id), [
-        item.id,
-        setActive,
-    ]);
+    const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
 
     if (noneActive) {
         return (
-            <Styled.ItemSummary
-                className="net-worth-list-item-summary"
-                onClick={onActivate}
-            >
-                <span className="entry-title">
-                    {item.date.toFormat('dd MMM yy')}
-                </span>
-                <span className="button-delete">
-                    <Button className="button-delete-button" onClick={onDelete}>
+            <Styled.ItemSummary className="net-worth-list-item-summary" onClick={onActivate}>
+                <span className="entry-title">{item.date.toFormat('dd MMM yy')}</span>
+                <Styled.ButtonDelete className="button-delete">
+                    <ButtonDelete className="button-delete-button" onClick={onDelete}>
                         &minus;
-                    </Button>
-                </span>
+                    </ButtonDelete>
+                </Styled.ButtonDelete>
             </Styled.ItemSummary>
         );
     }

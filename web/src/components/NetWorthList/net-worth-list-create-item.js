@@ -5,6 +5,7 @@ import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
 import { CREATE_ID } from '~client/constants/data';
 import { NetWorthAddForm } from '~client/components/NetWorthEditForm';
+import * as Styled from './styles';
 
 export default function NetWorthListCreateItem({
     data,
@@ -19,12 +20,9 @@ export default function NetWorthListCreateItem({
 
     if (noneActive) {
         return (
-            <div
-                className="net-worth-list-item-summary"
-                onClick={onActivate}
-            >
+            <Styled.ItemSummary add className="net-worth-list-item-summary" onClick={onActivate}>
                 {'Add a new entry'}
-            </div>
+            </Styled.ItemSummary>
         );
     }
     if (!active) {

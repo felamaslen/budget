@@ -10,6 +10,7 @@ import * as Styled from './styles';
 export const Wrapper = ({ item, value, active, small, children }) => (
     <Styled.FormField
         className={classNames('form-field', `form-field-${item}`, active)}
+        item={item}
         active={active}
         small={small}
     >
@@ -35,12 +36,7 @@ export default function FormFieldText({ label, item, ...props }) {
     const [currentValue, , onChange, ref, onBlur] = useField(props);
 
     return (
-        <Wrapper
-            item={item}
-            value={props.value}
-            active={props.active}
-            small={props.small}
-        >
+        <Wrapper item={item} value={props.value} active={props.active} small={props.small}>
             <input
                 ref={ref}
                 aria-label={label}

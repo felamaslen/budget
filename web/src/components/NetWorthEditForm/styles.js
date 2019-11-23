@@ -20,6 +20,16 @@ export const FormContainer = styled.div`
     flex-flow: column;
     flex: 1;
     min-height: 0;
+
+    ${({ add }) =>
+        add &&
+        css`
+            flex: 1 1 0;
+            min-height: 0;
+            width: 100%;
+            position: relative;
+            background: ${colors.white};
+        `};
 `;
 
 function stepStyles({ step }) {
