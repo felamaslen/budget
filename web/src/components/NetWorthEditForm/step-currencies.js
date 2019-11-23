@@ -1,10 +1,4 @@
-import React, {
-    useRef,
-    useState,
-    useCallback,
-    useMemo,
-    useEffect,
-} from 'react';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import axios from 'axios';
@@ -12,14 +6,14 @@ import { debounce } from 'throttle-debounce';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
-import { Button } from '~client/styled/shared/button';
+import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared/button';
 import FormFieldText from '~client/components/FormField';
 import FormFieldNumber from '~client/components/FormField/number';
-import {
-    netWorthItem,
-    currency as currencyShape,
-} from '~client/prop-types/net-worth/list';
+import { netWorthItem, currency as currencyShape } from '~client/prop-types/net-worth/list';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
+
+import { STEP_CURRENCIES } from './constants';
+import * as Styled from './styles';
 
 const BASE = 'GBP';
 
@@ -48,31 +42,25 @@ function validateCurrency(symbol, currencies = []) {
     return symbolUpper;
 }
 
-const getCurrencies = debounce(
-    100,
-    async (symbols, source, onSuccess, onError, onComplete) => {
-        try {
-            const res = await axios.get(
-                'https://api.exchangeratesapi.io/latest',
-                {
-                    params: {
-                        base: BASE,
-                        symbols: symbols.join(','),
-                    },
-                    cancelToken: source.current.token,
-                },
-            );
+const getCurrencies = debounce(100, async (symbols, source, onSuccess, onError, onComplete) => {
+    try {
+        const res = await axios.get('https://api.exchangeratesapi.io/latest', {
+            params: {
+                base: BASE,
+                symbols: symbols.join(','),
+            },
+            cancelToken: source.current.token,
+        });
 
-            onSuccess(res.data);
-        } catch (err) {
-            if (!axios.isCancel(err)) {
-                onError(err);
-            }
-        } finally {
-            onComplete();
+        onSuccess(res.data);
+    } catch (err) {
+        if (!axios.isCancel(err)) {
+            onError(err);
         }
-    },
-);
+    } finally {
+        onComplete();
+    }
+});
 
 function useCurrencyApi(symbols) {
     const [loading, setLoading] = useState(false);
@@ -104,16 +92,12 @@ function useCurrencyApi(symbols) {
 
     const getRates = useCallback(
         (extraSymbol = null) => {
-            const allSymbols = Array.from(
-                new Set(symbols.concat([extraSymbol])),
-            ).filter(value => value);
+            const allSymbols = Array.from(new Set(symbols.concat([extraSymbol]))).filter(
+                value => value,
+            );
 
             const allCached = allSymbols.every(symbol => rates[symbol]);
-            if (
-                allCached &&
-                cacheTime &&
-                cacheTime > Date.now() - 3600 * 1000
-            ) {
+            if (allCached && cacheTime && cacheTime > Date.now() - 3600 * 1000) {
                 return;
             }
 
@@ -161,13 +145,9 @@ function useRateRefresh(rates, getRates, loading, symbol, setRate) {
 
     const button = useMemo(
         () => (
-            <Button
-                className="button-refresh"
-                disabled={loading}
-                onClick={initRefresh}
-            >
+            <ButtonRefresh className="button-refresh" disabled={loading} onClick={initRefresh}>
                 &#8635;
-            </Button>
+            </ButtonRefresh>
         ),
         [loading, initRefresh],
     );
@@ -175,14 +155,7 @@ function useRateRefresh(rates, getRates, loading, symbol, setRate) {
     return [button, readyToInsert];
 }
 
-function EditCurrency({
-    entry,
-    onChange,
-    onRemove,
-    rates,
-    getRates,
-    loadingRates,
-}) {
+function EditCurrency({ entry, onChange, onRemove, rates, getRates, loadingRates }) {
     const [tempRate, setTempRate] = useState(entry.rate);
     const [error, setError] = useState(null);
 
@@ -212,21 +185,17 @@ function EditCurrency({
     }, [onRemove, entry.id]);
 
     return (
-        <div className="edit-currency">
-            <h5 className="currency-title">{entry.currency}</h5>
-            <div className="input-group">
-                <FormFieldNumber
-                    value={tempRate}
-                    onChange={setTempRate}
-                    disabled={refreshing}
-                />
-                {error && <span className="error">{error}</span>}
-            </div>
+        <Styled.EditCurrency className="edit-currency">
+            <Styled.CurrencyTitle className="currency-title">{entry.currency}</Styled.CurrencyTitle>
+            <Styled.CurrencyInputGroup className="input-group">
+                <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
+                {error && <Styled.Error className="error">{error}</Styled.Error>}
+            </Styled.CurrencyInputGroup>
             {refreshButton}
-            <Button className="button-delete" onClick={onRemoveCallback}>
+            <ButtonDelete className="button-delete" onClick={onRemoveCallback}>
                 &minus;
-            </Button>
-        </div>
+            </ButtonDelete>
+        </Styled.EditCurrency>
     );
 }
 
@@ -266,27 +235,26 @@ function AddCurrency({ currencies, onAdd, rates, getRates, loadingRates }) {
     }, [currencies, onAdd, tempCurrency, tempRate]);
 
     return (
-        <div className="edit-currency edit-currency-add">
-            <h5 className="currency-title">{'Add a currency'}</h5>
-            <div className="form-section">
-                <FormFieldText
-                    value={tempCurrency}
-                    onChange={setTempCurrency}
-                />
-                <div className="input-group">
+        <Styled.AddCurrency className="edit-currency edit-currency-add">
+            <Styled.CurrencyTitle className="currency-title">
+                {'Add a currency'}
+            </Styled.CurrencyTitle>
+            <Styled.FormSection className="form-section">
+                <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
+                <Styled.CurrencyInputGroup className="input-group">
                     <FormFieldNumber
                         value={tempRate}
                         onChange={setTempRate}
                         disabled={refreshing}
                     />
-                    {error && <span className="error">{error}</span>}
-                </div>
+                    {error && <Styled.Error className="error">{error}</Styled.Error>}
+                </Styled.CurrencyInputGroup>
                 {refreshButton}
-                <Button className="button-add" onClick={onAddCallback}>
+                <ButtonAdd className="button-add" onClick={onAddCallback}>
                     +
-                </Button>
-            </div>
-        </div>
+                </ButtonAdd>
+            </Styled.FormSection>
+        </Styled.AddCurrency>
     );
 }
 
@@ -314,14 +282,8 @@ export default function StepCurrencies({ containerProps, item, onEdit }) {
 
     const onChangeValue = useCallback(
         currency => {
-            const index = item.currencies.findIndex(
-                ({ id }) => id === currency.id,
-            );
-            const newCurrencies = replaceAtIndex(
-                item.currencies,
-                index,
-                currency,
-            );
+            const index = item.currencies.findIndex(({ id }) => id === currency.id);
+            const newCurrencies = replaceAtIndex(item.currencies, index, currency);
             onEdit({ ...item, currencies: newCurrencies });
         },
         [onEdit, item],
@@ -329,9 +291,7 @@ export default function StepCurrencies({ containerProps, item, onEdit }) {
 
     const onRemoveValue = useCallback(
         id => {
-            const newCurrencies = item.currencies.filter(
-                ({ id: currencyId }) => currencyId !== id,
-            );
+            const newCurrencies = item.currencies.filter(({ id: currencyId }) => currencyId !== id);
             onEdit({ ...item, currencies: newCurrencies });
         },
         [onEdit, item],
@@ -341,16 +301,16 @@ export default function StepCurrencies({ containerProps, item, onEdit }) {
     const [rates, getRates, loadingRates, errorRates] = useCurrencyApi(symbols);
 
     return (
-        <FormContainer {...containerProps} className="step-currencies">
-            <h5 className="net-worth-edit-form-section-title">
+        <FormContainer {...containerProps} step={STEP_CURRENCIES} className="step-currencies">
+            <Styled.SectionTitle className="net-worth-edit-form-section-title">
                 {'Currencies - '}
                 {item.date.toISODate()}
-            </h5>
+            </Styled.SectionTitle>
             {errorRates && (
-                <div className="error">
+                <Styled.Error className="error">
                     {'Error loading rates: '}
                     {errorRates.message}
-                </div>
+                </Styled.Error>
             )}
             <div
                 className={classNames('edit-currencies', {

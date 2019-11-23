@@ -14,11 +14,11 @@ export const GraphOverview = styled.div`
         height: 300px;
     }
     ${breakpoint(breakpoints.tablet)} {
-        flex: 0 1 520px !important;
-        justify-content: center !important;
-        align-items: center !important;
-        overflow-y: auto !important;
-        height: auto !important;
-        max-height: 640px !important;
+        flex: 0 1 520px;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+        height: auto;
+        max-height: 640px;
     }
 `;

@@ -2,9 +2,14 @@ import styled from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { CategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
-import { FormColor } from '~client/components/FormField/styles';
-import { ButtonDelete } from '~client/components/ListRowDesktop/styles';
-import { ButtonAdd } from '~client/components/ListFootMobile/styles';
+import { FormColor, NetWorthValueComplex } from '~client/components/FormField/styles';
+import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
+import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
+import {
+    EditCurrency,
+    EditByCategory,
+    AddByCategoryValue,
+} from '~client/components/NetWorthEditForm/styles';
 
 export const Button = styled.button`
     display: flex;
@@ -21,13 +26,13 @@ export const Button = styled.button`
     text-transform: uppercase;
     font-weight: bold;
 
-    ${ButtonDelete} & {
+    ${RowButtonDelete} & {
         width: 18px !important;
         height: 18px !important;
         line-height: 18px !important;
     }
 
-    ${ButtonAdd} & {
+    ${MobileButtonAdd} & {
         width: 120px;
         flex-grow: 0;
         background: ${colors.primaryDarkMobile};
@@ -94,4 +99,39 @@ export const Button = styled.button`
         border: none;
         box-shadow: none;
     }
+
+    ${EditCurrency} & {
+        margin: 2px 4px;
+        width: 32px;
+        height: 22px;
+        line-height: 16px;
+    }
 `;
+
+export const ButtonCrud = styled(Button)`
+    ${NetWorthValueComplex} & {
+        margin: 0 3px;
+        top: 0;
+        flex: 0 0 auto;
+        width: 32px;
+    }
+${AddByCategoryValue} &,
+    ${EditByCategory} & {
+                margin: 0 5px;
+                flex: 0 0 auto;
+    }
+`;
+
+export const ButtonDelete = styled(ButtonCrud)``;
+
+export const ButtonAdd = styled(ButtonCrud)``;
+
+export const ButtonCancel = styled(Button)`
+    ${breakpoint(breakpoints.mobile)} {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+`;
+
+export const ButtonRefresh = styled(Button)``;

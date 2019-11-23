@@ -4,10 +4,36 @@ import { breakpoint } from '~client/styled/mixins';
 import { ModalDialog } from '~client/components/ModalDialog/styles';
 import { Row as ListRowDesktop } from '~client/components/ListRowDesktop/styles';
 import { RowCreate } from '~client/components/ListCreateDesktop/styles';
+import {
+    EditByCategory,
+    AddByCategoryValue,
+    AddCurrency,
+    currencyTitleWidth,
+} from '~client/components/NetWorthEditForm/styles';
 
 export const FormField = styled.div`
     ${breakpoint(breakpoints.mobile)} {
         opacity: ${({ small, active }) => (small && !active ? 0.3 : 1)};
+    }
+
+    ${({ small }) =>
+        small &&
+        css`
+            &,
+            input {
+                width: 100px;
+            }
+        `}
+
+    ${AddCurrency} & {
+        margin: 0 5px;
+        flex: 0 0 ${currencyTitleWidth}px;
+        input {
+            margin: 0;
+            padding-left: 0;
+            padding-right: 0;
+            width: ${currencyTitleWidth - 4}px;
+        }
     }
 `;
 
@@ -156,5 +182,55 @@ export const NumTransactions = styled.span`
             css`
                 z-index: 1;
             `}
+    }
+`;
+
+export const NetWorthValue = styled.div`
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+
+    ${EditByCategory} & {
+        flex: 3;
+    }
+    ${AddByCategoryValue} & {
+        margin: 0 10px;
+        flex: 2;
+    }
+`;
+
+export const NetWorthValueComplexToggle = styled.span`
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    font-size: 12px;
+`;
+
+export const NetWorthValueList = styled.ul`
+    margin: 0 6px 0 0;
+    padding: 0;
+    flex: 1;
+    list-style: none;
+`;
+
+export const NetWorthValueComplex = styled.li`
+    display: flex;
+    select {
+        flex: 0 0 60px;
+    }
+
+    ${({ add }) =>
+        add &&
+        css`
+            margin-top: 3px;
+            padding: 3px 0;
+            background: rgba(200, 200, 200, 0.3);
+        `}
+
+    ${FormField} {
+        flex: 0 0 64px;
+        input {
+            width: 64px;
+        }
     }
 `;
