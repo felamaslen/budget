@@ -12,6 +12,14 @@ import { PageFunds } from '~client/containers/PageFunds/styles';
 
 export const RowBase = styled.div``;
 
+const align = ({ column }) => {
+    if (['value', 'cost', 'daily'].includes(column)) {
+        return 'right';
+    }
+
+    return 'left';
+};
+
 export const Column = styled.span`
     flex: 0 0
         ${({ column }) => {
@@ -30,13 +38,8 @@ export const Column = styled.span`
 
             return 'auto';
         }};
-    justify-content: ${({ column }) => {
-        if (['value', 'cost'].includes(column)) {
-            return 'right';
-        }
-
-        return 'left';
-    }};
+    justify-content: ${align};
+    text-align: ${align};
 `;
 
 export const Row = styled(RowBase)`

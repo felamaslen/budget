@@ -208,6 +208,9 @@ export const ModalHeadCost = styled(ModalHeadColumn)`
 `;
 
 export const NumTransactions = styled.span`
+    display: block;
+    text-align: center;
+
     ${ModalDialog} & {
         display: none;
     }

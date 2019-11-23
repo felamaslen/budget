@@ -55,6 +55,7 @@ export default function Editable({ page, id, active, item, onSuggestion, ...prop
     return (
         <Styled.Editable
             active={active}
+            item={item}
             className={classNames('editable', `editable-${item}`, {
                 'editable-active': active,
                 'editable-inactive': !active,

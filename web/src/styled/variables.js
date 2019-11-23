@@ -66,6 +66,7 @@ export const colors = {
     loss: rgb(255, 44, 44),
     'loss-light': rgb(255, 167, 167),
     'loss-translucent': rgba(255, 100, 100, 0.7),
+    'editable-highlight': rgb(255, 140, 0),
     'bg-up': rgb(85, 232, 54),
     'bg-up-hl': rgb(18, 45, 12),
     'bg-up-rev': rgb(51, 44, 44),

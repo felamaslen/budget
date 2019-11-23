@@ -19,55 +19,37 @@ import { CREATE_ID } from '~client/constants/data';
 import * as Styled from './styles';
 
 function FormFieldTransaction({ item, children, onChange, active }) {
-    const onChangeDate = useCallback(
-        value => onChange(item.id, 'date', value),
-        [onChange, item.id],
-    );
-    const onChangeUnits = useCallback(
-        value => onChange(item.id, 'units', value),
-        [onChange, item.id],
-    );
-    const onChangeCost = useCallback(
-        value => onChange(item.id, 'cost', value),
-        [onChange, item.id],
-    );
+    const onChangeDate = useCallback(value => onChange(item.id, 'date', value), [
+        onChange,
+        item.id,
+    ]);
+    const onChangeUnits = useCallback(value => onChange(item.id, 'units', value), [
+        onChange,
+        item.id,
+    ]);
+    const onChangeCost = useCallback(value => onChange(item.id, 'cost', value), [
+        onChange,
+        item.id,
+    ]);
 
     return (
         <Styled.TransactionsListItem className="transactions-list-item">
             <Styled.TransactionRowDate className="row date">
-                <Styled.TransactionLabel className="col label">
-                    {'Date:'}
-                </Styled.TransactionLabel>
+                <Styled.TransactionLabel className="col label">{'Date:'}</Styled.TransactionLabel>
                 <Styled.TransactionCol className="col">
-                    <FormFieldDate
-                        value={item.date}
-                        onChange={onChangeDate}
-                        active={active}
-                    />
+                    <FormFieldDate value={item.date} onChange={onChangeDate} active={active} />
                 </Styled.TransactionCol>
             </Styled.TransactionRowDate>
             <Styled.TransactionRowUnits className="row units">
-                <Styled.TransactionLabel className="col label">
-                    {'Units:'}
-                </Styled.TransactionLabel>
+                <Styled.TransactionLabel className="col label">{'Units:'}</Styled.TransactionLabel>
                 <Styled.TransactionCol className="col">
-                    <FormFieldNumber
-                        value={item.units}
-                        onChange={onChangeUnits}
-                        active={active}
-                    />
+                    <FormFieldNumber value={item.units} onChange={onChangeUnits} active={active} />
                 </Styled.TransactionCol>
             </Styled.TransactionRowUnits>
             <Styled.TransactionRowCost className="row cost">
-                <Styled.TransactionLabel className="col label">
-                    {'Cost:'}
-                </Styled.TransactionLabel>
+                <Styled.TransactionLabel className="col label">{'Cost:'}</Styled.TransactionLabel>
                 <Styled.TransactionCol className="col">
-                    <FormFieldCost
-                        value={item.cost}
-                        onChange={onChangeCost}
-                        active={active}
-                    />
+                    <FormFieldCost value={item.cost} onChange={onChangeCost} active={active} />
                 </Styled.TransactionCol>
             </Styled.TransactionRowCost>
             {children}
@@ -116,8 +98,7 @@ function FormFieldTransactions({ create, ...props }) {
     );
 
     const onRemoveTransaction = useCallback(
-        id =>
-            onChange(currentValue.filter(({ id: valueId }) => valueId !== id)),
+        id => onChange(currentValue.filter(({ id: valueId }) => valueId !== id)),
         [currentValue, onChange],
     );
 
@@ -142,11 +123,8 @@ function FormFieldTransactions({ create, ...props }) {
     }, [newItem, currentValue, onChange]);
 
     return (
-        <Wrapper item="transactions" value={value} active={active}>
-            <Styled.NumTransactions
-                active={active}
-                className="num-transactions"
-            >
+        <Wrapper item="transactions" value={value} active>
+            <Styled.NumTransactions active={active} className="num-transactions">
                 {(value || []).length}
             </Styled.NumTransactions>
             {currentValue && active && (
@@ -167,10 +145,7 @@ function FormFieldTransactions({ create, ...props }) {
                         )}
                         <Styled.TransactionsList className="transactions-list">
                             {create && (
-                                <FormFieldTransaction
-                                    item={newItem}
-                                    onChange={onChangeAddField}
-                                >
+                                <FormFieldTransaction item={newItem} onChange={onChangeAddField}>
                                     <Styled.TransactionRowButton className="row button">
                                         <Button onClick={onAdd}>{'+'}</Button>
                                     </Styled.TransactionRowButton>
@@ -186,11 +161,7 @@ function FormFieldTransactions({ create, ...props }) {
                                 >
                                     {create && (
                                         <span className="row button">
-                                            <Button
-                                                onClick={() =>
-                                                    onRemoveTransaction(item.id)
-                                                }
-                                            >
+                                            <Button onClick={() => onRemoveTransaction(item.id)}>
                                                 &minus;
                                             </Button>
                                         </span>

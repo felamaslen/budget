@@ -5,14 +5,13 @@ import classNames from 'classnames';
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
 import * as Styled from './styles';
-import { Column } from '~client/components/ListRowMobile/styles';
 
 const ListHeadMobile = ({ listColsMobile }) => (
     <Styled.ListHead className="list-head">
         {listColsMobile.map(column => (
-            <Column key={column} column={column} className={classNames('column', column)}>
+            <Styled.Header key={column} column={column} className={classNames('column', column)}>
                 {column}
-            </Column>
+            </Styled.Header>
         ))}
     </Styled.ListHead>
 );
