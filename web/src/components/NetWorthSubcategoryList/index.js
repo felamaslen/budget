@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useContext, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { subcategory as subcategoryShape } from '~client/prop-types/net-worth/category';
+import { NetWorthSubcategoryContext } from '~client/context';
 import { Button } from '~client/styled/shared/button';
 import FormFieldText from '~client/components/FormField';
 import FormFieldRange from '~client/components/FormField/range';
@@ -116,10 +117,10 @@ NetWorthSubcategoryItemForm.defaultProps = {
 
 function NetWorthSubcategoryItem({
     item: { id, categoryId, subcategory, hasCreditLimit, opacity },
-    parent,
     onUpdate,
     onDelete,
 }) {
+    const { parent } = useContext(NetWorthSubcategoryContext);
     const onChange = useCallback(
         values => {
             onUpdate(id, values);
@@ -142,23 +143,25 @@ function NetWorthSubcategoryItem({
 }
 
 NetWorthSubcategoryItem.propTypes = {
-    parent: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     item: subcategoryShape.isRequired,
 };
 
-const NetWorthSubcategoryCreateItem = ({ parent, onCreate }) => (
-    <NetWorthSubcategoryItemForm
-        parent={parent}
-        categoryId={parent.id}
-        onChange={onCreate}
-        buttonText="Create"
-    />
-);
+const NetWorthSubcategoryCreateItem = ({ onCreate }) => {
+    const { parent } = useContext(NetWorthSubcategoryContext);
+
+    return (
+        <NetWorthSubcategoryItemForm
+            parent={parent}
+            categoryId={parent.id}
+            onChange={onCreate}
+            buttonText="Create"
+        />
+    );
+};
 
 NetWorthSubcategoryCreateItem.propTypes = {
-    parent: PropTypes.object.isRequired,
     onCreate: PropTypes.func.isRequired,
 };
 
@@ -169,35 +172,34 @@ export default function NetWorthSubcategoryList({
     onUpdate,
     onDelete,
 }) {
-    const extraProps = {
-        parent,
-    };
+    const netWorthSubcategoryContext = useMemo(() => ({ parent }), [parent]);
 
     const creditLimitDisabled = getCreditLimitDisabled(parent);
 
     return (
-        <Styled.SubcategoryList className="net-worth-subcategory-list">
-            <Styled.ListHead className="net-worth-subcategory-list-head">
-                <Styled.Name className="subcategory">{'Name'}</Styled.Name>
-                {!creditLimitDisabled && (
-                    <Styled.CreditLimit className="credit-limit">
-                        {'Credit limit'}
-                    </Styled.CreditLimit>
-                )}
-                <Styled.Opacity className="opacity">{'Opacity'}</Styled.Opacity>
-            </Styled.ListHead>
-            <CrudList
-                items={subcategories}
-                real
-                Item={NetWorthSubcategoryItem}
-                CreateItem={NetWorthSubcategoryCreateItem}
-                onCreate={onCreate}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                className="net-worth-subcategory-list-crud"
-                extraProps={extraProps}
-            />
-        </Styled.SubcategoryList>
+        <NetWorthSubcategoryContext.Provider value={netWorthSubcategoryContext}>
+            <Styled.SubcategoryList className="net-worth-subcategory-list">
+                <Styled.ListHead className="net-worth-subcategory-list-head">
+                    <Styled.Name className="subcategory">{'Name'}</Styled.Name>
+                    {!creditLimitDisabled && (
+                        <Styled.CreditLimit className="credit-limit">
+                            {'Credit limit'}
+                        </Styled.CreditLimit>
+                    )}
+                    <Styled.Opacity className="opacity">{'Opacity'}</Styled.Opacity>
+                </Styled.ListHead>
+                <CrudList
+                    items={subcategories}
+                    real
+                    Item={NetWorthSubcategoryItem}
+                    CreateItem={NetWorthSubcategoryCreateItem}
+                    onCreate={onCreate}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    className="net-worth-subcategory-list-crud"
+                />
+            </Styled.SubcategoryList>
+        </NetWorthSubcategoryContext.Provider>
     );
 }
 

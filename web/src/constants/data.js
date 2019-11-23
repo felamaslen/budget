@@ -87,7 +87,10 @@ export const PAGES = {
 export const PAGES_LIST = ['funds', 'income', 'bills', 'food', 'general', 'holiday', 'social'];
 export const PAGES_SUGGESTIONS = ['income', 'bills', 'food', 'general', 'holiday', 'social'];
 
-export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
+export const LIST_COLS_MOBILE = {
+    funds: ['item'],
+    default: ['date', 'item', 'cost'],
+};
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;

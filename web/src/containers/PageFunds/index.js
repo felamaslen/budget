@@ -6,16 +6,10 @@ import Media from 'react-media';
 import { mediaQueryMobile } from '~client/constants';
 
 import { fundsViewSoldToggled, fundsRequested } from '~client/actions/funds';
-import {
-    getProcessedFundsRows,
-    getFundsCachedValue,
-} from '~client/selectors/funds';
+import { getProcessedFundsRows, getFundsCachedValue } from '~client/selectors/funds';
 import { rowsShape } from '~client/prop-types/page/rows';
 import { cachedValueShape } from '~client/prop-types/page/funds';
-import {
-    itemHeightDesktop,
-    itemHeightDesktopFunds,
-} from '~client/constants/styles.json';
+import { itemHeightDesktop, itemHeightDesktopFunds } from '~client/constants/styles.json';
 import { PageListBase } from '~client/containers/PageList';
 import StocksList from '~client/containers/StocksList';
 import GraphFunds from '~client/containers/GraphFunds';
@@ -25,8 +19,6 @@ import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
 import ListRowFundsMobile from '~client/components/ListRowFundsMobile';
 
 import * as Styled from './styles';
-
-const LIST_COLS_MOBILE_FUNDS = ['item'];
 
 const FundsInfo = props => (
     <Styled.FundsInfo className="funds-info">
@@ -45,21 +37,14 @@ const FundsInfo = props => (
     </Styled.FundsInfo>
 );
 
-function PageFunds({
-    rows,
-    cachedValue,
-    period,
-    onViewSoldToggle,
-    onReloadPrices,
-}) {
-    const extraProps = useMemo(
+function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices }) {
+    const fundsContext = useMemo(
         () => ({
             period,
             cachedValue,
             TotalValue: ListHeadFundsDesktop,
             AfterRow: ListRowFundsDesktop,
             AfterRowMobile: ListRowFundsMobile,
-            listColsMobile: LIST_COLS_MOBILE_FUNDS,
             onViewSoldToggle,
             onReloadPrices,
         }),
@@ -84,11 +69,8 @@ function PageFunds({
                 itemSize={itemSize}
                 After={FundsInfo}
                 TotalValue={ListHeadFundsDesktop}
-                AfterRow={ListRowFundsDesktop}
-                AfterRowMobile={ListRowFundsMobile}
-                listColsMobile={LIST_COLS_MOBILE_FUNDS}
-                extraProps={extraProps}
                 rows={rows}
+                extraContext={fundsContext}
             />
         </Styled.PageFunds>
     );

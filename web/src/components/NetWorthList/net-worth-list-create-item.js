@@ -1,21 +1,14 @@
-import React, { useCallback } from 'react';
+import React, { useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
-import { netWorthItem } from '~client/prop-types/net-worth/list';
-import { category, subcategory } from '~client/prop-types/net-worth/category';
+import { NetWorthContext, NetWorthListContext } from '~client/context';
 import { CREATE_ID } from '~client/constants/data';
 import { NetWorthAddForm } from '~client/components/NetWorthEditForm';
 import * as Styled from './styles';
 
-export default function NetWorthListCreateItem({
-    data,
-    categories,
-    subcategories,
-    active,
-    setActive,
-    noneActive,
-    onCreate,
-}) {
+export default function NetWorthListCreateItem({ active, setActive, noneActive, onCreate }) {
+    const { categories, subcategories } = useContext(NetWorthContext);
+    const data = useContext(NetWorthListContext);
     const onActivate = useCallback(() => setActive(CREATE_ID), [setActive]);
 
     if (noneActive) {
@@ -41,9 +34,6 @@ export default function NetWorthListCreateItem({
 }
 
 NetWorthListCreateItem.propTypes = {
-    data: PropTypes.arrayOf(netWorthItem.isRequired).isRequired,
-    categories: PropTypes.arrayOf(category.isRequired).isRequired,
-    subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     active: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     noneActive: PropTypes.bool.isRequired,

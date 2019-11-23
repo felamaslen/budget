@@ -1,18 +1,16 @@
-import React, { useCallback } from 'react';
+import React, { useContext, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
+import { PageContext } from '~client/context';
 import { NULL_COMMAND } from '~client/hooks/nav';
 
 export default function CrudListItem({
     data: {
         items,
-        extraProps,
         Item,
         onUpdate,
         onDelete,
-        navState: {
-            nav, activeId, activeColumn, command,
-        },
+        navState: { nav, activeId, activeColumn, command },
         setActive,
         setCommand,
         navNext,
@@ -21,18 +19,22 @@ export default function CrudListItem({
     index,
     style,
 }) {
+    const page = useContext(PageContext);
     const item = items[index];
     const active = activeId === item.id;
     const noneActive = !nav && activeId === null;
     const odd = index % 2 === 1;
 
-    const onDeleteCallback = useCallback((event) => {
-        if (event) {
-            event.stopPropagation();
-        }
-        onDelete(item.id, extraProps, item);
-        setActive(null);
-    }, [item, setActive, onDelete, extraProps]);
+    const onDeleteCallback = useCallback(
+        event => {
+            if (event) {
+                event.stopPropagation();
+            }
+            onDelete(item.id, { page }, item);
+            setActive(null);
+        },
+        [item, setActive, onDelete, page],
+    );
 
     if (!active) {
         return (
@@ -50,7 +52,6 @@ export default function CrudListItem({
                 setActive={setActive}
                 onUpdate={onUpdate}
                 onDelete={onDeleteCallback}
-                {...extraProps}
             />
         );
     }
@@ -70,7 +71,6 @@ export default function CrudListItem({
             setActive={setActive}
             onUpdate={onUpdate}
             onDelete={onDeleteCallback}
-            {...extraProps}
         />
     );
 }
@@ -78,7 +78,6 @@ export default function CrudListItem({
 CrudListItem.propTypes = {
     data: PropTypes.shape({
         items: PropTypes.array.isRequired,
-        extraProps: PropTypes.object,
         Item: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,
         onUpdate: PropTypes.func.isRequired,
         onDelete: PropTypes.func.isRequired,

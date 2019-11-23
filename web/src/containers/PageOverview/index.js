@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { Route } from 'react-router-dom';
 
 import { getOverviewTable } from '~client/selectors/overview';
+import { PageContext } from '~client/context';
 import OverviewTable from '~client/components/OverviewTable';
 import GraphOverview from '~client/containers/GraphOverview';
 import NetWorth from '~client/containers/NetWorth';
@@ -12,13 +13,13 @@ import NetWorth from '~client/containers/NetWorth';
 import * as Styled from './styles';
 
 const PageOverview = ({ table }) => (
-    <>
+    <PageContext.Provider value="overview">
         <Styled.Page className="page page-overview">
             <OverviewTable rows={table} />
             <GraphOverview />
         </Styled.Page>
         <Route path="/net-worth" component={NetWorth} />
-    </>
+    </PageContext.Provider>
 );
 
 PageOverview.propTypes = {
@@ -27,8 +28,7 @@ PageOverview.propTypes = {
             key: PropTypes.string.isRequired,
             cells: PropTypes.arrayOf(
                 PropTypes.shape({
-                    column: PropTypes.arrayOf(PropTypes.string.isRequired)
-                        .isRequired,
+                    column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
                     value: PropTypes.oneOfType([
                         PropTypes.string.isRequired,
                         PropTypes.number.isRequired,

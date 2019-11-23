@@ -1,27 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { PageContext } from '~client/context';
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
 import * as Styled from './styles';
 
-const ListHeadMobile = ({ listColsMobile }) => (
-    <Styled.ListHead className="list-head">
-        {listColsMobile.map(column => (
-            <Styled.Header key={column} column={column} className={classNames('column', column)}>
-                {column}
-            </Styled.Header>
-        ))}
-    </Styled.ListHead>
-);
+export default function ListHeadMobile() {
+    const page = useContext(PageContext);
 
-ListHeadMobile.propTypes = {
-    listColsMobile: PropTypes.arrayOf(PropTypes.string.isRequired),
-};
-
-ListHeadMobile.defaultProps = {
-    listColsMobile: LIST_COLS_MOBILE,
-};
-
-export default ListHeadMobile;
+    return (
+        <Styled.ListHead className="list-head">
+            {(LIST_COLS_MOBILE[page] || LIST_COLS_MOBILE.default).map(column => (
+                <Styled.Header
+                    key={column}
+                    column={column}
+                    className={classNames('column', column)}
+                >
+                    {column}
+                </Styled.Header>
+            ))}
+        </Styled.ListHead>
+    );
+}

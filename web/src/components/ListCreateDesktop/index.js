@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useRef, useEffect, useCallback } from 'react';
 import memoize from 'fast-memoize';
 import compose from 'just-compose';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
+import { PageContext } from '~client/context';
 import { Button } from '~client/styled/shared/button';
 import { ListRowDesktopBase } from '~client/components/ListRowDesktop';
 import { IDENTITY, fieldExists } from '~client/modules/data';
@@ -39,13 +40,13 @@ const initialValues = memoize(page =>
 );
 
 export default function ListCreateDesktop({
-    page,
     activeColumn,
     command,
     setCommand,
     setActive,
     onCreate,
 }) {
+    const page = useContext(PageContext);
     const addBtn = useRef(null);
     const addBtnFocus = activeColumn === ADD_BTN;
     const [wasFocused, setWasFocused] = useState(false);
@@ -97,12 +98,7 @@ export default function ListCreateDesktop({
                 onUpdate={onUpdate}
             />
             <Styled.AddButtonOuter className="add-button-outer">
-                <Button
-                    ref={addBtn}
-                    aria-label="add-button"
-                    onMouseDown={onAddPre}
-                    onClick={onAdd}
-                >
+                <Button ref={addBtn} aria-label="add-button" onMouseDown={onAddPre} onClick={onAdd}>
                     {'Add'}
                 </Button>
             </Styled.AddButtonOuter>
@@ -111,7 +107,6 @@ export default function ListCreateDesktop({
 }
 
 ListCreateDesktop.propTypes = {
-    page: PropTypes.string.isRequired,
     activeColumn: PropTypes.string,
     command: PropTypes.object,
     setCommand: PropTypes.func.isRequired,

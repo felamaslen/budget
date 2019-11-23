@@ -1,21 +1,15 @@
-import React, { useCallback, useMemo } from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext, useCallback, useMemo } from 'react';
 
+import { PageContext, NavContext } from '~client/context';
 import { Button } from '~client/styled/shared/button';
 import ModalDialog from '~client/components/ModalDialog';
 import { CREATE_ID, PAGES } from '~client/constants/data';
 
 import * as Styled from './styles';
 
-export default function ListFootMobile({
-    page,
-    active,
-    setActive,
-    activeItem,
-    onCreate,
-    onUpdate,
-    onDelete,
-}) {
+export default function ListFootMobile() {
+    const page = useContext(PageContext);
+    const { active, setActive, activeItem, onCreate, onUpdate, onDelete } = useContext(NavContext);
     const onAdd = useCallback(() => setActive(CREATE_ID), [setActive]);
 
     const adding = active === CREATE_ID;
@@ -23,6 +17,9 @@ export default function ListFootMobile({
     const modalDialogType = adding ? 'add' : 'edit';
 
     const fields = useMemo(() => {
+        if (!page) {
+            return [];
+        }
         if (!activeItem) {
             return PAGES[page].cols.map(item => ({ item }));
         }
@@ -109,19 +106,3 @@ export default function ListFootMobile({
         </>
     );
 }
-
-ListFootMobile.propTypes = {
-    page: PropTypes.string.isRequired,
-    active: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-    setActive: PropTypes.func.isRequired,
-    activeItem: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-    }),
-    onCreate: PropTypes.func.isRequired,
-    onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired,
-};
-
-ListFootMobile.defaultProps = {
-    activeItem: null,
-};

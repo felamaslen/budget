@@ -1,11 +1,12 @@
 import { connect } from 'react-redux';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { withRouter } from 'react-router';
 import { Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import { NET_WORTH_AGGREGATE } from '~client/constants/data';
 
+import { NetWorthContext } from '~client/context';
 import { getProcessedCost } from '~client/selectors/overview';
 import {
     getCategories,
@@ -69,61 +70,74 @@ function NetWorth({
         return () => clearTimeout(timer.current);
     }, []);
 
+    const netWorthContext = useMemo(
+        () => ({
+            categories,
+            subcategories,
+            onCreateSubcategory,
+            onUpdateSubcategory,
+            onDeleteSubcategory,
+        }),
+        [categories, subcategories, onCreateSubcategory, onUpdateSubcategory, onDeleteSubcategory],
+    );
+
     return (
-        <Styled.NetWorth visible={visible}>
-            <Styled.Meta>
-                <Styled.Title>{'Net worth'}</Styled.Title>
-                <Styled.BackButton onClick={onClose}>&times;</Styled.BackButton>
-            </Styled.Meta>
-            <Route
-                exact
-                path="/net-worth"
-                render={routeProps => (
-                    <NetWorthView {...routeProps} table={table} aggregate={aggregate} />
-                )}
-            />
-            <Route
-                path="/net-worth/edit/categories"
-                render={routeProps => (
-                    <NetWorthCategoryList
-                        {...routeProps}
-                        categories={categories}
-                        subcategories={subcategories}
-                        onCreateCategory={onCreateCategory}
-                        onUpdateCategory={onUpdateCategory}
-                        onDeleteCategory={onDeleteCategory}
-                        onCreateSubcategory={onCreateSubcategory}
-                        onUpdateSubcategory={onUpdateSubcategory}
-                        onDeleteSubcategory={onDeleteSubcategory}
-                    />
-                )}
-            />
-            <Route
-                path="/net-worth/edit/list"
-                render={routeProps => (
-                    <NetWorthList
-                        {...routeProps}
-                        data={entries}
-                        categories={categories}
-                        subcategories={subcategories}
-                        onCreate={onCreateEntry}
-                        onUpdate={onUpdateEntry}
-                        onDelete={onDeleteEntry}
-                    />
-                )}
-            />
-            <Styled.TabBar>
-                <Styled.Tab exact to="/net-worth" activeClassName="selected">
-                    {'View'}
-                </Styled.Tab>
-                <Styled.Tab to="/net-worth/edit/categories" activeClassName="selected">
-                    {'Categories'}
-                </Styled.Tab>
-                <Styled.Tab to="/net-worth/edit/list" activeClassName="selected">
-                    {'Entries'}
-                </Styled.Tab>
-            </Styled.TabBar>
-        </Styled.NetWorth>
+        <NetWorthContext.Provider value={netWorthContext}>
+            <Styled.NetWorth visible={visible}>
+                <Styled.Meta>
+                    <Styled.Title>{'Net worth'}</Styled.Title>
+                    <Styled.BackButton onClick={onClose}>&times;</Styled.BackButton>
+                </Styled.Meta>
+                <Route
+                    exact
+                    path="/net-worth"
+                    render={routeProps => (
+                        <NetWorthView {...routeProps} table={table} aggregate={aggregate} />
+                    )}
+                />
+                <Route
+                    path="/net-worth/edit/categories"
+                    render={routeProps => (
+                        <NetWorthCategoryList
+                            {...routeProps}
+                            categories={categories}
+                            subcategories={subcategories}
+                            onCreateCategory={onCreateCategory}
+                            onUpdateCategory={onUpdateCategory}
+                            onDeleteCategory={onDeleteCategory}
+                            onCreateSubcategory={onCreateSubcategory}
+                            onUpdateSubcategory={onUpdateSubcategory}
+                            onDeleteSubcategory={onDeleteSubcategory}
+                        />
+                    )}
+                />
+                <Route
+                    path="/net-worth/edit/list"
+                    render={routeProps => (
+                        <NetWorthList
+                            {...routeProps}
+                            data={entries}
+                            categories={categories}
+                            subcategories={subcategories}
+                            onCreate={onCreateEntry}
+                            onUpdate={onUpdateEntry}
+                            onDelete={onDeleteEntry}
+                        />
+                    )}
+                />
+                <Styled.TabBar>
+                    <Styled.Tab exact to="/net-worth" activeClassName="selected">
+                        {'View'}
+                    </Styled.Tab>
+                    <Styled.Tab to="/net-worth/edit/categories" activeClassName="selected">
+                        {'Categories'}
+                    </Styled.Tab>
+                    <Styled.Tab to="/net-worth/edit/list" activeClassName="selected">
+                        {'Entries'}
+                    </Styled.Tab>
+                </Styled.TabBar>
+            </Styled.NetWorth>
+        </NetWorthContext.Provider>
     );
 }
 

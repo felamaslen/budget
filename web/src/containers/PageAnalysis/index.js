@@ -2,11 +2,7 @@ import { connect } from 'react-redux';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-    requested,
-    blockRequested,
-    treeItemDisplayToggled,
-} from '~client/actions/analysis';
+import { requested, blockRequested, treeItemDisplayToggled } from '~client/actions/analysis';
 
 import {
     getPeriod,
@@ -23,6 +19,7 @@ import { formatCurrency, capitalise } from '~client/modules/format';
 
 import { timelineShape, costShape } from '~client/prop-types/page/analysis';
 import { blocksShape } from '~client/prop-types/block-packer';
+import { PageContext } from '~client/context';
 
 import Timeline from '~client/containers/PageAnalysis/timeline';
 import Upper from '~client/containers/PageAnalysis/upper';
@@ -47,10 +44,7 @@ function PageAnalysis({
     onBlockClick,
 }) {
     const [activeBlock, setActiveBlock] = useState([null, null]);
-    const onHover = useCallback(
-        (main, sub = null) => setActiveBlock([main, sub]),
-        [],
-    );
+    const onHover = useCallback((main, sub = null) => setActiveBlock([main, sub]), []);
     const [activeMain, activeSub] = activeBlock;
 
     const [treeOpen, setTreeOpen] = useState({});
@@ -72,14 +66,11 @@ function PageAnalysis({
             return '';
         }
         if (activeSub) {
-            const { total } = main.subTree.find(
-                ({ name }) => name === activeSub,
-            );
+            const { total } = main.subTree.find(({ name }) => name === activeSub);
 
-            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(
-                total,
-                { raw: true },
-            )})`;
+            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(total, {
+                raw: true,
+            })})`;
         }
 
         return `${capitalise(activeMain)} (${formatCurrency(main.total, {
@@ -92,35 +83,37 @@ function PageAnalysis({
     }
 
     return (
-        <Styled.Page page="analysis">
-            <Upper
-                period={period}
-                grouping={grouping}
-                page={page}
-                description={description}
-                onRequest={onRequest}
-            />
-            <Styled.Outer>
-                {timeline && <Timeline data={timeline} />}
-                <ListTree
-                    cost={cost}
-                    treeVisible={treeVisible}
-                    toggleTreeItem={toggleTreeItem}
-                    treeOpen={treeOpen}
-                    setTreeOpen={setTreeOpen}
-                    onHover={onHover}
+        <PageContext.Provider page="analysis">
+            <Styled.Page page="analysis">
+                <Upper
+                    period={period}
+                    grouping={grouping}
+                    page={page}
+                    description={description}
+                    onRequest={onRequest}
                 />
-                <BlockPacker
-                    blocks={blocks}
-                    blocksDeep={blocksDeep}
-                    activeMain={activeMain}
-                    activeSub={activeSub}
-                    onHover={onHover}
-                    onClick={onBlockClick}
-                    status={status}
-                />
-            </Styled.Outer>
-        </Styled.Page>
+                <Styled.Outer>
+                    {timeline && <Timeline data={timeline} />}
+                    <ListTree
+                        cost={cost}
+                        treeVisible={treeVisible}
+                        toggleTreeItem={toggleTreeItem}
+                        treeOpen={treeOpen}
+                        setTreeOpen={setTreeOpen}
+                        onHover={onHover}
+                    />
+                    <BlockPacker
+                        blocks={blocks}
+                        blocksDeep={blocksDeep}
+                        activeMain={activeMain}
+                        activeSub={activeSub}
+                        onHover={onHover}
+                        onClick={onBlockClick}
+                        status={status}
+                    />
+                </Styled.Outer>
+            </Styled.Page>
+        </PageContext.Provider>
     );
 }
 

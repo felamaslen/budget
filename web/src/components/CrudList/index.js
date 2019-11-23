@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useContext, useRef, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import memoize from 'memoize-one';
@@ -6,6 +6,7 @@ import { FixedSizeList, VariableSizeList } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { NULL_COMMAND, useNav } from '~client/hooks/nav';
+import { PageContext, NavContext } from '~client/context';
 import { CREATE_ID } from '~client/constants/data';
 import CrudListItem from '~client/components/CrudList/item';
 
@@ -13,7 +14,6 @@ import * as Styled from './styles';
 
 const itemProps = [
     'items',
-    'extraProps',
     'Item',
     'onUpdate',
     'onDelete',
@@ -47,9 +47,9 @@ export default function CrudList({
     onUpdate,
     onDelete,
     className,
-    extraProps,
 }) {
-    const [navState, setActive, setCommand, navNext, navPrev] = useNav(nav, items, extraProps.page);
+    const page = useContext(PageContext);
+    const [navState, setActive, setCommand, navNext, navPrev] = useNav(nav, items, page);
     const { activeId, activeItem, activeColumn, command } = navState;
 
     const createActive = activeId === CREATE_ID;
@@ -57,7 +57,7 @@ export default function CrudList({
 
     const getItemKey = useCallback(index => items[index].id, [items]);
 
-    const metaProps = {
+    const navProps = {
         active: activeId,
         setActive,
         activeItem,
@@ -67,12 +67,10 @@ export default function CrudList({
         onCreate,
         onUpdate,
         onDelete,
-        ...extraProps,
     };
 
     const itemData = getItemData(
         items,
-        extraProps,
         Item,
         onUpdate,
         onDelete,
@@ -104,52 +102,56 @@ export default function CrudList({
                 'create-active': createActive,
             })}
         >
-            {BeforeList && <BeforeList {...metaProps} />}
-            <Styled.CrudListInner active={active} className={`crud-list-inner ${className}-inner`}>
-                {CreateItem && (
-                    <CreateItem
-                        active={createActive}
-                        activeColumn={createActive ? activeColumn : null}
-                        noneActive={noneActive}
-                        setActive={setActive}
-                        command={command.id === CREATE_ID ? command : NULL_COMMAND}
-                        setCommand={setCommand}
-                        navNext={navNext}
-                        navPrev={navPrev}
-                        onCreate={onCreate}
-                        {...extraProps}
-                    />
-                )}
-                <Styled.CrudWindow
+            <NavContext.Provider value={navProps}>
+                {BeforeList && <BeforeList />}
+                <Styled.CrudListInner
                     active={active}
-                    createActive={createActive}
-                    className={`crud-list-window ${className}-window`}
+                    className={`crud-list-inner ${className}-inner`}
                 >
-                    {real &&
-                        items.map((item, index) => (
-                            <CrudListItem key={item.id} data={itemData} index={index} />
-                        ))}
-                    {!real && (
-                        <AutoSizer>
-                            {({ width, height }) => (
-                                <List
-                                    ref={ref}
-                                    width={width}
-                                    height={height}
-                                    itemSize={itemSize}
-                                    itemCount={items.length}
-                                    itemData={itemData}
-                                    itemKey={getItemKey}
-                                    overscanCount={3}
-                                >
-                                    {CrudListItem}
-                                </List>
-                            )}
-                        </AutoSizer>
+                    {CreateItem && (
+                        <CreateItem
+                            active={createActive}
+                            activeColumn={createActive ? activeColumn : null}
+                            noneActive={noneActive}
+                            setActive={setActive}
+                            command={command.id === CREATE_ID ? command : NULL_COMMAND}
+                            setCommand={setCommand}
+                            navNext={navNext}
+                            navPrev={navPrev}
+                            onCreate={onCreate}
+                        />
                     )}
-                </Styled.CrudWindow>
-            </Styled.CrudListInner>
-            {AfterList && <AfterList {...metaProps} />}
+                    <Styled.CrudWindow
+                        active={active}
+                        createActive={createActive}
+                        className={`crud-list-window ${className}-window`}
+                    >
+                        {real &&
+                            items.map((item, index) => (
+                                <CrudListItem key={item.id} data={itemData} index={index} />
+                            ))}
+                        {!real && (
+                            <AutoSizer>
+                                {({ width, height }) => (
+                                    <List
+                                        ref={ref}
+                                        width={width}
+                                        height={height}
+                                        itemSize={itemSize}
+                                        itemCount={items.length}
+                                        itemData={itemData}
+                                        itemKey={getItemKey}
+                                        overscanCount={3}
+                                    >
+                                        {CrudListItem}
+                                    </List>
+                                )}
+                            </AutoSizer>
+                        )}
+                    </Styled.CrudWindow>
+                </Styled.CrudListInner>
+                {AfterList && <AfterList />}
+            </NavContext.Provider>
         </Styled.CrudList>
     );
 }
@@ -168,7 +170,6 @@ CrudList.propTypes = {
     BeforeList: PropTypes.func,
     AfterList: PropTypes.func,
     className: PropTypes.string,
-    extraProps: PropTypes.object,
     onCreate: PropTypes.func.isRequired,
     onRead: PropTypes.func,
     onUpdate: PropTypes.func.isRequired,
@@ -183,7 +184,4 @@ CrudList.defaultProps = {
     BeforeList: null,
     AfterList: null,
     CreateItem: null,
-    extraProps: {
-        page: null,
-    },
 };

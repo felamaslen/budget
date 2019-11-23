@@ -1,10 +1,11 @@
-import React, { memo, useCallback } from 'react';
+import React, { useContext, memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { NULL_COMMAND, ADD_BTN } from '~client/hooks/nav';
 import { VALUE_SET } from '~client/modules/nav';
+import { PageContext, ListContext } from '~client/context';
 import { ButtonDelete } from '~client/styled/shared/button';
 import ListRowCell from '~client/components/ListRowCell';
 import DailyText from '~client/components/DailyText';
@@ -18,8 +19,8 @@ export function ListRowDesktopBase({
     onUpdate,
     command,
     setCommand,
-    page,
 }) {
+    const page = useContext(PageContext);
     const columns = PAGES[page].cols;
 
     const onSuggestionConfirmed = useCallback(
@@ -72,7 +73,6 @@ ListRowDesktopBase.propTypes = {
     item: PropTypes.shape({
         id: PropTypes.string.isRequired,
     }).isRequired,
-    page: PropTypes.string.isRequired,
     activeColumn: PropTypes.string,
     setActive: PropTypes.func.isRequired,
     command: PropTypes.object.isRequired,
@@ -81,7 +81,6 @@ ListRowDesktopBase.propTypes = {
 };
 
 function ListRowDesktop({
-    page,
     item,
     style,
     odd,
@@ -89,10 +88,11 @@ function ListRowDesktop({
     setCommand,
     onUpdate,
     onDelete,
-    AfterRow,
     activeColumn,
     setActive,
 }) {
+    const page = useContext(PageContext);
+    const { AfterRow } = useContext(ListContext);
     const onColumnUpdate = useCallback(
         (column, value) =>
             onUpdate(
@@ -122,7 +122,6 @@ function ListRowDesktop({
         >
             <ListRowDesktopBase
                 item={item}
-                page={page}
                 activeColumn={activeColumn}
                 setActive={setActive}
                 command={command.id && command.id === item.id ? command : NULL_COMMAND}
@@ -142,7 +141,6 @@ function ListRowDesktop({
 
 ListRowDesktop.propTypes = {
     ...ListRowDesktopBase.propTypes,
-    page: PropTypes.string.isRequired,
     style: PropTypes.object,
     odd: PropTypes.bool.isRequired,
     item: PropTypes.shape({
@@ -159,7 +157,6 @@ ListRowDesktop.propTypes = {
     onUpdate: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     daily: PropTypes.number,
-    AfterRow: PropTypes.func,
 };
 
 ListRowDesktop.defaultProps = {

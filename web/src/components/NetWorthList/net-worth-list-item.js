@@ -1,23 +1,15 @@
-import React, { memo, useCallback } from 'react';
+import React, { useContext, memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/prop-types/net-worth/list';
-import { category, subcategory } from '~client/prop-types/net-worth/category';
+import { NetWorthContext } from '~client/context';
 import { ButtonDelete } from '~client/styled/shared/button';
 import { NetWorthEditForm } from '~client/components/NetWorthEditForm';
 
 import * as Styled from './styles';
 
-function NetWorthListItem({
-    item,
-    categories,
-    subcategories,
-    active,
-    noneActive,
-    setActive,
-    onUpdate,
-    onDelete,
-}) {
+function NetWorthListItem({ item, active, noneActive, setActive, onUpdate, onDelete }) {
+    const { categories, subcategories } = useContext(NetWorthContext);
     const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
 
     if (noneActive) {
@@ -49,8 +41,6 @@ function NetWorthListItem({
 
 NetWorthListItem.propTypes = {
     item: netWorthItem.isRequired,
-    categories: PropTypes.arrayOf(category.isRequired).isRequired,
-    subcategories: PropTypes.arrayOf(subcategory.isRequired).isRequired,
     active: PropTypes.bool.isRequired,
     noneActive: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
