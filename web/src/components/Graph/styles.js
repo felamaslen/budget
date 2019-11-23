@@ -1,13 +1,24 @@
 import styled from 'styled-components';
 
-import { breakpoints, colors } from '~client/styled/variables';
+import { breakpoints, colors, graphFundsHeightMobile } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { FundGraph } from '~client/components/GraphFundItem/styles';
+import { GraphFunds } from '~client/containers/GraphFunds/styles';
 
 export const Graph = styled.div`
     width: 100%;
     position: relative;
     z-index: 2;
+
+    ${GraphFunds} & {
+        position: relative;
+        height: ${graphFundsHeightMobile}px;
+
+        ${breakpoint(breakpoints.mobile)} {
+            margin: 10px;
+            height: 300px;
+        }
+    }
 
     ${breakpoint(breakpoints.mobile)} {
         display: inline-block;

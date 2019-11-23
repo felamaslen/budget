@@ -1,40 +1,46 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { rgb } from 'polished';
 
 import { fundItemShape } from '~client/prop-types/page/funds';
-import {
-    GRAPH_FUNDS_MODES,
-    GRAPH_FUNDS_PERIODS,
-} from '~client/constants/graph';
-import { rgba } from '~client/modules/color';
+import { GRAPH_FUNDS_MODES, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 
 import * as Styled from './styles';
 
-function FundItem({ toggleList, setToggleList, id, color, item }) {
+function FundItem({ numItems, toggleList, setToggleList, id, color, item }) {
     const onToggle = useCallback(
         () =>
-            setToggleList(last => ({
-                ...last,
-                [id]: last[id] === false,
-            })),
-        [id, setToggleList],
+            setToggleList(last => {
+                const next = { ...last, [id]: last[id] === false };
+                if (
+                    Object.keys(next).length === numItems &&
+                    Object.keys(next).every(value => !next[value])
+                ) {
+                    return last;
+                }
+
+                return next;
+            }),
+        [id, setToggleList, numItems],
     );
 
-    const style = { borderColor: rgba(color) };
-
     return (
-        <li
-            className={classNames({ enabled: toggleList[id] !== false })}
-            onClick={onToggle}
-        >
-            <span className="checkbox" style={style}></span>
-            <span className="fund">{item}</span>
+        <li className={classNames({ enabled: toggleList[id] !== false })} onClick={onToggle}>
+            <Styled.SidebarCheckbox
+                className="checkbox"
+                style={{
+                    borderColor: rgb(...color),
+                }}
+                checked={toggleList[id] !== false}
+            ></Styled.SidebarCheckbox>
+            <Styled.SidebarFund className="fund">{item}</Styled.SidebarFund>
         </li>
     );
 }
 
 FundItem.propTypes = {
+    numItems: PropTypes.number.isRequired,
     toggleList: PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
     setToggleList: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
@@ -51,9 +57,7 @@ function AfterCanvas({
     setToggleList,
     changePeriod,
 }) {
-    const onChange = useCallback(evt => changePeriod(evt.target.value), [
-        changePeriod,
-    ]);
+    const onChange = useCallback(evt => changePeriod(evt.target.value), [changePeriod]);
 
     return (
         <div className="after-canvas">
@@ -72,6 +76,7 @@ function AfterCanvas({
                         fundItems.map(item => (
                             <FundItem
                                 key={item.id}
+                                numItems={fundItems.length}
                                 {...item}
                                 toggleList={toggleList}
                                 setToggleList={setToggleList}
@@ -79,10 +84,10 @@ function AfterCanvas({
                         ))}
                 </Styled.FundSidebar>
             )}
-            <span className="mode">
+            <Styled.Mode className="mode">
                 {'Mode: '}
                 {GRAPH_FUNDS_MODES[mode]}
-            </span>
+            </Styled.Mode>
         </div>
     );
 }
