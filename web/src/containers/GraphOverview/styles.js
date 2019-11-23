@@ -1,8 +1,13 @@
 import styled from 'styled-components';
-import { breakpoints } from '~client/styled/variables';
+import { breakpoints, colors, graphOverviewHeightMobile } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 
 export const GraphOverview = styled.div`
+    flex: 0 0 auto;
+    height: ${graphOverviewHeightMobile}px;
+    box-shadow: 0 -2px 6px ${colors['shadow-l3']};
+    z-index: 10;
+
     ${breakpoint(breakpoints.mobile)} {
         display: flex;
         flex: 0 0 300px;
