@@ -6,16 +6,10 @@ import Media from 'react-media';
 import { mediaQueryMobile } from '~client/constants';
 
 import { fundsViewSoldToggled, fundsRequested } from '~client/actions/funds';
-import {
-    getProcessedFundsRows,
-    getFundsCachedValue,
-} from '~client/selectors/funds';
+import { getProcessedFundsRows, getFundsCachedValue } from '~client/selectors/funds';
 import { rowsShape } from '~client/prop-types/page/rows';
 import { cachedValueShape } from '~client/prop-types/page/funds';
-import {
-    itemHeightDesktop,
-    itemHeightDesktopFunds,
-} from '~client/constants/styles.json';
+import { itemHeightDesktop, itemHeightDesktopFunds } from '~client/styled/variables';
 import { PageListBase } from '~client/containers/PageList';
 import StocksList from '~client/containers/StocksList';
 import GraphFunds from '~client/containers/GraphFunds';
@@ -45,13 +39,7 @@ const FundsInfo = props => (
     </Styled.FundsInfo>
 );
 
-function PageFunds({
-    rows,
-    cachedValue,
-    period,
-    onViewSoldToggle,
-    onReloadPrices,
-}) {
+function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices }) {
     const extraProps = useMemo(
         () => ({
             period,

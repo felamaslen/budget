@@ -11,7 +11,7 @@ import {
     COLOR_BALANCE_PREDICTED,
     COLOR_BALANCE_STOCKS,
 } from '~client/constants/colors';
-import styles from '~client/constants/styles.json';
+import { graphOverviewHeightMobile } from '~client/styled/variables';
 import { rgba } from '~client/modules/color';
 import { leftPad } from '~client/modules/data';
 import { pixelPropTypes, rangePropTypes } from '~client/prop-types/graph';
@@ -160,7 +160,7 @@ export default function GraphBalance({
     };
 
     if (isMobile) {
-        graphProps.graphHeight = styles.graphOverviewHeightMobile;
+        graphProps.graphHeight = graphOverviewHeightMobile;
     }
 
     return <GraphCashFlow isMobile={isMobile} {...graphProps} />;

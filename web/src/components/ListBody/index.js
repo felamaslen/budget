@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import { rowsShape } from '~client/prop-types/page/rows';
-import { itemHeightDesktop, itemHeightMobile } from '~client/constants/styles.json';
+import { itemHeightDesktop, itemHeightMobile } from '~client/styled/variables';
 
 import CrudList from '~client/components/CrudList';
 import ListHeadDesktop from '~client/components/ListHeadDesktop';
@@ -25,43 +25,26 @@ export default function ListBody({
     onUpdate,
     onDelete,
 }) {
-    const extraProps = useMemo(() => ({
-        page,
-        getDaily,
-        weeklyValue,
-        totalCost,
-        ...pageExtraProps,
-    }), [
-        page,
-        getDaily,
-        weeklyValue,
-        totalCost,
-        pageExtraProps,
-    ]);
+    const extraProps = useMemo(
+        () => ({
+            page,
+            getDaily,
+            weeklyValue,
+            totalCost,
+            ...pageExtraProps,
+        }),
+        [page, getDaily, weeklyValue, totalCost, pageExtraProps],
+    );
 
     const [Item, CreateItem, className, BeforeList, AfterList] = useMemo(() => {
         if (isMobile) {
-            return [
-                ListRowMobile,
-                null,
-                'list-mobile',
-                ListHeadMobile,
-                ListFootMobile,
-            ];
+            return [ListRowMobile, null, 'list-mobile', ListHeadMobile, ListFootMobile];
         }
 
-        return [
-            ListRowDesktop,
-            ListCreateDesktop,
-            'list-desktop',
-            ListHeadDesktop,
-            null,
-        ];
+        return [ListRowDesktop, ListCreateDesktop, 'list-desktop', ListHeadDesktop, null];
     }, [isMobile]);
 
-    const defaultItemSize = isMobile
-        ? itemHeightMobile
-        : itemHeightDesktop;
+    const defaultItemSize = isMobile ? itemHeightMobile : itemHeightDesktop;
 
     return (
         <CrudList

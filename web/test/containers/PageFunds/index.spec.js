@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import React from 'react';
 import { DateTime } from 'luxon';
 import PageFunds from '~client/containers/PageFunds';
-import { widthPageMobile } from '~client/constants/styles.json';
+import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client-test/test_data/state';
 
 const getContainer = (customProps = {}, customState = state => state) => {
@@ -40,7 +40,7 @@ test('list page with extra props', t => {
 });
 
 test('funds meta - mobile info box', t => {
-    window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile - 1 });
+    window.matchMedia.setConfig({ type: 'screen', width: breakpoints.mobile - 1 });
 
     const { container } = getContainer();
 
@@ -62,7 +62,7 @@ test('funds meta - mobile info box', t => {
 });
 
 test('funds meta - desktop info box', t => {
-    window.matchMedia.setConfig({ type: 'screen', width: widthPageMobile + 1 });
+    window.matchMedia.setConfig({ type: 'screen', width: breakpoints.mobile + 1 });
 
     const { container } = getContainer();
     const {

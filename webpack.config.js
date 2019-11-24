@@ -13,15 +13,6 @@ function sassLoader() {
             loader: 'postcss-loader',
         },
         'sass-loader',
-        {
-            loader: '@epegzz/sass-vars-loader',
-            options: {
-                syntax: 'scss',
-                files: [
-                    path.join(__dirname, './web/src/constants/styles.json'),
-                ],
-            },
-        },
     ];
 
     if (__DEV__) {
@@ -34,18 +25,12 @@ function sassLoader() {
 function getPlugins() {
     const common = [
         new DeadCodePlugin({
-            patterns: [
-                'web/src/**/*.js',
-            ],
-            exclude: [
-                'web/test/**/*.js',
-            ],
+            patterns: ['web/src/**/*.js'],
+            exclude: ['web/test/**/*.js'],
         }),
         new webpack.LoaderOptionsPlugin({
             options: {
-                postcss: [
-                    autoprefixer(),
-                ],
+                postcss: [autoprefixer()],
             },
         }),
         new webpack.DefinePlugin({
@@ -106,12 +91,8 @@ const publicPath = '/';
 
 module.exports = {
     entry: getEntry(),
-    devtool: __DEV__
-        ? 'cheap-module-eval-source-map'
-        : false,
-    mode: __DEV__
-        ? 'development'
-        : 'production',
+    devtool: __DEV__ ? 'cheap-module-eval-source-map' : false,
+    mode: __DEV__ ? 'development' : 'production',
     output: {
         path: path.join(__dirname, './web/build'),
         publicPath,
@@ -144,12 +125,14 @@ module.exports = {
                 use: 'css-loader',
             },
             {
-                test: (filename) => {
+                test: filename => {
                     if (filename.match(/favicon\.png/)) {
                         return false;
                     }
 
-                    return filename.match(/\.(woff2?|ttf|eot|svg|png|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/);
+                    return filename.match(
+                        /\.(woff2?|ttf|eot|svg|png|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+                    );
                 },
                 use: {
                     loader: 'file-loader',
