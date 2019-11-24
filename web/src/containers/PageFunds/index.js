@@ -23,7 +23,7 @@ import * as Styled from './styles';
 const LIST_COLS_MOBILE_FUNDS = ['item'];
 
 const FundsInfo = props => (
-    <Styled.FundsInfo className="funds-info">
+    <Styled.FundsInfo>
         <Media query={mediaQueryMobile}>
             {isMobile =>
                 isMobile ? (
@@ -66,7 +66,7 @@ function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices
     );
 
     return (
-        <Styled.PageFunds className="page page-list page-funds">
+        <Styled.PageFunds>
             <PageListBase
                 page="funds"
                 itemSize={itemSize}

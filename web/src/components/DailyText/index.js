@@ -4,7 +4,7 @@ import { formatCurrency } from '~client/modules/format';
 import { Column } from '~client/components/ListRowDesktop/styles';
 
 const DailyText = ({ value }) => (
-    <Column column="daily" className="daily">
+    <Column column="daily">
         {!(value === null || typeof value === 'undefined') && formatCurrency(value)}
     </Column>
 );

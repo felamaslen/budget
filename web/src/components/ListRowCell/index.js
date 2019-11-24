@@ -1,6 +1,5 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import Editable from '~client/components/Editable';
 import * as Styled from './styles';
@@ -25,11 +24,7 @@ function ListRowCell({
         [onUpdate, onSuggestionConfirmed, column],
     );
 
-    const onSetActive = useCallback(() => setActive(id, column), [
-        setActive,
-        id,
-        column,
-    ]);
+    const onSetActive = useCallback(() => setActive(id, column), [setActive, id, column]);
 
     const onChange = useCallback(
         (editColumn, newValue) => {
@@ -43,12 +38,7 @@ function ListRowCell({
     );
 
     return (
-        <Styled.Cell
-            column={column}
-            active={active}
-            className={classNames('cell', column, { active })}
-            onMouseDown={onSetActive}
-        >
+        <Styled.Cell column={column} active={active} onMouseDown={onSetActive}>
             <Editable
                 page={page}
                 id={id}
@@ -77,4 +67,4 @@ ListRowCell.propTypes = {
     onUpdate: PropTypes.func.isRequired,
 };
 
-export default React.memo(ListRowCell);
+export default memo(ListRowCell);

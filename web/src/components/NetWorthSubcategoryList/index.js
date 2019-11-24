@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { subcategory as subcategoryShape } from '~client/prop-types/net-worth/category';
 import { InlineFlexCenter } from '~client/styled/shared/layout';
@@ -53,9 +52,6 @@ function NetWorthSubcategoryItemForm({
 
     return (
         <Styled.ItemForm
-            className={classNames('net-worth-subcategory-item-form', {
-                touched,
-            })}
             style={{
                 backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`,
             }}
@@ -81,16 +77,14 @@ function NetWorthSubcategoryItemForm({
                 value={tempOpacity}
                 onChange={setTempOpacity}
             />
-            <Styled.ButtonChange className="button-change">
-                <Button disabled={!touched} className="button-change-button" onClick={onChangeItem}>
+            <Styled.ButtonChange>
+                <Button disabled={!touched} onClick={onChangeItem}>
                     {buttonText}
                 </Button>
             </Styled.ButtonChange>
             {onDelete && (
-                <InlineFlexCenter className="button-delete">
-                    <ButtonDelete className="button-delete-button" onClick={onDelete}>
-                        &minus;
-                    </ButtonDelete>
+                <InlineFlexCenter>
+                    <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
                 </InlineFlexCenter>
             )}
         </Styled.ItemForm>
@@ -177,15 +171,11 @@ export default function NetWorthSubcategoryList({
     const creditLimitDisabled = getCreditLimitDisabled(parent);
 
     return (
-        <Styled.SubcategoryList className="net-worth-subcategory-list">
-            <Styled.ListHead className="net-worth-subcategory-list-head">
-                <Styled.Name className="subcategory">{'Name'}</Styled.Name>
-                {!creditLimitDisabled && (
-                    <Styled.CreditLimit className="credit-limit">
-                        {'Credit limit'}
-                    </Styled.CreditLimit>
-                )}
-                <Styled.Opacity className="opacity">{'Opacity'}</Styled.Opacity>
+        <Styled.SubcategoryList>
+            <Styled.ListHead>
+                <Styled.Name>{'Name'}</Styled.Name>
+                {!creditLimitDisabled && <Styled.CreditLimit>{'Credit limit'}</Styled.CreditLimit>}
+                <Styled.Opacity>{'Opacity'}</Styled.Opacity>
             </Styled.ListHead>
             <CrudList
                 items={subcategories}
@@ -195,7 +185,6 @@ export default function NetWorthSubcategoryList({
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
-                className="net-worth-subcategory-list-crud"
                 extraProps={extraProps}
             />
         </Styled.SubcategoryList>

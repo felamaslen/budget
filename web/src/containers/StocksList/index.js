@@ -1,15 +1,11 @@
 import { connect } from 'react-redux';
 import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 
 import { dataShape } from '~client/prop-types/graph';
 import GraphStocks from '~client/containers/StocksList/GraphStocks';
-import {
-    stocksListRequested,
-    stockPricesRequested,
-} from '~client/actions/stocks';
+import { stocksListRequested, stockPricesRequested } from '~client/actions/stocks';
 import { sigFigs } from '~client/modules/format';
 
 import * as Styled from './styles';
@@ -26,20 +22,7 @@ const stockShape = PropTypes.shape({
 
 const StockListItems = ({ stockMap }) =>
     stockMap.map(({ code, name, price, gain, up, down }) => (
-        <Styled.Item
-            key={code}
-            up={gain > 0}
-            down={gain < 0}
-            hlUp={up}
-            hlDown={down}
-            className={classNames({
-                up: gain > 0,
-                down: gain < 0,
-                'hl-up': up,
-                'hl-down': down,
-            })}
-            title={name}
-        >
+        <Styled.Item key={code} up={gain > 0} down={gain < 0} hlUp={up} hlDown={down} title={name}>
             <Styled.NameColumn>
                 <Styled.Code>{code}</Styled.Code>
                 <Styled.Title>{name}</Styled.Title>
@@ -106,9 +89,7 @@ function StocksList({
     }
 
     return (
-        <Styled.List
-            className={classNames('graph-container-outer', { loading })}
-        >
+        <Styled.List>
             <Styled.StocksGraph>
                 <Styled.ListUl>
                     <StockListItems stockMap={shares} />
@@ -118,9 +99,7 @@ function StocksList({
                     <Styled.SidebarList>
                         <li>
                             <Styled.NameColumn>Overall</Styled.NameColumn>
-                            <Styled.Text className="change">
-                                {sigFigs(weightedGain, 3)}%
-                            </Styled.Text>
+                            <Styled.Text>{sigFigs(weightedGain, 3)}%</Styled.Text>
                         </li>
                         <StockListItems stockMap={indices} />
                     </Styled.SidebarList>

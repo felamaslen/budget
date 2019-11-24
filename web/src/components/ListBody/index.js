@@ -36,12 +36,12 @@ export default function ListBody({
         [page, getDaily, weeklyValue, totalCost, pageExtraProps],
     );
 
-    const [Item, CreateItem, className, BeforeList, AfterList] = useMemo(() => {
+    const [Item, CreateItem, BeforeList, AfterList] = useMemo(() => {
         if (isMobile) {
-            return [ListRowMobile, null, 'list-mobile', ListHeadMobile, ListFootMobile];
+            return [ListRowMobile, null, ListHeadMobile, ListFootMobile];
         }
 
-        return [ListRowDesktop, ListCreateDesktop, 'list-desktop', ListHeadDesktop, null];
+        return [ListRowDesktop, ListCreateDesktop, ListHeadDesktop, null];
     }, [isMobile]);
 
     const defaultItemSize = isMobile ? itemHeightMobile : itemHeightDesktop;
@@ -55,7 +55,6 @@ export default function ListBody({
             CreateItem={CreateItem}
             BeforeList={BeforeList}
             AfterList={AfterList}
-            className={className}
             extraProps={extraProps}
             onCreate={onCreate}
             onUpdate={onUpdate}

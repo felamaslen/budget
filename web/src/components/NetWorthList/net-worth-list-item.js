@@ -22,12 +22,10 @@ function NetWorthListItem({
 
     if (noneActive) {
         return (
-            <Styled.ItemSummary className="net-worth-list-item-summary" onClick={onActivate}>
-                <span className="entry-title">{item.date.toFormat('dd MMM yy')}</span>
-                <Styled.ButtonDelete className="button-delete">
-                    <ButtonDelete className="button-delete-button" onClick={onDelete}>
-                        &minus;
-                    </ButtonDelete>
+            <Styled.ItemSummary onClick={onActivate}>
+                <span>{item.date.toFormat('dd MMM yy')}</span>
+                <Styled.ButtonDelete>
+                    <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
                 </Styled.ButtonDelete>
             </Styled.ItemSummary>
         );

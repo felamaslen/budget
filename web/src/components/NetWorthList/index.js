@@ -24,7 +24,7 @@ export default function NetWorthList({
     };
 
     return (
-        <Styled.NetWorthList className="net-worth-list">
+        <Styled.NetWorthList>
             <CrudList
                 items={data}
                 real
@@ -33,7 +33,6 @@ export default function NetWorthList({
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
-                className="net-worth-list-crud"
                 extraProps={extraProps}
             />
         </Styled.NetWorthList>

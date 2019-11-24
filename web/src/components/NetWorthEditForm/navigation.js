@@ -6,13 +6,11 @@ import * as Styled from './styles';
 
 export default function NextButton({ onPrevStep, onNextStep, onFirstStep, onLastStep }) {
     return (
-        <Styled.FormNavigation className="net-worth-edit-form-navigation">
-            <Button className="button-prev-step" onClick={onPrevStep} disabled={onFirstStep}>
+        <Styled.FormNavigation>
+            <Button onClick={onPrevStep} disabled={onFirstStep}>
                 {'Previous'}
             </Button>
-            <Button className="button-next-step" onClick={onNextStep}>
-                {onLastStep ? 'Finish' : 'Next'}
-            </Button>
+            <Button onClick={onNextStep}>{onLastStep ? 'Finish' : 'Next'}</Button>
         </Styled.FormNavigation>
     );
 }

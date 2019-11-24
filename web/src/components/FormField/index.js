@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { formatItem } from '~client/modules/format';
 import { useField } from '~client/hooks/field';
@@ -8,13 +7,7 @@ import { useField } from '~client/hooks/field';
 import * as Styled from './styles';
 
 export const Wrapper = ({ item, value, active, invalid, small, children }) => (
-    <Styled.FormField
-        className={classNames('form-field', `form-field-${item}`, active)}
-        item={item}
-        active={active}
-        invalid={invalid}
-        small={small}
-    >
+    <Styled.FormField item={item} active={active} invalid={invalid} small={small}>
         {active && children}
         {!active && formatItem(item, value)}
     </Styled.FormField>

@@ -13,7 +13,7 @@ import * as Styled from './styles';
 
 const PageOverview = ({ table }) => (
     <>
-        <Styled.Page className="page page-overview">
+        <Styled.Page>
             <OverviewTable rows={table} />
             <GraphOverview />
         </Styled.Page>
@@ -27,8 +27,7 @@ PageOverview.propTypes = {
             key: PropTypes.string.isRequired,
             cells: PropTypes.arrayOf(
                 PropTypes.shape({
-                    column: PropTypes.arrayOf(PropTypes.string.isRequired)
-                        .isRequired,
+                    column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
                     value: PropTypes.oneOfType([
                         PropTypes.string.isRequired,
                         PropTypes.number.isRequired,

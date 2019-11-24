@@ -1,6 +1,5 @@
 import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import compose from 'just-compose';
 import { DateTime } from 'luxon';
 
@@ -138,17 +137,10 @@ export default function ModalDialog({
     }
 
     return (
-        <Styled.ModalDialog className={classNames('modal-dialog', type)}>
-            <Styled.ModalInner
-                active={active}
-                isLoading={loading}
-                className={classNames('modal-dialog-inner', {
-                    hidden: !active,
-                    loading,
-                })}
-            >
-                <Styled.Title className="title">{title}</Styled.Title>
-                <Styled.FormList className="form-list">
+        <Styled.ModalDialog>
+            <Styled.ModalInner active={active} isLoading={loading}>
+                <Styled.Title>{title}</Styled.Title>
+                <Styled.FormList>
                     {fields.map(({ item, value }) => (
                         <ModalDialogField
                             key={item}
@@ -159,30 +151,15 @@ export default function ModalDialog({
                         />
                     ))}
                 </Styled.FormList>
-                <Styled.Buttons className="buttons">
-                    <ButtonCancel
-                        type="button"
-                        className="button-cancel"
-                        disabled={loading}
-                        onClick={onCancel}
-                    >
+                <Styled.Buttons>
+                    <ButtonCancel type="button" disabled={loading} onClick={onCancel}>
                         {'nope.avi'}
                     </ButtonCancel>
-                    <ButtonSubmit
-                        type="button"
-                        className="button-submit"
-                        disabled={loading}
-                        onClick={onSubmitCallback}
-                    >
+                    <ButtonSubmit type="button" disabled={loading} onClick={onSubmitCallback}>
                         {'Do it.'}
                     </ButtonSubmit>
                     {canRemove && (
-                        <Button
-                            type="button"
-                            className="button-remove"
-                            disabled={loading}
-                            onClick={onRemove}
-                        >
+                        <Button type="button" disabled={loading} onClick={onRemove}>
                             &minus;
                         </Button>
                     )}

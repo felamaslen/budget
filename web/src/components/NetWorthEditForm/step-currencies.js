@@ -1,6 +1,5 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import axios from 'axios';
 import { debounce } from 'throttle-debounce';
 import shortid from 'shortid';
@@ -145,7 +144,7 @@ function useRateRefresh(rates, getRates, loading, symbol, setRate) {
 
     const button = useMemo(
         () => (
-            <ButtonRefresh className="button-refresh" disabled={loading} onClick={initRefresh}>
+            <ButtonRefresh disabled={loading} onClick={initRefresh}>
                 &#8635;
             </ButtonRefresh>
         ),
@@ -185,16 +184,14 @@ function EditCurrency({ entry, onChange, onRemove, rates, getRates, loadingRates
     }, [onRemove, entry.id]);
 
     return (
-        <Styled.EditCurrency className="edit-currency">
-            <Styled.CurrencyTitle className="currency-title">{entry.currency}</Styled.CurrencyTitle>
-            <Styled.CurrencyInputGroup className="input-group">
+        <Styled.EditCurrency>
+            <Styled.CurrencyTitle>{entry.currency}</Styled.CurrencyTitle>
+            <Styled.CurrencyInputGroup>
                 <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
-                {error && <Styled.Error className="error">{error}</Styled.Error>}
+                {error && <Styled.Error>{error}</Styled.Error>}
             </Styled.CurrencyInputGroup>
             {refreshButton}
-            <ButtonDelete className="button-delete" onClick={onRemoveCallback}>
-                &minus;
-            </ButtonDelete>
+            <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>
         </Styled.EditCurrency>
     );
 }
@@ -235,24 +232,20 @@ function AddCurrency({ currencies, onAdd, rates, getRates, loadingRates }) {
     }, [currencies, onAdd, tempCurrency, tempRate]);
 
     return (
-        <Styled.AddCurrency className="edit-currency edit-currency-add">
-            <Styled.CurrencyTitle className="currency-title">
-                {'Add a currency'}
-            </Styled.CurrencyTitle>
-            <Styled.FormSection className="form-section">
+        <Styled.AddCurrency>
+            <Styled.CurrencyTitle>{'Add a currency'}</Styled.CurrencyTitle>
+            <Styled.FormSection>
                 <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
-                <Styled.CurrencyInputGroup className="input-group">
+                <Styled.CurrencyInputGroup>
                     <FormFieldNumber
                         value={tempRate}
                         onChange={setTempRate}
                         disabled={refreshing}
                     />
-                    {error && <Styled.Error className="error">{error}</Styled.Error>}
+                    {error && <Styled.Error>{error}</Styled.Error>}
                 </Styled.CurrencyInputGroup>
                 {refreshButton}
-                <ButtonAdd className="button-add" onClick={onAddCallback}>
-                    +
-                </ButtonAdd>
+                <ButtonAdd onClick={onAddCallback}>+</ButtonAdd>
             </Styled.FormSection>
         </Styled.AddCurrency>
     );
@@ -301,22 +294,18 @@ export default function StepCurrencies({ containerProps, item, onEdit }) {
     const [rates, getRates, loadingRates, errorRates] = useCurrencyApi(symbols);
 
     return (
-        <FormContainer {...containerProps} step={STEP_CURRENCIES} className="step-currencies">
-            <Styled.SectionTitle className="net-worth-edit-form-section-title">
+        <FormContainer {...containerProps} step={STEP_CURRENCIES}>
+            <Styled.SectionTitle>
                 {'Currencies - '}
                 {item.date.toISODate()}
             </Styled.SectionTitle>
             {errorRates && (
-                <Styled.Error className="error">
+                <Styled.Error>
                     {'Error loading rates: '}
                     {errorRates.message}
                 </Styled.Error>
             )}
-            <div
-                className={classNames('edit-currencies', {
-                    loading: loadingRates,
-                })}
-            >
+            <div>
                 {item.currencies.map(currency => (
                     <EditCurrency
                         key={currency.id}

@@ -4,10 +4,8 @@ import PropTypes from 'prop-types';
 import * as Styled from './styles';
 
 const AppLogo = ({ loading, unsaved }) => (
-    <Styled.AppLogo className="app-logo">
-        {unsaved && (
-            <Styled.QueueNotSaved>{'Unsaved changes!'}</Styled.QueueNotSaved>
-        )}
+    <Styled.AppLogo>
+        {unsaved && <Styled.QueueNotSaved>{'Unsaved changes!'}</Styled.QueueNotSaved>}
         <Styled.Logo>
             <span>{'Budget'}</span>
             {loading && <Styled.LoadingApi />}

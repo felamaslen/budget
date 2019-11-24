@@ -20,7 +20,7 @@ export default function NetWorthListCreateItem({
 
     if (noneActive) {
         return (
-            <Styled.ItemSummary add className="net-worth-list-item-summary" onClick={onActivate}>
+            <Styled.ItemSummary add onClick={onActivate}>
                 {'Add a new entry'}
             </Styled.ItemSummary>
         );

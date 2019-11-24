@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { InlineFlexCenter } from '~client/styled/shared/layout';
 import { Button, ButtonDelete } from '~client/styled/shared/button';
@@ -42,14 +41,7 @@ function NetWorthCategoryItemForm({ item: { id, type, category, color }, onChang
     );
 
     return (
-        <Styled.CategoryItemForm
-            className={classNames('net-worth-category-item-form', {
-                touched,
-                asset: type === 'asset',
-                liability: type === 'liability',
-            })}
-            style={{ backgroundColor: tempColor }}
-        >
+        <Styled.CategoryItemForm style={{ backgroundColor: tempColor }}>
             <FormFieldSelect
                 item="type"
                 options={typeOptions}
@@ -58,7 +50,7 @@ function NetWorthCategoryItemForm({ item: { id, type, category, color }, onChang
             />
             <FormFieldText item="category" value={tempCategory} onChange={setTempCategory} />
             <FormFieldColor value={tempColor} onChange={setTempColor} />
-            <Button disabled={!touched} className="button-change" onClick={onChangeItem}>
+            <Button disabled={!touched} onClick={onChangeItem}>
                 {buttonText}
             </Button>
         </Styled.CategoryItemForm>
@@ -118,19 +110,10 @@ function NetWorthCategoryItem({
     const onExpand = useCallback(() => onExpandToggle(item.id), [onExpandToggle, item.id]);
 
     return (
-        <Styled.CategoryItem
-            className={classNames('net-worth-category-item', {
-                expanded: expanded === item.id,
-            })}
-            style={itemStyle}
-        >
-            <Styled.CategoryItemMain className="net-worth-category-item-main">
-                <Styled.ToggleVisibility className="button-toggle-visibility">
-                    <Button
-                        expanded={expanded}
-                        className="button-toggle-visibility-button"
-                        onClick={onExpand}
-                    />
+        <Styled.CategoryItem style={itemStyle}>
+            <Styled.CategoryItemMain>
+                <Styled.ToggleVisibility>
+                    <Button expanded={expanded} onClick={onExpand} />
                 </Styled.ToggleVisibility>
                 <NetWorthCategoryItemForm
                     key="category-form"
@@ -138,10 +121,8 @@ function NetWorthCategoryItem({
                     onChange={onChange}
                     buttonText="Update"
                 />
-                <InlineFlexCenter className="button-delete">
-                    <ButtonDelete className="button-delete-button" onClick={onDelete}>
-                        &minus;
-                    </ButtonDelete>
+                <InlineFlexCenter>
+                    <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
                 </InlineFlexCenter>
             </Styled.CategoryItemMain>
             {expanded === item.id && (
@@ -177,7 +158,7 @@ NetWorthCategoryItem.defaultProps = {
 };
 
 const NetWorthCategoryCreateItem = ({ onCreate }) => (
-    <Styled.CategoryItem className="net-worth-category-item">
+    <Styled.CategoryItem>
         <NetWorthCategoryItemForm onChange={onCreate} buttonText="Create" />
     </Styled.CategoryItem>
 );
@@ -224,7 +205,7 @@ export default function NetWorthCategoryList({
     }
 
     return (
-        <Styled.CategoryList className="net-worth-category-list">
+        <Styled.CategoryList>
             <CrudList
                 items={categories}
                 real
@@ -233,7 +214,6 @@ export default function NetWorthCategoryList({
                 onCreate={onCreateCategory}
                 onUpdate={onUpdateCategory}
                 onDelete={onDeleteCategory}
-                className="net-worth-category-list-crud"
                 extraProps={extraProps}
             />
         </Styled.CategoryList>

@@ -8,7 +8,7 @@ import * as Styled from './styles';
 function getShortDate(dateIso) {
     if (dateIso.month % 3 === 0) {
         return (
-            <Styled.DateQuarter className="date-short-quarter">
+            <Styled.DateQuarter>
                 {dateIso.year - 2000}
                 {'Q'}
                 {Math.floor(dateIso.month / 3)}
@@ -24,7 +24,7 @@ export default function NetWorthViewRow({ date, assets, liabilities, fti, expens
     const dateLong = useMemo(() => date.toLocaleString(), [date]);
 
     return (
-        <Styled.Row className="net-worth-view-row">
+        <Styled.Row>
             <Styled.Column item="date-short">{dateShort}</Styled.Column>
             <Styled.Column item="date-long">{dateLong}</Styled.Column>
             <Styled.Column item="assets">{formatCurrency(assets)}</Styled.Column>

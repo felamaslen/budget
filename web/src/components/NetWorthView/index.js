@@ -9,23 +9,21 @@ import * as Styled from './styles';
 
 export default function NetWorthView({ table, aggregate }) {
     return (
-        <Styled.NetWorthView className="net-worth-view">
-            <Styled.Table className="net-worth-view-table">
+        <Styled.NetWorthView>
+            <Styled.Table>
                 <thead>
-                    <Styled.RowCategories className="row-categories">
+                    <Styled.RowCategories>
                         <SumByCategory item="cash-easy-access" aggregate={aggregate} />
                         <SumByCategory item="stocks" aggregate={aggregate} />
                         <Styled.Header item="assets">{'Assets'}</Styled.Header>
                         <Styled.Header item="liabilities">{'Liabilities'}</Styled.Header>
-                        <Styled.Header rowSpan={2} item="main" className="net-worth-header">
+                        <Styled.Header rowSpan={2} item="main">
                             {'Net Worth'}
                         </Styled.Header>
                         <Styled.Header item="expenses">{'Expenses'}</Styled.Header>
-                        <Styled.Header item="expenses" className="fti">
-                            {'FTI'}
-                        </Styled.Header>
+                        <Styled.Header item="expenses">{'FTI'}</Styled.Header>
                     </Styled.RowCategories>
-                    <Styled.RowSubtitle className="row-subtitle">
+                    <Styled.RowSubtitle>
                         <SumByCategory item="cash-other" aggregate={aggregate} />
                         <SumByCategory item="pension" aggregate={aggregate} />
                         <Styled.Header item="assets">{'Total (£)'}</Styled.Header>

@@ -2,7 +2,6 @@ import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
-import classNames from 'classnames';
 
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
 import { getSortedPageRows, getWeeklyAverages, getTotalCost } from '~client/selectors/list';
@@ -28,7 +27,7 @@ const PageListComponent = ({
     onDelete,
 }) => (
     <>
-        <Styled.PageListMain page={page} className={classNames('page-list-main', page)}>
+        <Styled.PageListMain page={page}>
             <Media query={mediaQueryMobile}>
                 {isMobile => (
                     <ListBody
@@ -90,7 +89,7 @@ export const PageListBase = connect(
 )(PageListComponent);
 
 const PageList = ({ page }) => (
-    <Styled.PageList page={page} className={classNames('page', 'page-list', `page-${page}`)}>
+    <Styled.PageList page={page}>
         <PageListBase page={page} />
     </Styled.PageList>
 );

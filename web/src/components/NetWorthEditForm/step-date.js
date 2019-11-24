@@ -12,10 +12,8 @@ export default function StepDate({ containerProps, item, onEdit }) {
     const onChange = useCallback(date => onEdit({ ...item, date }), [item, onEdit]);
 
     return (
-        <FormContainer {...containerProps} step={STEP_DATE} className="step-date">
-            <Styled.SectionTitle className="net-worth-edit-form-section-title">
-                {'On what date were the data collected?'}
-            </Styled.SectionTitle>
+        <FormContainer {...containerProps} step={STEP_DATE}>
+            <Styled.SectionTitle>{'On what date were the data collected?'}</Styled.SectionTitle>
             <FormFieldDate value={item.date} onChange={onChange} />
         </FormContainer>
     );

@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { SketchPicker } from 'react-color';
 import { Button } from '~client/styled/shared/button';
 
@@ -18,12 +17,8 @@ export default function FormFieldColor({ value, onChange }) {
     );
 
     return (
-        <Styled.FormColor
-            className={classNames('form-field', 'form-field-color')}
-        >
-            <Button className="color-value" onClick={toggle}>
-                {'Edit colour'}
-            </Button>
+        <Styled.FormColor>
+            <Button onClick={toggle}>{'Edit colour'}</Button>
             {active && (
                 <SketchPicker
                     className="color-picker"

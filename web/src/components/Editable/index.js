@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { PAGES, PAGES_SUGGESTIONS } from '~client/constants/data';
 import SuggestionsList from '~client/components/SuggestionsList';
@@ -51,14 +50,7 @@ export default function Editable({ page, id, active, item, onSuggestion, ...prop
     );
 
     return (
-        <Styled.Editable
-            active={active}
-            item={item}
-            className={classNames('editable', `editable-${item}`, {
-                'editable-active': active,
-                'editable-inactive': !active,
-            })}
-        >
+        <Styled.Editable active={active} item={item}>
             <EditableField id={id} active={active} item={item} onType={onType} {...props} />
             {showSuggestions && (
                 <SuggestionsList

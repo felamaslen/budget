@@ -20,27 +20,25 @@ export default function ListHeadDesktop({
     });
 
     return (
-        <Styled.ListHead className="list-head">
+        <Styled.ListHead>
             {PAGES[page].cols.map((column, key) => (
-                <Column key={key} column={column} className={column}>
+                <Column key={key} column={column}>
                     {column}
                 </Column>
             ))}
             {getDaily && (
-                <Styled.Daily className="daily">
-                    <Styled.DailyValue className="daily-value">{'Daily |'}</Styled.DailyValue>
-                    <Styled.Weekly className="weekly">{'Weekly:'}</Styled.Weekly>
-                    <Styled.WeeklyValue className="weekly-value">
-                        {weeklyValueFormatted}
-                    </Styled.WeeklyValue>
+                <Styled.Daily>
+                    <Styled.DailyValue>{'Daily |'}</Styled.DailyValue>
+                    <Styled.Weekly>{'Weekly:'}</Styled.Weekly>
+                    <Styled.WeeklyValue>{weeklyValueFormatted}</Styled.WeeklyValue>
                 </Styled.Daily>
             )}
             {TotalValue ? (
                 <TotalValue totalCost={totalCost} {...extraProps} />
             ) : (
-                <Styled.TotalOuter className="total-outer">
-                    <Styled.Total className="total">{'Total:'}</Styled.Total>
-                    <Styled.TotalValue className="total-value">
+                <Styled.TotalOuter>
+                    <Styled.Total>{'Total:'}</Styled.Total>
+                    <Styled.TotalValue>
                         {formatCurrency(totalCost, {
                             abbreviate: true,
                             precision: 1,

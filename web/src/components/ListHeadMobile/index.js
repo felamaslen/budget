@@ -1,15 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
 import * as Styled from './styles';
 
 const ListHeadMobile = ({ listColsMobile }) => (
-    <Styled.ListHead className="list-head">
+    <Styled.ListHead>
         {listColsMobile.map(column => (
-            <Styled.Header key={column} column={column} className={classNames('column', column)}>
+            <Styled.Header key={column} column={column}>
                 {column}
             </Styled.Header>
         ))}

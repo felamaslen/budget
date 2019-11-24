@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
@@ -25,8 +24,8 @@ import * as Styled from './styles';
 
 function CreditLimitEditor({ creditLimit, setCreditLimit }) {
     return (
-        <div className="credit-limit-editor">
-            <span className="label">{'Credit limit:'}</span>
+        <div>
+            <span>{'Credit limit:'}</span>
             <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} small />
         </div>
     );
@@ -38,9 +37,9 @@ CreditLimitEditor.propTypes = {
 };
 
 const SkipToggle = ({ skip, setSkip }) => (
-    <div className="skip-toggle">
+    <div>
         <input type="checkbox" checked={Boolean(skip)} onChange={() => setSkip(!skip)} />
-        <span className="label">{'Skip in calculations'}</span>
+        <span>{'Skip in calculations'}</span>
     </div>
 );
 
@@ -79,16 +78,14 @@ function EditByType({
     const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
     return (
-        <Styled.EditByCategoryValue className="edit-by-category-value">
-            <Styled.Subcategory className="subcategory">{subcategoryName}</Styled.Subcategory>
+        <Styled.EditByCategoryValue>
+            <Styled.Subcategory>{subcategoryName}</Styled.Subcategory>
             <FormFieldNetWorthValue value={value} onChange={setNewValue} currencies={currencies} />
             {hasCreditLimit && (
                 <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />
             )}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <ButtonDelete onClick={onRemoveCallback} className="button-delete">
-                &minus;
-            </ButtonDelete>
+            <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>
         </Styled.EditByCategoryValue>
     );
 }
@@ -146,9 +143,9 @@ function AddByType({ isLiability, categories, subcategories, currencies, onAdd }
     }, [onAdd, subcategory, value, creditLimit, skip]);
 
     return (
-        <Styled.AddByCategoryValue className="add-by-category-value">
-            <Styled.AddCategory className="category">
-                <Styled.AddLabel className="label">{'Category:'}</Styled.AddLabel>
+        <Styled.AddByCategoryValue>
+            <Styled.AddCategory>
+                <Styled.AddLabel>{'Category:'}</Styled.AddLabel>
                 <FormFieldSelect
                     item="category"
                     options={categoryOptions}
@@ -156,8 +153,8 @@ function AddByType({ isLiability, categories, subcategories, currencies, onAdd }
                     onChange={setCategory}
                 />
             </Styled.AddCategory>
-            <Styled.AddSubcategory className="subcategory">
-                <Styled.AddLabel className="label">{'Subcategory:'}</Styled.AddLabel>
+            <Styled.AddSubcategory>
+                <Styled.AddLabel>{'Subcategory:'}</Styled.AddLabel>
                 <FormFieldSelect
                     item="subcategory"
                     options={subcategoryOptions}
@@ -170,9 +167,7 @@ function AddByType({ isLiability, categories, subcategories, currencies, onAdd }
                 <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />
             )}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <ButtonAdd onClick={onAddCallback} className="button-add">
-                {'+'}
-            </ButtonAdd>
+            <ButtonAdd onClick={onAddCallback}>{'+'}</ButtonAdd>
         </Styled.AddByCategoryValue>
     );
 }
@@ -277,15 +272,8 @@ function CategoryGroup({ category: { category, color }, children }) {
     const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
 
     return (
-        <Styled.EditByCategoryGroup
-            style={{ backgroundColor: color }}
-            className={classNames('edit-by-category-group', { hidden })}
-        >
-            <Styled.SectionSubtitle
-                hidden={hidden}
-                className="net-worth-edit-form-section-subtitle"
-                onClick={onToggleHidden}
-            >
+        <Styled.EditByCategoryGroup style={{ backgroundColor: color }}>
+            <Styled.SectionSubtitle hidden={hidden} onClick={onToggleHidden}>
                 {category}
             </Styled.SectionSubtitle>
             {!hidden && children}
@@ -377,15 +365,15 @@ function StepValues({ typeFilter, name, containerProps, item, categories, subcat
     const onRemoveValue = useRemoveValue(item, onEdit);
 
     return (
-        <FormContainer {...containerProps} step={STEP_VALUES} className="step-values">
-            <Styled.SectionTitle className="net-worth-edit-form-section-title">
-                <span className="type">{name}</span>
-                <span className="date">
+        <FormContainer {...containerProps} step={STEP_VALUES}>
+            <Styled.SectionTitle>
+                <span>{name}</span>
+                <span>
                     {' - '}
                     {item.date.toISODate()}
                 </span>
             </Styled.SectionTitle>
-            <Styled.EditByCategory className="edit-by-category">
+            <Styled.EditByCategory>
                 {valueKeys.map(categoryId => (
                     <CategoryGroup
                         key={categoryId}

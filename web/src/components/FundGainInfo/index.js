@@ -25,11 +25,9 @@ export default function FundGainInfo({
     return (
         <Styled.FundGainInfo gain={gain} sold={sold}>
             <Styled.Text gain={gain} color={color}>
-                <Styled.Value className="value">
-                    {formatCurrency(value, formatOptions)}
-                </Styled.Value>
+                <Styled.Value>{formatCurrency(value, formatOptions)}</Styled.Value>
                 <Styled.Breakdown>
-                    <Styled.Overall sold={sold} className="overall">
+                    <Styled.Overall sold={sold}>
                         <Styled.GainAbs gain={gain}>
                             {formatCurrency(gainAbs, formatOptions)}
                         </Styled.GainAbs>

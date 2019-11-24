@@ -1,6 +1,5 @@
 import React, { useReducer, useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { netWorthValueSize, currency as currencyShape } from '~client/prop-types/net-worth/list';
@@ -13,7 +12,6 @@ import FormFieldSelect from '~client/components/FormField/select';
 import * as Styled from './styles';
 
 function FormFieldWithCurrency({
-    className,
     add,
     index,
     value,
@@ -50,10 +48,7 @@ function FormFieldWithCurrency({
     }, [onAdd, newValue, newCurrency]);
 
     return (
-        <Styled.NetWorthValueComplex
-            add={add}
-            className={classNames('form-field-net-worth-value-complex', className)}
-        >
+        <Styled.NetWorthValueComplex add={add}>
             <FormFieldNumber value={newValue} onChange={setNewValue} />
             <FormFieldSelect
                 item="currency"
@@ -61,23 +56,14 @@ function FormFieldWithCurrency({
                 value={newCurrency}
                 onChange={setNewCurrency}
             />
-            {onRemove && (
-                <ButtonDelete className="delete-button" onClick={onRemoveCallback}>
-                    &minus;
-                </ButtonDelete>
-            )}
-            {onAdd && (
-                <ButtonAdd className="add-button" onClick={onAddCallback}>
-                    +
-                </ButtonAdd>
-            )}
+            {onRemove && <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>}
+            {onAdd && <ButtonAdd onClick={onAddCallback}>+</ButtonAdd>}
         </Styled.NetWorthValueComplex>
     );
 }
 
 FormFieldWithCurrency.propTypes = {
     add: PropTypes.bool,
-    className: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
     currency: PropTypes.string.isRequired,
@@ -89,7 +75,6 @@ FormFieldWithCurrency.propTypes = {
 
 FormFieldWithCurrency.defaultProps = {
     add: false,
-    className: {},
     onChange: () => null,
 };
 
@@ -182,8 +167,8 @@ export default function FormFieldNetWorthValue({ value, onChange, currencies }) 
     );
 
     return (
-        <Styled.NetWorthValue className="form-field form-field-net-worth-value">
-            <Styled.NetWorthValueComplexToggle className="complex-toggle">
+        <Styled.NetWorthValue>
+            <Styled.NetWorthValueComplexToggle>
                 <FormFieldTickbox item="fx-toggle" value={isComplex} onChange={toggleComplex} />
                 {'FX'}
             </Styled.NetWorthValueComplexToggle>

@@ -111,19 +111,10 @@ function makeBeforeLines({ popout }) {
     return BeforeLines;
 }
 
-export default function GraphFundItem({
-    name,
-    sold,
-    values,
-    popout,
-    onToggle,
-}) {
+export default function GraphFundItem({ name, sold, values, popout, onToggle }) {
     const { width, height } = getDimensions({ popout, sold });
 
-    const beforeLines = useMemo(() => values && makeBeforeLines({ popout }), [
-        values,
-        popout,
-    ]);
+    const beforeLines = useMemo(() => values && makeBeforeLines({ popout }), [values, popout]);
 
     const svgProperties = useMemo(
         () => ({
@@ -146,7 +137,7 @@ export default function GraphFundItem({
     };
 
     return (
-        <Styled.FundGraph sold={sold} popout={popout} className="fund-graph">
+        <Styled.FundGraph sold={sold} popout={popout}>
             <LineGraph {...graphProps} />
         </Styled.FundGraph>
     );
@@ -155,9 +146,7 @@ export default function GraphFundItem({
 GraphFundItem.propTypes = {
     name: PropTypes.string.isRequired,
     sold: PropTypes.bool.isRequired,
-    values: PropTypes.arrayOf(
-        PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-    ),
+    values: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number.isRequired).isRequired),
     popout: PropTypes.bool.isRequired,
     onToggle: PropTypes.func.isRequired,
 };

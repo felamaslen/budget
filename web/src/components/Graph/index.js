@@ -1,11 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import * as Styled from './styles';
 
 export default function Graph({
-    name,
     width,
     height,
     graphRef,
@@ -16,13 +14,7 @@ export default function Graph({
     children,
 }) {
     return (
-        <Styled.Graph
-            ref={graphRef}
-            className={classNames('graph-container', {
-                [`graph-${name}`]: name,
-            })}
-            {...outerProperties}
-        >
+        <Styled.Graph ref={graphRef} {...outerProperties}>
             {before && before()}
             <svg width={width} height={height} {...svgProperties}>
                 {children}
@@ -33,7 +25,6 @@ export default function Graph({
 }
 
 Graph.propTypes = {
-    name: PropTypes.string,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     padding: PropTypes.array,

@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { PAGES } from '~client/constants/data';
 
 import * as Styled from './styles';
 
 const Navbar = ({ onLogout }) => (
-    <Styled.NavList className="nav-list">
+    <Styled.NavList>
         {Object.keys(PAGES).map(page => (
             <Styled.Link
                 key={page}
@@ -15,7 +14,6 @@ const Navbar = ({ onLogout }) => (
                 to={PAGES[page].path || `/${page}`}
                 activeClassName="active"
                 page={page}
-                className={classNames('nav-link', `nav-link-${page}`)}
             >
                 {page}
             </Styled.Link>

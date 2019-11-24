@@ -1,6 +1,5 @@
 import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { NULL_COMMAND, ADD_BTN } from '~client/hooks/nav';
@@ -113,11 +112,6 @@ function ListRowDesktop({
             small={item.small}
             future={item.future}
             firstPresent={item.firstPresent}
-            className={classNames('list-row-desktop', item.className || {}, {
-                odd,
-                future: item.future,
-                'first-present': item.firstPresent,
-            })}
             style={style}
         >
             <ListRowDesktopBase
@@ -130,10 +124,8 @@ function ListRowDesktop({
                 onUpdate={onColumnUpdate}
             />
             {PAGES[page].daily && <DailyText value={item.daily} />}
-            <Styled.ButtonDelete className="button-delete">
-                <ButtonDelete className="button-delete-button" onClick={onDelete}>
-                    &minus;
-                </ButtonDelete>
+            <Styled.ButtonDelete>
+                <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
             </Styled.ButtonDelete>
             {AfterRow && <AfterRow page={page} row={item} />}
         </Styled.RowBody>
@@ -151,7 +143,6 @@ ListRowDesktop.propTypes = {
         firstPresent: PropTypes.bool,
         daily: PropTypes.number,
         small: PropTypes.bool,
-        className: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
     }).isRequired,
     active: PropTypes.bool,
     command: PropTypes.object.isRequired,

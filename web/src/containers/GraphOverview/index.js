@@ -21,7 +21,7 @@ import GraphSpending from '~client/components/GraphSpending';
 import * as Styled from './styles';
 
 const GraphOverviewWrapped = ({ futureMonths, cost, netWorthOld, targets, ...commonProps }) => (
-    <Styled.GraphOverview className="graph-container-outer">
+    <Styled.GraphOverview>
         <GraphBalance
             name="balance"
             {...commonProps}

@@ -24,17 +24,22 @@ const routes = [
     { key: 'general', component: PageGeneral },
     { key: 'holiday', component: PageHoliday },
     { key: 'social', component: PageSocial },
-    { key: 'overview', path: '/', component: PageOverview },
+    {
+        key: 'overview',
+        path: ['/', '/net-worth', '/net-worth/*'],
+        exact: true,
+        component: PageOverview,
+    },
 ];
 
 const NotFound = () => (
-    <div className="page page-not-found">
+    <div>
         <h1>{'Page not found'}</h1>
     </div>
 );
 
 const Content = () => (
-    <PageWrapper className="page-wrapper">
+    <PageWrapper>
         <Switch>
             {routes.map(({ key, path = `/${key}`, ...rest }) => (
                 <Route key={key} path={path} {...rest} />

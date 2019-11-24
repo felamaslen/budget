@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { rgb } from 'polished';
 
 import { fundItemShape } from '~client/prop-types/page/funds';
@@ -26,15 +25,14 @@ function FundItem({ numItems, toggleList, setToggleList, id, color, item }) {
     );
 
     return (
-        <li className={classNames({ enabled: toggleList[id] !== false })} onClick={onToggle}>
+        <li onClick={onToggle}>
             <Styled.SidebarCheckbox
-                className="checkbox"
                 style={{
                     borderColor: rgb(...color),
                 }}
                 checked={toggleList[id] !== false}
             ></Styled.SidebarCheckbox>
-            <Styled.SidebarFund className="fund">{item}</Styled.SidebarFund>
+            <Styled.SidebarFund>{item}</Styled.SidebarFund>
         </li>
     );
 }
@@ -60,9 +58,9 @@ function AfterCanvas({
     const onChange = useCallback(evt => changePeriod(evt.target.value), [changePeriod]);
 
     return (
-        <div className="after-canvas">
+        <div>
             {!isMobile && (
-                <Styled.FundSidebar className="fund-sidebar">
+                <Styled.FundSidebar>
                     <li>
                         <select defaultValue={period} onChange={onChange}>
                             {GRAPH_FUNDS_PERIODS.map(([value, display]) => (
@@ -84,7 +82,7 @@ function AfterCanvas({
                         ))}
                 </Styled.FundSidebar>
             )}
-            <Styled.Mode className="mode">
+            <Styled.Mode>
                 {'Mode: '}
                 {GRAPH_FUNDS_MODES[mode]}
             </Styled.Mode>

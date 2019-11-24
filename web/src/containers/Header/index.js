@@ -12,7 +12,7 @@ import Navbar from '~client/components/Navbar';
 import * as Styled from './styles';
 
 const Header = ({ loggedIn, loadingApi, unsavedApi, onLogout }) => (
-    <Styled.Header className="navbar">
+    <Styled.Header>
         <AppLogo loading={loadingApi} unsaved={unsavedApi} />
         {loggedIn && <Navbar onLogout={onLogout} />}
     </Styled.Header>

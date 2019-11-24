@@ -4,9 +4,7 @@ import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { COLOR_DARK } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
 
-export default function Axes({
-    popout, minX, minY, maxY, height, pixX, pixY,
-}) {
+export default function Axes({ popout, minX, minY, maxY, height, pixX, pixY }) {
     if (!popout) {
         return null;
     }
@@ -24,18 +22,26 @@ export default function Axes({
     const [fontSize, fontFamily] = FONT_AXIS_LABEL;
     const fontColor = rgba(COLOR_DARK);
 
-    const ticks = new Array(numTicks).fill(0)
-        .map((tick, key) => {
-            const tickValue = start + key * increment;
-            const tickPos = Math.floor(pixY(tickValue)) + 0.5;
-            const tickName = `${tickValue.toFixed(1)}p`;
+    const ticks = new Array(numTicks).fill(0).map((tick, key) => {
+        const tickValue = start + key * increment;
+        const tickPos = Math.floor(pixY(tickValue)) + 0.5;
+        const tickName = `${tickValue.toFixed(1)}p`;
 
-            return <text key={tickName}
-                x={x0} y={tickPos} color={fontColor}
-                fontSize={fontSize} fontFamily={fontFamily}>{tickName}</text>;
-        });
+        return (
+            <text
+                key={tickName}
+                x={x0}
+                y={tickPos}
+                color={fontColor}
+                fontSize={fontSize}
+                fontFamily={fontFamily}
+            >
+                {tickName}
+            </text>
+        );
+    });
 
-    return <g className="axes">{ticks}</g>;
+    return <g>{ticks}</g>;
 }
 
 Axes.propTypes = {

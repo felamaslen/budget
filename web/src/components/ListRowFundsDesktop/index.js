@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { gainShape } from '~client/prop-types/page/funds';
 import GraphFundItem from '~client/components/GraphFundItem';
@@ -8,9 +7,7 @@ import FundGainInfo from '~client/components/FundGainInfo';
 
 import * as Styled from './styles';
 
-export default function ListRowFundsDesktop({
-    row: { item, sold, prices, gain },
-}) {
+export default function ListRowFundsDesktop({ row: { item, sold, prices, gain } }) {
     const [popout, setPopout] = useState(false);
     const onToggleGraph = useCallback(() => {
         setPopout(!popout);
@@ -21,11 +18,7 @@ export default function ListRowFundsDesktop({
     }
 
     return (
-        <Styled.FundExtraInfo
-            className={classNames({ popout })}
-            popout={popout}
-            sold={sold}
-        >
+        <Styled.FundExtraInfo popout={popout} sold={sold}>
             <GraphFundItem
                 name={item.toLowerCase().replace(/\W+/g, '-')}
                 sold={sold}

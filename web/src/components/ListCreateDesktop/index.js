@@ -86,7 +86,7 @@ export default function ListCreateDesktop({
     }, [onCreate, setActive, page, values]);
 
     return (
-        <Styled.RowCreate className="list-row-desktop list-row-desktop-create">
+        <Styled.RowCreate>
             <ListRowDesktopBase
                 item={values}
                 page={page}
@@ -96,13 +96,8 @@ export default function ListCreateDesktop({
                 setCommand={setCommand}
                 onUpdate={onUpdate}
             />
-            <Styled.AddButtonOuter className="add-button-outer">
-                <Button
-                    ref={addBtn}
-                    aria-label="add-button"
-                    onMouseDown={onAddPre}
-                    onClick={onAdd}
-                >
+            <Styled.AddButtonOuter>
+                <Button ref={addBtn} aria-label="add-button" onMouseDown={onAddPre} onClick={onAdd}>
                     {'Add'}
                 </Button>
             </Styled.AddButtonOuter>

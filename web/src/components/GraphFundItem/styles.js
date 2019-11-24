@@ -11,8 +11,7 @@ export const FundGraph = styled.div`
         flex: 0 0 100px;
         z-index: 2;
 
-        ${ListRowDesktop}
-        :nth-last-child(-n + 3) & {
+        ${ListRowDesktop}:nth-last-child(-n + 3) & {
             svg {
                 top: initial;
                 bottom: 0;

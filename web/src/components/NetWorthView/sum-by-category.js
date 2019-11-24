@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { formatCurrency } from '~client/modules/format';
 import * as Styled from './styles';
 
 const SumByCategory = ({ item, aggregate }) => (
-    <Styled.SumValue item={item} className={classNames('sum-value', item)}>
+    <Styled.SumValue item={item}>
         {formatCurrency(aggregate[item], { precision: 0 })}
     </Styled.SumValue>
 );

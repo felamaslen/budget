@@ -1,6 +1,5 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import memoize from 'memoize-one';
 import { FixedSizeList, VariableSizeList } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -46,7 +45,6 @@ export default function CrudList({
     onCreate,
     onUpdate,
     onDelete,
-    className,
     extraProps,
 }) {
     const [navState, setActive, setCommand, navNext, navPrev] = useNav(nav, items, extraProps.page);
@@ -97,15 +95,9 @@ export default function CrudList({
     const active = activeId !== null;
 
     return (
-        <Styled.CrudList
-            active={active}
-            className={classNames('crud-list', className, {
-                active: activeId !== null,
-                'create-active': createActive,
-            })}
-        >
+        <Styled.CrudList active={active}>
             {BeforeList && <BeforeList {...metaProps} />}
-            <Styled.CrudListInner active={active} className={`crud-list-inner ${className}-inner`}>
+            <Styled.CrudListInner active={active}>
                 {CreateItem && (
                     <CreateItem
                         active={createActive}
@@ -120,11 +112,7 @@ export default function CrudList({
                         {...extraProps}
                     />
                 )}
-                <Styled.CrudWindow
-                    active={active}
-                    createActive={createActive}
-                    className={`crud-list-window ${className}-window`}
-                >
+                <Styled.CrudWindow active={active} createActive={createActive}>
                     {real &&
                         items.map((item, index) => (
                             <CrudListItem key={item.id} data={itemData} index={index} />
@@ -167,7 +155,6 @@ CrudList.propTypes = {
     CreateItem: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
     BeforeList: PropTypes.func,
     AfterList: PropTypes.func,
-    className: PropTypes.string,
     extraProps: PropTypes.object,
     onCreate: PropTypes.func.isRequired,
     onRead: PropTypes.func,
@@ -176,7 +163,6 @@ CrudList.propTypes = {
 };
 
 CrudList.defaultProps = {
-    className: 'crud-list',
     itemSize: 32,
     nav: false,
     real: false,

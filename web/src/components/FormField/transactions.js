@@ -33,22 +33,22 @@ function FormFieldTransaction({ item, children, onChange, active }) {
     ]);
 
     return (
-        <Styled.TransactionsListItem className="transactions-list-item">
-            <Styled.TransactionRowDate className="row date">
-                <Styled.TransactionLabel className="col label">{'Date:'}</Styled.TransactionLabel>
-                <Styled.TransactionCol className="col">
+        <Styled.TransactionsListItem>
+            <Styled.TransactionRowDate>
+                <Styled.TransactionLabel>{'Date:'}</Styled.TransactionLabel>
+                <Styled.TransactionCol>
                     <FormFieldDate value={item.date} onChange={onChangeDate} active={active} />
                 </Styled.TransactionCol>
             </Styled.TransactionRowDate>
-            <Styled.TransactionRowUnits className="row units">
-                <Styled.TransactionLabel className="col label">{'Units:'}</Styled.TransactionLabel>
-                <Styled.TransactionCol className="col">
+            <Styled.TransactionRowUnits>
+                <Styled.TransactionLabel>{'Units:'}</Styled.TransactionLabel>
+                <Styled.TransactionCol>
                     <FormFieldNumber value={item.units} onChange={onChangeUnits} active={active} />
                 </Styled.TransactionCol>
             </Styled.TransactionRowUnits>
-            <Styled.TransactionRowCost className="row cost">
-                <Styled.TransactionLabel className="col label">{'Cost:'}</Styled.TransactionLabel>
-                <Styled.TransactionCol className="col">
+            <Styled.TransactionRowCost>
+                <Styled.TransactionLabel>{'Cost:'}</Styled.TransactionLabel>
+                <Styled.TransactionCol>
                     <FormFieldCost value={item.cost} onChange={onChangeCost} active={active} />
                 </Styled.TransactionCol>
             </Styled.TransactionRowCost>
@@ -124,29 +124,21 @@ function FormFieldTransactions({ create, invalid, ...props }) {
 
     return (
         <Wrapper item="transactions" value={value} active invalid={invalid}>
-            <Styled.NumTransactions active={active} className="num-transactions">
-                {(value || []).length}
-            </Styled.NumTransactions>
+            <Styled.NumTransactions active={active}>{(value || []).length}</Styled.NumTransactions>
             {currentValue && active && (
-                <Styled.TransactionsModal className="modal">
-                    <Styled.ModalInner className="modal-inner">
+                <Styled.TransactionsModal>
+                    <Styled.ModalInner>
                         {create && (
                             <Styled.ModalHead>
-                                <Styled.ModalHeadDate className="label">
-                                    {'Date'}
-                                </Styled.ModalHeadDate>
-                                <Styled.ModalHeadUnits className="label">
-                                    {'Units'}
-                                </Styled.ModalHeadUnits>
-                                <Styled.ModalHeadCost className="label">
-                                    {'Cost'}
-                                </Styled.ModalHeadCost>
+                                <Styled.ModalHeadDate>{'Date'}</Styled.ModalHeadDate>
+                                <Styled.ModalHeadUnits>{'Units'}</Styled.ModalHeadUnits>
+                                <Styled.ModalHeadCost>{'Cost'}</Styled.ModalHeadCost>
                             </Styled.ModalHead>
                         )}
-                        <Styled.TransactionsList className="transactions-list">
+                        <Styled.TransactionsList>
                             {create && (
                                 <FormFieldTransaction item={newItem} onChange={onChangeAddField}>
-                                    <Styled.TransactionRowButton className="row button">
+                                    <Styled.TransactionRowButton>
                                         <Button onClick={onAdd}>{'+'}</Button>
                                     </Styled.TransactionRowButton>
                                 </FormFieldTransaction>
@@ -160,7 +152,7 @@ function FormFieldTransactions({ create, invalid, ...props }) {
                                     onRemove={onRemoveTransaction}
                                 >
                                     {create && (
-                                        <span className="row button">
+                                        <span>
                                             <Button onClick={() => onRemoveTransaction(item.id)}>
                                                 &minus;
                                             </Button>

@@ -85,13 +85,8 @@ export default function ListFootMobile({
 
     return (
         <>
-            <Styled.ButtonAdd className="button-add">
-                <Button
-                    type="button"
-                    className="button-add-button"
-                    onClick={onAdd}
-                    disabled={Boolean(active)}
-                >
+            <Styled.ButtonAdd>
+                <Button type="button" onClick={onAdd} disabled={Boolean(active)}>
                     {'Add'}
                 </Button>
             </Styled.ButtonAdd>
