@@ -3,11 +3,13 @@ import humanizeDuration from 'humanize-duration';
 
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { getNow } from '~client/selectors/now';
+import { getFundsRows, getCurrentFundsCache } from '~client/selectors/funds/helpers';
 import {
-    getFundsRows,
-    getCurrentFundsCache,
-} from '~client/selectors/funds/helpers';
-import { getRowGains, getGainsForRow } from '~client/selectors/funds/gains';
+    getRowGains,
+    getGainsForRow,
+    getDayGain,
+    getDayGainAbs,
+} from '~client/selectors/funds/gains';
 
 export const getPeriod = state => state.funds.period;
 
@@ -51,16 +53,14 @@ const getLastFundsValue = createSelector(
                 return sum;
             }
 
-            return (
-                sum + prices[prices.length - 1] * getTotalUnits(transactions)
-            );
+            return sum + prices[prices.length - 1] * getTotalUnits(transactions);
         }, 0);
     },
 );
 
 export const getFundsCachedValue = createSelector(
-    [getLastFundsValue, getFundCacheAge],
-    (value, ageText) => ({ value, ageText }),
+    [getLastFundsValue, getFundCacheAge, getDayGain, getDayGainAbs],
+    (value, ageText, dayGain, dayGainAbs) => ({ value, ageText, dayGain, dayGainAbs }),
 );
 
 export const getFundsCost = createSelector(
