@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
-const setValueDate = (isoDate) => DateTime.fromISO(isoDate);
+const setValueDate = isoDate => DateTime.fromISO(isoDate);
 
 function parseYear(year) {
     if (year && year.length <= 2) {
@@ -38,7 +38,7 @@ function setValueString(date) {
     return result;
 }
 
-export default function FormFieldDate({ label, ...props }) {
+export default function FormFieldDate({ label, invalid, ...props }) {
     let setValue = setValueDate;
     let type = 'date';
 
@@ -57,7 +57,7 @@ export default function FormFieldDate({ label, ...props }) {
         : props.value.toISODate();
 
     return (
-        <Wrapper item="date" value={props.value} active={props.active}>
+        <Wrapper item="date" value={props.value} active={props.active} invalid={invalid}>
             <input
                 ref={ref}
                 aria-label={label}
@@ -75,9 +75,11 @@ FormFieldDate.propTypes = {
     label: PropTypes.string,
     value: PropTypes.instanceOf(DateTime),
     active: PropTypes.bool,
+    invalid: PropTypes.bool,
 };
 
 FormFieldDate.defaultProps = {
+    invalid: false,
     string: false,
     label: null,
     value: DateTime.local(),

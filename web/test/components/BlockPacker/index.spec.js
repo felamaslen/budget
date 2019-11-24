@@ -79,7 +79,6 @@ test('basic structure', (t) => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'block-view');
     t.is(div.childNodes.length, 2);
 });
 
@@ -89,7 +88,6 @@ test('outer block tree', (t) => {
     const [blockTreeOuter] = div.childNodes;
 
     t.is(blockTreeOuter.tagName, 'DIV');
-    t.is(blockTreeOuter.className, 'block-tree-outer');
 });
 
 test('status bar', (t) => {
@@ -98,15 +96,8 @@ test('status bar', (t) => {
     const [, statusBarOuter] = div.childNodes;
 
     t.is(statusBarOuter.tagName, 'DIV');
-    t.is(statusBarOuter.className, 'status-bar');
-
     t.is(statusBarOuter.childNodes.length, 1);
-
-    const [inner] = statusBarOuter.childNodes;
-
-    t.is(inner.tagName, 'SPAN');
-    t.is(inner.className, 'inner');
-    t.is(inner.innerHTML, 'bar');
+    t.is(statusBarOuter.innerHTML, 'bar');
 });
 
 test('blocks', (t) => {
@@ -127,7 +118,7 @@ test('running onHover, with null values on mouseout / touchend', (t) => {
     fireEvent.mouseOut(div);
 
     t.is(onHover.calls.length, 1);
-    t.deepEqual(onHover.calls[0].arguments, [null, null]);
+    t.deepEqual(onHover.calls[0].arguments, [null]);
 });
 
 test('not rendering blocks if blocks is null', (t) => {

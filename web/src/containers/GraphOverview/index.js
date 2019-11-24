@@ -18,17 +18,12 @@ import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
-import './style.scss';
+import * as Styled from './styles';
 
-const GraphOverviewWrapped = ({
-    futureMonths,
-    cost,
-    netWorthOld,
-    targets,
-    ...commonProps
-}) => (
-    <div className="graph-container-outer">
-        <GraphBalance name="balance"
+const GraphOverviewWrapped = ({ futureMonths, cost, netWorthOld, targets, ...commonProps }) => (
+    <Styled.GraphOverview>
+        <GraphBalance
+            name="balance"
             {...commonProps}
             futureMonths={futureMonths}
             cost={cost}
@@ -36,13 +31,14 @@ const GraphOverviewWrapped = ({
             targets={targets}
         />
         {!commonProps.isMobile && (
-            <GraphSpending name="spend"
+            <GraphSpending
+                name="spend"
                 {...commonProps}
                 valuesNet={cost.net}
                 valuesSpending={cost.spending}
             />
         )}
-    </div>
+    </Styled.GraphOverview>
 );
 
 GraphOverviewWrapped.propTypes = {
@@ -59,14 +55,12 @@ GraphOverviewWrapped.propTypes = {
 function GraphOverview(props) {
     return (
         <Media query={mediaQueryMobile}>
-            {(isMobile) => (
-                <GraphOverviewWrapped isMobile={isMobile} {...props} />
-            )}
+            {isMobile => <GraphOverviewWrapped isMobile={isMobile} {...props} />}
         </Media>
     );
 }
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     now: getCurrentDate(state),
     startDate: getStartDate(state),
     graphWidth: Math.min(state.app.windowWidth, GRAPH_WIDTH),

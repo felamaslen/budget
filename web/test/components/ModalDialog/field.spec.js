@@ -19,32 +19,28 @@ const getModalDialogField = memoize((customProps = {}) => {
         ...customProps,
     };
 
-    return render(
-        <ModalDialogField {...props} />,
-    );
+    return render(<ModalDialogField {...props} />);
 });
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getModalDialogField();
 
     t.is(container.childNodes.length, 1);
     const [li] = container.childNodes;
     t.is(li.tagName, 'LI');
-    t.is(li.className, 'form-row foo');
     t.is(li.childNodes.length, 2);
 });
 
-test('label', (t) => {
+test('label', t => {
     const { container } = getModalDialogField();
     const [li] = container.childNodes;
 
     const [label] = li.childNodes;
     t.is(label.tagName, 'SPAN');
-    t.is(label.className, 'form-label');
     t.is(label.innerHTML, 'foo');
 });
 
-test('form field container', (t) => {
+test('form field container', t => {
     const { container } = getModalDialogField();
     const [li] = container.childNodes;
 
@@ -55,17 +51,7 @@ test('form field container', (t) => {
     t.is(input.tagName, 'INPUT');
 });
 
-test('invalid class', (t) => {
-    const { container } = getModalDialogField({
-        invalid: true,
-    });
-
-    const [li] = container.childNodes;
-
-    t.is(li.className, 'form-row foo invalid');
-});
-
-test('transactions fields', (t) => {
+test('transactions fields', t => {
     const { container } = getModalDialogField({
         item: 'transactions',
         value: getTransactionsList([]),
@@ -79,10 +65,9 @@ test('transactions fields', (t) => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 2);
-    t.is(div.className, 'inner');
 });
 
-test('firing onChange', (t) => {
+test('firing onChange', t => {
     const onChange = t.context.stub();
     const { container } = getModalDialogField({ onChange });
     const [li] = container.childNodes;

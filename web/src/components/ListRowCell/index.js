@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import Editable from '~client/components/Editable';
+import * as Styled from './styles';
 
 function ListRowCell({
     page,
@@ -12,29 +12,33 @@ function ListRowCell({
     active,
     setActive,
     command,
+    small,
     onSuggestionConfirmed,
     onUpdate,
 }) {
-    const onSuggestion = useCallback((suggestion, next) => {
-        onUpdate(column, suggestion);
-        setImmediate(() => onSuggestionConfirmed(column, next));
-    }, [onUpdate, onSuggestionConfirmed, column]);
+    const onSuggestion = useCallback(
+        (suggestion, next) => {
+            onUpdate(column, suggestion);
+            setImmediate(() => onSuggestionConfirmed(column, next));
+        },
+        [onUpdate, onSuggestionConfirmed, column],
+    );
 
     const onSetActive = useCallback(() => setActive(id, column), [setActive, id, column]);
 
-    const onChange = useCallback((editColumn, newValue) => {
-        if (typeof newValue === 'string' && !newValue.length) {
-            return;
-        }
+    const onChange = useCallback(
+        (editColumn, newValue) => {
+            if (typeof newValue === 'string' && !newValue.length) {
+                return;
+            }
 
-        onUpdate(editColumn, newValue);
-    }, [onUpdate]);
+            onUpdate(editColumn, newValue);
+        },
+        [onUpdate],
+    );
 
     return (
-        <span
-            className={classNames('cell', column, { active })}
-            onMouseDown={onSetActive}
-        >
+        <Styled.Cell column={column} active={active} onMouseDown={onSetActive}>
             <Editable
                 page={page}
                 id={id}
@@ -42,10 +46,11 @@ function ListRowCell({
                 active={active}
                 item={column}
                 value={value}
+                small={small}
                 onSuggestion={onSuggestion}
                 command={command}
             />
-        </span>
+        </Styled.Cell>
     );
 }
 
@@ -58,7 +63,8 @@ ListRowCell.propTypes = {
     active: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     command: PropTypes.object,
+    small: PropTypes.bool,
     onUpdate: PropTypes.func.isRequired,
 };
 
-export default React.memo(ListRowCell);
+export default memo(ListRowCell);

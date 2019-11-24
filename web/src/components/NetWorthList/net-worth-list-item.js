@@ -3,7 +3,10 @@ import PropTypes from 'prop-types';
 
 import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
+import { ButtonDelete } from '~client/styled/shared/button';
 import { NetWorthEditForm } from '~client/components/NetWorthEditForm';
+
+import * as Styled from './styles';
 
 function NetWorthListItem({
     item,
@@ -19,20 +22,12 @@ function NetWorthListItem({
 
     if (noneActive) {
         return (
-            <div
-                className="net-worth-list-item-summary"
-                onClick={onActivate}
-            >
-                <span className="entry-title">
-                    {item.date.toFormat('dd MMM yy')}
-                </span>
-                <span className="button-delete">
-                    <button
-                        className="button-delete-button"
-                        onClick={onDelete}
-                    >&minus;</button>
-                </span>
-            </div>
+            <Styled.ItemSummary onClick={onActivate}>
+                <span>{item.date.toFormat('dd MMM yy')}</span>
+                <Styled.ButtonDelete>
+                    <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
+                </Styled.ButtonDelete>
+            </Styled.ItemSummary>
         );
     }
     if (!active) {

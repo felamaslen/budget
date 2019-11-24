@@ -1,8 +1,6 @@
 import { connect } from 'react-redux';
-import './style.scss';
 import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { loginRequested } from '~client/actions/login';
 import { getLoggedIn } from '~client/selectors/app';
@@ -10,17 +8,20 @@ import PinDisplay from '~client/components/LoginForm/pin-display';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
-function LoginForm({
-    loading, initialised, loggedIn, onLogin,
-}) {
-    const [pin, setPin] = useState('');
-    const onInput = useCallback((digit) => setPin((last) => `${last}${digit}`), []);
+import * as Styled from './styles';
 
-    const onKeydown = useCallback((event) => {
-        if (!Number.isNaN(Number(event.key))) {
-            onInput(event.key);
-        }
-    }, [onInput]);
+function LoginForm({ loading, initialised, loggedIn, onLogin }) {
+    const [pin, setPin] = useState('');
+    const onInput = useCallback(digit => setPin(last => `${last}${digit}`), []);
+
+    const onKeydown = useCallback(
+        event => {
+            if (!Number.isNaN(Number(event.key))) {
+                onInput(event.key);
+            }
+        },
+        [onInput],
+    );
 
     useEffect(() => {
         if (loggedIn) {
@@ -46,13 +47,13 @@ function LoginForm({
     }
 
     return (
-        <div className={classNames('login-form', { loading })}>
-            <div className="login-form-inner">
-                <h3>{'Enter your PIN:'}</h3>
+        <Styled.Form isLoading={loading}>
+            <Styled.FormInner>
+                <Styled.Title>{'Enter your PIN:'}</Styled.Title>
                 <PinDisplay inputStep={inputStep} />
                 <NumberInputPad onInput={onInput} />
-            </div>
-        </div>
+            </Styled.FormInner>
+        </Styled.Form>
     );
 }
 
@@ -63,7 +64,7 @@ LoginForm.propTypes = {
     onLogin: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     initialised: state.login.initialised,
     loading: state.login.loading,
     loggedIn: getLoggedIn(state),
@@ -73,4 +74,7 @@ const mapDispatchToProps = {
     onLogin: loginRequested,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(LoginForm);

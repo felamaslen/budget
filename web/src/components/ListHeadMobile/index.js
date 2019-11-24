@@ -1,17 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { LIST_COLS_MOBILE } from '~client/constants/data';
 
+import * as Styled from './styles';
+
 const ListHeadMobile = ({ listColsMobile }) => (
-    <div className="list-head noselect">
-        {listColsMobile.map((column) => (
-            <span key={column}
-                className={classNames('column', column)}
-            >{column}</span>
+    <Styled.ListHead>
+        {listColsMobile.map(column => (
+            <Styled.Header key={column} column={column}>
+                {column}
+            </Styled.Header>
         ))}
-    </div>
+    </Styled.ListHead>
 );
 
 ListHeadMobile.propTypes = {

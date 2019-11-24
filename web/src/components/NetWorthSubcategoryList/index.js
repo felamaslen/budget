@@ -1,16 +1,17 @@
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { subcategory as subcategoryShape } from '~client/prop-types/net-worth/category';
+import { InlineFlexCenter } from '~client/styled/shared/layout';
+import { Button, ButtonDelete } from '~client/styled/shared/button';
 import FormFieldText from '~client/components/FormField';
 import FormFieldRange from '~client/components/FormField/range';
 import FormFieldTickbox from '~client/components/FormField/tickbox';
 import CrudList from '~client/components/CrudList';
 
-import './style.scss';
+import * as Styled from './styles';
 
-const getCreditLimitDisabled = (parent) => parent.type !== 'liability';
+const getCreditLimitDisabled = parent => parent.type !== 'liability';
 
 function NetWorthSubcategoryItemForm({
     categoryId,
@@ -25,43 +26,35 @@ function NetWorthSubcategoryItemForm({
     const [tempSubcategory, setTempSubcategory] = useState(subcategory);
 
     const creditLimitDisabled = getCreditLimitDisabled(parent);
-    const initialHasCreditLimit = creditLimitDisabled
-        ? null
-        : Boolean(hasCreditLimit);
+    const initialHasCreditLimit = creditLimitDisabled ? null : Boolean(hasCreditLimit);
 
     const [tempHasCreditLimit, setTempHasCreditLimit] = useState(initialHasCreditLimit);
 
     const [tempOpacity, setTempOpacity] = useState(opacity);
 
-    const touched = !(onDelete
-        && tempSubcategory === subcategory
-        && tempHasCreditLimit === initialHasCreditLimit
-        && tempOpacity === opacity
+    const touched = !(
+        onDelete &&
+        tempSubcategory === subcategory &&
+        tempHasCreditLimit === initialHasCreditLimit &&
+        tempOpacity === opacity
     );
 
-    const onChangeItem = useCallback(() => onChange({
-        categoryId,
-        subcategory: tempSubcategory,
-        hasCreditLimit: tempHasCreditLimit,
-        opacity: tempOpacity,
-    }), [
-        onChange,
-        categoryId,
-        tempSubcategory,
-        tempHasCreditLimit,
-        tempOpacity,
-    ]);
-
-    const style = {
-        backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`,
-    };
+    const onChangeItem = useCallback(
+        () =>
+            onChange({
+                categoryId,
+                subcategory: tempSubcategory,
+                hasCreditLimit: tempHasCreditLimit,
+                opacity: tempOpacity,
+            }),
+        [onChange, categoryId, tempSubcategory, tempHasCreditLimit, tempOpacity],
+    );
 
     return (
-        <span
-            className={classNames('net-worth-subcategory-item-form', {
-                touched,
-            })}
-            style={style}
+        <Styled.ItemForm
+            style={{
+                backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`,
+            }}
         >
             <FormFieldText
                 item="subcategory"
@@ -69,11 +62,13 @@ function NetWorthSubcategoryItemForm({
                 onChange={setTempSubcategory}
                 active
             />
-            {!creditLimitDisabled && <FormFieldTickbox
-                item="credit-limit"
-                value={Boolean(tempHasCreditLimit)}
-                onChange={setTempHasCreditLimit}
-            />}
+            {!creditLimitDisabled && (
+                <FormFieldTickbox
+                    item="credit-limit"
+                    value={Boolean(tempHasCreditLimit)}
+                    onChange={setTempHasCreditLimit}
+                />
+            )}
             <FormFieldRange
                 item="opacity"
                 min={0}
@@ -82,22 +77,17 @@ function NetWorthSubcategoryItemForm({
                 value={tempOpacity}
                 onChange={setTempOpacity}
             />
-            <div className="button-change">
-                <button
-                    disabled={!touched}
-                    className="button-change-button"
-                    onClick={onChangeItem}
-                >{buttonText}</button>
-            </div>
+            <Styled.ButtonChange>
+                <Button disabled={!touched} onClick={onChangeItem}>
+                    {buttonText}
+                </Button>
+            </Styled.ButtonChange>
             {onDelete && (
-                <div className="button-delete">
-                    <button
-                        className="button-delete-button"
-                        onClick={onDelete}
-                    >&minus;</button>
-                </div>
+                <InlineFlexCenter>
+                    <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
+                </InlineFlexCenter>
             )}
-        </span>
+        </Styled.ItemForm>
     );
 }
 
@@ -120,20 +110,17 @@ NetWorthSubcategoryItemForm.defaultProps = {
 };
 
 function NetWorthSubcategoryItem({
-    item: {
-        id,
-        categoryId,
-        subcategory,
-        hasCreditLimit,
-        opacity,
-    },
+    item: { id, categoryId, subcategory, hasCreditLimit, opacity },
     parent,
     onUpdate,
     onDelete,
 }) {
-    const onChange = useCallback((values) => {
-        onUpdate(id, values);
-    }, [onUpdate, id]);
+    const onChange = useCallback(
+        values => {
+            onUpdate(id, values);
+        },
+        [onUpdate, id],
+    );
 
     return (
         <NetWorthSubcategoryItemForm
@@ -184,12 +171,12 @@ export default function NetWorthSubcategoryList({
     const creditLimitDisabled = getCreditLimitDisabled(parent);
 
     return (
-        <div className="net-worth-subcategory-list">
-            <div className="net-worth-subcategory-list-head">
-                <span className="subcategory">{'Name'}</span>
-                {!creditLimitDisabled && <span className="credit-limit">{'Credit limit'}</span>}
-                <span className="opacity">{'Opacity'}</span>
-            </div>
+        <Styled.SubcategoryList>
+            <Styled.ListHead>
+                <Styled.Name>{'Name'}</Styled.Name>
+                {!creditLimitDisabled && <Styled.CreditLimit>{'Credit limit'}</Styled.CreditLimit>}
+                <Styled.Opacity>{'Opacity'}</Styled.Opacity>
+            </Styled.ListHead>
             <CrudList
                 items={subcategories}
                 real
@@ -198,10 +185,9 @@ export default function NetWorthSubcategoryList({
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
-                className="net-worth-subcategory-list-crud"
                 extraProps={extraProps}
             />
-        </div>
+        </Styled.SubcategoryList>
     );
 }
 

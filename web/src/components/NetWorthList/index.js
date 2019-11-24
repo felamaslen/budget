@@ -7,7 +7,7 @@ import CrudList from '~client/components/CrudList';
 import NetWorthListItem from '~client/components/NetWorthList/net-worth-list-item';
 import NetWorthListCreateItem from '~client/components/NetWorthList/net-worth-list-create-item';
 
-import './style.scss';
+import * as Styled from './styles';
 
 export default function NetWorthList({
     data,
@@ -24,7 +24,7 @@ export default function NetWorthList({
     };
 
     return (
-        <div className="net-worth-list">
+        <Styled.NetWorthList>
             <CrudList
                 items={data}
                 real
@@ -33,10 +33,9 @@ export default function NetWorthList({
                 onCreate={onCreate}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
-                className="net-worth-list-crud"
                 extraProps={extraProps}
             />
-        </div>
+        </Styled.NetWorthList>
     );
 }
 

@@ -19,25 +19,22 @@ const getContainer = memoize((customProps = {}) => {
     return render(<NumberInputPad {...props} />);
 });
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'number-input noselect');
     t.is(div.childNodes.length, 4);
 });
 
 const testNumberInputRow = (t, row) => {
     t.is(row.tagName, 'DIV');
-    t.is(row.className, 'number-input-row');
     t.is(row.childNodes.length, 3);
 
-    row.childNodes.forEach((button) => {
+    row.childNodes.forEach(button => {
         t.is(button.tagName, 'BUTTON');
-        t.regex(button.className, /^btn-digit\sbtn-digit-[0-9]$/);
     });
 };
 
@@ -57,7 +54,7 @@ const testDigits = (t, rowIndex, digits) => {
     });
 };
 
-test('digits 1-3 (rendering)', (t) => {
+test('digits 1-3 (rendering)', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -66,7 +63,7 @@ test('digits 1-3 (rendering)', (t) => {
     testNumberInputRow(t, row);
 });
 
-test('digits 4-6 (rendering)', (t) => {
+test('digits 4-6 (rendering)', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -75,7 +72,7 @@ test('digits 4-6 (rendering)', (t) => {
     testNumberInputRow(t, row);
 });
 
-test('digits 7-9 (rendering)', (t) => {
+test('digits 7-9 (rendering)', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
@@ -84,34 +81,32 @@ test('digits 7-9 (rendering)', (t) => {
     testNumberInputRow(t, row);
 });
 
-test('digits 1-3 (handling)', (t) => {
+test('digits 1-3 (handling)', t => {
     testDigits(t, 0, [1, 2, 3]);
 });
 
-test('digits 4-6 (handling)', (t) => {
+test('digits 4-6 (handling)', t => {
     testDigits(t, 1, [4, 5, 6]);
 });
 
-test('digits 7-9 (handling)', (t) => {
+test('digits 7-9 (handling)', t => {
     testDigits(t, 2, [7, 8, 9]);
 });
 
-test('digit 0 (rendering)', (t) => {
+test('digit 0 (rendering)', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
     const [, , , row] = div.childNodes;
     t.is(row.tagName, 'DIV');
-    t.is(row.className, 'number-input-row');
     t.is(row.childNodes.length, 1);
 
     const [button] = row.childNodes;
 
     t.is(button.tagName, 'BUTTON');
-    t.is(button.className, 'btn-digit btn-digit-0');
 });
 
-test('digit 0 (handling)', (t) => {
+test('digit 0 (handling)', t => {
     const onInput = t.context.stub();
     const { container } = render(<NumberInputPad onInput={onInput} />);
 

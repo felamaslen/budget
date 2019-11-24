@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
+
+import * as Styled from './styles';
 
 const Digit = ({ digit, onInput }) => (
-    <button className={classNames('btn-digit', `btn-digit-${digit}`)}
-        onMouseDown={() => onInput(digit)}
-    >{digit}</button>
+    <Styled.Digit digit={digit} onMouseDown={() => onInput(digit)}>
+        {digit}
+    </Styled.Digit>
 );
 
 Digit.propTypes = {

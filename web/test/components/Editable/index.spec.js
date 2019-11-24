@@ -16,7 +16,7 @@ const getContainer = (customProps = {}, ...args) => {
     return render(<Editable {...props} />, ...args);
 };
 
-test('rendering active editable item', (t) => {
+test('rendering active editable item', t => {
     const { container } = getContainer({
         active: true,
         item: 'shop',
@@ -26,13 +26,11 @@ test('rendering active editable item', (t) => {
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'editable editable-shop editable-active');
 
     t.is(span.childNodes.length, 1);
-    t.regex(span.childNodes[0].className, /form-field/);
 });
 
-test('rendering inactive editable item', (t) => {
+test('rendering inactive editable item', t => {
     const { container } = getContainer({
         active: false,
         item: 'shop',
@@ -41,10 +39,12 @@ test('rendering inactive editable item', (t) => {
 
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
-    t.notRegex(span.className, /editable-active/);
+    t.is(span.childNodes.length, 1);
+
+    t.is(span.childNodes[0].innerHTML, 'Tesco');
 });
 
-test('Undefined value is renderd as a blank string', (t) => {
+test('Undefined value is renderd as a blank string', t => {
     const { container } = getContainer({
         active: false,
         item: 'shop',
@@ -56,7 +56,7 @@ test('Undefined value is renderd as a blank string', (t) => {
     t.is(editable.innerHTML, '');
 });
 
-test('Falsey transactions are rendered as 0 items', (t) => {
+test('Falsey transactions are rendered as 0 items', t => {
     const { container } = getContainer({
         active: false,
         item: 'transactions',
@@ -66,16 +66,15 @@ test('Falsey transactions are rendered as 0 items', (t) => {
     t.is(container.childNodes.length, 1);
     const [span] = container.childNodes;
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'editable editable-transactions editable-inactive');
     t.is(span.childNodes.length, 1);
 
     const [field] = span.childNodes;
     t.is(field.tagName, 'DIV');
-    t.is(field.className, 'form-field form-field-transactions');
-    t.is(field.innerHTML, '0');
+    t.is(field.childNodes.length, 1);
+    t.is(field.childNodes[0].innerHTML, '0');
 });
 
-test('onChange is called with the column and new value', (t) => {
+test('onChange is called with the column and new value', t => {
     const onChange = sinon.spy();
 
     const props = {
@@ -97,10 +96,13 @@ test('onChange is called with the column and new value', (t) => {
     fireEvent.change(input, { target: { value: 'Wilko' } });
 
     act(() => {
-        getContainer({
-            ...props,
-            active: false,
-        }, { container });
+        getContainer(
+            {
+                ...props,
+                active: false,
+            },
+            { container },
+        );
     });
 
     t.true(onChange.calledOnce);

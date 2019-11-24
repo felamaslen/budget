@@ -11,9 +11,7 @@ import {
 } from '~client/selectors/list';
 import { testState as state } from '~client-test/test_data/state';
 import { replaceAtIndex, getTransactionsList } from '~client/modules/data';
-import {
-    CREATE, UPDATE, DELETE, PAGES,
-} from '~client/constants/data';
+import { CREATE, UPDATE, DELETE, PAGES } from '~client/constants/data';
 
 const stateWithUnorderedRows = {
     ...state,
@@ -66,7 +64,7 @@ const stateWithUnorderedRows = {
     },
 };
 
-test('getAllPageRows excludes optimistically deleted items', (t) => {
+test('getAllPageRows excludes optimistically deleted items', t => {
     const result = getAllPageRows(stateWithUnorderedRows, { page: 'general' });
 
     t.true(Array.isArray(result));
@@ -100,52 +98,204 @@ const craftedState = {
     },
 };
 
-test('getSortedPageRows sorts list rows by date, newest first, adding future / first present / daily props', (t) => {
+test('getSortedPageRows sorts list rows by date, newest first, adding future / first present / daily props', t => {
     t.true(PAGES.general.daily);
 
     const result = getSortedPageRows(craftedState, { page: 'general' });
 
     t.deepEqual(result, [
         {
-            id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37, future: true, firstPresent: false, daily: 37,
+            id: 'id37',
+            date: DateTime.fromISO('2019-08-21'),
+            cost: 37,
+            future: true,
+            firstPresent: false,
+            daily: 37,
         },
         {
-            id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31, future: true, firstPresent: false, daily: 31,
+            id: 'id31',
+            date: DateTime.fromISO('2019-07-25'),
+            cost: 31,
+            future: true,
+            firstPresent: false,
+            daily: 31,
         },
         {
-            id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5, future: false, firstPresent: true, daily: null,
+            id: 'id5',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 5,
+            future: false,
+            firstPresent: true,
+            daily: null,
         },
         {
-            id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2, future: false, firstPresent: false, daily: null,
+            id: 'id2',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 2,
+            future: false,
+            firstPresent: false,
+            daily: null,
         },
         {
-            id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11, future: false, firstPresent: false, daily: null,
+            id: 'id11',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 11,
+            future: false,
+            firstPresent: false,
+            daily: null,
         },
         {
-            id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13, future: false, firstPresent: false, daily: null,
+            id: 'id13',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 13,
+            future: false,
+            firstPresent: false,
+            daily: null,
         },
         {
-            id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3, future: false, firstPresent: false, daily: 34,
+            id: 'id3',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 3,
+            future: false,
+            firstPresent: false,
+            daily: 34,
         },
         {
-            id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7, future: false, firstPresent: false, daily: null,
+            id: 'id7',
+            date: DateTime.fromISO('2019-06-15'),
+            cost: 7,
+            future: false,
+            firstPresent: false,
+            daily: null,
         },
         {
-            id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17, future: false, firstPresent: false, daily: 24,
+            id: 'id17',
+            date: DateTime.fromISO('2019-06-15'),
+            cost: 17,
+            future: false,
+            firstPresent: false,
+            daily: 24,
         },
         {
-            id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19, future: false, firstPresent: false, daily: null,
+            id: 'id19',
+            date: DateTime.fromISO('2019-06-14'),
+            cost: 19,
+            future: false,
+            firstPresent: false,
+            daily: null,
         },
         {
-            id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23, future: false, firstPresent: false, daily: 42,
+            id: 'id23',
+            date: DateTime.fromISO('2019-06-14'),
+            cost: 23,
+            future: false,
+            firstPresent: false,
+            daily: 42,
         },
         {
-            id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29, future: false, firstPresent: false, daily: 29,
+            id: 'id29',
+            date: DateTime.fromISO('2019-06-13'),
+            cost: 29,
+            future: false,
+            firstPresent: false,
+            daily: 29,
         },
     ]);
 });
 
-test('getSortedPageRows returns shallowly equal rows where possible', (t) => {
+test('getSortedPageRows gets first present information for non-daily pages', t => {
+    t.falsy(PAGES.income.daily);
+
+    const result = getSortedPageRows(craftedState, { page: 'income' });
+
+    t.deepEqual(result, [
+        {
+            id: 'id37',
+            date: DateTime.fromISO('2019-08-21'),
+            cost: 37,
+            future: true,
+            firstPresent: false,
+        },
+        {
+            id: 'id31',
+            date: DateTime.fromISO('2019-07-25'),
+            cost: 31,
+            future: true,
+            firstPresent: false,
+        },
+        {
+            id: 'id5',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 5,
+            future: false,
+            firstPresent: true,
+        },
+        {
+            id: 'id2',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 2,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id11',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 11,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id13',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 13,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id3',
+            date: DateTime.fromISO('2019-06-16'),
+            cost: 3,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id7',
+            date: DateTime.fromISO('2019-06-15'),
+            cost: 7,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id17',
+            date: DateTime.fromISO('2019-06-15'),
+            cost: 17,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id19',
+            date: DateTime.fromISO('2019-06-14'),
+            cost: 19,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id23',
+            date: DateTime.fromISO('2019-06-14'),
+            cost: 23,
+            future: false,
+            firstPresent: false,
+        },
+        {
+            id: 'id29',
+            date: DateTime.fromISO('2019-06-13'),
+            cost: 29,
+            future: false,
+            firstPresent: false,
+        },
+    ]);
+});
+test('getSortedPageRows returns shallowly equal rows where possible', t => {
     const result0 = getSortedPageRows(state, { page: 'food' });
 
     t.deepEqual(result0, [
@@ -201,10 +351,18 @@ test('getSortedPageRows returns shallowly equal rows where possible', (t) => {
         food: {
             ...state.food,
             items: compose(
-                (array) => replaceAtIndex(array, 3, (value) => ({
-                    ...value, __optimistic: 'SOME_OPTIMISTIC_VALUE',
-                }), true),
-                (array) => replaceAtIndex(array, 2, (value) => ({ ...value, item: 'foo3_updated' }), true),
+                array =>
+                    replaceAtIndex(
+                        array,
+                        3,
+                        value => ({
+                            ...value,
+                            __optimistic: 'SOME_OPTIMISTIC_VALUE',
+                        }),
+                        true,
+                    ),
+                array =>
+                    replaceAtIndex(array, 2, value => ({ ...value, item: 'foo3_updated' }), true),
             )(state.food.items),
         },
     };
@@ -219,7 +377,7 @@ test('getSortedPageRows returns shallowly equal rows where possible', (t) => {
     t.is(result1[3].item, 'foo3_updated');
 });
 
-test('getSortedPageRows memoises the result set across different pages', (t) => {
+test('getSortedPageRows memoises the result set across different pages', t => {
     const resultFood0 = getSortedPageRows(state, { page: 'food' });
     const resultGeneral0 = getSortedPageRows(state, { page: 'general' });
     const resultFood1 = getSortedPageRows(state, { page: 'food' });
@@ -229,8 +387,8 @@ test('getSortedPageRows memoises the result set across different pages', (t) => 
     t.is(resultGeneral0, resultGeneral1);
 });
 
-test('getSortedPageRows doesn\'t recalculate until the next day', (t) => {
-    const getState = (now) => ({ ...stateWithUnorderedRows, now: DateTime.fromISO(now) });
+test("getSortedPageRows doesn't recalculate until the next day", t => {
+    const getState = now => ({ ...stateWithUnorderedRows, now: DateTime.fromISO(now) });
 
     const resultA = getSortedPageRows(getState('2019-07-13T16:45:23Z'), { page: 'general' });
     const resultB = getSortedPageRows(getState('2019-07-13T18:23:19Z'), { page: 'general' });
@@ -248,57 +406,39 @@ test('getSortedPageRows doesn\'t recalculate until the next day', (t) => {
     t.is(resultF, resultG);
 });
 
-test('getSortedPageRows returns the items as-is, for the funds page', (t) => {
+test('getSortedPageRows returns the items as-is, for the funds page', t => {
     const result = getSortedPageRows(state, { page: 'funds' });
 
     t.deepEqual(result, state.funds.items);
 });
 
-test('getSortedPageRows sorts rows by date for other non-daily pages', (t) => {
-    t.falsy(PAGES.income.daily);
-
-    const result = getSortedPageRows(craftedState, { page: 'income' });
-
-    t.deepEqual(result, [
-        { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37 },
-        { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31 },
-        { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5 },
-        { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2 },
-        { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11 },
-        { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13 },
-        { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3 },
-        { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7 },
-        { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17 },
-        { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19 },
-        { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23 },
-        { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29 },
-    ]);
-});
-
-test('getSortedPageRows memoises the result for non-daily pages', (t) => {
+test('getSortedPageRows memoises the result for non-daily pages', t => {
     const result0 = getSortedPageRows(craftedState, { page: 'income' });
     const result1 = getSortedPageRows(craftedState, { page: 'income' });
 
     t.is(result0, result1);
 });
 
-test('getWeeklyAverages returns null for non-daily pages', (t) => {
+test('getWeeklyAverages returns null for non-daily pages', t => {
     t.is(getWeeklyAverages(state, { page: 'analysis' }), null);
 });
 
-test('getWeeklyAverages returns the data with a processed weekly value', (t) => {
-    t.is(getWeeklyAverages(state, { page: 'food' }), Math.round((29 + 1139 + 876 + 498) / 10.571428571428571));
+test('getWeeklyAverages returns the data with a processed weekly value', t => {
+    t.is(
+        getWeeklyAverages(state, { page: 'food' }),
+        Math.round((29 + 1139 + 876 + 498) / 10.571428571428571),
+    );
 });
 
-test('getTotalCost returns the total cost of a list page', (t) => {
+test('getTotalCost returns the total cost of a list page', t => {
     t.is(getTotalCost(state, { page: 'food' }), 8755601);
 });
 
-test('getTotalCost returns the fund cost value for the funds page', (t) => {
+test('getTotalCost returns the fund cost value for the funds page', t => {
     t.is(getTotalCost(state, { page: 'funds' }), 400000);
 });
 
-test('getCrudRequests maps optimistically updated items to a HTTP request list', (t) => {
+test('getCrudRequests maps optimistically updated items to a HTTP request list', t => {
     const stateWithUpdates = {
         income: { items: [] },
         funds: {
@@ -317,21 +457,30 @@ test('getCrudRequests maps optimistically updated items to a HTTP request list',
         food: {
             items: [
                 {
-                    id: 'real-id-z', other: 'this-prop', is: null, __optimistic: UPDATE,
+                    id: 'real-id-z',
+                    other: 'this-prop',
+                    is: null,
+                    __optimistic: UPDATE,
                 },
             ],
         },
         general: {
             items: [
                 {
-                    id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE,
+                    id: 'some-fake-id',
+                    some: 'prop',
+                    is: true,
+                    __optimistic: CREATE,
                 },
             ],
         },
         holiday: {
             items: [
                 {
-                    id: 'real-id-x', thisProp: 'foo', is: false, __optimistic: DELETE,
+                    id: 'real-id-x',
+                    thisProp: 'foo',
+                    is: false,
+                    __optimistic: DELETE,
                 },
             ],
         },
@@ -348,9 +497,7 @@ test('getCrudRequests maps optimistically updated items to a HTTP request list',
             body: {
                 id: 'some-fund-id',
                 name: 'some-fund-name',
-                transactions: [
-                    { date: '2019-05-03', units: 103, cost: 99231 },
-                ],
+                transactions: [{ date: '2019-05-03', units: 103, cost: 99231 }],
             },
         },
         {

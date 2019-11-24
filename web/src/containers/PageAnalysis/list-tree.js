@@ -1,11 +1,12 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { formatCurrency } from '~client/modules/format';
 import { costShape } from '~client/prop-types/page/analysis';
 import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 import SubTree from '~client/containers/PageAnalysis/sub-tree';
+
+import * as Styled from './styles';
 
 function ListTreeItem({
     item: {
@@ -26,21 +27,24 @@ function ListTreeItem({
     const onToggleExpandCallback = useCallback(() => onToggleExpand(name), [onToggleExpand, name]);
 
     return (
-        <li key={name} className={classNames('tree-list-item', name, { open })}>
-            <div className="main"
+        <Styled.TreeListItem
+            key={name}
+        >
+            <Styled.TreeMain
+                open={open}
                 onClick={onToggleExpandCallback}
                 onMouseOver={onMouseOver}
                 onMouseOut={onMouseOut}
             >
-                <span className="indicator" />
+                <Styled.TreeIndicator name={name} />
                 <input type="checkbox"
                     defaultChecked={visible}
                     onClick={onToggleCallback}
                 />
-                <span className="title">{name}</span>
-                <span className="cost">{formatCurrency(itemCost)}</span>
-                <span className="pct">{' ('}{pct.toFixed(1)}{'%)'}</span>
-            </div>
+                <Styled.TreeTitle>{name}</Styled.TreeTitle>
+                <Styled.TreeValue>{formatCurrency(itemCost)}</Styled.TreeValue>
+                <Styled.TreeValue>{' ('}{pct.toFixed(1)}{'%)'}</Styled.TreeValue>
+            </Styled.TreeMain>
             <SubTree
                 name={name}
                 itemCost={itemCost}
@@ -48,7 +52,7 @@ function ListTreeItem({
                 open={open}
                 onHover={onHover}
             />
-        </li>
+        </Styled.TreeListItem>
     );
 }
 
@@ -82,8 +86,8 @@ function ListTree({
     const onToggleExpand = useToggle(setTreeOpen);
 
     return (
-        <div className="tree">
-            <ul className="tree-list">
+        <Styled.Tree>
+            <Styled.TreeList>
                 <ListTreeHead items={costPct} />
                 {costPct.map((item) => (
                     <ListTreeItem key={item.name}
@@ -93,8 +97,8 @@ function ListTree({
                         onToggleExpand={onToggleExpand}
                     />
                 ))}
-            </ul>
-        </div>
+            </Styled.TreeList>
+        </Styled.Tree>
     );
 }
 

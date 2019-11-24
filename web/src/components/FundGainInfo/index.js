@@ -1,61 +1,53 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { gainShape } from '~client/prop-types/page/funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { rgba } from '~client/modules/color';
+
+import * as Styled from './styles';
 
 const formatOptions = {
-    brackets: true, abbreviate: true, precision: 1, noPence: true,
+    brackets: true,
+    abbreviate: true,
+    precision: 1,
+    noPence: true,
 };
 const formatOptionsPct = { brackets: true, precision: 2 };
 
-const profitLossClass = (value) => ({
-    profit: value >= 0,
-    loss: value < 0,
-});
-
 export default function FundGainInfo({
-    gain: {
-        color, value, gainAbs, gain, dayGainAbs, dayGain,
-    },
+    gain: { color, value, gainAbs, gain, dayGainAbs, dayGain },
     sold,
 }) {
     if (!gain) {
         return null;
     }
 
-    const gainStyle = { backgroundColor: rgba(color) };
-
     return (
-        <span className="fund-extra-info-gain">
-            <span className={classNames('text', profitLossClass(gain))} style={gainStyle}>
-                <span className="value">
-                    {formatCurrency(value, formatOptions)}
-                </span>
-                <span className={classNames('breakdown', { sold })}>
-                    <span className="overall">
-                        <span className={classNames('gain-abs', profitLossClass(gainAbs))}>
+        <Styled.FundGainInfo gain={gain} sold={sold}>
+            <Styled.Text gain={gain} color={color}>
+                <Styled.Value>{formatCurrency(value, formatOptions)}</Styled.Value>
+                <Styled.Breakdown>
+                    <Styled.Overall sold={sold}>
+                        <Styled.GainAbs gain={gain}>
                             {formatCurrency(gainAbs, formatOptions)}
-                        </span>
-                        <span className={classNames('gain', profitLossClass(gain))}>
+                        </Styled.GainAbs>
+                        <Styled.Gain gain={gain}>
                             {formatPercent(gain, formatOptionsPct)}
-                        </span>
-                    </span>
+                        </Styled.Gain>
+                    </Styled.Overall>
                     {!sold && (
-                        <span className="day-gain-outer">
-                            <span className={classNames('day-gain-abs', profitLossClass(dayGainAbs))}>
+                        <Styled.DayGainOuter>
+                            <Styled.DayGainAbs>
                                 {formatCurrency(dayGainAbs, formatOptions)}
-                            </span>
-                            <span className={classNames('day-gain', profitLossClass(dayGain))}>
+                            </Styled.DayGainAbs>
+                            <Styled.DayGain>
                                 {formatPercent(dayGain, formatOptionsPct)}
-                            </span>
-                        </span>
+                            </Styled.DayGain>
+                        </Styled.DayGainOuter>
                     )}
-                </span>
-            </span>
-        </span>
+                </Styled.Breakdown>
+            </Styled.Text>
+        </Styled.FundGainInfo>
     );
 }
 

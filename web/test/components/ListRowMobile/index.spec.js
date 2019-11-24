@@ -33,19 +33,18 @@ const getContainer = memoize(() => {
     return render(<ListRowMobile {...props} />);
 });
 
-test('rendering the children of a list item', (t) => {
+test('rendering the children of a list item', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'list-row-mobile');
 
     t.is(div.childNodes.length, 4);
 });
 
-test('cells', (t) => {
+test('cells', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [date, item, cost] = div.childNodes;
@@ -54,22 +53,25 @@ test('cells', (t) => {
     t.is(item.tagName, 'SPAN');
     t.is(cost.tagName, 'SPAN');
 
-    t.is(date.className, 'column date');
-    t.is(item.className, 'column item');
-    t.is(cost.className, 'column cost');
-
-    t.is(date.innerHTML, DateTime.fromISO('2019-07-06T18:39:32Z').toLocaleString(DateTime.DATE_SHORT));
+    t.is(
+        date.innerHTML,
+        DateTime.fromISO('2019-07-06T18:39:32Z').toLocaleString(
+            DateTime.DATE_SHORT,
+        ),
+    );
     t.is(item.innerHTML, 'something');
     t.is(cost.innerHTML, '£3.43');
 });
 
-test('custom after row component', (t) => {
+test('custom after row component', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, , , after] = div.childNodes;
 
     t.is(after.tagName, 'SPAN');
     t.is(after.className, 'my-after-row');
-    t.is(after.innerHTML,
-        '{"item":{"id":"my-id","date":"2019-07-06T18:39:32.000+00:00","item":"something","cost":343}}');
+    t.is(
+        after.innerHTML,
+        '{"item":{"id":"my-id","date":"2019-07-06T18:39:32.000+00:00","item":"something","cost":343}}',
+    );
 });

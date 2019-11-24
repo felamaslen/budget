@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import { rowsShape } from '~client/prop-types/page/rows';
-import { itemHeightDesktop, itemHeightMobile } from '~client/constants/styles.json';
+import { itemHeightDesktop, itemHeightMobile } from '~client/styled/variables';
 
 import CrudList from '~client/components/CrudList';
 import ListHeadDesktop from '~client/components/ListHeadDesktop';
@@ -25,43 +25,26 @@ export default function ListBody({
     onUpdate,
     onDelete,
 }) {
-    const extraProps = useMemo(() => ({
-        page,
-        getDaily,
-        weeklyValue,
-        totalCost,
-        ...pageExtraProps,
-    }), [
-        page,
-        getDaily,
-        weeklyValue,
-        totalCost,
-        pageExtraProps,
-    ]);
+    const extraProps = useMemo(
+        () => ({
+            page,
+            getDaily,
+            weeklyValue,
+            totalCost,
+            ...pageExtraProps,
+        }),
+        [page, getDaily, weeklyValue, totalCost, pageExtraProps],
+    );
 
-    const [Item, CreateItem, className, BeforeList, AfterList] = useMemo(() => {
+    const [Item, CreateItem, BeforeList, AfterList] = useMemo(() => {
         if (isMobile) {
-            return [
-                ListRowMobile,
-                null,
-                'list-mobile',
-                ListHeadMobile,
-                ListFootMobile,
-            ];
+            return [ListRowMobile, null, ListHeadMobile, ListFootMobile];
         }
 
-        return [
-            ListRowDesktop,
-            ListCreateDesktop,
-            'list-desktop',
-            ListHeadDesktop,
-            null,
-        ];
+        return [ListRowDesktop, ListCreateDesktop, ListHeadDesktop, null];
     }, [isMobile]);
 
-    const defaultItemSize = isMobile
-        ? itemHeightMobile
-        : itemHeightDesktop;
+    const defaultItemSize = isMobile ? itemHeightMobile : itemHeightDesktop;
 
     return (
         <CrudList
@@ -72,7 +55,6 @@ export default function ListBody({
             CreateItem={CreateItem}
             BeforeList={BeforeList}
             AfterList={AfterList}
-            className={className}
             extraProps={extraProps}
             onCreate={onCreate}
             onUpdate={onUpdate}

@@ -32,7 +32,6 @@ test('basic structure', (t) => {
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'timeline-outer');
     t.is(div.childNodes.length, 5);
 });
 
@@ -52,7 +51,6 @@ test('timeline items', (t) => {
         const child = div.childNodes[index];
 
         t.is(child.tagName, 'SPAN');
-        t.is(child.className, 'data-item');
         t.is(child.style.backgroundColor, color);
     });
 });

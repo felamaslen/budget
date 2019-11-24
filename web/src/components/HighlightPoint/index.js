@@ -38,7 +38,14 @@ function getLabelPosY(posY, height, labelHeight) {
 }
 
 export default function HighlightPoint({
-    pixX, pixY, minY, maxY, width, height, hoverEffect, hlPoint,
+    pixX,
+    pixY,
+    minY,
+    maxY,
+    width,
+    height,
+    hoverEffect,
+    hlPoint,
 }) {
     if (!(hlPoint && maxY !== minY)) {
         return null;
@@ -80,16 +87,32 @@ export default function HighlightPoint({
         alignmentBaseline: 'middle',
     };
 
-    return <g className="hl-point">
-        <path d={pathVertical} {...lineProps} />
-        <path d={pathHorizontal} {...lineProps} />
-        <rect x={rectPosX} y={height - labelHeight} width={labelWidthX} height={labelHeight}
-            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text {...textProps} {...textPropsX}>{labelTextX}</text>
-        <rect x={width - labelWidthY} y={rectPosY} width={labelWidthY} height={labelHeight}
-            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text {...textProps} {...textPropsY}>{labelTextY}</text>
-    </g>;
+    return (
+        <g>
+            <path d={pathVertical} {...lineProps} />
+            <path d={pathHorizontal} {...lineProps} />
+            <rect
+                x={rectPosX}
+                y={height - labelHeight}
+                width={labelWidthX}
+                height={labelHeight}
+                fill={rgba(COLOR_TRANSLUCENT_DARK)}
+            />
+            <text {...textProps} {...textPropsX}>
+                {labelTextX}
+            </text>
+            <rect
+                x={width - labelWidthY}
+                y={rectPosY}
+                width={labelWidthY}
+                height={labelHeight}
+                fill={rgba(COLOR_TRANSLUCENT_DARK)}
+            />
+            <text {...textProps} {...textPropsY}>
+                {labelTextY}
+            </text>
+        </g>
+    );
 }
 
 HighlightPoint.propTypes = {

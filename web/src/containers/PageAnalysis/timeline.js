@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { COLOR_CATEGORY } from '~client/constants/colors';
 import { rgba, averageColor } from '~client/modules/color';
 import { timelineShape } from '~client/prop-types/page/analysis';
+
+import * as Styled from './styles';
 
 const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 
@@ -17,7 +19,7 @@ function Timeline({ data }) {
     }, [sums]);
 
     return (
-        <div className="timeline-outer">
+        <Styled.Timeline>
             {data.map((row, timeIndex) => {
                 const score = getSumScore(sums[timeIndex]);
                 const backgroundColor = averageColor(row
@@ -29,16 +31,13 @@ function Timeline({ data }) {
                     ])));
 
                 return (
-                    <span
+                    <Styled.DataItem
                         key={timeIndex}
-                        className="data-item"
-                        style={{
-                            backgroundColor: rgba(backgroundColor),
-                        }}
+                        color={rgba(backgroundColor)}
                     />
                 );
             })}
-        </div>
+        </Styled.Timeline>
     );
 }
 
@@ -46,4 +45,4 @@ Timeline.propTypes = {
     data: timelineShape,
 };
 
-export default React.memo(Timeline);
+export default memo(Timeline);

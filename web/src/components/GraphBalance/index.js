@@ -6,18 +6,23 @@ import React, { useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
-import { COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS } from '~client/constants/colors';
-import styles from '~client/constants/styles.json';
+import {
+    COLOR_BALANCE_ACTUAL,
+    COLOR_BALANCE_PREDICTED,
+    COLOR_BALANCE_STOCKS,
+} from '~client/constants/colors';
+import { graphOverviewHeightMobile } from '~client/styled/variables';
 import { rgba } from '~client/modules/color';
 import { leftPad } from '~client/modules/data';
 import { pixelPropTypes, rangePropTypes } from '~client/prop-types/graph';
 import { targetsShape } from '~client/prop-types/graph/balance';
-import GraphCashFlow, { getValuesWithTime, graphCashFlowPropTypes } from '~client/components/GraphCashFlow';
+import GraphCashFlow, {
+    getValuesWithTime,
+    graphCashFlowPropTypes,
+} from '~client/components/GraphCashFlow';
 import Key from '~client/components/GraphBalance/Key';
 import Targets from '~client/components/GraphBalance/Targets';
 import AfterCanvas from '~client/components/GraphBalance/AfterCanvas';
-
-import './style.scss';
 
 const colorBalance = [rgba(COLOR_BALANCE_PREDICTED), rgba(COLOR_BALANCE_ACTUAL)];
 const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
@@ -48,7 +53,13 @@ function processData({
     showAll,
     futureMonths,
 }) {
-    const { balance, funds, oldOffset } = getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll);
+    const { balance, funds, oldOffset } = getData(
+        netWorthCombined,
+        netWorthOld,
+        fundsCurrent,
+        fundsOld,
+        showAll,
+    );
 
     const futureKey = oldOffset + netWorthCombined.length - futureMonths;
 
@@ -58,10 +69,7 @@ function processData({
         startDate,
     });
 
-    const dataFunds = funds.map((value, index) => ([
-        dataBalance[index][0],
-        value,
-    ]));
+    const dataFunds = funds.map((value, index) => [dataBalance[index][0], value]);
 
     return [
         {
@@ -83,9 +91,7 @@ function processData({
 }
 
 function makeAfterLines({ showAll, targets }) {
-    const AfterLines = ({
-        minY, maxY, pixX, pixY,
-    }) => (
+    const AfterLines = ({ minY, maxY, pixX, pixY }) => (
         <g>
             <Targets
                 minY={minY}
@@ -118,22 +124,31 @@ export default function GraphBalance({
     isMobile,
 }) {
     const [showAll, setShowAll] = useState(false);
-    const lines = useMemo(() => processData({
-        startDate,
-        cost,
-        netWorthOld,
-        showAll,
-        futureMonths,
-    }), [startDate, cost, netWorthOld, showAll, futureMonths]);
+    const lines = useMemo(
+        () =>
+            processData({
+                startDate,
+                cost,
+                netWorthOld,
+                showAll,
+                futureMonths,
+            }),
+        [startDate, cost, netWorthOld, showAll, futureMonths],
+    );
 
-    const afterLines = useMemo(() => makeAfterLines({
-        showAll,
-        targets,
-    }), [showAll, targets]);
+    const afterLines = useMemo(
+        () =>
+            makeAfterLines({
+                showAll,
+                targets,
+            }),
+        [showAll, targets],
+    );
 
-    const after = useCallback(() => (
-        <AfterCanvas showAll={showAll} setShowAll={setShowAll} />
-    ), [showAll, setShowAll]);
+    const after = useCallback(() => <AfterCanvas showAll={showAll} setShowAll={setShowAll} />, [
+        showAll,
+        setShowAll,
+    ]);
 
     const graphProps = {
         name: 'balance',
@@ -145,7 +160,7 @@ export default function GraphBalance({
     };
 
     if (isMobile) {
-        graphProps.graphHeight = styles.graphOverviewHeightMobile;
+        graphProps.graphHeight = graphOverviewHeightMobile;
     }
 
     return <GraphCashFlow isMobile={isMobile} {...graphProps} />;

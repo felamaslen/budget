@@ -22,14 +22,13 @@ const getContainer = (customProps = {}) => {
     );
 };
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [nav] = container.childNodes;
 
     t.is(nav.tagName, 'NAV');
-    t.is(nav.className, 'nav-list noselect');
     t.is(nav.childNodes.length, 10);
 });
 
@@ -46,25 +45,18 @@ const pageCases = [
 ];
 
 pageCases.forEach(({ page, path }, index) => {
-    test(`rendering a button for the ${page} page`, (t) => {
+    test(`rendering a button for the ${page} page`, t => {
         const { container } = getContainer();
         const [nav] = container.childNodes;
 
         const link = nav.childNodes[index];
 
         t.is(link.tagName, 'A');
-        t.regex(link.className, new RegExp(`nav-link nav-link-${page}`));
-        if (path === '/') {
-            t.regex(link.className, /active/);
-        } else {
-            t.notRegex(link.className, /active/);
-        }
-
         t.is(link.href, path);
     });
 });
 
-test('logout button', (t) => {
+test('logout button', t => {
     const onLogout = t.context.stub();
     const { container } = getContainer({
         onLogout,
@@ -74,7 +66,6 @@ test('logout button', (t) => {
     const link = nav.childNodes[9];
 
     t.is(link.tagName, 'A');
-    t.is(link.className, 'nav-link nav-link-logout');
     t.is(link.innerHTML, 'Log out');
 
     t.is(onLogout.calls.length, 0);

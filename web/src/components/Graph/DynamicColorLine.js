@@ -4,7 +4,13 @@ import { getDynamicLinePaths } from '~client/components/Graph/helpers';
 import { dataShape } from '~client/prop-types/graph';
 
 export default function DynamicColorLine({
-    fill, data, smooth, color, children, pathProps, ...props
+    fill,
+    data,
+    smooth,
+    color,
+    children,
+    pathProps,
+    ...props
 }) {
     if (props.minY === props.maxY) {
         return null;
@@ -14,7 +20,10 @@ export default function DynamicColorLine({
     }
 
     const linePaths = getDynamicLinePaths({
-        data, smooth, color, ...props,
+        data,
+        smooth,
+        color,
+        ...props,
     });
     if (!linePaths) {
         return null;
@@ -24,7 +33,12 @@ export default function DynamicColorLine({
         <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
     ));
 
-    return <g className="lines">{children}{paths}</g>;
+    return (
+        <g>
+            {children}
+            {paths}
+        </g>
+    );
 }
 
 DynamicColorLine.propTypes = {

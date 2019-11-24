@@ -1,36 +1,44 @@
-/*
- * Individual fund price graph
- */
-
-import './style.scss';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import LineGraph from '~client/components/Graph/LineGraph';
 import Axes from './Axes';
 import { rgba } from '~client/modules/color';
 import { separateLines } from '~client/modules/funds';
 import {
-    GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_WIDTH_LARGE,
-    GRAPH_FUND_ITEM_HEIGHT, GRAPH_FUND_ITEM_HEIGHT_LARGE,
+    GRAPH_FUND_ITEM_WIDTH,
+    GRAPH_FUND_ITEM_WIDTH_LARGE,
+    GRAPH_FUND_ITEM_HEIGHT,
+    GRAPH_FUND_ITEM_HEIGHT_LARGE,
 } from '~client/constants/graph';
 import { COLOR_LOSS, COLOR_PROFIT } from '~client/constants/colors';
 
+import * as Styled from './styles';
+
 function getDimensions({ popout, sold }) {
     if (popout) {
-        return { width: GRAPH_FUND_ITEM_WIDTH_LARGE, height: GRAPH_FUND_ITEM_HEIGHT_LARGE };
+        return {
+            width: GRAPH_FUND_ITEM_WIDTH_LARGE,
+            height: GRAPH_FUND_ITEM_HEIGHT_LARGE,
+        };
     }
     if (sold) {
-        return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT / 2 };
+        return {
+            width: GRAPH_FUND_ITEM_WIDTH,
+            height: GRAPH_FUND_ITEM_HEIGHT / 2,
+        };
     }
 
     return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT };
 }
 
-const getRange = (data) => data.reduce(({ min, max }, value) => ({
-    min: Math.min(min, value),
-    max: Math.max(max, value),
-}), { min: Infinity, max: -Infinity });
+const getRange = data =>
+    data.reduce(
+        ({ min, max }, value) => ({
+            min: Math.min(min, value),
+            max: Math.max(max, value),
+        }),
+        { min: Infinity, max: -Infinity },
+    );
 
 const valuesColor = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
 
@@ -70,14 +78,16 @@ function processData(data, popout) {
     }));
 
     return {
-        lines, minX, maxX, minY, maxY,
+        lines,
+        minX,
+        maxX,
+        minY,
+        maxY,
     };
 }
 
 function makeBeforeLines({ popout }) {
-    const BeforeLines = ({
-        minX, minY, maxY, height, pixX, pixY,
-    }) => (
+    const BeforeLines = ({ minX, minY, maxY, height, pixX, pixY }) => (
         <Axes
             popout={popout}
             minX={minX}
@@ -101,16 +111,17 @@ function makeBeforeLines({ popout }) {
     return BeforeLines;
 }
 
-export default function GraphFundItem({
-    name, sold, values, popout, onToggle,
-}) {
+export default function GraphFundItem({ name, sold, values, popout, onToggle }) {
     const { width, height } = getDimensions({ popout, sold });
 
     const beforeLines = useMemo(() => values && makeBeforeLines({ popout }), [values, popout]);
 
-    const svgProperties = useMemo(() => ({
-        onClick: onToggle,
-    }), [onToggle]);
+    const svgProperties = useMemo(
+        () => ({
+            onClick: onToggle,
+        }),
+        [onToggle],
+    );
 
     if (!values) {
         return null;
@@ -119,7 +130,6 @@ export default function GraphFundItem({
     const graphProps = {
         name,
         svgProperties,
-        svgClasses: classNames({ popout }),
         beforeLines,
         width,
         height,
@@ -127,9 +137,9 @@ export default function GraphFundItem({
     };
 
     return (
-        <div className="fund-graph">
+        <Styled.FundGraph sold={sold} popout={popout}>
             <LineGraph {...graphProps} />
-        </div>
+        </Styled.FundGraph>
     );
 }
 

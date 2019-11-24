@@ -1,16 +1,14 @@
-import React, {
-    useRef, useState, useReducer, useEffect, useCallback,
-} from 'react';
+import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import compose from 'just-compose';
 import { DateTime } from 'luxon';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { validateField } from '~client/modules/validate';
+import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared/button';
 import ModalDialogField from '~client/components/ModalDialog/field';
 
-import './style.scss';
+import * as Styled from './styles';
 
 function getTitle({ type, id }) {
     if (type === 'edit') {
@@ -22,11 +20,11 @@ function getTitle({ type, id }) {
 
 export const animationTime = 350;
 
-const withDefaultDate = (fields) => replaceAtIndex(
-    fields,
-    fields.findIndex(({ item, value }) => item === 'date' && !value),
-    { item: 'date', value: DateTime.local() },
-);
+const withDefaultDate = fields =>
+    replaceAtIndex(fields, fields.findIndex(({ item, value }) => item === 'date' && !value), {
+        item: 'date',
+        value: DateTime.local(),
+    });
 
 const HIDDEN = 'HIDDEN';
 const SHOWN = 'SHOWN';
@@ -92,18 +90,21 @@ export default function ModalDialog({
 
     const [tempFields, setTempFields] = useState();
     useEffect(() => {
-        setTempFields(compose(
-            withDefaultDate,
-        )(fields.slice()));
+        setTempFields(compose(withDefaultDate)(fields.slice()));
     }, [fields]);
 
     const [invalid, setInvalid] = useState({});
 
-    const onChangeField = useCallback((item, value) => setTempFields((last) => replaceAtIndex(
-        last,
-        last.findIndex(({ item: thisItem }) => thisItem === item),
-        { item, value },
-    )), []);
+    const onChangeField = useCallback(
+        (item, value) =>
+            setTempFields(last =>
+                replaceAtIndex(last, last.findIndex(({ item: thisItem }) => thisItem === item), {
+                    item,
+                    value,
+                }),
+            ),
+        [],
+    );
 
     const onSubmitCallback = useCallback(() => {
         const nextInvalid = tempFields.reduce((last, { item, value }) => {
@@ -119,7 +120,9 @@ export default function ModalDialog({
         setInvalid(nextInvalid);
 
         if (!Object.keys(nextInvalid).length) {
-            onSubmit(tempFields.reduce((last, { item, value }) => ({ ...last, [item]: value }), { id }));
+            onSubmit(
+                tempFields.reduce((last, { item, value }) => ({ ...last, [item]: value }), { id }),
+            );
         }
     }, [onSubmit, tempFields, id]);
 
@@ -134,41 +137,35 @@ export default function ModalDialog({
     }
 
     return (
-        <div className={classNames('modal-dialog', type)}>
-            <div className={classNames('modal-dialog-inner', { hidden: !active, loading })}>
-                <span className="title">{title}</span>
-                <ul className="form-list">
+        <Styled.ModalDialog>
+            <Styled.ModalInner active={active} isLoading={loading}>
+                <Styled.Title>{title}</Styled.Title>
+                <Styled.FormList>
                     {fields.map(({ item, value }) => (
-                        <ModalDialogField key={item}
+                        <ModalDialogField
+                            key={item}
                             item={item}
                             value={value}
                             invalid={Boolean(invalid[item])}
                             onChange={onChangeField}
                         />
                     ))}
-                </ul>
-                <div className="buttons">
-                    <button
-                        type="button"
-                        className="button-cancel"
-                        disabled={loading}
-                        onClick={onCancel}
-                    >{'nope.avi'}</button>
-                    <button
-                        type="button"
-                        className="button-submit"
-                        disabled={loading}
-                        onClick={onSubmitCallback}
-                    >{'Do it.'}</button>
-                    {canRemove && <button
-                        type="button"
-                        className="button-remove"
-                        disabled={loading}
-                        onClick={onRemove}
-                    >&minus;</button>}
-                </div>
-            </div>
-        </div>
+                </Styled.FormList>
+                <Styled.Buttons>
+                    <ButtonCancel type="button" disabled={loading} onClick={onCancel}>
+                        {'nope.avi'}
+                    </ButtonCancel>
+                    <ButtonSubmit type="button" disabled={loading} onClick={onSubmitCallback}>
+                        {'Do it.'}
+                    </ButtonSubmit>
+                    {canRemove && (
+                        <Button type="button" disabled={loading} onClick={onRemove}>
+                            &minus;
+                        </Button>
+                    )}
+                </Styled.Buttons>
+            </Styled.ModalInner>
+        </Styled.ModalDialog>
     );
 }
 
@@ -177,10 +174,12 @@ ModalDialog.propTypes = {
     loading: PropTypes.bool,
     type: PropTypes.string,
     id: PropTypes.string,
-    fields: PropTypes.arrayOf(PropTypes.shape({
-        item: PropTypes.string.isRequired,
-        value: PropTypes.any,
-    })),
+    fields: PropTypes.arrayOf(
+        PropTypes.shape({
+            item: PropTypes.string.isRequired,
+            value: PropTypes.any,
+        }),
+    ),
     onCancel: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
     onRemove: PropTypes.func,

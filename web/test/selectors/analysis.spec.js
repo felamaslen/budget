@@ -113,8 +113,7 @@ test('getDeepBlocks gets a block-packed map of the state', (t) => {
         ...testState,
         analysis: {
             ...testState.analysis,
-            deepBlock: 'foo2_bar2',
-            deep: [
+            costDeep: [
                 ['foo2_bar2_baz1', [
                     ['foo2_bar2_baz1_bak1', 100],
                     ['foo2_bar2_baz1_bak2', 130],

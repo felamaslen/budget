@@ -19,7 +19,7 @@ const getContainer = memoize((customProps = {}) => {
     return render(<Digit {...props} />);
 });
 
-test('basic structure', (t) => {
+test('basic structure', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
@@ -27,11 +27,10 @@ test('basic structure', (t) => {
     const [button] = container.childNodes;
 
     t.is(button.tagName, 'BUTTON');
-    t.is(button.className, 'btn-digit btn-digit-3');
     t.is(button.innerHTML, '3');
 });
 
-test('handling input', (t) => {
+test('handling input', t => {
     const onInput = t.context.stub();
 
     const { container } = getContainer({ onInput });

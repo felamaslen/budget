@@ -1,25 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default function AppLogo({ loading, unsaved }) {
-    const unsavedChanges = unsaved
-        ? <span className="queue-not-saved">{'Unsaved changes!'}</span>
-        : null;
+import * as Styled from './styles';
 
-    const loadingSpinner = loading
-        ? <span className="loading-api" />
-        : null;
-
-    return <div className="app-logo">
-        {unsavedChanges}
-        <a className="logo">
+const AppLogo = ({ loading, unsaved }) => (
+    <Styled.AppLogo>
+        {unsaved && <Styled.QueueNotSaved>{'Unsaved changes!'}</Styled.QueueNotSaved>}
+        <Styled.Logo>
             <span>{'Budget'}</span>
-            {loadingSpinner}
-        </a>
-    </div>;
-}
+            {loading && <Styled.LoadingApi />}
+        </Styled.Logo>
+    </Styled.AppLogo>
+);
 
 AppLogo.propTypes = {
     loading: PropTypes.bool.isRequired,
     unsaved: PropTypes.bool.isRequired,
 };
+
+export default AppLogo;

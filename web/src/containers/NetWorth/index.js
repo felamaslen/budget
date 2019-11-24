@@ -1,11 +1,8 @@
 import { connect } from 'react-redux';
-import React, {
-    useState, useRef, useCallback, useEffect,
-} from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { withRouter } from 'react-router';
-import { Route, NavLink } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { NET_WORTH_AGGREGATE } from '~client/constants/data';
 
@@ -37,7 +34,7 @@ import NetWorthView from '~client/components/NetWorthView';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
 import NetWorthList from '~client/components/NetWorthList';
 
-import './style.scss';
+import * as Styled from './styles';
 
 function NetWorth({
     history,
@@ -73,62 +70,60 @@ function NetWorth({
     }, []);
 
     return (
-        <div className={classNames('net-worth', { visible })}>
-            <div className="meta">
-                <h2 className="title">{'Net worth'}</h2>
-                <a className="button-back" onClick={onClose}>&times;</a>
-            </div>
+        <Styled.NetWorth visible={visible}>
+            <Styled.Meta>
+                <Styled.Title>{'Net worth'}</Styled.Title>
+                <Styled.BackButton onClick={onClose}>&times;</Styled.BackButton>
+            </Styled.Meta>
             <Route
                 exact
                 path="/net-worth"
-                render={(routeProps) => <NetWorthView {...routeProps}
-                    table={table}
-                    aggregate={aggregate}
-                />}
+                render={routeProps => (
+                    <NetWorthView {...routeProps} table={table} aggregate={aggregate} />
+                )}
             />
             <Route
                 path="/net-worth/edit/categories"
-                render={(routeProps) => <NetWorthCategoryList {...routeProps}
-                    categories={categories}
-                    subcategories={subcategories}
-                    onCreateCategory={onCreateCategory}
-                    onUpdateCategory={onUpdateCategory}
-                    onDeleteCategory={onDeleteCategory}
-                    onCreateSubcategory={onCreateSubcategory}
-                    onUpdateSubcategory={onUpdateSubcategory}
-                    onDeleteSubcategory={onDeleteSubcategory}
-                />}
+                render={routeProps => (
+                    <NetWorthCategoryList
+                        {...routeProps}
+                        categories={categories}
+                        subcategories={subcategories}
+                        onCreateCategory={onCreateCategory}
+                        onUpdateCategory={onUpdateCategory}
+                        onDeleteCategory={onDeleteCategory}
+                        onCreateSubcategory={onCreateSubcategory}
+                        onUpdateSubcategory={onUpdateSubcategory}
+                        onDeleteSubcategory={onDeleteSubcategory}
+                    />
+                )}
             />
             <Route
                 path="/net-worth/edit/list"
-                render={(routeProps) => <NetWorthList {...routeProps}
-                    data={entries}
-                    categories={categories}
-                    subcategories={subcategories}
-                    onCreate={onCreateEntry}
-                    onUpdate={onUpdateEntry}
-                    onDelete={onDeleteEntry}
-                />}
+                render={routeProps => (
+                    <NetWorthList
+                        {...routeProps}
+                        data={entries}
+                        categories={categories}
+                        subcategories={subcategories}
+                        onCreate={onCreateEntry}
+                        onUpdate={onUpdateEntry}
+                        onDelete={onDeleteEntry}
+                    />
+                )}
             />
-            <div className="net-worth-tab-bar">
-                <NavLink
-                    exact
-                    to="/net-worth"
-                    className="tab tab-button tab-view"
-                    activeClassName="selected"
-                >{'View'}</NavLink>
-                <NavLink
-                    to="/net-worth/edit/categories"
-                    className="tab tab-button tab-edit-categories"
-                    activeClassName="selected"
-                >{'Categories'}</NavLink>
-                <NavLink
-                    to="/net-worth/edit/list"
-                    className="tab tab-button tab-edit-list"
-                    activeClassName="selected"
-                >{'Entries'}</NavLink>
-            </div>
-        </div>
+            <Styled.TabBar>
+                <Styled.Tab exact to="/net-worth" activeClassName="selected">
+                    {'View'}
+                </Styled.Tab>
+                <Styled.Tab to="/net-worth/edit/categories" activeClassName="selected">
+                    {'Categories'}
+                </Styled.Tab>
+                <Styled.Tab to="/net-worth/edit/list" activeClassName="selected">
+                    {'Entries'}
+                </Styled.Tab>
+            </Styled.TabBar>
+        </Styled.NetWorth>
     );
 }
 
@@ -153,7 +148,7 @@ NetWorth.propTypes = {
     onDeleteEntry: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     cost: getProcessedCost(state),
     categories: getCategories(state),
     subcategories: getSubcategories(state),
@@ -174,4 +169,7 @@ const mapDispatchToProps = {
     onDeleteEntry: netWorthDeleted,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(NetWorth));
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(withRouter(NetWorth));

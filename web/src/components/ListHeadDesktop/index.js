@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { formatCurrency } from '~client/modules/format';
 import { PAGES } from '~client/constants/data';
 
+import * as Styled from './styles';
+import { Column } from '~client/components/ListRowDesktop/styles';
+
 export default function ListHeadDesktop({
     page,
     weeklyValue,
@@ -17,28 +20,33 @@ export default function ListHeadDesktop({
     });
 
     return (
-        <div className="list-head noselect">
+        <Styled.ListHead>
             {PAGES[page].cols.map((column, key) => (
-                <span key={key} className={column}>{column}</span>
+                <Column key={key} column={column}>
+                    {column}
+                </Column>
             ))}
             {getDaily && (
-                <span className="daily">
-                    <span className="daily-value">{'Daily |'}</span>
-                    <span className="weekly">{'Weekly:'}</span>
-                    <span className="weekly-value">{weeklyValueFormatted}</span>
-                </span>
+                <Styled.Daily>
+                    <Styled.DailyValue>{'Daily |'}</Styled.DailyValue>
+                    <Styled.Weekly>{'Weekly:'}</Styled.Weekly>
+                    <Styled.WeeklyValue>{weeklyValueFormatted}</Styled.WeeklyValue>
+                </Styled.Daily>
             )}
-            {TotalValue
-                ? <TotalValue totalCost={totalCost} {...extraProps} />
-                : <div className="total-outer">
-                    <span className="total">{'Total:'}</span>
-                    <span className="total-value">{formatCurrency(totalCost, {
-                        abbreviate: true,
-                        precision: 1,
-                    })}</span>
-                </div>
-            }
-        </div>
+            {TotalValue ? (
+                <TotalValue totalCost={totalCost} {...extraProps} />
+            ) : (
+                <Styled.TotalOuter>
+                    <Styled.Total>{'Total:'}</Styled.Total>
+                    <Styled.TotalValue>
+                        {formatCurrency(totalCost, {
+                            abbreviate: true,
+                            precision: 1,
+                        })}
+                    </Styled.TotalValue>
+                </Styled.TotalOuter>
+            )}
+        </Styled.ListHead>
     );
 }
 

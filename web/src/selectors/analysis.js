@@ -32,7 +32,7 @@ export const getBlocks = createSelector(getCost, getTreeVisible, (cost, treeVisi
         ANALYSIS_VIEW_HEIGHT,
     ));
 
-const getDeepArray = (state) => state.analysis.deep;
+const getDeepArray = (state) => state.analysis.costDeep;
 
 export const getDeepCost = createSelector(getDeepArray, (cost) => cost && cost.map(getSortedTree));
 

@@ -1,8 +1,5 @@
-import React, {
-    useState, useCallback, useMemo, useEffect,
-} from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import shortid from 'shortid';
 
 import { replaceAtIndex } from '~client/modules/data';
@@ -16,16 +13,20 @@ import {
     category as categoryShape,
     subcategory as subcategoryShape,
 } from '~client/prop-types/net-worth/category';
+import { ButtonAdd, ButtonDelete } from '~client/styled/shared/button';
 import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldSelect from '~client/components/FormField/select';
 import FormContainer from '~client/components/NetWorthEditForm/form-container';
+import { STEP_VALUES } from './constants';
+
+import * as Styled from './styles';
 
 function CreditLimitEditor({ creditLimit, setCreditLimit }) {
     return (
-        <div className="credit-limit-editor">
-            <span className="label">{'Credit limit:'}</span>
-            <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} />
+        <div>
+            <span>{'Credit limit:'}</span>
+            <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} small />
         </div>
     );
 }
@@ -36,9 +37,9 @@ CreditLimitEditor.propTypes = {
 };
 
 const SkipToggle = ({ skip, setSkip }) => (
-    <div className="skip-toggle">
+    <div>
         <input type="checkbox" checked={Boolean(skip)} onChange={() => setSkip(!skip)} />
-        <span className="label">{'Skip in calculations'}</span>
+        <span>{'Skip in calculations'}</span>
     </div>
 );
 
@@ -52,23 +53,17 @@ function EditByType({
     subcategories,
     creditLimit: creditLimitList,
     currencies,
-    value: {
-        id,
-        subcategory,
-        skip,
-        value,
-    },
+    value: { id, subcategory, skip, value },
     onChange,
     onRemove,
 }) {
-    const {
-        subcategory: subcategoryName,
-        hasCreditLimit,
-    } = subcategories.find(({ id: subcategoryId }) => subcategoryId === subcategory);
+    const { subcategory: subcategoryName, hasCreditLimit } = subcategories.find(
+        ({ id: subcategoryId }) => subcategoryId === subcategory,
+    );
 
-    const { value: initialCreditLimit } = creditLimitList.find(({ subcategory: subcategoryId }) => (
-        subcategoryId === subcategory
-    )) || { value: null };
+    const { value: initialCreditLimit } = creditLimitList.find(
+        ({ subcategory: subcategoryId }) => subcategoryId === subcategory,
+    ) || { value: null };
 
     const [newValue, setNewValue] = useState(value);
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
@@ -83,20 +78,15 @@ function EditByType({
     const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
     return (
-        <div className="edit-by-category-value">
-            <h6 className="subcategory">{subcategoryName}</h6>
-            <FormFieldNetWorthValue
-                value={value}
-                onChange={setNewValue}
-                currencies={currencies}
-            />
-            {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
+        <Styled.EditByCategoryValue>
+            <Styled.Subcategory>{subcategoryName}</Styled.Subcategory>
+            <FormFieldNetWorthValue value={value} onChange={setNewValue} currencies={currencies} />
+            {hasCreditLimit && (
+                <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />
+            )}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <button
-                onClick={onRemoveCallback}
-                className="button-delete"
-            >&minus;</button>
-        </div>
+            <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>
+        </Styled.EditByCategoryValue>
     );
 }
 
@@ -111,29 +101,28 @@ EditByType.propTypes = {
     onRemove: PropTypes.func.isRequired,
 };
 
-const getFirstOption = (options) => (options[0] || {}).internal;
+const getFirstOption = options => (options[0] || {}).internal;
 
-function AddByType({
-    isLiability,
-    categories,
-    subcategories,
-    currencies,
-    onAdd,
-}) {
-    const categoryOptions = useMemo(() => categories.map(({ id, category }) => ({
-        internal: String(id),
-        external: category,
-    })), [categories]);
+function AddByType({ isLiability, categories, subcategories, currencies, onAdd }) {
+    const categoryOptions = useMemo(
+        () =>
+            categories.map(({ id, category }) => ({
+                internal: String(id),
+                external: category,
+            })),
+        [categories],
+    );
 
     const [category, setCategory] = useState(getFirstOption(categoryOptions));
 
     const subcategoryOptions = useMemo(
-        () => subcategories
-            .filter(({ categoryId }) => categoryId === category)
-            .map(({ id, subcategory }) => ({
-                internal: id,
-                external: subcategory,
-            })),
+        () =>
+            subcategories
+                .filter(({ categoryId }) => categoryId === category)
+                .map(({ id, subcategory }) => ({
+                    internal: id,
+                    external: subcategory,
+                })),
         [category, subcategories],
     );
 
@@ -142,12 +131,11 @@ function AddByType({
     const [value, setValue] = useState(0);
     const [skip, setSkip] = useState(null);
 
-    const { hasCreditLimit } = useMemo(() => (
-        subcategories.find(({ id }) => id === subcategory) || {}
-    ), [subcategories, subcategory]);
-    const initialCreditLimit = hasCreditLimit
-        ? 0
-        : null;
+    const { hasCreditLimit } = useMemo(
+        () => subcategories.find(({ id }) => id === subcategory) || {},
+        [subcategories, subcategory],
+    );
+    const initialCreditLimit = hasCreditLimit ? 0 : null;
     const [creditLimit, setCreditLimit] = useState(initialCreditLimit);
 
     const onAddCallback = useCallback(() => {
@@ -155,34 +143,32 @@ function AddByType({
     }, [onAdd, subcategory, value, creditLimit, skip]);
 
     return (
-        <div className="add-by-category-value">
-            <span className="category">
-                <span className="label">{'Category:'}</span>
+        <Styled.AddByCategoryValue>
+            <Styled.AddCategory>
+                <Styled.AddLabel>{'Category:'}</Styled.AddLabel>
                 <FormFieldSelect
                     item="category"
                     options={categoryOptions}
                     value={category}
                     onChange={setCategory}
                 />
-            </span>
-            <span className="subcategory">
-                <span className="label">{'Subcategory:'}</span>
+            </Styled.AddCategory>
+            <Styled.AddSubcategory>
+                <Styled.AddLabel>{'Subcategory:'}</Styled.AddLabel>
                 <FormFieldSelect
                     item="subcategory"
                     options={subcategoryOptions}
                     value={subcategory}
                     onChange={setSubcategory}
                 />
-            </span>
-            <FormFieldNetWorthValue
-                value={value}
-                onChange={setValue}
-                currencies={currencies}
-            />
-            {hasCreditLimit && <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />}
+            </Styled.AddSubcategory>
+            <FormFieldNetWorthValue value={value} onChange={setValue} currencies={currencies} />
+            {hasCreditLimit && (
+                <CreditLimitEditor creditLimit={creditLimit} setCreditLimit={setCreditLimit} />
+            )}
             {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-            <button onClick={onAddCallback} className="button-add">{'+'}</button>
-        </div>
+            <ButtonAdd onClick={onAddCallback}>{'+'}</ButtonAdd>
+        </Styled.AddByCategoryValue>
     );
 }
 
@@ -195,7 +181,9 @@ AddByType.propTypes = {
 };
 
 function appendCreditLimit(item, subcategory, value) {
-    const index = item.creditLimit.findIndex(({ subcategory: subcategoryId }) => subcategoryId === subcategory);
+    const index = item.creditLimit.findIndex(
+        ({ subcategory: subcategoryId }) => subcategoryId === subcategory,
+    );
     const creditLimit = { subcategory, value };
     if (index === -1) {
         return item.creditLimit.concat([creditLimit]);
@@ -205,84 +193,91 @@ function appendCreditLimit(item, subcategory, value) {
 }
 
 function useAddValue(item, onEdit) {
-    return useCallback((newValue, creditLimit, subcategory, skip = null) => {
-        const itemWithValue = {
-            ...item,
-            values: item.values.concat([{
-                id: shortid.generate(),
-                subcategory,
-                skip,
-                value: newValue,
-            }]),
-        };
+    return useCallback(
+        (newValue, creditLimit, subcategory, skip = null) => {
+            const itemWithValue = {
+                ...item,
+                values: item.values.concat([
+                    {
+                        id: shortid.generate(),
+                        subcategory,
+                        skip,
+                        value: newValue,
+                    },
+                ]),
+            };
 
-        if (creditLimit === null) {
-            onEdit(itemWithValue);
-        } else {
-            onEdit({
-                ...itemWithValue,
-                creditLimit: appendCreditLimit(item, subcategory, creditLimit),
-            });
-        }
-    }, [item, onEdit]);
+            if (creditLimit === null) {
+                onEdit(itemWithValue);
+            } else {
+                onEdit({
+                    ...itemWithValue,
+                    creditLimit: appendCreditLimit(item, subcategory, creditLimit),
+                });
+            }
+        },
+        [item, onEdit],
+    );
 }
 
 function useChangeValue(item, onEdit) {
-    return useCallback((id, newValue, creditLimit, skip = null) => {
-        const index = item.values.findIndex(({ id: valueId }) => valueId === id);
-        const itemWithValue = {
-            ...item,
-            values: replaceAtIndex(item.values, index, {
-                ...item.values[index],
-                skip,
-                value: newValue,
-            }),
-        };
-
-        if (creditLimit === null) {
-            onEdit(itemWithValue);
-        } else {
-            const creditLimitIndex = item.creditLimit.findIndex(({ subcategory }) => (
-                subcategory === item.values[index].subcategory
-            ));
-
-            onEdit({
-                ...itemWithValue,
-                creditLimit: replaceAtIndex(item.creditLimit, creditLimitIndex, {
-                    ...item.creditLimit[creditLimitIndex],
-                    value: creditLimit,
+    return useCallback(
+        (id, newValue, creditLimit, skip = null) => {
+            const index = item.values.findIndex(({ id: valueId }) => valueId === id);
+            const itemWithValue = {
+                ...item,
+                values: replaceAtIndex(item.values, index, {
+                    ...item.values[index],
+                    skip,
+                    value: newValue,
                 }),
-            });
-        }
-    }, [item, onEdit]);
+            };
+
+            if (creditLimit === null) {
+                onEdit(itemWithValue);
+            } else {
+                const creditLimitIndex = item.creditLimit.findIndex(
+                    ({ subcategory }) => subcategory === item.values[index].subcategory,
+                );
+
+                onEdit({
+                    ...itemWithValue,
+                    creditLimit: replaceAtIndex(item.creditLimit, creditLimitIndex, {
+                        ...item.creditLimit[creditLimitIndex],
+                        value: creditLimit,
+                    }),
+                });
+            }
+        },
+        [item, onEdit],
+    );
 }
 
 function useRemoveValue(item, onEdit) {
-    return useCallback((id) => {
-        const index = item.values.findIndex(({ id: valueId }) => valueId === id);
-        const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
-        const creditLimit = item.creditLimit.filter(({ subcategory }) => (
-            subcategory !== item.values[index].subcategory
-        ));
-        onEdit({ ...item, values: newItemValues, creditLimit });
-    }, [item, onEdit]);
+    return useCallback(
+        id => {
+            const index = item.values.findIndex(({ id: valueId }) => valueId === id);
+            const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
+            const creditLimit = item.creditLimit.filter(
+                ({ subcategory }) => subcategory !== item.values[index].subcategory,
+            );
+            onEdit({ ...item, values: newItemValues, creditLimit });
+        },
+        [item, onEdit],
+    );
 }
 
 function CategoryGroup({ category: { category, color }, children }) {
     const [hidden, setHidden] = useState(true);
     const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
 
-    const style = {
-        backgroundColor: color,
-    };
-
     return (
-        <div style={style} className={classNames('edit-by-category-group', { hidden })}>
-            <h6 className="net-worth-edit-form-section-subtitle"
-                onClick={onToggleHidden}
-            >{category}</h6>
+        <Styled.EditByCategoryGroup style={{ backgroundColor: color }}>
+            <Styled.SectionSubtitle hidden={hidden} onClick={onToggleHidden}>
+                {category}
+            </Styled.SectionSubtitle>
             {!hidden && children}
-        </div>
+        </Styled.EditByCategoryGroup>
     );
 }
 
@@ -291,86 +286,104 @@ CategoryGroup.propTypes = {
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
 };
 
-const toIdMap = (items) => items.reduce((last, item) => ({
-    ...last,
-    [item.id]: item,
-}), {});
+const toIdMap = items =>
+    items.reduce(
+        (last, item) => ({
+            ...last,
+            [item.id]: item,
+        }),
+        {},
+    );
 
-function StepValues({
-    typeFilter,
-    name,
-    containerProps,
-    item,
-    categories,
-    subcategories,
-    onEdit,
-}) {
+function StepValues({ typeFilter, name, containerProps, item, categories, subcategories, onEdit }) {
     const isLiability = typeFilter === 'liability';
-    const categoriesByType = useMemo(() => (
-        categories.filter(({ type }) => type === typeFilter)
-    ), [categories, typeFilter]);
+    const categoriesByType = useMemo(() => categories.filter(({ type }) => type === typeFilter), [
+        categories,
+        typeFilter,
+    ]);
 
     const categoriesById = useMemo(() => toIdMap(categoriesByType), [categoriesByType]);
     const subcategoriesById = useMemo(() => toIdMap(subcategories), [subcategories]);
 
     const valuesByType = useMemo(
-        () => item.values
-            .map(({ subcategory, ...rest }) => {
-                const { categoryId } = subcategoriesById[subcategory];
-                const category = categoriesById[categoryId];
+        () =>
+            item.values
+                .map(({ subcategory, ...rest }) => {
+                    const { categoryId } = subcategoriesById[subcategory];
+                    const category = categoriesById[categoryId];
 
-                return { subcategory, category, ...rest };
-            })
-            .filter(({ category }) => category)
-            .reduce((last, value) => ({
-                ...last,
-                [value.category.id]: (last[value.category.id] || []).concat([value]),
-            }), {}),
+                    return { subcategory, category, ...rest };
+                })
+                .filter(({ category }) => category)
+                .reduce(
+                    (last, value) => ({
+                        ...last,
+                        [value.category.id]: (last[value.category.id] || []).concat([value]),
+                    }),
+                    {},
+                ),
         [categoriesById, subcategoriesById, item.values],
     );
 
     const valueKeys = useMemo(
-        () => Object.keys(valuesByType).sort((idA, idB) => {
-            if (categoriesById[idA].category < categoriesById[idB].category) {
-                return -1;
-            }
-            if (categoriesById[idA].category < categoriesById[idB].category) {
-                return 1;
-            }
+        () =>
+            Object.keys(valuesByType).sort((idA, idB) => {
+                if (categoriesById[idA].category < categoriesById[idB].category) {
+                    return -1;
+                }
+                if (categoriesById[idA].category < categoriesById[idB].category) {
+                    return 1;
+                }
 
-            return 0;
-        }),
+                return 0;
+            }),
         [valuesByType, categoriesById],
     );
 
-    const availableSubcategories = useMemo(() => subcategories.filter(({ id: subcategoryId, categoryId }) => (
-        categoriesByType.some(({ id }) => id === categoryId)
-        && !Object.keys(valuesByType).some((key) => (
-            valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId)
-        ))
-    )), [subcategories, categoriesByType, valuesByType]);
+    const availableSubcategories = useMemo(
+        () =>
+            subcategories.filter(
+                ({ id: subcategoryId, categoryId }) =>
+                    categoriesByType.some(({ id }) => id === categoryId) &&
+                    !Object.keys(valuesByType).some(key =>
+                        valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId),
+                    ),
+            ),
+        [subcategories, categoriesByType, valuesByType],
+    );
 
-    const availableCategories = useMemo(() => categoriesByType.filter(({ id }) => (
-        availableSubcategories.some(({ categoryId }) => categoryId === id)
-    )), [categoriesByType, availableSubcategories]);
+    const availableCategories = useMemo(
+        () =>
+            categoriesByType.filter(({ id }) =>
+                availableSubcategories.some(({ categoryId }) => categoryId === id),
+            ),
+        [categoriesByType, availableSubcategories],
+    );
 
     const onAddValue = useAddValue(item, onEdit);
     const onChangeValue = useChangeValue(item, onEdit);
     const onRemoveValue = useRemoveValue(item, onEdit);
 
     return (
-        <FormContainer {...containerProps} className="step-values">
-            <h5 className="net-worth-edit-form-section-title">
-                <span className="type">{name}</span>
-                <span className="date">{' - '}{item.date.toISODate()}</span>
-            </h5>
-            <div className="edit-by-category">
-                {valueKeys.map((categoryId) => (
-                    <CategoryGroup key={categoryId}
-                        category={categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId)}
+        <FormContainer {...containerProps} step={STEP_VALUES}>
+            <Styled.SectionTitle>
+                <span>{name}</span>
+                <span>
+                    {' - '}
+                    {item.date.toISODate()}
+                </span>
+            </Styled.SectionTitle>
+            <Styled.EditByCategory>
+                {valueKeys.map(categoryId => (
+                    <CategoryGroup
+                        key={categoryId}
+                        category={categories.find(
+                            ({ id: otherCategoryId }) => otherCategoryId === categoryId,
+                        )}
                     >
-                        {valuesByType[categoryId].map((value) => (
-                            <EditByType key={value.id}
+                        {valuesByType[categoryId].map(value => (
+                            <EditByType
+                                key={value.id}
                                 isLiability={isLiability}
                                 categories={categoriesByType}
                                 subcategories={subcategories}
@@ -383,14 +396,17 @@ function StepValues({
                         ))}
                     </CategoryGroup>
                 ))}
-                {availableCategories.length > 0 && <AddByType key="add"
-                    isLiability={isLiability}
-                    categories={availableCategories}
-                    subcategories={availableSubcategories}
-                    currencies={item.currencies}
-                    onAdd={onAddValue}
-                />}
-            </div>
+                {availableCategories.length > 0 && (
+                    <AddByType
+                        key="add"
+                        isLiability={isLiability}
+                        categories={availableCategories}
+                        subcategories={availableSubcategories}
+                        currencies={item.currencies}
+                        onAdd={onAddValue}
+                    />
+                )}
+            </Styled.EditByCategory>
         </FormContainer>
     );
 }
@@ -405,10 +421,8 @@ StepValues.propTypes = {
     onEdit: PropTypes.func.isRequired,
 };
 
-export const StepAssets = (props) => (
-    <StepValues {...props} typeFilter="asset" name="Assets" />
-);
+export const StepAssets = props => <StepValues {...props} typeFilter="asset" name="Assets" />;
 
-export const StepLiabilities = (props) => (
+export const StepLiabilities = props => (
     <StepValues {...props} typeFilter="liability" name="Liabilities" />
 );

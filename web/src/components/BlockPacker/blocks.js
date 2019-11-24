@@ -1,20 +1,42 @@
-import React, { useMemo } from 'react';
+import React, { useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { blocksShape, blockShape } from '~client/prop-types/block-packer';
 import BlockBits from '~client/components/BlockPacker/block-bits';
 
-function OuterBlockGroupComponent({
-    block, activeMain, activeSub, ...props
-}) {
-    const style = useMemo(() => ({
-        width: block.width,
-        height: block.height,
-    }), [block]);
+import * as Styled from './styles';
+
+const OuterBlockGroupComponent = ({
+    block,
+    activeMain,
+    activeSub,
+    onClick,
+    onHover,
+}) => {
+    const blockRef = useRef();
+    const onClickBlock = useCallback((name, color) => {
+        if (!blockRef.current) {
+            return;
+        }
+
+        const preview = {
+            left: blockRef.current.offsetLeft,
+            top: blockRef.current.offsetTop,
+            width: block.width,
+            height: block.height,
+            name,
+            color,
+        };
+
+        onClick(name, preview);
+    }, [onClick, block.width, block.height]);
 
     return (
-        <div className="block-group" style={style}>
+        <Styled.BlockGroup
+            ref={blockRef}
+            width={block.width}
+            height={block.height}
+        >
             {block.bits.map((blockBit) => (
                 <BlockBits
                     key={blockBit.name}
@@ -24,37 +46,37 @@ function OuterBlockGroupComponent({
                         ? activeSub
                         : null
                     }
-                    {...props}
+                    onClick={onClickBlock}
+                    onHover={onHover}
                 />
             ))}
-        </div>
+        </Styled.BlockGroup>
     );
-}
+};
 
 OuterBlockGroupComponent.propTypes = {
     activeMain: PropTypes.string,
     activeSub: PropTypes.string,
     block: blockShape,
+    onClick: PropTypes.func.isRequired,
+    onHover: PropTypes.func.isRequired,
 };
 
 export const OuterBlockGroup = React.memo(OuterBlockGroupComponent);
 
 const Blocks = ({
+    deep,
     blocks,
-    deepBlock,
     activeMain,
     activeSub,
-    ...props
+    onHover,
+    onClick,
 }) => (
-    <div className={classNames('block-tree', {
-        'block-tree-deep': deepBlock,
-        [`block-tree-${deepBlock}`]: deepBlock,
-    })}>
+    <Styled.BlockTree deep={deep}>
         {blocks.map((block) => (
             <OuterBlockGroup
                 key={block.bits[0].name}
                 block={block}
-                deep={deepBlock}
                 activeMain={block.bits && block.bits.some(({ name }) => name === activeMain)
                     ? activeMain
                     : null
@@ -67,17 +89,24 @@ const Blocks = ({
                     ? activeSub
                     : null
                 }
-                {...props}
+                onHover={onHover}
+                onClick={onClick}
             />
         ))}
-    </div>
+    </Styled.BlockTree>
 );
 
 Blocks.propTypes = {
+    deep: PropTypes.bool,
     blocks: blocksShape,
-    deepBlock: PropTypes.string,
     activeMain: PropTypes.string,
     activeSub: PropTypes.string,
+    onHover: PropTypes.func.isRequired,
+    onClick: PropTypes.func.isRequired,
+};
+
+Blocks.defaultProps = {
+    deep: false,
 };
 
 export default Blocks;
