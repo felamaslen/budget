@@ -12,6 +12,7 @@ import {
     EditByCategory,
     AddByCategoryValue,
 } from '~client/components/NetWorthEditForm/styles';
+import { ModalDialog } from '~client/components/ModalDialog/styles';
 
 export const Button = styled.button`
     display: flex;
@@ -151,6 +152,17 @@ export const ButtonDelete = styled(ButtonCrud)`
 export const ButtonAdd = styled(ButtonCrud)``;
 
 export const ButtonCancel = styled(Button)`
+    ${ModalDialog} & {
+        background: ${colors['slightly-light']};
+        color: ${colors.black};
+        &::after {
+            display: block;
+            content: '';
+            height: 100%;
+            width: 0;
+            border-right: 1px solid ${colors['medium-very-light']};
+        }
+    }
     ${breakpoint(breakpoints.mobile)} {
         position: absolute;
         left: 0;
@@ -159,3 +171,10 @@ export const ButtonCancel = styled(Button)`
 `;
 
 export const ButtonRefresh = styled(Button)``;
+
+export const ButtonSubmit = styled(Button)`
+    ${ModalDialog} & {
+        background: ${colors.blue};
+        color: ${colors.white};
+    }
+`;

@@ -1,10 +1,4 @@
-import React, {
-    useRef,
-    useState,
-    useReducer,
-    useEffect,
-    useCallback,
-} from 'react';
+import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import compose from 'just-compose';
@@ -12,11 +6,10 @@ import { DateTime } from 'luxon';
 
 import { replaceAtIndex } from '~client/modules/data';
 import { validateField } from '~client/modules/validate';
-import { Button } from '~client/styled/shared/button';
+import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared/button';
 import ModalDialogField from '~client/components/ModalDialog/field';
 
 import * as Styled from './styles';
-import './style.scss';
 
 function getTitle({ type, id }) {
     if (type === 'edit') {
@@ -29,11 +22,10 @@ function getTitle({ type, id }) {
 export const animationTime = 350;
 
 const withDefaultDate = fields =>
-    replaceAtIndex(
-        fields,
-        fields.findIndex(({ item, value }) => item === 'date' && !value),
-        { item: 'date', value: DateTime.local() },
-    );
+    replaceAtIndex(fields, fields.findIndex(({ item, value }) => item === 'date' && !value), {
+        item: 'date',
+        value: DateTime.local(),
+    });
 
 const HIDDEN = 'HIDDEN';
 const SHOWN = 'SHOWN';
@@ -89,10 +81,7 @@ export default function ModalDialog({
             dispatch({ type: SHOWN, payload: { type, id, onRemove } });
         } else if (!active && visible) {
             clearTimeout(timer.current);
-            timer.current = setTimeout(
-                () => dispatch({ type: HIDDEN }),
-                animationTime,
-            );
+            timer.current = setTimeout(() => dispatch({ type: HIDDEN }), animationTime);
         } else {
             dispatch({ type: CHANGED_ID, payload: { type, id, onRemove } });
         }
@@ -110,11 +99,10 @@ export default function ModalDialog({
     const onChangeField = useCallback(
         (item, value) =>
             setTempFields(last =>
-                replaceAtIndex(
-                    last,
-                    last.findIndex(({ item: thisItem }) => thisItem === item),
-                    { item, value },
-                ),
+                replaceAtIndex(last, last.findIndex(({ item: thisItem }) => thisItem === item), {
+                    item,
+                    value,
+                }),
             ),
         [],
     );
@@ -134,10 +122,7 @@ export default function ModalDialog({
 
         if (!Object.keys(nextInvalid).length) {
             onSubmit(
-                tempFields.reduce(
-                    (last, { item, value }) => ({ ...last, [item]: value }),
-                    { id },
-                ),
+                tempFields.reduce((last, { item, value }) => ({ ...last, [item]: value }), { id }),
             );
         }
     }, [onSubmit, tempFields, id]);
@@ -154,14 +139,16 @@ export default function ModalDialog({
 
     return (
         <Styled.ModalDialog className={classNames('modal-dialog', type)}>
-            <div
+            <Styled.ModalInner
+                active={active}
+                isLoading={loading}
                 className={classNames('modal-dialog-inner', {
                     hidden: !active,
                     loading,
                 })}
             >
-                <span className="title">{title}</span>
-                <ul className="form-list">
+                <Styled.Title className="title">{title}</Styled.Title>
+                <Styled.FormList className="form-list">
                     {fields.map(({ item, value }) => (
                         <ModalDialogField
                             key={item}
@@ -171,24 +158,24 @@ export default function ModalDialog({
                             onChange={onChangeField}
                         />
                     ))}
-                </ul>
-                <div className="buttons">
-                    <Button
+                </Styled.FormList>
+                <Styled.Buttons className="buttons">
+                    <ButtonCancel
                         type="button"
                         className="button-cancel"
                         disabled={loading}
                         onClick={onCancel}
                     >
                         {'nope.avi'}
-                    </Button>
-                    <Button
+                    </ButtonCancel>
+                    <ButtonSubmit
                         type="button"
                         className="button-submit"
                         disabled={loading}
                         onClick={onSubmitCallback}
                     >
                         {'Do it.'}
-                    </Button>
+                    </ButtonSubmit>
                     {canRemove && (
                         <Button
                             type="button"
@@ -199,8 +186,8 @@ export default function ModalDialog({
                             &minus;
                         </Button>
                     )}
-                </div>
-            </div>
+                </Styled.Buttons>
+            </Styled.ModalInner>
         </Styled.ModalDialog>
     );
 }

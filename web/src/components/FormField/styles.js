@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
-import { ModalDialog } from '~client/components/ModalDialog/styles';
+import { ModalDialog, FormRowInner } from '~client/components/ModalDialog/styles';
 import { Editable } from '~client/components/Editable/styles';
 import { Row as ListRowDesktop } from '~client/components/ListRowDesktop/styles';
 import { RowCreate } from '~client/components/ListCreateDesktop/styles';
@@ -42,40 +42,80 @@ export const FormField = styled.div`
             }
         `}
 
-${NetWorthSubcategoryList} & {
-    ${({ item }) => {
-        if (item === 'subcategory') {
-            return css`
-                margin: 0 2em;
-                padding: 0 0.5em;
-                grid-column: 1;
-            `;
-        }
-        if (item === 'credit-limit') {
-            return css`
-                margin: auto;
-                grid-column: 2;
-            `;
-        }
-        if (item === 'opacity') {
-            return css`
-                margin: 0 1em;
-                grid-column: 3;
+    ${NetWorthSubcategoryList} & {
+        ${({ item }) => {
+            if (item === 'subcategory') {
+                return css`
+                    margin: 0 2em;
+                    padding: 0 0.5em;
+                    grid-column: 1;
+                `;
+            }
+            if (item === 'credit-limit') {
+                return css`
+                    margin: auto;
+                    grid-column: 2;
+                `;
+            }
+            if (item === 'opacity') {
+                return css`
+                    margin: 0 1em;
+                    grid-column: 3;
 
-                input {
-                    width: 100%;
-                }
-            `;
+                    input {
+                        width: 100%;
+                    }
+                `;
+            }
+
+            return null;
+        }};
+    }
+
+    ${ModalDialog} & {
+        display: flex;
+        flex-flow: column nowrap;
+        flex-basis: 0;
+        flex-grow: 2;
+        border: 0;
+        line-height: 28px;
+        &::after {
+            display: block;
+            content: '';
+            width: 100%;
+            height: 4px;
+            border: 1px solid ${({ invalid }) =>
+                invalid ? colors.error : colors['slightly-light']};
+            border-top: none;
+        }
+        input[type='text'],
+        input[type='number'],
+        input[type='date'] {
+            display: block;
+            border: none;
+            outline: none;
+            line-height: 28px;
+            width: 100%;
+            font-size: 16px;
         }
 
-        return null;
-    }};
-}
+        ${({ name }) =>
+            name === 'transactions' &&
+            css`
+                flex-basis: auto;
+            `};
+    }
+
+    ${FormRowInner} > & {
+        &::after {
+            display: none;
+        }
+    }
 `;
 
 export const FormColor = styled.div``;
 
-const transactionsWidthDate = 128;
+const transactionsWidthDate = 120;
 const transactionsWidthUnits = 60;
 const transactionsWidthCost = 60;
 
@@ -132,12 +172,16 @@ export const ModalHead = styled.div`
 `;
 
 export const TransactionsList = styled.ul`
+    list-style: none;
+
+    ${ModalDialog} & {
+        font-size: 85%;
+    }
     ${breakpoint(breakpoints.mobile)} {
         display: flex;
         margin: 0;
         padding: 0;
         flex-flow: column;
-        list-style: none;
         max-height: 130px;
         overflow-y: auto;
     }
@@ -146,6 +190,11 @@ export const TransactionsList = styled.ul`
 export const TransactionsListItem = styled.li`
     ${ModalDialog} & {
         flex-flow: column;
+
+        &:not(:last-child) {
+            padding-bottom: 3px;
+            border-bottom: 1px solid ${colors['medium-very-light']};
+        }
     }
 
     ${breakpoint(breakpoints.mobile)} {
@@ -195,6 +244,11 @@ const transactionItem = width => css`
 `;
 
 export const TransactionRow = styled.span`
+    ${ModalDialog} & {
+        display: flex;
+        flex-flow: row nowrap;
+    }
+
     ${breakpoint(breakpoints.mobile)} {
         margin: 0;
     }

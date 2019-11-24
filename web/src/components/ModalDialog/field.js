@@ -6,12 +6,13 @@ import FormFieldText from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldTransactions from '~client/components/FormField/transactions';
+import * as Styled from './styles';
 
 const FormFieldContainer = ({ children, item, className }) => (
-    <li className={className}>
-        <span className="form-label">{item}</span>
+    <Styled.FormRow item={item} className={className}>
+        <Styled.FormLabel className="form-label">{item}</Styled.FormLabel>
         {children}
-    </li>
+    </Styled.FormRow>
 );
 
 FormFieldContainer.propTypes = {
@@ -20,53 +21,45 @@ FormFieldContainer.propTypes = {
     children: PropTypes.node.isRequired,
 };
 
-export default function ModalDialogField({
-    item, value, invalid, onChange,
-}) {
+export default function ModalDialogField({ item, value, invalid, onChange }) {
     const className = classNames('form-row', item, { invalid });
-    const onChangeCallback = useCallback((newValue) => onChange(item, newValue), [onChange, item]);
+    const onChangeCallback = useCallback(newValue => onChange(item, newValue), [onChange, item]);
 
     if (item === 'date') {
         return (
             <FormFieldContainer item={item} className={className}>
-                <FormFieldDate
-                    value={value}
-                    onChange={onChangeCallback}
-                />
+                <FormFieldDate invalid={invalid} value={value} onChange={onChangeCallback} />
             </FormFieldContainer>
         );
     }
     if (item === 'cost') {
         return (
             <FormFieldContainer item={item} className={className}>
-                <FormFieldCost
-                    value={value}
-                    onChange={onChangeCallback}
-                />
+                <FormFieldCost invalid={invalid} value={value} onChange={onChangeCallback} />
             </FormFieldContainer>
         );
     }
     if (item === 'transactions') {
         return (
-            <li className={className}>
-                <div className="inner">
-                    <span className="form-label">{item}</span>
+            <Styled.FormRow item={item} className={className}>
+                <Styled.FormRowInner item={item} className="inner">
+                    <Styled.FormLabel item={item} className="form-label">
+                        {item}
+                    </Styled.FormLabel>
                     <FormFieldTransactions
+                        invalid={invalid}
                         value={value}
                         onChange={onChangeCallback}
                         active
                     />
-                </div>
-            </li>
+                </Styled.FormRowInner>
+            </Styled.FormRow>
         );
     }
 
     return (
         <FormFieldContainer item={item} className={className}>
-            <FormFieldText
-                value={value}
-                onChange={onChangeCallback}
-            />
+            <FormFieldText invalid={invalid} value={value} onChange={onChangeCallback} />
         </FormFieldContainer>
     );
 }

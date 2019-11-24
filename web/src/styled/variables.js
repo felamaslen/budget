@@ -28,6 +28,7 @@ export const colors = {
     green: rgb(0, 153, 51),
     amber: rgb(251, 224, 127),
     accent: rgb(255, 160, 64),
+    error: rgb(153, 0, 0),
     dark: colorDark,
     'very-dark': rgb(17, 17, 17),
     'very-dark-1': rgb(24, 24, 24),

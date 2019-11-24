@@ -71,7 +71,7 @@ const newItemInit = {
     cost: 0,
 };
 
-function FormFieldTransactions({ create, ...props }) {
+function FormFieldTransactions({ create, invalid, ...props }) {
     const [currentValue, , onChangeInput] = useField({
         ...props,
         string: true,
@@ -123,7 +123,7 @@ function FormFieldTransactions({ create, ...props }) {
     }, [newItem, currentValue, onChange]);
 
     return (
-        <Wrapper item="transactions" value={value} active>
+        <Wrapper item="transactions" value={value} active invalid={invalid}>
             <Styled.NumTransactions active={active} className="num-transactions">
                 {(value || []).length}
             </Styled.NumTransactions>
@@ -180,11 +180,13 @@ FormFieldTransactions.propTypes = {
     create: PropTypes.bool,
     value: transactionsListShape,
     active: PropTypes.bool,
+    invalid: PropTypes.bool,
     onChange: PropTypes.func.isRequired,
 };
 
 FormFieldTransactions.defaultProps = {
     create: false,
+    invalid: false,
     value: [],
 };
 

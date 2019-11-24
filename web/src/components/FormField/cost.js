@@ -36,7 +36,7 @@ function getInitialInputValue(value) {
     return String(value / 100);
 }
 
-export default function FormFieldCost({ label, ...props }) {
+export default function FormFieldCost({ label, invalid, ...props }) {
     const [, inputValue, onChange, ref, onBlur] = useField({
         ...props,
         getInitialInputValue,
@@ -46,7 +46,13 @@ export default function FormFieldCost({ label, ...props }) {
     const inputProps = props.string ? { type: 'text' } : { type: 'number', step: 0.01 };
 
     return (
-        <Wrapper item="cost" value={props.value} active={props.active} small={props.small}>
+        <Wrapper
+            item="cost"
+            value={props.value}
+            active={props.active}
+            invalid={invalid}
+            small={props.small}
+        >
             <input
                 ref={ref}
                 aria-label={label}
@@ -63,12 +69,14 @@ FormFieldCost.propTypes = {
     label: PropTypes.string,
     value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     active: PropTypes.bool,
+    invalid: PropTypes.bool,
     small: PropTypes.bool,
     string: PropTypes.bool,
 };
 
 FormFieldCost.defaultProps = {
     label: null,
+    invalid: false,
     string: false,
     small: false,
     value: null,

@@ -7,11 +7,12 @@ import { useField } from '~client/hooks/field';
 
 import * as Styled from './styles';
 
-export const Wrapper = ({ item, value, active, small, children }) => (
+export const Wrapper = ({ item, value, active, invalid, small, children }) => (
     <Styled.FormField
         className={classNames('form-field', `form-field-${item}`, active)}
         item={item}
         active={active}
+        invalid={invalid}
         small={small}
     >
         {active && children}
@@ -23,20 +24,28 @@ Wrapper.propTypes = {
     item: PropTypes.string.isRequired,
     value: PropTypes.any,
     active: PropTypes.bool,
+    invalid: PropTypes.bool,
     small: PropTypes.bool,
     children: PropTypes.node.isRequired,
 };
 
 Wrapper.defaultProps = {
     active: true,
+    invalid: false,
     small: false,
 };
 
-export default function FormFieldText({ label, item, ...props }) {
+export default function FormFieldText({ label, item, invalid, ...props }) {
     const [currentValue, , onChange, ref, onBlur] = useField(props);
 
     return (
-        <Wrapper item={item} value={props.value} active={props.active} small={props.small}>
+        <Wrapper
+            item={item}
+            value={props.value}
+            active={props.active}
+            invalid={invalid}
+            small={props.small}
+        >
             <input
                 ref={ref}
                 aria-label={label}
@@ -54,6 +63,7 @@ FormFieldText.propTypes = {
     item: PropTypes.string,
     value: PropTypes.string,
     active: PropTypes.bool,
+    invalid: PropTypes.bool,
     small: PropTypes.bool,
 };
 
@@ -61,4 +71,6 @@ FormFieldText.defaultProps = {
     label: null,
     item: 'text',
     value: '',
+    invalid: false,
+    small: false,
 };
