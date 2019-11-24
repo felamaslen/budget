@@ -96,6 +96,19 @@ export const colors = {
         spendingMobile: rgb(255, 163, 163),
         netWorthMobile: rgb(163, 186, 255),
     },
+    netWorth: {
+        date: rgb(238, 238, 239),
+        assets: rgb(216, 233, 211),
+        liabilities: rgb(245, 202, 203),
+        main: rgb(178, 166, 211),
+        expenses: rgb(213, 164, 187),
+        aggregate: {
+            'cash-easy-access': rgb(180, 214, 169),
+            'cash-other': rgb(145, 194, 129),
+            stocks: rgb(159, 195, 199),
+            pension: rgb(47, 123, 211),
+        },
+    },
     funds: {
         main: rgb(84, 110, 122),
         light: rgb(194, 221, 234),

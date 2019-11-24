@@ -5,37 +5,43 @@ import { netWorthTableShape } from '~client/prop-types/net-worth/view';
 import SumByCategory from '~client/components/NetWorthView/sum-by-category';
 import NetWorthViewRow from '~client/components/NetWorthView/net-worth-view-row';
 
-import './style.scss';
+import * as Styled from './styles';
 
 export default function NetWorthView({ table, aggregate }) {
     return (
-        <div className="net-worth-view">
-            <table className="net-worth-view-table">
+        <Styled.NetWorthView className="net-worth-view">
+            <Styled.Table className="net-worth-view-table">
                 <thead>
-                    <tr className="row-categories">
-                        <SumByCategory className="cash-easy-access" aggregate={aggregate} />
-                        <SumByCategory className="stocks" aggregate={aggregate} />
-                        <th className="assets">{'Assets'}</th>
-                        <th className="liabilities">{'Liabilities'}</th>
-                        <th rowSpan={2} className="net-worth-header">{'Net Worth'}</th>
-                        <th className="expenses">{'Expenses'}</th>
-                        <th className="fti">{'FTI'}</th>
-                    </tr>
-                    <tr className="row-subtitle">
-                        <SumByCategory className="cash-other" aggregate={aggregate} />
-                        <SumByCategory className="pension" aggregate={aggregate} />
-                        <th className="assets">{'Total (£)'}</th>
-                        <th className="liabilities">{'Total (£)'}</th>
-                        <th colSpan={2} className="retirement">
+                    <Styled.RowCategories className="row-categories">
+                        <SumByCategory item="cash-easy-access" aggregate={aggregate} />
+                        <SumByCategory item="stocks" aggregate={aggregate} />
+                        <Styled.Header item="assets">{'Assets'}</Styled.Header>
+                        <Styled.Header item="liabilities">{'Liabilities'}</Styled.Header>
+                        <Styled.Header rowSpan={2} item="main" className="net-worth-header">
+                            {'Net Worth'}
+                        </Styled.Header>
+                        <Styled.Header item="expenses">{'Expenses'}</Styled.Header>
+                        <Styled.Header item="expenses" className="fti">
+                            {'FTI'}
+                        </Styled.Header>
+                    </Styled.RowCategories>
+                    <Styled.RowSubtitle className="row-subtitle">
+                        <SumByCategory item="cash-other" aggregate={aggregate} />
+                        <SumByCategory item="pension" aggregate={aggregate} />
+                        <Styled.Header item="assets">{'Total (£)'}</Styled.Header>
+                        <Styled.Header item="liabilities">{'Total (£)'}</Styled.Header>
+                        <Styled.HeaderRetirement colSpan={2} item="date">
                             {'Retire when FTI > 1000'}
-                        </th>
-                    </tr>
+                        </Styled.HeaderRetirement>
+                    </Styled.RowSubtitle>
                 </thead>
                 <tbody>
-                    {table.map((row) => <NetWorthViewRow key={row.id} {...row} />)}
+                    {table.map(row => (
+                        <NetWorthViewRow key={row.id} {...row} />
+                    ))}
                 </tbody>
-            </table>
-        </div>
+            </Styled.Table>
+        </Styled.NetWorthView>
     );
 }
 
