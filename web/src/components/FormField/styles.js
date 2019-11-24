@@ -11,7 +11,16 @@ import {
     AddCurrency,
     currencyTitleWidth,
 } from '~client/components/NetWorthEditForm/styles';
+import { CategoryItemForm as NetWorthCategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
 import { SubcategoryList as NetWorthSubcategoryList } from '~client/components/NetWorthSubcategoryList/styles';
+
+export const centerGridOne = css`
+    display: flex;
+    margin: 0 0.2em;
+    align-items: center;
+    justify-content: center;
+    grid-row: 1;
+`;
 
 export const FormField = styled.div`
     ${breakpoint(breakpoints.mobile)} {
@@ -41,6 +50,23 @@ export const FormField = styled.div`
                 }
             }
         `}
+
+    ${NetWorthCategoryItemForm} & {
+        ${({ item }) => ['type', 'category', 'color'].includes(item) && centerGridOne};
+        ${({ item }) =>
+            item === 'category' &&
+            css`
+                padding: 0 0.2em;
+                border: none;
+                outline: none;
+                font-size: 18px;
+
+                input {
+                    width: 100%;
+                    font-size: 16px;
+                }
+            `};
+    }
 
     ${NetWorthSubcategoryList} & {
         ${({ item }) => {
@@ -142,7 +168,7 @@ export const TransactionsModal = styled.div`
             }
         }
 
-        ${ListRowDesktop}:nth-last-child(-n + 3) & {
+        ${ListRowDesktop}:nth-last-child (-n + 3) & {
             top: initial;
             bottom: 0;
         }

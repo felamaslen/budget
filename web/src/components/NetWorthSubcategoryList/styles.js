@@ -1,9 +1,15 @@
 import styled from 'styled-components';
+import { CategoryList } from '~client/components/NetWorthCategoryList/styles';
 
 export const SubcategoryList = styled.div`
     display: grid;
     grid-template-rows: 28px auto;
     grid-template-columns: auto 100px 100px 64px 64px;
+
+    ${CategoryList} & {
+        grid-row: 2;
+        grid-column: 1 / span 3;
+    }
 `;
 
 export const ItemForm = styled.span`

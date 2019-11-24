@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { subcategory as subcategoryShape } from '~client/prop-types/net-worth/category';
-import { Button } from '~client/styled/shared/button';
+import { InlineFlexCenter } from '~client/styled/shared/layout';
+import { Button, ButtonDelete } from '~client/styled/shared/button';
 import FormFieldText from '~client/components/FormField';
 import FormFieldRange from '~client/components/FormField/range';
 import FormFieldTickbox from '~client/components/FormField/tickbox';
@@ -86,11 +87,11 @@ function NetWorthSubcategoryItemForm({
                 </Button>
             </Styled.ButtonChange>
             {onDelete && (
-                <div className="button-delete">
-                    <Button className="button-delete-button" onClick={onDelete}>
+                <InlineFlexCenter className="button-delete">
+                    <ButtonDelete className="button-delete-button" onClick={onDelete}>
                         &minus;
-                    </Button>
-                </div>
+                    </ButtonDelete>
+                </InlineFlexCenter>
             )}
         </Styled.ItemForm>
     );

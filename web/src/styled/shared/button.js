@@ -1,9 +1,13 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
-import { CategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
+import { CategoryItemForm, ToggleVisibility } from '~client/components/NetWorthCategoryList/styles';
 import { CrudList } from '~client/components/CrudList/styles';
-import { FormColor, NetWorthValueComplex } from '~client/components/FormField/styles';
+import {
+    centerGridOne,
+    FormColor,
+    NetWorthValueComplex,
+} from '~client/components/FormField/styles';
 import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
 import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
 import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
@@ -30,9 +34,9 @@ export const Button = styled.button`
     font-weight: bold;
 
     ${RowButtonDelete} & {
-        width: 18px !important;
-        height: 18px !important;
-        line-height: 18px !important;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
     }
 
     ${MobileButtonAdd} & {
@@ -40,6 +44,38 @@ export const Button = styled.button`
         flex-grow: 0;
         background: ${colors.primaryDarkMobile};
         color: ${colors.white};
+    }
+
+    ${CategoryItemForm} & {
+        ${centerGridOne};
+        grid-column: 4;
+    }
+
+    ${ToggleVisibility} & {
+        &,
+        &:hover,
+        &:active {
+            background: none;
+            border: none;
+            box-shadow: none;
+        }
+
+        &::after {
+            display: block;
+            margin-left: 16px;
+            content: '';
+            width: 0;
+            height: 0;
+            border: solid transparent;
+            border-left-color: ${colors['very-dark']};
+            border-width: 6px 8px;
+            transform-origin: left center;
+            ${({ expanded }) =>
+                expanded &&
+                css`
+                    transform: rotate(90deg);
+                `};
+        }
     }
 
     &:disabled {
@@ -118,10 +154,10 @@ export const ButtonCrud = styled(Button)`
         flex: 0 0 auto;
         width: 32px;
     }
-${AddByCategoryValue} &,
+    ${AddByCategoryValue} &,
     ${EditByCategory} & {
-                margin: 0 5px;
-                flex: 0 0 auto;
+        margin: 0 5px;
+        flex: 0 0 auto;
     }
 `;
 
@@ -136,16 +172,20 @@ export const ButtonDelete = styled(ButtonCrud)`
         height: 22px;
         font-size: 18px;
         line-height: 22px;
-        background: #c00;
+        background: ${colors.delete};
         border-radius: 100%;
         border: none;
         box-shadow: none;
     }
+    ${CategoryItemForm} > & {
+        grid-row: 1;
+        grid-column: 3;
+    }
     ${NetWorthEntryDelete} & {
-        width: 16px !important;
-        height: 16px !important;
-        font-size: 16px !important;
-        line-height: 16px !important;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        line-height: 16px;
     }
 `;
 
