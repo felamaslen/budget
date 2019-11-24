@@ -51,11 +51,7 @@ export const Digit = styled(Button)`
         return 1 + ((digit - 1) % 3);
     }};
     background-color: ${colors['medium-light']} !important;
-    background-image: linear-gradient(
-            167deg,
-            ${colors['translucent-l1']} 50%,
-            transparent 55%
-        ),
+    background-image: linear-gradient(167deg, ${colors['translucent-l1']} 50%, transparent 55%),
         linear-gradient(to bottom, ${colors['translucent-l15']}, transparent) !important;
     box-shadow: inset 0 0 0 1px ${colors['medium-light']},
         inset 0 0 0 2px ${colors['translucent-l15']}, 0 8px 0 0 ${colors.medium},
@@ -72,8 +68,7 @@ export const Digit = styled(Button)`
     transition: all linear 0.05s;
 
     &:active {
-        box-shadow: inset 0 0 0 1px ${colors.medium},
-            inset 0 0 0 2px ${colors['translucent-l15']},
+        box-shadow: inset 0 0 0 1px ${colors.medium}, inset 0 0 0 2px ${colors['translucent-l15']},
             0 0 0 1px ${colors['shadow-l4']};
         transform: translateY(10px);
     }
@@ -101,8 +96,7 @@ export const InputPin = styled.div`
     position: relative;
     border: none;
     border-radius: 4px;
-    background-color: ${({ active }) =>
-        active ? colors['very-light'] : colors['slightly-dark']};
+    background-color: ${({ active }) => (active ? colors['very-light'] : colors['slightly-dark'])};
     color: transparent;
     text-align: center;
     outline: none;

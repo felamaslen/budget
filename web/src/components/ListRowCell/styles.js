@@ -29,7 +29,7 @@ export const Cell = styled(Column)`
                 }
 
                 return '0 0 auto';
-            }} !important;
+            }};
 
             ${({ column, active }) =>
                 column === 'transactions' &&

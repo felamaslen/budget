@@ -84,9 +84,9 @@ export const RowBody = styled(Row)`
             ${({ small }) =>
                 !small &&
                 css`
-                    flex: 0 0 ${itemHeightDesktopFunds}px !important;
-                    line-height: ${itemHeightDesktopFunds}px !important;
-                    height: ${itemHeightDesktopFunds}px !important;
+                    flex: 0 0 ${itemHeightDesktopFunds}px;
+                    line-height: ${itemHeightDesktopFunds}px;
+                    height: ${itemHeightDesktopFunds}px;
                 `}
         }
     }

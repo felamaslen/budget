@@ -15,7 +15,7 @@ export const FundExtraInfo = styled.span`
             popout &&
             css`
                 z-index: 10;
-                overflow: visible !important;
+                overflow: visible;
 
                 ${Graph} {
                     box-shadow: none;
