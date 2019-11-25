@@ -18,7 +18,7 @@ docker-compose -f docker-test.yml run budget_test sh -c "./node_modules/.bin/kne
 docker-compose -f docker-test.yml run budget_test sh -c "./node_modules/.bin/knex seed:run"
 
 set +e
-docker-compose -f docker-test.yml run budget_test sh -c "npm run test:api:run"
+docker-compose -f docker-test.yml run budget_test sh -c "./node_modules/.bin/ava \"./api/test/**/*.spec.js\""
 set -e
 
 docker-compose -f docker-test.yml down

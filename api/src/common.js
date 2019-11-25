@@ -10,5 +10,5 @@ class ErrorBadRequest extends Error {
 
 module.exports = {
     sqlConcat,
-    ErrorBadRequest
+    ErrorBadRequest,
 };

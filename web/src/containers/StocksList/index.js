@@ -1,15 +1,14 @@
 import { connect } from 'react-redux';
-import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 
 import { dataShape } from '~client/prop-types/graph';
 import GraphStocks from '~client/containers/StocksList/GraphStocks';
 import { stocksListRequested, stockPricesRequested } from '~client/actions/stocks';
 import { sigFigs } from '~client/modules/format';
 
-import './style.scss';
+import * as Styled from './styles';
 
 const stockShape = PropTypes.shape({
     code: PropTypes.string.isRequired,
@@ -18,25 +17,23 @@ const stockShape = PropTypes.shape({
     gain: PropTypes.number.isRequired,
     price: PropTypes.number,
     up: PropTypes.bool.isRequired,
-    down: PropTypes.bool.isRequired
+    down: PropTypes.bool.isRequired,
 });
 
-const StockListItems = ({ stockMap }) => stockMap.map(({ code, name, price, gain, up, down }) => (
-    <li key={code}
-        className={classNames({ up: gain > 0, down: gain < 0, 'hl-up': up, 'hl-down': down })}
-        title={name}
-    >
-        <span className="name-column">
-            <span className="code">{code}</span>
-            <span className="title">{name}</span>
-        </span>
-        <span className="price">{(price || 0).toFixed(2)}</span>
-        <span className="change">{sigFigs(gain, 3)}%</span>
-    </li>
-));
+const StockListItems = ({ stockMap }) =>
+    stockMap.map(({ code, name, price, gain, up, down }) => (
+        <Styled.Item key={code} up={gain > 0} down={gain < 0} hlUp={up} hlDown={down} title={name}>
+            <Styled.NameColumn>
+                <Styled.Code>{code}</Styled.Code>
+                <Styled.Title>{name}</Styled.Title>
+            </Styled.NameColumn>
+            <Styled.Price>{(price || 0).toFixed(2)}</Styled.Price>
+            <Styled.Change>{sigFigs(gain, 3)}%</Styled.Change>
+        </Styled.Item>
+    ));
 
 StockListItems.propTypes = {
-    stockMap: PropTypes.arrayOf(stockShape.isRequired).isRequired
+    stockMap: PropTypes.arrayOf(stockShape.isRequired).isRequired,
 };
 
 function StocksList({
@@ -47,7 +44,7 @@ function StocksList({
     history,
     lastPriceUpdate,
     requestList,
-    requestPrices
+    requestPrices,
 }) {
     useEffect(() => {
         if (enabled) {
@@ -62,7 +59,7 @@ function StocksList({
     const [prevLastPriceUpdate, setLastPriceUpdate] = useState(lastPriceUpdate);
     const timer = useRef(null);
 
-    const [oldWeightedGain, setOldWeightedGain] = useState(0);
+    const [, setOldWeightedGain] = useState(0);
     const [weightedGain, setWeightedGain] = useState(0);
 
     useEffect(() => {
@@ -92,28 +89,23 @@ function StocksList({
     }
 
     return (
-        <div className={classNames('stocks-list', 'graph-container-outer', { loading })}>
-            <div className="graph-container">
-                <ul className="stocks-list-ul">
+        <Styled.List>
+            <Styled.StocksGraph>
+                <Styled.ListUl>
                     <StockListItems stockMap={shares} />
-                </ul>
-                <div className="stocks-sidebar">
+                </Styled.ListUl>
+                <Styled.Sidebar>
                     <GraphStocks history={history} />
-                    <ul>
-                        <li className={classNames({
-                            up: weightedGain > 0,
-                            down: weightedGain < 0,
-                            'hl-up': weightedGain > oldWeightedGain,
-                            'hl-down': weightedGain < oldWeightedGain
-                        })}>
-                            <span className="name-column">Overall</span>
-                            <span className="change">{sigFigs(weightedGain, 3)}%</span>
+                    <Styled.SidebarList>
+                        <li>
+                            <Styled.NameColumn>Overall</Styled.NameColumn>
+                            <Styled.Text>{sigFigs(weightedGain, 3)}%</Styled.Text>
                         </li>
                         <StockListItems stockMap={indices} />
-                    </ul>
-                </div>
-            </div>
-        </div>
+                    </Styled.SidebarList>
+                </Styled.Sidebar>
+            </Styled.StocksGraph>
+        </Styled.List>
     );
 }
 
@@ -125,12 +117,12 @@ StocksList.propTypes = {
     history: dataShape.isRequired,
     lastPriceUpdate: PropTypes.number,
     requestList: PropTypes.func.isRequired,
-    requestPrices: PropTypes.func.isRequired
+    requestPrices: PropTypes.func.isRequired,
 };
 
 StocksList.defaultProps = {
     lastPriceUpdate: 0,
-    enabled: DO_STOCKS_LIST
+    enabled: DO_STOCKS_LIST,
 };
 
 const mapStateToProps = state => ({
@@ -138,12 +130,15 @@ const mapStateToProps = state => ({
     shares: state.stocks.shares,
     indices: state.stocks.indices,
     history: state.stocks.history,
-    lastPriceUpdate: state.stocks.lastPriceUpdate
+    lastPriceUpdate: state.stocks.lastPriceUpdate,
 });
 
 const mapDispatchToProps = {
     requestList: stocksListRequested,
-    requestPrices: stockPricesRequested
+    requestPrices: stockPricesRequested,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(StocksList);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(StocksList);

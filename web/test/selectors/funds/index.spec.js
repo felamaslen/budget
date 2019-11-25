@@ -6,8 +6,9 @@ import {
     getFundsCachedValueAgeText,
     getFundsCachedValue,
     getFundsCost,
-    getProcessedFundsRows
+    getProcessedFundsRows,
 } from '~client/selectors/funds';
+import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
 import { getTransactionsList } from '~client/modules/data';
 
 test('getFundsCachedValueAgeText returns the expected string', t => {
@@ -19,31 +20,43 @@ test('getFundsCachedValueAgeText returns the expected string', t => {
 test('getFundsCachedValueAgeText uses only one unit', t => {
     const now = DateTime.fromISO('2018-06-03');
 
-    t.is(getFundsCachedValueAgeText(now.ts / 1000 - 86400 - 3600 * 5.4, [0, 100, 400], now), '1 day ago');
+    t.is(
+        getFundsCachedValueAgeText(now.ts / 1000 - 86400 - 3600 * 5.4, [0, 100, 400], now),
+        '1 day ago',
+    );
 });
 
 test('getFundsCachedValue gets an age text and value', t => {
     const expectedValue = 399098.2;
     const expectedAgeText = '7 months ago';
 
-    t.deepEqual(getFundsCachedValue(state), { value: expectedValue, ageText: expectedAgeText });
+    t.deepEqual(getFundsCachedValue(state), {
+        value: expectedValue,
+        ageText: expectedAgeText,
+        dayGain: getDayGain(state),
+        dayGainAbs: getDayGainAbs(state),
+    });
 });
 
 test('getFundsCachedValue returns a default value if there are no data', t => {
-    t.deepEqual(getFundsCachedValue({
+    const stateNoCache = {
         ...state,
         funds: {
             ...state.funds,
-            cache: null
-        }
-    }), {
+            cache: null,
+        },
+    };
+
+    t.deepEqual(getFundsCachedValue(stateNoCache), {
+        dayGain: getDayGain(stateNoCache),
+        dayGainAbs: getDayGainAbs(stateNoCache),
         value: 0,
-        ageText: ''
+        ageText: '',
     });
 });
 
 test('getFundsCachedValue skips funds without price data', t => {
-    t.deepEqual(getFundsCachedValue({
+    const stateNoPrice = {
         ...state,
         funds: {
             ...state.funds,
@@ -52,14 +65,18 @@ test('getFundsCachedValue skips funds without price data', t => {
                 {
                     item: 'new fund',
                     transactions: getTransactionsList([
-                        { date: '2019-07-23', units: 13, cost: 12 }
-                    ])
-                }
-            ]
-        }
-    }), {
+                        { date: '2019-07-23', units: 13, cost: 12 },
+                    ]),
+                },
+            ],
+        },
+    };
+
+    t.deepEqual(getFundsCachedValue(stateNoPrice), {
+        dayGain: getDayGain(stateNoPrice),
+        dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,
-        ageText: '7 months ago'
+        ageText: '7 months ago',
     });
 });
 
@@ -79,7 +96,7 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
         id: '10',
         item: 'some fund 1',
         transactions: state.funds.items[0].transactions,
-        className: '',
+        small: false,
         sold: false,
         gain: {
             color: [255, 250, 250],
@@ -87,8 +104,8 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
             dayGainAbs: 2989,
             gain: -0.0023,
             gainAbs: -902,
-            value: 399098.2
-        }
+            value: 399098.2,
+        },
     });
 
     const { cols: cols1, prices: prices1, ...rest1 } = result.find(({ id }) => id === '1');
@@ -97,13 +114,13 @@ test('getProcessedFundsRows sets gain, prices, sold and class information on eac
         id: '1',
         item: 'some fund 3',
         transactions: state.funds.items[2].transactions,
-        className: 'sold',
+        small: true,
         sold: true,
         gain: {
             color: [255, 44, 44],
             gain: -0.1027,
             gainAbs: -9240,
-            value: 80760
-        }
+            value: 80760,
+        },
     });
 });

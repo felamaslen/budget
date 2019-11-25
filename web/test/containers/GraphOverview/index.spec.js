@@ -11,7 +11,7 @@ import { testState } from '~client-test/test_data/state';
 
 const getContainer = memoize((customProps = {}) => {
     const props = {
-        ...customProps
+        ...customProps,
     };
 
     const state = {
@@ -19,8 +19,8 @@ const getContainer = memoize((customProps = {}) => {
         now: DateTime.fromISO('2018-03-02T12:36:49Z'),
         app: {
             ...testState.app,
-            windowWidth: 1045
-        }
+            windowWidth: 1045,
+        },
     };
 
     const store = createMockStore(state);
@@ -28,7 +28,7 @@ const getContainer = memoize((customProps = {}) => {
     const utils = render(
         <Provider store={store}>
             <GraphOverview {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
@@ -40,7 +40,6 @@ test('rendering a graph container', t => {
     t.is(container.childNodes.length, 1);
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'graph-container-outer');
     t.is(div.childNodes.length, 2);
 });
 
@@ -50,7 +49,6 @@ test('rendering a balance graph', t => {
     const [graphBalance] = div.childNodes;
 
     t.is(graphBalance.tagName, 'DIV');
-    t.is(graphBalance.className, 'graph-container graph-balance');
 });
 
 test('rendering a spending graph', t => {
@@ -59,5 +57,4 @@ test('rendering a spending graph', t => {
     const [, graphSpending] = div.childNodes;
 
     t.is(graphSpending.tagName, 'DIV');
-    t.is(graphSpending.className, 'graph-container graph-spend');
 });

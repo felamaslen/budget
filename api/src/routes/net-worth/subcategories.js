@@ -8,7 +8,7 @@ const { schemaSubcategory } = require('../../schema/net-worth');
 
 const dbMap = [
     { external: 'categoryId', internal: 'category_id' },
-    { external: 'hasCreditLimit', internal: 'has_credit_limit' }
+    { external: 'hasCreditLimit', internal: 'has_credit_limit' },
 ];
 
 const toDb = mapExternalToInternal(dbMap);
@@ -20,11 +20,11 @@ function routeSubCategories(db) {
         db,
         'net_worth_categories',
         'Category',
-        req => {
+        (req) => {
             const { error } = joi.validate(req.body, joi.object({
                 categoryId: joi.string()
                     .uuid()
-                    .required()
+                    .required(),
             }).unknown(true));
 
             if (error) {
@@ -32,7 +32,7 @@ function routeSubCategories(db) {
             }
 
             return req.body.categoryId;
-        }
+        },
     );
 
     router.post('/*', checkCategoryExists);
@@ -43,12 +43,12 @@ function routeSubCategories(db) {
         item: 'Subcategory',
         schema: schemaSubcategory,
         jsonToDb: (body, params) => toDb({ ...body, ...params }),
-        dbToJson: mapInternalToExternal(dbMap)
+        dbToJson: mapInternalToExternal(dbMap),
     })(db, router);
 
     return router;
 }
 
 module.exports = {
-    routeSubCategories
+    routeSubCategories,
 };

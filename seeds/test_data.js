@@ -1,9 +1,9 @@
-const md5 = require('md5');
+import md5 from 'md5';
+import config from '~api/config';
 
-const getConfig = require('../api/src/config');
-const { generateUserPin } = require('../api/src/modules/auth');
+import { generateUserPin } from '~api/modules/auth';
 
-async function generateFunds(config, uid, db) {
+async function generateFunds(uid, db) {
     const cids = await db.insert([
         { time: '2017-09-30 17:01:01', done: true },
         { time: '2017-09-01 17:01:01', done: true },
@@ -55,7 +55,7 @@ async function generateFunds(config, uid, db) {
         .into('funds_transactions');
 }
 
-async function generateListData(config, uid, db) {
+async function generateListData(uid, db) {
     await db.insert([
         { uid, date: '2018-03-24', item: 'Salary', cost: 433201 }
     ])
@@ -92,14 +92,12 @@ async function generateListData(config, uid, db) {
         .into('social');
 }
 
-async function seed(knex) {
+export async function seed(knex) {
     if (process.env.NODE_ENV !== 'test') {
         console.log('Skipping test data seed, since NODE_ENV !== test');
 
         return null;
     }
-
-    const config = getConfig();
 
     const { pinHash } = await generateUserPin('1234');
 
@@ -112,9 +110,7 @@ async function seed(knex) {
         .into('users');
 
     return Promise.all([
-        generateFunds(config, uid, knex),
-        generateListData(config, uid, knex)
+        generateFunds(uid, knex),
+        generateListData(uid, knex)
     ]);
 }
-
-module.exports = { seed };

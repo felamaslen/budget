@@ -15,7 +15,7 @@ const withFundHash = (db, salt) => db.raw('md5(f.item || ?)', salt);
 
 function getNumResultsQuery(db, user, salt, minTime) {
     return db.select(db.raw('COUNT(1)::integer AS count'))
-        .from(qb1 => qb1.select('c.cid')
+        .from((qb1) => qb1.select('c.cid')
             .from('funds as f')
             .innerJoin('fund_hash as fh', 'fh.hash', withFundHash(db, salt))
             .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
@@ -24,36 +24,34 @@ function getNumResultsQuery(db, user, salt, minTime) {
             .where('c.done', '=', true)
             .where('c.time', '>', minTime)
             .groupBy('c.cid')
-            .as('results')
-        );
+            .as('results'));
 }
 
 const getAllHistoryForFundsQuery = (db, user, salt, numResults, numDisplay, minTime) => db.select()
-    .from(qb1 => qb1.select(
+    .from((qb1) => qb1.select(
         'id',
         'time',
         'price',
         'row_num',
-        db.raw('floor(row_num % ?) as period', Math.ceil(numResults / numDisplay))
+        db.raw('floor(row_num % ?) as period', Math.ceil(numResults / numDisplay)),
     )
-        .from(qb2 => qb2.select(
+        .from((qb2) => qb2.select(
             'c.cid',
             'c.time',
             db.raw('array_agg(f.id order by f.date desc) as id'),
             db.raw('array_agg(fc.price order by f.date desc) as price'),
-            db.raw('row_number() over (order by time) as row_num')
+            db.raw('row_number() over (order by time) as row_num'),
         )
-            .from(qb3 => qb3.distinct(
+            .from((qb3) => qb3.distinct(
                 'f.id',
                 'f.item',
-                db.raw('min(ft.date) as date')
+                db.raw('min(ft.date) as date'),
             )
                 .from('funds as f')
                 .innerJoin('funds_transactions as ft', 'ft.fund_id', 'f.id')
                 .where('uid', '=', user.uid)
                 .groupBy('f.id')
-                .as('f')
-            )
+                .as('f'))
             .innerJoin('fund_hash as fh', 'fh.hash', withFundHash(db, salt))
             .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
             .innerJoin('fund_cache_time as c', 'c.cid', 'fc.cid')
@@ -61,10 +59,8 @@ const getAllHistoryForFundsQuery = (db, user, salt, numResults, numDisplay, minT
             .where('c.time', '>', minTime)
             .groupBy('c.cid')
             .orderBy('time')
-            .as('prices')
-        )
-        .as('results')
-    )
+            .as('prices'))
+        .as('results'))
     .where('period', '=', 0)
     .orWhere('row_num', '=', numResults - 1)
     .orWhere('row_num', '=', numResults);
@@ -77,7 +73,7 @@ function processFundHistory(queryResult) {
                 if (!(fundId in idMap)) {
                     return {
                         idMap: { ...idMap, [fundId]: [price[idKey]] },
-                        startIndex: { ...startIndex, [fundId]: rowKey }
+                        startIndex: { ...startIndex, [fundId]: rowKey },
                     };
                 }
 
@@ -90,7 +86,6 @@ function processFundHistory(queryResult) {
                         }
 
                         return { num: num + 1, found: false };
-
                     }, { num: 0, found: false })
                     .num;
 
@@ -99,15 +94,13 @@ function processFundHistory(queryResult) {
                 return {
                     idMap: {
                         ...idMap,
-                        [fundId]: [...idMap[fundId], ...zeroes, price[idKey]]
+                        [fundId]: [...idMap[fundId], ...zeroes, price[idKey]],
                     },
-                    startIndex
+                    startIndex,
                 };
-
             }, data);
 
             return { rowIds: [id, ...rowIds], data: newData };
-
         }, { rowIds: [], data: { idMap: {}, startIndex: {} } })
         .data;
 
@@ -115,7 +108,7 @@ function processFundHistory(queryResult) {
 
     const startTime = unixTimes[0];
 
-    const times = unixTimes.map(time => time - startTime);
+    const times = unixTimes.map((time) => time - startTime);
 
     return { ...keyMap, startTime, times };
 }
@@ -125,7 +118,9 @@ function fundHash(fundName, salt) {
 }
 
 async function getFundHistoryMappedToFundIds(db, user, now, params) {
-    const { period, length, numDisplay, salt } = params;
+    const {
+        period, length, numDisplay, salt,
+    } = params;
 
     const minTime = getMaxAge(now, period, length);
     const minTimeSQL = minTime.toSQL({ includeOffset: false });
@@ -133,12 +128,15 @@ async function getFundHistoryMappedToFundIds(db, user, now, params) {
     const [{ count: numResults }] = await getNumResultsQuery(db, user, salt, minTimeSQL);
     if (numResults > 2) {
         const fundHistory = await getAllHistoryForFundsQuery(
-            db, user, salt, numResults, numDisplay, minTimeSQL);
+            db, user, salt, numResults, numDisplay, minTimeSQL,
+        );
 
         return processFundHistory(fundHistory);
     }
 
-    return { idMap: {}, startIndex: {}, startTime: Math.round(minTime.ts / 1000), times: [] };
+    return {
+        idMap: {}, startIndex: {}, startTime: Math.round(minTime.ts / 1000), times: [],
+    };
 }
 
 module.exports = {
@@ -147,5 +145,5 @@ module.exports = {
     getAllHistoryForFundsQuery,
     processFundHistory,
     fundHash,
-    getFundHistoryMappedToFundIds
+    getFundHistoryMappedToFundIds,
 };

@@ -6,12 +6,14 @@ import { FAKE_STOCK_PRICES } from '~client/constants/stocks';
 function getStockPricesFromYahoo(symbols) {
     const symbolsJoined = symbols
         .slice(0, 1)
-        .map(symbol => JSON.stringify(symbol))
+        .map((symbol) => JSON.stringify(symbol))
         .join(',');
 
-    const env = `env 'store://datatables.org/alltableswithkeys';`;
+    const env = 'env \'store://datatables.org/alltableswithkeys\';';
 
-    const query = `select symbol, PreviousClose, LastTradePriceOnly from yahoo.finance.quotes where symbol in (${symbolsJoined})`;
+    const query = `select symbol, PreviousClose, LastTradePriceOnly
+    from yahoo.finance.quotes
+    where symbol in (${symbolsJoined})`;
 
     const encodedQuery = encodeURIComponent(`${env} ${query}`);
 
@@ -25,18 +27,18 @@ function getStockPricesFromYahoo(symbols) {
 
             try {
                 const res = data.query.results.quote
-                    .map(item => {
+                    .map((item) => {
                         const code = item.symbol;
                         const open = Number(item.PreviousClose);
                         const close = Number(item.LastTradePriceOnly);
 
-                        if (isNaN(close) || isNaN(open)) {
+                        if (Number.isNaN(close) || Number.isNaN(open)) {
                             return null;
                         }
 
                         return { code, open, close };
                     })
-                    .filter(item => item !== null);
+                    .filter((item) => item !== null);
 
                 return resolve(res);
             } catch (dataErr) {
@@ -49,7 +51,7 @@ function getStockPricesFromYahoo(symbols) {
 function makeGetFakeStockPrices() {
     let prices = [];
 
-    return symbols => {
+    return (symbols) => {
         prices = symbols.reduce((last, code) => {
             const existsIndex = last.findIndex(({ code: haveCode }) => haveCode === code);
             if (existsIndex === -1) {
@@ -67,7 +69,7 @@ function makeGetFakeStockPrices() {
 
         const thisResult = prices.slice();
 
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             setTimeout(() => resolve(thisResult), 100 * randnBm());
         });
     };

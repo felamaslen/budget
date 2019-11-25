@@ -14,9 +14,9 @@ const getGainInfo = memoize((customProps = {}) => {
             gainAbs: 4030,
             dayGain: -0.02,
             dayGainAbs: -341,
-            color: [255, 128, 30]
+            color: [255, 128, 30],
         },
-        ...customProps
+        ...customProps,
     };
 
     return render(<FundGainInfo {...props} />);
@@ -32,13 +32,12 @@ test('gain info', t => {
 
     const [inner] = outer.childNodes;
     t.is(inner.tagName, 'SPAN');
-    t.is(inner.className, 'text profit');
     t.is(inner.childNodes.length, 2);
 });
 
 const getInner = compose(
     getGainInfo,
-    ({ container }) => container.childNodes[0].childNodes[0]
+    ({ container }) => container.childNodes[0].childNodes[0],
 );
 
 test('current value', t => {
@@ -47,7 +46,6 @@ test('current value', t => {
 
     t.is(value.tagName, 'SPAN');
     t.is(value.innerHTML, '£5.6k');
-    t.is(value.className, 'value');
 });
 
 test('breakdown', t => {
@@ -55,13 +53,12 @@ test('breakdown', t => {
     const [, breakdown] = inner.childNodes;
 
     t.is(breakdown.tagName, 'SPAN');
-    t.is(breakdown.className, 'breakdown');
     t.is(breakdown.childNodes.length, 2);
 });
 
 const getBreakdown = compose(
     getInner,
-    inner => inner.childNodes[1]
+    inner => inner.childNodes[1],
 );
 
 test('overall gain', t => {
@@ -75,7 +72,7 @@ test('overall gain', t => {
 
 const getOverall = compose(
     getBreakdown,
-    breakdown => breakdown.childNodes[0]
+    breakdown => breakdown.childNodes[0],
 );
 
 test('(overall) absolute value', t => {
@@ -84,7 +81,6 @@ test('(overall) absolute value', t => {
     const [absolute] = overall.childNodes;
 
     t.is(absolute.tagName, 'SPAN');
-    t.is(absolute.className, 'gain-abs profit');
     t.is(absolute.innerHTML, '£40');
 });
 
@@ -94,7 +90,6 @@ test('(overall) relative value', t => {
     const [, relative] = overall.childNodes;
 
     t.is(relative.tagName, 'SPAN');
-    t.is(relative.className, 'gain profit');
     t.is(relative.innerHTML, '30.00%');
 });
 
@@ -104,13 +99,12 @@ test('daily gain', t => {
     const [, daily] = breakdown.childNodes;
 
     t.is(daily.tagName, 'SPAN');
-    t.is(daily.className, 'day-gain-outer');
     t.is(daily.childNodes.length, 2);
 });
 
 const getDaily = compose(
     getBreakdown,
-    breakdown => breakdown.childNodes[1]
+    breakdown => breakdown.childNodes[1],
 );
 
 test('(daily) absolute value', t => {
@@ -119,7 +113,6 @@ test('(daily) absolute value', t => {
     const [absolute] = daily.childNodes;
 
     t.is(absolute.tagName, 'SPAN');
-    t.is(absolute.className, 'day-gain-abs loss');
     t.is(absolute.innerHTML, '(£3)');
 });
 
@@ -129,6 +122,5 @@ test('(daily) relative value', t => {
     const [, relative] = daily.childNodes;
 
     t.is(relative.tagName, 'SPAN');
-    t.is(relative.className, 'day-gain loss');
     t.is(relative.innerHTML, '(2.00%)');
 });

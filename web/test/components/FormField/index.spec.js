@@ -1,17 +1,18 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import FormFieldText from '~client/components/FormField';
 
+const test = ninos(ava);
+
 const getFormFieldText = (customProps = {}) => {
     const props = {
         value: 'foo',
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldText {...props} />);
@@ -24,7 +25,6 @@ test('basic structure', t => {
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 1);
-    t.is(div.className, 'form-field form-field-text');
 });
 
 test('input', t => {

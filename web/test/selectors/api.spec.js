@@ -3,26 +3,26 @@ import { testState } from '~client-test/test_data/state';
 import {
     getApiKey,
     getLocked,
-    getUnsaved
+    getUnsaved,
 } from '~client/selectors/api';
 import { getTransactionsList } from '~client/modules/data';
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 
-test('getApiKey gets the API key from the state', t => {
+test('getApiKey gets the API key from the state', (t) => {
     t.is(getApiKey({
         api: {
-            key: 'foo'
-        }
+            key: 'foo',
+        },
     }), 'foo');
 });
 
-test('getLocked returns true iff the state is locked for synchronisation', t => {
+test('getLocked returns true iff the state is locked for synchronisation', (t) => {
     t.true(getLocked({ api: { locked: true } }));
     t.false(getLocked({ api: { locked: false } }));
     t.false(getLocked({ api: {} }));
 });
 
-test('getUnsaved returns true iff the state contains unsaved optimistic updates', t => {
+test('getUnsaved returns true iff the state contains unsaved optimistic updates', (t) => {
     t.true(getUnsaved({
         ...testState,
         funds: {
@@ -33,33 +33,39 @@ test('getUnsaved returns true iff the state contains unsaved optimistic updates'
                     id: 'some-fund-id',
                     name: 'some-fund-name',
                     transactions: getTransactionsList([
-                        { date: '2019-05-03', units: 103, cost: 99231 }
+                        { date: '2019-05-03', units: 103, cost: 99231 },
                     ]),
-                    __optimistic: UPDATE
-                }
-            ]
+                    __optimistic: UPDATE,
+                },
+            ],
         },
         food: {
             ...testState.food,
             items: [
                 ...testState.food.items,
-                { id: 'real-id-z', other: 'this-prop', is: null, __optimistic: UPDATE }
-            ]
+                {
+                    id: 'real-id-z', other: 'this-prop', is: null, __optimistic: UPDATE,
+                },
+            ],
         },
         general: {
             ...testState.general,
             items: [
                 ...testState.general.items,
-                { id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE }
-            ]
+                {
+                    id: 'some-fake-id', some: 'prop', is: true, __optimistic: CREATE,
+                },
+            ],
         },
         holiday: {
             ...testState.holiday,
             items: [
                 ...testState.holiday.items,
-                { id: 'real-id-x', thisProp: 'foo', is: false, __optimistic: DELETE }
-            ]
-        }
+                {
+                    id: 'real-id-x', thisProp: 'foo', is: false, __optimistic: DELETE,
+                },
+            ],
+        },
     }));
 
     t.true(getUnsaved({
@@ -73,10 +79,10 @@ test('getUnsaved returns true iff the state contains unsaved optimistic updates'
                     type: 'asset',
                     category: 'My asset',
                     color: '#00ff00',
-                    __optimistic: CREATE
-                }
-            ]
-        }
+                    __optimistic: CREATE,
+                },
+            ],
+        },
     }));
 
     t.true(getUnsaved({
@@ -91,10 +97,10 @@ test('getUnsaved returns true iff the state contains unsaved optimistic updates'
                     subcategory: 'My wallet',
                     hasCreditLimit: null,
                     opacity: 0,
-                    __optimistic: CREATE
-                }
-            ]
-        }
+                    __optimistic: CREATE,
+                },
+            ],
+        },
     }));
 
     t.true(getUnsaved({
@@ -105,10 +111,10 @@ test('getUnsaved returns true iff the state contains unsaved optimistic updates'
                 ...testState.netWorth.entries,
                 {
                     ...testState.netWorth.entries[0],
-                    __optimistic: UPDATE
-                }
-            ]
-        }
+                    __optimistic: UPDATE,
+                },
+            ],
+        },
     }));
 
     t.false(getUnsaved({
@@ -121,32 +127,36 @@ test('getUnsaved returns true iff the state contains unsaved optimistic updates'
                     id: 'some-fund-id',
                     name: 'some-fund-name',
                     transactions: getTransactionsList([
-                        { date: '2019-05-03', units: 103, cost: 99231 }
+                        { date: '2019-05-03', units: 103, cost: 99231 },
                     ]),
-                    __optimistic: null
-                }
-            ]
+                    __optimistic: null,
+                },
+            ],
         },
         food: {
             ...testState.food,
             items: [
                 ...testState.food.items,
-                { id: 'real-id-z', other: 'this-prop', is: null, __optimistic: null }
-            ]
+                {
+                    id: 'real-id-z', other: 'this-prop', is: null, __optimistic: null,
+                },
+            ],
         },
         general: {
             ...testState.general,
             items: [
                 ...testState.general.items,
-                { id: 'some-fake-id', some: 'prop', is: true, __optimistic: null }
-            ]
+                {
+                    id: 'some-fake-id', some: 'prop', is: true, __optimistic: null,
+                },
+            ],
         },
         holiday: {
             ...testState.holiday,
             items: [
                 ...testState.holiday.items,
-                { id: 'real-id-x', thisProp: 'foo', is: false }
-            ]
-        }
+                { id: 'real-id-x', thisProp: 'foo', is: false },
+            ],
+        },
     }));
 });

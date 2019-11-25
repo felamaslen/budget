@@ -1,7 +1,3 @@
-/**
- * User route
- */
-
 const { Router } = require('express');
 const joi = require('joi');
 const { DateTime } = require('luxon');
@@ -13,7 +9,7 @@ async function attemptLogin(config, db, req) {
         pin: joi.number().integer()
             .min(1000)
             .max(9999)
-            .required()
+            .required(),
     }));
 
     if (error) {
@@ -103,7 +99,7 @@ async function loginBanCheck(config, db, logger, loggedIn, ip) {
 
 function login(config, db, logger) {
     return catchAsyncErrors(async (req, res) => {
-        const ip = req.headers && req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const ip = (req.headers && req.headers['x-forwarded-for']) || req.connection.remoteAddress;
 
         let loginErr = null;
         let response = null;
@@ -126,7 +122,6 @@ function login(config, db, logger) {
         }
 
         res.json(response);
-
     });
 }
 
@@ -197,5 +192,5 @@ module.exports = {
     getNewBadLoginCount,
     loginBanCheck,
     login,
-    handler
+    handler,
 };

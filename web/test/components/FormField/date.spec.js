@@ -1,7 +1,6 @@
 import ava from 'ava';
 import sinon from 'sinon';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
@@ -10,12 +9,14 @@ import { DateTime } from 'luxon';
 
 import FormFieldDate from '~client/components/FormField/date';
 
+const test = ninos(ava);
+
 const getContainer = (customProps = {}, ...args) => {
     const props = {
         active: true,
         value: DateTime.fromISO('2017-11-10'),
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldDate {...props} />, ...args);
@@ -27,8 +28,6 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-
-    t.is(div.className, 'form-field form-field-date');
 
     t.is(div.childNodes.length, 1);
 });
@@ -80,14 +79,18 @@ test('handling bad values', t => {
 });
 
 test('rendering as a string input - entering abbreviations', t => {
-    const clock = sinon.useFakeTimers(new Date('2019-07-06T16:47:20Z').getTime());
+    const clock = sinon.useFakeTimers(
+        new Date('2019-07-06T16:47:20Z').getTime(),
+    );
 
     const onChange = t.context.stub();
     const props = { onChange, string: true };
 
     const { container } = getContainer(props);
 
-    const { childNodes: [input] } = container.childNodes[0];
+    const {
+        childNodes: [input],
+    } = container.childNodes[0];
 
     t.is(input.type, 'text');
 
@@ -101,7 +104,9 @@ test('rendering as a string input - entering abbreviations', t => {
     act(() => {
         getContainer({ ...props, active: true }, { container });
     });
-    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '4/3' } });
+    fireEvent.change(container.childNodes[0].childNodes[0], {
+        target: { value: '4/3' },
+    });
     act(() => {
         getContainer({ ...props, active: false }, { container });
     });
@@ -111,7 +116,9 @@ test('rendering as a string input - entering abbreviations', t => {
     act(() => {
         getContainer({ ...props, active: true }, { container });
     });
-    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '2/9/16' } });
+    fireEvent.change(container.childNodes[0].childNodes[0], {
+        target: { value: '2/9/16' },
+    });
     act(() => {
         getContainer({ ...props, active: false }, { container });
     });
@@ -121,7 +128,9 @@ test('rendering as a string input - entering abbreviations', t => {
     act(() => {
         getContainer({ ...props, active: true }, { container });
     });
-    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '2/9/2016' } });
+    fireEvent.change(container.childNodes[0].childNodes[0], {
+        target: { value: '2/9/2016' },
+    });
     act(() => {
         getContainer({ ...props, active: false }, { container });
     });
@@ -136,7 +145,9 @@ test('rendering as a string input - handling invalid input', t => {
     const props = { onChange, active: true, string: true };
     const { container } = getContainer(props);
 
-    const { childNodes: [input] } = container.childNodes[0];
+    const {
+        childNodes: [input],
+    } = container.childNodes[0];
 
     t.is(input.type, 'text');
 

@@ -12,7 +12,7 @@ import appSaga, {
     windowResizeEventChannel,
     fetchLegacy,
     fetchNetWorth,
-    fetchData
+    fetchData,
 } from '~client/sagas/app';
 import { getFundHistoryQuery } from '~client/sagas/funds';
 import { windowResized } from '~client/actions/app';
@@ -22,7 +22,7 @@ import { getApiKey } from '~client/selectors/api';
 import { LOGGED_IN } from '~client/constants/actions/login';
 import { API_PREFIX } from '~client/constants/data';
 
-test('watchEventEmitter dispatching an action emitted by the channel', t => {
+test('watchEventEmitter dispatching an action emitted by the channel', (t) => {
     const channel = windowResizeEventChannel();
 
     testSaga(watchEventEmitter, windowResizeEventChannel)
@@ -40,12 +40,12 @@ test('watchEventEmitter dispatching an action emitted by the channel', t => {
     t.pass();
 });
 
-test('fetchLegacy calls GET /data/all with fund query options', t => {
+test('fetchLegacy calls GET /data/all with fund query options', (t) => {
     const res = {
         data: {
-            data: { isRes: true }
+            data: { isRes: true },
         },
-        headers: {}
+        headers: {},
     };
 
     testSaga(fetchLegacy, 'some-api-key')
@@ -54,8 +54,8 @@ test('fetchLegacy calls GET /data/all with fund query options', t => {
         .next({ period: 'month', length: 6, history: true })
         .call(axios.get, `${API_PREFIX}/data/all?period=month&length=6&history=true`, {
             headers: {
-                Authorization: 'some-api-key'
-            }
+                Authorization: 'some-api-key',
+            },
         })
         .next(res)
         .returns(res.data.data);
@@ -63,7 +63,7 @@ test('fetchLegacy calls GET /data/all with fund query options', t => {
     t.pass();
 });
 
-test('fetchNetWorth gets categories, subcategories and entries', t => {
+test('fetchNetWorth gets categories, subcategories and entries', (t) => {
     const resCategories = { isCategoryRes: true };
     const resSubcategories = { isSubcategoryRes: true };
     const resEntries = { count: 17, data: ['some-data'] };
@@ -75,23 +75,23 @@ test('fetchNetWorth gets categories, subcategories and entries', t => {
         .all({
             categories: call(axios.get, `${API_PREFIX}/data/net-worth/categories`, options),
             subcategories: call(axios.get, `${API_PREFIX}/data/net-worth/subcategories`, options),
-            entries: call(axios.get, `${API_PREFIX}/data/net-worth`, options)
+            entries: call(axios.get, `${API_PREFIX}/data/net-worth`, options),
         })
         .next({
             categories: resCategories,
             subcategories: resSubcategories,
-            entries: resEntries
+            entries: resEntries,
         })
         .returns({
             categories: resCategories,
             subcategories: resSubcategories,
-            entries: resEntries
+            entries: resEntries,
         });
 
     t.pass();
 });
 
-test('fetchData gets all data from the API', t => {
+test('fetchData gets all data from the API', (t) => {
     const stub = sinon.stub(shortid, 'generate').returns('some-id');
 
     const resLegacy = { foo: 'bar' };
@@ -105,11 +105,11 @@ test('fetchData gets all data from the API', t => {
         .next('some-api-key')
         .all({
             legacy: call(fetchLegacy, 'some-api-key'),
-            netWorth: call(fetchNetWorth, 'some-api-key')
+            netWorth: call(fetchNetWorth, 'some-api-key'),
         })
         .next({
             legacy: resLegacy,
-            netWorth: resNetWorth
+            netWorth: resNetWorth,
         })
         .put(dataRead({ ...resLegacy, netWorth: resNetWorth }))
         .next()
@@ -121,7 +121,7 @@ test('fetchData gets all data from the API', t => {
         .next('some-api-key')
         .all({
             legacy: call(fetchLegacy, 'some-api-key'),
-            netWorth: call(fetchNetWorth, 'some-api-key')
+            netWorth: call(fetchNetWorth, 'some-api-key'),
         })
         .throw(err)
         .put(errorOpened('Error loading data: something bad happened'))
@@ -133,7 +133,7 @@ test('fetchData gets all data from the API', t => {
     t.pass();
 });
 
-test('appSaga forks other sagas', t => {
+test('appSaga forks other sagas', (t) => {
     testSaga(appSaga)
         .next()
         .fork(watchEventEmitter, windowResizeEventChannel)

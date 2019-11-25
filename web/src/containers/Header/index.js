@@ -9,28 +9,35 @@ import { getUnsaved } from '~client/selectors/api';
 import AppLogo from '~client/components/AppLogo';
 import Navbar from '~client/components/Navbar';
 
+import * as Styled from './styles';
+
 const Header = ({ loggedIn, loadingApi, unsavedApi, onLogout }) => (
-    <header className="navbar">
+    <Styled.Header>
         <AppLogo loading={loadingApi} unsaved={unsavedApi} />
         {loggedIn && <Navbar onLogout={onLogout} />}
-    </header>
+    </Styled.Header>
 );
 
 Header.propTypes = {
     loggedIn: PropTypes.bool.isRequired,
     loadingApi: PropTypes.bool.isRequired,
     unsavedApi: PropTypes.bool.isRequired,
-    onLogout: PropTypes.func.isRequired
+    onLogout: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
     loggedIn: getLoggedIn(state),
     loadingApi: state.api.loading,
-    unsavedApi: getUnsaved(state)
+    unsavedApi: getUnsaved(state),
 });
 
 const mapDispatchToProps = {
-    onLogout: loggedOut
+    onLogout: loggedOut,
 };
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));
+export default withRouter(
+    connect(
+        mapStateToProps,
+        mapDispatchToProps,
+    )(Header),
+);

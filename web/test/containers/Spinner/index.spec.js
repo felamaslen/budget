@@ -9,20 +9,20 @@ import Spinner from '~client/containers/Spinner';
 const getContainer = (customProps = {}, customState = state => state) => {
     const state = customState({
         api: {
-            initialLoading: true
-        }
+            initialLoading: true,
+        },
     });
 
     const store = createMockStore(state);
 
     const props = {
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
             <Spinner {...props} />
-        </Provider>
+        </Provider>,
     );
 
     return { store, ...utils };
@@ -36,20 +36,19 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'progress-outer');
     t.is(div.childNodes.length, 1);
 
     const [inner] = div.childNodes;
 
     t.is(inner.tagName, 'DIV');
-    t.is(inner.className, 'progress-inner');
-    t.is(inner.childNodes.length, 1);
+    t.is(inner.childNodes.length, 2);
 
-    const [progress] = inner.childNodes;
+    const [leader, follower] = inner.childNodes;
 
-    t.is(progress.tagName, 'DIV');
-    t.is(progress.className, 'progress');
-    t.is(progress.childNodes.length, 0);
+    t.is(leader.tagName, 'DIV');
+    t.is(leader.childNodes.length, 0);
+    t.is(follower.tagName, 'DIV');
+    t.is(follower.childNodes.length, 0);
 });
 
 test('not rendering if inactive', t => {
@@ -57,8 +56,8 @@ test('not rendering if inactive', t => {
         ...state,
         api: {
             ...state.api,
-            initialLoading: false
-        }
+            initialLoading: false,
+        },
     }));
 
     t.is(container.childNodes.length, 0);

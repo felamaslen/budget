@@ -16,7 +16,6 @@ const getContainer = memoize((customProps = {}) => {
             date: DateTime.fromISO('2019-07-16'),
             future: true,
             firstPresent: false,
-            className: 'my-classname'
         },
         odd: false,
         command: {},
@@ -28,7 +27,7 @@ const getContainer = memoize((customProps = {}) => {
         AfterRow,
         navNext: () => null,
         navPrev: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<ListRowDesktop {...props} />);
@@ -41,7 +40,6 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'list-row-desktop my-classname future');
     t.is(div.childNodes.length, 7);
 });
 
@@ -52,7 +50,6 @@ test('list of columns', t => {
     const [rowCell] = div.childNodes;
 
     t.is(rowCell.tagName, 'SPAN');
-    t.is(rowCell.className, 'cell date');
 });
 
 test('daily column', t => {
@@ -62,6 +59,5 @@ test('daily column', t => {
     const [, , , , , span] = div.childNodes;
 
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'daily');
     t.is(span.childNodes.length, 0);
 });

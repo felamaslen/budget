@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -8,11 +7,13 @@ import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import Digit from '~client/components/LoginForm/digit';
 
+const test = ninos(ava);
+
 const getContainer = memoize((customProps = {}) => {
     const props = {
         digit: 3,
         onInput: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<Digit {...props} />);
@@ -26,7 +27,6 @@ test('basic structure', t => {
     const [button] = container.childNodes;
 
     t.is(button.tagName, 'BUTTON');
-    t.is(button.className, 'btn-digit btn-digit-3');
     t.is(button.innerHTML, '3');
 });
 

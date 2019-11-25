@@ -1,40 +1,39 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import HoverCost from '~client/components/HoverCost';
 
-function getStyle(rgb) {
-    if (!rgb) {
-        return {};
-    }
+import * as Styled from './styles';
 
-    return { backgroundColor: `rgb(${rgb.join(',')})` };
-}
-
-export default function OverviewTableCells({ row: { cells, past, active, future } }) {
-    return (
-        <div className={classNames('row', { past, active, future })}>
-            {cells.map(({ column: [key], value, rgb }, index) => (
-                <div
-                    key={key}
-                    className={classNames('col', key)}
-                    style={getStyle(rgb)}
-                >
-                    <HoverCost value={value} abbreviate={index > 0} />
-                </div>
-            ))}
-        </div>
-    );
-}
+const OverviewTableCells = ({ row: { cells, past, active, future } }) => (
+    <Styled.Row past={past} active={active} future={future}>
+        {cells.map(({ column: [key], value, rgb }, index) => (
+            <Styled.Cell
+                key={key}
+                column={key}
+                color={rgb}
+                past={past}
+                active={active}
+                future={future}
+            >
+                <HoverCost value={value} abbreviate={index > 0} />
+            </Styled.Cell>
+        ))}
+    </Styled.Row>
+);
 
 OverviewTableCells.propTypes = {
     row: PropTypes.shape({
-        cells: PropTypes.arrayOf(PropTypes.shape({
-            column: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-            rgb: PropTypes.arrayOf(PropTypes.number)
-        }).isRequired).isRequired,
+        cells: PropTypes.arrayOf(
+            PropTypes.shape({
+                column: PropTypes.arrayOf(PropTypes.string.isRequired)
+                    .isRequired,
+                rgb: PropTypes.arrayOf(PropTypes.number),
+            }).isRequired,
+        ).isRequired,
         past: PropTypes.bool,
         active: PropTypes.bool,
-        future: PropTypes.bool
-    }).isRequired
+        future: PropTypes.bool,
+    }).isRequired,
 };
+
+export default OverviewTableCells;

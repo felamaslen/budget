@@ -18,17 +18,12 @@ import { GRAPH_WIDTH } from '~client/constants/graph';
 import GraphBalance from '~client/components/GraphBalance';
 import GraphSpending from '~client/components/GraphSpending';
 
-import './style.scss';
+import * as Styled from './styles';
 
-const GraphOverviewWrapped = ({
-    futureMonths,
-    cost,
-    netWorthOld,
-    targets,
-    ...commonProps
-}) => (
-    <div className="graph-container-outer">
-        <GraphBalance name="balance"
+const GraphOverviewWrapped = ({ futureMonths, cost, netWorthOld, targets, ...commonProps }) => (
+    <Styled.GraphOverview>
+        <GraphBalance
+            name="balance"
             {...commonProps}
             futureMonths={futureMonths}
             cost={cost}
@@ -36,13 +31,14 @@ const GraphOverviewWrapped = ({
             targets={targets}
         />
         {!commonProps.isMobile && (
-            <GraphSpending name="spend"
+            <GraphSpending
+                name="spend"
                 {...commonProps}
                 valuesNet={cost.net}
                 valuesSpending={cost.spending}
             />
         )}
-    </div>
+    </Styled.GraphOverview>
 );
 
 GraphOverviewWrapped.propTypes = {
@@ -53,15 +49,13 @@ GraphOverviewWrapped.propTypes = {
     cost: costShape.isRequired,
     netWorthOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     targets: targetsShape.isRequired,
-    graphWidth: PropTypes.number.isRequired
+    graphWidth: PropTypes.number.isRequired,
 };
 
 function GraphOverview(props) {
     return (
         <Media query={mediaQueryMobile}>
-            {isMobile => (
-                <GraphOverviewWrapped isMobile={isMobile} {...props} />
-            )}
+            {isMobile => <GraphOverviewWrapped isMobile={isMobile} {...props} />}
         </Media>
     );
 }
@@ -73,7 +67,7 @@ const mapStateToProps = state => ({
     cost: getProcessedCost(state),
     netWorthOld: getNetWorthSummaryOld(state),
     futureMonths: getFutureMonths(state),
-    targets: getTargets(state)
+    targets: getTargets(state),
 });
 
 export default connect(mapStateToProps)(GraphOverview);

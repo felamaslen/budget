@@ -1,22 +1,17 @@
-import './style.scss';
 import { connect } from 'react-redux';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Media from 'react-media';
-import classNames from 'classnames';
 
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
-import {
-    getSortedPageRows,
-    getWeeklyAverages,
-    getTotalCost
-} from '~client/selectors/list';
+import { getSortedPageRows, getWeeklyAverages, getTotalCost } from '~client/selectors/list';
 
 import { rowsShape } from '~client/prop-types/page/rows';
 import { mediaQueryMobile } from '~client/constants';
 import { PAGES } from '~client/constants/data';
-import Page from '~client/components/Page';
 import ListBody from '~client/components/ListBody';
+
+import * as Styled from './styles';
 
 const PageListComponent = ({
     page,
@@ -29,31 +24,30 @@ const PageListComponent = ({
     extraProps,
     onCreate,
     onUpdate,
-    onDelete
+    onDelete,
 }) => (
-    <Page page={page} className="page-list">
-        <div className={classNames('page-list-main', page)}>
-            <Media query={mediaQueryMobile}>{isMobile => (
-                <ListBody
-                    page={page}
-                    isMobile={isMobile}
-                    rows={rows}
-                    itemSize={isMobile
-                        ? null
-                        : itemSize
-                    }
-                    getDaily={getDaily}
-                    weeklyValue={weeklyValue}
-                    totalCost={totalCost}
-                    extraProps={extraProps}
-                    onCreate={onCreate}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                />
-            )}</Media>
-        </div>
+    <>
+        <Styled.PageListMain page={page}>
+            <Media query={mediaQueryMobile}>
+                {isMobile => (
+                    <ListBody
+                        page={page}
+                        isMobile={isMobile}
+                        rows={rows}
+                        itemSize={isMobile ? null : itemSize}
+                        getDaily={getDaily}
+                        weeklyValue={weeklyValue}
+                        totalCost={totalCost}
+                        extraProps={extraProps}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                    />
+                )}
+            </Media>
+        </Styled.PageListMain>
         {After && <After totalCost={totalCost} {...extraProps} />}
-    </Page>
+    </>
 );
 
 PageListComponent.propTypes = {
@@ -67,29 +61,42 @@ PageListComponent.propTypes = {
     extraProps: PropTypes.object,
     onCreate: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 PageListComponent.defaultProps = {
     After: null,
     itemSize: null,
-    extraProps: {}
+    extraProps: {},
 };
 
 const mapStateToProps = (state, props) => ({
     rows: props.rows || getSortedPageRows(state, props),
     weeklyValue: getWeeklyAverages(state, props),
     getDaily: Boolean(PAGES[props.page].daily),
-    totalCost: getTotalCost(state, props)
+    totalCost: getTotalCost(state, props),
 });
 
 const mapDispatchToProps = {
     onCreate: listItemCreated,
     onUpdate: listItemUpdated,
-    onDelete: listItemDeleted
+    onDelete: listItemDeleted,
 };
 
-export const PageList = connect(mapStateToProps, mapDispatchToProps)(PageListComponent);
+export const PageListBase = connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(PageListComponent);
+
+const PageList = ({ page }) => (
+    <Styled.PageList page={page}>
+        <PageListBase page={page} />
+    </Styled.PageList>
+);
+
+PageList.propTypes = {
+    page: PropTypes.string.isRequired,
+};
 
 export const PageIncome = () => <PageList page="income" />;
 export const PageBills = () => <PageList page="bills" />;

@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 
 import { Wrapper } from '~client/components/FormField';
 
-function FormFieldSelect({ options, value, onChange, ...props }) {
-    const onChangeCallback = useCallback(event => onChange(event.target.value), [onChange]);
+function FormFieldSelect({
+    options, value, onChange, ...props
+}) {
+    const onChangeCallback = useCallback((event) => onChange(event.target.value), [onChange]);
 
     useEffect(() => {
         if (options.length && !options.some(({ internal }) => internal === value)) {
@@ -28,10 +30,10 @@ function FormFieldSelect({ options, value, onChange, ...props }) {
 FormFieldSelect.propTypes = {
     options: PropTypes.arrayOf(PropTypes.shape({
         internal: PropTypes.string.isRequired,
-        external: PropTypes.string
+        external: PropTypes.string,
     }).isRequired).isRequired,
     value: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
 };
 
 export default FormFieldSelect;

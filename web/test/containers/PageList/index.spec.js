@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import { createMockStore } from 'redux-test-utils';
 import { Provider } from 'react-redux';
 import React from 'react';
-import { PageList } from '~client/containers/PageList';
+import { PageListBase } from '~client/containers/PageList';
 import { testState } from '~client-test/test_data/state';
 
 const getContainer = (customProps = {}, customState = state => state) => {
@@ -14,9 +14,9 @@ const getContainer = (customProps = {}, customState = state => state) => {
             ...testState.food,
             data: {
                 ...testState.food.data,
-                total: 34
-            }
-        }
+                total: 34,
+            },
+        },
     });
 
     const store = createMockStore(state);
@@ -24,13 +24,13 @@ const getContainer = (customProps = {}, customState = state => state) => {
     const props = {
         page: 'food',
         After: () => null,
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(
         <Provider store={store}>
-            <PageList {...props} />
-        </Provider>
+            <PageListBase {...props} />
+        </Provider>,
     );
 
     return { store, ...utils };
@@ -42,7 +42,6 @@ test('basic structure', t => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'page page-list page-food');
     t.is(div.childNodes.length, 1);
 });
 
@@ -52,11 +51,9 @@ test('list', t => {
     const [pageList] = div.childNodes;
 
     t.is(pageList.tagName, 'DIV');
-    t.is(pageList.className, 'page-list-main food');
-    t.is(pageList.childNodes.length, 1);
+    t.is(pageList.childNodes.length, 2);
 
     const [crudList] = pageList.childNodes;
 
     t.is(crudList.tagName, 'DIV');
-    t.is(crudList.className, 'crud-list list-desktop');
 });

@@ -11,7 +11,7 @@ import {
     NET_WORTH_SUBCATEGORY_DELETED,
     NET_WORTH_CREATED,
     NET_WORTH_UPDATED,
-    NET_WORTH_DELETED
+    NET_WORTH_DELETED,
 } from '~client/constants/actions/net-worth';
 
 import { LOGGED_OUT } from '~client/constants/actions/login';
@@ -25,10 +25,10 @@ import { IDENTITY } from '~client/modules/data';
 export const initialState = {
     categories: [],
     subcategories: [],
-    entries: []
+    entries: [],
 };
 
-const withDates = item => {
+const withDates = (item) => {
     if (item.date) {
         return { ...item, date: DateTime.fromISO(item.date) };
     }
@@ -36,7 +36,7 @@ const withDates = item => {
     return item;
 };
 
-const mapChanges = (requestType, idKey = 'id') => (requests, postProcess = IDENTITY) => item => {
+const mapChanges = (requestType, idKey = 'id') => (requests, postProcess = IDENTITY) => (item) => {
     if (item.__optimistic !== requestType) {
         return item;
     }
@@ -51,15 +51,15 @@ const mapChanges = (requestType, idKey = 'id') => (requests, postProcess = IDENT
 
 const mapCreates = mapChanges(CREATE, 'fakeId');
 
-const mapEntryItems = processor => ({ values, creditLimit, ...rest }) => ({
+const mapEntryItems = (processor) => ({ values, creditLimit, ...rest }) => ({
     ...rest,
     values: processor(values),
-    creditLimit: processor(creditLimit)
+    creditLimit: processor(creditLimit),
 });
 
-const mapCreatedCategory = requests => subcategory => {
-    const created = requests.find(({ type, fakeId }) => type === CREATE &&
-        fakeId === subcategory.categoryId);
+const mapCreatedCategory = (requests) => (subcategory) => {
+    const created = requests.find(({ type, fakeId }) => type === CREATE
+        && fakeId === subcategory.categoryId);
 
     if (!created) {
         return subcategory;
@@ -68,9 +68,9 @@ const mapCreatedCategory = requests => subcategory => {
     return { ...subcategory, categoryId: created.res.id };
 };
 
-const mapCreatedSubcategory = requests => mapEntryItems(items => items.map(entryItem => {
-    const created = requests.find(({ type, fakeId }) => type === CREATE &&
-        fakeId === entryItem.subcategory);
+const mapCreatedSubcategory = (requests) => mapEntryItems((items) => items.map((entryItem) => {
+    const created = requests.find(({ type, fakeId }) => type === CREATE
+        && fakeId === entryItem.subcategory);
 
     if (!created) {
         return entryItem;
@@ -79,52 +79,53 @@ const mapCreatedSubcategory = requests => mapEntryItems(items => items.map(entry
     return { ...entryItem, subcategory: created.res.id };
 }));
 
-const withCreates = requests => state => ({
+const withCreates = (requests) => (state) => ({
     ...state,
     categories: state.categories.map(mapCreates(requests)),
     subcategories: state.subcategories.map(mapCreates(requests))
         .map(mapCreatedCategory(requests)),
     entries: state.entries.map(mapCreates(requests, withDates))
-        .map(mapCreatedSubcategory(requests))
+        .map(mapCreatedSubcategory(requests)),
 });
 
 const mapUpdates = mapChanges(UPDATE);
 
-const withUpdates = requests => state => ({
+const withUpdates = (requests) => (state) => ({
     ...state,
     categories: state.categories.map(mapUpdates(requests)),
     subcategories: state.subcategories.map(mapUpdates(requests)),
-    entries: state.entries.map(mapUpdates(requests, withDates))
+    entries: state.entries.map(mapUpdates(requests, withDates)),
 });
 
-const filterDeletes = requests => ({ id, __optimistic }) => !(
-    __optimistic === DELETE &&
-    requests.some(({ type, id: deletedId }) => type === DELETE && deletedId === id)
+const filterDeletes = (requests) => ({ id, __optimistic }) => !(
+    __optimistic === DELETE
+    && requests.some(({ type, id: deletedId }) => type === DELETE && deletedId === id)
 );
 
-const deleteCategories = requests => state => ({
+const deleteCategories = (requests) => (state) => ({
     ...state,
-    categories: state.categories.filter(filterDeletes(requests))
+    categories: state.categories.filter(filterDeletes(requests)),
 });
 
-const deleteSubcategories = requests => state => ({
+const deleteSubcategories = (requests) => (state) => ({
     ...state,
     subcategories: state.subcategories.filter(filterDeletes(requests))
-        .filter(({ categoryId }) => state.categories.some(({ id }) => id === categoryId))
+        .filter(({ categoryId }) => state.categories.some(({ id }) => id === categoryId)),
 });
 
-const deleteEntries = requests => state => ({
+const deleteEntries = (requests) => (state) => ({
     ...state,
-    entries: state.entries.filter(filterDeletes(requests))
-        .map(mapEntryItems(items => items.filter(({ subcategory }) =>
+    entries: state.entries
+        .filter(filterDeletes(requests))
+        .map(mapEntryItems((items) => items.filter(({ subcategory }) => (
             state.subcategories.some(({ id }) => id === subcategory)
-        )))
+        )))),
 });
 
-const withDeletes = requests => state => compose(
+const withDeletes = (requests) => (state) => compose(
     deleteCategories(requests),
     deleteSubcategories(requests),
-    deleteEntries(requests)
+    deleteEntries(requests),
 )(state);
 
 const onRead = (state, { res: { netWorth: { categories, subcategories, entries } } }) => ({
@@ -141,15 +142,15 @@ const onRead = (state, { res: { netWorth: { categories, subcategories, entries }
         values,
         creditLimit,
         currencies,
-        ...rest
+        ...rest,
     })),
-    old: entries.data.old || []
+    old: entries.data.old || [],
 });
 
 const onSyncReceived = (state, { res: { netWorth: requests = [] } }) => compose(
     withCreates(requests),
     withUpdates(requests),
-    withDeletes(requests)
+    withDeletes(requests),
 )(state);
 
 const COLUMNS_CATEGORIES = ['category', 'color', 'type'];
@@ -158,22 +159,20 @@ const COLUMNS_ENTRIES = ['date', 'values', 'currencies', 'creditLimit'];
 
 const removeDeletedSubcategories = ({ subcategories, ...state }) => ({
     ...state,
-    subcategories: subcategories.filter(({ categoryId }) =>
-        state.categories.some(({ id }) => id === categoryId))
+    subcategories: subcategories.filter(({ categoryId }) => state.categories.some(({ id }) => id === categoryId)),
 });
 
 const removeDeletedEntries = ({ entries, ...state }) => ({
     ...state,
     entries: entries.map(({ values, ...rest }) => ({
         ...rest,
-        values: values.filter(({ subcategory }) =>
-            state.subcategories.some(({ id }) => id === subcategory))
-    }))
+        values: values.filter(({ subcategory }) => state.subcategories.some(({ id }) => id === subcategory)),
+    })),
 });
 
-const removeDependencies = handler => (state, action) => compose(
+const removeDependencies = (handler) => (state, action) => compose(
     removeDeletedSubcategories,
-    removeDeletedEntries
+    removeDeletedEntries,
 )({ ...state, ...handler(state, action) });
 
 const handlers = {
@@ -188,7 +187,7 @@ const handlers = {
     [NET_WORTH_UPDATED]: onUpdateOptimistic('entries', COLUMNS_ENTRIES),
     [NET_WORTH_DELETED]: onDeleteOptimistic('entries'),
     [DATA_READ]: onRead,
-    [SYNC_RECEIVED]: onSyncReceived
+    [SYNC_RECEIVED]: onSyncReceived,
 };
 
 export default createReducerObject(handlers, initialState);

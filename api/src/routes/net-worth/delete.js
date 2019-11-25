@@ -1,6 +1,6 @@
 const { catchAsyncErrors, clientError } = require('../../modules/error-handling');
 
-const onDelete = db => catchAsyncErrors(async (req, res) => {
+const onDelete = (db) => catchAsyncErrors(async (req, res) => {
     const [item] = await db.select('id')
         .from('net_worth')
         .where('uid', '=', req.user.uid)
@@ -18,5 +18,5 @@ const onDelete = db => catchAsyncErrors(async (req, res) => {
 });
 
 module.exports = {
-    onDelete
+    onDelete,
 };

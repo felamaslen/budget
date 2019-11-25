@@ -17,28 +17,37 @@ function getStyleProps(fill, color) {
 
 export default function RenderedLine({ line, ...props }) {
     const { data, color, fill, smooth, movingAverage, arrows, strokeWidth, dashed } = line;
-    const pathProps = useMemo(() => !arrows && getPathProps({ strokeWidth, dashed }), [arrows, strokeWidth, dashed]);
+    const pathProps = useMemo(() => !arrows && getPathProps({ strokeWidth, dashed }), [
+        arrows,
+        strokeWidth,
+        dashed,
+    ]);
 
-    const averageLine = useMemo(() => !arrows && data.length && (
-        <AverageLine {...props} data={data} value={movingAverage} />
-    ), [arrows, data, movingAverage, props]);
+    const averageLine = useMemo(
+        () =>
+            !arrows && data.length && <AverageLine {...props} data={data} value={movingAverage} />,
+        [arrows, data, movingAverage, props],
+    );
 
     const constantColor = typeof color === 'string';
 
     const linePath = useMemo(
-        () => constantColor &&
+        () =>
+            constantColor &&
             !arrows &&
             data.length &&
-            getSingleLinePath({ data, smooth, fill, ...props }),
-        [constantColor, arrows, data, smooth, fill, props]
+            getSingleLinePath({
+                data,
+                smooth,
+                fill,
+                ...props,
+            }),
+        [constantColor, arrows, data, smooth, fill, props],
     );
 
     const styleProps = useMemo(
-        () => constantColor &&
-            !arrows &&
-            data.length &&
-            getStyleProps(fill, color),
-        [constantColor, arrows, data, fill, color]
+        () => constantColor && !arrows && data.length && getStyleProps(fill, color),
+        [constantColor, arrows, data, fill, color],
     );
 
     if (!(data.length && props.minY !== props.maxY)) {
@@ -49,14 +58,21 @@ export default function RenderedLine({ line, ...props }) {
     }
     if (constantColor) {
         return (
-            <g className="line">
+            <g>
                 <path d={linePath} {...styleProps} {...pathProps} />
                 {averageLine}
             </g>
         );
     }
 
-    const lineProps = { data, color, fill, smooth, movingAverage, pathProps };
+    const lineProps = {
+        data,
+        color,
+        fill,
+        smooth,
+        movingAverage,
+        pathProps,
+    };
 
     return (
         <DynamicColorLine {...lineProps} {...props}>
@@ -72,5 +88,5 @@ RenderedLine.propTypes = {
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     valX: PropTypes.func.isRequired,
-    valY: PropTypes.func.isRequired
+    valY: PropTypes.func.isRequired,
 };

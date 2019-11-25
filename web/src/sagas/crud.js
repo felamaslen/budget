@@ -1,4 +1,6 @@
-import { debounce, delay, fork, select, all, call, put } from 'redux-saga/effects';
+import {
+    debounce, delay, fork, select, all, call, put,
+} from 'redux-saga/effects';
 import axios from 'axios';
 
 import { getLocked, getApiKey } from '~client/selectors/api';
@@ -9,23 +11,25 @@ import {
     syncLocked,
     syncUnlocked,
     syncReceived,
-    syncErrorOccurred
+    syncErrorOccurred,
 } from '~client/actions/api';
 import { API_PREFIX, API_BACKOFF_TIME, TIMER_UPDATE_SERVER } from '~client/constants/data';
 
 const withRes = (requests, res) => requests.map((request, index) => ({ ...request, res: res[index] }));
 
-export function *updateLists(apiKey, requests) {
+export function* updateLists(apiKey, requests) {
     if (!requests.length) {
         return [];
     }
 
     const res = yield call(axios.patch, `${API_PREFIX}/data/multiple`, {
-        list: requests.map(({ type, id, fakeId, ...request }) => request)
+        list: requests.map(({
+            type, id, fakeId, ...request
+        }) => request),
     }, {
         headers: {
-            Authorization: apiKey
-        }
+            Authorization: apiKey,
+        },
     });
 
     return withRes(requests, res.data.data);
@@ -41,24 +45,26 @@ function getUrlFromRoute(id, route) {
     return base;
 }
 
-export function *updateNetWorth(apiKey, requests) {
+export function* updateNetWorth(apiKey, requests) {
     if (!requests.length) {
         return [];
     }
 
-    const res = yield all(requests.map(({ method, id, route, body: data }) => call(axios, {
+    const res = yield all(requests.map(({
+        method, id, route, body: data,
+    }) => call(axios, {
         headers: {
-            Authorization: apiKey
+            Authorization: apiKey,
         },
         method,
         url: getUrlFromRoute(id, route),
-        data
+        data,
     })));
 
     return withRes(requests, res.map(({ data }) => data));
 }
 
-export function *updateCrud(backoffIndex = 0, unlock = false) {
+export function* updateCrud(backoffIndex = 0, unlock = false) {
     const listRequests = yield select(getCrudRequests);
     const netWorthRequests = yield select(getNetWorthRequests);
     if (listRequests.length + netWorthRequests.length === 0) {
@@ -77,7 +83,7 @@ export function *updateCrud(backoffIndex = 0, unlock = false) {
 
         const res = yield all({
             list: call(updateLists, apiKey, listRequests),
-            netWorth: call(updateNetWorth, apiKey, netWorthRequests)
+            netWorth: call(updateNetWorth, apiKey, netWorthRequests),
         });
 
         yield put(syncReceived(res));
@@ -90,7 +96,7 @@ export function *updateCrud(backoffIndex = 0, unlock = false) {
     }
 }
 
-export function *updateCrudFromAction() {
+export function* updateCrudFromAction() {
     const locked = yield select(getLocked);
     if (locked) {
         return;
@@ -99,10 +105,9 @@ export function *updateCrudFromAction() {
     yield fork(updateCrud);
 }
 
-export const matchCrudAction = ({ type }) =>
-    type.startsWith('@@list') ||
-    type.startsWith('@@net-worth');
+export const matchCrudAction = ({ type }) => type.startsWith('@@list')
+    || type.startsWith('@@net-worth');
 
-export default function *crudSaga() {
+export default function* crudSaga() {
     yield debounce(TIMER_UPDATE_SERVER, matchCrudAction, updateCrudFromAction);
 }

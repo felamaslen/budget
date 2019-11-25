@@ -39,7 +39,7 @@
         "react-hot-loader/babel"
       ]
     },
-    "test": {
+    "node": {
       "presets": [
         [
           "@babel/preset-env",

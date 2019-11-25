@@ -6,7 +6,6 @@ import {
     ANALYSIS_BLOCK_REQUESTED,
     ANALYSIS_BLOCK_RECEIVED,
     ANALYSIS_TREE_DISPLAY_TOGGLED,
-    ANALYSIS_TREE_HOVERED
 } from '~client/constants/actions/analysis';
 
 export const initialState = {
@@ -16,59 +15,65 @@ export const initialState = {
     grouping: 'category',
     page: 0,
     timeline: null,
-    cost: null,
-    deep: null,
+    cost: null, // array of values
+    costDeep: null, // array of deep values
     saved: null,
     description: null,
-    activeGroup: null,
-    activeBlock: null,
-    treeVisible: { bills: false }
+    treeVisible: { bills: false },
 };
 
 const onRequest = (state, {
     period = state.period,
     grouping = state.grouping,
-    page = 0
+    page = 0,
 }) => ({
     period,
     grouping,
     page,
     loading: true,
-    loadingDeep: false
+    loadingDeep: false,
 });
 
 const onReceive = (state, { res }) => ({
     timeline: res.data.timeline,
     cost: res.data.cost,
     saved: res.data.saved,
-    deep: null,
+    costDeep: null,
     description: res.data.description,
     loading: false,
-    loadingDeep: false
+    loadingDeep: false,
 });
 
 function onBlockRequest(state, { name }) {
-    if (state.deep) {
-        return { loading: false, loadingDeep: false, deep: null, deepBlock: null };
+    if (state.costDeep) {
+        return {
+            loading: false,
+            loadingDeep: false,
+            costDeep: null,
+        };
     }
     if (['bills', 'saved'].includes(name)) {
-        return { loading: false, loadingDeep: false };
+        return {
+            loading: false,
+            loadingDeep: false,
+        };
     }
 
-    return { loading: true, loadingDeep: true, deepBlock: name };
+    return {
+        loading: true,
+        loadingDeep: true,
+    };
 }
 
 const onBlockReceive = (state, { res }) => ({
-    deep: res.data.items,
+    costDeep: res.data.items,
     loading: false,
-    loadingDeep: false
+    loadingDeep: false,
 });
 
 const onTreeDisplayToggle = (state, { group }) => ({
-    treeVisible: { ...state.treeVisible, [group]: state.treeVisible[group] === false }
+    treeVisible: { ...state.treeVisible, [group]: state.treeVisible[group] === false },
 });
-
-const onTreeHover = (state, { group, name }) => ({ activeGroup: group, activeBlock: name });
 
 const handlers = {
     [ANALYSIS_REQUESTED]: onRequest,
@@ -76,7 +81,6 @@ const handlers = {
     [ANALYSIS_BLOCK_REQUESTED]: onBlockRequest,
     [ANALYSIS_BLOCK_RECEIVED]: onBlockReceive,
     [ANALYSIS_TREE_DISPLAY_TOGGLED]: onTreeDisplayToggle,
-    [ANALYSIS_TREE_HOVERED]: onTreeHover
 };
 
 export default createReducerObject(handlers, initialState);

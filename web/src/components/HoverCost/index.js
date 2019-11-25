@@ -1,66 +1,59 @@
-import './style.scss';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { formatCurrency } from '~client/modules/format';
 
-export default function HoverCost(allProps) {
-    const [hover, setHover] = useState(null);
+import * as Styled from './styles';
 
+export default function HoverCost(allProps) {
     const { abbreviate, value, ...props } = allProps;
+    const [hover, setHover] = useState(false);
 
     const formattedValue = formatCurrency(value, {
         brackets: true,
         ...props,
-        abbreviate: false
+        abbreviate: false,
     });
 
-    const abbreviated = abbreviate && formatCurrency(value, {
-        abbreviate: true,
-        precision: 1,
-        brackets: true,
-        ...props
-    });
+    const abbreviated =
+        abbreviate &&
+        formatCurrency(value, {
+            abbreviate: true,
+            precision: 1,
+            brackets: true,
+            ...props,
+        });
 
     const doHover = formattedValue !== abbreviated;
 
-    const onMouseEnter = useCallback(() => doHover && setHover(true), [doHover, setHover]);
-    const onMouseLeave = useCallback(() => doHover && setHover(null), [doHover, setHover]);
-
     if (!abbreviate) {
-        return (
-            <span className="hover-cost">{value}</span>
-        );
+        return <Styled.HoverCost>{value}</Styled.HoverCost>;
     }
 
     if (!doHover) {
-        return (
-            <span className="hover-cost">{formattedValue}</span>
-        );
+        return <Styled.HoverCost>{formattedValue}</Styled.HoverCost>;
     }
 
-    const className = classNames('hover-cost', { hover });
-
     return (
-        <span className={className}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+        <Styled.HoverCost
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(null)}
+            hover={hover}
         >
-            <span className="abbreviated">{abbreviated}</span>
-            {hover && <span className="full">{formattedValue}</span>}
-        </span>
+            {hover && formattedValue}
+            {!hover && abbreviated}
+        </Styled.HoverCost>
     );
 }
 
 HoverCost.propTypes = {
     value: PropTypes.oneOfType([
         PropTypes.number.isRequired,
-        PropTypes.string.isRequired
+        PropTypes.string.isRequired,
     ]),
     abbreviate: PropTypes.bool,
-    precision: PropTypes.number
+    precision: PropTypes.number,
 };
 
 HoverCost.defaultProps = {
-    abbreviate: true
+    abbreviate: true,
 };

@@ -159,5 +159,5 @@ module.exports = {
     routeGet,
     routePost,
     routePut,
-    routeDelete
+    routeDelete,
 };

@@ -5,7 +5,7 @@ import {
     lineGraphPropTypes,
     rangePropTypes,
     pixelPropTypes,
-    lineShape
+    lineShape,
 } from '~client/prop-types/graph';
 import RenderedLine from '~client/components/Graph/RenderedLine';
 import HighlightPoint from '~client/components/HighlightPoint';
@@ -13,7 +13,7 @@ import HighlightPoint from '~client/components/HighlightPoint';
 function useBeforeAfter(component, basicProps) {
     return useMemo(
         () => component && component(basicProps),
-        [component, basicProps]
+        [component, basicProps],
     );
 }
 
@@ -30,12 +30,11 @@ export default function LineGraphDumb({
     graphRef,
     outerProperties,
     svgProperties,
-    svgClasses,
-    hoverEffect
+    hoverEffect,
 }) {
     const basicProps = useMemo(() => ({
         ...dimensions,
-        ...calc
+        ...calc,
     }), [dimensions, calc]);
 
     const graphProps = {
@@ -45,8 +44,7 @@ export default function LineGraphDumb({
         graphRef,
         outerProperties,
         svgProperties,
-        svgClasses,
-        ...basicProps
+        ...basicProps,
     };
 
     const renderedLines = useMemo(() => lines.map(({ key, ...line }) => (
@@ -92,7 +90,7 @@ LineGraphDumb.propTypes = {
     after: PropTypes.func,
     dimensions: PropTypes.shape({
         ...lineGraphPropTypes,
-        ...rangePropTypes
+        ...rangePropTypes,
     }).isRequired,
     calc: PropTypes.shape(pixelPropTypes).isRequired,
     lines: PropTypes.arrayOf(lineShape.isRequired).isRequired,
@@ -100,12 +98,11 @@ LineGraphDumb.propTypes = {
     graphRef: PropTypes.object,
     outerProperties: PropTypes.object.isRequired,
     svgProperties: PropTypes.object.isRequired,
-    svgClasses: PropTypes.string,
-    hlPoint: PropTypes.object
+    hlPoint: PropTypes.object,
 };
 
 LineGraphDumb.defaultProps = {
     graphRef: null,
     before: null,
-    after: null
+    after: null,
 };

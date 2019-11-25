@@ -2,17 +2,17 @@ import test from 'ava';
 
 import { CREATE, UPDATE, DELETE } from '~client/constants/data';
 import {
-    getRequests
+    getRequests,
 } from '~client/selectors/crud';
 
-test('getRequests gets create requests', t => {
+test('getRequests gets create requests', (t) => {
     const items = [
         {
             id: 'some-fake-id',
             foo: 'bar',
             bar: 'baz',
-            __optimistic: CREATE
-        }
+            __optimistic: CREATE,
+        },
     ];
 
     const result = getRequests('my/url/something')(items);
@@ -24,19 +24,19 @@ test('getRequests gets create requests', t => {
         route: 'my/url/something',
         body: {
             foo: 'bar',
-            bar: 'baz'
-        }
+            bar: 'baz',
+        },
     }]);
 });
 
-test('getRequests gets update requests', t => {
+test('getRequests gets update requests', (t) => {
     const items = [
         {
             id: 'some-real-id',
             foo: 'bar',
             bar: 'baz',
-            __optimistic: UPDATE
-        }
+            __optimistic: UPDATE,
+        },
     ];
 
     const result = getRequests('my/url/something')(items);
@@ -48,17 +48,17 @@ test('getRequests gets update requests', t => {
         route: 'my/url/something',
         body: {
             foo: 'bar',
-            bar: 'baz'
-        }
+            bar: 'baz',
+        },
     }]);
 });
 
-test('getRequests gets delete requests', t => {
+test('getRequests gets delete requests', (t) => {
     const items = [
         {
             id: 'some-real-id',
-            __optimistic: DELETE
-        }
+            __optimistic: DELETE,
+        },
     ];
 
     const result = getRequests('my/url/something')(items);
@@ -67,6 +67,6 @@ test('getRequests gets delete requests', t => {
         type: DELETE,
         id: 'some-real-id',
         method: 'delete',
-        route: 'my/url/something'
+        route: 'my/url/something',
     }]);
 });

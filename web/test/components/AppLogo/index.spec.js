@@ -9,7 +9,7 @@ const getContainer = memoize((customProps = {}) => {
     const props = {
         loading: true,
         unsaved: true,
-        ...customProps
+        ...customProps,
     };
 
     const utils = render(<AppLogo {...props} />);
@@ -29,13 +29,6 @@ test('children', t => {
     t.is(container.childNodes.length, 1);
 });
 
-test('class name', t => {
-    const { container } = getContainer();
-    const [div] = container.childNodes;
-
-    t.is(div.className, 'app-logo');
-});
-
 test('logo children', t => {
     const { container } = getContainer();
     const [div] = container.childNodes;
@@ -50,7 +43,6 @@ test('queue not saved', t => {
     const [queue] = div.childNodes;
 
     t.is(queue.tagName, 'SPAN');
-    t.is(queue.className, 'queue-not-saved');
     t.is(queue.innerHTML, 'Unsaved changes!');
 });
 
@@ -69,14 +61,13 @@ test('logo', t => {
     t.is(name.innerHTML, 'Budget');
 
     t.is(loading.tagName, 'SPAN');
-    t.is(loading.className, 'loading-api');
     t.is(loading.childNodes.length, 0);
 });
 
 test('no unsaved changes rendered, if there are no requests in the list', t => {
     const { container } = getContainer({
         loading: false,
-        unsaved: false
+        unsaved: false,
     });
 
     const [div] = container.childNodes;
@@ -85,22 +76,19 @@ test('no unsaved changes rendered, if there are no requests in the list', t => {
 
     const [logo] = div.childNodes;
     t.is(logo.tagName, 'A');
-    t.is(logo.className, 'logo');
 });
 
 test('no loading spinner if not loading a request', t => {
     const { container } = getContainer({
         loading: false,
-        unsaved: true
+        unsaved: true,
     });
 
     const [div] = container.childNodes;
 
     t.is(div.childNodes.length, 2);
 
-    const [queue, logo] = div.childNodes;
-
-    t.is(queue.className, 'queue-not-saved');
+    const [, logo] = div.childNodes;
 
     t.is(logo.childNodes.length, 1);
     const [name] = logo.childNodes;

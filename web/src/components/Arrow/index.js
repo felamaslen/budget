@@ -12,7 +12,7 @@ export default function Arrow({
     fill,
     dashed,
     pixX,
-    pixY
+    pixY,
 }) {
     const arrowWidth = 6 * (arrowSize + 0.5);
     const arrowHeight = 10 * (arrowSize + 0.5);
@@ -32,15 +32,13 @@ export default function Arrow({
         [-(arrowHeight - strokeWidth) * 0.3, -(arrowWidth - strokeWidth / 2)],
         [(arrowHeight - strokeWidth) * 0.6, 0],
         [-(arrowHeight - strokeWidth) * 0.3, arrowWidth - strokeWidth / 2],
-        [0, 0]
+        [0, 0],
     ]
         .map(([xPix, yPix]) => ([
             endPixX + (cosA * xPix - sinA * yPix),
-            endPixY + (sinA * xPix + cosA * yPix)
+            endPixY + (sinA * xPix + cosA * yPix),
         ]))
-        .reduce((path, [xPix, yPix]) => {
-            return `${path} L${xPix.toFixed(1)},${yPix.toFixed(1)}`;
-        }, '');
+        .reduce((path, [xPix, yPix]) => `${path} L${xPix.toFixed(1)},${yPix.toFixed(1)}`, '');
 
     const arrowHead = `M${startPixX},${startPixY} L${endPixX},${endPixY} ${arrowHeadParts}`;
 
@@ -71,5 +69,5 @@ Arrow.propTypes = {
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    pixY: PropTypes.func.isRequired,
 };

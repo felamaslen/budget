@@ -2,11 +2,12 @@ import { connect } from 'react-redux';
 import React, { useReducer, useCallback, useMemo, useEffect } from 'react';
 import { debounce } from 'throttle-debounce';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import shortid from 'shortid';
 
 import { suggestionsRequested, suggestionsCleared } from '~client/actions/suggestions';
 import { isCtrl, isEnter, getNavDirection } from '~client/modules/nav';
+
+import * as Styled from './styles';
 
 const NAV_PREV = 'NAV_PREV';
 const NAV_NEXT = 'NAV_NEXT';
@@ -28,7 +29,10 @@ function suggestionsReducer(state, action) {
         return state;
     }
     if (action.type === NAV_PREV) {
-        return { ...state, active: ((state.active - 1 + state.size) % state.size) % state.size };
+        return {
+            ...state,
+            active: ((state.active - 1 + state.size) % state.size) % state.size,
+        };
     }
     if (action.type === NAV_NEXT) {
         if (state.active === null) {
@@ -42,14 +46,21 @@ function suggestionsReducer(state, action) {
             return { ...state, confirm: null };
         }
 
-        return { ...state, confirm: shortid.generate(), prevConfirm: state.confirm };
+        return {
+            ...state,
+            confirm: shortid.generate(),
+            prevConfirm: state.confirm,
+        };
     }
 
     return state;
 }
 
 function SuggestionsList({ page, column, search, onConfirm, list, next, request, clear }) {
-    const [state, dispatch] = useReducer(suggestionsReducer, { size: list.length, active: null });
+    const [state, dispatch] = useReducer(suggestionsReducer, {
+        size: list.length,
+        active: null,
+    });
     useEffect(() => {
         dispatch({ type: LIST_SIZE_SET, size: list.length });
     }, [list.length, next]);
@@ -70,26 +81,17 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
     const haveList = size > 0;
 
     useEffect(() => {
-        if (state.confirm &&
+        if (
+            state.confirm &&
             state.confirm !== state.prevConfirm &&
             haveList &&
             state.active !== null
         ) {
-            const nextValue = state.active < next.length
-                ? next[state.active]
-                : null;
+            const nextValue = state.active < next.length ? next[state.active] : null;
 
             onConfirm(list[state.active], nextValue);
         }
-    }, [
-        state.confirm,
-        state.prevConfirm,
-        haveList,
-        state.active,
-        next,
-        list,
-        onConfirm
-    ]);
+    }, [state.confirm, state.prevConfirm, haveList, state.active, next, list, onConfirm]);
 
     const onKey = useCallback(event => {
         if (isCtrl(event)) {
@@ -128,13 +130,13 @@ function SuggestionsList({ page, column, search, onConfirm, list, next, request,
     }
 
     return (
-        <ul className="suggestions">
+        <Styled.Suggestions>
             {list.map((value, index) => (
-                <li key={value} className={classNames('suggestion', {
-                    active: index === active
-                })}>{value}</li>
+                <Styled.Suggestion key={value} active={index === active}>
+                    {value}
+                </Styled.Suggestion>
             ))}
-        </ul>
+        </Styled.Suggestions>
     );
 }
 
@@ -146,17 +148,20 @@ SuggestionsList.propTypes = {
     list: PropTypes.arrayOf(PropTypes.string.isRequired),
     next: PropTypes.arrayOf(PropTypes.string.isRequired),
     request: PropTypes.func.isRequired,
-    clear: PropTypes.func.isRequired
+    clear: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
     list: state.suggestions.list,
-    next: state.suggestions.next
+    next: state.suggestions.next,
 });
 
 const mapDispatchToProps = {
     request: suggestionsRequested,
-    clear: suggestionsCleared
+    clear: suggestionsCleared,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(SuggestionsList);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(SuggestionsList);

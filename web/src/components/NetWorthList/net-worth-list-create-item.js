@@ -5,6 +5,7 @@ import { netWorthItem } from '~client/prop-types/net-worth/list';
 import { category, subcategory } from '~client/prop-types/net-worth/category';
 import { CREATE_ID } from '~client/constants/data';
 import { NetWorthAddForm } from '~client/components/NetWorthEditForm';
+import * as Styled from './styles';
 
 export default function NetWorthListCreateItem({
     data,
@@ -13,18 +14,15 @@ export default function NetWorthListCreateItem({
     active,
     setActive,
     noneActive,
-    onCreate
+    onCreate,
 }) {
     const onActivate = useCallback(() => setActive(CREATE_ID), [setActive]);
 
     if (noneActive) {
         return (
-            <div
-                className="net-worth-list-item-summary"
-                onClick={onActivate}
-            >
+            <Styled.ItemSummary add onClick={onActivate}>
                 {'Add a new entry'}
-            </div>
+            </Styled.ItemSummary>
         );
     }
     if (!active) {
@@ -49,5 +47,5 @@ NetWorthListCreateItem.propTypes = {
     active: PropTypes.bool.isRequired,
     setActive: PropTypes.func.isRequired,
     noneActive: PropTypes.bool.isRequired,
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const { JSDOM } = require('jsdom');
 const matchMedia = require('match-media-mock').create();
 
@@ -12,7 +13,7 @@ if (!global.window) {
     matchMedia.setConfig({ type: 'screen', width: 1200 });
     global.window.matchMedia = matchMedia;
 
-    Object.keys(window).forEach(property => {
+    Object.keys(window).forEach((property) => {
         if (typeof global[property] === 'undefined') {
             exposedProperties.push(property);
             global[property] = window[property];
@@ -20,13 +21,13 @@ if (!global.window) {
     });
 
     global.navigator = {
-        userAgent: 'node.js'
+        userAgent: 'node.js',
     };
 
     global.localStorage = {
         getItem: () => null,
         setItem: () => null,
-        removeItem: () => null
+        removeItem: () => null,
     };
 
     global.HTMLElement = global.window.HTMLElement;

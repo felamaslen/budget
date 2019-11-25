@@ -9,16 +9,15 @@ const { searchSchema } = require('../../schema');
 
 function matchQuery(db, table, column, searchTerm, conditions) {
     if (searchTerm.length < 3) {
-        return qb1 => conditions(qb1
+        return (qb1) => conditions(qb1
             .select(
                 db.raw(`distinct("${column}") as "${column}"`),
-                db.raw(`count("${column}") AS count`)
+                db.raw(`count("${column}") AS count`),
             )
             .from(table)
             .whereRaw(`"${table}"."${column}" ILIKE ?`, `${searchTerm}%`)
             .groupBy(column)
-            .orderBy('count', 'desc')
-        )
+            .orderBy('count', 'desc'))
             .as('items_ranked');
     }
 
@@ -26,45 +25,46 @@ function matchQuery(db, table, column, searchTerm, conditions) {
         .trim()
         .replace(/[^\w\s+]/g, '')
         .split(/\s+/)
-        .map(word => `${word}:*`)
+        .map((word) => `${word}:*`)
         .join(' | ');
 
-    return qb1 => qb1
+    return (qb1) => qb1
         .distinct(
             column,
             db.raw(`ts_rank_cd("${table}"."${column}_search", to_tsquery(?)) as rank`, tsQuery),
-            db.raw(`char_length("${table}"."${column}") as length`)
+            db.raw(`char_length("${table}"."${column}") as length`),
         )
         .from(table)
         .whereRaw(`"${table}"."${column}_search" @@ to_tsquery(?)`, tsQuery)
         .orderBy([
             { column: 'rank', order: 'desc' },
-            { column: 'length' }
+            { column: 'length' },
         ])
         .as('items_ranked');
 }
 
 function getQuery(db, request, uid) {
-    const { table, column, searchTerm, numResults } = request;
+    const {
+        table, column, searchTerm, numResults,
+    } = request;
 
-    const conditions = qb => qb.where(`${table}.uid`, '=', uid);
+    const conditions = (qb) => qb.where(`${table}.uid`, '=', uid);
 
-    const query = qb0 => matchQuery(db, table, column, searchTerm, conditions)(qb0)
+    const query = (qb0) => matchQuery(db, table, column, searchTerm, conditions)(qb0)
         .limit(numResults)
         .as('items');
 
     if (['food', 'general'].includes(table) && column === 'item') {
         return db.select(
             'items.item',
-            db.raw('COALESCE(next_values.category, \'\') as next_category')
+            db.raw('COALESCE(next_values.category, \'\') as next_category'),
         )
             .from(query)
-            .leftJoin(`${table} as next_values`, 'next_values.id', qb => qb.select('id')
+            .leftJoin(`${table} as next_values`, 'next_values.id', (qb) => qb.select('id')
                 .from(table)
                 .where('item', '=', db.raw('items.item'))
                 .andWhere('uid', '=', uid)
-                .limit(1)
-            );
+                .limit(1));
     }
 
     return query(db);
@@ -132,7 +132,7 @@ function routeGet(config, db) {
         const result = await getQuery(db, value, req.user.uid);
 
         const data = {
-            list: result.map(({ [value.column]: item }) => String(item))
+            list: result.map(({ [value.column]: item }) => String(item)),
         };
 
         if (result.length && result[0].next_category) {
@@ -155,5 +155,5 @@ function handler(config, db) {
 
 module.exports = {
     routeGet,
-    handler
+    handler,
 };

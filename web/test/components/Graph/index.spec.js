@@ -10,14 +10,13 @@ const getGraph = (customProps = {}) => {
         width: 200,
         height: 100,
         padding: [10, 10, 10, 10],
-        svgClasses: 'svgClass1 svgClass2',
-        ...customProps
+        ...customProps,
     };
 
     return render(
         <Graph {...props}>
             <span>{'foo'}</span>
-        </Graph>
+        </Graph>,
     );
 };
 
@@ -28,17 +27,6 @@ test('rendering a basic container', t => {
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 1);
-    t.is(div.className, 'graph-container graph-foo');
-});
-
-test('rendering an SVG with a custom class', t => {
-    const { container } = getGraph();
-    const [div] = container.childNodes;
-    t.is(div.childNodes.length, 1);
-
-    const [svg] = div.childNodes;
-    t.is(svg.tagName, 'svg');
-    t.is(svg.className, 'svgClass1 svgClass2');
 });
 
 test('rendering its children inside the SVG', t => {
@@ -57,7 +45,7 @@ test('accepting a child before the SVG', t => {
     const Before = () => <span>{'before1'}</span>;
 
     const { container } = getGraph({
-        before: Before
+        before: Before,
     });
     const [div] = container.childNodes;
 
@@ -74,7 +62,7 @@ test('accepting a child after the SVG', t => {
     const After = () => <span>{'after1'}</span>;
 
     const { container } = getGraph({
-        after: After
+        after: After,
     });
     const [div] = container.childNodes;
 
@@ -93,7 +81,7 @@ test('accepting children before and after the SVG', t => {
 
     const { container } = getGraph({
         before: Before,
-        after: After
+        after: After,
     });
     const [div] = container.childNodes;
 

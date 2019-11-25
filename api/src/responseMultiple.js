@@ -10,11 +10,13 @@ class ResponseMultiple {
         this.result = null;
         this.ended = false;
     }
+
     json(object) {
         this.result = object;
 
         return this;
     }
+
     end(string) {
         if (string) {
             this.result = string;
@@ -24,6 +26,7 @@ class ResponseMultiple {
 
         return this;
     }
+
     status(statusCode) {
         this.statusCode = statusCode;
 

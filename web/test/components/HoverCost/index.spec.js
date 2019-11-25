@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -8,10 +7,12 @@ import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import HoverCost from '~client/components/HoverCost';
 
+const test = ninos(ava);
+
 const getContainer = memoize((customProps = {}) => {
     const props = {
         value: 123456.78,
-        ...customProps
+        ...customProps,
     };
 
     return render(<HoverCost {...props} />);
@@ -20,7 +21,7 @@ const getContainer = memoize((customProps = {}) => {
 test('rendering its value unmodified, if set not to abbreviate', t => {
     const { container } = getContainer({
         value: 'foo',
-        abbreviate: false
+        abbreviate: false,
     });
 
     t.is(container.children.length, 1);
@@ -38,13 +39,7 @@ test('rendering an abbreviated currency value', t => {
     const [child] = container.childNodes;
 
     t.is(child.tagName, 'SPAN');
-    t.is(child.className, 'hover-cost');
-    t.is(child.childNodes.length, 1);
-
-    const [abbreviated] = child.childNodes;
-    t.is(abbreviated.tagName, 'SPAN');
-    t.is(abbreviated.className, 'abbreviated');
-    t.is(abbreviated.innerHTML, '£1.2k');
+    t.is(child.innerHTML, '£1.2k');
 });
 
 test('rendering a hover label on hover', t => {
@@ -52,18 +47,10 @@ test('rendering a hover label on hover', t => {
 
     const [child] = container.childNodes;
 
-    t.is(child.childNodes.length, 1);
     fireEvent.mouseEnter(child);
-    t.is(child.childNodes.length, 2);
 
-    const [abbreviated, full] = child.childNodes;
-
-    t.is(abbreviated.tagName, 'SPAN');
-    t.is(abbreviated.innerHTML, '£1.2k');
-
-    t.is(full.tagName, 'SPAN');
-    t.is(full.className, 'full');
-    t.is(full.innerHTML, '£1,234.57');
+    t.is(child.tagName, 'SPAN');
+    t.is(child.innerHTML, '£1,234.57');
 });
 
 test('removing the label on mouseout', t => {
@@ -73,10 +60,9 @@ test('removing the label on mouseout', t => {
 
     fireEvent.mouseEnter(child);
 
-    t.is(child.childNodes.length, 2);
-    fireEvent.mouseLeave(child);
-    t.is(child.childNodes.length, 1);
+    t.is(child.innerHTML, '£1,234.57');
 
-    t.is(child.childNodes[0].className, 'abbreviated');
-    t.is(child.childNodes[0].innerHTML, '£1.2k');
+    fireEvent.mouseLeave(child);
+
+    t.is(child.innerHTML, '£1.2k');
 });

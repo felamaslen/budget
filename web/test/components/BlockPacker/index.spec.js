@@ -1,12 +1,13 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import memoize from 'fast-memoize';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import BlockPacker from '~client/components/BlockPacker';
+
+const test = ninos(ava);
 
 const getBlockPacker = memoize((customProps = {}) => {
     const props = {
@@ -31,11 +32,11 @@ const getBlockPacker = memoize((customProps = {}) => {
                                         value: 3,
                                         color: 'teal',
                                         width: 3,
-                                        height: 3.1
-                                    }
-                                ]
-                            }
-                        ]
+                                        height: 3.1,
+                                    },
+                                ],
+                            },
+                        ],
                     },
                     {
                         name: 'bar',
@@ -49,14 +50,14 @@ const getBlockPacker = memoize((customProps = {}) => {
                                         value: 4,
                                         color: 'teal',
                                         width: 3,
-                                        height: 3.1
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
+                                        height: 3.1,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
         ],
         activeMain: 'not_foo',
         activeSub: 'not_bar',
@@ -64,13 +65,13 @@ const getBlockPacker = memoize((customProps = {}) => {
         status: 'bar',
         onClick: () => null,
         onHover: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<BlockPacker {...props} />);
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getBlockPacker();
 
     t.is(container.tagName, 'DIV');
@@ -78,37 +79,28 @@ test('basic structure', t => {
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'block-view');
     t.is(div.childNodes.length, 2);
 });
 
-test('outer block tree', t => {
+test('outer block tree', (t) => {
     const { container } = getBlockPacker();
     const [div] = container.childNodes;
     const [blockTreeOuter] = div.childNodes;
 
     t.is(blockTreeOuter.tagName, 'DIV');
-    t.is(blockTreeOuter.className, 'block-tree-outer');
 });
 
-test('status bar', t => {
+test('status bar', (t) => {
     const { container } = getBlockPacker();
     const [div] = container.childNodes;
     const [, statusBarOuter] = div.childNodes;
 
     t.is(statusBarOuter.tagName, 'DIV');
-    t.is(statusBarOuter.className, 'status-bar');
-
     t.is(statusBarOuter.childNodes.length, 1);
-
-    const [inner] = statusBarOuter.childNodes;
-
-    t.is(inner.tagName, 'SPAN');
-    t.is(inner.className, 'inner');
-    t.is(inner.innerHTML, 'bar');
+    t.is(statusBarOuter.innerHTML, 'bar');
 });
 
-test('blocks', t => {
+test('blocks', (t) => {
     const { container } = getBlockPacker();
     const [div] = container.childNodes;
     const [blockTreeOuter] = div.childNodes;
@@ -116,7 +108,7 @@ test('blocks', t => {
     t.is(blockTreeOuter.childNodes.length, 1);
 });
 
-test('running onHover, with null values on mouseout / touchend', t => {
+test('running onHover, with null values on mouseout / touchend', (t) => {
     const onHover = t.context.stub();
     const { container } = getBlockPacker({ onHover });
 
@@ -126,10 +118,10 @@ test('running onHover, with null values on mouseout / touchend', t => {
     fireEvent.mouseOut(div);
 
     t.is(onHover.calls.length, 1);
-    t.deepEqual(onHover.calls[0].arguments, [null, null]);
+    t.deepEqual(onHover.calls[0].arguments, [null]);
 });
 
-test('not rendering blocks if blocks is null', t => {
+test('not rendering blocks if blocks is null', (t) => {
     const { container } = getBlockPacker({ blocks: null });
     const [div] = container.childNodes;
     const [blocks] = div.childNodes;

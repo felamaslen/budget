@@ -13,8 +13,7 @@ function getLabelPosX(posX, width, labelWidthX) {
         anchorLabelX = 'end';
         labelPosX = width;
         rectPosX = width - labelWidthX;
-    }
-    else if (posX < labelWidthX / 2) {
+    } else if (posX < labelWidthX / 2) {
         anchorLabelX = 'start';
         labelPosX = 0;
         rectPosX = 0;
@@ -30,8 +29,7 @@ function getLabelPosY(posY, height, labelHeight) {
     if (posY >= height - labelHeight / 2) {
         labelPosY = height - labelHeight / 2 + 2;
         rectPosY = height - labelHeight;
-    }
-    else if (posY < labelHeight / 2) {
+    } else if (posY < labelHeight / 2) {
         labelPosY = labelHeight / 2;
         rectPosY = 0;
     }
@@ -39,7 +37,16 @@ function getLabelPosY(posY, height, labelHeight) {
     return { labelPosY, rectPosY };
 }
 
-export default function HighlightPoint({ pixX, pixY, minY, maxY, width, height, hoverEffect, hlPoint }) {
+export default function HighlightPoint({
+    pixX,
+    pixY,
+    minY,
+    maxY,
+    width,
+    height,
+    hoverEffect,
+    hlPoint,
+}) {
     if (!(hlPoint && maxY !== minY)) {
         return null;
     }
@@ -68,44 +75,60 @@ export default function HighlightPoint({ pixX, pixY, minY, maxY, width, height, 
 
     const textProps = { fontSize, fontFamily, color: rgba(COLOR_GRAPH_TITLE) };
     const textPropsX = {
-        'x': labelPosX,
-        'y': height - 2,
+        x: labelPosX,
+        y: height - 2,
         textAnchor: anchorLabelX,
-        alignmentBaseline: 'baseline'
+        alignmentBaseline: 'baseline',
     };
     const textPropsY = {
-        'x': width,
-        'y': labelPosY,
+        x: width,
+        y: labelPosY,
         textAnchor: 'end',
-        alignmentBaseline: 'middle'
+        alignmentBaseline: 'middle',
     };
 
-    return <g className="hl-point">
-        <path d={pathVertical} {...lineProps} />
-        <path d={pathHorizontal} {...lineProps} />
-        <rect x={rectPosX} y={height - labelHeight} width={labelWidthX} height={labelHeight}
-            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text {...textProps} {...textPropsX}>{labelTextX}</text>
-        <rect x={width - labelWidthY} y={rectPosY} width={labelWidthY} height={labelHeight}
-            fill={rgba(COLOR_TRANSLUCENT_DARK)} />
-        <text {...textProps} {...textPropsY}>{labelTextY}</text>
-    </g>;
+    return (
+        <g>
+            <path d={pathVertical} {...lineProps} />
+            <path d={pathHorizontal} {...lineProps} />
+            <rect
+                x={rectPosX}
+                y={height - labelHeight}
+                width={labelWidthX}
+                height={labelHeight}
+                fill={rgba(COLOR_TRANSLUCENT_DARK)}
+            />
+            <text {...textProps} {...textPropsX}>
+                {labelTextX}
+            </text>
+            <rect
+                x={width - labelWidthY}
+                y={rectPosY}
+                width={labelWidthY}
+                height={labelHeight}
+                fill={rgba(COLOR_TRANSLUCENT_DARK)}
+            />
+            <text {...textProps} {...textPropsY}>
+                {labelTextY}
+            </text>
+        </g>
+    );
 }
 
 HighlightPoint.propTypes = {
     hoverEffect: PropTypes.shape({
         labelX: PropTypes.func.isRequired,
-        labelY: PropTypes.func.isRequired
+        labelY: PropTypes.func.isRequired,
     }).isRequired,
     hlPoint: PropTypes.shape({
         valX: PropTypes.number.isRequired,
         valY: PropTypes.number.isRequired,
-        color: PropTypes.string.isRequired
+        color: PropTypes.string.isRequired,
     }),
     minY: PropTypes.number,
     maxY: PropTypes.number,
     pixX: PropTypes.func.isRequired,
     pixY: PropTypes.func.isRequired,
     width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
+    height: PropTypes.number.isRequired,
 };

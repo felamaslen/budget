@@ -28,7 +28,7 @@ function setValueString(date) {
     const result = DateTime.fromObject({
         year: parseYear(year) || now.year,
         month: Number(month) || now.month,
-        day: Number(day) || now.day
+        day: Number(day) || now.day,
     });
 
     if (result.invalid) {
@@ -38,7 +38,7 @@ function setValueString(date) {
     return result;
 }
 
-export default function FormFieldDate({ label, ...props }) {
+export default function FormFieldDate({ label, invalid, ...props }) {
     let setValue = setValueDate;
     let type = 'date';
 
@@ -49,7 +49,7 @@ export default function FormFieldDate({ label, ...props }) {
 
     const [, , onChange, ref, onBlur] = useField({
         ...props,
-        setValue
+        setValue,
     });
 
     const defaultValue = props.string
@@ -57,7 +57,7 @@ export default function FormFieldDate({ label, ...props }) {
         : props.value.toISODate();
 
     return (
-        <Wrapper item="date" value={props.value} active={props.active}>
+        <Wrapper item="date" value={props.value} active={props.active} invalid={invalid}>
             <input
                 ref={ref}
                 aria-label={label}
@@ -74,11 +74,13 @@ FormFieldDate.propTypes = {
     string: PropTypes.bool,
     label: PropTypes.string,
     value: PropTypes.instanceOf(DateTime),
-    active: PropTypes.bool
+    active: PropTypes.bool,
+    invalid: PropTypes.bool,
 };
 
 FormFieldDate.defaultProps = {
+    invalid: false,
     string: false,
     label: null,
-    value: DateTime.local()
+    value: DateTime.local(),
 };

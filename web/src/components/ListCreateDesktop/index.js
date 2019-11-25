@@ -4,10 +4,13 @@ import compose from 'just-compose';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
+import { Button } from '~client/styled/shared/button';
 import { ListRowDesktopBase } from '~client/components/ListRowDesktop';
 import { IDENTITY, fieldExists } from '~client/modules/data';
 import { PAGES, CREATE_ID } from '~client/constants/data';
 import { ADD_BTN } from '~client/hooks/nav';
+
+import * as Styled from './styles';
 
 const withInitialValue = (column, initialValue) => page => {
     if (!PAGES[page].cols.includes(column)) {
@@ -18,15 +21,22 @@ const withInitialValue = (column, initialValue) => page => {
 };
 
 const withDate = withInitialValue('date', DateTime.local);
-const withTransactions = withInitialValue('transactions', () => ([]));
+const withTransactions = withInitialValue('transactions', () => []);
 
-const initialValues = memoize(page => compose(
-    withDate(page),
-    withTransactions(page)
-)(PAGES[page].cols.reduce((last, col) => ({
-    ...last,
-    [col]: undefined
-}), { id: CREATE_ID })));
+const initialValues = memoize(page =>
+    compose(
+        withDate(page),
+        withTransactions(page),
+    )(
+        PAGES[page].cols.reduce(
+            (last, col) => ({
+                ...last,
+                [col]: undefined,
+            }),
+            { id: CREATE_ID },
+        ),
+    ),
+);
 
 export default function ListCreateDesktop({
     page,
@@ -34,7 +44,7 @@ export default function ListCreateDesktop({
     command,
     setCommand,
     setActive,
-    onCreate
+    onCreate,
 }) {
     const addBtn = useRef(null);
     const addBtnFocus = activeColumn === ADD_BTN;
@@ -56,7 +66,10 @@ export default function ListCreateDesktop({
 
     const [values, setValues] = useState(initialValues(page));
 
-    const onUpdate = useCallback((column, value) => setValues(last => ({ ...last, [column]: value })), []);
+    const onUpdate = useCallback(
+        (column, value) => setValues(last => ({ ...last, [column]: value })),
+        [],
+    );
 
     const onAddPre = useCallback(() => {
         setActive(CREATE_ID, null);
@@ -73,7 +86,7 @@ export default function ListCreateDesktop({
     }, [onCreate, setActive, page, values]);
 
     return (
-        <div className="list-row-desktop list-row-desktop-create">
+        <Styled.RowCreate>
             <ListRowDesktopBase
                 item={values}
                 page={page}
@@ -83,15 +96,12 @@ export default function ListCreateDesktop({
                 setCommand={setCommand}
                 onUpdate={onUpdate}
             />
-            <span className="add-button-outer">
-                <button
-                    ref={addBtn}
-                    aria-label="add-button"
-                    onMouseDown={onAddPre}
-                    onClick={onAdd}
-                >{'Add'}</button>
-            </span>
-        </div>
+            <Styled.AddButtonOuter>
+                <Button ref={addBtn} aria-label="add-button" onMouseDown={onAddPre} onClick={onAdd}>
+                    {'Add'}
+                </Button>
+            </Styled.AddButtonOuter>
+        </Styled.RowCreate>
     );
 }
 
@@ -101,5 +111,5 @@ ListCreateDesktop.propTypes = {
     command: PropTypes.object,
     setCommand: PropTypes.func.isRequired,
     setActive: PropTypes.func.isRequired,
-    onCreate: PropTypes.func.isRequired
+    onCreate: PropTypes.func.isRequired,
 };

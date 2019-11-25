@@ -17,7 +17,7 @@ const colorProfitLoss = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
 function processData({ valuesNet, valuesSpending, startDate }) {
     const props = {
         oldOffset: 0,
-        startDate
+        startDate,
     };
 
     const dataNet = getValuesWithTime(valuesNet, props);
@@ -28,7 +28,7 @@ function processData({ valuesNet, valuesSpending, startDate }) {
             key: 'net',
             data: dataNet,
             arrows: true,
-            color: ([, yValue]) => colorProfitLoss[(yValue > 0) >> 0]
+            color: ([, yValue]) => colorProfitLoss[(yValue > 0) >> 0],
         },
         {
             key: 'spending',
@@ -36,13 +36,15 @@ function processData({ valuesNet, valuesSpending, startDate }) {
             fill: false,
             smooth: true,
             color: rgba(COLOR_SPENDING),
-            movingAverage: 6
-        }
+            movingAverage: 6,
+        },
     ];
 }
 
 function makeAfterLines() {
-    const AfterLines = ({ pixX, pixY, maxX, minY, maxY }) => (
+    const AfterLines = ({
+        pixX, pixY, maxX, minY, maxY,
+    }) => (
         <g>
             <Key
                 title="Cash flow"
@@ -57,17 +59,19 @@ function makeAfterLines() {
 
     AfterLines.propTypes = {
         ...rangePropTypes,
-        ...pixelPropTypes
+        ...pixelPropTypes,
     };
 
     return AfterLines;
 }
 
-export default function GraphSpending({ graphWidth, now, valuesNet, valuesSpending, startDate }) {
+export default function GraphSpending({
+    graphWidth, now, valuesNet, valuesSpending, startDate,
+}) {
     const lines = useMemo(() => processData({
         valuesNet,
         valuesSpending,
-        startDate
+        startDate,
     }), [valuesNet, valuesSpending, startDate]);
 
     const afterLines = useMemo(makeAfterLines, []);
@@ -77,7 +81,7 @@ export default function GraphSpending({ graphWidth, now, valuesNet, valuesSpendi
         graphWidth,
         now,
         lines,
-        afterLines
+        afterLines,
     };
 
     return <GraphCashFlow {...graphProps} />;
@@ -87,5 +91,5 @@ GraphSpending.propTypes = {
     ...graphCashFlowPropTypes,
     startDate: PropTypes.instanceOf(DateTime).isRequired,
     valuesNet: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-    valuesSpending: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
+    valuesSpending: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
 };

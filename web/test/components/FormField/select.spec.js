@@ -10,11 +10,11 @@ const getContainer = (customProps = {}, ...args) => {
         item: 'my-select-input',
         options: [
             { internal: 'something', external: 'Something' },
-            { internal: 'else', external: 'My option' }
+            { internal: 'else', external: 'My option' },
         ],
         value: 'something',
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldSelect {...props} />, ...args);
@@ -27,7 +27,6 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'form-field form-field-my-select-input');
     t.is(div.childNodes.length, 1);
 
     const [select] = div.childNodes;
@@ -70,15 +69,24 @@ test('if the available options updates, the value updates', t => {
     const optionsB = optionsA.slice(0, 2);
     const optionsC = optionsA.slice(0, 1);
 
-    const { container } = getContainer({ onChange, options: optionsA, value: 'B' });
+    const { container } = getContainer({
+        onChange,
+        options: optionsA,
+        value: 'B',
+    });
 
     t.is(onChange.getCalls().length, 0);
-    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: 'C' } });
+    fireEvent.change(container.childNodes[0].childNodes[0], {
+        target: { value: 'C' },
+    });
     t.is(onChange.getCalls().length, 1);
     t.deepEqual(onChange.getCalls()[0].args, ['C']);
 
     act(() => {
-        getContainer({ onChange, options: optionsB, value: 'C' }, { container });
+        getContainer(
+            { onChange, options: optionsB, value: 'C' },
+            { container },
+        );
     });
 
     // Change required, as C is no longer a valid option
@@ -86,7 +94,10 @@ test('if the available options updates, the value updates', t => {
     t.deepEqual(onChange.getCalls()[1].args, ['A']);
 
     act(() => {
-        getContainer({ onChange, options: optionsC, value: 'A' }, { container });
+        getContainer(
+            { onChange, options: optionsC, value: 'A' },
+            { container },
+        );
     });
 
     // Change not required, as A is still in the options set

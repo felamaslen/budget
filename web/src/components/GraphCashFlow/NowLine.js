@@ -14,13 +14,28 @@ export default function NowLine({ now, minY, maxY, pixX, pixY }) {
 
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
-    return <g className="now-line">
-        <line x1={nowLineX} y1={pixY(minY)} x2={nowLineX} y2={pixY(maxY)}
-            stroke={rgba(COLOR_DARK)} strokeWidth={1} />
+    return (
+        <g>
+            <line
+                x1={nowLineX}
+                y1={pixY(minY)}
+                x2={nowLineX}
+                y2={pixY(maxY)}
+                stroke={rgba(COLOR_DARK)}
+                strokeWidth={1}
+            />
 
-        <text x={nowLineX} y={pixY(maxY)} color={rgba(COLOR_GRAPH_TITLE)}
-            fontSize={fontSize} fontFamily={fontFamily}>{'Now'}</text>
-    </g>;
+            <text
+                x={nowLineX}
+                y={pixY(maxY)}
+                color={rgba(COLOR_GRAPH_TITLE)}
+                fontSize={fontSize}
+                fontFamily={fontFamily}
+            >
+                {'Now'}
+            </text>
+        </g>
+    );
 }
 
 NowLine.propTypes = {
@@ -28,5 +43,5 @@ NowLine.propTypes = {
     minY: PropTypes.number.isRequired,
     maxY: PropTypes.number.isRequired,
     pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired
+    pixY: PropTypes.func.isRequired,
 };

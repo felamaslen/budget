@@ -1,63 +1,45 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
-import './style.scss';
+import * as Styled from './styles';
 
 export default function Graph({
-    name,
     width,
     height,
     graphRef,
-    svgClasses,
     svgProperties,
     outerProperties,
     before,
     after,
-    children
+    children,
 }) {
     return (
-        <div
-            ref={graphRef}
-            className={classNames('graph-container', { [`graph-${name}`]: name })}
-            {...outerProperties}
-        >
+        <Styled.Graph ref={graphRef} {...outerProperties}>
             {before && before()}
-            <svg
-                className={svgClasses}
-                width={width}
-                height={height}
-                {...svgProperties}
-            >
+            <svg width={width} height={height} {...svgProperties}>
                 {children}
             </svg>
             {after && after()}
-        </div>
+        </Styled.Graph>
     );
 }
 
 Graph.propTypes = {
-    name: PropTypes.string,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     padding: PropTypes.array,
     graphRef: PropTypes.object,
-    svgClasses: PropTypes.string,
     svgProperties: PropTypes.object,
     outerProperties: PropTypes.object,
     before: PropTypes.func,
     after: PropTypes.func,
-    children: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.array
-    ])
+    children: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
 Graph.defaultProps = {
     before: null,
     after: null,
-    svgClasses: '',
     outerProperties: {},
     svgProperties: {},
-    children: null
+    children: null,
 };

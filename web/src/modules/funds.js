@@ -11,7 +11,7 @@ export function separateLines(line) {
             return [lines.concat([[[xValue, yValue]]]), false];
         }
 
-        return [replaceAtIndex(lines, lines.length - 1, part => part.concat([[xValue, yValue]]), true), false];
+        return [replaceAtIndex(lines, lines.length - 1, (part) => part.concat([[xValue, yValue]]), true), false];
     }, [[], true])[0];
 }
 

@@ -6,26 +6,25 @@ import {
     requested,
     received,
     treeItemDisplayToggled,
-    treeItemHovered,
     blockRequested,
-    blockReceived
+    blockReceived,
 } from '~client/actions/analysis';
 import { loggedOut } from '~client/actions/login';
 
-test('Null action returns the initial state', t => {
+test('Null action returns the initial state', (t) => {
     t.is(reducer(undefined, null), initialState);
 });
 
-test('LOGGED_OUT resets the state', t => {
+test('LOGGED_OUT resets the state', (t) => {
     t.deepEqual(reducer(undefined, loggedOut()), initialState);
 });
 
-test('ANALYSIS_REQUESTED sets up the state for loading new data', t => {
+test('ANALYSIS_REQUESTED sets up the state for loading new data', (t) => {
     const state = {
         loading: false,
         period: 'year',
         grouping: 'category',
-        page: 3
+        page: 3,
     };
 
     const withPeriod = reducer(state, requested({ period: 'month' }));
@@ -57,30 +56,30 @@ test('ANALYSIS_REQUESTED sets up the state for loading new data', t => {
     t.is(withNothing.page, 0);
 });
 
-test('ANALYSIS_RECEIVED updates data in state', t => {
+test('ANALYSIS_RECEIVED updates data in state', (t) => {
     const state = {
         loading: true,
         period: 'year',
         grouping: 'category',
         page: 0,
         timeline: null,
-        treeVisible: { bills: false, general: true }
+        treeVisible: { bills: false, general: true },
     };
 
     const action = received({
         data: {
             timeline: [
                 [72500, 1035, 2779, 1745],
-                [3724, 3340, 3299]
+                [3724, 3340, 3299],
             ],
             cost: [
                 ['bills', [['EDF Energy', -6110], ['Water', 44272]]],
                 ['food', [['Baking', 880], ['Dairy', 4614]]],
-                ['general', [['Furniture', 8399], ['Mail', 402]]]
+                ['general', [['Furniture', 8399], ['Mail', 402]]],
             ],
             saved: 996899,
-            description: '2019'
-        }
+            description: '2019',
+        },
     });
 
     const result = reducer(state, action);
@@ -90,15 +89,15 @@ test('ANALYSIS_RECEIVED updates data in state', t => {
 
     t.deepEqual(result.timeline, [
         [72500, 1035, 2779, 1745],
-        [3724, 3340, 3299]
+        [3724, 3340, 3299],
     ]);
 
-    t.is(result.deep, null);
+    t.is(result.costDeep, null);
 
     t.deepEqual(result.cost, [
         ['bills', [['EDF Energy', -6110], ['Water', 44272]]],
         ['food', [['Baking', 880], ['Dairy', 4614]]],
-        ['general', [['Furniture', 8399], ['Mail', 402]]]
+        ['general', [['Furniture', 8399], ['Mail', 402]]],
     ]);
 
     t.is(result.saved, 996899);
@@ -106,7 +105,7 @@ test('ANALYSIS_RECEIVED updates data in state', t => {
     t.is(result.description, '2019');
 });
 
-test('ANALYSIS_BLOCK_REQUESTED (while on main view) sets state up for loading deep view', t => {
+test('ANALYSIS_BLOCK_REQUESTED (while on main view) sets state up for loading deep view', (t) => {
     const state = {};
 
     const action = blockRequested('food');
@@ -115,33 +114,30 @@ test('ANALYSIS_BLOCK_REQUESTED (while on main view) sets state up for loading de
 
     t.is(result.loading, true);
     t.is(result.loadingDeep, true);
-    t.is(result.deepBlock, 'food');
 });
 
-test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bills or saved block', t => {
+test('ANALYSIS_BLOCK_REQUESTED (while on main view) doesn\'t do anything on bills or saved block', (t) => {
     const state = {};
 
     t.deepEqual(reducer(state, blockRequested('bills')), { loading: false, loadingDeep: false });
     t.deepEqual(reducer(state, blockRequested('saved')), { loading: false, loadingDeep: false });
 });
 
-test('ANALYSIS_BLOCK_REQUESTED (while on deep view) resets the deep data', t => {
+test('ANALYSIS_BLOCK_REQUESTED (while on deep view) resets the deep data', (t) => {
     const state = {
-        deep: [1, 2, 3],
-        deepBlock: 'food'
+        costDeep: [1, 2, 3],
     };
 
     const action = blockRequested('Fish');
 
     const result = reducer(state, action);
 
-    t.is(result.deep, null);
-    t.is(result.deepBlock, null);
+    t.is(result.costDeep, null);
     t.is(result.loading, false);
     t.is(result.loadingDeep, false);
 });
 
-test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', t => {
+test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', (t) => {
     const state = {
         loading: false,
         loadingDeep: true,
@@ -152,16 +148,16 @@ test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', t => {
         grouping: 'category',
         page: 0,
         timeline: [1, 2, 3],
-        treeVisible: { bills: false, general: true }
+        treeVisible: { bills: false, general: true },
     };
 
     const action = blockReceived({
         data: {
             items: [
                 ['Bread', [['Bread', 317]]],
-                ['Fish', [['Cod Fillets', 299], ['Salmon', 585]]]
-            ]
-        }
+                ['Fish', [['Cod Fillets', 299], ['Salmon', 585]]],
+            ],
+        },
     });
 
     const result = reducer(state, action);
@@ -171,9 +167,9 @@ test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', t => {
 
     t.is(result.timeline, state.timeline);
 
-    t.deepEqual(result.deep, [
+    t.deepEqual(result.costDeep, [
         ['Bread', [['Bread', 317]]],
-        ['Fish', [['Cod Fillets', 299], ['Salmon', 585]]]
+        ['Fish', [['Cod Fillets', 299], ['Salmon', 585]]],
     ]);
 
     t.is(result.cost, state.cost);
@@ -183,9 +179,9 @@ test('ANALYSIS_BLOCK_RECEIVED updates deep-block data in state', t => {
     t.is(result.description, state.description);
 });
 
-test('ANALYSIS_TREE_DISPLAY_TOGGLED toggles treeVisible', t => {
+test('ANALYSIS_TREE_DISPLAY_TOGGLED toggles treeVisible', (t) => {
     const state = {
-        treeVisible: { bills: false, general: true }
+        treeVisible: { bills: false, general: true },
     };
 
     const withBills = reducer(state, treeItemDisplayToggled('bills'));
@@ -196,15 +192,4 @@ test('ANALYSIS_TREE_DISPLAY_TOGGLED toggles treeVisible', t => {
 
     const withGeneral = reducer(state, treeItemDisplayToggled('general'));
     t.deepEqual(withGeneral.treeVisible, { bills: false, general: false });
-});
-
-test('ANALYSIS_TREE_HOVERED sets the active block', t => {
-    const state = {};
-
-    const action = treeItemHovered('food', 'Fish');
-
-    const result = reducer(state, action);
-
-    t.is(result.activeGroup, 'food');
-    t.is(result.activeBlock, 'Fish');
 });

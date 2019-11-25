@@ -4,7 +4,7 @@ import {
     LOGIN_REQUESTED,
     LOGIN_ERROR_OCCURRED,
     LOGGED_IN,
-    LOGGED_OUT
+    LOGGED_OUT,
 } from '~client/constants/actions/login';
 
 export const initialState = {
@@ -12,7 +12,7 @@ export const initialState = {
     loading: false,
     error: null,
     uid: null,
-    name: null
+    name: null,
 };
 
 const handlers = {
@@ -20,19 +20,19 @@ const handlers = {
     [LOGIN_ERROR_OCCURRED]: (state, { err }) => ({
         initialised: true,
         loading: false,
-        error: err
+        error: err,
     }),
     [LOGGED_IN]: (state, { res: { uid, name } }) => ({
         initialised: true,
         loading: false,
         error: null,
         uid,
-        name
+        name,
     }),
     [LOGGED_OUT]: () => ({
         ...initialState,
-        initialised: true
-    })
+        initialised: true,
+    }),
 };
 
 export default createReducerObject(handlers, initialState);

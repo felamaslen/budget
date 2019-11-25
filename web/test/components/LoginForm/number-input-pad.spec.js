@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -9,10 +8,12 @@ import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import NumberInputPad from '~client/components/LoginForm/number-input-pad';
 
+const test = ninos(ava);
+
 const getContainer = memoize((customProps = {}) => {
     const props = {
         onInput: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<NumberInputPad {...props} />);
@@ -25,18 +26,15 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'number-input noselect');
     t.is(div.childNodes.length, 4);
 });
 
 const testNumberInputRow = (t, row) => {
     t.is(row.tagName, 'DIV');
-    t.is(row.className, 'number-input-row');
     t.is(row.childNodes.length, 3);
 
     row.childNodes.forEach(button => {
         t.is(button.tagName, 'BUTTON');
-        t.regex(button.className, /^btn-digit\sbtn-digit-[0-9]$/);
     });
 };
 
@@ -101,13 +99,11 @@ test('digit 0 (rendering)', t => {
 
     const [, , , row] = div.childNodes;
     t.is(row.tagName, 'DIV');
-    t.is(row.className, 'number-input-row');
     t.is(row.childNodes.length, 1);
 
     const [button] = row.childNodes;
 
     t.is(button.tagName, 'BUTTON');
-    t.is(button.className, 'btn-digit btn-digit-0');
 });
 
 test('digit 0 (handling)', t => {

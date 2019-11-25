@@ -3,7 +3,15 @@ import PropTypes from 'prop-types';
 import { getDynamicLinePaths } from '~client/components/Graph/helpers';
 import { dataShape } from '~client/prop-types/graph';
 
-export default function DynamicColorLine({ fill, data, smooth, color, children, pathProps, ...props }) {
+export default function DynamicColorLine({
+    fill,
+    data,
+    smooth,
+    color,
+    children,
+    pathProps,
+    ...props
+}) {
     if (props.minY === props.maxY) {
         return null;
     }
@@ -11,7 +19,12 @@ export default function DynamicColorLine({ fill, data, smooth, color, children, 
         throw new Error('Dynamically coloured, filled graph not implemented');
     }
 
-    const linePaths = getDynamicLinePaths({ data, smooth, color, ...props });
+    const linePaths = getDynamicLinePaths({
+        data,
+        smooth,
+        color,
+        ...props,
+    });
     if (!linePaths) {
         return null;
     }
@@ -20,7 +33,12 @@ export default function DynamicColorLine({ fill, data, smooth, color, children, 
         <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
     ));
 
-    return <g className="lines">{children}{paths}</g>;
+    return (
+        <g>
+            {children}
+            {paths}
+        </g>
+    );
 }
 
 DynamicColorLine.propTypes = {
@@ -31,11 +49,11 @@ DynamicColorLine.propTypes = {
         PropTypes.func,
         PropTypes.shape({
             changes: PropTypes.array.isRequired,
-            values: PropTypes.array.isRequired
-        })
+            values: PropTypes.array.isRequired,
+        }),
     ]).isRequired,
     minY: PropTypes.number,
     maxY: PropTypes.number,
     children: PropTypes.object,
-    pathProps: PropTypes.object.isRequired
+    pathProps: PropTypes.object.isRequired,
 };

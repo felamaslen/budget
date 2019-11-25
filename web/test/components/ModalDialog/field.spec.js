@@ -1,6 +1,5 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import memoize from 'fast-memoize';
 import '~client-test/browser';
@@ -9,18 +8,18 @@ import React from 'react';
 import ModalDialogField from '~client/components/ModalDialog/field';
 import { getTransactionsList } from '~client/modules/data';
 
+const test = ninos(ava);
+
 const getModalDialogField = memoize((customProps = {}) => {
     const props = {
         item: 'foo',
         value: 'bar',
         invalid: false,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
-    return render(
-        <ModalDialogField {...props} />
-    );
+    return render(<ModalDialogField {...props} />);
 });
 
 test('basic structure', t => {
@@ -29,7 +28,6 @@ test('basic structure', t => {
     t.is(container.childNodes.length, 1);
     const [li] = container.childNodes;
     t.is(li.tagName, 'LI');
-    t.is(li.className, 'form-row foo');
     t.is(li.childNodes.length, 2);
 });
 
@@ -39,7 +37,6 @@ test('label', t => {
 
     const [label] = li.childNodes;
     t.is(label.tagName, 'SPAN');
-    t.is(label.className, 'form-label');
     t.is(label.innerHTML, 'foo');
 });
 
@@ -54,20 +51,10 @@ test('form field container', t => {
     t.is(input.tagName, 'INPUT');
 });
 
-test('invalid class', t => {
-    const { container } = getModalDialogField({
-        invalid: true
-    });
-
-    const [li] = container.childNodes;
-
-    t.is(li.className, 'form-row foo invalid');
-});
-
 test('transactions fields', t => {
     const { container } = getModalDialogField({
         item: 'transactions',
-        value: getTransactionsList([])
+        value: getTransactionsList([]),
     });
 
     t.is(container.childNodes.length, 1);
@@ -78,7 +65,6 @@ test('transactions fields', t => {
 
     t.is(div.tagName, 'DIV');
     t.is(div.childNodes.length, 2);
-    t.is(div.className, 'inner');
 });
 
 test('firing onChange', t => {

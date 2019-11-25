@@ -21,14 +21,15 @@ const getContainer = (customProps = {}, ...args) => {
         active: false,
         setActive: () => null,
         onUpdate: () => null,
-        ...customProps
+        ...customProps,
     };
 
-    return render((
+    return render(
         <Provider store={store}>
             <ListRowCell {...props} />
-        </Provider>
-    ), ...args);
+        </Provider>,
+        ...args,
+    );
 };
 
 test('basic structure', t => {
@@ -39,23 +40,11 @@ test('basic structure', t => {
     const [span] = container.childNodes;
 
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'cell item');
     t.is(span.childNodes.length, 1);
 
     const [editable] = span.childNodes;
 
     t.is(editable.tagName, 'SPAN');
-    t.is(editable.className, 'editable editable-item editable-inactive');
-});
-
-test('no active class while inactive', t => {
-    const { container } = getContainer({
-        active: false
-    });
-
-    const [span] = container.childNodes;
-
-    t.notRegex(span.className, /active/);
 });
 
 test('onUpdate is called when the input changes, with the column and new value', t => {
@@ -65,7 +54,7 @@ test('onUpdate is called when the input changes, with the column and new value',
         column: 'shop',
         value: 'Tesco',
         active: true,
-        onUpdate
+        onUpdate,
     };
     const { container } = getContainer(props);
 
@@ -94,7 +83,7 @@ test('onUpdate is not called when the input is blank', t => {
         column: 'shop',
         value: 'Tesco',
         active: true,
-        onUpdate
+        onUpdate,
     };
     const { container } = getContainer(props);
 

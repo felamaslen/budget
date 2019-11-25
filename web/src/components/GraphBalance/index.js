@@ -6,18 +6,23 @@ import React, { useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 
-import { COLOR_BALANCE_ACTUAL, COLOR_BALANCE_PREDICTED, COLOR_BALANCE_STOCKS } from '~client/constants/colors';
-import styles from '~client/constants/styles.json';
+import {
+    COLOR_BALANCE_ACTUAL,
+    COLOR_BALANCE_PREDICTED,
+    COLOR_BALANCE_STOCKS,
+} from '~client/constants/colors';
+import { graphOverviewHeightMobile } from '~client/styled/variables';
 import { rgba } from '~client/modules/color';
 import { leftPad } from '~client/modules/data';
 import { pixelPropTypes, rangePropTypes } from '~client/prop-types/graph';
 import { targetsShape } from '~client/prop-types/graph/balance';
-import GraphCashFlow, { getValuesWithTime, graphCashFlowPropTypes } from '~client/components/GraphCashFlow';
+import GraphCashFlow, {
+    getValuesWithTime,
+    graphCashFlowPropTypes,
+} from '~client/components/GraphCashFlow';
 import Key from '~client/components/GraphBalance/Key';
 import Targets from '~client/components/GraphBalance/Targets';
 import AfterCanvas from '~client/components/GraphBalance/AfterCanvas';
-
-import './style.scss';
 
 const colorBalance = [rgba(COLOR_BALANCE_PREDICTED), rgba(COLOR_BALANCE_ACTUAL)];
 const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
@@ -30,14 +35,14 @@ function getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll)
         return {
             balance: leftPad(netWorthOld.concat(netWorthCombined), totalLength),
             funds: leftPad(fundsOld.concat(fundsCurrent), totalLength),
-            oldOffset
+            oldOffset,
         };
     }
 
     return {
         balance: netWorthCombined,
         funds: fundsCurrent,
-        oldOffset: 0
+        oldOffset: 0,
     };
 }
 
@@ -46,23 +51,25 @@ function processData({
     cost: { netWorthCombined, funds: fundsCurrent, fundsOld },
     netWorthOld,
     showAll,
-    futureMonths
+    futureMonths,
 }) {
-    const { balance, funds, oldOffset } =
-        getData(netWorthCombined, netWorthOld, fundsCurrent, fundsOld, showAll);
+    const { balance, funds, oldOffset } = getData(
+        netWorthCombined,
+        netWorthOld,
+        fundsCurrent,
+        fundsOld,
+        showAll,
+    );
 
     const futureKey = oldOffset + netWorthCombined.length - futureMonths;
 
     const dataBalance = getValuesWithTime(balance, {
         oldOffset,
         breakAtToday: false,
-        startDate
+        startDate,
     });
 
-    const dataFunds = funds.map((value, index) => ([
-        dataBalance[index][0],
-        value
-    ]));
+    const dataFunds = funds.map((value, index) => [dataBalance[index][0], value]);
 
     return [
         {
@@ -71,15 +78,15 @@ function processData({
             fill: false,
             smooth: true,
             movingAverage: 12,
-            color: (point, index) => colorBalance[(index < futureKey - 1) >> 0]
+            color: (point, index) => colorBalance[(index < futureKey - 1) >> 0],
         },
         {
             key: 'funds',
             data: dataFunds,
             fill: true,
             smooth: true,
-            color: colorBalanceStocks
-        }
+            color: colorBalanceStocks,
+        },
     ];
 }
 
@@ -100,7 +107,7 @@ function makeAfterLines({ showAll, targets }) {
 
     AfterLines.propTypes = {
         ...pixelPropTypes,
-        ...rangePropTypes
+        ...rangePropTypes,
     };
 
     return AfterLines;
@@ -114,25 +121,34 @@ export default function GraphBalance({
     cost,
     netWorthOld,
     targets,
-    isMobile
+    isMobile,
 }) {
     const [showAll, setShowAll] = useState(false);
-    const lines = useMemo(() => processData({
-        startDate,
-        cost,
-        netWorthOld,
-        showAll,
-        futureMonths
-    }), [startDate, cost, netWorthOld, showAll, futureMonths]);
+    const lines = useMemo(
+        () =>
+            processData({
+                startDate,
+                cost,
+                netWorthOld,
+                showAll,
+                futureMonths,
+            }),
+        [startDate, cost, netWorthOld, showAll, futureMonths],
+    );
 
-    const afterLines = useMemo(() => makeAfterLines({
-        showAll,
-        targets
-    }), [showAll, targets]);
+    const afterLines = useMemo(
+        () =>
+            makeAfterLines({
+                showAll,
+                targets,
+            }),
+        [showAll, targets],
+    );
 
-    const after = useCallback(() => (
-        <AfterCanvas showAll={showAll} setShowAll={setShowAll} />
-    ), [showAll, setShowAll]);
+    const after = useCallback(() => <AfterCanvas showAll={showAll} setShowAll={setShowAll} />, [
+        showAll,
+        setShowAll,
+    ]);
 
     const graphProps = {
         name: 'balance',
@@ -140,11 +156,11 @@ export default function GraphBalance({
         lines,
         graphWidth,
         afterLines,
-        after
+        after,
     };
 
     if (isMobile) {
-        graphProps.graphHeight = styles.graphOverviewHeightMobile;
+        graphProps.graphHeight = graphOverviewHeightMobile;
     }
 
     return <GraphCashFlow isMobile={isMobile} {...graphProps} />;
@@ -156,10 +172,10 @@ GraphBalance.propTypes = {
     cost: PropTypes.shape({
         netWorthCombined: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
         funds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-        fundsOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
+        fundsOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     }).isRequired,
     netWorthOld: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
     targets: targetsShape.isRequired,
     startDate: PropTypes.instanceOf(DateTime).isRequired,
-    futureMonths: PropTypes.number.isRequired
+    futureMonths: PropTypes.number.isRequired,
 };

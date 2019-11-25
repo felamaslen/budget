@@ -5,11 +5,11 @@ import { DateTime } from 'luxon';
 import reducer, { initialState } from '~client/reducers/now';
 import { timeUpdated } from '~client/actions/now';
 
-test('Null action returns the initial state', t => {
+test('Null action returns the initial state', (t) => {
     t.is(reducer(undefined, null), initialState);
 });
 
-test('TIME_UPDATED updates the state to the current time', t => {
+test('TIME_UPDATED updates the state to the current time', (t) => {
     const clock = sinon.useFakeTimers(new Date('2019-07-04T18:03Z').getTime());
 
     const state = null;
@@ -21,7 +21,7 @@ test('TIME_UPDATED updates the state to the current time', t => {
     clock.restore();
 });
 
-test('State is memoised with second precision', t => {
+test('State is memoised with second precision', (t) => {
     const clock = sinon.useFakeTimers(new Date('2019-07-04T18:03:31.001Z'));
 
     const state = reducer(null, timeUpdated());

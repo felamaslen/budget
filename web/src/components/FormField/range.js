@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 
 import { Wrapper } from '~client/components/FormField';
 
-export default function FormFieldRange({ item, value, onChange, min, max, step }) {
-    const onChangeCallback = useCallback(event => onChange(Number(event.target.value)), [onChange]);
+export default function FormFieldRange({
+    item, value, onChange, min, max, step,
+}) {
+    const onChangeCallback = useCallback((event) => onChange(Number(event.target.value)), [onChange]);
 
     return (
         <Wrapper item={item} active>
@@ -26,9 +28,9 @@ FormFieldRange.propTypes = {
     onChange: PropTypes.func.isRequired,
     min: PropTypes.number,
     max: PropTypes.number,
-    step: PropTypes.number
+    step: PropTypes.number,
 };
 
 FormFieldRange.defaultProps = {
-    value: 0
+    value: 0,
 };

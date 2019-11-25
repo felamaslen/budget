@@ -11,6 +11,7 @@ services:
       - net_budget_test
     environment:
       NODE_ENV: test
+      BABEL_ENV: node
       PORT: 3000
       DATABASE_URL: postgres://docker:docker@db_test:5432/budget
       DEFAULT_PIN: 1234

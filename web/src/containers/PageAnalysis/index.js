@@ -6,7 +6,6 @@ import {
     requested,
     blockRequested,
     treeItemDisplayToggled,
-    treeItemHovered
 } from '~client/actions/analysis';
 
 import {
@@ -17,7 +16,7 @@ import {
     getCost,
     getDeepCost,
     getBlocks,
-    getDeepBlocks
+    getDeepBlocks,
 } from '~client/selectors/analysis';
 
 import { formatCurrency, capitalise } from '~client/modules/format';
@@ -25,32 +24,34 @@ import { formatCurrency, capitalise } from '~client/modules/format';
 import { timelineShape, costShape } from '~client/prop-types/page/analysis';
 import { blocksShape } from '~client/prop-types/block-packer';
 
-import Page from '~client/components/Page';
 import Timeline from '~client/containers/PageAnalysis/timeline';
 import Upper from '~client/containers/PageAnalysis/upper';
 import ListTree from '~client/containers/PageAnalysis/list-tree';
 import BlockPacker from '~client/components/BlockPacker';
 
-import './style.scss';
+import * as Styled from './styles';
 
 function PageAnalysis({
     timeline,
     cost,
+    costDeep,
     blocks,
+    blocksDeep,
     period,
     grouping,
     page,
     description,
     treeVisible,
-    deepBlockName,
-    deepCost,
-    deepBlocks,
     onRequest,
     toggleTreeItem,
-    onBlockClick
+    onBlockClick,
 }) {
     const [activeBlock, setActiveBlock] = useState([null, null]);
-    const onBlockHover = useCallback((main, deep = null) => setActiveBlock([main, deep]), []);
+    const onHover = useCallback(
+        (main, sub = null) => setActiveBlock([main, sub]),
+        [],
+    );
+    const [activeMain, activeSub] = activeBlock;
 
     const [treeOpen, setTreeOpen] = useState({});
 
@@ -61,9 +62,7 @@ function PageAnalysis({
     }, [cost, onRequest]);
 
     const status = useMemo(() => {
-        const [activeMain, activeSub] = activeBlock;
-        const activeCost = deepCost || cost;
-
+        const activeCost = costDeep || cost;
         if (!(activeCost && activeMain)) {
             return '';
         }
@@ -73,20 +72,27 @@ function PageAnalysis({
             return '';
         }
         if (activeSub) {
-            const { total } = main.subTree.find(({ name }) => name === activeSub);
+            const { total } = main.subTree.find(
+                ({ name }) => name === activeSub,
+            );
 
-            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
+            return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(
+                total,
+                { raw: true },
+            )})`;
         }
 
-        return `${capitalise(activeMain)} (${formatCurrency(main.total, { raw: true })})`;
-    }, [cost, deepCost, activeBlock]);
+        return `${capitalise(activeMain)} (${formatCurrency(main.total, {
+            raw: true,
+        })})`;
+    }, [cost, costDeep, activeMain, activeSub]);
 
     if (!cost) {
         return null;
     }
 
     return (
-        <Page page="analysis">
+        <Styled.Page page="analysis">
             <Upper
                 period={period}
                 grouping={grouping}
@@ -94,7 +100,7 @@ function PageAnalysis({
                 description={description}
                 onRequest={onRequest}
             />
-            <div className="analysis-outer">
+            <Styled.Outer>
                 {timeline && <Timeline data={timeline} />}
                 <ListTree
                     cost={cost}
@@ -102,59 +108,58 @@ function PageAnalysis({
                     toggleTreeItem={toggleTreeItem}
                     treeOpen={treeOpen}
                     setTreeOpen={setTreeOpen}
-                    onHover={onBlockHover}
+                    onHover={onHover}
                 />
                 <BlockPacker
-                    blocks={deepBlocks || blocks}
-                    activeMain={activeBlock[0]}
-                    activeSub={activeBlock[1]}
-                    deepBlock={deepBlockName}
-                    onHover={onBlockHover}
+                    blocks={blocks}
+                    blocksDeep={blocksDeep}
+                    activeMain={activeMain}
+                    activeSub={activeSub}
+                    onHover={onHover}
                     onClick={onBlockClick}
                     status={status}
                 />
-            </div>
-        </Page>
+            </Styled.Outer>
+        </Styled.Page>
     );
 }
 
 PageAnalysis.propTypes = {
     timeline: timelineShape,
     cost: costShape,
+    costDeep: costShape,
     blocks: blocksShape,
+    blocksDeep: blocksShape,
     period: PropTypes.string.isRequired,
     grouping: PropTypes.string.isRequired,
     page: PropTypes.number.isRequired,
     description: PropTypes.string,
     treeVisible: PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
-    deepBlockName: PropTypes.string,
-    deepCost: costShape,
-    deepBlocks: blocksShape,
     onBlockClick: PropTypes.func.isRequired,
     onRequest: PropTypes.func.isRequired,
     toggleTreeItem: PropTypes.func.isRequired,
-    hoverTreeItem: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
     cost: getCost(state),
+    costDeep: getDeepCost(state),
     blocks: getBlocks(state),
+    blocksDeep: getDeepBlocks(state),
     period: getPeriod(state),
     grouping: getGrouping(state),
     page: getPage(state),
     description: state.analysis.description,
-    deepBlockName: state.analysis.deepBlock,
-    deepCost: getDeepCost(state),
-    deepBlocks: getDeepBlocks(state),
     treeVisible: getTreeVisible(state),
-    timeline: state.analysis.timeline
+    timeline: state.analysis.timeline,
 });
 
 const mapDispatchToProps = {
     onBlockClick: blockRequested,
     onRequest: requested,
     toggleTreeItem: treeItemDisplayToggled,
-    hoverTreeItem: treeItemHovered
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(PageAnalysis);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(PageAnalysis);

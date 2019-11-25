@@ -10,21 +10,23 @@ export default function CrudListItem({
         Item,
         onUpdate,
         onDelete,
-        navState: { nav, activeId, activeColumn, command },
+        navState: {
+            nav, activeId, activeColumn, command,
+        },
         setActive,
         setCommand,
         navNext,
-        navPrev
+        navPrev,
     },
     index,
-    style
+    style,
 }) {
     const item = items[index];
     const active = activeId === item.id;
     const noneActive = !nav && activeId === null;
     const odd = index % 2 === 1;
 
-    const onDeleteCallback = useCallback(event => {
+    const onDeleteCallback = useCallback((event) => {
         if (event) {
             event.stopPropagation();
         }
@@ -88,18 +90,18 @@ CrudListItem.propTypes = {
                 type: PropTypes.string,
                 id: PropTypes.string,
                 column: PropTypes.string,
-                payload: PropTypes.any
-            })
+                payload: PropTypes.any,
+            }),
         }),
         setActive: PropTypes.func.isRequired,
         setCommand: PropTypes.func.isRequired,
         navNext: PropTypes.func.isRequired,
-        navPrev: PropTypes.func.isRequired
+        navPrev: PropTypes.func.isRequired,
     }).isRequired,
     index: PropTypes.number.isRequired,
-    style: PropTypes.object
+    style: PropTypes.object,
 };
 
 CrudListItem.defaultProps = {
-    style: {}
+    style: {},
 };

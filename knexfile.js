@@ -1,3 +1,5 @@
+require('@babel/register');
+
 function parseConnectionURI(uri = '') {
     const matches = uri.match(/^postgres(ql)?:\/\/(\w+):(\w+)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/);
 

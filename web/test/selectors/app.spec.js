@@ -1,33 +1,33 @@
 import test from 'ava';
 import {
-    getLoggedIn
+    getLoggedIn,
 } from '~client/selectors/app';
 
-test('getLoggedIn returns true iff there is an API key and a user ID in state', t => {
+test('getLoggedIn returns true iff there is an API key and a user ID in state', (t) => {
     t.is(getLoggedIn({
         api: {
-            key: 'foo'
+            key: 'foo',
         },
         login: {
-            uid: 'bar'
-        }
+            uid: 'bar',
+        },
     }), true);
 
     t.is(getLoggedIn({
         api: {
-            key: 'foo'
+            key: 'foo',
         },
         login: {
-            uid: null
-        }
+            uid: null,
+        },
     }), false);
 
     t.is(getLoggedIn({
         api: {
-            key: null
+            key: null,
         },
         login: {
-            uid: 'bar'
-        }
+            uid: 'bar',
+        },
     }), false);
 });

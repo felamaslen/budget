@@ -10,22 +10,18 @@ const getContainer = memoize((customProps = {}) => {
         row: {
             id: '10',
             item: 'foo-fund',
-            prices: [
-                [1, 10],
-                [2, 11],
-                [3, 10.2]
-            ],
+            prices: [[1, 10], [2, 11], [3, 10.2]],
             gain: {
                 value: 561932,
                 gain: 0.3,
                 gainAbs: 4030,
                 dayGain: -0.02,
                 dayGainAbs: -341,
-                color: [255, 128, 30]
+                color: [255, 128, 30],
             },
-            sold: false
+            sold: false,
         },
-        ...customProps
+        ...customProps,
     };
 
     return render(<ListRowFundsDesktop {...props} />);
@@ -39,7 +35,6 @@ test('basic structure', t => {
 
     t.is(span.tagName, 'SPAN');
     t.is(span.childNodes.length, 2);
-    t.is(span.className, 'fund-extra-info');
 });
 
 test('fund graph', t => {
@@ -49,13 +44,11 @@ test('fund graph', t => {
     const [graph] = span.childNodes;
 
     t.is(graph.tagName, 'DIV');
-    t.is(graph.className, 'fund-graph');
     t.is(graph.childNodes.length, 1);
 
     const [graphItem] = graph.childNodes;
 
     t.is(graphItem.tagName, 'DIV');
-    t.is(graphItem.className, 'graph-container graph-foo-fund');
 });
 
 test('gain info', t => {
@@ -65,5 +58,4 @@ test('gain info', t => {
     const [, gainInfo] = span.childNodes;
 
     t.is(gainInfo.tagName, 'SPAN');
-    t.is(gainInfo.className, 'fund-extra-info-gain');
 });

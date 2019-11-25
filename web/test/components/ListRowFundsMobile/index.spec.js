@@ -10,7 +10,7 @@ test('renders nothing if there is no gain', t => {
     const item = {
         item: 'some fund',
         transactions: [],
-        gain: null
+        gain: null,
     };
     const { container } = render(<ListRowFundsMobile item={item} />);
 
@@ -20,12 +20,12 @@ test('renders nothing if there is no gain', t => {
 const getContainer = memoize((process = item => item) => {
     const item = process({
         gain: {
-            value: 9931
+            value: 9931,
         },
         item: 'some fund',
         transactions: getTransactionsList([
-            { date: '2019-06-23', units: 44.31, cost: 1092397 }
-        ])
+            { date: '2019-06-23', units: 44.31, cost: 1092397 },
+        ]),
     });
 
     return render(<ListRowFundsMobile item={item} />);
@@ -38,25 +38,26 @@ test('renders a main container', t => {
     const [span] = container.childNodes;
 
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'cost');
     t.is(span.childNodes.length, 2);
 });
 
 test('renders a cost value', t => {
     const { container } = getContainer();
-    const { childNodes: [costValue] } = container.childNodes[0];
+    const {
+        childNodes: [costValue],
+    } = container.childNodes[0];
 
     t.is(costValue.tagName, 'SPAN');
-    t.is(costValue.className, 'cost-value');
     t.is(costValue.innerHTML, '£10.9k');
 });
 
 test('renders an actual value', t => {
     const { container } = getContainer();
-    const { childNodes: [, actualValue] } = container.childNodes[0];
+    const {
+        childNodes: [, actualValue],
+    } = container.childNodes[0];
 
     t.is(actualValue.tagName, 'SPAN');
-    t.is(actualValue.className, 'actual-value');
     t.is(actualValue.innerHTML, '£99.31');
 });
 
@@ -65,11 +66,13 @@ test('renders a dash if the fund is sold', t => {
         ...item,
         transactions: getTransactionsList([
             { date: '2019-06-23', units: 44.31, cost: 1092397 },
-            { date: '2019-07-31', units: -44.31, cost: -1131032 }
-        ])
+            { date: '2019-07-31', units: -44.31, cost: -1131032 },
+        ]),
     }));
 
-    const { childNodes: [, actualValue] } = container.childNodes[0];
+    const {
+        childNodes: [, actualValue],
+    } = container.childNodes[0];
 
     t.is(actualValue.innerHTML, '\u2013');
 });

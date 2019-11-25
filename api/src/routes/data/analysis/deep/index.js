@@ -4,7 +4,9 @@ const { analysisDeepSchema } = require('../../../../schema');
 const common = require('../common');
 
 function getPeriodCostDeep(db, user, now, params) {
-    const { period, groupBy, pageIndex, category } = params;
+    const {
+        period, groupBy, pageIndex, category,
+    } = params;
 
     const categoryColumn = common.getCategoryColumn(category, groupBy);
 
@@ -29,7 +31,7 @@ function processDataResponse(result) {
         return { ...obj, [itemCol]: [[item, Number(cost)]] };
     }, {});
 
-    return Object.keys(resultObj).map(itemCol => ([itemCol, resultObj[itemCol]]));
+    return Object.keys(resultObj).map((itemCol) => ([itemCol, resultObj[itemCol]]));
 }
 
 /**
@@ -98,5 +100,5 @@ function routeGet(config, db) {
 module.exports = {
     getPeriodCostDeep,
     processDataResponse,
-    routeGet
+    routeGet,
 };

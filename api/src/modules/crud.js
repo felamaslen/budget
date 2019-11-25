@@ -3,7 +3,7 @@ const { Router } = require('express');
 const { clientError, catchAsyncErrors } = require('./error-handling');
 const { validate } = require('./validate');
 
-const noop = value => value;
+const noop = (value) => value;
 
 const makeGetItem = (table, item, dbToJson) => async (db, id) => {
     const [data] = await db.select()
@@ -17,7 +17,7 @@ const makeGetItem = (table, item, dbToJson) => async (db, id) => {
     return dbToJson(data);
 };
 
-const checkItem = (db, table, item, getId = req => req.params.id) => {
+const checkItem = (db, table, item, getId = (req) => req.params.id) => {
     const getItem = makeGetItem(table, item, noop);
 
     return catchAsyncErrors(async (req, res, next) => {
@@ -82,7 +82,7 @@ function makeCrudRoute({
     item,
     schema,
     jsonToDb = noop,
-    dbToJson = noop
+    dbToJson = noop,
 }) {
     const getItem = makeGetItem(table, item, dbToJson);
 
@@ -101,5 +101,5 @@ function makeCrudRoute({
 
 module.exports = {
     checkItem,
-    makeCrudRoute
+    makeCrudRoute,
 };

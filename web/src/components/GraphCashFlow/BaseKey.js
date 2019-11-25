@@ -7,20 +7,26 @@ import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 export default function BaseKey({ title, children }) {
     const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-    return <g className="key">
-        <rect x={45} y={8} width={200} height={60}
-            fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
+    return (
+        <g>
+            <rect x={45} y={8} width={200} height={60} fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
 
-        <text x={65} y={10} color={rgba(COLOR_GRAPH_TITLE)} alignmentBaseline="hanging"
-            fontSize={fontSize} fontFamily={fontFamily}>{title}</text>
-        {children}
-    </g>;
+            <text
+                x={65}
+                y={10}
+                color={rgba(COLOR_GRAPH_TITLE)}
+                alignmentBaseline="hanging"
+                fontSize={fontSize}
+                fontFamily={fontFamily}
+            >
+                {title}
+            </text>
+            {children}
+        </g>
+    );
 }
 
 BaseKey.propTypes = {
     title: PropTypes.string.isRequired,
-    children: PropTypes.oneOfType([
-        PropTypes.object,
-        PropTypes.array
-    ])
+    children: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };

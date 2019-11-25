@@ -1,9 +1,9 @@
 const test = require('ava');
 const { DateTime } = require('luxon');
 
-const analysis = require('~api/src/routes/data/analysis/common');
+const analysis = require('~api/routes/data/analysis/common');
 
-test('getCategoryColumn returning a group as expected', t => {
+test('getCategoryColumn returning a group as expected', (t) => {
     t.is(analysis.getCategoryColumn('bills'), 'item');
     t.is(analysis.getCategoryColumn('food', 'category'), 'category');
     t.is(analysis.getCategoryColumn('general', 'category'), 'category');
@@ -15,7 +15,7 @@ test('getCategoryColumn returning a group as expected', t => {
     t.is(analysis.getCategoryColumn(null, null), null);
 });
 
-test('periodCondition getting weekly periods', t => {
+test('periodCondition getting weekly periods', (t) => {
     const now = DateTime.fromISO('2017-09-04');
 
     const result = analysis.periodCondition(now, 'week');
@@ -31,7 +31,7 @@ test('periodCondition getting weekly periods', t => {
     t.is(result3.description, 'Week beginning August 14, 2017');
 });
 
-test('periodCondition getting monthly periods', t => {
+test('periodCondition getting monthly periods', (t) => {
     const now = DateTime.fromISO('2017-09-04');
 
     const result = analysis.periodCondition(now, 'month');
@@ -47,7 +47,7 @@ test('periodCondition getting monthly periods', t => {
     t.is(result10.description, 'November 2016');
 });
 
-test('periodCondition getting yearly periods', t => {
+test('periodCondition getting yearly periods', (t) => {
     const now = DateTime.fromISO('2017-09-04');
 
     const result = analysis.periodCondition(now, 'year');

@@ -12,29 +12,27 @@ const getContainer = (customProps = {}) => {
         page: 0,
         description: 'foo',
         onRequest: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<Upper {...props} />);
 };
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
     t.is(container.childNodes.length, 1);
 
     const [div] = container.childNodes;
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'upper');
     t.is(div.childNodes.length, 4);
 });
 
-test('period switcher - basic structure', t => {
+test('period switcher - basic structure', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [input] = div.childNodes;
 
     t.is(input.tagName, 'SPAN');
-    t.is(input.className, 'input-period');
     t.is(input.childNodes.length, 4);
 
     const [title] = input.childNodes;
@@ -43,7 +41,7 @@ test('period switcher - basic structure', t => {
     t.is(title.innerHTML, 'Period:');
 });
 
-test('period switcher - year group', t => {
+test('period switcher - year group', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [input] = div.childNodes;
@@ -62,7 +60,7 @@ test('period switcher - year group', t => {
     t.is(titleYear.innerHTML, 'year');
 });
 
-test('period switcher - month group', t => {
+test('period switcher - month group', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [input] = div.childNodes;
@@ -82,7 +80,7 @@ test('period switcher - month group', t => {
     t.is(titleMonth.innerHTML, 'month');
 });
 
-test('period switcher - week group', t => {
+test('period switcher - week group', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [input] = div.childNodes;
@@ -99,13 +97,12 @@ test('period switcher - week group', t => {
     t.is(titleWeek.innerHTML, 'week');
 });
 
-test('grouping switcher - basic structure', t => {
+test('grouping switcher - basic structure', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, grouping] = div.childNodes;
 
     t.is(grouping.tagName, 'SPAN');
-    t.is(grouping.className, 'input-grouping');
     t.is(grouping.childNodes.length, 3);
 
     const [title] = grouping.childNodes;
@@ -114,7 +111,7 @@ test('grouping switcher - basic structure', t => {
     t.is(title.innerHTML, 'Grouping:');
 });
 
-test('grouping switcher - category group', t => {
+test('grouping switcher - category group', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, grouping] = div.childNodes;
@@ -134,7 +131,7 @@ test('grouping switcher - category group', t => {
     t.is(title.innerHTML, 'category');
 });
 
-test('grouping switcher - shop group', t => {
+test('grouping switcher - shop group', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, grouping] = div.childNodes;
@@ -154,31 +151,28 @@ test('grouping switcher - shop group', t => {
     t.is(title.innerHTML, 'shop');
 });
 
-test('buttons', t => {
+test('buttons', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
     const [, , buttons] = div.childNodes;
 
     t.is(buttons.tagName, 'DIV');
-    t.is(buttons.className, 'btns');
     t.is(buttons.childNodes.length, 2);
 
     const [previous, next] = buttons.childNodes;
 
     t.is(previous.tagName, 'BUTTON');
-    t.is(previous.className, 'btn-previous');
     t.is(previous.disabled, false);
 
     t.is(next.tagName, 'BUTTON');
-    t.is(next.className, 'btn-next');
     t.is(next.disabled, true);
 });
 
-test('calling functions when the buttons are pressed', t => {
+test('calling functions when the buttons are pressed', (t) => {
     const onRequest = sinon.spy();
     const { container } = getContainer({
         page: 1,
-        onRequest
+        onRequest,
     });
 
     const [div] = container.childNodes;
@@ -192,13 +186,12 @@ test('calling functions when the buttons are pressed', t => {
     t.deepEqual(onRequest.getCalls()[1].args, [{ page: 0 }]);
 });
 
-test('description', t => {
+test('description', (t) => {
     const { container } = getContainer();
     const [div] = container.childNodes;
 
     const [, , , title] = div.childNodes;
 
     t.is(title.tagName, 'H3');
-    t.is(title.className, 'period-title');
     t.is(title.innerHTML, 'foo');
 });

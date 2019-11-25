@@ -1,18 +1,19 @@
 import ava from 'ava';
 import ninos from 'ninos';
-const test = ninos(ava);
 
 import '~client-test/browser';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import FormFieldCost from '~client/components/FormField/cost';
 
+const test = ninos(ava);
+
 const getContainer = (customProps = {}, ...args) => {
     const props = {
         active: true,
         value: 10345,
         onChange: () => null,
-        ...customProps
+        ...customProps,
     };
 
     return render(<FormFieldCost {...props} />, ...args);
@@ -25,7 +26,6 @@ test('basic structure', t => {
     const [div] = container.childNodes;
 
     t.is(div.tagName, 'DIV');
-    t.is(div.className, 'form-field form-field-cost');
     t.is(div.childNodes.length, 1);
 });
 
@@ -43,7 +43,7 @@ test('input', t => {
 test('handling onchange', t => {
     const onChange = t.context.stub();
     const { container } = getContainer({
-        onChange
+        onChange,
     });
 
     t.is(onChange.calls.length, 0);
@@ -65,7 +65,9 @@ test('rendering as a string input', t => {
     const props = { onChange, string: true };
     const { container } = getContainer(props);
 
-    const { childNodes: [input] } = container.childNodes[0];
+    const {
+        childNodes: [input],
+    } = container.childNodes[0];
 
     t.is(input.type, 'text');
 
@@ -78,7 +80,9 @@ test('rendering as a string input', t => {
     act(() => {
         getContainer({ ...props, active: true }, { container });
     });
-    fireEvent.change(container.childNodes[0].childNodes[0], { target: { value: '229.119330' } });
+    fireEvent.change(container.childNodes[0].childNodes[0], {
+        target: { value: '229.119330' },
+    });
     act(() => {
         getContainer({ ...props, active: false }, { container });
     });
@@ -106,7 +110,9 @@ test('rendering as a string input - decimal point', t => {
         });
 
         t.is(onChange.calls.length, numCalls + 1);
-        t.deepEqual(onChange.calls[onChange.calls.length - 1].arguments, [changeTo]);
+        t.deepEqual(onChange.calls[onChange.calls.length - 1].arguments, [
+            changeTo,
+        ]);
 
         act(() => {
             getContainer({ ...props, active: true }, { container });
@@ -117,7 +123,8 @@ test('rendering as a string input - decimal point', t => {
         const chars = string.split('');
 
         chars.forEach((value, index) =>
-            testInputCharacter(string.substring(0, index + 1), changeTo[index]));
+            testInputCharacter(string.substring(0, index + 1), changeTo[index]),
+        );
     };
 
     testInput('1.5', [100, 100, 150]);
@@ -143,7 +150,9 @@ test('rendering as a string input - handling invalid input', t => {
     const props = { onChange, string: true };
     const { container } = getContainer(props);
 
-    const { childNodes: [input] } = container.childNodes[0];
+    const {
+        childNodes: [input],
+    } = container.childNodes[0];
 
     t.is(input.type, 'text');
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { withRouter } from 'react-router';
+import { withRouter } from 'react-router-dom';
 import Route, { CacheSwitch as Switch } from 'react-router-cache-route';
 import PropTypes from 'prop-types';
 import PageOverview from '~client/containers/PageOverview';
@@ -11,9 +11,9 @@ import {
     PageFood,
     PageGeneral,
     PageHoliday,
-    PageSocial
+    PageSocial,
 } from '~client/containers/PageList';
-import './style.scss';
+import { PageWrapper } from '~client/styled/shared/page';
 
 const routes = [
     { key: 'analysis', component: PageAnalysis },
@@ -24,29 +24,34 @@ const routes = [
     { key: 'general', component: PageGeneral },
     { key: 'holiday', component: PageHoliday },
     { key: 'social', component: PageSocial },
-    { key: 'overview', path: '/', component: PageOverview }
+    {
+        key: 'overview',
+        path: ['/', '/net-worth', '/net-worth/*'],
+        exact: true,
+        component: PageOverview,
+    },
 ];
 
 const NotFound = () => (
-    <div className="page page-not-found">
+    <div>
         <h1>{'Page not found'}</h1>
     </div>
 );
 
 const Content = () => (
-    <div className="page-wrapper">
+    <PageWrapper>
         <Switch>
             {routes.map(({ key, path = `/${key}`, ...rest }) => (
-                <Route key={key} className="inner" path={path} {...rest} />
+                <Route key={key} path={path} {...rest} />
             ))}
             <Route path="/" component={NotFound} />
         </Switch>
-    </div>
+    </PageWrapper>
 );
 
 Content.propTypes = {
     location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired
+    history: PropTypes.object.isRequired,
 };
 
 export default withRouter(Content);

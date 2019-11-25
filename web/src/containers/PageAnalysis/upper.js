@@ -3,11 +3,15 @@ import PropTypes from 'prop-types';
 
 import { ANALYSIS_PERIODS, ANALYSIS_GROUPINGS } from '~client/constants/analysis';
 
-const Upper = ({ period, grouping, page, description, onRequest }) => (
-    <div className="upper">
-        <span className="input-period">
+import * as Styled from './styles';
+
+const Upper = ({
+    period, grouping, page, description, onRequest,
+}) => (
+    <Styled.Upper>
+        <Styled.Input>
             <span>{'Period:'}</span>
-            {ANALYSIS_PERIODS.map(value => (
+            {ANALYSIS_PERIODS.map((value) => (
                 <span key={value}>
                     <input type="radio"
                         checked={value === period}
@@ -16,10 +20,10 @@ const Upper = ({ period, grouping, page, description, onRequest }) => (
                     <span>{value}</span>
                 </span>
             ))}
-        </span>
-        <span className="input-grouping">
+        </Styled.Input>
+        <Styled.Input>
             <span>{'Grouping:'}</span>
-            {ANALYSIS_GROUPINGS.map(value => (
+            {ANALYSIS_GROUPINGS.map((value) => (
                 <span key={value}>
                     <input type="radio"
                         checked={value === grouping}
@@ -28,18 +32,20 @@ const Upper = ({ period, grouping, page, description, onRequest }) => (
                     <span>{value}</span>
                 </span>
             ))}
-        </span>
-        <div className="btns">
-            <button className="btn-previous"
-                onClick={() => onRequest({ page: page + 1 })}
-            >{'Previous'}</button>
-            <button className="btn-next"
+        </Styled.Input>
+        <Styled.Buttons>
+            <Styled.Button onClick={() => onRequest({ page: page + 1 })}>
+                Previous
+            </Styled.Button>
+            <Styled.Button
                 disabled={page === 0}
                 onClick={() => onRequest({ page: page - 1 })}
-            >{'Next'}</button>
-        </div>
-        <h3 className="period-title">{description}</h3>
-    </div>
+            >
+                Next
+            </Styled.Button>
+        </Styled.Buttons>
+        <Styled.PeriodTitle>{description}</Styled.PeriodTitle>
+    </Styled.Upper>
 );
 
 Upper.propTypes = {
@@ -47,7 +53,7 @@ Upper.propTypes = {
     grouping: PropTypes.string.isRequired,
     page: PropTypes.number.isRequired,
     description: PropTypes.string,
-    onRequest: PropTypes.func.isRequired
+    onRequest: PropTypes.func.isRequired,
 };
 
 export default React.memo(Upper);

@@ -8,32 +8,36 @@ import ListTreeHead from '~client/containers/PageAnalysis/list-tree-head';
 const getContainer = memoize((customProps = {}) => {
     const props = {
         items: [
-            { name: 'foo', itemCost: 3, pct: 5, open: false, visible: true },
-            { name: 'bar', itemCost: 5, pct: 8, open: false, visible: true },
-            { name: 'baz', itemCost: 1, pct: 2, open: false, visible: false }
+            {
+                name: 'foo', itemCost: 3, pct: 5, open: false, visible: true,
+            },
+            {
+                name: 'bar', itemCost: 5, pct: 8, open: false, visible: true,
+            },
+            {
+                name: 'baz', itemCost: 1, pct: 2, open: false, visible: false,
+            },
         ],
-        ...customProps
+        ...customProps,
     };
 
     return render(<ListTreeHead {...props} />);
 });
 
-test('basic structure', t => {
+test('basic structure', (t) => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
     const [li] = container.childNodes;
     t.is(li.tagName, 'LI');
-    t.is(li.className, 'tree-list-item head');
     t.is(li.childNodes.length, 1);
 
     const [inner] = li.childNodes;
     t.is(inner.tagName, 'DIV');
-    t.is(inner.className, 'inner');
     t.is(inner.childNodes.length, 4);
 });
 
-test('indicator', t => {
+test('indicator', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -41,11 +45,10 @@ test('indicator', t => {
     const [indicator] = inner.childNodes;
 
     t.is(indicator.tagName, 'SPAN');
-    t.is(indicator.className, 'indicator');
     t.is(indicator.childNodes.length, 0);
 });
 
-test('title', t => {
+test('title', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -53,11 +56,10 @@ test('title', t => {
     const [, title] = inner.childNodes;
 
     t.is(title.tagName, 'SPAN');
-    t.is(title.className, 'title');
     t.is(title.innerHTML, 'Total:');
 });
 
-test('total cost', t => {
+test('total cost', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -65,21 +67,18 @@ test('total cost', t => {
     const [, , span] = inner.childNodes;
 
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'cost');
     t.is(span.childNodes.length, 2);
 
     const [total, selected] = span.childNodes;
 
     t.is(total.tagName, 'DIV');
-    t.is(total.className, 'total');
     t.is(total.innerHTML, '£0.09');
 
     t.is(selected.tagName, 'DIV');
-    t.is(selected.className, 'selected');
     t.is(selected.innerHTML, '£0.08');
 });
 
-test('total percent', t => {
+test('total percent', (t) => {
     const { container } = getContainer();
     const [li] = container.childNodes;
     const [inner] = li.childNodes;
@@ -87,16 +86,13 @@ test('total percent', t => {
     const [, , , span] = inner.childNodes;
 
     t.is(span.tagName, 'SPAN');
-    t.is(span.className, 'pct');
     t.is(span.childNodes.length, 2);
 
     const [total, selected] = span.childNodes;
 
     t.is(total.tagName, 'DIV');
-    t.is(total.className, 'total');
     t.is(total.innerHTML, '15.0%');
 
     t.is(selected.tagName, 'DIV');
-    t.is(selected.className, 'selected');
     t.is(selected.innerHTML, '13.0%');
 });
