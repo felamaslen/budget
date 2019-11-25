@@ -12,9 +12,12 @@ export const RowCreate = styled(Row)`
 export const AddButtonOuter = styled.span`
     ${breakpoint(breakpoints.mobile)} {
         ${PageFunds} & {
-            flex: 0 0 320px;
+            flex: 0 0 330px;
             border-right: none;
             z-index: 5;
+            ${breakpoint(breakpoints.tablet)} {
+                flex: 0 0 322px;
+            }
         }
     }
 `;
