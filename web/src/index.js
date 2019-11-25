@@ -1,6 +1,4 @@
-/**
- * Main entry point for budget web app
- */
+import '@babel/polyfill';
 
 import React from 'react';
 import { AppContainer } from 'react-hot-loader';
