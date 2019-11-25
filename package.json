@@ -11,7 +11,7 @@
   },
   "sasslintConfig": ".sass-lint.yml",
   "scripts": {
-    "build:api": "BABEL_ENV=node babel -d api/build api/src",
+    "build:api": "NODE_ENV=production BABEL_ENV=node babel -d api/build api/src",
     "build:web": "NODE_ENV=production webpack --mode production",
     "build": "npm run build:api && npm run build:web",
     "start": "node api/build",
