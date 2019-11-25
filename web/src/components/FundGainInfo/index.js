@@ -6,13 +6,13 @@ import { formatCurrency, formatPercent } from '~client/modules/format';
 
 import * as Styled from './styles';
 
-const formatOptions = {
+export const formatOptions = {
     brackets: true,
     abbreviate: true,
     precision: 1,
     noPence: true,
 };
-const formatOptionsPct = { brackets: true, precision: 2 };
+export const formatOptionsPct = { brackets: true, precision: 2 };
 
 export default function FundGainInfo({
     gain: { color, value, gainAbs, gain, dayGainAbs, dayGain },
@@ -37,10 +37,10 @@ export default function FundGainInfo({
                     </Styled.Overall>
                     {!sold && (
                         <Styled.DayGainOuter>
-                            <Styled.DayGainAbs>
+                            <Styled.DayGainAbs gain={dayGain}>
                                 {formatCurrency(dayGainAbs, formatOptions)}
                             </Styled.DayGainAbs>
-                            <Styled.DayGain>
+                            <Styled.DayGain gain={dayGain}>
                                 {formatPercent(dayGain, formatOptionsPct)}
                             </Styled.DayGain>
                         </Styled.DayGainOuter>

@@ -13,8 +13,7 @@ import { itemHeightDesktop, itemHeightDesktopFunds } from '~client/styled/variab
 import { PageListBase } from '~client/containers/PageList';
 import StocksList from '~client/containers/StocksList';
 import GraphFunds from '~client/containers/GraphFunds';
-import ListHeadFundsDesktop from '~client/components/ListHeadFundsDesktop';
-import ListHeadFundsMobile from '~client/components/ListHeadFundsMobile';
+import ListHeadFunds from '~client/components/ListHeadFunds';
 import ListRowFundsDesktop from '~client/components/ListRowFundsDesktop';
 import ListRowFundsMobile from '~client/components/ListRowFundsMobile';
 
@@ -27,7 +26,7 @@ const FundsInfo = props => (
         <Media query={mediaQueryMobile}>
             {isMobile =>
                 isMobile ? (
-                    <ListHeadFundsMobile {...props} />
+                    <ListHeadFunds {...props} showGraph />
                 ) : (
                     <div>
                         <StocksList />
@@ -44,7 +43,7 @@ function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices
         () => ({
             period,
             cachedValue,
-            TotalValue: ListHeadFundsDesktop,
+            TotalValue: ListHeadFunds,
             AfterRow: ListRowFundsDesktop,
             AfterRowMobile: ListRowFundsMobile,
             listColsMobile: LIST_COLS_MOBILE_FUNDS,
@@ -71,7 +70,7 @@ function PageFunds({ rows, cachedValue, period, onViewSoldToggle, onReloadPrices
                 page="funds"
                 itemSize={itemSize}
                 After={FundsInfo}
-                TotalValue={ListHeadFundsDesktop}
+                TotalValue={ListHeadFunds}
                 AfterRow={ListRowFundsDesktop}
                 AfterRowMobile={ListRowFundsMobile}
                 listColsMobile={LIST_COLS_MOBILE_FUNDS}

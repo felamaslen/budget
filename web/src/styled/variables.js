@@ -14,8 +14,11 @@ export const itemHeightMobile = 30;
 export const graphOverviewHeightMobile = 240;
 export const graphFundsHeightMobile = 125;
 
-export const downArrow = "'\\25be'";
-export const upArrow = "'\\25b4'";
+export const downArrow = "'\\2198'";
+export const upArrow = "'\\2197'";
+
+export const downArrowStrong = "'\\2b0a'";
+export const upArrowStrong = "'\\2b08'";
 
 const colorDark = rgb(34, 34, 34);
 const colorLight = rgb(234, 234, 234);

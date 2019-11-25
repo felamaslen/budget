@@ -1,5 +1,5 @@
 import { css, createGlobalStyle } from 'styled-components';
-import { breakpoint } from '~client/styled/mixins';
+import { breakpoint, rem } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const reset = css`
@@ -39,14 +39,14 @@ export const reset = css`
     ${breakpoint(breakpoints.mobile)} {
         * {
             &::-webkit-scrollbar {
-                width: 0.5em;
+                width: ${rem(8)};
             }
             &::-webkit-scrollbar-track {
                 -webkit-box-shadow: inset 0 0 16px -4px ${colors['shadow-l3']};
             }
             &::-webkit-scrollbar-thumb {
                 background-color: ${colors['shadow-l3']};
-                border-radius: 0.5em;
+                border-radius: ${rem(8)};
             }
             &::-webkit-scrollbar-thumb:hover {
                 background-color: ${colors['shadow-l4']};

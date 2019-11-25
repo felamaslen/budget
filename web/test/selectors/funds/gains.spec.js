@@ -1,10 +1,11 @@
 import test from 'ava';
-import {
-    testRows, testPrices, testStartTime, testCacheTimes,
-} from '../../test_data/testFunds';
+import { DateTime } from 'luxon';
+import { testRows, testPrices, testStartTime, testCacheTimes } from '../../test_data/testFunds';
 import {
     getRowGains,
     getGainsForRow,
+    getDayGain,
+    getDayGainAbs,
 } from '~client/selectors/funds/gains';
 import { getTransactionsList } from '~client/modules/data';
 
@@ -14,7 +15,44 @@ const testCache = {
     prices: testPrices,
 };
 
-test('getRowGains returns the correct values', (t) => {
+const stateWithGains = {
+    funds: {
+        items: [
+            {
+                id: 'fund1',
+                transactions: getTransactionsList([
+                    { date: DateTime.fromISO('2019-10-09'), units: 345, cost: 1199 },
+                ]),
+            },
+            {
+                id: 'fund2',
+                transactions: getTransactionsList([
+                    { date: DateTime.fromISO('2019-10-01'), units: 167, cost: 98503 },
+                    { date: DateTime.fromISO('2019-10-27'), units: -23, cost: -130 },
+                ]),
+            },
+        ],
+        period: 'somePeriod',
+        cache: {
+            somePeriod: {
+                startTime: DateTime.fromISO('2019-10-10').ts / 1000,
+                cacheTimes: [0, 86400 * 5, 86400 * 32],
+                prices: {
+                    fund1: {
+                        startIndex: 1,
+                        values: [109, 113.2],
+                    },
+                    fund2: {
+                        startIndex: 0,
+                        values: [56.2, 57.9, 49.3],
+                    },
+                },
+            },
+        },
+    },
+};
+
+test('getRowGains returns the correct values', t => {
     const result = getRowGains(testRows, testCache);
 
     const expectedResult = {
@@ -45,10 +83,8 @@ test('getRowGains returns the correct values', (t) => {
     t.deepEqual(result, expectedResult);
 });
 
-test('getRowGains sets the value to 0 for funds with no data', (t) => {
-    const result = getRowGains([
-        { id: 'non-existent-id', item: 'some fund' },
-    ], testCache);
+test('getRowGains sets the value to 0 for funds with no data', t => {
+    const result = getRowGains([{ id: 'non-existent-id', item: 'some fund' }], testCache);
 
     t.deepEqual(result, {
         'non-existent-id': {
@@ -59,17 +95,20 @@ test('getRowGains sets the value to 0 for funds with no data', (t) => {
     });
 });
 
-test('getRowGains sets the cost and estimated value, if there are transactions available', (t) => {
-    const result = getRowGains([
-        {
-            id: 'non-existent-id',
-            item: 'some fund',
-            transactions: getTransactionsList([
-                { date: '2019-04-03', units: 345, cost: 1199 },
-                { date: '2019-07-01', units: -345, cost: -1302 },
-            ]),
-        },
-    ], testCache);
+test('getRowGains sets the cost and estimated value, if there are transactions available', t => {
+    const result = getRowGains(
+        [
+            {
+                id: 'non-existent-id',
+                item: 'some fund',
+                transactions: getTransactionsList([
+                    { date: '2019-04-03', units: 345, cost: 1199 },
+                    { date: '2019-07-01', units: -345, cost: -1302 },
+                ]),
+            },
+        ],
+        testCache,
+    );
 
     t.deepEqual(result, {
         'non-existent-id': {
@@ -80,7 +119,7 @@ test('getRowGains sets the cost and estimated value, if there are transactions a
     });
 });
 
-test('getGainsForRow sets a colour', (t) => {
+test('getGainsForRow sets a colour', t => {
     const rowGains = {
         10: {
             value: 399098.2,
@@ -116,10 +155,130 @@ test('getGainsForRow sets a colour', (t) => {
     t.falsy(getGainsForRow(rowGains, 'non-existent-id'));
 });
 
-test('getGainsForRow returns null if there are no gain data for the fund', (t) => {
+test('getGainsForRow returns null if there are no gain data for the fund', t => {
     const rowGains = {
         'some-id': {},
     };
 
     t.is(getGainsForRow(rowGains, 'some-id'), null);
+});
+
+test('getDayGainAbs returns the absolute gain from the previous scrape', t => {
+    const valueLatest = 345 * 113.2 + (167 - 23) * 49.3;
+    const valuePrev = 345 * 109 + 167 * 57.9;
+
+    t.is(getDayGainAbs(stateWithGains), valueLatest - valuePrev);
+});
+
+test('getDayGain returns the gain from the previous scrape', t => {
+    const costLatest = 1199 + (98503 - 130);
+    const valueLatest = 345 * 113.2 + (167 - 23) * 49.3;
+
+    // on the second cache item, the 2019-10-27 transaction is in the future
+    const costPrev = 1199 + 98503;
+    const valuePrev = 345 * 109 + 167 * 57.9;
+
+    const gainLatest = (valueLatest - costLatest) / costLatest;
+    const gainPrev = (valuePrev - costPrev) / costPrev;
+
+    const expectedDayGain = (1 + gainLatest) / (1 + gainPrev) - 1;
+
+    t.is(getDayGain(stateWithGains), expectedDayGain);
+});
+
+test('getDayGain returns 0 when there are no items', t => {
+    t.is(
+        getDayGain({
+            funds: {
+                items: [],
+                period: 'somePeriod',
+                cache: {
+                    somePeriod: {
+                        startTime: DateTime.fromISO('2019-10-10').ts / 1000,
+                        cacheTimes: [0, 86400 * 5, 86400 * 32],
+                        prices: {
+                            fund1: {
+                                startIndex: 1,
+                                values: [109, 113.2],
+                            },
+                            fund2: {
+                                startIndex: 0,
+                                values: [56.2, 57.9, 49.3],
+                            },
+                        },
+                    },
+                },
+            },
+        }),
+        0,
+    );
+});
+
+test('getDayGain returns 0 when there is no cache', t => {
+    t.is(
+        getDayGain({
+            funds: {
+                items: [
+                    {
+                        id: 'fund1',
+                        transactions: getTransactionsList([
+                            { date: DateTime.fromISO('2019-10-09'), units: 345, cost: 1199 },
+                        ]),
+                    },
+                    {
+                        id: 'fund2',
+                        transactions: getTransactionsList([
+                            { date: DateTime.fromISO('2019-10-01'), units: 167, cost: 98503 },
+                            { date: DateTime.fromISO('2019-10-27'), units: -23, cost: -130 },
+                        ]),
+                    },
+                ],
+                period: 'somePeriod',
+                cache: {},
+            },
+        }),
+        0,
+    );
+});
+
+test('getDayGain returns 0 when the cache contains only one item', t => {
+    t.is(
+        getDayGain({
+            funds: {
+                items: [
+                    {
+                        id: 'fund1',
+                        transactions: getTransactionsList([
+                            { date: DateTime.fromISO('2019-10-09'), units: 345, cost: 1199 },
+                        ]),
+                    },
+                    {
+                        id: 'fund2',
+                        transactions: getTransactionsList([
+                            { date: DateTime.fromISO('2019-10-01'), units: 167, cost: 98503 },
+                            { date: DateTime.fromISO('2019-10-27'), units: -23, cost: -130 },
+                        ]),
+                    },
+                ],
+                period: 'somePeriod',
+                cache: {
+                    somePeriod: {
+                        startTime: DateTime.fromISO('2019-10-10').ts / 1000,
+                        cacheTimes: [10],
+                        prices: {
+                            fund1: {
+                                startIndex: 1,
+                                values: [109, 113.2],
+                            },
+                            fund2: {
+                                startIndex: 0,
+                                values: [56.2, 57.9, 49.3],
+                            },
+                        },
+                    },
+                },
+            },
+        }),
+        0,
+    );
 });

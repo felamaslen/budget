@@ -40,6 +40,14 @@ export const Column = styled.span`
         }};
     justify-content: ${align};
     text-align: ${align};
+
+    ${PageFunds} & {
+        ${({ column }) =>
+            column === 'item' &&
+            css`
+                flex: 0 1 376px;
+            `};
+    }
 `;
 
 export const Row = styled(RowBase)`
@@ -98,11 +106,5 @@ export const ButtonDelete = styled.div`
         display: inline-flex;
         align-items: center;
         justify-content: center;
-    }
-
-    ${breakpoint(breakpoints.mobile)} {
-        ${PageFunds} & {
-            flex: 1;
-        }
     }
 `;

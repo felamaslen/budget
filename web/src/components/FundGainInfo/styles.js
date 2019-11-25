@@ -1,19 +1,26 @@
 import styled, { css } from 'styled-components';
-import { rgb } from 'polished';
+import { rgb, desaturate } from 'polished';
 import {
     breakpoints,
     upArrow,
+    upArrowStrong,
     downArrow,
+    downArrowStrong,
     colors,
 } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
-
+import { breakpoint, rem } from '~client/styled/mixins';
+import { InlineFlex } from '~client/styled/shared/layout';
 import { Row as ListRowDesktop } from '~client/components/ListRowDesktop/styles';
+
+const profitColor = (postProcess = value => value) => ({ gain }) =>
+    postProcess(gain >= 0 ? colors.profit : colors.loss);
 
 const Column = styled.span`
     display: flex;
     flex: 1 0 0;
     flex-flow: column;
+    overflow: visible;
+    text-overflow: none;
 `;
 
 export const Value = styled.span`
@@ -21,12 +28,12 @@ export const Value = styled.span`
     text-align: left;
     flex: 1 1 0;
     font-weight: bold;
-    font-size: 1.1em;
+    font-size: ${rem(18)};
     color: ${colors['slightly-dark']};
+    overflow: visible !important;
 `;
 
-export const Breakdown = styled.span`
-    display: flex;
+export const Breakdown = styled(InlineFlex)`
     flex: 2 1 0;
 `;
 export const Overall = styled(Column)`
@@ -37,26 +44,47 @@ export const Overall = styled(Column)`
 export const DayGainOuter = styled(Column)``;
 
 const BreakdownValue = styled.span`
+    color: ${profitColor()};
     flex: 1 0 0;
-    font-size: 0.8em;
+    font-size: ${rem(13)};
     line-height: 24px;
     height: 24px;
-    background: ${colors['translucent-l8']};
+    background: ${colors['translucent-l6']};
 `;
 
 const BreakdownAbs = styled(BreakdownValue)`
     &::before {
-        content: ${({ gain }) => (gain >= 0 ? upArrow : downArrow)};
+        content: ${({ gain }) => {
+            if (gain >= 0.1) {
+                return upArrowStrong;
+            }
+            if (gain >= 0) {
+                return upArrow;
+            }
+            if (gain > -0.05) {
+                return downArrow;
+            }
+
+            return downArrowStrong;
+        }};
         font-style: normal;
-        font-weight: normal;
         margin-right: 0.2em;
     }
 `;
 
 export const GainAbs = styled(BreakdownAbs)``;
 export const Gain = styled(BreakdownValue)``;
-export const DayGainAbs = styled(BreakdownAbs)``;
-export const DayGain = styled(BreakdownValue)``;
+
+const breakdownDay = css`
+    color: ${profitColor(desaturate(0.5))};
+`;
+
+export const DayGainAbs = styled(BreakdownAbs)`
+    ${breakdownDay};
+`;
+export const DayGain = styled(BreakdownValue)`
+    ${breakdownDay};
+`;
 
 export const Text = styled.span.attrs(({ color }) => ({
     style: { backgroundColor: rgb(...color) },
@@ -87,7 +115,7 @@ export const Text = styled.span.attrs(({ color }) => ({
 export const FundGainInfo = styled.span`
     flex: 0 0 200px;
     z-index: 1;
-    color: ${({ gain }) => (gain >= 0 ? colors.profit : colors.loss)};
+    color: ${profitColor()};
 
     ${breakpoint(breakpoints.mobile)} {
         display: flex;

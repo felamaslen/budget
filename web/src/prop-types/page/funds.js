@@ -17,5 +17,7 @@ export const fundItemShape = PropTypes.shape({
 
 export const cachedValueShape = PropTypes.shape({
     value: PropTypes.number.isRequired,
+    dayGain: PropTypes.number.isRequired,
+    dayGainAbs: PropTypes.number.isRequired,
     ageText: PropTypes.string.isRequired,
 });

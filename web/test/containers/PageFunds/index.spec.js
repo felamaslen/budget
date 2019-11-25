@@ -52,7 +52,7 @@ test('funds meta - mobile info box', t => {
     t.is(meta.childNodes.length, 1);
 
     const [div] = meta.childNodes;
-    t.is(div.childNodes.length, 2);
+    t.is(div.childNodes.length, 3);
 
     const [gain, graph] = div.childNodes;
 
