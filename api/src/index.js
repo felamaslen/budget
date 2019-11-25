@@ -1,3 +1,5 @@
+import '@babel/polyfill';
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import serveStatic from 'serve-static';
@@ -25,19 +27,27 @@ function setupLogging(app) {
     if (config.debug) {
         app.use(webLogger('dev'));
     } else {
-        webLogger.token('remote-addr', (req) => req.headers['x-real-ip']
-            || req.headers['x-forwarded-for']
-            || req.connection.remoteAddress);
+        webLogger.token(
+            'remote-addr',
+            req =>
+                req.headers['x-real-ip'] ||
+                req.headers['x-forwarded-for'] ||
+                req.connection.remoteAddress,
+        );
 
-        app.use(webLogger('common', {
-            skip: (req, res) => res.statusCode < 400,
-            stream: process.stderr,
-        }));
+        app.use(
+            webLogger('common', {
+                skip: (req, res) => res.statusCode < 400,
+                stream: process.stderr,
+            }),
+        );
 
-        app.use(webLogger('common', {
-            skip: (req, res) => res.statusCode >= 400,
-            stream: process.stdout,
-        }));
+        app.use(
+            webLogger('common', {
+                skip: (req, res) => res.statusCode >= 400,
+                stream: process.stdout,
+            }),
+        );
     }
 }
 
@@ -68,9 +78,7 @@ function setupApiDocs(app) {
 
     const swaggerOptions = {
         swaggerDefinition,
-        apis: [
-            path.join(__dirname, './routes/**/index.js'),
-        ],
+        apis: [path.join(__dirname, './routes/**/index.js')],
     };
 
     const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -82,7 +90,9 @@ function setupApiDocs(app) {
 
     const swaggerUiAssetPath = swaggerUiDist.getAbsoluteFSPath();
 
-    app.get('/docs/api', (req, res) => res.sendFile(path.join(__dirname, '../../docs/api/index.html')));
+    app.get('/docs/api', (req, res) =>
+        res.sendFile(path.join(__dirname, '../../docs/api/index.html')),
+    );
     app.use('/docs/', express.static(swaggerUiAssetPath));
 }
 
@@ -107,22 +117,26 @@ function setupDevServer(app) {
     const compiler = require('webpack')(conf);
 
     // eslint-disable-next-line import/no-extraneous-dependencies, global-require
-    app.use(require('webpack-dev-middleware')(compiler, {
-        publicPath: '/',
-        stats: {
-            colors: true,
-            modules: false,
-            chunks: false,
-            reasons: false,
-        },
-        hot: true,
-        quiet: false,
-    }));
+    app.use(
+        require('webpack-dev-middleware')(compiler, {
+            publicPath: '/',
+            stats: {
+                colors: true,
+                modules: false,
+                chunks: false,
+                reasons: false,
+            },
+            hot: true,
+            quiet: false,
+        }),
+    );
 
     // eslint-disable-next-line import/no-extraneous-dependencies, global-require
-    app.use(require('webpack-hot-middleware')(compiler, {
-        log: console.log, // eslint-disable-line no-console
-    }));
+    app.use(
+        require('webpack-hot-middleware')(compiler, {
+            log: console.log, // eslint-disable-line no-console
+        }),
+    );
 }
 
 function setupWebApp(app) {
@@ -146,9 +160,12 @@ function setupWebApp(app) {
     };
 
     // web app static files
-    app.use('/', serveStatic(path.resolve(__dirname, '../../web/build'), {
-        maxAge: 3600 * 24 * 100 * 1000,
-    }));
+    app.use(
+        '/',
+        serveStatic(path.resolve(__dirname, '../../web/build'), {
+            maxAge: 3600 * 24 * 100 * 1000,
+        }),
+    );
 
     app.get('/:pageName?', singlePageApp);
     app.get('/:pageName/*', singlePageApp);
