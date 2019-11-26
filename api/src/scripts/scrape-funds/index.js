@@ -1,3 +1,5 @@
+import '@babel/polyfill';
+
 import commandLineArgs from 'command-line-args';
 
 import config from '~api/config';
