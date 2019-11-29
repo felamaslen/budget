@@ -6,22 +6,6 @@ const DeadCodePlugin = require('webpack-deadcode-plugin');
 
 const __DEV__ = process.env.NODE_ENV === 'development';
 
-function sassLoader() {
-    const common = [
-        'css-loader',
-        {
-            loader: 'postcss-loader',
-        },
-        'sass-loader',
-    ];
-
-    if (__DEV__) {
-        return ['style-loader', ...common];
-    }
-
-    return [MiniCssExtractPlugin.loader, ...common];
-}
-
 function getPlugins() {
     const common = [
         new DeadCodePlugin({
@@ -114,11 +98,6 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 use: 'babel-loader',
-            },
-            {
-                test: /\.scss$/,
-                exclude: /node_modules/,
-                use: sassLoader(),
             },
             {
                 test: /\.css$/,
