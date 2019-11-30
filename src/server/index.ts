@@ -3,6 +3,7 @@ import path from 'path';
 import Koa from 'koa';
 import Router from 'koa-router';
 import helmet from 'koa-helmet';
+import bodyParser from 'koa-bodyparser';
 
 import config from '~/server/config';
 import { logger } from '~/server/modules/logger';
@@ -24,6 +25,7 @@ function createServer(): Koa {
   const app = new Koa();
 
   app.use(helmet());
+  app.use(bodyParser());
   app.use(healthRoute().routes());
   appRoute(app);
 
