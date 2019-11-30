@@ -10,6 +10,7 @@ export default {
   logLevel: process.env.LOG_LEVEL || 'info',
   databaseUrl: process.env.DATABASE_URL,
   port: Number(process.env.PORT) || 3000,
+  userTokenSecret: process.env.USER_TOKEN_SECRET || '',
   webUrl: process.env.WEB_URL || '',
   openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
   user: {

@@ -3,6 +3,7 @@
     "prettier",
     "react",
     "react-hooks",
+    "jest",
     "import"
   ],
   "parser": "@typescript-eslint/parser",
@@ -13,6 +14,7 @@
   "env": {
       "browser": true,
       "commonjs": true,
+      "jest/globals": true,
       "es6": true,
       "node": true
   },
