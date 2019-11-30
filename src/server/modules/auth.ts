@@ -11,6 +11,12 @@ export interface user {
   pinHash?: string;
 }
 
+export interface loginResponse {
+  uid: string;
+  name: string;
+  token: string;
+}
+
 export async function genToken(
   { uid }: user,
   secret: string = config.userTokenSecret,
@@ -56,8 +62,8 @@ export async function verifyToken(
   });
 }
 
-export const loginWithPin = withDb<user | null>(
-  async (db: DatabasePoolConnectionType, pin: string): Promise<user | null> => {
+export const loginWithPin = withDb<loginResponse | null>(
+  async (db: DatabasePoolConnectionType, pin: string) => {
     const users = await db.query(sql`
 select
   ${sql.join(
@@ -71,7 +77,7 @@ select
 from users
     `);
 
-    return users.rows.reduce(
+    const loggedInUser = await users.rows.reduce(
       (
         last: Promise<user | null>,
         item: QueryResultRowType<'uid' | 'pinHash'>,
@@ -98,5 +104,14 @@ from users
         ),
       Promise.resolve(null),
     );
+
+    if (!loggedInUser) {
+      return null;
+    }
+
+    const token = await genToken(loggedInUser);
+    const { uid, name } = loggedInUser;
+
+    return { uid, name: name || '', token };
   },
 );
