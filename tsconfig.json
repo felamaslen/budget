@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "react",
@@ -13,7 +13,6 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "lib": ["es2015", "dom"],
-    "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"],
@@ -21,7 +20,9 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "migrations",
+    "seeds"
   ],
   "exclude": [
     "node_modules"
