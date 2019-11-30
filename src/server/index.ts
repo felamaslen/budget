@@ -9,6 +9,7 @@ import config from '~/server/config';
 import { logger } from '~/server/modules/logger';
 
 import appRoute from '~/server/routes/app';
+import authRoute from '~/server/routes/auth';
 
 function healthRoute(): Router {
   const router = new Router();
@@ -27,6 +28,8 @@ function createServer(): Koa {
   app.use(helmet());
   app.use(bodyParser());
   app.use(healthRoute().routes());
+
+  app.use(authRoute().middleware());
   appRoute(app);
 
   return app;

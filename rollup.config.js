@@ -17,6 +17,19 @@ const external = [
   ...Object.keys(pkg.peerDependencies || {}),
   'path',
   'fs',
+  'stream',
+  'readable-stream',
+  'url',
+  'util',
+  'events',
+  'net',
+  'tls',
+  'buffer',
+  'crypto',
+  'dns',
+  'assert',
+  'string_decoder',
+  'async_hooks',
 ];
 
 const globals = {
@@ -53,6 +66,8 @@ export default {
       include: /node_modules/,
       namedExports: {
         'react-dom': ['render', 'hydrate'],
+        slonik: ['createPool'],
+        'slonik-interceptor-query-logging': ['createQueryLoggingInterceptor'],
       },
     }),
     alias({

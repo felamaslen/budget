@@ -1,6 +1,7 @@
 FROM node:10-alpine
 
-RUN apk add --no-cache python gcc g++ make
+RUN apk add --no-cache python gcc g++ make jq postgresql-dev
+ENV NODE_JQ_SKIP_INSTALL_BINARY=true
 
 WORKDIR /opt/app
 

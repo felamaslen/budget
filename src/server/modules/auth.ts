@@ -1,9 +1,14 @@
+import { sql, DatabasePoolConnectionType, QueryResultRowType } from 'slonik';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import addDays from 'date-fns/addDays';
 import config from '~/server/config';
+import { withDb } from '~/server/modules/db';
 
 export interface user {
   uid: string;
+  name?: string;
+  pinHash?: string;
 }
 
 export async function genToken(
@@ -50,3 +55,48 @@ export async function verifyToken(
     });
   });
 }
+
+export const loginWithPin = withDb<user | null>(
+  async (db: DatabasePoolConnectionType, pin: string): Promise<user | null> => {
+    const users = await db.query(sql`
+select
+  ${sql.join(
+    [
+      sql.identifier(['uid']),
+      sql.identifier(['name']),
+      sql`${sql.identifier(['pin_hash'])} as ${sql.identifier(['pinHash'])}`,
+    ],
+    sql`, `,
+  )}
+from users
+    `);
+
+    return users.rows.reduce(
+      (
+        last: Promise<user | null>,
+        item: QueryResultRowType<'uid' | 'pinHash'>,
+      ): Promise<user | null> =>
+        last.then(
+          (validUser: user | null): Promise<user | null> => {
+            if (validUser) {
+              return Promise.resolve(validUser);
+            }
+
+            return new Promise((resolve, reject) => {
+              bcrypt.compare(pin, item.pinHash as string, (err: Error, res: boolean) => {
+                if (err) {
+                  return reject(err);
+                }
+                if (!res) {
+                  return resolve(null);
+                }
+
+                return resolve(item as user);
+              });
+            });
+          },
+        ),
+      Promise.resolve(null),
+    );
+  },
+);
