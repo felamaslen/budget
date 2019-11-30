@@ -5,7 +5,7 @@
     "react-hooks",
     "import"
   ],
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 8,
     "sourceType": "module"
@@ -25,12 +25,9 @@
     "import/resolver": {
       "alias": {
         "map": [
-          ["~client", "./web/src"],
-          ["~client-test", "./web/test"],
-          ["~api", "./api/src"],
-          ["~api-test", "./api/test"]
+          ["~", "./src"]
         ],
-        "extensions": [".js"]
+        "extensions": [".ts", ".tsx", ".js"]
       }
     },
     "react": {
@@ -43,6 +40,9 @@
     "no-bitwise": 0,
     "no-underscore-dangle": 0,
     "prettier/prettier": ["error"],
+    "react/jsx-filename-extension": [2, {
+      "extensions": [".jsx", ".tsx"],
+    }],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
   }

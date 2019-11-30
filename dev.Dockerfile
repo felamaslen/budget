@@ -15,4 +15,4 @@ RUN npm install
 ENV SKIP_APP=false
 ENV DEBUG=
 
-CMD node_modules/.bin/babel-watch -I -w ./api/src ./api/src
+CMD npm run dev:run

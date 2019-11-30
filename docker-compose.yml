@@ -19,10 +19,11 @@ services:
       - .env
     environment:
       NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: debug
       DEBUG: ${DEBUG}
       SKIP_APP: ${SKIP_APP}
       FAKE_STOCK_PRICES: "true"
-      PORT: 3000
       DATABASE_URL: postgres://docker:docker@db:5432/budget
       WEB_URL: http://localhost:3000
       DEFAULT_PIN: 1234

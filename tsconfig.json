@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "isolatedModules": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "lib": ["es2015", "dom"],
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"],
+      "~test/*": ["test/*"]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
