@@ -11,7 +11,7 @@ export interface user {
   pinHash?: string;
 }
 
-export interface loginResponse {
+export interface LoginResponse {
   uid: string;
   name: string;
   token: string;
@@ -62,7 +62,7 @@ export async function verifyToken(
   });
 }
 
-export const loginWithPin = withDb<loginResponse | null>(
+export const loginWithPin = withDb<LoginResponse | null>(
   async (db: DatabasePoolConnectionType, pin: string) => {
     const users = await db.query(sql`
 select

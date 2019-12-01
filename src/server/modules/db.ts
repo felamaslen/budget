@@ -4,7 +4,7 @@ import config from '~/server/config';
 
 const interceptors = [createQueryLoggingInterceptor()];
 
-const pool = createPool(config.databaseUrl as string, { interceptors });
+const pool = createPool(config.databaseUrl, { interceptors });
 
 export const withDb = <T>(handler: (db: DatabasePoolConnectionType, ...args: any[]) => any) => (
   ...args: any[]

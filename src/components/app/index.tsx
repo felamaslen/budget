@@ -1,9 +1,13 @@
-import * as React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Switch, Route } from 'react-router-dom';
+
+const Food = () => <span>Food route</span>;
+const General = () => <span>General route</span>;
 
 export default function App() {
-  const [color, setColor] = React.useState<boolean>(false);
-  const timer = React.useRef<number>();
-  React.useEffect(() => {
+  const [color, setColor] = useState<boolean>(false);
+  const timer = useRef<number>();
+  useEffect(() => {
     timer.current = window.setInterval(() => setColor(last => !last), 1000);
 
     return () => clearInterval(timer.current);
@@ -16,6 +20,10 @@ export default function App() {
       }}
     >
       <h1>Hello world</h1>
+      <Switch>
+        <Route path="/food" component={Food} />
+        <Route path="/general" component={General} />
+      </Switch>
     </div>
   );
 }

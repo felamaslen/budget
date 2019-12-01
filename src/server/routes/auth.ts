@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 import createRouter, { Router, Joi } from 'koa-joi-router';
-import { loginResponse, loginWithPin } from '~/server/modules/auth';
+import { LoginResponse, loginWithPin } from '~/server/modules/auth';
 
 export default function authRoute(): Router {
   const router = createRouter();
@@ -35,7 +35,7 @@ export default function authRoute(): Router {
     },
     handler: async (ctx: Context) => {
       try {
-        const user: loginResponse | null = await loginWithPin(ctx.request.body.pin);
+        const user: LoginResponse | null = await loginWithPin(ctx.request.body.pin);
         if (!user) {
           throw new Error('Invalid PIN');
         }

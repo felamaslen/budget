@@ -34,10 +34,12 @@ async function serveApp(ctx: any): Promise<void> {
 
 export default function appRoute(app: Koa): void {
   if (process.env.NODE_ENV === 'development') {
+    /* eslint-disable global-require, import/no-extraneous-dependencies */
     const compiler = require('webpack')(require('../../../webpack.config'));
 
     app.use(require('koa-webpack-dev-middleware')(compiler));
     app.use(require('koa-webpack-hot-middleware')(compiler));
+    /* eslint-enable global-require, import/no-extraneous-dependencies */
   }
 
   app.use(

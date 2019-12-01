@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 services:
   budget:
     container_name: budget
@@ -23,8 +23,9 @@ services:
       LOG_LEVEL: debug
       DEBUG: ${DEBUG}
       SKIP_APP: ${SKIP_APP}
-      FAKE_STOCK_PRICES: "true"
+      FAKE_STOCK_PRICES: 'true'
       DATABASE_URL: postgres://docker:docker@db:5432/budget
+      REDIS_URL: redis://redis
       WEB_URL: http://localhost:3000
       DEFAULT_PIN: 1234
   db:
@@ -37,6 +38,10 @@ services:
     environment:
       POSTGRES_USER: docker
       POSTGRES_PASSWORD: docker
+  redis:
+    image: redis
+    networks:
+      - net_budget_dev
 networks:
   net_budget_dev:
     driver: bridge

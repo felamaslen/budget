@@ -1,7 +1,9 @@
-import * as md5 from 'md5';
-import * as Knex from 'knex';
-import { generateUserPin, userPin } from './common';
-import config from '../src/server/config';
+import 'module-alias/register'; // eslint-disable-line import/no-extraneous-dependencies
+import md5 from 'md5';
+import Knex from 'knex';
+import { generateUserPin } from './common';
+import config from '~/server/config';
+import { logger } from '~/server/modules/logger';
 
 async function generateFunds(uid: string, db: Knex): Promise<void> {
   const cids = await db
@@ -99,7 +101,7 @@ async function generateListData(uid: string, db: Knex): Promise<void> {
 
 exports.seed = async (knex: Knex) => {
   if (process.env.NODE_ENV !== 'test') {
-    console.log('Skipping test data seed, since NODE_ENV !== test');
+    logger.warn('Skipping test data seed, since NODE_ENV !== test');
 
     return null;
   }

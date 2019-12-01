@@ -1,12 +1,13 @@
 import '@babel/polyfill';
-import path from 'path';
 import Koa from 'koa';
+import http, { Server } from 'http';
 import Router from 'koa-router';
 import helmet from 'koa-helmet';
 import bodyParser from 'koa-bodyparser';
 
 import config from '~/server/config';
 import { logger } from '~/server/modules/logger';
+import { setupSockets } from '~/server/modules/socket';
 
 import appRoute from '~/server/routes/app';
 import authRoute from '~/server/routes/auth';
@@ -22,8 +23,11 @@ function healthRoute(): Router {
   return router;
 }
 
-function createServer(): Koa {
+function createServer(): Server {
   const app = new Koa();
+  const server = http.createServer(app.callback());
+
+  setupSockets(server);
 
   app.use(helmet());
   app.use(bodyParser());
@@ -32,7 +36,7 @@ function createServer(): Koa {
   app.use(authRoute().middleware());
   appRoute(app);
 
-  return app;
+  return server;
 }
 
 function run(): void {
