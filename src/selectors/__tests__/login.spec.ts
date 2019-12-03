@@ -1,6 +1,5 @@
-import { createMemoryHistory } from 'history';
 import { getToken, getLoggedIn } from '~/selectors/login';
-import reducer, { GlobalState } from '~/reducers';
+import { GlobalState } from '~/reducers';
 
 test('getToken gets the token from the state', () => {
   const state: GlobalState = {

@@ -1,14 +1,16 @@
 import { testSaga } from 'redux-saga-test-plan';
 import axios from 'axios';
+import { push } from 'connected-react-router';
 
 import config from '~/config';
 import { getLoggedIn } from '~/selectors/login';
 import { errored } from '~/actions/app';
 import { loginRequested, loggedIn, LoginResponsePayload } from '~/actions/login';
+import { getCurrentPathname } from '~/selectors/router';
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
 
-import loginSaga, { onLoginToggle, attemptLogin, attemptLogout } from '~/sagas/login';
+import loginSaga, { onLoginToggle, attemptLogin, attemptLogout, watchLogout } from '~/sagas/login';
 
 test('onLoginToggle waits for login status', () => {
   testSaga(onLoginToggle)
@@ -79,12 +81,34 @@ test('attemptLogin handles errors', () => {
     .isDone();
 });
 
-test('loginSaga watches LOGGED_IN and calls attemptLogin', () => {
+test('watchLogout redirects to / if not logged in', () => {
+  testSaga(watchLogout)
+    .next()
+    .call(onLoginToggle)
+    .next(true)
+    .call(onLoginToggle)
+    .next(true)
+    .call(onLoginToggle)
+    .next(false)
+    .select(getCurrentPathname)
+    .next('/')
+    .call(onLoginToggle)
+    .next(false)
+    .select(getCurrentPathname)
+    .next('/some-page')
+    .put(push('/'))
+    .next()
+    .call(onLoginToggle);
+});
+
+test('loginSaga forks other sagas', () => {
   testSaga(loginSaga)
     .next()
     .takeLatest(LOGIN_REQUESTED, attemptLogin)
     .next()
     .takeLatest(LOGGED_OUT, attemptLogout)
+    .next()
+    .fork(watchLogout)
     .next()
     .isDone();
 });

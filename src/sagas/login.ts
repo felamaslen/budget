@@ -1,11 +1,13 @@
 import { SagaIterator } from '@redux-saga/core';
-import { select, takeLatest, take, call, put } from '@redux-saga/core/effects';
+import { fork, select, takeLatest, take, call, put } from '@redux-saga/core/effects';
 import axios from 'axios';
+import { push } from 'connected-react-router';
 
 import config from '~/config';
 import { getLoggedIn } from '~/selectors/login';
 import { errored } from '~/actions/app';
 import { loggedIn, LoginRequestAction } from '~/actions/login';
+import { getCurrentPathname } from '~/selectors/router';
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
 
@@ -50,7 +52,20 @@ export function* attemptLogout() {
   }
 }
 
+export function* watchLogout() {
+  while (true) {
+    const isLoggedIn = yield call(onLoginToggle);
+    if (!isLoggedIn) {
+      const currentPathname = yield select(getCurrentPathname);
+      if (currentPathname !== '/') {
+        yield put(push('/'));
+      }
+    }
+  }
+}
+
 export default function* loginSaga(): SagaIterator {
   yield takeLatest(LOGIN_REQUESTED, attemptLogin);
   yield takeLatest(LOGGED_OUT, attemptLogout);
+  yield fork(watchLogout);
 }
