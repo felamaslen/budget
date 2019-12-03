@@ -19,6 +19,7 @@ async function serveApp(ctx: any): Promise<void> {
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   </head>
   <body>
+    <pre>${JSON.stringify(ctx.session)}</pre>
     <div id="root">${renderToString(
       <StaticRouter location={ctx.request.url}>
         <App />

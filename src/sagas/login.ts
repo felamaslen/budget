@@ -40,6 +40,17 @@ export function* attemptLogin({ pin }: LoginRequestAction): SagaIterator {
   }
 }
 
+export function* attemptLogout() {
+  try {
+    yield call<typeof axios>(axios, `${config.webUrl}/logout`, {
+      method: 'POST',
+    });
+  } catch (err) {
+    yield call([console, 'warn'], 'Error logging out:', err.message);
+  }
+}
+
 export default function* loginSaga(): SagaIterator {
   yield takeLatest(LOGIN_REQUESTED, attemptLogin);
+  yield takeLatest(LOGGED_OUT, attemptLogout);
 }

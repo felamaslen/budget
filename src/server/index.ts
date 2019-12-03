@@ -7,7 +7,8 @@ import bodyParser from 'koa-bodyparser';
 
 import config from '~/server/config';
 import { logger } from '~/server/modules/logger';
-import { setupSockets } from '~/server/modules/socket';
+import setupSockets from '~/server/modules/socket';
+import setupSessions from '~/server/modules/session';
 
 import appRoute from '~/server/routes/app';
 import authRoute from '~/server/routes/auth';
@@ -33,6 +34,7 @@ function createServer(): Server {
   app.use(bodyParser());
   app.use(healthRoute().routes());
 
+  setupSessions(app);
   app.use(authRoute().middleware());
   appRoute(app);
 

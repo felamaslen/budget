@@ -73,7 +73,7 @@ function onConnection(socket: SocketWithAuth) {
   // socketRoutes(socket, ioServer);
 }
 
-export function setupSockets(server: Server) {
+export default function setupSockets(server: Server) {
   const io = setupIO(server);
 
   io.adapter(

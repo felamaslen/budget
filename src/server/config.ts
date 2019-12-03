@@ -10,6 +10,7 @@ export default {
   logLevel: process.env.LOG_LEVEL || 'info',
   databaseUrl: process.env.DATABASE_URL || '',
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
+  sessionSecret: process.env.SESSION_SECRET || 'supersecret',
   port: Number(process.env.PORT) || 3000,
   userTokenSecret: process.env.USER_TOKEN_SECRET || '',
   userTokenExpiryDays: Number(process.env.USER_TOKEN_EXPIRY_DAYS) || 30,

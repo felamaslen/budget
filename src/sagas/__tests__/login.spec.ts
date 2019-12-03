@@ -8,7 +8,7 @@ import { loginRequested, loggedIn, LoginResponsePayload } from '~/actions/login'
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
 
-import loginSaga, { onLoginToggle, attemptLogin } from '~/sagas/login';
+import loginSaga, { onLoginToggle, attemptLogin, attemptLogout } from '~/sagas/login';
 
 test('onLoginToggle waits for login status', () => {
   testSaga(onLoginToggle)
@@ -83,6 +83,8 @@ test('loginSaga watches LOGGED_IN and calls attemptLogin', () => {
   testSaga(loginSaga)
     .next()
     .takeLatest(LOGIN_REQUESTED, attemptLogin)
+    .next()
+    .takeLatest(LOGGED_OUT, attemptLogout)
     .next()
     .isDone();
 });
