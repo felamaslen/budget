@@ -12,7 +12,7 @@ export interface PreloadedState {
   login?: LoginState;
 }
 
-interface State extends GlobalState {
+export interface State extends GlobalState {
   router: RouterState;
 }
 
