@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
+import LoginStatus from '~/containers/partials/login-status';
+
 const Food = () => <span>Food route</span>;
 const General = () => <span>General route</span>;
 
@@ -20,6 +22,9 @@ export default function App() {
       }}
     >
       <h1>Hello world</h1>
+      <section>
+        <LoginStatus />
+      </section>
       <Switch>
         <Route path="/food" component={Food} />
         <Route path="/general" component={General} />

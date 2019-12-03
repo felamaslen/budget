@@ -1,15 +1,31 @@
 import path from 'path';
-import Koa from 'koa';
-import Router from 'koa-router';
+import Koa, { Context } from 'koa';
+import createRouter, { Router } from 'koa-joi-router';
 import serve from 'koa-static';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
+import { Provider } from 'react-redux';
 
 import config from '~/server/config';
+import { getPreloadedState } from '~/server/modules/state';
+import configureStore from '~/store';
+import { GlobalState } from '~/reducers';
 import App from '~/components/app/index';
 
-async function serveApp(ctx: any): Promise<void> {
+async function serveApp(ctx: Context): Promise<void> {
+  const history = createMemoryHistory({
+    initialEntries: [ctx.request.url],
+  });
+
+  const preloadedState: GlobalState = await getPreloadedState(ctx.session);
+  if (!(preloadedState.login && preloadedState.login.uid)) {
+    ctx.session = null;
+  }
+
+  const store = configureStore(preloadedState, history);
+
   ctx.body = `
 <!doctype html>
 <html>
@@ -19,12 +35,14 @@ async function serveApp(ctx: any): Promise<void> {
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
   </head>
   <body>
-    <pre>${JSON.stringify(ctx.session)}</pre>
     <div id="root">${renderToString(
-      <StaticRouter location={ctx.request.url}>
-        <App />
-      </StaticRouter>,
+      <Provider store={store}>
+        <StaticRouter location={ctx.request.url}>
+          <App />
+        </StaticRouter>
+      </Provider>,
     )}</div>
+    <script>var __PRELOADED_STATE__=${JSON.stringify(preloadedState)};</script>
     <script src="/assets/bundle.js?v=${config.version}"></script>
   </body>
 </html>
@@ -51,10 +69,19 @@ export default function appRoute(app: Koa): void {
     }),
   );
 
-  const router = new Router();
+  const router = createRouter();
 
-  router.get('/', serveApp);
-  router.get('/*', serveApp);
+  router.route({
+    method: 'get',
+    path: '/',
+    handler: serveApp,
+  });
 
-  app.use(router.routes());
+  router.route({
+    method: 'get',
+    path: '/*',
+    handler: serveApp,
+  });
+
+  app.use(router.middleware());
 }

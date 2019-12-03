@@ -42,6 +42,7 @@ export default function authRoute(): Router {
 
         if (ctx.session) {
           ctx.session.userId = user.uid;
+          ctx.session.token = user.token;
           ctx.session.save();
         }
 

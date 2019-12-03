@@ -11,10 +11,14 @@ const sagaMiddleware = createSagaMiddleware();
 declare global {
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
+    __PRELOADED_STATE__?: PreloadedState;
   }
 }
 
-export default function configureStore(preloadedState: PreloadedState = {}, history: History) {
+export default function configureStore(
+  preloadedState: PreloadedState | null = null,
+  history: History,
+) {
   const middleware = [sagaMiddleware, routerMiddleware(history)];
 
   const enhancers = [applyMiddleware(...middleware)];
@@ -24,7 +28,8 @@ export default function configureStore(preloadedState: PreloadedState = {}, hist
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       : compose;
 
-  const store = createStore(createReducer(history), preloadedState, composeEnhancers(...enhancers));
+  const state = preloadedState || window.__PRELOADED_STATE__ || {};
+  const store = createStore(createReducer(history), state, composeEnhancers(...enhancers));
 
   sagaMiddleware.run(rootSaga);
 

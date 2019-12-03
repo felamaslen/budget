@@ -9,7 +9,7 @@ import App from '~/components/app';
 import '~/images/favicon.png';
 
 const history = createBrowserHistory();
-const store = configureStore({}, history);
+const store = configureStore(null, history);
 
 function renderApp(Component: typeof App = App): void {
   hydrate(
