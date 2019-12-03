@@ -17,7 +17,7 @@ function getPlugins() {
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        WEB_URL: JSON.stringify(process.env.WEB_URL) || 'http://localhost:3000',
+        WEB_URL: JSON.stringify(process.env.WEB_URL || 'http://localhost:3000'),
         SKIP_LOG_ACTIONS: JSON.stringify(process.env.SKIP_LOG_ACTIONS || ''),
         BIRTH_DATE: JSON.stringify(process.env.BIRTH_DATE || '1990-01-01'),
         STOCK_INDICES: JSON.stringify(process.env.STOCK_INDICES || ''),

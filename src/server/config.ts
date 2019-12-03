@@ -14,7 +14,6 @@ export default {
   port: Number(process.env.PORT) || 3000,
   userTokenSecret: process.env.USER_TOKEN_SECRET || '',
   userTokenExpiryDays: Number(process.env.USER_TOKEN_EXPIRY_DAYS) || 30,
-  webUrl: process.env.WEB_URL || '',
   openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
   user: {
     banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,
