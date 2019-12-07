@@ -19,11 +19,6 @@
       "~/*": ["src/*"]
     }
   },
-  "include": [
-    "src",
-    "migrations",
-    "seeds"
-  ],
   "exclude": [
     "node_modules"
   ]
