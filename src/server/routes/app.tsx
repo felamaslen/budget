@@ -5,6 +5,7 @@ import serve from 'koa-static';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
+import { ServerStyleSheet } from 'styled-components';
 import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 
@@ -26,6 +27,20 @@ async function serveApp(ctx: Context): Promise<void> {
 
   const store = configureStore(preloadedState, history);
 
+  const sheet = new ServerStyleSheet();
+
+  const html = renderToString(
+    sheet.collectStyles(
+      <Provider store={store}>
+        <StaticRouter location={ctx.request.url}>
+          <App />
+        </StaticRouter>
+      </Provider>,
+    ),
+  );
+
+  const styleTags = sheet.getStyleTags();
+
   ctx.body = `
 <!doctype html>
 <html>
@@ -34,15 +49,10 @@ async function serveApp(ctx: Context): Promise<void> {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
     <link rel="icon" href="/assets/favicon.ico" type="image/png" />
+    ${styleTags}
   </head>
   <body>
-    <div id="root">${renderToString(
-      <Provider store={store}>
-        <StaticRouter location={ctx.request.url}>
-          <App />
-        </StaticRouter>
-      </Provider>,
-    )}</div>
+    <div id="root">${html}</div>
     <script>var __PRELOADED_STATE__=${JSON.stringify(preloadedState)};</script>
     <script src="/assets/bundle.js?v=${config.version}"></script>
   </body>
