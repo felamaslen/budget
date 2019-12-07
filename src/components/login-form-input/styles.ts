@@ -2,12 +2,11 @@ import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { breakpoints, colors } from '~/styled/variables';
 import { breakpoint, rem } from '~/styled/mixins';
-import { FlexCenter, RowSingleLine } from '~/styled/layout';
+import { Grid, FlexCenter, RowSingleLine } from '~/styled/layout';
 import { H3 } from '~/styled/typography';
 
 export const Box = styled.div`
   width: ${rem(240)};
-  height: ${rem(300)};
   text-align: center;
   background: ${colors.backgroundDark};
   border-radius: 4px;
@@ -15,7 +14,6 @@ export const Box = styled.div`
 
   ${breakpoint(breakpoints.mobile)} {
     width: ${rem(300)};
-    height: ${rem(450)};
   }
 `;
 
@@ -66,6 +64,66 @@ export const InputPin = styled(FlexCenter)<InputPinProps>`
       : css``};
 
   ${breakpoint(breakpoints.mobile)} {
-    height: 80px;
+    height: ${rem(80)};
+  }
+`;
+
+const buttonHeight = rem(48);
+
+export const InputPad = styled(Grid)`
+  padding: ${rem(12)} ${rem(6)};
+  grid-template-rows: repeat(4, buttonHeight);
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: ${rem(12)};
+  background: ${colors.backgroundMediumDark};
+  box-shadow: inset 0 0 13px ${colors.shadowMedium};
+  user-select: none;
+`;
+
+export const InputRow = styled(Grid)`
+  grid-template-columns: inherit;
+  grid-column: 1 / span 3;
+  grid-gap: ${rem(6)};
+  &:nth-child(1) {
+    grid-row: 1;
+  }
+  &:nth-child(2) {
+    grid-row: 2;
+  }
+  &:nth-child(3) {
+    grid-row: 3;
+  }
+  &:nth-child(4) {
+    grid-row: 4;
+  }
+`;
+
+interface DigitProps {
+  digit: number;
+}
+
+export const Digit = styled(FlexCenter)<DigitProps>`
+  margin: 0;
+  padding: 0;
+  height: ${buttonHeight};
+  line-height: ${buttonHeight};
+  font-size: ${rem(20)};
+  grid-column: ${({ digit }): number => {
+    if (digit === 0) {
+      return 2;
+    }
+
+    return 1 + ((digit - 1) % 3);
+  }};
+  color: ${colors.white};
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  letter-spacing: -1px;
+  position: relative;
+  transition: all linear 0.05s;
+
+  ${breakpoint(breakpoints.mobile)} {
+    font-size: ${rem(24)};
   }
 `;

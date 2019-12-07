@@ -1,4 +1,4 @@
-import React, { SFC, useState, useEffect } from 'react';
+import React, { SFC, useState, useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { GlobalState } from '~/reducers';
@@ -26,6 +26,8 @@ interface NativeKeyboardEvent {
 
 const LoginForm: SFC<LoginFormProps> = ({ isLoggedIn, onLogin }) => {
   const [pin, setPin] = useState<string>('');
+  const onInput = useCallback((digit: number) => setPin(last => `${last}${digit}`), []);
+
   useEffect((): (() => void | undefined) => {
     if (isLoggedIn) {
       return (): undefined => undefined;
@@ -33,13 +35,13 @@ const LoginForm: SFC<LoginFormProps> = ({ isLoggedIn, onLogin }) => {
 
     const onKeydown = (event: NativeKeyboardEvent): void => {
       if (!Number.isNaN(Number(event.key))) {
-        setPin((last: string) => `${last}${event.key}`);
+        onInput(Number(event.key));
       }
     };
 
     window.addEventListener('keydown', onKeydown);
     return (): void => window.removeEventListener('keydown', onKeydown);
-  }, [isLoggedIn]);
+  }, [isLoggedIn, onInput]);
 
   useEffect(() => {
     if (!isLoggedIn && pin.length === pinLength) {
@@ -54,7 +56,7 @@ const LoginForm: SFC<LoginFormProps> = ({ isLoggedIn, onLogin }) => {
 
   return (
     <FlexCenter>
-      <LoginFormInput pin={pin} setPin={setPin} length={pinLength} />
+      <LoginFormInput pin={pin} onInput={onInput} length={pinLength} />
     </FlexCenter>
   );
 };
