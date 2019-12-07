@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { SFC } from 'react';
 
 import * as Styled from './styles';
 
@@ -8,7 +8,7 @@ interface LoginFormInputProps {
   length: number;
 }
 
-export default function LoginFormInput({ pin, setPin, length }: LoginFormInputProps) {
+const LoginFormInput: SFC<LoginFormInputProps> = ({ pin, setPin, length }) => {
   return (
     <Styled.Box>
       <Styled.Title>{'Enter your PIN:'}</Styled.Title>
@@ -23,4 +23,6 @@ export default function LoginFormInput({ pin, setPin, length }: LoginFormInputPr
       </Styled.PinDisplay>
     </Styled.Box>
   );
-}
+};
+
+export default LoginFormInput;

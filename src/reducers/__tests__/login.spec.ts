@@ -1,4 +1,4 @@
-import reducer, { initialState, LoginState } from '~/reducers/login';
+import reducer, { LoginState } from '~/reducers/login';
 
 import { ErrorAction } from '~/actions/types';
 
@@ -13,7 +13,7 @@ import {
 
 import { ERRORED } from '~/constants/actions.rt';
 
-import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
+import { LOGGED_IN } from '~/constants/actions.app';
 
 test('LOGIN_REQUESTED sets loading and error state', () => {
   const state: LoginState = {

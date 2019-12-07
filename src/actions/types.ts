@@ -1,9 +1,11 @@
 import { ERRORED } from '~/constants/actions.rt';
 
+type Payload = object | string | number;
+
 export interface SocketAction {
   type: string;
   __FROM_SOCKET__?: boolean;
-  payload: any;
+  payload: Payload | Payload[] | undefined;
 }
 
 export interface ErrorAction<T> extends SocketAction {

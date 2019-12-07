@@ -1,20 +1,20 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import React, { SFC } from 'react';
 import { GlobalState } from '~/reducers';
 
 interface LoginStatusProps {
   userName?: string;
 }
 
-function LoginStatus({ userName }: LoginStatusProps) {
+const LoginStatus: SFC<LoginStatusProps> = ({ userName }) => {
   if (userName) {
     return <span>Logged in as {userName}</span>;
   }
 
   return <span>Logged out</span>;
-}
+};
 
-const mapStateToProps = (state: GlobalState) => ({
+const mapStateToProps = (state: GlobalState): object => ({
   userName: state.login.name,
 });
 

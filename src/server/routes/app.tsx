@@ -1,6 +1,6 @@
 import path from 'path';
 import Koa, { Context } from 'koa';
-import createRouter, { Router } from 'koa-joi-router';
+import createRouter from 'koa-joi-router';
 import serve from 'koa-static';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import config from '~/server/config';
 import { getPreloadedState } from '~/server/modules/state';
 import configureStore from '~/store';
-import { GlobalState } from '~/reducers';
+import { PreloadedState } from '~/reducers';
 import App from '~/components/app/index';
 
 async function serveApp(ctx: Context): Promise<void> {
@@ -19,7 +19,7 @@ async function serveApp(ctx: Context): Promise<void> {
     initialEntries: [ctx.request.url],
   });
 
-  const preloadedState: GlobalState = await getPreloadedState(ctx.session);
+  const preloadedState: PreloadedState = await getPreloadedState(ctx.session);
   if (!(preloadedState.login && preloadedState.login.uid)) {
     ctx.session = null;
   }
@@ -54,12 +54,12 @@ async function serveApp(ctx: Context): Promise<void> {
 
 export default function appRoute(app: Koa): void {
   if (process.env.NODE_ENV === 'development') {
-    /* eslint-disable global-require, import/no-extraneous-dependencies */
+    /* eslint-disable global-require, @typescript-eslint/no-var-requires, import/no-extraneous-dependencies */
     const compiler = require('webpack')(require('../../../webpack.config'));
 
     app.use(require('koa-webpack-dev-middleware')(compiler));
     app.use(require('koa-webpack-hot-middleware')(compiler));
-    /* eslint-enable global-require, import/no-extraneous-dependencies */
+    /* eslint-enable global-require, @typescript-eslint/no-var-requires, import/no-extraneous-dependencies */
   }
 
   app.use(

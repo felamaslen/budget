@@ -42,7 +42,7 @@ export function* attemptLogin({ pin }: LoginRequestAction): SagaIterator {
   }
 }
 
-export function* attemptLogout() {
+export function* attemptLogout(): SagaIterator {
   try {
     yield call<typeof axios>(axios, `${config.webUrl}/logout`, {
       method: 'POST',
@@ -52,7 +52,7 @@ export function* attemptLogout() {
   }
 }
 
-export function* watchLogout() {
+export function* watchLogout(): SagaIterator {
   while (true) {
     const isLoggedIn = yield call(onLoginToggle);
     if (!isLoggedIn) {

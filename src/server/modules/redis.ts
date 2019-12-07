@@ -23,9 +23,10 @@ export function getRedisConfig(): {
   };
 }
 
-export default function getRedisClient(key: string = ''): RedisClient {
+export default function getRedisClient(key = ''): RedisClient {
   const redisConfig = getRedisConfig();
 
+  // eslint-disable-next-line @typescript-eslint/camelcase
   const client = redis.createClient(redisConfig.port, redisConfig.host, { no_ready_check: true });
 
   if (redisConfig.auth) {

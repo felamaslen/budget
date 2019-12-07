@@ -18,11 +18,11 @@ interface SocketWithAuth extends Socket {
   handshake: HandshakeWithAuth;
 }
 
-const authenticate = withDb<LoginResponse>(
+const authenticate = withDb<void>(
   async (
     db: DatabasePoolConnectionType,
     socket: SocketWithAuth,
-    next: (err?: any) => void,
+    next: (err?: Error) => void,
   ): Promise<void> => {
     const { token } = socket.handshake.query;
     if (!token) {
@@ -56,7 +56,7 @@ where uid = ${userId}
   },
 );
 
-function onConnection(socket: SocketWithAuth) {
+function onConnection(socket: SocketWithAuth): void {
   if (!socket.handshake.user) {
     logger.debug('Anonymous connection: %s', socket.id);
     return;
@@ -73,7 +73,7 @@ function onConnection(socket: SocketWithAuth) {
   // socketRoutes(socket, ioServer);
 }
 
-export default function setupSockets(server: Server) {
+export default function setupSockets(server: Server): void {
   const io = setupIO(server);
 
   io.adapter(

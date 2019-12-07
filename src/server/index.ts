@@ -1,7 +1,7 @@
 import '@babel/polyfill';
 import Koa from 'koa';
 import http, { Server } from 'http';
-import Router from 'koa-router';
+import Router, { RouterContext } from 'koa-router';
 import helmet from 'koa-helmet';
 import bodyParser from 'koa-bodyparser';
 
@@ -16,7 +16,7 @@ import authRoute from '~/server/routes/auth';
 function healthRoute(): Router {
   const router = new Router();
 
-  router.get('/health', (ctx: any) => {
+  router.get('/health', (ctx: RouterContext) => {
     ctx.body = 'OK';
     ctx.status = 200;
   });

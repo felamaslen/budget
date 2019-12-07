@@ -1,10 +1,18 @@
+import { RouterState } from 'connected-react-router';
 import { getCurrentPathname } from '~/selectors/router';
-import { State } from '~/reducers';
 
 test('getCurrentPathname gets the current router pathname', () => {
-  const state: State = {
+  interface TestState {
+    router: RouterState;
+  }
+
+  const state: TestState = {
     router: {
+      action: 'PUSH',
       location: {
+        search: '',
+        state: '',
+        hash: '',
         pathname: '/foo/bar',
       },
     },

@@ -5,7 +5,7 @@ import addDays from 'date-fns/addDays';
 import config from '~/server/config';
 import { withDb } from '~/server/modules/db';
 
-export interface user {
+export interface User {
   uid: string;
   name?: string;
   pinHash?: string;
@@ -18,7 +18,7 @@ export interface LoginResponse {
 }
 
 export async function genToken(
-  { uid }: user,
+  { uid }: User,
   secret: string = config.userTokenSecret,
 ): Promise<string> {
   const expires = addDays(new Date(), config.userTokenExpiryDays);
@@ -53,17 +53,17 @@ export async function verifyToken(
       if (err instanceof jwt.TokenExpiredError) {
         return reject(new Error('Expired token'));
       }
-      if (err || !(data as user).uid) {
+      if (err || !(data as User).uid) {
         return reject(new Error('Invalid token'));
       }
 
-      return resolve((data as user).uid);
+      return resolve((data as User).uid);
     });
   });
 }
 
 export const loginWithPin = withDb<LoginResponse | null>(
-  async (db: DatabasePoolConnectionType, pin: string) => {
+  async (db: DatabasePoolConnectionType, pin: string): Promise<LoginResponse | null> => {
     const users = await db.query(sql`
 select
   ${sql.join(
@@ -79,11 +79,11 @@ from users
 
     const loggedInUser = await users.rows.reduce(
       (
-        last: Promise<user | null>,
+        last: Promise<User | null>,
         item: QueryResultRowType<'uid' | 'pinHash'>,
-      ): Promise<user | null> =>
+      ): Promise<User | null> =>
         last.then(
-          (validUser: user | null): Promise<user | null> => {
+          (validUser: User | null): Promise<User | null> => {
             if (validUser) {
               return Promise.resolve(validUser);
             }
@@ -97,7 +97,7 @@ from users
                   return resolve(null);
                 }
 
-                return resolve(item as user);
+                return resolve(item as User);
               });
             });
           },

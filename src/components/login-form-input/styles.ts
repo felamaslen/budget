@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { breakpoints, colors } from '~/styled/variables';
 import { breakpoint, rem } from '~/styled/mixins';
@@ -45,24 +45,25 @@ export const InputPin = styled(FlexCenter)<InputPinProps>`
   margin: 0 6px;
   border: none;
   border-radius: ${rem(4)};
-  background-color: ${({ isActive }) => (isActive ? colors.textLight : colors.textDark)};
+  background-color: ${({ isActive }): string => (isActive ? colors.textLight : colors.textDark)};
   color: transparent;
   text-align: center;
   outline: none;
   transition: background-color linear 0.1s;
 
-  ${({ isDone }) =>
-    isDone &&
-    css`
-      &::after {
-        content: '';
-        width: ${rem(16)};
-        height: ${rem(16)};
-        background: ${colors.textLight};
-        border-radius: ${rem(16)};
-        position: absolute;
-      }
-    `}
+  ${({ isDone }): FlattenSimpleInterpolation =>
+    isDone
+      ? css`
+          &::after {
+            content: '';
+            width: ${rem(16)};
+            height: ${rem(16)};
+            background: ${colors.textLight};
+            border-radius: ${rem(16)};
+            position: absolute;
+          }
+        `
+      : css``};
 
   ${breakpoint(breakpoints.mobile)} {
     height: 80px;

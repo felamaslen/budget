@@ -1,9 +1,9 @@
-import { compose, createStore, applyMiddleware } from 'redux';
+import { compose, createStore, applyMiddleware, Store } from 'redux';
 import { routerMiddleware } from 'connected-react-router';
 import { History } from 'history';
 import createSagaMiddleware from '@redux-saga/core';
 
-import createReducer, { PreloadedState } from '~/reducers';
+import createReducer, { State, PreloadedState } from '~/reducers';
 import rootSaga from '~/sagas';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -18,7 +18,7 @@ declare global {
 export default function configureStore(
   preloadedState: PreloadedState | null = null,
   history: History,
-) {
+): Store<State> {
   const middleware = [sagaMiddleware, routerMiddleware(history)];
 
   const enhancers = [applyMiddleware(...middleware)];
