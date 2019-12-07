@@ -86,33 +86,23 @@ module.exports = {
       {
         test: /\.tsx?/,
         exclude: /node_modules/,
-        use: 'babel-loader',
+        use: {
+          loader: 'babel-loader',
+          options: {
+            envName: __DEV__ ? 'development' : 'production',
+          },
+        },
       },
       {
         test: /\.css$/,
         use: 'css-loader',
       },
       {
-        test: filename => {
-          if (filename.match(/favicon\.png/)) {
-            return false;
-          }
-
-          return filename.match(/\.(woff2?|ttf|eot|svg|png|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/);
-        },
+        test: /\.(woff2?|ttf|eot|svg|png|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: {
           loader: 'file-loader',
           options: {
             name: 'assets/[hash].[ext]',
-          },
-        },
-      },
-      {
-        test: /favicon\.png/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            name: 'assets/favicon.ico',
           },
         },
       },

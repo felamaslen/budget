@@ -14,6 +14,7 @@ import { getPreloadedState } from '~/server/modules/state';
 import configureStore from '~/store';
 import { PreloadedState } from '~/reducers';
 import App from '~/components/app/index';
+import favicon from '~/images/favicon.png';
 
 async function serveApp(ctx: Context): Promise<void> {
   const history = createMemoryHistory({
@@ -48,7 +49,7 @@ async function serveApp(ctx: Context): Promise<void> {
     <title>Budget</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-    <link rel="icon" href="/assets/favicon.ico" type="image/png" />
+    <link rel="icon" href="${favicon}" type="image/png" />
     ${styleTags}
   </head>
   <body>

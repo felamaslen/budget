@@ -51,6 +51,19 @@ module.exports = {
           },
         ],
       ],
+      plugins: [
+        [
+          'file-loader',
+          {
+            name: 'assets/[hash].[ext]',
+            extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg'],
+            publicPath: '/',
+            outputPath: '/public',
+            context: '',
+            limit: 0,
+          },
+        ],
+      ],
     },
   },
 };
