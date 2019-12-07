@@ -17,6 +17,7 @@
     "dev:run": "NODE_ENV=development BABEL_ENV=node babel-watch -e .ts,.tsx,.js -L -w src/server -D src/server/index.ts | roarr pretty-print",
     "dev": "docker-compose up --build",
     "dev:api": "SKIP_APP=true npm run dev",
+    "pretest": "./node_modules/.bin/eslint --fix 'src/**/*.ts' 'src/**/*.tsx'",
     "test": "TZ=UTC BABEL_ENV=node jest",
     "test:dev": "npm run test -- --watch",
     "lint": "BABEL_ENV=node eslint webpack.config.js \"src/**/*.ts*\"",
@@ -39,6 +40,11 @@
   "homepage": "https://github.com/felamaslen/budget#readme",
   "_moduleAliases": {
     "~": "./src"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run pretest"
+    }
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
@@ -139,6 +145,7 @@
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-react-hooks": "^2.3.0",
     "file-loader": "^5.0.2",
+    "husky": "^3.1.0",
     "jest": "^24.9.0",
     "koa-webpack-dev-middleware": "^2.0.2",
     "koa-webpack-hot-middleware": "^1.0.3",
