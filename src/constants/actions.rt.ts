@@ -1,3 +1,4 @@
 export const ERRORED = 'io/ERRORED';
+export const QUERIED = 'io/QUERIED';
 
-export const THING_ADDED = 'io/THING_ADDED';
+export const HELLO = 'io_query_HELLO';

@@ -4,9 +4,10 @@ import io from 'socket.io-client';
 
 import config from '~/config';
 import * as socketActions from '~/constants/actions.rt';
-import { SocketAction } from '~/actions/types';
+import { SocketAction, SocketErrorAction } from '~/actions/types';
+import { socketErrored } from '~/actions/app';
 import { onLoginToggle } from '~/sagas/login';
-import { getToken } from '~/selectors/login';
+import { getToken, getLoggedIn } from '~/selectors/login';
 
 interface SocketEvent {
   type: string;
@@ -15,8 +16,10 @@ interface SocketEvent {
 
 const socketActionTypes: string[] = Object.values(socketActions);
 
-const makeListenChannel = (socket: SocketIOClient.Socket): EventChannel<SocketEvent> =>
-  eventChannel((emit: (event: SocketEvent) => void): (() => void) => {
+const makeListenChannel = (
+  socket: SocketIOClient.Socket,
+): EventChannel<SocketEvent | SocketErrorAction> =>
+  eventChannel((emit: (event: SocketEvent | SocketErrorAction) => void): (() => void) => {
     socketActionTypes.forEach((eventType: string) => {
       socket.on(eventType, (data: object) =>
         emit({
@@ -24,6 +27,10 @@ const makeListenChannel = (socket: SocketIOClient.Socket): EventChannel<SocketEv
           data,
         }),
       );
+    });
+
+    socket.emit('io/QUERIED', {
+      query: '{ io_query_HELLO }',
     });
 
     return (): void => {
@@ -57,7 +64,7 @@ function* sendToSocket(socket: SocketIOClient.Socket): SagaIterator {
 
 function connect(token: string): Promise<SocketIOClient.Socket> {
   return new Promise((resolve, reject) => {
-    const socket = io.connect(config.webUrl || '', {
+    const socket = io.connect(`${config.webUrl}` || '', {
       query: { token },
     });
 
@@ -68,20 +75,28 @@ function connect(token: string): Promise<SocketIOClient.Socket> {
     socket.on('connect_error', (err: Error) => {
       reject(new Error(`Socket connection failed: ${err.message}`));
     });
+
+    socket.on('error', (err: string) => {
+      reject(new Error(err));
+    });
   });
 }
 
 export function* createSocket(token: string): SagaIterator {
-  const socket = yield call(connect, token);
+  try {
+    const socket = yield call(connect, token);
 
-  yield fork(listenToSocket, socket);
-  yield fork(sendToSocket, socket);
+    yield fork(listenToSocket, socket);
+    yield fork(sendToSocket, socket);
+  } catch (err) {
+    yield put(socketErrored(err));
+  }
 }
 
 export default function* ioSaga(): SagaIterator {
   let task = null;
+  let isLoggedIn = yield select(getLoggedIn);
   while (true) {
-    const isLoggedIn = yield call(onLoginToggle);
     if (task) {
       yield cancel(task);
     }
@@ -89,5 +104,6 @@ export default function* ioSaga(): SagaIterator {
       const token = yield select(getToken);
       task = yield fork(createSocket, token);
     }
+    isLoggedIn = yield call(onLoginToggle);
   }
 }

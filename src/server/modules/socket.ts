@@ -7,6 +7,7 @@ import { getLogger } from '~/server/modules/logger';
 import getRedisClient from '~/server/modules/redis';
 import { LoginResponse, verifyToken } from '~/server/modules/auth';
 import { withDb } from '~/server/modules/db';
+import socketRoutes from '~/server/routes/socket';
 
 const logger = getLogger('modules/socket');
 
@@ -14,7 +15,7 @@ interface HandshakeWithAuth extends Handshake {
   user?: LoginResponse;
 }
 
-interface SocketWithAuth extends Socket {
+export interface SocketWithAuth extends Socket {
   handshake: HandshakeWithAuth;
 }
 
@@ -26,6 +27,7 @@ const authenticate = withDb<void>(
   ): Promise<void> => {
     const { token } = socket.handshake.query;
     if (!token) {
+      logger.debug('Anonymous connection: %s', socket.id);
       return next(new Error('Must provide authentication token'));
     }
 
@@ -58,7 +60,6 @@ where uid = ${userId}
 
 function onConnection(socket: SocketWithAuth): void {
   if (!socket.handshake.user) {
-    logger.debug('Anonymous connection: %s', socket.id);
     return;
   }
 
@@ -70,7 +71,7 @@ function onConnection(socket: SocketWithAuth): void {
 
   logger.debug('Connected: %s -> %s', socket.id, userId);
 
-  // socketRoutes(socket, ioServer);
+  socketRoutes(socket);
 }
 
 export default function setupSockets(server: Server): void {

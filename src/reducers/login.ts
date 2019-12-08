@@ -42,7 +42,11 @@ export default function loginReducer(state = initialState, action: LoginActions)
     case LOGGED_IN:
       return onLogin(state, action);
     case ERRORED:
-      return onLoginError(state, action);
+      if (action.actionType === LOGGED_IN) {
+        return onLoginError(state, action);
+      }
+
+      return state;
     case LOGGED_OUT:
       return onLogout();
     default:
