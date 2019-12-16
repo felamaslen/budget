@@ -7,7 +7,7 @@ import bodyParser from 'koa-bodyparser';
 
 import config from '~/server/config';
 import { logger } from '~/server/modules/logger';
-import setupSockets from '~/server/modules/socket';
+import { setupSockets } from '~/server/modules/socket';
 import setupSessions from '~/server/modules/session';
 
 import appRoute from '~/server/routes/app';

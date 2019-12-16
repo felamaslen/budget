@@ -29,9 +29,7 @@ const makeListenChannel = (
       );
     });
 
-    socket.emit('io/QUERIED', {
-      query: '{ io_query_HELLO }',
-    });
+    socket.emit('io/OVERVIEW_READ');
 
     return (): void => {
       socket.close();

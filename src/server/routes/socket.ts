@@ -1,37 +1,13 @@
-import { graphql } from 'graphql';
+import { SocketWithAuth, ioRoute } from '~/server/modules/socket';
+import { OVERVIEW_READ } from '~/constants/actions.rt';
+import { getOverview } from '~/server/queries/overview';
 
-import schema from '~/server/schema';
-import { SocketWithAuth } from '~/server/modules/socket';
-import { QUERIED, ERRORED } from '~/constants/actions.rt';
-import { QueryActionPayload } from '~/actions/types';
+const onOverviewRead = async (socket: SocketWithAuth): Promise<void> => {
+  const data = await getOverview(socket.handshake.user.uid);
+
+  socket.emit(OVERVIEW_READ, data);
+};
 
 export default function socketRoutes(socket: SocketWithAuth): void {
-  socket.on(
-    QUERIED,
-    async (data?: QueryActionPayload): Promise<void> => {
-      if (!(data && data.query)) {
-        return;
-      }
-
-      const result = await graphql(schema, data.query);
-
-      if (result.errors) {
-        result.errors.forEach(({ message }: { message: string }) => {
-          socket.emit(ERRORED, {
-            error: message,
-          });
-        });
-      }
-
-      const { data: results } = result;
-
-      if (!results) {
-        return;
-      }
-
-      Object.keys(results).forEach(key => {
-        socket.emit(key, results[key]);
-      });
-    },
-  );
+  ioRoute(socket, OVERVIEW_READ, onOverviewRead);
 }

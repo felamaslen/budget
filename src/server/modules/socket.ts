@@ -8,11 +8,13 @@ import getRedisClient from '~/server/modules/redis';
 import { LoginResponse, verifyToken } from '~/server/modules/auth';
 import { withDb } from '~/server/modules/db';
 import socketRoutes from '~/server/routes/socket';
+import { ERRORED } from '~/constants/actions.rt';
+import { ActionPayload } from '~/actions/types';
 
 const logger = getLogger('modules/socket');
 
 interface HandshakeWithAuth extends Handshake {
-  user?: LoginResponse;
+  user: LoginResponse;
 }
 
 export interface SocketWithAuth extends Socket {
@@ -74,7 +76,27 @@ function onConnection(socket: SocketWithAuth): void {
   socketRoutes(socket);
 }
 
-export default function setupSockets(server: Server): void {
+export const ioRoute = (
+  socket: SocketWithAuth,
+  actionType: string,
+  handler: (socket: SocketWithAuth, data: ActionPayload) => Promise<void>,
+): void => {
+  socket.on(
+    actionType,
+    async (data: ActionPayload): Promise<void> => {
+      try {
+        await handler(socket, data);
+      } catch (err) {
+        socket.emit(ERRORED, {
+          error: err.message,
+          actionType,
+        });
+      }
+    },
+  );
+};
+
+export function setupSockets(server: Server): void {
   const io = setupIO(server);
 
   io.adapter(
