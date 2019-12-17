@@ -96,11 +96,11 @@ test('watchLoginStatus redirects to / if not logged in', () => {
     .next('/')
     .call(onLoginToggle)
     .next(true)
-    .fork(onLogin)
+    .fork(onLogin, true)
     .next()
     .call(onLoginToggle)
     .next(true)
-    .fork(onLogin)
+    .fork(onLogin, false)
     .next()
     .call(onLoginToggle)
     .next(false)
@@ -112,7 +112,10 @@ test('watchLoginStatus redirects to / if not logged in', () => {
     .next('/some-page')
     .put(push('/'))
     .next()
-    .call(onLoginToggle);
+    .call(onLoginToggle)
+    .next(true)
+    .fork(onLogin, false)
+    .next();
 });
 
 test('loginSaga forks other sagas', () => {

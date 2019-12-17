@@ -21,7 +21,7 @@ async function serveApp(ctx: Context): Promise<void> {
     initialEntries: [ctx.request.url],
   });
 
-  const preloadedState: PreloadedState = await getPreloadedState(ctx.session);
+  const preloadedState: PreloadedState = await getPreloadedState(ctx.session, ctx.request.url);
   if (!(preloadedState.login && preloadedState.login.uid)) {
     ctx.session = null;
   }

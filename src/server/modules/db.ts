@@ -6,7 +6,7 @@ const interceptors = [createQueryLoggingInterceptor()];
 
 const pool = createPool(config.databaseUrl, { interceptors });
 
-export const withDb = <T>(
+export const withDb = <T = void>(
   handler: (db: DatabasePoolConnectionType, ...args: any[]) => Promise<T>,
 ) => (...args: any[]): Promise<T> =>
   pool.connect<T>(async db => {

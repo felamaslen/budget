@@ -58,10 +58,13 @@ export function* attemptLogout(): SagaIterator {
   }
 }
 
-export function* onLogin(): SagaIterator {
+export function* onLogin(initialLoad: boolean): SagaIterator {
   yield take(SOCKET_READY);
 
-  yield put(overviewRead());
+  if (!initialLoad) {
+    yield put(overviewRead());
+  }
+
   yield put(netWorthCategoriesRead());
   yield put(netWorthSubcategoriesRead());
   yield put(netWorthEntriesRead());
@@ -69,10 +72,12 @@ export function* onLogin(): SagaIterator {
 
 export function* watchLoginStatus(): SagaIterator {
   let isLoggedIn = yield select(getLoggedIn);
+  let wasLoggedIn = false;
 
   while (true) {
     if (isLoggedIn) {
-      yield fork(onLogin);
+      yield fork(onLogin, !wasLoggedIn);
+      wasLoggedIn = true;
     } else {
       const currentPathname = yield select(getCurrentPathname);
       if (currentPathname !== '/') {

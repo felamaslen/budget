@@ -76,29 +76,35 @@ function onConnection(socket: SocketWithAuth): void {
   socketRoutes(socket);
 }
 
-type RouteHandler<R = object> = (socket: SocketWithAuth, data: ActionPayload) => Promise<R>;
+type RouteHandler<R = object, A = ActionPayload> = (
+  db: DatabasePoolConnectionType,
+  userId: string,
+  data: A,
+) => Promise<R>;
 
-export const ioRoute = <R>(
+export const ioRoute = <R, A = ActionPayload>(
   socket: SocketWithAuth,
   actionType: string,
-  handler: RouteHandler<R>,
+  handler: RouteHandler<R, A>,
 ): void => {
   socket.on(
     actionType,
-    async (data: ActionPayload): Promise<void> => {
-      try {
-        const result = await handler(socket, data);
+    withDb(
+      async (db: DatabasePoolConnectionType, data: A): Promise<void> => {
+        try {
+          const result = await handler(db, socket.handshake.user.uid, data);
 
-        if (result) {
-          socket.emit(actionType, result);
+          if (result) {
+            socket.emit(actionType, result);
+          }
+        } catch (err) {
+          socket.emit(ERRORED, {
+            error: err.message,
+            actionType,
+          });
         }
-      } catch (err) {
-        socket.emit(ERRORED, {
-          error: err.message,
-          actionType,
-        });
-      }
-    },
+      },
+    ),
   );
 };
 

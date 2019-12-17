@@ -1,5 +1,3 @@
-import { Reducer } from 'redux';
-
 import createReducer from '~/reducers/create-reducer';
 import { OverviewBase } from '~/types/overview';
 import { SocketAction } from '~/actions/types';

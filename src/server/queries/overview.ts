@@ -4,7 +4,6 @@ import format from 'date-fns/format';
 import addMonths from 'date-fns/addMonths';
 import isSameMonth from 'date-fns/isSameMonth';
 
-import { withDb } from '~/server/modules/db';
 import { SocketWithAuth } from '~/server/modules/socket';
 import config from '~/server/config';
 
@@ -54,7 +53,7 @@ async function getMonthlyTotalFundValues(
   const { rows } = await db.query<FundValue>(sql`
 select
   fund_units.month
-  ,sum(fund_units.sum_units * fc.price) as value
+  ,round(sum(fund_units.sum_units * fc.price)) as value
   ,sum(fund_units.sum_cost) as cost
 from (
   select *
@@ -204,21 +203,21 @@ export const getViewStartDate = (): Date => {
   return startOfMonth(addMonths(new Date(), -pastMonths));
 };
 
-export const getOverview = withDb<Overview>(
-  async (db: DatabasePoolConnectionType, socket: SocketWithAuth) => {
-    const userId = socket.handshake.user.uid;
-    const { startDate, pastMonths } = config.overview;
+export const getOverview = async (
+  db: DatabasePoolConnectionType,
+  userId: string,
+): Promise<Overview> => {
+  const { startDate, pastMonths } = config.overview;
 
-    const [funds, cost] = await Promise.all([
-      getMonthlyTotalFundValues(db, userId),
-      getMonthlyCostValues(db, userId, pastMonths, getViewStartDate()),
-    ]);
+  const [funds, cost] = await Promise.all([
+    getMonthlyTotalFundValues(db, userId),
+    getMonthlyCostValues(db, userId, pastMonths, getViewStartDate()),
+  ]);
 
-    return {
-      startDate,
-      pastMonths,
-      funds,
-      ...cost,
-    };
-  },
-);
+  return {
+    startDate,
+    pastMonths,
+    funds,
+    ...cost,
+  };
+};
