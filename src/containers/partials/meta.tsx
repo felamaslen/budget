@@ -1,36 +1,24 @@
-import React, { SFC } from 'react';
-import { connect } from 'react-redux';
+import React, { SFC, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { loggedOut, LoggedOutAction } from '~/actions/login';
-import { GlobalState } from '~/reducers';
+import { loggedOut } from '~/actions/login';
 import { getLoggedIn } from '~/selectors/login';
 import Header from '~/components/header';
 import AppLogo from '~/components/app-logo';
 import Nav from '~/components/nav';
 
-interface StateProps {
-  loggedIn: boolean;
-}
+const Meta: SFC = () => {
+  const isLoggedIn = useSelector(getLoggedIn);
+  const dispatch = useDispatch();
 
-interface DispatchProps {
-  onLogout: () => LoggedOutAction;
-}
+  const onLogout = useCallback(() => dispatch(loggedOut()), [dispatch]);
 
-interface MetaProps extends StateProps, DispatchProps {}
-
-const Meta: SFC<MetaProps> = ({ loggedIn, onLogout }) => (
-  <Header>
-    <AppLogo />
-    {loggedIn && <Nav onLogout={onLogout} />}
-  </Header>
-);
-
-const mapStateToProps = (state: GlobalState): StateProps => ({
-  loggedIn: getLoggedIn(state),
-});
-
-const mapDispatchToProps = {
-  onLogout: loggedOut,
+  return (
+    <Header>
+      <AppLogo />
+      {isLoggedIn && <Nav onLogout={onLogout} />}
+    </Header>
+  );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Meta);
+export default Meta;

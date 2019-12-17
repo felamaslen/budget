@@ -1,5 +1,5 @@
 import React, { SFC, useState, useCallback, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { GlobalState } from '~/reducers';
 import { loginRequested, LoginRequestAction } from '~/actions/login';
@@ -8,23 +8,16 @@ import { getLoggedIn } from '~/selectors/login';
 import { FlexCenter } from '~/styled/layout';
 import LoginFormInput from '~/components/login-form-input';
 
-interface StateProps {
-  isLoggedIn: boolean;
-}
-
-interface DispatchProps {
-  onLogin: (pin: string) => LoginRequestAction;
-}
-
-interface LoginFormProps extends StateProps, DispatchProps {}
-
 const pinLength = 4;
 
 interface NativeKeyboardEvent {
   key: string;
 }
 
-const LoginForm: SFC<LoginFormProps> = ({ isLoggedIn, onLogin }) => {
+const LoginForm: SFC = () => {
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector(getLoggedIn);
+
   const [pin, setPin] = useState<string>('');
   const onInput = useCallback((digit: number) => setPin(last => `${last}${digit}`), []);
 
@@ -45,10 +38,10 @@ const LoginForm: SFC<LoginFormProps> = ({ isLoggedIn, onLogin }) => {
 
   useEffect(() => {
     if (!isLoggedIn && pin.length === pinLength) {
-      onLogin(pin);
+      dispatch(loginRequested(pin));
       setPin('');
     }
-  }, [isLoggedIn, pin, onLogin]);
+  }, [dispatch, isLoggedIn, pin]);
 
   if (isLoggedIn) {
     return null;
@@ -61,12 +54,4 @@ const LoginForm: SFC<LoginFormProps> = ({ isLoggedIn, onLogin }) => {
   );
 };
 
-const mapStateToProps = (state: GlobalState): StateProps => ({
-  isLoggedIn: getLoggedIn(state),
-});
-
-const mapDispatchToProps: DispatchProps = {
-  onLogin: loginRequested,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
+export default LoginForm;
