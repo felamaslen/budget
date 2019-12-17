@@ -26,7 +26,7 @@ async function serveApp(ctx: Context): Promise<void> {
     ctx.session = null;
   }
 
-  const store = configureStore(preloadedState, history);
+  const store = configureStore(preloadedState, history, false);
 
   const sheet = new ServerStyleSheet();
 

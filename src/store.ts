@@ -18,10 +18,13 @@ declare global {
 export default function configureStore(
   preloadedState: PreloadedState | null = null,
   history: History,
+  runSaga = true,
 ): Store<State> {
-  const middleware = [sagaMiddleware, routerMiddleware(history)];
+  const middleware = [routerMiddleware(history)];
 
-  const enhancers = [applyMiddleware(...middleware)];
+  const enhancers = [
+    runSaga ? applyMiddleware(sagaMiddleware, ...middleware) : applyMiddleware(...middleware),
+  ];
 
   const composeEnhancers =
     typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
@@ -31,7 +34,9 @@ export default function configureStore(
   const state = preloadedState || window.__PRELOADED_STATE__ || {};
   const store = createStore(createReducer(history), state, composeEnhancers(...enhancers));
 
-  sagaMiddleware.run(rootSaga);
+  if (runSaga) {
+    sagaMiddleware.run(rootSaga);
+  }
 
   if (module.hot) {
     module.hot.accept('./reducers', () => {
