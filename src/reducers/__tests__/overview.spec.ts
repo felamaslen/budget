@@ -1,7 +1,7 @@
 import reducer, { initialState, OverviewState } from '~/reducers/overview';
 import { Overview } from '~/types/overview';
 import { SocketAction } from '~/actions/types';
-import { OVERVIEW_READ } from '~/constants/actions.rt';
+import { OVERVIEW_READ, NET_WORTH_ENTRIES_READ } from '~/constants/actions.rt';
 
 test('OVERVIEW_READ inserts data into state', () => {
   const action: SocketAction<Overview> = {
@@ -10,6 +10,7 @@ test('OVERVIEW_READ inserts data into state', () => {
     payload: {
       startDate: '2014-09-01',
       pastMonths: 12,
+      netWorth: [1, 2, 3, 7, 17, 8, 13, 2013, 193, -32, 1302, 142, 9, 132],
       funds: [
         {
           value: 706735.286959267,
@@ -217,6 +218,7 @@ test('OVERVIEW_READ inserts data into state', () => {
   expect(result).toStrictEqual({
     startDate: new Date('2014-09-01'),
     pastMonths: 12,
+    netWorth: (action.payload || {}).netWorth,
     funds: (action.payload || {}).funds,
     income: (action.payload || {}).income,
     bills: (action.payload || {}).bills,
@@ -225,4 +227,20 @@ test('OVERVIEW_READ inserts data into state', () => {
     holiday: (action.payload || {}).holiday,
     social: (action.payload || {}).social,
   });
+});
+
+test('NET_WORTH_ENTRIES_READ (from socket) resets the initial net worth values', () => {
+  const testState = {
+    ...initialState,
+    netWorth: [1, 2, 3],
+  };
+
+  const action: SocketAction<Overview> = {
+    type: NET_WORTH_ENTRIES_READ,
+    __FROM_SOCKET__: true,
+  };
+
+  const result: OverviewState = reducer(testState, action);
+
+  expect(result.netWorth).toHaveLength(0);
 });

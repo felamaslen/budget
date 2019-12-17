@@ -15,6 +15,7 @@ export interface MonthCost {
 
 export interface OverviewBase extends MonthCost {
   pastMonths: number;
+  netWorth: number[];
   funds: FundValue[];
 }
 

@@ -3,41 +3,35 @@ import startOfMonth from 'date-fns/startOfMonth';
 import format from 'date-fns/format';
 import addMonths from 'date-fns/addMonths';
 import isSameMonth from 'date-fns/isSameMonth';
+import differenceInMonths from 'date-fns/differenceInMonths';
 
-import { SocketWithAuth } from '~/server/modules/socket';
 import config from '~/server/config';
-
-export interface FundValue {
-  month?: Date;
-  value: number;
-  cost: number;
-}
-
-export interface MonthCost {
-  income: number[];
-  bills: number[];
-  food: number[];
-  general: number[];
-  holiday: number[];
-  social: number[];
-}
-
-export interface Overview extends MonthCost {
-  startDate: string;
-  pastMonths: number;
-  funds: FundValue[];
-}
+import { FundValue, MonthCost, Overview } from '~/types/overview';
 
 const monthCostCategories = ['income', 'bills', 'food', 'general', 'social', 'holiday'];
 
-const getMonthsToFill = (pastMonths: number, viewStartDate: Date): Date[] =>
-  new Array(pastMonths).fill(0).map((item, index) => addMonths(viewStartDate, index));
+export const getViewStartDate = (): Date => {
+  return startOfMonth(addMonths(new Date(), -config.overview.pastMonths));
+};
+
+const fillMonths = (startDate: Date, numValues: number): Date[] =>
+  new Array(numValues).fill(0).map((item, index) => addMonths(startDate, index));
+
+const getMonthsToFill = (extended = false): Date[] => {
+  if (extended) {
+    const startDate = new Date(config.overview.startDate);
+
+    return fillMonths(startDate, differenceInMonths(new Date(), startDate));
+  }
+
+  return fillMonths(getViewStartDate(), config.overview.pastMonths);
+};
 
 const fillMonthValues = (
-  monthsToFill: Date[],
   rows: readonly { month: string; value: number }[],
+  extended = false,
 ): number[] =>
-  monthsToFill.map(date => {
+  getMonthsToFill(extended).map(date => {
     const row = rows.find(({ month }) => isSameMonth(new Date(month), date));
     if (!row) {
       return 0;
@@ -145,11 +139,46 @@ order by fund_units.month
   return rows.map(({ value, cost }) => ({ value, cost }));
 }
 
+async function getMonthlyNetWorthValues(
+  db: DatabasePoolConnectionType,
+  userId: string,
+): Promise<number[]> {
+  const { rows } = await db.query<{
+    month: string;
+    value: number;
+  }>(sql`
+  select
+    net_worth.month
+    ,round(sum(coalesce(nwv.value, 0) + (coalesce(fxv.value, 0) * coalesce(fx.rate, 0) * 100))) as value
+  from (
+    select
+      id
+      ,date_trunc('month', "date")::date as month
+    from net_worth
+    where ${sql.join(
+      [
+        sql`net_worth.uid = ${userId}`,
+        sql`date >= to_date(${config.overview.startDate}, 'YYYY-MM-DD')`,
+      ],
+      sql` and `,
+    )}
+  ) net_worth
+  left join net_worth_values nwv on nwv.net_worth_id = net_worth.id
+  left join net_worth_fx_values fxv on fxv.values_id = nwv.id
+  left join net_worth_subcategories cat on nwv.subcategory = cat.id
+  left join net_worth_currencies fx on fx.net_worth_id = net_worth.id
+    and fx.currency = fxv.currency
+  where nwv.skip = false or nwv.skip is null
+  group by month
+  order by month
+  `);
+
+  return fillMonthValues(rows, true);
+}
+
 async function getMonthlyCostValues(
   db: DatabasePoolConnectionType,
   userId: string,
-  pastMonths: number,
-  viewStartDate: Date,
 ): Promise<MonthCost> {
   const results = await Promise.all(
     monthCostCategories.map(category =>
@@ -166,7 +195,7 @@ from (
     [
       sql`${sql.identifier([category, 'uid'])} = ${userId}`,
       sql`${sql.identifier([category, 'date'])} >= to_date(${format(
-        viewStartDate,
+        getViewStartDate(),
         'yyyy-MM-dd',
       )}, 'YYYY-MM-DD')`,
     ],
@@ -179,12 +208,10 @@ order by month
     ),
   );
 
-  const monthsToFill = getMonthsToFill(pastMonths, viewStartDate);
-
   return results.reduce(
     (last, { rows }, index) => ({
       ...last,
-      [monthCostCategories[index]]: fillMonthValues(monthsToFill, rows),
+      [monthCostCategories[index]]: fillMonthValues(rows),
     }),
     {
       income: [],
@@ -197,26 +224,22 @@ order by month
   );
 }
 
-export const getViewStartDate = (): Date => {
-  const { pastMonths } = config.overview;
-
-  return startOfMonth(addMonths(new Date(), -pastMonths));
-};
-
 export const getOverview = async (
   db: DatabasePoolConnectionType,
   userId: string,
 ): Promise<Overview> => {
   const { startDate, pastMonths } = config.overview;
 
-  const [funds, cost] = await Promise.all([
+  const [funds, netWorth, cost] = await Promise.all([
     getMonthlyTotalFundValues(db, userId),
-    getMonthlyCostValues(db, userId, pastMonths, getViewStartDate()),
+    getMonthlyNetWorthValues(db, userId),
+    getMonthlyCostValues(db, userId),
   ]);
 
   return {
     startDate,
     pastMonths,
+    netWorth,
     funds,
     ...cost,
   };
