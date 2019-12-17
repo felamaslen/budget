@@ -5,6 +5,7 @@ import addMonths from 'date-fns/addMonths';
 import isSameMonth from 'date-fns/isSameMonth';
 
 import { withDb } from '~/server/modules/db';
+import { SocketWithAuth } from '~/server/modules/socket';
 import config from '~/server/config';
 
 export interface FundValue {
@@ -197,15 +198,20 @@ order by month
   );
 }
 
-export const getOverview = withDb<Overview>(
-  async (db: DatabasePoolConnectionType, userId: string) => {
-    const { startDate, pastMonths } = config.overview;
+export const getViewStartDate = (): Date => {
+  const { pastMonths } = config.overview;
 
-    const viewStartDate = startOfMonth(addMonths(new Date(), -pastMonths));
+  return startOfMonth(addMonths(new Date(), -pastMonths));
+};
+
+export const getOverview = withDb<Overview>(
+  async (db: DatabasePoolConnectionType, socket: SocketWithAuth) => {
+    const userId = socket.handshake.user.uid;
+    const { startDate, pastMonths } = config.overview;
 
     const [funds, cost] = await Promise.all([
       getMonthlyTotalFundValues(db, userId),
-      getMonthlyCostValues(db, userId, pastMonths, viewStartDate),
+      getMonthlyCostValues(db, userId, pastMonths, getViewStartDate()),
     ]);
 
     return {

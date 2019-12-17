@@ -8,6 +8,11 @@ import { getLoggedIn } from '~/selectors/login';
 import { errored } from '~/actions/app';
 import { loggedIn, LoginRequestAction } from '~/actions/login';
 import { overviewRead } from '~/actions/overview';
+import {
+  netWorthCategoriesRead,
+  netWorthSubcategoriesRead,
+  netWorthEntriesRead,
+} from '~/actions/net-worth';
 import { getCurrentPathname } from '~/selectors/router';
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT, SOCKET_READY } from '~/constants/actions.app';
@@ -57,6 +62,9 @@ export function* onLogin(): SagaIterator {
   yield take(SOCKET_READY);
 
   yield put(overviewRead());
+  yield put(netWorthCategoriesRead());
+  yield put(netWorthSubcategoriesRead());
+  yield put(netWorthEntriesRead());
 }
 
 export function* watchLoginStatus(): SagaIterator {

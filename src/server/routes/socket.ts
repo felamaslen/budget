@@ -1,13 +1,9 @@
-import { SocketWithAuth, ioRoute } from '~/server/modules/socket';
-import { OVERVIEW_READ } from '~/constants/actions.rt';
-import { getOverview } from '~/server/queries/overview';
+import { SocketWithAuth } from '~/server/modules/socket';
 
-const onOverviewRead = async (socket: SocketWithAuth): Promise<void> => {
-  const data = await getOverview(socket.handshake.user.uid);
-
-  socket.emit(OVERVIEW_READ, data);
-};
+import overview from '~/server/routes/overview';
+import netWorth from '~/server/routes/net-worth';
 
 export default function socketRoutes(socket: SocketWithAuth): void {
-  ioRoute(socket, OVERVIEW_READ, onOverviewRead);
+  overview(socket);
+  netWorth(socket);
 }

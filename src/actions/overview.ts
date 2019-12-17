@@ -1,26 +1,9 @@
+import { Overview } from '~/types/overview';
 import { SocketAction } from '~/actions/types';
 import { OVERVIEW_READ } from '~/constants/actions.rt';
 
-export interface DataPayload {
-  pastMonths: number;
-  funds: {
-    value: number;
-    cost: number;
-  }[];
-  income: number[];
-  bills: number[];
-  food: number[];
-  general: number[];
-  holiday: number[];
-  social: number[];
-}
-
-export interface OverviewPayload extends DataPayload {
-  startDate: string;
-}
-
 interface OverviewReadAction extends SocketAction {
-  payload: OverviewPayload;
+  payload: Overview;
 }
 
 export const isOverviewReadAction = (action: SocketAction): action is OverviewReadAction =>

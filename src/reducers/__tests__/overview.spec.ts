@@ -1,10 +1,10 @@
 import reducer, { initialState, OverviewState } from '~/reducers/overview';
+import { Overview } from '~/types/overview';
 import { SocketAction } from '~/actions/types';
-import { OverviewPayload } from '~/actions/overview';
 import { OVERVIEW_READ } from '~/constants/actions.rt';
 
 test('OVERVIEW_READ inserts data into state', () => {
-  const action: SocketAction<OverviewPayload> = {
+  const action: SocketAction<Overview> = {
     type: OVERVIEW_READ,
     __FROM_SOCKET__: true,
     payload: {

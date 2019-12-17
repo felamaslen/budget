@@ -1,11 +1,12 @@
 import { Reducer } from 'redux';
 
 import createReducer from '~/reducers/create-reducer';
+import { OverviewBase } from '~/types/overview';
 import { SocketAction } from '~/actions/types';
-import { DataPayload, isOverviewReadAction } from '~/actions/overview';
+import { isOverviewReadAction } from '~/actions/overview';
 import { OVERVIEW_READ } from '~/constants/actions.rt';
 
-export interface OverviewState extends DataPayload {
+export interface OverviewState extends OverviewBase {
   startDate?: Date;
 }
 

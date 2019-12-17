@@ -76,16 +76,22 @@ function onConnection(socket: SocketWithAuth): void {
   socketRoutes(socket);
 }
 
-export const ioRoute = (
+type RouteHandler<R = object> = (socket: SocketWithAuth, data: ActionPayload) => Promise<R>;
+
+export const ioRoute = <R>(
   socket: SocketWithAuth,
   actionType: string,
-  handler: (socket: SocketWithAuth, data: ActionPayload) => Promise<void>,
+  handler: RouteHandler<R>,
 ): void => {
   socket.on(
     actionType,
     async (data: ActionPayload): Promise<void> => {
       try {
-        await handler(socket, data);
+        const result = await handler(socket, data);
+
+        if (result) {
+          socket.emit(actionType, result);
+        }
       } catch (err) {
         socket.emit(ERRORED, {
           error: err.message,
