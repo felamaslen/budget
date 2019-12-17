@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import config from '~/config';
 import * as socketActions from '~/constants/actions.rt';
 import { SocketAction, SocketErrorAction } from '~/actions/types';
-import { socketErrored } from '~/actions/app';
+import { socketReady, socketErrored } from '~/actions/app';
 import { onLoginToggle } from '~/sagas/login';
 import { getToken, getLoggedIn } from '~/selectors/login';
 
@@ -28,8 +28,6 @@ const makeListenChannel = (
         }),
       );
     });
-
-    socket.emit('io/OVERVIEW_READ');
 
     return (): void => {
       socket.close();
@@ -86,6 +84,7 @@ export function* createSocket(token: string): SagaIterator {
 
     yield fork(listenToSocket, socket);
     yield fork(sendToSocket, socket);
+    yield put(socketReady());
   } catch (err) {
     yield put(socketErrored(err));
   }

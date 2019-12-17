@@ -1,7 +1,9 @@
+import { Reducer } from 'redux';
+
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
 import { ErrorAction } from '~/actions/types';
-import { LoggedInAction, LoginActions } from '~/actions/login';
+import { LoggedInAction, LoginAction } from '~/actions/login';
 
 export interface LoginState {
   loading: boolean;
@@ -26,7 +28,7 @@ function onLogin(state: LoginState, action: LoggedInAction): LoginState {
   };
 }
 
-const onLoginError = (state: LoginState, action: ErrorAction<typeof LOGGED_IN>): LoginState => ({
+const onLoginError = (state: LoginState, action: ErrorAction): LoginState => ({
   loading: false,
   error: action.payload.error,
 });
@@ -35,7 +37,7 @@ const onLogout = (): LoginState => ({
   loading: false,
 });
 
-export default function loginReducer(state = initialState, action: LoginActions): LoginState {
+export default function loginReducer(state = initialState, action: LoginAction): LoginState {
   switch (action.type) {
     case LOGIN_REQUESTED:
       return onLoginRequest();

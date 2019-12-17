@@ -10,7 +10,13 @@ import { getCurrentPathname } from '~/selectors/router';
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
 
-import loginSaga, { onLoginToggle, attemptLogin, attemptLogout, watchLogout } from '~/sagas/login';
+import loginSaga, {
+  onLoginToggle,
+  attemptLogin,
+  attemptLogout,
+  onLogin,
+  watchLoginStatus,
+} from '~/sagas/login';
 
 test('onLoginToggle waits for login status', () => {
   testSaga(onLoginToggle)
@@ -81,13 +87,21 @@ test('attemptLogin handles errors', () => {
     .isDone();
 });
 
-test('watchLogout redirects to / if not logged in', () => {
-  testSaga(watchLogout)
+test('watchLoginStatus redirects to / if not logged in', () => {
+  testSaga(watchLoginStatus)
+    .next()
+    .select(getLoggedIn)
+    .next(false)
+    .select(getCurrentPathname)
+    .next('/')
+    .call(onLoginToggle)
+    .next(true)
+    .fork(onLogin)
     .next()
     .call(onLoginToggle)
     .next(true)
-    .call(onLoginToggle)
-    .next(true)
+    .fork(onLogin)
+    .next()
     .call(onLoginToggle)
     .next(false)
     .select(getCurrentPathname)
@@ -108,7 +122,7 @@ test('loginSaga forks other sagas', () => {
     .next()
     .takeLatest(LOGGED_OUT, attemptLogout)
     .next()
-    .fork(watchLogout)
+    .fork(watchLoginStatus)
     .next()
     .isDone();
 });

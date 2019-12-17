@@ -7,9 +7,10 @@ import config from '~/config';
 import { getLoggedIn } from '~/selectors/login';
 import { errored } from '~/actions/app';
 import { loggedIn, LoginRequestAction } from '~/actions/login';
+import { overviewRead } from '~/actions/overview';
 import { getCurrentPathname } from '~/selectors/router';
 import { ERRORED } from '~/constants/actions.rt';
-import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
+import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT, SOCKET_READY } from '~/constants/actions.app';
 
 export function* onLoginToggle(): SagaIterator {
   const loggedInInitial = yield select(getLoggedIn);
@@ -52,20 +53,31 @@ export function* attemptLogout(): SagaIterator {
   }
 }
 
-export function* watchLogout(): SagaIterator {
+export function* onLogin(): SagaIterator {
+  yield take(SOCKET_READY);
+
+  yield put(overviewRead());
+}
+
+export function* watchLoginStatus(): SagaIterator {
+  let isLoggedIn = yield select(getLoggedIn);
+
   while (true) {
-    const isLoggedIn = yield call(onLoginToggle);
-    if (!isLoggedIn) {
+    if (isLoggedIn) {
+      yield fork(onLogin);
+    } else {
       const currentPathname = yield select(getCurrentPathname);
       if (currentPathname !== '/') {
         yield put(push('/'));
       }
     }
+
+    isLoggedIn = yield call(onLoginToggle);
   }
 }
 
 export default function* loginSaga(): SagaIterator {
   yield takeLatest(LOGIN_REQUESTED, attemptLogin);
   yield takeLatest(LOGGED_OUT, attemptLogout);
-  yield fork(watchLogout);
+  yield fork(watchLoginStatus);
 }

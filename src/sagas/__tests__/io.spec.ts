@@ -3,14 +3,14 @@ import { createMockTask } from '@redux-saga/testing-utils';
 
 import ioSaga, { createSocket } from '~/sagas/io';
 import { onLoginToggle } from '~/sagas/login';
-import { getToken } from '~/selectors/login';
+import { getToken, getLoggedIn } from '~/selectors/login';
 
 test('ioSaga creates a socket when logged in', () => {
   const task = createMockTask();
 
   testSaga(ioSaga)
     .next()
-    .call(onLoginToggle)
+    .select(getLoggedIn)
     .next(false)
     .call(onLoginToggle)
     .next(true)

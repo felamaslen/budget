@@ -1,13 +1,17 @@
 import { ERRORED } from '~/constants/actions.rt';
-import { SOCKET_ERRORED } from '~/constants/actions.app';
+import { SOCKET_READY, SOCKET_ERRORED } from '~/constants/actions.app';
 
 type Payload = object | string | number;
 export type ActionPayload = Payload | Payload[] | undefined;
 
-export interface SocketAction {
+export interface SocketAction<P = ActionPayload> {
   type: string;
   __FROM_SOCKET__?: boolean;
-  payload: ActionPayload;
+  payload?: P;
+}
+
+export interface SocketReadyAction {
+  type: typeof SOCKET_READY;
 }
 
 export interface SocketErrorAction {
@@ -15,9 +19,9 @@ export interface SocketErrorAction {
   message: string;
 }
 
-export interface ErrorAction<T> extends SocketAction {
+export interface ErrorAction extends SocketAction {
   type: typeof ERRORED;
-  actionType: T;
+  actionType: string;
   payload: {
     error: string;
   };

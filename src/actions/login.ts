@@ -1,5 +1,5 @@
-import { ErrorAction } from '~/actions/types';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
+import { ErrorAction } from '~/actions/types';
 
 export interface LoginResponsePayload {
   uid: string;
@@ -35,8 +35,4 @@ export const loggedOut = (): LoggedOutAction => ({
   type: LOGGED_OUT,
 });
 
-export type LoginActions =
-  | LoginRequestAction
-  | LoggedInAction
-  | LoggedOutAction
-  | ErrorAction<typeof LOGGED_IN>;
+export type LoginAction = LoginRequestAction | LoggedInAction | LoggedOutAction | ErrorAction;

@@ -50,7 +50,7 @@ test('LOGGED_IN sets user info', () => {
   });
 });
 
-test('ERRORED<LOGGED_IN> (from socket) sets error', () => {
+test('ERRORED (from socket) sets error', () => {
   const state = {
     loading: true,
     uid: 'my-user-id',
@@ -58,7 +58,7 @@ test('ERRORED<LOGGED_IN> (from socket) sets error', () => {
     token: 'my-token',
   };
 
-  const action: ErrorAction<typeof LOGGED_IN> = {
+  const action: ErrorAction = {
     type: ERRORED,
     __FROM_SOCKET__: true,
     actionType: LOGGED_IN,
