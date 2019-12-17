@@ -1,8 +1,7 @@
-import { LoginSlice, getToken, getLoggedIn } from '~/selectors/login';
-import { PreloadedState } from '~/reducers';
+import { State, getToken, getLoggedIn } from '~/selectors/login';
 
 test('getToken gets the token from the state', () => {
-  const state: LoginSlice = {
+  const state: State = {
     login: {
       loading: false,
       token: 'my-token',
@@ -13,7 +12,7 @@ test('getToken gets the token from the state', () => {
 });
 
 test('getLoggedIn returns true iff there is a token in state', () => {
-  const stateLoggedIn: LoginSlice = {
+  const stateLoggedIn: State = {
     login: {
       loading: false,
       token: 'my-token',
@@ -22,7 +21,7 @@ test('getLoggedIn returns true iff there is a token in state', () => {
 
   expect(getLoggedIn(stateLoggedIn)).toBe(true);
 
-  const stateLoggedOut: LoginSlice = {
+  const stateLoggedOut: State = {
     login: {
       loading: false,
     },

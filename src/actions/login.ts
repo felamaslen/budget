@@ -1,5 +1,5 @@
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
-import { ErrorAction } from '~/actions/types';
+import { ErrorAction } from '~/types/actions';
 
 export interface LoginResponsePayload {
   uid: string;

@@ -1,5 +1,5 @@
 import { sql, DatabasePoolConnectionType } from 'slonik';
-import startOfMonth from 'date-fns/startOfMonth';
+import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
 import addMonths from 'date-fns/addMonths';
 import isSameMonth from 'date-fns/isSameMonth';
@@ -10,41 +10,57 @@ import { FundValue, MonthCost, Overview } from '~/types/overview';
 
 const monthCostCategories = ['income', 'bills', 'food', 'general', 'social', 'holiday'];
 
-export const getViewStartDate = (): Date => {
-  return startOfMonth(addMonths(new Date(), -config.overview.pastMonths));
+export const getViewStartDate = (now: Date = new Date()): Date => {
+  return endOfMonth(addMonths(now, -config.overview.pastMonths));
 };
 
 const fillMonths = (startDate: Date, numValues: number): Date[] =>
   new Array(numValues).fill(0).map((item, index) => addMonths(startDate, index));
 
-const getMonthsToFill = (extended = false): Date[] => {
-  if (extended) {
-    const startDate = new Date(config.overview.startDate);
+const getMonthsToFill = (now: Date, extendPast = false, extendFuture = false): Date[] => {
+  const startDate = extendPast ? config.overview.startDate : getViewStartDate(now);
+  const numValues =
+    (extendFuture ? config.overview.futureMonths : 0) +
+    (extendPast ? differenceInMonths(now, startDate) : config.overview.pastMonths);
 
-    return fillMonths(startDate, differenceInMonths(new Date(), startDate));
-  }
-
-  return fillMonths(getViewStartDate(), config.overview.pastMonths);
+  return fillMonths(startDate, numValues);
 };
 
-const fillMonthValues = (
-  rows: readonly { month: string; value: number }[],
-  extended = false,
-): number[] =>
-  getMonthsToFill(extended).map(date => {
+function fillMonthValues<T = number>({
+  now,
+  rows,
+  defaultValue,
+  duplicateMissing = false,
+  extendPast = false,
+  extendFuture = false,
+}: {
+  now: Date;
+  rows: readonly { month: string; value: T }[];
+  defaultValue: T;
+  duplicateMissing?: boolean;
+  extendPast?: boolean;
+  extendFuture?: boolean;
+}): T[] {
+  return getMonthsToFill(now, extendPast, extendFuture).reduce((last: T[], date, index) => {
     const row = rows.find(({ month }) => isSameMonth(new Date(month), date));
     if (!row) {
-      return 0;
+      if (duplicateMissing && index > 0) {
+        return [...last, last[last.length - 1]];
+      }
+
+      return [...last, defaultValue];
     }
 
-    return row.value;
-  });
+    return [...last, row.value];
+  }, []);
+}
 
 async function getMonthlyTotalFundValues(
   db: DatabasePoolConnectionType,
+  now: Date,
   userId: string,
 ): Promise<FundValue[]> {
-  const { rows } = await db.query<FundValue>(sql`
+  const { rows } = await db.query<FundValue<string>>(sql`
 select
   fund_units.month
   ,round(sum(fund_units.sum_units * fc.price)) as value
@@ -136,11 +152,23 @@ group by fund_units.month
 order by fund_units.month
   `);
 
-  return rows.map(({ value, cost }) => ({ value, cost }));
+  const items: readonly {
+    month: string;
+    value: FundValue;
+  }[] = rows.map(({ month = '', value, cost }) => ({ month, value: { value, cost } }));
+
+  return fillMonthValues<FundValue>({
+    now,
+    rows: items,
+    defaultValue: { value: 0, cost: 0 },
+    duplicateMissing: true,
+    extendPast: true,
+  });
 }
 
 async function getMonthlyNetWorthValues(
   db: DatabasePoolConnectionType,
+  now: Date,
   userId: string,
 ): Promise<number[]> {
   const { rows } = await db.query<{
@@ -158,7 +186,7 @@ async function getMonthlyNetWorthValues(
     where ${sql.join(
       [
         sql`net_worth.uid = ${userId}`,
-        sql`date >= to_date(${config.overview.startDate}, 'YYYY-MM-DD')`,
+        sql`date >= to_date(${format(config.overview.startDate, 'yyyy-MM-dd')}, 'YYYY-MM-DD')`,
       ],
       sql` and `,
     )}
@@ -173,11 +201,20 @@ async function getMonthlyNetWorthValues(
   order by month
   `);
 
-  return fillMonthValues(rows, true);
+  return fillMonthValues<number>({
+    now,
+    rows,
+    defaultValue: 0,
+    duplicateMissing: true,
+    extendPast: true,
+  });
 }
+
+const includeFutureCategories = ['income'];
 
 async function getMonthlyCostValues(
   db: DatabasePoolConnectionType,
+  now: Date,
   userId: string,
 ): Promise<MonthCost> {
   const results = await Promise.all(
@@ -195,7 +232,7 @@ from (
     [
       sql`${sql.identifier([category, 'uid'])} = ${userId}`,
       sql`${sql.identifier([category, 'date'])} >= to_date(${format(
-        getViewStartDate(),
+        getViewStartDate(now),
         'yyyy-MM-dd',
       )}, 'YYYY-MM-DD')`,
     ],
@@ -211,7 +248,12 @@ order by month
   return results.reduce(
     (last, { rows }, index) => ({
       ...last,
-      [monthCostCategories[index]]: fillMonthValues(rows),
+      [monthCostCategories[index]]: fillMonthValues<number>({
+        now,
+        rows,
+        defaultValue: 0,
+        extendFuture: includeFutureCategories.includes(monthCostCategories[index]),
+      }),
     }),
     {
       income: [],
@@ -227,18 +269,20 @@ order by month
 export const getOverview = async (
   db: DatabasePoolConnectionType,
   userId: string,
-): Promise<Overview> => {
-  const { startDate, pastMonths } = config.overview;
+): Promise<Overview<string>> => {
+  const { startDate } = config.overview;
+
+  const now = new Date();
 
   const [funds, netWorth, cost] = await Promise.all([
-    getMonthlyTotalFundValues(db, userId),
-    getMonthlyNetWorthValues(db, userId),
-    getMonthlyCostValues(db, userId),
+    getMonthlyTotalFundValues(db, now, userId),
+    getMonthlyNetWorthValues(db, now, userId),
+    getMonthlyCostValues(db, now, userId),
   ]);
 
   return {
-    startDate,
-    pastMonths,
+    startDate: startDate.toISOString(),
+    viewStartDate: getViewStartDate(now).toISOString(),
     netWorth,
     funds,
     ...cost,

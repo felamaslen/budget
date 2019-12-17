@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 
 import config from '~/config';
 import * as socketActions from '~/constants/actions.rt';
-import { SocketAction, SocketErrorAction } from '~/actions/types';
+import { SocketAction, SocketErrorAction } from '~/types/actions';
 import { socketReady, socketErrored } from '~/actions/app';
 import { onLoginToggle } from '~/sagas/login';
 import { getToken, getLoggedIn } from '~/selectors/login';

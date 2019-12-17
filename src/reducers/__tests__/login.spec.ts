@@ -1,6 +1,6 @@
 import reducer, { LoginState } from '~/reducers/login';
 
-import { ErrorAction } from '~/actions/types';
+import { ErrorAction } from '~/types/actions';
 
 import {
   LoginRequestAction,

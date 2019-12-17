@@ -2,7 +2,7 @@ import { Reducer } from 'redux';
 
 import { ERRORED } from '~/constants/actions.rt';
 import { LOGIN_REQUESTED, LOGGED_IN, LOGGED_OUT } from '~/constants/actions.app';
-import { ErrorAction } from '~/actions/types';
+import { ErrorAction } from '~/types/actions';
 import { LoggedInAction, LoginAction } from '~/actions/login';
 
 export interface LoginState {

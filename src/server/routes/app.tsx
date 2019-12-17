@@ -11,8 +11,8 @@ import { Provider } from 'react-redux';
 
 import config from '~/server/config';
 import { getPreloadedState } from '~/server/modules/state';
-import configureStore from '~/store';
 import { PreloadedState } from '~/reducers';
+import configureStore from '~/store';
 import App from '~/components/app/index';
 import favicon from '~/images/favicon.png';
 

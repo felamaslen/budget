@@ -9,7 +9,7 @@ import { LoginResponse, verifyToken } from '~/server/modules/auth';
 import { withDb } from '~/server/modules/db';
 import socketRoutes from '~/server/routes/socket';
 import { ERRORED } from '~/constants/actions.rt';
-import { ActionPayload } from '~/actions/types';
+import { ActionPayload } from '~/types/actions';
 
 const logger = getLogger('modules/socket');
 

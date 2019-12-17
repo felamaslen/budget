@@ -15,8 +15,10 @@ export const sizes: { [key: string]: number } = {
   logo: 30,
 };
 
+const black = rgb(0, 0, 0);
+
 export const colors: { [key: string]: string } = {
-  black: rgb(0, 0, 0),
+  black,
   white: rgb(255, 255, 255),
   primary: rgb(216, 77, 77),
   secondary: rgb(255, 254, 247),
@@ -35,9 +37,13 @@ export const colors: { [key: string]: string } = {
   analysis: rgb(244, 167, 66),
   funds: rgb(84, 110, 122),
   income: rgb(216, 67, 21),
+  incomeKey: rgb(36, 191, 55),
+  spendingKey: rgb(191, 36, 36),
   bills: rgb(183, 28, 28),
   food: rgb(67, 160, 71),
   general: rgb(1, 87, 155),
   holiday: rgb(0, 137, 123),
   social: rgb(191, 158, 36),
+  graphTitle: black,
+  graphFundLine: black,
 };

@@ -2,26 +2,30 @@ import { combineReducers, Reducer } from 'redux';
 import { connectRouter, RouterState } from 'connected-react-router';
 import { History } from 'history';
 
+import now from '~/reducers/now';
 import login, { LoginState } from '~/reducers/login';
-import overview, { OverviewState } from '~/reducers/overview';
+import overview, { State as OverviewState } from '~/reducers/overview';
+import netWorth, { State as NetWorthState } from '~/reducers/net-worth';
+import funds, { State as FundsState } from '~/reducers/funds';
 
-export interface GlobalState {
+export type GlobalState = {
+  now: Date;
   login: LoginState;
   overview: OverviewState;
-}
+  netWorth: NetWorthState;
+  funds: FundsState;
+};
 
-export interface PreloadedState {
-  login?: LoginState;
-  overview?: OverviewState;
-}
+export type PreloadedState = Partial<GlobalState>;
 
-export interface State extends GlobalState {
-  router: RouterState;
-}
+export type State = GlobalState & { router: RouterState };
 
 export default (history: History): Reducer<State> =>
   combineReducers<State>({
     router: connectRouter(history),
+    now,
     login,
     overview,
+    netWorth,
+    funds,
   });

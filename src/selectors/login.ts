@@ -1,13 +1,9 @@
 import { createSelector } from 'reselect';
-import { LoginState } from '~/reducers/login';
+import { IncludeOne } from '~/types/utils';
+import { GlobalState } from '~/reducers';
 
-export interface LoginSlice {
-  login: LoginState;
-}
+export type State = IncludeOne<GlobalState, 'login'>;
 
-export const getToken = (state: LoginSlice): string | undefined => state.login.token;
+export const getToken = (state: State): string | undefined => state.login.token;
 
-export const getLoggedIn = createSelector<LoginSlice, string | undefined, boolean>(
-  getToken,
-  Boolean,
-);
+export const getLoggedIn = createSelector<State, string | undefined, boolean>(getToken, Boolean);

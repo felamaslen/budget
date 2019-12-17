@@ -1,5 +1,5 @@
 import { Overview } from '~/types/overview';
-import { SocketAction } from '~/actions/types';
+import { SocketAction } from '~/types/actions';
 import { OVERVIEW_READ } from '~/constants/actions.rt';
 
 interface OverviewReadAction extends SocketAction {

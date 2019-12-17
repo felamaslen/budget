@@ -18,6 +18,7 @@ module.exports = {
     'prettier',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:jest/all',
     'plugin:react/recommended',
   ],
   settings: {
@@ -41,6 +42,8 @@ module.exports = {
     ],
     '@typescript-eslint/no-var-requires': 'off',
     'import/prefer-default-export': 0,
+    'jest/lowercase-name': 0,
+    'jest/require-top-level-describe': 0,
     'max-len': ['error', 120],
     'no-bitwise': 0,
     'no-underscore-dangle': 0,
@@ -59,7 +62,9 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx'],
       rules: {
+        'prefer-destructuring': 0,
         '@typescript-eslint/explicit-function-return-type': ['error'],
+        '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
         '@typescript-eslint/no-var-requires': ['error'],
       },
     },

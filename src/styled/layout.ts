@@ -9,6 +9,10 @@ export const FlexCenter = styled(Flex)`
   justify-content: center;
 `;
 
+export const FlexColumn = styled(Flex)`
+  flex-flow: column;
+`;
+
 export const Grid = styled.div`
   display: grid;
 `;

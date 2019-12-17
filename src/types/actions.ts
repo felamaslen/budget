@@ -26,3 +26,6 @@ export interface ErrorAction extends SocketAction {
     error: string;
   };
 }
+
+export const isErrorAction = (action: SocketAction): action is ErrorAction =>
+  action.type === ERRORED;

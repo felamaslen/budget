@@ -1,13 +1,8 @@
-import {
-  sql,
-  DatabasePoolConnectionType,
-  SqlSqlTokenType,
-  QueryResultType,
-  QueryResultRowType,
-} from 'slonik';
+import { sql, DatabasePoolConnectionType, QueryResultType } from 'slonik';
 import format from 'date-fns/format';
 
 import {
+  NetWorth,
   Category,
   Subcategory,
   Entry,
@@ -16,59 +11,35 @@ import {
   CreditLimit,
   Currency,
 } from '~/types/net-worth';
-import errors from '~/server/errors';
+// import errors from '~/server/errors';
 import { getViewStartDate } from '~/server/queries/overview';
 
 export interface SpecificItem {
   id: string;
 }
 
-const haveSpecificItem = (data: SpecificItem | undefined): data is SpecificItem =>
-  Boolean(data && data.id);
+// const haveSpecificItem = (data: SpecificItem | undefined): data is SpecificItem =>
+//   Boolean(data && data.id);
+//
+// const whereId = (data: SpecificItem | undefined): SqlSqlTokenType<QueryResultRowType<string>> =>
+//   haveSpecificItem(data) ? sql`id = ${data.id}` : sql`true`;
 
-const whereId = (data: SpecificItem | undefined): SqlSqlTokenType<QueryResultRowType<string>> =>
-  haveSpecificItem(data) ? sql`id = ${data.id}` : sql`true`;
-
-export const getCategories = async (
-  db: DatabasePoolConnectionType,
-  userId: string,
-  data: SpecificItem | undefined,
-): Promise<Category | readonly Category[]> => {
+const getCategories = async (db: DatabasePoolConnectionType): Promise<readonly Category[]> => {
   const { rows } = await db.query<Category>(sql`
     select *
     from net_worth_categories
-    where ${sql.join([sql`1=1`, whereId(data)], sql` and `)}
   `);
-
-  if (haveSpecificItem(data)) {
-    if (!rows.length) {
-      throw errors.NET_WORTH_CATEGORY_NOT_FOUND();
-    }
-
-    return rows[0];
-  }
 
   return rows;
 };
 
-export const getSubcategories = async (
+const getSubcategories = async (
   db: DatabasePoolConnectionType,
-  userId: string,
-  data: SpecificItem | undefined,
-): Promise<Subcategory | readonly Subcategory[]> => {
+): Promise<readonly Subcategory[]> => {
   const { rows } = await db.query<Subcategory>(sql`
     select *
     from net_worth_subcategories
-    where ${sql.join([sql`1=1`, whereId(data)], sql` and `)}
   `);
-
-  if (haveSpecificItem(data)) {
-    if (!rows.length) {
-      throw errors.NET_WORTH_SUBCATEGORY_NOT_FOUND();
-    }
-
-    return rows[0];
-  }
 
   return rows;
 };
@@ -89,20 +60,15 @@ type CurrencyRow = Currency & { netWorthId: string };
 
 type CreditLimitRow = CreditLimit & { netWorthId: string };
 
-export const getEntries = async (
+const getEntries = async (
   db: DatabasePoolConnectionType,
   userId: string,
-  data: SpecificItem | undefined,
-): Promise<Entry | readonly Entry[]> => {
+): Promise<readonly Entry[]> => {
   const { rows: netWorth } = await db.query<EntryIDRow>(sql`
     select id, date
     from net_worth nw
     where ${sql.join(
-      [
-        sql`uid = ${userId}`,
-        whereId(data),
-        sql`date >= ${format(getViewStartDate(), 'yyyy-MM-dd')}`,
-      ],
+      [sql`uid = ${userId}`, sql`date >= ${format(getViewStartDate(), 'yyyy-MM-dd')}`],
       sql` and `,
     )}
   `);
@@ -149,7 +115,7 @@ export const getEntries = async (
 
   return netWorth.map(({ id, date }: EntryIDRow) => ({
     id,
-    date,
+    date: new Date(date),
     values: values.rows
       .filter(({ netWorthId }) => netWorthId === id)
       .map(({ id: valueId, subcategory, skip, value, fxValues, fxCurrencies }: ValueRow) => ({
@@ -173,4 +139,17 @@ export const getEntries = async (
       rate,
     })),
   }));
+};
+
+export const getNetWorth = async (
+  db: DatabasePoolConnectionType,
+  userId: string,
+): Promise<NetWorth> => {
+  const [categories, subcategories, entries] = await Promise.all([
+    getCategories(db),
+    getSubcategories(db),
+    getEntries(db, userId),
+  ]);
+
+  return { categories, subcategories, entries };
 };

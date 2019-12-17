@@ -1,15 +1,18 @@
+import config from '~/config';
 import createReducer from '~/reducers/create-reducer';
-import { OverviewBase } from '~/types/overview';
-import { SocketAction } from '~/actions/types';
+import { Overview } from '~/types/overview';
+import { SocketAction } from '~/types/actions';
 import { isOverviewReadAction } from '~/actions/overview';
-import { OVERVIEW_READ, NET_WORTH_ENTRIES_READ } from '~/constants/actions.rt';
+import { OVERVIEW_READ } from '~/constants/actions.rt';
 
-export interface OverviewState extends OverviewBase {
-  startDate?: Date;
+export interface State extends Overview {
+  futureMonths: number;
 }
 
-export const initialState: OverviewState = {
-  pastMonths: 0,
+export const initialState: State = {
+  startDate: new Date(),
+  viewStartDate: new Date(),
+  futureMonths: config.futureMonths,
   netWorth: [],
   funds: [],
   income: [],
@@ -20,33 +23,25 @@ export const initialState: OverviewState = {
   social: [],
 };
 
-const onRead = (state: OverviewState, action: SocketAction): Partial<OverviewState> => {
+const onRead = (state: State, action: SocketAction<Overview<string>>): Partial<State> => {
   if (isOverviewReadAction(action)) {
     return {
       ...action.payload,
       startDate: new Date(action.payload.startDate),
+      viewStartDate: new Date(action.payload.viewStartDate),
     };
   }
 
   return {};
 };
 
-const onNetWorthRead = (state: OverviewState, action: SocketAction): Partial<OverviewState> => {
-  if (!action.__FROM_SOCKET__) {
-    return {};
-  }
-
-  return {
-    netWorth: [],
-  };
-};
-
-const overviewReducer = createReducer<OverviewState>({
+const overviewReducer = createReducer<State, Overview<string>>({
   initialState,
   handlers: {
     [OVERVIEW_READ]: onRead,
-    [NET_WORTH_ENTRIES_READ]: onNetWorthRead,
   },
 });
 
 export default overviewReducer;
+
+export { overviewReducer as reducer };

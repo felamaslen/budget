@@ -1,15 +1,16 @@
-import reducer, { initialState, OverviewState } from '~/reducers/overview';
+import { reducer, initialState, State } from '~/reducers/overview';
 import { Overview } from '~/types/overview';
-import { SocketAction } from '~/actions/types';
-import { OVERVIEW_READ, NET_WORTH_ENTRIES_READ } from '~/constants/actions.rt';
+import { SocketAction } from '~/types/actions';
+import { OVERVIEW_READ } from '~/constants/actions.rt';
 
-test('OVERVIEW_READ inserts data into state', () => {
-  const action: SocketAction<Overview> = {
+test('action: OVERVIEW_READ inserts data into state', () => {
+  expect.assertions(1);
+  const action: SocketAction<Overview<string>> = {
     type: OVERVIEW_READ,
     __FROM_SOCKET__: true,
     payload: {
-      startDate: '2014-09-01',
-      pastMonths: 12,
+      startDate: '2014-09-30',
+      viewStartDate: '2018-01-31',
       netWorth: [1, 2, 3, 7, 17, 8, 13, 2013, 193, -32, 1302, 142, 9, 132],
       funds: [
         {
@@ -213,11 +214,12 @@ test('OVERVIEW_READ inserts data into state', () => {
     },
   };
 
-  const result: OverviewState = reducer(initialState, action);
+  const result: State = reducer(initialState, action);
 
   expect(result).toStrictEqual({
-    startDate: new Date('2014-09-01'),
-    pastMonths: 12,
+    startDate: new Date('2014-09-30'),
+    viewStartDate: new Date('2018-01-31'),
+    futureMonths: 12,
     netWorth: (action.payload || {}).netWorth,
     funds: (action.payload || {}).funds,
     income: (action.payload || {}).income,
@@ -227,20 +229,4 @@ test('OVERVIEW_READ inserts data into state', () => {
     holiday: (action.payload || {}).holiday,
     social: (action.payload || {}).social,
   });
-});
-
-test('NET_WORTH_ENTRIES_READ (from socket) resets the initial net worth values', () => {
-  const testState = {
-    ...initialState,
-    netWorth: [1, 2, 3],
-  };
-
-  const action: SocketAction<Overview> = {
-    type: NET_WORTH_ENTRIES_READ,
-    __FROM_SOCKET__: true,
-  };
-
-  const result: OverviewState = reducer(testState, action);
-
-  expect(result.netWorth).toHaveLength(0);
 });

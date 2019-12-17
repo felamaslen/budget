@@ -4,3 +4,5 @@ export const LOGGED_OUT = 'LOGGED_OUT';
 
 export const SOCKET_READY = 'SOCKET_READY';
 export const SOCKET_ERRORED = 'SOCKET_ERRORED';
+
+export const TIME_UPDATED = 'TIME_UPDATED';

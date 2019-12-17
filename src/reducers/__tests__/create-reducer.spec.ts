@@ -1,6 +1,6 @@
 import createReducer from '~/reducers/create-reducer';
 import { ERRORED } from '~/constants/actions.rt';
-import { SocketAction, ErrorAction } from '~/actions/types';
+import { SocketAction, ErrorAction } from '~/types/actions';
 
 const ACTION1 = 'ACTION1';
 const ACTION2 = 'ACTION2';

@@ -1,6 +1,7 @@
-import { ErrorAction, SocketReadyAction, SocketErrorAction } from '~/actions/types';
+import { Action } from 'redux';
+import { ErrorAction, SocketReadyAction, SocketErrorAction } from '~/types/actions';
 import { ERRORED } from '~/constants/actions.rt';
-import { SOCKET_READY, SOCKET_ERRORED } from '~/constants/actions.app';
+import { SOCKET_READY, SOCKET_ERRORED, TIME_UPDATED } from '~/constants/actions.app';
 
 export const errored = (err: Error, actionType: string): ErrorAction => ({
   type: ERRORED,
@@ -18,4 +19,8 @@ export const socketReady = (): SocketReadyAction => ({
 export const socketErrored = (err: Error): SocketErrorAction => ({
   type: SOCKET_ERRORED,
   message: err.message,
+});
+
+export const timeUpdated = (): Action => ({
+  type: TIME_UPDATED,
 });

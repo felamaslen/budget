@@ -1,5 +1,6 @@
-import { RouterState } from 'connected-react-router';
-import { State } from '~/reducers';
+import { IncludeOne } from '~/types/utils';
+import { State as GlobalStateWithRouter } from '~/reducers';
 
-export const getCurrentPathname = (state: State | { router: RouterState }): string =>
-  state.router.location.pathname;
+export type State = IncludeOne<GlobalStateWithRouter, 'router'>;
+
+export const getCurrentPathname = (state: State): string => state.router.location.pathname;

@@ -2,16 +2,20 @@ import React from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react';
 import createMockStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
+
+import { IncludeOne } from '~/types/utils';
 import LoginForm from '~/containers/pages/login-form';
 import { loginRequested } from '~/actions/login';
-import { PreloadedState } from '~/reducers';
+import { GlobalState } from '~/reducers';
 
-afterEach(cleanup);
+type MockState = IncludeOne<GlobalState, 'login'>;
 
-const mockStore = createMockStore<PreloadedState>([]);
+const mockStore = createMockStore<MockState>([]);
 
 test('The page is not rendered if logged in', () => {
-  const state: PreloadedState = {
+  expect.assertions(1);
+
+  const state: MockState = {
     login: {
       loading: false,
       uid: 'some-user-id',
@@ -28,10 +32,14 @@ test('The page is not rendered if logged in', () => {
   );
 
   expect(container.childNodes).toHaveLength(0);
+
+  cleanup();
 });
 
 test('Entering a four digit pin triggers a login action', () => {
-  const state: PreloadedState = {
+  expect.assertions(7);
+
+  const state: MockState = {
     login: {
       loading: false,
     },
@@ -58,4 +66,6 @@ test('Entering a four digit pin triggers a login action', () => {
   fireEvent.keyDown(document.body, { key: '4' });
   expect(store.getActions()).toHaveLength(1);
   expect(store.getActions()[0]).toStrictEqual(loginRequested('1234'));
+
+  cleanup();
 });

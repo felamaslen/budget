@@ -1,4 +1,5 @@
 import pkg from '../../package.json';
+import clientConfig from '~/config';
 
 export default {
   version: pkg.version,
@@ -15,8 +16,9 @@ export default {
   userTokenSecret: process.env.USER_TOKEN_SECRET || '',
   userTokenExpiryDays: Number(process.env.USER_TOKEN_EXPIRY_DAYS) || 30,
   overview: {
-    startDate: process.env.START_DATE || '2014-09-01',
+    startDate: new Date(process.env.START_DATE || '2014-09-01'),
     pastMonths: Number(process.env.PAST_MONTHS) || 12,
+    futureMonths: clientConfig.futureMonths,
   },
   funds: {
     salt: 'a963anx2',
