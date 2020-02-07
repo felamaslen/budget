@@ -63,6 +63,7 @@
     "command-line-args": "^5.0.2",
     "create-reducer-object": "^1.1.0",
     "cssnano": "^4.1.10",
+    "date-fns": "^2.9.0",
     "dateformat": "^2.0.0",
     "deepmerge": "^2.0.1",
     "ejs": "^2.5.7",

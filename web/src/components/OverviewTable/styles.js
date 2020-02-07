@@ -1,5 +1,7 @@
 import styled, { css } from 'styled-components';
 import { rgb } from 'polished';
+import isSameDay from 'date-fns/isSameDay';
+import endOfMonth from 'date-fns/endOfMonth';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint, unimportant } from '~client/styled/mixins';
 
@@ -107,19 +109,26 @@ export const Row = styled.div`
     }
 `;
 
+const isEndOfMonth = isSameDay(new Date(), endOfMonth(new Date()));
+
+const displayMobile = (column, past, active) => {
+    return (
+        ['month', 'income', 'spending'].includes(column) ||
+        (past && column === 'netWorth') ||
+        (active && isEndOfMonth && column === 'netWorth') ||
+        (active && !isEndOfMonth && column === 'netWorthPredicted') ||
+        (!past && !active && column === 'netWorthPredicted')
+    );
+};
+
 export const Cell = styled.div.attrs(({ color }) => ({
     style: color ? { backgroundColor: rgb(...color) } : {},
 }))`
     flex-flow: row nowrap;
     flex-grow: 1;
     flex-basis: 0;
-    display: ${({ column }) => {
-        if (columnsMobile.includes(column)) {
-            return 'flex';
-        }
-
-        return 'none';
-    }};
+    display: ${({ column, past, active }) =>
+        displayMobile(column, past, active) ? 'flex' : 'none'};
     padding: 4px 2px;
     position: relative;
     width: 100%;
@@ -238,8 +247,7 @@ export const HeaderLink = styled(Cell)`
     white-space: nowrap;
     height: 24px;
     text-align: center;
-    background: ${({ column }) =>
-        colors.overview[`${column}Mobile`] || colors.white};
+    background: ${({ column }) => colors.overview[`${column}Mobile`] || colors.white};
     }};
 
     ${({ column }) =>
