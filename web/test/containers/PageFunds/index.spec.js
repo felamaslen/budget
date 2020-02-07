@@ -56,7 +56,7 @@ test('funds meta - mobile info box', t => {
 
     const [gain, graph] = div.childNodes;
 
-    t.is(gain.tagName, 'DIV');
+    t.is(gain.tagName, 'A');
 
     t.is(graph.tagName, 'DIV');
 });

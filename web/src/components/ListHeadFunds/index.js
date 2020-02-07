@@ -18,6 +18,7 @@ const ListHeadFunds = ({
 }) => (
     <Styled.ListHeadFunds title={ageText}>
         <Styled.OverallGain
+            as="a"
             profit={value > totalCost}
             loss={value < totalCost}
             onClick={onReloadPrices}

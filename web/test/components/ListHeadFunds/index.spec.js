@@ -72,6 +72,7 @@ test('reloading fund prices on click', t => {
 
     const [main] = container.childNodes;
     t.is(onReloadPrices.getCalls().length, 0);
+    t.is(main.childNodes[0].tagName, 'A');
     fireEvent.click(main.childNodes[0]);
     t.is(onReloadPrices.getCalls().length, 1);
 });
