@@ -13,6 +13,7 @@ export const GraphOverview = styled(GraphOuter)`
         display: flex;
         flex: 0 0 300px;
         height: 300px;
+        box-shadow: none;
     }
     ${breakpoint(breakpoints.tablet)} {
         flex: 0 1 520px;
