@@ -1,16 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { DateTime } from 'luxon';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
 
-export default function NowLine({ now, minY, maxY, pixX, pixY }) {
+type IProps = {
+    now: DateTime;
+    minY: number;
+    maxY: number;
+    pixX: (x: number) => number;
+    pixY: (y: number) => number;
+};
+
+const NowLine: React.FunctionComponent<IProps> = ({ now, minY, maxY, pixX, pixY }) => {
     if (minY === maxY) {
         return null;
     }
 
-    const nowLineX = Math.floor(pixX(now.ts / 1000)) + 0.5;
+    const nowLineX = Math.floor(pixX(now.toSeconds())) + 0.5;
 
     const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
@@ -36,12 +43,6 @@ export default function NowLine({ now, minY, maxY, pixX, pixY }) {
             </text>
         </g>
     );
-}
-
-NowLine.propTypes = {
-    now: PropTypes.instanceOf(DateTime).isRequired,
-    minY: PropTypes.number.isRequired,
-    maxY: PropTypes.number.isRequired,
-    pixX: PropTypes.func.isRequired,
-    pixY: PropTypes.func.isRequired,
 };
+
+export default NowLine;

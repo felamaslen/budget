@@ -1,7 +1,10 @@
 const defaultFont = 'Arial, Helvetica, sans-serif';
-export const FONT_GRAPH_TITLE = [16, defaultFont];
-export const FONT_GRAPH_KEY = [11, defaultFont];
-export const FONT_AXIS_LABEL = FONT_GRAPH_KEY;
+
+type Font = [number, string];
+
+export const FONT_GRAPH_TITLE: Font = [16, defaultFont];
+export const FONT_GRAPH_KEY: Font = [11, defaultFont];
+export const FONT_AXIS_LABEL: Font = FONT_GRAPH_KEY;
 
 export const GRAPH_CURVINESS = 0.35;
 export const GRAPH_WIDTH = 500;
@@ -11,7 +14,10 @@ export const GRAPH_ZOOM_SPEED = 0.15;
 
 export const GRAPH_CASHFLOW_NUM_TICKS = 5;
 export const GRAPH_CASHFLOW_PADDING = [40, 0, 0, 0];
-export const GRAPH_SPEND_CATEGORIES = [
+
+type SpendCategory = { name: string; key: number };
+
+export const GRAPH_SPEND_CATEGORIES: SpendCategory[] = [
     { name: 'bills', key: 15 },
     { name: 'food', key: 67 },
     { name: 'general', key: 125 },
