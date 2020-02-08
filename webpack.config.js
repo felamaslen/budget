@@ -106,12 +106,13 @@ module.exports = {
             '~api': path.resolve(__dirname, './api/src'),
             '~api-test': path.resolve(__dirname, './api/test'),
         },
+        extensions: ['.ts', '.tsx', '.js'],
     },
     optimization: getOptimization(),
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.(js|tsx?)$/,
                 exclude: /node_modules/,
                 use: 'babel-loader',
             },

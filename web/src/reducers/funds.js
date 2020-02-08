@@ -5,9 +5,11 @@ import { DATA_KEY_ABBR } from '~client/constants/data';
 import { GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 
 function getDefaultFundPeriod() {
-    if (process.env.DEFAULT_FUND_PERIOD && GRAPH_FUNDS_PERIODS
-        .map(([shortPeriod]) => shortPeriod)
-        .includes(process.env.DEFAULT_FUND_PERIOD)
+    if (
+        process.env.DEFAULT_FUND_PERIOD &&
+        GRAPH_FUNDS_PERIODS.map(([shortPeriod]) => shortPeriod).includes(
+            process.env.DEFAULT_FUND_PERIOD,
+        )
     ) {
         return process.env.DEFAULT_FUND_PERIOD;
     }
@@ -35,10 +37,13 @@ const onReadRows = onRead('funds');
 function getPriceCache(funds) {
     const { data, startTime, cacheTimes } = funds;
 
-    const prices = data.reduce((last, { [DATA_KEY_ABBR.id]: id, pr, prStartIndex }) => ({
-        ...last,
-        [id]: { startIndex: prStartIndex, values: pr },
-    }), {});
+    const prices = data.reduce(
+        (last, { [DATA_KEY_ABBR.id]: id, pr, prStartIndex }) => ({
+            ...last,
+            [id]: { startIndex: prStartIndex, values: pr },
+        }),
+        {},
+    );
 
     return {
         startTime,
