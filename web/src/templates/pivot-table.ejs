@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Budget pivot table</title>
+    <style>
+html {
+  font-family: Hack, monospace;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+}
+tr {
+}
+th {
+  font-family: Helvetica, Ubuntu, sans-serif;
+  text-align: left;
+  font-size: 1.1rem;
+}
+th,
+td {
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  min-width: 100px;
+}
+td {
+  font-size: 0.9rem;
+  font-style: italic;
+}
+td.total {
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: bold;
+}
+    </style>
+  </head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <% header.map((item) => { %><th><%= item %></th><% }) %>
+        </tr>
+      </thead>
+      <tbody>
+        <% sheet.map(({ thing, years, total }) => {
+        %><tr>
+          <th><%= thing -%></th>
+          <% years.map(year => { -%><td>£<%= year.toFixed(2) %></td>
+          <% })
+          -%><td class="total">£<%= total.toFixed(2) %></td>
+        </tr><% }) %>
+      </tbody>
+    </table>
+  </body>
+</html>

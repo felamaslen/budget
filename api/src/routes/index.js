@@ -1,6 +1,8 @@
 const { Router } = require('express');
+const { catchAsyncErrors } = require('../modules/error-handling');
 const data = require('./data');
 const user = require('./user');
+const getPivotTable = require('./pivot-table');
 
 /**
  * @swagger
@@ -76,6 +78,8 @@ function handler(config, db, logger) {
 
     router.use('/user', user.handler(config, db, logger));
     router.use('/data', data.handler(config, db, logger));
+
+    router.use('/pivot-table', catchAsyncErrors(getPivotTable(db)));
 
     return router;
 }
