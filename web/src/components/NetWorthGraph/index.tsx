@@ -5,6 +5,8 @@ import LineGraph from '~client/components/Graph/LineGraph';
 import TimeAxes from '~client/components/Graph/TimeAxes';
 import { Pix, Dimensions, Line } from '~client/types/graph';
 
+import * as Styled from './styles';
+
 type GraphProps = {
     table: {
         id: string;
@@ -127,7 +129,18 @@ const NetWorthGraph: React.FunctionComponent<GraphProps> = ({ table }) => {
                 maxY={0}
                 beforeLines={BeforeLinesNetWorth}
             />
-            <h3>FTI</h3>
+            <Styled.FTILabel>
+                FTI
+                <Styled.FTIFormula>
+                    <Styled.FTIEquals>=</Styled.FTIEquals>
+                    <Styled.FTIFraction>
+                        <Styled.FTIFormulaNumerator>
+                            Net worth &times; Age
+                        </Styled.FTIFormulaNumerator>
+                        <Styled.FTIFormulaDenominator>Expenses</Styled.FTIFormulaDenominator>
+                    </Styled.FTIFraction>
+                </Styled.FTIFormula>
+            </Styled.FTILabel>
             <LineGraph
                 name="fti"
                 lines={dataFti}
