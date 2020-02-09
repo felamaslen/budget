@@ -14,7 +14,7 @@ export default function Graph({
     children,
 }) {
     return (
-        <Styled.Graph ref={graphRef} {...outerProperties}>
+        <Styled.Graph ref={graphRef} {...outerProperties} width={width} height={height}>
             {before && before()}
             <svg width={width} height={height} {...svgProperties}>
                 {children}

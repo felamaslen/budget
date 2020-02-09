@@ -95,22 +95,21 @@ const makeGetRanges = ({ mode, zoomRange: [zoomMin, zoomMax], lines, cacheTimes 
 };
 
 function makeBeforeLines({ mode, startTime, tickSizeY, labelY }) {
-    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) =>
-        maxY !== 0 && (
-            <TimeAxes
-                minY={minY}
-                maxY={maxY}
-                minX={minX}
-                maxX={maxX}
-                pixX={pixX}
-                pixY={pixY}
-                hideMinorTicks
-                yAlign="right"
-                tickSizeY={tickSizeY}
-                labelY={labelY}
-                offset={startTime}
-            />
-        );
+    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) => (
+        <TimeAxes
+            minY={minY}
+            maxY={maxY}
+            minX={minX}
+            maxX={maxX}
+            pixX={pixX}
+            pixY={pixY}
+            hideMinorTicks
+            yAlign="right"
+            tickSizeY={tickSizeY}
+            labelY={labelY}
+            offset={startTime}
+        />
+    );
 
     BeforeLines.propTypes = {
         ...rangePropTypes,

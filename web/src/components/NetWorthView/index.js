@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { netWorthTableShape } from '~client/prop-types/net-worth/view';
 import SumByCategory from '~client/components/NetWorthView/sum-by-category';
 import NetWorthViewRow from '~client/components/NetWorthView/net-worth-view-row';
+import NetWorthGraph from '~client/components/NetWorthGraph';
 
 import * as Styled from './styles';
 
@@ -39,6 +40,9 @@ export default function NetWorthView({ table, aggregate }) {
                     ))}
                 </tbody>
             </Styled.Table>
+            <Styled.Graphs>
+                <NetWorthGraph table={table} />
+            </Styled.Graphs>
         </Styled.NetWorthView>
     );
 }

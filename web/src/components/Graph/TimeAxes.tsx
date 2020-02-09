@@ -10,22 +10,18 @@ import {
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTimeScale } from '~client/components/Graph/helpers';
+import { Pix, Dimensions } from '~client/types/graph';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
 type IProps = {
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-    pixX: (x: number) => number;
-    pixY: (y: number) => number;
     offset?: number;
     tickSizeY?: number;
     hideMinorTicks?: boolean;
     yAlign?: 'left' | 'right';
     labelY?: (value: number) => string;
-};
+} & Pix &
+    Dimensions;
 
 type TimeScale = {
     pix: number;
@@ -68,7 +64,7 @@ function getTicksY({
 const axisColor = rgba(COLOR_LIGHT_GREY);
 const lightColor = rgba(COLOR_LIGHT);
 
-const defaultLabelY = value =>
+const defaultLabelY = (value: number): string =>
     formatCurrency(value, {
         raw: true,
         noPence: true,
@@ -100,6 +96,10 @@ const TimeAxes: React.FunctionComponent<IProps> = props => {
         yAlign = 'left',
         labelY = defaultLabelY,
     } = props;
+
+    if (minY === maxY) {
+        return null;
+    }
 
     const ticksY = getTicksY(props);
     const x0 = pixX(minX);

@@ -2,10 +2,11 @@ import styled, { css } from 'styled-components';
 import { colors } from '~client/styled/variables';
 
 export const NetWorthView = styled.div`
+    display: flex;
     margin: 0 3px;
     min-height: 0;
     max-height: 720px;
-    overflow: auto;
+    overflow: hidden;
     background: ${colors['translucent-l95']};
 `;
 
@@ -25,6 +26,8 @@ export const Table = styled.table`
         border-right: 1px solid ${colors['slightly-light']};
     }
 `;
+
+export const Graphs = styled.div``;
 
 export const Row = styled.tr``;
 
