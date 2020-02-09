@@ -31,7 +31,7 @@ import {
 import { rangePropTypes, pixelPropTypes } from '~client/prop-types/graph';
 import { fundItemShape } from '~client/prop-types/page/funds';
 import LineGraph from '~client/components/Graph/LineGraph';
-import Axes from '~client/containers/GraphFunds/Axes';
+import TimeAxes from '~client/components/Graph/TimeAxes';
 import AfterCanvas from '~client/containers/GraphFunds/after-canvas';
 
 import * as Styled from './styles';
@@ -94,21 +94,22 @@ const makeGetRanges = ({ mode, zoomRange: [zoomMin, zoomMax], lines, cacheTimes 
     };
 };
 
-function makeBeforeLines({ mode, startTime, tickSizeY }) {
-    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) =>
-        maxY !== 0 && (
-            <Axes
-                mode={mode}
-                startTime={startTime}
-                tickSizeY={tickSizeY}
-                minY={minY}
-                maxY={maxY}
-                minX={minX}
-                maxX={maxX}
-                pixX={pixX}
-                pixY={pixY}
-            />
-        );
+function makeBeforeLines({ mode, startTime, tickSizeY, labelY }) {
+    const BeforeLines = ({ minY, maxY, minX, maxX, pixX, pixY }) => (
+        <TimeAxes
+            minY={minY}
+            maxY={maxY}
+            minX={minX}
+            maxX={maxX}
+            pixX={pixX}
+            pixY={pixY}
+            hideMinorTicks
+            yAlign="right"
+            tickSizeY={tickSizeY}
+            labelY={labelY}
+            offset={startTime}
+        />
+    );
 
     BeforeLines.propTypes = {
         ...rangePropTypes,
@@ -210,6 +211,8 @@ function GraphFunds({
 
     const { minX, maxX, minY, maxY, tickSizeY } = useMemo(getRanges, [getRanges]);
 
+    const labelY = useCallback(value => formatValue(value, mode), [mode]);
+
     const beforeLines = useMemo(() => {
         if (!haveData) {
             return () => null;
@@ -219,8 +222,9 @@ function GraphFunds({
             mode,
             startTime,
             tickSizeY,
+            labelY,
         });
-    }, [haveData, mode, startTime, tickSizeY]);
+    }, [haveData, mode, startTime, tickSizeY, labelY]);
 
     const after = useCallback(
         () => (
@@ -244,8 +248,6 @@ function GraphFunds({
             ),
         [startTime],
     );
-
-    const labelY = useCallback(value => formatValue(value, mode), [mode]);
 
     const hoverEffect = useMemo(
         () => ({

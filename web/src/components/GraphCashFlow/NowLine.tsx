@@ -3,14 +3,12 @@ import { DateTime } from 'luxon';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { rgba } from '~client/modules/color';
+import { Pix, DimensionsY } from '~client/types/graph';
 
 type IProps = {
     now: DateTime;
-    minY: number;
-    maxY: number;
-    pixX: (x: number) => number;
-    pixY: (y: number) => number;
-};
+} & Pix &
+    DimensionsY;
 
 const NowLine: React.FunctionComponent<IProps> = ({ now, minY, maxY, pixX, pixY }) => {
     if (minY === maxY) {
