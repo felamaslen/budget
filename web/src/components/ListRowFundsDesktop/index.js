@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import { gainShape } from '~client/prop-types/page/funds';
-import GraphFundItem from '~client/components/GraphFundItem';
+import { GraphFundItem } from '~client/components/graph-fund-item';
 import FundGainInfo from '~client/components/FundGainInfo';
 
 import * as Styled from './styles';

@@ -6,7 +6,7 @@ import { Route } from 'react-router-dom';
 
 import { getOverviewTable } from '~client/selectors/overview';
 import OverviewTable from '~client/components/OverviewTable';
-import GraphOverview from '~client/containers/GraphOverview';
+import GraphOverview from '~client/containers/graph-overview';
 import NetWorth from '~client/containers/NetWorth';
 
 import * as Styled from './styles';

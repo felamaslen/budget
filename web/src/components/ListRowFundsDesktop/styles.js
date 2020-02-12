@@ -1,7 +1,7 @@
 import styled, { css } from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
-import { Graph } from '~client/components/Graph/styles';
+import { Graph } from '~client/components/graph/styles';
 import { Row } from '~client/components/ListRowDesktop/styles';
 
 export const FundExtraInfo = styled.span`

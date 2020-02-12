@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import { cachedValueShape } from '~client/prop-types/page/funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import GraphFunds from '~client/containers/GraphFunds';
+import GraphFunds from '~client/containers/graph-funds';
 import * as Styled from './styles';
 import { DesktopOnly, MobileOnly } from '~client/styled/shared/layout';
 import { formatOptions, formatOptionsPct } from '~client/components/FundGainInfo';

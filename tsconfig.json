@@ -22,7 +22,8 @@
   },
   "include": [
     "api/src/**/*",
-    "web/src/**/*"
+    "web/src/**/*",
+    "web/test/**/*"
   ],
   "exclude": [
     "node_modules"

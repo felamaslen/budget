@@ -1,3 +1,5 @@
+import { Padding } from '~client/types/graph';
+
 const defaultFont = 'Arial, Helvetica, sans-serif';
 
 type Font = [number, string];
@@ -13,7 +15,7 @@ export const GRAPH_HEIGHT = 300;
 export const GRAPH_ZOOM_SPEED = 0.15;
 
 export const GRAPH_CASHFLOW_NUM_TICKS = 5;
-export const GRAPH_CASHFLOW_PADDING = [40, 0, 0, 0];
+export const GRAPH_CASHFLOW_PADDING: Padding = [40, 0, 0, 0];
 
 type SpendCategory = { name: string; key: number };
 
@@ -35,22 +37,25 @@ export const GRAPH_FUND_ITEM_HEIGHT_LARGE = 120;
 export const GRAPH_FUNDS_WIDTH = 500;
 export const GRAPH_FUNDS_HEIGHT = 300;
 
-export const GRAPH_FUNDS_MODE_ROI = 'MODE_ROI';
-export const GRAPH_FUNDS_MODE_ABSOLUTE = 'MODE_ABSOLUTE';
-export const GRAPH_FUNDS_MODE_PRICE = 'MODE_PRICE';
+export enum Mode {
+    ROI = 'ROI',
+    Value = 'Value',
+    Price = 'Price',
+}
 
-export const GRAPH_FUNDS_MODES = {
-    [GRAPH_FUNDS_MODE_ROI]: 'ROI',
-    [GRAPH_FUNDS_MODE_ABSOLUTE]: 'Value',
-    [GRAPH_FUNDS_MODE_PRICE]: 'Price',
-};
+export const GRAPH_FUNDS_MODE_ROI = Mode.ROI;
+export const GRAPH_FUNDS_MODE_ABSOLUTE = Mode.Value;
+export const GRAPH_FUNDS_MODE_PRICE = Mode.Price;
 
-export const GRAPH_FUNDS_PERIODS = [
-    ['year1', '1 year'],
-    ['year5', '5 years'],
-    ['month1', '1 month'],
-    ['month3', '3 months'],
-];
+export enum Period {
+    year1 = '1 year',
+    year5 = '5 years',
+    month1 = '1 month',
+    month3 = '3 months',
+}
+
+export const GRAPH_FUNDS_PERIODS = Object.entries(Period);
+
 export const GRAPH_FUNDS_NUM_TICKS = 10;
 
 export const GRAPH_STOCKS_WIDTH = 150;

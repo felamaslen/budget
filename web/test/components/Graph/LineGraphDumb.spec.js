@@ -2,9 +2,9 @@ import test from 'ava';
 import { render } from '@testing-library/react';
 import '~client-test/browser';
 import React from 'react';
-import LineGraphDumb from '~client/components/Graph/LineGraphDumb';
+import LineGraphDumb from '~client/components/graph/line-graph-dumb';
 
-const getContainer = (customProps = {}) => {
+const getContainer = customProps => {
     const props = {
         name: 'some-dumb-graph',
         dimensions: {
@@ -52,14 +52,12 @@ const getContainer = (customProps = {}) => {
             },
         ],
         calc: {
-            minX: 100,
-            maxX: 103,
-            minY: -2,
-            maxY: 2,
             pixX: () => 0,
-            pixY: () => 0,
+            pixY1: () => 0,
+            pixY2: () => 0,
             valX: () => 0,
-            valY: () => 0,
+            valY1: () => 0,
+            valY2: () => 0,
         },
         ...customProps,
     };
@@ -71,21 +69,19 @@ test('rendering a line graph', t => {
     const { container } = getContainer();
 
     t.is(container.childNodes.length, 1);
-    const [graph] = container.childNodes;
+    const graph = container.childNodes[0];
 
     t.is(graph.tagName, 'DIV');
     t.is(graph.childNodes.length, 1);
 
-    const [svg] = graph.childNodes;
+    const svg = graph.childNodes[0];
     t.is(svg.tagName, 'svg');
 });
 
 test('not rendering any SVG data if there are no lines', t => {
     const { container } = getContainer({ lines: [] });
 
-    const {
-        childNodes: [svg],
-    } = container.childNodes[0];
+    const svg = container.childNodes[0].childNodes[0];
 
     t.is(svg.childNodes.length, 0);
 });
@@ -93,9 +89,7 @@ test('not rendering any SVG data if there are no lines', t => {
 test('rendering lines', t => {
     const { container } = getContainer();
 
-    const {
-        childNodes: [svg],
-    } = container.childNodes[0];
+    const svg = container.childNodes[0].childNodes[0];
 
     t.is(svg.childNodes.length, 5);
 
@@ -103,8 +97,7 @@ test('rendering lines', t => {
         t.is(line.tagName, 'g');
         t.is(line.childNodes.length, 1);
 
-        const [path] = line.childNodes;
-
+        const path = line.childNodes[0];
         t.is(path.tagName, 'path');
     });
 });

@@ -44,6 +44,12 @@ module.exports = {
             },
         ],
         '@typescript-eslint/no-var-requires': 'off',
+        'import/no-extraneous-dependencies': [
+            'error',
+            {
+                devDependencies: ['**/*spec.ts', '**/*.spec.tsx', '**/*.spec.js'],
+            },
+        ],
         'import/prefer-default-export': 0,
         'jest/lowercase-name': 0,
         'jest/require-top-level-describe': 0,
