@@ -1,12 +1,15 @@
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 
 import * as Styled from './styles';
 
-export default function AfterCanvas({ showAll, setShowAll }) {
+type IProps = {
+    showAll: boolean;
+    setShowAll: (value: boolean | ((lastValue: boolean) => boolean)) => void;
+};
+
+const AfterCanvas: React.FunctionComponent<IProps> = ({ showAll, setShowAll }) => {
     const skip = useCallback(event => {
         event.stopPropagation();
-        event.preventDefault();
     }, []);
 
     const onToggle = useCallback(
@@ -31,9 +34,6 @@ export default function AfterCanvas({ showAll, setShowAll }) {
             <Styled.CheckBox enabled={showAll} />
         </Styled.ShowAll>
     );
-}
-
-AfterCanvas.propTypes = {
-    showAll: PropTypes.bool.isRequired,
-    setShowAll: PropTypes.func.isRequired,
 };
+
+export default AfterCanvas;
