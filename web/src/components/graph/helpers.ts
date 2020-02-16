@@ -58,9 +58,9 @@ export const genPixelCompute = (dimensions: Dimensions): Calc => {
         valX: (pix: number): number =>
             (pix - padLeft) * ((maxX - minX) / (width - padLeft - padRight)) + minX,
         valY1: (pix: number): number =>
-            (height - padBottom - pix) * (maxY - minY / (height - padTop - padBottom)) + minY,
+            ((height - padBottom - pix) * (maxY - minY)) / (height - padTop - padBottom) + minY,
         valY2: (pix: number): number =>
-            (height - padBottom - pix) * (maxY2 - minY2 / (height - padTop - padBottom)) + minY2,
+            ((height - padBottom - pix) * (maxY2 - minY2)) / (height - padTop - padBottom) + minY2,
     };
 };
 
