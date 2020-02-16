@@ -52,8 +52,11 @@ function normaliseSecondAxis(
         return { minY2, maxY2, minY, maxY };
     }
 
-    const tickSizePrimary = getTickSize(minY, maxY, 10);
-    const numTicks = Math.ceil((maxY - minY) / tickSizePrimary);
+    const tickSizePrimary = getTickSize(minY, maxY, 5);
+    const minYNext = Math.floor(minY / tickSizePrimary) * tickSizePrimary;
+    const maxYNext = Math.ceil(maxY / tickSizePrimary) * tickSizePrimary;
+
+    const numTicks = Math.ceil((maxYNext - minYNext) / tickSizePrimary);
 
     const tickSizeSecondary = normaliseTickSize((maxY2 - minY2) / numTicks);
 
@@ -63,8 +66,8 @@ function normaliseSecondAxis(
     const y2Shift = maxY2Next / maxY2 >= 0 ? 0 : -maxY2Next;
 
     const result = {
-        minY: Math.floor(minY / tickSizePrimary) * tickSizePrimary,
-        maxY: Math.ceil(maxY / tickSizePrimary) * tickSizePrimary,
+        minY: minYNext,
+        maxY: maxYNext,
         minY2: minY2Next + y2Shift,
         maxY2: maxY2Next + y2Shift,
     };

@@ -10,7 +10,7 @@ import {
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTimeScale } from '~client/components/graph/helpers';
-import { Range, Pix, BasicProps, TimeScale } from '~client/types/graph';
+import { BasicProps, TimeScale } from '~client/types/graph';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
@@ -32,12 +32,23 @@ type TicksY = {
     valueSecondary?: number;
 }[];
 
-function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: Props): TicksY {
+function getTicksY({
+    minY,
+    minY2 = minY,
+    maxY,
+    maxY2 = maxY,
+    pixY1,
+    tickSizeY = 0,
+    hideMinorTicks,
+}: Props): TicksY {
     const minorTicks = hideMinorTicks ? 1 : 5;
+    const numTicksGuide = 5 * minorTicks;
 
-    const tickSize = tickSizeY || getTickSize(minY, maxY, 5 * minorTicks);
+    const tickSize = tickSizeY || getTickSize(minY, maxY, numTicksGuide);
+    const tickSize2 = getTickSize(minY2, maxY2, numTicksGuide);
     const majorTickSize = tickSize * minorTicks;
     const tickStart = Math.floor(minY / tickSize) * tickSize;
+    const tickStart2 = Math.floor(minY2 / tickSize2) * tickSize2;
 
     const numTicks = Math.ceil((maxY - minY) / tickSize);
     if (numTicks > 50) {
@@ -46,11 +57,11 @@ function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: 
 
     return new Array(numTicks + 1).fill(0).map((_, index) => {
         const value = tickStart + index * tickSize;
+        const valueSecondary = tickStart2 + index * tickSize2;
+
         const pos = Math.floor(pixY1(value)) + 0.5;
 
         const major = value % majorTickSize === 0;
-
-        const valueSecondary = valY2(pos);
 
         return { pos, major, value, valueSecondary };
     });
