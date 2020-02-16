@@ -10,60 +10,49 @@ import {
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTimeScale } from '~client/components/graph/helpers';
-import { Range, Pix, TimeScale } from '~client/types/graph';
+import { Range, Pix, BasicProps, TimeScale } from '~client/types/graph';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
 export type LabelY = (value: number) => string;
 
-type Props = {
+export type Props = {
     dualAxis?: boolean;
     offset?: number;
     tickSizeY?: number;
     hideMinorTicks?: boolean;
     yAlign?: 'left' | 'right';
     labelY?: LabelY;
-} & Range &
-    Pix;
-
-type YAxisProps = {
-    x0: number;
-    xMax: number;
-    min: number;
-    max: number;
-    pix: (value: number) => number;
-    hideMinorTicks: boolean;
-    tickSizeY: number;
-    labelY: LabelY;
-    align: 'left' | 'right';
-    alignPos: number;
-};
+} & BasicProps;
 
 type TicksY = {
     pos: number;
     major: boolean;
     value: number;
+    valueSecondary?: number;
 }[];
 
-function getTicksY({ min, max, pix, tickSizeY = 0, hideMinorTicks }: YAxisProps): TicksY {
+function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: Props): TicksY {
     const minorTicks = hideMinorTicks ? 1 : 5;
 
-    const tickSize = tickSizeY || getTickSize(min, max, 5 * minorTicks);
+    const tickSize = tickSizeY || getTickSize(minY, maxY, 5 * minorTicks);
     const majorTickSize = tickSize * minorTicks;
-    const tickStart = Math.floor(min / tickSize) * tickSize;
+    const tickStart = Math.floor(minY / tickSize) * tickSize;
 
-    const numTicks = Math.ceil((max - min) / tickSize);
+    const numTicks = Math.ceil((maxY - minY) / tickSize);
     if (numTicks > 50) {
         return [];
     }
 
-    return new Array(numTicks + 1).fill(0).map((item, index) => {
+    return new Array(numTicks + 1).fill(0).map((_, index) => {
         const value = tickStart + index * tickSize;
-        const pos = Math.floor(pix(value)) + 0.5;
+        const pos = Math.floor(pixY1(value)) + 0.5;
 
         const major = value % majorTickSize === 0;
 
-        return { pos, major, value };
+        const valueSecondary = valY2(pos);
+
+        return { pos, major, value, valueSecondary };
     });
 }
 
@@ -135,16 +124,17 @@ const TicksYMinor: React.FC<YAxisTicksProps> = ({ x0, xMax, ticksY }) => (
 );
 
 type YAxisTextProps = YAxisPartProps & {
+    secondary?: boolean;
     align: 'left' | 'right';
     alignPos: number;
     labelY: LabelY;
 };
 
-const TicksYText: React.FC<YAxisTextProps> = ({ ticksY, labelY, align, alignPos }) => (
+const TicksYText: React.FC<YAxisTextProps> = ({ secondary, ticksY, labelY, align, alignPos }) => (
     <g>
         {ticksY
             .filter(({ major }) => major)
-            .map(({ value, pos }) => (
+            .map(({ value, valueSecondary = value, pos }) => (
                 <text
                     key={pos}
                     x={alignPos}
@@ -154,21 +144,41 @@ const TicksYText: React.FC<YAxisTextProps> = ({ ticksY, labelY, align, alignPos 
                     fontSize={fontSize}
                     alignmentBaseline="baseline"
                 >
-                    {labelY(value)}
+                    {labelY(secondary ? valueSecondary : value)}
                 </text>
             ))}
     </g>
 );
 
-const YAxis: React.FC<YAxisProps> = props => {
-    const { x0, xMax, align, alignPos, hideMinorTicks, labelY } = props;
+const YAxis: React.FC<Props> = props => {
     const ticksY = getTicksY(props);
+
+    const { dualAxis, minX, maxX, pixX, yAlign, hideMinorTicks, labelY = defaultLabelY } = props;
+
+    const x0 = pixX(minX);
+    const xMax = pixX(maxX);
+
+    const [alignPosPrimary, alignPosSecondary] = yAlign === 'left' ? [x0, xMax] : [xMax, x0];
 
     return (
         <>
             <TicksYMajor x0={x0} xMax={xMax} ticksY={ticksY} />
             {!hideMinorTicks && <TicksYMinor x0={x0} xMax={xMax} ticksY={ticksY} />}
-            <TicksYText ticksY={ticksY} labelY={labelY} align={align} alignPos={alignPos} />
+            <TicksYText
+                ticksY={ticksY}
+                labelY={labelY}
+                align={yAlign || 'left'}
+                alignPos={alignPosPrimary}
+            />
+            {dualAxis && (
+                <TicksYText
+                    secondary
+                    ticksY={ticksY}
+                    labelY={labelY}
+                    align={yAlign === 'left' ? 'right' : 'left'}
+                    alignPos={alignPosSecondary}
+                />
+            )}
         </>
     );
 };
@@ -252,58 +262,21 @@ export const TimeAxes: React.FC<Props> = props => {
         maxY2 = maxY,
         pixX,
         pixY1,
-        pixY2,
         offset = 0,
-        dualAxis,
         hideMinorTicks = false,
-        tickSizeY = 0,
-        yAlign = 'left',
-        labelY = defaultLabelY,
     } = props;
 
     if (minY === maxY || minY2 === maxY2) {
         return null;
     }
 
-    const x0 = pixX(minX);
-    const xMax = pixX(maxX);
     const y0 = pixY1(minY);
 
     const timeScale: TimeScale = getTimeScale({ minX, maxX, pixX })(offset);
 
-    const yAxisProps = {
-        hideMinorTicks,
-        tickSizeY,
-        labelY,
-        x0,
-        xMax,
-    };
-
-    const alignPrimary = yAlign === 'left' ? 'left' : 'right';
-    const alignSecondary = yAlign === 'right' ? 'left' : 'right';
-
-    const [alignPosPrimary, alignPosSecondary] = yAlign === 'left' ? [x0, xMax] : [xMax, x0];
-
     return (
         <g>
-            <YAxis
-                min={minY}
-                max={maxY}
-                pix={pixY1}
-                align={alignPrimary}
-                alignPos={alignPosPrimary}
-                {...yAxisProps}
-            />
-            {dualAxis && (
-                <YAxis
-                    min={minY2}
-                    max={maxY2}
-                    pix={pixY2}
-                    align={alignSecondary}
-                    alignPos={alignPosSecondary}
-                    {...yAxisProps}
-                />
-            )}
+            <YAxis {...props} />
             <TicksXBackground y0={y0} timeScale={timeScale} hideMinorTicks={hideMinorTicks} />
             <TicksXForeground y0={y0} timeScale={timeScale} />
             <TicksXText y0={y0} timeScale={timeScale} />

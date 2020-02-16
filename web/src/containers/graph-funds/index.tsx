@@ -34,7 +34,7 @@ import {
 } from '~client/components/graph/line-graph';
 import { TimeAxes, LabelY } from '~client/components/graph/time-axes';
 import { AfterCanvas } from '~client/containers/graph-funds/after-canvas';
-import { Padding, Line, Range, Pix } from '~client/types/graph';
+import { Padding, Line, Range, Pix, BasicProps } from '~client/types/graph';
 import { FundItem, FundLine } from '~client/types/funds';
 
 import * as Styled from './styles';
@@ -125,16 +125,10 @@ function makeBeforeLines({
     startTime: number;
     tickSizeY?: number;
     labelY: LabelY;
-}): React.FC<Range & Pix> {
-    const BeforeLines: React.FC<Range & Pix> = ({ minY, maxY, minX, maxX, pixX, pixY1, pixY2 }) => (
+}): React.FC<BasicProps> {
+    const BeforeLines: React.FC<BasicProps> = props => (
         <TimeAxes
-            minY={minY}
-            maxY={maxY}
-            minX={minX}
-            maxX={maxX}
-            pixX={pixX}
-            pixY1={pixY1}
-            pixY2={pixY2}
+            {...props}
             hideMinorTicks
             yAlign="right"
             tickSizeY={tickSizeY}
@@ -251,7 +245,7 @@ const GraphFunds: React.FC<Props> = ({
         onFundsRequested,
     ]);
 
-    const beforeLines = useMemo<React.FC<Range & Pix>>(() => {
+    const beforeLines = useMemo<React.FC<BasicProps>>(() => {
         if (!haveData) {
             return (): null => null;
         }

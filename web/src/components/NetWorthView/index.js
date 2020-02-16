@@ -30,7 +30,7 @@ export default function NetWorthView({ table, aggregate }) {
                         <Styled.Header item="assets">{'Total (£)'}</Styled.Header>
                         <Styled.Header item="liabilities">{'Total (£)'}</Styled.Header>
                         <Styled.HeaderRetirement colSpan={2} item="date">
-                            {'Retire when FTI > 1000'}
+                            {'Retire when > 1000'}
                         </Styled.HeaderRetirement>
                     </Styled.RowSubtitle>
                 </thead>

@@ -1,7 +1,7 @@
 import { Data } from '~client/types/graph';
 import { Color } from '~client/constants/colors';
 
-type Transaction = {
+export type Transaction = {
     date: Date;
     units: number;
     cost: number;

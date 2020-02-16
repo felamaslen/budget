@@ -6,7 +6,7 @@ import { TimeAxes } from '~client/components/graph/time-axes';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
-import { Range, Pix, BasicProps, Line } from '~client/types/graph';
+import { Range, BasicProps, Line } from '~client/types/graph';
 
 export type Props = PickUnion<GraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
     isMobile?: boolean;
@@ -72,7 +72,7 @@ export function getRanges(lines: Line[]): Range {
 }
 
 function makeBeforeLines({ now }: Pick<Props, 'now'>): React.FC<BasicProps> {
-    const BeforeLines: React.FC<Range & Pix> = props => (
+    const BeforeLines: React.FC<BasicProps> = props => (
         <g>
             <TimeAxes {...props} />
             <NowLine now={now} {...props} />

@@ -2,8 +2,8 @@ import React from 'react';
 import { DateTime } from 'luxon';
 
 import { LineGraph } from '~client/components/graph/line-graph';
-import { TimeAxes } from '~client/components/graph/time-axes';
-import { Pix, Range, Dimensions, Line } from '~client/types/graph';
+import { TimeAxes, Props as TimeAxesProps } from '~client/components/graph/time-axes';
+import { Range, BasicProps, Line } from '~client/types/graph';
 
 import * as Styled from './styles';
 
@@ -18,17 +18,10 @@ type GraphProps = {
     }[];
 };
 
-type BeforeLinesProps = Pix & Range & Dimensions;
-
 const labelY = (value: number): string => String(value);
 
-type AxisProps = {
-    labelY?: (value: number) => string;
-    hideMinorTicks?: boolean;
-};
-
-const makeBeforeLines = (axisProps: AxisProps = {}): React.FC<BeforeLinesProps> => {
-    const BeforeLines: React.FC<BeforeLinesProps> = props => (
+const makeBeforeLines = (axisProps: Partial<TimeAxesProps> = {}): React.FC<BasicProps> => {
+    const BeforeLines: React.FC<BasicProps> = props => (
         <TimeAxes {...props} yAlign="right" {...axisProps} />
     );
 
@@ -38,6 +31,7 @@ const makeBeforeLines = (axisProps: AxisProps = {}): React.FC<BeforeLinesProps> 
 const BeforeLinesFTI = makeBeforeLines({ labelY });
 const BeforeLinesNetWorth = makeBeforeLines({
     hideMinorTicks: true,
+    dualAxis: true,
 });
 
 const dimensions = (lines: Line[]): Range => ({
@@ -59,6 +53,8 @@ const dimensions = (lines: Line[]): Range => ({
     ),
 });
 
+const graphWidth = 320;
+
 export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
     const dataFti = React.useMemo<[Line]>(
         () => [
@@ -74,59 +70,55 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
 
     const dimensionsFti = dimensions(dataFti);
 
-    const dataNetWorth = React.useMemo<[Line, Line, Line]>(
+    const dataNetWorth = React.useMemo<Line[]>(
         () => [
             {
                 key: 'assets',
                 data: table.map(({ date, assets }) => [date.toSeconds(), assets]),
-                color: 'darkgreen',
+                color: Styled.colors.assets,
                 smooth: true,
             },
             {
                 key: 'liabilities',
                 data: table.map(({ date, liabilities }) => [date.toSeconds(), -liabilities]),
-                secondary: true,
-                color: 'darkred',
+                color: Styled.colors.liabilities,
                 smooth: true,
+                strokeWidth: 1,
+                secondary: true,
             },
             {
                 key: 'expenses',
                 data: table.map(({ date, expenses }) => [date.toSeconds(), -expenses]),
-                secondary: true,
-                color: 'blueviolet',
+                color: Styled.colors.expenses,
                 smooth: true,
+                strokeWidth: 1,
+                secondary: true,
             },
         ],
         [table],
     );
 
-    const dimensionsNetWorthLeft = dimensions(dataNetWorth.slice(1));
-    const dimensionsNetWorthRight = dimensions(dataNetWorth.slice(0, 1));
+    const dimensionsNetWorthLeft = dimensions(dataNetWorth.filter(({ secondary }) => secondary));
+    const dimensionsNetWorthRight = dimensions(dataNetWorth.filter(({ secondary }) => !secondary));
 
     return (
         <>
-            <h3>Assets</h3>
+            <Styled.GraphKey>
+                <ul>
+                    <Styled.KeyAssets>&mdash; Assets</Styled.KeyAssets>
+                    <Styled.KeyLiabilities>&mdash; Liabilities</Styled.KeyLiabilities>
+                    <Styled.KeyExpenses>&mdash; Expenses</Styled.KeyExpenses>
+                </ul>
+            </Styled.GraphKey>
             <LineGraph
-                name="assets"
-                lines={dataNetWorth.slice(0, 1)}
-                width={320}
-                height={100}
+                name="net-worth"
+                lines={dataNetWorth}
+                width={graphWidth}
+                height={240}
                 {...dimensionsNetWorthRight}
                 minY={0}
-                beforeLines={BeforeLinesNetWorth}
-            />
-            <h3>
-                <span style={{ color: 'darkred' }}>Liabilities</span> /{' '}
-                <span style={{ color: 'blueviolet' }}>Expenses</span>
-            </h3>
-            <LineGraph
-                name="liabilities"
-                lines={dataNetWorth.slice(1)}
-                width={320}
-                height={128}
-                {...dimensionsNetWorthLeft}
                 minY2={dimensionsNetWorthLeft.minY}
-                maxY2={0}
+                maxY2={dimensionsNetWorthLeft.maxY}
                 beforeLines={BeforeLinesNetWorth}
             />
             <Styled.FTILabel>
@@ -144,10 +136,10 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
             <LineGraph
                 name="fti"
                 lines={dataFti}
-                width={320}
+                width={graphWidth}
                 height={180}
-                padding={[0, 0, 0, 0]}
                 {...dimensionsFti}
+                minY={0}
                 maxY={Math.min(2000, 1.5 * dimensionsFti.maxY)}
                 beforeLines={BeforeLinesFTI}
             />
