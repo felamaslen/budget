@@ -44,3 +44,6 @@
 - [DONE] Airbnb eslint guidelines
 - [DONE] Styled components
 - Fund portfolio pie chart
+- Rewrite tests in jest
+- Use date-fns instead of luxon
+- typescript styled-components
