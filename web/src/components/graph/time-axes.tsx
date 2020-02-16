@@ -23,6 +23,7 @@ export type Props = {
     hideMinorTicks?: boolean;
     yAlign?: 'left' | 'right';
     labelY?: LabelY;
+    labelY2?: LabelY;
 } & BasicProps;
 
 type TicksY = {
@@ -164,7 +165,16 @@ const TicksYText: React.FC<YAxisTextProps> = ({ secondary, ticksY, labelY, align
 const YAxis: React.FC<Props> = props => {
     const ticksY = getTicksY(props);
 
-    const { dualAxis, minX, maxX, pixX, yAlign, hideMinorTicks, labelY = defaultLabelY } = props;
+    const {
+        dualAxis,
+        minX,
+        maxX,
+        pixX,
+        yAlign,
+        hideMinorTicks,
+        labelY = defaultLabelY,
+        labelY2 = defaultLabelY,
+    } = props;
 
     const x0 = pixX(minX);
     const xMax = pixX(maxX);
@@ -185,7 +195,7 @@ const YAxis: React.FC<Props> = props => {
                 <TicksYText
                     secondary
                     ticksY={ticksY}
-                    labelY={labelY}
+                    labelY={labelY2}
                     align={yAlign === 'left' ? 'right' : 'left'}
                     alignPos={alignPosSecondary}
                 />

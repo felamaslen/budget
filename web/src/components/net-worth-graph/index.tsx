@@ -15,6 +15,7 @@ type GraphProps = {
         liabilities: number;
         expenses: number;
         fti: number;
+        pastYearAverageSpend: number;
     }[];
 };
 
@@ -22,17 +23,14 @@ const labelY = (value: number): string => String(value);
 
 const makeBeforeLines = (axisProps: Partial<TimeAxesProps> = {}): React.FC<BasicProps> => {
     const BeforeLines: React.FC<BasicProps> = props => (
-        <TimeAxes {...props} yAlign="right" {...axisProps} />
+        <TimeAxes {...props} yAlign="right" hideMinorTicks dualAxis {...axisProps} />
     );
 
     return BeforeLines;
 };
 
 const BeforeLinesFTI = makeBeforeLines({ labelY });
-const BeforeLinesNetWorth = makeBeforeLines({
-    hideMinorTicks: true,
-    dualAxis: true,
-});
+const BeforeLinesNetWorth = makeBeforeLines();
 
 const dimensions = (lines: Line[]): Range => ({
     minX: lines.reduce(
@@ -56,7 +54,7 @@ const dimensions = (lines: Line[]): Range => ({
 const graphWidth = 320;
 
 export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
-    const dataFti = React.useMemo<[Line]>(
+    const dataFti = React.useMemo<Line[]>(
         () => [
             {
                 key: 'fti',
@@ -64,11 +62,31 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
                 color: '#000',
                 smooth: true,
             },
+            {
+                key: 'net-worth',
+                data: table.map(({ date, assets, liabilities }) => [
+                    date.toSeconds(),
+                    assets - liabilities,
+                ]),
+                color: 'darkgreen',
+                smooth: true,
+                strokeWidth: 1,
+                secondary: true,
+            },
+            {
+                key: 'spending',
+                data: table.map(({ date, pastYearAverageSpend }) => [
+                    date.toSeconds(),
+                    pastYearAverageSpend,
+                ]),
+                color: 'red',
+                smooth: true,
+                strokeWidth: 1,
+                secondary: true,
+            },
         ],
         [table],
     );
-
-    const dimensionsFti = dimensions(dataFti);
 
     const dataNetWorth = React.useMemo<Line[]>(
         () => [
@@ -100,6 +118,9 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
 
     const dimensionsNetWorthLeft = dimensions(dataNetWorth.filter(({ secondary }) => secondary));
     const dimensionsNetWorthRight = dimensions(dataNetWorth.filter(({ secondary }) => !secondary));
+
+    const dimensionsFti = dimensions(dataFti.filter(({ secondary }) => !secondary));
+    const dimensionsFtiBackground = dimensions(dataFti.filter(({ secondary }) => secondary));
 
     return (
         <>
@@ -140,7 +161,8 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
                 height={180}
                 {...dimensionsFti}
                 minY={0}
-                maxY={Math.min(2000, 1.5 * dimensionsFti.maxY)}
+                minY2={0}
+                maxY2={dimensionsFtiBackground.maxY}
                 beforeLines={BeforeLinesFTI}
             />
         </>
