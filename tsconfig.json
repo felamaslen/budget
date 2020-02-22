@@ -23,7 +23,6 @@
   "include": [
     "api/src/**/*",
     "web/src/**/*",
-    "./*",
     "seeds/*",
     "migrations/*"
   ],

@@ -1,0 +1,12 @@
+{
+  "disclaimer": "Usage subject to terms: https://openexchangerates.org/terms",
+  "license": "https://openexchangerates.org/license",
+  "timestamp": 1582416016,
+  "base": "USD",
+  "rates": {
+    "GBP": 0.771546,
+    "USD": 1,
+    "XAG": 0.05406284,
+    "ZAR": 15.00329
+  }
+}
