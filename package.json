@@ -19,10 +19,7 @@
     "start": "node api/build",
     "dev": "docker-compose up --build",
     "dev:api": "SKIP_APP=true npm run dev",
-    "test:web": "TZ=UTC NODE_ENV=test BABEL_ENV=node ava \"./web/test/**/*.spec.js\"",
-    "test:api": "./api/test/docker.sh",
-    "test:dev": "TZ=UTC NODE_ENV=test BABEL_ENV=node ava -w --fail-fast \"./web/test/**/*.spec.js\"",
-    "test": "npm run test:web && npm run test:api",
+    "test": "NODE_ENV=test jest --detectOpenHandles --runInBand",
     "lint": "eslint webpack.config.js api/src api/test web/src web/test",
     "sass-lint": "sass-lint -qv \"./web/src/**/*.scss\"",
     "knex:migrate:make": "knex --knexfile knexfile.ts -x js migrate:make",
@@ -46,17 +43,6 @@
     "url": "https://github.com/felamaslen/budget/issues"
   },
   "homepage": "https://github.com/felamaslen/budget#readme",
-  "ava": {
-    "require": [
-      "@babel/register",
-      "ignore-styles"
-    ],
-    "babel": {
-      "testOptions": {
-        "babelrc": true
-      }
-    }
-  },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
     "@babel/register": "^7.5.5",
@@ -138,6 +124,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.8.3",
     "@testing-library/react": "^8.0.4",
+    "@types/jest": "^25.1.2",
     "@types/luxon": "^1.21.0",
     "@types/node": "^13.7.0",
     "@types/react": "^16.9.19",
@@ -151,7 +138,6 @@
     "@typescript-eslint/parser": "^2.19.0",
     "array-permutation": "^0.2.0",
     "autoprefixer": "^9.6.1",
-    "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "babel-plugin-webpack-alias-7": "^0.1.1",
@@ -170,11 +156,9 @@
     "file-loader": "^1.1.11",
     "fs-extra": "^4.0.1",
     "ignore-styles": "^5.0.1",
-    "it-each": "^0.3.1",
-    "jsdom": "^11.2.0",
+    "jest": "^25.1.0",
     "match-media-mock": "^0.1.1",
     "mini-css-extract-plugin": "^0.4.0",
-    "ninos": "^2.0.2",
     "node-sass": "^4.12.0",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
@@ -189,6 +173,7 @@
     "sinon-chai": "^2.14.0",
     "sqlite3": "^4.0.6",
     "style-loader": "^0.19.1",
+    "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5",
     "webpack": "^4.34.0",
