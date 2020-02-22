@@ -36,6 +36,8 @@ services:
     environment:
       POSTGRES_USER: docker
       POSTGRES_PASSWORD: docker
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 networks:
   net_budget_dev:
     driver: bridge

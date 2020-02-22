@@ -1,3 +1,12 @@
 language: node_js
 node_js:
   - "10"
+services:
+  - postgresql
+before_script:
+  - psql -U postgres -c 'create database budget_test;'
+env:
+  global:
+    - POSTGRES_USER: docker
+    - POSTGRES_PASSWORD: docker
+    - DATABASE_URL: postgres://docker:docker@localhost:5432/budget_test
