@@ -1,3 +1,13 @@
+import { Server } from 'http';
+import path from 'path';
+import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+import config from '~api/config';
+import logger from '~api/modules/logger';
+
+/*
 import '@babel/polyfill';
 
 import express from 'express';
@@ -6,117 +16,99 @@ import serveStatic from 'serve-static';
 import path from 'path';
 import webLogger from 'morgan';
 import passport from 'passport';
-import swaggerUiDist from 'swagger-ui-dist';
-import swaggerJSDoc from 'swagger-jsdoc';
 
 import { version } from '../../package.json';
 import config from '~api/config';
-import db from '~api/modules/db';
-import getLogger from '~api/modules/logger';
+import logger from '~api/modules/logger';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
 import routes from '~api/routes';
 
 const API_PREFIX = '/api/v4';
 
-function getVersion() {
-    return version.substring(0, version.indexOf('-'));
-}
+const getHeader = (req: express.Request, key: string): string => {
+    const header = req.headers[key];
+    if (Array.isArray(header)) {
+        return header[0] || '';
+    }
 
-function setupLogging(app) {
+    return header || '';
+};
+
+function setupLogging(app: express.Express): void {
     if (config.debug) {
         app.use(webLogger('dev'));
     } else {
         webLogger.token(
             'remote-addr',
             req =>
-                req.headers['x-real-ip'] ||
-                req.headers['x-forwarded-for'] ||
-                req.connection.remoteAddress,
+                getHeader(req, 'x-real-ip') ||
+                getHeader(req, 'x-forwarded-for') ||
+                req.connection.remoteAddress ||
+                '',
         );
 
         app.use(
             webLogger('common', {
-                skip: (req, res) => res.statusCode < 400,
+                skip: (_, res) => res.statusCode < 400,
                 stream: process.stderr,
             }),
         );
 
         app.use(
             webLogger('common', {
-                skip: (req, res) => res.statusCode >= 400,
+                skip: (_, res) => res.statusCode >= 400,
                 stream: process.stdout,
             }),
         );
     }
 }
 
-function setupStaticViews(app) {
+function setupStaticViews(app: express.Express): void {
     // set up template engine
     app.set('views', path.join(__dirname, '../../web/src/templates'));
     app.set('view engine', 'ejs');
 }
 
-function setupDataInput(app) {
+function setupDataInput(app: express.Express): void {
     // accept REST data parameters
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
 }
+*/
 
-function setupApiDocs(app) {
-    // API docs
-    const swaggerDefinition = {
-        info: {
-            title: 'Budget API',
-            version: getVersion(),
-            description: 'Personal finance manager API',
-        },
-        host: config.webUrl.substring(config.webUrl.indexOf('//') + 2),
-        schemes: [config.webUrl.substring(0, config.webUrl.indexOf(':'))],
-        basePath: API_PREFIX,
-    };
+function setupApiDocs(app: express.Express): void {
+  app.use(
+    '/docs',
+    swaggerUi.serve,
+    (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const swaggerDocument = YAML.load(path.resolve(__dirname, '../../docs/api.yml'));
 
-    const swaggerOptions = {
-        swaggerDefinition,
-        apis: [path.join(__dirname, './routes/**/index.js')],
-    };
-
-    const swaggerSpec = swaggerJSDoc(swaggerOptions);
-
-    app.get('/docs/spec.json', (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(swaggerSpec);
-    });
-
-    const swaggerUiAssetPath = swaggerUiDist.getAbsoluteFSPath();
-
-    app.get('/docs/api', (req, res) =>
-        res.sendFile(path.join(__dirname, '../../docs/api/index.html')),
-    );
-    app.use('/docs/', express.static(swaggerUiAssetPath));
+      swaggerUi.setup(swaggerDocument)(req, res, next);
+    },
+  );
 }
 
-function setupApi(app, logger) {
-    passport.use('jwt', getStrategy(config, db, logger));
+function setupApi(app: express.Express): void {
+  // passport.use('jwt', getStrategy());
 
-    app.use(passport.initialize());
+  // app.use(passport.initialize());
 
-    app.get('/health', (req, res) => {
-        res.send('ok');
-    });
+  app.get('/health', (_, res) => {
+    res.json({ ok: true });
+  });
 
-    app.use(API_PREFIX, routes(config, db, logger));
+  // app.use(API_PREFIX, routes());
 
-    setupApiDocs(app);
+  setupApiDocs(app);
 }
 
-function setupDevServer(app) {
-    // eslint-disable-next-line global-require
+/*
+function setupDevServer(app: express.Express): void {
+    // eslint-disable global-require, import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
     const conf = require('../../webpack.config');
-    // eslint-disable-next-line global-require, import/no-extraneous-dependencies
     const compiler = require('webpack')(conf);
 
-    // eslint-disable-next-line import/no-extraneous-dependencies, global-require
     app.use(
         require('webpack-dev-middleware')(compiler, {
             publicPath: '/',
@@ -131,15 +123,15 @@ function setupDevServer(app) {
         }),
     );
 
-    // eslint-disable-next-line import/no-extraneous-dependencies, global-require
     app.use(
         require('webpack-hot-middleware')(compiler, {
             log: console.log, // eslint-disable-line no-console
         }),
     );
+    // eslint-enable global-require, import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
 }
 
-function setupWebApp(app) {
+function setupWebApp(app: express.Express): void {
     const hot = process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'development';
     if (hot) {
         setupDevServer(app);
@@ -147,7 +139,7 @@ function setupWebApp(app) {
 
     setupStaticViews(app);
 
-    const singlePageApp = (req, res) => {
+    const singlePageApp = (_: express.Request, res: express.Response): void => {
         const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
 
         res.setHeader('Cache-Control', 'no-cache');
@@ -171,26 +163,23 @@ function setupWebApp(app) {
     app.get('/:pageName/*', singlePageApp);
 }
 
-function setupErrorHandling(app, logger) {
-    app.use(errorHandler(logger));
+function setupErrorHandling(app: express.Express): void {
+    app.use(errorHandler());
 
-    app.use((req, res) => {
+    app.use((_, res) => {
         res.status(404).send('File not found');
     });
 }
 
-function run() {
-    const logger = getLogger();
-
+function run(): void {
     try {
         const app = express();
         const port = process.env.PORT || 3000;
 
         setupLogging(app);
         setupDataInput(app);
-        setupApi(app, logger);
         setupWebApp(app);
-        setupErrorHandling(app, logger);
+        setupErrorHandling(app);
 
         app.listen(port, () => {
             logger.info('Server listening on port', port);
@@ -199,5 +188,20 @@ function run() {
         logger.error('Server did not start:', err.stack);
     }
 }
+*/
 
-run();
+export function run(port = config.app.port): Server {
+  const app = express();
+
+  setupApi(app);
+
+  const server = app.listen(port, () => {
+    logger.info('Server listening on port %s', port);
+  });
+
+  return server;
+}
+
+if (!module.parent) {
+  run();
+}

@@ -15,11 +15,14 @@ const { format, transports } = winston;
 
 const logger = winston.createLogger({
   level: getLevel(),
-  format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
   transports: [
     new transports.Console({
-      format: format.combine(format.timestamp(), format.colorize(), format.simple()),
+      format: format.combine(
+        format.colorize(),
+        format.timestamp(),
+        format.splat(),
+        format.printf(info => `${info.level} [${info.timestamp}] ${info.message}`),
+      ),
       silent: process.env.NODE_ENV === 'test',
     }),
   ],

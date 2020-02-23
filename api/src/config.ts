@@ -41,8 +41,9 @@ export type Config = {
     client: string;
     connection: PgConnectionConfig;
   };
-  test: boolean;
-  debug: boolean;
+  app: {
+    port: number;
+  };
   webUrl: string;
   openExchangeRatesApiKey: string;
   user: {
@@ -102,8 +103,9 @@ const config: Config = {
     client: 'pg',
     connection: parseConnectionURI(databaseUrl),
   },
-  test: process.env.NODE_ENV === 'test',
-  debug: process.env.NODE_ENV !== 'production',
+  app: {
+    port: Number(process.env.PORT) || 3000,
+  },
   webUrl: process.env.WEB_URL || '',
   openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
   user: {
