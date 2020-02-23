@@ -215,7 +215,8 @@ describe('Fund scraper - integration tests', () => {
 
   describe('Scraping holdings', () => {
     const weightCTY: { [userId: string]: number } = {
-      [uid1]: 0.9998364, // (100000 + 100000 - 90000) / (100000 + 100000 - 90000 + 193 - 175 + Math.max(0, 216704 - 276523)),
+      // (100000 + 100000 - 90000) / (100000 + 100000 - 90000 + 193 - 175 + Math.max(0, 216704 - 276523)),
+      [uid1]: 0.9998364,
       [uid2]: 1, // only holding
     };
 

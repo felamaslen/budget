@@ -5,7 +5,7 @@ import db from '~api/modules/db';
 import config from '~api/config';
 import logger from '~api/modules/logger';
 import { fundHash } from '~api/routes/data/funds/common';
-import { CLIOptions, Broker, Fund, DataByUrl } from './types';
+import { CLIOptions, Broker, Fund } from './types';
 import { getCurrencyPrices } from './currencies';
 import { getFundUrl, downloadUrl } from './scrape';
 import { scrapeFundHoldings } from './holdings';
@@ -45,7 +45,9 @@ export async function getFunds(): Promise<Fund[]> {
           .groupBy('f.item')
           .as('r'),
     )
-    .where('units', '>', 0);
+    .where('units', '>', 0)
+    .orderBy('uid')
+    .orderBy('item');
 
   return rows
     .map(({ uid, item, units, cost }) => ({

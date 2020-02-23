@@ -52,6 +52,10 @@ describe('getFunds', () => {
           uid: uid2,
           item: 'City of London Investment Trust ORD 25p (share)',
         },
+        {
+          uid: uid2,
+          item: 'Apple Inc Com Stk NPV (share)',
+        },
       ])
       .returning('id');
 
@@ -62,6 +66,7 @@ describe('getFunds', () => {
       { fund_id: fundIds[1], date: '2016-11-10', units: 30, cost: 193 },
       { fund_id: fundIds[1], date: '2017-04-03', units: -30, cost: -203 },
       { fund_id: fundIds[2], date: '2016-08-07', units: 1032.19, cost: 560321 },
+      { fund_id: fundIds[3], date: '2018-03-01', units: 14, cost: 243032 },
     ]);
   });
 
@@ -75,12 +80,9 @@ describe('getFunds', () => {
   it('should get the list of funds (separated by uid) with total units and costs', async () => {
     const result = await getFunds();
 
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(3);
 
-    const result1 = result.find(({ uid: userId }) => userId === uid);
-    const result2 = result.find(({ uid: userId }) => userId === uid2);
-
-    expect(result1).toEqual(
+    expect(result).toEqual([
       expect.objectContaining({
         uid,
         name: 'City of London Investment Trust ORD 25p (share)',
@@ -88,9 +90,13 @@ describe('getFunds', () => {
         units: 89.095 + 894.134 - 883.229,
         cost: 100000 + 100000 - 230000,
       }),
-    );
-
-    expect(result2).toEqual(
+      expect.objectContaining({
+        uid: uid2,
+        name: 'Apple Inc Com Stk NPV (share)',
+        broker: 'hl',
+        units: 14,
+        cost: 243032,
+      }),
       expect.objectContaining({
         uid: uid2,
         name: 'City of London Investment Trust ORD 25p (share)',
@@ -98,7 +104,7 @@ describe('getFunds', () => {
         units: 1032.19,
         cost: 560321,
       }),
-    );
+    ]);
   });
 
   it('should filter out funds with no held units', async () => {
