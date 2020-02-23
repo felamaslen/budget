@@ -15,5 +15,4 @@ module.exports = {
     '~web/(.*)': '<rootDir>/web/src/$1',
   },
   globalSetup: '<rootDir>/api/src/test-setup.ts',
-  globalTeardown: '<rootDir>/api/src/test-teardown.ts',
 };
