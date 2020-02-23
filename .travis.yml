@@ -5,6 +5,7 @@ services:
   - postgresql
 before_script:
   - psql -U postgres -c 'create database budget_test;'
+  - psql -U postgres budget_test -c 'create extension if not exists "uuid-ossp"'
 env:
   global:
     - POSTGRES_USER: docker
