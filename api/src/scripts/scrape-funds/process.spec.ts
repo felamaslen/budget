@@ -82,7 +82,10 @@ describe('getFunds', () => {
 
     expect(result).toHaveLength(3);
 
-    expect(result).toEqual([
+    const user1 = result.filter(({ uid: userId }) => userId === uid1);
+    const user2 = result.filter(({ uid: userId }) => userId === uid2);
+
+    expect(user1).toEqual([
       expect.objectContaining({
         uid: uid1,
         name: 'City of London Investment Trust ORD 25p (share)',
@@ -90,6 +93,9 @@ describe('getFunds', () => {
         units: 89.095 + 894.134 - 883.229,
         cost: 100000 + 100000 - 230000,
       }),
+    ]);
+
+    expect(user2).toEqual([
       expect.objectContaining({
         uid: uid2,
         name: 'Apple Inc Com Stk NPV (share)',
