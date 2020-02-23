@@ -20,32 +20,32 @@ describe('getBroker', () => {
 
 describe('getFunds', () => {
   let fundIds: string[] = [];
-  let uid: string;
+  let uid1: string;
   let uid2: string;
 
   beforeAll(async () => {
-    const user = await db('users')
-      .select<{ uid: string }>('uid')
-      .first();
-
-    [uid2] = await db('users')
-      .insert({ name: 'test-user-2', pin_hash: 'some-pin-hash' })
-      .returning('uid');
-
-    uid = user?.uid || '';
-
+    await db('users')
+      .select()
+      .del();
     await db('funds')
       .select()
       .del();
 
+    [uid1] = await db('users')
+      .insert({ name: 'test-user-1', pin_hash: 'some-pin-hash' })
+      .returning('uid');
+    [uid2] = await db('users')
+      .insert({ name: 'test-user-2', pin_hash: 'other-pin-hash' })
+      .returning('uid');
+
     fundIds = await db('funds')
       .insert([
         {
-          uid,
+          uid: uid1,
           item: 'City of London Investment Trust ORD 25p (share)',
         },
         {
-          uid,
+          uid: uid1,
           item: 'Jupiter Asian Income Class I (accum.)',
         },
         {
@@ -84,7 +84,7 @@ describe('getFunds', () => {
 
     expect(result).toEqual([
       expect.objectContaining({
-        uid,
+        uid: uid1,
         name: 'City of London Investment Trust ORD 25p (share)',
         broker: 'hl',
         units: 89.095 + 894.134 - 883.229,
@@ -118,7 +118,7 @@ describe('getFunds', () => {
     const [badFundId] = await db('funds')
       .insert([
         {
-          uid,
+          uid: uid1,
           item: 'Some invalid fund name',
         },
       ])

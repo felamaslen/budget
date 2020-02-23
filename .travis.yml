@@ -3,6 +3,8 @@ node_js:
   - "10"
 services:
   - postgresql
+addons:
+  - postgresql: "10"
 before_script:
   - psql -U postgres -c 'create database budget_test;'
   - psql -U postgres budget_test -c 'create extension if not exists "uuid-ossp"'

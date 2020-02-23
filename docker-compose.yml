@@ -28,7 +28,7 @@ services:
       DEFAULT_PIN: 1234
   db:
     restart: always
-    image: postgres:latest
+    image: postgres:10.4
     networks:
       - net_budget_dev
     ports:

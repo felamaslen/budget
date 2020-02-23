@@ -35,17 +35,6 @@ describe('Fund scraper - integration tests', () => {
   const uid2 = uuidv4();
   let fundIds: string[] = [];
 
-  const clearUsers = async (): Promise<void> => {
-    await db('users')
-      .select()
-      .where({ name: 'test-user-funds-1' })
-      .del();
-    await db('users')
-      .select()
-      .where({ name: 'test-user-funds-2' })
-      .del();
-  };
-
   beforeAll(async () => {
     await db('funds')
       .select()
@@ -57,7 +46,9 @@ describe('Fund scraper - integration tests', () => {
       .select()
       .del();
 
-    await clearUsers();
+    await db('users')
+      .select()
+      .del();
     await db('users').insert({ uid: uid1, name: 'test-user-funds-1', pin_hash: 'some-pin-hash' });
     await db('users').insert({ uid: uid2, name: 'test-user-funds-2', pin_hash: 'other-pin-hash' });
 
@@ -103,7 +94,9 @@ describe('Fund scraper - integration tests', () => {
     clock.restore();
     nock.enableNetConnect();
 
-    await clearUsers();
+    await db('users')
+      .select()
+      .del();
 
     await db('funds')
       .select()
@@ -216,7 +209,7 @@ describe('Fund scraper - integration tests', () => {
   describe('Scraping holdings', () => {
     const weightCTY: { [userId: string]: number } = {
       // (100000 + 100000 - 90000) / (100000 + 100000 - 90000 + 193 - 175 + Math.max(0, 216704 - 276523)),
-      [uid1]: 0.9998364,
+      [uid1]: 0.999836,
       [uid2]: 1, // only holding
     };
 
