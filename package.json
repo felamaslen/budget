@@ -19,7 +19,7 @@
     "start": "node api/build",
     "dev": "docker-compose up --build",
     "dev:api": "SKIP_APP=true npm run dev",
-    "test": "NODE_ENV=test jest --detectOpenHandles --runInBand",
+    "test": "NODE_ENV=test jest --detectOpenHandles --runInBand --forceExit",
     "lint": "eslint webpack.config.js api/src api/test web/src web/test",
     "sass-lint": "sass-lint -qv \"./web/src/**/*.scss\"",
     "knex:migrate:make": "knex --knexfile knexfile.ts -x js migrate:make",
