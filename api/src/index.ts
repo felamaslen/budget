@@ -190,16 +190,22 @@ function run(): void {
 }
 */
 
-export function run(port = config.app.port): Server {
+export function run(port: number = config.app.port): Promise<Server> {
   const app = express();
 
   setupApi(app);
 
-  const server = app.listen(port, () => {
-    logger.info('Server listening on port %s', port);
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, (err?: Error) => {
+      if (err) {
+        logger.error('Error starting server: %s', err.stack);
+        reject(err);
+      } else {
+        logger.info('Server listening on port %s', port);
+        resolve(server);
+      }
+    });
   });
-
-  return server;
 }
 
 if (!module.parent) {
