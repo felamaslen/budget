@@ -122,5 +122,4 @@ module.exports = {
   genToken,
   checkLoggedIn,
   authMiddleware,
-  generateUserPin,
 };
