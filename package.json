@@ -13,7 +13,7 @@
   "scripts": {
     "check-types": "tsc",
     "check-types:watch": "npm run check-types -- --watch",
-    "build:api": "NODE_ENV=production BABEL_ENV=node babel -d api/build api/src",
+    "build:api": "NODE_ENV=production BABEL_ENV=node babel api/src -d api/build --extensions \".ts,.js\" --copy-files",
     "build:web": "NODE_ENV=production webpack --mode production",
     "build": "npm run check-types && npm run build:api && npm run build:web",
     "start": "node api/build",
@@ -26,8 +26,9 @@
     "knex:migrate:latest": "knex --knexfile knexfile.ts migrate:latest",
     "knex:migrate:rollback": "knex --knexfile knexfile.ts migrate:rollback",
     "knex:seed:run": "knex --knexfile knexfile.ts seed:run",
-    "scrape_funds": "node ./api/build/scripts/scrape-funds --prices",
-    "scrape_holdings": "node ./api/build/scripts/scrape-funds --holdings",
+    "scrape": "node ./api/build/scripts/scrape-funds",
+    "scrape_funds": "npm run scrape -- --prices",
+    "scrape_holdings": "npm run scrape -- --holdings",
     "dev:scrape": "docker-compose run budget ./node_modules/.bin/ts-node -r tsconfig-paths/register ./api/src/scripts/scrape-funds",
     "dev:scrape_funds": "npm run dev:scrape -- --prices",
     "dev:scrape_holdings": "npm run dev:scrape -- --holdings"
