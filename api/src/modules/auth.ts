@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import Knex from 'knex';
 import jwt from 'jwt-simple';
 import passport from 'passport';
 import addDays from 'date-fns/addDays';
 import { Strategy, ExtractJwt, VerifiedCallback } from 'passport-jwt';
 import bcrypt from 'bcrypt';
 
-import config, { Config } from '~api/config';
+import config from '~api/config';
 import db from '~api/modules/db';
 import { clientError } from '~api/modules/error-handling';
 
@@ -14,7 +13,13 @@ type User = {
   uid: string;
 };
 
-type UserRow = User & { pin_hash: string };
+type UserInfo = User & {
+  name: string;
+};
+
+type UserRow = UserInfo & {
+  pin_hash: string;
+};
 
 export function getStrategy(): Strategy {
   const params = {
@@ -39,13 +44,13 @@ export function getStrategy(): Strategy {
   });
 }
 
-type LoginResponse = {
+export type LoginResponse = UserInfo & {
+  error: string | false;
   apiKey: string;
   expires: Date;
-  uid: string;
 };
 
-export function genToken({ uid }: User): LoginResponse {
+export function genToken({ uid }: User): Omit<LoginResponse, 'name'> {
   const expires = addDays(new Date(), 30);
   const token = jwt.encode(
     {
@@ -56,6 +61,7 @@ export function genToken({ uid }: User): LoginResponse {
   );
 
   return {
+    error: false,
     apiKey: `Bearer ${token}`,
     expires,
     uid,
@@ -64,12 +70,12 @@ export function genToken({ uid }: User): LoginResponse {
 
 function checkValidUser(
   pin: number | string,
-): (last: Promise<User | null>, user: UserRow) => Promise<User | null> {
+): (last: Promise<UserInfo | null>, user: UserRow) => Promise<UserInfo | null> {
   const stringPin = String(pin);
 
-  return (last, { pin_hash, ...user }): Promise<User | null> =>
+  return (last, { pin_hash, ...user }): Promise<UserInfo | null> =>
     last.then(
-      async (previous): Promise<User | null> => {
+      async (previous): Promise<UserInfo | null> => {
         if (previous) {
           return previous;
         }
@@ -90,7 +96,7 @@ function checkValidUser(
     );
 }
 
-export async function checkLoggedIn(_: Config, __: Knex, pin: number | string): Promise<User> {
+export async function checkLoggedIn(pin: number | string): Promise<UserInfo> {
   const users = await db.select<UserRow[]>('uid', 'name', 'pin_hash').from('users');
 
   const validUser = await users.reduce(checkValidUser(pin), Promise.resolve(null));

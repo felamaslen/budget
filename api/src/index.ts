@@ -12,6 +12,7 @@ import config from '~api/config';
 import db from '~api/modules/db';
 import logger from '~api/modules/logger';
 import routes from '~api/routes';
+import { getIp } from '~api/modules/headers';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
 
@@ -83,15 +84,6 @@ function setupWebApp(app: express.Express): void {
   app.get('/:pageName/*', singlePageApp);
 }
 
-const getHeader = (req: express.Request, key: string): string => {
-  const header = req.headers[key];
-  if (Array.isArray(header)) {
-    return header[0] || '';
-  }
-
-  return header || '';
-};
-
 function setupLogging(app: express.Express): void {
   if (process.env.NODE_ENV === 'test') {
     return;
@@ -99,14 +91,7 @@ function setupLogging(app: express.Express): void {
   if (process.env.NODE_ENV === 'development') {
     app.use(webLogger('dev'));
   } else {
-    webLogger.token(
-      'remote-addr',
-      (req: express.Request) =>
-        getHeader(req, 'x-real-ip') ||
-        getHeader(req, 'x-forwarded-for') ||
-        req.connection.remoteAddress ||
-        '',
-    );
+    webLogger.token('remote-addr', getIp);
 
     app.use(
       webLogger('common', {
@@ -143,24 +128,20 @@ function setupApiDocs(app: express.Express): void {
 
 function setupApi(app: express.Express): void {
   passport.use('jwt', getStrategy());
-
   app.use(passport.initialize());
-
   app.get('/health', (_, res) => {
     res.json({ ok: true });
   });
-
   app.use(API_PREFIX, routes(config, db, logger));
-
   setupApiDocs(app);
 }
 
 function setupErrorHandling(app: express.Express): void {
-  app.use(errorHandler(logger));
-
   app.use((_, res) => {
     res.status(404).send('File not found');
   });
+
+  app.use(errorHandler);
 }
 
 export function run(port: number = config.app.port): Promise<Server> {
