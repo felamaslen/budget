@@ -33,17 +33,18 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: authRequest
-          description: The PIN of the user to retrieve an API key for
-          schema:
-            type: object
-            required:
-              - pin
-            properties:
-              pin:
-                type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pin:
+                  type: integer
+                  example: 1234
+                  description: The PIN of the user to retrieve an API key for
+                  required: true
       responses:
         200:
           description: successful login
@@ -52,12 +53,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: boolean
-                    example: false
                   apiKey:
                     type: string
-                    example: f1d2d2f924e986ac86fdf7b36c94bcdf32beec15
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidG9rZW4ifQ.utPBtEhCTUy5DvSpRPSgA1cldi6v7Nj874DiRprsCQY
                   expires:
                     type: string
                     format: date-time
@@ -73,13 +71,10 @@ paths:
             application/json:
               schema:
                 type: object
-                  properties:
-                    error:
-                      type: boolean
-                      example: true
-                    errorText:
-                      type: string
-                      example: Bad PIN
+                properties:
+                  err:
+                    type: string
+                    example: Bad PIN
 
   /data/all:
     get:

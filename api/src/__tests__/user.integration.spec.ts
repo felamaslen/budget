@@ -38,7 +38,6 @@ describe('API integration tests - Authentication', () => {
       expect(res.status).toBe(200);
       expect(res.body).toEqual(
         expect.objectContaining({
-          error: false,
           uid,
           name: 'test-user',
           expires: addDays(now, 30).toISOString(),
