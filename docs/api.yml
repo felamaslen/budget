@@ -4,8 +4,12 @@ info:
   title: Budget
   license:
     name: MIT
-  servers:
-    - url: http://budget.fela.space/api/v4
+
+servers:
+  - url: http://localhost:3000/api/v4
+    description: dev
+  - url: https://budget.fela.space/api/v4
+    description: prod
 
 securitySchemas:
   BearerAuth:
@@ -94,38 +98,29 @@ paths:
             application/json:
               schema:
                 type: object
-                  properties:
-                    error:
-                      type: boolean
-                      example: false
-                    data:
-                      type: object
-                      properties:
-                        overview:
-                          type: object
-                          schema:
-                            $ref: "#/definitions/OverviewData"
-                        funds:
-                          type: object
-                          description: Funds data
-                        income:
-                          type: object
-                          description: Income data
-                        bills:
-                          type: object
-                          description: Bills data
-                        food:
-                          type: object
-                          description: Food data
-                        general:
-                          type: object
-                          description: General data
-                        social:
-                          type: object
-                          description: Social data
-                        holiday:
-                          type: object
-                          description: Holiday data
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  data:
+                    type: object
+                    properties:
+                      overview:
+                        $ref: "#/definitions/OverviewData"
+                      funds:
+                        $ref: "#/definitions/DataResponseFunds"
+                      income:
+                        $ref: "#/definitions/DataResponseIncome"
+                      bills:
+                        $ref: "#/definitions/DataResponseBills"
+                      food:
+                        $ref: "#/definitions/DataResponseFood"
+                      general:
+                        $ref: "#/definitions/DataResponseGeneral"
+                      social:
+                        $ref: "#/definitions/DataResponseSocial"
+                      holiday:
+                        $ref: "#/definitions/DataResponseHoliday"
 
   /multiple:
     patch:
@@ -139,31 +134,32 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: taskList
-          schema:
-            type: object
-          required:
-            - tasks
-          properties:
-            tasks:
-              type: array
-              items:
-                type: object
-                  properties:
-                    route:
-                      type: string
-                      description: sub-path of api/data to activate
-                    method:
-                      type: string
-                      description: method of request route
-                    query:
-                      type: object
-                      description: what would be in the URL query
-                    body:
-                      type: object
-                      description: what would be in the form body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      route:
+                        type: string
+                        description: sub-path of api/data to activate
+                        example: 'food'
+                      method:
+                        type: string
+                        description: method of request route
+                        enum: ['post', 'put', 'delete']
+                      query:
+                        type: object
+                        description: what would be in the URL query
+                      body:
+                        type: object
+                        description: what would be in the request body
       responses:
         200:
           description: successful operation
@@ -172,8 +168,7 @@ paths:
               schema:
                 type: array
                 items:
-                  schema:
-                    $ref: "#/definitions/DataResponsePostList"
+                  $ref: "#/definitions/DataResponsePostList"
 
   /data/search/{dataType}/{column}/{searchTerm}/{numResults}:
     get:
@@ -190,39 +185,49 @@ paths:
           name: dataType
           description: The type of data to get
           required: true
-          type: string
+          schema:
+            type: string
+            enum: [income, bills, food, general, holiday, social]
         - in: path
           name: column
           description: The column of data to search
           required: true
-          type: string
+          schema:
+            type: string
+            enum: [item, category, shop]
         - in: path
           name: searchTerm
           description: The term to search for
           required: true
-          type: string
+          schema:
+            type: string
+            example: "p"
         - in: path
           name: numResults
           description: The number of results to return
           required: false
-          type: number
+          schema:
+            type: number
+            default: 5
       responses:
         200:
           description: successful operation
-          application/json:
-            schema:
-              type: object
-              properties:
-                error:
-                  type: boolean
-                  example: false
-                data:
-                  type: object
-                  properties:
-                    list:
-                    type: array
-                      items:
-                      type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: false
+                  data:
+                    type: object
+                    properties:
+                      list:
+                        type: array
+                        items:
+                          type: string
+                        example: [Pizza, Peas, Pasta]
 
   /data/overview:
     get:
@@ -252,22 +257,28 @@ paths:
         Insert a new fund holding into the database
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: item
-          required: true
-          type: string
-        - in: body
-          name: transactions
-          required: true
-          type: array
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item:
+                  type: string
+                  example: "Scottish Mortgage IT Ordinary Shares 5p (share)"
+                  required: true
+                transactions:
+                  type: array
+                  items:
+                    $ref: "#/definitions/FundTransaction"
       responses:
         201:
           description: successful operation
-            content:
-              application/json:
-                schema:
-                  $ref: "#/definitions/DataResponsePostList"
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/DataResponsePostList"
     get:
       summary: Get funds data
       tags:
@@ -282,86 +293,29 @@ paths:
           name: history
           description: whether or not to retrieve price history with holdings data
           required: false
-          type: boolean
+          schema:
+            type: boolean
         - in: query
           name: period
           description: period of time to retrieve price history over
           required: false
-          type: string
-          example: year
+          schema:
+            type: string
+            enum: [year, month]
         - in: query
           name: length
           description: number of periods to retrive price history for
           required: false
-          type: integer
-          example: 3
+          schema:
+            type: integer
+            example: 3
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      total:
-                      type: integer
-                      example: 1000000
-                      description: Total-to-date purchase cost of all holdings
-                    data:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          I:
-                            type: uuid
-                            description: ID of holding
-                          i:
-                            type: string
-                            example: Gold ETF
-                            description: Name of holding
-                          tr:
-                            type: array
-                            description: List of transactions for this holding
-                            items:
-                              type: array
-                              items:
-                                type: object
-                                properties:
-                                  c:
-                                    type: integer
-                                    description: Cost of transaction
-                                    example: 200000
-                                  u:
-                                    type: float
-                                    description: Units purchased (or sold)
-                                    example: 1499.7
-                                  d:
-                                    type: array
-                                    description: Date of transaction
-                                    example: "2016-09-21"
-                          pr:
-                            type: array
-                            description: List of cached asset prices
-                            items:
-                              type: number
-                            example: [103.4, 102.97, 103.94]
-                          prStartIndex:
-                            description: Where in the list of price-cache times this holding first appears
-                            type: integer
-                            example: 1
-                          startTime:
-                            type: integer
-                            description: Timestamp of the first price cache time
-                            example: 1475661661
-                          cacheTimes:
-                            type: array
-                            description: Timestamps of all of the price cache times, relative to startTime
-                            items:
-                              type: number
-                            example: [0, 259200, 518400]
+                $ref: "#/definitions/DataResponseFunds"
     put:
       summary: Update funds data
       tags:
@@ -371,30 +325,38 @@ paths:
         Update an existing fund holding in the database
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          required: true
-          type: integer
-        - in: body
-          name: item
-          required: false
-          type: string
-        - in: body
-          name: transactions
-          required: false
-          type: array
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                item:
+                  type: string
+                  required: true
+                  example: "City of London IT (share)"
+                transactions:
+                  type: array
+                  items:
+                    $ref: "#/definitions/FundTransaction"
       responses:
         200:
           description: successful operation
-          application/json:
-            schema:
-              $ref: "#/definitions/DataResponsePutList"
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/DataResponsePutList"
         400:
           description: invalid id
-          application/json:
-            schema:
-              $ref: "#/definitions/ErrorResponse"
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
     delete:
       summary: Delete funds data
       tags:
@@ -404,22 +366,30 @@ paths:
         Delete an existing fund holding in the database
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          required: true
-          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
       responses:
         200:
           description: successful operation
-          application/json:
-            schema:
-              $ref: "#/definitions/DataResponsePutList"
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/DataResponsePutList"
         400:
           description: invalid id
-          application/json:
-            schema:
-              $ref: "#/definitions/ErrorResponse"
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
 
   /data/stocks:
     get:
@@ -433,25 +403,26 @@ paths:
         - application/json
       responses:
         200:
-        description: successful operation
-        application/json:
-          schema:
-            type: object
-            properties:
-              data:
+          description: successful operation
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  total:
-                    type: integer
-                    description: total weight
-                  apiKey:
-                    type: string
-                    description: api key for stock quotes
-                  stocks:
-                    type: array
-                    items:
-                      type: array
-                      example: ["NASDAQ:GOOGL", "Alphabet Inc Class A", 11239]
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: total weight
+                      apiKey:
+                        type: string
+                        description: api key for stock quotes
+                      stocks:
+                        type: array
+                        items:
+                          type: array
+                          example: ["NASDAQ:GOOGL", "Alphabet Inc Class A", 11239]
   
   /data/analysis/{period}/{groupBy}/{pageIndex}:
     get:
@@ -466,18 +437,24 @@ paths:
       parameters:
         - in: path
           name: period
-          description: one of week, month, year
-          required: true
-          type: string
+          description: Period (e.g. week) to analyse
+          default: year
+          schema:
+            type: string
+            enum: [year, month, week]
         - in: path
           name: groupBy
-          description: one of category, shop
-          required: true
-          type: string
+          description: Value to group items by
+          default: category
+          schema:
+            type: string
+            enum: [category, shop]
         - in: path
           name: pageIndex
-          description: page to retrieve, starting with 0
-          type: integer
+          description: Page to retrieve, starting with 0
+          default: 0
+          schema:
+            type: integer
       responses:
         200:
           description: successful operation
@@ -485,15 +462,15 @@ paths:
             application/json:
               schema:
                 type: object
-                  properties:
-                    data:
-                      type: object
-                        properties:
-                          cost:
-                            type: array
-                              items:
-                                type: array
-                                example: ["bills", [6500, 12300]]
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      cost:
+                        type: array
+                        items:
+                          type: array
+                          example: ["bills", [6500, 12300]]
   
   /data/analysis/deep/{category}/{period}/{groupBy}/{pageIndex}:
     get:
@@ -510,21 +487,29 @@ paths:
           name: category
           description: category of data to retrieve
           required: true
-          type: string
+          schema:
+            type: string
+            enum: [food, general, social, holiday]
         - in: path
           name: period
-          description: one of week, month, year
-          required: true
-          type: string
+          description: Period (e.g. week) to analyse
+          default: year
+          schema:
+            type: string
+            enum: [year, month, week]
         - in: path
           name: groupBy
-          description: one of category, shop
-          required: true
-          type: string
+          description: Value to group items by
+          default: category
+          schema:
+            type: string
+            enum: [category, shop]
         - in: path
           name: pageIndex
-          description: page to retrieve, starting with 0
-          type: integer
+          description: Page to retrieve, starting with 0
+          default: 0
+          schema:
+            type: integer
       responses:
         200:
           description: successful operation
@@ -532,13 +517,13 @@ paths:
             application/json:
               schema:
                 type: object
-                  properties:
-                    data:
-                      type: object
-                      properties:
-                        items:
-                          type: array
-                          example: ["bills", [["Electricity", 6500], ["Water", 12300]]]
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        example: ["bills", [["Electricity", 6500], ["Water", 12300]]]
 
   /data/income:
     post:
@@ -550,21 +535,29 @@ paths:
         Post new income item
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: true
-        - in: body
-          name: item
-          type: string
-          required: true
-        - in: body
-          name: cost
-          type: number
-          description: Value of income
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: Date of payment
+                  format: date
+                  example: "2020-02-10"
+                  required: true
+                item:
+                  type: string
+                  description: Source of income
+                  example: "Salary"
+                  required: true
+                cost:
+                  type: integer
+                  description: Value of income
+                  example: 325670
+                  required: true
       responses:
         201:
           description: successful operation
@@ -583,25 +576,31 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          type: number
-          required: true
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: false
-        - in: body
-          name: item
-          type: string
-          required: false
-        - in: body
-          name: cost
-          type: number
-          description: Value of income
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                date:
+                  type: string
+                  format: date
+                  example: "2020-02-10"
+                  required: false
+                item:
+                  type: string
+                  example: "Salary"
+                  required: false
+                cost:
+                  type: integer
+                  description: Value of income
+                  example: 325610
+                  required: false
       responses:
         200:
           description: successful operation
@@ -654,6 +653,7 @@ paths:
           name: page
           description: Page of data to get (starts at 0)
           type: number
+          default: 0
           required: false
       responses:
         200:
@@ -661,7 +661,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/definitions/DataResponse"
+                $ref: "#/definitions/DataResponseIncome"
 
   /data/bills:
     post:
@@ -673,21 +673,29 @@ paths:
         Post new bills item
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: true
-        - in: body
-          name: item
-          type: string
-          required: true
-        - in: body
-          name: cost
-          type: number
-          description: Value of bills
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: Date of payment
+                  format: date
+                  example: "2020-02-10"
+                  required: true
+                item:
+                  type: string
+                  description: Bill
+                  example: "Council tax"
+                  required: true
+                cost:
+                  type: integer
+                  description: Value of bill
+                  example: 12801
+                  required: true
       responses:
         201:
           description: successful operation
@@ -706,25 +714,31 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          type: number
-          required: true
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: false
-        - in: body
-          name: item
-          type: string
-          required: false
-        - in: body
-          name: cost
-          type: number
-          description: Value of bills
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                date:
+                  type: string
+                  format: date
+                  example: "2020-02-10"
+                  required: false
+                item:
+                  type: string
+                  example: "Council tax"
+                  required: false
+                cost:
+                  type: integer
+                  description: Value of bills
+                  example: 16400
+                  required: false
       responses:
         200:
           description: successful operation
@@ -777,6 +791,7 @@ paths:
           name: page
           description: Page of data to get (starts at 0)
           type: number
+          default: 0
           required: false
       responses:
         200:
@@ -784,7 +799,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/definitions/DataResponse"
+                $ref: "#/definitions/DataResponseBills"
 
   /data/food:
     post:
@@ -796,21 +811,36 @@ paths:
         Post new food item
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: true
-        - in: body
-          name: item
-          type: string
-          required: true
-        - in: body
-          name: cost
-          type: number
-          description: Value of food
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: Date of payment
+                  format: date
+                  example: "2020-02-10"
+                  required: true
+                item:
+                  type: string
+                  example: "Lentils"
+                  required: true
+                category:
+                  type: string
+                  example: "Legumes"
+                  required: true
+                cost:
+                  type: integer
+                  description: Value of item
+                  example: 300
+                  required: true
+                shop:
+                  type: string
+                  example: Tesco
+                  required: true
       responses:
         201:
           description: successful operation
@@ -829,25 +859,39 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          type: number
-          required: true
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: false
-        - in: body
-          name: item
-          type: string
-          required: false
-        - in: body
-          name: cost
-          type: number
-          description: Value of food
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                date:
+                  type: string
+                  format: date
+                  example: "2020-02-10"
+                  required: false
+                item:
+                  type: string
+                  example: "Lentils"
+                  required: false
+                category:
+                  type: string
+                  example: "Legumes"
+                  required: false
+                cost:
+                  type: integer
+                  description: Value of food
+                  example: 305
+                  required: false
+                shop:
+                  type: string
+                  example: "Tesco"
+                  required: false
       responses:
         200:
           description: successful operation
@@ -895,21 +939,36 @@ paths:
         Post new general item
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: true
-        - in: body
-          name: item
-          type: string
-          required: true
-        - in: body
-          name: cost
-          type: number
-          description: Value of general item
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: Date of payment
+                  format: date
+                  example: "2020-02-10"
+                  required: true
+                item:
+                  type: string
+                  example: "Vacuum"
+                  required: true
+                category:
+                  type: string
+                  example: "Household"
+                  required: true
+                cost:
+                  type: integer
+                  description: Value of item
+                  example: 13999
+                  required: true
+                shop:
+                  type: string
+                  example: Argos
+                  required: true
       responses:
         201:
           description: successful operation
@@ -928,25 +987,39 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          type: number
-          required: true
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: false
-        - in: body
-          name: item
-          type: string
-          required: false
-        - in: body
-          name: cost
-          type: number
-          description: Value of general item
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                date:
+                  type: string
+                  format: date
+                  example: "2020-02-10"
+                  required: false
+                item:
+                  type: string
+                  example: "Vacuum cleaner"
+                  required: false
+                category:
+                  type: string
+                  example: "Household"
+                  required: false
+                cost:
+                  type: integer
+                  description: Value of general item
+                  example: 13999
+                  required: false
+                shop:
+                  type: string
+                  example: "Argos"
+                  required: false
       responses:
         200:
           description: successful operation
@@ -983,6 +1056,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/definitions/ErrorResponse"
+  
+  /data/food/{page}:
+    get:
+      summary: Get food data
+      tags:
+        - Food
+      operationId: readFood
+      description: |
+        Get list of food items
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: page
+          description: Page of data to get (starts at 0)
+          type: number
+          default: 0
+          required: false
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/DataResponseFood"
+
 
   /data/general/{page}:
     get:
@@ -999,6 +1098,7 @@ paths:
           name: page
           description: Page of data to get (starts at 0)
           type: number
+          default: 0
           required: false
       responses:
         200:
@@ -1018,21 +1118,36 @@ paths:
         Post new social item
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: true
-        - in: body
-          name: item
-          type: string
-          required: true
-        - in: body
-          name: cost
-          type: number
-          description: Value of social item
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: Date of payment
+                  format: date
+                  example: "2020-02-10"
+                  required: true
+                item:
+                  type: string
+                  example: "Bowling"
+                  required: true
+                society:
+                  type: string
+                  example: "Work parties"
+                  required: true
+                cost:
+                  type: integer
+                  description: Value of item
+                  example: 1850
+                  required: true
+                shop:
+                  type: string
+                  example: "Bowling alley 101"
+                  required: true
       responses:
         201:
           description: successful operation
@@ -1051,25 +1166,39 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          type: number
-          required: true
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: false
-        - in: body
-          name: item
-          type: string
-          required: false
-        - in: body
-          name: cost
-          type: number
-          description: Value of social item
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                date:
+                  type: string
+                  format: date
+                  example: "2020-02-10"
+                  required: false
+                item:
+                  type: string
+                  example: "Bowling"
+                  required: false
+                society:
+                  type: string
+                  example: "Work parties"
+                  required: false
+                cost:
+                  type: integer
+                  description: Value of social item
+                  example: 1499
+                  required: false
+                shop:
+                  type: string
+                  example: "Bowling alley 101"
+                  required: false
       responses:
         200:
           description: successful operation
@@ -1122,6 +1251,7 @@ paths:
           name: page
           description: Page of data to get (starts at 0)
           type: number
+          default: 0
           required: false
       responses:
         200:
@@ -1141,21 +1271,36 @@ paths:
         Post new holiday item
       produces:
         - application/json
-      parameters:
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: true
-        - in: body
-          name: item
-          type: string
-          required: true
-        - in: body
-          name: cost
-          type: number
-          description: Value of holiday item
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: Date of payment
+                  format: date
+                  example: "2020-02-10"
+                  required: true
+                item:
+                  type: string
+                  example: Tickets
+                  required: true
+                society:
+                  type: string
+                  example: "Greece 2020"
+                  required: true
+                cost:
+                  type: integer
+                  description: Value of item
+                  example: 43560
+                  required: true
+                shop:
+                  type: string
+                  example: Easyjet
+                  required: true
       responses:
         201:
           description: successful operation
@@ -1174,25 +1319,39 @@ paths:
         - application/json
       consumes:
         - application/json
-      parameters:
-        - in: body
-          name: id
-          type: number
-          required: true
-        - in: body
-          name: date
-          type: string
-          example: "2020-02-10"
-          required: false
-        - in: body
-          name: item
-          type: string
-          required: false
-        - in: body
-          name: cost
-          type: number
-          description: Value of holiday item
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  required: true
+                date:
+                  type: string
+                  format: date
+                  example: "2020-02-10"
+                  required: false
+                item:
+                  type: string
+                  example: "Tickets"
+                  required: false
+                holiday:
+                  type: string
+                  example: "Greece 2020"
+                  required: false
+                cost:
+                  type: integer
+                  description: Value of holiday item
+                  example: 42854
+                  required: false
+                shop:
+                  type: string
+                  example: "Easyjet"
+                  required: false
       responses:
         200:
           description: successful operation
@@ -1245,6 +1404,7 @@ paths:
           name: page
           description: Page of data to get (starts at 0)
           type: number
+          default: 0
           required: false
       responses:
         200:
@@ -1319,88 +1479,127 @@ definitions:
             type: integer
             example: 9
 
+  DataResponseItem:
+    type: object
+    properties:
+      I:
+        type: string
+        format: uuid
+        description: ID
+      d:
+        type: string
+        format: date
+        description: Date
+        example: "2020-02-10"
+      i:
+        type: string
+        description: Item
+        example: "Some item"
+      c:
+        type: integer
+        description: Value
+        example: 15492
+
   DataResponse:
     type: object
-      properties:
-        error:
-          type: boolean
-          example: false
-        data:
-          type: object
-          properties:
-        total:
-          type: number
-          description: Total cost of all list items since the beginning of time
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              I:
-                type: uuid
-                description: ID
-              d:
-                type: array
-                description: Date
-                example: "2020-02-10"
-              i:
-                type: string
-                description: Item
-              c:
-                type: number
-                description: Value
+    properties:
+      error:
+        type: boolean
+        example: false
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/DataResponseItem"
+      total:
+        type: number
+        description: Total cost of all list items since the beginning of time
+
+  DataResponseIncome:
+    allOf:
+      - $ref: "#/definitions/DataResponse"
+  DataResponseBills:
+    allOf:
+      - $ref: "#/definitions/DataResponse"
   DataResponseFood:
     allOf:
       - $ref: "#/definitions/DataResponse"
       - type: object
         properties:
-          k:
-            type: string
-            description: Category
-            example: Fruit
-          s:
-            type: string
-            description: Shop
-            example: Tesco
+          data:
+            type: array
+            items:
+              allOf:
+                - $ref: "#/definitions/DataResponseItem"
+                - type: object
+                  properties:
+                    k:
+                      type: string
+                      description: Category
+                      example: Fruit
+                    s:
+                      type: string
+                      description: Shop
+                      example: Tesco
   DataResponseGeneral:
     allOf:
       - $ref: "#/definitions/DataResponse"
       - type: object
         properties:
-          k:
-            type: string
-            description: Category
-            example: Electronics
-          s:
-            type: string
-            description: Shop
-            example: Amazon
+          data:
+            type: array
+            items:
+              allOf:
+                - $ref: "#/definitions/DataResponseItem"
+                - type: object
+                  properties:
+                    k:
+                      type: string
+                      description: Category
+                      example: Electronics
+                    s:
+                      type: string
+                      description: Shop
+                      example: Amazon
   DataResponseSocial:
     allOf:
       - $ref: "#/definitions/DataResponse"
       - type: object
         properties:
-          y:
-            type: string
-            description: Society
-            example: Dinner
-          s:
-            type: string
-            description: Shop
-            example: The Fat Duck
+          data:
+            type: array
+            items:
+              allOf:
+                - $ref: "#/definitions/DataResponseItem"
+                - type: object
+                  properties:
+                    y:
+                      type: string
+                      description: Society
+                      example: Dinner
+                    s:
+                      type: string
+                      description: Shop
+                      example: The Fat Duck
   DataResponseHoliday:
     allOf:
       - $ref: "#/definitions/DataResponse"
       - type: object
         properties:
-          h:
-            type: string
-            description: Holiday
-            example: Norway
-          s:
-            type: string
-            description: Shop
-            example: Easyjet.com
+          data:
+            type: array
+            items:
+              allOf:
+                - $ref: "#/definitions/DataResponseItem"
+                - type: object
+                  properties:
+                    h:
+                      type: string
+                      description: Holiday
+                      example: Norway
+                    s:
+                      type: string
+                      description: Shop
+                      example: Easyjet.com
 
   DataResponsePostList:
     type: object
@@ -1415,6 +1614,9 @@ definitions:
       error:
         type: boolean
         example: false
+    example:
+      total: 1003
+      error: false
 
   DataResponsePutList:
     type: object
@@ -1426,3 +1628,81 @@ definitions:
       error:
         type: boolean
         example: false
+
+  FundTransaction:
+    type: object
+    properties:
+      date:
+        type: string
+        format: date
+        example: "2018-06-03"
+      units:
+        type: number
+        example: 123.456
+      cost:
+        type: integer
+        example: 607451
+
+  DataResponseFunds:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          total:
+            type: integer
+            example: 1000000
+            description: Total-to-date purchase cost of all holdings
+          data:
+            type: array
+            items:
+              type: object
+              properties:
+                I:
+                  type: uuid
+                  description: ID of holding
+                i:
+                  type: string
+                  example: Gold ETF
+                  description: Name of holding
+                tr:
+                  type: array
+                  description: List of transactions for this holding
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        c:
+                          type: integer
+                          description: Cost of transaction
+                          example: 200000
+                        u:
+                          type: float
+                          description: Units purchased (or sold)
+                          example: 1499.7
+                        d:
+                          type: string
+                          format: date
+                          description: Date of transaction
+                          example: "2016-09-21"
+                pr:
+                  type: array
+                  description: List of cached asset prices
+                  items:
+                    type: number
+                  example: [103.4, 102.97, 103.94]
+                prStartIndex:
+                  description: Where in the list of price-cache times this holding first appears
+                  type: integer
+                  example: 1
+                startTime:
+                  type: integer
+                  description: Timestamp of the first price cache time
+                  example: 1475661661
+                cacheTimes:
+                  type: array
+                  description: Timestamps of all of the price cache times, relative to startTime
+                  items:
+                    type: number
+                  example: [0, 259200, 518400]
