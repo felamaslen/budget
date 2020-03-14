@@ -54,6 +54,11 @@ describe('API integration tests - Authentication', () => {
       });
 
       expect(res.status).toBe(401);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          err: 'Bad PIN',
+        }),
+      );
       expect(res.body).not.toHaveProperty('uid');
       expect(res.body).not.toHaveProperty('apiKey');
       expect(res.body).not.toHaveProperty('expires');
