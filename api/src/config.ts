@@ -46,6 +46,7 @@ export type Config = {
   };
   webUrl: string;
   openExchangeRatesApiKey: string;
+  scrapeTimeout: number;
   user: {
     tokenSecret: string;
     banTime: number;
@@ -109,6 +110,7 @@ const config: Config = {
   },
   webUrl: process.env.WEB_URL || '',
   openExchangeRatesApiKey: process.env.OPEN_EXCHANGE_RATES_API_KEY || '',
+  scrapeTimeout: Number(process.env.SCRAPE_TIMEOUT) || 30000,
   user: {
     tokenSecret: process.env.USER_TOKEN_SECRET || 'mysupersecret',
     banTime: (Number(process.env.IP_BAN_TIME) || 300) * 1000,

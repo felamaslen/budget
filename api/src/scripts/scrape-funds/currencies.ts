@@ -10,6 +10,9 @@ export async function getCurrencyPrices(): Promise<CurrencyPrices> {
   try {
     const response = await axios.get(
       `https://openexchangerates.org/api/latest.json?app_id=${config.openExchangeRatesApiKey}`,
+      {
+        timeout: config.scrapeTimeout,
+      },
     );
 
     if (
