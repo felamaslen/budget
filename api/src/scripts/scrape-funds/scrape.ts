@@ -21,6 +21,7 @@ export async function downloadUrl(url: string): Promise<string> {
       headers: {
         'User-Agent': config.data.funds.scraper.userAgent,
       },
+      timeout: config.scrapeTimeout,
     });
 
     logger.debug(`Downloaded ${url}`);
