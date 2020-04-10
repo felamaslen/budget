@@ -1,4 +1,4 @@
-import request from 'request';
+import axios from 'axios';
 
 import config from '~api/config';
 import logger from '~api/modules/logger';
@@ -13,36 +13,22 @@ export function getFundUrl(fund: Pick<Fund, 'name' | 'broker'>): string {
   return '';
 }
 
-export function downloadUrl(url: string): Promise<string> {
-  const req = request.defaults({
-    jar: true,
-    rejectUnauthorized: false,
-    followAllRedirects: true,
-  });
-
-  return new Promise((resolve, reject) => {
+export async function downloadUrl(url: string): Promise<string> {
+  try {
     logger.verbose(`Downloading ${url}...`);
 
-    return req.get(
-      {
-        url,
-        headers: {
-          'User-Agent': config.data.funds.scraper.userAgent,
-        },
+    const res = await axios.get<string>(url, {
+      headers: {
+        'User-Agent': config.data.funds.scraper.userAgent,
       },
-      (
-        err: Error,
-        res: {
-          body: string;
-        },
-      ): void => {
-        if (err) {
-          reject(err);
-        } else {
-          logger.debug(`Downloaded ${url}`);
-          resolve(res.body);
-        }
-      },
-    );
-  });
+    });
+
+    logger.debug(`Downloaded ${url}`);
+
+    return res.data;
+  } catch (err) {
+    logger.error(`Error downloading ${url}: ${err.message}`);
+
+    return '';
+  }
 }
