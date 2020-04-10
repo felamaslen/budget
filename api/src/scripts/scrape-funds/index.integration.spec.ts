@@ -9,7 +9,6 @@ import config from '../../config';
 import db from '~api/modules/db';
 import { run } from '.';
 import mockOpenExchangeRatesResponse from './__tests__/currencies.json';
-// import { Holding } from './types';
 
 type TestFundPrice = {
   cid: string;

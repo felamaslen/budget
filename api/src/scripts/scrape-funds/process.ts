@@ -7,7 +7,7 @@ import logger from '~api/modules/logger';
 import { fundHash } from '~api/routes/data/funds/common';
 import { CLIOptions, Broker, Fund } from './types';
 import { getCurrencyPrices } from './currencies';
-import { getFundUrl, downloadUrl } from './scrape';
+import { getFundUrl, downloadMultipleUrls } from './scrape';
 import { scrapeFundHoldings } from './holdings';
 import { scrapeFundPrices } from './prices';
 
@@ -89,7 +89,7 @@ export async function processScrape(flags: CLIOptions): Promise<void> {
       cost: groupedFunds[url].reduce((last, { cost: value }) => last + value, 0),
     }));
 
-    const rawData = await Promise.all(uniqueFunds.map(({ url }) => downloadUrl(url)));
+    const rawData = await downloadMultipleUrls(uniqueFunds.map(({ url }) => url));
 
     if (holdings) {
       await scrapeFundHoldings(funds, uniqueFunds, rawData);

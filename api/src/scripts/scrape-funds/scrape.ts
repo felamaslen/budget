@@ -33,3 +33,11 @@ export async function downloadUrl(url: string): Promise<string> {
     return '';
   }
 }
+
+export async function downloadMultipleUrls(urls: string[]): Promise<string[]> {
+  if (urls.length === 0) {
+    return [];
+  }
+
+  return [await downloadUrl(urls[0]), ...(await downloadMultipleUrls(urls.slice(1)))];
+}
