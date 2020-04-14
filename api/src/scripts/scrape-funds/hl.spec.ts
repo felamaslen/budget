@@ -21,19 +21,12 @@ describe('Fund scraper - HL', () => {
   let testDataShareFX: string;
 
   beforeAll(async () => {
-    nock.disableNetConnect();
-    nock.enableNetConnect('127.0.0.1');
-
     [testDataFund, testDataShare, testDataShareComma, testDataShareFX] = await Promise.all([
       fs.readFile(testFileFund, 'utf8'),
       fs.readFile(testFileShare, 'utf8'),
       fs.readFile(testFileShareComma, 'utf8'),
       fs.readFile(testFileShareFX, 'utf8'),
     ]);
-  });
-
-  afterAll(() => {
-    nock.enableNetConnect();
   });
 
   describe('isHLFundShare', () => {
