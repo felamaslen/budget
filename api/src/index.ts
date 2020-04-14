@@ -93,6 +93,9 @@ const getHeader = (req: express.Request, key: string): string => {
 };
 
 function setupLogging(app: express.Express): void {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
   if (process.env.NODE_ENV === 'development') {
     app.use(webLogger('dev'));
   } else {
