@@ -1,19 +1,18 @@
 import { Server } from 'http';
 import request, { Test, SuperTest } from 'supertest';
 
-import { run } from '.';
+import { run } from '..';
 
-describe('Server - integration tests', () => {
+describe('Server - integration tests (health)', () => {
   let server: Server;
   let agent: SuperTest<Test>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     server = await run(4444);
-
     agent = request.agent(server);
   });
 
-  afterEach(done => {
+  afterAll(done => {
     server.close(done);
   });
 
