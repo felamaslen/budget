@@ -1,7 +1,7 @@
 import { getFundsRows } from './helpers';
 
 import state from '~client/test-data/state';
-import { DELETE } from '~client/constants/data';
+import { RequestType } from '~client/types/crud';
 
 describe('getFundsRows', () => {
   it('should exclude optimistically deleted items', () => {
@@ -10,7 +10,12 @@ describe('getFundsRows', () => {
         funds: {
           ...state.funds,
           items: [
-            { id: 'some-id', item: 'foo fund', transactions: null, __optimistic: DELETE },
+            {
+              id: 'some-id',
+              item: 'foo fund',
+              transactions: null,
+              __optimistic: RequestType.delete,
+            },
             { id: 'other-id', item: 'bar fund', transactions: null },
           ],
         },

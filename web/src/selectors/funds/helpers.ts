@@ -4,9 +4,8 @@ import { compose } from '@typed/compose';
 import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
 import { LegacyRow } from '~client/types/funds';
-import { WithCrud } from '~client/types/crud';
+import { WithCrud, RequestType } from '~client/types/crud';
 import { sortByKey } from '~client/modules/data';
-import { DELETE } from '~client/constants/data';
 import { Period } from '~client/constants/graph';
 
 type StateSliced = Pick<State, 'funds'>;
@@ -19,7 +18,7 @@ export const getFundsRows = createSelector(
   getNonFilteredFundsRows,
   compose(
     (items: WithCrud<LegacyRow>[]): WithCrud<LegacyRow>[] =>
-      items.filter(({ __optimistic }) => __optimistic !== DELETE),
+      items.filter(({ __optimistic }) => __optimistic !== RequestType.delete),
     sortByKey('item'),
   ),
 );

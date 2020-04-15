@@ -36,6 +36,8 @@ export const sortByKey: SortByKey;
 
 export const randnBm: () => number;
 
+export const fieldExists: <V = never>(value: V) => boolean;
+
 export const NULL: () => null;
 
 export type Identity<I, O = I> = (state: I) => O;
