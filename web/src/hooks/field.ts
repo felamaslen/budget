@@ -13,11 +13,11 @@ import { NULL_COMMAND } from '~client/hooks/nav';
 const ACTIVE_TOGGLED = 'ACTIVE_TOGGLED';
 const TYPED = 'TYPED';
 
-type State<V> = {
+type State<FV, IV> = {
   active: boolean;
-  initialValue: V;
-  currentValue: V;
-  inputValue: V;
+  initialValue: FV;
+  currentValue: FV;
+  inputValue: IV;
 };
 
 type Action = {
@@ -26,11 +26,11 @@ type Action = {
   [x: string]: any;
 };
 
-type Reducer<V> = (state: State<V>, action: Action) => State<V>;
+type Reducer<FV, IV> = (state: State<FV, IV>, action: Action) => State<FV, IV>;
 
-function fieldReducer<V>(state: State<V>, action: Action): State<V> {
+function fieldReducer<FV, IV>(state: State<FV, IV>, action: Action): State<FV, IV> {
   if (action.type === VALUE_SET) {
-    return { ...state, currentValue: action.payload as V };
+    return { ...state, currentValue: action.payload as FV };
   }
   if (action.type === CANCELLED) {
     return { ...state, currentValue: state.initialValue };
@@ -61,48 +61,51 @@ function fieldReducer<V>(state: State<V>, action: Action): State<V> {
 }
 
 // used to make the input value diverge (temporarily) from the underlying value
-type Split<V> = {
+export type Split<FV, IV = string> = {
   __split: true;
-  inputValue: V;
-  fieldValue: V;
+  inputValue: IV;
+  fieldValue: FV;
 };
 
-const valueIsNotSplit = <V>(value: V | Split<V>): value is V => typeof value !== 'object';
-const valueIsSplit = <V>(value: V | Split<V>): value is Split<V> =>
+const valueIsNotSplit = <FV, IV>(value: FV | Split<FV, IV>): value is FV =>
+  typeof value !== 'object';
+const valueIsSplit = <FV, IV>(value: FV | Split<FV, IV>): value is Split<FV, IV> =>
   !valueIsNotSplit(value) && value.__split;
 
-type Options<V> = {
-  value: V;
-  string?: boolean;
-  onChange: (value: V) => void;
-  onType?: (value: V | Split<V>) => void;
-  setValue?: (value: V) => V | Split<V>;
-  getInitialInputValue?: (value: V) => V;
+type Options<FV, IV> = {
+  value: FV;
+  string?: boolean; // TODO: remove this deprecated property
+  inline?: boolean;
+  onChange: (value: FV) => void;
+  onType?: (value: FV | Split<FV, IV>) => void;
+  setValue?: (value: string) => FV | Split<FV, IV>;
+  getInitialInputValue?: (value: FV) => IV;
   command?: Action;
   active?: boolean;
 };
 
-type Result<V, I> = [
-  V,
-  V,
+type Result<FV, IV, I> = [
+  FV,
+  IV,
   (event: React.ChangeEvent<I>) => void,
   React.MutableRefObject<I | null>,
   () => void,
 ];
 
-export function useField<V, I extends HTMLInputElement = HTMLInputElement>({
+export function useField<FV = string, IV = string, I extends HTMLInputElement = HTMLInputElement>({
   value,
-  string: isString = false,
+  string = false, // deprecated
+  inline = string,
   onChange,
   onType = NULL,
   setValue = IDENTITY,
   getInitialInputValue = IDENTITY,
   command = NULL_COMMAND,
   active = false,
-}: Options<V>): Result<V, I> {
+}: Options<FV, IV>): Result<FV, IV, I> {
   const inputRef = useRef<I>(null);
 
-  const [state, dispatch] = useReducer<Reducer<V>>(fieldReducer, {
+  const [state, dispatch] = useReducer<Reducer<FV, IV>>(fieldReducer, {
     active: false,
     initialValue: value,
     currentValue: value,
@@ -114,7 +117,7 @@ export function useField<V, I extends HTMLInputElement = HTMLInputElement>({
   }, [value]);
 
   useEffect(() => {
-    if (!isString) {
+    if (!inline) {
       return;
     }
     if (!active && state.active && state.currentValue !== state.initialValue) {
@@ -141,7 +144,7 @@ export function useField<V, I extends HTMLInputElement = HTMLInputElement>({
       inputRef.current.blur();
     }
   }, [
-    isString,
+    inline,
     onChange,
     active,
     value,
@@ -152,10 +155,10 @@ export function useField<V, I extends HTMLInputElement = HTMLInputElement>({
   ]);
 
   useEffect(() => {
-    if (isString && command !== NULL_COMMAND) {
+    if (inline && command !== NULL_COMMAND) {
       dispatch(command);
     }
-  }, [isString, command]);
+  }, [inline, command]);
 
   const onChangeInput = useCallback(
     event => {
@@ -181,10 +184,10 @@ export function useField<V, I extends HTMLInputElement = HTMLInputElement>({
   );
 
   const onBlurInput = useCallback(() => {
-    if (!isString) {
+    if (!inline) {
       onChange(state.currentValue);
     }
-  }, [isString, onChange, state.currentValue]);
+  }, [inline, onChange, state.currentValue]);
 
   return [state.currentValue, state.inputValue, onChangeInput, inputRef, onBlurInput];
 }

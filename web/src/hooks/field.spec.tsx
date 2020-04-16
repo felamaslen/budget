@@ -1,13 +1,13 @@
 import { render, fireEvent, act, RenderResult } from '@testing-library/react';
 import React from 'react';
 
-import { useField } from '~client/hooks/field';
+import { useField } from './field';
 
 describe('Field hook', () => {
   type Props = {
     value: string;
     onChange: (value: string) => void;
-    isString?: boolean;
+    inline?: boolean;
   };
 
   const props: Props = {
@@ -15,7 +15,7 @@ describe('Field hook', () => {
     onChange: jest.fn(),
   };
 
-  const TestComponent: React.FC<Props> = ({ value, onChange, isString = false }) => {
+  const TestComponent: React.FC<Props> = ({ value, onChange, inline = false }) => {
     const [active, setActive] = React.useState<boolean>(false);
     const [focused, setFocused] = React.useState<boolean>(false);
 
@@ -23,7 +23,7 @@ describe('Field hook', () => {
       value,
       onChange,
       active,
-      string: isString,
+      inline,
     });
 
     const onFocus = React.useCallback(() => setFocused(true), []);
@@ -118,10 +118,10 @@ describe('Field hook', () => {
     });
   });
 
-  describe('when the input is of "string" type', () => {
+  describe('when the input is displayed inline', () => {
     describe('when setting the field to active', () => {
       const setup = async (): Promise<RenderResult> => {
-        const renderProps = render(<TestComponent {...props} isString />);
+        const renderProps = render(<TestComponent {...props} inline />);
         const activateButton = await renderProps.findByTestId('button-activate-toggle');
 
         act(() => {
@@ -141,7 +141,7 @@ describe('Field hook', () => {
 
     describe('when setting the field to inactive', () => {
       const setup = async (): Promise<RenderResult> => {
-        const renderProps = render(<TestComponent {...props} isString />);
+        const renderProps = render(<TestComponent {...props} inline />);
         const activateButton = await renderProps.findByTestId('button-activate-toggle');
 
         act(() => {
