@@ -7,4 +7,5 @@ module.exports = {
   moduleNameMapper: {
     '~client/(.*)': '<rootDir>/web/src/$1',
   },
+  setupFilesAfterEnv: ['<rootDir>/web/src/test-after-env.ts'],
 };
