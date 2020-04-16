@@ -1,7 +1,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import FormFieldText from '~client/components/FormField';
+import FormFieldText from '.';
 
 describe('<FormFieldText />', () => {
   const props = {
