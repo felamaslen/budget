@@ -2,12 +2,14 @@ import React, { useCallback, useEffect } from 'react';
 
 import { Wrapper } from '.';
 
+export type Options<V extends string = string> = {
+  internal: V;
+  external?: string;
+}[];
+
 export type Props<V extends string> = {
   item?: string;
-  options: {
-    internal: V;
-    external?: string;
-  }[];
+  options: Options<V>;
   value: V;
   onChange: (value: V) => void;
 };
