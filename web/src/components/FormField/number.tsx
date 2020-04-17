@@ -5,7 +5,7 @@ import { useField, Split } from '~client/hooks/field';
 
 export const setValueInline = (
   setValue: (inputValue: string) => number = Number,
-  getInputValueFromFieldValue: (inputValue: number) => string = String,
+  getInputValueFromFieldValue: (fieldValue?: number) => string = String,
 ) => (inputValue: string): Split<number> => {
   if (inputValue === '.') {
     return { __split: true, fieldValue: 0, inputValue: '.' };
@@ -32,14 +32,7 @@ type Props = WrapperProps<number | undefined> & {
   step?: number;
 };
 
-const FormFieldNumber: React.FC<Props> = ({
-  value = 0,
-  type = 'number',
-  min,
-  max,
-  step,
-  ...props
-}) => {
+const FormFieldNumber: React.FC<Props> = ({ value, type = 'number', min, max, step, ...props }) => {
   const [currentValue, , onChange, ref, onBlur] = useField<number | undefined>({
     ...props,
     value,

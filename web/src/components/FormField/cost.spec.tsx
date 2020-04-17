@@ -70,7 +70,7 @@ describe('<FormFieldCost />', () => {
     });
 
     describe('decimal fraction input', () => {
-      const propsDecimal = { ...props, inline: true, value: '' };
+      const propsDecimal = { ...props, inline: true, value: undefined };
 
       const input = (renderProps: RenderResult): HTMLInputElement => {
         const element = renderProps.container.querySelector('input') as HTMLInputElement;

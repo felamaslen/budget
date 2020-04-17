@@ -61,8 +61,9 @@ const FormFieldDate: React.FC<Props> = ({
   ]);
 
   const onChangeBackwardsCompatible = React.useCallback(
-    (newValue: Date): void =>
-      onChange(isLegacyDate(value) ? DateTime.fromJSDate(newValue) : newValue),
+    (newValue: Date): void => {
+      onChange(isLegacyDate(value) ? DateTime.fromJSDate(newValue) : newValue);
+    },
     [value, onChange],
   );
 

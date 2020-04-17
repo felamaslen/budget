@@ -74,7 +74,6 @@ const valueIsSplit = <FV, IV>(value: FV | Split<FV, IV>): value is Split<FV, IV>
 
 type Options<FV, IV> = {
   value: FV;
-  string?: boolean; // TODO: remove this deprecated property
   inline?: boolean;
   onChange: (value: FV) => void;
   onType?: (value: FV | Split<FV, IV>) => void;
@@ -94,8 +93,7 @@ type Result<FV, IV, I> = [
 
 export function useField<FV = string, IV = string, I extends HTMLInputElement = HTMLInputElement>({
   value,
-  string = false, // deprecated
-  inline = string,
+  inline = false,
   onChange,
   onType = NULL,
   setValue = IDENTITY,

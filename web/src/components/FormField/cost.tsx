@@ -4,12 +4,10 @@ import { Wrapper, WrapperProps } from '.';
 import { setValueInline } from './number';
 import { useField, Split } from '~client/hooks/field';
 
-type FieldValue = number | string | null;
-
 const setValue = (cost: string): number =>
   Math.round(Number((100 * (Number(cost) || 0)).toPrecision(10)));
 
-const getInputValueFromFieldValue = (value: number): string => String(value / 100);
+const getInputValueFromFieldValue = (value = 0): string => String(value / 100);
 const setValueString = setValueInline(setValue, getInputValueFromFieldValue);
 
 function setValueNumber(inputValue: string): Split<number> {
@@ -18,7 +16,7 @@ function setValueNumber(inputValue: string): Split<number> {
   return { __split: true, fieldValue, inputValue: getInputValueFromFieldValue(fieldValue) };
 }
 
-function getInitialInputValue(value: FieldValue): string {
+function getInitialInputValue(value: number | undefined): string {
   if (typeof value !== 'number') {
     return '';
   }
@@ -26,19 +24,14 @@ function getInitialInputValue(value: FieldValue): string {
   return String(value / 100);
 }
 
-type Props = WrapperProps<FieldValue> & {
-  onChange: () => void;
+type Props = WrapperProps<number | undefined> & {
+  onChange: (value?: number) => void;
   label?: string;
   inline?: boolean;
 };
 
-const FormFieldCost: React.FC<Props> = ({
-  label = null,
-  value = null,
-  invalid = false,
-  ...props
-}) => {
-  const [, inputValue, onChange, ref, onBlur] = useField<FieldValue>({
+const FormFieldCost: React.FC<Props> = ({ label = null, value, invalid = false, ...props }) => {
+  const [, inputValue, onChange, ref, onBlur] = useField<number | undefined>({
     ...props,
     value,
     getInitialInputValue,
