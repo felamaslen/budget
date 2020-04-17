@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Wrapper } from '.';
+import { setValueInline } from './number';
 import { useField, Split } from '~client/hooks/field';
 
 type FieldValue = number | string | null;
@@ -8,27 +9,13 @@ type FieldValue = number | string | null;
 const setValue = (cost: string): number =>
   Math.round(Number((100 * (Number(cost) || 0)).toPrecision(10)));
 
-function setValueString(inputValue: string): Split<number> {
-  if (inputValue === '.') {
-    return { __split: true, fieldValue: 0, inputValue: '.' };
-  }
-  if (Number.isNaN(Number(inputValue))) {
-    throw new Error('Invalid value');
-  }
-
-  const fieldValue = setValue(inputValue);
-
-  if (inputValue.match('.')) {
-    return { __split: true, fieldValue, inputValue };
-  }
-
-  return { __split: true, fieldValue, inputValue: String(fieldValue / 100) };
-}
+const getInputValueFromFieldValue = (value: number): string => String(value / 100);
+const setValueString = setValueInline(setValue, getInputValueFromFieldValue);
 
 function setValueNumber(inputValue: string): Split<number> {
   const fieldValue = setValue(inputValue);
 
-  return { __split: true, fieldValue, inputValue: String(fieldValue / 100) };
+  return { __split: true, fieldValue, inputValue: getInputValueFromFieldValue(fieldValue) };
 }
 
 function getInitialInputValue(value: FieldValue): string {
