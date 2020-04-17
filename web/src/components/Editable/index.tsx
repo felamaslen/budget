@@ -31,7 +31,8 @@ const isDate = (value: Value): value is DateValue =>
 const isTransactions = (value: Value): value is Transaction[] =>
   value === null || Array.isArray(value);
 
-const isNumber = (value: Value): value is number => typeof value === 'number';
+const isNumber = (value?: Value): value is number =>
+  typeof value === 'undefined' || typeof value === 'number';
 
 const EditableField: React.FC<FieldProps> = ({ id, item, value, onChange, ...rest }) => {
   const onChangeCallback = useCallback(
