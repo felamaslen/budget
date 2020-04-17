@@ -1,41 +1,46 @@
 import { Data } from '~client/types/graph';
 import { Color } from '~client/constants/colors';
 
-export type Transaction = {
-    date: Date;
-    units: number;
-    cost: number;
+export type TransactionRaw = {
+  date: string;
+  units: number;
+  cost: number;
+};
+
+export type Transaction = Omit<TransactionRaw, 'date'> & {
+  id: string;
+  date: Date;
 };
 
 export type Row = {
-    id: string;
-    item: string;
-    transactions: Transaction[];
+  id: string;
+  item: string;
+  transactions: Transaction[];
 };
 
 export type Prices = {
-    [id: string]: {
-        values: number[];
-        startIndex: number;
-    };
+  [id: string]: {
+    values: number[];
+    startIndex: number;
+  };
 };
 
 export type FundItem = {
-    id: string;
-    item: string;
-    color: Color;
+  id: string;
+  item: string;
+  color: Color;
 };
 
 export type FundLine = Pick<FundItem, 'id' | 'color'> & {
-    data: Data;
+  data: Data;
 };
 
 export type Stock = {
-    code: string;
-    name: string;
-    weight: number;
-    gain: number;
-    price?: number;
-    up: boolean;
-    down: boolean;
+  code: string;
+  name: string;
+  weight: number;
+  gain: number;
+  price?: number;
+  up: boolean;
+  down: boolean;
 };
