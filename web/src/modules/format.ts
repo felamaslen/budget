@@ -175,15 +175,18 @@ export function getTickSize(min: number, max: number, numTicks: number): number 
   return normaliseTickSize(minimum);
 }
 
-export function formatItem<V = string>(item: string, value: V): string {
+export function formatItem<V = string>(item: string, value?: V): string {
+  if (item === 'transactions') {
+    return String(Array.isArray(value) ? value.length : 0);
+  }
+  if (typeof value === 'undefined') {
+    return '';
+  }
   if (value instanceof Date) {
     return format(value, 'dd/MM/yyyy');
   }
   if (item === 'cost') {
     return formatCurrency(Number(value));
-  }
-  if (item === 'transactions' && Array.isArray(value)) {
-    return String(value.length);
   }
 
   return String(value);

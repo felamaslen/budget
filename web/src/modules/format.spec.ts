@@ -195,8 +195,14 @@ describe('getTickSize', () => {
 });
 
 describe('formatItem', () => {
-  it('should format dates', () => {
-    expect(formatItem<Date>('date', new Date('2019-07-14T23:19:20Z'))).toEqual('14/07/2019');
+  describe('dates', () => {
+    it('should be formatted as locale strings', () => {
+      expect(formatItem<Date>('date', new Date('2019-07-14T23:19:20Z'))).toEqual('14/07/2019');
+    });
+
+    it('should be formatted as empty strings if undefined', () => {
+      expect(formatItem<Date>('date')).toEqual('');
+    });
   });
 
   it('should format strings', () => {
@@ -208,19 +214,31 @@ describe('formatItem', () => {
     expect(formatItem('social', 'kebab')).toEqual('kebab');
   });
 
-  it('should format costs', () => {
-    expect(formatItem<number>('cost', 3462)).toEqual('£34.62');
+  describe('costs', () => {
+    it('should be formatted with currency', () => {
+      expect(formatItem<number>('cost', 3462)).toEqual('£34.62');
+    });
+
+    it('should be formatted as empty strings if undefined', () => {
+      expect(formatItem<number>('cost')).toEqual('');
+    });
   });
 
-  it('should format transaction lists', () => {
-    expect(
-      formatItem<Transaction[]>(
-        'transactions',
-        getTransactionsList([
-          { date: '2019-05-03', units: 3, cost: 2 },
-          { date: '2019-05-017', units: 31, cost: 25 },
-        ]),
-      ),
-    ).toEqual('2');
+  describe('transactions', () => {
+    it('should return the number of transactions as a string', () => {
+      expect(
+        formatItem<Transaction[]>(
+          'transactions',
+          getTransactionsList([
+            { date: '2019-05-03', units: 3, cost: 2 },
+            { date: '2019-05-017', units: 31, cost: 25 },
+          ]),
+        ),
+      ).toEqual('2');
+    });
+
+    it('should return 0 if the value is undefined', () => {
+      expect(formatItem<Transaction[]>('transactions')).toEqual('0');
+    });
   });
 });
