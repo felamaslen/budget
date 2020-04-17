@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ModalDialog /> should render a form list 1`] = `
+<ul
+  class="sc-kEYyzF hCTcAT"
+  data-testid="form-list"
+>
+  <li
+    class="sc-kkGfuU leTnSG"
+  >
+    <span
+      class="sc-iAyFgw dKiNCX"
+    >
+      item
+    </span>
+    <div
+      class="sc-frDJqD hmOCaD"
+    >
+      <input
+        type="text"
+        value="some item"
+      />
+    </div>
+  </li>
+  <li
+    class="sc-kkGfuU leTnSG"
+  >
+    <span
+      class="sc-iAyFgw dKiNCX"
+    >
+      cost
+    </span>
+    <div
+      class="sc-frDJqD gSOATx"
+    >
+      <input
+        step="0.01"
+        type="number"
+        value="3.42"
+      />
+    </div>
+  </li>
+</ul>
+`;
