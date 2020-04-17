@@ -7,7 +7,7 @@ import * as Styled from './styles';
 
 export type WrapperProps<V = string> = React.PropsWithChildren<{
   item?: string;
-  value: V;
+  value?: V;
   active?: boolean;
   invalid?: boolean;
   small?: boolean;
@@ -30,7 +30,8 @@ export const Wrapper: <V = string>(
 );
 
 type Props = {
-  onChange: () => void;
+  onChange: (value?: string) => void;
+  inline?: boolean;
   label?: string;
   item?: string;
   value?: string;
