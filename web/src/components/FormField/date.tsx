@@ -9,6 +9,7 @@ import getDate from 'date-fns/getDate';
 import startOfDay from 'date-fns/startOfDay';
 import isValid from 'date-fns/isValid';
 import format from 'date-fns/format';
+import { DateTime } from 'luxon';
 
 import { Wrapper } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
@@ -36,11 +37,13 @@ function setValueString(value: string): Date {
   return isValid(result) ? result : now;
 }
 
+const isLegacyDate = (value: Date | DateTime): value is DateTime => value instanceof DateTime;
+
 type Props = {
-  onChange: () => void;
+  onChange: (value: Date | DateTime) => void;
   inline?: boolean;
   label?: string | null;
-  value?: Date;
+  value?: Date | DateTime;
   active?: boolean;
   invalid?: boolean;
 };
@@ -49,27 +52,39 @@ const FormFieldDate: React.FC<Props> = ({
   label = null,
   invalid = false,
   value = new Date(),
+  onChange,
   ...props
 }) => {
   const setValue = props.inline ? setValueString : setValueDate;
   const type = props.inline ? 'text' : 'date';
 
-  const [, , onChange, ref, onBlur] = useField({
-    ...props,
+  const dateValue = React.useMemo<Date>(() => (isLegacyDate(value) ? value.toJSDate() : value), [
     value,
+  ]);
+
+  const onChangeBackwardsCompatible = React.useCallback(
+    (newValue: Date): void =>
+      onChange(isLegacyDate(value) ? DateTime.fromJSDate(newValue) : newValue),
+    [value, onChange],
+  );
+
+  const [, , onChangeInput, ref, onBlur] = useField({
+    ...props,
+    value: dateValue,
     setValue,
+    onChange: onChangeBackwardsCompatible,
   });
 
-  const defaultValue = format(value, props.inline ? 'dd/MM/yyyy' : 'yyyy-MM-dd');
+  const defaultValue = format(dateValue, props.inline ? 'dd/MM/yyyy' : 'yyyy-MM-dd');
 
   return (
-    <Wrapper<Date> item="date" value={value} active={props.active} invalid={invalid}>
+    <Wrapper<Date> item="date" value={dateValue} active={props.active} invalid={invalid}>
       <input
         ref={ref}
         aria-label={label || undefined}
         type={type}
         defaultValue={defaultValue}
-        onChange={onChange}
+        onChange={onChangeInput}
         onBlur={onBlur}
       />
     </Wrapper>

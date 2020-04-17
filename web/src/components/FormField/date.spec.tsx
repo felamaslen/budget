@@ -2,6 +2,7 @@ import sinon from 'sinon';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import isValid from 'date-fns/isValid';
+import { DateTime } from 'luxon';
 
 import FormFieldDate from './date';
 
@@ -163,6 +164,28 @@ describe('<FormFieldDate />', () => {
       });
 
       expect(props.onChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when passing in a deprecated luxon DateTime object', () => {
+    const legacyDate = DateTime.fromISO('2020-04-20');
+
+    it('should emit DateTime objects on the change event', async () => {
+      const { findByDisplayValue } = render(<FormFieldDate {...props} value={legacyDate} />);
+
+      const input = await findByDisplayValue('2020-04-20');
+
+      act(() => {
+        fireEvent.change(input, { target: { value: '2014-04-09' } });
+      });
+      expect(props.onChange).not.toHaveBeenCalled();
+
+      act(() => {
+        fireEvent.blur(input);
+      });
+
+      expect(props.onChange).toHaveBeenCalledTimes(1);
+      expect(props.onChange).toHaveBeenCalledWith(DateTime.fromISO('2014-04-09'));
     });
   });
 });
