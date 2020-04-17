@@ -26,7 +26,6 @@ export const setValueInline = (
 type Props = WrapperProps<number | undefined> & {
   onChange: (value?: number) => void;
   type?: 'number' | 'range';
-  value?: number | null;
   active?: boolean;
   min?: number;
   max?: number;

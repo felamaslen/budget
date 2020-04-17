@@ -5,7 +5,7 @@ import { useField } from '~client/hooks/field';
 
 import * as Styled from './styles';
 
-export type WrapperProps<V> = React.PropsWithChildren<{
+export type WrapperProps<V = string> = React.PropsWithChildren<{
   item?: string;
   value: V;
   active?: boolean;

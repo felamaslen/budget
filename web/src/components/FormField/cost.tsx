@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Wrapper } from '.';
+import { Wrapper, WrapperProps } from '.';
 import { setValueInline } from './number';
 import { useField, Split } from '~client/hooks/field';
 
@@ -26,13 +26,9 @@ function getInitialInputValue(value: FieldValue): string {
   return String(value / 100);
 }
 
-type Props = {
+type Props = WrapperProps<FieldValue> & {
   onChange: () => void;
   label?: string;
-  value?: FieldValue;
-  active?: boolean;
-  invalid?: boolean;
-  small?: boolean;
   inline?: boolean;
 };
 

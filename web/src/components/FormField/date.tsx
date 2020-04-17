@@ -11,7 +11,7 @@ import isValid from 'date-fns/isValid';
 import format from 'date-fns/format';
 import { DateTime } from 'luxon';
 
-import { Wrapper } from '~client/components/FormField';
+import { Wrapper, WrapperProps } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
 const setValueDate: (value: string) => Date = parseISO;
@@ -39,12 +39,10 @@ function setValueString(value: string): Date {
 
 const isLegacyDate = (value: Date | DateTime): value is DateTime => value instanceof DateTime;
 
-type Props = {
+type Props = WrapperProps<Date | DateTime> & {
   onChange: (value: Date | DateTime) => void;
   inline?: boolean;
   label?: string | null;
-  value?: Date | DateTime;
-  active?: boolean;
   invalid?: boolean;
 };
 
