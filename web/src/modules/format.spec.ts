@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 import {
   capitalise,
   numberFormat,
@@ -202,6 +204,15 @@ describe('formatItem', () => {
 
     it('should be formatted as empty strings if undefined', () => {
       expect(formatItem<Date>('date')).toEqual('');
+    });
+  });
+
+  describe('dates (legacy)', () => {
+    // TODO: remove this legacy compat
+    it('should be formatted as locale strings', () => {
+      expect(formatItem<DateTime>('date', DateTime.fromISO('2019-07-14'))).toEqual(
+        DateTime.fromISO('2019-07-14').toLocaleString(DateTime.DATE_SHORT),
+      );
     });
   });
 

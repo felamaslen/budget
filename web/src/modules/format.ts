@@ -1,4 +1,5 @@
 import format from 'date-fns/format';
+import { DateTime } from 'luxon';
 
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 
@@ -19,7 +20,6 @@ export function numberFormat(value: number | string): string {
 }
 
 const getSign = (value: number): string => (value < 0 ? '-' : '');
-
 export function sigFigs(value: number, figs: number): string {
   if (value === 0) {
     return value.toFixed(figs - 1);
@@ -184,6 +184,9 @@ export function formatItem<V = string>(item: string, value?: V): string {
   }
   if (value instanceof Date) {
     return format(value, 'dd/MM/yyyy');
+  }
+  if (value instanceof DateTime) {
+    return value.toLocaleString(DateTime.DATE_SHORT);
   }
   if (item === 'cost') {
     return formatCurrency(Number(value));
