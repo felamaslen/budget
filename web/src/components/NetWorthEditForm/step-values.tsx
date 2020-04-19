@@ -3,8 +3,9 @@ import shortid from 'shortid';
 import { replaceAtIndex } from 'replace-array';
 import format from 'date-fns/format';
 
+import { isLegacyDate, IdMap } from '~client/types';
 import { CreateEdit } from '~client/types/crud';
-import { IdMap } from '~client/types';
+
 import {
   Category,
   Subcategory,
@@ -425,7 +426,7 @@ const StepValues: React.FC<PropsStep> = ({
         <span>{name}</span>
         <span>
           {' - '}
-          {format(item.date, 'yyyy-MM-dd')}
+          {format(isLegacyDate(item.date) ? item.date.toJSDate() : item.date, 'yyyy-MM-dd')}
         </span>
       </Styled.SectionTitle>
       <Styled.EditByCategory>

@@ -3,6 +3,7 @@ import shortid from 'shortid';
 import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
 
+import { isLegacyDate } from '~client/types';
 import { CreateEdit, Create } from '~client/types/crud';
 import {
   Entry,
@@ -141,13 +142,15 @@ export type PropsAdd = Omit<PropsBase, 'item'> & {
 export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }) => {
   const item = useMemo<Omit<Entry, 'id'>>(() => {
     if (data.length) {
-      const itemsSorted = sortByDate(data);
+      const itemsSorted: Entry[] = sortByDate(data);
 
       const lastItem = itemsSorted[itemsSorted.length - 1];
 
       return {
         ...withContrivedIds(lastItem),
-        date: endOfMonth(addMonths(lastItem.date, 1)),
+        date: endOfMonth(
+          addMonths(isLegacyDate(lastItem.date) ? lastItem.date.toJSDate() : lastItem.date, 1),
+        ),
       };
     }
 

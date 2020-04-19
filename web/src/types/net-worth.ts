@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export type Category = {
   id: string;
   type: 'asset' | 'liability';
@@ -41,7 +43,7 @@ export type CreditLimit = {
 
 export type Entry = {
   id: string;
-  date: Date;
+  date: Date | DateTime;
   values: ValueObject[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
