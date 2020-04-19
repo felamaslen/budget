@@ -128,7 +128,7 @@ export type Props = {
   currencies: Currency[];
 };
 
-const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }) => {
+const FormFieldNetWorthValue: React.FC<Props> = ({ value: initialValue, onChange, currencies }) => {
   const onChangeTruthy = useCallback(
     (newValue?: Value): void => {
       if (newValue) {
@@ -138,10 +138,10 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
     [onChange],
   );
 
-  const [state, dispatch] = useReducer<Reducer>(reducer, {
-    complex: isComplex(value),
-    otherValue: isComplex(value) ? 0 : [],
-    value,
+  const [{ value, complex }, dispatch] = useReducer<Reducer>(reducer, {
+    complex: isComplex(initialValue),
+    otherValue: isComplex(initialValue) ? 0 : [],
+    value: initialValue,
   });
 
   const toggleComplex = useCallback(() => {
@@ -149,14 +149,14 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
   }, []);
 
   useEffect(() => {
-    if (state.complex !== isComplex(value) && value !== state.value) {
-      onChangeTruthy(state.value);
+    if (complex !== isComplex(value) && value !== initialValue) {
+      onChangeTruthy(value);
     }
-  }, [onChangeTruthy, state.complex, value, state.value]);
+  }, [onChangeTruthy, complex, value, initialValue]);
 
   useEffect(() => {
-    dispatch({ type: ActionType.ValueSet, value });
-  }, [value]);
+    dispatch({ type: ActionType.ValueSet, value: initialValue });
+  }, [initialValue]);
 
   const currencyOptions = useMemo(() => currencies.map(({ currency }) => currency), [currencies]);
 
