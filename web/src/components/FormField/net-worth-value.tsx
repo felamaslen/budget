@@ -124,15 +124,24 @@ const reducer: Reducer = (state, action): State => {
 
 export type Props = {
   value: Value;
-  onChange: (value?: Value) => void;
+  onChange: (value: Value) => void;
   currencies: Currency[];
 };
 
-const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }) => {
-  const [state, dispatch] = useReducer<Reducer>(reducer, {
-    complex: isComplex(value),
-    otherValue: isComplex(value) ? 0 : [],
-    value,
+const FormFieldNetWorthValue: React.FC<Props> = ({ value: initialValue, onChange, currencies }) => {
+  const onChangeTruthy = useCallback(
+    (newValue?: Value): void => {
+      if (newValue) {
+        onChange(newValue);
+      }
+    },
+    [onChange],
+  );
+
+  const [{ value, complex }, dispatch] = useReducer<Reducer>(reducer, {
+    complex: isComplex(initialValue),
+    otherValue: isComplex(initialValue) ? 0 : [],
+    value: initialValue,
   });
 
   const toggleComplex = useCallback(() => {
@@ -140,14 +149,14 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
   }, []);
 
   useEffect(() => {
-    if (state.complex !== isComplex(value) && value !== state.value) {
-      onChange(state.value);
+    if (complex !== isComplex(value) && value !== initialValue) {
+      onChangeTruthy(value);
     }
-  }, [onChange, state.complex, value, state.value]);
+  }, [onChangeTruthy, complex, value, initialValue]);
 
   useEffect(() => {
-    dispatch({ type: ActionType.ValueSet, value });
-  }, [value]);
+    dispatch({ type: ActionType.ValueSet, value: initialValue });
+  }, [initialValue]);
 
   const currencyOptions = useMemo(() => currencies.map(({ currency }) => currency), [currencies]);
 
@@ -176,14 +185,14 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
         return;
       }
 
-      onChange(
+      onChangeTruthy(
         replaceAtIndex(value, index, {
           value: numberValue,
           currency,
         }),
       );
     },
-    [onChange, value],
+    [onChangeTruthy, value],
   );
 
   const onRemoveComplexValue = useCallback(
@@ -192,9 +201,9 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
         return;
       }
 
-      onChange(value.slice(0, index).concat(value.slice(index + 1)));
+      onChangeTruthy(value.slice(0, index).concat(value.slice(index + 1)));
     },
-    [onChange, value],
+    [onChangeTruthy, value],
   );
 
   const onAddComplexValue = useCallback(
@@ -203,9 +212,9 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
         return;
       }
 
-      onChange(value.concat([{ value: numberValue, currency }]));
+      onChangeTruthy(value.concat([{ value: numberValue, currency }]));
     },
-    [onChange, value],
+    [onChangeTruthy, value],
   );
 
   return (
@@ -214,7 +223,7 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value, onChange, currencies }
         <FormFieldTickbox item="fx-toggle" value={isComplex(value)} onChange={toggleComplex} />
         {'FX'}
       </Styled.NetWorthValueComplexToggle>
-      {!isComplex(value) && <FormFieldCost value={value} onChange={onChange} />}
+      {!isComplex(value) && <FormFieldCost value={value} onChange={onChangeTruthy} />}
       {isComplex(value) && (
         <Styled.NetWorthValueList>
           {value.map(({ value: numberValue, currency }, index) => (

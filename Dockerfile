@@ -1,6 +1,15 @@
 FROM node:10-alpine
 
-RUN apk add --no-cache python gcc g++ make
+RUN apk add --no-cache \
+  python \
+  build-base \
+  gcc \
+  g++ \
+  make \
+  cairo-dev \
+  jpeg-dev \
+  pango-dev \
+  giflib-dev 
 
 WORKDIR /opt/app
 

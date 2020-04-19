@@ -11,6 +11,7 @@ import isValid from 'date-fns/isValid';
 import format from 'date-fns/format';
 import { DateTime } from 'luxon';
 
+import { isLegacyDate } from '~client/types';
 import { Wrapper, WrapperProps } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
@@ -36,8 +37,6 @@ function setValueString(value: string): Date {
 
   return isValid(result) ? result : now;
 }
-
-const isLegacyDate = (value: Date | DateTime): value is DateTime => value instanceof DateTime;
 
 type Props = WrapperProps<Date | DateTime> & {
   onChange: (value: Date | DateTime) => void;

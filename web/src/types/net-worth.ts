@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export type Category = {
   id: string;
   type: 'asset' | 'liability';
@@ -27,28 +29,33 @@ export const isComplex = (value: Value): value is ComplexValue => Array.isArray(
 export const isFX = (value: ComplexValueItem): value is FXValue =>
   typeof value === 'object' && Reflect.has(value, 'currency');
 
-type ValueObject = {
+export type ValueObject = {
+  id: string;
   subcategory: Subcategory['id'];
   skip?: boolean | null;
   value: Value;
 };
 
+export type CreditLimit = {
+  subcategory: Subcategory['id'];
+  value: number;
+};
+
 export type Entry = {
   id: string;
-  date: string;
+  date: Date | DateTime;
   values: ValueObject[];
-  creditLimit: {
-    subcategory: Subcategory['id'];
-    value: number;
-  }[];
-  currencies: {
-    currency: string;
-    rate: number;
-  }[];
+  creditLimit: CreditLimit[];
+  currencies: Currency[];
 };
 
 export type Currency = {
   id: string;
   currency: string;
   rate: number;
+};
+
+export type Item = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
+  spend: number;
+  fti: () => number;
 };
