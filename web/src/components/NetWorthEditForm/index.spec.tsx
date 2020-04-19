@@ -2,6 +2,7 @@ import sinon from 'sinon';
 import React from 'react';
 import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
 import nock from 'nock';
+import { DateTime } from 'luxon';
 
 import { Category, Subcategory, Entry } from '~client/types/net-worth';
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
@@ -59,7 +60,7 @@ describe('Net worth entry form', () => {
 
   const item: Entry = {
     id: 'some-fake-id',
-    date: new Date(oldDate),
+    date: DateTime.fromJSDate(new Date(oldDate)),
     values: [
       {
         id: 'fake-value-id-bank-account',
@@ -304,7 +305,7 @@ describe('Net worth entry form', () => {
       it('should call onUpdate when hitting finish', () => {
         expect(props.onUpdate).toHaveBeenCalledWith('some-fake-id', {
           id: 'some-fake-id',
-          date: new Date(newDate),
+          date: DateTime.fromJSDate(new Date(newDate)),
           values: [
             {
               id: 'fake-value-id-bank-account',
@@ -404,7 +405,7 @@ describe('Net worth entry form', () => {
       it('should call onCreate when hitting finish', async () => {
         expect(props.onCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            date: new Date(newDate),
+            date: DateTime.fromJSDate(new Date(newDate)),
             values: expect.arrayContaining([
               expect.objectContaining({
                 subcategory: 'fake-subcategory-id-bank-account',
@@ -448,7 +449,7 @@ describe('Net worth entry form', () => {
 
         expect(props.onCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            date: new Date('2020-05-31T23:59:59.999Z'),
+            date: DateTime.fromJSDate(new Date('2020-05-31T23:59:59.999Z')),
           }),
         );
       });

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import shortid from 'shortid';
 import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
+import { DateTime } from 'luxon';
 
 import { isLegacyDate } from '~client/types';
 import { CreateEdit, Create } from '~client/types/crud';
@@ -148,14 +149,16 @@ export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }
 
       return {
         ...withContrivedIds(lastItem),
-        date: endOfMonth(
-          addMonths(isLegacyDate(lastItem.date) ? lastItem.date.toJSDate() : lastItem.date, 1),
+        date: DateTime.fromJSDate(
+          endOfMonth(
+            addMonths(isLegacyDate(lastItem.date) ? lastItem.date.toJSDate() : lastItem.date, 1),
+          ),
         ),
       };
     }
 
     return {
-      date: new Date(),
+      date: DateTime.fromJSDate(new Date()),
       creditLimit: [],
       currencies: [],
       values: [],
