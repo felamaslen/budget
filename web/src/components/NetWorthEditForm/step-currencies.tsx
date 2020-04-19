@@ -58,15 +58,16 @@ const getCurrencies = debounce(
     onComplete: () => void,
   ): Promise<void> => {
     try {
-      const res = await axios.get<Rates>('https://api.exchangeratesapi.io/latest', {
+      const res = await axios.get<{ rates: Rates }>('https://api.exchangeratesapi.io/latest', {
         params: {
+          _timestamp: Date.now(),
           base: BASE,
           symbols: symbols.join(','),
         },
         cancelToken: (source.current && source.current.token) || undefined,
       });
 
-      onSuccess(res.data);
+      onSuccess(res.data?.rates);
     } catch (err) {
       if (!axios.isCancel(err)) {
         onError(err);

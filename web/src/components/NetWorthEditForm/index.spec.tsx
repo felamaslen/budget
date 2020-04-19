@@ -170,12 +170,16 @@ describe('Net worth entry form', () => {
 
     expect(inputUSD).toBeInTheDocument();
     expect(refreshButtons).toHaveLength(2);
+
     expect(buttonNext).toBeInTheDocument();
 
     nock('https://api.exchangeratesapi.io')
-      .get('/latest?base=GBP&symbols=USD')
+      .get(`/latest?_timestamp=${now.getTime() + 100}&base=GBP&symbols=USD`)
       .reply(200, {
-        USD: 1.24859,
+        rates: {
+          USD: 1.24859,
+        },
+        base: 'GBP',
       });
 
     act(() => {
