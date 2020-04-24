@@ -1,16 +1,25 @@
 import { createSelector } from 'reselect';
+
+import * as Funds from '~client/reducers/funds';
 import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
-import { colorKey } from '~client/modules/color';
+import * as Color from '~client/modules/color';
 import { getTotalUnits, getTotalCost, isSold } from '~client/modules/data';
 import {
   getViewSoldFunds,
   getCurrentFundsCache,
   getFundsRows,
 } from '~client/selectors/funds/helpers';
-import { getFundLineProcessed } from '~client/selectors/funds/lines';
+import { getFundLineProcessed, PUC } from '~client/selectors/funds/lines';
 import { Data } from '~client/types/graph';
-import { Row, Prices, FundLine, FundItem } from '~client/types/funds';
+import {
+  LegacyRow,
+  LegacyTransaction,
+  Prices,
+  FundPrices,
+  FundLine,
+  FundItem,
+} from '~client/types/funds';
 
 type IndexedNumber = { [id: string]: number };
 type IndexedNumberArray = { [id: string]: number[] };
@@ -19,17 +28,26 @@ type IndexedBool = { [id: string]: boolean };
 type TimeOffsets = IndexedNumber;
 type RowLengths = IndexedNumber;
 
-const getPrices = createSelector(getCurrentFundsCache, ({ prices }) => prices);
+const getPrices = createSelector(
+  getCurrentFundsCache,
+  (cache?: Funds.Cache): Prices => cache?.prices || {},
+);
 
-export const getStartTime = createSelector(getCurrentFundsCache, ({ startTime }) => startTime);
+export const getStartTime = createSelector(
+  getCurrentFundsCache,
+  (cache?: Funds.Cache) => cache?.startTime,
+);
 
-export const getCacheTimes = createSelector(getCurrentFundsCache, ({ cacheTimes }) => cacheTimes);
+export const getCacheTimes = createSelector(
+  getCurrentFundsCache,
+  (cache?: Funds.Cache): number[] => cache?.cacheTimes || [],
+);
 
 const getTimeOffsets = createSelector(getPrices, prices =>
-  Object.keys(prices).reduce(
-    (last, id) => ({
+  Object.entries(prices).reduce(
+    (last: TimeOffsets, [id, { startIndex }]: [string, FundPrices]): TimeOffsets => ({
       ...last,
-      [id]: prices[id].startIndex,
+      [id]: startIndex,
     }),
     {},
   ),
@@ -47,26 +65,37 @@ const getRowLengths = createSelector(
     ),
 );
 
-const getMaxLength = createSelector(getPrices, getRowLengths, (prices, rowLengths: RowLengths) =>
-  Object.keys(prices).reduce((last, id) => Math.max(last, rowLengths[id]), 0),
+const getMaxLength = createSelector(
+  getPrices,
+  getRowLengths,
+  (prices, rowLengths: RowLengths): number =>
+    Object.keys(prices).reduce((last, id) => Math.max(last, rowLengths[id]), 0),
 );
+
+type WithInfo<V = {}> = LegacyRow &
+  V & {
+    transactionsToDate: LegacyTransaction[][];
+  };
 
 const getItemsWithInfo = createSelector(
   [getFundsRows, getPrices, getStartTime, getCacheTimes],
-  (items: Row[], prices: Prices, startTime, cacheTimes) =>
+  (items: LegacyRow[], prices: Prices, startTime, cacheTimes) =>
     items
       .filter(({ id }) => prices[id])
-      .map(({ id, transactions, ...rest }) => ({
-        id,
-        ...rest,
-        transactions,
-        transactionsToDate: prices[id].values.map((price, index) =>
-          transactions.filter(
-            ({ date }) =>
-              Number(date) < 1000 * (startTime + cacheTimes[index + prices[id].startIndex]),
+      .map(
+        ({ id, transactions, ...rest }): WithInfo => ({
+          id,
+          ...rest,
+          transactions,
+          transactionsToDate: prices[id].values.map((_, index) =>
+            (transactions || []).filter(
+              ({ date }) =>
+                Number(date) <
+                1000 * ((startTime || 0) + cacheTimes[index + prices[id].startIndex]),
+            ),
           ),
-        ),
-      })),
+        }),
+      ),
 );
 
 const getTimesById = createSelector(
@@ -93,29 +122,31 @@ const getSoldById = createSelector([getViewSoldFunds, getItemsWithInfo], (viewSo
   items.reduce(
     (last, { id, transactions }) => ({
       ...last,
-      [id]: !viewSold && isSold(transactions),
+      [id]: !viewSold && isSold(transactions || []),
     }),
     {},
   ),
 );
 
-const getPricesById = createSelector([getPrices, getItemsWithInfo], (prices, items) =>
-  items.reduce(
-    (last, { id }) => ({
-      ...last,
-      [id]: prices[id].values,
-    }),
-    {},
-  ),
+const getPricesById = createSelector(
+  [getPrices, getItemsWithInfo],
+  (prices: Prices, items: WithInfo[]): PUC =>
+    items.reduce(
+      (last, { id }) => ({
+        ...last,
+        [id]: prices[id].values,
+      }),
+      {},
+    ),
 );
 
 const getUnitsById = createSelector(
   [getPricesById, getItemsWithInfo],
-  (prices: { [id: string]: number[] }, items) =>
+  (prices: { [id: string]: number[] }, items: WithInfo[]) =>
     items.reduce(
       (last, { id, transactionsToDate }) => ({
         ...last,
-        [id]: prices[id].map((price, index) => getTotalUnits(transactionsToDate[index])),
+        [id]: prices[id].map((_, index) => getTotalUnits(transactionsToDate[index])),
       }),
       {},
     ),
@@ -123,11 +154,11 @@ const getUnitsById = createSelector(
 
 const getCostsById = createSelector(
   [getPricesById, getItemsWithInfo],
-  (prices: { [id: string]: number[] }, items) =>
+  (prices: { [id: string]: number[] }, items: WithInfo[]) =>
     items.reduce(
       (last, { id, transactionsToDate }) => ({
         ...last,
-        [id]: prices[id].map((price, index) => getTotalCost(transactionsToDate[index])),
+        [id]: prices[id].map((_, index) => getTotalCost(transactionsToDate[index])),
       }),
       {},
     ),
@@ -148,16 +179,13 @@ export const getFundItems = createSelector(
         .map(({ id, item }) => ({
           id,
           item,
-          color: colorKey(item),
+          color: Color.colorKey(item),
         })),
     ),
 );
 
 type Times = IndexedNumberArray;
 type Sold = IndexedBool;
-
-type Units = IndexedNumberArray;
-type Costs = IndexedNumberArray;
 
 export const getFundLines = createSelector(
   [
@@ -174,9 +202,9 @@ export const getFundLines = createSelector(
     times: Times,
     timeOffsets: TimeOffsets,
     sold: Sold,
-    prices: Prices,
-    units: Units,
-    costs: Costs,
+    prices: PUC,
+    units: PUC,
+    costs: PUC,
   ): {
     [mode in Mode]: FundLine[];
   } => {

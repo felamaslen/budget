@@ -143,7 +143,7 @@ export type PropsAdd = Omit<PropsBase, 'item'> & {
 export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }) => {
   const item = useMemo<Omit<Entry, 'id'>>(() => {
     if (data.length) {
-      const itemsSorted: Entry[] = sortByDate(data);
+      const itemsSorted: Entry[] = sortByDate<Entry>(data);
 
       const lastItem = itemsSorted[itemsSorted.length - 1];
 

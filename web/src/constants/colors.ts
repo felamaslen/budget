@@ -1,14 +1,14 @@
 export type Color = [number, number, number, number?];
 
 export const COLOR_CATEGORY: { [category: string]: Color } = {
-    funds: [84, 110, 122],
-    bills: [183, 28, 28],
-    food: [67, 160, 71],
-    general: [1, 87, 155],
-    holiday: [0, 137, 123],
-    social: [191, 158, 36],
-    income: [36, 191, 55],
-    spending: [191, 36, 36],
+  funds: [84, 110, 122],
+  bills: [183, 28, 28],
+  food: [67, 160, 71],
+  general: [1, 87, 155],
+  holiday: [0, 137, 123],
+  social: [191, 158, 36],
+  income: [36, 191, 55],
+  spending: [191, 36, 36],
 };
 
 // fund colour scale

@@ -6,7 +6,7 @@
 
 import { useRef, useReducer, useCallback, useEffect } from 'react';
 
-import { NULL, IDENTITY } from '~client/modules/data';
+import * as Data from '~client/modules/data';
 import { VALUE_SET, CANCELLED } from '~client/modules/nav';
 import { NULL_COMMAND } from '~client/hooks/nav';
 
@@ -77,7 +77,7 @@ type Options<FV, IV> = {
   inline?: boolean;
   onChange: (value: FV) => void;
   onType?: (value: FV | Split<FV, IV>) => void;
-  setValue?: (value: string) => FV | Split<FV, IV>;
+  setValue?: Data.Identity<string, FV | Split<FV, IV>>;
   getInitialInputValue?: (value: FV) => IV;
   command?: Action;
   active?: boolean;
@@ -95,9 +95,9 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
   value,
   inline = false,
   onChange,
-  onType = NULL,
-  setValue = IDENTITY,
-  getInitialInputValue = IDENTITY,
+  onType = Data.NULL,
+  setValue = Data.IDENTITY,
+  getInitialInputValue = Data.IDENTITY,
   command = NULL_COMMAND,
   active = false,
 }: Options<FV, IV>): Result<FV, IV, I> {

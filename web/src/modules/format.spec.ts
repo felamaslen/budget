@@ -11,7 +11,7 @@ import {
   formatItem,
 } from '~client/modules/format';
 
-import { Transaction } from '~client/types/funds';
+import { LegacyTransaction } from '~client/types/funds';
 import { getTransactionsList } from '~client/modules/data';
 
 describe('format module', () => {
@@ -238,7 +238,7 @@ describe('formatItem', () => {
   describe('transactions', () => {
     it('should return the number of transactions as a string', () => {
       expect(
-        formatItem<Transaction[]>(
+        formatItem<LegacyTransaction[]>(
           'transactions',
           getTransactionsList([
             { date: '2019-05-03', units: 3, cost: 2 },
@@ -249,7 +249,7 @@ describe('formatItem', () => {
     });
 
     it('should return 0 if the value is undefined', () => {
-      expect(formatItem<Transaction[]>('transactions')).toEqual('0');
+      expect(formatItem<LegacyTransaction[]>('transactions')).toEqual('0');
     });
   });
 });
