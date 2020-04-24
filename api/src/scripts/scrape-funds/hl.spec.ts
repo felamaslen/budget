@@ -12,19 +12,22 @@ import { Fund } from './types';
 describe('Fund scraper - HL', () => {
   const testFileFund = path.resolve(__dirname, './__tests__/fund-test-hl.html');
   const testFileShare = path.resolve(__dirname, './__tests__/share-test-hl.html');
+  const testFileShareComma = path.resolve(__dirname, './__tests__/share-test-hl-comma.html');
   const testFileShareFX = path.resolve(__dirname, './__tests__/share-test-hl-dollar.html');
 
   let testDataFund: string;
   let testDataShare: string;
+  let testDataShareComma: string;
   let testDataShareFX: string;
 
   beforeAll(async () => {
     nock.disableNetConnect();
     nock.enableNetConnect('127.0.0.1');
 
-    [testDataFund, testDataShare, testDataShareFX] = await Promise.all([
+    [testDataFund, testDataShare, testDataShareComma, testDataShareFX] = await Promise.all([
       fs.readFile(testFileFund, 'utf8'),
       fs.readFile(testFileShare, 'utf8'),
+      fs.readFile(testFileShareComma, 'utf8'),
       fs.readFile(testFileShareFX, 'utf8'),
     ]);
   });
@@ -182,6 +185,10 @@ describe('Fund scraper - HL', () => {
       };
 
       expect(getPriceFromDataHL(testDataShareFX, currencyPrices)).toEqual(22582 * 0.76746);
+    });
+
+    it('should handle data where there is a comma in the price', () => {
+      expect(getPriceFromDataHL(testDataShareComma)).toEqual(1862);
     });
 
     it('should throw an error on dollar share data if there are no currency data', () => {

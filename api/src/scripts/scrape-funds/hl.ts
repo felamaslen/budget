@@ -55,7 +55,7 @@ export function getPriceFromDataHL(data: string, currencyPrices?: CurrencyPrices
     [
       '<div id="security-price">',
       '.*',
-      '<span class="bid price-divide"[^>]*>(\\$?)([0-9]+(\\.[0-9]*)?)p?<\\/span>',
+      '<span class="bid price-divide"[^>]*>(\\$?)([0-9,]+(\\.[0-9]*)?)p?<\\/span>',
     ].join(''),
   );
 
@@ -67,7 +67,7 @@ export function getPriceFromDataHL(data: string, currencyPrices?: CurrencyPrices
     throw new Error('Scraped data formatted incorrectly');
   }
 
-  const rawPrice = Number(price);
+  const rawPrice = Number(price.replace(/[,]+/g, ''));
 
   if (dollar) {
     if (!(currencyPrices && 'GBP' in currencyPrices)) {
