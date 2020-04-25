@@ -5,15 +5,6 @@ import { getCurrencyPrices } from './currencies';
 import mockOpenExchangeRatesResponse from './vendor/currencies.json';
 
 describe('getCurrencyPrices', () => {
-  beforeAll(() => {
-    nock.disableNetConnect();
-    nock.enableNetConnect('127.0.0.1');
-  });
-
-  afterAll(() => {
-    nock.enableNetConnect();
-  });
-
   it('should return the USD/GBP rate', async () => {
     nock('https://openexchangerates.org')
       .get(`/api/latest.json?app_id=${config.openExchangeRatesApiKey}`)

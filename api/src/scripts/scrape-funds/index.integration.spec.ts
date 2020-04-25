@@ -51,9 +51,6 @@ describe('Fund scraper - integration tests', () => {
     await db('users').insert({ uid: uid1, name: 'test-user-funds-1', pin_hash: 'some-pin-hash' });
     await db('users').insert({ uid: uid2, name: 'test-user-funds-2', pin_hash: 'other-pin-hash' });
 
-    nock.disableNetConnect();
-    nock.enableNetConnect('127.0.0.1');
-
     clock = sinon.useFakeTimers(new Date(now).getTime());
 
     fundIds = await db('funds')
@@ -91,7 +88,6 @@ describe('Fund scraper - integration tests', () => {
 
   afterAll(async () => {
     clock.restore();
-    nock.enableNetConnect();
 
     await db('users')
       .select()

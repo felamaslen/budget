@@ -1,29 +1,18 @@
-import * as nock from 'nock';
 import { Server } from 'http';
 import request, { Test, SuperTest } from 'supertest';
 
-import { run } from '.';
+import { run } from '..';
 
-describe('Server - integration tests', () => {
+describe('Server - integration tests (health)', () => {
   let server: Server;
   let agent: SuperTest<Test>;
 
-  beforeAll(() => {
-    nock.disableNetConnect();
-    nock.enableNetConnect('127.0.0.1');
-  });
-
-  afterAll(() => {
-    nock.enableNetConnect();
-  });
-
-  beforeEach(async () => {
+  beforeAll(async () => {
     server = await run(4444);
-
     agent = request.agent(server);
   });
 
-  afterEach(done => {
+  afterAll(done => {
     server.close(done);
   });
 
