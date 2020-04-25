@@ -10,10 +10,10 @@ import {
 import { Fund } from './types';
 
 describe('Fund scraper - HL', () => {
-  const testFileFund = path.resolve(__dirname, './__tests__/fund-test-hl.html');
-  const testFileShare = path.resolve(__dirname, './__tests__/share-test-hl.html');
-  const testFileShareComma = path.resolve(__dirname, './__tests__/share-test-hl-comma.html');
-  const testFileShareFX = path.resolve(__dirname, './__tests__/share-test-hl-dollar.html');
+  const testFileFund = path.resolve(__dirname, './vendor/fund-test-hl.html');
+  const testFileShare = path.resolve(__dirname, './vendor/share-test-hl.html');
+  const testFileShareComma = path.resolve(__dirname, './vendor/share-test-hl-comma.html');
+  const testFileShareFX = path.resolve(__dirname, './vendor/share-test-hl-dollar.html');
 
   let testDataFund: string;
   let testDataShare: string;

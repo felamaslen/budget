@@ -8,7 +8,7 @@ import uuidv4 from 'uuid/v4';
 import config from '../../config';
 import db from '~api/modules/db';
 import { run } from '.';
-import mockOpenExchangeRatesResponse from './__tests__/currencies.json';
+import mockOpenExchangeRatesResponse from './vendor/currencies.json';
 
 type TestFundPrice = {
   cid: string;
@@ -17,9 +17,9 @@ type TestFundPrice = {
   price: number;
 };
 
-const testFileFund = path.resolve(__dirname, './__tests__/fund-test-hl.html');
-const testFileShare = path.resolve(__dirname, './__tests__/share-test-hl.html');
-const testFileShareFX = path.resolve(__dirname, './__tests__/share-test-hl-dollar.html');
+const testFileFund = path.resolve(__dirname, './vendor/fund-test-hl.html');
+const testFileShare = path.resolve(__dirname, './vendor/share-test-hl.html');
+const testFileShareFX = path.resolve(__dirname, './vendor/share-test-hl-dollar.html');
 
 // These values come from the test data - see hl.spec.ts and __tests__/*
 const testPriceCTY = 424.1;
