@@ -1,35 +1,12 @@
 import sinon from 'sinon';
-import { Server } from 'http';
-import request, { Test, SuperTest } from 'supertest';
-import axios from 'axios';
 import addMonths from 'date-fns/addMonths';
 import format from 'date-fns/format';
 
-import { run } from '..';
 import config from '~api/config';
 import db from '~api/modules/db';
 import { Category, Subcategory, Entry } from '~api/routes/net-worth/types';
 
 describe('Server - integration tests (net-worth)', () => {
-  let server: Server;
-  let agent: SuperTest<Test>;
-  let token: string;
-
-  beforeAll(async () => {
-    server = await run(4444);
-    agent = request.agent(server);
-
-    ({
-      data: { apiKey: token },
-    } = await axios.post('http://127.0.0.1:4444/api/v4/user/login', {
-      pin: 1234,
-    }));
-  });
-
-  afterAll(done => {
-    server.close(done);
-  });
-
   const clearDb = async (): Promise<void> => {
     await db('net_worth')
       .select()
@@ -54,9 +31,8 @@ describe('Server - integration tests (net-worth)', () => {
   describe('categories', () => {
     describe('POST /net-worth/categories', () => {
       it('should respond with the category', async () => {
-        const res = await agent
-          .post('/api/v4/data/net-worth/categories')
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
 
         expect(res.status).toBe(201);
@@ -65,9 +41,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should create the category in the database', async () => {
-        await agent
-          .post('/api/v4/data/net-worth/categories')
-          .set('Authorization', token)
+        await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
 
         const categories = await db('net_worth_categories').select();
@@ -89,9 +64,9 @@ describe('Server - integration tests (net-worth)', () => {
       it('should respond with the category', async () => {
         expect(categoryId).toBeTruthy();
 
-        const res = await agent
-          .get(`/api/v4/data/net-worth/categories/${categoryId}`)
-          .set('Authorization', token);
+        const res = await global.withAuth(
+          global.agent.get(`/api/v4/data/net-worth/categories/${categoryId}`),
+        );
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
@@ -113,9 +88,8 @@ describe('Server - integration tests (net-worth)', () => {
       it('should respond with the updated category', async () => {
         expect(categoryId).toBeTruthy();
 
-        const res = await agent
-          .put(`/api/v4/data/net-worth/categories/${categoryId}`)
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/categories/${categoryId}`))
           .send({
             ...category,
             category: 'Bank',
@@ -130,9 +104,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update the category in the database', async () => {
-        await agent
-          .put(`/api/v4/data/net-worth/categories/${categoryId}`)
-          .set('Authorization', token)
+        await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/categories/${categoryId}`))
           .send({
             ...category,
             category: 'Bank',
@@ -162,17 +135,17 @@ describe('Server - integration tests (net-worth)', () => {
       it('should respond with the 204 no content', async () => {
         expect(categoryId).toBeTruthy();
 
-        const res = await agent
-          .delete(`/api/v4/data/net-worth/categories/${categoryId}`)
-          .set('Authorization', token);
+        const res = await global.withAuth(
+          global.agent.delete(`/api/v4/data/net-worth/categories/${categoryId}`),
+        );
 
         expect(res.status).toBe(204);
       });
 
       it('should delete the category in the database', async () => {
-        await agent
-          .delete(`/api/v4/data/net-worth/categories/${categoryId}`)
-          .set('Authorization', token);
+        await global.withAuth(
+          global.agent.delete(`/api/v4/data/net-worth/categories/${categoryId}`),
+        );
 
         const categories = await db('net_worth_categories').select();
 
@@ -200,9 +173,8 @@ describe('Server - integration tests (net-worth)', () => {
 
     describe('POST /net-worth/subcategories', () => {
       it('should respond with the subcategory', async () => {
-        const res = await agent
-          .post('/api/v4/data/net-worth/subcategories')
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
           .send(subcategory);
 
         expect(res.status).toBe(201);
@@ -211,9 +183,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should create the subcategory in the database', async () => {
-        await agent
-          .post('/api/v4/data/net-worth/subcategories')
-          .set('Authorization', token)
+        await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
           .send(subcategory);
 
         const subcategories = await db('net_worth_subcategories').select();
@@ -247,9 +218,9 @@ describe('Server - integration tests (net-worth)', () => {
       it('should respond with the subcategory', async () => {
         expect(subcategoryId).toBeTruthy();
 
-        const res = await agent
-          .get(`/api/v4/data/net-worth/subcategories/${subcategoryId}`)
-          .set('Authorization', token);
+        const res = await global.withAuth(
+          global.agent.get(`/api/v4/data/net-worth/subcategories/${subcategoryId}`),
+        );
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
@@ -276,9 +247,8 @@ describe('Server - integration tests (net-worth)', () => {
       it('should respond with the updated subcategory', async () => {
         expect(subcategoryId).toBeTruthy();
 
-        const res = await agent
-          .put(`/api/v4/data/net-worth/subcategories/${subcategoryId}`)
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${subcategoryId}`))
           .send({
             ...subcategory,
             subcategory: 'Savings account',
@@ -293,9 +263,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update the subcategory in the database', async () => {
-        await agent
-          .put(`/api/v4/data/net-worth/subcategories/${subcategoryId}`)
-          .set('Authorization', token)
+        await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${subcategoryId}`))
           .send({
             ...subcategory,
             subcategory: 'Savings account',
@@ -332,17 +301,17 @@ describe('Server - integration tests (net-worth)', () => {
       it('should respond with the 204 no content', async () => {
         expect(subcategoryId).toBeTruthy();
 
-        const res = await agent
-          .delete(`/api/v4/data/net-worth/subcategories/${subcategoryId}`)
-          .set('Authorization', token);
+        const res = await global.withAuth(
+          global.agent.delete(`/api/v4/data/net-worth/subcategories/${subcategoryId}`),
+        );
 
         expect(res.status).toBe(204);
       });
 
       it('should delete the subcategory in the database', async () => {
-        await agent
-          .delete(`/api/v4/data/net-worth/subcategories/${subcategoryId}`)
-          .set('Authorization', token);
+        await global.withAuth(
+          global.agent.delete(`/api/v4/data/net-worth/subcategories/${subcategoryId}`),
+        );
 
         const subcategories = await db('net_worth_subcategories').select();
 
@@ -480,10 +449,7 @@ describe('Server - integration tests (net-worth)', () => {
 
     describe('POST /net-worth', () => {
       it('should respond with the entry', async () => {
-        const res = await agent
-          .post('/api/v4/data/net-worth')
-          .set('Authorization', token)
-          .send(entry);
+        const res = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry);
 
         expect(res.status).toBe(201);
         expect(res.body).toHaveProperty('date', '2020-04-14');
@@ -512,18 +478,13 @@ describe('Server - integration tests (net-worth)', () => {
       beforeEach(async () => {
         ({
           body: { id: entryId },
-        } = await agent
-          .post('/api/v4/data/net-worth')
-          .set('Authorization', token)
-          .send(entry));
+        } = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry));
       });
 
       it('should respond with the entry', async () => {
         expect(entryId).toBeTruthy();
 
-        const res = await agent
-          .get(`/api/v4/data/net-worth/${entryId}`)
-          .set('Authorization', token);
+        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth/${entryId}`));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(
@@ -578,19 +539,16 @@ describe('Server - integration tests (net-worth)', () => {
 
         await Promise.all(
           mods.map(mod =>
-            agent
-              .post('/api/v4/data/net-worth')
-              .set('Authorization', token)
-              .send({
-                ...entry,
-                ...mod,
-              }),
+            global.withAuth(global.agent.post('/api/v4/data/net-worth')).send({
+              ...entry,
+              ...mod,
+            }),
           ),
         );
       });
 
       it('should get a list of net worth entries', async () => {
-        const res = await agent.get(`/api/v4/data/net-worth`).set('Authorization', token);
+        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
         const expectedResults = mods.slice(0, 7).map(({ date }) =>
           expect.objectContaining({
@@ -610,7 +568,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should put old values in their own section', async () => {
-        const res = await agent.get(`/api/v4/data/net-worth`).set('Authorization', token);
+        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
         const entryValueOld = 500000 - 15000;
         const entryValueOlder = 62000 * 0.113 * 100 - 15000;
@@ -630,10 +588,7 @@ describe('Server - integration tests (net-worth)', () => {
       beforeEach(async () => {
         ({
           body: { id: entryId },
-        } = await agent
-          .post('/api/v4/data/net-worth')
-          .set('Authorization', token)
-          .send(entry));
+        } = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry));
       });
 
       it('should update the date', async () => {
@@ -642,9 +597,8 @@ describe('Server - integration tests (net-worth)', () => {
           date: '2020-04-15',
         };
 
-        const res = await agent
-          .put(`/api/v4/data/net-worth/${entryId}`)
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -663,9 +617,8 @@ describe('Server - integration tests (net-worth)', () => {
           ],
         };
 
-        const res = await agent
-          .put(`/api/v4/data/net-worth/${entryId}`)
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -687,9 +640,8 @@ describe('Server - integration tests (net-worth)', () => {
           ],
         };
 
-        const res = await agent
-          .put(`/api/v4/data/net-worth/${entryId}`)
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -711,9 +663,8 @@ describe('Server - integration tests (net-worth)', () => {
           ],
         };
 
-        const res = await agent
-          .put(`/api/v4/data/net-worth/${entryId}`)
-          .set('Authorization', token)
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -730,24 +681,19 @@ describe('Server - integration tests (net-worth)', () => {
       beforeEach(async () => {
         ({
           body: { id: entryId },
-        } = await agent
-          .post('/api/v4/data/net-worth')
-          .set('Authorization', token)
-          .send(entry));
+        } = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry));
       });
 
       it('should respond with the 204 no content', async () => {
         expect(entryId).toBeTruthy();
 
-        const res = await agent
-          .delete(`/api/v4/data/net-worth/${entryId}`)
-          .set('Authorization', token);
+        const res = await global.withAuth(global.agent.delete(`/api/v4/data/net-worth/${entryId}`));
 
         expect(res.status).toBe(204);
       });
 
       it('should delete the entry in the database', async () => {
-        await agent.delete(`/api/v4/data/net-worth/${entryId}`).set('Authorization', token);
+        await global.withAuth(global.agent.delete(`/api/v4/data/net-worth/${entryId}`));
 
         const entries = await db('net_worth').select();
 
