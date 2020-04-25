@@ -14,7 +14,7 @@ exports[`<ModalDialog /> should render a form list 1`] = `
       item
     </span>
     <div
-      class="sc-frDJqD hmOCaD"
+      class="sc-frDJqD hdaOXn"
     >
       <input
         type="text"
@@ -31,7 +31,7 @@ exports[`<ModalDialog /> should render a form list 1`] = `
       cost
     </span>
     <div
-      class="sc-frDJqD gSOATx"
+      class="sc-frDJqD ggTVzp"
     >
       <input
         step="0.01"

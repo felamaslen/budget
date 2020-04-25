@@ -99,7 +99,7 @@ const Editable: React.FC<Props> = ({
   return (
     <Styled.Editable active={active} item={item}>
       <EditableField id={id} active={active} item={item} value={value} onType={onType} {...props} />
-      {showSuggestions && (
+      {showSuggestions && onSuggestion && (
         <SuggestionsList page={page} column={item} search={typed} onConfirm={onSuggestion} />
       )}
     </Styled.Editable>
