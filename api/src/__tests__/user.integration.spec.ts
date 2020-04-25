@@ -1,25 +1,11 @@
-import { Server } from 'http';
-import request, { Test, SuperTest } from 'supertest';
+import { Test } from 'supertest';
 import sinon from 'sinon';
 import addDays from 'date-fns/addDays';
 
-import { run } from '..';
 import config from '~api/config';
 import db from '~api/modules/db';
 
 describe('API integration tests - Authentication', () => {
-  let server: Server;
-  let agent: SuperTest<Test>;
-
-  beforeAll(async () => {
-    server = await run(4444);
-    agent = request.agent(server);
-  });
-
-  afterAll(done => {
-    server.close(done);
-  });
-
   describe('POST /user/login', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2020-03-07T23:06:23Z');
@@ -37,7 +23,7 @@ describe('API integration tests - Authentication', () => {
     });
 
     it('should return a successful login response', async () => {
-      const res = await agent.post('/api/v4/user/login').send({
+      const res = await global.agent.post('/api/v4/user/login').send({
         pin: 1234,
       });
 
@@ -64,7 +50,7 @@ describe('API integration tests - Authentication', () => {
     });
 
     it('should return an unsuccessful login response', async () => {
-      const res = await agent.post('/api/v4/user/login').send({
+      const res = await global.agent.post('/api/v4/user/login').send({
         pin: 1235,
       });
 
@@ -79,13 +65,13 @@ describe('API integration tests - Authentication', () => {
       const ip1 = '1.9.3.7';
 
       const badLogin = (ip = ip0): Test =>
-        agent
+        global.agent
           .post(`/api/v4/user/login`)
           .send({ pin: 9999 })
           .set('X-Forwarded-For', ip);
 
       const goodLogin = (ip = ip0): Test =>
-        agent
+        global.agent
           .post(`/api/v4/user/login`)
           .send({ pin: 1234 })
           .set('X-Forwarded-For', ip);
