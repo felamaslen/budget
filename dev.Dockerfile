@@ -14,12 +14,12 @@ RUN apk add --no-cache \
 WORKDIR /opt/app
 
 COPY package.json ./
-COPY package-lock.json ./
+COPY yarn.lock ./
 
 ENV NODE_ENV=development
 ENV BABEL_ENV=node
 
-RUN npm install
+RUN yarn install --frozen-lockfile
 
 ENV SKIP_APP=false
 ENV DEBUG=
