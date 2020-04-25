@@ -9,9 +9,8 @@ import bodyParser from 'body-parser';
 import passport from 'passport';
 
 import config from '~api/config';
-import db from '~api/modules/db';
 import logger from '~api/modules/logger';
-import routes from '~api/routes';
+import { handler as routes } from '~api/routes';
 import { getIp } from '~api/modules/headers';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
@@ -132,7 +131,7 @@ function setupApi(app: express.Express): void {
   app.get('/health', (_, res) => {
     res.json({ ok: true });
   });
-  app.use(API_PREFIX, routes(config, db, logger));
+  app.use(API_PREFIX, routes());
   setupApiDocs(app);
 }
 

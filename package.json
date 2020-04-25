@@ -76,7 +76,7 @@
     "date-fns": "^2.9.0",
     "date-fns-timezone": "^0.1.4",
     "dateformat": "^2.0.0",
-    "deepmerge": "^2.0.1",
+    "deepmerge": "^4.2.2",
     "ejs": "^2.5.7",
     "express": "^4.17.1",
     "fast-levenshtein": "^2.0.6",

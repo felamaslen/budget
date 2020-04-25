@@ -9,7 +9,7 @@ import config from '~api/config';
 import db from '~api/modules/db';
 import { clientError } from '~api/modules/error-handling';
 
-type User = {
+export type User = {
   uid: string;
 };
 
@@ -107,31 +107,29 @@ export async function checkLoggedIn(pin: number | string): Promise<UserInfo> {
   return validUser;
 }
 
-export function authMiddleware(): (req: Request, res: Response, next: NextFunction) => void {
-  return (req, res, next): void => {
-    passport.authenticate(
-      'jwt',
-      {
-        session: false,
-        failWithError: true,
-      },
-      (err, user, info) => {
-        if (err) {
-          return next(err);
+export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+  passport.authenticate(
+    'jwt',
+    {
+      session: false,
+      failWithError: true,
+    },
+    (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!user) {
+        if (info.name === 'TokenExpiredError') {
+          return res.status(401).json({ errorMessage: 'Token expired' });
         }
 
-        if (!user) {
-          if (info.name === 'TokenExpiredError') {
-            return res.status(401).json({ errorMessage: 'Token expired' });
-          }
+        return res.status(401).json({ errorMessage: info.message });
+      }
 
-          return res.status(401).json({ errorMessage: info.message });
-        }
+      req.user = user;
 
-        req.user = user;
-
-        return next();
-      },
-    )(req, res, next);
-  };
+      return next();
+    },
+  )(req, res, next);
 }
