@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 import { Data } from '~client/types/graph';
 import { Color } from '~client/constants/colors';
 
@@ -12,17 +14,24 @@ export type Transaction = Omit<TransactionRaw, 'date'> & {
   date: Date;
 };
 
+export type LegacyTransaction = Omit<Transaction, 'date'> & { date: DateTime };
+
 export type Row = {
   id: string;
   item: string;
-  transactions: Transaction[];
+  transactions: Transaction[] | null;
 };
 
+export type LegacyRow = Omit<Row, 'transactions'> & {
+  transactions: LegacyTransaction[] | null;
+};
+
+export type FundPrices = {
+  values: number[];
+  startIndex: number;
+};
 export type Prices = {
-  [id: string]: {
-    values: number[];
-    startIndex: number;
-  };
+  [id: string]: FundPrices;
 };
 
 export type FundItem = {
@@ -40,7 +49,9 @@ export type Stock = {
   name: string;
   weight: number;
   gain: number;
-  price?: number;
+  price: number | null;
   up: boolean;
   down: boolean;
 };
+
+export type Index = Omit<Stock, 'price'> & Partial<Pick<Stock, 'price'>>;

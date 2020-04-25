@@ -2,7 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { DateTime } from 'luxon';
 import format from 'date-fns/format';
 
-import { Transaction } from '~client/types/funds';
+import {
+  LegacyTransaction as Transaction,
+  Transaction as NewTransaction,
+} from '~client/types/funds';
 import { useField } from '~client/hooks/field';
 import { Button } from '~client/styled/shared/button';
 import { Wrapper, WrapperProps } from '.';
@@ -15,7 +18,7 @@ import { CREATE_ID } from '~client/constants/data';
 import * as Styled from './styles';
 
 type PropsTransaction = {
-  item: Transaction;
+  item: Transaction | NewTransaction;
   // TODO: make this a delta: Partial<Transaction>
   onChange: (id: string, column: 'date' | 'units' | 'cost', value: string | number) => void;
   active?: boolean;
@@ -71,7 +74,7 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   );
 };
 
-const newItemInit: Transaction = {
+const newItemInit: NewTransaction = {
   id: CREATE_ID,
   date: new Date(),
   units: 0,
@@ -120,13 +123,13 @@ const FormFieldTransactions: React.FC<Props> = ({
     [currentValue, onChange],
   );
 
-  const [newItem, setNewItem] = useState<Transaction>(newItemInit);
+  const [newItem, setNewItem] = useState<NewTransaction>(newItemInit);
 
   const onChangeAddField = useCallback(
     // TODO: use delta: Partial<Transaction>
     (_, field: 'date' | 'units' | 'cost', fieldValue: string | number) => {
       setNewItem(
-        (last: Transaction): Transaction => {
+        (last: NewTransaction): NewTransaction => {
           const result = {
             ...last,
             [field]: field === 'date' ? new Date(fieldValue) : fieldValue,

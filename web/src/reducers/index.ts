@@ -1,7 +1,5 @@
 import { combineReducers } from 'redux';
-
-import { Stock } from '~client/types/funds';
-import { Data } from '~client/types/graph';
+import { DateTime } from 'luxon';
 
 import now from '~client/reducers/now';
 import app from '~client/reducers/app';
@@ -11,8 +9,8 @@ import error from '~client/reducers/error';
 import overview from '~client/reducers/overview';
 import netWorth from '~client/reducers/net-worth';
 import analysis from '~client/reducers/analysis';
-import stocks from '~client/reducers/stocks';
-import funds from '~client/reducers/funds';
+import * as Stocks from '~client/reducers/stocks';
+import * as Funds from './funds';
 import income from '~client/reducers/income';
 import bills from '~client/reducers/bills';
 import food from '~client/reducers/food';
@@ -22,34 +20,43 @@ import social from '~client/reducers/social';
 import suggestions from '~client/reducers/suggestions';
 
 export type State = {
-    app: {
-        windowWidth: number;
-    };
-    stocks: {
-        loading: boolean;
-        shares: Stock[];
-        indices: Stock[];
-        history: Data;
-        lastPriceUpdate: number;
-    };
+  now: DateTime;
+  app: {
+    windowWidth: number;
+  };
+  login: object;
+  api: object;
+  error: object[];
+  overview: object;
+  netWorth: object;
+  stocks: Stocks.State;
+  funds: Funds.State;
+  analysis: object;
+  income: object;
+  bills: object;
+  food: object;
+  general: object;
+  holiday: object;
+  social: object;
+  suggestions: object;
 };
 
 export default combineReducers({
-    now,
-    app,
-    api,
-    login,
-    error,
-    overview,
-    netWorth,
-    analysis,
-    stocks,
-    funds,
-    income,
-    bills,
-    food,
-    general,
-    holiday,
-    social,
-    suggestions,
+  now,
+  app,
+  api,
+  login,
+  error,
+  overview,
+  netWorth,
+  analysis,
+  stocks: Stocks.default,
+  funds: Funds.default,
+  income,
+  bills,
+  food,
+  general,
+  holiday,
+  social,
+  suggestions,
 });

@@ -21,6 +21,9 @@ module.exports = {
     'plugin:react/recommended',
   ],
   settings: {
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
+    },
     'import/resolver': {
       alias: {
         map: [
@@ -30,6 +33,9 @@ module.exports = {
           ['~api-test', './api/test'],
         ],
         extensions: ['.js', '.tsx', '.ts'],
+      },
+      typescript: {
+        alwaysTryTypes: true,
       },
     },
     react: {
@@ -45,6 +51,16 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-var-requires': 'off',
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never',
+      },
+    ],
     'import/no-extraneous-dependencies': [
       'error',
       {

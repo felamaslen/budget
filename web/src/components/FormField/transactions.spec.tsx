@@ -5,7 +5,7 @@ import { DateTime } from 'luxon';
 
 import FormFieldTransactions, { Props } from './transactions';
 import { getTransactionsList, modifyTransaction } from '~client/modules/data';
-import { Transaction, TransactionRaw } from '~client/types/funds';
+import { LegacyTransaction as Transaction, TransactionRaw } from '~client/types/funds';
 
 describe('<FormFieldTransactions />', () => {
   const transactions: TransactionRaw[] = [

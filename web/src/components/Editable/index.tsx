@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { DateTime } from 'luxon';
 
 import { PickUnion } from '~client/types';
-import { Transaction } from '~client/types/funds';
+import { LegacyTransaction as Transaction } from '~client/types/funds';
 import { PAGES, PAGES_SUGGESTIONS } from '~client/constants/data';
 import SuggestionsList from '~client/components/SuggestionsList';
 import FormFieldText from '~client/components/FormField';
