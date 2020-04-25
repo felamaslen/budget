@@ -1,6 +1,6 @@
 # Budget
 
-Personal finance app for web, cli and android
+Personal finance app for web, cli and android [![Build Status](https://travis-ci.org/felamaslen/budget.svg?branch=master)](https://travis-ci.org/felamaslen/budget)
 
 ## Architecture
 
